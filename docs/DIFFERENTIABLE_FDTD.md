@@ -41,8 +41,9 @@ Native geometry and smoothing width use **micrometres**. Time uses seconds.
 `epsilon` is relative permittivity with shape `(Nx, Ny, Nz)` or `(Nx, Ny, Nz, 3)`.
 It replaces the scene's material field for this calculation. Its dtype must match
 the region, and its device selects CPU or CUDA execution. CUDA forward and replay
-use the existing fused update kernels. The explicit transpose currently uses
-Torch tensor operations. It is not yet a fused CUDA backward.
+use the existing fused update kernels. The default CUDA backward now uses native
+fused transpose kernels. `AdjointOptions(backward_kernel="torch")` selects the
+explicit Torch transpose for comparison. CPU execution uses that Torch path.
 
 The sigmoid sphere helper differentiates radius, centre and tensor material
 parameters through a regularized material field. It is not the CAD subpixel
@@ -68,15 +69,16 @@ workbench's monitor apodization configuration.
 | Normal-incidence prepared one-way plane | Fixed background near injection, both directions and vector polarization checked |
 | Point signals and Torch DFT | Implemented |
 | Regularized sphere radius/centre chain | Implemented |
-| Checkpoint replay on device, host or disk | Implemented, synchronous transfers |
+| Checkpoint replay on device, host or disk | Implemented, synchronous or optional asynchronous transfers |
 | Mixed GPU/host/disk checkpoint slots | Implemented with explicit slot counts |
 | Full-tensor subpixel geometry derivatives | Pending |
 | ADE, complex Bloch, live TFSF, frequency-plane/port adjoints | Pending, rejected by this API |
 | Trainable sources, boundaries and adaptive meshes | Pending |
 | Higher derivatives | Rejected explicitly |
 | Batched CUDA backward and shared-budget microbatch execution | Pending |
-| Spatial out-of-core / space-time tiling | Pending |
-| Async prefetch, automatic tier/tile selection, GDS | Pending |
+| Spatial out-of-core / space-time tiling | Experimental DRAM slab API with block adjoint, synchronous tile transfers |
+| Async checkpoint prefetch | Implemented with bounded event-owned staging slots |
+| Async spatial tile pipeline, automatic tier/tile selection, GDS | Pending |
 | Single-domain multi-GPU backward | Pending |
 
 Multiple calls can share a design tensor and their losses can accumulate, but

@@ -1,7 +1,9 @@
 # Adjoint memory design and acceptance gates
 
 Status: an initial limited [Torch discrete adjoint](DIFFERENTIABLE_FDTD.md) and
-device/host/disk checkpoint implementation now exist. The broader acceptance
+device/host/disk checkpoint implementation now exist. Native fused backward,
+event-owned asynchronous checkpoint staging and an experimental synchronous
+[DRAM slab/block adjoint](STREAMED_FDTD.md) have since been added. The broader acceptance
 requirements below are not all complete. [Measured development results](validation/ADJOINT_REPORT.md)
 and [spatial hierarchy milestones](HIERARCHICAL_EXECUTION.md) distinguish current
 capabilities from planned large-domain streaming.

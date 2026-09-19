@@ -4,6 +4,11 @@ Measured on 20 September 2026 using an NVIDIA RTX 5880 Ada, Windows and
 PyTorch CUDA. These are native solver experiments. They do not use commercial
 simulation data or establish a ranking against external FDTD solvers.
 
+These measurements predate fused backward and asynchronous checkpoint staging.
+The later [DRAM slab validation](STREAMED_REPORT.md) records spatial forward and
+backward parity, final targeted tests and a warmed resident/streamed ablation.
+Historical timings below do not describe the new runtime's current speed.
+
 ## Complete iteration measurements
 
 The benchmark initializes the CUDA context, then times scene preparation,

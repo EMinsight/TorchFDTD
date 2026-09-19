@@ -13,13 +13,12 @@ from pathlib import Path
 import tempfile
 import time
 
-import fdtd
 import numpy as np
 import torch
 
-from .boundaries import CURL_TERMS, YeeGrid, _slice
+from .boundaries import BoundaryDescription, CURL_TERMS, _slice
 from .models import Project
-from .solver import ENGINE_LOCK, field_axes, index_at
+from .solver import field_axes, index_at
 
 
 @dataclass(frozen=True)
@@ -32,8 +31,17 @@ class AdjointOptions:
     checkpoint_directory: str | Path | None = None
     device_checkpoints: int = 0
     host_checkpoints: int = 0
+    backward_kernel: str = 'auto'
+    checkpoint_transfers: str = 'sync'
+    staging_slots: int = 2
 
     def __post_init__(self):
+        if self.backward_kernel not in ('auto','torch','fused'):
+            raise ValueError('backward_kernel must be auto, torch or fused.')
+        if self.checkpoint_transfers not in ('sync','async'):
+            raise ValueError('checkpoint_transfers must be sync or async.')
+        if isinstance(self.staging_slots,bool) or not isinstance(self.staging_slots,int) or not 1<=self.staging_slots<=4:
+            raise ValueError('staging_slots must be an integer from one to four.')
         if isinstance(self.checkpoints, bool) or not isinstance(self.checkpoints,int) or not 0 <= self.checkpoints <= 64:
             raise ValueError('checkpoints must be an integer between 0 and 64.')
         if self.storage not in ('device','host','disk','hierarchical'):
@@ -91,19 +99,10 @@ class _System:
         self.epsilon=epsilon
         self.eps4=epsilon[...,None] if epsilon.ndim==3 else epsilon
         self.device,self.dtype=epsilon.device,epsilon.dtype
-        # fdtd's global backend is confined to template creation. Neither a
-        # previous caller's dtype nor grad mode may leak through this boundary.
-        with ENGINE_LOCK:
-            old_dtype,old_grad=torch.get_default_dtype(),torch.is_grad_enabled()
-            try:
-                fdtd.set_backend('numpy')
-                fdtd.backend.float=np.float64
-                template=YeeGrid(r)
-            finally:
-                fdtd.set_backend('numpy')
-                fdtd.backend.float=np.float64
-                torch.set_default_dtype(old_dtype)
-                torch.set_grad_enabled(old_grad)
+        self.current_step=0
+        # Preparing coefficients must not allocate another full-volume E/H
+        # field or touch fdtd's process-global backend.
+        template=BoundaryDescription(r)
         g=self.grid=_Grid()
         g.E=torch.zeros((*r.shape,3),device=self.device,dtype=self.dtype)
         g.H=torch.zeros_like(g.E)
@@ -122,7 +121,7 @@ class _System:
             g.cpml[key]=[]
             self.keys[key]=[]
             for seg in segs:
-                item={'slice':seg['slice'], 'psi':self.tensor(seg['psi']),
+                item={'slice':seg['slice'], 'psi':torch.zeros(seg['shape'],device=self.device,dtype=self.dtype),
                       **{name:self.tensor(seg[name]) for name in ('b','c','inv_k')}}
                 self.keys[key].append(len(self.segments))
                 self.segments.append(item)
@@ -148,6 +147,7 @@ class _System:
 
     def zero(self):
         for value in self.state():value.zero_()
+        self.current_step=0
 
     def curl(self,field,psis,forward):
         g=self.grid
@@ -228,6 +228,7 @@ class _System:
             else:
                 new=self.reference_step(self.state(),step,self.epsilon)
                 for target,value in zip(self.state(),new):target.copy_(value)
+        self.current_step=end
 
     def observe(self,state):
         return torch.stack([state[0 if name[0]=='E' else 1][loc+(component,)]
@@ -251,9 +252,9 @@ class _System:
 
 
 class _Checkpoints:
-    def __init__(self,system,options,report):
+    def __init__(self,system,options,report,*,admission=False):
         self.system,self.options,self.report=system,options,report
-        self.values={};self.serial=0;self.directory=None
+        self.values={};self.times={};self.prefetched={};self.serial=0;self.directory=None;self.staging=None
         self.size=sum(x.numel()*x.element_size() for x in system.state())
         if options.storage=='hierarchical':
             disk=options.checkpoints-options.device_checkpoints-options.host_checkpoints
@@ -262,7 +263,8 @@ class _Checkpoints:
             self.tiers=['disk']*disk+['host']*options.host_checkpoints+['device']*options.device_checkpoints
         else:self.tiers=[options.storage]*options.checkpoints
         disk_count=self.tiers.count('disk');host_count=self.tiers.count('host')
-        host_bytes=self.size*(host_count+(1 if disk_count else 0))
+        asynchronous=options.checkpoint_transfers=='async' and (disk_count or host_count)
+        host_bytes=self.size*(host_count+(options.staging_slots if asynchronous else 0)+(1 if disk_count else 0))
         archive_bound=self.size+4096+512*len(system.state())
         if options.host_budget_bytes is not None and host_bytes>options.host_budget_bytes:
             raise ValueError('Host checkpoint budget cannot hold its slots and disk staging state.')
@@ -277,13 +279,19 @@ class _Checkpoints:
                       checkpoint_storage=options.storage,peak_checkpoints=0,checkpoint_bytes_written=0,
                       checkpoint_bytes_read=0,checkpoint_io_seconds=0.,replayed_steps=0,
                       checkpoint_tiers=self.tiers.copy(),peak_checkpoints_by_tier={t:0 for t in ('device','host','disk')})
+        if asynchronous and not admission:
+            from .staging import AsyncStateStaging
+            self.staging=AsyncStateStaging(system.state(),options.staging_slots,report)
 
     def save(self):
         if len(self.values)>=self.options.checkpoints:raise RuntimeError('Checkpoint scheduler exceeded its slot budget.')
         started=time.perf_counter();key=self.serial;self.serial+=1
         state=self.system.state()
         tier=self.tiers[len(self.values)]
-        if tier=='device':
+        if self.staging is not None and tier!='device':
+            path=self.directory/f'{key}.npz' if tier=='disk' else None
+            value=self.staging.save(state,path=path,max_file_bytes=self.size+4096+512*len(state))
+        elif tier=='device':
             value=tuple(x.clone() for x in state)
         elif tier=='host':
             value=tuple(x.detach().to('cpu',copy=True) for x in state)
@@ -299,6 +307,7 @@ class _Checkpoints:
                 value.unlink(missing_ok=True)
                 raise
         self.values[key]=(tier,value)
+        self.times[key]=self.system.current_step
         self.report['peak_checkpoints']=max(self.report['peak_checkpoints'],len(self.values))
         count=sum(t==tier for t,_ in self.values.values())
         self.report['peak_checkpoints_by_tier'][tier]=max(self.report['peak_checkpoints_by_tier'][tier],count)
@@ -307,10 +316,18 @@ class _Checkpoints:
         return key
 
     def restore(self,key):
+        target_time=0 if key is None else self.times[key]
+        if self.system.current_step==target_time:
+            if key in self.prefetched:self.staging.consume(self.prefetched.pop(key))
+            return
         if key is None:
             self.system.zero();return
         started=time.perf_counter();tier,value=self.values[key]
-        if tier=='disk':
+        if self.staging is not None and tier!='device':
+            ticket=self.prefetched.pop(key,None)
+            if ticket is None:ticket=self.staging.load(value,disk=tier=='disk')
+            self.staging.consume(ticket,self.system.state())
+        elif tier=='disk':
             with np.load(value,allow_pickle=False) as archive:
                 for i,target in enumerate(self.system.state()):
                     target.copy_(torch.from_numpy(archive[f's{i}']))
@@ -318,14 +335,42 @@ class _Checkpoints:
             for target,source in zip(self.system.state(),value):target.copy_(source)
         self.report['checkpoint_bytes_read']+=self.size
         self.report['checkpoint_io_seconds']+=time.perf_counter()-started
+        self.system.current_step=target_time
+
+    def prefetch(self,key):
+        if self.staging is None or key is None or key in self.prefetched:return
+        tier,value=self.values[key]
+        if tier!='device':self.prefetched[key]=self.staging.load(value,disk=tier=='disk')
 
     def drop(self,key):
+        error=None
+        if key in self.prefetched:
+            try:self.staging.consume(self.prefetched.pop(key))
+            except BaseException as exc:error=exc
         tier,value=self.values.pop(key)
-        if tier=='disk':value.unlink()
+        self.times.pop(key)
+        future=value if hasattr(value,'result') else None
+        try:
+            if future is not None:value=future.result()
+            if tier=='disk':value.unlink()
+        except BaseException as exc:
+            if error is None:error=exc
+        finally:
+            if self.staging is not None and future is not None:self.staging.forget(future)
+        if error is not None:raise error
 
     def close(self):
-        for key in list(self.values):self.drop(key)
+        error=None
+        for key in list(self.values):
+            try:self.drop(key)
+            except BaseException as exc:
+                if error is None:error=exc
+        if self.staging is not None:
+            try:self.staging.close()
+            except BaseException as exc:
+                if error is None:error=exc
         if self.directory is not None:self.directory.rmdir()
+        if error is not None:raise error
 
 
 def _split(length,slots):
@@ -360,9 +405,13 @@ class _FDTD(torch.autograd.Function):
             raise RuntimeError('Higher-order derivatives are not supported by the discrete adjoint yet.')
         epsilon,=ctx.saved_tensors
         system,options,report=ctx.system,ctx.options,ctx.report
-        gradient=torch.zeros_like(epsilon)
-        adjoint=tuple(torch.zeros_like(x) for x in system.state())
         started=time.perf_counter()
+        gradient=torch.zeros(epsilon.shape,device=epsilon.device,dtype=epsilon.dtype)
+        fused=None
+        if epsilon.is_cuda and options.backward_kernel!='torch':
+            from .cuda_adjoint import FusedAdjointCUDA
+            fused=FusedAdjointCUDA(system,gradient,signal_bar)
+        adjoint=None if fused else tuple(torch.zeros_like(x) for x in system.state())
         checkpoints=_Checkpoints(system,options,report)
 
         def replay(key,start,end):
@@ -378,8 +427,11 @@ class _FDTD(torch.autograd.Function):
                 if end-start==1 or slots==0:
                     for step in range(end-1,start-1,-1):
                         replay(key,start,step)
-                        adjoint,part=system.transpose_step(system.state(),adjoint,signal_bar[step])
-                        gradient.add_(part)
+                        if step>start:checkpoints.prefetch(key)
+                        if fused:fused.step(step)
+                        else:
+                            adjoint,part=system.transpose_step(system.state(),adjoint,signal_bar[step])
+                            gradient.add_(part)
                     return
                 middle=start+_split(end-start,slots)
                 replay(key,start,middle)
@@ -427,6 +479,10 @@ class DifferentiableSimulation(torch.nn.Module):
             raise ValueError('epsilon must be a real float32 or float64 torch Tensor.')
         if epsilon.device.type not in ('cpu','cuda'):
             raise ValueError('Only CPU and CUDA tensors are supported.')
+        if epsilon.device.type!='cuda' and self.options.backward_kernel=='fused':
+            raise ValueError('The fused backward requires a CUDA tensor.')
+        if epsilon.device.type!='cuda' and self.options.checkpoint_transfers=='async':
+            raise ValueError('Asynchronous checkpoints require a CUDA tensor.')
         if tuple(epsilon.shape) not in (r.shape,r.shape+(3,)):
             raise ValueError('epsilon shape must match the scene grid, optionally with three Yee components.')
         if not bool(torch.isfinite(epsilon).all()) or bool((epsilon<1).any()):
@@ -450,6 +506,8 @@ class DifferentiableSimulation(torch.nn.Module):
         # allocations and cannot be bounded by this solver admission estimate.
         history_bytes=2*output_bytes+source_bytes
         device_slots=self.options.checkpoints if self.options.storage=='device' else self.options.device_checkpoints if self.options.storage=='hierarchical' else 0
+        if self.options.checkpoint_transfers=='async' and self.options.checkpoints>device_slots:
+            device_slots+=self.options.staging_slots
         required=workspace+device_slots*state_upper+history_bytes
         if epsilon.is_cuda:
             free,_=torch.cuda.mem_get_info(epsilon.device)
@@ -458,13 +516,13 @@ class DifferentiableSimulation(torch.nn.Module):
         report=dict(experimental=True,adjoint='discrete Yee/CPML',higher_order=False,
                     spatial_streaming=False,full_time_autograd=False,steps=r.steps,
                     forward_backend='fused CUDA' if epsilon.is_cuda else 'torch CPU',
-                    backward_backend='torch explicit transpose',memory_reservation_bytes=required,
+                    backward_backend='fused CUDA transpose' if epsilon.is_cuda and self.options.backward_kernel!='torch' else 'torch explicit transpose',memory_reservation_bytes=required,
                     workspace_reservation_bytes=workspace,history_reservation_bytes=history_bytes,
-                    checkpoint_transfers='synchronous',output_history_bytes=output_bytes,
+                    checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes,
                     source_history_bytes=source_bytes)
         with torch.no_grad():system=_System(self.project,epsilon)
         # Check host/disk admission before spending the forward compute time.
-        admission=_Checkpoints(system,self.options,report)
+        admission=_Checkpoints(system,self.options,report,admission=True)
         admission.close()
         signals=_FDTD.apply(epsilon,system,self.options,report)
         return DifferentiableResult(signals,r.time_step,tuple(m.component for m in self.project.monitors if m.enabled),report)

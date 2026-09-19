@@ -40,3 +40,5 @@ from .differentiable import AdjointOptions, DifferentiableSimulation, Differenti
 __all__ += ['AdjointOptions', 'DifferentiableSimulation', 'DifferentiableResult', 'smooth_sphere_epsilon']
 from .memory_profile import profile_memory_transfers
 __all__ += ['profile_memory_transfers']
+from .streamed import StreamedAdjointOptions, StreamedSimulation
+__all__ += ['StreamedAdjointOptions', 'StreamedSimulation']

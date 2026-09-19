@@ -46,6 +46,9 @@ class YeeGrid(fdtd.Grid):
             else:
                 kind = np.complex128 if region.precision == 'float64' else np.complex64
                 self.E, self.H = self.E.astype(kind), self.H.astype(kind)
+        self._prepare_boundaries(region)
+
+    def _prepare_boundaries(self,region):
         self.wrap = {}
         self.metric = {}
         if region.mesh_type != 'uniform' or region.mesh_steps is not None:
@@ -103,6 +106,7 @@ class YeeGrid(fdtd.Grid):
                     psi = self._zeros(tuple(shape))
                     self.memory_states.append(psi)
                     segments.append({'slice': _slice(axis, slice(lo-active_start, hi-active_start)),
+                                     'shape':tuple(shape),
                                      'psi': psi, 'b': self._coefficient(decay.reshape(coeff_shape)),
                                      'c': self._coefficient(coupling.reshape(coeff_shape)),
                                      'inv_k': self._coefficient((1/kappa).reshape(coeff_shape))})
@@ -152,3 +156,14 @@ class YeeGrid(fdtd.Grid):
 
     def update_H(self):
         self.H -= self.courant_number * self.inverse_permeability * self.curl(self.E, True)
+
+
+class BoundaryDescription:
+    """Boundary coefficients and state shapes without allocating volume fields."""
+    def __init__(self,region):
+        self.courant_number=region.rectangular_courant
+        YeeGrid._prepare_boundaries(self,region)
+
+    def _zeros(self,shape):return None
+
+    def _coefficient(self,array):return np.asarray(array,dtype=np.float64)

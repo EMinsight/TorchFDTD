@@ -1,0 +1,51 @@
+# Color-router inverse-design validation
+
+## Selected reference
+
+The user selected the recent TORCWA-based color-router study with color
+reconstruction and information objectives on 2026-09-20. Its original geometry,
+optical sampling, material models, reconstruction model and objective definitions
+are the reference contract. A generic RGB transmission objective is not a
+substitute for this study's objective.
+
+The exact source revision, configuration and input hashes remain to be resolved
+from the research project's lock manifests before experiments. A directory name
+or a file labelled latest, best or final does not establish the reference.
+
+## Execution gates
+
+Run the CR validation only after the following runtime milestones pass:
+
+1. Fused backward agrees with the reference discrete adjoint, including CPML,
+   periodic seams and material gradients.
+2. Asynchronous staging preserves lossless checkpoint replay, protects buffer
+   lifetimes and propagates delayed I/O failures. Measure transfer overlap
+   separately from numerical correctness.
+3. DRAM spatial and temporal tiling reproduces resident fields, observables and
+   gradients. All tiles in a block read the same physical time. Backward must
+   sum shared-halo contributions. Checkpoint offload alone does not satisfy
+   this milestone.
+4. The automatic scheduler admits only configurations within explicit memory
+   budgets and is evaluated against fixed policies, including tuning overhead.
+
+Low-precision storage is deferred until the lossless paths and gradients pass.
+
+## CR comparison contract
+
+Record the reference source revision and hashes before translating the model.
+Preserve wavelength and angle weights, polarization, detector geometry, material
+dispersion, illumination normalization, reconstruction and noise assumptions,
+regularization and fabrication constraints. Unsupported physics or observables
+are implementation blockers rather than silent substitutions.
+
+First compare the same fixed geometry with TORCWA and FDTD using spatial,
+temporal and spectral convergence sweeps. Then compare the resulting optical
+response, reconstructed colors and information objective. Check geometry
+derivatives using directional finite differences and Taylor residuals before
+optimization.
+
+Re-optimize from matched initial designs and record seeds, optimizer settings,
+complete iteration time, objective history and memory in every storage tier.
+Re-evaluate final designs at independently refined numerical settings. Report
+disagreements and numerical tolerances alongside improvements. No CR result or
+runtime advantage has been established by this plan.

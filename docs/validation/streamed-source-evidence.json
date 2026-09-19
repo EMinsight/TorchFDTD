@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-20",
+  "source_files": [
+    {
+      "path": "photonweave/spacetime.py",
+      "sha256": "eb1b2292a74278379b79de0542ad5e73ae65a6b1e232fa212deb67d9d0cb6184"
+    },
+    {
+      "path": "photonweave/streamed.py",
+      "sha256": "318ea2d76a1b2c5e5ff78f1c58ec3c71c7a4fa0774c8577b17dbe52e664bfadc"
+    },
+    {
+      "path": "photonweave/differentiable.py",
+      "sha256": "1bf8cc95efb4940bb5071bcc8731d0d20ac8aa4341a7f9e0067af11cd8b33dd5"
+    },
+    {
+      "path": "photonweave/cuda_adjoint.py",
+      "sha256": "d3bec19e60148c6400562cc88d69dde977b079007204d12888daadc2805707fe"
+    },
+    {
+      "path": "photonweave/cuda_kernels.py",
+      "sha256": "62f92d7a74c766495eb7bcd84dd65388dc297e283d8a123bff7223228428cfa4"
+    },
+    {
+      "path": "photonweave/boundaries.py",
+      "sha256": "5955e9371a41d496287f3b9ccaca115cb32349e244b307b6d1ff47190b89e468"
+    },
+    {
+      "path": "photonweave/staging.py",
+      "sha256": "b7ebb3fc46a4f9b93417a8ea8e222f406baef70a9cac92392a0e0046462d9e46"
+    },
+    {
+      "path": "tests/test_spacetime.py",
+      "sha256": "ef5bf5354cd556bfcfc98d7491c3cac247e5c0be65aef6b5e2f4ecb5876776f9"
+    },
+    {
+      "path": "benchmarks/streamed_adjoint.py",
+      "sha256": "57c46e99b8ecbcb528917eb905b0125b6ed69afb65cee0d6f0a3ba9a8338b453"
+    }
+  ],
+  "scope": "Current native streamed prototype. Full suites preceded final payload-packing/admission changes. Final targeted precision and memory tests are recorded separately in STREAMED_REPORT.md."
+}
