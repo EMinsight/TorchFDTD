@@ -74,6 +74,7 @@ def run_tensor_batch(cases, *, objective=None, output_dir=None, keep_results=Tru
     if not isinstance(device,int) or not 0<=device<torch.cuda.device_count():raise ValueError('Invalid CUDA device.')
     projects=[Project.model_validate(c.project.model_dump()) for c in cases]
     for p in projects:
+        p.region.require_resident()
         if p.region.backend=='cpu':raise ValueError('Tensor batch cannot execute a CPU project. Set backend="cuda" or "auto" explicitly.')
         if p.region.complex_fields:raise ValueError('Tensor batch currently requires real fields. Use BatchRunner for complex Bloch fields.')
         if p.region.run_control.auto_shutoff:raise ValueError('Tensor batch requires fixed-duration runs. Set auto_shutoff=False or use BatchRunner.')

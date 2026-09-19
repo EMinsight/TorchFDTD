@@ -79,7 +79,7 @@ workbench's monitor apodization configuration.
 | Spatial out-of-core / space-time tiling | Experimental DRAM slab API with block adjoint and reusable buffers |
 | Async checkpoint prefetch | Implemented with bounded event-owned staging slots |
 | Async spatial tile pipeline | Optional bounded pinned slots, separate copy streams, FIFO halo reduction |
-| Automatic tile policy | Initial measured-prefix selection, full-duration optimality unproven |
+| Automatic tile policy | Two-duration replay-cost selection, full-duration optimality unproven |
 | Unified resident/DRAM/NVMe selection and GDS | Pending |
 | Single-domain multi-GPU backward | Pending |
 

@@ -34,10 +34,12 @@ The direct view path retains Torch ownership and records the consumer stream.
 `cuda_binding="dlpack"` and `reuse_tile_buffers=False` retain comparison paths.
 Disabling reuse requires synchronous transfers.
 
-The API does not yet remove the workbench's eight-million-cell scene limit.
-Large-domain admission validation and a unified resident/DRAM/NVMe policy remain
-unfinished. These limits prevent claiming the final large-domain runtime or a
-general performance advantage.
+For grids above eight million cells, construct `Region(memory_mode="streamed",
+...)` and use this Python API with explicit budgets. This opt-in cannot run
+through the resident solver or workbench. The resident limit remains unchanged.
+Each grid axis is limited to one million cells to bound mesh metadata. Passing
+admission is not evidence of physical-VRAM-overflow performance. A unified
+resident/DRAM/NVMe policy remains unfinished.
 
 ## Measured policy selection
 
@@ -53,16 +55,25 @@ print(tuning.report)  # includes the total cost of tuning
 The default small candidate set varies slab width, temporal depth and transfer
 policy. An explicit list of `StreamedAdjointOptions` can also vary checkpoint
 and buffer counts. Every candidate must fit the full-duration reservation before
-its shorter prefix is timed. One warm-up and repeated complete prefix iterations
+its shorter prefixes are timed. One warm-up and repeated complete prefix iterations
 include forward, replay and backward. Candidate signals and gradients must agree.
 The user's design values and accumulated gradients are preserved.
 
-This is a hardware-measured prefix selection, not a proof of full-run optimality.
-Amortize tuning across repeated optimization iterations and re-evaluate when the
-workload or hardware changes. In the initial held-out test, the selected policy
-was about 20% slower than the best candidate at the longer duration. It still
-beat the narrow K=1 fixed policy, but that does not establish a competitive solver
-advantage. Construct the returned policy's model with the original full project.
+The default `strategy="replay_cost"` measures two durations, `probe_steps` and
+twice that value, clipped to the full duration. It separates startup and per-block
+costs and counts the actual checkpoint schedule's forward replays to predict a
+full iteration. Negative fitted costs trigger a work-count fallback. A partial
+terminal block is counted as a full block. `strategy="prefix"` retains the old
+single-prefix selection for comparison.
+
+This is a timing model, not a proof of full-run optimality. Amortize tuning across
+repeated optimization iterations and re-evaluate when the workload or hardware
+changes. The earlier prefix selector chose a policy 20–29% slower than the best
+candidate in two longer-duration runs. The replay-cost selector chose the best
+of those four candidates in a subsequent held-out run, with 13 seconds of tuning
+overhead. This does not establish general superiority. Construct the returned
+policy's model with the original full project. See the
+[replay-cost validation](validation/REPLAY_POLICY_REPORT.md).
 
 ## Dependency and transpose
 

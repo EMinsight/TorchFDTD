@@ -31,6 +31,7 @@ def _slice(axis, value, component=None):
 class YeeGrid(fdtd.Grid):
     """Extend the open-source fdtd grid with complex fields and native CPML."""
     def __init__(self, region):
+        region.require_resident()
         super().__init__(shape=region.shape, grid_spacing=region.reference_step * 1e-6,
                          courant_number=region.courant_factor/math.sqrt(2 if region.dimension == '2d' else 3))
         # fdtd validates a cubic-grid Courant number in its constructor. The

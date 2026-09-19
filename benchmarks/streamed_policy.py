@@ -20,6 +20,7 @@ def main():
     parser.add_argument('--steps', type=int, default=48)
     parser.add_argument('--probe-steps', type=int, default=12)
     parser.add_argument('--repeats', type=int, default=2)
+    parser.add_argument('--strategy', choices=('prefix','replay_cost'), default='replay_cost')
     args = parser.parse_args()
     if args.repeats < 1:raise ValueError('repeats must be positive')
     region = Region(dimension='3d',size=(6.4,1.6,1.6),mesh=.1,steps=args.steps,
@@ -33,7 +34,8 @@ def main():
     candidates = [base,replace(base,slab_width=16,temporal_depth=3),
                   replace(base,slab_width=32,temporal_depth=4),
                   replace(base,slab_width=32,temporal_depth=4,tile_transfers='async',tile_buffers=2)]
-    tuning = tune_streamed(project,epsilon,candidates=candidates,probe_steps=args.probe_steps,repeats=args.repeats)
+    tuning = tune_streamed(project,epsilon,candidates=candidates,probe_steps=args.probe_steps,repeats=args.repeats,
+                          strategy=args.strategy)
     reference_eps = epsilon.detach().to('cuda').requires_grad_()
     reference = DifferentiableSimulation(project)(reference_eps)
     gradient, = torch.autograd.grad(reference.signals.square().sum(),reference_eps)

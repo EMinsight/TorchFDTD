@@ -161,6 +161,7 @@ class Region(Model):
     bloch_phase: tuple[float, float, float] = (0, 0, 0)  # radians per positive unit-cell translation
     background_index: float = Field(default=1, ge=1, le=20)
     backend: Literal['auto', 'cuda', 'cpu'] = 'auto'
+    memory_mode: Literal['resident', 'streamed'] = 'resident'
     cuda_kernel: Literal['torch', 'fused'] = 'torch'
     cuda_monitor_kernel: Literal['torch', 'fused'] = 'torch'
     precision: Literal['float32', 'float64'] = 'float32'
@@ -169,6 +170,12 @@ class Region(Model):
     slice_axis: Literal['x', 'y', 'z'] = 'z'
     slice_position: float = 0
     complex_display: Literal['real', 'imag', 'magnitude', 'phase'] = 'real'
+
+    def require_resident(self):
+        if self.memory_mode == 'streamed':
+            raise ValueError('Streamed scenes require StreamedSimulation and explicit memory budgets.')
+        if math.prod(self.shape) > 8_000_000:
+            raise ValueError('Resident execution is limited to 8 million cells. Use memory_mode="streamed" with StreamedSimulation.')
 
     @property
     def complex_fields(self):
@@ -271,8 +278,9 @@ class Region(Model):
                 raise ValueError('Mesh must leave at least 5 cells between the PML boundaries.')
         if self.dimension == '2d' and (any(f.kind != 'pml' for f in self.boundaries.pair(2)) or self.bloch_phase[2] != 0):
             raise ValueError('The invariant z axis has no boundary condition in 2D; keep its defaults.')
-        if math.prod(self.shape) > 8_000_000:
-            raise ValueError('This workbench limits a job to 8 million cells. Increase mesh spacing.')
+        if max(self.shape) > 1_000_000:
+            raise ValueError('A grid axis may contain at most one million cells.')
+        if self.memory_mode == 'resident':self.require_resident()
         if self.dimension == '2d' and self.slice_axis != 'z':
             raise ValueError('2D simulations use the XY (z-normal) field plane.')
         if abs(self.slice_position) > self.size['xyz'.index(self.slice_axis)] / 2:

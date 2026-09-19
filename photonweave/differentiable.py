@@ -475,6 +475,7 @@ class DifferentiableSimulation(torch.nn.Module):
 
     def forward(self,epsilon: torch.Tensor):
         r=self.project.region
+        r.require_resident()
         if not isinstance(epsilon,torch.Tensor) or epsilon.dtype not in (torch.float32,torch.float64):
             raise ValueError('epsilon must be a real float32 or float64 torch Tensor.')
         if epsilon.device.type not in ('cpu','cuda'):

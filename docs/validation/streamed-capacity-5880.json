@@ -1,0 +1,120 @@
+{
+  "grid": [
+    256,
+    256,
+    128
+  ],
+  "cells": 8388608,
+  "steps": 10,
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "torch_version": "2.10.0",
+  "records": [
+    {
+      "seconds": 10.15305459999945,
+      "peak_cuda_allocated_bytes": 65311744,
+      "gradient_relative_l2": null,
+      "gradient_norm": 4.047037145937793e-05,
+      "signal_norm": 0.0060135493986308575,
+      "report": {
+        "experimental": true,
+        "spatial_streaming": true,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "slab_width": 8,
+        "temporal_depth": 1,
+        "checkpoint_capacity": 1,
+        "execution_device": "cuda",
+        "tile_transfers": "sync",
+        "tile_buffers": 1,
+        "cuda_binding": "direct",
+        "reuse_tile_buffers": true,
+        "policy": "manual",
+        "precision": "torch.float32",
+        "host_reservation_bytes": 3223322856,
+        "gpu_reservation_bytes": 201326608,
+        "state_bytes": 211812352,
+        "max_extended_tile_cells": 393216,
+        "source_and_output_history_bytes": 200,
+        "host_tile_reservation_bytes": 201326624,
+        "forward_seconds": 2.1988259999779984,
+        "forward_workspace": {
+          "allocations": 5,
+          "buffer_bytes": 16097768,
+          "pinned_bytes": 0,
+          "binding_hits": 630,
+          "binding_misses": 10,
+          "h2d_bytes": 3629622960,
+          "d2h_bytes": 2118123600,
+          "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+        },
+        "peak_block_checkpoints": 1,
+        "replayed_blocks": 20,
+        "backward_seconds": 7.924337200005539,
+        "backward_workspace": {
+          "allocations": 115,
+          "buffer_bytes": 52359664,
+          "pinned_bytes": 0,
+          "binding_hits": 3152,
+          "binding_misses": 48,
+          "h2d_bytes": 14020260960,
+          "d2h_bytes": 7865712800,
+          "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+        }
+      }
+    },
+    {
+      "seconds": 4.250416700029746,
+      "peak_cuda_allocated_bytes": 123380224,
+      "gradient_relative_l2": 9.048532945143961e-08,
+      "gradient_norm": 4.0470364183420315e-05,
+      "signal_norm": 0.0060135493986308575,
+      "report": {
+        "experimental": true,
+        "spatial_streaming": true,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "slab_width": 16,
+        "temporal_depth": 2,
+        "checkpoint_capacity": 1,
+        "execution_device": "cuda",
+        "tile_transfers": "sync",
+        "tile_buffers": 1,
+        "cuda_binding": "direct",
+        "reuse_tile_buffers": true,
+        "policy": "manual",
+        "precision": "torch.float32",
+        "host_reservation_bytes": 3424649480,
+        "gpu_reservation_bytes": 402653216,
+        "state_bytes": 211812352,
+        "max_extended_tile_cells": 786432,
+        "source_and_output_history_bytes": 200,
+        "host_tile_reservation_bytes": 402653248,
+        "forward_seconds": 1.0891654000151902,
+        "forward_workspace": {
+          "allocations": 5,
+          "buffer_bytes": 32195052,
+          "pinned_bytes": 0,
+          "binding_hits": 150,
+          "binding_misses": 10,
+          "h2d_bytes": 1795808320,
+          "d2h_bytes": 1059061840,
+          "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+        },
+        "peak_block_checkpoints": 1,
+        "replayed_blocks": 6,
+        "backward_seconds": 3.146327599999495,
+        "backward_workspace": {
+          "allocations": 115,
+          "buffer_bytes": 100000252,
+          "pinned_bytes": 0,
+          "binding_hits": 624,
+          "binding_misses": 48,
+          "h2d_bytes": 5500131344,
+          "d2h_bytes": 3066642528,
+          "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+        }
+      }
+    }
+  ],
+  "scope": "Single cold iteration per policy. Agreement between two streamed policies, not independent large-grid physics validation. Exceeds the former scene cap, not physical GPU VRAM. Torch allocation peak excludes CUDA context and allocator cache."
+}

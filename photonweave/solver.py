@@ -151,6 +151,8 @@ def estimate(p: Project):
     dt = r.time_step
     active_materials = [m for m in p.materials if any(s.enabled and s.material == m.name for s in p.structures)]
     warnings = list(p.import_provenance.differences) if p.import_provenance else []
+    if r.memory_mode == 'streamed':
+        warnings.append('Streamed scenes require the Python StreamedSimulation API. This estimate describes resident storage, not streamed budget admission.')
     for material in active_materials:
         if material.fit_dt_s is not None and not math.isclose(material.fit_dt_s,dt,rel_tol=1e-10,abs_tol=0):
             warnings.append(f'{material.name}: ADE-target material was fitted at a different timestep. Refit or inspect the numerical n/k error at the current timestep.')
@@ -331,6 +333,7 @@ class Simulation:
     """
     def __init__(self, project: Project):
         self.project = Project.model_validate(project.model_dump())
+        self.project.region.require_resident()
 
     def run(self, progress=None, cancel=None, cuda_graph=True, cuda_graph_steps=1):
         with ENGINE_LOCK:
@@ -345,6 +348,7 @@ class Simulation:
     def _run(self, progress, cancel, cuda_graph, cuda_graph_steps):
         from .cuda_graph import CudaStepGraphs, observation_schedule, validate_graph_steps
         p, r = self.project, self.project.region
+        r.require_resident()
         use_cuda = r.backend == 'cuda' or (r.backend == 'auto' and torch.cuda.is_available())
         validate_graph_steps(cuda_graph_steps, use_cuda and cuda_graph)
         if use_cuda and not torch.cuda.is_available():
