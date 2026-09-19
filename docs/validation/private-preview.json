@@ -15,8 +15,20 @@
     "cpu_nonzero_traces": true,
     "finite_fields": true,
     "packaged_browser_assets": 2,
-    "http_ui_and_capabilities": true
+    "http_ui_and_capabilities": true,
+    "github_download_sha256_verified": true
   },
   "numerical_validation": "fsp-instrument-list.json",
-  "source_manifest_note": "The staged Git tree is separately checked against the current release audit allowlist before push."
+  "source_manifest_note": "The staged Git tree is separately checked against the current release audit allowlist before push.",
+  "github_cpu_ci": {
+    "status": "success",
+    "url": "https://github.com/hyoseokp/photonweave/actions/runs/35450742135",
+    "tested_source_commit": "3301e38ad27a75cc1c956471756d3ebf10c7e5d1",
+    "python_passed": 429,
+    "python_skipped": 128,
+    "browser_passed": 22,
+    "browser_skipped": 8,
+    "frontend_and_wheel_builds": "passed",
+    "later_changes": "documentation, archive byte preservation and evidence only"
+  }
 }

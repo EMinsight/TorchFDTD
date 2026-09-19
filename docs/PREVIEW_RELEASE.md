@@ -62,5 +62,7 @@ require the review recorded in the distribution document. Private staging does
 not resolve those questions or provide a legal guarantee.
 
 The local and RTX 5880 Python results, browser evidence and package checks are
-recorded in [ACCEPTANCE.md](ACCEPTANCE.md). GitHub Actions separately checks the
-CPU/Linux installation and browser workflow on the pushed revision.
+recorded in [ACCEPTANCE.md](ACCEPTANCE.md). GitHub Actions passed 429 Python and
+22 browser tests on Linux CPU, with 128 and 8 environment-dependent skips.
+The acceptance record identifies the tested numerical-source revision and
+subsequent documentation-only delivery updates.

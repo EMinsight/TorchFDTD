@@ -446,6 +446,16 @@ that wheel and verified package import outside the source checkout, nonzero
 finite CPU fields/traces, HTTP browser assets and the capabilities endpoint.
 The [package record](validation/private-preview.json) includes its SHA-256.
 
+GitHub Actions also passed the Linux CPU pipeline on numerical-source revision
+`3301e38ad27a75cc1c956471756d3ebf10c7e5d1`: **429 Python tests passed, 128 skipped**
+in that CPU-only environment, and **22 browser tests passed, 8 skipped**.
+Frontend and wheel builds passed. Later preview commits update documentation,
+archive byte preservation and this evidence only. The
+[workflow result](https://github.com/hyoseokp/photonweave/actions/runs/35450742135)
+and the package record distinguish this CPU coverage from workstation CUDA
+validation. Uploaded wheel bytes were downloaded and matched their recorded
+SHA-256.
+
 ## Remaining gates
 
 The [feature checklist](FEATURE_CHECKLIST.md) has 1658 rows: 159 implemented within
