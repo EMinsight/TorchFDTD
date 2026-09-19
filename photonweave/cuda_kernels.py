@@ -17,6 +17,22 @@ import torch
 from .boundaries import CURL_TERMS
 
 
+def _direct_cuda_view(cupy, tensor):
+    """Internal contiguous view for kernels launched on the current Torch stream.
+
+    Torch owns the allocation and records the consumer stream. CuPy only wraps
+    its pointer and retains a detached tensor owner. This avoids a DLPack stream
+    negotiation for every small coefficient view in a short-lived slab.
+    """
+    if not tensor.is_cuda or not tensor.is_contiguous() or tensor.dtype not in (torch.float32, torch.float64):
+        raise ValueError('Direct CUDA views require contiguous CUDA FP32/FP64 tensors.')
+    tensor.record_stream(torch.cuda.current_stream(tensor.device))
+    memory = cupy.cuda.UnownedMemory(tensor.data_ptr(), tensor.numel()*tensor.element_size(),
+                                    tensor.detach(), device_id=tensor.device.index)
+    return cupy.ndarray(tensor.shape, dtype='float64' if tensor.dtype == torch.float64 else 'float32',
+                        memptr=cupy.cuda.MemoryPointer(memory, 0))
+
+
 @lru_cache(maxsize=64)
 def _compile(source, device, capability, kernel_name='yee_update'):
     # CuPy RawKernel unconditionally adds -ftz=true. FDTD weak fields must
@@ -43,7 +59,7 @@ def _compile(source, device, capability, kernel_name='yee_update'):
 class FusedYeeCUDA:
     """Specialize a real-valued grid while retaining its CPML and ADE states."""
 
-    def __init__(self, grid):
+    def __init__(self, grid, *, direct_views=False, bindings_cache=None):
         if not grid.is_torch or not grid.E.is_cuda:
             raise ValueError('The fused CUDA kernel requires backend="cuda" and a CUDA GPU.')
         if grid.E.is_complex():
@@ -66,7 +82,8 @@ class FusedYeeCUDA:
             for forward in (False, True):
                 source, tensors = self._source(forward)
                 kernel, module = _compile(source, self.device, cupy.cuda.Device(self.device).compute_capability)
-                arrays = tuple(cupy.from_dlpack(t.detach()) for t in tensors)
+                view = lambda t: _direct_cuda_view(cupy, t) if direct_views else cupy.from_dlpack(t.detach())
+                arrays = bindings_cache.cuda_arguments(source, tensors, view) if bindings_cache is not None else tuple(view(t) for t in tensors)
                 self.launches[forward] = kernel, arrays, module
 
     @property

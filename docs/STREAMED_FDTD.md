@@ -19,12 +19,50 @@ loss = result.signals.square().sum()
 loss.backward()
 ```
 
-This is a manual execution policy. It is not the automatic scheduler and does
-not yet remove the workbench's eight-million-cell scene limit. CUDA slab copies
-are synchronous. The separate asynchronous checkpoint staging path in the
-resident differentiable solver is not an asynchronous spatial tile pipeline.
-These remaining limitations prevent claiming the final large-domain runtime
-or a general performance advantage.
+The default uses reusable buffers and synchronous transfers. Set
+`tile_transfers="async", tile_buffers=2` to use bounded pinned staging, separate
+H2D/D2H streams and ordered host reductions. One to three slots are supported.
+Every slot is released only after its previous copy and host consumer finish.
+Errors drain outstanding work before retry. More slots consume more memory and
+are charged to admission. Asynchrony is not a promise of full transfer/compute
+overlap or faster execution for every workload.
+
+Device buffers are shared across geometry specializations instead of retaining
+one field bank per tile. CUDA argument views are cached against source text,
+pointers, shapes, dtype and device. Buffer growth invalidates these bindings.
+The direct view path retains Torch ownership and records the consumer stream.
+`cuda_binding="dlpack"` and `reuse_tile_buffers=False` retain comparison paths.
+Disabling reuse requires synchronous transfers.
+
+The API does not yet remove the workbench's eight-million-cell scene limit.
+Large-domain admission validation and a unified resident/DRAM/NVMe policy remain
+unfinished. These limits prevent claiming the final large-domain runtime or a
+general performance advantage.
+
+## Measured policy selection
+
+```python
+from photonweave import tune_streamed
+
+tuning = tune_streamed(project, epsilon, probe_steps=24, repeats=2)
+model = StreamedSimulation(project, tuning.options)
+result = model(epsilon)
+print(tuning.report)  # includes the total cost of tuning
+```
+
+The default small candidate set varies slab width, temporal depth and transfer
+policy. An explicit list of `StreamedAdjointOptions` can also vary checkpoint
+and buffer counts. Every candidate must fit the full-duration reservation before
+its shorter prefix is timed. One warm-up and repeated complete prefix iterations
+include forward, replay and backward. Candidate signals and gradients must agree.
+The user's design values and accumulated gradients are preserved.
+
+This is a hardware-measured prefix selection, not a proof of full-run optimality.
+Amortize tuning across repeated optimization iterations and re-evaluate when the
+workload or hardware changes. In the initial held-out test, the selected policy
+was about 20% slower than the best candidate at the longer duration. It still
+beat the narrow K=1 fixed policy, but that does not establish a competitive solver
+advantage. Construct the returned policy's model with the original full project.
 
 ## Dependency and transpose
 
@@ -65,11 +103,14 @@ multiple temporal blocks and a geometry-radius chain.
 Run the reproducible native capacity/time ablation with:
 
 ```sh
-python -m benchmarks.streamed_adjoint --nx 64 --steps 24 --repeats 3 --output results/streamed.json
+python -m benchmarks.streamed_adjoint --nx 64 --steps 24 --repeats 3 --compare-bindings --compare-transfers --output results/streamed.json
+python -m benchmarks.streamed_policy --output results/policy.json
 ```
 
 It measures complete iterations after warm-up, compares signals and gradients,
 and records resident and streamed CUDA allocation peaks. It does not compare
 external solvers or prove execution beyond the GPU's physical VRAM capacity.
-The initial small-grid implementation incurs substantial Python, transfer and
-replay overhead. A reduction in device storage is not itself a speedup.
+The small-grid implementation still incurs substantial Python, transfer and
+replay overhead. A reduction in device storage is not itself a speedup. The
+[runtime validation report](validation/TILE_RUNTIME_REPORT.md) records both
+improvements and the prefix selector's longer-duration prediction errors.

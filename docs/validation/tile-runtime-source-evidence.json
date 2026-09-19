@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-20",
+  "files": [
+    {
+      "path": "photonweave/tile_workspace.py",
+      "sha256": "2fefcda28ee1119e74e70068883acc9f3c85e125060f966a172e05fa755b6596"
+    },
+    {
+      "path": "photonweave/spacetime.py",
+      "sha256": "e4bd5ef53908d4bf6e6fc63f2eca3ea862b2e7bd0de3e55efb246d58421497c1"
+    },
+    {
+      "path": "photonweave/streamed.py",
+      "sha256": "ef373280904b17394fe4a17ce27c291680cd6fc2a80bd7d32f8b809f6b2a2c66"
+    },
+    {
+      "path": "photonweave/streamed_tuning.py",
+      "sha256": "05c6bbe56cde7110dc550beeb31d6f112093fbc813ded4b1db1827ca5d2de4bf"
+    },
+    {
+      "path": "photonweave/cuda_kernels.py",
+      "sha256": "3de2fa924b3786b7a485c916e3dc1b22c927ab74761e892eff6904267ae526c3"
+    },
+    {
+      "path": "photonweave/cuda_adjoint.py",
+      "sha256": "f7a8c03cadde56ec9965bd8e2b9107d1458edd7d911294c35958b4764d738d75"
+    },
+    {
+      "path": "tests/test_tile_workspace.py",
+      "sha256": "ab7a282bc8fa8fae17fcd7c53b947008470eb6831ca92329f6268f1003fe3eaf"
+    },
+    {
+      "path": "tests/test_streamed_tuning.py",
+      "sha256": "853b5ffa63e3a1c89bdf1ac010b45e4668ac1488cfa2dd1c420ba915fa74f889"
+    },
+    {
+      "path": "tests/test_spacetime.py",
+      "sha256": "ef5bf5354cd556bfcfc98d7491c3cac247e5c0be65aef6b5e2f4ecb5876776f9"
+    },
+    {
+      "path": "benchmarks/streamed_adjoint.py",
+      "sha256": "084e0082b332e1900d01865a64d0f3aa341274511bf75f2909b8d8535f161342"
+    },
+    {
+      "path": "benchmarks/streamed_policy.py",
+      "sha256": "384e4f47dd36bc44c3f3dec137c61533548a64e9072f00c653d3f807ccdf45e9"
+    }
+  ]
+}

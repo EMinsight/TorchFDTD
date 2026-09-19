@@ -9,8 +9,9 @@ The first [differentiable implementation](DIFFERENTIABLE_FDTD.md) provides a
 discrete Yee/CPML adjoint, bounded replay checkpoints, explicit three-tier
 checkpoint placement and a Torch geometry/Adam example. The new experimental
 [DRAM slab API](STREAMED_FDTD.md) streams spatial state and transposes its halo
-dependencies. It is a synchronous manual policy, with small-grid parity tests,
-not a completed oversized-domain or high-throughput runtime. The UI continues
+dependencies. It now has reusable buffers, an optional asynchronous tile pipeline
+and measured-prefix policy selection, with small-grid parity tests. It is not a
+completed oversized-domain or high-throughput runtime. The UI continues
 to use the normal forward solver.
 
 ## Adopted design choices

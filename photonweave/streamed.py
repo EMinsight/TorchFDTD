@@ -19,6 +19,10 @@ class StreamedAdjointOptions:
     gpu_budget_bytes: int = 1024**3
     host_budget_bytes: int = 8*1024**3
     device: str = 'cuda'
+    cuda_binding: str = 'direct'
+    reuse_tile_buffers: bool = True
+    tile_transfers: str = 'sync'
+    tile_buffers: int = 2
 
     def __post_init__(self):
         for name in ('slab_width', 'temporal_depth', 'gpu_budget_bytes', 'host_budget_bytes'):
@@ -29,6 +33,13 @@ class StreamedAdjointOptions:
             raise ValueError('checkpoints must be an integer between zero and 32.')
         if torch.device(self.device).type not in ('cpu', 'cuda'):
             raise ValueError('Streamed execution supports CPU or CUDA tiles.')
+        if self.cuda_binding not in ('direct', 'dlpack'):raise ValueError('cuda_binding must be direct or dlpack.')
+        if not isinstance(self.reuse_tile_buffers,bool):raise ValueError('reuse_tile_buffers must be boolean.')
+        if self.tile_transfers not in ('sync','async'):raise ValueError('tile_transfers must be sync or async.')
+        if isinstance(self.tile_buffers,bool) or not isinstance(self.tile_buffers,int) or not 1 <= self.tile_buffers <= 3:
+            raise ValueError('tile_buffers must be between one and three.')
+        if self.tile_transfers == 'async' and (not self.reuse_tile_buffers or torch.device(self.device).type != 'cuda'):
+            raise ValueError('Asynchronous tiles require reusable CUDA buffers.')
 
 
 def _reservation(project, epsilon, options):
@@ -53,8 +64,9 @@ def _reservation(project, epsilon, options):
     source_copies = math.ceil(width/region.shape[0])+1
     tile_history = depth*(monitors+terms*source_copies)*item
     tile_workspace = 128*tile_cells*item
-    host = (options.checkpoints+12)*state+8*epsilon.numel()*item+history+tile_workspace+2*tile_history
-    gpu = tile_workspace+tile_history
+    buffers = options.tile_buffers if options.tile_transfers == 'async' else 1
+    host = (options.checkpoints+12)*state+8*epsilon.numel()*item+history+buffers*(tile_workspace+2*tile_history)
+    gpu = buffers*(tile_workspace+tile_history)
     available = host_memory()['available_bytes']
     host_limit = min(options.host_budget_bytes, int(available*.8)) if available is not None else options.host_budget_bytes
     if host > host_limit:
@@ -65,7 +77,7 @@ def _reservation(project, epsilon, options):
             raise ValueError('Streamed tile workspace reservation exceeds the GPU budget.')
     return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,
                 state_bytes=state, max_extended_tile_cells=tile_cells,
-                source_and_output_history_bytes=history, host_tile_reservation_bytes=tile_workspace+2*tile_history)
+                source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))
 
 
 class _Streamed(torch.autograd.Function):
@@ -75,7 +87,9 @@ class _Streamed(torch.autograd.Function):
         ctx.project, ctx.options, ctx.report = project.model_copy(deep=True), options, report
         started = time.perf_counter()
         host = _System(project, epsilon)
-        operator = SlabBlockOperator(host, options.slab_width, options.device)
+        operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
+                                    reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
+                                    tile_buffers=options.tile_buffers)
         state = host.state()
         signals = epsilon.new_empty((project.region.steps, len(host.monitors)))
         for start in range(0, project.region.steps, options.temporal_depth):
@@ -83,6 +97,8 @@ class _Streamed(torch.autograd.Function):
             state, values = operator.forward(epsilon, state, start, depth)
             signals[start:start+depth].copy_(values)
         report['forward_seconds'] = time.perf_counter()-started
+        if operator.workspace is not None:
+            report['forward_workspace'] = operator.workspace_report()
         # No physical time history is retained by the autograd context.
         return signals
 
@@ -94,7 +110,9 @@ class _Streamed(torch.autograd.Function):
         _reservation(project, epsilon, options)
         started = time.perf_counter()
         host = _System(project, epsilon)
-        operator = SlabBlockOperator(host, options.slab_width, options.device)
+        operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
+                                    reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
+                                    tile_buffers=options.tile_buffers)
         steps = project.region.steps
         starts = list(range(0, steps, options.temporal_depth))+[steps]
         gradient = torch.zeros_like(epsilon)
@@ -132,6 +150,8 @@ class _Streamed(torch.autograd.Function):
 
         reverse(0, len(starts)-1, host.state(), options.checkpoints)
         report['backward_seconds'] = time.perf_counter()-started
+        if operator.workspace is not None:
+            report['backward_workspace'] = operator.workspace_report()
         return gradient, None, None, None
 
 
@@ -139,8 +159,9 @@ class StreamedSimulation(DifferentiableSimulation):
     """First-order epsilon-to-signal operation with CPU-resident global state.
 
     Geometry tensors and outputs reside on CPU. CUDA receives one extended slab
-    at a time. Transfers are currently synchronous. The manual slab/depth policy
-    and conservative admission are explicit, not an automatic throughput claim.
+    per reusable slot. Optional asynchronous transfers use bounded pinned pools.
+    A manual policy or a policy from tune_streamed is explicit, and conservative
+    admission does not itself establish a throughput advantage.
     """
     def __init__(self, project, options=None):
         super().__init__(project)
@@ -161,7 +182,10 @@ class StreamedSimulation(DifferentiableSimulation):
         report = dict(experimental=True, spatial_streaming=True, full_time_autograd=False,
                       higher_order=False, slab_width=options.slab_width,
                       temporal_depth=options.temporal_depth, checkpoint_capacity=options.checkpoints,
-                      execution_device=options.device, tile_transfers='synchronous',
+                      execution_device=options.device, tile_transfers=options.tile_transfers,
+                      tile_buffers=options.tile_buffers if options.tile_transfers == 'async' else 1,
+                      cuda_binding=options.cuda_binding,
+                      reuse_tile_buffers=options.reuse_tile_buffers,
                       policy='manual', precision=str(epsilon.dtype), **reservation)
         signals = _Streamed.apply(epsilon, self.project, options, report)
         return DifferentiableResult(signals, region.time_step,

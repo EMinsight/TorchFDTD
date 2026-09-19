@@ -5,7 +5,7 @@
 ## 현재 실행 순서 · 2026-09-20
 
 1. **미분 가능한 물리 경로.** 제한된 실수 비분산 Yee·CPML의 이산 adjoint와 fused CUDA backward, 점 관측, Torch DFT, regularized sphere 형상과 Adam을 구현했다. [API 범위](DIFFERENTIABLE_FDTD.md)에 표시한 부분 구현이며 plane·mode port 목적함수, ADE·Bloch·TFSF 및 coupled subpixel 미분을 확대해야 한다. Taylor 검사는 이산식 검증이며 물리 shape-gradient 수렴은 별도다.
-2. **계층형 메모리와 공간·시간 분할.** GPU/host/disk checkpoint, 혼합 tier, binomial 재계산과 비동기 checkpoint staging을 구현했다. 별도의 [DRAM 공간·시간 slab API](STREAMED_FDTD.md)는 동기 타일 전송과 halo adjoint를 구현한 실험 단계다. 다음은 타일 버퍼 재사용과 비동기 파이프라인, 실측 tile/K/checkpoint/microbatch 정책, admission에 기반한 기존 격자 크기 제한 대체다. SSD 공간 backing과 단일 grid multi-GPU는 그다음이다. 작은 격자의 전송·재계산 오버헤드는 아직 크다. [구체적 통과 조건](HIERARCHICAL_EXECUTION.md).
+2. **계층형 메모리와 공간·시간 분할.** GPU/host/disk checkpoint, 혼합 tier, binomial 재계산과 비동기 checkpoint staging을 구현했다. 별도의 [DRAM 공간·시간 slab API](STREAMED_FDTD.md)는 halo adjoint, 버퍼 재사용, 비동기 타일 파이프라인과 짧은 실제 실행을 이용한 정책 선택을 구현한 실험 단계다. 다음은 긴 실행에서 정책 선택의 검증·개선, admission에 기반한 기존 격자 크기 제한 대체와 대형 문제 검증이다. Microbatch 공동 예산, SSD 공간 backing과 단일 grid multi-GPU도 남아 있다. 작은 격자의 전송·재계산 오버헤드는 아직 크다. [구체적 통과 조건](HIERARCHICAL_EXECUTION.md).
 3. **정확도와 유효한 설계 목적함수.** 측정 재료 피팅과 실험적 subpixel의 독립 해석 기준 검증을 유지한다. 모드 소스·포트의 전력 정규화, 양방향 분해와 상반성·보존 검사를 진행한다. 작은 adjoint 구현을 이 모든 기능이 끝날 때까지 미루지 않는다.
 4. **동일 오차의 전체 역설계 비용.** forward, backward, 재계산, I/O, geometry VJP와 optimizer를 함께 측정한다. 가능한 최대 크기와 처리 속도를 분리하고, 기존 잘 조정된 정책과 경쟁 solver를 지원 조건에 맞춰 비교한다. 성능 예상치를 측정 결과로 표시하지 않는다.
 5. **사용성과 배포.** Python 기능을 UI·저장·결과 검토로 연결한다. 공개 배포의 자료·라이선스 검토는 별도 출고 조건이다. FSP 주변 속성의 일대일 복제나 외관 항목이 위 두 핵심 개발을 앞서지 않는다.

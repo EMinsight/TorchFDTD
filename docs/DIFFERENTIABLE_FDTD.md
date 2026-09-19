@@ -76,9 +76,11 @@ workbench's monitor apodization configuration.
 | Trainable sources, boundaries and adaptive meshes | Pending |
 | Higher derivatives | Rejected explicitly |
 | Batched CUDA backward and shared-budget microbatch execution | Pending |
-| Spatial out-of-core / space-time tiling | Experimental DRAM slab API with block adjoint, synchronous tile transfers |
+| Spatial out-of-core / space-time tiling | Experimental DRAM slab API with block adjoint and reusable buffers |
 | Async checkpoint prefetch | Implemented with bounded event-owned staging slots |
-| Async spatial tile pipeline, automatic tier/tile selection, GDS | Pending |
+| Async spatial tile pipeline | Optional bounded pinned slots, separate copy streams, FIFO halo reduction |
+| Automatic tile policy | Initial measured-prefix selection, full-duration optimality unproven |
+| Unified resident/DRAM/NVMe selection and GDS | Pending |
 | Single-domain multi-GPU backward | Pending |
 
 Multiple calls can share a design tensor and their losses can accumulate, but

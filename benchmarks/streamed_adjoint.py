@@ -1,5 +1,6 @@
 """Compare native resident and DRAM-streamed full first-order iterations."""
 import argparse
+from dataclasses import replace
 import gc
 import json
 from pathlib import Path
@@ -21,6 +22,8 @@ def main():
     parser.add_argument('--width', type=int, default=8)
     parser.add_argument('--depth', type=int, default=3)
     parser.add_argument('--repeats', type=int, default=3)
+    parser.add_argument('--compare-bindings', action='store_true')
+    parser.add_argument('--compare-transfers', action='store_true')
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
     if args.repeats < 1:raise ValueError('repeats must be positive')
@@ -33,6 +36,11 @@ def main():
     options = StreamedAdjointOptions(slab_width=args.width, temporal_depth=args.depth, checkpoints=2)
     models = {'resident':DifferentiableSimulation(project, AdjointOptions(checkpoints=2)),
               'streamed':StreamedSimulation(project, options)}
+    if args.compare_bindings:
+        models['streamed_direct_unreused'] = StreamedSimulation(project, replace(options, reuse_tile_buffers=False))
+        models['streamed_dlpack'] = StreamedSimulation(project, replace(options, cuda_binding='dlpack', reuse_tile_buffers=False))
+    if args.compare_transfers:
+        models['streamed_async'] = StreamedSimulation(project, replace(options, tile_transfers='async', tile_buffers=2))
     records = {name:[] for name in models}
     outputs, gradients = {}, {}
 
@@ -56,10 +64,11 @@ def main():
 
     for name in models:iteration(name, False)
     for repeat in range(args.repeats):
-        for name in (('resident','streamed') if repeat%2 == 0 else ('streamed','resident')):
+        for name in (tuple(models) if repeat%2 == 0 else tuple(reversed(models))):
             iteration(name, True)
-    torch.testing.assert_close(outputs['streamed'], outputs['resident'], rtol=1e-10, atol=1e-12)
-    torch.testing.assert_close(gradients['streamed'], gradients['resident'], rtol=1e-9, atol=1e-11)
+    for name in models:
+        torch.testing.assert_close(outputs[name], outputs['resident'], rtol=1e-10, atol=1e-12)
+        torch.testing.assert_close(gradients[name], gradients['resident'], rtol=1e-9, atol=1e-11)
     denominator = torch.linalg.vector_norm(gradients['resident'])
     if denominator == 0:raise RuntimeError('Degenerate benchmark gradient')
     medians = {name:statistics.median(row['full_iteration_seconds'] for row in rows)
@@ -70,7 +79,7 @@ def main():
                 median_seconds=medians, streamed_over_resident_time=medians['streamed']/medians['resident'],
                 gradient_relative_l2=float(torch.linalg.vector_norm(gradients['streamed']-gradients['resident'])/denominator),
                 records=records,
-                scope='Native resident/streamed ablation, synchronous slab transfers. CUDA memory is Torch allocations only. No external solver speed claim or physical VRAM-overflow demonstration.')
+                scope='Native resident/streamed ablation. Per-mode reports identify bindings, reuse and transfer policy. CUDA memory is Torch allocations only. No external solver speed claim or physical VRAM-overflow demonstration.')
     path = Path(args.output)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2), encoding='utf8')

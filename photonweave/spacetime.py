@@ -20,16 +20,65 @@ def _host_copies(tensors):
 
 
 class SlabBlockOperator:
-    def __init__(self, host_system, width, device='cuda'):
+    def __init__(self, host_system, width, device='cuda', *, cuda_binding='direct', reuse_buffers=True,
+                 tile_transfers='sync', tile_buffers=2):
         if host_system.device.type != 'cpu':
             raise ValueError('The global slab state must reside in CPU DRAM.')
         if isinstance(width, bool) or not isinstance(width, int) or width < 1:
             raise ValueError('Slab width must be a positive integer.')
         self.host = host_system
         self.width = width
+        if cuda_binding not in ('direct', 'dlpack'):raise ValueError('cuda_binding must be direct or dlpack.')
+        self.direct_views = cuda_binding == 'direct'
         self.device = torch.device(device)
         if self.device.type == 'cuda' and self.device.index is None:
             self.device = torch.device('cuda', torch.cuda.current_device())
+        from .tile_workspace import TileWorkspace
+        if tile_transfers not in ('sync', 'async'):raise ValueError('tile_transfers must be sync or async.')
+        if isinstance(tile_buffers,bool) or not isinstance(tile_buffers,int) or not 1 <= tile_buffers <= 3:
+            raise ValueError('tile_buffers must be between one and three.')
+        if tile_transfers == 'async' and (not reuse_buffers or self.device.type != 'cuda'):
+            raise ValueError('Asynchronous tiles require reusable CUDA buffers.')
+        self.workspaces = [TileWorkspace(self.device, asynchronous=tile_transfers == 'async')
+                           for _ in range(tile_buffers if tile_transfers == 'async' else 1)] if reuse_buffers else []
+        self.workspace = self.workspaces[0] if self.workspaces else None
+
+    def workspace_report(self):
+        return dict(allocations=sum(w.allocations for w in self.workspaces),
+                    buffer_bytes=sum(w.allocated_bytes for w in self.workspaces),
+                    pinned_bytes=sum(w.pinned_bytes for w in self.workspaces),
+                    binding_hits=sum(w.binding_hits for w in self.workspaces),
+                    binding_misses=sum(w.binding_misses for w in self.workspaces),
+                    h2d_bytes=sum(w.h2d_bytes for w in self.workspaces),
+                    d2h_bytes=sum(w.d2h_bytes for w in self.workspaces),
+                    transfer_scope='Logical workspace payload bytes, not measured PCIe transactions.')
+
+    def _pipeline(self, depth, prepare, commit):
+        pending = []
+        count = len(self.workspaces) or 1
+        completed = False
+        try:
+            for index, descriptor in enumerate(self.tiles(depth)):
+                if len(pending) == count:
+                    transfer, metadata = pending.pop(0)
+                    commit(transfer.wait(), metadata)
+                self.workspace = self.workspaces[index % count] if self.workspaces else None
+                if self.workspace is not None:self.workspace.drain()
+                transfer, metadata = prepare(descriptor)
+                pending.append((transfer, metadata))
+            for transfer, metadata in pending:commit(transfer.wait(), metadata)
+            completed = True
+        finally:
+            # Also drain in-flight copies when preparation or reduction fails.
+            # An exception before output staging may leave compute with no D2H
+            # completion event. Finish it before a caller retries this workspace.
+            if not completed and self.device.type == 'cuda':torch.cuda.current_stream(self.device).synchronize()
+            for workspace in self.workspaces:workspace.drain()
+
+    def _return(self, tensors):
+        if self.workspace is not None:return self.workspace.to_host(tensors)
+        from .tile_workspace import HostTransfer
+        return HostTransfer(_host_copies(tensors))
 
     def tiles(self, depth):
         n = self.host.region.shape[0]
@@ -139,12 +188,17 @@ class SlabBlockOperator:
             for _, _, wave, profile in terms:
                 tensors.append(wave)
                 if profile is not None:tensors.append(profile)
-        packed = torch.cat([value.reshape(-1) for value in tensors]).to(self.device)
+        packed = torch.cat([value.reshape(-1) for value in tensors])
+        packed = self.workspace.copy('payload', packed) if self.workspace is not None else packed.to(self.device)
         views = iter(piece.view_as(original) for piece, original in
                      zip(packed.split([value.numel() for value in tensors]), tensors))
         local.epsilon, grid.E, grid.H, grid.inverse_permeability = [next(views) for _ in range(4)]
         local.eps4 = local.epsilon[..., None] if epsilon.ndim == 3 else local.epsilon
-        grid.inverse_permittivity = (1/local.eps4).expand_as(grid.E).contiguous()
+        if self.workspace is None:
+            grid.inverse_permittivity = (1/local.eps4).expand_as(grid.E).contiguous()
+        else:
+            grid.inverse_permittivity = self.workspace.array('inverse', grid.E.shape, epsilon.dtype)
+            grid.inverse_permittivity.copy_(local.eps4.expand_as(grid.E)).reciprocal_()
         grid.metric = {key:(next(views), edge) for key, (_, edge) in grid.metric.items()}
         for segment in local.segments:
             for name in ('psi', 'b', 'c', 'inv_k'):segment[name] = next(views)
@@ -154,7 +208,7 @@ class SlabBlockOperator:
         local.kernel = None
         if self.device.type == 'cuda':
             from .cuda_kernels import FusedYeeCUDA
-            local.kernel = FusedYeeCUDA(grid)
+            local.kernel = FusedYeeCUDA(grid, direct_views=self.direct_views, bindings_cache=self.workspace)
         return local, mapping, observer_ids
 
     def _validate(self, epsilon, state, start, depth):
@@ -175,7 +229,7 @@ class SlabBlockOperator:
         self._validate(epsilon, state, start, depth)
         output = tuple(torch.zeros_like(s) for s in state)
         signals = epsilon.new_zeros((depth, len(self.host.monitors)))
-        for descriptor in self.tiles(depth):
+        def prepare(descriptor):
             lo, hi, _, core = descriptor
             local, mapping, observers = self._tile(epsilon, state, descriptor, start, depth)
             observations = torch.empty((depth, len(observers)), device=self.device, dtype=epsilon.dtype)
@@ -186,13 +240,15 @@ class SlabBlockOperator:
             for value, (_, _, owned, _) in zip(local.state()[2:], mapping):
                 owned_slice = slice(int(owned[0]), int(owned[-1])+1) if owned.numel() else slice(0,0)
                 owned_values.append(value[owned_slice])
-            returned = _host_copies((*owned_values, observations))
+            return self._return((*owned_values, observations)), (lo, hi, mapping, observers)
+
+        def commit(returned, metadata):
+            lo, hi, mapping, observers = metadata
             if observers:signals[:, observers] = returned[-1]
             for target, value in zip(output[:2], returned[:2]):target[lo:hi].copy_(value)
             for value, (global_id, _, _, destination) in zip(returned[2:-1], mapping):
                 output[global_id].index_copy_(0, destination, value)
-            # Do not retain device arrays from previous tiles.
-            del local, value, observations, owned_values, returned
+        self._pipeline(depth, prepare, commit)
         return output, signals
 
     @torch.no_grad()
@@ -203,20 +259,25 @@ class SlabBlockOperator:
             raise ValueError('Signal adjoint must have the host block observation shape.')
         initial_bar = tuple(torch.zeros_like(s) for s in state)
         gradient = torch.zeros_like(epsilon)
-        for descriptor in self.tiles(depth):
+        def prepare(descriptor):
             lo, hi, indices, core = descriptor
             local, mapping, observers = self._tile(epsilon, state, descriptor, start, depth)
-            restart = tuple(s.clone() for s in local.state())
-            adjoint = tuple(torch.zeros_like(s) for s in local.state())
+            restart = tuple(self.workspace.copy(f'restart:{i}', s) if self.workspace is not None else s.clone()
+                            for i,s in enumerate(local.state()))
+            adjoint = tuple(torch.zeros_like(s, device='cpu') for s in local.state())
             for target, value in zip(adjoint[:2], endpoint_bar[:2]):target[core].copy_(value[lo:hi])
             for target, (global_id, _, owned, destination) in zip(adjoint[2:], mapping):
-                target.index_copy_(0, owned.to(self.device), endpoint_bar[global_id].index_select(0, destination).to(self.device))
-            samples = signal_bar[:, observers].to(self.device).contiguous()
-            local_gradient = torch.zeros_like(local.epsilon)
+                target.index_copy_(0, owned, endpoint_bar[global_id].index_select(0, destination))
+            seed = torch.cat([s.reshape(-1) for s in adjoint])
+            seed = self.workspace.copy('adjoint_seed', seed) if self.workspace is not None else seed.to(self.device)
+            adjoint = tuple(part.view_as(original) for part, original in
+                            zip(seed.split([s.numel() for s in adjoint]), adjoint))
+            samples = self.workspace.copy('signal', signal_bar[:, observers]) if self.workspace is not None else signal_bar[:, observers].to(self.device).contiguous()
+            local_gradient = self.workspace.zeros('gradient', local.epsilon) if self.workspace is not None else torch.zeros_like(local.epsilon)
             backward = None
             if self.device.type == 'cuda':
                 from .cuda_adjoint import FusedAdjointCUDA
-                backward = FusedAdjointCUDA(local, local_gradient, samples)
+                backward = FusedAdjointCUDA(local, local_gradient, samples, direct_views=self.direct_views, buffers=self.workspace)
                 backward.e_bar.copy_(adjoint[0]);backward.h_bar.copy_(adjoint[1])
                 for target, value in zip(backward.psi_bars[0], adjoint[2:]):target.copy_(value)
                 del adjoint
@@ -231,10 +292,13 @@ class SlabBlockOperator:
                     local_gradient.add_(contribution)
             if backward is not None:
                 adjoint = (backward.e_bar, backward.h_bar, *backward.psi_bars[backward.phase])
-            returned = _host_copies((*adjoint, local_gradient))
+            return self._return((*adjoint, local_gradient)), (indices, mapping)
+
+        def commit(returned, metadata):
+            indices, mapping = metadata
             for target, value in zip(initial_bar[:2], returned[:2]):target.index_add_(0, indices, value)
             for value, (global_id, take, _, _) in zip(returned[2:-1], mapping):
                 initial_bar[global_id].index_add_(0, take, value)
             gradient.index_add_(0, indices, returned[-1])
-            del adjoint, backward, local, restart, local_gradient, value, samples, returned
+        self._pipeline(depth, prepare, commit)
         return initial_bar, gradient

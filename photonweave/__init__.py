@@ -42,3 +42,5 @@ from .memory_profile import profile_memory_transfers
 __all__ += ['profile_memory_transfers']
 from .streamed import StreamedAdjointOptions, StreamedSimulation
 __all__ += ['StreamedAdjointOptions', 'StreamedSimulation']
+from .streamed_tuning import StreamedTuning, tune_streamed
+__all__ += ['StreamedTuning', 'tune_streamed']

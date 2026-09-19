@@ -3,6 +3,10 @@
 Date: 20 September 2026. This report describes a prototype, not the completed
 large-domain runtime or a benchmark against an external solver.
 
+This is the baseline from revision `7ea5cb4`. See the later
+[reusable/asynchronous runtime and policy measurements](TILE_RUNTIME_REPORT.md)
+for the subsequent implementation. The baseline rows below remain unchanged.
+
 The full Python suite passed on both local RTX 3060 and RTX 5880 with 685 passes
 and one skip. Those full runs preceded the final tile-payload packing and host
 availability admission changes. The final spatial regression file separately

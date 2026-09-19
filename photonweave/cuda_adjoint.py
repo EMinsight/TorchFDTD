@@ -10,21 +10,23 @@ import math
 import torch
 
 from .boundaries import CURL_TERMS
-from .cuda_kernels import _compile
+from .cuda_kernels import _compile, _direct_cuda_view
 
 
 class FusedAdjointCUDA:
-    def __init__(self,system,gradient,signal_bar):
+    def __init__(self,system,gradient,signal_bar,*,direct_views=False,buffers=None):
         import cupy
         self.cp=cupy
+        self.direct_views=direct_views
         self.system=system
         self.device=system.device.index
         self.gradient=gradient
         self.signal_bar=signal_bar.contiguous()
         self.epsilon=system.eps4.detach().contiguous()
-        self.e_bar=torch.zeros_like(system.grid.E)
-        self.h_bar=torch.zeros_like(system.grid.H)
-        self.psi_bars=[tuple(torch.zeros_like(s['psi']) for s in system.segments) for _ in range(2)]
+        allocate = lambda name, value: buffers.zeros(name, value) if buffers is not None else torch.zeros_like(value)
+        self.e_bar=allocate('bar:E',system.grid.E)
+        self.h_bar=allocate('bar:H',system.grid.H)
+        self.psi_bars=[tuple(allocate(f'bar:psi:{phase}:{i}',s['psi']) for i,s in enumerate(system.segments)) for phase in range(2)]
         self.phase=0
         self.launches={}
         self.count=math.prod(system.region.shape)
@@ -33,9 +35,12 @@ class FusedAdjointCUDA:
                 for forward in (True,False):
                     code,tensors=self.source(forward,phase)
                     fn,module=_compile(code,self.device,cupy.cuda.Device(self.device).compute_capability,'adjoint_update')
-                    arrays=tuple(cupy.from_dlpack(t.detach()) for t in tensors)
+                    arrays=buffers.cuda_arguments(code,tensors,self.view) if buffers is not None else tuple(self.view(t) for t in tensors)
                     self.launches[forward,phase]=(fn,arrays,module)
             self.observer=self.observer_kernel()
+
+    def view(self,tensor):
+        return _direct_cuda_view(self.cp,tensor) if self.direct_views else self.cp.from_dlpack(tensor.detach())
 
     def stream(self):
         return self.cp.cuda.ExternalStream(torch.cuda.current_stream(self.device).cuda_stream,device_id=self.device)
@@ -57,7 +62,7 @@ class FusedAdjointCUDA:
             lines.append('}')
         code=f'extern "C" __global__ void add_observations({real}* e,{real}* h,const {real}* v,int step){{'+''.join(lines)+'}'
         fn,module=_compile(code,self.device,self.cp.cuda.Device(self.device).compute_capability,'add_observations')
-        arrays=tuple(self.cp.from_dlpack(t.detach()) for t in (self.e_bar,self.h_bar,self.signal_bar))
+        arrays=tuple(self.view(t) for t in (self.e_bar,self.h_bar,self.signal_bar))
         return fn,arrays,module,len(groups)
 
     def source(self,forward,phase):
