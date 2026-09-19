@@ -10,6 +10,12 @@ This is a **development preview**. The required-workflow checklist remains incom
 
 **Comparison guide:** **[Lumerical FDTD speed comparison](#primary-speed-comparison-lumerical-fdtd)**, [capabilities and batch support](#capability-comparison), [mixed-grid ensembles](#mixed-meshes-and-durations-in-one-python-batch), [single-case measurements](#measured-cuda-comparisons), [remaining competitiveness work](docs/OPEN_SOURCE_COMPARISON_KO.md#비교우위-개발-프로젝트의-현재-작업). Measured gains below establish a specific forward-workflow advantage against flaport/fdtd, not leadership over every CUDA solver.
 
+Experimental [file-backed spatial execution](docs/validation/STATE_BACKING_REPORT.md)
+now extends the streamed adjoint beyond application-owned DRAM field banks.
+Supported gradients match the DRAM path exactly in the recorded tests, while
+file execution is slower. OS cache memory and sustained NVMe performance remain
+unvalidated.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 

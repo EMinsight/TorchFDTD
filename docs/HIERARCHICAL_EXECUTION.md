@@ -177,3 +177,14 @@ time, maximum admitted cells, all-tier peak memory, transferred bytes, redundant
 updates and error. Capacity and speed form a measured Pareto frontier only
 after these runs. Neither a memory-capacity ratio nor an LLM result establishes
 our achievable FDTD problem size or speed.
+
+## File-bank prototype status
+
+Global primal, CPML and adjoint banks can now use buffered scratch files with
+bounded slab I/O. Checkpoint references retain immutable versions. See the
+[implementation contract](STREAMED_FDTD.md#experimental-file-backed-spatial-state)
+and [recorded validation](validation/STATE_BACKING_REPORT.md). This implements
+the basic spatial backing path in priority 7. Sustained cold NVMe measurements,
+asynchronous disk prefetch, automatic tier selection, durable restart and
+single-domain multi-GPU remain open. Material and gradient tensors still occupy
+CPU memory, and the host admission estimate excludes the OS page cache.

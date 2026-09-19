@@ -1,4 +1,4 @@
-"""Lossless DRAM slab blocks and their discrete transpose.
+"""Lossless host/file-backed slab blocks and their discrete transpose.
 
 Internal execution primitive, not yet an automatically admitted public solver.
 Each tile reads the same immutable block-start state. A conservative 2*K halo
@@ -21,12 +21,13 @@ def _host_copies(tensors):
 
 class SlabBlockOperator:
     def __init__(self, host_system, width, device='cuda', *, cuda_binding='direct', reuse_buffers=True,
-                 tile_transfers='sync', tile_buffers=2, local_checkpoints=0):
+                 tile_transfers='sync', tile_buffers=2, local_checkpoints=0, state_factory=None):
         if host_system.device.type != 'cpu':
-            raise ValueError('The global slab state must reside in CPU DRAM.')
+            raise ValueError('Slab metadata and epsilon must reside on CPU.')
         if isinstance(width, bool) or not isinstance(width, int) or width < 1:
             raise ValueError('Slab width must be a positive integer.')
         self.host = host_system
+        self.state_factory = state_factory
         self.width = width
         if isinstance(local_checkpoints,bool) or not isinstance(local_checkpoints,int) or not 0 <= local_checkpoints <= 32:
             raise ValueError('local_checkpoints must be an integer between zero and 32.')
@@ -86,6 +87,10 @@ class SlabBlockOperator:
         if self.workspace is not None:return self.workspace.to_host(tensors)
         from .tile_workspace import HostTransfer
         return HostTransfer(_host_copies(tensors))
+
+    def new_state(self):
+        templates = self.host.state()
+        return self.state_factory(templates) if self.state_factory is not None else tuple(torch.zeros_like(s) for s in templates)
 
     def tiles(self, depth):
         n = self.host.region.shape[0]
@@ -234,7 +239,7 @@ class SlabBlockOperator:
     @torch.no_grad()
     def forward(self, epsilon, state, start, depth):
         self._validate(epsilon, state, start, depth)
-        output = tuple(torch.zeros_like(s) for s in state)
+        output = self.new_state()
         signals = epsilon.new_zeros((depth, len(self.host.monitors)))
         def prepare(descriptor):
             lo, hi, _, core = descriptor
@@ -252,7 +257,9 @@ class SlabBlockOperator:
         def commit(returned, metadata):
             lo, hi, mapping, observers = metadata
             if observers:signals[:, observers] = returned[-1]
-            for target, value in zip(output[:2], returned[:2]):target[lo:hi].copy_(value)
+            for target, value in zip(output[:2], returned[:2]):
+                if isinstance(target,torch.Tensor):target[lo:hi].copy_(value)
+                else:target.index_copy_(0,torch.arange(lo,hi,dtype=torch.int64,device='cpu'),value)
             for value, (global_id, _, _, destination) in zip(returned[2:-1], mapping):
                 output[global_id].index_copy_(0, destination, value)
         self._pipeline(depth, prepare, commit)
@@ -264,7 +271,7 @@ class SlabBlockOperator:
         self._validate(epsilon, endpoint_bar, start, depth)
         if signal_bar.shape != (depth, len(self.host.monitors)) or signal_bar.device.type != 'cpu' or signal_bar.dtype != epsilon.dtype:
             raise ValueError('Signal adjoint must have the host block observation shape.')
-        initial_bar = tuple(torch.zeros_like(s) for s in state)
+        initial_bar = self.new_state()
         gradient = torch.zeros_like(epsilon)
         def prepare(descriptor):
             lo, hi, indices, core = descriptor

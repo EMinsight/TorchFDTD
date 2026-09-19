@@ -1,0 +1,12 @@
+{
+  "base_commit": "894dfef",
+  "sha256": {
+    "photonweave/state_store.py": "08971b3f2f70b24019d3a130f41050c3a18ff0a252c13a4cce8d1348a23b19bb",
+    "photonweave/streamed.py": "9d54f205102d1ddb51c9c983c1099145161c3dfec6ef7ef8f65e795a1942d064",
+    "photonweave/spacetime.py": "e0a6a57950368579c086c206965a0f5627ba6eb5f3ddd6a36088af4b1b5dae2a",
+    "benchmarks/streamed_backing.py": "f77231493ea33b5ad66eacabecc8a652e7e8878e9d1b39c31d8444813bcfccda",
+    "examples/differentiable_design.py": "b35cce2de1b91d3144043aaf08a4b56d638a1d89f658ba3deb62483ddf434c70",
+    "tests/test_state_store.py": "0d92a4f7166e5c44cb666ff3e087f69a542f31d3abceccd93c624c73df33feb1"
+  },
+  "scope": "Final source snapshot. Small initial benchmark preceded explicit tight host-budget execution and CLI parameterization. Large benchmark used the final benchmark source. Small test differs only in admission/CLI bookkeeping, not numerical policy."
+}

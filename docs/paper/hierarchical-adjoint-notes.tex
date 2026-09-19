@@ -131,7 +131,19 @@ not universal acceleration or superiority over another solver.
 
 The executable benchmark, raw repetitions, source hashes, gradient checks and
 memory scope are recorded in the companion local replay validation report.
-Large-domain physical accuracy, storage-backed spatial execution, fully
+An experimental buffered-file policy stores global primal and adjoint banks
+outside application-owned DRAM. Slab reads and writes replace whole-bank
+allocation and checkpoints retain immutable file versions. The material and
+its gradient remain CPU tensors. The OS page cache is not included in the host
+reservation. File cleanup is included in measured iteration time.
+For a $256\times256\times128$ FP32 case with 16 steps, one timed iteration
+after a warm-up took 3.142 seconds with DRAM banks and 8.210 seconds with file
+banks on an RTX 5880 Ada. Gradients agreed exactly. The host reservations were
+3.314 and 0.891 GiB, respectively. These are allocation estimates rather than
+measured resident memory. This experiment establishes a lossless file-backed
+execution path, not cold-storage throughput or acceleration.
+
+Large-domain physical accuracy, sustained storage-backed performance, fully
 automatic tier selection and the color-router objective remain separate
 validation requirements.
 \end{document}

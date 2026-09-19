@@ -1,0 +1,171 @@
+{
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "torch_version": "2.10.0",
+  "grid": [
+    256,
+    256,
+    128
+  ],
+  "steps": 16,
+  "precision": "float32",
+  "warmups_per_mode": 1,
+  "repeats": 1,
+  "median_seconds": {
+    "host": 3.1418997999862768,
+    "disk": 8.209609200013801
+  },
+  "host_fits_disk_host_reservation": false,
+  "records": {
+    "host": [
+      {
+        "seconds": 3.1418997999862768,
+        "gradient_relative_l2": 0.0,
+        "peak_cuda_allocated_bytes": 183951872,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 16,
+          "temporal_depth": 4,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 0,
+          "state_storage": "host",
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float32",
+          "host_reservation_bytes": 3558867336,
+          "gpu_reservation_bytes": 536870960,
+          "disk_reservation_bytes": 0,
+          "disk_io_workspace_bytes": 0,
+          "host_initial_state_reservation_bytes": 104,
+          "state_bytes": 211812352,
+          "max_extended_tile_cells": 1048576,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 192,
+          "host_tile_reservation_bytes": 536871008,
+          "host_initial_state_storage_bytes": 104,
+          "host_inverse_permittivity_bytes": 0,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 5,
+            "buffer_bytes": 42926580,
+            "pinned_bytes": 0,
+            "binding_hits": 118,
+            "binding_misses": 10,
+            "h2d_bytes": 1891794240,
+            "d2h_bytes": 847249472,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "forward_seconds": 0.9526499999919906,
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 3,
+          "backward_workspace": {
+            "local_replayed_steps": 384,
+            "peak_local_checkpoints": 0,
+            "allocations": 115,
+            "buffer_bytes": 131637764,
+            "pinned_bytes": 0,
+            "binding_hits": 432,
+            "binding_misses": 48,
+            "h2d_bytes": 4942355312,
+            "d2h_bytes": 2527199280,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "backward_seconds": 2.179210399976
+        }
+      }
+    ],
+    "disk": [
+      {
+        "seconds": 8.209609200013801,
+        "gradient_relative_l2": 0.0,
+        "peak_cuda_allocated_bytes": 183951872,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 16,
+          "temporal_depth": 4,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 0,
+          "state_storage": "disk",
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float32",
+          "host_reservation_bytes": 956301704,
+          "gpu_reservation_bytes": 536870960,
+          "disk_reservation_bytes": 2753560576,
+          "disk_io_workspace_bytes": 150994944,
+          "host_initial_state_reservation_bytes": 104,
+          "state_bytes": 211812352,
+          "max_extended_tile_cells": 1048576,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 192,
+          "host_tile_reservation_bytes": 536871008,
+          "host_initial_state_storage_bytes": 104,
+          "host_inverse_permittivity_bytes": 0,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 5,
+            "buffer_bytes": 42926580,
+            "pinned_bytes": 0,
+            "binding_hits": 118,
+            "binding_misses": 10,
+            "h2d_bytes": 1891794240,
+            "d2h_bytes": 847249472,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "forward_backing_store": {
+            "peak_logical_file_bytes": 423624704,
+            "live_logical_file_bytes": 0,
+            "created_banks": 4,
+            "logical_read_bytes": 1223786496,
+            "logical_written_bytes": 847249408,
+            "max_single_read_bytes": 12582912,
+            "closed": true,
+            "io_scope": "Buffered file I/O. OS page cache and physical storage traffic are not measured. No whole-state file mapping."
+          },
+          "forward_seconds": 2.0319475999567658,
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 3,
+          "backward_workspace": {
+            "local_replayed_steps": 384,
+            "peak_local_checkpoints": 0,
+            "allocations": 115,
+            "buffer_bytes": 131637764,
+            "pinned_bytes": 0,
+            "binding_hits": 432,
+            "binding_misses": 48,
+            "h2d_bytes": 4942355312,
+            "d2h_bytes": 2527199280,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "backward_backing_store": {
+            "peak_logical_file_bytes": 847249408,
+            "live_logical_file_bytes": 0,
+            "created_banks": 7,
+            "logical_read_bytes": 4306796544,
+            "logical_written_bytes": 2267152384,
+            "max_single_read_bytes": 12582912,
+            "closed": true,
+            "io_scope": "Buffered file I/O. OS page cache and physical storage traffic are not measured. No whole-state file mapping."
+          },
+          "backward_seconds": 6.161254599981476
+        }
+      }
+    ]
+  },
+  "scope": "Buffered file banks versus DRAM, not cold SSD/NVMe throughput. OS cache is uncontrolled and excluded from host reservation. Complete iteration includes file creation, reads, writes and cleanup. Torch GPU peaks exclude context/cache. No physical-memory-overflow or external-solver claim."
+}

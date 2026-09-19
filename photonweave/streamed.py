@@ -1,5 +1,7 @@
-"""Experimental DRAM-backed differentiable FDTD with bounded CUDA slabs."""
+"""Experimental host/file-backed differentiable FDTD with bounded CUDA slabs."""
 from dataclasses import dataclass
+from contextlib import contextmanager
+from pathlib import Path
 import math
 import time
 
@@ -24,8 +26,19 @@ class StreamedAdjointOptions:
     tile_transfers: str = 'sync'
     tile_buffers: int = 2
     local_checkpoints: int = 0
+    state_storage: str = 'host'
+    state_directory: str | Path | None = None
+    disk_budget_bytes: int | None = None
 
     def __post_init__(self):
+        if self.state_storage not in ('host','disk'):raise ValueError('state_storage must be host or disk.')
+        if self.disk_budget_bytes is not None and (isinstance(self.disk_budget_bytes,bool) or not isinstance(self.disk_budget_bytes,int) or self.disk_budget_bytes<1):
+            raise ValueError('disk_budget_bytes must be a positive integer.')
+        if self.state_directory is not None:
+            if not isinstance(self.state_directory,(str,Path)):raise ValueError('state_directory must be a path or string.')
+            object.__setattr__(self,'state_directory',str(self.state_directory))
+        if self.state_storage == 'disk' and (not self.state_directory or self.disk_budget_bytes is None):
+            raise ValueError('Disk field banks require a state_directory and explicit disk_budget_bytes.')
         for name in ('slab_width', 'temporal_depth', 'gpu_budget_bytes', 'host_budget_bytes'):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int) or value < 1:
@@ -73,20 +86,41 @@ def _reservation(project, epsilon, options):
     initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values()))*item
     # The immutable all-zero host initial bank is represented by scalar views.
     # Retain the remaining conservative headroom for replay and transpose banks.
-    host = (options.checkpoints+11)*state+initial_storage+8*epsilon.numel()*item+history+buffers*(tile_workspace+2*tile_history)
+    state_banks = (options.checkpoints+11)*state
+    disk = state_banks if options.state_storage == 'disk' else 0
+    disk_io_workspace = 36*tile_cells*item if disk else 0
+    host = (0 if disk else state_banks)+initial_storage+8*epsilon.numel()*item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace
     gpu = buffers*(tile_workspace+tile_history)
     available = host_memory()['available_bytes']
     host_limit = min(options.host_budget_bytes, int(available*.8)) if available is not None else options.host_budget_bytes
     if host > host_limit:
         raise ValueError('Streamed state and checkpoint reservation exceed the host budget.')
+    if disk:
+        from .state_store import disk_free
+        if disk > min(options.disk_budget_bytes,int(disk_free(options.state_directory)*.8)):
+            raise ValueError('Field bank reservation exceeds the disk budget or available disk space.')
     if torch.device(options.device).type == 'cuda':
         free, _ = torch.cuda.mem_get_info(torch.device(options.device))
         if gpu > min(options.gpu_budget_bytes, int(free*.8)):
             raise ValueError('Streamed tile workspace reservation exceeds the GPU budget.')
     return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,
+                disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,
                 host_initial_state_reservation_bytes=initial_storage,
                 state_bytes=state, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*18*local_slots*tile_cells*item,
                 source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))
+
+
+@contextmanager
+def _backing(options,report,phase):
+    if options.state_storage == 'host':
+        yield None
+        return
+    from .state_store import StateStore
+    store = StateStore(options.state_directory,options.disk_budget_bytes)
+    try:yield store
+    finally:
+        try:store.close()
+        finally:report[phase+'_backing_store'] = store.report()
 
 
 class _Streamed(torch.autograd.Function):
@@ -98,18 +132,20 @@ class _Streamed(torch.autograd.Function):
         host = _System(project, epsilon, prepare_updates=False)
         report['host_initial_state_storage_bytes'] = sum(s.untyped_storage().nbytes() for s in host.state())
         report['host_inverse_permittivity_bytes'] = 0
-        operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
-                                    reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
-                                    tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints)
-        state = host.state()
-        signals = epsilon.new_empty((project.region.steps, len(host.monitors)))
-        for start in range(0, project.region.steps, options.temporal_depth):
-            depth = min(options.temporal_depth, project.region.steps-start)
-            state, values = operator.forward(epsilon, state, start, depth)
-            signals[start:start+depth].copy_(values)
+        with _backing(options,report,'forward') as store:
+            operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
+                                        reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
+                                        tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints,
+                                        state_factory=store.new_state if store is not None else None)
+            state = host.state()
+            signals = epsilon.new_empty((project.region.steps, len(host.monitors)))
+            for start in range(0, project.region.steps, options.temporal_depth):
+                depth = min(options.temporal_depth, project.region.steps-start)
+                state, values = operator.forward(epsilon, state, start, depth)
+                signals[start:start+depth].copy_(values)
+            if operator.workspace is not None:
+                report['forward_workspace'] = operator.workspace_report()
         report['forward_seconds'] = time.perf_counter()-started
-        if operator.workspace is not None:
-            report['forward_workspace'] = operator.workspace_report()
         # No physical time history is retained by the autograd context.
         return signals
 
@@ -121,53 +157,55 @@ class _Streamed(torch.autograd.Function):
         _reservation(project, epsilon, options)
         started = time.perf_counter()
         host = _System(project, epsilon, prepare_updates=False)
-        operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
-                                    reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
-                                    tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints)
-        steps = project.region.steps
-        starts = list(range(0, steps, options.temporal_depth))+[steps]
-        gradient = torch.zeros_like(epsilon)
-        adjoint = tuple(torch.zeros_like(s) for s in host.state())
-        live = 0
-        report.update(peak_block_checkpoints=0, replayed_blocks=0)
+        with _backing(options,report,'backward') as store:
+            operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
+                                        reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
+                                        tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints,
+                                        state_factory=store.new_state if store is not None else None)
+            steps = project.region.steps
+            starts = list(range(0, steps, options.temporal_depth))+[steps]
+            gradient = torch.zeros_like(epsilon)
+            adjoint = host.state()
+            live = 0
+            report.update(peak_block_checkpoints=0, replayed_blocks=0)
 
-        def replay(state, begin, end):
-            for block in range(begin, end):
-                state, _ = operator.forward(epsilon, state, starts[block], starts[block+1]-starts[block])
-                report['replayed_blocks'] += 1
-            return state
+            def replay(state, begin, end):
+                for block in range(begin, end):
+                    state, _ = operator.forward(epsilon, state, starts[block], starts[block+1]-starts[block])
+                    report['replayed_blocks'] += 1
+                return state
 
-        def reverse(begin, end, restart, slots):
-            nonlocal adjoint, live
-            while end > begin:
-                if end-begin == 1 or slots == 0:
-                    for block in reversed(range(begin, end)):
-                        state = replay(restart, begin, block)
-                        start, stop = starts[block], starts[block+1]
-                        adjoint, contribution = operator.transpose(epsilon, state, start, stop-start,
-                                                                   adjoint, signal_bar[start:stop])
-                        gradient.add_(contribution)
-                        del state, contribution
-                    return
-                middle = begin+_split(end-begin, slots)
-                saved = replay(restart, begin, middle)
-                live += 1
-                report['peak_block_checkpoints'] = max(live, report['peak_block_checkpoints'])
-                try:reverse(middle, end, saved, slots-1)
-                finally:
-                    del saved
-                    live -= 1
-                end = middle
+            def reverse(begin, end, restart, slots):
+                nonlocal adjoint, live
+                while end > begin:
+                    if end-begin == 1 or slots == 0:
+                        for block in reversed(range(begin, end)):
+                            state = replay(restart, begin, block)
+                            start, stop = starts[block], starts[block+1]
+                            adjoint, contribution = operator.transpose(epsilon, state, start, stop-start,
+                                                                       adjoint, signal_bar[start:stop])
+                            gradient.add_(contribution)
+                            del state, contribution
+                        return
+                    middle = begin+_split(end-begin, slots)
+                    saved = replay(restart, begin, middle)
+                    live += 1
+                    report['peak_block_checkpoints'] = max(live, report['peak_block_checkpoints'])
+                    try:reverse(middle, end, saved, slots-1)
+                    finally:
+                        del saved
+                        live -= 1
+                    end = middle
 
-        reverse(0, len(starts)-1, host.state(), options.checkpoints)
+            reverse(0, len(starts)-1, host.state(), options.checkpoints)
+            if operator.workspace is not None:
+                report['backward_workspace'] = operator.workspace_report()
         report['backward_seconds'] = time.perf_counter()-started
-        if operator.workspace is not None:
-            report['backward_workspace'] = operator.workspace_report()
         return gradient, None, None, None
 
 
 class StreamedSimulation(DifferentiableSimulation):
-    """First-order epsilon-to-signal operation with CPU-resident global state.
+    """First-order epsilon-to-signal operation with host or file-backed state.
 
     Geometry tensors and outputs reside on CPU. CUDA receives one extended slab
     per reusable slot. Optional asynchronous transfers use bounded pinned pools.
@@ -194,6 +232,7 @@ class StreamedSimulation(DifferentiableSimulation):
                       higher_order=False, slab_width=options.slab_width,
                       temporal_depth=options.temporal_depth, checkpoint_capacity=options.checkpoints,
                       local_checkpoint_capacity=options.local_checkpoints,
+                      state_storage=options.state_storage,
                       execution_device=options.device, tile_transfers=options.tile_transfers,
                       tile_buffers=options.tile_buffers if options.tile_transfers == 'async' else 1,
                       cuda_binding=options.cuda_binding,

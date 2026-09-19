@@ -121,6 +121,31 @@ held-out measurements of deeper tiles.
 
 ## Dependency and transpose
 
+### Experimental file-backed spatial state
+
+`StreamedAdjointOptions(state_storage='disk', state_directory='results/state-scratch',
+disk_budget_bytes=4*1024**3)` places global E/H/CPML primal and adjoint banks in
+temporary files. The default `state_storage='host'` keeps them in DRAM. Both
+policies use the same slab operator and first-order backward. Run
+`python -m examples.differentiable_design --execution disk` for a small Adam
+example. This is a regularized sphere demonstration, not the color-router study.
+
+Each version is immutable after its block completes. Checkpoints retain a bank
+reference. Contiguous slab reads and owned writes avoid mapping or loading the
+whole bank. Backward accumulates overlapping halo contributions with bounded
+reads and writes. Files are released at the end of each forward/backward phase,
+including tested computation and I/O failures. Only private scratch files are
+removed. The files do not provide durable restart.
+
+Admission separately checks host, GPU and logical disk budgets. Epsilon and its
+gradient still occupy full CPU tensors. File I/O is synchronous and buffered by
+the OS. Its page cache is outside the host reservation, so this is not a cap on
+whole-machine RAM usage or measured physical SSD traffic. No GPUDirect Storage,
+asynchronous disk prefetch or automatic resident/DRAM/disk tier selection is
+implemented. Explicit tuner candidates may compare host and disk policies.
+See [the file-bank validation](validation/STATE_BACKING_REPORT.md) for measured
+capacity estimates, slower execution and exact gradient comparisons.
+
 Every tile in a time block reads the same immutable old global state. Two
 radius-one curl updates per full step admit a conservative x halo of 2K for
 K steps. The full y/z extent is retained. Only the owned x interior is written
