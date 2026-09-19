@@ -33,3 +33,6 @@ from .tuning import TensorBatchTuning, tune_tensor_batch
 __all__ += ['TensorBatchTuning', 'tune_tensor_batch']
 from .fsp_geometry import write_fsp_geometry, write_fsp_scene
 __all__ += ['write_fsp_geometry', 'write_fsp_scene']
+from .optical_data import OpticalData
+from .material_fit import FitOptions, MaterialFitResult, fit_material, material_fit_report
+__all__ += ['OpticalData', 'FitOptions', 'MaterialFitResult', 'fit_material', 'material_fit_report']

@@ -10,7 +10,7 @@ The convention is fields proportional to `exp(-i omega t)`, so positive imaginar
 | Drude | `epsilon_inf - plasma_rad_s² / (omega² + i collision_rad_s omega)` | `epsilon_inf >= 1`, plasma frequency > 0, collision >= 0 |
 | Lorentz | `epsilon_inf + delta_epsilon resonance_rad_s² / (resonance_rad_s² - omega² - 2 i linewidth_rad_s omega)` | `epsilon_inf >= 1`, strength and resonance > 0, linewidth >= 0 |
 
-The built-in Si, SiN and SiO2 entries remain explicitly labelled constant-index approximations. There is no bundled measured optical-constant database or automatic fit of sampled n/k data. Gain, anisotropy, Debye, conductivity models, magnetic response, nonlinear materials and subcell/conformal material averaging remain unimplemented. The background medium remains a constant dielectric. A successful import is not evidence that these other material families are supported.
+The built-in Si, SiN and SiO2 entries remain explicitly labelled constant-index approximations. No measured optical-constant database is bundled. User-supplied n/k and complex permittivity tables can be imported and passively fitted through Python or Materials. See [the fitting workflow and limits](MATERIAL_FITTING.md). Gain, anisotropy, Debye, conductivity models, magnetic response, nonlinear materials and subcell/conformal material averaging remain unimplemented. The background medium remains a constant dielectric. A successful import is not evidence that these other material families are supported.
 
 ## Native API and familiar commands
 

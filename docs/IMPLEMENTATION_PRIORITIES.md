@@ -2,25 +2,37 @@
 
 기준은 선형 photonics, Python 자동화, 단일 NVIDIA GPU와 inverse design이다. 개별 제품의 속성을 전부 복제하는 것을 완료 기준으로 삼지 않는다. 모든 기존 행에 중요도, 필요 여부, 기능군, 이유를 부여한 [전체 분류 CSV](FEATURE_PRIORITY_INDEX.csv)와 UI의 **Feature checklist → Capability priority**에서 항목별 판단을 확인할 수 있다.
 
-현재 1,658행 중 엔진 또는 UI에 남은 작업이 있는 행은 1,505개다. P0 8행, P1 986행, P2 446행, P3 65행이다. 반복되는 객체 속성을 포함한 행 수이며 기능 개수나 완성률이 아니다. 기능군과 개별 속성의 검증된 범위를 따로 표시한다.
+## 현재 실행 순서 · 2026-09-20
+
+최근 FSP 목록·속성 저장 작업에 비중이 커졌으므로, 실제 소자를 신뢰하고 설계할 수 있는 순서로 남은 작업을 다시 정렬한다. 기본 실행·수렴 검사는 모든 단계의 통과 조건이고, 공개 배포 검토는 별도 출고 조건이다. 체크리스트 행 수를 늘리는 것으로 계산 기능의 공백을 대신하지 않는다.
+
+1. **측정 재료와 인터페이스 정확도.** 측정 n/k 피팅의 Python/UI 구현과 CPU/CUDA 검증을 완료했다. 다음은 subpixel 인터페이스다. 입력 단위·수동성·피팅 대역과 오차, 독립 박막/곡면 해석 기준, 메시·시간 수렴 및 CPU/CUDA 일치를 확인한다. 분산 재료 피팅만으로 곡면 정확도가 해결됐다고 보지 않는다.
+2. **모드 소스·포트·S-parameter.** 독립 도파관 고유모드, 전력 정규화, 양방향 모드 분해, 위상·상반성·전력 보존을 검증한다. 직선 도파관에서 시작해 실제 소자의 전송·반사 목적함수까지 연결한다.
+3. **이산 adjoint와 설계 영역.** 재료·경계·소스·모니터를 포함한 방향 미분과 Taylor 검사를 통과하고, 다수 설계 변수의 gradient 시간·메모리를 측정한다. 미분 없는 배치 탐색을 adjoint로 표시하지 않는다.
+4. **같은 정확도에서 GPU·배치 성능.** 각 단계에서도 CPU/CUDA와 독립/배치 결과 일치를 유지한다. 핵심 물리 기능이 갖춰지면 단일 실행과 ensemble의 전체 시간을 같은 오차 조건에서 비교하고 병목을 개선한다. 과거 다른 버전의 시간비는 현 버전의 성능 보장이 아니다.
+5. **작업 이전과 UI 완성.** 위 계산 기능의 Python/UI/저장 경로를 함께 제공하고 FSP 매핑을 연결한다. 필요한 FSP 작업 이전은 유지하되, 모든 과거 버전·내부 결과 형식은 조건부로 분류하고 새 물리 기능보다 주변 속성의 왕복 저장을 먼저 늘리지 않는다. 외부 reader 검증이 없는 범위는 계속 미검증으로 표시한다.
+
+비선형·특수 재료, 단일 문제 multi-GPU, 세부 표시 옵션은 이 순서 뒤에 둔다. 이 순서는 우선 해결할 대체 장애물을 정한 것이며 전체 제품 대체가 완료됐다는 뜻이 아니다.
+
+현재 1,658행 중 엔진 또는 UI에 남은 작업이 있는 행은 1,504개다. P0 8행, P1 982행, P2 449행, P3 65행이다. 반복되는 객체 속성을 포함한 행 수이며 기능 개수나 완성률이 아니다. 기능군과 개별 속성의 검증된 범위를 따로 표시한다.
 
 | 순서 | 중요도 | 필요 여부 | 기능군 | 판단과 다음 통과 기준 |
 |---:|---|---|---|---|
 | 1 | P0 | 필수 | 실행 신뢰성·계산 낭비 방지 | 자동 종료와 전체 장 발산 검사. 지연 소스, 연속파, 취소와 정상 조기 종료를 구분해야 한다. 이번 구현에 포함. |
 | 2 | P0 | 필수 | 정확도·수렴 검증 | 같은 물리적 시간·영역·PML 두께에서 관측량을 비교한다. 이번에 Python 수렴 검사와 matched reference 지원 추가. GUI study 실행은 남음. |
 | 3 | P0 | 공개 배포 전 필수 | 독립 배포 패키지 | 배포 파일 목록, 출처·라이선스, 자격증명 제외와 재현 가능한 설치를 검증. 아직 미완료. |
-| 4 | P1 | 필수 | 단방향/TFSF·모드 포트·S-parameter | Normal-incidence one-way plane과 closed TFSF box, 3D FSP subset 구현. 독립 이산 기준·박막 R/T·Mie 구 산란 검증. Oblique/finite-aperture·mode port·S-parameter와 FSP 일반 호환은 남음. |
-| 5 | P1 | 필수 | 다중 공진·측정 재료 피팅 | 이번에 수동 다중 공진 ADE와 GUI/Python 편집 구현. 측정 n/k import와 passive fitting, 대각 이방성은 남음. |
-| 6 | P1 | 필수 | subpixel·독립 축 메시·대칭 경계 | 독립 축 간격·명시적 노드와 CPU/CUDA/batch 구현. 일정 횡단면 구조의 matched-dt 실측 완료. Subpixel·대칭 경계·일반 곡면 정확도는 남음. |
+| 4 | P1 | 필수 | 다중 공진·측정 재료 피팅 | 수동 다중 공진 ADE와 GUI/Python 편집, 측정 n/k import 및 passive fitting 구현. 피팅 오차·대역·ADE 시간 간격 표시. 대각 이방성과 일반 재료 FSP 저장은 남음. |
+| 5 | P1 | 필수 | subpixel·독립 축 메시·대칭 경계 | 독립 축 간격·명시적 노드와 CPU/CUDA/batch 구현. 일정 횡단면 구조의 matched-dt 실측 완료. Subpixel·대칭 경계·일반 곡면 정확도는 남음. |
+| 6 | P1 | 필수 | 단방향/TFSF·모드 포트·S-parameter | Normal-incidence one-way plane과 closed TFSF box, 3D FSP subset 구현. 독립 이산 기준·박막 R/T·Mie 구 산란 검증. Oblique/finite-aperture·mode port·S-parameter와 FSP 일반 호환은 남음. |
 | 7 | P1 | 필수 | 이산 adjoint / autodiff | 대규모 topology inverse design의 핵심. 재료·CPML·모니터를 포함한 Taylor 검사와 방향 미분 검사, gradient 시간·메모리 측정. 미구현. |
 | 8 | P1 | 필수 | GPU tensor batch | 동일 실수 격자의 batch-axis CUDA와 cohort 분할 구현. 실측 기반 cohort 선택과 DE population 실행 연결. 서로 다른 메시·시간·정밀도 조건의 자동 분류와 입력 순서 복원을 추가. B=1/2/4/8/16 전체 E/H·점 신호 bitwise 일치와 5880 처리량 실측. 복소장·개별 자동 종료·GUI 실행은 남음. |
 | 9 | P1 | 필수 | 주파수 공간장·흡수·회절·방사 | 성분 선택과 물리적 관측량을 구현하고 광학적 합법칙·보존·수렴 검증. |
 | 10 | P1 | 필수 | 핵심 CAD·설계 영역 | Polygon extrusion·타원체/기둥/링 sector·3축 회전, Python/UI와 CUDA batch 구현. 형상 경계로 판정 범위를 줄이는 준비 최적화 실측 완료. 인식된 FSP primitive import·writeback 추가. 공간 재료 배열·GDS·그룹은 남음. |
-| 11 | P1 | 필수 | 일반 FSP 호환 | 기존 primitive 위치·크기·회전·가변 vertex·상수 재료의 독립 writeback 구현. 원본 byte 보존과 재변환 검사. 소스 시간·위상, 모니터 주파수·window, duration·CFL·일부 PML/Periodic 설정 writeback 추가. Primitive 추가·삭제·순서 저장과 ID/byte 대응표 추가. Electric source·TIME/DFT monitor 목록과 shared component 분리 저장 추가. 새 레코드 외부 reader 검증, 전체 버전·결과·미지원 소스/모니터 class·일반 설정은 필수 후속 작업. |
-| 12 | P2 | 후속 필수 | 결과 탐색·GUI sweep·그룹·checkpoint | Python 기능을 GUI에서도 조합할 수 있게 만들고 큰 계산의 재시작을 지원. |
-| 13 | P2 | 조건부 | 비선형·gain·Raman·자기·열·전하·2D sheet | 해당 연구 문제를 다룰 때 추가. 일반 선형 유전체 소자 개발의 선행 조건은 아님. |
-| 14 | P2 | 조건부 | 단일 문제 multi-GPU/MPI·클러스터 | 한 장치에 들어가지 않는 문제와 실제 다중 GPU 검증 환경이 필요할 때 추진. |
-| 15 | P2 | 조건부 | STL·복잡 곡면·공정 builder·동적 subgrid | 실제 입력 형상이나 검증된 필요가 있을 때 추진. 구현 복잡도와 검증 비용이 큼. |
+| 11 | P2 | 후속 필수 | 결과 탐색·GUI sweep·그룹·checkpoint | Python 기능을 GUI에서도 조합할 수 있게 만들고 큰 계산의 재시작을 지원. |
+| 12 | P2 | 조건부 | 비선형·gain·Raman·자기·열·전하·2D sheet | 해당 연구 문제를 다룰 때 추가. 일반 선형 유전체 소자 개발의 선행 조건은 아님. |
+| 13 | P2 | 조건부 | 단일 문제 multi-GPU/MPI·클러스터 | 한 장치에 들어가지 않는 문제와 실제 다중 GPU 검증 환경이 필요할 때 추진. |
+| 14 | P2 | 조건부 | STL·복잡 곡면·공정 builder·동적 subgrid | 실제 입력 형상이나 검증된 필요가 있을 때 추진. 구현 복잡도와 검증 비용이 큼. |
+| 15 | P2 | 조건부 | 추가 FSP 호환 | 기존 primitive 위치·크기·회전·가변 vertex·상수 재료의 독립 writeback 구현. 원본 byte 보존과 재변환 검사. 소스 시간·위상, 모니터 주파수·window, duration·CFL·일부 PML/Periodic 설정 writeback 추가. Primitive 추가·삭제·순서 저장과 ID/byte 대응표 추가. Electric source·TIME/DFT monitor 목록과 shared component 분리 저장 추가. 새 레코드 외부 reader 검증, 전체 버전·결과·미지원 소스/모니터 class·일반 설정은 해당 작업 이전에 필요할 때 후속 검증. |
 | 16 | P3 | 제외 권장 | 전체 전용 스크립트·제품별 내부 알고리즘의 동일 복제 | native Python/JSON/NPZ와 독립 알고리즘으로 필요한 작업을 지원한다. 독점 DB 복제도 불필요. 공개·사용자 재료 데이터 입력은 P1 재료 작업에 포함. |
 | 17 | P3 | 제외 권장 | opacity·wireframe 등 세부 표시 옵션의 일대일 복제 | 계산과 결과 해석에 영향 없는 옵션을 동일하게 재현할 필요는 없음. 이미 있는 편의 기능을 삭제한다는 뜻은 아님. |
 
@@ -31,7 +43,7 @@ P1의 순서는 선행 기능과 검증 가능성을 고려한 구현 순서다.
 CAD 후속 구현은 [형상 정의·Python/UI 사용법](ANALYTIC_GEOMETRY.md)과
 [RTX 5880의 8개 배치 실측](validation/GEOMETRY_ENSEMBLE_REPORT.md)에 정리했다.
 다각형·타원 형상·3축 회전을 지원하고, 불필요한 전 영역 형상 판정을 줄인다.
-일반 FSP 호환은 요청된 완전 대체 목표의 필수 작업으로 유지한다.
+추가 FSP 호환은 실제 연구 파일을 옮기는 요구가 생길 때 해당 범위를 검증한다. 이미 제공한 호환 기능은 유지한다.
 
 후속 [FSP 형상 왕복 저장](FSP_NATIVE.md)은 다섯 primitive의 회전·polygon pivot·타원 링 sector를 독립 변환하고, 기존 형상 편집을 Python/CLI/UI에서 저장한다. 형상만 수정하면 메시 노드는 고정이다. Scene writer의 [uniform 메시 편집](FSP_MESH_WRITE.md)은 간격·영역 크기·CAD/PML 범위·저장 노드·CFL을 함께 갱신한다. 추가된 [primitive 목록 편집](FSP_OBJECTS_WRITE.md)은 다섯 형상의 추가·삭제·복제·순서와 ID 대응을 저장한다. [소스·모니터 목록 편집](FSP_INSTRUMENTS_WRITE.md)은 electric dipole, 3D plane/TFSF, TIME/DFT와 shared component 분리를 저장한다. 새 레코드 기본 metadata의 외부 reader 검증, 비균일 생성기 저장과 외부 remeshing 검증은 남아 있다. 미지원 물리 변경을 조용히 누락하지 않고 오류로 반환한다. 합성 파일의 미수정 byte, native CPU/CUDA·tensor 계산 및 UI 재입력 흐름으로 검증한다. 전체 파일 호환 완료로 표시하지 않는다.
 
@@ -59,7 +71,7 @@ CAD 후속 구현은 [형상 정의·Python/UI 사용법](ANALYTIC_GEOMETRY.md)�
 
 0.14의 TFSF 추가 후 전체 Python 검사는 RTX 3060과 RTX 5880에서 각각 207개 통과, 선택형 1개 skip이다. 5880 UI는 14개 통과, 선택형 연동 4개 skip이다. 초기 로딩 중 편집 race도 수정했다. [소스 정의](TFSF_SOURCES.md)와 [구 산란 검증](validation/TFSF_REPORT.md)은 구현 범위와 한계를 명시한다. 구 산란의 50 nm 메시 오차 0.31%만으로 일반 정확도 우위를 주장하지 않는다.
 
-분류 규칙은 `photonweave/priorities.py`, 기능 상태와 근거는 `benchmarks/build_feature_inventory.py`에 있다. 이 스크립트가 전체 JSON, 체크리스트, CSV를 함께 갱신한다. `required`는 필요, `conditional`은 특정 사용 사례가 있을 때, `omit`은 현재 목표에서 제외를 뜻한다. 엔진이 구현되어도 UI가 빠져 있으면 잔여 작업에 포함된다. 전용 형식 호환 여부는 native 구현과 별도로 유지한다.
+분류 규칙은 `photonweave/priorities.py`, 기능 상태와 근거는 `benchmarks/build_feature_inventory.py`에 있다. 이 스크립트가 전체 JSON, 체크리스트, CSV를 함께 갱신한다. `required`는 필요, `conditional`은 특정 사용 사례가 있을 때만 착수하며, `omit`은 새로 구현하지 않는다. 이미 구현된 기능은 유지한다. 엔진이 구현되어도 UI가 빠져 있으면 잔여 작업에 포함된다. 전용 형식 호환 여부는 native 구현과 별도로 유지한다.
 
 ## 스펙트럼 배치 처리량 후속 구현
 

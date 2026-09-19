@@ -17,6 +17,8 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .models import Project, Material, demo_project
 from .solver import Simulation, estimate, hardware
+from .material_fit import OpticalDataRequest, MaterialFitRequest, fit_material, material_fit_report
+from .optical_data import OpticalData
 
 
 def create_app(result_dir=None):
@@ -87,6 +89,16 @@ def create_app(result_dir=None):
     def mesh_coordinates(project: Project):
         return {'nodes_um':[a.tolist() for a in project.region.mesh_nodes]}
 
+    @app.post('/api/materials/data')
+    def optical_data(request: OpticalDataRequest):
+        try:return OpticalData.from_text(request.text,kind=request.kind,unit=request.unit,reference=request.reference).model_dump()
+        except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+    @app.post('/api/materials/fit')
+    def fit_optical_data(request: MaterialFitRequest):
+        try:return fit_material(request.data,name=request.name,color=request.color,options=request.options).as_dict()
+        except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
     @app.post('/api/materials/preview')
     def material_preview(material: Material, wavelength_start: float = Query(1.3, gt=0),
                          wavelength_stop: float = Query(1.8, gt=0), dt_fs: float = Query(0, ge=0)):
@@ -101,8 +113,11 @@ def create_app(result_dir=None):
         if not np.isfinite(epsilon).all() or not np.isfinite(numerical).all():
             raise HTTPException(422, 'Undamped resonance is singular in this range. Add damping or change the range.')
         n, numerical_n = np.sqrt(epsilon), np.sqrt(numerical)
+        try:sampled=material_fit_report(material,dt_s=dt_fs*1e-15) if material.samples else None
+        except ValueError as exc:raise HTTPException(422,str(exc)) from exc
         return dict(wavelength_um=wavelength.tolist(), epsilon_real=epsilon.real.tolist(), epsilon_imag=epsilon.imag.tolist(),
-                    n=n.real.tolist(), k=n.imag.tolist(), numerical_n=numerical_n.real.tolist(), numerical_k=numerical_n.imag.tolist())
+                    n=n.real.tolist(), k=n.imag.tolist(), numerical_n=numerical_n.real.tolist(), numerical_k=numerical_n.imag.tolist(),
+                    samples=sampled,fit_dt_s=material.fit_dt_s)
 
     @app.post('/api/sources/{source_id}/preview')
     def source_preview(source_id: str, project: Project):

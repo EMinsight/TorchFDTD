@@ -101,6 +101,9 @@ def _write_fsp(document,project,*,settings):
     if base is None:raise ValueError('Original FSP has unsupported native mappings: '+str(conversion.issues))
     if tuple(provenance.origin_m)!=tuple(conversion.origin_m):raise ValueError('FSP coordinate origin was changed.')
     native_only=[];instruments=None
+    for material in project.materials:
+        if material.samples is not None or material.fit_band_um is not None:
+            native_only.append(f'material {material.name}: optical samples and fit metadata (retain in native JSON)')
     if settings:
         from .fsp_settings import plan_settings, verify_settings
         settings_patches,settings_native_only,instruments=plan_settings(document,base,project,conversion)

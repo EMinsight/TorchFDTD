@@ -147,10 +147,23 @@ def estimate(p: Project):
     dt = r.time_step
     active_materials = [m for m in p.materials if any(s.enabled and s.material == m.name for s in p.structures)]
     warnings = list(p.import_provenance.differences) if p.import_provenance else []
+    for material in active_materials:
+        if material.fit_dt_s is not None and not math.isclose(material.fit_dt_s,dt,rel_tol=1e-10,abs_tol=0):
+            warnings.append(f'{material.name}: ADE-target material was fitted at a different timestep. Refit or inspect the numerical n/k error at the current timestep.')
+        if material.samples is not None and material.fit_band_um is None:
+            warnings.append(f'{material.name}: optical samples are retained but no fitted wavelength band is recorded. Inspect the model/data error before quantitative use.')
     for source in p.sources:
         s = p.resolved_source(source)
         shortest = s.wavelength_start if s.time_definition in ('wavelength','frequency') else s.wavelength
         wavelengths = np.linspace(s.wavelength_start, s.wavelength_stop, 201) if s.time_definition in ('wavelength','frequency') else np.array([s.wavelength])
+        if s.enabled:
+            for material in active_materials:
+                if material.fit_band_um is not None:
+                    low,high=material.fit_band_um
+                    if s.pulse=='sampled':
+                        warnings.append(f'{material.name}: supplied time signal may extend beyond its material fit band ({low:g}–{high:g} um). Inspect its spectrum.')
+                    elif min(wavelengths)<low or max(wavelengths)>high:
+                        warnings.append(f'{s.name}: source wavelength lies outside {material.name} fit band ({low:g}–{high:g} um). Extrapolated material accuracy is not validated.')
         max_n = max([r.background_index] + [float(np.max(abs(np.sqrt(permittivity(m, C0/(wavelengths*1e-6)))))) for m in active_materials])
         finest=max(r.axis_steps[:2 if r.dimension=='2d' else 3])
         if s.enabled and shortest / (max_n*finest) < 15:

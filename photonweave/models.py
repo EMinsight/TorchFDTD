@@ -8,6 +8,7 @@ from typing import Literal
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
+from .optical_data import OpticalData
 
 
 class Model(BaseModel):
@@ -40,11 +41,22 @@ class Material(Model):
     linewidth_rad_s: float = Field(default=1e14, ge=0, le=1e18)
     delta_epsilon: float = Field(default=1, gt=0, le=10000)
     poles: list[LorentzPole] = Field(default_factory=list, max_length=16)
+    samples: OpticalData | None = None
+    fit_band_um: tuple[float,float] | None = None
+    fit_dt_s: float | None = Field(default=None,gt=0)
 
     @model_validator(mode='after')
     def valid_poles(self):
         if self.model == 'multipole' and not self.poles:
             raise ValueError('A multipole material requires at least one passive pole.')
+        if self.fit_band_um is not None:
+            low,high=self.fit_band_um
+            if self.samples is None or not 0<low<high or low<self.samples.wavelength_um[0] or high>self.samples.wavelength_um[-1]:
+                raise ValueError('A fitted band must lie inside the retained optical data.')
+            if sum(low<=w<=high for w in self.samples.wavelength_um)<3:
+                raise ValueError('A fitted band must contain at least three optical samples.')
+        if self.fit_dt_s is not None and self.fit_band_um is None:
+            raise ValueError('An ADE-target fit timestep requires a fitted wavelength band.')
         return self
 
     @property

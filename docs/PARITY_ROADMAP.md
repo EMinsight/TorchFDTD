@@ -1,7 +1,7 @@
 # Replacement requirements and remaining work
 
 The goal is a familiar, independently implemented photonics workbench with
-complete Python access and native GPU execution. It is not yet a complete
+complete Python access and native GPU execution for the required linear-photonics workflows. The current goal implements required checklist items in priority order, activates conditional items only for concrete use cases and excludes product-specific replication. It is not yet a complete
 Lumerical replacement. The detailed record is the [feature checklist](FEATURE_CHECKLIST.md).
 The [ordered priorities](IMPLEMENTATION_PRIORITIES.md) distinguish necessary,
 conditional and deliberately excluded scope for every row.
@@ -15,7 +15,7 @@ retired commercial fields, waveform fixtures or comparison plots.
 | Family | Current native scope | Open work |
 | --- | --- | --- |
 | CAD | Boxes, ellipsoids, elliptical cylinders/ring sectors, extruded simple polygons, ordered three-axis rotations and overlap order | General solids, paths, groups, builders, GDS/STL and hierarchical FSP transforms |
-| Materials | Constant index, isotropic coupled multipole Drude/Lorentz | Sampled-data passive fitting, anisotropy, magnetic/nonlinear/sheet response |
+| Materials | Constant index, isotropic coupled multipole Drude/Lorentz, user sampled-data import and passive fitting with Python/UI error reports | Anisotropy and wider device validation. Magnetic/nonlinear/sheet response is conditional |
 | Mesh | Uniform/static graded/explicit rectilinear, independent axis steps, Yee sampling, preview and Python convergence studies | Conformal/subpixel interfaces, subgrids, error-driven adaptation, GUI study runner |
 | Boundaries | CPML, Periodic/Bloch | PEC/PMC, symmetry, BFAST, grazing/dispersive validation |
 | Sources | Reduced electric/magnetic point/sheet, theta/phi, normal-incidence one-way planes and closed TFSF boxes, temporal controls | Oblique/finite-aperture planes, modes/ports, Gaussian beams, imported fields, calibration, general FSP source conversion, legacy rule provenance |
@@ -23,7 +23,7 @@ retired commercial fields, waveform fixtures or comparison plots.
 | Analysis | Controlled slab R/T, complex incident subtraction, fields/flux | General R/T/A, S-matrix, near-to-far, diffraction, resonance and radiation |
 | Execution | CPU/CUDA/Graph, decay shutoff, diagnostics, process batches, real-field CUDA tensor cohorts and exact mixed-topology grouping | Restart, single-grid multi-GPU/MPI, complex/auto-stopping tensor cohorts and graphical batch control |
 | Design | Sweeps, custom Python objectives, parallel differential evolution | Adjoint/autograd, fabrication constraints, more optimizers, graphical sweeps |
-| Interoperability | Independent layout subset with explicit mesh, rotated primitives, polygon pivots and ellipse sectors. Mapped primitive/source/monitor list edits, existing geometry, uniform target meshes and a source/monitor/region settings subset can be written through Python/CLI/UI with retained-byte and ID maps | External acceptance of new records/remeshing, graded/user mesh-generator export, required general FSP versions/results, unmapped source/monitor classes and general settings writeback, groups, contract/provenance |
+| Interoperability | Independent layout subset with explicit mesh, rotated primitives, polygon pivots and ellipse sectors. Mapped primitive/source/monitor list edits, existing geometry, uniform target meshes and a source/monitor/region settings subset can be written through Python/CLI/UI with retained-byte and ID maps | External acceptance of new records/remeshing, graded/user mesh-generator export, Use-case-dependent general FSP versions/results, unmapped source/monitor classes and general settings writeback, groups, contract/provenance |
 | UI | Tree, CAD views, properties, materials, plots and Python export | Complete property coverage, frequency maps, grouping/results/resources |
 
 ## Required validation

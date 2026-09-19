@@ -70,6 +70,24 @@ class FDTD:
         for obj in self.project.structures:
             if obj.material == name: obj.material = updated.name
 
+    def fitmaterial(self, name, data, *, options=None):
+        """Fit and install a named material only when its tolerance is met.
+
+        ``data`` uses OpticalData's explicit wavelength units, not facade SI
+        lengths. Failed fits leave the project unchanged. Use fit_material
+        directly to inspect an unconverged best-fit candidate.
+        """
+        from .material_fit import fit_material
+        self._layout()
+        matches=[(i,m) for i,m in enumerate(self.project.materials) if m.name==name]
+        if len(matches)>1:raise ValueError('Material name must be unique.')
+        color=matches[0][1].color if matches else '#6ca8dd'
+        result=fit_material(data,name=name,color=color,options=options)
+        material=result.require_tolerance()
+        if matches:self.project.materials[matches[0][0]]=material
+        else:self.project.materials.append(material)
+        return result
+
     def getfdtdindex(self, name, frequencies, fmin=None, fmax=None):
         from .materials import permittivity
         matches = [m for m in self.project.materials if m.name == name]

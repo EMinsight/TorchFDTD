@@ -1,0 +1,60 @@
+{
+  "recorded_utc": "2026-09-19T18:27:31.635210+00:00",
+  "scope": "User-supplied passive isotropic optical data, continuous or fixed-dt ADE target, native Python/UI and CPU/CUDA/tensor execution.",
+  "objective": "Required checklist items in priority order. Conditional items only for concrete use cases. No new implementation of excluded product-specific replication.",
+  "full_python": {
+    "RTX 3060": {
+      "tests": 583,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "seconds": 208.519
+    },
+    "RTX 5880 Ada": {
+      "tests": 583,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "seconds": 197.08
+    }
+  },
+  "browser": {
+    "hardware": "RTX 5880 Ada",
+    "startTime": "2026-09-19T18:23:28.107Z",
+    "duration": 158282.299,
+    "expected": 27,
+    "skipped": 5,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "independent_checks": [
+    "Authored constant, Lorentz, Drude, mixed and narrow responses with held-out wavelengths",
+    "Positive loss over a dense positive-frequency sweep",
+    "Noisy data, input units, duplicate rejection, fixed epsilon infinity, data-band limits and explicit unmet tolerance",
+    "Native discrete D/E driven independently over 8192 steps",
+    "Fitted-material CPU/CUDA and independent/tensor-cohort agreement",
+    "Browser CSV import, failed tolerance, candidate apply, JSON/Python persistence, actual overridden timestep and native GPU execution",
+    "Stale browser fit results discarded after input changes"
+  ],
+  "source_sha256": {
+    "photonweave/optical_data.py": "51c152c1195033d7b61ba99b61e77149fe13bbffcaf17b417319e4f7624b7307",
+    "photonweave/material_fit.py": "e0168888ab4a557e1e1cdd19b83e948fd1b468b3b3bc529a8e4f54c5ee9e58fe",
+    "photonweave/models.py": "aeaad2948c6772d4effdc2d769e4775d7419a917d8c2ba529a1f7dbc11be8fe4",
+    "photonweave/materials.py": "dfda96462a54794e6b1e52f91080d890158b0e9f23dd7c2338f7b8a089441526",
+    "photonweave/server.py": "4b26d93c6ba6b97c05b129fb7bcbd270dd70e136fcf4fbe7527179d067f88363",
+    "photonweave/session.py": "e3cf5994367c0fe910d4d161707eadc5c3c7ea20ed957e958ca5925fc349ca67",
+    "photonweave/solver.py": "7812f2ec02eaca83826f8b317d68e8d68e7cf2c213d74fde981628b538a99215",
+    "photonweave/fsp_geometry.py": "042d0706d1ae1ebfbc0e76ad8d4a1dd21114e9c2841cae3d8462b3c6cee44ce9",
+    "frontend/src/material_fit.js": "d14d4d55c48f207128c94ea19b6093c7bebe9f8b0be4dd58238a65b7660477aa",
+    "frontend/src/materials.js": "89226c81e95ec40a79fb534f9dc8a3ca376d4fc09708588813c615bedb46fbae",
+    "tests/test_material_fit.py": "3616ed962dd83a1172b9c82bbfca59b6cd79d7eb8522debd812c90f8654d3bb2",
+    "tests/ui/material-fit.spec.js": "f2e9ee6ed2c7844506b3a4a13dc41840ddf95591274b50ec7d7a81869f3b23e9"
+  },
+  "limitations": [
+    "Authored-data checks do not validate every measured material",
+    "Subpixel curved/dispersive interface accuracy remains the next required work",
+    "No new Lumerical calculation or commercial optical-data redistribution",
+    "No new FSP dispersive-material writeback",
+    "Finite-band nonlinear fitting has local minima and no unique-fit guarantee"
+  ]
+}

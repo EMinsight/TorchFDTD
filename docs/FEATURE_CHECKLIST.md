@@ -6,7 +6,7 @@
 
 체크는 해당 행의 명시된 native 범위만 의미합니다. Python은 native Project/Simulation 또는 workflow API로 그 범위를 사용할 수 있다는 뜻이며, 동일한 LSF 명령을 모두 지원한다는 뜻이 아닙니다. UI와 FSP를 별도로 확인해야 합니다. API bridge로 읽히는 기능은 독립 GPU 엔진 구현으로 세지 않습니다.
 
-전체 1658행: 구현 159, 미구현/미검증 1274, 부분 225
+전체 1658행: 구현 160, 미구현/미검증 1273, 부분 225
 
 구현 우선순위와 제외 기준: [개발 우선순위](IMPLEMENTATION_PRIORITIES.md). 모든 행의 분류: [CSV](FEATURE_PRIORITY_INDEX.csv). UI 체크리스트에서도 중요도로 필터할 수 있습니다.
 
@@ -39,13 +39,13 @@
 
 | 체크 | 기능/속성 | 엔진 | Python | UI | 독립 FSP | 범위·검증 근거 |
 | --- | --- | --- | --- | --- | --- | --- |
-| ☐ | [측정 n/k 데이터·passive multi-pole fit](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
+| ☑ | [측정 n/k 데이터·passive multi-pole fit](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 구현 | 구현 | 구현 | 미구현/미검증 | 사용자 CSV/nk/복소 epsilon의 수동 등방 Drude/Lorentz fit. 3–8192개 sample, 최대 16 poles, 명시적 band·tolerance·실패와 원자료 hash. 연속/ADE target·고정 epsilon infinity·Python facade·UI import/plot/apply·JSON/Python 저장. 이방성/gain/자기 및 일반 재료 FSP writeback 미지원. [optical_data.py](../photonweave/optical_data.py) [material_fit.py](../photonweave/material_fit.py) [test_material_fit.py](../tests/test_material_fit.py) [material_fit.js](../frontend/src/material_fit.js) [material-fit.spec.js](../tests/ui/material-fit.spec.js) [MATERIAL_FITTING.md](../docs/MATERIAL_FITTING.md) |
 | ☐ | [중심 주파수 n/k](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 | ☐ | [전기 전도도](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 | ☐ | [Debye](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 | ☐ | [Sellmeier](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 | ☐ | [이상 PEC 재료](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
-| ☑ | [다중 oscillator](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 구현 | 구현 | 구현 | 미구현/미검증 | 최대 16개 수동 Drude/Lorentz pole의 합. 공통 E를 동시에 구하는 trapezoidal ADE, n/k preview·JSON/Python·GUI pole 편집. 측정 데이터 피팅은 별도 미구현. [materials.py](../photonweave/materials.py) [test_multipole.py](../tests/test_multipole.py) [materials.js](../frontend/src/materials.js) |
+| ☑ | [다중 oscillator](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 구현 | 구현 | 구현 | 미구현/미검증 | 최대 16개 수동 Drude/Lorentz pole의 합. 공통 E를 동시에 구하는 trapezoidal ADE, n/k preview·JSON/Python·GUI pole 편집. 측정 데이터 피팅은 material.sampled_fit에서 지원 범위 확인. [materials.py](../photonweave/materials.py) [test_multipole.py](../tests/test_multipole.py) [materials.js](../frontend/src/materials.js) |
 | ☐ | [대각 이방성](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 | ☐ | [일반 tensor·grid transform](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 | ☐ | [자기 permeability](https://optics.ansys.com/hc/en-us/articles/360034394734-Advanced-and-custom-optical-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
@@ -55,7 +55,7 @@
 | ☐ | [2D conductivity·graphene](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 | ☐ | [온도·전하 의존 재료](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 | ☐ | [사용자 material plugin](https://optics.ansys.com/hc/en-us/articles/360034394734-Advanced-and-custom-optical-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
-| ☐ | [상용 재료 DB와 사용자 DB import/export](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
+| ☐ | [상용 재료 DB의 동일 복제](https://optics.ansys.com/hc/en-us/articles/360034394634-Standard-optical-permittivity-material-models-in-FDTD-and-MODE) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 
 ## 메시
 

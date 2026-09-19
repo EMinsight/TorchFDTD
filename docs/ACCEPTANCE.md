@@ -1,7 +1,8 @@
 # Current acceptance record
 
-Development snapshot: 0.14.0.dev0, 19 September 2026. The full replacement objective
-is **not complete**. Public publication remains conditional on completion and the
+Development snapshot: 0.14.0.dev0, 19 September 2026. The required-workflow checklist objective is **not complete**. Conditional
+features are developed only for concrete use cases and excluded replication
+items are not implementation targets. Public publication remains conditional on completion and the
 [distribution review](RELEASE_REVIEW.md).
 
 Active numerical validation uses analytic solutions and independently authored
@@ -458,11 +459,11 @@ SHA-256.
 
 ## Remaining gates
 
-The [feature checklist](FEATURE_CHECKLIST.md) has 1658 rows: 159 implemented within
-their stated scope, 225 partial and 1274 missing or unverified. All rows have
+The [feature checklist](FEATURE_CHECKLIST.md) has 1658 rows: 160 implemented within
+their stated scope, 225 partial and 1273 missing or unverified. All rows have
 [importance and scope decisions](IMPLEMENTATION_PRIORITIES.md). Counts are not
 completion percentages. Major gaps include oblique/finite-aperture injection, mode sources,
-S-parameters, conformal interfaces, sampled-data fitting, further materials and
+S-parameters, subpixel interfaces, further materials and
 boundaries, near-to-far fields, adjoint differentiation, complete graphical
 sweeps and general format compatibility.
 
@@ -474,3 +475,37 @@ writeback also remain open. FSP plane/TFSF conversion now covers a checked 3D no
 The paper and README are development artifacts in the private delivery. No public repository,
 paper submission or vendor contact has been made. Final source/package bytes
 and licences require review after product scope and provenance issues are resolved.
+
+
+## Required-workflow priorities and optical-data fitting, 20 September 2026
+
+The revised [priority plan](IMPLEMENTATION_PRIORITIES.md) implements required
+linear-photonics capabilities before conditional format expansion and excludes
+product-specific replication. The remaining order is interface accuracy,
+mode ports and S-parameters, adjoint design, then measured accuracy-matched
+throughput improvements. Existing Python/UI capabilities and FSP subsets are
+retained. New conditional work needs a concrete use case.
+
+The [optical-data workflow](MATERIAL_FITTING.md) imports user n/k or complex
+permittivity samples and fits passive isotropic Drude/Lorentz coefficients.
+It exposes continuous and fixed-timestep ADE targets, explicit tolerance
+failure, data-band/error reports and retained sample provenance. Python,
+HTTP and Materials use the same implementation. The UI reads the actual
+validated timestep, including independent axis spacing and overrides.
+Unsuccessful or stale candidates cannot replace the material through the UI
+or facade. Fitting is CPU preparation, while fitted coefficients use existing
+native CPU/CUDA and tensor-cohort stepping.
+
+Both complete Python suites passed **582 tests with 1 optional skip**:
+208.58 seconds on RTX 3060 and 197.10 seconds on RTX 5880. The complete RTX 5880
+browser suite passed **27 tests with 5 optional skips** in 158.28 seconds.
+The new flow imports CSV, demonstrates an unmet tolerance, fits and applies
+three poles, verifies the overridden timestep, saves/reloads data, exports
+Python and executes on GPU. An additional race test discards a stale fit.
+The rendered editor and measured/fitted response plot were inspected.
+
+The [validation record](validation/material-fitting.json) lists independent
+checks and implementation/test hashes. Authored analytic samples establish
+those cases, not all measured substances. No commercial solver calculation
+or measured material database is used. Subpixel interface accuracy and the
+remaining required checklist still need implementation and validation.
