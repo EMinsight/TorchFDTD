@@ -32,10 +32,13 @@ Low-precision storage is deferred until the lossless paths and gradients pass.
 
 The [online spectral adjoint](validation/ONLINE_SPECTRUM_REPORT.md) now avoids
 retaining the full point-observation history for spectral losses. This is one
-prerequisite for detector-plane objectives, not a CR result. Next implement
-collocated E/H sampling and its interpolation transpose, signed Poynting
-quadrature and matched-reference normalization. Preserve spatial detector
-responses before applying the locked color reconstruction/information model.
+prerequisite for detector-plane objectives, not a CR result. The
+[plane adjoint](validation/PLANE_ADJOINT_REPORT.md) now provides collocated E/H,
+its interpolation transpose, signed Poynting quadrature and matched-reference
+normalization. A fixed dielectric slab passes Fresnel, conservation and material
+derivative checks. The next requirement is to preserve the locked CR spatial
+detector responses and connect its exact reconstruction/information model.
+Required material dispersion and geometry-gradient convergence remain gates.
 
 ## CR comparison contract
 

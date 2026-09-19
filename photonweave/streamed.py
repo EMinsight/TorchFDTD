@@ -70,7 +70,7 @@ def _reservation(project, epsilon, options, spectral=None):
     if 0 not in boundary.wrap:width = min(width, region.shape[0])
     tile_cells = width*region.shape[1]*region.shape[2]
     if 3*tile_cells >= 2**31:raise ValueError('A CUDA tile exceeds the supported integer index range.')
-    monitors = sum(m.enabled for m in project.monitors)
+    monitors = sum(m.enabled for m in project.monitors) if spectral is None else len(spectral.components)
     terms = sum(len(s.polarization_components)*(2 if s.injection == 'oneway' else 1)
                 for s in project.sources if s.enabled)
     history = region.steps*(2*monitors+terms)*item if spectral is None else region.steps*terms*item+spectral.reservation(depth)['spectral_reservation_bytes']
@@ -130,7 +130,7 @@ class _Streamed(torch.autograd.Function):
         ctx.project, ctx.options, ctx.report = project.model_copy(deep=True), options, report
         ctx.spectral = spectral
         started = time.perf_counter()
-        host = _System(project, epsilon, prepare_updates=False)
+        host = _System(project, epsilon, prepare_updates=False, observation_monitors=None if spectral is None else spectral.observers)
         report['host_initial_state_storage_bytes'] = sum(s.untyped_storage().nbytes() for s in host.state())
         report['host_inverse_permittivity_bytes'] = 0
         with _backing(options,report,'forward') as store:
@@ -158,7 +158,7 @@ class _Streamed(torch.autograd.Function):
         options, project, report = ctx.options, ctx.project, ctx.report
         _reservation(project, epsilon, options, ctx.spectral)
         started = time.perf_counter()
-        host = _System(project, epsilon, prepare_updates=False)
+        host = _System(project, epsilon, prepare_updates=False, observation_monitors=None if ctx.spectral is None else ctx.spectral.observers)
         with _backing(options,report,'backward') as store:
             operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
                                         reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,

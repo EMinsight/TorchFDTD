@@ -83,7 +83,7 @@ while the CUDA tile executes the field updates.
 Backward regenerates only the needed block of real observation derivatives
 from the complex spectrum derivative. Frequency and optional window values
 are fixed snapshots. Trainable frequencies/windows, higher derivatives and
-field-plane/port objectives remain unsupported. Window weights must be finite
+mode-port objectives remain unsupported. Window weights must be finite
 and have one entry per timestep. Automatic monitor apodization is not applied.
 The observation storage scales with frequencies and monitors plus a bounded
 time block. Prepared source histories and an explicitly supplied window still
@@ -100,11 +100,12 @@ scale with timestep count. See [validation and timings](validation/ONLINE_SPECTR
 | Prepared soft point/plane sources | Implemented, source parameters are fixed |
 | Normal-incidence prepared one-way plane | Fixed background near injection, both directions and vector polarization checked |
 | Point signals and Torch DFT | Implemented, including online spectral output and its bounded transpose |
+| Collocated frequency planes and normalized signed power | Experimental [plane API](DIFFERENTIABLE_PLANES.md), native parity and slab/index-gradient checks |
 | Regularized sphere radius/centre chain | Implemented |
 | Checkpoint replay on device, host or disk | Implemented, synchronous or optional asynchronous transfers |
 | Mixed GPU/host/disk checkpoint slots | Implemented with explicit slot counts |
 | Full-tensor subpixel geometry derivatives | Pending |
-| ADE, complex Bloch, live TFSF, frequency-plane/port adjoints | Pending, rejected by this API |
+| ADE, complex Bloch, live TFSF and mode-port adjoints | Pending, rejected by this API |
 | Trainable sources, boundaries and adaptive meshes | Pending |
 | Higher derivatives | Rejected explicitly |
 | Batched CUDA backward and shared-budget microbatch execution | Pending |

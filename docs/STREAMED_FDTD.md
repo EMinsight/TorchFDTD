@@ -128,8 +128,9 @@ observation seeds. The host admission estimate includes spectral accumulators,
 kernel/transpose workspace and an optional copied window. CUDA tile history is
 still bounded by `temporal_depth`. This works with either host or file banks.
 See the [spectral API contract](DIFFERENTIABLE_FDTD.md) and
-[recorded checks](validation/ONLINE_SPECTRUM_REPORT.md). It does not yet provide
-collocated plane flux or the CR detector objective.
+[recorded checks](validation/ONLINE_SPECTRUM_REPORT.md). The separate
+[plane API](DIFFERENTIABLE_PLANES.md) adds collocation and normalized power on
+this path. The CR detector/reconstruction objective remains pending.
 
 ### Experimental file-backed spatial state
 

@@ -33,6 +33,7 @@ class SpectralObservation:
         if self.window is not None and (self.window.shape != (self.steps,) or not bool(torch.isfinite(self.window).all())):
             raise ValueError('Window must contain one finite weight per timestep.')
         self.groups = {family: [i for i, c in enumerate(self.components) if c[0] == family] for family in ('E', 'H')}
+        self.observers = None
 
     def _fixed(self, value, name):
         if isinstance(value, torch.Tensor) and value.requires_grad:

@@ -1,0 +1,13 @@
+{
+  "base_commit": "954f357",
+  "sha256": {
+    "photonweave/adjoint_planes.py": "e14c7a155471306372b537cb992c1ac524570c11ff5a34dce1f94554622d42c1",
+    "photonweave/adjoint_spectrum.py": "e6a254a698b04e1f2d1801b51959638a7e9281c9b7f43ea78cb1b54830db0e5f",
+    "photonweave/differentiable.py": "5a67f5576de5e9fe8b7cf2157f5f6f494a3683a20ef23b513d45ac96488b1c01",
+    "photonweave/streamed.py": "37640da0300d13b0bd87a53361082bf96b93947b556f013972bd89177df3fb76",
+    "photonweave/field_monitors.py": "6a0261708c3178dfbdd4382c5048e58ae726fb28b04a28b01bc07d720ca50162",
+    "benchmarks/plane_adjoint.py": "5d30a8bf6f05258fbbf469a62c4a57c6737b3dcae5cbed0d5c6dd34764f970c8",
+    "tests/test_adjoint_planes.py": "6fc1b68534963a3a0c8617dcba19ff6f7bf953385efe923e4f45e1e2d381c686"
+  },
+  "scope": "Final source. Slab measurement preceded the added fixed-configuration mutation guard and plane_output_bytes report field. The numerical execution, interpolation and power formulas are unchanged."
+}

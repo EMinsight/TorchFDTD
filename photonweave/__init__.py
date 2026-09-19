@@ -46,3 +46,5 @@ from .streamed import StreamedAdjointOptions, StreamedSimulation
 __all__ += ['StreamedAdjointOptions', 'StreamedSimulation']
 from .streamed_tuning import StreamedTuning, tune_streamed
 __all__ += ['StreamedTuning', 'tune_streamed']
+from .adjoint_planes import DifferentiablePlaneSimulation, DifferentiablePlaneResult
+__all__ += ['DifferentiablePlaneSimulation', 'DifferentiablePlaneResult']

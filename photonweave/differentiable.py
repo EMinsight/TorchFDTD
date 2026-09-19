@@ -93,7 +93,7 @@ class _Grid:
 
 
 class _System:
-    def __init__(self, project, epsilon, *, prepare_updates=True):
+    def __init__(self, project, epsilon, *, prepare_updates=True, observation_monitors=None):
         self.project=project
         self.region=r=project.region
         self.epsilon=epsilon
@@ -141,6 +141,7 @@ class _System:
                                                   self.tensor(waveform),None if profile is None else self.tensor(profile)))
         self.monitors=[(m.component,index_at(m.center,r,m.component),'xyz'.index(m.component[1].lower()))
                        for m in project.monitors if m.enabled]
+        if observation_monitors is not None:self.monitors=list(observation_monitors)
         self.kernel=None
         if self.device.type=='cuda':
             from .cuda_kernels import FusedYeeCUDA
@@ -536,7 +537,7 @@ class DifferentiableSimulation(torch.nn.Module):
         cpml_upper=12*n
         state_upper=(6*n+cpml_upper)*item
         workspace=(42*n+5*cpml_upper)*item
-        monitor_count=sum(m.enabled for m in self.project.monitors)
+        monitor_count=sum(m.enabled for m in self.project.monitors) if spectral is None else len(spectral.components)
         source_terms_count=sum(len(s.polarization_components)*(2 if s.injection=='oneway' else 1)
                                for s in self.project.sources if s.enabled)
         output_bytes=r.steps*monitor_count*item if spectral is None else spectral.reservation(spectral.block_size)['spectral_output_bytes']
@@ -561,7 +562,7 @@ class DifferentiableSimulation(torch.nn.Module):
                     workspace_reservation_bytes=workspace,history_reservation_bytes=history_bytes,
                     checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes if spectral is None else 0,
                     source_history_bytes=source_bytes)
-        with torch.no_grad():system=_System(self.project,epsilon)
+        with torch.no_grad():system=_System(self.project,epsilon,observation_monitors=None if spectral is None else spectral.observers)
         # Check host/disk admission before spending the forward compute time.
         admission=_Checkpoints(system,self.options,report,admission=True)
         admission.close()

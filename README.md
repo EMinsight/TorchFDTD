@@ -16,6 +16,8 @@ Supported gradients match the DRAM path exactly in the recorded tests, while
 file execution is slower. OS cache memory and sustained NVMe performance remain
 unvalidated.
 
+Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and the CR reconstruction objective remain pending.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 

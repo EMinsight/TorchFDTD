@@ -12,8 +12,8 @@
 \section{Scope of the implemented operation}
 The current differentiable operation advances real, nondispersive Yee fields
 and convolutional perfectly matched layer memories on a fixed mesh. The
-permittivity can be scalar or diagonal. Point observations define the current
-output contract. A geometry map implemented with Torch operations can precede
+permittivity can be scalar or diagonal. Point observations and fixed collocated
+spectral planes define the current output contract. A geometry map implemented with Torch operations can precede
 this operation. This supplement does not establish derivatives of every
 forward-solver feature, convergence of physical shape derivatives, or a new
 checkpointing algorithm relative to prior work.
@@ -60,6 +60,34 @@ workspace scales as $O(FM+FB+BM)$. A supplied window and the prepared sources
 still require time-length arrays. These observations are point fields, not
 collocated plane flux or normalized port transmission. They establish neither
 a new Fourier algorithm nor completion of the color-router objective.
+
+\section{Collocated spectral planes}
+For each component, fixed trilinear interpolation maps indexed Yee samples to
+physical quadrature points. Shared support samples are deduplicated across
+planes. Interpolation commutes with the linear Fourier accumulation because
+its weights are time independent. The plane API uses the positive exponential
+of the native frequency monitor, obtained by conjugating the point transform
+kernel. Its transpose uses the same conjugated convention.
+
+For a plane with coordinate normal $a$, let $(a,b,c)$ be a cyclic ordering.
+The integrated reduced spectral power is
+\begin{equation}
+ P_a=\frac{1}{2}\sum_q A_q\operatorname{Re}
+ \left(E_b(q)H_c(q)^*-E_c(q)H_b(q)^*\right),
+\end{equation}
+where $A_q$ is the clipped physical-cell quadrature weight. Torch transposes
+the interpolation and power objective into spectral sample derivatives.
+The field solver then applies its bounded discrete adjoint. Matched-reference
+normalization divides by absolute incident flux. Reflection subtraction acts
+on the complex fields before power is formed. This is not mode decomposition.
+
+A fixed dielectric slab with index 1.5 and thickness 0.2 micrometres was tested
+at nine wavelengths between 1.3 and 1.8 micrometres. At a 0.025 micrometre mesh
+and 1,600 steps, the maximum Fresnel transmission error was 0.001535 and the
+maximum error in $T+R=1$ was $4.44\times10^{-6}$. The mean-transmission index
+derivative agreed with a central difference of step $10^{-4}$ to relative
+error $1.14\times10^{-8}$. This validates one fixed-mask material derivative,
+not sharp-interface shape convergence or the color-router objective.
 
 \section{Slab ownership and the transpose}
 A time block contains $K$ full steps. Each x slab retains the full y and z
