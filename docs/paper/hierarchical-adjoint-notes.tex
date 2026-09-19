@@ -89,6 +89,27 @@ derivative agreed with a central difference of step $10^{-4}$ to relative
 error $1.14\times10^{-8}$. This validates one fixed-mask material derivative,
 not sharp-interface shape convergence or the color-router objective.
 
+\section{Joint Gaussian target objectives}
+The real local measurement model is $Y=AX+N$. Explicit joint moments
+$\Sigma_{XX}$, $\Sigma_{XZ}$ and $\Sigma_{ZZ}$ retain target uncertainty
+outside the sampled scene latent. Let $L_XL_X^{\mathsf T}=\Sigma_{XX}$ and
+$L_NL_N^{\mathsf T}=\Sigma_N$. Define
+\begin{align}
+ C&=L_X^{-1}\Sigma_{XZ},& W&=L_N^{-1}AL_X,\\
+ R&=\Sigma_{ZZ}-C^{\mathsf T}C,& Q&=I+W^{\mathsf T}W.
+\end{align}
+The implemented posterior and information are
+\begin{align}
+ \Sigma_{Z|Y}&=R+C^{\mathsf T}Q^{-1}C,\\
+ I(Y;Z)&=\frac{\log\det\Sigma_{ZZ}-\log\det\Sigma_{Z|Y}}{2\log 2}.
+\end{align}
+Triangular and Cholesky solves replace explicit inverses. A response-dependent
+shot covariance remains differentiable. Invalid covariance inputs are rejected
+without jitter. This standard Gaussian model is not a novelty claim or a
+replacement for the locked optical response, statistical prior and electron
+calibration in the color-router study. Synthetic comparisons verify algebra
+and derivatives only.
+
 \section{Slab ownership and the transpose}
 A time block contains $K$ full steps. Each x slab retains the full y and z
 extent and a conservative halo of $2K$ cells on either x side. This bound covers

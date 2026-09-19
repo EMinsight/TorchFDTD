@@ -1,0 +1,9 @@
+{
+  "base_commit": "961abc8",
+  "sha256": {
+    "photonweave/information.py": "0f8f71f093a7b9aeb10b92499e069416a9c494d2cfafa85252ddc421e721ff26",
+    "tests/test_information.py": "27d49f27a4b541ddce5523d1576698a76acbd410a688360927e96b2619d78b4f",
+    "photonweave/adjoint_planes.py": "e14c7a155471306372b537cb992c1ac524570c11ff5a34dce1f94554622d42c1"
+  },
+  "scope": "Final implementation. Synthetic reference comparison preceded explicit complex-read-noise and empty-channel guards. Valid-case formulas are unchanged. External reference source and private research inputs are not distributed."
+}

@@ -40,7 +40,24 @@ derivative checks. The next requirement is to preserve the locked CR spatial
 detector responses and connect its exact reconstruction/information model.
 Required material dispersion and geometry-gradient convergence remain gates.
 
+The [joint Gaussian target objective](TARGET_INFORMATION.md) is now implemented
+and checked against synthetic inputs to the supplied active research module.
+A read-only S11 audit verified the seed and three recorded dependency hashes.
+The audit also establishes that the detector proxy uses electric-intensity
+allocation rescaled by total transmission. Replacing it with local flux would
+change the study. The exact prior/calibration replay and optical integration
+remain pending, including oblique pupil phases and wavelength-dependent indices.
+
 ## CR comparison contract
+
+The inspected SiN/SiO2 tables have wavelength-dependent real indices and zero
+tabulated extinction. A separate selected-frequency solve may use the exact
+epsilon and transverse Bloch phase at that wavelength, provided temporal and
+spectral convergence are demonstrated there. This preserves the frequency-domain
+comparison without claiming broadband ADE differentiation. A single constant
+index shared across the whole band is not equivalent. Complex Bloch/source
+adjoints and a bounded multi-ray/polarization gradient schedule are the next
+solver requirements for this route.
 
 Record the reference source revision and hashes before translating the model.
 Preserve wavelength and angle weights, polarization, detector geometry, material

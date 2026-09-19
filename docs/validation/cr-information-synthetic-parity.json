@@ -1,0 +1,68 @@
+{
+  "reference_module_sha256": "e7f04e0ba1f6160ceccabeb39635145a40b5951f25760313d8ec877f09472a3c",
+  "torch_version": "2.10.0+cu126",
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "cases": [
+    {
+      "device": "cpu",
+      "seed": 861,
+      "bits_absolute_error": 1.3322676295501878e-15,
+      "gradient_relative_l2": 1.115134933944454e-15
+    },
+    {
+      "device": "cpu",
+      "seed": 862,
+      "bits_absolute_error": 1.3322676295501878e-15,
+      "gradient_relative_l2": 1.1307655589206948e-15
+    },
+    {
+      "device": "cpu",
+      "seed": 863,
+      "bits_absolute_error": 1.3322676295501878e-15,
+      "gradient_relative_l2": 9.56423271357489e-16
+    },
+    {
+      "device": "cpu",
+      "seed": 864,
+      "bits_absolute_error": 0.0,
+      "gradient_relative_l2": 1.1755406084832805e-15
+    },
+    {
+      "device": "cpu",
+      "seed": 865,
+      "bits_absolute_error": 1.3322676295501878e-15,
+      "gradient_relative_l2": 1.1550809328946459e-15
+    },
+    {
+      "device": "cuda",
+      "seed": 861,
+      "bits_absolute_error": 0.0,
+      "gradient_relative_l2": 1.6534723023346871e-15
+    },
+    {
+      "device": "cuda",
+      "seed": 862,
+      "bits_absolute_error": 1.3322676295501878e-15,
+      "gradient_relative_l2": 9.499633852462624e-16
+    },
+    {
+      "device": "cuda",
+      "seed": 863,
+      "bits_absolute_error": 1.1102230246251565e-15,
+      "gradient_relative_l2": 1.4191649009774593e-15
+    },
+    {
+      "device": "cuda",
+      "seed": 864,
+      "bits_absolute_error": 2.4424906541753444e-15,
+      "gradient_relative_l2": 1.5467594234222764e-15
+    },
+    {
+      "device": "cuda",
+      "seed": 865,
+      "bits_absolute_error": 0.0,
+      "gradient_relative_l2": 1.542024218134463e-15
+    }
+  ],
+  "scope": "Synthetic 4x9 real response and 3-target covariance parity against the active research objective module, including response-dependent shot noise. No CR prior, mask optimization, optical response or promotion claim."
+}

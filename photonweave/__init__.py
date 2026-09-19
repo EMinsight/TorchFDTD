@@ -48,3 +48,5 @@ from .streamed_tuning import StreamedTuning, tune_streamed
 __all__ += ['StreamedTuning', 'tune_streamed']
 from .adjoint_planes import DifferentiablePlaneSimulation, DifferentiablePlaneResult
 __all__ += ['DifferentiablePlaneSimulation', 'DifferentiablePlaneResult']
+from .information import GaussianTargetResult, gaussian_target_information, shot_read_covariance
+__all__ += ['GaussianTargetResult', 'gaussian_target_information', 'shot_read_covariance']
