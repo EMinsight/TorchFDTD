@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--repeats', type=int, default=3)
     parser.add_argument('--compare-bindings', action='store_true')
     parser.add_argument('--compare-transfers', action='store_true')
+    parser.add_argument('--compare-local-checkpoints', action='store_true')
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
     if args.repeats < 1:raise ValueError('repeats must be positive')
@@ -41,6 +42,9 @@ def main():
         models['streamed_dlpack'] = StreamedSimulation(project, replace(options, cuda_binding='dlpack', reuse_tile_buffers=False))
     if args.compare_transfers:
         models['streamed_async'] = StreamedSimulation(project, replace(options, tile_transfers='async', tile_buffers=2))
+    if args.compare_local_checkpoints:
+        for count in (1,2,4):
+            models[f'streamed_local_{count}'] = StreamedSimulation(project,replace(options,local_checkpoints=count))
     records = {name:[] for name in models}
     outputs, gradients = {}, {}
 

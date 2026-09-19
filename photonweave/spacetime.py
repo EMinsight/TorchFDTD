@@ -9,7 +9,7 @@ from types import SimpleNamespace
 
 import torch
 
-from .differentiable import _Grid, _System
+from .differentiable import _Grid, _System, _split
 
 
 def _host_copies(tensors):
@@ -21,13 +21,18 @@ def _host_copies(tensors):
 
 class SlabBlockOperator:
     def __init__(self, host_system, width, device='cuda', *, cuda_binding='direct', reuse_buffers=True,
-                 tile_transfers='sync', tile_buffers=2):
+                 tile_transfers='sync', tile_buffers=2, local_checkpoints=0):
         if host_system.device.type != 'cpu':
             raise ValueError('The global slab state must reside in CPU DRAM.')
         if isinstance(width, bool) or not isinstance(width, int) or width < 1:
             raise ValueError('Slab width must be a positive integer.')
         self.host = host_system
         self.width = width
+        if isinstance(local_checkpoints,bool) or not isinstance(local_checkpoints,int) or not 0 <= local_checkpoints <= 32:
+            raise ValueError('local_checkpoints must be an integer between zero and 32.')
+        self.local_checkpoints = local_checkpoints
+        self.local_replayed_steps = 0
+        self.peak_local_checkpoints = 0
         if cuda_binding not in ('direct', 'dlpack'):raise ValueError('cuda_binding must be direct or dlpack.')
         self.direct_views = cuda_binding == 'direct'
         self.device = torch.device(device)
@@ -44,7 +49,9 @@ class SlabBlockOperator:
         self.workspace = self.workspaces[0] if self.workspaces else None
 
     def workspace_report(self):
-        return dict(allocations=sum(w.allocations for w in self.workspaces),
+        return dict(local_replayed_steps=self.local_replayed_steps,
+                    peak_local_checkpoints=self.peak_local_checkpoints,
+                    allocations=sum(w.allocations for w in self.workspaces),
                     buffer_bytes=sum(w.allocated_bytes for w in self.workspaces),
                     pinned_bytes=sum(w.pinned_bytes for w in self.workspaces),
                     binding_hits=sum(w.binding_hits for w in self.workspaces),
@@ -281,15 +288,36 @@ class SlabBlockOperator:
                 backward.e_bar.copy_(adjoint[0]);backward.h_bar.copy_(adjoint[1])
                 for target, value in zip(backward.psi_bars[0], adjoint[2:]):target.copy_(value)
                 del adjoint
-            # Bounded local replay: one restart, independent of temporal depth.
-            # A local checkpoint schedule will reduce this triangular replay cost.
-            for j in reversed(range(depth)):
-                for target, value in zip(local.state(), restart):target.copy_(value)
-                local.advance(0, j)
+            def restore(saved, begin, end):
+                for target, value in zip(local.state(), saved):target.copy_(value)
+                local.advance(begin, end)
+                self.local_replayed_steps += end-begin
+
+            def step(j):
+                nonlocal adjoint
                 if backward is not None:backward.step(j)
                 else:
                     adjoint, contribution = local.transpose_step(local.state(), adjoint, samples[j])
                     local_gradient.add_(contribution)
+
+            def reverse(begin, end, saved, slots, level):
+                while end > begin:
+                    if end-begin == 1 or slots == 0:
+                        for j in reversed(range(begin,end)):
+                            restore(saved,begin,j)
+                            step(j)
+                        return
+                    middle = begin+_split(end-begin,slots)
+                    restore(saved,begin,middle)
+                    checkpoint = tuple(self.workspace.copy(f'local_checkpoint:{level}:{i}',s)
+                                       if self.workspace is not None else s.clone()
+                                       for i,s in enumerate(local.state()))
+                    self.peak_local_checkpoints = max(self.peak_local_checkpoints,level+1)
+                    reverse(middle,end,checkpoint,slots-1,level+1)
+                    del checkpoint
+                    end = middle
+
+            reverse(0,depth,restart,self.local_checkpoints,0)
             if backward is not None:
                 adjoint = (backward.e_bar, backward.h_bar, *backward.psi_bars[backward.phase])
             return self._return((*adjoint, local_gradient)), (indices, mapping)

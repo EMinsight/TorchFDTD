@@ -37,3 +37,14 @@ def test_tuner_rejects_empty_or_inadmissible_search():
         tune_streamed(p,epsilon,candidates=[StreamedAdjointOptions(device='cpu',host_budget_bytes=1)])
     with torch.inference_mode(),pytest.raises(ValueError,match='inference_mode'):
         tune_streamed(p,epsilon)
+
+
+def test_deep_default_search_compares_local_replay_without_mutating_design():
+    p = project(steps=17,periodic=True)
+    epsilon = torch.full(p.region.shape,1.7,dtype=torch.float64,requires_grad=True)
+    options = StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=8)
+    tuned = tune_streamed(p,epsilon,options=options,probe_steps=10,repeats=1)
+    measured = [row for row in tuned.report['candidates'] if row['status']=='measured']
+    assert {row['policy']['local_checkpoints'] for row in measured} == {0,1}
+    assert epsilon.grad is None
+    assert tuned.options.local_checkpoints in (0,1)

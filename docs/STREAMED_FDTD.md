@@ -75,6 +75,14 @@ overhead. This does not establish general superiority. Construct the returned
 policy's model with the original full project. See the
 [replay-cost validation](validation/REPLAY_POLICY_REPORT.md).
 
+For a base temporal depth of at least eight and no local checkpoints, the default
+candidate set also tries one local checkpoint on the wide synchronous and,
+when available, asynchronous policies. Explicit candidates can vary
+`local_checkpoints` from zero to 32. The tuner still compares complete iterations
+and reserves checkpoint space before running them. Probe lengths that truncate
+a large temporal block can bias the timing model because both halo volume and
+local replay work change. Validate the selected policy at the intended duration.
+
 ## Dependency and transpose
 
 Every tile in a time block reads the same immutable old global state. Two
@@ -92,9 +100,19 @@ Backward seeds each tile's owned output and intermediate observations, replays
 its physical state, and uses the native fused CUDA transpose. All initial-state
 and epsilon halo contributions are added back to their original host indices.
 Repeated periodic copies accumulate rather than overwrite. The global temporal
-schedule uses bounded block checkpoints. Local replay currently retains one
-tile restart and recomputes prefixes, trading bounded memory for triangular
-local replay work. This cost must be addressed before choosing large K values.
+schedule uses bounded block checkpoints. By default, local replay retains one
+tile restart and recomputes prefixes, requiring K(K-1)/2 replay steps per tile.
+Optional `local_checkpoints` adds bounded complete local E/H/CPML states and a
+recursive replay schedule. Both local and global checkpoint counts remain fixed
+as the full simulation duration grows. Each workspace slot is charged for its
+local checkpoint banks. The report records local replay steps and peak live
+local checkpoints.
+
+Local checkpoint copies can outweigh the eliminated forward updates. In one
+RTX 5880 case, K=32 with one local checkpoint reduced a complete iteration from
+0.591 to 0.396 seconds. A smaller K=12 case became slower. The zero-checkpoint
+path therefore remains the default and stays in the automatic candidate set.
+See [the local replay measurements](validation/LOCAL_REPLAY_REPORT.md).
 
 ## Admission and validation
 

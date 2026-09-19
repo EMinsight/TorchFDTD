@@ -8,6 +8,9 @@ not differentiability for every feature of the forward workbench.
 The existing manuscript draft predates this prototype. Its mathematical
 derivation, final validation and new runtime experiments need a later TeX update
 before the prototype is presented as a paper contribution.
+The new [TeX methods supplement](paper/hierarchical-adjoint-notes.tex) documents
+the discrete recurrence, slab ownership and bounded local/global replay. It
+does not replace the remaining full-manuscript revision or novelty assessment.
 
 ```python
 import torch

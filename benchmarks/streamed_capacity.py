@@ -14,15 +14,22 @@ from photonweave import Region, Project, Source, Monitor, StreamedSimulation, St
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output',required=True)
+    parser.add_argument('--steps',type=int,default=10)
+    parser.add_argument('--width',type=int,default=8)
+    parser.add_argument('--depth',type=int,default=1)
+    parser.add_argument('--local-checkpoints',type=int,default=0)
+    parser.add_argument('--gpu-budget-mib',type=int,default=512)
+    parser.add_argument('--host-budget-gib',type=int,default=12)
     args = parser.parse_args()
-    region = Region(dimension='3d',size=(25.6,25.6,12.8),mesh=.1,steps=10,
+    region = Region(dimension='3d',size=(25.6,25.6,12.8),mesh=.1,steps=args.steps,
                     precision='float32',pml_cells=3,memory_mode='streamed')
     project = Project(region=region,sources=[Source(center=(0,0,0),pulse='continuous')],
                       monitors=[Monitor(center=(.1,0,0)),Monitor(center=(0,.1,0),component='Hy')])
     epsilon = torch.full(region.shape,1.7,dtype=torch.float32,requires_grad=True)
-    base = StreamedAdjointOptions(slab_width=8,temporal_depth=1,checkpoints=1,
-                                 gpu_budget_bytes=512*1024**2,host_budget_bytes=12*1024**3)
-    policies = [base,replace(base,slab_width=16,temporal_depth=2)]
+    base = StreamedAdjointOptions(slab_width=args.width,temporal_depth=args.depth,checkpoints=1,
+                                 local_checkpoints=args.local_checkpoints,
+                                 gpu_budget_bytes=args.gpu_budget_mib*1024**2,host_budget_bytes=args.host_budget_gib*1024**3)
+    policies = [base,replace(base,slab_width=2*args.width,temporal_depth=2*args.depth)]
     reference = None
     records = []
     for policy in policies:

@@ -11,9 +11,10 @@ from photonweave import (Source, Region, StreamedSimulation, StreamedAdjointOpti
 
 
 @pytest.mark.parametrize('device', ['cpu', 'cuda'])
+@pytest.mark.parametrize('local_checkpoints', [0,2])
 @pytest.mark.parametrize('precision', ['float32', 'float64'])
 @pytest.mark.parametrize('periodic,depth,diagonal', [(False, 1, False), (False, 3, True), (True, 3, True), (True, 9, False)])
-def test_block_and_transpose_match_resident(device, precision, periodic, depth, diagonal):
+def test_block_and_transpose_match_resident(device, local_checkpoints, precision, periodic, depth, diagonal):
     if device == 'cuda':gpu()
     p = project('3d', precision=precision, steps=max(10, depth+2), periodic=periodic)
     torch.manual_seed(608)
@@ -22,7 +23,7 @@ def test_block_and_transpose_match_resident(device, precision, periodic, depth, 
     state = tuple(torch.randn_like(s)*.01 for s in host.state())
     endpoint = tuple(torch.randn_like(s)*.02 for s in host.state())
     weights = torch.randn(depth, len(host.monitors), dtype=epsilon.dtype)
-    operator = SlabBlockOperator(host, 5, device)
+    operator = SlabBlockOperator(host, 5, device,local_checkpoints=local_checkpoints)
     result, signals = operator.forward(epsilon, state, 1, depth)
     got_bar, got_gradient = operator.transpose(epsilon, state, 1, depth, endpoint, weights)
 
@@ -41,6 +42,9 @@ def test_block_and_transpose_match_resident(device, precision, periodic, depth, 
     torch.testing.assert_close(signals, expected_signals, **tolerance)
     for got, want in zip(got_bar, expected[:-1]):torch.testing.assert_close(got, want, **tolerance)
     torch.testing.assert_close(got_gradient, expected[-1], **tolerance)
+    from photonweave.streamed_cost import replay_blocks
+    assert operator.local_replayed_steps == len(list(operator.tiles(depth)))*replay_blocks(depth,local_checkpoints)
+    assert operator.peak_local_checkpoints <= local_checkpoints
 
 
 def test_temporal_blocks_compose_without_mutating_old_bank():

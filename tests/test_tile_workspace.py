@@ -52,17 +52,18 @@ def test_direct_view_owns_offset_allocation_on_nondefault_stream():
 
 
 @pytest.mark.parametrize('binding', ['direct', 'dlpack'])
+@pytest.mark.parametrize('local_checkpoints', [0,2])
 @pytest.mark.parametrize('buffers', [0, 1, 2, 3])
-def test_reused_streamed_workspaces_match_unreused_on_nondefault_stream(binding, buffers):
+def test_reused_streamed_workspaces_match_unreused_on_nondefault_stream(binding, buffers, local_checkpoints):
     gpu()
     from photonweave import StreamedAdjointOptions, StreamedSimulation
     from test_differentiable import project
     from dataclasses import replace
     p = project(steps=13, periodic=False)
-    options = StreamedAdjointOptions(slab_width=3, temporal_depth=2, cuda_binding=binding,
+    options = StreamedAdjointOptions(slab_width=3, temporal_depth=4, cuda_binding=binding,local_checkpoints=local_checkpoints,
                                      tile_transfers='async' if buffers else 'sync', tile_buffers=buffers or 1)
     epsilon = torch.full(p.region.shape, 1.8, dtype=torch.float64, requires_grad=True)
-    expected = StreamedSimulation(p, replace(options, reuse_tile_buffers=False, tile_transfers='sync'))(epsilon)
+    expected = StreamedSimulation(p, replace(options, reuse_tile_buffers=False, tile_transfers='sync',local_checkpoints=0))(epsilon)
     wanted, = torch.autograd.grad(expected.signals.square().sum(), epsilon)
     stream = torch.cuda.Stream()
     stream.wait_stream(torch.cuda.current_stream())

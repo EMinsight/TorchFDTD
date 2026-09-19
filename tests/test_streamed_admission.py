@@ -65,3 +65,26 @@ def test_tensor_batch_rejects_streamed_scene(tmp_path):
     p.region.memory_mode = 'streamed'
     with pytest.raises(ValueError,match='StreamedSimulation'):
         run_tensor_batch([p],output_dir=tmp_path)
+
+
+def test_local_checkpoints_are_bounded_and_charged_to_admission(monkeypatch):
+    from dataclasses import replace
+    from photonweave.streamed import _reservation
+    p = project(steps=10)
+    epsilon = torch.ones(p.region.shape,dtype=torch.float64)
+    options = StreamedAdjointOptions(device='cpu',temporal_depth=4)
+    baseline = _reservation(p,epsilon,options)
+    policy = replace(options,local_checkpoints=2)
+    expanded = _reservation(p,epsilon,policy)
+    added = expanded['local_checkpoint_reservation_bytes']
+    assert added == 2*18*expanded['max_extended_tile_cells']*epsilon.element_size()
+    assert expanded['gpu_reservation_bytes'] == baseline['gpu_reservation_bytes']+added
+    assert expanded['host_reservation_bytes'] == baseline['host_reservation_bytes']+added
+    with pytest.raises(ValueError,match='host budget'):
+        _reservation(p,epsilon,replace(policy,host_budget_bytes=baseline['host_reservation_bytes']))
+    monkeypatch.setattr(torch.cuda,'mem_get_info',lambda *a:(2**40,2**40))
+    with pytest.raises(ValueError,match='GPU budget'):
+        _reservation(p,epsilon,replace(policy,device='cuda',gpu_budget_bytes=baseline['gpu_reservation_bytes']))
+    for invalid in (-1,33,True,1.5):
+        with pytest.raises(ValueError,match='local_checkpoints'):
+            replace(options,local_checkpoints=invalid)

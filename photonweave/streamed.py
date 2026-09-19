@@ -23,6 +23,7 @@ class StreamedAdjointOptions:
     reuse_tile_buffers: bool = True
     tile_transfers: str = 'sync'
     tile_buffers: int = 2
+    local_checkpoints: int = 0
 
     def __post_init__(self):
         for name in ('slab_width', 'temporal_depth', 'gpu_budget_bytes', 'host_budget_bytes'):
@@ -31,6 +32,8 @@ class StreamedAdjointOptions:
                 raise ValueError(f'{name} must be a positive integer.')
         if isinstance(self.checkpoints, bool) or not isinstance(self.checkpoints, int) or not 0 <= self.checkpoints <= 32:
             raise ValueError('checkpoints must be an integer between zero and 32.')
+        if isinstance(self.local_checkpoints,bool) or not isinstance(self.local_checkpoints,int) or not 0 <= self.local_checkpoints <= 32:
+            raise ValueError('local_checkpoints must be an integer between zero and 32.')
         if torch.device(self.device).type not in ('cpu', 'cuda'):
             raise ValueError('Streamed execution supports CPU or CUDA tiles.')
         if self.cuda_binding not in ('direct', 'dlpack'):raise ValueError('cuda_binding must be direct or dlpack.')
@@ -63,7 +66,9 @@ def _reservation(project, epsilon, options):
     # Geometry graphs and optimizer/objective allocations remain caller-owned.
     source_copies = math.ceil(width/region.shape[0])+1
     tile_history = depth*(monitors+terms*source_copies)*item
-    tile_workspace = 128*tile_cells*item
+    local_slots = min(options.local_checkpoints,depth-1)
+    # A complete local state contains six fields and at most twelve CPML arrays.
+    tile_workspace = (128+18*local_slots)*tile_cells*item
     buffers = options.tile_buffers if options.tile_transfers == 'async' else 1
     host = (options.checkpoints+12)*state+8*epsilon.numel()*item+history+buffers*(tile_workspace+2*tile_history)
     gpu = buffers*(tile_workspace+tile_history)
@@ -76,7 +81,7 @@ def _reservation(project, epsilon, options):
         if gpu > min(options.gpu_budget_bytes, int(free*.8)):
             raise ValueError('Streamed tile workspace reservation exceeds the GPU budget.')
     return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,
-                state_bytes=state, max_extended_tile_cells=tile_cells,
+                state_bytes=state, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*18*local_slots*tile_cells*item,
                 source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))
 
 
@@ -89,7 +94,7 @@ class _Streamed(torch.autograd.Function):
         host = _System(project, epsilon)
         operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
                                     reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
-                                    tile_buffers=options.tile_buffers)
+                                    tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints)
         state = host.state()
         signals = epsilon.new_empty((project.region.steps, len(host.monitors)))
         for start in range(0, project.region.steps, options.temporal_depth):
@@ -112,7 +117,7 @@ class _Streamed(torch.autograd.Function):
         host = _System(project, epsilon)
         operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
                                     reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
-                                    tile_buffers=options.tile_buffers)
+                                    tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints)
         steps = project.region.steps
         starts = list(range(0, steps, options.temporal_depth))+[steps]
         gradient = torch.zeros_like(epsilon)
@@ -182,6 +187,7 @@ class StreamedSimulation(DifferentiableSimulation):
         report = dict(experimental=True, spatial_streaming=True, full_time_autograd=False,
                       higher_order=False, slab_width=options.slab_width,
                       temporal_depth=options.temporal_depth, checkpoint_capacity=options.checkpoints,
+                      local_checkpoint_capacity=options.local_checkpoints,
                       execution_device=options.device, tile_transfers=options.tile_transfers,
                       tile_buffers=options.tile_buffers if options.tile_transfers == 'async' else 1,
                       cuda_binding=options.cuda_binding,

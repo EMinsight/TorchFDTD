@@ -1,0 +1,116 @@
+% Development methods supplement. No external novelty claim is established.
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage[margin=25mm]{geometry}
+\title{Hierarchical discrete adjoints in PhotonWeave\\\large Development methods supplement}
+\author{Hyoseok Park}
+\date{20 September 2026}
+\begin{document}
+\maketitle
+
+\section{Scope of the implemented operation}
+The current differentiable operation advances real, nondispersive Yee fields
+and convolutional perfectly matched layer memories on a fixed mesh. The
+permittivity can be scalar or diagonal. Point observations define the current
+output contract. A geometry map implemented with Torch operations can precede
+this operation. This supplement does not establish derivatives of every
+forward-solver feature, convergence of physical shape derivatives, or a new
+checkpointing algorithm relative to prior work.
+
+Let $s_t$ contain all six field components and the CPML auxiliary states.
+The implemented full step updates the electric field and then the magnetic
+field, including prepared sources and their prescribed times. Write this as
+\begin{equation}
+ s_{t+1}=F_t(s_t,\epsilon),\qquad y_t=P_t s_{t+1}.
+\end{equation}
+For a real objective $L(y_0,\ldots,y_{T-1})$, let $\bar y_t$ denote its incoming
+observation derivative. The discrete reverse recurrence is
+\begin{align}
+ v_{t+1} &= \bar s_{t+1}+P_t^{\mathsf T}\bar y_t,\\
+ \bar s_t &= (D_s F_t)^{\mathsf T}v_{t+1},\\
+ \bar\epsilon &\mathrel{+}= (D_\epsilon F_t)^{\mathsf T}v_{t+1}.
+\end{align}
+The CUDA transpose includes CPML state derivatives. Reversing lossless Maxwell
+fields alone would not reproduce this discrete recurrence in an absorbing
+domain. Checkpoint replay reconstructs the complete primal state required by
+the transpose. A Torch geometry map $\epsilon=g(\theta)$ then supplies
+$\bar\theta=(D_\theta g)^{\mathsf T}\bar\epsilon$.
+
+\section{Slab ownership and the transpose}
+A time block contains $K$ full steps. Each x slab retains the full y and z
+extent and a conservative halo of $2K$ cells on either x side. This bound covers
+the two radius-one curls per full step. Every slab reads the same immutable
+block-start state. Only its owned interior is committed to the next global
+state. CPML ownership follows the target cell of its derivative rather than
+an unshifted field index. Periodic halos can contain repeated physical cells.
+
+Let $S_i$ gather tile $i$, including halo replication. Let $R_i$ scatter only
+its owned output and let $G_i$ be its local time-block operation. The global
+block map has the form
+\begin{equation}
+ s_{b+1}=\sum_i R_i G_i(S_i s_b,S_i^\epsilon\epsilon).
+\end{equation}
+The input derivative accumulates complete halo contributions,
+\begin{equation}
+ \bar s_b=\sum_i S_i^{\mathsf T}
+ (D_sG_i)^{\mathsf T}R_i^{\mathsf T}\bar s_{b+1},
+\end{equation}
+with additional observation terms at each local time. Permittivity derivatives
+use the corresponding gather transpose $(S_i^\epsilon)^{\mathsf T}$. Repeated
+periodic copies are summed. Overwriting halo derivatives would omit valid
+dependency paths. Each observation is emitted and seeded only by its owner.
+
+\section{Two levels of bounded replay}
+Global block checkpoints reside in host DRAM. Local checkpoints reside in the
+active tile workspace and include E, H and every local CPML state. These are
+different budgets. A fixed number of local checkpoints does not retain a
+time-length field graph on the GPU.
+
+For a schedule of $n$ operations and $q$ additional checkpoints, denote the
+number of forward replay operations by $A(n,q)$. The current recursive split
+$m=m(n,q)$ obeys
+\begin{align}
+ A(1,q)&=0,\\
+ A(n,0)&=n(n-1)/2,\\
+ A(n,q)&=m+A(n-m,q-1)+A(m,q),\qquad q>0.
+\end{align}
+This describes the implemented split and is not an optimality theorem. It is
+used once for global blocks and again for local steps. A zero-checkpoint tile
+requires $K(K-1)/2$ replay steps. Additional checkpoints reduce replay in the
+measured deeper-block case but add state copies and allocations. Consequently,
+fewer replay steps do not imply a lower complete-iteration time.
+
+For $N$ global cells, maximum extended tile volume $V$, $p$ asynchronous slots,
+and fixed checkpoint counts $q_g,q_\ell$, the physical-state storage scales as
+\begin{align}
+ M_{\rm host}&=O\bigl(N(q_g+1)+pV(q_\ell+1)\bigr),\\
+ M_{\rm device}&=O\bigl(pV(q_\ell+1)\bigr).
+\end{align}
+The constants include state banks, adjoints, coefficients and staging buffers.
+Prepared drives and returned time traces also require time-dependent storage.
+Geometry graphs, optimizer allocations, CUDA context and allocator caching
+are outside the solver reservation. These equations therefore do not imply
+a time-independent bound on the entire process.
+
+\section{Selection and current evidence}
+The measured policy selector compares admitted slab sizes, block depths,
+transfer policies and optional local checkpoints. Two calibration durations
+separate startup and block costs. The actual global replay count extrapolates
+the full iteration. A partial block can change halo size and local replay work,
+so prediction quality must be tested at the intended duration.
+
+On an RTX 5880 Ada, the $128\times32\times32$ FP64 case with 64 steps and
+$K=32$ required 0.591 seconds per complete streamed iteration without local
+checkpoints and 0.396 seconds with one. These are medians of three measurements
+after a warm-up. The resident solver required 0.073 seconds in the same test.
+A smaller $64\times16\times16$ case with $K=12$ regressed when local checkpoints
+were enabled. The measurements support an optional memory--replay trade-off,
+not universal acceleration or superiority over another solver.
+
+The executable benchmark, raw repetitions, source hashes, gradient checks and
+memory scope are recorded in the companion local replay validation report.
+Large-domain physical accuracy, storage-backed spatial execution, fully
+automatic tier selection and the color-router objective remain separate
+validation requirements.
+\end{document}

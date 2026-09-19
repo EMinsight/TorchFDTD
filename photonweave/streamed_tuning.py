@@ -43,6 +43,12 @@ def tune_streamed(project, epsilon, *, options=None, candidates=None, probe_step
                                          (2*base.slab_width,base.temporal_depth))]
         if torch.device(base.device).type == 'cuda' and base.reuse_tile_buffers:
             candidates.append(replace(base, slab_width=min(n,2*base.slab_width), tile_transfers='async', tile_buffers=2))
+        # Deeper tiles can save forward replay at the cost of local state copies.
+        # Keep the zero-slot policies in the race, since shallow/small workloads
+        # can regress when copies cost more than the eliminated updates.
+        if base.local_checkpoints == 0 and base.temporal_depth >= 8:
+            candidates.extend(replace(p,local_checkpoints=1) for p in list(candidates)
+                              if p.slab_width == min(n,2*base.slab_width) and p.temporal_depth == base.temporal_depth)
         candidates = list(dict.fromkeys(candidates))
     else:candidates = list(candidates)
     if not 1 <= len(candidates) <= 12 or not all(isinstance(p,StreamedAdjointOptions) for p in candidates):
