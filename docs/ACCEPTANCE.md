@@ -509,3 +509,11 @@ checks and implementation/test hashes. Authored analytic samples establish
 those cases, not all measured substances. No commercial solver calculation
 or measured material database is used. Subpixel interface accuracy and the
 remaining required checklist still need implementation and validation.
+
+The independent GitHub Linux CPU [pipeline](https://github.com/hyoseokp/photonweave/actions/runs/35461296962)
+also passed on source revision `b61af1bffddc6920109b3b3b0a0dd8b29ea6a9ea`:
+**454 Python tests passed, 129 skipped**, and **24 browser tests passed,
+8 skipped**. Frontend and wheel builds passed. These CPU checks complement
+the workstation CUDA checks above. Subsequent evidence-only commits do not
+change numerical or browser code. The private repository has been updated,
+while the earlier tagged preview release assets remain unchanged.

@@ -56,5 +56,17 @@
     "No new Lumerical calculation or commercial optical-data redistribution",
     "No new FSP dispersive-material writeback",
     "Finite-band nonlinear fitting has local minima and no unique-fit guarantee"
-  ]
+  ],
+  "github_ci": {
+    "url": "https://github.com/hyoseokp/photonweave/actions/runs/35461296962",
+    "source_revision": "b61af1bffddc6920109b3b3b0a0dd8b29ea6a9ea",
+    "conclusion": "success",
+    "platform": "Ubuntu Linux CPU, Python 3.11",
+    "python_passed": 454,
+    "python_skipped": 129,
+    "ui_passed": 24,
+    "ui_skipped": 8,
+    "frontend_build": "passed",
+    "wheel_build": "passed"
+  }
 }
