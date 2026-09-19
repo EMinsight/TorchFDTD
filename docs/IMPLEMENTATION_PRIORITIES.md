@@ -1,42 +1,39 @@
 # 구현 우선순위와 제외 기준
 
-기준은 선형 photonics, Python 자동화, 단일 NVIDIA GPU와 inverse design이다. 개별 제품의 속성을 전부 복제하는 것을 완료 기준으로 삼지 않는다. 모든 기존 행에 중요도, 필요 여부, 기능군, 이유를 부여한 [전체 분류 CSV](FEATURE_PRIORITY_INDEX.csv)와 UI의 **Feature checklist → Capability priority**에서 항목별 판단을 확인할 수 있다.
+핵심 목표는 **Torch에서 형상·재료부터 loss.backward와 optimizer까지 연결하는 inverse design**, 그리고 **VRAM·DRAM·저장장치 계층으로 메모리 병목과 큰 격자의 한계를 줄이는 실행 엔진**이다. 속성 수를 채우는 것으로 완료를 판단하지 않는다. 모든 행의 중요도·필요 여부는 [분류 CSV](FEATURE_PRIORITY_INDEX.csv)와 UI의 Feature checklist에서 확인한다.
 
 ## 현재 실행 순서 · 2026-09-20
 
-최근 FSP 목록·속성 저장 작업에 비중이 커졌으므로, 실제 소자를 신뢰하고 설계할 수 있는 순서로 남은 작업을 다시 정렬한다. 기본 실행·수렴 검사는 모든 단계의 통과 조건이고, 공개 배포 검토는 별도 출고 조건이다. 체크리스트 행 수를 늘리는 것으로 계산 기능의 공백을 대신하지 않는다.
+1. **미분 가능한 물리 경로.** 제한된 실수 비분산 Yee·CPML의 이산 adjoint, 점 관측, Torch DFT, regularized sphere 형상과 Adam을 구현했다. [API 범위](DIFFERENTIABLE_FDTD.md)에 표시한 부분 구현이며 fused backward, plane·mode port 목적함수, ADE·Bloch·TFSF 및 coupled subpixel 미분을 확대해야 한다. Taylor 검사는 이산식 검증이며 물리 shape-gradient 수렴은 별도다.
+2. **계층형 메모리와 공간·시간 분할.** GPU/host/disk checkpoint와 명시적 혼합 tier, 제한된 binomial 재계산, 전송 profiler를 구현했다. 현재 동기식이며 공간 out-of-core는 아니다. 다음은 event 기반 bounded staging, DRAM slab·causal halo·temporal blocking, 실측 tile/K/checkpoint/microbatch 정책이다. SSD 공간 backing과 단일 grid multi-GPU는 그다음이다. [구체적 통과 조건](HIERARCHICAL_EXECUTION.md).
+3. **정확도와 유효한 설계 목적함수.** 측정 재료 피팅과 실험적 subpixel의 독립 해석 기준 검증을 유지한다. 모드 소스·포트의 전력 정규화, 양방향 분해와 상반성·보존 검사를 진행한다. 작은 adjoint 구현을 이 모든 기능이 끝날 때까지 미루지 않는다.
+4. **동일 오차의 전체 역설계 비용.** forward, backward, 재계산, I/O, geometry VJP와 optimizer를 함께 측정한다. 가능한 최대 크기와 처리 속도를 분리하고, 기존 잘 조정된 정책과 경쟁 solver를 지원 조건에 맞춰 비교한다. 성능 예상치를 측정 결과로 표시하지 않는다.
+5. **사용성과 배포.** Python 기능을 UI·저장·결과 검토로 연결한다. 공개 배포의 자료·라이선스 검토는 별도 출고 조건이다. FSP 주변 속성의 일대일 복제나 외관 항목이 위 두 핵심 개발을 앞서지 않는다.
 
-1. **측정 재료와 인터페이스 정확도.** 측정 n/k 피팅의 Python/UI 구현과 CPU/CUDA 검증을 완료했다. 현재는 [실험적 subpixel 인터페이스](SUBPIXEL_INTERFACES.md)를 검증 중이다. 선택형 유전체 연산자·Python/UI·CPU/CUDA/batch를 연결했고 해석 평면 분율과 고굴절률 이산 안정성 검사를 통과했다. 구 산란은 개선과 악화 사례를 모두 기록한다. 고굴절률 소자 정확도, 분산 혼합과 비균일 subpixel은 아직 완료가 아니다. 입력 단위·수동성·피팅 대역과 오차, 독립 박막/곡면 해석 기준, 메시·시간 수렴 및 CPU/CUDA 일치를 확인한다. 분산 재료 피팅만으로 곡면 정확도가 해결됐다고 보지 않는다.
-2. **모드 소스·포트·S-parameter.** 독립 도파관 고유모드, 전력 정규화, 양방향 모드 분해, 위상·상반성·전력 보존을 검증한다. 직선 도파관에서 시작해 실제 소자의 전송·반사 목적함수까지 연결한다.
-3. **이산 adjoint와 설계 영역.** [메모리 설계와 통과 조건](ADJOINT_MEMORY_PLAN.md)에 따라 전체 시간 이력을 autograd로 저장하지 않는 custom backward와 예산 제한 checkpoint·재계산을 구현한다. 재료·경계·소스·모니터를 포함한 방향 미분과 Taylor 검사를 통과하고, 다수 설계 변수의 gradient 시간·메모리를 측정한다. 1천/1만/5만 step의 peak memory와 재계산 비용, 배치 gradient 일치를 확인한다. 현재 adjoint는 미구현이며 미분 없는 배치 탐색을 adjoint로 표시하지 않는다.
-4. **같은 정확도에서 GPU·배치 성능.** 각 단계에서도 CPU/CUDA와 독립/배치 결과 일치를 유지한다. 핵심 물리 기능이 갖춰지면 단일 실행과 ensemble의 전체 시간을 같은 오차 조건에서 비교하고 병목을 개선한다. 과거 다른 버전의 시간비는 현 버전의 성능 보장이 아니다.
-5. **작업 이전과 UI 완성.** 위 계산 기능의 Python/UI/저장 경로를 함께 제공하고 FSP 매핑을 연결한다. 필요한 FSP 작업 이전은 유지하되, 모든 과거 버전·내부 결과 형식은 조건부로 분류하고 새 물리 기능보다 주변 속성의 왕복 저장을 먼저 늘리지 않는다. 외부 reader 검증이 없는 범위는 계속 미검증으로 표시한다.
+현재 1,661행 중 엔진 또는 UI에 남은 작업이 있는 행은 1,507개다. 행 수는 완성도나 연구 기여의 지표가 아니다.
 
-비선형·특수 재료, 단일 문제 multi-GPU, 세부 표시 옵션은 이 순서 뒤에 둔다. 이 순서는 우선 해결할 대체 장애물을 정한 것이며 전체 제품 대체가 완료됐다는 뜻이 아니다.
+| 순서 | 중요도 | 필요 여부 | 기능군 | 현재 상태와 다음 조건 |
+| --- | --- | --- | --- | --- |
+| 1 | P0 | 필수 | 실행 신뢰성 | 발산·취소·결과 상태, 모든 수치 경로의 일치 검증 |
+| 2 | P0 | 필수 | 정확도·수렴 | 동일 영역·물리 시간·PML 조건과 독립 기준 |
+| 3 | P0 | 공개 전 필수 | 독립 배포 | 코드·데이터·라이선스·자격증명 확인, 물리 구현과 별도 출고 조건 |
+| 4 | P0 | 핵심 | Torch adjoint·자동미분 | 제한된 실수 유전체/CPML 경로 구현, 일반 물리·포트·형상 미분 확대 |
+| 5 | P0 | 핵심 | 계층형 메모리·대규모 실행 | 체크포인트 3계층 부분 구현, DRAM space-time streaming·자동 정책은 남음 |
+| 6 | P1 | 필수 | 측정·분산 재료 | passive fitting·ADE forward 구현, 설계에 필요한 ADE backward |
+| 7 | P1 | 필수 | 계면·메시 | 실험적 subpixel의 개선·퇴행 기록, 고굴절률·분산·비균일 계면 및 gradient 수렴 |
+| 8 | P1 | 필수 | 모드·포트·정규화 | 독립 고유모드·전력 보존·S-parameter 검증 |
+| 9 | P1 | 필수 | CUDA tensor batch | forward cohort 구현, gradient microbatch·공유 메모리 예산 |
+| 10 | P1 | 필수 | 주파수장·흡수·회절·방사 | 물리 관측량과 differentiable observer 연결 |
+| 11 | P1 | 필수 | 핵심 CAD·설계 영역 | 분석 형상·회전 구현, 일반 geometry VJP·제조 조건 |
+| 12 | P2 | 후속 필수 | UI·workflow | GUI 설계·sweep, 영구 checkpoint/restart |
+| 13 | P2 | 조건부 | 비선형·특수 물성 | 구체적 연구에 필요할 때 |
+| 14 | P2 | 조건부 | 단일 grid multi-GPU | 단일 GPU·DRAM 경로 뒤, backward까지 분할 검증 |
+| 15 | P2 | 조건부 | 특수 CAD·동적 subgrid | 실제 입력·정확도 요구가 있을 때 |
+| 16 | P2 | 조건부 | 추가 FSP 호환 | 실제 작업 이전에 필요한 부분만 |
+| 17 | P3 | 제외 권장 | 내부 알고리즘·전용언어 전체 복제 | 독립 Python/API와 필요한 계산으로 대체 |
+| 18 | P3 | 제외 권장 | 표시 옵션의 일대일 복제 | 수치·해석에 영향 없는 외관 맞추기 |
 
-현재 1,658행 중 엔진 또는 UI에 남은 작업이 있는 행은 1,504개다. P0 8행, P1 982행, P2 449행, P3 65행이다. 반복되는 객체 속성을 포함한 행 수이며 기능 개수나 완성률이 아니다. 기능군과 개별 속성의 검증된 범위를 따로 표시한다.
-
-| 순서 | 중요도 | 필요 여부 | 기능군 | 판단과 다음 통과 기준 |
-|---:|---|---|---|---|
-| 1 | P0 | 필수 | 실행 신뢰성·계산 낭비 방지 | 자동 종료와 전체 장 발산 검사. 지연 소스, 연속파, 취소와 정상 조기 종료를 구분해야 한다. 이번 구현에 포함. |
-| 2 | P0 | 필수 | 정확도·수렴 검증 | 같은 물리적 시간·영역·PML 두께에서 관측량을 비교한다. 이번에 Python 수렴 검사와 matched reference 지원 추가. GUI study 실행은 남음. |
-| 3 | P0 | 공개 배포 전 필수 | 독립 배포 패키지 | 배포 파일 목록, 출처·라이선스, 자격증명 제외와 재현 가능한 설치를 검증. 아직 미완료. |
-| 4 | P1 | 필수 | 다중 공진·측정 재료 피팅 | 수동 다중 공진 ADE와 GUI/Python 편집, 측정 n/k import 및 passive fitting 구현. 피팅 오차·대역·ADE 시간 간격 표시. 대각 이방성과 일반 재료 FSP 저장은 남음. |
-| 5 | P1 | 필수 | subpixel·독립 축 메시·대칭 경계 | 독립 축 간격·명시적 노드와 CPU/CUDA/batch 구현. 일정 횡단면 구조의 matched-dt 실측 완료. 실험적 유전체 subpixel과 Python/UI 선택 추가. 고굴절률 소자·분산 혼합·비균일 subpixel의 정확도 및 대칭 경계는 남음. |
-| 6 | P1 | 필수 | 단방향/TFSF·모드 포트·S-parameter | Normal-incidence one-way plane과 closed TFSF box, 3D FSP subset 구현. 독립 이산 기준·박막 R/T·Mie 구 산란 검증. Oblique/finite-aperture·mode port·S-parameter와 FSP 일반 호환은 남음. |
-| 7 | P1 | 필수 | 이산 adjoint / autodiff | 대규모 topology inverse design의 핵심. 재료·CPML·모니터를 포함한 Taylor 검사와 방향 미분 검사, gradient 시간·메모리 측정. 미구현. |
-| 8 | P1 | 필수 | GPU tensor batch | 동일 실수 격자의 batch-axis CUDA와 cohort 분할 구현. 실측 기반 cohort 선택과 DE population 실행 연결. 서로 다른 메시·시간·정밀도 조건의 자동 분류와 입력 순서 복원을 추가. B=1/2/4/8/16 전체 E/H·점 신호 bitwise 일치와 5880 처리량 실측. 복소장·개별 자동 종료·GUI 실행은 남음. |
-| 9 | P1 | 필수 | 주파수 공간장·흡수·회절·방사 | 성분 선택과 물리적 관측량을 구현하고 광학적 합법칙·보존·수렴 검증. |
-| 10 | P1 | 필수 | 핵심 CAD·설계 영역 | Polygon extrusion·타원체/기둥/링 sector·3축 회전, Python/UI와 CUDA batch 구현. 형상 경계로 판정 범위를 줄이는 준비 최적화 실측 완료. 인식된 FSP primitive import·writeback 추가. 공간 재료 배열·GDS·그룹은 남음. |
-| 11 | P2 | 후속 필수 | 결과 탐색·GUI sweep·그룹·checkpoint | Python 기능을 GUI에서도 조합할 수 있게 만들고 큰 계산의 재시작을 지원. |
-| 12 | P2 | 조건부 | 비선형·gain·Raman·자기·열·전하·2D sheet | 해당 연구 문제를 다룰 때 추가. 일반 선형 유전체 소자 개발의 선행 조건은 아님. |
-| 13 | P2 | 조건부 | 단일 문제 multi-GPU/MPI·클러스터 | 한 장치에 들어가지 않는 문제와 실제 다중 GPU 검증 환경이 필요할 때 추진. |
-| 14 | P2 | 조건부 | STL·복잡 곡면·공정 builder·동적 subgrid | 실제 입력 형상이나 검증된 필요가 있을 때 추진. 구현 복잡도와 검증 비용이 큼. |
-| 15 | P2 | 조건부 | 추가 FSP 호환 | 기존 primitive 위치·크기·회전·가변 vertex·상수 재료의 독립 writeback 구현. 원본 byte 보존과 재변환 검사. 소스 시간·위상, 모니터 주파수·window, duration·CFL·일부 PML/Periodic 설정 writeback 추가. Primitive 추가·삭제·순서 저장과 ID/byte 대응표 추가. Electric source·TIME/DFT monitor 목록과 shared component 분리 저장 추가. 새 레코드 외부 reader 검증, 전체 버전·결과·미지원 소스/모니터 class·일반 설정은 해당 작업 이전에 필요할 때 후속 검증. |
-| 16 | P3 | 제외 권장 | 전체 전용 스크립트·제품별 내부 알고리즘의 동일 복제 | native Python/JSON/NPZ와 독립 알고리즘으로 필요한 작업을 지원한다. 독점 DB 복제도 불필요. 공개·사용자 재료 데이터 입력은 P1 재료 작업에 포함. |
-| 17 | P3 | 제외 권장 | opacity·wireframe 등 세부 표시 옵션의 일대일 복제 | 계산과 결과 해석에 영향 없는 옵션을 동일하게 재현할 필요는 없음. 이미 있는 편의 기능을 삭제한다는 뜻은 아님. |
-
-P1의 순서는 선행 기능과 검증 가능성을 고려한 구현 순서다. Adjoint와 tensor batch는 어렵다는 이유로 선택 기능으로 내리지 않았다. 정확한 목적함수·재료·경계 검증 위에 구현해야 하는 핵심 기능으로 남긴다. broadband oblique injection 자체도 필요한 소스 기능이며, 특정 제품의 구현 방식을 복제할 필요는 없다.
+전체 물리의 Torch 미분과 큰 격자의 자동 스트리밍이 완성됐다는 뜻은 아니다. 구현된 부분과 다음 검증은 [개발 측정](validation/ADJOINT_REPORT.md)과 [메모리 계약](ADJOINT_MEMORY_PLAN.md)에 분리해 기록한다.
 
 ## 이번에 구현한 범위
 

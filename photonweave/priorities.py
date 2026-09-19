@@ -9,7 +9,8 @@ WORKSTREAMS = {
     'ports': (1,6,'required','소스·모드·정규화','단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다.'),
     'materials': (1,4,'required','수동 분산 재료','다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.'),
     'interfaces': (1,5,'required','인터페이스·메시 효율','subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.'),
-    'adjoint': (1,7,'required','이산 adjoint·자동미분','많은 설계 변수를 다루는 inverse design에 필수다. Taylor 검사와 gradient 비용 측정이 필요하다.'),
+    'adjoint': (0,4,'required','Torch 이산 adjoint·자동미분','주요 개발 목표. 형상·유전율부터 loss.backward와 optimizer까지 연결하고 물리 gradient·시간·메모리를 검증한다.'),
+    'memory': (0,5,'required','계층형 메모리·대규모 실행','주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다.'),
     'tensor_batch': (1,8,'required','GPU tensor batch','같은 격자의 독립 구조물을 함께 처리하고 동일 결과와 실제 cases/s 향상을 검증해야 한다.'),
     'observables': (1,9,'required','관측량·주파수 공간장','전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.'),
     'geometry': (1,10,'required','핵심 CAD·설계 영역','다각형, 회전과 공간 재료 표현은 실제 소자와 topology 설계에 필요하다.'),
@@ -22,6 +23,14 @@ WORKSTREAMS = {
     'cosmetic': (3,17,'omit','세부 표시 옵션의 일대일 복제','계산과 결과 해석에 영향 없는 표시 속성은 동일하게 복제할 필요가 없다.'),
 }
 
+# Keep the two main research workstreams ahead of remaining product features.
+for _group,_rank in dict(materials=6,interfaces=7,ports=8,tensor_batch=9,observables=10,
+                        geometry=11,workflow=12,special_physics=13,distributed=14,
+                        special_cad=15,fsp_compatibility=16,compatibility=17,cosmetic=18).items():
+    _value=WORKSTREAMS[_group]
+    WORKSTREAMS[_group]=(_value[0],_rank,*_value[2:])
+del _group,_rank,_value
+
 EXACT = {
     'reliability': 'workflow.shutoff workflow.divergence native.cpu native.cuda native.precision native.cancel native.python native.npz native.cuda_fused native.batch_resume',
     'convergence': 'native.convergence',
@@ -30,6 +39,7 @@ EXACT = {
     'materials': 'material.sampled_fit material.nk material.multipole material.sellmeier material.diagonal',
     'interfaces': 'mesh.subpixel mesh.axis_step mesh.override_step mesh.user_nodes mesh.metal_mesh mesh.symmetric_mesh boundary.pec boundary.pmc boundary.symmetry boundary.antisymmetry native.mesh_preview',
     'adjoint': 'workflow.adjoint',
+    'memory': 'workflow.memory_hierarchy workflow.out_of_core native.memory_profile',
     'tensor_batch': 'workflow.fused_batch',
     'observables': 'monitor.plane monitor.global monitor.custom monitor.chebyshev monitor.selection monitor.volume_dft monitor.time_space monitor.index monitor.time_sampling analysis.diffraction analysis.nearfar analysis.absorption analysis.cross_sections analysis.resonance analysis.mode_area analysis.directivity',
     'geometry': 'cad.polygon cad.triangle cad.ellipse cad.rotation3 cad.arrays cad.spatial_index cad.image_geometry cad.gds',

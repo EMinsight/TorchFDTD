@@ -1,0 +1,32 @@
+{
+  "shape": [
+    24,
+    24,
+    1
+  ],
+  "steps": 1000,
+  "precision": "float32",
+  "device": "NVIDIA RTX 5880 Ada Generation",
+  "mode": "full-autograd reference",
+  "options": {
+    "steps": 1000,
+    "checkpoints": 4,
+    "storage": "device",
+    "device": "cuda",
+    "precision": "float32",
+    "size": 24,
+    "dimension": "2d",
+    "output": "results/adjoint-reference-1000.json",
+    "checkpoint_directory": "local scratch",
+    "reference": true
+  },
+  "full_wall_seconds": 16.06231750000734,
+  "forward_setup_wall_seconds": 3.527819900016766,
+  "loss": 0.828026294708252,
+  "gradient_norm": 1.0665605068206787,
+  "baseline_gpu_allocated_bytes": 2560,
+  "peak_gpu_allocated_bytes": 12917760,
+  "peak_gpu_reserved_bytes": 14680064,
+  "report": {},
+  "measurement_scope": "PyTorch allocator peak only, not external CUDA/context, CPU RSS or physical NVMe throughput. One cold run, not a speed comparison."
+}

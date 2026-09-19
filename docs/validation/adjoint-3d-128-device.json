@@ -1,0 +1,68 @@
+{
+  "shape": [
+    128,
+    128,
+    128
+  ],
+  "steps": 200,
+  "precision": "float32",
+  "device": "NVIDIA RTX 5880 Ada Generation",
+  "mode": "discrete adjoint",
+  "options": {
+    "steps": 200,
+    "checkpoints": 4,
+    "storage": "device",
+    "device": "cuda",
+    "precision": "float32",
+    "size": 128,
+    "dimension": "3d",
+    "output": "results/adjoint-3d-128-device.json",
+    "checkpoint_directory": "local scratch",
+    "reference": false
+  },
+  "full_wall_seconds": 1.715956699976232,
+  "forward_setup_wall_seconds": 0.49728589999722317,
+  "loss": 0.023925505578517914,
+  "gradient_norm": 0.021061021834611893,
+  "baseline_gpu_allocated_bytes": 8388608,
+  "peak_gpu_allocated_bytes": 566405632,
+  "peak_gpu_reserved_bytes": 595591168,
+  "report": {
+    "experimental": true,
+    "adjoint": "discrete Yee/CPML",
+    "higher_order": false,
+    "spatial_streaming": false,
+    "full_time_autograd": false,
+    "steps": 200,
+    "forward_backend": "fused CUDA",
+    "backward_backend": "torch explicit transpose",
+    "memory_reservation_bytes": 1459621792,
+    "workspace_reservation_bytes": 855638016,
+    "history_reservation_bytes": 4000,
+    "checkpoint_transfers": "synchronous",
+    "output_history_bytes": 1600,
+    "source_history_bytes": 800,
+    "restart_bytes": 54263808,
+    "checkpoint_capacity": 4,
+    "checkpoint_storage": "device",
+    "peak_checkpoints": 4,
+    "checkpoint_bytes_written": 5806227456,
+    "checkpoint_bytes_read": 16333406208,
+    "checkpoint_io_seconds": 0.08858170011080801,
+    "replayed_steps": 843,
+    "checkpoint_tiers": [
+      "device",
+      "device",
+      "device",
+      "device"
+    ],
+    "peak_checkpoints_by_tier": {
+      "device": 4,
+      "host": 0,
+      "disk": 0
+    },
+    "forward_seconds": 0.03177010000217706,
+    "backward_seconds": 1.1933835999807343
+  },
+  "measurement_scope": "PyTorch allocator peak only, not external CUDA/context, CPU RSS or physical NVMe throughput. One cold run, not a speed comparison."
+}

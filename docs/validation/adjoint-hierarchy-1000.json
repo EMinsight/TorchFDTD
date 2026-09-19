@@ -1,0 +1,68 @@
+{
+  "shape": [
+    24,
+    24,
+    1
+  ],
+  "steps": 1000,
+  "precision": "float32",
+  "device": "NVIDIA RTX 5880 Ada Generation",
+  "mode": "discrete adjoint",
+  "options": {
+    "steps": 1000,
+    "checkpoints": 4,
+    "storage": "hierarchical",
+    "device": "cuda",
+    "precision": "float32",
+    "size": 24,
+    "dimension": "2d",
+    "output": "results/adjoint-hierarchy-1000.json",
+    "checkpoint_directory": "local scratch",
+    "reference": false
+  },
+  "full_wall_seconds": 7.442715500015765,
+  "forward_setup_wall_seconds": 0.5516353999846615,
+  "loss": 0.828026294708252,
+  "gradient_norm": 1.0665605068206787,
+  "baseline_gpu_allocated_bytes": 2560,
+  "peak_gpu_allocated_bytes": 195072,
+  "peak_gpu_reserved_bytes": 2097152,
+  "report": {
+    "experimental": true,
+    "adjoint": "discrete Yee/CPML",
+    "higher_order": false,
+    "spatial_streaming": false,
+    "full_time_autograd": false,
+    "steps": 1000,
+    "forward_backend": "fused CUDA",
+    "backward_backend": "torch explicit transpose",
+    "memory_reservation_bytes": 296480,
+    "workspace_reservation_bytes": 235008,
+    "history_reservation_bytes": 20000,
+    "checkpoint_transfers": "synchronous",
+    "output_history_bytes": 8000,
+    "source_history_bytes": 4000,
+    "restart_bytes": 17664,
+    "checkpoint_capacity": 4,
+    "checkpoint_storage": "hierarchical",
+    "peak_checkpoints": 4,
+    "checkpoint_bytes_written": 7295232,
+    "checkpoint_bytes_read": 24800256,
+    "checkpoint_io_seconds": 1.1980978000792675,
+    "replayed_steps": 6409,
+    "checkpoint_tiers": [
+      "disk",
+      "disk",
+      "host",
+      "device"
+    ],
+    "peak_checkpoints_by_tier": {
+      "device": 1,
+      "host": 1,
+      "disk": 2
+    },
+    "forward_seconds": 0.153000200050883,
+    "backward_seconds": 6.866381199972238
+  },
+  "measurement_scope": "PyTorch allocator peak only, not external CUDA/context, CPU RSS or physical NVMe throughput. One cold run, not a speed comparison."
+}

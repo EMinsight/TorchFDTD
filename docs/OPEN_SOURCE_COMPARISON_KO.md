@@ -1,6 +1,6 @@
 # GPU FDTD 경쟁력과 검증 기준
 
-검토일: 2026-09-19. 아래 기능 비교는 공식 코드와 문서에 근거한다.
+외부 코드 검토일: 2026-09-19. PhotonWeave 구현 갱신: 2026-09-20. 아래 기능 비교는 공식 코드와 문서에 근거한다.
 프로젝트가 발표한 성능과 우리가 직접 측정한 성능을 구분한다.
 현재 PhotonWeave를 가장 빠르거나 가장 완성된 FDTD라고 부를 근거는 없다.
 
@@ -22,11 +22,11 @@
 
 | 프로젝트 | 확인한 계산 경로 | 미분 상태 | PhotonWeave와의 차이 |
 |---|---|---|---|
-| [FDTDX](https://github.com/ymahlau/fdtdx) | JAX, CUDA 및 ROCm 설치 경로 | 자동미분과 역시간 복원 기반 메모리 절약을 제공 | inverse design에서 우리가 따라가야 할 기준. 현재 우리 엔진에는 adjoint가 없다. |
+| [FDTDX](https://github.com/ymahlau/fdtdx) | JAX, CUDA 및 ROCm 설치 경로 | 자동미분과 역시간 복원 기반 메모리 절약을 제공 | inverse design에서 우리가 따라가야 할 기준. 우리 엔진은 제한된 실수 유전체/CPML adjoint를 추가했으며 지원 물리와 설계 검증을 확대해야 한다. |
 | [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX에서 전용 CUDA systolic kernel 호출 | 확인한 공개 primitive에는 JVP/VJP/transpose 규칙 등록이 없음 | 유전체 전용, z 크기와 경계·출력 제약이 있다. 우리 분산 재료, 축별 CPML, graded mesh, 온라인 면 DFT는 기능 차이다. 속도 우위는 미측정이다. |
 | [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy 또는 PyTorch CUDA | backend 초기화에서 gradients를 비활성화. 기본 사용을 미분 지원으로 표시하면 안 됨 | 우리는 이 프로젝트의 grid를 사용하고 원저작자 고지를 유지한다. 자체 CPML·ADE·mesh·모니터, GUI와 workflow를 추가한 상태다. |
 | [fdtd3d](https://github.com/zer011b/fdtd3d) | C++/CUDA와 MPI | 공식 README에 adjoint 제공이 명시되어 있지 않음 | 단일 큰 문제를 여러 장치로 나누는 병렬 계산이 중요하다. 우리의 여러 작업 분배는 이 기능과 다르다. |
-| PhotonWeave | NumPy CPU, PyTorch CUDA graph, fused CUDA와 batch-axis launch | forward 및 gradient-free differential evolution. adjoint/autodiff 없음 | 브라우저 UI와 Python 동일 모델, NPZ 결과, 재개 가능한 process batch, 제한된 실수 고정시간 tensor batch와 cohort 분할. Windows CUDA 실측. |
+| PhotonWeave | NumPy CPU, PyTorch CUDA graph, fused CUDA와 batch-axis launch | forward/DE와 별도의 제한된 Torch 이산 adjoint. 점 관측·regularized geometry·계층형 checkpoint | 브라우저 UI와 Python 동일 모델, NPZ 결과, 재개 가능한 process batch, 제한된 실수 고정시간 tensor batch와 cohort 분할. Windows CUDA 실측. |
 
 FDTDX의 PyTorch 전환은 [공식 refactor 논의](https://github.com/ymahlau/fdtdx/discussions/349)에 발표된 계획이다.
 확인한 main은 여전히 JAX이다. 자동미분의 제공은 [JOSS 논문](https://joss.theoj.org/papers/10.21105/joss.08912)에도 명시되어 있다.
@@ -38,7 +38,7 @@ fdtdz의 미분 상태는 [primitive 등록 코드](https://github.com/spinsphot
 JAX wrapper 자체가 이 CUDA primitive를 자동으로 미분해 주지는 않는다.
 이는 외부에서 별도 adjoint를 구성할 수 없다는 뜻은 아니다.
 flaport/fdtd의 [gradient 비활성화 코드](https://github.com/flaport/fdtd/blob/a760cb59e604b403d1f2a13a35b21aa0f89b3a6d/fdtd/backend.py#L47)와 설치된 0.2.2의 기본 backward 실패를 확인했다.
-PhotonWeave 역시 현재 forward 경로를 미분 가능한 solver로 표시하지 않는다.
+PhotonWeave의 기존 `Simulation.run()`은 미분 경로가 아니다. 별도 `DifferentiableSimulation`의 제한된 지원 범위는 [API](DIFFERENTIABLE_FDTD.md)와 [측정 보고서](validation/ADJOINT_REPORT.md)에 구분한다.
 
 검토한 commit:
 
@@ -121,14 +121,14 @@ python -m pytest tests/test_cuda_kernels.py
 | 상태 | 작업 | 통과 기준 |
 |---|---|---|
 | 완료, 제한 범위 | fused 실수 Yee/CPML | 전체 장·trace 비교, subnormal 회귀, periodic/graded/분산/ADE/면 DFT 검사와 5880 측정 |
-| 미완료 | 전용 adjoint / custom backward | 다수의 임의 방향에서 finite difference와 Taylor 검사. CPML·재료 상태를 포함한 정확한 이산 연산의 미분. gradient 시간과 peak memory 측정 |
+| 부분 구현 | 전용 adjoint / custom backward | 다수의 임의 방향에서 finite difference와 Taylor 검사. CPML·재료 상태를 포함한 정확한 이산 연산의 미분. gradient 시간과 peak memory 측정 |
 | 완료, 제한 범위 | 같은 격자 실수 구조물의 tensor batch | B=1,2,4,8,16에서 전체 E/H·점 신호 bitwise 일치, 실제 cases/s·objective evaluations/s 측정. 수동 분할, 실측 기반 묶음 선택, DE population 실행 구현. 복소장·개별 자동 종료·GUI는 남음 |
 | 미완료 | 큰 격자의 메모리·시간 최적화 | SoA와 tile별 비교. 내부와 CPML/ADE 영역별 비용 분리. 시간 blocking은 halo 및 monitor 정확성 검사를 통과한 경우만 사용 |
 | 미완료 | 정확도 목표 기반 mesh | 균일 mesh보다 적은 셀 수만으로 판단하지 않고, 같은 물리량 오차에서 시간·메모리 절약을 입증 |
 | 미완료 | 단일 문제의 multi-GPU 분할 | halo 교환, global boundary 일관성, strong/weak scaling을 실제 다중 GPU에서 측정 |
 | 부분 완료 | 네 라이브러리와 공통 benchmark | flaport 0.2.2는 8개 fixture 및 10개 batch 설정 실측. 다른 세 프로젝트는 환경 준비 후 실행. 공통 물리량의 정확도·경계 의미를 먼저 맞춘다. |
 
-대규모 topology inverse design에서는 adjoint 부재가 가장 큰 공백이다.
+대규모 topology inverse design에서는 제한된 adjoint를 정규화된 물리 목적함수와 큰 격자에 연결하는 것이 핵심 과제다.
 현재 differential evolution은 작은 수의 설계 변수를 다루는 black-box 경로이며
 수십만 voxel의 gradient 기반 설계를 대체하지 않는다.
 
@@ -144,7 +144,7 @@ Windows native NVIDIA GPU를 지원하지 않고 WSL2를 experimental로 표시�
 따라서 FDTDX/fdtdz의 동일 GPU 실측 비교는 아직 실행하지 않았다.
 fdtd3d는 현재 호스트에 호환 compiler/build 환경이 없고 검토 소스에 POSIX 의존성이 있다. 현재 실행하지 못했다는 사실을 제품의 일반적인 플랫폼 한계나 성능 열세로 해석하지 않는다.
 
-다음 개발 순서는 (1) Linux CUDA 환경에서 세 라이브러리의 공통 fixture 실측, (2) source·mode·목적함수 정규화 검증, (3) CPML/ADE 상태를 포함한 discrete adjoint와 Taylor 검사, (4) 큰 grid와 cohort 선택의 GPU profiling이다. FDTDX 대비 inverse design 우위를 주장하려면 forward 속도 외에 정확한 gradient의 시간·메모리 우위를 실측해야 한다. 그 전에는 "최고"라는 배포 문구를 사용하지 않는다.
+핵심 개발 순서는 [최신 우선순위](IMPLEMENTATION_PRIORITIES.md)에 따른다. Torch adjoint 확대와 계층형 메모리 실행이 P0이며, 정규화된 목적함수·물리 gradient·DRAM 타일링을 함께 검증한다. 호환 Linux CUDA 환경에서 외부 엔진의 공통 fixture 실측도 필요하다. FDTDX 대비 inverse design 우위를 주장하려면 forward 속도 외에 정확한 gradient의 시간·메모리 우위를 실측해야 한다. 그 전에는 "최고"라는 배포 문구를 사용하지 않는다.
 
 ## 비교우위 개발 프로젝트의 현재 작업
 
@@ -154,8 +154,8 @@ fdtd3d는 현재 호스트에 호환 compiler/build 환경이 없고 검토 소�
 | P0 | 완료 | 실제 cohort 선택 API, 준비 비용 공개, 별도 후속 타이밍, 메모리 입장 거부 기록. 최적 크기를 보장한다고 표현하지 않음 |
 | P0 | 완료, forward-only | DE population CUDA 배치 실행. 독립 실행과 전체 파라미터·목적함수 이력 동일성, 전체 루프 시간·evaluations/s 측정 |
 | P1 | 환경 준비 필요 | FDTDX/fdtdz/fdtd3d의 동일 GPU 실행. 호환 Linux CUDA와 검증한 adapter가 필요. 다른 기계의 발표 수치로 대체하지 않음 |
-| P1 | 미구현 | 이산 adjoint, CPML/ADE 및 목적함수 미분. 방향 미분·Taylor 검사와 gradient 시간·메모리 비교를 통과해야 inverse design 우위 주장 |
-| P1 | 후속 | 큰 격자 데이터 배치와 kernel profiling. 셀 수·정밀도·출력·정확도를 줄이지 않고 full wall과 메모리가 개선되어야 채택 |
+| P0 | 부분 구현 | 실수 유전체/CPML 이산 adjoint와 bounded checkpoint는 구현. ADE·일반 관측량·공간 streaming은 남음. 방향 미분·Taylor 검사와 gradient 시간·메모리 비교를 통과해야 inverse design 우위 주장 |
+| P0 | 후속 | 큰 격자 데이터 배치와 kernel profiling. 셀 수·정밀도·출력·정확도를 줄이지 않고 full wall과 메모리가 개선되어야 채택 |
 | P2 | 후속 | 적은 pilot 비용으로 cohort를 예측하고 다른 workload에서 평가. 현재 full-workload 튜닝 비용까지 포함한 총시간보다 좋아야 채택 |
 
 현재의 구체적인 장점은 측정된 flaport 대비 forward 처리량과 Python에서 바로 사용 가능한 CUDA population workflow다. FDTDX 대비 adjoint, fdtdz 대비 최고 forward 성능, fdtd3d 대비 단일 문제 MPI 우위는 확보하지 못했다.

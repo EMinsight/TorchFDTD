@@ -1,0 +1,48 @@
+"""A complete Torch geometry -> epsilon -> FDTD -> loss -> Adam example.
+
+This small regularized-shape example minimizes point-field energy. It is not
+port-normalized transmission, a manufactured device, or a physical shape-
+gradient convergence validation.
+"""
+import argparse
+import json
+from pathlib import Path
+
+import torch
+
+from photonweave import (AdjointOptions,DifferentiableSimulation,Monitor,Project,
+                        Region,Source,smooth_sphere_epsilon)
+
+
+def main():
+    ap=argparse.ArgumentParser()
+    ap.add_argument('--device',default='cuda' if torch.cuda.is_available() else 'cpu')
+    ap.add_argument('--iterations',type=int,default=8)
+    ap.add_argument('--output',default='results/differentiable-design.json')
+    args=ap.parse_args()
+    project=Project(region=Region(size=(1.6,1.5,1.4),mesh=.1,pml_cells=3,
+                                  steps=40,precision='float64'),
+                    sources=[Source(center=(-.2,0,0),pulse='continuous',wavelength=1.1)],
+                    monitors=[Monitor(center=(.1,0,0))])
+    radius=torch.nn.Parameter(torch.tensor(.25,device=args.device,dtype=torch.float64))
+    model=DifferentiableSimulation(project,AdjointOptions(checkpoints=4,storage='host',host_budget_bytes=128*1024**2))
+    optimizer=torch.optim.Adam([radius],lr=.003)
+    history=[]
+    for iteration in range(args.iterations):
+        optimizer.zero_grad()
+        epsilon=smooth_sphere_epsilon(project.region,radius,width=.09,inside=3.)
+        result=model(epsilon)
+        loss=result.signals[:,0].square().mean()
+        loss.backward()
+        history.append(dict(iteration=iteration,radius_um=float(radius.detach()),
+                            loss=float(loss.detach()),gradient=float(radius.grad),execution=result.report.copy()))
+        optimizer.step()
+        with torch.no_grad():radius.clamp_(.1,.4)
+    output=dict(description=__doc__,device=args.device,history=history,final_radius_um=float(radius.detach()))
+    path=Path(args.output);path.parent.mkdir(parents=True,exist_ok=True)
+    path.write_text(json.dumps(output,indent=2),encoding='utf-8')
+    print(json.dumps({'initial_loss':history[0]['loss'],'last_evaluated_loss':history[-1]['loss'],
+                      'final_radius_um':output['final_radius_um']}))
+
+
+if __name__=='__main__':main()

@@ -127,7 +127,8 @@ updates={
  'analysis.normalization':('partial','partial','동일 run signature·격자·소스·주파수·unapodized air reference로 signed flux 비율. Reflection은 complex E/H incident subtraction. 박막 R/T 및 R+T 검증. 일반 source power calibration, closed-box A는 미지원.',('photonweave/field_monitors.py','tests/test_field_monitors.py')),
  'workflow.sweep':('implemented','missing','Python parameter_sweep + BatchRunner. 독립 프로세스, 메모리 기반 GPU 동시 실행 제한, per-case 결과·재개. 단일 grid MPI 분할은 아님.',('photonweave/batch.py','tests/test_batch.py')),
  'workflow.nested_sweep':('implemented','missing','여러 dotted Project path의 Cartesian product, atomic project validation과 결정적 case id.',('photonweave/batch.py','tests/test_batch.py')),
- 'workflow.optimization':('partial','missing','Python 목적함수와 병렬 DE/rand/1/bin. seed·history·resume. 상용 최적화 알고리즘 전체, adjoint/autograd는 미지원.',('photonweave/design.py','tests/test_batch.py')),
+ 'workflow.optimization':('partial','missing','Python 병렬 DE와 별도 Torch differentiable API의 Adam 예제. 후자는 실수 비분산 epsilon·점 관측·regularized sphere 부분집합이며 일반 소자 최적화 검증은 남음.',('photonweave/design.py','photonweave/differentiable.py','examples/differentiable_design.py','tests/test_differentiable.py')),
+ 'workflow.checkpoint':('partial','missing','Adjoint 내부 E/H·CPML checkpoint/replay와 device/host/disk 저장. 일반 forward 작업의 영구 저장·재개, ADE/TFSF 상태 및 UI checkpoint는 남음.',('photonweave/differentiable.py','tests/test_differentiable.py')),
  'workflow.multi_gpu':('partial','missing','Python devices 목록으로 독립 case를 여러 CUDA 장치에 배정. 현재 single-GPU 검증만 실시. 단일 grid multi-GPU/MPI는 미지원.',('photonweave/batch.py','tests/test_batch.py')),
 }
 for row in features:
@@ -138,7 +139,10 @@ for row in features:
         row['fsp']='partial'
     if row['id'] == 'source.vector':
         row['fsp'] = 'partial'
-feature('workflow.adjoint','실행·자동화·호환','Adjoint·자동미분 FDTD',scope='미구현. 현재 inverse design은 독립 forward solve를 병렬 평가하는 black-box 최적화.',priority=1)
+feature('workflow.adjoint','실행·자동화·호환','Adjoint·자동미분 FDTD','partial','missing','n/a',scope='실수 비분산 diagonal epsilon→Yee/CPML→점 신호→Torch backward. CUDA fused forward/replay, 명시적 transpose, 제한된 checkpoint, regularized sphere·Adam. ADE·복소 Bloch·TFSF·plane/port·coupled subpixel 미분과 물리 shape-gradient 수렴은 남음.',evidence=('photonweave/differentiable.py','tests/test_differentiable.py','docs/DIFFERENTIABLE_FDTD.md'),reference='',priority=0)
+feature('workflow.memory_hierarchy','실행·자동화·호환','GPU·DRAM·디스크 계층형 checkpoint','partial','missing','n/a',scope='명시적인 tier별 slot 수, binomial 분할·재계산, 무손실 state 저장과 byte 한도. 현재 동기식 전송. 비동기·자동 정책·전체 host RSS 한도·공간 스트리밍은 미구현.',evidence=('photonweave/differentiable.py','tests/test_differentiable.py','docs/HIERARCHICAL_EXECUTION.md'),reference='',priority=0)
+feature('workflow.out_of_core','실행·자동화·호환','Space-time tiled out-of-core GPU FDTD',scope='필수 후속. causal halo·DRAM slab·async prefetch·tile/K tuning 뒤 NVMe backing과 정확한 backward를 검증. 현재 시간 checkpoint는 공간 out-of-core 지원이 아니다.',evidence=('docs/HIERARCHICAL_EXECUTION.md',),reference='',priority=0)
+feature('native.memory_profile','자체 실행·출력','GPU·host·파일 전송 비용 측정','partial','missing','n/a',scope='제한된 pinned H2D/D2H, host capacity, fsync write·warm-cache file read. 실제 NVMe 지속 대역폭·copy/compute overlap·자동 tile 정책은 미검증.',evidence=('photonweave/memory_profile.py','tests/test_memory_profile.py'),reference='',priority=0)
 feature('workflow.fused_batch','실행·자동화·호환','단일 CUDA kernel의 tensor batch','implemented','missing','n/a',
         scope='run_tensor_batch: 동일 격자의 실수 2D/3D·float32/64, CPML/periodic, graded, multipole, native DFT 결과. E/H/source/point trace의 batch-axis launch와 cohort 분할. tune_tensor_batch는 실제 전체 실행으로 묶음 크기 선택, 준비 비용·오차 검사를 기록. optimize의 tensor population 경로 지원. run_grouped_batch의 혼합 mesh/시간/정밀도 자동 분류와 입력 순서 복원 추가. 복소장·auto shutoff·resume·GUI batch 실행은 미지원.',
         evidence=('photonweave/cuda_batch.py','photonweave/tensor_batch.py','photonweave/tuning.py','photonweave/design.py','photonweave/grouped_batch.py','tests/test_grouped_batch.py','tests/test_tensor_batch.py','tests/test_tuning.py','docs/TENSOR_BATCH.md'),reference='',priority=1)

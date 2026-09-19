@@ -36,3 +36,7 @@ __all__ += ['write_fsp_geometry', 'write_fsp_scene']
 from .optical_data import OpticalData
 from .material_fit import FitOptions, MaterialFitResult, fit_material, material_fit_report
 __all__ += ['OpticalData', 'FitOptions', 'MaterialFitResult', 'fit_material', 'material_fit_report']
+from .differentiable import AdjointOptions, DifferentiableSimulation, DifferentiableResult, smooth_sphere_epsilon
+__all__ += ['AdjointOptions', 'DifferentiableSimulation', 'DifferentiableResult', 'smooth_sphere_epsilon']
+from .memory_profile import profile_memory_transfers
+__all__ += ['profile_memory_transfers']

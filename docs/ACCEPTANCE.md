@@ -545,3 +545,38 @@ speed advantage, universal interface convergence or full replacement is claimed.
 Adjoint remains unimplemented. The [memory design](ADJOINT_MEMORY_PLAN.md)
 requires a discrete custom backward and bounded checkpoint/recomputation,
 including physical restart state and measured gradient/memory acceptance gates.
+
+
+## Experimental Torch adjoint checkpoint, 20 September 2026
+
+The [new Python API](DIFFERENTIABLE_FDTD.md) connects real nondispersive
+permittivity and a regularized sphere to point signals, a differentiable DFT
+and a Torch optimizer. CUDA forward/replay uses native fused Yee/CPML kernels.
+Backward explicitly transposes the discrete operators and complete CPML state.
+Bounded checkpoints support device, host, disk and explicit mixed-tier storage.
+The final binomial split counts the already available restart state, reducing
+unnecessary replay without retaining old adjoints in recursive frames.
+
+The full RTX 5880 Python suite passed 654 tests with one optional skip in
+213.21 seconds before the final schedule refinement. After that refinement,
+38 targeted tests passed on both RTX 3060 and RTX 5880, in 17.82 and 14.20
+seconds respectively. They check full-autograd and native-forward parity,
+Taylor and central differences, nonuniform metrics, magnetic/vector sources,
+periodic wrapping, both one-way directions, all checkpoint tiers, budget
+rejection, failure cleanup and optimizer updates. Two local browser tests
+passed in 7.3 seconds for priority/material controls. No new adjoint GUI is
+claimed. A fresh wheel verifies all 49 package files against current source.
+
+The [raw measurements and scope](validation/ADJOINT_REPORT.md) record a tiny
+1,000/10,000-step memory baseline, a 128-cubed 3D run, a three-tier restart run,
+an Adam example and bounded transfer profiling. Allocator memory is not total
+GPU usage. The cold diagnostic timers do not establish competitive speedups.
+This API does not yet provide all forward physics, normalized device objectives,
+spatial out-of-core, asynchronous streaming or single-domain multi-GPU.
+
+The [hierarchy plan](HIERARCHICAL_EXECUTION.md) adopts capacity-constrained
+placement and asynchronous block movement from verified FlexGen/vLLM sources,
+with FDTD-specific causal halos and transposed dependencies. Lossy storage and
+sparse field skipping are not implemented. The manuscript predates this
+prototype and needs a later validated TeX update. Public publication remains
+separate from the private development delivery.

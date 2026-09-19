@@ -48,11 +48,11 @@ Only aggregate timing facts are included here. No commercial field arrays, spect
 
 ## Capability comparison
 
-Reviewed public source on 19 September 2026. A feature distinction is not a measured speed advantage. Unknown or unmeasured batch behavior is not marked unsupported.
+Reviewed external public source on 19 September 2026. PhotonWeave implementation status updated on 20 September 2026. A feature distinction is not a measured speed advantage. Unknown or unmeasured batch behavior is not marked unsupported.
 
 | Project | GPU/backend | Independent ensemble / same-GPU batch | Adjoint/autodiff | Relevant scope | RTX 5880 comparison |
 |---|---|---|---|---|---|
-| **PhotonWeave** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **No**. Forward objectives and differential evolution | Browser + Python analytic CAD, independent FSP scene import/writeback subset, multipole ADE, independent-axis/explicit/graded meshes, six-face CPML, selective shared CUDA plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
+| **PhotonWeave** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **Partial**. Real dielectric Yee/CPML discrete adjoint, Torch geometry and bounded three-tier checkpoints. DE remains a separate path | Browser + Python analytic CAD, independent FSP scene import/writeback subset, multipole ADE, independent-axis/explicit/graded meshes, six-face CPML, selective shared CUDA plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
 | [FDTDX](https://github.com/ymahlau/fdtdx) | **JAX currently**, CUDA/ROCm installation paths | JAX composition. Same-GPU cohort throughput not measured here | **Yes**, reversible/checkpointed paths with model restrictions | Already provides dispersive/anisotropic materials and rectilinear grids. Those are not unique PhotonWeave advantages | Not measured, Linux CUDA environment pending |
 | [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX wrapper + specialized CUDA | README proposes distributing independent jobs through JAX. Fused batch-axis throughput not verified | Reviewed primitive has no registered JVP/VJP/transpose rule | Fast specialized dielectric scope, constrained z size, x/y adiabatic absorption, z PML. PhotonWeave adds dispersion, graded grids and online plane DFT | Not measured, Linux CUDA environment pending |
 | [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy / PyTorch CUDA | Public `Grid` represents one case. Our external graph adapter runs its updates. Dedicated upstream cohort API not verified | Default backend disables gradients, so default autodiff is not established | Readable grid foundation used and attributed by PhotonWeave | PyPI 0.2.2 measured, including eager and graph-adapted baselines |
@@ -66,7 +66,9 @@ Six-component frequency planes, reference-normalized flux, global/custom monitor
 
 **Spectral batch development:** selectable shared CUDA plane interpolation and DFT accumulation now cover single runs and independent cohorts. Set `region.cuda_monitor_kernel="fused"`, or use **Frequency monitor kernel** in the FDTD panel. The new tables separate monitor improvements, cohort scheduling and an external baseline given the same fused observation adapter. [Complete Python example](examples/spectral_batch.py), [algorithm and limits](docs/CUDA_SPECTRA.md).
 
-**Measured-material fitting:** import your optical samples through Python or Materials, fit passive Drude/Lorentz poles, inspect measured/fitted n/k and continuous/FDTD errors, then retain the data and coefficients in your project. Unmet tolerances stay explicit. [Workflow, algorithm and limits](docs/MATERIAL_FITTING.md), [Python example](examples/material_fitting.py). The next required work is subpixel interface accuracy, then mode ports and adjoint design, as recorded in the [priority plan](docs/IMPLEMENTATION_PRIORITIES.md).
+**Measured-material fitting:** import your optical samples through Python or Materials, fit passive Drude/Lorentz poles, inspect measured/fitted n/k and continuous/FDTD errors, then retain the data and coefficients in your project. Unmet tolerances stay explicit. [Workflow, algorithm and limits](docs/MATERIAL_FITTING.md), [Python example](examples/material_fitting.py). The main development priorities are Torch differentiable design and hierarchical memory execution, with interface accuracy and normalized mode/port objectives as required validation, as recorded in the [priority plan](docs/IMPLEMENTATION_PRIORITIES.md).
+
+**Torch differentiation and memory:** an experimental `DifferentiableSimulation` now connects real nondispersive epsilon and regularized sphere parameters to point signals, `loss.backward()` and Adam. A discrete Yee/CPML adjoint uses bounded replay checkpoints on the device, host or disk, including explicit mixed-tier placement. CUDA forward/replay is fused. Backward is an explicit Torch transpose. This is not yet spatial out-of-core, all-physics differentiation or a port-normalized design workflow. [API and limits](docs/DIFFERENTIABLE_FDTD.md), [complete example](examples/differentiable_design.py), [measured development results](docs/validation/ADJOINT_REPORT.md), [hierarchy plan](docs/HIERARCHICAL_EXECUTION.md).
 
 **Interface accuracy in progress:** Python and the UI now select an [experimental dielectric subpixel operator](docs/SUBPIXEL_INTERFACES.md), including fused CUDA and independent tensor cohorts. The [complete sphere study](docs/validation/SUBPIXEL_REPORT.md) records both improvements and regressions against an analytic solution. High-index device accuracy, dispersive mixtures and nonuniform subpixel remain open. Staircase stays the default, and no general accuracy or equal-error speed advantage is claimed.
 
@@ -469,8 +471,9 @@ if __name__ == "__main__":
 Batch concurrency isolates process-global solver state and limits estimated VRAM.
 It supports independent cases on selected CUDA devices, per-case errors, cancellation
 and checksum-validated resume. A separate [`run_tensor_batch`](docs/TENSOR_BATCH.md)
-API shares CUDA launches across compatible real-field cases. Single-grid MPI and adjoint
-gradients remain unimplemented. `optimize()` supplies a seeded parallel differential
+API shares CUDA launches across compatible real-field cases. Single-grid MPI remains
+unimplemented. A separate [experimental Torch adjoint API](docs/DIFFERENTIABLE_FDTD.md)
+supports a limited real dielectric scope. `optimize()` supplies a seeded parallel differential
 evolution loop with a user-defined Python objective. [Complete API conventions](docs/PYTHON_BATCH.md).
 
 A small `FDTD` facade offers familiar Python commands. **This facade uses SI metres**, while the native `Project` API and UI use micrometres. Unsupported commands raise errors instead of silently approximating behavior.

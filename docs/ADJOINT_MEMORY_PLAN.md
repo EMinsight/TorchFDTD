@@ -1,7 +1,13 @@
 # Adjoint memory design and acceptance gates
 
-Status: design requirement, not an implemented adjoint or a memory benchmark.
-The existing optimizer is gradient-free differential evolution. Current native
+Status: an initial limited [Torch discrete adjoint](DIFFERENTIABLE_FDTD.md) and
+device/host/disk checkpoint implementation now exist. The broader acceptance
+requirements below are not all complete. [Measured development results](validation/ADJOINT_REPORT.md)
+and [spatial hierarchy milestones](HIERARCHICAL_EXECUTION.md) distinguish current
+capabilities from planned large-domain streaming.
+
+The existing `optimize()` API remains gradient-free differential evolution.
+The new Torch API is separate. Current native
 forward stepping uses `torch.no_grad()` and reusable E/H buffers. CUDA Graph
 records a bounded stepping schedule and does not retain a PyTorch differentiation
 graph over the full physical duration.
@@ -30,8 +36,9 @@ by removing it and claiming large-grid support.
 1. **One differentiable simulation operation.** Expose a custom
    `torch.autograd.Function` with explicit output observables. Its forward calls
    the native solver without recording each time step. Its backward calls a
-   discrete adjoint and returns material/design gradients. The current NumPy
-   Result API does not provide such a gradient path.
+   discrete adjoint and returns material/design gradients. The normal NumPy
+   Result API does not provide such a gradient path. The separate experimental
+   DifferentiableResult now retains Torch point signals and their VJP.
 2. **Differentiate the actual update.** Reverse the composition of E/H updates,
    source injection, CPML and active ADE recurrences with correct time staggering
    and monitor weights. A forward solver run with time reversed is insufficient.
@@ -90,7 +97,8 @@ the long time integration.
 - Run a port-normalized device design with fabrication filtering and measured
   objective improvement. Differential evolution is not evidence for this gate.
 
-These checks precede an adjoint capability checkmark or a comparison-table claim.
+The limited tested scope is marked partial in the feature inventory. Remaining
+checks precede a full adjoint capability checkmark or broad comparison claim.
 
 ## Primary references
 

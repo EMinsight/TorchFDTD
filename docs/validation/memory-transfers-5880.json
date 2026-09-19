@@ -1,0 +1,50 @@
+{
+  "host": {
+    "total_bytes": 137065152512,
+    "available_bytes": 113118908416
+  },
+  "copy_bytes": 67108864,
+  "repeats": 5,
+  "gpu": {
+    "name": "NVIDIA RTX 5880 Ada Generation",
+    "total_bytes": 51526500352,
+    "available_bytes": 49643782144,
+    "h2d": {
+      "seconds": [
+        0.002774208068847656,
+        0.0027670719623565676,
+        0.0027655038833618163,
+        0.00276582407951355,
+        0.0027653119564056395
+      ],
+      "median_seconds": 0.00276582407951355,
+      "effective_bytes_per_second": 24263605374.280724
+    },
+    "d2h": {
+      "seconds": [
+        0.0025626559257507326,
+        0.0025576319694519045,
+        0.0025565121173858644,
+        0.00255731201171875,
+        0.0025612480640411378
+      ],
+      "median_seconds": 0.0025576319694519045,
+      "effective_bytes_per_second": 26238671083.854687
+    },
+    "mode": "pinned, sequential directions, CUDA-event timing",
+    "concurrent_copy_compute_measured": false
+  },
+  "storage": {
+    "file_bytes": 268435456,
+    "available_bytes": 455915507712,
+    "fsynced_write_seconds": 0.15999199997168034,
+    "warm_read_seconds": 0.1421693000011146,
+    "fsynced_write_bytes_per_second": 1677805490.5714965,
+    "warm_read_bytes_per_second": 1888139394.3551488,
+    "physical_medium": "not identified",
+    "read_cache": "not flushed, warm",
+    "gds": false,
+    "sustained_nvme_bandwidth_measured": false
+  },
+  "scope": "Transfer probes only. No FDTD speedup, optimal policy or GDS support is inferred."
+}
