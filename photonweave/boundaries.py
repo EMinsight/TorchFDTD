@@ -144,7 +144,9 @@ class YeeGrid(fdtd.Grid):
 
     def update_E(self):
         prepared = [state.prepare(self.E) for state in self.material_states]
-        self.E += self.courant_number * self.inverse_permittivity * self.curl(self.H, False)
+        curl=self.curl(self.H,False)
+        self.E += self.courant_number * self.inverse_permittivity * curl
+        if getattr(self,'subpixel',None) is not None:self.subpixel.add(curl)
         for state, (old, response) in zip(self.material_states, prepared):
             state.correct(self.E, old, response)
 

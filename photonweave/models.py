@@ -141,6 +141,8 @@ class Region(Model):
     mesh_steps: tuple[float,float,float] | None = None
     mesh_coordinates: tuple[tuple[float,...],tuple[float,...],tuple[float,...]] | None = None
     material_sampling: Literal['cell', 'yee'] = 'cell'
+    interface_method: Literal['staircase','subpixel'] = 'staircase'
+    subpixel_quadrature: int = Field(default=8,ge=2,le=32)
     mesh_type: Literal['uniform','graded','explicit'] = 'uniform'
     mesh_max: float = Field(default=.15, gt=0, le=10)
     mesh_grading: float = Field(default=1.25, ge=1.05, le=1.5)
@@ -252,6 +254,10 @@ class Region(Model):
                     raise ValueError('The invariant z axis needs exactly two bounding nodes.')
         if (self.mesh_type!='uniform' or self.mesh_steps is not None) and self.material_sampling=='cell':
             raise ValueError('Graded, explicit and axis-specific meshes require Yee material sampling.')
+        if self.interface_method=='subpixel':
+            if self.material_sampling!='yee':raise ValueError('Subpixel interfaces require Yee material sampling.')
+            if any(any(not math.isclose(b-a,nodes[1]-nodes[0],rel_tol=1e-10,abs_tol=0) for a,b in zip(nodes,nodes[1:])) for nodes in self.mesh_nodes):
+                raise ValueError('Subpixel interfaces currently require uniform spacing on each axis. Choose staircase for nonuniform nodes.')
         if self.time_step_override is not None and self.time_step_override>self.cfl_time_step*(1+1e-12):
             raise ValueError('The time-step override exceeds the configured conservative CFL limit.')
         active = self.shape[:2] if self.dimension == '2d' else self.shape
@@ -542,6 +548,10 @@ class Project(Model):
         from .mesh import configure_auto_mesh
         configure_auto_mesh(self)
         r.valid_grid()
+        if r.interface_method=='subpixel':
+            active={s.material for s in self.structures if s.enabled}
+            if any(m.oscillators and m.name in active for m in self.materials):
+                raise ValueError('Subpixel interfaces currently require lossless nondispersive materials. Choose staircase for dispersive materials.')
         dt = r.time_step
         from .waveforms import pulse_parameters
         for source in self.sources:

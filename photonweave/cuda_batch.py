@@ -23,6 +23,10 @@ class FusedBatchYeeCUDA:
         self.device=grids[0].E.device.index
         self.launches={}
         self.owners=[]
+        self.interface_update=None
+        if getattr(grids[0],'subpixel',None) is not None:
+            from .cuda_subpixel import SubpixelCUDA
+            self.interface_update=SubpixelCUDA(grids)
         with cupy.cuda.Device(self.device), self._stream():
             for forward in (False,True):
                 templates=[FusedYeeCUDA._source(SimpleNamespace(grid=g),forward) for g in grids]
@@ -54,6 +58,7 @@ class FusedBatchYeeCUDA:
     def update_E(self):
         prepared=[[(state,*state.prepare(g.E)) for state in g.material_states] for g in self.grids]
         self.update(False)
+        if self.interface_update is not None:self.interface_update.update()
         for g,states in zip(self.grids,prepared):
             for state,old,response in states:state.correct(g.E,old,response)
 

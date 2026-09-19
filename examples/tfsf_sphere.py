@@ -59,7 +59,7 @@ def make_project(mesh=.05,backend='auto',direction='+',duration_fs=120.):
         monitors=monitors)
 
 
-def evaluate(sample,reference):
+def evaluate(sample,reference,*,radius=.3,index=1.5):
     incident=reference.field_monitor('incident')
     intensity=abs(incident['flux'])/sum(incident['weights'])
     if not np.all(intensity>.01*max(intensity)):raise ValueError('Incident spectrum is too weak.')
@@ -73,7 +73,7 @@ def evaluate(sample,reference):
             empty+=abs(b['flux'])
     wavelength=299792458/incident['frequency_hz']*1e6
     actual=power/intensity*1e12
-    analytic=mie_cross_section(wavelength,.3,1.5)
+    analytic=mie_cross_section(wavelength,radius,index)
     return dict(wavelength_um=wavelength.tolist(),scattering_cross_section_um2=actual.tolist(),
         mie_cross_section_um2=analytic.tolist(),
         max_relative_error=float(max(abs(actual/analytic-1))),

@@ -15,20 +15,22 @@ export function pmlThickness(r,axis,side){
  return n*(r.mesh_steps?.[axis]??r.mesh);
 }
 export function meshControls(r,numeric,dropdown,esc){
- r.mesh_type??='uniform';r.material_sampling??='cell';r.mesh_max??=.15;r.mesh_grading??=1.25;r.mesh_ppw??=24;r.mesh_auto_refine??=true;r.mesh_refinements??=[];
+ r.mesh_type??='uniform';r.material_sampling??='cell';r.interface_method??='staircase';r.subpixel_quadrature??=8;r.mesh_max??=.15;r.mesh_grading??=1.25;r.mesh_ppw??=24;r.mesh_auto_refine??=true;r.mesh_refinements??=[];
  const graded=r.mesh_type==='graded',explicit=r.mesh_type==='explicit',axis=!!r.mesh_steps;
  return dropdown('mesh type','mesh_type',r.mesh_type,[['uniform','Uniform'],['graded','Graded · local refinement'],...(explicit?[['explicit','Explicit node arrays']]:[])])+
  (explicit?'<p class="property-help">Frozen node arrays. Geometry edits keep these nodes. Edit the arrays or select a generated mesh to change the grid.</p>':
  `<label class="enabled-row"><input type="checkbox" data-axis-steps ${axis?'checked':''}> Independent axis spacing</label>`+
  (axis?r.mesh_steps.map((v,i)=>numeric('d'+'xyz'[i],`mesh_steps.${i}`,v,'µm',{min:.001})).join(''):numeric(graded?'fine mesh step':'dx = dy = dz','mesh',r.mesh,'µm',{min:.001})))+
- dropdown('interface sampling','material_sampling',r.material_sampling,graded||explicit||axis?[['yee','Yee component locations']]:[['cell','Cell centers (legacy)'],['yee','Yee component locations']])+
+ dropdown('interface method','interface_method',r.interface_method,[['staircase','Staircase'],['subpixel','Subpixel · experimental dielectric']])+
+ dropdown('interface sampling','material_sampling',r.material_sampling,graded||explicit||axis||r.interface_method==='subpixel'?[['yee','Yee component locations']]:[['cell','Cell centers (legacy)'],['yee','Yee component locations']])+
+ (r.interface_method==='subpixel'?numeric('face quadrature order','subpixel_quadrature',r.subpixel_quadrature,'',{min:2,max:32,step:1})+'<p class="property-help">Lossless dielectrics and constant spacing on each axis only. Compare quadrature orders and mesh refinement. Curved-interface accuracy is under validation, especially at high index contrast.</p>':'')+
  `<label class="enabled-row"><input type="checkbox" data-fixed-dt ${r.time_step_override?'checked':''}> Set a smaller fixed time step</label>`+
  (r.time_step_override?numeric('time step','time_step_override',r.time_step_override*1e15,'fs',{min:.000001,scale:1e-15}):'')+
  (graded?numeric('maximum step','mesh_max',r.mesh_max,'µm',{min:r.mesh})+numeric('grading factor','mesh_grading',r.mesh_grading,'',{min:1.05})+numeric('background cells / λ','mesh_ppw',r.mesh_ppw,'',{min:6})+
  `<label class="enabled-row"><input type="checkbox" data-path="mesh_auto_refine" ${r.mesh_auto_refine?'checked':''}> Refine structures, sources and monitors</label><p class="property-help">Fine spacing is retained in refinement regions and PML. The wavelength setting caps the background step. The timestep stays fixed by the fine spacing.</p>`+
  r.mesh_refinements.map((b,i)=>`<details class="boundary-options"><summary>${esc(b.name)}</summary><label class="enabled-row"><input type="checkbox" data-path="mesh_refinements.${i}.enabled" ${b.enabled?'checked':''}> Enabled</label>${b.center.map((v,j)=>numeric('xyz'[j],`mesh_refinements.${i}.center.${j}`,v,'µm')).join('')}${b.size.map((v,j)=>numeric('xyz'[j]+' span',`mesh_refinements.${i}.size.${j}`,v,'µm',{min:.001})).join('')}<button data-action="mesh-remove" data-index="${i}">Remove refinement</button></details>`).join('')+
  `<button data-action="mesh-add">+ Add refinement region</button><button data-action="mesh-freeze">Freeze automatic refinements</button>`:'')+
- `<button data-action="mesh-nodes">Edit explicit node arrays</button><button data-action="mesh-preview">Preview simulation mesh</button><p class="property-help">Yee sampling places materials at each electric field component. Interfaces remain staircase approximations. Test mesh convergence for the required accuracy.</p>`;
+ `<button data-action="mesh-nodes">Edit explicit node arrays</button><button data-action="mesh-preview">Preview simulation mesh</button><p class="property-help">Yee sampling places materials at each electric field component. ${r.interface_method==='subpixel'?'Subpixel also couples neighboring components across interfaces. The permittivity image shows only the reciprocal diagonal of that operator.':'Staircase interfaces follow the grid.'} Test mesh convergence for the required accuracy.</p>`;
 }
 
 export function setupMesh({state,api,esc,commit}){

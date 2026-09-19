@@ -210,7 +210,10 @@ class FDTD:
             if data['mesh_type']!='uniform':data['material_sampling']='yee'
         elif isinstance(obj,Region) and key=='maximum mesh step':
             data['mesh_max']=float(value)*1e6
-        elif isinstance(obj,Region) and key in ('material sampling','mesh grading','mesh ppw','mesh auto refine'):
+        elif isinstance(obj,Region) and key=='interface method':
+            data['interface_method']=value
+            if value=='subpixel':data['material_sampling']='yee'
+        elif isinstance(obj,Region) and key in ('material sampling','subpixel quadrature','mesh grading','mesh ppw','mesh auto refine'):
             data[key.replace(' ','_')]=value
         elif isinstance(obj,Region) and key in [a+' '+s+' bc' for a in 'xyz' for s in ('min','max')]:
             axis, side, _ = key.split()

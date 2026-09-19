@@ -517,3 +517,31 @@ also passed on source revision `b61af1bffddc6920109b3b3b0a0dd8b29ea6a9ea`:
 the workstation CUDA checks above. Subsequent evidence-only commits do not
 change numerical or browser code. The private repository has been updated,
 while the earlier tagged preview release assets remain unchanged.
+
+## Experimental subpixel checkpoint, 20 September 2026
+
+The [selectable dielectric interface method](SUBPIXEL_INTERFACES.md) now runs
+through Python, the workbench, CPU, Torch CUDA and real-field fused tensor
+cohorts. It remains a partial capability. Active dispersion and nonuniform
+subpixel spacing are rejected. The permittivity image and result metadata
+disclose the reciprocal-diagonal interpretation of the coupled operator.
+
+The initial full local Python suite passed 603 tests with one optional skip.
+After expanded geometry, precision and facade checks, the full RTX 5880 suite
+passed 614 tests with one optional skip in 202.99 seconds. The final targeted
+suite passed 35 tests on each GPU, including additional heterogeneous-cohort,
+complex-Bloch and immediate grid-release lifetime checks.
+The complete local browser suite passed 28 tests with five optional skips in
+3.1 minutes. The new UI test selects the method, changes quadrature, exports
+Python, retains settings and executes a CPU simulation. This browser evidence
+does not claim a new RTX 5880 browser run.
+
+The [complete sphere study](validation/SUBPIXEL_REPORT.md) retains 52 sample
+solves in 26 paired comparisons, plus homogeneous references, across mesh,
+index, translation, time and quadrature. It includes regressions. Timers are
+diagnostic only because part of the exploratory work overlapped. No equal-error
+speed advantage, universal interface convergence or full replacement is claimed.
+
+Adjoint remains unimplemented. The [memory design](ADJOINT_MEMORY_PLAN.md)
+requires a discrete custom backward and bounded checkpoint/recomputation,
+including physical restart state and measured gradient/memory acceptance gates.

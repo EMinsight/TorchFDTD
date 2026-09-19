@@ -6,7 +6,7 @@
 
 체크는 해당 행의 명시된 native 범위만 의미합니다. Python은 native Project/Simulation 또는 workflow API로 그 범위를 사용할 수 있다는 뜻이며, 동일한 LSF 명령을 모두 지원한다는 뜻이 아닙니다. UI와 FSP를 별도로 확인해야 합니다. API bridge로 읽히는 기능은 독립 GPU 엔진 구현으로 세지 않습니다.
 
-전체 1658행: 구현 160, 미구현/미검증 1273, 부분 225
+전체 1658행: 구현 160, 미구현/미검증 1272, 부분 226
 
 구현 우선순위와 제외 기준: [개발 우선순위](IMPLEMENTATION_PRIORITIES.md). 모든 행의 분류: [CSV](FEATURE_PRIORITY_INDEX.csv). UI 체크리스트에서도 중요도로 필터할 수 있습니다.
 
@@ -62,7 +62,7 @@
 | 체크 | 기능/속성 | 엔진 | Python | UI | 독립 FSP | 범위·검증 근거 |
 | --- | --- | --- | --- | --- | --- | --- |
 | ☐ | [Conformal CMT 변형](https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
-| ☐ | [Subpixel averaging](https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
+| ☐ | [Subpixel averaging](https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object) | 부분 | 부분 | 구현 | 미구현/미검증 | 실험적 lossless dielectric subpixel. 축별 일정 간격의 2D/3D, 전역 Hermitian/positive edge-triplet 연산자, CPU/Torch/fused CUDA·tensor, Python/UI/JSON. 해석 평면 분율·고굴절률 이산 에너지·Mie 구 산란 검사. 모든 조건의 오차 개선은 아니며 고굴절률 소자·모드·분산 혼합·비균일 subpixel 검증은 남음. [subpixel.py](../photonweave/subpixel.py) [subpixel_geometry.py](../photonweave/subpixel_geometry.py) [test_subpixel.py](../tests/test_subpixel.py) [subpixel.spec.js](../tests/ui/subpixel.spec.js) [SUBPIXEL_INTERFACES.md](../docs/SUBPIXEL_INTERFACES.md) |
 | ☑ | [독립 dx/dy/dz](https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object) | 구현 | 구현 | 구현 | 부분 | 독립 dx/dy/dz. 실제 시간 간격·미분 metric·물리 PML 깊이·paired source 보정, CPU/CUDA/tensor, Python/SI facade/UI. 등방 baseline과 matched-dt layer ensemble 실측. [models.py](../photonweave/models.py) [test_rectilinear.py](../tests/test_rectilinear.py) [rectilinear.spec.js](../tests/ui/rectilinear.spec.js) [rectilinear_ensembles.py](../benchmarks/rectilinear_ensembles.py) |
 | ☐ | [영역별 target step](https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object) | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현/미검증 | 미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.  |
 | ☑ | [사용자 node 배열](https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object) | 구현 | 구현 | 구현 | 부분 | 중심 대칭 끝점의 세 strictly increasing coordinate 배열. Python/SI setmesh/UI 원자적 편집, JSON/NPZ 보존. 임의 격자의 정확도 보장은 아니며 TFSF support는 축별 일정 간격 필요. [models.py](../photonweave/models.py) [test_rectilinear.py](../tests/test_rectilinear.py) [test_fsp_mesh.py](../tests/test_fsp_mesh.py) [rectilinear.spec.js](../tests/ui/rectilinear.spec.js) |

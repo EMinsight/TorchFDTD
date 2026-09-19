@@ -32,7 +32,7 @@ def _topology(region):
     """Exact compatibility signature shared with the heterogeneous scheduler."""
     return (region.dimension, region.precision, region.steps, region.courant_factor,
             region.reference_step, region.time_step, region.rectangular_courant,
-            region.mesh_type, region.mesh_steps is not None,
+            region.mesh_type, region.mesh_steps is not None,region.interface_method,
             json.dumps(region.boundaries.model_dump(), sort_keys=True),
             tuple(region.pml_layers(axis, side) for axis in range(3) for side in range(2)),
             tuple(tuple(n) for n in region.mesh_nodes))
@@ -122,13 +122,19 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
     grids=[];epsilon=[];traces=[];planes=[];diagnostics=[];decisions=[]
     for p,s in zip(projects,stats):
         g=YeeGrid(p.region)
-        eps,counts,ownership=voxelize(p,with_ownership=True)
+        from .subpixel import prepare_interfaces,configure_interfaces
+        interface_plan=prepare_interfaces(p)
+        if interface_plan is not None:s['subpixel']=interface_plan.metadata
+        eps,counts,ownership=voxelize(p,with_ownership=True,interface_plan=interface_plan)
         from .injection import validate_oneway_materials
         validate_oneway_materials(p,eps,ownership)
         for obj in p.structures:
-            if obj.enabled and counts.get(obj.id)==0:s['warnings'].append(f'{obj.name}: no cells intersect this object. Refine mesh or reposition it.')
+            if obj.enabled and counts.get(obj.id)==0:
+                message='no Yee component centers intersect this object; subpixel integration may still include it. Check quadrature and mesh convergence.' if interface_plan is not None else 'no cells intersect this object. Refine mesh or reposition it.'
+                s['warnings'].append(f'{obj.name}: {message}')
         g.inverse_permittivity[:]=torch.as_tensor(1/(eps if eps.ndim==4 else eps[...,None]),device=g.E.device,dtype=dtype)
         configure_materials(g,p,ownership)
+        configure_interfaces(g,interface_plan)
         from .tfsf import prepare_tfsf
         prepare_tfsf(g,p,eps,ownership)
         grids.append(g);epsilon.append(eps)
@@ -239,7 +245,7 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
                  slice_position=float(field_axes(r,r.field)[axis][index]) if r.material_sampling=='yee' else (0 if r.dimension=='2d' else (index+.5)*r.mesh-r.actual_size[axis]/2),
                  complex_fields=False,complex_display=r.complex_display,material_update='trapezoidal ADE' if g.material_states else 'nondispersive',
                  dispersive_samples=sum(state.P.numel() for state in g.material_states),material_sampling=r.material_sampling,
-                 epsilon_definition='instantaneous relative permittivity (epsilon-infinity for dispersive cells)',
+                 epsilon_definition=s['subpixel']['epsilon_image'] if 'subpixel' in s else 'instantaneous relative permittivity (epsilon-infinity for dispersive cells)',
                  boundaries=r.boundaries.model_dump(),bloch_phase=r.bloch_phase,
                  units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad',engine='PhotonWeave batched Yee/CPML CUDA')
         frequency=[m.result() for m in planes[i]]

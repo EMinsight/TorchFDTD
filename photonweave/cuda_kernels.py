@@ -56,6 +56,10 @@ class FusedYeeCUDA:
         self._grid = weakref.ref(grid)
         self.device = grid.E.device.index
         self.launches = {}
+        self.interface_update=None
+        if getattr(grid,'subpixel',None) is not None:
+            from .cuda_subpixel import SubpixelCUDA
+            self.interface_update=SubpixelCUDA([grid])
         # Compile and create all views before CUDA graph capture. Keep ownership
         # in both the grid and DLPack views for the complete graph lifetime.
         with cupy.cuda.Device(self.device), self._stream():
@@ -93,6 +97,8 @@ class FusedYeeCUDA:
 
         argument('src', g.E if forward else g.H)
         argument('dst', g.H if forward else g.E, True)
+        subpixel=not forward and getattr(g,'subpixel',None) is not None
+        if subpixel:argument('curl_buffer',g.subpixel.curl_buffer,True)
         inverse = g.inverse_permeability if forward else g.inverse_permittivity
         argument('inverse', inverse)
         count = math.prod(shape)
@@ -143,6 +149,7 @@ class FusedYeeCUDA:
                 lines.append('}')
             lines.extend([f'c{out} += {"-" if sign < 0 else ""}d;', '}'])
         for comp in range(3):
+            if subpixel:lines.append(f'curl_buffer[3*i+{comp}]=c{comp};')
             index = '0' if inverse.numel() == 1 else str(comp) if inverse.numel() == 3 else f'3*i+{comp}'
             lines.append(f'dst[3*i+{comp}] {"-=" if forward else "+="} '
                          f'(({real})({g.courant_number:.17g}) * inverse[{index}]) * c{comp};')
@@ -157,6 +164,7 @@ class FusedYeeCUDA:
         g = self.grid
         prepared = [state.prepare(g.E) for state in g.material_states]
         self.update(False)
+        if self.interface_update is not None:self.interface_update.update()
         for state, (old, response) in zip(g.material_states, prepared):
             state.correct(g.E, old, response)
 

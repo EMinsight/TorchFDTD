@@ -161,7 +161,7 @@ boundary.symmetry,Symmetric,P1,5,required,인터페이스·메시 효율,True,mi
 mesh.axis_step,독립 dx/dy/dz,P1,5,required,인터페이스·메시 효율,False,implemented,implemented,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.metal_mesh,금속 skin-depth 자동 메시,P1,5,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.override_step,영역별 target step,P1,5,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
-mesh.subpixel,Subpixel averaging,P1,5,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
+mesh.subpixel,Subpixel averaging,P1,5,required,인터페이스·메시 효율,True,partial,partial,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.symmetric_mesh,대칭 강제 메시,P1,5,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.user_nodes,사용자 node 배열,P1,5,required,인터페이스·메시 효율,False,implemented,implemented,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 native.mesh_preview,실제 mesh node 미리보기,P1,5,required,인터페이스·메시 효율,False,implemented,implemented,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.

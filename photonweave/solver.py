@@ -42,7 +42,11 @@ def field_axes(region, component):
             for i,nodes in enumerate(region.mesh_nodes)]
 
 
-def voxelize(p: Project, *, with_ownership=False):
+def voxelize(p: Project, *, with_ownership=False, interface_plan=None):
+    if p.region.interface_method=='subpixel':
+        from .subpixel import prepare_interfaces
+        plan=interface_plan if interface_plan is not None else prepare_interfaces(p)
+        return (plan.epsilon,plan.counts,plan.ownership) if with_ownership else (plan.epsilon,plan.counts)
     if p.region.material_sampling == 'yee':
         parts = [_voxelize_at(p, field_axes(p.region, component), with_ownership) for component in ('Ex','Ey','Ez')]
         eps = np.stack([part[0] for part in parts], axis=-1)
@@ -198,6 +202,12 @@ def estimate(p: Project):
                 warnings.append(f'{m.name}: start-apodization center is beyond the simulation end.')
     if r.mesh_type == 'graded':
         warnings.append('Graded rectilinear mesh coarsens background gaps and retains the fine timestep. Refinement boxes project across each coordinate axis. Check convergence against a uniform Yee mesh, especially near resonances and thin features.')
+    interface_bytes=0
+    if r.interface_method=='subpixel':
+        real_bytes=8 if r.precision=='float64' else 4
+        field_bytes=real_bytes*(2 if r.complex_fields else 1)
+        interface_bytes=n*(3*8*(field_bytes+4)+24+3*field_bytes)
+        warnings.append('Subpixel uses a bounded symmetric edge/face operator on lossless uniform-axis grids. The epsilon image shows only its reciprocal diagonal. Check face-quadrature and mesh convergence, especially at corners, overlaps and unresolved thin features.')
     from .injection import oneway_metadata
     planes=[oneway_metadata(s,r) for s in p.sources if s.enabled and s.injection=='oneway' and s.kind!='tfsf']
     if planes:
@@ -214,7 +224,7 @@ def estimate(p: Project):
         auxiliary_bytes+=surface*(16+real_bytes)+(10*box['incident_line_cells']+r.steps)*real_bytes
     if boxes:warnings.append('TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
-            'estimated_memory_mb': round((n * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes)/2**20, 1),
+            'estimated_memory_mb': round((n * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes}
 
 
@@ -360,18 +370,23 @@ class Simulation:
                     return np.ones(shape, dtype=dtype or cpu_dtype)
             fdtd.backend.__class__ = PrecisionNumpyBackend
         started = time.perf_counter()
-        eps, counts, ownership = voxelize(p, with_ownership=True)
+        from .subpixel import prepare_interfaces,configure_interfaces
+        interface_plan=prepare_interfaces(p)
+        if interface_plan is not None:stats['subpixel']=interface_plan.metadata
+        eps, counts, ownership = voxelize(p, with_ownership=True,interface_plan=interface_plan)
         from .injection import source_terms, validate_oneway_materials
         validate_oneway_materials(p, eps, ownership)
         for obj in p.structures:
             if obj.enabled and counts.get(obj.id) == 0:
-                stats['warnings'].append(f'{obj.name}: no cells intersect this object. Refine mesh or reposition it.')
+                message='no Yee component centers intersect this object; subpixel integration may still include it. Check quadrature and mesh convergence.' if interface_plan is not None else 'no cells intersect this object. Refine mesh or reposition it.'
+                stats['warnings'].append(f'{obj.name}: {message}')
         g = YeeGrid(r)
         if use_cuda:
             g.inverse_permittivity[:] = torch.as_tensor(1/(eps if eps.ndim == 4 else eps[..., None]), device='cuda', dtype=dtype)
         else:
             g.inverse_permittivity[:] = 1/(eps if eps.ndim == 4 else eps[..., None])
         configure_materials(g, p, ownership)
+        configure_interfaces(g,interface_plan)
         from .cuda_kernels import configure_cuda_kernel
         configure_cuda_kernel(g, r.cuda_kernel)
         from .tfsf import prepare_tfsf,TfsfInjection
@@ -524,7 +539,7 @@ class Simulation:
                      material_update='trapezoidal ADE' if g.material_states else 'nondispersive',
                      dispersive_samples=sum(state.P.numel() if use_cuda else state.P.size for state in g.material_states),
                      material_sampling=r.material_sampling,
-                     epsilon_definition='instantaneous relative permittivity (epsilon-infinity for dispersive cells)',
+                     epsilon_definition=interface_plan.metadata['epsilon_image'] if interface_plan is not None else 'instantaneous relative permittivity (epsilon-infinity for dispersive cells)',
                      boundaries=r.boundaries.model_dump(), bloch_phase=r.bloch_phase,
                      units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad', engine='PhotonWeave Yee/CPML on fdtd grid')
         frequency_results=[m.result() for m in frequency_monitors]

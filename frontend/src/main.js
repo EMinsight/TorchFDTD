@@ -98,6 +98,7 @@ function renderProperties(){
   const value=input.type==='checkbox'?input.checked:input.type==='number'?(input.dataset.reciprocal?Number(input.dataset.reciprocal)/Number(input.value):Number(input.value)*Number(input.dataset.scale||1)):input.value;
   if(parts.length===1&&p.sources.includes(obj))updateTemporalField(obj,parts[0],value);else target[parts.at(-1)]=value;
   if(obj===r&&parts[0]==='mesh_type'&&value==='graded'){r.material_sampling='yee';r.mesh_max=Math.max(r.mesh_max,r.mesh);}
+  if(obj===r&&parts[0]==='interface_method'&&value==='subpixel')r.material_sampling='yee';
   if(obj===r&&parts[0]==='mesh_type'&&value!=='explicit')r.mesh_coordinates=null;
   if(p.sources.includes(obj)&&['injection','normal'].includes(parts[0]))configureOneWayPlane(obj,r,{boundaries:true});
   if(obj.kind==='field'&&parts[0]==='normal'){const old=obj.size.indexOf(0),axis='xyz'.indexOf(value);if(old!==axis){obj.size[old]=Math.min(1,r.size[old]/2);obj.size[axis]=0;}}
