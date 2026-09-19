@@ -1,0 +1,2674 @@
+{
+  "cases": [
+    {
+      "direction": "+",
+      "wavelength_um": [
+        1.7999999999999998,
+        1.7772151898734179,
+        1.755,
+        1.7333333333333332,
+        1.7121951219512195,
+        1.691566265060241,
+        1.6714285714285713,
+        1.651764705882353,
+        1.6325581395348836,
+        1.6137931034482758,
+        1.5954545454545457,
+        1.5775280898876405,
+        1.56,
+        1.542857142857143,
+        1.526086956521739,
+        1.5096774193548388,
+        1.4936170212765958,
+        1.4778947368421052,
+        1.4625,
+        1.447422680412371,
+        1.4326530612244897,
+        1.4181818181818182,
+        1.404,
+        1.3900990099009902,
+        1.3764705882352941,
+        1.3631067961165046,
+        1.35,
+        1.3371428571428572,
+        1.3245283018867926,
+        1.3121495327102803,
+        1.3
+      ],
+      "R": [
+        0.11591147431701651,
+        0.1175017670088076,
+        0.11906126125719481,
+        0.12058915967979812,
+        0.12208470655425337,
+        0.12354718382330947,
+        0.12497590544379505,
+        0.12637021076391455,
+        0.12772945782233439,
+        0.1290530174231858,
+        0.1303402685937707,
+        0.1315905957171469,
+        0.13280338740140474,
+        0.1339780370683715,
+        0.13511394526207915,
+        0.13621052365912228,
+        0.13726720059778957,
+        0.13828342763018078,
+        0.13925868626739407,
+        0.14019249391542582,
+        0.14108440811177433,
+        0.14193402854585935,
+        0.1427409968121091,
+        0.1435049941887719,
+        0.14422573783191722,
+        0.1449029756681464,
+        0.14553648014870255,
+        0.14612604109129154,
+        0.14667145814409652,
+        0.1471725338114597,
+        0.1476290682024163
+      ],
+      "T": [
+        0.8840886358769243,
+        0.882496953660271,
+        0.8809361941765542,
+        0.8794072858702114,
+        0.8779110901128095,
+        0.8764483943276672,
+        0.8750199099594901,
+        0.8736262756254881,
+        0.8722680653711485,
+        0.8709458014109231,
+        0.8696599701275657,
+        0.8684110395807654,
+        0.8671994764990644,
+        0.8660257607913147,
+        0.8648903959955152,
+        0.863793914663453,
+        0.8627368783021381,
+        0.8617198720383766,
+        0.8607434946046228,
+        0.8598083445991433,
+        0.858915004306557,
+        0.858064022687468,
+        0.8572558993901704,
+        0.8564910716856007,
+        0.8557699059719241,
+        0.8550926949226942,
+        0.8544596605668403,
+        0.8538709627880843,
+        0.8533267121138315,
+        0.8528269853380472,
+        0.8523718424563043
+      ],
+      "R_scattered": [
+        0.1159100550541989,
+        0.11750107725530895,
+        0.11906138074719702,
+        0.12059008821528294,
+        0.12208636239091676,
+        0.12354941056168645,
+        0.12497848698339069,
+        0.12637289278700387,
+        0.1277319734063044,
+        0.12905511393458155,
+        0.13034173303771154,
+        0.13159127609276058,
+        0.13280320816118907,
+        0.13397700734209528,
+        0.135112159035386,
+        0.13620815165248487,
+        0.13726447426898628,
+        0.1382806165563094,
+        0.13925607105605692,
+        0.14019033753716567,
+        0.14108292889653648,
+        0.14193337789663577,
+        0.14274124398796706,
+        0.1435061195022117,
+        0.14422763457976367,
+        0.14490546030185222,
+        0.1455393096557054,
+        0.14612893619411693,
+        0.14667413053790598,
+        0.14717471513734925,
+        0.1476305378692407
+      ],
+      "analytic_T": [
+        0.8847926267281104,
+        0.8832275903343008,
+        0.8816935274634387,
+        0.8801912446893425,
+        0.8787215221823578,
+        0.8772851139536247,
+        0.8758827481143231,
+        0.874515127147977,
+        0.8731829281939665,
+        0.87188680334045,
+        0.8706273799249665,
+        0.8694052608410452,
+        0.8682210248492197,
+        0.8670752268909024,
+        0.8659683984036407,
+        0.8649010476363433,
+        0.8638736599631226,
+        0.8628866981944694,
+        0.8619406028845328,
+        0.8610357926333447,
+        0.8601726643828838,
+        0.8593515937059413,
+        0.8585729350868024,
+        0.8578370221928194,
+        0.8571441681360087,
+        0.8564946657238572,
+        0.8558887876985819,
+        0.8553267869641339,
+        0.8548088968002969,
+        0.8543353310632742,
+        0.8539062843722137
+      ],
+      "valid": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "max_T_absolute_error": 0.0015344419159094569,
+      "max_R_absolute_error": 0.0015353525746300278,
+      "max_energy_residual": 4.438322575239795e-06,
+      "max_scattered_R_difference": 2.8951028253898503e-06,
+      "max_empty_scattered_flux_ratio": 1.44748793912739e-11,
+      "project": {
+        "schema_version": 1,
+        "name": "One-way dielectric slab",
+        "region": {
+          "dimension": "2d",
+          "size": [
+            8.0,
+            0.5,
+            1.0
+          ],
+          "mesh": 0.025,
+          "material_sampling": "yee",
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24.0,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "steps": 1600,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0.0,
+            "divergence_check": true,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 16,
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            }
+          },
+          "bloch_phase": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "background_index": 1.0,
+          "backend": "cuda",
+          "cuda_kernel": "torch",
+          "precision": "float64",
+          "snapshot_interval": 1600,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0.0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "Air",
+            "index": 1.0,
+            "color": "#b7c5d7",
+            "model": "dielectric",
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": []
+          },
+          {
+            "name": "SiO2 (constant n)",
+            "index": 1.5,
+            "color": "#80c4d7",
+            "model": "dielectric",
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": []
+          },
+          {
+            "name": "SiN (constant n)",
+            "index": 2.0,
+            "color": "#69a1e8",
+            "model": "dielectric",
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": []
+          },
+          {
+            "name": "Si (constant n)",
+            "index": 3.48,
+            "color": "#cc8bdc",
+            "model": "dielectric",
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": []
+          }
+        ],
+        "structures": [
+          {
+            "id": "1064bc8b1b62",
+            "name": "object",
+            "center": [
+              0.0125,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "rectangle",
+            "size": [
+              0.2,
+              0.5,
+              1.0
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0.0,
+            "material": "SiO2 (constant n)",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 1.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "source",
+            "name": "source",
+            "center": [
+              -1.5,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "plane",
+            "injection": "oneway",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0.0,
+              0.5,
+              0.0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0.0,
+            "amplitude": 1.0,
+            "phase": 0.0,
+            "use_global_source": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3.0,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "reflection",
+            "name": "reflection",
+            "center": [
+              -0.8,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "frequency",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 31,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.5,
+              1.0
+            ],
+            "downsample": 1
+          },
+          {
+            "id": "transmission",
+            "name": "transmission",
+            "center": [
+              0.8,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "frequency",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 31,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.5,
+              1.0
+            ],
+            "downsample": 1
+          },
+          {
+            "id": "scattered",
+            "name": "scattered",
+            "center": [
+              -2.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "frequency",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 31,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.5,
+              1.0
+            ],
+            "downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null
+      },
+      "sample_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 6400,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.024999999999999467,
+          0.024999999999999967
+        ],
+        "axis_max_step_um": [
+          0.025000000000000355,
+          0.025000000000000022
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000355,
+        "shape": [
+          320,
+          20,
+          1
+        ],
+        "actual_size_um": [
+          8.0,
+          0.5,
+          1.0
+        ],
+        "cells": 6400,
+        "dt_fs": 0.05837669483455467,
+        "duration_fs": 93.40271173528748,
+        "estimated_memory_mb": 3.3,
+        "warnings": [
+          "Periodic/Bloch cells repeat every structure and source. A point source represents an array of sources, not an isolated dipole.",
+          "One-way planes retain the eight-cell incident-line delay and discrete dispersion. Amplitude scales the incident-line drive. The opposite side contains scattered fields. Check incident PML layer convergence for very small reflections."
+        ],
+        "oneway_planes": [
+          {
+            "source_id": "source",
+            "normal": "x",
+            "direction": "+",
+            "electric_index": 100,
+            "magnetic_index": 99,
+            "electric_coordinate_um": -1.5,
+            "magnetic_coordinate_um": -1.5125,
+            "incident_drive_offset_cells": 8,
+            "incident_pml_cells": 96,
+            "total_field_side": "greater coordinate"
+          }
+        ],
+        "backend": "cuda",
+        "precision": "float64",
+        "gpu": "NVIDIA RTX 5880 Ada Generation",
+        "cuda_graph": true,
+        "cuda_kernel": "torch",
+        "steps": 1600,
+        "requested_steps": 1600,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 2.9188347417277336e-15,
+            "state_norm": 0.00029845691612628123,
+            "relative_norm": 1.0,
+            "field_peak": 0.0007462802876940628,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 5.837669483455467e-15,
+            "state_norm": 0.009926982168394162,
+            "relative_norm": 1.0,
+            "field_peak": 0.00412249887634808,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 8.7565042251832e-15,
+            "state_norm": 0.21267488185183223,
+            "relative_norm": 1.0,
+            "field_peak": 0.017842996209235868,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 1.1675338966910935e-14,
+            "state_norm": 3.4638349728305755,
+            "relative_norm": 1.0,
+            "field_peak": 0.09385320746901335,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 1.4594173708638668e-14,
+            "state_norm": 34.58238008327975,
+            "relative_norm": 1.0,
+            "field_peak": 0.2906283952364767,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 1.75130084503664e-14,
+            "state_norm": 180.18146066890867,
+            "relative_norm": 1.0,
+            "field_peak": 0.5438968437413575,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 2.0431843192094134e-14,
+            "state_norm": 500.0387576072965,
+            "relative_norm": 1.0,
+            "field_peak": 0.7135471696156498,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 2.335067793382187e-14,
+            "state_norm": 844.8532196951866,
+            "relative_norm": 1.0,
+            "field_peak": 0.8561364278554946,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 2.62695126755496e-14,
+            "state_norm": 1047.7192091137103,
+            "relative_norm": 1.0,
+            "field_peak": 0.8601866693545916,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 2.9188347417277336e-14,
+            "state_norm": 1111.667444909125,
+            "relative_norm": 1.0,
+            "field_peak": 0.6655349472435257,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 3.210718215900507e-14,
+            "state_norm": 1097.478183725727,
+            "relative_norm": 0.9872360558471172,
+            "field_peak": 0.6490805213078471,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 3.50260169007328e-14,
+            "state_norm": 988.6197429057461,
+            "relative_norm": 0.8893124894797674,
+            "field_peak": 0.649046878688134,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 3.794485164246054e-14,
+            "state_norm": 706.194474691698,
+            "relative_norm": 0.6352569538000882,
+            "field_peak": 0.6449019737138607,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 4.086368638418827e-14,
+            "state_norm": 340.5981477371113,
+            "relative_norm": 0.3063849259028666,
+            "field_peak": 0.5009260944244129,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 4.3782521125916e-14,
+            "state_norm": 102.39336321917844,
+            "relative_norm": 0.09210790842898953,
+            "field_peak": 0.30440985782222546,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 4.670135586764374e-14,
+            "state_norm": 19.350956371836176,
+            "relative_norm": 0.01740714496988625,
+            "field_peak": 0.14452837701074675,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 4.962019060937147e-14,
+            "state_norm": 2.3143888083157647,
+            "relative_norm": 0.0020819075155204874,
+            "field_peak": 0.05351711891800863,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 5.25390253510992e-14,
+            "state_norm": 0.16253229880397743,
+            "relative_norm": 0.0001462058635865368,
+            "field_peak": 0.015469057662766399,
+            "source_finished": false
+          },
+          {
+            "step": 950,
+            "time_s": 5.5457860092826933e-14,
+            "state_norm": 0.006044742309743185,
+            "relative_norm": 5.437545497464237e-06,
+            "field_peak": 0.0034077168333219734,
+            "source_finished": false
+          },
+          {
+            "step": 1000,
+            "time_s": 5.837669483455467e-14,
+            "state_norm": 0.00011208331330913001,
+            "relative_norm": 1.008244991093469e-07,
+            "field_peak": 0.0005199413702882847,
+            "source_finished": false
+          },
+          {
+            "step": 1050,
+            "time_s": 6.129552957628241e-14,
+            "state_norm": 1.041497318911372e-06,
+            "relative_norm": 9.368784915676926e-10,
+            "field_peak": 5.3247768518449346e-05,
+            "source_finished": false
+          },
+          {
+            "step": 1100,
+            "time_s": 6.421436431801013e-14,
+            "state_norm": 1.0640606563314251e-08,
+            "relative_norm": 9.571753326089427e-12,
+            "field_peak": 4.328740844486539e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1150,
+            "time_s": 6.713319905973787e-14,
+            "state_norm": 2.773903917391204e-09,
+            "relative_norm": 2.4952641458507057e-12,
+            "field_peak": 1.7116055738524032e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1200,
+            "time_s": 7.00520338014656e-14,
+            "state_norm": 9.52569663995918e-10,
+            "relative_norm": 8.568836555916121e-13,
+            "field_peak": 1.0597472677046927e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1250,
+            "time_s": 7.297086854319334e-14,
+            "state_norm": 4.106612606835288e-10,
+            "relative_norm": 3.6941017078817034e-13,
+            "field_peak": 6.231591954323923e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1300,
+            "time_s": 7.588970328492107e-14,
+            "state_norm": 3.290370433753474e-10,
+            "relative_norm": 2.959851391548531e-13,
+            "field_peak": 5.8880707195021e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1350,
+            "time_s": 7.88085380266488e-14,
+            "state_norm": 3.8050817551164274e-10,
+            "relative_norm": 3.4228597522953277e-13,
+            "field_peak": 6.468799319099798e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1400,
+            "time_s": 8.172737276837654e-14,
+            "state_norm": 3.5375534463759694e-10,
+            "relative_norm": 3.182204770478956e-13,
+            "field_peak": 6.430923086618166e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1450,
+            "time_s": 8.464620751010428e-14,
+            "state_norm": 3.0877856368892003e-10,
+            "relative_norm": 2.777616319547449e-13,
+            "field_peak": 5.948871803818506e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1500,
+            "time_s": 8.7565042251832e-14,
+            "state_norm": 3.449728838273586e-10,
+            "relative_norm": 3.103202179816995e-13,
+            "field_peak": 5.635064085736888e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1550,
+            "time_s": 9.048387699355974e-14,
+            "state_norm": 3.0957396533353016e-10,
+            "relative_norm": 2.7847713518212886e-13,
+            "field_peak": 6.260710076288125e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1600,
+            "time_s": 9.340271173528748e-14,
+            "state_norm": 2.8270150350339365e-10,
+            "relative_norm": 2.5430402302237386e-13,
+            "field_peak": 6.318552716589153e-07,
+            "source_finished": false
+          }
+        ],
+        "diagnostic_seconds": 0.3511546002700925,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 9.343190008270474e-14,
+        "seconds": 0.4357173999887891,
+        "setup_seconds": 0.486723699956201,
+        "mcells_per_second": 23.501471367137214,
+        "field_peak": 4.870111780440273e-07,
+        "slice_index": 0,
+        "slice_position": 0.0,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "PhotonWeave Yee/CPML on fdtd grid"
+      },
+      "reference_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 6400,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.024999999999999467,
+          0.024999999999999967
+        ],
+        "axis_max_step_um": [
+          0.025000000000000355,
+          0.025000000000000022
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000355,
+        "shape": [
+          320,
+          20,
+          1
+        ],
+        "actual_size_um": [
+          8.0,
+          0.5,
+          1.0
+        ],
+        "cells": 6400,
+        "dt_fs": 0.05837669483455467,
+        "duration_fs": 93.40271173528748,
+        "estimated_memory_mb": 3.3,
+        "warnings": [
+          "Periodic/Bloch cells repeat every structure and source. A point source represents an array of sources, not an isolated dipole.",
+          "One-way planes retain the eight-cell incident-line delay and discrete dispersion. Amplitude scales the incident-line drive. The opposite side contains scattered fields. Check incident PML layer convergence for very small reflections."
+        ],
+        "oneway_planes": [
+          {
+            "source_id": "source",
+            "normal": "x",
+            "direction": "+",
+            "electric_index": 100,
+            "magnetic_index": 99,
+            "electric_coordinate_um": -1.5,
+            "magnetic_coordinate_um": -1.5125,
+            "incident_drive_offset_cells": 8,
+            "incident_pml_cells": 96,
+            "total_field_side": "greater coordinate"
+          }
+        ],
+        "backend": "cuda",
+        "precision": "float64",
+        "gpu": "NVIDIA RTX 5880 Ada Generation",
+        "cuda_graph": true,
+        "cuda_kernel": "torch",
+        "steps": 1600,
+        "requested_steps": 1600,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 2.9188347417277336e-15,
+            "state_norm": 0.00029845691612628123,
+            "relative_norm": 1.0,
+            "field_peak": 0.0007462802876940628,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 5.837669483455467e-15,
+            "state_norm": 0.009926731852053512,
+            "relative_norm": 1.0,
+            "field_peak": 0.00412249887634808,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 8.7565042251832e-15,
+            "state_norm": 0.21257332545974736,
+            "relative_norm": 1.0,
+            "field_peak": 0.017844952284141877,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 1.1675338966910935e-14,
+            "state_norm": 3.462037324459705,
+            "relative_norm": 1.0,
+            "field_peak": 0.09400056715892552,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 1.4594173708638668e-14,
+            "state_norm": 34.613323707508464,
+            "relative_norm": 1.0,
+            "field_peak": 0.29141479958894734,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 1.75130084503664e-14,
+            "state_norm": 180.82555286187852,
+            "relative_norm": 1.0,
+            "field_peak": 0.5433568098990331,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 2.0431843192094134e-14,
+            "state_norm": 502.53370463449977,
+            "relative_norm": 1.0,
+            "field_peak": 0.693319739534485,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 2.335067793382187e-14,
+            "state_norm": 844.4229450824533,
+            "relative_norm": 1.0,
+            "field_peak": 0.6937121781728366,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 2.62695126755496e-14,
+            "state_norm": 1037.5427843925045,
+            "relative_norm": 1.0,
+            "field_peak": 0.6937581218994331,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 2.9188347417277336e-14,
+            "state_norm": 1102.3635336880368,
+            "relative_norm": 1.0,
+            "field_peak": 0.6938045603978176,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 3.210718215900507e-14,
+            "state_norm": 1089.2284742023792,
+            "relative_norm": 0.9880846389741201,
+            "field_peak": 0.6938495950160206,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 3.50260169007328e-14,
+            "state_norm": 954.1769159685853,
+            "relative_norm": 0.8655737302705556,
+            "field_peak": 0.6938953742309115,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 3.794485164246054e-14,
+            "state_norm": 640.291304435002,
+            "relative_norm": 0.5808349830775527,
+            "field_peak": 0.6939416101037922,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 4.086368638418827e-14,
+            "state_norm": 290.7111684727011,
+            "relative_norm": 0.26371624204594823,
+            "field_peak": 0.5441749846353523,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 4.3782521125916e-14,
+            "state_norm": 87.79914225050712,
+            "relative_norm": 0.07964626873747242,
+            "field_peak": 0.3342627313015477,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 4.670135586764374e-14,
+            "state_norm": 17.83623748624003,
+            "relative_norm": 0.016179995927992654,
+            "field_peak": 0.16091916529983044,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 4.962019060937147e-14,
+            "state_norm": 2.2211506445456766,
+            "relative_norm": 0.002014898512757091,
+            "field_peak": 0.060732061649304295,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 5.25390253510992e-14,
+            "state_norm": 0.14678434766222503,
+            "relative_norm": 0.00013315421199678785,
+            "field_peak": 0.017558977853092603,
+            "source_finished": false
+          },
+          {
+            "step": 950,
+            "time_s": 5.5457860092826933e-14,
+            "state_norm": 0.0046554242639856615,
+            "relative_norm": 4.223129776808385e-06,
+            "field_peak": 0.003513966663848374,
+            "source_finished": false
+          },
+          {
+            "step": 1000,
+            "time_s": 5.837669483455467e-14,
+            "state_norm": 6.687604176159977e-05,
+            "relative_norm": 6.066605046146723e-08,
+            "field_peak": 0.0004603392104260504,
+            "source_finished": false
+          },
+          {
+            "step": 1050,
+            "time_s": 6.129552957628241e-14,
+            "state_norm": 4.3223644419550603e-07,
+            "relative_norm": 3.920997302490838e-10,
+            "field_peak": 3.8645365021293296e-05,
+            "source_finished": false
+          },
+          {
+            "step": 1100,
+            "time_s": 6.421436431801013e-14,
+            "state_norm": 7.359773284764111e-09,
+            "relative_norm": 6.676357716715699e-12,
+            "field_peak": 2.3447528465056162e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1150,
+            "time_s": 6.713319905973787e-14,
+            "state_norm": 2.1135330338050514e-09,
+            "relative_norm": 1.9172740835630455e-12,
+            "field_peak": 1.3776807424280949e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1200,
+            "time_s": 7.00520338014656e-14,
+            "state_norm": 6.628822025053673e-10,
+            "relative_norm": 6.013281301928112e-13,
+            "field_peak": 6.21684981953592e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1250,
+            "time_s": 7.297086854319334e-14,
+            "state_norm": 4.3171123114627293e-10,
+            "relative_norm": 3.9162328755737397e-13,
+            "field_peak": 4.1854020877141694e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1300,
+            "time_s": 7.588970328492107e-14,
+            "state_norm": 3.794603596886024e-10,
+            "relative_norm": 3.4422433987732733e-13,
+            "field_peak": 4.1054301926735675e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1350,
+            "time_s": 7.88085380266488e-14,
+            "state_norm": 3.136294259957104e-10,
+            "relative_norm": 2.8450635059238625e-13,
+            "field_peak": 3.9954802488275395e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1400,
+            "time_s": 8.172737276837654e-14,
+            "state_norm": 3.2826492266166275e-10,
+            "relative_norm": 2.977828208480634e-13,
+            "field_peak": 3.782751543957826e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1450,
+            "time_s": 8.464620751010428e-14,
+            "state_norm": 3.5745680329850965e-10,
+            "relative_norm": 3.2426399492970537e-13,
+            "field_peak": 4.00546568854511e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1500,
+            "time_s": 8.7565042251832e-14,
+            "state_norm": 3.098705040597405e-10,
+            "relative_norm": 2.810964755184221e-13,
+            "field_peak": 4.0419083560030705e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1550,
+            "time_s": 9.048387699355974e-14,
+            "state_norm": 3.0060786895127207e-10,
+            "relative_norm": 2.7269395237119893e-13,
+            "field_peak": 3.653523213081298e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1600,
+            "time_s": 9.340271173528748e-14,
+            "state_norm": 3.443525467363037e-10,
+            "relative_norm": 3.1237657652212736e-13,
+            "field_peak": 3.922281866282521e-07,
+            "source_finished": false
+          }
+        ],
+        "diagnostic_seconds": 0.34294740011682734,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 9.343190008270474e-14,
+        "seconds": 0.4187378999777138,
+        "setup_seconds": 0.028235499979928136,
+        "mcells_per_second": 24.454437968344866,
+        "field_peak": 3.922281866282521e-07,
+        "slice_index": 0,
+        "slice_position": 0.0,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "PhotonWeave Yee/CPML on fdtd grid"
+      }
+    },
+    {
+      "direction": "-",
+      "wavelength_um": [
+        1.7999999999999998,
+        1.7772151898734179,
+        1.755,
+        1.7333333333333332,
+        1.7121951219512195,
+        1.691566265060241,
+        1.6714285714285713,
+        1.651764705882353,
+        1.6325581395348836,
+        1.6137931034482758,
+        1.5954545454545457,
+        1.5775280898876405,
+        1.56,
+        1.542857142857143,
+        1.526086956521739,
+        1.5096774193548388,
+        1.4936170212765958,
+        1.4778947368421052,
+        1.4625,
+        1.447422680412371,
+        1.4326530612244897,
+        1.4181818181818182,
+        1.404,
+        1.3900990099009902,
+        1.3764705882352941,
+        1.3631067961165046,
+        1.35,
+        1.3371428571428572,
+        1.3245283018867926,
+        1.3121495327102803,
+        1.3
+      ],
+      "R": [
+        0.11591151529444266,
+        0.11750169555493782,
+        0.1190610782738897,
+        0.12058887834341092,
+        0.12208435133450377,
+        0.12354678830766026,
+        0.12497550923992283,
+        0.12636985573302525,
+        0.1277291838843384,
+        0.12905285823018423,
+        0.13034024748183926,
+        0.13159072244982198,
+        0.13280365622851076,
+        0.133978426494822,
+        0.13511441967207788,
+        0.13621103664618117,
+        0.13726769960060758,
+        0.13828385933006573,
+        0.13925900217259554,
+        0.1401926556017896,
+        0.14108439165129208,
+        0.14193382770009255,
+        0.1427406246026346,
+        0.14350448252440437,
+        0.14422513502268988,
+        0.14490234190795737,
+        0.14553588136849108,
+        0.14612554188817334,
+        0.1466711146781797,
+        0.14717238756141177,
+        0.14762914128405122
+      ],
+      "T": [
+        0.8840886120706942,
+        0.8824969091158865,
+        0.8809361327412024,
+        0.8794072131413033,
+        0.8779110130247259,
+        0.8764483207208912,
+        0.8750198479987096,
+        0.8736262329737082,
+        0.8722680481700328,
+        0.870945813272423,
+        0.8696600114094477,
+        0.8684111071573531,
+        0.8671995640794877,
+        0.8660258596691685,
+        0.8648904960224483,
+        0.8637940052601966,
+        0.8627369494203709,
+        0.861719915085336,
+        0.860743503366557,
+        0.859808316129346,
+        0.8589149396264714,
+        0.8580639270715925,
+        0.8572557820399155,
+        0.8564909447500355,
+        0.8557697830792996,
+        0.8550925895375879,
+        0.8544595845017793,
+        0.8538709250686312,
+        0.8533267182048766,
+        0.8528270366091842,
+        0.8523719357844688
+      ],
+      "R_scattered": [
+        0.1159104851674749,
+        0.11750145378297953,
+        0.11906166090869624,
+        0.12059023792454802,
+        0.12208636031194729,
+        0.12354925096834825,
+        0.12497818103567222,
+        0.12637246798245524,
+        0.12773147117494435,
+        0.1290545855836416,
+        0.13034123446860973,
+        0.13159086186334842,
+        0.1328029255336781,
+        0.1339768909496362,
+        0.1351122267390301,
+        0.13620840205971785,
+        0.13726488624531602,
+        0.138281150874793,
+        0.13925667409796674,
+        0.14019094670467944,
+        0.1410834791709454,
+        0.14193380882184897,
+        0.14274150630861274,
+        0.1435061807358062,
+        0.14422748292526194,
+        0.14490510644973528,
+        0.14553878625095787,
+        0.1461282949162928,
+        0.14667343700981486,
+        0.14717404214319224,
+        0.14762995760883732
+      ],
+      "analytic_T": [
+        0.8847926267281104,
+        0.8832275903343008,
+        0.8816935274634387,
+        0.8801912446893425,
+        0.8787215221823578,
+        0.8772851139536247,
+        0.8758827481143231,
+        0.874515127147977,
+        0.8731829281939665,
+        0.87188680334045,
+        0.8706273799249665,
+        0.8694052608410452,
+        0.8682210248492197,
+        0.8670752268909024,
+        0.8659683984036407,
+        0.8649010476363433,
+        0.8638736599631226,
+        0.8628866981944694,
+        0.8619406028845328,
+        0.8610357926333447,
+        0.8601726643828838,
+        0.8593515937059413,
+        0.8585729350868024,
+        0.8578370221928194,
+        0.8571441681360087,
+        0.8564946657238572,
+        0.8558887876985819,
+        0.8553267869641339,
+        0.8548088968002969,
+        0.8543353310632742,
+        0.8539062843722137
+      ],
+      "valid": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "max_T_absolute_error": 0.001534348587744927,
+      "max_R_absolute_error": 0.0015354256562649382,
+      "max_energy_residual": 5.081898010517172e-06,
+      "max_scattered_R_difference": 2.9048824667921025e-06,
+      "max_empty_scattered_flux_ratio": 1.4517826017311831e-11,
+      "project": {
+        "schema_version": 1,
+        "name": "One-way dielectric slab",
+        "region": {
+          "dimension": "2d",
+          "size": [
+            8.0,
+            0.5,
+            1.0
+          ],
+          "mesh": 0.025,
+          "material_sampling": "yee",
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24.0,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "steps": 1600,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0.0,
+            "divergence_check": true,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 16,
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            }
+          },
+          "bloch_phase": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "background_index": 1.0,
+          "backend": "cuda",
+          "cuda_kernel": "torch",
+          "precision": "float64",
+          "snapshot_interval": 1600,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0.0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "Air",
+            "index": 1.0,
+            "color": "#b7c5d7",
+            "model": "dielectric",
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": []
+          },
+          {
+            "name": "SiO2 (constant n)",
+            "index": 1.5,
+            "color": "#80c4d7",
+            "model": "dielectric",
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": []
+          },
+          {
+            "name": "SiN (constant n)",
+            "index": 2.0,
+            "color": "#69a1e8",
+            "model": "dielectric",
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": []
+          },
+          {
+            "name": "Si (constant n)",
+            "index": 3.48,
+            "color": "#cc8bdc",
+            "model": "dielectric",
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": []
+          }
+        ],
+        "structures": [
+          {
+            "id": "8e3e5a0c2893",
+            "name": "object",
+            "center": [
+              -0.0125,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "rectangle",
+            "size": [
+              0.2,
+              0.5,
+              1.0
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0.0,
+            "material": "SiO2 (constant n)",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 1.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "source",
+            "name": "source",
+            "center": [
+              1.5,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "plane",
+            "injection": "oneway",
+            "normal": "x",
+            "direction": "-",
+            "incident_pml_cells": 96,
+            "size": [
+              0.0,
+              0.5,
+              0.0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0.0,
+            "amplitude": 1.0,
+            "phase": 0.0,
+            "use_global_source": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3.0,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "reflection",
+            "name": "reflection",
+            "center": [
+              0.8,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "frequency",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 31,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.5,
+              1.0
+            ],
+            "downsample": 1
+          },
+          {
+            "id": "transmission",
+            "name": "transmission",
+            "center": [
+              -0.8,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "frequency",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 31,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.5,
+              1.0
+            ],
+            "downsample": 1
+          },
+          {
+            "id": "scattered",
+            "name": "scattered",
+            "center": [
+              2.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "frequency",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 31,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.5,
+              1.0
+            ],
+            "downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null
+      },
+      "sample_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 6400,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.024999999999999467,
+          0.024999999999999967
+        ],
+        "axis_max_step_um": [
+          0.025000000000000355,
+          0.025000000000000022
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000355,
+        "shape": [
+          320,
+          20,
+          1
+        ],
+        "actual_size_um": [
+          8.0,
+          0.5,
+          1.0
+        ],
+        "cells": 6400,
+        "dt_fs": 0.05837669483455467,
+        "duration_fs": 93.40271173528748,
+        "estimated_memory_mb": 3.3,
+        "warnings": [
+          "Periodic/Bloch cells repeat every structure and source. A point source represents an array of sources, not an isolated dipole.",
+          "One-way planes retain the eight-cell incident-line delay and discrete dispersion. Amplitude scales the incident-line drive. The opposite side contains scattered fields. Check incident PML layer convergence for very small reflections."
+        ],
+        "oneway_planes": [
+          {
+            "source_id": "source",
+            "normal": "x",
+            "direction": "-",
+            "electric_index": 220,
+            "magnetic_index": 220,
+            "electric_coordinate_um": 1.5,
+            "magnetic_coordinate_um": 1.5125000000000002,
+            "incident_drive_offset_cells": 8,
+            "incident_pml_cells": 96,
+            "total_field_side": "lesser coordinate"
+          }
+        ],
+        "backend": "cuda",
+        "precision": "float64",
+        "gpu": "NVIDIA RTX 5880 Ada Generation",
+        "cuda_graph": true,
+        "cuda_kernel": "torch",
+        "steps": 1600,
+        "requested_steps": 1600,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 2.9188347417277336e-15,
+            "state_norm": 0.0002984569161262811,
+            "relative_norm": 1.0,
+            "field_peak": 0.0007462802876940628,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 5.837669483455467e-15,
+            "state_norm": 0.00992698216839416,
+            "relative_norm": 1.0,
+            "field_peak": 0.00412249887634808,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 8.7565042251832e-15,
+            "state_norm": 0.21267488185183203,
+            "relative_norm": 1.0,
+            "field_peak": 0.017842996209235868,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 1.1675338966910935e-14,
+            "state_norm": 3.4638349728305706,
+            "relative_norm": 1.0,
+            "field_peak": 0.09385320746901335,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 1.4594173708638668e-14,
+            "state_norm": 34.58238008327971,
+            "relative_norm": 1.0,
+            "field_peak": 0.2906283952364767,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 1.75130084503664e-14,
+            "state_norm": 180.1814606682948,
+            "relative_norm": 1.0,
+            "field_peak": 0.5438968437413575,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 2.0431843192094134e-14,
+            "state_norm": 500.0387742544534,
+            "relative_norm": 1.0,
+            "field_peak": 0.7135471696156498,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 2.335067793382187e-14,
+            "state_norm": 844.8533674285125,
+            "relative_norm": 1.0,
+            "field_peak": 0.8561364278554946,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 2.62695126755496e-14,
+            "state_norm": 1047.715610084765,
+            "relative_norm": 1.0,
+            "field_peak": 0.8601866693545919,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 2.9188347417277336e-14,
+            "state_norm": 1111.667282473273,
+            "relative_norm": 1.0,
+            "field_peak": 0.6655349473209833,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 3.210718215900507e-14,
+            "state_norm": 1098.4324785665972,
+            "relative_norm": 0.9880946357643714,
+            "field_peak": 0.6490805429754102,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 3.50260169007328e-14,
+            "state_norm": 995.5139102614437,
+            "relative_norm": 0.8955142657851659,
+            "field_peak": 0.6490467699408357,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 3.794485164246054e-14,
+            "state_norm": 721.9982406270279,
+            "relative_norm": 0.6494733199493855,
+            "field_peak": 0.6449024123204572,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 4.086368638418827e-14,
+            "state_norm": 353.91014125181727,
+            "relative_norm": 0.3183597707979915,
+            "field_peak": 0.5070343724584018,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 4.3782521125916e-14,
+            "state_norm": 106.21095045031828,
+            "relative_norm": 0.09554203143769488,
+            "field_peak": 0.3044099394014217,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 4.670135586764374e-14,
+            "state_norm": 19.510926067087414,
+            "relative_norm": 0.017551048209027868,
+            "field_peak": 0.144528199022255,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 4.962019060937147e-14,
+            "state_norm": 2.2745532520018683,
+            "relative_norm": 0.002046073755936551,
+            "field_peak": 0.053517064573936735,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 5.25390253510992e-14,
+            "state_norm": 0.16196092589155442,
+            "relative_norm": 0.00014569190660286284,
+            "field_peak": 0.01546906216790625,
+            "source_finished": false
+          },
+          {
+            "step": 950,
+            "time_s": 5.5457860092826933e-14,
+            "state_norm": 0.0063342600613490495,
+            "relative_norm": 5.697981906291588e-06,
+            "field_peak": 0.0034521446587084436,
+            "source_finished": false
+          },
+          {
+            "step": 1000,
+            "time_s": 5.837669483455467e-14,
+            "state_norm": 0.00012520045824291226,
+            "relative_norm": 1.1262403798046685e-07,
+            "field_peak": 0.0005437490951546541,
+            "source_finished": false
+          },
+          {
+            "step": 1050,
+            "time_s": 6.129552957628241e-14,
+            "state_norm": 1.231603212507916e-06,
+            "relative_norm": 1.1078883330701303e-09,
+            "field_peak": 5.781425850277206e-05,
+            "source_finished": false
+          },
+          {
+            "step": 1100,
+            "time_s": 6.421436431801013e-14,
+            "state_norm": 1.2495916642657884e-08,
+            "relative_norm": 1.1240698399305742e-11,
+            "field_peak": 4.900825634972276e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1150,
+            "time_s": 6.713319905973787e-14,
+            "state_norm": 2.9816929643062297e-09,
+            "relative_norm": 2.682181090795857e-12,
+            "field_peak": 1.78483717501339e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1200,
+            "time_s": 7.00520338014656e-14,
+            "state_norm": 1.033235126033816e-09,
+            "relative_norm": 9.294463751195785e-13,
+            "field_peak": 1.1289645609407793e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1250,
+            "time_s": 7.297086854319334e-14,
+            "state_norm": 4.4208614926883167e-10,
+            "relative_norm": 3.9767847470086935e-13,
+            "field_peak": 6.173701097394719e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1300,
+            "time_s": 7.588970328492107e-14,
+            "state_norm": 3.270080154804967e-10,
+            "relative_norm": 2.94159970915901e-13,
+            "field_peak": 6.39503074982571e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1350,
+            "time_s": 7.88085380266488e-14,
+            "state_norm": 3.590898721618582e-10,
+            "relative_norm": 3.2301919632189184e-13,
+            "field_peak": 5.776075805097661e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1400,
+            "time_s": 8.172737276837654e-14,
+            "state_norm": 3.649164252782265e-10,
+            "relative_norm": 3.282604705846418e-13,
+            "field_peak": 5.856482393362421e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1450,
+            "time_s": 8.464620751010428e-14,
+            "state_norm": 3.104960384771862e-10,
+            "relative_norm": 2.7930662651722975e-13,
+            "field_peak": 5.59435291044466e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1500,
+            "time_s": 8.7565042251832e-14,
+            "state_norm": 3.3403109444672417e-10,
+            "relative_norm": 3.0047757967974116e-13,
+            "field_peak": 5.409087570422841e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1550,
+            "time_s": 9.048387699355974e-14,
+            "state_norm": 3.1960585790096453e-10,
+            "relative_norm": 2.8750136208910925e-13,
+            "field_peak": 5.486322040531191e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1600,
+            "time_s": 9.340271173528748e-14,
+            "state_norm": 2.80540192077602e-10,
+            "relative_norm": 2.523598530789241e-13,
+            "field_peak": 4.989669059264913e-07,
+            "source_finished": false
+          }
+        ],
+        "diagnostic_seconds": 0.354482100228779,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 9.343190008270474e-14,
+        "seconds": 0.4398849999997765,
+        "setup_seconds": 0.49744429998099804,
+        "mcells_per_second": 23.27881150756494,
+        "field_peak": 4.7502794355951687e-07,
+        "slice_index": 0,
+        "slice_position": 0.0,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "PhotonWeave Yee/CPML on fdtd grid"
+      },
+      "reference_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 6400,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.024999999999999467,
+          0.024999999999999967
+        ],
+        "axis_max_step_um": [
+          0.025000000000000355,
+          0.025000000000000022
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000355,
+        "shape": [
+          320,
+          20,
+          1
+        ],
+        "actual_size_um": [
+          8.0,
+          0.5,
+          1.0
+        ],
+        "cells": 6400,
+        "dt_fs": 0.05837669483455467,
+        "duration_fs": 93.40271173528748,
+        "estimated_memory_mb": 3.3,
+        "warnings": [
+          "Periodic/Bloch cells repeat every structure and source. A point source represents an array of sources, not an isolated dipole.",
+          "One-way planes retain the eight-cell incident-line delay and discrete dispersion. Amplitude scales the incident-line drive. The opposite side contains scattered fields. Check incident PML layer convergence for very small reflections."
+        ],
+        "oneway_planes": [
+          {
+            "source_id": "source",
+            "normal": "x",
+            "direction": "-",
+            "electric_index": 220,
+            "magnetic_index": 220,
+            "electric_coordinate_um": 1.5,
+            "magnetic_coordinate_um": 1.5125000000000002,
+            "incident_drive_offset_cells": 8,
+            "incident_pml_cells": 96,
+            "total_field_side": "lesser coordinate"
+          }
+        ],
+        "backend": "cuda",
+        "precision": "float64",
+        "gpu": "NVIDIA RTX 5880 Ada Generation",
+        "cuda_graph": true,
+        "cuda_kernel": "torch",
+        "steps": 1600,
+        "requested_steps": 1600,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 2.9188347417277336e-15,
+            "state_norm": 0.0002984569161262811,
+            "relative_norm": 1.0,
+            "field_peak": 0.0007462802876940628,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 5.837669483455467e-15,
+            "state_norm": 0.009926731852053512,
+            "relative_norm": 1.0,
+            "field_peak": 0.00412249887634808,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 8.7565042251832e-15,
+            "state_norm": 0.21257332545974716,
+            "relative_norm": 1.0,
+            "field_peak": 0.017844952284141877,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 1.1675338966910935e-14,
+            "state_norm": 3.4620373244596996,
+            "relative_norm": 1.0,
+            "field_peak": 0.09400056715892552,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 1.4594173708638668e-14,
+            "state_norm": 34.613323707508414,
+            "relative_norm": 1.0,
+            "field_peak": 0.29141479958894734,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 1.75130084503664e-14,
+            "state_norm": 180.82555286188253,
+            "relative_norm": 1.0,
+            "field_peak": 0.5433568098990331,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 2.0431843192094134e-14,
+            "state_norm": 502.5337160930069,
+            "relative_norm": 1.0,
+            "field_peak": 0.693319739534485,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 2.335067793382187e-14,
+            "state_norm": 844.4230539543785,
+            "relative_norm": 1.0,
+            "field_peak": 0.6937121781728366,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 2.62695126755496e-14,
+            "state_norm": 1037.5513127882386,
+            "relative_norm": 1.0,
+            "field_peak": 0.6937581218994331,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 2.9188347417277336e-14,
+            "state_norm": 1102.6503961629599,
+            "relative_norm": 1.0,
+            "field_peak": 0.6938045607396205,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 3.210718215900507e-14,
+            "state_norm": 1092.153538560624,
+            "relative_norm": 0.9904803393361457,
+            "field_peak": 0.6938495893490513,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 3.50260169007328e-14,
+            "state_norm": 965.2276782908239,
+            "relative_norm": 0.875370545051864,
+            "field_peak": 0.6938952083979828,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 3.794485164246054e-14,
+            "state_norm": 656.5501311831507,
+            "relative_norm": 0.5954290983505163,
+            "field_peak": 0.6939412069682855,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 4.086368638418827e-14,
+            "state_norm": 299.60536418604005,
+            "relative_norm": 0.27171383171730307,
+            "field_peak": 0.5441749974880139,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 4.3782521125916e-14,
+            "state_norm": 89.28877518593683,
+            "relative_norm": 0.08097650488010245,
+            "field_peak": 0.3342623576797282,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 4.670135586764374e-14,
+            "state_norm": 17.932990573770336,
+            "relative_norm": 0.01626353251780815,
+            "field_peak": 0.16091940108442715,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 4.962019060937147e-14,
+            "state_norm": 2.2749969052862826,
+            "relative_norm": 0.0020632078065748616,
+            "field_peak": 0.06073206887808989,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 5.25390253510992e-14,
+            "state_norm": 0.157308014190745,
+            "relative_norm": 0.00014266354479910474,
+            "field_peak": 0.017787751149881466,
+            "source_finished": false
+          },
+          {
+            "step": 950,
+            "time_s": 5.5457860092826933e-14,
+            "state_norm": 0.005293205226813978,
+            "relative_norm": 4.8004383304385985e-06,
+            "field_peak": 0.003677601671449039,
+            "source_finished": false
+          },
+          {
+            "step": 1000,
+            "time_s": 5.837669483455467e-14,
+            "state_norm": 8.12833073389552e-05,
+            "relative_norm": 7.371629994584648e-08,
+            "field_peak": 0.0005011659990659745,
+            "source_finished": false
+          },
+          {
+            "step": 1050,
+            "time_s": 6.129552957628241e-14,
+            "state_norm": 5.587751019798069e-07,
+            "relative_norm": 5.067563607869288e-10,
+            "field_peak": 4.3838774177494534e-05,
+            "source_finished": false
+          },
+          {
+            "step": 1100,
+            "time_s": 6.421436431801013e-14,
+            "state_norm": 8.087937164322763e-09,
+            "relative_norm": 7.334996833509007e-12,
+            "field_peak": 2.4334455703283894e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1150,
+            "time_s": 6.713319905973787e-14,
+            "state_norm": 2.273529203522556e-09,
+            "relative_norm": 2.0618767393854478e-12,
+            "field_peak": 1.5023599981616174e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1200,
+            "time_s": 7.00520338014656e-14,
+            "state_norm": 7.055497343341069e-10,
+            "relative_norm": 6.398671208837386e-13,
+            "field_peak": 6.249273240413549e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1250,
+            "time_s": 7.297086854319334e-14,
+            "state_norm": 4.378974290092445e-10,
+            "relative_norm": 3.971317024263128e-13,
+            "field_peak": 4.198426461846144e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1300,
+            "time_s": 7.588970328492107e-14,
+            "state_norm": 3.668455513258722e-10,
+            "relative_norm": 3.326943450094733e-13,
+            "field_peak": 4.2047546107214483e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1350,
+            "time_s": 7.88085380266488e-14,
+            "state_norm": 3.035459323208617e-10,
+            "relative_norm": 2.75287555672361e-13,
+            "field_peak": 3.791946262553475e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1400,
+            "time_s": 8.172737276837654e-14,
+            "state_norm": 3.408708336800985e-10,
+            "relative_norm": 3.091377238572374e-13,
+            "field_peak": 3.969315822340322e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1450,
+            "time_s": 8.464620751010428e-14,
+            "state_norm": 3.6243049706563325e-10,
+            "relative_norm": 3.2869030685231796e-13,
+            "field_peak": 4.085882362872522e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1500,
+            "time_s": 8.7565042251832e-14,
+            "state_norm": 2.971466432098123e-10,
+            "relative_norm": 2.6948400349179873e-13,
+            "field_peak": 3.951685962638155e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1550,
+            "time_s": 9.048387699355974e-14,
+            "state_norm": 3.1167422983995786e-10,
+            "relative_norm": 2.826591555442526e-13,
+            "field_peak": 3.849166798507658e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1600,
+            "time_s": 9.340271173528748e-14,
+            "state_norm": 3.454489015030483e-10,
+            "relative_norm": 3.1328959995403174e-13,
+            "field_peak": 3.9377554648097904e-07,
+            "source_finished": false
+          }
+        ],
+        "diagnostic_seconds": 0.3418054999783635,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 9.343190008270474e-14,
+        "seconds": 0.41913140000542626,
+        "setup_seconds": 0.021688500011805445,
+        "mcells_per_second": 24.431479006028727,
+        "field_peak": 3.9377554648097904e-07,
+        "slice_index": 0,
+        "slice_position": 0.0,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "PhotonWeave Yee/CPML on fdtd grid"
+      }
+    }
+  ]
+}

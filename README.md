@@ -1,0 +1,540 @@
+![PhotonWeave: native GPU FDTD, Python-first simulation and independent design ensembles](docs/assets/hero.png)
+
+# PhotonWeave FDTD
+
+An independent, MIT-licensed photonics workbench: visual structure editing in the browser, a shared Python project API, and GPU FDTD on NVIDIA CUDA. The open-source [flaport/fdtd](https://github.com/flaport/fdtd) supplies the grid/backend foundation. PhotonWeave implements Yee derivatives, face-specific convolutional PML, periodic/Bloch wrapping and PyTorch CUDA Graph execution. No commercial solver is needed for the native solver. The optional FSP interoperability bridge requires an installed, licensed Lumerical FDTD.
+
+The interface follows the familiar FDTD workflow: Objects Tree, XY/XZ/YZ and perspective CAD views, object properties, material database, simulation region, Layout/Analysis modes, field visualizer, monitor traces, and Python export. It is not affiliated with Ansys and does not implement the full Lumerical feature set.
+
+This is a **development preview**. The complete replacement objective remains open. See the [preview release scope](docs/PREVIEW_RELEASE.md), [feature/property checklist](docs/FEATURE_CHECKLIST.md), [parity requirements](docs/PARITY_ROADMAP.md) and [FSP bridge scope](docs/FSP.md). The checklist separates native-engine, Python, UI and independent FSP support. Its counts are property counts, not a product-completion percentage.
+
+**Comparison guide:** **[Lumerical FDTD speed comparison](#primary-speed-comparison-lumerical-fdtd)**, [capabilities and batch support](#capability-comparison), [mixed-grid ensembles](#mixed-meshes-and-durations-in-one-python-batch), [single-case measurements](#measured-cuda-comparisons), [remaining competitiveness work](docs/OPEN_SOURCE_COMPARISON_KO.md#비교우위-개발-프로젝트의-현재-작업). Measured gains below establish a specific forward-workflow advantage against flaport/fdtd, not leadership over every CUDA solver.
+
+<!-- BEGIN LUMERICAL TIMING COMPARISON -->
+## Primary speed comparison: Lumerical FDTD
+
+**Historical measurements, not a validated current-release speedup.** The primary comparison target is Lumerical FDTD. The available paired records below compare its **CPU engine configured for one process and 16 threads** with earlier PhotonWeave GPU builds on the **RTX 5880 Ada** workstation. Each value is the median of three recorded runs. These rows do not establish equal optical accuracy or performance against Lumerical GPU execution.
+
+### Recorded run wall time
+
+| Historical case | Lumerical CPU, 16 threads (s) | PhotonWeave RTX 5880 (s) | Lumerical CPU / PhotonWeave GPU |
+|---|---:|---:|---:|
+| Sphere, earlier build, 64³ / 1,000 steps | 3.997 | 0.613 | **6.52×** |
+| Sphere, earlier build, 128³ / 2,000 steps | 30.736 | 3.119 | **9.85×** |
+| Sphere, later CPML revision, 128³ / 2,000 steps | 30.233 | 1.990 | **15.19×** |
+
+Run wall time includes Lumerical meshing, engine launch and file I/O. PhotonWeave timing includes allocation, graph preparation, stepping and final host transfer, excluding optional NPZ compression. These are differently scoped workflow timers. The ratio is Lumerical time divided by PhotonWeave time.
+
+### Recorded engine and stepping time
+
+| Historical case | Lumerical logged FDTD time (s) | PhotonWeave stepping time (s) | Lumerical CPU / PhotonWeave GPU |
+|---|---:|---:|---:|
+| Sphere, earlier build, 64³ / 1,000 steps | 1.897 | 0.561 | 3.38× |
+| Sphere, earlier build, 128³ / 2,000 steps | 28.186 | 3.027 | 9.31× |
+| Sphere, later CPML revision, 128³ / 2,000 steps | 28.288 | 1.924 | 14.71× |
+
+The fixture is an index-2 sphere of radius 0.6 µm in air, in a 6 × 6 × 6 µm computational domain, with a 1.55 µm Gaussian dipole excitation and one point monitor. Total cell counts and actual time steps were checked in the original paired runs. Native precision was float32. The archived Lumerical API version string is `8.31.3633` from the v241 installation. Its numerical precision, exact CPU model, explicit warmup policy and source hashes for those earlier native builds are not established by these records.
+
+**Accuracy qualification:** dipole normalization, field staggering/interpolation and absorbing boundaries differ. The historical optical traces were not equivalent. These timing ratios must not be presented as same-accuracy speedups or multiplied by later native optimization gains. The two 128³ rows are successive development measurements of the same fixture, not two different workloads.
+
+| Primary comparison still required | Status |
+|---|---|
+| Current PhotonWeave vs Lumerical CPU, common accuracy target | Pending new matched validation |
+| Current PhotonWeave vs Lumerical GPU on the same RTX 5880 | Not measured |
+| Multi-structure batch / inverse-design throughput vs Lumerical | Not measured |
+
+Only aggregate timing facts are included here. No commercial field arrays, spectra, screenshots, project files or engine logs are redistributed with this table. The governing licence remains unknown, and this local draft is **not cleared for public release**. [Publication conditions](docs/RELEASE_REVIEW.md#timing-table-exception-and-publication-status). The reproducible open-source comparisons below are secondary benchmarks.
+<!-- END LUMERICAL TIMING COMPARISON -->
+
+## Capability comparison
+
+Reviewed public source on 19 September 2026. A feature distinction is not a measured speed advantage. Unknown or unmeasured batch behavior is not marked unsupported.
+
+| Project | GPU/backend | Independent ensemble / same-GPU batch | Adjoint/autodiff | Relevant scope | RTX 5880 comparison |
+|---|---|---|---|---|---|
+| **PhotonWeave** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **No**. Forward objectives and differential evolution | Browser + Python analytic CAD, independent FSP scene import/writeback subset, multipole ADE, independent-axis/explicit/graded meshes, six-face CPML, selective shared CUDA plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
+| [FDTDX](https://github.com/ymahlau/fdtdx) | **JAX currently**, CUDA/ROCm installation paths | JAX composition. Same-GPU cohort throughput not measured here | **Yes**, reversible/checkpointed paths with model restrictions | Already provides dispersive/anisotropic materials and rectilinear grids. Those are not unique PhotonWeave advantages | Not measured, Linux CUDA environment pending |
+| [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX wrapper + specialized CUDA | README proposes distributing independent jobs through JAX. Fused batch-axis throughput not verified | Reviewed primitive has no registered JVP/VJP/transpose rule | Fast specialized dielectric scope, constrained z size, x/y adiabatic absorption, z PML. PhotonWeave adds dispersion, graded grids and online plane DFT | Not measured, Linux CUDA environment pending |
+| [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy / PyTorch CUDA | Public `Grid` represents one case. Our external graph adapter runs its updates. Dedicated upstream cohort API not verified | Default backend disables gradients, so default autodiff is not established | Readable grid foundation used and attributed by PhotonWeave | PyPI 0.2.2 measured, including eager and graph-adapted baselines |
+| [fdtd3d](https://github.com/zer011b/fdtd3d) | C++ / CUDA / MPI | **Single-problem domain decomposition** differs from independent-case batches. Cohort throughput not verified | Not documented in reviewed README | Compiled solver and distributed execution. Single-grid MPI is still missing from PhotonWeave | Not measured, compatible compiler/runtime environment pending |
+
+FDTDX is ahead of PhotonWeave for differentiable inverse design. We have not demonstrated a speed advantage against FDTDX, fdtdz or fdtd3d. [Pinned sources, detailed limitations and next work](docs/OPEN_SOURCE_COMPARISON_KO.md).
+
+**Current development, 0.14:** closed normal-incidence [TFSF boxes](docs/TFSF_SOURCES.md) separate incident and scattered fields around isolated structures. Python, UI previews, CPU/CUDA and shared CUDA batches use a live incident Yee line and sparse face corrections. Independent discrete references and analytic Mie sphere comparisons are recorded, including non-monotonic mesh errors. A 3D FSP source subset is mapped, while oblique incidence and general FSP compatibility remain open. Version 0.13 added [one-way periodic-cell planes](docs/ONEWAY_SOURCES.md), while 0.12 added [electric/magnetic vector sources](docs/DIPOLE_SOURCES.md). Python controls fixed-duration ensembles, objectives and native field results through [`run_tensor_batch`](docs/TENSOR_BATCH.md). Automatic decay termination, full-domain divergence checks, coupled passive multipole materials and matched-reference mesh studies remain available in single/process runs. See the [ordered implementation priorities](docs/IMPLEMENTATION_PRIORITIES.md).
+
+Six-component frequency planes, reference-normalized flux, global/custom monitor frequencies, independent process batches and black-box inverse design are also available. Read the [Python and batch guide](docs/PYTHON_BATCH.md), run the [slab example](examples/flux_slab.py) or [design example](examples/inverse_design.py), and see the [technical manuscript by Hyoseok Park](docs/paper/photonweave-manuscript.pdf) ([LaTeX source](docs/paper/manuscript.tex), [build and Overleaf guide](docs/paper/README.md)). The manuscript is a draft, not a peer-reviewed publication.
+
+**Spectral batch development:** selectable shared CUDA plane interpolation and DFT accumulation now cover single runs and independent cohorts. Set `region.cuda_monitor_kernel="fused"`, or use **Frequency monitor kernel** in the FDTD panel. The new tables separate monitor improvements, cohort scheduling and an external baseline given the same fused observation adapter. [Complete Python example](examples/spectral_batch.py), [algorithm and limits](docs/CUDA_SPECTRA.md).
+
+**Analytic CAD follow-up:** polygon extrusion, ellipsoids, elliptical cylinders/ring sectors and ordered three-axis rotations now share Python, UI and CUDA batch paths. Bounded material preparation reduces native batch full wall by **1.44–21.19×** in eight compact-solid workloads. [Measured ablation](#analytic-cad-and-material-preparation-ablation), [geometry conventions and example](docs/ANALYTIC_GEOMETRY.md).
+
+**Rectilinear follow-up:** independent dx/dy/dz and explicit node arrays are available in Python and the UI, with rectangular CFL, physical PML depth and shared CUDA batches. Eight transverse-invariant layer ensembles show **4.33–13.39×** lower native batch wall time after removing unnecessary transverse cells at the same actual time step. [Matched-observable table](#rectilinear-mesh-and-batch-ablation), [controls and limits](docs/RECTILINEAR_MESH.md). This is a native mesh ablation, not an additional cross-library speedup.
+
+**Selective-output follow-up:** selective plane outputs accumulate only the required E/H channels. Eight RTX 5880 ensembles show **1.14–1.69×** lower full-wall cost when requesting the same signed flux instead of storing every field. [Measured timing and memory tables](#selective-output-cuda-ensembles), [runnable Python example](examples/selective_spectra.py). Optional complex128 DFT, per-axis/time strides, Lobatto sampling and independent local apodization are exposed in Python and UI. The [phase/graph study](#current-spectral-throughput-and-optimization-ablations) retains earlier gains and regressions with its original source hashes.
+
+**Ensemble follow-up:** `tune_tensor_batch()` measures cohort sizes with output-equivalence checks and reports the full selection cost. `optimize(execution="tensor")` evaluates differential-evolution populations through shared CUDA launches. The tables below include four 16-case workloads, complete design loops and timing-selection regressions. [Executable Python example](examples/tuned_inverse_design.py).
+
+**Experimental fused CUDA:** select `Region(backend="cuda", cuda_kernel="fused")`, or the **CUDA kernel** control in the UI, after installing `pip install -e ".[cuda-kernels]"`. The earlier native 64³/96³/128³ tests show **3.67–5.76×** full-wall improvement over our PyTorch reference path with bitwise E/H/traces. The cross-library and batch measurements below use their own stated baselines. Complex Bloch fields retain the reference path. Adjoint is not implemented. [Development milestones](docs/OPEN_SOURCE_COMPARISON_KO.md).
+
+**Measured RTX 5880 ensemble:** four native 64³ sphere cases at 800 steps take 47.04 s with one NumPy CPU worker and 1.175 s with one CUDA worker, approximately 40.0x faster. This is the full batch wall time after warm-up, including setup, transfers and IPC. Two/four concurrent GPU workers take 1.182/1.204 s and do not improve this case. This is not a commercial CPU solver comparison. [Reproduction and raw measurements](docs/validation/BATCH_REPORT.md).
+
+**Distribution status:** public GitHub publication is pending the requested completion and licence review. In particular, independent implementation alone does not resolve applicable commercial licence restrictions or every interoperability issue. [Review record and outstanding conditions](docs/RELEASE_REVIEW.md).
+
+An [independent FSP record reader](docs/FSP_BINARY.md) decodes recognized layout records without a vendor runtime. [Native import and scene writeback](docs/FSP_NATIVE.md) now include boxes, rotated ellipsoids/cylinders, partial elliptical rings and simple polygon extrusions with their stored pivots. Python, CLI and **FSP → GPU → Export current scene** update existing objects while preserving unedited bytes. Variable-length names and vertex lists are supported. Export reparses and checks the resulting geometry and material assignments before returning a file. [Uniform mesh edits](docs/FSP_MESH_WRITE.md) can update axis spacing, total spans, CAD/PML bounds, saved nodes and effective CFL together. Supported source bands/phases, monitor spectra/windows, duration and PML/Periodic settings can also be written. Interface-sampling and automatic-sampling limits are disclosed in the report. [Primitive list editing](docs/FSP_OBJECTS_WRITE.md) adds, removes, duplicates and reorders five primitive families with explicit ID and retained-byte maps. New records use authored drawing defaults. [Source and monitor list editing](docs/FSP_INSTRUMENTS_WRITE.md) adds electric dipoles, mapped 3D planes/TFSF, point traces and frequency planes. Shared monitor components can be separated while retaining their output order. External acceptance of new records/remeshing, groups, graded/explicit mesh-generator export, result-bearing files and general FSP compatibility remain open.
+
+Version 0.5 adds [custom time signals and global source settings](docs/SOURCES.md), CSV/JSON signal editing and mesh-time waveform/spectrum previews. Version 0.6 adds [automatic wavelength/frequency ranges, chirped pulses and endpoint tapering](docs/BROADBAND.md), including independent FSP mapping. DC removal and advanced spatial source types remain unsupported.
+
+<!-- BEGIN GROUPED MEASUREMENTS -->
+## Mixed meshes and durations in one Python batch
+
+**RTX 5880 Ada, 16 cases per row, float32, median of 3 warmed repetitions.** Every row interleaves vacuum, sphere, slab and waveguide cases across two meshes or durations. Three planes retain all six complex field components at nine frequencies, plus complete final E/H, point traces and native snapshots.
+
+`run_grouped_batch()` automatically groups exact compatible cases and restores input result order. The four-case cohort cap is fixed before measurement. Full wall includes grouping, setup, graph capture, stepping and output transfer. No grid padding, precision reduction, decimation or shortened run is used.
+
+| Mixed conditions | flaport sequence (s) | Native sequence (s) | Native grouped (s) | vs flaport sequence | vs native sequence | Grouped cases/s |
+|---|---:|---:|---:|---:|---:|---:|
+| 32³ + 48³, 800 steps | 6.958 | 0.649 | 0.455 | 15.30× | 1.43× | 35.18 |
+| 32³ + 64³, 800 steps | 7.892 | 0.722 | 0.578 | 13.66× | 1.25× | 27.70 |
+| 32³, 400 + 800 steps | 5.827 | 0.522 | 0.348 | 16.76× | 1.50× | 46.00 |
+| 64³, 400 + 800 steps | 6.337 | 0.891 | 0.852 | 7.44× | 1.05× | 18.78 |
+
+The external baseline is **flaport/fdtd 0.2.2 with CUDA Graph and the same fused DFT observer**. It calls unchanged upstream E/H updates. Both one-step and eight-step graphs are measured, and the table uses the lower median. This compares ensemble workflows against an external sequence, not an independently optimized upstream batch implementation.
+
+**All 48 timed-ensemble gates pass.** Native complete outputs agree bitwise with independent native runs. Maximum external point-trace and complex-plane DFT relative L2 differences are **0.3233%** and **0.3875%**, respectively, below the predeclared 1% gates. External final E/H differences remain in the raw record without an equivalence claim.
+
+| Mixed conditions | Grouping and preflight (ms) | Torch peak allocated, sequential / grouped (MiB) |
+|---|---:|---:|
+| 32³ + 48³, 800 steps | 38.8 | 8.00 / 31.98 |
+| 32³ + 64³, 800 steps | 39.0 | 17.92 / 71.63 |
+| 32³, 400 + 800 steps | 38.2 | 2.66 / 10.61 |
+| 64³, 400 + 800 steps | 39.5 | 17.92 / 71.63 |
+
+The speedup uses existing fused cohort kernels. The new capability schedules heterogeneous inputs automatically. Groups execute successively on one GPU and objective callbacks follow cohort order. Complex fields, automatic per-case termination, grouped optimizer routing and GUI ensemble submission remain open. Cold interpreter/context/compiler, checks and disk I/O are excluded. Torch memory excludes external graph, driver and context allocations. Three repetitions do not establish confidence intervals. **FDTDX, fdtdz and fdtd3d remain unmeasured on this GPU.**
+
+[Python API and semantics](docs/GROUPED_BATCH.md), [standalone example](examples/grouped_batch.py), [all inputs, repetitions, errors and source hashes](docs/validation/grouped-ensembles.json).
+<!-- END GROUPED MEASUREMENTS -->
+
+<!-- BEGIN GEOMETRY MEASUREMENTS -->
+## Analytic CAD and material-preparation ablation
+
+**RTX 5880 Ada, four independent scenes per row, eight solids per scene, 800 float32 steps, median of three warmed repetitions.**
+
+Native CAD now includes extruded concave polygons, ellipsoids, elliptical cylinders/ring sectors and ordered three-axis rotations. The new preparation path tests membership only inside conservative solid bounds. The baseline tests the same analytic equations over the whole domain. Both use identical Yee grids, sources, CPML, CUDA kernels, cohort sizes and complete outputs. This is a native implementation ablation, not a comparison with another library.
+
+| Solids | Grid | Unpruned batch (s) | Bounded batch (s) | Full-wall gain | Host material preparation, before → after (s) |
+|---|---:|---:|---:|---:|---:|
+| Spheres | 64³ | 0.242 | 0.161 | 1.50× | 0.091 → 0.013 |
+| Rotated boxes | 64³ | 0.608 | 0.185 | 3.28× | 0.437 → 0.018 |
+| Concave polygons | 64³ | 3.965 | 0.194 | 20.40× | 3.590 → 0.031 |
+| Elliptical ring sectors | 64³ | 2.015 | 0.191 | 10.54× | 1.681 → 0.022 |
+| Spheres | 96³ | 0.888 | 0.617 | 1.44× | 0.301 → 0.029 |
+| Rotated boxes | 96³ | 2.023 | 0.623 | 3.25× | 1.438 → 0.034 |
+| Concave polygons | 96³ | 13.768 | 0.650 | 21.19× | 12.843 → 0.053 |
+| Elliptical ring sectors | 96³ | 6.414 | 0.628 | 10.21× | 5.578 → 0.044 |
+
+**All 48 timed-ensemble gates pass bitwise** for permittivity, complete final E/H, point traces, time arrays, snapshots, complex plane fields and signed flux. Display tessellation does not enter the material equations. Independent tests also compare analytic volumes and equivalent box/polygon optical representations.
+
+Full wall includes host preparation, CUDA Graph capture, stepping and output transfer. Cold compilation/context, checks and disk writes are excluded. The GPU still updates every Yee cell. These gains primarily remove host preparation work for compact solids and do not establish a faster CUDA update kernel. Unchanged kernels also show different loop timings in some repetitions, so loop fluctuations are retained in the raw record without attributing them to a new kernel. Longer propagation runs or large overlapping solids may benefit less. No geometry-result cache is used in either mode. Three repetitions do not establish confidence intervals.
+
+[Geometry controls and conventions](docs/ANALYTIC_GEOMETRY.md), [Python batch example](examples/analytic_solids.py), [inputs, repetitions and source hashes](docs/validation/geometry-ensembles.json).
+<!-- END GEOMETRY MEASUREMENTS -->
+
+<!-- BEGIN RECTILINEAR MEASUREMENTS -->
+## Rectilinear mesh and batch ablation
+
+**NVIDIA RTX 5880 Ada Generation, 4 independent cases per row, 800 float32 steps, median of 3 warmed repetitions.**
+
+The native solver now supports independent axis spacing and explicit rectilinear node arrays. This experiment retains the same physical domain, propagation step, actual time step, sources, PML, duration and 17 flux frequencies. Transverse spacing changes from 0.05 to 0.2 µm, removing 93.75% of cells. The geometries and normal-incidence excitation are uniform in both transverse directions. This is a native mesh ablation, separate from the cross-library tables below.
+
+| Workload | Uniform → rectangular grid | Uniform batch (s) | Rectangular batch (s) | Mesh gain | Batch gain at rectangular mesh | Torch peak allocated, uniform → rectangular (MiB) |
+|---|---|---:|---:|---:|---:|---:|
+| Vacuum | 128 × 64 × 64 → 128 × 16 × 16 | 0.312 | 0.060 | 5.18× | 1.80× | 120.71 → 7.63 |
+| Slab | 128 × 64 × 64 → 128 × 16 × 16 | 0.326 | 0.075 | 4.33× | 1.62× | 120.71 → 7.63 |
+| Bilayer | 128 × 64 × 64 → 128 × 16 × 16 | 0.326 | 0.075 | 4.34× | 1.54× | 120.71 → 7.63 |
+| Multilayer | 128 × 64 × 64 → 128 × 16 × 16 | 0.336 | 0.069 | 4.88× | 1.70× | 120.71 → 7.63 |
+| Vacuum | 192 × 96 × 96 → 192 × 24 × 24 | 1.175 | 0.088 | 13.39× | 1.48× | 386.24 → 24.23 |
+| Slab | 192 × 96 × 96 → 192 × 24 × 24 | 1.199 | 0.099 | 12.09× | 1.41× | 386.24 → 24.23 |
+| Bilayer | 192 × 96 × 96 → 192 × 24 × 24 | 1.203 | 0.095 | 12.67× | 1.42× | 386.24 → 24.23 |
+| Multilayer | 192 × 96 × 96 → 192 × 24 × 24 | 1.255 | 0.094 | 13.37× | 1.46× | 386.24 → 24.23 |
+
+**All 72 timed-ensemble gates pass.** Maximum relative L2 across centerline final E/H, full point traces and signed flux is **5.95e-15** (gate: 3e-5). Every final E/H array is constant along the transverse directions in this experiment. Different grids contain different sample counts. This does not establish a curved-geometry accuracy improvement, a resolution-independent speedup, or superiority over another library.
+
+Full wall includes preparation, graph capture, and final fields/monitor transfer. Cold compilation/context, validation and disk writes are excluded. Memory is the Torch allocator peak, excluding external context, driver and graph allocations. Three repetitions do not establish confidence intervals.
+
+[Python and UI controls](docs/RECTILINEAR_MESH.md), [example](examples/rectilinear_mesh.py), [inputs, repetitions, errors and source hashes](docs/validation/rectilinear-ensembles.json).
+<!-- END RECTILINEAR MEASUREMENTS -->
+
+<!-- BEGIN SELECTIVE MONITOR MEASUREMENTS -->
+## Selective-output CUDA ensembles
+
+**NVIDIA RTX 5880 Ada Generation, 8 cases per row, 800 float32 steps, three planes with 65 frequencies, cohorts of 4, 3 measured repetitions after warmup.** Full wall includes setup, graph capture, final E/H, point traces and selected results. Cold compilation/context and disk writes are excluded.
+
+When the requested observable is signed flux, the new output selector accumulates **four tangential E/H components instead of six**, and omits unused field/Poynting exports. The same flux frequencies, quadrature and time samples are retained. The full-output column is the native batch with all six fields and three Poynting components stored. The external flaport/fdtd 0.2.2 sequence also receives the **same selective fused observer**, using the lower median of its one-step/eight-step graph options. Native graphs use one step.
+
+| Workload | Grid | flaport sequence (s) | Native full-output batch (s) | Native flux-only batch (s) | Output-selection gain | vs flaport sequence |
+|---|---:|---:|---:|---:|---:|---:|
+| Vacuum | 32³ | 3.404 | 0.241 | 0.211 | 1.14× | 16.11× |
+| Sphere | 32³ | 3.381 | 0.220 | 0.175 | 1.26× | 19.32× |
+| Slab | 32³ | 3.324 | 0.239 | 0.194 | 1.23× | 17.14× |
+| Waveguide | 32³ | 3.475 | 0.244 | 0.213 | 1.14× | 16.30× |
+| Vacuum | 64³ | 4.388 | 0.833 | 0.492 | 1.69× | 8.91× |
+| Sphere | 64³ | 4.298 | 0.882 | 0.541 | 1.63× | 7.95× |
+| Slab | 64³ | 4.208 | 0.847 | 0.544 | 1.56× | 7.74× |
+| Waveguide | 64³ | 4.204 | 0.889 | 0.533 | 1.67× | 7.89× |
+
+Cohort scheduling and memory are separate from output selection:
+
+| Workload | Grid | Flux-only native sequential (s) | Flux-only batch gain | Batch cases/s | Torch peak allocated, full / flux-only (MiB) |
+|---|---:|---:|---:|---:|---:|
+| Vacuum | 32³ | 0.304 | 1.44× | 37.86 | 18.51 / 14.88 |
+| Sphere | 32³ | 0.280 | 1.60× | 45.70 | 18.51 / 14.88 |
+| Slab | 32³ | 0.283 | 1.46× | 41.24 | 18.51 / 14.88 |
+| Waveguide | 32³ | 0.309 | 1.45× | 37.54 | 18.51 / 14.88 |
+| Vacuum | 64³ | 0.535 | 1.09× | 16.25 | 103.15 / 96.25 |
+| Sphere | 64³ | 0.576 | 1.07× | 14.80 | 103.15 / 96.25 |
+| Slab | 64³ | 0.546 | 1.00× | 14.71 | 103.15 / 96.25 |
+| Waveguide | 64³ | 0.557 | 1.04× | 15.02 | 103.15 / 96.25 |
+
+**All 120 timed-ensemble accuracy gates pass.** Native final E/H, point traces and signed flux agree bitwise with independent full-output runs. Maximum external trace relative L2 is 0.3267% (gate 1%) and flux relative L2 is 0.1314% (gate 2%). External full-field differences remain in the raw record without a full-field equivalence claim.
+
+These gains apply when the omitted fields are not requested. They are not six-field-output speedups, mesh-converged error claims or adjoint measurements. Temporal/spatial decimation was **not** used in this comparison. Torch memory excludes context, driver and graph-executable allocations outside its allocator. Three repetitions do not establish confidence intervals. FDTDX, fdtdz and fdtd3d remain unmeasured on this GPU.
+
+[Python/UI controls](docs/CUDA_SPECTRA.md), [all modes and repetitions](docs/validation/SELECTIVE_MONITOR_REPORT.md), [input/settings/hash/error record](docs/validation/selective-monitors.json).
+<!-- END SELECTIVE MONITOR MEASUREMENTS -->
+
+<!-- BEGIN MEASURED PHASE AND GRAPH -->
+## Current spectral throughput and optimization ablations
+
+**NVIDIA RTX 5880 Ada Generation, 8 independent cases per row, 800 float32 steps, cohorts of 4, median of 3 warmed repetitions.** Three planes retain all six complex components at nine frequencies, with point traces and full final E/H. Full wall includes preparation, graph capture and output transfer. Cold context/compilation and disk writes are excluded.
+
+The current fused monitor adds one shared CUDA phase kernel. The external **flaport/fdtd 0.2.2** sequence receives the identical observer and both one-step and 8-step graph options. The external column uses the **lower measured median** of those two options. PhotonWeave uses a fixed one-step graph and shared case launches. This compares ensemble workflows, not an upstream fused-batch implementation.
+
+| Workload | Grid | flaport + shared observer, sequence (s) | PhotonWeave batch (s) | vs flaport sequence |
+|---|---:|---:|---:|---:|
+| Vacuum | 32³ | 3.371 | 0.179 | 18.86× |
+| Sphere | 32³ | 3.409 | 0.198 | 17.25× |
+| Slab | 32³ | 3.613 | 0.171 | 21.11× |
+| Waveguide | 32³ | 3.301 | 0.154 | 21.44× |
+| Vacuum | 64³ | 4.026 | 0.396 | 10.17× |
+| Sphere | 64³ | 4.324 | 0.382 | 11.32× |
+| Slab | 64³ | 4.107 | 0.416 | 9.87× |
+| Waveguide | 64³ | 4.147 | 0.390 | 10.63× |
+
+Optimization effects are measured separately. Ratios below one are retained slowdowns:
+
+| Workload | Grid | CUDA phase gain, full wall / loop | 8-step graph gain, full wall / loop | Batch cases/s |
+|---|---:|---:|---:|---:|
+| Vacuum | 32³ | 1.03× / 1.19× | 1.01× / 1.03× | 44.76 |
+| Sphere | 32³ | 1.03× / 1.18× | 0.96× / 1.04× | 40.47 |
+| Slab | 32³ | 0.95× / 1.16× | 1.02× / 1.04× | 46.75 |
+| Waveguide | 32³ | 1.06× / 1.19× | 0.99× / 1.03× | 51.97 |
+| Vacuum | 64³ | 0.94× / 1.06× | 1.09× / 1.02× | 20.21 |
+| Sphere | 64³ | 1.03× / 1.08× | 0.99× / 0.98× | 20.93 |
+| Slab | 64³ | 1.04× / 1.13× | 0.96× / 0.93× | 19.22 |
+| Waveguide | 64³ | 0.99× / 1.08× | 1.01× / 1.00× | 20.51 |
+
+**Accuracy gates: passed throughout.** With the current phase kernel, native single/batch/unrolled complete output arrays match bitwise. The previous phase expression differs by at most 3.42e-08 in complete complex DFT relative L2 (gate: 3e-6). The maximum external complex DFT difference is 0.3875% (gate: 1%). External unrolling matches its own original graph outputs bitwise. Cross-library final fields remain different.
+
+`cuda_graph_steps=8` is optional in single runs, tensor batches, tuning and tensor design. Every physical step and requested output is retained. Snapshot, diagnostic and callback steps are exact barriers. Additional capture cost can erase loop savings, so the default remains one. Cancellation is polled between replays. This adds no adjoint. **FDTDX, fdtdz and fdtd3d remain unmeasured on this GPU.**
+
+[Algorithm and Python controls](docs/CUDA_SPECTRA.md), [all timings, setup costs and memory](docs/validation/GRAPH_ENSEMBLE_REPORT.md), [raw input/settings/checks](docs/validation/graph-ensembles.json).
+<!-- END MEASURED PHASE AND GRAPH -->
+
+<!-- BEGIN MEASURED SPECTRAL ENSEMBLES -->
+## Spectral ensembles: monitor fusion and independent CUDA batches
+
+8 independent cases per row, 800 steps, float32, NVIDIA RTX 5880 Ada Generation. Every case records three spatial planes, six complex E/H components at nine frequencies, one point trace and final E/H. Cohorts contain 4 cases. Medians of 3 warmed full-solve timings include preparation and result transfer. No output resolution or time step is reduced.
+
+The external baseline uses **flaport/fdtd 0.2.2 + CUDA Graph + the same new fused DFT adapter**, executing cases sequentially. The external Torch-DFT baseline is also retained in the full report. The native reference already uses fused Yee updates, with Torch DFT per plane. The new selectable monitor path shares interpolation and spectral accumulation launches across planes and cases.
+
+| Workload | Grid | flaport + adapters, sequential (s) | Native Torch DFT, batch (s) | Shared CUDA DFT, batch (s) | vs flaport sequence | Monitor improvement at same cohort |
+|---|---:|---:|---:|---:|---:|---:|
+| Vacuum | 32³ | 3.444 | 1.367 | 0.182 | 18.89× | 7.50× |
+| Sphere | 32³ | 3.458 | 1.434 | 0.204 | 16.91× | 7.01× |
+| Slab | 32³ | 3.465 | 1.325 | 0.163 | 21.23× | 8.12× |
+| Waveguide | 32³ | 3.364 | 1.331 | 0.181 | 18.58× | 7.35× |
+| Vacuum | 64³ | 4.111 | 1.560 | 0.370 | 11.12× | 4.22× |
+| Sphere | 64³ | 4.248 | 1.581 | 0.436 | 9.75× | 3.63× |
+| Slab | 64³ | 4.114 | 1.606 | 0.395 | 10.41× | 4.06× |
+| Waveguide | 64³ | 4.145 | 1.563 | 0.382 | 10.84× | 4.09× |
+
+Batch scheduling contributes separately from monitor fusion:
+
+| Workload | Grid | Shared DFT, native sequential (s) | Shared DFT, batch (s) | Batch vs sequential | Batch cases/s | Torch peak allocated, sequential / batch (MiB) |
+|---|---:|---:|---:|---:|---:|---:|
+| Vacuum | 32³ | 0.301 | 0.182 | 1.65× | 43.90 | 2.66 / 10.61 |
+| Sphere | 32³ | 0.322 | 0.204 | 1.57× | 39.13 | 2.66 / 10.61 |
+| Slab | 32³ | 0.283 | 0.163 | 1.73× | 49.02 | 2.66 / 10.61 |
+| Waveguide | 32³ | 0.281 | 0.181 | 1.55× | 44.19 | 2.66 / 10.61 |
+| Vacuum | 64³ | 0.447 | 0.370 | 1.21× | 21.64 | 17.92 / 71.63 |
+| Sphere | 64³ | 0.464 | 0.436 | 1.07× | 18.35 | 17.92 / 71.63 |
+| Slab | 64³ | 0.471 | 0.395 | 1.19× | 20.24 | 17.92 / 71.63 |
+| Waveguide | 64³ | 0.445 | 0.382 | 1.16× | 20.93 | 17.92 / 71.63 |
+
+**Accuracy gates: passed in every row.** Maximum complete complex-plane DFT relative L2 difference is **0.3875%** against the external adapter (gate: 1%), and **5.28e-08** against native Torch DFT (gate: 3e-6). Native final E/H and point traces match bitwise. Fused single and batch complex DFTs match bitwise. The previous Torch and new fused DFTs are tolerance-equivalent, with small reduction-order rounding differences.
+
+These are measured forward ensemble ratios against the stated adapters, not speed rankings against FDTDX, fdtdz or fdtd3d. They do not establish mesh-converged accuracy, mode efficiency or adjoint performance. Batching raises resident memory. Torch allocation excludes CUDA context/driver overhead. The raw record retains late-time external full-field differences without claiming full-field equivalence.
+
+[Python/UI selection and algorithm](docs/CUDA_SPECTRA.md), [full record](docs/validation/spectral-ensembles.json), [reproduction and all timing modes](docs/validation/SPECTRAL_ENSEMBLE_REPORT.md).
+<!-- END MEASURED SPECTRAL ENSEMBLES -->
+
+<!-- BEGIN MEASURED OPEN SOURCE -->
+## Measured CUDA comparisons
+
+**RTX 5880 Ada 48 GB, Windows, float32, 800 steps, three warmed repetitions.** Times below are median full-solve wall times, including construction, CUDA graph preparation and final field transfer. Cold interpreter/context startup and first compilation are excluded. These are fixed-step forward benchmarks, not mesh-convergence or adjoint benchmarks.
+
+The external baseline is **flaport/fdtd 0.2.2 with an added CUDA Graph adapter**, calling its unmodified E/H updates. Its eager timings are retained in the raw records. Both engines receive identical voxel permittivity, timestep, sampled source and point monitor. The upstream high-side PML interface stencil differs, so agreement is assessed separately.
+
+| Example | Grid | flaport + graph (ms) | PhotonWeave fused (ms) | Speedup | Point-trace relative L2 |
+|---|---:|---:|---:|---:|---:|
+| Vacuum | 64³ | 649.23 | 38.06 | 17.06× | 0.0142% |
+| Sphere | 64³ | 629.07 | 39.72 | 15.84× | 0.0233% |
+| Slab | 64³ | 636.26 | 37.23 | 17.09× | 0.0197% |
+| Waveguide | 64³ | 632.59 | 39.90 | 15.85× | 0.0372% |
+| Vacuum | 96³ | 954.98 | 78.77 | 12.12× | 0.0120% |
+| Sphere | 96³ | 848.58 | 88.05 | 9.64× | 0.0208% |
+| Slab | 96³ | 836.66 | 80.37 | 10.41× | 0.0174% |
+| Waveguide | 96³ | 848.07 | 80.00 | 10.60× | 0.0328% |
+
+All eight point traces pass the predeclared 1% relative-L2 tolerance. This is cross-solver agreement, not error against an exact solution. **Final full fields are not identical across libraries:** for the late-time 64³ vacuum case, H relative L2 is 31.45% with maximum absolute difference 1.89e-7 in reduced units (reference final H peak 1.23e-7). All E/H errors and reference scales are retained. The upstream graph adapter itself matches upstream eager E/H/traces bitwise in these cases.
+
+Torch peak allocated memory is **17.85 vs 52.51 MiB** at 64³ and **56.99 vs 141.76 MiB** at 96³ (PhotonWeave vs graph-adapted upstream). This excludes CUDA context and driver allocations.
+
+### Independent structures in one CUDA launch
+
+`run_tensor_batch()` adds a real CUDA batch axis to the E/H updates and shares source/point-trace launches. The sweep varies the sphere radius. All timed native batch E/H arrays and point traces match separate native solves **bitwise**. Cases/s also equals scalar objective evaluations/s for the measured trace-peak objective.
+
+| Grid | Cases | Native sequential (ms) | Native tensor batch (ms) | Tensor cases/s | Batch speedup vs native sequential |
+|---|---:|---:|---:|---:|---:|
+| 32³ | 1 | 23.22 | 20.38 | 49.06 | 1.14× |
+| 32³ | 2 | 46.00 | 31.39 | 63.71 | 1.47× |
+| 32³ | 4 | 106.81 | 63.67 | 62.83 | 1.68× |
+| 32³ | 8 | 181.89 | 88.24 | 90.66 | 2.06× |
+| 32³ | 16 | 341.29 | 142.46 | 112.31 | 2.40× |
+| 64³ | 1 | 39.08 | 40.49 | 24.70 | 0.97× |
+| 64³ | 2 | 86.40 | 78.29 | 25.55 | 1.10× |
+| 64³ | 4 | 167.68 | 153.87 | 26.00 | 1.09× |
+| 64³ | 8 | 307.35 | 357.10 | 22.40 | 0.86× |
+| 64³ | 16 | 669.53 | 852.94 | 18.76 | 0.78× |
+
+**Larger batches can be slower.** The 64³, B=8 and B=16 regressions are retained above. Use an explicit `cohort_size` to bound the cases processed together. A follow-up 64³, 16-case experiment measures the cost of splitting rather than extrapolating it:
+
+| 16 × 64³ execution | Full wall (ms) | Cases/s | Torch peak allocated (MiB) |
+|---|---:|---:|---:|
+| Independent sequential | 667.89 | 23.96 | 17.85 |
+| Four cohorts of four | 607.88 | 26.32 | 62.40 |
+| One cohort of sixteen | 866.73 | 18.46 | 240.61 |
+
+This initial follow-up used user-selected sizes. The measured selector is evaluated separately below. Splitting preserves bitwise E/H/traces in this follow-up. It reduces GPU allocation but still retains host results when `keep_results=True`.
+
+| 16-case sweep | flaport + graph, sequential (s) | Native, 2 process workers (s) | Native, one tensor cohort (s) |
+|---|---:|---:|---:|
+| 32³ | 6.470 | 0.914 | 0.142 |
+| 64³ | 8.196 | 1.280 | 0.853 |
+
+The process comparison excludes worker startup and includes IPC. The upstream ensemble runs cases sequentially through our graph adapter, so it does not establish a limit on a separately optimized upstream batch implementation. The 32³ batch traces differ from upstream by at most 0.267%, still below the predeclared 1% threshold.
+
+**FDTDX, fdtdz and fdtd3d have not been timed on this GPU.** Their capabilities are compared below, but there is no measured speed ranking against them. The current GPU host lacks a Linux CUDA environment. See [method, environment and limitations](docs/validation/OPEN_SOURCE_REPORT.md), [raw single-case data](docs/validation/open-source-flaport.json), [raw batch data](docs/validation/tensor-batch.json), [raw cohort data](docs/validation/cohorts.json), and the [Python batch API](docs/TENSOR_BATCH.md).
+
+### Four workloads with 16 independent cases each
+
+A follow-up repeats vacuum amplitude, sphere radius, slab thickness and waveguide width sweeps. Each row contains 16 complete 800-step solves. The upstream graph adapter runs those cases sequentially. PhotonWeave uses shared CUDA launches and the cohort size selected by a separate full-workload timing trial. **These are ensemble throughput ratios, not single-solve speedups or comparisons with an upstream fused batch implementation.**
+
+| Workload | Grid | flaport graph sequential (s) | Native sequential (s) | Selected cohort | Native batch (s) | vs flaport sequence | vs native sequence |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Vacuum | 32³ | 6.523 | 0.341 | 2 | 0.209 | 31.20× | 1.63× |
+| Sphere | 32³ | 6.665 | 0.371 | 16 | 0.207 | 32.22× | 1.79× |
+| Slab | 32³ | 6.977 | 0.380 | 16 | 0.204 | 34.12× | 1.86× |
+| Waveguide | 32³ | 6.436 | 0.347 | 16 | 0.145 | 44.32× | 2.39× |
+| Vacuum | 64³ | 7.911 | 0.595 | 4 | 0.519 | 15.24× | 1.15× |
+| Sphere | 64³ | 8.290 | 0.660 | 4 | 0.545 | 15.22× | 1.21× |
+| Slab | 64³ | 7.949 | 0.574 | 4 | 0.503 | 15.81× | 1.14× |
+| Waveguide | 64³ | 8.058 | 0.601 | 4 | 0.562 | 14.33× | 1.07× |
+
+Every native E/H/point-trace result matches the independent native solve bitwise. The largest upstream point-trace relative L2 difference is 0.3893% (gate: 1%). Full upstream field errors and weak-field reference scales are retained in the raw records. These point-driven fixtures do not measure mode efficiency, resonator Q or mesh-converged accuracy.
+
+**Tuning is an up-front cost.** `tune_tensor_batch()` tests sizes 1/2/4/8/16 with one warmup and three measured repetitions each. The following runs are independent of the selection samples. A noisy timing winner need not remain fastest. The break-even column divides the entire tuning cost by the later median saving against native sequential execution, rounded up. It assumes that saving persists across repeated identical ensembles and excludes user-objective/disk costs.
+
+| Workload | Grid | Tuning cost (s) | Batch speedup vs fixed cohort 16 | Estimated ensembles to repay tuning vs native sequential |
+|---|---:|---:|---:|---:|
+| Vacuum | 32³ | 6.02 | 0.801× | 46 |
+| Sphere | 32³ | 5.54 | 1.006× | 34 |
+| Slab | 32³ | 5.51 | 0.995× | 32 |
+| Waveguide | 32³ | 5.88 | 1.010× | 30 |
+| Vacuum | 64³ | 15.50 | 1.543× | 204 |
+| Sphere | 64³ | 16.65 | 1.488× | 144 |
+| Slab | 64³ | 15.58 | 1.540× | 220 |
+| Waveguide | 64³ | 16.09 | 1.473× | 420 |
+
+A ratio below 1 retains a regression. For a single short sweep, an explicit size can cost less overall than tuning. All fixed-size measurements, all trial samples and peak Torch allocations are in [the ensemble record](docs/validation/ensembles.json).
+
+### Complete black-box inverse-design loop
+
+`optimize(execution="tensor", cohort_size=...)` now evaluates differential-evolution populations in CUDA cohorts. These timings include all 64 forward solves, proposal/replacement logic and scalar objectives: population 16, three trial generations, seed 73. The objective is an unnormalized integrated point-field intensity. The full parameter and objective histories are identical to native independent execution. This is **forward-only**, with no adjoint.
+
+| Grid | Cohort | Independent design loop (s) | Tensor design loop (s) | Speedup | Tensor objective evaluations/s |
+|---|---:|---:|---:|---:|---:|
+| 32³ | 16 | 1.677 | 0.818 | 2.05× | 78.28 |
+| 64³ | 4 | 2.468 | 2.204 | 1.12× | 29.04 |
+
+Design timings use explicit cohort sizes and exclude cohort tuning. [Raw complete histories](docs/validation/design-throughput.json), [reproduction and interpretation](docs/validation/ENSEMBLE_REPORT.md), [Python tuning and design example](examples/tuned_inverse_design.py).
+<!-- END MEASURED OPEN SOURCE -->
+
+### Isolated-scatterer validation
+
+The new closed TFSF source adds an isolated-scattering workflow with Python/UI control and shared CUDA batch execution. This expands native scope without establishing a unique capability or speed advantage over every other library. A radius-0.3 µm, index-1.5 sphere is compared with the analytic Mie series at nine wavelengths from 1.3 to 1.8 µm. Domain size, physical PML thickness and 120 fs duration are held fixed.
+
+| Mesh (µm) | Grid | Maximum relative scattering-cross-section error |
+|---|---:|---:|
+| 0.1 | 32³ | 8.8963% |
+| 0.05 | 64³ | 0.3086% |
+| 0.025 | 128³ | 1.0474% |
+| 0.02 | 160³ | 0.5514% |
+
+**The error is not monotonic.** The best row is not a general accuracy guarantee. Doubling the 0.025 µm duration to 240 fs leaves the result essentially unchanged. Twenty independent homogeneous propagation cases, auxiliary-PML convergence and all sphere results are retained in the [TFSF validation report](docs/validation/TFSF_REPORT.md). [Executable sphere example](examples/tfsf_sphere.py).
+
+## Quick start
+
+Python 3.10+ and Node.js 20.19+ / 22.12+. Install a [CUDA-enabled PyTorch distribution](https://pytorch.org/get-started/locally/) for your GPU first. CPU operation is also supported.
+
+```powershell
+python -m venv --system-site-packages .venv
+.venv/Scripts/python.exe -m pip install --upgrade pip
+.venv/Scripts/python.exe -m pip install -e ".[dev]"
+npm.cmd ci
+npm.cmd run build
+.venv/Scripts/python.exe -m photonweave.cli serve
+```
+
+Open **http://127.0.0.1:8765**. On Linux/macOS use `.venv/bin/python` and `npm` instead. The server listens only on loopback. Use SSH forwarding to connect to a remote GPU, rather than exposing an unauthenticated solver on the network.
+
+## Familiar editing workflow
+
+1. Start with the SiN waveguide, cylinder or 3D sphere example.
+2. Add Rectangle, Circle (z-oriented cylinder), Ring or Sphere from Design.
+3. Select from the tree or a CAD view. Drag objects in a 2D view or use the 3D translation gizmo. Scroll to zoom, use Fit view to reset, and use Snap to align positions to the mesh.
+4. Edit center position, spans, ellipse radii, ring angles, material, mesh order and ordered rotations in Object properties. Use Polygon → Edit polygon vertices for a validated local contour. Lower mesh order wins. Later objects win ties.
+5. Select FDTD to set the domain, uniform or graded mesh spacing, PML layers, time steps, field component and output slice. All geometry and wavelengths use **µm**, all API time arrays use **seconds**.
+6. Add an electric/magnetic point or sheet source and point time monitors. Choose Cartesian polarization or theta/phi orientation. A soft sheet radiates in both directions. Select one-way injection for a plane covering a transverse periodic cell, or add a TFSF box around an isolated scatterer. Both paired injection options currently require normal incidence. Oblique and waveguide mode sources remain unavailable.
+7. Run. The interface locks the layout while a calculation is running and in Analysis mode. Inspect signed field snapshots, animate time steps, and view monitor traces and FFTs.
+8. Export NPZ fields and monitor CSV. Switch to Layout to edit and rerun. Save JSON to exchange projects with Python.
+
+Shortcuts: `Ctrl+S` save, `Ctrl+O` open, `Ctrl+D` duplicate, `Delete` remove, `Ctrl+Z` undo, `Ctrl+Y` redo, `F` fit.
+
+## Python
+
+```python
+from photonweave import Project, Region, Structure, Source, Monitor, Simulation
+
+project = Project(
+    name="My waveguide",
+    region=Region(size=(8, 6, 2), mesh=0.05, steps=1000, backend="cuda"),
+    structures=[Structure(name="core", size=(8, 0.65, 0.4))],
+    sources=[Source(center=(-2.5, 0, 0), wavelength=1.55)],
+    monitors=[Monitor(name="output", center=(2, 0, 0))],
+)
+project.save("project.json")  # Open in the browser.
+result = Simulation(project).run()
+result.save("results/run.npz")
+print(result.summary)
+```
+
+Use `Project.load("project.json")` to run browser-created geometry. `result.electric` and `.magnetic` contain final arrays shaped `(Nx, Ny, Nz, 3)`. `.signals` is `(steps, enabled_point_monitors)`, `.times` is in seconds, and `.frames` stores the selected field slice. NPZ includes the exact project, timing and engine metadata. Python export in the UI produces a complete executable script. Scripts run in your Python environment, not as arbitrary server-side browser code.
+
+The native `Project.model_json_schema()` documents every accepted solver setting.
+`Result.load()` restores saved results without pickle. `FieldMonitor` records
+complex planar E/H arrays and signed flux. `normalize_flux()` validates and uses
+a matching reference. No UI is needed for these operations.
+
+```python
+from photonweave import Project, BatchRunner, parameter_sweep
+
+def objective(result):
+    return {"peak": result.summary["field_peak"]}
+
+if __name__ == "__main__":
+    base = Project.load("sphere.json")
+    cases = parameter_sweep(base, {"structures.0.radius": [0.4, 0.5, 0.6]})
+    with BatchRunner(backend="cuda", max_workers=2) as runner:
+        report = runner.run(cases, objective=objective, objective_key="peak-v1",
+                            output_dir="results/sweep", resume=True)
+        report.raise_for_errors()
+        print([item.metrics for item in report.items])
+```
+
+Batch concurrency isolates process-global solver state and limits estimated VRAM.
+It supports independent cases on selected CUDA devices, per-case errors, cancellation
+and checksum-validated resume. A separate [`run_tensor_batch`](docs/TENSOR_BATCH.md)
+API shares CUDA launches across compatible real-field cases. Single-grid MPI and adjoint
+gradients remain unimplemented. `optimize()` supplies a seeded parallel differential
+evolution loop with a user-defined Python objective. [Complete API conventions](docs/PYTHON_BATCH.md).
+
+A small `FDTD` facade offers familiar Python commands. **This facade uses SI metres**, while the native `Project` API and UI use micrometres. Unsupported commands raise errors instead of silently approximating behavior.
+
+```python
+from photonweave import FDTD
+fdtd = FDTD()
+fdtd.addrect(name="core", x_span=4e-6, y_span=0.5e-6, z_span=0.4e-6, index=2)
+fdtd.adddipole(name="source", x=-1e-6, wavelength=1.55e-6)
+fdtd.addtime(name="output", x=1e-6)
+fdtd.setnamed("FDTD", "backend", "cuda")
+fdtd.save("familiar-api.json")
+fdtd.run()
+trace = fdtd.getresult("output")
+```
+
+```powershell
+.venv/Scripts/python.exe -m photonweave.cli hardware
+.venv/Scripts/python.exe -m photonweave.cli example 3d --output sphere.json
+.venv/Scripts/python.exe -m photonweave.cli run sphere.json --output results/sphere.npz
+```
+
+## GPU workstation
+
+`scripts/remote.py` deploys into a dedicated directory and a new venv, reusing an existing CUDA PyTorch interpreter without changing that interpreter's packages. It requires `pip install paramiko` locally. Passwords are requested interactively, or passed via `PHOTONWEAVE_SSH_PASSWORD`, and are never written into the project.
+
+```powershell
+python scripts/remote.py deploy --host YOUR_GPU_HOST --user YOUR_USER --python C:/path/to/cuda/python.exe --root C:/path/to/photonweave
+# Start `python -m photonweave.cli serve` inside that remote venv.
+ssh -N -L 8766:127.0.0.1:8765 YOUR_USER@YOUR_GPU_HOST
+```
+
+Open **http://127.0.0.1:8766**. The connection badge identifies the actual GPU and host. `scripts/tunnel.py` provides equivalent SSH forwarding with a host key recorded by the deployment helper.
+
+On Windows, after deployment, `scripts/start_remote.ps1 -GpuHost YOUR_GPU_HOST` starts a persistent SSH session for the remote solver and opens a local forwarding port. The password is requested once and is not saved. Keep that tunnel process running while using the workbench. The script prints its process ID and local URL.
+
+## Numerical model and limits
+
+- Full six-component Yee FDTD in 3D, and z-invariant 2D with all vector components available. Ez excitation yields TMz in 2D. Uniform Cartesian cells and a configurable CFL stability factor (default 0.99).
+- Constant dielectrics with index ≥ 1, plus passive isotropic Drude/Lorentz dispersion and absorption with up to 16 coupled poles. Built-in Si, SiN and SiO2 values are editable approximations, not dispersive optical-constant databases. Parameter editing and n/k previews are available through [Materials](docs/MATERIALS.md) and the [multipole guide](docs/RUN_CONTROL_AND_CONVERGENCE.md). Sampled-data fitting, gain, nonlinearity and anisotropy remain unsupported.
+- Voxelized geometry without conformal/subpixel material smoothing. Refine the mesh and perform convergence studies for quantitative work.
+- Six-face convolutional PML in 3D, four faces in 2D, with independent layers, sigma scale, kappa, alpha and polynomial orders. Periodic and Bloch boundary pairs are supported. Symmetry/antisymmetry and PEC/PMC are not implemented yet. See [boundary conventions and validation](docs/BOUNDARIES.md).
+- Gaussian, smoothly ramped continuous, or sampled time/amplitude/phase electric or magnetic soft sources, with Cartesian or theta/phi orientation. Magnetic injection uses the H half-step time. The legacy cycle-based Gaussian has σ = `pulse_cycles * wavelength / c`, with center at 4σ. Standard time-domain mode exposes power-FWHM, offset and phase. [Source conventions](docs/SOURCES.md) describe carrier definitions, global inheritance and custom tables. Amplitudes are reduced fields, not calibrated V/m or dipole moments.
+- Bloch simulations retain complex E/H fields and monitor traces. A sheet source automatically applies the specified Bloch spatial phase. Snapshots can show real, imaginary, magnitude or phase values, while NPZ retains the complete complex data.
+- Point monitors record one E/H component every step. Choose FFT bins or custom-range uniform frequency/wavelength DFT, with None/Start/End/Full/Hann apodization. [Definitions, UI controls and exports](docs/MONITORS.md) distinguish FFT amplitude from complex DFT integrals. Neither is normalized transmission, reflection, power or S-parameters. E and H are staggered in space and time, and should not be naively multiplied as collocated Poynting fields.
+- Field movies retain at most 100 sampled planes, downsampled spatially to ≤256 pixels per axis for the browser. NPZ also retains all final E/H components at the full mesh resolution.
+- The web server serializes interactive runs because `fdtd` uses process-global state. The Python BatchRunner isolates concurrent cases in separate processes. One web-server process supports one active job and two queued jobs. Cancellation is checked each time step. Job metadata is session-local; exported NPZ files persist.
+- FSP files can be inspected and edited using the optional [Lumerical bridge](docs/FSP.md), with original-file preservation and saved-value verification. The independent importer runs the [documented layout subset](docs/FSP_NATIVE.md) on the native GPU engine. Unsupported physics blocks conversion, and calculation differences remain visible. Native `.lsf`, GDS and STL import are not implemented. Mode ports, far-field transformations, adaptive subgrids and inverse-design gradients remain unimplemented. Planar flux monitors and black-box inverse design are available natively.
+
+## Verification and performance
+
+```powershell
+python -m pytest -q
+npm run test:ui
+python benchmarks/performance.py --sizes 64 96 128 --steps 300 --repeats 3
+python -m benchmarks.batch_validation
+python -m benchmarks.open_source
+python -m benchmarks.tensor_batch_validation
+python -m benchmarks.cohort_validation
+python -m examples.flux_slab --backend cuda
+```
+
+Validation uses analytic solutions and independently authored native CPU/CUDA projects. No Lumerical simulation results are used. Total wall time and stepping time are distinguished. See the [native batch measurements](docs/validation/BATCH_REPORT.md) and [slab example](examples/flux_slab.py).
+
+## Attribution
+
+- [flaport/fdtd](https://github.com/flaport/fdtd), Floris Laporte and contributors, MIT. Used as a dependency, not relicensed or represented as a new Maxwell solver.
+- PyTorch, NumPy, FastAPI, Three.js, Lucide and Vite retain their respective licenses.
+- Familiar workflow references: [Ansys modern FDTD interface](https://optics.ansys.com/hc/en-us/articles/36952912384403-Ansys-Lumerical-FDTD-Modern-User-Interface), [layout and analysis modes](https://optics.ansys.com/hc/en-us/articles/360034915533-Understanding-analysis-and-layout-modes).
+
+Contributions are welcome. Keep numerical changes backed by CPU/GPU parity and physics checks, disclose unsupported physics, and include reproducible benchmark conditions with performance claims.

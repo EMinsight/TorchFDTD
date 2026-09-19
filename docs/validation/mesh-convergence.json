@@ -1,0 +1,1428 @@
+{
+  "status": "converged",
+  "levels": [
+    {
+      "mesh_um": 0.05,
+      "shape": [
+        160,
+        16,
+        1
+      ],
+      "steps": 800,
+      "time_step_s": 1.1675338966910934e-16,
+      "duration_s": 9.340271173528748e-14,
+      "wall_seconds": 0.5144048999063671,
+      "summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 2560,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.04999999999999982,
+          0.04999999999999993
+        ],
+        "axis_max_step_um": [
+          0.05000000000000071,
+          0.050000000000000044
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000178,
+        "shape": [
+          160,
+          16,
+          1
+        ],
+        "actual_size_um": [
+          8.0,
+          0.8,
+          1.0
+        ],
+        "cells": 2560,
+        "dt_fs": 0.11675338966910934,
+        "duration_fs": 93.40271173528748,
+        "estimated_memory_mb": 1.4,
+        "warnings": [
+          "Periodic/Bloch cells repeat every structure and source. A point source represents an array of sources, not an isolated dipole."
+        ],
+        "backend": "cpu",
+        "precision": "float64",
+        "gpu": null,
+        "cuda_graph": false,
+        "cuda_kernel": null,
+        "steps": 800,
+        "requested_steps": 800,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 5.837669483455467e-15,
+            "state_norm": 0.016284646295419147,
+            "relative_norm": 1.0,
+            "field_peak": 0.0092464419645832,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 1.1675338966910935e-14,
+            "state_norm": 7.750308323549055,
+            "relative_norm": 1.0,
+            "field_peak": 0.15933722076881152,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 1.75130084503664e-14,
+            "state_norm": 204.52165574423137,
+            "relative_norm": 1.0,
+            "field_peak": 0.5582621892473624,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 2.335067793382187e-14,
+            "state_norm": 656.5069946533584,
+            "relative_norm": 1.0,
+            "field_peak": 0.75891176095046,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 2.9188347417277336e-14,
+            "state_norm": 610.103748982943,
+            "relative_norm": 0.9293179721643076,
+            "field_peak": 0.7540162998127794,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 3.50260169007328e-14,
+            "state_norm": 373.84468714222095,
+            "relative_norm": 0.569445093787027,
+            "field_peak": 0.6486314450806675,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 4.086368638418827e-14,
+            "state_norm": 111.51160442813631,
+            "relative_norm": 0.1698559274102105,
+            "field_peak": 0.5030985810035,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 4.670135586764374e-14,
+            "state_norm": 6.542623206043654,
+            "relative_norm": 0.009965808832696776,
+            "field_peak": 0.14611903093563852,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 5.25390253510992e-14,
+            "state_norm": 0.035036268675884205,
+            "relative_norm": 5.3367700513813514e-05,
+            "field_peak": 0.013903002163415548,
+            "source_finished": true
+          },
+          {
+            "step": 500,
+            "time_s": 5.837669483455467e-14,
+            "state_norm": 1.3361826479710289e-05,
+            "relative_norm": 2.0352908024636434e-08,
+            "field_peak": 0.00026891000980281066,
+            "source_finished": true
+          },
+          {
+            "step": 550,
+            "time_s": 6.421436431801013e-14,
+            "state_norm": 4.494734797099259e-07,
+            "relative_norm": 6.846438550852788e-10,
+            "field_peak": 2.2973263874685342e-05,
+            "source_finished": true
+          },
+          {
+            "step": 600,
+            "time_s": 7.00520338014656e-14,
+            "state_norm": 3.874167350762983e-08,
+            "relative_norm": 5.901182138674056e-11,
+            "field_peak": 8.57690866009056e-06,
+            "source_finished": true
+          },
+          {
+            "step": 650,
+            "time_s": 7.588970328492107e-14,
+            "state_norm": 2.8008026036169933e-09,
+            "relative_norm": 4.266218983844707e-12,
+            "field_peak": 2.626399629734919e-06,
+            "source_finished": true
+          },
+          {
+            "step": 700,
+            "time_s": 8.172737276837654e-14,
+            "state_norm": 2.8840483262384086e-09,
+            "relative_norm": 4.3930199521502614e-12,
+            "field_peak": 2.3888270749752895e-06,
+            "source_finished": true
+          },
+          {
+            "step": 750,
+            "time_s": 8.7565042251832e-14,
+            "state_norm": 2.461250934475677e-09,
+            "relative_norm": 3.74900946146848e-12,
+            "field_peak": 2.858597729132963e-06,
+            "source_finished": true
+          },
+          {
+            "step": 800,
+            "time_s": 9.340271173528748e-14,
+            "state_norm": 2.826989764858735e-09,
+            "relative_norm": 4.306107608726105e-12,
+            "field_peak": 2.214927187244484e-06,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 0.002220800146460533,
+        "diagnostic_backend": "numpy",
+        "source_end_s": 5.206284476371953e-14,
+        "seconds": 0.25040660006925464,
+        "setup_seconds": 0.004495099652558565,
+        "mcells_per_second": 8.178698163041977,
+        "field_peak": 2.214927187244484e-06,
+        "slice_index": 0,
+        "slice_position": 0.0,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": 8,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": 8,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "PhotonWeave Yee/CPML on fdtd grid"
+      },
+      "values": {
+        "transmission": [
+          0.881920086269221,
+          0.8802350848054487,
+          0.8785844124649772,
+          0.8769702360143212,
+          0.8753940248630606,
+          0.8738564789005688,
+          0.872357540827733,
+          0.8708964914643883,
+          0.8694721167730127,
+          0.8680829272566225,
+          0.8667274048206189,
+          0.8654042495233196,
+          0.8641125989111029,
+          0.8628521956778964,
+          0.8616234849389838,
+          0.8604276300692493,
+          0.8592664451964688,
+          0.8581422521150227,
+          0.8570576783747318,
+          0.8560154203097671,
+          0.8550179987420443,
+          0.854067535471792,
+          0.8531655755528876,
+          0.8523129744095633,
+          0.8515098610769305,
+          0.8507556802710106,
+          0.8500493074797426,
+          0.8493892234904376,
+          0.848773728322259,
+          0.8482011700501958,
+          0.8476701621761992
+        ]
+      },
+      "comparison": {}
+    },
+    {
+      "mesh_um": 0.025,
+      "shape": [
+        320,
+        32,
+        1
+      ],
+      "steps": 1600,
+      "time_step_s": 5.837669483455467e-17,
+      "duration_s": 9.340271173528748e-14,
+      "wall_seconds": 1.9384588999673724,
+      "summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 10240,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.024999999999999467,
+          0.02499999999999991
+        ],
+        "axis_max_step_um": [
+          0.025000000000000355,
+          0.025000000000000022
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000355,
+        "shape": [
+          320,
+          32,
+          1
+        ],
+        "actual_size_um": [
+          8.0,
+          0.8,
+          1.0
+        ],
+        "cells": 10240,
+        "dt_fs": 0.05837669483455467,
+        "duration_fs": 93.40271173528748,
+        "estimated_memory_mb": 4.8,
+        "warnings": [
+          "Periodic/Bloch cells repeat every structure and source. A point source represents an array of sources, not an isolated dipole."
+        ],
+        "backend": "cpu",
+        "precision": "float64",
+        "gpu": null,
+        "cuda_graph": false,
+        "cuda_kernel": null,
+        "steps": 1600,
+        "requested_steps": 1600,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 2.9188347417277336e-15,
+            "state_norm": 0.0011220319421203831,
+            "relative_norm": 1.0,
+            "field_peak": 0.0008481562577934067,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 5.837669483455467e-15,
+            "state_norm": 0.0589072736340405,
+            "relative_norm": 1.0,
+            "field_peak": 0.008823511098508026,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 8.7565042251832e-15,
+            "state_norm": 1.8878957681036916,
+            "relative_norm": 1.0,
+            "field_peak": 0.048123160532271524,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 1.1675338966910935e-14,
+            "state_norm": 29.163266978185867,
+            "relative_norm": 1.0,
+            "field_peak": 0.15776233517411303,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 1.4594173708638668e-14,
+            "state_norm": 214.3076156046016,
+            "relative_norm": 1.0,
+            "field_peak": 0.3348495675138001,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 1.75130084503664e-14,
+            "state_norm": 806.3710211571778,
+            "relative_norm": 1.0,
+            "field_peak": 0.556384464133194,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 2.0431843192094134e-14,
+            "state_norm": 1766.638071732058,
+            "relative_norm": 1.0,
+            "field_peak": 0.730301987196454,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 2.335067793382187e-14,
+            "state_norm": 2606.795961773948,
+            "relative_norm": 1.0,
+            "field_peak": 0.7502237499275253,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 2.62695126755496e-14,
+            "state_norm": 2839.3774988940468,
+            "relative_norm": 1.0,
+            "field_peak": 0.9257151531778323,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 2.9188347417277336e-14,
+            "state_norm": 2460.093174696179,
+            "relative_norm": 0.8664199021279837,
+            "field_peak": 0.7505496717938214,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 3.210718215900507e-14,
+            "state_norm": 1956.030025233882,
+            "relative_norm": 0.6888939656652793,
+            "field_peak": 0.6490806849783017,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 3.50260169007328e-14,
+            "state_norm": 1505.451734449959,
+            "relative_norm": 0.5302048547740978,
+            "field_peak": 0.6490490645459612,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 3.794485164246054e-14,
+            "state_norm": 958.0479780468679,
+            "relative_norm": 0.3374147954683845,
+            "field_peak": 0.6448993761887001,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 4.086368638418827e-14,
+            "state_norm": 437.35659682493844,
+            "relative_norm": 0.15403256417834235,
+            "field_peak": 0.5009265201242932,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 4.3782521125916e-14,
+            "state_norm": 133.9274573987665,
+            "relative_norm": 0.04716789417783722,
+            "field_peak": 0.30440769327408695,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 4.670135586764374e-14,
+            "state_norm": 25.273239790130212,
+            "relative_norm": 0.008900979105446275,
+            "field_peak": 0.14452948608347072,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 4.962019060937147e-14,
+            "state_norm": 2.6407257644441318,
+            "relative_norm": 0.0009300368709242462,
+            "field_peak": 0.05317542255605137,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 5.25390253510992e-14,
+            "state_norm": 0.14123840808835775,
+            "relative_norm": 4.9742736970822265e-05,
+            "field_peak": 0.0138711425877579,
+            "source_finished": true
+          },
+          {
+            "step": 950,
+            "time_s": 5.5457860092826933e-14,
+            "state_norm": 0.00374800727810652,
+            "relative_norm": 1.3200102063097947e-06,
+            "field_peak": 0.0024031668070059148,
+            "source_finished": true
+          },
+          {
+            "step": 1000,
+            "time_s": 5.837669483455467e-14,
+            "state_norm": 5.022041804005768e-05,
+            "relative_norm": 1.7687122638542713e-08,
+            "field_peak": 0.0002693287109853967,
+            "source_finished": true
+          },
+          {
+            "step": 1050,
+            "time_s": 6.129552957628241e-14,
+            "state_norm": 3.654175204591766e-07,
+            "relative_norm": 1.2869635002795817e-10,
+            "field_peak": 1.900316427726344e-05,
+            "source_finished": true
+          },
+          {
+            "step": 1100,
+            "time_s": 6.421436431801013e-14,
+            "state_norm": 1.0504672122578567e-08,
+            "relative_norm": 3.699639138040009e-12,
+            "field_peak": 2.2846162012878103e-06,
+            "source_finished": true
+          },
+          {
+            "step": 1150,
+            "time_s": 6.713319905973787e-14,
+            "state_norm": 4.016458611102269e-09,
+            "relative_norm": 1.4145560471147996e-12,
+            "field_peak": 1.3238029618935486e-06,
+            "source_finished": true
+          },
+          {
+            "step": 1200,
+            "time_s": 7.00520338014656e-14,
+            "state_norm": 1.5628204641939612e-09,
+            "relative_norm": 5.504095404019678e-13,
+            "field_peak": 9.029804610904727e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1250,
+            "time_s": 7.297086854319334e-14,
+            "state_norm": 9.35763723239813e-10,
+            "relative_norm": 3.295665066037532e-13,
+            "field_peak": 8.500206281848842e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1300,
+            "time_s": 7.588970328492107e-14,
+            "state_norm": 1.0533590245853214e-09,
+            "relative_norm": 3.709823808196024e-13,
+            "field_peak": 7.673067068259461e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1350,
+            "time_s": 7.88085380266488e-14,
+            "state_norm": 8.258709847561167e-10,
+            "relative_norm": 2.9086339702198736e-13,
+            "field_peak": 8.323175863724816e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1400,
+            "time_s": 8.172737276837654e-14,
+            "state_norm": 8.993607017987554e-10,
+            "relative_norm": 3.1674573111502835e-13,
+            "field_peak": 7.466486259658903e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1450,
+            "time_s": 8.464620751010428e-14,
+            "state_norm": 9.548683858494884e-10,
+            "relative_norm": 3.3629497529702016e-13,
+            "field_peak": 7.995489593858336e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1500,
+            "time_s": 8.7565042251832e-14,
+            "state_norm": 8.618499832169776e-10,
+            "relative_norm": 3.0353483591127734e-13,
+            "field_peak": 7.704418333418322e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1550,
+            "time_s": 9.048387699355974e-14,
+            "state_norm": 7.254282587264441e-10,
+            "relative_norm": 2.5548848612380793e-13,
+            "field_peak": 6.299828677460206e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1600,
+            "time_s": 9.340271173528748e-14,
+            "state_norm": 1.036780941892755e-09,
+            "relative_norm": 3.651437479858127e-13,
+            "field_peak": 9.008521155025523e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 0.0070056007243692875,
+        "diagnostic_backend": "numpy",
+        "source_end_s": 5.206284476371953e-14,
+        "seconds": 0.882408699952066,
+        "setup_seconds": 0.0025717997923493385,
+        "mcells_per_second": 18.56736000097235,
+        "field_peak": 8.838064954574956e-07,
+        "slice_index": 0,
+        "slice_position": 0.0,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": 16,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": 16,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "PhotonWeave Yee/CPML on fdtd grid"
+      },
+      "values": {
+        "transmission": [
+          0.884088637176037,
+          0.882496954555647,
+          0.8809361941161208,
+          0.8794072849873825,
+          0.8779110890719509,
+          0.8764483938417603,
+          0.875019910317685,
+          0.8736262765326294,
+          0.8722680661798922,
+          0.87094580157157,
+          0.8696599695515095,
+          0.8684110386842671,
+          0.8671994759096474,
+          0.8660257609187849,
+          0.8648903967536338,
+          0.8637939155268027,
+          0.8627368786615998,
+          0.8617198716207635,
+          0.860743493674461,
+          0.8598083437977834,
+          0.8589150042220233,
+          0.8580640234351382,
+          0.8572559004946674,
+          0.8564910723691825,
+          0.8557699056841033,
+          0.8550926937629352,
+          0.854459659290107,
+          0.8538709623383242,
+          0.8533267129562451,
+          0.8528269870412789,
+          0.8523718438658694
+        ]
+      },
+      "comparison": {
+        "transmission": {
+          "max_absolute_change": 0.004701681689670223,
+          "max_relative_change": 0.005515998356240973,
+          "passed": true
+        }
+      }
+    },
+    {
+      "mesh_um": 0.0125,
+      "shape": [
+        640,
+        64,
+        1
+      ],
+      "steps": 3200,
+      "time_step_s": 2.9188347417277335e-17,
+      "duration_s": 9.340271173528748e-14,
+      "wall_seconds": 12.83128139982,
+      "summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 40960,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.01249999999999929,
+          0.012499999999999956
+        ],
+        "axis_max_step_um": [
+          0.012500000000000178,
+          0.012500000000000067
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.000000000000071,
+        "shape": [
+          640,
+          64,
+          1
+        ],
+        "actual_size_um": [
+          8.0,
+          0.8,
+          1.0
+        ],
+        "cells": 40960,
+        "dt_fs": 0.029188347417277334,
+        "duration_fs": 93.40271173528748,
+        "estimated_memory_mb": 17.3,
+        "warnings": [
+          "Periodic/Bloch cells repeat every structure and source. A point source represents an array of sources, not an isolated dipole."
+        ],
+        "backend": "cpu",
+        "precision": "float64",
+        "gpu": null,
+        "cuda_graph": false,
+        "cuda_kernel": null,
+        "steps": 3200,
+        "requested_steps": 3200,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 1.4594173708638668e-15,
+            "state_norm": 0.0014859366377092563,
+            "relative_norm": 1.0,
+            "field_peak": 0.0007027568136662545,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 2.9188347417277336e-15,
+            "state_norm": 0.004379489054743492,
+            "relative_norm": 1.0,
+            "field_peak": 0.0008099241285091319,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 4.3782521125916e-15,
+            "state_norm": 0.0888348441280658,
+            "relative_norm": 1.0,
+            "field_peak": 0.004119946208702963,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 5.837669483455467e-15,
+            "state_norm": 0.22468460372460997,
+            "relative_norm": 1.0,
+            "field_peak": 0.008613352356062174,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 7.297086854319334e-15,
+            "state_norm": 2.3113820563272816,
+            "relative_norm": 1.0,
+            "field_peak": 0.017833584651481785,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 8.7565042251832e-15,
+            "state_norm": 7.229587378228528,
+            "relative_norm": 1.0,
+            "field_peak": 0.04749375352928796,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 1.0215921596047067e-14,
+            "state_norm": 30.039847792123005,
+            "relative_norm": 1.0,
+            "field_peak": 0.060582010129325285,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 1.1675338966910935e-14,
+            "state_norm": 113.18739943667842,
+            "relative_norm": 1.0,
+            "field_peak": 0.15704425076941855,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 1.31347563377748e-14,
+            "state_norm": 229.66610533129227,
+            "relative_norm": 1.0,
+            "field_peak": 0.16055461543488478,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 1.4594173708638668e-14,
+            "state_norm": 842.9026562303841,
+            "relative_norm": 1.0,
+            "field_peak": 0.33427531307133196,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 1.6053591079502534e-14,
+            "state_norm": 1196.3337063920326,
+            "relative_norm": 1.0,
+            "field_peak": 0.3416436663083945,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 1.75130084503664e-14,
+            "state_norm": 3201.6390848804817,
+            "relative_norm": 1.0,
+            "field_peak": 0.5552101969180593,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 1.897242582123027e-14,
+            "state_norm": 4100.813057698685,
+            "relative_norm": 1.0,
+            "field_peak": 0.6083571620049983,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 2.0431843192094134e-14,
+            "state_norm": 7033.953021431302,
+            "relative_norm": 1.0,
+            "field_peak": 0.7312608359508349,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 2.1891260562958e-14,
+            "state_norm": 8490.64767998517,
+            "relative_norm": 1.0,
+            "field_peak": 0.7463337436904719,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 2.335067793382187e-14,
+            "state_norm": 10359.201435274415,
+            "relative_norm": 1.0,
+            "field_peak": 0.7255167846062179,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 2.4810095304685735e-14,
+            "state_norm": 10968.885594218189,
+            "relative_norm": 1.0,
+            "field_peak": 0.8113849980883845,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 2.62695126755496e-14,
+            "state_norm": 11274.514006496458,
+            "relative_norm": 1.0,
+            "field_peak": 0.9121958946995731,
+            "source_finished": false
+          },
+          {
+            "step": 950,
+            "time_s": 2.7728930046413467e-14,
+            "state_norm": 10254.913501508276,
+            "relative_norm": 0.909565901962543,
+            "field_peak": 0.7962013645718417,
+            "source_finished": false
+          },
+          {
+            "step": 1000,
+            "time_s": 2.9188347417277336e-14,
+            "state_norm": 9766.630265541138,
+            "relative_norm": 0.8662573180461289,
+            "field_peak": 0.7579596147291885,
+            "source_finished": false
+          },
+          {
+            "step": 1050,
+            "time_s": 3.0647764788141205e-14,
+            "state_norm": 8429.625025386002,
+            "relative_norm": 0.7476708105137649,
+            "field_peak": 0.6489042065978837,
+            "source_finished": false
+          },
+          {
+            "step": 1100,
+            "time_s": 3.210718215900507e-14,
+            "state_norm": 7764.366160468362,
+            "relative_norm": 0.6886652636197425,
+            "field_peak": 0.6488996874238805,
+            "source_finished": false
+          },
+          {
+            "step": 1150,
+            "time_s": 3.3566599529868936e-14,
+            "state_norm": 6897.047683702788,
+            "relative_norm": 0.6117379143552137,
+            "field_peak": 0.6488950554295743,
+            "source_finished": false
+          },
+          {
+            "step": 1200,
+            "time_s": 3.50260169007328e-14,
+            "state_norm": 5995.807396721097,
+            "relative_norm": 0.531801849132146,
+            "field_peak": 0.6488906017050903,
+            "source_finished": false
+          },
+          {
+            "step": 1250,
+            "time_s": 3.648543427159667e-14,
+            "state_norm": 5304.766071123504,
+            "relative_norm": 0.4705095109258686,
+            "field_peak": 0.6488858421978978,
+            "source_finished": false
+          },
+          {
+            "step": 1300,
+            "time_s": 3.794485164246054e-14,
+            "state_norm": 3827.3198854072434,
+            "relative_norm": 0.3394665067782002,
+            "field_peak": 0.6442879928677206,
+            "source_finished": false
+          },
+          {
+            "step": 1350,
+            "time_s": 3.94042690133244e-14,
+            "state_norm": 3113.430973503153,
+            "relative_norm": 0.2761476877592392,
+            "field_peak": 0.6438079787906864,
+            "source_finished": false
+          },
+          {
+            "step": 1400,
+            "time_s": 4.086368638418827e-14,
+            "state_norm": 1747.132197373056,
+            "relative_norm": 0.1549629719175785,
+            "field_peak": 0.5004924109645327,
+            "source_finished": false
+          },
+          {
+            "step": 1450,
+            "time_s": 4.232310375505214e-14,
+            "state_norm": 1139.40976937738,
+            "relative_norm": 0.10106065491788326,
+            "field_peak": 0.47100444857861623,
+            "source_finished": false
+          },
+          {
+            "step": 1500,
+            "time_s": 4.3782521125916e-14,
+            "state_norm": 535.2003850671172,
+            "relative_norm": 0.0474699295028354,
+            "field_peak": 0.30383845958018946,
+            "source_finished": false
+          },
+          {
+            "step": 1550,
+            "time_s": 4.524193849677987e-14,
+            "state_norm": 232.44654898331774,
+            "relative_norm": 0.020616990572665066,
+            "field_peak": 0.23032389202925263,
+            "source_finished": false
+          },
+          {
+            "step": 1600,
+            "time_s": 4.670135586764374e-14,
+            "state_norm": 101.50014458821597,
+            "relative_norm": 0.00900261816427128,
+            "field_peak": 0.1441334489513213,
+            "source_finished": false
+          },
+          {
+            "step": 1650,
+            "time_s": 4.81607732385076e-14,
+            "state_norm": 25.946277803820465,
+            "relative_norm": 0.0023013211734776353,
+            "field_peak": 0.0719951893629471,
+            "source_finished": false
+          },
+          {
+            "step": 1700,
+            "time_s": 4.962019060937147e-14,
+            "state_norm": 10.703124022474642,
+            "relative_norm": 0.0009493202116124405,
+            "field_peak": 0.053092305219967974,
+            "source_finished": false
+          },
+          {
+            "step": 1750,
+            "time_s": 5.107960798023534e-14,
+            "state_norm": 1.693678975123304,
+            "relative_norm": 0.00015022190527657278,
+            "field_peak": 0.015399806506566001,
+            "source_finished": false
+          },
+          {
+            "step": 1800,
+            "time_s": 5.25390253510992e-14,
+            "state_norm": 0.5785572127098916,
+            "relative_norm": 5.131549017337001e-05,
+            "field_peak": 0.01394156139517451,
+            "source_finished": true
+          },
+          {
+            "step": 1850,
+            "time_s": 5.399844272196307e-14,
+            "state_norm": 0.06988627129577715,
+            "relative_norm": 6.1986061000508024e-06,
+            "field_peak": 0.003460864967069273,
+            "source_finished": true
+          },
+          {
+            "step": 1900,
+            "time_s": 5.5457860092826933e-14,
+            "state_norm": 0.015499141074010361,
+            "relative_norm": 1.3747059132730372e-06,
+            "field_peak": 0.002430916614042779,
+            "source_finished": true
+          },
+          {
+            "step": 1950,
+            "time_s": 5.69172774636908e-14,
+            "state_norm": 0.0017508638185881266,
+            "relative_norm": 1.5529395037154292e-07,
+            "field_peak": 0.0006048000216025171,
+            "source_finished": true
+          },
+          {
+            "step": 2000,
+            "time_s": 5.837669483455467e-14,
+            "state_norm": 0.00020923000239287553,
+            "relative_norm": 1.8557784599169035e-08,
+            "field_peak": 0.00027389325132493,
+            "source_finished": true
+          },
+          {
+            "step": 2050,
+            "time_s": 5.983611220541854e-14,
+            "state_norm": 2.365005895328988e-05,
+            "relative_norm": 2.0976566209117787e-09,
+            "field_peak": 8.135046049740107e-05,
+            "source_finished": true
+          },
+          {
+            "step": 2100,
+            "time_s": 6.129552957628241e-14,
+            "state_norm": 1.5258853127212114e-06,
+            "relative_norm": 1.3533934250664685e-10,
+            "field_peak": 1.9361152748674562e-05,
+            "source_finished": true
+          },
+          {
+            "step": 2150,
+            "time_s": 6.275494694714627e-14,
+            "state_norm": 1.6200639481415992e-07,
+            "relative_norm": 1.4369257488243897e-11,
+            "field_peak": 7.740573289936116e-06,
+            "source_finished": true
+          },
+          {
+            "step": 2200,
+            "time_s": 6.421436431801013e-14,
+            "state_norm": 6.9225246969339525e-09,
+            "relative_norm": 6.139976138168921e-13,
+            "field_peak": 1.3278062234980734e-06,
+            "source_finished": true
+          },
+          {
+            "step": 2250,
+            "time_s": 6.5673781688874e-14,
+            "state_norm": 1.1693130763960076e-09,
+            "relative_norm": 1.037129472474149e-13,
+            "field_peak": 5.61050783638343e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2300,
+            "time_s": 6.713319905973787e-14,
+            "state_norm": 4.3931194930171564e-10,
+            "relative_norm": 3.896504532688335e-14,
+            "field_peak": 2.5175996485036073e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2350,
+            "time_s": 6.859261643060174e-14,
+            "state_norm": 4.780382297318624e-10,
+            "relative_norm": 4.2399896745563777e-14,
+            "field_peak": 2.8987954279061365e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2400,
+            "time_s": 7.00520338014656e-14,
+            "state_norm": 4.2128462769503353e-10,
+            "relative_norm": 3.736610087603654e-14,
+            "field_peak": 2.6311867595310715e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2450,
+            "time_s": 7.151145117232947e-14,
+            "state_norm": 3.9960289863705584e-10,
+            "relative_norm": 3.5443026493807334e-14,
+            "field_peak": 2.9397848151876335e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2500,
+            "time_s": 7.297086854319334e-14,
+            "state_norm": 3.9556657326435955e-10,
+            "relative_norm": 3.5085022115936097e-14,
+            "field_peak": 2.390728496010605e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2550,
+            "time_s": 7.44302859140572e-14,
+            "state_norm": 4.135733741584649e-10,
+            "relative_norm": 3.668214646947628e-14,
+            "field_peak": 2.2390292049190988e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2600,
+            "time_s": 7.588970328492107e-14,
+            "state_norm": 3.68268273548216e-10,
+            "relative_norm": 3.2663782521891156e-14,
+            "field_peak": 2.6533520994436355e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2650,
+            "time_s": 7.734912065578494e-14,
+            "state_norm": 3.5423039679007176e-10,
+            "relative_norm": 3.1418684351801025e-14,
+            "field_peak": 2.2622416651596037e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2700,
+            "time_s": 7.88085380266488e-14,
+            "state_norm": 4.2534943085458e-10,
+            "relative_norm": 3.7726631108843407e-14,
+            "field_peak": 2.3733169292294742e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2750,
+            "time_s": 8.026795539751267e-14,
+            "state_norm": 3.1674371575464214e-10,
+            "relative_norm": 2.809377996888665e-14,
+            "field_peak": 2.3477465745817853e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2800,
+            "time_s": 8.172737276837654e-14,
+            "state_norm": 3.7039391928084394e-10,
+            "relative_norm": 3.2852317986160665e-14,
+            "field_peak": 2.4338322977222185e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2850,
+            "time_s": 8.318679013924041e-14,
+            "state_norm": 4.056826616875159e-10,
+            "relative_norm": 3.5982274841625864e-14,
+            "field_peak": 2.2774157559329237e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2900,
+            "time_s": 8.464620751010428e-14,
+            "state_norm": 3.139059006912055e-10,
+            "relative_norm": 2.7842078204908043e-14,
+            "field_peak": 2.3802473609847008e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2950,
+            "time_s": 8.610562488096814e-14,
+            "state_norm": 3.3779187214620513e-10,
+            "relative_norm": 2.996065923121537e-14,
+            "field_peak": 2.4112203890707335e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3000,
+            "time_s": 8.7565042251832e-14,
+            "state_norm": 3.9109195907963675e-10,
+            "relative_norm": 3.468814344053204e-14,
+            "field_peak": 2.3107268174872562e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3050,
+            "time_s": 8.902445962269587e-14,
+            "state_norm": 2.9541278059956883e-10,
+            "relative_norm": 2.6201819469056475e-14,
+            "field_peak": 2.2171159900256587e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3100,
+            "time_s": 9.048387699355974e-14,
+            "state_norm": 3.313593792052639e-10,
+            "relative_norm": 2.93901252873811e-14,
+            "field_peak": 2.5090352201371047e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3150,
+            "time_s": 9.194329436442361e-14,
+            "state_norm": 3.8465960544524717e-10,
+            "relative_norm": 3.411762185257861e-14,
+            "field_peak": 2.403699114102269e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3200,
+            "time_s": 9.340271173528748e-14,
+            "state_norm": 2.849905231872859e-10,
+            "relative_norm": 2.527741089532305e-14,
+            "field_peak": 2.330336439116135e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 0.06288329884409904,
+        "diagnostic_backend": "numpy",
+        "source_end_s": 5.206284476371953e-14,
+        "seconds": 6.853838999755681,
+        "setup_seconds": 0.006932400166988373,
+        "mcells_per_second": 19.123880792162222,
+        "field_peak": 1.903750158099409e-07,
+        "slice_index": 0,
+        "slice_position": 0.0,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": 32,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": 32,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "PhotonWeave Yee/CPML on fdtd grid"
+      },
+      "values": {
+        "transmission": [
+          0.8846174457320435,
+          0.8830460090463419,
+          0.8815054825562767,
+          0.8799966842387262,
+          0.8785204027024598,
+          0.8770773969148157,
+          0.8756683964234601,
+          0.8742941020120085,
+          0.8729551866691367,
+          0.8716522967551242,
+          0.870386053290028,
+          0.8691570533205545,
+          0.8679658713168942,
+          0.8668130605074308,
+          0.8656991540106076,
+          0.8646246656089817,
+          0.8635900900562976,
+          0.862595902901704,
+          0.8616425599211728,
+          0.8607304963148803,
+          0.8598601258386579,
+          0.8590318399923259,
+          0.8582460073274369,
+          0.8575029729021757,
+          0.856803057922558,
+          0.8561465596506427,
+          0.8555337516888014,
+          0.8549648847214829,
+          0.8544401877012152,
+          0.8539598693375153,
+          0.853524119649031
+        ]
+      },
+      "comparison": {
+        "transmission": {
+          "max_absolute_change": 0.0011522757831615715,
+          "max_relative_change": 0.0013500213487058657,
+          "passed": true
+        }
+      }
+    }
+  ],
+  "relative_tolerance": 0,
+  "absolute_tolerance": 0.006,
+  "required_consecutive": 2,
+  "requested_duration_s": 9.340271173528748e-14,
+  "interpretation": "Agreement of selected observables on successive meshes, not a general error bound."
+}

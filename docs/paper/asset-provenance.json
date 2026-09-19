@@ -1,0 +1,28 @@
+{
+  "description": "Figures and tables derived from recorded native validation measurements. No solver is run by the paper build.",
+  "inputs": {
+    "docs/validation/flux.json": "ee69cb029b79696e383111680d197b1f6d569a5dca6ab89f2e4b03ca8bd9962f",
+    "docs/validation/batch.json": "f9c17a7190bbda0e16a4a8547b0593e885fc78de340a1a654d764a6c3a23a784",
+    "docs/validation/cuda-kernels.json": "353cfc9f65d221faab1d98a74773870dd72a61953fa7c076fbbaa18138e1eef1",
+    "docs/validation/open-source-flaport.json": "f47b4a2366284de61bc061b0cf1b6fcc25bff24a0279e98cd1daa91c4fd350bc",
+    "docs/validation/tensor-batch.json": "39d94c845a98ef0f7b805798fda641ce48578db4137024bd44eb6fe9a1206187",
+    "docs/validation/cohorts.json": "d32c3c6208d3f3f9269863dc966610117ebde88a1470a5ed29178ff21fa92c76",
+    "docs/validation/vector-sources.json": "8d941b520a8091d4c5cd20a0e760119b0a46af0834b2141586c305b893565250",
+    "docs/validation/oneway-sources.json": "67301ef9789d6397e966feaf7abb3c5827960732427783d8e8eef281e7745d03",
+    "docs/validation/oneway-slab.json": "c0ab929fb1c77b6e0e7897de7bc74d0b53ccc4008590665d1eed31169e1e2744",
+    "docs/validation/ensembles.json": "a38b5b2505bea77976b7c032d453ea9bd17a238b6a5034c7df4bc1bb1f970548",
+    "docs/validation/design-throughput.json": "c413c290eb294c457ce2613a468329f0570ecd7914f95befe790968c7dfe05ea",
+    "docs/validation/ensemble-before.json": "cc5e78dc50a121ba1caa5cdaebcfdc92435619828bf06c63fcabaac48d99604e",
+    "docs/validation/tfsf-sources.json": "7fb8e75f9451014e80fe13624ce1aeaf1a5c0e6422fe3f929e560f405fde1d81",
+    "docs/validation/tfsf-sphere.json": "bb527a1a375b48ab679658fcc19044a908a14ddca3734ee4d5d001d1a891da51",
+    "docs/validation/tfsf-sphere-finer.json": "9b7a254eaa108c23b9eeb9333bd68b216e20e621e75530c92b62c0d648b867bd",
+    "docs/validation/tfsf-sphere-long.json": "838438163992e13357dd04cf387a242eacd7f20eae0fff1343b4ea14aef80c63",
+    "docs/validation/spectral-ensembles.json": "50501246b5c1ba6166fffef33f3c22663689ccb1a58e5ed2510d50b7c2fc6794",
+    "docs/validation/graph-ensembles.json": "4eaa7d2886da4bef67a361c0befbb729a66337391fd121ac009e1414f7ab5adf",
+    "docs/validation/selective-monitors.json": "65e4e07a373cb74d7a7fc150360fb4c6014f983245a8b6ec04647495a40a4fdd",
+    "docs/validation/rectilinear-ensembles.json": "710c1c227433856b2eef184471fefac739c32a45c83ef8e5d1a5cf56e540a3cd",
+    "docs/validation/geometry-ensembles.json": "9c881db0dbaf50287851d4168bb80d6298d3021a149e5144a5ec15fd356cf5c2",
+    "docs/validation/grouped-ensembles.json": "b9c311df4248abe768c08a0e809c7ead88411edabe1aef4882bb48872f3bbf1c"
+  },
+  "generator": "scripts/build_paper_assets.py"
+}

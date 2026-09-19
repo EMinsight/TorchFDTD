@@ -1,0 +1,60 @@
+{
+  "scope": "Author-generated uniform FSP mesh writeback and native reimport only",
+  "commercial_execution": false,
+  "external_remeshing_verified": false,
+  "local_full_before_last_test": {
+    "passed": 501,
+    "skipped": 1
+  },
+  "final_local_mesh_tests": {
+    "passed": 23
+  },
+  "rtx5880_fsp_regression_before_last_test": {
+    "passed": 126
+  },
+  "rtx5880_ui": {
+    "passed": 3,
+    "final_display_rerun_passed": 1
+  },
+  "material_assignment_probe": {
+    "cases": 18,
+    "unequal_entries": 0,
+    "dx_um": [
+      0.1,
+      0.12,
+      0.125,
+      0.15,
+      0.16,
+      0.2
+    ],
+    "axis_step_multipliers": [
+      1,
+      1.2,
+      1.5
+    ],
+    "sphere_radius_um": [
+      0.25,
+      0.3,
+      0.4
+    ]
+  },
+  "source_hashes": {
+    "photonweave/fsp_settings.py": "0db6e0b7a68ecae1948c5dd113b144c004c711f3dc6c8a607db12a81ec492b8d",
+    "photonweave/fsp_geometry.py": "8a728b301c1ce9545682d5d691a2bd19851a58edc0b1d9ec8236430692239ccd",
+    "photonweave/fsp_native.py": "57548ce934aba38935c58e731b154503b0e9d26efdc2565381eec03d548a1151",
+    "photonweave/fsp_binary.py": "4c0abede4b8c869659b3c77cdff6ad8a4d63efd8d0f98b83732ec05caa49a327",
+    "photonweave/models.py": "347d12ba5e56d8607186af4552b681a323b90fc45b7ef1f1fe9f36fecc68d25d",
+    "photonweave/mesh.py": "aa7db979920db1aeefb7178efbf717c0ced61b1fdbca17daed44cb52fb609217",
+    "tests/test_fsp_mesh_write.py": "828fb661a3e0fe2d7890303b2d0ae66d0642308ba016ddff9bbcfb16b5b628e8",
+    "tests/ui/fsp-mesh-write.spec.js": "2f1fd6c862d2656751d78c8a33254cac1ff3861397eb3ba4c267082a2c02bff3"
+  },
+  "final_rtx5880_full_tests": {
+    "passed": 502,
+    "skipped": 1,
+    "seconds": 173.19,
+    "command": "python -m pytest -q",
+    "gpu": "NVIDIA RTX 5880 Ada Generation",
+    "gpu_memory_gb": 48.0,
+    "torch": "2.10.0"
+  }
+}

@@ -1,0 +1,1045 @@
+{
+  "method": "Periodic Yee recurrence from analytic Fourier difference symbols, without the native curl or waveform functions. Real float64, 80 steps, 2D/3D and electric/magnetic vector excitation. Same discrete problem, not a continuum convergence or calibrated dipole-power claim.",
+  "cases": [
+    {
+      "project": {
+        "schema_version": 1,
+        "name": "Untitled",
+        "region": {
+          "dimension": "2d",
+          "size": [
+            1.6,
+            1.4,
+            1.2
+          ],
+          "mesh": 0.1,
+          "material_sampling": "yee",
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "steps": 80,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 10,
+          "boundaries": {
+            "x_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cpu",
+          "cuda_kernel": "torch",
+          "precision": "float64",
+          "snapshot_interval": 80,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "Air",
+            "index": 1.0,
+            "color": "#b7c5d7",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "SiO2 (constant n)",
+            "index": 1.444,
+            "color": "#80c4d7",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "SiN (constant n)",
+            "index": 2.0,
+            "color": "#69a1e8",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "Si (constant n)",
+            "index": 3.48,
+            "color": "#cc8bdc",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          }
+        ],
+        "structures": [],
+        "sources": [
+          {
+            "wavelength": 1.0,
+            "pulse": "gaussian",
+            "pulse_cycles": 3,
+            "time_definition": "standard",
+            "pulse_length": 2e-15,
+            "pulse_offset": 4e-15,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "935a4c33682a",
+            "name": "source",
+            "center": [
+              0.023,
+              0.021,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": 38.0,
+            "phi": 127.0,
+            "amplitude": 1,
+            "phase": 19.0,
+            "use_global_source": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "58bdc0086fe9",
+            "name": "monitor",
+            "center": [
+              0.3,
+              0.2,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ex",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null
+      },
+      "errors": {
+        "E": {
+          "max_absolute": 2.220446049250313e-16,
+          "relative_l2": 1.2580559175047475e-15
+        },
+        "H": {
+          "max_absolute": 1.8388068845354155e-16,
+          "relative_l2": 1.8722925043017656e-15
+        }
+      }
+    },
+    {
+      "project": {
+        "schema_version": 1,
+        "name": "Untitled",
+        "region": {
+          "dimension": "2d",
+          "size": [
+            1.6,
+            1.4,
+            1.2
+          ],
+          "mesh": 0.1,
+          "material_sampling": "yee",
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "steps": 80,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 10,
+          "boundaries": {
+            "x_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cpu",
+          "cuda_kernel": "torch",
+          "precision": "float64",
+          "snapshot_interval": 80,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "Air",
+            "index": 1.0,
+            "color": "#b7c5d7",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "SiO2 (constant n)",
+            "index": 1.444,
+            "color": "#80c4d7",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "SiN (constant n)",
+            "index": 2.0,
+            "color": "#69a1e8",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "Si (constant n)",
+            "index": 3.48,
+            "color": "#cc8bdc",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          }
+        ],
+        "structures": [],
+        "sources": [
+          {
+            "wavelength": 1.0,
+            "pulse": "gaussian",
+            "pulse_cycles": 3,
+            "time_definition": "standard",
+            "pulse_length": 2e-15,
+            "pulse_offset": 4e-15,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "831c4e682b95",
+            "name": "source",
+            "center": [
+              0.023,
+              0.021,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Hz",
+            "theta": 38.0,
+            "phi": 127.0,
+            "amplitude": 1,
+            "phase": 19.0,
+            "use_global_source": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "b4a7f12a8e64",
+            "name": "monitor",
+            "center": [
+              0.3,
+              0.2,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Hx",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null
+      },
+      "errors": {
+        "E": {
+          "max_absolute": 1.5612511283791264e-16,
+          "relative_l2": 1.8009408249562193e-15
+        },
+        "H": {
+          "max_absolute": 2.498001805406602e-16,
+          "relative_l2": 1.2889464634102431e-15
+        }
+      }
+    },
+    {
+      "project": {
+        "schema_version": 1,
+        "name": "Untitled",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            1.6,
+            1.4,
+            1.2
+          ],
+          "mesh": 0.1,
+          "material_sampling": "yee",
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "steps": 80,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 10,
+          "boundaries": {
+            "x_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cpu",
+          "cuda_kernel": "torch",
+          "precision": "float64",
+          "snapshot_interval": 80,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "Air",
+            "index": 1.0,
+            "color": "#b7c5d7",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "SiO2 (constant n)",
+            "index": 1.444,
+            "color": "#80c4d7",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "SiN (constant n)",
+            "index": 2.0,
+            "color": "#69a1e8",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "Si (constant n)",
+            "index": 3.48,
+            "color": "#cc8bdc",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          }
+        ],
+        "structures": [],
+        "sources": [
+          {
+            "wavelength": 1.0,
+            "pulse": "gaussian",
+            "pulse_cycles": 3,
+            "time_definition": "standard",
+            "pulse_length": 2e-15,
+            "pulse_offset": 4e-15,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "a93aac5162bc",
+            "name": "source",
+            "center": [
+              0.023,
+              0.021,
+              0.016
+            ],
+            "enabled": true,
+            "kind": "point",
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": 38.0,
+            "phi": 127.0,
+            "amplitude": 1,
+            "phase": 19.0,
+            "use_global_source": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "fed219157428",
+            "name": "monitor",
+            "center": [
+              0.3,
+              0.2,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ex",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null
+      },
+      "errors": {
+        "E": {
+          "max_absolute": 1.196959198423997e-16,
+          "relative_l2": 2.112827325205617e-15
+        },
+        "H": {
+          "max_absolute": 5.898059818321144e-17,
+          "relative_l2": 2.9356132386365515e-15
+        }
+      }
+    },
+    {
+      "project": {
+        "schema_version": 1,
+        "name": "Untitled",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            1.6,
+            1.4,
+            1.2
+          ],
+          "mesh": 0.1,
+          "material_sampling": "yee",
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "steps": 80,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 10,
+          "boundaries": {
+            "x_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "periodic",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cpu",
+          "cuda_kernel": "torch",
+          "precision": "float64",
+          "snapshot_interval": 80,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "Air",
+            "index": 1.0,
+            "color": "#b7c5d7",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "SiO2 (constant n)",
+            "index": 1.444,
+            "color": "#80c4d7",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "SiN (constant n)",
+            "index": 2.0,
+            "color": "#69a1e8",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          },
+          {
+            "name": "Si (constant n)",
+            "index": 3.48,
+            "color": "#cc8bdc",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          }
+        ],
+        "structures": [],
+        "sources": [
+          {
+            "wavelength": 1.0,
+            "pulse": "gaussian",
+            "pulse_cycles": 3,
+            "time_definition": "standard",
+            "pulse_length": 2e-15,
+            "pulse_offset": 4e-15,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "a8593cefbc3c",
+            "name": "source",
+            "center": [
+              0.023,
+              0.021,
+              0.016
+            ],
+            "enabled": true,
+            "kind": "point",
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Hz",
+            "theta": 38.0,
+            "phi": 127.0,
+            "amplitude": 1,
+            "phase": 19.0,
+            "use_global_source": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "4ab136604058",
+            "name": "monitor",
+            "center": [
+              0.3,
+              0.2,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Hx",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null
+      },
+      "errors": {
+        "E": {
+          "max_absolute": 7.025630077706069e-17,
+          "relative_l2": 2.8570141915776953e-15
+        },
+        "H": {
+          "max_absolute": 1.249000902703301e-16,
+          "relative_l2": 2.031674820833352e-15
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "scope": "Independent native primitive scene-list roundtrip in recognized FSP layouts",
+  "commercial_execution": false,
+  "external_reader_verified": false,
+  "new_record_metadata": "Authored zero/default drawing bytes for explicitly decoded primitive revisions",
+  "local_full_before_final_range_index_and_2d_cases": {
+    "passed": 518,
+    "skipped": 1,
+    "seconds": 201.11
+  },
+  "final_local_objects_tests": {
+    "passed": 21,
+    "seconds": 16.17
+  },
+  "rtx5880_fsp_regression_before_final_changes": {
+    "passed": 130,
+    "seconds": 35.4
+  },
+  "rtx5880_ui": {
+    "passed": 3,
+    "seconds": 37.5,
+    "final_objects_rerun_passed": 1,
+    "final_objects_rerun_seconds": 16.0
+  },
+  "gpu": "NVIDIA RTX 5880 Ada Generation",
+  "source_hashes": {
+    "photonweave/fsp_objects.py": "44a4fddd0309f3b952a4ced6c09c5d3e5fabeb00b7a2f2481548d64d3402c3dd",
+    "photonweave/fsp_binary.py": "21f14568d781c46848219ba6de00c6b94fb8dd245dcda0ab73440a928f886041",
+    "photonweave/fsp_geometry.py": "ad57ace2b1cc25115def602712c62a99f013198165648bc94a04c30eeefe58c7",
+    "photonweave/fsp_settings.py": "990e7188701fd98e62ef4b72ec246d350432586d75f19e8e5fde92ddad8c29f8",
+    "photonweave/fsp_native.py": "57548ce934aba38935c58e731b154503b0e9d26efdc2565381eec03d548a1151",
+    "frontend/src/fsp_native.js": "7fadcdd0f8a039789f39f4f1bcc13224ca2ee9b5118af0253ddba11b9f8c8a78",
+    "frontend/src/main.js": "1f6faa797edb813f15a8d01ee7c9fda2735fb459a232557b174668e7a689c24b",
+    "tests/test_fsp_objects_write.py": "16d901141fafd4aabfabc66ac4eb220cbc5e65a73921da3ad92a21b9702d22b0",
+    "tests/ui/fsp-objects-write.spec.js": "2489ba9cac2b7c44679fb2577521a042feec8fcd25692a94668085fb1485052c"
+  },
+  "final_rtx5880_full_tests": {
+    "passed": 523,
+    "skipped": 1,
+    "seconds": 180.69,
+    "command": "python -m pytest -q",
+    "skipped_scope": "Optional installed licensed integration"
+  }
+}

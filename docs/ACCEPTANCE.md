@@ -1,0 +1,466 @@
+# Current acceptance record
+
+Development snapshot: 0.14.0.dev0, 19 September 2026. The full replacement objective
+is **not complete**. Public publication remains conditional on completion and the
+[distribution review](RELEASE_REVIEW.md).
+
+Active numerical validation uses analytic solutions and independently authored
+native CPU/CUDA projects. Earlier vendor field/spectrum comparison artifacts
+remain outside source release directories and are not release validation.
+The latest user instruction permits a historical aggregate timing table in the
+local README, with Lumerical as the primary comparison. That table is explicitly
+qualified and does not establish current-version or same-accuracy performance,
+nor public-release clearance. See the [timing exception](RELEASE_REVIEW.md#timing-table-exception-and-publication-status).
+
+## Implemented native workflows
+
+- Shared validated Python/JSON scene model and browser editor.
+- 2D/3D Yee updates, CPU/CUDA, float32/float64 and CUDA Graph.
+- Optional fused real-field CUDA updates with CPML and graded metrics.
+- Independently selectable shared CUDA interpolation and six-component plane DFT,
+  exposed in Python, the browser, single solves and tensor cohorts.
+- CPML, Periodic/Bloch, isotropic dielectric and coupled multipole Drude/Lorentz materials.
+- Uniform/graded rectilinear mesh, Yee sampling, refinement controls and matched-reference Python convergence studies.
+- Optional automatic decay termination, full-domain divergence checks and fused CUDA diagnostics.
+- Point spectra, planar six-component DFT, signed flux, matching-reference
+  normalization, global/custom/Chebyshev monitor sampling.
+- Electric/magnetic Cartesian and theta/phi point/sheet sources, staggered
+  magnetic injection, Python/UI editing and independent electric-vector FSP import.
+- Normal-incidence one-way E/H planes on full transverse periodic cells, paired
+  previews, adjustable incident-line absorption and staggered geometry metadata.
+- Independent process batches with memory admission, Python objectives,
+  errors/cancellation, saved NPZ and checksum/fingerprint resume.
+- Real-field fixed-duration CUDA tensor cohorts, explicit splitting, measured
+  cohort selection with visible cost, native result/objective APIs and bitwise
+  independence checks. No graphical batch control yet.
+- Seeded parallel differential evolution with generation history and examples.
+  Process and shared CUDA population execution are selectable.
+
+## Current evidence
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Closed TFSF follow-up full Python suite, RTX 3060 and RTX 5880 | 207 passed, 1 optional skip on each | tests/ |
+| Browser suite on RTX 5880, 0.14 UI and server | 14 passed, 4 optional interoperability cases skipped. Includes TFSF creation, direction editing, preview and GPU exterior-leakage check. Startup edit race fixed | tests/ui/ |
+| Closed TFSF independent discrete reference, 20 cases | Max full-field relative L2 4.28e-7, exterior peak ratio 5.04e-13. Long incident-line error reported separately | [TFSF report](validation/TFSF_REPORT.md) |
+| RTX 5880 TFSF sphere, four physical meshes | Max Mie cross-section error 8.8963%, 0.3086%, 1.0474%, 0.5514%. Non-monotonic. A 240 fs control isolates the duration effect | [TFSF report](validation/TFSF_REPORT.md) |
+| Full Python suite before the ensemble follow-up, both GPUs | 191 passed, 1 optional skip on each | tests/ |
+| Ensemble follow-up full Python suite, RTX 3060 and RTX 5880 | 195 passed, 1 optional skip on each | tests/ |
+| Observation scheduling, cohort selection and design regression, both GPUs | 15 passed on each | tests/test_tensor_batch.py, tests/test_tuning.py, tests/test_batch.py |
+| Four 16-case workloads at 32³/64³ on RTX 5880 | Native E/H/trace bitwise agreement, external trace L2 at most 0.3893%. Native batch 1.07–2.39x vs native sequential, excluding explicit tuning | [Ensemble report](validation/ENSEMBLE_REPORT.md) |
+| Complete 64-evaluation DE loops on RTX 5880 | Identical complete design histories. 2.05x at 32³ and 1.12x at 64³ vs independent native evaluation, fixed cohorts | [Design record](validation/design-throughput.json) |
+| Final one-way/source-termination/facade regression, both GPUs | 28 passed on each after the delayed-drive and coupled-keyword fixes | tests/test_oneway_sources.py, tests/test_run_control.py, tests/test_session.py |
+| Electric/magnetic vectors in periodic 2D/3D | Four independent Fourier recurrence checks, maximum full-field relative L2 2.94e-15 | [Source measurements](validation/vector-sources.json) |
+| Normal-incidence one-way planes, 20 independent early propagation cases | Max full-field relative L2 4.46e-9. Long-time incident-line errors reported separately | [Source measurements](validation/oneway-sources.json) |
+| RTX 5880 one-way slab, both directions | Max absolute R/T error 0.001536, energy residual 5.09e-6, scattered-side reflection difference 2.91e-6 | [Slab measurements](validation/oneway-slab.json) |
+| Tensor batch and cohort splitting regression | 8 passed on each GPU | tests/test_tensor_batch.py |
+| flaport/fdtd 0.2.2 graph-adapted comparison, eight fixtures | Full wall 9.64–17.09x, point-trace L2 0.012–0.037%, full-field differences disclosed | [External comparison](validation/OPEN_SOURCE_REPORT.md) |
+| Native CUDA batch axis | B=1/2/4/8/16 at 32³/64³, bitwise E/H/traces. 32³ B=16 full-wall throughput 2.40x vs native sequential. Large-cohort regressions retained | [Batch data](validation/tensor-batch.json) |
+| 64³, 16-case cohort splitting | Four-by-four 1.10x vs sequential, 1.43x vs one cohort. Bitwise E/H/traces | [Cohort data](validation/cohorts.json) |
+| Fused kernel regression | 13 passed | tests/test_cuda_kernels.py |
+| Browser suite on RTX 5880, 0.13 UI and server | 13 passed, 4 interoperability cases skipped, including one-way editing, preview and backward GPU propagation | tests/ui/ |
+| Automatic termination, 64³ native sphere with zero-area pulse | 4000 to 1000 steps, full wall 2.09x vs unchecked fixed duration, DFT relative L2 1.8267e-8 | [Termination report](validation/RUN_CONTROL_REPORT.md) |
+| Slab mesh convergence, 0.05/0.025/0.0125 µm | maximum T error 0.0062361/0.0015344/0.0003822 | [Convergence measurements](validation/mesh-convergence.json) |
+| Fused CUDA vs native tensor CUDA, 64³/96³/128³ | loop 6.06–13.08x, full wall 3.67–5.76x, E/H/trace identical | [Kernel measurements](validation/cuda-kernels.json) |
+| Slab transmission absolute error | max 0.00153444 | [Native slab](validation/flux.json) |
+| Slab reflection absolute error | max 0.00153535 | [Native slab](validation/flux.json) |
+| Slab energy residual | max 4.43991e-6 | [Native slab](validation/flux.json) |
+| Four 64³ cases, CPU wall time | 47.0377 s | [Batch report](validation/BATCH_REPORT.md) |
+| Same native cases, CUDA 1 worker | 1.1749 s, 40.03x vs NumPy CPU | [Batch report](validation/BATCH_REPORT.md) |
+| CUDA 2/4 workers | 1.1819/1.2040 s, no gain for this case | [Batch report](validation/BATCH_REPORT.md) |
+
+These establish their stated cases only. They do not establish all-feature
+accuracy or compatibility. The CPU performance baseline is NumPy.
+
+## Spectral ensemble follow-up
+
+The local RTX 3060 suite passed 252 tests with one optional skip, followed by one
+additional external-observer equivalence test. The complete RTX 5880 suite passed
+253 tests with one optional skip. The 5880 browser suite passed 15 tests with four
+optional interoperability skips, including selection and execution of the shared
+DFT monitor path. Production frontend build and screenshot review passed.
+
+Eight workloads cover vacuum, sphere, slab and waveguide at 32³/64³, with eight
+independent cases each. Every case records three spatial planes, six components
+and nine frequencies for 800 float32 steps. The matched cohort size is four.
+The external flaport 0.2.2 sequence also receives the same fused observation
+adapter, and the older Torch adapter remains in the record. Full-wall median
+ratios are 9.75–21.23 against that upstream sequence, 3.63–8.12 for monitor fusion
+at fixed native cohort size, and 1.07–1.73 for batching with the new observer.
+
+All native final E/H and point traces are bitwise equal. New fused independent
+and batch complex spectra are also bitwise equal. Maximum complete complex DFT
+relative L2 differences are 5.28e-8 against native Torch DFT and 0.3875% against
+the external adapter. Gates are 3e-6 and 1%, respectively. Full-field external
+differences and weak-field scales are retained. These are fixed-work forward
+ensemble comparisons, without a mesh-convergence or adjoint performance claim.
+[Full tables and raw measurements](validation/SPECTRAL_ENSEMBLE_REPORT.md),
+[implementation and Python/UI selection](CUDA_SPECTRA.md).
+
+The TeX manuscript includes the two monitor kernels, numerical conventions and
+this ablation. The 21-page PDF was rendered and visually reviewed. Its source
+bundle contains 16 entries and the provenance record verifies 17 measurement
+inputs. FDTDX, fdtdz and fdtd3d remain unmeasured on this host.
+
+## Phase and graph follow-up
+
+The final local RTX 3060 suite passed 263 tests with one optional skip. The RTX
+5880 full suite passed 262 tests with one optional skip, followed by the added
+complex-field/one-way graph regression passing separately. The Python spectral
+batch example ran on both GPUs with two different spheres and eight-step graphs.
+
+The new experiment records eight workloads, seven modes and three measured
+repetitions after warmup, for 168 timed ensembles. The external flaport sequence
+receives the identical current DFT observer and both graph options. Using its
+lower measured median, the native one-step cohort workflow ratio is 9.87–21.44.
+The isolated phase-kernel loop ratio is 1.06–1.19, while full wall is 0.94–1.06
+and regresses in three rows. Graph unrolling also retains regressions and remains
+optional with default one. No general end-to-end improvement is asserted.
+
+Native single/cohort/unrolled fields, traces, snapshots, permittivity and complex
+spectra match bitwise with the current phase kernel. Previous-versus-current
+phase DFT relative L2 is at most 3.42e-8 (gate 3e-6). External complete complex
+DFT relative L2 is at most 0.3875% (gate 1%). Both libraries preserve their own
+one-step results under unrolling. Exact host barriers, auto-decay stop,
+cancellation, multipole and auxiliary-source state are tested. The absolute
+phase law is checked in both precisions through counters above one billion.
+[All measurements](validation/GRAPH_ENSEMBLE_REPORT.md).
+
+The 22-page TeX manuscript adds the phase kernel, observation-barrier algorithm
+and the new ablation table. All pages were rendered and visually reviewed.
+It contains three vector figures and nine measurement tables with provenance for
+18 input records. No new GUI controls were introduced in this follow-up.
+
+## Selective spectra and native monitor import follow-up
+
+Plane monitors select E/H/P channels and signed flux independently. Online
+accumulators contain only the dependency union. Mixed complex64/128 DFT,
+per-axis quadrature strides, DFT temporal stride, nearest normal-node sampling,
+Chebyshev roots/Lobatto, source-bound frequency intervals and independent local
+apodization are available through Python and the property panel. Point time
+traces retain all steps. Decimation does not include antialias filtering.
+
+Synthetic FSP tests cover plane normals, XY lines, frequency tables, all four
+apodization modes, local/global inheritance, output selection, strides and
+precision. Unsupported averages, uncollocated fields, shapes and invalid settings
+block the entire runnable projection. Original bytes remain unchanged.
+Native sample phase, quadrature and normalization differences remain explicit.
+
+The RTX 3060 full suite passed 321 tests and one optional skip before three
+additional FSP tests were added. After a NumPy-version-dependent CPU rejection
+guard was corrected, all 76 monitor-related tests passed locally. The guard now
+checks the backend before accessing a tensor device. It does not change CUDA
+arithmetic. The RTX 5880 full suite had 323 passing tests, one failure on that
+CPU rejection path and one optional skip. After correction, all 76 affected
+monitor tests passed on the RTX 5880. Four browser tests on the remote GPU
+passed, covering selected outputs, precision/stride controls, local apodization,
+missing-component API errors, synthetic FSP byte preservation and native GPU
+execution. The new selective-spectrum Python example also ran successfully on
+both GPUs with nonzero flux for its two distinct sphere cases.
+
+Eight workloads, five modes and three measured repetitions yield 120 timed
+ensembles, with all accuracy gates passing. Native final E/H, point traces and
+signed flux agree bitwise with independent full-output runs. The selective
+full-wall improvement is 1.14–1.69, with Torch peak allocation reduced by
+6.70–19.63 percent. The upstream comparison uses the same selective observer
+and the lower median of its one/eight-step graphs. Its workflow ratio is
+7.74–19.32. The memory metric excludes non-Torch context/driver allocations.
+The retained source hashes identify the measured revision before the CPU-only
+backend guard correction. [Complete results](validation/SELECTIVE_MONITOR_REPORT.md).
+
+The TeX manuscript now has 24 pages, three vector figures and ten measurement
+tables. Its 19 input measurement records are fingerprinted. The portable source
+bundle compiles with no unresolved references or overfull boxes. All pages were
+rendered and visually reviewed. The author remains Hyoseok Park, with no em
+dashes or semicolons in manuscript sources.
+
+## Rectilinear mesh follow-up, 19 September 2026
+
+Independent axis spacings, explicit node arrays, conservative rectangular CFL
+and an optional smaller actual time step are available in Python and UI. Curl
+metrics, physical CPML depth, paired-source coefficients, result coordinates and
+tensor-cohort compatibility use the new grid representation. Synthetic FSP tests
+map saved auto/custom nonuniform and anisotropic uniform staircase nodes, keeping
+the original input bytes unchanged. This imports a frozen mesh, not the source
+mesh generator or conformal interfaces.
+
+The RTX 5880 full Python suite passes **353 tests, with 1 optional skip**.
+The local full run found two cached-node equality failures after 350 passes and
+1 skip. The model comparison now excludes the derived NumPy cache. All 98
+affected solver/source/rectilinear/FSP/monitor/batch/convergence checks pass after
+the correction on RTX 3060. A variable-depth PML pulse test also passes its
+1e-3 late-return amplitude gate. Independent rectangular Fourier waves, irregular
+periodic/Bloch curl adjointness and 240-step discrete energy conservation are
+tested separately from CPU/CUDA agreement.
+
+Four current GPU UI workflows pass: graded mesh editing, selective DFT controls,
+independent-axis/explicit-node editing with Python export, and a newly generated
+synthetic nonuniform FSP import through native GPU execution. Invalid node edits
+leave the scene unchanged, and the downloaded FSP bytes match the synthetic
+input exactly. Two older optional fixture-dependent UI cases were skipped in
+the broader invocation. The current server was reloaded before these checks.
+
+Eight matched-dt layer ensembles, four cases per row and 800 float32 steps,
+yield 72 timed solves after warmup. Reducing only transverse spacing removes
+93.75% of cells and improves native batch full wall by 4.33–13.39 times.
+Rectangular-mesh batch scheduling contributes a separate 1.41–1.80 times gain.
+Final centerline E/H and full point traces agree bitwise, and flux relative L2
+is at most 5.95e-15. The entire final fields are transverse-invariant for these
+fixtures. This native ablation does not establish a cross-library advantage or
+curved-geometry accuracy. [Raw record and method](validation/RECTILINEAR_ENSEMBLE_REPORT.md).
+
+The raw source hashes identify the measured revision. Subsequent model changes
+correct cache equality, explicit uniform-reference rounding and boundary-roundoff
+validation, without changing the measured field-update arithmetic. Source and
+result hashes for older experiments remain unchanged.
+
+The manuscript now contains 25 pages, three vector figures and eleven measurement
+tables. Twenty raw input records are fingerprinted. The 19-entry portable TeX
+bundle builds without unresolved references or overfull boxes, and every PDF page
+has been rendered and visually reviewed. Author: Hyoseok Park. The source still
+contains no em dashes or semicolons.
+
+## Analytic CAD and material-preparation follow-up
+
+Native solids now include extruded simple polygons, elliptical cylinders,
+ellipsoids and partial elliptical rings with ordered three-axis rotations.
+Python/SI facade, local vertex editing, orthographic/perspective display and
+CPU/CUDA/tensor material preparation share their declared geometry convention.
+Material membership uses analytic equations independent of display triangles.
+The preparer restricts membership work to conservative solid support while
+retaining complete Yee updates and exact overlap/material ownership.
+
+Independent checks cover concave contours, edge rejection, rotation composition,
+six rotated analytic-volume refinements, full-domain versus bounded material
+arrays, and bitwise optical agreement of equivalent rotated boxes and polygons.
+Mixed solids agree across CPU/fused CUDA and independent tensor cohorts.
+Unrotated synthetic circle/sphere ellipse FSP records convert without a vendor
+runtime, and original bytes remain unchanged. Other FSP rotations, polygon
+pivots and ring sectors remain explicitly unsupported.
+
+RTX 5880 measurements include four scene families at two grid sizes, four cases
+per cohort, eight solids per case and 800 steps. All 48 timed-ensemble gates
+pass bitwise across epsilon, final E/H, traces, snapshots, complex plane fields
+and flux. Bounded preparation improves native full batch wall time by
+1.44–21.19 times. The baseline evaluates the same analytic solids across the
+whole domain. This is a host-preparation ablation, not an external-library or
+CUDA stepping-kernel speed ranking. Loop fluctuations and all individual
+timings are retained. [Inputs and table](validation/GEOMETRY_ENSEMBLE_REPORT.md).
+The measured source revision precedes a large-legacy-angle support-rounding
+fix. That fix retains identical arithmetic for the zero legacy angle used in
+this experiment. Earlier raw measurement records remain unchanged.
+
+The RTX 5880 full Python suite passed 386 tests with one optional skip. The
+local full Python suite passed 385 tests with one optional skip. A subsequent
+large-legacy-angle regression and affected geometry/FSP suite passed all 33
+tests. The complete Python example ran on CPU and an RTX 5880 four-case CUDA
+cohort, producing the same four nonzero peak-trace objectives. Three independent
+frontend geometry checks passed. Four RTX 5880 UI workflows passed: polygon and
+rotation editing/execution, synthetic ellipse FSP conversion, explicit mesh
+editing/export, and synthetic nonuniform FSP conversion. A new-dialog selector
+collision and missing initial polygon persistence were fixed before acceptance.
+CAD tick spacing was corrected after inspecting the rendered interface.
+
+The updated manuscript has 26 pages, three vector figures and twelve measured
+tables derived from 21 fingerprinted JSON inputs. All pages were rendered and
+visually reviewed, with full-page inspection of the new equations and table.
+The portable TeX bundle has 20 entries. LaTeX compilation found no unresolved references, overfull boxes, em dashes or
+semicolons. The author remains Hyoseok Park. Its numerical and distribution
+limits remain explicit.
+
+## Independent primitive geometry writeback
+
+Recognized layout records now import boxes, rotated ellipsoids/cylinders,
+partial elliptical rings and simple polygon extrusions with separate stored
+pivots. The new `write_fsp_geometry` Python function, CLI and workbench export
+update existing geometry while preserving unedited byte segments. Unicode
+names and variable-length vertex matrices may move later records. Reports
+retain original/output offsets and hashes. No-op exports preserve every byte.
+Candidate outputs must reparse and match geometry and material response before
+they are returned. Saved mesh nodes remain fixed. Unsupported object-list,
+nongeometry and new dispersive-material changes fail explicitly.
+
+Author-generated fixtures cover five primitives, nonzero pivots, ordered and
+composed legacy rotations, closed polygon contours, changed vertex counts,
+missing ellipse extensions, untouched unknown properties, malformed metadata
+and rejection paths. Five edited/imported shape pairs produce identical native
+material grids and CPU optical outputs. Native CPU/CUDA and tensor-cohort
+comparisons also pass. No commercial field results or raw commercial layout
+fixtures are included in this release validation.
+
+The local RTX 3060 and remote RTX 5880 full Python suites each passed 414 tests
+with one optional skip. Five RTX 5880 UI workflows passed, including polygon
+edit, verified FSP download, reimport and native GPU execution. A subsequent
+malformed-ellipse-switch guard and regression passed the 56-test focused FSP
+suite on both machines. This record establishes the supported subset, not universal FSP
+compatibility or a speed comparison with a commercial solver.
+
+The updated TeX manuscript compiled into 27 pages. All pages were rendered
+and inspected, including full-page review of the new interoperability prose
+and the retained preparation-ablation table. Three figures, twelve measurement
+tables and their 21 input hashes remain unchanged. The portable bundle retains
+20 entries, Hyoseok Park authorship and the no-em-dash/no-semicolon rule.
+
+## Mixed-topology CUDA scheduler and scene settings follow-up
+
+`plan_grouped_batch` and `run_grouped_batch` accept mixed real-field meshes,
+durations, boundary parameters and precisions. Exact topology groups include
+resolved default PML layers. Each group is partitioned by a case cap and native
+memory estimate, with original result order restored. Tests compare complete
+E/H, permittivity, traces, times, snapshots, complex plane fields, flux, saved
+results and objective values against independent native runs. Cancellation,
+unsupported inputs, memory admission, output protection and objective failure
+are covered. The combined grouped/tensor suite passed 23 tests on both RTX 3060
+and RTX 5880. The final full local suite passed 480 tests with one optional skip.
+
+Four RTX 5880 mixed-workload ensembles each interleave 16 cases from vacuum,
+sphere, slab and waveguide families. Native independent and grouped execution
+are compared with two graph-adapted flaport modes using the same fused DFT
+observer. Three repetitions follow warmup. All 48 timed-ensemble output gates
+pass. The [measurement report](validation/GROUPED_ENSEMBLE_REPORT.md) records
+full-wall time, grouping cost, increased allocated GPU memory and the complete
+accuracy limits. Source hashes and every input/repetition accompany the table.
+FDTDX, fdtdz and fdtd3d are still unmeasured on this GPU.
+
+The independent scene writer adds supported source timing/phase, monitor
+frequency/window and region duration/CFL/PML/Periodic edits. Controlling input
+properties and resolved values are updated together. Local sampled signals,
+global temporal inheritance and effective local apodization are tested.
+Automatic external sampling and PML-profile constraints remain explicit limits.
+All 51 author-generated settings tests passed locally. The earlier complete
+RTX 5880 Python suite passed 466 tests with one optional skip before the grouped
+addition. The settings browser workflow passed on RTX 5880, including edit,
+export, reimport and native GPU execution. Its asynchronous import assertion
+now waits for the actual import to finish. No commercial field outputs or raw
+commercial layout fixtures are included in these release checks.
+
+The updated manuscript builds to 28 pages with three vector figures, thirteen
+measurement tables and 22 input-file hashes. All pages were rendered and
+visually inspected, including full-size reviews of the edited interoperability,
+grouping and mixed-workload result pages. The source preserves Hyoseok Park
+authorship and the existing no-em-dash/no-semicolon writing rule.
+
+## Independent uniform FSP mesh writeback
+
+The scene writer now updates recognized uniform target meshes in Python, CLI
+and the workbench. It writes axis spacing, actual total-domain spans, CAD/PML
+bounds, periodic duplicate intervals and time settings together. A smaller
+fixed native dt is encoded through its effective CFL fraction. The original
+coordinate origin and unedited bytes are retained. The export report records
+old/new shapes, requested/actual spans and native-only representations.
+
+Isotropic uniform records currently require legacy cell sampling, and
+anisotropic uniform records require Yee sampling. Unsupported sampling changes
+are rejected rather than silently changing the dielectric discretization.
+Anisotropic records reimport as explicit uniform nodes. Edited nonuniform mesh
+generators and external reopening/remeshing remain unverified. The geometry-only
+writer retains its fixed-grid contract. See [mesh conventions and the Python
+example](FSP_MESH_WRITE.md).
+
+The full local Python suite passed 501 tests with one optional skip before
+adding a final 2D point-monitor case. The final focused mesh suite passed all
+23 tests. The final complete RTX 5880 suite passed 502 tests with one optional
+skip in 173.19 seconds. Checks include independent serialized-grid/PML/CFL formulas, translated
+origins, field/DFT roundtrips, CPU/CUDA and shared CUDA cohorts. An additional
+18-case material-assignment probe found no changed Yee dielectric entries
+after anisotropic remeshing and reimport. This is a tested input set, not a
+general equivalence proof.
+
+The [machine-readable validation record](validation/fsp-uniform-mesh.json)
+retains the tested scope, counts and final implementation/test source hashes.
+
+All three RTX 5880 browser workflows passed: primitive geometry export, source
+and monitor settings export, and the new axis-mesh export. The last edits a
+48×48×48 grid to 40×30×24, downloads and reimports the file, exports Python and
+completes a native GPU run with nonzero flux. An initial server-lifetime failure
+was resolved by retaining the SSH execution channel before the successful
+runs. The final display-only correction also passed its mesh browser rerun,
+and its rendered export dialog was inspected.
+
+## Independent FSP primitive-list writeback
+
+The scene writer supports addition, deletion, duplication and reordering of
+the five mapped primitive families. Existing records retain their opaque
+bytes, while new records use authored defaults for reserved drawing metadata.
+External-reader acceptance of those new defaults remains unverified. This is
+native roundtrip support, not general FSP serialization or commercial solver
+equivalence. [Definitions, Python and UI workflow](FSP_OBJECTS_WRITE.md).
+
+The writer preserves the relative order of nonstructure records, reconstructs
+the root child count and checks every retained byte range at its new offset.
+Reports distinguish the structural replacement envelope, individual field
+edits and preserved ranges. Object/component IDs are remapped after reparsing.
+Material priority, supported source pulses and monitor settings are verified
+alongside geometry. The fixed-topology geometry API retains its earlier
+contract. New structures can reuse unchanged supported database materials,
+while new dispersive coefficients, source/monitor list changes and groups
+remain outside the export subset.
+
+The local full Python suite passed 518 tests with one optional skip before the
+final range-indexing change and five additional 2D cases. The final focused
+primitive-list suite passed 21 tests. Its coverage includes 2D/3D additions,
+duplicate names, delete-all/add-again, repeated edits, interleaved records,
+point-channel ID changes, database material reuse, exact material assignment,
+combined mesh/list edits, CPU/CUDA fields, shared CUDA spectra and CLI output
+preservation. The preceding RTX 5880 FSP regression suite passed 130 tests.
+The final complete RTX 5880 Python suite passed 523 tests with one optional
+licensed-integration skip in 180.69 seconds. The [validation record and source
+hashes](validation/fsp-object-list.json) distinguish the final run from the
+earlier focused checks.
+
+All three RTX 5880 UI flows passed for object-list editing, uniform mesh
+editing and source/monitor settings. The new flow duplicates a sphere, deletes
+its original, adds a box, exercises both tree-order controls, exports and
+reimports the edited file, exports Python and completes a GPU run with nonzero
+flux. The final code and dialog rerun also passed, and its rendered export
+dialog was inspected. Native-only settings are disclosed with readable object
+names in a collapsible section.
+
+## Source and monitor list follow-up, 20 September 2026
+
+Mapped electric dipoles, 3D normal-incidence plane/TFSF sources, point TIME/DFT
+monitors and frequency planes can now be added, deleted, duplicated and
+reordered through Python, CLI and the workbench. Shared point-monitor channels
+can be removed individually or split when their positions, names or order
+diverge. Split templates preserve unknown property encodings. New records use
+authored recognized defaults. Native reimport verifies waveform, geometry,
+spectral settings and ID mapping. External reader acceptance remains unverified.
+See the [scope and example](FSP_INSTRUMENTS_WRITE.md).
+
+The complete Python suite passed **556 tests with 1 optional skip** on both the
+RTX 3060 (231.23 seconds) and RTX 5880 (195.21 seconds). The full RTX 5880 browser
+suite passed **25 tests with 5 optional fixture-dependent skips**. It includes
+the new source/monitor add, duplicate, delete, export, reimport, Python export
+and GPU execution flow. Its rendered export dialog was inspected. The
+[validation record](validation/fsp-instrument-list.json) retains source hashes
+and machine-independent test summaries.
+
+## Private GitHub development preview
+
+The [private development repository](https://github.com/hyoseokp/photonweave)
+holds the experimental 0.14.0.dev0 delivery. Its [release scope](PREVIEW_RELEASE.md)
+keeps the complete replacement goal and public-release conditions open.
+A wheel built from fresh staging contains exactly the 42 current package files,
+including the current browser assets. A separate virtual environment installed
+that wheel and verified package import outside the source checkout, nonzero
+finite CPU fields/traces, HTTP browser assets and the capabilities endpoint.
+The [package record](validation/private-preview.json) includes its SHA-256.
+
+## Remaining gates
+
+The [feature checklist](FEATURE_CHECKLIST.md) has 1658 rows: 159 implemented within
+their stated scope, 225 partial and 1274 missing or unverified. All rows have
+[importance and scope decisions](IMPLEMENTATION_PRIORITIES.md). Counts are not
+completion percentages. Major gaps include oblique/finite-aperture injection, mode sources,
+S-parameters, conformal interfaces, sampled-data fitting, further materials and
+boundaries, near-to-far fields, adjoint differentiation, complete graphical
+sweeps and general format compatibility.
+
+Native magnetic source support does not verify the FSP magnetic type encoding.
+That encoding remains rejected. Source power calibration and general native-to-FSP
+writeback also remain open. FSP plane/TFSF conversion now covers a checked 3D normal-incidence subset with explicit auxiliary-line and amplitude differences.
+[Vector sources](DIPOLE_SOURCES.md), [one-way definitions and limits](ONEWAY_SOURCES.md), [TFSF scope](TFSF_SOURCES.md).
+
+The paper and README are development artifacts in the private delivery. No public repository,
+paper submission or vendor contact has been made. Final source/package bytes
+and licences require review after product scope and provenance issues are resolved.

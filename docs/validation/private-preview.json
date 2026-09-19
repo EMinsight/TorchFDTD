@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-20",
+  "version": "0.14.0.dev0",
+  "visibility": "private",
+  "public_release_cleared": false,
+  "repository": "https://github.com/hyoseokp/photonweave",
+  "package": {
+    "filename": "photonweave-0.14.0.dev0-py3-none-any.whl",
+    "bytes": 404979,
+    "sha256": "716c34a12f031839f65fad6b73157e9ba025000699dd44247a025941743acb5d",
+    "verified_source_payload_files": 42,
+    "installed_outside_source_checkout": true,
+    "version": "0.14.0.dev0",
+    "cpu_nonzero_fields": true,
+    "cpu_nonzero_traces": true,
+    "finite_fields": true,
+    "packaged_browser_assets": 2,
+    "http_ui_and_capabilities": true
+  },
+  "numerical_validation": "fsp-instrument-list.json",
+  "source_manifest_note": "The staged Git tree is separately checked against the current release audit allowlist before push."
+}

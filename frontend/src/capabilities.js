@@ -1,0 +1,16 @@
+export function setupCapabilities({api,esc}){
+ const dialog=document.createElement('dialog');dialog.className='capability-dialog';document.body.append(dialog);let data;
+ const $=s=>dialog.querySelector(s);
+ function rows(){
+  const query=$('[data-search]').value.toLowerCase(),status=$('[data-status]').value,category=$('[data-category]').value,priority=$('[data-priority]').value;
+  const matching=data.features.filter(r=>(!status||r.native===status)&&(!category||r.category===category)&&(!priority||r.product_priority===priority)&&(!$('[data-remaining]').checked||r.remaining)&&[r.name,r.category,r.scope,r.workstream_title].join(' ').toLowerCase().includes(query)).sort((a,b)=>a.delivery_rank-b.delivery_rank||a.name.localeCompare(b.name));
+  $('.capability-count').textContent=`${matching.length.toLocaleString()} / ${data.features.length.toLocaleString()} entries`;
+  $('tbody').innerHTML=matching.map(r=>`<tr><td>${r.native==='implemented'?'☑':'☐'}</td><td><b>${esc(r.product_priority)}</b><small>${esc(data.decision_labels[r.decision])}</small></td><td><small>${esc(r.workstream_title)} · ${esc(r.category)}</small>${r.reference?`<a href="${esc(r.reference)}" target="_blank" rel="noopener">${esc(r.name)}</a>`:`<span>${esc(r.name)}</span>`}</td>${['native','python','ui','fsp'].map(k=>`<td><span class="cap-status ${r[k]}">${esc(data.status_labels[r[k]])}</span></td>`).join('')}<td>${esc(r.scope)}<small>${esc(r.priority_reason)}</small>${r.evidence.length?`<small>${r.evidence.map(esc).join(' · ')}</small>`:''}</td></tr>`).join('');
+ }
+ return {async open(){
+  data=await api('/capabilities');dialog.innerHTML=`<div class="fsp-heading"><h2>Feature priorities and checklist</h2><button data-close-panel>Close</button></div><p>${esc(data.priority_note)}</p><p>${Object.entries(data.remaining_priority_counts).sort().map(([p,n])=>`${esc(p)}: ${n} remaining entries`).join(' · ')}</p><div class="capability-filters"><input data-search aria-label="Search capabilities" placeholder="Search feature or property"><select data-priority aria-label="Capability priority"><option value="">All priorities</option>${Object.entries(data.priority_labels).map(([v,t])=>`<option value="${v}">${esc(t)}</option>`).join('')}</select><select data-status aria-label="Capability status"><option value="">All statuses</option>${Object.entries(data.status_labels).map(([v,t])=>`<option value="${v}">${esc(t)}</option>`).join('')}</select><select data-category aria-label="Capability category"><option value="">All categories</option>${[...new Set(data.features.map(r=>r.category))].map(c=>`<option>${esc(c)}</option>`).join('')}</select><label><input data-remaining type="checkbox" aria-label="Remaining work only"> Remaining work only</label><a href="/api/capabilities" target="_blank">JSON</a><span class="capability-count"></span></div><div class="capability-table"><table><thead><tr><th></th><th>Priority</th><th>Feature / property</th><th>Native engine</th><th>Python</th><th>UI</th><th>Independent FSP</th><th>Scope / reason / evidence</th></tr></thead><tbody></tbody></table></div>`;
+  $('[data-close-panel]').onclick=()=>dialog.close();$('[data-search]').oninput=rows;
+  for(const field of ['data-status','data-category','data-priority','data-remaining'])$('['+field+']').onchange=rows;
+  rows();dialog.showModal();
+ }};
+}

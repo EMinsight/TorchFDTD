@@ -1,0 +1,35 @@
+"""PhotonWeave: micrometre geometry, SI time, open-source Yee FDTD."""
+# The upstream grid package changes process-wide Torch defaults on first import.
+# A forward simulator must not disable gradients in its caller's training code.
+import torch as _torch
+_previous_dtype, _previous_grad = _torch.get_default_dtype(), _torch.is_grad_enabled()
+try:
+    import fdtd as _fdtd
+finally:
+    _torch.set_default_dtype(_previous_dtype)
+    _torch.set_grad_enabled(_previous_grad)
+del _torch, _fdtd, _previous_dtype, _previous_grad
+
+from .models import Project, Region, MeshRefinement, Structure, Source, SourceTimeSettings, TimeSignal, Monitor, Material, BoundaryFace, Boundaries, SpectrumSettings
+from .solver import Simulation, Result
+from .session import FDTD
+from .mesh import freeze_refinements
+from .models import FieldMonitor
+from .field_monitors import normalize_flux
+from .batch import BatchCase, BatchItem, BatchReport, BatchRunner, run_batch, parameter_case, parameter_sweep
+from .design import DesignResult, optimize
+from .models import LorentzPole, RunControl
+from .convergence import ConvergenceReport, mesh_refinement_projects, mesh_convergence
+
+__all__ = ['Project', 'Region', 'MeshRefinement', 'freeze_refinements', 'Structure', 'Source', 'SourceTimeSettings', 'TimeSignal', 'Monitor', 'FieldMonitor', 'normalize_flux', 'Material', 'BoundaryFace', 'Boundaries', 'SpectrumSettings', 'Simulation', 'Result', 'FDTD']
+__all__ += ['BatchCase','BatchItem','BatchReport','BatchRunner','run_batch','parameter_case','parameter_sweep','DesignResult','optimize']
+__all__ += ['LorentzPole', 'RunControl']
+__all__ += ['ConvergenceReport', 'mesh_refinement_projects', 'mesh_convergence']
+from .tensor_batch import run_tensor_batch
+__all__ += ['run_tensor_batch']
+from .grouped_batch import plan_grouped_batch, run_grouped_batch
+__all__ += ['plan_grouped_batch', 'run_grouped_batch']
+from .tuning import TensorBatchTuning, tune_tensor_batch
+__all__ += ['TensorBatchTuning', 'tune_tensor_batch']
+from .fsp_geometry import write_fsp_geometry, write_fsp_scene
+__all__ += ['write_fsp_geometry', 'write_fsp_scene']

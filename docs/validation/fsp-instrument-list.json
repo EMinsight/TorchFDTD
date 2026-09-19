@@ -1,0 +1,44 @@
+{
+  "scope": "Authored layout source/monitor list edits and native CPU/CUDA/tensor checks. No commercial execution or readback.",
+  "date": "2026-09-20",
+  "external_reader_verified": false,
+  "local_python": {
+    "gpu": "RTX 3060",
+    "tests": 557,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 556,
+    "seconds": 231.215
+  },
+  "workstation_python": {
+    "gpu": "RTX 5880 Ada",
+    "tests": 557,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 556,
+    "seconds": 195.168
+  },
+  "workstation_ui": {
+    "gpu": "RTX 5880 Ada",
+    "tests": 30,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "passed": 25,
+    "seconds": 146.773
+  },
+  "source_hashes": {
+    "photonweave/fsp_instruments.py": "a3353960dfd9eab2156785c097b1242016e6794499ae1e219cd3d117e436294a",
+    "photonweave/fsp_settings.py": "b548c77190055e6133f03e219b43353e63e7566e97dc60b300756f171f691486",
+    "photonweave/fsp_objects.py": "f95cbbc95cb48a2c8055cbad391cc0acf477acdf669775db8cffc1cb5a704c58",
+    "photonweave/fsp_geometry.py": "af801b844889a073bb49b3587387b41866fc3c6145d6d8a0b13e1ee18be8a1c7",
+    "frontend/src/main.js": "6c3c0129adea82ba207cda9d108b8895b74a746485dc48de4b0b41a392b0d5e2",
+    "frontend/src/fsp_native.js": "9221a72a0777d19c897223d570906b3c4e5fd3468aa5006587b29d9c01d3702d",
+    "tests/test_fsp_instruments_write.py": "c95d9e71c63e2d602de4a279775f10e7930495a231fbc0168ce6afdb10f91b65",
+    "tests/test_fsp_settings_write.py": "d3e583e433d32ee3f03c8049ba4e6dfe948b5a0d5a84e26a997cfc07bd803767",
+    "tests/test_fsp_objects_write.py": "16d901141fafd4aabfabc66ac4eb220cbc5e65a73921da3ad92a21b9702d22b0",
+    "tests/ui/fsp-instruments-write.spec.js": "83e350e74052520e3529af74e69d2550ccfe07be6848f5843dd21ca2fe8fa38e"
+  }
+}

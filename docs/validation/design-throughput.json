@@ -1,0 +1,1169 @@
+{
+  "hardware": {
+    "cuda": true,
+    "gpu": "NVIDIA RTX 5880 Ada Generation",
+    "gpu_memory_gb": 48.0,
+    "torch": "2.10.0",
+    "engine": "PhotonWeave Yee/CPML on fdtd grid",
+    "cpu_threads": 8
+  },
+  "method": "DE/rand/1/bin, seed 73, population 16, three trial generations, 64 full forward solves per run. Radius bounds [0.25,0.75] um, maximized integrated squared point trace. Fixed 800 steps. One warmup and three alternating measured repetitions. Includes generation logic, setup, graph preparation, stepping, final E/H transfer and objective. Excludes disk output and cold context/compiler. No gradients, no calibrated efficiency or global-optimum claim.",
+  "cases": [
+    {
+      "shape": [
+        32,
+        32,
+        32
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "sphere-32",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.15,
+          "material_sampling": "yee",
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 4,
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "cuda_kernel": "fused",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          }
+        ],
+        "structures": [
+          {
+            "id": "f434a3fb1488",
+            "name": "object",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "enabled": true,
+            "kind": "sphere",
+            "size": [
+              1,
+              1,
+              0.5
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0,
+            "material": "dielectric",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "8a7a9b1cb0c3",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "5b55394c7914",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null
+      },
+      "cohort_size": 16,
+      "runs": {
+        "sequential": [
+          {
+            "wall_seconds": 1.4764073000405915,
+            "evaluations_per_second": 43.34847165700171,
+            "peak_allocated_bytes": 2347008,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.008498191599520288,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.008498191599520288,
+                  "mean": 0.003338987650062036,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.008498191599520288,
+                  "mean": 0.005187026571542923,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.008498191599520288,
+                  "mean": 0.006874417074242091,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.008498191599520288,
+                  "mean": 0.0077573238096613345,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          },
+          {
+            "wall_seconds": 1.676864100038074,
+            "evaluations_per_second": 38.16647991840654,
+            "peak_allocated_bytes": 2347008,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.008498191599520288,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.008498191599520288,
+                  "mean": 0.003338987650062036,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.008498191599520288,
+                  "mean": 0.005187026571542923,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.008498191599520288,
+                  "mean": 0.006874417074242091,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.008498191599520288,
+                  "mean": 0.0077573238096613345,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          },
+          {
+            "wall_seconds": 1.7193302999949083,
+            "evaluations_per_second": 37.22379580013772,
+            "peak_allocated_bytes": 2347008,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.008498191599520288,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.008498191599520288,
+                  "mean": 0.003338987650062036,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.008498191599520288,
+                  "mean": 0.005187026571542923,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.008498191599520288,
+                  "mean": 0.006874417074242091,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.008498191599520288,
+                  "mean": 0.0077573238096613345,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          }
+        ],
+        "tensor": [
+          {
+            "wall_seconds": 0.8098327000043355,
+            "evaluations_per_second": 79.02866851345638,
+            "peak_allocated_bytes": 31707648,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.008498191599520288,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.008498191599520288,
+                  "mean": 0.003338987650062036,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.008498191599520288,
+                  "mean": 0.005187026571542923,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.008498191599520288,
+                  "mean": 0.006874417074242091,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.008498191599520288,
+                  "mean": 0.0077573238096613345,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          },
+          {
+            "wall_seconds": 0.8176283999928273,
+            "evaluations_per_second": 78.2751675462367,
+            "peak_allocated_bytes": 31707648,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.008498191599520288,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.008498191599520288,
+                  "mean": 0.003338987650062036,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.008498191599520288,
+                  "mean": 0.005187026571542923,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.008498191599520288,
+                  "mean": 0.006874417074242091,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.008498191599520288,
+                  "mean": 0.0077573238096613345,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          },
+          {
+            "wall_seconds": 0.8287485999753699,
+            "evaluations_per_second": 77.22486650584032,
+            "peak_allocated_bytes": 31707648,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.008498191599520288,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.008498191599520288,
+                  "mean": 0.003338987650062036,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.008498191599520288,
+                  "mean": 0.005187026571542923,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.008498191599520288,
+                  "mean": 0.006874417074242091,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.008498191599520288,
+                  "mean": 0.0077573238096613345,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          }
+        ]
+      },
+      "checks": [
+        {
+          "identical_history": true
+        },
+        {
+          "identical_history": true
+        },
+        {
+          "identical_history": true
+        }
+      ],
+      "medians": {
+        "sequential": {
+          "wall_seconds": 1.676864100038074,
+          "evaluations_per_second": 38.16647991840654,
+          "peak_allocated_bytes": 2347008
+        },
+        "tensor": {
+          "wall_seconds": 0.8176283999928273,
+          "evaluations_per_second": 78.2751675462367,
+          "peak_allocated_bytes": 31707648
+        }
+      }
+    },
+    {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "sphere-64",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.075,
+          "material_sampling": "yee",
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "cuda_kernel": "fused",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": []
+          }
+        ],
+        "structures": [
+          {
+            "id": "8577eddebe68",
+            "name": "object",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "enabled": true,
+            "kind": "sphere",
+            "size": [
+              1,
+              1,
+              0.5
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0,
+            "material": "dielectric",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "07279424c93c",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "06d935d20687",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null
+      },
+      "cohort_size": 4,
+      "runs": {
+        "sequential": [
+          {
+            "wall_seconds": 2.510560400027316,
+            "evaluations_per_second": 25.49231637657618,
+            "peak_allocated_bytes": 18714624,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.0010725611157083865,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.00040710679784866535,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.0006137985331848842,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0008243625309633403,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0009396694249999933,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          },
+          {
+            "wall_seconds": 2.4683438999927603,
+            "evaluations_per_second": 25.928315742465106,
+            "peak_allocated_bytes": 18714624,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.0010725611157083865,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.00040710679784866535,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.0006137985331848842,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0008243625309633403,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0009396694249999933,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          },
+          {
+            "wall_seconds": 2.4645896999863908,
+            "evaluations_per_second": 25.967811194030958,
+            "peak_allocated_bytes": 18714624,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.0010725611157083865,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.00040710679784866535,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.0006137985331848842,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0008243625309633403,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0009396694249999933,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          }
+        ],
+        "tensor": [
+          {
+            "wall_seconds": 2.1696771000279114,
+            "evaluations_per_second": 29.497476836150728,
+            "peak_allocated_bytes": 65432064,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.0010725611157083865,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.00040710679784866535,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.0006137985331848842,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0008243625309633403,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0009396694249999933,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          },
+          {
+            "wall_seconds": 2.204087799997069,
+            "evaluations_per_second": 29.036955787371586,
+            "peak_allocated_bytes": 65432064,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.0010725611157083865,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.00040710679784866535,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.0006137985331848842,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0008243625309633403,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0009396694249999933,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          },
+          {
+            "wall_seconds": 2.3475531000294723,
+            "evaluations_per_second": 27.26242912213424,
+            "peak_allocated_bytes": 65432064,
+            "result": {
+              "parameters": {
+                "structures.0.radius": 0.75
+              },
+              "objective": 0.0010725611157083865,
+              "history": [
+                {
+                  "generation": 0,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.00040710679784866535,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 16
+                },
+                {
+                  "generation": 1,
+                  "best": 0.0010566803344538862,
+                  "mean": 0.0006137985331848842,
+                  "parameters": {
+                    "structures.0.radius": 0.7425785731711014
+                  },
+                  "evaluations": 32
+                },
+                {
+                  "generation": 2,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0008243625309633403,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 48
+                },
+                {
+                  "generation": 3,
+                  "best": 0.0010725611157083865,
+                  "mean": 0.0009396694249999933,
+                  "parameters": {
+                    "structures.0.radius": 0.75
+                  },
+                  "evaluations": 64
+                }
+              ],
+              "evaluations": 64,
+              "seed": 73
+            }
+          }
+        ]
+      },
+      "checks": [
+        {
+          "identical_history": true
+        },
+        {
+          "identical_history": true
+        },
+        {
+          "identical_history": true
+        }
+      ],
+      "medians": {
+        "sequential": {
+          "wall_seconds": 2.4683438999927603,
+          "evaluations_per_second": 25.928315742465106,
+          "peak_allocated_bytes": 18714624
+        },
+        "tensor": {
+          "wall_seconds": 2.204087799997069,
+          "evaluations_per_second": 29.036955787371586,
+          "peak_allocated_bytes": 65432064
+        }
+      }
+    }
+  ]
+}

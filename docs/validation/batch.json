@@ -1,0 +1,603 @@
+{
+  "hardware": {
+    "cuda": true,
+    "gpu": "NVIDIA RTX 5880 Ada Generation",
+    "gpu_memory_gb": 48.0,
+    "torch": "2.10.0",
+    "engine": "PhotonWeave Yee/CPML on fdtd grid",
+    "cpu_threads": 8
+  },
+  "project": {
+    "schema_version": 1,
+    "name": "Independent dielectric sphere ensemble",
+    "region": {
+      "dimension": "3d",
+      "size": [
+        4.8,
+        4.8,
+        4.8
+      ],
+      "mesh": 0.075,
+      "material_sampling": "yee",
+      "mesh_type": "uniform",
+      "mesh_max": 0.15,
+      "mesh_grading": 1.25,
+      "mesh_ppw": 24,
+      "mesh_auto_refine": true,
+      "mesh_refinements": [],
+      "courant_factor": 0.99,
+      "steps": 800,
+      "pml_cells": 8,
+      "boundaries": {
+        "x_min": {
+          "kind": "pml",
+          "layers": null,
+          "sigma_scale": 1,
+          "kappa": 1,
+          "alpha": 1e-08,
+          "polynomial": 3,
+          "alpha_polynomial": 0
+        },
+        "x_max": {
+          "kind": "pml",
+          "layers": null,
+          "sigma_scale": 1,
+          "kappa": 1,
+          "alpha": 1e-08,
+          "polynomial": 3,
+          "alpha_polynomial": 0
+        },
+        "y_min": {
+          "kind": "pml",
+          "layers": null,
+          "sigma_scale": 1,
+          "kappa": 1,
+          "alpha": 1e-08,
+          "polynomial": 3,
+          "alpha_polynomial": 0
+        },
+        "y_max": {
+          "kind": "pml",
+          "layers": null,
+          "sigma_scale": 1,
+          "kappa": 1,
+          "alpha": 1e-08,
+          "polynomial": 3,
+          "alpha_polynomial": 0
+        },
+        "z_min": {
+          "kind": "pml",
+          "layers": null,
+          "sigma_scale": 1,
+          "kappa": 1,
+          "alpha": 1e-08,
+          "polynomial": 3,
+          "alpha_polynomial": 0
+        },
+        "z_max": {
+          "kind": "pml",
+          "layers": null,
+          "sigma_scale": 1,
+          "kappa": 1,
+          "alpha": 1e-08,
+          "polynomial": 3,
+          "alpha_polynomial": 0
+        }
+      },
+      "bloch_phase": [
+        0,
+        0,
+        0
+      ],
+      "background_index": 1,
+      "backend": "auto",
+      "precision": "float32",
+      "snapshot_interval": 800,
+      "field": "Ez",
+      "slice_axis": "z",
+      "slice_position": 0,
+      "complex_display": "real"
+    },
+    "materials": [
+      {
+        "name": "Air",
+        "index": 1.0,
+        "color": "#b7c5d7",
+        "model": "dielectric",
+        "epsilon_inf": 1,
+        "plasma_rad_s": 2000000000000000.0,
+        "collision_rad_s": 100000000000000.0,
+        "resonance_rad_s": 2000000000000000.0,
+        "linewidth_rad_s": 100000000000000.0,
+        "delta_epsilon": 1
+      },
+      {
+        "name": "SiO2 (constant n)",
+        "index": 1.444,
+        "color": "#80c4d7",
+        "model": "dielectric",
+        "epsilon_inf": 1,
+        "plasma_rad_s": 2000000000000000.0,
+        "collision_rad_s": 100000000000000.0,
+        "resonance_rad_s": 2000000000000000.0,
+        "linewidth_rad_s": 100000000000000.0,
+        "delta_epsilon": 1
+      },
+      {
+        "name": "SiN (constant n)",
+        "index": 2.0,
+        "color": "#69a1e8",
+        "model": "dielectric",
+        "epsilon_inf": 1,
+        "plasma_rad_s": 2000000000000000.0,
+        "collision_rad_s": 100000000000000.0,
+        "resonance_rad_s": 2000000000000000.0,
+        "linewidth_rad_s": 100000000000000.0,
+        "delta_epsilon": 1
+      },
+      {
+        "name": "Si (constant n)",
+        "index": 3.48,
+        "color": "#cc8bdc",
+        "model": "dielectric",
+        "epsilon_inf": 1,
+        "plasma_rad_s": 2000000000000000.0,
+        "collision_rad_s": 100000000000000.0,
+        "resonance_rad_s": 2000000000000000.0,
+        "linewidth_rad_s": 100000000000000.0,
+        "delta_epsilon": 1
+      }
+    ],
+    "structures": [
+      {
+        "id": "d8bb71119dd6",
+        "name": "object",
+        "center": [
+          0,
+          0,
+          0
+        ],
+        "enabled": true,
+        "kind": "sphere",
+        "size": [
+          1,
+          1,
+          0.5
+        ],
+        "radius": 0.45,
+        "inner_radius": 0.3,
+        "rotation": 0,
+        "material": "SiO2 (constant n)",
+        "mesh_order": 2
+      }
+    ],
+    "sources": [
+      {
+        "wavelength": 1.55,
+        "pulse": "gaussian",
+        "pulse_cycles": 1.0,
+        "time_definition": "cycles",
+        "pulse_length": 2e-14,
+        "pulse_offset": 5e-14,
+        "signal": null,
+        "wavelength_start": 1.3,
+        "wavelength_stop": 1.8,
+        "optimize_for_short_pulse": true,
+        "eliminate_discontinuities": false,
+        "chirp_bandwidth_hz": 100000000000000.0,
+        "id": "74ed4e7850b2",
+        "name": "source",
+        "center": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "enabled": true,
+        "kind": "point",
+        "size": [
+          0,
+          2,
+          0
+        ],
+        "component": "Ez",
+        "amplitude": 1,
+        "phase": 0,
+        "use_global_source": false
+      }
+    ],
+    "global_source": {
+      "wavelength": 1.55,
+      "pulse": "gaussian",
+      "pulse_cycles": 3,
+      "time_definition": "cycles",
+      "pulse_length": 2e-14,
+      "pulse_offset": 5e-14,
+      "signal": null,
+      "wavelength_start": 1.3,
+      "wavelength_stop": 1.8,
+      "optimize_for_short_pulse": true,
+      "eliminate_discontinuities": false,
+      "chirp_bandwidth_hz": 100000000000000.0
+    },
+    "monitors": [
+      {
+        "id": "d14954486fb5",
+        "name": "monitor",
+        "center": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "enabled": true,
+        "kind": "point",
+        "component": "Ez",
+        "spectrum": {
+          "sampling": "fft",
+          "chebyshev_wavelength": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "hann",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "use_global_monitor": false
+      }
+    ],
+    "global_monitor": {
+      "sampling": "frequency",
+      "chebyshev_wavelength": false,
+      "custom_frequencies_hz": [],
+      "wavelength_start": 1.3,
+      "wavelength_stop": 1.8,
+      "frequency_points": 101,
+      "apodization": "none",
+      "apodization_center": 2e-14,
+      "apodization_time_width": 1e-14
+    },
+    "import_provenance": null
+  },
+  "cases": [
+    {
+      "structures.0.radius": 0.4
+    },
+    {
+      "structures.0.radius": 0.45
+    },
+    {
+      "structures.0.radius": 0.5
+    },
+    {
+      "structures.0.radius": 0.55
+    }
+  ],
+  "measurements": [
+    {
+      "backend": "cpu",
+      "workers": 1,
+      "seconds": [
+        46.7342445999966,
+        47.55748979997588,
+        47.037651899969205
+      ],
+      "median_seconds": 47.037651899969205,
+      "cases_per_second": 0.08503825846805543,
+      "plan": {
+        "backend": "cpu",
+        "devices": [
+          null
+        ],
+        "workers": {
+          "None": 1
+        },
+        "largest_solver_estimate_mb": 50.0,
+        "estimated_worker_mb": 139.0,
+        "memory_budget_mb": {
+          "None": null
+        },
+        "method": "spawned independent simulation processes",
+        "cuda_graph": true
+      },
+      "metrics": [
+        {
+          "trace_energy": 0.0002012432087212801,
+          "field_peak": 0.0004547552380245179
+        },
+        {
+          "trace_energy": 0.00024534837575629354,
+          "field_peak": 0.00045458204112946987
+        },
+        {
+          "trace_energy": 0.0003142060595564544,
+          "field_peak": 0.00045447261072695255
+        },
+        {
+          "trace_energy": 0.00039422037662006915,
+          "field_peak": 0.00045470017357729375
+        }
+      ],
+      "compute_seconds": [
+        11.65910619997885,
+        11.69022520002909,
+        11.63194019999355,
+        11.976047399977688
+      ],
+      "setup_seconds": [
+        0.013259799976367503,
+        0.013690299994777888,
+        0.013066100014839321,
+        0.013492099998984486
+      ],
+      "concurrent_process_intervals": [
+        {
+          "pid": 13844,
+          "start": 1789753066.2656753,
+          "end": 1789753077.956861
+        },
+        {
+          "pid": 13844,
+          "start": 1789753077.9588666,
+          "end": 1789753089.6589553
+        },
+        {
+          "pid": 13844,
+          "start": 1789753089.6589553,
+          "end": 1789753101.318716
+        },
+        {
+          "pid": 13844,
+          "start": 1789753101.318716,
+          "end": 1789753113.3100376
+        }
+      ],
+      "speedup_vs_cpu_1": 1.0,
+      "max_trace_energy_relative_error": 0.0
+    },
+    {
+      "backend": "cuda",
+      "workers": 1,
+      "seconds": [
+        1.174935499962885,
+        1.172690599982161,
+        1.198220600024797
+      ],
+      "median_seconds": 1.174935499962885,
+      "cases_per_second": 3.404442201402848,
+      "plan": {
+        "backend": "cuda",
+        "devices": [
+          0
+        ],
+        "workers": {
+          "0": 1
+        },
+        "largest_solver_estimate_mb": 50.0,
+        "estimated_worker_mb": 843.0,
+        "memory_budget_mb": {
+          "0": 28406.399999999998
+        },
+        "method": "spawned independent simulation processes",
+        "cuda_graph": true
+      },
+      "metrics": [
+        {
+          "trace_energy": 0.0002012432087212801,
+          "field_peak": 0.0004547552380245179
+        },
+        {
+          "trace_energy": 0.00024534837575629354,
+          "field_peak": 0.00045458204112946987
+        },
+        {
+          "trace_energy": 0.0003142060595564544,
+          "field_peak": 0.00045447261072695255
+        },
+        {
+          "trace_energy": 0.00039422037662006915,
+          "field_peak": 0.00045470017357729375
+        }
+      ],
+      "compute_seconds": [
+        0.19673100003274158,
+        0.19619439996313304,
+        0.196983200032264,
+        0.19581380003364757
+      ],
+      "setup_seconds": [
+        0.025405599968507886,
+        0.029223899997305125,
+        0.025291399972047657,
+        0.025752099987585098
+      ],
+      "concurrent_process_intervals": [
+        {
+          "pid": 11052,
+          "start": 1789753120.383682,
+          "end": 1789753120.6194618
+        },
+        {
+          "pid": 11052,
+          "start": 1789753120.6830041,
+          "end": 1789753120.9019718
+        },
+        {
+          "pid": 11052,
+          "start": 1789753120.9810126,
+          "end": 1789753121.2158048
+        },
+        {
+          "pid": 11052,
+          "start": 1789753121.279214,
+          "end": 1789753121.5141597
+        }
+      ],
+      "speedup_vs_cpu_1": 40.034241795788006,
+      "max_trace_energy_relative_error": 0.0
+    },
+    {
+      "backend": "cuda",
+      "workers": 2,
+      "seconds": [
+        1.1848738000262529,
+        1.1719082999625243,
+        1.181857499992475
+      ],
+      "median_seconds": 1.181857499992475,
+      "cases_per_second": 3.384502784832747,
+      "plan": {
+        "backend": "cuda",
+        "devices": [
+          0
+        ],
+        "workers": {
+          "0": 2
+        },
+        "largest_solver_estimate_mb": 50.0,
+        "estimated_worker_mb": 843.0,
+        "memory_budget_mb": {
+          "0": 28406.399999999998
+        },
+        "method": "spawned independent simulation processes",
+        "cuda_graph": true
+      },
+      "metrics": [
+        {
+          "trace_energy": 0.0002012432087212801,
+          "field_peak": 0.0004547552380245179
+        },
+        {
+          "trace_energy": 0.00024534837575629354,
+          "field_peak": 0.00045458204112946987
+        },
+        {
+          "trace_energy": 0.0003142060595564544,
+          "field_peak": 0.00045447261072695255
+        },
+        {
+          "trace_energy": 0.00039422037662006915,
+          "field_peak": 0.00045470017357729375
+        }
+      ],
+      "compute_seconds": [
+        0.47701420000521466,
+        0.4774049999541603,
+        0.4772021999815479,
+        0.4774108999990858
+      ],
+      "setup_seconds": [
+        0.03363830002490431,
+        0.03357180004240945,
+        0.034603399981278926,
+        0.03413310000905767
+      ],
+      "concurrent_process_intervals": [
+        {
+          "pid": 16052,
+          "start": 1789753128.733216,
+          "end": 1789753129.2394378
+        },
+        {
+          "pid": 14132,
+          "start": 1789753128.733216,
+          "end": 1789753129.2394378
+        },
+        {
+          "pid": 16052,
+          "start": 1789753129.318934,
+          "end": 1789753129.843035
+        },
+        {
+          "pid": 14132,
+          "start": 1789753129.318934,
+          "end": 1789753129.843035
+        }
+      ],
+      "speedup_vs_cpu_1": 39.799765961859784,
+      "max_trace_energy_relative_error": 0.0
+    },
+    {
+      "backend": "cuda",
+      "workers": 4,
+      "seconds": [
+        1.2070180000155233,
+        1.191652300010901,
+        1.2040137000149116
+      ],
+      "median_seconds": 1.2040137000149116,
+      "cases_per_second": 3.32222133348687,
+      "plan": {
+        "backend": "cuda",
+        "devices": [
+          0
+        ],
+        "workers": {
+          "0": 4
+        },
+        "largest_solver_estimate_mb": 50.0,
+        "estimated_worker_mb": 843.0,
+        "memory_budget_mb": {
+          "0": 28406.399999999998
+        },
+        "method": "spawned independent simulation processes",
+        "cuda_graph": true
+      },
+      "metrics": [
+        {
+          "trace_energy": 0.0002012432087212801,
+          "field_peak": 0.0004547552380245179
+        },
+        {
+          "trace_energy": 0.00024534837575629354,
+          "field_peak": 0.00045458204112946987
+        },
+        {
+          "trace_energy": 0.0003142060595564544,
+          "field_peak": 0.00045447261072695255
+        },
+        {
+          "trace_energy": 0.00039422037662006915,
+          "field_peak": 0.00045470017357729375
+        }
+      ],
+      "compute_seconds": [
+        1.0639179999707267,
+        1.0592164000263438,
+        1.0641275999951176,
+        1.0649078999995254
+      ],
+      "setup_seconds": [
+        0.05476770002860576,
+        0.05182479997165501,
+        0.054519299999810755,
+        0.05466540000634268
+      ],
+      "concurrent_process_intervals": [
+        {
+          "pid": 4824,
+          "start": 1789753137.4392345,
+          "end": 1789753138.569946
+        },
+        {
+          "pid": 7680,
+          "start": 1789753137.4392345,
+          "end": 1789753138.5574338
+        },
+        {
+          "pid": 16372,
+          "start": 1789753137.4392345,
+          "end": 1789753138.569946
+        },
+        {
+          "pid": 9472,
+          "start": 1789753137.4392345,
+          "end": 1789753138.569946
+        }
+      ],
+      "speedup_vs_cpu_1": 39.06737265480172,
+      "max_trace_energy_relative_error": 0.0
+    }
+  ],
+  "timing": "Wall time for all four cases, including voxelization, graph capture, host transfers, worker IPC and cache release. Process startup excluded by one warm batch. Three measured batches.",
+  "method": "Independent spawned processes. GPU kernels from different contexts need not overlap on one GPU. Not a fused tensor batch or MPI."
+}
