@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-20",
+  "scope": "Final source. The refinement default was set to zero after the trials. Reproduction commands supply explicit counts.",
+  "files": [
+    {
+      "path": "photonweave/streamed_tuning.py",
+      "sha256": "b62e7f8cc0c429dbd22cd3a1b9e16bfcb74d1f2f9d5e91e0272c353b677ebfa0"
+    },
+    {
+      "path": "photonweave/streamed_cost.py",
+      "sha256": "76956e288bc94d07c439d1f5ed11f004c6038c5bbd04662a805322924d9fea94"
+    },
+    {
+      "path": "photonweave/streamed.py",
+      "sha256": "cfd747dc9d44c3ce28db674e7e41bd520843af7b02990a01cf94ffa1d1dfca7d"
+    },
+    {
+      "path": "photonweave/spacetime.py",
+      "sha256": "4751bd669e6001edb4542f28464185fb80c9b3f1bb67a84a234b1805b030ed81"
+    },
+    {
+      "path": "benchmarks/streamed_policy.py",
+      "sha256": "23919d2f21047682c8c9be4c0c346868ee3af891e5af1a38175f78dddeb79083"
+    },
+    {
+      "path": "tests/test_streamed_tuning.py",
+      "sha256": "f9b60fb80ac18054ecba363936279058d8ca27d4c771b2d0e8de2b81be41bb42"
+    }
+  ]
+}

@@ -59,12 +59,36 @@ its shorter prefixes are timed. One warm-up and repeated complete prefix iterati
 include forward, replay and backward. Candidate signals and gradients must agree.
 The user's design values and accumulated gradients are preserved.
 
-The default `strategy="replay_cost"` measures two durations, `probe_steps` and
-twice that value, clipped to the full duration. It separates startup and per-block
+The default `strategy="replay_cost"` rounds `probe_steps` up to a whole temporal
+block for each candidate and measures that duration and twice it, clipped to
+the full duration. For example, K=32 and `probe_steps=12` use 32 and 64 steps.
+Only a measurement of the complete requested run may end on a partial block.
+It separates startup and per-block
 costs and counts the actual checkpoint schedule's forward replays to predict a
 full iteration. Negative fitted costs trigger a work-count fallback. A partial
 terminal block is counted as a full block. `strategy="prefix"` retains the old
 single-prefix selection for comparison.
+
+`max_calibration_steps=512` bounds each calibration duration. Candidates that
+would exceed it are rejected before simulation, with the reason recorded.
+Increasing this limit explicitly permits longer calibration runs. Each row
+records its actual `calibration_steps`. All distinct durations are checked
+against the first admitted policy, including additional reference evaluations
+when another depth introduces a new duration. Reference signal/gradient buffers
+are charged to the host budget, and all additional runs count in total tuning
+time. Different candidates are compared by their predicted full-duration cost,
+not by raw times from unequal calibration lengths.
+
+Optional `refine_candidates=2` remeasures the two initially fastest predicted
+candidates at twice their longer calibration duration, clipped to the target.
+This extra duration is used only when it is longer and within the calibration
+limit. Predictions are then refitted using the two longest measurements.
+Potential reference buffers for this stage are reserved up front. Set
+`refine_candidates=0`, the default, to disable refinement. The report retains initial
+predictions, refined indices and all timings. This is a bounded additional
+measurement, not a statistical confidence guarantee or exhaustive search.
+In sequential trials without concurrent agent-launched regression tests, both modes selected the fastest
+candidate but refinement increased tuning cost. It therefore remains opt-in.
 
 This is a timing model, not a proof of full-run optimality. Amortize tuning across
 repeated optimization iterations and re-evaluate when the workload or hardware
@@ -79,9 +103,12 @@ For a base temporal depth of at least eight and no local checkpoints, the defaul
 candidate set also tries one local checkpoint on the wide synchronous and,
 when available, asynchronous policies. Explicit candidates can vary
 `local_checkpoints` from zero to 32. The tuner still compares complete iterations
-and reserves checkpoint space before running them. Probe lengths that truncate
-a large temporal block can bias the timing model because both halo volume and
-local replay work change. Validate the selected policy at the intended duration.
+and reserves checkpoint space before running them. Whole-block calibration
+preserves each candidate's halo volume and local replay work. Startup noise and
+partial blocks in the full target can still bias extrapolation. Validate the
+selected policy at the intended duration. The
+[aligned-calibration report](validation/ALIGNED_POLICY_REPORT.md) records
+held-out measurements of deeper tiles.
 
 ## Dependency and transpose
 

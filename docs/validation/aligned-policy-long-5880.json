@@ -1,0 +1,838 @@
+{
+  "tuning": {
+    "selected_index": 1,
+    "candidates": [
+      {
+        "index": 0,
+        "policy": {
+          "slab_width": 16,
+          "temporal_depth": 8,
+          "checkpoints": 2,
+          "gpu_budget_bytes": 67108864,
+          "host_budget_bytes": 8589934592,
+          "device": "cuda",
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "tile_transfers": "sync",
+          "tile_buffers": 2,
+          "local_checkpoints": 0
+        },
+        "status": "measured",
+        "seconds": [
+          0.1099326999974437,
+          0.11668350000400096
+        ],
+        "median_seconds": 0.11330810000072233,
+        "reservation": {
+          "host_reservation_bytes": 29250048,
+          "gpu_reservation_bytes": 12583168,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 12288,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 12583424
+        },
+        "probes": [
+          {
+            "steps": 16,
+            "samples": [
+              {
+                "total": 0.1099326999974437,
+                "forward": 0.021583200024906546,
+                "backward": 0.08578580000903457
+              },
+              {
+                "total": 0.11668350000400096,
+                "forward": 0.022747399983927608,
+                "backward": 0.09125329996459186
+              }
+            ],
+            "total": 0.11330810000072233,
+            "forward": 0.022165300004417077,
+            "backward": 0.08851954998681322
+          },
+          {
+            "steps": 32,
+            "samples": [
+              {
+                "total": 0.23429930000565946,
+                "forward": 0.04311349999625236,
+                "backward": 0.1884880000143312
+              },
+              {
+                "total": 0.2380661999923177,
+                "forward": 0.04389820003416389,
+                "backward": 0.19150449999142438
+              }
+            ],
+            "total": 0.23618274999898858,
+            "forward": 0.043505850015208125,
+            "backward": 0.1899962500028778
+          }
+        ],
+        "calibration_steps": [
+          16,
+          32
+        ],
+        "prediction": {
+          "seconds": 6.249107077004737,
+          "method": "two-duration replay cost",
+          "blocks": 64,
+          "replay_blocks": 281,
+          "forward_block_seconds": 0.010670275005395524,
+          "transpose_block_seconds": 0.04006807500263676,
+          "startup_forward_seconds": 0.0008247499936260283,
+          "startup_backward_seconds": 0.0,
+          "outside_solver_seconds": 0.002680649980902672
+        },
+        "selection_score_seconds": 6.249107077004737
+      },
+      {
+        "index": 1,
+        "policy": {
+          "slab_width": 32,
+          "temporal_depth": 16,
+          "checkpoints": 2,
+          "gpu_budget_bytes": 67108864,
+          "host_budget_bytes": 8589934592,
+          "device": "cuda",
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "tile_transfers": "sync",
+          "tile_buffers": 2,
+          "local_checkpoints": 0
+        },
+        "status": "measured",
+        "seconds": [
+          0.06600819999584928,
+          0.062195900012739
+        ],
+        "median_seconds": 0.06410205000429414,
+        "reservation": {
+          "host_reservation_bytes": 41833728,
+          "gpu_reservation_bytes": 25166464,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 24576,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 25167104
+        },
+        "probes": [
+          {
+            "steps": 16,
+            "samples": [
+              {
+                "total": 0.06600819999584928,
+                "forward": 0.011459700006525964,
+                "backward": 0.05210400000214577
+              },
+              {
+                "total": 0.062195900012739,
+                "forward": 0.012001499999314547,
+                "backward": 0.047877100005280226
+              }
+            ],
+            "total": 0.06410205000429414,
+            "forward": 0.011730600002920255,
+            "backward": 0.049990550003713
+          },
+          {
+            "steps": 32,
+            "samples": [
+              {
+                "total": 0.11996079998789355,
+                "forward": 0.020368900033645332,
+                "backward": 0.09720439999364316
+              },
+              {
+                "total": 0.1312418999732472,
+                "forward": 0.02020159998210147,
+                "backward": 0.10839350003516302
+              }
+            ],
+            "total": 0.12560134998057038,
+            "forward": 0.0202852500078734,
+            "backward": 0.10279895001440309
+          }
+        ],
+        "calibration_steps": [
+          16,
+          32
+        ],
+        "prediction": {
+          "seconds": 2.522545100771822,
+          "method": "two-duration replay cost",
+          "blocks": 32,
+          "replay_blocks": 96,
+          "forward_block_seconds": 0.008554650004953146,
+          "transpose_block_seconds": 0.04425375000573695,
+          "startup_forward_seconds": 0.003175949997967109,
+          "startup_backward_seconds": 0.00573679999797605,
+          "outside_solver_seconds": 0.002517149958293885
+        },
+        "selection_score_seconds": 2.522545100771822
+      },
+      {
+        "index": 2,
+        "policy": {
+          "slab_width": 32,
+          "temporal_depth": 32,
+          "checkpoints": 2,
+          "gpu_budget_bytes": 67108864,
+          "host_budget_bytes": 8589934592,
+          "device": "cuda",
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "tile_transfers": "sync",
+          "tile_buffers": 2,
+          "local_checkpoints": 0
+        },
+        "status": "measured",
+        "seconds": [
+          0.1997679999913089,
+          0.19193209998775274
+        ],
+        "median_seconds": 0.19585004998953082,
+        "reservation": {
+          "host_reservation_bytes": 58612736,
+          "gpu_reservation_bytes": 41944576,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 40960,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 41946112
+        },
+        "probes": [
+          {
+            "steps": 32,
+            "samples": [
+              {
+                "total": 0.1997679999913089,
+                "forward": 0.017386999970767647,
+                "backward": 0.17992550000781193
+              },
+              {
+                "total": 0.19193209998775274,
+                "forward": 0.017464699980337173,
+                "backward": 0.17202659999020398
+              }
+            ],
+            "total": 0.19585004998953082,
+            "forward": 0.01742584997555241,
+            "backward": 0.17597604999900796
+          },
+          {
+            "steps": 64,
+            "samples": [
+              {
+                "total": 0.3974232000182383,
+                "forward": 0.0378713000100106,
+                "backward": 0.3569858000264503
+              },
+              {
+                "total": 0.48008690000278875,
+                "forward": 0.03524300002027303,
+                "backward": 0.4419832000276074
+              }
+            ],
+            "total": 0.4387550500105135,
+            "forward": 0.036557150015141815,
+            "backward": 0.39948450002702884
+          }
+        ],
+        "calibration_steps": [
+          32,
+          64
+        ],
+        "prediction": {
+          "seconds": 4.210181501723127,
+          "method": "two-duration replay cost",
+          "blocks": 16,
+          "replay_blocks": 33,
+          "forward_block_seconds": 0.019131300039589405,
+          "transpose_block_seconds": 0.20437714998843148,
+          "startup_forward_seconds": 0.0,
+          "startup_backward_seconds": 0.0,
+          "outside_solver_seconds": 0.0027133999683428556
+        },
+        "selection_score_seconds": 4.210181501723127
+      },
+      {
+        "index": 3,
+        "policy": {
+          "slab_width": 32,
+          "temporal_depth": 32,
+          "checkpoints": 2,
+          "gpu_budget_bytes": 67108864,
+          "host_budget_bytes": 8589934592,
+          "device": "cuda",
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "tile_transfers": "sync",
+          "tile_buffers": 2,
+          "local_checkpoints": 1
+        },
+        "status": "measured",
+        "seconds": [
+          0.10972060001222417,
+          0.107538599986583
+        ],
+        "median_seconds": 0.10862959999940358,
+        "reservation": {
+          "host_reservation_bytes": 64510976,
+          "gpu_reservation_bytes": 47842816,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 40960,
+          "local_checkpoint_reservation_bytes": 5898240,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 47844352
+        },
+        "probes": [
+          {
+            "steps": 32,
+            "samples": [
+              {
+                "total": 0.10972060001222417,
+                "forward": 0.019577500002924353,
+                "backward": 0.0877924999804236
+              },
+              {
+                "total": 0.107538599986583,
+                "forward": 0.018017499998677522,
+                "backward": 0.087053700000979
+              }
+            ],
+            "total": 0.10862959999940358,
+            "forward": 0.018797500000800937,
+            "backward": 0.0874230999907013
+          },
+          {
+            "steps": 64,
+            "samples": [
+              {
+                "total": 0.2769679999910295,
+                "forward": 0.03254929999820888,
+                "backward": 0.24197370000183582
+              },
+              {
+                "total": 0.27106419997289777,
+                "forward": 0.0471362000098452,
+                "backward": 0.22111069998936728
+              }
+            ],
+            "total": 0.27401609998196363,
+            "forward": 0.03984275000402704,
+            "backward": 0.23154219999560155
+          }
+        ],
+        "calibration_steps": [
+          32,
+          64
+        ],
+        "prediction": {
+          "seconds": 3.0030300001672003,
+          "method": "two-duration replay cost",
+          "blocks": 16,
+          "replay_blocks": 33,
+          "forward_block_seconds": 0.0210452500032261,
+          "transpose_block_seconds": 0.12307385000167415,
+          "startup_forward_seconds": 0.0,
+          "startup_backward_seconds": 0.0,
+          "outside_solver_seconds": 0.002631149982335046
+        },
+        "selection_score_seconds": 3.0030300001672003
+      }
+    ],
+    "probe_steps": 12,
+    "calibration_steps": [
+      16,
+      32,
+      64
+    ],
+    "strategy": "replay_cost",
+    "max_calibration_steps": 512,
+    "reference_policy_index": 0,
+    "extra_reference_evaluations": 1,
+    "full_steps": 512,
+    "warmups_per_candidate": 1,
+    "repeats": 2,
+    "tuning_seconds": 6.048287799989339,
+    "tuning_reference_reservation_bytes": 527872,
+    "torch_version": "2.10.0",
+    "device": "cuda",
+    "hardware": "NVIDIA RTX 5880 Ada Generation",
+    "scope": "Selection from measured prefixes with optional two-duration checkpoint-replay extrapolation. Prediction errors and startup variation remain possible. Full-duration optimality, resident-vs-streamed selection and SSD policies are not established."
+  },
+  "full_steps": 512,
+  "grid": [
+    64,
+    16,
+    16
+  ],
+  "full_records": [
+    [
+      {
+        "seconds": 6.495479600038379,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 16,
+          "temporal_depth": 8,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 0,
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float64",
+          "host_reservation_bytes": 29250048,
+          "gpu_reservation_bytes": 12583168,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 12288,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 12583424,
+          "forward_seconds": 0.7040668000117876,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 2,
+            "buffer_bytes": 1229832,
+            "pinned_bytes": 0,
+            "binding_hits": 510,
+            "binding_misses": 2,
+            "h2d_bytes": 239335424,
+            "d2h_bytes": 71311360,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 281,
+          "backward_seconds": 5.788030299998354,
+          "backward_workspace": {
+            "local_replayed_steps": 7168,
+            "peak_local_checkpoints": 0,
+            "allocations": 58,
+            "buffer_bytes": 4080776,
+            "pinned_bytes": 0,
+            "binding_hits": 3770,
+            "binding_misses": 14,
+            "h2d_bytes": 1504085216,
+            "d2h_bytes": 552176768,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          }
+        },
+        "peak_cuda_allocated_bytes": 5015552
+      },
+      {
+        "seconds": 6.30035420000786,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 16,
+          "temporal_depth": 8,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 0,
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float64",
+          "host_reservation_bytes": 29250048,
+          "gpu_reservation_bytes": 12583168,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 12288,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 12583424,
+          "forward_seconds": 0.7925854999921285,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 2,
+            "buffer_bytes": 1229832,
+            "pinned_bytes": 0,
+            "binding_hits": 510,
+            "binding_misses": 2,
+            "h2d_bytes": 239335424,
+            "d2h_bytes": 71311360,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 281,
+          "backward_seconds": 5.50423929997487,
+          "backward_workspace": {
+            "local_replayed_steps": 7168,
+            "peak_local_checkpoints": 0,
+            "allocations": 58,
+            "buffer_bytes": 4080776,
+            "pinned_bytes": 0,
+            "binding_hits": 3770,
+            "binding_misses": 14,
+            "h2d_bytes": 1504085216,
+            "d2h_bytes": 552176768,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          }
+        },
+        "peak_cuda_allocated_bytes": 5015552
+      }
+    ],
+    [
+      {
+        "seconds": 2.7023241000133567,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 32,
+          "temporal_depth": 16,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 0,
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float64",
+          "host_reservation_bytes": 41833728,
+          "gpu_reservation_bytes": 25166464,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 24576,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 25167104,
+          "forward_seconds": 0.300343899987638,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 3,
+            "buffer_bytes": 2458824,
+            "pinned_bytes": 0,
+            "binding_hits": 124,
+            "binding_misses": 4,
+            "h2d_bytes": 119611904,
+            "d2h_bytes": 35659776,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 96,
+          "backward_seconds": 2.398518200032413,
+          "backward_workspace": {
+            "local_replayed_steps": 7680,
+            "peak_local_checkpoints": 0,
+            "allocations": 59,
+            "buffer_bytes": 8160712,
+            "pinned_bytes": 0,
+            "binding_hits": 752,
+            "binding_misses": 16,
+            "h2d_bytes": 585410560,
+            "d2h_bytes": 226516992,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          }
+        },
+        "peak_cuda_allocated_bytes": 10227200
+      },
+      {
+        "seconds": 3.025357400008943,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 32,
+          "temporal_depth": 16,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 0,
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float64",
+          "host_reservation_bytes": 41833728,
+          "gpu_reservation_bytes": 25166464,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 24576,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 25167104,
+          "forward_seconds": 0.28393259999575093,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 3,
+            "buffer_bytes": 2458824,
+            "pinned_bytes": 0,
+            "binding_hits": 124,
+            "binding_misses": 4,
+            "h2d_bytes": 119611904,
+            "d2h_bytes": 35659776,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 96,
+          "backward_seconds": 2.7379744999925606,
+          "backward_workspace": {
+            "local_replayed_steps": 7680,
+            "peak_local_checkpoints": 0,
+            "allocations": 59,
+            "buffer_bytes": 8160712,
+            "pinned_bytes": 0,
+            "binding_hits": 752,
+            "binding_misses": 16,
+            "h2d_bytes": 585410560,
+            "d2h_bytes": 226516992,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          }
+        },
+        "peak_cuda_allocated_bytes": 10227200
+      }
+    ],
+    [
+      {
+        "seconds": 3.7564302000100724,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 32,
+          "temporal_depth": 32,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 0,
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float64",
+          "host_reservation_bytes": 58612736,
+          "gpu_reservation_bytes": 41944576,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 40960,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 41946112,
+          "forward_seconds": 0.2438061999855563,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 2,
+            "buffer_bytes": 4097736,
+            "pinned_bytes": 0,
+            "binding_hits": 62,
+            "binding_misses": 2,
+            "h2d_bytes": 99666176,
+            "d2h_bytes": 17833984,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 33,
+          "backward_seconds": 3.5090903000091203,
+          "backward_workspace": {
+            "local_replayed_steps": 15872,
+            "peak_local_checkpoints": 0,
+            "allocations": 58,
+            "buffer_bytes": 13600968,
+            "pinned_bytes": 0,
+            "binding_hits": 310,
+            "binding_misses": 14,
+            "h2d_bytes": 394364816,
+            "d2h_bytes": 136397312,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          }
+        },
+        "peak_cuda_allocated_bytes": 16714240
+      },
+      {
+        "seconds": 3.891805899969768,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 32,
+          "temporal_depth": 32,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 0,
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float64",
+          "host_reservation_bytes": 58612736,
+          "gpu_reservation_bytes": 41944576,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 40960,
+          "local_checkpoint_reservation_bytes": 0,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 41946112,
+          "forward_seconds": 0.27952630002982914,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 2,
+            "buffer_bytes": 4097736,
+            "pinned_bytes": 0,
+            "binding_hits": 62,
+            "binding_misses": 2,
+            "h2d_bytes": 99666176,
+            "d2h_bytes": 17833984,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 33,
+          "backward_seconds": 3.6085332999937236,
+          "backward_workspace": {
+            "local_replayed_steps": 15872,
+            "peak_local_checkpoints": 0,
+            "allocations": 58,
+            "buffer_bytes": 13600968,
+            "pinned_bytes": 0,
+            "binding_hits": 310,
+            "binding_misses": 14,
+            "h2d_bytes": 394364816,
+            "d2h_bytes": 136397312,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          }
+        },
+        "peak_cuda_allocated_bytes": 16714240
+      }
+    ],
+    [
+      {
+        "seconds": 2.2409351999522187,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 32,
+          "temporal_depth": 32,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 1,
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float64",
+          "host_reservation_bytes": 64510976,
+          "gpu_reservation_bytes": 47842816,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 40960,
+          "local_checkpoint_reservation_bytes": 5898240,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 47844352,
+          "forward_seconds": 0.2845779999624938,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 2,
+            "buffer_bytes": 4097736,
+            "pinned_bytes": 0,
+            "binding_hits": 62,
+            "binding_misses": 2,
+            "h2d_bytes": 99666176,
+            "d2h_bytes": 17833984,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 33,
+          "backward_seconds": 1.9526812999974936,
+          "backward_workspace": {
+            "local_replayed_steps": 4672,
+            "peak_local_checkpoints": 1,
+            "allocations": 76,
+            "buffer_bytes": 16386248,
+            "pinned_bytes": 0,
+            "binding_hits": 310,
+            "binding_misses": 14,
+            "h2d_bytes": 394364816,
+            "d2h_bytes": 136397312,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          }
+        },
+        "peak_cuda_allocated_bytes": 19499520
+      },
+      {
+        "seconds": 2.2369068999541923,
+        "report": {
+          "experimental": true,
+          "spatial_streaming": true,
+          "full_time_autograd": false,
+          "higher_order": false,
+          "slab_width": 32,
+          "temporal_depth": 32,
+          "checkpoint_capacity": 2,
+          "local_checkpoint_capacity": 1,
+          "execution_device": "cuda",
+          "tile_transfers": "sync",
+          "tile_buffers": 1,
+          "cuda_binding": "direct",
+          "reuse_tile_buffers": true,
+          "policy": "manual",
+          "precision": "torch.float64",
+          "host_reservation_bytes": 64510976,
+          "gpu_reservation_bytes": 47842816,
+          "state_bytes": 1114112,
+          "max_extended_tile_cells": 40960,
+          "local_checkpoint_reservation_bytes": 5898240,
+          "source_and_output_history_bytes": 20480,
+          "host_tile_reservation_bytes": 47844352,
+          "forward_seconds": 0.27542859996901825,
+          "forward_workspace": {
+            "local_replayed_steps": 0,
+            "peak_local_checkpoints": 0,
+            "allocations": 2,
+            "buffer_bytes": 4097736,
+            "pinned_bytes": 0,
+            "binding_hits": 62,
+            "binding_misses": 2,
+            "h2d_bytes": 99666176,
+            "d2h_bytes": 17833984,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          },
+          "peak_block_checkpoints": 2,
+          "replayed_blocks": 33,
+          "backward_seconds": 1.9580611999845132,
+          "backward_workspace": {
+            "local_replayed_steps": 4672,
+            "peak_local_checkpoints": 1,
+            "allocations": 76,
+            "buffer_bytes": 16386248,
+            "pinned_bytes": 0,
+            "binding_hits": 310,
+            "binding_misses": 14,
+            "h2d_bytes": 394364816,
+            "d2h_bytes": 136397312,
+            "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+          }
+        },
+        "peak_cuda_allocated_bytes": 19499520
+      }
+    ]
+  ],
+  "full_median_seconds": [
+    6.3979169000231195,
+    2.86384075001115,
+    3.82411804998992,
+    2.2389210499532055
+  ],
+  "selected_full_over_best": 1.279116452128138,
+  "scope": "One held-out duration on one device. Includes tuning overhead separately. No optimality or external-solver claim."
+}

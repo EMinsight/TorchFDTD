@@ -95,10 +95,25 @@ a time-independent bound on the entire process.
 
 \section{Selection and current evidence}
 The measured policy selector compares admitted slab sizes, block depths,
-transfer policies and optional local checkpoints. Two calibration durations
-separate startup and block costs. The actual global replay count extrapolates
-the full iteration. A partial block can change halo size and local replay work,
-so prediction quality must be tested at the intended duration.
+transfer policies and optional local checkpoints. For requested probe length
+$P$ and candidate depth $K_i$, the first calibration duration is
+$L_i=\min(T,K_i\lceil P/K_i\rceil)$ and the second is
+$\min(T,2L_i)$. Thus a truncated block occurs only when measuring the complete
+target run. Two distinct durations separate startup and block costs. Every
+distinct duration is checked against the same admitted reference policy.
+Reference storage and additional evaluations count toward memory admission and
+calibration cost. An explicit maximum calibration length bounds the search.
+An optional refinement remeasures the two initially fastest predicted policies
+at one additional doubled duration when the target and calibration limit allow
+it. The two longest measurements then determine their revised predictions.
+The initial estimates and all additional costs are retained in the report.
+This bounded refinement does not establish statistical confidence or global
+optimality.
+Refinement is disabled by default because sequential development trials
+selected the same fastest candidate with and without the additional measurements.
+The actual global replay count extrapolates the full iteration. Startup noise
+and a partial terminal block in the target can still bias that prediction,
+so its quality must be tested at the intended duration.
 
 On an RTX 5880 Ada, the $128\times32\times32$ FP64 case with 64 steps and
 $K=32$ required 0.591 seconds per complete streamed iteration without local
