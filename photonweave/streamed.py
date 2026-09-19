@@ -70,7 +70,10 @@ def _reservation(project, epsilon, options):
     # A complete local state contains six fields and at most twelve CPML arrays.
     tile_workspace = (128+18*local_slots)*tile_cells*item
     buffers = options.tile_buffers if options.tile_transfers == 'async' else 1
-    host = (options.checkpoints+12)*state+8*epsilon.numel()*item+history+buffers*(tile_workspace+2*tile_history)
+    initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values()))*item
+    # The immutable all-zero host initial bank is represented by scalar views.
+    # Retain the remaining conservative headroom for replay and transpose banks.
+    host = (options.checkpoints+11)*state+initial_storage+8*epsilon.numel()*item+history+buffers*(tile_workspace+2*tile_history)
     gpu = buffers*(tile_workspace+tile_history)
     available = host_memory()['available_bytes']
     host_limit = min(options.host_budget_bytes, int(available*.8)) if available is not None else options.host_budget_bytes
@@ -81,6 +84,7 @@ def _reservation(project, epsilon, options):
         if gpu > min(options.gpu_budget_bytes, int(free*.8)):
             raise ValueError('Streamed tile workspace reservation exceeds the GPU budget.')
     return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,
+                host_initial_state_reservation_bytes=initial_storage,
                 state_bytes=state, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*18*local_slots*tile_cells*item,
                 source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))
 
@@ -91,7 +95,9 @@ class _Streamed(torch.autograd.Function):
         ctx.save_for_backward(epsilon)
         ctx.project, ctx.options, ctx.report = project.model_copy(deep=True), options, report
         started = time.perf_counter()
-        host = _System(project, epsilon)
+        host = _System(project, epsilon, prepare_updates=False)
+        report['host_initial_state_storage_bytes'] = sum(s.untyped_storage().nbytes() for s in host.state())
+        report['host_inverse_permittivity_bytes'] = 0
         operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
                                     reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
                                     tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints)
@@ -114,7 +120,7 @@ class _Streamed(torch.autograd.Function):
         options, project, report = ctx.options, ctx.project, ctx.report
         _reservation(project, epsilon, options)
         started = time.perf_counter()
-        host = _System(project, epsilon)
+        host = _System(project, epsilon, prepare_updates=False)
         operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
                                     reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
                                     tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints)

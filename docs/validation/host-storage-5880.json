@@ -1,0 +1,38 @@
+{
+  "grid": [
+    256,
+    256,
+    128
+  ],
+  "precision": "float32",
+  "torch_version": "2.10.0",
+  "rows": [
+    {
+      "prepare_updates": true,
+      "initial_state_logical_bytes": 211812352,
+      "initial_state_storage_bytes": 211812352,
+      "inverse_permittivity_bytes": 100663296,
+      "constructor_seconds": 0.032815299986395985
+    },
+    {
+      "prepare_updates": false,
+      "initial_state_logical_bytes": 211812352,
+      "initial_state_storage_bytes": 104,
+      "inverse_permittivity_bytes": 0,
+      "constructor_seconds": 0.0019913999713025987
+    }
+  ],
+  "eliminated_persistent_tensor_bytes": 312475544,
+  "host_reservation_reduction_bytes": 211812248,
+  "reservation": {
+    "host_reservation_bytes": 3827302720,
+    "gpu_reservation_bytes": 805306416,
+    "host_initial_state_reservation_bytes": 104,
+    "state_bytes": 211812352,
+    "max_extended_tile_cells": 1572864,
+    "local_checkpoint_reservation_bytes": 0,
+    "source_and_output_history_bytes": 120,
+    "host_tile_reservation_bytes": 805306464
+  },
+  "scope": "Explicit tensor storage for the initial E/H/CPML bank and inverse permittivity only. Excludes epsilon, metadata, sources, later state banks and allocator overhead. Not process RSS, peak process memory or a throughput benchmark. Construction times are single cold observations."
+}

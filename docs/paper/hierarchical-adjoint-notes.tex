@@ -88,6 +88,12 @@ and fixed checkpoint counts $q_g,q_\ell$, the physical-state storage scales as
  M_{\rm device}&=O\bigl(pV(q_\ell+1)\bigr).
 \end{align}
 The constants include state banks, adjoints, coefficients and staging buffers.
+The all-zero host initial fields and CPML memories use scalar-backed views.
+They are read by tile extraction and are not advanced in place. The host
+template omits inverse permittivity because each active tile constructs its
+own coefficients. Evolved global banks and their adjoints remain dense in
+DRAM. This reduces a persistent initialization constant rather than changing
+the asymptotic storage of the evolved states or exploiting sparse fields.
 Prepared drives and returned time traces also require time-dependent storage.
 Geometry graphs, optimizer allocations, CUDA context and allocator caching
 are outside the solver reservation. These equations therefore do not imply

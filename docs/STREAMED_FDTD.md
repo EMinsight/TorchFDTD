@@ -5,6 +5,15 @@ in CPU DRAM. Only an extended x slab is moved to the selected execution device.
 Its first-order custom backward returns a CPU epsilon gradient, so ordinary
 Torch geometry parameters and optimizers can remain on CPU.
 
+The all-zero host initial E/H/CPML bank uses scalar-backed views as read-only inputs rather
+than a dense global allocation. The host template also omits inverse permittivity,
+which is constructed only inside each active tile. The first evolved global bank
+is dense in DRAM. Local tile extraction and CPML ownership remain unchanged.
+In-place stepping of the storage-only initial template is rejected. One-way
+source validation uses a broadcast background ownership view instead of a dense
+global integer map. This reduces initialization storage without reducing precision
+or skipping any field updates.
+
 ```python
 from photonweave import StreamedSimulation, StreamedAdjointOptions
 
@@ -149,6 +158,9 @@ primal/adjoint workspace, coefficients and source/output histories. This is an
 allocation estimate, not a measured whole-process cap. Caller-owned geometry,
 objectives, optimizer storage, CUDA context and allocator caching remain outside
 the reservation. Reported CUDA peaks from the benchmark are Torch allocations.
+The [compact-host and capacity report](validation/COMPACT_HOST_REPORT.md)
+records the removed initial-state allocations, an 8.39-million-cell 128-step
+check and a 512³ 16-step forward/backward check within declared budgets.
 
 `tests/test_spacetime.py` compares both the operator and its transpose with the
 full-domain Torch autograd oracle. Tests include random E/H and CPML memories,

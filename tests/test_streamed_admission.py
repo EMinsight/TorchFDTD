@@ -88,3 +88,25 @@ def test_local_checkpoints_are_bounded_and_charged_to_admission(monkeypatch):
     for invalid in (-1,33,True,1.5):
         with pytest.raises(ValueError,match='local_checkpoints'):
             replace(options,local_checkpoints=invalid)
+
+
+def test_storage_only_initial_state_is_small_and_cannot_be_advanced_in_place():
+    from photonweave.differentiable import _System
+    from photonweave.spacetime import SlabBlockOperator
+    p = project(dimension='3d',steps=10,periodic=True)
+    epsilon = torch.full(p.region.shape,1.7,dtype=torch.float64)
+    host = _System(p,epsilon,prepare_updates=False)
+    assert host.grid.inverse_permittivity is None
+    assert all(s.untyped_storage().nbytes()==epsilon.element_size() for s in host.state())
+    from photonweave.streamed import _reservation
+    admitted = _reservation(p,epsilon,StreamedAdjointOptions(device='cpu'))
+    assert admitted['host_initial_state_reservation_bytes'] == sum(s.untyped_storage().nbytes() for s in host.state())
+    assert all(torch.count_nonzero(s)==0 for s in host.state())
+    with pytest.raises(RuntimeError,match='Storage-only'):host.advance(0,1)
+    operator = SlabBlockOperator(host,4,'cpu',local_checkpoints=1)
+    state,signals = operator.forward(epsilon,host.state(),0,3)
+    _,later = operator.forward(epsilon,state,3,3)
+    assert all(torch.count_nonzero(s)==0 for s in host.state())
+    dense = _System(p,epsilon)
+    dense.advance(0,6)
+    torch.testing.assert_close(later[-1],dense.observe(dense.state()),rtol=1e-12,atol=1e-13)

@@ -20,16 +20,22 @@ def main():
     parser.add_argument('--local-checkpoints',type=int,default=0)
     parser.add_argument('--gpu-budget-mib',type=int,default=512)
     parser.add_argument('--host-budget-gib',type=int,default=12)
+    parser.add_argument('--nx',type=int,default=256)
+    parser.add_argument('--ny',type=int,default=256)
+    parser.add_argument('--nz',type=int,default=128)
     args = parser.parse_args()
-    region = Region(dimension='3d',size=(25.6,25.6,12.8),mesh=.1,steps=args.steps,
+    region = Region(dimension='3d',size=(args.nx*.1,args.ny*.1,args.nz*.1),mesh=.1,steps=args.steps,
                     precision='float32',pml_cells=3,memory_mode='streamed')
     project = Project(region=region,sources=[Source(center=(0,0,0),pulse='continuous')],
                       monitors=[Monitor(center=(.1,0,0)),Monitor(center=(0,.1,0),component='Hy')])
-    epsilon = torch.full(region.shape,1.7,dtype=torch.float32,requires_grad=True)
     base = StreamedAdjointOptions(slab_width=args.width,temporal_depth=args.depth,checkpoints=1,
                                  local_checkpoints=args.local_checkpoints,
                                  gpu_budget_bytes=args.gpu_budget_mib*1024**2,host_budget_bytes=args.host_budget_gib*1024**3)
     policies = [base,replace(base,slab_width=2*args.width,temporal_depth=2*args.depth)]
+    from photonweave.streamed import _reservation
+    metadata = torch.empty(region.shape,device='meta',dtype=torch.float32)
+    for policy in policies:_reservation(project,metadata,policy)
+    epsilon = torch.full(region.shape,1.7,dtype=torch.float32,requires_grad=True)
     reference = None
     records = []
     for policy in policies:

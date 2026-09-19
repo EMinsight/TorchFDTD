@@ -11,7 +11,7 @@ checkpoint placement and a Torch geometry/Adam example. The new experimental
 [DRAM slab API](STREAMED_FDTD.md) streams spatial state and transposes its halo
 dependencies. It now has reusable buffers, an optional asynchronous tile pipeline
 and two-duration replay-cost policy selection, with small-grid parity tests and an
-[8.39-million-cell admission smoke test](validation/REPLAY_POLICY_REPORT.md). It is not a
+[explicit-budget 512³, 16-step capacity check](validation/COMPACT_HOST_REPORT.md). It is not a
 completed oversized-domain or high-throughput runtime. The UI continues
 to use the normal forward solver.
 

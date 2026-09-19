@@ -19,7 +19,7 @@ def test_block_and_transpose_match_resident(device, local_checkpoints, precision
     p = project('3d', precision=precision, steps=max(10, depth+2), periodic=periodic)
     torch.manual_seed(608)
     epsilon = 1.5 + torch.rand(p.region.shape + ((3,) if diagonal else ()), dtype=getattr(torch, precision))
-    host = _System(p, epsilon)
+    host = _System(p, epsilon, prepare_updates=False)
     state = tuple(torch.randn_like(s)*.01 for s in host.state())
     endpoint = tuple(torch.randn_like(s)*.02 for s in host.state())
     weights = torch.randn(depth, len(host.monitors), dtype=epsilon.dtype)

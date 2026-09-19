@@ -93,20 +93,25 @@ class _Grid:
 
 
 class _System:
-    def __init__(self, project, epsilon):
+    def __init__(self, project, epsilon, *, prepare_updates=True):
         self.project=project
         self.region=r=project.region
         self.epsilon=epsilon
         self.eps4=epsilon[...,None] if epsilon.ndim==3 else epsilon
         self.device,self.dtype=epsilon.device,epsilon.dtype
+        if not prepare_updates and self.device.type != 'cpu':
+            raise ValueError('Storage-only systems require CPU epsilon.')
         self.current_step=0
         # Preparing coefficients must not allocate another full-volume E/H
         # field or touch fdtd's process-global backend.
         template=BoundaryDescription(r)
         g=self.grid=_Grid()
-        g.E=torch.zeros((*r.shape,3),device=self.device,dtype=self.dtype)
-        g.H=torch.zeros_like(g.E)
-        g.inverse_permittivity=(1/self.eps4.detach()).expand_as(g.E).contiguous()
+        def initial(shape):
+            if not prepare_updates:return torch.zeros((),device=self.device,dtype=self.dtype).expand(shape)
+            return torch.zeros(shape,device=self.device,dtype=self.dtype)
+        g.E=initial((*r.shape,3))
+        g.H=initial(g.E.shape)
+        g.inverse_permittivity=(1/self.eps4.detach()).expand_as(g.E).contiguous() if prepare_updates else None
         g.inverse_permeability=torch.ones(1,device=self.device,dtype=self.dtype)
         g.is_torch=True
         g.courant_number=r.rectangular_courant
@@ -121,7 +126,7 @@ class _System:
             g.cpml[key]=[]
             self.keys[key]=[]
             for seg in segs:
-                item={'slice':seg['slice'], 'psi':torch.zeros(seg['shape'],device=self.device,dtype=self.dtype),
+                item={'slice':seg['slice'], 'psi':initial(seg['shape']),
                       **{name:self.tensor(seg[name]) for name in ('b','c','inv_k')}}
                 self.keys[key].append(len(self.segments))
                 self.segments.append(item)
@@ -129,7 +134,7 @@ class _System:
         self.sources={'E':[],'H':[]}
         from .injection import source_terms,validate_oneway_materials
         if any(s.enabled and s.injection=='oneway' for s in project.sources):
-            validate_oneway_materials(project,epsilon.detach().cpu().numpy(),np.full(r.shape,-1,dtype=np.int32))
+            validate_oneway_materials(project,epsilon.detach().cpu().numpy(),np.broadcast_to(np.array(-1,dtype=np.int32),r.shape))
         for source in project.sources:
             for component,loc,waveform,profile in source_terms(project,source):
                 self.sources[component[0]].append((loc,'xyz'.index(component[1].lower()),
@@ -221,6 +226,8 @@ class _System:
         return (e,h,*psis)
 
     def advance(self,start,end):
+        if self.grid.inverse_permittivity is None:
+            raise RuntimeError('Storage-only initial states cannot be advanced in place. Use a tile operator.')
         for step in range(start,end):
             if self.kernel is not None:
                 self.kernel.update_E();self.inject(self.grid.E,'E',step)
