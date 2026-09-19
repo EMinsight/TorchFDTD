@@ -171,12 +171,12 @@ class FusedAdjointCUDA:
             else:lines.append('gradient[i]+=(g0+g1)+g2;')
         return 'extern "C" __global__ void adjoint_update('+','.join(parameters)+'){\n'+'\n'.join(lines)+'\n}',tensors
 
-    def step(self,index):
+    def step(self,index,*,observation_index=None):
         import numpy as np
         with self.cp.cuda.Device(self.device),self.stream():
             if self.observer is not None:
                 fn,arrays,_,count=self.observer
-                fn(((count+127)//128,),(128,),(*arrays,np.int32(index)))
+                fn(((count+127)//128,),(128,),(*arrays,np.int32(index if observation_index is None else observation_index)))
             for forward in (True,False):
                 fn,arrays,_=self.launches[forward,self.phase]
                 fn(((self.count+255)//256,),(256,),arrays)

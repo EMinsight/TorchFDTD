@@ -60,6 +60,35 @@ time-integral DFT with the half-step H observation convention. A supplied window
 has one weight per timestep. This method does not automatically apply the
 workbench's monitor apodization configuration.
 
+For long spectral objectives, use `model.spectrum(epsilon, frequency_hz,
+window=window)` directly. It returns `DifferentiableSpectrum` with complex
+`fields` of shape `(frequency, enabled point monitor)`, `frequency_hz`, component
+names and an execution report. It accumulates the DFT during the solve, without
+retaining the full point-signal history. It has the same time-integral units
+and E/H half-step convention as `model(epsilon).spectrum(...)`.
+
+```python
+spectral = model.spectrum(epsilon, [2.5e14, 3.0e14])
+loss = spectral.fields.abs().square().sum()
+loss.backward()
+```
+
+This example is spectral point intensity, not power-normalized transmission.
+Resident execution buffers at most `block_size=32` timesteps by default. Pass
+another positive integer to `DifferentiableSimulation.spectrum` to trade
+observation workspace for DFT launch overhead. `StreamedSimulation.spectrum`
+uses the solver's `temporal_depth` instead. Its accumulated spectra live on CPU
+while the CUDA tile executes the field updates.
+
+Backward regenerates only the needed block of real observation derivatives
+from the complex spectrum derivative. Frequency and optional window values
+are fixed snapshots. Trainable frequencies/windows, higher derivatives and
+field-plane/port objectives remain unsupported. Window weights must be finite
+and have one entry per timestep. Automatic monitor apodization is not applied.
+The observation storage scales with frequencies and monitors plus a bounded
+time block. Prepared source histories and an explicitly supplied window still
+scale with timestep count. See [validation and timings](validation/ONLINE_SPECTRUM_REPORT.md).
+
 ## Supported and pending scope
 
 | Capability | Current state |
@@ -70,7 +99,7 @@ workbench's monitor apodization configuration.
 | Real periodic wrapping | Implemented |
 | Prepared soft point/plane sources | Implemented, source parameters are fixed |
 | Normal-incidence prepared one-way plane | Fixed background near injection, both directions and vector polarization checked |
-| Point signals and Torch DFT | Implemented |
+| Point signals and Torch DFT | Implemented, including online spectral output and its bounded transpose |
 | Regularized sphere radius/centre chain | Implemented |
 | Checkpoint replay on device, host or disk | Implemented, synchronous or optional asynchronous transfers |
 | Mixed GPU/host/disk checkpoint slots | Implemented with explicit slot counts |
@@ -79,7 +108,7 @@ workbench's monitor apodization configuration.
 | Trainable sources, boundaries and adaptive meshes | Pending |
 | Higher derivatives | Rejected explicitly |
 | Batched CUDA backward and shared-budget microbatch execution | Pending |
-| Spatial out-of-core / space-time tiling | Experimental DRAM slab API with block adjoint and reusable buffers |
+| Spatial out-of-core / space-time tiling | Experimental DRAM/file-backed slab API with block adjoint and reusable buffers |
 | Async checkpoint prefetch | Implemented with bounded event-owned staging slots |
 | Async spatial tile pipeline | Optional bounded pinned slots, separate copy streams, FIFO halo reduction |
 | Automatic tile policy | Two-duration replay-cost selection, full-duration optimality unproven |

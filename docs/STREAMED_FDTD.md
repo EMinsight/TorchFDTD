@@ -121,6 +121,16 @@ held-out measurements of deeper tiles.
 
 ## Dependency and transpose
 
+`model.spectrum(epsilon, frequency_hz, window=...)` accumulates a complex DFT
+on the host at each completed temporal block. It returns spectral point fields
+instead of a full time history. Backward creates only the current block's
+observation seeds. The host admission estimate includes spectral accumulators,
+kernel/transpose workspace and an optional copied window. CUDA tile history is
+still bounded by `temporal_depth`. This works with either host or file banks.
+See the [spectral API contract](DIFFERENTIABLE_FDTD.md) and
+[recorded checks](validation/ONLINE_SPECTRUM_REPORT.md). It does not yet provide
+collocated plane flux or the CR detector objective.
+
 ### Experimental file-backed spatial state
 
 `StreamedAdjointOptions(state_storage='disk', state_directory='results/state-scratch',

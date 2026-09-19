@@ -30,6 +30,13 @@ Run the CR validation only after the following runtime milestones pass:
 
 Low-precision storage is deferred until the lossless paths and gradients pass.
 
+The [online spectral adjoint](validation/ONLINE_SPECTRUM_REPORT.md) now avoids
+retaining the full point-observation history for spectral losses. This is one
+prerequisite for detector-plane objectives, not a CR result. Next implement
+collocated E/H sampling and its interpolation transpose, signed Poynting
+quadrature and matched-reference normalization. Preserve spatial detector
+responses before applying the locked color reconstruction/information model.
+
 ## CR comparison contract
 
 Record the reference source revision and hashes before translating the model.

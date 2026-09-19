@@ -1,0 +1,12 @@
+{
+  "base_commit": "e12da1f",
+  "sha256": {
+    "photonweave/adjoint_spectrum.py": "59ec85ff3ea5e5d4b8842650c6b14fae30255ea166919f282203d246dcaa4bcc",
+    "photonweave/differentiable.py": "52fc9b05c02d4105b2b8cf83afc7b31b118958ca383f6480ec64f5c0407145e6",
+    "photonweave/cuda_adjoint.py": "768f8aab37e76587a11e5a8ee445e168a9c78743d10531bd77621afd6a121bdd",
+    "photonweave/streamed.py": "6619eb47ddd431cd512452c8cb5b7e9a5ee343fc51a6c47b862d8bc288833e62",
+    "benchmarks/adjoint_spectrum.py": "06002d60475024dd0294ebc2f043716081129e1abd8fc59bb8b90b1fd29ecffc",
+    "tests/test_adjoint_spectrum.py": "d79c27281c7ac0a64e6f35706ab271c2d34609eda38ca5e210b2c9ada87ecc20"
+  },
+  "scope": "Final blocked implementation. Initial resident, host and disk trials preceded resident block buffering and the benchmark block-size option. Their streamed numerical policy is unchanged. Final block1, block32 and long trials use the final source."
+}

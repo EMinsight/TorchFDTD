@@ -58,7 +58,7 @@ class StreamedAdjointOptions:
             raise ValueError('Asynchronous tiles require reusable CUDA buffers.')
 
 
-def _reservation(project, epsilon, options):
+def _reservation(project, epsilon, options, spectral=None):
     region = project.region
     n = math.prod(region.shape)
     boundary = BoundaryDescription(region)
@@ -73,7 +73,7 @@ def _reservation(project, epsilon, options):
     monitors = sum(m.enabled for m in project.monitors)
     terms = sum(len(s.polarization_components)*(2 if s.injection == 'oneway' else 1)
                 for s in project.sources if s.enabled)
-    history = region.steps*(2*monitors+terms)*item
+    history = region.steps*(2*monitors+terms)*item if spectral is None else region.steps*terms*item+spectral.reservation(depth)['spectral_reservation_bytes']
     # Conservative bounds cover restart banks, two adjoint banks, tile gather/
     # scatter copies, validation temporaries and recursive saved block states.
     # Geometry graphs and optimizer/objective allocations remain caller-owned.
@@ -125,9 +125,10 @@ def _backing(options,report,phase):
 
 class _Streamed(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, epsilon, project, options, report):
+    def forward(ctx, epsilon, project, options, report, spectral):
         ctx.save_for_backward(epsilon)
         ctx.project, ctx.options, ctx.report = project.model_copy(deep=True), options, report
+        ctx.spectral = spectral
         started = time.perf_counter()
         host = _System(project, epsilon, prepare_updates=False)
         report['host_initial_state_storage_bytes'] = sum(s.untyped_storage().nbytes() for s in host.state())
@@ -138,11 +139,12 @@ class _Streamed(torch.autograd.Function):
                                         tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints,
                                         state_factory=store.new_state if store is not None else None)
             state = host.state()
-            signals = epsilon.new_empty((project.region.steps, len(host.monitors)))
+            signals = epsilon.new_empty((project.region.steps, len(host.monitors))) if spectral is None else spectral.zeros()
             for start in range(0, project.region.steps, options.temporal_depth):
                 depth = min(options.temporal_depth, project.region.steps-start)
                 state, values = operator.forward(epsilon, state, start, depth)
-                signals[start:start+depth].copy_(values)
+                if spectral is None:signals[start:start+depth].copy_(values)
+                else:spectral.accumulate(signals, values, start)
             if operator.workspace is not None:
                 report['forward_workspace'] = operator.workspace_report()
         report['forward_seconds'] = time.perf_counter()-started
@@ -154,7 +156,7 @@ class _Streamed(torch.autograd.Function):
         if torch.is_grad_enabled():raise RuntimeError('Higher-order streamed derivatives are not implemented.')
         epsilon, = ctx.saved_tensors
         options, project, report = ctx.options, ctx.project, ctx.report
-        _reservation(project, epsilon, options)
+        _reservation(project, epsilon, options, ctx.spectral)
         started = time.perf_counter()
         host = _System(project, epsilon, prepare_updates=False)
         with _backing(options,report,'backward') as store:
@@ -183,7 +185,7 @@ class _Streamed(torch.autograd.Function):
                             state = replay(restart, begin, block)
                             start, stop = starts[block], starts[block+1]
                             adjoint, contribution = operator.transpose(epsilon, state, start, stop-start,
-                                                                       adjoint, signal_bar[start:stop])
+                                                                       adjoint, signal_bar[start:stop] if ctx.spectral is None else ctx.spectral.transpose(signal_bar,start,stop))
                             gradient.add_(contribution)
                             del state, contribution
                         return
@@ -201,7 +203,7 @@ class _Streamed(torch.autograd.Function):
             if operator.workspace is not None:
                 report['backward_workspace'] = operator.workspace_report()
         report['backward_seconds'] = time.perf_counter()-started
-        return gradient, None, None, None
+        return gradient, None, None, None, None
 
 
 class StreamedSimulation(DifferentiableSimulation):
@@ -216,7 +218,17 @@ class StreamedSimulation(DifferentiableSimulation):
         super().__init__(project)
         self.streaming_options = options or StreamedAdjointOptions()
 
+    def spectrum(self, epsilon, frequency_hz, *, window=None):
+        """Accumulate a fixed-frequency DFT without retaining time signals."""
+        from .adjoint_spectrum import SpectralObservation
+        spectral = SpectralObservation(epsilon, self.project.region,
+                                       [m.component for m in self.project.monitors if m.enabled], frequency_hz, window)
+        return self._run(epsilon, spectral)
+
     def forward(self, epsilon):
+        return self._run(epsilon, None)
+
+    def _run(self, epsilon, spectral):
         region = self.project.region
         if not isinstance(epsilon, torch.Tensor) or epsilon.device.type != 'cpu':
             raise ValueError('Streamed epsilon must be a CPU tensor to avoid full-volume VRAM allocation.')
@@ -225,7 +237,7 @@ class StreamedSimulation(DifferentiableSimulation):
         if tuple(epsilon.shape) not in (region.shape, region.shape+(3,)):
             raise ValueError('Epsilon shape must match the project grid.')
         options = self.streaming_options
-        reservation = _reservation(self.project, epsilon, options)
+        reservation = _reservation(self.project, epsilon, options, spectral)
         if not bool(torch.isfinite(epsilon).all()) or bool((epsilon < 1).any()):
             raise ValueError('The CFL contract requires finite epsilon >= 1.')
         report = dict(experimental=True, spatial_streaming=True, full_time_autograd=False,
@@ -238,6 +250,9 @@ class StreamedSimulation(DifferentiableSimulation):
                       cuda_binding=options.cuda_binding,
                       reuse_tile_buffers=options.reuse_tile_buffers,
                       policy='manual', precision=str(epsilon.dtype), **reservation)
-        signals = _Streamed.apply(epsilon, self.project, options, report)
+        report['observation_storage'] = 'time_history' if spectral is None else 'online_spectrum'
+        if spectral is not None:report.update(spectral.reservation(min(options.temporal_depth,region.steps)))
+        signals = _Streamed.apply(epsilon, self.project, options, report, spectral)
+        if spectral is not None:return spectral.result(signals,report)
         return DifferentiableResult(signals, region.time_step,
                                     tuple(m.component for m in self.project.monitors if m.enabled), report)

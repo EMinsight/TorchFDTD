@@ -37,6 +37,30 @@ domain. Checkpoint replay reconstructs the complete primal state required by
 the transpose. A Torch geometry map $\epsilon=g(\theta)$ then supplies
 $\bar\theta=(D_\theta g)^{\mathsf T}\bar\epsilon$.
 
+\section{Bounded spectral observations}
+For a fixed frequency $f_j$ and fixed real window $w_t$, a point component has
+the time-integral observation
+\begin{equation}
+ z_{jm}=\Delta t\sum_{t=0}^{T-1}w_t y_{tm}
+ \exp\left[-2\pi\mathrm{i}f_j(t+1+\delta_m)\Delta t\right],
+\end{equation}
+where $\delta_m=0$ for electric components and $\delta_m=1/2$ for magnetic
+components under the implemented update ordering. For the incoming complex
+derivative $\bar z_{jm}$, the real observation seed is
+\begin{equation}
+ \bar y_{tm}=\Delta t w_t\operatorname{Re}\sum_j
+ \bar z_{jm}\exp\left[2\pi\mathrm{i}f_j(t+1+\delta_m)\Delta t\right].
+\end{equation}
+The complex derivative convention satisfies
+$dL=\operatorname{Re}\sum_{jm}\bar z_{jm}^{*}dz_{jm}$.
+Both the accumulation and its transpose operate on bounded time blocks.
+The point-signal history and a full time-by-frequency matrix are not retained.
+With $F$ frequencies, $M$ observations and block length $B$, the additional
+workspace scales as $O(FM+FB+BM)$. A supplied window and the prepared sources
+still require time-length arrays. These observations are point fields, not
+collocated plane flux or normalized port transmission. They establish neither
+a new Fourier algorithm nor completion of the color-router objective.
+
 \section{Slab ownership and the transpose}
 A time block contains $K$ full steps. Each x slab retains the full y and z
 extent and a conservative halo of $2K$ cells on either x side. This bound covers
@@ -62,7 +86,7 @@ periodic copies are summed. Overwriting halo derivatives would omit valid
 dependency paths. Each observation is emitted and seeded only by its owner.
 
 \section{Two levels of bounded replay}
-Global block checkpoints reside in host DRAM. Local checkpoints reside in the
+Global block checkpoints reside in host DRAM or immutable file banks. Local checkpoints reside in the
 active tile workspace and include E, H and every local CPML state. These are
 different budgets. A fixed number of local checkpoints does not retain a
 time-length field graph on the GPU.

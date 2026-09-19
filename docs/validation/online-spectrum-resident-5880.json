@@ -1,0 +1,300 @@
+{
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "torch_version": "2.10.0",
+  "mode": "resident",
+  "grid": [
+    24,
+    20,
+    1
+  ],
+  "steps": 128,
+  "monitors": 24,
+  "frequencies": [
+    72803025454677.1,
+    175583767273044.75,
+    351167534546089.5
+  ],
+  "warmups_per_policy": 1,
+  "repeats": 3,
+  "records": {
+    "history": [
+      {
+        "seconds": 0.2851878000074066,
+        "gradient_relative_l2": 0.0,
+        "peak_cuda_allocated_bytes": 17352192,
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 128,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose",
+          "memory_reservation_bytes": 718336,
+          "workspace_reservation_bytes": 391680,
+          "history_reservation_bytes": 50176,
+          "checkpoint_transfers": "sync",
+          "output_history_bytes": 24576,
+          "source_history_bytes": 1024,
+          "restart_bytes": 30080,
+          "checkpoint_capacity": 4,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 4,
+          "checkpoint_bytes_written": 2135680,
+          "checkpoint_bytes_read": 3669760,
+          "checkpoint_io_seconds": 0.1095431002904661,
+          "replayed_steps": 547,
+          "checkpoint_tiers": [
+            "device",
+            "device",
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 4,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "time_history",
+          "forward_seconds": 0.03297180001391098,
+          "backward_seconds": 0.23506159998942167
+        }
+      },
+      {
+        "seconds": 0.28563220001524314,
+        "gradient_relative_l2": 0.0,
+        "peak_cuda_allocated_bytes": 17352192,
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 128,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose",
+          "memory_reservation_bytes": 718336,
+          "workspace_reservation_bytes": 391680,
+          "history_reservation_bytes": 50176,
+          "checkpoint_transfers": "sync",
+          "output_history_bytes": 24576,
+          "source_history_bytes": 1024,
+          "restart_bytes": 30080,
+          "checkpoint_capacity": 4,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 4,
+          "checkpoint_bytes_written": 2135680,
+          "checkpoint_bytes_read": 3669760,
+          "checkpoint_io_seconds": 0.11001419997774065,
+          "replayed_steps": 547,
+          "checkpoint_tiers": [
+            "device",
+            "device",
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 4,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "time_history",
+          "forward_seconds": 0.033219599979929626,
+          "backward_seconds": 0.23562559997662902
+        }
+      },
+      {
+        "seconds": 0.2862655999488197,
+        "gradient_relative_l2": 0.0,
+        "peak_cuda_allocated_bytes": 17352192,
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 128,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose",
+          "memory_reservation_bytes": 718336,
+          "workspace_reservation_bytes": 391680,
+          "history_reservation_bytes": 50176,
+          "checkpoint_transfers": "sync",
+          "output_history_bytes": 24576,
+          "source_history_bytes": 1024,
+          "restart_bytes": 30080,
+          "checkpoint_capacity": 4,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 4,
+          "checkpoint_bytes_written": 2135680,
+          "checkpoint_bytes_read": 3669760,
+          "checkpoint_io_seconds": 0.1100671001477167,
+          "replayed_steps": 547,
+          "checkpoint_tiers": [
+            "device",
+            "device",
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 4,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "time_history",
+          "forward_seconds": 0.03405329998349771,
+          "backward_seconds": 0.2353737999801524
+        }
+      }
+    ],
+    "online": [
+      {
+        "seconds": 0.5219783000065945,
+        "gradient_relative_l2": 5.2916771183496734e-17,
+        "peak_cuda_allocated_bytes": 17309184,
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 128,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose",
+          "memory_reservation_bytes": 677232,
+          "workspace_reservation_bytes": 391680,
+          "history_reservation_bytes": 9072,
+          "checkpoint_transfers": "sync",
+          "output_history_bytes": 0,
+          "source_history_bytes": 1024,
+          "restart_bytes": 30080,
+          "checkpoint_capacity": 4,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 4,
+          "checkpoint_bytes_written": 2135680,
+          "checkpoint_bytes_read": 3669760,
+          "checkpoint_io_seconds": 0.10932559962384403,
+          "replayed_steps": 547,
+          "checkpoint_tiers": [
+            "device",
+            "device",
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 4,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "online_spectrum",
+          "spectral_output_bytes": 1152,
+          "spectral_workspace_bytes": 5720,
+          "spectral_settings_bytes": 24,
+          "spectral_reservation_bytes": 8048,
+          "forward_seconds": 0.11226909997640178,
+          "backward_seconds": 0.40305660001467913
+        }
+      },
+      {
+        "seconds": 0.5272374000051059,
+        "gradient_relative_l2": 5.2916771183496734e-17,
+        "peak_cuda_allocated_bytes": 17309184,
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 128,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose",
+          "memory_reservation_bytes": 677232,
+          "workspace_reservation_bytes": 391680,
+          "history_reservation_bytes": 9072,
+          "checkpoint_transfers": "sync",
+          "output_history_bytes": 0,
+          "source_history_bytes": 1024,
+          "restart_bytes": 30080,
+          "checkpoint_capacity": 4,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 4,
+          "checkpoint_bytes_written": 2135680,
+          "checkpoint_bytes_read": 3669760,
+          "checkpoint_io_seconds": 0.10975339962169528,
+          "replayed_steps": 547,
+          "checkpoint_tiers": [
+            "device",
+            "device",
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 4,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "online_spectrum",
+          "spectral_output_bytes": 1152,
+          "spectral_workspace_bytes": 5720,
+          "spectral_settings_bytes": 24,
+          "spectral_reservation_bytes": 8048,
+          "forward_seconds": 0.11368840001523495,
+          "backward_seconds": 0.40693220001412556
+        }
+      },
+      {
+        "seconds": 0.3018670000019483,
+        "gradient_relative_l2": 5.2916771183496734e-17,
+        "peak_cuda_allocated_bytes": 17309184,
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 128,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose",
+          "memory_reservation_bytes": 677232,
+          "workspace_reservation_bytes": 391680,
+          "history_reservation_bytes": 9072,
+          "checkpoint_transfers": "sync",
+          "output_history_bytes": 0,
+          "source_history_bytes": 1024,
+          "restart_bytes": 30080,
+          "checkpoint_capacity": 4,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 4,
+          "checkpoint_bytes_written": 2135680,
+          "checkpoint_bytes_read": 3669760,
+          "checkpoint_io_seconds": 0.0338056999607943,
+          "replayed_steps": 547,
+          "checkpoint_tiers": [
+            "device",
+            "device",
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 4,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "online_spectrum",
+          "spectral_output_bytes": 1152,
+          "spectral_workspace_bytes": 5720,
+          "spectral_settings_bytes": 24,
+          "spectral_reservation_bytes": 8048,
+          "forward_seconds": 0.11367469996912405,
+          "backward_seconds": 0.1815929000149481
+        }
+      }
+    ]
+  },
+  "median_seconds": {
+    "history": 0.28563220001524314,
+    "online": 0.5219783000065945
+  },
+  "scope": "Complete spectral-loss forward/backward on one fixed small scene. Torch CUDA allocation peak excludes context and cache. Admission is an estimate. Point observations, not a plane flux or CR validation. No external-solver or physical-memory-overflow claim."
+}

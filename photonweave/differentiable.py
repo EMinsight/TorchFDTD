@@ -393,15 +393,23 @@ def _split(length,slots):
 
 class _FDTD(torch.autograd.Function):
     @staticmethod
-    def forward(ctx,epsilon,system,options,report):
+    def forward(ctx,epsilon,system,options,report,spectral):
         ctx.save_for_backward(epsilon)
         ctx.system,ctx.options,ctx.report=system,options,report
+        ctx.spectral=spectral
         system.zero()
-        signals=torch.empty((system.region.steps,len(system.monitors)),device=epsilon.device,dtype=epsilon.dtype)
+        signals=torch.empty((system.region.steps,len(system.monitors)),device=epsilon.device,dtype=epsilon.dtype) if spectral is None else spectral.zeros()
+        samples=None if spectral is None else epsilon.new_empty((spectral.block_size,len(system.monitors)))
         started=time.perf_counter()
         for step in range(system.region.steps):
             system.advance(step,step+1)
-            signals[step]=system.observe(system.state())
+            values=system.observe(system.state())
+            if spectral is None:signals[step]=values
+            else:
+                local=step%spectral.block_size
+                samples[local]=values
+                if local+1==spectral.block_size or step+1==system.region.steps:
+                    spectral.accumulate(signals,samples[:local+1],step-local)
         if epsilon.is_cuda:torch.cuda.synchronize(epsilon.device)
         report['forward_seconds']=time.perf_counter()-started
         return signals
@@ -417,7 +425,8 @@ class _FDTD(torch.autograd.Function):
         fused=None
         if epsilon.is_cuda and options.backward_kernel!='torch':
             from .cuda_adjoint import FusedAdjointCUDA
-            fused=FusedAdjointCUDA(system,gradient,signal_bar)
+            fused_seed=signal_bar if ctx.spectral is None else epsilon.new_empty((ctx.spectral.block_size,len(system.monitors)))
+            fused=FusedAdjointCUDA(system,gradient,fused_seed)
         adjoint=None if fused else tuple(torch.zeros_like(x) for x in system.state())
         checkpoints=_Checkpoints(system,options,report)
 
@@ -426,8 +435,10 @@ class _FDTD(torch.autograd.Function):
             system.advance(start,end)
             report['replayed_steps']+=end-start
 
+        spectral_start=-1
+        spectral_seed=None
         def reverse(start,end,key,slots):
-            nonlocal adjoint
+            nonlocal adjoint,spectral_start,spectral_seed
             # The left recursion is a loop. Only the right branch consumes a
             # checkpoint slot, so Python call depth never grows with duration.
             while end>start:
@@ -435,9 +446,21 @@ class _FDTD(torch.autograd.Function):
                     for step in range(end-1,start-1,-1):
                         replay(key,start,step)
                         if step>start:checkpoints.prefetch(key)
-                        if fused:fused.step(step)
+                        if ctx.spectral is None:
+                            seed=signal_bar[step]
+                            observation_index=None
                         else:
-                            adjoint,part=system.transpose_step(system.state(),adjoint,signal_bar[step])
+                            begin=(step//ctx.spectral.block_size)*ctx.spectral.block_size
+                            if begin!=spectral_start:
+                                spectral_seed=ctx.spectral.transpose(signal_bar,begin,min(begin+ctx.spectral.block_size,system.region.steps))
+                                spectral_start=begin
+                                if fused:fused.signal_bar[:len(spectral_seed)].copy_(spectral_seed)
+                            observation_index=step-begin
+                            seed=spectral_seed[observation_index]
+                        if fused:
+                            fused.step(step,observation_index=observation_index)
+                        else:
+                            adjoint,part=system.transpose_step(system.state(),adjoint,seed)
                             gradient.add_(part)
                     return
                 middle=start+_split(end-start,slots)
@@ -453,7 +476,7 @@ class _FDTD(torch.autograd.Function):
             report['backward_seconds']=time.perf_counter()-started
         finally:
             checkpoints.close()
-        return gradient,None,None,None
+        return gradient,None,None,None,None
 
 
 class DifferentiableSimulation(torch.nn.Module):
@@ -480,7 +503,17 @@ class DifferentiableSimulation(torch.nn.Module):
         if r.run_control.auto_shutoff:
             raise ValueError('Differentiable simulations require a fixed number of timesteps.')
 
+    def spectrum(self,epsilon,frequency_hz,*,window=None,block_size=32):
+        """Online DFT with fixed settings and a bounded observation transpose."""
+        from .adjoint_spectrum import SpectralObservation
+        spectral=SpectralObservation(epsilon,self.project.region,
+                                     [m.component for m in self.project.monitors if m.enabled],frequency_hz,window,block_size)
+        return self._run(epsilon,spectral)
+
     def forward(self,epsilon: torch.Tensor):
+        return self._run(epsilon,None)
+
+    def _run(self,epsilon,spectral):
         r=self.project.region
         r.require_resident()
         if not isinstance(epsilon,torch.Tensor) or epsilon.dtype not in (torch.float32,torch.float64):
@@ -506,13 +539,13 @@ class DifferentiableSimulation(torch.nn.Module):
         monitor_count=sum(m.enabled for m in self.project.monitors)
         source_terms_count=sum(len(s.polarization_components)*(2 if s.injection=='oneway' else 1)
                                for s in self.project.sources if s.enabled)
-        output_bytes=r.steps*monitor_count*item
+        output_bytes=r.steps*monitor_count*item if spectral is None else spectral.reservation(spectral.block_size)['spectral_output_bytes']
         source_bytes=r.steps*source_terms_count*item
         # The physical tape is bounded, but outputs and prepared drives are not.
         # Reserve the returned signals and their incoming first-order adjoints.
         # User objectives, spectrum matrices and geometry graphs have separate
         # allocations and cannot be bounded by this solver admission estimate.
-        history_bytes=2*output_bytes+source_bytes
+        history_bytes=2*output_bytes+source_bytes if spectral is None else spectral.reservation(spectral.block_size)['spectral_reservation_bytes']+source_bytes
         device_slots=self.options.checkpoints if self.options.storage=='device' else self.options.device_checkpoints if self.options.storage=='hierarchical' else 0
         if self.options.checkpoint_transfers=='async' and self.options.checkpoints>device_slots:
             device_slots+=self.options.staging_slots
@@ -526,13 +559,16 @@ class DifferentiableSimulation(torch.nn.Module):
                     forward_backend='fused CUDA' if epsilon.is_cuda else 'torch CPU',
                     backward_backend='fused CUDA transpose' if epsilon.is_cuda and self.options.backward_kernel!='torch' else 'torch explicit transpose',memory_reservation_bytes=required,
                     workspace_reservation_bytes=workspace,history_reservation_bytes=history_bytes,
-                    checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes,
+                    checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes if spectral is None else 0,
                     source_history_bytes=source_bytes)
         with torch.no_grad():system=_System(self.project,epsilon)
         # Check host/disk admission before spending the forward compute time.
         admission=_Checkpoints(system,self.options,report,admission=True)
         admission.close()
-        signals=_FDTD.apply(epsilon,system,self.options,report)
+        report['observation_storage']='time_history' if spectral is None else 'online_spectrum'
+        if spectral is not None:report.update(spectral.reservation(spectral.block_size),spectral_block_size=spectral.block_size)
+        signals=_FDTD.apply(epsilon,system,self.options,report,spectral)
+        if spectral is not None:return spectral.result(signals,report)
         return DifferentiableResult(signals,r.time_step,tuple(m.component for m in self.project.monitors if m.enabled),report)
 
     def reference(self,epsilon):
