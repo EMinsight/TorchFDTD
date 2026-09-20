@@ -166,7 +166,9 @@ class DispersiveSimulation(DifferentiableSimulation):
 
     def _inputs(self, epsilon, strength, omega0, gamma, *, reference=False, streamed=False):
         r = self.project.region
-        if not streamed:r.require_resident()
+        if not streamed:
+            from .adjoint_memory import _resident_contract
+            _resident_contract(r,self.options)
         elif not isinstance(epsilon, torch.Tensor) or epsilon.device.type != 'cpu':
             raise ValueError('Streamed epsilon_inf must be a CPU tensor.')
         if not isinstance(epsilon, torch.Tensor) or epsilon.dtype not in (torch.float32, torch.float64):

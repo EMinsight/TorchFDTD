@@ -35,6 +35,7 @@ class AdjointOptions:
     backward_kernel: str = 'auto'
     checkpoint_transfers: str = 'sync'
     staging_slots: int = 2
+    resident_budget_bytes: int | None = None
 
     def __post_init__(self):
         if self.backward_kernel not in ('auto','torch','fused'):
@@ -51,7 +52,7 @@ class AdjointOptions:
             raise ValueError('Tier checkpoint counts must be nonnegative integers.')
         if self.device_checkpoints+self.host_checkpoints>self.checkpoints:
             raise ValueError('Tier checkpoint counts exceed the total checkpoint count.')
-        for name in ('gpu_budget_bytes','host_budget_bytes','disk_budget_bytes'):
+        for name in ('gpu_budget_bytes','host_budget_bytes','disk_budget_bytes','resident_budget_bytes'):
             value=getattr(self,name)
             if value is not None and (isinstance(value,bool) or not isinstance(value,int) or value <= 0):
                 raise ValueError(f'{name} must be a positive integer byte budget.')
@@ -551,7 +552,8 @@ class DifferentiableSimulation(torch.nn.Module):
     def _run(self,epsilon,spectral,*,system_factory=None,autograd_input=None,
              pole_count=0,material_parameter_elements=0):
         r=self.project.region
-        r.require_resident()
+        from .adjoint_memory import _resident_contract
+        _resident_contract(r,self.options)
         if not isinstance(epsilon,torch.Tensor) or epsilon.dtype not in (torch.float32,torch.float64):
             raise ValueError('epsilon must be a real float32 or float64 torch Tensor.')
         if epsilon.device.type not in ('cpu','cuda'):

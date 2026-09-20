@@ -699,7 +699,20 @@ execution modes. Resident CUDA includes differentiable material transfers to
 the device and observation transfers back to the host. Gradients therefore
 return to the original geometry graph. Admission accounts for these transfer
 carriers in addition to native solver workspace and checkpoint capacity.
-The resident cell limit remains enforced before allocating fields.
+Generated resident candidates use an explicit byte budget rather than the
+workbench cell-count guard. Admission checks workspace, checkpoint tiers,
+transfer carriers and signed CUDA field and observation offsets. The legacy
+guard remains the default outside this opt-in adjoint path.
+
+Short real-FP32 tests above the legacy guard used a $256^3$ dielectric grid
+and a $208^3$ single-pole grid on an RTX 3060. A source near the high-side
+absorbing layer excites nonzero CPML states. A $40^3$ full-autograd reference
+contains the complete causal cone for twelve steps. The largest relative
+output or parameter-gradient discrepancies were $1.12\times10^{-7}$ and
+$1.78\times10^{-7}$, respectively. The complete epsilon-gradient norms agree
+with the reference crop. These are short resident index and VJP checks.
+They do not establish beyond-VRAM capacity or long-time optical convergence.
+A concurrent application excludes their elapsed times from performance claims.
 
 Candidates are checked at the requested full duration and timed at bounded
 prefix durations. Resident replay uses individual time steps while streamed
@@ -709,4 +722,25 @@ native solver workspaces during gradient comparison. The selected policy is
 reused explicitly and rechecks live resources on execution. Full-duration
 ranking of this broader search and complete application optimization remain
 unverified. The mechanism is not a proof of globally optimal placement.
+
+\subsection{Held-out causal-halo policy measurements}
+Two further RTX 5880 studies use a $K$-cell causal halo, a $128^3$ grid,
+two poles and 128 time steps. Calibration sees at most 32 time steps.
+One warm-up and three full repetitions are performed for each of six
+policies. A width of 32 cells, depth of eight steps, two global checkpoints
+and asynchronous double buffering is selected for real FP32 and complex
+FP64 fields. This policy is also fastest among the measured full workloads.
+Its medians are 4.577 and 18.082 seconds. The matched synchronous medians
+are 7.354 and 28.525 seconds.
+
+Tuning costs 60.678 and 212.550 seconds. Against the first admitted
+width-16, depth-four synchronous policy, the observed savings amortize
+tuning after five and six iterations. All complete observations and
+separately scaled material derivatives pass the resident reference checks.
+The largest relative comparison errors are $1.49\times10^{-6}$ and
+$6.02\times10^{-15}$. These problems fit device memory. The earlier and
+causal-halo revisions were measured sequentially, without randomized
+alternation between revisions. No isolated causal speed estimate,
+beyond-VRAM speedup or external-solver advantage follows from this study.
+
 \end{document}

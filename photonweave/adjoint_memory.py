@@ -8,6 +8,25 @@ from .memory_profile import host_memory
 from .state_store import disk_free
 
 
+def _resident_contract(region,options):
+    if options.resident_budget_bytes is None:
+        region.require_resident()
+    elif region.memory_mode=='streamed':
+        raise ValueError('Use memory_mode="budgeted" for byte-admitted resident execution.')
+
+
+def _cuda_index_contract(region,monitor_count,observation_steps):
+    # Fused Yee field offsets use signed int arithmetic. Complex forward uses
+    # two real lanes. ADE pole and packed-parameter offsets already use int64.
+    lanes=2 if region.complex_fields else 1
+    if 3*lanes*math.prod(region.shape)>=2**31:
+        raise ValueError('Resident CUDA field indexing exceeds the signed 32-bit range. Use spatial streaming.')
+    # The real fused observation kernel forms step*monitor_count in int32.
+    # Spectral observations seed bounded time blocks instead of full history.
+    if lanes*monitor_count*observation_steps>=2**31:
+        raise ValueError('Resident CUDA observation indexing exceeds the signed 32-bit range. Use online spectra or fewer observations.')
+
+
 def _material_shapes(region, parameter_shapes):
     shapes=tuple(tuple(s) for s in parameter_shapes)
     grid=region.shape
@@ -25,11 +44,14 @@ def _material_shapes(region, parameter_shapes):
 def _resident_reservation(project, options, device, spectral=None, *, pole_count=0, parameter_elements=0):
     """Shared planner/execution calculation, including original tier semantics."""
     region=project.region
-    region.require_resident()
+    _resident_contract(region,options)
     device=torch.device(device)
     if device.type not in ('cpu','cuda'):raise ValueError('Only CPU and CUDA execution are supported.')
     if device.type!='cuda' and options.backward_kernel=='fused':raise ValueError('The fused backward requires a CUDA tensor.')
     if device.type!='cuda' and options.checkpoint_transfers=='async':raise ValueError('Asynchronous checkpoints require a CUDA tensor.')
+    monitor_count=sum(m.enabled for m in project.monitors) if spectral is None else len(spectral.components)
+    if device.type=='cuda':
+        _cuda_index_contract(region,monitor_count,region.steps if spectral is None else spectral.block_size)
     n=math.prod(region.shape)
     real_item=8 if region.precision=='float64' else 4
     item=real_item*(2 if region.complex_fields else 1)
@@ -43,7 +65,6 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     # Packing and its normalization graph precede field creation. Budget those
     # carriers before torch.cat, rather than testing only the packed output.
     packing=4*parameter_elements*real_item
-    monitor_count=sum(m.enabled for m in project.monitors) if spectral is None else len(spectral.components)
     terms=sum(len(s.polarization_components)*(2 if s.injection=='oneway' else 1)
               for s in project.sources if s.enabled)
     output=region.steps*monitor_count*item if spectral is None else spectral.reservation(spectral.block_size)['spectral_output_bytes']
@@ -64,7 +85,15 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     array_count=2+len(segments)+(2 if pole_count else 0)
     disk_checkpoint=(state+4096+512*array_count)*disk_slots
     required=workspace+(device_slots+staging_slots)*state_upper+history+index_bytes+packing
-    host_required=host_checkpoint+(required if device.type=='cpu' else 0)
+    # The resident one-way validator currently copies epsilon to CPU. Reserve
+    # the diagonal worst case plus its three-plane NumPy comparison temporaries.
+    oneway=any(s.enabled and s.injection=='oneway' for s in project.sources)
+    source_validation=(3*n+18*max(region.shape[0]*region.shape[1],region.shape[0]*region.shape[2],region.shape[1]*region.shape[2]))*real_item if oneway and device.type=='cuda' else 0
+    host_required=host_checkpoint+(required if device.type=='cpu' else 0)+source_validation
+    if options.resident_budget_bytes is not None:
+        active=host_required if device.type=='cpu' else required
+        if active>options.resident_budget_bytes:
+            raise ValueError('Resident solver reservation exceeds the explicit resident byte budget.')
     # host_budget_bytes retains its existing checkpoint-tier meaning. The
     # current available-host check additionally covers CPU working fields.
     if options.host_budget_bytes is not None and host_checkpoint>options.host_budget_bytes:
@@ -86,7 +115,9 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
         source_history_bytes=source,observation_index_bytes=index_bytes,
         material_packing_reservation_bytes=packing,restart_state_bytes=state,
         host_checkpoint_reservation_bytes=host_checkpoint,disk_checkpoint_reservation_bytes=disk_checkpoint,
-        host_reservation_bytes=host_required,gpu_reservation_bytes=required if device.type=='cuda' else 0)
+        host_source_validation_bytes=source_validation,
+        host_reservation_bytes=host_required,gpu_reservation_bytes=required if device.type=='cuda' else 0,
+        budgeted_resident=options.resident_budget_bytes is not None)
 
 
 def estimate_adjoint_memory(project, options=None, *, device='cpu', parameter_shapes=None,

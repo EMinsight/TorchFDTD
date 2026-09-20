@@ -58,17 +58,18 @@ def _streamed_options(policy):
     return replace(policy.streamed,host_budget_bytes=min(policy.host_budget_bytes,policy.streamed.host_budget_bytes))
 
 
-def _resident_project(project):
-    # The original project may opt into large streamed grids. Retain the actual
-    # resident cell guard when considering this candidate, rather than removing it.
+def _resident_project(project,options):
+    # Deferred large-grid projects are admitted through explicit byte budgets.
+    # Legacy candidates without that budget retain the workbench cell guard.
     project=project.model_copy(deep=True)
-    project.region.memory_mode='resident'
-    project.region.require_resident()
+    project.region.memory_mode='budgeted' if options.resident_budget_bytes is not None else 'resident'
+    from .adjoint_memory import _resident_contract
+    _resident_contract(project.region,options)
     return project
 
 
 def _resident_reservation(project,shapes,policy,frequency_hz=None,window=None,block_size=32):
-    project=_resident_project(project)
+    project=_resident_project(project,policy.resident)
     if shapes[0] not in (project.region.shape,project.region.shape+(3,)):
         raise ValueError('epsilon shape must match the grid, optionally with three components.')
     settings=dict(device=policy.device,frequency_hz=frequency_hz,window=window,block_size=block_size)
@@ -88,6 +89,9 @@ def _resident_reservation(project,shapes,policy,frequency_hz=None,window=None,bl
     limit=policy.host_budget_bytes
     if available is not None:limit=min(limit,int(available*.8))
     if host>limit:raise ValueError('Resident solver and transfer reservation exceed the unified host budget.')
+    active=host if not cuda else gpu
+    if policy.resident.resident_budget_bytes is not None and active>policy.resident.resident_budget_bytes:
+        raise ValueError('Resident solver and transfers exceed the explicit resident byte budget.')
     if cuda:
         free,_=torch.cuda.mem_get_info(torch.device(policy.device))
         limit=min(int(free*.8),policy.resident.gpu_budget_bytes or int(free*.8))
@@ -99,7 +103,7 @@ def _resident_reservation(project,shapes,policy,frequency_hz=None,window=None,bl
 class _ResidentFromHost(torch.nn.Module):
     def __init__(self,project,policy,dispersive):
         super().__init__()
-        self.project=_resident_project(project)
+        self.project=_resident_project(project,policy.resident)
         self.policy,self.dispersive=policy,dispersive
         model=DifferentiableSimulation
         if dispersive:
@@ -193,7 +197,8 @@ def tune_adjoint_execution(project,epsilon,*material_parameters,options=None,can
         device=base.device
         kernel='fused' if torch.device(device).type=='cuda' else 'torch'
         resident=AdjointOptions(checkpoints=base.checkpoints,backward_kernel=kernel,
-            gpu_budget_bytes=base.gpu_budget_bytes,host_budget_bytes=base.host_budget_bytes)
+            gpu_budget_bytes=base.gpu_budget_bytes,host_budget_bytes=base.host_budget_bytes,
+            resident_budget_bytes=base.gpu_budget_bytes if torch.device(device).type=='cuda' else base.host_budget_bytes)
         residents=[resident,replace(resident,checkpoints=0)]
         if torch.device(device).type=='cuda':
             residents.append(replace(resident,storage='host',checkpoint_transfers='async'))

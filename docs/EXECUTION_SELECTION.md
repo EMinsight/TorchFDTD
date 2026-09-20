@@ -58,10 +58,12 @@ histories, ADE packing and input/gradient transfer carriers. The wrapper's
 pass. Caller inputs, geometry and optimizer graphs remain outside these
 budgets. CUDA context and OS file cache are not included.
 
-The resident cell limit still applies, even if the project has
-`memory_mode="streamed"`. Larger projects must be created in that mode so
-streamed candidates can be considered. Resident denial is recorded as a
-candidate rejection rather than a reason to allocate the full grid on GPU.
+Generated resident candidates now use [explicit byte admission](BUDGETED_RESIDENT.md)
+instead of the workbench's eight-million-cell guard. Create large projects with
+`memory_mode="streamed"` or `"budgeted"` to defer allocation. Resident workspace,
+checkpoint, transfer and CUDA-index checks must all pass. Explicit custom
+resident candidates without `resident_budget_bytes` retain the old guard.
+Resident denial is recorded as a candidate rejection.
 Execution rechecks live resources before copying resident inputs or creating
 fields. A selected policy is not an exclusive resource reservation.
 
@@ -98,7 +100,8 @@ requires a resident reference, it is not a beyond-VRAM capacity experiment.
 
 Validation covers CPU/CUDA design-copy gradients, scalar/pole ADE derivatives,
 point history/spectrum objectives, explicit rejection before copies, the
-resident cell guard, no mutation of input `.grad`, and release of the preceding
+legacy cell guard and opt-in byte admission, no mutation of input `.grad`,
+and release of the preceding
 native solver before an uncached reference solve with cyclic GC disabled.
 
 The local execution/streamed tuning and existing policy-driver suite passed

@@ -161,7 +161,7 @@ class Region(Model):
     bloch_phase: tuple[float, float, float] = (0, 0, 0)  # radians per positive unit-cell translation
     background_index: float = Field(default=1, ge=1, le=20)
     backend: Literal['auto', 'cuda', 'cpu'] = 'auto'
-    memory_mode: Literal['resident', 'streamed'] = 'resident'
+    memory_mode: Literal['resident', 'streamed', 'budgeted'] = 'resident'
     cuda_kernel: Literal['torch', 'fused'] = 'torch'
     cuda_monitor_kernel: Literal['torch', 'fused'] = 'torch'
     precision: Literal['float32', 'float64'] = 'float32'
@@ -172,6 +172,8 @@ class Region(Model):
     complex_display: Literal['real', 'imag', 'magnitude', 'phase'] = 'real'
 
     def require_resident(self):
+        if self.memory_mode == 'budgeted':
+            raise ValueError('Budgeted scenes require the adjoint API and an explicit resident byte budget.')
         if self.memory_mode == 'streamed':
             raise ValueError('Streamed scenes require StreamedSimulation and explicit memory budgets.')
         if math.prod(self.shape) > 8_000_000:

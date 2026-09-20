@@ -112,3 +112,39 @@ relative to the matched synchronous width-32/depth-8 policy. Tuning took
 policy. This remains a resident-size native scheduling comparison, with the
 same limitations as the real-FP32 case. It does not establish unified
 resident-versus-streamed policy quality.
+
+## Held-out causal-halo rerun
+
+The following separate runs use frozen source `d4dd7c2`, with a causal halo of
+K cells per side instead of the earlier conservative 2K. They retain the same
+128-cubed two-pole geometry, 128 steps, point spectra, six policies, one warmup
+and three full repetitions. Calibration uses at most 32 steps. Complete
+outputs and separately scaled material gradients pass the resident reference
+checks for every measured policy.
+
+| Width / depth | Transfer | Global / local checkpoints | Real FP32, s | Complex FP64, s |
+| --- | --- | --- | ---: | ---: |
+| 16 / 4 | Synchronous | 2 / 0 | 18.3367 | 56.3460 |
+| 32 / 8 | Synchronous | 2 / 0 | 7.3542 | 28.5245 |
+| 32 / 8 | Asynchronous, 2 buffers | 2 / 0 | **4.5773** | **18.0818** |
+| 32 / 8 | Synchronous | 2 / 1 | 7.1888 | 27.5841 |
+| 32 / 8 | Synchronous | 0 / 0 | 14.6546 | 56.5094 |
+| 32 / 8 | Synchronous | 4 / 0 | 6.9639 | 26.5048 |
+
+The prefix-selected policy is the fastest measured full-duration policy in
+both cases. Its full-time ratio relative to the first admitted policy is
+4.01 for FP32 and 3.12 for complex FP64. Tuning costs 60.678 and 212.550 seconds,
+respectively, with five and six iterations of measured payback against that
+baseline. The matched synchronous/asynchronous ratios are 1.61 and 1.58.
+
+The [FP32 record](material-policy-halo-128-fp32-5880.json) and
+[complex-FP64 record](material-policy-halo-128-complex-fp64-5880.json) retain
+their exact driver/runtime hashes, timing samples and comparison errors.
+Hashes were checked against the frozen commit before these records were
+curated. The older and newer revision studies ran sequentially, rather than
+as randomized alternating revisions. Their elapsed-time differences are
+observations, not a controlled estimate of the halo change's isolated effect.
+
+These workloads fit VRAM. The ratios compare our streamed policies, not other
+solvers or resident execution. They do not establish full-application optical
+convergence, performance beyond VRAM, or the unified selector's ranking.

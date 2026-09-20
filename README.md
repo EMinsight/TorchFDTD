@@ -22,7 +22,13 @@ The measured search includes resident input/output transfers and reuses the
 bounded gradient-reference cache. Policy quality at full application duration
 remains unverified. A separate [held-out streamed-policy study](docs/validation/MATERIAL_POLICY_REPORT.md#held-out-rtx-5880-real-fp32-policy-comparison)
 selected the fastest of six 128-step ADE policies using at most 32 calibration
-steps. That study used the earlier halo and does not validate unified selection.
+steps. A separate [causal-halo rerun](docs/validation/MATERIAL_POLICY_REPORT.md#held-out-causal-halo-rerun)
+retained that ranking for real FP32 and complex FP64. These studies compare
+streamed policies and do not validate unified selection.
+Large grids can now opt into [byte-budgeted resident adjoints](docs/BUDGETED_RESIDENT.md)
+so a grid that fits memory is not forced into streaming by the workbench cell
+guard. Short 256-cubed dielectric and 208-cubed ADE forward/VJP checks passed.
+They are resident index/capacity checks, not beyond-VRAM speed measurements.
 
 Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and physical convergence of the full CR objective remain pending.
 

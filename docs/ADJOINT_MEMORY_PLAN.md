@@ -28,10 +28,12 @@ near `L = sqrt(T)`. At T = 10,000 this is approximately 200 field states or
 existing in-place fused kernel is not an adjoint implementation and cannot
 supply missing kernel derivatives.
 
-The current model also rejects grids above 8,000,000 cells. The example grid is
-therefore not a supported present configuration. Replace that fixed guard only
-after full device/host-memory admission and large-index allocation tests, not
-by removing it and claiming large-grid support.
+The default workbench still rejects grids above 8,000,000 cells. The separate
+[budgeted resident adjoint](BUDGETED_RESIDENT.md) now requires an explicit byte
+budget and checks device/host workspace, checkpoint tiers and CUDA indices.
+Actual 256-cubed dielectric and 208-cubed ADE runs pass short forward/VJP checks.
+Those results do not validate the example's 10,000-step workload. Large problems
+that fail resident admission still require the spatial-streaming path.
 
 ## Required architecture
 

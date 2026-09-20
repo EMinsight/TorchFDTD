@@ -162,8 +162,11 @@ checked against the explicit tier budgets and 80% of currently free capacity.
 These are conservative checks, not exclusive operating-system reservations.
 Execution repeats them and still validates actual parameter values. Caller
 inputs, geometry/optimizer graphs, CUDA context and OS file cache are outside
-the estimate. The resident cell limit remains in effect. This API supplies
-admission metadata and does not automatically switch to spatial streaming.
+the estimate. Large grids can opt into `Region(memory_mode="budgeted")` with
+`AdjointOptions.resident_budget_bytes`. The legacy workbench guard remains the
+default. [Byte-budget contract and large-index checks](BUDGETED_RESIDENT.md).
+This API supplies admission metadata and does not automatically switch to
+spatial streaming.
 
 ## Checkpoint algorithm and tiers
 
