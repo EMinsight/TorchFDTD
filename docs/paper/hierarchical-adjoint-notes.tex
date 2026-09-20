@@ -10,7 +10,8 @@
 \maketitle
 
 \section{Scope of the implemented operation}
-The current differentiable operation advances real, nondispersive Yee fields
+The current differentiable operation advances nondispersive Yee fields,
+including fixed complex Bloch fields in the resident execution path,
 and convolutional perfectly matched layer memories on a fixed mesh. The
 permittivity can be scalar or diagonal. Point observations and fixed collocated
 spectral planes define the current output contract. A geometry map implemented with Torch operations can precede
@@ -27,15 +28,27 @@ field, including prepared sources and their prescribed times. Write this as
 For a real objective $L(y_0,\ldots,y_{T-1})$, let $\bar y_t$ denote its incoming
 observation derivative. The discrete reverse recurrence is
 \begin{align}
- v_{t+1} &= \bar s_{t+1}+P_t^{\mathsf T}\bar y_t,\\
- \bar s_t &= (D_s F_t)^{\mathsf T}v_{t+1},\\
- \bar\epsilon &\mathrel{+}= (D_\epsilon F_t)^{\mathsf T}v_{t+1}.
+ v_{t+1} &= \bar s_{t+1}+P_t^{\mathsf H}\bar y_t,\\
+ \bar s_t &= (D_s F_t)^{\mathsf H}v_{t+1},\\
+ \bar\epsilon &\mathrel{+}=\operatorname{Re}\left[(D_\epsilon F_t)^{\mathsf H}v_{t+1}\right].
 \end{align}
 The CUDA transpose includes CPML state derivatives. Reversing lossless Maxwell
 fields alone would not reproduce this discrete recurrence in an absorbing
 domain. Checkpoint replay reconstructs the complete primal state required by
 the transpose. A Torch geometry map $\epsilon=g(\theta)$ then supplies
 $\bar\theta=(D_\theta g)^{\mathsf T}\bar\epsilon$.
+
+For fixed Bloch factor $p=\exp(\mathrm{i}\phi)$, the forward seam difference
+is $pF_0-F_{N-1}$ and the backward seam difference is
+$F_0-F_{N-1}/p$. Their adjoints multiply by conjugate seam coefficients.
+Complex CPML memories participate in checkpoint replay. The implemented complex
+resident path uses explicit Torch operations on CPU or CUDA. Real-only fused
+kernels and spatial slab streaming are not used for this complex path.
+A 20-degree TE slab check at 1.55 micrometres gave transmission error 0.004442
+against the Fresnel slab formula and conservation error $9.58\times10^{-6}$.
+Its fixed-geometry index derivative agreed with a central difference to relative
+error $1.18\times10^{-8}$. This is a single-frequency validation rather than a
+full pupil, broadband constant-angle or shape-convergence result.
 
 \section{Bounded spectral observations}
 For a fixed frequency $f_j$ and fixed real window $w_t$, a point component has
@@ -53,6 +66,7 @@ derivative $\bar z_{jm}$, the real observation seed is
 \end{equation}
 The complex derivative convention satisfies
 $dL=\operatorname{Re}\sum_{jm}\bar z_{jm}^{*}dz_{jm}$.
+For complex time samples, the observation seed omits the real-part projection.
 Both the accumulation and its transpose operate on bounded time blocks.
 The point-signal history and a full time-by-frequency matrix are not retained.
 With $F$ frequencies, $M$ observations and block length $B$, the additional

@@ -18,6 +18,8 @@ unvalidated.
 
 Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and the CR reconstruction objective remain pending.
 
+[Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) now support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Fused complex kernels, complex spatial streaming and full-pupil CR reproduction remain pending.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 

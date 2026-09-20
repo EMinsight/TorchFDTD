@@ -59,8 +59,10 @@ all planes. Stored frequency-sampling settings do not choose this argument.
 Temporal downsampling must be one and apodization must be disabled. Mixed field
 and DFT precision is rejected. Plane positions, mesh, quadrature and frequencies
 are fixed, while epsilon and preceding Torch geometry operations differentiate.
-Rebuild the model after changing its fixed project configuration. Complex Bloch,
-ADE, live TFSF, coupled subpixel and higher-order derivatives remain unsupported.
+Rebuild the model after changing its fixed project configuration.
+[Fixed complex Bloch fields](BLOCH_ADJOINT.md) are supported in resident execution.
+Complex spatial streaming, ADE, live TFSF, coupled subpixel and higher-order
+derivatives remain unsupported.
 
 ## Normalization
 
@@ -85,7 +87,7 @@ It is not directional mode decomposition or mode-port normalization.
 ## Storage and validation
 
 Yee support samples shared between planes are deduplicated. Interpolation uses
-the existing trilinear maps, real periodic seams, nonuniform Yee coordinates and
+the existing trilinear maps, real periodic and complex Bloch seams, nonuniform Yee coordinates and
 clipped physical-cell quadrature. Torch transposes the interpolation and the
 power objective, then the solver seeds its discrete field adjoint. The global
 time history is not retained. Resident GPU and streamed admission charge the support-sample spectra,

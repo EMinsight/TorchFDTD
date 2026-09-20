@@ -215,6 +215,8 @@ class StreamedSimulation(DifferentiableSimulation):
     admission does not itself establish a throughput advantage.
     """
     def __init__(self, project, options=None):
+        if project.region.complex_fields:
+            raise ValueError('Complex Bloch spatial streaming is not implemented. Use the resident differentiable path.')
         super().__init__(project)
         self.streaming_options = options or StreamedAdjointOptions()
 
@@ -230,6 +232,7 @@ class StreamedSimulation(DifferentiableSimulation):
 
     def _run(self, epsilon, spectral):
         region = self.project.region
+        if region.complex_fields:raise ValueError('Complex Bloch spatial streaming is not implemented.')
         if not isinstance(epsilon, torch.Tensor) or epsilon.device.type != 'cpu':
             raise ValueError('Streamed epsilon must be a CPU tensor to avoid full-volume VRAM allocation.')
         if epsilon.dtype not in (torch.float32, torch.float64) or (epsilon.dtype == torch.float64) != (region.precision == 'float64'):

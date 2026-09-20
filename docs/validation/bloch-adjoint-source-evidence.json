@@ -1,0 +1,12 @@
+{
+  "base_commit": "315ac53",
+  "sha256": {
+    "photonweave/differentiable.py": "31df024ea20dde5f3f0e77b0c1c086f8af72a4bdf32dbaaa33a5c77acafb7cc4",
+    "photonweave/adjoint_spectrum.py": "08dcc8a81b04fec8a14f43e2e8b1006d1f5da89e5755aa70fd5a75fd0e15173f",
+    "photonweave/adjoint_planes.py": "1ebf61b5605d66eb70d780b2b8beb91891e6e68a13c2e889eeb18110936fbd91",
+    "photonweave/streamed.py": "27a7f509dc26202a6e7c4cdbdceb3919af86a6819225efe2f2b09089d52afff6",
+    "benchmarks/bloch_adjoint.py": "2146349efcae1b53eb74c057dd138a84e039e89d38ae3f7b476c24652ef3988f",
+    "tests/test_bloch_adjoint.py": "4ce23e7985b4d48880569ceafa76ba04e4438af0e48258b144454752241e12cc"
+  },
+  "scope": "Final source. Physical slab measurement preceded the resident project-snapshot guard and documentation changes. Field updates, Hermitian transpose, interpolation, normalization and the benchmark are unchanged."
+}

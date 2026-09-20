@@ -65,7 +65,8 @@ unverified optimized mask. No original mask, measured dataset or private prior
 is included in this library.
 
 The tabulated optical indices vary with wavelength. The FDTD adapter must
-preserve those values and oblique pupil phases. Complex Bloch/source adjoints,
+preserve those values and oblique pupil phases. A resident fixed-Bloch adjoint
+is now available, while matched oblique polarization/source calibration,
 the exact intensity-allocation proxy, calibrated electron integration and the
 locked prior replay still need implementation/integration. A single normal-ray
 constant-index solve or a sum of RGB transmissions would change the experiment.

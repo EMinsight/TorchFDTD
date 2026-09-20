@@ -24,6 +24,7 @@ class SpectralObservation:
         self.block_size=min(block_size,self.steps)
         self.dtype, self.device = epsilon.dtype, epsilon.device
         self.complex_dtype = torch.complex128 if self.dtype == torch.float64 else torch.complex64
+        self.complex_samples=region.complex_fields
         self.frequency = self._fixed(frequency_hz, 'Frequencies').reshape(-1)
         if not self.frequency.numel() or not bool(torch.isfinite(self.frequency).all()) or bool((self.frequency <= 0).any()):
             raise ValueError('Frequencies must be nonempty, finite and positive.')
@@ -61,10 +62,11 @@ class SpectralObservation:
                 output[:, indices] += self.kernel(start, stop, family)@samples[:, indices].to(self.complex_dtype)
 
     def transpose(self, seed, start, stop):
-        result = torch.empty((stop-start, len(self.components)), dtype=self.dtype, device=self.device)
+        result = torch.empty((stop-start, len(self.components)), dtype=self.complex_dtype if self.complex_samples else self.dtype, device=self.device)
         for family, indices in self.groups.items():
             if indices:
-                result[:, indices] = (self.kernel(start, stop, family).conj().T@seed[:, indices]).real
+                values=self.kernel(start, stop, family).conj().T@seed[:, indices]
+                result[:, indices] = values if self.complex_samples else values.real
         return result
 
     def reservation(self, depth):
@@ -74,6 +76,7 @@ class SpectralObservation:
         # Returned values + seed + accumulator/product/gather temporaries,
         # bounded phase/kernel/transpose workspace and optional cloned window.
         workspace = (8*f*m+12*f*depth+4*depth*m+4*depth+f)*item
+        if self.complex_samples:workspace*=2
         window = 0 if self.window is None else self.steps*item
         return dict(spectral_output_bytes=output, spectral_workspace_bytes=workspace,
                     spectral_settings_bytes=window+f*item,

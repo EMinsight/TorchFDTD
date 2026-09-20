@@ -2,7 +2,9 @@
 
 `DifferentiableSimulation` connects a Torch permittivity tensor to native
 Yee/CPML point signals and back to a Torch optimizer. The long time integration
-uses an explicit discrete adjoint and bounded physical checkpoints. It does not
+uses an explicit discrete adjoint and bounded physical checkpoints. Fixed
+[complex Bloch phases](BLOCH_ADJOINT.md) are supported by the resident Torch path.
+It does not
 retain a Torch graph for each timestep. This is a limited first implementation,
 not differentiability for every feature of the forward workbench.
 The existing manuscript draft predates this prototype. Its mathematical
@@ -44,9 +46,10 @@ Native geometry and smoothing width use **micrometres**. Time uses seconds.
 `epsilon` is relative permittivity with shape `(Nx, Ny, Nz)` or `(Nx, Ny, Nz, 3)`.
 It replaces the scene's material field for this calculation. Its dtype must match
 the region, and its device selects CPU or CUDA execution. CUDA forward and replay
-use the existing fused update kernels. The default CUDA backward now uses native
+use the existing fused update kernels for real fields. The default real CUDA backward uses native
 fused transpose kernels. `AdjointOptions(backward_kernel="torch")` selects the
 explicit Torch transpose for comparison. CPU execution uses that Torch path.
+Complex Bloch fields use Torch forward and backward on both CPU and CUDA.
 
 The sigmoid sphere helper differentiates radius, centre and tensor material
 parameters through a regularized material field. It is not the CAD subpixel
@@ -97,6 +100,7 @@ scale with timestep count. See [validation and timings](validation/ONLINE_SPECTR
 | Diagonal nondispersive epsilon gradient | Implemented |
 | CPML physical state and its discrete transpose | Implemented |
 | Real periodic wrapping | Implemented |
+| Fixed complex Bloch phases | Resident Torch CPU/CUDA, complex checkpoint replay and spectral planes |
 | Prepared soft point/plane sources | Implemented, source parameters are fixed |
 | Normal-incidence prepared one-way plane | Fixed background near injection, both directions and vector polarization checked |
 | Point signals and Torch DFT | Implemented, including online spectral output and its bounded transpose |
@@ -105,7 +109,8 @@ scale with timestep count. See [validation and timings](validation/ONLINE_SPECTR
 | Checkpoint replay on device, host or disk | Implemented, synchronous or optional asynchronous transfers |
 | Mixed GPU/host/disk checkpoint slots | Implemented with explicit slot counts |
 | Full-tensor subpixel geometry derivatives | Pending |
-| ADE, complex Bloch, live TFSF and mode-port adjoints | Pending, rejected by this API |
+| ADE, live TFSF and mode-port adjoints | Pending, rejected by this API |
+| Complex spatial streaming and fused complex kernels | Pending, explicit rejection for unsupported requests |
 | Trainable sources, boundaries and adaptive meshes | Pending |
 | Higher derivatives | Rejected explicitly |
 | Batched CUDA backward and shared-budget microbatch execution | Pending |

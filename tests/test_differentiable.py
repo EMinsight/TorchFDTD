@@ -141,8 +141,8 @@ def test_invalid_feature_and_memory_contracts(tmp_path):
     with pytest.raises(ValueError,match='explicit disk'):
         AdjointOptions(storage='disk')
     p.region.boundaries.x_min=p.region.boundaries.x_max=BoundaryFace(kind='bloch')
-    with pytest.raises(ValueError,match='real fields'):
-        DifferentiableSimulation(p)
+    with pytest.raises(ValueError,match='Torch backward'):
+        DifferentiableSimulation(p,AdjointOptions(backward_kernel='fused'))
 
 
 def test_higher_order_is_explicitly_rejected():

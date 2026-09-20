@@ -93,7 +93,6 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         active=[m for m in self.project.monitors if m.enabled]
         if not active or any(m.kind!='field' for m in active):
             raise ValueError('DifferentiablePlaneSimulation requires enabled field monitors only.')
-        if self.project.region.complex_fields:raise ValueError('Complex Bloch plane adjoints are not supported.')
         self.plans=[]
         observers=[]
         lookup={}
@@ -143,7 +142,7 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
             fields=[]
             for indices,weights in entries:
                 index=torch.as_tensor(indices,device=epsilon.device,dtype=torch.int64)
-                weight=torch.as_tensor(weights,device=epsilon.device,dtype=epsilon.dtype)
+                weight=torch.as_tensor(weights,device=epsilon.device,dtype=result.fields.dtype if np.iscomplexobj(weights) else epsilon.dtype)
                 fields.append((result.fields[:,index]*weight[None,:,:]).sum(dim=1))
             fields=torch.stack(fields,dim=-1)
             output[identifier]=DifferentiablePlaneResult(fields,result.frequency_hz.clone(),

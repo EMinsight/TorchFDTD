@@ -1,8 +1,9 @@
 """Discrete Yee/CPML derivatives with bounded, recomputed physical checkpoints.
 
 The supported contract is real nondispersive diagonal epsilon, fixed mesh,
-prepared point/plane sources and point observations. CUDA forward/replay uses
-the native fused kernels. Backward transposes the actual staggered updates.
+prepared point/plane sources and indexed observations. Real CUDA forward/replay
+uses native fused kernels. Complex Bloch fields use Torch operations. Backward
+transposes the actual staggered updates, including conjugate Bloch seams.
 This module does not promise derivatives for unsupported scene features.
 """
 from __future__ import annotations
@@ -68,7 +69,7 @@ class DifferentiableResult:
 
     def spectrum(self, frequency_hz, *, window=None):
         """Time-integral DFT, including the existing half-step H time convention."""
-        frequency=torch.as_tensor(frequency_hz,device=self.signals.device,dtype=self.signals.dtype).reshape(-1)
+        frequency=torch.as_tensor(frequency_hz,device=self.signals.device,dtype=self.signals.real.dtype).reshape(-1)
         if not bool(torch.isfinite(frequency).all()) or bool((frequency<=0).any()):
             raise ValueError('Frequencies must be finite and positive.')
         if bool((frequency*self.time_step>=.5).any()):
@@ -99,6 +100,7 @@ class _System:
         self.epsilon=epsilon
         self.eps4=epsilon[...,None] if epsilon.ndim==3 else epsilon
         self.device,self.dtype=epsilon.device,epsilon.dtype
+        self.field_dtype=(torch.complex128 if self.dtype==torch.float64 else torch.complex64) if r.complex_fields else self.dtype
         if not prepare_updates and self.device.type != 'cpu':
             raise ValueError('Storage-only systems require CPU epsilon.')
         self.current_step=0
@@ -107,8 +109,8 @@ class _System:
         template=BoundaryDescription(r)
         g=self.grid=_Grid()
         def initial(shape):
-            if not prepare_updates:return torch.zeros((),device=self.device,dtype=self.dtype).expand(shape)
-            return torch.zeros(shape,device=self.device,dtype=self.dtype)
+            if not prepare_updates:return torch.zeros((),device=self.device,dtype=self.field_dtype).expand(shape)
+            return torch.zeros(shape,device=self.device,dtype=self.field_dtype)
         g.E=initial((*r.shape,3))
         g.H=initial(g.E.shape)
         g.inverse_permittivity=(1/self.eps4.detach()).expand_as(g.E).contiguous() if prepare_updates else None
@@ -143,11 +145,14 @@ class _System:
                        for m in project.monitors if m.enabled]
         if observation_monitors is not None:self.monitors=list(observation_monitors)
         self.kernel=None
-        if self.device.type=='cuda':
+        if self.device.type=='cuda' and not r.complex_fields:
             from .cuda_kernels import FusedYeeCUDA
             self.kernel=FusedYeeCUDA(g)
 
-    def tensor(self,value):return torch.as_tensor(value,device=self.device,dtype=self.dtype)
+    def tensor(self,value):
+        is_complex=value.is_complex() if isinstance(value,torch.Tensor) else np.iscomplexobj(value)
+        dtype=(torch.complex128 if self.dtype==torch.float64 else torch.complex64) if is_complex else self.dtype
+        return torch.as_tensor(value,device=self.device,dtype=dtype)
 
     def state(self):return (self.grid.E,self.grid.H,*(seg['psi'] for seg in self.segments))
 
@@ -175,8 +180,9 @@ class _System:
             target=_slice(axis,slice(None,-1) if forward else slice(1,None),out)
             result[target]=result[target]+sign*derivative
             if axis in g.wrap:
-                # Only real periodic wrapping is admitted by the public contract.
-                edge=field[_slice(axis,0,component)]-field[_slice(axis,-1,component)]
+                phase=g.wrap[axis]
+                first,last=field[_slice(axis,0,component)],field[_slice(axis,-1,component)]
+                edge=phase*first-last if forward else first-last/phase
                 if metric:edge=edge*metric[1]
                 dest=_slice(axis,-1 if forward else 0,out)
                 result[dest]=result[dest]+sign*edge
@@ -206,8 +212,9 @@ class _System:
                 edge=sign*bar[_slice(axis,-1 if forward else 0,out)]
                 if metric:edge=edge*metric[1]
                 first,last=_slice(axis,0,component),_slice(axis,-1,component)
-                result[first]=result[first]+edge
-                result[last]=result[last]-edge
+                phase=g.wrap[axis]
+                result[first]=result[first]+(np.conj(phase)*edge if forward else edge)
+                result[last]=result[last]-(edge if forward else np.conj(1/phase)*edge)
         return result,tuple(previous)
 
     def inject(self,value,family,step,*,functional=False):
@@ -252,7 +259,7 @@ class _System:
         contribution,psi_bar=self.curl_transpose(-self.grid.courant_number*h_bar,psi_bar,True)
         e_bar=e_bar+contribution
         curl_e,_=self.curl(state[1],state[2:],False)
-        full=-self.grid.courant_number*e_bar*curl_e/self.eps4.square()
+        full=-self.grid.courant_number*(e_bar.conj()*curl_e).real/self.eps4.square()
         gradient=full.sum_to_size(self.eps4.shape)
         if self.epsilon.ndim==3:gradient=gradient[...,0]
         contribution,psi_bar=self.curl_transpose(self.grid.courant_number/self.eps4*e_bar,psi_bar,False)
@@ -399,8 +406,8 @@ class _FDTD(torch.autograd.Function):
         ctx.system,ctx.options,ctx.report=system,options,report
         ctx.spectral=spectral
         system.zero()
-        signals=torch.empty((system.region.steps,len(system.monitors)),device=epsilon.device,dtype=epsilon.dtype) if spectral is None else spectral.zeros()
-        samples=None if spectral is None else epsilon.new_empty((spectral.block_size,len(system.monitors)))
+        signals=system.grid.E.new_empty((system.region.steps,len(system.monitors))) if spectral is None else spectral.zeros()
+        samples=None if spectral is None else system.grid.E.new_empty((spectral.block_size,len(system.monitors)))
         started=time.perf_counter()
         for step in range(system.region.steps):
             system.advance(step,step+1)
@@ -424,7 +431,7 @@ class _FDTD(torch.autograd.Function):
         started=time.perf_counter()
         gradient=torch.zeros(epsilon.shape,device=epsilon.device,dtype=epsilon.dtype)
         fused=None
-        if epsilon.is_cuda and options.backward_kernel!='torch':
+        if epsilon.is_cuda and not system.region.complex_fields and options.backward_kernel!='torch':
             from .cuda_adjoint import FusedAdjointCUDA
             fused_seed=signal_bar if ctx.spectral is None else epsilon.new_empty((ctx.spectral.block_size,len(system.monitors)))
             fused=FusedAdjointCUDA(system,gradient,fused_seed)
@@ -492,8 +499,10 @@ class DifferentiableSimulation(torch.nn.Module):
         self.project=Project.model_validate(project.model_dump())
         self.options=options or AdjointOptions()
         p=self.project;r=p.region
-        if r.complex_fields or r.interface_method!='staircase':
-            raise ValueError('DifferentiableSimulation currently requires real fields and staircase coefficients.')
+        if r.interface_method!='staircase':
+            raise ValueError('DifferentiableSimulation currently requires staircase coefficients.')
+        if r.complex_fields and self.options.backward_kernel=='fused':
+            raise ValueError('Complex Bloch adjoints currently require the Torch backward, not the real fused kernel.')
         active={s.material for s in p.structures if s.enabled}
         if any(m.oscillators and m.name in active for m in p.materials):
             raise ValueError('Dispersive ADE derivatives are not implemented yet.')
@@ -517,6 +526,8 @@ class DifferentiableSimulation(torch.nn.Module):
     def _run(self,epsilon,spectral):
         r=self.project.region
         r.require_resident()
+        if r.complex_fields and self.options.backward_kernel=='fused':
+            raise ValueError('Complex Bloch adjoints require the Torch backward.')
         if not isinstance(epsilon,torch.Tensor) or epsilon.dtype not in (torch.float32,torch.float64):
             raise ValueError('epsilon must be a real float32 or float64 torch Tensor.')
         if epsilon.device.type not in ('cpu','cuda'):
@@ -533,7 +544,7 @@ class DifferentiableSimulation(torch.nn.Module):
             raise ValueError('epsilon dtype must match the project precision.')
         # Reserve a conservative bound before creating native fields or tapes.
         # This includes replay, transposed curls, full epsilon gradient and CPML.
-        n=math.prod(r.shape);item=epsilon.element_size()
+        n=math.prod(r.shape);item=epsilon.element_size()*(2 if r.complex_fields else 1)
         cpml_upper=12*n
         state_upper=(6*n+cpml_upper)*item
         workspace=(42*n+5*cpml_upper)*item
@@ -557,12 +568,13 @@ class DifferentiableSimulation(torch.nn.Module):
             if required>budget:raise ValueError('Adjoint workspace and checkpoint reservation exceed the GPU budget.')
         report=dict(experimental=True,adjoint='discrete Yee/CPML',higher_order=False,
                     spatial_streaming=False,full_time_autograd=False,steps=r.steps,
-                    forward_backend='fused CUDA' if epsilon.is_cuda else 'torch CPU',
-                    backward_backend='fused CUDA transpose' if epsilon.is_cuda and self.options.backward_kernel!='torch' else 'torch explicit transpose',memory_reservation_bytes=required,
+                    forward_backend='fused CUDA' if epsilon.is_cuda and not r.complex_fields else 'torch CUDA' if epsilon.is_cuda else 'torch CPU',
+                    backward_backend='fused CUDA transpose' if epsilon.is_cuda and not r.complex_fields and self.options.backward_kernel!='torch' else 'torch explicit transpose',memory_reservation_bytes=required,
                     workspace_reservation_bytes=workspace,history_reservation_bytes=history_bytes,
                     checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes if spectral is None else 0,
                     source_history_bytes=source_bytes)
-        with torch.no_grad():system=_System(self.project,epsilon,observation_monitors=None if spectral is None else spectral.observers)
+        # A later wavelength/ray configuration must not alter an earlier graph's replay.
+        with torch.no_grad():system=_System(self.project.model_copy(deep=True),epsilon,observation_monitors=None if spectral is None else spectral.observers)
         # Check host/disk admission before spending the forward compute time.
         admission=_Checkpoints(system,self.options,report,admission=True)
         admission.close()

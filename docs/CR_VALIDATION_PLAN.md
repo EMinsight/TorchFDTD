@@ -55,9 +55,10 @@ tabulated extinction. A separate selected-frequency solve may use the exact
 epsilon and transverse Bloch phase at that wavelength, provided temporal and
 spectral convergence are demonstrated there. This preserves the frequency-domain
 comparison without claiming broadband ADE differentiation. A single constant
-index shared across the whole band is not equivalent. Complex Bloch/source
-adjoints and a bounded multi-ray/polarization gradient schedule are the next
-solver requirements for this route.
+index shared across the whole band is not equivalent. The resident
+[fixed Bloch adjoint](BLOCH_ADJOINT.md) now passes discrete and oblique TE slab
+checks. Matched two-polarization oblique illumination, a bounded multi-ray
+gradient schedule and fused/streamed complex execution remain requirements.
 
 Record the reference source revision and hashes before translating the model.
 Preserve wavelength and angle weights, polarization, detector geometry, material

@@ -1,0 +1,24 @@
+{
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "torch_version": "2.10.0",
+  "grid": [
+    8,
+    160,
+    1
+  ],
+  "mesh_um": 0.05,
+  "steps": 512,
+  "wavelength_um": 1.55,
+  "angle_deg": 20,
+  "bloch_phase": 0.5545744359492382,
+  "transmission": 0.8445341552020739,
+  "reflection": 0.15545626897343437,
+  "fresnel_transmission": 0.8489752752907034,
+  "transmission_error": 0.004441120088629513,
+  "conservation_error": 9.575824491792062e-06,
+  "index_gradient": -0.53877519444901,
+  "index_finite_difference": -0.5387751880919778,
+  "gradient_relative_error": 1.1799044155063934e-08,
+  "elapsed_seconds": 21.554804099956527,
+  "scope": "Fixed selected-frequency real-index TE slab. Torch CUDA complex forward/transpose with bounded checkpoints. No fused-complex, spatial-streaming, full-pupil or shape-convergence claim."
+}
