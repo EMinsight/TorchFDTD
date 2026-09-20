@@ -331,4 +331,21 @@ truncation. A complete iteration on RTX 3060 took 158.54 seconds and peaked
 at 332,274,176 bytes of Torch CUDA allocation with four checkpoint slots
 and sequential source-case replay. This validates one discrete directional
 derivative and does not establish physical gradient convergence.
+
+\section{Spectral and pupil assembly}
+For fixed wavelength $\lambda_\ell$ and pupil ray $r$, the detector response
+$R_{\ell r p c}$ retains polarization $p$ and channel $c$ as separate axes.
+The incoherent spectral response is
+\[
+ A_{c\ell}=\sum_r w_r\frac{1}{P}\sum_{p=1}^{P}R_{\ell r p c}.
+\]
+The fixed intensity weights $w_r$ are not renormalized. Consequently,
+illumination falloff and exact-weight pupil subsets are preserved. Compact
+case outputs are retained while backward replays one wavelength--ray graph
+at a time. The selected-layer implementation recalculates homogeneous
+references without gradients on every call and retains two source graphs
+within the active case. This is a compute--memory tradeoff rather than a
+parallel throughput claim. The assembled response feeds the spectral electron
+operator and exposure-weighted information objective. Full CR optical
+convergence and optimization remain unverified.
 \end{document}

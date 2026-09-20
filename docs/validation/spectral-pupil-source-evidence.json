@@ -1,0 +1,24 @@
+{
+  "base_commit": "aa591f9",
+  "source_sha256": {
+    "photonweave/pupil_response.py": "c7645bae6200a6f41a1e8b555fa8fac8a949a2c6bfec8222400521868ea936c4",
+    "photonweave/periodic_response.py": "fe31f993fca0faef2e7790a66755aebbe7945e50189643f452861306c93d0292",
+    "benchmarks/cr_spectral_objective.py": "d2a7b3b1ccc4f51fa344cc548976e45449be7caa8b0eab0b76a3c07671bf0129",
+    "tests/test_pupil_response.py": "4bad52ab8edd17a28a437edf92efe273ee8b9ba3716a47a889430f992774cc29"
+  },
+  "input_sha256": {
+    "cr-full-schedule.json": "23df354b7d7acc4cd3ac8201d9999cda96e5cfc44cc889925bb5309abbee4732",
+    "cr-electron-reference.pt": "a20bec68bdbf9945e257f0886429a9981aabb479e57dbdbb49a74e0e5d037f4d",
+    "cr-case-density.npy": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44"
+  },
+  "reference_sha256": {
+    "src/cr_itd_v2/forward/pupil.py": "8fb89d6a60dadca16806b4e9d959fda2aee44d6564c692d1675fb662a6ba8a11",
+    "src/cr_itd_v2/forward/contracts.py": "7786665b60ef31fc07d4942dddfc68f182bb586943790293fd719d74abdf6efd",
+    "src/cr_itd_v2/forward/materials.py": "eab2e09d3a09786b808dc298823525405413e49d11995c100466c07cd5f9608c",
+    "src/cr_itd_v2/forward/local_response.py": "83b4979d9838bbcf03dbbd3461403779f185ea04bfe1102045c9e35dcf809055"
+  },
+  "wavelength_count": 9,
+  "ray_count": 16,
+  "ray_weight_sum": 0.9961983181723989,
+  "validation": "31 relevant tests passed locally and on RTX 5880. Full optical run launched, no completed full-pupil result claimed. Private arrays and context excluded."
+}

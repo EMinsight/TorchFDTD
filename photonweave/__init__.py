@@ -60,3 +60,7 @@ from .electron_model import spectral_interpolate, spectral_electron_model, expos
 __all__ += ['spectral_interpolate', 'spectral_electron_model', 'exposure_target_information', 'SpectralElectronModel', 'ExposureInformation']
 from .density_layer import periodic_density_layer
 __all__ += ['periodic_density_layer']
+from .pupil_response import spectral_pupil_response
+__all__ += ['spectral_pupil_response']
+from .periodic_response import periodic_layer_response
+__all__ += ['periodic_layer_response']

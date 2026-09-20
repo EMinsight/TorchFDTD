@@ -1,0 +1,8 @@
+{
+  "objective": 0.2843927415139927,
+  "directional_derivative": 0.21922469270490433,
+  "elapsed_seconds": 159.02193550020456,
+  "peak_cuda_allocated_bytes": 420831232,
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "scope": "Public periodic_layer_response API parity against the recorded relaxed CR seed objective and directional derivative. Includes reference preparation, two sample graphs retained per case."
+}

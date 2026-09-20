@@ -32,6 +32,8 @@ The first [locked CR seed optical pilot](docs/validation/CR_SEED_OPTICAL_PILOT.m
 
 The [actual CR density derivative pilot](docs/validation/CR_DENSITY_ADJOINT_PILOT.md) passes one directional finite-difference check on RTX 3060 and RTX 5880, with relative discrepancy 3.06e-6 and peak Torch allocation 332 MB. This validates a discrete one-ray test objective, not the full CR information optimization.
 
+[Spectral/pupil objective assembly](docs/SPECTRAL_PUPIL_RESPONSE.md) now connects explicit wavelength/ray cases to electron information with bounded case replay and unnormalized illumination weights. Full CR optical validation remains in progress.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 

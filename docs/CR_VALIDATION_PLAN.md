@@ -68,8 +68,7 @@ passes a 3D oblique slab check for Cartesian x/y inputs. Matching the full CR
 pupil and fused/streamed complex execution remain requirements.
 The [electric-intensity allocation](DETECTOR_ALLOCATION.md) and independent
 24-by-24 midpoint quadrature are implemented and pass synthetic reference
-parity. Physical transmission, detector z origin and the CR ray schedule have not yet
-been replayed. Locked electron calibration and prior loading passed in an
+parity. Physical transmission and detector z origin have been exercised in the selected-ray pilot. Full ray-schedule optical validation remains pending. Locked electron calibration and prior loading passed in an
 isolated byte-restored copy with the original required production runtime.
 
 Record the reference source revision and hashes before translating the model.
@@ -98,5 +97,13 @@ detector offset and two calibrated Cartesian polarizations. At matched short
 duration, reducing mesh from 50 to 25 nm reduced maximum unpolarized channel
 discrepancy from 0.04682 to 0.00711. At doubled 25 nm duration the discrepancy
 is 0.00816. This remains an exploratory convergence pilot. The full pupil,
-other wavelengths, independent mesh/time convergence and density gradients
-on the actual structure remain gates before optimization.
+other wavelengths and independent mesh/time convergence remain gates before optimization. The actual relaxed structure now passes a selected-ray discrete directional-derivative check, which does not establish physical gradient convergence.
+
+## Full spectral/pupil integration
+
+The [spectral/pupil API](SPECTRAL_PUPIL_RESPONSE.md) now connects selected-frequency
+FDTD cases to the exact-weight incoherent pupil and electron information model.
+The locked schedule contains nine wavelengths and sixteen rays. Its weight sum
+is 0.996198318172399 and is preserved without normalization. A first full forward
+run at 50 nm and 1600 steps has been launched on RTX 5880. Completion and optical
+convergence are not yet established. No optimization has been launched.
