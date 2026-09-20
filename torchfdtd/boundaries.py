@@ -51,6 +51,13 @@ class YeeGrid(fdtd.Grid):
 
     def _prepare_boundaries(self,region):
         self.wrap = {}
+        # PEC planes are exactly mesh endpoints. Upper tangential E is a
+        # zero ghost node. Lower tangential E / normal H are zero states.
+        self.pec_upper = {
+            axis: float(region.reference_step / (nodes[-1]-nodes[-2]))
+            for axis, nodes in enumerate(region.mesh_nodes)
+            if region.shape[axis] > 1 and region.boundaries.pair(axis)[1].kind in ('pec', 'antisymmetric')
+        }
         self.metric = {}
         if region.mesh_type != 'uniform' or region.mesh_steps is not None:
             for axis, nodes in enumerate(region.mesh_nodes):
@@ -145,6 +152,9 @@ class YeeGrid(fdtd.Grid):
                 if (forward, axis) in self.metric:
                     edge *= self.metric[forward, axis][1]
                 result[_slice(axis, -1 if forward else 0, output)] += sign*edge
+            elif forward and axis in self.pec_upper:
+                edge = -self.pec_upper[axis] * field[_slice(axis, -1, component)]
+                result[_slice(axis, -1, output)] += sign * edge
         return result
 
     def update_E(self):

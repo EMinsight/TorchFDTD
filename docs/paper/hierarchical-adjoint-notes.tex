@@ -1102,4 +1102,73 @@ spatial replay in FP32. A separate directional finite-difference check uses
 FP64. These checks establish the discrete regularized chain, not physical
 shape-gradient convergence or a new sharp-interface derivative algorithm.
 
+\section{Material production inside spatial replay}
+A second API eliminates the dense permittivity and material-gradient arrays
+for the supported analytic solids. Let $P_i$ list the primary-domain sample
+indices of tile $i$, including repeated periodic halo indices. The tile
+material is generated as $\epsilon_i=G(P_i,\boldsymbol\theta)$ on the host
+immediately before staging. Material values do not acquire a Bloch phase.
+During reverse block propagation the material seed is reduced directly:
+\begin{equation}
+\overline{\boldsymbol\theta}=
+\sum_{b,i}
+\left[D_{\boldsymbol\theta}G(P_{b,i},\boldsymbol\theta)\right]^T
+\overline{\epsilon}_{b,i}.
+\end{equation}
+Here $b$ indexes differentiated time blocks. Each tile returns only its owned
+physical outputs, while every halo material contribution is included in the
+parameter reduction. This is the chain rule for the same spatial replay
+operator, without first forming a global $\overline\epsilon$.
+
+Material workspace scales with the extended tile, the bounded geometry chunk,
+the solid parameter packet and the one-dimensional axes. Field and CPML banks
+still scale with the full domain and reside in host memory or files.
+A private coordinate snapshot fixes the replay geometry after forward.
+Memory admission precedes that snapshot and plane-layout allocation and
+includes their storage. Fixed collocated planes retain the existing flux
+and matched-reference normalization derivatives. Tests compare host and
+file execution, periodic halo replication, complex Bloch spectra and
+asynchronous CUDA tiles with the dense material path. This API does not
+yet route automatic CR execution through the producer. Dispersive geometry,
+one-way material validation and TFSF adjoints remain outside its scope.
+No large-domain speed or capacity result is inferred from the small tests.
+
+\section{Physical slab shape-gradient refinement}
+An FP32 study uses an air--dielectric--air slab of thickness
+$0.23\,\mu{\rm m}$ and relative permittivity 2.25 at wavelength
+$1.55\,\mu{\rm m}$. The independent sharp-interface transmission is
+\begin{equation}
+T=\left[1+\frac{(\epsilon-1)^2}{4\epsilon}
+\sin^2\left(\frac{2\pi\sqrt{\epsilon}d}{\lambda}\right)\right]^{-1}.
+\end{equation}
+The derivatives with respect to thickness and permittivity follow from this
+expression. The physical domain, source, observation locations, 90 fs
+duration and $0.4\,\mu{\rm m}$ PML thickness remain fixed during refinement.
+Each grid uses a matched air reference.
+
+\begin{center}
+\begin{tabular}{rrrrr}
+\toprule
+Mesh & Width & $|T-T_{\rm sharp}|$ & Thickness error & Permittivity error\\
+$(\mu{\rm m})$ & $(\mu{\rm m})$ & & (\%) & (\%)\\
+\midrule
+0.04 & 0.16 & 0.0152381 & 12.0901 & 11.9563\\
+0.02 & 0.12 & 0.0089792 & 6.8438 & 7.0096\\
+0.01 & 0.08 & 0.0040911 & 2.7977 & 3.1889\\
+0.01 & 0.06 & 0.0022881 & 1.6326 & 1.7834\\
+\bottomrule
+\end{tabular}
+\end{center}
+The initial finest case fails the declared 3 percent derivative criterion.
+The final row is an explicit regularization followup with the same criterion,
+not a replacement of that failed record. Separate time and PML controls
+change the final observables and derivatives by less than $1.8\times10^{-7}$.
+Keeping a fixed transition width while refining the mesh leaves a nonzero
+sharp-interface bias. Small thickness and permittivity moves selected by
+the gradients increase both measured and analytic transmission.
+The record \texttt{gradient\_mesh\_3060.json} retains the initial failure,
+controls and provenance. These results concern a normally incident planar
+slab, not arbitrary curved interfaces or the CR objective.
+
+
 \end{document}

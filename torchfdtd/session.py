@@ -217,13 +217,15 @@ class FDTD:
             data[key.replace(' ','_')]=value
         elif isinstance(obj,Region) and key in [a+' '+s+' bc' for a in 'xyz' for s in ('min','max')]:
             axis, side, _ = key.split()
-            kind = str(value).lower()
-            if kind not in ('pml', 'periodic', 'bloch'):
-                raise ValueError('Supported native boundaries: PML, Periodic, Bloch')
+            kind = str(value).strip().lower().replace('-', '').replace(' ', '')
+            if kind in ('pmc', 'symmetric', 'symmetry'):
+                raise ValueError('PMC/symmetric endpoint boundaries are not implemented. Upper-face Yee states are required.')
+            if kind not in ('pml', 'periodic', 'bloch', 'pec', 'antisymmetric'):
+                raise ValueError('Supported native boundaries: PML, Periodic, Bloch, PEC, Anti-Symmetric')
             data['boundaries'][axis+'_'+side]['kind'] = kind
             # A cyclic boundary always controls both ends of the axis.
             other = axis+'_'+('max' if side=='min' else 'min')
-            if kind != 'pml' or data['boundaries'][other]['kind'] != 'pml':
+            if kind in ('periodic', 'bloch') or data['boundaries'][other]['kind'] in ('periodic', 'bloch'):
                 data['boundaries'][other]['kind'] = kind
             if kind != 'bloch':
                 phase=list(data['bloch_phase']);phase['xyz'.index(axis)]=0;data['bloch_phase']=phase

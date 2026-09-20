@@ -75,6 +75,9 @@ class FusedComplexYeeCUDA(FusedYeeCUDA):
                 lines+=['else {',f'd={expression};']
                 if metric:lines.append(f'd*=({real})({metric[1]:.17g});')
                 lines.append('}')
+            elif forward and axis in getattr(g,'pec_upper',{}):
+                factor=g.pec_upper[axis]
+                lines+=['else {',f'd=-({real})({factor:.17g})*{field("i",comp)};','}']
             lines += [f'c{out}+={"-" if sign<0 else ""}d;','}']
         lines.extend(self._update_statements(forward,inverse,argument,real))
         return 'extern "C" __global__ void yee_update('+', '.join(parameters)+') {\n'+'\n'.join(lines)+'\n}',tensors

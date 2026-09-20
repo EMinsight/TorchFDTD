@@ -168,6 +168,10 @@ class FusedAdjointCUDA:
                     value=f'({"-" if sign<0 else ""}(({scale})*bar[3*({target})+{out}]))'
                     if term in metrics:value+=f'*(({real})({metrics[term][1]:.17g}))'
                     lines.append(f'if({coord}=={coord_value})r{comp}{action}{value};')
+            elif forward and axis in getattr(g,'pec_upper',{}):
+                factor=g.pec_upper[axis]
+                value=f'({real})({sign*g.courant_number*factor:.17g})*bar[3*i+{out}]'
+                lines.append(f'if({coord}=={n-1})r{comp}+={value};')
         for c in range(3):lines.append(f'target[3*i+{c}]+=r{c};')
 
         if not forward and self.material_gradient:

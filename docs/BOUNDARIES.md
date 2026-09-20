@@ -1,6 +1,6 @@
 # Native boundaries and complex fields
 
-TorchFDTD v0.2 supports independently configured PML faces and paired Periodic/Bloch faces in its CPU and CUDA engines. The browser exposes these under FDTD → Boundary conditions. Python uses the same project model.
+TorchFDTD supports independently configured PML, PEC and anti-symmetric faces, and paired Periodic/Bloch faces in its CPU and CUDA engines. The browser exposes these under FDTD → Boundary conditions. Python uses the same project model.
 
 ```python
 from torchfdtd import Project, Region, BoundaryFace, Boundaries
@@ -27,6 +27,20 @@ project = Project(region=Region(
 - The invariant z dimension has no boundary in 2D. Its configuration remains at defaults.
 
 The sign convention follows the documented [Lumerical Bloch phase relationship](https://optics.ansys.com/hc/en-us/articles/360034382714-Bloch-boundary-conditions-in-FDTD-and-MODE). FSP wavevector and mesh mapping are not yet validated for native import.
+
+## PEC and anti-symmetric walls
+
+Use `BoundaryFace(kind="pec")` or `BoundaryFace(kind="antisymmetric")`. The browser offers PEC and Anti-symmetric (PEC). The familiar facade accepts `FDTD.set("x min bc", "PEC")` and `FDTD.set("x max bc", "Anti-Symmetric")`. These faces are independent. Entering a cyclic boundary pairs both faces, and replacing one member of a cyclic pair replaces the other to keep the model valid.
+
+Both labels implement the same electromagnetic parity: tangential E and normal H are odd across the wall, while normal E and tangential H are even. Anti-symmetric reduction is valid only when the full material distribution and excitation obey this parity. It does not automatically mirror or validate the omitted geometry. This terminology follows the [Ansys symmetry convention](https://optics.ansys.com/hc/en-us/articles/360034382694-Symmetric-and-anti-symmetric-BCs-in-FDTD-and-MODE).
+
+Walls lie exactly at `region.mesh_nodes[axis][0]` and `[-1]`. For uniform meshes these are the mesh-rounded region endpoints. Tangential E at the lower wall is a stored zero node. The upper tangential E is a zero ghost node, so the last forward derivative is `-E_last / dx_last`. The wall is never moved to a half-cell location. Production zero initialization and validated source injection preserve lower-wall tangential E and normal H constraints. Low-level callers supplying their own initial fields must satisfy those constraints.
+
+Supported scope: staircase materials, real and complex fields, CPU/Torch and fused CUDA updates and explicit adjoints, streamed slabs, and real CUDA batches. Subpixel interfaces with these walls are rejected. Every component of a vector source is checked at its actual Yee support. Sources that write constrained wall components are rejected. Existing one-way and TFSF source restrictions exclude these walls.
+
+Tests cover discrete cavity eigenfrequencies, both transverse polarizations on all three axes, doubled periodic versus reduced domains, corners, nonuniform edge metrics, transpose identities, resident/streamed gradients and CUDA batch consistency. See [numerical tests](../tests/test_pec_boundaries.py) and [delivery-surface tests](../tests/test_pec_surface.py). These are native verification results, not vendor-equivalence measurements.
+
+**PMC and symmetric boundaries remain unsupported.** Exact upper-endpoint PMC requires additional tangential E and normal H face states, plus intersecting E-edge states. Selecting these kinds raises an explicit error. The next implementation contract is [PMC implementation plan](PMC_IMPLEMENTATION_PLAN.md). PEC boundaries do not implement a PEC material model.
 
 ## Native CPML parameters
 
@@ -56,4 +70,4 @@ Real traces use a one-sided Hann FFT scaled by 2/N. Complex traces use the posit
 
 ## Verification and remaining scope
 
-Still required for full parity: independent FSP mapping, named Lumerical PML-profile equivalence, symmetry/antisymmetry, PEC/PMC, automatic angle-to-Bloch source settings, BFAST, dispersive-medium and grazing-angle coverage, and the other families in the parity roadmap.
+Still required for full parity: independent FSP mapping, named Lumerical PML-profile equivalence, PMC/symmetric boundaries, PEC/subpixel coupling, automatic angle-to-Bloch source settings, BFAST, dispersive-medium and grazing-angle coverage, and the other families in the parity roadmap.

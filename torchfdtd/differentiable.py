@@ -122,6 +122,7 @@ class _System:
         g.time_step=r.time_step
         g.material_states=[]
         g.wrap=template.wrap.copy()
+        g.pec_upper=template.pec_upper.copy()
         g.metric={key:(self.tensor(value),edge) for key,(value,edge) in template.metric.items()}
         g.cpml={}
         self.segments=[]
@@ -205,6 +206,9 @@ class _System:
                 if metric:edge=edge*metric[1]
                 dest=_slice(axis,-1 if forward else 0,out)
                 result[dest]=result[dest]+sign*edge
+            elif forward and axis in g.pec_upper:
+                dest=_slice(axis,-1,out)
+                result[dest]=result[dest]-sign*g.pec_upper[axis]*field[_slice(axis,-1,component)]
         return result,tuple(updated)
 
     def curl_transpose(self,bar,psi_bar,forward):
@@ -234,6 +238,9 @@ class _System:
                 phase=g.wrap[axis]
                 result[first]=result[first]+(np.conj(phase)*edge if forward else edge)
                 result[last]=result[last]-(edge if forward else np.conj(1/phase)*edge)
+            elif forward and axis in g.pec_upper:
+                dest=_slice(axis,-1,component)
+                result[dest]=result[dest]-sign*g.pec_upper[axis]*bar[_slice(axis,-1,out)]
         return result,tuple(previous)
 
     def inject(self,value,family,step,*,functional=False):

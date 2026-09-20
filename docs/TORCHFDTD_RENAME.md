@@ -37,3 +37,8 @@ revision, not measurements rerun with the new name. Live frozen GPU jobs retain
 their current directories and interpreter paths until they finish. Renaming
 does not authorize discarding results, restarting scientific jobs, making the
 repository public or posting promotional messages.
+
+For an active Windows workspace, a `TorchFDTD` directory junction can expose
+the canonical name while running processes hold the previous physical folder
+open. The physical folder move must wait until those locks are released.
+This compatibility path does not require restarting scientific jobs.

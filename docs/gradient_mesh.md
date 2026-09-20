@@ -83,6 +83,10 @@ preserves the experiment history and explicitly identifies the metadata and
 group-label changes made after measurement. No simulations were repeated just
 to add provenance metadata.
 
+The recorded reproduction-driver bytes are preserved in commit `4cfa94f`.
+Later LF newline normalization changes the file hash without changing the
+experiment or its archived numeric record.
+
 A bounded curved-interface followup should use a dielectric cylinder and an
 independent cylindrical Mie series for scattering power and its radius
 sensitivity. Compare the adjoint radius derivative against a converged

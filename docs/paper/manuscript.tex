@@ -56,7 +56,7 @@ The implementation builds on the MIT-licensed \code{flaport/fdtd} package for it
 
 TORCWA demonstrates the value of pairing an electromagnetic formulation with GPU execution and a programmable design workflow \citep{kim2023}. It solves a frequency-domain Fourier modal problem and provides automatic differentiation. TorchFDTD advances a time-domain Yee discretization and provides first-order discrete adjoints through a PyTorch interface. Supported material and regularized analytic shape parameters connect to PyTorch optimizers. Bounded checkpoint replay and spatial streaming avoid retaining a full time-unrolled autograd graph. The independent forward ensemble optimizer remains available. No TORCWA code is incorporated. Equivalent design accuracy and end-to-end optimization performance require separate comparisons.
 
-The forward solver includes two-dimensional z-invariant and three-dimensional models, analytic solids, isotropic dielectric and multipole dispersive materials, electric and magnetic vector soft sources, normal-incidence one-way planes and closed TFSF boxes, and point or planar frequency monitors. The differentiable path supports a narrower, explicitly documented set of sources, material models and observations. Periodic-layer response objectives support oblique Bloch incidence. Automatic decay termination and empirical mesh studies support selected forward observables. General eigenmode ports, near-to-far transformation, PEC/PMC and symmetry boundaries, rotated full material tensors, nonlinear materials and source-parameter adjoints remain incomplete. Physical shape-gradient mesh convergence is distinct from discrete adjoint correctness and remains a release requirement. A machine-readable feature inventory separates numerical, graphical and Python coverage.
+The forward solver includes two-dimensional z-invariant and three-dimensional models, analytic solids, isotropic dielectric and multipole dispersive materials, electric and magnetic vector soft sources, normal-incidence one-way planes and closed TFSF boxes, and point or planar frequency monitors. The differentiable path supports a narrower, explicitly documented set of sources, material models and observations. Periodic-layer response objectives support oblique Bloch incidence. Automatic decay termination and empirical mesh studies support selected forward observables. General eigenmode ports, near-to-far transformation, PMC and magnetic symmetry boundaries, rotated full material tensors, nonlinear materials and source-parameter adjoints remain incomplete. Physical shape-gradient mesh convergence is distinct from discrete adjoint correctness and remains a release requirement. A machine-readable feature inventory separates numerical, graphical and Python coverage.
 
 \section{Scene model and software architecture}
 
@@ -124,6 +124,27 @@ F(x+L)=\exp(i\phi)F(x).
 \end{equation}
 
 At a forward seam the difference uses $\exp(i\phi)F_0-F_{N-1}$. At a backward seam it uses $F_0-\exp(-i\phi)F_{N-1}$. The corresponding primal or dual spacing is applied to that difference. Source sheets can carry the same transverse Bloch phase. A point source in a periodic domain represents a periodically repeated source, which changes the physical problem from that of an isolated emitter.
+
+\subsection{PEC and electric antisymmetry}
+
+PEC planes lie at the declared mesh endpoints. At a lower plane the stored
+tangential electric and normal magnetic components are zero. Production
+initialization and validated source support preserve this invariant subspace
+for the admitted diagonal material update. At an upper plane the missing
+tangential electric node has the exact ghost value $E_t(N)=0$, giving
+$(E_t(N)-E_t(N-1))/\Delta x_{N-1}=-E_t(N-1)/\Delta x_{N-1}$.
+The transpose scatters the same signed coefficient back to its stored node.
+Spatial tiles inherit this condition only at the true global boundary.
+Electric antisymmetry uses the same parity. Subpixel coupling is not admitted.
+
+FP32 checks compare discrete cavity eigenmodes and doubled periodic domains
+for all axes and transverse polarizations. Resident real and complex CUDA,
+material adjoints, spatial replay and CUDA cohorts use the same edge rule.
+These checks do not establish PMC support. At an upper PMC plane the
+tangential electric node is nonzero and needs an additional dynamic state,
+together with its normal magnetic face and intersecting edge support.
+Replacing it with the last interior sample would shift the physical wall.
+PMC and magnetic symmetry therefore remain explicitly unsupported.
 
 \subsection{Convolutional PML}
 
@@ -608,13 +629,39 @@ The grouping algorithm uses an explicit cap of four cases per cohort and one-ste
 
 The external flaport baseline receives the same fused DFT observer and both one-step and eight-step graph options. The lower external median gives workflow ratios of 7.44 to 16.76 against grouped native execution. All 48 timed-ensemble gates pass. Native complete outputs agree bitwise with independent native runs. Maximum external point-trace and complex-plane DFT relative $L_2$ differences are 0.3233 and 0.3875 percent, below the predeclared 1 percent gates. External final fields remain different and their errors are retained. This experiment measures existing fused cohorts reached through a new mixed-input scheduler. It does not establish a new stencil-kernel speedup, an upstream fused-batch comparison or a ranking against the three other unmeasured libraries. Exact inputs, source hashes, repetitions and checks are in \code{docs/validation/grouped-ensembles.json}. The entry point is \command{python -m benchmarks.grouped_ensembles}.
 
+\subsection{Physical material and shape-gradient refinement}
+
+A separate FP32 slab study compares normalized transmission and its thickness
+and permittivity derivatives with the analytic air--slab--air solution.
+Mesh steps of 0.04, 0.02 and 0.01 micrometres use transition widths of 0.16,
+0.12 and 0.08 micrometres while retaining the same physical domain, source,
+90 fs duration and 0.4 micrometre PML thickness. Both gradient errors decrease.
+The initial finest material derivative error of 3.19 percent fails the declared
+3 percent criterion. An explicit 0.06 micrometre width followup gives
+1.63 percent thickness error and 1.78 percent permittivity error, with
+0.00229 absolute transmission error. Longer-duration and thicker-PML controls
+change these quantities by less than $1.8\times10^{-7}$.
+Fixed-width refinement retains a measurable sharp-interface bias.
+Small actual parameter moves increase both measured and analytic transmission.
+The failed initial criterion and all controls remain in
+\code{docs/validation/gradient_mesh_3060.json}. This planar result does not
+establish curved-interface or CR design convergence.
+
+The methods supplement \code{hierarchical-adjoint-notes.tex} describes
+checkpoint and spatial replay, the geometry chain rule and a new streamed
+material producer. The latter generates a slab from shape parameters and
+reduces its material VJP directly to those parameters, avoiding a dense
+permittivity map and its dense gradient. Field banks remain domain-sized.
+CPU, CUDA and file-backed checks establish agreement with the dense path
+within their tested scope. Sustained large-domain throughput remains unmeasured.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.
 
-Near-term numerical priorities are physical output and shape-gradient convergence, independent validation of complete inverse-design runs, PEC/PMC and symmetry boundaries, eigenmode ports and mode expansion, and near-to-far objectives. Existing discrete material adjoints and regularized analytic shape derivatives do not imply differentiability of every scene property. General source parameters, additional material tensors and nonlinear models require their own derivatives and physical validation. Workflow priorities include concurrent adjoint batches, complete results inspection and reliable restart across supported execution modes.
+Near-term numerical priorities are physical output and shape-gradient convergence, independent validation of complete inverse-design runs, PMC and magnetic symmetry boundaries, eigenmode ports and mode expansion, and near-to-far objectives. Existing discrete material adjoints and regularized analytic shape derivatives do not imply differentiability of every scene property. General source parameters, additional material tensors and nonlinear models require their own derivatives and physical validation. Workflow priorities include concurrent adjoint batches, complete results inspection and reliable restart across supported execution modes.
 
-The current browser uses an original identity, artwork and source code. Its workflow is organized around objects, regions, sources and monitors, with a separate periodic-density inverse-design editor. The hierarchical runtime provides lossless host and file-backed state banks, space-time slabs and asynchronous staging. Capacity demonstrations must be distinguished from long physical trajectories and competitive throughput. Dense material inputs and their gradients can still limit host capacity. Predictive scheduling, concurrent adjoint execution and single-problem multi-GPU decomposition remain development targets. Comparisons against additional libraries require common accuracy targets and a compatible measured GPU environment before any performance-leadership claim.
+The current browser uses an original identity, artwork and source code. Its workflow is organized around objects, regions, sources and monitors, with a separate periodic-density inverse-design editor. The hierarchical runtime provides lossless host and file-backed state banks, space-time slabs and asynchronous staging. Capacity demonstrations must be distinguished from long physical trajectories and competitive throughput. The analytic-geometry streaming API avoids dense material inputs and material VJPs through tile production and direct parameter reduction. Other dense material paths can still limit host capacity. Predictive scheduling, concurrent adjoint execution and single-problem multi-GPU decomposition remain development targets. Comparisons against additional libraries require common accuracy targets and a compatible measured GPU environment before any performance-leadership claim.
 
 \section{Conclusions}
 

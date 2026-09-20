@@ -29,6 +29,16 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 
 ## Gradient 수렴이 필요한 이유와 실행 범위
 
+병렬 구현 후속: PEC와 반대칭 경계는 CPU/CUDA, 복소장, discrete adjoint,
+공간 스트리밍과 CUDA batch에서 검증했고, UI·Python 별도 면 설정과
+저장·내보내기·실행도 확인했다. PMC/대칭 경계는 상단 Yee face/edge 상태를
+추가해야 하므로 미완료이며 [상태 구조 계획](PMC_IMPLEMENTATION_PLAN.md)을 따른다.
+
+[형상 기반 재료 스트리밍](streamed_geometry.md)은 전체 epsilon과 material
+VJP 배열을 만들지 않고 타일별 생성과 파라미터 축약을 수행한다. 점 출력과
+정규화한 검출면 전력의 미분을 연결했다. 이 경로의 실제 48GB 초과 실행,
+자동 CR 연결, 분산재료와 one-way/TFSF 경로는 남아 있다.
+
 2026-09-21 후속 증거: [FP32 박막 수렴 실험](gradient_mesh.md)에서 동일한
 물리 영역·시간·소스·PML 두께를 유지하고 메시와 형상 전이 폭을 줄였다.
 해석해 대비 두께 gradient 오차는 12.09%에서 1.63%, 유전율 gradient

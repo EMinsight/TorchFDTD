@@ -80,7 +80,14 @@ class Material(Model):
 
 
 class BoundaryFace(Model):
-    kind: Literal['pml', 'periodic', 'bloch'] = 'pml'
+    @model_validator(mode='before')
+    @classmethod
+    def reject_unimplemented_magnetic_wall(cls, value):
+        if isinstance(value, dict) and value.get('kind') in ('pmc', 'symmetric', 'symmetry'):
+            raise ValueError('PMC/symmetric boundaries at exact mesh endpoints are not implemented: upper-face Yee states are required.')
+        return value
+
+    kind: Literal['pml', 'periodic', 'bloch', 'pec', 'antisymmetric'] = 'pml'
     layers: int | None = Field(default=None, ge=3, le=100)
     # Dimensionless native CPML coefficients, not Lumerical's normalized values.
     sigma_scale: float = Field(default=1, gt=0, le=20)
@@ -263,6 +270,9 @@ class Region(Model):
                     raise ValueError('The invariant z axis needs exactly two bounding nodes.')
         if (self.mesh_type!='uniform' or self.mesh_steps is not None) and self.material_sampling=='cell':
             raise ValueError('Graded, explicit and axis-specific meshes require Yee material sampling.')
+        if self.interface_method=='subpixel' and any(
+                face.kind in ('pec','antisymmetric') for axis in range(3) for face in self.boundaries.pair(axis)):
+            raise ValueError('PEC/antisymmetric boundaries currently require staircase interfaces.')
         if self.interface_method=='subpixel':
             if self.material_sampling!='yee':raise ValueError('Subpixel interfaces require Yee material sampling.')
             if any(any(not math.isclose(b-a,nodes[1]-nodes[0],rel_tol=1e-10,abs_tol=0) for a,b in zip(nodes,nodes[1:])) for nodes in self.mesh_nodes):
@@ -572,6 +582,18 @@ class Project(Model):
             elif resolved.enabled and resolved.injection == 'oneway':
                 from .injection import oneway_plan
                 oneway_plan(resolved, r)
+            if resolved.enabled and resolved.injection != 'oneway' and any(r.boundaries.pair(a)[0].kind in ('pec','antisymmetric') for a in range(3)):
+                from .solver import source_slice
+                for field, weight in resolved.polarization_components:
+                    scalar=resolved.model_copy(update={'component':field, 'theta':None})
+                    location=source_slice(scalar,r)
+                    component='xyz'.index(field[1].lower())
+                    for axis in range(2 if r.dimension=='2d' else 3):
+                        constrained=(component != axis) if field[0]=='E' else (component == axis)
+                        index=location[axis]
+                        hits_zero=(index.start == 0) if isinstance(index,slice) else (index == 0)
+                        if r.boundaries.pair(axis)[0].kind in ('pec','antisymmetric') and constrained and hits_zero:
+                            raise ValueError(f'{source.name}: source writes a constrained PEC/antisymmetric wall component ({field}).')
             if resolved.enabled and resolved.pulse=='broadband':
                 pulse=pulse_parameters(resolved)
                 if pulse.frequency_hz+pulse.frequency_span_hz/2 >= .5/dt:

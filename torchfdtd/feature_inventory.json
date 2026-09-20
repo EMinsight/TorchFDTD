@@ -10,8 +10,8 @@
     "n/a": "해당 없음"
   },
   "counts": {
-    "implemented": 160,
-    "missing": 1270,
+    "implemented": 162,
+    "missing": 1268,
     "partial": 231
   },
   "features": [
@@ -988,21 +988,27 @@
       "id": "boundary.pec",
       "category": "경계",
       "name": "PEC 경계",
-      "native": "missing",
-      "ui": "missing",
+      "native": "implemented",
+      "ui": "implemented",
       "fsp": "missing",
-      "scope": "미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.",
-      "evidence": [],
+      "scope": "정확한 mesh endpoint의 PEC. CPU/Torch/실수·복소 CUDA, explicit adjoint, streamed 및 실수 batch 검증. Staircase만 지원하며 wall-constrained source는 거부. PEC 재료·PMC는 미지원.",
+      "evidence": [
+        "torchfdtd/boundaries.py",
+        "tests/test_pec_boundaries.py",
+        "tests/test_pec_surface.py",
+        "tests/ui/pec-boundaries.spec.js",
+        "docs/BOUNDARIES.md"
+      ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object",
       "priority": 2,
-      "python": "missing",
+      "python": "implemented",
       "product_priority": "P1",
       "delivery_rank": 7,
       "decision": "required",
       "workstream": "interfaces",
       "workstream_title": "인터페이스·메시 효율",
       "priority_reason": "subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.",
-      "remaining": true
+      "remaining": false
     },
     {
       "id": "boundary.pmc",
@@ -1048,21 +1054,27 @@
       "id": "boundary.antisymmetry",
       "category": "경계",
       "name": "Anti-symmetric",
-      "native": "missing",
-      "ui": "missing",
+      "native": "implemented",
+      "ui": "implemented",
       "fsp": "missing",
-      "scope": "미구현. 독립 엔진·사용자 흐름·정확도 검증 필요.",
-      "evidence": [],
+      "scope": "E tangential·H normal이 홀수인 PEC와 동일한 반사 parity. 실제 endpoint를 보존하며 full/reduced-domain 비교 검증. PMC/symmetric은 미지원. 형상·재료·소스가 선택 parity와 일치해야 함.",
+      "evidence": [
+        "torchfdtd/boundaries.py",
+        "tests/test_pec_boundaries.py",
+        "tests/test_pec_surface.py",
+        "tests/ui/pec-boundaries.spec.js",
+        "docs/BOUNDARIES.md"
+      ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object",
       "priority": 2,
-      "python": "missing",
+      "python": "implemented",
       "product_priority": "P1",
       "delivery_rank": 7,
       "decision": "required",
       "workstream": "interfaces",
       "workstream_title": "인터페이스·메시 효율",
       "priority_reason": "subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.",
-      "remaining": true
+      "remaining": false
     },
     {
       "id": "boundary.vendor_pml",
@@ -34858,7 +34870,7 @@
   },
   "remaining_priority_counts": {
     "P2": 449,
-    "P1": 981,
+    "P1": 979,
     "P3": 65,
     "P0": 12
   },

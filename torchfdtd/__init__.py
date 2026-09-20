@@ -90,3 +90,7 @@ __all__ += ['PeriodicDesignConfig', 'periodic_design_plan', 'run_periodic_design
 
 from .differentiable_geometry import DifferentiableSolid, smooth_geometry_epsilon
 __all__ += ['DifferentiableSolid', 'smooth_geometry_epsilon']
+from .streamed_geometry import (StreamedGeometry, streamed_geometry, StreamedGeometrySimulation,
+                               StreamedGeometryPlaneSimulation)
+__all__ += ['StreamedGeometry', 'streamed_geometry', 'StreamedGeometrySimulation',
+            'StreamedGeometryPlaneSimulation']

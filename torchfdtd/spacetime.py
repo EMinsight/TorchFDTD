@@ -201,6 +201,8 @@ class SlabBlockOperator:
         grid.is_torch = True
         grid.material_states = []
         grid.wrap = {axis: value for axis, value in host.grid.wrap.items() if axis != 0}
+        grid.pec_upper = {axis: value for axis, value in host.grid.pec_upper.items()
+                          if axis != 0 or int(indices[-1]) == host.region.shape[0]-1}
         grid.metric = {}
         for (forward, axis), (values, edge) in host.grid.metric.items():
             if axis == 0:

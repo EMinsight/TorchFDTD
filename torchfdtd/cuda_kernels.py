@@ -170,6 +170,9 @@ class FusedYeeCUDA:
                 if metric:
                     lines.append(f'd *= ({real})({metric[1]:.17g});')
                 lines.append('}')
+            elif forward and axis in getattr(g,'pec_upper',{}):
+                factor=g.pec_upper[axis]
+                lines.extend(['else {',f'd = -({real})({factor:.17g})*src[3*i+{comp}];','}'])
             lines.extend([f'c{out} += {"-" if sign < 0 else ""}d;', '}'])
         finish=getattr(self,'_update_statements',None)
         # Tensor cohorts build templates from a minimal grid-only proxy.

@@ -61,6 +61,16 @@ errors, with duration/PML controls and actual improving design steps. The
 initial failed criterion is retained. Curved-interface and CR convergence
 remain separate requirements.
 
+The optional [streamed geometry API](docs/streamed_geometry.md) produces
+material slabs and reduces their VJPs directly to shape parameters, avoiding
+both global epsilon and global epsilon-gradient arrays. It supports fixed
+plane flux objectives, host/file banks and asynchronous CUDA tiles. Its large
+capacity and throughput measurements remain pending.
+
+[PEC and electric antisymmetry](docs/BOUNDARIES.md) now preserve physical mesh
+endpoints across CPU/CUDA, adjoint, streaming and batch paths. PMC and magnetic
+symmetry require additional boundary states and remain unimplemented.
+
 [Dispersive material adjoints](docs/DISPERSIVE_ADJOINT.md) connect epsilon-infinity, oscillator strength, resonance and damping to point spectra and fixed plane flux. Resident Torch and optional fused CUDA paths include Drude/Lorentz P/Q states in bounded checkpoint replay. Shared parameters stay compact, and CUDA material gradients use block reductions without atomics. Experimental [spatial ADE streaming](docs/STREAMED_DISPERSIVE.md) adds DRAM/file banks, asynchronous CUDA tiles and compact material-gradient reductions. A [54 GiB ADE capacity run](docs/validation/DISPERSIVE_CAPACITY_REPORT.md) completed ten forward steps and first-order material gradients on RTX 5880 with 5.17 GB peak Torch CUDA allocation in 54.8 minutes. A separately recorded causal-halo rerun completed with 3.65 GB in 49.6 minutes and matching discrete gradients. This demonstrates short-run capacity beyond physical VRAM. Sustained performance and physical design-gradient convergence remain unverified.
 
 RTX 5880 resident ADE measurements compare the same forward/objective/backward operation, including checkpoint replay, against our Torch CUDA path. These are warmed internal comparisons. [Full conditions, backward-only ablation, memory and raw records](docs/validation/DISPERSIVE_CUDA_REPORT.md).
