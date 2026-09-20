@@ -17,8 +17,8 @@ with 455,137,873,920 bytes free. Availability must be rechecked before launch.
 A 1024 x 1024 x 576 complex FP64 grid has 603,979,776 cells. E/H alone require
 57,982,058,496 bytes (54 GiB), already larger than the device's total memory.
 Epsilon, CPML, checkpoints, gradients and transfer workspaces are additional.
-The forward phase completed. Backward was interrupted by a workstation restart,
-so the complete forward/VJP capacity gate remains unproven. Windows event 1074
+The initial forward phase completed, but its backward was interrupted by a
+workstation restart. Windows event 1074
 attributes the restart to the Start menu process on behalf of the admin user.
 After reboot the calculation process was absent and the result remained at
 `forward_complete`. This is not a completed gradient run or evidence of OOM.
@@ -26,11 +26,48 @@ The transient field banks do not support resuming after reboot.
 
 The author subsequently authorized stopping the competing calculation and
 restarting this test. The retry's forward completed in 673.955 seconds and
-passed the same point-history check. Backward is running. Its
+passed the same point-history check. The retry subsequently completed its
+forward and backward validation in 3121.894 seconds. Its
 [separate snapshot](validation/beyond-vram-forward-retry-5880.json) records
 source hashes and the 100 GiB per-bank disk-headroom setting. The previous
 interrupted record is retained. Different machine/cache conditions prevent
 interpreting the difference between forward times as an algorithmic speedup.
+
+## Completed capacity and gradient check
+
+The [completed retry record](validation/beyond-vram-complete-5880.json) reports
+stage `forward_backward_validated`. This is 603,979,776 cells and ten timesteps,
+with E/H storage 1.125 times physical device VRAM. Signals match the finite-cone
+full-autograd oracle exactly. The maximum gradient difference in the 56-cubed
+comparison region is 3.3881e-21. The global gradient is finite and nonzero,
+with norm 4.0470365e-5, and its norm matches the local oracle. This additionally
+checks for unintended gradient outside the dependency cone.
+
+| Measurement | Completed retry |
+| --- | ---: |
+| Forward wall time, including initial epsilon construction | 673.955 s |
+| Reported backward wall time | 2446.685 s |
+| Complete elapsed time including final gradient checks | 3121.894 s |
+| Peak Torch CUDA allocated bytes | 7,091,686,400 |
+| Sampled peak process RSS bytes | 22,506,119,168 |
+| Peak live backward logical file bytes | 175,519,039,488 |
+| Backward logical read bytes | 1,257,886,449,664 |
+| Backward logical written bytes | 1,023,861,063,680 |
+
+Both backing stores report closed with zero live bytes. A post-run directory
+inspection independently found zero scratch entries and approximately 442 GB
+free on C. The completed process was absent before syncing later code and
+starting the CPU/GPU benchmark. The result contains the exact source hashes
+used by this retry, which precede later automatic observation-aware planning.
+
+This establishes short beyond-physical-VRAM forward/VJP execution. It does not
+establish long-duration optical accuracy, fast inverse design, a 10-times-VRAM
+problem, or speed superiority. The source has not reached the Bloch seams or
+outer CPML in ten steps. Small separate tests cover those boundary derivatives.
+Torch allocation excludes CUDA context and external allocations. Sampled RSS
+can miss transient peaks and excludes OS file cache. Logical file traffic is
+not measured physical SSD traffic. Complete system-level all-tier accounting
+and useful-duration application throughput remain open.
 
 The reservation now charges `checkpoints + 5` complete field banks. Instrumented
 file-backed replay tests disable cyclic garbage collection and exercise repeated
@@ -74,8 +111,9 @@ Forward created five successive banks and held at most two simultaneously,
 117,012,692,992 logical file bytes. Logical reads were 351,038,078,976 bytes and
 writes were 292,531,732,480 bytes. All forward banks were released. Buffered
 I/O may hit the OS cache, so these counters do not measure physical SSD traffic.
-The final record must still establish backward accuracy, peak device/host
-allocation, full elapsed time and backward scratch cleanup.
+The completed retry above now establishes its backward accuracy, measured
+device/process peaks, full elapsed time and scratch cleanup. The earlier
+forward-only record remains separately labeled.
 
 - Report complete resident state/workspace byte accounting relative to the
   actual device capacity. Avoid deliberately causing an OOM just to prove it.

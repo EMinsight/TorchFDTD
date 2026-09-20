@@ -461,14 +461,17 @@ and subsequent design optimization remain necessary.
 
 A separate $1024\times1024\times576$ complex FP64 capacity experiment has
 57,982,058,496 bytes of electric and magnetic fields alone, exceeding the
-device's 51,526,500,352 bytes of physical VRAM. Ten forward steps completed
-in 741.239 seconds using file-backed spatial tiles. The maximum simultaneous
-logical file storage was 117,012,692,992 bytes. Point histories agreed with
-a smaller full-autograd domain whose boundaries lie outside the finite
-dependency cone. This short experiment tests forward capacity and consistency.
-It does not establish a converged optical response. Backward accuracy and
-complete all-tier peak memory remain pending in this experiment.
-The backward run was interrupted by a workstation restart attributed by the
-Windows event log to a Start menu restart request. Its forward snapshot is
-preserved, but no complete capacity-gradient result is available from that run.
+device's 51,526,500,352 bytes of physical VRAM. A completed ten-step retry used
+673.955 seconds for forward execution and 3121.894 seconds through backward
+and final checks. Point histories matched a smaller full-autograd domain
+whose boundaries lie outside the finite dependency cone. The maximum gradient
+discrepancy in that domain was $3.39\times10^{-21}$, and the finite global
+gradient norm matched the local oracle at $4.0470\times10^{-5}$.
+Peak Torch CUDA allocation was 7,091,686,400 bytes and sampled process RSS
+was 22,506,119,168 bytes. Backward held at most 175,519,039,488 logical file
+bytes and all scratch banks were released. These are short capacity and VJP
+consistency results, not a converged optical application or speed advantage.
+Torch allocations exclude context memory and process RSS excludes OS file
+cache. The initial attempt was interrupted by a workstation restart and its
+forward-only snapshot is retained separately from the completed retry.
 \end{document}

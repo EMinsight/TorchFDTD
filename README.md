@@ -125,7 +125,24 @@ Six-component frequency planes, reference-normalized flux, global/custom monitor
 | 64 × 32 × 32 / 24 | 1.587 s | 0.088 s | 0.737 s | 2.15× |
 | 128 × 64 × 64 / 32 | 26.144 s | 0.381 s | 2.104 s | 12.43× |
 
-These problems fit in VRAM. The ratios describe our Torch CPU implementation and do not establish performance against an external CPU/MPI solver, on RTX 5880, or beyond 48 GB. [Conditions, variability and raw records](docs/validation/CPU_DRAM_COMPARISON.md). The separate [physical-VRAM-overflow test](docs/BEYOND_VRAM_VALIDATION.md) has completed forward, with complete gradient validation still pending.
+These problems fit in VRAM. The ratios describe our Torch CPU implementation and do not establish performance against an external CPU/MPI solver, on RTX 5880, or beyond 48 GB. [Conditions, variability and raw records](docs/validation/CPU_DRAM_COMPARISON.md). The separate [physical-VRAM-overflow test](docs/BEYOND_VRAM_VALIDATION.md) completed forward and first-order gradient validation on 603,979,776 cells with 54 GiB of E/H fields, using 7.09 GB peak Torch CUDA allocation. Its 52-minute, ten-step run demonstrates capacity, not speed superiority.
+
+On the **RTX 5880 / Xeon w3-2435 workstation**, a separate real-FP32
+128 x 64 x 64, 32-step forward/backward comparison gave:
+
+| Execution | Median iteration | Speedup over native CPU |
+| --- | ---: | ---: |
+| CPU + DRAM, 8 threads | 1.955 s | 1.00x |
+| Resident GPU | 0.04189 s | 46.68x |
+| GPU + DRAM, synchronous tiles | 0.4612 s | 4.24x |
+| GPU + DRAM, asynchronous tiles | 0.3896 s | 5.02x |
+
+Eight threads was fastest among 1, 4, 8 and 16 tested CPU threads. All modes
+passed signal/gradient checks, with three timed repetitions after warmup.
+This short problem fits in VRAM. It does not measure beyond-48-GB speed or
+external solver performance. Async buffering uses more GPU memory than
+synchronous streaming in this case. [Full conditions and every thread-count
+record](docs/validation/CPU_DRAM_COMPARISON.md#completed-rtx-5880-real-fp32-comparison).
 
 An [independent FSP record reader](docs/FSP_BINARY.md) decodes recognized layout records without a vendor runtime. [Native import and scene writeback](docs/FSP_NATIVE.md) now include boxes, rotated ellipsoids/cylinders, partial elliptical rings and simple polygon extrusions with their stored pivots. Python, CLI and **FSP → GPU → Export current scene** update existing objects while preserving unedited bytes. Variable-length names and vertex lists are supported. Export reparses and checks the resulting geometry and material assignments before returning a file. [Uniform mesh edits](docs/FSP_MESH_WRITE.md) can update axis spacing, total spans, CAD/PML bounds, saved nodes and effective CFL together. Supported source bands/phases, monitor spectra/windows, duration and PML/Periodic settings can also be written. Interface-sampling and automatic-sampling limits are disclosed in the report. [Primitive list editing](docs/FSP_OBJECTS_WRITE.md) adds, removes, duplicates and reorders five primitive families with explicit ID and retained-byte maps. New records use authored drawing defaults. [Source and monitor list editing](docs/FSP_INSTRUMENTS_WRITE.md) adds electric dipoles, mapped 3D planes/TFSF, point traces and frequency planes. Shared monitor components can be separated while retaining their output order. External acceptance of new records/remeshing, groups, graded/explicit mesh-generator export, result-bearing files and general FSP compatibility remain open.
 

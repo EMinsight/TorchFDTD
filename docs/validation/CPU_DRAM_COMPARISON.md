@@ -84,4 +84,40 @@ uses `rtol=5e-5, atol=2e-6` for signals and gradients. These are implementation
 parity tolerances, not an optical accuracy guarantee. The new FP32 driver paths
 passed real and complex asymmetric-grid smoke checks locally. Their single
 timed repetitions are not performance evidence. No RTX 5880 CPU speed ratio is
-available until its current capacity job finishes and this comparison runs.
+inferred from those smoke checks. The capacity job has now finished, and the
+first matched workstation measurements are recorded below.
+
+## Completed RTX 5880 real-FP32 comparison
+
+On 2026-09-20 the 128 x 64 x 64, 32-step real-FP32 case completed after the
+capacity process exited and scratch cleanup was verified. All modes evaluate
+the same full forward/objective/backward iteration. CUDA uses fused kernels,
+slab width 32, temporal depth 8 and two global checkpoints. Each configuration
+has one warmup and three timed repetitions, alternating mode order.
+
+| CPU threads | CPU + DRAM median | Raw record |
+| ---: | ---: | --- |
+| 1 | 6.640 s | [JSON](cpu-dram-5880-fp32-t1.json) |
+| 4 | 2.549 s | [JSON](cpu-dram-5880-fp32-t4.json) |
+| 8 | 1.955 s | [JSON](cpu-dram-5880-fp32-t8.json) |
+| 16 | 2.216 s | [JSON](cpu-dram-5880-fp32-t16.json) |
+
+The eight-thread CPU is fastest among these tested counts. Using GPU medians
+from that same eight-thread run gives the following comparison. This does not
+select each GPU mode's fastest timing across independent runs.
+
+| Mode | Full iteration median | CPU median / mode median | Peak Torch CUDA bytes |
+| --- | ---: | ---: | ---: |
+| CPU + DRAM | 1.955 s | 1.00 | 0 |
+| Resident RTX 5880 | 0.04189 s | 46.68 | 67,401,216 |
+| RTX 5880 + DRAM, synchronous | 0.4612 s | 4.24 | 38,211,072 |
+| RTX 5880 + DRAM, asynchronous | 0.3896 s | 5.02 | 77,533,184 |
+
+All signal and gradient comparisons passed. The synchronous streamed gradient
+relative L2 error is 3.69e-8. Double buffering is faster here than synchronous
+streaming, but uses more allocated GPU memory, even more than resident in this
+small case. Individual repetitions and separate runs show timing variability.
+These measurements cover 524,288 cells that fit comfortably in VRAM, native
+Torch CPU code and a short discrete workload. They are not ratios for the
+54 GiB case, converged optics, Lumerical, Meep MPI or another optimized solver.
+The beyond-VRAM run establishes capacity separately and took 3121.894 seconds.
