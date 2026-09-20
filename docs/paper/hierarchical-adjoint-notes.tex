@@ -1133,6 +1133,37 @@ yet route automatic CR execution through the producer. Dispersive geometry,
 one-way material validation and TFSF adjoints remain outside its scope.
 No large-domain speed or capacity result is inferred from the small tests.
 
+\section{Periodic-density material streaming}
+An extruded periodic design has a two-dimensional density matrix $D$.
+For electric component $c$, let $W_{x,c}$ and $W_{y,c}$ contain periodic
+pixel-overlap weights at that component's Yee coordinates, and let $f_c(z)$
+be its fixed layer-height overlap fraction. An extended slab has
+\begin{equation}
+ \epsilon_c(x,y,z)=\epsilon_b+
+ (\epsilon_d-\epsilon_b)(W_{x,c}D W_{y,c}^{T})_{xy}f_c(z).
+\end{equation}
+The material transpose accumulates directly into the density,
+\begin{equation}
+ \overline D \mathrel{+}=
+ (\epsilon_d-\epsilon_b)\sum_c W_{x,c}^{T}
+ \left[\sum_z\overline\epsilon_c(x,y,z)f_c(z)\right] W_{y,c}.
+\end{equation}
+Repeated periodic halo rows retain their own contributions in this sum.
+Material values carry no Bloch phase. The overlap matrices are rebuilt per
+component and slab. No full three-dimensional material or material-VJP array
+is retained. The producer and reduction run on CPU while field tiles may run
+on CUDA. Homogeneous references use zero density. Source-basis calibration,
+coherent polarization mixing and detector normalization remain unchanged.
+
+The streamed periodic-response API uses this producer automatically for
+explicit streamed policies. Two source-basis cases still execute sequentially
+and replay for backward. Tests cover both density pixel origins, fractional
+height interfaces, repeated seams, host and file state banks, asynchronous
+CUDA, shared admission and full response gradients. These synthetic tests
+do not establish workstation-scale throughput or physical CR convergence.
+Interfaces and selected-frequency permittivities are fixed. One-way sources,
+TFSF and dispersive density materials remain unsupported by this producer.
+
 \section{Physical slab shape-gradient refinement}
 An FP32 study uses an air--dielectric--air slab of thickness
 $0.23\,\mu{\rm m}$ and relative permittivity 2.25 at wavelength

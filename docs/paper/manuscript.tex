@@ -655,6 +655,43 @@ permittivity map and its dense gradient. Field banks remain domain-sized.
 CPU, CUDA and file-backed checks establish agreement with the dense path
 within their tested scope. Sustained large-domain throughput remains unmeasured.
 
+The periodic-density response additionally synthesizes Yee material slabs
+from a two-dimensional density and applies the exact linear transfer transpose
+directly to that density. Host, file-backed and asynchronous CUDA response/VJP
+checks match the dense path. This removes dense material storage in that
+streamed response, while preserving the fixed layer interfaces, lossless
+selected-frequency permittivities and first-order density-derivative scope.
+
+\subsection{Matched native CPU and CUDA adjoints}
+
+A separate RTX 5880 experiment uses $256^3$ cells, 128 FP32 steps and two
+checkpoints. One full warm-up per execution mode precedes three interleaved
+measurements. The timer includes construction, material packing, input/output
+transfers, forward, the plane-field and signed-flux proxy objective, checkpoint
+replay and every material VJP. It excludes optimizer and geometry updates,
+verification and final cleanup. The CPU uses the same project's Torch backend.
+Among the tested six- and twelve-thread configurations, twelve threads give
+the lower median for both materials.
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+Material & CPU (s) & CUDA (s) & Ratio & DRAM (s) & Ratio\\
+\midrule
+Dielectric & 407.689 & 2.283 & 178.55 & 9.435 & 43.21\\
+Two-pole ADE & 742.037 & 4.996 & 148.53 & 23.902 & 31.04\\
+\bottomrule
+\end{tabular}
+\end{center}
+CUDA denotes resident execution and DRAM denotes asynchronous CUDA slabs.
+Ratios divide the fastest tested CPU median by the corresponding CUDA median.
+Maximum complete-output and material-VJP relative $L_2$ errors are
+$2.41\times10^{-7}$ for the dielectric and $4.31\times10^{-7}$ for ADE,
+below the $2\times10^{-4}$ criterion. Raw records retain all repetitions and
+77 source hashes at revision \code{23cefe1}. Both problems fit GPU memory.
+These are internal backend measurements, not comparisons with external CPU
+or GPU solvers or evidence of beyond-VRAM throughput.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.

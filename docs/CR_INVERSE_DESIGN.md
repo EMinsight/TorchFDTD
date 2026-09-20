@@ -33,7 +33,9 @@ writing a new archive. Small local tests explicitly lower the checkpoint floor.
 The driver preflights every case before allocating optical fields. It subtracts
 a design/Adam copy allowance from the shared solver host budget. Solver state,
 source-basis replay and fixed references use the existing bounded hierarchy.
-The density/material map still resides in CPU RAM. Caller context, iteration
+The 2D density resides in CPU RAM. Resident execution builds a dense epsilon
+map, while streamed execution synthesizes material slabs and reduces their
+adjoints directly to density (see [streamed density](streamed_density.md)). Caller context, iteration
 metadata, Python/runtime overhead and OS file cache are outside these tensor
 reservations. This is not an exact process-RSS limit.
 

@@ -1,6 +1,6 @@
 # Exact-endpoint PMC implementation plan
 
-Status: pending. PEC and anti-symmetric endpoint boundaries are implemented and verified separately. PMC/symmetric labels must remain rejected until this state and transpose contract is complete. This plan contains no vendor execution or equivalence claims.
+Status: production integration pending. A private exact-endpoint CPU reference now implements the volume, upper-face and upper-edge topology below. PEC and anti-symmetric production boundaries are verified separately. Public PMC/symmetric labels remain rejected. This plan contains no vendor execution or equivalence claims.
 
 The existing mesh has N cell intervals with endpoints x_0 and x_N. E_a occupies half nodes along a and integer nodes along transverse axes. H_a occupies integer nodes along a and half nodes along transverse axes. Existing arrays omit every upper integer node. PMC has even tangential E and normal H, and odd normal E and tangential H. Replacing the missing E_t(N) with E_t(N-1) freezes the last H sample and shifts the wall to x_(N-1/2). That shortcut is prohibited.
 
@@ -18,8 +18,27 @@ Upper PMC E_t(N) evolves from the normal derivative -2 H_t(N-1/2)/dx_last plus i
 
 The transpose scatters the interior last-half derivative seed to both volume E_t(N-1) and face E_t(N), and scatters face E normal-derivative seed with coefficient -2/dx_last onto volume H_t(N-1/2). Tangential face curls transpose within face arrays and into edge arrays using the same signed incidence. Identity paths and ADE states transpose on each disjoint array. All coefficients use the actual local time-step and material scaling. Euclidean adjoint tests require no arbitrary energy half weights. Energy diagnostics separately need dual-cell quadrature at endpoint nodes.
 
-For X-slab streaming only the global last tile owns X-upper face arrays. Y/Z face arrays extend over slab X and participate in usual halos, while E edges shared with X upper face appear only on the last tile. Stores/checkpoints must include these state tensors explicitly. Byte accounting is sum of each tensor's unique element count, not a padded N+1 volume approximation. CUDA batch compatibility includes the face topology and every face material-state bank. This contract remains unimplemented.
+For X-slab streaming only the global last tile owns X-upper face arrays. Y/Z face arrays extend over slab X and participate in usual halos, while E edges shared with X upper face appear only on the last tile. Stores/checkpoints must include these state tensors explicitly. Byte accounting is the sum of each tensor's unique element count, not a padded N+1 volume approximation. CUDA batch compatibility includes the face topology and every face material-state bank. Production streaming remains unimplemented.
 
+
+## Direct CUDA foundation
+
+`torchfdtd/pmc_cuda.py` adds real FP32 direct gathers and their exact transpose
+for the same disjoint topology, with fused forward and explicit reverse steps.
+It retains compact block descriptors and six one-dimensional metric arrays,
+not volume incidence tables. A 128-cubed grid uses 3,084 GPU metric bytes.
+This figure excludes fields, material arrays, outputs and CUDA runtime memory.
+
+Fifteen targeted CUDA tests passed, including mixed PEC/PMC faces, nonuniform
+metrics, nine-step state/material adjoints against the CPU autograd reference,
+and a 128-cubed nondefault-stream check. A further targeted guard check rejects
+an ordinary Torch in-place material change after preparation. External pointer
+writes remain a caller responsibility. The compact topology copies read-only
+nodes and its prepared material checks conservative CFL.
+
+This kernel foundation has no public solver dispatch, automatic Torch backward,
+source/monitor integration, ADE, checkpoint admission or spatial streaming.
+Its test memory sizes are for kernel correctness, not a 48 GB capacity claim.
 
 ## Acceptance tests and admission
 
@@ -32,3 +51,23 @@ For X-slab streaming only the global last tile owns X-upper face arrays. Y/Z fac
 - Expose PMC/symmetric in model, facade, JSON and UI only after the corresponding numerical path is complete. Update the feature inventory separately from PEC material status. Explicitly reject unsupported subpixel, material, source or storage combinations.
 
 The native PMC and symmetry feature rows remain missing until these requirements are met. No partial storage implementation should be presented as complete boundary support.
+
+## CPU reference evidence
+
+`torchfdtd/pmc_reference.py` implements the disjoint state and sparse incidence
+curl as an independent correctness reference. Its 21 CPU tests cover 15
+analytic three-dimensional cavity cases, including mixed face parities and
+three polarizations, and compare all stored degrees of freedom with doubled
+periodic or antiperiodic domains. Additional checks exercise nonuniform real
+and complex transposes, autograd and directional finite-difference material
+derivatives, endpoint geometry sampling and exact field payload counts.
+
+`sample_epsilon` samples geometry at each actual electric Yee coordinate.
+`shared_volume_epsilon` is a separately named nearest-interior parameter-sharing
+model. It must not be substituted for endpoint geometry sampling without
+explicitly choosing that material model. Reference sparse-index storage and
+Python construction are for small validation problems, not production capacity.
+
+These checks establish a boundary-state foundation. They do not establish
+production PMC sources, monitors, CUDA/adjoint dispatch, ADE, streaming,
+checkpoint budgeting or UI support. Those integrations remain release gates.

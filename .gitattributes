@@ -5,3 +5,5 @@
 *.jpg binary
 *.zip binary
 *.whl binary
+# Preserve the original line endings of this measured numerical record.
+docs/validation/mode_ports_cpu.json whitespace=cr-at-eol

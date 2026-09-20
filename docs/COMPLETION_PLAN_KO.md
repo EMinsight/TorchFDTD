@@ -34,10 +34,16 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 저장·내보내기·실행도 확인했다. PMC/대칭 경계는 상단 Yee face/edge 상태를
 추가해야 하므로 미완료이며 [상태 구조 계획](PMC_IMPLEMENTATION_PLAN.md)을 따른다.
 
-[형상 기반 재료 스트리밍](streamed_geometry.md)은 전체 epsilon과 material
-VJP 배열을 만들지 않고 타일별 생성과 파라미터 축약을 수행한다. 점 출력과
-정규화한 검출면 전력의 미분을 연결했다. 이 경로의 실제 48GB 초과 실행,
-자동 CR 연결, 분산재료와 one-way/TFSF 경로는 남아 있다.
+[형상 기반 재료 스트리밍](streamed_geometry.md)에 이어
+[CR 밀도 스트리밍](streamed_density.md)도 연결했다. Streamed
+`PeriodicLayerResponse`는 2D density에서 타일 유전율을 생성하고 gradient를
+2D로 직접 축약한다. 전체 3D epsilon과 그 VJP를 만들지 않으며 CPU·파일·
+비동기 CUDA 검사를 통과했다. 실제 48GB 초과 성능과 분산재료 경로는 남았다.
+
+PMC는 실제 endpoint의 face/edge 상태를 갖는 CPU 기준 구현과 real FP32
+CUDA forward/transpose 기반을 검증했다. 공개 solver·streaming·ADE 연결은
+아직 남아 있다. [Mode port 기반](mode_ports.md)은 벡터 고유모드, 전력 정규화,
+필드 overlap 미분을 검증했으며 실제 FDTD mode source 연결은 다음 단계다.
 
 2026-09-21 후속 증거: [FP32 박막 수렴 실험](gradient_mesh.md)에서 동일한
 물리 영역·시간·소스·PML 두께를 유지하고 메시와 형상 전이 폭을 줄였다.
@@ -61,15 +67,12 @@ VJP 배열을 만들지 않고 타일별 생성과 파라미터 축약을 수행
 
 ## 현재 시간 측정과 추정의 한계
 
-2026-09-21 02:02 KST에 확인한 RTX 5880의 ADE 비교는 살아 있는
-coordinator PID 2856에서 `cpu_t12`, 반복 0을 수행 중이었다.
-CPU 6-thread warm-up은 821.18 s, 첫 측정은 820.07 s였고,
-12-thread warm-up은 741.71 s였다. GPU warm-up은 resident 6.07 s,
-DRAM 24.69 s였다. Warm-up 값은 최종 성능 표의 median이 아니다.
-
-현재 진행분을 제외한 남은 3회 측정의 수와 위 시간을 적용하면
-순수 계산은 약 54분이다. 결과 확인·메모리 정리와 실행 변동을 포함한
-잠정 잔여 시간은 55–70분이다. 동일 측정이 끝나면 반복 실행하지 않는다.
+2026-09-21 02:56 KST에 RTX 5880의 ADE 비교가 끝나고 원래 CR
+정보량 목적함수의 24-cycle 최적화가 시작됐다. ADE의 3회 측정 median은
+CPU 12-thread 742.0371초, GPU resident 4.9957초, GPU+DRAM 23.9025초다.
+자체 Torch CPU 대비 각각 148.53배와 31.04배다. 같은 실험을 다시 돌리지
+않고 77개 소스 hash와 전체 출력·gradient 오차를 확인해 기록을 보존했다.
+이는 VRAM 안에 들어가는 문제이며 경쟁 solver 대비 측정은 아니다.
 
 CR 전체 144조건의 FP32 응답과 gradient 검증은 RTX 3060에서
 2218.756 s, 약 37분 걸렸다. 이를 단순히 24회 곱하면 14.8시간이다.

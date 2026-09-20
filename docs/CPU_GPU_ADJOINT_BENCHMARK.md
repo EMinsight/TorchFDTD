@@ -69,7 +69,7 @@ The end-to-end driver tests exercise CPU, resident CUDA and asynchronous CUDA
 slabs for both material types. Additional tests reject a corrupted gradient
 beyond the first comparison chunk, mismatched groups, nonfinite results and a
 tiny but relatively incorrect gradient. Failure records and slower-GPU ratios
-remain visible. The dielectric workload below is complete. The two-pole ADE workload is still running. This benchmark does
+remain visible. The dielectric workload below is complete. The two-pole ADE workload is also complete. This benchmark does
 not establish beyond-VRAM capacity or comparative performance against external
 solvers.
 
@@ -94,3 +94,24 @@ beyond 48 GB or equality with resident performance. The CPU implementation is
 this project's Torch backend, not a tuned external CPU solver. The ADE run is
 separate and remains pending. No repeated simulation was needed to archive
 these completed measurements.
+
+## Completed 256-cubed two-pole ADE measurement
+
+The [complete record](validation/cpu-gpu-adjoint-256-ade-5880.json) retains
+both poles, material parameters and VJPs, all warm-ups and repetitions.
+The [archive verification](validation/cpu-gpu-adjoint-256-ade-provenance.json)
+matches all 77 source hashes to revision `23cefe1`, checks all trial counts
+and recomputes the medians and speed ratios. No simulation was repeated.
+Maximum output/material-VJP relative L2 error across every warm-up and measured
+trial is 4.31e-7, below the predeclared 2e-4 limit.
+
+| Native execution | Median forward/objective/backward | Speed ratio to fastest tested CPU |
+| --- | ---: | ---: |
+| Torch CPU, 6 threads, DRAM | 820.0677 s | 0.90x |
+| Torch CPU, 12 threads, DRAM | 742.0371 s | 1.00x |
+| Fused CUDA, resident | 4.9957 s | 148.53x |
+| Fused CUDA, asynchronous DRAM slabs | 23.9025 s | 31.04x |
+
+The same within-VRAM and internal-backend limitations apply. Neither this
+benchmark nor its faster GPU result establishes a speed ratio against
+Lumerical, FDTDX, Meep or a separately optimized CPU implementation.

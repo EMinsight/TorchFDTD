@@ -87,3 +87,7 @@ sinc(m/Nx) * sinc(n/Ny)` at order `(m,n)`. Edge-origin boxes additionally
 carry a half-pixel phase. Selecting sample centers aligns that phase origin
 but does not remove the sinc difference. Reference-grid interpretation and
 convergence must be resolved before calling the solver responses equivalent.
+
+## Bounded density execution
+
+PeriodicLayerResponse with an explicit streamed policy now synthesizes each material slab directly from the 2D density and reduces material adjoints back to that density. It avoids the full 3D epsilon and epsilon-gradient arrays while preserving the transfer and reference-calibration conventions above. Resident execution retains the dense path. See [streamed density execution](streamed_density.md) for API examples, budget scope and limitations. Local synthetic correctness and allocation checks do not establish large-workstation throughput or physical convergence.

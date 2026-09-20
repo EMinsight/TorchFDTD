@@ -210,6 +210,8 @@ class StreamedGeometrySimulation(StreamedSimulation):
     still follows StreamedAdjointOptions, including optional disk-backed banks.
     One-way injection is excluded until bounded material validation is provided.
     """
+    _execution_type = _GeometryExecution
+
     def spectrum(self, geometry, frequency_hz, *, window=None, block_size=32):
         from .adjoint_spectrum import SpectralObservation
         self._validate_geometry(geometry)
@@ -236,7 +238,7 @@ class StreamedGeometrySimulation(StreamedSimulation):
     def _run(self, geometry, spectral):
         self._validate_geometry(geometry)
         options, region = self.streaming_options, self.project.region
-        execution = _GeometryExecution(geometry, getattr(self, '_geometry_fixed_host_bytes', 0))
+        execution = self._execution_type(geometry, getattr(self, '_geometry_fixed_host_bytes', 0))
         reservation = execution.reservation(self.project, geometry.parameters, options, spectral)
         execution.snapshot()
         report = dict(experimental=True, spatial_streaming=True, parameterized_geometry=True,

@@ -1,0 +1,11 @@
+{
+  "raw_file": "cpu-gpu-adjoint-256-ade-5880.json",
+  "raw_sha256": "64ab4673c096e8762fedf67604c1b14a8ce1ec34083aa0b011ceb0a0b19f35bd",
+  "source_revision": "23cefe11d79c634857811e050f1ecd9454ddcfce",
+  "verified_source_files": 77,
+  "complete_warmup_and_three_repetitions_per_mode": true,
+  "maximum_relative_l2_outputs_and_material_vjps": 4.307786460440484e-07,
+  "tolerance_relative_l2": 0.0002,
+  "medians_and_speed_ratios_recomputed_from_raw_records": true,
+  "scope": "Archive verification only. No simulation repeated. Internal backends, within VRAM capacity."
+}

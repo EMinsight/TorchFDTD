@@ -94,3 +94,7 @@ from .streamed_geometry import (StreamedGeometry, streamed_geometry, StreamedGeo
                                StreamedGeometryPlaneSimulation)
 __all__ += ['StreamedGeometry', 'streamed_geometry', 'StreamedGeometrySimulation',
             'StreamedGeometryPlaneSimulation']
+from .streamed_density import (StreamedDensityLayer, streamed_density_layer, StreamedDensitySimulation,
+                              StreamedDensityPlaneSimulation)
+__all__ += ['StreamedDensityLayer', 'streamed_density_layer', 'StreamedDensitySimulation',
+            'StreamedDensityPlaneSimulation']

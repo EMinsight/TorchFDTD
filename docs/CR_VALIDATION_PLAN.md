@@ -1,5 +1,49 @@
 # Color-router inverse-design validation
 
+## Current execution and final-candidate gate
+
+The entries below preserve the earlier validation sequence. The 25 nm,
+6400-step relaxed-seed study has completed and is summarized in
+[the spatial refinement record](validation/cr-full-spatial-refinement.json).
+The separate full FP32 response and density-gradient comparison also passed
+[its recorded tolerances](validation/cr-full-fp32-comparison.json). These are
+fixed-seed checks, not a completed original-optimizer trajectory.
+
+The original binary information-arm optimizer uses its unchanged 24-cycle
+protocol and fabrication projector in a private frozen runtime. Its GPU
+workstation run started on 2026-09-21 at 02:56 KST after the matched CPU/GPU
+comparison completed. New density streaming work does not modify that frozen
+runtime or its input hashes. The final trajectory remains pending.
+The public continuous-density Adam example is a different optimizer and is
+not substituted for this original binary protocol.
+
+After its selected hard mask is committed and freshly confirmed, validate that
+candidate against the original hard seed. Both masks must retain the exact
+128 by 128 physical pixels and fabrication constraints. Do not replace them
+with the 0.01/0.99 relaxed seed used in the historical optical study. Reuse an
+old result only if its density, source, settings and runtime contract match.
+
+The first follow-up pairs 50 nm/3200 steps/12 PML cells with
+25 nm/6400 steps/24 PML cells. Keep the physical outer extent, duration,
+source and detector positions, 0.6 micrometre PML thickness, all nine
+wavelengths and sixteen pupil weights fixed. Record actual mesh coordinates
+and duration to verify these invariants before executing fields. FP32 remains
+the default. Per-case persistence avoids repeating completed forward cases.
+
+Report seed and candidate responses and information scores separately at each
+mesh. The useful quantity is the candidate-minus-seed improvement at the same
+settings, not a score difference between solvers or different meshes. A sign
+change under refinement fails the improvement claim. If the improvement is
+comparable to the observed refinement or time/PML change, report it unresolved
+and refine the affected conditions. Two meshes alone do not prove an absolute
+error bound. Physical density-gradient convergence is a separate gate and is
+not established by this forward confirmation.
+
+This follow-up does not rerun every optimizer iteration or the already passed
+FP32/FP64 comparison. It evaluates the selected candidate and its matched seed
+after the queued capacity job, without overlapping workstation benchmarks.
+
+
 ## Selected reference
 
 The user selected the recent TORCWA-based color-router study with color

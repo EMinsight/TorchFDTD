@@ -30,9 +30,10 @@ class PeriodicLayerResponse(torch.nn.Module):
     policy selects resident CPU/CUDA or DRAM/file spatial execution. The host
     budget includes solver replay, material-map construction and this module's
     bounded reference cache. Caller optimizer/other graphs, process/runtime
-    overhead and OS file cache are excluded. The material map remains dense
-    in CPU RAM even with file-backed field states. This is not lazy geometry,
-    concurrent adjoint batching or a converged CR optimization by itself.
+    overhead and OS file cache are excluded. Streamed policies synthesize
+    density materials by slab and reduce directly to the 2D density. Resident
+    policies retain their dense material path. This is not concurrent adjoint
+    batching or a converged CR optimization by itself.
     """
     def __init__(self, spec, *, density_shape, policy, batch_options,
                  mesh, steps, dtype=torch.float32, pml_cells=12,
@@ -78,6 +79,11 @@ class PeriodicLayerResponse(torch.nn.Module):
         if -spec['height_um']/2 < lo or spec['height_um']/2 > hi:
             raise ValueError('Patterned layer must lie inside the non-PML region.')
         self._epsilon_shape = region.shape + (3,)
+        self._streamed_density = policy.streamed is not None
+        self._layer_settings = dict(bottom_um=-self._spec['height_um']/2,
+            top_um=self._spec['height_um']/2,
+            background_epsilon=self._spec['background_index']**2,
+            design_epsilon=self._spec['design_index']**2, pixel_origin=self._pixel_origin)
         item = torch.empty((), dtype=dtype).element_size()
         parameter_bytes = math.prod(self._epsilon_shape)*item
         # Yee averaging constructs three component arrays and then stacks them.
@@ -87,7 +93,8 @@ class PeriodicLayerResponse(torch.nn.Module):
         dx, dy = density_shape
         maps = 8*(nx*dx + ny*dy + nx*ny + nx + ny + nz)*item
         reference_copies = 4*4*(16*math.prod(quadrature_counts)+1)*item + 65536
-        self._geometry_allowance = 2*parameter_bytes + 4*dx*dy*item + maps
+        self._geometry_allowance = (8*dx*dy*item+64*(nx+ny+nz)*item+65536
+            if self._streamed_density else 2*parameter_bytes+4*dx*dy*item+maps)
         self._reference_allowance = reference_copies + self._cache_budget
         self._response_allowance = self._response_budget + (4*dx*dy*item+1024*self._response_entries+1024 if self._response_budget else 0)
         self._outside_batch = self._geometry_allowance + self._reference_allowance + self._response_allowance
@@ -100,9 +107,13 @@ class PeriodicLayerResponse(torch.nn.Module):
             project.sources[0].component = component
             cases.append(AdjointCase(project, policy, frequency_hz=frequency,
                 quadrature_counts={'incident':quadrature_counts, 'detector':quadrature_counts}))
-        self._batch = RecomputedAdjointBatch(cases, replace(batch_options,
-            host_budget_bytes=self._host_budget-self._outside_batch))
-        payload = dict(version='budgeted-periodic-response-1',
+        batch_settings = replace(batch_options, host_budget_bytes=self._host_budget-self._outside_batch)
+        if self._streamed_density:
+            from .streamed_density import RecomputedDensityBatch
+            self._batch = RecomputedDensityBatch(cases, batch_settings, layer=self._layer_settings)
+        else:
+            self._batch = RecomputedAdjointBatch(cases, batch_settings)
+        payload = dict(version='budgeted-periodic-density-streaming-1' if self._streamed_density else 'budgeted-periodic-response-1',
             projects=[c.project.model_dump(mode='json') for c in cases],
             policy=asdict(policy), frequency=frequency, quadrature_counts=quadrature_counts,
             dtype=str(dtype))
@@ -211,7 +222,8 @@ class PeriodicLayerResponse(torch.nn.Module):
             raise ValueError('Response-cache budget or entry limit changed. Rebuild the response module.')
         if self._cache.budget_bytes != self._cache_budget:
             raise ValueError('Reference-cache budget changed. Rebuild the response module.')
-        logical = torch.empty((), dtype=self._dtype).expand(self._epsilon_shape)
+        input_shape = self._density_shape if self._streamed_density else self._epsilon_shape
+        logical = torch.zeros((), dtype=self._dtype).expand(input_shape)
         batch = self._batch.plan(logical)
         total = batch['host_reservation_bytes'] + self._outside_batch
         available = host_memory()['available_bytes']
@@ -225,12 +237,14 @@ class PeriodicLayerResponse(torch.nn.Module):
             reference_allowance_bytes=self._reference_allowance,
             response_cache_allowance_bytes=self._response_allowance,
             density_shape=self._density_shape, epsilon_shape=self._epsilon_shape,
+            material_input='streamed_density' if self._streamed_density else 'dense_epsilon',
+            dense_material_storage_bytes=0 if self._streamed_density else math.prod(self._epsilon_shape)*torch.empty((),dtype=self._dtype).element_size(),
             scope='One invocation. Excludes caller optimizer/other graphs, runtime and OS cache.')
 
     def _references(self):
         def compute():
-            background = torch.full(self._epsilon_shape, self._spec['background_index']**2,
-                                    dtype=self._dtype)
+            background = (torch.zeros(self._density_shape, dtype=self._dtype) if self._streamed_density else
+                torch.full(self._epsilon_shape, self._spec['background_index']**2, dtype=self._dtype))
             result = self._batch(background)
             return {f'{basis}/{name}':plane for basis, planes in enumerate(result.cases)
                     for name, plane in planes.items()}
@@ -281,13 +295,11 @@ class PeriodicLayerResponse(torch.nn.Module):
             targets = [math.cos(phi)*pvec-math.sin(phi)*svec, math.sin(phi)*pvec+math.cos(phi)*svec]
             coefficients = [calibrate_plane_polarization([r['incident'] for r in refs], [self._kt], v[None])
                             for v in targets]
-        # Revalidate after reference computation, before dense geometry creation.
+        # Revalidate after reference computation, before material production.
         self.plan()
-        epsilon = periodic_density_layer(density, self._project.region,
-            bottom_um=-self._spec['height_um']/2, top_um=self._spec['height_um']/2,
-            background_epsilon=self._spec['background_index']**2,
-            design_epsilon=self._spec['design_index']**2, pixel_origin=self._pixel_origin)
-        result = self._batch(epsilon)
+        material = density if self._streamed_density else periodic_density_layer(
+            density, self._project.region, **self._layer_settings)
+        result = self._batch(material)
         planes = [p['detector'] for p in result.cases]
         responses = []
         for c in coefficients:

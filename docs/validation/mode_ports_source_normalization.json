@@ -1,0 +1,26 @@
+{
+  "scope": "Post-measurement CRLF-to-LF and blank-EOF normalization only. Numerical evidence bytes are unchanged.",
+  "files": {
+    "torchfdtd/mode_ports.py": {
+      "measured_sha256": "45eed775573c6b77fa3a7015a5a8a1abbf7cdf25190a2e39109f941ef0935bd1",
+      "normalized_sha256": "0467e4404d94c2420d065e6a6451868951d73891bd1aaebc98051ab969a20d00",
+      "measured_crlf_line_ranges_inclusive": [
+        [
+          1,
+          318
+        ]
+      ],
+      "trailing_lf_removed": 2
+    },
+    "benchmarks/mode_ports_limits.py": {
+      "measured_sha256": "5673ba64b211ac07e01dda6b7a60252ec43eb16d706bf30e663fc3d96e1a4900",
+      "normalized_sha256": "d5c681797716d2705fe972276391f3037360f81d7dfca204228fad1539c68b56",
+      "measured_crlf_line_ranges_inclusive": [
+        [
+          94,
+          94
+        ]
+      ]
+    }
+  }
+}

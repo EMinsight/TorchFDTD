@@ -20,6 +20,16 @@ Supported gradients match the DRAM path exactly in the recorded tests, while
 file execution is slower. OS cache memory and sustained NVMe performance remain
 unvalidated.
 
+[Periodic density streaming](docs/streamed_density.md) now generates material
+slabs directly from a CPU 2D design and reduces gradients back to that design.
+Streamed `PeriodicLayerResponse` avoids both global 3D epsilon and epsilon-VJP
+arrays. Host, file and asynchronous CUDA numerical checks pass. Its large-grid
+throughput is still unmeasured.
+
+The [exact-endpoint PMC foundation](docs/PMC_IMPLEMENTATION_PLAN.md) and
+[full-vector mode foundation](docs/mode_ports.md) are available for development.
+Production PMC dispatch and mode injection remain incomplete.
+
 Experimental [resident/streamed adjoint selection](docs/EXECUTION_SELECTION.md)
 now compares full-grid and tiled execution with one CPU design-tensor API.
 The measured search includes resident input/output transfers and reuses the
@@ -95,12 +105,19 @@ completed on RTX 5880 with a 15.9 GB peak Torch CUDA allocation. After fixing
 [cached-memory admission](docs/CUDA_CACHE_ADMISSION.md), fresh dielectric and
 ADE eight-case runs both passed, with respective peaks of 15.9 GB and 17.9 GB.
 These remain twelve-step capacity/VJP checks. Concurrent adjoint microbatches remain open.
-The [matched CPU/DRAM and CUDA adjoint driver](docs/CPU_GPU_ADJOINT_BENCHMARK.md)
-now includes input/output transfers and complete material VJPs. For a completed
-256-cubed, 128-step FP32 dielectric case, the fastest tested Torch CPU median
-is 407.69 s, versus 2.28 s resident CUDA and 9.43 s CUDA with DRAM slabs
-(178.55x and 43.21x). These are internal backend comparisons on RTX 5880,
-within VRAM capacity. They are not external-solver or beyond-VRAM speedups.
+The [matched CPU/DRAM and CUDA adjoint measurements](docs/CPU_GPU_ADJOINT_BENCHMARK.md)
+include input/output transfers and complete material VJPs. Each 256-cubed,
+128-step FP32 problem uses one warm-up and three interleaved repetitions.
+
+| Material | Fastest tested Torch CPU (s) | Resident CUDA (s) | CPU/CUDA ratio | CUDA + DRAM slabs (s) | CPU/DRAM ratio |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Dielectric | 407.689 | 2.283 | 178.55x | 9.435 | 43.21x |
+| Two-pole ADE | 742.037 | 4.996 | 148.53x | 23.902 | 31.04x |
+
+These are internal backend comparisons on RTX 5880, within VRAM capacity.
+The CPU baseline is this project's Torch implementation. These are not
+external-solver or beyond-VRAM speedups.
+
 
 [Differentiable detector allocation](docs/DETECTOR_ALLOCATION.md) preserves the CR reference's electric-intensity well fractions with independent midpoint quadrature. Synthetic source parity and material-gradient tests pass. Matched CR optical validation remains pending.
 

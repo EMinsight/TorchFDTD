@@ -1,0 +1,397 @@
+{
+  "scope": "Fixed full-vector eigenmodes and synthetic directional overlaps, not validated FDTD mode injection.",
+  "precision": "float32",
+  "backend": "CPU SciPy sparse ARPACK",
+  "python": "3.10.2",
+  "numpy": "2.2.6",
+  "scipy": "1.15.3",
+  "torch": "2.10.0+cu126",
+  "homogeneous": {
+    "modes": [
+      {
+        "neff": 1.500000003701715,
+        "power": 0.9999998807907104,
+        "backward_power": -0.9999998807907104,
+        "eigenpair_residual": 9.911523536948798e-07,
+        "maxwell_residual": 9.930697278776507e-07,
+        "outer_three_u_cells_field_fraction": 0.30000001192092896,
+        "component_norms": [
+          2.1770331859588623,
+          3434186.0,
+          11024504.0,
+          3.3075218200683594,
+          16536757.0,
+          5151279.0
+        ]
+      },
+      {
+        "neff": 1.500000003701715,
+        "power": 1.0,
+        "backward_power": -1.0,
+        "eigenpair_residual": 1.6312747884029772e-06,
+        "maxwell_residual": 1.6324404245159942e-06,
+        "outer_three_u_cells_field_fraction": 0.30000001192092896,
+        "component_norms": [
+          4.452125549316406,
+          11024504.0,
+          3434186.0,
+          6.374619007110596,
+          5151279.0,
+          16536757.0
+        ]
+      },
+      {
+        "neff": 1.2861960002120254,
+        "power": 1.0,
+        "backward_power": -1.0,
+        "eigenpair_residual": 1.4537007368062281e-05,
+        "maxwell_residual": 1.1212617669675395e-05,
+        "outer_three_u_cells_field_fraction": 0.25893086194992065,
+        "component_norms": [
+          5440613.0,
+          9066522.0,
+          6610243.0,
+          5101897.0,
+          8502062.0,
+          15860471.0
+        ]
+      },
+      {
+        "neff": 1.286195458737625,
+        "power": 1.0,
+        "backward_power": -1.0,
+        "eigenpair_residual": 7.849097675385028e-06,
+        "maxwell_residual": 5.78241883806622e-06,
+        "outer_three_u_cells_field_fraction": 0.3839106261730194,
+        "component_norms": [
+          6382556.0,
+          10636220.0,
+          1277167.125,
+          985739.125,
+          1642686.125,
+          18606424.0
+        ]
+      },
+      {
+        "neff": 1.2861953684918694,
+        "power": 1.0,
+        "backward_power": -1.0,
+        "eigenpair_residual": 5.227493703261339e-06,
+        "maxwell_residual": 4.38242056092299e-06,
+        "outer_three_u_cells_field_fraction": 0.21354398131370544,
+        "component_norms": [
+          2648226.25,
+          4413139.5,
+          11358188.0,
+          8766441.0,
+          14608852.0,
+          7720107.0
+        ]
+      },
+      {
+        "neff": 1.2861951428774527,
+        "power": 1.0,
+        "backward_power": -1.0,
+        "eigenpair_residual": 4.751940882272727e-06,
+        "maxwell_residual": 4.0166071206629585e-06,
+        "outer_three_u_cells_field_fraction": 0.343614786863327,
+        "component_norms": [
+          2233239.5,
+          3721584.0,
+          11690157.0,
+          9022660.0,
+          15035831.0,
+          6510338.0
+        ]
+      }
+    ],
+    "max_power_gram_error": 1.6777215705587878e-07,
+    "analytic_discrete_neff": [
+      1.5,
+      1.5,
+      1.2861954437296415,
+      1.2861954437296415,
+      1.2861954437296415,
+      1.2861954437296415
+    ]
+  },
+  "analytic_slab_neff": [
+    1.807659160020482,
+    1.7372311704419812
+  ],
+  "slab": [
+    {
+      "mesh_um": 0.1,
+      "box_u_um": 4.0,
+      "modes": [
+        {
+          "neff": 1.812790580746961,
+          "power": 0.9999998807907104,
+          "backward_power": -0.9999998807907104,
+          "eigenpair_residual": 2.915618789618602e-06,
+          "maxwell_residual": 2.7833968809945484e-06,
+          "outer_three_u_cells_field_fraction": 1.999895175686106e-06,
+          "component_norms": [
+            8.003689765930176,
+            14854434.0,
+            8.036186218261719,
+            26927986.0,
+            44.767391204833984,
+            9138987.0
+          ]
+        },
+        {
+          "neff": 1.7454447687686423,
+          "power": 1.0,
+          "backward_power": -1.0,
+          "eigenpair_residual": 3.0789462156962974e-06,
+          "maxwell_residual": 2.7672998271707035e-06,
+          "outer_three_u_cells_field_fraction": 1.0105592082254589e-05,
+          "component_norms": [
+            14447241.0,
+            18.049060821533203,
+            6110094.5,
+            34.386741638183594,
+            28412692.0,
+            13.171258926391602
+          ]
+        }
+      ],
+      "max_power_gram_error": 1.1920928955078125e-07,
+      "absolute_neff_errors": [
+        0.005131420726478986,
+        0.008213598326661131
+      ]
+    },
+    {
+      "mesh_um": 0.05,
+      "box_u_um": 4.0,
+      "modes": [
+        {
+          "neff": 1.8068724527265096,
+          "power": 1.0,
+          "backward_power": -1.0,
+          "eigenpair_residual": 3.923146571806577e-06,
+          "maxwell_residual": 3.7487439471045536e-06,
+          "outer_three_u_cells_field_fraction": 6.951470368221635e-07,
+          "component_norms": [
+            14.839897155761719,
+            21041720.0,
+            11.88437557220459,
+            38019708.0,
+            72.102783203125,
+            12775099.0
+          ]
+        },
+        {
+          "neff": 1.7388288221904307,
+          "power": 1.0,
+          "backward_power": -1.0,
+          "eigenpair_residual": 5.238971329664781e-06,
+          "maxwell_residual": 4.68408633698365e-06,
+          "outer_three_u_cells_field_fraction": 4.024967438454041e-06,
+          "component_norms": [
+            20575280.0,
+            34.028507232666016,
+            8701222.0,
+            93.97228240966797,
+            40191468.0,
+            22.569034576416016
+          ]
+        }
+      ],
+      "max_power_gram_error": 5.6649149371423846e-08,
+      "absolute_neff_errors": [
+        0.0007867072939724551,
+        0.0015976517484495023
+      ]
+    },
+    {
+      "mesh_um": 0.025,
+      "box_u_um": 4.0,
+      "modes": [
+        {
+          "neff": 1.8074631724146373,
+          "power": 0.9999998807907104,
+          "backward_power": -0.9999998807907104,
+          "eigenpair_residual": 1.1411946084402594e-05,
+          "maxwell_residual": 1.0951828467476532e-05,
+          "outer_three_u_cells_field_fraction": 2.9895980446781323e-07,
+          "component_norms": [
+            8.709548950195312,
+            29752642.0,
+            19.486154556274414,
+            53776736.0,
+            203.12686157226562,
+            18093246.0
+          ]
+        },
+        {
+          "neff": 1.737632580605998,
+          "power": 0.9999998807907104,
+          "backward_power": -0.9999998807907104,
+          "eigenpair_residual": 1.2040250521452209e-05,
+          "maxwell_residual": 1.0917411846738302e-05,
+          "outer_three_u_cells_field_fraction": 1.9184140001016203e-06,
+          "component_norms": [
+            29122584.0,
+            140.82923889160156,
+            12281056.0,
+            342.70343017578125,
+            56805832.0,
+            67.36219787597656
+          ]
+        }
+      ],
+      "max_power_gram_error": 1.1920928955078125e-07,
+      "absolute_neff_errors": [
+        0.00019598760584482733,
+        0.0004014101640168466
+      ]
+    },
+    {
+      "mesh_um": 0.05,
+      "box_u_um": 2.0,
+      "modes": [
+        {
+          "neff": 1.8073837316293637,
+          "power": 1.0,
+          "backward_power": -1.0,
+          "eigenpair_residual": 4.91107901589078e-06,
+          "maxwell_residual": 4.688806061182222e-06,
+          "outer_three_u_cells_field_fraction": 0.0023885779082775116,
+          "component_norms": [
+            17.834444046020508,
+            21038740.0,
+            13.192974090576172,
+            38025088.0,
+            98.15746307373047,
+            12624659.0
+          ]
+        },
+        {
+          "neff": 1.7400116335033462,
+          "power": 1.0,
+          "backward_power": -1.0,
+          "eigenpair_residual": 5.976394499045216e-06,
+          "maxwell_residual": 5.398688915375928e-06,
+          "outer_three_u_cells_field_fraction": 0.004855346400290728,
+          "component_norms": [
+            20639374.0,
+            48.08102798461914,
+            8497462.0,
+            113.37467956542969,
+            40090640.0,
+            44.10661697387695
+          ]
+        }
+      ],
+      "max_power_gram_error": 1.1920928955078125e-07,
+      "absolute_neff_errors": [
+        0.0002754283911183819,
+        0.002780463061365035
+      ]
+    },
+    {
+      "mesh_um": 0.05,
+      "box_u_um": 6.0,
+      "modes": [
+        {
+          "neff": 1.8068721957660694,
+          "power": 0.9999998807907104,
+          "backward_power": -0.9999998807907104,
+          "eigenpair_residual": 4.718153343891063e-06,
+          "maxwell_residual": 4.488719768783686e-06,
+          "outer_three_u_cells_field_fraction": 1.9850676657995336e-10,
+          "component_norms": [
+            9.0837984085083,
+            21041720.0,
+            12.320647239685059,
+            38019708.0,
+            89.38838958740234,
+            12775194.0
+          ]
+        },
+        {
+          "neff": 1.7388278876350027,
+          "power": 0.9999998807907104,
+          "backward_power": -0.9999998807907104,
+          "eigenpair_residual": 5.8081498101400285e-06,
+          "maxwell_residual": 5.19136337797303e-06,
+          "outer_three_u_cells_field_fraction": 3.267470960466312e-09,
+          "component_norms": [
+            20575154.0,
+            34.8218994140625,
+            8701595.0,
+            103.2616195678711,
+            40191660.0,
+            28.77823257446289
+          ]
+        }
+      ],
+      "max_power_gram_error": 4.341813450992049e-07,
+      "absolute_neff_errors": [
+        0.0007869642544127142,
+        0.0015967171930215684
+      ]
+    }
+  ],
+  "hybrid_rectangular_core": {
+    "modes": [
+      {
+        "neff": 1.6751362248172816,
+        "power": 0.9999998807907104,
+        "backward_power": -0.9999998807907104,
+        "eigenpair_residual": 1.0694870161109319e-06,
+        "maxwell_residual": 9.678729118110255e-07,
+        "outer_three_u_cells_field_fraction": 3.969696626882069e-05,
+        "component_norms": [
+          3466556.75,
+          10549314.0,
+          802615.625,
+          6137993.5,
+          1016223.125,
+          19253968.0
+        ]
+      },
+      {
+        "neff": 1.6055180075955213,
+        "power": 1.0,
+        "backward_power": -1.0,
+        "eigenpair_residual": 5.422414954206789e-06,
+        "maxwell_residual": 4.7744816374796984e-06,
+        "outer_three_u_cells_field_fraction": 0.00043319101678207517,
+        "component_norms": [
+          3865028.25,
+          877084.8125,
+          10792686.0,
+          4772897.5,
+          19151852.0,
+          575565.4375
+        ]
+      }
+    ],
+    "max_power_gram_error": 1.1920928955078125e-07
+  },
+  "synthetic_overlap": {
+    "backward_leakage": 0.0,
+    "forward_leakage_of_reverse": 0.0,
+    "cross_polarization_leakage": 1.7960366176082997e-16,
+    "field_directional_derivative": -0.28886348009109497,
+    "centered_difference": -0.28896331787109375,
+    "finite_difference_step": 0.001,
+    "relative_derivative_error": 0.000345503300330033
+  },
+  "checks": {
+    "slab_mesh_errors_decrease": true,
+    "slab_fine_neff": true,
+    "box_delta": true,
+    "confinement": true,
+    "field_derivative": true
+  },
+  "elapsed_seconds": 0.11353089986369014,
+  "source_sha256": {
+    "torchfdtd/mode_ports.py": "45eed775573c6b77fa3a7015a5a8a1abbf7cdf25190a2e39109f941ef0935bd1",
+    "benchmarks/mode_ports_limits.py": "5673ba64b211ac07e01dda6b7a60252ec43eb16d706bf30e663fc3d96e1a4900"
+  }
+}
