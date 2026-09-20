@@ -103,6 +103,90 @@ class PeriodicLayerResponse(torch.nn.Module):
         # execution paths must not silently reuse another path's reference.
         self._reference_key = hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
         self.last_report = None
+        self._selection_report = None
+
+    @classmethod
+    def auto(cls, spec, *, density_shape, mesh, steps, gpu_budget_bytes,
+             host_budget_bytes, device='cuda', checkpoints=2, max_slab_width=256,
+             temporal_depth=8, state_directory=None, disk_budget_bytes=None,
+             disk_free_reserve_bytes=100*1024**3, **settings):
+        """Select an admitted memory tier without running calibration solves.
+
+        Prefer resident execution, then asynchronous CUDA/DRAM slabs, then
+        explicitly configured file banks. Tile width and temporal depth shrink
+        together until the shared solver/geometry/reference budget is admitted.
+        This capacity heuristic does not promise the fastest policy. Precision,
+        physical mesh, duration and checkpoint count are never reduced.
+        Inspect selection_report for the chosen policy and rejected plans.
+        """
+        from .differentiable import AdjointOptions
+        from .streamed import StreamedAdjointOptions
+        if any(key in settings for key in ('policy', 'batch_options')):
+            raise ValueError('auto supplies policy and batch_options from the shared budgets.')
+        if (state_directory is None) != (disk_budget_bytes is None):
+            raise ValueError('File fallback requires both state_directory and disk_budget_bytes.')
+        for name, value in (('max_slab_width', max_slab_width), ('temporal_depth', temporal_depth)):
+            if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                raise ValueError(f'{name} must be a positive integer.')
+        device = str(torch.device(device))
+        cuda = torch.device(device).type == 'cuda'
+        batch = AdjointBatchOptions(host_budget_bytes=host_budget_bytes,
+            gpu_budget_bytes=gpu_budget_bytes, disk_budget_bytes=disk_budget_bytes)
+        resident = AdjointOptions(checkpoints=checkpoints,
+            backward_kernel='fused' if cuda else 'torch', gpu_budget_bytes=gpu_budget_bytes,
+            host_budget_bytes=host_budget_bytes,
+            resident_budget_bytes=gpu_budget_bytes if cuda else host_budget_bytes)
+        streamed = StreamedAdjointOptions(device=device, checkpoints=checkpoints,
+            slab_width=max_slab_width, temporal_depth=temporal_depth,
+            tile_transfers='async' if cuda else 'sync', gpu_budget_bytes=gpu_budget_bytes,
+            host_budget_bytes=host_budget_bytes, state_directory=state_directory,
+            disk_budget_bytes=disk_budget_bytes, disk_free_reserve_bytes=disk_free_reserve_bytes)
+        attempts = []
+        def admit(policy, mode):
+            try:
+                model = cls(spec, density_shape=density_shape, mesh=mesh, steps=steps,
+                    policy=policy, batch_options=batch, **settings)
+                plan = model.plan()
+            except ValueError as exc:
+                attempts.append(dict(mode=mode, policy=asdict(policy), admitted=False, reason=str(exc)))
+                return None
+            attempts.append(dict(mode=mode, policy=asdict(policy), admitted=True,
+                reservation_bytes={key:plan[key] for key in (
+                    'host_reservation_bytes', 'gpu_reservation_bytes', 'disk_reservation_bytes')}))
+            model._selection_report = dict(mode=mode, policy=asdict(policy), attempts=attempts,
+                calibration_solves=0, scope='Capacity-first heuristic using live admission. No performance optimality claim.')
+            return model
+        selected = admit(AdjointExecutionPolicy(resident=resident, device=device,
+            host_budget_bytes=host_budget_bytes), 'resident')
+        if selected is not None:
+            return selected
+        project, _ = _periodic_project(spec, dtype=settings.get('dtype', torch.float32),
+            mesh=mesh, steps=steps, pml_cells=settings.get('pml_cells', 12),
+            forward_kernel=settings.get('forward_kernel', 'fused'), memory_mode='streamed')
+        width = min(max_slab_width, project.region.shape[0])
+        tiles = []
+        while True:
+            # Keep halos bounded relative to useful width as tiles shrink.
+            depth = min(temporal_depth, steps, max(1, width//2))
+            tiles.append((width, depth))
+            if width == 1:
+                break
+            width = max(1, width//2)
+        for storage, mode in (('host', 'dram'), ('disk', 'file')):
+            if storage == 'disk' and state_directory is None:
+                continue
+            for width, depth in tiles:
+                options = replace(streamed, state_storage=storage, slab_width=width, temporal_depth=depth)
+                selected = admit(AdjointExecutionPolicy(streamed=options, device=device,
+                    host_budget_bytes=host_budget_bytes), mode)
+                if selected is not None:
+                    return selected
+        raise ValueError('No periodic execution policy fits the shared budgets: '+json.dumps(attempts))
+
+    @property
+    def selection_report(self):
+        """Automatic planning evidence, or None for an explicit policy."""
+        return deepcopy(self._selection_report)
 
     @property
     def project(self):
@@ -168,7 +252,7 @@ class PeriodicLayerResponse(torch.nn.Module):
             sample = mix_plane_fields(planes, c)
             reference = mix_plane_fields([r['detector'] for r in refs], c)
             responses.append(quadrant_intensity_allocation(sample, sample.normalized_flux(reference))[0])
-        self.last_report = dict(plan=plan, batch=result.report,
+        self.last_report = dict(plan=plan, batch=result.report, selection=self.selection_report,
             reference_cache_hits=self._cache.hits-hits, reference_cache_misses=self._cache.misses-misses,
             reference_cache_tensor_bytes=self._cache.tensor_bytes)
         return torch.stack(responses)

@@ -6,6 +6,8 @@ CR 후속으로 [재시작 가능한 밀도 최적화 실행기](CR_INVERSE_DESI
 
 정밀도 정책: 일반 실행과 CR 역설계의 기본값은 FP32다. 밀도·광학장·정보량·gradient·Adam에 하나의 정밀도를 사용하고 FP64는 명시적인 검증 옵션으로 유지한다. 이후 48GB 초과 용량 실험도 FP32 실제 상태 크기를 기준으로 설계하며, FP64 사용으로 늘어난 메모리를 FP32 용량 한계로 설명하지 않는다. 전체 144조건의 FP32 response·gradient 검증은 별도 완료 조건이다.
 
+자동 실행 선택 후속: `PeriodicLayerResponse.auto(...)`는 별도 시험 연산 없이 resident → DRAM → 명시적 파일 저장소의 예산을 확인한다. 공간 폭과 시간 깊이를 함께 줄이며, 정밀도·메시·계산 시간·checkpoint 개수는 바꾸지 않는다. 선택 결과를 고정해 forward/backward에 사용한다. 실제 속도를 비교하는 tuner는 별도 선택으로 유지한다. 이 경로의 UI 연결은 후속이다.
+
 ## 현재 실행 순서 · 2026-09-20
 
 1. **미분 가능한 물리 경로.** 제한된 실수 비분산 Yee·CPML의 이산 adjoint와 fused CUDA backward, 점 관측, 전체 시간기록 없이 블록으로 누적하는 Torch DFT와 그 transpose, regularized sphere 형상과 Adam을 구현했다. [API 범위](DIFFERENTIABLE_FDTD.md)에 표시한 부분 구현이며 고정 검출면의 E/H 보간·전력 적분·기준 정규화와 박막 검증을 추가했다. 고정 Bloch 위상의 resident Torch CPU/CUDA 미분과 경사 TE 박막 검증도 추가했다. 분산 재료의 resident Torch·fused CUDA transpose와 spectral plane을 추가했다. 공간 ADE의 DRAM/파일 P/Q 저장·fused CUDA 타일·재료 gradient를 실험적으로 연결했다. 분산 장시간 수렴/속도 검증, mode port 목적함수, TFSF와 coupled subpixel은 남아 있다. Taylor 검사는 이산식 검증이며 물리 shape-gradient 수렴은 별도다.

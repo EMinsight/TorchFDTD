@@ -1038,4 +1038,23 @@ gradient convergence. Subsequent beyond-VRAM capacity studies should exceed
 the available VRAM at FP32, with state size reported separately from transient
 and checkpoint allocations.
 
+\section{Capacity-first periodic execution admission}
+The periodic response API now offers selection without calibration solves.
+It first attempts resident admission under shared GPU and host budgets.
+If rejected, it decreases slab width and temporal depth until asynchronous
+DRAM execution fits. Explicitly configured file banks form the final tier,
+with a separate free-space reserve. Geometry, precision, physical duration
+and checkpoint count remain fixed. The selected policy is reused for the
+forward and backward calls, and live execution admission is retained.
+This is a capacity heuristic rather than a measured performance optimum.
+
+The completed complex-FP64 dense-plane study illustrates why calibration is
+not mandatory for ordinary execution. With nine policies and a 256-step
+held-out duration, the fastest resident median is 11.8467 s, while calibration
+costs 399.602 s. The initially admitted resident baseline is already fastest.
+Asynchronous width-32, depth-eight streaming takes 56.0846 s, compared with
+91.4281 s synchronously. All full outputs and material VJPs pass comparison
+with the recorded resident reference. These measurements fit VRAM and do not
+establish a beyond-VRAM speed advantage.
+
 \end{document}

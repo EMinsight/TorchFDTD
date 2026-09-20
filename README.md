@@ -95,6 +95,10 @@ integration remains separate from the legacy-path optical measurements.
 The [restartable CR design driver](docs/CR_INVERSE_DESIGN.md) adds projected
 Adam updates, atomic density/moment checkpoints and a complete final forward
 evaluation. The original CR application's physical optimization remains pending.
+`PeriodicLayerResponse.auto(...)` now selects resident, DRAM or explicitly
+configured file execution from shared memory budgets without calibration
+solves. It shrinks tiles when needed and keeps the chosen policy for backward.
+This capacity heuristic does not claim the fastest policy.
 The CR evaluator and optimizer now default to one FP32 path for density,
 fields, information, gradients and Adam moments. `PeriodicLayerResponse` also
 defaults to FP32. FP64 remains an explicit validation option. See the

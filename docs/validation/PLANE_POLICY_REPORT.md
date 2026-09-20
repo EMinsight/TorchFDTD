@@ -39,5 +39,37 @@ It cannot establish that later revision's timing.
 
 This study extends the earlier point-spectrum policy validation to dense planes.
 It does not establish beyond-VRAM speed, optical convergence, CR optimization
-time or an advantage over another solver. The separately queued complex-FP64
-plane study is still pending.
+time or an advantage over another solver. The complex-FP64 follow-up is reported below.
+
+
+## Completed complex-FP64 follow-up
+
+The same nine-policy, 128-cubed, 256-step study with fixed Bloch phase also
+completed. Each policy has three full repetitions and one warmup. All 76
+recorded source hashes match revision `45d9e5c`.
+
+| Policy | Median seconds |
+|---|---:|
+| Resident, two device checkpoints | 11.8467 |
+| Resident, zero checkpoints | 126.5094 |
+| Resident, two asynchronous host checkpoints | 19.2456 |
+| Streamed width 16, depth 4, synchronous | 217.8961 |
+| Streamed width 32, depth 8, synchronous | 91.4281 |
+| Same slab, asynchronous double buffering | 56.0846 |
+| Same synchronous slab, one local checkpoint | 90.2803 |
+| Same synchronous slab, zero global checkpoints | 283.7843 |
+| Same synchronous slab, four global checkpoints | 80.5754 |
+
+The selected and measured fastest policy is again resident with two device
+checkpoints. Calibration takes 399.602 s, versus the
+selected full-run median of 11.8467 s. There is no
+payback relative to the already-fastest resident baseline. Asynchronous
+width-32/depth-eight execution is 1.630x
+faster than its synchronous counterpart, but still slower than resident.
+The largest output/material-VJP relative L2 discrepancy is 5.790e-16.
+See the [raw record](plane-policy-128-complex-fp64-45d9e5c-5880.json).
+
+This completed FP64 study is retained as historical validation. It does not
+make FP64 the default or establish speed for FP32 beyond-VRAM problems. The
+new capacity-first periodic API avoids mandatory calibration solves. Its
+selection is not itself a measured performance optimum.

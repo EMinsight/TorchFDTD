@@ -63,6 +63,54 @@ as the GPU/host limits. For file-backed execution, use the streamed policy's
 `disk_free_reserve_bytes`. Also supply the shared batch's `disk_budget_bytes`.
 This is ordinary file-backed field storage, not GPUDirect Storage.
 
+## Automatic memory admission without trial simulations
+
+For normal use, prepare one model with the memory budgets available to the
+solver. `auto` does not run warmups, gradients or calibration solves:
+
+```python
+model = PeriodicLayerResponse.auto(
+    spec, density_shape=(4, 4), mesh=0.1, steps=160, pml_cells=6,
+    quadrature_counts=(4, 4),
+    gpu_budget_bytes=32 * 1024**3,
+    host_budget_bytes=64 * 1024**3,
+)
+print(model.selection_report)
+response = model(logits.sigmoid())
+loss = -response[:, 0].mean()
+loss.backward()
+```
+
+It checks resident execution first. If it does not fit, it tries DRAM-backed
+space-time slabs with asynchronous CUDA double buffering. Width decreases
+from at most 256 cells, with temporal depth bounded by eight steps and half
+the useful width. Both shrink under tighter budgets. Precision, physical
+mesh, simulated duration and checkpoint count stay fixed. The first admitted
+policy is retained for later calls and backward replay. Execution rechecks
+live resources and fails if they no longer suffice, rather than silently
+switching numerical policies inside a graph.
+
+File-backed fallback requires both `state_directory` and `disk_budget_bytes`.
+It preserves `disk_free_reserve_bytes`, defaulting to 100 GiB. No directory or
+field bank is created during selection. Geometry/material maps and caller
+optimizer storage still need DRAM. This is capacity-first admission, not a
+hardware-calibrated speed guarantee. The existing measured tuner remains an
+explicit choice for runs where its calibration cost is justified.
+
+`selection_report` records the selected policy, rejected candidates and their
+reservation failures. It returns an inspection copy. The synthetic example
+now defaults to this path:
+
+```console
+python -m examples.hierarchical_periodic_design --device cuda
+```
+
+Four targeted tests cover a real CPU Torch density/gradient chain, metadata-only
+DRAM and file admission, tile shrinking, and refusal of unconfigured storage
+or insufficient free space. The metadata tests do not claim large-domain
+execution or memory throughput. Existing solver correctness tests were not
+rerun solely for this selector addition. GUI binding remains follow-up work.
+
 ## Memory and state contract
 
 The host reservation includes the active solver, retained outputs and adjoint
