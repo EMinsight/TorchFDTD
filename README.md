@@ -144,6 +144,13 @@ external solver performance. Async buffering uses more GPU memory than
 synchronous streaming in this case. [Full conditions and every thread-count
 record](docs/validation/CPU_DRAM_COMPARISON.md#completed-rtx-5880-real-fp32-comparison).
 
+The same short grid with **complex FP64 / fixed Bloch phase** gave 7.899 s
+for CPU + DRAM, 0.09191 s for resident GPU (**85.94x**) and 0.7736 s for
+asynchronous GPU + DRAM (**10.21x**). Sixteen CPU threads was fastest in that
+sweep, only 1.65% ahead of eight. All repetitions passed signal/gradient checks.
+These are native implementation comparisons, not external-solver or large
+out-of-core speed claims. [Complete thread sweep and raw timings](docs/validation/CPU_DRAM_COMPARISON.md#completed-rtx-5880-complex-fp64-comparison).
+
 An [independent FSP record reader](docs/FSP_BINARY.md) decodes recognized layout records without a vendor runtime. [Native import and scene writeback](docs/FSP_NATIVE.md) now include boxes, rotated ellipsoids/cylinders, partial elliptical rings and simple polygon extrusions with their stored pivots. Python, CLI and **FSP → GPU → Export current scene** update existing objects while preserving unedited bytes. Variable-length names and vertex lists are supported. Export reparses and checks the resulting geometry and material assignments before returning a file. [Uniform mesh edits](docs/FSP_MESH_WRITE.md) can update axis spacing, total spans, CAD/PML bounds, saved nodes and effective CFL together. Supported source bands/phases, monitor spectra/windows, duration and PML/Periodic settings can also be written. Interface-sampling and automatic-sampling limits are disclosed in the report. [Primitive list editing](docs/FSP_OBJECTS_WRITE.md) adds, removes, duplicates and reorders five primitive families with explicit ID and retained-byte maps. New records use authored drawing defaults. [Source and monitor list editing](docs/FSP_INSTRUMENTS_WRITE.md) adds electric dipoles, mapped 3D planes/TFSF, point traces and frequency planes. Shared monitor components can be separated while retaining their output order. External acceptance of new records/remeshing, groups, graded/explicit mesh-generator export, result-bearing files and general FSP compatibility remain open.
 
 Version 0.5 adds [custom time signals and global source settings](docs/SOURCES.md), CSV/JSON signal editing and mesh-time waveform/spectrum previews. Version 0.6 adds [automatic wavelength/frequency ranges, chirped pulses and endpoint tapering](docs/BROADBAND.md), including independent FSP mapping. DC removal and advanced spatial source types remain unsupported.

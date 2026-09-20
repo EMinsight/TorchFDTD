@@ -121,3 +121,37 @@ These measurements cover 524,288 cells that fit comfortably in VRAM, native
 Torch CPU code and a short discrete workload. They are not ratios for the
 54 GiB case, converged optics, Lumerical, Meep MPI or another optimized solver.
 The beyond-VRAM run establishes capacity separately and took 3121.894 seconds.
+
+## Completed RTX 5880 complex-FP64 comparison
+
+The same grid, 32 steps, slab/checkpoint policy and repetition scheme were
+also measured with complex FP64 fields and fixed x-Bloch phase 0.63. The
+explicit CUDA budget was 2 GiB. The initial attempt with the default 1 GiB
+budget correctly rejected async admission by 1024 bytes, before its warmup.
+That incomplete attempt contributes no timing sample below.
+
+| CPU threads | CPU + DRAM median | Raw record |
+| ---: | ---: | --- |
+| 1 | 28.276 s | [JSON](cpu-dram-5880-complex-fp64-t1.json) |
+| 4 | 10.031 s | [JSON](cpu-dram-5880-complex-fp64-t4.json) |
+| 8 | 8.031 s | [JSON](cpu-dram-5880-complex-fp64-t8.json) |
+| 16 | 7.899 s | [JSON](cpu-dram-5880-complex-fp64-t16.json) |
+
+Sixteen threads was fastest in this sweep, only 1.65% faster than eight.
+This limited sampling does not establish a stable global CPU optimum.
+The following GPU medians come from the same sixteen-thread run.
+
+| Mode | Full iteration median | CPU median / mode median | Peak Torch CUDA bytes |
+| --- | ---: | ---: | ---: |
+| CPU + DRAM | 7.899 s | 1.00 | 0 |
+| Resident RTX 5880 | 0.09191 s | 85.94 | 248,543,744 |
+| RTX 5880 + DRAM, synchronous | 0.9151 s | 8.63 | 140,251,648 |
+| RTX 5880 + DRAM, asynchronous | 0.7736 s | 10.21 | 280,500,224 |
+
+Every repetition passed signal and gradient parity checks. Synchronous
+streamed gradient relative L2 error was 1.42e-16. The variability is retained
+in the raw records, including a resident outlier in the one-thread run.
+As with FP32, this is native Torch CPU versus native fused GPU on a small,
+resident-size discrete problem. It is neither a commercial-solver comparison
+nor the 54 GiB out-of-core timing ratio. No competing solver workload ran
+during the comparison, and the CR job started only after this sweep exited.

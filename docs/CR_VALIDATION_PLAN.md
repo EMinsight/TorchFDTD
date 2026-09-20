@@ -163,4 +163,11 @@ tolerance is `1e-8 + 1e-3 * max(abs(fd), abs(adjoint))`. Inspect the whole sweep
 for truncation and cancellation. A single directional pass establishes neither
 all gradient entries nor physical mesh/time convergence. Small multi-case
 fused-FDTD integration and analytic wrong-gradient tests exercise this driver.
-The locked 144-case directional run remains pending.
+The locked 144-case directional run has now started on RTX 5880 after the
+completed 54 GiB capacity/VJP run and both CPU thread sweeps. Its input hashes
+match the original schedule, binary seed and electron context. It uses 50 nm,
+1600 steps, 12 PML cells, fused forward/backward, a 64 MiB reference cache and
+the three perturbations above. The output is
+`results/cr-full-directional-5880.json`, with a gradient NPY saved before the
+additional forward probes. Results remain pending. No CR optimization has
+been started, and optical convergence remains an independent gate.
