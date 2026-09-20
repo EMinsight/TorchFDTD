@@ -115,3 +115,11 @@ the candidate electron model to that response differs by 4.22e-15. This isolates
 the objective adapter from the remaining optical comparison. The reference
 uses complex64 and has not passed an independent order-convergence study.
 See [full reference](validation/cr-full-torcwa-reference.json).
+
+The full relaxed-seed density-gradient execution has now been launched using
+fused complex forward and transpose kernels, exact supplied ray weights and
+the locked electron context. A small physical multi-case integration test
+first verified objective/VJP parity and directional finite differences through
+the combined cache/recompute/objective path. Full CR response and gradient
+results remain pending. The intermediate forward snapshot is not evidence of
+gradient completion, and no optimization has been launched.

@@ -101,3 +101,21 @@ transpose. The benchmark exposes `--forward-kernel fused --backward-kernel fused
 This does not enable complex spatial streaming, dispersive derivatives or native
 Simulation parity.
 See [scope and evidence](COMPLEX_CUDA.md).
+
+## Combined CUDA objective validation
+
+A two-wavelength, two-ray physical FDTD integration test now joins fused
+forward, fused backward, CPU reference caching, bounded case replay and the
+exposure information objective. Its objective and complete density gradient
+match direct case evaluation with the Torch transpose. A central directional
+finite difference also passes. These small synthetic optical conditions test
+the combined execution path, not the full CR research result.
+
+The full locked nine-wavelength, sixteen-ray relaxed-seed objective and gradient
+run has been launched on RTX 3060 with fused forward/backward and a 64 MiB CPU
+reference cache. The original RTX 5880 Torch forward run continues independently.
+Neither a completed full gradient nor physical optical convergence is claimed.
+The runner atomically saves `OUTPUT.forward.json` after all forward cases and
+objective assembly, before gradient replay. That snapshot explicitly says the
+gradient has not been computed. The final `OUTPUT.json` remains the completion
+record, and a snapshot must not be mistaken for a completed gradient run.

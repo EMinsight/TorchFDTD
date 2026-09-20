@@ -54,6 +54,22 @@ def main():
     result=exposure_target_information(model,c['scene_covariance'],c['scene_target_cross_covariance_xyz'],c['target_covariance_xyz'],
         exposure_scales=[e/c['reference_weighted_cfa_green_e'] for e in c['exposure_weighted_cfa_green_e']],
         probabilities=c['exposure_probabilities'],read_noise_e_rms=c['read_noise_e_rms'],raw_pixels=4)
+    # Preserve the full optical response before the longer replay/VJP stage.
+    # This snapshot is explicitly incomplete for a requested gradient run.
+    torch.cuda.synchronize()
+    output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
+    snapshot=output.with_suffix('.forward.json')
+    partial_record=dict(stage='forward_complete_gradient_not_computed',input_sha256=hashes,
+        hardware=torch.cuda.get_device_name(),mesh_um=args.mesh,steps=args.steps,pml_cells=args.pml_cells,
+        pixel_origin=args.pixel_origin,forward_kernel=args.forward_kernel,
+        relaxation='0.01 + 0.98 * binary seed',wavelength_count=len(rows),ray_count=len(weights),
+        ray_weight_sum=sum(weights),response=response.detach().tolist(),
+        weighted_bits_per_pixel=float(result.weighted_bits_per_pixel.detach()),
+        bits_per_pixel=result.bits_per_pixel.detach().tolist(),elapsed_seconds=time.perf_counter()-start,
+        peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated())
+    temporary=snapshot.with_suffix(snapshot.suffix+'.tmp')
+    temporary.write_text(json.dumps(partial_record,indent=2)+'\n');temporary.replace(snapshot)
+    print('Full forward objective saved to '+str(snapshot),flush=True)
     gradient=None
     if not args.forward_only:gradient,=torch.autograd.grad(result.weighted_bits_per_pixel,density)
     torch.cuda.synchronize()

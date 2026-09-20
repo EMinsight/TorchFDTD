@@ -1,0 +1,27 @@
+{
+  "record_type": "launch_manifest",
+  "base_commit": "d9ad2b9",
+  "source_sha256": {
+    "benchmarks/cr_spectral_objective.py": "8516ef1206a69303a8bf2538f39f2edc40470dc6b692edc214932227751c7393",
+    "tests/test_fused_pupil_objective.py": "81d252a992a6d866e42f791c019de267fa707fe593641fcbac7946b6da48e256",
+    "photonweave/periodic_response.py": "8d9a134eb51085a9187c4e88e9f35774a373674b728d0e37c5f85038abcefbc9",
+    "photonweave/pupil_response.py": "c7645bae6200a6f41a1e8b555fa8fac8a949a2c6bfec8222400521868ea936c4",
+    "photonweave/cuda_complex.py": "f3c4621d1468c91a308128f44bd84cdc19d0269e56948dad1e48a002f966b902",
+    "photonweave/cuda_complex_adjoint.py": "9f46b8c1d2d95cf4eaa4e28aac3f4988e010229af2b7f286a151bc73a3cb9435",
+    "photonweave/differentiable.py": "d76efb752977cfcc0da23f37bffdec42ec72001feca9e50f0931e9b43dbac684"
+  },
+  "input_sha256": {
+    "cr-full-schedule.json": "23df354b7d7acc4cd3ac8201d9999cda96e5cfc44cc889925bb5309abbee4732",
+    "cr-electron-reference.pt": "a20bec68bdbf9945e257f0886429a9981aabb479e57dbdbb49a74e0e5d037f4d",
+    "cr-case-density.npy": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44"
+  },
+  "mesh_um": 0.05,
+  "steps": 1600,
+  "wavelengths": 9,
+  "rays": 16,
+  "reference_cache_mib": 64,
+  "forward_kernel": "fused",
+  "backward_kernel": "fused",
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "validation": "Physical 2-wavelength/2-ray combined objective and gradient integration test passed. Full locked CR execution launched, no completed result or optical convergence claimed."
+}
