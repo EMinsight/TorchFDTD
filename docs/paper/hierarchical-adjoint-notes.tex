@@ -1074,4 +1074,32 @@ Asynchronous width-32, depth-eight streaming takes 56.0846 s, compared with
 with the recorded resident reference. These measurements fit VRAM and do not
 establish a beyond-VRAM speed advantage.
 
+\section{Bounded replay of parameterized geometry}
+An additional geometry layer maps tensor-valued dimensions, centers, rotations
+and material values to diagonal permittivity at the fixed electric sample
+locations. Boxes, ellipsoids and finite cylinders use compact cubic occupancy
+transitions. For an occupancy $a_s$ and solid permittivity $\epsilon_s^{\rm solid}$,
+ordered composition is
+\begin{equation}
+\epsilon_s=(1-a_s)\epsilon_{s-1}+a_s\epsilon_s^{\rm solid}.
+\end{equation}
+This defines an explicitly regularized geometry and overlap order. It does not
+implement the coupled sharp-interface subpixel operator.
+
+The geometry backward retains parameters and one-dimensional coordinate axes.
+For each spatial chunk $c$, it regenerates the local geometry graph and applies
+the material VJP returned by the Maxwell adjoint:
+\begin{equation}
+\nabla_{\boldsymbol\theta}L=
+\sum_c\left(\frac{\partial\epsilon_c}{\partial\boldsymbol\theta}\right)^T
+\nabla_{\epsilon_c}L.
+\end{equation}
+With $N$ cells, $S$ solids and $C$ cells per chunk, the retained local geometry
+graph requires $O(CS)$ storage rather than $O(NS)$ intermediate arrays. Dense
+permittivity and incoming material gradients still require $O(N)$ storage.
+First-order CPU and CUDA chains are checked against full-time autograd and
+spatial replay in FP32. A separate directional finite-difference check uses
+FP64. These checks establish the discrete regularized chain, not physical
+shape-gradient convergence or a new sharp-interface derivative algorithm.
+
 \end{document}

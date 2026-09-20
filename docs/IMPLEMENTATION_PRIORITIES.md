@@ -2,6 +2,8 @@
 
 핵심 목표는 **Torch에서 형상·재료부터 loss.backward와 optimizer까지 연결하는 inverse design**, 그리고 **VRAM·DRAM·저장장치 계층으로 메모리 병목과 큰 격자의 한계를 줄이는 실행 엔진**이다. 속성 수를 채우는 것으로 완료를 판단하지 않는다. 모든 행의 중요도·필요 여부는 [분류 CSV](FEATURE_PRIORITY_INDEX.csv)와 UI의 Feature checklist에서 확인한다.
 
+형상 미분 후속: [상자·타원체·원기둥 파라미터 API](DIFFERENTIABLE_GEOMETRY.md)를 추가했다. 반경·높이·위치·회전·유전율을 Torch에 연결하고, 형상 backward는 작은 공간 묶음씩 재계산한다. 전체 격자의 형상 그래프를 보관하지 않지만 epsilon과 입력 material VJP는 아직 dense 텐서다. CPU·CUDA·DRAM FDTD 연결을 FP32로 검사했다. 날카로운 경계의 물리 shape-gradient 수렴, polygon/spline과 dense 재료 맵 없는 스트리밍은 남아 있다.
+
 CR 후속으로 [재시작 가능한 밀도 최적화 실행기](CR_INVERSE_DESIGN.md)를 추가했다. 전체 파장·입사 조건과 정보량 목적함수를 projected Adam에 연결하며, density·Adam 상태를 함께 저장하고 최종 구조를 별도 forward로 평가한다. 원래 CR 입력의 물리·gradient 수렴 및 실제 최적화 검증은 남아 있다.
 
 정밀도 정책: 일반 실행과 CR 역설계의 기본값은 FP32다. 밀도·광학장·정보량·gradient·Adam에 하나의 정밀도를 사용하고 FP64는 명시적인 검증 옵션으로 유지한다. 이후 48GB 초과 용량 실험도 FP32 실제 상태 크기를 기준으로 설계하며, FP64 사용으로 늘어난 메모리를 FP32 용량 한계로 설명하지 않는다. 전체 144조건의 FP32 response·gradient 검증은 통과했다. 응답 상대 오차 5.04e-7, 밀도 gradient 상대 오차 1.75e-5이며, 물리 메시·gradient 수렴과 실제 최적화 완료는 별도 조건이다.

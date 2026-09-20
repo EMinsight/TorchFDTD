@@ -57,6 +57,12 @@ operator and does not prove sharp-interface shape-gradient convergence. A
 small radius/centre Taylor check and an Adam example verify the computational
 chain. Independent physical-gradient convergence remains required.
 
+The [bounded geometry replay API](DIFFERENTIABLE_GEOMETRY.md) extends this chain
+to ordered boxes, ellipsoids and cylinders, including dimensions, positions,
+rotations and scalar materials. It replays small geometry chunks in backward
+instead of retaining a full-domain geometry graph. The dense epsilon and its
+incoming material gradient remain part of caller-owned storage.
+
 The point-field objective above is deliberately simple. It is **not normalized
 transmission**. `result.spectrum(frequency_hz, window=...)` provides a Torch
 time-integral DFT with the half-step H observation convention. A supplied window
