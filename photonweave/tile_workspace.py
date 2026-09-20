@@ -6,6 +6,7 @@ before replacing an allocation. The tile driver waits for the previous slot's
 device work and host consumer before handing it to the next tile.
 """
 from collections import OrderedDict
+from .tensor_packet import pack_tensors
 
 import torch
 
@@ -81,7 +82,7 @@ class TileWorkspace:
         return target
 
     def to_host(self, tensors):
-        packed = torch.cat([value.reshape(-1) for value in tensors])
+        packed,layout = pack_tensors(tensors)
         event = None
         if self.asynchronous:
             host = self.pinned_array('output', packed)
@@ -96,8 +97,7 @@ class TileWorkspace:
             self.events.append(event)
         else:host = packed.cpu()
         if packed.is_cuda:self.d2h_bytes += packed.numel()*packed.element_size()
-        values = tuple(piece.view_as(original) for piece, original in
-                       zip(host.split([value.numel() for value in tensors]), tensors))
+        values = layout.unpack(host)
         return HostTransfer(values, event, packed if self.asynchronous else None)
 
     def drain(self):

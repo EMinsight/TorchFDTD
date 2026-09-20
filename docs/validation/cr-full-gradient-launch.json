@@ -23,5 +23,6 @@
   "forward_kernel": "fused",
   "backward_kernel": "fused",
   "hardware": "NVIDIA GeForce RTX 3060",
-  "validation": "Physical 2-wavelength/2-ray combined objective and gradient integration test passed. Full locked CR execution launched, no completed result or optical convergence claimed."
+  "validation": "Physical 2-wavelength/2-ray combined objective and gradient integration test passed. Full locked CR execution launched, no completed result or optical convergence claimed.",
+  "timing_note": "Two small CUDA nonuniform-grid regression tests overlapped the early forward phase. Elapsed time is diagnostic, not an isolated performance benchmark. Numerical comparisons remain applicable."
 }

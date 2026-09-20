@@ -218,3 +218,20 @@ The small-grid implementation still incurs substantial Python, transfer and
 replay overhead. A reduction in device storage is not itself a speedup. The
 [runtime validation report](validation/TILE_RUNTIME_REPORT.md) records both
 improvements and the prefix selector's longer-duration prediction errors.
+
+## Lossless mixed-dtype transport preparation
+
+Internal tile input and output packets now preserve each tensor's dtype and
+shape. Homogeneous packets retain typed concatenation. Mixed packets use byte
+views with alignment padding, so a real material gradient is not promoted to
+complex and large integer metadata does not round through floating point.
+Unpacked views share packet storage and transport is explicitly detached from
+autograd. Existing HostTransfer completion and buffer-ownership rules apply.
+
+CPU tests cover complex conjugate views, noncontiguous arrays, empty tensors,
+signed zero, infinity, a NaN payload, large integers and workspace round trips.
+Sixteen CPU resident-versus-tiled field/gradient cases also pass. Mixed-dtype
+asynchronous GPU transport still needs a dedicated test when a GPU is free.
+This preparation does not enable complex spatial streaming. Bloch halo phase
+mapping, its conjugate transpose, backing-store support and memory admission
+remain required before that execution path can be exposed.

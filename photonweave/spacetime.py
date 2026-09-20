@@ -10,13 +10,13 @@ from types import SimpleNamespace
 import torch
 
 from .differentiable import _Grid, _System, _split
+from .tensor_packet import pack_tensors
 
 
 def _host_copies(tensors):
     """One payload transfer rather than a synchronization per CPML slab."""
-    packed = torch.cat([value.reshape(-1) for value in tensors]).cpu()
-    return tuple(piece.view_as(original) for piece, original in
-                 zip(packed.split([value.numel() for value in tensors]), tensors))
+    packed,layout = pack_tensors(tensors)
+    return layout.unpack(packed.cpu())
 
 
 class SlabBlockOperator:
@@ -200,10 +200,9 @@ class SlabBlockOperator:
             for _, _, wave, profile in terms:
                 tensors.append(wave)
                 if profile is not None:tensors.append(profile)
-        packed = torch.cat([value.reshape(-1) for value in tensors])
+        packed,layout = pack_tensors(tensors)
         packed = self.workspace.copy('payload', packed) if self.workspace is not None else packed.to(self.device)
-        views = iter(piece.view_as(original) for piece, original in
-                     zip(packed.split([value.numel() for value in tensors]), tensors))
+        views = iter(layout.unpack(packed))
         local.epsilon, grid.E, grid.H, grid.inverse_permeability = [next(views) for _ in range(4)]
         local.eps4 = local.epsilon[..., None] if epsilon.ndim == 3 else local.epsilon
         if self.workspace is None:

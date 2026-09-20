@@ -1,0 +1,11 @@
+{
+  "base_commit": "3030082",
+  "source_sha256": {
+    "photonweave/tensor_packet.py": "8be4fb83e0273dd2bf9f6c51e0732ca0f11296dfe8838518d1065c0d8da8efa6",
+    "photonweave/spacetime.py": "1f1ab185d8335de89457c8810ca73e1558f65b6010126d256aa74c61f75b667e",
+    "photonweave/tile_workspace.py": "43ef27f02cf38483190aa476ce3715363c8f0f6a009e98d224cf779ff23a386f",
+    "tests/test_tensor_packet.py": "b57e0b3998a3d545972ba7f993ea2223704af6d1ef81f753fe985e37aad2b265"
+  },
+  "validation": "3 CPU packet/workspace tests and 16 explicit CPU resident-versus-tiled cases passed. An earlier broad regression selection also passed 24 tests, including two small CUDA cases. No mixed-dtype asynchronous CUDA validation claimed.",
+  "scope": "Internal lossless transport preparation. Complex spatial streaming remains rejected. Running resident CR jobs do not use this tile path."
+}
