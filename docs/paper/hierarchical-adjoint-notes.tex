@@ -371,7 +371,8 @@ and replay. The adjoint transpose independently selects Torch or the fused
 complex implementation below. Tests compare
 both precisions, nonuniform metrics, all CPML memories and density VJPs,
 including three-dimensional Bloch seams and asynchronous checkpoint replay.
-This forward kernel does not implement complex spatial streaming.
+This forward kernel alone does not implement spatial streaming. The complex
+tile integration is described below.
 
 For one relaxed CR seed at 540 nm and one pupil ray, the complete FP64 forward
 API was measured at 50 nm with 1600 steps on RTX 3060. Three alternating
@@ -395,8 +396,8 @@ where $s$ is the reduced Yee Courant coefficient. The scalar material case sums
 the three electric-component contributions. Separate H and E transpose launches
 preserve update order. Observation seeds still use prepared Torch gather and
 scatter operations. The optional kernel supports first-order real dielectric
-VJPs with complex checkpoint replay. It does not supply complex spatial
-streaming, dispersive derivatives or trainable Bloch phases.
+VJPs with complex checkpoint replay. Dispersive derivatives and trainable
+Bloch phases remain unsupported.
 
 For the selected relaxed CR seed case, matched fused-forward runs with four
 checkpoint slots and no reference cache compared Torch and fused transposes.
@@ -409,4 +410,37 @@ follow an explicit recursive-closure lifetime fix in resident and tiled
 replay. Lifetime tests disable cyclic garbage collection and check object
 release after completed result graphs are discarded. This comparison does
 not establish full-pupil optimization or a competing-solver advantage.
+
+\section{Complex spatial tiles and measured communication costs}
+For an unwrapped tile coordinate $i$ and global extent $N_x$, define the
+Bloch extension $P_i=p^{\lfloor i/N_x\rfloor}$, where $p$ is the fixed
+unit-modulus phase. The tile reads $P_i F_{i\bmod N_x}$ for electric,
+magnetic and transverse CPML states. Repeated source images receive the
+same phase. Material coefficients remain periodic without this factor.
+The discrete adjoint accumulates $P_i^*\bar F_i$ at the corresponding
+global index, including repeated windings. Real material gradients sum
+without a phase factor. Global checkpoint replay and local tile replay
+preserve this extension and its Hermitian transpose.
+
+The experimental Python API supports complex time histories, online spectral
+observations, CPU geometry gradients and DRAM or file-backed field banks.
+CUDA staging uses bounded pinned buffers. Interior tiles skip identity phase
+multiplication and use read-only slices until the owned transport packet is
+formed. Endpoint adjoints transfer only owned cells. Device-side zeroing
+initializes halo seeds before the transpose. These changes reduce copies
+without discarding any physical field update or halo derivative.
+
+On an RTX 5880 Ada, a $256\times96\times96$ complex FP64 grid with 32 steps,
+tile width 32 and temporal depth 8 gave a median complete iteration of
+1.592 seconds with two asynchronous slots over three repetitions after
+warmup. The resident fused path took 0.277 seconds. Peak Torch CUDA
+allocation was 609,492,480 bytes for streaming and 1,080,850,944 bytes for
+residency. The streamed gradient relative $L_2$ difference was
+$1.42\times10^{-16}$. Thus streaming saves approximately 43.6 percent of
+device allocation but costs a factor of 5.74 in runtime for this case.
+The problem fits in physical VRAM and the run is short. These measurements
+do not establish an external-solver advantage or beyond-VRAM capacity.
+Reported transfer bytes are logical payload counters, not physical PCIe
+or NVMe traffic. Mixed precision, asynchronous storage prefetch and
+large complex-domain capacity validation remain future work.
 \end{document}

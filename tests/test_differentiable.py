@@ -141,8 +141,11 @@ def test_invalid_feature_and_memory_contracts(tmp_path):
     with pytest.raises(ValueError,match='explicit disk'):
         AdjointOptions(storage='disk')
     p.region.boundaries.x_min=p.region.boundaries.x_max=BoundaryFace(kind='bloch')
-    with pytest.raises(ValueError,match='Torch backward'):
-        DifferentiableSimulation(p,AdjointOptions(backward_kernel='fused'))
+    # Complex fused backward is supported on CUDA. Construction is valid,
+    # but attempting that backend with a CPU epsilon must still be rejected.
+    model=DifferentiableSimulation(p,AdjointOptions(backward_kernel='fused'))
+    with pytest.raises(ValueError,match='CUDA tensor'):
+        model(eps)
 
 
 def test_higher_order_is_explicitly_rejected():

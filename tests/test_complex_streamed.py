@@ -52,4 +52,8 @@ def test_complex_policy_tuning_uses_real_loss():
     policies = [StreamedAdjointOptions(device='cpu', slab_width=w, temporal_depth=3) for w in (4, 7)]
     result = tune_streamed(p, eps, candidates=policies, probe_steps=10, repeats=1)
     assert all(row['status'] == 'measured' for row in result.report['candidates'])
+    lengths=result.report['calibration_steps']
+    expected=((len(lengths)+1)*eps.numel()*eps.element_size()
+              +2*sum(lengths)*len(p.monitors)*2*eps.element_size())
+    assert result.report['tuning_reference_reservation_bytes'] == expected
     assert eps.grad is None

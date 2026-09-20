@@ -84,7 +84,9 @@ def tune_streamed(project, epsilon, *, options=None, candidates=None, probe_step
     reference_policy, reference_index = None, None
     extra_reference_evaluations = 0
     # The tuner holds a reference signal/gradient while evaluating later modes.
-    extra = (len(all_lengths)+1)*epsilon.numel()*epsilon.element_size()+2*sum(all_lengths)*sum(m.enabled for m in project.monitors)*epsilon.element_size()
+    signal_item = epsilon.element_size()*(2 if project.region.complex_fields else 1)
+    extra = ((len(all_lengths)+1)*epsilon.numel()*epsilon.element_size()
+             +2*sum(all_lengths)*sum(m.enabled for m in project.monitors)*signal_item)
 
     def measure(index,admitted,length):
         nonlocal extra_reference_evaluations
