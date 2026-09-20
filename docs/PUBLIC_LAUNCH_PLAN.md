@@ -14,6 +14,29 @@ Credit Hyoseok Park as the project author and acknowledge development assistance
 from Astra. This does not imply endorsement by OpenAI. Verify the intended
 signed-in social account before posting. Do not infer a handle from an email.
 
+The author supplied `qkrgytjr12@gmail.com` as the project contact. This is not
+authorization to send promotional email or create a social account.
+
+## Current evidence and remaining launch work
+
+At revision `0c72990`, the verified CUDA improvements are internal comparisons:
+one CR case's complete forward evaluation is 3.75 times faster than our Torch
+forward path, and its objective/gradient evaluation is 1.55 times faster than
+our Torch backward path on an RTX 3060. These are not Lumerical or competing
+open-source solver speedups. See COMPLEX_CUDA.md and COMPLEX_CUDA_ADJOINT.md.
+
+The full 9-wavelength, 16-ray CR evaluation and gradient validation are still
+running. Complex spatial out-of-core support and full inverse-design convergence
+remain incomplete. UI parity and a general replacement claim have not passed
+the release gates. Keep the repository private and the announcement unpublished
+until the evidence and distribution review satisfy the requested conditions.
+
+Prepare the launch in this order: reproducible numerical evidence, clean
+installation and Python tutorial, a tested UI demonstration, README comparison
+and limitations, then X and appropriately targeted Reddit announcements.
+Use 100 organic stars as the campaign target, with milestones at 25, 50 and 100.
+Do not buy engagement, automate star requests, or promise the target will be met.
+
 ## Release gates
 
 - Complete the runtime sequence in CR_VALIDATION_PLAN.md and its subsequent CR
@@ -79,8 +102,8 @@ presented as a speedup over any external solver.
 [Compositor](https://github.com/robbietilton/Compositor) introduces an identifiable
 workflow problem and explains concrete familiar editing features. Adopt that
 clarity and demonstration focus, not its wording, assets or implied feature
-parity. Its public page showed approximately 1.8k stars when inspected on
-2026-09-20. This does not establish which outreach caused the stars.
+parity. Its public page showed approximately 2.2k stars on the latest inspection
+on 2026-09-20. This does not establish which outreach caused the stars.
 
 [Patchy](https://github.com/SethRobinson/Patchy) is another relevant reference for
 presenting compatibility through concrete workflows and tests.
