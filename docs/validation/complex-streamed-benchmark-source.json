@@ -1,0 +1,6 @@
+{
+  "benchmark_sha256": "99b74e0471961c25e723a8c030563c90c7e3e2dbf83dbc229f20cc211469d98a",
+  "completed": "complex-streamed-256x96x96.json",
+  "followup": "Width 32 / depth 8 with local checkpoint ablations running. Do not infer results before completion.",
+  "scope": "Internal native CUDA memory/time comparison. No public release or external solver claim."
+}

@@ -25,6 +25,8 @@ def main():
     parser.add_argument('--compare-bindings', action='store_true')
     parser.add_argument('--compare-transfers', action='store_true')
     parser.add_argument('--compare-local-checkpoints', action='store_true')
+    parser.add_argument('--complex-bloch', action='store_true')
+    parser.add_argument('--gpu-budget-gib', type=float, default=1.)
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
     if args.repeats < 1:raise ValueError('repeats must be positive')
@@ -32,10 +34,15 @@ def main():
                     mesh=.1, precision='float64', steps=args.steps, pml_cells=3)
     region.boundaries.x_min = BoundaryFace(kind='periodic')
     region.boundaries.x_max = BoundaryFace(kind='periodic')
+    if args.complex_bloch:
+        region.boundaries.x_min.kind = region.boundaries.x_max.kind = 'bloch'
+        region.bloch_phase = (.63,0,0)
+        region.cuda_kernel = 'fused'
     project = Project(region=region, sources=[Source(center=(-.2,0,0), pulse='continuous')],
                       monitors=[Monitor(center=(.2,0,0)), Monitor(center=(0,.1,0),component='Hy')])
-    options = StreamedAdjointOptions(slab_width=args.width, temporal_depth=args.depth, checkpoints=2)
-    models = {'resident':DifferentiableSimulation(project, AdjointOptions(checkpoints=2)),
+    options = StreamedAdjointOptions(slab_width=args.width, temporal_depth=args.depth, checkpoints=2,
+                                    gpu_budget_bytes=int(args.gpu_budget_gib*1024**3))
+    models = {'resident':DifferentiableSimulation(project, AdjointOptions(checkpoints=2,backward_kernel='fused')),
               'streamed':StreamedSimulation(project, options)}
     if args.compare_bindings:
         models['streamed_direct_unreused'] = StreamedSimulation(project, replace(options, reuse_tile_buffers=False))
@@ -51,19 +58,27 @@ def main():
     def iteration(name, record):
         gc.collect()
         torch.cuda.synchronize()
+        baseline = torch.cuda.memory_allocated()
         torch.cuda.reset_peak_memory_stats()
         started = time.perf_counter()
         epsilon = torch.full(region.shape, 1.7, dtype=torch.float64,
                              device='cuda' if name == 'resident' else 'cpu', requires_grad=True)
         result = models[name](epsilon)
-        loss = result.signals.square().sum()
+        loss = result.signals.abs().square().sum()
         gradient, = torch.autograd.grad(loss, epsilon)
         torch.cuda.synchronize()
         row = dict(full_iteration_seconds=time.perf_counter()-started,
+                   torch_cuda_baseline_allocated_bytes=baseline,
                    torch_cuda_peak_allocated_bytes=torch.cuda.max_memory_allocated(),
                    report=result.report)
         outputs[name] = result.signals.detach().cpu()
         gradients[name] = gradient.detach().cpu()
+        if name != 'resident':
+            torch.testing.assert_close(outputs[name], outputs['resident'], rtol=1e-10, atol=1e-12)
+            torch.testing.assert_close(gradients[name], gradients['resident'], rtol=1e-9, atol=1e-11)
+            row['signal_max_abs_difference'] = float((outputs[name]-outputs['resident']).abs().max())
+            row['gradient_max_abs_difference'] = float((gradients[name]-gradients['resident']).abs().max())
+        print(f'{name}: {row["full_iteration_seconds"]:.3f}s, peak={row["torch_cuda_peak_allocated_bytes"]}, measured={record}',flush=True)
         if record:records[name].append(row)
 
     for name in models:iteration(name, False)
@@ -80,6 +95,7 @@ def main():
     data = dict(device=torch.cuda.get_device_name(), torch_version=torch.__version__,
                 cuda_version=torch.version.cuda, grid=region.shape, steps=region.steps,
                 precision='float64', repeats=args.repeats, warmups_per_mode=1,
+                complex_bloch=args.complex_bloch, bloch_phase=region.bloch_phase,
                 median_seconds=medians, streamed_over_resident_time=medians['streamed']/medians['resident'],
                 gradient_relative_l2=float(torch.linalg.vector_norm(gradients['streamed']-gradients['resident'])/denominator),
                 records=records,

@@ -312,3 +312,30 @@ zero/two global checkpoints, retained-graph backward repetition and disk cleanup
 Tile index admission accounts for both interleaved complex lanes. This remains
 experimental first-order execution. Trainable Bloch phases or sources, ADE,
 higher derivatives and large complex-domain capacity certification are absent.
+
+### Measured complex memory/time tradeoff
+
+An RTX 5880 Ada run used a 256 x 96 x 96 grid, FP64 complex fields, fixed X
+Bloch phase 0.63, 32 steps, scalar epsilon 1.7 and two point monitors. Both
+resident and streamed paths used fused CUDA forward/backward. One warm-up per
+mode preceded three alternating-order repetitions. All streamed repetitions
+checked complete signals and epsilon gradients against the resident result.
+
+| Execution | Median complete iteration | Peak Torch CUDA allocation |
+| --- | ---: | ---: |
+| Resident | 0.335 s | 1,080,850,944 B |
+| Streamed, width 16 / depth 4 | 7.710 s | 167,514,624 B |
+| Streamed, same tiles / two asynchronous slots | 5.524 s | 335,026,176 B |
+
+The synchronous path saves 84.5% of peak device allocation but takes 23.0 times
+the resident duration. Asynchronous staging saves 69.0% and takes 16.5 times the
+resident duration, or 28.3% less time than synchronous staging. The final
+streamed epsilon-gradient relative L2 difference is 1.50e-16. These results
+demonstrate a capacity/time tradeoff, not near-resident throughput. The model
+fits in physical VRAM, has a short duration, and uses a synthetic source/objective.
+No competing solver, full CR inverse-design or physical VRAM-overflow claim is
+supported by this measurement. [Raw measurements](validation/complex-streamed-256x96x96.json).
+
+Reproduce with `python -m benchmarks.streamed_adjoint --nx 256 --ny 96 --steps 32
+--width 16 --depth 4 --complex-bloch --gpu-budget-gib 2 --compare-transfers
+--repeats 3 --output results/complex-streamed.json` on a suitable CUDA system.
