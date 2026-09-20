@@ -1,0 +1,26 @@
+{
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "scope": "Internal complex GPU slab forward/transpose and staging. Public complex streaming remains disabled.",
+  "test_runs": [
+    {
+      "passed": 56,
+      "seconds": 22.26,
+      "scope": "initial 6 complex slabs plus resident complex adjoint and real slab regressions"
+    },
+    {
+      "passed": 40,
+      "seconds": 28.14,
+      "scope": "extended 18 complex slabs and workspace regressions"
+    }
+  ],
+  "runs_overlap": true,
+  "memory_scope": "Incremental Torch peak bounded by reservation on tested small grids. No large-domain certificate or CuPy/CUDA context whole-process accounting.",
+  "source_sha256": {
+    "photonweave/cuda_complex.py": "9d74c56eccc4a0a1100efcea975e8ae3d6a15263915c847981634764c5a5b43f",
+    "photonweave/cuda_kernels.py": "b921e7175a032d3b928646ee799adf44c0cb80ad345c7cda950a62b14c729e4c",
+    "photonweave/spacetime.py": "c4de5c9c9bea9925626c1e45b110fbfd4d9ea2565cb76a7a24461c1731e383f6",
+    "tests/test_complex_spacetime_cuda.py": "c6afd6dd6156e03c70f2ed6b53da7c2df1a8bd58b08f84a8b43c5e1b583ea2b7",
+    "tests/test_tile_workspace.py": "5e76940ffb38edc541e909a5e3c55932afdab1c099ea3e07310c9668d554606a"
+  },
+  "wheel_package_files_byte_verified": 71
+}

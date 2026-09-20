@@ -24,12 +24,16 @@ def _direct_cuda_view(cupy, tensor):
     its pointer and retains a detached tensor owner. This avoids a DLPack stream
     negotiation for every small coefficient view in a short-lived slab.
     """
-    if not tensor.is_cuda or not tensor.is_contiguous() or tensor.dtype not in (torch.float32, torch.float64):
-        raise ValueError('Direct CUDA views require contiguous CUDA FP32/FP64 tensors.')
+    dtypes = {torch.float32:'float32', torch.float64:'float64',
+              torch.complex64:'complex64', torch.complex128:'complex128'}
+    if not tensor.is_cuda or not tensor.is_contiguous() or tensor.dtype not in dtypes:
+        raise ValueError('Direct CUDA views require contiguous CUDA real/complex FP32/FP64 tensors.')
+    if tensor.is_conj() or tensor.is_neg():
+        raise ValueError('Direct CUDA views require resolved conjugate/negative storage.')
     tensor.record_stream(torch.cuda.current_stream(tensor.device))
     memory = cupy.cuda.UnownedMemory(tensor.data_ptr(), tensor.numel()*tensor.element_size(),
                                     tensor.detach(), device_id=tensor.device.index)
-    return cupy.ndarray(tensor.shape, dtype='float64' if tensor.dtype == torch.float64 else 'float32',
+    return cupy.ndarray(tensor.shape, dtype=dtypes[tensor.dtype],
                         memptr=cupy.cuda.MemoryPointer(memory, 0))
 
 

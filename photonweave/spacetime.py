@@ -37,8 +37,6 @@ class SlabBlockOperator:
         if cuda_binding not in ('direct', 'dlpack'):raise ValueError('cuda_binding must be direct or dlpack.')
         self.direct_views = cuda_binding == 'direct'
         self.device = torch.device(device)
-        if host_system.grid.E.is_complex() and self.device.type != 'cpu':
-            raise ValueError('Complex spatial blocks currently require CPU validation execution.')
         if self.device.type == 'cuda' and self.device.index is None:
             self.device = torch.device('cuda', torch.cuda.current_device())
         from .tile_workspace import TileWorkspace
@@ -238,7 +236,9 @@ class SlabBlockOperator:
         local.prepare_observations()
         if self.device.type == 'cuda':
             from .cuda_kernels import FusedYeeCUDA
-            local.kernel = FusedYeeCUDA(grid, direct_views=self.direct_views, bindings_cache=self.workspace)
+            from .cuda_complex import FusedComplexYeeCUDA
+            kernel_type = FusedComplexYeeCUDA if grid.E.is_complex() else FusedYeeCUDA
+            local.kernel = kernel_type(grid, direct_views=self.direct_views, bindings_cache=self.workspace)
         return local, mapping, observer_ids
 
     def _validate(self, epsilon, state, start, depth):
@@ -309,7 +309,9 @@ class SlabBlockOperator:
             backward = None
             if self.device.type == 'cuda':
                 from .cuda_adjoint import FusedAdjointCUDA
-                backward = FusedAdjointCUDA(local, local_gradient, samples, direct_views=self.direct_views, buffers=self.workspace)
+                from .cuda_complex_adjoint import FusedComplexAdjointCUDA
+                backward_type = FusedComplexAdjointCUDA if local.grid.E.is_complex() else FusedAdjointCUDA
+                backward = backward_type(local, local_gradient, samples, direct_views=self.direct_views, buffers=self.workspace)
                 backward.e_bar.copy_(adjoint[0]);backward.h_bar.copy_(adjoint[1])
                 for target, value in zip(backward.psi_bars[0], adjoint[2:]):target.copy_(value)
                 del adjoint

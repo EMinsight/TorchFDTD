@@ -233,8 +233,8 @@ signed zero, infinity, a NaN payload, large integers and workspace round trips.
 Sixteen CPU resident-versus-tiled field/gradient cases also pass. Mixed-dtype
 asynchronous GPU transport still needs a dedicated test when a GPU is free.
 This preparation does not enable public complex spatial streaming. The CPU
-Bloch extension is validated below. CUDA execution and measured device-memory
-admission remain required before that execution path can be exposed.
+Bloch extension and internal CUDA blocks are validated below. Public integration
+across temporal blocks and spectral objectives remains required.
 
 ## Complex Bloch slabs: internal CPU validation
 
@@ -250,7 +250,7 @@ state adjoint and the epsilon gradient against resident Torch autograd. They
 cover FP32/FP64, scalar/component-diagonal epsilon, local checkpoint replay,
 nonuniform 2D grids, repeated windings, and 3D X/Z CPML with Bloch boundaries on
 the remaining axes. Inputs contain nonzero random CPML memories and endpoint
-adjoints. A separate test verifies early rejection of complex CUDA slabs.
+adjoints. A separate test verifies the public unsupported-physics gate.
 These 25 checks plus 3 packet and 16 real CPU regression cases passed.
 
 Public `StreamedSimulation` still rejects complex fields. This CPU oracle is a
@@ -271,7 +271,29 @@ The internal reservation now charges complex fields, CPML, source histories and
 observation histories at twice the real scalar size. Epsilon and its gradient
 remain real. A CPU test checks state bytes against all actual host state tensors
 and rejects insufficient host/disk budgets before creating scratch files.
-The conservative tile workspace also uses the complex element size. Its bound
-still needs validation against actual CUDA allocations before public admission.
+The conservative tile workspace also uses the complex element size. Small-grid
+CUDA allocation checks below pass, but do not establish a large-domain bound.
 This storage uses buffered file I/O, not GPUDirect Storage, and does not establish
 physical NVMe throughput or asynchronous disk prefetch.
+
+### Internal complex CUDA slab validation
+
+The internal operator selects fused complex forward and Hermitian-transpose
+kernels while retaining real epsilon gradients. Direct CuPy pointer views now
+preserve complex64/complex128 dtype and reject unresolved conjugate/negative
+views. Torch owns the allocation and records the current consumer stream.
+
+On RTX 5880 Ada, 18 block/transpose cases passed across FP32/FP64, nonuniform
+2D and uniform 3D X/Z CPML, Bloch seams, repeated halos, synchronous DLPack and
+three-slot asynchronous direct bindings, and DRAM/file-backed banks. Every case
+runs twice to exercise buffer and cached-binding reuse. Fields, CPML adjoints,
+observations and real epsilon gradients match the CPU oracle. Incremental Torch
+peak allocation fits the conservative reservation in these small cases.
+
+The extended run passed 40 tests including workspace regressions and complex
+pointer lifetime on a nondefault stream. An earlier 56-test run also passed
+resident complex adjoint and real slab regressions. These runs overlap and
+should not be summed as a unique test count. They establish correctness for
+the tested cases, not a performance advantage, physical NVMe throughput or
+large-domain capacity. The public complex guard remains until complete
+temporal checkpoint replay and spectral-objective integration are verified.

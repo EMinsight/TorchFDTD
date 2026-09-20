@@ -62,11 +62,11 @@ def test_complex_slab_against_resident_autograd(dtype, depth, nonuniform, diagon
         assert any(len(d[2]) > 2*p.region.shape[0] for d in operator.tiles(depth))
 
 
-def test_complex_cuda_spatial_guard_precedes_allocation():
+def test_public_complex_spatial_guard_precedes_allocation():
+    from photonweave import StreamedSimulation
     p = scene()
-    host = _System(p, torch.ones(p.region.shape, dtype=torch.float64), prepare_updates=False)
-    with pytest.raises(ValueError, match='CPU validation'):
-        SlabBlockOperator(host, 5, 'cuda')
+    with pytest.raises(ValueError, match='Complex Bloch'):
+        StreamedSimulation(p)
 
 
 @pytest.mark.parametrize('dtype', [torch.float32, torch.float64])

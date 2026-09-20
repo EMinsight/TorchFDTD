@@ -1,0 +1,12 @@
+{
+  "scope": "Full 9 wavelength by 16 ray forward parity, Torch RTX 5880 vs fused CUDA RTX 3060. Different hardware and run conditions, not a speed comparison.",
+  "input_sha256": {
+    "schedule": "23df354b7d7acc4cd3ac8201d9999cda96e5cfc44cc889925bb5309abbee4732",
+    "density": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44",
+    "context": "a20bec68bdbf9945e257f0886429a9981aabb479e57dbdbb49a74e0e5d037f4d"
+  },
+  "response_max_abs_difference": 5.551115123125783e-17,
+  "objective_abs_difference": 4.218847493575595e-15,
+  "torch_objective": 1.2362633488910961,
+  "fused_objective": 1.236263348891092
+}

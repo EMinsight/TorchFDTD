@@ -29,10 +29,12 @@ def test_workspace_reuses_storage_and_invalidates_old_pointer_bindings():
     assert workspace.allocated_bytes == 320
 
 
-def test_direct_view_owns_offset_allocation_on_nondefault_stream():
+@pytest.mark.parametrize('dtype',[torch.float64,torch.complex64,torch.complex128])
+def test_direct_view_owns_offset_allocation_on_nondefault_stream(dtype):
     gpu()
     import cupy
-    producer = torch.arange(128, device='cuda', dtype=torch.float64)
+    producer = torch.arange(128, device='cuda', dtype=torch.float64).to(dtype)
+    if producer.is_complex():producer = producer+1j*(producer+1)
     selected = producer[8:120]
     expected = selected.cpu().numpy().copy()*2
     stream = torch.cuda.Stream()
@@ -40,11 +42,11 @@ def test_direct_view_owns_offset_allocation_on_nondefault_stream():
     with torch.cuda.stream(stream), cupy.cuda.Device(torch.cuda.current_device()), cupy.cuda.ExternalStream(stream.cuda_stream):
         array = _direct_cuda_view(cupy, selected)
         assert array.data.ptr == selected.data_ptr()
+        if selected.is_complex():
+            with pytest.raises(ValueError, match='resolved'):_direct_cuda_view(cupy, selected.conj())
         del selected, producer
         gc.collect()
-        code = 'extern "C" __global__ void scale(double* a){int i=threadIdx.x;if(i<112)a[i]*=2.0;}'
-        kernel, module = _compile(code, torch.cuda.current_device(), cupy.cuda.Device().compute_capability, 'scale')
-        kernel((1,), (128,), (array,))
+        array *= 2
         actual = cupy.asnumpy(array)
     np.testing.assert_array_equal(actual, expected)
     with pytest.raises(ValueError, match='contiguous CUDA'):

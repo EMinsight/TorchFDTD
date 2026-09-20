@@ -9,12 +9,12 @@ class FusedComplexYeeCUDA(FusedYeeCUDA):
     """Two real lanes per cell, complex Bloch seams, real material coefficients."""
     complex_fields=True
 
-    def __init__(self,grid):
+    def __init__(self,grid,*,direct_views=False,bindings_cache=None):
         if grid.E.dtype not in (torch.complex64,torch.complex128):
             raise ValueError('Complex fused updates require complex64/complex128 fields.')
         if grid.material_states or getattr(grid,'subpixel',None) is not None:
             raise ValueError('Complex fused updates currently require real diagonal dielectric coefficients.')
-        super().__init__(grid)
+        super().__init__(grid,direct_views=direct_views,bindings_cache=bindings_cache)
 
     def _source(self,forward):
         g=self.grid
