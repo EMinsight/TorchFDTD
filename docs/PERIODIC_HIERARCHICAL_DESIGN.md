@@ -2,7 +2,9 @@
 
 `PeriodicLayerResponse` connects a real CPU density tensor to a two-polarization
 detector response using resident CPU/CUDA or DRAM/file-backed spatial execution.
-Both source bases share one material map and one adjoint batch budget. Their
+`PeriodicLayerResponse` defaults to `dtype=torch.float32`, matching the usual
+Torch tensor default. Set both the model and density to `torch.float64` only
+when explicitly validating precision. Both source bases share one material map and one adjoint batch budget. Their
 fields are coherently combined before the power and quadrant calculations.
 Backward receives seeds from the complete coupled objective and replays one
 source-basis graph at a time. It does not retain two complete solver graphs.
@@ -37,7 +39,7 @@ model = PeriodicLayerResponse(
     mesh=0.1, steps=160, pml_cells=6, quadrature_counts=(4, 4),
 )
 plan = model.plan()  # No full material map or domain fields are allocated.
-logits = torch.zeros((4, 4), dtype=torch.float64, requires_grad=True)
+logits = torch.zeros((4, 4), dtype=torch.float32, requires_grad=True)
 optimizer = torch.optim.Adam([logits], lr=0.03)
 optimizer.zero_grad(set_to_none=True)
 response = model(logits.sigmoid())  # CPU, shape (2, 4), R/G2/G1/B order.

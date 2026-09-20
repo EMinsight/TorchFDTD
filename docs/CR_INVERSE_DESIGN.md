@@ -20,7 +20,10 @@ python -m benchmarks.cr_inverse_design --schedule schedule.json --density seed.n
 
 This example's numerical settings are not a convergence recommendation. Inputs
 are supplied explicitly and are not included with the package. The driver
-requires CUDA and uses FP64 density, complex-FP64 fields and fused kernels.
+requires CUDA and defaults to FP32 density, information, gradients and Adam
+moments, with complex64 optical fields and fused kernels. One `--precision
+float64` option selects FP64 throughout for validation. No per-stage precision
+selection or automatic FP64 promotion is required.
 Resident, asynchronous DRAM and file-backed execution share the same objective.
 File mode additionally requires `--state-directory` and `--disk-budget-gib`.
 Both file execution and the default optimizer checkpoint policy preserve
@@ -36,7 +39,7 @@ reservations. This is not an exact process-RSS limit.
 
 To extend the same run, repeat the command with `--resume` and a larger total
 `--iterations`. Inputs, source hashes, runtime, memory policy, learning rate
-and CPU thread count must match. Changed settings require a new output directory.
+precision and CPU thread count must match. Changed settings require a new output directory.
 
 `checkpoint.pt` is the authoritative atomically replaced state. It retains
 density, Adam moments and step count, scalar/compact response history, the
@@ -62,7 +65,7 @@ an improved device.
 
 ## Executed checks
 
-Five optimizer/driver tests pass on the local RTX 3060 environment. They check
+Optimizer/driver tests on the local RTX 3060 environment check
 Adam moment restart, exact resumed designs, partial archive writes, rejected
 nonfinite gradients, free-space failures, projection bounds, checkpoint
 checksums, exclusive ownership and the real optical/information computation.
@@ -73,6 +76,6 @@ wavelengths, one ray and a 2 x 2 density. Two resident updates increase the
 information score from 0.07000366558 to 0.07002771570 bits per pixel. Saving
 after one update and resuming gives the exact same final response and density.
 One asynchronous DRAM update matches its resident counterpart to the recorded
-tolerance. All 80 driver/runtime hashes in the record match the tested sources.
+tolerance. The record retains 80 driver/runtime hashes for that FP64 revision.
 These small checks validate optimizer connectivity and restart behavior, not
 the original 144-case application or memory capacity.

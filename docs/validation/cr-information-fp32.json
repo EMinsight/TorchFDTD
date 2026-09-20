@@ -1,0 +1,17 @@
+{
+  "stage": "passed",
+  "scope": "Actual fixed CR electron context applied to an archived full response. Only information algebra and its response gradient are evaluated. No optical solve or full density-gradient test.",
+  "context_sha256": "a20bec68bdbf9945e257f0886429a9981aabb479e57dbdbb49a74e0e5d037f4d",
+  "reference_record_sha256": "bcda45b11fb70e5ea43ee2821e6f8cfa48830d98735aec690b72c6d06413f0ed",
+  "weighted_bits_per_pixel": {
+    "float64": 1.236263348891092,
+    "float32": 1.236266851425171
+  },
+  "information_absolute_error": 3.5025340789918147e-06,
+  "response_gradient_relative_l2": 1.0810619238158417e-05,
+  "source_sha256": {
+    "benchmarks/cr_spectral_objective.py": "187bb7e4081d5081284eab5ed39cbf26303b288643056e3d46582f70088c7b13",
+    "photonweave/electron_model.py": "e3e7f65547d797d75f9aaa8513b000a216bed82d2d994d65aced7a8035b5ead4",
+    "photonweave/information.py": "0f8f71f093a7b9aeb10b92499e069416a9c494d2cfafa85252ddc421e721ff26"
+  }
+}

@@ -36,7 +36,7 @@ def main(argv=None):
         batch_options=AdjointBatchOptions(host_budget_bytes=budget,gpu_budget_bytes=budget),
         mesh=.1,steps=160,pml_cells=6,quadrature_counts=(4,4),reference_cache=PlaneReferenceCache(1024**2))
     plan=model.plan()
-    logits=torch.linspace(-.7,.7,16,dtype=torch.float64).reshape(4,4).requires_grad_()
+    logits=torch.linspace(-.7,.7,16,dtype=torch.float32).reshape(4,4).requires_grad_()
     optimizer=torch.optim.Adam([logits],lr=.03)
     history=[]
     for _ in range(args.iterations):

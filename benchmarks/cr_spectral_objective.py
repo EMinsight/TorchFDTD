@@ -19,7 +19,11 @@ def information_objective(response, context):
     c = context
     model = spectral_electron_model(response,c['wavelengths_nm'],c['sampled_qe'],c['source_spectrum'],
         c['scene_spectral_basis'],calibration=c['electron_calibration'])
-    return exposure_target_information(model,c['scene_covariance'],c['scene_target_cross_covariance_xyz'],c['target_covariance_xyz'],
+    # Imported calibration matrices follow the response precision and device.
+    # Tensor.to returns the same tensor when already matched. No promotion occurs.
+    moments = [c[key].to(response) for key in ('scene_covariance',
+        'scene_target_cross_covariance_xyz', 'target_covariance_xyz')]
+    return exposure_target_information(model,*moments,
         exposure_scales=[e/c['reference_weighted_cfa_green_e'] for e in c['exposure_weighted_cfa_green_e']],
         probabilities=c['exposure_probabilities'],read_noise_e_rms=c['read_noise_e_rms'],raw_pixels=4)
 
@@ -104,6 +108,8 @@ def main():
     ap.add_argument('--forward-kernel',choices=['torch','fused'],default='torch')
     ap.add_argument('--reference-cache-mib',type=int,default=0)
     ap.add_argument('--backward-kernel',choices=['auto','torch','fused'],default='auto')
+    ap.add_argument('--precision',choices=['float32','float64'],default='float32',
+        help='One precision for density, optical fields, information and gradients. FP64 is optional validation.')
     ap.add_argument('--execution-policy',choices=['legacy','resident','dram','file'],default='legacy')
     ap.add_argument('--gpu-budget-gib',type=float,default=32.)
     ap.add_argument('--host-budget-gib',type=float,default=64.)
@@ -122,6 +128,7 @@ def main():
         if args.cpu_threads<1:ap.error('--cpu-threads must be positive')
         torch.set_num_threads(args.cpu_threads)
     execution=execution_settings(args)
+    dtype=getattr(torch,args.precision)
     if args.forward_only and args.directional_steps:
         ap.error('--directional-steps requires a gradient run')
     if args.directional_steps and any(not math.isfinite(h) or not 0<h<.01 for h in args.directional_steps):
@@ -139,13 +146,14 @@ def main():
     for w,row in zip(wavelengths,rows):
         if any(abs(spec['wavelength_um']*1000-float(w))>1e-10 for spec in row):
             raise ValueError('Case wavelength ordering differs from electron context.')
-    seed=torch.tensor(np.load(args.density,allow_pickle=False),device='cpu' if execution else 'cuda',dtype=torch.float64)
+    seed=torch.tensor(np.load(args.density,allow_pickle=False),device='cpu' if execution else 'cuda',dtype=dtype)
     if not bool(((seed==0)|(seed==1)).all()):raise ValueError('Expected a binary locked seed.')
     density=(.01+.98*seed).requires_grad_(not args.forward_only)
     output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
     contract=dict(input_sha256=hashes,source_sha256=source_hashes(),runtime=runtime_identity(),
         mesh_um=args.mesh,steps=args.steps,pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,
         forward_kernel=args.forward_kernel,backward_kernel=args.backward_kernel,
+        precision=args.precision,
         reference_cache_mib=args.reference_cache_mib,forward_only=args.forward_only,
         relaxation='0.01 + 0.98 * binary seed',dtype=str(density.dtype),shape=list(density.shape))
     if execution:
@@ -163,7 +171,7 @@ def main():
         maxima=dict(host_reservation_bytes=0,gpu_reservation_bytes=0,disk_reservation_bytes=0)
         for row in rows:
             for spec in row:
-                candidate=PeriodicLayerResponse(spec,density_shape=tuple(density.shape),dtype=density.dtype,
+                candidate=PeriodicLayerResponse(spec,density_shape=tuple(density.shape),dtype=dtype,
                     mesh=args.mesh,steps=args.steps,pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,
                     reference_cache=cache,forward_kernel=args.forward_kernel,**execution)
                 planned=candidate.plan()
@@ -181,9 +189,11 @@ def main():
                 pixel_origin=args.pixel_origin,reference_cache=cache,forward_kernel=args.forward_kernel)
             if execution:
                 from photonweave import PeriodicLayerResponse
-                return PeriodicLayerResponse(spec,density_shape=tuple(d.shape),dtype=d.dtype,**execution,**settings)(d)
-            return periodic_layer_response(d,spec,**settings,
-                options=AdjointOptions(checkpoints=4,backward_kernel=args.backward_kernel))
+                response=PeriodicLayerResponse(spec,density_shape=tuple(d.shape),dtype=dtype,**execution,**settings)(d)
+            else:
+                response=periodic_layer_response(d,spec,**settings,
+                    options=AdjointOptions(checkpoints=4,backward_kernel=args.backward_kernel))
+            return response
         result=journal.evaluate(d,index,compute)
         print(f'case {index} complete, replay_grad={torch.is_grad_enabled()}, restored={journal.hits>previous_hits}',flush=True)
         return result
@@ -207,6 +217,7 @@ def main():
             stage='forward_complete_gradient_not_computed',input_sha256=hashes,
             hardware=torch.cuda.get_device_name(),mesh_um=args.mesh,steps=args.steps,pml_cells=args.pml_cells,
             pixel_origin=args.pixel_origin,forward_kernel=args.forward_kernel,
+            precision=args.precision,
             relaxation='0.01 + 0.98 * binary seed',wavelength_count=len(rows),ray_count=len(weights),
             ray_weight_sum=sum(weights),response=response.detach().tolist(),
             weighted_bits_per_pixel=float(result.weighted_bits_per_pixel.detach()),
@@ -234,6 +245,7 @@ def main():
             timing_scope='Current invocation through gradient, including case journal I/O. Resumed timing excludes previous work.',
             input_sha256=hashes,hardware=torch.cuda.get_device_name(),mesh_um=args.mesh,steps=args.steps,
             pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,forward_kernel=args.forward_kernel,backward_kernel=args.backward_kernel,relaxation='0.01 + 0.98 * binary seed',
+            precision=args.precision,
             wavelength_count=len(rows),ray_count=len(weights),ray_weight_sum=sum(weights),response=response.detach().tolist(),
             weighted_bits_per_pixel=float(result.weighted_bits_per_pixel.detach()),bits_per_pixel=result.bits_per_pixel.detach().tolist(),
             gradient_l2=None if gradient is None else float(gradient.norm()),elapsed_seconds=time.perf_counter()-start,

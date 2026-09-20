@@ -34,7 +34,7 @@ class PeriodicLayerResponse(torch.nn.Module):
     concurrent adjoint batching or a converged CR optimization by itself.
     """
     def __init__(self, spec, *, density_shape, policy, batch_options,
-                 mesh, steps, dtype=torch.float64, pml_cells=12,
+                 mesh, steps, dtype=torch.float32, pml_cells=12,
                  quadrature_counts=(24, 24), pixel_origin='cell_edges',
                  reference_cache=None, forward_kernel='fused'):
         super().__init__()

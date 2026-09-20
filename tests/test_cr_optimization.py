@@ -7,8 +7,8 @@ import torch
 from benchmarks.cr_optimization import ProjectedAdamRun
 
 
-def start(path, resume=False, **kwargs):
-    return ProjectedAdamRun(path, torch.tensor([[.1,.9],[.7,.2]], dtype=torch.float64),
+def start(path, resume=False, dtype=torch.float64, **kwargs):
+    return ProjectedAdamRun(path, torch.tensor([[.1,.9],[.7,.2]], dtype=dtype),
         {'physics':'test'}, learning_rate=.03, resume=resume, **kwargs)
 
 
@@ -17,19 +17,20 @@ def update(run):
     return run.step(score, {'response':'synthetic quadratic'})
 
 
-def test_restart_preserves_density_adam_and_evaluated_best(tmp_path):
-    with start(tmp_path/'uninterrupted') as whole:
+@pytest.mark.parametrize('dtype', [torch.float32, torch.float64])
+def test_restart_preserves_density_adam_and_evaluated_best(tmp_path, dtype):
+    with start(tmp_path/'uninterrupted', dtype=dtype) as whole:
         for _ in range(4):
             update(whole)
         expected = whole.density.detach().clone()
         moments = whole.optimizer.state[whole.density]
-    with start(tmp_path/'split') as split:
+    with start(tmp_path/'split', dtype=dtype) as split:
         update(split)
         update(split)
         initial_best = split.best['record']['weighted_bits_per_pixel']
     # An interrupted archive write cannot replace the committed checkpoint.
     (tmp_path/'split/checkpoint.pt.tmp').write_bytes(b'partial')
-    with start(tmp_path/'split', resume=True) as resumed:
+    with start(tmp_path/'split', resume=True, dtype=dtype) as resumed:
         assert resumed.updates == 2
         for _ in range(2):
             update(resumed)
@@ -119,9 +120,10 @@ def synthetic_inputs(tmp_path):
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
-def test_full_torch_cr_optimization_resume_and_streaming(tmp_path):
+@pytest.mark.parametrize('precision', ['float64', 'float32'])
+def test_full_torch_cr_optimization_resume_and_streaming(tmp_path, precision):
     from benchmarks.cr_inverse_design import main
-    args = synthetic_inputs(tmp_path)
+    args = synthetic_inputs(tmp_path)+([] if precision == 'float32' else ['--precision',precision])
     whole = main(args+['--output-directory',str(tmp_path/'whole'),'--iterations','2'])
     first = main(args+['--output-directory',str(tmp_path/'split'),'--iterations','1'])
     resumed = main(args+['--output-directory',str(tmp_path/'split'),'--iterations','2','--resume'])
@@ -139,9 +141,18 @@ def test_full_torch_cr_optimization_resume_and_streaming(tmp_path):
     streamed = main(args+['--output-directory',str(tmp_path/'dram'),'--iterations','1','--execution-policy','dram'])
     a = torch.load(tmp_path/'split/checkpoint.pt', weights_only=True)
     assert a['updates'] == 2 and len(a['history']) == 2
+    assert a['density'].dtype == getattr(torch, precision)
+    state = next(iter(a['optimizer']['state'].values()))
+    assert state['exp_avg'].dtype == state['exp_avg_sq'].dtype == a['density'].dtype
+    assert a['contract']['inputs']['precision'] == precision
+    field_rtol, information_atol = (2e-7, 1e-10) if precision == 'float64' else (2e-4, 1e-5)
     torch.testing.assert_close(torch.tensor(streamed['final']['metadata']['response']),
-        torch.tensor(first['final']['metadata']['response']), rtol=2e-7, atol=1e-10)
-    assert abs(streamed['final']['weighted_bits_per_pixel']-first['final']['weighted_bits_per_pixel']) < 1e-10
+        torch.tensor(first['final']['metadata']['response']), rtol=field_rtol, atol=information_atol)
+    assert abs(streamed['final']['weighted_bits_per_pixel']-first['final']['weighted_bits_per_pixel']) < information_atol
     assert all(row['loss_gradient_l2'] > 0 for row in whole['history'])
     assert json.loads((tmp_path/'whole/plan.json').read_text())['cases'] == 3
     assert json.loads((tmp_path/'whole/progress.json').read_text())['stage'] == 'requested_updates_and_final_forward_complete'
+    changed = 'float32' if precision == 'float64' else 'float64'
+    with pytest.raises(ValueError, match='contract mismatch'):
+        main(args+['--precision',changed,'--output-directory',str(tmp_path/'split'),
+                   '--iterations','3','--resume'])

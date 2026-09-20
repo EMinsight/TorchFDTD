@@ -39,7 +39,7 @@ def load_inputs(args):
     for wavelength, row in zip(wavelengths, rows):
         if any(abs(spec['wavelength_um']*1000-float(wavelength)) > 1e-10 for spec in row):
             raise ValueError('Case wavelengths differ from the electron context.')
-    seed = torch.tensor(np.load(paths['density'], allow_pickle=False), dtype=torch.float64)
+    seed = torch.tensor(np.load(paths['density'], allow_pickle=False), dtype=getattr(torch, args.precision))
     if seed.ndim != 2 or not seed.numel() or not bool(((seed == 0) | (seed == 1)).all()):
         raise ValueError('Expected a nonempty binary two-dimensional locked seed.')
     return schedule, context, hashes, .01+.98*seed
@@ -56,6 +56,8 @@ def main(argv=None):
     parser.add_argument('--pml-cells', type=int, default=12)
     parser.add_argument('--pixel-origin', choices=['cell_edges','sample_centers'], default='cell_edges')
     parser.add_argument('--execution-policy', choices=['resident','dram','file'], default='resident')
+    parser.add_argument('--precision', choices=['float32','float64'], default='float32',
+        help='One precision for density, optical fields, information and Adam. FP64 is optional validation.')
     parser.add_argument('--gpu-budget-gib', type=float, default=32.)
     parser.add_argument('--host-budget-gib', type=float, default=64.)
     parser.add_argument('--slab-width', type=int, default=32)
@@ -77,11 +79,12 @@ def main(argv=None):
     args.forward_kernel = args.backward_kernel = 'fused'
     schedule, context, hashes, initial = load_inputs(args)
     # Validate fixed electron/covariance inputs before any optical execution.
-    information_objective(torch.ones((4, len(schedule['cases'])), dtype=torch.float64), context)
+    information_objective(torch.ones((4, len(schedule['cases'])), dtype=initial.dtype), context)
     # Keep optimizer/copy work outside the solver's own shared host reservation.
     # Context and ordinary interpreter/OS overhead are reported separately.
     optimizer_reservation = 16*initial.numel()*initial.element_size() + 1024**2
     execution = execution_settings(args)
+    dtype = initial.dtype
     remaining_host = execution['batch_options'].host_budget_bytes-optimizer_reservation
     if remaining_host <= 0:
         raise ValueError('Host budget cannot hold the optimizer reservation.')
@@ -95,6 +98,7 @@ def main(argv=None):
     contract = dict(input_sha256=hashes, source_sha256=sources, runtime=runtime_identity(),
         settings=settings, execution={key:asdict(value) for key,value in execution.items()},
         cpu_threads=args.cpu_threads, reference_cache_mib=args.reference_cache_mib,
+        precision=args.precision,
         optimizer_reservation_bytes=optimizer_reservation,
         checkpoint_free_reserve_bytes=int(args.checkpoint_free_reserve_gib*1024**3),
         density_parameterization='Projected continuous density initialized as 0.01 + 0.98 * binary seed',
@@ -102,7 +106,7 @@ def main(argv=None):
         scope='Caller context, interpreter/runtime overhead and OS file cache are outside the solver/optimizer reservation.')
     cache = PlaneReferenceCache(args.reference_cache_mib*1024**2)
     def module(spec):
-        return PeriodicLayerResponse(spec, density_shape=tuple(initial.shape), dtype=initial.dtype,
+        return PeriodicLayerResponse(spec, density_shape=tuple(initial.shape), dtype=dtype,
             reference_cache=cache, **settings, **execution)
     directory = Path(args.output_directory)
     started = time.perf_counter()

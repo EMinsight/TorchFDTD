@@ -33,9 +33,9 @@ class ProjectedAdamRun:
     """
     def __init__(self, directory, initial_density, contract, *, learning_rate,
                  resume=False, disk_free_reserve_bytes=0):
-        if (initial_density.device.type != 'cpu' or initial_density.dtype != torch.float64
+        if (initial_density.device.type != 'cpu' or initial_density.dtype not in (torch.float32, torch.float64)
                 or initial_density.ndim != 2 or not initial_density.numel()):
-            raise ValueError('Use a nonempty two-dimensional CPU FP64 density.')
+            raise ValueError('Use a nonempty two-dimensional CPU FP32 or FP64 density.')
         self._validate_density(initial_density)
         if not 0 < learning_rate < 1 or not isinstance(disk_free_reserve_bytes, int) or disk_free_reserve_bytes < 0:
             raise ValueError('Use 0 < learning_rate < 1 and a nonnegative disk reserve.')

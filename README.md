@@ -95,6 +95,10 @@ integration remains separate from the legacy-path optical measurements.
 The [restartable CR design driver](docs/CR_INVERSE_DESIGN.md) adds projected
 Adam updates, atomic density/moment checkpoints and a complete final forward
 evaluation. The original CR application's physical optimization remains pending.
+The CR evaluator and optimizer now default to one FP32 path for density,
+fields, information, gradients and Adam moments. `PeriodicLayerResponse` also
+defaults to FP32. FP64 remains an explicit validation option. See the
+[precision scope and checks](docs/validation/FP32_PRECISION.md).
 A [measured observation-setup improvement](docs/validation/PERIODIC_OBSERVATION_SETUP.md)
 removes repeated mesh-count derivation. On a synthetic periodic RTX 3060 case,
 full response/objective/VJP medians improve by 1.52x at 128 steps and 1.04x at

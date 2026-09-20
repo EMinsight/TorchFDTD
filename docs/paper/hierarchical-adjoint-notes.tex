@@ -1021,4 +1021,21 @@ density exactly. One asynchronous DRAM update agrees with its resident
 counterpart. These checks establish discrete optimizer connectivity and
 restart behavior, not performance or a completed original CR application.
 
+\section{Default single-precision execution}
+The periodic density API and complete CR evaluation and optimization drivers
+now default to FP32. Density, optical response, information matrices, density
+gradients and Adam moments share this precision. Bloch optical fields use
+complex64. FP64 is an explicit validation mode, rather than a mandatory
+stage in each objective evaluation. Imported fixed calibration matrices are
+converted to the selected response precision. Restart contracts bind that
+selection, so a checkpoint cannot silently switch precision.
+
+FP32 and FP64 optimizer tests cover uninterrupted and resumed runs, bounded
+case replay and agreement between resident and asynchronous DRAM execution.
+These checks establish discrete connectivity and restart behavior. They do
+not establish precision independence for arbitrary devices or physical CR
+gradient convergence. Subsequent beyond-VRAM capacity studies should exceed
+the available VRAM at FP32, with state size reported separately from transient
+and checkpoint allocations.
+
 \end{document}

@@ -210,7 +210,7 @@ def test_explicit_cr_runner_preserves_objective_and_full_gradient(tmp_path, monk
         monkeypatch.setattr('sys.argv', ['cr_spectral_objective', '--schedule', str(schedule),
             '--density', str(density), '--context', str(context), '--output', str(output),
             '--mesh', '.1', '--steps', '160', '--pml-cells', '6', '--forward-kernel', 'fused',
-            '--backward-kernel', 'fused', '--cpu-threads', '1', '--reference-cache-mib', '1',
+            '--backward-kernel', 'fused', '--cpu-threads', '1', '--reference-cache-mib', '1', '--precision', 'float64',
             '--execution-policy', mode, '--gpu-budget-gib', '1', '--host-budget-gib', '1',
             '--slab-width', '4', '--temporal-depth', '4'])
         main()
@@ -227,3 +227,14 @@ def test_explicit_cr_runner_preserves_objective_and_full_gradient(tmp_path, monk
             assert record['execution_preflight']['cases'] == 3
             assert json.loads(output.with_suffix('.plan.json').read_text())['stage'] == 'admitted_not_executed'
             assert 'execution' in record['restart_contract']
+
+
+def test_default_fp32_model_accepts_fp32_density_and_backpropagates(tmp_path):
+    module = PeriodicLayerResponse(SPEC, **SETTINGS, density_shape=(2, 2),
+        policy=policy('cpu', 'resident', tmp_path),
+        batch_options=AdjointBatchOptions(host_budget_bytes=BUDGET, gpu_budget_bytes=BUDGET))
+    density = torch.tensor([[.2, .4], [.5, .3]], dtype=torch.float32, requires_grad=True)
+    response = module(density)
+    gradient, = torch.autograd.grad(objective(response), density)
+    assert response.dtype == gradient.dtype == torch.float32
+    assert bool(torch.isfinite(gradient).all()) and gradient.norm() > 1e-4
