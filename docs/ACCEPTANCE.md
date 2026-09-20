@@ -16,8 +16,53 @@ and its actual descent step improves both native and continuum objectives.
 See [the physical record](MODE_NETWORK_GRADIENT_ACCEPTANCE.md),
 [PMC integration](PMC_IMPLEMENTATION_PLAN.md) and
 [tensor CPML contract](ANISOTROPY_IMPLEMENTATION_PLAN.md).
-The prior CI counts below apply to their recorded revision. This runtime
-integration requires its own complete CI record.
+The follow-up at `99c61c7` connects explicit full-cell GDS ports to native
+mode-network S parameters and material gradients. Its independently checked
+rotated-tensor slab reduces complex transmission error from 1.0088% to
+0.2421% on mesh refinement. The rotation VJP differs from the continuum
+derivative by 1.5077%. See [GDS mode ports](GDS_MODE_PORTS.md) and
+[the tensor slab record](TENSOR_CPML_SLAB_ACCEPTANCE.md).
+
+Linux CI [35537265913](https://github.com/hyoseokp/TorchFDTD/actions/runs/35537265913)
+at `99c61c7` passed **1,218 Python tests**, with 432 environment-dependent skips
+and no Python failures. Three actual two/three-process Gloo cases passed.
+The JUnit SHA-256 is
+`ad92bbc29a544da0d7533cb24adfa7acc92f24004a283e4946e2f67bbbdfb4ea`.
+Its browser step passed 28 cases and skipped 8, but failed one obsolete
+assertion requiring the PMC option to be absent. The complete CI run therefore
+failed. Revision `11ec24d` corrects that test expectation. The affected browser
+workflow then passed locally. The unchanged Python suite was not repeated
+for this test-only correction. The earlier `6fa0c3` run also failed, on a stale
+PEC rejection-message expectation, and is not counted as an all-pass run.
+
+The `99c61c7` staged-source audit checked 771 allowlisted files with no pattern
+findings. A wheel built from those exact bytes was installed and all 101
+package files matched the audited source and wheel. Its SHA-256 is
+`e200e4e06225f872e1472bc7295c94aef18d5f85ca48cab28f32e21016ed382a`.
+The UI-test follow-up changes no package bytes.
+These records do not establish full feature parity, multi-GPU performance
+or public-release clearance.
+
+The next integration adds a separate uniform PMC+CPML endpoint API with compact
+direct CUDA gathers and a complete auxiliary-state transpose. Four focused CPU
+tests and one CUDA test passed. Full/half-domain CPU fields and gradients agree,
+and complete checkpoint payload halves in the recorded geometry. The final
+CUDA case exercises both electric and magnetic auxiliary families. Its peak
+Torch allocation was 107,520 bytes within a 297,428-byte plan. The initial
+allocation undercount and corrected fixture remain documented in
+[the PMC record](PMC_IMPLEMENTATION_PLAN.md).
+
+Stored native six-field planes also connect to browser diffraction and bounded
+NPZ/Python postprocessing. Two actual CPU API/adapter tests and one actual-run
+browser test passed, including matched references, cutoff errors and stale
+response rejection. The production frontend was built and its computed table
+visually reviewed. See [the workflow](RADIATION_WORKFLOW.md). The manuscript was
+rebuilt to 34 pages and changed pages were rendered and reviewed.
+
+A separate frozen-wheel [FDTDX correctness fixture](FDTDX_MATCHED_CORRECTNESS.md)
+passes in the same Linux RTX 3060 environment. The two histories, scalar loss
+and scalar material derivative agree exactly for this periodic 16³/64-step
+case. It is not a comparative timing or large-capacity result.
 
 The current feature-by-feature status is in [FDTDX parity gates](FDTDX_PARITY_KO.md).
 The earlier acceptance snapshot below is retained as historical evidence.

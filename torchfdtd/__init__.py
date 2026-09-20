@@ -125,3 +125,7 @@ from .endpoint_project import EndpointProject, endpoint_from_project
 from .mode_network import FixedModePort, ModeNetwork, ModeNetworkResult
 __all__ += ["EndpointProject", "endpoint_from_project", "FixedModePort",
             "ModeNetwork", "ModeNetworkResult"]
+
+from .pmc_cpml import EndpointCPMLSimulation
+from .radiation_io import native_radiation_plane, load_native_radiation_plane
+__all__ += ["EndpointCPMLSimulation", "native_radiation_plane", "load_native_radiation_plane"]

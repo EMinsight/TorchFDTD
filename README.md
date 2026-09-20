@@ -31,6 +31,10 @@ connects real FP32 CPU/CUDA fields, point-source waveforms and material gradient
 through bounded binomial checkpoint replay. Closed PEC/PMC projects also run
 through the browser, JSON, CLI and ordinary `Simulation` API, with six-face
 editing, point traces and complete endpoint NPZ storage. A separate
+uniform PMC+CPML endpoint API includes real FP32 CPU/CUDA propagation and
+auxiliary-state, material and waveform adjoints. A small full/half-domain
+comparison preserves fields and gradients and halves checkpoint payload.
+Mixed-boundary Project dispatch and throughput remain pending. A separate
 [bulk tensor dielectric API](docs/ANISOTROPY_IMPLEMENTATION_PLAN.md) supports
 periodic/Bloch CPU/CUDA fields and full symmetric tensor gradients. An
 isotropic fixed CPML exterior now encloses interior tensor materials, with
@@ -56,7 +60,9 @@ and [differentiable diffraction/far-field transforms](docs/RADIATION.md) extend
 the Python API. A separate [GDS mode-port adapter](docs/GDS_MODE_PORTS.md)
 connects explicit full-cell TEXT markers to the opposing-port network and a
 caller-sampled native material tensor. The native dipole angular-pattern error decreases from 1.03%
-to 0.23% over three FP32 meshes. See the [FDTDX parity completion gates](docs/FDTDX_PARITY_KO.md)
+to 0.23% over three FP32 meshes. The [stored-plane diffraction workflow](docs/RADIATION_WORKFLOW.md)
+adds browser order tables, matched-reference efficiencies and NPZ/Python
+postprocessing without another FDTD run. See the [FDTDX parity completion gates](docs/FDTDX_PARITY_KO.md)
 for verified scope and remaining work. This does not establish overall FDTDX
 parity or a speed advantage over it.
 
@@ -111,7 +117,8 @@ capacity and throughput measurements remain pending.
 endpoints across CPU/CUDA, adjoint, streaming and batch paths. PMC and magnetic
 symmetry now run closed cavities through the native Project, browser and CLI.
 The resident `EndpointProject` API retains material and waveform gradients.
-PML mixing, ADE, streaming and tensor-batch integration remain pending.
+The explicit uniform PMC+CPML API now supports CPU/CUDA adjoints. Its native
+dispatch, ADE, streaming and tensor-batch integration remain pending.
 The experimental [single-domain slab API](docs/DOMAIN_DECOMPOSITION.md) adds
 rank-local Yee propagation, halo transposes and checkpointed material gradients.
 Its 2/3-rank checks include real Linux Gloo CPU processes, with fields and
@@ -256,8 +263,8 @@ Reviewed external public source on 19 September 2026. TorchFDTD implementation s
 | Project | GPU/backend | Independent ensemble / same-GPU batch | Adjoint/autodiff | Relevant scope | RTX 5880 comparison |
 |---|---|---|---|---|---|
 | **TorchFDTD** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **Partial**. Dielectric/Bloch/CPML/ADE/PEC discrete adjoints, analytic geometry and density, fixed-plane/mode/radiation objectives and hierarchical replay. Source/eigenmode derivatives remain limited | Browser + Python CAD, independent FSP subset, GDS geometry, multipole ADE, rectilinear/graded mesh, selective plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
-| [FDTDX](https://github.com/ymahlau/fdtdx) | **JAX currently**, CUDA/ROCm installation paths | JAX composition. Same-GPU cohort throughput not measured here | **Yes**, reversible/checkpointed paths with model restrictions | Already provides dispersive/anisotropic materials and rectilinear grids. Those are not unique TorchFDTD advantages | Not measured, Linux CUDA environment pending |
-| [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX wrapper + specialized CUDA | README proposes distributing independent jobs through JAX. Fused batch-axis throughput not verified | Reviewed primitive has no registered JVP/VJP/transpose rule | Fast specialized dielectric scope, constrained z size, x/y adiabatic absorption, z PML. TorchFDTD adds dispersion, graded grids and online plane DFT | Not measured, Linux CUDA environment pending |
+| [FDTDX](https://github.com/ymahlau/fdtdx) | **JAX currently**, CUDA/ROCm installation paths | JAX composition. Same-GPU cohort throughput not measured here | Reversible/checkpointed with restrictions. ADE uses checkpointing, reference eigenmodes are held fixed | Dispersive/anisotropic materials and rectilinear grids | Matched Linux GPU correctness below. Comparative throughput pending |
+| [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX wrapper + specialized CUDA | README proposes distributing independent jobs through JAX. Fused batch-axis throughput not verified | Reviewed primitive has no registered JVP/VJP/transpose rule | Fast specialized dielectric scope, constrained z size, x/y adiabatic absorption, z PML. TorchFDTD adds dispersion, graded grids and online plane DFT | Not measured, compatible package setup pending |
 | [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy / PyTorch CUDA | Public `Grid` represents one case. Our external graph adapter runs its updates. Dedicated upstream cohort API not verified | Default backend disables gradients, so default autodiff is not established | Readable grid foundation used and attributed by TorchFDTD | PyPI 0.2.2 measured, including eager and graph-adapted baselines |
 | [fdtd3d](https://github.com/zer011b/fdtd3d) | C++ / CUDA / MPI | **Single-problem domain decomposition** differs from independent-case batches. Cohort throughput not verified | Not documented in reviewed README | Compiled solver and distributed execution. Single-grid MPI is still missing from TorchFDTD | Not measured, compatible compiler/runtime environment pending |
 
@@ -266,13 +273,30 @@ workflows. TorchFDTD's bulk tensor API supports nondispersive periodic/Bloch
 domains and a fixed isotropic CPML exterior. We have not demonstrated a speed advantage against
 FDTDX, fdtdz or fdtd3d. [Pinned sources and limitations](docs/OPEN_SOURCE_COMPARISON_KO.md).
 
+A first [matched FDTDX correctness gate](docs/FDTDX_MATCHED_CORRECTNESS.md)
+uses the same Linux RTX 3060, a 16³ periodic dielectric grid, 64 FP32 steps,
+one fixed point source, two raw Ex histories and four requested checkpoints.
+TorchFDTD uses the frozen `6fa0c35` wheel and FDTDX uses `60c1c27`.
+
+| Matched quantity | TorchFDTD | FDTDX | Difference |
+|---|---:|---:|---:|
+| Loss | 0.0001640023838263 | 0.0001640023838263 | 0 |
+| Slab-permittivity derivative | −7.2264010669e−5 | −7.2264010669e−5 | 0 |
+| Two complete Ex histories | 64 × 2 samples | 64 × 2 samples | Max absolute error 0 |
+| Comparative speed / memory | Pending | Pending | No ranking |
+
+The small fixture establishes the comparison contract. It does not establish
+large-domain capacity, all-physics equivalence or a performance advantage.
+The independent Fourier check, finite differences, precision conventions,
+artifact hashes and setup corrections are retained in the linked record.
+
 | Required workflow | TorchFDTD implementation milestone | Still needed for broader FDTDX parity |
 |---|---|---|
-| GDS | Explicit layer stack, hierarchy/units/PATH conversion and limited export | General holes and automatic runnable port mapping |
+| GDS | Explicit layer stack, hierarchy/units/PATH conversion, limited export and explicit full-cell opposing mode ports | General holes, narrow/branch ports and automatic port mapping |
 | Design parameters | Density filters, fixed masks, exact symmetry, projection/continuation and optimizer resume | General shape derivatives and fabrication guarantees |
-| Mode ports | Actual fixed-mode CUDA launch and opposing-port multimode complex S matrices with interior material VJPs | Arbitrary branch/unequal-section ports, open cross-sections, streamed injection, source/eigenmode gradients and physical convergence |
-| Radiation | Differentiable Bloch orders and closed-box homogeneous far fields, including native FP32 mesh convergence | Layered/periodic-lattice far fields and complete UI |
-| Boundaries / tensors / multi-GPU | PEC, native closed-PMC GUI/CLI/API, resident PMC waveform/material adjoints, tensor adjoints with fixed isotropic CPML exterior | General PMC/tensor boundary and streaming workflows, verified single-problem multi-GPU |
+| Mode ports | Actual fixed-mode CUDA launch and opposing-port multimode complex S matrices with interior material VJPs | Arbitrary branch/unequal-section ports, open cross-sections, streamed injection, source parameters and broader physical convergence. Eigenmode differentiation is a separate research extension |
+| Radiation | Differentiable Bloch orders, closed-box homogeneous far fields, native FP32 mesh convergence, stored-plane browser/NPZ diffraction | Layered/periodic-lattice far fields and closed-box UI |
+| Boundaries / tensors / multi-GPU | PEC, native closed-PMC GUI/CLI/API, separate uniform PMC+CPML CPU/CUDA adjoints, tensor adjoints with fixed isotropic CPML exterior | Mixed-boundary native dispatch, general absorption/streaming workflows, verified single-problem multi-GPU |
 
 The [complete row-by-row parity gates](docs/FDTDX_PARITY_KO.md) retain failed,
 partial and unmeasured conditions instead of treating API presence as full parity.
@@ -590,7 +614,7 @@ This initial follow-up used user-selected sizes. The measured selector is evalua
 
 The process comparison excludes worker startup and includes IPC. The upstream ensemble runs cases sequentially through our graph adapter, so it does not establish a limit on a separately optimized upstream batch implementation. The 32³ batch traces differ from upstream by at most 0.267%, still below the predeclared 1% threshold.
 
-**FDTDX, fdtdz and fdtd3d have not been timed on this GPU.** Their capabilities are compared below, but there is no measured speed ranking against them. The current GPU host lacks a Linux CUDA environment. See [method, environment and limitations](docs/validation/OPEN_SOURCE_REPORT.md), [raw single-case data](docs/validation/open-source-flaport.json), [raw batch data](docs/validation/tensor-batch.json), [raw cohort data](docs/validation/cohorts.json), and the [Python batch API](docs/TENSOR_BATCH.md).
+**FDTDX, fdtdz and fdtd3d have not been timed on the GPU in this historical study.** There is no measured speed ranking against them. A subsequent [Linux RTX 3060 comparison](docs/FDTDX_MATCHED_CORRECTNESS.md) establishes one FDTDX correctness fixture only. See [method, environment and limitations](docs/validation/OPEN_SOURCE_REPORT.md), [raw single-case data](docs/validation/open-source-flaport.json), [raw batch data](docs/validation/tensor-batch.json), [raw cohort data](docs/validation/cohorts.json), and the [Python batch API](docs/TENSOR_BATCH.md).
 
 ### Four workloads with 16 independent cases each
 
@@ -765,7 +789,7 @@ On Windows, after deployment, `scripts/start_remote.ps1 -GpuHost YOUR_GPU_HOST` 
 - Full six-component Yee FDTD in 3D, and z-invariant 2D with all vector components available. Ez excitation yields TMz in 2D. Uniform Cartesian cells and a configurable CFL stability factor (default 0.99).
 - Constant dielectrics with index ≥ 1, plus passive isotropic Drude/Lorentz dispersion and absorption with up to 16 coupled poles. Built-in Si, SiN and SiO2 values are editable approximations, not dispersive optical-constant databases. Parameter editing and n/k previews are available through [Materials](docs/MATERIALS.md) and the [multipole guide](docs/RUN_CONTROL_AND_CONVERGENCE.md). User-supplied sampled n/k or complex permittivity now supports [passive fitting](docs/MATERIAL_FITTING.md), with explicit error/band reports and continuous or fixed-timestep ADE targets. Gain and nonlinearity remain unsupported. A separate experimental bulk tensor API supports nondispersive periodic/Bloch domains on CPU and CUDA.
 - Staircase geometry is the default, with an optional experimental [dielectric subpixel operator](docs/SUBPIXEL_INTERFACES.md). Refine the mesh and perform convergence studies for quantitative work.
-- Six-face convolutional PML in 3D, four faces in 2D, with independent layers, sigma scale, kappa, alpha and polynomial orders. Periodic and Bloch boundary pairs are supported. PEC/electric antisymmetry are implemented in native execution. PMC/magnetic symmetry use the separate bounded resident endpoint API and are not yet admitted by the general project/UI dispatch. See [boundary conventions and validation](docs/BOUNDARIES.md).
+- Six-face convolutional PML in 3D, four faces in 2D, with independent layers, sigma scale, kappa, alpha and polynomial orders. Periodic and Bloch boundary pairs are supported. PEC/electric antisymmetry are implemented in native execution. Closed PMC/magnetic-symmetry cavities run through Project, CLI and browser dispatch, while the resident endpoint API additionally exposes material and waveform gradients. See [boundary conventions and validation](docs/BOUNDARIES.md).
 - Gaussian, smoothly ramped continuous, or sampled time/amplitude/phase electric or magnetic soft sources, with Cartesian or theta/phi orientation. Magnetic injection uses the H half-step time. The legacy cycle-based Gaussian has σ = `pulse_cycles * wavelength / c`, with center at 4σ. Standard time-domain mode exposes power-FWHM, offset and phase. [Source conventions](docs/SOURCES.md) describe carrier definitions, global inheritance and custom tables. Amplitudes are reduced fields, not calibrated V/m or dipole moments.
 - Bloch simulations retain complex E/H fields and monitor traces. A sheet source automatically applies the specified Bloch spatial phase. Snapshots can show real, imaginary, magnitude or phase values, while NPZ retains the complete complex data.
 - Point monitors record one E/H component every step. Choose FFT bins or custom-range uniform frequency/wavelength DFT, with None/Start/End/Full/Hann apodization. [Definitions, UI controls and exports](docs/MONITORS.md) distinguish FFT amplitude from complex DFT integrals. Neither is normalized transmission, reflection, power or S-parameters. E and H are staggered in space and time, and should not be naively multiplied as collocated Poynting fields.

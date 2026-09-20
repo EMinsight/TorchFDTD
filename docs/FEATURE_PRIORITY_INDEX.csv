@@ -908,7 +908,7 @@ addtime.z min,z min,P1,10,required,관측량·주파수 공간장,True,missing,m
 addtime.z span,z span,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.absorption,국소 흡수·charge/current,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.cross_sections,산란·흡수 cross-section,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
-analysis.diffraction,회절 차수·grating projection,P1,10,required,관측량·주파수 공간장,True,partial,partial,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
+analysis.diffraction,회절 차수·grating projection,P1,10,required,관측량·주파수 공간장,True,partial,partial,partial,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.directivity,Directivity·편광 분석,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.mode_area,Mode area·volume,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.nearfar,Near-to-far field,P1,10,required,관측량·주파수 공간장,True,partial,partial,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.

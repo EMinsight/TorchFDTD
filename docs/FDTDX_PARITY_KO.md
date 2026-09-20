@@ -10,6 +10,16 @@
 FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch 처리량을,
 `자동미분`이라는 설명만으로 모든 설정과 고유모드의 미분을 가정하지 않는다.
 
+고정한 FDTDX 버전의 mode solver는 재료와 좌표에 `stop_gradient`를 적용한
+외부 고유모드 계산을 사용한다. ADE는 checkpointed gradient 경로를 사용하며,
+reversible 경로에서는 명시적으로 거부한다. 사용자 정의 stopping condition과
+gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은 추가 연구 목표**로
+분리하고, 기본 동등성은 실제 지원하는 고정 모드 주입·검출·설계 영역 gradient로
+평가한다. 일반 형상·재료·경계의 모든 조합을 양쪽 모두 지원한다고 가정하지 않는다.
+근거: [mode 계산](https://github.com/ymahlau/fdtdx/blob/60c1c2712da8bb0ccaa55c77846217932bb665a2/src/fdtdx/core/physics/modes.py#L363),
+[ADE 경로 제한](https://github.com/ymahlau/fdtdx/blob/60c1c2712da8bb0ccaa55c77846217932bb665a2/src/fdtdx/fdtd/fdtd.py#L98),
+[stopping condition 제한](https://github.com/ymahlau/fdtdx/blob/60c1c2712da8bb0ccaa55c77846217932bb665a2/src/fdtdx/fdtd/wrapper.py#L24).
+
 | 항목 | FDTDX 확인 범위 | TorchFDTD 현재 검증 범위 | 동등성·우위 판단과 남은 완료 조건 |
 |---|---|---|---|
 | Browser CAD·결과 | 대응하는 공식 browser CAD workflow는 확인되지 않음 | Tree, 여러 CAD view, 속성, 결과, Python export | 사용성 차별점. 새 물리 기능의 UI와 전체 작업 흐름 검증은 계속 필요 |
@@ -22,10 +32,10 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 | 단일 문제 multi-GPU | Sharding | 별도 periodic/Bloch 초기값 API의 rank-owned slab·halo transpose·재료 VJP·binomial checkpoint. 실제 Linux 2/3-process Gloo CPU 검사 통과 | **부분/GPU 미검증**. 실제 NCCL·2장 이상 GPU, source/monitor·물리 경계·scaling 검증 필요 |
 | 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 새 고정 모드와 radiation 목적함수 | **부분**. PMC/tensor의 추가 물리·실행 경로, 일반 source/eigenmode·동시 adjoint batch 확대 필요 |
 | 설계 파라미터화 | Density, projection/binarization, symmetry | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수 | 기본 topology workflow 구현. 일반 spline/polygon shape derivative·제작 제약·최종 CR 물리 수렴은 별도 |
-| Mode source·detector·port | Mode source/detector, overlap/S-parameter | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 같은 exterior 단면의 고정 모드만 지원. 일반 branch/서로 다른 단면·open/PML 횡단면·streamed injection·모드 미분·물리 수렴·UI가 남음 |
-| Far-field·회절 | Field projection, diffraction detectors | Closed-box 벡터 원거리장, Bloch 회절 차수·방향별 효율, field graph와 재료 VJP, FP32 방사 패턴 수렴 | 기본 homogeneous exterior 기능 구현. substrate/periodic lattice far-field·일반 응용·UI는 남음 |
+| Mode source·detector·port | 고정 mode source/detector, overlap/S-parameter. 고유모드 재료·좌표의 미분은 중단 | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 같은 exterior 단면의 고정 모드만 지원. 일반 branch/서로 다른 단면·open/PML 횡단면·streamed injection·물리 수렴·UI가 남음. 고유모드 자체 미분은 별도 연구 목표 |
+| Far-field·회절 | Field projection, diffraction detectors | Closed-box 벡터 원거리장, Bloch 회절 차수·방향별 효율, field graph와 재료 VJP, FP32 방사 패턴 수렴. 저장 결과/NPZ adapter와 실제 회절 browser workflow | 기본 homogeneous exterior 기능과 회절 UI 구현. substrate/periodic lattice far-field·일반 응용·closed-box UI는 남음 |
 | 이방성 | 대각·일반 tensor | Node-sampled SPD bulk tensor, periodic/Bloch CPU·CUDA와 고정 등방성 CPML 외부, 이산 transpose·6성분 VJP·checkpoint·고유파 검증 | **부분**. 일반 anisotropic CPML·반사/장시간 안정성·interface·tensor ADE·streaming·mode·UI 검증이 남음 |
-| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. Closed PMC cavity의 native Project·CLI·browser 편집/실행·전체 endpoint NPZ, 별도 재료/파형 VJP·checkpoint | **부분**. PMC의 PML 혼합·ADE·streaming·tensor batch와 실제 domain reduction의 실행 비용 검증이 남음 |
+| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. Closed PMC native Project·CLI·browser·endpoint NPZ. 별도 uniform PMC+CPML CPU/CUDA API와 보조 상태·재료·파형 adjoint, 전체/절반 영역 일치와 checkpoint 절반 절감 | **부분**. 혼합 경계의 native dispatch·일반 흡수 정확도·속도, ADE·streaming·tensor batch 확대가 남음 |
 
 ## 이번 구현의 근거
 
@@ -62,11 +72,23 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 - [원거리장·회절](RADIATION.md): 해석 vector dipole의 복소 진폭과 전력,
   Bloch 차수·방향 분리, FP32 normalization, 실제 material VJP.
   native dipole 방사 패턴의 100→75→50 nm 메시 오차는 1.03→0.54→0.23%다.
+  [저장 결과 회절 workflow](RADIATION_WORKFLOW.md)는 실제 native 6-field plane을
+  browser와 NPZ/Python에서 계산한다. 참조 정규화, 비전파 차수, cutoff와
+  외부 매질 조건을 구분하고 기존 필드로 계산해 FDTD를 다시 실행하지 않는다.
+
+- [FDTDX 동일 조건 정확도 gate](FDTDX_MATCHED_CORRECTNESS.md): 같은 Linux·RTX 3060에서
+  16³, 64-step FP32 periodic 소스 문제의 두 Ex history, 목적함수와 한 재료
+  파라미터 VJP가 일치했다. 독립 Fourier·유한차분도 확인했다. 작은 비교 계약의
+  검증이며 속도, 대규모 용량, 전체 물리 동등성의 근거로 확대하지 않는다.
 
 - [PMC resident API](PMC_IMPLEMENTATION_PLAN.md): 실제 endpoint의 소스·관측과
   FP32 CUDA·재료/파형 gradient, 10,000-step logical binomial schedule.
   Native Project·CLI·browser의 closed-cavity 실행과 exact endpoint NPZ,
   여섯 경계의 원자적 편집·오류 시 원본 보존을 추가했다.
+  별도 uniform PMC+CPML API는 CPU 독립 점화식·보조 상태 transpose와 CUDA
+  필드·재료·파형 VJP가 일치했다. 240-step 전체/대칭 절반 영역의 대응 E/H
+  차이는 0, 완전 checkpoint는 37,088→18,544 bytes였다. 이 작은 사례의
+  메모리 비율을 대규모 속도나 일반 흡수 정확도로 확대하지 않는다.
 - [Bulk tensor API](ANISOTROPY_IMPLEMENTATION_PLAN.md): periodic/Bloch
   CPU/CUDA, 6성분 유한차분, 독립 Fourier symbol·에너지·mesh dispersion.
   고정 등방성 CPML/collar 안의 tensor에 비주기 정규화 연산자와 전체
@@ -84,7 +106,8 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 
 1. 진행 중인 원래 CR 24-cycle 결과와 실제 FP32 48 GB 초과 용량 검증을
    보존하며 완료한다. 최적 CR 후보의 세밀한 메시 재검증은 별도 단계다.
-2. Native PMC closed-cavity 경로를 PML 혼합·ADE·streaming·batch로 확장한다.
+2. 별도 PMC+CPML 경로를 native dispatch에 연결하고 흡수 정확도를 검증한 뒤,
+   필요한 ADE·streaming·batch 조합으로 확장한다.
    이미 통과한 경로는 변경 없이 반복하지 않는다.
 3. [일반 이방성 tensor 계획](ANISOTROPY_IMPLEMENTATION_PLAN.md)의 고정 등방성
    CPML 외부에서 반사·안정성 및 계면을 검증하고 streaming과 UI로 확장한다.

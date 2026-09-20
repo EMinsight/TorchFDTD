@@ -343,3 +343,136 @@ material/source gradients, and oblique-pulse decay at PMC/PML intersections.
 PML profiles must be physically mirrored in the full/reduced comparison.
 Report actual cell, psi, checkpoint and elapsed-time savings from halving the
 mesh. Merely changing a boundary label is not a domain-reduction measurement.
+
+## Experimental mixed-wall resident API
+
+`torchfdtd.pmc_cpml.EndpointCPMLSimulation` now implements a separate CPU FP32
+reference for uniform rectangular meshes with PMC/PEC and CPML faces, plus the
+direct CUDA path described below. Native
+Project, Simulation, CLI and browser admission remain unchanged. This bounded
+implementation does not complete mixed-boundary parity or spatial streaming. The ordinary closed-cavity endpoint runtime is unchanged.
+
+CPML terminates at exact PEC endpoints. The existing endpoint incidence retains
+the last magnetic derivative to that known zero and all upper PMC face/edge
+degrees of freedom. Each signed curl derivative has its own compact auxiliary
+array on active target Yee rows within its CPML layer. Rows at intersections
+with upper PMC faces are included. Zero-depth interface rows need no auxiliary
+storage. The profiles use kappa = 1, alpha = 0 and cubic conductivity, sampled
+at the actual electric or magnetic target coordinates. With thickness L,
+background index n and the caller's profile target R, the decay rate is
+`-2 log(R) rho**3 / (L n)`. R controls the profile strength and is not a measured
+reflection guarantee.
+
+The timestep computes E and psi-E, injects the electric waveform once, then
+computes H and psi-H. Its explicit transpose includes future psi cotangents
+and returns both material and waveform derivatives. The waveform cotangent
+therefore includes the magnetic auxiliary update. There is no second stateful
+curl correction after a completed step. The binomial schedule stores complete
+E, H and all psi states. There is no accumulated timestep autograd graph.
+
+```python
+import numpy as np
+import torch
+from torchfdtd.pmc_cpml import EndpointCPMLSimulation
+
+sim = EndpointCPMLSimulation(
+    [np.linspace(0, 1.6, 17), np.linspace(0, .6, 7), np.linspace(0, .6, 7)],
+    [('pmc', 'pml'), ('pmc', 'pmc'), ('pmc', 'pmc')],
+    dt_seconds=.04 / (299792458.0 * 1e6),
+    pml_cells=4, background_epsilon=2., reflection=1e-6,
+    sources=[(2, (0, 3, 2))],
+    observations=[('E', 2, (2, 6, 2))],
+    checkpoints=2, tensor_budget_bytes=64_000_000,
+)
+epsilon = sim.sample_epsilon(lambda xyz, component: torch.full_like(component, 2., dtype=torch.float32))
+waveform = torch.zeros(60, 1)
+waveform[0, 0] = 1
+traces = sim(epsilon, waveform)
+print(sim.memory_plan(len(waveform)))
+```
+
+Materials must have sampled epsilon at least one. All electric samples in a
+PML layer and its additional one-cell collar must equal the explicit fixed
+scalar background epsilon. Their material VJP is zero. Sources and observations
+inside PML layers are rejected. Interior sampled diagonal material and waveform
+gradients are supported. CPML profile parameters, mesh, topology and source
+indices are fixed. Nonuniform grids, periodic/Bloch faces, ADE, full tensors and native dispatch
+are outside this API's scope.
+
+The constructor admits a conservative temporary bound before constructing
+sparse incidence tables, including simultaneous closed and derivative-split
+metadata during preparation. Per-call admission includes complete auxiliary
+states, checkpoint slots, transpose workspace and coefficient tensors.
+`memory_plan` separately reports field, psi and complete-state payload bytes.
+Python topology objects, allocator/runtime memory and caller sampler graphs
+remain outside the tensor budget. Saved tensor versions and coefficient/index
+configuration tokens reject ordinary in-place mutation before backward.
+
+Four focused CPU tests passed in 5.79 seconds before a subsequent assertion
+placement correction that does not change the solve. They cover independently
+assembled dense derivative recurrences, nonzero auxiliary-state transposes,
+material finite differences, waveform VJPs, repeated observation cotangents,
+fixed-collar gradients and budget/mutation rejection. No GPU was used.
+
+A three-dimensional pulse comparison used a full x interval [-1.6, 1.6] um
+with four-cell CPML on both ends and its reduced [0, 1.6] um counterpart with
+PMC at zero. Both transverse extents were 0.6 um with PMC endpoints, mesh
+spacing 0.1 um, background epsilon 2 and timestep 0.04/c in micrometre units.
+An Ez point pulse on the symmetry plane generated transverse spatial content.
+The comparison included every corresponding E/H degree of freedom, including
+upper transverse faces and their intersections with CPML. Maximum discrepancy
+over 240 steps was zero in CPU FP32. A 60-step interior material/source adjoint
+comparison also agreed, with shared material derivative 1.026760578.
+
+The cell count fell from 1152 to 576. Field payload fell from 32,384 to 16,192
+bytes and psi payload from 4,704 to 2,352 bytes. Each complete checkpoint fell
+from 37,088 to 18,544 bytes. These auxiliary counts exclude exactly zero-depth
+interface rows after the CUDA comparison exposed floating-coordinate roundoff
+that previously allocated inert additional psi rows. The physical traces and
+material gradients were unchanged by their removal. The reduced-domain final unweighted epsilon-E/H
+squared norm was 0.277585 of its maximum during the pulse run. This is a bounded
+decay observation, not a measured reflection coefficient or a conserved-energy
+test. No elapsed-time speedup, broad oblique absorption study or production
+mixed-boundary completion is claimed.
+
+
+## Direct CUDA mixed-wall execution
+
+`EndpointCPMLSimulation(..., device="cuda")` now selects direct FP32 CUDA
+kernels in `pmc_cpml_cuda.py`. They reuse the existing closed-endpoint generated
+coordinate/index helpers and one-dimensional metric arrays without modifying
+the closed-wall runtime. Each derivative uses compact rectangular descriptors
+for CPML slab intersections with endpoint blocks. These descriptors are
+compiled constants. Auxiliary arrays contain actual target rows only. The
+constructor does not instantiate CPU sparse incidence maps or all-node
+coordinate arrays. Its CUDA construction regression fails immediately if the
+CPU sparse topology constructor is invoked.
+
+There is a separate direct gather for each derivative and its transpose,
+followed by Torch field/source/material operations. This is not a fused
+high-performance claim. All kernels run on the current Torch CUDA stream.
+Checkpoint replay includes every electric and magnetic auxiliary array, and
+the transpose includes future auxiliary seeds. A 512-byte quantum allowance
+per bounded live buffer supplements the tensor payload plan for small CUDA
+allocation rounding. CUDA context, compilation, CuPy/runtime state, arbitrary
+allocator fragmentation and caller parameterization graphs remain excluded.
+The plan is not a total-process VRAM guarantee.
+
+The first executable GPU case passed numerical checks but exposed a small
+allocation-accounting gap: 67,584 allocated Torch bytes exceeded the 64,990-byte
+raw tensor estimate. Explicit rounding admission corrected that gap. The final
+case used two PML cells so both electric and magnetic auxiliary families have
+nonzero support. Its grid was 8 by 4 by 7, with x-min/x-max and z-min CPML,
+y-min/y-max and z-max PMC, background epsilon 2 and an electric source on an
+upper PMC edge. Seventeen steps with two checkpoint slots were compared with
+the ordinary-autograd CPU reference for a pulse, material derivative and source
+waveform derivative. Repeated electric observations and a magnetic observation
+were included.
+
+The final RTX 3060 check measured maximum trace error 7.45e-9, material-VJP
+error 2.98e-8 and waveform-VJP error 4.77e-7. The sampled material derivative was
+0.246204734. CUDA metric/profile payload was 868 bytes. Peak Torch allocated
+memory was 107,520 bytes against a 297,428-byte plan, including rounding reserve.
+Five affected CPU/CUDA tests passed in 6.89 seconds. This small correctness
+case is not a throughput, large-grid capacity, broad CPML absorption or complete
+boundary-parity benchmark. No native Project/CLI/UI admission was changed.

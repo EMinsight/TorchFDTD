@@ -170,6 +170,9 @@ def create_app(result_dir=None):
             raise HTTPException(404, 'Job not found in this server session.')
         return jobs[key]
 
+    from .radiation_api import register_radiation_routes
+    register_radiation_routes(app, get_job)
+
     @app.get('/api/jobs/{key}')
     def status(key: str):
         job = get_job(key)

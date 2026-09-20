@@ -1037,7 +1037,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "정확한 Yee endpoint, real FP32 CPU·CUDA closed PEC/PMC cavity. Native Project·Simulation·CLI·browser 6면 편집과 실행, point source/observer, 전체 endpoint NPZ 저장. EndpointProject 재료·파형 VJP와 binomial checkpoint. PML혼합·복소장·ADE·streaming·tensor batch는 미지원.",
+      "scope": "Native Project·CLI·browser는 real FP32 closed PEC/PMC cavity, 6면 편집과 endpoint NPZ를 지원. 별도 uniform PMC+CPML CPU/CUDA API는 실제 upper endpoint와 CPML 보조 상태, 재료·파형 VJP, bounded checkpoint를 포함. 혼합 경계 native dispatch·복소장·ADE·streaming·tensor batch와 일반 흡수 정확도는 남음.",
       "evidence": [
         "torchfdtd/pmc_simulation.py",
         "torchfdtd/endpoint_project.py",
@@ -1046,7 +1046,11 @@
         "tests/test_pmc_simulation.py",
         "tests/test_endpoint_native.py",
         "tests/ui/pmc.spec.js",
-        "docs/PMC_IMPLEMENTATION_PLAN.md"
+        "docs/PMC_IMPLEMENTATION_PLAN.md",
+        "torchfdtd/pmc_cpml.py",
+        "torchfdtd/pmc_cpml_cuda.py",
+        "tests/test_pmc_cpml.py",
+        "tests/test_pmc_cpml_cuda.py"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object",
       "priority": 2,
@@ -1066,7 +1070,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "PMC/magnetic symmetry alias와 추가 face/edge 상태를 native Project·CLI·browser closed cavity에 연결. 별도 EndpointProject는 재료/파형 VJP 지원. ADE·streaming 통합과 응용 domain reduction 비용 검증은 남음.",
+      "scope": "PMC/magnetic symmetry의 native closed-cavity workflow와 별도 uniform PMC+CPML adjoint. 실제 CPU 전체/절반 영역 E/H와 재료·파형 gradient 일치, 완전 checkpoint 37,088→18,544 bytes. CUDA mixed-wall transpose 검증. 일반 실행 속도·혼합 경계 native dispatch·ADE·streaming은 남음.",
       "evidence": [
         "torchfdtd/pmc_simulation.py",
         "torchfdtd/endpoint_native.py",
@@ -1075,7 +1079,11 @@
         "tests/test_endpoint_native.py",
         "tests/ui/pmc.spec.js",
         "tests/test_pmc_reference.py",
-        "docs/PMC_IMPLEMENTATION_PLAN.md"
+        "docs/PMC_IMPLEMENTATION_PLAN.md",
+        "torchfdtd/pmc_cpml.py",
+        "torchfdtd/pmc_cpml_cuda.py",
+        "tests/test_pmc_cpml.py",
+        "tests/test_pmc_cpml_cuda.py"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object",
       "priority": 2,
@@ -1766,12 +1774,14 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "missing",
-      "scope": "균질·무손실·등방 외부의 6면 closed-box vector transform. 복소 진폭·편광·방사 전력·실제 material VJP와 FP32 dipole 메시 수렴. Substrate·periodic lattice·유한 거리 near field는 미지원.",
+      "scope": "균질·무손실·등방 외부의 6면 closed-box vector transform. 복소 진폭·편광·방사 전력·실제 material VJP와 FP32 dipole 메시 수렴. Native 저장 plane/NPZ adapter 제공. Closed-box UI·substrate·periodic lattice·유한 거리 near field는 미지원.",
       "evidence": [
         "torchfdtd/radiation.py",
         "tests/test_radiation.py",
         "benchmarks/radiation_dipole.py",
-        "docs/RADIATION.md"
+        "docs/RADIATION.md",
+        "torchfdtd/radiation_io.py",
+        "docs/RADIATION_WORKFLOW.md"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360033154434-FDTD-product-reference-manual",
       "priority": 2,
@@ -1789,13 +1799,19 @@
       "category": "분석",
       "name": "회절 차수·grating projection",
       "native": "partial",
-      "ui": "missing",
+      "ui": "partial",
       "fsp": "missing",
-      "scope": "균질 periodic cell의 Bloch Rayleigh orders, E/H 전후진 분리, propagating 효율·evanescent 진폭, reference 양쪽 graph. Full midpoint quadrature 필요, grazing cutoff 거부.",
+      "scope": "균질 periodic cell의 Bloch Rayleigh orders, E/H 전후진 분리와 reference graph. Native 저장 6-field plane/NPZ와 browser 차수·raw power·matched-reference 효율 연결. 외부 매질 명시, full midpoint quadrature, grazing cutoff 거부와 stale UI 결과 차단. 저장 결과 후처리는 autograd graph 없음.",
       "evidence": [
         "torchfdtd/radiation.py",
         "tests/test_radiation.py",
-        "docs/RADIATION.md"
+        "docs/RADIATION.md",
+        "torchfdtd/radiation_io.py",
+        "torchfdtd/radiation_api.py",
+        "frontend/src/radiation_tools.js",
+        "tests/test_radiation_workflow.py",
+        "tests/ui/radiation.spec.js",
+        "docs/RADIATION_WORKFLOW.md"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360033154434-FDTD-product-reference-manual",
       "priority": 2,

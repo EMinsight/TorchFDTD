@@ -843,6 +843,16 @@ $L_2$ errors of $1.0314\%$, $0.5412\%$ and $0.2304\%$ at mesh spacings
 of 100, 75 and 50 nm. This establishes one vacuum radiation limit, not absolute
 source-power calibration or convergence of every radiation gradient.
 
+Stored native frequency planes also feed these transforms without another
+time-domain solve. The browser diffraction workflow requires six complex
+field components, complete uniform unit-cell quadrature and an explicitly
+declared homogeneous lossless exterior. Raw directional powers remain
+distinct from efficiencies, which require a matching incident reference.
+Evanescent and grazing-cutoff orders are distinguished. A bounded NPZ adapter
+reads the selected monitor without loading full-domain fields or snapshots.
+These saved-data operations have no retained simulation graph. Direct
+differentiable-plane inputs continue to expose the radiation VJP.
+
 \subsection{Bulk tensor constitutive operator}
 
 A separate experimental periodic-domain API admits a real symmetric physical
@@ -955,7 +965,31 @@ usual result interface, while NPZ additionally preserves the true upper
 face and edge samples. Calculated tensor and host requirements are admitted
 against available memory instead of imposing a fixed small GPU capacity.
 Independent CPU and CUDA results and the complete browser export/run flow
-are checked. PML mixing, ADE and streamed endpoint propagation remain open.
+are checked. This Project adapter still excludes PML mixing, ADE and
+streamed endpoint propagation.
+
+A separate uniform-grid endpoint extension combines PMC with CPML terminated
+at PEC walls. Each curl derivative owns auxiliary samples at its actual
+target Yee positions, including intersections with upper PMC faces and edges.
+The update order is electric field and auxiliary state, electric source,
+then magnetic field and auxiliary state. The transpose reverses this order
+and includes future auxiliary cotangents in the waveform derivative.
+All auxiliary states participate in bounded checkpoint replay. The admitted
+PML and one-cell material collar are fixed, scalar and isotropic.
+
+An independently assembled CPU recurrence checks the full state transpose
+and material and waveform VJPs. A 240-step pulse in a full CPML domain and
+its PMC-reduced half agrees at every corresponding E/H sample in FP32.
+A separate 60-step design objective gives matching material and waveform
+derivatives. Complete checkpoint payload falls from 37,088 to 18,544 bytes
+in this small geometry. This is a state-size and symmetry check, not a
+large-domain throughput result. Direct CUDA derivative and transpose kernels
+use compact CPML slab descriptors and one-dimensional profiles. A mixed-wall
+case exercising both auxiliary families agrees with the CPU reference within
+$7.45\times10^{-9}$ for traces, $2.98\times10^{-8}$ for material VJPs and
+$4.77\times10^{-7}$ for waveform VJPs. These kernels are not fused across
+curl terms, and their general absorption accuracy and execution speed remain
+uncharacterized.
 
 A second foundation partitions one periodic or Bloch problem into owned
 $x$ slabs. Each rank stores only its local E/H, material and checkpoint banks.
@@ -975,6 +1009,27 @@ initialization still fails on the current Windows runtime and a second CUDA
 device is unavailable. These checks do not establish NCCL multi-GPU
 execution, communication overlap or scaling. Sources, monitor
 histories, CPML, mirrors and ADE are outside this distributed initial-value API.
+
+\subsection{Matched cross-framework correctness}
+
+A first comparison with FDTDX \citep{fdtdx-source} uses the same Linux RTX 3060
+environment, a $16^3$ periodic dielectric grid, 100 nm spacing and 64 FP32
+steps. Both solvers receive identical sampled permittivity and electric
+source kicks and return two raw electric histories. The source cell remains
+vacuum. Its reference pulse and detector locations are fixed, while a scalar
+parameter perturbs the interior slab permittivity. Each implementation
+requests four device checkpoints. Coordinate construction uses FP64 in
+both setups to preserve an identical timestep, with FP32 dynamic state.
+
+The two histories agree exactly for this fixture. Both objectives equal
+$1.640023838263\times10^{-4}$ and both material derivatives equal
+$-7.226401066873\times10^{-5}$. An independent homogeneous Fourier recurrence
+has maximum absolute history error $4.552\times10^{-8}$. Three centered
+finite-difference steps provide separate derivative checks. The record
+\code{docs/validation/fdtdx_periodic_correctness.json} fixes software
+revisions, artifact hashes, numerical conventions and setup corrections.
+This finite periodic calculation does not establish open-boundary physical
+accuracy, complete feature parity or comparative throughput and memory use.
 
 \section{Limitations and development priorities}
 

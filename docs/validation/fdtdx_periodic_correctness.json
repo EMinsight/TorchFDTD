@@ -1,0 +1,224 @@
+{
+  "schema": "torchfdtd-fdtdx-matched-correctness-v1",
+  "date": "2026-09-21",
+  "status": "passed",
+  "scope": "One fixed periodic source-driven scalar dielectric fixture; correctness only, no throughput or general parity conclusion.",
+  "identities": {
+    "native_revision": "6fa0c3518efba5d0e93c4c1125b52665a5b7713b",
+    "native_wheel_sha256": "56ae40b83e74e3e643f21ce06b29f22dabab174d3946825a4f8e08861e674ee5",
+    "fdtdx_revision": "60c1c2712da8bb0ccaa55c77846217932bb665a2",
+    "fdtdx_source_archive_sha256": "0b6c28dbf6ed7ef50cbb2a060c36f21dafa6c0b48e4947874d348659c8cfed93",
+    "contract_sha256": "f454aa86ce66534c729284ce48ab8d218bd5de58b592c4f30b470eb616c87038",
+    "environment_lock_sha256": "640e736d6eecb9f7ec99d93579a0d1ed6e6d082686ac6d9f25d8903402aa086d",
+    "adapter_sha256": "ec10ba4d58fc0386e7cb25c0e54a8613372f4b1033457fa31422ac3bf4c50b37",
+    "installed_native_runner_sha256": "7a6cdf77b237624c2729968853f2d9e0f1191751e5cb19065a522e9b81f18114",
+    "numpy_fourier_oracle_sha256": "da64b6bfb45c708478fde73a5fba78d035530850b7da046f34c1c84c90bd119b",
+    "native_installed_python_files_verified": 96,
+    "native_all_python_hash_manifest_sha256": "e37374cc4896ed6106933d1f4dd5dc48568ecf941452fb1082041ab731ce3255",
+    "fdtdx_installed_python_files_verified": 110,
+    "fdtdx_all_python_hash_manifest_sha256": "b9eb72be4ec276306fa5904e6af659522315b45bbb09fcc8eb1a7ea43384e1f8",
+    "manifest_digest_encoding": "SHA256 of UTF-8 JSON with sorted keys and separators comma/colon, no whitespace",
+    "native_core_sha256": {
+      "torchfdtd/models.py": "35b4cb0613c3017dc218dde15d192f30c81842f1faf7f7599549ec852121bbf1",
+      "torchfdtd/solver.py": "30a1e70397bb7dfd0bee5742b38f0e2e34e639081db0dc78108157d20d200309",
+      "torchfdtd/waveforms.py": "654333e8afa4da1310afc714a1c15ad60663ef21f3533f4b55c1a7489a0809b9",
+      "torchfdtd/differentiable.py": "90772d3c5cbfe35b37bd8d90e636a6e86424cecc2b612211d04ebef52b52106b",
+      "torchfdtd/injection.py": "3c1b41a678c6356e9f08acebc3f6411693535b4111b815fa6b3ce33966961552",
+      "torchfdtd/boundaries.py": "43ed7dc65066160cd7519cff73a391d612ae61102e08b195976f98b3b43581c3",
+      "torchfdtd/cuda_kernels.py": "19ceb53777e53851c085ce80be959bca191c0d6663a9a11cb4a4b6edbaca66d0",
+      "torchfdtd/cuda_adjoint.py": "ba380285bed58be59f80b7a3bb979dad78a0666689c1fe156208119ec2a90127"
+    },
+    "fdtdx_core_sha256": {
+      "__init__.py": "285f5f972403245ec3722288a517738ab97293bcabe11f12887ca303eead542f",
+      "config.py": "57946a89816b94d3b9a126359d118b9803a9ed1733eb2108d357ea264fde4da1",
+      "constants.py": "84df6119cfddc2ec9d42a799f9ad9f6a9e897a200fbdaf8087c35ad193f3663f",
+      "core/grid.py": "179e6190863b34c38f68d099b3432f34bdd4f1e0fac831ddbacce0ef2b84c98f",
+      "core/physics/curl.py": "f9d70c0b7462c4034d60430d891bf5dc216dfdb9569e86622dc08bce10658258",
+      "fdtd/container.py": "1c2f69ec2c2e30d4629489cd6e84a1f4d8235480611cf34250f58e5c0eb449c7",
+      "fdtd/initialization.py": "2889dd5e48deb520ca584dbc15784a4a4d6c50a01e3008e6bb6d4d81e1d95139",
+      "fdtd/fdtd.py": "33a275a8a7dcc0d2c38f537cb8f5d8714ebf4959c462e54f1af8e58fc3660cfb",
+      "fdtd/forward.py": "04f46f0262c5d01334e850096ff5c2380954b736c465b464a786ecf9d9d766b7",
+      "fdtd/update.py": "c8bf86fe5816e738aca6559a930eebccf127035138afea6940ae198e84dfd3f6",
+      "fdtd/wrapper.py": "297449e7b5c2ca44a55f4b1c9c03a0e8ecc46adb2d47398fe6deb12692a1ba5c",
+      "objects/boundaries/bloch.py": "f66e30732990baf36d16caec921972a389fa69f8d9a591cbc8b623263ed88056",
+      "objects/sources/dipole.py": "eb144dd062b199ffc104d946c52bd2864180f16a9e5068539513f360185cc5c9",
+      "objects/sources/profile.py": "317a11fad4fed2d254095e89ba1f91288e5fe2fd214cbca629beeb4de3a36b28",
+      "objects/detectors/field.py": "2825c643eea40ae49442bb7396b41cc046c2f507dbc5d393e420b0043dca29b1",
+      "objects/detectors/detector.py": "2e9847f97aa088b99f8abbd6f4c746db97e2760eff4ee1776026b9fd0d440b61"
+    }
+  },
+  "environment": {
+    "os": "Linux under WSL2",
+    "python": "3.12.14",
+    "packages": {
+      "torchfdtd": "0.14.0.dev0",
+      "fdtdx": "0.6.2",
+      "jax": "0.10.1",
+      "jaxlib": "0.10.1",
+      "torch": "2.10.0+cu128",
+      "cupy-cuda12x": "13.6.0",
+      "equinox": "0.13.8",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1",
+      "optax": "0.2.8"
+    },
+    "jax_cuda12_plugin": "0.10.1",
+    "jax_cuda12_pjrt": "0.10.1",
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "driver": "591.86",
+    "torch_cuda_build": "12.8",
+    "cupy_runtime_version": 12090,
+    "jax_default_x64": false,
+    "jax_preallocate": false,
+    "same_environment": true,
+    "separate_sequential_processes": true
+  },
+  "configuration": {
+    "shape": [
+      16,
+      16,
+      16
+    ],
+    "cell_spacing_m": 1e-07,
+    "domain_origin_m": [
+      -8e-07,
+      -8e-07,
+      -8e-07
+    ],
+    "domain_extent_m": [
+      1.6e-06,
+      1.6e-06,
+      1.6e-06
+    ],
+    "dt_seconds": 1.7332498813918235e-16,
+    "courant_factor": 0.9,
+    "courant_number": 0.5196152422706632,
+    "steps": 64,
+    "boundaries": "all six periodic, zero Bloch phase",
+    "initial_fields": "E=H=0, reduced magnetic field",
+    "dynamic_dtype": "float32",
+    "geometry_dtype": "float64",
+    "fdtdx_dynamic_float_dtypes": [
+      "float32"
+    ],
+    "epsilon": "1 outside z indices8:10, 2.25 inside; isotropic sampled array shared by both solvers",
+    "theta": 0.0,
+    "theta_mask": "one at z indices8:10, zero elsewhere",
+    "source": {
+      "component": "Ex",
+      "index": [
+        8,
+        8,
+        3
+      ],
+      "epsilon_fixed": 1.0,
+      "native_pulse": {
+        "type": "gaussian",
+        "wavelength_um": 0.6,
+        "pulse_length_seconds": 5e-16,
+        "pulse_offset_seconds": 1.5e-15,
+        "time_definition": "standard",
+        "amplitude": 1.0
+      },
+      "native_table_sample": "waveform((n+1)*dt), cast FP32",
+      "fdtdx_table": "-native_kick/FP32(C), sampled with nearest interpolation at n*dt",
+      "kick_placement": "after E curl update and before H curl update"
+    },
+    "probes": {
+      "component": "Ex",
+      "indices": [
+        [
+          8,
+          8,
+          6
+        ],
+        [
+          8,
+          8,
+          12
+        ]
+      ],
+      "sampling": "raw Yee component after each full step, no spatial or temporal interpolation"
+    },
+    "objective": "mean_t(Ex_probe0**2)+0.3*mean_t(Ex_probe1**2)",
+    "gradient": "scalar theta VJP for epsilon(theta)=epsilon0+theta*mask",
+    "checkpoints": 4,
+    "checkpoint_storage": "device",
+    "native_forward_backend": "fused CUDA",
+    "native_backward_backend": "fused CUDA transpose",
+    "fdtdx_gradient_method": "checkpointed",
+    "input_float32_little_endian_sha256": {
+      "epsilon": "f5cc65a3bc8b9d3654989b27b7ed76c4178d656c322c25245536e54eda82f7a0",
+      "mask": "2b41d1c3c82f4185c2bfd82ac3564dae69c8e3f2d322f2e78e033896c21c93fd",
+      "kick": "263fd997e8742e560334c0a3c3dab30ce8b759c967c35bb97877965161eb9746",
+      "fdtdx_profile": "f753c6ce15b1d021e8f73a671d16d86bbe4dbf361c81d561e71a8c29fda93093"
+    }
+  },
+  "results": {
+    "history_max_absolute_error": 0.0,
+    "history_relative_l2": 0.0,
+    "native_loss": 0.0001640023838263005,
+    "fdtdx_loss": 0.0001640023838263005,
+    "loss_relative_error": 0.0,
+    "native_theta_vjp": -7.226401066873223e-05,
+    "fdtdx_theta_vjp": -7.226401066873223e-05,
+    "vjp_relative_error": 0.0,
+    "fdtdx_one_step_E_max_error": 0.0,
+    "fdtdx_one_step_H_max_error": 0.0,
+    "fdtdx_homogeneous_fourier_max_error": 4.5518205728928285e-08,
+    "native_finite_difference": [
+      {
+        "delta": 0.01,
+        "gradient": -7.226844900287688e-05,
+        "relative_error": 6.141832017873738e-05
+      },
+      {
+        "delta": 0.003,
+        "gradient": -7.226724119391292e-05,
+        "relative_error": 4.470448222845803e-05
+      },
+      {
+        "delta": 0.001,
+        "gradient": -7.225025910884142e-05,
+        "relative_error": 0.00019029610678330107
+      }
+    ],
+    "fdtdx_finite_difference": [
+      {
+        "delta": 0.01,
+        "gradient": -7.226844900287688e-05,
+        "relative_error": 6.141832017873738e-05
+      },
+      {
+        "delta": 0.003,
+        "gradient": -7.226966408779845e-05,
+        "relative_error": 7.823284389980155e-05
+      },
+      {
+        "delta": 0.001,
+        "gradient": -7.224297587526962e-05,
+        "relative_error": 0.00029108256333890126
+      }
+    ]
+  },
+  "admission_corrections": [
+    {
+      "stage": "before first FDTDX timestep",
+      "issue": "Centered FP32 grid edge subtraction inferred uniform cell width with relative2e-7 error, causing the same relative timestep mismatch. Exact-dt admission rejected this configuration.",
+      "resolution": "Construct only public UniformGrid.resolve geometry inside jax.enable_x64(True); resume default x64=false for setup and execution, and assert all floating dynamic ArrayContainer leaves are float32."
+    },
+    {
+      "stage": "before first FDTDX timestep",
+      "issue": "First retry referenced removed jax.experimental.enable_x64 API.",
+      "resolution": "Use public jax.enable_x64(True) in JAX0.10.1."
+    }
+  ],
+  "limitations": [
+    "No throughput measurement or cross-framework memory conclusion.",
+    "Only recorded Ex histories, loss and scalar material VJP were compared across the64-step runs; full terminal fields were not compared.",
+    "No PML, ADE, anisotropy, arbitrary source or monitor, batch, streaming or distributed correctness claim.",
+    "This finite periodic box is not an open-boundary slab transmission or continuum convergence study.",
+    "Equal requested checkpoint counts do not imply identical memory usage or reverse scheduling.",
+    "Raw histories, source/material arrays, complete installed-source manifests and failed logs are retained in separate private evidence."
+  ]
+}
