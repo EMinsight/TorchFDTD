@@ -7,6 +7,51 @@ from photonweave.boundaries import YeeGrid
 from test_differentiable import project
 
 
+@pytest.mark.parametrize('diagonal',[False,True])
+@pytest.mark.parametrize('complex_fields',[False,True])
+def test_spectral_plan_matches_storage_execution_and_vjp(diagonal,complex_fields,tmp_path):
+    from dataclasses import replace
+    from photonweave import estimate_streamed_memory,select_streamed_storage
+    p=project('3d',steps=10)
+    p.region.size=(6.4,1.6,1.6)
+    if complex_fields:
+        from photonweave import BoundaryFace
+        p.region.boundaries.x_min=p.region.boundaries.x_max=BoundaryFace(kind='bloch')
+        p.region.bloch_phase=(.4,0,0)
+    options=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2,
+        state_directory=tmp_path/'banks',disk_budget_bytes=1024**3)
+    settings=dict(frequency_hz=[1e14,2e14],window=torch.linspace(.2,1.,10,dtype=torch.float64))
+    host=select_streamed_storage(p,options,diagonal=diagonal,**settings)
+    disk_plan=estimate_streamed_memory(p,replace(options,state_storage='disk'),diagonal=diagonal,**settings)
+    disk=select_streamed_storage(p,replace(options,host_budget_bytes=disk_plan['host_reservation_bytes']),diagonal=diagonal,**settings)
+    assert host.options.state_storage=='host' and disk.options.state_storage=='disk'
+    assert not (tmp_path/'banks').exists()
+    epsilon=torch.full(p.region.shape+((3,) if diagonal else ()),1.7,dtype=torch.float64,requires_grad=True)
+    results=[StreamedSimulation(p,plan.options).spectrum(epsilon,**settings) for plan in (host,disk)]
+    for plan,result in zip((host,disk),results):
+        assert all(result.report[k]==v for k,v in plan.reservation.items())
+    grads=[torch.autograd.grad(result.fields.abs().square().sum(),epsilon)[0] for result in results]
+    torch.testing.assert_close(results[0].fields,results[1].fields,rtol=0,atol=0)
+    torch.testing.assert_close(grads[0],grads[1],rtol=0,atol=0)
+    assert not list((tmp_path/'banks').iterdir())
+
+
+def test_spectral_plan_accounts_for_history_reduction_and_validates_settings():
+    from dataclasses import replace
+    from photonweave import estimate_streamed_memory,select_streamed_storage
+    p=project(steps=10);p.region.steps=100000
+    options=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2)
+    timed=estimate_streamed_memory(p,options)
+    spectral=estimate_streamed_memory(p,options,frequency_hz=[1e14])
+    assert spectral['host_reservation_bytes']<timed['host_reservation_bytes']
+    bounded=replace(options,host_budget_bytes=spectral['host_reservation_bytes'])
+    assert select_streamed_storage(p,bounded,frequency_hz=[1e14]).options.state_storage=='host'
+    with pytest.raises(ValueError,match='host budget'):estimate_streamed_memory(p,bounded)
+    with pytest.raises(ValueError,match='requires frequency'):estimate_streamed_memory(p,options,window=[1.])
+    with pytest.raises(ValueError,match='Nyquist'):estimate_streamed_memory(p,options,frequency_hz=[1/p.region.time_step])
+    with pytest.raises(ValueError,match='Window'):estimate_streamed_memory(p,options,frequency_hz=[1e14],window=[1.])
+
+
 def test_storage_selection_prefers_host_then_explicit_disk_and_rechecks(tmp_path,monkeypatch):
     from dataclasses import replace
     from photonweave import select_streamed_storage,estimate_streamed_memory

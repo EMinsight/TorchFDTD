@@ -139,19 +139,30 @@ def _backing(options,report,phase):
         finally:report[phase+'_backing_store'] = store.report()
 
 
-def estimate_streamed_memory(project, options=None, *, diagonal=False):
-    """Check time-history memory admission without allocating domain arrays.
+def estimate_streamed_memory(project, options=None, *, diagonal=False, frequency_hz=None, window=None):
+    """Check time-history or spectral admission without domain allocation.
 
     Uses current free resources and the same reservation as StreamedSimulation.
     Does not validate all physics or include caller-owned geometry/optimizer
-    graphs or OS file cache. Spectral observers require their own reservation.
+    graphs or OS file cache. Supplied spectral settings are validated on CPU
+    and copied, including an optional O(steps) window, but no fields are built.
     Admission is checked again at execution because resources may change.
     """
     if not isinstance(diagonal,bool):raise ValueError('diagonal must be boolean.')
     options=options or StreamedAdjointOptions()
     shape=project.region.shape+((3,) if diagonal else ())
     epsilon=torch.empty(shape,dtype=getattr(torch,project.region.precision),device='meta')
-    return _reservation(project,epsilon,options)
+    if window is not None and frequency_hz is None:
+        raise ValueError('A spectral window requires frequency_hz.')
+    spectral=None
+    if frequency_hz is not None:
+        from .adjoint_spectrum import SpectralObservation
+        scalar=torch.empty((),dtype=epsilon.dtype,device='cpu')
+        spectral=SpectralObservation(scalar,project.region,
+            [m.component for m in project.monitors if m.enabled],frequency_hz,window)
+    reservation=_reservation(project,epsilon,options,spectral)
+    if spectral is not None:reservation.update(spectral.reservation(min(options.temporal_depth,project.region.steps)))
+    return reservation
 
 
 @dataclass(frozen=True)
@@ -161,7 +172,7 @@ class StreamedStoragePlan:
     rejected: dict
 
 
-def select_streamed_storage(project, options=None, *, diagonal=False):
+def select_streamed_storage(project, options=None, *, diagonal=False, frequency_hz=None, window=None):
     """Prefer admitted DRAM banks, otherwise use explicitly configured disk.
 
     Capacity selection only, without domain allocation or performance probes.
@@ -175,7 +186,7 @@ def select_streamed_storage(project, options=None, *, diagonal=False):
             rejected[storage]='No explicit disk directory and budget configured.'
             continue
         candidate=replace(base,state_storage=storage)
-        try:reservation=estimate_streamed_memory(project,candidate,diagonal=diagonal)
+        try:reservation=estimate_streamed_memory(project,candidate,diagonal=diagonal,frequency_hz=frequency_hz,window=window)
         except ValueError as exc:
             rejected[storage]=str(exc)
             continue

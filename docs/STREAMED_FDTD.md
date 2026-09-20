@@ -188,8 +188,12 @@ time-history reservation using a metadata-only tensor. The result contains
 host, GPU, disk and tile workspace bytes and raises when current resources
 cannot admit the policy. It does not allocate full-domain E/H or epsilon.
 This is a memory check, not complete physics validation or a reservation of
-resources against other programs. Execution rechecks admission. Online spectral
-observers have additional observation-specific accounting.
+resources against other programs. Execution rechecks admission. For online
+spectral observers, supply `frequency_hz` and optional `window` to either
+planning function. They use the same DFT workspace/settings accounting as
+execution, including real/complex field precision. Frequency and window
+settings are validated and copied on CPU, so an explicitly supplied window
+still occupies O(steps) memory. No domain fields are allocated.
 
 `select_streamed_storage(project, options)` tries those same reservations for
 DRAM first and then file banks. The disk fallback requires an explicit
@@ -206,6 +210,22 @@ selected storage and rejected alternatives alongside its memory estimate.
 This example's auto mode selects host/file banks only. It does not select
 resident execution or tune tile performance. A fallback test verifies full
 signal/gradient agreement and rejects execution if free RAM drops after planning.
+
+```python
+frequencies = [4e14, 5e14]  # Hz, must lie below the selected grid's Nyquist limit
+plan = select_streamed_storage(project, options, frequency_hz=frequencies)
+# Build CPU epsilon only after the requested observation policy is admitted.
+result = StreamedSimulation(project, plan.options).spectrum(epsilon, frequencies)
+loss = result.fields.abs().square().sum()
+loss.backward()
+```
+
+Use the same frequencies and window in planning and execution. A time-history
+plan can overestimate long-run signal storage or underestimate a large DFT.
+The spectral plan includes returned frequency fields, transpose workspace and
+fixed settings. DRAM/file spectrum and gradient parity is checked for scalar
+and diagonal permittivity. This selector currently covers point spectra, not
+the separate detector-plane and pupil-response adapters.
 
 Set `disk_free_reserve_bytes` to retain
 an additional minimum amount of free space, for example `100*1024**3` on a
