@@ -164,9 +164,10 @@ on RTX 3060 with 3200 steps, the same 50 nm mesh, 12 PML cells, fixed source,
 pupil weights and relaxed seed. This isolates duration sensitivity relative
 to the existing 1600-step evaluation. Its output is
 `results/cr-full-time3200-3060.json`. No gradients or directional probes are
-requested in this duration run. The RTX 5880 continues its separate discrete
-directional-gradient check. Duration results are pending, followed by mesh
-and PML refinement as required by their observed errors.
+requested in this duration run. The original duration process subsequently
+stopped before saving a complete forward result. Duration results are pending
+and the run must restart with case persistence, followed by mesh and PML
+refinement as required by their observed errors.
 
 Future evaluator runs persist the complete relaxed-density gradient as an NPY
 artifact, with its hash, shape and variable definition in the result JSON.
@@ -198,5 +199,48 @@ match the original schedule, binary seed and electron context. It uses 50 nm,
 1600 steps, 12 PML cells, fused forward/backward, a 64 MiB reference cache and
 the three perturbations above. The output is
 `results/cr-full-directional-5880.json`, with a gradient NPY saved before the
-additional forward probes. Results remain pending. No CR optimization has
-been started, and optical convergence remains an independent gate.
+additional forward probes. That execution completed its gradient with norm
+0.029781743905171316, but the subsequent directional check failed with
+`OSError(22, 'Invalid argument')`. The recorded exception does not identify
+the failing system call. It is not a failed gradient-tolerance result.
+After verifying that its process had exited, a new full evaluation started
+at `results/cr-full-directional-5880-retry.json` with stdout and stderr directed
+to files. It is still pending. No CR optimization has been started, and
+optical convergence remains an independent gate.
+
+## Restartable evaluation
+
+New executions of `benchmarks.cr_spectral_objective` save each completed
+two-polarization, four-quadrant response in an adjacent `.cases.json` journal.
+Restart the same command with `--resume` to reuse completed cases. The key
+includes the complete density tensor, so positive and negative directional
+probes cannot share the wrong response. A partial current case is recomputed.
+An OS file lock prevents two processes from writing the same journal and is
+released when its owner exits. The small `.lock` file may remain on disk.
+
+Reuse requires identical input hashes, solver/evaluator source hashes,
+numerical settings and recorded runtime identity. A mismatch fails before
+solver execution and requires a new output. Older records lacking this
+contract are deliberately ineligible. Saved gradient bytes, shape, dtype and
+variable are checked before a completed VJP is reused. If interruption occurs
+during backward, the full VJP is recomputed. Gradient replay never reads a
+detached case result in place of a differentiable solver execution.
+
+The journal contains compact optical responses, not field states or a general
+FDTD restart facility. Timing includes journal I/O and resumed elapsed times
+cover only that invocation. Such times are not fresh performance measurements.
+This restart path does not alter the already running RTX 5880 retry.
+
+Verification includes an interruption after two completed spectral/pupil
+cases, restored forward values with fresh differentiable replay, interruption
+during a directional sweep, mismatched contracts, corrupt artifacts and
+concurrent-writer exclusion. The targeted CPU and fused CUDA tests passed
+(16 tests). A separate nine-wavelength, one-ray, 100 nm, 600-step CLI run on
+RTX 3060 passed its directional check at step 0.0005 with relative discrepancy
+3.67e-8. Restart then restored its gradient and all 27 directional case
+responses without executing new FDTD cases. This is restart integration
+evidence, not the full CR accuracy study.
+
+The complete 144-case, 50 nm, 3200-step duration study restarted on RTX 3060
+with this journal at `results/cr-full-time3200-3060-restartable.json`. The
+result is pending. Each completed case now survives a process interruption.
