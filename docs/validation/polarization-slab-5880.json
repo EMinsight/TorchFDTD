@@ -1,0 +1,32 @@
+{
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "grid": [
+    8,
+    8,
+    160
+  ],
+  "steps": 512,
+  "theta_deg": 20,
+  "phi_deg": 22.5,
+  "transmission_reflection": [
+    [
+      0.880489798077448,
+      0.11949959594642895
+    ],
+    [
+      0.8507074741043696,
+      0.1492831757469418
+    ]
+  ],
+  "fresnel_transmission": [
+    0.8844938638807988,
+    0.8550693016600632
+  ],
+  "transmission_error": 0.004361827555693587,
+  "conservation_error": 1.060597612312364e-05,
+  "gradient": -0.9677794581512851,
+  "finite_difference": -0.9677794471096846,
+  "gradient_relative_error": 1.140921162953377e-08,
+  "elapsed_seconds": 142.2010675999918,
+  "scope": "Single-frequency 3D isotropic slab, calibrated coherent x/y source bases. Not full CR, broadband injection or shape convergence."
+}

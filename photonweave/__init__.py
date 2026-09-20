@@ -54,3 +54,5 @@ from .recomputed_batch import recompute_cases
 __all__ += ['recompute_cases']
 from .detector_allocation import quadrant_intensity_allocation
 __all__ += ['quadrant_intensity_allocation']
+from .polarization import calibrate_plane_polarization, mix_plane_fields
+__all__ += ['calibrate_plane_polarization', 'mix_plane_fields']

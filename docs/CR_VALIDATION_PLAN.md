@@ -58,8 +58,9 @@ comparison without claiming broadband ADE differentiation. A single constant
 index shared across the whole band is not equivalent. The resident
 [fixed Bloch adjoint](BLOCH_ADJOINT.md) now passes discrete and oblique TE slab
 checks. A [sequential case-recompute API](RECOMPUTED_CASES.md) now bounds multi-case
-graph residency and passes coupled-gradient checks. Matched two-polarization
-oblique illumination and fused/streamed complex execution remain requirements.
+graph residency and passes coupled-gradient checks. [Calibrated two-basis polarization synthesis](POLARIZATION_SYNTHESIS.md) now
+passes a 3D oblique slab check for Cartesian x/y inputs. Matching the full CR
+pupil and fused/streamed complex execution remain requirements.
 The [electric-intensity allocation](DETECTOR_ALLOCATION.md) and independent
 24-by-24 midpoint quadrature are implemented and pass synthetic reference
 parity. Physical transmission, detector z origin, the CR ray schedule and

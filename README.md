@@ -24,6 +24,8 @@ Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now
 
 [Differentiable detector allocation](docs/DETECTOR_ALLOCATION.md) preserves the CR reference's electric-intensity well fractions with independent midpoint quadrature. Synthetic source parity and material-gradient tests pass. Matched CR optical validation remains pending.
 
+[Selected-frequency polarization synthesis](docs/POLARIZATION_SYNTHESIS.md) now passes a 3D oblique x/y slab check for transmission, energy balance and material derivatives. It uses two calibrated source responses and is not yet full-pupil CR validation.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 

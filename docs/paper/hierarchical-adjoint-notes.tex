@@ -268,4 +268,20 @@ charge collection. For an incoherent pupil, allocation is computed separately
 for each ray and polarization before weighted averaging. The reference uses
 power-normalized RCWA transmission. A matched FDTD flux reference requires
 independent physical validation before claiming an equivalent CR response.
+
+\section{Fixed spectral polarization synthesis}
+Two independent source responses in a homogeneous reference define the
+transverse matrix $M(f)$. Its columns are quadrature averages of the complex
+tangential electric field after removing the prescribed transverse Bloch phase.
+For desired tangential polarization $e_t(f)$, fixed coefficients satisfy
+\[
+M(f)c(f)=e_t(f),\qquad
+E(f)=\sum_{j=1}^{2}c_j(f)E_j(f),\quad
+H(f)=\sum_{j=1}^{2}c_j(f)H_j(f).
+\]
+The same coefficients combine reference and structure fields before power is
+computed. Structure derivatives traverse both source solves. The coefficients
+are fixed and do not supply source or angle derivatives. The method assumes a
+homogeneous forward-wave reference and rejects an ill-conditioned basis.
+It is a selected-frequency synthesis rather than an oblique one-way source.
 \end{document}

@@ -1,0 +1,9 @@
+{
+  "base_commit": "b0a92a1",
+  "sha256": {
+    "photonweave/polarization.py": "225f8bf7d2be2a6111ee6d59c9498eb3dcd799e64237de7ff1957b8e0c12543e",
+    "benchmarks/polarization_slab.py": "02861a3b5b642b12d58e25343c696c8320dc5cdfd845afc76d917e278df2cf0a",
+    "tests/test_polarization.py": "e02aa107ccd6ca88906e9a439e3f098be3574ba2b3230fb554d6f5fc8c28d5f2"
+  },
+  "scope": "Physical benchmark preceded added finite quadrature and real wavevector input guards. Calibration, mixing and solver numerics unchanged."
+}
