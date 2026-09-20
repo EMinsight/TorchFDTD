@@ -1,0 +1,242 @@
+{
+  "recorded_utc": "2026-09-20T22:04:19.755250+00:00",
+  "device": "cpu",
+  "precision": "float32",
+  "revision": "b68bb0b8776c7bc3ccf993038ba0ba659e097fbd",
+  "source_sha256": {
+    "benchmarks/mode_network_unequal_oracle.py": "8ec66933c21c39872689d3932802ef6537604fdcf85316f7d82cd659ca7df1e2",
+    "tests/test_mode_network_unequal.py": "68f5091e6882f9abb74c798ed291f9f10166e394b721bdfdb57d5a998e4c9b68",
+    "torchfdtd/mode_network.py": "89d64b6ddcd81cda0bf034176588c4d69c51d73fbfcaa00d15e29f9a48e3e9bd",
+    "torchfdtd/mode_injection.py": "ecc4a25939737623aa2ecd16b283afebb2aefa07b021c904666d10a3b03ecf3a",
+    "torchfdtd/mode_ports.py": "0467e4404d94c2420d065e6a6451868951d73891bd1aaebc98051ab969a20d00",
+    "torchfdtd/adjoint_planes.py": "edbb64361a748d1f04f852d2ddd5de341aa32f59123cd71a539ff855679bac68",
+    "torchfdtd/adjoint_spectrum.py": "08dcc8a81b04fec8a14f43e2e8b1006d1f5da89e5755aa70fd5a75fd0e15173f",
+    "torchfdtd/field_monitors.py": "23e73d2b971af0dabcf6649e0cfc3d3d4049ee9187f06ffebb50c9e8d5eb25af",
+    "torchfdtd/models.py": "35b4cb0613c3017dc218dde15d192f30c81842f1faf7f7599549ec852121bbf1",
+    "torchfdtd/solver.py": "30a1e70397bb7dfd0bee5742b38f0e2e34e639081db0dc78108157d20d200309",
+    "torchfdtd/waveforms.py": "654333e8afa4da1310afc714a1c15ad60663ef21f3533f4b55c1a7489a0809b9",
+    "torchfdtd/differentiable.py": "90772d3c5cbfe35b37bd8d90e636a6e86424cecc2b612211d04ebef52b52106b",
+    "torchfdtd/recomputed_batch.py": "7547c431d6fb958f8ae1f390606f82a391647e9bdcd518703404af04adae8378",
+    "torchfdtd/injection.py": "3c1b41a678c6356e9f08acebc3f6411693535b4111b815fa6b3ce33966961552",
+    "torchfdtd/boundaries.py": "43ed7dc65066160cd7519cff73a391d612ae61102e08b195976f98b3b43581c3",
+    "torchfdtd/adjoint_memory.py": "3a7cff0062a8b7f84ab88b3f36a465c67b61ef1d379825f387064f8f5aec23a0",
+    "benchmarks/mode_network_unequal_cpml.py": "f9ee57aca39b0d817912afc0d761da9715631af4feb4286d99396c3b7ffc8f74"
+  },
+  "prior_record": "docs/validation/mode_network_unequal_interface_cpu.json",
+  "prior_record_sha256": "593330829250c8b2f14475722751aeb04317db058e2872d52af1dab3911e5ffe",
+  "diagnosis": {
+    "coarse_finite_cpml_s_real_imag": [
+      [
+        [
+          -0.047479746169864716,
+          -0.0889887396636717
+        ],
+        [
+          -0.9805190817472983,
+          0.1679250800976384
+        ]
+      ],
+      [
+        [
+          -0.9808766675598882,
+          0.16792117319404076
+        ],
+        [
+          -0.000741988132102633,
+          -0.10080187450764976
+        ]
+      ]
+    ],
+    "coarse_finite_cpml_vs_native_error": [
+      [
+        5.24660689101695e-07,
+        6.248640867178566e-07
+      ],
+      [
+        2.3315409777718217e-07,
+        2.969174760889493e-07
+      ]
+    ],
+    "maximum_coarse_finite_cpml_vs_native_error": 6.248640867178566e-07,
+    "exact_outgoing_s_real_imag": [
+      [
+        [
+          -0.04520154963412204,
+          -0.10334795788877901
+        ],
+        [
+          -0.9792280236901846,
+          0.16848886352144749
+        ]
+      ],
+      [
+        [
+          -0.9792280236901533,
+          0.16848886352142134
+        ],
+        [
+          0.008060004544444896,
+          -0.1125123074650879
+        ]
+      ]
+    ],
+    "maximum_exact_outgoing_vs_interface_error": 1.2942112088781916e-08,
+    "prepared_basis": {
+      "native_detector_admittance": [
+        0.9157499074935913,
+        1.051339864730835
+      ],
+      "native_q_rad_per_cell": [
+        0.8268530173715889,
+        1.0060989288147755
+      ]
+    },
+    "interface_oracle": {
+      "kappa": 0.8034991203388725,
+      "q_rad_per_cell": [
+        0.8268531394469482,
+        1.00609897374363
+      ],
+      "collocated_admittance": [
+        0.9157495787078826,
+        1.0513397990373763
+      ],
+      "interface_electric_amplitudes": [
+        [
+          -0.0763879705397434,
+          0.08299914726023494
+        ],
+        [
+          0.9236120294602568,
+          0.082999147260235
+        ],
+        [
+          0.060366401490860803,
+          0.09528839415244178
+        ],
+        [
+          1.060366401490861,
+          0.09528839415244161
+        ]
+      ]
+    }
+  },
+  "harmonic_trials": [
+    {
+      "domain_um": [
+        12.0,
+        1.0,
+        1.0
+      ],
+      "shape": [
+        60,
+        5,
+        5
+      ],
+      "h_um": 0.2,
+      "pml_cells": 15,
+      "pml_thickness_um": 3.0,
+      "ports_um": [
+        -1.0,
+        1.0
+      ],
+      "sources_um": [
+        -2.0,
+        2.0
+      ],
+      "interface_first_sample_um": 0.0,
+      "steps": 600,
+      "dt_seconds": 3.8131497390620113e-16,
+      "harmonic_s_real_imag": [
+        [
+          [
+            -0.04519400858460407,
+            -0.10335824326664375
+          ],
+          [
+            -0.9792270969369741,
+            0.16848997499953544
+          ]
+        ],
+        [
+          [
+            -0.9792270966395115,
+            0.16848997492073464
+          ],
+          [
+            0.008071457488329383,
+            -0.11251787842378522
+          ]
+        ]
+      ],
+      "maximum_predicted_complex_error": 1.2753682825419723e-05
+    }
+  ],
+  "criterion": {
+    "maximum_complex_entry_absolute_error": 0.004,
+    "meaning": "all four S entries, independent Yee interface including reference-plane phases"
+  },
+  "accepted": true,
+  "measured_s_real_imag": [
+    [
+      [
+        -0.04519370570778847,
+        -0.10335823148488998
+      ],
+      [
+        -0.9792267680168152,
+        0.16848988831043243
+      ]
+    ],
+    [
+      [
+        -0.9792270064353943,
+        0.16849006712436676
+      ],
+      [
+        0.008071178570389748,
+        -0.11251775175333023
+      ]
+    ]
+  ],
+  "oracle_s_real_imag": [
+    [
+      [
+        -0.04520154963412046,
+        -0.10334795788877987
+      ],
+      [
+        -0.9792280236901681,
+        0.16848886352142312
+      ]
+    ],
+    [
+      [
+        -0.9792280236901683,
+        0.16848886352142323
+      ],
+      [
+        0.008059997192370834,
+        -0.11251229681401884
+      ]
+    ]
+  ],
+  "complex_entry_absolute_error": [
+    [
+      1.2925709161797708e-05,
+      1.6207739148195394e-06
+    ],
+    [
+      1.5759020657550625e-06,
+      1.2441044059597469e-05
+    ]
+  ],
+  "maximum_complex_error": 1.2925709161797708e-05,
+  "maximum_native_vs_finite_cpml_error": 3.401521299399761e-07,
+  "native_power_columns": [
+    0.9999998211860657,
+    0.9999993443489075
+  ],
+  "native_network_forward_seconds": 3.6138369999825954,
+  "scope": "One lower-reflection physical CPML followup. Same mesh, interface, port/source planes and duration. No new VJP, continuum refinement, GPU or general guide claim."
+}

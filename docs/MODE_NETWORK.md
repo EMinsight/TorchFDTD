@@ -2,7 +2,7 @@
 
 `torchfdtd.mode_network.ModeNetwork` implements a bounded two-port network around the native modal source and plane adjoint. Each port can contain multiple validated modes. It runs one independent launch per incident channel and returns a complex matrix with outgoing channels on rows and incident channels on columns.
 
-The supported physical arrangement has two opposing complete transverse-cell ports on one shared propagation axis. The transverse boundaries are periodic and the propagation axis uses CPML. Both exterior guides must have the same fixed isotropic nondispersive cross-section, repeated along the propagation axis for calibration. The material between the port neighborhoods may scatter and differentiate. This is not arbitrary multi-branch routing, unequal port cross-sections, anisotropic eigenmodes, transverse open/PML modes, or spatial streaming.
+The supported physical arrangement has two opposing complete transverse-cell ports on one shared propagation axis. The transverse boundaries are periodic and the propagation axis uses CPML. Each exterior guide has its own fixed isotropic nondispersive cross-section, repeated along the propagation axis for its incident-channel calibration. The material between the port neighborhoods may scatter and differentiate. This is not arbitrary multi-branch routing, finite-aperture ports, anisotropic eigenmodes, transverse open/PML modes, or spatial streaming.
 
 ## Usage
 
@@ -57,7 +57,7 @@ At the excited port only, the matched guide's outward baseline is subtracted bef
 
 The sampled Hermitian power Gram matrix must be the identity within `gram_tolerance`, default `1e-4`. Dependent or significantly nonorthogonal mode sets are rejected. The matched launch must excite its selected inward channel with other selected inward amplitudes below `1e-3` relative amplitude. This is not a general nonorthogonal-basis least-squares detector. It cannot account for omitted channels automatically, and sums of selected modal powers need not capture radiation or all propagating modes.
 
-Material through both source/exterior guides and the detector neighborhoods must equal the same fixed calibration cross-section. The wrapper freezes these exterior material derivatives once per network invocation, without retaining a full-volume mask. Only the material between those neighborhoods differentiates. This includes the existing launcher's fixed-source material convention and excludes eigenmode/material derivatives at the ports.
+Material through both source/exterior guides and the detector neighborhoods must equal the corresponding port's fixed calibration cross-section. The wrapper freezes these exterior material derivatives once per network invocation, without retaining a full-volume mask. Only the material between those neighborhoods differentiates. This includes the existing launcher's fixed-source material convention and excludes eigenmode/material derivatives at the ports.
 
 ## Execution and memory
 
@@ -115,3 +115,134 @@ The subsequent bounded continuum/discrete-oracle analysis and one 0.05 micrometr
 The [physical-gradient direction diagnostic](MODE_NETWORK_SLAB_ORACLE.md#remaining-physical-gradient-direction-gate) exposes an additional limitation of the coarse material-gradient check. For the same complex S objective, its measured native adjoint is negative while the independent continuum derivative is positive. Scalar step halving confirms this difference. A subsequent native forward/backward at each of 0.1 and 0.05 micrometre gives gradients +0.17989309 and +0.23723969, agreeing with the discrete oracle within 0.00181% and 0.000124%. Both recover the continuum sign, but their continuum magnitude errors remain about 29.1% and 6.50%. These results establish the bounded direction check, not general shape-gradient convergence or a measured optimization step. Agreement with a same-mesh native finite difference alone does not establish a continuum improvement direction.
 
 A further [25 nm acceptance run](MODE_NETWORK_GRADIENT_ACCEPTANCE.md) retains those records and uses a predeclared 2% material-gradient criterion. It measures a 1.58% continuum derivative error and an actual native loss decrease for a fixed epsilon decrement, matching the continuum descent direction. This is a fixed-slab material result, not general shape or CR acceptance.
+
+## Unequal opposing cross-sections
+
+The legacy `ModeNetwork(project, ports, permittivity=...)` call uses one section
+at both ports. Alternatively, omit `permittivity` and pass
+`port_permittivities={"left": 1.0, "right": 1.44}`. Keys must exactly match the
+port names. Values use the native eigensolver's scalar or callable
+`epsilon(u_um, v_um)` contract. Passing both APIs is an error. Trainable tensor
+values or callable results are rejected. The material profiles, modes and
+calibration remain fixed and do not support eigenmode differentiation.
+
+```python
+network = ModeNetwork(project, ports,
+    port_permittivities={"left": 1.0, "right": 1.44})
+epsilon = network.reference_epsilon(port="left", device="cpu")
+# This example uses the 40-cell x grid from the usage example above.
+epsilon[20:] = 1.44
+epsilon.requires_grad_()
+result = network(epsilon)
+(-result.s[2, 0].abs().square()).backward()
+```
+
+For the explicit map API, `reference_epsilon` requires a port name. It returns
+that port's straight calibration guide, not a device joining the two sections.
+Construct the transition separately inside the admitted design region. The
+left fixed region extends through index `left_index + 1`; the right starts at
+`right_index - 1`. These include each detector stencil, its source and the
+normal-side CPML. Exterior material cotangents are exactly zero. Interior
+cotangents retain the caller's PyTorch graph.
+
+Each calibration projects only its incident plane into that port's own basis.
+It never projects a straight left-guide reference onto a mismatched right-guide
+basis. The sample uses each receiving port's own power-normalized basis. Only
+one full calibration epsilon exists at a time, with no full NumPy temporary.
+The wrapper reservation includes this volume, and the result reports its actual
+`calibration_volume_bytes` and `calibration_volume_limit=1`. Compact calibration
+coefficients are retained per channel; no calibration volume enters a case
+closure or a persistent cache. The two ports still occupy the same complete
+transverse periodic cell. Finite apertures, transverse PML and non-opposing
+ports remain unsupported.
+
+`tests/test_mode_network_unequal.py` is explicitly CPU-only. Its public synthetic
+normal-incidence dielectric interface checks independently calculated Fresnel
+powers, reciprocity, a central finite-difference interior material derivative,
+and exactly zero exterior cotangents. Coarse-grid Fresnel tolerances are absolute
+0.012 for reflection and 0.025 for transmission power, rather than a continuum
+convergence claim. No unequal-port GPU or scaling measurement is claimed.
+
+Focused validation: the new contract check passed, the physical CPU check passed
+in 26.63 s, and the reference-lifetime regression passed in 3.91 s. Two legacy
+CPU admission/replay cases passed in 4.13 s. The interface material VJP was
+-0.3092645 versus central finite difference -0.3092736. The measured through
+coefficients were approximately -0.98088+0.16792i and -0.98052+0.16793i.
+These checks do not establish arbitrary waveguide-transition accuracy.
+
+### Independent discrete complex-S acceptance
+
+The original continuum power tolerances above are retained as historical
+evidence. They admit zero reflection and unit transmission because the
+continuum reflectance is only 0.00826446. A subsequent gate therefore requires
+absolute complex error at most 0.004 in every S entry, including reflection
+phase. This threshold was declared before the new native measurement. It was
+not relaxed after the original configuration failed.
+
+`benchmarks/mode_network_unequal_oracle.py` independently solves the scalar
+normal-incidence Yee interface equations. With `kappa = 2 sin(omega dt/2)/C`,
+the transverse electric samples obey
+
+```text
+E[j+1] - (2 - epsilon[j]*kappa**2)*E[j] + E[j-1] = 0
+q = 2 asin(sqrt(epsilon)*kappa/2)
+```
+
+The first right-medium transverse E sample is index 20 at x = 0 um in the
+original 40-cell grid. No interface displacement is fitted. For left incidence,
+the equations at j = -1 and j = 0 give `t = 1 + r` and
+`exp(-i q_left) + r exp(i q_left) = t exp(-i q_right)`. The reciprocal incidence
+is solved separately. Both phase planes remain at -1 and +1 um.
+
+Native temporal DFT offsets align H's half timestep. Spatial interpolation at
+an electric-node plane averages its two adjacent magnetic half-cell samples.
+The sampled admittance is therefore `Y = sqrt(epsilon)*cos(q/2)`, and electric
+transmission amplitudes convert to the port power amplitudes with
+`sqrt(Y_out/Y_in)`. The scalar algebra tests check both interface recurrences,
+unitarity, reciprocity, the uniform-medium phase limit and rejection of a
+reflectionless negative control. The latter differs from this oracle by more
+than twenty times the new tolerance.
+
+The [original complex-S record](validation/mode_network_unequal_interface_cpu.json)
+preserves its failed gate. Its two reflection errors were 0.0145389 and
+0.0146498, while its transmission errors were 0.00174341 and 0.00140824. This
+was not a native modal-basis mismatch. Prepared q values agreed with the
+independent dispersion within 1.3e-7 rad/cell, and detector H/E ratios agreed
+with the collocated admittances within 3.3e-7.
+
+`benchmarks/mode_network_unequal_cpml.py` isolates the boundary effect without
+additional time-domain solves. It assembles a scalar harmonic E/H linear
+system using native CPML coefficients and actual source-packet DFTs as data.
+Each auxiliary response is eliminated with
+`stretch = 1/kappa_cpml + c/(1-b*exp(i omega dt))`. Independently assembled
+spatial differences, collocation and matched-reference subtraction reproduce
+the original measured S within 6.25e-7. Replacing only the outer response with
+exact discrete outgoing-wave impedances, while retaining the actual source
+packets and native basis, recovers the infinite-interface oracle within
+1.30e-8. The original runtime correctly solves its finite problem. Its coarse
+five-cell CPML approximation does not meet this stricter open-boundary gate.
+
+One physically defined harmonic trial increased the domain from 8 to 12 um and
+PML thickness from 5 to 15 cells, or 1 to 3 um. Mesh spacing remained 0.2 um,
+the interface remained at zero, source planes remained at -2 and +2 um, and
+the detector planes remained at -1 and +1 um. The same 600 steps and timestep
+preserved the 228.789 fs duration. No conductivity fitting or further trials
+were used. The harmonic model predicted maximum complex error 1.27537e-5.
+
+The sole [native CPU followup](validation/mode_network_unequal_cpml_followup_cpu.json)
+then measured maximum complex error **1.29257e-5**, passing the unchanged
+**0.004** criterion. Its maximum difference from the finite-CPML harmonic
+prediction was 3.40e-7. Native network forward time was 3.614 s. The measured S
+was approximately
+
+```text
+[[-0.04519371 - 0.10335823i, -0.97922677 + 0.16848989i],
+ [-0.97922701 + 0.16849007i,  0.00807118 - 0.11251775i]]
+```
+
+Both records contain raw complex matrices, per-entry errors, source hashes and
+the exact physical configuration. The followup also links the unchanged failed
+record by SHA256 and records the sole harmonic trial. The new physical test
+uses this lower-reflection configuration, while the original coarse power and
+VJP checks remain unchanged. No additional VJP/finite-difference run, GPU solve,
+mesh refinement or arbitrary waveguide-transition acceptance is implied.

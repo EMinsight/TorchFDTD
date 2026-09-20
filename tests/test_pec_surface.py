@@ -26,8 +26,8 @@ def test_familiar_pec_aliases_preserve_independent_faces(tmp_path):
     f.set("x max bc","Symmetric")
     assert f.project.region.boundaries.x_max.kind=="symmetric"
     # The editing facade permits sequential region edits. Save/run must still
-    # reject this incomplete closed-cavity configuration before execution.
-    with pytest.raises(ValueError,match="closed PEC/PMC"):
+    # reject this unsupported two-dimensional PMC configuration before execution.
+    with pytest.raises(ValueError,match="real FP32 3D"):
         f.save(tmp_path/"unsupported.json")
 
 
@@ -58,7 +58,7 @@ def test_pec_api_validates_exports_and_runs(tmp_path):
         payload["region"]["boundaries"]["x_max"]["kind"]="pmc"
         rejected=client.post("/api/validate",json=payload)
         assert rejected.status_code==422
-        assert "closed PEC/PMC" in rejected.text
+        assert "periodic or Bloch mixing" in rejected.text
 
 
 def test_familiar_pmc_facade_runs_and_preserves_endpoint_results(tmp_path):
@@ -78,5 +78,5 @@ def test_familiar_pmc_facade_runs_and_preserves_endpoint_results(tmp_path):
         f.set('z max bc','PEC')
     f.switchtolayout()
     f.set('z max bc','PML')
-    with pytest.raises(ValueError,match='closed PEC/PMC'):
+    with pytest.raises(ValueError,match='alpha=0'):
         f.run()

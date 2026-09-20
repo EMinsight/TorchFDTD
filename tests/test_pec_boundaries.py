@@ -106,9 +106,9 @@ def test_resident_and_streamed_adjoint(device,complex_fields):
 
 
 @pytest.mark.parametrize("kind",["pmc","symmetric"])
-def test_magnetic_wall_requires_closed_endpoint_dispatch(kind):
+def test_magnetic_wall_rejects_periodic_endpoint_mixing(kind):
     assert BoundaryFace(kind=kind).kind==kind
-    with pytest.raises(ValueError,match="closed PEC/PMC"):
+    with pytest.raises(ValueError,match="periodic or Bloch mixing"):
         scene(kind=kind)
 
 

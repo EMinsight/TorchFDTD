@@ -32,10 +32,10 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 | 단일 문제 multi-GPU | Sharding | 별도 periodic/Bloch 초기값 API의 rank-owned slab·halo transpose·재료 VJP·binomial checkpoint. 실제 Linux 2/3-process Gloo CPU 검사 통과 | **부분/GPU 미검증**. 실제 NCCL·2장 이상 GPU, source/monitor·물리 경계·scaling 검증 필요 |
 | 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 새 고정 모드와 radiation 목적함수 | **부분**. PMC/tensor의 추가 물리·실행 경로, 일반 source/eigenmode·동시 adjoint batch 확대 필요 |
 | 설계 파라미터화 | Density, projection/binarization, symmetry | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수 | 기본 topology workflow 구현. 일반 spline/polygon shape derivative·제작 제약·최종 CR 물리 수렴은 별도 |
-| Mode source·detector·port | 고정 mode source/detector, overlap/S-parameter. 고유모드 재료·좌표의 미분은 중단 | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 같은 exterior 단면의 고정 모드만 지원. 일반 branch/서로 다른 단면·open/PML 횡단면·streamed injection·물리 수렴·UI가 남음. 고유모드 자체 미분은 별도 연구 목표 |
+| Mode source·detector·port | 고정 mode source/detector, overlap/S-parameter. 고유모드 재료·좌표의 미분은 중단 | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 서로 다른 고정 exterior 단면과 입사 포트별 calibration을 지원하며 추가 CPU 물리 검증을 기록. 일반 branch·open/PML 횡단면·streamed injection·일반 물리 수렴·UI가 남음. 고유모드 자체 미분은 별도 연구 목표 |
 | Far-field·회절 | Field projection, diffraction detectors | Closed-box 벡터 원거리장, Bloch 회절 차수·방향별 효율, field graph와 재료 VJP, FP32 방사 패턴 수렴. 저장 결과/NPZ adapter와 실제 회절 browser workflow | 기본 homogeneous exterior 기능과 회절 UI 구현. substrate/periodic lattice far-field·일반 응용·closed-box UI는 남음 |
 | 이방성 | 대각·일반 tensor | Node-sampled SPD bulk tensor, periodic/Bloch CPU·CUDA와 고정 등방성 CPML 외부, 이산 transpose·6성분 VJP·checkpoint·고유파 검증 | **부분**. 일반 anisotropic CPML·반사/장시간 안정성·interface·tensor ADE·streaming·mode·UI 검증이 남음 |
-| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. Closed PMC native Project·CLI·browser·endpoint NPZ. 별도 uniform PMC+CPML CPU/CUDA API와 보조 상태·재료·파형 adjoint, 전체/절반 영역 일치와 checkpoint 절반 절감 | **부분**. 혼합 경계의 native dispatch·일반 흡수 정확도·속도, ADE·streaming·tensor batch 확대가 남음 |
+| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. Closed PMC native Project·CLI·browser·endpoint NPZ. 별도 uniform PMC+CPML CPU/CUDA API와 보조 상태·재료·파형 adjoint, 전체/절반 영역 일치와 checkpoint 절반 절감 | **부분**. 제한된 공통 PML profile의 혼합 경계를 Project·CLI·browser에 연결. 일반 profile·흡수 정확도·속도, ADE·streaming·tensor batch 확대가 남음 |
 
 ## 이번 구현의 근거
 
@@ -81,6 +81,12 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
   파라미터 VJP가 일치했다. 독립 Fourier·유한차분도 확인했다. 작은 비교 계약의
   검증이며 속도, 대규모 용량, 전체 물리 동등성의 근거로 확대하지 않는다.
 
+- [전체 재료 gradient 비교](FDTDX_MATCHED_FULL_GRADIENT.md): 동일 frozen 버전의
+  64³, 512-step periodic 문제에서 전체 epsilon VJP의 상대 L2 차이는 1.06e-6,
+  최대 절대 차이는 8.38e-13이며 두 history는 동일하다. 고정 source의 zero
+  cotangent, slab contraction과 독립 방향 유한차분도 통과했다. 속도 비교와
+  다른 물리 조합의 동등성을 의미하지 않는다.
+
 - [PMC resident API](PMC_IMPLEMENTATION_PLAN.md): 실제 endpoint의 소스·관측과
   FP32 CUDA·재료/파형 gradient, 10,000-step logical binomial schedule.
   Native Project·CLI·browser의 closed-cavity 실행과 exact endpoint NPZ,
@@ -89,6 +95,9 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
   필드·재료·파형 VJP가 일치했다. 240-step 전체/대칭 절반 영역의 대응 E/H
   차이는 0, 완전 checkpoint는 37,088→18,544 bytes였다. 이 작은 사례의
   메모리 비율을 대규모 속도나 일반 흡수 정확도로 확대하지 않는다.
+  [혼합 경계 native workflow](PMC_NATIVE_CPML.md)는 공통 PML 깊이·세기,
+  명시적 cubic profile과 균일 등간격 격자에서 Python·CLI·browser를 연결한다.
+  지원하지 않는 PML 값은 거부하며 실제 보조 상태와 적용 profile을 결과에 기록한다.
 - [Bulk tensor API](ANISOTROPY_IMPLEMENTATION_PLAN.md): periodic/Bloch
   CPU/CUDA, 6성분 유한차분, 독립 Fourier symbol·에너지·mesh dispersion.
   고정 등방성 CPML/collar 안의 tensor에 비주기 정규화 연산자와 전체
@@ -106,8 +115,8 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 
 1. 진행 중인 원래 CR 24-cycle 결과와 실제 FP32 48 GB 초과 용량 검증을
    보존하며 완료한다. 최적 CR 후보의 세밀한 메시 재검증은 별도 단계다.
-2. 별도 PMC+CPML 경로를 native dispatch에 연결하고 흡수 정확도를 검증한 뒤,
-   필요한 ADE·streaming·batch 조합으로 확장한다.
+2. 연결한 PMC+CPML native dispatch의 실제 CUDA 작업과 흡수 정확도를 검증한 뒤,
+   필요한 profile·ADE·streaming·batch 조합으로 확장한다.
    이미 통과한 경로는 변경 없이 반복하지 않는다.
 3. [일반 이방성 tensor 계획](ANISOTROPY_IMPLEMENTATION_PLAN.md)의 고정 등방성
    CPML 외부에서 반사·안정성 및 계면을 검증하고 streaming과 UI로 확장한다.

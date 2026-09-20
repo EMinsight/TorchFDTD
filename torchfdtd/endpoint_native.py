@@ -1,4 +1,4 @@
-"""Native closed-wall PMC dispatch. Ordinary Yee paths must reject these walls."""
+"""Native endpoint PMC dispatch, including restricted fixed-exterior CPML."""
 import math
 import time
 from dataclasses import asdict
@@ -11,12 +11,37 @@ def uses_endpoint(region):
     return any(face.kind in ('pmc','symmetric') for axis in range(3) for face in region.boundaries.pair(axis))
 
 
+def endpoint_cpml_options(region):
+    """Translate the admitted native strength into the endpoint cubic profile."""
+    active=[(a, side, f) for a in range(3) for side, f in enumerate(region.boundaries.pair(a)) if f.kind=='pml']
+    if not active:return None
+    widths=[np.diff(nodes) for nodes in region.mesh_nodes]
+    h=float(widths[0][0])
+    if any(not np.allclose(w,h,rtol=1e-12,atol=1e-14) for w in widths):
+        raise ValueError('PMC with PML requires uniform equal-spacing axes.')
+    depths={region.pml_layers(a,side) for a,side,_ in active}
+    strengths={f.sigma_scale for _,_,f in active}
+    if len(depths)!=1 or len(strengths)!=1:
+        raise ValueError('PMC endpoint CPML requires equal resolved layers and sigma_scale on all PML faces.')
+    if any(f.kappa!=1 or f.alpha!=0 or f.polynomial!=3 or f.alpha_polynomial!=0 for _,_,f in active):
+        raise ValueError('PMC endpoint CPML requires kappa=1, alpha=0, polynomial=3 and alpha_polynomial=0. Set alpha explicitly to zero.')
+    layers=next(iter(depths));strength=next(iter(strengths));background=region.background_index**2
+    exponent=-20*strength*layers*math.sqrt(background)/(layers+1)
+    reflection=math.exp(exponent)
+    if not 0<reflection<1:
+        raise ValueError('PMC endpoint CPML sigma_scale/background gives an unrepresentable decay profile.')
+    for a in range(3):
+        if sum(region.pml_layers(a,side) for side in (0,1))+2>=region.shape[a]:
+            raise ValueError('Leave at least three cells between PML interiors or the opposite wall.')
+    return dict(pml_cells=layers,background_epsilon=background,reflection=reflection)
+
+
 def validate_endpoint_project(project):
     """Metadata-only admission shared by Project parsing and native dispatch."""
     r=project.region
     if not uses_endpoint(r):return
-    if any(f.kind not in ('pec','antisymmetric','pmc','symmetric') for a in range(3) for f in r.boundaries.pair(a)):
-        raise ValueError('PMC native dispatch requires closed PEC/PMC walls on every face; PML/periodic mixing is unsupported.')
+    if any(f.kind not in ('pec','antisymmetric','pmc','symmetric','pml') for a in range(3) for f in r.boundaries.pair(a)):
+        raise ValueError('PMC native dispatch supports PEC/PMC/PML faces; periodic or Bloch mixing is unsupported.')
     if r.dimension!='3d' or r.precision!='float32' or r.complex_fields or r.mesh_type not in ('uniform','explicit'):
         raise ValueError('PMC native dispatch requires fixed uniform/explicit real FP32 3D meshes.')
     if r.memory_mode!='resident' or r.run_control.auto_shutoff:
@@ -33,6 +58,7 @@ def validate_endpoint_project(project):
         raise ValueError('PMC native dispatch accepts enabled point E/H monitors at every timestep only.')
     if r.backend=='cpu' and math.prod(r.shape)>32768:
         raise ValueError('PMC CPU reference is limited to 32768 cells; select CUDA or reduce the mesh.')
+    cpml=endpoint_cpml_options(r)
     seen=set()
     for item in [*project.sources,*project.monitors]:
         terms=project.resolved_source(item).polarization_components if item in project.sources else ((item.component,1.),)
@@ -42,6 +68,8 @@ def validate_endpoint_project(project):
                 nodal=(component!=a) if field[0]=='E' else (component==a)
                 coords=nodes if nodal else (nodes[:-1]+nodes[1:])/2
                 index=int(np.argmin(abs(coords-item.center[a])));indices.append(index)
+                if cpml is not None and (coords[index]<nodes[r.pml_layers(a,0)]-1e-12 or coords[index]>nodes[len(nodes)-1-r.pml_layers(a,1)]+1e-12):
+                    raise ValueError(f'{item.name}: nearest {field} sample lies inside a CPML layer.')
                 if nodal and ((index==0 and r.boundaries.pair(a)[0].kind in ('pec','antisymmetric')) or
                               (index==len(nodes)-1 and r.boundaries.pair(a)[1].kind in ('pec','antisymmetric'))):
                     raise ValueError(f'{item.name}: nearest {field} sample is constrained by a PEC wall.')
@@ -58,12 +86,14 @@ def estimate_endpoint(project):
     faces=tuple(tuple('pmc' if f.kind in ('pmc','symmetric') else 'pec' for f in r.boundaries.pair(a)) for a in range(3))
     topology=CompactEndpointTopology(r.mesh_nodes,faces)
     count=sum(topology.counts.values());cells=math.prod(r.shape)
+    cpml=endpoint_cpml_options(r)
     terms=sum(len(project.resolved_source(s).polarization_components) for s in project.sources)
     # Conservative native setup/runtime payload; no adjoint checkpoints here.
     tensor=12*4*count+12*topology.counts['E']+8*r.steps*(terms+len(project.monitors))+8*terms
     use_cuda=r.backend=='cuda' or (r.backend=='auto' and torch.cuda.is_available())
     if not use_cuda:tensor+=81*count
     else:tensor+=sum(4*(2*n+1) for n in r.shape)
+    if cpml is not None:tensor+=400*count+((16*14+64)*512 if use_cuda else 0)
     interval=max(r.snapshot_interval,math.ceil(r.steps/100))
     snapshots=math.ceil(r.steps/interval)
     plane=math.prod(min(256,n) for a,n in enumerate(r.shape) if a!='xyz'.index(r.slice_axis))
@@ -74,7 +104,7 @@ def estimate_endpoint(project):
         'estimated_memory_mb':(tensor+host)/2**20,'endpoint_tensor_bytes':tensor,'endpoint_host_bytes':host,
         'endpoint_counts':topology.counts,'endpoint_preparation_bytes':preparation,
         'endpoint_tensor_budget_bytes':tensor,'endpoint_host_reservation_bytes':host,
-        'warnings':['Closed PMC endpoint solver: point sources/monitors only; volume plots crop upper stored faces and edges.'],
+        'warnings':['Endpoint PEC/PMC'+('/CPML' if cpml else '')+' solver: point sources/monitors only; volume plots crop upper stored faces and edges.'],
         'oneway_planes':[],'tfsf_boxes':[],'tfsf_auxiliary_estimated_bytes':0}
 
 
@@ -109,7 +139,9 @@ def run_endpoint(project,progress=None,cancel=None):
     adapter=endpoint_from_project(project,device='cuda' if use_cuda else 'cpu',checkpoints=0,
         **budgets)
     sim=adapter.simulation;epsilon=adapter.rasterize();waveforms=adapter.waveforms()
-    material=sim._material(epsilon);state=sim._zero();base=3*math.prod(r.shape)
+    adapter.validate_material(epsilon,waveforms)
+    cpml=endpoint_cpml_options(r)
+    material=epsilon if cpml else sim._material(epsilon);state=sim._zero();base=3*math.prod(r.shape)
     trace=torch.empty((r.steps,len(project.monitors)),dtype=torch.float32,device=sim.device)
     axis='xyz'.index(r.slice_axis);component='xyz'.index(r.field[1].lower())
     slice_index=index_at(tuple(r.slice_position if a==axis else 0 for a in range(3)),r,r.field)[axis]
@@ -127,6 +159,8 @@ def run_endpoint(project,progress=None,cancel=None):
             state=sim._step(state,material,waveforms[n]);completed=n+1
             for j,(family,index) in enumerate(sim.observation_ids):trace[n,j]=(state.electric if family=='E' else state.magnetic)[index]
             if completed%r.run_control.check_interval==0 or completed==r.steps:
+                if hasattr(state,'psi') and any(not bool(torch.isfinite(v).all()) for v in state.psi):
+                    raise FloatingPointError('Non-finite endpoint CPML auxiliary state detected.')
                 peak=max(float(state.electric.abs().max()),float(state.magnetic.abs().max()))
                 norm=float(state.electric.double().square().sum()+state.magnetic.double().square().sum())
                 decision.update(completed,norm,peak)
@@ -135,11 +169,13 @@ def run_endpoint(project,progress=None,cancel=None):
                 image={'real':np.real,'imag':np.imag,'magnitude':np.abs,'phase':np.angle}[r.complex_display](image)
                 frames.append(image);frame_steps.append(completed)
                 if progress:progress(dict(step=completed,total=r.steps,frame=image.tolist(),elapsed=time.perf_counter()-begin,termination_reason=None,diagnostics=decision.history[-1] if decision.history else None))
+        if hasattr(state,'psi') and any(not bool(torch.isfinite(v).all()) for v in state.psi):
+            raise FloatingPointError('Non-finite endpoint CPML auxiliary state detected.')
         if not bool(torch.isfinite(state.electric).all() & torch.isfinite(state.magnetic).all()):raise FloatingPointError('Non-finite PMC endpoint fields detected.')
     if use_cuda:torch.cuda.synchronize()
     seconds=time.perf_counter()-begin
     full_e=state.electric.detach().cpu().numpy();full_h=state.magnetic.detach().cpu().numpy()
-    stats.update(engine='TorchFDTD exact-endpoint PEC/PMC',backend='cuda' if use_cuda else 'cpu',precision='float32',
+    stats.update(engine='TorchFDTD exact-endpoint PEC/PMC'+('/CPML' if cpml else ''),backend='cuda' if use_cuda else 'cpu',precision='float32',
         gpu=torch.cuda.get_device_name() if use_cuda else None,steps=completed,requested_steps=r.steps,
         seconds=seconds,setup_seconds=setup,cancelled=reason=='cancelled',termination_reason=reason,
         cuda_graph=False,cuda_graph_steps=1,cuda_graph_replays=0,cuda_kernel='endpoint-direct' if use_cuda else None,cuda_monitor_kernel=None,auto_shutoff=False,

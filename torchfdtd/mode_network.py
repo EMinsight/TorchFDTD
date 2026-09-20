@@ -83,12 +83,24 @@ def _decompose(plane, launches, gram_tolerance):
     return torch.stack(forward, -1), torch.stack(backward, -1)
 
 
+def _fixed_section(section):
+    def checked(value):
+        if isinstance(value, torch.Tensor):
+            if value.requires_grad:
+                raise ValueError('Port cross-sections are fixed. Trainable profile tensors are unsupported.')
+            return value.detach().cpu().numpy()
+        return value
+    if callable(section):
+        return lambda u, v: checked(section(u, v))
+    return checked(section)
+
+
 class ModeNetwork:
     """Complex S[outgoing channel, incident channel] from independent launches.
 
     Supports two opposing complete-cell ports on project.sources[0].normal.
-    The same fixed straight calibration cross-section is required at BOTH ports.
-    It is built from permittivity and repeated along the propagation axis. All port
+    Each port has a fixed straight calibration cross-section. Use permittivity
+    for a shared section, or port_permittivities keyed by the two port names. All port
     and source exterior material remains fixed. Only the interior design
     differentiates. Mode profiles/eigenvalues and calibration do not.
 
@@ -96,7 +108,8 @@ class ModeNetwork:
     bounds retained packets and conservative wrapper working tensors, not the
     solver, eigensolver library, optimizer, or caller material-construction graph.
     """
-    def __init__(self, project, ports, permittivity, options=None, *, num_modes=2,
+    def __init__(self, project, ports, permittivity=None, options=None, *, num_modes=2,
+                 port_permittivities=None,
                  network_budget_bytes=256*1024**2, gram_tolerance=1e-4):
         self.project = Project.model_validate(project.model_dump())
         self.ports = tuple(ports)
@@ -105,6 +118,17 @@ class ModeNetwork:
             raise ValueError('Mode networks require resident AdjointOptions, not streaming.')
         if len(self.ports) != 2 or not all(isinstance(p, FixedModePort) for p in self.ports):
             raise ValueError('Exactly two opposing fixed mode ports are supported.')
+        self._shared_section = port_permittivities is None
+        if port_permittivities is None:
+            if permittivity is None:
+                raise ValueError('Provide permittivity or explicit port_permittivities.')
+            sections = {p.name: permittivity for p in self.ports}
+        else:
+            if permittivity is not None:
+                raise ValueError('Use either permittivity or port_permittivities, not both.')
+            if not isinstance(port_permittivities, dict) or set(port_permittivities) != {p.name for p in self.ports}:
+                raise ValueError('port_permittivities must map exactly both port names to fixed sections.')
+            sections = dict(port_permittivities)
         left, right = self.ports
         if len({p.name for p in self.ports}) != 2 or any(not p.name for p in self.ports):
             raise ValueError('Port names must be unique and nonempty.')
@@ -149,7 +173,7 @@ class ModeNetwork:
                 p.monitors = [FieldMonitor(id=q.name, normal=self.normal,
                     center=tuple(q.coordinate_um if a == self.axis else 0. for a in range(3)),
                     size=tuple(size)) for q in self.ports]
-                launch = prepare_modal_launch(p, permittivity, mode_index=mode_index, num_modes=num_modes,
+                launch = prepare_modal_launch(p, _fixed_section(sections[port.name]), mode_index=mode_index, num_modes=num_modes,
                                               source_budget_bytes=network_budget_bytes)
                 projects.append(p); launches.append(launch)
         self._projects, self._launches = tuple(projects), tuple(launches)
@@ -161,7 +185,7 @@ class ModeNetwork:
 
     def _configuration(self):
         return (self.ports, self.normal, self.axis, self.indices, self.channels, self.options,
-                self.gram_tolerance, self.network_budget_bytes,
+                self.gram_tolerance, self.network_budget_bytes, self._shared_section,
                 tuple(launch.identity for launch in self._launches))
 
     def _guard_configuration(self):
@@ -180,7 +204,8 @@ class ModeNetwork:
         # Fixed packets for all launches, parameter carrier and gradients,
         # reference epsilon, one plane-map construction and modal scratch.
         packet = getattr(self, '_packet_bytes', count*(8*r.steps+80*points)*item)
-        required = packet + 24*cells*item + 8192*points + 128*count*points*item + 16*count*count*item
+        calibration_bytes = 3*cells*item
+        required = packet + 21*cells*item + calibration_bytes + 8192*points + 128*count*points*item + 16*count*count*item
         if required > self.network_budget_bytes:
             raise ValueError('Mode network packet/wrapper reservation exceeds network byte budget.')
         from .memory_profile import host_memory
@@ -189,12 +214,27 @@ class ModeNetwork:
             raise ValueError('Mode network wrapper reservation exceeds available host memory.')
         return required
 
-    def reference_epsilon(self, *, device='cpu'):
+    def _port_profile(self, port_index, device):
+        offset = 0 if port_index == 0 else len(self.ports[0].mode_indices)
+        launch = self._launches[offset]
+        cross = np.stack([_profile(launch.epsilon[..., c], self.normal) for c in range(3)], -1)
+        return torch.tensor(cross, device=device)
+
+    def reference_epsilon(self, *, port=None, device='cpu'):
+        """A straight guide for one incident port, not the unequal-port device."""
         self._guard_configuration()
         self._admit()
-        launch = self._launches[0]
-        cross = np.stack([_profile(launch.epsilon[..., c], self.normal) for c in range(3)], -1)
-        return torch.tensor(np.broadcast_to(cross, self.project.region.shape+(3,)).copy(), device=device)
+        if port is None:
+            if not self._shared_section:
+                raise ValueError('Select port by name for a per-port calibration guide.')
+            index = 0
+        else:
+            names = tuple(p.name for p in self.ports)
+            if port not in names:
+                raise ValueError('Unknown calibration port name.')
+            index = names.index(port)
+        # No full-volume NumPy temporary or retained reference per port.
+        return self._port_profile(index, device).expand(self.project.region.shape+(3,)).clone()
 
     def __call__(self, epsilon, *, output_device='cpu', output_budget_bytes=64*1024**2):
         self._guard_configuration()
@@ -213,12 +253,11 @@ class ModeNetwork:
             raise ValueError('Network epsilon requires CPU or CUDA.')
         # Freeze both exterior guides once, before recomputed launch cases.
         # No full-volume mask is retained, and all columns share this carrier.
-        reference = self.reference_epsilon(device=epsilon.device)
         fixed = []
-        for span in (slice(None, self.indices[0]+2), slice(self.indices[1]-1, None)):
+        for port_index, span in enumerate((slice(None, self.indices[0]+2), slice(self.indices[1]-1, None))):
             selection = [slice(None)]*3; selection[self.axis] = span
             selection = tuple(selection)
-            if not torch.allclose(epsilon[selection], reference[selection], rtol=2e-6, atol=1e-7):
+            if not torch.allclose(epsilon[selection], self._port_profile(port_index, epsilon.device).expand_as(epsilon[selection]), rtol=2e-6, atol=1e-7):
                 raise ValueError('Port/source exterior material must match the fixed calibration guide.')
             fixed.append(selection)
         material = epsilon.clone() if epsilon.requires_grad else epsilon
@@ -237,28 +276,29 @@ class ModeNetwork:
         for column, (project, launch) in enumerate(zip(projects, launches)):
             port_index = 0 if column < counts[0] else 1
             local_index = column if port_index == 0 else column-counts[0]
+            reference = self.reference_epsilon(port=ports[port_index].name, device=epsilon.device)
             model = ModeInjectedPlaneSimulation(project, launch, options)
             with torch.no_grad():
                 planes = model(reference, frequency)
-                scale = max(float(x.fields.abs().max()) for x in planes.values())
+                plane = planes[ports[port_index].name]
+                scale = float(plane.fields.abs().max())
                 if not math.isfinite(scale) or scale <= 0:
                     raise ValueError('Calibration has no finite incident field.')
-                incoming, baseline = [], []
-                for p, basis in zip(ports, port_launches):
-                    forward, backward = _decompose(replace(planes[p.name], fields=planes[p.name].fields/scale), basis, tolerance)
-                    incoming.append(forward if p.direction == 1 else backward)
-                    baseline.append(backward if p.direction == 1 else forward)
-                normalization = incoming[port_index][0, local_index].detach().clone()
-                if not bool(torch.isfinite(normalization)) or not bool(normalization.abs() > 1e-6*incoming[port_index].abs().max()):
+                forward, backward = _decompose(replace(plane, fields=plane.fields/scale),
+                    port_launches[port_index], tolerance)
+                incoming = forward if ports[port_index].direction == 1 else backward
+                baseline = backward if ports[port_index].direction == 1 else forward
+                normalization = incoming[0, local_index].detach().clone()
+                if not bool(torch.isfinite(normalization)) or not bool(normalization.abs() > 1e-6*incoming.abs().max()):
                     raise ValueError('Calibration incident channel is unsupported.')
-                incident = incoming[port_index][0].clone()
+                incident = incoming[0].clone()
                 incident[local_index] = 0
                 if bool(incident.abs().max() > 1e-3*normalization.abs()):
                     raise ValueError('Calibration excites multiple incident channels. Select a validated basis.')
-                reflected = baseline[port_index][0].detach().clone()
+                reflected = baseline[0].detach().clone()
                 reports.append(dict(incident_channel=self.channels[column], field_scale=scale,
                                     incident_amplitude=[float(normalization.real), float(normalization.imag)]))
-            del planes, incoming, baseline, model
+            del planes, plane, forward, backward, incoming, baseline, model, reference
             def case(value, p=project, source=launch, input_port=port_index,
                      norm=normalization, reflection=reflected, field_scale=scale):
                 current = ModeInjectedPlaneSimulation(p, source, options)(value, frequency)
@@ -271,12 +311,13 @@ class ModeNetwork:
                     outgoing.append(amplitude/norm)
                 return torch.cat(outgoing)
             cases.append(case)
-        del reference
         columns = recompute_cases(cases, material, output_device=output_device,
                                   output_budget_bytes=output_budget_bytes)
         return ModeNetworkResult(columns.transpose(0, 1), self.channels,
             tuple(p.coordinate_um for p in ports),
             dict(scope='opposing two-port fixed-mode network', wrapper_reservation_bytes=reserved,
+                 calibration_volume_bytes=3*math.prod(r.shape)*epsilon.element_size(),
+                 calibration_volume_limit=1, per_port_sections=not self._shared_section,
                  calibration=reports, calibration_policy='fresh matched-guide solve per column per call', case_graphs_retained=0, backward_case_graph_limit=1,
                  phase_convention='outgoing at row phase plane / matched incident at column phase plane',
                  reflection_reference='subtract same-input-port matched-guide outgoing baseline only',

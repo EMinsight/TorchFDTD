@@ -34,7 +34,10 @@ editing, point traces and complete endpoint NPZ storage. A separate
 uniform PMC+CPML endpoint API includes real FP32 CPU/CUDA propagation and
 auxiliary-state, material and waveform adjoints. A small full/half-domain
 comparison preserves fields and gradients and halves checkpoint payload.
-Mixed-boundary Project dispatch and throughput remain pending. A separate
+[Restricted mixed-boundary Project dispatch](docs/PMC_NATIVE_CPML.md) now
+connects this path to ordinary Python, CLI and browser execution. It requires
+equal uniform spacing, a common PML depth/strength and an explicitly supported
+profile. General absorption accuracy and throughput remain pending. A separate
 [bulk tensor dielectric API](docs/ANISOTROPY_IMPLEMENTATION_PLAN.md) supports
 periodic/Bloch CPU/CUDA fields and full symmetric tensor gradients. An
 isotropic fixed CPML exterior now encloses interior tensor materials, with
@@ -47,9 +50,11 @@ establish general anisotropic PML reflection or long-time stability.
 [Opposing mode ports](docs/MODE_NETWORK.md) now assemble complex multimode
 S matrices with fixed reference planes and one case graph at a time during
 backward. FP32 CUDA checks cover four-channel guide propagation, reciprocity
-and an interior material gradient. Both ports require the same fixed exterior
-cross-section. Arbitrary branch ports, source/eigenmode gradients and streamed
-injection remain open. The measured coarse-mesh power defect is reported in
+and an interior material gradient. A subsequent Python extension accepts
+different fixed exterior cross-sections, with incident-port-specific calibration
+and receiving-port-specific normalization. Its CPU checks and open-boundary
+accuracy limits are recorded separately from the earlier CUDA evidence.
+Arbitrary branch ports, source/eigenmode gradients and streamed injection remain open. The measured coarse-mesh power defect is reported in
 the validation record, rather than interpreted as exact conservation.
 A [fixed-slab physical-gradient check](docs/MODE_NETWORK_GRADIENT_ACCEPTANCE.md)
 at 25 nm spacing passes a predeclared 2% derivative criterion and an actual
@@ -117,8 +122,10 @@ capacity and throughput measurements remain pending.
 endpoints across CPU/CUDA, adjoint, streaming and batch paths. PMC and magnetic
 symmetry now run closed cavities through the native Project, browser and CLI.
 The resident `EndpointProject` API retains material and waveform gradients.
-The explicit uniform PMC+CPML API now supports CPU/CUDA adjoints. Its native
-dispatch, ADE, streaming and tensor-batch integration remain pending.
+The explicit uniform PMC+CPML API supports CPU/CUDA adjoints, and the
+[restricted native adapter](docs/PMC_NATIVE_CPML.md) exposes supported mixed
+boundaries in Project, CLI and browser execution. ADE, streaming and
+tensor-batch integration remain pending.
 The experimental [single-domain slab API](docs/DOMAIN_DECOMPOSITION.md) adds
 rank-local Yee propagation, halo transposes and checkpointed material gradients.
 Its 2/3-rank checks include real Linux Gloo CPU processes, with fields and
@@ -290,13 +297,21 @@ large-domain capacity, all-physics equivalence or a performance advantage.
 The independent Fourier check, finite differences, precision conventions,
 artifact hashes and setup corrections are retained in the linked record.
 
+A subsequent [64³, 512-step full-gradient gate](docs/FDTDX_MATCHED_FULL_GRADIENT.md)
+uses the same frozen implementations and compares all 262,144 epsilon-gradient
+entries, including the fixed source cell's zero cotangent. The histories remain
+identical. Gradient relative L2 difference is **1.06e-6**, and maximum absolute
+difference is **8.38e-13**. Independent slab and signed-direction finite
+differences also pass. This extends the derivative comparison, not the speed
+ranking. Ambient desktop activity prevented the primary quiet timing criterion.
+
 | Required workflow | TorchFDTD implementation milestone | Still needed for broader FDTDX parity |
 |---|---|---|
 | GDS | Explicit layer stack, hierarchy/units/PATH conversion, limited export and explicit full-cell opposing mode ports | General holes, narrow/branch ports and automatic port mapping |
 | Design parameters | Density filters, fixed masks, exact symmetry, projection/continuation and optimizer resume | General shape derivatives and fabrication guarantees |
-| Mode ports | Actual fixed-mode CUDA launch and opposing-port multimode complex S matrices with interior material VJPs | Arbitrary branch/unequal-section ports, open cross-sections, streamed injection, source parameters and broader physical convergence. Eigenmode differentiation is a separate research extension |
+| Mode ports | Fixed-mode CUDA launch, opposing-port multimode S matrices and interior material VJPs, plus unequal fixed sections with separate CPU complex-S checks | Arbitrary branch ports, open cross-sections, streamed injection, source parameters and broader physical convergence. Eigenmode differentiation is a separate research extension |
 | Radiation | Differentiable Bloch orders, closed-box homogeneous far fields, native FP32 mesh convergence, stored-plane browser/NPZ diffraction | Layered/periodic-lattice far fields and closed-box UI |
-| Boundaries / tensors / multi-GPU | PEC, native closed-PMC GUI/CLI/API, separate uniform PMC+CPML CPU/CUDA adjoints, tensor adjoints with fixed isotropic CPML exterior | Mixed-boundary native dispatch, general absorption/streaming workflows, verified single-problem multi-GPU |
+| Boundaries / tensors / multi-GPU | PEC, native closed-PMC and restricted PMC+CPML GUI/CLI/API, endpoint CPU/CUDA adjoints, tensor adjoints with fixed isotropic CPML exterior | General PML profiles/absorption, streaming combinations and verified single-problem multi-GPU |
 
 The [complete row-by-row parity gates](docs/FDTDX_PARITY_KO.md) retain failed,
 partial and unmeasured conditions instead of treating API presence as full parity.
@@ -695,7 +710,7 @@ Open **http://127.0.0.1:8765**. On Linux/macOS use `.venv/bin/python` and `npm` 
 3. Select from the tree or a CAD view. Drag objects in a 2D view or use the 3D translation gizmo. Scroll to zoom, use Fit view to reset, and use Snap to align positions to the mesh.
 4. Edit center position, spans, ellipse radii, ring angles, material, mesh order and ordered rotations in Object properties. Use Polygon → Edit polygon vertices for a validated local contour. Lower mesh order wins. Later objects win ties.
 5. Select FDTD to set the domain, uniform or graded mesh spacing, PML layers, time steps, field component and output slice. All geometry and wavelengths use **µm**, all API time arrays use **seconds**.
-6. Add an electric/magnetic point or sheet source and point time monitors. Choose Cartesian polarization or theta/phi orientation. A soft sheet radiates in both directions. Select one-way injection for a plane covering a transverse periodic cell, or add a TFSF box around an isolated scatterer. Both paired injection options currently require normal incidence. Oblique and waveguide mode sources remain unavailable.
+6. Add an electric/magnetic point or sheet source and point time monitors. Choose Cartesian polarization or theta/phi orientation. A soft sheet radiates in both directions. Select one-way injection for a plane covering a transverse periodic cell, or add a TFSF box around an isolated scatterer. Both paired injection options currently require normal incidence. Oblique injection and graphical mode-source editing remain unavailable. Fixed-mode injection and opposing ports are available through the Python API.
 7. Run. The interface locks the layout while a calculation is running and in Analysis mode. Inspect signed field snapshots, animate time steps, and view monitor traces and FFTs.
 8. Export NPZ fields and monitor CSV. Switch to Layout to edit and rerun. Save JSON to exchange projects with Python.
 

@@ -64,6 +64,43 @@ passes in the same Linux RTX 3060 environment. The two histories, scalar loss
 and scalar material derivative agree exactly for this periodic 16³/64-step
 case. It is not a comparative timing or large-capacity result.
 
+Linux CI [35539439385](https://github.com/hyoseokp/TorchFDTD/actions/runs/35539439385)
+at `b68bb0b8776c7bc3ccf993038ba0ba659e097fbd` passed **1,224 Python tests** with
+433 environment-dependent skips, and **30 browser tests** with 8 skips.
+Frontend and wheel builds passed. The Python suite took 341.85 seconds.
+Its JUnit SHA-256 is
+`ad2158b9a0c3e5165c9e484584c5756e0581c8b7d4c2d2a8ab77b956d5b99764`.
+The artifact confirms all four mixed PMC/CPML CPU cases, both radiation workflow
+cases and three actual two/three-process Gloo cases passed. CUDA-specific and
+two-GPU NCCL cases were skipped in this CPU environment. The separate local
+mixed PMC/CPML CUDA evidence above remains distinct from CI.
+
+The `b68bb0b` staged-source audit checked 784 allowlisted files without pattern
+findings. All 105 package files in a fresh wheel and separate installation
+matched the audited source exactly. The wheel SHA-256 is
+`edab666706af59673a3236d1de5efababbae036debf11eec79606275cf6b2cb0`.
+This successful integration supersedes the earlier failing CI runs for its
+covered paths while retaining their failure history. It does not establish
+full feature parity, comparative throughput or public-release clearance.
+
+The next scoped integration connects unequal fixed opposing port sections and
+restricted native PMC/CPML execution. The port extension retains one calibration
+volume and one recomputed case graph at a time, with zero exterior cotangents.
+Its original five-cell-PML fixture failed an independently predeclared complex
+S criterion. A separate frequency-domain calculation reproduced that finite
+problem within 6.25e-7, isolating finite-PML error. A single thicker-PML follow-up
+reduced maximum complex S error to 1.29e-5 under the unchanged 0.004 criterion.
+The original failure remains in [the port record](MODE_NETWORK.md). These are
+CPU unequal-interface results, separate from prior shared-section CUDA checks.
+
+The [native PMC/CPML workflow](PMC_NATIVE_CPML.md) passed ten targeted CPU cases,
+one closed-PMC trace/NPZ regression and an actual browser CPU job. Five additional
+affected rejection cases passed after updating obsolete closed-wall assertions.
+The explicit profile button preserves atomic scene validation. Unsupported
+profile settings are rejected rather than silently replaced. These additions
+were not present in the `b68bb0b` CI run above, and its counts are not evidence
+for the follow-up implementation.
+
 The current feature-by-feature status is in [FDTDX parity gates](FDTDX_PARITY_KO.md).
 The earlier acceptance snapshot below is retained as historical evidence.
 Linux CI [35533483790](https://github.com/hyoseokp/TorchFDTD/actions/runs/35533483790)

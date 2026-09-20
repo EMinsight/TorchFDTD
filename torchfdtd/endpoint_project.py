@@ -1,4 +1,4 @@
-"""Native Project adapter for the separate closed PEC/PMC endpoint solver."""
+"""Native Project adapter for endpoint PEC/PMC and restricted CPML."""
 import math
 import numpy as np
 import torch
@@ -36,10 +36,18 @@ class EndpointProject:
             raise ValueError('Remove disabled sources/monitors explicitly before endpoint conversion.')
         if boundary_faces is None:
             boundary_faces=tuple(tuple(f.kind for f in r.boundaries.pair(a)) for a in range(3))
-        aliases={'pec':'pec','antisymmetric':'pec','pmc':'pmc','symmetric':'pmc'}
+        aliases={'pec':'pec','antisymmetric':'pec','pmc':'pmc','symmetric':'pmc','pml':'pml'}
         try:faces=tuple(tuple(aliases[x.lower()] for x in pair) for pair in boundary_faces)
-        except (KeyError,AttributeError) as exc:raise ValueError('Provide explicit closed PEC/PMC boundary faces.') from exc
+        except (KeyError,AttributeError) as exc:raise ValueError('Provide explicit PEC/PMC/PML boundary faces.') from exc
         if len(faces)!=3 or any(len(pair)!=2 for pair in faces):raise ValueError('Provide three lower/upper face pairs.')
+        from .endpoint_native import endpoint_cpml_options
+        if any('pml' in pair for pair in faces):
+            if any(f.kind not in aliases for a in range(3) for f in r.boundaries.pair(a)):
+                raise ValueError('CPML boundary overrides require native PEC/PMC/PML faces, not periodic or Bloch faces.')
+            native=tuple(tuple(aliases[f.kind] for f in r.boundaries.pair(a)) for a in range(3))
+            if faces!=native:raise ValueError('CPML boundary overrides must match native Project faces and parameters.')
+            self.cpml_options=endpoint_cpml_options(r)
+        else:self.cpml_options=None
         nodes=tuple(np.array(a,copy=True) for a in r.mesh_nodes)
         if isinstance(host_preparation_budget_bytes,bool) or not isinstance(host_preparation_budget_bytes,int) or host_preparation_budget_bytes<=0:
             raise ValueError('A positive host_preparation_budget_bytes is required.')
@@ -71,8 +79,13 @@ class EndpointProject:
             if monitor.kind!='point':raise ValueError('Endpoint Project supports point monitors only.')
             comp,index,record=location(monitor,monitor.component)
             observers.append((monitor.component[0],comp,index));self.observation_records.append(record)
-        self.simulation=EndpointSimulation(nodes,faces,dt_seconds=r.time_step,sources=sources,
-            observations=observers,device=device,checkpoints=checkpoints,tensor_budget_bytes=tensor_budget_bytes)
+        simulation=EndpointSimulation
+        if self.cpml_options is not None:
+            from .pmc_cpml import EndpointCPMLSimulation
+            simulation=EndpointCPMLSimulation
+        self.simulation=simulation(nodes,faces,dt_seconds=r.time_step,sources=sources,
+            observations=observers,device=device,checkpoints=checkpoints,tensor_budget_bytes=tensor_budget_bytes,
+            **(self.cpml_options or {}))
         self._project_fingerprint=self.project.model_dump_json()
         self._admit()
 
@@ -91,7 +104,16 @@ class EndpointProject:
 
     def plan(self):
         """JSON-serializable review record. Original Project boundaries are overridden."""
-        return dict(api='endpoint-project',boundary_faces=self.simulation.topology.faces,
+        cpml=None
+        if self.cpml_options is not None:
+            cpml=dict(self.cpml_options,physical_faces=self.simulation.physical_faces,
+                native_sigma_scale=next(f.sigma_scale for a in range(3) for f in self.project.region.boundaries.pair(a) if f.kind=='pml'),
+                kappa=1,alpha=0,polynomial=3,alpha_polynomial=0,
+                profile='rho=max(1-distance/(layers*h),0) at each endpoint derivative target; b=exp(-rate*c0*dt), c=b-1',
+                rate_per_um='40*sigma_scale/((layers+1)*h)*rho**3',
+                collar='PML plus one electric-sample cell, exact fixed background epsilon; zero material VJP',
+                scalar_yee_profile_equivalence=False)
+        return dict(api='endpoint-project',boundary_faces=self.simulation.topology.faces,cpml=cpml,
             original_boundary_faces=[[f.kind for f in self.project.region.boundaries.pair(a)] for a in range(3)],
             nodes_um=[a.tolist() for a in self.simulation.topology.nodes],
             source_terms=self.source_records,observations=self.observation_records,
@@ -136,6 +158,21 @@ class EndpointProject:
                 result[start:stop]=torch.as_tensor(epsilon,device=self.simulation.device)
         return result
 
+    def validate_material(self,epsilon,waveforms):
+        """Shared native-loop input admission; the adapter call also checks these."""
+        sim=self.simulation
+        for value in (epsilon,waveforms):
+            if not isinstance(value,torch.Tensor) or value.dtype!=torch.float32 or value.device!=sim.device or not value.is_contiguous():
+                raise ValueError('Endpoint inputs must be contiguous FP32 tensors on the configured device.')
+            if not bool(torch.isfinite(value).all()):raise ValueError('Endpoint inputs must be finite.')
+        if epsilon.shape!=(sim.topology.counts['E'],):raise ValueError('One epsilon per endpoint electric DOF is required.')
+        if bool((epsilon<=0).any()):raise ValueError('Endpoint epsilon must be positive.')
+        if self.cpml_options is not None and bool((epsilon<1).any()):raise ValueError('Endpoint CPML requires epsilon >= 1.')
+        if sim.dt>math.sqrt(float(epsilon.detach().min()))*sim.topology.cfl_unit*(1+1e-7):
+            raise ValueError('Endpoint material violates conservative Yee CFL.')
+        if self.cpml_options is not None and not bool((epsilon[sim.collar]==sim.background_epsilon).all()):
+            raise ValueError('CPML and its one-cell collar require exact fixed isotropic background epsilon.')
+
     def __call__(self,epsilon=None,waveforms=None):
         """Return native DifferentiableResult; optional tensors retain gradients."""
         self._admit()
@@ -144,6 +181,7 @@ class EndpointProject:
         if not isinstance(waveforms,torch.Tensor) or waveforms.ndim!=2:
             raise ValueError('Waveforms must be a tensor with shape [steps, source terms].')
         if waveforms.shape[0]!=self.project.region.steps:raise ValueError('Waveform duration must match the fixed native Project.')
+        self.validate_material(epsilon,waveforms)
         signals=self.simulation(epsilon,waveforms)
         report=self.plan();report['execution']=self.simulation.last_report
         return DifferentiableResult(signals,self.project.region.time_step,
@@ -151,5 +189,5 @@ class EndpointProject:
 
 
 def endpoint_from_project(project,*,boundary_faces=None,**options):
-    """Create a separately scoped closed-wall adapter from a Project or its dict."""
+    """Create an endpoint adapter from a Project or its dict."""
     return EndpointProject(project,boundary_faces=boundary_faces,**options)

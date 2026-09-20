@@ -1037,7 +1037,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "Native Project·CLI·browser는 real FP32 closed PEC/PMC cavity, 6면 편집과 endpoint NPZ를 지원. 별도 uniform PMC+CPML CPU/CUDA API는 실제 upper endpoint와 CPML 보조 상태, 재료·파형 VJP, bounded checkpoint를 포함. 혼합 경계 native dispatch·복소장·ADE·streaming·tensor batch와 일반 흡수 정확도는 남음.",
+      "scope": "Native Project·CLI·browser에서 closed PEC/PMC 및 제한된 PMC+CPML 실행. CPML은 균일 등간격 FP32, 공통 깊이·세기와 명시적 cubic profile, 고정 등방성 collar, point source/monitor. CPU/CUDA endpoint adjoint와 upper DOF·보조 상태·재료/파형 VJP. 일반 profile·흡수 정확도·복소장·ADE·streaming·tensor batch는 남음.",
       "evidence": [
         "torchfdtd/pmc_simulation.py",
         "torchfdtd/endpoint_project.py",
@@ -1050,7 +1050,10 @@
         "torchfdtd/pmc_cpml.py",
         "torchfdtd/pmc_cpml_cuda.py",
         "tests/test_pmc_cpml.py",
-        "tests/test_pmc_cpml_cuda.py"
+        "tests/test_pmc_cpml_cuda.py",
+        "tests/test_endpoint_native_cpml.py",
+        "tests/ui/pmc-cpml.spec.js",
+        "docs/PMC_NATIVE_CPML.md"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object",
       "priority": 2,
@@ -1070,7 +1073,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "PMC/magnetic symmetry의 native closed-cavity workflow와 별도 uniform PMC+CPML adjoint. 실제 CPU 전체/절반 영역 E/H와 재료·파형 gradient 일치, 완전 checkpoint 37,088→18,544 bytes. CUDA mixed-wall transpose 검증. 일반 실행 속도·혼합 경계 native dispatch·ADE·streaming은 남음.",
+      "scope": "PMC/magnetic symmetry의 closed cavity와 제한된 native PMC+CPML workflow. CPU 전체/절반 영역 E/H와 재료·파형 gradient 일치, 완전 checkpoint 37,088→18,544 bytes. CUDA mixed-wall transpose 검증. 일반 흡수 정확도·속도·ADE·streaming은 남음.",
       "evidence": [
         "torchfdtd/pmc_simulation.py",
         "torchfdtd/endpoint_native.py",
@@ -1083,7 +1086,9 @@
         "torchfdtd/pmc_cpml.py",
         "torchfdtd/pmc_cpml_cuda.py",
         "tests/test_pmc_cpml.py",
-        "tests/test_pmc_cpml_cuda.py"
+        "tests/test_pmc_cpml_cuda.py",
+        "docs/PMC_NATIVE_CPML.md",
+        "tests/test_endpoint_native_cpml.py"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object",
       "priority": 2,
@@ -1330,12 +1335,15 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "missing",
-      "scope": "전벡터 CPU sparse mode와 실제 resident CUDA Yee 주입. 균일 3D·등방 fixed cross-section·횡방향 periodic·단일 carrier. Source/eigenmode material gradient는 고정. Streamed·횡방향 PML은 남음.",
+      "scope": "고정 full-vector eigenmode의 native CUDA 주입·검출. Periodic transverse cell, 실수 비분산 uniform mesh와 normal CPML. Opposing port별 서로 다른 고정 단면, own-guide calibration 및 interior VJP. Shared-section CUDA와 unequal homogeneous CPU complex S 검증. Branch/finite-aperture·streamed·UI·eigenmode 자체 미분은 남음.",
       "evidence": [
         "torchfdtd/mode_ports.py",
         "torchfdtd/mode_injection.py",
         "tests/test_mode_injection.py",
-        "docs/MODE_INJECTION.md"
+        "docs/MODE_INJECTION.md",
+        "torchfdtd/mode_network.py",
+        "tests/test_mode_network_unequal.py",
+        "docs/MODE_NETWORK.md"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360034902153-Mode-source-Simulation-object",
       "priority": 1,
@@ -1355,7 +1363,7 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "missing",
-      "scope": "고정 mode directional amplitude·matched-reference complex t/r와 opposing 두 port의 multimode S 행렬. 같은 exterior 단면과 고정 reference plane, actual CUDA 4-channel/상반성/VJP 검사. GDS full-cell TEXT의 명시적 두 port 연결 추가. 일반 branch·서로 다른 단면·자동 GDS 배치·UI는 남음.",
+      "scope": "고정 directional mode·matched-reference complex t/r와 opposing 두 port의 multimode S. Shared-section CUDA 4-channel/상반성/VJP와 port별 서로 다른 고정 단면의 CPU complex S·interior VJP 검증. GDS full-cell TEXT helper는 shared calibration subset. 일반 branch/open 횡단면·streaming·자동 GDS 배치·UI는 남음.",
       "evidence": [
         "torchfdtd/mode_injection.py",
         "torchfdtd/mode_network.py",
@@ -1363,7 +1371,9 @@
         "tests/test_mode_injection.py",
         "tests/test_mode_network.py",
         "tests/test_gds_ports.py",
-        "docs/MODE_NETWORK.md"
+        "docs/MODE_NETWORK.md",
+        "tests/test_mode_network_unequal.py",
+        "docs/validation/mode_network_unequal_cpml_followup_cpu.json"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360034902153-Mode-source-Simulation-object",
       "priority": 1,
@@ -1748,13 +1758,17 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "missing",
-      "scope": "고정 모드의 전진/후진 분리와 복소 t/r. ModeNetwork는 opposing port의 복소 S 행렬과 interior material VJP를 순차 case replay로 계산. 물리 위상 보존, coarse 전력 결함 명시. 일반 branch/단면·eigenmode 미분·물리 수렴은 남음.",
+      "scope": "마주보는 full-cell fixed-mode port의 복소 multimode S와 내부 재료 VJP. Port별 고정 단면·calibration, 한 case graph만 재생. Shared-section CUDA 및 unequal homogeneous CPU complex S 독립 이산 기준 검증. Coarse CPML 실패와 두꺼운 PML 후속 통과를 함께 기록. 일반 branch/open transverse plane·streaming·UI는 남음.",
       "evidence": [
         "torchfdtd/mode_injection.py",
         "torchfdtd/mode_network.py",
         "tests/test_mode_injection.py",
         "tests/test_mode_network.py",
-        "docs/MODE_NETWORK.md"
+        "docs/MODE_NETWORK.md",
+        "tests/test_mode_network_unequal.py",
+        "benchmarks/mode_network_unequal_oracle.py",
+        "benchmarks/mode_network_unequal_cpml.py",
+        "docs/validation/mode_network_unequal_cpml_followup_cpu.json"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360033154434-FDTD-product-reference-manual",
       "priority": 1,

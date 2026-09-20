@@ -754,8 +754,26 @@ and port planes, slab bounds and PML thickness, reduces this defect to
 $0.000465\%$. The complex through coefficients still change substantially
 between these meshes. This check does not establish convergence of complex
 S parameters or separate spatial dispersion from PML discretization error.
-Arbitrary branch ports, unequal exterior cross-sections, eigenmode gradients
-and spatially streamed injection remain outside this wrapper.
+Arbitrary branch ports, eigenmode gradients and spatially streamed injection
+remain outside this wrapper. A subsequent extension accepts a fixed
+cross-section for each opposing port. Each incident column is calibrated in
+its own straight guide, and each receiving plane uses its own power-normalized
+mode basis. Only one complete calibration material volume is alive at a time,
+and no such volume is retained by the recomputed case closures. Exterior
+material cotangents are zero. CPU checks cover a homogeneous unequal-index
+interface and an interior material VJP, with open-boundary accuracy assessed
+separately from finite-difference agreement.
+For one unequal homogeneous interface, the original five-cell PML gives a
+maximum complex S error of 0.01465 against an independent infinite Yee-interface
+solution and fails a predeclared 0.004 criterion. A separate harmonic solve of
+the actual finite CPML problem reproduces the native matrix within
+$6.25\times10^{-7}$, identifying the open-boundary approximation. Increasing
+the domain and PML thickness while preserving mesh, source and detector planes,
+interface location and duration reduces native error to
+$1.29\times10^{-5}$ in one follow-up. This passes the unchanged discrete
+criterion, while neither result establishes continuum mesh convergence or
+general waveguide-transition accuracy.
+
 
 An independent normal-incidence slab calculation solves the four continuum
 interface-continuity equations with propagation to the same reference planes.
@@ -965,8 +983,8 @@ usual result interface, while NPZ additionally preserves the true upper
 face and edge samples. Calculated tensor and host requirements are admitted
 against available memory instead of imposing a fixed small GPU capacity.
 Independent CPU and CUDA results and the complete browser export/run flow
-are checked. This Project adapter still excludes PML mixing, ADE and
-streamed endpoint propagation.
+are checked. ADE and streamed endpoint propagation remain outside this
+native adapter.
 
 A separate uniform-grid endpoint extension combines PMC with CPML terminated
 at PEC walls. Each curl derivative owns auxiliary samples at its actual
@@ -990,6 +1008,15 @@ $7.45\times10^{-9}$ for traces, $2.98\times10^{-8}$ for material VJPs and
 $4.77\times10^{-7}$ for waveform VJPs. These kernels are not fused across
 curl terms, and their general absorption accuracy and execution speed remain
 uncharacterized.
+
+A restricted native adapter subsequently exposes mixed PMC and CPML through
+ordinary Project, CLI and browser execution. It admits equal uniform spacing,
+common PML depth and strength, and explicit cubic grading with unit kappa and
+zero alpha. Unsupported profile values are rejected. The applied target-row
+decay profile and fixed material collar are recorded in each result. Native
+CPU fields and traces match the direct endpoint API, and an actual browser
+workflow checks atomic profile selection and execution. This is an integration
+result, not a general PML reflection or throughput measurement.
 
 A second foundation partitions one periodic or Bloch problem into owned
 $x$ slabs. Each rank stores only its local E/H, material and checkpoint banks.
