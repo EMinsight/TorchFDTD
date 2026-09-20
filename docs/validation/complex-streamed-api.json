@@ -1,0 +1,34 @@
+{
+  "scope": "Experimental public complex StreamedSimulation: fixed Bloch phases, real nondispersive epsilon, first-order history and online spectral gradients. No large complex domain certification.",
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "test_runs": [
+    {
+      "passed": 66,
+      "seconds": 31.57,
+      "files": [
+        "test_complex_streamed.py",
+        "test_complex_spacetime.py",
+        "test_bloch_adjoint.py",
+        "test_state_store.py"
+      ]
+    },
+    {
+      "passed": 57,
+      "seconds": 22.2,
+      "files": [
+        "test_bloch_adjoint.py::test_bloch_plane_seam_interpolation_and_gradient",
+        "test_spacetime.py",
+        "test_streamed_tuning.py"
+      ]
+    }
+  ],
+  "runs_overlap": true,
+  "source_sha256": {
+    "photonweave/streamed.py": "5c4c71a23e354d108b5d5660af4cb2d09a0478552fb5253e1e8b876fe6479bf7",
+    "photonweave/streamed_tuning.py": "9209b51f2374f87de6024d50c00153d34be3a29467e26278f60545e77ccbc5b7",
+    "tests/test_complex_streamed.py": "84328b85d4a9a3e8a6a839e0f6ecfa1670dd028c4388e64984698bcc30f9d16c",
+    "tests/test_bloch_adjoint.py": "6e6a24edd349629e6be4bb94560a9711011133d69b2126f9a289a31400f8751d",
+    "tests/test_complex_spacetime.py": "dfc846db4cb968ca4a0871cef9e5aa6061260c4efe33fa556ccdd97b417c2afc"
+  },
+  "wheel_package_files_byte_verified": 71
+}

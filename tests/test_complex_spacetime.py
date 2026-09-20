@@ -62,13 +62,6 @@ def test_complex_slab_against_resident_autograd(dtype, depth, nonuniform, diagon
         assert any(len(d[2]) > 2*p.region.shape[0] for d in operator.tiles(depth))
 
 
-def test_public_complex_spatial_guard_precedes_allocation():
-    from photonweave import StreamedSimulation
-    p = scene()
-    with pytest.raises(ValueError, match='Complex Bloch'):
-        StreamedSimulation(p)
-
-
 @pytest.mark.parametrize('dtype', [torch.float32, torch.float64])
 def test_complex_file_banks_match_host_blocks(tmp_path, dtype):
     from photonweave.state_store import StateStore
@@ -122,7 +115,6 @@ def test_complex_reservation_counts_field_bytes_and_rejects_small_budget(tmp_pat
         _reservation(p, eps, replace(options, disk_budget_bytes=record['disk_reservation_bytes']-1))
     with pytest.raises(ValueError, match='host budget'):
         _reservation(p, eps, replace(options, host_budget_bytes=record['host_reservation_bytes']-1))
-    # Accounting readiness does not remove the public unsupported-physics gate.
-    with pytest.raises(ValueError, match='Complex Bloch'):
-        StreamedSimulation(p, options)(eps)
+    with pytest.raises(ValueError, match='disk budget'):
+        StreamedSimulation(p, replace(options, disk_budget_bytes=1))(eps)
     assert not (tmp_path/'scratch').exists()

@@ -96,7 +96,7 @@ def tune_streamed(project, epsilon, *, options=None, candidates=None, probe_step
             before = time.perf_counter()
             with torch.enable_grad():
                 result = model(design)
-                gradient, = torch.autograd.grad(result.signals.square().sum(),design)
+                gradient, = torch.autograd.grad(result.signals.abs().square().sum(),design)
             elapsed = time.perf_counter()-before
             values = result.signals.detach()
             if length not in references:
@@ -106,7 +106,7 @@ def tune_streamed(project, epsilon, *, options=None, candidates=None, probe_step
                     # Compare unique durations with the same reference policy.
                     with torch.enable_grad():
                         reference_result = StreamedSimulation(prefix,reference_policy)(design)
-                        reference_gradient, = torch.autograd.grad(reference_result.signals.square().sum(),design)
+                        reference_gradient, = torch.autograd.grad(reference_result.signals.abs().square().sum(),design)
                     references[length] = (reference_result.signals.detach(),reference_gradient)
                     extra_reference_evaluations += 1
                     del reference_result, reference_gradient

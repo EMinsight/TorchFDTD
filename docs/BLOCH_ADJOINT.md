@@ -43,14 +43,16 @@ complex periodic-seam weights. Preserve that convention when comparing fields.
 Physical checkpoints can use device, host, disk or the existing hierarchical
 policy. Optional asynchronous checkpoint staging preserves complex arrays.
 Resident workspace estimates conservatively account for complex state storage.
-Complex **spatial** streaming is rejected, including when an existing streamed
-project is mutated. Checkpoint offload is not spatial domain decomposition.
+[Complex spatial streaming](STREAMED_FDTD.md#public-complex-streamed-api) supports
+fixed-phase Bloch propagation with real nondispersive epsilon, first-order
+gradients, DRAM/file-backed states and optional asynchronous CUDA staging.
+Checkpoint offload alone is not spatial domain decomposition.
 The CPU workspace cap limitation of the resident API remains unchanged.
 
 Prepared soft plane sources include the fundamental Bloch spatial phase at
 their component's sample positions. Normal-incidence one-way sources retain
 their zero-transverse-phase restriction. General oblique one-way sources,
-trainable source/phase derivatives, ADE and complex spatial streaming remain
+trainable source/phase derivatives and ADE remain
 pending. A fixed selected-frequency Bloch calculation is not automatically a
 broadband constant-angle illumination.
 

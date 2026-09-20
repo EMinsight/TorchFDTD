@@ -70,7 +70,10 @@ def test_complex_native_forward_and_disk_replay(device,tmp_path):
     assert list(tmp_path.iterdir())==[]
 
 
-def test_bloch_plane_seam_interpolation_and_gradient():
+@pytest.mark.parametrize('execution',['resident','cpu','cuda','cuda_disk'])
+def test_bloch_plane_seam_interpolation_and_gradient(execution,tmp_path):
+    from photonweave import StreamedAdjointOptions
+    if execution.startswith('cuda'):gpu()
     from test_adjoint_planes import reference
     p=scene()
     p.monitors=[FieldMonitor(normal='y',center=(0,.2,0),size=(1.6,0,1),downsample=2)]
@@ -93,17 +96,22 @@ def test_bloch_plane_seam_interpolation_and_gradient():
         history.append(torch.stack(values,-1))
     expected=torch.stack(history).sum(0)
     eg,=torch.autograd.grad((expected.real+.4*expected.imag).square().sum(),eps)
-    actual=DifferentiablePlaneSimulation(p)(eps,freq)[p.monitors[0].id].fields/p.region.time_step
+    options=None if execution=='resident' else StreamedAdjointOptions(
+        device='cuda' if execution.startswith('cuda') else 'cpu',slab_width=5,temporal_depth=3,
+        checkpoints=2,local_checkpoints=1,tile_transfers='async' if execution.startswith('cuda') else 'sync',
+        state_storage='disk' if execution=='cuda_disk' else 'host',
+        state_directory=tmp_path,disk_budget_bytes=128*1024**2)
+    actual=DifferentiablePlaneSimulation(p,options)(eps,freq)[p.monitors[0].id].fields/p.region.time_step
     ag,=torch.autograd.grad((actual.real+.4*actual.imag).square().sum(),eps)
     torch.testing.assert_close(actual,expected,rtol=1e-11,atol=1e-12)
     torch.testing.assert_close(ag,eg,rtol=2e-10,atol=1e-11)
+    assert not list(tmp_path.iterdir())
 
 
 def test_unsupported_complex_execution_fails_explicitly():
     p=scene()
     with pytest.raises(ValueError,match='CUDA tensor'):
         DifferentiableSimulation(p,AdjointOptions(backward_kernel='fused'))(torch.ones(p.region.shape,dtype=torch.float64))
-    with pytest.raises(ValueError,match='spatial streaming'):StreamedSimulation(p)
 
 
 @pytest.mark.parametrize('device',['cpu','cuda'])

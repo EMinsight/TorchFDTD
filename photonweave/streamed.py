@@ -72,7 +72,8 @@ def _reservation(project, epsilon, options, spectral=None):
     width = min(options.slab_width, region.shape[0])+4*depth
     if 0 not in boundary.wrap:width = min(width, region.shape[0])
     tile_cells = width*region.shape[1]*region.shape[2]
-    if 3*tile_cells >= 2**31:raise ValueError('A CUDA tile exceeds the supported integer index range.')
+    if (6 if region.complex_fields else 3)*tile_cells >= 2**31:
+        raise ValueError('A CUDA tile exceeds the supported integer index range.')
     monitors = sum(m.enabled for m in project.monitors) if spectral is None else len(spectral.components)
     terms = sum(len(s.polarization_components)*(2 if s.injection == 'oneway' else 1)
                 for s in project.sources if s.enabled)
@@ -142,7 +143,8 @@ class _Streamed(torch.autograd.Function):
                                         tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints,
                                         state_factory=store.new_state if store is not None else None)
             state = host.state()
-            signals = epsilon.new_empty((project.region.steps, len(host.monitors))) if spectral is None else spectral.zeros()
+            signals = torch.empty((project.region.steps, len(host.monitors)), dtype=host.field_dtype,
+                                  device='cpu') if spectral is None else spectral.zeros()
             for start in range(0, project.region.steps, options.temporal_depth):
                 depth = min(options.temporal_depth, project.region.steps-start)
                 state, values = operator.forward(epsilon, state, start, depth)
@@ -219,8 +221,6 @@ class StreamedSimulation(DifferentiableSimulation):
     admission does not itself establish a throughput advantage.
     """
     def __init__(self, project, options=None):
-        if project.region.complex_fields:
-            raise ValueError('Complex Bloch spatial streaming is not implemented. Use the resident differentiable path.')
         super().__init__(project)
         self.streaming_options = options or StreamedAdjointOptions()
 
@@ -236,7 +236,6 @@ class StreamedSimulation(DifferentiableSimulation):
 
     def _run(self, epsilon, spectral):
         region = self.project.region
-        if region.complex_fields:raise ValueError('Complex Bloch spatial streaming is not implemented.')
         if not isinstance(epsilon, torch.Tensor) or epsilon.device.type != 'cpu':
             raise ValueError('Streamed epsilon must be a CPU tensor to avoid full-volume VRAM allocation.')
         if epsilon.dtype not in (torch.float32, torch.float64) or (epsilon.dtype == torch.float64) != (region.precision == 'float64'):
@@ -248,6 +247,7 @@ class StreamedSimulation(DifferentiableSimulation):
         if not bool(torch.isfinite(epsilon).all()) or bool((epsilon < 1).any()):
             raise ValueError('The CFL contract requires finite epsilon >= 1.')
         report = dict(experimental=True, spatial_streaming=True, full_time_autograd=False,
+                      complex_fields=region.complex_fields,
                       higher_order=False, slab_width=options.slab_width,
                       temporal_depth=options.temporal_depth, checkpoint_capacity=options.checkpoints,
                       local_checkpoint_capacity=options.local_checkpoints,

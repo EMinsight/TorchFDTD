@@ -17,14 +17,14 @@ or skipping any field updates.
 ```python
 from photonweave import StreamedSimulation, StreamedAdjointOptions
 
-# project is a validated real, nondispersive point-observation scene.
+# project is a validated nondispersive scene, optionally with fixed Bloch phase.
 # epsilon is a CPU float32/float64 tensor matching the region precision.
 model = StreamedSimulation(project, StreamedAdjointOptions(
     slab_width=32, temporal_depth=4, checkpoints=2,
     gpu_budget_bytes=1024**3, host_budget_bytes=8*1024**3,
 ))
 result = model(epsilon)
-loss = result.signals.square().sum()
+loss = result.signals.abs().square().sum()
 loss.backward()
 ```
 
@@ -232,9 +232,8 @@ CPU tests cover complex conjugate views, noncontiguous arrays, empty tensors,
 signed zero, infinity, a NaN payload, large integers and workspace round trips.
 Sixteen CPU resident-versus-tiled field/gradient cases also pass. Mixed-dtype
 asynchronous GPU transport still needs a dedicated test when a GPU is free.
-This preparation does not enable public complex spatial streaming. The CPU
-Bloch extension and internal CUDA blocks are validated below. Public integration
-across temporal blocks and spectral objectives remains required.
+The CPU Bloch extension and CUDA blocks are validated below. Public integration
+across temporal blocks and spectral objectives is described at the end.
 
 ## Complex Bloch slabs: internal CPU validation
 
@@ -253,9 +252,8 @@ the remaining axes. Inputs contain nonzero random CPML memories and endpoint
 adjoints. A separate test verifies the public unsupported-physics gate.
 These 25 checks plus 3 packet and 16 real CPU regression cases passed.
 
-Public `StreamedSimulation` still rejects complex fields. This CPU oracle is a
-correctness prerequisite, not evidence of CUDA out-of-core performance or a
-completed complex streamed inverse-design path.
+This CPU oracle is a correctness prerequisite, not evidence of CUDA out-of-core
+performance or a completed application-level inverse-design demonstration.
 
 ### Complex file banks and reservation accounting
 
@@ -295,5 +293,22 @@ pointer lifetime on a nondefault stream. An earlier 56-test run also passed
 resident complex adjoint and real slab regressions. These runs overlap and
 should not be summed as a unique test count. They establish correctness for
 the tested cases, not a performance advantage, physical NVMe throughput or
-large-domain capacity. The public complex guard remains until complete
-temporal checkpoint replay and spectral-objective integration are verified.
+large-domain capacity.
+
+### Public complex streamed API
+
+`StreamedSimulation` now accepts fixed-phase complex Bloch fields with real
+scalar or component-diagonal nondispersive epsilon. History outputs preserve
+complex dtype. `spectrum` retains the complex Hermitian observation transpose
+through global checkpoint replay and local tile checkpoints. CPU geometry
+parameters receive real first-order gradients through ordinary Torch chains.
+Both DRAM and file-backed field banks are supported, including asynchronous
+CUDA staging. `tune_streamed` uses a real squared-magnitude calibration loss for
+both real and complex signals and does not populate the caller's `.grad`.
+
+Public integration tests compare nonuniform Bloch time histories, windowed
+online spectra and a geometry-parameter chain against resident autograd, with
+zero/two global checkpoints, retained-graph backward repetition and disk cleanup.
+Tile index admission accounts for both interleaved complex lanes. This remains
+experimental first-order execution. Trainable Bloch phases or sources, ADE,
+higher derivatives and large complex-domain capacity certification are absent.

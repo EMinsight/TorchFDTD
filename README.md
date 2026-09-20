@@ -18,7 +18,7 @@ unvalidated.
 
 Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and the CR reconstruction objective remain pending.
 
-[Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) now support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Optional [fused complex forward updates](docs/COMPLEX_CUDA.md) are available in resident adjoint APIs. [Fused complex backward](docs/COMPLEX_CUDA_ADJOINT.md) is separately selectable. Complex spatial streaming and full-pupil CR reproduction remain pending.
+[Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Optional [fused complex forward updates](docs/COMPLEX_CUDA.md) and [fused complex backward](docs/COMPLEX_CUDA_ADJOINT.md) are available. Experimental [complex spatial streaming](docs/STREAMED_FDTD.md#public-complex-streamed-api) supports DRAM/file-backed states, asynchronous CUDA staging and first-order real-epsilon gradients. Full-pupil CR optical convergence and inverse-design validation remain pending.
 
 [Sequential case replay](docs/RECOMPUTED_CASES.md) now supports coupled multi-case inverse-design objectives. An eight-case RTX 5880 experiment reduced peak Torch CUDA allocation by 55%, with a 63% iteration-time increase and matching gradients. This is a memory trade-off, not a speedup or completed CR validation.
 
