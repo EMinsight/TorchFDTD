@@ -45,8 +45,10 @@ and checked against synthetic inputs to the supplied active research module.
 A read-only S11 audit verified the seed and three recorded dependency hashes.
 The audit also establishes that the detector proxy uses electric-intensity
 allocation rescaled by total transmission. Replacing it with local flux would
-change the study. The exact prior/calibration replay and optical integration
-remain pending, including oblique pupil phases and wavelength-dependent indices.
+change the study. The [electron objective adapter](ELECTRON_OBJECTIVE.md) now reproduces the
+active information objective and response gradients using the locked development
+prior and common CFA calibration. Optical integration remains pending, including
+full-pupil replay and wavelength-dependent indices.
 
 ## CR comparison contract
 
@@ -63,8 +65,9 @@ passes a 3D oblique slab check for Cartesian x/y inputs. Matching the full CR
 pupil and fused/streamed complex execution remain requirements.
 The [electric-intensity allocation](DETECTOR_ALLOCATION.md) and independent
 24-by-24 midpoint quadrature are implemented and pass synthetic reference
-parity. Physical transmission, detector z origin, the CR ray schedule and
-locked electron calibration have not yet been replayed.
+parity. Physical transmission, detector z origin and the CR ray schedule have not yet
+been replayed. Locked electron calibration and prior loading passed in an
+isolated byte-restored copy with the original required production runtime.
 
 Record the reference source revision and hashes before translating the model.
 Preserve wavelength and angle weights, polarization, detector geometry, material

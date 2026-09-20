@@ -26,6 +26,8 @@ Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now
 
 [Selected-frequency polarization synthesis](docs/POLARIZATION_SYNTHESIS.md) now passes a 3D oblique x/y slab check for transmission, energy balance and material derivatives. It uses two calibrated source responses and is not yet full-pupil CR validation.
 
+[Equivalent-electron objectives](docs/ELECTRON_OBJECTIVE.md) now connect spectral response, fixed calibration, shot noise and exposure-weighted information. Scores and gradients match the active CR objective using its locked development context. The optical CR simulation itself remains unvalidated.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 

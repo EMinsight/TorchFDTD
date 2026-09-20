@@ -284,4 +284,21 @@ computed. Structure derivatives traverse both source solves. The coefficients
 are fixed and do not supply source or angle derivatives. The method assumes a
 homogeneous forward-wave reference and rejects an ill-conditioned basis.
 It is a selected-frequency synthesis rather than an oblique one-way source.
+
+\section{Equivalent-electron objective composition}
+For spectral response $R$, mean irradiance $s$, quantum efficiency $q$,
+quadrature $w$, and fixed calibration $c$, define
+\[
+U_{ij}=R_{ij}s_j q_j w_j\frac{\lambda_j}{hc_0}c,
+\qquad A=UB^{\mathsf T},\qquad \mu=U\mathbf{1}.
+\]
+Here $B$ is the explicitly supplied latent spectral basis. Exposure factor
+$e$ gives $A_e=eA$ and mean $e\mu$. The Gaussian shot--read approximation
+uses $N_e=\operatorname{diag}(e\mu+\sigma_r^2)$, retaining the response
+contribution to the noise derivative. Fixed exposure probabilities average
+information per raw pixel. The design is not renormalized to a fixed output
+brightness. A locked development-context comparison on three generated optical
+responses gave maximum score error $6.0\times10^{-15}$ and response-gradient
+relative error $4.81\times10^{-14}$ across CPU and CUDA evaluations.
+This validates objective composition rather than an optical CR reconstruction.
 \end{document}

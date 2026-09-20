@@ -1,0 +1,8 @@
+{
+  "base_commit": "d6363ee",
+  "sha256": {
+    "photonweave/electron_model.py": "e3e7f65547d797d75f9aaa8513b000a216bed82d2d994d65aced7a8035b5ead4",
+    "photonweave/information.py": "0f8f71f093a7b9aeb10b92499e069416a9c494d2cfafa85252ddc421e721ff26",
+    "tests/test_electron_model.py": "7fa4271fc5e013979f6d66fd2bc2c0620727995364e1b57fffe832c5472676b9"
+  }
+}

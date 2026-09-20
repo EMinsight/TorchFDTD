@@ -1,0 +1,48 @@
+{
+  "records": [
+    {
+      "seed": 93,
+      "device": "cpu",
+      "objective_absolute_error": 8.881784197001252e-16,
+      "gradient_relative_l2": 1.8230249517422357e-14
+    },
+    {
+      "seed": 94,
+      "device": "cpu",
+      "objective_absolute_error": 3.3306690738754696e-15,
+      "gradient_relative_l2": 1.723140445126609e-14
+    },
+    {
+      "seed": 95,
+      "device": "cpu",
+      "objective_absolute_error": 5.329070518200751e-15,
+      "gradient_relative_l2": 2.72838660025687e-14
+    },
+    {
+      "seed": 93,
+      "device": "cuda",
+      "objective_absolute_error": 1.9984014443252818e-15,
+      "gradient_relative_l2": 1.9115295810496507e-14
+    },
+    {
+      "seed": 94,
+      "device": "cuda",
+      "objective_absolute_error": 5.995204332975845e-15,
+      "gradient_relative_l2": 4.803947174423265e-14
+    },
+    {
+      "seed": 95,
+      "device": "cuda",
+      "objective_absolute_error": 2.4424906541753444e-15,
+      "gradient_relative_l2": 3.077769698148874e-14
+    }
+  ],
+  "reference_sha256": {
+    "src/cr_itd_v2/optimization/local_objectives.py": "6ade3522161bb90e5e63fa9bd1996b703f63ba5140d92ad9712979b01c745f2b",
+    "src/cr_itd_v2/evaluation/local_electron.py": "a50a2b0bc8d2bd65c9c114c81ace30b56cc816ffde2d90fdc2caeeca0ff3ab6f",
+    "provenance/manifests/s11_full_cie_target_contract.json": "22d6f18cd3783c999849c87c78518f211f6ef19fd4daa9cf8776b3111bc561c2"
+  },
+  "reference_runtime": "Python 3.12.7 / NumPy 2.4.2 / Torch 2.6.0+cu118",
+  "candidate_runtime": "2.10.0+cu126",
+  "scope": "Generated optical responses with the active locked development prior and common CFA calibration. Original loader passed all integrity and production-runtime checks in an isolated copy. 28 legacy text files restored to their exact pinned CRLF hashes. No original research files modified. No FDTD or mask optical solve. Priors and reference tensors remain local."
+}

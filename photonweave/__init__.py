@@ -56,3 +56,5 @@ from .detector_allocation import quadrant_intensity_allocation
 __all__ += ['quadrant_intensity_allocation']
 from .polarization import calibrate_plane_polarization, mix_plane_fields
 __all__ += ['calibrate_plane_polarization', 'mix_plane_fields']
+from .electron_model import spectral_interpolate, spectral_electron_model, exposure_target_information, SpectralElectronModel, ExposureInformation
+__all__ += ['spectral_interpolate', 'spectral_electron_model', 'exposure_target_information', 'SpectralElectronModel', 'ExposureInformation']
