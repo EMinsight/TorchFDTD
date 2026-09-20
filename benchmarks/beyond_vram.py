@@ -16,8 +16,8 @@ import psutil
 import torch
 import photonweave
 from photonweave import (Region, Project, Source, Monitor, BoundaryFace,
-    StreamedSimulation, StreamedAdjointOptions, DifferentiableSimulation)
-from photonweave.streamed import _reservation
+    StreamedSimulation, StreamedAdjointOptions, DifferentiableSimulation,
+    estimate_streamed_memory)
 
 
 def main():
@@ -53,7 +53,7 @@ def main():
         gpu_budget_bytes=args.gpu_gib*1024**3,slab_width=args.width,temporal_depth=args.depth,
         checkpoints=0,local_checkpoints=0)
     meta=torch.empty(p.region.shape,dtype=torch.float64,device='meta')
-    reservation=_reservation(p,meta,options)
+    reservation=estimate_streamed_memory(p,options)
     scratch=Path(args.scratch).resolve()
     scratch.mkdir(parents=True,exist_ok=True)
     disk_free=shutil.disk_usage(scratch).free

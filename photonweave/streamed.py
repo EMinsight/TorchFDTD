@@ -106,16 +106,18 @@ def _reservation(project, epsilon, options, spectral=None):
     available = host_memory()['available_bytes']
     host_limit = min(options.host_budget_bytes, int(available*.8)) if available is not None else options.host_budget_bytes
     if host > host_limit:
-        raise ValueError('Streamed state and checkpoint reservation exceed the host budget.')
+        raise ValueError(f'Streamed state and checkpoint reservation exceed the host budget: required={host} bytes, admissible={host_limit} bytes.')
     if disk:
         from .state_store import disk_free
         free_disk = disk_free(options.state_directory)
-        if disk > min(options.disk_budget_bytes,int(free_disk*.8),free_disk-options.disk_free_reserve_bytes):
-            raise ValueError('Field bank reservation exceeds the disk budget or available disk space.')
+        disk_limit=min(options.disk_budget_bytes,int(free_disk*.8),free_disk-options.disk_free_reserve_bytes)
+        if disk > disk_limit:
+            raise ValueError(f'Field bank reservation exceeds the disk budget or available disk space: required={disk} bytes, admissible={max(0,disk_limit)} bytes, free={free_disk} bytes.')
     if torch.device(options.device).type == 'cuda':
         free, _ = torch.cuda.mem_get_info(torch.device(options.device))
-        if gpu > min(options.gpu_budget_bytes, int(free*.8)):
-            raise ValueError('Streamed tile workspace reservation exceeds the GPU budget.')
+        gpu_limit=min(options.gpu_budget_bytes, int(free*.8))
+        if gpu > gpu_limit:
+            raise ValueError(f'Streamed tile workspace reservation exceeds the GPU budget: required={gpu} bytes, admissible={gpu_limit} bytes.')
     return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,observation_index_bytes=16*monitors,
                 state_bank_capacity=state_bank_capacity,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,
@@ -135,6 +137,21 @@ def _backing(options,report,phase):
     finally:
         try:store.close()
         finally:report[phase+'_backing_store'] = store.report()
+
+
+def estimate_streamed_memory(project, options=None, *, diagonal=False):
+    """Check time-history memory admission without allocating domain arrays.
+
+    Uses current free resources and the same reservation as StreamedSimulation.
+    Does not validate all physics or include caller-owned geometry/optimizer
+    graphs or OS file cache. Spectral observers require their own reservation.
+    Admission is checked again at execution because resources may change.
+    """
+    if not isinstance(diagonal,bool):raise ValueError('diagonal must be boolean.')
+    options=options or StreamedAdjointOptions()
+    shape=project.region.shape+((3,) if diagonal else ())
+    epsilon=torch.empty(shape,dtype=getattr(torch,project.region.precision),device='meta')
+    return _reservation(project,epsilon,options)
 
 
 class _Streamed(torch.autograd.Function):

@@ -171,8 +171,27 @@ logical reads, with workload-dependent overhead, rather than a general runtime
 advantage. [Baseline](validation/bank-reads-medium-baseline-3060.json),
 [row-aware accumulation](validation/bank-reads-medium-optimized-3060.json).
 
+The comparison is now reproducible with
+`python -m benchmarks.streamed_backing --compare-zero-reads --output results/bank-reads.json`.
+The serial benchmark alternates host, row-aware disk and read-then-add disk
+policies and restores the production accumulation method even on failure.
+One three-repeat interleaved run measured 2.883 seconds for row-aware disk and
+3.044 seconds for read-then-add, with DRAM at 1.526 seconds. Combined with the
+sequential measurements above, this supports reporting variability rather than
+a universal speedup. All repetitions compare signals and gradients to DRAM.
+[Interleaved record](validation/bank-reads-interleaved-3060.json).
+
 Admission separately checks host, GPU and logical disk budgets. Epsilon and its
-gradient still occupy full CPU tensors. Set `disk_free_reserve_bytes` to retain
+gradient still occupy full CPU tensors. Before constructing that tensor, call
+`estimate_streamed_memory(project, options, diagonal=False)` to check the same
+time-history reservation using a metadata-only tensor. The result contains
+host, GPU, disk and tile workspace bytes and raises when current resources
+cannot admit the policy. It does not allocate full-domain E/H or epsilon.
+This is a memory check, not complete physics validation or a reservation of
+resources against other programs. Execution rechecks admission. Online spectral
+observers have additional observation-specific accounting.
+
+Set `disk_free_reserve_bytes` to retain
 an additional minimum amount of free space, for example `100*1024**3` on a
 shared system drive. Admission and every new file-bank allocation check this
 floor. The default is zero, and another process can still consume space after

@@ -7,6 +7,46 @@ from photonweave.boundaries import YeeGrid
 from test_differentiable import project
 
 
+def test_public_plan_handles_beyond_vram_shape_without_allocating_fields(tmp_path,monkeypatch):
+    from photonweave import estimate_streamed_memory, Project, BoundaryFace
+    region=Region(dimension='3d',size=(102.4,102.4,57.6),mesh=.1,steps=10,
+                  pml_cells=3,precision='float64',memory_mode='streamed')
+    region.boundaries.x_min=region.boundaries.x_max=BoundaryFace(kind='bloch')
+    region.bloch_phase=(.63,0,0)
+    p=Project(region=region)
+    monkeypatch.setattr('photonweave.streamed.host_memory',lambda:dict(available_bytes=1024**4))
+    monkeypatch.setattr('photonweave.state_store.disk_free',lambda _:1024**4)
+    def forbidden(*args,**kwargs):raise AssertionError('Field system allocated during planning')
+    monkeypatch.setattr('photonweave.streamed._System',forbidden)
+    options=StreamedAdjointOptions(device='cpu',state_storage='disk',state_directory=tmp_path/'absent',
+        disk_budget_bytes=280*1024**3,host_budget_bytes=76*1024**3,
+        slab_width=16,temporal_depth=2,checkpoints=0)
+    result=estimate_streamed_memory(p,options)
+    assert result['state_bytes']==58506346496
+    assert result['disk_reservation_bytes']==5*result['state_bytes']
+    assert not (tmp_path/'absent').exists()
+
+
+@pytest.mark.parametrize('diagonal',[False,True])
+def test_public_memory_plan_matches_execution_without_domain_allocation(diagonal,monkeypatch):
+    from photonweave import estimate_streamed_memory
+    p=project(steps=10)
+    options=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2)
+    original=torch.empty
+    requests=[]
+    def checked_empty(*args,**kwargs):
+        requests.append((args,kwargs.get('device')))
+        return original(*args,**kwargs)
+    with monkeypatch.context() as patch:
+        patch.setattr(torch,'empty',checked_empty)
+        estimate=estimate_streamed_memory(p,options,diagonal=diagonal)
+    domain_shape=p.region.shape+((3,) if diagonal else ())
+    assert any(args==(domain_shape,) and device=='meta' for args,device in requests)
+    assert all(device=='meta' for args,device in requests if args==(domain_shape,))
+    result=StreamedSimulation(p,options)(torch.full(domain_shape,1.7,dtype=torch.float64))
+    assert all(result.report[key]==value for key,value in estimate.items())
+
+
 def test_large_region_requires_explicit_streamed_mode():
     settings = dict(dimension='3d', size=(25.6,25.6,12.8), mesh=.1, pml_cells=3)
     with pytest.raises(ValueError,match='8 million'):

@@ -42,8 +42,8 @@ from .adjoint_spectrum import DifferentiableSpectrum
 __all__ += ['DifferentiableSpectrum']
 from .memory_profile import profile_memory_transfers
 __all__ += ['profile_memory_transfers']
-from .streamed import StreamedAdjointOptions, StreamedSimulation
-__all__ += ['StreamedAdjointOptions', 'StreamedSimulation']
+from .streamed import StreamedAdjointOptions, StreamedSimulation, estimate_streamed_memory
+__all__ += ['StreamedAdjointOptions', 'StreamedSimulation', 'estimate_streamed_memory']
 from .streamed_tuning import StreamedTuning, tune_streamed
 __all__ += ['StreamedTuning', 'tune_streamed']
 from .adjoint_planes import DifferentiablePlaneSimulation, DifferentiablePlaneResult
