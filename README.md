@@ -28,6 +28,8 @@ Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now
 
 [Equivalent-electron objectives](docs/ELECTRON_OBJECTIVE.md) now connect spectral response, fixed calibration, shot noise and exposure-weighted information. Scores and gradients match the active CR objective using its locked development context. The optical CR simulation itself remains unvalidated.
 
+The first [locked CR seed optical pilot](docs/validation/CR_SEED_OPTICAL_PILOT.md) now compares TORCWA and FDTD at one wavelength/ray. Mesh refinement reduces the discrepancy, but convergence and full-pupil inverse design remain unvalidated. Dense observation gathering was also batched to remove per-sample Python overhead.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 

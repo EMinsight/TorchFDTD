@@ -89,7 +89,7 @@ def _reservation(project, epsilon, options, spectral=None):
     state_banks = (options.checkpoints+11)*state
     disk = state_banks if options.state_storage == 'disk' else 0
     disk_io_workspace = 36*tile_cells*item if disk else 0
-    host = (0 if disk else state_banks)+initial_storage+8*epsilon.numel()*item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace
+    host = (0 if disk else state_banks)+initial_storage+8*epsilon.numel()*item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
     gpu = buffers*(tile_workspace+tile_history)
     available = host_memory()['available_bytes']
     host_limit = min(options.host_budget_bytes, int(available*.8)) if available is not None else options.host_budget_bytes
@@ -103,7 +103,7 @@ def _reservation(project, epsilon, options, spectral=None):
         free, _ = torch.cuda.mem_get_info(torch.device(options.device))
         if gpu > min(options.gpu_budget_bytes, int(free*.8)):
             raise ValueError('Streamed tile workspace reservation exceeds the GPU budget.')
-    return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,
+    return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,observation_index_bytes=16*monitors,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,
                 host_initial_state_reservation_bytes=initial_storage,
                 state_bytes=state, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*18*local_slots*tile_cells*item,

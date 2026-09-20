@@ -86,3 +86,14 @@ complete iteration time, objective history and memory in every storage tier.
 Re-evaluate final designs at independently refined numerical settings. Report
 disagreements and numerical tolerances alongside improvements. No CR result or
 runtime advantage has been established by this plan.
+
+## First locked-seed optical pilot
+
+A [540 nm/ray-zero seed comparison](validation/CR_SEED_OPTICAL_PILOT.md) now
+uses the exact seed hash, selected-frequency indices, refracted ray, output-face
+detector offset and two calibrated Cartesian polarizations. At matched short
+duration, reducing mesh from 50 to 25 nm reduced maximum unpolarized channel
+discrepancy from 0.04682 to 0.00711. At doubled 25 nm duration the discrepancy
+is 0.00816. This remains an exploratory convergence pilot. The full pupil,
+other wavelengths, independent mesh/time convergence and density gradients
+on the actual structure remain gates before optimization.

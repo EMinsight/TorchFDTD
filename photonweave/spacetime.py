@@ -218,6 +218,7 @@ class SlabBlockOperator:
             local.sources[family] = [(loc, component, next(views), next(views) if profile is not None else None)
                                      for loc, component, _, profile in terms]
         local.kernel = None
+        local.prepare_observations()
         if self.device.type == 'cuda':
             from .cuda_kernels import FusedYeeCUDA
             local.kernel = FusedYeeCUDA(grid, direct_views=self.direct_views, bindings_cache=self.workspace)

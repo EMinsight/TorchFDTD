@@ -1,0 +1,25 @@
+{
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "observations": 10000,
+  "seconds": {
+    "scalar": [
+      0.051064400002360344,
+      0.04929490014910698,
+      0.052463799715042114,
+      0.0522107002325356,
+      0.04879479994997382
+    ],
+    "batched": [
+      0.00048719998449087143,
+      0.00010140007361769676,
+      0.00034980010241270065,
+      9.709969162940979e-05,
+      0.00023170001804828644
+    ]
+  },
+  "medians": {
+    "scalar": 0.051064400002360344,
+    "batched": 0.00023170001804828644
+  },
+  "scope": "Observation gather only. Includes duplicate mixed E/H complex samples. Not a whole-solver speedup."
+}

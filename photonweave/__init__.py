@@ -58,3 +58,5 @@ from .polarization import calibrate_plane_polarization, mix_plane_fields
 __all__ += ['calibrate_plane_polarization', 'mix_plane_fields']
 from .electron_model import spectral_interpolate, spectral_electron_model, exposure_target_information, SpectralElectronModel, ExposureInformation
 __all__ += ['spectral_interpolate', 'spectral_electron_model', 'exposure_target_information', 'SpectralElectronModel', 'ExposureInformation']
+from .density_layer import periodic_density_layer
+__all__ += ['periodic_density_layer']

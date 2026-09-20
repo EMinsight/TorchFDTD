@@ -1,0 +1,13 @@
+{
+  "base_commit": "4d0b32e",
+  "sha256": {
+    "photonweave/density_layer.py": "6ff5dbff84cde635883d742cae898c9edd9ab134956846e589e807d8d4b45ae8",
+    "photonweave/differentiable.py": "4a42deb68a8d87d35780e9352f16271d950850ca0dd4c503364375be55f93ea5",
+    "photonweave/spacetime.py": "a53e25518e28e28e9963d5b0f654d070fbb31c2b2b9ae84ef00a7f8cbb1e217f",
+    "photonweave/streamed.py": "69553d889317d819909d8b9552d8d5c3d176df0bcf92e1b8901f1e66715ed465",
+    "benchmarks/periodic_layer_case.py": "2d144edb2a4c8b0f2fb28ad88850568cd01bf3f7faf31ac1fb1e3c9a6de286db",
+    "benchmarks/observation_gather.py": "616445565b04987092536fd5b4d11295cd42c92cd98254c628999583771b8ab0",
+    "tests/test_density_layer.py": "b80e501a23274e0d647f6b154479b005de1ed14041f6093906bfe525cb24f139"
+  },
+  "scope": "Optical pilot uses final batched-observation runtime. Gather microbenchmark is local RTX 3060. Private density and material/reference extraction remain outside the distributed package."
+}

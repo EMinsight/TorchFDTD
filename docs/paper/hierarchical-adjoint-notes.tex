@@ -301,4 +301,19 @@ brightness. A locked development-context comparison on three generated optical
 responses gave maximum score error $6.0\times10^{-15}$ and response-gradient
 relative error $4.81\times10^{-14}$ across CPU and CUDA evaluations.
 This validates objective composition rather than an optical CR reconstruction.
+
+\section{Periodic density transfer and dense observations}
+Piecewise-constant transverse density pixels are transferred by exact box
+intersection weights with periodic wrapping. Each electric component receives
+an arithmetic volume average at its own Yee location. The transfer preserves
+integrated density and is linear in density values. It is not a conformal
+interface construction and requires optical mesh convergence.
+
+Dense planes exposed an observation overhead independent of the Yee update.
+Prepared per-family indices replace per-sample Python indexing with batched
+gather and adjoint scatter-add, retaining duplicate-observation accumulation.
+Index storage is included in admission estimates. For 10,000 complex E/H
+samples on RTX 3060, the observation-only median decreased from 51.064 to
+0.232 milliseconds over five alternating repetitions. This measurement does
+not establish an end-to-end solver acceleration factor.
 \end{document}

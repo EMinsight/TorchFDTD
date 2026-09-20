@@ -144,10 +144,22 @@ class _System:
         self.monitors=[(m.component,index_at(m.center,r,m.component),'xyz'.index(m.component[1].lower()))
                        for m in project.monitors if m.enabled]
         if observation_monitors is not None:self.monitors=list(observation_monitors)
+        self.prepare_observations()
         self.kernel=None
         if self.device.type=='cuda' and not r.complex_fields:
             from .cuda_kernels import FusedYeeCUDA
             self.kernel=FusedYeeCUDA(g)
+
+    def prepare_observations(self):
+        self.observation_maps=[]
+        for family in ('E','H'):
+            positions=[];indices=[]
+            for position,(name,loc,component) in enumerate(self.monitors):
+                if name[0]==family:
+                    positions.append(position)
+                    indices.append(((loc[0]*self.region.shape[1]+loc[1])*self.region.shape[2]+loc[2])*3+component)
+            self.observation_maps.append((torch.tensor(positions,device=self.device,dtype=torch.long),
+                                          torch.tensor(indices,device=self.device,dtype=torch.long)))
 
     def tensor(self,value):
         is_complex=value.is_complex() if isinstance(value,torch.Tensor) else np.iscomplexobj(value)
@@ -246,16 +258,17 @@ class _System:
         self.current_step=end
 
     def observe(self,state):
-        return torch.stack([state[0 if name[0]=='E' else 1][loc+(component,)]
-                            for name,loc,component in self.monitors])
+        result=state[0].new_empty(len(self.monitors))
+        for field,(positions,indices) in zip(state[:2],self.observation_maps):
+            if indices.numel():result.index_copy_(0,positions,field.reshape(-1).index_select(0,indices))
+        return result
 
     def transpose_step(self,state,adjoint,signal_bar):
         e_bar,h_bar,*psi_bar=adjoint
         # Every point sample is taken after both source injections of this step.
         # Multiple monitors may coincide, so their adjoints must accumulate.
-        for i,(name,loc,component) in enumerate(self.monitors):
-            target=e_bar if name[0]=='E' else h_bar
-            target[loc+(component,)]+=signal_bar[i]
+        for target,(positions,indices) in zip((e_bar,h_bar),self.observation_maps):
+            if indices.numel():target.reshape(-1).index_add_(0,indices,signal_bar.index_select(0,positions))
         contribution,psi_bar=self.curl_transpose(-self.grid.courant_number*h_bar,psi_bar,True)
         e_bar=e_bar+contribution
         curl_e,_=self.curl(state[1],state[2:],False)
@@ -561,7 +574,8 @@ class DifferentiableSimulation(torch.nn.Module):
         device_slots=self.options.checkpoints if self.options.storage=='device' else self.options.device_checkpoints if self.options.storage=='hierarchical' else 0
         if self.options.checkpoint_transfers=='async' and self.options.checkpoints>device_slots:
             device_slots+=self.options.staging_slots
-        required=workspace+device_slots*state_upper+history_bytes
+        observation_index_bytes=16*monitor_count
+        required=workspace+device_slots*state_upper+history_bytes+observation_index_bytes
         if epsilon.is_cuda:
             free,_=torch.cuda.mem_get_info(epsilon.device)
             budget=min(int(free*.8),self.options.gpu_budget_bytes or int(free*.8))
@@ -572,7 +586,7 @@ class DifferentiableSimulation(torch.nn.Module):
                     backward_backend='fused CUDA transpose' if epsilon.is_cuda and not r.complex_fields and self.options.backward_kernel!='torch' else 'torch explicit transpose',memory_reservation_bytes=required,
                     workspace_reservation_bytes=workspace,history_reservation_bytes=history_bytes,
                     checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes if spectral is None else 0,
-                    source_history_bytes=source_bytes)
+                    source_history_bytes=source_bytes,observation_index_bytes=observation_index_bytes)
         # A later wavelength/ray configuration must not alter an earlier graph's replay.
         with torch.no_grad():system=_System(self.project.model_copy(deep=True),epsilon,observation_monitors=None if spectral is None else spectral.observers)
         # Check host/disk admission before spending the forward compute time.
