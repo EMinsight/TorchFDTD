@@ -37,7 +37,7 @@ class _ParameterLayout:
 
 
 class _DispersiveSystem(_System):
-    def __init__(self, project, epsilon, parameters, layout, **kwargs):
+    def __init__(self, project, epsilon, parameters, layout, *, fused_forward=False, fused_backward=False, **kwargs):
         super().__init__(project, epsilon, prepare_kernels=False, prepare_permittivity=False, **kwargs)
         self.parameters = parameters.detach()
         self.layout = layout
@@ -45,6 +45,17 @@ class _DispersiveSystem(_System):
         shape = (self.pole_count, *self.grid.E.shape)
         self.P = torch.zeros(shape, dtype=self.field_dtype, device=self.device)
         self.Q = torch.zeros_like(self.P)
+        if fused_forward or fused_backward:
+            # The ADE kernel replaces the dielectric final update. Its shared
+            # curl generator only needs a scalar placeholder, not 3*N inverses.
+            self.grid.inverse_permittivity = torch.ones(1,dtype=self.dtype,device=self.device)
+        if fused_forward:
+            from .cuda_dispersive_adjoint import fused_ade_forward
+            self.kernel = fused_ade_forward(self)
+
+    def fused_adjoint(self, gradient, signal_bar):
+        from .cuda_dispersive_adjoint import FusedDispersiveAdjointCUDA
+        return FusedDispersiveAdjointCUDA(self,gradient,signal_bar)
 
     def state(self):
         return (*super().state(), self.P, self.Q)
@@ -76,9 +87,13 @@ class _DispersiveSystem(_System):
 
     def advance(self, start, end):
         for step in range(start, end):
-            new = self.reference_step(self.state(), step, self.parameters)
-            for target, value in zip(self.state(), new):
-                target.copy_(value)
+            if self.kernel is not None:
+                self.kernel.update_E(); self.inject(self.grid.E,'E',step)
+                self.kernel.update_H(); self.inject(self.grid.H,'H',step)
+            else:
+                new = self.reference_step(self.state(), step, self.parameters)
+                for target, value in zip(self.state(), new):
+                    target.copy_(value)
         self.current_step = end
 
     def transpose_step(self, state, adjoint, signal_bar):
@@ -126,8 +141,8 @@ class DispersiveSimulation(DifferentiableSimulation):
     scalar. Pole-vector lengths must match P. Scalars share a rate across poles.
     omega0=0 gives Drude. All parameters may retain a Torch geometry graph.
 
-    Uses Torch CPU/CUDA updates and an explicit transpose, with the resident
-    checkpoint tiers. Fused ADE transpose and spatial streaming are pending.
+    Uses Torch CPU/CUDA or explicit fused CUDA updates and transpose, with the
+    resident checkpoint tiers. ADE spatial streaming remains pending.
     """
     _explicit_dispersive_parameters = True
 
@@ -135,9 +150,9 @@ class DispersiveSimulation(DifferentiableSimulation):
         options = options or AdjointOptions()
         if not isinstance(options, AdjointOptions):
             raise ValueError('Dispersive differentiation requires resident AdjointOptions. ADE spatial streaming is pending.')
-        if options.backward_kernel == 'fused':
-            raise ValueError('Fused dispersive backward is not implemented. Select torch or auto.')
-        super().__init__(project, replace(options, backward_kernel='torch'))
+        # Keep the Torch fallback as auto until application-scale performance
+        # comparisons establish when native ADE kernels are beneficial.
+        super().__init__(project, replace(options, backward_kernel='torch') if options.backward_kernel=='auto' else options)
         if any(s.enabled and s.injection != 'soft' for s in self.project.sources):
             raise ValueError('Dispersive differentiation currently requires soft source injection.')
 
@@ -190,14 +205,17 @@ class DispersiveSimulation(DifferentiableSimulation):
         n = math.prod(self.project.region.shape)
         real_item = epsilon.element_size()
         field_item = real_item*(2 if self.project.region.complex_fields else 1)
+        fused_forward = epsilon.is_cuda and self.project.region.cuda_kernel == 'fused'
+        fused_backward = epsilon.is_cuda and self.options.backward_kernel == 'fused'
         def factory(project, value, **kwargs):
-            return _DispersiveSystem(project, value, parameters, layout, **kwargs)
+            return _DispersiveSystem(project, value, parameters, layout,
+                                     fused_forward=fused_forward,fused_backward=fused_backward,**kwargs)
         result = super()._run(epsilon, spectral, system_factory=factory, autograd_input=parameters,
             extra_state_bytes=6*count*n*field_item,
             extra_workspace_bytes=n*((36*count+12)*field_item+(36*count+12)*real_item))
         result.report.update(adjoint='discrete Yee/CPML/trapezoidal ADE',
-            forward_backend='torch CUDA' if epsilon.is_cuda else 'torch CPU',
-            backward_backend='torch explicit ADE transpose', oscillator_count=count,
+            forward_backend='fused CUDA ADE' if fused_forward else 'torch CUDA' if epsilon.is_cuda else 'torch CPU',
+            backward_backend='fused CUDA ADE transpose' if fused_backward else 'torch explicit ADE transpose', oscillator_count=count,
             material_state_bytes=6*count*n*field_item,
             material_parameter_bytes=parameters.numel()*real_item,
             material_parameter_layout='compact original shapes with broadcast transpose reductions',

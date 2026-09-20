@@ -454,7 +454,8 @@ class _FDTD(torch.autograd.Function):
             else:
                 from .cuda_adjoint import FusedAdjointCUDA as Kernel
             fused_seed=signal_bar if ctx.spectral is None else torch.empty((ctx.spectral.block_size,len(system.monitors)),device=epsilon.device,dtype=system.field_dtype)
-            fused=Kernel(system,gradient,fused_seed)
+            factory=getattr(system,'fused_adjoint',None)
+            fused=Kernel(system,gradient,fused_seed) if factory is None else factory(gradient,fused_seed)
         adjoint=None if fused else tuple(torch.zeros_like(x) for x in system.state())
         checkpoints=_Checkpoints(system,options,report)
 
@@ -500,6 +501,7 @@ class _FDTD(torch.autograd.Function):
 
         try:
             reverse(0,system.region.steps,None,options.checkpoints)
+            if fused is not None and hasattr(fused,'finalize'):fused.finalize(report)
             if epsilon.is_cuda:torch.cuda.synchronize(epsilon.device)
             report['backward_seconds']=time.perf_counter()-started
         finally:

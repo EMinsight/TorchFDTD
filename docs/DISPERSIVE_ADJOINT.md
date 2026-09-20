@@ -66,21 +66,22 @@ For a 240-cell grid with scalar epsilon-infinity, two pole strengths, two
 resonances and one shared damping rate, the FP64 packed parameter buffer now
 uses 1,960 bytes instead of the former 40,320 bytes of fully expanded
 parameters. This is a parameter-buffer comparison only, not the whole solver
-peak. The unused inverse-permittivity field is also omitted in this ADE path.
+peak. The Torch path omits the unused inverse-permittivity field. The fused
+path uses a scalar placeholder for the shared curl generator.
 Tests compare compact and explicitly expanded inputs for shared, spatial and
 component-dependent poles under real and Bloch fields. Forward values and VJPs
 agree within FP64 tolerances. Summation order can differ, so bitwise gradient
 equality is not required. No reduced storage precision is used.
 
-The current implementation uses Torch updates and an analytic discrete
+The default implementation uses Torch updates and an analytic discrete
 transpose. CPU FP32/FP64, CPML, real/complex Bloch and diagonal material
 gradients are covered by targeted tests. The material suite also passed on
 RTX 3060 after its CR duration run finished. It covers CUDA FP32/FP64, real
 and complex Bloch VJPs, plane-flux derivatives and asynchronous
 device/host/file restoration of the P/Q state.
-Fused ADE forward/backward, sparse material-state allocation and spatial
-out-of-core ADE are still pending. Selecting fused backward or streamed plane
-options raises an explicit error. Live TFSF, one-way sources, subpixel
+Optional resident fused CUDA forward/backward is also available. Sparse
+material-state allocation and spatial out-of-core ADE are still pending.
+Selecting streamed plane options raises an explicit error. Live TFSF, one-way sources, subpixel
 interfaces, moving monitors and higher derivatives are also outside this API.
 
 Validation checks the native Drude/Lorentz/multipole forward, a small full-time
@@ -99,3 +100,47 @@ broadcast-layout checks passed 201 tests with 59 CUDA-dependent skips.
 A subsequent dedicated material suite passed all 32 CPU/CUDA tests, including
 the extended GPU cases and pre-allocation rejection of an oversized oracle.
 This does not establish CUDA throughput or large dispersive-domain capacity.
+
+## Native CUDA material transpose
+
+Set `project.region.cuda_kernel="fused"` for native ADE forward and
+`AdjointOptions(backward_kernel="fused")` for native backward, then supply
+CUDA parameter tensors. Both choices are independent. `auto` backward keeps
+the Torch path. The implementation supports the same compact scalar, pole,
+spatial and Yee-component parameter layouts as the Torch path, for real or
+fixed-Bloch complex FP32/FP64 fields and one to 64 poles.
+
+The forward kernel solves the coupled electric/ADE update per component and
+updates P/Q directly. The magnetic Yee update follows electric source
+injection. Backward re-evaluates pre-source E without modifying checkpointed
+E/H, P/Q or CPML memories. It then applies the magnetic curl transpose, one
+material-transpose kernel and the electric curl transpose. Spatial parameter
+gradients have unique cell writers. Shared rates use fixed-order CUDA block
+reductions, with one partial per shared parameter per 256-cell block. A final
+Torch sum returns those derivatives to the compact input tensor. There are no
+material-gradient atomics or dense pole-by-cell temporaries for shared rates.
+The reduction allocation is reported as `material_gradient_reduction_bytes`.
+Field states and their adjoints remain spatial, and the conservative memory
+admission is unchanged.
+
+Tests compare every material VJP with a full-time autograd oracle, including
+the complete one-step state transpose with nonzero incoming P/Q and CPML
+adjoints. They also check a 64-pole Drude limit, normalized plane flux, repeated
+backward, geometry Taylor residuals, nondefault streams and asynchronous mixed
+checkpoint tiers. The reference path remains independent of the native kernels.
+
+Run the geometry-and-damping optimizer with
+`python -m examples.differentiable_dispersive_design --device cuda --kernel fused`.
+The [matched benchmark driver](../benchmarks/dispersive_adjoint_kernels.py)
+separates Torch, fused-backward-only and fused-forward/backward modes. Its
+measurements cover resident discrete problems and do not establish large-domain
+optical convergence, streamed ADE support or an external-solver speed advantage.
+
+The [RTX 5880 measurements](validation/DISPERSIVE_CUDA_REPORT.md) cover six
+resident cases at 32 cubed, 64 cubed and 128 cubed. Matched fused forward and
+backward reduce full wall by 4.30 to 16.15 times against our Torch CUDA path.
+At 128 cubed and 128 steps, peak Torch allocation changes from 1.572 to
+0.804 GiB for real FP32 and from 5.512 to 3.129 GiB for complex FP64. The
+backward-only ablation gives a smaller full-wall gain because replay still
+uses Torch forward. All timed repetitions pass signal and material-gradient
+comparisons. The raw records retain exact source hashes and measurement scope.

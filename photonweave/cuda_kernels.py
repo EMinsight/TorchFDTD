@@ -159,7 +159,7 @@ class FusedYeeCUDA:
                 lines.extend([f'if ({coord} >= {lo} && {coord} < {hi}) {{',
                               f'const int p = {index};', f'const int q = {coord}-{lo};',
                               f'{real} memory = {psi}[p]*{b}[q] + {c}[q]*d;',
-                              f'{psi}[p] = memory;', f'd = d*{inv_k}[q] + memory;', '}'])
+                                  *([f'{psi}[p] = memory;'] if getattr(self,'write_cpml',True) else []), f'd = d*{inv_k}[q] + memory;', '}'])
             lines.append('}')
             if axis in g.wrap:
                 if g.wrap[axis] != 1:
@@ -171,12 +171,21 @@ class FusedYeeCUDA:
                     lines.append(f'd *= ({real})({metric[1]:.17g});')
                 lines.append('}')
             lines.extend([f'c{out} += {"-" if sign < 0 else ""}d;', '}'])
+        finish=getattr(self,'_update_statements',None)
+        # Tensor cohorts build templates from a minimal grid-only proxy.
+        lines.extend(FusedYeeCUDA._update_statements(self,forward,inverse,argument,real,subpixel=subpixel)
+                     if finish is None else finish(forward,inverse,argument,real,subpixel=subpixel))
+        return ('extern "C" __global__ void yee_update(' + ', '.join(parameters) + ') {\n' + '\n'.join(lines) + '\n}'), tensors
+
+    def _update_statements(self,forward,inverse,argument,real,*,subpixel=False):
+        g=self.grid
+        lines=[]
         for comp in range(3):
             if subpixel:lines.append(f'curl_buffer[3*i+{comp}]=c{comp};')
             index = '0' if inverse.numel() == 1 else str(comp) if inverse.numel() == 3 else f'3*i+{comp}'
             lines.append(f'dst[3*i+{comp}] {"-=" if forward else "+="} '
                          f'(({real})({g.courant_number:.17g}) * inverse[{index}]) * c{comp};')
-        return ('extern "C" __global__ void yee_update(' + ', '.join(parameters) + ') {\n' + '\n'.join(lines) + '\n}'), tensors
+        return lines
 
     def update(self, forward):
         kernel, arrays, _ = self.launches[forward]

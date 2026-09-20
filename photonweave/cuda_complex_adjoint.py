@@ -46,14 +46,14 @@ class FusedComplexAdjointCUDA(FusedAdjointCUDA):
             tensors.append(tensor)
             parameters.append(f'{"" if write else "const "}{"C" if tensor.is_complex() else real}* __restrict__ {name}')
             return name
-        argument('bar',self.h_bar if forward else self.e_bar)
+        argument('bar',self.h_bar if forward else self.electric_seed)
         argument('target',self.e_bar if forward else self.h_bar,True)
         argument('epsilon',self.epsilon)
-        if not forward:
+        if not forward and self.material_gradient:
             argument('primal',g.H)
             argument('gradient',self.gradient,True)
         diagonal=self.epsilon.shape[-1]==3
-        def eps(index,component):return f'epsilon[{"3*("+index+")+"+str(component) if diagonal else index}]'
+        def eps(index,component):return 'epsilon[0]' if self.epsilon.numel()==1 else f'epsilon[{"3*("+index+")+"+str(component) if diagonal else index}]'
         metrics={}
         segments={}
         for term,(axis,comp,_,_) in enumerate(CURL_TERMS):
@@ -66,7 +66,7 @@ class FusedComplexAdjointCUDA(FusedAdjointCUDA):
                 values={k:argument(f'{k}_{index}',seg[k]) for k in ('b','c','inv_k')}
                 values['old']=argument(f'old_{index}',self.psi_bars[phase][index])
                 values['new']=argument(f'new_{index}',self.psi_bars[1-phase][index],True)
-                if not forward:values['primal']=argument(f'primal_{index}',seg['psi'])
+                if not forward and self.material_gradient:values['primal']=argument(f'primal_{index}',seg['psi'])
                 segments[term].append((seg,values))
         lines=[f'const int i=blockIdx.x*blockDim.x+threadIdx.x;',f'if(i>={self.count})return;',
                f'const int x=i/{strides[0]};',f'const int y=(i/{strides[1]})%{shape[1]};',
@@ -114,7 +114,7 @@ class FusedComplexAdjointCUDA(FusedAdjointCUDA):
                     lines.append(f'if({coord}=={coord_value})r{comp}{action}{value};')
         for c in range(3):lines.append(f'target[3*i+{c}]+=r{c};')
 
-        if not forward:
+        if not forward and self.material_gradient:
             lines.append('C c0=0,c1=0,c2=0;')
             for term,(axis,comp,out,sign) in enumerate(CURL_TERMS):
                 n=shape[axis]

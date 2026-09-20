@@ -99,8 +99,8 @@ def test_geometry_to_ade_taylor_and_online_spectrum():
 def test_invalid_parameters_and_options():
     p = project(steps=10)
     eps = torch.full(p.region.shape, 1.5, dtype=torch.float64)
-    with pytest.raises(ValueError,match='Fused dispersive'):
-        DispersiveSimulation(p,AdjointOptions(backward_kernel='fused'))
+    with pytest.raises(ValueError,match='requires a CUDA tensor'):
+        DispersiveSimulation(p,AdjointOptions(backward_kernel='fused'))(eps,[1e30],1e15,1e14)
     from photonweave import StreamedAdjointOptions
     with pytest.raises(ValueError,match='resident AdjointOptions'):
         DispersiveSimulation(p,StreamedAdjointOptions())

@@ -14,7 +14,8 @@ from .cuda_kernels import _compile, _direct_cuda_view
 
 
 class FusedAdjointCUDA:
-    def __init__(self,system,gradient,signal_bar,*,direct_views=False,buffers=None):
+    def __init__(self,system,gradient,signal_bar,*,direct_views=False,buffers=None,
+                 material_gradient=True,electric_seed=None,curl_permittivity=None):
         import cupy
         self.cp=cupy
         self.direct_views=direct_views
@@ -22,10 +23,12 @@ class FusedAdjointCUDA:
         self.device=system.device.index
         self.gradient=gradient
         self.signal_bar=signal_bar.contiguous()
-        self.epsilon=system.eps4.detach().contiguous()
+        self.epsilon=(system.eps4 if curl_permittivity is None else curl_permittivity).detach().contiguous()
+        self.material_gradient=material_gradient
         allocate = lambda name, value: buffers.zeros(name, value) if buffers is not None else torch.zeros_like(value)
         self.e_bar=allocate('bar:E',system.grid.E)
         self.h_bar=allocate('bar:H',system.grid.H)
+        self.electric_seed=self.e_bar if electric_seed is None else electric_seed
         self.psi_bars=[tuple(allocate(f'bar:psi:{phase}:{i}',s['psi']) for i,s in enumerate(system.segments)) for phase in range(2)]
         self.phase=0
         self.launches={}
@@ -77,14 +80,14 @@ class FusedAdjointCUDA:
             tensors.append(tensor)
             parameters.append(f'{"" if write else "const "}{real}* __restrict__ {name}')
             return name
-        argument('bar',self.h_bar if forward else self.e_bar)
+        argument('bar',self.h_bar if forward else self.electric_seed)
         argument('target',self.e_bar if forward else self.h_bar,True)
         argument('epsilon',self.epsilon)
-        if not forward:
+        if not forward and self.material_gradient:
             argument('primal',g.H)
             argument('gradient',self.gradient,True)
         diagonal=self.epsilon.shape[-1]==3
-        def eps(index,component):return f'epsilon[{"3*("+index+")+"+str(component) if diagonal else index}]'
+        def eps(index,component):return 'epsilon[0]' if self.epsilon.numel()==1 else f'epsilon[{"3*("+index+")+"+str(component) if diagonal else index}]'
         metrics={}
         segments={}
         for term,(axis,comp,_,_) in enumerate(CURL_TERMS):
@@ -97,7 +100,7 @@ class FusedAdjointCUDA:
                 values={k:argument(f'{k}_{index}',seg[k]) for k in ('b','c','inv_k')}
                 values['old']=argument(f'old_{index}',self.psi_bars[phase][index])
                 values['new']=argument(f'new_{index}',self.psi_bars[1-phase][index],True)
-                if not forward:values['primal']=argument(f'primal_{index}',seg['psi'])
+                if not forward and self.material_gradient:values['primal']=argument(f'primal_{index}',seg['psi'])
                 segments[term].append((seg,values))
         lines=[f'const int i=blockIdx.x*blockDim.x+threadIdx.x;',f'if(i>={self.count})return;',
                f'const int x=i/{strides[0]};',f'const int y=(i/{strides[1]})%{shape[1]};',
@@ -142,7 +145,7 @@ class FusedAdjointCUDA:
                     lines.append(f'if({coord}=={coord_value})r{comp}{action}{value};')
         for c in range(3):lines.append(f'target[3*i+{c}]+=r{c};')
 
-        if not forward:
+        if not forward and self.material_gradient:
             lines.append(f'{real} c0=0,c1=0,c2=0;')
             for term,(axis,comp,out,sign) in enumerate(CURL_TERMS):
                 n=shape[axis]

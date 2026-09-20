@@ -205,8 +205,16 @@ additional forward probes. That execution completed its gradient with norm
 the failing system call. It is not a failed gradient-tolerance result.
 After verifying that its process had exited, a new full evaluation started
 at `results/cr-full-directional-5880-retry.json` with stdout and stderr directed
-to files. It is still pending. No CR optimization has been started, and
-optical convergence remains an independent gate.
+to files. The retry has now completed with process exit code zero. The
+[complete result](validation/cr-full-directional-5880.json) records all 144
+cases and the three directional probes. Relative central-difference errors
+are 1.95428e-7, 4.89033e-8 and 1.20533e-8 as the perturbation decreases from
+0.002 to 0.001 and 0.0005. First-order residuals decrease by approximately
+four each time, consistent with the expected Taylor behavior in this direction.
+The gradient artifact hash matches the previously fetched 128 by 128 tensor.
+Solver and evaluator hashes were captured after exit, before synchronizing
+new code to the workstation. No CR optimization has been started, and
+physical mesh, time and PML convergence remain independent gates.
 
 ## Restartable evaluation
 

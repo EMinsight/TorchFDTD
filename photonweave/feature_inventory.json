@@ -2399,7 +2399,7 @@
       "native": "implemented",
       "ui": "implemented",
       "fsp": "n/a",
-      "scope": "선택형 실수 CUDA kernel. 2D/3D, float32/64, CPML·periodic·graded 및 기존 ADE. 별도 선택형 plane DFT는 위상·공간 보간·복소 누적을 single/batch에서 공유 launch. Python cuda_graph_steps는 관측 시점을 보존한 선택형 graph unrolling. 5880 장·스펙트럼 비교와 준비 비용·회귀 포함 성능 측정. 고정 Bloch의 fused forward·transpose를 별도 미분 API에서 지원. ADE 미분은 resident Torch 경로이며 fused·공간 ADE는 후속.",
+      "scope": "선택형 실수 CUDA kernel. 2D/3D, float32/64, CPML·periodic·graded 및 기존 ADE. 별도 선택형 plane DFT는 위상·공간 보간·복소 누적을 single/batch에서 공유 launch. Python cuda_graph_steps는 관측 시점을 보존한 선택형 graph unrolling. 5880 장·스펙트럼 비교와 준비 비용·회귀 포함 성능 측정. 고정 Bloch의 fused forward·transpose를 별도 미분 API에서 지원. ADE 미분은 resident Torch와 선택형 fused CUDA 경로이며 공간 ADE는 후속.",
       "evidence": [
         "photonweave/cuda_kernels.py",
         "photonweave/cuda_monitors.py",
@@ -2431,7 +2431,7 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "n/a",
-      "scope": "고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph 지원. 명시적 ADE 재료 미분은 resident Torch 경로. Fused·공간 ADE, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음.",
+      "scope": "고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph 지원. 명시적 ADE 재료 미분은 resident Torch 및 fused CUDA 경로. 공간 ADE, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음.",
       "evidence": [
         "photonweave/differentiable.py",
         "tests/test_differentiable.py",

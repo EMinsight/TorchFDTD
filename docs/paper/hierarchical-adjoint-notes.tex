@@ -531,7 +531,7 @@ point summation order but not the represented material or storage precision.
 The spatial P and Q states remain necessary, and this parameter reduction
 does not imply sparse field evolution or a bound on the full solver peak.
 
-The implemented path uses Torch operations and an explicit analytic
+The reference implementation uses Torch operations and an explicit analytic
 transpose. Small CPU tests cover FP32 and FP64, fixed Bloch phase, scalar
 and diagonal epsilon, all four material parameter derivatives, checkpoint
 restoration and online spectral observations. Native Drude, Lorentz and
@@ -540,8 +540,65 @@ autograd oracle and directional tests check the material VJP. Fixed
 collocated planes connect it to reference-normalized flux objectives.
 The material suite also passes on an RTX 3060, including FP32 and FP64
 VJPs and asynchronous device, host and file checkpoint restoration.
-Fused ADE kernels, spatially streamed ADE,
+Spatially streamed ADE,
 sparse oscillator state and physical gradient convergence remain pending.
 These tests do not establish a new dispersive integration algorithm or
 a large-domain performance advantage.
+
+\subsection{Native material transpose and shared-parameter reductions}
+The resident CUDA path fuses the electric curl and coupled material update.
+Each component first sums the pole responses, solves for
+$\widetilde E$, and updates P and Q in place. The magnetic kernel follows
+electric source injection. Backward recomputes $\widetilde E$ without
+changing the primal restart state. Magnetic and electric curl transposes
+surround a pointwise material transpose. This keeps the existing Yee and
+CPML derivative conventions and avoids a time-axis computational graph.
+
+Spatial material derivatives have a unique writer for each cell or
+component. Shared pole rates instead use a fixed-order reduction within
+256-thread blocks. Block partials accumulate across reverse time steps,
+followed by a compact reduction at the end of backward. For $m$ shared
+parameters and $N$ cells, this temporary contains
+\begin{equation}
+ m\left\lceil\frac{N}{256}\right\rceil
+\end{equation}
+real values rather than a dense pole-by-cell material-gradient array.
+This reduction uses no atomic updates. The P/Q states and their adjoints
+remain dense, and this count does not bound total solver memory.
+
+The native path is tested against the full-time Torch graph for real and
+complex fields, scalar and diagonal epsilon, spatial and shared material
+parameters, and FP32 and FP64 arithmetic. A complete one-step state
+transpose test includes nonzero material and CPML endpoint adjoints.
+Additional checks cover fixed spectral planes, repeated backward,
+mixed-tier checkpoint restoration and a 64-pole Drude limit.
+This is an implementation of the stated discrete transpose, not a claim
+of a new dispersive time integrator.
+
+On an RTX 5880 Ada, a matched resident comparison uses two poles,
+three device checkpoints, one warmup per execution mode and three timed
+repetitions with rotating order. Every repetition checks signals and material
+gradients against the Torch implementation. At $128^3$ cells and 128 steps,
+the median results are shown in Table~\ref{tab:ade-cuda}.
+Full wall includes parameter packing, forward, the objective, checkpoint
+replay, backward and shared-gradient reduction. Model construction, input
+allocation and final host copies are excluded. Peak memory counts Torch
+allocations and excludes the CUDA context. These measurements do not establish
+external-solver performance, optical convergence or out-of-core ADE capacity.
+\begin{table}[ht]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+Fields & Torch (s) & Fused (s) & Ratio & Peak GiB, Torch / fused \\
+\midrule
+Real FP32 & 4.2505 & 0.5307 & 8.01 & 1.572 / 0.804 \\
+Complex FP64 & 19.9781 & 4.6447 & 4.30 & 5.512 / 3.129 \\
+\bottomrule
+\end{tabular}
+\caption{Native resident ADE forward and backward ablation at $128^3$ cells.
+Fused backward alone gives ratios of 1.28 in both cases because its replay
+retains Torch forward. Raw repetition records and source hashes accompany
+the repository validation report.}
+\label{tab:ade-cuda}
+\end{table}
 \end{document}
