@@ -13,7 +13,10 @@ solver. Public-release conditions remain recorded in
 - Python/JSON simulation API and browser CAD workbench.
 - CPU/CUDA FDTD, native fused CUDA updates and selective plane DFT.
 - Independent process batches, shared CUDA tensor cohorts and black-box design
-  objectives. Differentiable adjoint optimization is not implemented.
+  objectives. Checkpointed Torch adjoints support the explicitly documented
+  nondispersive subset and resident dispersive parameters. Spatial streaming
+  and gradient-driven examples are experimental. General differentiability and
+  validated application-level inverse design remain incomplete.
 - Authored examples, native/analytic validation, explicit feature checklist and
   supported FSP import/writeback subset.
 - Technical manuscript draft by Hyoseok Park, with TeX and PDF. The manuscript

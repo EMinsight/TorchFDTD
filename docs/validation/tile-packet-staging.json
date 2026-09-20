@@ -1,0 +1,33 @@
+{
+  "torch_version": "2.10.0+cu126",
+  "shape": [
+    64,
+    96,
+    64
+  ],
+  "precision": "float64",
+  "cpu_threads": 4,
+  "measurements": [
+    {
+      "state": "scalar_backed_initial",
+      "packet_bytes": 44040192,
+      "allocating_pack_positive_cpu_tensor_bytes": 84934672,
+      "reused_pack_positive_cpu_tensor_bytes": 0,
+      "bitwise_equal": true
+    },
+    {
+      "state": "evolved",
+      "packet_bytes": 44040192,
+      "allocating_pack_positive_cpu_tensor_bytes": 47185936,
+      "reused_pack_positive_cpu_tensor_bytes": 0,
+      "bitwise_equal": true
+    }
+  ],
+  "source_sha256": {
+    "photonweave/tensor_packet.py": "26ecfd0b04eb0641df02c8632eb361d1ddfb834f3628e3f14d0ae6fc1639ffe0",
+    "photonweave/tile_workspace.py": "61089f16294c87a3696a46e44591faa99a3c7c7c0c8a8d55c12ec03545c2e842",
+    "photonweave/spacetime.py": "6eaf3555045075e797c741fb58039d1263213a96d13879ffe577c88888e819a5",
+    "benchmarks/packet_staging.py": "528c8ff38b685125a4bcfee431a3d7b5f6c36c39e45017576c2f011da6af5f92"
+  },
+  "scope": "CPU packet construction only. Reused destination allocated before measurement. Positive tensor allocation events, not peak process RAM or CUDA usage. No PCIe, file I/O, FDTD throughput or physical-VRAM-overflow claim."
+}

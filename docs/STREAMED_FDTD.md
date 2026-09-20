@@ -43,6 +43,36 @@ The direct view path retains Torch ownership and records the consumer stream.
 `cuda_binding="dlpack"` and `reuse_tile_buffers=False` retain comparison paths.
 Disabling reuse requires synchronous transfers.
 
+Input tensors are packed directly into each slot's pinned staging buffer for
+asynchronous CUDA transfers. Synchronous CUDA uses a reusable pageable staging
+buffer. Both avoid constructing a separate temporary input packet. Output uses
+one reusable byte buffer per slot, shared by homogeneous forward fields and
+mixed complex-field/real-gradient backward packets. Its storage is separate
+from cached kernel arguments. Slot completion and host reduction still precede
+reuse, and transfer precision is unchanged.
+
+The forward/backward workspace reports include `buffers_by_name`,
+`pinned_by_name` and `host_staging_by_name`. Their sums match the corresponding
+owned buffer totals. These are end-of-phase high-water pools, not process peaks
+or an accounting of CUDA context, caller graphs and OS file cache. Admission
+retains its conservative reservation until all live temporaries are bounded.
+
+The [packet allocation measurement](validation/tile-packet-staging.json) uses
+a 64 by 96 by 64 complex-FP64 tile and a 42 MiB mixed packet. After allocating
+the reusable destination, direct packing creates zero additional CPU tensor
+bytes. The previous allocating path creates approximately 81 MiB for the
+scalar-backed initial fields and 45 MiB for evolved fields, including a
+strided auxiliary array. Packet bytes match exactly. These are positive
+allocation events during packing, not peak RAM, PCIe traffic or solver speed.
+Reproduce with `python -m benchmarks.packet_staging --output results/packet-staging.json`.
+
+Targeted checks cover exact mixed-packet bytes, strided and scalar-backed inputs,
+conjugate views, empty arrays and alias rejection. CUDA tests include FP32/FP64
+complex fields, CPML and Bloch boundaries, host/file banks, one to three async
+slots, nondefault streams, replayed gradients and recovery after partial failure.
+The packet/workspace/complex-CUDA suites passed 50 checks on RTX 3060. Their
+runtime is not used as a benchmark because a separate CR validation was active.
+
 For grids above eight million cells, construct `Region(memory_mode="streamed",
 ...)` and use this Python API with explicit budgets. This opt-in cannot run
 through the resident solver or workbench. The resident limit remains unchanged.

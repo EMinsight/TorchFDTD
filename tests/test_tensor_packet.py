@@ -1,6 +1,6 @@
 import pytest
 import torch
-from photonweave.tensor_packet import pack_tensors
+from photonweave.tensor_packet import TensorLayout, pack_tensors
 from photonweave.spacetime import _host_copies
 
 
@@ -45,3 +45,74 @@ def test_cpu_workspace_mixed_roundtrip():
     for a,b in zip(recovered,values):
         assert a.dtype==b.dtype
         torch.testing.assert_close(a,b,rtol=0,atol=0)
+
+
+@pytest.mark.parametrize('mixed', [False, True])
+def test_direct_packet_has_identical_bytes_without_contiguous_temporaries(monkeypatch, mixed):
+    values = [torch.arange(120, dtype=torch.float64).reshape(4,5,6)[:,::2,:].requires_grad_(),
+              torch.tensor([1.,-0.,float('inf')], dtype=torch.float64),
+              torch.tensor([0x7ff8000000000015], dtype=torch.int64).view(torch.float64),
+              torch.empty((2,0), dtype=torch.float64),
+              torch.tensor(3., dtype=torch.float64).expand(7,8)]
+    if mixed:
+        values += [torch.tensor([1+2j,-3+4j], dtype=torch.complex128).conj(),
+                   torch.tensor([2**60+3], dtype=torch.int64), torch.tensor([True,False])]
+    expected, layout = pack_tensors(values)
+    assert TensorLayout.from_tensors(values) == layout
+    storage = torch.empty_like(expected)
+    def disallow(*args, **kwargs):raise AssertionError('Intermediate contiguous packet allocation')
+    monkeypatch.setattr(torch, 'cat', disallow)
+    monkeypatch.setattr(torch.Tensor, 'contiguous', disallow)
+    packet, actual_layout = pack_tensors(values, out=storage)
+    assert packet is storage and not packet.requires_grad and packet.grad_fn is None
+    assert actual_layout == layout
+    assert torch.equal(packet.view(torch.uint8), expected.view(torch.uint8))
+
+
+def test_packet_destination_rejects_alias_grad_and_strided_storage():
+    values = (torch.arange(8, dtype=torch.float64),)
+    with pytest.raises(ValueError, match='share storage'):
+        pack_tensors(values, out=values[0])
+    with pytest.raises(ValueError, match='detached'):
+        pack_tensors(values, out=torch.empty(8, dtype=torch.float64, requires_grad=True))
+    with pytest.raises(ValueError, match='layout'):
+        pack_tensors(values, out=torch.empty(16, dtype=torch.float64)[::2])
+    with pytest.raises(ValueError, match='layout'):
+        pack_tensors(values, out=torch.empty(7, dtype=torch.float64))
+
+
+def test_packet_slots_reuse_input_and_output_allocations_without_aliasing_inputs():
+    from photonweave.tile_workspace import TileWorkspace
+    workspace = TileWorkspace('cpu')
+    values = (torch.arange(60, dtype=torch.float64).reshape(5,4,3)[:,::2],
+              torch.arange(20, dtype=torch.float64).to(torch.complex128).conj())
+    pointers = None
+    for scale in (1,2,3):
+        inputs = tuple(value*scale for value in values)
+        packed, layout = workspace.copy_packet('payload', inputs)
+        uploaded = layout.unpack(packed)
+        returned = workspace.to_host(uploaded).wait()
+        for actual, expected in zip(returned, inputs):
+            torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+            assert actual.untyped_storage().data_ptr() != expected.untyped_storage().data_ptr()
+        addresses = tuple(value.data_ptr() for value in workspace.buffers.values())
+        if pointers is None:pointers = addresses
+        else:assert addresses == pointers
+    assert workspace.allocations == 2
+    assert not workspace.pinned and not workspace.host_staging
+
+
+def test_output_layout_changes_do_not_flush_input_kernel_bindings():
+    from photonweave.tile_workspace import TileWorkspace
+    workspace = TileWorkspace('cpu')
+    value = workspace.array('field', (100,), torch.complex128)
+    value.fill_(1+2j)
+    cached = workspace.cuda_arguments('forward', [value], lambda t:t.detach())
+    for values in ((value, value), (value, value.real.clone()), (value[:3],)):
+        result = workspace.to_host(values).wait()
+        for actual, expected in zip(result, values):
+            torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+        assert workspace.cuda_arguments('forward', [value], lambda t:t.detach()) is cached
+    # Byte storage does not change dtype between complex forward output and
+    # mixed complex/real backward output, including shorter boundary slabs.
+    assert workspace.allocations == 2

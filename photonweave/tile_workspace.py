@@ -6,7 +6,7 @@ before replacing an allocation. The tile driver waits for the previous slot's
 device work and host consumer before handing it to the next tile.
 """
 from collections import OrderedDict
-from .tensor_packet import pack_tensors
+from .tensor_packet import TensorLayout, pack_tensors
 
 import torch
 
@@ -32,6 +32,8 @@ class TileWorkspace:
         self.binding_misses = 0
         self.asynchronous = asynchronous
         self.pinned = {}
+        self.host_staging = {}
+        self.host_allocations = self.pinned_allocations = 0
         self.h2d_bytes = self.d2h_bytes = 0
         self.events = []
         if asynchronous:
@@ -40,33 +42,39 @@ class TileWorkspace:
             self.d2h = torch.cuda.Stream(device=self.device)
 
     def pinned_array(self, name, value):
-        current = self.pinned.get(name)
-        if current is None or current.numel() < value.numel() or current.dtype != value.dtype:
-            current = torch.empty(value.numel(), dtype=value.dtype, pin_memory=True)
-            self.pinned[name] = current
-        return current[:value.numel()].view(value.shape)
+        return self.host_array(name, value.shape, value.dtype, pinned=True)
 
-    def array(self, name, shape, dtype):
+    def host_array(self, name, shape, dtype, *, pinned=False):
         count = 1
         for length in shape:count *= length
-        value = self.buffers.get(name)
-        if value is None or value.numel() < count or value.dtype != dtype:
-            # Cached views own allocations. Invalidate them before replacement.
-            self.bindings.clear()
-            value = torch.empty(count, dtype=dtype, device=self.device)
-            self.buffers[name] = value
-            self.allocations += 1
-        if value.is_cuda:value.record_stream(torch.cuda.current_stream(self.device))
-        return value[:count].view(shape)
+        pool = self.pinned if pinned else self.host_staging
+        current = pool.get(name)
+        if current is None or current.numel() < count or current.dtype != dtype:
+            current = torch.empty(count, dtype=dtype, device='cpu', pin_memory=pinned)
+            pool[name] = current
+            if pinned:self.pinned_allocations += 1
+            else:self.host_allocations += 1
+        return current[:count].view(shape)
 
-    def zeros(self, name, like):
-        return self.array(name, like.shape, like.dtype).zero_()
+    def copy_packet(self, name, tensors):
+        """Pack CPU values directly into this slot's transfer storage."""
+        values = tuple(tensors)
+        layout = TensorLayout.from_tensors(values)
+        if values[0].device.type != 'cpu':
+            raise ValueError('Tile input packets must originate on CPU.')
+        target = self.array(name, (layout.count,), layout.dtype)
+        if self.device.type == 'cpu':
+            return pack_tensors(values, out=target)
+        staging = self.host_array('input:'+name, (layout.count,), layout.dtype,
+                                  pinned=self.asynchronous)
+        pack_tensors(values, out=staging)
+        self._copy_into(name, target, staging, staged=True)
+        return target, layout
 
-    def copy(self, name, value):
-        target = self.array(name, value.shape, value.dtype)
+    def _copy_into(self, name, target, value, *, staged=False):
         if self.asynchronous and value.device.type == 'cpu':
-            pinned = self.pinned_array('input:'+name, value)
-            pinned.copy_(value)
+            pinned = value if staged else self.pinned_array('input:'+name, value)
+            if not staged:pinned.copy_(value)
             with torch.cuda.stream(self.h2d):
                 target.copy_(pinned, non_blocking=True)
                 target.record_stream(self.h2d)
@@ -81,8 +89,35 @@ class TileWorkspace:
             self.h2d_bytes += value.numel()*value.element_size()
         return target
 
+    def array(self, name, shape, dtype, *, invalidate_bindings=True):
+        count = 1
+        for length in shape:count *= length
+        value = self.buffers.get(name)
+        if value is None or value.numel() < count or value.dtype != dtype:
+            # Cached views own allocations. Invalidate them before replacement.
+            if invalidate_bindings:self.bindings.clear()
+            value = torch.empty(count, dtype=dtype, device=self.device)
+            self.buffers[name] = value
+            self.allocations += 1
+        if value.is_cuda:value.record_stream(torch.cuda.current_stream(self.device))
+        return value[:count].view(shape)
+
+    def zeros(self, name, like):
+        return self.array(name, like.shape, like.dtype).zero_()
+
+    def copy(self, name, value):
+        target = self.array(name, value.shape, value.dtype)
+        return self._copy_into(name, target, value)
+
     def to_host(self, tensors):
-        packed,layout = pack_tensors(tensors)
+        tensors = tuple(tensors)
+        layout = TensorLayout.from_tensors(tensors)
+        # Forward packets can be homogeneous complex, whereas backward adds a
+        # real gradient. A byte buffer reuses one allocation across both layouts.
+        # Output packets never appear in a cached Yee/adjoint argument list.
+        count = layout.count*(1 if layout.dtype == torch.uint8 else tensors[0].element_size())
+        packed = self.array('output_packet', (count,), torch.uint8, invalidate_bindings=False)
+        pack_tensors(tensors, out=packed.view(layout.dtype))
         event = None
         if self.asynchronous:
             host = self.pinned_array('output', packed)
@@ -95,9 +130,12 @@ class TileWorkspace:
                 event = torch.cuda.Event()
                 event.record(self.d2h)
             self.events.append(event)
-        else:host = packed.cpu()
+        elif packed.is_cuda:
+            host = self.host_array('output', packed.shape, packed.dtype)
+            host.copy_(packed)
+        else:host = packed
         if packed.is_cuda:self.d2h_bytes += packed.numel()*packed.element_size()
-        values = layout.unpack(host)
+        values = layout.unpack(host.view(layout.dtype))
         return HostTransfer(values, event, packed if self.asynchronous else None)
 
     def drain(self):
@@ -123,3 +161,7 @@ class TileWorkspace:
     @property
     def pinned_bytes(self):
         return sum(t.numel()*t.element_size() for t in self.pinned.values())
+
+    @property
+    def host_staging_bytes(self):
+        return sum(t.numel()*t.element_size() for t in self.host_staging.values())

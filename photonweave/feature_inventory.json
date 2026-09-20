@@ -11,8 +11,8 @@
   },
   "counts": {
     "implemented": 160,
-    "missing": 1271,
-    "partial": 230
+    "missing": 1270,
+    "partial": 231
   },
   "features": [
     {
@@ -2016,12 +2016,15 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "missing",
-      "scope": "Python 병렬 DE와 별도 Torch differentiable API의 Adam 예제. 후자는 실수 비분산 epsilon·점 관측·regularized sphere 부분집합이며 일반 소자 최적화 검증은 남음.",
+      "scope": "Python 병렬 DE와 별도 Torch API의 Adam 예제. 고정 Bloch를 포함한 epsilon·점/스펙트럼/고정 plane 목적함수, 일부 형상 graph와 resident ADE 재료 gradient 지원. 일반 소자 최적화·물리 shape-gradient 수렴·gradient microbatch·UI는 남음.",
       "evidence": [
         "photonweave/design.py",
         "photonweave/differentiable.py",
+        "photonweave/dispersive_adjoint.py",
         "examples/differentiable_design.py",
-        "tests/test_differentiable.py"
+        "examples/differentiable_dispersive_design.py",
+        "tests/test_differentiable.py",
+        "docs/CR_VALIDATION_PLAN.md"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360033154434-FDTD-product-reference-manual",
       "priority": 2,
@@ -2455,10 +2458,11 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "n/a",
-      "scope": "명시적인 tier별 slot 수, binomial 분할·재계산, 무손실 state 저장과 byte 한도. 현재 동기식 전송. 비동기·자동 정책·전체 host RSS 한도·공간 스트리밍은 미구현.",
+      "scope": "명시적인 tier별 slot, binomial 재계산, 무손실 state 저장과 byte 한도, 비동기 checkpoint staging 및 혼합 tier 구현. 별도 slab API에서 DRAM/파일 공간 backing·비동기 전송 지원. 전체 host RSS·OS cache 한도와 resident까지 통합한 성능 정책은 미완료.",
       "evidence": [
         "photonweave/differentiable.py",
         "tests/test_differentiable.py",
+        "photonweave/streamed.py",
         "docs/HIERARCHICAL_EXECUTION.md"
       ],
       "reference": "",
@@ -2476,16 +2480,22 @@
       "id": "workflow.out_of_core",
       "category": "실행·자동화·호환",
       "name": "Space-time tiled out-of-core GPU FDTD",
-      "native": "missing",
+      "native": "partial",
       "ui": "missing",
-      "fsp": "missing",
-      "scope": "필수 후속. causal halo·DRAM slab·async prefetch·tile/K tuning 뒤 NVMe backing과 정확한 backward를 검증. 현재 시간 checkpoint는 공간 out-of-core 지원이 아니다.",
+      "fsp": "n/a",
+      "scope": "실험적 비분산 실수/복소 Bloch slab·causal halo transpose·DRAM/파일 backing·비동기 staging·tile/K 실측 tuning 구현. 54GiB E/H의 10-step forward/gradient 검증 완료. 장시간 응용 속도·전체 메모리 계측·공간 ADE·통합 자동 정책·UI는 미완료.",
       "evidence": [
-        "docs/HIERARCHICAL_EXECUTION.md"
+        "photonweave/streamed.py",
+        "photonweave/spacetime.py",
+        "photonweave/tile_workspace.py",
+        "tests/test_spacetime.py",
+        "tests/test_complex_spacetime_cuda.py",
+        "docs/STREAMED_FDTD.md",
+        "docs/BEYOND_VRAM_VALIDATION.md"
       ],
       "reference": "",
       "priority": 0,
-      "python": "missing",
+      "python": "partial",
       "product_priority": "P0",
       "delivery_rank": 5,
       "decision": "required",

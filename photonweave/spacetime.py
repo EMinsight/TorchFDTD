@@ -50,11 +50,23 @@ class SlabBlockOperator:
         self.workspace = self.workspaces[0] if self.workspaces else None
 
     def workspace_report(self):
+        def sizes(pool):
+            result = {}
+            for workspace in self.workspaces:
+                for name, value in getattr(workspace, pool).items():
+                    result[name] = result.get(name, 0) + value.numel()*value.element_size()
+            return result
         return dict(local_replayed_steps=self.local_replayed_steps,
                     peak_local_checkpoints=self.peak_local_checkpoints,
                     allocations=sum(w.allocations for w in self.workspaces),
                     buffer_bytes=sum(w.allocated_bytes for w in self.workspaces),
                     pinned_bytes=sum(w.pinned_bytes for w in self.workspaces),
+                    host_staging_bytes=sum(w.host_staging_bytes for w in self.workspaces),
+                    host_allocations=sum(w.host_allocations for w in self.workspaces),
+                    pinned_allocations=sum(w.pinned_allocations for w in self.workspaces),
+                    buffers_by_name=sizes('buffers'),
+                    pinned_by_name=sizes('pinned'),
+                    host_staging_by_name=sizes('host_staging'),
                     binding_hits=sum(w.binding_hits for w in self.workspaces),
                     binding_misses=sum(w.binding_misses for w in self.workspaces),
                     h2d_bytes=sum(w.h2d_bytes for w in self.workspaces),
@@ -226,8 +238,11 @@ class SlabBlockOperator:
             for _, _, wave, profile in terms:
                 tensors.append(wave)
                 if profile is not None:tensors.append(profile)
-        packed,layout = pack_tensors(tensors)
-        packed = self.workspace.copy('payload', packed) if self.workspace is not None else packed.to(self.device)
+        if self.workspace is not None:
+            packed,layout = self.workspace.copy_packet('payload', tensors)
+        else:
+            packed,layout = pack_tensors(tensors)
+            packed = packed.to(self.device)
         views = iter(layout.unpack(packed))
         local.epsilon, grid.E, grid.H, grid.inverse_permeability = [next(views) for _ in range(4)]
         local.eps4 = local.epsilon[..., None] if epsilon.ndim == 3 else local.epsilon
@@ -320,8 +335,11 @@ class SlabBlockOperator:
                 owned_values = [value[lo:hi] for value in endpoint_bar[:2]]
                 owned_values.extend(endpoint_bar[global_id].index_select(0, destination)
                                     for global_id, _, _, destination in mapping)
-                seed, layout = pack_tensors(owned_values)
-                seed = self.workspace.copy('adjoint_seed_owned', seed) if self.workspace is not None else seed.to(self.device)
+                if self.workspace is not None:
+                    seed, layout = self.workspace.copy_packet('adjoint_seed_owned', owned_values)
+                else:
+                    seed, layout = pack_tensors(owned_values)
+                    seed = seed.to(self.device)
                 values = layout.unpack(seed)
                 backward.e_bar[core].copy_(values[0]);backward.h_bar[core].copy_(values[1])
                 for target, value, (_, _, owned, _) in zip(backward.psi_bars[0], values[2:], mapping):

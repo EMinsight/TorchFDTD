@@ -21,7 +21,7 @@ native.release,독립 공개 배포 패키지·출처 검증,P0,3,required,독�
 workflow.adjoint,Adjoint·자동미분 FDTD,P0,4,required,Torch 이산 adjoint·자동미분,True,partial,partial,missing,주요 개발 목표. 형상·유전율부터 loss.backward와 optimizer까지 연결하고 물리 gradient·시간·메모리를 검증한다.
 native.memory_profile,GPU·host·파일 전송 비용 측정,P0,5,required,계층형 메모리·대규모 실행,True,partial,partial,missing,"주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다."
 workflow.memory_hierarchy,GPU·DRAM·디스크 계층형 checkpoint,P0,5,required,계층형 메모리·대규모 실행,True,partial,partial,missing,"주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다."
-workflow.out_of_core,Space-time tiled out-of-core GPU FDTD,P0,5,required,계층형 메모리·대규모 실행,True,missing,missing,missing,"주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다."
+workflow.out_of_core,Space-time tiled out-of-core GPU FDTD,P0,5,required,계층형 메모리·대규모 실행,True,partial,partial,missing,"주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다."
 "material.(n,k) Material.Imaginary Refractive Index",Imaginary Refractive Index,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 "material.(n,k) Material.Refractive Index",Refractive Index,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 "material.(n,k) Material.anisotropy",anisotropy,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.

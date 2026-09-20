@@ -46,7 +46,15 @@ def test_direct_view_owns_offset_allocation_on_nondefault_stream(dtype):
             with pytest.raises(ValueError, match='resolved'):_direct_cuda_view(cupy, selected.conj())
         del selected, producer
         gc.collect()
-        array *= 2
+        # Use the solver's header-free compiler. CuPy's unrelated elementwise
+        # cache can require toolkit headers under a non-ASCII Windows path.
+        real = 'float' if dtype == torch.complex64 else 'double'
+        count = array.size*(2 if dtype.is_complex else 1)
+        source = ('extern "C" __global__ void scale('+real+'* p, int n) {'
+                  'int i=blockIdx.x*blockDim.x+threadIdx.x; if(i<n)p[i]*=2;}')
+        kernel, module = _compile(source, torch.cuda.current_device(),
+                                  cupy.cuda.Device().compute_capability, 'scale')
+        kernel(((count+127)//128,), (128,), (array, np.int32(count)))
         actual = cupy.asnumpy(array)
     np.testing.assert_array_equal(actual, expected)
     with pytest.raises(ValueError, match='contiguous CUDA'):
@@ -77,10 +85,47 @@ def test_reused_streamed_workspaces_match_unreused_on_nondefault_stream(binding,
     torch.testing.assert_close(result.signals, expected.signals, rtol=0, atol=0)
     torch.testing.assert_close(got, wanted, rtol=0, atol=0)
     assert result.report['backward_workspace']['binding_hits'] > 0
+    report = result.report['backward_workspace']
+    assert report['buffer_bytes'] == sum(report['buffers_by_name'].values())
+    assert report['pinned_bytes'] == sum(report['pinned_by_name'].values())
+    assert report['host_staging_bytes'] == sum(report['host_staging_by_name'].values())
+    assert report['buffers_by_name']['output_packet'] > 0
     if buffers:
         assert result.report['backward_workspace']['h2d_bytes'] > 0
         assert result.report['backward_workspace']['d2h_bytes'] > 0
         assert result.report['backward_workspace']['pinned_bytes'] > 0
+
+
+@pytest.mark.parametrize('asynchronous', [False, True])
+def test_cuda_packets_reuse_staging_on_nondefault_stream(asynchronous):
+    gpu()
+    workspace = TileWorkspace('cuda', asynchronous=asynchronous)
+    stream = torch.cuda.Stream()
+    values = (torch.arange(120, dtype=torch.float64).reshape(4,5,6).transpose(0,1),
+              torch.arange(41, dtype=torch.float64).to(torch.complex128).conj())
+    pointers = None
+    with torch.cuda.stream(stream):
+        for size in (41,23,41,17):
+            workspace.drain()
+            inputs = (values[0] + size, values[1][:size])
+            packed, layout = workspace.copy_packet('payload', inputs)
+            uploaded = layout.unpack(packed)
+            # Exercise actual compute between the H2D and D2H streams.
+            for value in uploaded:value.mul_(2)
+            returned = workspace.to_host(uploaded).wait()
+            for actual, expected in zip(returned, inputs):
+                torch.testing.assert_close(actual, 2*expected, rtol=0, atol=0)
+            addresses = tuple(value.data_ptr() for pool in
+                              (workspace.buffers, workspace.pinned, workspace.host_staging)
+                              for value in pool.values())
+            if pointers is None:pointers = addresses
+            else:assert addresses == pointers
+        workspace.drain()
+    assert workspace.allocations == 2
+    assert (workspace.pinned_allocations if asynchronous else workspace.host_allocations) == 2
+    assert not (workspace.host_staging if asynchronous else workspace.pinned)
+    assert workspace.h2d_bytes == workspace.d2h_bytes > 0
+    assert not workspace.events
 
 
 @pytest.mark.parametrize('failure_point', ['_tile', '_return'])
