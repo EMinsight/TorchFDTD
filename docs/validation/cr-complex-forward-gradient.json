@@ -1,0 +1,8 @@
+{
+  "objective": 0.2843927415139927,
+  "directional_derivative": 0.21922469270490433,
+  "elapsed_seconds": 51.99931890005246,
+  "peak_cuda_allocated_bytes": 413641728,
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "scope": "Fused complex forward with Torch backward API parity against the recorded relaxed CR seed objective and directional derivative. Includes reference preparation, two sample graphs retained per case."
+}

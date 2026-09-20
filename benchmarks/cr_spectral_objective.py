@@ -19,6 +19,7 @@ def main():
     ap.add_argument('--pml-cells',type=int,default=12)
     ap.add_argument('--pixel-origin',choices=['cell_edges','sample_centers'],default='cell_edges')
     ap.add_argument('--forward-only',action='store_true')
+    ap.add_argument('--forward-kernel',choices=['torch','fused'],default='torch')
     ap.add_argument('--reference-cache-mib',type=int,default=0)
     args=ap.parse_args()
     schedule=json.loads(Path(args.schedule).read_text())
@@ -40,7 +41,7 @@ def main():
     cache=PlaneReferenceCache(args.reference_cache_mib*1024**2) if args.reference_cache_mib else None
     def evaluate(d,spec,index):
         result=periodic_layer_response(d,spec,mesh=args.mesh,steps=args.steps,
-            pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,reference_cache=cache)
+            pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,reference_cache=cache,forward_kernel=args.forward_kernel)
         print(f'case {index} complete, replay_grad={torch.is_grad_enabled()}',flush=True)
         return result
     cases=[[functools.partial(evaluate,spec=spec,index=(w,r)) for r,spec in enumerate(row)] for w,row in enumerate(rows)]
@@ -55,7 +56,7 @@ def main():
     if not args.forward_only:gradient,=torch.autograd.grad(result.weighted_bits_per_pixel,density)
     torch.cuda.synchronize()
     record=dict(input_sha256=hashes,hardware=torch.cuda.get_device_name(),mesh_um=args.mesh,steps=args.steps,
-        pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,relaxation='0.01 + 0.98 * binary seed',
+        pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,forward_kernel=args.forward_kernel,relaxation='0.01 + 0.98 * binary seed',
         wavelength_count=len(rows),ray_count=len(weights),ray_weight_sum=sum(weights),response=response.detach().tolist(),
         weighted_bits_per_pixel=float(result.weighted_bits_per_pixel.detach()),bits_per_pixel=result.bits_per_pixel.detach().tolist(),
         gradient_l2=None if gradient is None else float(gradient.norm()),elapsed_seconds=time.perf_counter()-start,

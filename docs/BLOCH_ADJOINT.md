@@ -25,11 +25,14 @@ loss.backward()
 ```
 
 Use a real loss or an explicit complex output seed. Epsilon remains FP32/FP64,
-with complex64/complex128 physical states. CPU and CUDA use explicit Torch
-updates and the discrete Torch transpose. `backward_kernel='auto'` selects this
-path for complex fields. Requesting the real-only `fused` backward fails.
-Execution reports name the actual backend. Native complex fused kernels are
-not implemented, so this is not a complex-kernel acceleration claim.
+with complex64/complex128 physical states. CPU uses Torch updates. Resident
+CUDA adjoints optionally select fused complex Yee/CPML forward updates with
+`project.region.cuda_kernel='fused'`. The default remains Torch. Both forward
+choices still use the discrete Torch transpose in backward, and requesting
+`backward_kernel='fused'` for complex fields still fails. Execution reports
+name the actual forward and backward backends. This opt-in applies to the
+resident differentiable APIs. The native `Simulation` fused kernel remains
+real-only. See [complex CUDA validation](COMPLEX_CUDA.md).
 
 Point histories, bounded online point spectra and collocated spectral planes
 are supported. Point spectra use a negative Fourier exponential and plane

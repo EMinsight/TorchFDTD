@@ -59,10 +59,12 @@ def _compile(source, device, capability, kernel_name='yee_update'):
 class FusedYeeCUDA:
     """Specialize a real-valued grid while retaining its CPML and ADE states."""
 
+    complex_fields = False
+
     def __init__(self, grid, *, direct_views=False, bindings_cache=None):
         if not grid.is_torch or not grid.E.is_cuda:
             raise ValueError('The fused CUDA kernel requires backend="cuda" and a CUDA GPU.')
-        if grid.E.is_complex():
+        if grid.E.is_complex() and not self.complex_fields:
             raise ValueError('The fused CUDA kernel currently supports real fields. Select cuda_kernel="torch" for Bloch fields.')
         try:
             import cupy

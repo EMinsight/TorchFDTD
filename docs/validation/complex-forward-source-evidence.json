@@ -1,0 +1,12 @@
+{
+  "base_commit": "fd59931",
+  "source_sha256": {
+    "photonweave/cuda_complex.py": "f3c4621d1468c91a308128f44bd84cdc19d0269e56948dad1e48a002f966b902",
+    "photonweave/cuda_kernels.py": "d6d3e560c9555f33a4163ba20fe197600645e785286e4921d7aa416968a76ffd",
+    "photonweave/differentiable.py": "6c9db409f24bf33ed27b7d5e999eafa79a64db146a38efd522f69749dec33b5e",
+    "photonweave/periodic_response.py": "8d9a134eb51085a9187c4e88e9f35774a373674b728d0e37c5f85038abcefbc9",
+    "benchmarks/complex_layer_kernel.py": "aa29687275546096b6cdbc5e628f557c1322226bd46a13a29ae9570fa5cf55b2",
+    "tests/test_complex_cuda.py": "a5a363c8ee875dbf3cec889a67b0fb623c31db19d602ba750ed1ff26aa6a2102"
+  },
+  "scope": "Optional resident complex forward kernel. 68 relevant local tests passed. Selected CR forward benchmark and actual relaxed-seed directional derivative on RTX 3060. Remote full-pupil run retains 31d17a5 and has not been updated."
+}

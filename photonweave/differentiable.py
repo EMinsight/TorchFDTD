@@ -149,6 +149,9 @@ class _System:
         if self.device.type=='cuda' and not r.complex_fields:
             from .cuda_kernels import FusedYeeCUDA
             self.kernel=FusedYeeCUDA(g)
+        elif self.device.type=='cuda' and r.cuda_kernel=='fused':
+            from .cuda_complex import FusedComplexYeeCUDA
+            self.kernel=FusedComplexYeeCUDA(g)
 
     def prepare_observations(self):
         self.observation_maps=[]
@@ -582,7 +585,7 @@ class DifferentiableSimulation(torch.nn.Module):
             if required>budget:raise ValueError('Adjoint workspace and checkpoint reservation exceed the GPU budget.')
         report=dict(experimental=True,adjoint='discrete Yee/CPML',higher_order=False,
                     spatial_streaming=False,full_time_autograd=False,steps=r.steps,
-                    forward_backend='fused CUDA' if epsilon.is_cuda and not r.complex_fields else 'torch CUDA' if epsilon.is_cuda else 'torch CPU',
+                    forward_backend='fused CUDA' if epsilon.is_cuda and (not r.complex_fields or r.cuda_kernel=='fused') else 'torch CUDA' if epsilon.is_cuda else 'torch CPU',
                     backward_backend='fused CUDA transpose' if epsilon.is_cuda and not r.complex_fields and self.options.backward_kernel!='torch' else 'torch explicit transpose',memory_reservation_bytes=required,
                     workspace_reservation_bytes=workspace,history_reservation_bytes=history_bytes,
                     checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes if spectral is None else 0,

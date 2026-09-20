@@ -1,0 +1,70 @@
+{
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "density_sha256": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44",
+  "spec_sha256": "8d8ef17abf260f2ef1cb539d1f279e967b81ea9991a36dea28d0899e39a2c55b",
+  "mesh_um": 0.05,
+  "steps": 1600,
+  "precision": "float64",
+  "relaxation": "0.01 + 0.98 * seed",
+  "seconds": {
+    "torch": [
+      31.44985739979893,
+      31.435821899678558,
+      31.9227869999595
+    ],
+    "fused": [
+      8.130334800109267,
+      8.415857199579477,
+      8.390424000099301
+    ]
+  },
+  "median_seconds": {
+    "torch": 31.44985739979893,
+    "fused": 8.390424000099301
+  },
+  "peak_cuda_allocated_bytes": {
+    "torch": [
+      143787520,
+      143787520,
+      143787520
+    ],
+    "fused": [
+      88134144,
+      88134144,
+      88134144
+    ]
+  },
+  "speedup": 3.7483037090171747,
+  "response_max_absolute_difference": 5.551115123125783e-17,
+  "responses": {
+    "torch": [
+      [
+        0.2814851233110536,
+        0.19392219096694654,
+        0.21040996805671067,
+        0.2748198690378237
+      ],
+      [
+        0.27680920013243704,
+        0.1889596695676248,
+        0.21154548944042129,
+        0.27962070413619433
+      ]
+    ],
+    "fused": [
+      [
+        0.2814851233110536,
+        0.1939221909669466,
+        0.21040996805671072,
+        0.2748198690378236
+      ],
+      [
+        0.276809200132437,
+        0.18895966956762483,
+        0.21154548944042134,
+        0.2796207041361944
+      ]
+    ]
+  },
+  "scope": "One selected CR ray/wavelength, complete forward API including two reference and two sample solves, preparation and reduction. One warmup per path excluded. No backward, full-pupil, competitor or equal-accuracy claim."
+}

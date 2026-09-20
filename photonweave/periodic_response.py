@@ -11,7 +11,7 @@ from .solver import C0
 
 
 def periodic_layer_response(density,spec,*,mesh,steps,pml_cells=12,
-                            quadrature_counts=(24,24),pixel_origin='cell_edges',options=None,reference_cache=None):
+                            quadrature_counts=(24,24),pixel_origin='cell_edges',options=None,reference_cache=None,forward_kernel='torch'):
     """Compute Cartesian x/y responses with shape (2,4), well order R,G2,G1,B.
 
     spec supplies wavelength_um, background_index, design_index, period_um,
@@ -38,7 +38,7 @@ def periodic_layer_response(density,spec,*,mesh,steps,pml_cells=12,
     half=math.ceil((max(detector,abs(source_z))+max(1.,20*mesh))/mesh)*mesh
     kt=[2*math.pi*n/wavelength*math.sin(theta)*v for v in (math.cos(phi),math.sin(phi))]
     project=Project(region=Region(dimension='3d',size=(*period,2*half),mesh=mesh,steps=steps,pml_cells=pml_cells,
-        precision='float64' if density.dtype==torch.float64 else 'float32',background_index=n,material_sampling='yee',cuda_kernel='torch',
+        precision='float64' if density.dtype==torch.float64 else 'float32',background_index=n,material_sampling='yee',cuda_kernel=forward_kernel,
         bloch_phase=(kt[0]*period[0],kt[1]*period[1],0),
         boundaries=Boundaries(x_min=BoundaryFace(kind='bloch'),x_max=BoundaryFace(kind='bloch'),
                              y_min=BoundaryFace(kind='bloch'),y_max=BoundaryFace(kind='bloch'))),

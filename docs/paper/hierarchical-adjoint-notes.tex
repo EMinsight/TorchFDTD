@@ -358,4 +358,26 @@ these homogeneous references. Cached returns are independent copies, and no
 full field history is retained. The cache can eliminate repeated reference
 solves in backward when entries remain resident. It does not reduce the first
 forward sweep and no measured speedup is claimed at this stage.
+
+\section{Complex fused forward execution}
+A selectable resident CUDA path represents complex fields by two adjacent
+real lanes. Each lane evaluates Yee differences and CPML recurrence in a
+single kernel. Seam samples use the complex Bloch factor for the forward
+difference and its reciprocal for the backward difference. Real diagonal
+material coefficients scale the resulting curl. Separate H and E launches
+preserve the global update order, with source injection between them.
+The implementation avoids full-volume derivative temporaries during forward
+and replay. The adjoint transpose still uses Torch operations. Tests compare
+both precisions, nonuniform metrics, all CPML memories and density VJPs,
+including three-dimensional Bloch seams and asynchronous checkpoint replay.
+This does not implement complex spatial streaming or a fused complex adjoint.
+
+For one relaxed CR seed at 540 nm and one pupil ray, the complete FP64 forward
+API was measured at 50 nm with 1600 steps on RTX 3060. Three alternating
+measurements followed one warmup per backend. The median decreased from
+31.4499 seconds to 8.3904 seconds, a factor of 3.7483, with a final response
+difference of $5.55\times10^{-17}$. Peak Torch CUDA allocation decreased from
+143,787,520 to 88,134,144 bytes. Both paths include two homogeneous references,
+two sample solves and detector reduction. These measurements do not include
+backward or establish physical convergence or superiority over another solver.
 \end{document}

@@ -18,7 +18,7 @@ unvalidated.
 
 Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and the CR reconstruction objective remain pending.
 
-[Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) now support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Fused complex kernels, complex spatial streaming and full-pupil CR reproduction remain pending.
+[Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) now support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Optional [fused complex forward updates](docs/COMPLEX_CUDA.md) are available in resident adjoint APIs. Fused complex backward, complex spatial streaming and full-pupil CR reproduction remain pending.
 
 [Sequential case replay](docs/RECOMPUTED_CASES.md) now supports coupled multi-case inverse-design objectives. An eight-case RTX 5880 experiment reduced peak Torch CUDA allocation by 55%, with a 63% iteration-time increase and matching gradients. This is a memory trade-off, not a speedup or completed CR validation.
 
@@ -35,6 +35,8 @@ The [actual CR density derivative pilot](docs/validation/CR_DENSITY_ADJOINT_PILO
 [Spectral/pupil objective assembly](docs/SPECTRAL_PUPIL_RESPONSE.md) now connects explicit wavelength/ray cases to electron information with bounded case replay and unnormalized illumination weights. Full CR optical validation remains in progress.
 
 [Bounded CPU reference caching](docs/SPECTRAL_PUPIL_RESPONSE.md#bounded-cpu-reference-reuse) can reuse homogeneous spectral planes across case replay without retaining full field histories. It preserves tested responses and density gradients. No cache speedup is claimed yet.
+
+On one relaxed CR seed ray at 540 nm, [fused complex forward execution](docs/COMPLEX_CUDA.md#selected-cr-layer-measurement-on-rtx-3060) reduced the complete FP64 forward API median from **31.45 s to 8.39 s (3.75x)** on RTX 3060, with a 5.55e-17 response difference. This compares our two backends at the same fixed settings, not competing solvers or complete inverse-design iterations.
 
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD

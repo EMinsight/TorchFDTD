@@ -90,3 +90,12 @@ sweep. The benchmark exposes `--reference-cache-mib` (default 0), and reports
 retained tensor bytes, hits, misses and evictions. The first ongoing full CR
 forward run uses no cache. Cache parity, gradient, invalidation and budget tests
 are separate from that optical run. No wall-clock speedup is claimed yet.
+
+## Complex forward kernel selection
+
+`periodic_layer_response(..., forward_kernel='fused')` selects the optional
+fused complex Yee/CPML forward and replay updates on CUDA. The default is
+`'torch'`. Backward remains the Torch discrete transpose. The benchmark exposes
+`--forward-kernel fused`. This does not enable complex spatial streaming,
+complex fused backward, dispersive derivatives or native Simulation parity.
+See [scope and evidence](COMPLEX_CUDA.md).
