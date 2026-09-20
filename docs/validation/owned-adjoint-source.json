@@ -1,0 +1,19 @@
+{
+  "scope": "CUDA tile endpoint seeds transfer owned E/H and CPML cells only, halos initialized on device. CPU, real and complex regression coverage.",
+  "tests": {
+    "passed": 108,
+    "seconds": 52.25,
+    "hardware": "RTX 5880 Ada / CPU",
+    "files": [
+      "test_complex_spacetime_cuda.py",
+      "test_complex_streamed.py",
+      "test_spacetime.py",
+      "test_state_store.py",
+      "test_tile_workspace.py"
+    ]
+  },
+  "source_sha256": {
+    "photonweave/spacetime.py": "2501131ce69aff32eaafbdce2152a7b3d4c60789ce83b693d216acd87d5ea79c"
+  },
+  "wheel_package_files_byte_verified": 71
+}

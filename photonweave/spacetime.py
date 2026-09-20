@@ -306,14 +306,7 @@ class SlabBlockOperator:
             local, mapping, observers = self._tile(epsilon, state, descriptor, start, depth)
             restart = tuple(self.workspace.copy(f'restart:{i}', s) if self.workspace is not None else s.clone()
                             for i,s in enumerate(local.state()))
-            adjoint = tuple(torch.zeros_like(s, device='cpu') for s in local.state())
-            for target, value in zip(adjoint[:2], endpoint_bar[:2]):target[core].copy_(value[lo:hi])
-            for target, (global_id, _, owned, destination) in zip(adjoint[2:], mapping):
-                target.index_copy_(0, owned, endpoint_bar[global_id].index_select(0, destination))
-            seed = torch.cat([s.reshape(-1) for s in adjoint])
-            seed = self.workspace.copy('adjoint_seed', seed) if self.workspace is not None else seed.to(self.device)
-            adjoint = tuple(part.view_as(original) for part, original in
-                            zip(seed.split([s.numel() for s in adjoint]), adjoint))
+            adjoint = None
             samples = self.workspace.copy('signal', signal_bar[:, observers]) if self.workspace is not None else signal_bar[:, observers].to(self.device).contiguous()
             local_gradient = self.workspace.zeros('gradient', local.epsilon) if self.workspace is not None else torch.zeros_like(local.epsilon)
             backward = None
@@ -322,9 +315,22 @@ class SlabBlockOperator:
                 from .cuda_complex_adjoint import FusedComplexAdjointCUDA
                 backward_type = FusedComplexAdjointCUDA if local.grid.E.is_complex() else FusedAdjointCUDA
                 backward = backward_type(local, local_gradient, samples, direct_views=self.direct_views, buffers=self.workspace)
-                backward.e_bar.copy_(adjoint[0]);backward.h_bar.copy_(adjoint[1])
-                for target, value in zip(backward.psi_bars[0], adjoint[2:]):target.copy_(value)
-                del adjoint
+                # The CUDA adjoint allocator zeros the complete tile. Transfer
+                # only owned endpoint values, rather than sending zero halos.
+                owned_values = [value[lo:hi] for value in endpoint_bar[:2]]
+                owned_values.extend(endpoint_bar[global_id].index_select(0, destination)
+                                    for global_id, _, _, destination in mapping)
+                seed, layout = pack_tensors(owned_values)
+                seed = self.workspace.copy('adjoint_seed_owned', seed) if self.workspace is not None else seed.to(self.device)
+                values = layout.unpack(seed)
+                backward.e_bar[core].copy_(values[0]);backward.h_bar[core].copy_(values[1])
+                for target, value, (_, _, owned, _) in zip(backward.psi_bars[0], values[2:], mapping):
+                    if owned.numel():target[int(owned[0]):int(owned[-1])+1].copy_(value)
+            else:
+                adjoint = tuple(torch.zeros_like(s) for s in local.state())
+                for target, value in zip(adjoint[:2], endpoint_bar[:2]):target[core].copy_(value[lo:hi])
+                for target, (global_id, _, owned, destination) in zip(adjoint[2:], mapping):
+                    target.index_copy_(0, owned, endpoint_bar[global_id].index_select(0, destination))
             def restore(saved, begin, end):
                 for target, value in zip(local.state(), saved):target.copy_(value)
                 local.advance(begin, end)

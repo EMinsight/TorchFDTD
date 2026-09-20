@@ -393,3 +393,21 @@ times slower while saving 38.0% of peak device allocation. The final gradient
 relative L2 difference remains 1.42e-16. These are separate-revision measurements,
 not an interleaved statistical estimate of the incremental speedup.
 [Raw measurements](validation/complex-streamed-slice-packing.json).
+
+CUDA transpose initialization now transfers only owned endpoint E/H and CPML
+adjoints. The reusable device adjoint arrays are zeroed before inserting those
+values, including on repeated slot use. Zero halos are no longer built as a
+full CPU state and transferred as a second complete device tile. The return
+path still accumulates all halo input gradients with the Hermitian Bloch phase.
+Real/complex, asynchronous, disk, CPML and workspace regression tests passed
+(108 checks on RTX 5880 Ada and CPU).
+
+The same width-32/depth-8 benchmark now records 2.538 s synchronous and 1.592 s
+asynchronous. Their CUDA peaks are 304,747,008 B and 609,492,480 B. Resident
+median is 0.277 s and peak is 1,080,850,944 B, so asynchronous execution saves
+43.6% of device allocation while remaining 5.74 times slower. Logical H2D
+payload per full iteration falls from 7,681,972,992 B to 6,713,088,768 B in both
+streamed modes. These are workspace payload counters, not physical PCIe traffic.
+The final gradient relative L2 difference is 1.42e-16. As above, separate-revision
+timings are exploratory comparisons, not interleaved statistical estimates.
+[Raw measurements](validation/complex-streamed-owned-adjoint.json).
