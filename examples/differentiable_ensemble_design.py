@@ -9,7 +9,7 @@ from pathlib import Path
 
 import torch
 
-from photonweave import (AdjointBatchOptions, AdjointCase, AdjointExecutionPolicy,
+from torchfdtd import (AdjointBatchOptions, AdjointCase, AdjointExecutionPolicy,
     AdjointOptions, BoundaryFace, FieldMonitor, Project, RecomputedAdjointBatch,
     Region, Source, StreamedAdjointOptions, smooth_sphere_epsilon)
 

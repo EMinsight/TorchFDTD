@@ -1,8 +1,8 @@
 import pytest
 import torch
 
-from photonweave import StreamedAdjointOptions, StreamedSimulation
-from photonweave.streamed_cost import predict_duration, replay_blocks
+from torchfdtd import StreamedAdjointOptions, StreamedSimulation
+from torchfdtd.streamed_cost import predict_duration, replay_blocks
 from test_differentiable import project
 
 

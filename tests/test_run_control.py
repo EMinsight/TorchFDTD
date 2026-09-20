@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import Simulation, RunControl, Source, TimeSignal, Result
-from photonweave.run_control import DecayDecision, source_end_time
+from torchfdtd import Simulation, RunControl, Source, TimeSignal, Result
+from torchfdtd.run_control import DecayDecision, source_end_time
 from test_solver import small
 
 
@@ -79,7 +79,7 @@ def test_zero_source_completion_and_explicit_cancellation_are_distinct():
 
 
 def test_nonfinite_fields_outside_snapshot_are_detected(monkeypatch):
-    from photonweave.boundaries import YeeGrid
+    from torchfdtd.boundaries import YeeGrid
     original=YeeGrid.update_H
     def bad_update(grid):
         original(grid)
@@ -121,7 +121,7 @@ def completed_steps(result):
 
 
 def test_decayed_batch_evaluates_objective_and_remains_resumable(tmp_path):
-    from photonweave import BatchCase, BatchRunner
+    from torchfdtd import BatchCase, BatchRunner
     p=decay_project();p.sources=[]
     with BatchRunner(backend='cpu',max_workers=1) as runner:
         cases=[BatchCase('decay',p)]

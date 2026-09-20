@@ -3,10 +3,10 @@ import {test,expect} from '@playwright/test';
 test('configure full-cell one-way injection, inspect paired currents and run backward on GPU',async({page})=>{
  const p=await (await page.request.get('/api/examples/scatterer')).json();
  p.structures=[];p.region.size=[12,4,1];p.region.mesh=.05;p.region.steps=300;p.region.pml_cells=20;
- p.region.precision='float64';p.region.material_sampling='yee';p.region.backend=process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu';
+ p.region.precision='float64';p.region.material_sampling='yee';p.region.backend=process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu';
  p.sources[0].center=[0,0,0];p.sources[0].size=[0,2,0];p.sources[0].pulse_cycles=1;
  p.monitors[0].center=[-1,0,0];p.monitors[1].center=[1,0,0];
- await page.addInitScript(p=>localStorage.setItem('photonweave.project.v1',JSON.stringify(p)),p);
+ await page.addInitScript(p=>localStorage.setItem('torchfdtd.project.v1',JSON.stringify(p)),p);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await page.locator('[data-select="source"]').click();
  await page.getByLabel('injection',{exact:true}).selectOption('oneway');
@@ -26,7 +26,7 @@ test('configure full-cell one-way injection, inspect paired currents and run bac
  expect(job.summary.field_peak).toBeGreaterThan(.01);
  const peaks=job.monitors.map(m=>Math.max(...m.signal.map(Math.abs)));
  expect(peaks[0]).toBeGreaterThan(.01);expect(peaks[1]/peaks[0]).toBeLessThan(1e-4);
- if(process.env.PHOTONWEAVE_TEST_CUDA)expect(job.summary.backend).toBe('cuda');
+ if(process.env.TORCHFDTD_TEST_CUDA)expect(job.summary.backend).toBe('cuda');
  await page.screenshot({path:'results/ui-oneway-source.png',fullPage:true});
  expect(errors).toEqual([]);
 });

@@ -1,4 +1,4 @@
-# PhotonWeave manuscript
+# TorchFDTD manuscript
 
 `manuscript.tex` is the canonical editable manuscript. The author is **Hyoseok Park**.
 `references.bib` holds the bibliography. The source preserves the established prose style and uses neither em dashes nor semicolons.
@@ -21,7 +21,7 @@ The checked-in figure PDFs and table files are sufficient. Python, CUDA and the 
 
 ## Overleaf
 
-Upload the contents of this folder, or import `photonweave-latex-source.zip` as a new project. Select `manuscript.tex` as the main document and pdfLaTeX as the compiler. The ZIP includes only the manuscript, bibliography, figure PDFs, table sources, this guide and an asset provenance record.
+Upload the contents of this folder, or import `torchfdtd-latex-source.zip` as a new project. Select `manuscript.tex` as the main document and pdfLaTeX as the compiler. The ZIP includes only the manuscript, bibliography, figure PDFs, table sources, this guide and an asset provenance record.
 
 ## Repository build
 
@@ -31,7 +31,7 @@ From the repository root, with NumPy and Matplotlib available:
 python scripts/build_paper.py
 ```
 
-The build regenerates three vector figures and thirteen measurement tables from the recorded JSON measurements in `docs/validation`, compiles the TeX and resolves BibTeX citations. It writes the PDF to `docs/paper/photonweave-manuscript.pdf` and `output/pdf/photonweave-manuscript.pdf`, and a portable source bundle to `output/photonweave-latex-source.zip`. Intermediate files stay in `tmp/latex`. No simulation runs during this build. The geometry update adds analytic solid/rotation definitions, bounded host preparation and eight full-wall CUDA ensemble ablations with bitwise output gates. The rectilinear update adds the axis-dependent CFL, explicit node representation, a discrete energy identity, and an eight-workload matched-dt mesh ablation, separate from the cross-library timings.
+The build regenerates three vector figures and thirteen measurement tables from the recorded JSON measurements in `docs/validation`, compiles the TeX and resolves BibTeX citations. It writes the PDF to `docs/paper/torchfdtd-manuscript.pdf` and `output/pdf/torchfdtd-manuscript.pdf`, and a portable source bundle to `output/torchfdtd-latex-source.zip`. Intermediate files stay in `tmp/latex`. No simulation runs during this build. The geometry update adds analytic solid/rotation definitions, bounded host preparation and eight full-wall CUDA ensemble ablations with bitwise output gates. The rectilinear update adds the axis-dependent CFL, explicit node representation, a discrete energy identity, and an eight-workload matched-dt mesh ablation, separate from the cross-library timings.
 
 Use `--keep-assets` to compile the checked-in assets unchanged. Do not edit generated files in `tables` by hand. Update the recorded validation data only after completing the corresponding experiment, then regenerate the assets. `asset-provenance.json` records SHA-256 hashes of the input JSON files.
 

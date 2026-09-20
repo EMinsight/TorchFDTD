@@ -1,5 +1,5 @@
 import pytest
-from photonweave import FDTD, Project
+from torchfdtd import FDTD, Project
 
 
 def test_familiar_commands_use_si_and_shared_project(tmp_path):
@@ -31,7 +31,7 @@ def test_familiar_boundary_commands_pair_cyclic_faces():
 
 def test_plane_monitor_and_global_settings_python_only(tmp_path):
     import numpy as np
-    from photonweave import Result
+    from torchfdtd import Result
     f=FDTD()
     f.set('backend','cpu');f.set('time steps',100)
     f.adddipole(name='source')

@@ -438,7 +438,7 @@ and machine-independent test summaries.
 
 ## Private GitHub development preview
 
-The [private development repository](https://github.com/hyoseokp/photonweave)
+The [private development repository](https://github.com/hyoseokp/TorchFDTD)
 holds the experimental 0.14.0.dev0 delivery. Its [release scope](PREVIEW_RELEASE.md)
 keeps the complete replacement goal and public-release conditions open.
 A wheel built from fresh staging contains exactly the 42 current package files,
@@ -452,7 +452,7 @@ GitHub Actions also passed the Linux CPU pipeline on numerical-source revision
 in that CPU-only environment, and **22 browser tests passed, 8 skipped**.
 Frontend and wheel builds passed. Later preview commits update documentation,
 archive byte preservation and this evidence only. The
-[workflow result](https://github.com/hyoseokp/photonweave/actions/runs/35450742135)
+[workflow result](https://github.com/hyoseokp/TorchFDTD/actions/runs/35450742135)
 and the package record distinguish this CPU coverage from workstation CUDA
 validation. Uploaded wheel bytes were downloaded and matched their recorded
 SHA-256.
@@ -510,7 +510,7 @@ those cases, not all measured substances. No commercial solver calculation
 or measured material database is used. Subpixel interface accuracy and the
 remaining required checklist still need implementation and validation.
 
-The independent GitHub Linux CPU [pipeline](https://github.com/hyoseokp/photonweave/actions/runs/35461296962)
+The independent GitHub Linux CPU [pipeline](https://github.com/hyoseokp/TorchFDTD/actions/runs/35461296962)
 also passed on source revision `b61af1bffddc6920109b3b3b0a0dd8b29ea6a9ea`:
 **454 Python tests passed, 129 skipped**, and **24 browser tests passed,
 8 skipped**. Frontend and wheel builds passed. These CPU checks complement

@@ -78,7 +78,7 @@ def profile_memory_transfers(*,device='cuda',copy_bytes=64*1024**2,repeats=5,
         root=Path(storage_directory).resolve();root.mkdir(parents=True,exist_ok=True)
         free=shutil.disk_usage(root).free
         if file_bytes>free//4:raise ValueError('File probe exceeds one quarter of available storage.')
-        descriptor,path=tempfile.mkstemp(prefix='photonweave-io-',suffix='.bin',dir=root)
+        descriptor,path=tempfile.mkstemp(prefix='torchfdtd-io-',suffix='.bin',dir=root)
         path=Path(path).resolve()
         if path.parent!=root:
             os.close(descriptor);raise RuntimeError('File probe escaped its selected directory.')

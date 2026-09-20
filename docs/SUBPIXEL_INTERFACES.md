@@ -8,7 +8,7 @@ are recorded in [the validation report](validation/SUBPIXEL_REPORT.md).
 ## Select in Python or the workbench
 
 ```python
-from photonweave import Project, Simulation, FDTD
+from torchfdtd import Project, Simulation, FDTD
 
 project = Project()
 project.region.material_sampling = "yee"

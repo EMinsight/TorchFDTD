@@ -14,8 +14,8 @@ import fdtd
 import numpy as np
 import torch
 
-from photonweave import BatchCase, Simulation, plan_grouped_batch, run_grouped_batch
-from photonweave.solver import hardware
+from torchfdtd import BatchCase, Simulation, plan_grouped_batch, run_grouped_batch
+from torchfdtd.solver import hardware
 from .ensemble_comparison import digest
 from .open_source import upstream_run
 from .spectral_ensemble import projects_for, error
@@ -62,13 +62,13 @@ def main():
     path = Path(args.output)
     if path.exists(): raise FileExistsError('Preserve prior measurements. Choose a new output path.')
     modes = ['flaport_graph_1', 'flaport_graph_8', 'native_sequential', 'native_grouped']
-    sources = ['photonweave/grouped_batch.py', 'photonweave/tensor_batch.py', 'photonweave/solver.py',
-        'photonweave/models.py', 'photonweave/geometry.py', 'photonweave/cuda_kernels.py',
-        'photonweave/cuda_batch.py', 'photonweave/cuda_graph.py', 'photonweave/cuda_monitors.py',
-        'photonweave/field_monitors.py', 'photonweave/boundaries.py', 'benchmarks/grouped_ensembles.py',
+    sources = ['torchfdtd/grouped_batch.py', 'torchfdtd/tensor_batch.py', 'torchfdtd/solver.py',
+        'torchfdtd/models.py', 'torchfdtd/geometry.py', 'torchfdtd/cuda_kernels.py',
+        'torchfdtd/cuda_batch.py', 'torchfdtd/cuda_graph.py', 'torchfdtd/cuda_monitors.py',
+        'torchfdtd/field_monitors.py', 'torchfdtd/boundaries.py', 'benchmarks/grouped_ensembles.py',
         'benchmarks/open_source.py', 'benchmarks/spectral_ensemble.py', 'benchmarks/ensemble_comparison.py']
     record = dict(hardware=hardware(), platform=platform.platform(), configuration=vars(args),
-        packages={k: importlib.metadata.version(k) for k in ('photonweave', 'fdtd', 'torch', 'numpy', 'cupy-cuda12x')},
+        packages={k: importlib.metadata.version(k) for k in ('torchfdtd', 'fdtd', 'torch', 'numpy', 'cupy-cuda12x')},
         source_sha256={p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in sources},
         upstream_sha256={k: hashlib.sha256(Path(inspect.getfile(v)).read_bytes()).hexdigest()
                          for k, v in [('grid', fdtd.Grid), ('boundary', fdtd.PML)]},

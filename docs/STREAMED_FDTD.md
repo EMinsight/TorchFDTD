@@ -23,7 +23,7 @@ global integer map. This reduces initialization storage without reducing precisi
 or skipping any field updates.
 
 ```python
-from photonweave import StreamedSimulation, StreamedAdjointOptions
+from torchfdtd import StreamedSimulation, StreamedAdjointOptions
 
 # project is a validated nondispersive scene, optionally with fixed Bloch phase.
 # epsilon is a CPU float32/float64 tensor matching the region precision.
@@ -91,7 +91,7 @@ resident/DRAM/NVMe policy remains unfinished.
 ## Measured policy selection
 
 ```python
-from photonweave import tune_streamed
+from torchfdtd import tune_streamed
 
 tuning = tune_streamed(project, epsilon, probe_steps=24, repeats=2)
 model = StreamedSimulation(project, tuning.options)

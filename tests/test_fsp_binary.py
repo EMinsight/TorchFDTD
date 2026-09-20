@@ -5,7 +5,7 @@ import struct
 import numpy as np
 import pytest
 
-from photonweave.fsp_binary import FspDocument, FspFormatError
+from torchfdtd.fsp_binary import FspDocument, FspFormatError
 
 
 def u(n):return struct.pack('<I',n)
@@ -42,7 +42,7 @@ def fixture():
 
 
 def test_independent_decode_complex_arrays_roundtrip_and_unknown_preservation(tmp_path,monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Independent parser must not load the vendor API'))
     raw,expected=fixture();doc=FspDocument(raw)
     np.testing.assert_array_equal(doc.materials[0]['coefficients'].value,expected)

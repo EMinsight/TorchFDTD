@@ -17,7 +17,7 @@ The UI shows orthographic projections and a perspective CAD model, all using the
 ## Python and SI editing facade
 
 ```python
-from photonweave import FDTD
+from torchfdtd import FDTD
 
 fd = FDTD()
 fd.addpoly(

@@ -1,10 +1,10 @@
 """Native complex slab kernels, mixed packets and asynchronous slot ownership."""
 import pytest
 import torch
-from photonweave.differentiable import _System
-from photonweave.spacetime import SlabBlockOperator
-from photonweave.state_store import StateStore
-from photonweave import Source, Monitor, StreamedAdjointOptions
+from torchfdtd.differentiable import _System
+from torchfdtd.spacetime import SlabBlockOperator
+from torchfdtd.state_store import StateStore
+from torchfdtd import Source, Monitor, StreamedAdjointOptions
 from test_bloch_adjoint import scene
 from test_differentiable import gpu
 
@@ -42,7 +42,7 @@ def test_cuda_complex_block_and_transpose(tmp_path, dtype, transfers, binding, s
     oracle = SlabBlockOperator(host, 5, 'cpu', local_checkpoints=2)
     expected, signals = oracle.forward(eps, initial, 1, 10)
     wanted, gradient = oracle.transpose(eps, initial, 1, 10, endpoint, weights)
-    from photonweave.streamed import _reservation
+    from torchfdtd.streamed import _reservation
     reservation = _reservation(p, eps, StreamedAdjointOptions(device='cuda', slab_width=5,
         temporal_depth=10, local_checkpoints=2, tile_transfers=transfers, tile_buffers=3))
     torch.cuda.synchronize()

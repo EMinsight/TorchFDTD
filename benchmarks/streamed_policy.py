@@ -16,7 +16,7 @@ from types import SimpleNamespace
 
 import torch
 
-from photonweave import (AdjointOptions, BoundaryFace, DifferentiableSimulation, Monitor, FieldMonitor, Project,
+from torchfdtd import (AdjointOptions, BoundaryFace, DifferentiableSimulation, Monitor, FieldMonitor, Project,
                         Region, Source, StreamedAdjointOptions, StreamedSimulation,
                         DispersiveSimulation, StreamedDispersiveSimulation,
                         tune_streamed, tune_streamed_dispersive,
@@ -163,7 +163,7 @@ def main(argv=None):
                     [AdjointExecutionPolicy(streamed=p,device=args.device,host_budget_bytes=base.host_budget_bytes)
                      for p in candidates])
     # Validate the intended holdout before any calibration or field allocation.
-    from photonweave.streamed_tuning import _calibration_lengths
+    from torchfdtd.streamed_tuning import _calibration_lengths
     possible = [_calibration_lengths(region.steps,args.probe_steps,p.temporal_depth,args.strategy,512) for p in candidates]
     maximum = max(min(region.steps,(2 if args.refine_candidates and args.strategy=='replay_cost' else 1)*max(v)) for v in possible)
     if args.require_held_out and maximum >= region.steps:
@@ -178,7 +178,7 @@ def main(argv=None):
         torch_version=torch.__version__,device=args.device,cpu_threads=torch.get_num_threads(),
         hardware=torch.cuda.get_device_name() if args.device=='cuda' else 'CPU',
         source_sha256={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in [Path(__file__).resolve(),*sorted((root/'photonweave').glob('*.py'))]},
+            for p in [Path(__file__).resolve(),*sorted((root/'torchfdtd').glob('*.py'))]},
         gradient_coordinates=['epsilon_inf','strength / 1e30','omega0 / 1e15','gamma / 1e15'] if args.dispersive else ['epsilon'],
         eh_material_state_bytes=math.prod(region.shape)*6*(3 if args.dispersive else 1)*epsilon.element_size()*(2 if region.complex_fields else 1),
         state_size_scope='E/H and two-pole P/Q only, excludes CPML, workspaces, checkpoints and observations.',
@@ -206,7 +206,7 @@ def main(argv=None):
         reference_design = tuple(v.detach().to(args.device).requires_grad_() for v in design)
         resident = DispersiveSimulation if args.dispersive else DifferentiableSimulation
         if args.planes:
-            from photonweave import DifferentiablePlaneSimulation, DispersivePlaneSimulation
+            from torchfdtd import DifferentiablePlaneSimulation, DispersivePlaneSimulation
             resident=DispersivePlaneSimulation if args.dispersive else DifferentiablePlaneSimulation
         reference_model = resident(project,AdjointOptions(backward_kernel='fused' if args.device=='cuda' else 'torch'))
         reference_result,values,gradients = evaluate(reference_model,reference_design,region,

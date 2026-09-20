@@ -2,9 +2,9 @@
 import argparse,json,math,time
 from pathlib import Path
 import torch
-from photonweave import (Project,Region,Source,Structure,FieldMonitor,BoundaryFace,Boundaries,
+from torchfdtd import (Project,Region,Source,Structure,FieldMonitor,BoundaryFace,Boundaries,
     AdjointOptions,DifferentiablePlaneSimulation,calibrate_plane_polarization,mix_plane_fields)
-from photonweave.solver import voxelize,C0
+from torchfdtd.solver import voxelize,C0
 
 
 def main():

@@ -8,7 +8,7 @@ objects, so plane flux, reference normalization and downstream Torch objectives
 retain their existing interfaces.
 
 ```python
-from photonweave import AdjointCase, AdjointBatchOptions, RecomputedAdjointBatch
+from torchfdtd import AdjointCase, AdjointBatchOptions, RecomputedAdjointBatch
 
 cases = [
     AdjointCase(project_a, policy_a, parameter_indices=(0,), frequency_hz=frequencies),

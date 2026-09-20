@@ -3,11 +3,11 @@ from dataclasses import replace
 import numpy as np
 import pytest
 import torch
-from photonweave import (FieldMonitor,Monitor,AdjointOptions,StreamedAdjointOptions,
+from torchfdtd import (FieldMonitor,Monitor,AdjointOptions,StreamedAdjointOptions,
                         DifferentiablePlaneSimulation,DifferentiablePlaneResult)
-from photonweave.differentiable import _System
-from photonweave.field_monitors import plane_plan,interpolation_map
-from photonweave.adjoint_planes import COMPONENTS
+from torchfdtd.differentiable import _System
+from torchfdtd.field_monitors import plane_plan,interpolation_map
+from torchfdtd.adjoint_planes import COMPONENTS
 from test_differentiable import project,gpu
 
 
@@ -84,7 +84,7 @@ def test_three_dimensional_plane_and_flux():
 
 
 def test_affine_spatial_interpolation_and_quadrature():
-    from photonweave.solver import field_axes
+    from torchfdtd.solver import field_axes
     p=scene('3d');m=p.monitors[0]
     plan=plane_plan(p.region,m)
     expected=1+plan['points_um']@np.array([2.,-3.,.7])
@@ -151,8 +151,8 @@ def test_unsupported_monitor_settings_are_rejected():
 
 
 def test_native_frequency_plane_matches_complex_fields_and_flux():
-    from photonweave import SpectrumSettings
-    from photonweave.field_monitors import FrequencyPlane
+    from torchfdtd import SpectrumSettings
+    from torchfdtd.field_monitors import FrequencyPlane
     p=scene();p.monitors=p.monitors[:1]
     frequencies=[.025/p.region.time_step,.06/p.region.time_step]
     m=p.monitors[0]
@@ -179,7 +179,7 @@ def test_shared_planes_deduplicate_samples_and_budget_before_state(monkeypatch):
     duplicate=DifferentiablePlaneSimulation(p)
     assert duplicate.observers==single.observers
     def forbidden(*args,**kwargs):raise AssertionError('Physical fields allocated before admission')
-    monkeypatch.setattr('photonweave.streamed._System',forbidden)
+    monkeypatch.setattr('torchfdtd.streamed._System',forbidden)
     model=DifferentiablePlaneSimulation(p,StreamedAdjointOptions(device='cpu',host_budget_bytes=1))
     with pytest.raises(ValueError,match='host budget'):
         model(torch.ones(p.region.shape,dtype=torch.float64),[1e12])

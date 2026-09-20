@@ -5,9 +5,9 @@ import math
 from pathlib import Path
 import time
 import torch
-from photonweave import (Project,Region,Source,Structure,FieldMonitor,BoundaryFace,Boundaries,
+from torchfdtd import (Project,Region,Source,Structure,FieldMonitor,BoundaryFace,Boundaries,
                         AdjointOptions,DifferentiablePlaneSimulation)
-from photonweave.solver import voxelize,C0
+from torchfdtd.solver import voxelize,C0
 
 
 def main():

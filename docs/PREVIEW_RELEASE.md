@@ -1,7 +1,7 @@
 # Private development preview
 
 Version: **0.14.0.dev0**. Repository:
-[hyoseokp/photonweave](https://github.com/hyoseokp/photonweave).
+[hyoseokp/TorchFDTD](https://github.com/hyoseokp/TorchFDTD).
 
 This repository is staged privately under the user's GitHub account. It is an
 experimental development snapshot, not a completed replacement for another
@@ -39,14 +39,14 @@ From a checkout:
 
 ```sh
 python -m pip install -e '.[dev]'
-photonweave serve
+torchfdtd serve
 ```
 
 Or install the wheel attached to the private prerelease:
 
 ```sh
-python -m pip install photonweave-0.14.0.dev0-py3-none-any.whl
-photonweave serve
+python -m pip install torchfdtd-0.14.0.dev0-py3-none-any.whl
+torchfdtd serve
 ```
 
 The wheel includes the built browser assets. Development builds use

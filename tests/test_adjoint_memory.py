@@ -4,7 +4,7 @@ from dataclasses import replace
 import pytest
 import torch
 
-from photonweave import (AdjointOptions, DifferentiableSimulation, DispersiveSimulation, FieldMonitor,
+from torchfdtd import (AdjointOptions, DifferentiableSimulation, DispersiveSimulation, FieldMonitor,
                          estimate_adjoint_memory)
 from test_differentiable import project
 from test_streamed_dispersive import scene, inputs
@@ -42,14 +42,14 @@ def test_denial_precedes_fields_material_carrier_and_scratch(tmp_path,monkeypatc
     options=AdjointOptions(storage='host',host_budget_bytes=64*1024**2)
     if failure=='host_checkpoint':options=replace(options,host_budget_bytes=1)
     if failure=='host_available':
-        monkeypatch.setattr('photonweave.adjoint_memory.host_memory',lambda:dict(available_bytes=1))
+        monkeypatch.setattr('torchfdtd.adjoint_memory.host_memory',lambda:dict(available_bytes=1))
     if failure.startswith('disk'):
         options=replace(options,storage='disk',checkpoint_directory=tmp_path/'absent',
                         disk_budget_bytes=1 if failure=='disk_budget' else 64*1024**2)
-    if failure=='disk_available':monkeypatch.setattr('photonweave.adjoint_memory.disk_free',lambda _:1)
+    if failure=='disk_available':monkeypatch.setattr('torchfdtd.adjoint_memory.disk_free',lambda _:1)
     def forbidden(*args,**kwargs):pytest.fail('Allocated a field or packed material before admission')
-    monkeypatch.setattr('photonweave.differentiable._System',forbidden)
-    monkeypatch.setattr('photonweave.dispersive_adjoint._DispersiveSystem',forbidden)
+    monkeypatch.setattr('torchfdtd.differentiable._System',forbidden)
+    monkeypatch.setattr('torchfdtd.dispersive_adjoint._DispersiveSystem',forbidden)
     monkeypatch.setattr(torch,'cat',forbidden)
     model=(DispersiveSimulation if dispersive else DifferentiableSimulation)(p,options)
     with pytest.raises(ValueError,match='budget|available'):
@@ -65,7 +65,7 @@ def test_metadata_cuda_plan_queries_capacity_without_cuda_tensors(monkeypatch):
     monkeypatch.setattr(torch.cuda,'is_available',lambda:True)
     monkeypatch.setattr(torch.cuda,'get_device_capability',lambda device:(8,9))
     def forbidden(*args,**kwargs):pytest.fail('Allocated a resident system while planning')
-    monkeypatch.setattr('photonweave.differentiable._System',forbidden)
+    monkeypatch.setattr('torchfdtd.differentiable._System',forbidden)
     estimate=estimate_adjoint_memory(p,options,device='cuda',parameter_shapes=(p.region.shape,(2,),(),()),frequency_hz=[1e14])
     assert estimate['host_checkpoint_reservation_bytes']==6*estimate['restart_state_bytes']
     assert estimate['gpu_reservation_bytes']==estimate['memory_reservation_bytes']
@@ -79,7 +79,7 @@ def test_planner_preserves_checkpoint_budget_semantics_and_rechecks_ram(monkeypa
     plan=estimate_adjoint_memory(p,options)
     assert plan['host_checkpoint_reservation_bytes']==0
     assert plan['host_reservation_bytes']>options.host_budget_bytes
-    monkeypatch.setattr('photonweave.adjoint_memory.host_memory',lambda:dict(available_bytes=plan['host_reservation_bytes']))
+    monkeypatch.setattr('torchfdtd.adjoint_memory.host_memory',lambda:dict(available_bytes=plan['host_reservation_bytes']))
     with pytest.raises(ValueError,match='available host memory'):estimate_adjoint_memory(p,options)
 
 

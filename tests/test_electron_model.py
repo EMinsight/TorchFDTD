@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import torch
-from photonweave import (spectral_interpolate,spectral_electron_model,exposure_target_information,
+from torchfdtd import (spectral_interpolate,spectral_electron_model,exposure_target_information,
                         gaussian_target_information,shot_read_covariance,recompute_cases)
 
 

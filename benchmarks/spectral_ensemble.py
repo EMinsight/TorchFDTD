@@ -19,8 +19,8 @@ import time
 import numpy as np
 import torch
 
-from photonweave import FieldMonitor, SpectrumSettings, Simulation, run_tensor_batch
-from photonweave.solver import hardware
+from torchfdtd import FieldMonitor, SpectrumSettings, Simulation, run_tensor_batch
+from torchfdtd.solver import hardware
 from .ensemble_comparison import ensemble, digest
 from .open_source import upstream_run
 
@@ -66,9 +66,9 @@ def main():
     gates = dict(native_complex_dft_relative_l2=3e-6, upstream_complex_dft_relative_l2=.01,
                  upstream_point_trace_relative_l2=.01, native_fields_and_trace='bitwise')
     record = dict(hardware=hardware(), platform=platform.platform(),
-        packages={k:importlib.metadata.version(k) for k in ('photonweave','fdtd','torch','numpy','cupy-cuda12x')},
+        packages={k:importlib.metadata.version(k) for k in ('torchfdtd','fdtd','torch','numpy','cupy-cuda12x')},
         source_sha256={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in map(Path,
-            ('photonweave/cuda_monitors.py','photonweave/field_monitors.py','photonweave/tensor_batch.py',
+            ('torchfdtd/cuda_monitors.py','torchfdtd/field_monitors.py','torchfdtd/tensor_batch.py',
              'benchmarks/spectral_ensemble.py','benchmarks/open_source.py'))},
         method='800 steps by default, float32, three 6-component frequency planes with 9 frequencies, no downsampling, point trace and final E/H. Full setup, graph preparation, loop and output transfers. One warmup and alternating run order, no disk output, cold context/compilation excluded. Upstream is flaport 0.2.2 with CUDA Graph and either common Torch or identical fused DFT adapter, not an upstream DFT capability claim. Native reference retains fused Yee updates and Torch plane DFT. Cohort size is explicit, never tuned on these timing samples.',
         gates=gates, cases=[])

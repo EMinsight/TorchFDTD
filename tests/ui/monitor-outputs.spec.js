@@ -8,7 +8,7 @@ test('select spectral outputs, precision, strides and local apodization, then ru
  p.global_monitor={sampling:'chebyshev',chebyshev_nodes:'lobatto',frequency_points:5,apodization:'full'};
  p.monitors=[{id:'selected',name:'Selective plane',kind:'field',normal:'x',center:[.7,0,0],size:[0,1,1],
   use_global_monitor:true,inherit_apodization:true,spectrum:{sampling:'frequency',apodization:'none'}}];
- await page.addInitScript(p=>localStorage.setItem('photonweave.project.v1',JSON.stringify(p)),p);
+ await page.addInitScript(p=>localStorage.setItem('torchfdtd.project.v1',JSON.stringify(p)),p);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
  await page.locator('#tree').getByText('Selective plane',{exact:true}).click();
  await page.getByLabel('Inherit global apodization',{exact:true}).uncheck();
@@ -33,15 +33,15 @@ test('select spectral outputs, precision, strides and local apodization, then ru
 });
 
 test('synthetic FSP plane imports, preserves original bytes and runs on GPU',async({page})=>{
- test.skip(!process.env.PHOTONWEAVE_SPECTRAL_FSP,'Synthetic spectral FSP path required');
+ test.skip(!process.env.TORCHFDTD_SPECTRAL_FSP,'Synthetic spectral FSP path required');
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
  await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-action="fsp-native"]').click();
- await page.locator('#fsp-native-input').setInputFiles(process.env.PHOTONWEAVE_SPECTRAL_FSP);
+ await page.locator('#fsp-native-input').setInputFiles(process.env.TORCHFDTD_SPECTRAL_FSP);
  await expect(page.locator('#fsp-native-status')).toContainText('Ready to open',{timeout:20000});
  await expect(page.locator('.native-issues')).toContainText('Native DFT');
  const download=page.waitForEvent('download');await page.locator('[data-native="original"]').click();
- expect(fs.readFileSync(await (await download).path())).toEqual(fs.readFileSync(process.env.PHOTONWEAVE_SPECTRAL_FSP));
+ expect(fs.readFileSync(await (await download).path())).toEqual(fs.readFileSync(process.env.TORCHFDTD_SPECTRAL_FSP));
  await page.locator('[data-native="load"]').click();
  await page.locator('#tree').getByText('monitor',{exact:true}).click();
  await expect(page.getByLabel('DFT accumulation precision',{exact:true})).toHaveValue('float64');

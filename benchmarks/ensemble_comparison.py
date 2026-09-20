@@ -18,8 +18,8 @@ import time
 import numpy as np
 import torch
 
-from photonweave import Simulation, run_tensor_batch
-from photonweave.solver import hardware
+from torchfdtd import Simulation, run_tensor_batch
+from torchfdtd.solver import hardware
 from .open_source import scene, upstream_run, relative
 
 
@@ -66,9 +66,9 @@ def main():
     parser.add_argument('--output', default='results/open-source/ensembles.json')
     args = parser.parse_args()
     record = dict(hardware=hardware(), platform=platform.platform(),
-        packages={k: importlib.metadata.version(k) for k in ('photonweave', 'fdtd', 'numpy', 'torch', 'cupy-cuda12x')},
+        packages={k: importlib.metadata.version(k) for k in ('torchfdtd', 'fdtd', 'numpy', 'torch', 'cupy-cuda12x')},
         source_sha256={str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in
-            (Path('photonweave/tensor_batch.py'), Path(__file__).relative_to(Path.cwd()), Path('benchmarks/open_source.py'))},
+            (Path('torchfdtd/tensor_batch.py'), Path(__file__).relative_to(Path.cwd()), Path('benchmarks/open_source.py'))},
         method='Full setup, graph preparation, stepping, full E/H/trace transfer and trace-peak objective. One warmup per mode and alternating measured order. Cold interpreter/CUDA/compiler and disk output excluded. Tuning cost recorded separately, followed by independent timed runs. Same fixed-step projects in every mode. Native E/H/trace bitwise gate, upstream trace relative L2 < 1%. Full upstream field differences retained without an equivalence claim.',
         cases=[])
     for n in args.sizes:
@@ -80,7 +80,7 @@ def main():
                 projects=[p.model_dump() for p in projects], runs={m: [] for m in args.modes}, checks=[])
             selected = None
             if 'tuned' in args.modes:
-                from photonweave import tune_tensor_batch
+                from torchfdtd import tune_tensor_batch
                 tuning = tune_tensor_batch(projects, candidates=(1, 2, 4, 8, 16), repeats=args.repeats)
                 case['tuning'] = tuning.as_dict()
                 selected = tuning.cohort_size

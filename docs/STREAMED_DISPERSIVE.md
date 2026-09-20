@@ -8,7 +8,7 @@ It uses the same coupled trapezoidal material recurrence as the
 [resident implementation](DISPERSIVE_ADJOINT.md).
 
 ```python
-from photonweave import (
+from torchfdtd import (
     StreamedAdjointOptions, StreamedDispersiveSimulation,
     estimate_streamed_dispersive_memory,
 )

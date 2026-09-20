@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import tune_tensor_batch, run_tensor_batch, Simulation, optimize, FieldMonitor, SpectrumSettings
-from photonweave.solver import estimate
+from torchfdtd import tune_tensor_batch, run_tensor_batch, Simulation, optimize, FieldMonitor, SpectrumSettings
+from torchfdtd.solver import estimate
 from test_tensor_batch import cases
 
 
@@ -62,7 +62,7 @@ def test_tensor_design_matches_independent_forward_design_and_rejects_resume(tmp
     # A native serial runner isolates optimizer semantics from cohort scheduling.
     class Serial:
         def run(self,cases,objective,**kwargs):
-            from photonweave import BatchItem,BatchReport
+            from torchfdtd import BatchItem,BatchReport
             return BatchReport([BatchItem(c.id,'completed',c.parameters,
                 metrics={'objective':objective(Simulation(c.project).run())}) for c in cases],0,{})
     options=dict(population=4,generations=2,seed=7)

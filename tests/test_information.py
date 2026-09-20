@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pytest
 import torch
-from photonweave import gaussian_target_information,shot_read_covariance
+from torchfdtd import gaussian_target_information,shot_read_covariance
 
 
 def inputs(device='cpu'):
@@ -99,7 +99,7 @@ def test_invalid_covariances_fail_without_repair(kind):
 
 def test_fdtd_plane_geometry_to_information_gradient():
     from test_adjoint_planes import scene
-    from photonweave import DifferentiablePlaneSimulation,AdjointOptions
+    from torchfdtd import DifferentiablePlaneSimulation,AdjointOptions
     p=scene();model=DifferentiablePlaneSimulation(p,AdjointOptions(checkpoints=2))
     mask=torch.zeros(p.region.shape,dtype=torch.float64);mask[6:9,5:8]=1
     xx=torch.eye(2,dtype=mask.dtype);xz=.7*xx;zz=xx.clone()

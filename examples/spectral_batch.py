@@ -2,7 +2,7 @@
 import argparse
 import json
 
-from photonweave import (Project, Region, Material, Structure, Source, FieldMonitor,
+from torchfdtd import (Project, Region, Material, Structure, Source, FieldMonitor,
                          SpectrumSettings, BatchCase, run_tensor_batch)
 
 

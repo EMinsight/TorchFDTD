@@ -49,7 +49,7 @@ work. The separate CR runner retains its own restart interface and objective.
 ```python
 import json
 from pathlib import Path
-from photonweave import (
+from torchfdtd import (
     PeriodicDesignConfig, periodic_design_plan, run_periodic_design,
 )
 

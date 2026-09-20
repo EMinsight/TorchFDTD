@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import AdjointOptions, BoundaryFace, Material, Simulation, Structure
-from photonweave import DispersiveSimulation, DispersivePlaneSimulation
+from torchfdtd import AdjointOptions, BoundaryFace, Material, Simulation, Structure
+from torchfdtd import DispersiveSimulation, DispersivePlaneSimulation
 from test_differentiable import project
 
 
@@ -42,7 +42,7 @@ def test_ade_explicit_transpose_matches_full_time_graph(dimension, bloch, diagon
 @pytest.mark.parametrize('kind', ['drude', 'lorentz', 'multipole'])
 def test_matches_existing_native_ade_forward(kind):
     p = project(steps=45)
-    from photonweave import LorentzPole
+    from torchfdtd import LorentzPole
     material = Material(name='dispersion', model=kind, epsilon_inf=1.8,
         plasma_rad_s=1.2e15, collision_rad_s=2e14,
         resonance_rad_s=1.7e15, linewidth_rad_s=3e14, delta_epsilon=.8,
@@ -101,7 +101,7 @@ def test_invalid_parameters_and_options():
     eps = torch.full(p.region.shape, 1.5, dtype=torch.float64)
     with pytest.raises(ValueError,match='requires a CUDA tensor'):
         DispersiveSimulation(p,AdjointOptions(backward_kernel='fused'))(eps,[1e30],1e15,1e14)
-    from photonweave import StreamedAdjointOptions
+    from torchfdtd import StreamedAdjointOptions
     with pytest.raises(ValueError,match='resident AdjointOptions'):
         DispersiveSimulation(p,StreamedAdjointOptions())
     model = DispersiveSimulation(p)
@@ -152,7 +152,7 @@ def test_cpu_cuda_precision_and_parameter_directions(device, dtype):
 @pytest.mark.parametrize('device', ['cpu','cuda'])
 def test_plane_flux_material_gradient_and_zero_pole_limit(device):
     if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
-    from photonweave import DifferentiablePlaneSimulation
+    from torchfdtd import DifferentiablePlaneSimulation
     from test_adjoint_planes import scene
     p = scene(); p.region.steps = 24
     eps = torch.full(p.region.shape,1.7,dtype=torch.float64,device=device)

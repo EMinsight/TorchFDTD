@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory=$true)][string]$GpuHost,
     [string]$User = 'admin',
-    [string]$RemoteRoot = 'C:/Users/admin/photonweave',
+    [string]$RemoteRoot = 'C:/Users/admin/torchfdtd',
     [int]$LocalPort = 8766,
     [int]$RemotePort = 8765
 )
@@ -9,10 +9,10 @@ $ErrorActionPreference = 'Stop'
 $workspacePath = Split-Path -Parent $PSScriptRoot
 $pythonPath = Join-Path $workspacePath '.venv/Scripts/python.exe'
 if (-not (Test-Path -LiteralPath $pythonPath)) { throw 'Create the local .venv and install paramiko first.' }
-if (-not $env:PHOTONWEAVE_SSH_PASSWORD) {
+if (-not $env:TORCHFDTD_SSH_PASSWORD) {
     $securePassword = Read-Host 'GPU workstation SSH password' -AsSecureString
     $passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
-    try { $env:PHOTONWEAVE_SSH_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer) }
+    try { $env:TORCHFDTD_SSH_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer) }
     finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer) }
 }
 Push-Location -LiteralPath $workspacePath
@@ -25,6 +25,6 @@ try {
     $tunnelProcess.Id | Set-Content -LiteralPath ".local/tunnel-$LocalPort.pid"
     Write-Output "Open http://127.0.0.1:$LocalPort (SSH tunnel PID $($tunnelProcess.Id))."
 } finally {
-    Remove-Item Env:PHOTONWEAVE_SSH_PASSWORD -ErrorAction SilentlyContinue
+    Remove-Item Env:TORCHFDTD_SSH_PASSWORD -ErrorAction SilentlyContinue
     Pop-Location
 }

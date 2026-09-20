@@ -11,17 +11,17 @@ Choose **FSP → GPU**, select a layout FSP, and review the object-specific diag
 The **FSP inspect** button and opening an FSP through the general Open control continue to use the licensed property inspector. The independent **FSP → GPU** path supports **Export current scene**. This writes supported existing-object and scene-setting edits into a new FSP using the original import as its immutable base. The original file remains downloadable separately.
 
 ```powershell
-photonweave fsp-convert input.fsp --output scene.json --report conversion.json --backend cuda
-photonweave run scene.json --output results/imported.npz
-photonweave fsp-write-geometry input.fsp scene.json --output edited.fsp --report write-report.json
+torchfdtd fsp-convert input.fsp --output scene.json --report conversion.json --backend cuda
+torchfdtd run scene.json --output results/imported.npz
+torchfdtd fsp-write-geometry input.fsp scene.json --output edited.fsp --report write-report.json
 ```
 
 Output files must be new paths. A blocked conversion writes its report and exits with code 2, without writing a partial runnable scene.
 
 ```python
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import convert_fsp
-from photonweave import Simulation
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import convert_fsp
+from torchfdtd import Simulation
 
 conversion = convert_fsp(FspDocument.load('input.fsp'), backend='cuda')
 if conversion.project is None:
@@ -58,9 +58,9 @@ Automatic pulse parameters and standard/chirped selection must agree with the sa
 ## Independent geometry writeback
 
 ```python
-from photonweave import write_fsp_geometry
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import convert_fsp
+from torchfdtd import write_fsp_geometry
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import convert_fsp
 
 original = FspDocument.load('input.fsp')
 conversion = convert_fsp(original, backend='cuda')
@@ -87,7 +87,7 @@ Author-generated fixtures in `tests/test_fsp_geometry_write.py` cover all five p
 `write_fsp_scene(original, project)` extends the geometry writer with a checked subset of source, monitor and region edits. Mapped primitive, source and monitor lists may be changed, including [component-level monitor separation](FSP_INSTRUMENTS_WRITE.md). Saved nodes remain fixed unless a supported uniform mesh edit is requested. The old `write_fsp_geometry` API and `fsp-write-geometry` command retain their geometry-only contract.
 
 ```sh
-photonweave fsp-write-scene input.fsp scene.json --output edited.fsp --report write-report.json
+torchfdtd fsp-write-scene input.fsp scene.json --output edited.fsp --report write-report.json
 ```
 
 | Record | Supported edits |

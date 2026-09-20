@@ -8,7 +8,7 @@ inverse-design integration and the CR reconstruction objective remain pending.
 
 ```python
 import torch
-from photonweave import (
+from torchfdtd import (
     Project, Region, Source, FieldMonitor, AdjointOptions,
     DifferentiablePlaneSimulation,
 )

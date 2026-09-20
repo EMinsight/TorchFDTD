@@ -1,6 +1,6 @@
 """Deploy/run on a Windows CUDA workstation over SSH without saving passwords.
 
-PHOTONWEAVE_SSH_PASSWORD can be supplied by the shell, or entered interactively.
+TORCHFDTD_SSH_PASSWORD can be supplied by the shell, or entered interactively.
 Use an existing CUDA-enabled interpreter as --python; dependencies install only
 into a new per-project venv. No existing simulation environment is modified.
 """
@@ -21,7 +21,7 @@ def main():
     ap.add_argument('--host', required=True)
     ap.add_argument('--user', default='admin')
     ap.add_argument('--python', default='C:/Users/admin/miniconda3/envs/gpu/python.exe')
-    ap.add_argument('--root', default='C:/Users/admin/photonweave')
+    ap.add_argument('--root', default='C:/Users/admin/torchfdtd')
     ap.add_argument('--command', default='')
     ap.add_argument('--file')
     args = ap.parse_args()
@@ -31,7 +31,7 @@ def main():
     if known.exists():
         client.load_host_keys(str(known))
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(args.host, username=args.user, password=os.environ.get('PHOTONWEAVE_SSH_PASSWORD') or getpass.getpass('SSH password: '), timeout=20)
+    client.connect(args.host, username=args.user, password=os.environ.get('TORCHFDTD_SSH_PASSWORD') or os.environ.get('PHOTONWEAVE_SSH_PASSWORD') or getpass.getpass('SSH password: '), timeout=20)
     client.save_host_keys(str(known))
     def execute(command):
         _, out, err = client.exec_command(command)
@@ -56,7 +56,7 @@ def main():
                     sftp.mkdir(path)
             mkdir(args.root)
             files = [Path(x) for x in ['pyproject.toml', 'LICENSE', 'THIRD_PARTY_NOTICES.txt', 'README.md'] if Path(x).exists()]
-            for folder in ['photonweave','examples','tests','benchmarks']:
+            for folder in ['torchfdtd','examples','tests','benchmarks']:
                 files.extend(p for p in Path(folder).rglob('*') if p.is_file() and '__pycache__' not in str(p))
             for path in files:
                 target = args.root+'/'+path.as_posix()

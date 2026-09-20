@@ -32,11 +32,11 @@ test('edit Drude and Lorentz materials, preview n/k and run dispersive GPU field
  await page.screenshot({path:'results/ui-material-lorentz.png',fullPage:true});
  await dialog.getByRole('button',{name:'Apply materials',exact:true}).click();
  await page.locator('[data-select="fdtd"]').click();
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.getByLabel('time steps',{exact:true}).fill('400');await page.getByLabel('time steps',{exact:true}).press('Tab');
  await page.locator('#run-button').click();
  await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:60000});
- if(process.env.PHOTONWEAVE_TEST_CUDA)await expect(page.locator('.run-summary')).toContainText('CUDA graph');
+ if(process.env.TORCHFDTD_TEST_CUDA)await expect(page.locator('.run-summary')).toContainText('CUDA graph');
  const save=page.waitForEvent('download');await page.locator('[data-action="save"]').click();
  const project=JSON.parse(fs.readFileSync(await (await save).path(),'utf8'));
  expect(project.materials.find(m=>m.name==='Drude test').linewidth_rad_s).toBe(2e14);
@@ -44,15 +44,15 @@ test('edit Drude and Lorentz materials, preview n/k and run dispersive GPU field
 });
 
 test('independently import a real Lorentz FSP and execute on GPU',async({page})=>{
- test.skip(!process.env.PHOTONWEAVE_MATERIAL_FSP,'Requires controlled material fixture');
+ test.skip(!process.env.TORCHFDTD_MATERIAL_FSP,'Requires controlled material fixture');
  test.setTimeout(120000);
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-action="fsp-native"]').click();
- if(process.env.PHOTONWEAVE_DRUDE_FSP){
-  await page.locator('#fsp-native-input').setInputFiles(process.env.PHOTONWEAVE_DRUDE_FSP);
+ if(process.env.TORCHFDTD_DRUDE_FSP){
+  await page.locator('#fsp-native-input').setInputFiles(process.env.TORCHFDTD_DRUDE_FSP);
   await expect(page.locator('.native-issues')).toContainText('Experimental curved Drude geometry',{timeout:20000});
  }
- await page.locator('#fsp-native-input').setInputFiles(process.env.PHOTONWEAVE_MATERIAL_FSP);
+ await page.locator('#fsp-native-input').setInputFiles(process.env.TORCHFDTD_MATERIAL_FSP);
  await expect(page.locator('#fsp-native-status')).toContainText('Ready to open',{timeout:20000});
  await expect(page.locator('.native-issues')).toContainText('trapezoidal ADE');
  await page.locator('[data-native="load"]').click();

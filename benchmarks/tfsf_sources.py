@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import numpy as np
 
-from photonweave import Project,Region,Source,Monitor,Simulation
+from torchfdtd import Project,Region,Source,Monitor,Simulation
 
 
 def box_project(axis=0,component=2,direction='+',dimension='3d',index=1.):
@@ -95,7 +95,7 @@ def main():
                     row=measure(box_project(axis,component,direction,dimension))
                     rows.append(row)
                     print(dimension,axis,component,direction,row['relative_l2'],row['outside_peak_ratio'],flush=True)
-    from photonweave.tfsf import incident_preview
+    from torchfdtd.tfsf import incident_preview
     incident=[]
     for index in (1.,1.5,3.):
         p=box_project(dimension='2d',index=index);p.region.steps=1600

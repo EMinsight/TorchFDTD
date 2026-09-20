@@ -1,8 +1,8 @@
 # GPU FDTD 경쟁력과 검증 기준
 
-외부 코드 검토일: 2026-09-19. PhotonWeave 구현 갱신: 2026-09-20. 아래 기능 비교는 공식 코드와 문서에 근거한다.
+외부 코드 검토일: 2026-09-19. TorchFDTD 구현 갱신: 2026-09-20. 아래 기능 비교는 공식 코드와 문서에 근거한다.
 프로젝트가 발표한 성능과 우리가 직접 측정한 성능을 구분한다.
-현재 PhotonWeave를 가장 빠르거나 가장 완성된 FDTD라고 부를 근거는 없다.
+현재 TorchFDTD를 가장 빠르거나 가장 완성된 FDTD라고 부를 근거는 없다.
 
 이번에는 실제 계산 비교로 진행했다. 5880에서 vacuum/sphere/slab/waveguide 각각 64³와 96³, 총 8개를 flaport/fdtd 0.2.2와 실행했다. 상대 기준선에도 CUDA Graph를 적용했고 전체 wall time은 9.64–17.09배 단축됐다. 점 신호 상대 L2 차이는 0.012–0.037%다. 경계 stencil 차이 때문에 최종 전체 장은 동일하지 않으며, 약한 최종 H의 상대 오차가 큰 사례도 [상세 보고서](validation/OPEN_SOURCE_REPORT.md)에 공개했다. 다른 세 라이브러리의 속도는 아직 측정하지 않았다.
 
@@ -20,13 +20,13 @@
 
 0.14에서는 독립 scatterer의 입사장·산란장을 분리하는 [closed normal-incidence TFSF box](TFSF_SOURCES.md)를 Python/UI/CUDA batch에 추가했다. 이는 native 활용 범위 확장이며 다른 모든 엔진에 없는 독자 기능이라는 주장이 아니다. 독립 이산 기준과 Mie 해로 검증했고 구 산란 메시 오차가 단조 감소하지 않은 결과도 [그대로 기록](validation/TFSF_REPORT.md)했다. 성능 우위 표는 위의 실측 기준선에만 적용된다.
 
-| 프로젝트 | 확인한 계산 경로 | 미분 상태 | PhotonWeave와의 차이 |
+| 프로젝트 | 확인한 계산 경로 | 미분 상태 | TorchFDTD와의 차이 |
 |---|---|---|---|
 | [FDTDX](https://github.com/ymahlau/fdtdx) | JAX, CUDA 및 ROCm 설치 경로 | 자동미분과 역시간 복원 기반 메모리 절약을 제공 | inverse design에서 우리가 따라가야 할 기준. 우리 엔진은 제한된 실수 유전체/CPML adjoint를 추가했으며 지원 물리와 설계 검증을 확대해야 한다. |
 | [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX에서 전용 CUDA systolic kernel 호출 | 확인한 공개 primitive에는 JVP/VJP/transpose 규칙 등록이 없음 | 유전체 전용, z 크기와 경계·출력 제약이 있다. 우리 분산 재료, 축별 CPML, graded mesh, 온라인 면 DFT는 기능 차이다. 속도 우위는 미측정이다. |
 | [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy 또는 PyTorch CUDA | backend 초기화에서 gradients를 비활성화. 기본 사용을 미분 지원으로 표시하면 안 됨 | 우리는 이 프로젝트의 grid를 사용하고 원저작자 고지를 유지한다. 자체 CPML·ADE·mesh·모니터, GUI와 workflow를 추가한 상태다. |
 | [fdtd3d](https://github.com/zer011b/fdtd3d) | C++/CUDA와 MPI | 공식 README에 adjoint 제공이 명시되어 있지 않음 | 단일 큰 문제를 여러 장치로 나누는 병렬 계산이 중요하다. 우리의 여러 작업 분배는 이 기능과 다르다. |
-| PhotonWeave | NumPy CPU, PyTorch CUDA graph, fused CUDA와 batch-axis launch | forward/DE와 별도의 제한된 Torch 이산 adjoint. 점 관측·regularized geometry·계층형 checkpoint | 브라우저 UI와 Python 동일 모델, NPZ 결과, 재개 가능한 process batch, 제한된 실수 고정시간 tensor batch와 cohort 분할. Windows CUDA 실측. |
+| TorchFDTD | NumPy CPU, PyTorch CUDA graph, fused CUDA와 batch-axis launch | forward/DE와 별도의 제한된 Torch 이산 adjoint. 점 관측·regularized geometry·계층형 checkpoint | 브라우저 UI와 Python 동일 모델, NPZ 결과, 재개 가능한 process batch, 제한된 실수 고정시간 tensor batch와 cohort 분할. Windows CUDA 실측. |
 
 FDTDX의 PyTorch 전환은 [공식 refactor 논의](https://github.com/ymahlau/fdtdx/discussions/349)에 발표된 계획이다.
 확인한 main은 여전히 JAX이다. 자동미분의 제공은 [JOSS 논문](https://joss.theoj.org/papers/10.21105/joss.08912)에도 명시되어 있다.
@@ -38,7 +38,7 @@ fdtdz의 미분 상태는 [primitive 등록 코드](https://github.com/spinsphot
 JAX wrapper 자체가 이 CUDA primitive를 자동으로 미분해 주지는 않는다.
 이는 외부에서 별도 adjoint를 구성할 수 없다는 뜻은 아니다.
 flaport/fdtd의 [gradient 비활성화 코드](https://github.com/flaport/fdtd/blob/a760cb59e604b403d1f2a13a35b21aa0f89b3a6d/fdtd/backend.py#L47)와 설치된 0.2.2의 기본 backward 실패를 확인했다.
-PhotonWeave의 기존 `Simulation.run()`은 미분 경로가 아니다. 별도 `DifferentiableSimulation`의 제한된 지원 범위는 [API](DIFFERENTIABLE_FDTD.md)와 [측정 보고서](validation/ADJOINT_REPORT.md)에 구분한다.
+TorchFDTD의 기존 `Simulation.run()`은 미분 경로가 아니다. 별도 `DifferentiableSimulation`의 제한된 지원 범위는 [API](DIFFERENTIABLE_FDTD.md)와 [측정 보고서](validation/ADJOINT_REPORT.md)에 구분한다.
 
 검토한 commit:
 
@@ -73,7 +73,7 @@ python -m pip install -e ".[cuda-kernels]"
 ```
 
 ```python
-from photonweave import Project, Simulation
+from torchfdtd import Project, Simulation
 
 project = Project.load("project.json")
 project.region.backend = "cuda"

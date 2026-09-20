@@ -6,7 +6,7 @@ import argparse
 import json
 
 import torch
-from photonweave import (AdjointOptions, DispersiveSimulation, StreamedAdjointOptions, StreamedDispersiveSimulation, Monitor, Project,
+from torchfdtd import (AdjointOptions, DispersiveSimulation, StreamedAdjointOptions, StreamedDispersiveSimulation, Monitor, Project,
                         Region, Source, smooth_sphere_epsilon, tune_streamed_dispersive, tune_adjoint_execution)
 
 

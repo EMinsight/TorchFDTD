@@ -10,8 +10,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from photonweave import Project, Region, Structure, Source, Monitor, Simulation
-from photonweave.solver import hardware
+from torchfdtd import Project, Region, Structure, Source, Monitor, Simulation
+from torchfdtd.solver import hardware
 
 
 def scene(n=96, steps=300):

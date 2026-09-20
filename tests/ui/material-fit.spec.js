@@ -5,11 +5,11 @@ import fs from 'node:fs';
 test('measured samples, failed tolerance, fit preview, persistence and native GPU execution',async({page})=>{
  test.setTimeout(120000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const python=process.env.PHOTONWEAVE_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
+ const python=process.env.TORCHFDTD_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
  const csv=execFileSync(python,['-c',"import sys,numpy as np;sys.path.insert(0,'tests');from test_material_fit import authored_data;d,_=authored_data();n=np.sqrt(d.epsilon);print('wavelength_nm,n,k');print('\\n'.join(f'{w*1000},{a},{b}' for w,a,b in zip(d.wavelength_um,n.real,n.imag)))"],{encoding:'utf8'});
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  const initial=await (await page.request.get('/api/examples/waveguide')).json();
- await page.evaluate(p=>{p.region.time_step_override=5e-17;p.region.steps=120;p.region.mesh_steps=[.04,.06,.04];p.region.material_sampling='yee';localStorage.setItem('photonweave.project.v1',JSON.stringify(p));},initial);
+ await page.evaluate(p=>{p.region.time_step_override=5e-17;p.region.steps=120;p.region.mesh_steps=[.04,.06,.04];p.region.material_sampling='yee';localStorage.setItem('torchfdtd.project.v1',JSON.stringify(p));},initial);
  await page.reload();await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-action="materials"]').click();const dialog=page.locator('.material-dialog');
  await dialog.getByRole('button',{name:'+ Add material',exact:true}).click();
@@ -49,7 +49,7 @@ test('measured samples, failed tolerance, fit preview, persistence and native GP
  const script=await page.request.post('/api/python',{data:project});expect(await script.text()).toContain('authored-response.csv');
  await page.reload();await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-select="fdtd"]').click();
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.locator('#run-button').click();await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:60000});
  expect(errors).toEqual([]);
 });

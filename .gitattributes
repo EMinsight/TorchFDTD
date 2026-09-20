@@ -1,2 +1,7 @@
 # Keep scientific source/measurement hashes independent of checkout settings.
 * -text
+*.pdf binary
+*.png binary
+*.jpg binary
+*.zip binary
+*.whl binary

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from photonweave import OpticalData, FitOptions, fit_material
+from torchfdtd import OpticalData, FitOptions, fit_material
 
 
 def main():

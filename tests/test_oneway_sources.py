@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 import torch
-from photonweave import Project, Simulation, Source, Structure, RunControl, FDTD, run_tensor_batch
-from photonweave.injection import oneway_tables
-from photonweave.source_preview import preview_source
-from photonweave.run_control import source_end_time
+from torchfdtd import Project, Simulation, Source, Structure, RunControl, FDTD, run_tensor_batch
+from torchfdtd.injection import oneway_tables
+from torchfdtd.source_preview import preview_source
+from torchfdtd.run_control import source_end_time
 from benchmarks.oneway_sources import plane_project, long_line_reference
 
 
@@ -23,7 +23,7 @@ def test_oneway_fields_against_independent_light_cone_reference(axis,direction):
 @pytest.mark.parametrize('direction',['+','-'])
 def test_oneway_slab_fresnel_and_energy(direction):
     from examples.oneway_slab import make_project, evaluate
-    from photonweave.field_monitors import normalize_flux
+    from torchfdtd.field_monitors import normalize_flux
     p=make_project('cpu',direction)
     sample=Simulation(p).run();p.structures=[];reference=Simulation(p).run()
     reflected=normalize_flux(sample.frequency_fields[0],reference.frequency_fields[0],subtract_incident=True)['ratio']
@@ -107,7 +107,7 @@ def test_incident_line_absorption_convergence_and_background():
 
 @pytest.mark.parametrize('pulse',['continuous','broadband','sampled'])
 def test_incident_temporal_modes_and_late_sampled_drive(pulse):
-    from photonweave import TimeSignal
+    from torchfdtd import TimeSignal
     p=plane_project(dimension='2d');p.region.steps=400;s=p.sources[0]
     s.pulse=pulse
     if pulse=='broadband':s.time_definition='wavelength';s.wavelength_start=.9;s.wavelength_stop=1.3

@@ -82,7 +82,7 @@ The [July multi-GPU gradient issue](https://github.com/ymahlau/fdtdx/issues/417)
 reports replicated backward memory and slower two-GPU execution for one example.
 It is an external user report with specific settings, not a general ranking or
 an independently reproduced benchmark. We do not place its numbers into a table
-as PhotonWeave comparative results.
+as TorchFDTD comparative results.
 
 Space-time blocking and hierarchical checkpointing are established methods.
 The candidate contribution is an accurate differentiable electromagnetic

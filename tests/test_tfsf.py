@@ -2,10 +2,10 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import (Project,Simulation,Source,Structure,Material,RunControl,FDTD,
+from torchfdtd import (Project,Simulation,Source,Structure,Material,RunControl,FDTD,
                         run_tensor_batch,FieldMonitor,SpectrumSettings,TimeSignal)
-from photonweave.run_control import source_end_time
-from photonweave.source_preview import preview_source
+from torchfdtd.run_control import source_end_time
+from torchfdtd.source_preview import preview_source
 from benchmarks.tfsf_sources import box_project,reference
 
 
@@ -115,9 +115,9 @@ def test_tfsf_overlapping_boxes_and_soft_source_preserve_superposition():
 
 def test_tfsf_incident_energy_is_checked_and_delayed_drive_cannot_stop():
     import fdtd
-    from photonweave.boundaries import YeeGrid
-    from photonweave.tfsf import TfsfState
-    from photonweave.run_control import StateDiagnostics
+    from torchfdtd.boundaries import YeeGrid
+    from torchfdtd.tfsf import TfsfState
+    from torchfdtd.run_control import StateDiagnostics
     p=box_project(dimension='2d')
     g=YeeGrid(p.region);line=TfsfState(p.sources[0],p.region,g)
     line.e[0]=2

@@ -25,10 +25,10 @@ test('select graded mesh, inspect nodes, edit and freeze refinements, run GPU',a
  await page.locator('#properties summary').filter({hasText:'Refinement 1'}).click();
  await page.getByRole('button',{name:'Remove refinement',exact:true}).first().click();
  await page.getByLabel('time steps',{exact:true}).fill('150');await page.getByLabel('time steps',{exact:true}).press('Tab');
- const backend=process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu';await page.getByLabel('resource',{exact:true}).selectOption(backend);
+ const backend=process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu';await page.getByLabel('resource',{exact:true}).selectOption(backend);
  await page.locator('#run-button').click();await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:90000});
  await expect(page.locator('.run-summary')).toContainText(backend==='cuda'?'CUDA graph':'CPU');
- const job=await page.evaluate(()=>localStorage.getItem('photonweave.project.v1'));
+ const job=await page.evaluate(()=>localStorage.getItem('torchfdtd.project.v1'));
  expect(JSON.parse(job).region.mesh_type).toBe('graded');
  await page.locator('#layout-button').click();
  await page.getByLabel('mesh type',{exact:true}).selectOption('uniform');

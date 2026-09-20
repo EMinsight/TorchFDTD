@@ -308,7 +308,7 @@ class _Checkpoints:
         if disk_count:
             root=Path(options.checkpoint_directory).resolve()
             root.mkdir(parents=True,exist_ok=True)
-            self.directory=Path(tempfile.mkdtemp(prefix='photonweave-adjoint-',dir=root)).resolve()
+            self.directory=Path(tempfile.mkdtemp(prefix='torchfdtd-adjoint-',dir=root)).resolve()
             if self.directory.parent!=root:raise RuntimeError('Checkpoint path escaped the selected directory.')
         report.update(restart_bytes=self.size,checkpoint_capacity=options.checkpoints,
                       checkpoint_storage=options.storage,peak_checkpoints=0,checkpoint_bytes_written=0,

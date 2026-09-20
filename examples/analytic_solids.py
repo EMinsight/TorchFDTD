@@ -6,7 +6,7 @@ CPU example: python examples/analytic_solids.py --backend cpu
 import argparse
 from pathlib import Path
 import numpy as np
-from photonweave import Project,Region,Structure,Source,Monitor,Simulation,run_tensor_batch
+from torchfdtd import Project,Region,Structure,Source,Monitor,Simulation,run_tensor_batch
 
 
 def projects(backend='cuda'):

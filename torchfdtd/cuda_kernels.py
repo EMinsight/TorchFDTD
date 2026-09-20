@@ -44,7 +44,7 @@ def _compile(source, device, capability, kernel_name='yee_update'):
     # Compilation stays entirely in memory and needs no include files.
     from cupy_backends.cuda.libs import nvrtc
     from cupy.cuda.function import Module
-    program = nvrtc.createProgram(source, 'photonweave_yee.cu', (), ())
+    program = nvrtc.createProgram(source, 'torchfdtd_yee.cu', (), ())
     try:
         options = ('--std=c++11', '--fmad=false', '--ftz=false',
                    '--gpu-architecture=compute_'+capability)
@@ -73,7 +73,7 @@ class FusedYeeCUDA:
         try:
             import cupy
         except ImportError as exc:
-            raise RuntimeError('Install photonweave[cuda-kernels] to use the fused CUDA kernel.') from exc
+            raise RuntimeError('Install torchfdtd[cuda-kernels] to use the fused CUDA kernel.') from exc
         self.cp = cupy
         self._grid = weakref.ref(grid)
         self.device = grid.E.device.index

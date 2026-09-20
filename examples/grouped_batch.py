@@ -1,5 +1,5 @@
 """Run mixed grids and durations using python examples/grouped_batch.py."""
-from photonweave import (BatchCase, Material, Monitor, Project, Region, Source,
+from torchfdtd import (BatchCase, Material, Monitor, Project, Region, Source,
                         Structure, plan_grouped_batch, run_grouped_batch)
 
 

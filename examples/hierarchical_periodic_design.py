@@ -8,7 +8,7 @@ import json
 
 import torch
 
-from photonweave import (AdjointBatchOptions, AdjointExecutionPolicy, AdjointOptions,
+from torchfdtd import (AdjointBatchOptions, AdjointExecutionPolicy, AdjointOptions,
     PeriodicLayerResponse, PlaneReferenceCache, StreamedAdjointOptions)
 
 

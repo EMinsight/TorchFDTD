@@ -1,7 +1,7 @@
 """Python-only independent sphere sweep using a CUDA batch axis."""
 import argparse
 import numpy as np
-from photonweave import Project, Region, Material, Structure, Source, Monitor, parameter_sweep, run_tensor_batch
+from torchfdtd import Project, Region, Material, Structure, Source, Monitor, parameter_sweep, run_tensor_batch
 
 
 def main():

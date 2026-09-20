@@ -4,11 +4,11 @@ import numpy as np
 import pytest
 import torch
 from fastapi.testclient import TestClient
-from photonweave import Project,Region,Structure,Source,Monitor,MeshRefinement,Simulation,freeze_refinements
-from photonweave.models import Boundaries,BoundaryFace
-from photonweave.boundaries import YeeGrid
-from photonweave.mesh import mesh_summary
-from photonweave.solver import field_axes,C0
+from torchfdtd import Project,Region,Structure,Source,Monitor,MeshRefinement,Simulation,freeze_refinements
+from torchfdtd.models import Boundaries,BoundaryFace
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.mesh import mesh_summary
+from torchfdtd.solver import field_axes,C0
 
 
 def project():
@@ -102,7 +102,7 @@ def test_graded_dispersive_bloch_gpu_and_physical_output(precision,tmp_path):
 
 
 def test_mesh_api_preview_and_freeze(tmp_path):
-    from photonweave.server import create_app
+    from torchfdtd.server import create_app
     c=TestClient(create_app(tmp_path));p=project().model_dump()
     response=c.post('/api/mesh/preview',json=p);assert response.status_code==200
     data=response.json();assert data['summary']['cell_reduction_percent']>25 and data['refinements']
@@ -132,7 +132,7 @@ def test_graded_slab_transmission_against_fresnel():
 
 
 def test_mesh_facade_and_axis_sampling():
-    from photonweave import FDTD
+    from torchfdtd import FDTD
     fd=FDTD();fd.set('mesh type','graded');fd.set('maximum mesh step',.1e-6);fd.set('mesh ppw',30)
     assert fd.project.region.mesh_type=='graded' and fd.project.region.material_sampling=='yee'
     assert fd.project.region.mesh_max==pytest.approx(.1) and fd.project.region.mesh_ppw==30

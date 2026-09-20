@@ -29,15 +29,15 @@ def test_bounded_gradient_statistics_reject_nonfinite_and_tiny_wrong_groups():
 def test_real_fp32_metadata_admission_without_full_fields(tmp_path,monkeypatch):
     # Synthetic capacities only. This is not a GPU execution/capacity result.
     gib=1024**3
-    monkeypatch.setattr('photonweave.streamed.host_memory',lambda:dict(available_bytes=120*gib))
-    monkeypatch.setattr('photonweave.streamed.cuda_budget_limit',lambda device,required,budget:budget)
-    monkeypatch.setattr('photonweave.state_store.disk_free',lambda path:410*gib)
+    monkeypatch.setattr('torchfdtd.streamed.host_memory',lambda:dict(available_bytes=120*gib))
+    monkeypatch.setattr('torchfdtd.streamed.cuda_budget_limit',lambda device,required,budget:budget)
+    monkeypatch.setattr('torchfdtd.state_store.disk_free',lambda path:410*gib)
     monkeypatch.setattr('benchmarks.beyond_vram.psutil.virtual_memory',lambda:SimpleNamespace(available=120*gib))
     monkeypatch.setattr('benchmarks.beyond_vram.shutil.disk_usage',lambda path:SimpleNamespace(free=410*gib))
     monkeypatch.setattr(torch.cuda,'mem_get_info',lambda:(46*gib,51_526_500_352))
     monkeypatch.setattr(torch.cuda,'get_device_name',lambda:'Synthetic metadata test')
     def forbidden(*args,**kwargs):raise AssertionError('No field allocation during planning')
-    monkeypatch.setattr('photonweave.streamed._System',forbidden)
+    monkeypatch.setattr('torchfdtd.streamed._System',forbidden)
     monkeypatch.setattr(torch,'full',forbidden)
     output=tmp_path/'plan.json'
     main(['--output',str(output),'--scratch',str(tmp_path/'scratch')])

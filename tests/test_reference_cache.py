@@ -1,7 +1,7 @@
 from dataclasses import replace
 import pytest
 import torch
-from photonweave import PlaneReferenceCache,periodic_layer_response
+from torchfdtd import PlaneReferenceCache,periodic_layer_response
 from test_polarization import bases
 
 

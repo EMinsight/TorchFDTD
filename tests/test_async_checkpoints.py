@@ -3,8 +3,8 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import AdjointOptions,DifferentiableSimulation
-from photonweave.staging import AsyncStateStaging
+from torchfdtd import AdjointOptions,DifferentiableSimulation
+from torchfdtd.staging import AsyncStateStaging
 from test_differentiable import project,gpu
 
 

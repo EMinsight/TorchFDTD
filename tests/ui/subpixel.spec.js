@@ -9,10 +9,10 @@ test('choose experimental dielectric interfaces, retain Python settings and run'
  await expect(page.locator('#properties')).toContainText('Lossless dielectrics');
  const order=page.getByLabel('face quadrature order',{exact:true});await order.fill('16');await order.press('Tab');
  await page.getByLabel('time steps',{exact:true}).fill('100');await page.getByLabel('time steps',{exact:true}).press('Tab');
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.locator('[data-action="python"]').click();
  await expect(page.locator('#python-editor')).toHaveValue(/interface_method.*subpixel/s);
- const saved=JSON.parse(await page.evaluate(()=>localStorage.getItem('photonweave.project.v1')));
+ const saved=JSON.parse(await page.evaluate(()=>localStorage.getItem('torchfdtd.project.v1')));
  expect(saved.region.interface_method).toBe('subpixel');expect(saved.region.subpixel_quadrature).toBe(16);
  await page.locator('#run-button').click();await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:90000});
  await page.locator('#layout-button').click();

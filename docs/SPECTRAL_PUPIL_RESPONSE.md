@@ -17,7 +17,7 @@ exact-weight ray subsets to add back to the full pupil.
 
 ```python
 from functools import partial
-from photonweave import periodic_layer_response, spectral_pupil_response
+from torchfdtd import periodic_layer_response, spectral_pupil_response
 
 cases = [[partial(periodic_layer_response, spec=spec, mesh=0.05, steps=1600)
           for spec in wavelength_cases] for wavelength_cases in schedule]

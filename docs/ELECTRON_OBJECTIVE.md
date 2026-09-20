@@ -13,7 +13,7 @@ arbitrary basis is accepted explicitly, without silently constructing an
 identity or normalizing the response.
 
 ```python
-from photonweave import spectral_electron_model, exposure_target_information
+from torchfdtd import spectral_electron_model, exposure_target_information
 
 # response has shape (4, 9), in the locked R, G2, G1, B row order.
 model = spectral_electron_model(
@@ -55,7 +55,7 @@ The other 49 legacy files already matched. No original research file, expected
 hash, tolerance or loader check was modified.
 
 Three generated positive optical responses were evaluated by the original
-five-exposure information objective with that locked context. PhotonWeave
+five-exposure information objective with that locked context. TorchFDTD
 reproduced their scores and response VJPs on CPU and CUDA. Maximum score error
 was 6.0e-15 and maximum gradient relative L2 error was 4.81e-14. The
 [record](validation/electron-locked-context-parity.json) contains source hashes

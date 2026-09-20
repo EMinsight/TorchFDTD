@@ -3,8 +3,8 @@ import json
 import numpy as np
 import pytest
 
-from photonweave import Project, Monitor, Region, Source, Simulation, SpectrumSettings, FDTD
-from photonweave.spectra import apodization_window, direct_transform, frequency_samples, point_spectrum
+from torchfdtd import Project, Monitor, Region, Source, Simulation, SpectrumSettings, FDTD
+from torchfdtd.spectra import apodization_window, direct_transform, frequency_samples, point_spectrum
 
 
 def test_dft_gaussian_has_analytic_complex_amplitude_and_phase():

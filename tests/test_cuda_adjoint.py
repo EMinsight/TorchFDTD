@@ -1,9 +1,9 @@
 import pytest
 import torch
 
-from photonweave import AdjointOptions,DifferentiableSimulation
-from photonweave.cuda_adjoint import FusedAdjointCUDA
-from photonweave.differentiable import _System
+from torchfdtd import AdjointOptions,DifferentiableSimulation
+from torchfdtd.cuda_adjoint import FusedAdjointCUDA
+from torchfdtd.differentiable import _System
 from test_differentiable import project,gpu
 
 
@@ -45,8 +45,8 @@ def test_fused_rejects_cpu_and_unknown_selection():
 @pytest.mark.parametrize('precision',['float32','float64'])
 def test_dense_observer_code_is_bounded_and_duplicate_additions_are_ordered(monkeypatch,precision):
     import numpy as np
-    import photonweave.cuda_adjoint as module
-    from photonweave.tile_workspace import TileWorkspace
+    import torchfdtd.cuda_adjoint as module
+    from torchfdtd.tile_workspace import TileWorkspace
     gpu()
     p=project('3d',precision=precision,steps=12)
     dtype=getattr(torch,precision)

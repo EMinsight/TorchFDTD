@@ -15,8 +15,8 @@ import time
 
 import psutil
 import torch
-import photonweave
-from photonweave import (Region, Project, Source, Monitor, BoundaryFace,
+import torchfdtd
+from torchfdtd import (Region, Project, Source, Monitor, BoundaryFace,
     StreamedSimulation, StreamedAdjointOptions, DifferentiableSimulation,
     estimate_streamed_memory)
 
@@ -115,7 +115,7 @@ def main(argv=None):
         initial_available_ram_bytes=ram_free,disk_headroom_bytes=disk_floor,
         ram_headroom_bytes=ram_floor,
         source_sha256={path.name:hashlib.sha256(path.read_bytes()).hexdigest()
-            for path in [Path(__file__),*sorted(Path(photonweave.__file__).parent.glob('*.py'))]},
+            for path in [Path(__file__),*sorted(Path(torchfdtd.__file__).parent.glob('*.py'))]},
         scope='Short selected-precision capacity/VJP test. Only a non-smoke completed record with E/H exceeding physical VRAM is capacity evidence. No throughput superiority or converged application claim.')
     output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
     def save():

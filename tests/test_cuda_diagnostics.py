@@ -3,9 +3,9 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave.boundaries import YeeGrid
-from photonweave.materials import MaterialADE
-from photonweave.run_control import StateDiagnostics
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.materials import MaterialADE
+from torchfdtd.run_control import StateDiagnostics
 from test_solver import small
 from test_multipole import multi_material
 

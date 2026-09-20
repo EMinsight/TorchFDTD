@@ -1,8 +1,8 @@
 {
-  "name": "photonweave-workbench",
+  "name": "torchfdtd-workbench",
   "private": true,
   "type": "module",
-  "scripts": {"build": "vite build --outDir ../photonweave/web --emptyOutDir", "dev": "vite --host 127.0.0.1", "test:ui": "playwright test"},
+  "scripts": {"build": "vite build --outDir ../torchfdtd/web --emptyOutDir", "dev": "vite --host 127.0.0.1", "test:ui": "playwright test"},
   "dependencies": {"three": "^0.180.0", "lucide": "^0.468.0"},
   "devDependencies": {"vite": "^6.3.0", "@playwright/test": "^1.55.0"}
 }

@@ -4,7 +4,7 @@ from contextlib import contextmanager
 import pytest
 import torch
 
-from photonweave.cuda_memory import cuda_budget_limit
+from torchfdtd.cuda_memory import cuda_budget_limit
 
 
 def allocator(monkeypatch,*,free=300,total=1000,reserved=400,allocated=100,after=800):
@@ -48,14 +48,14 @@ def test_live_or_insufficient_cached_memory_is_not_evicted(monkeypatch,reserved,
 
 @pytest.mark.parametrize('path',['native','unified','streamed'])
 def test_adjoint_admission_paths_recover_before_field_allocation(monkeypatch,path):
-    from photonweave import AdjointOptions,AdjointExecutionPolicy,StreamedAdjointOptions,estimate_adjoint_memory,estimate_streamed_memory
-    from photonweave.execution_tuning import _resident_reservation
+    from torchfdtd import AdjointOptions,AdjointExecutionPolicy,StreamedAdjointOptions,estimate_adjoint_memory,estimate_streamed_memory
+    from torchfdtd.execution_tuning import _resident_reservation
     from test_differentiable import project
     p=project(steps=10)
     budget=64*1024**2
     state=allocator(monkeypatch,free=1,total=2*1024**3,reserved=1024**3,allocated=0,after=1024**3)
     def forbidden(*a,**kw):pytest.fail('Constructed fields while checking capacity')
-    monkeypatch.setattr('photonweave.differentiable._System',forbidden)
+    monkeypatch.setattr('torchfdtd.differentiable._System',forbidden)
     options=AdjointOptions(gpu_budget_bytes=budget,backward_kernel='fused')
     if path=='native':report=estimate_adjoint_memory(p,options,device='cuda')
     elif path=='unified':
@@ -67,7 +67,7 @@ def test_adjoint_admission_paths_recover_before_field_allocation(monkeypatch,pat
 
 
 def test_automatic_real_fused_backward_counts_observer_packet(monkeypatch):
-    from photonweave import AdjointOptions,estimate_adjoint_memory
+    from torchfdtd import AdjointOptions,estimate_adjoint_memory
     from test_differentiable import project
     allocator(monkeypatch,free=1024**3,total=2*1024**3)
     p=project(steps=10)

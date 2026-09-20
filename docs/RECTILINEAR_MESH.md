@@ -3,7 +3,7 @@
 The native solver accepts uniform, graded, and explicit tensor-product grids. All nonuniform grids and independent axis spacings require `material_sampling="yee"`. Coordinates and geometry use micrometres. The SI editing facade uses metres.
 
 ```python
-from photonweave import Region
+from torchfdtd import Region
 
 r = Region(dimension="3d", size=(6.4, 3.2, 3.2),
            mesh_steps=(0.05, 0.2, 0.2), material_sampling="yee")

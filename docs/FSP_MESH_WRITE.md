@@ -15,9 +15,9 @@ native parser do not establish general FSP compatibility.
 ## Python workflow
 
 ```python
-from photonweave import Project, Simulation, write_fsp_scene
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import convert_fsp
+from torchfdtd import Project, Simulation, write_fsp_scene
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import convert_fsp
 
 original = FspDocument.load('input.fsp')
 conversion = convert_fsp(original, backend='cuda')

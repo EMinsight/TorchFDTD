@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 test('add, duplicate and remove FSP sources and monitors, export and run the GPU scene',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const python=process.env.PHOTONWEAVE_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
+ const python=process.env.TORCHFDTD_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
  const raw=Buffer.from(execFileSync(python,['-c',"import sys,base64;sys.path.insert(0,'tests');from test_fsp_settings_write import settings_fixture;print(base64.b64encode(settings_fixture()).decode())"],{encoding:'utf8'}).trim(),'base64');
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-action="fsp-native"]').click();
@@ -12,7 +12,7 @@ test('add, duplicate and remove FSP sources and monitors, export and run the GPU
  await expect(page.locator('#fsp-native-status')).toContainText('Ready to open',{timeout:20000});
  await page.locator('[data-native="load"]').click();await expect(page.locator('#fsp-native-dialog')).not.toBeVisible();
  await page.getByLabel('time steps',{exact:true}).fill('80');await page.getByLabel('time steps',{exact:true}).press('Tab');
- const original=await page.evaluate(()=>JSON.parse(localStorage.getItem('photonweave.project.v1')));
+ const original=await page.evaluate(()=>JSON.parse(localStorage.getItem('torchfdtd.project.v1')));
  await page.locator('#tree .source-row').click();await page.locator('[data-action="duplicate"]').click();
  await page.locator('#tree .tree-row').filter({hasText:new RegExp('^'+original.sources[0].name+'$')}).click();
  await page.locator('[data-action="delete"]').click();
@@ -27,7 +27,7 @@ test('add, duplicate and remove FSP sources and monitors, export and run the GPU
  await page.locator('[data-add="monitor"]').click();
  await expect(page.getByLabel('apodization',{exact:true})).toHaveValue('none');
  await page.locator('[data-add="field"]').click();
- const expected=await page.evaluate(()=>JSON.parse(localStorage.getItem('photonweave.project.v1')));
+ const expected=await page.evaluate(()=>JSON.parse(localStorage.getItem('torchfdtd.project.v1')));
  expect(expected.sources).toHaveLength(2);expect(expected.monitors).toHaveLength(3);
  await page.locator('[data-action="fsp-native"]').click();await page.locator('[data-native="export"]').click();
  await expect(page.locator('#fsp-native-status')).toContainText('Scene export verified',{timeout:20000});
@@ -42,18 +42,18 @@ test('add, duplicate and remove FSP sources and monitors, export and run the GPU
  await page.locator('#fsp-native-input').setInputFiles({name:'edited-instruments.fsp',mimeType:'application/octet-stream',buffer:bytes});
  await expect(page.locator('#fsp-native-status')).toContainText('Ready to open',{timeout:20000});
  await page.locator('[data-native="load"]').click();await expect(page.locator('#fsp-native-dialog')).not.toBeVisible();
- const actual=await page.evaluate(()=>JSON.parse(localStorage.getItem('photonweave.project.v1')));
+ const actual=await page.evaluate(()=>JSON.parse(localStorage.getItem('torchfdtd.project.v1')));
  for(const key of ['structures','sources','monitors'])expect(actual[key].map(o=>o.id)).toEqual(expected[key].map(o=>report.id_mapping[o.id]));
  expect(actual.sources.map(s=>s.name)).toEqual(expected.sources.map(s=>s.name));
  expect(actual.monitors.map(m=>m.name)).toEqual(expected.monitors.map(m=>m.name));
  expect(actual.sources[1].pulse_length).toBeCloseTo(4e-15,27);
  const script=await page.request.post('/api/python',{data:actual});expect(await script.text()).toContain(actual.sources[1].name);
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  const submitted=page.waitForResponse(r=>r.url().endsWith('/api/jobs')&&r.request().method()==='POST');
  await page.locator('#run-button').click();const job=await (await submitted).json();
  await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:90000});
  const result=await (await page.request.get('/api/jobs/'+job.id)).json();expect(result.status).toBe('completed');
  expect(result.flux_monitors.length).toBe(2);expect(result.flux_monitors.some(m=>m.flux.some(v=>Math.abs(v)>0))).toBe(true);
- if(process.env.PHOTONWEAVE_TEST_CUDA)expect(result.summary.gpu).toContain('5880');
+ if(process.env.TORCHFDTD_TEST_CUDA)expect(result.summary.gpu).toContain('5880');
  expect(errors).toEqual([]);
 });

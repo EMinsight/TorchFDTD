@@ -17,7 +17,7 @@ def ensemble_tables():
     lines=['### Four workloads with 16 independent cases each', '',
         'A follow-up repeats vacuum amplitude, sphere radius, slab thickness and waveguide width sweeps. '
         'Each row contains 16 complete 800-step solves. The upstream graph adapter runs those cases sequentially. '
-        'PhotonWeave uses shared CUDA launches and the cohort size selected by a separate full-workload timing trial. '
+        'TorchFDTD uses shared CUDA launches and the cohort size selected by a separate full-workload timing trial. '
         '**These are ensemble throughput ratios, not single-solve speedups or comparisons with an upstream fused batch implementation.**', '',
         '| Workload | Grid | flaport graph sequential (s) | Native sequential (s) | Selected cohort | Native batch (s) | vs flaport sequence | vs native sequence |',
         '|---|---:|---:|---:|---:|---:|---:|---:|']
@@ -65,11 +65,11 @@ def tables():
         'calling its unmodified E/H updates. Its eager timings are retained in the raw records. '
         'Both engines receive identical voxel permittivity, timestep, sampled source and point monitor. '
         'The upstream high-side PML interface stencil differs, so agreement is assessed separately.', '',
-        '| Example | Grid | flaport + graph (ms) | PhotonWeave fused (ms) | Speedup | Point-trace relative L2 |',
+        '| Example | Grid | flaport + graph (ms) | TorchFDTD fused (ms) | Speedup | Point-trace relative L2 |',
         '|---|---:|---:|---:|---:|---:|']
     for c in single['cases']:
-        a=c['medians']['flaport_graph'];b=c['medians']['photonweave_fused']
-        err=max(e['photonweave_relative_l2']['trace'] for e in c['errors'])
+        a=c['medians']['flaport_graph'];b=c['medians']['torchfdtd_fused']
+        err=max(e['torchfdtd_relative_l2']['trace'] for e in c['errors'])
         lines.append(f"| {c['name'].capitalize()} | {c['shape'][0]}³ | {1000*a['wall_seconds']:.2f} | {1000*b['wall_seconds']:.2f} | {a['wall_seconds']/b['wall_seconds']:.2f}× | {100*err:.4f}% |")
     lines+=['', 'All eight point traces pass the predeclared 1% relative-L2 tolerance. '
         'This is cross-solver agreement, not error against an exact solution. '
@@ -78,7 +78,7 @@ def tables():
         '(reference final H peak 1.23e-7). All E/H errors and reference scales are retained. '
         'The upstream graph adapter itself matches upstream eager E/H/traces bitwise in these cases.', '',
         'Torch peak allocated memory is **17.85 vs 52.51 MiB** at 64³ and **56.99 vs 141.76 MiB** at 96³ '
-        '(PhotonWeave vs graph-adapted upstream). This excludes CUDA context and driver allocations.', '',
+        '(TorchFDTD vs graph-adapted upstream). This excludes CUDA context and driver allocations.', '',
         '### Independent structures in one CUDA launch', '',
         '`run_tensor_batch()` adds a real CUDA batch axis to the E/H updates and shares source/point-trace launches. '
         'The sweep varies the sphere radius. All timed native batch E/H arrays and point traces match separate native solves **bitwise**. '

@@ -7,7 +7,7 @@ import re
 
 
 def main():
-    folders=['.github','photonweave','frontend','examples','tests','scripts','benchmarks','docs']
+    folders=['.github','torchfdtd','frontend','examples','tests','scripts','benchmarks','docs']
     files=sorted(p for folder in folders for p in Path(folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
     files += [Path(p) for p in ['README.md','LICENSE','THIRD_PARTY_NOTICES.txt','pyproject.toml','package.json','package-lock.json','vite.config.js','playwright.config.js','.gitignore','.gitattributes']]
     checks=[]

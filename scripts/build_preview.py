@@ -22,7 +22,7 @@ def main():
     if not stage.is_relative_to(staging_root):
         raise ValueError('Build staging must remain inside its dedicated directory.')
     stage.mkdir(parents=True)
-    package_files=[p for p in (root/'photonweave').rglob('*') if p.is_file()
+    package_files=[p for p in (root/'torchfdtd').rglob('*') if p.is_file()
                    and '__pycache__' not in p.parts and p.suffix!='.pyc']
     for path in package_files+[root/name for name in ('pyproject.toml','README.md','LICENSE','THIRD_PARTY_NOTICES.txt')]:
         target=stage/path.relative_to(root)
@@ -34,11 +34,11 @@ def main():
     if result.returncode:
         print(result.stdout);print(result.stderr,file=sys.stderr)
         raise SystemExit(result.returncode)
-    wheels=list(output.glob('photonweave-*.whl'))
+    wheels=list(output.glob('torchfdtd-*.whl'))
     wheel=max(wheels,key=lambda p:p.stat().st_mtime_ns)
     expected={p.relative_to(root).as_posix() for p in package_files}
     with zipfile.ZipFile(wheel) as archive:
-        actual={n for n in archive.namelist() if n.startswith('photonweave/')}
+        actual={n for n in archive.namelist() if n.startswith('torchfdtd/')}
         if actual!=expected:
             raise ValueError(f'Wheel payload differs from source: extra={actual-expected}, missing={expected-actual}')
         for name in expected:

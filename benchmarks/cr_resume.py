@@ -29,7 +29,7 @@ def tensor_digest(value):
 
 def source_hashes():
     root = Path(__file__).resolve().parents[1]
-    paths = sorted((root / 'photonweave').rglob('*.py'))
+    paths = sorted((root / 'torchfdtd').rglob('*.py'))
     paths += [Path(__file__).resolve(), root / 'benchmarks/cr_spectral_objective.py']
     return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 

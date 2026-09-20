@@ -5,8 +5,8 @@ test('periodic density editor, memory plan, real adjoint update and Python expor
  test.setTimeout(120000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{
-  localStorage.setItem('photonweave.periodicDesign.v1',JSON.stringify({device:'cpu',iterations:1,steps:80,quadrature_counts:[4,4],initial_density:[[.2,.4],[.6,.3]]}));
-  localStorage.removeItem('photonweave.periodicDesign.v1.job');
+  localStorage.setItem('torchfdtd.periodicDesign.v1',JSON.stringify({device:'cpu',iterations:1,steps:80,quadrature_counts:[4,4],initial_density:[[.2,.4],[.6,.3]]}));
+  localStorage.removeItem('torchfdtd.periodicDesign.v1.job');
  });
  await page.goto('/');await expect(page.locator('#tree')).toContainText('FDTD');
  await page.getByRole('button',{name:'Inverse design',exact:true}).click();

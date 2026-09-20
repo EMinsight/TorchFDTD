@@ -29,7 +29,7 @@ The legacy FFT path retains its historical magnitude and scale, `2/N` for real t
 ## Python and exports
 
 ```python
-from photonweave import Monitor, SpectrumSettings
+from torchfdtd import Monitor, SpectrumSettings
 
 monitor = Monitor(
     name="resonance", center=(2, 0, 0),

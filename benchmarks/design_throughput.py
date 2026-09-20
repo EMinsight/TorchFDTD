@@ -9,8 +9,8 @@ import time
 import numpy as np
 import torch
 
-from photonweave import BatchItem, BatchReport, Simulation, optimize
-from photonweave.solver import hardware
+from torchfdtd import BatchItem, BatchReport, Simulation, optimize
+from torchfdtd.solver import hardware
 from .open_source import scene
 
 

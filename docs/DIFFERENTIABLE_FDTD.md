@@ -16,7 +16,7 @@ does not replace the remaining full-manuscript revision or novelty assessment.
 
 ```python
 import torch
-from photonweave import (
+from torchfdtd import (
     Project, Region, Source, Monitor, AdjointOptions,
     DifferentiableSimulation, smooth_sphere_epsilon,
 )
@@ -143,7 +143,7 @@ history, device/host/disk checkpoint slots and asynchronous staging. ADE also
 reserves packed material and normalization carriers before packing begins.
 
 ```python
-from photonweave import estimate_adjoint_memory
+from torchfdtd import estimate_adjoint_memory
 
 reservation = estimate_adjoint_memory(
     project, model.options, device="cuda", frequency_hz=[2.5e14, 3.0e14],

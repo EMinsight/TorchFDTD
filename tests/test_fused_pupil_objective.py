@@ -2,7 +2,7 @@ from functools import partial
 import pytest
 import torch
 from benchmarks.cr_spectral_objective import check_density_direction
-from photonweave import (periodic_layer_response,spectral_pupil_response,PlaneReferenceCache,
+from torchfdtd import (periodic_layer_response,spectral_pupil_response,PlaneReferenceCache,
     AdjointOptions,spectral_electron_model,exposure_target_information)
 
 

@@ -3,10 +3,10 @@ import pytest
 import torch
 import numpy as np
 
-from photonweave.differentiable import _System
-from photonweave.spacetime import SlabBlockOperator
+from torchfdtd.differentiable import _System
+from torchfdtd.spacetime import SlabBlockOperator
 from test_differentiable import project, gpu
-from photonweave import (Source, Region, StreamedSimulation, StreamedAdjointOptions,
+from torchfdtd import (Source, Region, StreamedSimulation, StreamedAdjointOptions,
                          DifferentiableSimulation, smooth_sphere_epsilon)
 
 
@@ -42,7 +42,7 @@ def test_block_and_transpose_match_resident(device, local_checkpoints, precision
     torch.testing.assert_close(signals, expected_signals, **tolerance)
     for got, want in zip(got_bar, expected[:-1]):torch.testing.assert_close(got, want, **tolerance)
     torch.testing.assert_close(got_gradient, expected[-1], **tolerance)
-    from photonweave.streamed_cost import replay_blocks
+    from torchfdtd.streamed_cost import replay_blocks
     assert operator.local_replayed_steps == len(list(operator.tiles(depth)))*replay_blocks(depth,local_checkpoints)
     assert operator.peak_local_checkpoints <= local_checkpoints
 
@@ -104,7 +104,7 @@ def test_nonuniform_plane_source_and_cpml_transpose(periodic):
 
 
 def test_streamed_admission_precedes_state_allocation(monkeypatch):
-    import photonweave.streamed as module
+    import torchfdtd.streamed as module
     p = project(steps=10)
     epsilon = torch.full(p.region.shape, 1.6, dtype=torch.float64)
     def unexpected(*args, **kwargs):raise AssertionError('Allocated before admission')

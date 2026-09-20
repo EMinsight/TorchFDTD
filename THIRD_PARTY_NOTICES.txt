@@ -1,4 +1,4 @@
-Third-party notices for PhotonWeave
+Third-party notices for TorchFDTD
 
 
 ======================================================================

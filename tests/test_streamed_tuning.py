@@ -3,7 +3,7 @@ from dataclasses import replace
 import pytest
 import torch
 
-from photonweave import StreamedAdjointOptions, StreamedSimulation, DifferentiableSimulation, tune_streamed
+from torchfdtd import StreamedAdjointOptions, StreamedSimulation, DifferentiableSimulation, tune_streamed
 from test_differentiable import project
 
 
@@ -59,7 +59,7 @@ def test_deep_default_search_compares_local_replay_without_mutating_design():
     (10,12,32,[10]),(1000,256,7,[259,518]),
 ])
 def test_calibration_uses_whole_blocks_unless_measuring_full_duration(steps,probe,depth,expected):
-    from photonweave.streamed_tuning import _calibration_lengths
+    from torchfdtd.streamed_tuning import _calibration_lengths
     lengths = _calibration_lengths(steps,probe,depth,'replay_cost',1024)
     assert lengths == expected
     assert all(length == steps or length%depth == 0 for length in lengths)
@@ -69,7 +69,7 @@ def test_calibration_limit_rejects_before_any_simulation(monkeypatch):
     p = project(steps=1000)
     epsilon = torch.ones(p.region.shape,dtype=torch.float64)
     def forbidden(*a,**kw):raise AssertionError('Calibration ran beyond its declared limit')
-    monkeypatch.setattr('photonweave.streamed_tuning.StreamedSimulation',forbidden)
+    monkeypatch.setattr('torchfdtd.streamed_tuning.StreamedSimulation',forbidden)
     options = StreamedAdjointOptions(device='cpu',temporal_depth=300)
     with pytest.raises(ValueError,match='max_calibration_steps'):
         tune_streamed(p,epsilon,candidates=[options])
@@ -87,14 +87,14 @@ def test_unique_duration_is_checked_against_the_reference_policy(monkeypatch):
                 result.signals = result.signals*1.1
             return result
         return run
-    monkeypatch.setattr('photonweave.streamed_tuning.StreamedSimulation',corrupt_unique_duration)
+    monkeypatch.setattr('torchfdtd.streamed_tuning.StreamedSimulation',corrupt_unique_duration)
     with pytest.raises(AssertionError):
         tune_streamed(p,epsilon,candidates=[base,replace(base,temporal_depth=3)],probe_steps=10,repeats=1)
 
 
 @pytest.mark.parametrize('limit,expected',[(30,[12,24]),(50,[12,24,48])])
 def test_refinement_uses_longer_blocks_within_the_calibration_limit(limit,expected):
-    from photonweave.streamed_cost import predict_duration
+    from torchfdtd.streamed_cost import predict_duration
     p = project(steps=50,periodic=True)
     epsilon = torch.full(p.region.shape,1.7,dtype=torch.float64)
     options = StreamedAdjointOptions(device='cpu',slab_width=8,temporal_depth=3)

@@ -4,10 +4,10 @@ from dataclasses import replace
 import pytest
 import torch
 
-from photonweave import (AdjointOptions, AdjointExecutionPolicy, Region, Project,
+from torchfdtd import (AdjointOptions, AdjointExecutionPolicy, Region, Project,
     Monitor, Source, DifferentiableSimulation, DispersiveSimulation, estimate_adjoint_memory)
-from photonweave.adjoint_memory import _cuda_index_contract
-from photonweave.execution_tuning import _resident_reservation
+from torchfdtd.adjoint_memory import _cuda_index_contract
+from torchfdtd.execution_tuning import _resident_reservation
 from test_streamed_dispersive import scene,inputs
 
 
@@ -21,10 +21,10 @@ def large_scene(size=25.6):
 def test_large_metadata_requires_explicit_budget_without_allocating(monkeypatch,device):
     p=large_scene()
     assert p.region.shape==(256,256,256)
-    monkeypatch.setattr('photonweave.adjoint_memory.host_memory',lambda:dict(available_bytes=128*1024**3))
+    monkeypatch.setattr('torchfdtd.adjoint_memory.host_memory',lambda:dict(available_bytes=128*1024**3))
     monkeypatch.setattr(torch.cuda,'mem_get_info',lambda device:(48*1024**3,48*1024**3))
     def forbidden(*a,**kw):pytest.fail('Created resident fields during metadata admission')
-    monkeypatch.setattr('photonweave.differentiable._System',forbidden)
+    monkeypatch.setattr('torchfdtd.differentiable._System',forbidden)
     with pytest.raises(ValueError,match='explicit resident byte budget'):
         estimate_adjoint_memory(p,device=device)
     options=AdjointOptions(checkpoints=0,resident_budget_bytes=16*1024**3)
@@ -46,7 +46,7 @@ def test_default_workbench_guard_remains_and_budgeted_mode_roundtrips():
 def test_index_rejection_precedes_boundary_arrays_and_memory_query(monkeypatch):
     p=large_scene(100.)
     def forbidden(*a,**kw):pytest.fail('Allocated metadata or queried CUDA before rejecting overflowing field indices')
-    monkeypatch.setattr('photonweave.adjoint_memory.BoundaryDescription',forbidden)
+    monkeypatch.setattr('torchfdtd.adjoint_memory.BoundaryDescription',forbidden)
     monkeypatch.setattr(torch.cuda,'mem_get_info',forbidden)
     with pytest.raises(ValueError,match='field indexing'):
         estimate_adjoint_memory(p,AdjointOptions(resident_budget_bytes=1024**5),device='cuda')
@@ -81,7 +81,7 @@ def test_budgeted_actual_execution_matches_legacy_and_preserves_gradients(device
 def test_unified_large_resident_candidate_uses_byte_admission(monkeypatch):
     p=large_scene()
     p.region.memory_mode='streamed'
-    monkeypatch.setattr('photonweave.adjoint_memory.host_memory',lambda:dict(available_bytes=128*1024**3))
+    monkeypatch.setattr('torchfdtd.adjoint_memory.host_memory',lambda:dict(available_bytes=128*1024**3))
     monkeypatch.setattr(torch.cuda,'mem_get_info',lambda device:(48*1024**3,48*1024**3))
     policy=AdjointExecutionPolicy(resident=AdjointOptions(checkpoints=0,resident_budget_bytes=16*1024**3),
         device='cuda',host_budget_bytes=4*1024**3)
@@ -98,8 +98,8 @@ def test_budget_denial_precedes_field_allocation_and_ade_packing(monkeypatch,dis
     model=(DispersiveSimulation if dispersive else DifferentiableSimulation)(
         p,AdjointOptions(resident_budget_bytes=1))
     def forbidden(*args,**kwargs):pytest.fail('Allocated fields or packed ADE before byte admission')
-    monkeypatch.setattr('photonweave.differentiable._System',forbidden)
-    monkeypatch.setattr('photonweave.dispersive_adjoint._DispersiveSystem',forbidden)
+    monkeypatch.setattr('torchfdtd.differentiable._System',forbidden)
+    monkeypatch.setattr('torchfdtd.dispersive_adjoint._DispersiveSystem',forbidden)
     monkeypatch.setattr(torch,'cat',forbidden)
     with pytest.raises(ValueError,match='explicit resident byte budget'):
         model(*values) if dispersive else model(values[0])

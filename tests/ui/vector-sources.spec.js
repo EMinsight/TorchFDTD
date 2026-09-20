@@ -4,7 +4,7 @@ test('edit magnetic vector source, preview half-step samples, execute and retain
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.getByLabel('time steps',{exact:true}).fill('120');await page.getByLabel('time steps',{exact:true}).press('Tab');
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.locator('[data-select="source"]').click();
  await page.getByLabel('polarization',{exact:true}).selectOption('Hz');
  await page.getByLabel('Use theta / phi orientation',{exact:true}).check();
@@ -25,7 +25,7 @@ test('edit magnetic vector source, preview half-step samples, execute and retain
  const job=await (await page.request.get('/api/jobs/'+key)).json();
  expect(job.project.sources[0].component).toBe('Hz');expect(job.project.sources[0].theta).toBe(43);
  expect(job.project.sources[0].phi).toBe(219);expect(job.summary.field_peak).toBeGreaterThan(0);
- if(process.env.PHOTONWEAVE_TEST_CUDA)expect(job.summary.backend).toBe('cuda');
+ if(process.env.TORCHFDTD_TEST_CUDA)expect(job.summary.backend).toBe('cuda');
  await expect(page.getByLabel('theta',{exact:true})).toBeDisabled();
  await page.reload();await page.locator('[data-select="source"]').click();
  await expect(page.getByLabel('theta',{exact:true})).toHaveValue('43');

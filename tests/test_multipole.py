@@ -3,9 +3,9 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import Material, LorentzPole, Simulation, Project
-from photonweave.boundaries import YeeGrid
-from photonweave.materials import MaterialADE, permittivity
+from torchfdtd import Material, LorentzPole, Simulation, Project
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.materials import MaterialADE, permittivity
 from test_solver import small
 
 
@@ -77,7 +77,7 @@ def test_multipole_gpu_graph_eager_and_cpu(precision,kernel):
 
 def test_multipole_material_preview_and_python_export(tmp_path):
     from fastapi.testclient import TestClient
-    from photonweave.server import create_app
+    from torchfdtd.server import create_app
     p=small();p.materials.append(multi_material())
     assert Project.model_validate_json(p.model_dump_json()).materials[-1].model=='multipole'
     assert 'strength_rad_s_squared' in p.python_script()
@@ -88,7 +88,7 @@ def test_multipole_material_preview_and_python_export(tmp_path):
 
 
 def test_material_state_energy_is_visible_when_electric_field_is_zero():
-    from photonweave.run_control import StateDiagnostics
+    from torchfdtd.run_control import StateDiagnostics
     fdtd.set_backend('numpy');fdtd.backend.float=np.float64
     g=YeeGrid(small().region)
     state=MaterialADE(g,multi_material(),np.array([0]))

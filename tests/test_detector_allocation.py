@@ -2,9 +2,9 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 import torch
-from photonweave import (quadrant_intensity_allocation,DifferentiablePlaneSimulation,
+from torchfdtd import (quadrant_intensity_allocation,DifferentiablePlaneSimulation,
                         FieldMonitor,AdjointOptions)
-from photonweave.field_monitors import plane_plan
+from torchfdtd.field_monitors import plane_plan
 from test_differentiable import project
 
 

@@ -38,7 +38,7 @@ class AsyncStateStaging:
         self.h2d=torch.cuda.Stream(device=self.device)
         self.slots=[_Slot(tuple(torch.empty(t.shape,dtype=t.dtype,pin_memory=True) for t in state),
                           tuple(torch.empty_like(t) for t in state)) for _ in range(slots)]
-        self.executor=ThreadPoolExecutor(max_workers=1,thread_name_prefix='photonweave-state-io')
+        self.executor=ThreadPoolExecutor(max_workers=1,thread_name_prefix='torchfdtd-state-io')
         self.tasks=set()
         self.error=None
         size=sum(t.numel()*t.element_size() for t in state)

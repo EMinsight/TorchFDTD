@@ -14,7 +14,7 @@ test('configure paired Bloch faces and custom PML, run complex fields',async({pa
  await expect(page.locator('[data-boundary-default="x_min"]')).not.toBeChecked();
  await page.getByLabel('field display',{exact:true}).selectOption('imag');
  await page.getByLabel('time steps',{exact:true}).fill('500');await page.getByLabel('time steps',{exact:true}).press('Tab');
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.screenshot({path:'results/ui-boundaries.png',fullPage:true});
  const submitted=page.waitForResponse(r=>r.url().endsWith('/api/jobs')&&r.request().method()==='POST');
  await page.locator('#run-button').click();const key=(await (await submitted).json()).id;
@@ -23,7 +23,7 @@ test('configure paired Bloch faces and custom PML, run complex fields',async({pa
  await expect(page.locator('#field-label')).toContainText('imag');
  const job=await (await page.request.get('/api/jobs/'+key)).json();
  expect(job.status).toBe('completed');expect(job.summary.complex_fields).toBe(true);
- if(process.env.PHOTONWEAVE_TEST_CUDA)expect(job.summary.cuda_graph).toBe(true);
+ if(process.env.TORCHFDTD_TEST_CUDA)expect(job.summary.cuda_graph).toBe(true);
  expect(job.summary.boundaries.x_min.layers).toBe(14);
  expect(job.monitors.every(m=>m.complex)).toBe(true);
  const csv=await (await page.request.get('/api/jobs/'+key+'/monitors.csv')).text();

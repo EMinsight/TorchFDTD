@@ -2,10 +2,10 @@
 import struct
 import numpy as np
 import pytest
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import convert_fsp,ZERO_UUID
-from photonweave.solver import voxelize
-from photonweave.geometry import contains
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import convert_fsp,ZERO_UUID
+from torchfdtd.solver import voxelize
+from torchfdtd.geometry import contains
 from test_fsp_native import fixture,items
 from test_fsp_binary import u,string,mapping
 
@@ -29,7 +29,7 @@ def ellipse_fixture(kind='sphere',radius2=.21e-6,radius3=.13e-6):
 
 @pytest.mark.parametrize('kind',['sphere','circle'])
 def test_unrotated_ellipse_radii_and_original_bytes_preserved(kind,monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Vendor runtime accessed'))
     raw=ellipse_fixture(kind);doc=FspDocument(raw);report=convert_fsp(doc,backend='cpu')
     assert report.project is not None,report.issues

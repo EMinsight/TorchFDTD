@@ -5,7 +5,7 @@ from pathlib import Path
 
 import torch
 
-from photonweave import (AdjointOptions, DifferentiableSimulation, DifferentiableSolid,
+from torchfdtd import (AdjointOptions, DifferentiableSimulation, DifferentiableSolid,
     Monitor, Project, Region, Source, StreamedAdjointOptions, StreamedSimulation,
     smooth_geometry_epsilon)
 

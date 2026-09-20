@@ -2,8 +2,8 @@
 import numpy as np
 import pytest
 
-from photonweave import Project, Region, Structure, Source, Monitor, Simulation
-from photonweave.solver import C0
+from torchfdtd import Project, Region, Structure, Source, Monitor, Simulation
+from torchfdtd.solver import C0
 
 
 def test_vacuum_pulse_propagation_speed():

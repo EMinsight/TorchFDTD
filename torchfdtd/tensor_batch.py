@@ -248,7 +248,7 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
                  dispersive_samples=sum(state.P.numel() for state in g.material_states),material_sampling=r.material_sampling,
                  epsilon_definition=s['subpixel']['epsilon_image'] if 'subpixel' in s else 'instantaneous relative permittivity (epsilon-infinity for dispersive cells)',
                  boundaries=r.boundaries.model_dump(),bloch_phase=r.bloch_phase,
-                 units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad',engine='PhotonWeave batched Yee/CPML CUDA')
+                 units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad',engine='TorchFDTD batched Yee/CPML CUDA')
         frequency=[m.result() for m in planes[i]]
         if frequency:
             config=dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','field','slice_axis','slice_position','complex_display','snapshot_interval'}),

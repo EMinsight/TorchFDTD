@@ -9,13 +9,13 @@ import pytest
 from fastapi.testclient import TestClient
 from scipy.spatial.transform import Rotation
 
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_geometry import write_fsp_geometry, _rotation
-from photonweave.fsp_native import convert_fsp, ZERO_UUID
-from photonweave.geometry import rotation_matrix
-from photonweave.models import Material, Structure
-from photonweave.server import create_app
-from photonweave.solver import Simulation, voxelize
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_geometry import write_fsp_geometry, _rotation
+from torchfdtd.fsp_native import convert_fsp, ZERO_UUID
+from torchfdtd.geometry import rotation_matrix
+from torchfdtd.models import Material, Structure
+from torchfdtd.server import create_app
+from torchfdtd.solver import Simulation, voxelize
 from test_fsp_native import fixture, items
 from test_fsp_binary import mapping, string, u
 
@@ -82,7 +82,7 @@ def assert_untouched(original,output,report):
 
 @pytest.mark.parametrize('kind',['rectangle','sphere','circle','ring','polygon'])
 def test_import_rotation_and_byte_identical_noop(kind,monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Commercial runtime loaded'))
     doc,p=imported(shape_fixture(kind));s=p.structures[0]
     np.testing.assert_allclose(s.center,[.17,-.23,.11],atol=1e-15)
@@ -177,7 +177,7 @@ def test_malformed_polygon_metadata_and_ring_switch_are_rejected():
 
 def test_changed_geometry_cpu_cuda_and_tensor_cohort():
     import torch
-    from photonweave import run_tensor_batch
+    from torchfdtd import run_tensor_batch
     if not torch.cuda.is_available():pytest.skip('CUDA not available')
     cases=[]
     for kind in ('rectangle','sphere','circle','ring','polygon'):
@@ -201,7 +201,7 @@ def test_cli_exclusive_outputs_and_geometry_report(tmp_path):
     doc,p=imported(source.read_bytes());p.structures[0].name='CLI polygon'
     scene=tmp_path/'scene.json';p.save(scene)
     output=tmp_path/'edited.fsp';report=tmp_path/'report.json'
-    command=[sys.executable,'-m','photonweave.cli','fsp-write-geometry',str(source),str(scene),
+    command=[sys.executable,'-m','torchfdtd.cli','fsp-write-geometry',str(source),str(scene),
              '--output',str(output),'--report',str(report)]
     run=subprocess.run(command,capture_output=True,text=True)
     assert run.returncode==0,run.stderr
@@ -212,7 +212,7 @@ def test_cli_exclusive_outputs_and_geometry_report(tmp_path):
 
 
 def test_api_geometry_export_and_rejected_non_geometry_change(tmp_path,monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Vendor runtime accessed'))
     app=create_app(tmp_path)
     try:

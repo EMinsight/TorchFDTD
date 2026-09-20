@@ -1,16 +1,16 @@
 import { test, expect } from '@playwright/test';
 
 test('import a real global frequency-range FSP and execute independently on GPU',async({page})=>{
- test.skip(!process.env.PHOTONWEAVE_BROADBAND_FSP,'Requires a controlled broadband layout fixture');
+ test.skip(!process.env.TORCHFDTD_BROADBAND_FSP,'Requires a controlled broadband layout fixture');
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-action="fsp-native"]').click();
- if(process.env.PHOTONWEAVE_DC_FSP){
-  await page.locator('#fsp-native-input').setInputFiles(process.env.PHOTONWEAVE_DC_FSP);
+ if(process.env.TORCHFDTD_DC_FSP){
+  await page.locator('#fsp-native-input').setInputFiles(process.env.TORCHFDTD_DC_FSP);
   await expect(page.locator('.native-issues')).toContainText('Eliminate-DC',{timeout:20000});
   await expect(page.locator('[data-native="load"]')).toBeDisabled();
  }
- await page.locator('#fsp-native-input').setInputFiles(process.env.PHOTONWEAVE_BROADBAND_FSP);
+ await page.locator('#fsp-native-input').setInputFiles(process.env.TORCHFDTD_BROADBAND_FSP);
  await expect(page.locator('#fsp-native-status')).toContainText('Ready to open',{timeout:20000});
  await page.locator('[data-native="load"]').click();
  await expect(page.locator('#fsp-native-dialog')).not.toBeVisible();
@@ -32,7 +32,7 @@ test('automatic source wavelength/frequency range, global inheritance and GPU ca
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.getByLabel('time steps',{exact:true}).fill('1200');await page.getByLabel('time steps',{exact:true}).press('Tab');
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.locator('[data-select="source"]').click();
  await page.getByLabel('pulse',{exact:true}).selectOption('broadband');
  await page.getByLabel('wavelength start',{exact:true}).fill('1.2');await page.getByLabel('wavelength start',{exact:true}).press('Tab');
@@ -69,7 +69,7 @@ test('automatic source wavelength/frequency range, global inheritance and GPU ca
  expect(job.project.global_source.time_definition).toBe('frequency');
  expect(job.project.sources[0].use_global_source).toBe(true);
  expect(job.monitors[0].signal.some(v=>Math.abs(v)>1e-4)).toBe(true);
- if(process.env.PHOTONWEAVE_TEST_CUDA)expect(job.summary.cuda_graph).toBe(true);
+ if(process.env.TORCHFDTD_TEST_CUDA)expect(job.summary.cuda_graph).toBe(true);
  await page.locator('#layout-button').click();
  await page.getByLabel('Use global source settings',{exact:true}).uncheck();
  await expect(page.getByLabel('wavelength start',{exact:true})).toHaveValue('1.24913524167');

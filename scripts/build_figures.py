@@ -7,11 +7,11 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
-from photonweave.models import demo_project
-from photonweave import Simulation
+from torchfdtd.models import demo_project
+from torchfdtd import Simulation
 
 
-def main():
+def build_hero():
     assets=Path('docs/assets');assets.mkdir(parents=True,exist_ok=True)
     dest=Path('docs/validation')
     p=demo_project();p.region.backend='cpu';p.region.steps=600;p.region.snapshot_interval=20
@@ -28,7 +28,7 @@ def main():
     for spine in ax.spines.values():spine.set_color('#264661')
     ax.set_title(f'NATIVE YEE FIELD   /   $E_z$   /   STEP {result.frame_steps[k]}',loc='left',color='#91b5cd',fontsize=9,pad=16)
     fig.text(.05,.85,'OPEN PHOTONICS  /  GPU COMPUTING',color='#72d8d5',fontsize=10,fontweight='bold')
-    fig.text(.05,.68,'PhotonWeave',color='#f1f6fc',fontsize=38,fontweight='bold')
+    fig.text(.05,.68,'TorchFDTD',color='#f1f6fc',fontsize=38,fontweight='bold')
     fig.text(.05,.58,'From one field to a design space.',color='#bfd0e3',fontsize=17)
     fig.text(.05,.39,'Build visually. Run entirely in Python.\nExplore independent designs on CUDA.',color='#8fa9c1',fontsize=13,linespacing=1.8)
     for x,label in [(.05,'YEE + CPML'),(.175,'GRADED MESH'),(.32,'BATCH API')]:
@@ -39,6 +39,9 @@ def main():
     fig.savefig(assets/'hero.png',dpi=180,facecolor=fig.get_facecolor());plt.close(fig)
     (assets/'hero-provenance.json').write_text(json.dumps(dict(project=p.model_dump(),step=int(result.frame_steps[k]),
         scale=float(scale),description='Native computed Ez field, divided by its absolute maximum. Original matplotlib layout. No vendor artwork.'),indent=2),encoding='utf-8')
+def main():
+    build_hero()
+    dest=Path('docs/validation')
     flux=json.loads(Path('results/flux/validation.json').read_text())
     shutil.copyfile('results/flux/validation.json',dest/'flux.json')
     fig,axes=plt.subplots(1,2,figsize=(9,3.5),layout='constrained')

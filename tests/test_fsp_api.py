@@ -2,8 +2,8 @@ import time
 
 from fastapi.testclient import TestClient
 
-from photonweave import fsp
-from photonweave.server import create_app
+from torchfdtd import fsp
+from torchfdtd.server import create_app
 
 
 def test_upload_inspection_and_original_download(tmp_path, monkeypatch):

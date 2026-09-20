@@ -6,9 +6,9 @@ import weakref
 import pytest
 import torch
 
-from photonweave import (StreamedAdjointOptions, StreamedDispersiveSimulation,
+from torchfdtd import (StreamedAdjointOptions, StreamedDispersiveSimulation,
     DispersiveSimulation, tune_streamed, tune_streamed_dispersive)
-from photonweave.streamed_tuning import _ReferenceCache, _DispersiveTuningWorkload, _fit_default_policy
+from torchfdtd.streamed_tuning import _ReferenceCache, _DispersiveTuningWorkload, _fit_default_policy
 from test_streamed_dispersive import scene, inputs
 
 
@@ -51,7 +51,7 @@ def test_material_and_spectral_tuning_preserves_inputs(tmp_path,spectral,cache_b
 
 @pytest.mark.parametrize('precision', ['float32','float64'])
 def test_tuning_detects_material_vjp_error_hidden_by_si_units(monkeypatch,precision):
-    import photonweave.streamed_dispersive as module
+    import torchfdtd.streamed_dispersive as module
     p=scene(steps=13,precision=precision)
     values=inputs(p,'shared')
     base=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2)

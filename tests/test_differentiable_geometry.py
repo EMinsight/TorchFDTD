@@ -1,10 +1,10 @@
 import pytest
 import torch
 
-from photonweave import (AdjointOptions, DifferentiableSimulation, DifferentiableSolid,
+from torchfdtd import (AdjointOptions, DifferentiableSimulation, DifferentiableSolid,
     Monitor, Project, Region, Source, StreamedAdjointOptions, StreamedSimulation,
     smooth_geometry_epsilon)
-from photonweave.solver import field_axes
+from torchfdtd.solver import field_axes
 
 
 def region(precision='float32', sampling='yee'):

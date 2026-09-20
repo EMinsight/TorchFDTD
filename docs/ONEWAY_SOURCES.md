@@ -5,7 +5,7 @@ Version 0.13 adds a discrete electric/magnetic injection pair for a plane travel
 ## Python
 
 ```python
-from photonweave import Project, Region, Source, Monitor, Simulation, Boundaries, BoundaryFace
+from torchfdtd import Project, Region, Source, Monitor, Simulation, Boundaries, BoundaryFace
 
 p = Project(
     region=Region(size=(8, .5, 1), mesh=.025, steps=1600,

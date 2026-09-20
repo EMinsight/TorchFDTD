@@ -13,6 +13,15 @@ import { runControls } from './run_control.js';
 import { geometryDefaults,geometryControls,rotationControls,setupGeometryEditor } from './geometry.js';
 import { setupMonitorTools, spectralControls, fieldMonitorControls } from './monitor_tools.js';
 
+// Preserve existing browser projects and design setups across the product rename.
+try {
+ for(const oldKey of Object.keys(localStorage)){
+  if(!oldKey.startsWith('photonweave.'))continue;
+  const newKey='torchfdtd.'+oldKey.slice('photonweave.'.length);
+  if(localStorage.getItem(newKey)===null)localStorage.setItem(newKey,localStorage.getItem(oldKey));
+ }
+} catch { /* The ordinary save action reports unavailable browser storage. */ }
+
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon=n=>`<i data-lucide="${n}"></i>`;
@@ -21,7 +30,7 @@ let views,health,pollTimer,playTimer,stats;
 const messages=[];
 
 $('#app').innerHTML=`
-<header><div class="brand"><span class="brand-mark">${icon('waves')}</span><strong>PhotonWeave</strong><span class="product">FDTD</span></div><div class="project-title" id="project-title"></div><div class="connection" id="connection"><span class="dot"></span>Connecting to solver…</div></header>
+<header><div class="brand"><span class="brand-mark">${icon('waves')}</span><strong>TorchFDTD</strong><span class="product">Workbench</span></div><div class="project-title" id="project-title"></div><div class="connection" id="connection"><span class="dot"></span>Connecting to solver…</div></header>
 <nav class="menubar"><button data-action="new">File</button><button data-action="undo">Edit</button><button data-action="fit">View</button><button data-action="materials">Materials</button><button data-action="region">Simulation</button><button data-action="inverse-design">Inverse design</button><button data-action="capabilities">Feature checklist</button><button data-action="flux-results">Flux results</button><button data-action="help">Help</button><span class="version">DEVELOPMENT</span></nav>
 <div class="ribbon-tabs"><button class="active" data-ribbon="design">Design</button><button data-ribbon="simulation">FDTD</button><button data-ribbon="view">View</button><span class="ribbon-note">Geometry and wavelength in µm</span></div>
 <div class="ribbon">
@@ -47,7 +56,7 @@ async function api(path,body){const r=await fetch('/api'+path,body===undefined?{
 function selected(){return [...state.project.structures,...state.project.sources,...state.project.monitors].find(o=>o.id===state.selected);}
 function category(id){return state.project.structures.some(o=>o.id===id)?'structures':state.project.sources.some(o=>o.id===id)?'sources':'monitors';}
 function remember(){state.history.push(JSON.stringify(state.project));if(state.history.length>80)state.history.shift();state.future=[];}
-function persist(){state.dirty=true;try{localStorage.setItem('photonweave.project.v1',JSON.stringify(state.project));}catch{toast('Browser storage is full. Use Save to keep this project before closing or reloading.');log('Automatic browser save failed. Export this project with Save to retain the current settings.','warning');}}
+function persist(){state.dirty=true;try{localStorage.setItem('torchfdtd.project.v1',JSON.stringify(state.project));}catch{toast('Browser storage is full. Use Save to keep this project before closing or reloading.');log('Automatic browser save failed. Export this project with Save to retain the current settings.','warning');}}
 function change(id,patch,commit=true){Object.assign([...state.project.structures,...state.project.sources,...state.project.monitors].find(o=>o.id===id)||{},patch);if(commit){persist();renderProperties();renderTree();validate();}}
 function select(id){state.selected=id;renderTree();renderProperties();views?.render();}
 function setMode(mode){state.mode=mode;$('#mode-badge').textContent=mode.toUpperCase();$('#mode-badge').className='mode-badge '+mode;$$('.editable').forEach(b=>b.disabled=mode!=='layout');$('#run-button').disabled=mode!=='layout';$('#stop-button').disabled=mode!=='running';$('#layout-button').disabled=mode==='running';$$('[data-example]').forEach(b=>b.disabled=mode==='running');renderProperties();views?.render();}
@@ -150,16 +159,16 @@ function renderResults(){const r=state.project.region,axis='xyz'.indexOf(r.slice
 }
 async function run(){
  if(state.mode!=='layout')return;if(!await validate()){toast('Fix the highlighted project settings before running.');return;}
- try{state.results=null;state.monitors=null;state.liveFrame=null;const job=await api('/jobs',state.project);state.job=job.id;localStorage.setItem('photonweave.activeJob',job.id);setMode('running');setTab('fields');log('Submitted '+state.project.name+' · '+state.project.region.backend+' · '+state.project.region.precision);stats.warnings.forEach(w=>log(w,'warning'));poll();}catch(e){log(e.message,'error');toast(e.message);}
+ try{state.results=null;state.monitors=null;state.liveFrame=null;const job=await api('/jobs',state.project);state.job=job.id;localStorage.setItem('torchfdtd.activeJob',job.id);setMode('running');setTab('fields');log('Submitted '+state.project.name+' · '+state.project.region.backend+' · '+state.project.region.precision);stats.warnings.forEach(w=>log(w,'warning'));poll();}catch(e){log(e.message,'error');toast(e.message);}
 }
 async function poll(){
  try{const job=await api('/jobs/'+state.job),progress=job.progress;const pct=Math.round(100*progress.step/progress.total);$('#progress-bar').style.width=pct+'%';$('#progress-label').textContent=pct+'%';$('#status-text').textContent=job.status==='queued'?'Queued on solver':job.status==='running'?'Calculating fields…':job.status;state.liveFrame=progress.frame;
  if(state.tab==='fields')renderResults();
  if(['completed','cancelled','failed'].includes(job.status)){
-  if(job.status==='failed'){localStorage.removeItem('photonweave.activeJob');setMode('analysis');log(job.error,'error');toast(job.error);return;}
+  if(job.status==='failed'){localStorage.removeItem('torchfdtd.activeJob');setMode('analysis');log(job.error,'error');toast(job.error);return;}
   $('#status-text').textContent='Calculation complete · loading field results…';
   const result=await api('/jobs/'+state.job+'/fields');let max=1e-20;result.frames.forEach(f=>f.forEach(row=>row.forEach(v=>max=Math.max(max,Math.abs(v)))));result.max=max;state.results=result;state.frame=Math.max(0,result.frames.length-1);state.monitors=job.monitors;
-  localStorage.removeItem('photonweave.activeJob');setMode('analysis');$('#status-text').textContent=job.status;
+  localStorage.removeItem('torchfdtd.activeJob');setMode('analysis');$('#status-text').textContent=job.status;
   $('#results-tree').innerHTML=`<button data-tab="fields">${icon('chart-no-axes-combined')} ${esc(state.project.region.field)} field snapshots</button>${job.monitors.map(m=>`<button data-tab="fields">${icon('activity')} ${esc(m.name)} · ${m.component}</button>`).join('')}<div class="run-summary"><b>${job.summary.seconds.toFixed(2)} s</b> solver loop<br>${job.summary.backend.toUpperCase()}${job.summary.cuda_graph?' · CUDA graph':''}${job.summary.cuda_kernel==='fused'?' · fused Yee / CPML':''}${job.summary.cuda_monitor_kernel==='fused'?' · shared plane DFT':''}<br>${job.summary.mcells_per_second.toFixed(1)} Mcells/s<br>${job.summary.gpu?esc(job.summary.gpu):'NumPy CPU'}<br>${job.summary.auto_shutoff?'Decay threshold reached':job.summary.cancelled?'Cancelled':'Step limit reached'}<br>${job.summary.steps} / ${job.summary.requested_steps??job.summary.steps} steps</div>`;
   refreshIcons();renderResults();log(`${job.status}: ${job.summary.steps} steps in ${job.summary.seconds.toFixed(3)} s, ${job.summary.mcells_per_second.toFixed(1)} Mcells/s. Setup ${job.summary.setup_seconds.toFixed(2)} s.`);job.summary.warnings.forEach(w=>log(w,'warning'));return;
  }
@@ -218,7 +227,7 @@ const actions={
  csv:()=>{if(state.results)window.location.href='/api/jobs/'+state.job+(state.spectrum?'/spectra.csv':'/monitors.csv');else toast('Run the simulation first.');},
  playback:()=>{if(playTimer){clearInterval(playTimer);playTimer=null;return;}if(!state.results?.frames.length)return;playTimer=setInterval(()=>{if(!state.results){clearInterval(playTimer);playTimer=null;return;}state.frame=(state.frame+1)%state.results.frames.length;renderResults();},80);},
  'add-material':()=>{remember();state.project.materials.push({name:'Custom dielectric '+state.project.materials.length,index:1.5,color:'#60bdaa'});persist();$('#dialog').close();materials();},
- help:()=>showDialog(`<h2>From Lumerical to PhotonWeave</h2><p>The workbench follows the familiar Objects Tree, CAD views, FDTD region and Layout / Analysis workflow.</p><ol><li>Add a Rectangle, Circle, Ring or Sphere from the Design ribbon.</li><li>Select an object in the tree or any viewport. Drag to move. Edit x, y, z, spans, material and mesh order in Object properties.</li><li>Select FDTD to set dimension, mesh, PML and simulation time steps.</li><li>Add a dipole or bidirectional sheet source and point time monitors.</li><li>Run on the connected solver. Inspect field snapshots, time traces and field spectra.</li><li>Switch to Layout to edit, or export JSON, Python and NPZ results.</li></ol><p><b>Shortcuts:</b> Ctrl+S save · Ctrl+O open · Ctrl+D duplicate · Delete remove · Ctrl+Z undo · Ctrl+Y redo · F fit.</p><p>This is an independent open-source workbench. The FSP inspector reads and edits .fsp settings through an installed, licensed Lumerical API. FSP → GPU independently imports a verified subset of layout settings and displays unsupported settings and numerical differences. Arbitrary FSP execution and .lsf execution remain unimplemented. Sampled-data material fitting, anisotropy, mode ports, normalized flux, conformal interfaces and full commercial-solver equivalence are not implemented.</p>`),
+ help:()=>showDialog(`<h2>From Lumerical to TorchFDTD</h2><p>The workbench follows the familiar Objects Tree, CAD views, FDTD region and Layout / Analysis workflow.</p><ol><li>Add a Rectangle, Circle, Ring or Sphere from the Design ribbon.</li><li>Select an object in the tree or any viewport. Drag to move. Edit x, y, z, spans, material and mesh order in Object properties.</li><li>Select FDTD to set dimension, mesh, PML and simulation time steps.</li><li>Add a dipole or bidirectional sheet source and point time monitors.</li><li>Run on the connected solver. Inspect field snapshots, time traces and field spectra.</li><li>Switch to Layout to edit, or export JSON, Python and NPZ results.</li></ol><p><b>Shortcuts:</b> Ctrl+S save · Ctrl+O open · Ctrl+D duplicate · Delete remove · Ctrl+Z undo · Ctrl+Y redo · F fit.</p><p>This is an independent open-source workbench. The FSP inspector reads and edits .fsp settings through an installed, licensed Lumerical API. FSP → GPU independently imports a verified subset of layout settings and displays unsupported settings and numerical differences. Arbitrary FSP execution and .lsf execution remain unimplemented. Sampled-data material fitting, anisotropy, mode ports, normalized flux, conformal interfaces and full commercial-solver equivalence are not implemented.</p>`),
 };
 function moveStructure(delta){
  if(state.mode!=='layout')return;
@@ -246,10 +255,10 @@ $('#plot-axis').onchange=()=>renderResults();
 window.addEventListener('resize',()=>{if(state.tab==='fields')renderResults();});
 async function init(){
  try{health=await api('/health');$('.version').textContent='DEVELOPMENT'+(health.version?' · '+health.version:'');$('#connection').innerHTML=`<span class="dot"></span>${health.cuda?esc(health.gpu):'CPU solver'} <small>${esc(health.hostname)}</small>`;$('#footer-device').textContent=health.cuda?'CUDA · '+health.gpu_memory_gb+' GB':'CPU · NumPy';
- const saved=localStorage.getItem('photonweave.project.v1');try{state.project=saved?(await api('/validate',JSON.parse(saved))).project:await api('/examples/waveguide');}catch{state.project=await api('/examples/waveguide');}
+ const saved=localStorage.getItem('torchfdtd.project.v1');try{state.project=saved?(await api('/validate',JSON.parse(saved))).project:await api('/examples/waveguide');}catch{state.project=await api('/examples/waveguide');}
  views=new Views($('#viewports'),state,select,change,remember);renderTree();setMode('layout');views.fit();await validate();log('Connected to '+health.hostname+' · '+health.engine+'.');log('Select an object to edit. Add structures, configure FDTD and Run. Python and JSON use the same project model.');
- const active=localStorage.getItem('photonweave.activeJob');if(active){try{const job=await api('/jobs/'+active);state.project=job.project;state.job=active;setMode('running');renderTree();setTab('fields');poll();}catch{localStorage.removeItem('photonweave.activeJob');}}
- }catch(e){$('#connection').textContent='Solver unavailable';log(e.message,'error');toast('Cannot connect to the solver. Start photonweave serve and reload.');}
+ const active=localStorage.getItem('torchfdtd.activeJob');if(active){try{const job=await api('/jobs/'+active);state.project=job.project;state.job=active;setMode('running');renderTree();setTab('fields');poll();}catch{localStorage.removeItem('torchfdtd.activeJob');}}
+ }catch(e){$('#connection').textContent='Solver unavailable';log(e.message,'error');toast('Cannot connect to the solver. Start torchfdtd serve and reload.');}
  refreshIcons();
 }
 $$('.editable').forEach(b=>b.disabled=true);$('#run-button').disabled=true;

@@ -4,10 +4,10 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import Project, Region, Source, Monitor, Structure, Simulation
-from photonweave.boundaries import YeeGrid
-from photonweave.cuda_kernels import FusedYeeCUDA
-from photonweave.models import Boundaries, BoundaryFace, MeshRefinement, Material
+from torchfdtd import Project, Region, Source, Monitor, Structure, Simulation
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.cuda_kernels import FusedYeeCUDA
+from torchfdtd.models import Boundaries, BoundaryFace, MeshRefinement, Material
 
 
 def require_cuda():
@@ -118,7 +118,7 @@ def test_fused_preserves_subnormal_fields():
 def test_fused_frequency_plane_matches_cpu_flux():
     require_cuda()
     from test_field_monitors import slab_project
-    from photonweave import normalize_flux
+    from torchfdtd import normalize_flux
     p = slab_project()
     p.materials[1].index = 1.5
     cpu = Simulation(p).run()

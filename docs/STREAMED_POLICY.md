@@ -7,7 +7,7 @@ signals or online point spectra. Reuse the selected options with the original
 full-duration project across optimization iterations.
 
 ```python
-from photonweave import (
+from torchfdtd import (
     StreamedAdjointOptions, StreamedDispersiveSimulation,
     tune_streamed_dispersive,
 )

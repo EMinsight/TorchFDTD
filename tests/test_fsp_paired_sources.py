@@ -7,9 +7,9 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import Simulation,Source,run_tensor_batch
-from photonweave.fsp_binary import FspDocument,Value
-from photonweave.fsp_native import PLANE,TFSF,FDTD,convert_fsp,paired_polarization
+from torchfdtd import Simulation,Source,run_tensor_batch
+from torchfdtd.fsp_binary import FspDocument,Value
+from torchfdtd.fsp_native import PLANE,TFSF,FDTD,convert_fsp,paired_polarization
 from test_fsp_native import fixture
 
 
@@ -37,7 +37,7 @@ def paired_fixture(kind='tfsf',axis=0,direction='+',*,polarization=31.,phi=17.,e
 @pytest.mark.parametrize('axis',[0,1,2])
 @pytest.mark.parametrize('direction',['+','-'])
 def test_paired_import_native_fields_and_original_bytes(kind,axis,direction,monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Independent import loaded vendor runtime'))
     raw=paired_fixture(kind,axis,direction);doc=FspDocument(raw)
     report=convert_fsp(doc,backend='cpu');assert report.project is not None,report.issues
@@ -150,7 +150,7 @@ def test_imported_paired_sources_cuda_graph_and_tensor_match_independent_runs():
 def test_cli_preserves_original_and_reports_conversion_scope(tmp_path):
     raw=paired_fixture();source=tmp_path/'source.fsp';source.write_bytes(raw)
     target=tmp_path/'native.json';report=tmp_path/'conversion.json'
-    result=subprocess.run([sys.executable,'-m','photonweave.cli','fsp-convert',str(source),
+    result=subprocess.run([sys.executable,'-m','torchfdtd.cli','fsp-convert',str(source),
                            '--output',str(target),'--report',str(report),'--backend','cpu'],capture_output=True)
     assert result.returncode==0,result.stderr
     assert source.read_bytes()==raw

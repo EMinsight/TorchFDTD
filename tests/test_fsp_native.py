@@ -7,11 +7,11 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import DIPOLE, FDTD, ROOT, TIME, ZERO_UUID, convert_fsp
-from photonweave.models import Project, Region, Source
-from photonweave.server import create_app
-from photonweave.solver import Simulation, source_time_signal
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import DIPOLE, FDTD, ROOT, TIME, ZERO_UUID, convert_fsp
+from torchfdtd.models import Project, Region, Source
+from torchfdtd.server import create_app
+from torchfdtd.solver import Simulation, source_time_signal
 from test_fsp_binary import mapping, node, string, u
 
 
@@ -59,7 +59,7 @@ def fixture(source_overrides=None, region_overrides=None, *, source_class=DIPOLE
 
 
 def test_conversion_retains_geometry_timestep_pulse_and_fingerprint(monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp, 'load_api', lambda: pytest.fail('Independent conversion loaded Lumerical'))
     raw = fixture(); doc = FspDocument(raw); report = convert_fsp(doc, 'Synthetic sphere', 'cpu')
     assert report.project is not None, report.issues
@@ -133,7 +133,7 @@ def test_imported_standard_pulse_with_nondefault_cfl_cpu_cuda_parity(precision):
 
 
 def test_native_upload_download_and_run_without_vendor_runtime(tmp_path, monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp, 'availability', lambda: {'installed':False, 'reason':'Not installed'})
     monkeypatch.setattr(fsp, 'load_api', lambda: pytest.fail('Independent import loaded Lumerical'))
     app = create_app(tmp_path)

@@ -11,7 +11,7 @@ source-basis graph at a time. It does not retain two complete solver graphs.
 
 ```python
 import torch
-from photonweave import (
+from torchfdtd import (
     AdjointBatchOptions, AdjointExecutionPolicy, PeriodicLayerResponse,
     StreamedAdjointOptions,
 )
@@ -118,7 +118,7 @@ physical hard mask. An optional `PeriodicResponseCache` avoids solving that
 identical structure again. It is separate from the homogeneous reference cache:
 
 ```python
-from photonweave import PeriodicResponseCache
+from torchfdtd import PeriodicResponseCache
 
 cache = PeriodicResponseCache(64 * 1024**2, max_entries=4096)
 model = PeriodicLayerResponse.auto(

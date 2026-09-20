@@ -15,8 +15,8 @@ The built-in Si, SiN and SiO2 entries remain explicitly labelled constant-index 
 ## Native API and familiar commands
 
 ```python
-from photonweave import Material
-from photonweave.materials import permittivity
+from torchfdtd import Material
+from torchfdtd.materials import permittivity
 
 metal = Material(name='Example Drude', model='drude', epsilon_inf=2,
                  plasma_rad_s=2e15, collision_rad_s=1.5e14)
@@ -24,7 +24,7 @@ epsilon = permittivity(metal, [180e12, 200e12])
 ```
 
 ```python
-from photonweave import FDTD
+from torchfdtd import FDTD
 fd = FDTD()
 name = fd.addmaterial('Lorentz')
 fd.setmaterial(name, 'name', 'Example Lorentz')

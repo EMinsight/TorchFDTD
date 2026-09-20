@@ -6,9 +6,9 @@ import weakref
 import pytest
 import torch
 
-from photonweave import (AdjointCase, AdjointBatchOptions, RecomputedAdjointBatch,
+from torchfdtd import (AdjointCase, AdjointBatchOptions, RecomputedAdjointBatch,
     smooth_sphere_epsilon)
-from photonweave.adjoint_batch import _PreparedCase, _BatchRun
+from torchfdtd.adjoint_batch import _PreparedCase, _BatchRun
 from test_plane_execution import planes, policies
 from test_streamed_dispersive import scene, inputs
 
@@ -129,7 +129,7 @@ def test_replay_rechecks_live_shared_memory(monkeypatch):
     batch=RecomputedAdjointBatch([AdjointCase(p,policies()[0])])
     epsilon=inputs(p,'shared',True)[0]
     result=batch(epsilon)
-    monkeypatch.setattr('photonweave.adjoint_batch.host_memory',lambda:{'available_bytes':1})
+    monkeypatch.setattr('torchfdtd.adjoint_batch.host_memory',lambda:{'available_bytes':1})
     with pytest.raises(ValueError,match='shared host budget'):result.cases[0].signals.sum().backward()
 
 
@@ -160,7 +160,7 @@ def test_fixed_configuration_and_first_order_guards():
 
 
 def test_no_overlapping_case_systems_with_cyclic_gc_disabled(monkeypatch):
-    from photonweave.differentiable import _System
+    from torchfdtd.differentiable import _System
     live=[]
     original=_System.__init__
     def track(self,*args,**kwargs):

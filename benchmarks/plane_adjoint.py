@@ -5,9 +5,9 @@ from pathlib import Path
 import time
 import numpy as np
 import torch
-from photonweave import (Project,Region,Source,Structure,FieldMonitor,Boundaries,BoundaryFace,
+from torchfdtd import (Project,Region,Source,Structure,FieldMonitor,Boundaries,BoundaryFace,
                         SpectrumSettings,AdjointOptions,DifferentiablePlaneSimulation)
-from photonweave.solver import voxelize,C0
+from torchfdtd.solver import voxelize,C0
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
               monitors=[FieldMonitor(id='reflection',center=(-.8,0,0),size=(0,.5,1),spectrum=settings),
                         FieldMonitor(id='transmission',center=(.8,0,0),size=(0,.5,1),spectrum=settings)])
     p.materials[1].index=1.5
-    from photonweave.spectra import frequency_samples
+    from torchfdtd.spectra import frequency_samples
     frequencies=frequency_samples(settings)
     eps,_=voxelize(p)
     mask=torch.as_tensor((eps-1)/(1.5**2-1),device=args.device,dtype=torch.float64)

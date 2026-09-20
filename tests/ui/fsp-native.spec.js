@@ -2,16 +2,16 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 
 test('independent FSP import, source controls and actual GPU execution',async({page})=>{
- test.skip(!process.env.PHOTONWEAVE_NATIVE_FSP,'Requires prepared native-import fixture');
+ test.skip(!process.env.TORCHFDTD_NATIVE_FSP,'Requires prepared native-import fixture');
  test.setTimeout(120000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-action="fsp-native"]').click();
- await page.locator('#fsp-native-input').setInputFiles(process.env.PHOTONWEAVE_NATIVE_FSP);
+ await page.locator('#fsp-native-input').setInputFiles(process.env.TORCHFDTD_NATIVE_FSP);
  await expect(page.locator('#fsp-native-status')).toContainText('Ready to open',{timeout:20000});
  await expect(page.locator('.native-issues')).toContainText('dipole moment');
  const originalEvent=page.waitForEvent('download');await page.locator('[data-native="original"]').click();
- expect(fs.readFileSync(await (await originalEvent).path())).toEqual(fs.readFileSync(process.env.PHOTONWEAVE_NATIVE_FSP));
+ expect(fs.readFileSync(await (await originalEvent).path())).toEqual(fs.readFileSync(process.env.TORCHFDTD_NATIVE_FSP));
  await page.screenshot({path:'results/ui-fsp-native-review.png',fullPage:true});
  await page.locator('[data-native="load"]').click();
  await expect(page.locator('#fsp-native-dialog')).not.toBeVisible();

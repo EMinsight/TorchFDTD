@@ -144,9 +144,9 @@ def build_assets() -> None:
         r'Fixture, grid & \shortstack{Upstream graph\\(ms)} & \shortstack{Native fused\\(ms)} & Speedup & \shortstack{Trace L2\\(\%)}',
         [f"{c['name'].capitalize()}, ${c['shape'][0]}^3$ & "
          f"{1000*c['medians']['flaport_graph']['wall_seconds']:.2f} & "
-         f"{1000*c['medians']['photonweave_fused']['wall_seconds']:.2f} & "
-         f"${c['medians']['flaport_graph']['wall_seconds']/c['medians']['photonweave_fused']['wall_seconds']:.2f}\\times$ & "
-         f"{100*max(e['photonweave_relative_l2']['trace'] for e in c['errors']):.4f} " + r'\\'
+         f"{1000*c['medians']['torchfdtd_fused']['wall_seconds']:.2f} & "
+         f"${c['medians']['flaport_graph']['wall_seconds']/c['medians']['torchfdtd_fused']['wall_seconds']:.2f}\\times$ & "
+         f"{100*max(e['torchfdtd_relative_l2']['trace'] for e in c['errors']):.4f} " + r'\\'
          for c in data['open-source-flaport']['cases']])
 
     write_table('tensor-batch',

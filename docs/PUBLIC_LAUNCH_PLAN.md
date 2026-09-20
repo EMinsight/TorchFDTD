@@ -10,7 +10,7 @@ post. No social announcement may be sent until that later approval arrives.
 ## User authorization and objective
 
 On 2026-09-20 the author requested public promotion on their own X account once
-PhotonWeave has demonstrated clear advantages against the previously considered
+TorchFDTD has demonstrated clear advantages against the previously considered
 open-source solvers and Lumerical FDTD, with release-ready UI, Python API and
 library usability. Relevant Reddit announcements are also authorized if useful.
 The outreach goal is 100 organic GitHub stars, not a promised outcome.
@@ -119,7 +119,7 @@ Its exact contents and identity as the user's intended example remain unverified
 
 ## Draft structure, not publishable text
 
-With Astra's help, I built PhotonWeave, an open-source CUDA FDTD solver for
+With Astra's help, I built TorchFDTD, an open-source CUDA FDTD solver for
 photonic inverse design with a Python API and a visual workspace.
 
 [Insert only verified differentiability scope and measured advantage, naming

@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 import numpy as np
 import torch
-from photonweave import (periodic_layer_response,spectral_pupil_response,
+from torchfdtd import (periodic_layer_response,spectral_pupil_response,
     spectral_electron_model,exposure_target_information,PlaneReferenceCache,AdjointOptions)
 from benchmarks.cr_resume import (CaseJournal, load_gradient_record, runtime_identity,
                                   source_hashes, write_json)
@@ -31,7 +31,7 @@ def information_objective(response, context):
 def execution_settings(args):
     """Prepare explicit hierarchy policies without allocating design fields."""
     if args.execution_policy == 'legacy':return None
-    from photonweave import AdjointExecutionPolicy, AdjointBatchOptions, StreamedAdjointOptions
+    from torchfdtd import AdjointExecutionPolicy, AdjointBatchOptions, StreamedAdjointOptions
     if any(not math.isfinite(v) or v <= 0 for v in (args.gpu_budget_gib,args.host_budget_gib)):
         raise ValueError('Execution memory budgets must be finite and positive.')
     gpu,host=int(args.gpu_budget_gib*1024**3),int(args.host_budget_gib*1024**3)
@@ -166,7 +166,7 @@ def main():
     cache=PlaneReferenceCache(args.reference_cache_mib*1024**2) if args.reference_cache_mib or execution else None
     execution_preflight=None
     if execution:
-        from photonweave import PeriodicLayerResponse
+        from torchfdtd import PeriodicLayerResponse
         preflight_started=time.perf_counter()
         maxima=dict(host_reservation_bytes=0,gpu_reservation_bytes=0,disk_reservation_bytes=0)
         for row in rows:
@@ -188,7 +188,7 @@ def main():
             settings=dict(mesh=args.mesh,steps=args.steps,pml_cells=args.pml_cells,
                 pixel_origin=args.pixel_origin,reference_cache=cache,forward_kernel=args.forward_kernel)
             if execution:
-                from photonweave import PeriodicLayerResponse
+                from torchfdtd import PeriodicLayerResponse
                 response=PeriodicLayerResponse(spec,density_shape=tuple(d.shape),dtype=dtype,**execution,**settings)(d)
             else:
                 response=periodic_layer_response(d,spec,**settings,

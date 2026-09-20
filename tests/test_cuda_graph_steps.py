@@ -5,9 +5,9 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import Simulation, run_tensor_batch, FieldMonitor, SpectrumSettings
-from photonweave.cuda_graph import observation_schedule, validate_graph_steps
-from photonweave.tuning import _result_digest
+from torchfdtd import Simulation, run_tensor_batch, FieldMonitor, SpectrumSettings
+from torchfdtd.cuda_graph import observation_schedule, validate_graph_steps
+from torchfdtd.tuning import _result_digest
 from test_tensor_batch import cases
 from test_multipole import multi_material
 
@@ -107,7 +107,7 @@ def test_external_graph_unrolling_is_bitwise_and_handles_tail():
 @gpu
 def test_complex_and_oneway_graphs_keep_their_auxiliary_states():
     pytest.importorskip('cupy')
-    from photonweave import Source
+    from torchfdtd import Source
     p=cases(1,'float64','2d')[0]
     p.region.cuda_kernel='torch';p.region.steps=117
     p.region.boundaries.y_min.kind=p.region.boundaries.y_max.kind='bloch'

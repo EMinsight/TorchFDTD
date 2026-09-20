@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 import torch
 
-from photonweave import PeriodicLayerResponse, PlaneReferenceCache
+from torchfdtd import PeriodicLayerResponse, PlaneReferenceCache
 from test_periodic_adjoint import SPEC, SETTINGS
 
 MIB = 1024**2
@@ -24,7 +24,7 @@ def forbidden(*args, **kwargs):
 
 def test_auto_resident_no_calibration_and_torch_chain():
     with patch.object(PeriodicLayerResponse, 'forward', forbidden), patch(
-            'photonweave.periodic_adjoint.periodic_density_layer', forbidden):
+            'torchfdtd.periodic_adjoint.periodic_density_layer', forbidden):
         model = PeriodicLayerResponse.auto(SPEC, **SETTINGS, density_shape=(2, 2),
             device='cpu', gpu_budget_bytes=GIB, host_budget_bytes=GIB,
             reference_cache=PlaneReferenceCache(MIB))
@@ -46,9 +46,9 @@ def test_auto_shrinks_tiles_and_selects_admitted_storage(tmp_path, host_budget, 
     spec = dict(SPEC, period_um=(4., 4.))
     directory = tmp_path/'unallocated-state'
     with patch('torch.cuda.mem_get_info', return_value=(100*GIB, 100*GIB)), patch(
-            'photonweave.state_store.disk_free', return_value=200*GIB), patch.object(
+            'torchfdtd.state_store.disk_free', return_value=200*GIB), patch.object(
             PeriodicLayerResponse, 'forward', forbidden), patch(
-            'photonweave.periodic_adjoint.periodic_density_layer', forbidden):
+            'torchfdtd.periodic_adjoint.periodic_density_layer', forbidden):
         model = PeriodicLayerResponse.auto(spec, **SETTINGS, density_shape=(2, 2),
             gpu_budget_bytes=16*MIB, host_budget_bytes=host_budget,
             reference_cache=PlaneReferenceCache(MIB), state_directory=directory,
@@ -77,7 +77,7 @@ def test_auto_never_uses_unconfigured_or_insufficient_disk(tmp_path):
             PeriodicLayerResponse, 'forward', forbidden):
         with pytest.raises(ValueError, match='No periodic execution policy fits'):
             PeriodicLayerResponse.auto(spec, **settings)
-        with patch('photonweave.state_store.disk_free', return_value=100*GIB):
+        with patch('torchfdtd.state_store.disk_free', return_value=100*GIB):
             with pytest.raises(ValueError, match='disk budget or available disk space'):
                 PeriodicLayerResponse.auto(spec, **settings,
                     state_directory=tmp_path/'unused', disk_budget_bytes=GIB)

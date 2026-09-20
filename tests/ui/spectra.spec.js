@@ -4,7 +4,7 @@ test('set wavelength samples and apodization, run CUDA, export complex spectra',
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.getByLabel('time steps',{exact:true}).fill('600');await page.getByLabel('time steps',{exact:true}).press('Tab');
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.locator('[data-select="output"]').click();
  await page.getByLabel('sample spacing',{exact:true}).selectOption('wavelength');
  await expect(page.getByLabel('apodization',{exact:true})).toHaveValue('none');
@@ -27,7 +27,7 @@ test('set wavelength samples and apodization, run CUDA, export complex spectra',
  expect(m.wavelength_um[0]).toBeCloseTo(1.4,12);
  expect(m.wavelength_um.at(-1)).toBeCloseTo(1.7,12);
  expect(m.spectrum.some(x=>x>0)).toBe(true);
- if(process.env.PHOTONWEAVE_TEST_CUDA)expect(job.summary.cuda_graph).toBe(true);
+ if(process.env.TORCHFDTD_TEST_CUDA)expect(job.summary.cuda_graph).toBe(true);
  await page.getByLabel('Plot monitor',{exact:true}).selectOption('output');
  await page.locator('[data-plot="spectrum"]').click();
  await page.getByLabel('Spectrum axis',{exact:true}).selectOption('wavelength');

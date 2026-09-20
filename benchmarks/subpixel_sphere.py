@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 import time
 
-from photonweave import Simulation
+from torchfdtd import Simulation
 from examples.tfsf_sphere import make_project,evaluate
 
 

@@ -2,8 +2,8 @@
 import argparse,json,statistics,time
 from pathlib import Path
 import torch
-from photonweave import Project,Region,BoundaryFace,Boundaries
-from photonweave.differentiable import _System
+from torchfdtd import Project,Region,BoundaryFace,Boundaries
+from torchfdtd.differentiable import _System
 
 
 def main():

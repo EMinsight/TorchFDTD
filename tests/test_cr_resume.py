@@ -7,7 +7,7 @@ import torch
 
 from benchmarks.cr_resume import CaseJournal, load_gradient_record, write_json
 from benchmarks.cr_spectral_objective import check_density_direction
-from photonweave import spectral_pupil_response
+from torchfdtd import spectral_pupil_response
 
 
 def test_interrupted_cases_resume_without_detaching_gradient(tmp_path):

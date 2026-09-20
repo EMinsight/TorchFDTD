@@ -1,4 +1,4 @@
-from photonweave import Project, Region, Structure, Source, Monitor, Simulation
+from torchfdtd import Project, Region, Structure, Source, Monitor, Simulation
 
 project = Project(
     name='SiN waveguide',

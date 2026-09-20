@@ -17,7 +17,7 @@ Oblique incidence, layered incident backgrounds, structures crossing the box fac
 ## Python and interface
 
 ```python
-from photonweave import Project, Region, Source, Structure, Simulation
+from torchfdtd import Project, Region, Source, Structure, Simulation
 
 p = Project(
     region=Region(dimension="3d", size=(3.2, 3.2, 3.2), mesh=0.05,
@@ -35,7 +35,7 @@ result = Simulation(p).run()
 Native lengths are micrometres. The optional editing facade uses metres:
 
 ```python
-from photonweave import FDTD
+from torchfdtd import FDTD
 fdtd = FDTD(p)
 fdtd.addtfsf(name="second box", x_span=1.6e-6, y_span=1.6e-6,
             z_span=1.6e-6, injection_axis="y-axis", direction="Backward",

@@ -1,6 +1,6 @@
 """Two independent CUDA cases with flux-only and high-precision selected fields."""
-from photonweave import FieldMonitor, SpectrumSettings, run_tensor_batch
-from photonweave.models import demo_project
+from torchfdtd import FieldMonitor, SpectrumSettings, run_tensor_batch
+from torchfdtd.models import demo_project
 
 
 def main():

@@ -8,7 +8,7 @@ comparisons between candidates. The selected policy can be reused across
 optimization iterations.
 
 ```python
-from photonweave import StreamedAdjointOptions, tune_adjoint_execution
+from torchfdtd import StreamedAdjointOptions, tune_adjoint_execution
 
 budget = StreamedAdjointOptions(
     device="cuda", gpu_budget_bytes=24 * 1024**3,

@@ -28,9 +28,9 @@ definition is the desired native input.
 
 ```python
 from uuid import uuid4
-from photonweave import Source, Monitor, SpectrumSettings, write_fsp_scene
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import convert_fsp
+from torchfdtd import Source, Monitor, SpectrumSettings, write_fsp_scene
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import convert_fsp
 
 original = FspDocument.load('input.fsp')
 conversion = convert_fsp(original, backend='cuda')
@@ -65,7 +65,7 @@ adequately sampled by its time step. Change the example positions or region
 as needed. List removal uses normal Python `del` or `remove` operations.
 
 ```sh
-photonweave fsp-write-scene input.fsp edited-native.json --output edited.fsp --report edits.json
+torchfdtd fsp-write-scene input.fsp edited-native.json --output edited.fsp --report edits.json
 ```
 
 Reimport the edited file before saving it again. Record offsets, object IDs and

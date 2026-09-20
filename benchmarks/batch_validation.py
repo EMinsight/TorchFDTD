@@ -7,8 +7,8 @@ import json
 from pathlib import Path
 import numpy as np
 
-from photonweave import Project,Region,Structure,Source,Monitor,Simulation,BatchRunner,parameter_sweep
-from photonweave.solver import hardware
+from torchfdtd import Project,Region,Structure,Source,Monitor,Simulation,BatchRunner,parameter_sweep
+from torchfdtd.solver import hardware
 
 
 def objective(result):

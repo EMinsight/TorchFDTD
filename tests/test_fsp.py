@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from photonweave import fsp
+from torchfdtd import fsp
 
 
 def test_array_and_complex_encoding():
@@ -51,7 +51,7 @@ def test_unsupported_physics_cannot_be_silently_accepted():
             'unsupported_object', 'apodization_mapping_required', 'material_mapping_required'} <= {i['code'] for i in issues}
 
 
-@pytest.mark.skipif(os.environ.get('PHOTONWEAVE_LUMERICAL_TESTS') != '1', reason='Requires installed licensed Lumerical')
+@pytest.mark.skipif(os.environ.get('TORCHFDTD_LUMERICAL_TESTS') != '1', reason='Requires installed licensed Lumerical')
 def test_installed_lumerical_fsp_roundtrip(tmp_path):
     api = fsp.load_api()
     source = tmp_path / 'source.fsp'
@@ -120,7 +120,7 @@ def test_installed_lumerical_fsp_roundtrip(tmp_path):
     assert after['::model::polygon']['vertices'] == objects['::model::polygon']['vertices']
     assert first['referenced_materials'] == second['referenced_materials']
     assert fsp.fingerprint(source) == sha
-    artifacts = os.environ.get('PHOTONWEAVE_FSP_TEST_ARTIFACTS')
+    artifacts = os.environ.get('TORCHFDTD_FSP_TEST_ARTIFACTS')
     if artifacts:
         folder = Path(artifacts)
         folder.mkdir(parents=True, exist_ok=True)

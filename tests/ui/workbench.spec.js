@@ -17,11 +17,11 @@ test('edit, drag, undo, save, run and inspect a real FDTD job',async({page})=>{
  await expect(page.getByLabel('y',{exact:true})).not.toHaveValue('0');
  await page.locator('[data-action="save"]').click();
  await page.locator('[data-action="python"]').click();await expect(page.locator('#python-editor')).toContainText('');await expect(page.locator('#python-editor')).toHaveValue(/Simulation\(project\).run/);
- await page.locator('[data-select="fdtd"]').click();await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');await page.getByLabel('time steps',{exact:true}).fill('300');await page.getByLabel('time steps',{exact:true}).press('Tab');
+ await page.locator('[data-select="fdtd"]').click();await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');await page.getByLabel('time steps',{exact:true}).fill('300');await page.getByLabel('time steps',{exact:true}).press('Tab');
  await page.screenshot({path:'results/ui-layout.png',fullPage:true});
  await page.locator('#run-button').click();await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:45000});
  await expect(page.locator('#results-tree')).toContainText('field snapshots');await expect(page.locator('#run-button')).toBeDisabled();
- if(process.env.PHOTONWEAVE_TEST_CUDA){await expect(page.locator('#connection')).toContainText('5880');await expect(page.locator('#results-tree')).toContainText('CUDA graph');}
+ if(process.env.TORCHFDTD_TEST_CUDA){await expect(page.locator('#connection')).toContainText('5880');await expect(page.locator('#results-tree')).toContainText('CUDA graph');}
  await expect(page.locator('[data-add="rectangle"]')).toBeDisabled();
  await page.locator('[data-plot="spectrum"]').click();await page.screenshot({path:'results/ui-results.png',fullPage:true});
  await page.locator('#layout-button').click();await expect(page.locator('#run-button')).toBeEnabled();

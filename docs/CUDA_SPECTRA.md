@@ -3,7 +3,7 @@
 Select `Region(cuda_monitor_kernel="fused")` independently of the Yee kernel, or choose **FDTD → Frequency monitor kernel → Shared CUDA plane DFT**. The default remains `"torch"`. The optional CUDA extension requires `pip install -e ".[cuda-kernels]"`.
 
 ```python
-from photonweave import Simulation, run_tensor_batch
+from torchfdtd import Simulation, run_tensor_batch
 
 project.region.backend = "cuda"
 project.region.cuda_kernel = "fused"

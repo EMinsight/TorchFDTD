@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import (AdjointOptions, BoundaryFace, DifferentiableSimulation,
+from torchfdtd import (AdjointOptions, BoundaryFace, DifferentiableSimulation,
                         Monitor, Project, Region, Simulation, Source, smooth_sphere_epsilon)
 
 
@@ -158,7 +158,7 @@ def test_higher_order_is_explicitly_rejected():
 
 def test_long_history_budget_rejected_before_system_allocation(monkeypatch):
     gpu()
-    import photonweave.differentiable as implementation
+    import torchfdtd.differentiable as implementation
     p=project(steps=100000)
     eps=torch.full(p.region.shape,1.6,dtype=torch.float64,device='cuda')
     fields_only=102*math.prod(p.region.shape)*eps.element_size()
@@ -253,7 +253,7 @@ def test_mesh_metrics_and_fixed_plane_source_gradients(scene,device):
     mask=torch.zeros_like(baseline)
     if scene=='nonuniform':mask[5:11,5:10]=1
     else:
-        from photonweave.solver import field_axes
+        from torchfdtd.solver import field_axes
         x=torch.tensor(field_axes(p.region,'Ez')[0],device=device)
         sign=1 if scene=='oneway_forward' else -1
         mask[(x*sign>.25)&(x*sign<.8)]=1

@@ -16,9 +16,9 @@ import time
 
 import torch
 
-from photonweave import (AdjointBatchOptions, AdjointExecutionPolicy, AdjointOptions,
+from torchfdtd import (AdjointBatchOptions, AdjointExecutionPolicy, AdjointOptions,
                         PeriodicLayerResponse)
-from photonweave.differentiable import _System
+from torchfdtd.differentiable import _System
 
 
 def repeated_shape_setup(self):
@@ -46,7 +46,7 @@ def main(argv=None):
         raise ValueError('Use at least three repetitions and 128 steps.')
     torch.set_num_threads(4)
     root = Path(__file__).resolve().parents[1]
-    sources = [Path(__file__).resolve(), *sorted((root/'photonweave').glob('*.py'))]
+    sources = [Path(__file__).resolve(), *sorted((root/'torchfdtd').glob('*.py'))]
     report = dict(stage='running', scope=__doc__, hardware=torch.cuda.get_device_name(),
         torch_version=torch.__version__, cpu_threads=torch.get_num_threads(), repeats=args.repeats,
         warmups_per_variant=1, baseline_revision='8d9ae7a', cases=[],

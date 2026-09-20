@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import run_tensor_batch, Simulation, BatchCase, Result, Source, FieldMonitor, SpectrumSettings
+from torchfdtd import run_tensor_batch, Simulation, BatchCase, Result, Source, FieldMonitor, SpectrumSettings
 from test_solver import small
 from test_multipole import multi_material
 

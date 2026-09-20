@@ -7,8 +7,8 @@ from fastapi.testclient import TestClient
 import pytest
 import torch
 
-from photonweave import PeriodicDesignConfig, periodic_design_plan, run_periodic_design
-from photonweave.server import create_app
+from torchfdtd import PeriodicDesignConfig, periodic_design_plan, run_periodic_design
+from torchfdtd.server import create_app
 
 
 def test_adam_result_scores_evaluated_design_and_cancellation():
@@ -17,7 +17,7 @@ def test_adam_result_scores_evaluated_design_and_cancellation():
         calls.append(density.detach().clone())
         return density.mean().expand(2,4)
     config=PeriodicDesignConfig(initial_density=[[.3,.4]],iterations=2,learning_rate=.01)
-    with patch('photonweave.periodic_design._prepare',return_value=(model,{})):
+    with patch('torchfdtd.periodic_design._prepare',return_value=(model,{})):
         result=run_periodic_design(config)
     assert len(calls)==3 and result['updates_completed']==2
     assert result['history'][-1]['objective'] > result['history'][0]['objective']
@@ -25,7 +25,7 @@ def test_adam_result_scores_evaluated_design_and_cancellation():
     assert result['last_evaluated']['objective']==float(calls[-1].mean())
     assert result['pending_density'] is None
     event=threading.Event()
-    with patch('photonweave.periodic_design._prepare',return_value=(model,{})):
+    with patch('torchfdtd.periodic_design._prepare',return_value=(model,{})):
         cancelled=run_periodic_design(config,cancel=event,
             on_progress=lambda p:event.set() if p['stage']=='evaluated' else None)
     assert cancelled['status']=='cancelled' and cancelled['updates_completed']==0
@@ -34,7 +34,7 @@ def test_adam_result_scores_evaluated_design_and_cancellation():
 
 def test_memory_plan_runs_no_fields_and_revalidates_mutated_config():
     config=PeriodicDesignConfig(initial_density=[[.3,.4],[.5,.6]],quadrature_counts=(4,4))
-    with patch('photonweave.periodic_adjoint.PeriodicLayerResponse._compute_response',
+    with patch('torchfdtd.periodic_adjoint.PeriodicLayerResponse._compute_response',
                side_effect=AssertionError('Planning must not solve fields')):
         plan=periodic_design_plan(config)
     assert plan['calibration_solves']==0 and plan['selection']['mode']=='resident'
@@ -62,7 +62,7 @@ def test_design_routes_share_queue_and_export_validated_python(tmp_path):
         def fake_run(config,*,on_progress,cancel):
             on_progress(dict(stage='evaluated',updates_completed=1,history=[{'update':1,'objective':.6}]))
             return dict(status='completed',updates_completed=1,best={'objective':.6},last_evaluated={'objective':.6})
-        with patch('photonweave.design_service.run_periodic_design',fake_run):
+        with patch('torchfdtd.design_service.run_periodic_design',fake_run):
             response=client.post('/api/design/jobs',json=config)
             assert response.status_code==202
             key=response.json()['id']

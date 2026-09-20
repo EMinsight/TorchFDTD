@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import numpy as np
 
-from photonweave import Project, Region, Source, Monitor, Boundaries, BoundaryFace, Simulation
+from torchfdtd import Project, Region, Source, Monitor, Boundaries, BoundaryFace, Simulation
 
 
 def plane_project(axis=0, component=2, direction='+', dimension='3d', index=1.):
@@ -85,7 +85,7 @@ def main():
                     row=measure(plane_project(axis,ec,d,dimension))
                     cases.append(row)
                     print(dimension,row['normal'],row['component'],d,row['relative_l2'],row['outside_electric_peak_ratio'])
-    from photonweave.injection import oneway_tables
+    from torchfdtd.injection import oneway_tables
     incident=[]
     for index in (1.,1.5,3.):
         p=plane_project(dimension='2d',index=index);p.region.steps=1600

@@ -28,7 +28,7 @@ class StateStore:
             raise ValueError('free_reserve_bytes must be a nonnegative integer.')
         parent = Path(directory).expanduser().resolve()
         parent.mkdir(parents=True,exist_ok=True)
-        self.root = Path(tempfile.mkdtemp(prefix='photonweave-state-',dir=parent))
+        self.root = Path(tempfile.mkdtemp(prefix='torchfdtd-state-',dir=parent))
         self.budget = budget
         self.free_reserve_bytes = free_reserve_bytes
         self.banks = weakref.WeakValueDictionary()

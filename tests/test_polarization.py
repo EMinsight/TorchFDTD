@@ -1,7 +1,7 @@
 from dataclasses import replace
 import pytest
 import torch
-from photonweave import calibrate_plane_polarization,mix_plane_fields,DifferentiablePlaneResult
+from torchfdtd import calibrate_plane_polarization,mix_plane_fields,DifferentiablePlaneResult
 
 
 def bases():

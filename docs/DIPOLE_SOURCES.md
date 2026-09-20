@@ -5,7 +5,7 @@ Version 0.12 adds arbitrary linear orientation and magnetic excitation to native
 ## Python and UI
 
 ```python
-from photonweave import Project, Region, Source, Monitor, Simulation
+from torchfdtd import Project, Region, Source, Monitor, Simulation
 
 project = Project(
     region=Region(dimension='3d', size=(4, 4, 4), mesh=0.1,

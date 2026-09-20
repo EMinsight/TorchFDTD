@@ -1,9 +1,9 @@
 # Native boundaries and complex fields
 
-PhotonWeave v0.2 supports independently configured PML faces and paired Periodic/Bloch faces in its CPU and CUDA engines. The browser exposes these under FDTD → Boundary conditions. Python uses the same project model.
+TorchFDTD v0.2 supports independently configured PML faces and paired Periodic/Bloch faces in its CPU and CUDA engines. The browser exposes these under FDTD → Boundary conditions. Python uses the same project model.
 
 ```python
-from photonweave import Project, Region, BoundaryFace, Boundaries
+from torchfdtd import Project, Region, BoundaryFace, Boundaries
 
 project = Project(region=Region(
     boundaries=Boundaries(

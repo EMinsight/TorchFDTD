@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 import numpy as np
-from photonweave import (Project,Region,Structure,Source,FieldMonitor,SpectrumSettings,
+from torchfdtd import (Project,Region,Structure,Source,FieldMonitor,SpectrumSettings,
                          Boundaries,BoundaryFace,Simulation,normalize_flux)
 
 

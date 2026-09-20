@@ -3,9 +3,9 @@
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,booktabs}
 \usepackage[margin=25mm]{geometry}
-\title{Hierarchical discrete adjoints in PhotonWeave\\\large Development methods supplement}
+\title{Hierarchical discrete adjoints in TorchFDTD\\\large Development methods supplement}
 \author{Hyoseok Park}
-\date{20 September 2026}
+\date{21 September 2026}
 \begin{document}
 \maketitle
 
@@ -115,7 +115,7 @@ $L_NL_N^{\mathsf T}=\Sigma_N$. Define
 The implemented posterior and information are
 \begin{align}
  \Sigma_{Z|Y}&=R+C^{\mathsf T}Q^{-1}C,\\
- I(Y;Z)&=\frac{\log\det\Sigma_{ZZ}-\log\det\Sigma_{Z|Y}}{2\log 2}.
+ I(Y,Z)&=\frac{\log\det\Sigma_{ZZ}-\log\det\Sigma_{Z|Y}}{2\log 2}.
 \end{align}
 Triangular and Cholesky solves replace explicit inverses. A response-dependent
 shot covariance remains differentiable. Invalid covariance inputs are rejected

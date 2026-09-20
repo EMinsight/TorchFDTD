@@ -1,7 +1,7 @@
 import pytest
 import torch
-from photonweave import DifferentiableSimulation,AdjointOptions
-from photonweave.differentiable import _System
+from torchfdtd import DifferentiableSimulation,AdjointOptions
+from torchfdtd.differentiable import _System
 from test_bloch_adjoint import scene
 from test_differentiable import gpu
 
@@ -40,7 +40,7 @@ def test_complex_cuda_state_cpml_and_density_vjp(dtype,nonuniform):
 
 @pytest.mark.parametrize('dtype',[torch.float32,torch.float64])
 def test_three_dimensional_negative_seams_and_disk_replay(dtype,tmp_path):
-    from photonweave import Source,Monitor
+    from torchfdtd import Source,Monitor
     gpu()
     p=scene();p.region.dimension='3d'
     p.region.boundaries.y_min.kind=p.region.boundaries.y_max.kind='bloch'

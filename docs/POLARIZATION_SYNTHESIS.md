@@ -8,7 +8,7 @@ p electric vector is cos(theta)*(cos(phi),sin(phi)) and s is
 (-sin(phi),cos(phi)). The longitudinal component is supplied by Maxwell's
 equations, not discarded.
 
-PhotonWeave can synthesize these selected-frequency responses from two
+TorchFDTD can synthesize these selected-frequency responses from two
 independent source-basis solves. First run both sources in a homogeneous
 reference medium under `torch.no_grad()`. At a downstream reference plane,
 remove the known transverse Bloch phase and quadrature-average the tangential
@@ -16,7 +16,7 @@ electric fields. These two vectors form a 2-by-2 matrix M at each frequency.
 `calibrate_plane_polarization` solves M c = target for fixed coefficients c.
 
 ```python
-from photonweave import calibrate_plane_polarization, mix_plane_fields
+from torchfdtd import calibrate_plane_polarization, mix_plane_fields
 
 # references and samples each contain two DifferentiablePlaneResult objects.
 # kt has shape (frequency, 2), in radians per micrometre.

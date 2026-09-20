@@ -2,9 +2,9 @@
 import pytest
 import torch
 
-from photonweave import BoundaryFace, Project, Region
-from photonweave.differentiable import _System
-from photonweave.spacetime import SlabBlockOperator
+from torchfdtd import BoundaryFace, Project, Region
+from torchfdtd.differentiable import _System
+from torchfdtd.spacetime import SlabBlockOperator
 
 
 class UnderHalo(SlabBlockOperator):

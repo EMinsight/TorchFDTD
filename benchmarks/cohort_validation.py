@@ -8,8 +8,8 @@ import time
 import numpy as np
 import torch
 
-from photonweave import Simulation, run_tensor_batch
-from photonweave.solver import hardware
+from torchfdtd import Simulation, run_tensor_batch
+from torchfdtd.solver import hardware
 from .open_source import scene
 from .tensor_batch_validation import objective
 

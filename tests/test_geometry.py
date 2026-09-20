@@ -3,9 +3,9 @@ import math
 import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
-from photonweave import Structure,Material,FDTD,Project,Simulation,run_tensor_batch
-from photonweave.geometry import contains,object_bounds,rotation_matrix
-from photonweave.solver import voxelize,field_axes
+from torchfdtd import Structure,Material,FDTD,Project,Simulation,run_tensor_batch
+from torchfdtd.geometry import contains,object_bounds,rotation_matrix
+from torchfdtd.solver import voxelize,field_axes
 from test_solver import small
 
 

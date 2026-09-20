@@ -6,11 +6,11 @@ import pytest
 import torch
 from fastapi.testclient import TestClient
 
-from photonweave import OpticalData,FitOptions,fit_material,material_fit_report,Material,Simulation,Project,run_tensor_batch
-from photonweave.materials import permittivity,MaterialADE
-from photonweave.boundaries import YeeGrid
-from photonweave.server import create_app
-from photonweave.solver import estimate
+from torchfdtd import OpticalData,FitOptions,fit_material,material_fit_report,Material,Simulation,Project,run_tensor_batch
+from torchfdtd.materials import permittivity,MaterialADE
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.server import create_app
+from torchfdtd.solver import estimate
 from test_solver import small
 
 
@@ -136,7 +136,7 @@ def test_http_import_fit_preview_and_python_serialization(tmp_path):
 
 
 def test_facade_fit_is_atomic_and_preserves_named_structure_assignments():
-    from photonweave import FDTD
+    from torchfdtd import FDTD
     data,_=authored_data('mixed');fd=FDTD(small());name=fd.project.structures[0].material
     before=fd.project.model_dump_json()
     with pytest.raises(ValueError,match='tolerance'):

@@ -4,10 +4,10 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import Project,Region,Source,Monitor,Simulation,RunControl,run_tensor_batch,FDTD,Result
-from photonweave.models import Boundaries,BoundaryFace
-from photonweave.source_preview import preview_source
-from photonweave.waveforms import source_time_signal
+from torchfdtd import Project,Region,Source,Monitor,Simulation,RunControl,run_tensor_batch,FDTD,Result
+from torchfdtd.models import Boundaries,BoundaryFace
+from torchfdtd.source_preview import preview_source
+from torchfdtd.waveforms import source_time_signal
 
 
 from benchmarks.vector_sources import periodic_project, fourier_reference
@@ -69,8 +69,8 @@ def test_mixed_vector_sources_cuda_graph_fused_and_tensor_batch(precision):
 
 
 def test_fsp_vector_mapping_and_familiar_python_commands():
-    from photonweave.fsp_native import convert_fsp
-    from photonweave.fsp_binary import FspDocument
+    from torchfdtd.fsp_native import convert_fsp
+    from torchfdtd.fsp_binary import FspDocument
     from test_fsp_native import fixture
     doc=FspDocument(fixture(source_overrides={'theta':43.,'angle':219.,'phase':-27.}))
     original=doc.data
@@ -96,7 +96,7 @@ def test_fsp_vector_mapping_and_familiar_python_commands():
 def test_bloch_magnetic_vector_sheet_and_plane_dft():
     if not torch.cuda.is_available():pytest.skip('CUDA unavailable')
     from test_boundaries import pulse_project
-    from photonweave import FieldMonitor,SpectrumSettings
+    from torchfdtd import FieldMonitor,SpectrumSettings
     p=pulse_project(bloch=True);p.region.steps=140;p.region.material_sampling='yee'
     p.sources[0].component='Hy';p.sources[0].theta=48;p.sources[0].phi=133
     p.monitors.append(FieldMonitor(name='flux',center=(.4,0,0),size=(0,.8,1),

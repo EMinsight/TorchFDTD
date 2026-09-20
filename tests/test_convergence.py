@@ -4,7 +4,7 @@ import threading
 import numpy as np
 import pytest
 
-from photonweave import mesh_convergence, mesh_refinement_projects, normalize_flux
+from torchfdtd import mesh_convergence, mesh_refinement_projects, normalize_flux
 from test_solver import small
 from test_field_monitors import slab_project
 

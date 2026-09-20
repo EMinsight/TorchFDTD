@@ -1,6 +1,6 @@
 """Independent axis spacing and frozen node arrays, without a GUI."""
 import numpy as np
-from photonweave import (Project,Region,Source,Monitor,Boundaries,BoundaryFace,
+from torchfdtd import (Project,Region,Source,Monitor,Boundaries,BoundaryFace,
                         Simulation,run_tensor_batch)
 
 

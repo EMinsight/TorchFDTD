@@ -9,7 +9,7 @@ the existing CPU/CUDA solvers and independent CUDA tensor cohorts directly.
 ## Python workflow
 
 ```python
-from photonweave import OpticalData, FitOptions, fit_material, FDTD
+from torchfdtd import OpticalData, FitOptions, fit_material, FDTD
 
 data = OpticalData.from_csv("my_measurement.csv", unit="nm", kind="nk",
                             reference="Measurement description or citation")

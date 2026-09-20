@@ -2,12 +2,12 @@
 import numpy as np
 import pytest
 
-from photonweave import Project,SourceTimeSettings,TimeSignal,Simulation,run_tensor_batch
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_geometry import write_fsp_scene
-from photonweave.fsp_native import convert_fsp
-from photonweave.spectra import frequency_samples
-from photonweave.waveforms import source_time_signal
+from torchfdtd import Project,SourceTimeSettings,TimeSignal,Simulation,run_tensor_batch
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_geometry import write_fsp_scene
+from torchfdtd.fsp_native import convert_fsp
+from torchfdtd.spectra import frequency_samples
+from torchfdtd.waveforms import source_time_signal
 from test_fsp_geometry_write import assert_untouched,shape_fixture
 from test_fsp_native import fixture
 from test_fsp_monitors import spectral_fixture
@@ -38,7 +38,7 @@ def roundtrip(doc,p):
 
 @pytest.mark.parametrize('raw',[fixture(),settings_fixture(),settings_fixture(inherited=True),shape_fixture(),paired_fixture(),paired_fixture('plane')])
 def test_scene_noop_preserves_every_byte(raw,monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Vendor runtime loaded'))
     doc,p=imported(raw);out,report=write_fsp_scene(doc,p)
     assert out.data==doc.data and report['byte_identical'] and report['edits']==[]
@@ -133,7 +133,7 @@ def test_paired_source_polarization_direction_geometry(kind,axis):
     if kind=='tfsf':s.center=(.03,-.02,.01);s.size=(1.5,1.6,1.7)
     else:
         center=list(s.center);center[axis]=.7;s.center=tuple(center)
-    from photonweave.fsp_native import paired_polarization
+    from torchfdtd.fsp_native import paired_polarization
     s.theta,s.phi=paired_polarization(axis,211.)
     q,_=roundtrip(doc,p)
     a,b=Simulation(p).run(),Simulation(q).run()
@@ -203,13 +203,13 @@ def test_unreferenced_global_settings_and_effective_global_window():
 def test_cli_and_http_scene_export_are_independent_and_preserve_original(tmp_path,monkeypatch):
     import json,subprocess,sys,time
     from fastapi.testclient import TestClient
-    from photonweave import fsp
-    from photonweave.server import create_app
+    from torchfdtd import fsp
+    from torchfdtd.server import create_app
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Vendor runtime loaded'))
     raw=settings_fixture();doc,p=imported(raw);p.sources[0].phase=17;p.monitors[0].spectrum.apodization='end'
     original=tmp_path/'original.fsp';original.write_bytes(raw);scene=tmp_path/'scene.json';p.save(scene)
     output=tmp_path/'edited.fsp';report=tmp_path/'write.json'
-    command=[sys.executable,'-m','photonweave.cli','fsp-write-scene',str(original),str(scene),'--output',str(output),'--report',str(report)]
+    command=[sys.executable,'-m','torchfdtd.cli','fsp-write-scene',str(original),str(scene),'--output',str(output),'--report',str(report)]
     run=subprocess.run(command,capture_output=True,text=True);assert run.returncode==0,run.stderr
     assert json.loads(report.read_text())['scope']=='existing objects and supported settings'
     assert subprocess.run(command,capture_output=True).returncode!=0
@@ -238,7 +238,7 @@ def test_cli_and_http_scene_export_are_independent_and_preserve_original(tmp_pat
 
 
 def test_scene_input_controls_are_written_with_resolved_values():
-    from photonweave.fsp_native import FDTD,DIPOLE,DFT
+    from torchfdtd.fsp_native import FDTD,DIPOLE,DFT
     doc,p=imported(settings_fixture());s=p.sources[0]
     s.pulse='broadband';s.time_definition='wavelength';s.wavelength_start=1.2;s.wavelength_stop=1.9
     p.monitors[0].time_downsample=2
@@ -255,15 +255,15 @@ def test_scene_input_controls_are_written_with_resolved_values():
 
 
 def test_sampled_source_sampling_override_and_stored_pml_limits():
-    from photonweave.fsp_settings import PropertyPlan
-    from photonweave.fsp_native import FDTD
+    from torchfdtd.fsp_settings import PropertyPlan
+    from torchfdtd.fsp_native import FDTD
     doc,p=imported(settings_fixture())
     p.sources[0].pulse='sampled';p.sources[0].signal=TimeSignal(time_s=[0,1e-15],amplitude=[0,1],phase_rad=[0,1])
     with pytest.raises(ValueError,match='time_downsample=1'):write_fsp_scene(doc,p)
     p.monitors[0].time_downsample=1;roundtrip(doc,p)
     # Supply independently authored profile limits as input metadata.
     domain=next(n for n in doc.root.children if n.uid==FDTD)
-    from photonweave.fsp_binary import Value
+    from torchfdtd.fsp_binary import Value
     domain.properties['minPMLLayers']=Value(np.full((6,1),4),5,0,0,0)
     p.region.boundaries.x_min.layers=3
     with pytest.raises(ValueError,match='profile limits'):write_fsp_scene(doc,p)

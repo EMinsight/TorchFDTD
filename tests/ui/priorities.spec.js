@@ -3,8 +3,8 @@ import fs from 'node:fs';
 
 test('priorities filter, decay controls, completion reason and Python export',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const project={name:'Decay verification',region:{size:[4,4,1],mesh:.1,pml_cells:5,steps:1400,snapshot_interval:500,backend:process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu'},structures:[],sources:[{kind:'point',center:[0,0,0],wavelength:1,pulse_cycles:1}],monitors:[{center:[.8,0,0]}]};
- await page.addInitScript(p=>localStorage.setItem('photonweave.project.v1',JSON.stringify(p)),project);
+ const project={name:'Decay verification',region:{size:[4,4,1],mesh:.1,pml_cells:5,steps:1400,snapshot_interval:500,backend:process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu'},structures:[],sources:[{kind:'point',center:[0,0,0],wavelength:1,pulse_cycles:1}],monitors:[{center:[.8,0,0]}]};
+ await page.addInitScript(p=>localStorage.setItem('torchfdtd.project.v1',JSON.stringify(p)),project);
  await page.goto('/');await expect(page.locator('#tree')).toContainText('FDTD');
  await page.locator('[data-action="capabilities"]').click();
  const audit=page.locator('.capability-dialog');

@@ -7,7 +7,7 @@ from .solver import Simulation, hardware
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='photonweave')
+    parser = argparse.ArgumentParser(prog='torchfdtd')
     sub = parser.add_subparsers(dest='command', required=True)
     serve = sub.add_parser('serve', help='Open the local web workbench')
     serve.add_argument('--port', type=int, default=8765)

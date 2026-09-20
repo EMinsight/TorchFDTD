@@ -2,8 +2,8 @@ import time
 
 from fastapi.testclient import TestClient
 
-from photonweave.models import demo_project
-from photonweave.server import create_app
+from torchfdtd.models import demo_project
+from torchfdtd.server import create_app
 
 
 def test_api_job_lifecycle(tmp_path):

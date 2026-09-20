@@ -32,7 +32,7 @@ The preview shows structure bounds, not their exact curved surfaces. For large g
 ## Python
 
 ```python
-from photonweave import Project, Region, MeshRefinement, Simulation, freeze_refinements
+from torchfdtd import Project, Region, MeshRefinement, Simulation, freeze_refinements
 
 p = Project(region=Region(
     dimension='3d', size=(6, 6, 6), mesh=0.046875,
@@ -56,7 +56,7 @@ The familiar editing facade additionally supports `set('mesh type', 'graded')`, 
 
 Start with Uniform + Yee as the accuracy baseline. Try Graded with 24 background cells/λ, then compare the complex response with the uniform case and refine the fine spacing. Increasing cells/λ or adding refinement regions reduces coarsening. If almost all cells are already fine, Graded can be slower because metric operations still cost time. Strong resonances can require a smaller **dt stability factor** as well as a finer spatial grid.
 
-Lumerical describes nonuniform grid resolution and conformal interface treatment as distinct techniques in its official [mesh refinement guide](https://optics.ansys.com/hc/en-us/articles/360034382614-Selecting-the-best-mesh-refinement-option-in-the-FDTD-simulation-object) and [FDTD simulation object documentation](https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object). PhotonWeave's controls implement the specific algorithm above, with separately measured behavior.
+Lumerical describes nonuniform grid resolution and conformal interface treatment as distinct techniques in its official [mesh refinement guide](https://optics.ansys.com/hc/en-us/articles/360034382614-Selecting-the-best-mesh-refinement-option-in-the-FDTD-simulation-object) and [FDTD simulation object documentation](https://optics.ansys.com/hc/en-us/articles/360034382534-FDTD-solver-Simulation-Object). TorchFDTD's controls implement the specific algorithm above, with separately measured behavior.
 
 
 Current validation uses discrete identities, analytic propagation and CPU/CUDA agreement. Grading is a selectable heuristic, with no universal accuracy or speed guarantee. Earlier commercial comparisons are excluded.

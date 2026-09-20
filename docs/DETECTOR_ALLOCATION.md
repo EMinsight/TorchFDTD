@@ -2,7 +2,7 @@
 
 The inspected active CR reference distributes total transmission among four
 wells using detector-plane electric intensity. It does not integrate local
-Poynting flux independently in each well. PhotonWeave now provides this
+Poynting flux independently in each well. TorchFDTD now provides this
 differentiable allocation separately from its physical power monitor.
 
 For quadrature point weights w and electric components E, the well integrals
@@ -13,7 +13,7 @@ G1 low-x/high-y and B high-x/high-y. Split coordinates are explicit physical
 coordinates. An origin translation must also translate the split.
 
 ```python
-from photonweave import DifferentiablePlaneSimulation, quadrant_intensity_allocation
+from torchfdtd import DifferentiablePlaneSimulation, quadrant_intensity_allocation
 
 # project contains a z-normal monitor named detector, spanning the periodic cell.
 model = DifferentiablePlaneSimulation(

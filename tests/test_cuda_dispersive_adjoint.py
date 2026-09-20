@@ -6,9 +6,9 @@ import weakref
 import pytest
 import torch
 
-from photonweave import AdjointOptions, BoundaryFace, DispersiveSimulation
-from photonweave.dispersive_adjoint import _DispersiveSystem
-from photonweave.cuda_dispersive_adjoint import FusedDispersiveAdjointCUDA
+from torchfdtd import AdjointOptions, BoundaryFace, DispersiveSimulation
+from torchfdtd.dispersive_adjoint import _DispersiveSystem
+from torchfdtd.cuda_dispersive_adjoint import FusedDispersiveAdjointCUDA
 from test_differentiable import gpu, project
 
 
@@ -141,7 +141,7 @@ def test_native_ade_releases_system_without_cyclic_gc():
 @pytest.mark.parametrize('backward', ['torch','fused'])
 def test_fused_plane_flux_zero_pole_and_material_finite_difference(backward):
     gpu()
-    from photonweave import DifferentiablePlaneSimulation, DispersivePlaneSimulation
+    from torchfdtd import DifferentiablePlaneSimulation, DispersivePlaneSimulation
     from test_adjoint_planes import scene
     p=scene();p.region.steps=23;p.region.cuda_kernel='fused'
     eps=torch.full(p.region.shape,1.7,device='cuda',dtype=torch.float64)

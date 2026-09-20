@@ -7,7 +7,7 @@ created or pushed by this work.
 
 The latest request is to continue through GitHub deployment. A private
 development repository has been created at
-[hyoseokp/photonweave](https://github.com/hyoseokp/photonweave). This is an
+[hyoseokp/TorchFDTD](https://github.com/hyoseokp/TorchFDTD). This is an
 intermediate development delivery while the earlier public-release conditions
 remain open. Its [preview scope](PREVIEW_RELEASE.md) identifies implemented
 features and remaining gaps. No public visibility change is authorized by this

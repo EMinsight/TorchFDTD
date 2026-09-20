@@ -8,7 +8,7 @@ import statistics
 import time
 
 import torch
-from photonweave import (AdjointOptions, BoundaryFace, DispersiveSimulation,
+from torchfdtd import (AdjointOptions, BoundaryFace, DispersiveSimulation,
                         Monitor, Project, Region, Source)
 
 
@@ -67,7 +67,7 @@ def main():
         for name in names[repeat%3:]+names[:repeat%3]:iteration(name,True)
     medians={name:statistics.median(row['full_wall_seconds'] for row in records[name]) for name in names}
     root=Path(__file__).resolve().parents[1]
-    paths=sorted((root/'photonweave').glob('*.py'))+[Path(__file__).resolve()]
+    paths=sorted((root/'torchfdtd').glob('*.py'))+[Path(__file__).resolve()]
     report=dict(grid=p.region.shape,steps=p.region.steps,precision=args.precision,complex_bloch=args.complex_bloch,
         device=torch.cuda.get_device_name(),torch_version=torch.__version__,cuda_version=torch.version.cuda,
         warmups_per_mode=1,repeats=args.repeats,records=records,median_seconds=medians,

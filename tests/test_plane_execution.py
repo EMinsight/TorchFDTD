@@ -6,11 +6,11 @@ import weakref
 import pytest
 import torch
 
-from photonweave import (AdjointOptions, AdjointExecutionPolicy, FieldMonitor,
+from torchfdtd import (AdjointOptions, AdjointExecutionPolicy, FieldMonitor,
     Monitor, StreamedAdjointOptions, tune_adjoint_execution)
-from photonweave.adjoint_planes import DifferentiablePlaneSimulation
-from photonweave.dispersive_adjoint import DispersivePlaneSimulation
-from photonweave.execution_tuning import _resident_reservation, _StreamedPlanesFromHost
+from torchfdtd.adjoint_planes import DifferentiablePlaneSimulation
+from torchfdtd.dispersive_adjoint import DispersivePlaneSimulation
+from torchfdtd.execution_tuning import _resident_reservation, _StreamedPlanesFromHost
 from test_streamed_dispersive import scene, inputs
 
 
@@ -88,7 +88,7 @@ def test_quadrature_selection_survives_file_policy_and_geometry_graph(tmp_path):
     p=planes(True,'3d')
     counts={'first':(2,3),'second':(3,2)}
     radius=torch.tensor(.24,dtype=torch.float64,requires_grad=True)
-    from photonweave import smooth_sphere_epsilon
+    from torchfdtd import smooth_sphere_epsilon
     epsilon=smooth_sphere_epsilon(p.region,radius,width=.1,inside=2.)
     frequency=[.035/p.region.time_step]
     candidates=policies(directory=tmp_path)
@@ -127,13 +127,13 @@ def test_invalid_plane_contract_rejected_before_tuning(monkeypatch,kind):
     elif kind=='missing_frequency':settings={}
     else:settings['window']=torch.ones(p.region.steps)
     def forbidden(*a,**kw):pytest.fail('Generated candidates for an unsupported observation contract')
-    monkeypatch.setattr('photonweave.execution_tuning._generated_candidates',forbidden)
+    monkeypatch.setattr('torchfdtd.execution_tuning._generated_candidates',forbidden)
     with pytest.raises(ValueError):tune_adjoint_execution(p,inputs(p,'shared')[0],**settings)
 
 
 @pytest.mark.parametrize('mode',['resident','streamed'])
 def test_plane_layout_denied_before_state_or_material_packing(monkeypatch,mode):
-    from photonweave.plane_execution import plane_reservation
+    from torchfdtd.plane_execution import plane_reservation
     p=planes()
     values=inputs(p,'shared',True)
     policy=policies()[mode=='streamed']
@@ -145,8 +145,8 @@ def test_plane_layout_denied_before_state_or_material_packing(monkeypatch,mode):
     model=limited.simulation(p,dispersive=True)
     def forbidden(*a,**kw):pytest.fail('Allocated state or packed materials before plane layout admission')
     monkeypatch.setattr(torch,'cat',forbidden)
-    monkeypatch.setattr('photonweave.differentiable._System',forbidden)
-    monkeypatch.setattr('photonweave.streamed_dispersive._SlabDispersiveSystem',forbidden)
+    monkeypatch.setattr('torchfdtd.differentiable._System',forbidden)
+    monkeypatch.setattr('torchfdtd.streamed_dispersive._SlabDispersiveSystem',forbidden)
     with pytest.raises(ValueError,match='host budget'):model(*values,frequency_hz=[1e14])
 
 
@@ -179,7 +179,7 @@ def test_calibration_rejects_corrupted_plane_vjp(monkeypatch):
 
 
 def test_plane_tuning_releases_system_before_uncached_reference(monkeypatch):
-    from photonweave.differentiable import _System
+    from torchfdtd.differentiable import _System
     p=planes()
     live=[]
     original=_System.__init__
@@ -202,7 +202,7 @@ def test_plane_tuning_releases_system_before_uncached_reference(monkeypatch):
 
 
 def test_reference_signature_tracks_resolved_global_source():
-    from photonweave.adjoint_planes import _plane_signature
+    from torchfdtd.adjoint_planes import _plane_signature
     p=planes()
     p.sources[0].use_global_source=True
     q=p.model_copy(deep=True)

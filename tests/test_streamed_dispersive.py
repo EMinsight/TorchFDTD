@@ -4,11 +4,11 @@ from dataclasses import replace
 import pytest
 import torch
 
-from photonweave import (BoundaryFace, DispersiveSimulation, DispersivePlaneSimulation, Region,
+from torchfdtd import (BoundaryFace, DispersiveSimulation, DispersivePlaneSimulation, Region,
                          StreamedDispersiveSimulation, StreamedAdjointOptions)
-from photonweave.streamed_dispersive import (_SlabDispersiveSystem, DispersiveSlabBlockOperator,
+from torchfdtd.streamed_dispersive import (_SlabDispersiveSystem, DispersiveSlabBlockOperator,
                                              _DispersiveExecution, _pole_state, _slab_state)
-from photonweave.dispersive_adjoint import _DispersiveSystem
+from torchfdtd.dispersive_adjoint import _DispersiveSystem
 from test_dispersive_adjoint import project
 
 
@@ -105,7 +105,7 @@ def test_admission_includes_poles_and_precedes_pack(tmp_path, monkeypatch):
     options = StreamedAdjointOptions(device='cpu', slab_width=3, temporal_depth=2,
         state_storage='disk', state_directory=tmp_path/'scratch', disk_budget_bytes=64*1024**2)
     report = execution.reservation(p, parameters, options, None)
-    from photonweave import estimate_streamed_dispersive_memory
+    from torchfdtd import estimate_streamed_dispersive_memory
     assert report == estimate_streamed_dispersive_memory(p,layout.shapes,options)
     host = execution.host(p, parameters, None)
     assert report['state_bytes'] == sum(s.numel()*s.element_size() for s in host.state())

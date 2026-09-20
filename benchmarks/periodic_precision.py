@@ -14,7 +14,7 @@ import time
 
 import torch
 
-from photonweave import AdjointBatchOptions, AdjointExecutionPolicy, AdjointOptions, PeriodicLayerResponse
+from torchfdtd import AdjointBatchOptions, AdjointExecutionPolicy, AdjointOptions, PeriodicLayerResponse
 
 
 def main(argv=None):
@@ -27,7 +27,7 @@ def main(argv=None):
         raise ValueError('Require CUDA, at least 128 steps and three repetitions.')
     torch.set_num_threads(4)
     root = Path(__file__).resolve().parents[1]
-    files = [Path(__file__).resolve(), *sorted((root/'photonweave').glob('*.py'))]
+    files = [Path(__file__).resolve(), *sorted((root/'torchfdtd').glob('*.py'))]
     report = dict(stage='running', scope=__doc__, hardware=torch.cuda.get_device_name(),
         torch_version=torch.__version__, cpu_threads=4, steps=args.steps, repeats=args.repeats,
         warmups_per_precision=1, design_and_objective_precision='Matches each run precision',

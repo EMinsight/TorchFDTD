@@ -3,9 +3,9 @@ import threading
 import numpy as np
 import pytest
 
-from photonweave import Project, Region, Structure, Source, Monitor, Simulation
-from photonweave.models import demo_project
-from photonweave.solver import voxelize
+from torchfdtd import Project, Region, Structure, Source, Monitor, Simulation
+from torchfdtd.models import demo_project
+from torchfdtd.solver import voxelize
 
 
 def small(backend='cpu', dimension='2d', precision='float64'):

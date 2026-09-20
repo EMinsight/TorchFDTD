@@ -3,9 +3,9 @@ from unittest.mock import patch
 import pytest
 import torch
 
-from photonweave import PeriodicLayerResponse, PeriodicResponseCache
+from torchfdtd import PeriodicLayerResponse, PeriodicResponseCache
 from test_periodic_adjoint import model, SPEC, SETTINGS, policy, BUDGET
-from photonweave import AdjointBatchOptions
+from torchfdtd import AdjointBatchOptions
 
 
 @pytest.fixture(autouse=True)

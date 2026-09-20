@@ -6,7 +6,7 @@ from pathlib import Path
 import statistics
 import time
 import torch
-from photonweave import (Project,Region,Source,Monitor,BoundaryFace,Boundaries,
+from torchfdtd import (Project,Region,Source,Monitor,BoundaryFace,Boundaries,
                         AdjointOptions,DifferentiableSimulation,recompute_cases)
 
 

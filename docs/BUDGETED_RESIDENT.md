@@ -13,7 +13,7 @@ the conservative Torch workspace. It also reserves cold spectral library
 workspace and explicit allocation headroom.
 
 ```python
-from photonweave import (
+from torchfdtd import (
     Region, Project, Source, Monitor, AdjointOptions, estimate_adjoint_memory,
 )
 

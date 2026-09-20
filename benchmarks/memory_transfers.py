@@ -2,7 +2,7 @@
 import argparse
 import json
 from pathlib import Path
-from photonweave import profile_memory_transfers
+from torchfdtd import profile_memory_transfers
 
 
 def main():

@@ -34,7 +34,8 @@ def main() -> None:
         raise SystemExit('Install TeX Live or MiKTeX with pdflatex and bibtex on PATH.')
     if not args.keep_assets:
         build_assets()
-    files = [PAPER / 'manuscript.tex', PAPER / 'references.bib', PAPER / 'README.md',
+    files = [PAPER / 'manuscript.tex', PAPER / 'hierarchical-adjoint-notes.tex',
+             PAPER / 'references.bib', PAPER / 'README.md',
              PAPER / 'asset-provenance.json', *sorted((PAPER / 'figures').glob('*.pdf')),
              *sorted((PAPER / 'tables').glob('*.tex'))]
     for path in files:
@@ -50,7 +51,7 @@ def main() -> None:
         destination = build / path.relative_to(PAPER)
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, destination)
-    job = 'photonweave-manuscript'
+    job = 'torchfdtd-manuscript'
     latex = [engines['pdflatex'], '-interaction=nonstopmode', '-halt-on-error',
              '-file-line-error', '-no-shell-escape', f'-jobname={job}', 'manuscript.tex']
     run(latex, build, 'latex-pass-1')
@@ -67,7 +68,7 @@ def main() -> None:
     output.mkdir(parents=True, exist_ok=True)
     for destination in (PAPER / f'{job}.pdf', output / f'{job}.pdf'):
         shutil.copyfile(build / f'{job}.pdf', destination)
-    bundle = ROOT / 'output/photonweave-latex-source.zip'
+    bundle = ROOT / 'output/torchfdtd-latex-source.zip'
     with ZipFile(bundle, 'w', ZIP_DEFLATED) as archive:
         for path in files:
             archive.write(path, path.relative_to(PAPER).as_posix())

@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 import numpy as np
 import torch
-from photonweave import periodic_layer_response,AdjointOptions
+from torchfdtd import periodic_layer_response,AdjointOptions
 
 
 def main():

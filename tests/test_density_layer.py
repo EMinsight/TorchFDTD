@@ -1,6 +1,6 @@
 import pytest
 import torch
-from photonweave import periodic_density_layer,BoundaryFace
+from torchfdtd import periodic_density_layer,BoundaryFace
 from test_differentiable import project
 
 
@@ -40,7 +40,7 @@ def test_invalid_transfer():
 
 
 def test_fdtd_density_directional_gradient():
-    from photonweave import DifferentiableSimulation,AdjointOptions
+    from torchfdtd import DifferentiableSimulation,AdjointOptions
     p=project(dimension='3d',steps=24);p.region=region()
     model=DifferentiableSimulation(p,AdjointOptions(checkpoints=2))
     d=torch.full((4,3),.4,dtype=torch.float64,requires_grad=True)

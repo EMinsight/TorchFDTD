@@ -1,10 +1,10 @@
 """Synthetic spectral-layout mappings. No vendor runtime or calculation data."""
 import numpy as np
 import pytest
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import DFT, convert_fsp
-from photonweave.models import FieldMonitor
-from photonweave.spectra import frequency_samples
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import DFT, convert_fsp
+from torchfdtd.models import FieldMonitor
+from torchfdtd.spectra import frequency_samples
 from test_fsp_native import fixture
 
 
@@ -88,7 +88,7 @@ def test_xy_layout_lines_map_to_native_invariant_planes(shape,normal):
 
 def test_converted_selected_plane_runs_on_cpu_cuda_and_tensor_batch():
     import torch
-    from photonweave import Simulation,run_tensor_batch
+    from torchfdtd import Simulation,run_tensor_batch
     if not torch.cuda.is_available():pytest.skip('CUDA unavailable')
     report=convert_fsp(FspDocument(spectral_fixture(overrides=dict(outputEx=0,outputHx=0))),backend='cpu')
     assert report.project is not None,report.issues

@@ -4,10 +4,10 @@ import math
 import numpy as np
 import pytest
 
-from photonweave import Project, Simulation, run_tensor_batch
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_geometry import write_fsp_scene, write_fsp_geometry
-from photonweave.fsp_native import FDTD, convert_fsp
+from torchfdtd import Project, Simulation, run_tensor_batch
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_geometry import write_fsp_scene, write_fsp_geometry
+from torchfdtd.fsp_native import FDTD, convert_fsp
 from test_fsp_native import fixture
 from test_fsp_mesh import settings
 from test_fsp_settings_write import imported, roundtrip, settings_fixture
@@ -28,7 +28,7 @@ def authored_2d():
 @pytest.mark.parametrize('axis_steps',[None,(.12,.16,.2)])
 @pytest.mark.parametrize('periodic',[False,True])
 def test_uniform_input_controls_nodes_pml_and_dt(dimension,axis_steps,periodic,monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Commercial API loaded'))
     doc,p=imported(authored_2d() if dimension=='2d' else fixture())
     r=p.region;r.boundaries.x_min.layers=3;r.boundaries.x_max.layers=5

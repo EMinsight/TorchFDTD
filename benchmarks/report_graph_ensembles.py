@@ -19,9 +19,9 @@ def tables(record):
         'Cold context/compilation and disk writes are excluded.','',
         'The current fused monitor adds one shared CUDA phase kernel. The external **flaport/fdtd 0.2.2** sequence receives '
         f'the identical observer and both one-step and {width}-step graph options. The external column uses the **lower measured median** '
-        'of those two options. PhotonWeave uses a fixed one-step graph and shared case launches. '
+        'of those two options. TorchFDTD uses a fixed one-step graph and shared case launches. '
         'This compares ensemble workflows, not an upstream fused-batch implementation.','',
-        '| Workload | Grid | flaport + shared observer, sequence (s) | PhotonWeave batch (s) | vs flaport sequence |',
+        '| Workload | Grid | flaport + shared observer, sequence (s) | TorchFDTD batch (s) | vs flaport sequence |',
         '|---|---:|---:|---:|---:|']
     for c in record['cases']:
         m=c['medians'];b=m['batch_1']['wall_seconds']

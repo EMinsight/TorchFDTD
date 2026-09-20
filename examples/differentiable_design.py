@@ -10,7 +10,7 @@ from pathlib import Path
 
 import torch
 
-from photonweave import (AdjointOptions,DifferentiableSimulation,Monitor,Project,
+from torchfdtd import (AdjointOptions,DifferentiableSimulation,Monitor,Project,
                         Region,Source,smooth_sphere_epsilon,StreamedSimulation,StreamedAdjointOptions,
                         estimate_streamed_memory,select_streamed_storage)
 

@@ -3,10 +3,10 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import Material, Project, Structure, Simulation
-from photonweave.boundaries import YeeGrid
-from photonweave.materials import MaterialADE, permittivity
-from photonweave.solver import voxelize
+from torchfdtd import Material, Project, Structure, Simulation
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.materials import MaterialADE, permittivity
+from torchfdtd.solver import voxelize
 from test_solver import small
 
 
@@ -77,7 +77,7 @@ def test_material_defaults_and_passivity():
 
 
 def test_material_facade_renames_references_and_rejects_unsupported_parameters():
-    from photonweave import FDTD
+    from torchfdtd import FDTD
     fd = FDTD(); name = fd.addmaterial('Lorentz')
     fd.addrect(material=name); fd.setmaterial(name, 'name', 'resonator')
     fd.setmaterial('resonator', 'Lorentz Linewidth', 2e14)
@@ -92,7 +92,7 @@ def test_material_facade_renames_references_and_rejects_unsupported_parameters()
 
 def test_material_preview_rejects_singular_and_invalid_ranges(tmp_path):
     from fastapi.testclient import TestClient
-    from photonweave.server import create_app
+    from torchfdtd.server import create_app
     with TestClient(create_app(tmp_path)) as client:
         material = Material(name='metal', model='drude').model_dump()
         response = client.post('/api/materials/preview?dt_fs=.1', json=material)
@@ -109,9 +109,9 @@ def test_material_preview_rejects_singular_and_invalid_ranges(tmp_path):
 
 @pytest.mark.parametrize('kind', [0,2,4])
 def test_fsp_database_material_mapping_and_priority(kind, monkeypatch):
-    from photonweave import fsp
-    from photonweave.fsp_binary import FspDocument, Reader
-    from photonweave.fsp_native import convert_fsp
+    from torchfdtd import fsp
+    from torchfdtd.fsp_binary import FspDocument, Reader
+    from torchfdtd.fsp_native import convert_fsp
     from test_fsp_native import fixture, items
     from test_fsp_binary import mapping
     monkeypatch.setattr(fsp, 'load_api', lambda: pytest.fail('Independent import loaded vendor API'))

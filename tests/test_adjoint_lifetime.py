@@ -2,7 +2,7 @@ import gc
 import weakref
 import pytest
 import torch
-from photonweave import DifferentiableSimulation,AdjointOptions
+from torchfdtd import DifferentiableSimulation,AdjointOptions
 from test_bloch_adjoint import scene
 
 
@@ -34,9 +34,9 @@ def test_completed_adjoint_does_not_retain_system_until_gc(backend,complex_field
 @pytest.mark.parametrize('device',['cpu','cuda'])
 def test_streamed_replay_releases_operators_and_tiles_without_gc(storage,device,tmp_path,monkeypatch):
     if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
-    import photonweave.streamed as streamed
-    import photonweave.spacetime as spacetime
-    from photonweave import StreamedSimulation,StreamedAdjointOptions
+    import torchfdtd.streamed as streamed
+    import torchfdtd.spacetime as spacetime
+    from torchfdtd import StreamedSimulation,StreamedAdjointOptions
     from test_differentiable import project
     references=[]
     class Operator(streamed.SlabBlockOperator):

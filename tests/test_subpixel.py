@@ -5,10 +5,10 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import Project,Region,Material,Structure,Simulation,run_tensor_batch
-from photonweave.boundaries import YeeGrid
-from photonweave.subpixel import prepare_interfaces,configure_interfaces,interface_tensor
-from photonweave.subpixel_geometry import DielectricGeometry
+from torchfdtd import Project,Region,Material,Structure,Simulation,run_tensor_batch
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.subpixel import prepare_interfaces,configure_interfaces,interface_tensor
+from torchfdtd.subpixel_geometry import DielectricGeometry
 from test_solver import small
 
 
@@ -136,7 +136,7 @@ def test_empty_homogeneous_case_keeps_legacy_fields_exactly():
 @pytest.mark.parametrize('cuda',[False,True])
 def test_interface_buffers_do_not_keep_finished_grids_alive(cuda):
     import weakref
-    from photonweave.cuda_kernels import configure_cuda_kernel
+    from torchfdtd.cuda_kernels import configure_cuda_kernel
     if cuda and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
     p=periodic_project();plan=prepare_interfaces(p)
     try:
@@ -151,7 +151,7 @@ def test_interface_buffers_do_not_keep_finished_grids_alive(cuda):
 
 
 def test_python_facade_roundtrip_and_result_metadata(tmp_path):
-    from photonweave import FDTD,Result
+    from torchfdtd import FDTD,Result
     f=FDTD(project=small());f.set('interface method','subpixel');f.set('subpixel quadrature',16)
     f.save(tmp_path/'scene.json');p=Project.load(tmp_path/'scene.json')
     assert p.region.interface_method=='subpixel' and p.region.material_sampling=='yee'
@@ -187,7 +187,7 @@ def test_cpu_cuda_graph_and_tensor_cohorts_agree(dimension,precision):
 
 @pytest.mark.skipif(not torch.cuda.is_available(),reason='CUDA unavailable')
 def test_complex_bloch_cpu_and_cuda_torch_paths_agree():
-    from photonweave import Source
+    from torchfdtd import Source
     p=periodic_project('3d',True);p.sources=[Source(component='Ey')]
     cpu=Simulation(p).run();p.region.backend='cuda';p.region.cuda_kernel='torch'
     gpu=Simulation(p).run()

@@ -8,7 +8,7 @@ import time
 
 import torch
 
-from photonweave import (Project,Region,Source,Monitor,AdjointOptions,DifferentiableSimulation,
+from torchfdtd import (Project,Region,Source,Monitor,AdjointOptions,DifferentiableSimulation,
                         StreamedAdjointOptions,StreamedSimulation)
 
 

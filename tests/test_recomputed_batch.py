@@ -1,7 +1,7 @@
 import weakref
 import pytest
 import torch
-from photonweave import recompute_cases, DifferentiableSimulation, AdjointOptions
+from torchfdtd import recompute_cases, DifferentiableSimulation, AdjointOptions
 from test_bloch_adjoint import scene
 
 
@@ -90,7 +90,7 @@ def test_output_contract_budget_and_constant_cases():
 
 
 def test_gaussian_information_coupled_cases():
-    from photonweave import gaussian_target_information,shot_read_covariance
+    from torchfdtd import gaussian_target_information,shot_read_covariance
     x=torch.tensor([.2,.4],dtype=torch.float64,requires_grad=True)
     cases=[lambda x,k=k: (x+k).square() for k in (.1,.5,1.)]
     eye=torch.eye(2,dtype=x.dtype)
@@ -103,7 +103,7 @@ def test_gaussian_information_coupled_cases():
 
 @pytest.mark.parametrize('storage',['host','disk'])
 def test_streamed_cases(storage,tmp_path):
-    from photonweave import StreamedSimulation,StreamedAdjointOptions
+    from torchfdtd import StreamedSimulation,StreamedAdjointOptions
     from test_differentiable import project
     cases=[]
     for wavelength in (1.,1.3):

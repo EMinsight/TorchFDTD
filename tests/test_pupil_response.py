@@ -1,6 +1,6 @@
 import pytest
 import torch
-from photonweave import spectral_pupil_response,spectral_electron_model,exposure_target_information
+from torchfdtd import spectral_pupil_response,spectral_electron_model,exposure_target_information
 
 
 @pytest.mark.parametrize('device',['cpu','cuda'])
@@ -45,7 +45,7 @@ def test_invalid_outputs_and_schedule():
 
 
 def test_periodic_response_uniform_medium_and_gradient():
-    from photonweave import periodic_layer_response
+    from torchfdtd import periodic_layer_response
     spec=dict(wavelength_um=.5,background_index=1.4,design_index=1.8,period_um=(.8,.8),
         height_um=.2,detector_offset_um=.5,theta_inside_rad=.1,phi_rad=.3)
     d=torch.full((2,2),.3,dtype=torch.float64,requires_grad=True)

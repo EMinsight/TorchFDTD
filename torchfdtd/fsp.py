@@ -86,7 +86,7 @@ def decode_value(value):
 
 
 def api_path(explicit=None):
-    supplied = explicit or os.environ.get('PHOTONWEAVE_LUMAPI')
+    supplied = explicit or os.environ.get('TORCHFDTD_LUMAPI') or os.environ.get('PHOTONWEAVE_LUMAPI')
     if supplied:
         path = Path(supplied).expanduser()
         if not path.is_file():
@@ -99,7 +99,7 @@ def api_path(explicit=None):
             candidates.extend(base.glob('v*/Lumerical/api/python/lumapi.py'))
     if candidates:
         return sorted(candidates, reverse=True)[0].resolve()
-    raise BridgeUnavailable('FSP bridge requires an installed Lumerical FDTD and CAD license. Set PHOTONWEAVE_LUMAPI to lumapi.py.')
+    raise BridgeUnavailable('FSP bridge requires an installed Lumerical FDTD and CAD license. Set TORCHFDTD_LUMAPI to lumapi.py.')
 
 
 def availability():
@@ -114,7 +114,7 @@ def availability():
 
 def load_api(explicit=None):
     path = api_path(explicit)
-    spec = importlib.util.spec_from_file_location('photonweave_vendor_lumapi', path)
+    spec = importlib.util.spec_from_file_location('torchfdtd_vendor_lumapi', path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -317,7 +317,7 @@ def export_fsp(source, target, patches=(), api=None):
     if not patches:
         _publish(source, target)
         return {'edited': False, 'sha256': fingerprint(target), 'verified': True, 'patches': []}
-    with BRIDGE_LOCK, tempfile.TemporaryDirectory(prefix='photonweave-fsp-') as scratch:
+    with BRIDGE_LOCK, tempfile.TemporaryDirectory(prefix='torchfdtd-fsp-') as scratch:
         private = Path(scratch) / 'working.fsp'
         output = Path(scratch) / 'exported.fsp'
         shutil.copyfile(source, private)

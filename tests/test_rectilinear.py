@@ -4,12 +4,12 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import Project,Region,Simulation,FieldMonitor,SpectrumSettings,run_tensor_batch,Result
-from photonweave.models import Boundaries,BoundaryFace
-from photonweave.boundaries import YeeGrid
-from photonweave.solver import field_axes
-from photonweave.cuda_kernels import FusedYeeCUDA
-from photonweave.tuning import _result_digest
+from torchfdtd import Project,Region,Simulation,FieldMonitor,SpectrumSettings,run_tensor_batch,Result
+from torchfdtd.models import Boundaries,BoundaryFace
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.solver import field_axes
+from torchfdtd.cuda_kernels import FusedYeeCUDA
+from torchfdtd.tuning import _result_digest
 
 
 def periodic(kind='periodic'):
@@ -157,8 +157,8 @@ def test_rectangular_paired_sources_against_independent_scalar_line(axis,directi
 
 
 def test_facade_axis_steps_explicit_atomicity_and_http(tmp_path):
-    from photonweave import FDTD
-    from photonweave.server import create_app
+    from torchfdtd import FDTD
+    from torchfdtd.server import create_app
     from fastapi.testclient import TestClient
     f=FDTD();f.set('dy',.1e-6)
     assert f.project.region.mesh_steps==pytest.approx((.05,.1,.05))
@@ -178,7 +178,7 @@ def test_facade_axis_steps_explicit_atomicity_and_http(tmp_path):
 
 
 def test_variable_physical_pml_depth_suppresses_returning_pulse():
-    from photonweave import Source,Monitor
+    from torchfdtd import Source,Monitor
     nodes=(coordinates(np.r_[.05*(1+.1*np.linspace(1,0,30)**2),np.full(260,.05),.05*(1+.1*np.linspace(0,1,30)**2)]),
            coordinates([.2]*8),coordinates([.2]*8))
     bc=Boundaries(**{a+'_'+s:BoundaryFace(kind='periodic') for a in 'yz' for s in ('min','max')})

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import (BatchCase, FieldMonitor, Simulation, SpectrumSettings,
+from torchfdtd import (BatchCase, FieldMonitor, Simulation, SpectrumSettings,
                         plan_grouped_batch, run_grouped_batch)
 from test_solver import small
 

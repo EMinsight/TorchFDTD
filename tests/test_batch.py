@@ -5,7 +5,7 @@ import threading
 import numpy as np
 import pytest
 
-from photonweave import (Project, Region, Source, Monitor, Simulation, Result, BatchRunner,
+from torchfdtd import (Project, Region, Source, Monitor, Simulation, Result, BatchRunner,
                          parameter_sweep, parameter_case, optimize)
 
 

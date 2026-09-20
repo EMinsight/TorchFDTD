@@ -4,9 +4,9 @@ from dataclasses import replace
 import pytest
 import torch
 
-from photonweave import AdjointOptions, DifferentiableSimulation, DifferentiableResult, StreamedSimulation, StreamedAdjointOptions
-from photonweave.adjoint_spectrum import SpectralObservation
-from photonweave.streamed import _reservation
+from torchfdtd import AdjointOptions, DifferentiableSimulation, DifferentiableResult, StreamedSimulation, StreamedAdjointOptions
+from torchfdtd.adjoint_spectrum import SpectralObservation
+from torchfdtd.streamed import _reservation
 from test_differentiable import project, gpu
 
 
@@ -134,7 +134,7 @@ def test_float32_3d_spectrum_matches_history(device):
 
 
 def test_geometry_central_difference_with_disk_spectrum(tmp_path):
-    from photonweave import smooth_sphere_epsilon
+    from torchfdtd import smooth_sphere_epsilon
     p=project(steps=19)
     model=StreamedSimulation(p,StreamedAdjointOptions(device='cpu',slab_width=5,temporal_depth=4,
                               state_storage='disk',state_directory=tmp_path,disk_budget_bytes=32*1024**2))

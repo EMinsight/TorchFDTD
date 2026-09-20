@@ -2,11 +2,11 @@
 import numpy as np
 import pytest
 
-from photonweave import Source,Monitor,FieldMonitor,SpectrumSettings,TimeSignal,Simulation,run_tensor_batch
-from photonweave.fsp_geometry import write_fsp_scene
-from photonweave.fsp_native import convert_fsp,DIPOLE,TIME,DFT
-from photonweave.waveforms import source_time_signal
-from photonweave.spectra import frequency_samples,point_spectrum
+from torchfdtd import Source,Monitor,FieldMonitor,SpectrumSettings,TimeSignal,Simulation,run_tensor_batch
+from torchfdtd.fsp_geometry import write_fsp_scene
+from torchfdtd.fsp_native import convert_fsp,DIPOLE,TIME,DFT
+from torchfdtd.waveforms import source_time_signal
+from torchfdtd.spectra import frequency_samples,point_spectrum
 from test_fsp_native import fixture
 from test_fsp_settings_write import settings_fixture
 from test_fsp_geometry_write import imported
@@ -45,7 +45,7 @@ def test_add_delete_reorder_dipoles_preserves_vector_waveforms(dimension,definit
         a.pulse='sampled';a.signal=TimeSignal(time_s=[0,2e-15,5e-15,9e-15],amplitude=[0,.7,1,0],phase_rad=[0,-2,-5,-11])
         for m in p.monitors:m.time_downsample=1
     if definition=='global':
-        from photonweave import SourceTimeSettings
+        from torchfdtd import SourceTimeSettings
         p.global_source=SourceTimeSettings(time_definition='standard',pulse_length=4e-15,pulse_offset=7e-15)
         a.use_global_source=True
     p.sources=[b,a]

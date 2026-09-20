@@ -17,10 +17,10 @@ from unittest.mock import patch
 import fdtd
 import torch
 
-from photonweave import Simulation, run_tensor_batch
-from photonweave.solver import hardware
-from photonweave.tuning import _result_digest
-from photonweave.cuda_monitors import FusedFrequencyPlanes
+from torchfdtd import Simulation, run_tensor_batch
+from torchfdtd.solver import hardware
+from torchfdtd.tuning import _result_digest
+from torchfdtd.cuda_monitors import FusedFrequencyPlanes
 from benchmarks.open_source import upstream_run
 from benchmarks.spectral_ensemble import projects_for, arrays, digest, error
 
@@ -42,12 +42,12 @@ def main():
     modes={f'{engine}_{width}':(engine,width) for engine in ('flaport','sequential','batch')
            for width in (1,args.graph_steps)}
     modes['batch_torch_phase']=('batch_torch_phase',1)
-    paths=['photonweave/cuda_graph.py','photonweave/solver.py','photonweave/tensor_batch.py',
-           'photonweave/cuda_kernels.py','photonweave/cuda_batch.py','photonweave/cuda_monitors.py',
-           'photonweave/field_monitors.py','benchmarks/graph_ensembles.py',
+    paths=['torchfdtd/cuda_graph.py','torchfdtd/solver.py','torchfdtd/tensor_batch.py',
+           'torchfdtd/cuda_kernels.py','torchfdtd/cuda_batch.py','torchfdtd/cuda_monitors.py',
+           'torchfdtd/field_monitors.py','benchmarks/graph_ensembles.py',
            'benchmarks/open_source.py','benchmarks/spectral_ensemble.py']
     record=dict(hardware=hardware(),platform=platform.platform(),
-        packages={k:importlib.metadata.version(k) for k in ('photonweave','fdtd','torch','numpy','cupy-cuda12x')},
+        packages={k:importlib.metadata.version(k) for k in ('torchfdtd','fdtd','torch','numpy','cupy-cuda12x')},
         source_sha256={p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in paths},
         upstream_sha256={k:hashlib.sha256(Path(inspect.getfile(v)).read_bytes()).hexdigest()
                          for k,v in [('grid',fdtd.Grid),('boundary',fdtd.PML)]},
@@ -92,7 +92,7 @@ def main():
                         loop=sum(r.summary['seconds'] for r in results)
                         setup=sum(r.summary['setup_seconds'] for r in results)
                     elif engine=='batch_torch_phase':
-                        with patch('photonweave.cuda_monitors.FusedFrequencyPlanes',
+                        with patch('torchfdtd.cuda_monitors.FusedFrequencyPlanes',
                                    partial(FusedFrequencyPlanes,phase_kernel='torch')):
                             report=run_tensor_batch(projects,cohort_size=args.cohort)
                         report.raise_for_errors();results=[item.load() for item in report.items]

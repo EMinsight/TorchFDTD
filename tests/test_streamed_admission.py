@@ -2,8 +2,8 @@
 import pytest
 import torch
 
-from photonweave import Region, Simulation, DifferentiableSimulation, StreamedSimulation, StreamedAdjointOptions
-from photonweave.boundaries import YeeGrid
+from torchfdtd import Region, Simulation, DifferentiableSimulation, StreamedSimulation, StreamedAdjointOptions
+from torchfdtd.boundaries import YeeGrid
 from test_differentiable import project
 
 
@@ -11,11 +11,11 @@ from test_differentiable import project
 @pytest.mark.parametrize('complex_fields',[False,True])
 def test_spectral_plan_matches_storage_execution_and_vjp(diagonal,complex_fields,tmp_path):
     from dataclasses import replace
-    from photonweave import estimate_streamed_memory,select_streamed_storage
+    from torchfdtd import estimate_streamed_memory,select_streamed_storage
     p=project('3d',steps=10)
     p.region.size=(6.4,1.6,1.6)
     if complex_fields:
-        from photonweave import BoundaryFace
+        from torchfdtd import BoundaryFace
         p.region.boundaries.x_min=p.region.boundaries.x_max=BoundaryFace(kind='bloch')
         p.region.bloch_phase=(.4,0,0)
     options=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2,
@@ -38,7 +38,7 @@ def test_spectral_plan_matches_storage_execution_and_vjp(diagonal,complex_fields
 
 def test_spectral_plan_accounts_for_history_reduction_and_validates_settings():
     from dataclasses import replace
-    from photonweave import estimate_streamed_memory,select_streamed_storage
+    from torchfdtd import estimate_streamed_memory,select_streamed_storage
     p=project(steps=10);p.region.steps=100000
     options=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2)
     timed=estimate_streamed_memory(p,options)
@@ -54,7 +54,7 @@ def test_spectral_plan_accounts_for_history_reduction_and_validates_settings():
 
 def test_storage_selection_prefers_host_then_explicit_disk_and_rechecks(tmp_path,monkeypatch):
     from dataclasses import replace
-    from photonweave import select_streamed_storage,estimate_streamed_memory
+    from torchfdtd import select_streamed_storage,estimate_streamed_memory
     p=project('3d',steps=10)
     p.region.size=(6.4,1.6,1.6)
     base=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2,
@@ -81,22 +81,22 @@ def test_storage_selection_prefers_host_then_explicit_disk_and_rechecks(tmp_path
     torch.testing.assert_close(actual_gradient,expected_gradient,rtol=0,atol=0)
     assert not list((tmp_path/'scratch').iterdir())
     # A plan is not a resource lease: changed conditions must reject execution.
-    monkeypatch.setattr('photonweave.streamed.host_memory',lambda:dict(available_bytes=1))
+    monkeypatch.setattr('torchfdtd.streamed.host_memory',lambda:dict(available_bytes=1))
     with pytest.raises(ValueError,match='host budget'):
         StreamedSimulation(p,disk.options)(epsilon)
 
 
 def test_public_plan_handles_beyond_vram_shape_without_allocating_fields(tmp_path,monkeypatch):
-    from photonweave import estimate_streamed_memory, Project, BoundaryFace
+    from torchfdtd import estimate_streamed_memory, Project, BoundaryFace
     region=Region(dimension='3d',size=(102.4,102.4,57.6),mesh=.1,steps=10,
                   pml_cells=3,precision='float64',memory_mode='streamed')
     region.boundaries.x_min=region.boundaries.x_max=BoundaryFace(kind='bloch')
     region.bloch_phase=(.63,0,0)
     p=Project(region=region)
-    monkeypatch.setattr('photonweave.streamed.host_memory',lambda:dict(available_bytes=1024**4))
-    monkeypatch.setattr('photonweave.state_store.disk_free',lambda _:1024**4)
+    monkeypatch.setattr('torchfdtd.streamed.host_memory',lambda:dict(available_bytes=1024**4))
+    monkeypatch.setattr('torchfdtd.state_store.disk_free',lambda _:1024**4)
     def forbidden(*args,**kwargs):raise AssertionError('Field system allocated during planning')
-    monkeypatch.setattr('photonweave.streamed._System',forbidden)
+    monkeypatch.setattr('torchfdtd.streamed._System',forbidden)
     options=StreamedAdjointOptions(device='cpu',state_storage='disk',state_directory=tmp_path/'absent',
         disk_budget_bytes=280*1024**3,host_budget_bytes=76*1024**3,
         slab_width=16,temporal_depth=2,checkpoints=0)
@@ -108,7 +108,7 @@ def test_public_plan_handles_beyond_vram_shape_without_allocating_fields(tmp_pat
 
 @pytest.mark.parametrize('diagonal',[False,True])
 def test_public_memory_plan_matches_execution_without_domain_allocation(diagonal,monkeypatch):
-    from photonweave import estimate_streamed_memory
+    from torchfdtd import estimate_streamed_memory
     p=project(steps=10)
     options=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2)
     original=torch.empty
@@ -158,7 +158,7 @@ def test_streamed_small_scene_preserves_gradient_and_budget_precedes_state(monke
     torch.testing.assert_close(result.signals,expected,rtol=1e-11,atol=1e-12)
     torch.testing.assert_close(actual_gradient,expected_gradient,rtol=1e-10,atol=1e-12)
     def forbidden(*args,**kwargs):raise AssertionError('State allocated before admission')
-    monkeypatch.setattr('photonweave.streamed._System',forbidden)
+    monkeypatch.setattr('torchfdtd.streamed._System',forbidden)
     rejected = StreamedSimulation(p,StreamedAdjointOptions(device='cpu',host_budget_bytes=1))
     with pytest.raises(ValueError,match='host budget'):rejected(epsilon)
 
@@ -171,7 +171,7 @@ def test_resident_guard_rechecks_mutated_shape():
 
 
 def test_estimate_labels_streamed_storage_scope():
-    from photonweave.solver import estimate
+    from torchfdtd.solver import estimate
     p = project(steps=10)
     p.region.memory_mode = 'streamed'
     assert any('not streamed budget admission' in text for text in estimate(p)['warnings'])
@@ -179,7 +179,7 @@ def test_estimate_labels_streamed_storage_scope():
 
 @pytest.mark.skipif(not torch.cuda.is_available(),reason='CUDA unavailable')
 def test_tensor_batch_rejects_streamed_scene(tmp_path):
-    from photonweave import run_tensor_batch
+    from torchfdtd import run_tensor_batch
     p = project(steps=10)
     p.region.memory_mode = 'streamed'
     with pytest.raises(ValueError,match='StreamedSimulation'):
@@ -188,7 +188,7 @@ def test_tensor_batch_rejects_streamed_scene(tmp_path):
 
 def test_local_checkpoints_are_bounded_and_charged_to_admission(monkeypatch):
     from dataclasses import replace
-    from photonweave.streamed import _reservation
+    from torchfdtd.streamed import _reservation
     p = project(steps=10)
     epsilon = torch.ones(p.region.shape,dtype=torch.float64)
     options = StreamedAdjointOptions(device='cpu',temporal_depth=4)
@@ -210,14 +210,14 @@ def test_local_checkpoints_are_bounded_and_charged_to_admission(monkeypatch):
 
 
 def test_storage_only_initial_state_is_small_and_cannot_be_advanced_in_place():
-    from photonweave.differentiable import _System
-    from photonweave.spacetime import SlabBlockOperator
+    from torchfdtd.differentiable import _System
+    from torchfdtd.spacetime import SlabBlockOperator
     p = project(dimension='3d',steps=10,periodic=True)
     epsilon = torch.full(p.region.shape,1.7,dtype=torch.float64)
     host = _System(p,epsilon,prepare_updates=False)
     assert host.grid.inverse_permittivity is None
     assert all(s.untyped_storage().nbytes()==epsilon.element_size() for s in host.state())
-    from photonweave.streamed import _reservation
+    from torchfdtd.streamed import _reservation
     admitted = _reservation(p,epsilon,StreamedAdjointOptions(device='cpu'))
     assert admitted['host_initial_state_reservation_bytes'] == sum(s.untyped_storage().nbytes() for s in host.state())
     assert all(torch.count_nonzero(s)==0 for s in host.state())

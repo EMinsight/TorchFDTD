@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pytest
 import torch
-from photonweave import (Source,Monitor,FieldMonitor,BoundaryFace,Simulation,AdjointOptions,
+from torchfdtd import (Source,Monitor,FieldMonitor,BoundaryFace,Simulation,AdjointOptions,
     DifferentiableSimulation,DifferentiablePlaneSimulation,StreamedSimulation)
 from test_differentiable import project,gpu
 
@@ -72,7 +72,7 @@ def test_complex_native_forward_and_disk_replay(device,tmp_path):
 
 @pytest.mark.parametrize('execution',['resident','cpu','cuda','cuda_disk'])
 def test_bloch_plane_seam_interpolation_and_gradient(execution,tmp_path):
-    from photonweave import StreamedAdjointOptions
+    from torchfdtd import StreamedAdjointOptions
     if execution.startswith('cuda'):gpu()
     from test_adjoint_planes import reference
     p=scene()
@@ -80,9 +80,9 @@ def test_bloch_plane_seam_interpolation_and_gradient(execution,tmp_path):
     eps=torch.full(p.region.shape,1.7,dtype=torch.float64,requires_grad=True)
     freq=torch.tensor([.03/p.region.time_step],dtype=eps.dtype)
     # Oracle must preserve complex interpolation weights at the Bloch seam.
-    from photonweave.differentiable import _System
-    from photonweave.field_monitors import plane_plan,interpolation_map
-    from photonweave.adjoint_planes import COMPONENTS
+    from torchfdtd.differentiable import _System
+    from torchfdtd.field_monitors import plane_plan,interpolation_map
+    from torchfdtd.adjoint_planes import COMPONENTS
     sys=_System(p,eps);state=sys.state();history=[]
     plan=plane_plan(p.region,p.monitors[0])
     for step in range(p.region.steps):
@@ -117,7 +117,7 @@ def test_unsupported_complex_execution_fails_explicitly():
 @pytest.mark.parametrize('device',['cpu','cuda'])
 def test_three_dimensional_two_phase_float32(device):
     if device=='cuda':gpu()
-    from photonweave import Project,Region,Boundaries
+    from torchfdtd import Project,Region,Boundaries
     p=Project(region=Region(dimension='3d',size=(1.2,1.2,1.6),mesh=.1,steps=11,pml_cells=3,
                             precision='float32',material_sampling='yee',cuda_kernel='torch',
                             boundaries=Boundaries(x_min=BoundaryFace(kind='bloch'),x_max=BoundaryFace(kind='bloch'),

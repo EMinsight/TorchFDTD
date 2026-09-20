@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      PHOTONWEAVE_TEST_PYTHON: python
+      TORCHFDTD_TEST_PYTHON: python
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,7 +29,7 @@ jobs:
       - run: npm ci && npm run build
       - run: python -m pytest -q
       - run: npx playwright install --with-deps chromium
-      - run: python -m photonweave.cli serve > server.log 2>&1 &
+      - run: python -m torchfdtd.cli serve > server.log 2>&1 &
       - run: python -c "import urllib.request,time; time.sleep(6); urllib.request.urlopen('http://127.0.0.1:8765/api/health')"
       - run: npm run test:ui
       - run: python -m build --wheel

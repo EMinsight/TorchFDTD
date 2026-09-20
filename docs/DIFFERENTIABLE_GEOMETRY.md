@@ -7,7 +7,7 @@ all their contributions, including parameters reused by several solids.
 
 ```python
 import torch
-from photonweave import DifferentiableSolid, smooth_geometry_epsilon
+from torchfdtd import DifferentiableSolid, smooth_geometry_epsilon
 
 # project and model are an existing matching FDTD project and adjoint model.
 # Use CPU parameters when model is a StreamedSimulation.

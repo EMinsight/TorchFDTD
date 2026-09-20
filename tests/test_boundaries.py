@@ -4,9 +4,9 @@ import fdtd
 import numpy as np
 import pytest
 
-from photonweave import Project, Region, Source, Monitor, Simulation
-from photonweave.models import Boundaries, BoundaryFace
-from photonweave.boundaries import YeeGrid
+from torchfdtd import Project, Region, Source, Monitor, Simulation
+from torchfdtd.models import Boundaries, BoundaryFace
+from torchfdtd.boundaries import YeeGrid
 
 
 def paired(kind='periodic', dimensions=3):

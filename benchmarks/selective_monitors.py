@@ -13,8 +13,8 @@ import time
 import fdtd
 import numpy as np
 import torch
-from photonweave import Simulation, run_tensor_batch
-from photonweave.solver import hardware
+from torchfdtd import Simulation, run_tensor_batch
+from torchfdtd.solver import hardware
 from .open_source import upstream_run
 from .spectral_ensemble import projects_for, digest, error
 
@@ -34,12 +34,12 @@ def main():
     args=ap.parse_args();target=Path(args.output)
     if target.exists():raise FileExistsError('Choose a new output path to preserve prior measurements.')
     modes=['flaport_flux_1','flaport_flux_8','native_sequential_flux','native_batch_full','native_batch_flux']
-    paths=['photonweave/models.py','photonweave/field_monitors.py','photonweave/cuda_monitors.py',
-           'photonweave/solver.py','photonweave/tensor_batch.py','photonweave/cuda_kernels.py',
-           'photonweave/cuda_batch.py','photonweave/cuda_graph.py','benchmarks/open_source.py',
+    paths=['torchfdtd/models.py','torchfdtd/field_monitors.py','torchfdtd/cuda_monitors.py',
+           'torchfdtd/solver.py','torchfdtd/tensor_batch.py','torchfdtd/cuda_kernels.py',
+           'torchfdtd/cuda_batch.py','torchfdtd/cuda_graph.py','benchmarks/open_source.py',
            'benchmarks/selective_monitors.py','benchmarks/spectral_ensemble.py','benchmarks/ensemble_comparison.py']
     record=dict(hardware=hardware(),platform=platform.platform(),configuration=vars(args),
-        packages={k:importlib.metadata.version(k) for k in ('photonweave','fdtd','torch','numpy','cupy-cuda12x')},
+        packages={k:importlib.metadata.version(k) for k in ('torchfdtd','fdtd','torch','numpy','cupy-cuda12x')},
         source_sha256={p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in paths},
         upstream_sha256={k:hashlib.sha256(Path(inspect.getfile(v)).read_bytes()).hexdigest()
                          for k,v in [('grid',fdtd.Grid),('boundary',fdtd.PML)]},

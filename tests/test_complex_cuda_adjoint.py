@@ -1,6 +1,6 @@
 import pytest
 import torch
-from photonweave import DifferentiableSimulation,AdjointOptions
+from torchfdtd import DifferentiableSimulation,AdjointOptions
 from test_bloch_adjoint import scene
 from test_differentiable import gpu
 
@@ -30,8 +30,8 @@ def test_fused_complex_backward_against_full_autograd(dtype,nonuniform):
 
 @pytest.mark.parametrize('dtype',[torch.float32,torch.float64])
 def test_random_state_and_cpml_adjoint_buffers(dtype):
-    from photonweave.differentiable import _System
-    from photonweave.cuda_complex_adjoint import FusedComplexAdjointCUDA
+    from torchfdtd.differentiable import _System
+    from torchfdtd.cuda_complex_adjoint import FusedComplexAdjointCUDA
     gpu();p=scene(True);p.region.precision='float64' if dtype==torch.float64 else 'float32'
     eps=torch.full(p.region.shape,1.7,device='cuda',dtype=dtype)
     system=_System(p,eps)
@@ -53,7 +53,7 @@ def test_random_state_and_cpml_adjoint_buffers(dtype):
 
 @pytest.mark.parametrize('pml_axis',['x','z'])
 def test_three_dimensional_seams_and_async_disk_replay(pml_axis,tmp_path):
-    from photonweave import Source,Monitor
+    from torchfdtd import Source,Monitor
     gpu();p=scene();p.region.dimension='3d';p.region.cuda_kernel='fused'
     for axis in 'xyz':
         for side in ('min','max'):getattr(p.region.boundaries,axis+'_'+side).kind='pml' if axis==pml_axis else 'bloch'

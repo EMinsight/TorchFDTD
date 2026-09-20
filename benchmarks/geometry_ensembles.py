@@ -13,10 +13,10 @@ import statistics
 import time
 import numpy as np
 import torch
-from photonweave import (Project,Region,Structure,Source,Monitor,FieldMonitor,
+from torchfdtd import (Project,Region,Structure,Source,Monitor,FieldMonitor,
                         SpectrumSettings,RunControl,run_tensor_batch)
-from photonweave import solver
-from photonweave.geometry import contains
+from torchfdtd import solver
+from torchfdtd.geometry import contains
 
 
 def unpruned(p,axes,with_ownership):
@@ -67,7 +67,7 @@ def main():
     if target.exists():raise FileExistsError('Use a fresh output path to preserve measurements.')
     original=solver._voxelize_at
     record=dict(hardware=solver.hardware(),platform=platform.platform(),configuration=vars(args),
-        source_sha256={str(p).replace('\\','/'):hashlib.sha256(p.read_bytes()).hexdigest() for p in [*Path('photonweave').glob('*.py'),Path(__file__)]},
+        source_sha256={str(p).replace('\\','/'):hashlib.sha256(p.read_bytes()).hexdigest() for p in [*Path('torchfdtd').glob('*.py'),Path(__file__)]},
         method='Native host material-preparation ablation with identical CUDA kernels. Four independent scenes, eight solids per scene. '
         'Three warmed alternating-order repetitions. Full wall includes preparation, graph capture, stepping and output transfers. '
         'Cold compilation/context, validation and disk writes excluded. Host voxelization time is nested inside full wall. '

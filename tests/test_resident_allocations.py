@@ -5,11 +5,11 @@ import gc
 import pytest
 import torch
 
-from photonweave import (AdjointOptions, BoundaryFace, DifferentiableSimulation,
+from torchfdtd import (AdjointOptions, BoundaryFace, DifferentiableSimulation,
     DifferentiablePlaneSimulation, DispersiveSimulation, DispersivePlaneSimulation,
     FieldMonitor, Source, estimate_adjoint_memory)
-from photonweave.adjoint_memory import _source_spatial_budget,_spectral_library_reservation
-from photonweave.injection import source_terms
+from torchfdtd.adjoint_memory import _source_spatial_budget,_spectral_library_reservation
+from torchfdtd.injection import source_terms
 from test_budgeted_resident import large_scene
 from test_differentiable import project
 from test_streamed_dispersive import inputs
@@ -20,7 +20,7 @@ def test_512_cube_admission_distinguishes_native_and_tensor_workspaces(monkeypat
     p=large_scene(51.2)
     p.region.cuda_kernel='fused'
     monkeypatch.setattr(torch.cuda,'mem_get_info',lambda device:(48*1024**3,48*1024**3))
-    monkeypatch.setattr('photonweave.adjoint_memory.host_memory',lambda:dict(available_bytes=128*1024**3))
+    monkeypatch.setattr('torchfdtd.adjoint_memory.host_memory',lambda:dict(available_bytes=128*1024**3))
     shapes=dict(parameter_shapes=(p.region.shape,(1,),(),())) if dispersive else {}
     options=AdjointOptions(checkpoints=0 if dispersive else 2,backward_kernel='fused',
         resident_budget_bytes=32*1024**3)
@@ -51,7 +51,7 @@ def test_many_bloch_profiles_are_counted_without_building_them(monkeypatch):
     p.sources=[Source(kind='plane',normal='y',size=(1.4,0,.6),theta=45,phi=30) for _ in range(20)]
     prepared=[term for source in p.sources for term in source_terms(p,source)]
     actual=sum(profile.size*16 for _,_,_,profile in prepared if profile is not None)
-    monkeypatch.setattr('photonweave.solver.source_profile',lambda *a:pytest.fail('Built profiles during admission'))
+    monkeypatch.setattr('torchfdtd.solver.source_profile',lambda *a:pytest.fail('Built profiles during admission'))
     profiles,injection=_source_spatial_budget(p,16)
     assert profiles>=actual and profiles>0 and injection>0
     p.sources=p.sources[:1]

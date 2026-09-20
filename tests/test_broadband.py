@@ -3,11 +3,11 @@ import math
 import numpy as np
 import pytest
 
-from photonweave import FDTD, Project, Source, SourceTimeSettings, Simulation
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import convert_fsp
-from photonweave.waveforms import TAIL_INNER, TAIL_OUTER, gaussian_envelope, pulse_parameters, source_time_signal
-from photonweave.solver import estimate
+from torchfdtd import FDTD, Project, Source, SourceTimeSettings, Simulation
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import convert_fsp
+from torchfdtd.waveforms import TAIL_INNER, TAIL_OUTER, gaussian_envelope, pulse_parameters, source_time_signal
+from torchfdtd.solver import estimate
 from test_fsp_native import fixture
 from test_solver import small
 

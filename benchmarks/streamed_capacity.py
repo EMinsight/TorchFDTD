@@ -8,7 +8,7 @@ import time
 
 import torch
 
-from photonweave import Region, Project, Source, Monitor, StreamedSimulation, StreamedAdjointOptions
+from torchfdtd import Region, Project, Source, Monitor, StreamedSimulation, StreamedAdjointOptions
 
 
 def main():
@@ -32,7 +32,7 @@ def main():
                                  local_checkpoints=args.local_checkpoints,
                                  gpu_budget_bytes=args.gpu_budget_mib*1024**2,host_budget_bytes=args.host_budget_gib*1024**3)
     policies = [base,replace(base,slab_width=2*args.width,temporal_depth=2*args.depth)]
-    from photonweave.streamed import _reservation
+    from torchfdtd.streamed import _reservation
     metadata = torch.empty(region.shape,device='meta',dtype=torch.float32)
     for policy in policies:_reservation(project,metadata,policy)
     epsilon = torch.full(region.shape,1.7,dtype=torch.float32,requires_grad=True)

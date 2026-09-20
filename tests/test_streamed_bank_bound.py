@@ -2,7 +2,7 @@
 import gc
 import pytest
 import torch
-from photonweave import StreamedSimulation, StreamedAdjointOptions
+from torchfdtd import StreamedSimulation, StreamedAdjointOptions
 from test_bloch_adjoint import scene
 
 

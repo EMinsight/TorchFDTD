@@ -1,5 +1,7 @@
 # 구현 우선순위와 제외 기준
 
+현재 남은 작업 순서와 항목별 완료 증거는 [전체 완료 계획](COMPLETION_PLAN_KO.md)에 정리한다. 핵심 gradient와 메모리 계층을 우선하고, 전체 목표가 검증되기 전에는 완료로 표시하지 않는다.
+
 핵심 목표는 **Torch에서 형상·재료부터 loss.backward와 optimizer까지 연결하는 inverse design**, 그리고 **VRAM·DRAM·저장장치 계층으로 메모리 병목과 큰 격자의 한계를 줄이는 실행 엔진**이다. 속성 수를 채우는 것으로 완료를 판단하지 않는다. 모든 행의 중요도·필요 여부는 [분류 CSV](FEATURE_PRIORITY_INDEX.csv)와 UI의 Feature checklist에서 확인한다.
 
 형상 미분 후속: [상자·타원체·원기둥 파라미터 API](DIFFERENTIABLE_GEOMETRY.md)를 추가했다. 반경·높이·위치·회전·유전율을 Torch에 연결하고, 형상 backward는 작은 공간 묶음씩 재계산한다. 전체 격자의 형상 그래프를 보관하지 않지만 epsilon과 입력 material VJP는 아직 dense 텐서다. CPU·CUDA·DRAM FDTD 연결을 FP32로 검사했다. 날카로운 경계의 물리 shape-gradient 수렴, polygon/spline과 dense 재료 맵 없는 스트리밍은 남아 있다.
@@ -84,7 +86,7 @@ CAD 후속 구현은 [형상 정의·Python/UI 사용법](ANALYTIC_GEOMETRY.md)�
 
 0.14의 TFSF 추가 후 전체 Python 검사는 RTX 3060과 RTX 5880에서 각각 207개 통과, 선택형 1개 skip이다. 5880 UI는 14개 통과, 선택형 연동 4개 skip이다. 초기 로딩 중 편집 race도 수정했다. [소스 정의](TFSF_SOURCES.md)와 [구 산란 검증](validation/TFSF_REPORT.md)은 구현 범위와 한계를 명시한다. 구 산란의 50 nm 메시 오차 0.31%만으로 일반 정확도 우위를 주장하지 않는다.
 
-분류 규칙은 `photonweave/priorities.py`, 기능 상태와 근거는 `benchmarks/build_feature_inventory.py`에 있다. 이 스크립트가 전체 JSON, 체크리스트, CSV를 함께 갱신한다. `required`는 필요, `conditional`은 특정 사용 사례가 있을 때만 착수하며, `omit`은 새로 구현하지 않는다. 이미 구현된 기능은 유지한다. 엔진이 구현되어도 UI가 빠져 있으면 잔여 작업에 포함된다. 전용 형식 호환 여부는 native 구현과 별도로 유지한다.
+분류 규칙은 `torchfdtd/priorities.py`, 기능 상태와 근거는 `benchmarks/build_feature_inventory.py`에 있다. 이 스크립트가 전체 JSON, 체크리스트, CSV를 함께 갱신한다. `required`는 필요, `conditional`은 특정 사용 사례가 있을 때만 착수하며, `omit`은 새로 구현하지 않는다. 이미 구현된 기능은 유지한다. 엔진이 구현되어도 UI가 빠져 있으면 잔여 작업에 포함된다. 전용 형식 호환 여부는 native 구현과 별도로 유지한다.
 
 ## 스펙트럼 배치 처리량 후속 구현
 

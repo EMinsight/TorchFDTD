@@ -1,9 +1,9 @@
 """CPU oracle for complex slab extension and its Hermitian transpose."""
 import pytest
 import torch
-from photonweave.differentiable import _System
-from photonweave.spacetime import SlabBlockOperator
-from photonweave import Source, Monitor
+from torchfdtd.differentiable import _System
+from torchfdtd.spacetime import SlabBlockOperator
+from torchfdtd import Source, Monitor
 from test_bloch_adjoint import scene
 
 
@@ -92,7 +92,7 @@ def test_complex_slab_against_resident_autograd(dtype, depth, nonuniform, diagon
 
 @pytest.mark.parametrize('dtype', [torch.float32, torch.float64])
 def test_complex_file_banks_match_host_blocks(tmp_path, dtype):
-    from photonweave.state_store import StateStore
+    from torchfdtd.state_store import StateStore
     p = scene(True)
     p.region.precision = 'float64' if dtype == torch.float64 else 'float32'
     eps = torch.full(p.region.shape+(3,), 1.7, dtype=dtype)
@@ -128,8 +128,8 @@ def test_complex_file_banks_match_host_blocks(tmp_path, dtype):
 
 def test_complex_reservation_counts_field_bytes_and_rejects_small_budget(tmp_path):
     from dataclasses import replace
-    from photonweave import StreamedAdjointOptions, StreamedSimulation
-    from photonweave.streamed import _reservation
+    from torchfdtd import StreamedAdjointOptions, StreamedSimulation
+    from torchfdtd.streamed import _reservation
     p = scene()
     eps = torch.ones(p.region.shape, dtype=torch.float64)
     host = _System(p, eps, prepare_updates=False)

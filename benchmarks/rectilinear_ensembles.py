@@ -14,9 +14,9 @@ import time
 
 import numpy as np
 import torch
-from photonweave import (Project,Region,Source,Monitor,FieldMonitor,SpectrumSettings,
+from torchfdtd import (Project,Region,Source,Monitor,FieldMonitor,SpectrumSettings,
                         Material,Structure,Boundaries,BoundaryFace,RunControl,Simulation,run_tensor_batch)
-from photonweave.solver import hardware
+from torchfdtd.solver import hardware
 
 
 def projects_for(kind,n,steps,count):
@@ -63,7 +63,7 @@ def main():
     parser.add_argument('--repeats',type=int,default=3);parser.add_argument('--output',default='results/open-source/rectilinear-ensembles.json')
     args=parser.parse_args();target=Path(args.output)
     if target.exists():raise FileExistsError('Choose a fresh path to preserve recorded measurements.')
-    paths=list(Path('photonweave').glob('*.py'))+[Path(__file__)]
+    paths=list(Path('torchfdtd').glob('*.py'))+[Path(__file__)]
     record=dict(hardware=hardware(),platform=platform.platform(),configuration=vars(args),
         packages={k:importlib.metadata.version(k) for k in ('torch','numpy','fdtd','cupy-cuda12x')},
         source_sha256={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},

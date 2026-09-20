@@ -10,9 +10,9 @@ import time
 
 import torch
 
-from photonweave import Region,Project,Source,Monitor,StreamedSimulation,StreamedAdjointOptions
-from photonweave.streamed import _reservation
-from photonweave.state_store import DiskArray
+from torchfdtd import Region,Project,Source,Monitor,StreamedSimulation,StreamedAdjointOptions
+from torchfdtd.streamed import _reservation
+from torchfdtd.state_store import DiskArray
 
 
 @contextmanager

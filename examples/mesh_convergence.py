@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-from photonweave import mesh_convergence, normalize_flux
+from torchfdtd import mesh_convergence, normalize_flux
 from .flux_slab import make_project
 
 

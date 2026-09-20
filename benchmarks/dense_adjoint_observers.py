@@ -11,7 +11,7 @@ import time
 
 import torch
 
-from photonweave import (AdjointOptions, BoundaryFace, DispersivePlaneSimulation,
+from torchfdtd import (AdjointOptions, BoundaryFace, DispersivePlaneSimulation,
     FieldMonitor, Project, Region, Source)
 from benchmarks.streamed_policy import evaluate, compare
 
@@ -36,7 +36,7 @@ def main(argv=None):
             for name,x in (('near',.2),('far',.3))])
     dtype=getattr(torch,args.precision)
     root=Path(__file__).resolve().parents[1]
-    sources=[Path(__file__).resolve(),root/'benchmarks/streamed_policy.py',*sorted((root/'photonweave').glob('*.py'))]
+    sources=[Path(__file__).resolve(),root/'benchmarks/streamed_policy.py',*sorted((root/'torchfdtd').glob('*.py'))]
     report=dict(stage='running',scope=__doc__,grid=region.shape,steps=args.steps,precision=args.precision,
         hardware=torch.cuda.get_device_name(),torch_version=torch.__version__,runs={},
         source_sha256={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})

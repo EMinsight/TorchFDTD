@@ -1,4 +1,4 @@
-"""PhotonWeave: micrometre geometry, SI time, open-source Yee FDTD."""
+"""TorchFDTD: micrometre geometry, SI time, open-source Yee FDTD."""
 # The upstream grid package changes process-wide Torch defaults on first import.
 # A forward simulator must not disable gradients in its caller's training code.
 import torch as _torch

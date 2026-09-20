@@ -28,7 +28,7 @@ def attach_design_routes(app, root, pool, jobs, lock):
     @app.post('/api/design/python')
     def python(config: PeriodicDesignConfig):
         source = ('import json\nfrom pathlib import Path\n'
-            'from photonweave import PeriodicDesignConfig, run_periodic_design\n\n'
+            'from torchfdtd import PeriodicDesignConfig, run_periodic_design\n\n'
             'config = PeriodicDesignConfig.model_validate('+pprint.pformat(config.model_dump(mode='json'),sort_dicts=False)+')\n'
             'result = run_periodic_design(config, on_progress=lambda p: print(p["stage"], p["updates_completed"]))\n'
             'Path("periodic-design-result.json").write_text(json.dumps(result, indent=2), encoding="utf8")\n')

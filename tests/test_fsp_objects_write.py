@@ -4,11 +4,11 @@ import struct
 import numpy as np
 import pytest
 
-from photonweave import Material, Project, Structure, Simulation, run_tensor_batch
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_geometry import write_fsp_scene, write_fsp_geometry
-from photonweave.fsp_native import convert_fsp, FDTD, identity
-from photonweave.solver import voxelize
+from torchfdtd import Material, Project, Structure, Simulation, run_tensor_batch
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_geometry import write_fsp_scene, write_fsp_geometry
+from torchfdtd.fsp_native import convert_fsp, FDTD, identity
+from torchfdtd.solver import voxelize
 from test_fsp_native import fixture
 from test_fsp_geometry_write import imported, shape_fixture, assert_untouched
 from test_fsp_settings_write import settings_fixture
@@ -44,7 +44,7 @@ def roundtrip(doc,p):
 @pytest.mark.parametrize('kind',['rectangle','sphere','circle','ring','polygon'])
 @pytest.mark.parametrize('dimension',['2d','3d'])
 def test_add_primitive_to_file_without_its_class(kind,dimension,monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Commercial runtime loaded'))
     from test_fsp_mesh_write import authored_2d
     doc,p=imported(authored_2d() if dimension=='2d' else fixture());p.materials.append(Material(name='new glass',index=1.73))
@@ -167,7 +167,7 @@ def test_new_primitive_can_reuse_unchanged_authored_database_material(kind):
     else:record.update(omegalorentz=np.eye(3)*1.1e15,deltalorentz=np.eye(3)*.8e14,epsilonlorentz=np.eye(3)*.7)
     raw=base.data[:base.root.start-4]+u(1)+mapping(items(record))+base.data[base.root.start:]
     doc,p=imported(raw)
-    from photonweave.fsp_native import convert_material
+    from torchfdtd.fsp_native import convert_material
     mat,_=convert_material(doc.materials,uid);p.materials.append(mat)
     s=added('rectangle',mat.name);s.mesh_order=3;p.structures.append(s)
     out,q,_=roundtrip(doc,p)
@@ -206,7 +206,7 @@ def test_cli_structure_export_keeps_original_and_refuses_overwrite(tmp_path):
     original=tmp_path/'original.fsp';original.write_bytes(doc.data)
     scene=tmp_path/'scene.json';p.save(scene)
     target=tmp_path/'export.fsp';report=tmp_path/'report.json'
-    command=[sys.executable,'-m','photonweave.cli','fsp-write-scene',str(original),str(scene),'--output',str(target),'--report',str(report)]
+    command=[sys.executable,'-m','torchfdtd.cli','fsp-write-scene',str(original),str(scene),'--output',str(target),'--report',str(report)]
     run=subprocess.run(command,capture_output=True,text=True);assert run.returncode==0,run.stderr
     data=json.loads(report.read_text());assert data['scope']=='primitive scene and supported settings'
     assert data['structure_list']['added']==['new-polygon']

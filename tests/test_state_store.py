@@ -3,8 +3,8 @@ import gc
 import pytest
 import torch
 
-from photonweave.state_store import StateStore
-from photonweave import StreamedAdjointOptions,StreamedSimulation,DifferentiableSimulation
+from torchfdtd.state_store import StateStore
+from torchfdtd import StreamedAdjointOptions,StreamedSimulation,DifferentiableSimulation
 from test_differentiable import project,gpu
 
 
@@ -26,7 +26,7 @@ def test_first_adjoint_write_skips_zero_reads_and_preserves_overlap(tmp_path):
 
 
 def test_reserved_disk_headroom_rechecked_before_each_bank(tmp_path,monkeypatch):
-    import photonweave.state_store as storage
+    import torchfdtd.state_store as storage
     template=torch.zeros(8,dtype=torch.float64)
     remaining=[1024]
     monkeypatch.setattr(storage,'disk_free',lambda _:remaining[0])
@@ -41,7 +41,7 @@ def test_reserved_disk_headroom_rechecked_before_each_bank(tmp_path,monkeypatch)
 
 
 def test_streamed_headroom_rejected_before_directory_creation(tmp_path,monkeypatch):
-    import photonweave.state_store as storage
+    import torchfdtd.state_store as storage
     monkeypatch.setattr(storage,'disk_free',lambda _:1024)
     p=project(steps=10)
     directory=tmp_path/'scratch'
@@ -117,7 +117,7 @@ def test_disk_budget_rejected_before_directory_creation(tmp_path):
 
 
 def test_failed_tile_read_cleans_scratch_without_touching_user_files(tmp_path,monkeypatch):
-    from photonweave.state_store import DiskArray
+    from torchfdtd.state_store import DiskArray
     p=project(steps=10)
     epsilon=torch.ones(p.region.shape,dtype=torch.float64,requires_grad=True)
     sentinel=tmp_path/'keep.bin';sentinel.write_bytes(b'user data')
@@ -133,8 +133,8 @@ def test_failed_tile_read_cleans_scratch_without_touching_user_files(tmp_path,mo
 @pytest.mark.parametrize('periodic',[False,True])
 def test_disk_banks_preserve_random_cpml_endpoint_and_periodic_halo_derivatives(tmp_path,device,periodic):
     if device=='cuda':gpu()
-    from photonweave.differentiable import _System
-    from photonweave.spacetime import SlabBlockOperator
+    from torchfdtd.differentiable import _System
+    from torchfdtd.spacetime import SlabBlockOperator
     p=project('3d',steps=12,periodic=periodic)
     epsilon=torch.full(p.region.shape+(3,),1.7,dtype=torch.float64)
     host=_System(p,epsilon,prepare_updates=False)
@@ -160,7 +160,7 @@ def test_disk_banks_preserve_random_cpml_endpoint_and_periodic_halo_derivatives(
 
 
 def test_failed_backward_reduction_cleans_scratch(tmp_path,monkeypatch):
-    from photonweave.state_store import DiskArray
+    from torchfdtd.state_store import DiskArray
     p=project(steps=10)
     epsilon=torch.ones(p.region.shape,dtype=torch.float64,requires_grad=True)
     options=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2,state_storage='disk',
@@ -194,7 +194,7 @@ def test_partial_io_and_truncated_file_are_handled(tmp_path):
 
 def test_file_policy_admission_releases_dense_host_banks(tmp_path):
     from dataclasses import replace
-    from photonweave.streamed import _reservation
+    from torchfdtd.streamed import _reservation
     p=project(steps=10)
     epsilon=torch.ones(p.region.shape,dtype=torch.float64)
     host=StreamedAdjointOptions(device='cpu',slab_width=1,temporal_depth=1)
@@ -208,7 +208,7 @@ def test_file_policy_admission_releases_dense_host_banks(tmp_path):
 
 def test_tuning_can_compare_host_and_disk_policies(tmp_path):
     from dataclasses import replace
-    from photonweave import tune_streamed
+    from torchfdtd import tune_streamed
     p=project(steps=10)
     epsilon=torch.ones(p.region.shape,dtype=torch.float64,requires_grad=True)
     host=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=3)
@@ -220,7 +220,7 @@ def test_tuning_can_compare_host_and_disk_policies(tmp_path):
 
 def test_unavailable_volume_is_rejected_and_io_is_always_cpu(tmp_path,monkeypatch):
     from pathlib import Path
-    from photonweave.state_store import disk_free
+    from torchfdtd.state_store import disk_free
     with monkeypatch.context() as patch:
         patch.setattr(Path,'exists',lambda self:False)
         with pytest.raises(ValueError,match='unavailable'):disk_free(tmp_path)

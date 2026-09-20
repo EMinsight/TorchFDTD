@@ -5,7 +5,7 @@
 ## 자동 종료와 발산 감지
 
 ```python
-from photonweave import Project, Simulation, RunControl
+from torchfdtd import Project, Simulation, RunControl
 
 project = Project.load("project.json")
 project.region.steps = 4000  # 최대 step 수
@@ -46,7 +46,7 @@ CuPy가 설치된 CUDA 환경에서는 두 개의 읽기 전용 reduction kernel
 ## 수동 다중 공진 재료
 
 ```python
-from photonweave import Material, LorentzPole
+from torchfdtd import Material, LorentzPole
 
 material = Material(
     name="Passive multi-pole example", model="multipole", epsilon_inf=2,
@@ -69,7 +69,7 @@ UI에서는 Materials → **Multiple Drude / Lorentz poles**에서 추가·삭�
 ## 같은 물리적 조건의 메시 수렴
 
 ```python
-from photonweave import mesh_convergence, normalize_flux
+from torchfdtd import mesh_convergence, normalize_flux
 
 reference = project.model_copy(deep=True)
 reference.structures = []

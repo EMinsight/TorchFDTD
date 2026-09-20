@@ -2,7 +2,7 @@ import './inverse_design.css';
 
 export function setupInverseDesign({esc}){
  const dialog=document.createElement('dialog');dialog.className='inverse-design-dialog';document.body.append(dialog);
- const $=s=>dialog.querySelector(s), storage='photonweave.periodicDesign.v1', jobStorage=storage+'.job';
+ const $=s=>dialog.querySelector(s), storage='torchfdtd.periodicDesign.v1', jobStorage=storage+'.job';
  let config,jobId=localStorage.getItem(jobStorage),timer,busy=false,latest=null,showResult=false,painting=false;
  async function request(path,data){
   const r=await fetch('/api/'+path,data===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});

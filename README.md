@@ -1,8 +1,12 @@
-![PhotonWeave: native GPU FDTD, Python-first simulation and independent design ensembles](docs/assets/hero.png)
+![TorchFDTD: native GPU FDTD, Python-first simulation and independent design ensembles](docs/assets/hero.png)
 
-# PhotonWeave FDTD
+# TorchFDTD
 
-An independent, MIT-licensed photonics workbench: visual structure editing in the browser, a shared Python project API, and GPU FDTD on NVIDIA CUDA. The open-source [flaport/fdtd](https://github.com/flaport/fdtd) supplies the grid/backend foundation. PhotonWeave implements Yee derivatives, face-specific convolutional PML, periodic/Bloch wrapping and PyTorch CUDA Graph execution. No commercial solver is needed for the native solver. The optional FSP interoperability bridge requires an installed, licensed Lumerical FDTD.
+Formerly PhotonWeave. The Python package and command are now `torchfdtd`.
+See the [rename and migration notes](docs/TORCHFDTD_RENAME.md). Archived numerical
+records retain their original names and source hashes.
+
+An independent, MIT-licensed photonics workbench: visual structure editing in the browser, a shared Python project API, and GPU FDTD on NVIDIA CUDA. The open-source [flaport/fdtd](https://github.com/flaport/fdtd) supplies the grid/backend foundation. TorchFDTD implements Yee derivatives, face-specific convolutional PML, periodic/Bloch wrapping and PyTorch CUDA Graph execution. No commercial solver is needed for the native solver. The optional FSP interoperability bridge requires an installed, licensed Lumerical FDTD.
 
 The interface follows the familiar FDTD workflow: Objects Tree, XY/XZ/YZ and perspective CAD views, object properties, material database, simulation region, Layout/Analysis modes, field visualizer, monitor traces, and Python export. It is not affiliated with Ansys and does not implement the full Lumerical feature set.
 
@@ -143,21 +147,21 @@ With the same fused forward, [fused complex backward](docs/COMPLEX_CUDA_ADJOINT.
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 
-**Historical measurements, not a validated current-release speedup.** The primary comparison target is Lumerical FDTD. The available paired records below compare its **CPU engine configured for one process and 16 threads** with earlier PhotonWeave GPU builds on the **RTX 5880 Ada** workstation. Each value is the median of three recorded runs. These rows do not establish equal optical accuracy or performance against Lumerical GPU execution.
+**Historical measurements, not a validated current-release speedup.** The primary comparison target is Lumerical FDTD. The available paired records below compare its **CPU engine configured for one process and 16 threads** with earlier TorchFDTD GPU builds on the **RTX 5880 Ada** workstation. Each value is the median of three recorded runs. These rows do not establish equal optical accuracy or performance against Lumerical GPU execution.
 
 ### Recorded run wall time
 
-| Historical case | Lumerical CPU, 16 threads (s) | PhotonWeave RTX 5880 (s) | Lumerical CPU / PhotonWeave GPU |
+| Historical case | Lumerical CPU, 16 threads (s) | TorchFDTD RTX 5880 (s) | Lumerical CPU / TorchFDTD GPU |
 |---|---:|---:|---:|
 | Sphere, earlier build, 64³ / 1,000 steps | 3.997 | 0.613 | **6.52×** |
 | Sphere, earlier build, 128³ / 2,000 steps | 30.736 | 3.119 | **9.85×** |
 | Sphere, later CPML revision, 128³ / 2,000 steps | 30.233 | 1.990 | **15.19×** |
 
-Run wall time includes Lumerical meshing, engine launch and file I/O. PhotonWeave timing includes allocation, graph preparation, stepping and final host transfer, excluding optional NPZ compression. These are differently scoped workflow timers. The ratio is Lumerical time divided by PhotonWeave time.
+Run wall time includes Lumerical meshing, engine launch and file I/O. TorchFDTD timing includes allocation, graph preparation, stepping and final host transfer, excluding optional NPZ compression. These are differently scoped workflow timers. The ratio is Lumerical time divided by TorchFDTD time.
 
 ### Recorded engine and stepping time
 
-| Historical case | Lumerical logged FDTD time (s) | PhotonWeave stepping time (s) | Lumerical CPU / PhotonWeave GPU |
+| Historical case | Lumerical logged FDTD time (s) | TorchFDTD stepping time (s) | Lumerical CPU / TorchFDTD GPU |
 |---|---:|---:|---:|
 | Sphere, earlier build, 64³ / 1,000 steps | 1.897 | 0.561 | 3.38× |
 | Sphere, earlier build, 128³ / 2,000 steps | 28.186 | 3.027 | 9.31× |
@@ -169,8 +173,8 @@ The fixture is an index-2 sphere of radius 0.6 µm in air, in a 6 × 6 × 6 µm 
 
 | Primary comparison still required | Status |
 |---|---|
-| Current PhotonWeave vs Lumerical CPU, common accuracy target | Pending new matched validation |
-| Current PhotonWeave vs Lumerical GPU on the same RTX 5880 | Not measured |
+| Current TorchFDTD vs Lumerical CPU, common accuracy target | Pending new matched validation |
+| Current TorchFDTD vs Lumerical GPU on the same RTX 5880 | Not measured |
 | Multi-structure batch / inverse-design throughput vs Lumerical | Not measured |
 
 Only aggregate timing facts are included here. No commercial field arrays, spectra, screenshots, project files or engine logs are redistributed with this table. The governing licence remains unknown, and this local draft is **not cleared for public release**. [Publication conditions](docs/RELEASE_REVIEW.md#timing-table-exception-and-publication-status). The reproducible open-source comparisons below are secondary benchmarks.
@@ -178,21 +182,21 @@ Only aggregate timing facts are included here. No commercial field arrays, spect
 
 ## Capability comparison
 
-Reviewed external public source on 19 September 2026. PhotonWeave implementation status updated on 20 September 2026. A feature distinction is not a measured speed advantage. Unknown or unmeasured batch behavior is not marked unsupported.
+Reviewed external public source on 19 September 2026. TorchFDTD implementation status updated on 20 September 2026. A feature distinction is not a measured speed advantage. Unknown or unmeasured batch behavior is not marked unsupported.
 
 | Project | GPU/backend | Independent ensemble / same-GPU batch | Adjoint/autodiff | Relevant scope | RTX 5880 comparison |
 |---|---|---|---|---|---|
-| **PhotonWeave** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **Partial**. Real dielectric Yee/CPML discrete adjoint, Torch geometry and bounded three-tier checkpoints. DE remains a separate path | Browser + Python analytic CAD, independent FSP scene import/writeback subset, multipole ADE, independent-axis/explicit/graded meshes, six-face CPML, selective shared CUDA plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
-| [FDTDX](https://github.com/ymahlau/fdtdx) | **JAX currently**, CUDA/ROCm installation paths | JAX composition. Same-GPU cohort throughput not measured here | **Yes**, reversible/checkpointed paths with model restrictions | Already provides dispersive/anisotropic materials and rectilinear grids. Those are not unique PhotonWeave advantages | Not measured, Linux CUDA environment pending |
-| [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX wrapper + specialized CUDA | README proposes distributing independent jobs through JAX. Fused batch-axis throughput not verified | Reviewed primitive has no registered JVP/VJP/transpose rule | Fast specialized dielectric scope, constrained z size, x/y adiabatic absorption, z PML. PhotonWeave adds dispersion, graded grids and online plane DFT | Not measured, Linux CUDA environment pending |
-| [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy / PyTorch CUDA | Public `Grid` represents one case. Our external graph adapter runs its updates. Dedicated upstream cohort API not verified | Default backend disables gradients, so default autodiff is not established | Readable grid foundation used and attributed by PhotonWeave | PyPI 0.2.2 measured, including eager and graph-adapted baselines |
-| [fdtd3d](https://github.com/zer011b/fdtd3d) | C++ / CUDA / MPI | **Single-problem domain decomposition** differs from independent-case batches. Cohort throughput not verified | Not documented in reviewed README | Compiled solver and distributed execution. Single-grid MPI is still missing from PhotonWeave | Not measured, compatible compiler/runtime environment pending |
+| **TorchFDTD** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **Partial**. Real dielectric Yee/CPML discrete adjoint, Torch geometry and bounded three-tier checkpoints. DE remains a separate path | Browser + Python analytic CAD, independent FSP scene import/writeback subset, multipole ADE, independent-axis/explicit/graded meshes, six-face CPML, selective shared CUDA plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
+| [FDTDX](https://github.com/ymahlau/fdtdx) | **JAX currently**, CUDA/ROCm installation paths | JAX composition. Same-GPU cohort throughput not measured here | **Yes**, reversible/checkpointed paths with model restrictions | Already provides dispersive/anisotropic materials and rectilinear grids. Those are not unique TorchFDTD advantages | Not measured, Linux CUDA environment pending |
+| [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX wrapper + specialized CUDA | README proposes distributing independent jobs through JAX. Fused batch-axis throughput not verified | Reviewed primitive has no registered JVP/VJP/transpose rule | Fast specialized dielectric scope, constrained z size, x/y adiabatic absorption, z PML. TorchFDTD adds dispersion, graded grids and online plane DFT | Not measured, Linux CUDA environment pending |
+| [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy / PyTorch CUDA | Public `Grid` represents one case. Our external graph adapter runs its updates. Dedicated upstream cohort API not verified | Default backend disables gradients, so default autodiff is not established | Readable grid foundation used and attributed by TorchFDTD | PyPI 0.2.2 measured, including eager and graph-adapted baselines |
+| [fdtd3d](https://github.com/zer011b/fdtd3d) | C++ / CUDA / MPI | **Single-problem domain decomposition** differs from independent-case batches. Cohort throughput not verified | Not documented in reviewed README | Compiled solver and distributed execution. Single-grid MPI is still missing from TorchFDTD | Not measured, compatible compiler/runtime environment pending |
 
-FDTDX is ahead of PhotonWeave for differentiable inverse design. We have not demonstrated a speed advantage against FDTDX, fdtdz or fdtd3d. [Pinned sources, detailed limitations and next work](docs/OPEN_SOURCE_COMPARISON_KO.md).
+FDTDX is ahead of TorchFDTD for differentiable inverse design. We have not demonstrated a speed advantage against FDTDX, fdtdz or fdtd3d. [Pinned sources, detailed limitations and next work](docs/OPEN_SOURCE_COMPARISON_KO.md).
 
 **Current development, 0.14:** closed normal-incidence [TFSF boxes](docs/TFSF_SOURCES.md) separate incident and scattered fields around isolated structures. Python, UI previews, CPU/CUDA and shared CUDA batches use a live incident Yee line and sparse face corrections. Independent discrete references and analytic Mie sphere comparisons are recorded, including non-monotonic mesh errors. A 3D FSP source subset is mapped, while oblique incidence and general FSP compatibility remain open. Version 0.13 added [one-way periodic-cell planes](docs/ONEWAY_SOURCES.md), while 0.12 added [electric/magnetic vector sources](docs/DIPOLE_SOURCES.md). Python controls fixed-duration ensembles, objectives and native field results through [`run_tensor_batch`](docs/TENSOR_BATCH.md). Automatic decay termination, full-domain divergence checks, coupled passive multipole materials and matched-reference mesh studies remain available in single/process runs. See the [ordered implementation priorities](docs/IMPLEMENTATION_PRIORITIES.md).
 
-Six-component frequency planes, reference-normalized flux, global/custom monitor frequencies, independent process batches and black-box inverse design are also available. Read the [Python and batch guide](docs/PYTHON_BATCH.md), run the [slab example](examples/flux_slab.py) or [design example](examples/inverse_design.py), and see the [technical manuscript by Hyoseok Park](docs/paper/photonweave-manuscript.pdf) ([LaTeX source](docs/paper/manuscript.tex), [build and Overleaf guide](docs/paper/README.md)). The manuscript is a draft, not a peer-reviewed publication.
+Six-component frequency planes, reference-normalized flux, global/custom monitor frequencies, independent process batches and black-box inverse design are also available. Read the [Python and batch guide](docs/PYTHON_BATCH.md), run the [slab example](examples/flux_slab.py) or [design example](examples/inverse_design.py), and see the [technical manuscript by Hyoseok Park](docs/paper/torchfdtd-manuscript.pdf) ([LaTeX source](docs/paper/manuscript.tex), [build and Overleaf guide](docs/paper/README.md)). The manuscript is a draft, not a peer-reviewed publication.
 
 **Spectral batch development:** selectable shared CUDA plane interpolation and DFT accumulation now cover single runs and independent cohorts. Set `region.cuda_monitor_kernel="fused"`, or use **Frequency monitor kernel** in the FDTD panel. The new tables separate monitor improvements, cohort scheduling and an external baseline given the same fused observation adapter. [Complete Python example](examples/spectral_batch.py), [algorithm and limits](docs/CUDA_SPECTRA.md).
 
@@ -376,9 +380,9 @@ These gains apply when the omitted fields are not requested. They are not six-fi
 
 **NVIDIA RTX 5880 Ada Generation, 8 independent cases per row, 800 float32 steps, cohorts of 4, median of 3 warmed repetitions.** Three planes retain all six complex components at nine frequencies, with point traces and full final E/H. Full wall includes preparation, graph capture and output transfer. Cold context/compilation and disk writes are excluded.
 
-The current fused monitor adds one shared CUDA phase kernel. The external **flaport/fdtd 0.2.2** sequence receives the identical observer and both one-step and 8-step graph options. The external column uses the **lower measured median** of those two options. PhotonWeave uses a fixed one-step graph and shared case launches. This compares ensemble workflows, not an upstream fused-batch implementation.
+The current fused monitor adds one shared CUDA phase kernel. The external **flaport/fdtd 0.2.2** sequence receives the identical observer and both one-step and 8-step graph options. The external column uses the **lower measured median** of those two options. TorchFDTD uses a fixed one-step graph and shared case launches. This compares ensemble workflows, not an upstream fused-batch implementation.
 
-| Workload | Grid | flaport + shared observer, sequence (s) | PhotonWeave batch (s) | vs flaport sequence |
+| Workload | Grid | flaport + shared observer, sequence (s) | TorchFDTD batch (s) | vs flaport sequence |
 |---|---:|---:|---:|---:|
 | Vacuum | 32³ | 3.371 | 0.179 | 18.86× |
 | Sphere | 32³ | 3.409 | 0.198 | 17.25× |
@@ -454,7 +458,7 @@ These are measured forward ensemble ratios against the stated adapters, not spee
 
 The external baseline is **flaport/fdtd 0.2.2 with an added CUDA Graph adapter**, calling its unmodified E/H updates. Its eager timings are retained in the raw records. Both engines receive identical voxel permittivity, timestep, sampled source and point monitor. The upstream high-side PML interface stencil differs, so agreement is assessed separately.
 
-| Example | Grid | flaport + graph (ms) | PhotonWeave fused (ms) | Speedup | Point-trace relative L2 |
+| Example | Grid | flaport + graph (ms) | TorchFDTD fused (ms) | Speedup | Point-trace relative L2 |
 |---|---:|---:|---:|---:|---:|
 | Vacuum | 64³ | 649.23 | 38.06 | 17.06× | 0.0142% |
 | Sphere | 64³ | 629.07 | 39.72 | 15.84× | 0.0233% |
@@ -467,7 +471,7 @@ The external baseline is **flaport/fdtd 0.2.2 with an added CUDA Graph adapter**
 
 All eight point traces pass the predeclared 1% relative-L2 tolerance. This is cross-solver agreement, not error against an exact solution. **Final full fields are not identical across libraries:** for the late-time 64³ vacuum case, H relative L2 is 31.45% with maximum absolute difference 1.89e-7 in reduced units (reference final H peak 1.23e-7). All E/H errors and reference scales are retained. The upstream graph adapter itself matches upstream eager E/H/traces bitwise in these cases.
 
-Torch peak allocated memory is **17.85 vs 52.51 MiB** at 64³ and **56.99 vs 141.76 MiB** at 96³ (PhotonWeave vs graph-adapted upstream). This excludes CUDA context and driver allocations.
+Torch peak allocated memory is **17.85 vs 52.51 MiB** at 64³ and **56.99 vs 141.76 MiB** at 96³ (TorchFDTD vs graph-adapted upstream). This excludes CUDA context and driver allocations.
 
 ### Independent structures in one CUDA launch
 
@@ -507,7 +511,7 @@ The process comparison excludes worker startup and includes IPC. The upstream en
 
 ### Four workloads with 16 independent cases each
 
-A follow-up repeats vacuum amplitude, sphere radius, slab thickness and waveguide width sweeps. Each row contains 16 complete 800-step solves. The upstream graph adapter runs those cases sequentially. PhotonWeave uses shared CUDA launches and the cohort size selected by a separate full-workload timing trial. **These are ensemble throughput ratios, not single-solve speedups or comparisons with an upstream fused batch implementation.**
+A follow-up repeats vacuum amplitude, sphere radius, slab thickness and waveguide width sweeps. Each row contains 16 complete 800-step solves. The upstream graph adapter runs those cases sequentially. TorchFDTD uses shared CUDA launches and the cohort size selected by a separate full-workload timing trial. **These are ensemble throughput ratios, not single-solve speedups or comparisons with an upstream fused batch implementation.**
 
 | Workload | Grid | flaport graph sequential (s) | Native sequential (s) | Selected cohort | Native batch (s) | vs flaport sequence | vs native sequence |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -572,7 +576,7 @@ python -m venv --system-site-packages .venv
 .venv/Scripts/python.exe -m pip install -e ".[dev]"
 npm.cmd ci
 npm.cmd run build
-.venv/Scripts/python.exe -m photonweave.cli serve
+.venv/Scripts/python.exe -m torchfdtd.cli serve
 ```
 
 Open **http://127.0.0.1:8765**. On Linux/macOS use `.venv/bin/python` and `npm` instead. The server listens only on loopback. Use SSH forwarding to connect to a remote GPU, rather than exposing an unauthenticated solver on the network.
@@ -593,7 +597,7 @@ Shortcuts: `Ctrl+S` save, `Ctrl+O` open, `Ctrl+D` duplicate, `Delete` remove, `C
 ## Python
 
 ```python
-from photonweave import Project, Region, Structure, Source, Monitor, Simulation
+from torchfdtd import Project, Region, Structure, Source, Monitor, Simulation
 
 project = Project(
     name="My waveguide",
@@ -616,7 +620,7 @@ complex planar E/H arrays and signed flux. `normalize_flux()` validates and uses
 a matching reference. No UI is needed for these operations.
 
 ```python
-from photonweave import Project, BatchRunner, parameter_sweep
+from torchfdtd import Project, BatchRunner, parameter_sweep
 
 def objective(result):
     return {"peak": result.summary["field_peak"]}
@@ -642,7 +646,7 @@ evolution loop with a user-defined Python objective. [Complete API conventions](
 A small `FDTD` facade offers familiar Python commands. **This facade uses SI metres**, while the native `Project` API and UI use micrometres. Unsupported commands raise errors instead of silently approximating behavior.
 
 ```python
-from photonweave import FDTD
+from torchfdtd import FDTD
 fdtd = FDTD()
 fdtd.addrect(name="core", x_span=4e-6, y_span=0.5e-6, z_span=0.4e-6, index=2)
 fdtd.adddipole(name="source", x=-1e-6, wavelength=1.55e-6)
@@ -654,18 +658,18 @@ trace = fdtd.getresult("output")
 ```
 
 ```powershell
-.venv/Scripts/python.exe -m photonweave.cli hardware
-.venv/Scripts/python.exe -m photonweave.cli example 3d --output sphere.json
-.venv/Scripts/python.exe -m photonweave.cli run sphere.json --output results/sphere.npz
+.venv/Scripts/python.exe -m torchfdtd.cli hardware
+.venv/Scripts/python.exe -m torchfdtd.cli example 3d --output sphere.json
+.venv/Scripts/python.exe -m torchfdtd.cli run sphere.json --output results/sphere.npz
 ```
 
 ## GPU workstation
 
-`scripts/remote.py` deploys into a dedicated directory and a new venv, reusing an existing CUDA PyTorch interpreter without changing that interpreter's packages. It requires `pip install paramiko` locally. Passwords are requested interactively, or passed via `PHOTONWEAVE_SSH_PASSWORD`, and are never written into the project.
+`scripts/remote.py` deploys into a dedicated directory and a new venv, reusing an existing CUDA PyTorch interpreter without changing that interpreter's packages. It requires `pip install paramiko` locally. Passwords are requested interactively, or passed via `TORCHFDTD_SSH_PASSWORD`, and are never written into the project.
 
 ```powershell
-python scripts/remote.py deploy --host YOUR_GPU_HOST --user YOUR_USER --python C:/path/to/cuda/python.exe --root C:/path/to/photonweave
-# Start `python -m photonweave.cli serve` inside that remote venv.
+python scripts/remote.py deploy --host YOUR_GPU_HOST --user YOUR_USER --python C:/path/to/cuda/python.exe --root C:/path/to/torchfdtd
+# Start `python -m torchfdtd.cli serve` inside that remote venv.
 ssh -N -L 8766:127.0.0.1:8765 YOUR_USER@YOUR_GPU_HOST
 ```
 

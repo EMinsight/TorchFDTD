@@ -1,6 +1,6 @@
 import pytest
 import torch
-from photonweave import profile_memory_transfers
+from torchfdtd import profile_memory_transfers
 
 
 def test_file_probe_preserves_existing_files_and_labels_cache(tmp_path):

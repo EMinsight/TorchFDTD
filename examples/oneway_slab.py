@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 import numpy as np
-from photonweave import Project, Simulation, FieldMonitor, normalize_flux
+from torchfdtd import Project, Simulation, FieldMonitor, normalize_flux
 from examples.flux_slab import make_project as soft_slab
 
 

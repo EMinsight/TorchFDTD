@@ -2,8 +2,8 @@
 import json
 from pathlib import Path
 import numpy as np
-from photonweave import Project,Region,Source,Monitor,Simulation,RunControl
-from photonweave.models import Boundaries,BoundaryFace
+from torchfdtd import Project,Region,Source,Monitor,Simulation,RunControl
+from torchfdtd.models import Boundaries,BoundaryFace
 
 
 def periodic_project(dimension='3d',family='H'):

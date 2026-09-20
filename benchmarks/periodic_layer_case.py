@@ -3,10 +3,10 @@ import argparse,hashlib,json,math,time
 from pathlib import Path
 import numpy as np
 import torch
-from photonweave import (Project,Region,Source,FieldMonitor,BoundaryFace,Boundaries,
+from torchfdtd import (Project,Region,Source,FieldMonitor,BoundaryFace,Boundaries,
     AdjointOptions,DifferentiablePlaneSimulation,periodic_density_layer,
     calibrate_plane_polarization,mix_plane_fields,quadrant_intensity_allocation)
-from photonweave.solver import C0
+from torchfdtd.solver import C0
 
 
 def main():

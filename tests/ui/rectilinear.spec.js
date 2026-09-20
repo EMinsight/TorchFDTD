@@ -11,7 +11,7 @@ test('axis spacing, atomic explicit nodes, Python export and native solve',async
  await page.getByLabel('dy',{exact:true}).fill('0.08');await page.getByLabel('dy',{exact:true}).press('Tab');
  await expect(page.getByLabel('interface sampling',{exact:true})).toHaveValue('yee');
  await page.getByLabel('time steps',{exact:true}).fill('80');await page.getByLabel('time steps',{exact:true}).press('Tab');
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.getByRole('button',{name:'Edit explicit node arrays',exact:true}).click();
  const dialog=page.locator('.mesh-dialog');await expect(dialog).toBeVisible();
  const x=dialog.getByLabel('x mesh nodes',{exact:true}),original=await x.inputValue();
@@ -20,7 +20,7 @@ test('axis spacing, atomic explicit nodes, Python export and native solve',async
  await x.fill(original);await dialog.getByRole('button',{name:'Apply node arrays',exact:true}).click();
  await expect(dialog).not.toBeVisible();
  await expect(page.getByLabel('mesh type',{exact:true})).toHaveValue('explicit');
- const project=await page.evaluate(()=>JSON.parse(localStorage.getItem('photonweave.project.v1')));
+ const project=await page.evaluate(()=>JSON.parse(localStorage.getItem('torchfdtd.project.v1')));
  expect(project.region.mesh_coordinates).toHaveLength(3);
  const response=await page.request.post('/api/python',{data:project});expect(await response.text()).toContain('mesh_coordinates');
  await page.getByRole('button',{name:'Preview simulation mesh',exact:true}).click();
@@ -32,7 +32,7 @@ test('axis spacing, atomic explicit nodes, Python export and native solve',async
 });
 
 test('synthetic nonuniform FSP retains nodes and original bytes through GPU workflow',async({page})=>{
- const python=process.env.PHOTONWEAVE_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
+ const python=process.env.TORCHFDTD_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
  const encoded=execFileSync(python,['-c',"import sys,base64;sys.path.insert(0,'tests');from test_fsp_native import fixture;from test_fsp_mesh import settings;print(base64.b64encode(fixture(region_overrides=settings())).decode())"],{encoding:'utf8'}).trim();
  const raw=Buffer.from(encoded,'base64');
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
@@ -44,10 +44,10 @@ test('synthetic nonuniform FSP retains nodes and original bytes through GPU work
  expect(fs.readFileSync(await (await downloaded).path())).toEqual(raw);
  await page.locator('[data-native="load"]').click();
  await expect(page.getByLabel('mesh type',{exact:true})).toHaveValue('explicit');
- const p=await page.evaluate(()=>JSON.parse(localStorage.getItem('photonweave.project.v1')));
+ const p=await page.evaluate(()=>JSON.parse(localStorage.getItem('torchfdtd.project.v1')));
  expect(p.region.mesh_coordinates.map(v=>v.length)).toEqual([49,49,49]);
  expect(p.region.time_step_override).toBeGreaterThan(0);
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.locator('#run-button').click();await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:90000});
  await page.screenshot({path:'results/ui-rectilinear-fsp.png',fullPage:true});
 });

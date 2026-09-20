@@ -6,7 +6,7 @@ It does not assume that the target Z is determined by the sampled scene X.
 The irreducible target covariance `ZZ - XZ.T @ solve(XX, XZ)` is retained.
 
 ```python
-from photonweave import gaussian_target_information, shot_read_covariance
+from torchfdtd import gaussian_target_information, shot_read_covariance
 
 # All tensors have a common device and real FP32/FP64 dtype.
 # A: (measurement, scene), XX: (scene, scene), XZ: (scene, target),

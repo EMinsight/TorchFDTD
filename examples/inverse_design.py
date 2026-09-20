@@ -6,7 +6,7 @@ collection-efficiency objective or a claim of a globally optimal structure.
 """
 import argparse
 import numpy as np
-from photonweave import Project,Region,Structure,Source,Monitor,SpectrumSettings,optimize
+from torchfdtd import Project,Region,Structure,Source,Monitor,SpectrumSettings,optimize
 
 
 def local_intensity(result):

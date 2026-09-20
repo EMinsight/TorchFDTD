@@ -11,10 +11,10 @@ import time
 
 import torch
 
-from photonweave import (AdjointBatchOptions, AdjointCase, AdjointExecutionPolicy,
+from torchfdtd import (AdjointBatchOptions, AdjointCase, AdjointExecutionPolicy,
     AdjointOptions, DifferentiableSimulation, DispersiveSimulation, RecomputedAdjointBatch)
-from photonweave.memory_profile import host_memory
-from photonweave.solver import index_at
+from torchfdtd.memory_profile import host_memory
+from torchfdtd.solver import index_at
 from benchmarks.budgeted_resident import scene, material
 
 
@@ -86,7 +86,7 @@ def main(argv=None):
     logical=scalar.expand(large[0].region.shape)
     plan=batch.plan(*material(logical,theta)) if args.dispersive else batch.plan(logical)
     root=Path(__file__).resolve().parents[1]
-    sources=[Path(__file__).resolve(),root/'benchmarks/budgeted_resident.py',*sorted((root/'photonweave').glob('*.py'))]
+    sources=[Path(__file__).resolve(),root/'benchmarks/budgeted_resident.py',*sorted((root/'torchfdtd').glob('*.py'))]
     report=dict(stage='admitted_not_executed',grid=large[0].region.shape,cases=args.cases,
         steps=args.steps,precision=args.precision,dispersive=args.dispersive,device=args.device,
         hardware=torch.cuda.get_device_name() if args.device=='cuda' else 'CPU',

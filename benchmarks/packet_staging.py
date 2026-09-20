@@ -6,7 +6,7 @@ from pathlib import Path
 
 import torch
 
-from photonweave.tensor_packet import TensorLayout, pack_tensors
+from torchfdtd.tensor_packet import TensorLayout, pack_tensors
 
 
 def allocated_during(call):
@@ -57,8 +57,8 @@ def main():
     if any(n < 1 for n in args.shape):parser.error('Shape dimensions must be positive.')
     torch.set_num_threads(4)
     root = Path(__file__).resolve().parents[1]
-    paths = ('photonweave/tensor_packet.py', 'photonweave/tile_workspace.py',
-             'photonweave/spacetime.py', 'benchmarks/packet_staging.py')
+    paths = ('torchfdtd/tensor_packet.py', 'torchfdtd/tile_workspace.py',
+             'torchfdtd/spacetime.py', 'benchmarks/packet_staging.py')
     report = dict(torch_version=torch.__version__, shape=args.shape, precision=args.precision,
                   cpu_threads=torch.get_num_threads(), measurements=measure(tuple(args.shape),args.precision),
                   source_sha256={path:hashlib.sha256((root/path).read_bytes()).hexdigest() for path in paths},

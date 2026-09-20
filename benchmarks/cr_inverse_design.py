@@ -15,7 +15,7 @@ import time
 import numpy as np
 import torch
 
-from photonweave import PeriodicLayerResponse, PlaneReferenceCache, spectral_pupil_response
+from torchfdtd import PeriodicLayerResponse, PlaneReferenceCache, spectral_pupil_response
 from benchmarks.cr_optimization import ProjectedAdamRun
 from benchmarks.cr_resume import CaseJournal, runtime_identity, source_hashes, tensor_digest, write_json
 from benchmarks.cr_spectral_objective import execution_settings, information_objective

@@ -1,8 +1,8 @@
 """Synthetic saved grids only, no vendor layout or calculation data."""
 import numpy as np
 import pytest
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import convert_fsp
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import convert_fsp
 from test_fsp_native import fixture
 
 

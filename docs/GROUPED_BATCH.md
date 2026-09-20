@@ -3,7 +3,7 @@
 `run_grouped_batch()` accepts interleaved projects with different meshes, durations, boundaries or real precisions. It groups exact compatible topologies, runs shared CUDA cohorts and returns results in the original input order. It never pads grids, resamples fields or changes requested time steps. The browser is not required.
 
 ```python
-from photonweave import Project, plan_grouped_batch, run_grouped_batch
+from torchfdtd import Project, plan_grouped_batch, run_grouped_batch
 
 cases = [Project.load(path) for path in ('coarse.json', 'fine.json', 'coarse-2.json')]
 for p in cases:

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 test('edit source band, phase, monitor window and duration, then export and run GPU',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const python=process.env.PHOTONWEAVE_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
+ const python=process.env.TORCHFDTD_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
  const raw=Buffer.from(execFileSync(python,['-c',"import sys,base64;sys.path.insert(0,'tests');from test_fsp_settings_write import settings_fixture;print(base64.b64encode(settings_fixture()).decode())"],{encoding:'utf8'}).trim(),'base64');
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-action="fsp-native"]').click();
@@ -37,16 +37,16 @@ test('edit source band, phase, monitor window and duration, then export and run 
  await page.locator('#fsp-native-input').setInputFiles({name:'edited-settings.fsp',mimeType:'application/octet-stream',buffer:bytes});
  await expect(page.locator('#fsp-native-status')).toContainText('Ready to open',{timeout:20000});await page.locator('[data-native="load"]').click();
  await expect(page.locator('#fsp-native-dialog')).not.toBeVisible();
- const p=await page.evaluate(()=>JSON.parse(localStorage.getItem('photonweave.project.v1')));
+ const p=await page.evaluate(()=>JSON.parse(localStorage.getItem('torchfdtd.project.v1')));
  expect(p.region.steps).toBe(80);expect(p.region.courant_factor).toBe(.7);expect(p.region.boundaries.x_min.layers).toBe(6);
  expect(p.sources[0].wavelength_start).toBeCloseTo(1.4);expect(p.sources[0].wavelength_stop).toBeCloseTo(1.8);expect(p.sources[0].phase).toBe(47);
  expect(p.monitors[0].spectrum.frequency_points).toBe(9);expect(p.monitors[0].spectrum.apodization).toBe('full');expect(p.monitors[0].time_downsample).toBe(2);
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  const submitted=page.waitForResponse(r=>r.url().endsWith('/api/jobs')&&r.request().method()==='POST');
  await page.locator('#run-button').click();const job=await (await submitted).json();
  await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:90000});
  const result=await (await page.request.get('/api/jobs/'+job.id)).json();expect(result.status).toBe('completed');
  expect(result.flux_monitors[0].flux.some(v=>Math.abs(v)>0)).toBe(true);
- if(process.env.PHOTONWEAVE_TEST_CUDA)expect(result.summary.gpu).toContain('5880');
+ if(process.env.TORCHFDTD_TEST_CUDA)expect(result.summary.gpu).toContain('5880');
  expect(errors).toEqual([]);
 });

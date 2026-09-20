@@ -9,7 +9,7 @@ approximation.
 
 ```python
 import torch
-from photonweave import recompute_cases
+from torchfdtd import recompute_cases
 
 # models and frequencies are fixed for this optimizer iteration.
 # build_epsilon must preserve Torch differentiation through the design.

@@ -3,10 +3,10 @@ import {test,expect} from '@playwright/test';
 test('create a closed TFSF box, preview incidence and verify empty exterior on GPU',async({page})=>{
  const p=await (await page.request.get('/api/examples/scatterer')).json();
  p.structures=[];p.sources=[];p.region.size=[3.2,3.2,1];p.region.mesh=.1;p.region.pml_cells=4;p.region.steps=300;
- p.region.backend=process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu';p.region.cuda_kernel=process.env.PHOTONWEAVE_TEST_CUDA?'fused':'torch';
+ p.region.backend=process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu';p.region.cuda_kernel=process.env.TORCHFDTD_TEST_CUDA?'fused':'torch';
  p.region.material_sampling='yee';p.region.precision='float64';
  p.monitors[0].center=[0,0,0];p.monitors[1].center=[1.1,1.1,0];
- await page.addInitScript(p=>localStorage.setItem('photonweave.project.v1',JSON.stringify(p)),p);
+ await page.addInitScript(p=>localStorage.setItem('torchfdtd.project.v1',JSON.stringify(p)),p);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await page.locator('[data-add="tfsf"]').click();
  await page.getByLabel('x span',{exact:true}).fill('1.6');await page.getByLabel('x span',{exact:true}).press('Tab');
@@ -25,6 +25,6 @@ test('create a closed TFSF box, preview incidence and verify empty exterior on G
  const peaks=job.monitors.map(m=>Math.max(...m.signal.map(Math.abs)));
  expect(peaks[0]).toBeGreaterThan(.01);expect(peaks[1]/peaks[0]).toBeLessThan(1e-6);
  expect(job.summary.tfsf_boxes).toHaveLength(1);
- if(process.env.PHOTONWEAVE_TEST_CUDA)expect(job.summary.backend).toBe('cuda');
+ if(process.env.TORCHFDTD_TEST_CUDA)expect(job.summary.backend).toBe('cuda');
  await page.screenshot({path:'results/ui-tfsf-source.png',fullPage:true});expect(errors).toEqual([]);
 });

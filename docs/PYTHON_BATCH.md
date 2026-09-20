@@ -14,7 +14,7 @@ source carrier phase degrees. `FDTD`, the optional familiar editing facade, uses
 SI metres for geometry and wavelength. Do not mix these two interfaces' lengths.
 
 ```python
-from photonweave import Project, Simulation, Result
+from torchfdtd import Project, Simulation, Result
 
 schema = Project.model_json_schema()  # Every accepted field, bound and enum.
 project = Project.load('project.json')
@@ -37,16 +37,16 @@ Yee arrays. `result.field_monitor(name_or_id)` returns complex plane E/H fields,
 coordinates, quadrature weights, frequencies and signed flux. UI plots can be
 decimated, whereas these Python arrays retain their recorded resolution.
 
-Use `photonweave.mesh.freeze_refinements` before removing geometry for a matching
-reference. Use `photonweave.solver.estimate(project)` for mesh/memory estimates,
-`photonweave.materials.permittivity(material, frequencies)` for analytic material
-response, and `photonweave.spectra.frequency_samples(settings)` for actual nodes.
+Use `torchfdtd.mesh.freeze_refinements` before removing geometry for a matching
+reference. Use `torchfdtd.solver.estimate(project)` for mesh/memory estimates,
+`torchfdtd.materials.permittivity(material, frequencies)` for analytic material
+response, and `torchfdtd.spectra.frequency_samples(settings)` for actual nodes.
 
 ## Frequency fields and reflection/transmission
 
 The optional fused real-field CUDA implementation is selected with
 `project.region.cuda_kernel = 'fused'` and `backend = 'cuda'`. Install
-`photonweave[cuda-kernels]` with a compatible CUDA 12 / NVRTC runtime first.
+`torchfdtd[cuda-kernels]` with a compatible CUDA 12 / NVRTC runtime first.
 It supports CPML, periodic boundaries, uniform/graded meshes and existing ADE
 materials. Complex Bloch configurations require `cuda_kernel = 'torch'`.
 The default remains `torch`. `result.summary['cuda_kernel']` records the choice.
@@ -60,7 +60,7 @@ See [measured scope and limitations](OPEN_SOURCE_COMPARISON_KO.md).
 [`examples/flux_slab.py`](../examples/flux_slab.py) is a complete executable example.
 
 ```python
-from photonweave import normalize_flux
+from torchfdtd import normalize_flux
 
 R_signed = normalize_flux(sample.field_monitor('reflection'),
                           air.field_monitor('reflection'), subtract_incident=True)
@@ -81,7 +81,7 @@ point-field ratio is not a modal transmission or a collection efficiency.
 ## Actual independent-case concurrency
 
 ```python
-from photonweave import Project, BatchRunner, parameter_sweep
+from torchfdtd import Project, BatchRunner, parameter_sweep
 
 def objective(result):
     return {'peak': result.summary['field_peak']}
@@ -141,7 +141,7 @@ is a project dictionary or a path relative to the manifest. For custom objective
 use Python.
 
 ```shell
-python -m photonweave.cli batch cases.json --backend cuda --workers 2 --output results/sweep --resume
+python -m torchfdtd.cli batch cases.json --backend cuda --workers 2 --output results/sweep --resume
 ```
 
 ## Inverse design

@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 from scipy.special import spherical_jn,spherical_yn
 
-from photonweave import Project,Region,Source,Structure,Material,FieldMonitor,SpectrumSettings,Simulation,RunControl
+from torchfdtd import Project,Region,Source,Structure,Material,FieldMonitor,SpectrumSettings,Simulation,RunControl
 
 
 def mie_cross_section(wavelength_um,radius_um,index):

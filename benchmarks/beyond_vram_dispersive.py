@@ -14,8 +14,8 @@ import time
 
 import psutil
 import torch
-import photonweave
-from photonweave import (Region, Project, Source, Monitor, BoundaryFace,
+import torchfdtd
+from torchfdtd import (Region, Project, Source, Monitor, BoundaryFace,
     DispersiveSimulation, AdjointOptions, StreamedDispersiveSimulation,
     StreamedAdjointOptions, estimate_streamed_dispersive_memory)
 
@@ -72,7 +72,7 @@ def main():
         scratch_directory=str(scratch),initial_disk_free_bytes=disk_free,initial_available_ram_bytes=ram_free,
         disk_headroom_bytes=disk_floor,ram_headroom_bytes=ram_floor,
         source_sha256={path.name:hashlib.sha256(path.read_bytes()).hexdigest()
-            for path in [Path(__file__),*sorted(Path(photonweave.__file__).parent.glob('*.py'))]},
+            for path in [Path(__file__),*sorted(Path(torchfdtd.__file__).parent.glob('*.py'))]},
         scope='Short complex FP64 one-pole ADE capacity/VJP test. E/H and P/Q together exceed VRAM in the default case. Oracle uses checkpointed resident Torch ADE and a finite dependency cone. No long-time, optical-convergence or throughput-superiority claim.')
     output = Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
     def save():

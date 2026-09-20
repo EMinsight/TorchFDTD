@@ -11,7 +11,7 @@ import time
 
 import torch
 
-from photonweave import AdjointOptions,DifferentiableSimulation,Monitor,Project,Region,Source
+from torchfdtd import AdjointOptions,DifferentiableSimulation,Monitor,Project,Region,Source
 
 
 def main():

@@ -1,7 +1,7 @@
 """Public complex streamed history, online spectra and checkpoint gradients."""
 import pytest
 import torch
-from photonweave import DifferentiableSimulation, StreamedSimulation, StreamedAdjointOptions, tune_streamed
+from torchfdtd import DifferentiableSimulation, StreamedSimulation, StreamedAdjointOptions, tune_streamed
 from test_bloch_adjoint import scene
 from test_differentiable import gpu
 

@@ -27,7 +27,7 @@ The legacy Gaussian uses `sigma = pulse_cycles*wavelength/c`, offset `4*sigma`, 
 ## Python
 
 ```python
-from photonweave import FDTD
+from torchfdtd import FDTD
 
 f = FDTD()
 f.adddipole(name='source')

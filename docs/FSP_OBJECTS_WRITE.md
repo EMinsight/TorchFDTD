@@ -18,9 +18,9 @@ do not establish general FSP file compatibility.
 
 ```python
 from uuid import uuid4
-from photonweave import Structure, write_fsp_scene
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import convert_fsp
+from torchfdtd import Structure, write_fsp_scene
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import convert_fsp
 
 original = FspDocument.load('input.fsp')
 conversion = convert_fsp(original, backend='cuda')
@@ -57,7 +57,7 @@ for the specified objects. Geometry must satisfy the same native validation
 and supported FSP/PML constraints as other scene exports. The exporter reports
 an error before returning a file when a mapping cannot be preserved.
 
-CLI: `photonweave fsp-write-scene original.fsp edited-native.json --output edited.fsp --report edits.json`.
+CLI: `torchfdtd fsp-write-scene original.fsp edited-native.json --output edited.fsp --report edits.json`.
 The geometry-only `write_fsp_geometry` API and `fsp-write-geometry` command keep
 their existing-object contract.
 

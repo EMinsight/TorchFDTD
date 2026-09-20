@@ -9,8 +9,8 @@ import time
 import numpy as np
 import torch
 
-from photonweave import RunControl, Simulation, SpectrumSettings, TimeSignal
-from photonweave.solver import hardware
+from torchfdtd import RunControl, Simulation, SpectrumSettings, TimeSignal
+from torchfdtd.solver import hardware
 from .cuda_kernels import scene
 
 

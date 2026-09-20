@@ -4,9 +4,9 @@ from dataclasses import replace
 import pytest
 import torch
 
-from photonweave import (AdjointExecutionPolicy, AdjointOptions, StreamedAdjointOptions,
+from torchfdtd import (AdjointExecutionPolicy, AdjointOptions, StreamedAdjointOptions,
     DifferentiableSimulation, DispersiveSimulation, tune_adjoint_execution)
-from photonweave.execution_tuning import _resident_reservation
+from torchfdtd.execution_tuning import _resident_reservation
 from test_streamed_dispersive import scene,inputs
 
 
@@ -103,7 +103,7 @@ def test_large_streamed_project_is_not_admitted_as_resident():
 def test_uncached_reference_does_not_keep_previous_resident_system(monkeypatch):
     import gc
     import weakref
-    from photonweave.differentiable import _System
+    from torchfdtd.differentiable import _System
     p=scene(steps=11)
     epsilon=inputs(p,'shared')[0]
     live=[]
@@ -132,6 +132,6 @@ def test_uncached_reference_does_not_keep_previous_resident_system(monkeypatch):
 def test_bad_calibration_settings_rejected_before_policy_generation(monkeypatch,setting,value):
     p=scene()
     def forbidden(*a,**kw):pytest.fail('Generated policies before validating calibration settings')
-    monkeypatch.setattr('photonweave.execution_tuning._generated_candidates',forbidden)
+    monkeypatch.setattr('torchfdtd.execution_tuning._generated_candidates',forbidden)
     with pytest.raises(ValueError,match=setting):
         tune_adjoint_execution(p,inputs(p,'shared')[0],**{setting:value})

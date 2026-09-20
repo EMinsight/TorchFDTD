@@ -22,10 +22,10 @@ from .optical_data import OpticalData
 
 
 def create_app(result_dir=None):
-    app = FastAPI(title='PhotonWeave FDTD', version='0.14.0.dev0')
+    app = FastAPI(title='TorchFDTD', version='0.14.0.dev0')
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', 'testserver'])
     app.add_middleware(GZipMiddleware, minimum_size=4096, compresslevel=1)
-    root = Path(result_dir or os.environ.get('PHOTONWEAVE_RESULTS', 'results')).resolve()
+    root = Path(result_dir or os.environ.get('TORCHFDTD_RESULTS') or os.environ.get('PHOTONWEAVE_RESULTS', 'results')).resolve()
     root.mkdir(parents=True, exist_ok=True)
     pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix='fdtd')
     jobs, lock = {}, threading.Lock()
@@ -243,7 +243,7 @@ def create_app(result_dir=None):
         path = root/f'{key}.npz'
         if not path.exists():
             raise HTTPException(409, 'Result is not ready.')
-        return FileResponse(path, filename=f'photonweave-{key[:8]}.npz')
+        return FileResponse(path, filename=f'torchfdtd-{key[:8]}.npz')
 
     @app.get('/api/jobs/{key}/monitors.csv')
     def csv(key: str):

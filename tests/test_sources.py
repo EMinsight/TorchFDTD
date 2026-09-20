@@ -2,12 +2,12 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
-from photonweave import FDTD, Project, Source, SourceTimeSettings, TimeSignal, Simulation
-from photonweave.fsp_binary import FspDocument
-from photonweave.fsp_native import convert_fsp
-from photonweave.server import create_app
-from photonweave.source_preview import preview_source
-from photonweave.solver import source_time_signal
+from torchfdtd import FDTD, Project, Source, SourceTimeSettings, TimeSignal, Simulation
+from torchfdtd.fsp_binary import FspDocument
+from torchfdtd.fsp_native import convert_fsp
+from torchfdtd.server import create_app
+from torchfdtd.source_preview import preview_source
+from torchfdtd.solver import source_time_signal
 from test_fsp_native import fixture
 from test_solver import small
 
@@ -84,7 +84,7 @@ def test_custom_global_signal_cpu_gpu_eager_graph_parity(precision):
 
 
 def test_independent_fsp_custom_signal_and_global_settings(monkeypatch):
-    from photonweave import fsp
+    from torchfdtd import fsp
     monkeypatch.setattr(fsp,'load_api',lambda:pytest.fail('Independent source import loaded vendor runtime'))
     s=signal()
     conversion=convert_fsp(FspDocument(fixture(dict(frequencyEnvelopeType=2,userTime=np.array(s.time_s),

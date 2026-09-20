@@ -6,9 +6,9 @@ import time
 
 import torch
 
-from photonweave import Region,Project,Source,Monitor,StreamedAdjointOptions
-from photonweave.differentiable import _System
-from photonweave.streamed import _reservation
+from torchfdtd import Region,Project,Source,Monitor,StreamedAdjointOptions
+from torchfdtd.differentiable import _System
+from torchfdtd.streamed import _reservation
 
 
 def main():

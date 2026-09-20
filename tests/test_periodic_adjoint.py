@@ -3,7 +3,7 @@ from dataclasses import replace
 import pytest
 import torch
 
-from photonweave import (AdjointBatchOptions, AdjointExecutionPolicy, AdjointOptions,
+from torchfdtd import (AdjointBatchOptions, AdjointExecutionPolicy, AdjointOptions,
     PeriodicLayerResponse, PlaneReferenceCache, StreamedAdjointOptions,
     periodic_layer_response, spectral_pupil_response)
 
@@ -99,7 +99,7 @@ def test_density_direction_optimizer_and_spectral_schedule(tmp_path):
 
 
 def test_denied_or_changed_budget_precedes_dense_geometry_and_reference(tmp_path, monkeypatch):
-    import photonweave.periodic_adjoint as implementation
+    import torchfdtd.periodic_adjoint as implementation
     with pytest.raises(ValueError, match='host budget'):
         model('cpu', 'resident', tmp_path,
             batch_options=AdjointBatchOptions(host_budget_bytes=1, gpu_budget_bytes=BUDGET))
@@ -116,7 +116,7 @@ def test_denied_or_changed_budget_precedes_dense_geometry_and_reference(tmp_path
 
 
 def test_plan_allocates_no_full_material_map_and_returns_an_inspection_copy(tmp_path, monkeypatch):
-    import photonweave.periodic_adjoint as implementation
+    import torchfdtd.periodic_adjoint as implementation
     spec = dict(SPEC)
     module = model('cpu', 'resident', tmp_path)
     monkeypatch.setattr(implementation, 'periodic_density_layer', lambda *a, **kw: pytest.fail('Allocated plan geometry'))

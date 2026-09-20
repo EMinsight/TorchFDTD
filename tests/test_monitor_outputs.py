@@ -4,11 +4,11 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import FieldMonitor, Monitor, Project, Region, Source, SpectrumSettings, Simulation, Result, FDTD, run_tensor_batch
-from photonweave.boundaries import YeeGrid
-from photonweave.field_monitors import FrequencyPlane, FrequencyUpdates, normalize_flux, plane_plan
-from photonweave.spectra import frequency_samples, apodization_window
-from photonweave.tuning import _result_digest
+from torchfdtd import FieldMonitor, Monitor, Project, Region, Source, SpectrumSettings, Simulation, Result, FDTD, run_tensor_batch
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.field_monitors import FrequencyPlane, FrequencyUpdates, normalize_flux, plane_plan
+from torchfdtd.spectra import frequency_samples, apodization_window
+from torchfdtd.tuning import _result_digest
 
 
 OUTPUTS = [dict(record_fields=('Hy',),record_poynting=(),record_flux=False),

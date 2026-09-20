@@ -23,9 +23,9 @@ import fdtd
 import numpy as np
 import torch
 
-from photonweave import Project, Region, Structure, Material, Source, Monitor, RunControl, Simulation
-from photonweave.solver import voxelize, source_slice, source_profile, index_at, hardware
-from photonweave.waveforms import source_time_signal
+from torchfdtd import Project, Region, Structure, Material, Source, Monitor, RunControl, Simulation
+from torchfdtd.solver import voxelize, source_slice, source_profile, index_at, hardware
+from torchfdtd.waveforms import source_time_signal
 
 
 def scene(kind='sphere', n=64, steps=800):
@@ -52,7 +52,7 @@ def upstream_run(project, graph=True, with_planes=False, plane_kernel='torch', c
     The two solvers consequently have small boundary-discretization differences.
     Their physical coefficient profiles, grid, dt and source table are equal.
     """
-    from photonweave.cuda_graph import CudaStepGraphs, observation_schedule, validate_graph_steps
+    from torchfdtd.cuda_graph import CudaStepGraphs, observation_schedule, validate_graph_steps
     validate_graph_steps(cuda_graph_steps,graph)
     r=project.region
     old_dtype=torch.get_default_dtype()
@@ -84,7 +84,7 @@ def upstream_run(project, graph=True, with_planes=False, plane_kernel='torch', c
             # Common observation adapter, not an upstream plane-DFT feature.
             # Either observer can be shared fairly with the native solver.
             from types import SimpleNamespace
-            from photonweave.field_monitors import FrequencyPlane,FrequencyUpdates
+            from torchfdtd.field_monitors import FrequencyPlane,FrequencyUpdates
             observed=SimpleNamespace(E=grid.E,H=grid.H,region=r.model_copy(update={'cuda_monitor_kernel':plane_kernel}),is_torch=True,
                                      time_step=grid.time_step,memory_states=[])
             planes=[FrequencyPlane(observed,project.resolved_monitor(m))
@@ -143,7 +143,7 @@ def main():
     def native(p):
         result=Simulation(p).run()
         return dict(setup_seconds=result.summary['setup_seconds'],loop_seconds=result.summary['seconds']),[result.electric,result.magnetic,result.signals]
-    runners['photonweave_fused']=native
+    runners['torchfdtd_fused']=native
     for n in args.sizes:
         for kind in args.cases:
             p=scene(kind,n,args.steps)
@@ -160,12 +160,12 @@ def main():
                 if repeat>=0:
                     eager,graph,ours=(outputs[k] for k in runners)
                     error=dict(upstream_graph_relative_l2=[relative(a,b) for a,b in zip(eager,graph)],
-                               photonweave_relative_l2=dict(zip(('E','H','trace'),[relative(a,b) for a,b in zip(ours,graph)])))
+                               torchfdtd_relative_l2=dict(zip(('E','H','trace'),[relative(a,b) for a,b in zip(ours,graph)])))
                     error['max_absolute_difference']=dict(zip(('E','H','trace'),[float(np.max(abs(a-b))) for a,b in zip(ours,graph)]))
                     error['reference_final_peak']=dict(zip(('E','H','trace'),[float(np.max(abs(a))) for a in graph]))
                     assert all(np.isfinite(v).all() for v in ours+graph+eager)
                     assert max(error['upstream_graph_relative_l2'])<1e-6
-                    error['trace_accuracy_pass']=error['photonweave_relative_l2']['trace']<.01
+                    error['trace_accuracy_pass']=error['torchfdtd_relative_l2']['trace']<.01
                     case['errors'].append(error)
                     print(json.dumps(error),flush=True)
             case['medians']={name:{k:statistics.median(row[k] for row in rows) for k in rows[0]}

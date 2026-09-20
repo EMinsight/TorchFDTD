@@ -4,7 +4,7 @@ test('edit global pulse and custom signal, inspect injection, run CUDA and retai
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.getByLabel('time steps',{exact:true}).fill('600');await page.getByLabel('time steps',{exact:true}).press('Tab');
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.locator('[data-select="source"]').click();
  await page.getByLabel('wavelength',{exact:true}).fill('1.6');await page.getByLabel('wavelength',{exact:true}).press('Tab');
  await page.getByLabel('phase',{exact:true}).fill('37');await page.getByLabel('phase',{exact:true}).press('Tab');
@@ -47,7 +47,7 @@ test('edit global pulse and custom signal, inspect injection, run CUDA and retai
  expect(job.project.sources[0].signal.phase_rad).toEqual([0,-12,-48,-72]);
  expect(job.project.sources[0].phase).toBe(37);expect(job.project.sources[0].amplitude).toBe(.7);
  expect(job.monitors[0].signal.some(v=>Math.abs(v)>1e-4)).toBe(true);
- if(process.env.PHOTONWEAVE_TEST_CUDA)expect(job.summary.cuda_graph).toBe(true);
+ if(process.env.TORCHFDTD_TEST_CUDA)expect(job.summary.cuda_graph).toBe(true);
  await expect(page.getByRole('button',{name:'Edit global source settings',exact:true})).toBeDisabled();
  await page.reload();await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-select="source"]').click();

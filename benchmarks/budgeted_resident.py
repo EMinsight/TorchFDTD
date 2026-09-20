@@ -12,11 +12,11 @@ import time
 
 import torch
 
-from photonweave import (AdjointOptions, DifferentiableSimulation, DispersiveSimulation,
+from torchfdtd import (AdjointOptions, DifferentiableSimulation, DispersiveSimulation,
     Monitor, Project, Region, Source, estimate_adjoint_memory)
-from photonweave.differentiable import _System
-from photonweave.dispersive_adjoint import _DispersiveSystem
-from photonweave.solver import index_at
+from torchfdtd.differentiable import _System
+from torchfdtd.dispersive_adjoint import _DispersiveSystem
+from torchfdtd.solver import index_at
 
 
 def scene(shape,precision,steps):
@@ -100,7 +100,7 @@ def main(argv=None):
         checkpoints=args.checkpoints,
         exceeds_workbench_cell_guard=args.size**3>8_000_000,source_cell_index=source_flat,
         reservation=reservation,source_sha256={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in [Path(__file__).resolve(),*sorted((root/'photonweave').glob('*.py'))]},
+            for p in [Path(__file__).resolve(),*sorted((root/'torchfdtd').glob('*.py'))]},
         scope='Short resident index/capacity and near-PML first-order VJP check. A 40-cubed full-autograd Torch oracle exercises nonzero CPML. Not a beyond-VRAM, long-time optical-convergence or speed comparison.')
     path=Path(args.output);path.parent.mkdir(parents=True,exist_ok=True)
     def save():

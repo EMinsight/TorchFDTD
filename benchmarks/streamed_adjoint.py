@@ -11,9 +11,9 @@ import statistics
 import time
 
 import torch
-import photonweave
+import torchfdtd
 
-from photonweave import (AdjointOptions, BoundaryFace, DifferentiableSimulation,
+from torchfdtd import (AdjointOptions, BoundaryFace, DifferentiableSimulation,
                         Monitor, Project, Region, Source, StreamedAdjointOptions,
                         StreamedSimulation)
 
@@ -117,7 +117,7 @@ def main():
                 precision=args.precision, repeats=args.repeats, warmups_per_mode=1,
                 comparison_tolerances=dict(signals=signal_tolerance,gradient=tolerance),
                 source_sha256={p.name:hashlib.sha256(p.read_bytes()).hexdigest()
-                    for p in [Path(__file__),*sorted(Path(photonweave.__file__).parent.glob('*.py'))]},
+                    for p in [Path(__file__),*sorted(Path(torchfdtd.__file__).parent.glob('*.py'))]},
                 complex_bloch=args.complex_bloch, bloch_phase=region.bloch_phase,
                 median_seconds=medians, streamed_over_resident_time=medians['streamed']/medians['resident'],
                 gradient_relative_l2=float(torch.linalg.vector_norm(gradients['streamed']-gradients['resident'])/denominator),

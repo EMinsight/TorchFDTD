@@ -8,7 +8,7 @@ Poynting flux and the existing reference-normalized flux operation.
 
 ```python
 import torch
-from photonweave import DispersiveSimulation, AdjointOptions
+from torchfdtd import DispersiveSimulation, AdjointOptions
 
 # project has a fixed mesh, soft sources and point monitors.
 model = DispersiveSimulation(project, AdjointOptions(checkpoints=4, storage="host"))

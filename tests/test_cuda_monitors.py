@@ -4,10 +4,10 @@ import numpy as np
 import pytest
 import torch
 
-from photonweave import FieldMonitor, SpectrumSettings, Simulation, run_tensor_batch
-from photonweave.boundaries import YeeGrid
-from photonweave.field_monitors import FrequencyPlane
-from photonweave.cuda_monitors import FusedFrequencyPlanes
+from torchfdtd import FieldMonitor, SpectrumSettings, Simulation, run_tensor_batch
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.field_monitors import FrequencyPlane
+from torchfdtd.cuda_monitors import FusedFrequencyPlanes
 from test_tensor_batch import cases
 
 pytestmark = pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')

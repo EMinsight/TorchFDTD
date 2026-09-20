@@ -1,6 +1,6 @@
 """Matched CPU, resident CUDA and DRAM-streamed CUDA forward/objective/VJPs.
 
-The CPU reference is PhotonWeave's Torch backend, not an optimized external
+The CPU reference is TorchFDTD's Torch backend, not an optimized external
 CPU solver. This measures a fixed discrete workload, not optical convergence,
 kernel-only throughput, beyond-VRAM capacity or a complete optimizer loop.
 """
@@ -18,11 +18,11 @@ import time
 
 import torch
 
-from photonweave import (AdjointExecutionPolicy, AdjointOptions, BoundaryFace,
+from torchfdtd import (AdjointExecutionPolicy, AdjointOptions, BoundaryFace,
     FieldMonitor, Project, Region, Source, StreamedAdjointOptions)
-from photonweave.execution_tuning import _resident_reservation
-from photonweave.memory_profile import host_memory
-from photonweave.plane_execution import plane_model, plane_reservation
+from torchfdtd.execution_tuning import _resident_reservation
+from torchfdtd.memory_profile import host_memory
+from torchfdtd.plane_execution import plane_model, plane_reservation
 from benchmarks.streamed_policy import evaluate
 
 
@@ -231,7 +231,7 @@ def main(argv=None):
     headroom = 0 if args.smoke else 16*1024**3
     root = Path(__file__).resolve().parents[1]
     sources = [Path(__file__).resolve(), root/'benchmarks/streamed_policy.py',
-               *sorted((root/'photonweave').glob('*.py'))]
+               *sorted((root/'torchfdtd').glob('*.py'))]
     data = dict(stage='planning', driver_smoke=args.smoke,
         configuration={k:v for k, v in vars(args).items() if k != 'output'},
         grid=project.region.shape, time_step_seconds=project.region.time_step,

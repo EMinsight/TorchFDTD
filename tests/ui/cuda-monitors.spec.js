@@ -7,7 +7,7 @@ test('select shared CUDA frequency monitors and collect six-component spectra',a
  p.region.backend='cuda';p.region.cuda_kernel='fused';p.region.steps=160;p.region.material_sampling='yee';
  p.monitors.push({id:'spectral-plane',name:'Spectral plane',kind:'field',normal:'x',center:[.7,0,0],size:[0,1,1],
   spectrum:{sampling:'frequency',frequency_points:5,apodization:'none'}});
- await page.addInitScript(p=>localStorage.setItem('photonweave.project.v1',JSON.stringify(p)),p);
+ await page.addInitScript(p=>localStorage.setItem('torchfdtd.project.v1',JSON.stringify(p)),p);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');
  await page.getByLabel('Frequency monitor kernel',{exact:true}).selectOption('fused');

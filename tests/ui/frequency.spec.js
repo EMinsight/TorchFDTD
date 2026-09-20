@@ -24,7 +24,7 @@ test('feature audit and global/custom frequency plane run without page errors',a
  await page.getByLabel('Use global monitor settings',{exact:true}).check();
  await expect(page.locator('#properties').getByLabel('Custom frequencies (THz)',{exact:true})).toBeDisabled();
  await page.locator('[data-select="fdtd"]').click();
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.getByLabel('time steps',{exact:true}).fill('100');
  await page.getByLabel('time steps',{exact:true}).press('Tab');
  await page.locator('#run-button').click();

@@ -30,7 +30,7 @@ def hardware():
     cuda = torch.cuda.is_available()
     return {'cuda': cuda, 'gpu': torch.cuda.get_device_name(0) if cuda else None,
             'gpu_memory_gb': round(torch.cuda.get_device_properties(0).total_memory / 2**30, 1) if cuda else 0,
-            'torch': torch.__version__, 'engine': 'PhotonWeave Yee/CPML on fdtd grid', 'cpu_threads': torch.get_num_threads()}
+            'torch': torch.__version__, 'engine': 'TorchFDTD Yee/CPML on fdtd grid', 'cpu_threads': torch.get_num_threads()}
 
 
 def field_axes(region, component):
@@ -545,7 +545,7 @@ class Simulation:
                      material_sampling=r.material_sampling,
                      epsilon_definition=interface_plan.metadata['epsilon_image'] if interface_plan is not None else 'instantaneous relative permittivity (epsilon-infinity for dispersive cells)',
                      boundaries=r.boundaries.model_dump(), bloch_phase=r.bloch_phase,
-                     units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad', engine='PhotonWeave Yee/CPML on fdtd grid')
+                     units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad', engine='TorchFDTD Yee/CPML on fdtd grid')
         frequency_results=[m.result() for m in frequency_monitors]
         if frequency_results:
             import hashlib

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 test('independent polygon import, native edit and verified geometry download',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const python=process.env.PHOTONWEAVE_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
+ const python=process.env.TORCHFDTD_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
  const raw=Buffer.from(execFileSync(python,['-c',"import sys,base64;sys.path.insert(0,'tests');from test_fsp_geometry_write import shape_fixture;print(base64.b64encode(shape_fixture()).decode())"],{encoding:'utf8'}).trim(),'base64');
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await page.locator('[data-action="fsp-native"]').click();
@@ -32,11 +32,11 @@ test('independent polygon import, native edit and verified geometry download',as
  await page.locator('#fsp-native-input').setInputFiles({name:'edited-polygon.fsp',mimeType:'application/octet-stream',buffer:bytes});
  await expect(page.locator('#fsp-native-status')).toContainText('Ready to open',{timeout:20000});
  await page.locator('[data-native="load"]').click();
- const scene=await page.evaluate(()=>JSON.parse(localStorage.getItem('photonweave.project.v1')));
+ const scene=await page.evaluate(()=>JSON.parse(localStorage.getItem('torchfdtd.project.v1')));
  expect(scene.structures[0].vertices).toHaveLength(3);expect(scene.structures[0].center[0]).toBeCloseTo(.32);
  expect(scene.structures[0].rotation_angles[1]).toBe(-27);
- await page.getByLabel('resource',{exact:true}).selectOption(process.env.PHOTONWEAVE_TEST_CUDA?'cuda':'cpu');
+ await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
  await page.locator('#run-button').click();await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:90000});
- if(process.env.PHOTONWEAVE_TEST_CUDA)await expect(page.locator('.run-summary')).toContainText('5880');
+ if(process.env.TORCHFDTD_TEST_CUDA)await expect(page.locator('.run-summary')).toContainText('5880');
  expect(errors).toEqual([]);
 });

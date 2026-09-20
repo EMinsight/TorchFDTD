@@ -1,7 +1,7 @@
 import pytest
 import torch
-from photonweave.tensor_packet import TensorLayout, pack_tensors
-from photonweave.spacetime import _host_copies
+from torchfdtd.tensor_packet import TensorLayout, pack_tensors
+from torchfdtd.spacetime import _host_copies
 
 
 def test_mixed_precision_complex_integer_and_alignment():
@@ -35,7 +35,7 @@ def test_homogeneous_fast_path_and_layout_guard():
 
 
 def test_cpu_workspace_mixed_roundtrip():
-    from photonweave.tile_workspace import TileWorkspace
+    from torchfdtd.tile_workspace import TileWorkspace
     values=(torch.tensor([1+2j],dtype=torch.complex64),torch.tensor([.25],dtype=torch.float64))
     workspace=TileWorkspace('cpu')
     packet,layout=pack_tensors(values)
@@ -82,7 +82,7 @@ def test_packet_destination_rejects_alias_grad_and_strided_storage():
 
 
 def test_packet_slots_reuse_input_and_output_allocations_without_aliasing_inputs():
-    from photonweave.tile_workspace import TileWorkspace
+    from torchfdtd.tile_workspace import TileWorkspace
     workspace = TileWorkspace('cpu')
     values = (torch.arange(60, dtype=torch.float64).reshape(5,4,3)[:,::2],
               torch.arange(20, dtype=torch.float64).to(torch.complex128).conj())
@@ -103,7 +103,7 @@ def test_packet_slots_reuse_input_and_output_allocations_without_aliasing_inputs
 
 
 def test_output_layout_changes_do_not_flush_input_kernel_bindings():
-    from photonweave.tile_workspace import TileWorkspace
+    from torchfdtd.tile_workspace import TileWorkspace
     workspace = TileWorkspace('cpu')
     value = workspace.array('field', (100,), torch.complex128)
     value.fill_(1+2j)

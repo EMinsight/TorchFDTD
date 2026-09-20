@@ -5,7 +5,7 @@ The preliminary timing trials are intentionally separate from optimization.
 """
 import numpy as np
 
-from photonweave import (Project, Region, Structure, Source, Monitor, RunControl,
+from torchfdtd import (Project, Region, Structure, Source, Monitor, RunControl,
                         parameter_sweep, tune_tensor_batch, optimize)
 
 

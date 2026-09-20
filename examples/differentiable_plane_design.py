@@ -11,7 +11,7 @@ from pathlib import Path
 
 import torch
 
-from photonweave import (AdjointExecutionPolicy, AdjointOptions, FieldMonitor,
+from torchfdtd import (AdjointExecutionPolicy, AdjointOptions, FieldMonitor,
     Project, Region, Source, StreamedAdjointOptions, smooth_sphere_epsilon,
     tune_adjoint_execution)
 

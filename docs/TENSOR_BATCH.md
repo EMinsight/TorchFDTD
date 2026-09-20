@@ -3,7 +3,7 @@
 `run_tensor_batch` evaluates independent structures in a shared CUDA launch. It returns the existing `BatchReport`, `BatchItem` and `Result` objects. The browser is not required. Install the CUDA kernel extra and a CUDA-enabled PyTorch build first.
 
 ```python
-from photonweave import Project, parameter_sweep, run_tensor_batch
+from torchfdtd import Project, parameter_sweep, run_tensor_batch
 
 base = Project.load('sphere.json')
 base.region.backend = 'cuda'
@@ -48,7 +48,7 @@ On the measured RTX 5880, 32³ × 16 is 2.40 times faster than native sequential
 ## Measure a cohort size explicitly
 
 ```python
-from photonweave import tune_tensor_batch, run_tensor_batch, optimize
+from torchfdtd import tune_tensor_batch, run_tensor_batch, optimize
 
 tuning = tune_tensor_batch(cases, candidates=(1, 2, 4, 8, 16), repeats=3)
 print(tuning.cohort_size, tuning.seconds)  # Selected size and complete tuning cost.

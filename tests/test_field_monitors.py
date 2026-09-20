@@ -3,11 +3,11 @@ import fdtd
 import numpy as np
 import pytest
 import torch
-from photonweave import Project,Region,Source,Structure,Monitor,FieldMonitor,Simulation,Boundaries,BoundaryFace,SpectrumSettings
-from photonweave.boundaries import YeeGrid
-from photonweave.field_monitors import FrequencyPlane,plane_plan,normalize_flux
-from photonweave.spectra import frequency_samples
-from photonweave.solver import C0
+from torchfdtd import Project,Region,Source,Structure,Monitor,FieldMonitor,Simulation,Boundaries,BoundaryFace,SpectrumSettings
+from torchfdtd.boundaries import YeeGrid
+from torchfdtd.field_monitors import FrequencyPlane,plane_plan,normalize_flux
+from torchfdtd.spectra import frequency_samples
+from torchfdtd.solver import C0
 
 
 def slab_project():

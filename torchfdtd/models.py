@@ -631,7 +631,7 @@ class Project(Model):
 
     def python_script(self):
         payload = pprint.pformat(self.model_dump(), sort_dicts=False, width=90)
-        return ('from photonweave import Project, Simulation\n\n'
+        return ('from torchfdtd import Project, Simulation\n\n'
                 '# Geometry and wavelength: micrometres. Time: seconds.\n'
                 f'project = Project.model_validate({payload})\n'
                 'result = Simulation(project).run()\n'

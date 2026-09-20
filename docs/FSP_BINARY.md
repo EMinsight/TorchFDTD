@@ -2,7 +2,7 @@
 
 # Independent FSP record reader and constrained writer
 
-`photonweave.fsp_binary` reads the observed **FSP 1.1 layout records written by Lumerical v241**, without loading its runtime. This is an independent file-format implementation. It is **not complete FSP compatibility** or a general project encoder. The separate [native scene converter](FSP_NATIVE.md) now executes a subset of these records.
+`torchfdtd.fsp_binary` reads the observed **FSP 1.1 layout records written by Lumerical v241**, without loading its runtime. This is an independent file-format implementation. It is **not complete FSP compatibility** or a general project encoder. The separate [native scene converter](FSP_NATIVE.md) now executes a subset of these records.
 
 The implementation was derived from controlled, user-authored FSP data files and verified through separate application readback. Vendor executable code was not examined. No vendor material database or original FSP fixtures are distributed with the package.
 
@@ -19,8 +19,8 @@ Saving without edits preserves every original byte. Existing destinations cannot
 ## Independent commands
 
 ```powershell
-photonweave fsp-read-native input.fsp --output inspection.json
-photonweave fsp-edit-native input.fsp --patches monitor-edits.json --output edited.fsp
+torchfdtd fsp-read-native input.fsp --output inspection.json
+torchfdtd fsp-edit-native input.fsp --patches monitor-edits.json --output edited.fsp
 ```
 
 Inspection reports the tree, class IDs, record offsets, embedded materials, selected geometry and raw property names, with `requires_lumerical: false` and `native_execution_allowed: false`. This developer-facing interface is separate from the workbench's existing familiar-property licensed bridge.

@@ -43,7 +43,7 @@ The envelope is `exp(-u*u/2)` without smoothing. For the endpoint taper, let `a=
 ## Python and FSP
 
 ```python
-from photonweave import FDTD
+from torchfdtd import FDTD
 
 f = FDTD()
 f.adddipole(name='source')

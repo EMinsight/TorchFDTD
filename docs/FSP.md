@@ -2,7 +2,7 @@
 
 # FSP interoperability bridge
 
-PhotonWeave has two FSP paths. **FSP → GPU** independently imports a supported layout subset into the native CPU/CUDA engine and writes supported scene edits, including uniform target meshes. See [native conversion and export](FSP_NATIVE.md) and [mesh editing](FSP_MESH_WRITE.md). General FSP compatibility remains incomplete.
+TorchFDTD has two FSP paths. **FSP → GPU** independently imports a supported layout subset into the native CPU/CUDA engine and writes supported scene edits, including uniform target meshes. See [native conversion and export](FSP_NATIVE.md) and [mesh editing](FSP_MESH_WRITE.md). General FSP compatibility remains incomplete.
 
 The optional **FSP inspect** bridge described below inspects and edits settings through an installed, licensed Lumerical FDTD. It is separate from the [independent record reader](FSP_BINARY.md) and native GPU path.
 
@@ -18,11 +18,11 @@ Arrays and complex values are represented with explicit types and dimensions in 
 
 ## Python and CLI
 
-Set `PHOTONWEAVE_LUMAPI` to the installed `api/python/lumapi.py` if automatic installation detection fails. License availability is checked when a session opens. Vendor code and material databases are not bundled with PhotonWeave.
+Set `TORCHFDTD_LUMAPI` to the installed `api/python/lumapi.py` if automatic installation detection fails. License availability is checked when a session opens. Vendor code and material databases are not bundled with TorchFDTD.
 
 ```powershell
-python -m photonweave.cli fsp-inspect project.fsp --output inspection.json --archive project.pwfsp
-python -m photonweave.cli fsp-export project.fsp --output edited.fsp --patches patches.json
+python -m torchfdtd.cli fsp-inspect project.fsp --output inspection.json --archive project.pwfsp
+python -m torchfdtd.cli fsp-export project.fsp --output edited.fsp --patches patches.json
 ```
 
 `patches.json` is an ordered list. Coupled settings follow Lumerical's own property-update behavior. Requested values are checked together after saving.
@@ -35,7 +35,7 @@ python -m photonweave.cli fsp-export project.fsp --output edited.fsp --patches p
 ```
 
 ```python
-from photonweave.fsp import inspect_fsp, export_fsp
+from torchfdtd.fsp import inspect_fsp, export_fsp
 inspection = inspect_fsp("project.fsp")
 export_fsp("project.fsp", "edited.fsp", [
     {"object_id": "::model::FDTD", "property": "pml layers", "value": 16}
@@ -52,4 +52,4 @@ An export with no patches is a byte-exact copy and needs no Lumerical license th
 - Vendor setup scripts may follow Lumerical's usual update rules when properties change. They are not translated into native Python. Final readback catches coupled changes to requested values, but does not yet prove every unrelated property is unchanged.
 - Optional installed-v241 integration tests are separate from current native release validation. Historical external readback records are not used as current release evidence. Synthetic tests exercise source hashing, mapped settings and failed-export preservation without loading the vendor runtime.
 
-Lumerical exposes object values through its documented [getnamed](https://optics.ansys.com/hc/en-us/articles/360034408574-getnamed-Script-command) and [setnamed](https://optics.ansys.com/hc/en-us/articles/360034928793-setnamed-Script-command) commands. Its separate [project-to-script prototype](https://optics.ansys.com/hc/en-us/articles/1500007185181-FDTD-Project-to-Script-Prototype) also advises checking reconstructed projects. PhotonWeave's preservation and readback checks do not establish full solver equivalence.
+Lumerical exposes object values through its documented [getnamed](https://optics.ansys.com/hc/en-us/articles/360034408574-getnamed-Script-command) and [setnamed](https://optics.ansys.com/hc/en-us/articles/360034928793-setnamed-Script-command) commands. Its separate [project-to-script prototype](https://optics.ansys.com/hc/en-us/articles/1500007185181-FDTD-Project-to-Script-Prototype) also advises checking reconstructed projects. TorchFDTD's preservation and readback checks do not establish full solver equivalence.
