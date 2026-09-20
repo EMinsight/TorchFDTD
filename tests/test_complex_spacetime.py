@@ -35,11 +35,12 @@ def test_packed_interior_tile_does_not_alias_restart_or_epsilon():
 
 
 @pytest.mark.parametrize('dtype', [torch.float32, torch.float64])
-@pytest.mark.parametrize('depth,nonuniform,diagonal', [(3, False, False), (10, True, True)])
+@pytest.mark.parametrize('depth,nonuniform,diagonal', [(3, False, False), (18, True, True)])
 @pytest.mark.parametrize('checkpoints', [0, 2])
 @pytest.mark.parametrize('pml_axis', [None, 'x', 'z'])
 def test_complex_slab_against_resident_autograd(dtype, depth, nonuniform, diagonal, checkpoints, pml_axis):
     p = scene(nonuniform)
+    p.region.steps=max(p.region.steps,depth+2)
     if pml_axis is not None:
         p.region.dimension = '3d'
         p.region.mesh_type = 'uniform'
@@ -85,7 +86,7 @@ def test_complex_slab_against_resident_autograd(dtype, depth, nonuniform, diagon
     torch.testing.assert_close(gradient, expected[-1], **tolerance)
     assert not gradient.is_complex()
     for actual, want in zip(state, old):torch.testing.assert_close(actual, want, rtol=0, atol=0)
-    if depth == 10 and pml_axis != 'x':
+    if depth == 18 and pml_axis != 'x':
         assert any(len(d[2]) > 2*p.region.shape[0] for d in operator.tiles(depth))
 
 

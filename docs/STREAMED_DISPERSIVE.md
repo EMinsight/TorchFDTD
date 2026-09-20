@@ -65,9 +65,11 @@ optical convergence or a capacity result.
 ## State ownership and transpose
 
 Each temporal block reads an immutable initial bank. A slab owns its x interval
-and reads a conservative `2*K` halo on both sides for `K` complete Yee steps.
+and reads a `K`-cell halo on both sides for `K` complete Yee steps.
 ADE adds pointwise P/Q recurrence and therefore does not enlarge the spatial
-dependency cone. Only owned cells are written to the next global bank.
+dependency cone. The E backward difference followed by the H forward difference
+has x support from `i-1` to `i+1`, so their radii do not add to two.
+Only owned cells are written to the next global bank.
 
 Global material states use `(Nx, P, Ny, Nz, 3)` so x-slab reads and writes remain
 contiguous in the file tier. Native tile kernels use `(P, Tx, Ny, Nz, 3)`.

@@ -126,8 +126,12 @@ and derivatives only.
 
 \section{Slab ownership and the transpose}
 A time block contains $K$ full steps. Each x slab retains the full y and z
-extent and a conservative halo of $2K$ cells on either x side. This bound covers
-the two radius-one curls per full step. Every slab reads the same immutable
+extent and a halo of $K$ cells on either x side. The electric update uses a
+backward x difference with support $\{i-1,i\}$, while the magnetic update
+uses a forward difference with support $\{i,i+1\}$. Their composition has
+support $\{i-1,i,i+1\}$. Pointwise ADE recurrences do not enlarge this set.
+Thus a complete step has x radius one, and $K$ complete steps have radius $K$.
+Every slab reads the same immutable
 block-start state. Only its owned interior is committed to the next global
 state. CPML ownership follows the target cell of its derivative rather than
 an unshifted field index. Periodic halos can contain repeated physical cells.
@@ -603,8 +607,8 @@ the repository validation report.}
 \end{table}
 \subsection{Material states in space-time slabs}
 The spatial extension retains the same pointwise ADE recurrence.
-Consequently, it adds no spatial dependency beyond the conservative
-$2K$ halo for $K$ complete Yee steps. Every tile reads an immutable
+Consequently, it adds no spatial dependency beyond the
+$K$ halo for $K$ complete Yee steps. Every tile reads an immutable
 block-start state, evolves its extended domain, and commits only owned cells.
 E/H, CPML and P/Q participate in both block and local checkpoint replay.
 

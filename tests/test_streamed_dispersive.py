@@ -35,7 +35,7 @@ def inputs(p, layout, requires_grad=False):
 
 
 @pytest.mark.parametrize('layout', ['shared', 'spatial', 'diagonal'])
-@pytest.mark.parametrize('bloch,depth', [(False, 2), (True, 2), (True, 8)])
+@pytest.mark.parametrize('bloch,depth', [(False, 2), (True, 2), (True, 18)])
 @pytest.mark.parametrize('device', ['cpu', 'cuda'])
 def test_complete_block_jacobian(layout, bloch, depth, device):
     if device == 'cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
@@ -52,6 +52,8 @@ def test_complete_block_jacobian(layout, bloch, depth, device):
     original = tuple(s.clone() for s in state)
     weights = torch.randn(depth, len(host.monitors), dtype=host.field_dtype)
     operator = DispersiveSlabBlockOperator(host, 3, device, local_checkpoints=2)
+    if depth == 18:
+        assert any(len(d[2])>2*p.region.shape[0] for d in operator.tiles(depth))
     actual, signals = operator.forward(parameters, state, 1, depth)
     bars, gradient = operator.transpose(parameters, state, 1, depth, endpoint, weights)
     differentiable = parameters.clone().requires_grad_()

@@ -72,7 +72,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     item = material_item*(2 if region.complex_fields else 1)
     state = (6*n+cpml+6*pole_count*n)*item
     depth = min(options.temporal_depth, region.steps)
-    width = min(options.slab_width, region.shape[0])+4*depth
+    width = min(options.slab_width, region.shape[0])+2*depth
     if 0 not in boundary.wrap:width = min(width, region.shape[0])
     tile_cells = width*region.shape[1]*region.shape[2]
     if (6 if region.complex_fields else 3)*tile_cells >= 2**31:
@@ -126,7 +126,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
                 state_bank_capacity=state_bank_capacity,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,
                 host_initial_state_reservation_bytes=initial_storage,
-                state_bytes=state, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*(18+6*pole_count)*local_slots*tile_cells*item,
+                state_bytes=state, halo_cells_per_side=depth, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*(18+6*pole_count)*local_slots*tile_cells*item,
                 source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))
 
 

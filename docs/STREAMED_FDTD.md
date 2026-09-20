@@ -5,6 +5,10 @@ in CPU DRAM. Only an extended x slab is moved to the selected execution device.
 Its first-order custom backward returns a CPU epsilon gradient, so ordinary
 Torch geometry parameters and optimizers can remain on CPU.
 
+The [Yee dependency bound](CAUSAL_HALO.md) now uses K halo cells on either side
+for K complete steps, reducing the earlier conservative 2K gather. Admission
+uses the same bound. Historical measurements retain their original wider halo.
+
 The separate [dispersive streamed API](STREAMED_DISPERSIVE.md) adds coupled
 Drude/Lorentz P/Q banks and material gradients. Its large-domain capacity and
 performance validation are separate from the nondispersive measurements here.
@@ -303,9 +307,10 @@ implemented. Explicit tuner candidates may compare host and disk policies.
 See [the file-bank validation](validation/STATE_BACKING_REPORT.md) for measured
 capacity estimates, slower execution and exact gradient comparisons.
 
-Every tile in a time block reads the same immutable old global state. Two
-radius-one curl updates per full step admit a conservative x halo of 2K for
-K steps. The full y/z extent is retained. Only the owned x interior is written
+Every tile in a time block reads the same immutable old global state. The
+oppositely oriented E/H differences give an x halo of K for K complete steps,
+as described in the [dependency analysis](CAUSAL_HALO.md).
+The full y/z extent is retained. Only the owned x interior is written
 to the next global state. Global CPML ends are clipped instead of extending
 evolving ghost cells. Real periodic x boundaries use replicated wrapped inputs,
 including nonuniform seam metrics and source copies.

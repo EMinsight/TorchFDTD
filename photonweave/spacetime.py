@@ -1,9 +1,10 @@
 """Lossless host/file-backed slab blocks and their discrete transpose.
 
-Internal execution primitive, not yet an automatically admitted public solver.
-Each tile reads the same immutable block-start state. A conservative 2*K halo
-covers the two radius-one curls in each full Yee step. Only owned cells are
-committed. The transpose accumulates all replicated halo inputs on the host.
+Each tile reads the same immutable block-start state with a K-cell halo for
+K complete Yee steps. Oppositely oriented E/H differences have a combined
+radius of one along x, not two. CPML ownership follows its derivative target,
+and pointwise ADE does not widen this support. Only owned cells are committed.
+The transpose accumulates all replicated halo inputs on the host.
 """
 from types import SimpleNamespace
 
@@ -108,7 +109,7 @@ class SlabBlockOperator:
         n = self.host.region.shape[0]
         for lo in range(0, n, self.width):
             hi = min(lo + self.width, n)
-            begin, end = lo - 2 * depth, hi + 2 * depth
+            begin, end = lo - depth, hi + depth
             if 0 not in self.host.grid.wrap:
                 begin, end = max(0, begin), min(n, end)
             coordinates = torch.arange(begin, end, dtype=torch.int64)
