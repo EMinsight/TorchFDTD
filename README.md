@@ -16,6 +16,14 @@ Supported gradients match the DRAM path exactly in the recorded tests, while
 file execution is slower. OS cache memory and sustained NVMe performance remain
 unvalidated.
 
+Experimental [resident/streamed adjoint selection](docs/EXECUTION_SELECTION.md)
+now compares full-grid and tiled execution with one CPU design-tensor API.
+The measured search includes resident input/output transfers and reuses the
+bounded gradient-reference cache. Policy quality at full application duration
+remains unverified. A separate [held-out streamed-policy study](docs/validation/MATERIAL_POLICY_REPORT.md#held-out-rtx-5880-real-fp32-policy-comparison)
+selected the fastest of six 128-step ADE policies using at most 32 calibration
+steps. That study used the earlier halo and does not validate unified selection.
+
 Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and physical convergence of the full CR objective remain pending.
 
 [Dispersive material adjoints](docs/DISPERSIVE_ADJOINT.md) connect epsilon-infinity, oscillator strength, resonance and damping to point spectra and fixed plane flux. Resident Torch and optional fused CUDA paths include Drude/Lorentz P/Q states in bounded checkpoint replay. Shared parameters stay compact, and CUDA material gradients use block reductions without atomics. Experimental [spatial ADE streaming](docs/STREAMED_DISPERSIVE.md) adds DRAM/file banks, asynchronous CUDA tiles and compact material-gradient reductions. A [54 GiB ADE capacity run](docs/validation/DISPERSIVE_CAPACITY_REPORT.md) completed ten forward steps and first-order material gradients on RTX 5880 with 5.17 GB peak Torch CUDA allocation in 54.8 minutes. This demonstrates short-run capacity beyond physical VRAM. Sustained performance and physical design-gradient convergence remain unverified.

@@ -103,6 +103,16 @@ disagreement. The original project and window remain unchanged.
 
 ## Limits and validation
 
+An [RTX 5880 held-out study](validation/MATERIAL_POLICY_REPORT.md#held-out-rtx-5880-real-fp32-policy-comparison)
+now records a 128-step two-pole FP32 case selected using at most 32 calibration
+steps. The chosen policy was fastest among the six tested full-duration
+policies. This is a resident-size scheduling ablation with the earlier halo,
+not a beyond-VRAM throughput claim.
+
+The experimental [unified selection API](EXECUTION_SELECTION.md) extends the
+same search to resident candidates and includes CPU/GPU interface-copy costs.
+Full-duration validation of that broader selection remains separate.
+
 Tests include a policy error isolated to a material derivative while forward
 values remain exactly unchanged, CPU/file equivalence, complex spectra,
 input/gradient preservation, compact-cache eviction, rejection before packing,

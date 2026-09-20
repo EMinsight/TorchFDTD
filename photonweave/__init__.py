@@ -74,3 +74,5 @@ from .dispersive_adjoint import DispersiveSimulation, DispersivePlaneSimulation
 __all__ += ['DispersiveSimulation', 'DispersivePlaneSimulation']
 from .streamed_dispersive import StreamedDispersiveSimulation, estimate_streamed_dispersive_memory
 __all__ += ['StreamedDispersiveSimulation', 'estimate_streamed_dispersive_memory']
+from .execution_tuning import AdjointExecutionPolicy, AdjointExecutionSelection, tune_adjoint_execution
+__all__ += ['AdjointExecutionPolicy', 'AdjointExecutionSelection', 'tune_adjoint_execution']

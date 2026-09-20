@@ -119,7 +119,8 @@ scale with timestep count. See [validation and timings](validation/ONLINE_SPECTR
 | Async checkpoint prefetch | Implemented with bounded event-owned staging slots |
 | Async spatial tile pipeline | Optional bounded pinned slots, separate copy streams, FIFO halo reduction |
 | Automatic tile policy | Two-duration replay-cost selection, full-duration optimality unproven |
-| Unified resident/DRAM/NVMe selection and GDS | Pending |
+| Resident/DRAM/file execution selection | Experimental [measured search](EXECUTION_SELECTION.md) with CPU design tensors and input/output transfer accounting. Full-duration policy quality remains unverified |
+| GPUDirect Storage | Pending |
 | Single-domain multi-GPU backward | Pending |
 
 Multiple calls can share a design tensor and their losses can accumulate, but

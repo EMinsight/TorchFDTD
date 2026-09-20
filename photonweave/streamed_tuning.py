@@ -215,9 +215,43 @@ def tune_streamed_dispersive(project, epsilon_inf, strength, omega0, gamma, *, o
         refine_candidates=refine_candidates,reference_cache_bytes=reference_cache_bytes)
 
 
-def _tune_streamed(project, workload, *, options=None, candidates=None, probe_steps=24, repeats=2,
-                   strategy='replay_cost', max_calibration_steps=512, refine_candidates=0,
-                   reference_cache_bytes=64*1024**2):
+def _generated_candidates(project, workload, base, reference_cache_bytes, max_calibration_steps):
+    planning = []
+    n = project.region.shape[0]
+    candidates = [replace(base, slab_width=min(n,width), temporal_depth=depth, tile_transfers='sync')
+                  for width,depth in ((base.slab_width,1),(base.slab_width,base.temporal_depth),
+                                     (2*base.slab_width,base.temporal_depth))]
+    if torch.device(base.device).type == 'cuda' and base.reuse_tile_buffers:
+        candidates.append(replace(base, slab_width=min(n,2*base.slab_width), tile_transfers='async', tile_buffers=2))
+    # Deeper tiles can save forward replay at the cost of local state copies.
+    # Keep the zero-slot policies in the race, since shallow/small workloads
+    # can regress when copies cost more than the eliminated updates.
+    if base.local_checkpoints == 0 and base.temporal_depth >= 8:
+        candidates.extend(replace(p,local_checkpoints=1) for p in list(candidates)
+                          if p.slab_width == min(n,2*base.slab_width) and p.temporal_depth == base.temporal_depth)
+    # Include a low-memory global schedule and a less replay-heavy one.
+    # These are admitted independently because saved banks can dominate
+    # DRAM/file capacity even when the CUDA tile itself fits.
+    candidates.extend(replace(base,slab_width=min(n,base.slab_width),checkpoints=count,tile_transfers='sync')
+                      for count in {0,min(32,base.checkpoints+2)} if count != base.checkpoints)
+    candidates = list(dict.fromkeys(candidates))
+    longest = min(project.region.steps,max_calibration_steps)
+    reference_upper = workload.parameter_bytes+workload.output_bytes(longest)
+    overhead = min(reference_cache_bytes,3*len(candidates)*reference_upper)+4*reference_upper
+    fitted = []
+    for proposed in candidates:
+        policy,detail = _fit_default_policy(workload,proposed,overhead)
+        planning.append(dict(proposed=asdict(proposed),fitted=None if policy is None else asdict(policy),**detail))
+        # Keep an unfitted proposal for a precise rejection at measurement
+        # admission. Conservative planning overhead can exceed the final
+        # reference working set for short calibrations.
+        fitted.append(proposed if policy is None else policy)
+    candidates = list(dict.fromkeys(fitted))
+    return candidates, planning
+
+
+def _validate_tuning_arguments(probe_steps, repeats, strategy, max_calibration_steps,
+                               refine_candidates, reference_cache_bytes):
     if isinstance(probe_steps,bool) or not isinstance(probe_steps,int) or not 10 <= probe_steps <= 256:
         raise ValueError('probe_steps must be an integer between 10 and 256.')
     if isinstance(repeats,bool) or not isinstance(repeats,int) or not 1 <= repeats <= 5:
@@ -229,43 +263,20 @@ def _tune_streamed(project, workload, *, options=None, candidates=None, probe_st
         raise ValueError('refine_candidates must be an integer between zero and twelve.')
     if isinstance(reference_cache_bytes,bool) or not isinstance(reference_cache_bytes,int) or reference_cache_bytes<0:
         raise ValueError('reference_cache_bytes must be a nonnegative integer.')
+
+
+def _tune_streamed(project, workload, *, options=None, candidates=None, probe_steps=24, repeats=2,
+                   strategy='replay_cost', max_calibration_steps=512, refine_candidates=0,
+                   reference_cache_bytes=64*1024**2, _policy_type=StreamedAdjointOptions):
+    _validate_tuning_arguments(probe_steps,repeats,strategy,max_calibration_steps,
+                               refine_candidates,reference_cache_bytes)
     epsilon = workload.epsilon
     base = options or StreamedAdjointOptions()
-    planning = []
     if candidates is None:
-        n = project.region.shape[0]
-        candidates = [replace(base, slab_width=min(n,width), temporal_depth=depth, tile_transfers='sync')
-                      for width,depth in ((base.slab_width,1),(base.slab_width,base.temporal_depth),
-                                         (2*base.slab_width,base.temporal_depth))]
-        if torch.device(base.device).type == 'cuda' and base.reuse_tile_buffers:
-            candidates.append(replace(base, slab_width=min(n,2*base.slab_width), tile_transfers='async', tile_buffers=2))
-        # Deeper tiles can save forward replay at the cost of local state copies.
-        # Keep the zero-slot policies in the race, since shallow/small workloads
-        # can regress when copies cost more than the eliminated updates.
-        if base.local_checkpoints == 0 and base.temporal_depth >= 8:
-            candidates.extend(replace(p,local_checkpoints=1) for p in list(candidates)
-                              if p.slab_width == min(n,2*base.slab_width) and p.temporal_depth == base.temporal_depth)
-        # Include a low-memory global schedule and a less replay-heavy one.
-        # These are admitted independently because saved banks can dominate
-        # DRAM/file capacity even when the CUDA tile itself fits.
-        candidates.extend(replace(base,slab_width=min(n,base.slab_width),checkpoints=count,tile_transfers='sync')
-                          for count in {0,min(32,base.checkpoints+2)} if count != base.checkpoints)
-        candidates = list(dict.fromkeys(candidates))
-        longest = min(project.region.steps,max_calibration_steps)
-        reference_upper = workload.parameter_bytes+workload.output_bytes(longest)
-        overhead = min(reference_cache_bytes,3*len(candidates)*reference_upper)+4*reference_upper
-        fitted = []
-        for proposed in candidates:
-            policy,detail = _fit_default_policy(workload,proposed,overhead)
-            planning.append(dict(proposed=asdict(proposed),fitted=None if policy is None else asdict(policy),**detail))
-            # Keep an unfitted proposal for a precise rejection at measurement
-            # admission. Conservative planning overhead can exceed the final
-            # reference working set for short calibrations.
-            fitted.append(proposed if policy is None else policy)
-        candidates = list(dict.fromkeys(fitted))
-    else:candidates = list(candidates)
-    if not 1 <= len(candidates) <= 12 or not all(isinstance(p,StreamedAdjointOptions) for p in candidates):
-        raise ValueError('Supply one to twelve StreamedAdjointOptions candidates.')
+        candidates,planning = _generated_candidates(project,workload,base,reference_cache_bytes,max_calibration_steps)
+    else:candidates,planning = list(candidates),[]
+    if not 1 <= len(candidates) <= 12 or not all(isinstance(p,_policy_type) for p in candidates):
+        raise ValueError(f'Supply one to twelve {_policy_type.__name__} candidates.')
     if len({torch.device(p.device) for p in candidates}) != 1:
         raise ValueError('Compare policies on a single selected execution device.')
     started = time.perf_counter()
@@ -303,6 +314,12 @@ def _tune_streamed(project, workload, *, options=None, candidates=None, probe_st
             with torch.enable_grad():
                 result, values, raw_gradients = workload.evaluate(model,length)
             elapsed = time.perf_counter()-before
+            forward_seconds=result.report['forward_seconds']
+            backward_seconds=result.report['backward_seconds']
+            # An exhausted result graph can still own its native system. Drop
+            # it before a cache miss starts a second reference solve, so the
+            # admission budget need not hold two simultaneous solver workspaces.
+            del result
             gradient = workload.comparison_gradients(raw_gradients)
             del raw_gradients
             reference = references.get(length)
@@ -323,8 +340,8 @@ def _tune_streamed(project, workload, *, options=None, candidates=None, probe_st
                 torch.testing.assert_close(actual,expected,**tolerance)
             del actual, expected
             evaluated_lengths.add(length)
-            if repeat:samples.append(dict(total=elapsed,forward=result.report['forward_seconds'],backward=result.report['backward_seconds']))
-            del result, gradient, values, reference
+            if repeat:samples.append(dict(total=elapsed,forward=forward_seconds,backward=backward_seconds))
+            del gradient, values, reference
         return dict(steps=length,samples=samples,**{k:statistics.median(s[k] for s in samples) for k in ('total','forward','backward')})
 
     admitted_policies = {}

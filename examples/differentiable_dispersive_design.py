@@ -7,7 +7,7 @@ import json
 
 import torch
 from photonweave import (AdjointOptions, DispersiveSimulation, StreamedAdjointOptions, StreamedDispersiveSimulation, Monitor, Project,
-                        Region, Source, smooth_sphere_epsilon, tune_streamed_dispersive)
+                        Region, Source, smooth_sphere_epsilon, tune_streamed_dispersive, tune_adjoint_execution)
 
 
 def main():
@@ -18,7 +18,9 @@ def main():
     parser.add_argument('--streamed', action='store_true', help='Keep geometry and field banks on CPU, stream CUDA tiles')
     parser.add_argument('--state-directory', help='Optional file-backed field banks, requires --streamed')
     parser.add_argument('--tune', action='store_true', help='Measure and select the streamed policy before optimization')
+    parser.add_argument('--auto-execution', action='store_true', help='Compare resident and streamed policies with CPU design parameters')
     args = parser.parse_args()
+    if args.auto_execution:args.streamed=args.tune=True
     if args.iterations < 1:
         parser.error('--iterations must be positive')
     if args.kernel == 'fused' and args.device != 'cuda':
@@ -51,11 +53,12 @@ def main():
         strength = (.8e30*density)[None]
         damping = (torch.nn.functional.softplus(raw_damping)+.01)*1e15
         if args.tune and iteration == 0:
-            selected = tune_streamed_dispersive(project,epsilon,strength,1.5e15,damping,
+            tuner = tune_adjoint_execution if args.auto_execution else tune_streamed_dispersive
+            selected = tuner(project,epsilon,strength,1.5e15,damping,
                 options=model.streaming_options,probe_steps=10,repeats=1,frequency_hz=[2e14])
-            model = StreamedDispersiveSimulation(project,selected.options)
+            model = selected.simulation(project) if args.auto_execution else StreamedDispersiveSimulation(project,selected.options)
             print(json.dumps(dict(tuning=selected.report)),flush=True)
-        result = model.spectrum(epsilon,strength,1.5e15,damping,[2e14],block_size=8)
+        result = model.spectrum(epsilon,strength,1.5e15,damping,[2e14],block_size=32 if args.auto_execution else 8)
         loss = (result.fields.abs()/ (project.region.steps*project.region.time_step)).square().mean()
         loss.backward()
         print(json.dumps(dict(iteration=iteration,point_spectrum_loss=float(loss.detach()),

@@ -74,3 +74,18 @@ def test_cuda_dispersive_policy_driver(tmp_path):
     assert len(report['full_records'])==4
     assert report['tuning']['candidates'][-1]['policy']['tile_transfers']=='async'
     assert all(rows[0]['peak_cuda_allocated_bytes']>0 for rows in report['full_records'])
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_unified_driver_keeps_resident_and_streamed_full_validation(tmp_path,device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    report=main(['--output',str(tmp_path/'unified.json'),'--device',device,'--nx','12','--ny','12',
+        '--steps','26','--probe-steps','10','--repeats','1','--cpu-threads','1',
+        '--dispersive','--spectrum','--complex-bloch','--require-held-out','--unified'])
+    assert report['stage']=='complete' and report['held_out_duration'] and report['unified_selection']
+    policies=[row['policy'] for row in report['tuning']['candidates']]
+    assert any(p['resident'] is not None for p in policies)
+    assert any(p['streamed'] is not None for p in policies)
+    for rows in report['full_records']:
+        assert len(rows)==1
+        assert max(rows[0]['relative_l2_output_and_gradients'])<1e-8

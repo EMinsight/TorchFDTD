@@ -18,7 +18,8 @@ import torch
 from photonweave import (AdjointOptions, BoundaryFace, DifferentiableSimulation, Monitor, Project,
                         Region, Source, StreamedAdjointOptions, StreamedSimulation,
                         DispersiveSimulation, StreamedDispersiveSimulation,
-                        tune_streamed, tune_streamed_dispersive)
+                        tune_streamed, tune_streamed_dispersive,
+                        AdjointExecutionPolicy, tune_adjoint_execution)
 
 
 def evaluate(model, design, region, *, dispersive=False, spectrum=False):
@@ -79,6 +80,7 @@ def main(argv=None):
     parser.add_argument('--dispersive',action='store_true')
     parser.add_argument('--spectrum',action='store_true')
     parser.add_argument('--checkpoint-tiles',action='store_true')
+    parser.add_argument('--unified',action='store_true')
     parser.add_argument('--require-held-out',action='store_true')
     parser.add_argument('--complex-bloch',action='store_true')
     parser.add_argument('--capacity-tiles',action='store_true')
@@ -87,6 +89,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.repeats < 1:raise ValueError('repeats must be positive')
     if args.cpu_threads < 1:raise ValueError('cpu-threads must be positive')
+    if args.unified and args.strategy!='replay_cost':raise ValueError('Unified selection requires replay_cost strategy.')
     if sum((args.deep_tiles,args.capacity_tiles,args.checkpoint_tiles))>1:raise ValueError('Select one policy family.')
     torch.set_num_threads(args.cpu_threads)
     region = Region(dimension='3d',size=(args.nx*.1,args.ny*.1,(args.nz or args.ny)*.1),mesh=.1,steps=args.steps,
@@ -129,6 +132,15 @@ def main(argv=None):
         candidates = [baseline,wider,asynchronous(wider),
                       replace(wider,local_checkpoints=1),replace(wider,checkpoints=0),replace(wider,checkpoints=4)]
     candidates = list(dict.fromkeys(candidates))
+    if args.unified:
+        resident=AdjointOptions(checkpoints=base.checkpoints,gpu_budget_bytes=base.gpu_budget_bytes,
+            host_budget_bytes=base.host_budget_bytes,backward_kernel='fused' if args.device=='cuda' else 'torch')
+        resident_policies=[resident,replace(resident,checkpoints=0)]
+        if args.device=='cuda':resident_policies.append(replace(resident,storage='host',checkpoint_transfers='async'))
+        candidates=([AdjointExecutionPolicy(resident=p,device=args.device,host_budget_bytes=base.host_budget_bytes)
+                     for p in resident_policies]+
+                    [AdjointExecutionPolicy(streamed=p,device=args.device,host_budget_bytes=base.host_budget_bytes)
+                     for p in candidates])
     # Validate the intended holdout before any calibration or field allocation.
     from photonweave.streamed_tuning import _calibration_lengths
     possible = [_calibration_lengths(region.steps,args.probe_steps,p.temporal_depth,args.strategy,512) for p in candidates]
@@ -139,7 +151,7 @@ def main(argv=None):
     path.parent.mkdir(parents=True,exist_ok=True)
     root = Path(__file__).resolve().parents[1]
     data = dict(stage='tuning',full_steps=region.steps,grid=region.shape,
-        precision=args.precision,dispersive=args.dispersive,spectrum=args.spectrum,
+        precision=args.precision,dispersive=args.dispersive,spectrum=args.spectrum,unified_selection=args.unified,
         complex_bloch=args.complex_bloch,bloch_phase=region.bloch_phase,
         torch_version=torch.__version__,device=args.device,cpu_threads=torch.get_num_threads(),
         hardware=torch.cuda.get_device_name() if args.device=='cuda' else 'CPU',
@@ -153,15 +165,17 @@ def main(argv=None):
               'forward, point proxy objective, replay and backward. Input allocation, oracle, checks and final host copies excluded. '
               'Tuning wall time includes planning and comparison. Torch peaks exclude context and non-Torch allocations. '
               'No beyond-VRAM, physical optical-convergence, complete optimizer or external-solver claim.')
+    if args.unified:
+        data['scope']+=' Unified resident candidates include differentiable CPU-to-GPU input and CPU output/gradient transfers in their timed operation.'
     def save():
         temp=path.with_suffix('.tmp');temp.write_bytes((json.dumps(data,indent=2)+'\n').encode('utf8'));temp.replace(path)
     save()
     try:
         started = time.perf_counter()
         parameters = (epsilon,design[1]*1e30,design[2]*1e15,design[3]*1e15) if args.dispersive else design
-        tune = tune_streamed_dispersive if args.dispersive else tune_streamed
+        tune = tune_adjoint_execution if args.unified else tune_streamed_dispersive if args.dispersive else tune_streamed
         tuning = tune(project,*parameters,candidates=candidates,probe_steps=args.probe_steps,repeats=args.repeats,
-            strategy=args.strategy,refine_candidates=args.refine_candidates,
+            **({} if args.unified else dict(strategy=args.strategy)),refine_candidates=args.refine_candidates,
             frequency_hz=[1.5e14,2e14,2.5e14] if args.spectrum else None)
         del parameters
         data.update(tuning=tuning.report,tuning_wall_seconds=time.perf_counter()-started,stage='resident_reference')
@@ -185,7 +199,7 @@ def main(argv=None):
                 torch.cuda.synchronize();torch.cuda.reset_peak_memory_stats()
             started = time.perf_counter()
             streamed = StreamedDispersiveSimulation if args.dispersive else StreamedSimulation
-            model = streamed(project,candidates[index])
+            model = candidates[index].simulation(project,dispersive=args.dispersive) if args.unified else streamed(project,candidates[index])
             result,values,gradients = evaluate(model,design,region,dispersive=args.dispersive,spectrum=args.spectrum)
             if args.device=='cuda':torch.cuda.synchronize()
             elapsed = time.perf_counter()-started

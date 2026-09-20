@@ -690,6 +690,23 @@ comparison, model construction, the caller's geometry graph and optimizer
 are excluded. Tests verify derivative disagreement even when forward values
 are unchanged, bounded cache ownership and admission before packing.
 This remains a bounded empirical search. Full-duration ranking on large
-dispersive applications, physical storage bandwidth and resident-versus-streamed
-selection require separate experiments.
+dispersive applications and physical storage bandwidth require separate experiments.
+
+\subsection{Resident and streamed candidates}
+The experimental unified search adds resident checkpoint policies to the
+same measured candidate set. A CPU design interface is retained across both
+execution modes. Resident CUDA includes differentiable material transfers to
+the device and observation transfers back to the host. Gradients therefore
+return to the original geometry graph. Admission accounts for these transfer
+carriers in addition to native solver workspace and checkpoint capacity.
+The resident cell limit remains enforced before allocating fields.
+
+Candidates are checked at the requested full duration and timed at bounded
+prefix durations. Resident replay uses individual time steps while streamed
+replay uses temporal blocks in the cost model. Completed result graphs are
+released before recomputing an uncached reference, avoiding overlapping
+native solver workspaces during gradient comparison. The selected policy is
+reused explicitly and rechecks live resources on execution. Full-duration
+ranking of this broader search and complete application optimization remain
+unverified. The mechanism is not a proof of globally optimal placement.
 \end{document}
