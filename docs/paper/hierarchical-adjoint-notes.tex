@@ -973,4 +973,26 @@ frequency regularization and geometry representations remain
 comparison limitations. Two meshes do not establish a converged error bound
 or physical density-gradient convergence. No optimization was performed.
 
+\section{Dense-plane policy and preparation measurements}
+A real-FP32 RTX 5880 follow-up uses two spectral planes with 75,600 internal
+observations, two ADE poles and a $128^3$ grid over 256 steps. Calibration sees
+at most 32 steps. One warm-up and three full-duration repetitions per policy
+identify the two-device-checkpoint resident policy as fastest at 2.5578 s.
+The selector chooses the same policy. Width-32, depth-eight streaming takes
+52.2151 s synchronously and 37.9850 s with asynchronous double buffering.
+The largest full-output or material-VJP relative discrepancy is
+$4.005\times10^{-7}$. Calibration costs 272.805 s and has no payback relative
+to the already-fastest resident baseline. This is a VRAM-fitting proxy problem.
+
+A separate periodic-response profile identifies repeated mesh-count derivation
+inside observation preparation. Reusing the shape within each setup leaves
+the numerical operation unchanged. On RTX 3060, a synthetic $40\times40\times84$
+complex-FP64 problem with two source bases takes median 2.0004 s before and
+1.3154 s after the change at 128 steps. At 1,600 steps, medians are 18.5272 s
+and 17.8533 s. Three alternating repetitions give identical response and
+density-gradient bits. Timings include the warm response, objective and VJP,
+but exclude outer module construction and fixed-reference warm-up. The nearly
+constant preparation saving yields a smaller relative gain at longer duration.
+Neither study establishes optical convergence or external-solver superiority.
+
 \end{document}

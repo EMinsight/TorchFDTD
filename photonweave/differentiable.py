@@ -157,12 +157,14 @@ class _System:
 
     def prepare_observations(self):
         self.observation_maps=[]
+        # Region.shape derives mesh counts. Reuse them across dense planes.
+        _,ny,nz=self.region.shape
         for family in ('E','H'):
             positions=[];indices=[]
             for position,(name,loc,component) in enumerate(self.monitors):
                 if name[0]==family:
                     positions.append(position)
-                    indices.append(((loc[0]*self.region.shape[1]+loc[1])*self.region.shape[2]+loc[2])*3+component)
+                    indices.append(((loc[0]*ny+loc[1])*nz+loc[2])*3+component)
             self.observation_maps.append((torch.tensor(positions,device=self.device,dtype=torch.long),
                                           torch.tensor(indices,device=self.device,dtype=torch.long)))
 

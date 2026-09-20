@@ -30,6 +30,9 @@ retained that ranking for real FP32 and complex FP64. These studies compare
 streamed policies. A subsequent [nine-policy unified study](docs/validation/UNIFIED_POLICY_REPORT.md)
 selected the fastest resident policy in both precisions. Calibration did not
 repay its cost relative to the already-fastest resident baseline.
+A [256-step dense-plane follow-up](docs/validation/PLANE_POLICY_REPORT.md)
+also selected the fastest resident policy for real FP32. Complete field and
+material VJPs passed. Streaming remains slower for this VRAM-fitting workload.
 Large grids can now opt into [byte-budgeted resident adjoints](docs/BUDGETED_RESIDENT.md)
 so a grid that fits memory is not forced into streaming by the workbench cell
 guard. Short 256-cubed dielectric and 208-cubed ADE forward/VJP checks passed.
@@ -89,6 +92,10 @@ file-backed execution, with one source-basis solver graph at a time. The CR
 runner exposes these policies and preflights its complete case schedule.
 Small response/gradient checks pass. Full-application validation of this new
 integration remains separate from the legacy-path optical measurements.
+A [measured observation-setup improvement](docs/validation/PERIODIC_OBSERVATION_SETUP.md)
+removes repeated mesh-count derivation. On a synthetic periodic RTX 3060 case,
+full response/objective/VJP medians improve by 1.52x at 128 steps and 1.04x at
+1,600 steps, with bitwise-identical responses and density gradients.
 
 The completed [144-case spatial refinement](docs/validation/CR_SPATIAL_REFINEMENT.md)
 reduced the response discrepancy relative to the recorded TORCWA order-16
