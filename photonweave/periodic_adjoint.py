@@ -15,6 +15,7 @@ from .memory_profile import host_memory
 from .periodic_response import _periodic_project
 from .polarization import calibrate_plane_polarization, mix_plane_fields
 from .reference_cache import PlaneReferenceCache
+from .response_cache import PeriodicResponseCache
 from .solver import C0
 
 
@@ -36,7 +37,7 @@ class PeriodicLayerResponse(torch.nn.Module):
     def __init__(self, spec, *, density_shape, policy, batch_options,
                  mesh, steps, dtype=torch.float32, pml_cells=12,
                  quadrature_counts=(24, 24), pixel_origin='cell_edges',
-                 reference_cache=None, forward_kernel='fused'):
+                 reference_cache=None, response_cache=None, forward_kernel='fused'):
         super().__init__()
         if not isinstance(policy, AdjointExecutionPolicy) or not isinstance(batch_options, AdjointBatchOptions):
             raise ValueError('Provide an AdjointExecutionPolicy and shared AdjointBatchOptions.')
@@ -59,6 +60,11 @@ class PeriodicLayerResponse(torch.nn.Module):
             raise ValueError('Fixed lossless indices must be finite and at least one.')
         if reference_cache is not None and not isinstance(reference_cache, PlaneReferenceCache):
             raise ValueError('Expected PlaneReferenceCache.')
+        if response_cache is not None and not isinstance(response_cache, PeriodicResponseCache):
+            raise ValueError('Expected PeriodicResponseCache.')
+        self._response_cache = response_cache
+        self._response_budget = 0 if response_cache is None else response_cache.budget_bytes
+        self._response_entries = 0 if response_cache is None else response_cache.max_entries
         self._spec = deepcopy(spec)
         self._density_shape, self._dtype, self._pixel_origin = density_shape, dtype, pixel_origin
         self._cache = reference_cache if reference_cache is not None else PlaneReferenceCache()
@@ -83,7 +89,8 @@ class PeriodicLayerResponse(torch.nn.Module):
         reference_copies = 4*4*(16*math.prod(quadrature_counts)+1)*item + 65536
         self._geometry_allowance = 2*parameter_bytes + 4*dx*dy*item + maps
         self._reference_allowance = reference_copies + self._cache_budget
-        self._outside_batch = self._geometry_allowance + self._reference_allowance
+        self._response_allowance = self._response_budget + (4*dx*dy*item+1024*self._response_entries+1024 if self._response_budget else 0)
+        self._outside_batch = self._geometry_allowance + self._reference_allowance + self._response_allowance
         if self._outside_batch >= self._host_budget:
             raise ValueError('Material map, geometry and reference cache exceed the host budget.')
         frequency = [C0/(spec['wavelength_um']*1e-6)]
@@ -102,6 +109,10 @@ class PeriodicLayerResponse(torch.nn.Module):
         # Placement/kernel policy is part of the key. Numerically different
         # execution paths must not silently reuse another path's reference.
         self._reference_key = hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
+        response_identity = dict(version='periodic-density-response-vjp-1', reference=self._reference_key,
+            spec=self._spec, density_shape=density_shape, pixel_origin=pixel_origin)
+        self._response_key = hashlib.sha256(json.dumps(response_identity, sort_keys=True).encode()).hexdigest()
+        self._execution_device = torch.device(policy.device)
         self.last_report = None
         self._selection_report = None
 
@@ -195,6 +206,9 @@ class PeriodicLayerResponse(torch.nn.Module):
 
     def plan(self):
         """Live admission without full material maps or field allocations."""
+        if self._response_cache is not None and (self._response_cache.budget_bytes != self._response_budget
+                or self._response_cache.max_entries != self._response_entries):
+            raise ValueError('Response-cache budget or entry limit changed. Rebuild the response module.')
         if self._cache.budget_bytes != self._cache_budget:
             raise ValueError('Reference-cache budget changed. Rebuild the response module.')
         logical = torch.empty((), dtype=self._dtype).expand(self._epsilon_shape)
@@ -209,6 +223,7 @@ class PeriodicLayerResponse(torch.nn.Module):
             disk_reservation_bytes=batch['disk_reservation_bytes'],
             geometry_allowance_bytes=self._geometry_allowance,
             reference_allowance_bytes=self._reference_allowance,
+            response_cache_allowance_bytes=self._response_allowance,
             density_shape=self._density_shape, epsilon_shape=self._epsilon_shape,
             scope='One invocation. Excludes caller optimizer/other graphs, runtime and OS cache.')
 
@@ -229,6 +244,33 @@ class PeriodicLayerResponse(torch.nn.Module):
             raise ValueError('Density must be a real CPU tensor matching the prepared shape and dtype.')
         if not bool(torch.isfinite(density).all()) or bool(((density < 0) | (density > 1)).any()):
             raise ValueError('Density must be finite in [0,1].')
+        if self._response_cache is None or not self._response_budget:
+            return self._compute_response(density)
+        plan = self.plan()
+        namespace = self._response_namespace()
+        computed = [False]
+        def compute(value):
+            computed[0] = True
+            return self._compute_response(value)
+        result = self._response_cache._evaluate(namespace, density, compute, self._validate_response_cache)
+        statistics = self._response_cache.statistics()
+        if not computed[0]:
+            self.last_report = dict(plan=plan, batch=None, selection=self.selection_report, skipped_forward_solver=True)
+        self.last_report.update(response_cache_at_forward_return=statistics)
+        return result
+
+    def _response_namespace(self):
+        device = self._execution_device
+        index = torch.cuda.current_device() if device.type == 'cuda' and device.index is None else device.index
+        return (self._response_key, device.type, index, torch.get_num_threads(),
+            torch.get_float32_matmul_precision(), torch.are_deterministic_algorithms_enabled())
+
+    def _validate_response_cache(self, namespace):
+        self.plan()
+        if namespace != self._response_namespace():
+            raise RuntimeError('Periodic execution context changed between cached forward and backward.')
+
+    def _compute_response(self, density):
         plan = self.plan()
         with torch.no_grad():
             hits, misses = self._cache.hits, self._cache.misses

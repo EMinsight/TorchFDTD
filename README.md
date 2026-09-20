@@ -99,6 +99,9 @@ evaluation. The original CR application's physical optimization remains pending.
 configured file execution from shared memory budgets without calibration
 solves. It shrinks tiles when needed and keeps the chosen policy for backward.
 This capacity heuristic does not claim the fastest policy.
+An opt-in `PeriodicResponseCache` also reuses exact responses and seeded
+density gradients when the same physical design recurs. It retains bounded
+CPU tensors, without field histories. Full optimizer speedup is unmeasured.
 The CR evaluator and optimizer now default to one FP32 path for density,
 fields, information, gradients and Adam moments. `PeriodicLayerResponse` also
 defaults to FP32. FP64 remains an explicit validation option. See the

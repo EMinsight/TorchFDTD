@@ -111,6 +111,65 @@ or insufficient free space. The metadata tests do not claim large-domain
 execution or memory throughput. Existing solver correctness tests were not
 rerun solely for this selector addition. GUI binding remains follow-up work.
 
+## Exact response and gradient reuse
+
+Some binary-design optimizers change latent parameters without changing the
+physical hard mask. An optional `PeriodicResponseCache` avoids solving that
+identical structure again. It is separate from the homogeneous reference cache:
+
+```python
+from photonweave import PeriodicResponseCache
+
+cache = PeriodicResponseCache(64 * 1024**2, max_entries=4096)
+model = PeriodicLayerResponse.auto(
+    spec, density_shape=(4, 4), mesh=0.1, steps=160, pml_cells=6,
+    quadrature_counts=(4, 4), response_cache=cache,
+    gpu_budget_bytes=16 * 1024**3,
+    host_budget_bytes=64 * 1024**3,
+)
+logits = torch.full((4, 4), 0.1, requires_grad=True)
+optimizer = torch.optim.Adam([logits], lr=0.01)
+for _ in range(2):
+    optimizer.zero_grad(set_to_none=True)
+    hard = (logits.detach() >= 0).to(logits.dtype)
+    soft = logits.sigmoid()
+    density = hard + (soft - soft.detach())
+    loss = -model(density)[:, 0].mean()
+    loss.backward()
+    optimizer.step()
+print(cache.statistics())
+```
+
+This illustrative straight-through estimator sends the exact hard mask to the
+optical solver and uses the sigmoid derivative for the latent update. It is a
+surrogate for the discontinuous threshold, not its true derivative or a
+manufacturability projector. The optical density VJP is computed by the solver.
+Its reuse still applies the current sigmoid derivative outside the cache.
+This example does not reproduce any particular fabrication or CR protocol.
+
+Reuse requires identical density bytes, fixed physical model and execution
+context. A stored VJP also requires an identical incoming objective seed. A
+changed seed recomputes its VJP. A changed density recomputes the response and
+VJP. There is no approximate matching or interpolation. Before storing a new
+VJP, replay must reproduce its forward response exactly. Context changes before
+backward or nonidentical replay raise an error. Only first-order derivatives
+are supported, and model instances remain intended for sequential execution.
+
+The cache stores detached CPU response/VJP tensors, never field histories or
+solver graphs. LRU eviction respects both the tensor-byte budget and entry
+limit. `plan()` includes that budget and allowances for metadata and temporary
+copies. These are engineering reservations, not exact process-RSS bounds.
+`clear()` releases retained entries and preserves counters. Changing budget or
+entry limit requires rebuilding the model. `last_report` records the counters
+at forward return. Read `statistics()` after backward for current VJP counters.
+
+The cache is disabled unless supplied. A miss may add forward replay work, so
+continuously changing designs or one-off solves may be better without it.
+Measured acceleration of the full CR optimizer is still pending. Targeted
+checks cover exact CPU optical response/gradient reuse without another solve,
+new latent chains, changed seeds and densities, bounded retention, model
+identity, and rejection of replay/context drift and higher derivatives.
+
 ## Memory and state contract
 
 The host reservation includes the active solver, retained outputs and adjoint

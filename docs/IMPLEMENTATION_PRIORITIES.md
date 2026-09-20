@@ -8,6 +8,10 @@ CR 후속으로 [재시작 가능한 밀도 최적화 실행기](CR_INVERSE_DESI
 
 자동 실행 선택 후속: `PeriodicLayerResponse.auto(...)`는 별도 시험 연산 없이 resident → DRAM → 명시적 파일 저장소의 예산을 확인한다. 공간 폭과 시간 깊이를 함께 줄이며, 정밀도·메시·계산 시간·checkpoint 개수는 바꾸지 않는다. 선택 결과를 고정해 forward/backward에 사용한다. 실제 속도를 비교하는 tuner는 별도 선택으로 유지한다. 이 경로의 UI 연결은 후속이다.
 
+중복 연산 감소: 선택형 `PeriodicResponseCache`는 구조·물리 설정·실행 조건이 동일할 때 응답을 재사용하고, 목적함수의 입력 gradient까지 동일할 때 밀도 VJP도 재사용한다. 저장량을 제한하며 광학장 이력은 보관하지 않는다. 다른 latent 값에서 동일 hard mask가 반복되어도 현재 sigmoid의 미분은 그대로 연결된다. 실제 CR 최적화의 가속률은 미측정이다. 기존 projected Adam 예제는 연속 밀도 경로이며, 원래 CR의 hard-mask 제작 제약·straight-through·블록별 gradient 처리와 동일한 최적화로 간주하지 않는다.
+
+검증 운영: 코드와 조건이 같은 통과 검사는 재실행하지 않는다. 변경 범위의 검사와 새 결과의 필수 정확도 검증만 실행하고, 진행 중인 작업은 상태 확인만 한다. 전체 144조건 FP32 검증이 완료되기 전에 같은 검증을 다시 예약하지 않는다.
+
 ## 현재 실행 순서 · 2026-09-20
 
 1. **미분 가능한 물리 경로.** 제한된 실수 비분산 Yee·CPML의 이산 adjoint와 fused CUDA backward, 점 관측, 전체 시간기록 없이 블록으로 누적하는 Torch DFT와 그 transpose, regularized sphere 형상과 Adam을 구현했다. [API 범위](DIFFERENTIABLE_FDTD.md)에 표시한 부분 구현이며 고정 검출면의 E/H 보간·전력 적분·기준 정규화와 박막 검증을 추가했다. 고정 Bloch 위상의 resident Torch CPU/CUDA 미분과 경사 TE 박막 검증도 추가했다. 분산 재료의 resident Torch·fused CUDA transpose와 spectral plane을 추가했다. 공간 ADE의 DRAM/파일 P/Q 저장·fused CUDA 타일·재료 gradient를 실험적으로 연결했다. 분산 장시간 수렴/속도 검증, mode port 목적함수, TFSF와 coupled subpixel은 남아 있다. Taylor 검사는 이산식 검증이며 물리 shape-gradient 수렴은 별도다.

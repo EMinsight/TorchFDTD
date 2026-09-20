@@ -81,3 +81,6 @@ __all__ += ['AdjointCase', 'AdjointBatchOptions', 'AdjointBatchResult', 'Recompu
 
 from .periodic_adjoint import PeriodicLayerResponse
 __all__ += ['PeriodicLayerResponse']
+
+from .response_cache import PeriodicResponseCache
+__all__ += ['PeriodicResponseCache']
