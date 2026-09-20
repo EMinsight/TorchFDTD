@@ -126,3 +126,15 @@ record, and a snapshot must not be mistaken for a completed gradient run.
 Subsequent gradient runs also save `OUTPUT.gradient.npy` and identify its hash,
 shape and differentiation variable in the final JSON. The completed record
 above predates that extension and contains only the norm.
+
+## Budgeted source-basis replay
+
+The [PeriodicLayerResponse API](PERIODIC_HIERARCHICAL_DESIGN.md) connects this
+response convention to shared-budget resident, DRAM and file-backed adjoints.
+Its two coherent source bases are replayed one graph at a time. The explicit
+CR runner selects it with --execution-policy and admits every supplied case
+before computing fields. The legacy path remains available.
+
+The [matched spatial-refinement record](validation/CR_SPATIAL_REFINEMENT.md)
+now covers all 144 cases at 25 nm and 6,400 steps. That legacy-path forward
+record does not validate the new execution integration or a converged gradient.

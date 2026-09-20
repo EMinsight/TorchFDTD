@@ -83,6 +83,19 @@ The [actual CR density derivative pilot](docs/validation/CR_DENSITY_ADJOINT_PILO
 
 [Spectral/pupil objective assembly](docs/SPECTRAL_PUPIL_RESPONSE.md) now connects explicit wavelength/ray cases to electron information with bounded case replay and unnormalized illumination weights. Full CR optical validation remains in progress.
 
+[Budgeted periodic density responses](docs/PERIODIC_HIERARCHICAL_DESIGN.md)
+now connect the same two-polarization detector objective to resident, DRAM or
+file-backed execution, with one source-basis solver graph at a time. The CR
+runner exposes these policies and preflights its complete case schedule.
+Small response/gradient checks pass. Full-application validation of this new
+integration remains separate from the legacy-path optical measurements.
+
+The completed [144-case spatial refinement](docs/validation/CR_SPATIAL_REFINEMENT.md)
+reduced the response discrepancy relative to the recorded TORCWA order-16
+reference from 4.85% to 0.888% in relative L2 when mesh spacing changed from
+50 to 25 nm at matched duration and PML thickness. This is a convergence trend,
+not a physical-gradient or optimized-design certificate.
+
 [Bounded CPU reference caching](docs/SPECTRAL_PUPIL_RESPONSE.md#bounded-cpu-reference-reuse) can reuse homogeneous spectral planes across case replay without retaining full field histories. It preserves tested responses and density gradients. No cache speedup is claimed yet.
 
 On one relaxed CR seed ray at 540 nm, [fused complex forward execution](docs/COMPLEX_CUDA.md#selected-cr-layer-measurement-on-rtx-3060) reduced the complete FP64 forward API median from **31.45 s to 8.39 s (3.75x)** on RTX 3060, with a 5.55e-17 response difference. This compares our two backends at the same fixed settings, not competing solvers or complete inverse-design iterations.

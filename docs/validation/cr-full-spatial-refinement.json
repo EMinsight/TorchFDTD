@@ -1,0 +1,70 @@
+{
+  "status": "Matched-duration spatial refinement measured, not a convergence certificate",
+  "input_sha256": {
+    "schedule": "23df354b7d7acc4cd3ac8201d9999cda96e5cfc44cc889925bb5309abbee4732",
+    "density": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44",
+    "context": "a20bec68bdbf9945e257f0886429a9981aabb479e57dbdbb49a74e0e5d037f4d"
+  },
+  "torcwa_reference": {
+    "orders": [
+      16,
+      16
+    ],
+    "frequency_nudge": 0.0001,
+    "weighted_bits_per_pixel": 1.2065752346315706
+  },
+  "physical_duration_seconds": 3.050519791249609e-13,
+  "pml_thickness_um": 0.6,
+  "comparisons": [
+    {
+      "mesh_um": 0.05,
+      "steps": 3200,
+      "pml_cells": 12,
+      "response_max_absolute_difference": 0.029441950631132807,
+      "response_relative_l2": 0.04846978805793069,
+      "weighted_bits_per_pixel": 1.2345632878555595,
+      "objective_relative_difference": 0.02319627688408099,
+      "per_wavelength_max_absolute_difference": {
+        "420.0": 0.029441950631132807,
+        "450.0": 0.015464494480971258,
+        "470.0": 0.015316345045848945,
+        "510.0": 0.023539565602722523,
+        "540.0": 0.02106465316420708,
+        "570.0": 0.011040748085178964,
+        "600.0": 0.009684362109060207,
+        "635.0": 0.00913019672246948,
+        "670.0": 0.011735255035565467
+      }
+    },
+    {
+      "mesh_um": 0.025,
+      "steps": 6400,
+      "pml_cells": 24,
+      "response_max_absolute_difference": 0.0051600259878302746,
+      "response_relative_l2": 0.008883116777344692,
+      "weighted_bits_per_pixel": 1.216622733698254,
+      "objective_relative_difference": 0.008327287663708383,
+      "per_wavelength_max_absolute_difference": {
+        "420.0": 0.004322407124970451,
+        "450.0": 0.0051600259878302746,
+        "470.0": 0.004525001935026446,
+        "510.0": 0.0036581781067535624,
+        "540.0": 0.002712047117565064,
+        "570.0": 0.0021416422089522436,
+        "600.0": 0.003332803883272034,
+        "635.0": 0.001138723807392883,
+        "670.0": 0.0020180685695627976
+      }
+    }
+  ],
+  "source_verification": {
+    "revision": "c94e3e0",
+    "files_verified": 69
+  },
+  "limitations": [
+    "Two spatial meshes do not establish a converged error bound or physical density-gradient convergence.",
+    "FDTD uses FP64 real-frequency fields and arithmetic voxel averaging. The recorded TORCWA reference uses FP32/complex64 and frequency nudge 1e-4.",
+    "Local development overlapped this run. Its elapsed time is diagnostic, not a solver speed comparison.",
+    "No optimization was performed. The new budgeted periodic integration is a separate revision and is not validated by this legacy-path record."
+  ]
+}

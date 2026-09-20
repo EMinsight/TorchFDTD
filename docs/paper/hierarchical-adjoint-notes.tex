@@ -944,4 +944,33 @@ source hashes. This protocol compares native backends and does not establish
 optical convergence, an optimized external CPU baseline or beyond-VRAM speed.
 Large-workload measurements remain pending.
 
+
+\section{Budgeted periodic density responses}
+A prepared periodic-layer module maps a CPU density tensor to component-wise
+Yee permittivity, two source-basis spectral responses, coherent polarization
+synthesis and detector allocation. Resident and spatially streamed policies
+share the same interface. A joint adjoint batch retains compact fields and
+replays one source-basis graph at a time using seeds from the coupled objective.
+The density map remains dense in host memory. Admission includes its construction
+workspace and a bounded fixed-reference cache in addition to solver state and
+material-gradient carriers. Other caller graphs and OS cache are excluded.
+
+Small resident, DRAM and file-backed checks compare complete responses and
+density VJPs with the preceding layer implementation. Spectral assembly,
+a directional finite difference and optimizer connectivity are also checked.
+The explicit-input CR runner now admits every supplied case before field
+execution and records the chosen policy in its restart contract. These tests
+do not establish large-application performance or optical convergence.
+
+A separate legacy-path forward study completed nine wavelengths and sixteen
+pupil rays at 25 nm spacing and 6,400 steps. Its 50 nm and 3,200-step comparison
+preserves physical duration and 0.6 micrometre PML thickness. Relative response
+L2 discrepancy against the recorded TORCWA order-16 reference decreased from
+0.04847 to 0.008883. The maximum channel discrepancy decreased from 0.02944
+to 0.005160. Weighted information was 1.216623 bits per pixel at 25 nm,
+compared with the reference value 1.206575. Different field precision,
+frequency regularization and geometry representations remain
+comparison limitations. Two meshes do not establish a converged error bound
+or physical density-gradient convergence. No optimization was performed.
+
 \end{document}

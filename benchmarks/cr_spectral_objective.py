@@ -14,6 +14,36 @@ from benchmarks.cr_resume import (CaseJournal, load_gradient_record, runtime_ide
                                   source_hashes, write_json)
 
 
+def execution_settings(args):
+    """Prepare explicit hierarchy policies without allocating design fields."""
+    if args.execution_policy == 'legacy':return None
+    from photonweave import AdjointExecutionPolicy, AdjointBatchOptions, StreamedAdjointOptions
+    if any(not math.isfinite(v) or v <= 0 for v in (args.gpu_budget_gib,args.host_budget_gib)):
+        raise ValueError('Execution memory budgets must be finite and positive.')
+    gpu,host=int(args.gpu_budget_gib*1024**3),int(args.host_budget_gib*1024**3)
+    disk=None
+    if args.execution_policy=='resident':
+        policy=AdjointExecutionPolicy(device='cuda',host_budget_bytes=host,
+            resident=AdjointOptions(checkpoints=4,backward_kernel=args.backward_kernel,
+                gpu_budget_bytes=gpu,host_budget_bytes=host,resident_budget_bytes=gpu))
+    else:
+        if args.backward_kernel=='torch':
+            raise ValueError('Streamed CUDA execution uses fused backward, not backward-kernel=torch.')
+        extra={}
+        if args.execution_policy=='file':
+            if not args.state_directory or args.disk_budget_gib is None or not math.isfinite(args.disk_budget_gib) or args.disk_budget_gib<=0:
+                raise ValueError('File execution requires an explicit directory and positive disk budget.')
+            disk=int(args.disk_budget_gib*1024**3)
+            extra=dict(state_storage='disk',state_directory=args.state_directory,
+                disk_budget_bytes=disk,disk_free_reserve_bytes=100*1024**3)
+        policy=AdjointExecutionPolicy(device='cuda',host_budget_bytes=host,
+            streamed=StreamedAdjointOptions(device='cuda',checkpoints=4,
+                slab_width=args.slab_width,temporal_depth=args.temporal_depth,
+                gpu_budget_bytes=gpu,host_budget_bytes=host,tile_transfers='async',**extra))
+    return dict(policy=policy,batch_options=AdjointBatchOptions(host_budget_bytes=host,
+        gpu_budget_bytes=gpu,disk_budget_bytes=disk,replay_rtol=1e-9,replay_atol=0.))
+
+
 def check_density_direction(objective, density, gradient, steps, *, seed=1729,
                             rtol=1e-3, atol=1e-8):
     """Full-objective central differences along a reproducible fixed direction.
@@ -64,12 +94,24 @@ def main():
     ap.add_argument('--forward-kernel',choices=['torch','fused'],default='torch')
     ap.add_argument('--reference-cache-mib',type=int,default=0)
     ap.add_argument('--backward-kernel',choices=['auto','torch','fused'],default='auto')
+    ap.add_argument('--execution-policy',choices=['legacy','resident','dram','file'],default='legacy')
+    ap.add_argument('--gpu-budget-gib',type=float,default=32.)
+    ap.add_argument('--host-budget-gib',type=float,default=64.)
+    ap.add_argument('--slab-width',type=int,default=32)
+    ap.add_argument('--temporal-depth',type=int,default=8)
+    ap.add_argument('--state-directory')
+    ap.add_argument('--disk-budget-gib',type=float)
+    ap.add_argument('--cpu-threads',type=int,help='Explicit host Torch threads, recorded in the restart contract')
     ap.add_argument('--directional-steps',type=float,nargs='+',
         help='Optional full-schedule finite differences after gradient evaluation, e.g. 0.002 0.001 0.0005')
     ap.add_argument('--directional-seed',type=int,default=1729)
     ap.add_argument('--resume',action='store_true',
         help='Reuse completed forward cases and a saved gradient only with an identical restart contract.')
     args=ap.parse_args()
+    if args.cpu_threads is not None:
+        if args.cpu_threads<1:ap.error('--cpu-threads must be positive')
+        torch.set_num_threads(args.cpu_threads)
+    execution=execution_settings(args)
     if args.forward_only and args.directional_steps:
         ap.error('--directional-steps requires a gradient run')
     if args.directional_steps and any(not math.isfinite(h) or not 0<h<.01 for h in args.directional_steps):
@@ -87,7 +129,7 @@ def main():
     for w,row in zip(wavelengths,rows):
         if any(abs(spec['wavelength_um']*1000-float(w))>1e-10 for spec in row):
             raise ValueError('Case wavelength ordering differs from electron context.')
-    seed=torch.tensor(np.load(args.density,allow_pickle=False),device='cuda',dtype=torch.float64)
+    seed=torch.tensor(np.load(args.density,allow_pickle=False),device='cpu' if execution else 'cuda',dtype=torch.float64)
     if not bool(((seed==0)|(seed==1)).all()):raise ValueError('Expected a binary locked seed.')
     density=(.01+.98*seed).requires_grad_(not args.forward_only)
     output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
@@ -96,15 +138,43 @@ def main():
         forward_kernel=args.forward_kernel,backward_kernel=args.backward_kernel,
         reference_cache_mib=args.reference_cache_mib,forward_only=args.forward_only,
         relaxation='0.01 + 0.98 * binary seed',dtype=str(density.dtype),shape=list(density.shape))
+    if execution:
+        from dataclasses import asdict
+        contract['execution']={key:asdict(value) for key,value in execution.items()}
+    if args.cpu_threads is not None:contract['cpu_threads']=torch.get_num_threads()
     if output.exists() and not args.resume:
         raise FileExistsError('Output already exists. Use --resume or a new output.')
     journal=CaseJournal(output.with_suffix('.cases.json'),contract,resume=args.resume)
-    cache=PlaneReferenceCache(args.reference_cache_mib*1024**2) if args.reference_cache_mib else None
+    cache=PlaneReferenceCache(args.reference_cache_mib*1024**2) if args.reference_cache_mib or execution else None
+    execution_preflight=None
+    if execution:
+        from photonweave import PeriodicLayerResponse
+        preflight_started=time.perf_counter()
+        maxima=dict(host_reservation_bytes=0,gpu_reservation_bytes=0,disk_reservation_bytes=0)
+        for row in rows:
+            for spec in row:
+                candidate=PeriodicLayerResponse(spec,density_shape=tuple(density.shape),dtype=density.dtype,
+                    mesh=args.mesh,steps=args.steps,pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,
+                    reference_cache=cache,forward_kernel=args.forward_kernel,**execution)
+                planned=candidate.plan()
+                for key in maxima:maxima[key]=max(maxima[key],planned[key])
+                del candidate
+        execution_preflight=dict(cases=len(rows)*len(weights),maxima=maxima,
+            seconds=time.perf_counter()-preflight_started,
+            scope='All case metadata admitted before any fields. Sequential cases, not simultaneous reservations.')
+        write_json(output.with_suffix('.plan.json'),dict(stage='admitted_not_executed',
+            restart_contract=contract,execution_preflight=execution_preflight))
     def evaluate(d,spec,index):
         previous_hits=journal.hits
-        result=journal.evaluate(d,index,lambda: periodic_layer_response(d,spec,mesh=args.mesh,steps=args.steps,
-            pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,reference_cache=cache,forward_kernel=args.forward_kernel,
-            options=AdjointOptions(checkpoints=4,backward_kernel=args.backward_kernel)))
+        def compute():
+            settings=dict(mesh=args.mesh,steps=args.steps,pml_cells=args.pml_cells,
+                pixel_origin=args.pixel_origin,reference_cache=cache,forward_kernel=args.forward_kernel)
+            if execution:
+                from photonweave import PeriodicLayerResponse
+                return PeriodicLayerResponse(spec,density_shape=tuple(d.shape),dtype=d.dtype,**execution,**settings)(d)
+            return periodic_layer_response(d,spec,**settings,
+                options=AdjointOptions(checkpoints=4,backward_kernel=args.backward_kernel))
+        result=journal.evaluate(d,index,compute)
         print(f'case {index} complete, replay_grad={torch.is_grad_enabled()}, restored={journal.hits>previous_hits}',flush=True)
         return result
     cases=[[functools.partial(evaluate,spec=spec,index=(w,r)) for r,spec in enumerate(row)] for w,row in enumerate(rows)]
@@ -190,6 +260,7 @@ def main():
         restored_cases=journal.hits,computed_cases=journal.computed,
         peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
         timing_scope='This invocation only. A resumed run is not a fresh wall-clock benchmark.')
+    if execution_preflight is not None:record['execution_preflight']=execution_preflight
     write_json(output,record)
     print(json.dumps(record),flush=True)
     journal.close()

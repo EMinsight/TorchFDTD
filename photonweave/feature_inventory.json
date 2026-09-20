@@ -2431,7 +2431,7 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "n/a",
-      "scope": "고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph와 ADE 미분 지원. 공유 메모리 예산의 순차 case replay로 서로 다른 격자·관측·재료를 하나의 목적함수에 연결. 512³ resident 및 54GiB 상태의 짧은 용량/VJP 검증 완료. 장시간 응용, 동시 adjoint microbatch, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음.",
+      "scope": "고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph와 ADE 미분 지원. 공유 메모리 예산의 순차 case replay로 서로 다른 격자·관측·재료를 하나의 목적함수에 연결. PeriodicLayerResponse가 밀도→편광 합성→검출 응답을 같은 예산의 resident/DRAM/파일 실행에 연결하며 source graph를 하나씩 재계산. 512³ resident 및 54GiB 상태의 짧은 용량/VJP 검증 완료. 장시간 응용, 동시 adjoint microbatch, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음.",
       "evidence": [
         "photonweave/differentiable.py",
         "tests/test_differentiable.py",
@@ -2443,7 +2443,10 @@
         "tests/test_adjoint_batch.py",
         "docs/DIFFERENTIABLE_FDTD.md",
         "docs/DISPERSIVE_ADJOINT.md",
-        "docs/ADJOINT_BATCH.md"
+        "docs/ADJOINT_BATCH.md",
+        "photonweave/periodic_adjoint.py",
+        "tests/test_periodic_adjoint.py",
+        "docs/PERIODIC_HIERARCHICAL_DESIGN.md"
       ],
       "reference": "",
       "priority": 0,

@@ -78,3 +78,6 @@ from .execution_tuning import AdjointExecutionPolicy, AdjointExecutionSelection,
 __all__ += ['AdjointExecutionPolicy', 'AdjointExecutionSelection', 'tune_adjoint_execution']
 from .adjoint_batch import AdjointCase, AdjointBatchOptions, AdjointBatchResult, RecomputedAdjointBatch
 __all__ += ['AdjointCase', 'AdjointBatchOptions', 'AdjointBatchResult', 'RecomputedAdjointBatch']
+
+from .periodic_adjoint import PeriodicLayerResponse
+__all__ += ['PeriodicLayerResponse']

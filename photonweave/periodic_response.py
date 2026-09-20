@@ -10,20 +10,7 @@ from .detector_allocation import quadrant_intensity_allocation
 from .solver import C0
 
 
-def periodic_layer_response(density,spec,*,mesh,steps,pml_cells=12,
-                            quadrature_counts=(24,24),pixel_origin='cell_edges',options=None,reference_cache=None,forward_kernel='torch'):
-    """Compute Cartesian x/y responses with shape (2,4), well order R,G2,G1,B.
-
-    spec supplies wavelength_um, background_index, design_index, period_um,
-    height_um, detector_offset_um, theta_inside_rad and phi_rad. All are fixed.
-    This selected-frequency dielectric model differentiates only density.
-    Two homogeneous references are evaluated without gradients. An optional
-    PlaneReferenceCache retains only their compact spectral planes on CPU.
-    Use spectral_pupil_response to bound residency across wavelengths/rays.
-    Arithmetic material averaging and time/mesh convergence remain user checks.
-    """
-    if not isinstance(density,torch.Tensor) or density.dtype not in (torch.float32,torch.float64):
-        raise ValueError('Density must be real FP32 or FP64.')
+def _periodic_project(spec,*,dtype,mesh,steps,pml_cells,forward_kernel,memory_mode='resident'):
     for key in ('wavelength_um','background_index','design_index','height_um','detector_offset_um','theta_inside_rad','phi_rad'):
         value=spec[key]
         if isinstance(value,torch.Tensor) or not math.isfinite(value):
@@ -38,12 +25,32 @@ def periodic_layer_response(density,spec,*,mesh,steps,pml_cells=12,
     half=math.ceil((max(detector,abs(source_z))+max(1.,20*mesh))/mesh)*mesh
     kt=[2*math.pi*n/wavelength*math.sin(theta)*v for v in (math.cos(phi),math.sin(phi))]
     project=Project(region=Region(dimension='3d',size=(*period,2*half),mesh=mesh,steps=steps,pml_cells=pml_cells,
-        precision='float64' if density.dtype==torch.float64 else 'float32',background_index=n,material_sampling='yee',cuda_kernel=forward_kernel,
+        memory_mode=memory_mode,precision='float64' if dtype==torch.float64 else 'float32',background_index=n,material_sampling='yee',cuda_kernel=forward_kernel,
         bloch_phase=(kt[0]*period[0],kt[1]*period[1],0),
         boundaries=Boundaries(x_min=BoundaryFace(kind='bloch'),x_max=BoundaryFace(kind='bloch'),
                              y_min=BoundaryFace(kind='bloch'),y_max=BoundaryFace(kind='bloch'))),
         sources=[Source(id='periodic-plane-source',kind='plane',normal='z',size=(*period,0),center=(0,0,source_z),component='Ex',wavelength=wavelength,pulse_cycles=1)],
         monitors=[FieldMonitor(id=name,normal='z',size=(*period,0),center=(0,0,z)) for name,z in [('incident',probe_z),('detector',detector)]])
+    return project,kt
+
+
+def periodic_layer_response(density,spec,*,mesh,steps,pml_cells=12,
+                            quadrature_counts=(24,24),pixel_origin='cell_edges',options=None,reference_cache=None,forward_kernel='torch'):
+    """Compute Cartesian x/y responses with shape (2,4), well order R,G2,G1,B.
+
+    spec supplies wavelength_um, background_index, design_index, period_um,
+    height_um, detector_offset_um, theta_inside_rad and phi_rad. All are fixed.
+    This selected-frequency dielectric model differentiates only density.
+    Two homogeneous references are evaluated without gradients. An optional
+    PlaneReferenceCache retains only their compact spectral planes on CPU.
+    Use spectral_pupil_response to bound residency across wavelengths/rays.
+    Arithmetic material averaging and time/mesh convergence remain user checks.
+    """
+    if not isinstance(density,torch.Tensor) or density.dtype not in (torch.float32,torch.float64):
+        raise ValueError('Density must be real FP32 or FP64.')
+    project,kt=_periodic_project(spec,dtype=density.dtype,mesh=mesh,steps=steps,
+        pml_cells=pml_cells,forward_kernel=forward_kernel)
+    n,height,wavelength,theta,phi=(spec[k] for k in ('background_index','height_um','wavelength_um','theta_inside_rad','phi_rad'))
     def epsilon(d):return periodic_density_layer(d,project.region,bottom_um=-height/2,top_um=height/2,
         background_epsilon=n*n,design_epsilon=spec['design_index']**2,pixel_origin=pixel_origin)
     frequency=[C0/(wavelength*1e-6)];models=[];refs=[]
