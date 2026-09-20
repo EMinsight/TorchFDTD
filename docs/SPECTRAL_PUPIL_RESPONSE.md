@@ -95,7 +95,9 @@ are separate from that optical run. No wall-clock speedup is claimed yet.
 
 `periodic_layer_response(..., forward_kernel='fused')` selects the optional
 fused complex Yee/CPML forward and replay updates on CUDA. The default is
-`'torch'`. Backward remains the Torch discrete transpose. The benchmark exposes
-`--forward-kernel fused`. This does not enable complex spatial streaming,
-complex fused backward, dispersive derivatives or native Simulation parity.
+`'torch'`. Backward defaults to the Torch discrete transpose. Pass
+`options=AdjointOptions(backward_kernel='fused')` for the optional complex CUDA
+transpose. The benchmark exposes `--forward-kernel fused --backward-kernel fused`.
+This does not enable complex spatial streaming, dispersive derivatives or native
+Simulation parity.
 See [scope and evidence](COMPLEX_CUDA.md).

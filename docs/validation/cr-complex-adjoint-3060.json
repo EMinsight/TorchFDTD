@@ -1,0 +1,56 @@
+{
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "density_sha256": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44",
+  "spec_sha256": "8d8ef17abf260f2ef1cb539d1f279e967b81ea9991a36dea28d0899e39a2c55b",
+  "mesh_um": 0.05,
+  "steps": 1600,
+  "precision": "float64",
+  "forward_kernel": "fused",
+  "checkpoints": 4,
+  "relaxation": "0.01 + 0.98 * seed",
+  "seconds": {
+    "torch": [
+      50.16442100005224,
+      50.201108099892735,
+      50.26431249966845
+    ],
+    "fused": [
+      32.3096958999522,
+      32.40176900010556,
+      32.4396041999571
+    ]
+  },
+  "median_seconds": {
+    "torch": 50.201108099892735,
+    "fused": 32.40176900010556
+  },
+  "peak_cuda_allocated_bytes": {
+    "torch": [
+      359952384,
+      359952384,
+      359952384
+    ],
+    "fused": [
+      328486400,
+      328486400,
+      328486400
+    ]
+  },
+  "baseline_cuda_allocated_bytes": {
+    "torch": [
+      17170944,
+      17170944,
+      17170944
+    ],
+    "fused": [
+      17170944,
+      17170944,
+      17170944
+    ]
+  },
+  "speedup": 1.5493323250261177,
+  "gradient_max_absolute_difference": 2.168404344971009e-19,
+  "objective": 0.2843927415139927,
+  "directional_derivative": 0.21922469270490433,
+  "scope": "One selected CR ray/wavelength, complete objective and density VJP including homogeneous references. Fused forward for both paths. No reference cache. One warmup per path excluded. No full-pupil, competitor or physical-convergence claim."
+}

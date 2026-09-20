@@ -447,10 +447,13 @@ class _FDTD(torch.autograd.Function):
         started=time.perf_counter()
         gradient=torch.zeros(epsilon.shape,device=epsilon.device,dtype=epsilon.dtype)
         fused=None
-        if epsilon.is_cuda and not system.region.complex_fields and options.backward_kernel!='torch':
-            from .cuda_adjoint import FusedAdjointCUDA
-            fused_seed=signal_bar if ctx.spectral is None else epsilon.new_empty((ctx.spectral.block_size,len(system.monitors)))
-            fused=FusedAdjointCUDA(system,gradient,fused_seed)
+        if epsilon.is_cuda and options.backward_kernel!='torch' and (not system.region.complex_fields or options.backward_kernel=='fused'):
+            if system.region.complex_fields:
+                from .cuda_complex_adjoint import FusedComplexAdjointCUDA as Kernel
+            else:
+                from .cuda_adjoint import FusedAdjointCUDA as Kernel
+            fused_seed=signal_bar if ctx.spectral is None else torch.empty((ctx.spectral.block_size,len(system.monitors)),device=epsilon.device,dtype=system.field_dtype)
+            fused=Kernel(system,gradient,fused_seed)
         adjoint=None if fused else tuple(torch.zeros_like(x) for x in system.state())
         checkpoints=_Checkpoints(system,options,report)
 
@@ -499,6 +502,9 @@ class _FDTD(torch.autograd.Function):
             if epsilon.is_cuda:torch.cuda.synchronize(epsilon.device)
             report['backward_seconds']=time.perf_counter()-started
         finally:
+            # Break the recursive closure cycle so solver buffers do not wait
+            # for cyclic GC after the caller releases its result graph.
+            reverse=None
             checkpoints.close()
         return gradient,None,None,None,None
 
@@ -517,8 +523,6 @@ class DifferentiableSimulation(torch.nn.Module):
         p=self.project;r=p.region
         if r.interface_method!='staircase':
             raise ValueError('DifferentiableSimulation currently requires staircase coefficients.')
-        if r.complex_fields and self.options.backward_kernel=='fused':
-            raise ValueError('Complex Bloch adjoints currently require the Torch backward, not the real fused kernel.')
         active={s.material for s in p.structures if s.enabled}
         if any(m.oscillators and m.name in active for m in p.materials):
             raise ValueError('Dispersive ADE derivatives are not implemented yet.')
@@ -542,8 +546,6 @@ class DifferentiableSimulation(torch.nn.Module):
     def _run(self,epsilon,spectral):
         r=self.project.region
         r.require_resident()
-        if r.complex_fields and self.options.backward_kernel=='fused':
-            raise ValueError('Complex Bloch adjoints require the Torch backward.')
         if not isinstance(epsilon,torch.Tensor) or epsilon.dtype not in (torch.float32,torch.float64):
             raise ValueError('epsilon must be a real float32 or float64 torch Tensor.')
         if epsilon.device.type not in ('cpu','cuda'):
@@ -586,7 +588,7 @@ class DifferentiableSimulation(torch.nn.Module):
         report=dict(experimental=True,adjoint='discrete Yee/CPML',higher_order=False,
                     spatial_streaming=False,full_time_autograd=False,steps=r.steps,
                     forward_backend='fused CUDA' if epsilon.is_cuda and (not r.complex_fields or r.cuda_kernel=='fused') else 'torch CUDA' if epsilon.is_cuda else 'torch CPU',
-                    backward_backend='fused CUDA transpose' if epsilon.is_cuda and not r.complex_fields and self.options.backward_kernel!='torch' else 'torch explicit transpose',memory_reservation_bytes=required,
+                    backward_backend='fused CUDA complex transpose' if epsilon.is_cuda and r.complex_fields and self.options.backward_kernel=='fused' else 'fused CUDA transpose' if epsilon.is_cuda and not r.complex_fields and self.options.backward_kernel!='torch' else 'torch explicit transpose',memory_reservation_bytes=required,
                     workspace_reservation_bytes=workspace,history_reservation_bytes=history_bytes,
                     checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes if spectral is None else 0,
                     source_history_bytes=source_bytes,observation_index_bytes=observation_index_bytes)

@@ -18,7 +18,7 @@ unvalidated.
 
 Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and the CR reconstruction objective remain pending.
 
-[Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) now support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Optional [fused complex forward updates](docs/COMPLEX_CUDA.md) are available in resident adjoint APIs. Fused complex backward, complex spatial streaming and full-pupil CR reproduction remain pending.
+[Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) now support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Optional [fused complex forward updates](docs/COMPLEX_CUDA.md) are available in resident adjoint APIs. [Fused complex backward](docs/COMPLEX_CUDA_ADJOINT.md) is separately selectable. Complex spatial streaming and full-pupil CR reproduction remain pending.
 
 [Sequential case replay](docs/RECOMPUTED_CASES.md) now supports coupled multi-case inverse-design objectives. An eight-case RTX 5880 experiment reduced peak Torch CUDA allocation by 55%, with a 63% iteration-time increase and matching gradients. This is a memory trade-off, not a speedup or completed CR validation.
 
@@ -37,6 +37,10 @@ The [actual CR density derivative pilot](docs/validation/CR_DENSITY_ADJOINT_PILO
 [Bounded CPU reference caching](docs/SPECTRAL_PUPIL_RESPONSE.md#bounded-cpu-reference-reuse) can reuse homogeneous spectral planes across case replay without retaining full field histories. It preserves tested responses and density gradients. No cache speedup is claimed yet.
 
 On one relaxed CR seed ray at 540 nm, [fused complex forward execution](docs/COMPLEX_CUDA.md#selected-cr-layer-measurement-on-rtx-3060) reduced the complete FP64 forward API median from **31.45 s to 8.39 s (3.75x)** on RTX 3060, with a 5.55e-17 response difference. This compares our two backends at the same fixed settings, not competing solvers or complete inverse-design iterations.
+
+Replay now releases recursive closure references after backward, so completed resident and streamed solver buffers do not wait for cyclic garbage collection after their result graphs are released. [Lifetime checks](docs/COMPLEX_CUDA_ADJOINT.md#replay-lifetime) cover CPU, CUDA and file-backed tile execution.
+
+With the same fused forward, [fused complex backward](docs/COMPLEX_CUDA_ADJOINT.md#selected-cr-objective-and-gradient-measurement) reduced a complete selected-CR objective/VJP call from **50.20 s to 32.40 s (1.55x)** on RTX 3060. Peak Torch allocation was **360 MB vs 328 MB**, with a maximum density-gradient difference of 2.17e-19. This is a separate matched-backend measurement, not a full-pupil or competitor comparison.
 
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD

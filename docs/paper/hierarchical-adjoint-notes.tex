@@ -41,9 +41,9 @@ $\bar\theta=(D_\theta g)^{\mathsf T}\bar\epsilon$.
 For fixed Bloch factor $p=\exp(\mathrm{i}\phi)$, the forward seam difference
 is $pF_0-F_{N-1}$ and the backward seam difference is
 $F_0-F_{N-1}/p$. Their adjoints multiply by conjugate seam coefficients.
-Complex CPML memories participate in checkpoint replay. The implemented complex
-resident path uses explicit Torch operations on CPU or CUDA. Real-only fused
-kernels and spatial slab streaming are not used for this complex path.
+Complex CPML memories participate in checkpoint replay. The complex resident
+path uses Torch on CPU and optionally fused forward and transpose kernels on
+CUDA. Complex spatial slab streaming remains unsupported.
 A 20-degree TE slab check at 1.55 micrometres gave transmission error 0.004442
 against the Fresnel slab formula and conservation error $9.58\times10^{-6}$.
 Its fixed-geometry index derivative agreed with a central difference to relative
@@ -367,10 +367,11 @@ difference and its reciprocal for the backward difference. Real diagonal
 material coefficients scale the resulting curl. Separate H and E launches
 preserve the global update order, with source injection between them.
 The implementation avoids full-volume derivative temporaries during forward
-and replay. The adjoint transpose still uses Torch operations. Tests compare
+and replay. The adjoint transpose independently selects Torch or the fused
+complex implementation below. Tests compare
 both precisions, nonuniform metrics, all CPML memories and density VJPs,
 including three-dimensional Bloch seams and asynchronous checkpoint replay.
-This does not implement complex spatial streaming or a fused complex adjoint.
+This forward kernel does not implement complex spatial streaming.
 
 For one relaxed CR seed at 540 nm and one pupil ray, the complete FP64 forward
 API was measured at 50 nm with 1600 steps on RTX 3060. Three alternating
@@ -380,4 +381,32 @@ difference of $5.55\times10^{-17}$. Peak Torch CUDA allocation decreased from
 143,787,520 to 88,134,144 bytes. Both paths include two homogeneous references,
 two sample solves and detector reduction. These measurements do not include
 backward or establish physical convergence or superiority over another solver.
+
+\section{Fused complex transpose}
+A separate optional CUDA transpose gathers conjugated Bloch seam contributions
+and updates complex CPML adjoints using two buffers. One thread owns each
+cell's real material derivative,
+\[
+ \bar{\epsilon} \mathrel{+}=
+ -s\,\operatorname{Re}\!\left(\bar{E}^{*}\operatorname{curl}H\right)
+ /\epsilon^2,
+\]
+where $s$ is the reduced Yee Courant coefficient. The scalar material case sums
+the three electric-component contributions. Separate H and E transpose launches
+preserve update order. Observation seeds still use prepared Torch gather and
+scatter operations. The optional kernel supports first-order real dielectric
+VJPs with complex checkpoint replay. It does not supply complex spatial
+streaming, dispersive derivatives or trainable Bloch phases.
+
+For the selected relaxed CR seed case, matched fused-forward runs with four
+checkpoint slots and no reference cache compared Torch and fused transposes.
+Three alternating measurements after one warmup per path gave complete
+objective/VJP medians of 50.2011 and 32.4018 seconds, respectively. Peak Torch
+CUDA allocations were 359,952,384 and 328,486,400 bytes, with a common starting
+allocation of 17,170,944 bytes in every measured repetition. The maximum
+per-pixel gradient difference was $2.17\times10^{-19}$. These measurements
+follow an explicit recursive-closure lifetime fix in resident and tiled
+replay. Lifetime tests disable cyclic garbage collection and check object
+release after completed result graphs are discarded. This comparison does
+not establish full-pupil optimization or a competing-solver advantage.
 \end{document}

@@ -199,7 +199,8 @@ class _Streamed(torch.autograd.Function):
                         live -= 1
                     end = middle
 
-            reverse(0, len(starts)-1, host.state(), options.checkpoints)
+            try:reverse(0, len(starts)-1, host.state(), options.checkpoints)
+            finally:reverse=None  # Release recursive replay captures without cyclic GC.
             if operator.workspace is not None:
                 report['backward_workspace'] = operator.workspace_report()
         report['backward_seconds'] = time.perf_counter()-started

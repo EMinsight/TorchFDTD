@@ -1,0 +1,14 @@
+{
+  "base_commit": "2b3e7ba",
+  "source_sha256": {
+    "photonweave/cuda_complex_adjoint.py": "9f46b8c1d2d95cf4eaa4e28aac3f4988e010229af2b7f286a151bc73a3cb9435",
+    "photonweave/differentiable.py": "d76efb752977cfcc0da23f37bffdec42ec72001feca9e50f0931e9b43dbac684",
+    "photonweave/streamed.py": "97f26f9f9c648cbb558d192be8aca3677c7ba8cfaacb394aa484cbd4e80e6c43",
+    "photonweave/spacetime.py": "446a11d4ef117b592e010a1d902710a46f7947024a65694c8cd3863b09edfec6",
+    "benchmarks/complex_layer_adjoint.py": "87eeaef14864f982c0493eef970455c73802ee60e2cff4494e116f4f8960b0cd",
+    "tests/test_adjoint_lifetime.py": "5050661a6441ff272524c6cf1367f644e4535bb26588ae340d8205b28db0b525",
+    "tests/test_complex_cuda_adjoint.py": "5a8a75dd155635fa1e17a03af9a62ccbf6170af56602820d5cc3f1b9890562dc"
+  },
+  "scope": "Optional complex fused transpose and replay closure lifetime fixes. Matched selected-ray objective/VJP timings after lifetime fix on RTX 3060. Original full-pupil RTX 5880 run retains 31d17a5 and has not been updated.",
+  "validation": "91 affected local tests passed, including real/complex adjoints, disabled-GC lifetime checks, streamed host/disk CPU/CUDA and admission."
+}

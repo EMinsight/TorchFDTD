@@ -28,8 +28,9 @@ Use a real loss or an explicit complex output seed. Epsilon remains FP32/FP64,
 with complex64/complex128 physical states. CPU uses Torch updates. Resident
 CUDA adjoints optionally select fused complex Yee/CPML forward updates with
 `project.region.cuda_kernel='fused'`. The default remains Torch. Both forward
-choices still use the discrete Torch transpose in backward, and requesting
-`backward_kernel='fused'` for complex fields still fails. Execution reports
+choices can use the discrete Torch transpose or the optional fused complex
+transpose selected by `AdjointOptions(backward_kernel='fused')`. The default
+`'auto'` retains the Torch complex transpose. Execution reports
 name the actual forward and backward backends. This opt-in applies to the
 resident differentiable APIs. The native `Simulation` fused kernel remains
 real-only. See [complex CUDA validation](COMPLEX_CUDA.md).

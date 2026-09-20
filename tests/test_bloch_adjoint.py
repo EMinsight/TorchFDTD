@@ -101,8 +101,8 @@ def test_bloch_plane_seam_interpolation_and_gradient():
 
 def test_unsupported_complex_execution_fails_explicitly():
     p=scene()
-    with pytest.raises(ValueError,match='Torch backward'):
-        DifferentiableSimulation(p,AdjointOptions(backward_kernel='fused'))
+    with pytest.raises(ValueError,match='CUDA tensor'):
+        DifferentiableSimulation(p,AdjointOptions(backward_kernel='fused'))(torch.ones(p.region.shape,dtype=torch.float64))
     with pytest.raises(ValueError,match='spatial streaming'):StreamedSimulation(p)
 
 

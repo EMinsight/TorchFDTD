@@ -325,7 +325,8 @@ class SlabBlockOperator:
                     del checkpoint
                     end = middle
 
-            reverse(0,depth,restart,self.local_checkpoints,0)
+            try:reverse(0,depth,restart,self.local_checkpoints,0)
+            finally:reverse=None  # Do not retain a tile through its recursive closure.
             if backward is not None:
                 adjoint = (backward.e_bar, backward.h_bar, *backward.psi_bars[backward.phase])
             return self._return((*adjoint, local_gradient)), (indices, mapping)

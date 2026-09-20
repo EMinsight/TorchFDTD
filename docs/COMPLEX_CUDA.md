@@ -5,7 +5,8 @@ complex64/complex128 E/H and CPML states with real scalar or diagonal
 permittivity. Set `project.region.cuda_kernel='fused'`, or pass
 `forward_kernel='fused'` to `periodic_layer_response`. The default complex path
 remains Torch. The option affects forward and checkpoint replay updates.
-**Backward still uses the Torch explicit transpose.**
+Backward defaults to the Torch explicit transpose. An optional
+[fused complex transpose](COMPLEX_CUDA_ADJOINT.md) is now separately selectable.
 
 Each CUDA thread updates one real or imaginary lane of one cell. The two
 lanes read adjacent complex storage, while CPML and material coefficients stay
@@ -34,8 +35,8 @@ and alternates backend order across measured repetitions. The benchmark checks
 responses against the same Torch calculation. It is not an equal-accuracy
 comparison against another solver and does not include backward.
 
-Native `Simulation` fused execution, ADE/subpixel-interface updates, complex
-fused transpose and complex spatial streaming are outside this implementation.
+Native `Simulation` fused execution, ADE/subpixel-interface updates, complex spatial streaming are outside this forward implementation. The fused
+complex transpose is documented and validated separately.
 The current full-pupil CR run started before this option and continues using
 the original Torch path.
 
