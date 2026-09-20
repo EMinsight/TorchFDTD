@@ -1,0 +1,21 @@
+{
+  "scope": "Primary-domain slab slices avoid intermediate gather before owned packet copy. Boundary wrap still gathers.",
+  "tests": [
+    {
+      "passed": 59,
+      "deselected": 20,
+      "seconds": 19.84,
+      "device": "CPU"
+    },
+    {
+      "passed": 68,
+      "seconds": 31.68,
+      "device": "RTX 5880 Ada and CPU"
+    }
+  ],
+  "source_sha256": {
+    "photonweave/spacetime.py": "3058e907b549b4be23581533b722575a1df92c9f374e4b772bcaf14708f6c61a",
+    "tests/test_complex_spacetime.py": "a3b2921217d09f5d24f1bd3365381ff6c429f053137f5e2ef1392826410ba0a9"
+  },
+  "wheel_package_files_byte_verified": 71
+}

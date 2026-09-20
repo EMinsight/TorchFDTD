@@ -125,12 +125,18 @@ class SlabBlockOperator:
         local.device, local.dtype = self.device, epsilon.dtype
         local.field_dtype = host.field_dtype
         phase = self._halo_phase(descriptor)
-        local.epsilon = epsilon.index_select(0, indices)
+        begin, end = lo-core.start, lo-core.start+len(indices)
+        contiguous = begin >= 0 and end <= host.region.shape[0]
+        def rows(value):
+            # The final packet owns a copy. Until then, a primary-domain slice
+            # can remain a read-only view instead of a redundant gather buffer.
+            return value[begin:end] if contiguous else value.index_select(0, indices)
+        local.epsilon = rows(epsilon)
         local.eps4 = local.epsilon[..., None] if epsilon.ndim == 3 else local.epsilon
         local.region = SimpleNamespace(shape=(len(indices), *host.region.shape[1:]))
         local.current_step = 0
         grid = local.grid = _Grid()
-        grid.E, grid.H = [self._phase_value(s.index_select(0, indices), phase) for s in state[:2]]
+        grid.E, grid.H = [self._phase_value(rows(s), phase) for s in state[:2]]
         grid.inverse_permeability = torch.ones(1, dtype=epsilon.dtype)
         grid.courant_number = host.grid.courant_number
         grid.time_step = host.grid.time_step
@@ -174,7 +180,7 @@ class SlabBlockOperator:
                     destination = indices[owned]
                     sl = segment['slice']
                     coefficients = {name: segment[name] for name in ('b', 'c', 'inv_k')}
-                item = dict(slice=sl, psi=state[global_id+2].index_select(0, take),
+                item = dict(slice=sl, psi=rows(state[global_id+2]) if axis != 0 else state[global_id+2].index_select(0, take),
                             **coefficients)
                 if axis != 0:item['psi'] = self._phase_value(item['psi'], phase)
                 local.keys[key].append(len(local.segments))

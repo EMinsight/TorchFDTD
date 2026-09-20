@@ -379,3 +379,17 @@ establish its variance under interleaved revision measurements.
 [CPU profile](validation/complex-streamed-cpu-profile.json).
 The profile includes startup/warm-up and synchronization waits and is not a
 CUDA execution timeline. Further copy/packing optimization remains necessary.
+
+Primary-domain slab extraction now uses read-only slices until the final owned
+transport packet is built. Periodic image tiles still gather wrapped rows.
+This removes an intermediate E/H/epsilon/transverse-CPML copy without allowing
+tile updates to mutate the immutable input bank. A specific alias test and
+real/complex host/file-backed forward/transpose regressions cover this invariant.
+
+The same three-repeat width-32/depth-8 measurement gave 2.782 s synchronous and
+1.729 s asynchronous, with the same respective 335,024,640 B and 670,046,208 B
+CUDA peaks. Resident median was 0.277 s. The asynchronous path remains 6.23
+times slower while saving 38.0% of peak device allocation. The final gradient
+relative L2 difference remains 1.42e-16. These are separate-revision measurements,
+not an interleaved statistical estimate of the incremental speedup.
+[Raw measurements](validation/complex-streamed-slice-packing.json).

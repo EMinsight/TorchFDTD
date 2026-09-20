@@ -19,6 +19,21 @@ def test_interior_bloch_tile_needs_no_phase_materialization():
     assert operator._phase_value(value, None) is value
 
 
+def test_packed_interior_tile_does_not_alias_restart_or_epsilon():
+    p = scene()
+    eps = torch.full(p.region.shape, 1.7, dtype=torch.float64)
+    host = _System(p, eps, prepare_updates=False)
+    state = tuple(torch.randn_like(s) for s in host.state())
+    original = tuple(s.clone() for s in state)
+    operator = SlabBlockOperator(host, 4, 'cpu')
+    descriptor = list(operator.tiles(1))[1]
+    local, _, _ = operator._tile(eps, state, descriptor, 0, 1)
+    for s in local.state():s.zero_()
+    local.epsilon.zero_()
+    for actual, expected in zip(state, original):torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    torch.testing.assert_close(eps, torch.full_like(eps, 1.7), rtol=0, atol=0)
+
+
 @pytest.mark.parametrize('dtype', [torch.float32, torch.float64])
 @pytest.mark.parametrize('depth,nonuniform,diagonal', [(3, False, False), (10, True, True)])
 @pytest.mark.parametrize('checkpoints', [0, 2])
