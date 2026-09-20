@@ -8,6 +8,7 @@ import { setupSourceTools, temporalControls, updateTemporalField, polarizationCo
 import { setupMaterials } from './materials.js';
 import { meshControls, setupMesh } from './mesh.js';
 import { setupCapabilities } from './capabilities.js';
+import { setupInverseDesign } from './inverse_design.js';
 import { runControls } from './run_control.js';
 import { geometryDefaults,geometryControls,rotationControls,setupGeometryEditor } from './geometry.js';
 import { setupMonitorTools, spectralControls, fieldMonitorControls } from './monitor_tools.js';
@@ -21,7 +22,7 @@ const messages=[];
 
 $('#app').innerHTML=`
 <header><div class="brand"><span class="brand-mark">${icon('waves')}</span><strong>PhotonWeave</strong><span class="product">FDTD</span></div><div class="project-title" id="project-title"></div><div class="connection" id="connection"><span class="dot"></span>Connecting to solver…</div></header>
-<nav class="menubar"><button data-action="new">File</button><button data-action="undo">Edit</button><button data-action="fit">View</button><button data-action="materials">Materials</button><button data-action="region">Simulation</button><button data-action="capabilities">Feature checklist</button><button data-action="flux-results">Flux results</button><button data-action="help">Help</button><span class="version">DEVELOPMENT</span></nav>
+<nav class="menubar"><button data-action="new">File</button><button data-action="undo">Edit</button><button data-action="fit">View</button><button data-action="materials">Materials</button><button data-action="region">Simulation</button><button data-action="inverse-design">Inverse design</button><button data-action="capabilities">Feature checklist</button><button data-action="flux-results">Flux results</button><button data-action="help">Help</button><span class="version">DEVELOPMENT</span></nav>
 <div class="ribbon-tabs"><button class="active" data-ribbon="design">Design</button><button data-ribbon="simulation">FDTD</button><button data-ribbon="view">View</button><span class="ribbon-note">Geometry and wavelength in µm</span></div>
 <div class="ribbon">
  <div class="tool-group"><div class="tool-row"><button class="tool" data-action="open">${icon('folder-open')}<span>Open</span></button><button class="tool" data-action="save">${icon('save')}<span>Save</span></button><button class="tool" data-action="fsp">${icon('folder-open')}<span>FSP inspect</span></button><button class="tool editable" data-action="fsp-native">${icon('folder-open')}<span>FSP → GPU</span></button><button class="tool" data-action="python">${icon('file-code-2')}<span>Python</span></button></div><label>Project</label></div>
@@ -181,10 +182,12 @@ const meshTools=setupMesh({state,api,esc,commit:project=>{if(state.mode!=='layou
 const sourceTools=setupSourceTools({state,api,esc,toast,commit:project=>{if(state.mode!=='layout')throw Error('Switch to Layout before editing.');remember();state.project=project;persist();renderProperties();renderTree();views.render();validate();}});
 const geometryTools=setupGeometryEditor({state,api,esc,commit:project=>{if(state.mode!=='layout')throw Error('Switch to Layout before editing.');remember();state.project=project;persist();renderProperties();renderTree();views.render();validate();}});
 const capabilityTools=setupCapabilities({api,esc});
+const inverseDesign=setupInverseDesign({esc});
 const monitorTools=setupMonitorTools({state,api,esc,toast,numeric,dropdown,commit:project=>{if(state.mode!=='layout')throw Error('Switch to Layout before editing.');remember();state.project=project;persist();renderProperties();renderTree();views.render();validate();}});
 const actions={
  'geometry-vertices':()=>geometryTools.open(state.selected),
  'capabilities':()=>capabilityTools.open(),
+ 'inverse-design':()=>inverseDesign.open(),
  'global-monitor':()=>monitorTools.globals(),
  'flux-results':()=>monitorTools.flux(),
  'mesh-preview':()=>meshTools.open(),

@@ -942,7 +942,13 @@ above $2\times10^{-4}$ fail the comparison before any speed ratio is emitted.
 Sampled process RSS and Torch allocated and reserved peaks are retained with
 source hashes. This protocol compares native backends and does not establish
 optical convergence, an optimized external CPU baseline or beyond-VRAM speed.
-Large-workload measurements remain pending.
+A completed $256^3$, 128-step dielectric measurement on RTX 5880 gives
+medians of 448.5862 s and 407.6886 s for six and twelve CPU threads.
+Resident CUDA takes 2.2834 s and asynchronous DRAM slabs take 9.4349 s,
+corresponding to ratios of 178.55 and 43.21 against the faster tested CPU
+median. All 77 source hashes are verified. Measured output and material-VJP
+relative errors remain below $2.41\times10^{-7}$. This problem fits VRAM.
+The two-pole dispersive measurement is still pending.
 
 
 \section{Budgeted periodic density responses}

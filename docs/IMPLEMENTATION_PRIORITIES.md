@@ -6,7 +6,7 @@ CR 후속으로 [재시작 가능한 밀도 최적화 실행기](CR_INVERSE_DESI
 
 정밀도 정책: 일반 실행과 CR 역설계의 기본값은 FP32다. 밀도·광학장·정보량·gradient·Adam에 하나의 정밀도를 사용하고 FP64는 명시적인 검증 옵션으로 유지한다. 이후 48GB 초과 용량 실험도 FP32 실제 상태 크기를 기준으로 설계하며, FP64 사용으로 늘어난 메모리를 FP32 용량 한계로 설명하지 않는다. 전체 144조건의 FP32 response·gradient 검증은 통과했다. 응답 상대 오차 5.04e-7, 밀도 gradient 상대 오차 1.75e-5이며, 물리 메시·gradient 수렴과 실제 최적화 완료는 별도 조건이다.
 
-자동 실행 선택 후속: `PeriodicLayerResponse.auto(...)`는 별도 시험 연산 없이 resident → DRAM → 명시적 파일 저장소의 예산을 확인한다. 공간 폭과 시간 깊이를 함께 줄이며, 정밀도·메시·계산 시간·checkpoint 개수는 바꾸지 않는다. 선택 결과를 고정해 forward/backward에 사용한다. 실제 속도를 비교하는 tuner는 별도 선택으로 유지한다. 이 경로의 UI 연결은 후속이다.
+자동 실행 선택 후속: `PeriodicLayerResponse.auto(...)`는 별도 시험 연산 없이 resident → DRAM → 명시적 파일 저장소의 예산을 확인한다. 공간 폭과 시간 깊이를 함께 줄이며, 정밀도·메시·계산 시간·checkpoint 개수는 바꾸지 않는다. 선택 결과를 고정해 forward/backward에 사용한다. 실제 속도를 비교하는 tuner는 별도 선택으로 유지한다. 주기 밀도 설계 UI에 자동 선택·명시적 resident/DRAM/파일·메모리 사전 확인·Adam 실행·Python/JSON 내보내기를 연결했다. 범용 CAD·다파장 UI와 optimizer 재시작은 남아 있다.
 
 중복 연산 감소: 선택형 `PeriodicResponseCache`는 구조·물리 설정·실행 조건이 동일할 때 응답을 재사용하고, 목적함수의 입력 gradient까지 동일할 때 밀도 VJP도 재사용한다. 저장량을 제한하며 광학장 이력은 보관하지 않는다. 다른 latent 값에서 동일 hard mask가 반복되어도 현재 sigmoid의 미분은 그대로 연결된다. 실제 CR 최적화의 가속률은 미측정이다. 기존 projected Adam 예제는 연속 밀도 경로이며, 원래 CR의 hard-mask 제작 제약·straight-through·블록별 gradient 처리와 동일한 최적화로 간주하지 않는다.
 

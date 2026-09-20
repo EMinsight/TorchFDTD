@@ -84,3 +84,6 @@ __all__ += ['PeriodicLayerResponse']
 
 from .response_cache import PeriodicResponseCache
 __all__ += ['PeriodicResponseCache']
+
+from .periodic_design import PeriodicDesignConfig, periodic_design_plan, run_periodic_design
+__all__ += ['PeriodicDesignConfig', 'periodic_design_plan', 'run_periodic_design']

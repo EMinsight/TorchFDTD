@@ -173,7 +173,9 @@ def create_app(result_dir=None):
     @app.get('/api/jobs/{key}')
     def status(key: str):
         job = get_job(key)
-        return {k:v for k,v in list(job.items()) if k not in ('cancel','frames','epsilon','frame_steps','frequency_fields')}
+        result = {k:v for k,v in list(job.items()) if k not in ('cancel','frames','epsilon','frame_steps','frequency_fields')}
+        result['cancel_requested'] = job['cancel'].is_set()
+        return result
 
     @app.get('/api/jobs')
     def job_list():
@@ -271,6 +273,8 @@ def create_app(result_dir=None):
                 writer.writerow([m['name'], m['component'], f, wl, re, im, mag, m['spectrum_units'], m['spectrum_settings']['apodization']])
         return Response(out.getvalue(), media_type='text/csv', headers={'Content-Disposition':'attachment; filename=spectra.csv'})
 
+    from .design_service import attach_design_routes
+    attach_design_routes(app, root, pool, jobs, lock)
     from .fsp_service import attach_fsp_routes
     attach_fsp_routes(app, root)
     static = Path(__file__).parent/'web'

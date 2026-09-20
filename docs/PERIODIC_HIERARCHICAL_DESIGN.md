@@ -109,7 +109,7 @@ Four targeted tests cover a real CPU Torch density/gradient chain, metadata-only
 DRAM and file admission, tile shrinking, and refusal of unconfigured storage
 or insufficient free space. The metadata tests do not claim large-domain
 execution or memory throughput. Existing solver correctness tests were not
-rerun solely for this selector addition. GUI binding remains follow-up work.
+rerun solely for this selector addition. A [periodic density UI](PERIODIC_DESIGN_UI.md) now exposes this selection and the shared Python workflow.
 
 ## Exact response and gradient reuse
 

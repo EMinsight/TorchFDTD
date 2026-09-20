@@ -18,10 +18,10 @@ workflow.divergence,성장 감지·divergence threshold,P0,1,required,실행 신
 workflow.shutoff,에너지 기반 auto shutoff,P0,1,required,실행 신뢰성·낭비 방지,False,implemented,implemented,implemented,"자동 종료, 전체 장 발산 검사, 취소·저장 결과의 구분은 모든 계산의 기반이다."
 native.convergence,물리 시간·PML 두께 고정 mesh 수렴 검사,P0,2,required,정확도·수렴 검증,True,implemented,implemented,missing,같은 물리량과 물리적 시간으로 메시를 비교해야 정확도 대비 비용을 판단할 수 있다.
 native.release,독립 공개 배포 패키지·출처 검증,P0,3,required,독립 배포 패키지,True,missing,missing,missing,공개할 코드·데이터·라이선스·자격증명 제외 목록을 검증해야 한다.
-workflow.adjoint,Adjoint·자동미분 FDTD,P0,4,required,Torch 이산 adjoint·자동미분,True,partial,partial,missing,주요 개발 목표. 형상·유전율부터 loss.backward와 optimizer까지 연결하고 물리 gradient·시간·메모리를 검증한다.
+workflow.adjoint,Adjoint·자동미분 FDTD,P0,4,required,Torch 이산 adjoint·자동미분,True,partial,partial,partial,주요 개발 목표. 형상·유전율부터 loss.backward와 optimizer까지 연결하고 물리 gradient·시간·메모리를 검증한다.
 native.memory_profile,GPU·host·파일 전송 비용 측정,P0,5,required,계층형 메모리·대규모 실행,True,partial,partial,missing,"주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다."
-workflow.memory_hierarchy,GPU·DRAM·디스크 계층형 checkpoint,P0,5,required,계층형 메모리·대규모 실행,True,partial,partial,missing,"주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다."
-workflow.out_of_core,Space-time tiled out-of-core GPU FDTD,P0,5,required,계층형 메모리·대규모 실행,True,partial,partial,missing,"주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다."
+workflow.memory_hierarchy,GPU·DRAM·디스크 계층형 checkpoint,P0,5,required,계층형 메모리·대규모 실행,True,partial,partial,partial,"주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다."
+workflow.out_of_core,Space-time tiled out-of-core GPU FDTD,P0,5,required,계층형 메모리·대규모 실행,True,partial,partial,partial,"주요 개발 목표. VRAM·DRAM·저장장치 checkpoint와 공간·시간 분할, 전송·재계산·batch 비용을 함께 검증한다."
 "material.(n,k) Material.Imaginary Refractive Index",Imaginary Refractive Index,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 "material.(n,k) Material.Refractive Index",Refractive Index,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 "material.(n,k) Material.anisotropy",anisotropy,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
@@ -1256,7 +1256,7 @@ workflow.checkpoint,Checkpoint·restart,P2,12,required,사용성·자동화,True
 workflow.datasets,Rectilinear/unstructured dataset API,P2,12,required,사용성·자동화,True,missing,missing,missing,"결과 탐색, GUI sweep, 그룹과 checkpoint는 연구 생산성을 높인다."
 workflow.monte_carlo,Monte Carlo·yield,P2,12,required,사용성·자동화,True,missing,missing,missing,"결과 탐색, GUI sweep, 그룹과 checkpoint는 연구 생산성을 높인다."
 workflow.nested_sweep,Nested sweep,P2,12,required,사용성·자동화,True,implemented,implemented,missing,"결과 탐색, GUI sweep, 그룹과 checkpoint는 연구 생산성을 높인다."
-workflow.optimization,Optimization,P2,12,required,사용성·자동화,True,partial,partial,missing,"결과 탐색, GUI sweep, 그룹과 checkpoint는 연구 생산성을 높인다."
+workflow.optimization,Optimization,P2,12,required,사용성·자동화,True,partial,partial,partial,"결과 탐색, GUI sweep, 그룹과 checkpoint는 연구 생산성을 높인다."
 workflow.sweep,Parameter sweep,P2,12,required,사용성·자동화,True,implemented,implemented,missing,"결과 탐색, GUI sweep, 그룹과 checkpoint는 연구 생산성을 높인다."
 workflow.ui_tabs,모든 property tab·results browser,P2,12,required,사용성·자동화,True,missing,missing,missing,"결과 탐색, GUI sweep, 그룹과 checkpoint는 연구 생산성을 높인다."
 analysis.impulse,Impulse response convolution,P2,13,conditional,특수 물성·실험 조건,True,missing,missing,missing,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.

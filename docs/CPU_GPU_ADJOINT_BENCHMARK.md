@@ -69,6 +69,28 @@ The end-to-end driver tests exercise CPU, resident CUDA and asynchronous CUDA
 slabs for both material types. Additional tests reject a corrupted gradient
 beyond the first comparison chunk, mismatched groups, nonfinite results and a
 tiny but relatively incorrect gradient. Failure records and slower-GPU ratios
-remain visible. Large-workload measurements are pending. This benchmark does
+remain visible. The dielectric workload below is complete. The two-pole ADE workload is still running. This benchmark does
 not establish beyond-VRAM capacity or comparative performance against external
 solvers.
+
+
+## Completed 256-cubed dielectric measurement
+
+The [complete RTX 5880 record](validation/cpu-gpu-adjoint-256-dielectric-5880.json)
+uses 256 x 256 x 256 cells and 128 FP32 steps, two checkpoints, one full warm-up
+per mode and three interleaved measured repetitions. All 77 source hashes match
+revision `23cefe1`. Relative L2 errors across measured complete outputs and
+spatial density VJPs are at most 2.41e-7, below the 2e-4 limit.
+
+| Native execution | Median forward/objective/backward | Speed ratio to fastest tested CPU |
+|---|---:|---:|
+| Torch CPU, 6 threads, DRAM | 448.5862 s | 0.91x |
+| Torch CPU, 12 threads, DRAM | 407.6886 s | 1.00x |
+| Fused CUDA, resident | 2.2834 s | 178.55x |
+| Fused CUDA, asynchronous DRAM slabs | 9.4349 s | 43.21x |
+
+This problem fits GPU memory. The streamed result does not establish speed
+beyond 48 GB or equality with resident performance. The CPU implementation is
+this project's Torch backend, not a tuned external CPU solver. The ADE run is
+separate and remains pending. No repeated simulation was needed to archive
+these completed measurements.

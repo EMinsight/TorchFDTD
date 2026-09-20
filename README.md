@@ -71,8 +71,11 @@ completed on RTX 5880 with a 15.9 GB peak Torch CUDA allocation. After fixing
 ADE eight-case runs both passed, with respective peaks of 15.9 GB and 17.9 GB.
 These remain twelve-step capacity/VJP checks. Concurrent adjoint microbatches remain open.
 The [matched CPU/DRAM and CUDA adjoint driver](docs/CPU_GPU_ADJOINT_BENCHMARK.md)
-now includes input/output transfers and complete material VJPs. Large-workload
-CPU speed ratios are pending.
+now includes input/output transfers and complete material VJPs. For a completed
+256-cubed, 128-step FP32 dielectric case, the fastest tested Torch CPU median
+is 407.69 s, versus 2.28 s resident CUDA and 9.43 s CUDA with DRAM slabs
+(178.55x and 43.21x). These are internal backend comparisons on RTX 5880,
+within VRAM capacity. They are not external-solver or beyond-VRAM speedups.
 
 [Differentiable detector allocation](docs/DETECTOR_ALLOCATION.md) preserves the CR reference's electric-intensity well fractions with independent midpoint quadrature. Synthetic source parity and material-gradient tests pass. Matched CR optical validation remains pending.
 
@@ -99,6 +102,9 @@ evaluation. The original CR application's physical optimization remains pending.
 configured file execution from shared memory budgets without calibration
 solves. It shrinks tiles when needed and keeps the chosen policy for backward.
 This capacity heuristic does not claim the fastest policy.
+The [Inverse design panel](docs/PERIODIC_DESIGN_UI.md) now edits periodic density,
+checks memory, runs Adam through the same Torch API, and exports setup, Python
+and evaluated results. It uses the ordinary shared simulation queue.
 An opt-in `PeriodicResponseCache` also reuses exact responses and seeded
 density gradients when the same physical design recurs. It retains bounded
 CPU tensors, without field histories. Full optimizer speedup is unmeasured.
