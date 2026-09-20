@@ -106,6 +106,9 @@ class DiskArray:
         self.bank,self.offset,self.shape,self.dtype = bank,offset,torch.Size(shape),dtype
         self.item = torch.empty((),dtype=dtype,device='cpu').element_size()
         self.row_bytes = math.prod(self.shape[1:])*self.item
+        # Newly truncated banks are zero. Track complete row writes so the
+        # first adjoint contribution need not read those zeros from disk.
+        self.written_rows = set()
 
     def element_size(self):return self.item
 
@@ -164,6 +167,7 @@ class DiskArray:
                 if not count:raise OSError('Incomplete field bank write.')
                 done += count
             self.bank.store.written_bytes += len(piece)
+            self.written_rows.update(range(row,row+end-begin))
         return self
 
     def index_add_(self,axis,indices,value):
@@ -173,8 +177,17 @@ class DiskArray:
         # Consecutive runs preserve duplicate-index accumulation order across
         # periodic halo copies. Never materialize the whole global field bank.
         for begin,end,row in self._groups(indices):
-            selected = torch.arange(row,row+end-begin,dtype=torch.int64,device='cpu')
-            current = self.index_select(0,selected)
-            current.add_(value[begin:end])
-            self.index_copy_(0,selected,current)
+            offset=0
+            while offset<end-begin:
+                written=row+offset in self.written_rows
+                stop=offset+1
+                while stop<end-begin and ((row+stop in self.written_rows)==written):stop+=1
+                selected=torch.arange(row+offset,row+stop,dtype=torch.int64,device='cpu')
+                contribution=value[begin+offset:begin+stop]
+                if written:
+                    current=self.index_select(0,selected)
+                    current.add_(contribution)
+                else:current=contribution
+                self.index_copy_(0,selected,current)
+                offset=stop
         return self

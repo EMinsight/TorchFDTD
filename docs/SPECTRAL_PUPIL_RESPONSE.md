@@ -112,10 +112,17 @@ finite difference also passes. These small synthetic optical conditions test
 the combined execution path, not the full CR research result.
 
 The full locked nine-wavelength, sixteen-ray relaxed-seed objective and gradient
-run has been launched on RTX 3060 with fused forward/backward and a 64 MiB CPU
-reference cache. The original RTX 5880 Torch forward run continues independently.
-Neither a completed full gradient nor physical optical convergence is claimed.
+run completed on RTX 3060 with fused forward/backward and a 64 MiB CPU
+reference cache. The gradient norm is 0.029781743905171024 and peak Torch CUDA
+allocation is 328,878,592 bytes. The independent RTX 5880 Torch forward also
+completed and agrees with the fused forward to roundoff on this schedule.
+See the [gradient record](validation/cr-full-gradient-3060.json) and
+[forward comparison](validation/cr-full-forward-kernel-parity.json).
+Physical optical convergence and actual optimization remain unverified.
 The runner atomically saves `OUTPUT.forward.json` after all forward cases and
 objective assembly, before gradient replay. That snapshot explicitly says the
 gradient has not been computed. The final `OUTPUT.json` remains the completion
 record, and a snapshot must not be mistaken for a completed gradient run.
+Subsequent gradient runs also save `OUTPUT.gradient.npy` and identify its hash,
+shape and differentiation variable in the final JSON. The completed record
+above predates that extension and contains only the norm.

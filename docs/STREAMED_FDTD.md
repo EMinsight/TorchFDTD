@@ -148,6 +148,29 @@ reads and writes. Files are released at the end of each forward/backward phase,
 including tested computation and I/O failures. Only private scratch files are
 removed. The files do not provide durable restart.
 
+File adjoint accumulation tracks which complete rows have been written. A
+first contribution writes directly into a known-zero row, while overlapping
+and repeated indices still read and accumulate existing values in order.
+On RTX 3060, the 128 x 32 x 32, 32-step file-bank benchmark reduced backward
+logical reads from 414,810,112 to 352,681,984 bytes. Three-repeat median total
+time increased from 2.421 to 2.517 seconds. This is a traffic reduction, not
+demonstrated acceleration. Buffered cache effects are uncontrolled. These
+sequential runs change only the accumulation method, using the method from
+`ccf6757` as the baseline. Both retain the current write-row tracking, so this
+is not a full old-revision versus new-revision timing. Every run checked signals and gradients
+against DRAM execution. The large-capacity run predates this change.
+[Baseline](validation/bank-reads-baseline-3060.json),
+[row-aware accumulation](validation/bank-reads-optimized-3060.json).
+
+A second 128 x 128 x 64, 32-step measurement with the same method comparison
+gave median file execution of 9.182 seconds before and 9.060 seconds after.
+The roughly 1.3% difference is not a robust speedup estimate with three
+sequential repetitions and uncontrolled cache. DRAM medians were 3.825 and
+3.793 seconds. All gradient comparisons passed. The evidence supports reduced
+logical reads, with workload-dependent overhead, rather than a general runtime
+advantage. [Baseline](validation/bank-reads-medium-baseline-3060.json),
+[row-aware accumulation](validation/bank-reads-medium-optimized-3060.json).
+
 Admission separately checks host, GPU and logical disk budgets. Epsilon and its
 gradient still occupy full CPU tensors. Set `disk_free_reserve_bytes` to retain
 an additional minimum amount of free space, for example `100*1024**3` on a

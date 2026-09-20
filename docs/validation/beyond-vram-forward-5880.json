@@ -1,0 +1,195 @@
+{
+  "stage": "forward_complete",
+  "grid": [
+    1024,
+    1024,
+    576
+  ],
+  "steps": 10,
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "physical_vram_bytes": 51526500352,
+  "free_vram_bytes": 49643782144,
+  "eh_bytes": 57982058496,
+  "reservation": {
+    "host_reservation_bytes": 75799463264,
+    "gpu_reservation_bytes": 28991029376,
+    "observation_index_bytes": 32,
+    "state_bank_capacity": 5,
+    "disk_reservation_bytes": 292531732480,
+    "disk_io_workspace_bytes": 8153726976,
+    "host_initial_state_reservation_bytes": 288,
+    "state_bytes": 58506346496,
+    "max_extended_tile_cells": 14155776,
+    "local_checkpoint_reservation_bytes": 0,
+    "source_and_output_history_bytes": 800,
+    "host_tile_reservation_bytes": 28991029504
+  },
+  "physical_vram_exceeded": true,
+  "driver_smoke": false,
+  "scratch_directory": "C:\\Users\\admin\\photonweave\\.local\\beyond-vram-state",
+  "initial_disk_free_bytes": 455133671424,
+  "initial_available_ram_bytes": 113124040704,
+  "disk_headroom_bytes": 107374182400,
+  "ram_headroom_bytes": 17179869184,
+  "scope": "Short complex FP64 capacity/VJP test. Only a non-smoke completed record exceeding physical VRAM is capacity evidence. No throughput superiority or converged application claim.",
+  "forward_seconds": 741.239108800015,
+  "signals_real_imag": [
+    [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    [
+      [
+        6.667155893851539e-06,
+        0.0
+      ],
+      [
+        -3.810791407543942e-06,
+        0.0
+      ]
+    ],
+    [
+      [
+        5.908895978001035e-05,
+        0.0
+      ],
+      [
+        -3.465529020291757e-05,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.00022254780340492787,
+        0.0
+      ],
+      [
+        -0.00013341525582150277,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.0005415656025197979,
+        0.0
+      ],
+      [
+        -0.00032309983854215594,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.0010115300253977777,
+        0.0
+      ],
+      [
+        -0.0005805780260128245,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.001597499776853034,
+        0.0
+      ],
+      [
+        -0.000852764650036308,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.002258928618086709,
+        0.0
+      ],
+      [
+        -0.0010900055392025704,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.002945207885795672,
+        0.0
+      ],
+      [
+        -0.0012532823149231105,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.0035809341866848976,
+        0.0
+      ],
+      [
+        -0.001301769657054786,
+        0.0
+      ]
+    ]
+  ],
+  "report": {
+    "experimental": true,
+    "spatial_streaming": true,
+    "full_time_autograd": false,
+    "complex_fields": true,
+    "higher_order": false,
+    "slab_width": 16,
+    "temporal_depth": 2,
+    "checkpoint_capacity": 0,
+    "local_checkpoint_capacity": 0,
+    "state_storage": "disk",
+    "execution_device": "cuda",
+    "tile_transfers": "sync",
+    "tile_buffers": 1,
+    "cuda_binding": "direct",
+    "reuse_tile_buffers": true,
+    "policy": "manual",
+    "precision": "torch.float64",
+    "host_reservation_bytes": 75799463264,
+    "gpu_reservation_bytes": 28991029376,
+    "observation_index_bytes": 32,
+    "state_bank_capacity": 5,
+    "disk_reservation_bytes": 292531732480,
+    "disk_io_workspace_bytes": 8153726976,
+    "host_initial_state_reservation_bytes": 288,
+    "state_bytes": 58506346496,
+    "max_extended_tile_cells": 14155776,
+    "local_checkpoint_reservation_bytes": 0,
+    "source_and_output_history_bytes": 800,
+    "host_tile_reservation_bytes": 28991029504,
+    "observation_storage": "time_history",
+    "host_initial_state_storage_bytes": 288,
+    "host_inverse_permittivity_bytes": 0,
+    "forward_workspace": {
+      "local_replayed_steps": 0,
+      "peak_local_checkpoints": 0,
+      "allocations": 3,
+      "buffer_bytes": 1824228512,
+      "pinned_bytes": 0,
+      "binding_hits": 636,
+      "binding_misses": 4,
+      "h2d_bytes": 475036759200,
+      "d2h_bytes": 292531732800,
+      "transfer_scope": "Logical workspace payload bytes, not measured PCIe transactions."
+    },
+    "forward_backing_store": {
+      "peak_logical_file_bytes": 117012692992,
+      "live_logical_file_bytes": 0,
+      "created_banks": 5,
+      "logical_read_bytes": 351038078976,
+      "logical_written_bytes": 292531732480,
+      "max_single_read_bytes": 679477248,
+      "closed": true,
+      "io_scope": "Buffered file I/O. OS page cache and physical storage traffic are not measured. No whole-state file mapping."
+    },
+    "forward_seconds": 739.9543725000112
+  }
+}

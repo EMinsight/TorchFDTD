@@ -73,16 +73,31 @@ def main():
     gradient=None
     if not args.forward_only:gradient,=torch.autograd.grad(result.weighted_bits_per_pixel,density)
     torch.cuda.synchronize()
+    gradient_artifact=None
+    if gradient is not None:
+        if not bool(torch.isfinite(gradient).all()):
+            raise RuntimeError('Non-finite density gradient. Forward snapshot is incomplete.')
+        gradient_path=output.with_suffix('.gradient.npy')
+        temporary=gradient_path.with_suffix('.npy.tmp')
+        with temporary.open('wb') as stream:
+            np.save(stream,gradient.detach().cpu().numpy(),allow_pickle=False)
+        temporary.replace(gradient_path)
+        gradient_artifact=dict(file=gradient_path.name,shape=list(gradient.shape),
+            dtype=str(gradient.dtype),sha256=hashlib.sha256(gradient_path.read_bytes()).hexdigest(),
+            variable='relaxed density',objective='weighted_bits_per_pixel',
+            sign='positive gradient increases the information objective locally')
     record=dict(input_sha256=hashes,hardware=torch.cuda.get_device_name(),mesh_um=args.mesh,steps=args.steps,
         pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,forward_kernel=args.forward_kernel,backward_kernel=args.backward_kernel,relaxation='0.01 + 0.98 * binary seed',
         wavelength_count=len(rows),ray_count=len(weights),ray_weight_sum=sum(weights),response=response.detach().tolist(),
         weighted_bits_per_pixel=float(result.weighted_bits_per_pixel.detach()),bits_per_pixel=result.bits_per_pixel.detach().tolist(),
         gradient_l2=None if gradient is None else float(gradient.norm()),elapsed_seconds=time.perf_counter()-start,
+        gradient_artifact=gradient_artifact,
         peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
         reference_cache=None if cache is None else dict(budget_bytes=cache.budget_bytes,tensor_bytes=cache.tensor_bytes,hits=cache.hits,misses=cache.misses,evictions=cache.evictions),
         scope='Full supplied spectral/pupil schedule and supplied development electron context. No optimization, optical convergence or competitor speed claim.')
     output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
-    output.write_text(json.dumps(record,indent=2)+'\n')
+    temporary=output.with_suffix(output.suffix+'.tmp')
+    temporary.write_text(json.dumps(record,indent=2)+'\n');temporary.replace(output)
     print(json.dumps(record),flush=True)
 
 

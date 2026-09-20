@@ -104,9 +104,13 @@ other wavelengths and independent mesh/time convergence remain gates before opti
 The [spectral/pupil API](SPECTRAL_PUPIL_RESPONSE.md) now connects selected-frequency
 FDTD cases to the exact-weight incoherent pupil and electron information model.
 The locked schedule contains nine wavelengths and sixteen rays. Its weight sum
-is 0.996198318172399 and is preserved without normalization. A first full forward
-run at 50 nm and 1600 steps has been launched on RTX 5880. Completion and optical
-convergence are not yet established. No optimization has been launched.
+is 0.996198318172399 and is preserved without normalization. Full forward runs
+at 50 nm and 1600 steps have completed using Torch on RTX 5880 and fused CUDA
+on RTX 3060. Their maximum response difference is 5.55e-17 and objective
+difference is 4.22e-15. This establishes implementation parity for this schedule,
+not optical convergence or a cross-hardware speed comparison.
+See [forward parity](validation/cr-full-forward-kernel-parity.json).
+No optimization has been launched.
 
 The original full-schedule TORCWA response for the same 0.01/0.99 relaxed seed
 is now recorded at Fourier orders (8,8), with the original 1e-4 frequency nudge.
@@ -120,6 +124,23 @@ The full relaxed-seed density-gradient execution has now been launched using
 fused complex forward and transpose kernels, exact supplied ray weights and
 the locked electron context. A small physical multi-case integration test
 first verified objective/VJP parity and directional finite differences through
-the combined cache/recompute/objective path. Full CR response and gradient
-results remain pending. The intermediate forward snapshot is not evidence of
-gradient completion, and no optimization has been launched.
+the combined cache/recompute/objective path. The full 144-case gradient now
+completed on RTX 3060, with norm 0.029781743905171024 and peak Torch CUDA
+allocation of 328,878,592 bytes. Total forward/replay/backward time was
+5416.329 seconds. The reference cache held 42,471,936 bytes within its 64 MiB
+budget. See [the completed record](validation/cr-full-gradient-3060.json).
+Earlier overlapping development tests make this elapsed time diagnostic rather
+than an isolated performance measurement. No optimization has been launched.
+
+The coarse FDTD objective is 1.236263348891092 bits per pixel, versus
+1.2064319578769425 for TORCWA. The 2.47% difference is a solver discrepancy,
+not a design improvement. The maximum channel-response difference is 0.03262.
+[The comparison record](validation/cr-full-coarse-comparison.json) retains
+per-wavelength errors and numerical limitations. Mesh/time/PML convergence and
+TORCWA order convergence remain requirements before interpreting optimization.
+
+Future evaluator runs persist the complete relaxed-density gradient as an NPY
+artifact, with its hash, shape and variable definition in the result JSON.
+Non-finite gradients fail the run. The completed gradient job predates
+this artifact extension and reports the gradient norm only. Neither form of
+record replaces directional-derivative and physical-convergence validation.

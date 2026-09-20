@@ -8,6 +8,23 @@ from photonweave import StreamedAdjointOptions,StreamedSimulation,Differentiable
 from test_differentiable import project,gpu
 
 
+def test_first_adjoint_write_skips_zero_reads_and_preserves_overlap(tmp_path):
+    template=torch.zeros(8,2,dtype=torch.complex128)
+    expected=torch.zeros_like(template)
+    with StateStore(tmp_path,1024) as store:
+        array,=store.new_state([template])
+        first=torch.tensor([2,3,4])
+        values=torch.full((3,2),1+2j,dtype=template.dtype)
+        array.index_add_(0,first,values);expected.index_add_(0,first,values)
+        assert store.read_bytes==0
+        # Existing prefix, new suffix and a repeated row in the same request.
+        second=torch.tensor([3,4,5,6,3])
+        values=torch.full((5,2),3-1j,dtype=template.dtype).conj()
+        array.index_add_(0,second,values);expected.index_add_(0,second,values)
+        assert store.read_bytes==3*array.row_bytes
+        torch.testing.assert_close(array[:],expected,rtol=0,atol=0)
+
+
 def test_reserved_disk_headroom_rechecked_before_each_bank(tmp_path,monkeypatch):
     import photonweave.state_store as storage
     template=torch.zeros(8,dtype=torch.float64)

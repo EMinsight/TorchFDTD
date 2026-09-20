@@ -442,5 +442,33 @@ The problem fits in physical VRAM and the run is short. These measurements
 do not establish an external-solver advantage or beyond-VRAM capacity.
 Reported transfer bytes are logical payload counters, not physical PCIe
 or NVMe traffic. Mixed precision, asynchronous storage prefetch and
-large complex-domain capacity validation remain future work.
+complete large complex-domain forward and adjoint validation remain future work.
+
+\section{Full spectral objective and initial capacity evidence}
+The supplied color-router schedule contains nine wavelengths and sixteen
+pupil rays with an unnormalized total ray weight of 0.996198318172399.
+At a 50 nm mesh and 1600 time steps, the relaxed seed gives an information
+objective of 1.236263348891092 bits per pixel. The complete density-gradient
+norm is 0.029781743905171024. Sequential case replay on an RTX 3060 reaches
+a peak Torch CUDA allocation of 328,878,592 bytes. The compact reference
+cache holds 42,471,936 bytes. Total forward and backward time is 5416.329
+seconds, including overlapping development activity during part of the run.
+This elapsed time is diagnostic rather than an isolated performance result.
+The corresponding TORCWA order-eight objective is 1.2064319578769425.
+The difference is a numerical discrepancy for one fixed design, not an
+optimization improvement. Optical mesh, duration and Fourier-order convergence
+and subsequent design optimization remain necessary.
+
+A separate $1024\times1024\times576$ complex FP64 capacity experiment has
+57,982,058,496 bytes of electric and magnetic fields alone, exceeding the
+device's 51,526,500,352 bytes of physical VRAM. Ten forward steps completed
+in 741.239 seconds using file-backed spatial tiles. The maximum simultaneous
+logical file storage was 117,012,692,992 bytes. Point histories agreed with
+a smaller full-autograd domain whose boundaries lie outside the finite
+dependency cone. This short experiment tests forward capacity and consistency.
+It does not establish a converged optical response. Backward accuracy and
+complete all-tier peak memory remain pending in this experiment.
+The backward run was interrupted by a workstation restart attributed by the
+Windows event log to a Start menu restart request. Its forward snapshot is
+preserved, but no complete capacity-gradient result is available from that run.
 \end{document}

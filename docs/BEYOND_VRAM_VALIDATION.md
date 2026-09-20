@@ -17,7 +17,12 @@ with 455,137,873,920 bytes free. Availability must be rechecked before launch.
 A 1024 x 1024 x 576 complex FP64 grid has 603,979,776 cells. E/H alone require
 57,982,058,496 bytes (54 GiB), already larger than the device's total memory.
 Epsilon, CPML, checkpoints, gradients and transfer workspaces are additional.
-The capacity run has started. It is not yet a completed result.
+The forward phase completed. Backward was interrupted by a workstation restart,
+so the complete forward/VJP capacity gate remains unproven. Windows event 1074
+attributes the restart to the Start menu process on behalf of the admin user.
+After reboot the calculation process was absent and the result remained at
+`forward_complete`. This is not a completed gradient run or evidence of OOM.
+The transient field banks do not support resuming after reboot.
 
 The reservation now charges `checkpoints + 5` complete field banks. Instrumented
 file-backed replay tests disable cyclic garbage collection and exercise repeated
@@ -37,7 +42,7 @@ other programs consuming resources during execution.
 Subsequent runs also pass `disk_free_reserve_bytes=100*1024**3` through the public
 streamed options. Admission and each new file-bank allocation recheck this
 headroom. A competing process can still consume disk space after a check, so
-this is not an exclusive filesystem reservation. The already-running capacity
+this is not an exclusive filesystem reservation. The interrupted capacity
 job predates this per-bank option and must be identified accordingly.
 
 ```powershell
@@ -49,6 +54,20 @@ short smaller driver smoke is correctness evidence only, never evidence of
 physical VRAM overflow.
 
 ## Required evidence
+
+The [forward snapshot](validation/beyond-vram-forward-5880.json) records
+741.239 seconds for ten steps on 603,979,776 cells. The source's finite
+dependency cone permits comparison with a 56-cubed full-autograd reference.
+Point histories passed the configured absolute/relative tolerance before this
+snapshot was saved. This is a short capacity and consistency test, not a
+converged optical experiment or a gradient result.
+
+Forward created five successive banks and held at most two simultaneously,
+117,012,692,992 logical file bytes. Logical reads were 351,038,078,976 bytes and
+writes were 292,531,732,480 bytes. All forward banks were released. Buffered
+I/O may hit the OS cache, so these counters do not measure physical SSD traffic.
+The final record must still establish backward accuracy, peak device/host
+allocation, full elapsed time and backward scratch cleanup.
 
 - Report complete resident state/workspace byte accounting relative to the
   actual device capacity. Avoid deliberately causing an OOM just to prove it.
