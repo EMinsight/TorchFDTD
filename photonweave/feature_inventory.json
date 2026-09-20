@@ -2431,7 +2431,7 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "n/a",
-      "scope": "고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph 지원. 명시적 ADE 미분은 resident Torch·fused CUDA 및 실험적 DRAM/파일 공간 타일 경로. 분산 대규모 검증, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음.",
+      "scope": "고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph와 ADE 미분 지원. 공유 메모리 예산의 순차 case replay로 서로 다른 격자·관측·재료를 하나의 목적함수에 연결. 512³ resident 및 54GiB 상태의 짧은 용량/VJP 검증 완료. 장시간 응용, 동시 adjoint microbatch, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음.",
       "evidence": [
         "photonweave/differentiable.py",
         "tests/test_differentiable.py",
@@ -2439,8 +2439,11 @@
         "tests/test_dispersive_adjoint.py",
         "photonweave/streamed_dispersive.py",
         "tests/test_streamed_dispersive.py",
+        "photonweave/adjoint_batch.py",
+        "tests/test_adjoint_batch.py",
         "docs/DIFFERENTIABLE_FDTD.md",
-        "docs/DISPERSIVE_ADJOINT.md"
+        "docs/DISPERSIVE_ADJOINT.md",
+        "docs/ADJOINT_BATCH.md"
       ],
       "reference": "",
       "priority": 0,
@@ -2460,12 +2463,17 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "n/a",
-      "scope": "명시적인 tier별 slot, binomial 재계산, 무손실 state 저장과 byte 한도, 비동기 checkpoint staging 및 혼합 tier 구현. 별도 slab API에서 DRAM/파일 공간 backing·비동기 전송 지원. 전체 host RSS·OS cache 한도와 resident까지 통합한 성능 정책은 미완료.",
+      "scope": "명시적인 tier별 slot, binomial 재계산, 무손실 state 저장과 byte 한도, 비동기 checkpoint staging 및 혼합 tier 구현. 별도 slab API에서 DRAM/파일 공간 backing·비동기 전송 지원. Resident/streamed 후보의 실측 선택과 여러 case의 출력·gradient·활성 solver 공동 예산 추가. 전체 host RSS·OS cache 한도, 장시간 응용에서의 성능 선택 검증과 UI는 미완료.",
       "evidence": [
         "photonweave/differentiable.py",
         "tests/test_differentiable.py",
         "photonweave/streamed.py",
-        "docs/HIERARCHICAL_EXECUTION.md"
+        "photonweave/execution_tuning.py",
+        "tests/test_execution_tuning.py",
+        "photonweave/adjoint_batch.py",
+        "docs/HIERARCHICAL_EXECUTION.md",
+        "docs/EXECUTION_SELECTION.md",
+        "docs/ADJOINT_BATCH.md"
       ],
       "reference": "",
       "priority": 0,
@@ -2485,7 +2493,7 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "n/a",
-      "scope": "실험적 실수/복소 Bloch slab·causal halo transpose·DRAM/파일 backing·비동기 staging·tile/K 실측 tuning 구현. 54GiB E/H의 10-step forward/gradient 검증 완료. ADE P/Q 공간 저장·재료 gradient, 분산 비용 측정·기본 타일 예산 조정·기준 gradient 캐시 한도를 추가. 분산 대규모 용량·속도, 장시간 응용·전체 메모리 계측·통합 자동 정책·UI는 미완료.",
+      "scope": "실험적 실수/복소 Bloch slab·causal halo transpose·DRAM/파일 backing·비동기 staging·tile/K 실측 tuning 구현. 54GiB E/H와 별도 54GiB E/H+ADE P/Q의 10-step forward/gradient 검증 완료. 점 스펙트럼·고정 검출면의 resident/streamed 통합 선택과 기준 gradient 캐시 한도 지원. 용량과 속도는 별도이며 장시간 응용·전체 메모리 계측·동시 microbatch 공동 튜닝·UI는 미완료.",
       "evidence": [
         "photonweave/streamed.py",
         "photonweave/streamed_dispersive.py",
@@ -2494,8 +2502,11 @@
         "photonweave/tile_workspace.py",
         "tests/test_spacetime.py",
         "tests/test_complex_spacetime_cuda.py",
+        "photonweave/plane_execution.py",
+        "tests/test_plane_execution.py",
         "docs/STREAMED_FDTD.md",
-        "docs/BEYOND_VRAM_VALIDATION.md"
+        "docs/BEYOND_VRAM_VALIDATION.md",
+        "docs/EXECUTION_SELECTION.md"
       ],
       "reference": "",
       "priority": 0,
