@@ -43,12 +43,16 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 
 PMC는 실제 endpoint의 face/edge 상태와 real FP32 CPU/CUDA를 갖는
 `EndpointSimulation`에서 point source/monitor, 재료·파형 gradient와
-binomial checkpoint를 연결했다. 일반 project/UI·streaming·ADE 연결은
+binomial checkpoint를 연결했다. `EndpointProject` 어댑터는 native 형상·pulse와
+명시적 closed-wall override를 연결한다. 전역 dispatch/UI·streaming·ADE 연결은
 아직 남아 있다. 일반 tensor는 별도 `TensorDielectricSimulation`의
 periodic/Bloch bulk 경로에서 CPU/CUDA·6성분 VJP·고유파를 검증했다.
 CPML·tensor ADE·streaming·anisotropic mode·UI는 남았다. [Mode source 연결](MODE_INJECTION.md)은 실제 CUDA 전파,
-방향별 복소 t/r 및 국소 산란체 material VJP까지 검증했다. 일반 multiport
-S 행렬·횡방향 PML·streamed source·eigenmode 미분은 남아 있다.
+방향별 복소 t/r 및 국소 산란체 material VJP까지 검증했다.
+[ModeNetwork](MODE_NETWORK.md)는 같은 exterior 단면의 opposing port를
+다중 모드 복소 S 행렬로 묶고 backward에서 각 case를 하나씩 재생한다.
+일반 branch/서로 다른 단면·횡방향 PML·streamed source·eigenmode 미분과
+전력 보존의 물리 수렴은 남아 있다.
 [회절·원거리장](RADIATION.md), [density 제약](DESIGN_PARAMETERIZATION.md),
 [GDS](GDS.md)도 추가했다. 항목별 FDTDX 동등성의 정확한 완료 기준은
 [별도 추적표](FDTDX_PARITY_KO.md)를 따른다.

@@ -95,3 +95,71 @@ was changed. Real Gloo tests remain enabled where device creation succeeds.
 The real two-CUDA test requires at least two visible GPUs and NCCL and skips on
 this single-GPU, non-NCCL host. No multi-GPU speed, scaling, >48 GB capacity or
 complete source-to-observable distributed simulation has been demonstrated.
+
+## Executable measurement harness
+
+`examples/distributed_pulse.py` initializes only rank-local coordinates, a
+uniform dielectric slab, and a divergence-free Ez standing wave with H=0.
+It supports real torchrun Gloo/NCCL groups and compares the global objective
+and summed material derivative with an independent scalar discrete-Fourier
+recurrence. The oracle allocates no global spatial tensor.
+
+```sh
+python -m torch.distributed.run --standalone --nproc-per-node=2 \
+  -m examples.distributed_pulse --backend gloo --shape 48 24 24 \
+  --steps 40 --checkpoints 2 --rank-budget-mib 512 --output scratch/dd-cpu.json
+
+python -m torch.distributed.run --standalone --nproc-per-node=2 \
+  -m examples.distributed_pulse --backend nccl --shape 96 48 48 \
+  --steps 100 --warmup 1 --repetitions 3 --output scratch/dd-cuda.json
+```
+
+CUDA requires a readable distinct GPU UUID for every rank and explicit local
+rank/device binding. UUIDs must match the physical-GPU list reported by
+`nvidia-smi`; missing identity evidence and MIG instance UUIDs are rejected.
+Launch only on available devices. Backend/group failures
+are surfaced, never replaced by case batching. No real group was run
+successfully on the current host. The launcher tests emulate a single-rank
+protocol and verify compact multi-rank aggregation, not hardware performance.
+
+Rank zero atomically writes JSON containing compact rank records and aggregate
+metrics. Fields/material tensors are never collected. Timing includes halo
+communication and synchronization, and objective reduction in forward timing.
+Reported forward GCUPS is global cells times forward steps divided by the
+maximum rank mean forward duration and 1e9. Backward includes checkpoint replay
+and is reported separately. Warmup is optional and excluded from mean timings.
+CUDA peaks include PyTorch allocated/reserved memory after warmup; CPU tensor
+peak is explicitly unmeasured. Workspace reservation is reported separately
+from measured peaks. Caller objective temporary arrays and communication/runtime
+memory still require headroom beyond the core workspace budget. These outputs
+are future measurement evidence, not an existing multi-GPU speed claim.
+
+Every measured repetition retains raw forward/backward durations. JSON includes
+PyTorch/CUDA versions and SHA256 hashes of the launcher and domain core. The
+Fourier oracle uses constant-memory Python complex amplitudes plus an analytic
+uniform-permittivity tangent recurrence, without an autograd time-history graph.
+Objective and uniform-epsilon VJP accuracy gates run on every rank. With machine
+epsilon `eps`, their tolerance is `atol + rtol*abs(reference)`, where
+`rtol=min(1e-3,32*eps*steps)` and
+`atol=global_cells*min(1e-4,16*eps*steps)`. This accounts for the extensive
+objective and accumulated arithmetic while capping permissiveness on long runs.
+Both actual/reference values must be finite. Failed gates retain compact JSON,
+set forward GCUPS to null, and produce a nonzero exit on all ranks. Nonfinite
+values in failed records are represented by strings to keep valid JSON.
+
+The launcher always initializes a CPU Gloo control group first, including for
+NCCL runs. Device binding errors and physical GPU identities are collected there
+before NCCL is created, so duplicate or invalid CUDA assignments do not enter
+NCCL collectives during admission. NCCL therefore requires working Gloo as well.
+The explicit NCCL data group carries the domain, tensor reductions and timed
+barriers; compact configuration/results use the CPU control group. Teardown
+destroys the data group before the control group. Backend crashes or absent
+ranks remain subject to the configured 120-second process-group timeout.
+
+Linux CI run [35532291508](https://github.com/hyoseokp/TorchFDTD/actions/runs/35532291508)
+reported its full CPU pytest step successful at 2026-09-20 19:38:02 UTC for
+revision `887694afe8cb7ac1dd112681a7e858ac0e1bc342`. This does not establish
+whether individual real Gloo cases executed or skipped. No Gloo success is
+inferred from aggregate counts or progress symbols. Subsequent CI runs emit
+`test-results/pytest.xml` and upload `pytest-junit` even on failure, enabling
+exact per-test execution/skip evidence without an additional test invocation.

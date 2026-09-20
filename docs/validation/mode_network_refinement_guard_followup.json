@@ -1,0 +1,9 @@
+{
+  "reason": "Post-measurement metadata-only change: include public axis index in constructor configuration guard. Numerical operator, source, detector and calibration formulas unchanged.",
+  "measured_record": "docs/validation/mode_network_refinement_3060.json",
+  "measured_record_sha256": "cfc98b88836c00f9a75f084c6de925e169d50ae373e6f1db7824912633eaad2d",
+  "measured_mode_network_sha256": "4d3803f3c185468930359b71e3213832b4dc8dae2f0c67e9ebeb897975f43c1f",
+  "current_mode_network_sha256": "d1f416a6116857803f63f7851908c930acabe601f9fed138291b1c28c569290c",
+  "private_measured_source_snapshot": ".local/mode_network_measured_refinement.py",
+  "physical_rerun": false
+}

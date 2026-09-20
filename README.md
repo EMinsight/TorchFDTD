@@ -28,14 +28,19 @@ throughput is still unmeasured.
 
 The experimental [exact-endpoint PMC API](docs/PMC_IMPLEMENTATION_PLAN.md) now
 connects real FP32 CPU/CUDA fields, point-source waveforms and material gradients
-through bounded binomial checkpoint replay. A separate
+through bounded binomial checkpoint replay. A native Project adapter adds
+analytic geometry, native pulse definitions and recorded endpoint sampling,
+with an explicit closed-wall override. A separate
 [bulk tensor dielectric API](docs/ANISOTROPY_IMPLEMENTATION_PLAN.md) supports
 periodic/Bloch CPU/CUDA fields and full symmetric tensor gradients. General
 project/UI dispatch, open-boundary tensors and streamed PMC remain incomplete.
-[Native mode injection](docs/MODE_INJECTION.md) now supports a fixed selected
-mode, directional complex amplitudes and matched-reference t/r, with actual
-FP32 CUDA guide propagation and material-gradient checks. General multiport
-S matrices, source/eigenmode gradients and streamed injection remain open.
+[Opposing mode ports](docs/MODE_NETWORK.md) now assemble complex multimode
+S matrices with fixed reference planes and one case graph at a time during
+backward. FP32 CUDA checks cover four-channel guide propagation, reciprocity
+and an interior material gradient. Both ports require the same fixed exterior
+cross-section. Arbitrary branch ports, source/eigenmode gradients and streamed
+injection remain open. The measured coarse-mesh power defect is reported in
+the validation record, rather than interpreted as exact conservation.
 
 [GDS geometry workflows](docs/GDS.md), [trainable density constraints](docs/DESIGN_PARAMETERIZATION.md)
 and [differentiable diffraction/far-field transforms](docs/RADIATION.md) extend
@@ -94,7 +99,8 @@ capacity and throughput measurements remain pending.
 [PEC and electric antisymmetry](docs/BOUNDARIES.md) now preserve physical mesh
 endpoints across CPU/CUDA, adjoint, streaming and batch paths. PMC and magnetic
 symmetry are available through the separate resident `EndpointSimulation` API.
-Their general project, ADE, streaming and batch integration remains pending.
+An explicit Project adapter supports fixed geometry and native point pulses.
+General UI dispatch, ADE, streaming and batch integration remain pending.
 The experimental [single-domain slab API](docs/DOMAIN_DECOMPOSITION.md) adds
 rank-local Yee propagation, halo transposes and checkpointed material gradients.
 Its 2/3-rank protocol checks currently emulate transport. Actual multi-GPU
@@ -252,7 +258,7 @@ FDTDX, fdtdz or fdtd3d. [Pinned sources and limitations](docs/OPEN_SOURCE_COMPAR
 |---|---|---|
 | GDS | Explicit layer stack, hierarchy/units/PATH conversion and limited export | General holes and automatic runnable port mapping |
 | Design parameters | Density filters, fixed masks, exact symmetry, projection/continuation and optimizer resume | General shape derivatives and fabrication guarantees |
-| Mode ports | Actual fixed-mode CUDA launch, directional detection, complex t/r and a material VJP | Multimode/multiport S matrix, open cross-sections, streamed injection and source/eigenmode gradients |
+| Mode ports | Actual fixed-mode CUDA launch and opposing-port multimode complex S matrices with interior material VJPs | Arbitrary branch/unequal-section ports, open cross-sections, streamed injection, source/eigenmode gradients and physical convergence |
 | Radiation | Differentiable Bloch orders and closed-box homogeneous far fields, including native FP32 mesh convergence | Layered/periodic-lattice far fields and complete UI |
 | Boundaries / tensors / multi-GPU | PEC production support, resident PMC waveform/material adjoints, periodic bulk tensor adjoints | General PMC/tensor boundary and streaming workflows, verified single-problem multi-GPU |
 

@@ -729,6 +729,34 @@ whose relative difference from central differences is $9.14\times10^{-4}$.
 These tests establish one-channel objectives, not a complete multiport
 scattering matrix or derivatives of the eigenmode solver.
 
+A subsequent wrapper assembles multiple fixed modes at two opposing ports
+on the same propagation axis. Both exterior guides retain the same calibration
+cross-section. Each column uses an independent modal launch. A Hermitian
+sampled-power Gram check admits only an orthogonal power-normalized basis.
+For incident channel $j$, the outgoing amplitude at channel $i$ is divided
+by the matched guide's incident amplitude at the input reference plane.
+Only reflected amplitudes at the excited port have the matched guide's
+outgoing baseline subtracted. Through transmission therefore retains the
+propagation phase between the physical reference planes.
+
+The wrapper performs fresh calibration per incident channel on each call.
+Its backward pass reconstructs one sample case graph at a time through the
+native checkpointed adjoint. Interior material derivatives are accumulated,
+while the source and port exterior guides remain fixed. A four-channel FP32
+CUDA straight-guide test gives a maximum complex matrix error of
+$2.96\times10^{-6}$. A two-channel perturbation gives reciprocal transmission
+agreement within $8.43\times10^{-8}$ and a complex-objective material
+derivative within $6.82\times10^{-5}$ relative to central differences.
+
+The perturbed lossless column-power defect is $0.7403\%$ at 200 nm spacing.
+One refinement to 100 nm, preserving the physical domain, duration, source
+and port planes, slab bounds and PML thickness, reduces this defect to
+$0.000465\%$. The complex through coefficients still change substantially
+between these meshes. This check does not establish convergence of complex
+S parameters or separate spatial dispersion from PML discretization error.
+Arbitrary branch ports, unequal exterior cross-sections, eigenmode gradients
+and spatially streamed injection remain outside this wrapper.
+
 \subsection{Differentiable radiation transforms}
 
 Periodic diffraction analysis Fourier-projects collocated E/H fields over
@@ -766,13 +794,100 @@ $L_2$ errors of $1.0314\%$, $0.5412\%$ and $0.2304\%$ at mesh spacings
 of 100, 75 and 50 nm. This establishes one vacuum radiation limit, not absolute
 source-power calibration or convergence of every radiation gradient.
 
+\subsection{Bulk tensor constitutive operator}
+
+A separate experimental periodic-domain API admits a real symmetric physical
+permittivity tensor at each common mesh node. The electric components at one
+array index occupy different Yee edges, so a colocated matrix multiplication
+does not define the constitutive update. Instead, let $R_{ns}$ gather one of
+the eight triplets of incident electric edges at node $n$, including Bloch
+seam phases, and let $K_n=\epsilon_n^{-1}$. The bulk inverse operator is
+\begin{equation}
+S=\frac18\sum_{n,s}R_{ns}^{\dagger}K_nR_{ns} .
+\end{equation}
+Every bulk node participates. This differs from the interface-candidate
+operator used for isotropic subpixel homogenization. Complete periodic
+coverage gives $\frac18\sum_{n,s}R_{ns}^{\dagger}R_{ns}=I$. Consequently,
+the admitted spectral condition $\epsilon_n\succeq I$ implies $0\prec S\preceq I$
+and preserves the conservative vacuum CFL bound on the rectangular grid.
+Matrix-free gather and scatter avoid a dense global constitutive matrix.
+
+The electric update applies $S$ to the native magnetic curl. Its transpose
+applies the same Hermitian operator to the electric cotangent. Tensor
+derivatives follow
+\begin{equation}
+\delta S=-\frac18\sum_{n,s}
+R_{ns}^{\dagger}K_n\,\delta\epsilon_n\,K_nR_{ns} .
+\end{equation}
+The implementation projects the real material gradient onto symmetric
+tensor variations. It reuses the bounded native checkpoint schedule and
+point or online-DFT observations. Geometry construction, source parameters,
+Bloch phases and observation coordinates remain fixed in this API.
+
+For a constant tensor, an independent staggered Fourier calculation gives
+$S_{aa}(\mathbf q)=K_{aa}$ and
+$S_{ab}(\mathbf q)=K_{ab}\cos(q_a/2)\cos(q_b/2)$ for $a\ne b$.
+Tests compare the full vector update to this symbol, check all six symmetric
+material directions by central differences, and verify real and complex FP32
+CPU/CUDA trace and gradient agreement. A bounded FP64 Fourier diagnostic
+preserves modified leapfrog energy over 256 steps within $2\times10^{-12}$.
+Three mesh refinements approach the continuum dispersion with approximately
+second-order error. These checks establish a periodic nondispersive bulk
+foundation. Anisotropic interface accuracy, CPML, tensor ADE, modal injection,
+spatial streaming and optimized fused tensor kernels remain unvalidated.
+
+\subsection{Endpoint and distributed checkpoint foundations}
+
+Exact PMC walls require upper electric face and edge samples and upper normal
+magnetic samples omitted by the original volume-only Yee arrays. The bounded
+endpoint API stores these degrees of freedom once, samples material at their
+physical coordinates, and injects electric point waveforms between the
+electric and magnetic substeps. Real FP32 CPU and direct CUDA paths return
+point traces with sampled-material and waveform derivatives. No endpoint
+material is implicitly copied from an interior cell. Independent reference
+tests cover mixed walls, nonuniform metrics and upper-edge objectives.
+
+The reverse pass uses a fixed number of resident checkpoints and a binomial
+replay schedule. A logical 10,000-step schedule with four slots requires
+115,061 replayed forward steps, compared with 49,995,000 with no slots.
+This is a schedule count without fields, not a measured GPU acceleration.
+A separate 31-step field test checks the live-slot bound and gradient.
+Field storage is independent of duration at fixed checkpoint count, while
+waveform inputs and point-trace outputs still scale with duration and are
+included in admission. General project dispatch, ADE, streamed endpoints
+and large-domain throughput remain separate gates.
+
+A separately scoped Project adapter samples native analytic solids at every
+endpoint electric coordinate, applies native pulse and polarization settings,
+and records requested and selected Yee positions. Its closed-wall override
+is explicit and does not alter the general Project boundary schema.
+Optional sampled material and waveform tensors retain their gradients.
+This connects fixed CAD geometry to the endpoint API, while browser editing
+of the override and broader source/monitor types remain unimplemented.
+
+A second foundation partitions one periodic or Bloch problem into owned
+$x$ slabs. Each rank stores only its local E/H, material and checkpoint banks.
+One-row exchanges supply the magnetic-to-electric and electric-to-magnetic
+curl dependencies. The transpose reverses these transfers and conjugates
+only the global Bloch seam factor. Binomial replay retains a fixed local
+checkpoint count, with an explicit maximum replay-work admission. Local
+material derivatives are accumulated without a global field replication.
+
+Two- and three-rank protocol tests use emulated transport to compare unequal
+slabs, including a one-cell slab, with resident fields and material derivatives.
+Independent halo inner products and local finite differences check the seams.
+Actual Gloo initialization fails on the current Windows runtime and a second
+CUDA device is unavailable. These checks therefore do not establish actual
+multi-GPU execution, communication overlap or scaling. Sources, monitor
+histories, CPML, mirrors and ADE are outside this distributed initial-value API.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.
 
 Near-term numerical priorities are physical output and shape-gradient convergence, independent validation of complete inverse-design runs, PMC and magnetic symmetry boundaries, eigenmode ports and mode expansion, and near-to-far objectives. Existing discrete material adjoints and regularized analytic shape derivatives do not imply differentiability of every scene property. General source parameters, additional material tensors and nonlinear models require their own derivatives and physical validation. Workflow priorities include concurrent adjoint batches, complete results inspection and reliable restart across supported execution modes.
 
-The current browser uses an original identity, artwork and source code. Its workflow is organized around objects, regions, sources and monitors, with a separate periodic-density inverse-design editor. The hierarchical runtime provides lossless host and file-backed state banks, space-time slabs and asynchronous staging. Capacity demonstrations must be distinguished from long physical trajectories and competitive throughput. The analytic-geometry streaming API avoids dense material inputs and material VJPs through tile production and direct parameter reduction. Other dense material paths can still limit host capacity. Predictive scheduling, concurrent adjoint execution and single-problem multi-GPU decomposition remain development targets. Comparisons against additional libraries require common accuracy targets and a compatible measured GPU environment before any performance-leadership claim.
+The current browser uses an original identity, artwork and source code. Its workflow is organized around objects, regions, sources and monitors, with a separate periodic-density inverse-design editor. The hierarchical runtime provides lossless host and file-backed state banks, space-time slabs and asynchronous staging. Capacity demonstrations must be distinguished from long physical trajectories and competitive throughput. The analytic-geometry streaming API avoids dense material inputs and material VJPs through tile production and direct parameter reduction. Other dense material paths can still limit host capacity. Predictive scheduling, concurrent adjoint execution, complete distributed source/monitor workflows and actual multi-GPU validation remain development targets. Comparisons against additional libraries require common accuracy targets and a compatible measured GPU environment before any performance-leadership claim.
 
 \section{Conclusions}
 
@@ -782,8 +897,10 @@ TorchFDTD provides Python and graphical workflows for a defined subset of time-d
 
 The project source, tests and native examples are maintained in a local development workspace. A public release is not yet available. This manuscript and the associated implementation were prepared with AI assistance. Author review of the scientific content and software validation is pending before submission.
 
+\clearpage
 \begingroup
 \small
+\setlength{\bibsep}{5pt}
 \bibliographystyle{unsrtnat}
 \bibliography{references}
 \endgroup

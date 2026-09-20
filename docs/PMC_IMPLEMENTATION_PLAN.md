@@ -165,3 +165,79 @@ between forward and backward raises an error. The same identity/version
 contract includes CUDA metric tensors and CPU activity masks. Numeric input
 scans occur only after metadata-only shape and byte-budget admission. External
 raw-pointer writes that bypass version counters remain caller responsibility.
+
+## Native Project adapter
+
+`torchfdtd.endpoint_project.endpoint_from_project(project, boundary_faces=...)`
+accepts a native `Project` or its JSON dictionary and returns an `EndpointProject`
+adapter. Its boundary override is explicit and separate from the native schema.
+It does not make PMC an accepted native `BoundaryFace` value. Existing project
+boundaries are validated when parsing the project, then replaced for this
+separate solver only. `adapter.plan()` is a JSON-serializable review record
+containing original and effective boundaries, exact nodes, source/monitor
+requested and sampled positions, displacements, precedence and memory plan.
+Save the original Project dictionary and boundary override together to recreate
+this calculation. Ordinary native simulation of the original Project still
+uses its original boundary conditions.
+
+```python
+import json
+from torchfdtd.endpoint_project import endpoint_from_project
+
+bundle = json.load(open("endpoint-scene.json", encoding="utf-8"))
+adapter = endpoint_from_project(
+    bundle["project"], boundary_faces=bundle["boundary_faces"],
+    device="cpu", checkpoints=4, tensor_budget_bytes=128_000_000,
+)
+print(json.dumps(adapter.plan(), indent=2))
+result = adapter()  # native DifferentiableResult, with .signals and .spectrum()
+# Optional sampled epsilon and per-source-term waveform tensors keep gradients:
+# result = adapter(epsilon=sampled_epsilon, waveforms=source_waveforms)
+```
+
+Supported native inputs are fixed uniform or explicitly supplied nonuniform
+3D meshes, real FP32, staircase analytic solids, Yee sampling, nondispersive
+isotropic native materials, point soft electric sources, and point E/H monitors
+at every timestep. Native pulse/global-source settings and polarization weights
+produce waveform columns in the reported source-term order. The source contract
+is the resident solver's additive electric field increment, not current density.
+Nearest Yee selection uses each component's physical nodal/half-cell axes,
+including true upper endpoints. Exact ties select the lower coordinate. Requests
+outside the physical mesh or landing on constrained PEC nodes are rejected,
+not shifted to an interior active DOF. Coincident source terms mapping to the
+same component/DOF are rejected, not silently merged. Disabled sources/monitors
+must be removed explicitly. Disabled structures are skipped and reported.
+
+Default material rasterization evaluates native analytic solid membership at
+original FP64 mesh coordinates in bounded CPU NumPy chunks, including every
+upper electric face/edge. Lower mesh order wins and later objects win equal
+orders, matching the native material precedence. This fixed staircase rasterizer
+is not a differentiable shape sampler. Supply packed sampled epsilon linked to
+a differentiable sampler for material/shape parameter gradients. The separately
+named `host_preparation_budget_bytes` (default 64 MB) admits conservative chunk
+scratch and native pulse preparation before rasterization/waveform creation.
+These CPU temporaries are separate from the resident tensor budget. Existing
+Project objects, Python/runtime overhead and caller parameterization graphs are
+not included in that preparation bound. Defaults are generated on demand rather
+than retaining unused duplicate material/waveform tensors when overrides exist.
+
+Material-aware graded/automatic mesh generation is rejected. Native subpixel,
+ADE, complex fields, spatial quadrature/field monitors, plane/mode/current/TFSF
+sources, monitor downsampling, adaptive stop and spatial streaming remain
+unsupported. Public Project edits require rebuilding the adapter. The familiar
+Project geometry can still be inspected in the native CAD, but its PMC override
+and endpoint sampling report have no browser editor yet.
+
+Seven focused CPU tests validate Project/dictionary parsing, independent full
+endpoint rasterization and native base-volume agreement, native pulse samples,
+actual native-compatible traces, material and waveform derivatives, disabled/
+wall/unsupported admission, preparation budgets, polarization-term mapping, and
+fixed nonuniform node preservation, and coincident-source rejection. The underlying resident solver's CUDA
+kernels and adjoint are tested separately; this adapter adds no CUDA kernels.
+
+The adapter intentionally retains native Project validation. In particular,
+native point positions must be strictly below an exact upper region bound.
+An admitted nearby physical request can still select the true upper PMC Yee
+node, with the displacement recorded. Direct exact-endpoint point requests
+remain available through EndpointSimulation; relaxing the shared native
+Project position schema is a separate integration gate.

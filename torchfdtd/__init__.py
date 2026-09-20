@@ -120,3 +120,8 @@ from .domain_decomposition import (DistributedYeeDomain, SlabOwnership,
     distributed_capabilities, plan_domain_decomposition)
 __all__ += ["DistributedYeeDomain", "SlabOwnership", "distributed_capabilities",
             "plan_domain_decomposition"]
+
+from .endpoint_project import EndpointProject, endpoint_from_project
+from .mode_network import FixedModePort, ModeNetwork, ModeNetworkResult
+__all__ += ["EndpointProject", "endpoint_from_project", "FixedModePort",
+            "ModeNetwork", "ModeNetworkResult"]

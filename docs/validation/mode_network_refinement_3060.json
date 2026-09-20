@@ -1,0 +1,468 @@
+{
+  "recorded_utc": "2026-09-20T19:41:16.047927+00:00",
+  "revision": "887694afe8cb7ac1dd112681a7e858ac0e1bc342",
+  "device": "cuda",
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "torch_version": "2.10.0+cu126",
+  "source_sha256": {
+    "benchmarks/mode_network_refinement.py": "c440119ff63546db33965166b2cec083f7f6c62192d56ee14bf60cdcd7590cf6",
+    "torchfdtd/mode_network.py": "4d3803f3c185468930359b71e3213832b4dc8dae2f0c67e9ebeb897975f43c1f",
+    "torchfdtd/mode_injection.py": "ecc4a25939737623aa2ecd16b283afebb2aefa07b021c904666d10a3b03ecf3a",
+    "torchfdtd/mode_ports.py": "0467e4404d94c2420d065e6a6451868951d73891bd1aaebc98051ab969a20d00",
+    "torchfdtd/adjoint_planes.py": "edbb64361a748d1f04f852d2ddd5de341aa32f59123cd71a539ff855679bac68",
+    "torchfdtd/differentiable.py": "90772d3c5cbfe35b37bd8d90e636a6e86424cecc2b612211d04ebef52b52106b",
+    "torchfdtd/recomputed_batch.py": "7547c431d6fb958f8ae1f390606f82a391647e9bdcd518703404af04adae8378",
+    "torchfdtd/solver.py": "a6cb91f60338d9517724f1d26499c643fdef58ba29433f267fd5429ca4d4eab3",
+    "torchfdtd/boundaries.py": "572669fe34adea25dbfae061614f82febcda637c945e4fd330dd66ffbf939cf1",
+    "torchfdtd/cuda_kernels.py": "19ceb53777e53851c085ce80be959bca191c0d6663a9a11cb4a4b6edbaca66d0",
+    "torchfdtd/waveforms.py": "654333e8afa4da1310afc714a1c15ad60663ef21f3533f4b55c1a7489a0809b9",
+    "torchfdtd/models.py": "58b7119d81a435f1ecb4284fac5c87bdd0e72243fe175e1b6dc8efd7647bcb98"
+  },
+  "source_hash_scope": "Measured finer run driver/runtime bytes. Not attributed to the historical coarse run.",
+  "coarse": {
+    "s_real_imag": [
+      [
+        [
+          0.04124605283141136,
+          0.020350085571408272
+        ],
+        [
+          0.8277258276939392,
+          0.5658244490623474
+        ]
+      ],
+      [
+        [
+          0.8277257680892944,
+          0.5658245086669922
+        ],
+        [
+          -0.0457790307700634,
+          0.004412192385643721
+        ]
+      ]
+    ],
+    "column_power": [
+      1.0074026846241908,
+      1.00740254008822
+    ],
+    "maximum_power_defect": 0.007402684624190803,
+    "reciprocal_transmission_error": 8.429369702178807e-08,
+    "configuration": {
+      "domain_um": [
+        8.0,
+        1.0,
+        1.0
+      ],
+      "spacing_um": 0.2,
+      "steps": 600,
+      "pml_cells": 5,
+      "pml_thickness_um": 1.0,
+      "transverse_boundaries": "periodic",
+      "longitudinal_boundaries": "CPML",
+      "carrier_wavelength_um": 1.55,
+      "gaussian_pulse_cycles": 2,
+      "source_planes_um": [
+        -2.0,
+        2.0
+      ],
+      "port_phase_planes_um": [
+        -1.0,
+        1.0
+      ],
+      "background_epsilon": 2.25,
+      "epsilon_increment": 0.35,
+      "perturbation": "-0.2 <= actual Yee component x coordinate < 0.2 um, all y/z",
+      "perturbation_bounds_um": [
+        -0.2,
+        0.2
+      ],
+      "mode_indices": [
+        0
+      ],
+      "precision": "float32"
+    },
+    "physical_configuration_sha256": "e96d6611d87190cd3e87c6e7f39fbbcda4bb968e744dc4fa37c9bdc550331865",
+    "time_step_s": 3.8131497390620113e-16,
+    "duration_s": 2.2878898434372066e-13,
+    "measured_source_sha256": null,
+    "measured_full_project_sha256": null,
+    "provenance": "Verbatim S entries from prior test_mode_network physical test console output. Physical configuration reconstructed from that test. Source/config hashes were not recorded contemporaneously. No coarse solve rerun.",
+    "individual_solve_seconds": null,
+    "original_three_test_suite_seconds": 24.25
+  },
+  "fine": {
+    "s_real_imag": [
+      [
+        [
+          0.023057585582137108,
+          0.029422584921121597
+        ],
+        [
+          0.9981545805931091,
+          -0.04790313169360161
+        ]
+      ],
+      [
+        [
+          0.9981545805931091,
+          -0.047903142869472504
+        ],
+        [
+          -0.020112119615077972,
+          0.03150937706232071
+        ]
+      ]
+    ],
+    "column_power": [
+      1.0000046491622925,
+      1.0000046491622925
+    ],
+    "maximum_power_defect": 4.649162292480469e-06,
+    "reciprocal_transmission_error": 1.1175870895385742e-08,
+    "configuration": {
+      "domain_um": [
+        8.0,
+        1.0,
+        1.0
+      ],
+      "spacing_um": 0.1,
+      "steps": 1200,
+      "pml_cells": 10,
+      "pml_thickness_um": 1.0,
+      "transverse_boundaries": "periodic",
+      "longitudinal_boundaries": "CPML",
+      "carrier_wavelength_um": 1.55,
+      "gaussian_pulse_cycles": 2,
+      "source_planes_um": [
+        -2.0,
+        2.0
+      ],
+      "port_phase_planes_um": [
+        -1.0,
+        1.0
+      ],
+      "background_epsilon": 2.25,
+      "epsilon_increment": 0.35,
+      "perturbation": "-0.2 <= actual Yee component x coordinate < 0.2 um, all y/z",
+      "perturbation_bounds_um": [
+        -0.2,
+        0.2
+      ],
+      "mode_indices": [
+        0
+      ],
+      "precision": "float32"
+    },
+    "physical_configuration_sha256": "99d231142551eb4143740f582238035fc56187d9206093107d1a977e75583b54",
+    "measured_project": {
+      "schema_version": 1,
+      "name": "Untitled",
+      "region": {
+        "dimension": "3d",
+        "size": [
+          8.0,
+          1.0,
+          1.0
+        ],
+        "mesh": 0.1,
+        "mesh_steps": null,
+        "mesh_coordinates": null,
+        "material_sampling": "yee",
+        "interface_method": "staircase",
+        "subpixel_quadrature": 8,
+        "mesh_type": "uniform",
+        "mesh_max": 0.15,
+        "mesh_grading": 1.25,
+        "mesh_ppw": 24.0,
+        "mesh_auto_refine": true,
+        "mesh_refinements": [],
+        "courant_factor": 0.99,
+        "time_step_override": null,
+        "steps": 1200,
+        "run_control": {
+          "auto_shutoff": false,
+          "decay_threshold": 1e-06,
+          "check_interval": 50,
+          "consecutive_checks": 3,
+          "min_steps": 100,
+          "source_tail_amplitude": 1e-08,
+          "after_source_s": 0.0,
+          "divergence_check": true,
+          "growth_limit": 1000000.0,
+          "field_limit": null
+        },
+        "pml_cells": 10,
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "periodic",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "background_index": 1.0,
+        "backend": "auto",
+        "memory_mode": "resident",
+        "cuda_kernel": "torch",
+        "cuda_monitor_kernel": "torch",
+        "precision": "float32",
+        "snapshot_interval": 20,
+        "field": "Ez",
+        "slice_axis": "z",
+        "slice_position": 0.0,
+        "complex_display": "real"
+      },
+      "materials": [
+        {
+          "name": "Air",
+          "index": 1.0,
+          "color": "#b7c5d7",
+          "model": "dielectric",
+          "epsilon_inf": 1.0,
+          "plasma_rad_s": 2000000000000000.0,
+          "collision_rad_s": 100000000000000.0,
+          "resonance_rad_s": 2000000000000000.0,
+          "linewidth_rad_s": 100000000000000.0,
+          "delta_epsilon": 1.0,
+          "poles": [],
+          "samples": null,
+          "fit_band_um": null,
+          "fit_dt_s": null
+        },
+        {
+          "name": "SiO2 (constant n)",
+          "index": 1.444,
+          "color": "#80c4d7",
+          "model": "dielectric",
+          "epsilon_inf": 1.0,
+          "plasma_rad_s": 2000000000000000.0,
+          "collision_rad_s": 100000000000000.0,
+          "resonance_rad_s": 2000000000000000.0,
+          "linewidth_rad_s": 100000000000000.0,
+          "delta_epsilon": 1.0,
+          "poles": [],
+          "samples": null,
+          "fit_band_um": null,
+          "fit_dt_s": null
+        },
+        {
+          "name": "SiN (constant n)",
+          "index": 2.0,
+          "color": "#69a1e8",
+          "model": "dielectric",
+          "epsilon_inf": 1.0,
+          "plasma_rad_s": 2000000000000000.0,
+          "collision_rad_s": 100000000000000.0,
+          "resonance_rad_s": 2000000000000000.0,
+          "linewidth_rad_s": 100000000000000.0,
+          "delta_epsilon": 1.0,
+          "poles": [],
+          "samples": null,
+          "fit_band_um": null,
+          "fit_dt_s": null
+        },
+        {
+          "name": "Si (constant n)",
+          "index": 3.48,
+          "color": "#cc8bdc",
+          "model": "dielectric",
+          "epsilon_inf": 1.0,
+          "plasma_rad_s": 2000000000000000.0,
+          "collision_rad_s": 100000000000000.0,
+          "resonance_rad_s": 2000000000000000.0,
+          "linewidth_rad_s": 100000000000000.0,
+          "delta_epsilon": 1.0,
+          "poles": [],
+          "samples": null,
+          "fit_band_um": null,
+          "fit_dt_s": null
+        }
+      ],
+      "structures": [],
+      "sources": [
+        {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 2.0,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0,
+          "id": "00246c6036ac",
+          "name": "source",
+          "center": [
+            -2.0,
+            0.0,
+            0.0
+          ],
+          "enabled": true,
+          "kind": "plane",
+          "injection": "soft",
+          "normal": "x",
+          "direction": "+",
+          "incident_pml_cells": 96,
+          "size": [
+            0.0,
+            1.0,
+            1.0
+          ],
+          "component": "Ez",
+          "theta": null,
+          "phi": 0.0,
+          "amplitude": 1.0,
+          "phase": 0.0,
+          "use_global_source": false
+        }
+      ],
+      "global_source": {
+        "wavelength": 1.55,
+        "pulse": "gaussian",
+        "pulse_cycles": 3.0,
+        "time_definition": "cycles",
+        "pulse_length": 2e-14,
+        "pulse_offset": 5e-14,
+        "signal": null,
+        "wavelength_start": 1.3,
+        "wavelength_stop": 1.8,
+        "optimize_for_short_pulse": true,
+        "eliminate_discontinuities": false,
+        "chirp_bandwidth_hz": 100000000000000.0
+      },
+      "monitors": [],
+      "global_monitor": {
+        "sampling": "frequency",
+        "chebyshev_wavelength": false,
+        "chebyshev_nodes": "roots",
+        "use_source_limits": false,
+        "custom_frequencies_hz": [],
+        "wavelength_start": 1.3,
+        "wavelength_stop": 1.8,
+        "frequency_points": 101,
+        "apodization": "none",
+        "apodization_center": 2e-14,
+        "apodization_time_width": 1e-14
+      },
+      "import_provenance": null
+    },
+    "measured_project_sha256": "803764fe4fab2eb657334a5eacb3b502eb86f43a26a6dccbb4d3bed276d8c210",
+    "grid": [
+      80,
+      10,
+      10
+    ],
+    "time_step_s": 1.9065748695310057e-16,
+    "duration_s": 2.2878898434372066e-13,
+    "changed_yee_coordinates": [
+      {
+        "component": "Ex",
+        "indices": [
+          38,
+          39,
+          40,
+          41
+        ],
+        "coordinates_um": [
+          -0.1499999999999997,
+          -0.04999999999999982,
+          0.050000000000000266,
+          0.15000000000000036
+        ]
+      },
+      {
+        "component": "Ey",
+        "indices": [
+          38,
+          39,
+          40,
+          41
+        ],
+        "coordinates_um": [
+          -0.19999999999999973,
+          -0.09999999999999964,
+          0.0,
+          0.10000000000000053
+        ]
+      },
+      {
+        "component": "Ez",
+        "indices": [
+          38,
+          39,
+          40,
+          41
+        ],
+        "coordinates_um": [
+          -0.19999999999999973,
+          -0.09999999999999964,
+          0.0,
+          0.10000000000000053
+        ]
+      }
+    ],
+    "preparation_seconds": 0.017206199932843447,
+    "network_call_seconds": 5.052089000120759,
+    "beta_per_um": 6.164031937644013
+  },
+  "defect_ratio_fine_over_coarse": 0.0006280373308472093,
+  "elapsed_seconds": 5.785850900225341,
+  "scope": "One spatial refinement with fixed physical geometry, duration, PML thickness, source and port planes. Not a completed convergence study."
+}
