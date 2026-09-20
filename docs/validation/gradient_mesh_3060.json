@@ -1,0 +1,376 @@
+{
+  "precision": "float32",
+  "device": "cuda",
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "torch_version": "2.10.0+cu126",
+  "scope": "Normal-incidence nondispersive planar slab. No claim for curved, rotated, oblique or dispersive shape convergence.",
+  "cases": [
+    {
+      "mesh_um": 0.04,
+      "width_um": 0.16,
+      "width_in_cells": 4.0,
+      "duration_fs": 90.0,
+      "pml_um": 0.4,
+      "pml_cells": 10,
+      "steps": 964,
+      "time_step_s": 9.336099585062241e-17,
+      "grid": [
+        200,
+        6,
+        1
+      ],
+      "transmission": 0.8710295557975769,
+      "reflection": 0.1289876401424408,
+      "conservation_error": 1.71661376953125e-05,
+      "thickness_derivative_per_um": -0.22957780957221985,
+      "epsilon_derivative": -0.13731086254119873,
+      "analytic": [
+        0.8557914472908803,
+        -0.26115131368780703,
+        -0.15595767145076259
+      ],
+      "absolute_errors": [
+        0.015238108506696602,
+        0.03157350411558718,
+        0.018646808909563856
+      ],
+      "relative_gradient_errors": [
+        0.12090118816454311,
+        0.11956326826443316
+      ],
+      "elapsed_seconds": 3.0742866001091897,
+      "group": "joint"
+    },
+    {
+      "mesh_um": 0.02,
+      "width_um": 0.12,
+      "width_in_cells": 6.0,
+      "duration_fs": 90.0,
+      "pml_um": 0.4,
+      "pml_cells": 20,
+      "steps": 1928,
+      "time_step_s": 4.6680497925311206e-17,
+      "grid": [
+        400,
+        12,
+        1
+      ],
+      "transmission": 0.8647706508636475,
+      "reflection": 0.13523076474666595,
+      "conservation_error": 1.430511474609375e-06,
+      "thickness_derivative_per_um": -0.2432786226272583,
+      "epsilon_derivative": -0.14502567052841187,
+      "analytic": [
+        0.8557914472908803,
+        -0.26115131368780703,
+        -0.15595767145076259
+      ],
+      "absolute_errors": [
+        0.008979203572767158,
+        0.01787269106054873,
+        0.01093200092235072
+      ],
+      "relative_gradient_errors": [
+        0.06843806683628102,
+        0.07009594860360598
+      ],
+      "elapsed_seconds": 2.647258900105953,
+      "group": "joint"
+    },
+    {
+      "mesh_um": 0.01,
+      "width_um": 0.08,
+      "width_in_cells": 8.0,
+      "duration_fs": 90.0,
+      "pml_um": 0.4,
+      "pml_cells": 40,
+      "steps": 3855,
+      "time_step_s": 2.3346303501945526e-17,
+      "grid": [
+        800,
+        24,
+        1
+      ],
+      "transmission": 0.8598825931549072,
+      "reflection": 0.1401175558567047,
+      "conservation_error": 1.1920928955078125e-07,
+      "thickness_derivative_per_um": -0.2538450360298157,
+      "epsilon_derivative": -0.15098437666893005,
+      "analytic": [
+        0.8557914472908803,
+        -0.26115131368780703,
+        -0.15595767145076259
+      ],
+      "absolute_errors": [
+        0.004091145864026924,
+        0.007306277657991356,
+        0.004973294781832532
+      ],
+      "relative_gradient_errors": [
+        0.027977181331454586,
+        0.03188874734772282
+      ],
+      "elapsed_seconds": 7.553930699825287,
+      "group": "joint"
+    },
+    {
+      "mesh_um": 0.01,
+      "width_um": 0.06,
+      "width_in_cells": 6.0,
+      "duration_fs": 90.0,
+      "pml_um": 0.4,
+      "pml_cells": 40,
+      "steps": 3855,
+      "time_step_s": 2.3346303501945526e-17,
+      "grid": [
+        800,
+        24,
+        1
+      ],
+      "transmission": 0.8580795526504517,
+      "reflection": 0.14192093908786774,
+      "conservation_error": 4.76837158203125e-07,
+      "thickness_derivative_per_um": -0.2568877339363098,
+      "epsilon_derivative": -0.15317630767822266,
+      "analytic": [
+        0.8557914472908803,
+        -0.26115131368780703,
+        -0.15595767145076259
+      ],
+      "absolute_errors": [
+        0.0022881053595713574,
+        0.004263579751497215,
+        0.00278136377253993
+      ],
+      "relative_gradient_errors": [
+        0.016326089619423112,
+        0.017834093999140238
+      ],
+      "improvement_directions": [
+        {
+          "parameter": "thickness_um",
+          "step": -0.0010000000474974513,
+          "predicted_change": 0.0002568877534940839,
+          "actual_change": 0.0002612471580505371,
+          "analytic_change": 0.0002656513922558723
+        },
+        {
+          "parameter": "epsilon",
+          "step": -0.009999999776482582,
+          "predicted_change": 0.0015317630022764206,
+          "actual_change": 0.00153273344039917,
+          "analytic_change": 0.0015605981282426074
+        }
+      ],
+      "elapsed_seconds": 10.099833199754357,
+      "group": "regularization_followup"
+    },
+    {
+      "mesh_um": 0.04,
+      "width_um": 0.12,
+      "width_in_cells": 3.0,
+      "duration_fs": 90.0,
+      "pml_um": 0.4,
+      "pml_cells": 10,
+      "steps": 964,
+      "time_step_s": 9.336099585062241e-17,
+      "grid": [
+        200,
+        6,
+        1
+      ],
+      "transmission": 0.8639841079711914,
+      "reflection": 0.13603375852108002,
+      "conservation_error": 1.7881393432617188e-05,
+      "thickness_derivative_per_um": -0.24072465300559998,
+      "epsilon_derivative": -0.1457761973142624,
+      "analytic": [
+        0.8557914472908803,
+        -0.26115131368780703,
+        -0.15595767145076259
+      ],
+      "absolute_errors": [
+        0.008192660680311104,
+        0.020426660682207054,
+        0.010181474136500196
+      ],
+      "relative_gradient_errors": [
+        0.0782177213422946,
+        0.06528357368886846
+      ],
+      "elapsed_seconds": 1.8559657000005245,
+      "group": "fixed_width"
+    },
+    {
+      "mesh_um": 0.01,
+      "width_um": 0.12,
+      "width_in_cells": 12.0,
+      "duration_fs": 90.0,
+      "pml_um": 0.4,
+      "pml_cells": 40,
+      "steps": 3855,
+      "time_step_s": 2.3346303501945526e-17,
+      "grid": [
+        800,
+        24,
+        1
+      ],
+      "transmission": 0.8649237155914307,
+      "reflection": 0.1350768804550171,
+      "conservation_error": 5.960464477539062e-07,
+      "thickness_derivative_per_um": -0.2444668412208557,
+      "epsilon_derivative": -0.14483678340911865,
+      "analytic": [
+        0.8557914472908803,
+        -0.26115131368780703,
+        -0.15595767145076259
+      ],
+      "absolute_errors": [
+        0.009132268300550361,
+        0.016684472466951317,
+        0.011120888041643934
+      ],
+      "relative_gradient_errors": [
+        0.06388814297483009,
+        0.07130709209873598
+      ],
+      "elapsed_seconds": 7.923652499914169,
+      "group": "fixed_width"
+    },
+    {
+      "mesh_um": 0.01,
+      "width_um": 0.06,
+      "width_in_cells": 6.0,
+      "duration_fs": 120.0,
+      "pml_um": 0.4,
+      "pml_cells": 40,
+      "steps": 5140,
+      "time_step_s": 2.334630350194553e-17,
+      "grid": [
+        800,
+        24,
+        1
+      ],
+      "transmission": 0.8580795526504517,
+      "reflection": 0.14192093908786774,
+      "conservation_error": 4.76837158203125e-07,
+      "thickness_derivative_per_um": -0.2568875551223755,
+      "epsilon_derivative": -0.15317624807357788,
+      "analytic": [
+        0.8557914472908803,
+        -0.26115131368780703,
+        -0.15595767145076259
+      ],
+      "absolute_errors": [
+        0.0022881053595713574,
+        0.004263758565431541,
+        0.0027814233771847052
+      ],
+      "relative_gradient_errors": [
+        0.016326774333322504,
+        0.0178344761838973
+      ],
+      "elapsed_seconds": 10.599072400014848,
+      "group": "duration_control",
+      "changes_from_baseline": [
+        0.0,
+        1.7881393432617188e-07,
+        5.960464477539063e-08
+      ]
+    },
+    {
+      "mesh_um": 0.01,
+      "width_um": 0.06,
+      "width_in_cells": 6.0,
+      "duration_fs": 90.0,
+      "pml_um": 0.5,
+      "pml_cells": 50,
+      "steps": 3855,
+      "time_step_s": 2.3346303501945526e-17,
+      "grid": [
+        800,
+        24,
+        1
+      ],
+      "transmission": 0.8580796718597412,
+      "reflection": 0.14192086458206177,
+      "conservation_error": 4.76837158203125e-07,
+      "thickness_derivative_per_um": -0.2568877339363098,
+      "epsilon_derivative": -0.153176411986351,
+      "analytic": [
+        0.8557914472908803,
+        -0.26115131368780703,
+        -0.15595767145076259
+      ],
+      "absolute_errors": [
+        0.002288224568860908,
+        0.004263579751497215,
+        0.002781259464411573
+      ],
+      "relative_gradient_errors": [
+        0.016326089619423112,
+        0.01783342517581538
+      ],
+      "elapsed_seconds": 6.542873200029135,
+      "group": "pml_control",
+      "changes_from_baseline": [
+        1.1920928955078125e-07,
+        0.0,
+        1.043081283569336e-07
+      ]
+    }
+  ],
+  "checks": {
+    "joint_errors_decrease": true,
+    "followup_errors_decrease": true,
+    "fine_transmission_error": true,
+    "fine_gradient_error": true,
+    "conservation": true,
+    "improvement": true,
+    "fixed_width_discretization_converges": true,
+    "duration_control": true,
+    "pml_control": true
+  },
+  "improvement_step_magnitudes": {
+    "thickness_um": 0.001,
+    "epsilon": 0.01
+  },
+  "initial_validation": {
+    "gradient_relative_error_threshold": 0.03,
+    "fine_gradient_error_passed": false,
+    "note": "The initial 0.08 um width missed the unchanged 3% gradient criterion. The 0.06 um width is an explicit followup."
+  },
+  "fixed_width_discretization_differences": [
+    [
+      0.0007865428924560547,
+      0.002553969621658325,
+      0.0007505267858505249
+    ],
+    [
+      0.00015306472778320312,
+      0.0011882185935974121,
+      0.0001888871192932129
+    ]
+  ],
+  "provenance": {
+    "runtime_revision": "377eb04d8250ffe2ab4d051a8e974fef22eccb2a",
+    "runtime_hash_convention": "SHA256 of committed git blob bytes from runtime_revision, not post-run working-tree bytes",
+    "runtime_source_sha256": {
+      "torchfdtd/differentiable_geometry.py": "3ae26cc994e3974bdf52db286803706bd92e4b4a1593d568326d52fa3a0b8012",
+      "torchfdtd/adjoint_planes.py": "edbb64361a748d1f04f852d2ddd5de341aa32f59123cd71a539ff855679bac68",
+      "torchfdtd/differentiable.py": "f80b2faf3a7bd713e2f1ce88d9221c48ad1af0b0150f99a15f3406279956d877",
+      "torchfdtd/adjoint_spectrum.py": "08dcc8a81b04fec8a14f43e2e8b1006d1f5da89e5755aa70fd5a75fd0e15173f",
+      "torchfdtd/models.py": "e903af184768203159fe279ba5bd7e020f3aa10dd2da3847c50780588695b69b",
+      "torchfdtd/solver.py": "a6cb91f60338d9517724f1d26499c643fdef58ba29433f267fd5429ca4d4eab3",
+      "torchfdtd/boundaries.py": "f7db358abc9632a7fd339d03d628e440de182d91e08e9e636c1ebbbede11d948",
+      "torchfdtd/field_monitors.py": "23e73d2b971af0dabcf6649e0cfc3d3d4049ee9187f06ffebb50c9e8d5eb25af"
+    },
+    "driver_sha256": "1d83e837b03a6cf00633bbd86c2199b0fbb1f540cf26e18efa32457dac77fb97",
+    "driver_hash_role": "Post-experiment reproduction driver. Not the original measured driver bytes.",
+    "driver_history": [
+      "Initial driver used joint widths 0.16, 0.12, 0.08 um and a 3% gradient threshold, which failed for epsilon.",
+      "A separate 0.06 um followup was evaluated. A second driver run retained 0.08 as a regularization control and added 0.06 duration/PML controls.",
+      "The final reproduction driver restores the initial three rows as joint and labels 0.06 regularization_followup. Measured numeric outputs are preserved. Summaries, group ordering, and provenance were finalized after the runs."
+    ]
+  }
+}

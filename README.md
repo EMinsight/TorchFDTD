@@ -53,8 +53,13 @@ Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now
 [Parameterized boxes, ellipsoids and cylinders](docs/DIFFERENTIABLE_GEOMETRY.md)
 connect dimensions, positions, rotations and permittivities to Torch optimizers.
 Geometry backward replays bounded spatial chunks, with FP32 resident and DRAM
-FDTD checks. The dense material map remains allocated, and sharp-interface
-shape-gradient convergence is not yet established.
+FDTD checks. The dense material map remains allocated in this API.
+A separate [FP32 physical slab study](docs/gradient_mesh.md) refines both mesh
+and geometry transition width against analytic transmission and derivatives.
+The followup gives 1.63% thickness-gradient and 1.78% permittivity-gradient
+errors, with duration/PML controls and actual improving design steps. The
+initial failed criterion is retained. Curved-interface and CR convergence
+remain separate requirements.
 
 [Dispersive material adjoints](docs/DISPERSIVE_ADJOINT.md) connect epsilon-infinity, oscillator strength, resonance and damping to point spectra and fixed plane flux. Resident Torch and optional fused CUDA paths include Drude/Lorentz P/Q states in bounded checkpoint replay. Shared parameters stay compact, and CUDA material gradients use block reductions without atomics. Experimental [spatial ADE streaming](docs/STREAMED_DISPERSIVE.md) adds DRAM/file banks, asynchronous CUDA tiles and compact material-gradient reductions. A [54 GiB ADE capacity run](docs/validation/DISPERSIVE_CAPACITY_REPORT.md) completed ten forward steps and first-order material gradients on RTX 5880 with 5.17 GB peak Torch CUDA allocation in 54.8 minutes. A separately recorded causal-halo rerun completed with 3.65 GB in 49.6 minutes and matching discrete gradients. This demonstrates short-run capacity beyond physical VRAM. Sustained performance and physical design-gradient convergence remain unverified.
 

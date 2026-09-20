@@ -91,3 +91,9 @@ adjoints and spatial replay, background gradients and invalid input rejection.
 FP64 is used only in the finite-difference derivative check. The optical-chain
 checks and optimization example use FP32. Small grids verify the new chain and
 do not establish beyond-VRAM capacity or a performance advantage.
+
+[Physical slab convergence](gradient_mesh.md) separately compares normalized
+transmission and thickness/permittivity derivatives with an independent sharp
+slab solution. FP32 mesh and transition-width refinement, fixed-width controls,
+duration/PML controls and actual improving parameter moves are recorded.
+This supports the tested planar case, not arbitrary curved geometry or CR.
