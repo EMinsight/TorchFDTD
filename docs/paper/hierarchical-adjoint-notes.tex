@@ -826,4 +826,60 @@ Sequential runs without repeated alternation do not isolate a causal speed
 effect. Long-time optical convergence and sustained storage performance
 remain unverified.
 
+\section{Shared-budget coupled-case replay}
+Let independent electromagnetic cases return $u_i=F_i(\theta_{J_i})$, where
+$J_i$ binds explicit material tensors from a common design. A coupled objective
+$L=\Phi(u_1,\ldots,u_m)$ supplies seeds $\bar u_i$. Replaying each case with
+these seeds gives
+\begin{equation}
+ \frac{\partial L}{\partial\theta_j}
+ =\sum_{i:\,j\in J_i}
+ \left(\frac{\partial F_i}{\partial\theta_j}\right)^{*}\bar u_i.
+\end{equation}
+The caller's Torch geometry graph receives the accumulated material gradients.
+The complete objective need not be separable. Mixed grids, output layouts and
+material bindings can therefore share one outer backward operation.
+
+Forward retains observations but no case solver graphs. Backward replays one
+case graph at a time and skips cases with no incoming seed. Shared-budget
+admission includes all observations, gradient carriers, persistent metadata
+and the largest active solver reservation. With $O$ output bytes, $P$ logical
+parameter bytes and $D$ metadata allowance, the current host estimate is
+\begin{equation}
+ M_{\mathrm{host}}=3O+4P+D+\max_i R_i^{\mathrm{host}}.
+\end{equation}
+GPU and file reservations use the largest active case. Each case must still
+pass its own admission and free-resource checks. Caller geometry, input
+storage, fixed references, objective and optimizer graphs remain additional
+memory. This engineering model is not a process-memory proof or an exclusive
+resource reservation.
+
+The extra case replay costs approximately one forward evaluation per case,
+beyond each solver's internal checkpoint recomputation. Execution remains
+sequential. Concurrent adjoint microbatches, joint tile/microbatch selection
+and multi-GPU scheduling are not provided by this interface. Tests compare
+nonseparable objectives, material and geometry VJPs, and mixed resident/file
+execution with retained case graphs. GC-disabled checks enforce release of
+the previous native system before the next case. SI-scale replay checks use
+zero absolute tolerance by default to avoid hiding relative spectral drift.
+
+\subsection{Executed large resident and unified-policy checks}
+The allocation-derived planner's two $512^3$ cases completed on RTX 5880.
+Dielectric execution with two checkpoints reserved 22.390 GB and reached
+15.885 GB of Torch CUDA allocation. Single-pole execution without checkpoints
+reserved 26.210 GB and reached 17.912 GB. The largest finite-cone output or
+gradient discrepancies were $1.12\times10^{-7}$ and $1.80\times10^{-7}$.
+These are twelve-step capacity and discrete-gradient checks.
+
+Separate point-spectrum studies compared nine execution policies on a
+$128^3$ grid with two poles and 128 steps. At most 32 steps were used for calibration.
+Both real FP32 and complex FP64 selected two device checkpoints in resident
+execution, which also won the held-out comparison. Full-duration medians were
+0.5645 and 5.1187 seconds. Calibration cost 60.524 and 223.389 seconds.
+The first admitted baseline was already fastest, so there is no tuning
+payback relative to that baseline. The result demonstrates avoiding
+unnecessary streaming on resident-size problems. Detector-plane performance,
+long-time optical convergence and an external-solver advantage are separate
+requirements.
+
 \end{document}

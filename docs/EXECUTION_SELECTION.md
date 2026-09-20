@@ -85,6 +85,10 @@ changing tiers inside an existing autograd graph. Mixed point/plane projects,
 shared-budget microbatching, dynamic retuning and single-domain multi-GPU are
 not part of this entry point.
 
+Selected policies can be used in [shared-budget case replay](ADJOINT_BATCH.md).
+That API checks all case reservations together and replays one case graph at
+a time. It does not jointly tune concurrent microbatch size and tile policy.
+
 ## Fixed detection planes
 
 When all enabled monitors are `FieldMonitor` planes, supply explicit
@@ -185,5 +189,11 @@ rerun after adding keyword-frequency support. These groups overlap.
 The [CPU and RTX 3060 Adam record](validation/execution-selection-example-3060.json)
 contains two radius/damping iterations with matching loss and gradient values.
 Both selected a resident policy for this small example. A separate CR job was
-active, so its calibration timings are not performance evidence. Application
-duration policy quality still requires the separate RTX 5880 benchmark.
+active, so its calibration timings are not performance evidence. Policy
+quality on complete physical applications remains unverified.
+
+The subsequent [RTX 5880 point-spectrum comparison](validation/UNIFIED_POLICY_REPORT.md)
+completed both real FP32 and complex FP64 held-out workloads. It selected the
+fastest measured full-duration resident policy in both cases. Because that
+policy was already the first baseline, tuning had no time-saving payback.
+This evidence does not cover detector-plane selection or longer applications.

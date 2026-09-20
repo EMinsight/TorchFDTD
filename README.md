@@ -27,7 +27,9 @@ remains unverified. A separate [held-out streamed-policy study](docs/validation/
 selected the fastest of six 128-step ADE policies using at most 32 calibration
 steps. A separate [causal-halo rerun](docs/validation/MATERIAL_POLICY_REPORT.md#held-out-causal-halo-rerun)
 retained that ranking for real FP32 and complex FP64. These studies compare
-streamed policies and do not validate unified selection.
+streamed policies. A subsequent [nine-policy unified study](docs/validation/UNIFIED_POLICY_REPORT.md)
+selected the fastest resident policy in both precisions. Calibration did not
+repay its cost relative to the already-fastest resident baseline.
 Large grids can now opt into [byte-budgeted resident adjoints](docs/BUDGETED_RESIDENT.md)
 so a grid that fits memory is not forced into streaming by the workbench cell
 guard. Short 256-cubed dielectric and 208-cubed ADE forward/VJP checks passed.
@@ -35,7 +37,9 @@ They are resident index/capacity checks, not beyond-VRAM speed measurements.
 An [allocation-derived CUDA planner](docs/RESIDENT_ALLOCATION_MODEL.md) now
 counts native arrays, exact checkpoint states and cold spectral library pools.
 The two large-index cases also passed with two device checkpoints under a
-4 GiB solver budget. Their measured allocation is separate from speed claims.
+4 GiB solver budget. Subsequent 512-cubed dielectric and ADE checks completed
+on RTX 5880 with peak Torch CUDA allocations of 15.9 GB and 17.9 GB. These
+12-step capacity/gradient checks do not establish long-time convergence or speed superiority.
 
 Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and physical convergence of the full CR objective remain pending.
 
@@ -55,6 +59,10 @@ RTX 5880 resident ADE measurements compare the same forward/objective/backward o
 [Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Optional [fused complex forward updates](docs/COMPLEX_CUDA.md) and [fused complex backward](docs/COMPLEX_CUDA_ADJOINT.md) are available. Experimental [complex spatial streaming](docs/STREAMED_FDTD.md#public-complex-streamed-api) supports DRAM/file-backed states, asynchronous CUDA staging and first-order real-epsilon gradients. Full-pupil CR optical convergence and inverse-design validation remain pending.
 
 [Sequential case replay](docs/RECOMPUTED_CASES.md) now supports coupled multi-case inverse-design objectives. An eight-case RTX 5880 experiment reduced peak Torch CUDA allocation by 55%, with a 63% iteration-time increase and matching gradients. This is a memory trade-off, not a speedup or completed CR validation.
+A new [shared-budget case API](docs/ADJOINT_BATCH.md) admits all solver, output
+and gradient-carrier reservations before executing heterogeneous point/plane
+cases. It preserves coupled objectives and shared geometry/material gradients
+while retaining one solver graph at a time. Concurrent adjoint microbatches remain open.
 
 [Differentiable detector allocation](docs/DETECTOR_ALLOCATION.md) preserves the CR reference's electric-intensity well fractions with independent midpoint quadrature. Synthetic source parity and material-gradient tests pass. Matched CR optical validation remains pending.
 
@@ -620,7 +628,7 @@ On Windows, after deployment, `scripts/start_remote.ps1 -GpuHost YOUR_GPU_HOST` 
 - Point monitors record one E/H component every step. Choose FFT bins or custom-range uniform frequency/wavelength DFT, with None/Start/End/Full/Hann apodization. [Definitions, UI controls and exports](docs/MONITORS.md) distinguish FFT amplitude from complex DFT integrals. Neither is normalized transmission, reflection, power or S-parameters. E and H are staggered in space and time, and should not be naively multiplied as collocated Poynting fields.
 - Field movies retain at most 100 sampled planes, downsampled spatially to ≤256 pixels per axis for the browser. NPZ also retains all final E/H components at the full mesh resolution.
 - The web server serializes interactive runs because `fdtd` uses process-global state. The Python BatchRunner isolates concurrent cases in separate processes. One web-server process supports one active job and two queued jobs. Cancellation is checked each time step. Job metadata is session-local; exported NPZ files persist.
-- FSP files can be inspected and edited using the optional [Lumerical bridge](docs/FSP.md), with original-file preservation and saved-value verification. The independent importer runs the [documented layout subset](docs/FSP_NATIVE.md) on the native GPU engine. Unsupported physics blocks conversion, and calculation differences remain visible. Native `.lsf`, GDS and STL import are not implemented. Mode ports, far-field transformations, adaptive subgrids and inverse-design gradients remain unimplemented. Planar flux monitors and black-box inverse design are available natively.
+- FSP files can be inspected and edited using the optional [Lumerical bridge](docs/FSP.md), with original-file preservation and saved-value verification. The independent importer runs the [documented layout subset](docs/FSP_NATIVE.md) on the native GPU engine. Unsupported physics blocks conversion, and calculation differences remain visible. Native `.lsf`, GDS and STL import are not implemented. Mode ports, far-field transformations and adaptive subgrids remain unimplemented. First-order inverse-design gradients are available through the experimental adjoint APIs within their documented physics and geometry limits. Planar flux monitors and black-box inverse design are available natively.
 
 ## Verification and performance
 

@@ -42,6 +42,12 @@ Per-solver memory admission still applies. CPU output avoids retaining the full
 packed result on the GPU, at the cost of transfers. Only first-order gradients
 are supported.
 
+For native FDTD projects, [RecomputedAdjointBatch](ADJOINT_BATCH.md) adds
+all-case preflight and a shared host/GPU/file reservation including retained
+observations and gradient carriers. It preserves heterogeneous ordinary
+result objects and explicit shared material bindings. The generic callable
+API above retains its original output-only budget contract.
+
 One additional forward solve per case buys bounded case-graph residency.
 This is sequential execution and is separate from the forward CUDA cohort batch
 API. It does not introduce complex spatial streaming, fused complex kernels or

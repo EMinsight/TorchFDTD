@@ -93,7 +93,20 @@ Metadata-only checks additionally admit a real FP32 512-cubed dielectric grid
 with two checkpoints and a one-pole grid with zero checkpoints under a 32 GiB
 solver budget and mocked 48 GiB free capacity. They reject the same budget
 with the explicit Torch transpose. This planning result is not evidence that
-the 512-cubed jobs have executed. RTX 5880 execution is a separate next check.
+the 512-cubed jobs have executed. Subsequent RTX 5880 execution completed
+both cases, with results recorded below.
+
+| RTX 5880 case | Reservation, bytes | Peak Torch CUDA bytes | Largest relative L2 |
+| --- | ---: | ---: | ---: |
+| 512 cubed dielectric, two checkpoints | 22,389,615,266 | 15,884,920,320 | 1.12e-7 |
+| 512 cubed ADE, zero checkpoints | 26,210,101,973 | 17,911,821,824 | 1.80e-7 |
+
+The [dielectric](validation/resident-allocations-512-dielectric-5880.json) and
+[ADE](validation/resident-allocations-512-ade-5880.json) records both report
+`forward_backward_validated` and `driver_smoke=false`. All 73 driver/runtime
+hashes match revision `5e396ff`. These are twelve-step, near-PML finite-cone
+checks on 134,217,728 cells. They establish executed large-index capacity and
+discrete gradients, not long-time convergence or speed superiority.
 
 CUDA regression covers real and complex FP32/FP64, scalar/spatial/diagonal
 materials, noncontiguous inputs, nonuniform CPML profiles, device checkpoints,

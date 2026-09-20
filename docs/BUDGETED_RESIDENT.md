@@ -95,6 +95,15 @@ Actual execution requires available device and host capacity. Without
 `--execute`, the driver admits and records the plan only. A small `--smoke`
 driver run cannot be reported as large-grid capacity evidence.
 
+RTX 5880 subsequently completed a 384-cubed dielectric case and a 320-cubed
+single-pole case on revision `d16579f`. Their peak Torch CUDA allocations were
+3,957,171,712 and 4,414,385,664 bytes. Largest output/VJP relative errors remain
+1.12e-7 and 1.78e-7. The [dielectric](validation/budgeted-resident-dielectric-384-5880.json)
+and [ADE](validation/budgeted-resident-ade-320-5880.json) records preserve 73
+verified source hashes each. Both are twelve-step checks with zero checkpoints.
+The newer allocation-derived planner also has separate
+[executed 512-cubed evidence](RESIDENT_ALLOCATION_MODEL.md#executed-checks-and-scope).
+
 The byte-admission revision `d16579f` covered 190 passing tests across resident memory,
 unified selection, streamed admission, point spectra, planes, native CUDA
 adjoints and solver lifetime. The budget-specific suite then passed 17 tests,

@@ -310,11 +310,11 @@ class StreamedSimulation(DifferentiableSimulation):
         super().__init__(project)
         self.streaming_options = options or StreamedAdjointOptions()
 
-    def spectrum(self, epsilon, frequency_hz, *, window=None):
+    def spectrum(self, epsilon, frequency_hz, *, window=None, block_size=32):
         """Accumulate a fixed-frequency DFT without retaining time signals."""
         from .adjoint_spectrum import SpectralObservation
         spectral = SpectralObservation(epsilon, self.project.region,
-                                       [m.component for m in self.project.monitors if m.enabled], frequency_hz, window)
+                                       [m.component for m in self.project.monitors if m.enabled], frequency_hz, window, block_size)
         return self._run(epsilon, spectral)
 
     def forward(self, epsilon):
