@@ -38,6 +38,8 @@ from .material_fit import FitOptions, MaterialFitResult, fit_material, material_
 __all__ += ['OpticalData', 'FitOptions', 'MaterialFitResult', 'fit_material', 'material_fit_report']
 from .differentiable import AdjointOptions, DifferentiableSimulation, DifferentiableResult, smooth_sphere_epsilon
 __all__ += ['AdjointOptions', 'DifferentiableSimulation', 'DifferentiableResult', 'smooth_sphere_epsilon']
+from .adjoint_memory import estimate_adjoint_memory
+__all__ += ['estimate_adjoint_memory']
 from .adjoint_spectrum import DifferentiableSpectrum
 __all__ += ['DifferentiableSpectrum']
 from .memory_profile import profile_memory_transfers

@@ -218,7 +218,11 @@ class DispersiveSimulation(DifferentiableSimulation):
         return torch.cat([value.reshape(-1) for value in values]), layout
 
     def _evaluate(self, epsilon, strength, omega0, gamma, spectral):
-        parameters, layout = self._pack(epsilon, strength, omega0, gamma)
+        from .adjoint_memory import _resident_reservation
+        def admit(layout):
+            _resident_reservation(self.project,self.options,epsilon.device,spectral,
+                pole_count=layout.pole_count,parameter_elements=sum(math.prod(s) for s in layout.shapes))
+        parameters, layout = self._pack(epsilon, strength, omega0, gamma,admission=admit)
         count = layout.pole_count
         n = math.prod(self.project.region.shape)
         real_item = epsilon.element_size()
@@ -229,8 +233,7 @@ class DispersiveSimulation(DifferentiableSimulation):
             return _DispersiveSystem(project, value, parameters, layout,
                                      fused_forward=fused_forward,fused_backward=fused_backward,**kwargs)
         result = super()._run(epsilon, spectral, system_factory=factory, autograd_input=parameters,
-            extra_state_bytes=6*count*n*field_item,
-            extra_workspace_bytes=n*((36*count+12)*field_item+(36*count+12)*real_item))
+            pole_count=count,material_parameter_elements=parameters.numel())
         result.report.update(adjoint='discrete Yee/CPML/trapezoidal ADE',
             forward_backend='fused CUDA ADE' if fused_forward else 'torch CUDA' if epsilon.is_cuda else 'torch CPU',
             backward_backend='fused CUDA ADE transpose' if fused_backward else 'torch explicit ADE transpose', oscillator_count=count,

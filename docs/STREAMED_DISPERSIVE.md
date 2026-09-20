@@ -104,11 +104,14 @@ file cleanup and CPU/CUDA staging. A separate allocation test doubles the x
 domain at fixed tile size and checks that GPU allocation stays bounded and is
 released with cyclic garbage collection disabled.
 
-These discrete tests are necessary before large runs. They do not establish
-dispersive state beyond 48 GiB, a speed advantage, physical mesh convergence or
-an inverse-designed device. The completed 54 GiB capacity measurement in
-`BEYOND_VRAM_VALIDATION.md` is for the earlier **nondispersive** path. ADE capacity
-and sustained I/O measurements remain separate follow-up work.
+These discrete tests are necessary before large runs. A separate
+[completed ADE capacity run](validation/DISPERSIVE_CAPACITY_REPORT.md) now
+validates ten forward steps and first-order material gradients with 54 GiB of
+E/H and P/Q on the RTX 5880. It used 5.17 GB peak Torch CUDA allocation and
+3289.839 seconds for the complete run. This establishes short-run capacity,
+not a speed advantage, physical mesh convergence or an inverse-designed device.
+The recorded source predates the narrower causal halo and buffer-growth fix.
+Sustained I/O and the corrected large-run comparison remain follow-up work.
 
 `benchmarks/beyond_vram_dispersive.py` prepares that capacity experiment with
 one pole and a default 1024 by 768 by 384 complex FP64 grid. E/H occupy 27 GiB

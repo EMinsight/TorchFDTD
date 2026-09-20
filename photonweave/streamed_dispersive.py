@@ -137,16 +137,8 @@ def estimate_streamed_dispersive_memory(project, parameter_shapes, options=None,
     Caller-owned geometry graphs, optimizer allocations and OS cache are excluded.
     """
     options = options or StreamedAdjointOptions()
-    shapes = tuple(tuple(s) for s in parameter_shapes)
-    grid = project.region.shape
-    if len(shapes) != 4 or shapes[0] not in (grid, grid+(3,)):
-        raise ValueError('Provide four material shapes starting with the epsilon_inf grid shape.')
-    if not shapes[1] or isinstance(shapes[1][0],bool) or not isinstance(shapes[1][0],int) or not 1 <= shapes[1][0] <= 64:
-        raise ValueError('Strength needs a leading pole axis of length 1 to 64.')
-    poles = shapes[1][0]
-    for shape in shapes[1:]:
-        if any(isinstance(v,bool) or not isinstance(v,int) for v in shape) or shape not in ((),(poles,),(poles,*grid),(poles,*grid,3)):
-            raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3).')
+    from .adjoint_memory import _material_shapes
+    shapes,poles=_material_shapes(project.region,parameter_shapes)
     epsilon = torch.empty(shapes[0],dtype=getattr(torch,project.region.precision),device='meta')
     if window is not None and frequency_hz is None:raise ValueError('A spectral window requires frequency_hz.')
     spectral = None

@@ -128,6 +128,16 @@ check reduces the peak from 76,226,560 to 69,622,272 bytes with unchanged
 signals and material VJPs. That small check does not establish the corrected
 peak for this 54 GiB problem. A large rerun of the lifetime fix remains pending.
 
+### Dispersive-state extension
+
+A separate [one-pole ADE experiment](validation/DISPERSIVE_CAPACITY_REPORT.md)
+has now completed with 27 GiB of E/H and 27 GiB of P/Q. Its 301,989,888 cells,
+ten steps and synchronous file policy differ from the nondispersive case
+above. The complete run took 3289.839 seconds with 5,170,448,384 peak Torch
+CUDA bytes. Point fields, epsilon gradients and shared material gradients
+passed the finite-cone reference checks. This is another short capacity/VJP
+result, not a matched performance comparison between the two physics models.
+
 ### Earlier forward-only snapshot
 
 The [forward snapshot](validation/beyond-vram-forward-5880.json) records

@@ -633,7 +633,25 @@ including nonzero polarization and CPML states and arbitrary endpoint
 adjoints. Tests also cover repeated Bloch windings, shared and spatial
 material parameters, file-backed replay and asynchronous staging. These
 checks establish discrete consistency for the tested cases. They do not
-establish optical convergence, large dispersive capacity or a speed advantage.
+establish optical convergence or a speed advantage.
+
+A separate complex-FP64 capacity experiment completed ten steps and
+first-order backward on a $1024\times768\times384$ grid with one pole.
+E/H occupy 27 GiB and P/Q another 27 GiB, exceeding the RTX 5880 device's
+reported physical capacity before CPML. Peak Torch CUDA allocation was
+5,170,448,384 bytes and sampled peak process RSS was 14,584,545,280 bytes.
+Complete elapsed time was 3289.839 s. The finite-cone resident Torch
+reference agreed within $8.67\times10^{-19}$ for point fields and
+$1.36\times10^{-20}$ for the local permittivity gradient. All three shared
+material derivatives and the global permittivity-gradient norm passed the
+driver comparisons. Transient file states were released after execution.
+
+This experiment used the earlier conservative $2K$ halo, core width 8,
+temporal depth 2, synchronous file I/O and no block or local checkpoints.
+It predates the narrower causal halo and the buffer-growth lifetime fix.
+Logical file counters include OS-cache effects and are not physical storage
+traffic. This is short-run capacity and discrete-gradient evidence, not
+long-time optical convergence or sustained performance evidence.
 \subsection{Bounded material-aware policy calibration}
 Policy calibration now covers both dielectric and coupled ADE execution,
 using either point histories or online point spectra. Generated candidates

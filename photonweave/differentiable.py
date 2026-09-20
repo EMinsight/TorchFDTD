@@ -549,7 +549,7 @@ class DifferentiableSimulation(torch.nn.Module):
         return self._run(epsilon,None)
 
     def _run(self,epsilon,spectral,*,system_factory=None,autograd_input=None,
-             extra_state_bytes=0,extra_workspace_bytes=0):
+             pole_count=0,material_parameter_elements=0):
         r=self.project.region
         r.require_resident()
         if not isinstance(epsilon,torch.Tensor) or epsilon.dtype not in (torch.float32,torch.float64):
@@ -566,38 +566,16 @@ class DifferentiableSimulation(torch.nn.Module):
             raise ValueError('This conservative CFL contract requires finite epsilon >= 1.')
         if (epsilon.dtype==torch.float64)!=(r.precision=='float64'):
             raise ValueError('epsilon dtype must match the project precision.')
-        # Reserve a conservative bound before creating native fields or tapes.
-        # This includes replay, transposed curls, full epsilon gradient and CPML.
-        n=math.prod(r.shape);item=epsilon.element_size()*(2 if r.complex_fields else 1)
-        cpml_upper=12*n
-        state_upper=(6*n+cpml_upper)*item+extra_state_bytes
-        workspace=(42*n+5*cpml_upper)*item+extra_workspace_bytes
-        monitor_count=sum(m.enabled for m in self.project.monitors) if spectral is None else len(spectral.components)
-        source_terms_count=sum(len(s.polarization_components)*(2 if s.injection=='oneway' else 1)
-                               for s in self.project.sources if s.enabled)
-        output_bytes=r.steps*monitor_count*item if spectral is None else spectral.reservation(spectral.block_size)['spectral_output_bytes']
-        source_bytes=r.steps*source_terms_count*item
-        # The physical tape is bounded, but outputs and prepared drives are not.
-        # Reserve the returned signals and their incoming first-order adjoints.
-        # User objectives, spectrum matrices and geometry graphs have separate
-        # allocations and cannot be bounded by this solver admission estimate.
-        history_bytes=2*output_bytes+source_bytes if spectral is None else spectral.reservation(spectral.block_size)['spectral_reservation_bytes']+source_bytes
-        device_slots=self.options.checkpoints if self.options.storage=='device' else self.options.device_checkpoints if self.options.storage=='hierarchical' else 0
-        if self.options.checkpoint_transfers=='async' and self.options.checkpoints>device_slots:
-            device_slots+=self.options.staging_slots
-        observation_index_bytes=16*monitor_count
-        required=workspace+device_slots*state_upper+history_bytes+observation_index_bytes
-        if epsilon.is_cuda:
-            free,_=torch.cuda.mem_get_info(epsilon.device)
-            budget=min(int(free*.8),self.options.gpu_budget_bytes or int(free*.8))
-            if required>budget:raise ValueError('Adjoint workspace and checkpoint reservation exceed the GPU budget.')
+        # Check GPU, CPU working memory and checkpoint tiers before creating
+        # native fields. The public estimator uses this same calculation.
+        from .adjoint_memory import _resident_reservation
+        reservation=_resident_reservation(self.project,self.options,epsilon.device,spectral,
+            pole_count=pole_count,parameter_elements=material_parameter_elements)
         report=dict(experimental=True,adjoint='discrete Yee/CPML',higher_order=False,
                     spatial_streaming=False,full_time_autograd=False,steps=r.steps,
                     forward_backend='fused CUDA' if epsilon.is_cuda and (not r.complex_fields or r.cuda_kernel=='fused') else 'torch CUDA' if epsilon.is_cuda else 'torch CPU',
-                    backward_backend='fused CUDA complex transpose' if epsilon.is_cuda and r.complex_fields and self.options.backward_kernel=='fused' else 'fused CUDA transpose' if epsilon.is_cuda and not r.complex_fields and self.options.backward_kernel!='torch' else 'torch explicit transpose',memory_reservation_bytes=required,
-                    workspace_reservation_bytes=workspace,history_reservation_bytes=history_bytes,
-                    checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes if spectral is None else 0,
-                    source_history_bytes=source_bytes,observation_index_bytes=observation_index_bytes)
+                    backward_backend='fused CUDA complex transpose' if epsilon.is_cuda and r.complex_fields and self.options.backward_kernel=='fused' else 'fused CUDA transpose' if epsilon.is_cuda and not r.complex_fields and self.options.backward_kernel!='torch' else 'torch explicit transpose',
+                    checkpoint_transfers=self.options.checkpoint_transfers,**reservation)
         # A later wavelength/ray configuration must not alter an earlier graph's replay.
         factory=system_factory or _System
         with torch.no_grad():system=factory(self.project.model_copy(deep=True),epsilon,observation_monitors=None if spectral is None else spectral.observers)

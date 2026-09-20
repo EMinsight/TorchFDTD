@@ -109,7 +109,7 @@ scale with timestep count. See [validation and timings](validation/ONLINE_SPECTR
 | Checkpoint replay on device, host or disk | Implemented, synchronous or optional asynchronous transfers |
 | Mixed GPU/host/disk checkpoint slots | Implemented with explicit slot counts |
 | Full-tensor subpixel geometry derivatives | Pending |
-| ADE material adjoint | Separate [resident](DISPERSIVE_ADJOINT.md) and experimental [spatially streamed](STREAMED_DISPERSIVE.md) Torch/native CUDA paths. Large dispersive capacity and physical gradient convergence remain unverified |
+| ADE material adjoint | Separate [resident](DISPERSIVE_ADJOINT.md) and experimental [spatially streamed](STREAMED_DISPERSIVE.md) Torch/native CUDA paths. A ten-step 54 GiB capacity/VJP run is complete. Long-time optical and physical gradient convergence remain unverified |
 | Live TFSF and mode-port adjoints | Pending, rejected by this API |
 | Complex spatial streaming and fused complex kernels | Experimental fixed-Bloch [DRAM/file slabs](STREAMED_FDTD.md) and [ADE extension](STREAMED_DISPERSIVE.md), with first-order gradients. Moving phases and higher derivatives remain unsupported |
 | Trainable sources, boundaries and adaptive meshes | Pending |
@@ -126,6 +126,43 @@ Multiple calls can share a design tensor and their losses can accumulate, but
 each live result graph retains its own native state. This is not a global
 microbatch memory scheduler. Fixed-duration execution is required. Workbench
 automatic shutoff is rejected. The normal scene cell limit remains in force.
+
+## Admission before field allocation
+
+`estimate_adjoint_memory` checks resident execution without creating field
+arrays or scratch directories. It shares the execution calculation, including
+the exact restart state, conservative solver workspace, source and observation
+history, device/host/disk checkpoint slots and asynchronous staging. ADE also
+reserves packed material and normalization carriers before packing begins.
+
+```python
+from photonweave import estimate_adjoint_memory
+
+reservation = estimate_adjoint_memory(
+    project, model.options, device="cuda", frequency_hz=[2.5e14, 3.0e14],
+)
+print(reservation["gpu_reservation_bytes"])
+print(reservation["host_reservation_bytes"])
+print(reservation["disk_checkpoint_reservation_bytes"])
+```
+
+For ADE, supply `parameter_shapes=(epsilon_shape, strength_shape, omega_shape,
+gamma_shape)` using the original unbroadcast shapes. Omit `frequency_hz` for
+point histories. The public estimator supports point observations and rejects
+field-plane projects instead of counting a plane as a single sample. Plane
+execution uses the same internal admission with its own interpolation and
+spectral workspace accounting.
+
+`AdjointOptions.host_budget_bytes` retains its checkpoint-tier meaning. It is
+not a limit on all host memory. The report's `host_reservation_bytes` also
+includes CPU solver workspace when `device="cpu"`, and admission checks this
+total against 80% of currently available RAM. CUDA and disk reservations are
+checked against the explicit tier budgets and 80% of currently free capacity.
+These are conservative checks, not exclusive operating-system reservations.
+Execution repeats them and still validates actual parameter values. Caller
+inputs, geometry/optimizer graphs, CUDA context and OS file cache are outside
+the estimate. The resident cell limit remains in effect. This API supplies
+admission metadata and does not automatically switch to spatial streaming.
 
 ## Checkpoint algorithm and tiers
 
