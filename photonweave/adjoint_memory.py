@@ -1,5 +1,7 @@
 """Resident adjoint admission before material packing or field allocation."""
 import math
+import os
+import re
 
 import torch
 
@@ -41,6 +43,84 @@ def _material_shapes(region, parameter_shapes):
     return shapes,poles
 
 
+def _source_spatial_budget(project,item):
+    """Bound prepared profiles and one injection without materializing profiles."""
+    from .solver import source_slice
+    region=project.region
+    profiles=largest=0
+    for raw in project.sources:
+        source=project.resolved_source(raw)
+        if not source.enabled:continue
+        if source.injection=='oneway':
+            axis='xyz'.index(source.normal)
+            largest=max(largest,math.prod(n for a,n in enumerate(region.shape) if a!=axis))
+            continue
+        for component,_ in source.polarization_components:
+            scalar=source.model_copy(update=dict(component=component,theta=None))
+            loc=source_slice(scalar,region)
+            count=math.prod(len(range(*sl.indices(n))) if isinstance(sl,slice) else 1
+                            for sl,n in zip(loc,region.shape))
+            largest=max(largest,count)
+            if source.kind=='plane' and region.complex_fields:profiles+=count
+    # Profiles persist for each prepared polarization term. The multiply and
+    # injection sum have at most two simultaneous source-support temporaries.
+    return profiles*item,2*largest*item
+
+
+def _spectral_library_reservation(device):
+    """Cold cuBLAS/Lt pools for caller and autograd threads on one stream each.
+
+    Defaults and environment units follow PyTorch 2.10 CublasHandlePool.cpp.
+    No handle is created and no matrix multiply is run during admission.
+    Unknown devices retain the larger default used by Hopper.
+    """
+    capability=torch.cuda.get_device_capability(device) if torch.cuda.is_available() else (9,0)
+    default=32*1024**2 if capability==(9,0) else (4096*2+16*8)*1024
+    configured=sum(int(size)*int(count)*1024 for size,count in
+        re.findall(r':([0-9]+):([0-9]+)',os.environ.get('CUBLAS_WORKSPACE_CONFIG','')))
+    lt=os.environ.get('CUBLASLT_WORKSPACE_SIZE','1024')
+    if lt.lstrip().startswith('-'):raise ValueError('CUBLASLT_WORKSPACE_SIZE must not be negative.')
+    match=re.match(r'\s*\+?([0-9]+)',lt)
+    lt_bytes=max(1024,int(match[1]) if match else 1024)*1024
+    # Keep separate pools even when the caller has enabled unified workspaces.
+    # Existing warm caches are not relied on to make a cold invocation fit.
+    return 2*(max(default,configured)+lt_bytes)
+
+
+def _workspace(project,options,device,boundary,segments,n,cpml,item,real_item,poles,state,monitors):
+    region=project.region
+    native_forward=device.type=='cuda' and (region.cuda_kernel=='fused' or (not poles and not region.complex_fields))
+    native_backward=device.type=='cuda' and (options.backward_kernel=='fused' or
+        (not poles and not region.complex_fields and options.backward_kernel=='auto'))
+    fused=native_forward and native_backward
+    if fused:
+        # _System/_DispersiveSystem own primal E/H/P/Q. The CUDA transpose owns
+        # E/H/P/Q adjoints and two CPML adjoint banks. Pointer views do not copy.
+        parts=dict(primal_and_adjoint_fields=(12+12*poles)*n*item,
+                   primal_and_adjoint_cpml=3*cpml*item,
+                   replay_and_conversion_allowance=state)
+        if poles:
+            parts['ade_numerator_and_recomputed_electric']=6*n*item
+            # At most one shared scalar per pole for each of s, omega and gamma.
+            # Actual scalar/pole shape information may give a smaller reduction.
+            parts['ade_shared_reduction_bound']=3*poles*((n+255)//256)*real_item
+        else:
+            # Worst-case diagonal inverse epsilon, contiguous epsilon copy and
+            # returned epsilon gradient. Original caller parameters are excluded.
+            parts['dielectric_coefficients_and_gradient']=9*n*real_item
+        coefficient_elements=sum(seg[key].size for seg in segments for key in ('b','c','inv_k'))
+        coefficient_elements+=sum(values.size for values,_ in boundary.metric.values())+2
+        parts['boundary_coefficients']=coefficient_elements*real_item
+        model='fused_cuda_allocations'
+    else:
+        parts=dict(tensor_workspace_bound=102*n*item)
+        if poles:parts['tensor_ade_workspace_bound']=(36*poles+12)*n*(item+real_item)
+        model='conservative_tensor_bound'
+    profiles,injection=_source_spatial_budget(project,item)
+    parts.update(source_profiles=profiles,source_injection=injection,observation_gathers=3*monitors*item)
+    return model,parts
+
+
 def _resident_reservation(project, options, device, spectral=None, *, pole_count=0, parameter_elements=0):
     """Shared planner/execution calculation, including original tier semantics."""
     region=project.region
@@ -59,9 +139,9 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     segments=[s for group in boundary.cpml.values() for s in group]
     cpml=sum(math.prod(s['shape']) for s in segments)
     state=(6*n+cpml+6*pole_count*n)*item
-    state_upper=(18+6*pole_count)*n*item
-    workspace=102*n*item
-    if pole_count:workspace+=(36*pole_count+12)*n*(item+real_item)
+    workspace_model,workspace_parts=_workspace(project,options,device,boundary,segments,
+        n,cpml,item,real_item,pole_count,state,monitor_count)
+    workspace=sum(workspace_parts.values())
     # Packing and its normalization graph precede field creation. Budget those
     # carriers before torch.cat, rather than testing only the packed output.
     packing=4*parameter_elements*real_item
@@ -84,7 +164,14 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     host_checkpoint=state*(host_slots+staging_slots+(1 if disk_slots else 0))
     array_count=2+len(segments)+(2 if pole_count else 0)
     disk_checkpoint=(state+4096+512*array_count)*disk_slots
-    required=workspace+(device_slots+staging_slots)*state_upper+history+index_bytes+packing
+    device_checkpoint=device_slots*state
+    device_staging=staging_slots*state
+    library=_spectral_library_reservation(device) if device.type=='cuda' and spectral is not None else 0
+    subtotal=workspace+device_checkpoint+device_staging+history+index_bytes+packing+library
+    # Runtime/library setup and allocator rounding get explicit headroom. This
+    # is an engineering reserve, not a proof of a platform-independent peak.
+    headroom=8*1024**2+(subtotal+19)//20 if workspace_model=='fused_cuda_allocations' else 0
+    required=subtotal+headroom
     # The resident one-way validator currently copies epsilon to CPU. Reserve
     # the diagonal worst case plus its three-plane NumPy comparison temporaries.
     oneway=any(s.enabled and s.injection=='oneway' for s in project.sources)
@@ -111,6 +198,10 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
         limit=min(int(free*.8),options.gpu_budget_bytes or int(free*.8))
         if required>limit:raise ValueError('Adjoint workspace and checkpoint reservation exceed the GPU budget.')
     return dict(memory_reservation_bytes=required,workspace_reservation_bytes=workspace,
+        workspace_model=workspace_model,workspace_components_bytes=workspace_parts,
+        allocation_headroom_bytes=headroom,device_checkpoint_reservation_bytes=device_checkpoint,
+        device_staging_reservation_bytes=device_staging,
+        spectral_library_reservation_bytes=library,
         history_reservation_bytes=history,output_history_bytes=output if spectral is None else 0,
         source_history_bytes=source,observation_index_bytes=index_bytes,
         material_packing_reservation_bytes=packing,restart_state_bytes=state,

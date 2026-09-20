@@ -62,6 +62,8 @@ def test_metadata_cuda_plan_queries_capacity_without_cuda_tensors(monkeypatch):
     options=AdjointOptions(checkpoints=4,storage='host',checkpoint_transfers='async',staging_slots=2,
         gpu_budget_bytes=64*1024**2,host_budget_bytes=64*1024**2)
     monkeypatch.setattr(torch.cuda,'mem_get_info',lambda device:(1024**3,2*1024**3))
+    monkeypatch.setattr(torch.cuda,'is_available',lambda:True)
+    monkeypatch.setattr(torch.cuda,'get_device_capability',lambda device:(8,9))
     def forbidden(*args,**kwargs):pytest.fail('Allocated a resident system while planning')
     monkeypatch.setattr('photonweave.differentiable._System',forbidden)
     estimate=estimate_adjoint_memory(p,options,device='cuda',parameter_shapes=(p.region.shape,(2,),(),()),frequency_hz=[1e14])

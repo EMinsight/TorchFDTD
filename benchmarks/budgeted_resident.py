@@ -68,6 +68,7 @@ def main(argv=None):
     parser.add_argument('--precision',choices=('float32','float64'),default='float32')
     parser.add_argument('--resident-gib',type=float,default=16.)
     parser.add_argument('--cpu-threads',type=int,default=4)
+    parser.add_argument('--checkpoints',type=int,default=0)
     parser.add_argument('--dispersive',action='store_true')
     args=parser.parse_args(argv)
     if args.size<64 or args.size%4:raise ValueError('Use a size divisible by four and at least 64.')
@@ -77,7 +78,7 @@ def main(argv=None):
     if args.cpu_threads<1:raise ValueError('cpu-threads must be positive.')
     torch.set_num_threads(args.cpu_threads)
     project=scene((args.size,)*3,args.precision,args.steps)
-    options=AdjointOptions(checkpoints=0,resident_budget_bytes=int(args.resident_gib*1024**3),
+    options=AdjointOptions(checkpoints=args.checkpoints,resident_budget_bytes=int(args.resident_gib*1024**3),
         backward_kernel='fused' if args.device=='cuda' else 'torch')
     shapes=(project.region.shape,(1,),(),()) if args.dispersive else None
     reservation=estimate_adjoint_memory(project,options,device=args.device,parameter_shapes=shapes)
@@ -96,6 +97,7 @@ def main(argv=None):
     record=dict(stage='admitted_not_executed',grid=project.region.shape,steps=args.steps,
         device=args.device,hardware=torch.cuda.get_device_name() if args.device=='cuda' else 'CPU',
         precision=args.precision,dispersive=args.dispersive,driver_smoke=args.smoke,cpu_threads=torch.get_num_threads(),
+        checkpoints=args.checkpoints,
         exceeds_workbench_cell_guard=args.size**3>8_000_000,source_cell_index=source_flat,
         reservation=reservation,source_sha256={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
             for p in [Path(__file__).resolve(),*sorted((root/'photonweave').glob('*.py'))]},

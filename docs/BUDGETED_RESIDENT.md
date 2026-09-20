@@ -7,6 +7,11 @@ API accepts `Region(memory_mode="budgeted")` with an explicit
 ranges before creating fields, packing ADE material arrays or copying CPU
 design parameters to CUDA. The default workbench guard remains unchanged.
 
+The newer [allocation-derived CUDA planner](RESIDENT_ALLOCATION_MODEL.md)
+counts native field/adjoint owners and exact checkpoint states separately from
+the conservative Torch workspace. It also reserves cold spectral library
+workspace and explicit allocation headroom.
+
 ```python
 from photonweave import (
     Region, Project, Source, Monitor, AdjointOptions, estimate_adjoint_memory,
@@ -90,7 +95,7 @@ Actual execution requires available device and host capacity. Without
 `--execute`, the driver admits and records the plan only. A small `--smoke`
 driver run cannot be reported as large-grid capacity evidence.
 
-The final local regression covered 190 passing tests across resident memory,
+The byte-admission revision `d16579f` covered 190 passing tests across resident memory,
 unified selection, streamed admission, point spectra, planes, native CUDA
 adjoints and solver lifetime. The budget-specific suite then passed 17 tests,
 including three added denials before field allocation, ADE packing or CUDA

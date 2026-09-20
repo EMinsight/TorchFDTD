@@ -743,4 +743,43 @@ causal-halo revisions were measured sequentially, without randomized
 alternation between revisions. No isolated causal speed estimate,
 beyond-VRAM speedup or external-solver advantage follows from this study.
 
+
+\section{Allocation-derived resident admission}
+The fully fused CUDA path owns reusable arrays rather than Torch expression
+temporaries at every step. The planner therefore distinguishes native array
+ownership from the conservative bound retained for CPU and partially fused
+execution. With $N$ cells, $P$ poles, $C$ CPML scalars and field scalar size
+$b_f$, one physical restart occupies
+\begin{equation}
+ R=(6N+6PN+C)b_f.
+\end{equation}
+Device checkpoint and asynchronous staging slots each reserve $R$. The earlier
+bound treated CPML as twelve full-volume arrays in every saved state.
+
+Primal and adjoint E/H/P/Q require $(12+12P)Nb_f$. One primal CPML bank and two
+adjoint CPML banks require $3Cb_f$. Nondispersive coefficients, a contiguous
+epsilon copy and its gradient receive a diagonal upper bound of $9Nb_r$.
+ADE instead reserves two additional electric-sized arrays and shared material
+reduction partials, with parameter packing accounted separately. One complete
+restart is retained as a replay and conversion allowance. Source profiles,
+injection supports, boundary coefficients and observer gathers are explicit
+terms. The full native reservation adds five percent and 8 MiB of operational
+headroom. This is an engineering admission model, not a universal peak proof.
+
+Spectral matrix products may allocate additional library workspace on their
+first invocation. Separate cuBLAS and cuBLASLt pools are reserved for the
+calling and autograd threads. Hardware defaults and configured workspace
+sizes are included without performing a matrix-product warm-up.
+The defaults and configuration units follow \texttt{CublasHandlePool.cpp}
+in PyTorch version 2.10.0. Caller geometry, objective and optimizer graphs,
+CUDA context and unrelated processes remain outside the estimate.
+
+The $256^3$ dielectric and $208^3$ single-pole tests were repeated with two
+device checkpoints and a 4 GiB solver budget. Reservations were 2.856 and
+2.720 GB. Measured Torch CUDA peaks were 2.025 and 2.104 GB, including the
+driver's design tensor and objective. Both twelve-step tests retained the
+finite-cone reference agreement. Concurrent application work excludes their
+elapsed times from performance comparisons. Larger metadata-only admission
+checks do not establish that the corresponding simulations have executed.
+
 \end{document}

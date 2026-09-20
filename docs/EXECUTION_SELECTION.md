@@ -55,8 +55,11 @@ candidates include solver workspace, checkpoint tiers, complete source/output
 histories, ADE packing and input/gradient transfer carriers. The wrapper's
 `host_budget_bytes` limits total solver-owned RAM, while the nested
 `AdjointOptions.host_budget_bytes` keeps its checkpoint-tier meaning. Both must
-pass. Caller inputs, geometry and optimizer graphs remain outside these
-budgets. CUDA context and OS file cache are not included.
+pass. The [resident allocation model](RESIDENT_ALLOCATION_MODEL.md) distinguishes
+fully fused CUDA from generic Torch workspace, reserves exact restart slots
+and includes cold cuBLAS/Lt pools for spectral observations. Caller inputs,
+geometry and optimizer graphs remain outside these budgets. CUDA context and
+OS file cache are not included.
 
 Generated resident candidates now use [explicit byte admission](BUDGETED_RESIDENT.md)
 instead of the workbench's eight-million-cell guard. Create large projects with

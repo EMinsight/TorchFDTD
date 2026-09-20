@@ -29,6 +29,10 @@ Large grids can now opt into [byte-budgeted resident adjoints](docs/BUDGETED_RES
 so a grid that fits memory is not forced into streaming by the workbench cell
 guard. Short 256-cubed dielectric and 208-cubed ADE forward/VJP checks passed.
 They are resident index/capacity checks, not beyond-VRAM speed measurements.
+An [allocation-derived CUDA planner](docs/RESIDENT_ALLOCATION_MODEL.md) now
+counts native arrays, exact checkpoint states and cold spectral library pools.
+The two large-index cases also passed with two device checkpoints under a
+4 GiB solver budget. Their measured allocation is separate from speed claims.
 
 Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and physical convergence of the full CR objective remain pending.
 

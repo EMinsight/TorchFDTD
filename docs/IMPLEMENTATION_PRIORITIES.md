@@ -12,7 +12,7 @@
 
 분산 재료 후속: 27GiB E/H와 27GiB P/Q를 갖는 54GiB 실행의 10-step forward·gradient 검증도 완료했다. 최대 Torch CUDA 할당은 5.17GB, 전체 시간은 3289.839초다. 이는 용량 증거이며 장시간 수렴이나 속도 우위가 아니다. [측정·소스·한계](validation/DISPERSIVE_CAPACITY_REPORT.md). Resident 실행 전 메모리 검사는 필드와 재료 carrier 생성 전에 GPU·CPU 작업 공간·checkpoint 예산을 확인하며, 실험적 통합 후보 선택을 연결했으며 장시간 선택 품질 검증은 후속이다.
 
-Resident 후속: 명시적 byte 예산과 CUDA 인덱스 검사로 기본 800만 셀 제한을 넘는 adjoint 경로를 추가했다. 256³ 비분산과 208³ ADE의 12-step forward·gradient가 비영 CPML을 포함한 Torch 기준과 일치한다. 통합 선택의 기본 resident 후보에도 같은 예산을 적용한다. 장시간 검증과 과도하게 보수적인 작업 공간 예약의 정밀화는 남아 있다. [API·측정 범위](BUDGETED_RESIDENT.md).
+Resident 후속: 명시적 byte 예산과 CUDA 인덱스 검사로 기본 800만 셀 제한을 넘는 adjoint 경로를 추가했다. 256³ 비분산과 208³ ADE의 12-step forward·gradient가 비영 CPML을 포함한 Torch 기준과 일치한다. 통합 선택의 기본 resident 후보에도 같은 예산을 적용한다. CUDA 배열 구성에 따른 예약량 계산과 실제 restart 크기의 checkpoint 예산을 추가했다. 최초 스펙트럼 계산의 cuBLAS 작업 공간도 별도 예약한다. 두 큰 격자를 checkpoint 2개와 4GiB 예산으로 재검증했다. 512³ RTX 5880 실행과 장시간 검증은 후속이다. [API·측정 범위](BUDGETED_RESIDENT.md).
 
 현재 1,661행 중 엔진 또는 UI에 남은 작업이 있는 행은 1,507개다. 행 수는 완성도나 연구 기여의 지표가 아니다.
 
