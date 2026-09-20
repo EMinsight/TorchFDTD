@@ -24,8 +24,8 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 | 설계 파라미터화 | Density, projection/binarization, symmetry | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수 | 기본 topology workflow 구현. 일반 spline/polygon shape derivative·제작 제약·최종 CR 물리 수렴은 별도 |
 | Mode source·detector·port | Mode source/detector, overlap/S-parameter | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 같은 exterior 단면의 고정 모드만 지원. 일반 branch/서로 다른 단면·open/PML 횡단면·streamed injection·모드 미분·물리 수렴·UI가 남음 |
 | Far-field·회절 | Field projection, diffraction detectors | Closed-box 벡터 원거리장, Bloch 회절 차수·방향별 효율, field graph와 재료 VJP, FP32 방사 패턴 수렴 | 기본 homogeneous exterior 기능 구현. substrate/periodic lattice far-field·일반 응용·UI는 남음 |
-| 이방성 | 대각·일반 tensor | Node-sampled SPD bulk tensor, periodic/Bloch CPU·CUDA, 이산 transpose·6성분 VJP·checkpoint·고유파 검증 | **부분**. CPML·interface·tensor ADE·streaming·mode·UI 연결과 응용 검증이 남음 |
-| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. 별도 PMC endpoint CPU/CUDA·재료/파형 VJP·checkpoint 및 명시적 native Project 어댑터 | **부분**. PMC 전역 dispatch/UI·ADE·streaming·batch와 실제 domain reduction의 실행 비용 검증이 남음 |
+| 이방성 | 대각·일반 tensor | Node-sampled SPD bulk tensor, periodic/Bloch CPU·CUDA와 고정 등방성 CPML 외부, 이산 transpose·6성분 VJP·checkpoint·고유파 검증 | **부분**. 일반 anisotropic CPML·반사/장시간 안정성·interface·tensor ADE·streaming·mode·UI 검증이 남음 |
+| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. Closed PMC cavity의 native Project·CLI·browser 편집/실행·전체 endpoint NPZ, 별도 재료/파형 VJP·checkpoint | **부분**. PMC의 PML 혼합·ADE·streaming·tensor batch와 실제 domain reduction의 실행 비용 검증이 남음 |
 
 ## 이번 구현의 근거
 
@@ -52,14 +52,23 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
   이산 기준과 상대오차 0.00181%/0.000124%, 연속계와 같은 부호를 확인했다.
   가장 세밀한 메시에도 연속계 gradient 크기 오차 6.50%는 남는다.
   같은 격자의 finite difference 통과를 물리적 설계 방향 검증으로 대체하지 않는다.
+  별도 [25 nm 후속](MODE_NETWORK_GRADIENT_ACCEPTANCE.md)은 사전 선언한
+  2% 기준을 통과했다. Native gradient +0.249719의 연속계 오차는 1.58%이며,
+  epsilon을 0.001 줄인 실제 forward와 해석 기준 모두 목적함수가 감소했다.
+  앞선 메시의 오차를 보존하며 CR·일반 형상 미분의 완료로 확대하지 않는다.
 - [원거리장·회절](RADIATION.md): 해석 vector dipole의 복소 진폭과 전력,
   Bloch 차수·방향 분리, FP32 normalization, 실제 material VJP.
   native dipole 방사 패턴의 100→75→50 nm 메시 오차는 1.03→0.54→0.23%다.
 
 - [PMC resident API](PMC_IMPLEMENTATION_PLAN.md): 실제 endpoint의 소스·관측과
   FP32 CUDA·재료/파형 gradient, 10,000-step logical binomial schedule.
+  Native Project·CLI·browser의 closed-cavity 실행과 exact endpoint NPZ,
+  여섯 경계의 원자적 편집·오류 시 원본 보존을 추가했다.
 - [Bulk tensor API](ANISOTROPY_IMPLEMENTATION_PLAN.md): periodic/Bloch
   CPU/CUDA, 6성분 유한차분, 독립 Fourier symbol·에너지·mesh dispersion.
+  고정 등방성 CPML/collar 안의 tensor에 비주기 정규화 연산자와 전체
+  CPML 상태 transpose를 연결했다. CPU 독립 autograd와 FP32 CUDA 실수·복소
+  VJP가 일치한다. Eigenvalue 검사의 CUDA batch workspace도 제한했다.
 - [단일 도메인 분할](DOMAIN_DECOMPOSITION.md): 동일 도메인의 rank-local
   E/H·epsilon, halo transpose와 material VJP. Linux CI의 실제 2/3-process
   Gloo 경로에서 fields·초기 상태/재료 VJP·halo·local finite difference를
@@ -69,10 +78,10 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 
 1. 진행 중인 원래 CR 24-cycle 결과와 실제 FP32 48 GB 초과 용량 검증을
    보존하며 완료한다. 최적 CR 후보의 세밀한 메시 재검증은 별도 단계다.
-2. 별도 PMC API의 native Project 어댑터를 전역 dispatch/UI와
-   ADE·streaming·batch로 확장한다. 이미 통과한 경로는 변경 없이 반복하지 않는다.
-3. [일반 이방성 tensor 계획](ANISOTROPY_IMPLEMENTATION_PLAN.md)의 periodic
-   foundation을 CPML·계면·streaming과 UI로 확장하고 각 물리 범위를 검증한다.
+2. Native PMC closed-cavity 경로를 PML 혼합·ADE·streaming·batch로 확장한다.
+   이미 통과한 경로는 변경 없이 반복하지 않는다.
+3. [일반 이방성 tensor 계획](ANISOTROPY_IMPLEMENTATION_PLAN.md)의 고정 등방성
+   CPML 외부에서 반사·안정성 및 계면을 검증하고 streaming과 UI로 확장한다.
 4. Mode port의 일반 단면/branch와 streamed 경로, source parameter
    미분을 확장한다. GDS port metadata와 실제 실행 흐름도 연결한다.
 5. 단일 문제 multi-GPU의 물리 범위를 확장하고 실제 여러 장치에서 통신·peak memory·

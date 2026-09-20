@@ -161,8 +161,8 @@ addmesh.z min,z min,P1,7,required,인터페이스·메시 효율,True,missing,mi
 addmesh.z span,z span,P1,7,required,인터페이스·메시 효율,True,partial,partial,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 boundary.antisymmetry,Anti-symmetric,P1,7,required,인터페이스·메시 효율,False,implemented,implemented,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 boundary.pec,PEC 경계,P1,7,required,인터페이스·메시 효율,False,implemented,implemented,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
-boundary.pmc,PMC 경계,P1,7,required,인터페이스·메시 효율,True,partial,partial,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
-boundary.symmetry,Symmetric,P1,7,required,인터페이스·메시 효율,True,partial,partial,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
+boundary.pmc,PMC 경계,P1,7,required,인터페이스·메시 효율,True,partial,partial,partial,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
+boundary.symmetry,Symmetric,P1,7,required,인터페이스·메시 효율,True,partial,partial,partial,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.axis_step,독립 dx/dy/dz,P1,7,required,인터페이스·메시 효율,False,implemented,implemented,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.metal_mesh,금속 skin-depth 자동 메시,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.override_step,영역별 target step,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.

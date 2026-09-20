@@ -25,7 +25,7 @@ def main():
     batch.add_argument('--resume', action='store_true')
     batch.add_argument('--fail-fast', action='store_true')
     example = sub.add_parser('example')
-    example.add_argument('name', choices=['waveguide','scatterer','3d'])
+    example.add_argument('name', choices=['waveguide','scatterer','3d','pmc'])
     example.add_argument('--output', default='project.json')
     sub.add_parser('hardware')
     inspect = sub.add_parser('fsp-inspect', help='Inspect FSP using an installed, licensed Lumerical API')

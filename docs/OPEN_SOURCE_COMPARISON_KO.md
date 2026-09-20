@@ -9,8 +9,9 @@
 회절·closed-surface far-field를 추가했다. 기본 API 구현과 전체 기능 동등성을
 구분한다. 별도 API의 bulk tensor adjoint, PMC endpoint와 native Project
 어댑터, opposing multimode S 행렬, rank-local 분산 초기값 계산을 추가했다.
-일반 tensor의 CPML·streaming, production PMC와 실제 multi-GPU 검증은
-계속 미완료다.
+Native closed-PMC의 browser·CLI 실행과 고정 등방성 CPML 외부 안의 tensor
+adjoint까지 연결했다. 일반 anisotropic CPML·반사/안정성 검증, PMC의
+추가 물리·streaming과 실제 multi-GPU 검증은 계속 미완료다.
 
 이번에는 실제 계산 비교로 진행했다. 5880에서 vacuum/sphere/slab/waveguide 각각 64³와 96³, 총 8개를 flaport/fdtd 0.2.2와 실행했다. 상대 기준선에도 CUDA Graph를 적용했고 전체 wall time은 9.64–17.09배 단축됐다. 점 신호 상대 L2 차이는 0.012–0.037%다. 경계 stencil 차이 때문에 최종 전체 장은 동일하지 않으며, 약한 최종 H의 상대 오차가 큰 사례도 [상세 보고서](validation/OPEN_SOURCE_REPORT.md)에 공개했다. 다른 세 라이브러리의 속도는 아직 측정하지 않았다.
 

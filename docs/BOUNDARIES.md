@@ -40,7 +40,9 @@ Supported scope: staircase materials, real and complex fields, CPU/Torch and fus
 
 Tests cover discrete cavity eigenfrequencies, both transverse polarizations on all three axes, doubled periodic versus reduced domains, corners, nonuniform edge metrics, transpose identities, resident/streamed gradients and CUDA batch consistency. See [numerical tests](../tests/test_pec_boundaries.py) and [delivery-surface tests](../tests/test_pec_surface.py). These are native verification results, not vendor-equivalence measurements.
 
-**PMC and symmetric boundaries remain unsupported.** Exact upper-endpoint PMC requires additional tangential E and normal H face states, plus intersecting E-edge states. Selecting these kinds raises an explicit error. The next implementation contract is [PMC implementation plan](PMC_IMPLEMENTATION_PLAN.md). PEC boundaries do not implement a PEC material model.
+**PMC and symmetric boundaries support a closed-cavity workflow.** Exact upper-endpoint PMC stores additional tangential E and normal H face states, plus intersecting E-edge states. All six faces must be PEC, PMC or their symmetry equivalents. The supported real FP32 3D scene uses fixed Yee meshes, nondispersive materials, point electric sources and point E/H monitors. PML mixing, ADE, streamed execution and tensor batches remain unsupported. The [PMC implementation contract](PMC_IMPLEMENTATION_PLAN.md) describes the ordinary `Simulation` path and separate material/waveform adjoint API. PEC boundaries do not implement a PEC material model.
+
+In the browser, open **PMC cavity** under Example projects, or use **Edit six faces together** in the boundary panel. The dialog validates the complete proposed configuration before replacing the scene. JSON/Python export preserves it. Field plots show the base volume. NPZ also stores the upper face/edge values omitted from that view. These boundaries do not automatically mirror the user's geometry or excitation.
 
 ## Native CPML parameters
 
@@ -70,4 +72,4 @@ Real traces use a one-sided Hann FFT scaled by 2/N. Complex traces use the posit
 
 ## Verification and remaining scope
 
-Still required for full parity: independent FSP mapping, named Lumerical PML-profile equivalence, PMC/symmetric boundaries, PEC/subpixel coupling, automatic angle-to-Bloch source settings, BFAST, dispersive-medium and grazing-angle coverage, and the other families in the parity roadmap.
+Still required for full parity: independent FSP mapping, named Lumerical PML-profile equivalence, broader PMC/symmetric physics and streaming, PEC/subpixel coupling, automatic angle-to-Bloch source settings, BFAST, dispersive-medium and grazing-angle coverage, and the other families in the parity roadmap.

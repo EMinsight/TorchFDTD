@@ -1,10 +1,10 @@
 # General anisotropic materials: implementation plan
 
-Status: the bounded periodic nondispersive foundation is implemented in `torchfdtd/anisotropy.py`. The extensions below remain a plan. This is not general anisotropic source, open-boundary, dispersive, streamed, or production-performance parity.
+Status: the bounded periodic nondispersive foundation and a restricted fixed-isotropic-exterior CPML composition are implemented in `torchfdtd/anisotropy.py`. General anisotropic media extending into CPML remain unsupported. This is not general anisotropic source, open-boundary, dispersive, streamed, or production-performance parity.
 
 ## Implemented foundation and usage
 
-`TensorDielectricSimulation` accepts real node-sampled epsilon with shape `(Nx, Ny, Nz, 3, 3)`, exact symmetry, and eigenvalues at least one. It supports uniform rectangular 3D Yee grids with periodic/Bloch faces, FP32 or FP64, CPU or Torch CUDA, soft impressed-field sources, point histories, and online point DFT. It reuses native curl, source, observation, and bounded checkpoint scheduling machinery. Its constitutive update and analytic material VJP are tensor-aware. A full time-history autograd graph or dense global constitutive matrix is not retained.
+`TensorDielectricSimulation` accepts real node-sampled epsilon with shape `(Nx, Ny, Nz, 3, 3)`, exact symmetry, and eigenvalues at least one. It supports uniform rectangular 3D Yee grids with periodic/Bloch faces or CPML behind a fixed isotropic collar, FP32 or FP64, CPU or Torch CUDA, soft impressed-field sources, point histories, and online point DFT. It reuses native curl, source, observation, and bounded checkpoint scheduling machinery. Its constitutive update and analytic material VJP are tensor-aware. A full time-history autograd graph or dense global constitutive matrix is not retained.
 
 ```python
 import torch
@@ -26,9 +26,9 @@ loss.backward()
 
 The example parameterization keeps a strict margin above the CFL eigenvalue bound. Use a nonzero starting factor when optimizing, since its derivative vanishes at zero. Optimizer and caller material-construction graphs are outside solver admission. The operator includes the input tensor in its conservative extra storage allowance, but this does not bound arbitrary upstream graphs.
 
-The wrapper rejects CPML/walls, graded meshes, 2D reductions, spatial streaming, full-tensor ADE, one-way/TFSF injection, and fused tensor kernels. It does not expose modal source coupling or promise anisotropic interface homogenization. Epsilon is explicit input, not a tensor material schema in Project. Scene geometry does not generate these node tensors automatically. Native soft sources remain impressed field increments, not calibrated physical current sources. Higher derivatives are unsupported.
+The wrapper rejects anisotropic CPML coefficients, walls, graded meshes, 2D reductions, spatial streaming, full-tensor ADE, one-way/TFSF injection, and fused tensor kernels. It does not expose modal source coupling or promise anisotropic interface homogenization. Epsilon is explicit input, not a tensor material schema in Project. Scene geometry does not generate these node tensors automatically. Native soft sources remain impressed field increments, not calibrated physical current sources. Higher derivatives are unsupported.
 
-`reservation()` reports admission without allocating constitutive matrices or fields. `host_budget_bytes` limits total host reservation in this wrapper, stronger than the native checkpoint-tier-only meaning. Tensor coefficients, inverse/validation scratch, VJP temporaries, and sequential triplet scratch have a conservative linear allowance of 192 real scalars per cell in addition to the native reservation. CUDA adds 64 MiB for cold linear-algebra/allocator overhead. These are engineering bounds, not a platform-independent peak proof. CUDA uses ordinary Torch kernels, not an optimized fused anisotropic kernel.
+`reservation()` reports admission without allocating constitutive matrices or fields. `host_budget_bytes` limits total host reservation in this wrapper, stronger than the native checkpoint-tier-only meaning. Tensor coefficients, inverse/validation scratch, VJP temporaries, and sequential triplet scratch have a conservative linear allowance of 192 real scalars per cell in addition to the native reservation. CUDA adds 64 MiB for cold linear-algebra/allocator overhead. Eigenvalue validation uses batches of at most 64 matrices to bound solver scratch. These are engineering bounds, not a platform-independent peak proof. CUDA uses ordinary Torch kernels, not an optimized fused anisotropic kernel.
 
 ### Completed focused verification
 
@@ -43,6 +43,87 @@ The wrapper rejects CPML/walls, graded meshes, 2D reductions, spatial streaming,
 
 Remaining acceptance items include independent dense tiny-operator spectral bounds, broader spatially varying material objectives, high-contrast/CFL sweeps, measured large-grid memory/performance scaling, and the physical interface/source/boundary extensions listed below.
 
+## Restricted CPML composition and fixed exterior
+
+Use `TensorDielectricSimulation(project, options,
+cpml_background_epsilon=2.0)` when a face is CPML. This explicit finite scalar
+must be at least one. Every node tensor in every PML layer plus one adjacent
+node row must equal `2.0 * I` exactly in the input dtype. All CPML faces share
+that same fixed exterior. The interior can contain rotated, spatially varying
+SPD tensors. Periodic/Bloch axes may coexist with CPML axes.
+
+The exterior is **not a design variable**. The explicit scalar argument has no
+material derivative, and every tensor VJP entry in its PML/collar is zero,
+including diagonal entries. Optimize only the interior, for example by forming
+`epsilon = torch.where(interior_mask[..., None, None], design_tensor,
+background * torch.eye(3))`. A direct full-grid tensor input retains the same
+fixed-collar gradient contract. Changing the fixed scalar is a new simulation
+configuration, not a differentiable operation. Shape, dtype, exact symmetry,
+spectral bounds and exterior values are validated. Saved input version checks
+reject mutation between forward and backward.
+
+For finite axes, missing incident edges use zero extension, never a periodic
+roll. Let R contain only existing edge incidences. Its diagonal coverage is
+`D = (1/8) sum R¢ÓR`: one for ordinary edges and one half for the final edge of
+its own finite axis. The implemented gather is `R D^(-1/2)` and its scatter is
+`D^(-1/2) R¢Ó`. Thus
+
+```text
+S = D^(-1/2) [(1/8) sum R¢Ó K R] D^(-1/2)
+(1/8) sum (R D^(-1/2))¢Ó (R D^(-1/2)) = I
+```
+
+This yields Hermitian positive S, preserves local bounds on K, and recovers
+constant diagonal/isotropic material at every terminal edge. This is a nodal
+constitutive closure, not a new physical wall condition. CPML termination uses
+the existing scalar curl boundary contract. The CPML derivative target lies
+in its outer `layers` field rows. Gathering those edges reaches at most one
+additional node row. Fixing `layers + 1` rows therefore contains every tensor
+coefficient acting on a CPML-supported curl. A focused support test verifies
+that S on such a curl equals scalar division without coupling into the tensor
+interior or wrapping to the opposite face.
+
+The update first advances the electric CPML memories and constructs the
+CPML-modified H curl, then applies S to that complete curl. The magnetic curl
+updates its own memories after the electric field update. Every psi array is
+included in native checkpoints. Reverse propagation transposes the magnetic
+curl and its memory update first, applies S¢Ó to the electric seed, accumulates
+the inverse-matrix tensor VJP, then transposes the electric curl and memories.
+The reservation reuses the native CPML state/replay accounting plus the existing
+192-real-scalars-per-cell tensor allowance. No dense constitutive matrix or
+full time graph is used in production.
+
+`tests/test_anisotropy_cpml.py` has seven CPU checks and two CUDA cases. Six passed together in
+6.67 seconds; the subsequently added nonzero-memory transpose check passed in
+3.50 seconds. Five existing periodic CPU regressions passed in 5.37 seconds.
+Evidence includes independently assembled tiny incidence matrices, Hermitian
+and spectral bounds, no opposite-face coupling, finite-boundary material VJP,
+CPML support reach, FP32 constant-isotropic scalar forward parity, and native
+material-gradient parity after the exact nodal-to-Yee diagonal mapping. That
+mapping averages neighboring inverse node coefficients, so independent node
+and Yee scalar perturbations must not be equated. Real all-CPML and complex
+mixed Bloch/CPML tensor-interior pulses match full Torch-autograd histories and
+material derivatives in bounded FP64 diagnostics. A random nonzero-psi state
+checks every E/H/CPML transpose component against autograd. Fixed-collar
+rejection, zero exterior VJP and saved input version checks are covered.
+
+These results validate discrete composition and gradients. They do not validate
+a homogeneous rotated anisotropic medium continued into PML, anisotropic
+coordinate stretching, long-time CPML stability or quantitative open-boundary
+reflection convergence. Such inputs are rejected. Two bounded RTX 3060 FP32
+cases (real all-CPML and complex mixed Bloch/CPML) additionally passed against
+the CPU full-autograd oracle in 5.79 seconds. Allocated peaks were 9,489,920 and
+17,117,696 bytes versus reservations of 69,293,680 and 70,105,248 bytes. Initial
+validation exposed CUDA batched-eigenvalue scratch exceeding the reservation;
+validation now uses fixed batches of at most 64 matrices, reducing workspace
+without increasing the allowance. Invalid-eigenvalue flags accumulate on device
+and are read on host once after the scan, avoiding an explicit Python boolean
+synchronization per chunk. Python/kernel launch overhead remains, and PyTorch
+CUDA eigvalsh may synchronize internally. This conservative bounded-workspace
+scan is not an optimized large-grid CPU/CUDA startup path. The CPU validation test enforces that batch
+bound. No long-time GPU stability, performance or large-memory result follows
+from these small parity checks.
+
 ## Current supported scope
 
 | Interface | Supported constitutive scope | Limitation |
@@ -51,7 +132,7 @@ Remaining acceptance items include independent dense tiny-operator spectral boun
 | Native staircase voxelization | Scalar material sampled separately at the three electric Yee locations | Three samples do not represent off-diagonal coupling |
 | `DifferentiableSimulation` | Real FP32/FP64 epsilon of shape `(Nx, Ny, Nz)` or `(Nx, Ny, Nz, 3)` | Componentwise scalar or diagonal update and material VJP |
 | Differentiable ADE | Scalar or componentwise diagonal instantaneous epsilon and pole parameters, subject to the existing broadcast contracts | No off-diagonal oscillator coupling |
-| New `TensorDielectricSimulation` | Real symmetric full node tensors with eigenvalues at least one, periodic/Bloch, CPU/Torch CUDA | No CPML, full-tensor ADE, streaming, or calibrated modal injection |
+| New `TensorDielectricSimulation` | Real symmetric full node tensors with eigenvalues at least one, periodic/Bloch or fixed-isotropic-exterior CPML, CPU/Torch CUDA | No anisotropy inside CPML/collar, full-tensor ADE, streaming, or calibrated modal injection |
 | Streamed dielectric and ADE paths | Their existing scalar/diagonal material contracts | No general tensor constitutive operator |
 | Native subpixel path | A symmetric off-diagonal inverse constitutive operator built from isotropic dielectric interfaces | Not a bulk anisotropic material API, not a full-tensor differentiable path |
 
@@ -61,7 +142,7 @@ Relevant interfaces are `solver.field_axes`, `solver.voxelize`, `boundaries.upda
 
 ## Foundation design and remaining milestone gates
 
-The implemented foundation uses fixed real symmetric positive-definite bulk permittivity on uniform rectangular, periodic Yee grids, with relative permeability one and nondispersive materials. It includes an explicit operator transpose and tensor material VJP. Initially exclude CPML, nonperiodic walls, tensor dispersion, streamed execution, anisotropic interface homogenization, and anisotropic modal sources from the acceptance claim.
+The implemented foundation uses fixed real symmetric positive-definite bulk permittivity on uniform rectangular, periodic Yee grids, with relative permeability one and nondispersive materials. It includes an explicit operator transpose and tensor material VJP. General anisotropic CPML, nonperiodic walls, tensor dispersion, streamed execution, anisotropic interface homogenization, and anisotropic modal sources remain excluded from the acceptance claim.
 
 Define the tensor sampling location explicitly. A first contract can assign one physical tensor to each common mesh node. Represent six independent symmetric entries, or use a constrained parameterization such as `epsilon = I + L L^T` when the conservative vacuum CFL is required. Check finite values, symmetry, and eigenvalue bounds. Do not clip physical tensors to make an unsupported input appear valid.
 
@@ -81,7 +162,7 @@ Assembly must cover every bulk node, including homogeneous anisotropic interiors
 
 Complete periodic coverage gives `(1/8) sum R^dagger R = I`. Thus local bounds `m I <= K <= M I` give the same bounds on S, and S is Hermitian positive definite. The existing sparse row topology can be reused after checking its capacity and duplicate accumulation. A constant full tensor produces cross-component interpolation between distinct Yee edges, not a colocated multiply. Constant diagonal tensors should recover the existing diagonal update exactly.
 
-Nonperiodic edge-triplet completion requires a separate derivation. An isotropic baseline for missing triplets does not prove the same bounds for general anisotropic boundary tensors. Abrupt anisotropic interfaces also require separate accuracy evidence or tensor-aware homogenization. Bulk nodal assembly alone is not a claim of general subpixel interface accuracy.
+The normalized finite-node completion below supplies the nonperiodic edge-triplet derivation for the restricted CPML path. An arbitrary isotropic baseline for missing triplets would not establish these bounds. Abrupt anisotropic interfaces also require separate accuracy evidence or tensor-aware homogenization. Bulk nodal assembly alone is not a claim of general subpixel interface accuracy.
 
 ## Forward, transpose, and memory contracts
 

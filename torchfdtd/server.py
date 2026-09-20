@@ -54,7 +54,7 @@ def create_app(result_dir=None):
 
     @app.get('/api/examples/{name}')
     def example(name: str):
-        if name not in ('waveguide', 'scatterer', '3d'):
+        if name not in ('waveguide', 'scatterer', '3d', 'pmc'):
             raise HTTPException(404, 'Unknown example')
         return demo_project(name)
 

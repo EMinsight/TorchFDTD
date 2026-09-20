@@ -11,14 +11,14 @@ from .pmc_simulation import EndpointSimulation
 
 
 class EndpointProject:
-    """Validated native geometry/source adapter, without global PMC model dispatch.
+    """Validated native geometry/source adapter with an optional closed-wall override.
 
-    Boundary overrides are required and stored separately from the native
-    project. Physical positions use nearest Yee samples with lower-coordinate
+    Without an override, use the native Project face labels. Explicit overrides
+    remain separate from the native project. Physical positions use nearest Yee samples with lower-coordinate
     tie breaking. Out-of-domain and wall-constrained requests are rejected,
     never silently moved to the next active sample.
     """
-    def __init__(self,project,*,boundary_faces,device='cpu',checkpoints=4,
+    def __init__(self,project,*,boundary_faces=None,device='cpu',checkpoints=4,
                  tensor_budget_bytes=256_000_000,host_preparation_budget_bytes=64_000_000):
         self.project=Project.model_validate(project.model_dump() if isinstance(project,Project) else project)
         p=self.project;r=p.region
@@ -34,6 +34,8 @@ class EndpointProject:
         if any(m.oscillators for m in p.materials if m.name in active):raise ValueError('Endpoint Project does not support dispersive materials.')
         if any(not s.enabled for s in p.sources) or any(not m.enabled for m in p.monitors):
             raise ValueError('Remove disabled sources/monitors explicitly before endpoint conversion.')
+        if boundary_faces is None:
+            boundary_faces=tuple(tuple(f.kind for f in r.boundaries.pair(a)) for a in range(3))
         aliases={'pec':'pec','antisymmetric':'pec','pmc':'pmc','symmetric':'pmc'}
         try:faces=tuple(tuple(aliases[x.lower()] for x in pair) for pair in boundary_faces)
         except (KeyError,AttributeError) as exc:raise ValueError('Provide explicit closed PEC/PMC boundary faces.') from exc
@@ -148,6 +150,6 @@ class EndpointProject:
             tuple(m.component for m in self.project.monitors),report)
 
 
-def endpoint_from_project(project,*,boundary_faces,**options):
+def endpoint_from_project(project,*,boundary_faces=None,**options):
     """Create a separately scoped closed-wall adapter from a Project or its dict."""
     return EndpointProject(project,boundary_faces=boundary_faces,**options)

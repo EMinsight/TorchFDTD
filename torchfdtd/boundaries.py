@@ -31,6 +31,8 @@ def _slice(axis, value, component=None):
 class YeeGrid(fdtd.Grid):
     """Extend the open-source fdtd grid with complex fields and native CPML."""
     def __init__(self, region):
+        if any(f.kind in ('pmc','symmetric') for a in range(3) for f in region.boundaries.pair(a)):
+            raise ValueError('PMC/symmetric requires the dedicated endpoint Simulation path; this Yee/adjoint/batch/streamed path is unsupported.')
         region.require_resident()
         super().__init__(shape=region.shape, grid_spacing=region.reference_step * 1e-6,
                          courant_number=region.courant_factor/math.sqrt(2 if region.dimension == '2d' else 3))
@@ -172,6 +174,8 @@ class YeeGrid(fdtd.Grid):
 class BoundaryDescription:
     """Boundary coefficients and state shapes without allocating volume fields."""
     def __init__(self,region):
+        if any(f.kind in ('pmc','symmetric') for a in range(3) for f in region.boundaries.pair(a)):
+            raise ValueError('PMC/symmetric requires the dedicated endpoint Simulation path; this Yee/adjoint/batch/streamed path is unsupported.')
         self.courant_number=region.rectangular_courant
         YeeGrid._prepare_boundaries(self,region)
 

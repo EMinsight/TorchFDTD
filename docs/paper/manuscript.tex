@@ -784,6 +784,18 @@ convergence is established. The two backward calls take 12.29 and 27.42 s
 on RTX 3060, using four restart slots per active launch and reconstructing
 one launch graph at a time.
 
+One further fixed-domain refinement to 25 nm uses 4,800 steps and 40 CPML
+cells per end. Before execution, the experiment declares relative derivative
+limits of $10^{-4}$ against the exact discrete oracle and 2 percent against
+the continuum, together with native and continuum loss decrease for a fixed
+permittivity decrement of 0.001. The native derivative is $+0.24971902$,
+with relative discrepancies $4.60\times10^{-8}$ and 1.58 percent.
+The actual native loss changes by $-0.000249803$, compared with
+$-0.000253863$ in the continuum. All three criteria pass for this fixed
+slab material parameter. They do not establish arbitrary shape or CR
+optimization accuracy. The native backward takes 73.04 s with four restart
+slots per active launch, without a full time-autograd field history.
+
 \subsection{Differentiable radiation transforms}
 
 Periodic diffraction analysis Fourier-projects collocated E/H fields over
@@ -860,8 +872,27 @@ CPU/CUDA trace and gradient agreement. A bounded FP64 Fourier diagnostic
 preserves modified leapfrog energy over 256 steps within $2\times10^{-12}$.
 Three mesh refinements approach the continuum dispersion with approximately
 second-order error. These checks establish a periodic nondispersive bulk
-foundation. Anisotropic interface accuracy, CPML, tensor ADE, modal injection,
+foundation. Anisotropic interface accuracy, tensor ADE, modal injection,
 spatial streaming and optimized fused tensor kernels remain unvalidated.
+
+A subsequent extension encloses interior anisotropic material in a fixed
+isotropic CPML exterior. Nonperiodic gathers use zero extension instead of
+coupling opposite faces. Defining the diagonal coverage operator
+$D=\frac18\sum_{n,s}R_{ns}^{\dagger}R_{ns}$ gives the normalized assembly
+\begin{equation}
+S=D^{-1/2}\left(\frac18\sum_{n,s}R_{ns}^{\dagger}K_nR_{ns}\right)D^{-1/2}.
+\end{equation}
+This preserves the constant diagonal limit and the local positive-definite
+bounds at finite edges. The CPML derivative is applied before $S$, and the
+reverse pass includes every CPML auxiliary state in the correct reverse
+order. An explicit isotropic background is required throughout the PML and
+one additional nodal row enclosing the constitutive stencil. That collar
+is fixed and its material gradient is zero. Independent tiny-matrix and
+full-state autograd checks, including nonzero auxiliary states, verify the
+admitted algebra. Real and complex FP32 CUDA material gradients match the
+CPU reference. A fixed 64-matrix batch for eigenvalue validation bounds a
+previously excessive CUDA workspace. General anisotropic PML matching,
+long-time reflection and stability, and interface accuracy remain open.
 
 \subsection{Endpoint and distributed checkpoint foundations}
 
@@ -881,7 +912,7 @@ This is a schedule count without fields, not a measured GPU acceleration.
 A separate 31-step field test checks the live-slot bound and gradient.
 Field storage is independent of duration at fixed checkpoint count, while
 waveform inputs and point-trace outputs still scale with duration and are
-included in admission. General project dispatch, ADE, streamed endpoints
+included in admission. ADE, streamed endpoints
 and large-domain throughput remain separate gates.
 
 A separately scoped Project adapter samples native analytic solids at every
@@ -889,8 +920,17 @@ endpoint electric coordinate, applies native pulse and polarization settings,
 and records requested and selected Yee positions. Its closed-wall override
 is explicit and does not alter the general Project boundary schema.
 Optional sampled material and waveform tensors retain their gradients.
-This connects fixed CAD geometry to the endpoint API, while browser editing
-of the override and broader source/monitor types remain unimplemented.
+This connects fixed CAD geometry to the endpoint API. Broader source and
+monitor types remain unimplemented.
+
+The subsequent native dispatch accepts the same closed-cavity subset in
+ordinary Project JSON, CLI and browser execution. The browser validates all
+six proposed face edits atomically. Point traces and volume plots use the
+usual result interface, while NPZ additionally preserves the true upper
+face and edge samples. Calculated tensor and host requirements are admitted
+against available memory instead of imposing a fixed small GPU capacity.
+Independent CPU and CUDA results and the complete browser export/run flow
+are checked. PML mixing, ADE and streamed endpoint propagation remain open.
 
 A second foundation partitions one periodic or Bloch problem into owned
 $x$ slabs. Each rank stores only its local E/H, material and checkpoint banks.

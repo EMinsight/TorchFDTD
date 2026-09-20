@@ -134,11 +134,11 @@ def test_actual_endpoint_geometry_sampler_and_gradient():
     torch.testing.assert_close(actual,expected,atol=2e-6,rtol=2e-6)
 
 
-def test_reference_does_not_admit_public_magnetic_wall():
-    with pytest.raises(ValueError,match="upper-face Yee states"):
-        BoundaryFace(kind='pmc')
-    with pytest.raises(ValueError,match="upper-face Yee states"):
-        BoundaryFace(kind='symmetric')
+def test_magnetic_wall_never_falls_through_to_ordinary_yee():
+    region=Region(dimension='3d',size=(1,1,1),mesh=.1,material_sampling='yee',
+        boundaries={a+'_'+side:BoundaryFace(kind='pmc') for a in 'xyz' for side in ('min','max')})
+    with pytest.raises(ValueError,match='endpoint'):
+        YeeGrid(region)
 
 
 def test_nonuniform_endpoint_material_sharing_is_explicit():

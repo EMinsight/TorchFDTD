@@ -2,6 +2,23 @@
 
 ## 21 September 2026 integration
 
+The integration following `3bc7898` adds ordinary native Project/CLI/browser
+closed-PMC execution and complete endpoint NPZ storage, a fixed-isotropic-collar
+CPML path for full interior tensors, and a separate 25 nm slab-gradient
+acceptance record. Focused native PMC CPU, CUDA and browser checks passed.
+Tensor CPML checks cover independent tiny assembly, nonzero auxiliary-state
+transpose, material VJP and real/complex FP32 CUDA parity. A discovered CUDA
+eigenvalue-validation workspace excess was corrected with bounded matrix
+batches. These checks do not establish general anisotropic PML reflection,
+long-time stability, streamed PMC or a large-grid memory measurement.
+The fixed-slab material derivative meets its predeclared 2% continuum criterion
+and its actual descent step improves both native and continuum objectives.
+See [the physical record](MODE_NETWORK_GRADIENT_ACCEPTANCE.md),
+[PMC integration](PMC_IMPLEMENTATION_PLAN.md) and
+[tensor CPML contract](ANISOTROPY_IMPLEMENTATION_PLAN.md).
+The prior CI counts below apply to their recorded revision. This runtime
+integration requires its own complete CI record.
+
 The current feature-by-feature status is in [FDTDX parity gates](FDTDX_PARITY_KO.md).
 The earlier acceptance snapshot below is retained as historical evidence.
 Linux CI [35533483790](https://github.com/hyoseokp/TorchFDTD/actions/runs/35533483790)

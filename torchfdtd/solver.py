@@ -145,6 +145,8 @@ def source_profile(src, loc, region):
 
 
 def estimate(p: Project):
+    from .endpoint_native import uses_endpoint, estimate_endpoint
+    if uses_endpoint(p.region):return estimate_endpoint(p)
     configure_auto_mesh(p)
     r = p.region
     n = math.prod(r.shape)
@@ -247,6 +249,7 @@ class Result:
     electric: np.ndarray
     magnetic: np.ndarray
     frequency_fields: list[dict] = field(default_factory=list)
+    endpoint_fields: dict | None = None
 
     @property
     def point_monitors(self):
@@ -274,6 +277,8 @@ class Result:
             plane_metadata.append({key:v for key,v in result.items() if not isinstance(v,np.ndarray)})
             for key,v in result.items():
                 if isinstance(v,np.ndarray):spectral_arrays[f'field_monitor_{k}_{key}']=v
+        if self.endpoint_fields is not None:
+            spectral_arrays.update({'endpoint_'+key:value for key,value in self.endpoint_fields.items()})
         np.savez_compressed(path, project=self.project.model_dump_json(), summary=json.dumps(self.summary),
                             field_monitors=json.dumps(plane_metadata),
                             **{f'mesh_{a}_um': nodes for a,nodes in zip('xyz',self.project.region.mesh_nodes)},
@@ -310,7 +315,8 @@ class Result:
                 prefix = f'field_monitor_{k}_'
                 plane.update({key[len(prefix):]: data[key].copy() for key in data.files if key.startswith(prefix)})
             return cls(Project.model_validate_json(str(data['project'])), json.loads(str(data['summary'])),
-                       *(data[key].copy() for key in ('frames', 'frame_steps', 'epsilon', 'signals', 'times', 'E', 'H')), planes)
+                       *(data[key].copy() for key in ('frames', 'frame_steps', 'epsilon', 'signals', 'times', 'E', 'H')), planes,
+                       {key:data['endpoint_'+key].copy() for key in ('E_upper','H_upper')} if 'endpoint_E_upper' in data else None)
 
     def field_monitor(self, name_or_id):
         """Return full complex E/H arrays, physical coordinates and signed flux."""
@@ -346,6 +352,8 @@ class Simulation:
                 torch.set_default_dtype(old_dtype)
 
     def _run(self, progress, cancel, cuda_graph, cuda_graph_steps):
+        from .endpoint_native import uses_endpoint, run_endpoint
+        if uses_endpoint(self.project.region):return run_endpoint(self.project,progress,cancel)
         from .cuda_graph import CudaStepGraphs, observation_schedule, validate_graph_steps
         p, r = self.project, self.project.region
         r.require_resident()

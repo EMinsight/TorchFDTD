@@ -1,0 +1,932 @@
+{
+  "declared_utc": "2026-09-20T20:18:55.511461+00:00",
+  "status": "completed",
+  "complete": true,
+  "criteria": {
+    "discrete_derivative_relative_error_max": 0.0001,
+    "continuum_derivative_relative_error_max": 0.02,
+    "require_native_and_continuum_loss_decrease": true
+  },
+  "fixed_epsilon_change": -0.001,
+  "objective": "Re(S21) + 0.3 Im(S12)",
+  "target_slab_epsilon": 2.6,
+  "planned_native_network_calls": {
+    "forward_with_backward": 1,
+    "additional_forward_for_descent": 1
+  },
+  "planned_native_fdtd_finite_difference_calls": 0,
+  "revision": "3bc7898b1d9c102a18f0e7aa8b04740c97b854d2",
+  "source_sha256": {
+    "benchmarks/mode_network_refinement.py": "c440119ff63546db33965166b2cec083f7f6c62192d56ee14bf60cdcd7590cf6",
+    "benchmarks/mode_network_slab_oracle.py": "b2f0ae45ae9922ddaa00a27dd6695ba84e8965bcaca25f3b6f7ce5a0d03978c7",
+    "torchfdtd/mode_network.py": "d1f416a6116857803f63f7851908c930acabe601f9fed138291b1c28c569290c",
+    "torchfdtd/mode_injection.py": "ecc4a25939737623aa2ecd16b283afebb2aefa07b021c904666d10a3b03ecf3a",
+    "torchfdtd/mode_ports.py": "0467e4404d94c2420d065e6a6451868951d73891bd1aaebc98051ab969a20d00",
+    "torchfdtd/recomputed_batch.py": "7547c431d6fb958f8ae1f390606f82a391647e9bdcd518703404af04adae8378",
+    "torchfdtd/differentiable.py": "90772d3c5cbfe35b37bd8d90e636a6e86424cecc2b612211d04ebef52b52106b",
+    "torchfdtd/adjoint_planes.py": "edbb64361a748d1f04f852d2ddd5de341aa32f59123cd71a539ff855679bac68",
+    "torchfdtd/adjoint_spectrum.py": "08dcc8a81b04fec8a14f43e2e8b1006d1f5da89e5755aa70fd5a75fd0e15173f",
+    "torchfdtd/adjoint_memory.py": "3a7cff0062a8b7f84ab88b3f36a465c67b61ef1d379825f387064f8f5aec23a0",
+    "torchfdtd/cuda_adjoint.py": "ba380285bed58be59f80b7a3bb979dad78a0666689c1fe156208119ec2a90127",
+    "torchfdtd/cuda_kernels.py": "19ceb53777e53851c085ce80be959bca191c0d6663a9a11cb4a4b6edbaca66d0",
+    "torchfdtd/cuda_memory.py": "fcb115a9c771935a89ea25e4fa66f62a26f6180795bfd1f3a1935b9529613821",
+    "torchfdtd/memory_profile.py": "fdcbd0eb8126974c61304754cbd22d0c9bd1f921f3234e8f3adbb28c6ea444bf",
+    "torchfdtd/models.py": "58b7119d81a435f1ecb4284fac5c87bdd0e72243fe175e1b6dc8efd7647bcb98",
+    "torchfdtd/solver.py": "a6cb91f60338d9517724f1d26499c643fdef58ba29433f267fd5429ca4d4eab3",
+    "torchfdtd/boundaries.py": "572669fe34adea25dbfae061614f82febcda637c945e4fd330dd66ffbf939cf1",
+    "torchfdtd/field_monitors.py": "23e73d2b971af0dabcf6649e0cfc3d3d4049ee9187f06ffebb50c9e8d5eb25af",
+    "torchfdtd/injection.py": "3c1b41a678c6356e9f08acebc3f6411693535b4111b815fa6b3ce33966961552",
+    "torchfdtd/waveforms.py": "654333e8afa4da1310afc714a1c15ad60663ef21f3533f4b55c1a7489a0809b9",
+    "benchmarks/mode_network_gradient_acceptance.py": "3a8ac81a3c2afbea8b26807bd1a1323486beea89b9c12e34a83879207780377c"
+  },
+  "source_manifest_sha256": "d619d7d439d7f4659ea060761d349c7fcfdc62986dfa28d3a34512a9d1449cd4",
+  "raw_source_snapshot_directory": ".local/mode_network_gradient_acceptance_sources/d619d7d439d7f4659ea060761d349c7fcfdc62986dfa28d3a34512a9d1449cd4",
+  "previous_gradient_record_sha256": "c793820866cd2cd482955048e346da4e2cbb5a660573bd4ecb31c6d5e2f2307e",
+  "scope": "Uniform slab epsilon parameter in the fixed isotropic opposing-port network only. Not general CR or shape-gradient completion.",
+  "timing_policy": "No explicit GPU warmup. First invocation includes process-local lazy initialization. Existing on-disk compiler cache may be reused.",
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "device": "cuda:0",
+  "torch_version": "2.10.0+cu126",
+  "cuda_version": "12.6",
+  "precision": "float32",
+  "configuration": {
+    "domain_um": [
+      8.0,
+      1.0,
+      1.0
+    ],
+    "spacing_um": 0.025,
+    "steps": 4800,
+    "pml_cells": 40,
+    "pml_thickness_um": 1.0,
+    "transverse_boundaries": "periodic",
+    "longitudinal_boundaries": "CPML",
+    "carrier_wavelength_um": 1.55,
+    "gaussian_pulse_cycles": 2,
+    "source_planes_um": [
+      -2.0,
+      2.0
+    ],
+    "port_phase_planes_um": [
+      -1.0,
+      1.0
+    ],
+    "background_epsilon": 2.25,
+    "epsilon_increment": 0.35,
+    "perturbation": "-0.2 <= actual Yee component x coordinate < 0.2 um, all y/z",
+    "perturbation_bounds_um": [
+      -0.2,
+      0.2
+    ],
+    "mode_indices": [
+      0
+    ],
+    "precision": "float32"
+  },
+  "physical_configuration_sha256": "1874aa216c3bf0ad5b6ee1f8181b570d34b30f8523b0e70cb52ff39f1a9fccb7",
+  "grid": [
+    320,
+    40,
+    40
+  ],
+  "steps": 4800,
+  "time_step_s": 4.766437173827514e-17,
+  "duration_s": 2.2878898434372066e-13,
+  "checkpoint_options": {
+    "checkpoints": 4,
+    "storage": "device",
+    "gpu_budget_bytes": 2147483648,
+    "host_budget_bytes": 2147483648,
+    "disk_budget_bytes": null,
+    "checkpoint_directory": null,
+    "device_checkpoints": 0,
+    "host_checkpoints": 0,
+    "backward_kernel": "auto",
+    "checkpoint_transfers": "sync",
+    "staging_slots": 2,
+    "resident_budget_bytes": 2147483648
+  },
+  "checkpoint_scope": "Four device restart states per active launch and one launch graph at a time via recompute_cases. No full Nstep autograd graph.",
+  "memory_preflight": {
+    "passed": true,
+    "checked_before_volume_allocation": true,
+    "per_case_plans": [
+      {
+        "base": {
+          "memory_reservation_bytes": 187059943,
+          "workspace_reservation_bytes": 63863000,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 24576000,
+            "primal_and_adjoint_cpml": 6067200,
+            "replay_and_conversion_allowance": 14310400,
+            "dielectric_coefficients_and_gradient": 18432000,
+            "boundary_coefficients": 3800,
+            "source_profiles": 0,
+            "source_injection": 12800,
+            "observation_gathers": 460800
+          },
+          "allocation_headroom_bytes": 16896767,
+          "device_checkpoint_reservation_bytes": 57241600,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 19136512,
+          "history_reservation_bytes": 28078856,
+          "output_history_bytes": 0,
+          "source_history_bytes": 19200,
+          "observation_index_bytes": 1843208,
+          "observer_layout_bytes": 1228808,
+          "observer_preparation_bytes": 19660808,
+          "material_packing_reservation_bytes": 0,
+          "restart_state_bytes": 14310400,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 19660808,
+          "gpu_reservation_bytes": 187059943,
+          "budgeted_resident": true
+        },
+        "modal_extra_bytes": 6745600,
+        "host_layout_bytes": 41889792
+      },
+      {
+        "base": {
+          "memory_reservation_bytes": 187059943,
+          "workspace_reservation_bytes": 63863000,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 24576000,
+            "primal_and_adjoint_cpml": 6067200,
+            "replay_and_conversion_allowance": 14310400,
+            "dielectric_coefficients_and_gradient": 18432000,
+            "boundary_coefficients": 3800,
+            "source_profiles": 0,
+            "source_injection": 12800,
+            "observation_gathers": 460800
+          },
+          "allocation_headroom_bytes": 16896767,
+          "device_checkpoint_reservation_bytes": 57241600,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 19136512,
+          "history_reservation_bytes": 28078856,
+          "output_history_bytes": 0,
+          "source_history_bytes": 19200,
+          "observation_index_bytes": 1843208,
+          "observer_layout_bytes": 1228808,
+          "observer_preparation_bytes": 19660808,
+          "material_packing_reservation_bytes": 0,
+          "restart_state_bytes": 14310400,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 19660808,
+          "gpu_reservation_bytes": 187059943,
+          "budgeted_resident": true
+        },
+        "modal_extra_bytes": 6745600,
+        "host_layout_bytes": 41889792
+      }
+    ],
+    "wrapper_reservation_bytes": 64499456,
+    "combined_gpu_reservation_bytes": 258304999,
+    "combined_host_reservation_bytes": 132795656,
+    "explicit_gpu_and_host_budget_bytes": 2147483648,
+    "available_gpu_bytes": 11791237120,
+    "total_gpu_bytes": 12884377600,
+    "available_host_bytes": 35570315264
+  },
+  "recorded_utc": "2026-09-20T20:20:57.535062+00:00",
+  "changed_yee_coordinates": [
+    {
+      "component": "Ex",
+      "indices": [
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167
+      ],
+      "coordinates_um": [
+        -0.18749999999999978,
+        -0.16249999999999987,
+        -0.13749999999999996,
+        -0.11249999999999982,
+        -0.08749999999999969,
+        -0.06249999999999978,
+        -0.03749999999999987,
+        -0.012499999999999956,
+        0.012500000000000178,
+        0.03750000000000009,
+        0.0625,
+        0.08750000000000036,
+        0.11250000000000027,
+        0.13750000000000018,
+        0.1625000000000001,
+        0.1875
+      ]
+    },
+    {
+      "component": "Ey",
+      "indices": [
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167
+      ],
+      "coordinates_um": [
+        -0.19999999999999973,
+        -0.17499999999999982,
+        -0.1499999999999999,
+        -0.125,
+        -0.09999999999999964,
+        -0.07499999999999973,
+        -0.04999999999999982,
+        -0.02499999999999991,
+        0.0,
+        0.025000000000000355,
+        0.04999999999999982,
+        0.07500000000000018,
+        0.10000000000000053,
+        0.125,
+        0.15000000000000036,
+        0.17499999999999982
+      ]
+    },
+    {
+      "component": "Ez",
+      "indices": [
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167
+      ],
+      "coordinates_um": [
+        -0.19999999999999973,
+        -0.17499999999999982,
+        -0.1499999999999999,
+        -0.125,
+        -0.09999999999999964,
+        -0.07499999999999973,
+        -0.04999999999999982,
+        -0.02499999999999991,
+        0.0,
+        0.025000000000000355,
+        0.04999999999999982,
+        0.07500000000000018,
+        0.10000000000000053,
+        0.125,
+        0.15000000000000036,
+        0.17499999999999982
+      ]
+    }
+  ],
+  "changed_electric_dofs": 76800,
+  "measured_template_project": {
+    "schema_version": 1,
+    "name": "Untitled",
+    "region": {
+      "dimension": "3d",
+      "size": [
+        8.0,
+        1.0,
+        1.0
+      ],
+      "mesh": 0.025,
+      "mesh_steps": null,
+      "mesh_coordinates": null,
+      "material_sampling": "yee",
+      "interface_method": "staircase",
+      "subpixel_quadrature": 8,
+      "mesh_type": "uniform",
+      "mesh_max": 0.15,
+      "mesh_grading": 1.25,
+      "mesh_ppw": 24.0,
+      "mesh_auto_refine": true,
+      "mesh_refinements": [],
+      "courant_factor": 0.99,
+      "time_step_override": null,
+      "steps": 4800,
+      "run_control": {
+        "auto_shutoff": false,
+        "decay_threshold": 1e-06,
+        "check_interval": 50,
+        "consecutive_checks": 3,
+        "min_steps": 100,
+        "source_tail_amplitude": 1e-08,
+        "after_source_s": 0.0,
+        "divergence_check": true,
+        "growth_limit": 1000000.0,
+        "field_limit": null
+      },
+      "pml_cells": 40,
+      "boundaries": {
+        "x_min": {
+          "kind": "pml",
+          "layers": null,
+          "sigma_scale": 1.0,
+          "kappa": 1.0,
+          "alpha": 1e-08,
+          "polynomial": 3.0,
+          "alpha_polynomial": 0.0
+        },
+        "x_max": {
+          "kind": "pml",
+          "layers": null,
+          "sigma_scale": 1.0,
+          "kappa": 1.0,
+          "alpha": 1e-08,
+          "polynomial": 3.0,
+          "alpha_polynomial": 0.0
+        },
+        "y_min": {
+          "kind": "periodic",
+          "layers": null,
+          "sigma_scale": 1.0,
+          "kappa": 1.0,
+          "alpha": 1e-08,
+          "polynomial": 3.0,
+          "alpha_polynomial": 0.0
+        },
+        "y_max": {
+          "kind": "periodic",
+          "layers": null,
+          "sigma_scale": 1.0,
+          "kappa": 1.0,
+          "alpha": 1e-08,
+          "polynomial": 3.0,
+          "alpha_polynomial": 0.0
+        },
+        "z_min": {
+          "kind": "periodic",
+          "layers": null,
+          "sigma_scale": 1.0,
+          "kappa": 1.0,
+          "alpha": 1e-08,
+          "polynomial": 3.0,
+          "alpha_polynomial": 0.0
+        },
+        "z_max": {
+          "kind": "periodic",
+          "layers": null,
+          "sigma_scale": 1.0,
+          "kappa": 1.0,
+          "alpha": 1e-08,
+          "polynomial": 3.0,
+          "alpha_polynomial": 0.0
+        }
+      },
+      "bloch_phase": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "background_index": 1.0,
+      "backend": "auto",
+      "memory_mode": "resident",
+      "cuda_kernel": "torch",
+      "cuda_monitor_kernel": "torch",
+      "precision": "float32",
+      "snapshot_interval": 20,
+      "field": "Ez",
+      "slice_axis": "z",
+      "slice_position": 0.0,
+      "complex_display": "real"
+    },
+    "materials": [
+      {
+        "name": "Air",
+        "index": 1.0,
+        "color": "#b7c5d7",
+        "model": "dielectric",
+        "epsilon_inf": 1.0,
+        "plasma_rad_s": 2000000000000000.0,
+        "collision_rad_s": 100000000000000.0,
+        "resonance_rad_s": 2000000000000000.0,
+        "linewidth_rad_s": 100000000000000.0,
+        "delta_epsilon": 1.0,
+        "poles": [],
+        "samples": null,
+        "fit_band_um": null,
+        "fit_dt_s": null
+      },
+      {
+        "name": "SiO2 (constant n)",
+        "index": 1.444,
+        "color": "#80c4d7",
+        "model": "dielectric",
+        "epsilon_inf": 1.0,
+        "plasma_rad_s": 2000000000000000.0,
+        "collision_rad_s": 100000000000000.0,
+        "resonance_rad_s": 2000000000000000.0,
+        "linewidth_rad_s": 100000000000000.0,
+        "delta_epsilon": 1.0,
+        "poles": [],
+        "samples": null,
+        "fit_band_um": null,
+        "fit_dt_s": null
+      },
+      {
+        "name": "SiN (constant n)",
+        "index": 2.0,
+        "color": "#69a1e8",
+        "model": "dielectric",
+        "epsilon_inf": 1.0,
+        "plasma_rad_s": 2000000000000000.0,
+        "collision_rad_s": 100000000000000.0,
+        "resonance_rad_s": 2000000000000000.0,
+        "linewidth_rad_s": 100000000000000.0,
+        "delta_epsilon": 1.0,
+        "poles": [],
+        "samples": null,
+        "fit_band_um": null,
+        "fit_dt_s": null
+      },
+      {
+        "name": "Si (constant n)",
+        "index": 3.48,
+        "color": "#cc8bdc",
+        "model": "dielectric",
+        "epsilon_inf": 1.0,
+        "plasma_rad_s": 2000000000000000.0,
+        "collision_rad_s": 100000000000000.0,
+        "resonance_rad_s": 2000000000000000.0,
+        "linewidth_rad_s": 100000000000000.0,
+        "delta_epsilon": 1.0,
+        "poles": [],
+        "samples": null,
+        "fit_band_um": null,
+        "fit_dt_s": null
+      }
+    ],
+    "structures": [],
+    "sources": [
+      {
+        "wavelength": 1.55,
+        "pulse": "gaussian",
+        "pulse_cycles": 2.0,
+        "time_definition": "cycles",
+        "pulse_length": 2e-14,
+        "pulse_offset": 5e-14,
+        "signal": null,
+        "wavelength_start": 1.3,
+        "wavelength_stop": 1.8,
+        "optimize_for_short_pulse": true,
+        "eliminate_discontinuities": false,
+        "chirp_bandwidth_hz": 100000000000000.0,
+        "id": "0028a24a9bda",
+        "name": "source",
+        "center": [
+          -2.0,
+          0.0,
+          0.0
+        ],
+        "enabled": true,
+        "kind": "plane",
+        "injection": "soft",
+        "normal": "x",
+        "direction": "+",
+        "incident_pml_cells": 96,
+        "size": [
+          0.0,
+          1.0,
+          1.0
+        ],
+        "component": "Ez",
+        "theta": null,
+        "phi": 0.0,
+        "amplitude": 1.0,
+        "phase": 0.0,
+        "use_global_source": false
+      }
+    ],
+    "global_source": {
+      "wavelength": 1.55,
+      "pulse": "gaussian",
+      "pulse_cycles": 3.0,
+      "time_definition": "cycles",
+      "pulse_length": 2e-14,
+      "pulse_offset": 5e-14,
+      "signal": null,
+      "wavelength_start": 1.3,
+      "wavelength_stop": 1.8,
+      "optimize_for_short_pulse": true,
+      "eliminate_discontinuities": false,
+      "chirp_bandwidth_hz": 100000000000000.0
+    },
+    "monitors": [],
+    "global_monitor": {
+      "sampling": "frequency",
+      "chebyshev_wavelength": false,
+      "chebyshev_nodes": "roots",
+      "use_source_limits": false,
+      "custom_frequencies_hz": [],
+      "wavelength_start": 1.3,
+      "wavelength_stop": 1.8,
+      "frequency_points": 101,
+      "apodization": "none",
+      "apodization_center": 2e-14,
+      "apodization_time_width": 1e-14
+    },
+    "import_provenance": null
+  },
+  "measured_template_project_sha256": "cdf202a447fb77e21ce388c0fd2053d0173665357107b2a2d630469269958870",
+  "prepared_launch_project_sha256": [
+    "317ec4f14b60b2b91e929f1efa94b08686f0563a9ac3b412f25a6639342d5337",
+    "80f762af196be52fa23fb40fdd53321205fad2c633ccc0a60648be7a37f61fd0"
+  ],
+  "native_gradient": 0.2497190237045288,
+  "discrete_oracle_derivative": 0.2497190122296988,
+  "continuum_derivative": 0.2537247915712637,
+  "oracle_central_epsilon_step": 1e-05,
+  "relative_error_vs_discrete": 4.5950966587327e-08,
+  "relative_error_vs_continuum": 0.01578784572815306,
+  "native_base_loss": 0.9130741357803345,
+  "native_changed_loss": 0.9128243327140808,
+  "native_loss_change": -0.0002498030662536621,
+  "continuum_base_loss": 0.9076909559495407,
+  "continuum_changed_loss": 0.9074370933336078,
+  "continuum_loss_change": -0.0002538626159329649,
+  "fixed_change_is_native_descent_direction": true,
+  "base_s_parameters": {
+    "s_real_imag": [
+      [
+        [
+          0.013031037524342537,
+          0.03402646631002426
+        ],
+        [
+          0.9766252040863037,
+          -0.2118375450372696
+        ]
+      ],
+      [
+        [
+          0.976625382900238,
+          -0.2118375599384308
+        ],
+        [
+          0.0022380168084055185,
+          0.036367516964673996
+        ]
+      ]
+    ],
+    "column_power": [
+      0.9999998211860657,
+      0.999999463558197
+    ],
+    "maximum_power_defect": 5.364418029785156e-07,
+    "reciprocal_transmission_error": 1.794337407545754e-07
+  },
+  "changed_s_parameters": {
+    "s_real_imag": [
+      [
+        [
+          0.013024627231061459,
+          0.03395891189575195
+        ],
+        [
+          0.9765217304229736,
+          -0.212325319647789
+        ]
+      ],
+      [
+        [
+          0.976521909236908,
+          -0.2123253494501114
+        ],
+        [
+          0.0022521382197737694,
+          0.0363011471927166
+        ]
+      ]
+    ],
+    "column_power": [
+      1.0,
+      0.9999997019767761
+    ],
+    "maximum_power_defect": 2.980232238769531e-07,
+    "reciprocal_transmission_error": 1.8128045553567063e-07
+  },
+  "gradient_forward_seconds": 27.068683700170368,
+  "gradient_backward_seconds": 73.03973789978772,
+  "fixed_descent_forward_seconds": 21.101684499997646,
+  "gradient_torch_cuda_peaks": {
+    "allocated_bytes": 181353472,
+    "reserved_bytes": 205520896
+  },
+  "descent_torch_cuda_peaks": {
+    "allocated_bytes": 75914752,
+    "reserved_bytes": 88080384
+  },
+  "peak_vram_scope": "Torch allocated/reserved peaks include live input arrays, but exclude CUDA context, CuPy driver/module allocations and other processes. Not total-device VRAM.",
+  "native_launch_reports": [
+    {
+      "stage": "gradient_forward",
+      "direction": 1,
+      "report": {
+        "forward_seconds": 5.657628200016916,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 0,
+        "replayed_steps": 0,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 0,
+        "checkpoint_bytes_read": 0,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 187661543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    },
+    {
+      "stage": "gradient_forward",
+      "direction": -1,
+      "report": {
+        "forward_seconds": 5.373507999815047,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 0,
+        "replayed_steps": 0,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 0,
+        "checkpoint_bytes_read": 0,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 187661543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    },
+    {
+      "stage": "gradient_forward",
+      "direction": 1,
+      "report": {
+        "forward_seconds": 5.355404000263661,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 0,
+        "replayed_steps": 0,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 0,
+        "checkpoint_bytes_read": 0,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 193805543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    },
+    {
+      "stage": "gradient_forward",
+      "direction": -1,
+      "report": {
+        "forward_seconds": 6.309368799906224,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 0,
+        "replayed_steps": 0,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 0,
+        "checkpoint_bytes_read": 0,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 193805543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    },
+    {
+      "stage": "gradient_backward_reconstruction",
+      "direction": 1,
+      "report": {
+        "forward_seconds": 6.3608586001209915,
+        "backward_seconds": 29.45400059968233,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 4,
+        "replayed_steps": 47106,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 21723187200,
+        "checkpoint_bytes_read": 68503884800,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 193805543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    },
+    {
+      "stage": "gradient_backward_reconstruction",
+      "direction": -1,
+      "report": {
+        "forward_seconds": 5.858537599910051,
+        "backward_seconds": 29.805580399930477,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 4,
+        "replayed_steps": 47106,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 21723187200,
+        "checkpoint_bytes_read": 68503884800,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 193805543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    },
+    {
+      "stage": "fixed_descent_forward",
+      "direction": 1,
+      "report": {
+        "forward_seconds": 5.869671999942511,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 0,
+        "replayed_steps": 0,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 0,
+        "checkpoint_bytes_read": 0,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 187661543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    },
+    {
+      "stage": "fixed_descent_forward",
+      "direction": -1,
+      "report": {
+        "forward_seconds": 5.013067999854684,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 0,
+        "replayed_steps": 0,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 0,
+        "checkpoint_bytes_read": 0,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 187661543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    },
+    {
+      "stage": "fixed_descent_forward",
+      "direction": 1,
+      "report": {
+        "forward_seconds": 4.700695700012147,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 0,
+        "replayed_steps": 0,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 0,
+        "checkpoint_bytes_read": 0,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 187661543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    },
+    {
+      "stage": "fixed_descent_forward",
+      "direction": -1,
+      "report": {
+        "forward_seconds": 4.436291300226003,
+        "forward_backend": "fused CUDA",
+        "backward_backend": "fused CUDA transpose",
+        "restart_bytes": 14310400,
+        "checkpoint_capacity": 4,
+        "checkpoint_storage": "device",
+        "peak_checkpoints": 0,
+        "replayed_steps": 0,
+        "checkpoint_tiers": [
+          "device",
+          "device",
+          "device",
+          "device"
+        ],
+        "checkpoint_bytes_written": 0,
+        "checkpoint_bytes_read": 0,
+        "full_time_autograd": false,
+        "higher_order": false,
+        "gpu_reservation_bytes": 187661543,
+        "source_neighborhood_gradient": "frozen"
+      }
+    }
+  ],
+  "acceptance_checks": {
+    "discrete_derivative": true,
+    "continuum_derivative": true,
+    "native_and_continuum_descent": true
+  },
+  "accepted": true,
+  "actual_native_network_calls": {
+    "forward_with_backward": 1,
+    "additional_forward_for_descent": 1
+  },
+  "native_fdtd_finite_difference_calls": 0,
+  "conclusion_scope": "Only this fixed isotropic slab material-parameter objective and declared tolerances. No general CR, arbitrary shape, port eigenmode, or continuous-shape-gradient claim."
+}

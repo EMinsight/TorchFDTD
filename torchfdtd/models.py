@@ -80,14 +80,7 @@ class Material(Model):
 
 
 class BoundaryFace(Model):
-    @model_validator(mode='before')
-    @classmethod
-    def reject_unimplemented_magnetic_wall(cls, value):
-        if isinstance(value, dict) and value.get('kind') in ('pmc', 'symmetric', 'symmetry'):
-            raise ValueError('PMC/symmetric boundaries at exact mesh endpoints are not implemented: upper-face Yee states are required.')
-        return value
-
-    kind: Literal['pml', 'periodic', 'bloch', 'pec', 'antisymmetric'] = 'pml'
+    kind: Literal['pml', 'periodic', 'bloch', 'pec', 'antisymmetric', 'pmc', 'symmetric'] = 'pml'
     layers: int | None = Field(default=None, ge=3, le=100)
     # Dimensionless native CPML coefficients, not Lumerical's normalized values.
     sigma_scale: float = Field(default=1, gt=0, le=20)
@@ -568,6 +561,9 @@ class Project(Model):
         from .mesh import configure_auto_mesh
         configure_auto_mesh(self)
         r.valid_grid()
+        from .endpoint_native import uses_endpoint, validate_endpoint_project
+        endpoint = uses_endpoint(r)
+        if endpoint:validate_endpoint_project(self)
         if r.interface_method=='subpixel':
             active={s.material for s in self.structures if s.enabled}
             if any(m.oscillators and m.name in active for m in self.materials):
@@ -582,7 +578,7 @@ class Project(Model):
             elif resolved.enabled and resolved.injection == 'oneway':
                 from .injection import oneway_plan
                 oneway_plan(resolved, r)
-            if resolved.enabled and resolved.injection != 'oneway' and any(r.boundaries.pair(a)[0].kind in ('pec','antisymmetric') for a in range(3)):
+            if not endpoint and resolved.enabled and resolved.injection != 'oneway' and any(r.boundaries.pair(a)[0].kind in ('pec','antisymmetric') for a in range(3)):
                 from .solver import source_slice
                 for field, weight in resolved.polarization_components:
                     scalar=resolved.model_copy(update={'component':field, 'theta':None})
@@ -612,7 +608,7 @@ class Project(Model):
                 half = obj.size[axis] / 2 if (isinstance(obj, Source) and obj.kind in ('plane','tfsf')) or isinstance(obj,FieldMonitor) else 0
                 lower, upper = r.interior_bounds(axis)
                 tolerance=16*math.ulp(max(abs(lower),abs(upper),r.size[axis]))
-                if obj.center[axis]-half < lower-tolerance or obj.center[axis]+half > upper+tolerance or (half == 0 and obj.center[axis] >= upper):
+                if obj.center[axis]-half < lower-tolerance or obj.center[axis]+half > upper+tolerance or (half == 0 and obj.center[axis] >= upper and not endpoint):
                     raise ValueError(f'{obj.name} must lie entirely inside the non-PML region.')
             if r.dimension == '2d' and obj.center[2] != 0:
                 raise ValueError(f'{obj.name}: z must be 0 in a 2D simulation.')
@@ -662,6 +658,15 @@ class Project(Model):
 
 
 def demo_project(name='waveguide'):
+    if name == 'pmc':
+        return Project(name='Closed PMC cavity | exact endpoints',
+            region=Region(dimension='3d',size=(3.2,3.2,3.2),mesh=.2,steps=160,
+                backend='cpu',material_sampling='yee',snapshot_interval=8,
+                boundaries={a+'_'+side:BoundaryFace(kind='pmc') for a in 'xyz' for side in ('min','max')}),
+            sources=[Source(id='source',name='electric pulse',component='Ez',center=(0,0,0),pulse_cycles=1)],
+            monitors=[Monitor(id='electric',name='electric probe',component='Ez',center=(.4,0,0)),
+                      Monitor(id='magnetic',name='magnetic probe',component='Hy',center=(.4,0,0))])
+
     p = Project(name='SiN waveguide | 2D TMz',
                 structures=[Structure(id='waveguide', name='waveguide', size=(8, 0.65, 0.4))],
                 sources=[Source(id='source', center=(-2.5, 0, 0))],

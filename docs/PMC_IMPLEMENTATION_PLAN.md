@@ -1,6 +1,6 @@
 # Exact-endpoint PMC implementation plan
 
-Status: production integration pending. A private exact-endpoint CPU reference now implements the volume, upper-face and upper-edge topology below. PEC and anti-symmetric production boundaries are verified separately. Public PMC/symmetric labels remain rejected. This plan contains no vendor execution or equivalence claims.
+Status: bounded native closed-cavity integration implemented. Native Project JSON and Simulation now admit PMC/symmetric only for the supported resident real FP32 3D point-source/point-monitor contract described below. Other numerical paths reject these labels explicitly. Full boundary parity remains incomplete. This plan contains no vendor execution or equivalence claims.
 
 The existing mesh has N cell intervals with endpoints x_0 and x_N. E_a occupies half nodes along a and integer nodes along transverse axes. H_a occupies integer nodes along a and half nodes along transverse axes. Existing arrays omit every upper integer node. PMC has even tangential E and normal H, and odd normal E and tangential H. Replacing the missing E_t(N) with E_t(N-1) freezes the last H sample and shifts the wall to x_(N-1/2). That shortcut is prohibited.
 
@@ -50,7 +50,7 @@ Its test memory sizes are for kernel correctness, not a 48 GB capacity claim.
 - Cover ADE face/edge states, checkpoint replay, storage lifetime, exact memory accounting and serialized source/monitor locations before admitting those combinations.
 - Expose PMC/symmetric in model, facade, JSON and UI only after the corresponding numerical path is complete. Update the feature inventory separately from PEC material status. Explicitly reject unsupported subpixel, material, source or storage combinations.
 
-The native PMC and symmetry feature rows remain missing until these requirements are met. No partial storage implementation should be presented as complete boundary support.
+The native PMC and symmetry scope is partial until all these requirements are met. The bounded resident dispatch below is not complete boundary support across every numerical path.
 
 ## CPU reference evidence
 
@@ -75,8 +75,8 @@ checkpoint budgeting or UI support. Those integrations remain release gates.
 ## Bounded resident Python simulation API
 
 `torchfdtd.pmc_simulation.EndpointSimulation` is a separate usable resident
-closed-cavity API. It does not enable PMC in `Project`, the ordinary facade,
-JSON, browser, streamed, or batch dispatch. Its implemented combinations are:
+closed-cavity API. The native JSON/Simulation dispatch below now wraps its
+forward kernel; ordinary adjoint, streamed and tensor-batch dispatch remain unsupported. Its implemented combinations are:
 
 - Exact physical endpoint nodes in micrometres, including nonuniform axes.
 - PEC/PMC on every face. The local `symmetric` alias means PMC and the local
@@ -170,10 +170,9 @@ raw-pointer writes that bypass version counters remain caller responsibility.
 
 `torchfdtd.endpoint_project.endpoint_from_project(project, boundary_faces=...)`
 accepts a native `Project` or its JSON dictionary and returns an `EndpointProject`
-adapter. Its boundary override is explicit and separate from the native schema.
-It does not make PMC an accepted native `BoundaryFace` value. Existing project
-boundaries are validated when parsing the project, then replaced for this
-separate solver only. `adapter.plan()` is a JSON-serializable review record
+adapter. Its optional boundary override can still select a separate closed-wall
+calculation. Without an override it uses native project face labels. Native
+PMC/symmetric labels are now admitted only under the bounded contract below. `adapter.plan()` is a JSON-serializable review record
 containing original and effective boundaries, exact nodes, source/monitor
 requested and sampled positions, displacements, precedence and memory plan.
 Save the original Project dictionary and boundary override together to recreate
@@ -235,9 +234,77 @@ wall/unsupported admission, preparation budgets, polarization-term mapping, and
 fixed nonuniform node preservation, and coincident-source rejection. The underlying resident solver's CUDA
 kernels and adjoint are tested separately; this adapter adds no CUDA kernels.
 
-The adapter intentionally retains native Project validation. In particular,
-native point positions must be strictly below an exact upper region bound.
-An admitted nearby physical request can still select the true upper PMC Yee
-node, with the displacement recorded. Direct exact-endpoint point requests
-remain available through EndpointSimulation; relaxing the shared native
-Project position schema is a separate integration gate.
+Native Project validation now permits exact upper endpoint point positions
+when the project selects the closed PMC dispatch. A nearest sample constrained
+by an intersecting PEC face is still rejected. Other native boundary paths
+retain their existing strict upper-coordinate validation.
+
+## Native JSON, Simulation, CLI and local API dispatch
+
+A Project with any `pmc` or `symmetric` face now selects the exact-endpoint
+forward solver through ordinary `Simulation(project).run()`. All six faces must
+be PEC/antisymmetric or PMC/symmetric. Native schema admission requires real
+FP32 3D, fixed uniform or explicit meshes, staircase Yee sampling, resident
+storage, nondispersive active materials, enabled point soft electric sources,
+and enabled point E/H monitors sampled every step. At least one point monitor
+is required. Source polarization terms must address unique active electric DOFs.
+Mixed PML/periodic walls, ADE, subpixel, complex/FP64 fields, graded meshes,
+plane/TFSF/current sources, disabled source/monitor entries, field monitors,
+adaptive shutoff and streamed storage are rejected before dispatch. Ordinary
+YeeGrid and BoundaryDescription also reject PMC, preventing unimplemented
+adjoint, tensor-batch and streamed paths from silently using different walls.
+
+```python
+from torchfdtd import demo_project, Simulation
+project = demo_project('pmc')  # 16 cubed, 160 steps, real FP32 CPU
+project.save('pmc.json')
+result = Simulation(project).run()
+result.save('pmc.npz')
+```
+
+The same JSON runs with `torchfdtd run pmc.json --output pmc.npz` and the existing
+local `/api/validate` and `/api/jobs` endpoints. Native pulse definitions,
+source/monitor nearest-Yee sampling reports and analytic material rasterization
+are shared with EndpointProject. The optional explicit override API remains
+available. The familiar facade's boundary aliases and general parameterized
+shape/adjoint dispatch are not expanded by this change.
+
+Results use the existing Result, monitor spectra, progress frames and NPZ
+workflow. Base `E`, `H`, epsilon images and slice frames deliberately crop upper
+stored faces/edges for compatibility with the native volume display. True
+endpoint data are never discarded: NPZ `endpoint_E_upper` and
+`endpoint_H_upper` retain the suffixes. Concatenate each flattened base field
+with its suffix and interpret `summary.endpoint_blocks` to recover the complete
+packed topology. `Result.load()` retains these arrays in `endpoint_fields`.
+Source and monitor requested/sampled coordinates remain in
+`summary.endpoint_plan`. Display crops do not alter the solver or monitors.
+
+Native forward admission selects its tensor budget from the complete conservative
+endpoint tensor plan, including the resident EndpointSimulation workspace and
+trace requirement. Total host preparation/results are planned separately. There
+is no fixed 256 MB tensor or 64 MB total-host cap: native runs must fit 75% of
+currently free GPU memory and 80% of available host memory when reported. CPU
+runs include their solver tensor plan in the host check. Raster preparation
+retains bounded 65,536-sample chunks, while pulse/result buffers are sized and
+admitted for the actual project. Python topology objects, allocator/runtime
+overhead and caller parameter graphs are excluded explicitly. The CPU
+correctness backend remains limited to 32,768 cells. The separate EndpointProject
+API retains its explicit caller-selected budget contract. Native CUDA dispatch uses direct kernels, not CUDA graph capture.
+Diagnostics include the complete packed E/H states, including endpoints, as an
+unweighted state-norm growth heuristic, not a conserved electromagnetic energy.
+Field-limit and nonfinite checks, fixed-duration progress, and cancellation are
+preserved. Automatic decay stopping remains unsupported.
+
+`tests/test_endpoint_native.py` contains 14 focused CPU checks covering actual
+native JSON/Simulation/CLI/API calculations, adapter trace agreement, complete
+NPZ endpoint preservation, ordinary PEC path preservation, unsupported schema
+and fallback guards, runtime field-limit/cancellation, and the native demo.
+One additional native CPU/CUDA parity check passed on RTX 3060, comparing
+traces, cropped fields/frames, complete upper DOFs and GPU NPZ roundtrip. No
+full material/shape-gradient, general tensor-batch, or streamed PMC parity is
+claimed by this forward integration.
+
+A metadata-only 128-cubed CUDA planning regression exceeds the former fixed
+caps, admits against a simulated 16 GB free GPU/32 GB available host, and
+rejects insufficient GPU or host headroom. No large field allocation or
+large-GPU capacity claim is involved in this admission test.

@@ -106,9 +106,10 @@ def test_resident_and_streamed_adjoint(device,complex_fields):
 
 
 @pytest.mark.parametrize("kind",["pmc","symmetric"])
-def test_magnetic_wall_is_explicitly_unsupported(kind):
-    with pytest.raises(ValueError,match="upper-face Yee states"):
-        BoundaryFace(kind=kind)
+def test_magnetic_wall_requires_closed_endpoint_dispatch(kind):
+    assert BoundaryFace(kind=kind).kind==kind
+    with pytest.raises(ValueError,match="closed PEC/PMC"):
+        scene(kind=kind)
 
 
 @pytest.mark.parametrize("axis",range(3))

@@ -28,12 +28,14 @@ throughput is still unmeasured.
 
 The experimental [exact-endpoint PMC API](docs/PMC_IMPLEMENTATION_PLAN.md) now
 connects real FP32 CPU/CUDA fields, point-source waveforms and material gradients
-through bounded binomial checkpoint replay. A native Project adapter adds
-analytic geometry, native pulse definitions and recorded endpoint sampling,
-with an explicit closed-wall override. A separate
+through bounded binomial checkpoint replay. Closed PEC/PMC projects also run
+through the browser, JSON, CLI and ordinary `Simulation` API, with six-face
+editing, point traces and complete endpoint NPZ storage. A separate
 [bulk tensor dielectric API](docs/ANISOTROPY_IMPLEMENTATION_PLAN.md) supports
-periodic/Bloch CPU/CUDA fields and full symmetric tensor gradients. General
-project/UI dispatch, open-boundary tensors and streamed PMC remain incomplete.
+periodic/Bloch CPU/CUDA fields and full symmetric tensor gradients. An
+isotropic fixed CPML exterior now encloses interior tensor materials, with
+its collar excluded from design gradients. Tensor material UI, general
+anisotropic absorbing boundaries and streamed PMC remain incomplete.
 [Opposing mode ports](docs/MODE_NETWORK.md) now assemble complex multimode
 S matrices with fixed reference planes and one case graph at a time during
 backward. FP32 CUDA checks cover four-channel guide propagation, reciprocity
@@ -41,6 +43,9 @@ and an interior material gradient. Both ports require the same fixed exterior
 cross-section. Arbitrary branch ports, source/eigenmode gradients and streamed
 injection remain open. The measured coarse-mesh power defect is reported in
 the validation record, rather than interpreted as exact conservation.
+A [fixed-slab physical-gradient check](docs/MODE_NETWORK_GRADIENT_ACCEPTANCE.md)
+at 25 nm spacing passes a predeclared 2% derivative criterion and an actual
+descent step. It does not establish general shape or CR convergence.
 
 [GDS geometry workflows](docs/GDS.md), [trainable density constraints](docs/DESIGN_PARAMETERIZATION.md)
 and [differentiable diffraction/far-field transforms](docs/RADIATION.md) extend
@@ -98,9 +103,9 @@ capacity and throughput measurements remain pending.
 
 [PEC and electric antisymmetry](docs/BOUNDARIES.md) now preserve physical mesh
 endpoints across CPU/CUDA, adjoint, streaming and batch paths. PMC and magnetic
-symmetry are available through the separate resident `EndpointSimulation` API.
-An explicit Project adapter supports fixed geometry and native point pulses.
-General UI dispatch, ADE, streaming and batch integration remain pending.
+symmetry now run closed cavities through the native Project, browser and CLI.
+The resident `EndpointProject` API retains material and waveform gradients.
+PML mixing, ADE, streaming and tensor-batch integration remain pending.
 The experimental [single-domain slab API](docs/DOMAIN_DECOMPOSITION.md) adds
 rank-local Yee propagation, halo transposes and checkpointed material gradients.
 Its 2/3-rank checks include real Linux Gloo CPU processes, with fields and
@@ -251,8 +256,8 @@ Reviewed external public source on 19 September 2026. TorchFDTD implementation s
 | [fdtd3d](https://github.com/zer011b/fdtd3d) | C++ / CUDA / MPI | **Single-problem domain decomposition** differs from independent-case batches. Cohort throughput not verified | Not documented in reviewed README | Compiled solver and distributed execution. Single-grid MPI is still missing from TorchFDTD | Not measured, compatible compiler/runtime environment pending |
 
 FDTDX provides single-problem sharding and broader anisotropic material
-workflows. TorchFDTD's new bulk tensor API is limited to nondispersive periodic
-or Bloch domains. We have not demonstrated a speed advantage against
+workflows. TorchFDTD's bulk tensor API supports nondispersive periodic/Bloch
+domains and a fixed isotropic CPML exterior. We have not demonstrated a speed advantage against
 FDTDX, fdtdz or fdtd3d. [Pinned sources and limitations](docs/OPEN_SOURCE_COMPARISON_KO.md).
 
 | Required workflow | TorchFDTD implementation milestone | Still needed for broader FDTDX parity |
@@ -261,7 +266,7 @@ FDTDX, fdtdz or fdtd3d. [Pinned sources and limitations](docs/OPEN_SOURCE_COMPAR
 | Design parameters | Density filters, fixed masks, exact symmetry, projection/continuation and optimizer resume | General shape derivatives and fabrication guarantees |
 | Mode ports | Actual fixed-mode CUDA launch and opposing-port multimode complex S matrices with interior material VJPs | Arbitrary branch/unequal-section ports, open cross-sections, streamed injection, source/eigenmode gradients and physical convergence |
 | Radiation | Differentiable Bloch orders and closed-box homogeneous far fields, including native FP32 mesh convergence | Layered/periodic-lattice far fields and complete UI |
-| Boundaries / tensors / multi-GPU | PEC production support, resident PMC waveform/material adjoints, periodic bulk tensor adjoints | General PMC/tensor boundary and streaming workflows, verified single-problem multi-GPU |
+| Boundaries / tensors / multi-GPU | PEC, native closed-PMC GUI/CLI/API, resident PMC waveform/material adjoints, tensor adjoints with fixed isotropic CPML exterior | General PMC/tensor boundary and streaming workflows, verified single-problem multi-GPU |
 
 The [complete row-by-row parity gates](docs/FDTDX_PARITY_KO.md) retain failed,
 partial and unmeasured conditions instead of treating API presence as full parity.
