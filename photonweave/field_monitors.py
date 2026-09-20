@@ -10,7 +10,13 @@ import torch
 from .spectra import frequency_samples,apodization_window
 
 
-def plane_plan(region,monitor):
+def plane_plan(region,monitor,quadrature_counts=None):
+    if quadrature_counts is not None:
+        if region.dimension!='3d' or monitor.spatial_interpolation=='nearest':
+            raise ValueError('Explicit quadrature counts require a 3D interpolated plane.')
+        if len(quadrature_counts)!=2 or any(isinstance(n,bool) or not isinstance(n,int) or n<1 for n in quadrature_counts):
+            raise ValueError('Quadrature counts must be two positive integers in transverse axis order.')
+        counts=iter(quadrature_counts)
     axes=[];widths=[];normal='xyz'.index(monitor.normal)
     for a,nodes in enumerate(region.mesh_nodes):
         if region.dimension=='2d' and a==2:
@@ -20,6 +26,10 @@ def plane_plan(region,monitor):
             if monitor.spatial_interpolation=='nearest':position=nodes[np.argmin(abs(nodes-position))]
             axes.append(np.array([position]));widths.append(np.array([1.]));continue
         lo,hi=monitor.center[a]-monitor.size[a]/2,monitor.center[a]+monitor.size[a]/2
+        if quadrature_counts is not None:
+            edges=np.linspace(lo,hi,next(counts)+1)
+            axes.append((edges[:-1]+edges[1:])/2);widths.append(np.diff(edges)*1e-6)
+            continue
         edges=np.r_[lo,nodes[(nodes>lo+1e-12)&(nodes<hi-1e-12)],hi]
         # Coalesce adjacent quadrature cells. Keep their full combined width.
         stride=monitor.downsample_xyz[a] if monitor.downsample_xyz is not None else monitor.downsample

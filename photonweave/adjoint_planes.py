@@ -87,12 +87,15 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
     Geometry/epsilon differentiates. Monitor positions and mesh remain fixed.
     Every enabled project monitor must be a field plane.
     """
-    def __init__(self,project,options=None):
+    def __init__(self,project,options=None,*,quadrature_counts=None):
         super().__init__()
         self.project=Project.model_validate(project.model_dump())
         active=[m for m in self.project.monitors if m.enabled]
         if not active or any(m.kind!='field' for m in active):
             raise ValueError('DifferentiablePlaneSimulation requires enabled field monitors only.')
+        quadrature_counts={} if quadrature_counts is None else dict(quadrature_counts)
+        if set(quadrature_counts)-{m.id for m in active}:
+            raise ValueError('Quadrature counts must refer to enabled monitor IDs.')
         self.plans=[]
         observers=[]
         lookup={}
@@ -102,7 +105,7 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
                 raise ValueError('Differentiable planes require time_downsample=1 and no apodization.')
             if monitor.dft_precision=='float64' and self.project.region.precision!='float64':
                 raise ValueError('Mixed field/DFT precision is not supported by plane adjoints.')
-            plan=plane_plan(self.project.region,monitor)
+            plan=plane_plan(self.project.region,monitor,quadrature_counts.get(monitor.id))
             maps=[]
             for component in COMPONENTS:
                 indices,weights=interpolation_map(self.project.region,component,plan['points_um'])

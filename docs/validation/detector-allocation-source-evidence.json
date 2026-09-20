@@ -1,0 +1,9 @@
+{
+  "base_commit": "fe5249f",
+  "sha256": {
+    "photonweave/detector_allocation.py": "4040a34d9852906c7376eb3b13f5864714f2ae12cb59dd448a135cf91d02a239",
+    "photonweave/field_monitors.py": "23e73d2b971af0dabcf6649e0cfc3d3d4049ee9187f06ffebb50c9e8d5eb25af",
+    "photonweave/adjoint_planes.py": "b031f66934fcadbe5296ac9cb5b3121ba4146e58fabb998f5f58eaeae14bc51f",
+    "tests/test_detector_allocation.py": "0987e974143f7255a78e57ffb23de749270aee039c3e7065049331595b79c905"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "reference_sha256": "aab4153906eef369d7e47eccff9b00618a4d804937832f956aab773e69511ded",
+  "reference_functions": [
+    "_quadrant_masks",
+    "quadrant_field_powers"
+  ],
+  "records": [
+    {
+      "device": "cpu",
+      "seed": 0,
+      "max_output_error": 5.551115123125783e-17,
+      "max_gradient_relative_l2": 1.769953265991817e-16
+    },
+    {
+      "device": "cpu",
+      "seed": 1,
+      "max_output_error": 8.326672684688674e-17,
+      "max_gradient_relative_l2": 3.5167216838508853e-16
+    },
+    {
+      "device": "cpu",
+      "seed": 2,
+      "max_output_error": 2.7755575615628914e-17,
+      "max_gradient_relative_l2": 2.2507107557631316e-16
+    },
+    {
+      "device": "cpu",
+      "seed": 3,
+      "max_output_error": 2.7755575615628914e-17,
+      "max_gradient_relative_l2": 1.5006263155672476e-16
+    },
+    {
+      "device": "cpu",
+      "seed": 4,
+      "max_output_error": 5.551115123125783e-17,
+      "max_gradient_relative_l2": 6.329857257986297e-16
+    },
+    {
+      "device": "cuda",
+      "seed": 0,
+      "max_output_error": 8.326672684688674e-17,
+      "max_gradient_relative_l2": 3.0008989703690703e-16
+    },
+    {
+      "device": "cuda",
+      "seed": 1,
+      "max_output_error": 2.7755575615628914e-17,
+      "max_gradient_relative_l2": 3.066200847409348e-16
+    },
+    {
+      "device": "cuda",
+      "seed": 2,
+      "max_output_error": 2.7755575615628914e-17,
+      "max_gradient_relative_l2": 4.644994221963433e-16
+    },
+    {
+      "device": "cuda",
+      "seed": 3,
+      "max_output_error": 5.551115123125783e-17,
+      "max_gradient_relative_l2": 2.2525306531143336e-16
+    },
+    {
+      "device": "cuda",
+      "seed": 4,
+      "max_output_error": 5.551115123125783e-17,
+      "max_gradient_relative_l2": 1.5252269004740415e-16
+    }
+  ],
+  "scope": "Read-only active-source synthetic field allocation parity. No optical solve, prior, mask or commercial-solver data used. Total transmission supplied as a differentiable scalar."
+}

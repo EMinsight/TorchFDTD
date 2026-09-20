@@ -52,3 +52,5 @@ from .information import GaussianTargetResult, gaussian_target_information, shot
 __all__ += ['GaussianTargetResult', 'gaussian_target_information', 'shot_read_covariance']
 from .recomputed_batch import recompute_cases
 __all__ += ['recompute_cases']
+from .detector_allocation import quadrant_intensity_allocation
+__all__ += ['quadrant_intensity_allocation']

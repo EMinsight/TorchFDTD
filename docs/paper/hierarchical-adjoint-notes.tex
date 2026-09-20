@@ -254,4 +254,18 @@ Median complete iteration time increased from 4.161 to 6.778 seconds over
 three alternating repetitions after warm-up. Scalar gradients agreed exactly.
 This establishes a memory--recomputation trade-off for a synthetic coupled
 objective. It does not establish color-router fidelity or runtime superiority.
+
+\section{Detector allocation proxy}
+A fixed midpoint quadrature can be specified independently of the field mesh.
+The collocated electric samples define
+\[
+Q_j=\sum_{q\in j} w_q \sum_{c\in\{x,y,z\}} |E_c(q)|^2,
+\qquad a_j=T\frac{Q_j}{\sum_k Q_k}.
+\]
+Both the electric field and supplied total transmission $T$ differentiate.
+These entries allocate transmission and do not represent local absorption or
+charge collection. For an incoherent pupil, allocation is computed separately
+for each ray and polarization before weighted averaging. The reference uses
+power-normalized RCWA transmission. A matched FDTD flux reference requires
+independent physical validation before claiming an equivalent CR response.
 \end{document}
