@@ -12,7 +12,38 @@ Read-only inspection on 2026-09-20 found 51,526,500,352 bytes total CUDA memory,
 112,792,899,584 bytes available RAM. The only filesystem drive reported was C,
 with 455,137,873,920 bytes free. Availability must be rechecked before launch.
 
-## Target and admission
+## FP32 default and next capacity run
+
+The current driver defaults to real FP32 throughout the forward and gradient
+calculation. Its 1152 x 1024 x 2048 grid has 2,415,919,104 cells and requires
+57,982,058,496 bytes (54 GiB) for E/H alone. This exceeds the RTX 5880's physical
+VRAM without increasing precision to inflate the storage requirement.
+
+The FP32 run is prepared but has not completed. Metadata-only admission with
+synthetic capacities and bounded verification-statistic tests have passed.
+Those tests do not constitute hardware execution or capacity evidence. Existing
+FP64 results below remain labeled with their original precision and geometry.
+
+The current defaults use a 32 GiB GPU budget, an 88 GiB host budget, a 280 GiB
+file budget, slab width 4 and temporal depth 2. Actual launch requires at least
+104 GiB available RAM and 380 GiB free space on the selected C-drive directory.
+The 100 GiB disk floor is rechecked when allocating file banks. The run uses
+ten steps and checks signals and material gradients against the same-precision
+finite-cone autograd reference, with a preset relative L2 limit of 2e-4.
+The full gradient must be finite and exactly zero outside the comparison cone.
+Diagnostic norms accumulate in FP64 in bounded chunks, without converting or
+storing the full simulation state or gradient in FP64.
+
+```powershell
+python -m benchmarks.beyond_vram --execute --output results/beyond-vram-fp32-5880.json --scratch C:/Users/admin/photonweave/.local/beyond-vram-fp32-state
+```
+
+This is a new precision/capacity condition, not a repeat of the completed FP64
+experiment. It will run separately from active performance and optimization
+jobs. No small driver solve or repeat of the full solver suite is needed before
+each launch when the tested source and settings are unchanged.
+
+## Historical FP64 target and admission
 
 A 1024 x 1024 x 576 complex FP64 grid has 603,979,776 cells. E/H alone require
 57,982,058,496 bytes (54 GiB), already larger than the device's total memory.
@@ -91,7 +122,7 @@ this is not an exclusive filesystem reservation. The interrupted capacity
 job predates this per-bank option and must be identified accordingly.
 
 ```powershell
-python -m benchmarks.beyond_vram --execute --output results/beyond-vram-5880.json --scratch C:/Users/admin/photonweave/.local/beyond-vram-state --disk-gib 280 --host-gib 76
+python -m benchmarks.beyond_vram --execute --precision float64 --fields complex --nx 1024 --ny 1024 --nz 576 --width 16 --depth 2 --output results/beyond-vram-5880.json --scratch C:/Users/admin/photonweave/.local/beyond-vram-state --disk-gib 280 --host-gib 76
 ```
 
 Do not bypass admission checks or delete user data to make a case fit. The
