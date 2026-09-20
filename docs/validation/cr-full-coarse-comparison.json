@@ -1,0 +1,31 @@
+{
+  "status": "coarse forward comparison, not an accuracy gate pass",
+  "input_sha256": {
+    "schedule": "23df354b7d7acc4cd3ac8201d9999cda96e5cfc44cc889925bb5309abbee4732",
+    "density": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44",
+    "context": "a20bec68bdbf9945e257f0886429a9981aabb479e57dbdbb49a74e0e5d037f4d"
+  },
+  "fdtd_objective": 1.236263348891092,
+  "torcwa_objective": 1.2064319578769425,
+  "objective_relative_difference": 0.024726956890835483,
+  "response_max_absolute_difference": 0.03262107183724894,
+  "response_rmse": 0.01210590087535123,
+  "per_wavelength_max_absolute_difference": {
+    "420.0": 0.03262107183724894,
+    "450.0": 0.016565437045295617,
+    "470.0": 0.016571050231452944,
+    "510.0": 0.023963806155033407,
+    "540.0": 0.020868223036538347,
+    "570.0": 0.010861509062026098,
+    "600.0": 0.009982086119493472,
+    "635.0": 0.00983547573932858,
+    "670.0": 0.013252272461584114
+  },
+  "limitations": [
+    "FDTD 50 nm, 1600 steps and 12 PML cells have no full-pupil convergence certificate.",
+    "TORCWA order 8 has no full-pupil order convergence certificate.",
+    "FDTD FP64 versus TORCWA FP32/complex64; voxel/Fourier geometry representations differ.",
+    "Forward timing includes brief local GPU test overlap and is diagnostic only. No cross-solver speedup claim.",
+    "Complete objective gradient and optimization convergence remain pending."
+  ]
+}
