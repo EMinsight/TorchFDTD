@@ -130,10 +130,55 @@ class SlabBlockOperator:
     def _phase_value(value, phase):
         return value if phase is None else value*phase.reshape((-1,)+(1,)*(value.ndim-1))
 
+    def _new_local(self):
+        return object.__new__(_System)
+
+    def _material_epsilon(self, material):
+        return material
+
+    def _extra_payload(self, local, material, state, rows, phase, mapping, descriptor):
+        return ()
+
+    def _restore_payload(self, local, views):
+        pass
+
+    def _prepare_kernel(self, local):
+        if self.device.type == 'cuda':
+            from .cuda_kernels import FusedYeeCUDA
+            from .cuda_complex import FusedComplexYeeCUDA
+            kernel_type = FusedComplexYeeCUDA if local.grid.E.is_complex() else FusedYeeCUDA
+            local.kernel = kernel_type(local.grid, direct_views=self.direct_views, bindings_cache=self.workspace)
+
+    def _prepare_permittivity(self, local):
+        grid = local.grid
+        if self.workspace is None:
+            grid.inverse_permittivity = (1/local.eps4).expand_as(grid.E).contiguous()
+        else:
+            grid.inverse_permittivity = self.workspace.array('inverse', grid.E.shape, local.dtype)
+            grid.inverse_permittivity.copy_(local.eps4.expand_as(grid.E)).reciprocal_()
+
+    def _local_material(self, local):
+        return local.epsilon
+
+    def _backward(self, local, gradient, samples):
+        if self.device.type != 'cuda':return None
+        from .cuda_adjoint import FusedAdjointCUDA
+        from .cuda_complex_adjoint import FusedComplexAdjointCUDA
+        backward_type = FusedComplexAdjointCUDA if local.grid.E.is_complex() else FusedAdjointCUDA
+        return backward_type(local, gradient, samples, direct_views=self.direct_views, buffers=self.workspace)
+
+    def _adjoint_state(self, backward):
+        return (backward.e_bar, backward.h_bar, *backward.psi_bars[backward.phase])
+
+    def _accumulate_gradient(self, gradient, contribution, indices):
+        gradient.index_add_(0, indices, contribution)
+
     def _tile(self, epsilon, state, descriptor, start, depth):
         host = self.host
+        material = epsilon
+        epsilon = self._material_epsilon(material)
         lo, hi, indices, core = descriptor
-        local = object.__new__(_System)
+        local = self._new_local()
         local.device, local.dtype = self.device, epsilon.dtype
         local.field_dtype = host.field_dtype
         phase = self._halo_phase(descriptor)
@@ -228,6 +273,7 @@ class SlabBlockOperator:
             if lo <= loc[0] < hi:
                 local.monitors.append((name, (loc[0]-lo+core.start, *loc[1:]), component))
                 observer_ids.append(m)
+        extra = self._extra_payload(local, material, state, rows, phase, mapping, descriptor)
         # Pack small CPML/metric/source arrays with the fields to avoid one
         # blocking PCIe transaction for every individual boundary coefficient.
         tensors = [local.epsilon, grid.E, grid.H, grid.inverse_permeability]
@@ -238,6 +284,7 @@ class SlabBlockOperator:
             for _, _, wave, profile in terms:
                 tensors.append(wave)
                 if profile is not None:tensors.append(profile)
+        tensors.extend(extra)
         if self.workspace is not None:
             packed,layout = self.workspace.copy_packet('payload', tensors)
         else:
@@ -246,27 +293,21 @@ class SlabBlockOperator:
         views = iter(layout.unpack(packed))
         local.epsilon, grid.E, grid.H, grid.inverse_permeability = [next(views) for _ in range(4)]
         local.eps4 = local.epsilon[..., None] if epsilon.ndim == 3 else local.epsilon
-        if self.workspace is None:
-            grid.inverse_permittivity = (1/local.eps4).expand_as(grid.E).contiguous()
-        else:
-            grid.inverse_permittivity = self.workspace.array('inverse', grid.E.shape, epsilon.dtype)
-            grid.inverse_permittivity.copy_(local.eps4.expand_as(grid.E)).reciprocal_()
+        self._prepare_permittivity(local)
         grid.metric = {key:(next(views), edge) for key, (_, edge) in grid.metric.items()}
         for segment in local.segments:
             for name in ('psi', 'b', 'c', 'inv_k'):segment[name] = next(views)
         for family, terms in local.sources.items():
             local.sources[family] = [(loc, component, next(views), next(views) if profile is not None else None)
                                      for loc, component, _, profile in terms]
+        self._restore_payload(local, views)
         local.kernel = None
         local.prepare_observations()
-        if self.device.type == 'cuda':
-            from .cuda_kernels import FusedYeeCUDA
-            from .cuda_complex import FusedComplexYeeCUDA
-            kernel_type = FusedComplexYeeCUDA if grid.E.is_complex() else FusedYeeCUDA
-            local.kernel = kernel_type(grid, direct_views=self.direct_views, bindings_cache=self.workspace)
+        self._prepare_kernel(local)
         return local, mapping, observer_ids
 
     def _validate(self, epsilon, state, start, depth):
+        epsilon = self._material_epsilon(epsilon)
         if isinstance(depth, bool) or not isinstance(depth, int) or depth < 1:
             raise ValueError('Temporal depth must be a positive integer.')
         if start < 0 or start + depth > self.host.region.steps:
@@ -323,13 +364,10 @@ class SlabBlockOperator:
                             for i,s in enumerate(local.state()))
             adjoint = None
             samples = self.workspace.copy('signal', signal_bar[:, observers]) if self.workspace is not None else signal_bar[:, observers].to(self.device).contiguous()
-            local_gradient = self.workspace.zeros('gradient', local.epsilon) if self.workspace is not None else torch.zeros_like(local.epsilon)
-            backward = None
-            if self.device.type == 'cuda':
-                from .cuda_adjoint import FusedAdjointCUDA
-                from .cuda_complex_adjoint import FusedComplexAdjointCUDA
-                backward_type = FusedComplexAdjointCUDA if local.grid.E.is_complex() else FusedAdjointCUDA
-                backward = backward_type(local, local_gradient, samples, direct_views=self.direct_views, buffers=self.workspace)
+            material = self._local_material(local)
+            local_gradient = self.workspace.zeros('gradient', material) if self.workspace is not None else torch.zeros_like(material)
+            backward = self._backward(local, local_gradient, samples)
+            if backward is not None:
                 # The CUDA adjoint allocator zeros the complete tile. Transfer
                 # only owned endpoint values, rather than sending zero halos.
                 owned_values = [value[lo:hi] for value in endpoint_bar[:2]]
@@ -341,8 +379,9 @@ class SlabBlockOperator:
                     seed, layout = pack_tensors(owned_values)
                     seed = seed.to(self.device)
                 values = layout.unpack(seed)
-                backward.e_bar[core].copy_(values[0]);backward.h_bar[core].copy_(values[1])
-                for target, value, (_, _, owned, _) in zip(backward.psi_bars[0], values[2:], mapping):
+                seed_state = self._adjoint_state(backward)
+                seed_state[0][core].copy_(values[0]);seed_state[1][core].copy_(values[1])
+                for target, value, (_, _, owned, _) in zip(seed_state[2:], values[2:], mapping):
                     if owned.numel():target[int(owned[0]):int(owned[-1])+1].copy_(value)
             else:
                 adjoint = tuple(torch.zeros_like(s) for s in local.state())
@@ -381,7 +420,8 @@ class SlabBlockOperator:
             try:reverse(0,depth,restart,self.local_checkpoints,0)
             finally:reverse=None  # Do not retain a tile through its recursive closure.
             if backward is not None:
-                adjoint = (backward.e_bar, backward.h_bar, *backward.psi_bars[backward.phase])
+                if hasattr(backward, 'finalize'):backward.finalize({})
+                adjoint = self._adjoint_state(backward)
             return self._return((*adjoint, local_gradient)), (indices, mapping, self._halo_phase(descriptor))
 
         def commit(returned, metadata):
@@ -393,6 +433,6 @@ class SlabBlockOperator:
                 # Periodic X excludes X CPML, so every remaining psi slab
                 # shares the field's X winding and Hermitian extension.
                 initial_bar[global_id].index_add_(0, take, self._phase_value(value, conjugate))
-            gradient.index_add_(0, indices, returned[-1])
+            self._accumulate_gradient(gradient, returned[-1], indices)
         self._pipeline(depth, prepare, commit)
         return initial_bar, gradient

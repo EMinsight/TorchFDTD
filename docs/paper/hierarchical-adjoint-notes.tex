@@ -540,8 +540,8 @@ autograd oracle and directional tests check the material VJP. Fixed
 collocated planes connect it to reference-normalized flux objectives.
 The material suite also passes on an RTX 3060, including FP32 and FP64
 VJPs and asynchronous device, host and file checkpoint restoration.
-Spatially streamed ADE,
-sparse oscillator state and physical gradient convergence remain pending.
+Sparse oscillator state and physical gradient convergence remain pending.
+An experimental spatial extension is described below.
 These tests do not establish a new dispersive integration algorithm or
 a large-domain performance advantage.
 
@@ -601,4 +601,33 @@ retains Torch forward. Raw repetition records and source hashes accompany
 the repository validation report.}
 \label{tab:ade-cuda}
 \end{table}
+\subsection{Material states in space-time slabs}
+The spatial extension retains the same pointwise ADE recurrence.
+Consequently, it adds no spatial dependency beyond the conservative
+$2K$ halo for $K$ complete Yee steps. Every tile reads an immutable
+block-start state, evolves its extended domain, and commits only owned cells.
+E/H, CPML and P/Q participate in both block and local checkpoint replay.
+
+Global P/Q arrays have layout $(N_x,P,N_y,N_z,3)$ for contiguous x-slab
+file access. Packing supplies the pole-first layout to the native CUDA
+kernel. Bloch extension multiplies all replicated field and polarization
+states by the winding phase. Its transpose applies the conjugate phase
+before reducing overlapping halo contributions. Real material coefficients
+receive no Bloch phase. Their spatial derivatives sum over replicated x
+indices, while shared pole or scalar derivatives sum over all tiles.
+
+The initial global P/Q state uses scalar-backed zero views. Evolving
+states use DRAM or explicitly budgeted transient files, and CUDA scratch
+is reused per staging slot. Admission includes pole states, material-gradient
+carriers, local replay states and transfer buffers. The pole-dependent
+workspace estimate is conservative and still requires large-run calibration.
+The spectral observer and fixed-plane flux interface share this execution
+path without retaining the complete signal history.
+
+Complete block-Jacobian tests compare against resident full-time autograd,
+including nonzero polarization and CPML states and arbitrary endpoint
+adjoints. Tests also cover repeated Bloch windings, shared and spatial
+material parameters, file-backed replay and asynchronous staging. These
+checks establish discrete consistency for the tested cases. They do not
+establish optical convergence, large dispersive capacity or a speed advantage.
 \end{document}

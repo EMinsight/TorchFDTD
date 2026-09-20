@@ -109,9 +109,9 @@ scale with timestep count. See [validation and timings](validation/ONLINE_SPECTR
 | Checkpoint replay on device, host or disk | Implemented, synchronous or optional asynchronous transfers |
 | Mixed GPU/host/disk checkpoint slots | Implemented with explicit slot counts |
 | Full-tensor subpixel geometry derivatives | Pending |
-| ADE material adjoint | Separate [DispersiveSimulation and DispersivePlaneSimulation](DISPERSIVE_ADJOINT.md), resident Torch or explicit fused CUDA forward/transpose. Spatial ADE remains pending |
+| ADE material adjoint | Separate [resident](DISPERSIVE_ADJOINT.md) and experimental [spatially streamed](STREAMED_DISPERSIVE.md) Torch/native CUDA paths. Large dispersive capacity and physical gradient convergence remain unverified |
 | Live TFSF and mode-port adjoints | Pending, rejected by this API |
-| Complex spatial streaming and fused complex kernels | Pending, explicit rejection for unsupported requests |
+| Complex spatial streaming and fused complex kernels | Experimental fixed-Bloch [DRAM/file slabs](STREAMED_FDTD.md) and [ADE extension](STREAMED_DISPERSIVE.md), with first-order gradients. Moving phases and higher derivatives remain unsupported |
 | Trainable sources, boundaries and adaptive meshes | Pending |
 | Higher derivatives | Rejected explicitly |
 | Batched CUDA backward and shared-budget microbatch execution | Pending |

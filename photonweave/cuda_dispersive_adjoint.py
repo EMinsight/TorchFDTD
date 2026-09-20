@@ -51,16 +51,17 @@ class _ParameterCode:
 
 
 class _ADEUpdate:
-    def __init__(self, system, *, recompute=False):
+    def __init__(self, system, *, recompute=False, buffers=None):
         self.code = _ParameterCode(system)
         self.parameters = system.parameters
         self.P, self.Q = system.P, system.Q
         self.recompute = recompute
         self.write_cpml = not recompute
-        self.output = torch.empty_like(system.grid.E) if recompute else system.grid.E
+        self.output = (buffers.array('ade_recompute_E', system.grid.E.shape, system.field_dtype)
+                       if buffers is not None else torch.empty_like(system.grid.E)) if recompute else system.grid.E
         # No strong system/grid reference, so a completed graph is releasable
         # without cyclic garbage collection.
-        super().__init__(system.grid, direct_views=True)
+        super().__init__(system.grid, direct_views=True, bindings_cache=buffers)
 
     def _update_statements(self, forward, inverse, argument, real, **kwargs):
         if forward:return super()._update_statements(forward,inverse,argument,real,**kwargs)
@@ -101,14 +102,14 @@ class _RealADE(_ADEUpdate, FusedYeeCUDA):pass
 class _ComplexADE(_ADEUpdate, FusedComplexYeeCUDA):pass
 
 
-def fused_ade_forward(system, *, recompute=False):
+def fused_ade_forward(system, *, recompute=False, buffers=None):
     implementation = _ComplexADE if system.grid.E.is_complex() else _RealADE
-    return implementation(system, recompute=recompute)
+    return implementation(system, recompute=recompute, buffers=buffers)
 
 
 class FusedDispersiveAdjointCUDA:
     """Compose H-curl transpose, material transpose and E-curl transpose."""
-    def __init__(self, system, gradient, signal_bar):
+    def __init__(self, system, gradient, signal_bar, *, buffers=None):
         import cupy
         self.cp = cupy
         self.system = system
@@ -116,13 +117,14 @@ class FusedDispersiveAdjointCUDA:
         self.signal_bar = signal_bar.contiguous()
         self.code = _ParameterCode(system)
         self.blocks = (self.code.n+255)//256
-        self.numerator_bar = torch.empty_like(system.grid.E)
-        self.p_bar = torch.zeros_like(system.P)
-        self.q_bar = torch.zeros_like(system.Q)
-        self.partials = torch.zeros((self.code.shared_count,self.blocks), dtype=system.dtype,device=system.device)
-        self.recompute = fused_ade_forward(system, recompute=True)
+        self.numerator_bar = buffers.array('ade_numerator_bar',system.grid.E.shape,system.field_dtype) if buffers is not None else torch.empty_like(system.grid.E)
+        self.p_bar = buffers.zeros('ade_p_bar',system.P) if buffers is not None else torch.zeros_like(system.P)
+        self.q_bar = buffers.zeros('ade_q_bar',system.Q) if buffers is not None else torch.zeros_like(system.Q)
+        partial_shape = (self.code.shared_count,self.blocks)
+        self.partials = buffers.array('ade_partials',partial_shape,system.dtype).zero_() if buffers is not None else torch.zeros(partial_shape,dtype=system.dtype,device=system.device)
+        self.recompute = fused_ade_forward(system, recompute=True, buffers=buffers)
         kernel = FusedComplexAdjointCUDA if system.grid.E.is_complex() else FusedAdjointCUDA
-        self.curl = kernel(system,gradient,self.signal_bar,direct_views=True,
+        self.curl = kernel(system,gradient,self.signal_bar,direct_views=True,buffers=buffers,
                            material_gradient=False,electric_seed=self.numerator_bar,
                            curl_permittivity=torch.ones(1,dtype=system.dtype,device=system.device))
         source = self.source()

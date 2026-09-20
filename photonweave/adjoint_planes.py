@@ -128,7 +128,7 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         # Indexed internal observations avoid thousands of UI point objects.
         internal=self.project.model_copy(deep=True)
         internal.monitors=[Monitor()]
-        self.model=StreamedSimulation(internal,options) if isinstance(options,StreamedAdjointOptions) else self._resident_model_type(internal,options)
+        self.model=getattr(self, '_streamed_model_type', StreamedSimulation)(internal,options) if isinstance(options,StreamedAdjointOptions) else self._resident_model_type(internal,options)
         self._project_snapshot=self.project.model_dump()
         self._internal_snapshot=self.model.project.model_dump()
 

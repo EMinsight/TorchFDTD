@@ -70,3 +70,5 @@ from .reference_cache import PlaneReferenceCache
 __all__ += ['PlaneReferenceCache']
 from .dispersive_adjoint import DispersiveSimulation, DispersivePlaneSimulation
 __all__ += ['DispersiveSimulation', 'DispersivePlaneSimulation']
+from .streamed_dispersive import StreamedDispersiveSimulation, estimate_streamed_dispersive_memory
+__all__ += ['StreamedDispersiveSimulation', 'estimate_streamed_dispersive_memory']

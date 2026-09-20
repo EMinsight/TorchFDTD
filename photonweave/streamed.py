@@ -61,7 +61,7 @@ class StreamedAdjointOptions:
             raise ValueError('Asynchronous tiles require reusable CUDA buffers.')
 
 
-def _reservation(project, epsilon, options, spectral=None):
+def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, parameter_shapes=None):
     region = project.region
     n = math.prod(region.shape)
     boundary = BoundaryDescription(region)
@@ -70,7 +70,7 @@ def _reservation(project, epsilon, options, spectral=None):
     # Fields, CPML memories and source/observation histories are complex for
     # Bloch propagation even though epsilon and its gradient remain real.
     item = material_item*(2 if region.complex_fields else 1)
-    state = (6*n+cpml)*item
+    state = (6*n+cpml+6*pole_count*n)*item
     depth = min(options.temporal_depth, region.steps)
     width = min(options.slab_width, region.shape[0])+4*depth
     if 0 not in boundary.wrap:width = min(width, region.shape[0])
@@ -88,9 +88,12 @@ def _reservation(project, epsilon, options, spectral=None):
     tile_history = depth*(monitors+terms*source_copies)*item
     local_slots = min(options.local_checkpoints,depth-1)
     # A complete local state contains six fields and at most twelve CPML arrays.
-    tile_workspace = (128+18*local_slots)*tile_cells*item
+    # ADE includes P/Q and their adjoints, compact material packets and
+    # explicit Torch transpose temporaries. Keep a conservative pole-dependent
+    # bound for both CPU and native CUDA execution until large runs calibrate it.
+    tile_workspace = (128+144*pole_count+(18+6*pole_count)*local_slots)*tile_cells*item
     buffers = options.tile_buffers if options.tile_transfers == 'async' else 1
-    initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values()))*item
+    initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values())+(2 if pole_count else 0))*item
     # The immutable all-zero host initial bank is represented by scalar views.
     # Retain the remaining conservative headroom for replay and transpose banks.
     # At most C saved block states, one current adjoint and two evolving
@@ -100,8 +103,9 @@ def _reservation(project, epsilon, options, spectral=None):
     state_bank_capacity = options.checkpoints+5
     state_banks = state_bank_capacity*state
     disk = state_banks if options.state_storage == 'disk' else 0
-    disk_io_workspace = 36*tile_cells*item if disk else 0
-    host = (0 if disk else state_banks)+initial_storage+8*epsilon.numel()*material_item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
+    disk_io_workspace = (36+12*pole_count)*tile_cells*item if disk else 0
+    parameter_count = sum(math.prod(s) for s in parameter_shapes) if parameter_shapes is not None else epsilon.numel()
+    host = (0 if disk else state_banks)+initial_storage+8*parameter_count*material_item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
     gpu = buffers*(tile_workspace+tile_history)
     available = host_memory()['available_bytes']
     host_limit = min(options.host_budget_bytes, int(available*.8)) if available is not None else options.host_budget_bytes
@@ -122,7 +126,7 @@ def _reservation(project, epsilon, options, spectral=None):
                 state_bank_capacity=state_bank_capacity,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,
                 host_initial_state_reservation_bytes=initial_storage,
-                state_bytes=state, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*18*local_slots*tile_cells*item,
+                state_bytes=state, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*(18+6*pole_count)*local_slots*tile_cells*item,
                 source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))
 
 
@@ -194,21 +198,39 @@ def select_streamed_storage(project, options=None, *, diagonal=False, frequency_
     raise ValueError('No streamed storage policy fits: '+str(rejected))
 
 
+class _StreamedExecution:
+    """Physics factories for the common bounded block replay schedule."""
+    @property
+    def operator_type(self):
+        return SlabBlockOperator
+
+    def host(self, project, value, spectral):
+        return _System(project, value, prepare_updates=False,
+                       observation_monitors=None if spectral is None else spectral.observers)
+
+    def reservation(self, project, value, options, spectral):
+        return _reservation(project, value, options, spectral)
+
+    def operator(self, host, options, store):
+        return self.operator_type(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
+            reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
+            tile_buffers=options.tile_buffers, local_checkpoints=options.local_checkpoints,
+            state_factory=store.new_state if store is not None else None)
+
+
 class _Streamed(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, epsilon, project, options, report, spectral):
+    def forward(ctx, epsilon, project, options, report, spectral, execution):
         ctx.save_for_backward(epsilon)
         ctx.project, ctx.options, ctx.report = project.model_copy(deep=True), options, report
         ctx.spectral = spectral
+        ctx.execution = execution
         started = time.perf_counter()
-        host = _System(project, epsilon, prepare_updates=False, observation_monitors=None if spectral is None else spectral.observers)
+        host = execution.host(project, epsilon, spectral)
         report['host_initial_state_storage_bytes'] = sum(s.untyped_storage().nbytes() for s in host.state())
         report['host_inverse_permittivity_bytes'] = 0
         with _backing(options,report,'forward') as store:
-            operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
-                                        reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
-                                        tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints,
-                                        state_factory=store.new_state if store is not None else None)
+            operator = execution.operator(host, options, store)
             state = host.state()
             signals = torch.empty((project.region.steps, len(host.monitors)), dtype=host.field_dtype,
                                   device='cpu') if spectral is None else spectral.zeros()
@@ -228,14 +250,11 @@ class _Streamed(torch.autograd.Function):
         if torch.is_grad_enabled():raise RuntimeError('Higher-order streamed derivatives are not implemented.')
         epsilon, = ctx.saved_tensors
         options, project, report = ctx.options, ctx.project, ctx.report
-        _reservation(project, epsilon, options, ctx.spectral)
+        ctx.execution.reservation(project, epsilon, options, ctx.spectral)
         started = time.perf_counter()
-        host = _System(project, epsilon, prepare_updates=False, observation_monitors=None if ctx.spectral is None else ctx.spectral.observers)
+        host = ctx.execution.host(project, epsilon, ctx.spectral)
         with _backing(options,report,'backward') as store:
-            operator = SlabBlockOperator(host, options.slab_width, options.device, cuda_binding=options.cuda_binding,
-                                        reuse_buffers=options.reuse_tile_buffers, tile_transfers=options.tile_transfers,
-                                        tile_buffers=options.tile_buffers,local_checkpoints=options.local_checkpoints,
-                                        state_factory=store.new_state if store is not None else None)
+            operator = ctx.execution.operator(host, options, store)
             steps = project.region.steps
             starts = list(range(0, steps, options.temporal_depth))+[steps]
             gradient = torch.zeros_like(epsilon)
@@ -276,7 +295,7 @@ class _Streamed(torch.autograd.Function):
             if operator.workspace is not None:
                 report['backward_workspace'] = operator.workspace_report()
         report['backward_seconds'] = time.perf_counter()-started
-        return gradient, None, None, None, None
+        return gradient, None, None, None, None, None
 
 
 class StreamedSimulation(DifferentiableSimulation):
@@ -326,7 +345,7 @@ class StreamedSimulation(DifferentiableSimulation):
                       policy='manual', precision=str(epsilon.dtype), **reservation)
         report['observation_storage'] = 'time_history' if spectral is None else 'online_spectrum'
         if spectral is not None:report.update(spectral.reservation(min(options.temporal_depth,region.steps)))
-        signals = _Streamed.apply(epsilon, self.project, options, report, spectral)
+        signals = _Streamed.apply(epsilon, self.project, options, report, spectral, _StreamedExecution())
         if spectral is not None:return spectral.result(signals,report)
         return DifferentiableResult(signals, region.time_step,
                                     tuple(m.component for m in self.project.monitors if m.enabled), report)

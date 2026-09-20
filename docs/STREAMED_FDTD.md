@@ -5,6 +5,10 @@ in CPU DRAM. Only an extended x slab is moved to the selected execution device.
 Its first-order custom backward returns a CPU epsilon gradient, so ordinary
 Torch geometry parameters and optimizers can remain on CPU.
 
+The separate [dispersive streamed API](STREAMED_DISPERSIVE.md) adds coupled
+Drude/Lorentz P/Q banks and material gradients. Its large-domain capacity and
+performance validation are separate from the nondispersive measurements here.
+
 The all-zero host initial E/H/CPML bank uses scalar-backed views as read-only inputs rather
 than a dense global allocation. The host template also omits inverse permittivity,
 which is constructed only inside each active tile. The first evolved global bank

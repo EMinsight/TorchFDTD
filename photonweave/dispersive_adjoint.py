@@ -21,6 +21,10 @@ class _ParameterLayout:
         values = flat.split([math.prod(shape) for shape in self.shapes])
         return tuple(value.reshape(self.view_shape(i)) for i, value in enumerate(values))
 
+    def originals(self, flat):
+        values = flat.split([math.prod(shape) for shape in self.shapes])
+        return tuple(value.reshape(shape) for value, shape in zip(values, self.shapes))
+
     def view_shape(self, index):
         shape = self.shapes[index]
         if index == 0:
@@ -43,8 +47,12 @@ class _DispersiveSystem(_System):
         self.layout = layout
         self.pole_count = layout.pole_count
         shape = (self.pole_count, *self.grid.E.shape)
-        self.P = torch.zeros(shape, dtype=self.field_dtype, device=self.device)
-        self.Q = torch.zeros_like(self.P)
+        if kwargs.get('prepare_updates', True):
+            self.P = torch.zeros(shape, dtype=self.field_dtype, device=self.device)
+            self.Q = torch.zeros_like(self.P)
+        else:
+            self.P = torch.zeros((), dtype=self.field_dtype, device=self.device).expand(shape)
+            self.Q = torch.zeros((), dtype=self.field_dtype, device=self.device).expand(shape)
         if fused_forward or fused_backward:
             # The ADE kernel replaces the dielectric final update. Its shared
             # curl generator only needs a scalar placeholder, not 3*N inverses.
@@ -156,9 +164,11 @@ class DispersiveSimulation(DifferentiableSimulation):
         if any(s.enabled and s.injection != 'soft' for s in self.project.sources):
             raise ValueError('Dispersive differentiation currently requires soft source injection.')
 
-    def _pack(self, epsilon, strength, omega0, gamma, *, reference=False):
+    def _pack(self, epsilon, strength, omega0, gamma, *, reference=False, streamed=False, admission=None):
         r = self.project.region
-        r.require_resident()
+        if not streamed:r.require_resident()
+        elif not isinstance(epsilon, torch.Tensor) or epsilon.device.type != 'cpu':
+            raise ValueError('Streamed epsilon_inf must be a CPU tensor.')
         if not isinstance(epsilon, torch.Tensor) or epsilon.dtype not in (torch.float32, torch.float64):
             raise ValueError('epsilon_inf must be a real FP32/FP64 tensor.')
         if tuple(epsilon.shape) not in (r.shape, r.shape+(3,)):
@@ -184,6 +194,8 @@ class DispersiveSimulation(DifferentiableSimulation):
         for value in (strength, omega0, gamma):
             if value.shape not in ((), (count,), (count, *r.shape), (count, *r.shape, 3)):
                 raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3).')
+        layout = _ParameterLayout(tuple(tuple(value.shape) for value in (epsilon, strength, omega0, gamma)), count)
+        if admission is not None:admission(layout)
         packed_bytes = (epsilon.numel()+sum(v.numel() for v in (strength,omega0,gamma)))*epsilon.element_size()
         if epsilon.is_cuda:
             free, _ = torch.cuda.mem_get_info(epsilon.device)
@@ -196,7 +208,6 @@ class DispersiveSimulation(DifferentiableSimulation):
         if any(not bool(torch.isfinite(v).all()) for v in normalized):
             raise ValueError('Normalized oscillator coefficients overflow this precision.')
         values = (epsilon, *normalized)
-        layout = _ParameterLayout(tuple(tuple(value.shape) for value in values), count)
         return torch.cat([value.reshape(-1) for value in values]), layout
 
     def _evaluate(self, epsilon, strength, omega0, gamma, spectral):
@@ -249,9 +260,15 @@ class DispersivePlaneSimulation(DifferentiablePlaneSimulation):
     """Fixed spectral planes, flux and normalization with ADE material VJPs."""
     _resident_model_type = DispersiveSimulation
 
+    @property
+    def _streamed_model_type(self):
+        from .streamed_dispersive import StreamedDispersiveSimulation
+        return StreamedDispersiveSimulation
+
     def __init__(self, project, options=None, *, quadrature_counts=None):
-        if options is not None and not isinstance(options, AdjointOptions):
-            raise ValueError('Dispersive planes require resident AdjointOptions. ADE spatial streaming is pending.')
+        from .streamed import StreamedAdjointOptions
+        if options is not None and not isinstance(options, (AdjointOptions, StreamedAdjointOptions)):
+            raise ValueError('Dispersive planes require AdjointOptions or StreamedAdjointOptions.')
         super().__init__(project, options, quadrature_counts=quadrature_counts)
 
     def forward(self, epsilon_inf, strength, omega0, gamma, frequency_hz, *, block_size=32):

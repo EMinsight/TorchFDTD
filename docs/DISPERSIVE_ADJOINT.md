@@ -80,8 +80,10 @@ RTX 3060 after its CR duration run finished. It covers CUDA FP32/FP64, real
 and complex Bloch VJPs, plane-flux derivatives and asynchronous
 device/host/file restoration of the P/Q state.
 Optional resident fused CUDA forward/backward is also available. Sparse
-material-state allocation and spatial out-of-core ADE are still pending.
-Selecting streamed plane options raises an explicit error. Live TFSF, one-way sources, subpixel
+material-state allocation remains pending. Experimental spatial out-of-core
+ADE is described in [the streamed guide](STREAMED_DISPERSIVE.md).
+Streamed plane options select the same material recurrence with spatial slabs.
+Live TFSF, one-way sources, subpixel
 interfaces, moving monitors and higher derivatives are also outside this API.
 
 Validation checks the native Drude/Lorentz/multipole forward, a small full-time
