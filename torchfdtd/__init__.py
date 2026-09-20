@@ -131,3 +131,6 @@ __all__ += ["EndpointProject", "endpoint_from_project", "FixedModePort",
 from .pmc_cpml import EndpointCPMLSimulation
 from .radiation_io import native_radiation_plane, load_native_radiation_plane
 __all__ += ["EndpointCPMLSimulation", "native_radiation_plane", "load_native_radiation_plane"]
+
+from .reversible import ReversibleOptions, ReversibleSimulation
+__all__ += ["ReversibleOptions", "ReversibleSimulation"]

@@ -103,6 +103,9 @@ class _System:
         self.eps4=epsilon[...,None] if epsilon.ndim==3 else epsilon
         self.device,self.dtype=epsilon.device,epsilon.dtype
         self.field_dtype=(torch.complex128 if self.dtype==torch.float64 else torch.complex64) if r.complex_fields else self.dtype
+        if prepare_kernels and self.device.type=='cuda' and not r.complex_fields:
+            from .cuda_bootstrap import prepare_cuda_kernels
+            prepare_cuda_kernels()
         if not prepare_updates and self.device.type != 'cpu':
             raise ValueError('Storage-only systems require CPU epsilon.')
         self.current_step=0

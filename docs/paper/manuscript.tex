@@ -1084,6 +1084,44 @@ with different memory and recomputation costs. These correctness records
 do not imply that the checkpointed FDTDX path is its fastest applicable
 method, or establish an overall performance advantage.
 
+\subsection{Opt-in lossless periodic reconstruction}
+
+A separate \code{ReversibleSimulation} implementation now reconstructs
+FP32 scalar-dielectric periodic fields from one owned terminal E/H pair.
+It supports fixed impressed electric point increments and point E/H
+observations. Absorbing, dispersive and tensor states are excluded from this
+API. Reversible differentiation is an established approach, including in
+FDTDX \citep{fdtdx-source}, and is not claimed here as a new algorithm.
+
+For the stored native state, the inverse first recovers H using the new E,
+then subtracts the electric source increment and recovers the old E.
+The local transpose uses this reconstructed old H for the material VJP.
+An ordinary negative-Courant forward step would have the wrong update order.
+Each backward performs exactly one inverse and one transpose per timestep,
+with no checkpoint replay. The immutable terminal pair is copied into live
+working fields on every retained backward. Concurrent backwards on the
+same result are rejected.
+
+Field storage is $O(N)$, while source and point histories remain
+$O(T(K+M))$ for $K$ prepared source terms and $M$ observation terms.
+Admission includes terminal storage, live and adjoint fields, coefficients,
+gradient, histories, observer metadata, source preparation and bounded
+reduction scratch. Dynamic fields remain FP32. Diagnostic reductions use
+FP64 chunks of at most 65,536 scalars without allocating full FP64 fields.
+Absolute reconstruction residuals and their ratios to sampled forward
+field scales are reported. An explicit drift threshold rejects failed
+reconstruction before returning a gradient. This is a diagnostic, not a
+theorem bounding objective-gradient error.
+
+Native CUDA integration cases at $12^3$ cells and 96 steps and at $64^3$
+cells and 512 steps have bitwise-equal histories to checkpointed execution.
+The full material-gradient relative $L_2$ errors are
+$4.09\times10^{-7}$ and $4.91\times10^{-7}$, respectively.
+Distinct noncontiguous backward seeds also pass, and the systems, grids,
+original fields and terminal pairs are released after their graphs.
+These restricted checks do not establish arbitrary-duration accuracy,
+beyond-VRAM capacity or a competitive throughput ranking.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.

@@ -90,7 +90,7 @@ class FusedAdjointCUDA:
         }'''.replace('REAL',real)
         fn,module=_compile(code,self.device,self.cp.cuda.Device(self.device).compute_capability,'add_observations')
         arrays=tuple(self.view(t) for t in (self.e_bar,self.h_bar,self.signal_bar))
-        arrays+=(self.cp.from_dlpack(self.observer_layout.detach()),)
+        arrays+=(self.view(self.observer_layout),)
         return fn,(*arrays,np.int32(count),np.int32(len(self.system.monitors))),module,count
 
     def source(self,forward,phase):

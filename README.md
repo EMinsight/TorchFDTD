@@ -75,6 +75,13 @@ postprocessing without another FDTD run. See the [FDTDX parity completion gates]
 for verified scope and remaining work. This does not establish overall FDTDX
 parity or a speed advantage over it.
 
+An opt-in [reversible adjoint](docs/REVERSIBLE_ADJOINT.md) now reconstructs
+lossless periodic FP32 fields from one terminal state without checkpoint
+replay. The Python API includes memory admission, retained-backward
+ownership and drift rejection. CPU and native CUDA full-gradient checks
+pass through 512 steps. CPML reconstruction, broad long-time acceptance
+and competitive throughput remain separate work.
+
 Experimental [resident/streamed adjoint selection](docs/EXECUTION_SELECTION.md)
 now compares full-grid and tiled execution with one CPU design-tensor API.
 The measured search includes resident input/output transfers and reuses the

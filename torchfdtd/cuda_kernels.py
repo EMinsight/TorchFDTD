@@ -25,9 +25,9 @@ def _direct_cuda_view(cupy, tensor):
     negotiation for every small coefficient view in a short-lived slab.
     """
     dtypes = {torch.float32:'float32', torch.float64:'float64',
-              torch.complex64:'complex64', torch.complex128:'complex128'}
+              torch.complex64:'complex64', torch.complex128:'complex128', torch.int64:'int64'}
     if not tensor.is_cuda or not tensor.is_contiguous() or tensor.dtype not in dtypes:
-        raise ValueError('Direct CUDA views require contiguous CUDA real/complex FP32/FP64 tensors.')
+        raise ValueError('Direct CUDA views require contiguous CUDA real/complex FP32/FP64 or int64 tensors.')
     if tensor.is_conj() or tensor.is_neg():
         raise ValueError('Direct CUDA views require resolved conjugate/negative storage.')
     tensor.record_stream(torch.cuda.current_stream(tensor.device))

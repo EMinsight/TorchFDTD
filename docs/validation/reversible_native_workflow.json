@@ -1,0 +1,73 @@
+{
+  "status": "targeted implementation checks passed",
+  "scope": "real FP32 scalar, uniform 3D periodic, fixed soft electric point sources, point E/H histories, first material VJP",
+  "cpu": {
+    "cases": "80/512 steps, full VJP, source-cell FD, retained seeds, guards, ownership",
+    "passed_tests": 12,
+    "admission_tests_passed": 10
+  },
+  "cuda": {
+    "device": "NVIDIA GeForce RTX 3060",
+    "dynamic_dtype": "float32",
+    "numerical_metrics_dtype": "bounded float64 reductions only",
+    "cases": [
+      {
+        "cells_per_axis": 12,
+        "steps": 96,
+        "history": "bitwise checkpoint equality",
+        "gradient_relative_l2": 4.0856639316189103e-07,
+        "seed_relative_l2": 5.497383881447604e-07,
+        "initial_relative_l2": 7.577542549486111e-07,
+        "torch_peak_increment_bytes": 254464,
+        "reserved_solver_bytes": 8718186
+      },
+      {
+        "cells_per_axis": 64,
+        "steps": 512,
+        "history": "bitwise checkpoint equality",
+        "gradient_relative_l2": 4.90915283535287e-07,
+        "seed_relative_l2": 8.054579438976361e-07,
+        "initial_relative_l2": 1.907609088862925e-06,
+        "torch_peak_increment_bytes": 25191424,
+        "reserved_solver_bytes": 45789706
+      }
+    ],
+    "note": "Incremental Torch allocation excludes caller arrays present before execution and some dependency/context memory. No performance ranking.",
+    "ownership": "system, grid, original fields and terminal pair released without cyclic collection"
+  },
+  "cuda_bootstrap": {
+    "integrated_tests_passed": 5,
+    "cases": "synthetic exception lifetime, failure/retry, concurrent initialization, actual cold CUDA subprocess, CPML history/spectral gradients"
+  },
+  "publication_status": "NOT_CLEARED_FOR_PUBLICATION",
+  "initial_cuda_gate_source_sha256": {
+    "torchfdtd/reversible.py": "3c0645be41487701cf91b1a7ead223546710dafac22912dded69ade8f8fadbe4",
+    "torchfdtd/reversible_memory.py": "61b587e593b84b82aa27a5540f8f7c9a071751f9ba326449c47ca071df8c5328",
+    "torchfdtd/cuda_bootstrap.py": "b2b6a06f2bf25f5a28d1737dbd488c1aafd3be0e44c58ec54243b735cb5d3e4c",
+    "torchfdtd/cuda_kernels.py": "634e16f3979ef9c8aff925b8b30b3bad4433f969118dbe4f39ad7aa9ae6db1b9",
+    "torchfdtd/cuda_adjoint.py": "0be7744c399e4aed97b8f00f15d7a4649a28f842097ad2309bf262feb6a8ff5d",
+    "torchfdtd/differentiable.py": "4b20a33eeaa0e2d27d2499db3435ee623cc246bdd3569245f7156597840385e3",
+    "tests/test_reversible.py": "ff39e773edb357684fad80438d207d6f48b6add30df77d8a1f186d10bce8965e",
+    "tests/test_reversible_cuda.py": "ebef85815c71e9705308cdbfe01582ba46cc821932187bbdd39e1674126d533d",
+    "tests/test_reversible_memory.py": "61cbca3f8e0df20c1284f487781b270af9294ee110b56f3b85dc6d38be3e4d43",
+    "tests/test_cuda_bootstrap.py": "83b0dbf1124ced59a78bb2349dd2567b89a13ce41993f7aa044927abd46481d8"
+  },
+  "final_source_sha256": {
+    "torchfdtd/reversible.py": "74f777f57f90d88ec4ae7fbb553cf42c3822b9add6201e0b4803b1ba4a8fa9d1",
+    "torchfdtd/reversible_memory.py": "59e602e443c279f40662d169359b3bfe38dfc3f321925125a57e8f39099e4222",
+    "torchfdtd/cuda_bootstrap.py": "b2b6a06f2bf25f5a28d1737dbd488c1aafd3be0e44c58ec54243b735cb5d3e4c",
+    "torchfdtd/cuda_kernels.py": "634e16f3979ef9c8aff925b8b30b3bad4433f969118dbe4f39ad7aa9ae6db1b9",
+    "torchfdtd/cuda_adjoint.py": "0be7744c399e4aed97b8f00f15d7a4649a28f842097ad2309bf262feb6a8ff5d",
+    "torchfdtd/differentiable.py": "4b20a33eeaa0e2d27d2499db3435ee623cc246bdd3569245f7156597840385e3",
+    "tests/test_reversible.py": "925c9aab9f028b11c386b4b8697f5a4a5ed91bf10c70263a0e4567e2d5da7e55",
+    "tests/test_reversible_cuda.py": "ebef85815c71e9705308cdbfe01582ba46cc821932187bbdd39e1674126d533d",
+    "tests/test_reversible_memory.py": "bf3ccfa434a073e5dc6711f3a6da23c60b63d830871a6d152cc1b13f57a48a48",
+    "tests/test_cuda_bootstrap.py": "83b0dbf1124ced59a78bb2349dd2567b89a13ce41993f7aa044927abd46481d8"
+  },
+  "post_cuda_gate_changes": [
+    "Preserve explicit budgeted-resident contract while rechecking complete totals.",
+    "Revalidate numeric and CFL schema in a per-call Project snapshot before admission.",
+    "Avoid a tuple of validation views by traversing bounded material blocks."
+  ],
+  "post_cuda_gate_validation": "Targeted CPU admission and mutation/lifetime tests. No repeat of unchanged CUDA numerical kernels."
+}
