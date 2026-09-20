@@ -538,7 +538,9 @@ restoration and online spectral observations. Native Drude, Lorentz and
 multipole forward traces agree with the new recurrence. A full-time
 autograd oracle and directional tests check the material VJP. Fixed
 collocated planes connect it to reference-normalized flux objectives.
-CUDA hardware validation, fused ADE kernels, spatially streamed ADE,
+The material suite also passes on an RTX 3060, including FP32 and FP64
+VJPs and asynchronous device, host and file checkpoint restoration.
+Fused ADE kernels, spatially streamed ADE,
 sparse oscillator state and physical gradient convergence remain pending.
 These tests do not establish a new dispersive integration algorithm or
 a large-domain performance advantage.

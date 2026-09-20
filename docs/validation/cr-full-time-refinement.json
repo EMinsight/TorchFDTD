@@ -1,0 +1,36 @@
+{
+  "status": "full temporal refinement measured, not a convergence certificate",
+  "input_sha256": {
+    "schedule": "23df354b7d7acc4cd3ac8201d9999cda96e5cfc44cc889925bb5309abbee4732",
+    "density": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44",
+    "context": "a20bec68bdbf9945e257f0886429a9981aabb479e57dbdbb49a74e0e5d037f4d"
+  },
+  "baseline_steps": 1600,
+  "refined_steps": 3200,
+  "mesh_um": 0.05,
+  "pml_cells": 12,
+  "baseline_objective": 1.236263348891092,
+  "refined_objective": 1.2345632878555595,
+  "objective_relative_change": -0.0013751609129699638,
+  "response_max_absolute_change": 0.0012152838130044252,
+  "response_rmse_change": 0.0004664598886720958,
+  "per_wavelength_max_absolute_change": {
+    "420.0": 0.0005357421157765885,
+    "450.0": 0.0006449395646613287,
+    "470.0": 0.0007365471074103347,
+    "510.0": 0.0006105348695563673,
+    "540.0": 0.0006480410981971885,
+    "570.0": 0.0005262713547310449,
+    "600.0": 0.0010266163547571205,
+    "635.0": 0.000634724533077613,
+    "670.0": 0.0012152838130044252
+  },
+  "torcwa_order16_objective": 1.2065752346315706,
+  "remaining_objective_relative_difference": 0.02319627688408099,
+  "remaining_response_max_absolute_difference": 0.029441950631132807,
+  "limitations": [
+    "A single duration doubling does not prove time convergence. Mesh and PML refinements are still required.",
+    "The run overlapped development activity. Elapsed time is diagnostic, not an isolated speed measurement.",
+    "This is the same relaxed seed, not an optimized design. No competitor speed or full physical-gradient claim."
+  ]
+}

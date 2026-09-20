@@ -243,4 +243,20 @@ evidence, not the full CR accuracy study.
 
 The complete 144-case, 50 nm, 3200-step duration study restarted on RTX 3060
 with this journal at `results/cr-full-time3200-3060-restartable.json`. The
-result is pending. Each completed case now survives a process interruption.
+full run completed with 144 newly computed cases and no restored cases. The
+objective is 1.2345632878555595 bits per pixel, a 0.137516% decrease from
+1600 steps. Maximum absolute channel-response change is 0.00121528.
+Against the order-16 TORCWA objective, a 2.31963% discrepancy remains.
+This duration doubling reduces the discrepancy slightly but does not establish
+time convergence or explain it completely. See the [raw duration result](validation/cr-full-time3200-3060.json)
+and [comparison](validation/cr-full-time-refinement.json). Timing includes
+development overlap and is not a fresh solver-speed comparison.
+
+The next complete 144-case forward run uses a 25 nm mesh, 6400 steps and 24
+PML cells. All cases retain the 2 by 2 by 8.3 micrometre outer extent,
+305.052 fs physical duration and 0.6 micrometre z-PML thickness of the
+50 nm, 3200-step run. The grid changes from 40 by 40 by 166 to 80 by 80 by 332.
+It has started on RTX 3060 at `results/cr-full-mesh25nm6400-3060.json`.
+Its checkout is frozen at the same solver/evaluator source hashes as the
+completed duration run. Separate development can continue without changing
+its restart contract. Results remain pending.

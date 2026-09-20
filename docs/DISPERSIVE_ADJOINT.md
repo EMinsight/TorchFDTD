@@ -74,8 +74,10 @@ equality is not required. No reduced storage precision is used.
 
 The current implementation uses Torch updates and an analytic discrete
 transpose. CPU FP32/FP64, CPML, real/complex Bloch and diagonal material
-gradients are covered by targeted tests. CUDA tests are provided but hardware
-validation is pending while both available GPUs run the full CR studies.
+gradients are covered by targeted tests. The material suite also passed on
+RTX 3060 after its CR duration run finished. It covers CUDA FP32/FP64, real
+and complex Bloch VJPs, plane-flux derivatives and asynchronous
+device/host/file restoration of the P/Q state.
 Fused ADE forward/backward, sparse material-state allocation and spatial
 out-of-core ADE are still pending. Selecting fused backward or streamed plane
 options raises an explicit error. Live TFSF, one-way sources, subpixel
@@ -94,3 +96,6 @@ plane, Bloch, spectral and spatial-checkpoint paths passed 192 tests, with
 and transpose and compiles without an overfull-box warning.
 After compact parameter storage was added, the same regression scope plus
 broadcast-layout checks passed 201 tests with 59 CUDA-dependent skips.
+A subsequent dedicated material suite passed all 32 CPU/CUDA tests, including
+the extended GPU cases and pre-allocation rejection of an oversized oracle.
+This does not establish CUDA throughput or large dispersive-domain capacity.

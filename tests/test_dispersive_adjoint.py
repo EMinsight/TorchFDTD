@@ -8,7 +8,9 @@ from test_differentiable import project
 
 
 @pytest.mark.parametrize('dimension,bloch,diagonal', [('2d', False, False), ('3d', False, True), ('2d', True, True)])
-def test_ade_explicit_transpose_matches_full_time_graph(dimension, bloch, diagonal):
+@pytest.mark.parametrize('device', ['cpu','cuda'])
+def test_ade_explicit_transpose_matches_full_time_graph(dimension, bloch, diagonal, device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
     p = project(dimension=dimension, steps=15)
     if bloch:
         p.region.boundaries.x_min = BoundaryFace(kind='bloch')
@@ -16,14 +18,14 @@ def test_ade_explicit_transpose_matches_full_time_graph(dimension, bloch, diagon
         p.region.bloch_phase = (.41, 0, 0)
     torch.manual_seed(54)
     shape = p.region.shape+((3,) if diagonal else ())
-    epsilon = (1.5+.1*torch.rand(shape, dtype=torch.float64)).requires_grad_()
-    strength = torch.tensor([.8, .4], dtype=torch.float64, requires_grad=True)
-    omega = torch.tensor([0., 1.7], dtype=torch.float64, requires_grad=True)
-    gamma = torch.tensor([.2, .3], dtype=torch.float64, requires_grad=True)
+    epsilon = (1.5+.1*torch.rand(shape, dtype=torch.float64,device=device)).requires_grad_()
+    strength = torch.tensor([.8, .4], dtype=torch.float64,device=device,requires_grad=True)
+    omega = torch.tensor([0., 1.7], dtype=torch.float64,device=device,requires_grad=True)
+    gamma = torch.tensor([.2, .3], dtype=torch.float64,device=device,requires_grad=True)
     model = DispersiveSimulation(p, AdjointOptions(checkpoints=2))
     args = lambda: (epsilon, strength*1e30, omega*1e15, gamma*1e15)
     reference = model.reference(*args())
-    weights = torch.randn(reference.shape, dtype=reference.dtype)
+    weights = torch.randn(reference.shape, dtype=reference.dtype,device=device)
     loss = lambda signals: (signals.conj()*weights).real.sum() + signals.abs().square().sum()
     expected = torch.autograd.grad(loss(reference), (epsilon, strength, omega, gamma))
     actual = model(*args())
@@ -99,6 +101,9 @@ def test_invalid_parameters_and_options():
     eps = torch.full(p.region.shape, 1.5, dtype=torch.float64)
     with pytest.raises(ValueError,match='Fused dispersive'):
         DispersiveSimulation(p,AdjointOptions(backward_kernel='fused'))
+    from photonweave import StreamedAdjointOptions
+    with pytest.raises(ValueError,match='resident AdjointOptions'):
+        DispersiveSimulation(p,StreamedAdjointOptions())
     model = DispersiveSimulation(p)
     for strength in ([-1.], [float('nan')], [1+1j]):
         with pytest.raises(ValueError):
@@ -110,6 +115,15 @@ def test_invalid_parameters_and_options():
     p.region.memory_mode='streamed'
     with pytest.raises(ValueError,match='StreamedSimulation'):
         DispersiveSimulation(p)(eps,[1e30],1e15,1e14)
+
+
+def test_reference_size_guard_precedes_parameter_packing(monkeypatch):
+    p=project(steps=10000)
+    eps=torch.full(p.region.shape,1.5,dtype=torch.float64)
+    model=DispersiveSimulation(p)
+    monkeypatch.setattr(torch,'cat',lambda *a,**k: pytest.fail('Large oracle allocated packed parameters'))
+    with pytest.raises(ValueError,match='two million'):
+        model.reference(eps,[1e30],1e15,2e14)
 
 
 @pytest.mark.parametrize('dtype', [torch.float32, torch.float64])
@@ -135,11 +149,13 @@ def test_cpu_cuda_precision_and_parameter_directions(device, dtype):
         torch.testing.assert_close(got@direction,fd,rtol=1e-6,atol=1e-9)
 
 
-def test_plane_flux_material_gradient_and_zero_pole_limit():
+@pytest.mark.parametrize('device', ['cpu','cuda'])
+def test_plane_flux_material_gradient_and_zero_pole_limit(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
     from photonweave import DifferentiablePlaneSimulation
     from test_adjoint_planes import scene
     p = scene(); p.region.steps = 24
-    eps = torch.full(p.region.shape,1.7,dtype=torch.float64)
+    eps = torch.full(p.region.shape,1.7,dtype=torch.float64,device=device)
     options = AdjointOptions(checkpoints=2)
     model = DispersivePlaneSimulation(p,options)
     frequency = [.025/p.region.time_step,.06/p.region.time_step]
@@ -147,7 +163,7 @@ def test_plane_flux_material_gradient_and_zero_pole_limit():
     nondispersive = DifferentiablePlaneSimulation(p,options)(eps,frequency)
     for key in zero:
         torch.testing.assert_close(zero[key].fields,nondispersive[key].fields,rtol=2e-12,atol=1e-27)
-    strength = torch.tensor(.8,dtype=torch.float64,requires_grad=True)
+    strength = torch.tensor(.8,dtype=torch.float64,device=device,requires_grad=True)
     def loss(value):
         planes = model(eps,value[None]*1e30,1.5e15,2e14,frequency,block_size=5)
         return sum(plane.normalized_flux(zero[key]).sum() for key,plane in planes.items())
@@ -229,3 +245,24 @@ def test_uniform_poles_do_not_allocate_dense_parameter_copies():
     assert [value.numel() for value in (a,d,k)]==[2,2,2]
     gradient,=torch.autograd.grad(result.signals.square().sum(),epsilon)
     assert torch.isfinite(gradient).all() and gradient.norm()>0
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(),reason='CUDA unavailable')
+def test_ade_async_hierarchical_cuda_restores_polarization_and_current(tmp_path):
+    p=project(steps=14)
+    p.region.boundaries.x_min=BoundaryFace(kind='bloch')
+    p.region.boundaries.x_max=BoundaryFace(kind='bloch')
+    p.region.bloch_phase=(.31,0,0)
+    eps=torch.full(p.region.shape,1.5,dtype=torch.float64,device='cuda',requires_grad=True)
+    strength=torch.tensor([.5,.7],dtype=torch.float64,device='cuda',requires_grad=True)
+    model=DispersiveSimulation(p,AdjointOptions(checkpoints=3,storage='hierarchical',
+        device_checkpoints=1,host_checkpoints=1,checkpoint_transfers='async',
+        checkpoint_directory=tmp_path,disk_budget_bytes=32*1024**2,host_budget_bytes=32*1024**2))
+    expected=model.reference(eps,strength*1e30,[0.,1.8e15],2e14)
+    want=torch.autograd.grad(expected.abs().square().sum(),(eps,strength))
+    result=model(eps,strength*1e30,[0.,1.8e15],2e14)
+    got=torch.autograd.grad(result.signals.abs().square().sum(),(eps,strength))
+    for a,b in zip(got,want):torch.testing.assert_close(a,b,rtol=3e-10,atol=1e-12)
+    assert result.report['checkpoint_tiers']==['disk','host','device']
+    assert result.report['peak_checkpoints']==3
+    assert not list(tmp_path.iterdir())

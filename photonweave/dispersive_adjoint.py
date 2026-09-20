@@ -133,13 +133,15 @@ class DispersiveSimulation(DifferentiableSimulation):
 
     def __init__(self, project, options=None):
         options = options or AdjointOptions()
+        if not isinstance(options, AdjointOptions):
+            raise ValueError('Dispersive differentiation requires resident AdjointOptions. ADE spatial streaming is pending.')
         if options.backward_kernel == 'fused':
             raise ValueError('Fused dispersive backward is not implemented. Select torch or auto.')
         super().__init__(project, replace(options, backward_kernel='torch'))
         if any(s.enabled and s.injection != 'soft' for s in self.project.sources):
             raise ValueError('Dispersive differentiation currently requires soft source injection.')
 
-    def _pack(self, epsilon, strength, omega0, gamma):
+    def _pack(self, epsilon, strength, omega0, gamma, *, reference=False):
         r = self.project.region
         r.require_resident()
         if not isinstance(epsilon, torch.Tensor) or epsilon.dtype not in (torch.float32, torch.float64):
@@ -162,6 +164,8 @@ class DispersiveSimulation(DifferentiableSimulation):
         if strength.ndim == 0 or not 1 <= strength.shape[0] <= 64:
             raise ValueError('Strength needs a leading pole axis of length 1 to 64.')
         count = strength.shape[0]
+        if reference and math.prod(r.shape)*r.steps*(1+count)>2_000_000:
+            raise ValueError('Full-autograd ADE oracle is restricted to two million pole-cell-steps.')
         for value in (strength, omega0, gamma):
             if value.shape not in ((), (count,), (count, *r.shape), (count, *r.shape, 3)):
                 raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3).')
@@ -210,10 +214,7 @@ class DispersiveSimulation(DifferentiableSimulation):
         return self._evaluate(epsilon_inf, strength, omega0, gamma, spectral)
 
     def reference(self, epsilon_inf, strength, omega0, gamma):
-        parameters, layout = self._pack(epsilon_inf, strength, omega0, gamma)
-        count = layout.pole_count
-        if math.prod(self.project.region.shape)*self.project.region.steps*(1+count)>2_000_000:
-            raise ValueError('Full-autograd ADE oracle is restricted to two million pole-cell-steps.')
+        parameters, layout = self._pack(epsilon_inf, strength, omega0, gamma, reference=True)
         system = _DispersiveSystem(self.project, epsilon_inf, parameters, layout)
         state = tuple(torch.zeros_like(x) for x in system.state())
         signals = []
