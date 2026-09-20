@@ -218,10 +218,9 @@ class FDTD:
         elif isinstance(obj,Region) and key in [a+' '+s+' bc' for a in 'xyz' for s in ('min','max')]:
             axis, side, _ = key.split()
             kind = str(value).strip().lower().replace('-', '').replace(' ', '')
-            if kind in ('pmc', 'symmetric', 'symmetry'):
-                raise ValueError('PMC/symmetric endpoint boundaries are not implemented. Upper-face Yee states are required.')
-            if kind not in ('pml', 'periodic', 'bloch', 'pec', 'antisymmetric'):
-                raise ValueError('Supported native boundaries: PML, Periodic, Bloch, PEC, Anti-Symmetric')
+            if kind == 'symmetry':kind = 'symmetric'
+            if kind not in ('pml', 'periodic', 'bloch', 'pec', 'antisymmetric', 'pmc', 'symmetric'):
+                raise ValueError('Supported native boundaries: PML, Periodic, Bloch, PEC, Anti-Symmetric, PMC, Symmetric')
             data['boundaries'][axis+'_'+side]['kind'] = kind
             # A cyclic boundary always controls both ends of the axis.
             other = axis+'_'+('max' if side=='min' else 'min')

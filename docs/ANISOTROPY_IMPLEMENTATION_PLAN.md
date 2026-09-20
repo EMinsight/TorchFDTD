@@ -64,13 +64,13 @@ reject mutation between forward and backward.
 
 For finite axes, missing incident edges use zero extension, never a periodic
 roll. Let R contain only existing edge incidences. Its diagonal coverage is
-`D = (1/8) sum R¢ÓR`: one for ordinary edges and one half for the final edge of
+`D = (1/8) sum R^daggerR`: one for ordinary edges and one half for the final edge of
 its own finite axis. The implemented gather is `R D^(-1/2)` and its scatter is
-`D^(-1/2) R¢Ó`. Thus
+`D^(-1/2) R^dagger`. Thus
 
 ```text
-S = D^(-1/2) [(1/8) sum R¢Ó K R] D^(-1/2)
-(1/8) sum (R D^(-1/2))¢Ó (R D^(-1/2)) = I
+S = D^(-1/2) [(1/8) sum R^dagger K R] D^(-1/2)
+(1/8) sum (R D^(-1/2))^dagger (R D^(-1/2)) = I
 ```
 
 This yields Hermitian positive S, preserves local bounds on K, and recovers
@@ -87,7 +87,7 @@ The update first advances the electric CPML memories and constructs the
 CPML-modified H curl, then applies S to that complete curl. The magnetic curl
 updates its own memories after the electric field update. Every psi array is
 included in native checkpoints. Reverse propagation transposes the magnetic
-curl and its memory update first, applies S¢Ó to the electric seed, accumulates
+curl and its memory update first, applies S^dagger to the electric seed, accumulates
 the inverse-matrix tensor VJP, then transposes the electric curl and memories.
 The reservation reuses the native CPML state/replay accounting plus the existing
 192-real-scalars-per-cell tensor allowance. No dense constitutive matrix or
@@ -139,6 +139,15 @@ from these small parity checks.
 Real material coefficients can coexist with complex Bloch fields. Complex fields do not imply complex, gyrotropic, or general anisotropic material support. The present mode solver and modal launch also assume isotropic nondispersive cross-sections.
 
 Relevant interfaces are `solver.field_axes`, `solver.voxelize`, `boundaries.update_E`, `differentiable._System.reference_step`, `differentiable._System.transpose_step`, `dispersive_adjoint._ParameterLayout`, `dispersive_adjoint._DispersiveSystem.electric_step`, `subpixel.interface_tensor`, `subpixel.prepare_interfaces`, `SubpixelPlan.apply`, and `spacetime._prepare_permittivity`/`_tile`. Streamed ADE already exists. An older statement that ADE streaming is pending is not an accurate description of current coverage.
+
+## Separate physical slab evidence
+
+The [rotated-slab acceptance](TENSOR_CPML_SLAB_ACCEPTANCE.md) uses independent
+polarized continuum transfer coefficients inside the fixed isotropic exterior.
+Two FP32 normal-direction meshes give coherent transmission errors of 1.0088%
+and 0.2421%. The coarse rotation VJP error is 1.5077%. All predeclared gates pass.
+This does not isolate CPML reflection or validate anisotropy inside the PML,
+oblique incidence, general interfaces, long-time stability or large-grid speed.
 
 ## Foundation design and remaining milestone gates
 

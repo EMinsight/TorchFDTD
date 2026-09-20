@@ -1,0 +1,192 @@
+{
+  "schema": "torchfdtd.tensor_cpml_slab_acceptance.v1",
+  "dft_convention": "DifferentiableResult.spectrum: exp(-i omega t); forward +z phase exp(-i k z)",
+  "spec": {
+    "background_index": 1.2,
+    "eigen_indices": [
+      1.5,
+      2.0
+    ],
+    "rotation_deg": 25.0,
+    "slab_thickness_um": 0.6,
+    "wavelength_um": 1.55,
+    "domain_um": [
+      0.5,
+      0.5,
+      6.0
+    ],
+    "transverse_mesh_um": 0.1,
+    "normal_meshes_um": [
+      0.05,
+      0.025
+    ],
+    "pml_thickness_um": 1.0,
+    "source_z_um": -1.2,
+    "probe_z_um": 1.2,
+    "pulse_fwhm_s": 6e-15,
+    "pulse_offset_s": 1.8e-14,
+    "duration_s": 8e-14,
+    "precision": "float32"
+  },
+  "predeclared_criteria": {
+    "coarse_complex_vector_relative_error_max": 0.05,
+    "fine_complex_vector_relative_error_max": 0.03,
+    "fine_to_coarse_error_ratio_max": 0.8,
+    "fine_total_transmission_absolute_error_max": 0.03,
+    "tail_rms_to_peak_max": 0.001,
+    "rotation_vjp_relative_error_max": 0.15
+  },
+  "accepted": true,
+  "checks": {
+    "coarse_accuracy": true,
+    "fine_accuracy": true,
+    "refinement": true,
+    "transmission": true,
+    "tail": true,
+    "memory": true,
+    "rotation_vjp": true
+  },
+  "meshes": [
+    {
+      "dz_um": 0.05,
+      "shape": [
+        5,
+        5,
+        120
+      ],
+      "steps": 594,
+      "time_step_s": 1.3481520190852315e-16,
+      "actual_duration_s": 8.008022993366275e-14,
+      "geometry": {
+        "first_node": 54,
+        "last_node": 65,
+        "effective_faces_um": [
+          -0.32499999999999984,
+          0.275
+        ],
+        "effective_thickness_um": 0.6000000000000001
+      },
+      "transmission": [
+        [
+          0.5409876704216003,
+          -0.7005575895309448
+        ],
+        [
+          0.4035381078720093,
+          0.05477074533700943
+        ]
+      ],
+      "oracle_transmission": [
+        [
+          0.547616511623128,
+          -0.6987239954197709
+        ],
+        [
+          0.3996302560501961,
+          0.06062355669108045
+        ]
+      ],
+      "complex_vector_relative_error": 0.01008802483428999,
+      "total_transmission": 0.949291467666626,
+      "oracle_total_transmission": 0.9514786227542735,
+      "oracle_rotation_vjp_per_radian": 0.5483669046752431,
+      "records": [
+        {
+          "case": "reference",
+          "forward_seconds": 5.06117230001837,
+          "tail_rms_to_peak": 3.6102132838777834e-08,
+          "cuda_peak_allocated_bytes": 9076224,
+          "gpu_reservation_bytes": 71349800
+        },
+        {
+          "case": "slab",
+          "forward_seconds": 4.639066800009459,
+          "tail_rms_to_peak": 1.2658091463890742e-07,
+          "cuda_peak_allocated_bytes": 18918912,
+          "gpu_reservation_bytes": 71349800,
+          "backward_seconds": 26.807997199706733,
+          "rotation_vjp_per_radian": 0.5566346049308777,
+          "replayed_steps": 2158
+        }
+      ]
+    },
+    {
+      "dz_um": 0.025,
+      "shape": [
+        5,
+        5,
+        240
+      ],
+      "steps": 1028,
+      "time_step_s": 7.783559311273959e-17,
+      "actual_duration_s": 8.00149897198963e-14,
+      "geometry": {
+        "first_node": 108,
+        "last_node": 131,
+        "effective_faces_um": [
+          -0.31249999999999983,
+          0.28750000000000037
+        ],
+        "effective_thickness_um": 0.6000000000000001
+      },
+      "transmission": [
+        [
+          0.5460395216941833,
+          -0.6991507411003113
+        ],
+        [
+          0.4005868136882782,
+          0.05921228602528572
+        ]
+      ],
+      "oracle_transmission": [
+        [
+          0.547616511623128,
+          -0.6987239954197709
+        ],
+        [
+          0.3996302560501961,
+          0.06062355669108045
+        ]
+      ],
+      "complex_vector_relative_error": 0.0024207505882998972,
+      "total_transmission": 0.9509468078613281,
+      "oracle_total_transmission": 0.9514786227542735,
+      "oracle_rotation_vjp_per_radian": 0.5483669046752431,
+      "records": [
+        {
+          "case": "reference",
+          "forward_seconds": 7.892020999919623,
+          "tail_rms_to_peak": 4.966514666193689e-08,
+          "cuda_peak_allocated_bytes": 25788928,
+          "gpu_reservation_bytes": 75590480
+        },
+        {
+          "case": "slab",
+          "forward_seconds": 9.755272600334138,
+          "tail_rms_to_peak": 1.1852981174342858e-07,
+          "cuda_peak_allocated_bytes": 25789952,
+          "gpu_reservation_bytes": 75590480
+        }
+      ]
+    }
+  ],
+  "wall_seconds": 54.561745000071824,
+  "torch_version": "2.10.0+cu126",
+  "cuda_version": "12.6",
+  "device": "NVIDIA GeForce RTX 3060",
+  "device_uuid": "47b34d79-df05-5d4f-0667-bb41ed5e7a39",
+  "revision": "6fa0c3518efba5d0e93c4c1125b52665a5b7713b",
+  "source_sha256": {
+    "benchmarks/tensor_cpml_slab_acceptance.py": "8b213f589b3f7336b262ee69d8b91db4618f34f65749c30e938a18182f8063c5",
+    "torchfdtd/anisotropy.py": "edd41cfebba16d681e8f41e026898ac6da6cb0b54b37afc291a9fa6db348779a",
+    "torchfdtd/differentiable.py": "90772d3c5cbfe35b37bd8d90e636a6e86424cecc2b612211d04ebef52b52106b",
+    "torchfdtd/boundaries.py": "43ed7dc65066160cd7519cff73a391d612ae61102e08b195976f98b3b43581c3"
+  },
+  "limitations": [
+    "Fixed isotropic exterior/collar only",
+    "Normal incidence and homogeneous transverse plane",
+    "No general anisotropic CPML matching or long-time stability claim",
+    "Two meshes do not establish asymptotic convergence"
+  ]
+}

@@ -364,15 +364,18 @@
       "native": "partial",
       "ui": "implemented",
       "fsp": "missing",
-      "scope": "Python 및 browser 선택 cell, layer/datatype→명시적 Z/material, 단위·계층·회전·반사·array·PATH와 제한 export. Preview/report→CAD 적용→JSON/Python 저장 검증. TEXT/TEXTTYPE port metadata는 실제 source와 별개. Hole·일반 port 자동 연결은 미지원.",
+      "scope": "Python 및 browser 선택 cell, layer/datatype→명시적 Z/material, 단위·계층·회전·반사·array·PATH와 제한 export. Preview/report→CAD 적용→JSON/Python 저장 검증. 별도 Python adapter가 full-cell TEXT 두 port를 ModeNetwork에 연결. Native voxelize 후 sample epsilon은 caller가 제공. Hole·narrow-aperture·일반 branch 연결은 미지원.",
       "evidence": [
         "torchfdtd/gds.py",
         "torchfdtd/gds_service.py",
+        "torchfdtd/gds_ports.py",
+        "tests/test_gds_ports.py",
         "frontend/src/gds.js",
         "tests/test_gds.py",
         "tests/test_gds_api.py",
         "tests/ui/gds.spec.js",
-        "docs/GDS.md"
+        "docs/GDS.md",
+        "docs/GDS_MODE_PORTS.md"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360033154434-FDTD-product-reference-manual",
       "priority": 2,
@@ -1344,12 +1347,14 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "missing",
-      "scope": "고정 mode directional amplitude·matched-reference complex t/r와 opposing 두 port의 multimode S 행렬. 같은 exterior 단면과 고정 reference plane, actual CUDA 4-channel/상반성/VJP 검사. 일반 branch·서로 다른 단면·GDS 자동 배치·UI는 남음.",
+      "scope": "고정 mode directional amplitude·matched-reference complex t/r와 opposing 두 port의 multimode S 행렬. 같은 exterior 단면과 고정 reference plane, actual CUDA 4-channel/상반성/VJP 검사. GDS full-cell TEXT의 명시적 두 port 연결 추가. 일반 branch·서로 다른 단면·자동 GDS 배치·UI는 남음.",
       "evidence": [
         "torchfdtd/mode_injection.py",
         "torchfdtd/mode_network.py",
+        "torchfdtd/gds_ports.py",
         "tests/test_mode_injection.py",
         "tests/test_mode_network.py",
+        "tests/test_gds_ports.py",
         "docs/MODE_NETWORK.md"
       ],
       "reference": "https://optics.ansys.com/hc/en-us/articles/360034902153-Mode-source-Simulation-object",

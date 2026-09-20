@@ -21,8 +21,14 @@ def test_familiar_pec_aliases_preserve_independent_faces(tmp_path):
     assert f.project.region.bloch_phase[0]==0
     f.save(tmp_path/"walls.json")
     assert Project.load(tmp_path/"walls.json").region.boundaries.x_max.kind=="pec"
-    with pytest.raises(ValueError,match="not implemented"):f.set("x max bc","PMC")
-    with pytest.raises(ValueError,match="not implemented"):f.set("x max bc","Symmetric")
+    f.set("x max bc","PMC")
+    assert f.project.region.boundaries.x_max.kind=="pmc"
+    f.set("x max bc","Symmetric")
+    assert f.project.region.boundaries.x_max.kind=="symmetric"
+    # The editing facade permits sequential region edits. Save/run must still
+    # reject this incomplete closed-cavity configuration before execution.
+    with pytest.raises(ValueError,match="closed PEC/PMC"):
+        f.save(tmp_path/"unsupported.json")
 
 
 def test_pec_api_validates_exports_and_runs(tmp_path):
@@ -52,4 +58,25 @@ def test_pec_api_validates_exports_and_runs(tmp_path):
         payload["region"]["boundaries"]["x_max"]["kind"]="pmc"
         rejected=client.post("/api/validate",json=payload)
         assert rejected.status_code==422
-        assert "upper-face Yee states" in rejected.text
+        assert "closed PEC/PMC" in rejected.text
+
+
+def test_familiar_pmc_facade_runs_and_preserves_endpoint_results(tmp_path):
+    from torchfdtd.models import demo_project
+    f=FDTD(demo_project('pmc'))
+    f.set('x min bc','PEC')
+    f.set('y max bc','Symmetry')
+    f.set('z min bc','PMC')
+    f.save(tmp_path/'closed.json')
+    f.load(tmp_path/'closed.json')
+    assert f.project.region.boundaries.y_max.kind=='symmetric'
+    result=f.run()
+    assert result.summary['backend']=='cpu'
+    assert result.endpoint_fields is not None
+    assert result.summary['steps']==160 and abs(result.signals).max()>0
+    with pytest.raises(RuntimeError,match='switchtolayout'):
+        f.set('z max bc','PEC')
+    f.switchtolayout()
+    f.set('z max bc','PML')
+    with pytest.raises(ValueError,match='closed PEC/PMC'):
+        f.run()

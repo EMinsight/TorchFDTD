@@ -47,7 +47,7 @@ On Windows, gdstk's narrow filename handling can reject Unicode absolute paths. 
 
 Label text is a unique port name. The contract supplies a local unit `normal_xy`, a local width in micrometres and physical Z bounds. Nested label/reference rotation and reflection transform the direction, and magnification scales width. Label origin sets the transformed XY center. Z bounds stay fixed physical stack coordinates. Port metadata validates finite positions, unit directions and positive dimensions. Repeated arrays that create duplicate port names are rejected instead of silently assigning ambiguous sources. Rename or uniquely label instances before requesting their port metadata.
 
-`layout.ports` contains center, normal, width, height and originating layer/type. These records are suitable inputs for a later explicit mode/source/detector mapping step. **The importer does not create a runnable mode source, mode detector or source normalization.** Arbitrary in-plane normals may also require resampling or restrictions in a later Cartesian mode API.
+`layout.ports` contains center, normal, width, height and originating layer/type. **The importer does not create a runnable mode source, mode detector or source normalization.** The separate [explicit mode-port adapter](GDS_MODE_PORTS.md) connects two selected cardinal, full-transverse-cell TEXT markers to `ModeNetwork`. The caller supplies source offsets, wavelength, modal material and actual sample epsilon. Narrow waveguide apertures, arbitrary normals, unequal guides and branches remain unsupported.
 
 ## Export supported native geometry
 

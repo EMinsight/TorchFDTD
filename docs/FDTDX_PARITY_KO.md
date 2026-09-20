@@ -18,7 +18,7 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 | VRAM 초과 streaming | 공개 JAX 경로에서 단일 GPU CPU/disk 공간 streaming 확인되지 않음. multi-GPU는 별도 지원 | DRAM/file 공간·시간 tile, 비동기 staging, 재료·밀도 직접 생성, 기존 54 GiB 복소 FP64 짧은 용량 검증 | 차별 기능. 실제 FP32 48 GB 초과 작업·장시간·회복·전체 메모리 계측이 남음 |
 | 비균일 mesh | Uniform/QuasiUniform/Rectilinear | Graded/rectilinear, 독립 dx/dy/dz, node API/UI | 기능 동등 범주. 같은 오차에서 속도·메모리 우위는 별도 측정 |
 | 분산 재료 | ADE. 경로별 제한 확인 필요 | 다중 Drude/Lorentz·passive fit·resident/streamed ADE adjoint | 지원 모델 범위의 동등 후보. 이방성 ADE·응용 정확도·외부 실측은 남음 |
-| GDS | Layer stack, explicit port contracts | Layer/datatype·Z·재료 stack, 단위·계층·array·PATH, 제한 export, 명시적 TEXT port metadata | 기본 geometry workflow 구현. 자동 GDS port→실행 모드 연결과 일반 hole/다중 port 흐름은 남음 |
+| GDS | Layer stack, explicit port contracts | Layer/datatype·Z·재료 stack, 단위·계층·array·PATH, 제한 export, 명시적 full-cell TEXT 두 port→실제 ModeNetwork·native 재료 샘플링·S/VJP | 기본 geometry와 제한 port 연결 구현. 좁은 aperture·일반 hole/branch·자동 포트 추론은 남음 |
 | 단일 문제 multi-GPU | Sharding | 별도 periodic/Bloch 초기값 API의 rank-owned slab·halo transpose·재료 VJP·binomial checkpoint. 실제 Linux 2/3-process Gloo CPU 검사 통과 | **부분/GPU 미검증**. 실제 NCCL·2장 이상 GPU, source/monitor·물리 경계·scaling 검증 필요 |
 | 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 새 고정 모드와 radiation 목적함수 | **부분**. PMC/tensor의 추가 물리·실행 경로, 일반 source/eigenmode·동시 adjoint batch 확대 필요 |
 | 설계 파라미터화 | Density, projection/binarization, symmetry | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수 | 기본 topology workflow 구현. 일반 spline/polygon shape derivative·제작 제약·최종 CR 물리 수렴은 별도 |
@@ -31,6 +31,9 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 
 - [GDS](GDS.md): 독립 합성 fixture의 단위·계층·반사·회전·배열·PATH,
   port metadata, native 재료 샘플링과 실제 계산, geometry export/reimport.
+  별도 [명시적 mode 연결](GDS_MODE_PORTS.md)은 full-cell TEXT 두 port와
+  실제 imported slab 재료로 CPU S 행렬과 내부 재료 VJP를 연결했다.
+  일반 waveguide 폭의 포트나 자동 공정 추론을 지원한다는 뜻은 아니다.
 - [설계 파라미터화](DESIGN_PARAMETERIZATION.md): 2D 설계 입력에서 실제
   streamed FDTD 목적함수·gradient·optimizer update. 고정 영역, 대칭과 재시작.
 - [모드 주입](MODE_INJECTION.md): FP32 native CUDA 5개 실제 전파 사례.
@@ -69,6 +72,9 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
   고정 등방성 CPML/collar 안의 tensor에 비주기 정규화 연산자와 전체
   CPML 상태 transpose를 연결했다. CPU 독립 autograd와 FP32 CUDA 실수·복소
   VJP가 일치한다. Eigenvalue 검사의 CUDA batch workspace도 제한했다.
+  [회전 이방성 박막](TENSOR_CPML_SLAB_ACCEPTANCE.md)의 독립 연속계 기준
+  복소 투과 오차는 1.0088%→0.2421%, coarse 회전각 VJP 오차는 1.5077%다.
+  고정 등방성 외부의 정상입사 사례로 CPML 반사·장시간 안정성과 구분한다.
 - [단일 도메인 분할](DOMAIN_DECOMPOSITION.md): 동일 도메인의 rank-local
   E/H·epsilon, halo transpose와 material VJP. Linux CI의 실제 2/3-process
   Gloo 경로에서 fields·초기 상태/재료 VJP·halo·local finite difference를

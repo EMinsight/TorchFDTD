@@ -796,6 +796,16 @@ slab material parameter. They do not establish arbitrary shape or CR
 optimization accuracy. The native backward takes 73.04 s with four restart
 slots per active launch, without a full time-autograd field history.
 
+A separate GDS adapter maps two explicitly selected TEXT markers to this
+network. Cardinal opposing normals, full-transverse-cell apertures, source
+offsets, mode indices and a common fixed exterior are required. Imported
+polygons are sampled through the native Yee material builder before the
+network receives the sample permittivity. The straight calibration material
+does not contain these polygons. An independently generated GDS slab changes
+the computed scattering matrix and retains an interior material derivative.
+This verifies the connected workflow, not polygon-shape differentiation,
+general branch routing or a physically converged design gradient.
+
 \subsection{Differentiable radiation transforms}
 
 Periodic diffraction analysis Fourier-projects collocated E/H fields over
@@ -893,6 +903,21 @@ admitted algebra. Real and complex FP32 CUDA material gradients match the
 CPU reference. A fixed 64-matrix batch for eigenvalue validation bounds a
 previously excessive CUDA workspace. General anisotropic PML matching,
 long-time reflection and stability, and interface accuracy remain open.
+
+A separate normal-incidence acceptance uses a $0.6\,\mu$m slab with
+transverse principal indices 1.5 and 2.0, rotated by $25^\circ$, inside an
+index-1.2 exterior. Independent polarized transfer-matrix coefficients
+provide the continuum reference. Normal spacings of 50 and 25 nm preserve
+the slab thickness, 1 $\mu$m PML and approximately 80 fs duration. The FP32
+complex transmission-vector errors are 1.0088 and 0.2421 percent. The coarse
+rotation derivative of cross-polarized transmitted power is 0.556635 per
+radian, compared with the continuum value 0.548367. The 1.5077 percent
+derivative error and both transmission results pass their predeclared
+criteria. This experiment uses the negative-exponent history-spectrum
+convention, with the continuum phasor chosen consistently. The four forward
+solves and one checkpointed backward take 54.56 s on RTX 3060. These results
+validate this fixed-exterior slab observable. They do not isolate PML
+reflection or establish oblique-incidence and long-time stability.
 
 \subsection{Endpoint and distributed checkpoint foundations}
 

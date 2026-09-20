@@ -22,7 +22,10 @@ def main():
             checks.append(dict(file=path.as_posix(),kind='restricted_extension'))
         if path.suffix.lower() in binary_suffixes or path.name=='release_audit.py':continue
         try:text=path.read_text(encoding='utf-8')
-        except (UnicodeError,OSError):continue
+        except UnicodeError:
+            checks.append(dict(file=path.as_posix(),kind='invalid_utf8'));continue
+        except OSError:
+            checks.append(dict(file=path.as_posix(),kind='unreadable_file'));continue
         for kind,pattern in patterns.items():
             # Report file/line only, never print candidate credential contents.
             for match in pattern.finditer(text):checks.append(dict(file=path.as_posix(),kind=kind,line=text[:match.start()].count('\n')+1))

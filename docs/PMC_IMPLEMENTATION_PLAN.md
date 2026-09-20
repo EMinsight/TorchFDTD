@@ -308,3 +308,38 @@ A metadata-only 128-cubed CUDA planning regression exceeds the former fixed
 caps, admits against a simulated 16 GB free GPU/32 GB available host, and
 rejects insufficient GPU or host headroom. No large field allocation or
 large-GPU capacity claim is involved in this admission test.
+
+The SI editing facade also accepts `FDTD.set("x min bc", "PMC")` and
+`"Symmetric"`/`"Symmetry"` aliases. As with other facade properties, sequential
+region edits can temporarily leave an incomplete project. `save()` and `run()`
+still validate the entire closed-cavity contract. A focused CPU workflow checks
+editing, JSON save/load, actual propagation, retained endpoint results and
+rejection of unsupported mixed-PML execution.
+
+## Next mixed PMC/CPML execution gate
+
+The minimum extension must split the current endpoint step into electric/psi-E
+update, electric source injection, then magnetic/psi-H update. The existing
+post-step magnetic correction for the electric source cannot call a stateful
+CPML curl again. Psi-H must advance exactly once, and the waveform transpose
+must include its cotangent.
+
+Place each derivative's psi on the target Yee row, including intersections of
+transverse PML slabs with upper PMC faces. Construct these intersections from
+the endpoint block descriptors. PML termination uses finite PEC constraints,
+while the last magnetic half-cell still needs its derivative to the zero outer
+electric node. Reusing a volume stencil that omits that row is insufficient.
+Keep the existing PMC endpoint metric and PEC projections in both operators.
+
+For each derivative, use `psi_new=b*psi+c*d` and
+`d_eff=d/kappa+psi_new`. Given curl cotangent `q` and future psi cotangent `p`,
+the reverse is `u=p+q`, `psi_bar=b*u`, `d_bar=q/kappa+c*u`, followed by the
+endpoint derivative transpose. Material gradients use the modified curl.
+Checkpoint, reset, result and admission contracts must include all psi arrays.
+
+Acceptance requires full-domain versus half-domain reflected fields and
+objectives, physical PMC/PEC reflection signs and endpoint phases, matched
+material/source gradients, and oblique-pulse decay at PMC/PML intersections.
+PML profiles must be physically mirrored in the full/reduced comparison.
+Report actual cell, psi, checkpoint and elapsed-time savings from halving the
+mesh. Merely changing a boundary label is not a domain-reduction measurement.

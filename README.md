@@ -36,6 +36,10 @@ periodic/Bloch CPU/CUDA fields and full symmetric tensor gradients. An
 isotropic fixed CPML exterior now encloses interior tensor materials, with
 its collar excluded from design gradients. Tensor material UI, general
 anisotropic absorbing boundaries and streamed PMC remain incomplete.
+A [rotated tensor slab](docs/TENSOR_CPML_SLAB_ACCEPTANCE.md) in that fixed
+isotropic exterior gives 1.0088% and 0.2421% complex transmission errors on two
+meshes, with a 1.51% rotation-gradient error on the coarse mesh. This does not
+establish general anisotropic PML reflection or long-time stability.
 [Opposing mode ports](docs/MODE_NETWORK.md) now assemble complex multimode
 S matrices with fixed reference planes and one case graph at a time during
 backward. FP32 CUDA checks cover four-channel guide propagation, reciprocity
@@ -49,7 +53,9 @@ descent step. It does not establish general shape or CR convergence.
 
 [GDS geometry workflows](docs/GDS.md), [trainable density constraints](docs/DESIGN_PARAMETERIZATION.md)
 and [differentiable diffraction/far-field transforms](docs/RADIATION.md) extend
-the Python API. The native dipole angular-pattern error decreases from 1.03%
+the Python API. A separate [GDS mode-port adapter](docs/GDS_MODE_PORTS.md)
+connects explicit full-cell TEXT markers to the opposing-port network and a
+caller-sampled native material tensor. The native dipole angular-pattern error decreases from 1.03%
 to 0.23% over three FP32 meshes. See the [FDTDX parity completion gates](docs/FDTDX_PARITY_KO.md)
 for verified scope and remaining work. This does not establish overall FDTDX
 parity or a speed advantage over it.
