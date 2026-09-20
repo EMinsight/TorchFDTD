@@ -1,0 +1,35 @@
+{
+  "grid": [
+    120,
+    120,
+    498
+  ],
+  "mesh_um": 0.016666666666666666,
+  "steps": 9600,
+  "elapsed_seconds": 795.7923617000342,
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "peak_cuda_allocated_bytes": 1514204160,
+  "spec_sha256": "8d8ef17abf260f2ef1cb539d1f279e967b81ea9991a36dea28d0899e39a2c55b",
+  "density_sha256": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44",
+  "response_xy": [
+    [
+      0.27082258462905884,
+      0.19509004056453705,
+      0.20226620137691498,
+      0.306999534368515
+    ],
+    [
+      0.2680721580982208,
+      0.18481485545635223,
+      0.20501551032066345,
+      0.31674984097480774
+    ]
+  ],
+  "unpolarized_response": [
+    0.269447386264801,
+    0.18995244801044464,
+    0.20364084839820862,
+    0.3118746876716614
+  ],
+  "scope": "One wavelength/ray. No pupil weight applied. Arithmetic Yee-box material averaging. Optical convergence not yet established."
+}

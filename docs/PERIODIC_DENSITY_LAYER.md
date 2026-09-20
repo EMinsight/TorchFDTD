@@ -57,3 +57,33 @@ indexing and 0.232 ms for batched gathering. Values matched exactly. This is not
 a whole-solver speed ratio. The first unoptimized optical run was deliberately
 stopped after its first reference solve, then restarted with the verified
 observer change. It supplies no completed baseline timing.
+
+## Additional validation controls
+
+The selected-ray runner accepts `--pml-cells` (default 12). A fixed cell count
+changes physical PML thickness when mesh spacing changes. Record both and
+check thickness sensitivity separately before attributing all response change
+to interior mesh dispersion. `benchmarks.periodic_layer_adjoint` prepares a
+0.01/0.99 relaxation of an explicitly hash-identified binary seed, with FP64
+fields, four checkpoint slots and sequential source-case recomputation. Its
+weighted detector-allocation test loss exercises coherent polarization, total
+transmission normalization and the density transfer. It is a discrete gradient
+check, not the full nine-wavelength information objective or an optimization.
+
+## Explicit density origin
+
+`pixel_origin="cell_edges"` (default) starts the first pixel at the lower cell
+edge. `pixel_origin="sample_centers"` places its center at that coordinate and
+wraps the portion across the periodic seam. The latter shifts the boxed pattern
+by minus half a source pixel on each transverse axis. The selected-ray runner
+exposes the same choice with `--pixel-origin`. Volume, periodic translation and
+CPU/CUDA density-gradient checks cover the new option.
+
+The inspected TORCWA material convolution uses the normalized discrete FFT
+directly, without an explicit half-pixel phase or pixel-box sinc factor. Thus
+a shared density array alone does not prove a shared continuous geometry.
+A centered pixel-box interpretation has coefficient `DFT(density) *
+sinc(m/Nx) * sinc(n/Ny)` at order `(m,n)`. Edge-origin boxes additionally
+carry a half-pixel phase. Selecting sample centers aligns that phase origin
+but does not remove the sinc difference. Reference-grid interpretation and
+convergence must be resolved before calling the solver responses equivalent.

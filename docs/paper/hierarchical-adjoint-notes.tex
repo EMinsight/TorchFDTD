@@ -316,4 +316,19 @@ Index storage is included in admission estimates. For 10,000 complex E/H
 samples on RTX 3060, the observation-only median decreased from 51.064 to
 0.232 milliseconds over five alternating repetitions. This measurement does
 not establish an end-to-end solver acceleration factor.
+
+\section{Patterned-layer density derivative pilot}
+A hash-identified binary pattern was relaxed to $0.01+0.98\rho$ to permit
+central perturbations inside the density interval. A selected-ray test on a
+$40\times40\times166$ grid with 1600 FP64 steps combined two calibrated source
+bases and normalized detector allocation. Its weighted quadratic allocation
+objective is a derivative probe rather than the full CR information objective.
+For a smooth transverse density direction, the adjoint derivative was
+0.219224692705. Central differences at steps $10^{-3}$ and $5\times10^{-4}$
+had relative discrepancies $1.223\times10^{-5}$ and $3.057\times10^{-6}$.
+The approximately fourfold reduction is consistent with second-order
+truncation. A complete iteration on RTX 3060 took 158.54 seconds and peaked
+at 332,274,176 bytes of Torch CUDA allocation with four checkpoint slots
+and sequential source-case replay. This validates one discrete directional
+derivative and does not establish physical gradient convergence.
 \end{document}

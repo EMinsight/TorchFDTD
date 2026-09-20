@@ -1,0 +1,13 @@
+{
+  "base_commit": "5465ffd",
+  "sha256": {
+    "benchmarks/periodic_layer_adjoint.py": "ebfd260b333fcf301e47d6dc502779ca8c7a8b97715c9688c578a2fbe69bb125",
+    "benchmarks/periodic_layer_case.py": "0dfdfbde72e0209ff96392b850e6a289b8fad100d876c89dcc71ec82644fb08b",
+    "photonweave/density_layer.py": "2d9a24e8bdfa4ef478a9b1c37ff6bfd578a3bce69d5832701458938fa0cfc887",
+    "photonweave/polarization.py": "225f8bf7d2be2a6111ee6d59c9498eb3dcd799e64237de7ff1957b8e0c12543e",
+    "photonweave/recomputed_batch.py": "7547c431d6fb958f8ae1f390606f82a391647e9bdcd518703404af04adae8378",
+    "photonweave/differentiable.py": "4a42deb68a8d87d35780e9352f16271d950850ca0dd4c503364375be55f93ea5"
+  },
+  "torcwa_rcwa_sha256": "f74ccdd75182dd3e0cef10567bd7b45e995e8992fb223efc4a7295602d2aeef5",
+  "scope": "Final source hashes. Adjoint and PML-control measurements used cell_edges before the optional sample_centers addition, which leaves default numerics unchanged. The 16.67 nm run used the preceding 5465ffd runner. The sample-center record uses the final runner."
+}

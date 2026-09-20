@@ -1,0 +1,31 @@
+{
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "grid": [
+    40,
+    40,
+    166
+  ],
+  "steps": 1600,
+  "mesh_um": 0.05,
+  "seed_sha256": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44",
+  "relaxation": "0.01 + 0.98 * binary seed",
+  "objective": 0.2843927415139927,
+  "directional_derivative": 0.2192246927049043,
+  "gradient_l2": 0.02016370128549267,
+  "checks": [
+    {
+      "step": 0.001,
+      "finite_difference": 0.2192220119682231,
+      "relative_error": 1.2228260640336174e-05
+    },
+    {
+      "step": 0.0005,
+      "finite_difference": 0.2192240225179498,
+      "relative_error": 3.0570778602480228e-06
+    }
+  ],
+  "iteration_seconds": 138.4858517999528,
+  "peak_cuda_allocated_bytes": 332274176,
+  "validation_seconds": 209.30550489999587,
+  "scope": "FP64 selected-ray relaxed-seed discrete gradient with sequential source-case recomputation. Weighted allocation test loss, not the full CR information objective or converged optical gradient."
+}

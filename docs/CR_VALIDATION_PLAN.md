@@ -8,9 +8,12 @@ optical sampling, material models, reconstruction model and objective definition
 are the reference contract. A generic RGB transmission objective is not a
 substitute for this study's objective.
 
-The exact source revision, configuration and input hashes remain to be resolved
-from the research project's lock manifests before experiments. A directory name
-or a file labelled latest, best or final does not establish the reference.
+The selected seed and dependency hashes have been checked against the research
+lock manifests. Active objective source hashes and the production prior/calibration
+replay are recorded in the validation evidence. The optical pilot records its
+exact input hash and settings. A directory name or a file labelled latest, best
+or final does not establish a reference, and the whole research tree is not
+claimed to be frozen by these per-file checks.
 
 ## Execution gates
 

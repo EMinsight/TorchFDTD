@@ -50,3 +50,17 @@ def test_fdtd_density_directional_gradient():
     with torch.no_grad():finite=(loss(d+1e-5*direction)-loss(d-1e-5*direction))/2e-5
     torch.testing.assert_close((gradient*direction).sum(),finite,rtol=2e-6,atol=1e-9)
     assert gradient.norm()>1e-5
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_sample_center_origin_is_half_pixel_translation(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    r=region();r.size=(1.6,1.6,1.4)
+    d=torch.arange(16,dtype=torch.float64,device=device).reshape(4,4)/16
+    kwargs=dict(bottom_um=-.2,top_um=.2,background_epsilon=2.,design_epsilon=4.)
+    edges=periodic_density_layer(d,r,**kwargs)
+    centers=periodic_density_layer(d,r,**kwargs,pixel_origin='sample_centers')
+    torch.testing.assert_close(centers,edges.roll((-2,-2),(0,1)),rtol=1e-12,atol=1e-12)
+    torch.testing.assert_close(centers.sum(),edges.sum())
+    d=(d*.8+.1).requires_grad_()
+    assert torch.autograd.gradcheck(lambda d:periodic_density_layer(d,r,**kwargs,pixel_origin='sample_centers').square().mean(),(d,))

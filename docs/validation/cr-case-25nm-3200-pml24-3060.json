@@ -1,0 +1,37 @@
+{
+  "grid": [
+    80,
+    80,
+    332
+  ],
+  "mesh_um": 0.025,
+  "steps": 3200,
+  "pml_cells": 24,
+  "pml_thickness_um": 0.6000000000000001,
+  "elapsed_seconds": 233.72503039985895,
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "peak_cuda_allocated_bytes": 481277440,
+  "spec_sha256": "8d8ef17abf260f2ef1cb539d1f279e967b81ea9991a36dea28d0899e39a2c55b",
+  "density_sha256": "f13b0ff817c9dfdc04ae8cca4061524b521ec57e42e68197d4faf2527980aa44",
+  "response_xy": [
+    [
+      0.27320441603660583,
+      0.1981973946094513,
+      0.2030002772808075,
+      0.3002055883407593
+    ],
+    [
+      0.26950713992118835,
+      0.1858135610818863,
+      0.2072450965642929,
+      0.31016701459884644
+    ]
+  ],
+  "unpolarized_response": [
+    0.2713557779788971,
+    0.1920054852962494,
+    0.2051226794719696,
+    0.30518630146980286
+  ],
+  "scope": "One wavelength/ray. No pupil weight applied. Arithmetic Yee-box material averaging. Optical convergence not yet established."
+}

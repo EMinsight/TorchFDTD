@@ -30,6 +30,8 @@ Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now
 
 The first [locked CR seed optical pilot](docs/validation/CR_SEED_OPTICAL_PILOT.md) now compares TORCWA and FDTD at one wavelength/ray. Mesh refinement reduces the discrepancy, but convergence and full-pupil inverse design remain unvalidated. Dense observation gathering was also batched to remove per-sample Python overhead.
 
+The [actual CR density derivative pilot](docs/validation/CR_DENSITY_ADJOINT_PILOT.md) passes one directional finite-difference check on RTX 3060 and RTX 5880, with relative discrepancy 3.06e-6 and peak Torch allocation 332 MB. This validates a discrete one-ray test objective, not the full CR information optimization.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 
