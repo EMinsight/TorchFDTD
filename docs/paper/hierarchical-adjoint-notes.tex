@@ -915,8 +915,33 @@ admission limit was below the approximately 26.21 GB solver reservation.
 The revised admission helper releases unused cache only when it could resolve
 an otherwise denied reservation, then repeats the actual free-memory query.
 Explicit limits and the 80-percent rule are unchanged. Cached bytes are not
-credited before release and no partially executed solve is retried. This
-repair requires a fresh large-grid validation. Cache release can synchronize
-the process and its time belongs to the calling operation.
+credited before release and no partially executed solve is retried. Cache
+release can synchronize the process and its time belongs to the calling operation.
+
+A fresh eight-case ADE run at revision \texttt{45d9e5c} completed all twelve-step
+forward and backward cases. Peak Torch CUDA allocation was 17,911,820,288 bytes.
+Outputs agreed exactly with the finite-cone reference, and the largest material
+VJP relative discrepancy was $1.22\times10^{-7}$. The dielectric rerun also
+passed at 15,884,919,296 bytes. These results resolve the observed repeated-case
+admission failure without establishing long-time convergence or speed superiority.
+
+
+\section{Matched host and device measurement protocol}
+A separate driver compares the Torch CPU implementation with resident fused
+CUDA and asynchronous DRAM space-time slabs. All modes receive identical real
+FP32 projects and CPU material tensors. The timed operation includes model
+construction, admission, material packing, forward, a field and signed-flux
+proxy objective, replay, backward and host result transfers. Geometry creation,
+optimizer updates and numerical verification are excluded.
+
+One full-duration warm-up precedes interleaved repeated measurements.
+Reported ratios use the median of each mode and the fastest tested CPU thread
+count. Complete complex outputs and spatial material VJPs are compared in
+bounded chunks. Nonfinite or degenerate groups and relative discrepancies
+above $2\times10^{-4}$ fail the comparison before any speed ratio is emitted.
+Sampled process RSS and Torch allocated and reserved peaks are retained with
+source hashes. This protocol compares native backends and does not establish
+optical convergence, an optimized external CPU baseline or beyond-VRAM speed.
+Large-workload measurements remain pending.
 
 \end{document}

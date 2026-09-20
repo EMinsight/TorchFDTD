@@ -63,9 +63,13 @@ A new [shared-budget case API](docs/ADJOINT_BATCH.md) admits all solver, output
 and gradient-carrier reservations before executing heterogeneous point/plane
 cases. It preserves coupled objectives and shared geometry/material gradients
 while retaining one solver graph at a time. Eight 512-cubed dielectric cases
-completed on RTX 5880 with a 15.9 GB peak Torch CUDA allocation. The corresponding
-ADE run exposed a [cached-memory admission failure](docs/CUDA_CACHE_ADMISSION.md)
-whose repair is awaiting the large-grid rerun. Concurrent adjoint microbatches remain open.
+completed on RTX 5880 with a 15.9 GB peak Torch CUDA allocation. After fixing
+[cached-memory admission](docs/CUDA_CACHE_ADMISSION.md), fresh dielectric and
+ADE eight-case runs both passed, with respective peaks of 15.9 GB and 17.9 GB.
+These remain twelve-step capacity/VJP checks. Concurrent adjoint microbatches remain open.
+The [matched CPU/DRAM and CUDA adjoint driver](docs/CPU_GPU_ADJOINT_BENCHMARK.md)
+now includes input/output transfers and complete material VJPs. Large-workload
+CPU speed ratios are pending.
 
 [Differentiable detector allocation](docs/DETECTOR_ALLOCATION.md) preserves the CR reference's electric-intensity well fractions with independent midpoint quadrature. Synthetic source parity and material-gradient tests pass. Matched CR optical validation remains pending.
 

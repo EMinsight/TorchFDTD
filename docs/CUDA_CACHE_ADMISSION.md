@@ -42,5 +42,13 @@ ADE streaming and execution selection. New checks include fragmented or
 unavailable cache, explicit-budget denial, fresh capacity revalidation, all
 three admission paths and preservation of a live CUDA tensor. The real
 automatic fused-backward path also now counts its indexed observation packet.
-The large ADE batch must be rerun before claiming this failure is resolved on
-the 512-cubed workload.
+The [fresh eight-case ADE run](validation/adjoint-batch-8x512-ade-cache-recovery-5880.json)
+at revision `45d9e5c` completed every forward and backward case on RTX 5880.
+Peak Torch CUDA allocation was 17,911,820,288 bytes. Full outputs agreed
+exactly with the finite-cone reference, and the largest material-gradient
+relative L2 discrepancy was 1.22e-7. The [dielectric rerun](validation/adjoint-batch-8x512-dielectric-cache-recovery-5880.json)
+also passed, with 15,884,919,296 bytes and a 3.08e-7 epsilon-gradient discrepancy.
+All 79 unique driver/runtime source hashes in these and the dense-plane
+integration records match that revision. These eight-case, twelve-step runs
+resolve the observed admission failure. They do not establish sustained
+optical convergence, universal OOM recovery or a performance advantage.

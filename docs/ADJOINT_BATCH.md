@@ -137,4 +137,9 @@ relative L2 was 3.08e-7. This is sequential replay with a shared material map,
 not simultaneous eight-case execution or a measured speedup over retained graphs.
 
 The matching ADE batch exposed a [cache-sensitive admission failure](CUDA_CACHE_ADMISSION.md).
-That failed record remains separate. Its repair requires a new large-grid run.
+That failed record remains separate. The corrected revision `45d9e5c` passed
+fresh eight-case runs for [ADE](validation/adjoint-batch-8x512-ade-cache-recovery-5880.json)
+and [dielectrics](validation/adjoint-batch-8x512-dielectric-cache-recovery-5880.json).
+ADE reached 17,911,820,288 bytes of Torch CUDA allocation and a largest
+material-gradient relative discrepancy of 1.22e-7. Both retain the same
+512-cubed, twelve-step finite-cone validation scope.
