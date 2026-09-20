@@ -1,0 +1,15 @@
+{
+  "scope": "Internal CPU complex slab correctness. Public complex streaming remains disabled.",
+  "tests": {
+    "passed": 44,
+    "deselected_cuda": 16,
+    "seconds": 13.52
+  },
+  "source_sha256": {
+    "photonweave/spacetime.py": "d55e9dfff129e1ae92a14ee14d3a907c85d97027aef64825689cacb04683a7ad",
+    "tests/test_complex_spacetime.py": "e9f213b5d0b1d64acbe7fe848beb919cbd490eb1153fadaf5a68d8cd6a05b2ee",
+    "photonweave/tensor_packet.py": "8be4fb83e0273dd2bf9f6c51e0732ca0f11296dfe8838518d1065c0d8da8efa6"
+  },
+  "wheel_package_files_byte_verified": 71,
+  "gpu_validation": "pending; both devices occupied by full CR jobs"
+}

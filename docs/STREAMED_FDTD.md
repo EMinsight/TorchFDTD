@@ -232,6 +232,27 @@ CPU tests cover complex conjugate views, noncontiguous arrays, empty tensors,
 signed zero, infinity, a NaN payload, large integers and workspace round trips.
 Sixteen CPU resident-versus-tiled field/gradient cases also pass. Mixed-dtype
 asynchronous GPU transport still needs a dedicated test when a GPU is free.
-This preparation does not enable complex spatial streaming. Bloch halo phase
-mapping, its conjugate transpose, backing-store support and memory admission
-remain required before that execution path can be exposed.
+This preparation does not enable public complex spatial streaming. The CPU
+Bloch extension is validated below. CUDA execution, backing-store support and
+memory admission remain required before that execution path can be exposed.
+
+## Complex Bloch slabs: internal CPU validation
+
+The internal block operator now extends a periodic X halo at unwrapped index
+`i` with `phase ** floor(i / Nx)`. This applies to E/H, transverse CPML memories
+and repeated source images. Material coefficients remain periodic without a
+phase. The Hermitian transpose multiplies field/state adjoints by the conjugate
+extension before accumulating duplicate halo indices. Epsilon gradients stay
+real and accumulate without this phase factor.
+
+Twenty-four CPU cases compare complete block fields, observations, every restart
+state adjoint and the epsilon gradient against resident Torch autograd. They
+cover FP32/FP64, scalar/component-diagonal epsilon, local checkpoint replay,
+nonuniform 2D grids, repeated windings, and 3D X/Z CPML with Bloch boundaries on
+the remaining axes. Inputs contain nonzero random CPML memories and endpoint
+adjoints. A separate test verifies early rejection of complex CUDA slabs.
+These 25 checks plus 3 packet and 16 real CPU regression cases passed.
+
+Public `StreamedSimulation` still rejects complex fields. This CPU oracle is a
+correctness prerequisite, not evidence of CUDA out-of-core performance or a
+completed complex streamed inverse-design path.

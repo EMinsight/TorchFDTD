@@ -37,6 +37,8 @@ class SlabBlockOperator:
         if cuda_binding not in ('direct', 'dlpack'):raise ValueError('cuda_binding must be direct or dlpack.')
         self.direct_views = cuda_binding == 'direct'
         self.device = torch.device(device)
+        if host_system.grid.E.is_complex() and self.device.type != 'cpu':
+            raise ValueError('Complex spatial blocks currently require CPU validation execution.')
         if self.device.type == 'cuda' and self.device.index is None:
             self.device = torch.device('cuda', torch.cuda.current_device())
         from .tile_workspace import TileWorkspace
@@ -102,17 +104,31 @@ class SlabBlockOperator:
             coordinates = torch.arange(begin, end, dtype=torch.int64)
             yield lo, hi, coordinates.remainder(n), slice(lo-begin, hi-begin)
 
+    def _halo_phase(self, descriptor):
+        """Bloch extension on the unwrapped slab, including repeated windings."""
+        if 0 not in self.host.grid.wrap or not self.host.grid.E.is_complex():return None
+        lo, _, indices, core = descriptor
+        coordinates = torch.arange(lo-core.start, lo-core.start+len(indices))
+        winding = torch.div(coordinates, self.host.region.shape[0], rounding_mode='floor')
+        return torch.as_tensor(self.host.grid.wrap[0], dtype=self.host.field_dtype).pow(winding)
+
+    @staticmethod
+    def _phase_value(value, phase):
+        return value if phase is None else value*phase.reshape((-1,)+(1,)*(value.ndim-1))
+
     def _tile(self, epsilon, state, descriptor, start, depth):
         host = self.host
         lo, hi, indices, core = descriptor
         local = object.__new__(_System)
         local.device, local.dtype = self.device, epsilon.dtype
+        local.field_dtype = host.field_dtype
+        phase = self._halo_phase(descriptor)
         local.epsilon = epsilon.index_select(0, indices)
         local.eps4 = local.epsilon[..., None] if epsilon.ndim == 3 else local.epsilon
         local.region = SimpleNamespace(shape=(len(indices), *host.region.shape[1:]))
         local.current_step = 0
         grid = local.grid = _Grid()
-        grid.E, grid.H = [s.index_select(0, indices) for s in state[:2]]
+        grid.E, grid.H = [self._phase_value(s.index_select(0, indices), phase) for s in state[:2]]
         grid.inverse_permeability = torch.ones(1, dtype=epsilon.dtype)
         grid.courant_number = host.grid.courant_number
         grid.time_step = host.grid.time_step
@@ -158,6 +174,7 @@ class SlabBlockOperator:
                     coefficients = {name: segment[name] for name in ('b', 'c', 'inv_k')}
                 item = dict(slice=sl, psi=state[global_id+2].index_select(0, take),
                             **coefficients)
+                if axis != 0:item['psi'] = self._phase_value(item['psi'], phase)
                 local.keys[key].append(len(local.segments))
                 local.segments.append(item)
                 grid.cpml[key].append(item)
@@ -184,7 +201,8 @@ class SlabBlockOperator:
                         offset = (int(indices[position])-a)//stride
                         value = value[offset:offset+len(group)]
                     selection = position if isinstance(loc[0], int) else slice(position, group[-1]+1)
-                    local.sources[family].append(((selection, *loc[1:]), component, wave, value))
+                    image_wave = wave if phase is None else wave*phase[position]
+                    local.sources[family].append(((selection, *loc[1:]), component, image_wave, value))
         local.monitors, observer_ids = [], []
         for m, (name, loc, component) in enumerate(host.monitors):
             if lo <= loc[0] < hi:
@@ -240,11 +258,11 @@ class SlabBlockOperator:
     def forward(self, epsilon, state, start, depth):
         self._validate(epsilon, state, start, depth)
         output = self.new_state()
-        signals = epsilon.new_zeros((depth, len(self.host.monitors)))
+        signals = torch.zeros((depth, len(self.host.monitors)), dtype=self.host.field_dtype)
         def prepare(descriptor):
             lo, hi, _, core = descriptor
             local, mapping, observers = self._tile(epsilon, state, descriptor, start, depth)
-            observations = torch.empty((depth, len(observers)), device=self.device, dtype=epsilon.dtype)
+            observations = torch.empty((depth, len(observers)), device=self.device, dtype=self.host.field_dtype)
             for j in range(depth):
                 local.advance(j, j+1)
                 if observers:observations[j] = local.observe(local.state())
@@ -269,7 +287,7 @@ class SlabBlockOperator:
     def transpose(self, epsilon, state, start, depth, endpoint_bar, signal_bar):
         self._validate(epsilon, state, start, depth)
         self._validate(epsilon, endpoint_bar, start, depth)
-        if signal_bar.shape != (depth, len(self.host.monitors)) or signal_bar.device.type != 'cpu' or signal_bar.dtype != epsilon.dtype:
+        if signal_bar.shape != (depth, len(self.host.monitors)) or signal_bar.device.type != 'cpu' or signal_bar.dtype != self.host.field_dtype:
             raise ValueError('Signal adjoint must have the host block observation shape.')
         initial_bar = self.new_state()
         gradient = torch.zeros_like(epsilon)
@@ -328,13 +346,17 @@ class SlabBlockOperator:
             finally:reverse=None  # Do not retain a tile through its recursive closure.
             if backward is not None:
                 adjoint = (backward.e_bar, backward.h_bar, *backward.psi_bars[backward.phase])
-            return self._return((*adjoint, local_gradient)), (indices, mapping)
+            return self._return((*adjoint, local_gradient)), (indices, mapping, self._halo_phase(descriptor))
 
         def commit(returned, metadata):
-            indices, mapping = metadata
-            for target, value in zip(initial_bar[:2], returned[:2]):target.index_add_(0, indices, value)
+            indices, mapping, phase = metadata
+            conjugate = None if phase is None else phase.conj()
+            for target, value in zip(initial_bar[:2], returned[:2]):
+                target.index_add_(0, indices, self._phase_value(value, conjugate))
             for value, (global_id, take, _, _) in zip(returned[2:-1], mapping):
-                initial_bar[global_id].index_add_(0, take, value)
+                # Periodic X excludes X CPML, so every remaining psi slab
+                # shares the field's X winding and Hermitian extension.
+                initial_bar[global_id].index_add_(0, take, self._phase_value(value, conjugate))
             gradient.index_add_(0, indices, returned[-1])
         self._pipeline(depth, prepare, commit)
         return initial_bar, gradient
