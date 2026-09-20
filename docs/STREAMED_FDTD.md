@@ -339,3 +339,26 @@ supported by this measurement. [Raw measurements](validation/complex-streamed-25
 Reproduce with `python -m benchmarks.streamed_adjoint --nx 256 --ny 96 --steps 32
 --width 16 --depth 4 --complex-bloch --gpu-budget-gib 2 --compare-transfers
 --repeats 3 --output results/complex-streamed.json` on a suitable CUDA system.
+
+A subsequent width-32/depth-8 experiment on the same model produced the table
+below, again with one warm-up and three alternating repetitions. It used an
+explicit 4 GiB reservation budget and added local-checkpoint candidates.
+
+| Execution | Median complete iteration | Peak Torch CUDA allocation |
+| --- | ---: | ---: |
+| Resident | 0.278 s | 1,080,850,944 B |
+| Streamed synchronous | 3.121 s | 335,024,640 B |
+| Streamed asynchronous | 2.061 s | 670,046,208 B |
+| Synchronous, 1 local checkpoint | 3.115 s | 395,579,904 B |
+| Synchronous, 2 local checkpoints | 3.045 s | 456,135,168 B |
+| Synchronous, 4 local checkpoints | 3.072 s | 577,245,696 B |
+
+Wider/deeper tiles improve these measured streamed times but consume more VRAM.
+The asynchronous row saves 38.0% of resident peak allocation and remains 7.41
+times slower. Additional local checkpoints provide little time reduction in
+this short workload while increasing memory. The two configurations were
+separate runs, so their cross-run ratios are not interleaved measurements.
+All signals and gradients pass the same per-repetition checks. The final
+synchronous gradient relative L2 difference is 1.42e-16. This is evidence for
+selecting a policy under a memory limit, not a universal best tile configuration.
+[Deeper-tile raw measurements](validation/complex-streamed-256x96x96-deeper.json).
