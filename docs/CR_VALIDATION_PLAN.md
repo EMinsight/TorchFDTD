@@ -139,6 +139,18 @@ not a design improvement. The maximum channel-response difference is 0.03262.
 per-wavelength errors and numerical limitations. Mesh/time/PML convergence and
 TORCWA order convergence remain requirements before interpreting optimization.
 
+The full nine-wavelength, sixteen-ray TORCWA evaluation at orders (12,12)
+completed on RTX 3060 with the same relaxed seed, pupil weights, frequency
+nudge and locked electron objective. The objective is
+1.2065544902558776 bits per pixel, versus 1.2064319578769425 at (8,8), a
+0.01016% change. Maximum absolute channel-response change is 0.00316614.
+See [order-12 record](validation/cr-full-torcwa-order12.json).
+This increment alone does not explain the approximately 2.47% coarse-FDTD
+objective discrepancy. It also does not prove RCWA convergence. A full (16,16)
+evaluation has started on the local GPU while the RTX 5880 independently
+executes FDTD directional validation. No additional GPU workload shares either
+solver's device. FDTD mesh, duration and PML refinement remain necessary.
+
 Future evaluator runs persist the complete relaxed-density gradient as an NPY
 artifact, with its hash, shape and variable definition in the result JSON.
 Non-finite gradients fail the run. The completed gradient job predates
