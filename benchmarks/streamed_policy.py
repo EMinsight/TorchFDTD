@@ -12,19 +12,30 @@ import math
 from pathlib import Path
 import statistics
 import time
+from types import SimpleNamespace
 
 import torch
 
-from photonweave import (AdjointOptions, BoundaryFace, DifferentiableSimulation, Monitor, Project,
+from photonweave import (AdjointOptions, BoundaryFace, DifferentiableSimulation, Monitor, FieldMonitor, Project,
                         Region, Source, StreamedAdjointOptions, StreamedSimulation,
                         DispersiveSimulation, StreamedDispersiveSimulation,
                         tune_streamed, tune_streamed_dispersive,
                         AdjointExecutionPolicy, tune_adjoint_execution)
 
 
-def evaluate(model, design, region, *, dispersive=False, spectrum=False):
+def evaluate(model, design, region, *, dispersive=False, spectrum=False, planes=False):
     """Return outputs and VJPs in well-scaled, shared material coordinates."""
     parameters = (design[0], design[1]*1e30, design[2]*1e15, design[3]*1e15) if dispersive else design
+    if planes:
+        output=model(*parameters,frequency_hz=[1.5e14,2e14,2.5e14])
+        scale=region.steps*region.time_step
+        values=torch.cat([p.fields.reshape(-1) for p in output.values()])/scale
+        loss=values.abs().square().sum()
+        for plane in output.values():
+            normalized=replace(plane,fields=plane.fields/scale,weights=plane.weights/plane.weights.sum())
+            loss=loss+normalized.flux().sum()
+        gradients=torch.autograd.grad(loss,design)
+        return SimpleNamespace(report=next(iter(output.values())).report),values.detach(),tuple(g.detach() for g in gradients)
     if spectrum:
         result = model.spectrum(*parameters, [1.5e14, 2e14, 2.5e14])
         values = result.fields/(region.steps*region.time_step)
@@ -79,6 +90,8 @@ def main(argv=None):
     parser.add_argument('--precision',choices=('float32','float64'),default='float64')
     parser.add_argument('--dispersive',action='store_true')
     parser.add_argument('--spectrum',action='store_true')
+    parser.add_argument('--planes',action='store_true',help='Validate fixed detector fields and flux VJPs, requires --unified')
+    parser.add_argument('--plane-stride',type=int,default=4)
     parser.add_argument('--checkpoint-tiles',action='store_true')
     parser.add_argument('--unified',action='store_true')
     parser.add_argument('--require-held-out',action='store_true')
@@ -89,6 +102,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.repeats < 1:raise ValueError('repeats must be positive')
     if args.cpu_threads < 1:raise ValueError('cpu-threads must be positive')
+    if args.planes and not args.unified:raise ValueError('Plane policy validation requires --unified.')
+    if args.plane_stride<1:raise ValueError('plane-stride must be positive')
+    if args.planes:args.spectrum=True
     if args.unified and args.strategy!='replay_cost':raise ValueError('Unified selection requires replay_cost strategy.')
     if sum((args.deep_tiles,args.capacity_tiles,args.checkpoint_tiles))>1:raise ValueError('Select one policy family.')
     torch.set_num_threads(args.cpu_threads)
@@ -101,6 +117,11 @@ def main(argv=None):
         region.bloch_phase=(.63,0,0)
     project = Project(region=region,sources=[Source(center=(-.2,0,0),pulse='continuous')],
                       monitors=[Monitor(center=(.2,0,0)),Monitor(center=(0,.1,0),component='Hy')])
+    if args.planes:
+        size=(0,(region.shape[1]-8)*region.mesh,(region.shape[2]-8)*region.mesh)
+        project.monitors=[FieldMonitor(id='near',center=(.2,0,0),size=size,normal='x',downsample=args.plane_stride),
+                          FieldMonitor(id='far',center=(.3,0,0),size=size,normal='x',downsample=args.plane_stride)]
+        project=Project.model_validate(project.model_dump())
     dtype = getattr(torch,args.precision)
     epsilon = torch.full(region.shape,1.7,dtype=dtype,requires_grad=True)
     design = (epsilon,)
@@ -152,6 +173,7 @@ def main(argv=None):
     root = Path(__file__).resolve().parents[1]
     data = dict(stage='tuning',full_steps=region.steps,grid=region.shape,
         precision=args.precision,dispersive=args.dispersive,spectrum=args.spectrum,unified_selection=args.unified,
+        fixed_planes=args.planes,plane_stride=args.plane_stride if args.planes else None,
         complex_bloch=args.complex_bloch,bloch_phase=region.bloch_phase,
         torch_version=torch.__version__,device=args.device,cpu_threads=torch.get_num_threads(),
         hardware=torch.cuda.get_device_name() if args.device=='cuda' else 'CPU',
@@ -162,7 +184,7 @@ def main(argv=None):
         state_size_scope='E/H and two-pole P/Q only, excludes CPML, workspaces, checkpoints and observations.',
         full_records=[[] for _ in candidates],warmups_per_full_policy=1,repeats=args.repeats,
         scope='Native resident-reference policy calibration check. Full timers include model construction, material scaling/packing, '
-              'forward, point proxy objective, replay and backward. Input allocation, oracle, checks and final host copies excluded. '
+              'forward, observation proxy objective, replay and backward. Input allocation, oracle, checks and final host copies excluded. '
               'Tuning wall time includes planning and comparison. Torch peaks exclude context and non-Torch allocations. '
               'No beyond-VRAM, physical optical-convergence, complete optimizer or external-solver claim.')
     if args.unified:
@@ -183,9 +205,12 @@ def main(argv=None):
         print(f'Tuning complete: selected {tuning.report["selected_index"]}, resident reference next',flush=True)
         reference_design = tuple(v.detach().to(args.device).requires_grad_() for v in design)
         resident = DispersiveSimulation if args.dispersive else DifferentiableSimulation
+        if args.planes:
+            from photonweave import DifferentiablePlaneSimulation, DispersivePlaneSimulation
+            resident=DispersivePlaneSimulation if args.dispersive else DifferentiablePlaneSimulation
         reference_model = resident(project,AdjointOptions(backward_kernel='fused' if args.device=='cuda' else 'torch'))
         reference_result,values,gradients = evaluate(reference_model,reference_design,region,
-            dispersive=args.dispersive,spectrum=args.spectrum)
+            dispersive=args.dispersive,spectrum=args.spectrum,planes=args.planes)
         reference = tuple(t.detach().cpu().clone() for t in (values,*gradients))
         compare(reference[0],reference[1:],reference,dtype)
         del reference_design,reference_model,reference_result,values,gradients
@@ -200,7 +225,7 @@ def main(argv=None):
             started = time.perf_counter()
             streamed = StreamedDispersiveSimulation if args.dispersive else StreamedSimulation
             model = candidates[index].simulation(project,dispersive=args.dispersive) if args.unified else streamed(project,candidates[index])
-            result,values,gradients = evaluate(model,design,region,dispersive=args.dispersive,spectrum=args.spectrum)
+            result,values,gradients = evaluate(model,design,region,dispersive=args.dispersive,spectrum=args.spectrum,planes=args.planes)
             if args.device=='cuda':torch.cuda.synchronize()
             elapsed = time.perf_counter()-started
             errors = compare(values,gradients,reference,dtype)

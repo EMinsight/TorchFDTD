@@ -1,0 +1,2766 @@
+{
+  "scope": "Two-iteration matched-plane-flux geometry/damping connectivity check. A separate local CR job was active. Timings are not performance evidence. This is not a converged optical efficiency or CR inverse design.",
+  "cpu_threads": 4,
+  "source_sha256": {
+    "examples/differentiable_plane_design.py": "7c42858bdfdc8875081a0ceb3767d5ef6bd4d3a83be4f76897124030848d7f1a",
+    "photonweave/__init__.py": "55ddfbc5053616cc301179be34e96b3fa1b52c8aa3a4163f4112cad2147f6e88",
+    "photonweave/adjoint_memory.py": "0ab92f8651250768b548fed9cbc4d8eb5dbf7e394091ae54a37965de19203b50",
+    "photonweave/adjoint_planes.py": "edbb64361a748d1f04f852d2ddd5de341aa32f59123cd71a539ff855679bac68",
+    "photonweave/adjoint_spectrum.py": "08dcc8a81b04fec8a14f43e2e8b1006d1f5da89e5755aa70fd5a75fd0e15173f",
+    "photonweave/batch.py": "5c680b62fedbb4a681ba616d04aaa0ac6784b462d13b178113d6aef5a70a5f3d",
+    "photonweave/boundaries.py": "f7db358abc9632a7fd339d03d628e440de182d91e08e9e636c1ebbbede11d948",
+    "photonweave/cli.py": "f4ca4187f6b666326e937b703c0e0743541afe9785d5cb965a29c075e97fcb87",
+    "photonweave/convergence.py": "30343476a2d2ec454a2d0af981998c96177ff3204257d6e886b7a891ee612cbe",
+    "photonweave/cuda_adjoint.py": "ed2111b17c2ffc588db196a0b64fa694c39d2edce38dfdae328f104f5befd817",
+    "photonweave/cuda_batch.py": "a8d940341e2d4593d5258e5b86ca9745dbd13605161cf494682fe7185ed3a5ea",
+    "photonweave/cuda_complex.py": "503e9fca8568f3adbe64149779cff96db56ac5a39e4b416b882db8b335f85402",
+    "photonweave/cuda_complex_adjoint.py": "792beb310159833716be0850035f48b312f41f340f748ff3afb134af0259396d",
+    "photonweave/cuda_diagnostics.py": "e4b007fe4d721fa29e7955a5403040003c27c0a32df6747a6966df97b6b29eae",
+    "photonweave/cuda_dispersive_adjoint.py": "d54f9054eb1f92810e8cef6b4da495fbb4715525637ea4512c64b9b6d5b22072",
+    "photonweave/cuda_graph.py": "791feb844c4e833550fb4632c351d81f4d7183a5ab73bbd9efa98ddd294f1825",
+    "photonweave/cuda_kernels.py": "cd6824d74e57e696971d8b6d1ca69c98ea94d6cf1b15de9a5e1275425894e434",
+    "photonweave/cuda_monitors.py": "2eb755e8e51f2e3339fcbe8e469d8bcfc8835e398c6c62bc08c037b8d7008976",
+    "photonweave/cuda_subpixel.py": "66858d156b8569d778d0b45e14aed5dd23d10818aadeac62d0365a7173f7bcaa",
+    "photonweave/cuda_tfsf.py": "30459e4bd250cd18fdb8797ff32b864012f21d837ca303accd7ad8e3d6ce5b6f",
+    "photonweave/density_layer.py": "2d9a24e8bdfa4ef478a9b1c37ff6bfd578a3bce69d5832701458938fa0cfc887",
+    "photonweave/design.py": "ded601ec4770d78c390e890fb5b848150a426be307423709bb042ef3bb167699",
+    "photonweave/detector_allocation.py": "4040a34d9852906c7376eb3b13f5864714f2ae12cb59dd448a135cf91d02a239",
+    "photonweave/differentiable.py": "8378816ddcb75881d584128cc691d5c6c06c6915df031be1455f713125e5fb05",
+    "photonweave/dispersive_adjoint.py": "66f59342aa6fae64d1933501b2f18e8b77454cca464e324d23f5da1c24f0fb04",
+    "photonweave/electron_model.py": "e3e7f65547d797d75f9aaa8513b000a216bed82d2d994d65aced7a8035b5ead4",
+    "photonweave/execution_tuning.py": "16d7795368ca7b6806913cf1a6bfe611152330067aa7f8c6c551ae7eb7e3e62c",
+    "photonweave/field_monitors.py": "23e73d2b971af0dabcf6649e0cfc3d3d4049ee9187f06ffebb50c9e8d5eb25af",
+    "photonweave/fsp.py": "ac283becb444cb3645eefc51b339358fe002f23aa3a5f7a8d4c159c04b4436ad",
+    "photonweave/fsp_binary.py": "21f14568d781c46848219ba6de00c6b94fb8dd245dcda0ab73440a928f886041",
+    "photonweave/fsp_geometry.py": "042d0706d1ae1ebfbc0e76ad8d4a1dd21114e9c2841cae3d8462b3c6cee44ce9",
+    "photonweave/fsp_instruments.py": "a3353960dfd9eab2156785c097b1242016e6794499ae1e219cd3d117e436294a",
+    "photonweave/fsp_native.py": "57548ce934aba38935c58e731b154503b0e9d26efdc2565381eec03d548a1151",
+    "photonweave/fsp_objects.py": "f95cbbc95cb48a2c8055cbad391cc0acf477acdf669775db8cffc1cb5a704c58",
+    "photonweave/fsp_service.py": "3fdc3f1570e8aec80f9b78b75f4e3bdbc07717f79ada5e1df4409dc91e784d24",
+    "photonweave/fsp_settings.py": "b548c77190055e6133f03e219b43353e63e7566e97dc60b300756f171f691486",
+    "photonweave/geometry.py": "b31b863c3d6b085a4b019e064edf8073c3c50c8b926a31e4eb5e80738ba51c1d",
+    "photonweave/grouped_batch.py": "cf6ac6d7ca893220f4c75915b5f3350a0e1c6d4b4b6002e76ddf5e89d8fc6e59",
+    "photonweave/information.py": "0f8f71f093a7b9aeb10b92499e069416a9c494d2cfafa85252ddc421e721ff26",
+    "photonweave/injection.py": "3c1b41a678c6356e9f08acebc3f6411693535b4111b815fa6b3ce33966961552",
+    "photonweave/material_fit.py": "e0168888ab4a557e1e1cdd19b83e948fd1b468b3b3bc529a8e4f54c5ee9e58fe",
+    "photonweave/materials.py": "dfda96462a54794e6b1e52f91080d890158b0e9f23dd7c2338f7b8a089441526",
+    "photonweave/memory_profile.py": "2403748e30b566e8b39d4b3151414de48c94d6c5b5b4a9003c61fb6d179c2a2a",
+    "photonweave/mesh.py": "aa7db979920db1aeefb7178efbf717c0ced61b1fdbca17daed44cb52fb609217",
+    "photonweave/models.py": "45ced88b1b46ba15ac90fa4a6638ceb99bcf0434517d6b88c5112109c96ab936",
+    "photonweave/optical_data.py": "51c152c1195033d7b61ba99b61e77149fe13bbffcaf17b417319e4f7624b7307",
+    "photonweave/periodic_response.py": "8d9a134eb51085a9187c4e88e9f35774a373674b728d0e37c5f85038abcefbc9",
+    "photonweave/plane_execution.py": "2f428067f1113b087ea0f21f4cdc765c5df532ecce77c146b9e759715dd1636d",
+    "photonweave/polarization.py": "225f8bf7d2be2a6111ee6d59c9498eb3dcd799e64237de7ff1957b8e0c12543e",
+    "photonweave/priorities.py": "f38861f61fd24fed4faeb889e2e46d5b027675d1b298910e8c7366092e7f5e79",
+    "photonweave/pupil_response.py": "c7645bae6200a6f41a1e8b555fa8fac8a949a2c6bfec8222400521868ea936c4",
+    "photonweave/recomputed_batch.py": "7547c431d6fb958f8ae1f390606f82a391647e9bdcd518703404af04adae8378",
+    "photonweave/reference_cache.py": "89f5dea495dc0b785f1ad8a7ea888cc778e10b904403bb5649c1d3ddcdb40244",
+    "photonweave/run_control.py": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3",
+    "photonweave/server.py": "4b26d93c6ba6b97c05b129fb7bcbd270dd70e136fcf4fbe7527179d067f88363",
+    "photonweave/session.py": "155cc8b04839385d8c2c2eb8594c7724a0ef1c45b21d3d69754672c75c445ab9",
+    "photonweave/solver.py": "c8811aac7cbb4f74cfd515fa91cda6ee2437f81a68bc4c1ed1c6aa573c5acd29",
+    "photonweave/source_preview.py": "041ba4db6e9d07b3af565719933fb1265c4295768bc542e89876057b2c7797d3",
+    "photonweave/spacetime.py": "a3140864e58305b2fddb19a2d2f0f29f11981e27787ae64931563f6b15a98f79",
+    "photonweave/spectra.py": "21c011b26b6209fd147f4b70edfd1722cd5aaf14917f42a0997be40e37d95527",
+    "photonweave/staging.py": "b7ebb3fc46a4f9b93417a8ea8e222f406baef70a9cac92392a0e0046462d9e46",
+    "photonweave/state_store.py": "0258f09e167a44f2f20c131e4664ee324a3b3c5a4498e360369620fb5e7d41a5",
+    "photonweave/streamed.py": "6c212c0182575a4fc110e4c3be6fa06ced3c50089139a35e68324866555be935",
+    "photonweave/streamed_cost.py": "76956e288bc94d07c439d1f5ed11f004c6038c5bbd04662a805322924d9fea94",
+    "photonweave/streamed_dispersive.py": "2800349e46b1c49f5ee61956c649814125efc43559b835bb096ec76f3d96a159",
+    "photonweave/streamed_tuning.py": "c8bbc74590f4bb4cbc005b0b3b4913d8218f35e20329703b2f88d74174243af1",
+    "photonweave/subpixel.py": "b066387a644d7fced60ba4801e717fe2a1a0a2aa3289902e71561925f20d0fca",
+    "photonweave/subpixel_geometry.py": "9f2303105b3fc1bbdd93409e3272b700868d044685efbc7b6b3ed9bb2975324c",
+    "photonweave/tensor_batch.py": "45a21baedd679a532c8054fafbe3a142ac44045f92e15a2edf9e730f7d063b84",
+    "photonweave/tensor_packet.py": "26ecfd0b04eb0641df02c8632eb361d1ddfb834f3628e3f14d0ae6fc1639ffe0",
+    "photonweave/tfsf.py": "bbbaf2aa055d6425a67f2b826d929791a38fa26e8a2b914a42dcee0907222218",
+    "photonweave/tile_workspace.py": "823d2f1bbcc13dc805a2159057dc377d75148537894db541313ad38e7f73a90c",
+    "photonweave/tuning.py": "7d722ef872d2c8cc1db479b4c3edfa0dadd6466732b88f738ad42bcc658c22fa",
+    "photonweave/waveforms.py": "654333e8afa4da1310afc714a1c15ad60663ef21f3533f4b55c1a7489a0809b9"
+  },
+  "runs": {
+    "cpu": {
+      "scope": "Optimize a sphere radius and optional damping using matched detector flux.\n\nThis short 2D example demonstrates a complete geometry/material optimizer\ngraph. Its finite-duration dipole illumination is not a converged device\nefficiency or a color-router design. Frequencies and detector planes are fixed.\n",
+      "device": "cpu",
+      "execution": "auto",
+      "dispersive": true,
+      "policy": {
+        "resident": {
+          "checkpoints": 2,
+          "storage": "device",
+          "gpu_budget_bytes": 268435456,
+          "host_budget_bytes": 268435456,
+          "disk_budget_bytes": null,
+          "checkpoint_directory": null,
+          "device_checkpoints": 0,
+          "host_checkpoints": 0,
+          "backward_kernel": "torch",
+          "checkpoint_transfers": "sync",
+          "staging_slots": 2,
+          "resident_budget_bytes": 268435456
+        },
+        "streamed": null,
+        "device": "cpu",
+        "host_budget_bytes": 268435456
+      },
+      "tuning": {
+        "selected_index": 0,
+        "candidates": [
+          {
+            "index": 0,
+            "policy": {
+              "resident": {
+                "checkpoints": 2,
+                "storage": "device",
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "disk_budget_bytes": null,
+                "checkpoint_directory": null,
+                "device_checkpoints": 0,
+                "host_checkpoints": 0,
+                "backward_kernel": "torch",
+                "checkpoint_transfers": "sync",
+                "staging_slots": 2,
+                "resident_budget_bytes": 268435456
+              },
+              "streamed": null,
+              "device": "cpu",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.051586300134658813
+            ],
+            "median_seconds": 0.051586300134658813,
+            "reservation": {
+              "memory_reservation_bytes": 757680,
+              "workspace_reservation_bytes": 509056,
+              "workspace_model": "conservative_tensor_bound",
+              "workspace_components_bytes": {
+                "tensor_workspace_bound": 261120,
+                "tensor_ade_workspace_bound": 245760,
+                "source_profiles": 0,
+                "source_injection": 16,
+                "observation_gathers": 2160
+              },
+              "allocation_headroom_bytes": 0,
+              "device_checkpoint_reservation_bytes": 72960,
+              "device_staging_reservation_bytes": 0,
+              "spectral_library_reservation_bytes": 0,
+              "history_reservation_bytes": 112720,
+              "output_history_bytes": 0,
+              "source_history_bytes": 640,
+              "observation_index_bytes": 1440,
+              "material_packing_reservation_bytes": 61504,
+              "restart_state_bytes": 36480,
+              "host_checkpoint_reservation_bytes": 0,
+              "disk_checkpoint_reservation_bytes": 0,
+              "host_source_validation_bytes": 0,
+              "host_reservation_bytes": 855600,
+              "gpu_reservation_bytes": 0,
+              "budgeted_resident": true,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 102024,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 112080,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136,
+              "host_transfer_reservation_bytes": 0,
+              "gpu_transfer_reservation_bytes": 0
+            },
+            "probes": [
+              {
+                "steps": 10,
+                "samples": [
+                  {
+                    "total": 0.051586300134658813,
+                    "forward": 0.0097550000064075,
+                    "backward": 0.03405700018629432
+                  }
+                ],
+                "total": 0.051586300134658813,
+                "forward": 0.0097550000064075,
+                "backward": 0.03405700018629432
+              },
+              {
+                "steps": 20,
+                "samples": [
+                  {
+                    "total": 0.0923659997060895,
+                    "forward": 0.019100099802017212,
+                    "backward": 0.06633260007947683
+                  }
+                ],
+                "total": 0.0923659997060895,
+                "forward": 0.019100099802017212,
+                "backward": 0.06633260007947683
+              }
+            ],
+            "calibration_steps": [
+              10,
+              20
+            ],
+            "prediction": {
+              "seconds": 0.46909004519693553,
+              "method": "two-duration replay cost",
+              "blocks": 80,
+              "replay_blocks": 360,
+              "forward_block_seconds": 0.0009345099795609712,
+              "transpose_block_seconds": 0.0004240300506353378,
+              "startup_forward_seconds": 0.0004099002107977867,
+              "startup_backward_seconds": 0.01579904998652637,
+              "outside_solver_seconds": 0.007774299941956997
+            },
+            "selection_score_seconds": 0.46909004519693553
+          },
+          {
+            "index": 1,
+            "policy": {
+              "resident": {
+                "checkpoints": 0,
+                "storage": "device",
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "disk_budget_bytes": null,
+                "checkpoint_directory": null,
+                "device_checkpoints": 0,
+                "host_checkpoints": 0,
+                "backward_kernel": "torch",
+                "checkpoint_transfers": "sync",
+                "staging_slots": 2,
+                "resident_budget_bytes": 268435456
+              },
+              "streamed": null,
+              "device": "cpu",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.06926359981298447
+            ],
+            "median_seconds": 0.06926359981298447,
+            "reservation": {
+              "memory_reservation_bytes": 684720,
+              "workspace_reservation_bytes": 509056,
+              "workspace_model": "conservative_tensor_bound",
+              "workspace_components_bytes": {
+                "tensor_workspace_bound": 261120,
+                "tensor_ade_workspace_bound": 245760,
+                "source_profiles": 0,
+                "source_injection": 16,
+                "observation_gathers": 2160
+              },
+              "allocation_headroom_bytes": 0,
+              "device_checkpoint_reservation_bytes": 0,
+              "device_staging_reservation_bytes": 0,
+              "spectral_library_reservation_bytes": 0,
+              "history_reservation_bytes": 112720,
+              "output_history_bytes": 0,
+              "source_history_bytes": 640,
+              "observation_index_bytes": 1440,
+              "material_packing_reservation_bytes": 61504,
+              "restart_state_bytes": 36480,
+              "host_checkpoint_reservation_bytes": 0,
+              "disk_checkpoint_reservation_bytes": 0,
+              "host_source_validation_bytes": 0,
+              "host_reservation_bytes": 782640,
+              "gpu_reservation_bytes": 0,
+              "budgeted_resident": true,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 102024,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 112080,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136,
+              "host_transfer_reservation_bytes": 0,
+              "gpu_transfer_reservation_bytes": 0
+            },
+            "probes": [
+              {
+                "steps": 10,
+                "samples": [
+                  {
+                    "total": 0.06926359981298447,
+                    "forward": 0.009903499856591225,
+                    "backward": 0.052658299915492535
+                  }
+                ],
+                "total": 0.06926359981298447,
+                "forward": 0.009903499856591225,
+                "backward": 0.052658299915492535
+              },
+              {
+                "steps": 20,
+                "samples": [
+                  {
+                    "total": 0.20635439967736602,
+                    "forward": 0.016143999993801117,
+                    "backward": 0.18428529985249043
+                  }
+                ],
+                "total": 0.20635439967736602,
+                "forward": 0.016143999993801117,
+                "backward": 0.18428529985249043
+              }
+            ],
+            "calibration_steps": [
+              10,
+              20
+            ],
+            "prediction": {
+              "seconds": 2.3614048277959228,
+              "method": "two-duration replay cost",
+              "blocks": 80,
+              "replay_blocks": 3160,
+              "forward_block_seconds": 0.0006240500137209892,
+              "transpose_block_seconds": 0.004113974794745445,
+              "startup_forward_seconds": 0.0036629997193813324,
+              "startup_backward_seconds": 0.0,
+              "outside_solver_seconds": 0.006701800040900707
+            },
+            "selection_score_seconds": 2.3614048277959228
+          },
+          {
+            "index": 2,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 6,
+                "temporal_depth": 1,
+                "checkpoints": 2,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cpu",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cpu",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.4617244000546634
+            ],
+            "median_seconds": 0.4617244000546634,
+            "reservation": {
+              "host_reservation_bytes": 777360,
+              "gpu_reservation_bytes": 279264,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 7,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 1,
+              "max_extended_tile_cells": 128,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 19472,
+              "host_tile_reservation_bytes": 280000,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 8776,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 18832,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 10,
+                "samples": [
+                  {
+                    "total": 0.4617244000546634,
+                    "forward": 0.12268609972670674,
+                    "backward": 0.3332660002633929
+                  }
+                ],
+                "total": 0.4617244000546634,
+                "forward": 0.12268609972670674,
+                "backward": 0.3332660002633929
+              },
+              {
+                "steps": 20,
+                "samples": [
+                  {
+                    "total": 1.4496653997339308,
+                    "forward": 0.3181835999712348,
+                    "backward": 1.1253220001235604
+                  }
+                ],
+                "total": 1.4496653997339308,
+                "forward": 0.3181835999712348,
+                "backward": 1.1253220001235604
+              }
+            ],
+            "calibration_steps": [
+              10,
+              20
+            ],
+            "prediction": {
+              "seconds": 10.252557803411037,
+              "method": "two-duration replay cost",
+              "blocks": 80,
+              "replay_blocks": 360,
+              "forward_block_seconds": 0.019549750024452806,
+              "transpose_block_seconds": 0.020556349912658332,
+              "startup_forward_seconds": 0.0,
+              "startup_backward_seconds": 0.0,
+              "outside_solver_seconds": 0.006159799639135599
+            },
+            "selection_score_seconds": 10.252557803411037
+          },
+          {
+            "index": 3,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 6,
+                "temporal_depth": 4,
+                "checkpoints": 2,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cpu",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cpu",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.35221630008891225
+            ],
+            "median_seconds": 0.35221630008891225,
+            "reservation": {
+              "host_reservation_bytes": 999696,
+              "gpu_reservation_bytes": 490368,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 7,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 4,
+              "max_extended_tile_cells": 224,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 28496,
+              "host_tile_reservation_bytes": 493312,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 17800,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 27856,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 12,
+                "samples": [
+                  {
+                    "total": 0.35221630008891225,
+                    "forward": 0.0841509997844696,
+                    "backward": 0.2619455000385642
+                  }
+                ],
+                "total": 0.35221630008891225,
+                "forward": 0.0841509997844696,
+                "backward": 0.2619455000385642
+              },
+              {
+                "steps": 24,
+                "samples": [
+                  {
+                    "total": 0.676689799875021,
+                    "forward": 0.17473810026422143,
+                    "backward": 0.49635969987139106
+                  }
+                ],
+                "total": 0.676689799875021,
+                "forward": 0.17473810026422143,
+                "backward": 0.49635969987139106
+              }
+            ],
+            "calibration_steps": [
+              12,
+              24
+            ],
+            "prediction": {
+              "seconds": 2.4720877373280623,
+              "method": "two-duration replay cost",
+              "blocks": 20,
+              "replay_blocks": 45,
+              "forward_block_seconds": 0.030195700159917276,
+              "transpose_block_seconds": 0.017746666291107726,
+              "startup_forward_seconds": 0.0,
+              "startup_backward_seconds": 0.14831410084540647,
+              "outside_solver_seconds": 0.006119800265878439
+            },
+            "selection_score_seconds": 2.4720877373280623
+          },
+          {
+            "index": 4,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 12,
+                "temporal_depth": 4,
+                "checkpoints": 2,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cpu",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cpu",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.14495009975507855
+            ],
+            "median_seconds": 0.14495009975507855,
+            "reservation": {
+              "host_reservation_bytes": 1208592,
+              "gpu_reservation_bytes": 699264,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 7,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 4,
+              "max_extended_tile_cells": 320,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 28496,
+              "host_tile_reservation_bytes": 702208,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 17800,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 27856,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 12,
+                "samples": [
+                  {
+                    "total": 0.14495009975507855,
+                    "forward": 0.03688209969550371,
+                    "backward": 0.1037737000733614
+                  }
+                ],
+                "total": 0.14495009975507855,
+                "forward": 0.03688209969550371,
+                "backward": 0.1037737000733614
+              },
+              {
+                "steps": 24,
+                "samples": [
+                  {
+                    "total": 0.32328350003808737,
+                    "forward": 0.07246380019932985,
+                    "backward": 0.2466001003049314
+                  }
+                ],
+                "total": 0.32328350003808737,
+                "forward": 0.07246380019932985,
+                "backward": 0.2466001003049314
+              }
+            ],
+            "calibration_steps": [
+              12,
+              24
+            ],
+            "prediction": {
+              "seconds": 1.2626744387671351,
+              "method": "two-duration replay cost",
+              "blocks": 20,
+              "replay_blocks": 45,
+              "forward_block_seconds": 0.011860566834608713,
+              "transpose_block_seconds": 0.023887666407972578,
+              "startup_forward_seconds": 0.0013003991916775703,
+              "startup_backward_seconds": 0.008389567180226237,
+              "outside_solver_seconds": 0.004294299986213446
+            },
+            "selection_score_seconds": 1.2626744387671351
+          },
+          {
+            "index": 5,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 6,
+                "temporal_depth": 4,
+                "checkpoints": 0,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cpu",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cpu",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.3010544995777309
+            ],
+            "median_seconds": 0.3010544995777309,
+            "reservation": {
+              "host_reservation_bytes": 926736,
+              "gpu_reservation_bytes": 490368,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 5,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 4,
+              "max_extended_tile_cells": 224,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 28496,
+              "host_tile_reservation_bytes": 493312,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 17800,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 27856,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 12,
+                "samples": [
+                  {
+                    "total": 0.3010544995777309,
+                    "forward": 0.061283400282263756,
+                    "backward": 0.2351529998704791
+                  }
+                ],
+                "total": 0.3010544995777309,
+                "forward": 0.061283400282263756,
+                "backward": 0.2351529998704791
+              },
+              {
+                "steps": 24,
+                "samples": [
+                  {
+                    "total": 0.7798990001901984,
+                    "forward": 0.13895050017163157,
+                    "backward": 0.635094499681145
+                  }
+                ],
+                "total": 0.7798990001901984,
+                "forward": 0.13895050017163157,
+                "backward": 0.635094499681145
+              }
+            ],
+            "calibration_steps": [
+              12,
+              24
+            ],
+            "prediction": {
+              "seconds": 6.105917794009049,
+              "method": "two-duration replay cost",
+              "blocks": 20,
+              "replay_blocks": 190,
+              "forward_block_seconds": 0.02588903329645594,
+              "transpose_block_seconds": 0.02975770008439819,
+              "startup_forward_seconds": 0.0,
+              "startup_backward_seconds": 0.06821279972791672,
+              "outside_solver_seconds": 0.005854000337421894
+            },
+            "selection_score_seconds": 6.105917794009049
+          },
+          {
+            "index": 6,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 6,
+                "temporal_depth": 4,
+                "checkpoints": 4,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cpu",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cpu",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.2673097001388669
+            ],
+            "median_seconds": 0.2673097001388669,
+            "reservation": {
+              "host_reservation_bytes": 1072656,
+              "gpu_reservation_bytes": 490368,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 9,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 4,
+              "max_extended_tile_cells": 224,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 28496,
+              "host_tile_reservation_bytes": 493312,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 17800,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 27856,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 12,
+                "samples": [
+                  {
+                    "total": 0.2673097001388669,
+                    "forward": 0.0676150000654161,
+                    "backward": 0.195306200068444
+                  }
+                ],
+                "total": 0.2673097001388669,
+                "forward": 0.0676150000654161,
+                "backward": 0.195306200068444
+              },
+              {
+                "steps": 24,
+                "samples": [
+                  {
+                    "total": 0.5522810998372734,
+                    "forward": 0.1291006999090314,
+                    "backward": 0.41855179984122515
+                  }
+                ],
+                "total": 0.5522810998372734,
+                "forward": 0.1291006999090314,
+                "backward": 0.41855179984122515
+              }
+            ],
+            "calibration_steps": [
+              12,
+              24
+            ],
+            "prediction": {
+              "seconds": 2.1754045970737934,
+              "method": "two-duration replay cost",
+              "blocks": 20,
+              "replay_blocks": 33,
+              "forward_block_seconds": 0.0204952332812051,
+              "transpose_block_seconds": 0.05391996664305527,
+              "startup_forward_seconds": 0.006129300221800804,
+              "startup_backward_seconds": 0.0,
+              "outside_solver_seconds": 0.004628600087016821
+            },
+            "selection_score_seconds": 2.1754045970737934
+          }
+        ],
+        "probe_steps": 10,
+        "calibration_steps": [
+          10,
+          12,
+          20,
+          24
+        ],
+        "strategy": "replay_cost",
+        "max_calibration_steps": 512,
+        "reference_policy_index": 0,
+        "refine_candidates": 0,
+        "refined_indices": [],
+        "extra_reference_evaluations": 2,
+        "full_steps": 80,
+        "warmups_per_probe": 1,
+        "repeats": 1,
+        "total_warmup_runs": 14,
+        "tuning_seconds": 11.697381000034511,
+        "tuning_reference_reservation_bytes": 909440,
+        "reference_cache_limit_bytes": 67108864,
+        "reference_cache_reservation_bytes": 454720,
+        "reference_cache_peak_bytes": 63040,
+        "reference_cache_hits": 24,
+        "reference_cache_misses": 4,
+        "physics": "Yee/CPML/ADE",
+        "gradient_comparison_coordinates": [
+          "epsilon_inf",
+          "strength * dt^2",
+          "omega0 * dt",
+          "gamma * dt"
+        ],
+        "observation": "fixed_plane_spectrum_and_flux",
+        "default_candidate_planning": [
+          {
+            "proposed": {
+              "slab_width": 6,
+              "temporal_depth": 1,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 6,
+              "temporal_depth": 1,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          },
+          {
+            "proposed": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          },
+          {
+            "proposed": {
+              "slab_width": 12,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 12,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          },
+          {
+            "proposed": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 0,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 0,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          },
+          {
+            "proposed": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 4,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 4,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cpu",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          }
+        ],
+        "torch_version": "2.10.0+cu126",
+        "device": "cpu",
+        "hardware": "CPU",
+        "scope": "Measured resident and streamed prefixes with checkpoint-replay extrapolation. CPU-to-device design and CPU-result copies are included for resident CUDA. Full-duration optimality, geometry/optimizer cost, microbatch budgeting, multi-GPU and sustained physical-storage performance are not established.",
+        "quadrature_counts": null,
+        "proxy_objective": "Sum of squared duration-normalized complex plane fields and area-normalized signed flux."
+      },
+      "history": [
+        {
+          "iteration": 0,
+          "loss": -0.6641682800574733,
+          "normalized_flux": [
+            0.6641682800574733
+          ],
+          "radius_um": 0.22,
+          "radius_gradient": 1.8118753869231297,
+          "raw_damping": -1.0,
+          "raw_damping_gradient": -0.1303678483616117,
+          "execution": {
+            "experimental": true,
+            "adjoint": "discrete Yee/CPML/trapezoidal ADE",
+            "higher_order": false,
+            "spatial_streaming": false,
+            "full_time_autograd": false,
+            "steps": 80,
+            "forward_backend": "torch CPU",
+            "backward_backend": "torch explicit ADE transpose",
+            "checkpoint_transfers": "sync",
+            "memory_reservation_bytes": 757680,
+            "workspace_reservation_bytes": 509056,
+            "workspace_model": "conservative_tensor_bound",
+            "workspace_components_bytes": {
+              "tensor_workspace_bound": 261120,
+              "tensor_ade_workspace_bound": 245760,
+              "source_profiles": 0,
+              "source_injection": 16,
+              "observation_gathers": 2160
+            },
+            "allocation_headroom_bytes": 0,
+            "device_checkpoint_reservation_bytes": 72960,
+            "device_staging_reservation_bytes": 0,
+            "spectral_library_reservation_bytes": 0,
+            "history_reservation_bytes": 112720,
+            "output_history_bytes": 0,
+            "source_history_bytes": 640,
+            "observation_index_bytes": 1440,
+            "material_packing_reservation_bytes": 61504,
+            "restart_state_bytes": 36480,
+            "host_checkpoint_reservation_bytes": 0,
+            "disk_checkpoint_reservation_bytes": 0,
+            "host_source_validation_bytes": 0,
+            "host_reservation_bytes": 757680,
+            "gpu_reservation_bytes": 0,
+            "budgeted_resident": true,
+            "restart_bytes": 36480,
+            "checkpoint_capacity": 2,
+            "checkpoint_storage": "device",
+            "peak_checkpoints": 2,
+            "checkpoint_bytes_written": 984960,
+            "checkpoint_bytes_read": 2663040,
+            "checkpoint_io_seconds": 0.004358998499810696,
+            "replayed_steps": 360,
+            "checkpoint_tiers": [
+              "device",
+              "device"
+            ],
+            "peak_checkpoints_by_tier": {
+              "device": 2,
+              "host": 0,
+              "disk": 0
+            },
+            "observation_storage": "online_spectrum",
+            "spectral_output_bytes": 1440,
+            "spectral_workspace_bytes": 102024,
+            "spectral_settings_bytes": 8,
+            "spectral_reservation_bytes": 112080,
+            "plane_workspace_reservation_bytes": 7168,
+            "plane_output_bytes": 384,
+            "spectral_block_size": 32,
+            "forward_seconds": 0.07052299985662103,
+            "oscillator_count": 1,
+            "material_state_bytes": 15360,
+            "material_parameter_bytes": 15376,
+            "material_parameter_layout": "compact original shapes with broadcast transpose reductions",
+            "material_parameters": "epsilon_inf, strength [(rad/s)^2], omega0 [rad/s], gamma [rad/s]",
+            "unified_execution": "resident",
+            "host_input_interface": true,
+            "execution_reservation": {
+              "memory_reservation_bytes": 757680,
+              "workspace_reservation_bytes": 509056,
+              "workspace_model": "conservative_tensor_bound",
+              "workspace_components_bytes": {
+                "tensor_workspace_bound": 261120,
+                "tensor_ade_workspace_bound": 245760,
+                "source_profiles": 0,
+                "source_injection": 16,
+                "observation_gathers": 2160
+              },
+              "allocation_headroom_bytes": 0,
+              "device_checkpoint_reservation_bytes": 72960,
+              "device_staging_reservation_bytes": 0,
+              "spectral_library_reservation_bytes": 0,
+              "history_reservation_bytes": 112720,
+              "output_history_bytes": 0,
+              "source_history_bytes": 640,
+              "observation_index_bytes": 1440,
+              "material_packing_reservation_bytes": 61504,
+              "restart_state_bytes": 36480,
+              "host_checkpoint_reservation_bytes": 0,
+              "disk_checkpoint_reservation_bytes": 0,
+              "host_source_validation_bytes": 0,
+              "host_reservation_bytes": 855600,
+              "gpu_reservation_bytes": 0,
+              "budgeted_resident": true,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 102024,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 112080,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136,
+              "host_transfer_reservation_bytes": 0,
+              "gpu_transfer_reservation_bytes": 0
+            },
+            "backward_seconds": 0.4226480000652373
+          }
+        },
+        {
+          "iteration": 1,
+          "loss": -0.6680510596343878,
+          "normalized_flux": [
+            0.6680510596343878
+          ],
+          "radius_um": 0.21800000001103828,
+          "radius_gradient": 1.8101818038829482,
+          "raw_damping": -0.9980000001534121,
+          "raw_damping_gradient": -0.13028937878429292,
+          "execution": {
+            "experimental": true,
+            "adjoint": "discrete Yee/CPML/trapezoidal ADE",
+            "higher_order": false,
+            "spatial_streaming": false,
+            "full_time_autograd": false,
+            "steps": 80,
+            "forward_backend": "torch CPU",
+            "backward_backend": "torch explicit ADE transpose",
+            "checkpoint_transfers": "sync",
+            "memory_reservation_bytes": 757680,
+            "workspace_reservation_bytes": 509056,
+            "workspace_model": "conservative_tensor_bound",
+            "workspace_components_bytes": {
+              "tensor_workspace_bound": 261120,
+              "tensor_ade_workspace_bound": 245760,
+              "source_profiles": 0,
+              "source_injection": 16,
+              "observation_gathers": 2160
+            },
+            "allocation_headroom_bytes": 0,
+            "device_checkpoint_reservation_bytes": 72960,
+            "device_staging_reservation_bytes": 0,
+            "spectral_library_reservation_bytes": 0,
+            "history_reservation_bytes": 112720,
+            "output_history_bytes": 0,
+            "source_history_bytes": 640,
+            "observation_index_bytes": 1440,
+            "material_packing_reservation_bytes": 61504,
+            "restart_state_bytes": 36480,
+            "host_checkpoint_reservation_bytes": 0,
+            "disk_checkpoint_reservation_bytes": 0,
+            "host_source_validation_bytes": 0,
+            "host_reservation_bytes": 757680,
+            "gpu_reservation_bytes": 0,
+            "budgeted_resident": true,
+            "restart_bytes": 36480,
+            "checkpoint_capacity": 2,
+            "checkpoint_storage": "device",
+            "peak_checkpoints": 2,
+            "checkpoint_bytes_written": 984960,
+            "checkpoint_bytes_read": 2663040,
+            "checkpoint_io_seconds": 0.003925499506294727,
+            "replayed_steps": 360,
+            "checkpoint_tiers": [
+              "device",
+              "device"
+            ],
+            "peak_checkpoints_by_tier": {
+              "device": 2,
+              "host": 0,
+              "disk": 0
+            },
+            "observation_storage": "online_spectrum",
+            "spectral_output_bytes": 1440,
+            "spectral_workspace_bytes": 102024,
+            "spectral_settings_bytes": 8,
+            "spectral_reservation_bytes": 112080,
+            "plane_workspace_reservation_bytes": 7168,
+            "plane_output_bytes": 384,
+            "spectral_block_size": 32,
+            "forward_seconds": 0.07745300000533462,
+            "oscillator_count": 1,
+            "material_state_bytes": 15360,
+            "material_parameter_bytes": 15376,
+            "material_parameter_layout": "compact original shapes with broadcast transpose reductions",
+            "material_parameters": "epsilon_inf, strength [(rad/s)^2], omega0 [rad/s], gamma [rad/s]",
+            "unified_execution": "resident",
+            "host_input_interface": true,
+            "execution_reservation": {
+              "memory_reservation_bytes": 757680,
+              "workspace_reservation_bytes": 509056,
+              "workspace_model": "conservative_tensor_bound",
+              "workspace_components_bytes": {
+                "tensor_workspace_bound": 261120,
+                "tensor_ade_workspace_bound": 245760,
+                "source_profiles": 0,
+                "source_injection": 16,
+                "observation_gathers": 2160
+              },
+              "allocation_headroom_bytes": 0,
+              "device_checkpoint_reservation_bytes": 72960,
+              "device_staging_reservation_bytes": 0,
+              "spectral_library_reservation_bytes": 0,
+              "history_reservation_bytes": 112720,
+              "output_history_bytes": 0,
+              "source_history_bytes": 640,
+              "observation_index_bytes": 1440,
+              "material_packing_reservation_bytes": 61504,
+              "restart_state_bytes": 36480,
+              "host_checkpoint_reservation_bytes": 0,
+              "disk_checkpoint_reservation_bytes": 0,
+              "host_source_validation_bytes": 0,
+              "host_reservation_bytes": 855600,
+              "gpu_reservation_bytes": 0,
+              "budgeted_resident": true,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 102024,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 112080,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136,
+              "host_transfer_reservation_bytes": 0,
+              "gpu_transfer_reservation_bytes": 0
+            },
+            "backward_seconds": 0.4261651998385787
+          }
+        }
+      ],
+      "final_radius_um": 0.2160000489913159
+    },
+    "cuda": {
+      "scope": "Optimize a sphere radius and optional damping using matched detector flux.\n\nThis short 2D example demonstrates a complete geometry/material optimizer\ngraph. Its finite-duration dipole illumination is not a converged device\nefficiency or a color-router design. Frequencies and detector planes are fixed.\n",
+      "device": "cuda",
+      "execution": "auto",
+      "dispersive": true,
+      "policy": {
+        "resident": {
+          "checkpoints": 2,
+          "storage": "host",
+          "gpu_budget_bytes": 268435456,
+          "host_budget_bytes": 268435456,
+          "disk_budget_bytes": null,
+          "checkpoint_directory": null,
+          "device_checkpoints": 0,
+          "host_checkpoints": 0,
+          "backward_kernel": "fused",
+          "checkpoint_transfers": "async",
+          "staging_slots": 2,
+          "resident_budget_bytes": 268435456
+        },
+        "streamed": null,
+        "device": "cuda",
+        "host_budget_bytes": 268435456
+      },
+      "tuning": {
+        "selected_index": 2,
+        "candidates": [
+          {
+            "index": 0,
+            "policy": {
+              "resident": {
+                "checkpoints": 2,
+                "storage": "device",
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "disk_budget_bytes": null,
+                "checkpoint_directory": null,
+                "device_checkpoints": 0,
+                "host_checkpoints": 0,
+                "backward_kernel": "fused",
+                "checkpoint_transfers": "sync",
+                "staging_slots": 2,
+                "resident_budget_bytes": 268435456
+              },
+              "streamed": null,
+              "device": "cuda",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.09538180008530617
+            ],
+            "median_seconds": 0.09538180008530617,
+            "reservation": {
+              "memory_reservation_bytes": 28883449,
+              "workspace_reservation_bytes": 133760,
+              "workspace_model": "fused_cuda_allocations",
+              "workspace_components_bytes": {
+                "primal_and_adjoint_fields": 61440,
+                "primal_and_adjoint_cpml": 17280,
+                "replay_and_conversion_allowance": 36480,
+                "ade_numerator_and_recomputed_electric": 15360,
+                "ade_shared_reduction_bound": 48,
+                "boundary_coefficients": 976,
+                "source_profiles": 0,
+                "source_injection": 16,
+                "observation_gathers": 2160
+              },
+              "allocation_headroom_bytes": 9364553,
+              "device_checkpoint_reservation_bytes": 72960,
+              "device_staging_reservation_bytes": 0,
+              "spectral_library_reservation_bytes": 19136512,
+              "history_reservation_bytes": 112720,
+              "output_history_bytes": 0,
+              "source_history_bytes": 640,
+              "observation_index_bytes": 1440,
+              "material_packing_reservation_bytes": 61504,
+              "restart_state_bytes": 36480,
+              "host_checkpoint_reservation_bytes": 0,
+              "disk_checkpoint_reservation_bytes": 0,
+              "host_source_validation_bytes": 0,
+              "host_reservation_bytes": 129576,
+              "gpu_reservation_bytes": 28914201,
+              "budgeted_resident": true,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 102024,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 112080,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136,
+              "host_transfer_reservation_bytes": 31656,
+              "gpu_transfer_reservation_bytes": 30752
+            },
+            "probes": [
+              {
+                "steps": 10,
+                "samples": [
+                  {
+                    "total": 0.09538180008530617,
+                    "forward": 0.011096599977463484,
+                    "backward": 0.012920899782329798
+                  }
+                ],
+                "total": 0.09538180008530617,
+                "forward": 0.011096599977463484,
+                "backward": 0.012920899782329798
+              },
+              {
+                "steps": 20,
+                "samples": [
+                  {
+                    "total": 0.15492139989510179,
+                    "forward": 0.016366100404411554,
+                    "backward": 0.06131559982895851
+                  }
+                ],
+                "total": 0.15492139989510179,
+                "forward": 0.016366100404411554,
+                "backward": 0.06131559982895851
+              }
+            ],
+            "calibration_steps": [
+              10,
+              20
+            ],
+            "prediction": {
+              "seconds": 0.5756144081242383,
+              "method": "two-duration replay cost",
+              "blocks": 80,
+              "replay_blocks": 360,
+              "forward_block_seconds": 0.0005269500426948071,
+              "transpose_block_seconds": 0.0032586198765784504,
+              "startup_forward_seconds": 0.005827099550515413,
+              "startup_backward_seconds": 0.0,
+              "outside_solver_seconds": 0.07723969966173172
+            },
+            "selection_score_seconds": 0.5756144081242383
+          },
+          {
+            "index": 1,
+            "policy": {
+              "resident": {
+                "checkpoints": 0,
+                "storage": "device",
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "disk_budget_bytes": null,
+                "checkpoint_directory": null,
+                "device_checkpoints": 0,
+                "host_checkpoints": 0,
+                "backward_kernel": "fused",
+                "checkpoint_transfers": "sync",
+                "staging_slots": 2,
+                "resident_budget_bytes": 268435456
+              },
+              "streamed": null,
+              "device": "cuda",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.11688729980960488
+            ],
+            "median_seconds": 0.11688729980960488,
+            "reservation": {
+              "memory_reservation_bytes": 28806841,
+              "workspace_reservation_bytes": 133760,
+              "workspace_model": "fused_cuda_allocations",
+              "workspace_components_bytes": {
+                "primal_and_adjoint_fields": 61440,
+                "primal_and_adjoint_cpml": 17280,
+                "replay_and_conversion_allowance": 36480,
+                "ade_numerator_and_recomputed_electric": 15360,
+                "ade_shared_reduction_bound": 48,
+                "boundary_coefficients": 976,
+                "source_profiles": 0,
+                "source_injection": 16,
+                "observation_gathers": 2160
+              },
+              "allocation_headroom_bytes": 9360905,
+              "device_checkpoint_reservation_bytes": 0,
+              "device_staging_reservation_bytes": 0,
+              "spectral_library_reservation_bytes": 19136512,
+              "history_reservation_bytes": 112720,
+              "output_history_bytes": 0,
+              "source_history_bytes": 640,
+              "observation_index_bytes": 1440,
+              "material_packing_reservation_bytes": 61504,
+              "restart_state_bytes": 36480,
+              "host_checkpoint_reservation_bytes": 0,
+              "disk_checkpoint_reservation_bytes": 0,
+              "host_source_validation_bytes": 0,
+              "host_reservation_bytes": 129576,
+              "gpu_reservation_bytes": 28837593,
+              "budgeted_resident": true,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 102024,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 112080,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136,
+              "host_transfer_reservation_bytes": 31656,
+              "gpu_transfer_reservation_bytes": 30752
+            },
+            "probes": [
+              {
+                "steps": 10,
+                "samples": [
+                  {
+                    "total": 0.11688729980960488,
+                    "forward": 0.00950630009174347,
+                    "backward": 0.03065430000424385
+                  }
+                ],
+                "total": 0.11688729980960488,
+                "forward": 0.00950630009174347,
+                "backward": 0.03065430000424385
+              },
+              {
+                "steps": 20,
+                "samples": [
+                  {
+                    "total": 0.13906669989228249,
+                    "forward": 0.00924240006133914,
+                    "backward": 0.07388469995930791
+                  }
+                ],
+                "total": 0.13906669989228249,
+                "forward": 0.00924240006133914,
+                "backward": 0.07388469995930791
+              }
+            ],
+            "calibration_steps": [
+              10,
+              20
+            ],
+            "prediction": {
+              "seconds": 2.0073975810538167,
+              "method": "work-count fallback",
+              "blocks": 80,
+              "replay_blocks": 3160
+            },
+            "selection_score_seconds": 2.0073975810538167
+          },
+          {
+            "index": 2,
+            "policy": {
+              "resident": {
+                "checkpoints": 2,
+                "storage": "host",
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "disk_budget_bytes": null,
+                "checkpoint_directory": null,
+                "device_checkpoints": 0,
+                "host_checkpoints": 0,
+                "backward_kernel": "fused",
+                "checkpoint_transfers": "async",
+                "staging_slots": 2,
+                "resident_budget_bytes": 268435456
+              },
+              "streamed": null,
+              "device": "cuda",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.1366948001086712
+            ],
+            "median_seconds": 0.1366948001086712,
+            "reservation": {
+              "memory_reservation_bytes": 28883449,
+              "workspace_reservation_bytes": 133760,
+              "workspace_model": "fused_cuda_allocations",
+              "workspace_components_bytes": {
+                "primal_and_adjoint_fields": 61440,
+                "primal_and_adjoint_cpml": 17280,
+                "replay_and_conversion_allowance": 36480,
+                "ade_numerator_and_recomputed_electric": 15360,
+                "ade_shared_reduction_bound": 48,
+                "boundary_coefficients": 976,
+                "source_profiles": 0,
+                "source_injection": 16,
+                "observation_gathers": 2160
+              },
+              "allocation_headroom_bytes": 9364553,
+              "device_checkpoint_reservation_bytes": 0,
+              "device_staging_reservation_bytes": 72960,
+              "spectral_library_reservation_bytes": 19136512,
+              "history_reservation_bytes": 112720,
+              "output_history_bytes": 0,
+              "source_history_bytes": 640,
+              "observation_index_bytes": 1440,
+              "material_packing_reservation_bytes": 61504,
+              "restart_state_bytes": 36480,
+              "host_checkpoint_reservation_bytes": 145920,
+              "disk_checkpoint_reservation_bytes": 0,
+              "host_source_validation_bytes": 0,
+              "host_reservation_bytes": 275496,
+              "gpu_reservation_bytes": 28914201,
+              "budgeted_resident": true,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 102024,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 112080,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136,
+              "host_transfer_reservation_bytes": 31656,
+              "gpu_transfer_reservation_bytes": 30752
+            },
+            "probes": [
+              {
+                "steps": 10,
+                "samples": [
+                  {
+                    "total": 0.1366948001086712,
+                    "forward": 0.010401700157672167,
+                    "backward": 0.04351129988208413
+                  }
+                ],
+                "total": 0.1366948001086712,
+                "forward": 0.010401700157672167,
+                "backward": 0.04351129988208413
+              },
+              {
+                "steps": 20,
+                "samples": [
+                  {
+                    "total": 0.16967929992824793,
+                    "forward": 0.017423999961465597,
+                    "backward": 0.06506210006773472
+                  }
+                ],
+                "total": 0.16967929992824793,
+                "forward": 0.017423999961465597,
+                "backward": 0.06506210006773472
+              }
+            ],
+            "calibration_steps": [
+              10,
+              20
+            ],
+            "prediction": {
+              "seconds": 0.43591894721612334,
+              "method": "two-duration replay cost",
+              "blocks": 80,
+              "replay_blocks": 360,
+              "forward_block_seconds": 0.000702229980379343,
+              "transpose_block_seconds": 4.839007742702961e-05,
+              "startup_forward_seconds": 0.0033794003538787365,
+              "startup_backward_seconds": 0.03249394940212369,
+              "outside_solver_seconds": 0.08719319989904761
+            },
+            "selection_score_seconds": 0.43591894721612334
+          },
+          {
+            "index": 3,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 6,
+                "temporal_depth": 1,
+                "checkpoints": 2,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cuda",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cuda",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              1.1201973999850452
+            ],
+            "median_seconds": 1.1201973999850452,
+            "reservation": {
+              "host_reservation_bytes": 777360,
+              "gpu_reservation_bytes": 279264,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 7,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 1,
+              "max_extended_tile_cells": 128,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 19472,
+              "host_tile_reservation_bytes": 280000,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 8776,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 18832,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 10,
+                "samples": [
+                  {
+                    "total": 1.1201973999850452,
+                    "forward": 0.24418159993365407,
+                    "backward": 0.8697498999536037
+                  }
+                ],
+                "total": 1.1201973999850452,
+                "forward": 0.24418159993365407,
+                "backward": 0.8697498999536037
+              },
+              {
+                "steps": 20,
+                "samples": [
+                  {
+                    "total": 2.5562499002553523,
+                    "forward": 0.4861182998865843,
+                    "backward": 2.0643873997032642
+                  }
+                ],
+                "total": 2.5562499002553523,
+                "forward": 0.4861182998865843,
+                "backward": 2.0643873997032642
+              }
+            ],
+            "calibration_steps": [
+              10,
+              20
+            ],
+            "prediction": {
+              "seconds": 14.442362247267738,
+              "method": "two-duration replay cost",
+              "blocks": 80,
+              "replay_blocks": 360,
+              "forward_block_seconds": 0.024193669995293023,
+              "transpose_block_seconds": 0.046882739989086986,
+              "startup_forward_seconds": 0.002244899980723858,
+              "startup_backward_seconds": 0.03801745013333857,
+              "outside_solver_seconds": 0.00626590009778738
+            },
+            "selection_score_seconds": 14.442362247267738
+          },
+          {
+            "index": 4,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 6,
+                "temporal_depth": 4,
+                "checkpoints": 2,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cuda",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cuda",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.3609865000471473
+            ],
+            "median_seconds": 0.3609865000471473,
+            "reservation": {
+              "host_reservation_bytes": 999696,
+              "gpu_reservation_bytes": 490368,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 7,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 4,
+              "max_extended_tile_cells": 224,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 28496,
+              "host_tile_reservation_bytes": 493312,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 17800,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 27856,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 12,
+                "samples": [
+                  {
+                    "total": 0.3609865000471473,
+                    "forward": 0.08255460020154715,
+                    "backward": 0.27310310024768114
+                  }
+                ],
+                "total": 0.3609865000471473,
+                "forward": 0.08255460020154715,
+                "backward": 0.27310310024768114
+              },
+              {
+                "steps": 24,
+                "samples": [
+                  {
+                    "total": 0.5716507001779974,
+                    "forward": 0.12095509981736541,
+                    "backward": 0.4449155000038445
+                  }
+                ],
+                "total": 0.5716507001779974,
+                "forward": 0.12095509981736541,
+                "backward": 0.4449155000038445
+              }
+            ],
+            "calibration_steps": [
+              12,
+              24
+            ],
+            "prediction": {
+              "seconds": 1.6678457294280333,
+              "method": "two-duration replay cost",
+              "blocks": 20,
+              "replay_blocks": 45,
+              "forward_block_seconds": 0.012800166538606087,
+              "transpose_block_seconds": 0.031670466841508954,
+              "startup_forward_seconds": 0.044154100585728884,
+              "startup_backward_seconds": 0.1524913666459421,
+              "outside_solver_seconds": 0.005780100356787443
+            },
+            "selection_score_seconds": 1.6678457294280333
+          },
+          {
+            "index": 5,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 12,
+                "temporal_depth": 4,
+                "checkpoints": 2,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cuda",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cuda",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.19922940013930202
+            ],
+            "median_seconds": 0.19922940013930202,
+            "reservation": {
+              "host_reservation_bytes": 1208592,
+              "gpu_reservation_bytes": 699264,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 7,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 4,
+              "max_extended_tile_cells": 320,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 28496,
+              "host_tile_reservation_bytes": 702208,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 17800,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 27856,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 12,
+                "samples": [
+                  {
+                    "total": 0.19922940013930202,
+                    "forward": 0.04957900010049343,
+                    "backward": 0.14268579985946417
+                  }
+                ],
+                "total": 0.19922940013930202,
+                "forward": 0.04957900010049343,
+                "backward": 0.14268579985946417
+              },
+              {
+                "steps": 24,
+                "samples": [
+                  {
+                    "total": 0.45306740002706647,
+                    "forward": 0.1054704999551177,
+                    "backward": 0.34099499974399805
+                  }
+                ],
+                "total": 0.45306740002706647,
+                "forward": 0.1054704999551177,
+                "backward": 0.34099499974399805
+              }
+            ],
+            "calibration_steps": [
+              12,
+              24
+            ],
+            "prediction": {
+              "seconds": 1.813687031312535,
+              "method": "two-duration replay cost",
+              "blocks": 20,
+              "replay_blocks": 45,
+              "forward_block_seconds": 0.018630499951541424,
+              "transpose_block_seconds": 0.028842066725095112,
+              "startup_forward_seconds": 0.0,
+              "startup_backward_seconds": 0.01889859978109598,
+              "outside_solver_seconds": 0.006964600179344416
+            },
+            "selection_score_seconds": 1.813687031312535
+          },
+          {
+            "index": 6,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 12,
+                "temporal_depth": 4,
+                "checkpoints": 2,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cuda",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "async",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cuda",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.17649300023913383
+            ],
+            "median_seconds": 0.17649300023913383,
+            "reservation": {
+              "host_reservation_bytes": 1910800,
+              "gpu_reservation_bytes": 1398528,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 7,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 4,
+              "max_extended_tile_cells": 320,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 28496,
+              "host_tile_reservation_bytes": 1404416,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 17800,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 27856,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 12,
+                "samples": [
+                  {
+                    "total": 0.17649300023913383,
+                    "forward": 0.04290719982236624,
+                    "backward": 0.1281408998183906
+                  }
+                ],
+                "total": 0.17649300023913383,
+                "forward": 0.04290719982236624,
+                "backward": 0.1281408998183906
+              },
+              {
+                "steps": 24,
+                "samples": [
+                  {
+                    "total": 0.38806449994444847,
+                    "forward": 0.08266319986432791,
+                    "backward": 0.299511999823153
+                  }
+                ],
+                "total": 0.38806449994444847,
+                "forward": 0.08266319986432791,
+                "backward": 0.299511999823153
+              }
+            ],
+            "calibration_steps": [
+              12,
+              24
+            ],
+            "prediction": {
+              "seconds": 1.4925923002883792,
+              "method": "two-duration replay cost",
+              "blocks": 20,
+              "replay_blocks": 45,
+              "forward_block_seconds": 0.013252000013987223,
+              "transpose_block_seconds": 0.030619699973613027,
+              "startup_forward_seconds": 0.0031511997804045677,
+              "startup_backward_seconds": 0.00977779986957708,
+              "outside_solver_seconds": 0.0058893002569675446
+            },
+            "selection_score_seconds": 1.4925923002883792
+          },
+          {
+            "index": 7,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 6,
+                "temporal_depth": 4,
+                "checkpoints": 0,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cuda",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cuda",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.366053500212729
+            ],
+            "median_seconds": 0.366053500212729,
+            "reservation": {
+              "host_reservation_bytes": 926736,
+              "gpu_reservation_bytes": 490368,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 5,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 4,
+              "max_extended_tile_cells": 224,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 28496,
+              "host_tile_reservation_bytes": 493312,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 17800,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 27856,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 12,
+                "samples": [
+                  {
+                    "total": 0.366053500212729,
+                    "forward": 0.07668610010296106,
+                    "backward": 0.28173890011385083
+                  }
+                ],
+                "total": 0.366053500212729,
+                "forward": 0.07668610010296106,
+                "backward": 0.28173890011385083
+              },
+              {
+                "steps": 24,
+                "samples": [
+                  {
+                    "total": 1.0187901998870075,
+                    "forward": 0.1642848001793027,
+                    "backward": 0.8494772999547422
+                  }
+                ],
+                "total": 1.0187901998870075,
+                "forward": 0.1642848001793027,
+                "backward": 0.8494772999547422
+              }
+            ],
+            "calibration_steps": [
+              12,
+              24
+            ],
+            "prediction": {
+              "seconds": 7.588494835576663,
+              "method": "two-duration replay cost",
+              "blocks": 20,
+              "replay_blocks": 190,
+              "forward_block_seconds": 0.029199566692113876,
+              "transpose_block_seconds": 0.07244786651184161,
+              "startup_forward_seconds": 0.0,
+              "startup_backward_seconds": 0.0,
+              "outside_solver_seconds": 0.007628499995917082
+            },
+            "selection_score_seconds": 7.588494835576663
+          },
+          {
+            "index": 8,
+            "policy": {
+              "resident": null,
+              "streamed": {
+                "slab_width": 6,
+                "temporal_depth": 4,
+                "checkpoints": 4,
+                "gpu_budget_bytes": 268435456,
+                "host_budget_bytes": 268435456,
+                "device": "cuda",
+                "cuda_binding": "direct",
+                "reuse_tile_buffers": true,
+                "tile_transfers": "sync",
+                "tile_buffers": 2,
+                "local_checkpoints": 0,
+                "state_storage": "host",
+                "state_directory": null,
+                "disk_budget_bytes": null,
+                "disk_free_reserve_bytes": 0
+              },
+              "device": "cuda",
+              "host_budget_bytes": 268435456
+            },
+            "status": "measured",
+            "seconds": [
+              0.37019099993631244
+            ],
+            "median_seconds": 0.37019099993631244,
+            "reservation": {
+              "host_reservation_bytes": 1072656,
+              "gpu_reservation_bytes": 490368,
+              "observation_index_bytes": 1440,
+              "state_bank_capacity": 9,
+              "disk_reservation_bytes": 0,
+              "disk_io_workspace_bytes": 0,
+              "host_initial_state_reservation_bytes": 160,
+              "state_bytes": 36480,
+              "halo_cells_per_side": 4,
+              "max_extended_tile_cells": 224,
+              "local_checkpoint_reservation_bytes": 0,
+              "source_and_output_history_bytes": 28496,
+              "host_tile_reservation_bytes": 493312,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 17800,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 27856,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136
+            },
+            "probes": [
+              {
+                "steps": 12,
+                "samples": [
+                  {
+                    "total": 0.37019099993631244,
+                    "forward": 0.0814226996153593,
+                    "backward": 0.28077670000493526
+                  }
+                ],
+                "total": 0.37019099993631244,
+                "forward": 0.0814226996153593,
+                "backward": 0.28077670000493526
+              },
+              {
+                "steps": 24,
+                "samples": [
+                  {
+                    "total": 0.8220079001039267,
+                    "forward": 0.2576081999577582,
+                    "backward": 0.5573483002372086
+                  }
+                ],
+                "total": 0.8220079001039267,
+                "forward": 0.2576081999577582,
+                "backward": 0.5573483002372086
+              }
+            ],
+            "calibration_steps": [
+              12,
+              24
+            ],
+            "prediction": {
+              "seconds": 3.8527763721843566,
+              "method": "two-duration replay cost",
+              "blocks": 20,
+              "replay_blocks": 33,
+              "forward_block_seconds": 0.05872850011413296,
+              "transpose_block_seconds": 0.03346203329662482,
+              "startup_forward_seconds": 0.0,
+              "startup_backward_seconds": 0.06293359988679487,
+              "outside_solver_seconds": 0.007991600316017866
+            },
+            "selection_score_seconds": 3.8527763721843566
+          }
+        ],
+        "probe_steps": 10,
+        "calibration_steps": [
+          10,
+          12,
+          20,
+          24
+        ],
+        "strategy": "replay_cost",
+        "max_calibration_steps": 512,
+        "reference_policy_index": 0,
+        "refine_candidates": 0,
+        "refined_indices": [],
+        "extra_reference_evaluations": 2,
+        "full_steps": 80,
+        "warmups_per_probe": 1,
+        "repeats": 1,
+        "total_warmup_runs": 18,
+        "tuning_seconds": 22.54009689996019,
+        "tuning_reference_reservation_bytes": 909440,
+        "reference_cache_limit_bytes": 67108864,
+        "reference_cache_reservation_bytes": 454720,
+        "reference_cache_peak_bytes": 63040,
+        "reference_cache_hits": 32,
+        "reference_cache_misses": 4,
+        "physics": "Yee/CPML/ADE",
+        "gradient_comparison_coordinates": [
+          "epsilon_inf",
+          "strength * dt^2",
+          "omega0 * dt",
+          "gamma * dt"
+        ],
+        "observation": "fixed_plane_spectrum_and_flux",
+        "default_candidate_planning": [
+          {
+            "proposed": {
+              "slab_width": 6,
+              "temporal_depth": 1,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 6,
+              "temporal_depth": 1,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          },
+          {
+            "proposed": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          },
+          {
+            "proposed": {
+              "slab_width": 12,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 12,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          },
+          {
+            "proposed": {
+              "slab_width": 12,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "async",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 12,
+              "temporal_depth": 4,
+              "checkpoints": 2,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "async",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          },
+          {
+            "proposed": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 0,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 0,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          },
+          {
+            "proposed": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 4,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "fitted": {
+              "slab_width": 6,
+              "temporal_depth": 4,
+              "checkpoints": 4,
+              "gpu_budget_bytes": 268435456,
+              "host_budget_bytes": 268435456,
+              "device": "cuda",
+              "cuda_binding": "direct",
+              "reuse_tile_buffers": true,
+              "tile_transfers": "sync",
+              "tile_buffers": 2,
+              "local_checkpoints": 0,
+              "state_storage": "host",
+              "state_directory": null,
+              "disk_budget_bytes": null,
+              "disk_free_reserve_bytes": 0
+            },
+            "admission_probes": 1
+          }
+        ],
+        "torch_version": "2.10.0+cu126",
+        "device": "cuda",
+        "hardware": "NVIDIA GeForce RTX 3060",
+        "scope": "Measured resident and streamed prefixes with checkpoint-replay extrapolation. CPU-to-device design and CPU-result copies are included for resident CUDA. Full-duration optimality, geometry/optimizer cost, microbatch budgeting, multi-GPU and sustained physical-storage performance are not established.",
+        "quadrature_counts": null,
+        "proxy_objective": "Sum of squared duration-normalized complex plane fields and area-normalized signed flux."
+      },
+      "history": [
+        {
+          "iteration": 0,
+          "loss": -0.6641682800574733,
+          "normalized_flux": [
+            0.6641682800574733
+          ],
+          "radius_um": 0.22,
+          "radius_gradient": 1.8118753869231299,
+          "raw_damping": -1.0,
+          "raw_damping_gradient": -0.1303678483616117,
+          "execution": {
+            "experimental": true,
+            "adjoint": "discrete Yee/CPML/trapezoidal ADE",
+            "higher_order": false,
+            "spatial_streaming": false,
+            "full_time_autograd": false,
+            "steps": 80,
+            "forward_backend": "fused CUDA ADE",
+            "backward_backend": "fused CUDA ADE transpose",
+            "checkpoint_transfers": "async",
+            "memory_reservation_bytes": 28883449,
+            "workspace_reservation_bytes": 133760,
+            "workspace_model": "fused_cuda_allocations",
+            "workspace_components_bytes": {
+              "primal_and_adjoint_fields": 61440,
+              "primal_and_adjoint_cpml": 17280,
+              "replay_and_conversion_allowance": 36480,
+              "ade_numerator_and_recomputed_electric": 15360,
+              "ade_shared_reduction_bound": 48,
+              "boundary_coefficients": 976,
+              "source_profiles": 0,
+              "source_injection": 16,
+              "observation_gathers": 2160
+            },
+            "allocation_headroom_bytes": 9364553,
+            "device_checkpoint_reservation_bytes": 0,
+            "device_staging_reservation_bytes": 72960,
+            "spectral_library_reservation_bytes": 19136512,
+            "history_reservation_bytes": 112720,
+            "output_history_bytes": 0,
+            "source_history_bytes": 640,
+            "observation_index_bytes": 1440,
+            "material_packing_reservation_bytes": 61504,
+            "restart_state_bytes": 36480,
+            "host_checkpoint_reservation_bytes": 145920,
+            "disk_checkpoint_reservation_bytes": 0,
+            "host_source_validation_bytes": 0,
+            "host_reservation_bytes": 145920,
+            "gpu_reservation_bytes": 28883449,
+            "budgeted_resident": true,
+            "restart_bytes": 36480,
+            "checkpoint_capacity": 2,
+            "checkpoint_storage": "host",
+            "peak_checkpoints": 2,
+            "checkpoint_bytes_written": 984960,
+            "checkpoint_bytes_read": 2663040,
+            "checkpoint_io_seconds": 0.10975379962474108,
+            "replayed_steps": 360,
+            "checkpoint_tiers": [
+              "host",
+              "host"
+            ],
+            "peak_checkpoints_by_tier": {
+              "device": 0,
+              "host": 2,
+              "disk": 0
+            },
+            "observation_storage": "online_spectrum",
+            "spectral_output_bytes": 1440,
+            "spectral_workspace_bytes": 102024,
+            "spectral_settings_bytes": 8,
+            "spectral_reservation_bytes": 112080,
+            "plane_workspace_reservation_bytes": 7168,
+            "plane_output_bytes": 384,
+            "spectral_block_size": 32,
+            "forward_seconds": 0.04383950028568506,
+            "oscillator_count": 1,
+            "material_state_bytes": 15360,
+            "material_parameter_bytes": 15376,
+            "material_parameter_layout": "compact original shapes with broadcast transpose reductions",
+            "material_parameters": "epsilon_inf, strength [(rad/s)^2], omega0 [rad/s], gamma [rad/s]",
+            "unified_execution": "resident",
+            "host_input_interface": true,
+            "execution_reservation": {
+              "memory_reservation_bytes": 28883449,
+              "workspace_reservation_bytes": 133760,
+              "workspace_model": "fused_cuda_allocations",
+              "workspace_components_bytes": {
+                "primal_and_adjoint_fields": 61440,
+                "primal_and_adjoint_cpml": 17280,
+                "replay_and_conversion_allowance": 36480,
+                "ade_numerator_and_recomputed_electric": 15360,
+                "ade_shared_reduction_bound": 48,
+                "boundary_coefficients": 976,
+                "source_profiles": 0,
+                "source_injection": 16,
+                "observation_gathers": 2160
+              },
+              "allocation_headroom_bytes": 9364553,
+              "device_checkpoint_reservation_bytes": 0,
+              "device_staging_reservation_bytes": 72960,
+              "spectral_library_reservation_bytes": 19136512,
+              "history_reservation_bytes": 112720,
+              "output_history_bytes": 0,
+              "source_history_bytes": 640,
+              "observation_index_bytes": 1440,
+              "material_packing_reservation_bytes": 61504,
+              "restart_state_bytes": 36480,
+              "host_checkpoint_reservation_bytes": 145920,
+              "disk_checkpoint_reservation_bytes": 0,
+              "host_source_validation_bytes": 0,
+              "host_reservation_bytes": 275496,
+              "gpu_reservation_bytes": 28914201,
+              "budgeted_resident": true,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 102024,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 112080,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136,
+              "host_transfer_reservation_bytes": 31656,
+              "gpu_transfer_reservation_bytes": 30752
+            },
+            "staging_slots": 2,
+            "pinned_staging_bytes": 72960,
+            "device_staging_bytes": 72960,
+            "async_saves": 27,
+            "async_loads": 73,
+            "peak_staging_leases": 2,
+            "material_gradient_reduction_bytes": 32,
+            "material_gradient_reduction": "fixed CUDA block partials followed by compact Torch sums, no atomics",
+            "backward_seconds": 0.2625351003371179
+          }
+        },
+        {
+          "iteration": 1,
+          "loss": -0.668051059634388,
+          "normalized_flux": [
+            0.668051059634388
+          ],
+          "radius_um": 0.21800000001103828,
+          "radius_gradient": 1.810181803882948,
+          "raw_damping": -0.9980000001534121,
+          "raw_damping_gradient": -0.13028937878429292,
+          "execution": {
+            "experimental": true,
+            "adjoint": "discrete Yee/CPML/trapezoidal ADE",
+            "higher_order": false,
+            "spatial_streaming": false,
+            "full_time_autograd": false,
+            "steps": 80,
+            "forward_backend": "fused CUDA ADE",
+            "backward_backend": "fused CUDA ADE transpose",
+            "checkpoint_transfers": "async",
+            "memory_reservation_bytes": 28883449,
+            "workspace_reservation_bytes": 133760,
+            "workspace_model": "fused_cuda_allocations",
+            "workspace_components_bytes": {
+              "primal_and_adjoint_fields": 61440,
+              "primal_and_adjoint_cpml": 17280,
+              "replay_and_conversion_allowance": 36480,
+              "ade_numerator_and_recomputed_electric": 15360,
+              "ade_shared_reduction_bound": 48,
+              "boundary_coefficients": 976,
+              "source_profiles": 0,
+              "source_injection": 16,
+              "observation_gathers": 2160
+            },
+            "allocation_headroom_bytes": 9364553,
+            "device_checkpoint_reservation_bytes": 0,
+            "device_staging_reservation_bytes": 72960,
+            "spectral_library_reservation_bytes": 19136512,
+            "history_reservation_bytes": 112720,
+            "output_history_bytes": 0,
+            "source_history_bytes": 640,
+            "observation_index_bytes": 1440,
+            "material_packing_reservation_bytes": 61504,
+            "restart_state_bytes": 36480,
+            "host_checkpoint_reservation_bytes": 145920,
+            "disk_checkpoint_reservation_bytes": 0,
+            "host_source_validation_bytes": 0,
+            "host_reservation_bytes": 145920,
+            "gpu_reservation_bytes": 28883449,
+            "budgeted_resident": true,
+            "restart_bytes": 36480,
+            "checkpoint_capacity": 2,
+            "checkpoint_storage": "host",
+            "peak_checkpoints": 2,
+            "checkpoint_bytes_written": 984960,
+            "checkpoint_bytes_read": 2663040,
+            "checkpoint_io_seconds": 0.1085463035851717,
+            "replayed_steps": 360,
+            "checkpoint_tiers": [
+              "host",
+              "host"
+            ],
+            "peak_checkpoints_by_tier": {
+              "device": 0,
+              "host": 2,
+              "disk": 0
+            },
+            "observation_storage": "online_spectrum",
+            "spectral_output_bytes": 1440,
+            "spectral_workspace_bytes": 102024,
+            "spectral_settings_bytes": 8,
+            "spectral_reservation_bytes": 112080,
+            "plane_workspace_reservation_bytes": 7168,
+            "plane_output_bytes": 384,
+            "spectral_block_size": 32,
+            "forward_seconds": 0.04972809972241521,
+            "oscillator_count": 1,
+            "material_state_bytes": 15360,
+            "material_parameter_bytes": 15376,
+            "material_parameter_layout": "compact original shapes with broadcast transpose reductions",
+            "material_parameters": "epsilon_inf, strength [(rad/s)^2], omega0 [rad/s], gamma [rad/s]",
+            "unified_execution": "resident",
+            "host_input_interface": true,
+            "execution_reservation": {
+              "memory_reservation_bytes": 28883449,
+              "workspace_reservation_bytes": 133760,
+              "workspace_model": "fused_cuda_allocations",
+              "workspace_components_bytes": {
+                "primal_and_adjoint_fields": 61440,
+                "primal_and_adjoint_cpml": 17280,
+                "replay_and_conversion_allowance": 36480,
+                "ade_numerator_and_recomputed_electric": 15360,
+                "ade_shared_reduction_bound": 48,
+                "boundary_coefficients": 976,
+                "source_profiles": 0,
+                "source_injection": 16,
+                "observation_gathers": 2160
+              },
+              "allocation_headroom_bytes": 9364553,
+              "device_checkpoint_reservation_bytes": 0,
+              "device_staging_reservation_bytes": 72960,
+              "spectral_library_reservation_bytes": 19136512,
+              "history_reservation_bytes": 112720,
+              "output_history_bytes": 0,
+              "source_history_bytes": 640,
+              "observation_index_bytes": 1440,
+              "material_packing_reservation_bytes": 61504,
+              "restart_state_bytes": 36480,
+              "host_checkpoint_reservation_bytes": 145920,
+              "disk_checkpoint_reservation_bytes": 0,
+              "host_source_validation_bytes": 0,
+              "host_reservation_bytes": 275496,
+              "gpu_reservation_bytes": 28914201,
+              "budgeted_resident": true,
+              "spectral_output_bytes": 1440,
+              "spectral_workspace_bytes": 102024,
+              "spectral_settings_bytes": 8,
+              "spectral_reservation_bytes": 112080,
+              "plane_workspace_reservation_bytes": 7168,
+              "plane_output_bytes": 384,
+              "plane_layout_reservation_bytes": 97920,
+              "plane_result_metadata_bytes": 136,
+              "host_transfer_reservation_bytes": 31656,
+              "gpu_transfer_reservation_bytes": 30752
+            },
+            "staging_slots": 2,
+            "pinned_staging_bytes": 72960,
+            "device_staging_bytes": 72960,
+            "async_saves": 27,
+            "async_loads": 73,
+            "peak_staging_leases": 2,
+            "material_gradient_reduction_bytes": 32,
+            "material_gradient_reduction": "fixed CUDA block partials followed by compact Torch sums, no atomics",
+            "backward_seconds": 0.2563223000615835
+          }
+        }
+      ],
+      "final_radius_um": 0.2160000489913159
+    }
+  }
+}

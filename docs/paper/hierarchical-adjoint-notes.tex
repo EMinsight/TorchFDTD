@@ -782,4 +782,48 @@ finite-cone reference agreement. Concurrent application work excludes their
 elapsed times from performance comparisons. Larger metadata-only admission
 checks do not establish that the corresponding simulations have executed.
 
+\section{Fixed-plane execution selection}
+The unified policy interface also admits fixed spectral planes. Spatial
+interpolation commutes with Fourier accumulation. Indexed Yee observations
+are shared across planes, then collocated into six-component complex fields.
+Calibration compares the complete fields and the material derivatives of
+a proxy containing duration-normalized field energy and area-normalized
+signed Poynting flux. This includes the electric/magnetic cross-product
+transpose without storing all time-domain plane fields.
+
+Fields and quadrature weights are scaled before forming power products.
+Computing a very small SI-scaled flux first and dividing afterward can
+underflow FP32 values or overflow intermediate backward seeds. Common
+detached field and area scales cancel in the matched-reference ratio,
+preserving derivatives of both the sample and reference fields.
+
+The common CPU design interface retains gradients through resident CUDA
+input and output copies. Admission includes the collocated output, its
+gradient carrier, interpolation arrays and observer metadata allowance.
+The allowance is an engineering estimate and does not bound all process
+memory. Fixed mesh, source and duration signatures permit references to
+cross execution policies while preserving exact plane and frequency checks.
+The source signature resolves inherited waveform settings. Temporal windows,
+variable detector geometry and mixed point/plane projects remain unsupported.
+
+A two-iteration radius and damping example uses matched-reference plane flux.
+CPU and CUDA yield objectives of approximately $-0.66416828$ and $-0.66805106$
+at the two evaluated iterates. The final radius is $0.21600005$ micrometres.
+This short dipole-illuminated example establishes optimizer connectivity,
+not a converged device efficiency or a color-router optimization result.
+
+\subsection{Updated beyond-VRAM ADE capacity check}
+The $1024\times768\times384$ one-pole complex-FP64 experiment was repeated
+with the $K$-cell causal halo and corrected output-buffer lifetime. E/H and
+P/Q together still occupy 54 GiB. Ten forward steps and first-order backward
+completed in 2976.734 seconds with 3,651,167,232 peak Torch CUDA bytes and
+14,113,513,472 sampled peak process-RSS bytes. The finite-cone field and
+permittivity-gradient maximum errors remain $8.67\times10^{-19}$ and
+$1.36\times10^{-20}$. The global gradient norm and three shared material
+derivatives agree with the reference. All field stores closed with no live
+logical file bytes. Both revisions are preserved with verified source hashes.
+Sequential runs without repeated alternation do not isolate a causal speed
+effect. Long-time optical convergence and sustained storage performance
+remain unverified.
+
 \end{document}

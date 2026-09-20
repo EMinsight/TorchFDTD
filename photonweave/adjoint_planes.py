@@ -13,6 +13,15 @@ from .streamed import StreamedSimulation, StreamedAdjointOptions
 COMPONENTS = ('Ex','Ey','Ez','Hx','Hy','Hz')
 
 
+def _plane_signature(project):
+    # Execution placement must not invalidate a physically matched reference.
+    region=project.region.model_dump(mode='json')
+    for key in ('memory_mode','backend','cuda_kernel','cuda_monitor_kernel'):
+        region.pop(key,None)
+    payload=dict(region=region,sources=[project.resolved_source(s).model_dump(mode='json') for s in project.sources])
+    return hashlib.sha256(json.dumps(payload,sort_keys=True).encode()).hexdigest()
+
+
 @dataclass
 class DifferentiablePlaneResult:
     fields: torch.Tensor  # frequency, flattened quadrature point, component
@@ -48,15 +57,26 @@ class DifferentiablePlaneResult:
             a,b=getattr(self,name),getattr(reference,name)
             if a.device!=b.device or a.dtype!=b.dtype or a.shape!=b.shape or not torch.equal(a,b):
                 raise ValueError(f'Reference {name} must match exactly, including device and dtype.')
-        denominator=reference.flux().abs()
+        # Normalize before multiplying SI-scale spectral fields and areas.
+        # Dividing an O(dt^2*area) FP32 flux afterward can underflow the value
+        # or overflow its backward seed. Common detached scales cancel from
+        # the ratio and preserve derivatives wrt both sample and reference.
+        field_scale=reference.fields.detach().abs().amax()
+        area_scale=reference.weights.detach().abs().amax()
+        if not bool(torch.isfinite(field_scale)) or not bool(field_scale>0) or not bool(torch.isfinite(area_scale)) or not bool(area_scale>0):
+            raise ValueError('Reference power is zero, nonfinite or too weak. Select a supported frequency band.')
+        fields=self.fields/field_scale
+        reference_fields=reference.fields/field_scale
+        weights=self.weights/area_scale
+        a='xyz'.index(self.normal);b,c=(a+1)%3,(a+2)%3
+        def density(value):
+            return .5*(value[...,b]*value[...,3+c].conj()-value[...,c]*value[...,3+b].conj()).real
+        denominator=(density(reference_fields)@weights).abs()
         if not bool(torch.isfinite(denominator).all()) or bool((denominator<=0).any()) or bool((denominator<=min_reference_fraction*denominator.max()).any()):
             raise ValueError('Reference power is zero, nonfinite or too weak. Select a supported frequency band.')
         if subtract_incident:
-            fields=self.fields-reference.fields
-            a='xyz'.index(self.normal);b,c=(a+1)%3,(a+2)%3
-            density=.5*(fields[...,b]*fields[...,3+c].conj()-fields[...,c]*fields[...,3+b].conj()).real
-            numerator=density@self.weights
-        else:numerator=self.flux()
+            fields=fields-reference_fields
+        numerator=density(fields)@weights
         return numerator/denominator
 
 
@@ -123,8 +143,7 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
             self.plans.append((monitor.id,monitor.normal,plan,maps))
         self.observers=tuple(observers)
         self.components=tuple(o[0] for o in observers)
-        payload=dict(region=self.project.region.model_dump(mode='json'),sources=[s.model_dump(mode='json') for s in self.project.sources])
-        self.signature=hashlib.sha256(json.dumps(payload,sort_keys=True).encode()).hexdigest()
+        self.signature=_plane_signature(self.project)
         # Indexed internal observations avoid thousands of UI point objects.
         internal=self.project.model_copy(deep=True)
         internal.monitors=[Monitor()]
@@ -136,14 +155,26 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         """Return an ordered mapping from monitor IDs to spectral plane results."""
         return self._planes(epsilon,frequency_hz,block_size,lambda spectral:self.model._run(epsilon,spectral))
 
-    def _planes(self,epsilon,frequency_hz,block_size,run):
-        if self.project.model_dump()!=self._project_snapshot or self.model.project.model_dump()!=self._internal_snapshot:
-            raise ValueError('Plane configuration changed. Rebuild the model to regenerate fixed interpolation and source plans.')
+    @property
+    def layout_reservation_bytes(self):
+        arrays=sum(plan['points_um'].nbytes+plan['weights'].nbytes+
+            sum(i.nbytes+w.nbytes for i,w in entries) for _,_,plan,entries in self.plans)
+        # Include an allowance for indexed Python observations and construction
+        # containers, in addition to the retained NumPy interpolation arrays.
+        return arrays+1024*len(self.observers)+4096*len(self.plans)
+
+    def _spectral(self,epsilon,frequency_hz,block_size):
         points=sum(len(plan['weights']) for _,_,plan,_ in self.plans)
         maps=sum(i.nbytes+w.nbytes for _,_,_,entries in self.plans for i,w in entries)
         spectral=_PlaneSpectrum(epsilon,self.project.region,self.components,frequency_hz,
                                 block_size=block_size,points=points,maps=maps)
         spectral.observers=self.observers
+        return spectral
+
+    def _planes(self,epsilon,frequency_hz,block_size,run):
+        if self.project.model_dump()!=self._project_snapshot or self.model.project.model_dump()!=self._internal_snapshot:
+            raise ValueError('Plane configuration changed. Rebuild the model to regenerate fixed interpolation and source plans.')
+        spectral=self._spectral(epsilon,frequency_hz,block_size)
         result=run(spectral)
         output={}
         for identifier,normal,plan,entries in self.plans:

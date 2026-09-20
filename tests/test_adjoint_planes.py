@@ -116,6 +116,33 @@ def test_reference_normalization_and_field_subtraction_gradients():
     with pytest.raises(ValueError,match='frequency'):sample.normalized_flux(replace(reference_result,frequency_hz=args['frequency_hz']*2))
 
 
+@pytest.mark.parametrize('subtract',[False,True])
+def test_fp32_normalized_flux_preserves_both_graphs_at_photonic_si_scales(subtract):
+    def run(dtype):
+        amplitude=torch.tensor(2.,dtype=dtype,requires_grad=True)
+        incident=torch.tensor(.8,dtype=dtype,requires_grad=True)
+        base=torch.zeros((2,3,6),dtype=torch.complex64 if dtype==torch.float32 else torch.complex128)
+        base[...,1]=1e-16*(1+.3j);base[...,5]=.9e-16*(1-.2j)
+        args=dict(frequency_hz=torch.tensor([1e14,2e14],dtype=dtype),
+            points_um=torch.zeros((3,3),dtype=dtype),weights=torch.full((3,),1e-14,dtype=dtype),
+            shape=(1,3,1),normal='x',run_signature='fixed',report={})
+        reference=DifferentiablePlaneResult(fields=base*incident,**args)
+        sample=DifferentiablePlaneResult(fields=base*amplitude,**args)
+        ratio=sample.normalized_flux(reference,subtract_incident=subtract)
+        gradients=torch.autograd.grad(ratio.sum(),(amplitude,incident))
+        return ratio,gradients
+    actual,got=run(torch.float32)
+    expected,want=run(torch.float64)
+    torch.testing.assert_close(actual.double(),expected,rtol=1e-6,atol=1e-6)
+    for a,b in zip(got,want):
+        assert torch.isfinite(a)
+        torch.testing.assert_close(a.double(),b,rtol=1e-6,atol=1e-6)
+    # Analytic derivatives of (sample/reference - subtract)^2, two bands.
+    residual=2./.8-int(subtract)
+    assert float(got[0])==pytest.approx(4*residual/.8,rel=1e-6)
+    assert float(got[1])==pytest.approx(-4*residual*2./.8**2,rel=1e-6)
+
+
 def test_unsupported_monitor_settings_are_rejected():
     p=scene();p.monitors=[Monitor()]
     with pytest.raises(ValueError,match='field monitors'):DifferentiablePlaneSimulation(p)

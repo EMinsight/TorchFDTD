@@ -31,8 +31,8 @@ The run used synchronous file-backed slabs with core width 8, temporal depth 2,
 zero global checkpoints and zero local checkpoints. Source revision `d77e958`
 used the earlier 2K halo. Its 70 runtime modules and benchmark driver were
 checked byte-for-byte against all 71 recorded SHA-256 values. It predates both
-the buffer-growth lifetime fix and the narrower K halo. The pending corrected
-run must be compared separately rather than attributing this record to newer
+the buffer-growth lifetime fix and the narrower K halo. The corrected run
+below is retained separately rather than attributing this record to newer
 code. The only removed raw-record field is the workstation scratch path.
 
 The admitted reservation was 291,797,729,280 disk bytes, 43,486,545,472 host
@@ -48,3 +48,31 @@ the entire CUDA context or driver. This single ten-step run establishes
 capacity and discrete VJP consistency. It does not establish long-time
 stability, optical convergence, sustained storage bandwidth or a speed
 advantage over resident, CPU or external solvers.
+
+## Causal-halo rerun
+
+The same grid, precision, pole, ten steps and width/depth/checkpoint policy
+completed on source revision `d4dd7c2`, with the K-cell causal halo and expired
+output-buffer fix. All 71 driver/runtime SHA-256 values in the
+[corrected record](beyond-vram-ade-halo-5880.json) match that revision. The
+record is terminal, reports `driver_smoke=false` and has closed forward and
+backward stores with zero live logical file bytes.
+
+| Measurement | Corrected run |
+| --- | ---: |
+| Complete forward/objective/backward | 2976.734 s |
+| Driver forward, including preparation | 663.718 s |
+| Internal backward | 2312.188 s |
+| Peak Torch CUDA allocation | 3,651,167,232 bytes |
+| Sampled peak process RSS | 14,113,513,472 bytes |
+| Maximum point-signal absolute error | 8.67e-19 |
+| Maximum local epsilon-gradient absolute error | 1.36e-20 |
+
+The global epsilon-gradient norm and all three scaled material derivatives
+also agree with the finite-cone reference. Logical backward reads are
+1,254,730,235,904 bytes and writes 1,021,292,052,480 bytes. Peak logical live
+scratch remains 175,078,637,568 bytes. The 100 GiB disk floor and 16 GiB RAM
+floor are unchanged. Torch allocation is about 29.4% lower than in the older
+record. These two runs were sequential and not alternated or repeated, so
+their elapsed-time difference is not an isolated causal speed estimate. The
+same capacity-only and buffered-I/O limitations apply.

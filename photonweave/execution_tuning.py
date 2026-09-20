@@ -45,8 +45,13 @@ class AdjointExecutionPolicy:
     @property
     def checkpoints(self):return (self.resident or self.streamed).checkpoints
 
-    def simulation(self,project,*,dispersive=False):
-        if self.resident is not None:return _ResidentFromHost(project,self,dispersive)
+    def simulation(self,project,*,dispersive=False,quadrature_counts=None):
+        from .plane_execution import plane_mode
+        planes=plane_mode(project)
+        if not planes and quadrature_counts is not None:
+            raise ValueError('Quadrature counts require fixed field planes.')
+        if self.resident is not None:return _ResidentFromHost(project,self,dispersive,quadrature_counts)
+        if planes:return _StreamedPlanesFromHost(project,self,dispersive,quadrature_counts)
         model=StreamedSimulation
         if dispersive:
             from .streamed_dispersive import StreamedDispersiveSimulation
@@ -68,21 +73,28 @@ def _resident_project(project,options):
     return project
 
 
-def _resident_reservation(project,shapes,policy,frequency_hz=None,window=None,block_size=32):
+def _resident_reservation(project,shapes,policy,frequency_hz=None,window=None,block_size=32,*,quadrature_counts=None,plane=None):
+    from .plane_execution import plane_mode, plane_model, plane_reservation
     project=_resident_project(project,policy.resident)
     if shapes[0] not in (project.region.shape,project.region.shape+(3,)):
         raise ValueError('epsilon shape must match the grid, optionally with three components.')
-    settings=dict(device=policy.device,frequency_hz=frequency_hz,window=window,block_size=block_size)
-    if len(shapes)==4:settings['parameter_shapes']=shapes
-    result=estimate_adjoint_memory(project,policy.resident,**settings)
+    if plane_mode(project):
+        if window is not None:raise ValueError('Plane execution does not yet support a temporal window.')
+        plane=plane if plane is not None else plane_model(project,policy.resident,len(shapes)==4,quadrature_counts)
+        result=plane_reservation(plane,shapes,policy.resident,frequency_hz,device=policy.device,block_size=block_size)
+    else:
+        if quadrature_counts is not None:raise ValueError('Quadrature counts require fixed field planes.')
+        settings=dict(device=policy.device,frequency_hz=frequency_hz,window=window,block_size=block_size)
+        if len(shapes)==4:settings['parameter_shapes']=shapes
+        result=estimate_adjoint_memory(project,policy.resident,**settings)
     item=8 if project.region.precision=='float64' else 4
     parameters=sum(math.prod(shape) for shape in shapes)*item
-    output=result.get('spectral_output_bytes',result['output_history_bytes'])
+    output=result.get('plane_output_bytes',result.get('spectral_output_bytes',result['output_history_bytes']))
     cuda=torch.device(policy.device).type=='cuda'
     # Inputs copied to CUDA and their incoming gradients coexist with the
     # solver. CPU output/gradient copies must also fit outside caller storage.
     gpu_copy=2*parameters if cuda else 0
-    host_copy=2*parameters+2*output if cuda else 0
+    host_copy=2*parameters+2*output+result.get('plane_result_metadata_bytes',0) if cuda else 0
     gpu=result['gpu_reservation_bytes']+gpu_copy
     host=result['host_reservation_bytes']+host_copy
     available=host_memory()['available_bytes']
@@ -100,11 +112,51 @@ def _resident_reservation(project,shapes,policy,frequency_hz=None,window=None,bl
                 host_transfer_reservation_bytes=host_copy,gpu_transfer_reservation_bytes=gpu_copy)
 
 
-class _ResidentFromHost(torch.nn.Module):
-    def __init__(self,project,policy,dispersive):
+def _host_design(project,values,dispersive):
+    if len(values)!=(4 if dispersive else 1):raise ValueError('Wrong number of material inputs.')
+    epsilon=values[0]
+    if not isinstance(epsilon,torch.Tensor) or epsilon.device.type!='cpu' or epsilon.dtype not in (torch.float32,torch.float64):
+        raise ValueError('Unified execution requires real CPU design tensors.')
+    if (epsilon.dtype==torch.float64)!=(project.region.precision=='float64'):
+        raise ValueError('epsilon dtype must match the project precision.')
+    for value in values:
+        if isinstance(value,torch.Tensor) and (value.device.type!='cpu' or value.dtype!=epsilon.dtype):
+            raise ValueError('Material tensors must match epsilon CPU device and dtype.')
+    return tuple(torch.as_tensor(v,dtype=epsilon.dtype,device='cpu') for v in values)
+
+
+class _StreamedPlanesFromHost(torch.nn.Module):
+    def __init__(self,project,policy,dispersive,quadrature_counts):
         super().__init__()
+        from .plane_execution import plane_model
+        self.policy,self.dispersive=policy,dispersive
+        self.options=_streamed_options(policy)
+        self.model=plane_model(project,self.options,dispersive,quadrature_counts)
+        self.project=self.model.project
+
+    def forward(self,*values,frequency_hz=None,block_size=32):
+        from .plane_execution import plane_reservation
+        values=_host_design(self.project,values,self.dispersive)
+        reservation=plane_reservation(self.model,tuple(tuple(v.shape) for v in values),
+            self.options,frequency_hz,block_size=block_size)
+        planes=self.model(*values,frequency_hz=frequency_hz,block_size=block_size)
+        for plane in planes.values():
+            plane.report.update(unified_execution='streamed',host_input_interface=True,
+                                execution_reservation=reservation)
+        return planes
+
+
+class _ResidentFromHost(torch.nn.Module):
+    def __init__(self,project,policy,dispersive,quadrature_counts=None):
+        super().__init__()
+        from .plane_execution import plane_mode, plane_model
         self.project=_resident_project(project,policy.resident)
         self.policy,self.dispersive=policy,dispersive
+        self.planes=plane_mode(self.project)
+        self.quadrature_counts=quadrature_counts
+        if self.planes:
+            self.model=plane_model(self.project,policy.resident,dispersive,quadrature_counts)
+            return
         model=DifferentiableSimulation
         if dispersive:
             from .dispersive_adjoint import DispersiveSimulation
@@ -112,20 +164,21 @@ class _ResidentFromHost(torch.nn.Module):
         self.model=model(self.project,policy.resident)
 
     def _run(self,values,frequency_hz=None,window=None,block_size=32):
-        if len(values)!=(4 if self.dispersive else 1):raise ValueError('Wrong number of material inputs.')
-        epsilon=values[0]
-        if not isinstance(epsilon,torch.Tensor) or epsilon.device.type!='cpu' or epsilon.dtype not in (torch.float32,torch.float64):
-            raise ValueError('Unified execution requires real CPU design tensors.')
-        if (epsilon.dtype==torch.float64)!=(self.project.region.precision=='float64'):
-            raise ValueError('epsilon dtype must match the project precision.')
-        for value in values:
-            if isinstance(value,torch.Tensor) and (value.device.type!='cpu' or value.dtype!=epsilon.dtype):
-                raise ValueError('Material tensors must match epsilon CPU device and dtype.')
-        values=tuple(torch.as_tensor(v,dtype=epsilon.dtype,device='cpu') for v in values)
+        values=_host_design(self.project,values,self.dispersive)
         shapes=tuple(tuple(v.shape) for v in values)
-        reservation=_resident_reservation(self.project,shapes,self.policy,frequency_hz,window,block_size)
+        reservation=_resident_reservation(self.project,shapes,self.policy,frequency_hz,window,block_size,
+            quadrature_counts=self.quadrature_counts,plane=self.model if self.planes else None)
         # Do not detach: copies are part of the user's geometry-to-loss graph.
         copied=tuple(v.to(self.policy.device) for v in values)
+        if self.planes:
+            result=self.model(*copied,frequency_hz=frequency_hz,block_size=block_size)
+            output={}
+            for key,plane in result.items():
+                output[key]=replace(plane,fields=plane.fields.cpu(),frequency_hz=plane.frequency_hz.cpu(),
+                    points_um=plane.points_um.cpu(),weights=plane.weights.cpu())
+                plane.report.update(unified_execution='resident',host_input_interface=True,
+                                    execution_reservation=reservation)
+            return output
         if frequency_hz is None:
             result=self.model(*copied)
             result=replace(result,signals=result.signals.cpu())
@@ -136,7 +189,7 @@ class _ResidentFromHost(torch.nn.Module):
                              execution_reservation=reservation)
         return result
 
-    def forward(self,*values):return self._run(values)
+    def forward(self,*values,frequency_hz=None,block_size=32):return self._run(values,frequency_hz,block_size=block_size)
 
     def spectrum(self,*values,frequency_hz=None,window=None,block_size=32):
         if frequency_hz is None:
@@ -151,6 +204,8 @@ class _ExecutionWorkload:
     def __getattr__(self,name):return getattr(self.workload,name)
 
     def reservation(self,policy):
+        from .plane_execution import PlaneTuningWorkload
+        if isinstance(self.workload,PlaneTuningWorkload):return self.workload.execution_reservation(policy)
         if policy.streamed is not None:return self.workload.reservation(_streamed_options(policy))
         spectral=self.workload.spectral
         return _resident_reservation(self.workload.project,
@@ -159,6 +214,8 @@ class _ExecutionWorkload:
             None if spectral is None else spectral.window)
 
     def model(self,project,policy):
+        from .plane_execution import PlaneTuningWorkload
+        if isinstance(self.workload,PlaneTuningWorkload):return self.workload.execution_model(project,policy)
         return policy.simulation(project,dispersive=isinstance(self.workload,_DispersiveTuningWorkload))
 
 
@@ -167,18 +224,22 @@ class AdjointExecutionSelection:
     policy: AdjointExecutionPolicy
     report: dict
     dispersive: bool
+    quadrature_counts: dict | None = None
 
-    def simulation(self,project):return self.policy.simulation(project,dispersive=self.dispersive)
+    def simulation(self,project):return self.policy.simulation(project,dispersive=self.dispersive,quadrature_counts=self.quadrature_counts)
 
 
 def tune_adjoint_execution(project,epsilon,*material_parameters,options=None,candidates=None,
-        frequency_hz=None,window=None,probe_steps=24,repeats=2,max_calibration_steps=512,
+        frequency_hz=None,window=None,quadrature_counts=None,probe_steps=24,repeats=2,max_calibration_steps=512,
         refine_candidates=0,reference_cache_bytes=64*1024**2):
     """Compare resident and streamed full-iteration cost under shared budgets.
 
     Supply epsilon only, or epsilon_inf, strength, omega0 and gamma for ADE.
     Defaults combine generated streamed policies with device/host resident
     checkpoints. Input and result tensors remain on CPU with intact gradients.
+    All-field projects return fixed spectral planes from model(...,
+    frequency_hz=...). Optional quadrature_counts maps monitor IDs to transverse
+    point counts. Mixed point/plane projects and plane windows are unsupported.
     Tuning uses detached leaves and a proxy energy objective, never modifies
     caller .grad, and does not establish a globally optimal execution policy.
     File banks require explicit streamed directory, budget and headroom settings.
@@ -188,8 +249,15 @@ def tune_adjoint_execution(project,epsilon,*material_parameters,options=None,can
                                refine_candidates,reference_cache_bytes)
     if candidates is None and options is not None and not isinstance(options,StreamedAdjointOptions):
         raise ValueError('Default execution proposals require StreamedAdjointOptions budgets.')
-    workload=(_DispersiveTuningWorkload(project,epsilon,*material_parameters,frequency_hz,window)
-              if material_parameters else _TuningWorkload(project,epsilon,frequency_hz,window))
+    from .plane_execution import plane_mode, PlaneTuningWorkload
+    planes=plane_mode(project)
+    quadrature_counts=None if quadrature_counts is None else dict(quadrature_counts)
+    if planes:
+        workload=PlaneTuningWorkload(project,epsilon,material_parameters,frequency_hz,window,quadrature_counts)
+    else:
+        if quadrature_counts is not None:raise ValueError('Quadrature counts require fixed field planes.')
+        workload=(_DispersiveTuningWorkload(project,epsilon,*material_parameters,frequency_hz,window)
+                  if material_parameters else _TuningWorkload(project,epsilon,frequency_hz,window))
     planning=[]
     if candidates is None:
         base=options or StreamedAdjointOptions()
@@ -212,4 +280,7 @@ def tune_adjoint_execution(project,epsilon,*material_parameters,options=None,can
         _policy_type=AdjointExecutionPolicy)
     tuned.report.update(default_candidate_planning=planning,
         scope='Measured resident and streamed prefixes with checkpoint-replay extrapolation. CPU-to-device design and CPU-result copies are included for resident CUDA. Full-duration optimality, geometry/optimizer cost, microbatch budgeting, multi-GPU and sustained physical-storage performance are not established.')
-    return AdjointExecutionSelection(tuned.options,tuned.report,bool(material_parameters))
+    if planes:
+        tuned.report.update(observation='fixed_plane_spectrum_and_flux',quadrature_counts=quadrature_counts,
+            proxy_objective='Sum of squared duration-normalized complex plane fields and area-normalized signed flux.')
+    return AdjointExecutionSelection(tuned.options,tuned.report,bool(material_parameters),quadrature_counts)

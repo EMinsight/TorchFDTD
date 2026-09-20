@@ -89,3 +89,19 @@ def test_unified_driver_keeps_resident_and_streamed_full_validation(tmp_path,dev
     for rows in report['full_records']:
         assert len(rows)==1
         assert max(rows[0]['relative_l2_output_and_gradients'])<1e-8
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+@pytest.mark.parametrize('extra',[['--precision','float32'],['--dispersive','--complex-bloch']])
+def test_unified_plane_driver_full_fields_and_flux_vjp(tmp_path,device,extra):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    report=main(['--output',str(tmp_path/'planes.json'),'--device',device,'--nx','12','--ny','12',
+        '--steps','26','--probe-steps','10','--repeats','1','--cpu-threads','1',
+        '--require-held-out','--unified','--planes','--plane-stride','2',*extra])
+    assert report['stage']=='complete' and report['held_out_duration'] and report['fixed_planes']
+    assert report['tuning']['observation']=='fixed_plane_spectrum_and_flux'
+    assert len(report['reference_gradient_norms'])==(4 if '--dispersive' in extra else 1)
+    for rows in report['full_records']:
+        assert len(rows)==1
+        assert rows[0]['report']['execution_reservation']['plane_output_bytes']>0
+        assert max(rows[0]['relative_l2_output_and_gradients'])<(1e-4 if report['precision']=='float32' else 1e-8)

@@ -2,7 +2,7 @@
 
 `tune_adjoint_execution` compares resident and spatially streamed execution
 under common solver-memory budgets. It covers dielectric and Drude/Lorentz
-ADE point histories or point spectra. It uses the existing bounded reference
+ADE point histories, point spectra or fixed spectral detection planes. It uses the existing bounded reference
 cache and two-duration checkpoint-replay cost model, with first-order gradient
 comparisons between candidates. The selected policy can be reused across
 optimization iterations.
@@ -81,9 +81,77 @@ This is a bounded empirical search, not a globally optimal scheduler. Prefix
 ranking can differ from full-duration ranking. Use a held-out complete workload
 to assess policy quality and amortize tuning over enough iterations. A policy
 that later loses resource admission raises an error rather than silently
-changing tiers inside an existing autograd graph. Fixed-plane objectives,
+changing tiers inside an existing autograd graph. Mixed point/plane projects,
 shared-budget microbatching, dynamic retuning and single-domain multi-GPU are
 not part of this entry point.
+
+## Fixed detection planes
+
+When all enabled monitors are `FieldMonitor` planes, supply explicit
+`frequency_hz` during tuning and during execution. The selected model returns
+a mapping from monitor ID to `DifferentiablePlaneResult`:
+
+```python
+selection = tune_adjoint_execution(
+    project, epsilon, options=budget, frequency_hz=frequencies,
+)
+model = selection.simulation(project)
+with torch.no_grad():
+    reference = model(torch.ones_like(epsilon), frequency_hz=frequencies)
+planes = model(epsilon, frequency_hz=frequencies)
+loss = -planes["detector"].normalized_flux(reference["detector"]).mean()
+loss.backward()
+```
+
+Use the four material inputs for ADE. Optional `quadrature_counts` maps each
+3D plane ID to two transverse quadrature counts and is retained by the
+selection. Monitor positions, mesh and frequencies are fixed. Temporal
+apodization, time downsampling and mixed field/DFT precision remain outside
+the plane-adjoint contract.
+
+Calibration compares all six complex collocated fields. Its proxy combines
+duration-normalized field energy and area-normalized signed Poynting flux,
+then compares each scaled material gradient. This exercises E/H cross-product
+derivatives but does not time the user's complete optical objective. Fields
+and area weights are normalized before taking their products, avoiding FP32
+underflow or overflowing backward seeds from SI-scale spectral power.
+Matched-reference normalization uses common detached field/area scales that
+cancel in the ratio while retaining derivatives of both sample and reference.
+The resident CPU facade also reserves returned plane fields, their gradient
+carriers and metadata. Both modes include retained interpolation arrays and
+an allowance for Python observer metadata. Layout planning creates metadata
+before admission but allocates no domain fields. The metadata allowance is
+an engineering estimate, not a portable process-RSS bound.
+
+Physical reference signatures include resolved source settings, mesh,
+duration and boundaries. They exclude backend and memory placement, so a
+matched reference can be reused across execution policies. Plane coordinates,
+weights, frequencies, dtype and device must still match exactly.
+
+Run the complete radius/damping optimizer example with:
+
+```console
+python -m examples.differentiable_plane_design --device cuda --dispersive --iterations 2
+```
+
+`--execution resident` and `--execution streamed` exercise explicit policies.
+The default `auto` measures candidate policies first. Omit `--dispersive` for
+the dielectric case. The short dipole-illuminated example demonstrates graph
+connectivity and matched-reference flux, not a converged transmission
+efficiency or completed color-router optimization.
+
+Local validation includes CPU/CUDA, 2D/3D and fixed Bloch fields, dielectric
+and ADE material gradients, file-backed planes, quadrature overrides, memory
+denial before field allocation/material packing/transfers, and no mutation of
+caller gradients. A deliberately corrupted backward with unchanged fields is
+rejected. GC-disabled checks ensure the preceding solver is released before
+an uncached reference. FP32 normalized-flux gradients agree with FP64 and
+finite differences, and an analytic test checks both differentiable sample
+and reference fields at photonic SI scales.
+
+The [two-iteration CPU/CUDA example record](validation/plane-execution-example-3060.json)
+retains matching radius/damping updates and exact runtime hashes. A separate
+CR process was active, so these timings establish no performance advantage.
 
 ## Full-duration validation driver
 
@@ -95,6 +163,9 @@ python -m benchmarks.streamed_policy --unified --dispersive --spectrum --checkpo
 ```
 
 Add `--precision float32` for real FP32, or `--complex-bloch` for complex FP64.
+Add `--planes --plane-stride 4` for two fixed detector planes. The driver then
+checks every complex field and the VJP of field energy plus signed flux,
+with scaling performed before the field products. This requires `--unified`.
 The driver compares each complete output and scaled material VJP against the
 resident reference, preserves the prefix-selected winner, records every full
 repetition and reports tuning payback relative to the first admitted resident

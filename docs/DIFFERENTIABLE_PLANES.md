@@ -60,11 +60,20 @@ Temporal downsampling must be one and apodization must be disabled. Mixed field
 and DFT precision is rejected. Plane positions, mesh, quadrature and frequencies
 are fixed, while epsilon and preceding Torch geometry operations differentiate.
 Rebuild the model after changing its fixed project configuration.
-[Fixed complex Bloch fields](BLOCH_ADJOINT.md) are supported in resident execution.
-Complex spatial streaming, ADE, live TFSF, coupled subpixel and higher-order
-derivatives remain unsupported.
+[Fixed complex Bloch fields](BLOCH_ADJOINT.md) are supported in resident and
+streamed execution. [Dispersive planes](DISPERSIVE_ADJOINT.md) provide ADE
+material gradients through `DispersivePlaneSimulation`.
+[Unified policy selection](EXECUTION_SELECTION.md#fixed-detection-planes)
+handles both physics families with CPU design and result tensors. Live TFSF,
+coupled subpixel and higher-order derivatives remain unsupported.
 
 ## Normalization
+
+`normalized_flux` rescales both fields and quadrature weights before their
+products. The common detached scales cancel from the ratio and preserve
+derivatives of both the sample and reference. This avoids FP32 underflow and
+overflowing backward seeds when spectral fields carry seconds and areas
+carry square metres. Raw `flux()` retains its documented SI-scaled units.
 
 Run the same model with a reference permittivity, usually under `torch.no_grad()`
 when the incident reference is fixed. Then call:
