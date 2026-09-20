@@ -52,6 +52,10 @@ proof. CUDA context, caller-owned geometry/objective/optimizer graphs and
 unrelated processes are outside this estimate. Current available-memory checks
 still apply and admission is repeated at execution.
 
+Real fused backward now reserves an additional bounded observation packet
+and host grouping workspace. [Dense-observer details](DENSE_ADJOINT_OBSERVERS.md)
+describe its deterministic duplicate accumulation and integration checks.
+
 ## Cold spectral library workspace
 
 Point spectra and detector planes use Torch matrix products. Their first use

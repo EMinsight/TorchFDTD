@@ -107,6 +107,13 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     parameter_count = sum(math.prod(s) for s in parameter_shapes) if parameter_shapes is not None else epsilon.numel()
     host = (0 if disk else state_banks)+initial_storage+8*parameter_count*material_item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
     gpu = buffers*(tile_workspace+tile_history)
+    cuda=torch.device(options.device).type=='cuda'
+    observer_layout=32*monitors+8 if cuda and monitors and not region.complex_fields else 0
+    observer_preparation=512*monitors+8 if observer_layout else 0
+    # Each active slot owns its device index maps, plus an optional host/pinned
+    # copy of the real fused observer packet. Charge all slots conservatively.
+    gpu+=buffers*(16*monitors+observer_layout) if cuda else 0
+    host+=buffers*(observer_preparation+observer_layout)
     available = host_memory()['available_bytes']
     host_limit = min(options.host_budget_bytes, int(available*.8)) if available is not None else options.host_budget_bytes
     if host > host_limit:
@@ -123,6 +130,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
         if gpu > gpu_limit:
             raise ValueError(f'Streamed tile workspace reservation exceeds the GPU budget: required={gpu} bytes, admissible={gpu_limit} bytes.')
     return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,observation_index_bytes=16*monitors,
+                observer_layout_bytes=buffers*observer_layout,observer_preparation_bytes=buffers*observer_preparation,
                 state_bank_capacity=state_bank_capacity,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,
                 host_initial_state_reservation_bytes=initial_storage,

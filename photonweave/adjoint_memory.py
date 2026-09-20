@@ -23,7 +23,7 @@ def _cuda_index_contract(region,monitor_count,observation_steps):
     lanes=2 if region.complex_fields else 1
     if 3*lanes*math.prod(region.shape)>=2**31:
         raise ValueError('Resident CUDA field indexing exceeds the signed 32-bit range. Use spatial streaming.')
-    # The real fused observation kernel forms step*monitor_count in int32.
+    # Retain the conservative observation bound for all CUDA paths.
     # Spectral observations seed bounded time blocks instead of full history.
     if lanes*monitor_count*observation_steps>=2**31:
         raise ValueError('Resident CUDA observation indexing exceeds the signed 32-bit range. Use online spectra or fewer observations.')
@@ -151,6 +151,11 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     source=region.steps*terms*item
     history=2*output+source if spectral is None else spectral.reservation(spectral.block_size)['spectral_reservation_bytes']+source
     index_bytes=16*monitor_count
+    observer_layout=32*monitor_count+8 if monitor_count and device.type=='cuda' and not region.complex_fields and options.backward_kernel=='fused' else 0
+    index_bytes+=observer_layout
+    # Group construction retains Python keys/lists and a NumPy packet before
+    # uploading the compact map. This is an engineering host allowance.
+    observer_preparation=512*monitor_count+8 if observer_layout else 0
     if options.storage=='hierarchical':
         device_slots=options.device_checkpoints
         host_slots=options.host_checkpoints
@@ -176,7 +181,7 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     # the diagonal worst case plus its three-plane NumPy comparison temporaries.
     oneway=any(s.enabled and s.injection=='oneway' for s in project.sources)
     source_validation=(3*n+18*max(region.shape[0]*region.shape[1],region.shape[0]*region.shape[2],region.shape[1]*region.shape[2]))*real_item if oneway and device.type=='cuda' else 0
-    host_required=host_checkpoint+(required if device.type=='cpu' else 0)+source_validation
+    host_required=host_checkpoint+(required if device.type=='cpu' else 0)+source_validation+observer_preparation
     if options.resident_budget_bytes is not None:
         active=host_required if device.type=='cpu' else required
         if active>options.resident_budget_bytes:
@@ -204,6 +209,7 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
         spectral_library_reservation_bytes=library,
         history_reservation_bytes=history,output_history_bytes=output if spectral is None else 0,
         source_history_bytes=source,observation_index_bytes=index_bytes,
+        observer_layout_bytes=observer_layout,observer_preparation_bytes=observer_preparation,
         material_packing_reservation_bytes=packing,restart_state_bytes=state,
         host_checkpoint_reservation_bytes=host_checkpoint,disk_checkpoint_reservation_bytes=disk_checkpoint,
         host_source_validation_bytes=source_validation,

@@ -882,4 +882,21 @@ unnecessary streaming on resident-size problems. Detector-plane performance,
 long-time optical convergence and an external-solver advantage are separate
 requirements.
 
+
+\section{Bounded observation-kernel compilation}
+Real CUDA adjoints now pass observation groups as an indexed data packet,
+rather than generating a source-code branch for every observation. One thread
+owns each distinct field location and adds duplicate seeds in their original
+order, starting from the existing field adjoint. The device packet has an
+upper bound of $32m+8$ bytes for $m$ observations. Resident and streamed
+admission include this packet, index maps and host preparation allowances.
+The complex path retains its prior indexed transpose.
+
+FP32 and FP64 tests with 75,600 observations verify ordered duplicate
+accumulation and constant CUDA source size. A two-pole $128^3$ experiment
+with 32 steps compares the real fused and explicit Torch transposes. Outputs
+agree exactly and the largest relative material-gradient discrepancy is
+$2.24\times10^{-7}$. Concurrent local work precludes a timing comparison.
+This result establishes dense-observer integration, not optical convergence.
+
 \end{document}

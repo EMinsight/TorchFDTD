@@ -19,6 +19,7 @@ class FusedAdjointCUDA:
         import cupy
         self.cp=cupy
         self.direct_views=direct_views
+        self.buffers=buffers
         self.system=system
         self.device=system.device.index
         self.gradient=gradient
@@ -50,6 +51,7 @@ class FusedAdjointCUDA:
 
     def observer_kernel(self):
         if not self.system.monitors:return None
+        import numpy as np
         g=self.system.grid
         real='double' if g.E.dtype==torch.float64 else 'float'
         shape=g.E.shape[:3]
@@ -57,16 +59,39 @@ class FusedAdjointCUDA:
         for m,(name,loc,component) in enumerate(self.system.monitors):
             index=3*((loc[0]*shape[1]+loc[1])*shape[2]+loc[2])+component
             groups.setdefault((name[0],index),[]).append(m)
-        lines=['const int i=blockIdx.x*blockDim.x+threadIdx.x;']
+        count=len(groups)
+        # One thread owns each distinct field location. Preserve the original
+        # monitor order within duplicate groups without atomics. Indices are
+        # runtime data, so dense planes do not generate a huge NVRTC program.
+        layout=np.empty(3*count+1+len(self.system.monitors),dtype=np.int64)
+        cursor=0
         for i,((family,index),monitors) in enumerate(groups.items()):
-            lines.append(f'if(i=={i}) {{')
-            for m in monitors:
-                lines.append(f'{family.lower()}[{index}]+=v[step*{len(self.system.monitors)}+{m}];')
-            lines.append('}')
-        code=f'extern "C" __global__ void add_observations({real}* e,{real}* h,const {real}* v,int step){{'+''.join(lines)+'}'
+            layout[i]=cursor
+            layout[count+1+i]=index
+            layout[2*count+1+i]=int(family=='H')
+            layout[3*count+1+cursor:3*count+1+cursor+len(monitors)]=monitors
+            cursor+=len(monitors)
+        layout[count]=cursor
+        host=torch.from_numpy(layout)
+        self.observer_layout=(host.to(self.system.device) if self.buffers is None else
+                              self.buffers.copy('adjoint_observer_layout',host))
+        code='''extern "C" __global__ void add_observations(
+            REAL* e,REAL* h,const REAL* v,const long long* map,
+            int count,int monitors,int step) {
+            const int i=blockIdx.x*blockDim.x+threadIdx.x;
+            if(i>=count)return;
+            const long long begin=map[i],end=map[i+1];
+            const long long target=map[count+1LL+i];
+            REAL* field=map[2LL*count+1+i]?h:e;
+            REAL value=field[target];
+            for(long long j=begin;j<end;++j)
+                value+=v[(long long)step*monitors+map[3LL*count+1+j]];
+            field[target]=value;
+        }'''.replace('REAL',real)
         fn,module=_compile(code,self.device,self.cp.cuda.Device(self.device).compute_capability,'add_observations')
         arrays=tuple(self.view(t) for t in (self.e_bar,self.h_bar,self.signal_bar))
-        return fn,arrays,module,len(groups)
+        arrays+=(self.cp.from_dlpack(self.observer_layout.detach()),)
+        return fn,(*arrays,np.int32(count),np.int32(len(self.system.monitors))),module,count
 
     def source(self,forward,phase):
         system=self.system;g=system.grid

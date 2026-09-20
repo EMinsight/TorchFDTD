@@ -21,7 +21,7 @@ now compares full-grid and tiled execution with one CPU design-tensor API.
 The measured search includes resident input/output transfers and reuses the
 bounded gradient-reference cache. Fixed detection planes now use the same
 selection, including complex field/flux VJPs, reference normalization and
-optional 3D quadrature. A [radius/damping example](examples/differentiable_plane_design.py)
+optional 3D quadrature. The [real CUDA observation transpose](docs/DENSE_ADJOINT_OBSERVERS.md) now uses fixed-size kernel source and an indexed packet for dense planes. A [radius/damping example](examples/differentiable_plane_design.py)
 retains the optimizer graph across execution policies. Policy quality at full application duration
 remains unverified. A separate [held-out streamed-policy study](docs/validation/MATERIAL_POLICY_REPORT.md#held-out-rtx-5880-real-fp32-policy-comparison)
 selected the fastest of six 128-step ADE policies using at most 32 calibration
