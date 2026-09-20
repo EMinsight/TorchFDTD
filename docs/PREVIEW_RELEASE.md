@@ -42,12 +42,19 @@ python -m pip install -e '.[dev]'
 torchfdtd serve
 ```
 
-Or install the wheel attached to the private prerelease:
+For the current TorchFDTD APIs, build a wheel from the current checkout:
 
 ```sh
+python scripts/build_preview.py
+cd dist/private-preview
 python -m pip install torchfdtd-0.14.0.dev0-py3-none-any.whl
 torchfdtd serve
 ```
+
+The older `v0.14.0.dev0` GitHub prerelease is a historical PhotonWeave snapshot.
+Its assets predate the TorchFDTD rename and the newer physics APIs. The current
+branch and a freshly built wheel are the supported development install routes.
+Historical release tags and artifacts are retained rather than overwritten.
 
 The wheel includes the built browser assets. Development builds use
 `npm ci && npm run build`. `python scripts/build_preview.py` builds the wheel
@@ -65,7 +72,8 @@ require the review recorded in the distribution document. Private staging does
 not resolve those questions or provide a legal guarantee.
 
 The local and RTX 5880 Python results, browser evidence and package checks are
-recorded in [ACCEPTANCE.md](ACCEPTANCE.md). GitHub Actions passed 429 Python and
-22 browser tests on Linux CPU, with 128 and 8 environment-dependent skips.
-The acceptance record identifies the tested numerical-source revision and
-subsequent documentation-only delivery updates.
+recorded in [ACCEPTANCE.md](ACCEPTANCE.md). Linux CI for revision `ec3a28f`
+passed 1,180 Python and 28 browser tests, with 429 and 8 environment-dependent
+skips. It also passed the frontend and wheel builds. Subsequent solver changes
+require their own CI evidence. The acceptance
+record separates historical results from current feature completion gates.

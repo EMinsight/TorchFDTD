@@ -1995,7 +1995,7 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "missing",
-      "scope": "독립 case device 배정 외에 별도 DistributedYeeDomain의 단일 domain x-slab·Bloch halo transpose·local material VJP·binomial checkpoint 구현. 2/3-rank transport 모사 검증. 현재 Windows Gloo 초기화 실패와 단일 GPU로 실제 분산 하드웨어는 미검증. 일반 source/monitor·PML·ADE·UI·scaling은 남음.",
+      "scope": "독립 case device 배정 외에 별도 DistributedYeeDomain의 단일 domain x-slab·Bloch halo transpose·local material VJP·binomial checkpoint 구현. Linux 실제 2/3-process Gloo CPU 및 transport 모사 검증. Windows Gloo 초기화 실패, 실제 NCCL·복수 GPU는 미검증. 일반 source/monitor·PML·ADE·UI·scaling은 남음.",
       "evidence": [
         "torchfdtd/batch.py",
         "torchfdtd/domain_decomposition.py",

@@ -757,6 +757,33 @@ S parameters or separate spatial dispersion from PML discretization error.
 Arbitrary branch ports, unequal exterior cross-sections, eigenmode gradients
 and spatially streamed injection remain outside this wrapper.
 
+An independent normal-incidence slab calculation solves the four continuum
+interface-continuity equations with propagation to the same reference planes.
+One additional 50 nm calculation gives maximum absolute complex S errors
+of 0.80149, 0.17586 and 0.04258 at 200, 100 and 50 nm, respectively.
+An independent scalar Yee recurrence reproduces the 100 and 50 nm matrices
+within $1.63\times10^{-5}$ and $1.02\times10^{-6}$. This distinguishes
+expected lattice dispersion and the nodal slab's half-cell interface shift
+from a reference-plane phase error. The remaining continuum discrepancy at
+50 nm is explicit. These scalar isotropic results do not establish general
+guided-mode or shape-gradient convergence.
+
+The same example separates discrete-gradient correctness from physical design
+accuracy. For $L=\operatorname{Re}S_{21}+0.3\operatorname{Im}S_{12}$, the
+continuum slab derivative with respect to its permittivity is approximately
+$+0.25372$. The independent Yee recurrence gives $-0.20511$, $+0.17989$ and
+$+0.23724$ at 200, 100 and 50 nm. The recorded coarse native adjoint is
+$-0.20350$. Agreement with a finite difference on the coarse grid therefore
+does not guarantee even the correct continuum optimization direction.
+A subsequent native FP32 forward and backward at each finer mesh gives
+$+0.17989309$ and $+0.23723969$. Relative errors against the independent
+discrete derivatives are 0.00181 and 0.000124 percent. Both recover the
+continuum sign, while their continuum magnitude errors remain 29.10 and
+6.50 percent. No native optimization step or general shape-gradient
+convergence is established. The two backward calls take 12.29 and 27.42 s
+on RTX 3060, using four restart slots per active launch and reconstructing
+one launch graph at a time.
+
 \subsection{Differentiable radiation transforms}
 
 Periodic diffraction analysis Fourier-projects collocated E/H fields over
@@ -876,9 +903,12 @@ material derivatives are accumulated without a global field replication.
 Two- and three-rank protocol tests use emulated transport to compare unequal
 slabs, including a one-cell slab, with resident fields and material derivatives.
 Independent halo inner products and local finite differences check the seams.
-Actual Gloo initialization fails on the current Windows runtime and a second
-CUDA device is unavailable. These checks therefore do not establish actual
-multi-GPU execution, communication overlap or scaling. Sources, monitor
+Three subsequent Linux CI cases execute actual two- and three-process Gloo
+CPU groups, covering real and complex fields, scalar and diagonal material,
+local state/material derivatives and independent seam checks. Gloo
+initialization still fails on the current Windows runtime and a second CUDA
+device is unavailable. These checks do not establish NCCL multi-GPU
+execution, communication overlap or scaling. Sources, monitor
 histories, CPML, mirrors and ADE are outside this distributed initial-value API.
 
 \section{Limitations and development priorities}
@@ -897,7 +927,6 @@ TorchFDTD provides Python and graphical workflows for a defined subset of time-d
 
 The project source, tests and native examples are maintained in a local development workspace. A public release is not yet available. This manuscript and the associated implementation were prepared with AI assistance. Author review of the scientific content and software validation is pending before submission.
 
-\clearpage
 \begingroup
 \small
 \setlength{\bibsep}{5pt}

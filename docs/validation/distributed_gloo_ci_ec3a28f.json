@@ -1,0 +1,88 @@
+{
+  "schema": "torchfdtd.distributed_gloo_ci.v1",
+  "revision": "ec3a28f85b412866389781ffe5d6c2ace922ebf3",
+  "run_id": 35533483790,
+  "run_url": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35533483790",
+  "artifact_id": 10612028089,
+  "artifact_name": "pytest-junit",
+  "source_file": "pytest.xml",
+  "source_sha256": "da770acace7e17279d2f3f11c1c8eeef8fb860fc31de96c263e4dbe3d38761ef",
+  "selection": "testcase@classname == 'tests.test_domain_decomposition'",
+  "status_rule": "error/failure/skipped child determines status; otherwise passed",
+  "suites": [
+    {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "429",
+      "tests": "1609",
+      "time": "470.576",
+      "timestamp": "2026-09-20T19:49:02.917209+00:00",
+      "hostname": "runnervmlun5p",
+      "passed": "1180"
+    }
+  ],
+  "selected_cases": [
+    {
+      "classname": "tests.test_domain_decomposition",
+      "name": "test_actual_gloo_domain_matches_resident_and_independent_material_difference[gloo-2-False-float64-False-0]",
+      "status": "passed",
+      "time_seconds": "4.150"
+    },
+    {
+      "classname": "tests.test_domain_decomposition",
+      "name": "test_actual_gloo_domain_matches_resident_and_independent_material_difference[gloo-3-True-float64-True-2]",
+      "status": "passed",
+      "time_seconds": "5.797"
+    },
+    {
+      "classname": "tests.test_domain_decomposition",
+      "name": "test_actual_gloo_domain_matches_resident_and_independent_material_difference[gloo-2-True-float32-False-1]",
+      "status": "passed",
+      "time_seconds": "3.568"
+    },
+    {
+      "classname": "tests.test_domain_decomposition",
+      "name": "test_actual_gloo_domain_matches_resident_and_independent_material_difference[emulated-2-False-float64-False-0]",
+      "status": "passed",
+      "time_seconds": "0.048"
+    },
+    {
+      "classname": "tests.test_domain_decomposition",
+      "name": "test_actual_gloo_domain_matches_resident_and_independent_material_difference[emulated-3-True-float64-True-2]",
+      "status": "passed",
+      "time_seconds": "0.073"
+    },
+    {
+      "classname": "tests.test_domain_decomposition",
+      "name": "test_actual_gloo_domain_matches_resident_and_independent_material_difference[emulated-2-True-float32-False-1]",
+      "status": "passed",
+      "time_seconds": "0.048"
+    },
+    {
+      "classname": "tests.test_domain_decomposition",
+      "name": "test_admission_capabilities_ownership_and_fixed_memory_contract",
+      "status": "passed",
+      "time_seconds": "0.001"
+    },
+    {
+      "classname": "tests.test_domain_decomposition",
+      "name": "test_two_cuda_devices_single_problem",
+      "status": "skipped",
+      "time_seconds": "0.000",
+      "skip_message": "Requires at least two visible CUDA GPUs and NCCL; not emulated by CPU ranks."
+    },
+    {
+      "classname": "tests.test_domain_decomposition",
+      "name": "test_single_rank_replay_admission_and_immutable_configuration",
+      "status": "passed",
+      "time_seconds": "0.003"
+    }
+  ],
+  "evidence_scope": "Actual Linux Gloo multi-process CPU correctness and material/initial-state VJP checks. Case elapsed times are test durations, not throughput benchmarks.",
+  "exclusions": [
+    "CUDA/NCCL execution",
+    "multi-GPU performance or scaling",
+    "complete distributed source-to-monitor workflow"
+  ]
+}

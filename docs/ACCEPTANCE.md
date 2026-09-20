@@ -1,5 +1,32 @@
 # Current acceptance record
 
+## 21 September 2026 integration
+
+The current feature-by-feature status is in [FDTDX parity gates](FDTDX_PARITY_KO.md).
+The earlier acceptance snapshot below is retained as historical evidence.
+Linux CI [35533483790](https://github.com/hyoseokp/TorchFDTD/actions/runs/35533483790)
+passed 1,180 Python tests and 28 browser tests at revision `ec3a28f`, with
+429 and 8 environment-dependent skips. The frontend and wheel builds also
+passed. That run includes the bulk tensor, PMC endpoint, distributed-domain
+foundations, opposing mode network, native endpoint Project adapter and
+distributed launcher. Its JUnit artifact confirms three actual Linux
+two/three-process Gloo tests passed. The two-GPU NCCL test was skipped.
+Their targeted checks and physical evidence are documented in
+[mode networks](MODE_NETWORK.md), [PMC](PMC_IMPLEMENTATION_PLAN.md) and
+[domain decomposition](DOMAIN_DECOMPOSITION.md). A clean wheel from `ec3a28f`
+was built and installed with exact package-source verification. The source
+audit checked 748 allowlisted files without pattern findings. Neither these
+checks nor CI counts establish full parity or public-release clearance.
+The later slab-oracle and gradient diagnostics add independent physical
+evidence without changing the solver code covered by that CI run.
+Two new scalar-oracle algebra tests passed separately. Two bounded native
+fine-mesh forward/backward measurements confirm the continuum derivative
+sign for the fixed slab parameter, with a remaining 6.50% magnitude error
+at the finest mesh. They do not repeat the unchanged suite or establish
+general physical-gradient convergence. See the [slab oracle record](MODE_NETWORK_SLAB_ORACLE.md).
+
+## Historical 19 September snapshot
+
 Development snapshot: 0.14.0.dev0, 19 September 2026. The required-workflow checklist objective is **not complete**. Conditional
 features are developed only for concrete use cases and excluded replication
 items are not implementation targets. Public publication remains conditional on completion and the

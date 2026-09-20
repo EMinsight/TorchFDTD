@@ -19,7 +19,7 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 | 비균일 mesh | Uniform/QuasiUniform/Rectilinear | Graded/rectilinear, 독립 dx/dy/dz, node API/UI | 기능 동등 범주. 같은 오차에서 속도·메모리 우위는 별도 측정 |
 | 분산 재료 | ADE. 경로별 제한 확인 필요 | 다중 Drude/Lorentz·passive fit·resident/streamed ADE adjoint | 지원 모델 범위의 동등 후보. 이방성 ADE·응용 정확도·외부 실측은 남음 |
 | GDS | Layer stack, explicit port contracts | Layer/datatype·Z·재료 stack, 단위·계층·array·PATH, 제한 export, 명시적 TEXT port metadata | 기본 geometry workflow 구현. 자동 GDS port→실행 모드 연결과 일반 hole/다중 port 흐름은 남음 |
-| 단일 문제 multi-GPU | Sharding | 별도 periodic/Bloch 초기값 API의 rank-owned slab·halo transpose·재료 VJP·binomial checkpoint. 2/3-rank 통신 모사 검사 | **부분/미검증**. 실제 Gloo/NCCL·2장 이상 GPU, source/monitor·물리 경계·scaling 검증 필요 |
+| 단일 문제 multi-GPU | Sharding | 별도 periodic/Bloch 초기값 API의 rank-owned slab·halo transpose·재료 VJP·binomial checkpoint. 실제 Linux 2/3-process Gloo CPU 검사 통과 | **부분/GPU 미검증**. 실제 NCCL·2장 이상 GPU, source/monitor·물리 경계·scaling 검증 필요 |
 | 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 새 고정 모드와 radiation 목적함수 | **부분**. PMC/tensor의 추가 물리·실행 경로, 일반 source/eigenmode·동시 adjoint batch 확대 필요 |
 | 설계 파라미터화 | Density, projection/binarization, symmetry | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수 | 기본 topology workflow 구현. 일반 spline/polygon shape derivative·제작 제약·최종 CR 물리 수렴은 별도 |
 | Mode source·detector·port | Mode source/detector, overlap/S-parameter | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 같은 exterior 단면의 고정 모드만 지원. 일반 branch/서로 다른 단면·open/PML 횡단면·streamed injection·모드 미분·물리 수렴·UI가 남음 |
@@ -42,6 +42,16 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
   거친 메시의 무손실 전력 합 오차 0.7403%도 기록하며 물리 수렴과 구분한다.
   물리 크기·시간·PML 두께를 유지한 200→100 nm 후속에서는 전력 결함이
   0.000465%로 줄었다. 복소 S 값의 변화는 여전히 커서 전체 수렴 통과는 아니다.
+  독립 박막 해석해와 비교한 후속 200→100→50 nm의 최대 복소 S 절대오차는
+  0.80149→0.17586→0.04258이다. 독립 Yee 점화식과의 오차는 100/50 nm에서
+  1.63e-5/1.02e-6으로, 격자 분산과 반 셀 계면 이동을 확인했다.
+  일반 도파로·형상 gradient의 수렴 완료로 확대하지 않는다.
+  같은 박막 목적함수에서 coarse native gradient는 -0.20350인 반면 연속계
+  해석 기준은 +0.25372로 부호가 반대다. 독립 이산 기준은 100/50 nm에서
+  +0.17989/+0.23724로 접근한다. 후속 native VJP는 +0.179893/+0.237240으로
+  이산 기준과 상대오차 0.00181%/0.000124%, 연속계와 같은 부호를 확인했다.
+  가장 세밀한 메시에도 연속계 gradient 크기 오차 6.50%는 남는다.
+  같은 격자의 finite difference 통과를 물리적 설계 방향 검증으로 대체하지 않는다.
 - [원거리장·회절](RADIATION.md): 해석 vector dipole의 복소 진폭과 전력,
   Bloch 차수·방향 분리, FP32 normalization, 실제 material VJP.
   native dipole 방사 패턴의 100→75→50 nm 메시 오차는 1.03→0.54→0.23%다.
@@ -51,8 +61,9 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 - [Bulk tensor API](ANISOTROPY_IMPLEMENTATION_PLAN.md): periodic/Bloch
   CPU/CUDA, 6성분 유한차분, 독립 Fourier symbol·에너지·mesh dispersion.
 - [단일 도메인 분할](DOMAIN_DECOMPOSITION.md): 동일 도메인의 rank-local
-  E/H·epsilon, halo transpose와 material VJP. 통신 모사 검사는 실제
-  분산 runtime/hardware 증거와 구분한다.
+  E/H·epsilon, halo transpose와 material VJP. Linux CI의 실제 2/3-process
+  Gloo 경로에서 fields·초기 상태/재료 VJP·halo·local finite difference를
+  확인했다. CPU runtime 검증과 실제 multi-GPU 성능 검증은 구분한다.
 
 ## 다음 구현 순서
 
@@ -64,7 +75,7 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
    foundation을 CPML·계면·streaming과 UI로 확장하고 각 물리 범위를 검증한다.
 4. Mode port의 일반 단면/branch와 streamed 경로, source parameter
    미분을 확장한다. GDS port metadata와 실제 실행 흐름도 연결한다.
-5. 단일 문제 multi-GPU를 구현하고 실제 여러 장치에서 통신·peak memory·
+5. 단일 문제 multi-GPU의 물리 범위를 확장하고 실제 여러 장치에서 통신·peak memory·
    strong/weak scaling·gradient를 검증한다. 장치가 한 장뿐인 검사는
    multi-GPU 완료 근거로 대체하지 않는다.
 6. 필요한 UI, Python 예제·문서, 동일 정확도의 FDTDX benchmark와 공개

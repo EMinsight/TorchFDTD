@@ -107,3 +107,9 @@ This single refinement bounds the earlier conservation concern. It does not esta
 
 
 After that measurement, an admission-only guard was extended to reject changes to the public propagation-axis index before calibration. The measured JSON and its source hashes were preserved. `docs/validation/mode_network_refinement_guard_followup.json` records this change and the measured/current source hashes. Exact measured source bytes were also saved privately under `.local/mode_network_measured_refinement.py`. The targeted axis/port mutation regression was run without repeating physical solves.
+
+
+The subsequent bounded continuum/discrete-oracle analysis and one 0.05 micrometre run are documented in [MODE_NETWORK_SLAB_ORACLE.md](MODE_NETWORK_SLAB_ORACLE.md). They explain the large through-phase change as expected numerical dispersion while retaining a 0.0426-radian continuum phase error on the finest measured mesh.
+
+
+The [physical-gradient direction diagnostic](MODE_NETWORK_SLAB_ORACLE.md#remaining-physical-gradient-direction-gate) exposes an additional limitation of the coarse material-gradient check. For the same complex S objective, its measured native adjoint is negative while the independent continuum derivative is positive. Scalar step halving confirms this difference. A subsequent native forward/backward at each of 0.1 and 0.05 micrometre gives gradients +0.17989309 and +0.23723969, agreeing with the discrete oracle within 0.00181% and 0.000124%. Both recover the continuum sign, but their continuum magnitude errors remain about 29.1% and 6.50%. These results establish the bounded direction check, not general shape-gradient convergence or a measured optimization step. Agreement with a same-mesh native finite difference alone does not establish a continuum improvement direction.

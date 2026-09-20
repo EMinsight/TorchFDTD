@@ -156,10 +156,29 @@ barriers; compact configuration/results use the CPU control group. Teardown
 destroys the data group before the control group. Backend crashes or absent
 ranks remain subject to the configured 120-second process-group timeout.
 
-Linux CI run [35532291508](https://github.com/hyoseokp/TorchFDTD/actions/runs/35532291508)
-reported its full CPU pytest step successful at 2026-09-20 19:38:02 UTC for
-revision `887694afe8cb7ac1dd112681a7e858ac0e1bc342`. This does not establish
-whether individual real Gloo cases executed or skipped. No Gloo success is
-inferred from aggregate counts or progress symbols. Subsequent CI runs emit
-`test-results/pytest.xml` and upload `pytest-junit` even on failure, enabling
-exact per-test execution/skip evidence without an additional test invocation.
+## Verified Linux Gloo CPU execution
+
+Linux CI run [35533483790](https://github.com/hyoseokp/TorchFDTD/actions/runs/35533483790)
+for revision `ec3a28f85b412866389781ffe5d6c2ace922ebf3` provides explicit
+per-test evidence in the `pytest-junit` artifact `10612028089`. The three real
+Gloo multi-process cases passed without skip/failure/error elements:
+
+| Actual Gloo case | JUnit duration |
+| --- | ---: |
+| 2 ranks, real FP64, scalar epsilon, zero checkpoints | 4.150 s |
+| 3 ranks, complex FP64, diagonal epsilon, two checkpoints | 5.797 s |
+| 2 ranks, complex FP32, scalar epsilon, one checkpoint | 3.568 s |
+
+These cases exercise rank-local propagation, E/H/material VJPs, halo transpose
+identities and independent material finite differences against the resident
+oracle. The [machine-readable extraction](validation/distributed_gloo_ci_ec3a28f.json)
+records exact names, statuses, durations, skip reason, suite aggregates and the
+raw XML SHA256. The full suite contains 1609 cases: 1180 passed, 429 skipped,
+zero failures and zero errors. Individual Gloo success comes from its JUnit
+case records, not aggregate counts or progress symbols.
+
+The two-CUDA/NCCL case was explicitly skipped because it requires at least two
+visible CUDA GPUs and NCCL. This evidence validates real CPU Gloo execution;
+it supplies no CUDA/NCCL, multi-GPU scaling or throughput evidence. JUnit case
+durations include test setup and checks and are not simulation benchmarks.
+The local Windows Gloo initialization limitation described above remains.

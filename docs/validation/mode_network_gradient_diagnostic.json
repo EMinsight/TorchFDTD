@@ -1,0 +1,113 @@
+{
+  "recorded_utc": "2026-09-20T19:58:47.791542+00:00",
+  "revision": "ec3a28f85b412866389781ffe5d6c2ace922ebf3",
+  "computation": "FP64 scalar NumPy continuity/lattice oracle calculations only. No new FDTD or native adjoint.",
+  "objective": "Re(S21) + 0.3 Im(S12)",
+  "parameter": "Slab relative permittivity epsilon = 2.25 + increment",
+  "epsilon": 2.6,
+  "background_epsilon": 2.25,
+  "wavelength_um": 1.55,
+  "slab_bounds_um": [
+    -0.2,
+    0.2
+  ],
+  "port_phase_planes_um": [
+    -1.0,
+    1.0
+  ],
+  "spatial_steps_um": [
+    0.2,
+    0.1,
+    0.05
+  ],
+  "courant": 0.5715767664977295,
+  "central_difference_rows": [
+    {
+      "central_epsilon_step": 4e-05,
+      "continuum_derivative": 0.25372479160734596,
+      "discrete_derivatives": [
+        -0.20511299435727046,
+        0.17988983965766533,
+        0.23723939497205523
+      ]
+    },
+    {
+      "central_epsilon_step": 2e-05,
+      "continuum_derivative": 0.2537247915657126,
+      "discrete_derivatives": [
+        -0.20511299437253602,
+        0.1798898396215831,
+        0.2372393948568696
+      ]
+    },
+    {
+      "central_epsilon_step": 1e-05,
+      "continuum_derivative": 0.2537247915712637,
+      "discrete_derivatives": [
+        -0.20511299437253602,
+        0.17988983961880753,
+        0.23723939490127852
+      ]
+    },
+    {
+      "central_epsilon_step": 5e-06,
+      "continuum_derivative": 0.2537247915990193,
+      "discrete_derivatives": [
+        -0.20511299437808714,
+        0.17988983959105195,
+        0.2372393949290341
+      ]
+    },
+    {
+      "central_epsilon_step": 2.5e-06,
+      "continuum_derivative": 0.2537247915768148,
+      "discrete_derivatives": [
+        -0.20511299441139383,
+        0.17988983960215418,
+        0.2372393951510787
+      ]
+    }
+  ],
+  "derivative_max_minus_min_over_step_halving": [
+    4.163336342344337e-11,
+    5.412337245047638e-11,
+    6.661338147750939e-11,
+    2.942091015256665e-10
+  ],
+  "representative_epsilon_step": 1e-05,
+  "discrete_relative_error_against_continuum": [
+    1.808407381487299,
+    0.2910040894908693,
+    0.06497353517523707
+  ],
+  "discrete_sign_matches_continuum": [
+    false,
+    true,
+    true
+  ],
+  "historical_native_coarse": {
+    "spacing_um": 0.2,
+    "measured_adjoint": -0.20350411534309387,
+    "measured_central_difference": -0.2034902423620224,
+    "measured_epsilon_step": 0.004,
+    "recorded_native_adjoint_fd_relative_difference": 6.817516259616241e-05,
+    "native_adjoint_relative_difference_from_exact_discrete": 0.007843866910352992,
+    "native_adjoint_sign_matches_continuum": false,
+    "provenance": "Verbatim values from the original test_mode_network.py::test_reciprocal_two_port_native_propagation_and_material_gradient console output, also documented in MODE_NETWORK.md. That original run had no contemporaneous source hash. Quoted here, not rerun."
+  },
+  "finer_native_material_vjp_measured": false,
+  "illustrative_minimization_step": {
+    "epsilon_change": 0.001,
+    "direction": "Coarse native adjoint suggests increasing epsilon for descent.",
+    "continuum_objective_change": 0.00025358702396516275,
+    "coarse_discrete_objective_change": -0.00020530906453564146,
+    "native_fdtd_step_evaluated": false
+  },
+  "source_and_input_sha256": {
+    "benchmarks/mode_network_slab_oracle.py": "b2f0ae45ae9922ddaa00a27dd6695ba84e8965bcaca25f3b6f7ce5a0d03978c7",
+    "docs/validation/mode_network_refinement_3060.json": "cfc98b88836c00f9a75f084c6de925e169d50ae373e6f1db7824912633eaad2d",
+    "docs/validation/mode_network_slab_oracle_3060.json": "500f67fa94379b9c0cd0d0a78a69a317e65ad94f6caf207ba2f7515e58e113ea",
+    "benchmarks/mode_network_gradient_diagnostic.py": "2fd1372f0c7f21860b993972322fdba306a223f462c2073e6c76eb4c7ed46393"
+  },
+  "conclusion": "The coarse native gradient agrees in sign with its discrete problem but points opposite to the continuum derivative. Finer scalar discrete derivatives have the continuum sign and reduced error. Their native material VJPs have not been measured. No physical-gradient acceptance threshold is introduced."
+}
