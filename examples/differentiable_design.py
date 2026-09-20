@@ -11,7 +11,8 @@ from pathlib import Path
 import torch
 
 from photonweave import (AdjointOptions,DifferentiableSimulation,Monitor,Project,
-                        Region,Source,smooth_sphere_epsilon,StreamedSimulation,StreamedAdjointOptions)
+                        Region,Source,smooth_sphere_epsilon,StreamedSimulation,StreamedAdjointOptions,
+                        estimate_streamed_memory)
 
 
 def main():
@@ -29,14 +30,19 @@ def main():
                     monitors=[Monitor(center=(.1,0,0))])
     geometry_device=args.device if args.execution=='resident' else 'cpu'
     radius=torch.nn.Parameter(torch.tensor(.25,device=geometry_device,dtype=torch.float64))
+    memory_plan=None
     if args.execution=='resident':
         model=DifferentiableSimulation(project,AdjointOptions(checkpoints=4,storage='host',host_budget_bytes=128*1024**2))
     else:
-        model=StreamedSimulation(project,StreamedAdjointOptions(device=args.device,slab_width=4,temporal_depth=4,
+        options=StreamedAdjointOptions(device=args.device,slab_width=4,temporal_depth=4,
                                 gpu_budget_bytes=128*1024**2,host_budget_bytes=128*1024**2,
                                 state_storage='disk' if args.execution=='disk' else 'host',
                                 state_directory=args.state_directory if args.execution=='disk' else None,
-                                disk_budget_bytes=128*1024**2 if args.execution=='disk' else None))
+                                disk_budget_bytes=128*1024**2 if args.execution=='disk' else None)
+        # Check capacity before constructing the full-domain geometry tensor.
+        # Geometry and optimizer allocations are additional caller-owned memory.
+        memory_plan=estimate_streamed_memory(project,options)
+        model=StreamedSimulation(project,options)
     optimizer=torch.optim.Adam([radius],lr=.003)
     history=[]
     for iteration in range(args.iterations):
@@ -50,7 +56,7 @@ def main():
         optimizer.step()
         with torch.no_grad():radius.clamp_(.1,.4)
     output=dict(description=__doc__,device=args.device,geometry_device=geometry_device,execution=args.execution,
-                history=history,final_radius_um=float(radius.detach()))
+                memory_plan=memory_plan,history=history,final_radius_um=float(radius.detach()))
     path=Path(args.output);path.parent.mkdir(parents=True,exist_ok=True)
     path.write_text(json.dumps(output,indent=2),encoding='utf-8')
     print(json.dumps({'initial_loss':history[0]['loss'],'last_evaluated_loss':history[-1]['loss'],

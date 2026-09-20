@@ -3,6 +3,8 @@ import argparse
 from dataclasses import replace
 import gc
 import json
+import os
+import platform
 from pathlib import Path
 import statistics
 import time
@@ -26,10 +28,14 @@ def main():
     parser.add_argument('--compare-transfers', action='store_true')
     parser.add_argument('--compare-local-checkpoints', action='store_true')
     parser.add_argument('--complex-bloch', action='store_true')
+    parser.add_argument('--compare-cpu', action='store_true')
+    parser.add_argument('--cpu-threads', type=int, default=8)
     parser.add_argument('--gpu-budget-gib', type=float, default=1.)
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
     if args.repeats < 1:raise ValueError('repeats must be positive')
+    if args.cpu_threads<1:raise ValueError('cpu-threads must be positive')
+    if args.compare_cpu:torch.set_num_threads(args.cpu_threads)
     region = Region(dimension='3d', size=(args.nx*.1, args.ny*.1, args.ny*.1),
                     mesh=.1, precision='float64', steps=args.steps, pml_cells=3)
     region.boundaries.x_min = BoundaryFace(kind='periodic')
@@ -44,6 +50,8 @@ def main():
                                     gpu_budget_bytes=int(args.gpu_budget_gib*1024**3))
     models = {'resident':DifferentiableSimulation(project, AdjointOptions(checkpoints=2,backward_kernel='fused')),
               'streamed':StreamedSimulation(project, options)}
+    if args.compare_cpu:
+        models['cpu_dram']=DifferentiableSimulation(project,AdjointOptions(checkpoints=2,backward_kernel='torch'))
     if args.compare_bindings:
         models['streamed_direct_unreused'] = StreamedSimulation(project, replace(options, reuse_tile_buffers=False))
         models['streamed_dlpack'] = StreamedSimulation(project, replace(options, cuda_binding='dlpack', reuse_tile_buffers=False))
@@ -64,10 +72,14 @@ def main():
         epsilon = torch.full(region.shape, 1.7, dtype=torch.float64,
                              device='cuda' if name == 'resident' else 'cpu', requires_grad=True)
         result = models[name](epsilon)
+        torch.cuda.synchronize()
+        forward_end=time.perf_counter()
         loss = result.signals.abs().square().sum()
         gradient, = torch.autograd.grad(loss, epsilon)
         torch.cuda.synchronize()
-        row = dict(full_iteration_seconds=time.perf_counter()-started,
+        finished=time.perf_counter()
+        row = dict(full_iteration_seconds=finished-started,
+                   forward_seconds=forward_end-started,objective_backward_seconds=finished-forward_end,
                    torch_cuda_baseline_allocated_bytes=baseline,
                    torch_cuda_peak_allocated_bytes=torch.cuda.max_memory_allocated(),
                    report=result.report)
@@ -93,6 +105,8 @@ def main():
     medians = {name:statistics.median(row['full_iteration_seconds'] for row in rows)
                for name,rows in records.items()}
     data = dict(device=torch.cuda.get_device_name(), torch_version=torch.__version__,
+                cpu_model=platform.processor() or os.environ.get('PROCESSOR_IDENTIFIER','unknown'),
+                cpu_threads=torch.get_num_threads(),cpu_thread_policy='Explicit fixed count, not tuned to the fastest CPU configuration.',
                 cuda_version=torch.version.cuda, grid=region.shape, steps=region.steps,
                 precision='float64', repeats=args.repeats, warmups_per_mode=1,
                 complex_bloch=args.complex_bloch, bloch_phase=region.bloch_phase,
@@ -100,6 +114,9 @@ def main():
                 gradient_relative_l2=float(torch.linalg.vector_norm(gradients['streamed']-gradients['resident'])/denominator),
                 records=records,
                 scope='Native resident/streamed ablation. Per-mode reports identify bindings, reuse and transfer policy. CUDA memory is Torch allocations only. No external solver speed claim or physical VRAM-overflow demonstration.')
+    if args.compare_cpu:
+        data['cpu_dram_over_gpu_resident_time']=medians['cpu_dram']/medians['resident']
+        data['cpu_dram_over_gpu_streamed_time']=medians['cpu_dram']/medians['streamed']
     path = Path(args.output)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2), encoding='utf8')

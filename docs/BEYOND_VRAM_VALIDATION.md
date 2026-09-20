@@ -24,6 +24,14 @@ After reboot the calculation process was absent and the result remained at
 `forward_complete`. This is not a completed gradient run or evidence of OOM.
 The transient field banks do not support resuming after reboot.
 
+The author subsequently authorized stopping the competing calculation and
+restarting this test. The retry's forward completed in 673.955 seconds and
+passed the same point-history check. Backward is running. Its
+[separate snapshot](validation/beyond-vram-forward-retry-5880.json) records
+source hashes and the 100 GiB per-bank disk-headroom setting. The previous
+interrupted record is retained. Different machine/cache conditions prevent
+interpreting the difference between forward times as an algorithmic speedup.
+
 The reservation now charges `checkpoints + 5` complete field banks. Instrumented
 file-backed replay tests disable cyclic garbage collection and exercise repeated
 backward calls, multiple checkpoint counts and uneven temporal blocks. They
