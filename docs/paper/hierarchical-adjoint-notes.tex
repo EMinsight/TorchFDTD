@@ -233,4 +233,25 @@ execution path, not cold-storage throughput or acceleration.
 Large-domain physical accuracy, sustained storage-backed performance, fully
 automatic tier selection and the color-router objective remain separate
 validation requirements.
+
+\section{Coupled objectives across independent cases}
+For fixed cases $f_i$ and shared design $p$, let
+$L=\ell(f_1(p),\ldots,f_m(p))$. The runtime first evaluates the cases
+without recording their graphs and retains their compact outputs. Backward
+recomputes case $i$ and applies its objective seed $\bar y_i$, giving
+\[
+\nabla_p L=\sum_{i=1}^{m} (D f_i(p))^{\mathsf T}\bar y_i.
+\]
+For complex outputs the real differential uses the corresponding Hermitian
+vector--Jacobian convention. Only one case graph is retained at a time.
+The packed outputs, shared design, accumulated gradient and objective still
+require memory. Cases must be deterministic and unchanged between passes.
+An output replay check detects value drift but cannot prove purity.
+
+Eight fixed complex Bloch cases on a $64^3$ grid with 24 steps reduced peak
+Torch CUDA allocation from 358,044,672 to 159,702,528 bytes on an RTX 5880 Ada.
+Median complete iteration time increased from 4.161 to 6.778 seconds over
+three alternating repetitions after warm-up. Scalar gradients agreed exactly.
+This establishes a memory--recomputation trade-off for a synthetic coupled
+objective. It does not establish color-router fidelity or runtime superiority.
 \end{document}

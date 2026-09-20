@@ -1,0 +1,11 @@
+{
+  "base_commit": "70e5cd7",
+  "sha256": {
+    "photonweave/recomputed_batch.py": "7547c431d6fb958f8ae1f390606f82a391647e9bdcd518703404af04adae8378",
+    "photonweave/differentiable.py": "31df024ea20dde5f3f0e77b0c1c086f8af72a4bdf32dbaaa33a5c77acafb7cc4",
+    "photonweave/adjoint_spectrum.py": "08dcc8a81b04fec8a14f43e2e8b1006d1f5da89e5755aa70fd5a75fd0e15173f",
+    "benchmarks/recomputed_batch.py": "d438c1b4b4c771e6e9500b96eb7f6ad7ba74726c3817d7d53b229bd26633bf69",
+    "tests/test_recomputed_batch.py": "626fae3eae6b6a16678dcd1c117a74eaa06a8f1bb75ee48e6cf203354cc4383c"
+  },
+  "scope": "Benchmark and runtime unchanged since measurement. Streamed integration tests added after measurement."
+}

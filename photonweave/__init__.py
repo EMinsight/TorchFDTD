@@ -50,3 +50,5 @@ from .adjoint_planes import DifferentiablePlaneSimulation, DifferentiablePlaneRe
 __all__ += ['DifferentiablePlaneSimulation', 'DifferentiablePlaneResult']
 from .information import GaussianTargetResult, gaussian_target_information, shot_read_covariance
 __all__ += ['GaussianTargetResult', 'gaussian_target_information', 'shot_read_covariance']
+from .recomputed_batch import recompute_cases
+__all__ += ['recompute_cases']

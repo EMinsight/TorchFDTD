@@ -57,8 +57,10 @@ spectral convergence are demonstrated there. This preserves the frequency-domain
 comparison without claiming broadband ADE differentiation. A single constant
 index shared across the whole band is not equivalent. The resident
 [fixed Bloch adjoint](BLOCH_ADJOINT.md) now passes discrete and oblique TE slab
-checks. Matched two-polarization oblique illumination, a bounded multi-ray
-gradient schedule and fused/streamed complex execution remain requirements.
+checks. A [sequential case-recompute API](RECOMPUTED_CASES.md) now bounds multi-case
+graph residency and passes coupled-gradient checks. Matched two-polarization
+oblique illumination, the locked detector proxy and fused/streamed complex
+execution remain requirements. The CR ray schedule has not yet been replayed.
 
 Record the reference source revision and hashes before translating the model.
 Preserve wavelength and angle weights, polarization, detector geometry, material

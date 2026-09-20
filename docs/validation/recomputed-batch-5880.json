@@ -1,0 +1,64 @@
+{
+  "hardware": "NVIDIA RTX 5880 Ada Generation",
+  "torch_version": "2.10.0",
+  "grid": [
+    64,
+    64,
+    64
+  ],
+  "steps": 24,
+  "cases": 8,
+  "records": {
+    "stacked": [
+      {
+        "seconds": 3.52274619997479,
+        "peak_cuda_allocated_bytes": 358044672,
+        "gradient": 0.0002461311232764274,
+        "gradient_relative_error": 0.0
+      },
+      {
+        "seconds": 4.392818000051193,
+        "peak_cuda_allocated_bytes": 358044672,
+        "gradient": 0.0002461311232764274,
+        "gradient_relative_error": 0.0
+      },
+      {
+        "seconds": 4.161453699984122,
+        "peak_cuda_allocated_bytes": 358044672,
+        "gradient": 0.0002461311232764274,
+        "gradient_relative_error": 0.0
+      }
+    ],
+    "recomputed": [
+      {
+        "seconds": 6.109208400011994,
+        "peak_cuda_allocated_bytes": 159702528,
+        "gradient": 0.0002461311232764274,
+        "gradient_relative_error": 0.0
+      },
+      {
+        "seconds": 7.134541700012051,
+        "peak_cuda_allocated_bytes": 159702528,
+        "gradient": 0.0002461311232764274,
+        "gradient_relative_error": 0.0
+      },
+      {
+        "seconds": 6.777788000006694,
+        "peak_cuda_allocated_bytes": 159702528,
+        "gradient": 0.0002461311232764274,
+        "gradient_relative_error": 0.0
+      }
+    ]
+  },
+  "summary": {
+    "stacked": {
+      "median_seconds": 4.161453699984122,
+      "peak_cuda_allocated_bytes": 358044672
+    },
+    "recomputed": {
+      "median_seconds": 6.777788000006694,
+      "peak_cuda_allocated_bytes": 159702528
+    }
+  },
+  "scope": "Synthetic coupled point-spectrum objective, fixed complex Bloch cases. Torch allocator peak only. Sequential recomputation, not CR validation or competitor speed comparison."
+}

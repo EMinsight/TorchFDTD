@@ -172,3 +172,10 @@ python -m examples.flux_slab --backend cuda
 python -m examples.inverse_design --backend cuda --workers 2
 python -m benchmarks.batch_validation
 ```
+
+## Coupled differentiable cases
+
+Use [recompute_cases](RECOMPUTED_CASES.md) for compact outputs from independent
+simulations feeding one coupled objective. Backward recomputes one case at a
+time. This API trades an additional forward pass for lower graph residency
+and is separate from the forward parallel batch runner.

@@ -20,6 +20,8 @@ Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now
 
 [Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) now support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Fused complex kernels, complex spatial streaming and full-pupil CR reproduction remain pending.
 
+[Sequential case replay](docs/RECOMPUTED_CASES.md) now supports coupled multi-case inverse-design objectives. An eight-case RTX 5880 experiment reduced peak Torch CUDA allocation by 55%, with a 63% iteration-time increase and matching gradients. This is a memory trade-off, not a speedup or completed CR validation.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 
