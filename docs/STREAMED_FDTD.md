@@ -227,6 +227,23 @@ fixed settings. DRAM/file spectrum and gradient parity is checked for scalar
 and diagonal permittivity. This selector currently covers point spectra, not
 the separate detector-plane and pupil-response adapters.
 
+For an end-to-end geometry/Adam example using exactly the planned spectral
+settings, run:
+
+```console
+python -m examples.differentiable_design --execution auto --frequency-hz 2.5e14 3e14
+```
+
+The example minimizes the mean squared point-spectrum amplitude divided by
+observation duration squared. This removes the DFT's integration-time scale
+from the objective used by Adam. It does not normalize incident power or
+measure port transmission. The output records the frequencies, observation
+definition, admitted memory plan and each radius/gradient/loss. On the CPU
+integration check, resident, automatic DRAM and explicit file execution all
+gave loss `0.000234478264312458` then `0.000232675002066415` over two iterations
+and final radius `0.255992750378829` micrometers. This is workflow parity on a
+small regularized sphere, not a physical shape-convergence or CR result.
+
 Set `disk_free_reserve_bytes` to retain
 an additional minimum amount of free space, for example `100*1024**3` on a
 shared system drive. Admission and every new file-bank allocation check this
