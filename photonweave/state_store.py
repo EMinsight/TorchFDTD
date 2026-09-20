@@ -146,7 +146,9 @@ class DiskArray:
             raise ValueError('Field bank write shape, dtype or device mismatch.')
         groups = list(self._groups(indices))
         if not groups:return self
-        payload = value.detach().contiguous()
+        # Conjugate/negative views carry logical values not reflected in their
+        # underlying storage. Resolve those flags before exposing bytes to I/O.
+        payload = value.detach().resolve_conj().resolve_neg().contiguous()
         raw = memoryview(payload.numpy()).cast('B')
         for begin,end,row in groups:
             piece = raw[begin*self.row_bytes:end*self.row_bytes]

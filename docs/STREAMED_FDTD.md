@@ -233,8 +233,8 @@ signed zero, infinity, a NaN payload, large integers and workspace round trips.
 Sixteen CPU resident-versus-tiled field/gradient cases also pass. Mixed-dtype
 asynchronous GPU transport still needs a dedicated test when a GPU is free.
 This preparation does not enable public complex spatial streaming. The CPU
-Bloch extension is validated below. CUDA execution, backing-store support and
-memory admission remain required before that execution path can be exposed.
+Bloch extension is validated below. CUDA execution and measured device-memory
+admission remain required before that execution path can be exposed.
 
 ## Complex Bloch slabs: internal CPU validation
 
@@ -256,3 +256,22 @@ These 25 checks plus 3 packet and 16 real CPU regression cases passed.
 Public `StreamedSimulation` still rejects complex fields. This CPU oracle is a
 correctness prerequisite, not evidence of CUDA out-of-core performance or a
 completed complex streamed inverse-design path.
+
+### Complex file banks and reservation accounting
+
+Complex64/complex128 file banks preserve both field lanes through contiguous
+slab I/O and duplicate-index reductions. Writes resolve conjugate and negative
+views before exposing storage bytes. CPU tests compare full complex block
+outputs and transpose state/epsilon gradients with DRAM-backed execution,
+including repeated Bloch windings and nonzero CPML restart memories. Those
+results are bitwise equal within the same CPU execution path. Exact file-bank
+budgets and cleanup are checked without deleting user-owned files.
+
+The internal reservation now charges complex fields, CPML, source histories and
+observation histories at twice the real scalar size. Epsilon and its gradient
+remain real. A CPU test checks state bytes against all actual host state tensors
+and rejects insufficient host/disk budgets before creating scratch files.
+The conservative tile workspace also uses the complex element size. Its bound
+still needs validation against actual CUDA allocations before public admission.
+This storage uses buffered file I/O, not GPUDirect Storage, and does not establish
+physical NVMe throughput or asynchronous disk prefetch.

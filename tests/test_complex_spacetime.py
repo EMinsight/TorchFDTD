@@ -67,3 +67,62 @@ def test_complex_cuda_spatial_guard_precedes_allocation():
     host = _System(p, torch.ones(p.region.shape, dtype=torch.float64), prepare_updates=False)
     with pytest.raises(ValueError, match='CPU validation'):
         SlabBlockOperator(host, 5, 'cuda')
+
+
+@pytest.mark.parametrize('dtype', [torch.float32, torch.float64])
+def test_complex_file_banks_match_host_blocks(tmp_path, dtype):
+    from photonweave.state_store import StateStore
+    p = scene(True)
+    p.region.precision = 'float64' if dtype == torch.float64 else 'float32'
+    eps = torch.full(p.region.shape+(3,), 1.7, dtype=dtype)
+    host = _System(p, eps, prepare_updates=False)
+    torch.manual_seed(973)
+    state = tuple(torch.randn_like(s)*.02 for s in host.state())
+    endpoint = tuple(torch.randn_like(s)*.03 for s in host.state())
+    weights = torch.randn(10, len(host.monitors), dtype=host.field_dtype)
+    reference = SlabBlockOperator(host, 5, 'cpu', local_checkpoints=2)
+    expected, signals = reference.forward(eps, state, 1, 10)
+    expected_bar, gradient = reference.transpose(eps, state, 1, 10, endpoint, weights)
+    state_bytes = sum(s.numel()*s.element_size() for s in state)
+    sentinel = tmp_path/'keep.txt'
+    sentinel.write_text('user data')
+    with StateStore(tmp_path, 4*state_bytes) as store:
+        stored = store.new_state(host.state())
+        stored_endpoint = store.new_state(host.state())
+        for bank, values in ((stored, state), (stored_endpoint, endpoint)):
+            for target, value in zip(bank, values):
+                target.index_copy_(0, torch.arange(value.shape[0]), value)
+        operator = SlabBlockOperator(host, 5, 'cpu', local_checkpoints=2, state_factory=store.new_state)
+        actual, observed = operator.forward(eps, stored, 1, 10)
+        bars, actual_gradient = operator.transpose(eps, stored, 1, 10, stored_endpoint, weights)
+        for a,b in zip(actual, expected):torch.testing.assert_close(a[:], b, rtol=0, atol=0)
+        for a,b in zip(bars, expected_bar):torch.testing.assert_close(a[:], b, rtol=0, atol=0)
+        torch.testing.assert_close(observed, signals, rtol=0, atol=0)
+        torch.testing.assert_close(actual_gradient, gradient, rtol=0, atol=0)
+        assert store.live_bytes == store.peak_bytes == 4*state_bytes
+        with pytest.raises(MemoryError, match='disk budget'):store.new_state(host.state())
+    assert store.live_bytes == 0
+    assert list(tmp_path.iterdir()) == [sentinel]
+
+
+def test_complex_reservation_counts_field_bytes_and_rejects_small_budget(tmp_path):
+    from dataclasses import replace
+    from photonweave import StreamedAdjointOptions, StreamedSimulation
+    from photonweave.streamed import _reservation
+    p = scene()
+    eps = torch.ones(p.region.shape, dtype=torch.float64)
+    host = _System(p, eps, prepare_updates=False)
+    options = StreamedAdjointOptions(device='cpu', slab_width=5, temporal_depth=3,
+        state_storage='disk', state_directory=tmp_path/'scratch', disk_budget_bytes=128*1024**2)
+    record = _reservation(p, eps, options)
+    actual_bytes = sum(s.numel()*s.element_size() for s in host.state())
+    assert record['state_bytes'] == actual_bytes
+    assert record['disk_reservation_bytes'] >= actual_bytes*(options.checkpoints+11)
+    with pytest.raises(ValueError, match='disk budget'):
+        _reservation(p, eps, replace(options, disk_budget_bytes=record['disk_reservation_bytes']-1))
+    with pytest.raises(ValueError, match='host budget'):
+        _reservation(p, eps, replace(options, host_budget_bytes=record['host_reservation_bytes']-1))
+    # Accounting readiness does not remove the public unsupported-physics gate.
+    with pytest.raises(ValueError, match='Complex Bloch'):
+        StreamedSimulation(p, options)(eps)
+    assert not (tmp_path/'scratch').exists()

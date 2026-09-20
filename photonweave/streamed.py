@@ -63,7 +63,10 @@ def _reservation(project, epsilon, options, spectral=None):
     n = math.prod(region.shape)
     boundary = BoundaryDescription(region)
     cpml = sum(math.prod(s['shape']) for segments in boundary.cpml.values() for s in segments)
-    item = epsilon.element_size()
+    material_item = epsilon.element_size()
+    # Fields, CPML memories and source/observation histories are complex for
+    # Bloch propagation even though epsilon and its gradient remain real.
+    item = material_item*(2 if region.complex_fields else 1)
     state = (6*n+cpml)*item
     depth = min(options.temporal_depth, region.steps)
     width = min(options.slab_width, region.shape[0])+4*depth
@@ -89,7 +92,7 @@ def _reservation(project, epsilon, options, spectral=None):
     state_banks = (options.checkpoints+11)*state
     disk = state_banks if options.state_storage == 'disk' else 0
     disk_io_workspace = 36*tile_cells*item if disk else 0
-    host = (0 if disk else state_banks)+initial_storage+8*epsilon.numel()*item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
+    host = (0 if disk else state_banks)+initial_storage+8*epsilon.numel()*material_item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
     gpu = buffers*(tile_workspace+tile_history)
     available = host_memory()['available_bytes']
     host_limit = min(options.host_budget_bytes, int(available*.8)) if available is not None else options.host_budget_bytes

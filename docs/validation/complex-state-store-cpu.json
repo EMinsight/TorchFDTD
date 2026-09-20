@@ -1,0 +1,14 @@
+{
+  "scope": "Complex CPU disk-backed block/transpose and internal reservation; public complex streamed execution remains disabled",
+  "test_command": "python -m pytest tests/test_complex_spacetime.py tests/test_state_store.py -k \"not cuda\" -q",
+  "passed": 41,
+  "deselected": 5,
+  "seconds": 16.87,
+  "source_sha256": {
+    "photonweave/state_store.py": "02612f135d9799514486946119ba8fa09c5e519a92be418a2a3f6081f92f9817",
+    "photonweave/streamed.py": "23b4d2cf32ff099bdfe791fd39ac0675264b12b4f2aa3b18db3261d4f937231c",
+    "tests/test_state_store.py": "22c2d75b33a91b9496c6235431400f8b2163ad56b6b10830e580409560decb17",
+    "tests/test_complex_spacetime.py": "b526e2f3ae4282a36d860564186ca97d524574391a3c7457e2201ffe06d784ba"
+  },
+  "device_allocation_validation": "pending, not covered by CPU reservation tests"
+}

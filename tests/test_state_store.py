@@ -8,25 +8,30 @@ from photonweave import StreamedAdjointOptions,StreamedSimulation,Differentiable
 from test_differentiable import project,gpu
 
 
-def test_file_slabs_preserve_duplicate_reductions_and_release_banks(tmp_path):
+@pytest.mark.parametrize('dtype',[torch.float64,torch.complex64,torch.complex128])
+def test_file_slabs_preserve_duplicate_reductions_and_release_banks(tmp_path,dtype):
     sentinel=tmp_path/'user.txt';sentinel.write_text('keep')
-    template=torch.zeros((),dtype=torch.float64).expand(7,3,2)
-    with StateStore(tmp_path,2*template.numel()*8) as store:
+    template=torch.zeros((),dtype=dtype).expand(7,3,2)
+    size=template.numel()*template.element_size()
+    with StateStore(tmp_path,2*size) as store:
         array,=store.new_state([template])
         expected=torch.zeros_like(template)
         indices=torch.tensor([5,6,0,1,0,1,2])
-        values=torch.arange(42,dtype=torch.float64).reshape(7,3,2)
+        values=torch.arange(42,dtype=torch.float64).reshape(7,3,2).to(dtype)
+        if values.is_complex():values=(values+1j*(values+1)).conj()
         array.index_add_(0,indices,values);expected.index_add_(0,indices,values)
         torch.testing.assert_close(array[:],expected,rtol=0,atol=0)
         torch.testing.assert_close(array.index_select(0,indices),expected.index_select(0,indices),rtol=0,atol=0)
         empty=torch.empty(0,dtype=torch.int64)
         assert array.index_select(0,empty).shape == (0,3,2)
-        array.index_copy_(0,empty,torch.empty((0,3,2),dtype=torch.float64))
+        array.index_copy_(0,empty,torch.empty((0,3,2),dtype=dtype))
+        array.index_copy_(0,torch.arange(7),values)
+        torch.testing.assert_close(array[:],values,rtol=0,atol=0)
         second,=store.new_state([template])
         with pytest.raises(MemoryError,match='disk budget'):store.new_state([template])
         del second;gc.collect()
-        assert store.live_bytes == template.numel()*8
-        assert store.max_read_bytes <= template.numel()*8
+        assert store.live_bytes == size
+        assert store.max_read_bytes <= size
     assert store.live_bytes == 0 and store.report()['closed']
     with pytest.raises(RuntimeError,match='closed'):array[:]
     assert list(tmp_path.iterdir()) == [sentinel]
