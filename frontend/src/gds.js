@@ -1,6 +1,7 @@
 // GDS contributes geometry only. Stack materials and port contracts are explicit.
+import './gds.css';
 export function setupGds({esc,toast,log,getProject,loadProject}) {
- const dialog=document.createElement('dialog');dialog.id='gds-dialog';dialog.className='material-dialog source-dialog';document.body.append(dialog);
+ const dialog=document.createElement('dialog');dialog.id='gds-dialog';dialog.className='gds-dialog';document.body.append(dialog);
  let upload=null,candidate=null,snapshot=null,busy=false;
  async function request(url,options){const response=await fetch('/api/gds/'+url,options);const body=await response.json();if(!response.ok)throw Error(typeof body.detail==='string'?body.detail:JSON.stringify(body.detail));return body;}
  function configuration(){return JSON.stringify([...dialog.querySelectorAll('input,select,textarea')].map(el=>[el.value,el.checked]));}
