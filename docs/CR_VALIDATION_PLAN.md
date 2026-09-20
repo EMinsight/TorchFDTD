@@ -144,3 +144,23 @@ artifact, with its hash, shape and variable definition in the result JSON.
 Non-finite gradients fail the run. The completed gradient job predates
 this artifact extension and reports the gradient norm only. Neither form of
 record replaces directional-derivative and physical-convergence validation.
+
+## Full-objective directional verification
+
+The evaluator accepts `--directional-steps 0.002 0.001 0.0005` with
+`--directional-seed 1729` for a gradient run. It first saves the gradient and
+marks the requested check pending, then evaluates the same full spectral/pupil
+and electron objective at the baseline and both sides of each perturbation.
+The fixed CPU-generated Rademacher direction perturbs relaxed density directly.
+Perturbations outside [0, 1] are rejected rather than clipped. This adds seven
+full forward objective evaluations for the three-step example, so it should
+run after the capacity job, without competing GPU workloads.
+
+The JSON retains each central difference, adjoint projection, absolute and
+relative error, first-order Taylor residual and check timing. Failure at the
+smallest supplied step saves the results and exits with an error. The default
+tolerance is `1e-8 + 1e-3 * max(abs(fd), abs(adjoint))`. Inspect the whole sweep
+for truncation and cancellation. A single directional pass establishes neither
+all gradient entries nor physical mesh/time convergence. Small multi-case
+fused-FDTD integration and analytic wrong-gradient tests exercise this driver.
+The locked 144-case directional run remains pending.

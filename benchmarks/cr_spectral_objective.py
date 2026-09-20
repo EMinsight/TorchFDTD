@@ -3,12 +3,52 @@ import argparse
 import functools
 import hashlib
 import json
+import math
 import time
 from pathlib import Path
 import numpy as np
 import torch
 from photonweave import (periodic_layer_response,spectral_pupil_response,
     spectral_electron_model,exposure_target_information,PlaneReferenceCache,AdjointOptions)
+
+
+def check_density_direction(objective, density, gradient, steps, *, seed=1729,
+                            rtol=1e-3, atol=1e-8):
+    """Full-objective central differences along a reproducible fixed direction.
+
+    Perturb the relaxed density directly, without clipping or renormalizing.
+    This checks a discrete VJP, not mesh convergence or every gradient entry.
+    """
+    steps=sorted(set(float(h) for h in steps),reverse=True)
+    if not steps or any(not math.isfinite(h) or h<=0 for h in steps):
+        raise ValueError('Directional steps must be finite and positive.')
+    if any(not math.isfinite(v) or v<0 for v in (rtol,atol)):
+        raise ValueError('Directional tolerances must be finite and nonnegative.')
+    x=density.detach();g=gradient.detach()
+    if x.shape!=g.shape or not bool(torch.isfinite(x).all() & torch.isfinite(g).all()):
+        raise ValueError('Finite matching density and gradient are required.')
+    generator=torch.Generator(device='cpu').manual_seed(seed)
+    direction=(2*torch.randint(0,2,x.shape,generator=generator)-1).to(x)
+    if bool(((x-steps[0]*direction)<0).any() | ((x-steps[0]*direction)>1).any()
+            | ((x+steps[0]*direction)<0).any() | ((x+steps[0]*direction)>1).any()):
+        raise ValueError('Directional perturbation exceeds the density interval [0, 1].')
+    derivative=float((g*direction).sum())
+    rows=[]
+    with torch.no_grad():
+        baseline=float(objective(x))
+        for h in steps:
+            plus=float(objective(x+h*direction));minus=float(objective(x-h*direction))
+            if not all(math.isfinite(v) for v in (baseline,plus,minus,derivative)):
+                raise ValueError('Non-finite directional objective or derivative.')
+            central=(plus-minus)/(2*h);error=abs(central-derivative)
+            rows.append(dict(step=h,plus=plus,minus=minus,central_difference=central,
+                absolute_error=error,relative_error=error/max(abs(central),abs(derivative),1e-300),
+                first_order_residual=max(abs(plus-baseline-h*derivative),abs(minus-baseline+h*derivative)),
+                passed=error<=atol+rtol*max(abs(central),abs(derivative))))
+    return dict(stage='completed',seed=seed,direction='CPU seeded Rademacher, components +/-1',
+        density_shape=list(x.shape),baseline=baseline,adjoint_directional_derivative=derivative,
+        rtol=rtol,atol=atol,rows=rows,passed=rows[-1]['passed'],
+        criterion='Smallest supplied step passes. Inspect the sweep for cancellation and Taylor behavior. One direction does not establish physical gradient convergence.')
 
 
 def main():
@@ -22,7 +62,14 @@ def main():
     ap.add_argument('--forward-kernel',choices=['torch','fused'],default='torch')
     ap.add_argument('--reference-cache-mib',type=int,default=0)
     ap.add_argument('--backward-kernel',choices=['auto','torch','fused'],default='auto')
+    ap.add_argument('--directional-steps',type=float,nargs='+',
+        help='Optional full-schedule finite differences after gradient evaluation, e.g. 0.002 0.001 0.0005')
+    ap.add_argument('--directional-seed',type=int,default=1729)
     args=ap.parse_args()
+    if args.forward_only and args.directional_steps:
+        ap.error('--directional-steps requires a gradient run')
+    if args.directional_steps and any(not math.isfinite(h) or not 0<h<.01 for h in args.directional_steps):
+        ap.error('--directional-steps must be positive and below 0.01 for the locked relaxed seed')
     schedule=json.loads(Path(args.schedule).read_text())
     hashes={k:hashlib.sha256(Path(getattr(args,k)).read_bytes()).hexdigest() for k in ('schedule','density','context')}
     if hashes['density']!=schedule['density_sha256']:raise ValueError('Density hash mismatch.')
@@ -92,12 +139,35 @@ def main():
         weighted_bits_per_pixel=float(result.weighted_bits_per_pixel.detach()),bits_per_pixel=result.bits_per_pixel.detach().tolist(),
         gradient_l2=None if gradient is None else float(gradient.norm()),elapsed_seconds=time.perf_counter()-start,
         gradient_artifact=gradient_artifact,
+        directional_check=None if not args.directional_steps else dict(stage='pending',steps=args.directional_steps,seed=args.directional_seed),
         peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
         reference_cache=None if cache is None else dict(budget_bytes=cache.budget_bytes,tensor_bytes=cache.tensor_bytes,hits=cache.hits,misses=cache.misses,evictions=cache.evictions),
         scope='Full supplied spectral/pupil schedule and supplied development electron context. No optimization, optical convergence or competitor speed claim.')
     output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
     temporary=output.with_suffix(output.suffix+'.tmp')
     temporary.write_text(json.dumps(record,indent=2)+'\n');temporary.replace(output)
+    if args.directional_steps:
+        # Persist the expensive gradient before running additional forward probes.
+        def objective(d):
+            probe_response=spectral_pupil_response(cases,d,weights,replay_rtol=1e-10,replay_atol=1e-30)
+            probe_model=spectral_electron_model(probe_response,c['wavelengths_nm'],c['sampled_qe'],c['source_spectrum'],
+                c['scene_spectral_basis'],calibration=c['electron_calibration'])
+            return exposure_target_information(probe_model,c['scene_covariance'],c['scene_target_cross_covariance_xyz'],c['target_covariance_xyz'],
+                exposure_scales=[e/c['reference_weighted_cfa_green_e'] for e in c['exposure_weighted_cfa_green_e']],
+                probabilities=c['exposure_probabilities'],read_noise_e_rms=c['read_noise_e_rms'],raw_pixels=4).weighted_bits_per_pixel
+        check_started=time.perf_counter()
+        try:
+            check=check_density_direction(objective,density,gradient,args.directional_steps,seed=args.directional_seed)
+        except Exception as exc:
+            record['directional_check']=dict(stage='failed',error=repr(exc),steps=args.directional_steps,
+                seed=args.directional_seed,elapsed_seconds=time.perf_counter()-check_started)
+            temporary.write_text(json.dumps(record,indent=2)+'\n');temporary.replace(output)
+            raise
+        torch.cuda.synchronize()
+        check['elapsed_seconds']=time.perf_counter()-check_started
+        record['directional_check']=check
+        temporary.write_text(json.dumps(record,indent=2)+'\n');temporary.replace(output)
+        if not check['passed']:raise RuntimeError('Full objective directional derivative check failed. See saved result.')
     print(json.dumps(record),flush=True)
 
 

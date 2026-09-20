@@ -1,6 +1,7 @@
 from functools import partial
 import pytest
 import torch
+from benchmarks.cr_spectral_objective import check_density_direction
 from photonweave import (periodic_layer_response,spectral_pupil_response,PlaneReferenceCache,
     AdjointOptions,spectral_electron_model,exposure_target_information)
 
@@ -38,3 +39,5 @@ def test_fused_multicase_information_gradient_with_reference_cache():
     assert ag.norm()>1e-5
     assert cache.misses==8 and cache.hits>=24
     assert 0<cache.tensor_bytes<=cache.budget_bytes
+    sweep=check_density_direction(objective,density,ag,[.001,.0005],rtol=2e-4,atol=1e-9)
+    assert sweep['passed'] and all(row['passed'] for row in sweep['rows'])
