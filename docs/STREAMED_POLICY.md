@@ -116,3 +116,35 @@ multi-GPU decomposition and joint batch memory remain outside the search.
 The point-observation proxy does not calibrate a complete fixed-plane or CR
 reconstruction objective. Validate the selected policy on the intended workload
 and retain its accuracy and full-duration timing checks.
+
+## Full-duration policy check
+
+The `benchmarks.streamed_policy` driver now accepts `--dispersive` for two
+Drude/Lorentz poles and `--spectrum` for online point DFTs. It checks every
+admitted policy against a separate resident calculation at the target duration.
+All four material-gradient groups are compared in scaled coordinates.
+Rejected candidates remain in the report and are not run again.
+
+```console
+python -m benchmarks.streamed_policy --dispersive --spectrum --checkpoint-tiles --nx 128 --ny 128 --nz 128 --steps 128 --probe-steps 12 --repeats 3 --precision float32 --gpu-budget-gib 16 --host-budget-gib 64 --require-held-out --output results/ade-policy-128.json
+```
+
+`--checkpoint-tiles` compares width/depth, asynchronous staging, local replay
+and global checkpoint counts. Add `--complex-bloch --precision float64` for
+the complex case, or `--device cpu` for a driver correctness check. The CPU
+path omits CUDA asynchronous policies.
+
+The report preserves the original selection, every full-duration repetition,
+the measured fastest policy and the selected-to-fastest time ratio. It also
+records total tuning wall time, including planning and validation, and the
+number of subsequent iterations needed to repay tuning relative to the first
+admitted baseline. If the selected policy saves no time, payback is `null`.
+Calibration reaching the target is explicitly marked as overlapping rather
+than held out. `--require-held-out` rejects such a configuration before solving.
+Partial records identify the active stage and completed repetitions. They are
+progress records, not restartable solver state.
+
+This benchmark needs a resident reference and does not demonstrate physical
+VRAM overflow. The separate capacity driver serves that purpose. Small driver
+tests validate recording and numerical agreement, not scheduler speed or
+generalization. Full-sized measurements must run without competing GPU jobs.

@@ -13,6 +13,7 @@ Final local RTX 3060 checks on 2026-09-20:
 | Tile allocation/ownership, complex CUDA slabs, streamed ADE and graph lifetime | 90 passed |
 | CPU tuning followed by two geometry/damping Adam evaluations | Completed |
 | CUDA spectral tuning followed by the same two evaluations | Completed |
+| Full-duration policy driver, including CPU and CUDA ADE spectra | 6 passed |
 
 The material suite deliberately corrupts only the gamma VJP while keeping
 forward values unchanged. The normalized comparison rejects that policy in
@@ -46,3 +47,10 @@ VRAM, and a large run of this lifetime fix remains required.
 The running 54 GiB E/H/P/Q experiment uses a frozen earlier snapshot `d77e958`.
 It does not include the new policy tuner or output-growth fix. Its results must
 be attributed to that snapshot rather than the current implementation.
+
+The extended `benchmarks.streamed_policy` driver records admitted/rejected
+candidates, the unchanged prefix selection, full-duration ranking and tuning
+payback. Checks cover complex two-pole CUDA spectra, real FP32 time histories,
+material-gradient groups, a policy regression with no payback and calibration
+overlap. CPU and CUDA driver tests use small grids and are correctness evidence
+only. They do not measure a large-domain scheduling advantage.
