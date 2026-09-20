@@ -899,4 +899,24 @@ agree exactly and the largest relative material-gradient discrepancy is
 $2.24\times10^{-7}$. Concurrent local work precludes a timing comparison.
 This result establishes dense-observer integration, not optical convergence.
 
+
+\section{Repeated-case allocator admission}
+An eight-case $512^3$ real-FP32 dielectric batch completed twelve forward steps
+and first-order VJPs per case on RTX 5880. Peak Torch CUDA allocation was
+15,884,919,296 bytes. Complete outputs matched the finite-cone reference and
+the coupled permittivity-gradient relative discrepancy was
+$3.08\times10^{-7}$. Cases share the same material map and execute sequentially.
+This is capacity evidence, not a throughput comparison with retained graphs.
+
+The corresponding ADE batch was denied during backward admission. A two-case
+rerun showed zero live Torch CUDA bytes and 18.663 GB of unused reserved cache
+before the second replay. The driver reported 30.925 GB free, whose 80-percent
+admission limit was below the approximately 26.21 GB solver reservation.
+The revised admission helper releases unused cache only when it could resolve
+an otherwise denied reservation, then repeats the actual free-memory query.
+Explicit limits and the 80-percent rule are unchanged. Cached bytes are not
+credited before release and no partially executed solve is retried. This
+repair requires a fresh large-grid validation. Cache release can synchronize
+the process and its time belongs to the calling operation.
+
 \end{document}

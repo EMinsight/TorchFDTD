@@ -9,6 +9,7 @@ import math
 import torch
 
 from .differentiable import AdjointOptions, DifferentiableSimulation, _System
+from .cuda_memory import cuda_budget_limit
 
 
 @dataclass(frozen=True)
@@ -207,8 +208,7 @@ class DispersiveSimulation(DifferentiableSimulation):
         if admission is not None:admission(layout)
         packed_bytes = (epsilon.numel()+sum(v.numel() for v in (strength,omega0,gamma)))*epsilon.element_size()
         if epsilon.is_cuda:
-            free, _ = torch.cuda.mem_get_info(epsilon.device)
-            if packed_bytes > min(int(free*.8), self.options.gpu_budget_bytes or int(free*.8)):
+            if packed_bytes > cuda_budget_limit(epsilon.device,packed_bytes,self.options.gpu_budget_bytes):
                 raise ValueError('Oscillator parameter packing exceeds the GPU budget.')
         # Scale before broadcasting. The large physical rates are never squared
         # prior to multiplication by dt, avoiding avoidable FP32 overflow.

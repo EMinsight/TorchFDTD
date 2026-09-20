@@ -127,3 +127,14 @@ VJPs to independent 40-cubed full-time Torch graphs containing the finite cone.
 The driver permits only 10 to 12 time steps. A 64-cubed `--smoke` run validates
 the driver but does not establish large-grid capacity. No result from this
 command is claimed before its terminal record and source hashes are verified.
+
+The [eight-case dielectric record](validation/adjoint-batch-8x512-dielectric-5880.json)
+completed all forward and backward cases on RTX 5880 at revision `f47cae9`.
+Each case uses 512-cubed real FP32 fields and twelve steps. Peak Torch CUDA
+allocation was 15,884,919,296 bytes, against a 23,463,357,166-byte solver and
+transfer reservation. Output relative L2 was zero and coupled epsilon-gradient
+relative L2 was 3.08e-7. This is sequential replay with a shared material map,
+not simultaneous eight-case execution or a measured speedup over retained graphs.
+
+The matching ADE batch exposed a [cache-sensitive admission failure](CUDA_CACHE_ADMISSION.md).
+That failed record remains separate. Its repair requires a new large-grid run.

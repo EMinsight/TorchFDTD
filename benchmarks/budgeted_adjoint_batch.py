@@ -106,10 +106,12 @@ def main(argv=None):
     if args.device=='cuda':torch.cuda.synchronize();torch.cuda.reset_peak_memory_stats()
     started=time.perf_counter()
     try:
+        report['stage']='forward_running';save()
         epsilon=torch.full(large[0].region.shape,1.7,dtype=dtype,requires_grad=True)
         design=(epsilon,)
         if args.dispersive:theta=theta.requires_grad_();design+=(theta,)
         result=batch(*material(epsilon,theta)) if args.dispersive else batch(epsilon)
+        report.update(stage='backward_running',batch=result.report);save()
         signals=torch.stack([case.signals for case in result.cases])
         actual=torch.autograd.grad(objective(signals),design)
         rtol=1e-4 if dtype==torch.float32 else 2e-9
@@ -128,7 +130,14 @@ def main(argv=None):
             elapsed_seconds=time.perf_counter()-started,batch=result.report)
         save()
     except BaseException as exc:
-        report.update(stage='failed',error=repr(exc));save();raise
+        report.update(failed_during=report['stage'],stage='failed',error=repr(exc))
+        if args.device=='cuda':
+            try:
+                free,total=torch.cuda.mem_get_info()
+                report['failure_cuda_memory']=dict(free_bytes=free,total_bytes=total,
+                    allocated_bytes=torch.cuda.memory_allocated(),reserved_bytes=torch.cuda.memory_reserved())
+            except RuntimeError:pass
+        save();raise
     return report
 
 

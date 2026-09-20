@@ -7,6 +7,7 @@ import torch
 
 from .boundaries import BoundaryDescription
 from .memory_profile import host_memory
+from .cuda_memory import cuda_budget_limit
 from .state_store import disk_free
 
 
@@ -151,7 +152,8 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     source=region.steps*terms*item
     history=2*output+source if spectral is None else spectral.reservation(spectral.block_size)['spectral_reservation_bytes']+source
     index_bytes=16*monitor_count
-    observer_layout=32*monitor_count+8 if monitor_count and device.type=='cuda' and not region.complex_fields and options.backward_kernel=='fused' else 0
+    real_fused_backward=not region.complex_fields and (options.backward_kernel=='fused' or (not pole_count and options.backward_kernel=='auto'))
+    observer_layout=32*monitor_count+8 if monitor_count and device.type=='cuda' and real_fused_backward else 0
     index_bytes+=observer_layout
     # Group construction retains Python keys/lists and a NumPy packet before
     # uploading the compact map. This is an engineering host allowance.
@@ -199,8 +201,7 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
         if disk_checkpoint>int(disk_free(options.checkpoint_directory)*.8):
             raise ValueError('Disk checkpoint reservation exceeds available storage.')
     if device.type=='cuda':
-        free,_=torch.cuda.mem_get_info(device)
-        limit=min(int(free*.8),options.gpu_budget_bytes or int(free*.8))
+        limit=cuda_budget_limit(device,required,options.gpu_budget_bytes)
         if required>limit:raise ValueError('Adjoint workspace and checkpoint reservation exceed the GPU budget.')
     return dict(memory_reservation_bytes=required,workspace_reservation_bytes=workspace,
         workspace_model=workspace_model,workspace_components_bytes=workspace_parts,

@@ -56,6 +56,10 @@ Real fused backward now reserves an additional bounded observation packet
 and host grouping workspace. [Dense-observer details](DENSE_ADJOINT_OBSERVERS.md)
 describe its deterministic duplicate accumulation and integration checks.
 
+[Cache-aware admission](CUDA_CACHE_ADMISSION.md) can release unused Torch cache
+before repeating a free-memory check. It preserves the original byte limits
+and does not count unreleased cached memory as available capacity.
+
 ## Cold spectral library workspace
 
 Point spectra and detector planes use Torch matrix products. Their first use

@@ -11,6 +11,7 @@ from .boundaries import BoundaryDescription
 from .differentiable import DifferentiableResult, DifferentiableSimulation, _System, _split
 from .spacetime import SlabBlockOperator
 from .memory_profile import host_memory
+from .cuda_memory import cuda_budget_limit
 
 
 @dataclass(frozen=True)
@@ -125,8 +126,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
         if disk > disk_limit:
             raise ValueError(f'Field bank reservation exceeds the disk budget or available disk space: required={disk} bytes, admissible={max(0,disk_limit)} bytes, free={free_disk} bytes.')
     if torch.device(options.device).type == 'cuda':
-        free, _ = torch.cuda.mem_get_info(torch.device(options.device))
-        gpu_limit=min(options.gpu_budget_bytes, int(free*.8))
+        gpu_limit=cuda_budget_limit(options.device,gpu,options.gpu_budget_bytes)
         if gpu > gpu_limit:
             raise ValueError(f'Streamed tile workspace reservation exceeds the GPU budget: required={gpu} bytes, admissible={gpu_limit} bytes.')
     return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,observation_index_bytes=16*monitors,

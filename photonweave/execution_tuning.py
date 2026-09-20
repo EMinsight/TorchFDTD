@@ -7,6 +7,7 @@ import torch
 from .adjoint_memory import estimate_adjoint_memory
 from .differentiable import AdjointOptions, DifferentiableSimulation
 from .memory_profile import host_memory
+from .cuda_memory import cuda_budget_limit
 from .streamed import StreamedAdjointOptions, StreamedSimulation
 from .streamed_tuning import (_TuningWorkload, _DispersiveTuningWorkload,
                              _generated_candidates, _tune_streamed, _validate_tuning_arguments)
@@ -105,8 +106,7 @@ def _resident_reservation(project,shapes,policy,frequency_hz=None,window=None,bl
     if policy.resident.resident_budget_bytes is not None and active>policy.resident.resident_budget_bytes:
         raise ValueError('Resident solver and transfers exceed the explicit resident byte budget.')
     if cuda:
-        free,_=torch.cuda.mem_get_info(torch.device(policy.device))
-        limit=min(int(free*.8),policy.resident.gpu_budget_bytes or int(free*.8))
+        limit=cuda_budget_limit(policy.device,gpu,policy.resident.gpu_budget_bytes)
         if gpu>limit:raise ValueError('Resident solver and transfer reservation exceed the GPU budget.')
     return dict(result,host_reservation_bytes=host,gpu_reservation_bytes=gpu,
                 host_transfer_reservation_bytes=host_copy,gpu_transfer_reservation_bytes=gpu_copy)

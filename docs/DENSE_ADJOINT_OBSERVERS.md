@@ -44,3 +44,9 @@ difference is 2.24e-7. This verifies dense observation integration, not long-tim
 optical convergence. Another local CR process and targeted tests were active,
 so the recorded timings do not establish a performance ratio. RTX 5880 policy
 measurements from earlier revisions must not be attributed to this revision.
+
+The [RTX 5880 integration run](validation/dense-adjoint-observers-128-5880.json)
+also completed with 75,600 internal observations and maximum relative
+material-gradient L2 difference 2.24e-7. Its source hashes match `f47cae9`.
+The accompanying remote regression group passed 93 tests. This does not
+establish a speed ratio against the prior generated observer program.

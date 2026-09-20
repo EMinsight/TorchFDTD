@@ -1,0 +1,20 @@
+{
+  "revision": "f47cae9",
+  "grid": [
+    512,
+    512,
+    512
+  ],
+  "cases": 2,
+  "steps": 12,
+  "dispersive": true,
+  "observation": "Second case backward admission after the first replay released all Torch tensors.",
+  "method": "Instrumented torch.cuda.mem_get_info without allocating or clearing CUDA tensors. Stack paths omitted.",
+  "memory": {
+    "free": 30924603392,
+    "total": 51526500352,
+    "allocated": 0,
+    "reserved": 18662555648
+  },
+  "scope": "Diagnostic capacity snapshot from a failed run, not an executed second VJP or a speed measurement."
+}
