@@ -59,3 +59,29 @@ primary baseline but does not establish that eight threads is optimal.
 [One-thread record](cpu-dram-medium-1thread-3060.json).
 Further matched comparisons are to run on the RTX 5880 workstation after the
 capacity job, without concurrent solver workloads.
+
+## RTX 5880 comparison preparation
+
+A read-only hardware query identifies the GPU workstation CPU as Intel Xeon
+w3-2435, with eight physical cores and sixteen logical processors. The matched
+comparison should include CPU thread counts 1, 4, 8 and 16 rather than assume
+that the local i7's best measured setting transfers to this machine.
+
+The driver now accepts independent `--nz` and `--precision float32|float64`.
+Resident CUDA forward/backward use fused kernels for both real and complex
+fields. CPU remains the native Torch implementation, not an optimized external
+CPU solver. The JSON records signal/gradient tolerances and the driver/package
+source hashes. Existing records retain their original source and conditions.
+
+```console
+python -m benchmarks.streamed_adjoint --compare-cpu --cpu-threads 8 --nx 128 --ny 64 --nz 64 --steps 32 --width 32 --depth 8 --precision float32 --compare-transfers --repeats 3 --output results/cpu-dram-5880-fp32.json
+```
+
+Repeat with the other thread counts, then add `--complex-bloch` and repeat in
+FP64. Keep each configuration's raw record and report the faster measured CPU
+baseline per workload, with all tested settings disclosed. The FP32 comparison
+uses `rtol=5e-5, atol=2e-6` for signals and gradients. These are implementation
+parity tolerances, not an optical accuracy guarantee. The new FP32 driver paths
+passed real and complex asymmetric-grid smoke checks locally. Their single
+timed repetitions are not performance evidence. No RTX 5880 CPU speed ratio is
+available until its current capacity job finishes and this comparison runs.

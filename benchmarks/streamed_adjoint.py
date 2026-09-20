@@ -2,6 +2,7 @@
 import argparse
 from dataclasses import replace
 import gc
+import hashlib
 import json
 import os
 import platform
@@ -10,6 +11,7 @@ import statistics
 import time
 
 import torch
+import photonweave
 
 from photonweave import (AdjointOptions, BoundaryFace, DifferentiableSimulation,
                         Monitor, Project, Region, Source, StreamedAdjointOptions,
@@ -20,6 +22,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--nx', type=int, default=64)
     parser.add_argument('--ny', type=int, default=16)
+    parser.add_argument('--nz', type=int, help='Defaults to ny')
+    parser.add_argument('--precision', choices=('float32','float64'), default='float64')
     parser.add_argument('--steps', type=int, default=24)
     parser.add_argument('--width', type=int, default=8)
     parser.add_argument('--depth', type=int, default=3)
@@ -36,14 +40,16 @@ def main():
     if args.repeats < 1:raise ValueError('repeats must be positive')
     if args.cpu_threads<1:raise ValueError('cpu-threads must be positive')
     if args.compare_cpu:torch.set_num_threads(args.cpu_threads)
-    region = Region(dimension='3d', size=(args.nx*.1, args.ny*.1, args.ny*.1),
-                    mesh=.1, precision='float64', steps=args.steps, pml_cells=3)
+    region = Region(dimension='3d', size=(args.nx*.1, args.ny*.1, (args.ny if args.nz is None else args.nz)*.1),
+                    mesh=.1, precision=args.precision, steps=args.steps, pml_cells=3,cuda_kernel='fused')
+    dtype=getattr(torch,args.precision)
+    tolerance=dict(rtol=5e-5,atol=2e-6) if dtype==torch.float32 else dict(rtol=1e-9,atol=1e-11)
+    signal_tolerance=tolerance if dtype==torch.float32 else dict(rtol=1e-10,atol=1e-12)
     region.boundaries.x_min = BoundaryFace(kind='periodic')
     region.boundaries.x_max = BoundaryFace(kind='periodic')
     if args.complex_bloch:
         region.boundaries.x_min.kind = region.boundaries.x_max.kind = 'bloch'
         region.bloch_phase = (.63,0,0)
-        region.cuda_kernel = 'fused'
     project = Project(region=region, sources=[Source(center=(-.2,0,0), pulse='continuous')],
                       monitors=[Monitor(center=(.2,0,0)), Monitor(center=(0,.1,0),component='Hy')])
     options = StreamedAdjointOptions(slab_width=args.width, temporal_depth=args.depth, checkpoints=2,
@@ -69,7 +75,7 @@ def main():
         baseline = torch.cuda.memory_allocated()
         torch.cuda.reset_peak_memory_stats()
         started = time.perf_counter()
-        epsilon = torch.full(region.shape, 1.7, dtype=torch.float64,
+        epsilon = torch.full(region.shape, 1.7, dtype=dtype,
                              device='cuda' if name == 'resident' else 'cpu', requires_grad=True)
         result = models[name](epsilon)
         torch.cuda.synchronize()
@@ -86,8 +92,8 @@ def main():
         outputs[name] = result.signals.detach().cpu()
         gradients[name] = gradient.detach().cpu()
         if name != 'resident':
-            torch.testing.assert_close(outputs[name], outputs['resident'], rtol=1e-10, atol=1e-12)
-            torch.testing.assert_close(gradients[name], gradients['resident'], rtol=1e-9, atol=1e-11)
+            torch.testing.assert_close(outputs[name], outputs['resident'], **signal_tolerance)
+            torch.testing.assert_close(gradients[name], gradients['resident'], **tolerance)
             row['signal_max_abs_difference'] = float((outputs[name]-outputs['resident']).abs().max())
             row['gradient_max_abs_difference'] = float((gradients[name]-gradients['resident']).abs().max())
         print(f'{name}: {row["full_iteration_seconds"]:.3f}s, peak={row["torch_cuda_peak_allocated_bytes"]}, measured={record}',flush=True)
@@ -98,8 +104,8 @@ def main():
         for name in (tuple(models) if repeat%2 == 0 else tuple(reversed(models))):
             iteration(name, True)
     for name in models:
-        torch.testing.assert_close(outputs[name], outputs['resident'], rtol=1e-10, atol=1e-12)
-        torch.testing.assert_close(gradients[name], gradients['resident'], rtol=1e-9, atol=1e-11)
+        torch.testing.assert_close(outputs[name], outputs['resident'], **signal_tolerance)
+        torch.testing.assert_close(gradients[name], gradients['resident'], **tolerance)
     denominator = torch.linalg.vector_norm(gradients['resident'])
     if denominator == 0:raise RuntimeError('Degenerate benchmark gradient')
     medians = {name:statistics.median(row['full_iteration_seconds'] for row in rows)
@@ -108,7 +114,10 @@ def main():
                 cpu_model=platform.processor() or os.environ.get('PROCESSOR_IDENTIFIER','unknown'),
                 cpu_threads=torch.get_num_threads(),cpu_thread_policy='Explicit fixed count, not tuned to the fastest CPU configuration.',
                 cuda_version=torch.version.cuda, grid=region.shape, steps=region.steps,
-                precision='float64', repeats=args.repeats, warmups_per_mode=1,
+                precision=args.precision, repeats=args.repeats, warmups_per_mode=1,
+                comparison_tolerances=dict(signals=signal_tolerance,gradient=tolerance),
+                source_sha256={p.name:hashlib.sha256(p.read_bytes()).hexdigest()
+                    for p in [Path(__file__),*sorted(Path(photonweave.__file__).parent.glob('*.py'))]},
                 complex_bloch=args.complex_bloch, bloch_phase=region.bloch_phase,
                 median_seconds=medians, streamed_over_resident_time=medians['streamed']/medians['resident'],
                 gradient_relative_l2=float(torch.linalg.vector_norm(gradients['streamed']-gradients['resident'])/denominator),
