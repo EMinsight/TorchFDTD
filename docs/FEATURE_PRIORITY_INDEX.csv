@@ -88,6 +88,7 @@ material.multipole,다중 oscillator,P1,6,required,수동 분산 재료,False,im
 material.nk,중심 주파수 n/k,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 material.sampled_fit,측정 n/k 데이터·passive multi-pole fit,P1,6,required,수동 분산 재료,False,implemented,implemented,implemented,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 material.sellmeier,Sellmeier,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
+material.tensor,일반 tensor·grid transform,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 addfdtd.allow grading in x,allow grading in x,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 addfdtd.allow grading in y,allow grading in y,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 addfdtd.allow grading in z,allow grading in z,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
@@ -672,14 +673,14 @@ addtfsf.z max,z max,P1,8,required,소스·모드·정규화,True,missing,missing
 addtfsf.z min,z min,P1,8,required,소스·모드·정규화,True,missing,missing,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 addtfsf.z span,z span,P1,8,required,소스·모드·정규화,False,implemented,implemented,implemented,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 analysis.normalization,면적분 flux·air reference R/T/A,P1,8,required,소스·모드·정규화,True,partial,partial,partial,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
-analysis.sparameters,S-parameters·mode expansion,P1,8,required,소스·모드·정규화,True,missing,missing,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
+analysis.sparameters,S-parameters·mode expansion,P1,8,required,소스·모드·정규화,True,partial,partial,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 source.angle,임의 각도 injection,P1,8,required,소스·모드·정규화,True,missing,missing,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 source.calibration,물리 단위·source power calibration,P1,8,required,소스·모드·정규화,True,missing,missing,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 source.gaussian,Gaussian beam·waist,P1,8,required,소스·모드·정규화,True,missing,missing,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 source.import,공간 E/H import,P1,8,required,소스·모드·정규화,True,missing,missing,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
-source.mode,Eigenmode source,P1,8,required,소스·모드·정규화,True,missing,missing,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
+source.mode,Eigenmode source,P1,8,required,소스·모드·정규화,True,partial,partial,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 source.oneway,단방향 plane wave,P1,8,required,소스·모드·정규화,True,partial,partial,implemented,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
-source.port,Mode port,P1,8,required,소스·모드·정규화,True,missing,missing,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
+source.port,Mode port,P1,8,required,소스·모드·정규화,True,partial,partial,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 source.tfsf,TFSF box,P1,8,required,소스·모드·정규화,True,partial,partial,implemented,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 workflow.sparam_sweep,S-parameter matrix sweep,P1,8,required,소스·모드·정규화,True,missing,missing,missing,"단방향 여기, 모드 포트와 검증된 전송 목적함수가 실제 소자 설계에 필요하다."
 workflow.fused_batch,단일 CUDA kernel의 tensor batch,P1,9,required,GPU tensor batch,True,implemented,implemented,missing,같은 격자의 독립 구조물을 함께 처리하고 동일 결과와 실제 cases/s 향상을 검증해야 한다.
@@ -907,10 +908,10 @@ addtime.z min,z min,P1,10,required,관측량·주파수 공간장,True,missing,m
 addtime.z span,z span,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.absorption,국소 흡수·charge/current,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.cross_sections,산란·흡수 cross-section,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
-analysis.diffraction,회절 차수·grating projection,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
+analysis.diffraction,회절 차수·grating projection,P1,10,required,관측량·주파수 공간장,True,partial,partial,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.directivity,Directivity·편광 분석,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.mode_area,Mode area·volume,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
-analysis.nearfar,Near-to-far field,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
+analysis.nearfar,Near-to-far field,P1,10,required,관측량·주파수 공간장,True,partial,partial,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.resonance,공진 주파수·Q 분석,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 monitor.chebyshev,Chebyshev frequency sampling,P1,10,required,관측량·주파수 공간장,False,implemented,implemented,implemented,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 monitor.custom,사용자 주파수 표,P1,10,required,관측량·주파수 공간장,False,implemented,implemented,implemented,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
@@ -1110,7 +1111,7 @@ addtriangle.z min,z min,P1,11,required,핵심 CAD·설계 영역,True,missing,mi
 addtriangle.z span,z span,P1,11,required,핵심 CAD·설계 영역,True,missing,missing,missing,"다각형, 회전과 공간 재료 표현은 실제 소자와 topology 설계에 필요하다."
 cad.arrays,배열·패턴,P1,11,required,핵심 CAD·설계 영역,True,missing,missing,missing,"다각형, 회전과 공간 재료 표현은 실제 소자와 topology 설계에 필요하다."
 cad.ellipse,타원·타원체,P1,11,required,핵심 CAD·설계 영역,False,implemented,implemented,implemented,"다각형, 회전과 공간 재료 표현은 실제 소자와 topology 설계에 필요하다."
-cad.gds,GDSII,P1,11,required,핵심 CAD·설계 영역,True,missing,missing,missing,"다각형, 회전과 공간 재료 표현은 실제 소자와 topology 설계에 필요하다."
+cad.gds,GDSII,P1,11,required,핵심 CAD·설계 영역,True,partial,partial,implemented,"다각형, 회전과 공간 재료 표현은 실제 소자와 topology 설계에 필요하다."
 cad.image_geometry,이미지·binary geometry import,P1,11,required,핵심 CAD·설계 영역,True,missing,missing,missing,"다각형, 회전과 공간 재료 표현은 실제 소자와 topology 설계에 필요하다."
 cad.polygon,다각형 extrusion,P1,11,required,핵심 CAD·설계 영역,False,implemented,implemented,implemented,"다각형, 회전과 공간 재료 표현은 실제 소자와 topology 설계에 필요하다."
 cad.rotation3,3축 Euler 회전,P1,11,required,핵심 CAD·설계 영역,False,implemented,implemented,implemented,"다각형, 회전과 공간 재료 표현은 실제 소자와 topology 설계에 필요하다."
@@ -1293,16 +1294,15 @@ material.pec,이상 PEC 재료,P2,13,conditional,특수 물성·실험 조건,Tr
 material.plugin,사용자 material plugin,P2,13,conditional,특수 물성·실험 조건,True,missing,missing,missing,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
 material.raman,Raman,P2,13,conditional,특수 물성·실험 조건,True,missing,missing,missing,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
 material.temperature,온도·전하 의존 재료,P2,13,conditional,특수 물성·실험 조건,True,missing,missing,missing,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
-material.tensor,일반 tensor·grid transform,P2,13,conditional,특수 물성·실험 조건,True,missing,missing,missing,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
 monitor.pml,PML 내부 record,P2,13,conditional,특수 물성·실험 조건,True,missing,missing,missing,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
 source.dc,Eliminate DC,P2,13,conditional,특수 물성·실험 조건,True,missing,missing,missing,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
 source.incoherence,공간·시간 비간섭 ensemble,P2,13,conditional,특수 물성·실험 조건,True,missing,missing,missing,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
 source.magnetic,자기 dipole,P2,13,conditional,특수 물성·실험 조건,False,implemented,implemented,implemented,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
 source.pupil,Pupil·multifrequency beam,P2,13,conditional,특수 물성·실험 조건,True,missing,missing,missing,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
 source.vector,임의 벡터 dipole,P2,13,conditional,특수 물성·실험 조건,False,implemented,implemented,implemented,비선형·자기·열·전하·박막 모델은 대상 연구가 요구할 때 추가한다.
-addfdtd.set process grid,set process grid,P2,14,conditional,단일 문제 multi-GPU·클러스터,True,missing,missing,missing,한 GPU의 메모리를 넘는 문제나 실제 다중 GPU 환경이 생기면 우선순위를 올린다.
-workflow.distributed,분산 job·resource 설정,P2,14,conditional,단일 문제 multi-GPU·클러스터,True,missing,missing,missing,한 GPU의 메모리를 넘는 문제나 실제 다중 GPU 환경이 생기면 우선순위를 올린다.
-workflow.multi_gpu,다중 GPU·MPI,P2,14,conditional,단일 문제 multi-GPU·클러스터,True,partial,partial,missing,한 GPU의 메모리를 넘는 문제나 실제 다중 GPU 환경이 생기면 우선순위를 올린다.
+addfdtd.set process grid,set process grid,P1,14,required,단일 문제 multi-GPU·클러스터,True,missing,missing,missing,FDTDX 동등성 목표에 따라 단일 도메인 분할·halo transpose와 실제 여러 GPU의 정확도·성능 검증이 필요하다.
+workflow.distributed,분산 job·resource 설정,P1,14,required,단일 문제 multi-GPU·클러스터,True,missing,missing,missing,FDTDX 동등성 목표에 따라 단일 도메인 분할·halo transpose와 실제 여러 GPU의 정확도·성능 검증이 필요하다.
+workflow.multi_gpu,다중 GPU·MPI,P1,14,required,단일 문제 multi-GPU·클러스터,True,partial,partial,missing,FDTDX 동등성 목표에 따라 단일 도메인 분할·halo transpose와 실제 여러 GPU의 정확도·성능 검증이 필요하다.
 add2dpoly.alpha,alpha,P2,15,conditional,특수 CAD·제조 포맷,True,missing,missing,missing,곡면·STL·공정 builder는 구체적인 사용 사례와 형상 검증이 있을 때 추가한다.
 add2dpoly.detail,detail,P2,15,conditional,특수 CAD·제조 포맷,True,missing,missing,missing,곡면·STL·공정 builder는 구체적인 사용 사례와 형상 검증이 있을 때 추가한다.
 add2dpoly.enabled,enabled,P2,15,conditional,특수 CAD·제조 포맷,True,missing,missing,missing,곡면·STL·공정 builder는 구체적인 사용 사례와 형상 검증이 있을 때 추가한다.

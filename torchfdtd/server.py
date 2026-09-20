@@ -277,6 +277,8 @@ def create_app(result_dir=None):
     attach_design_routes(app, root, pool, jobs, lock)
     from .fsp_service import attach_fsp_routes
     attach_fsp_routes(app, root)
+    from .gds_service import attach_gds_routes
+    attach_gds_routes(app, root)
     static = Path(__file__).parent/'web'
     if static.exists():
         app.mount('/', StaticFiles(directory=static, html=True), name='workbench')

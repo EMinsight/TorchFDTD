@@ -1,0 +1,10 @@
+{
+  "measured_report": "mode_injection_3060.json",
+  "measured_report_sha256": "b3d4ec38c0d60832a7dddc869458fcd72120322b416979337d6b4d0653ae9bb0",
+  "measured_report_unchanged": true,
+  "reason": "Admission-only followup. Enforce host_budget_bytes against the full host reservation including modal packets and the gradient-freezing epsilon carrier before material validation arrays or clones. Numerical equations, source tables and propagation path unchanged.",
+  "source_path": "torchfdtd/mode_injection.py",
+  "measured_source_sha256": "db378c4b2dcc4e5435db57fff3026e1597e0448709d5dc29c8a999f57bb440c8",
+  "updated_source_sha256": "ecc4a25939737623aa2ecd16b283afebb2aefa07b021c904666d10a3b03ecf3a",
+  "validation": "New CPU regression failed before the change because allocation was reached, then passed after the admission guard. The five recorded GPU physical experiments were not repeated."
+}

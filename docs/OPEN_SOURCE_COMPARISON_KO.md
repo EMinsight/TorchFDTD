@@ -1,8 +1,13 @@
 # GPU FDTD 경쟁력과 검증 기준
 
-외부 코드 검토일: 2026-09-19. TorchFDTD 구현 갱신: 2026-09-20. 아래 기능 비교는 공식 코드와 문서에 근거한다.
+외부 코드 검토일: 2026-09-21. TorchFDTD 구현 갱신: 2026-09-21. 아래 기능 비교는 공식 코드와 문서에 근거한다.
 프로젝트가 발표한 성능과 우리가 직접 측정한 성능을 구분한다.
 현재 TorchFDTD를 가장 빠르거나 가장 완성된 FDTD라고 부를 근거는 없다.
+
+현재 FDTDX commit과 항목별 완료 조건은 [동등성 추적표](FDTDX_PARITY_KO.md)에
+모았다. GDS, 제약을 갖는 density parameterization, 실제 mode injection,
+회절·closed-surface far-field를 추가했다. 기본 API 구현과 전체 기능 동등성을
+구분하며, 단일 문제 multi-GPU·일반 tensor·production PMC는 계속 미완료다.
 
 이번에는 실제 계산 비교로 진행했다. 5880에서 vacuum/sphere/slab/waveguide 각각 64³와 96³, 총 8개를 flaport/fdtd 0.2.2와 실행했다. 상대 기준선에도 CUDA Graph를 적용했고 전체 wall time은 9.64–17.09배 단축됐다. 점 신호 상대 L2 차이는 0.012–0.037%다. 경계 stencil 차이 때문에 최종 전체 장은 동일하지 않으며, 약한 최종 H의 상대 오차가 큰 사례도 [상세 보고서](validation/OPEN_SOURCE_REPORT.md)에 공개했다. 다른 세 라이브러리의 속도는 아직 측정하지 않았다.
 

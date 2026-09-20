@@ -692,6 +692,80 @@ below the $2\times10^{-4}$ criterion. Raw records retain all repetitions and
 These are internal backend measurements, not comparisons with external CPU
 or GPU solvers or evidence of beyond-VRAM throughput.
 
+\subsection{Constrained density and fixed modal objectives}
+
+A trainable two-dimensional density module composes bounded logits or direct
+densities, a physical-radius cone filter, symmetry-orbit averaging and a smooth
+Heaviside projection. Fixed masks are applied before filtering and after
+projection. Their design derivatives vanish. Periodic filtering uses unique
+minimum-image neighbors, while finite-domain filtering renormalizes truncated
+support. Projection continuation and optimizer updates are explicit operations.
+Binary outputs optionally use a labelled straight-through surrogate, which is
+not the derivative of a hard threshold. Parameterization and optimizer states
+can be saved together. A native streamed optical objective verifies the
+complete two-dimensional design-to-gradient chain. Filtering alone does not
+guarantee minimum feature dimensions or manufacturability.
+
+A fixed-mode source uses a transverse full-vector sparse eigenproblem with
+the temporal wavenumber
+$\widetilde{k}_0=2\sin(\omega\Delta t/2)/(c\Delta t)$.
+Its longitudinal propagation constant satisfies
+$\beta=2\arcsin(\widetilde{\beta}\Delta w/2)/\Delta w$.
+Electric and magnetic Huygens sheets retain their different Yee positions
+and injection times. Collocated detector profiles include the longitudinal
+interpolation factors before evaluating directional overlap amplitudes.
+The tested scope is one fixed selected mode, a uniform three-dimensional
+mesh, periodic transverse boundaries and a lossless isotropic cross-section.
+Matched-reference complex transmission and reflection remain differentiable
+through the propagating fields. The launch eigensystem and source-neighborhood
+material are fixed, and streamed injection is not implemented.
+
+Five FP32 native CUDA propagation cases on RTX 3060 include homogeneous
+guides in three axes, both longitudinal directions and a dielectric slab
+guide. The maximum complex propagation error is $2.24\times10^{-5}$ and
+the slab counterpropagating power fraction is $2.14\times10^{-7}$.
+A localized slab-guide perturbation gives a transmission material derivative
+whose relative difference from central differences is $9.14\times10^{-4}$.
+These tests establish one-channel objectives, not a complete multiport
+scattering matrix or derivatives of the eigenmode solver.
+
+\subsection{Differentiable radiation transforms}
+
+Periodic diffraction analysis Fourier-projects collocated E/H fields over
+one complete rectangular cell. If $\mathbf e$ is tangential electric field
+and $\mathbf q=-\widehat{\mathbf n}\times\mathbf H$, directional amplitudes
+are $\mathbf e_\pm=(\mathbf e\pm\mathbf Y^{-1}\mathbf q)/2$, with
+$\mathbf Y=(k_n\mathbf I+\mathbf k_t\mathbf k_t^T/k_n)/k_0$.
+Evanescent orders retain complex amplitudes but no individual directional
+real power. Grazing cutoff is rejected with a precision-aware tolerance.
+Matched-reference power ratios preserve both field graphs and use common
+detached scales before multiplying SI-scale DFT fields and areas.
+
+For isolated radiation, six closed-box planes supply equivalent currents
+$\mathbf J=\widehat{\mathbf n}\times\mathbf H$ and
+$\mathbf M=-\widehat{\mathbf n}\times\mathbf E$. The outgoing amplitude is
+\begin{equation}
+\mathbf E_\infty(\widehat{\mathbf s})=
+\frac{ik}{4\pi}\int_S
+\left[\frac{(\mathbf I-\widehat{\mathbf s}\widehat{\mathbf s}^{T})\mathbf J}{n}
+-\widehat{\mathbf s}\times\mathbf M\right]
+e^{-ik\widehat{\mathbf s}\cdot(\mathbf r-\mathbf r_0)}\,dS .
+\end{equation}
+Here $n$ is the fixed exterior refractive index and relative permeability is
+one. All faces must lie in the same lossless isotropic exterior, outside PML.
+The integral does not implement layered-background or periodic lattice
+Green functions. Fixed scalar propagation phases use double precision before
+casting to the field precision, avoiding macroscopic-distance phase rounding.
+
+A translated analytic vector dipole verifies complex amplitude, polarization,
+surface-quadrature convergence and integrated power. A native material VJP
+for a radiation objective agrees with central differences. In a separate
+native FP32 dipole calculation, fixed physical domain, PML thickness and
+approximately fixed duration give normalized angular-pattern relative
+$L_2$ errors of $1.0314\%$, $0.5412\%$ and $0.2304\%$ at mesh spacings
+of 100, 75 and 50 nm. This establishes one vacuum radiation limit, not absolute
+source-power calibration or convergence of every radiation gradient.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.

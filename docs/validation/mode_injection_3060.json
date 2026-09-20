@@ -1,0 +1,182 @@
+{
+  "device": "cuda",
+  "hardware": "NVIDIA GeForce RTX 3060",
+  "precision": "float32",
+  "torch": "2.10.0+cu126",
+  "cases": [
+    {
+      "kind": "homogeneous",
+      "direction": "+",
+      "normal": "x",
+      "grid": [
+        80,
+        20,
+        12
+      ],
+      "steps": 1300,
+      "duration_fs": 247.85473303903072,
+      "neff_discrete": 1.5206060359911553,
+      "beta_per_um": 6.164031937644013,
+      "beta_tilde_per_um": 6.0669092877398505,
+      "temporal_k_per_um": 4.044606630606668,
+      "propagation_ratio": [
+        0.9717389345169067,
+        -0.23605670034885406
+      ],
+      "expected_propagation_ratio": [
+        0.9717390747526701,
+        -0.23605755780915932
+      ],
+      "complex_propagation_error": 8.724499593881774e-07,
+      "relative_counterpropagating_power": 2.9113687016746326e-09,
+      "outside_source_power_ratio": 2.881278327038217e-09,
+      "cross_mode_power_ratio": 1.9160783915909751e-16,
+      "mode_residual": 9.857389060390273e-07,
+      "source_storage_bytes": 63680
+    },
+    {
+      "kind": "slab",
+      "direction": "+",
+      "normal": "x",
+      "grid": [
+        80,
+        40,
+        12
+      ],
+      "steps": 1300,
+      "duration_fs": 247.85473303903072,
+      "neff_discrete": 1.8514184829066256,
+      "beta_per_um": 7.505035747896535,
+      "beta_tilde_per_um": 7.330136151265797,
+      "temporal_k_per_um": 4.044606630606668,
+      "propagation_ratio": [
+        -0.7662169933319092,
+        0.6426166892051697
+      ],
+      "expected_propagation_ratio": [
+        -0.766198644226717,
+        0.6426037951842026
+      ],
+      "complex_propagation_error": 2.2422756956075318e-05,
+      "relative_counterpropagating_power": 2.141365627039704e-07,
+      "outside_source_power_ratio": 1.9477482737784158e-07,
+      "cross_mode_power_ratio": 1.8419337236008637e-12,
+      "mode_residual": 1.0259334301265445e-06,
+      "source_storage_bytes": 85760,
+      "scattering": {
+        "epsilon_increment": 0.30000001192092896,
+        "mask_cells": 240,
+        "transmission": [
+          0.9899916648864746,
+          0.11330459266901016
+        ],
+        "reflection": [
+          0.001535580842755735,
+          -0.001931183272972703
+        ],
+        "transmitted_modal_power": 0.9929214119911194,
+        "gradient": -0.03968024626374245,
+        "finite_difference": -0.03971656411886215,
+        "finite_difference_step": 0.003,
+        "relative_gradient_error": 0.0009144258801825345
+      }
+    },
+    {
+      "kind": "homogeneous",
+      "direction": "-",
+      "normal": "x",
+      "grid": [
+        80,
+        20,
+        12
+      ],
+      "steps": 1300,
+      "duration_fs": 247.85473303903072,
+      "neff_discrete": 1.5206060359911553,
+      "beta_per_um": 6.164031937644013,
+      "beta_tilde_per_um": 6.0669092877398505,
+      "temporal_k_per_um": 4.044606630606668,
+      "propagation_ratio": [
+        0.971738874912262,
+        -0.23605668544769287
+      ],
+      "expected_propagation_ratio": [
+        0.9717390747526701,
+        -0.23605755780915932
+      ],
+      "complex_propagation_error": 8.971687179837318e-07,
+      "relative_counterpropagating_power": 2.946077160004279e-09,
+      "outside_source_power_ratio": 2.806533228039143e-09,
+      "cross_mode_power_ratio": 9.182960525682912e-16,
+      "mode_residual": 9.857389060390273e-07,
+      "source_storage_bytes": 63680
+    },
+    {
+      "kind": "homogeneous",
+      "direction": "+",
+      "normal": "y",
+      "grid": [
+        12,
+        80,
+        20
+      ],
+      "steps": 1300,
+      "duration_fs": 247.85473303903072,
+      "neff_discrete": 1.5206060359911553,
+      "beta_per_um": 6.164031937644013,
+      "beta_tilde_per_um": 6.0669092877398505,
+      "temporal_k_per_um": 4.044606630606668,
+      "propagation_ratio": [
+        0.9717389345169067,
+        -0.23605673015117645
+      ],
+      "expected_propagation_ratio": [
+        0.9717390747526701,
+        -0.23605755780915932
+      ],
+      "complex_propagation_error": 8.429369700024836e-07,
+      "relative_counterpropagating_power": 2.9154911818096707e-09,
+      "outside_source_power_ratio": 2.881278327038217e-09,
+      "cross_mode_power_ratio": 1.960891993154444e-16,
+      "mode_residual": 9.857389060390273e-07,
+      "source_storage_bytes": 63680
+    },
+    {
+      "kind": "homogeneous",
+      "direction": "+",
+      "normal": "z",
+      "grid": [
+        20,
+        12,
+        80
+      ],
+      "steps": 1300,
+      "duration_fs": 247.85473303903072,
+      "neff_discrete": 1.5206060359911553,
+      "beta_per_um": 6.164031937644013,
+      "beta_tilde_per_um": 6.0669092877398505,
+      "temporal_k_per_um": 4.044606630606668,
+      "propagation_ratio": [
+        0.9717389345169067,
+        -0.23605673015117645
+      ],
+      "expected_propagation_ratio": [
+        0.9717390747526701,
+        -0.23605755780915932
+      ],
+      "complex_propagation_error": 8.429369700024836e-07,
+      "relative_counterpropagating_power": 2.9107951604601112e-09,
+      "outside_source_power_ratio": 2.881278327038217e-09,
+      "cross_mode_power_ratio": 1.609913832943376e-16,
+      "mode_residual": 9.857389060390273e-07,
+      "source_storage_bytes": 63680
+    }
+  ],
+  "scope": "Actual native resident modal Yee/CPML source, detectors and fixed-source material adjoint. No PML transverse eigenmodes or mode-profile differentiation.",
+  "elapsed_seconds": 15.428924200125039,
+  "source_sha256": {
+    "torchfdtd/mode_injection.py": "db378c4b2dcc4e5435db57fff3026e1597e0448709d5dc29c8a999f57bb440c8",
+    "torchfdtd/mode_ports.py": "0467e4404d94c2420d065e6a6451868951d73891bd1aaebc98051ab969a20d00",
+    "benchmarks/mode_injection.py": "d7bcc196ff4aa38d19023852218d42b82e5b75cf34fddf2c328b002b8eea06a9"
+  }
+}

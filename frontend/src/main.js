@@ -4,6 +4,7 @@ import { Views, drawField, drawPlot } from './views.js';
 import './style.css';
 import { setupFspInspector } from './fsp.js';
 import { setupNativeFsp } from './fsp_native.js';
+import { setupGds } from './gds.js';
 import { setupSourceTools, temporalControls, updateTemporalField, polarizationControls, planeControls, configureOneWayPlane } from './sources.js';
 import { setupMaterials } from './materials.js';
 import { meshControls, setupMesh } from './mesh.js';
@@ -34,7 +35,7 @@ $('#app').innerHTML=`
 <nav class="menubar"><button data-action="new">File</button><button data-action="undo">Edit</button><button data-action="fit">View</button><button data-action="materials">Materials</button><button data-action="region">Simulation</button><button data-action="inverse-design">Inverse design</button><button data-action="capabilities">Feature checklist</button><button data-action="flux-results">Flux results</button><button data-action="help">Help</button><span class="version">DEVELOPMENT</span></nav>
 <div class="ribbon-tabs"><button class="active" data-ribbon="design">Design</button><button data-ribbon="simulation">FDTD</button><button data-ribbon="view">View</button><span class="ribbon-note">Geometry and wavelength in µm</span></div>
 <div class="ribbon">
- <div class="tool-group"><div class="tool-row"><button class="tool" data-action="open">${icon('folder-open')}<span>Open</span></button><button class="tool" data-action="save">${icon('save')}<span>Save</span></button><button class="tool" data-action="fsp">${icon('folder-open')}<span>FSP inspect</span></button><button class="tool editable" data-action="fsp-native">${icon('folder-open')}<span>FSP → GPU</span></button><button class="tool" data-action="python">${icon('file-code-2')}<span>Python</span></button></div><label>Project</label></div>
+ <div class="tool-group"><div class="tool-row"><button class="tool" data-action="open">${icon('folder-open')}<span>Open</span></button><button class="tool" data-action="save">${icon('save')}<span>Save</span></button><button class="tool" data-action="fsp">${icon('folder-open')}<span>FSP inspect</span></button><button class="tool editable" data-action="fsp-native">${icon('folder-open')}<span>FSP → GPU</span></button><button class="tool editable" data-action="gds">${icon('folder-open')}<span>GDS</span></button><button class="tool" data-action="python">${icon('file-code-2')}<span>Python</span></button></div><label>Project</label></div>
  <div class="tool-group"><div class="tool-row"><button class="tool editable" data-add="rectangle">${icon('box')}<span>Rectangle</span></button><button class="tool editable" data-add="circle">${icon('cylinder')}<span>Circle</span></button><button class="tool editable" data-add="ring">${icon('circle')}<span>Ring</span></button><button class="tool editable" data-add="sphere">${icon('orbit')}<span>Sphere</span></button><button class="tool editable" data-add="polygon">${icon('shapes')}<span>Polygon</span></button></div><label>Structures</label></div>
  <div class="tool-group"><div class="tool-row"><button class="tool" data-action="region">${icon('scan')}<span>FDTD region</span></button><button class="tool editable" data-add="point">${icon('radio')}<span>Dipole</span></button><button class="tool editable" data-add="plane">${icon('move-right')}<span>Sheet source</span></button><button class="tool editable" data-add="tfsf">${icon('scan')}<span>TFSF box</span></button><button class="tool editable" data-add="monitor">${icon('activity')}<span>Time monitor</span></button><button class="tool editable" data-add="field">${icon('activity')}<span>DFT / Flux</span></button></div><label>Simulation objects</label></div>
  <div class="tool-group"><div class="tool-row"><button class="tool editable" data-action="duplicate">${icon('copy')}<span>Duplicate</span></button><button class="tool editable" data-action="delete">${icon('trash-2')}<span>Delete</span></button><button class="tool" data-action="fit">${icon('maximize')}<span>Fit view</span></button></div><label>Edit & view</label></div>
@@ -186,6 +187,13 @@ const nativeFsp=setupNativeFsp({esc,toast,log,getProject:()=>state.project,loadP
  persist();setMode('layout');setTab('geometry');renderTree();views.fit();await validate();
  log('Opened independently converted FSP scene. Conversion differences are retained with the project.');
 }});
+const gdsTools=setupGds({esc,toast,log,getProject:()=>state.project,loadProject:async project=>{
+ if(state.mode!=='layout')throw Error('Switch to Layout before importing geometry.');
+ const validated=await api('/validate',project);remember();state.project=validated.project;state.selected='fdtd';
+ state.results=null;state.monitors=null;state.liveFrame=null;state.job=null;
+ $('#results-tree').innerHTML='<div class="muted empty-hint">Run to calculate the imported scene.</div>';
+ persist();setMode('layout');setTab('geometry');renderTree();views.fit();await validate();
+}});
 const materialTools=setupMaterials({state,api,esc,toast,commit:project=>{if(state.mode!=='layout')throw Error('Switch to Layout before editing.');remember();state.project=project;persist();renderProperties();renderTree();views.render();validate();}});
 const meshTools=setupMesh({state,api,esc,commit:project=>{if(state.mode!=='layout')throw Error('Switch to Layout before editing.');remember();state.project=project;persist();renderProperties();views.render();validate();}});
 const sourceTools=setupSourceTools({state,api,esc,toast,commit:project=>{if(state.mode!=='layout')throw Error('Switch to Layout before editing.');remember();state.project=project;persist();renderProperties();renderTree();views.render();validate();}});
@@ -194,6 +202,7 @@ const capabilityTools=setupCapabilities({api,esc});
 const inverseDesign=setupInverseDesign({esc});
 const monitorTools=setupMonitorTools({state,api,esc,toast,numeric,dropdown,commit:project=>{if(state.mode!=='layout')throw Error('Switch to Layout before editing.');remember();state.project=project;persist();renderProperties();renderTree();views.render();validate();}});
 const actions={
+ 'gds':()=>{if(state.mode==='layout')gdsTools.open();},
  'geometry-vertices':()=>geometryTools.open(state.selected),
  'capabilities':()=>capabilityTools.open(),
  'inverse-design':()=>inverseDesign.open(),

@@ -27,7 +27,7 @@ def main():
             # Report file/line only, never print candidate credential contents.
             for match in pattern.finditer(text):checks.append(dict(file=path.as_posix(),kind=kind,line=text[:match.start()].count('\n')+1))
     dependencies=[]
-    for name in ['fdtd','numpy','scipy','torch','fastapi','uvicorn','pydantic','cupy-cuda12x','psutil']:
+    for name in ['fdtd','numpy','scipy','torch','fastapi','uvicorn','pydantic','cupy-cuda12x','psutil','gdstk']:
         try:d=distribution(name)
         except PackageNotFoundError:
             dependencies.append(dict(name=name,installed=False));continue

@@ -26,9 +26,19 @@ Streamed `PeriodicLayerResponse` avoids both global 3D epsilon and epsilon-VJP
 arrays. Host, file and asynchronous CUDA numerical checks pass. Its large-grid
 throughput is still unmeasured.
 
-The [exact-endpoint PMC foundation](docs/PMC_IMPLEMENTATION_PLAN.md) and
-[full-vector mode foundation](docs/mode_ports.md) are available for development.
-Production PMC dispatch and mode injection remain incomplete.
+The [exact-endpoint PMC foundation](docs/PMC_IMPLEMENTATION_PLAN.md) is available
+for development. Production PMC dispatch remains incomplete.
+[Native mode injection](docs/MODE_INJECTION.md) now supports a fixed selected
+mode, directional complex amplitudes and matched-reference t/r, with actual
+FP32 CUDA guide propagation and material-gradient checks. General multiport
+S matrices, source/eigenmode gradients and streamed injection remain open.
+
+[GDS geometry workflows](docs/GDS.md), [trainable density constraints](docs/DESIGN_PARAMETERIZATION.md)
+and [differentiable diffraction/far-field transforms](docs/RADIATION.md) extend
+the Python API. The native dipole angular-pattern error decreases from 1.03%
+to 0.23% over three FP32 meshes. See the [FDTDX parity completion gates](docs/FDTDX_PARITY_KO.md)
+for verified scope and remaining work. This does not establish overall FDTDX
+parity or a speed advantage over it.
 
 Experimental [resident/streamed adjoint selection](docs/EXECUTION_SELECTION.md)
 now compares full-grid and tiled execution with one CPU design-tensor API.
@@ -58,7 +68,7 @@ The two large-index cases also passed with two device checkpoints under a
 on RTX 5880 with peak Torch CUDA allocations of 15.9 GB and 17.9 GB. These
 12-step capacity/gradient checks do not establish long-time convergence or speed superiority.
 
-Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and physical convergence of the full CR objective remain pending.
+Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. General mode-port workflows and physical convergence of the full CR objective remain pending.
 
 [Parameterized boxes, ellipsoids and cylinders](docs/DIFFERENTIABLE_GEOMETRY.md)
 connect dimensions, positions, rotations and permittivities to Torch optimizers.
@@ -218,13 +228,26 @@ Reviewed external public source on 19 September 2026. TorchFDTD implementation s
 
 | Project | GPU/backend | Independent ensemble / same-GPU batch | Adjoint/autodiff | Relevant scope | RTX 5880 comparison |
 |---|---|---|---|---|---|
-| **TorchFDTD** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **Partial**. Real dielectric Yee/CPML discrete adjoint, Torch geometry and bounded three-tier checkpoints. DE remains a separate path | Browser + Python analytic CAD, independent FSP scene import/writeback subset, multipole ADE, independent-axis/explicit/graded meshes, six-face CPML, selective shared CUDA plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
+| **TorchFDTD** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **Partial**. Dielectric/Bloch/CPML/ADE/PEC discrete adjoints, analytic geometry and density, fixed-plane/mode/radiation objectives and hierarchical replay. Source/eigenmode derivatives remain limited | Browser + Python CAD, independent FSP subset, GDS geometry, multipole ADE, rectilinear/graded mesh, selective plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
 | [FDTDX](https://github.com/ymahlau/fdtdx) | **JAX currently**, CUDA/ROCm installation paths | JAX composition. Same-GPU cohort throughput not measured here | **Yes**, reversible/checkpointed paths with model restrictions | Already provides dispersive/anisotropic materials and rectilinear grids. Those are not unique TorchFDTD advantages | Not measured, Linux CUDA environment pending |
 | [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX wrapper + specialized CUDA | README proposes distributing independent jobs through JAX. Fused batch-axis throughput not verified | Reviewed primitive has no registered JVP/VJP/transpose rule | Fast specialized dielectric scope, constrained z size, x/y adiabatic absorption, z PML. TorchFDTD adds dispersion, graded grids and online plane DFT | Not measured, Linux CUDA environment pending |
 | [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy / PyTorch CUDA | Public `Grid` represents one case. Our external graph adapter runs its updates. Dedicated upstream cohort API not verified | Default backend disables gradients, so default autodiff is not established | Readable grid foundation used and attributed by TorchFDTD | PyPI 0.2.2 measured, including eager and graph-adapted baselines |
 | [fdtd3d](https://github.com/zer011b/fdtd3d) | C++ / CUDA / MPI | **Single-problem domain decomposition** differs from independent-case batches. Cohort throughput not verified | Not documented in reviewed README | Compiled solver and distributed execution. Single-grid MPI is still missing from TorchFDTD | Not measured, compatible compiler/runtime environment pending |
 
-FDTDX is ahead of TorchFDTD for differentiable inverse design. We have not demonstrated a speed advantage against FDTDX, fdtdz or fdtd3d. [Pinned sources, detailed limitations and next work](docs/OPEN_SOURCE_COMPARISON_KO.md).
+FDTDX provides single-problem sharding and general tensor materials that
+TorchFDTD still lacks. We have not demonstrated a speed advantage against
+FDTDX, fdtdz or fdtd3d. [Pinned sources and limitations](docs/OPEN_SOURCE_COMPARISON_KO.md).
+
+| Required workflow | TorchFDTD implementation milestone | Still needed for broader FDTDX parity |
+|---|---|---|
+| GDS | Explicit layer stack, hierarchy/units/PATH conversion and limited export | General holes and automatic runnable port mapping |
+| Design parameters | Density filters, fixed masks, exact symmetry, projection/continuation and optimizer resume | General shape derivatives and fabrication guarantees |
+| Mode ports | Actual fixed-mode CUDA launch, directional detection, complex t/r and a material VJP | Multimode/multiport S matrix, open cross-sections, streamed injection and source/eigenmode gradients |
+| Radiation | Differentiable Bloch orders and closed-box homogeneous far fields, including native FP32 mesh convergence | Layered/periodic-lattice far fields and complete UI |
+| Boundaries / tensors / multi-GPU | PEC production support, PMC operator foundation, diagonal adjoint materials | PMC runtime integration, general tensors and verified single-problem multi-GPU |
+
+The [complete row-by-row parity gates](docs/FDTDX_PARITY_KO.md) retain failed,
+partial and unmeasured conditions instead of treating API presence as full parity.
 
 **Current development, 0.14:** closed normal-incidence [TFSF boxes](docs/TFSF_SOURCES.md) separate incident and scattered fields around isolated structures. Python, UI previews, CPU/CUDA and shared CUDA batches use a live incident Yee line and sparse face corrections. Independent discrete references and analytic Mie sphere comparisons are recorded, including non-monotonic mesh errors. A 3D FSP source subset is mapped, while oblique incidence and general FSP compatibility remain open. Version 0.13 added [one-way periodic-cell planes](docs/ONEWAY_SOURCES.md), while 0.12 added [electric/magnetic vector sources](docs/DIPOLE_SOURCES.md). Python controls fixed-duration ensembles, objectives and native field results through [`run_tensor_batch`](docs/TENSOR_BATCH.md). Automatic decay termination, full-domain divergence checks, coupled passive multipole materials and matched-reference mesh studies remain available in single/process runs. See the [ordered implementation priorities](docs/IMPLEMENTATION_PRIORITIES.md).
 
@@ -720,7 +743,7 @@ On Windows, after deployment, `scripts/start_remote.ps1 -GpuHost YOUR_GPU_HOST` 
 - Point monitors record one E/H component every step. Choose FFT bins or custom-range uniform frequency/wavelength DFT, with None/Start/End/Full/Hann apodization. [Definitions, UI controls and exports](docs/MONITORS.md) distinguish FFT amplitude from complex DFT integrals. Neither is normalized transmission, reflection, power or S-parameters. E and H are staggered in space and time, and should not be naively multiplied as collocated Poynting fields.
 - Field movies retain at most 100 sampled planes, downsampled spatially to ≤256 pixels per axis for the browser. NPZ also retains all final E/H components at the full mesh resolution.
 - The web server serializes interactive runs because `fdtd` uses process-global state. The Python BatchRunner isolates concurrent cases in separate processes. One web-server process supports one active job and two queued jobs. Cancellation is checked each time step. Job metadata is session-local; exported NPZ files persist.
-- FSP files can be inspected and edited using the optional [Lumerical bridge](docs/FSP.md), with original-file preservation and saved-value verification. The independent importer runs the [documented layout subset](docs/FSP_NATIVE.md) on the native GPU engine. Unsupported physics blocks conversion, and calculation differences remain visible. Native `.lsf`, GDS and STL import are not implemented. Mode ports, far-field transformations and adaptive subgrids remain unimplemented. First-order inverse-design gradients are available through the experimental adjoint APIs within their documented physics and geometry limits. Planar flux monitors and black-box inverse design are available natively.
+- FSP files can be inspected and edited using the optional [Lumerical bridge](docs/FSP.md), with original-file preservation and saved-value verification. The independent importer runs the [documented layout subset](docs/FSP_NATIVE.md) on the native GPU engine. Unsupported physics blocks conversion, and calculation differences remain visible. Native `.lsf`, STL and adaptive subgrids remain unimplemented. [GDS](docs/GDS.md), [fixed-mode injection/detection](docs/MODE_INJECTION.md) and [homogeneous radiation transforms](docs/RADIATION.md) now have explicit Python workflows and documented limits. First-order inverse-design gradients are available through the experimental adjoint APIs within their documented physics and geometry limits. Planar flux monitors and black-box inverse design are available natively.
 
 ## Verification and performance
 

@@ -133,6 +133,18 @@ updates={
  'workflow.checkpoint':('partial','missing','Adjoint 내부 E/H·CPML·명시적 ADE P/Q checkpoint/replay와 device/host/disk 저장. 일반 forward 작업의 영구 저장·재개, TFSF 상태 및 UI checkpoint는 남음.',('torchfdtd/differentiable.py','tests/test_differentiable.py')),
  'workflow.multi_gpu':('partial','missing','Python devices 목록으로 독립 case를 여러 CUDA 장치에 배정. 현재 single-GPU 검증만 실시. 단일 grid multi-GPU/MPI는 미지원.',('torchfdtd/batch.py','tests/test_batch.py')),
 }
+updates.update({
+ 'cad.gds':('partial','implemented','Python 및 browser 선택 cell, layer/datatype→명시적 Z/material, 단위·계층·회전·반사·array·PATH와 제한 export. Preview/report→CAD 적용→JSON/Python 저장 검증. TEXT/TEXTTYPE port metadata는 실제 source와 별개. Hole·일반 port 자동 연결은 미지원.',('torchfdtd/gds.py','torchfdtd/gds_service.py','frontend/src/gds.js','tests/test_gds.py','tests/test_gds_api.py','tests/ui/gds.spec.js','docs/GDS.md')),
+ 'source.mode':('partial','missing','전벡터 CPU sparse mode와 실제 resident CUDA Yee 주입. 균일 3D·등방 fixed cross-section·횡방향 periodic·단일 carrier. Source/eigenmode material gradient는 고정. Streamed·횡방향 PML은 남음.',('torchfdtd/mode_ports.py','torchfdtd/mode_injection.py','tests/test_mode_injection.py','docs/MODE_INJECTION.md')),
+ 'source.port':('partial','missing','단일 선택 mode의 directional amplitude·matched-reference complex t/r. 여러 port/channel S 행렬과 GDS 자동 배치는 남음.',('torchfdtd/mode_injection.py','tests/test_mode_injection.py','docs/MODE_INJECTION.md')),
+ 'analysis.sparameters':('partial','missing','고정 모드의 전진/후진 분리와 복소 t/r, reference 양쪽 field graph. Native slab 산란체의 transmission material VJP 검증. 자동 full S 행렬·일반 eigenmode 미분은 남음.',('torchfdtd/mode_injection.py','tests/test_mode_injection.py','docs/MODE_INJECTION.md')),
+ 'analysis.nearfar':('partial','missing','균질·무손실·등방 외부의 6면 closed-box vector transform. 복소 진폭·편광·방사 전력·실제 material VJP와 FP32 dipole 메시 수렴. Substrate·periodic lattice·유한 거리 near field는 미지원.',('torchfdtd/radiation.py','tests/test_radiation.py','benchmarks/radiation_dipole.py','docs/RADIATION.md')),
+ 'analysis.diffraction':('partial','missing','균질 periodic cell의 Bloch Rayleigh orders, E/H 전후진 분리, propagating 효율·evanescent 진폭, reference 양쪽 graph. Full midpoint quadrature 필요, grazing cutoff 거부.',('torchfdtd/radiation.py','tests/test_radiation.py','docs/RADIATION.md')),
+})
+updates['workflow.optimization'] = (
+    'partial','partial',updates['workflow.optimization'][2] +
+    ' 별도 DensityParameterization은 물리 filter·정확한 mask/symmetry·beta continuation·명시적 STE·optimizer 재시작과 실제 streamed 목적함수를 지원.',
+    updates['workflow.optimization'][3] + ('torchfdtd/design_parameterization.py','tests/test_design_parameterization.py','docs/DESIGN_PARAMETERIZATION.md'))
 for row in features:
     if row['id'] in updates:
         native,ui,scope,evidence=updates[row['id']]
@@ -183,7 +195,7 @@ def build():
         for file in row['evidence']:
             if not Path(file).is_file():raise ValueError('Missing evidence: '+file)
     annotate_inventory(inventory)
-    package=Path('torchfdtd/feature_inventory.json');package.write_text(json.dumps(inventory,ensure_ascii=False,indent=2),encoding='utf-8')
+    package=Path('torchfdtd/feature_inventory.json');package.write_text(json.dumps(inventory,ensure_ascii=False,indent=2),encoding='utf-8',newline='\n')
     with Path('docs/FEATURE_PRIORITY_INDEX.csv').open('w',encoding='utf-8-sig',newline='') as stream:
         columns=['id','name','product_priority','delivery_rank','decision','workstream_title','remaining','native','python','ui','priority_reason']
         writer=csv.DictWriter(stream,fieldnames=columns,extrasaction='ignore',lineterminator='\n');writer.writeheader()
@@ -200,7 +212,7 @@ def build():
             labels=[inventory['status_labels'][row[k]] for k in ('native','python','ui','fsp')]
             lines.append('| '+('☑' if row['native']=='implemented' else '☐')+f" | [{row['name']}]({row['reference']}) | "+' | '.join(labels)+f' | {scope} |')
         lines.append('')
-    Path('docs/FEATURE_CHECKLIST.md').write_text('\n'.join(lines),encoding='utf-8')
+    Path('docs/FEATURE_CHECKLIST.md').write_text('\n'.join(lines),encoding='utf-8',newline='\n')
     print('Inventory:',len(rows),'rows;',inventory['counts'])
 
 if __name__=='__main__':build()

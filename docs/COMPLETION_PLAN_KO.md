@@ -42,8 +42,12 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 
 PMC는 실제 endpoint의 face/edge 상태를 갖는 CPU 기준 구현과 real FP32
 CUDA forward/transpose 기반을 검증했다. 공개 solver·streaming·ADE 연결은
-아직 남아 있다. [Mode port 기반](mode_ports.md)은 벡터 고유모드, 전력 정규화,
-필드 overlap 미분을 검증했으며 실제 FDTD mode source 연결은 다음 단계다.
+아직 남아 있다. [Mode source 연결](MODE_INJECTION.md)은 실제 CUDA 전파,
+방향별 복소 t/r 및 국소 산란체 material VJP까지 검증했다. 일반 multiport
+S 행렬·횡방향 PML·streamed source·eigenmode 미분은 남아 있다.
+[회절·원거리장](RADIATION.md), [density 제약](DESIGN_PARAMETERIZATION.md),
+[GDS](GDS.md)도 추가했다. 항목별 FDTDX 동등성의 정확한 완료 기준은
+[별도 추적표](FDTDX_PARITY_KO.md)를 따른다.
 
 2026-09-21 후속 증거: [FP32 박막 수렴 실험](gradient_mesh.md)에서 동일한
 물리 영역·시간·소스·PML 두께를 유지하고 메시와 형상 전이 폭을 줄였다.
