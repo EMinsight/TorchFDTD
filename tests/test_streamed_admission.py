@@ -7,6 +7,40 @@ from photonweave.boundaries import YeeGrid
 from test_differentiable import project
 
 
+def test_storage_selection_prefers_host_then_explicit_disk_and_rechecks(tmp_path,monkeypatch):
+    from dataclasses import replace
+    from photonweave import select_streamed_storage,estimate_streamed_memory
+    p=project('3d',steps=10)
+    p.region.size=(6.4,1.6,1.6)
+    base=StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2,
+        state_directory=tmp_path/'scratch',disk_budget_bytes=1024**3)
+    host=select_streamed_storage(p,base)
+    assert host.options.state_storage=='host' and not host.rejected
+    disk_size=estimate_streamed_memory(p,replace(base,state_storage='disk'))['host_reservation_bytes']
+    assert disk_size<host.reservation['host_reservation_bytes']
+    bounded=replace(base,host_budget_bytes=disk_size)
+    disk=select_streamed_storage(p,bounded)
+    assert disk.options.state_storage=='disk' and 'host' in disk.rejected
+    assert disk.options.slab_width==base.slab_width
+    assert not (tmp_path/'scratch').exists()
+    with pytest.raises(ValueError,match='No streamed storage policy fits'):
+        select_streamed_storage(p,replace(bounded,disk_budget_bytes=1))
+    with pytest.raises(ValueError,match='No explicit disk'):
+        select_streamed_storage(p,replace(bounded,state_directory=None,disk_budget_bytes=None))
+    epsilon=torch.full(p.region.shape,1.7,dtype=torch.float64,requires_grad=True)
+    expected=StreamedSimulation(p,host.options)(epsilon)
+    expected_gradient,=torch.autograd.grad(expected.signals.square().sum(),epsilon)
+    actual=StreamedSimulation(p,disk.options)(epsilon)
+    actual_gradient,=torch.autograd.grad(actual.signals.square().sum(),epsilon)
+    torch.testing.assert_close(actual.signals,expected.signals,rtol=0,atol=0)
+    torch.testing.assert_close(actual_gradient,expected_gradient,rtol=0,atol=0)
+    assert not list((tmp_path/'scratch').iterdir())
+    # A plan is not a resource lease: changed conditions must reject execution.
+    monkeypatch.setattr('photonweave.streamed.host_memory',lambda:dict(available_bytes=1))
+    with pytest.raises(ValueError,match='host budget'):
+        StreamedSimulation(p,disk.options)(epsilon)
+
+
 def test_public_plan_handles_beyond_vram_shape_without_allocating_fields(tmp_path,monkeypatch):
     from photonweave import estimate_streamed_memory, Project, BoundaryFace
     region=Region(dimension='3d',size=(102.4,102.4,57.6),mesh=.1,steps=10,

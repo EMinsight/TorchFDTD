@@ -12,14 +12,14 @@ import torch
 
 from photonweave import (AdjointOptions,DifferentiableSimulation,Monitor,Project,
                         Region,Source,smooth_sphere_epsilon,StreamedSimulation,StreamedAdjointOptions,
-                        estimate_streamed_memory)
+                        estimate_streamed_memory,select_streamed_storage)
 
 
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--device',default='cuda' if torch.cuda.is_available() else 'cpu')
     ap.add_argument('--iterations',type=int,default=8)
-    ap.add_argument('--execution',choices=('resident','streamed','disk'),default='resident')
+    ap.add_argument('--execution',choices=('resident','streamed','disk','auto'),default='resident')
     ap.add_argument('--state-directory',default='results/design-state-scratch')
     ap.add_argument('--output',default='results/differentiable-design.json')
     args=ap.parse_args()
@@ -31,14 +31,19 @@ def main():
     geometry_device=args.device if args.execution=='resident' else 'cpu'
     radius=torch.nn.Parameter(torch.tensor(.25,device=geometry_device,dtype=torch.float64))
     memory_plan=None
+    storage_selection=None
     if args.execution=='resident':
         model=DifferentiableSimulation(project,AdjointOptions(checkpoints=4,storage='host',host_budget_bytes=128*1024**2))
     else:
         options=StreamedAdjointOptions(device=args.device,slab_width=4,temporal_depth=4,
                                 gpu_budget_bytes=128*1024**2,host_budget_bytes=128*1024**2,
                                 state_storage='disk' if args.execution=='disk' else 'host',
-                                state_directory=args.state_directory if args.execution=='disk' else None,
-                                disk_budget_bytes=128*1024**2 if args.execution=='disk' else None)
+                                state_directory=args.state_directory if args.execution in ('disk','auto') else None,
+                                disk_budget_bytes=128*1024**2 if args.execution in ('disk','auto') else None)
+        if args.execution=='auto':
+            plan=select_streamed_storage(project,options)
+            options=plan.options
+            storage_selection=dict(selected=options.state_storage,rejected=plan.rejected)
         # Check capacity before constructing the full-domain geometry tensor.
         # Geometry and optimizer allocations are additional caller-owned memory.
         memory_plan=estimate_streamed_memory(project,options)
@@ -56,7 +61,8 @@ def main():
         optimizer.step()
         with torch.no_grad():radius.clamp_(.1,.4)
     output=dict(description=__doc__,device=args.device,geometry_device=geometry_device,execution=args.execution,
-                memory_plan=memory_plan,history=history,final_radius_um=float(radius.detach()))
+                memory_plan=memory_plan,storage_selection=storage_selection,
+                history=history,final_radius_um=float(radius.detach()))
     path=Path(args.output);path.parent.mkdir(parents=True,exist_ok=True)
     path.write_text(json.dumps(output,indent=2),encoding='utf-8')
     print(json.dumps({'initial_loss':history[0]['loss'],'last_evaluated_loss':history[-1]['loss'],

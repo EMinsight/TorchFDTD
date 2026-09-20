@@ -1,5 +1,5 @@
 """Experimental host/file-backed differentiable FDTD with bounded CUDA slabs."""
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from contextlib import contextmanager
 from pathlib import Path
 import math
@@ -152,6 +152,35 @@ def estimate_streamed_memory(project, options=None, *, diagonal=False):
     shape=project.region.shape+((3,) if diagonal else ())
     epsilon=torch.empty(shape,dtype=getattr(torch,project.region.precision),device='meta')
     return _reservation(project,epsilon,options)
+
+
+@dataclass(frozen=True)
+class StreamedStoragePlan:
+    options: StreamedAdjointOptions
+    reservation: dict
+    rejected: dict
+
+
+def select_streamed_storage(project, options=None, *, diagonal=False):
+    """Prefer admitted DRAM banks, otherwise use explicitly configured disk.
+
+    Capacity selection only, without domain allocation or performance probes.
+    Tile/checkpoint policies and budgets are preserved. This does not select
+    resident execution, change physical precision or bypass execution admission.
+    """
+    base=options or StreamedAdjointOptions()
+    rejected={}
+    for storage in ('host','disk'):
+        if storage=='disk' and (base.state_directory is None or base.disk_budget_bytes is None):
+            rejected[storage]='No explicit disk directory and budget configured.'
+            continue
+        candidate=replace(base,state_storage=storage)
+        try:reservation=estimate_streamed_memory(project,candidate,diagonal=diagonal)
+        except ValueError as exc:
+            rejected[storage]=str(exc)
+            continue
+        return StreamedStoragePlan(candidate,reservation,rejected)
+    raise ValueError('No streamed storage policy fits: '+str(rejected))
 
 
 class _Streamed(torch.autograd.Function):

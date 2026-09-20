@@ -191,6 +191,22 @@ This is a memory check, not complete physics validation or a reservation of
 resources against other programs. Execution rechecks admission. Online spectral
 observers have additional observation-specific accounting.
 
+`select_streamed_storage(project, options)` tries those same reservations for
+DRAM first and then file banks. The disk fallback requires an explicit
+`state_directory` and `disk_budget_bytes` in the supplied options. It returns
+a `StreamedStoragePlan` containing `options`, `reservation` and rejected-policy
+diagnostics. Pass `plan.options` to `StreamedSimulation`. Selection creates no
+state files and preserves the tile, checkpoint and memory budgets. This is a
+capacity preference, not a timing optimizer or resident/DRAM/disk unified
+scheduler. Execution rechecks free resources. Both policies failing is an
+error, never an implicit budget increase.
+The regularized sphere example accepts
+`python -m examples.differentiable_design --execution auto` and records the
+selected storage and rejected alternatives alongside its memory estimate.
+This example's auto mode selects host/file banks only. It does not select
+resident execution or tune tile performance. A fallback test verifies full
+signal/gradient agreement and rejects execution if free RAM drops after planning.
+
 Set `disk_free_reserve_bytes` to retain
 an additional minimum amount of free space, for example `100*1024**3` on a
 shared system drive. Admission and every new file-bank allocation check this
