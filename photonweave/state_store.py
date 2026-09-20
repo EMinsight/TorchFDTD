@@ -23,11 +23,14 @@ def disk_free(directory):
 
 
 class StateStore:
-    def __init__(self,directory,budget):
+    def __init__(self,directory,budget,free_reserve_bytes=0):
+        if isinstance(free_reserve_bytes,bool) or not isinstance(free_reserve_bytes,int) or free_reserve_bytes<0:
+            raise ValueError('free_reserve_bytes must be a nonnegative integer.')
         parent = Path(directory).expanduser().resolve()
         parent.mkdir(parents=True,exist_ok=True)
         self.root = Path(tempfile.mkdtemp(prefix='photonweave-state-',dir=parent))
         self.budget = budget
+        self.free_reserve_bytes = free_reserve_bytes
         self.banks = weakref.WeakValueDictionary()
         self.closed = False
         self.live_bytes = self.peak_bytes = self.created_banks = 0
@@ -38,7 +41,8 @@ class StateStore:
         sizes = [math.prod(s.shape)*s.element_size() for s in templates]
         size = sum(sizes)
         if self.live_bytes+size > self.budget:raise MemoryError('Live field banks exceed the disk budget.')
-        if size > disk_free(self.root):raise OSError('Insufficient free space for a field bank.')
+        if size+self.free_reserve_bytes > disk_free(self.root):
+            raise OSError('Insufficient free space for a field bank and reserved disk headroom.')
         key = self.created_banks
         bank = _Bank(self,key,size)
         self.banks[key] = bank
@@ -53,6 +57,7 @@ class StateStore:
 
     def report(self):
         return dict(peak_logical_file_bytes=self.peak_bytes,live_logical_file_bytes=self.live_bytes,
+                    free_reserve_bytes=self.free_reserve_bytes,
                     created_banks=self.created_banks,logical_read_bytes=self.read_bytes,
                     logical_written_bytes=self.written_bytes,max_single_read_bytes=self.max_read_bytes,
                     closed=self.closed,io_scope='Buffered file I/O. OS page cache and physical storage traffic are not measured. No whole-state file mapping.')

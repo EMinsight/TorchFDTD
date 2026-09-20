@@ -2,6 +2,11 @@
 
 Status: preparation only. No public launch or social post has occurred.
 
+Latest author instruction: report completion first and obtain fresh explicit
+approval before publishing any X or Reddit promotion. Earlier conditional
+promotion authorization is superseded. Readiness alone does not authorize a
+post. No social announcement may be sent until that later approval arrives.
+
 ## User authorization and objective
 
 On 2026-09-20 the author requested public promotion on their own X account once

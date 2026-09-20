@@ -29,8 +29,11 @@ class StreamedAdjointOptions:
     state_storage: str = 'host'
     state_directory: str | Path | None = None
     disk_budget_bytes: int | None = None
+    disk_free_reserve_bytes: int = 0
 
     def __post_init__(self):
+        if isinstance(self.disk_free_reserve_bytes,bool) or not isinstance(self.disk_free_reserve_bytes,int) or self.disk_free_reserve_bytes<0:
+            raise ValueError('disk_free_reserve_bytes must be a nonnegative integer.')
         if self.state_storage not in ('host','disk'):raise ValueError('state_storage must be host or disk.')
         if self.disk_budget_bytes is not None and (isinstance(self.disk_budget_bytes,bool) or not isinstance(self.disk_budget_bytes,int) or self.disk_budget_bytes<1):
             raise ValueError('disk_budget_bytes must be a positive integer.')
@@ -90,7 +93,12 @@ def _reservation(project, epsilon, options, spectral=None):
     initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values()))*item
     # The immutable all-zero host initial bank is represented by scalar views.
     # Retain the remaining conservative headroom for replay and transpose banks.
-    state_banks = (options.checkpoints+11)*state
+    # At most C saved block states, one current adjoint and two evolving
+    # primal banks coexist during replay. Transpose instead holds a primal,
+    # old adjoint and new adjoint. Reserve two additional lifetime margins.
+    # The initial all-zero bank is scalar-backed and charged separately.
+    state_bank_capacity = options.checkpoints+5
+    state_banks = state_bank_capacity*state
     disk = state_banks if options.state_storage == 'disk' else 0
     disk_io_workspace = 36*tile_cells*item if disk else 0
     host = (0 if disk else state_banks)+initial_storage+8*epsilon.numel()*material_item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
@@ -101,13 +109,15 @@ def _reservation(project, epsilon, options, spectral=None):
         raise ValueError('Streamed state and checkpoint reservation exceed the host budget.')
     if disk:
         from .state_store import disk_free
-        if disk > min(options.disk_budget_bytes,int(disk_free(options.state_directory)*.8)):
+        free_disk = disk_free(options.state_directory)
+        if disk > min(options.disk_budget_bytes,int(free_disk*.8),free_disk-options.disk_free_reserve_bytes):
             raise ValueError('Field bank reservation exceeds the disk budget or available disk space.')
     if torch.device(options.device).type == 'cuda':
         free, _ = torch.cuda.mem_get_info(torch.device(options.device))
         if gpu > min(options.gpu_budget_bytes, int(free*.8)):
             raise ValueError('Streamed tile workspace reservation exceeds the GPU budget.')
     return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,observation_index_bytes=16*monitors,
+                state_bank_capacity=state_bank_capacity,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,
                 host_initial_state_reservation_bytes=initial_storage,
                 state_bytes=state, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*18*local_slots*tile_cells*item,
@@ -120,7 +130,7 @@ def _backing(options,report,phase):
         yield None
         return
     from .state_store import StateStore
-    store = StateStore(options.state_directory,options.disk_budget_bytes)
+    store = StateStore(options.state_directory,options.disk_budget_bytes,options.disk_free_reserve_bytes)
     try:yield store
     finally:
         try:store.close()

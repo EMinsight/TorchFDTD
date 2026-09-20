@@ -8,6 +8,33 @@ from photonweave import StreamedAdjointOptions,StreamedSimulation,Differentiable
 from test_differentiable import project,gpu
 
 
+def test_reserved_disk_headroom_rechecked_before_each_bank(tmp_path,monkeypatch):
+    import photonweave.state_store as storage
+    template=torch.zeros(8,dtype=torch.float64)
+    remaining=[1024]
+    monkeypatch.setattr(storage,'disk_free',lambda _:remaining[0])
+    with StateStore(tmp_path,512,free_reserve_bytes=256) as store:
+        first,=store.new_state([template])
+        remaining[0]=319  # Another process consumed space after admission.
+        with pytest.raises(OSError,match='headroom'):store.new_state([template])
+        assert store.created_banks==1 and store.live_bytes==64
+        assert first.bank.path.exists()
+        assert store.report()['free_reserve_bytes']==256
+    assert not list(tmp_path.iterdir())
+
+
+def test_streamed_headroom_rejected_before_directory_creation(tmp_path,monkeypatch):
+    import photonweave.state_store as storage
+    monkeypatch.setattr(storage,'disk_free',lambda _:1024)
+    p=project(steps=10)
+    directory=tmp_path/'scratch'
+    options=StreamedAdjointOptions(device='cpu',state_storage='disk',state_directory=directory,
+        disk_budget_bytes=10**9,disk_free_reserve_bytes=1024)
+    with pytest.raises(ValueError,match='disk budget'):
+        StreamedSimulation(p,options)(torch.ones(p.region.shape,dtype=torch.float64))
+    assert not directory.exists()
+
+
 @pytest.mark.parametrize('dtype',[torch.float64,torch.complex64,torch.complex128])
 def test_file_slabs_preserve_duplicate_reductions_and_release_banks(tmp_path,dtype):
     sentinel=tmp_path/'user.txt';sentinel.write_text('keep')

@@ -149,7 +149,19 @@ including tested computation and I/O failures. Only private scratch files are
 removed. The files do not provide durable restart.
 
 Admission separately checks host, GPU and logical disk budgets. Epsilon and its
-gradient still occupy full CPU tensors. File I/O is synchronous and buffered by
+gradient still occupy full CPU tensors. Set `disk_free_reserve_bytes` to retain
+an additional minimum amount of free space, for example `100*1024**3` on a
+shared system drive. Admission and every new file-bank allocation check this
+floor. The default is zero, and another process can still consume space after
+a check. This is not a filesystem quota or an exclusive reservation.
+
+The conservative bank capacity is `checkpoints + 5` complete states, including
+two banks of lifetime margin above the replay bound. Tile workspaces, gradients
+and I/O buffers are charged separately. Tests cover repeated backward with
+cyclic garbage collection disabled and uneven temporal blocks. The actual
+physical-VRAM-overflow validation is tracked [separately](BEYOND_VRAM_VALIDATION.md).
+
+File I/O is synchronous and buffered by
 the OS. Its page cache is outside the host reservation, so this is not a cap on
 whole-machine RAM usage or measured physical SSD traffic. No GPUDirect Storage,
 asynchronous disk prefetch or automatic resident/DRAM/disk tier selection is
