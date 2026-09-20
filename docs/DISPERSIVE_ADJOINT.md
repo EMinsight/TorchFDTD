@@ -1,0 +1,79 @@
+# Differentiable Drude and Lorentz materials
+
+`DispersiveSimulation` extends the resident checkpointed adjoint to coupled
+trapezoidal ADE states. The inputs are epsilon-infinity, oscillator strength,
+resonance angular frequency and damping rate. They can depend on Torch geometry
+or design variables. `DispersivePlaneSimulation` adds fixed spectral E/H planes,
+Poynting flux and the existing reference-normalized flux operation.
+
+```python
+import torch
+from photonweave import DispersiveSimulation, AdjointOptions
+
+# project has a fixed mesh, soft sources and point monitors.
+model = DispersiveSimulation(project, AdjointOptions(checkpoints=4, storage="host"))
+density = torch.sigmoid(logits)
+epsilon_inf = 1.0 + density
+strength = (density * 2e30)[None]       # leading pole axis
+omega0 = torch.tensor([1.8e15], dtype=density.dtype, device=density.device)
+gamma = torch.tensor([2e14], dtype=density.dtype, device=density.device)
+result = model(epsilon_inf, strength, omega0, gamma)
+loss = result.signals.square().mean()
+loss.backward()
+```
+
+This point-field loss is a computational example, not normalized transmission.
+Run `python -m examples.differentiable_dispersive_design --device cpu` for a
+complete geometry-and-damping Adam example. Three tested iterations reduced
+its point-spectrum loss from 9.31013e-5 to 9.26206e-5. This checks the optimizer
+connection and does not establish a useful optical design.
+For a project with field-plane monitors, call
+`DispersivePlaneSimulation(project)(epsilon_inf, strength, omega0, gamma, frequency_hz)`.
+It returns the same plane result type as `DifferentiablePlaneSimulation`.
+Reference fields for normalized flux must obey its mesh, source, frequency and
+sampling contract. Physical convergence and power conservation remain necessary.
+
+All rates use radians per second. Strength uses radians squared per second
+squared. A pole contributes `strength / (omega0**2 - omega**2 - 1j*gamma*omega)`
+in the continuum material model. `omega0=0` selects Drude. These explicit tensor
+inputs replace scene material assignments. Material objects are not converted
+automatically. In particular, the `Material` Lorentz `linewidth_rad_s` field is
+half its oscillator damping rate. `material.oscillators` supplies the actual
+`(omega0, strength, gamma)` tuples used by the native engine.
+
+Strength must have shape `(P,)`, `(P,Nx,Ny,Nz)` or `(P,Nx,Ny,Nz,3)`. Resonance
+and damping additionally accept a shared scalar. All poles are diagonal in
+the Yee components. Inputs must be finite, real and nonnegative, and
+epsilon-infinity must satisfy the existing conservative `epsilon >= 1` contract.
+The engine uses timestep-scaled coefficients to avoid squaring large physical
+rates in FP32. Torch differentiates this parameter conversion and any preceding
+geometry map. Only first-order solver derivatives are implemented.
+
+The explicit transpose includes P and Q in every restart state and propagates
+their adjoints through every replayed timestep. Device, host, file and mixed
+checkpoint tiers use the existing bounded scheduler. Online point spectra
+avoid a complete time-history output. Material P/Q state alone costs
+`6*P*Ncells*field_item_bytes`. Dense per-pole coefficients and parameter VJPs
+add further memory, reported and reserved separately. User geometry graphs
+and other live solver calls have separate allocations.
+
+The current implementation uses Torch updates and an analytic discrete
+transpose. CPU FP32/FP64, CPML, real/complex Bloch and diagonal material
+gradients are covered by targeted tests. CUDA tests are provided but hardware
+validation is pending while both available GPUs run the full CR studies.
+Fused ADE forward/backward, sparse material-state allocation and spatial
+out-of-core ADE are still pending. Selecting fused backward or streamed plane
+options raises an explicit error. Live TFSF, one-way sources, subpixel
+interfaces, moving monitors and higher derivatives are also outside this API.
+
+Validation checks the native Drude/Lorentz/multipole forward, a small full-time
+autograd oracle for all material parameters, a joint parameter finite
+difference, a geometry Taylor test, online spectra, normalized plane-flux
+gradients, checkpoint restoration including P/Q and buffer lifetime without
+cyclic garbage collection. These establish the tested discrete operation.
+They do not establish sharp-interface shape-gradient convergence, large
+dispersive-domain capacity or a competing-solver performance advantage.
+The CPU regression run covering this implementation and the existing resident,
+plane, Bloch, spectral and spatial-checkpoint paths passed 192 tests, with
+59 CUDA-dependent tests skipped. The TeX supplement includes the recurrence
+and transpose and compiles without an overfull-box warning.

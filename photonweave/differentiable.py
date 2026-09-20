@@ -94,7 +94,7 @@ class _Grid:
 
 
 class _System:
-    def __init__(self, project, epsilon, *, prepare_updates=True, observation_monitors=None):
+    def __init__(self, project, epsilon, *, prepare_updates=True, observation_monitors=None, prepare_kernels=True):
         self.project=project
         self.region=r=project.region
         self.epsilon=epsilon
@@ -146,10 +146,10 @@ class _System:
         if observation_monitors is not None:self.monitors=list(observation_monitors)
         self.prepare_observations()
         self.kernel=None
-        if self.device.type=='cuda' and not r.complex_fields:
+        if prepare_kernels and self.device.type=='cuda' and not r.complex_fields:
             from .cuda_kernels import FusedYeeCUDA
             self.kernel=FusedYeeCUDA(g)
-        elif self.device.type=='cuda' and r.cuda_kernel=='fused':
+        elif prepare_kernels and self.device.type=='cuda' and r.cuda_kernel=='fused':
             from .cuda_complex import FusedComplexYeeCUDA
             self.kernel=FusedComplexYeeCUDA(g)
 
@@ -516,6 +516,8 @@ class DifferentiableSimulation(torch.nn.Module):
     Geometry uses the existing micrometre convention. This is an experimental
     fixed-mesh design API, not a claim that every forward feature differentiates.
     """
+    _explicit_dispersive_parameters = False
+
     def __init__(self,project: Project,options: AdjointOptions | None=None):
         super().__init__()
         self.project=Project.model_validate(project.model_dump())
@@ -524,7 +526,7 @@ class DifferentiableSimulation(torch.nn.Module):
         if r.interface_method!='staircase':
             raise ValueError('DifferentiableSimulation currently requires staircase coefficients.')
         active={s.material for s in p.structures if s.enabled}
-        if any(m.oscillators and m.name in active for m in p.materials):
+        if not self._explicit_dispersive_parameters and any(m.oscillators and m.name in active for m in p.materials):
             raise ValueError('Dispersive ADE derivatives are not implemented yet.')
         if any(s.enabled and s.kind=='tfsf' for s in p.sources):
             raise ValueError('Live TFSF incident-state derivatives are not implemented yet.')
@@ -543,7 +545,8 @@ class DifferentiableSimulation(torch.nn.Module):
     def forward(self,epsilon: torch.Tensor):
         return self._run(epsilon,None)
 
-    def _run(self,epsilon,spectral):
+    def _run(self,epsilon,spectral,*,system_factory=None,autograd_input=None,
+             extra_state_bytes=0,extra_workspace_bytes=0):
         r=self.project.region
         r.require_resident()
         if not isinstance(epsilon,torch.Tensor) or epsilon.dtype not in (torch.float32,torch.float64):
@@ -564,8 +567,8 @@ class DifferentiableSimulation(torch.nn.Module):
         # This includes replay, transposed curls, full epsilon gradient and CPML.
         n=math.prod(r.shape);item=epsilon.element_size()*(2 if r.complex_fields else 1)
         cpml_upper=12*n
-        state_upper=(6*n+cpml_upper)*item
-        workspace=(42*n+5*cpml_upper)*item
+        state_upper=(6*n+cpml_upper)*item+extra_state_bytes
+        workspace=(42*n+5*cpml_upper)*item+extra_workspace_bytes
         monitor_count=sum(m.enabled for m in self.project.monitors) if spectral is None else len(spectral.components)
         source_terms_count=sum(len(s.polarization_components)*(2 if s.injection=='oneway' else 1)
                                for s in self.project.sources if s.enabled)
@@ -593,13 +596,14 @@ class DifferentiableSimulation(torch.nn.Module):
                     checkpoint_transfers=self.options.checkpoint_transfers,output_history_bytes=output_bytes if spectral is None else 0,
                     source_history_bytes=source_bytes,observation_index_bytes=observation_index_bytes)
         # A later wavelength/ray configuration must not alter an earlier graph's replay.
-        with torch.no_grad():system=_System(self.project.model_copy(deep=True),epsilon,observation_monitors=None if spectral is None else spectral.observers)
+        factory=system_factory or _System
+        with torch.no_grad():system=factory(self.project.model_copy(deep=True),epsilon,observation_monitors=None if spectral is None else spectral.observers)
         # Check host/disk admission before spending the forward compute time.
         admission=_Checkpoints(system,self.options,report,admission=True)
         admission.close()
         report['observation_storage']='time_history' if spectral is None else 'online_spectrum'
         if spectral is not None:report.update(spectral.reservation(spectral.block_size),spectral_block_size=spectral.block_size)
-        signals=_FDTD.apply(epsilon,system,self.options,report,spectral)
+        signals=_FDTD.apply(epsilon if autograd_input is None else autograd_input,system,self.options,report,spectral)
         if spectral is not None:return spectral.result(signals,report)
         return DifferentiableResult(signals,r.time_step,tuple(m.component for m in self.project.monitors if m.enabled),report)
 

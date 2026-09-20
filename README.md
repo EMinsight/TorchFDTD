@@ -16,7 +16,9 @@ Supported gradients match the DRAM path exactly in the recorded tests, while
 file execution is slower. OS cache memory and sustained NVMe performance remain
 unvalidated.
 
-Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and the CR reconstruction objective remain pending.
+Experimental [differentiable detector planes](docs/DIFFERENTIABLE_PLANES.md) now connect collocated E/H, signed power and matched-reference normalization to the discrete adjoint. A fixed dielectric slab passes Fresnel, conservation and refractive-index gradient checks. Mode ports and physical convergence of the full CR objective remain pending.
+
+[Dispersive material adjoints](docs/DISPERSIVE_ADJOINT.md) connect epsilon-infinity, oscillator strength, resonance and damping to point spectra and fixed plane flux. The resident Torch recurrence includes Drude/Lorentz P/Q states in bounded checkpoint replay. CPU discrete-gradient and native-forward checks pass. Fused ADE kernels, spatial ADE streaming and CUDA hardware validation remain pending.
 
 [Fixed Bloch-phase adjoints](docs/BLOCH_ADJOINT.md) support resident Torch CPU/CUDA and complex checkpoint replay, with an oblique TE slab validation. Optional [fused complex forward updates](docs/COMPLEX_CUDA.md) and [fused complex backward](docs/COMPLEX_CUDA_ADJOINT.md) are available. Experimental [complex spatial streaming](docs/STREAMED_FDTD.md#public-complex-streamed-api) supports DRAM/file-backed states, asynchronous CUDA staging and first-order real-epsilon gradients. Full-pupil CR optical convergence and inverse-design validation remain pending.
 

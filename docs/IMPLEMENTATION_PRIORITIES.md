@@ -4,7 +4,7 @@
 
 ## 현재 실행 순서 · 2026-09-20
 
-1. **미분 가능한 물리 경로.** 제한된 실수 비분산 Yee·CPML의 이산 adjoint와 fused CUDA backward, 점 관측, 전체 시간기록 없이 블록으로 누적하는 Torch DFT와 그 transpose, regularized sphere 형상과 Adam을 구현했다. [API 범위](DIFFERENTIABLE_FDTD.md)에 표시한 부분 구현이며 고정 검출면의 E/H 보간·전력 적분·기준 정규화와 박막 검증을 추가했다. 고정 Bloch 위상의 resident Torch CPU/CUDA 미분과 경사 TE 박막 검증도 추가했다. mode port 목적함수, ADE·TFSF, coupled subpixel, 복소 fused kernel과 공간 스트리밍을 확대해야 한다. Taylor 검사는 이산식 검증이며 물리 shape-gradient 수렴은 별도다.
+1. **미분 가능한 물리 경로.** 제한된 실수 비분산 Yee·CPML의 이산 adjoint와 fused CUDA backward, 점 관측, 전체 시간기록 없이 블록으로 누적하는 Torch DFT와 그 transpose, regularized sphere 형상과 Adam을 구현했다. [API 범위](DIFFERENTIABLE_FDTD.md)에 표시한 부분 구현이며 고정 검출면의 E/H 보간·전력 적분·기준 정규화와 박막 검증을 추가했다. 고정 Bloch 위상의 resident Torch CPU/CUDA 미분과 경사 TE 박막 검증도 추가했다. 분산 재료의 resident Torch transpose와 spectral plane을 추가했다. Fused·공간 ADE, mode port 목적함수, TFSF와 coupled subpixel을 확대해야 한다. Taylor 검사는 이산식 검증이며 물리 shape-gradient 수렴은 별도다.
 2. **계층형 메모리와 공간·시간 분할.** GPU/host/disk checkpoint, 혼합 tier, binomial 재계산과 비동기 checkpoint staging을 구현했다. 별도의 [DRAM 공간·시간 slab API](STREAMED_FDTD.md)는 halo adjoint, 버퍼 재사용, 비동기 타일 파이프라인과 짧은 실제 실행을 이용한 정책 선택을 구현한 실험 단계다. 두 길이 측정과 checkpoint 재계산 비용으로 정책 선택을 보완했고, 명시적 streamed 모드에서 838만 셀의 128-step forward·gradient 실행을 검증했다. 타일 내부의 제한된 체크포인트로 재계산을 줄이는 경로도 추가했으며, K=32의 내부 비교에서 1.49배 빨라졌지만 작은 문제에서는 역효과가 있어 선택 옵션으로 유지한다. 54GiB E/H를 갖는 6.04억 셀의 10-step forward·gradient 실행이 RTX 5880에서 완료됐고 최대 Torch CUDA 할당은 7.09GB였다. 전체 52분이 걸린 짧은 용량 검증이며 장시간 응용의 속도와 수렴 및 정책 예측의 일반화는 남아 있다. 실험적 파일 공간 backing을 추가했고 DRAM 경로와 gradient 일치를 검증했다. 현재 파일 경로는 더 느리며 OS cache를 포함한 실제 RAM 사용량과 지속 NVMe 성능은 미검증이다. 용량 기반 DRAM/파일 자동 선택과 시간·주파수 관측 예산 검사를 추가했다. Microbatch 공동 예산, resident까지 포함한 성능 기반 자동 tier 선택과 단일 grid multi-GPU는 남아 있다. 작은 격자의 전송·재계산 오버헤드는 아직 크다. [구체적 통과 조건](HIERARCHICAL_EXECUTION.md).
 3. **정확도와 유효한 설계 목적함수.** 측정 재료 피팅과 실험적 subpixel의 독립 해석 기준 검증을 유지한다. 모드 소스·포트의 전력 정규화, 양방향 분해와 상반성·보존 검사를 진행한다. 작은 adjoint 구현을 이 모든 기능이 끝날 때까지 미루지 않는다.
 4. **동일 오차의 전체 역설계 비용.** forward, backward, 재계산, I/O, geometry VJP와 optimizer를 함께 측정한다. 가능한 최대 크기와 처리 속도를 분리하고, 기존 잘 조정된 정책과 경쟁 solver를 지원 조건에 맞춰 비교한다. 성능 예상치를 측정 결과로 표시하지 않는다.
@@ -19,7 +19,7 @@
 | 3 | P0 | 공개 전 필수 | 독립 배포 | 코드·데이터·라이선스·자격증명 확인, 물리 구현과 별도 출고 조건 |
 | 4 | P0 | 핵심 | Torch adjoint·자동미분 | 제한된 실수 유전체/CPML 경로 구현, 일반 물리·포트·형상 미분 확대 |
 | 5 | P0 | 핵심 | 계층형 메모리·대규모 실행 | 체크포인트 3계층, DRAM slab·비동기 전송·정책 선택 부분 구현. 54GiB 짧은 forward/VJP 검증 완료. 장시간 응용·통합 정책 검증은 남음 |
-| 6 | P1 | 필수 | 측정·분산 재료 | passive fitting·ADE forward 구현, 설계에 필요한 ADE backward |
+| 6 | P1 | 필수 | 측정·분산 재료 | passive fitting·ADE forward 및 resident Torch ADE backward 구현, fused·공간 ADE 검증 후속 |
 | 7 | P1 | 필수 | 계면·메시 | 실험적 subpixel의 개선·퇴행 기록, 고굴절률·분산·비균일 계면 및 gradient 수렴 |
 | 8 | P1 | 필수 | 모드·포트·정규화 | 독립 고유모드·전력 보존·S-parameter 검증 |
 | 9 | P1 | 필수 | CUDA tensor batch | forward cohort 구현, gradient microbatch·공유 메모리 예산 |

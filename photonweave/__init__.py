@@ -68,3 +68,5 @@ from .periodic_response import periodic_layer_response
 __all__ += ['periodic_layer_response']
 from .reference_cache import PlaneReferenceCache
 __all__ += ['PlaneReferenceCache']
+from .dispersive_adjoint import DispersiveSimulation, DispersivePlaneSimulation
+__all__ += ['DispersiveSimulation', 'DispersivePlaneSimulation']

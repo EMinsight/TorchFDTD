@@ -474,4 +474,63 @@ consistency results, not a converged optical application or speed advantage.
 Torch allocations exclude context memory and process RSS excludes OS file
 cache. The initial attempt was interrupted by a workstation restart and its
 forward-only snapshot is retained separately from the completed retry.
+\section{Coupled dispersive material transpose}
+A separate resident operation now includes passive Drude and Lorentz poles.
+The pole parameters are spatially diagonal tensors and may depend on a
+Torch geometry map. Define dimensionless parameters $A_j=(\omega_{0j}\Delta t)^2$,
+$G_j=\gamma_j\Delta t$ and $S_j=f_j\Delta t^2$, where $f_j$ is the oscillator
+strength. With $Q_j=\Delta t\,\partial_t P_j$, define
+\begin{equation}
+ a_j=A_j/2,\qquad d_j=1+G_j/2+A_j/4,\qquad k_j=S_j/(4d_j).
+\end{equation}
+All products below act at individual Yee components. Let $c$ be the
+electric curl increment before division by permittivity. The coupled
+trapezoidal electric update is
+\begin{align}
+ r_j&=(Q_j-a_jP_j)/d_j, & b&=\epsilon_\infty+\sum_j k_j,\\
+ \widetilde E&=\frac{(\epsilon_\infty-\sum_j k_j)E+c-\sum_j r_j}{b}, &
+ \delta_j&=r_j+k_j(\widetilde E+E),\\
+ P'_j&=P_j+\delta_j, & Q'_j&=-Q_j+2\delta_j.
+\end{align}
+The electric source is added after this correction. The magnetic update
+uses that injected electric field. Source values are fixed in this API.
+The new material states join E, H and all CPML memories in every checkpoint.
+
+After transposing the magnetic update and observation, let $\bar e$ be the
+incoming electric adjoint. For complex Bloch fields, use Hermitian field
+transposes and real material derivatives. Set
+\begin{align}
+ t_j&=\bar P'_j+2\bar Q'_j, &
+ u&=(\bar e+\sum_j k_jt_j)/b,\\
+ v&=-\operatorname{Re}[(\bar e+\sum_j k_jt_j)^*\widetilde E]/b, &
+ \bar r_j&=t_j-u.
+\end{align}
+The material and local state derivatives are
+\begin{align}
+ \bar\epsilon_\infty&=\operatorname{Re}(u^*E)+v,\\
+ \bar k_j&=\operatorname{Re}[t_j^*(\widetilde E+E)-u^*E]+v,\\
+ \bar a_j&=-\operatorname{Re}(\bar r_j^*P_j)/d_j,\\
+ \bar d_j&=-\operatorname{Re}(\bar r_j^*r_j)/d_j-\bar k_j k_j/d_j,\\
+ \bar S_j&=\bar k_j/(4d_j),\qquad
+ \bar A_j=\bar a_j/2+\bar d_j/4,\qquad \bar G_j=\bar d_j/2,\\
+ \bar P_j&=\bar P'_j-a_j\bar r_j/d_j,\qquad
+ \bar Q_j=-\bar Q'_j+\bar r_j/d_j,\\
+ \bar E&=\sum_j k_jt_j+(\epsilon_\infty-\sum_j k_j)u.
+\end{align}
+The curl adjoint receives $u$ with the existing Courant factor. Torch
+differentiates the timestep scaling and preceding geometry map. This
+construction retains a bounded set of physical states rather than a
+computational graph across all time steps.
+
+The implemented path uses Torch operations and an explicit analytic
+transpose. Small CPU tests cover FP32 and FP64, fixed Bloch phase, scalar
+and diagonal epsilon, all four material parameter derivatives, checkpoint
+restoration and online spectral observations. Native Drude, Lorentz and
+multipole forward traces agree with the new recurrence. A full-time
+autograd oracle and directional tests check the material VJP. Fixed
+collocated planes connect it to reference-normalized flux objectives.
+CUDA hardware validation, fused ADE kernels, spatially streamed ADE,
+sparse oscillator state and physical gradient convergence remain pending.
+These tests do not establish a new dispersive integration algorithm or
+a large-domain performance advantage.
 \end{document}

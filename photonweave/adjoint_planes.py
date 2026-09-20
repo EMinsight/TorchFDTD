@@ -87,6 +87,8 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
     Geometry/epsilon differentiates. Monitor positions and mesh remain fixed.
     Every enabled project monitor must be a field plane.
     """
+    _resident_model_type = DifferentiableSimulation
+
     def __init__(self,project,options=None,*,quadrature_counts=None):
         super().__init__()
         self.project=Project.model_validate(project.model_dump())
@@ -126,12 +128,15 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         # Indexed internal observations avoid thousands of UI point objects.
         internal=self.project.model_copy(deep=True)
         internal.monitors=[Monitor()]
-        self.model=StreamedSimulation(internal,options) if isinstance(options,StreamedAdjointOptions) else DifferentiableSimulation(internal,options)
+        self.model=StreamedSimulation(internal,options) if isinstance(options,StreamedAdjointOptions) else self._resident_model_type(internal,options)
         self._project_snapshot=self.project.model_dump()
         self._internal_snapshot=self.model.project.model_dump()
 
     def forward(self,epsilon,frequency_hz,*,block_size=32):
         """Return an ordered mapping from monitor IDs to spectral plane results."""
+        return self._planes(epsilon,frequency_hz,block_size,lambda spectral:self.model._run(epsilon,spectral))
+
+    def _planes(self,epsilon,frequency_hz,block_size,run):
         if self.project.model_dump()!=self._project_snapshot or self.model.project.model_dump()!=self._internal_snapshot:
             raise ValueError('Plane configuration changed. Rebuild the model to regenerate fixed interpolation and source plans.')
         points=sum(len(plan['weights']) for _,_,plan,_ in self.plans)
@@ -139,7 +144,7 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         spectral=_PlaneSpectrum(epsilon,self.project.region,self.components,frequency_hz,
                                 block_size=block_size,points=points,maps=maps)
         spectral.observers=self.observers
-        result=self.model._run(epsilon,spectral)
+        result=run(spectral)
         output={}
         for identifier,normal,plan,entries in self.plans:
             fields=[]

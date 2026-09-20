@@ -109,7 +109,8 @@ scale with timestep count. See [validation and timings](validation/ONLINE_SPECTR
 | Checkpoint replay on device, host or disk | Implemented, synchronous or optional asynchronous transfers |
 | Mixed GPU/host/disk checkpoint slots | Implemented with explicit slot counts |
 | Full-tensor subpixel geometry derivatives | Pending |
-| ADE, live TFSF and mode-port adjoints | Pending, rejected by this API |
+| ADE material adjoint | Separate [DispersiveSimulation and DispersivePlaneSimulation](DISPERSIVE_ADJOINT.md), resident Torch explicit transpose. Fused and spatial ADE paths remain pending |
+| Live TFSF and mode-port adjoints | Pending, rejected by this API |
 | Complex spatial streaming and fused complex kernels | Pending, explicit rejection for unsupported requests |
 | Trainable sources, boundaries and adaptive meshes | Pending |
 | Higher derivatives | Rejected explicitly |
