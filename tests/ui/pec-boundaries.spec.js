@@ -8,7 +8,7 @@ test('PEC and anti-symmetric faces remain independent through export and executi
  await expect(page.getByLabel('x max bc',{exact:true})).toHaveValue('pml');
  await page.getByLabel('x max bc',{exact:true}).selectOption('antisymmetric');
  await expect(page.getByLabel('x min bc',{exact:true})).toHaveValue('pec');
- await expect(page.getByLabel('x min bc',{exact:true}).locator('option[value="pmc"]')).toHaveCount(0);
+ await expect(page.getByLabel('x min bc',{exact:true}).locator('option[value="pmc"]')).toHaveCount(1);
  await page.getByLabel('time steps',{exact:true}).fill('100');
  await page.getByLabel('time steps',{exact:true}).press('Tab');
  await page.getByLabel('resource',{exact:true}).selectOption(process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu');
