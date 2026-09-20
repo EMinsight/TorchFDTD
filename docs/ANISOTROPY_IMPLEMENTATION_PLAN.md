@@ -1,6 +1,47 @@
 # General anisotropic materials: implementation plan
 
-Status: proposed and unimplemented. This document records a read-only audit of the current interfaces. It does not establish general anisotropic material support or report new simulation results.
+Status: the bounded periodic nondispersive foundation is implemented in `torchfdtd/anisotropy.py`. The extensions below remain a plan. This is not general anisotropic source, open-boundary, dispersive, streamed, or production-performance parity.
+
+## Implemented foundation and usage
+
+`TensorDielectricSimulation` accepts real node-sampled epsilon with shape `(Nx, Ny, Nz, 3, 3)`, exact symmetry, and eigenvalues at least one. It supports uniform rectangular 3D Yee grids with periodic/Bloch faces, FP32 or FP64, CPU or Torch CUDA, soft impressed-field sources, point histories, and online point DFT. It reuses native curl, source, observation, and bounded checkpoint scheduling machinery. Its constitutive update and analytic material VJP are tensor-aware. A full time-history autograd graph or dense global constitutive matrix is not retained.
+
+```python
+import torch
+from torchfdtd import AdjointOptions
+from torchfdtd.anisotropy import TensorDielectricSimulation
+
+# project must use uniform 3D Yee sampling, periodic/Bloch faces,
+# fixed timesteps, nondispersive materials, soft sources, and point monitors.
+model = TensorDielectricSimulation(project, AdjointOptions(checkpoints=4))
+# Match region precision. Use device="cuda" for the Torch CUDA backend.
+lower = torch.zeros(project.region.shape + (3, 3), device="cpu",
+                    dtype=torch.float32, requires_grad=True)
+epsilon = 1.2 * torch.eye(3, device=lower.device) + lower @ lower.transpose(-1, -2)
+result = model(epsilon)
+loss = result.signals.abs().square().sum()
+loss.backward()
+# model.spectrum(epsilon, frequency_hz).fields uses the native DFT convention.
+```
+
+The example parameterization keeps a strict margin above the CFL eigenvalue bound. Use a nonzero starting factor when optimizing, since its derivative vanishes at zero. Optimizer and caller material-construction graphs are outside solver admission. The operator includes the input tensor in its conservative extra storage allowance, but this does not bound arbitrary upstream graphs.
+
+The wrapper rejects CPML/walls, graded meshes, 2D reductions, spatial streaming, full-tensor ADE, one-way/TFSF injection, and fused tensor kernels. It does not expose modal source coupling or promise anisotropic interface homogenization. Epsilon is explicit input, not a tensor material schema in Project. Scene geometry does not generate these node tensors automatically. Native soft sources remain impressed field increments, not calibrated physical current sources. Higher derivatives are unsupported.
+
+`reservation()` reports admission without allocating constitutive matrices or fields. `host_budget_bytes` limits total host reservation in this wrapper, stronger than the native checkpoint-tier-only meaning. Tensor coefficients, inverse/validation scratch, VJP temporaries, and sequential triplet scratch have a conservative linear allowance of 192 real scalars per cell in addition to the native reservation. CUDA adds 64 MiB for cold linear-algebra/allocator overhead. These are engineering bounds, not a platform-independent peak proof. CUDA uses ordinary Torch kernels, not an optimized fused anisotropic kernel.
+
+### Completed focused verification
+
+`tests/test_anisotropy.py` contains ten collected cases. Nine initial cases passed together, including both real and complex-Bloch CUDA paths. The extended Fourier energy test and the added reservation-scaling test then passed in a targeted two-case run. Tests use FP32 by default. Tiny FP64 operator/Fourier and central-difference checks isolate cancellation and algebraic errors.
+
+- Constant diagonal tensor signals match the native diagonal solver at FP32 tolerances.
+- All six independent symmetric epsilon directions match central differences of actual checkpointed field objectives, for periodic and Bloch cases, with relative tolerance `2e-5` and absolute tolerance `1e-10`.
+- Spatially varying SPD operator tests check Hermitian action, positive energy, the upper spectral bound in a sampled direction, and an analytic local epsilon VJP against Torch differentiation.
+- A rotated full tensor matches an independently derived Yee Fourier constitutive symbol and one full E/H time step to `2e-12`. Off-diagonal symbols contain `cos(q_a/2) cos(q_b/2)`, with component half-cell phases included explicitly. Three spatial refinements reduce continuum dispersion error by a factor below 0.27 per halving. The same resolved mode preserves modified leapfrog energy over 256 steps to `2e-12`.
+- Real and complex-Bloch FP32 Torch CUDA signals and checkpointed gradients match CPU. Measured allocated CUDA peak remains below the reported reservation for these bounded cases. No large-grid performance or scaling claim follows from this check.
+- Online DFT agrees with the native history DFT and differentiates. Budget rejection precedes inverse/eigenvalue work. Tensor storage and restart reservations increase eightfold for an eightfold cell-count increase. This is planner scaling, not a measured large-grid peak-memory study.
+
+Remaining acceptance items include independent dense tiny-operator spectral bounds, broader spatially varying material objectives, high-contrast/CFL sweeps, measured large-grid memory/performance scaling, and the physical interface/source/boundary extensions listed below.
 
 ## Current supported scope
 
@@ -10,6 +51,7 @@ Status: proposed and unimplemented. This document records a read-only audit of t
 | Native staircase voxelization | Scalar material sampled separately at the three electric Yee locations | Three samples do not represent off-diagonal coupling |
 | `DifferentiableSimulation` | Real FP32/FP64 epsilon of shape `(Nx, Ny, Nz)` or `(Nx, Ny, Nz, 3)` | Componentwise scalar or diagonal update and material VJP |
 | Differentiable ADE | Scalar or componentwise diagonal instantaneous epsilon and pole parameters, subject to the existing broadcast contracts | No off-diagonal oscillator coupling |
+| New `TensorDielectricSimulation` | Real symmetric full node tensors with eigenvalues at least one, periodic/Bloch, CPU/Torch CUDA | No CPML, full-tensor ADE, streaming, or calibrated modal injection |
 | Streamed dielectric and ADE paths | Their existing scalar/diagonal material contracts | No general tensor constitutive operator |
 | Native subpixel path | A symmetric off-diagonal inverse constitutive operator built from isotropic dielectric interfaces | Not a bulk anisotropic material API, not a full-tensor differentiable path |
 
@@ -17,9 +59,9 @@ Real material coefficients can coexist with complex Bloch fields. Complex fields
 
 Relevant interfaces are `solver.field_axes`, `solver.voxelize`, `boundaries.update_E`, `differentiable._System.reference_step`, `differentiable._System.transpose_step`, `dispersive_adjoint._ParameterLayout`, `dispersive_adjoint._DispersiveSystem.electric_step`, `subpixel.interface_tensor`, `subpixel.prepare_interfaces`, `SubpixelPlan.apply`, and `spacetime._prepare_permittivity`/`_tile`. Streamed ADE already exists. An older statement that ADE streaming is pending is not an accurate description of current coverage.
 
-## First implementation milestone
+## Foundation design and remaining milestone gates
 
-Implement fixed real symmetric positive-definite bulk permittivity on uniform rectangular, periodic Yee grids, with relative permeability one and nondispersive materials. Include an exact operator transpose and tensor material VJP before claiming differentiable support. Initially exclude CPML, nonperiodic walls, tensor dispersion, streamed execution, anisotropic interface homogenization, and anisotropic modal sources from the acceptance claim.
+The implemented foundation uses fixed real symmetric positive-definite bulk permittivity on uniform rectangular, periodic Yee grids, with relative permeability one and nondispersive materials. It includes an explicit operator transpose and tensor material VJP. Initially exclude CPML, nonperiodic walls, tensor dispersion, streamed execution, anisotropic interface homogenization, and anisotropic modal sources from the acceptance claim.
 
 Define the tensor sampling location explicitly. A first contract can assign one physical tensor to each common mesh node. Represent six independent symmetric entries, or use a constrained parameterization such as `epsilon = I + L L^T` when the conservative vacuum CFL is required. Check finite values, symmetry, and eigenvalue bounds. Do not clip physical tensors to make an unsupported input appear valid.
 

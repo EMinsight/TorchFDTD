@@ -32,7 +32,8 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 병렬 구현 후속: PEC와 반대칭 경계는 CPU/CUDA, 복소장, discrete adjoint,
 공간 스트리밍과 CUDA batch에서 검증했고, UI·Python 별도 면 설정과
 저장·내보내기·실행도 확인했다. PMC/대칭 경계는 상단 Yee face/edge 상태를
-추가해야 하므로 미완료이며 [상태 구조 계획](PMC_IMPLEMENTATION_PLAN.md)을 따른다.
+일반 실행 경로와 연결하는 작업은 미완료이며
+[상태 구조 계획과 별도 API](PMC_IMPLEMENTATION_PLAN.md)를 따른다.
 
 [형상 기반 재료 스트리밍](streamed_geometry.md)에 이어
 [CR 밀도 스트리밍](streamed_density.md)도 연결했다. Streamed
@@ -40,9 +41,12 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 2D로 직접 축약한다. 전체 3D epsilon과 그 VJP를 만들지 않으며 CPU·파일·
 비동기 CUDA 검사를 통과했다. 실제 48GB 초과 성능과 분산재료 경로는 남았다.
 
-PMC는 실제 endpoint의 face/edge 상태를 갖는 CPU 기준 구현과 real FP32
-CUDA forward/transpose 기반을 검증했다. 공개 solver·streaming·ADE 연결은
-아직 남아 있다. [Mode source 연결](MODE_INJECTION.md)은 실제 CUDA 전파,
+PMC는 실제 endpoint의 face/edge 상태와 real FP32 CPU/CUDA를 갖는
+`EndpointSimulation`에서 point source/monitor, 재료·파형 gradient와
+binomial checkpoint를 연결했다. 일반 project/UI·streaming·ADE 연결은
+아직 남아 있다. 일반 tensor는 별도 `TensorDielectricSimulation`의
+periodic/Bloch bulk 경로에서 CPU/CUDA·6성분 VJP·고유파를 검증했다.
+CPML·tensor ADE·streaming·anisotropic mode·UI는 남았다. [Mode source 연결](MODE_INJECTION.md)은 실제 CUDA 전파,
 방향별 복소 t/r 및 국소 산란체 material VJP까지 검증했다. 일반 multiport
 S 행렬·횡방향 PML·streamed source·eigenmode 미분은 남아 있다.
 [회절·원거리장](RADIATION.md), [density 제약](DESIGN_PARAMETERIZATION.md),

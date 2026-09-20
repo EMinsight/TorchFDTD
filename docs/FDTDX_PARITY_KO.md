@@ -19,13 +19,13 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
 | 비균일 mesh | Uniform/QuasiUniform/Rectilinear | Graded/rectilinear, 독립 dx/dy/dz, node API/UI | 기능 동등 범주. 같은 오차에서 속도·메모리 우위는 별도 측정 |
 | 분산 재료 | ADE. 경로별 제한 확인 필요 | 다중 Drude/Lorentz·passive fit·resident/streamed ADE adjoint | 지원 모델 범위의 동등 후보. 이방성 ADE·응용 정확도·외부 실측은 남음 |
 | GDS | Layer stack, explicit port contracts | Layer/datatype·Z·재료 stack, 단위·계층·array·PATH, 제한 export, 명시적 TEXT port metadata | 기본 geometry workflow 구현. 자동 GDS port→실행 모드 연결과 일반 hole/다중 port 흐름은 남음 |
-| 단일 문제 multi-GPU | Sharding | 독립 case 여러 장치 배정만 존재 | **미달**. 단일 도메인 halo 교환·transpose·분산 checkpoint·실제 2장 이상 검증 필요 |
-| 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 새 고정 모드와 radiation 목적함수 | **부분**. PMC runtime·full tensor·source/eigenmode·관련 모든 실행 경로, 동시 adjoint batch 확대 필요 |
+| 단일 문제 multi-GPU | Sharding | 별도 periodic/Bloch 초기값 API의 rank-owned slab·halo transpose·재료 VJP·binomial checkpoint. 2/3-rank 통신 모사 검사 | **부분/미검증**. 실제 Gloo/NCCL·2장 이상 GPU, source/monitor·물리 경계·scaling 검증 필요 |
+| 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 새 고정 모드와 radiation 목적함수 | **부분**. PMC/tensor의 추가 물리·실행 경로, 일반 source/eigenmode·동시 adjoint batch 확대 필요 |
 | 설계 파라미터화 | Density, projection/binarization, symmetry | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수 | 기본 topology workflow 구현. 일반 spline/polygon shape derivative·제작 제약·최종 CR 물리 수렴은 별도 |
 | Mode source·detector·port | Mode source/detector, overlap/S-parameter | 전벡터 sparse mode solver, 이산 시간·공간 보정 실제 주입, directional detector, 단일 선택 channel의 복소 t/r·material VJP | **부분**. 자동 multiport/multimode S 행렬·open/PML 횡단면·streamed injection·모드 미분·UI가 남음 |
 | Far-field·회절 | Field projection, diffraction detectors | Closed-box 벡터 원거리장, Bloch 회절 차수·방향별 효율, field graph와 재료 VJP, FP32 방사 패턴 수렴 | 기본 homogeneous exterior 기능 구현. substrate/periodic lattice far-field·일반 응용·UI는 남음 |
-| 이방성 | 대각·일반 tensor | Adjoint API의 Yee diagonal epsilon. Native material UI는 등방성, subpixel 전용 연산자는 별도 | **부분/미달**. 일반 물리 tensor rasterization·안정성·forward/transpose·ADE·UI를 일관되게 연결해야 함 |
-| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. PMC 추가 endpoint 상태와 CPU/CUDA 연산자 검증 | **부분**. PMC를 source/monitor/ADE/checkpoint/streaming에 연결하고 실제 domain reduction을 검증해야 함 |
+| 이방성 | 대각·일반 tensor | Node-sampled SPD bulk tensor, periodic/Bloch CPU·CUDA, 이산 transpose·6성분 VJP·checkpoint·고유파 검증 | **부분**. CPML·interface·tensor ADE·streaming·mode·UI 연결과 응용 검증이 남음 |
+| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. 별도 PMC API의 실제 endpoint·point source/monitor·CPU/CUDA·재료/파형 VJP·binomial checkpoint | **부분**. PMC 일반 project/UI·ADE·streaming·batch와 실제 domain reduction의 실행 비용 검증이 남음 |
 
 ## 이번 구현의 근거
 
@@ -40,15 +40,22 @@ FDTDX는 이미 rectilinear mesh를 제공한다. `vmap 가능`만으로 batch �
   Bloch 차수·방향 분리, FP32 normalization, 실제 material VJP.
   native dipole 방사 패턴의 100→75→50 nm 메시 오차는 1.03→0.54→0.23%다.
 
+- [PMC resident API](PMC_IMPLEMENTATION_PLAN.md): 실제 endpoint의 소스·관측과
+  FP32 CUDA·재료/파형 gradient, 10,000-step logical binomial schedule.
+- [Bulk tensor API](ANISOTROPY_IMPLEMENTATION_PLAN.md): periodic/Bloch
+  CPU/CUDA, 6성분 유한차분, 독립 Fourier symbol·에너지·mesh dispersion.
+- [단일 도메인 분할](DOMAIN_DECOMPOSITION.md): 동일 도메인의 rank-local
+  E/H·epsilon, halo transpose와 material VJP. 통신 모사 검사는 실제
+  분산 runtime/hardware 증거와 구분한다.
+
 ## 다음 구현 순서
 
 1. 진행 중인 원래 CR 24-cycle 결과와 실제 FP32 48 GB 초과 용량 검증을
    보존하며 완료한다. 최적 CR 후보의 세밀한 메시 재검증은 별도 단계다.
-2. PMC endpoint 상태를 production source/monitor/checkpoint/streaming에
-   연결한다. 이미 통과한 operator 검사를 반복하는 대신 새 연결만 검증한다.
-3. [일반 이방성 tensor 계획](ANISOTROPY_IMPLEMENTATION_PLAN.md)에 따라
-   정확한 이산 transpose를 구현하고 안정성·회전
-   매질·해석 고유파·gradient 검사를 통과시킨다.
+2. 별도 PMC API의 source/monitor/checkpoint 연결을 일반 project와
+   ADE·streaming·batch로 확장한다. 이미 통과한 경로는 변경 없이 반복하지 않는다.
+3. [일반 이방성 tensor 계획](ANISOTROPY_IMPLEMENTATION_PLAN.md)의 periodic
+   foundation을 CPML·계면·streaming과 UI로 확장하고 각 물리 범위를 검증한다.
 4. Mode port의 여러 channel/S 행렬과 streamed 경로, source parameter
    미분을 확장한다. GDS port metadata와 실제 실행 흐름도 연결한다.
 5. 단일 문제 multi-GPU를 구현하고 실제 여러 장치에서 통신·peak memory·

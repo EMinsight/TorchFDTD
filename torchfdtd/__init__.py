@@ -111,3 +111,12 @@ __all__ += ['DensityParameterization', 'GDSLayer', 'GDSPortLayer', 'GDSPort', 'G
             'ModeInjectedPlaneSimulation', 'modal_plane_amplitudes', 'modal_s_parameters',
             'DiffractionResult', 'diffraction_orders', 'diffraction_efficiency', 'FarFieldResult',
             'project_farfield', 'normalized_farfield_intensity']
+
+from .anisotropy import TensorDielectricSimulation
+from .pmc_simulation import EndpointSimulation
+__all__ += ["TensorDielectricSimulation", "EndpointSimulation"]
+
+from .domain_decomposition import (DistributedYeeDomain, SlabOwnership,
+    distributed_capabilities, plan_domain_decomposition)
+__all__ += ["DistributedYeeDomain", "SlabOwnership", "distributed_capabilities",
+            "plan_domain_decomposition"]

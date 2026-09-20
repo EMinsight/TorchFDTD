@@ -26,8 +26,12 @@ Streamed `PeriodicLayerResponse` avoids both global 3D epsilon and epsilon-VJP
 arrays. Host, file and asynchronous CUDA numerical checks pass. Its large-grid
 throughput is still unmeasured.
 
-The [exact-endpoint PMC foundation](docs/PMC_IMPLEMENTATION_PLAN.md) is available
-for development. Production PMC dispatch remains incomplete.
+The experimental [exact-endpoint PMC API](docs/PMC_IMPLEMENTATION_PLAN.md) now
+connects real FP32 CPU/CUDA fields, point-source waveforms and material gradients
+through bounded binomial checkpoint replay. A separate
+[bulk tensor dielectric API](docs/ANISOTROPY_IMPLEMENTATION_PLAN.md) supports
+periodic/Bloch CPU/CUDA fields and full symmetric tensor gradients. General
+project/UI dispatch, open-boundary tensors and streamed PMC remain incomplete.
 [Native mode injection](docs/MODE_INJECTION.md) now supports a fixed selected
 mode, directional complex amplitudes and matched-reference t/r, with actual
 FP32 CUDA guide propagation and material-gradient checks. General multiport
@@ -89,7 +93,12 @@ capacity and throughput measurements remain pending.
 
 [PEC and electric antisymmetry](docs/BOUNDARIES.md) now preserve physical mesh
 endpoints across CPU/CUDA, adjoint, streaming and batch paths. PMC and magnetic
-symmetry require additional boundary states and remain unimplemented.
+symmetry are available through the separate resident `EndpointSimulation` API.
+Their general project, ADE, streaming and batch integration remains pending.
+The experimental [single-domain slab API](docs/DOMAIN_DECOMPOSITION.md) adds
+rank-local Yee propagation, halo transposes and checkpointed material gradients.
+Its 2/3-rank protocol checks currently emulate transport. Actual multi-GPU
+execution and scaling remain unverified.
 
 [Dispersive material adjoints](docs/DISPERSIVE_ADJOINT.md) connect epsilon-infinity, oscillator strength, resonance and damping to point spectra and fixed plane flux. Resident Torch and optional fused CUDA paths include Drude/Lorentz P/Q states in bounded checkpoint replay. Shared parameters stay compact, and CUDA material gradients use block reductions without atomics. Experimental [spatial ADE streaming](docs/STREAMED_DISPERSIVE.md) adds DRAM/file banks, asynchronous CUDA tiles and compact material-gradient reductions. A [54 GiB ADE capacity run](docs/validation/DISPERSIVE_CAPACITY_REPORT.md) completed ten forward steps and first-order material gradients on RTX 5880 with 5.17 GB peak Torch CUDA allocation in 54.8 minutes. A separately recorded causal-halo rerun completed with 3.65 GB in 49.6 minutes and matching discrete gradients. This demonstrates short-run capacity beyond physical VRAM. Sustained performance and physical design-gradient convergence remain unverified.
 
@@ -234,8 +243,9 @@ Reviewed external public source on 19 September 2026. TorchFDTD implementation s
 | [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy / PyTorch CUDA | Public `Grid` represents one case. Our external graph adapter runs its updates. Dedicated upstream cohort API not verified | Default backend disables gradients, so default autodiff is not established | Readable grid foundation used and attributed by TorchFDTD | PyPI 0.2.2 measured, including eager and graph-adapted baselines |
 | [fdtd3d](https://github.com/zer011b/fdtd3d) | C++ / CUDA / MPI | **Single-problem domain decomposition** differs from independent-case batches. Cohort throughput not verified | Not documented in reviewed README | Compiled solver and distributed execution. Single-grid MPI is still missing from TorchFDTD | Not measured, compatible compiler/runtime environment pending |
 
-FDTDX provides single-problem sharding and general tensor materials that
-TorchFDTD still lacks. We have not demonstrated a speed advantage against
+FDTDX provides single-problem sharding and broader anisotropic material
+workflows. TorchFDTD's new bulk tensor API is limited to nondispersive periodic
+or Bloch domains. We have not demonstrated a speed advantage against
 FDTDX, fdtdz or fdtd3d. [Pinned sources and limitations](docs/OPEN_SOURCE_COMPARISON_KO.md).
 
 | Required workflow | TorchFDTD implementation milestone | Still needed for broader FDTDX parity |
@@ -244,7 +254,7 @@ FDTDX, fdtdz or fdtd3d. [Pinned sources and limitations](docs/OPEN_SOURCE_COMPAR
 | Design parameters | Density filters, fixed masks, exact symmetry, projection/continuation and optimizer resume | General shape derivatives and fabrication guarantees |
 | Mode ports | Actual fixed-mode CUDA launch, directional detection, complex t/r and a material VJP | Multimode/multiport S matrix, open cross-sections, streamed injection and source/eigenmode gradients |
 | Radiation | Differentiable Bloch orders and closed-box homogeneous far fields, including native FP32 mesh convergence | Layered/periodic-lattice far fields and complete UI |
-| Boundaries / tensors / multi-GPU | PEC production support, PMC operator foundation, diagonal adjoint materials | PMC runtime integration, general tensors and verified single-problem multi-GPU |
+| Boundaries / tensors / multi-GPU | PEC production support, resident PMC waveform/material adjoints, periodic bulk tensor adjoints | General PMC/tensor boundary and streaming workflows, verified single-problem multi-GPU |
 
 The [complete row-by-row parity gates](docs/FDTDX_PARITY_KO.md) retain failed,
 partial and unmeasured conditions instead of treating API presence as full parity.
@@ -735,9 +745,9 @@ On Windows, after deployment, `scripts/start_remote.ps1 -GpuHost YOUR_GPU_HOST` 
 ## Numerical model and limits
 
 - Full six-component Yee FDTD in 3D, and z-invariant 2D with all vector components available. Ez excitation yields TMz in 2D. Uniform Cartesian cells and a configurable CFL stability factor (default 0.99).
-- Constant dielectrics with index ≥ 1, plus passive isotropic Drude/Lorentz dispersion and absorption with up to 16 coupled poles. Built-in Si, SiN and SiO2 values are editable approximations, not dispersive optical-constant databases. Parameter editing and n/k previews are available through [Materials](docs/MATERIALS.md) and the [multipole guide](docs/RUN_CONTROL_AND_CONVERGENCE.md). User-supplied sampled n/k or complex permittivity now supports [passive fitting](docs/MATERIAL_FITTING.md), with explicit error/band reports and continuous or fixed-timestep ADE targets. Gain, nonlinearity and anisotropy remain unsupported.
-- Voxelized geometry without conformal/subpixel material smoothing. Refine the mesh and perform convergence studies for quantitative work.
-- Six-face convolutional PML in 3D, four faces in 2D, with independent layers, sigma scale, kappa, alpha and polynomial orders. Periodic and Bloch boundary pairs are supported. Symmetry/antisymmetry and PEC/PMC are not implemented yet. See [boundary conventions and validation](docs/BOUNDARIES.md).
+- Constant dielectrics with index ≥ 1, plus passive isotropic Drude/Lorentz dispersion and absorption with up to 16 coupled poles. Built-in Si, SiN and SiO2 values are editable approximations, not dispersive optical-constant databases. Parameter editing and n/k previews are available through [Materials](docs/MATERIALS.md) and the [multipole guide](docs/RUN_CONTROL_AND_CONVERGENCE.md). User-supplied sampled n/k or complex permittivity now supports [passive fitting](docs/MATERIAL_FITTING.md), with explicit error/band reports and continuous or fixed-timestep ADE targets. Gain and nonlinearity remain unsupported. A separate experimental bulk tensor API supports nondispersive periodic/Bloch domains on CPU and CUDA.
+- Staircase geometry is the default, with an optional experimental [dielectric subpixel operator](docs/SUBPIXEL_INTERFACES.md). Refine the mesh and perform convergence studies for quantitative work.
+- Six-face convolutional PML in 3D, four faces in 2D, with independent layers, sigma scale, kappa, alpha and polynomial orders. Periodic and Bloch boundary pairs are supported. PEC/electric antisymmetry are implemented in native execution. PMC/magnetic symmetry use the separate bounded resident endpoint API and are not yet admitted by the general project/UI dispatch. See [boundary conventions and validation](docs/BOUNDARIES.md).
 - Gaussian, smoothly ramped continuous, or sampled time/amplitude/phase electric or magnetic soft sources, with Cartesian or theta/phi orientation. Magnetic injection uses the H half-step time. The legacy cycle-based Gaussian has σ = `pulse_cycles * wavelength / c`, with center at 4σ. Standard time-domain mode exposes power-FWHM, offset and phase. [Source conventions](docs/SOURCES.md) describe carrier definitions, global inheritance and custom tables. Amplitudes are reduced fields, not calibrated V/m or dipole moments.
 - Bloch simulations retain complex E/H fields and monitor traces. A sheet source automatically applies the specified Bloch spatial phase. Snapshots can show real, imaginary, magnitude or phase values, while NPZ retains the complete complex data.
 - Point monitors record one E/H component every step. Choose FFT bins or custom-range uniform frequency/wavelength DFT, with None/Start/End/Full/Hann apodization. [Definitions, UI controls and exports](docs/MONITORS.md) distinguish FFT amplitude from complex DFT integrals. Neither is normalized transmission, reflection, power or S-parameters. E and H are staggered in space and time, and should not be naively multiplied as collocated Poynting fields.

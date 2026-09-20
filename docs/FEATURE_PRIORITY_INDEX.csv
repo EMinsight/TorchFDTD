@@ -83,12 +83,12 @@ material.Sellmeier.color,color,P1,6,required,수동 분산 재료,True,missing,m
 material.Sellmeier.mesh order,mesh order,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 material.Sellmeier.name,name,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 material.Sellmeier.type,type,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
-material.diagonal,대각 이방성,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
+material.diagonal,대각 이방성,P1,6,required,수동 분산 재료,True,partial,partial,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 material.multipole,다중 oscillator,P1,6,required,수동 분산 재료,False,implemented,implemented,implemented,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 material.nk,중심 주파수 n/k,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 material.sampled_fit,측정 n/k 데이터·passive multi-pole fit,P1,6,required,수동 분산 재료,False,implemented,implemented,implemented,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 material.sellmeier,Sellmeier,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
-material.tensor,일반 tensor·grid transform,P1,6,required,수동 분산 재료,True,missing,missing,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
+material.tensor,일반 tensor·grid transform,P1,6,required,수동 분산 재료,True,partial,partial,missing,다중 공진과 측정 광학상수의 수동 피팅이 파장 범위의 정확도를 결정한다.
 addfdtd.allow grading in x,allow grading in x,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 addfdtd.allow grading in y,allow grading in y,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 addfdtd.allow grading in z,allow grading in z,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
@@ -161,8 +161,8 @@ addmesh.z min,z min,P1,7,required,인터페이스·메시 효율,True,missing,mi
 addmesh.z span,z span,P1,7,required,인터페이스·메시 효율,True,partial,partial,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 boundary.antisymmetry,Anti-symmetric,P1,7,required,인터페이스·메시 효율,False,implemented,implemented,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 boundary.pec,PEC 경계,P1,7,required,인터페이스·메시 효율,False,implemented,implemented,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
-boundary.pmc,PMC 경계,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
-boundary.symmetry,Symmetric,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
+boundary.pmc,PMC 경계,P1,7,required,인터페이스·메시 효율,True,partial,partial,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
+boundary.symmetry,Symmetric,P1,7,required,인터페이스·메시 효율,True,partial,partial,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.axis_step,독립 dx/dy/dz,P1,7,required,인터페이스·메시 효율,False,implemented,implemented,implemented,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.metal_mesh,금속 skin-depth 자동 메시,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.
 mesh.override_step,영역별 target step,P1,7,required,인터페이스·메시 효율,True,missing,missing,missing,subpixel 및 독립 축 간격은 같은 오차에서 셀 수를 줄이는 수단이다. 수렴 증명이 먼저다.

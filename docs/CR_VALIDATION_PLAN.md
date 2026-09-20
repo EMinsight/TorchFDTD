@@ -44,6 +44,29 @@ FP32/FP64 comparison. It evaluates the selected candidate and its matched seed
 after the queued capacity job, without overlapping workstation benchmarks.
 
 
+## Queued selected-mask refinement
+
+The private follow-up driver passed all 144 physical mesh-pair preflights on
+both workstations without executing fields. Both levels use a 2 by 2 by
+8.3 micrometre domain, 305.052 fs duration and 0.6 micrometre PML.
+The requested source and detector coordinates are fixed. The actual snapped
+Yee source plane can shift by up to 25 nm and is recorded for each pair rather
+than being described as exactly colocated across the two meshes.
+
+The follow-up is queued after the existing real-FP32 capacity run. It verifies
+the completed 24-cycle result, authoritative selected-mask checksum, original
+hard seed and fresh final confirmation before starting. It retains the original
+frozen solver and objective sources. The two masks, two meshes, nine wavelengths
+and sixteen rays produce 576 case responses, each with two source polarizations.
+Homogeneous references are shared through a bounded cache. Completed cases are
+saved with exact input, runtime and source identities for an explicit resume.
+
+The queued driver preserves at least 100 GiB on C: and 16 GiB RAM above its
+64 GiB host budget. A predecessor failure stops the queue rather than starting
+a competing experiment. Preparation and queue placement are not optical
+validation results. Sign reversal, nonpositive improvement, or improvement
+comparable to the observed refinement shift remain explicit report outcomes.
+
 ## Selected reference
 
 The user selected the recent TORCWA-based color-router study with color

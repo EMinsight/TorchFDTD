@@ -71,3 +71,97 @@ Python construction are for small validation problems, not production capacity.
 These checks establish a boundary-state foundation. They do not establish
 production PMC sources, monitors, CUDA/adjoint dispatch, ADE, streaming,
 checkpoint budgeting or UI support. Those integrations remain release gates.
+
+## Bounded resident Python simulation API
+
+`torchfdtd.pmc_simulation.EndpointSimulation` is a separate usable resident
+closed-cavity API. It does not enable PMC in `Project`, the ordinary facade,
+JSON, browser, streamed, or batch dispatch. Its implemented combinations are:
+
+- Exact physical endpoint nodes in micrometres, including nonuniform axes.
+- PEC/PMC on every face. The local `symmetric` alias means PMC and the local
+  `antisymmetric` alias means PEC with the same field parity conventions.
+- Real FP32 positive nondispersive sampled diagonal relative epsilon, unit
+  relative permeability, zero initial state, no conductivity or ADE.
+- CPU sparse reference for up to 32,768 cells, or compact direct CUDA with CuPy.
+- Active electric point DOFs as sources, and active electric/magnetic point
+  DOFs as observations. Upper faces and electric edges are addressable.
+- First derivatives of sampled epsilon and source waveforms through a custom
+  backward. A differentiable sampler may connect exact endpoint samples to
+  shared material or geometry parameters. No nearest-cell material inference.
+
+A minimal Python workflow is:
+
+```python
+import numpy as np
+import torch
+from torchfdtd.pmc_simulation import EndpointSimulation
+
+sim = EndpointSimulation(
+    [np.linspace(0, 1, 9)] * 3,
+    [('symmetric', 'symmetric')] * 3,
+    dt_seconds=1e-16,
+    sources=[(2, (8, 8, 3))],  # Ez on the intersecting upper x/y edges
+    observations=[('E', 2, (8, 8, 3)), ('H', 0, (8, 4, 3))],
+    device='cpu', checkpoints=4, tensor_budget_bytes=64_000_000,
+)
+parameter = torch.tensor(2.0, requires_grad=True)
+epsilon = sim.sample_epsilon(lambda xyz, component: parameter.expand(len(xyz)))
+waveform = torch.zeros(30, 1)
+waveform[0, 0] = 1
+traces = sim(epsilon, waveform)
+traces.square().sum().backward()
+print(parameter.grad, sim.memory_plan(30))
+```
+
+The internal time increment is `dt_seconds * c0 * 1e6`. Magnetic field values
+are impedance scaled (`Z0 H`) so the stored electric and magnetic values have
+the same units. Source waveform entries are additive electric field increments,
+not current-density amplitudes. Injection occurs between electric and magnetic
+substeps, so the magnetic update sees the injected electric field. Each trace
+row samples the completed step: E at the next integer time, H at the following
+half time. No interpolation, source impedance calibration, plane mode, TFSF,
+pulse normalization, DFT monitor or port mapping is inferred by this API.
+
+The custom backward saves only sampled epsilon and waveform inputs through
+Torch's saved-tensor mechanism, plus at most the requested number of detached
+resident field checkpoints. A binomial bounded-slot reverse schedule reuses `differentiable._split`,
+with tail iteration and recursion depth bounded by checkpoint slots. It retains
+no segment-state list or timestep autograd graph.
+Zero checkpoints is valid but costs quadratic replay time. More checkpoints
+reduce recomputation. `last_report` exposes replayed steps, checkpoint saves,
+peak live checkpoints, forward steps and reverse steps. Ordinary in-place edits of saved inputs are rejected by
+Torch version checks. External raw-pointer or `.data` changes remain the
+caller's responsibility. Second derivatives are unsupported.
+
+`memory_plan(steps)` reports a conservative tensor payload upper bound including
+checkpoints, state/transpose workspaces, material arrays, waveform and trace
+inputs/outputs/cotangents, and backend tensor metadata. The constructor admits
+its minimum working set before constructing the backend, and each call checks
+the complete requested trace plan. This is not a total process-memory guarantee:
+CUDA allocator/runtime memory, caller geometry-sampler graph, and CPU Python
+sparse topology metadata are excluded explicitly. There is no disk/host tier,
+spatial streaming, multidevice execution, complex FP64 path, full tensor epsilon,
+ADE, global solver dispatch or UI support in this resident API.
+
+`tests/test_pmc_simulation.py` checks independent full-autograd reference traces
+and parameter/waveform gradients with 0, 1, 4 and 64 checkpoint requests,
+nonuniform mixed walls, upper-face/edge observations, endpoint material sampling,
+a directional finite difference, saved-tensor count, input mutation, type/CFL/
+budget admission, and real FP32 CUDA trace/gradient agreement. Nine focused
+CPU/CUDA tests passed on the local RTX 3060. Existing cavity-spectrum and doubled
+reflection-domain tests remain in the endpoint reference foundation. The native
+PMC feature remains incomplete until the other release gates above are covered.
+
+A logical 10,000-step schedule check exercises four resident slots without
+allocating fields and compares replay work with zero checkpoints. A separate
+31-step field/adjoint test verifies reduced replay counts and the live slot
+bound. This supports long-duration bounded checkpoint scheduling; complete
+trace storage still grows as steps times observation count and is budgeted.
+
+Four targeted admission/lifetime checks additionally verify that changing or
+replacing the source index tensor, or mutating CPU incidence coefficients,
+between forward and backward raises an error. The same identity/version
+contract includes CUDA metric tensors and CPU activity masks. Numeric input
+scans occur only after metadata-only shape and byte-budget admission. External
+raw-pointer writes that bypass version counters remain caller responsibility.
