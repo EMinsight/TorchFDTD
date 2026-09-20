@@ -155,6 +155,29 @@ The TeX manuscript was rebuilt to 35 pages with tensor-native and reversible
 cross-framework correctness records. Changed pages were rendered and visually
 reviewed. No new throughput ranking is added to the manuscript.
 
+Linux CI [35544633868](https://github.com/hyoseokp/TorchFDTD/actions/runs/35544633868)
+at `282a13a5f856f226c6bdb0093af7ef6d5dcd1845` passed **1,281 Python tests**
+with 438 environment-dependent skips and **32 browser tests** with 8 skips.
+Frontend and wheel builds passed. The Python suite took 445.90 seconds.
+JUnit SHA-256:
+`5498df4dab7ecc5a6e7ee0057dca7a19de6c70b3534074879d08cb8d3877db39`.
+
+The [scoped periodic reversible API](REVERSIBLE_ADJOINT.md) includes CPU/CUDA
+material gradients, retained backward, drift rejection, schema revalidation,
+terminal-storage admission and cold dependency-import lifetime checks.
+Targeted RTX 3060 CUDA checks remain distinct from the CPU CI run.
+The separate CPML reconstruction and chunk-storage prototypes are private
+development work and are not advertised as an implemented public API.
+
+The final source audit checked 819 allowlisted files without pattern findings.
+A clean build eliminated stale UI assets found in an earlier local build.
+All 110 package files matched the reviewed snapshot, final wheel and isolated
+install. Final wheel SHA-256:
+`0690b10b732502703beb7fceedfec81d7390b187e0bb699d241d74acb70de428`.
+The manuscript remains 35 pages, with its new reconstruction subsection
+rendered and reviewed. This remains private development delivery, not public
+release clearance or a performance-leadership claim.
+
 The current feature-by-feature status is in [FDTDX parity gates](FDTDX_PARITY_KO.md).
 The earlier acceptance snapshot below is retained as historical evidence.
 Linux CI [35533483790](https://github.com/hyoseokp/TorchFDTD/actions/runs/35533483790)
