@@ -115,17 +115,20 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 
 1. 진행 중인 원래 CR 24-cycle 결과와 실제 FP32 48 GB 초과 용량 검증을
    보존하며 완료한다. 최적 CR 후보의 세밀한 메시 재검증은 별도 단계다.
-2. 연결한 PMC+CPML native dispatch의 실제 CUDA 작업과 흡수 정확도를 검증한 뒤,
+2. CPU·CUDA·브라우저에서 확인한 PMC+CPML native dispatch의 흡수 정확도를 검증한 뒤,
    필요한 profile·ADE·streaming·batch 조합으로 확장한다.
    이미 통과한 경로는 변경 없이 반복하지 않는다.
 3. [일반 이방성 tensor 계획](ANISOTROPY_IMPLEMENTATION_PLAN.md)의 고정 등방성
-   CPML 외부에서 반사·안정성 및 계면을 검증하고 streaming과 UI로 확장한다.
+   CPML 외부에서 반사·안정성 및 계면을 검증하고 streaming으로 확장한다.
+   6성분 재료 편집·Project/CLI·재료표 미분 연결은 완료했다.
 4. Mode port의 일반 단면/branch와 streamed 경로, source parameter
    미분을 확장한다. GDS port metadata와 실제 실행 흐름도 연결한다.
 5. 단일 문제 multi-GPU의 물리 범위를 확장하고 실제 여러 장치에서 통신·peak memory·
    strong/weak scaling·gradient를 검증한다. 장치가 한 장뿐인 검사는
    multi-GPU 완료 근거로 대체하지 않는다.
-6. 필요한 UI, Python 예제·문서, 동일 정확도의 FDTDX benchmark와 공개
+6. 같은 물리의 FDTDX checkpointed/reversible 두 경로를 구분해 속도와 메모리를
+   비교한다. 현재 정확도 gate만 완료했으며 전체 속도 우위는 확립되지 않았다.
+   필요한 UI, Python 예제·문서, 동일 정확도의 FDTDX benchmark와 공개
    패키지 검토를 마친다. 공개 전환과 홍보는 사용자 승인 후 진행한다.
 
 기본 기능이 추가되더라도 모든 열을 O로 바꾸지 않는다. 완료는 위에서

@@ -1,0 +1,115 @@
+{
+  "contract": {
+    "dx_um": 0.1,
+    "c_dt_um": 0.05,
+    "steps": 240,
+    "source_x_um": 0,
+    "probe_x_um": 1,
+    "left_pec_x_um": -8,
+    "candidate_cpml_interface_x_um": 3,
+    "reference_cpml_interface_x_um": 20,
+    "transverse_cells": [
+      2,
+      2
+    ],
+    "source": "Ez at x=0, all y nodes 0,1,2 and z halfcells 0,1",
+    "faces": [
+      [
+        "pec",
+        "pml"
+      ],
+      [
+        "pmc",
+        "pmc"
+      ],
+      [
+        "pec",
+        "pec"
+      ]
+    ],
+    "epsilon": 1,
+    "pulse": {
+      "wavelength_um": 1.6,
+      "center_ct_um": 3,
+      "sigma_ct_um": 0.65
+    },
+    "depths": [
+      6,
+      12
+    ],
+    "sigma_scale": 0.3,
+    "reflection_mapping": "exp(-20*.3*L/(L+1))",
+    "incident_window_ct_um": [
+      0,
+      6
+    ],
+    "reflection_window_ct_um": [
+      6,
+      12
+    ],
+    "thresholds": {
+      "field_amplitude_ratio": 0.01,
+      "reflected_flux_ratio": 0.001,
+      "independent_1d_max_relative_error": 2e-05
+    },
+    "flux": "-Ez*Hy; Hy averaged at neighboring x halfcells, then consecutive magnetic half timesteps"
+  },
+  "contract_sha256": "64cec47cd9bbdbd721bb58ef4578e9c68bafe8e7fe28e5fbda65ade8c2f9b883",
+  "revision": "d942f2f4818b0d9845ec22d3b91c41c01e875854",
+  "source_sha256": {
+    "torchfdtd/pmc_cpml.py": "fc38199b7551203460cec9a5bb881c3650bc8f58994c0ead5e1905a2e37a33d2",
+    "torchfdtd/pmc_simulation.py": "f9dc70304b7e18964b0e3393dc7aeec62f972ef0eeefe48770ea025754c8b3cf",
+    "torchfdtd/pmc_reference.py": "d9662e9607fce57ab8d4502a20b075ae6434d43926fca8a60de6f62d2ec8122c"
+  },
+  "post_run_hashes_match": true,
+  "api": "direct EndpointCPMLSimulation; native translated coefficients, not native Project dispatch",
+  "backend": "CPU FP32 sparse endpoint reference",
+  "torch_version": "2.10.0+cu126",
+  "independent_1d_relative_error": 3.336712567967629e-07,
+  "incident_flux_integral": 0.58451865753285,
+  "independent_incident_flux_integral": 0.5845186627234138,
+  "reference_tensor_plan_bytes": 961800,
+  "cases": [
+    {
+      "layers": 6,
+      "field_amplitude_ratio": 0.0019915202237649923,
+      "reflected_signed_flux_integral": -2.1809136190394e-06,
+      "reflected_flux_ratio": 3.7311274686160588e-06,
+      "backwards_flux_sign_pass": true,
+      "passed": true,
+      "tensor_plan_bytes": 392808
+    },
+    {
+      "layers": 12,
+      "field_amplitude_ratio": 0.0018412583967587304,
+      "reflected_signed_flux_integral": -1.8591187865397036e-06,
+      "reflected_flux_ratio": 3.180597851891872e-06,
+      "backwards_flux_sign_pass": true,
+      "passed": true,
+      "tensor_plan_bytes": 418140
+    }
+  ],
+  "seconds": 0.583364199846983,
+  "passed": true,
+  "scope": "Normal incidence, one polarization, homogeneous background; no general absorption or performance claim.",
+  "measured_driver_sha256": "4d4293c3bc558591a423ed89d27feda801753b7b695c8256eed85bf5eb7b6c8d",
+  "published_driver": {
+    "path": "benchmarks/pmc_cpml_absorption.py",
+    "sha256": "2127778df9e26b67fddd3767ab416f584af3b2493ea6937b0e488fc262319a9a",
+    "numerical_body_sha256": "2f38bd130829158cc93b343fa91b991e7475ba461e92dbee5dd3bf56b48f1cfc",
+    "numerical_body_matches_measured_driver": true,
+    "rerun": false,
+    "changes": "CLI output destination, repository-relative source discovery and provenance file access only; all numerical setup, recurrence, metrics and acceptance expressions preserved."
+  },
+  "failure_provenance": {
+    "initial_record_preserved": true,
+    "initial_passed": false,
+    "cause": "Independent scalar oracle coded E_z -= D_minus H_y. Correct Maxwell recurrence is E_z += D_minus H_y, H_y += D_plus E_z. Native runtime was unchanged.",
+    "original_driver_sha256": "c49a15ebde0c6bd2621a7ef777e8820d4e9eaf62664d944ed2035d0452f5f69c",
+    "corrected_oracle_only": true,
+    "contract_thresholds_unchanged": true,
+    "candidate_metrics_unchanged": true
+  },
+  "precision_scope": "Endpoint CPU solver FP32; independent NumPy scalar oracle and metric accumulation FP64.",
+  "measurement_scope": "Direct endpoint API with two transverse cells, not a native Project minimum-size validation. Normal incidence, homogeneous epsilon1, Ez polarization only."
+}

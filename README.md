@@ -37,7 +37,9 @@ comparison preserves fields and gradients and halves checkpoint payload.
 [Restricted mixed-boundary Project dispatch](docs/PMC_NATIVE_CPML.md) now
 connects this path to ordinary Python, CLI and browser execution. It requires
 equal uniform spacing, a common PML depth/strength and an explicitly supported
-profile. General absorption accuracy and throughput remain pending. A separate
+profile. A [homogeneous normal-incidence pulse gate](docs/PMC_CPML_ABSORPTION.md)
+passes a 1% reflected-field criterion for two tested PML depths. General
+absorption accuracy and throughput remain pending. A separate
 [bulk tensor dielectric API](docs/ANISOTROPY_IMPLEMENTATION_PLAN.md) supports
 periodic/Bloch CPU/CUDA fields and full symmetric tensor gradients. An
 isotropic fixed CPML exterior now encloses interior tensor materials, with

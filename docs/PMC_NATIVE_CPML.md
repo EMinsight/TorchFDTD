@@ -136,3 +136,8 @@ and the original failure record remains preserved privately.
 | `torchfdtd/pmc_cpml.py` | `fc38199b7551203460cec9a5bb881c3650bc8f58994c0ead5e1905a2e37a33d2` |
 | `torchfdtd/pmc_cpml_cuda.py` | `c639f98dd3f029316a48b38a0e331a5f660d25c415f0ee26926da0a5032747c6` |
 | `tests/test_endpoint_native_cpml_cuda.py` | `9c7d9813f7ea054013a559a8bc8658eabe535832aa442d4e22b93f05420db40f` |
+
+The separate [normal-incidence CPU absorption gate](PMC_CPML_ABSORPTION.md)
+checks the direct endpoint API with native-translated coefficients against
+a long-domain reference and independent 1D Yee recurrence. Its two-cell
+transverse setup does not extend the native Project admission contract.

@@ -913,6 +913,18 @@ second-order error. These checks establish a periodic nondispersive bulk
 foundation. Anisotropic interface accuracy, tensor ADE, modal injection,
 spatial streaming and optimized fused tensor kernels remain unvalidated.
 
+The native material workflow accepts the six symmetric Cartesian entries
+in the browser editor and serialized Python projects. A bounded fixed-node
+ownership map gathers a differentiable material table into the tensor field.
+This connects all six material entries to the checkpointed field objective,
+without claiming shape differentiation of hard geometry membership.
+Native CPU/CUDA execution retains point traces, snapshots and NPZ fields.
+Independent periodic and Bloch Fourier-symbol tests also exercise this
+project-level path. Small periodic, Bloch and fixed-collar CPML cases have
+maximum CPU/CUDA trace and material-table VJP differences of
+$9.31\times10^{-10}$ and $1.00\times10^{-11}$, respectively.
+These are workflow correctness checks, not large-domain timing results.
+
 A subsequent extension encloses interior anisotropic material in a fixed
 isotropic CPML exterior. Nonperiodic gathers use zero extension instead of
 coupling opposite faces. Defining the diagonal coverage operator
@@ -1057,6 +1069,20 @@ finite-difference steps provide separate derivative checks. The record
 revisions, artifact hashes, numerical conventions and setup corrections.
 This finite periodic calculation does not establish open-boundary physical
 accuracy, complete feature parity or comparative throughput and memory use.
+
+A separate $64^3$, 512-step fixture compares the complete sampled
+permittivity gradient, with the source cell still fixed. Native and FDTDX
+checkpointed histories agree exactly, and the gradient relative $L_2$
+difference is $1.06\times10^{-6}$. Scalar and seeded directional finite
+differences provide independent checks. The FDTDX reversible path is also
+admissible for this lossless periodic problem. With zero interior reversible
+checkpoints and an empty recorder, its histories agree exactly and its
+gradient differs from the native result by $1.97\times10^{-6}$ in relative
+$L_2$ norm. Actual recorder array storage is zero for this fixture.
+Reversible reconstruction and four-checkpoint replay are distinct algorithms
+with different memory and recomputation costs. These correctness records
+do not imply that the checkpointed FDTDX path is its fastest applicable
+method, or establish an overall performance advantage.
 
 \section{Limitations and development priorities}
 

@@ -130,6 +130,31 @@ Its maximum trace error is 2.79e-9 and peak Torch allocation delta 214,016 bytes
 is below the 491,620-byte planned tensor payload. An initial test-only tuple/list
 JSON comparison failure was corrected before the targeted test passed.
 
+Linux CI [35542219514](https://github.com/hyoseokp/TorchFDTD/actions/runs/35542219514)
+at `d942f2f4818b0d9845ec22d3b91c41c01e875854` passed **1,256 Python tests**
+with 435 environment-dependent skips and **32 browser tests** with 8 skips.
+Frontend and wheel builds passed. The Python suite took 685.96 seconds.
+JUnit SHA-256:
+`42e66e49746be605914f6cb9e0c2fb26653bb24e1b65a2dc99e543458d60345a`.
+The new tensor-native tests and browser scene passed in this CPU environment.
+CUDA evidence remains the separate targeted RTX 3060 result above.
+
+The d942 source audit checked 807 allowlisted files without pattern findings.
+All 107 package files matched its audited source, wheel and isolated install.
+Wheel SHA-256:
+`ea98c882091361d7ad8b837ec25e5f7a42dc476ec20e2b8211b5d3337c25258a`.
+This is private development delivery, not public-release clearance.
+
+A subsequent [endpoint absorption gate](PMC_CPML_ABSORPTION.md) uses a
+homogeneous normal-incidence pulse and native-translated coefficients in the
+direct endpoint API. Reflected field ratios are 0.199152% and 0.184126% at
+six and twelve CPML layers, below the predeclared 1% limit. The first oracle
+sign error is preserved and documented. This is a separate physical check,
+not a native Project or general anisotropic/PML acceptance claim.
+The TeX manuscript was rebuilt to 35 pages with tensor-native and reversible
+cross-framework correctness records. Changed pages were rendered and visually
+reviewed. No new throughput ranking is added to the manuscript.
+
 The current feature-by-feature status is in [FDTDX parity gates](FDTDX_PARITY_KO.md).
 The earlier acceptance snapshot below is retained as historical evidence.
 Linux CI [35533483790](https://github.com/hyoseokp/TorchFDTD/actions/runs/35533483790)
