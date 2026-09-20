@@ -1,5 +1,5 @@
 """Selected-frequency differentiable periodic-layer detector responses."""
-import math
+import hashlib,json,math
 import torch
 from .models import Project,Region,Source,FieldMonitor,BoundaryFace,Boundaries
 from .differentiable import AdjointOptions
@@ -11,14 +11,14 @@ from .solver import C0
 
 
 def periodic_layer_response(density,spec,*,mesh,steps,pml_cells=12,
-                            quadrature_counts=(24,24),pixel_origin='cell_edges',options=None):
+                            quadrature_counts=(24,24),pixel_origin='cell_edges',options=None,reference_cache=None):
     """Compute Cartesian x/y responses with shape (2,4), well order R,G2,G1,B.
 
     spec supplies wavelength_um, background_index, design_index, period_um,
     height_um, detector_offset_um, theta_inside_rad and phi_rad. All are fixed.
     This selected-frequency dielectric model differentiates only density.
-    Two homogeneous references are recalculated without gradients on every
-    invocation. No reference fields or case graphs are cached across calls.
+    Two homogeneous references are evaluated without gradients. An optional
+    PlaneReferenceCache retains only their compact spectral planes on CPU.
     Use spectral_pupil_response to bound residency across wavelengths/rays.
     Arithmetic material averaging and time/mesh convergence remain user checks.
     """
@@ -42,7 +42,7 @@ def periodic_layer_response(density,spec,*,mesh,steps,pml_cells=12,
         bloch_phase=(kt[0]*period[0],kt[1]*period[1],0),
         boundaries=Boundaries(x_min=BoundaryFace(kind='bloch'),x_max=BoundaryFace(kind='bloch'),
                              y_min=BoundaryFace(kind='bloch'),y_max=BoundaryFace(kind='bloch'))),
-        sources=[Source(kind='plane',normal='z',size=(*period,0),center=(0,0,source_z),component='Ex',wavelength=wavelength,pulse_cycles=1)],
+        sources=[Source(id='periodic-plane-source',kind='plane',normal='z',size=(*period,0),center=(0,0,source_z),component='Ex',wavelength=wavelength,pulse_cycles=1)],
         monitors=[FieldMonitor(id=name,normal='z',size=(*period,0),center=(0,0,z)) for name,z in [('incident',probe_z),('detector',detector)]])
     def epsilon(d):return periodic_density_layer(d,project.region,bottom_um=-height/2,top_um=height/2,
         background_epsilon=n*n,design_epsilon=spec['design_index']**2,pixel_origin=pixel_origin)
@@ -52,7 +52,16 @@ def periodic_layer_response(density,spec,*,mesh,steps,pml_cells=12,
         for component in ('Ex','Ey'):
             p=project.model_copy(deep=True);p.sources[0].component=component
             model=DifferentiablePlaneSimulation(p,options or AdjointOptions(checkpoints=4),quadrature_counts={'incident':quadrature_counts,'detector':quadrature_counts})
-            models.append(model);refs.append(model(background,frequency))
+            models.append(model)
+            if reference_cache is None:reference=model(background,frequency)
+            else:
+                from .reference_cache import PlaneReferenceCache
+                if not isinstance(reference_cache,PlaneReferenceCache):raise ValueError('Expected PlaneReferenceCache.')
+                payload=dict(project=p.model_dump(mode='json'),frequency=frequency,quadrature_counts=quadrature_counts,
+                             dtype=str(density.dtype),device=str(density.device))
+                key=hashlib.sha256(json.dumps(payload,sort_keys=True).encode()).hexdigest()
+                reference=reference_cache._get(key,density.device,lambda:model(background,frequency))
+            refs.append(reference)
         pvec=density.new_tensor([math.cos(theta)*math.cos(phi),math.cos(theta)*math.sin(phi)])
         svec=density.new_tensor([-math.sin(phi),math.cos(phi)])
         targets=[math.cos(phi)*pvec-math.sin(phi)*svec,math.sin(phi)*pvec+math.cos(phi)*svec]

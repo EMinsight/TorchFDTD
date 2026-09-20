@@ -70,3 +70,23 @@ bytes because both source graphs remain in one active ray case. This differs
 from the earlier source-by-source replay pilot. Its 159.02-second measurement
 includes homogeneous references and is not a controlled speed comparison.
 See the [API parity record](validation/cr-periodic-response-api.json).
+
+## Bounded CPU reference reuse
+
+Pass `reference_cache=PlaneReferenceCache(budget_bytes=...)` to
+`periodic_layer_response` to reuse fixed homogeneous spectral planes. The cache
+keeps only fields, frequencies, points and quadrature weights on CPU. Its LRU
+budget counts retained tensor bytes, not Python metadata, current return copies
+or active solver workspace. Oversize entries are computed but not retained.
+The key includes the complete fixed project, frequency, quadrature, dtype and
+device. Layer-created sources use stable identifiers so signatures remain
+consistent across repeated calls. Changing the density reuses references but
+still solves the changed structure. Changing wavelength or duration invalidates
+the entry. Returned tensors do not alias cached storage.
+
+This removes repeated homogeneous solves when entries survive until backward
+or the next design iteration. It does not accelerate the first full forward
+sweep. The benchmark exposes `--reference-cache-mib` (default 0), and reports
+retained tensor bytes, hits, misses and evictions. The first ongoing full CR
+forward run uses no cache. Cache parity, gradient, invalidation and budget tests
+are separate from that optical run. No wall-clock speedup is claimed yet.

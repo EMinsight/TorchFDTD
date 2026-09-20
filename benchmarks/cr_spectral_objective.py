@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from photonweave import (periodic_layer_response,spectral_pupil_response,
-    spectral_electron_model,exposure_target_information)
+    spectral_electron_model,exposure_target_information,PlaneReferenceCache)
 
 
 def main():
@@ -19,6 +19,7 @@ def main():
     ap.add_argument('--pml-cells',type=int,default=12)
     ap.add_argument('--pixel-origin',choices=['cell_edges','sample_centers'],default='cell_edges')
     ap.add_argument('--forward-only',action='store_true')
+    ap.add_argument('--reference-cache-mib',type=int,default=0)
     args=ap.parse_args()
     schedule=json.loads(Path(args.schedule).read_text())
     hashes={k:hashlib.sha256(Path(getattr(args,k)).read_bytes()).hexdigest() for k in ('schedule','density','context')}
@@ -36,9 +37,10 @@ def main():
     seed=torch.tensor(np.load(args.density,allow_pickle=False),device='cuda',dtype=torch.float64)
     if not bool(((seed==0)|(seed==1)).all()):raise ValueError('Expected a binary locked seed.')
     density=(.01+.98*seed).requires_grad_(not args.forward_only)
+    cache=PlaneReferenceCache(args.reference_cache_mib*1024**2) if args.reference_cache_mib else None
     def evaluate(d,spec,index):
         result=periodic_layer_response(d,spec,mesh=args.mesh,steps=args.steps,
-            pml_cells=args.pml_cells,pixel_origin=args.pixel_origin)
+            pml_cells=args.pml_cells,pixel_origin=args.pixel_origin,reference_cache=cache)
         print(f'case {index} complete, replay_grad={torch.is_grad_enabled()}',flush=True)
         return result
     cases=[[functools.partial(evaluate,spec=spec,index=(w,r)) for r,spec in enumerate(row)] for w,row in enumerate(rows)]
@@ -58,6 +60,7 @@ def main():
         weighted_bits_per_pixel=float(result.weighted_bits_per_pixel.detach()),bits_per_pixel=result.bits_per_pixel.detach().tolist(),
         gradient_l2=None if gradient is None else float(gradient.norm()),elapsed_seconds=time.perf_counter()-start,
         peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
+        reference_cache=None if cache is None else dict(budget_bytes=cache.budget_bytes,tensor_bytes=cache.tensor_bytes,hits=cache.hits,misses=cache.misses,evictions=cache.evictions),
         scope='Full supplied spectral/pupil schedule and supplied development electron context. No optimization, optical convergence or competitor speed claim.')
     output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
     output.write_text(json.dumps(record,indent=2)+'\n')

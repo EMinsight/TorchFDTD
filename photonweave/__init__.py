@@ -64,3 +64,5 @@ from .pupil_response import spectral_pupil_response
 __all__ += ['spectral_pupil_response']
 from .periodic_response import periodic_layer_response
 __all__ += ['periodic_layer_response']
+from .reference_cache import PlaneReferenceCache
+__all__ += ['PlaneReferenceCache']

@@ -348,4 +348,14 @@ within the active case. This is a compute--memory tradeoff rather than a
 parallel throughput claim. The assembled response feeds the spectral electron
 operator and exposure-weighted information objective. Full CR optical
 convergence and optimization remain unverified.
+
+\section{Bounded homogeneous-reference reuse}
+An optional CPU cache retains compact homogeneous spectral-plane responses
+under a tensor-byte budget. Least-recently-used eviction limits retained
+storage. Keys include the fixed simulation, frequency, quadrature, precision
+and device. Density changes require a new sample solve but do not invalidate
+these homogeneous references. Cached returns are independent copies, and no
+full field history is retained. The cache can eliminate repeated reference
+solves in backward when entries remain resident. It does not reduce the first
+forward sweep and no measured speedup is claimed at this stage.
 \end{document}

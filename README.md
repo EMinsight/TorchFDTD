@@ -34,6 +34,8 @@ The [actual CR density derivative pilot](docs/validation/CR_DENSITY_ADJOINT_PILO
 
 [Spectral/pupil objective assembly](docs/SPECTRAL_PUPIL_RESPONSE.md) now connects explicit wavelength/ray cases to electron information with bounded case replay and unnormalized illumination weights. Full CR optical validation remains in progress.
 
+[Bounded CPU reference caching](docs/SPECTRAL_PUPIL_RESPONSE.md#bounded-cpu-reference-reuse) can reuse homogeneous spectral planes across case replay without retaining full field histories. It preserves tested responses and density gradients. No cache speedup is claimed yet.
+
 <!-- BEGIN LUMERICAL TIMING COMPARISON -->
 ## Primary speed comparison: Lumerical FDTD
 

@@ -1,0 +1,17 @@
+{
+  "base_commit": "31d17a5",
+  "source_sha256": {
+    "photonweave/reference_cache.py": "89f5dea495dc0b785f1ad8a7ea888cc778e10b904403bb5649c1d3ddcdb40244",
+    "photonweave/periodic_response.py": "12fd0983baefc0fb3587db96fc0f5f14366ea6c94b5971a4a386ae080442d9ce",
+    "tests/test_reference_cache.py": "5c4b89d9d4eb8a46961dbe095ac1170571a533a836eb15555995a678403ce3d3",
+    "benchmarks/cr_spectral_objective.py": "7634b920be63d69c7f1282e8b05390045bd3965618e5f1556c0c0b7d8aaa4142"
+  },
+  "reference_sha256": {
+    "src/cr_itd_v2/forward/pupil.py": "8fb89d6a60dadca16806b4e9d959fda2aee44d6564c692d1675fb662a6ba8a11",
+    "src/cr_itd_v2/forward/contracts.py": "7786665b60ef31fc07d4942dddfc68f182bb586943790293fd719d74abdf6efd",
+    "src/cr_itd_v2/forward/materials.py": "eab2e09d3a09786b808dc298823525405413e49d11995c100466c07cd5f9608c",
+    "src/cr_itd_v2/forward/local_response.py": "83b4979d9838bbcf03dbbd3461403779f185ea04bfe1102045c9e35dcf809055"
+  },
+  "reference_driver_sha256": "dde51207d1eb69357bcf33c8c4f7374ddb36d71b0bad2fdb1bac83e05c2d6e3b",
+  "scope": "Full TORCWA reference and optional bounded CPU reference cache. Running FDTD full forward retains the preceding 31d17a5 code and does not use the cache."
+}

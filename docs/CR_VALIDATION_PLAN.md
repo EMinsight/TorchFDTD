@@ -107,3 +107,11 @@ The locked schedule contains nine wavelengths and sixteen rays. Its weight sum
 is 0.996198318172399 and is preserved without normalization. A first full forward
 run at 50 nm and 1600 steps has been launched on RTX 5880. Completion and optical
 convergence are not yet established. No optimization has been launched.
+
+The original full-schedule TORCWA response for the same 0.01/0.99 relaxed seed
+is now recorded at Fourier orders (8,8), with the original 1e-4 frequency nudge.
+Its locked development objective is 1.2064319578769425 bits per pixel. Applying
+the candidate electron model to that response differs by 4.22e-15. This isolates
+the objective adapter from the remaining optical comparison. The reference
+uses complex64 and has not passed an independent order-convergence study.
+See [full reference](validation/cr-full-torcwa-reference.json).
