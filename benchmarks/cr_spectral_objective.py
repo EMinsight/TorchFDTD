@@ -14,6 +14,16 @@ from benchmarks.cr_resume import (CaseJournal, load_gradient_record, runtime_ide
                                   source_hashes, write_json)
 
 
+def information_objective(response, context):
+    """Shared fixed-calibration CR objective for evaluation and optimization."""
+    c = context
+    model = spectral_electron_model(response,c['wavelengths_nm'],c['sampled_qe'],c['source_spectrum'],
+        c['scene_spectral_basis'],calibration=c['electron_calibration'])
+    return exposure_target_information(model,c['scene_covariance'],c['scene_target_cross_covariance_xyz'],c['target_covariance_xyz'],
+        exposure_scales=[e/c['reference_weighted_cfa_green_e'] for e in c['exposure_weighted_cfa_green_e']],
+        probabilities=c['exposure_probabilities'],read_noise_e_rms=c['read_noise_e_rms'],raw_pixels=4)
+
+
 def execution_settings(args):
     """Prepare explicit hierarchy policies without allocating design fields."""
     if args.execution_policy == 'legacy':return None
@@ -179,11 +189,7 @@ def main():
         return result
     cases=[[functools.partial(evaluate,spec=spec,index=(w,r)) for r,spec in enumerate(row)] for w,row in enumerate(rows)]
     def electron_objective(response):
-        model=spectral_electron_model(response,c['wavelengths_nm'],c['sampled_qe'],c['source_spectrum'],
-            c['scene_spectral_basis'],calibration=c['electron_calibration'])
-        return exposure_target_information(model,c['scene_covariance'],c['scene_target_cross_covariance_xyz'],c['target_covariance_xyz'],
-            exposure_scales=[e/c['reference_weighted_cfa_green_e'] for e in c['exposure_weighted_cfa_green_e']],
-            probabilities=c['exposure_probabilities'],read_noise_e_rms=c['read_noise_e_rms'],raw_pixels=4)
+        return information_objective(response, c)
     torch.cuda.synchronize();torch.cuda.reset_peak_memory_stats();start=time.perf_counter()
     if args.resume and output.exists() and not args.forward_only:
         record,gradient=load_gradient_record(output,contract,density)

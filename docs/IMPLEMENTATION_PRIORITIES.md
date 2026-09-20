@@ -2,6 +2,8 @@
 
 핵심 목표는 **Torch에서 형상·재료부터 loss.backward와 optimizer까지 연결하는 inverse design**, 그리고 **VRAM·DRAM·저장장치 계층으로 메모리 병목과 큰 격자의 한계를 줄이는 실행 엔진**이다. 속성 수를 채우는 것으로 완료를 판단하지 않는다. 모든 행의 중요도·필요 여부는 [분류 CSV](FEATURE_PRIORITY_INDEX.csv)와 UI의 Feature checklist에서 확인한다.
 
+CR 후속으로 [재시작 가능한 밀도 최적화 실행기](CR_INVERSE_DESIGN.md)를 추가했다. 전체 파장·입사 조건과 정보량 목적함수를 projected Adam에 연결하며, density·Adam 상태를 함께 저장하고 최종 구조를 별도 forward로 평가한다. 원래 CR 입력의 물리·gradient 수렴 및 실제 최적화 검증은 남아 있다.
+
 ## 현재 실행 순서 · 2026-09-20
 
 1. **미분 가능한 물리 경로.** 제한된 실수 비분산 Yee·CPML의 이산 adjoint와 fused CUDA backward, 점 관측, 전체 시간기록 없이 블록으로 누적하는 Torch DFT와 그 transpose, regularized sphere 형상과 Adam을 구현했다. [API 범위](DIFFERENTIABLE_FDTD.md)에 표시한 부분 구현이며 고정 검출면의 E/H 보간·전력 적분·기준 정규화와 박막 검증을 추가했다. 고정 Bloch 위상의 resident Torch CPU/CUDA 미분과 경사 TE 박막 검증도 추가했다. 분산 재료의 resident Torch·fused CUDA transpose와 spectral plane을 추가했다. 공간 ADE의 DRAM/파일 P/Q 저장·fused CUDA 타일·재료 gradient를 실험적으로 연결했다. 분산 장시간 수렴/속도 검증, mode port 목적함수, TFSF와 coupled subpixel은 남아 있다. Taylor 검사는 이산식 검증이며 물리 shape-gradient 수렴은 별도다.

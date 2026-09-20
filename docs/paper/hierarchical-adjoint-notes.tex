@@ -995,4 +995,30 @@ but exclude outer module construction and fixed-reference warm-up. The nearly
 constant preparation saving yields a smaller relative gain at longer duration.
 Neither study establishes optical convergence or external-solver superiority.
 
+\section{Restartable full-schedule density optimization}
+An explicit-input driver now maximizes the fixed-calibration spectral electron
+information objective through periodic density responses and projected Adam.
+Every update uses all supplied wavelength and pupil-ray cases. Bounded case
+replay retains one optical solver graph at a time, and the optimizer works on
+the CPU density tensor. A conservative design and Adam copy allowance is
+subtracted from the shared solver host budget. Context and runtime overhead
+remain outside this tensor reservation.
+
+An atomically replaced checkpoint retains density, Adam moments, step count,
+compact objective history and the best evaluated design. A run owns an OS file
+lock and checks exact input, source, execution-policy and runtime identities
+when resuming. Completed forward cases can be restored, while their gradient
+replay executes the differentiable solver again. An uncommitted optimizer
+update is discarded after interruption. The final updated density receives
+a complete forward objective before export. This is projected continuous
+density optimization, without a new optimizer algorithm, binarization or
+an implicit claim of physical CR convergence.
+
+A synthetic three-wavelength, one-ray check with a $2\times2$ density increases
+information from 0.07000366558 to 0.07002771570 bits per pixel over two resident
+updates. Restarting after the first update preserves the final response and
+density exactly. One asynchronous DRAM update agrees with its resident
+counterpart. These checks establish discrete optimizer connectivity and
+restart behavior, not performance or a completed original CR application.
+
 \end{document}

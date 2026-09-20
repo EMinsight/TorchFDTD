@@ -113,6 +113,10 @@ all wavelength/ray cases before any field execution and add the exact execution
 settings to the restart contract. File mode requires an explicit directory and
 disk budget, and preserves 100 GiB free storage. The runner records preflight
 time separately from forward/backward time. It does not include an optimizer.
+The separate [CR inverse-design driver](CR_INVERSE_DESIGN.md) connects the same
+full schedule and information objective to projected Adam, committed optimizer
+checkpoints, per-update case restart and a final evaluated design export.
+It retains continuous densities and does not certify physical convergence.
 
 Use `--forward-kernel fused`, `--gpu-budget-gib`, `--host-budget-gib`,
 `--slab-width` and `--temporal-depth` to set the explicit policy. Streamed CUDA

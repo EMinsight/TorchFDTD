@@ -92,6 +92,9 @@ file-backed execution, with one source-basis solver graph at a time. The CR
 runner exposes these policies and preflights its complete case schedule.
 Small response/gradient checks pass. Full-application validation of this new
 integration remains separate from the legacy-path optical measurements.
+The [restartable CR design driver](docs/CR_INVERSE_DESIGN.md) adds projected
+Adam updates, atomic density/moment checkpoints and a complete final forward
+evaluation. The original CR application's physical optimization remains pending.
 A [measured observation-setup improvement](docs/validation/PERIODIC_OBSERVATION_SETUP.md)
 removes repeated mesh-count derivation. On a synthetic periodic RTX 3060 case,
 full response/objective/VJP medians improve by 1.52x at 128 steps and 1.04x at
