@@ -53,9 +53,24 @@ The explicit transpose includes P and Q in every restart state and propagates
 their adjoints through every replayed timestep. Device, host, file and mixed
 checkpoint tiers use the existing bounded scheduler. Online point spectra
 avoid a complete time-history output. Material P/Q state alone costs
-`6*P*Ncells*field_item_bytes`. Dense per-pole coefficients and parameter VJPs
-add further memory, reported and reserved separately. User geometry graphs
-and other live solver calls have separate allocations.
+`6*P*Ncells*field_item_bytes`. Parameter inputs retain their original compact
+shapes. Shared pole rates are not copied into every cell and Yee component.
+The local transpose sums shared-parameter derivatives before accumulation,
+including a rate shared by all poles. Spatial parameters still retain their
+full supplied maps. The packed parameter buffer has
+`(epsilon_inf.numel() + strength.numel() + omega0.numel() + gamma.numel())`
+real elements. Temporary field derivatives and P/Q states remain spatial.
+User geometry graphs and other live solver calls have separate allocations.
+
+For a 240-cell grid with scalar epsilon-infinity, two pole strengths, two
+resonances and one shared damping rate, the FP64 packed parameter buffer now
+uses 1,960 bytes instead of the former 40,320 bytes of fully expanded
+parameters. This is a parameter-buffer comparison only, not the whole solver
+peak. The unused inverse-permittivity field is also omitted in this ADE path.
+Tests compare compact and explicitly expanded inputs for shared, spatial and
+component-dependent poles under real and Bloch fields. Forward values and VJPs
+agree within FP64 tolerances. Summation order can differ, so bitwise gradient
+equality is not required. No reduced storage precision is used.
 
 The current implementation uses Torch updates and an analytic discrete
 transpose. CPU FP32/FP64, CPML, real/complex Bloch and diagonal material
@@ -73,7 +88,9 @@ gradients, checkpoint restoration including P/Q and buffer lifetime without
 cyclic garbage collection. These establish the tested discrete operation.
 They do not establish sharp-interface shape-gradient convergence, large
 dispersive-domain capacity or a competing-solver performance advantage.
-The CPU regression run covering this implementation and the existing resident,
+The initial CPU regression run covering this implementation and the existing resident,
 plane, Bloch, spectral and spatial-checkpoint paths passed 192 tests, with
 59 CUDA-dependent tests skipped. The TeX supplement includes the recurrence
 and transpose and compiles without an overfull-box warning.
+After compact parameter storage was added, the same regression scope plus
+broadcast-layout checks passed 201 tests with 59 CUDA-dependent skips.

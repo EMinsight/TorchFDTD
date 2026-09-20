@@ -38,6 +38,7 @@ def main():
             radius_um=float(radius.detach()),damping_rad_s=float(damping.detach()),
             radius_gradient=float(radius.grad),raw_damping_gradient=float(raw_damping.grad),
             material_state_bytes=result.report['material_state_bytes'],
+            material_parameter_bytes=result.report['material_parameter_bytes'],
             checkpoint_bytes=result.report['restart_bytes'])),flush=True)
         optimizer.step()
         with torch.no_grad():

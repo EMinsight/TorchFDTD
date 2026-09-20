@@ -3,7 +3,7 @@
 P is relative polarization and Q = dt*dP/dt. No timestep autograd graph is
 retained by the production solve. Material inputs replace scene assignments.
 """
-from dataclasses import replace
+from dataclasses import dataclass, replace
 import math
 
 import torch
@@ -11,11 +11,37 @@ import torch
 from .differentiable import AdjointOptions, DifferentiableSimulation, _System
 
 
+@dataclass(frozen=True)
+class _ParameterLayout:
+    """Original parameter shapes and their unexpanded Yee broadcast views."""
+    shapes: tuple
+    pole_count: int
+
+    def views(self, flat):
+        values = flat.split([math.prod(shape) for shape in self.shapes])
+        return tuple(value.reshape(self.view_shape(i)) for i, value in enumerate(values))
+
+    def view_shape(self, index):
+        shape = self.shapes[index]
+        if index == 0:
+            return (*shape, 1) if len(shape) == 3 else shape
+        if len(shape) == 0:
+            return (1, 1, 1, 1, 1)
+        if len(shape) == 1:
+            return (*shape, 1, 1, 1, 1)
+        return (*shape, 1) if len(shape) == 4 else shape
+
+    def transpose(self, gradients):
+        return torch.cat([value.sum_to_size(self.view_shape(i)).reshape(-1)
+                          for i, value in enumerate(gradients)])
+
+
 class _DispersiveSystem(_System):
-    def __init__(self, project, epsilon, parameters, **kwargs):
-        super().__init__(project, epsilon, prepare_kernels=False, **kwargs)
+    def __init__(self, project, epsilon, parameters, layout, **kwargs):
+        super().__init__(project, epsilon, prepare_kernels=False, prepare_permittivity=False, **kwargs)
         self.parameters = parameters.detach()
-        self.pole_count = (len(parameters)-1)//3
+        self.layout = layout
+        self.pole_count = layout.pole_count
         shape = (self.pole_count, *self.grid.E.shape)
         self.P = torch.zeros(shape, dtype=self.field_dtype, device=self.device)
         self.Q = torch.zeros_like(self.P)
@@ -24,9 +50,7 @@ class _DispersiveSystem(_System):
         return (*super().state(), self.P, self.Q)
 
     def coefficients(self, parameters):
-        count = self.pole_count
-        eps = parameters[0]
-        strength, frequency2, damping = parameters[1:].split(count)
+        eps, strength, frequency2, damping = self.layout.views(parameters)
         a = .5*frequency2
         d = 1 + .5*damping + .25*frequency2
         k = strength/(4*d)
@@ -89,7 +113,7 @@ class _DispersiveSystem(_System):
         frequency2_bar = .5*a_bar + .25*d_bar
         damping_bar = .5*d_bar
         contribution, psi_bar = self.curl_transpose(self.grid.courant_number*numerator_bar, psi_bar, False)
-        gradient = torch.cat((eps_bar[None], strength_bar, frequency2_bar, damping_bar), dim=0)
+        gradient = self.layout.transpose((eps_bar, strength_bar, frequency2_bar, damping_bar))
         return (old_bar, h_bar+contribution, *psi_bar, previous_p_bar, previous_q_bar), gradient
 
 
@@ -99,7 +123,7 @@ class DispersiveSimulation(DifferentiableSimulation):
     ``model(epsilon_inf, strength, omega0, gamma)`` uses angular frequencies in
     rad/s and oscillator strength in (rad/s)^2. Pole axis comes first. Strength
     accepts (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3). omega0 and gamma also accept a
-    scalar. Fields broadcast only over explicit cells/components, not poles.
+    scalar. Pole-vector lengths must match P. Scalars share a rate across poles.
     omega0=0 gives Drude. All parameters may retain a Torch geometry graph.
 
     Uses Torch CPU/CUDA updates and an explicit transpose, with the resident
@@ -138,38 +162,32 @@ class DispersiveSimulation(DifferentiableSimulation):
         if strength.ndim == 0 or not 1 <= strength.shape[0] <= 64:
             raise ValueError('Strength needs a leading pole axis of length 1 to 64.')
         count = strength.shape[0]
-        target = (count, *r.shape, 3)
-        packed_bytes = (1+3*count)*math.prod(r.shape)*3*epsilon.element_size()
+        for value in (strength, omega0, gamma):
+            if value.shape not in ((), (count,), (count, *r.shape), (count, *r.shape, 3)):
+                raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3).')
+        packed_bytes = (epsilon.numel()+sum(v.numel() for v in (strength,omega0,gamma)))*epsilon.element_size()
         if epsilon.is_cuda:
             free, _ = torch.cuda.mem_get_info(epsilon.device)
             if packed_bytes > min(int(free*.8), self.options.gpu_budget_bytes or int(free*.8)):
                 raise ValueError('Oscillator parameter packing exceeds the GPU budget.')
-        def expand(value):
-            if value.ndim == 0:
-                return value.expand(target)
-            if value.shape == (count,):
-                return value.reshape(count, 1, 1, 1, 1).expand(target)
-            if value.shape == (count, *r.shape):
-                return value[..., None].expand(target)
-            if value.shape == target:
-                return value
-            raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3).')
         # Scale before broadcasting. The large physical rates are never squared
         # prior to multiplication by dt, avoiding avoidable FP32 overflow.
         dt = r.time_step
-        normalized = [expand(strength*dt*dt), expand((omega0*dt).square()), expand(gamma*dt)]
+        normalized = [strength*dt*dt, (omega0*dt).square(), gamma*dt]
         if any(not bool(torch.isfinite(v).all()) for v in normalized):
             raise ValueError('Normalized oscillator coefficients overflow this precision.')
-        eps = epsilon[..., None].expand(*r.shape, 3) if epsilon.ndim == 3 else epsilon
-        return torch.cat((eps[None], *normalized), dim=0), count
+        values = (epsilon, *normalized)
+        layout = _ParameterLayout(tuple(tuple(value.shape) for value in values), count)
+        return torch.cat([value.reshape(-1) for value in values]), layout
 
     def _evaluate(self, epsilon, strength, omega0, gamma, spectral):
-        parameters, count = self._pack(epsilon, strength, omega0, gamma)
+        parameters, layout = self._pack(epsilon, strength, omega0, gamma)
+        count = layout.pole_count
         n = math.prod(self.project.region.shape)
         real_item = epsilon.element_size()
         field_item = real_item*(2 if self.project.region.complex_fields else 1)
         def factory(project, value, **kwargs):
-            return _DispersiveSystem(project, value, parameters, **kwargs)
+            return _DispersiveSystem(project, value, parameters, layout, **kwargs)
         result = super()._run(epsilon, spectral, system_factory=factory, autograd_input=parameters,
             extra_state_bytes=6*count*n*field_item,
             extra_workspace_bytes=n*((36*count+12)*field_item+(36*count+12)*real_item))
@@ -178,6 +196,7 @@ class DispersiveSimulation(DifferentiableSimulation):
             backward_backend='torch explicit ADE transpose', oscillator_count=count,
             material_state_bytes=6*count*n*field_item,
             material_parameter_bytes=parameters.numel()*real_item,
+            material_parameter_layout='compact original shapes with broadcast transpose reductions',
             material_parameters='epsilon_inf, strength [(rad/s)^2], omega0 [rad/s], gamma [rad/s]')
         return result
 
@@ -191,10 +210,11 @@ class DispersiveSimulation(DifferentiableSimulation):
         return self._evaluate(epsilon_inf, strength, omega0, gamma, spectral)
 
     def reference(self, epsilon_inf, strength, omega0, gamma):
-        parameters, count = self._pack(epsilon_inf, strength, omega0, gamma)
+        parameters, layout = self._pack(epsilon_inf, strength, omega0, gamma)
+        count = layout.pole_count
         if math.prod(self.project.region.shape)*self.project.region.steps*(1+count)>2_000_000:
             raise ValueError('Full-autograd ADE oracle is restricted to two million pole-cell-steps.')
-        system = _DispersiveSystem(self.project, epsilon_inf, parameters)
+        system = _DispersiveSystem(self.project, epsilon_inf, parameters, layout)
         state = tuple(torch.zeros_like(x) for x in system.state())
         signals = []
         for step in range(self.project.region.steps):

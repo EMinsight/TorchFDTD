@@ -94,7 +94,8 @@ class _Grid:
 
 
 class _System:
-    def __init__(self, project, epsilon, *, prepare_updates=True, observation_monitors=None, prepare_kernels=True):
+    def __init__(self, project, epsilon, *, prepare_updates=True, observation_monitors=None,
+                 prepare_kernels=True, prepare_permittivity=True):
         self.project=project
         self.region=r=project.region
         self.epsilon=epsilon
@@ -113,7 +114,7 @@ class _System:
             return torch.zeros(shape,device=self.device,dtype=self.field_dtype)
         g.E=initial((*r.shape,3))
         g.H=initial(g.E.shape)
-        g.inverse_permittivity=(1/self.eps4.detach()).expand_as(g.E).contiguous() if prepare_updates else None
+        g.inverse_permittivity=(1/self.eps4.detach()).expand_as(g.E).contiguous() if prepare_updates and prepare_permittivity else None
         g.inverse_permeability=torch.ones(1,device=self.device,dtype=self.dtype)
         g.is_torch=True
         g.courant_number=r.rectangular_courant

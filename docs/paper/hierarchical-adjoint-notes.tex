@@ -522,6 +522,15 @@ differentiates the timestep scaling and preceding geometry map. This
 construction retains a bounded set of physical states rather than a
 computational graph across all time steps.
 
+Shared material parameters retain their original tensor shapes in a compact
+input buffer. Broadcasting supplies the field update without storing dense
+copies of a uniform pole rate. The transpose reduces cell and component
+derivatives to those original shapes before temporal accumulation. A scalar
+shared by all poles also receives the pole-axis sum. This changes floating
+point summation order but not the represented material or storage precision.
+The spatial P and Q states remain necessary, and this parameter reduction
+does not imply sparse field evolution or a bound on the full solver peak.
+
 The implemented path uses Torch operations and an explicit analytic
 transpose. Small CPU tests cover FP32 and FP64, fixed Bloch phase, scalar
 and diagonal epsilon, all four material parameter derivatives, checkpoint

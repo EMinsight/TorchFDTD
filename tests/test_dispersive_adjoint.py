@@ -175,3 +175,57 @@ def test_ade_replay_releases_system_without_cyclic_gc():
         assert ref() is None
     finally:
         if enabled:gc.enable()
+
+
+@pytest.mark.parametrize('layout', ['shared', 'spatial_strength', 'spatial_rates', 'diagonal'])
+@pytest.mark.parametrize('bloch', [False, True])
+def test_compact_parameters_match_expanded_values_and_vjp(layout, bloch):
+    p=project(steps=14)
+    if bloch:
+        p.region.boundaries.x_min=BoundaryFace(kind='bloch')
+        p.region.boundaries.x_max=BoundaryFace(kind='bloch')
+        p.region.bloch_phase=(.37,0,0)
+    shape=p.region.shape
+    generator=torch.Generator().manual_seed(917)
+    parameter_shapes={
+        'shared': [(2,), (), (2,)],
+        'spatial_strength': [(2,*shape), (2,), ()],
+        'spatial_rates': [(2,), (2,*shape), (2,*shape,3)],
+        'diagonal': [(2,*shape,3), (2,*shape,3), ()],
+    }[layout]
+    epsilon=(1.4+.2*torch.rand(shape+((3,) if layout=='diagonal' else ()),generator=generator,dtype=torch.float64)).requires_grad_()
+    variables=[(.2+torch.rand(s,generator=generator,dtype=torch.float64)).requires_grad_() for s in parameter_shapes]
+    def inputs(expanded):
+        values=[variables[0]*1e30,variables[1]*1e15,variables[2]*1e15]
+        if not expanded:return epsilon,*values
+        def expand(v):
+            if v.ndim==0:v=v.reshape(1,1,1,1,1)
+            elif v.ndim==1:v=v.reshape(2,1,1,1,1)
+            elif v.ndim==4:v=v[...,None]
+            return v.expand(2,*shape,3)
+        eps=epsilon[...,None].expand(*shape,3) if epsilon.ndim==3 else epsilon
+        return eps,*(expand(v) for v in values)
+    model=DispersiveSimulation(p,AdjointOptions(checkpoints=2))
+    compact=model(*inputs(False)); expanded=model(*inputs(True))
+    loss=lambda result:result.signals.abs().square().sum()
+    a=torch.autograd.grad(loss(compact),(epsilon,*variables))
+    b=torch.autograd.grad(loss(expanded),(epsilon,*variables))
+    torch.testing.assert_close(compact.signals,expanded.signals,rtol=1e-12,atol=1e-14)
+    for want,got in zip(b,a):torch.testing.assert_close(got,want,rtol=2e-10,atol=1e-12)
+    expected_bytes=(epsilon.numel()+sum(v.numel() for v in variables))*8
+    assert compact.report['material_parameter_bytes']==expected_bytes
+    assert expected_bytes < expanded.report['material_parameter_bytes']
+
+
+def test_uniform_poles_do_not_allocate_dense_parameter_copies():
+    p=project(steps=10)
+    epsilon=torch.full(p.region.shape,1.7,dtype=torch.float64,requires_grad=True)
+    result=DispersiveSimulation(p)(epsilon,[.7e30,.4e30],[1.5e15,2e15],2e14)
+    system=result.signals.grad_fn.system
+    assert system.grid.inverse_permittivity is None
+    assert system.parameters.numel()==epsilon.numel()+5
+    eps,a,d,k=system.coefficients(system.parameters)
+    assert eps.numel()==epsilon.numel()
+    assert [value.numel() for value in (a,d,k)]==[2,2,2]
+    gradient,=torch.autograd.grad(result.signals.square().sum(),epsilon)
+    assert torch.isfinite(gradient).all() and gradient.norm()>0
