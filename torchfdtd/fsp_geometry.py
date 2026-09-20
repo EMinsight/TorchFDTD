@@ -102,6 +102,8 @@ def _write_fsp(document,project,*,settings):
     if tuple(provenance.origin_m)!=tuple(conversion.origin_m):raise ValueError('FSP coordinate origin was changed.')
     native_only=[];instruments=None
     for material in project.materials:
+        if material.model=='tensor':
+            native_only.append(f'material {material.name}: Cartesian tensor coefficients (retain in native JSON)')
         if material.samples is not None or material.fit_band_um is not None:
             native_only.append(f'material {material.name}: optical samples and fit metadata (retain in native JSON)')
     if settings:

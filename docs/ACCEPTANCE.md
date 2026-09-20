@@ -101,6 +101,35 @@ profile settings are rejected rather than silently replaced. These additions
 were not present in the `b68bb0b` CI run above, and its counts are not evidence
 for the follow-up implementation.
 
+Linux CI [35541201040](https://github.com/hyoseokp/TorchFDTD/actions/runs/35541201040)
+at `f355601860c563cbae5a4a57bb6aa1b5dadd6b6c` passed **1,240 Python tests**
+with 434 skips and **31 browser tests** with 8 skips. Frontend and wheel builds
+passed. The Python suite took 683.70 seconds. JUnit SHA-256:
+`4f95826afd7aeaa53494effea29e1009cb2cf9c8cd88f5b210ae8d57210b282f`.
+This includes unequal opposing fixed ports and native PMC/CPML. It predates
+the following tensor-native workflow and does not validate its new files.
+The f355 source audit covered 796 files without pattern findings. All 105
+package files matched its audited source, wheel and isolated installation.
+Wheel SHA-256: `cf3af7936337e17ed9bbb2789f6249967fd4ef4a779fe4afbbd395f55b1c1bab`.
+
+The tensor-native follow-up adds six Cartesian material coefficients, bounded
+fixed-node geometry rasterization, differentiable material tables and ordinary
+Project/CLI/browser execution. Sixteen focused CPU cases cover schema, material
+VJPs, independent periodic/Bloch Fourier-symbol oracles, snapshots, NPZ,
+cancellation, memory admission and scalar/export guards. The actual browser
+CPU workflow passed, including invalid-material rejection without changing the
+saved scene. Two initial UI fixture/locator failures remain in local logs.
+A separate CUDA integration case covers periodic, Bloch and fixed-collar CPML,
+with maximum trace error 9.31e-10 and table-VJP error 1.00e-11 versus CPU.
+These small correctness tests do not measure large-grid capacity or throughput.
+See [the native tensor workflow](TENSOR_NATIVE.md) for source hashes and scope.
+
+The separate restricted native PMC/CPML CUDA integration also passed,
+including waveform/material VJP, exact zero exterior gradients and NPZ fields.
+Its maximum trace error is 2.79e-9 and peak Torch allocation delta 214,016 bytes
+is below the 491,620-byte planned tensor payload. An initial test-only tuple/list
+JSON comparison failure was corrected before the targeted test passed.
+
 The current feature-by-feature status is in [FDTDX parity gates](FDTDX_PARITY_KO.md).
 The earlier acceptance snapshot below is retained as historical evidence.
 Linux CI [35533483790](https://github.com/hyoseokp/TorchFDTD/actions/runs/35533483790)

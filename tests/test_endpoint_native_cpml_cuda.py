@@ -1,4 +1,5 @@
 """One native CPU/CUDA endpoint CPML integration gate, run only with a GPU slot."""
+import json
 import numpy as np
 import pytest
 import torch
@@ -37,7 +38,7 @@ def test_native_cpml_cuda_results_npz_material_and_waveform_vjp(tmp_path):
         np.testing.assert_array_equal(getattr(loaded, name), getattr(gpu_result, name))
     for key in ('E_upper', 'H_upper'):
         np.testing.assert_array_equal(loaded.endpoint_fields[key], gpu_result.endpoint_fields[key])
-    assert loaded.summary['endpoint_plan']['cpml'] == gpu_result.summary['endpoint_plan']['cpml']
+    assert loaded.summary['endpoint_plan']['cpml'] == json.loads(json.dumps(gpu_result.summary['endpoint_plan']['cpml']))
 
     cpu = endpoint_from_project(project, checkpoints=3)
     cpu_epsilon = cpu.rasterize()

@@ -113,8 +113,10 @@ __all__ += ['DensityParameterization', 'GDSLayer', 'GDSPortLayer', 'GDSPort', 'G
             'project_farfield', 'normalized_farfield_intensity']
 
 from .anisotropy import TensorDielectricSimulation
+from .tensor_project import TensorProject, tensor_from_project
 from .pmc_simulation import EndpointSimulation
 __all__ += ["TensorDielectricSimulation", "EndpointSimulation"]
+__all__ += ["TensorProject", "tensor_from_project"]
 
 from .domain_decomposition import (DistributedYeeDomain, SlabOwnership,
     distributed_capabilities, plan_domain_decomposition)

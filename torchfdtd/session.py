@@ -58,7 +58,8 @@ class FDTD:
         if len(matches) != 1: raise ValueError('Material name must be unique and exist.')
         material = matches[0]
         fields = {'name': 'name', 'color': 'color'}
-        fields.update({'Refractive Index':'index'} if material.model == 'dielectric' else {'Permittivity':'epsilon_inf'})
+        if material.model == 'tensor':fields['Permittivity tensor']='epsilon_tensor'
+        else:fields.update({'Refractive Index':'index'} if material.model == 'dielectric' else {'Permittivity':'epsilon_inf'})
         if material.model == 'drude': fields.update({'Plasma resonance':'plasma_rad_s', 'Plasma collision':'collision_rad_s'})
         if material.model == 'lorentz': fields.update({'Lorentz Permittivity':'delta_epsilon', 'Lorentz Resonance':'resonance_rad_s', 'Lorentz Linewidth':'linewidth_rad_s'})
         if property not in fields: raise ValueError(f'Unsupported {material.model} material property: {property}')

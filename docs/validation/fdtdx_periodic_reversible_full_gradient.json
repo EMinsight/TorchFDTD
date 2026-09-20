@@ -1,0 +1,260 @@
+{
+  "schema": "torchfdtd-fdtdx-reversible-full-gradient-v1",
+  "date": "2026-09-21",
+  "status": "passed",
+  "scope": "Correctness of FDTDX public reversible differentiation on the same fixed 64^3 scalar dielectric periodic fixture; no overall performance advantage claimed.",
+  "identities": {
+    "native_revision": "6fa0c3518efba5d0e93c4c1125b52665a5b7713b",
+    "native_wheel_sha256": "56ae40b83e74e3e643f21ce06b29f22dabab174d3946825a4f8e08861e674ee5",
+    "fdtdx_revision": "60c1c2712da8bb0ccaa55c77846217932bb665a2",
+    "fdtdx_source_archive_sha256": "0b6c28dbf6ed7ef50cbb2a060c36f21dafa6c0b48e4947874d348659c8cfed93",
+    "environment_lock_sha256": "640e736d6eecb9f7ec99d93579a0d1ed6e6d082686ac6d9f25d8903402aa086d",
+    "native_installed_python_files_verified": 96,
+    "native_all_python_hash_manifest_sha256": "e37374cc4896ed6106933d1f4dd5dc48568ecf941452fb1082041ab731ce3255",
+    "fdtdx_installed_python_files_verified": 110,
+    "fdtdx_all_python_hash_manifest_sha256": "b9eb72be4ec276306fa5904e6af659522315b45bbb09fcc8eb1a7ea43384e1f8",
+    "manifest_digest_encoding": "SHA256 of UTF-8 JSON with sorted keys and separators comma/colon, no whitespace",
+    "native_core_sha256": {
+      "torchfdtd/models.py": "35b4cb0613c3017dc218dde15d192f30c81842f1faf7f7599549ec852121bbf1",
+      "torchfdtd/solver.py": "30a1e70397bb7dfd0bee5742b38f0e2e34e639081db0dc78108157d20d200309",
+      "torchfdtd/waveforms.py": "654333e8afa4da1310afc714a1c15ad60663ef21f3533f4b55c1a7489a0809b9",
+      "torchfdtd/differentiable.py": "90772d3c5cbfe35b37bd8d90e636a6e86424cecc2b612211d04ebef52b52106b",
+      "torchfdtd/injection.py": "3c1b41a678c6356e9f08acebc3f6411693535b4111b815fa6b3ce33966961552",
+      "torchfdtd/boundaries.py": "43ed7dc65066160cd7519cff73a391d612ae61102e08b195976f98b3b43581c3",
+      "torchfdtd/cuda_kernels.py": "19ceb53777e53851c085ce80be959bca191c0d6663a9a11cb4a4b6edbaca66d0",
+      "torchfdtd/cuda_adjoint.py": "ba380285bed58be59f80b7a3bb979dad78a0666689c1fe156208119ec2a90127"
+    },
+    "fdtdx_core_sha256": {
+      "__init__.py": "285f5f972403245ec3722288a517738ab97293bcabe11f12887ca303eead542f",
+      "config.py": "57946a89816b94d3b9a126359d118b9803a9ed1733eb2108d357ea264fde4da1",
+      "constants.py": "84df6119cfddc2ec9d42a799f9ad9f6a9e897a200fbdaf8087c35ad193f3663f",
+      "core/grid.py": "179e6190863b34c38f68d099b3432f34bdd4f1e0fac831ddbacce0ef2b84c98f",
+      "core/physics/curl.py": "f9d70c0b7462c4034d60430d891bf5dc216dfdb9569e86622dc08bce10658258",
+      "fdtd/container.py": "1c2f69ec2c2e30d4629489cd6e84a1f4d8235480611cf34250f58e5c0eb449c7",
+      "fdtd/initialization.py": "2889dd5e48deb520ca584dbc15784a4a4d6c50a01e3008e6bb6d4d81e1d95139",
+      "fdtd/fdtd.py": "33a275a8a7dcc0d2c38f537cb8f5d8714ebf4959c462e54f1af8e58fc3660cfb",
+      "fdtd/forward.py": "04f46f0262c5d01334e850096ff5c2380954b736c465b464a786ecf9d9d766b7",
+      "fdtd/update.py": "c8bf86fe5816e738aca6559a930eebccf127035138afea6940ae198e84dfd3f6",
+      "fdtd/wrapper.py": "297449e7b5c2ca44a55f4b1c9c03a0e8ecc46adb2d47398fe6deb12692a1ba5c",
+      "objects/boundaries/bloch.py": "f66e30732990baf36d16caec921972a389fa69f8d9a591cbc8b623263ed88056",
+      "objects/sources/dipole.py": "eb144dd062b199ffc104d946c52bd2864180f16a9e5068539513f360185cc5c9",
+      "objects/sources/profile.py": "317a11fad4fed2d254095e89ba1f91288e5fe2fd214cbca629beeb4de3a36b28",
+      "objects/detectors/field.py": "2825c643eea40ae49442bb7396b41cc046c2f507dbc5d393e420b0043dca29b1",
+      "objects/detectors/detector.py": "2e9847f97aa088b99f8abbd6f4c746db97e2760eff4ee1776026b9fd0d440b61"
+    },
+    "contract_sha256": "fd395f875cf462428ddccd27d80639d798e2505833814b86bae25cab8a42cdd8",
+    "driver_sha256": {
+      "benchmark.py": "39295397741e1f2d77fd9779637e3309766abcd65c5ed82e8c33ec76a0f05864",
+      "common.py": "dba396beb5fda3f1bf867d79a8acd4401068a82f7b1442bdf9fbe73bda39368b",
+      "compare_gate.py": "945779c1e34276f9af7dd35dcd2fb22b448b82e8c95bd081f7a33a1cda6f2c3d",
+      "config.json": "8a47ba375415b0defcc212c5f66e0caa59404a4f55dc668fa71f1578339783eb",
+      "fdtdx_problem.py": "eea8f51140ab953a1f8ab5a175f70ffbfd354d933dbd93dae8bc5a6f86a9b8c4",
+      "launch.sh": "2c8d972a515dd6666d89f3ad1b0a1eaf0f86b78af36bc710e92eeafa89d3695c",
+      "prepare.py": "4e07eb73fe7dd238bbf97616b77b819c6feaf6fdf1c6ac6575421f04dcdd82c1"
+    },
+    "input_sha256": {
+      "epsilon": "f26d2a20bde91d04606a0f8177358053b43000255f4b5ee0555d13f4bf04558c",
+      "mask": "d4c20a0576cbcbffdb7098b519d5ec04e1603c2e5422aef2511950480078b3c4",
+      "design_mask": "2bb78767950d5dc3166b0690c09bbcea9554c3c31ee496b48c1f8aa468aaf07c",
+      "direction": "cfdc212a85b477bb55fb2f3f679e986366c4cdace78c71bcc84dd355fc8be7aa",
+      "kick": "a4bcc96e64b0debc15c4ed28db54699af805eaa3aa6660edfc7af26b8bf7cc0c",
+      "profile": "905898b392b633e47200b3662851ad57e7f53386511f327d763e52768ad294cc"
+    },
+    "native_project_sha256": "40c35486a618ed2f6448092672a587f8699a1a8791f37558dff2948c86d9eb01",
+    "checkpointed_baseline_gate_seal_sha256": "503cffe5aab658aa671c21cd12acc756e8b5537b95d0fab6d2103b954671f126",
+    "reversible_gate_seal_sha256": "54a486453b4265a99778e479e33060d8bb842b7112800df6732baed680fc64c4",
+    "reversible_driver_sha256": {
+      "compare.py": "adac1f26c3f55975ef650be17072a44a90d821e3c8ffab58598c055758f28592",
+      "config.json": "4d22e227e829f21651765612c011c2b140db6ab43254d246cd1500c3160fac9d",
+      "driver.py": "cdcf3709d749cd0e5bdc4e5647990b67edb8c17444abee535980980b2190ed9e",
+      "fdtdx_problem.py": "b9b4176661ee5d955b3a6681bbdcb9842ba49f5cfcadb8319d2603698bff8e6c",
+      "launch.sh": "3167eb15097c66e4238120dd0143344c210eaf35b1a8d13c01da26dadc193dd4",
+      "prepare.py": "8eb4fa2c70b33025cef12619907ce9eca5b65a4dbda8abec68257811aee28435"
+    }
+  },
+  "environment": {
+    "os": "Linux under WSL2",
+    "python": "3.12.14",
+    "packages": {
+      "torchfdtd": "0.14.0.dev0",
+      "fdtdx": "0.6.2",
+      "jax": "0.10.1",
+      "jaxlib": "0.10.1",
+      "torch": "2.10.0+cu128",
+      "cupy-cuda12x": "13.6.0",
+      "equinox": "0.13.8",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1",
+      "optax": "0.2.8"
+    },
+    "jax_cuda12_plugin": "0.10.1",
+    "jax_cuda12_pjrt": "0.10.1",
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "driver": "591.86",
+    "torch_cuda_build": "12.8",
+    "cupy_runtime_version": 12090,
+    "jax_default_x64": false,
+    "jax_preallocate": false,
+    "same_environment": true,
+    "separate_sequential_processes": true
+  },
+  "configuration": {
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "steps": 512,
+    "dx_m": 1e-07,
+    "dt_seconds": 1.7332498813918235e-16,
+    "courant_factor": 0.9,
+    "courant_number": 0.5196152422706632,
+    "source_index": [
+      32,
+      32,
+      12
+    ],
+    "probe_indices": [
+      [
+        32,
+        32,
+        24
+      ],
+      [
+        32,
+        32,
+        48
+      ]
+    ],
+    "slab_z": [
+      32,
+      40
+    ],
+    "slab_epsilon": 2.25,
+    "loss_weights": [
+      1.0,
+      0.3
+    ],
+    "direction_seed": 20260921,
+    "input_dtype": "float32",
+    "input_layout": "C-order x,y,z",
+    "boundaries": "all six periodic, zero Bloch phase",
+    "initial_fields": "E=H=0, reduced H",
+    "geometry_dtype": "float64 only for grid construction",
+    "dynamic_dtype": "float32",
+    "source_component": "Ex",
+    "probe_components": [
+      "Ex",
+      "Ex"
+    ],
+    "source_epsilon_fixed": 1.0,
+    "design_cells": 262143,
+    "excluded_source_cells": 1,
+    "gradient_layout": "full 64x64x64 C-order x,y,z scalar epsilon parameter gradient",
+    "direction_support": "seeded Rademacher +/-1 on slab z32:40, zero elsewhere",
+    "loss": "mean(probe0**2) + 0.3*mean(probe1**2)",
+    "step_order": "E curl update; additive Ex kick; H curl update; point observations",
+    "source_mapping": "native kick[n] equals -float32(C)*FDTDX profile[n] at fixed vacuum source; shared exported FP32 arrays",
+    "gradient_method": "reversible",
+    "recorder_modules": [],
+    "interior_field_checkpoints": 0
+  },
+  "criteria": {
+    "history_relative_l2": 0.001,
+    "history_max_error_relative_to_native_peak": 0.001,
+    "gradient_relative_l2": 0.001,
+    "gradient_max_error_relative_to_native_peak": 0.001,
+    "loss_relative": 0.0001,
+    "theta_and_direction_cross_framework_relative": 0.001,
+    "mask_contraction_relative": 0.001,
+    "best_centered_finite_difference_relative": 0.005,
+    "source_cotangent": "exact zero in both",
+    "gradient_shape_dtype_finite": "64x64x64 float32 finite and nonzero",
+    "finite_difference_deltas": [
+      0.01,
+      0.003,
+      0.001
+    ]
+  },
+  "metrics_against_baselines": {
+    "native": {
+      "history": {
+        "relative_l2": 0.0,
+        "max_absolute_error": 0.0,
+        "max_error_relative_to_reference_peak": 0.0
+      },
+      "gradient": {
+        "relative_l2": 1.9670131636687808e-06,
+        "max_absolute_error": 2.1227464230832993e-12,
+        "max_error_relative_to_reference_peak": 1.6674660829305592e-06
+      }
+    },
+    "fdtdx": {
+      "history": {
+        "relative_l2": 0.0,
+        "max_absolute_error": 0.0,
+        "max_error_relative_to_reference_peak": 0.0
+      },
+      "gradient": {
+        "relative_l2": 1.9691223169737118e-06,
+        "max_absolute_error": 2.3105961588498758e-12,
+        "max_error_relative_to_reference_peak": 1.8150268522670311e-06
+      }
+    }
+  },
+  "loss": 7.328930223593488e-06,
+  "theta_vjp": 1.7016250239976216e-06,
+  "mask_contraction": 1.7016250173100797e-06,
+  "directional_contraction": -1.8898152684619472e-07,
+  "finite_difference": [
+    {
+      "delta": 0.01,
+      "gradient": 1.6751528164604679e-06,
+      "relative_error": 0.01555701589000065
+    },
+    {
+      "delta": 0.003,
+      "gradient": 1.6991634765872732e-06,
+      "relative_error": 0.001446586278195137
+    },
+    {
+      "delta": 0.001,
+      "gradient": 1.7014370996548678e-06,
+      "relative_error": 0.00011043816358103462
+    }
+  ],
+  "directional_finite_difference": [
+    {
+      "delta": 0.01,
+      "gradient": -1.8894752429332584e-07,
+      "relative_error": 0.00017992527331284094
+    },
+    {
+      "delta": 0.003,
+      "gradient": -1.8894752429332584e-07,
+      "relative_error": 0.00017992527331284094
+    },
+    {
+      "delta": 0.001,
+      "gradient": -1.8917488375791436e-07,
+      "relative_error": 0.001023152447471776
+    }
+  ],
+  "fixed_source_cotangent": 0.0,
+  "memory_contract": {
+    "recorder_array_bytes": 0,
+    "interior_checkpoint_bytes": 0,
+    "scope": "Final primal fields, adjoint/local VJP workspace, full material gradient and probe histories remain; zero PML recorder/interior snapshot bytes do not imply constant total memory"
+  },
+  "admission": "Correctness admitted with sufficient free VRAM and no listed unrelated compute processes. Ambient desktop activity prevented the primary quiet timing criterion, so this record contains no official speed comparison.",
+  "limitations": [
+    "Only this fixed configuration is covered; no extrapolation to other boundary/material/monitor types.",
+    "Exact raw probe traces are compared, not all terminal E/H fields.",
+    "Full gradient is with respect to sampled scalar epsilon; source cell is fixed, and no geometry/shape derivative is claimed.",
+    "Geometry-only FP64 construction preserves matching dx/dt; all dynamic arrays remain FP32.",
+    "The earlier 16^3 Fourier and one-step oracle records are preserved separately, not rerun or generalized here.",
+    "Reversible zero-interior-checkpoint differentiation is distinct from checkpointed differentiation with four slots; the storage/algorithm contracts are not identical.",
+    "FP32 reverse reconstruction may accumulate error on other durations/materials. This measured agreement does not establish an exact reverse reconstruction for all cases.",
+    "Timing diagnostics remain private; no public speed or overall capability advantage follows from either algorithm record."
+  ]
+}

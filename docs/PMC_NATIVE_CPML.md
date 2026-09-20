@@ -111,3 +111,28 @@ profile selection, atomic rejection, submission and result metadata. It passed
 in 3.9 seconds using an isolated API server and Vite, without building tracked
 frontend assets. This integration adds no GPU performance or reflection
 acceptance claim.
+
+## Native CUDA integration evidence
+
+One focused integration case passed on an RTX 3060 with Torch 2.10.0+cu126,
+CUDA 12.6 and driver 591.86. Native CPU/CUDA point traces, final E/H, stored
+upper endpoint arrays and NPZ field round-trip agreed. The adapter material
+and waveform VJPs also agreed, with exactly zero fixed-collar material
+cotangents and a nonzero interior derivative. Maximum errors were 2.7940e-9
+for the trace, 8.7312e-11 for material VJP and 2.3284e-9 for waveform VJP.
+Peak Torch allocation delta was 214,016 bytes against an admitted 491,620-byte
+plan. This is a small correctness test, not a speed or device-capacity claim.
+
+The base checkout was `f355601860c563cbae5a4a57bb6aa1b5dadd6b6c` plus the
+working-tree sources below. Pre/post hashes matched. The initial test-only
+NPZ metadata assertion compared JSON lists against tuples; it was corrected
+by JSON-normalizing the expected metadata. No runtime change was needed,
+and the original failure record remains preserved privately.
+
+| Measured source | SHA256 |
+| --- | --- |
+| `torchfdtd/endpoint_native.py` | `5a9a91dcf442c4a88d79f70d00ddbbfedabdba8240f3016bc1fdde1c8d7d1b55` |
+| `torchfdtd/endpoint_project.py` | `9bcb0667ba8469ddca19094fdadb482b696a9745b66c2d45d8b4cc357742784b` |
+| `torchfdtd/pmc_cpml.py` | `fc38199b7551203460cec9a5bb881c3650bc8f58994c0ead5e1905a2e37a33d2` |
+| `torchfdtd/pmc_cpml_cuda.py` | `c639f98dd3f029316a48b38a0e331a5f660d25c415f0ee26926da0a5032747c6` |
+| `tests/test_endpoint_native_cpml_cuda.py` | `9c7d9813f7ea054013a559a8bc8658eabe535832aa442d4e22b93f05420db40f` |

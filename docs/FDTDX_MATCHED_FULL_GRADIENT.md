@@ -31,3 +31,13 @@ The full-gradient mask contractions also match each framework's independently ev
 Ambient desktop GPU activity prevented the primary quiet timing criterion. Correctness admission retained free-memory and unrelated-compute checks, but did not require an idle desktop. No performance numbers are included here.
 
 This evidence covers sampled scalar material derivatives for this problem. It does not establish shape gradients, other physics configurations, or equality of unobserved terminal field arrays.
+
+## Reversible-method correctness follow-up
+
+The same fixture also passed with the pinned FDTDX public reversible method, `Recorder(modules=[])`, and zero interior full-field checkpoints. The [separate reversible evidence](validation/fdtdx_periodic_reversible_full_gradient.json) preserves its driver hashes, unchanged physical inputs and acceptance thresholds. This is a distinct algorithm and storage contract from the four-checkpoint comparison above.
+
+Probe histories match both checkpointed baselines exactly. Full-gradient relative L2 errors are 1.9670131636687808e-6 against TorchFDTD and 1.9691223169737118e-6 against checkpointed FDTDX. The fixed source-cell gradient is exactly zero. The best scalar and directional finite-difference relative errors are 1.1043816358103462e-4 and 1.7992527331284094e-4, respectively. No tolerance was relaxed.
+
+This periodic case has zero PML recorder-array bytes and zero interior-checkpoint bytes. Final primal fields, local inverse/VJP workspace, material gradients and probe histories still consume memory. Dynamic arrays remain FP32, so reverse reconstruction accuracy must be checked for each admitted problem and duration.
+
+Timing diagnostics remain private because the quiet-hardware criterion was not met. Neither the checkpointed record nor this reversible result establishes an overall performance or capability advantage.

@@ -141,7 +141,8 @@ class EndpointProject:
         if isinstance(chunk_size,bool) or not isinstance(chunk_size,int) or not 1<=chunk_size<=65536:
             raise ValueError('Raster chunks must be integers in [1, 65536].')
         p=self.project;t=self.simulation.topology
-        material={m.name:m.instantaneous_epsilon for m in p.materials}
+        active={s.material for s in p.structures if s.enabled}
+        material={m.name:m.instantaneous_epsilon for m in p.materials if m.name in active}
         result=torch.empty(t.counts['E'],dtype=torch.float32,device=self.simulation.device)
         for block in t.blocks['E']:
             for start in range(block.start,block.stop,chunk_size):

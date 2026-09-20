@@ -43,6 +43,9 @@ def field_axes(region, component):
 
 
 def voxelize(p: Project, *, with_ownership=False, interface_plan=None):
+    from .tensor_project import uses_tensor
+    if uses_tensor(p):
+        raise ValueError('Tensor materials require tensor_from_project().rasterize(), not scalar Yee voxelization.')
     if p.region.interface_method=='subpixel':
         from .subpixel import prepare_interfaces
         plan=interface_plan if interface_plan is not None else prepare_interfaces(p)
@@ -63,7 +66,8 @@ def _voxelize_at(p, axes, with_ownership):
     from .geometry import contains,object_bounds
     r = p.region
     eps = np.full(r.shape, r.background_index**2, dtype=np.float64 if r.precision == 'float64' else np.float32)
-    materials = {m.name: (i, m.instantaneous_epsilon) for i, m in enumerate(p.materials)}
+    active = {obj.material for obj in p.structures if obj.enabled}
+    materials = {m.name: (i, m.instantaneous_epsilon) for i, m in enumerate(p.materials) if m.name in active}
     ownership = np.full(r.shape, -1, dtype=np.int32) if with_ownership else None
     counts = {}
     # Lower mesh order wins. At equal order, the later tree object wins.
@@ -145,6 +149,10 @@ def source_profile(src, loc, region):
 
 
 def estimate(p: Project):
+    from .tensor_project import uses_tensor
+    if uses_tensor(p):
+        from .tensor_native import estimate_tensor
+        return estimate_tensor(p)
     from .endpoint_native import uses_endpoint, estimate_endpoint
     if uses_endpoint(p.region):return estimate_endpoint(p)
     configure_auto_mesh(p)
@@ -352,6 +360,10 @@ class Simulation:
                 torch.set_default_dtype(old_dtype)
 
     def _run(self, progress, cancel, cuda_graph, cuda_graph_steps):
+        from .tensor_project import uses_tensor
+        if uses_tensor(self.project):
+            from .tensor_native import run_tensor
+            return run_tensor(self.project, progress, cancel)
         from .endpoint_native import uses_endpoint, run_endpoint
         if uses_endpoint(self.project.region):return run_endpoint(self.project,progress,cancel)
         from .cuda_graph import CudaStepGraphs, observation_schedule, validate_graph_steps

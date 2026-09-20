@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "status": "passed targeted native workflow correctness checks",
+  "base_revision": "f355601860c563cbae5a4a57bb6aa1b5dadd6b6c",
+  "revision_scope": "Base checkout plus uncommitted working-tree implementation identified by runtime SHA256 below. The base commit alone does not contain this implementation.",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "gpu_memory_mib": 12288,
+    "driver_version": "591.86"
+  },
+  "torch_version": "2.10.0+cu126",
+  "cuda_version": "12.6",
+  "working_tree_sha256": {
+    "torchfdtd/tensor_native.py": "14ac330d2e4765b6a7ff5118af24fb73e14fb86c2d218d151b50487aa89af836",
+    "torchfdtd/tensor_project.py": "792372ff221b03d1dd58b8015dcd38a66c195a55503de23a307d4c395945278e",
+    "torchfdtd/anisotropy.py": "edd41cfebba16d681e8f41e026898ac6da6cb0b54b37afc291a9fa6db348779a",
+    "torchfdtd/models.py": "ca00322e4dbd98397e02e46c752fb0d7a1fe355eb0c6be7e0c5b5d42ccfaf3b9",
+    "torchfdtd/solver.py": "39dbd26ac73f06e3d966f8cbf4267175c605a593fba68765a49c74c8b33e4f13",
+    "tests/test_tensor_native_cuda.py": "4a8766c3a1f639ea59b75c5e98713f8ef463797fa3ae913e4010fd8c26b9323f"
+  },
+  "cuda_pre_post_hashes_match": true,
+  "cpu": {
+    "test_file": "tests/test_tensor_native.py",
+    "test_sha256": "a0b695f7c04d1c421a28aa81465aeb2ccb060f26b6c7216d30f6a5be23698ac7",
+    "native_integration_cases": 3,
+    "native_integration_seconds": 4.02,
+    "independent_fourier_cases": 2,
+    "independent_fourier_seconds": 3.8,
+    "oracle": "Independent NumPy FFT constitutive and curl symbols with point-drive recurrence, uniform rotated tensor, periodic and nonzero Bloch boundaries. Compared full final E/H and monitor history.",
+    "oracle_tolerance": {
+      "rtol": 5e-05,
+      "atol": 2e-07
+    },
+    "source_scope": "CPU checks preceded a display-only change making snapshot arrays own FP32 storage. The CUDA run validates the final runtime hashes recorded here; physics/update formulas were unchanged."
+  },
+  "cuda": {
+    "test_file": "tests/test_tensor_native_cuda.py",
+    "cases": 1,
+    "seconds": 8.54,
+    "subcases": [
+      {
+        "boundary": "periodic",
+        "trace_max_error": 4.656612873077393e-10,
+        "table_vjp_max_error": 1.000444171950221e-11,
+        "native_torch_peak_delta_bytes": 8627712,
+        "native_reservation_bytes": 68155440,
+        "adjoint_torch_peak_delta_bytes": 8559616,
+        "adjoint_reservation_bytes": 68183088
+      },
+      {
+        "boundary": "bloch",
+        "trace_max_error": 7.460698725481052e-14,
+        "table_vjp_max_error": 9.094947017729282e-13,
+        "native_torch_peak_delta_bytes": 8559104,
+        "native_reservation_bytes": 68390720,
+        "adjoint_torch_peak_delta_bytes": 8559616,
+        "adjoint_reservation_bytes": 68446016
+      },
+      {
+        "boundary": "cpml",
+        "trace_max_error": 9.313225746154785e-10,
+        "table_vjp_max_error": 8.185452315956354e-12,
+        "native_torch_peak_delta_bytes": 8559104,
+        "native_reservation_bytes": 68155440,
+        "adjoint_torch_peak_delta_bytes": 8559616,
+        "adjoint_reservation_bytes": 68188848
+      }
+    ],
+    "native_tolerance": {
+      "rtol": 8e-05,
+      "atol": 8e-07
+    },
+    "table_vjp_tolerance": {
+      "rtol": 0.0003,
+      "atol": 2e-07
+    },
+    "coverage": [
+      "native point signals, final E/H, frames and diagonal material preview",
+      "six-component material-table VJP through adapter",
+      "periodic, complex64 Bloch and fixed-isotropic-collar CPML",
+      "Torch peak allocation delta below admitted plan"
+    ]
+  },
+  "memory_scope": "Torch allocator peak delta, not process/device-wide memory. Plans include a conservative 64 MiB CUDA linear-algebra allowance.",
+  "limitations": [
+    "Small synthetic public scenes only: 16 by 6 by 6 cells and 12 steps.",
+    "No speed, scaling, large-domain, scalar-interface parity or general physical convergence claim.",
+    "No new GPU finite-difference sweep."
+  ]
+}

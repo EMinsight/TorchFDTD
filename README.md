@@ -41,8 +41,10 @@ profile. General absorption accuracy and throughput remain pending. A separate
 [bulk tensor dielectric API](docs/ANISOTROPY_IMPLEMENTATION_PLAN.md) supports
 periodic/Bloch CPU/CUDA fields and full symmetric tensor gradients. An
 isotropic fixed CPML exterior now encloses interior tensor materials, with
-its collar excluded from design gradients. Tensor material UI, general
-anisotropic absorbing boundaries and streamed PMC remain incomplete.
+its collar excluded from design gradients. The [native tensor workflow](docs/TENSOR_NATIVE.md)
+connects six-component materials to browser editing, Project/CLI execution
+and differentiable material tables. General anisotropic absorbing boundaries,
+tensor ADE and streamed PMC remain incomplete.
 A [rotated tensor slab](docs/TENSOR_CPML_SLAB_ACCEPTANCE.md) in that fixed
 isotropic exterior gives 1.0088% and 0.2421% complex transmission errors on two
 meshes, with a 1.51% rotation-gradient error on the coarse mesh. This does not

@@ -33,7 +33,8 @@ class Material(Model):
     name: str = Field(min_length=1, max_length=100)
     index: float = Field(default=1.5, ge=1, le=20)
     color: str = '#6ca8dd'
-    model: Literal['dielectric', 'drude', 'lorentz', 'multipole'] = 'dielectric'
+    model: Literal['dielectric', 'tensor', 'drude', 'lorentz', 'multipole'] = 'dielectric'
+    epsilon_tensor: tuple[float,float,float,float,float,float] = (2.25,2.25,2.25,0.,0.,0.)
     epsilon_inf: float = Field(default=1, ge=1, le=400)
     plasma_rad_s: float = Field(default=2e15, gt=0, le=1e18)
     collision_rad_s: float = Field(default=1e14, ge=0, le=1e18)
@@ -47,6 +48,12 @@ class Material(Model):
 
     @model_validator(mode='after')
     def valid_poles(self):
+        if self.model == 'tensor':
+            import numpy as np
+            xx,yy,zz,xy,xz,yz=self.epsilon_tensor
+            matrix=np.array(((xx,xy,xz),(xy,yy,yz),(xz,yz,zz)))
+            if not np.isfinite(matrix).all() or np.linalg.eigvalsh(matrix).min()<1:
+                raise ValueError('Tensor permittivity must be finite symmetric with eigenvalues >= 1.')
         if self.model == 'multipole' and not self.poles:
             raise ValueError('A multipole material requires at least one passive pole.')
         if self.fit_band_um is not None:
@@ -61,6 +68,8 @@ class Material(Model):
 
     @property
     def instantaneous_epsilon(self):
+        if self.model == 'tensor':
+            raise ValueError('Tensor material requires the node-tensor solver, not scalar permittivity.')
         return self.index**2 if self.model == 'dielectric' else self.epsilon_inf
 
     @property
@@ -558,6 +567,8 @@ class Project(Model):
         if self.global_source is None and any(s.use_global_source for s in self.sources):
             raise ValueError('Global source settings are unavailable. Configure them before enabling inheritance.')
         r = self.region
+        from .tensor_project import uses_tensor, validate_tensor_project
+        if uses_tensor(self):validate_tensor_project(self)
         from .mesh import configure_auto_mesh
         configure_auto_mesh(self)
         r.valid_grid()
