@@ -106,7 +106,11 @@ class SlabBlockOperator:
         """Bloch extension on the unwrapped slab, including repeated windings."""
         if 0 not in self.host.grid.wrap or not self.host.grid.E.is_complex():return None
         lo, _, indices, core = descriptor
-        coordinates = torch.arange(lo-core.start, lo-core.start+len(indices))
+        begin, end = lo-core.start, lo-core.start+len(indices)
+        # Interior slabs have no Bloch image. Avoid multiplying every E/H and
+        # CPML element by one and allocating a second host tile for that no-op.
+        if begin >= 0 and end <= self.host.region.shape[0]:return None
+        coordinates = torch.arange(begin, end)
         winding = torch.div(coordinates, self.host.region.shape[0], rounding_mode='floor')
         return torch.as_tensor(self.host.grid.wrap[0], dtype=self.host.field_dtype).pow(winding)
 

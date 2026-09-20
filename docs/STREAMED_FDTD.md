@@ -362,3 +362,20 @@ All signals and gradients pass the same per-repetition checks. The final
 synchronous gradient relative L2 difference is 1.42e-16. This is evidence for
 selecting a policy under a memory limit, not a universal best tile configuration.
 [Deeper-tile raw measurements](validation/complex-streamed-256x96x96-deeper.json).
+
+Profiling identified host tile preparation, copies and unnecessary identity
+Bloch multiplications as costs. Interior tiles now return no phase transform
+when their entire extended slab lies in the primary domain. This avoids
+allocating another field/CPML host array to multiply it by one. Boundary and
+repeated-winding tiles retain the full phase and conjugate transpose.
+
+With width 32/depth 8, a subsequent three-repeat run measured 2.872 s synchronous
+and 1.844 s asynchronous, versus the preceding 3.121 s and 2.061 s. Peak CUDA
+allocations are unchanged. Resident time was 0.276 s, so asynchronous streaming
+still takes 6.68 times as long. The final gradient relative L2 difference remains
+1.42e-16. Separate before/after runs suggest a useful improvement but do not
+establish its variance under interleaved revision measurements.
+[Result](validation/complex-streamed-interior-phase.json),
+[CPU profile](validation/complex-streamed-cpu-profile.json).
+The profile includes startup/warm-up and synchronization waits and is not a
+CUDA execution timeline. Further copy/packing optimization remains necessary.

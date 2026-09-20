@@ -1,0 +1,183 @@
+{
+  "scope": "cProfile diagnostic across startup and warm-up/measured resident, sync, async calls. CPU attribution can include synchronization waits; not a CUDA timeline or benchmark speed result.",
+  "total_seconds": 17.24538839999989,
+  "baseline_commit": "d4da977",
+  "selected_functions": [
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method 'copy_' of 'torch._C.TensorBase' objects>",
+      "calls": 25200,
+      "self_seconds": 2.7424918000000003,
+      "cumulative_seconds": 2.7424918000000003
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<built-in method torch.cat>",
+      "calls": 832,
+      "self_seconds": 1.3110534,
+      "cumulative_seconds": 1.3110534
+    },
+    {
+      "file": "spacetime.py",
+      "line": 113,
+      "function": "_phase_value",
+      "calls": 8640,
+      "self_seconds": 1.2423304000000002,
+      "cumulative_seconds": 1.2805231000000001
+    },
+    {
+      "file": "spacetime.py",
+      "line": 117,
+      "function": "_tile",
+      "calls": 352,
+      "self_seconds": 0.17562460000000002,
+      "cumulative_seconds": 5.5849348
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method 'index_copy_' of 'torch._C.TensorBase' objects>",
+      "calls": 6208,
+      "self_seconds": 0.12288270000000001,
+      "cumulative_seconds": 0.12288270000000001
+    },
+    {
+      "file": "tensor_packet.py",
+      "line": 23,
+      "function": "pack_tensors",
+      "calls": 704,
+      "self_seconds": 0.11445380000000001,
+      "cumulative_seconds": 1.3019508000000002
+    },
+    {
+      "file": "copy.py",
+      "line": 227,
+      "function": "_deepcopy_dict",
+      "calls": 1766,
+      "self_seconds": 0.0119553,
+      "cumulative_seconds": 0.0708449
+    },
+    {
+      "file": "copy.py",
+      "line": 201,
+      "function": "_deepcopy_list",
+      "calls": 11510,
+      "self_seconds": 0.0057346,
+      "cumulative_seconds": 0.010516600000000001
+    },
+    {
+      "file": "copy.py",
+      "line": 182,
+      "function": "_deepcopy_atomic",
+      "calls": 21136,
+      "self_seconds": 0.0015366000000000002,
+      "cumulative_seconds": 0.0015366000000000002
+    },
+    {
+      "file": "main.py",
+      "line": 974,
+      "function": "__deepcopy__",
+      "calls": 126,
+      "self_seconds": 0.00046830000000000005,
+      "cumulative_seconds": 0.0069103
+    },
+    {
+      "file": "pyplot.py",
+      "line": 175,
+      "function": "_copy_docstring_and_deprecators",
+      "calls": 200,
+      "self_seconds": 0.0003077,
+      "cumulative_seconds": 0.0122675
+    },
+    {
+      "file": "copy.py",
+      "line": 210,
+      "function": "_deepcopy_tuple",
+      "calls": 78,
+      "self_seconds": 0.0001721,
+      "cumulative_seconds": 0.0007141000000000001
+    },
+    {
+      "file": "typing.py",
+      "line": 1595,
+      "function": "copy_with",
+      "calls": 78,
+      "self_seconds": 0.0001509,
+      "cumulative_seconds": 0.0018228
+    },
+    {
+      "file": "colors.py",
+      "line": 815,
+      "function": "__copy__",
+      "calls": 184,
+      "self_seconds": 0.00011590000000000001,
+      "cumulative_seconds": 0.00018570000000000001
+    },
+    {
+      "file": "typing.py",
+      "line": 1636,
+      "function": "copy_with",
+      "calls": 52,
+      "self_seconds": 9.130000000000001e-05,
+      "cumulative_seconds": 0.0012633000000000002
+    },
+    {
+      "file": "~",
+      "line": 0,
+      "function": "<method '__deepcopy__' of 'numpy.ndarray' objects>",
+      "calls": 18,
+      "self_seconds": 8.280000000000001e-05,
+      "cumulative_seconds": 8.280000000000001e-05
+    },
+    {
+      "file": "main.py",
+      "line": 955,
+      "function": "__copy__",
+      "calls": 10,
+      "self_seconds": 7.26e-05,
+      "cumulative_seconds": 0.0001674
+    },
+    {
+      "file": "__init__.py",
+      "line": 2336,
+      "function": "_make_copy_from_view",
+      "calls": 12,
+      "self_seconds": 6.82e-05,
+      "cumulative_seconds": 0.0035376
+    },
+    {
+      "file": "typing.py",
+      "line": 1526,
+      "function": "copy_with",
+      "calls": 35,
+      "self_seconds": 4.0300000000000004e-05,
+      "cumulative_seconds": 0.0007363000000000001
+    },
+    {
+      "file": "typing.py",
+      "line": 1684,
+      "function": "copy_with",
+      "calls": 29,
+      "self_seconds": 1.5300000000000003e-05,
+      "cumulative_seconds": 0.0012870000000000002
+    },
+    {
+      "file": "_jit_internal.py",
+      "line": 890,
+      "function": "_copy_to_script_wrapper",
+      "calls": 15,
+      "self_seconds": 4.2000000000000004e-06,
+      "cumulative_seconds": 4.2000000000000004e-06
+    },
+    {
+      "file": "copy.py",
+      "line": 107,
+      "function": "_copy_immutable",
+      "calls": 10,
+      "self_seconds": 1.5e-06,
+      "cumulative_seconds": 1.5e-06
+    }
+  ]
+}

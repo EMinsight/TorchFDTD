@@ -1,0 +1,22 @@
+{
+  "scope": "Skip identity Bloch multiplication on interior slabs. Before/after are separate three-repeat runs, not interleaved revision measurements.",
+  "tests": [
+    {
+      "device": "local CPU",
+      "passed": 33,
+      "deselected": 4,
+      "seconds": 19.82
+    },
+    {
+      "device": "RTX 5880 Ada and CPU",
+      "passed": 27,
+      "seconds": 22.78
+    }
+  ],
+  "source_sha256": {
+    "photonweave/spacetime.py": "a1c2c211d4a973abf8cf3f8837cb443e3f1bbb0056a2ab4c1131606d2714d334",
+    "tests/test_complex_spacetime.py": "0fd68af2975417e4ff4413e9d284e78a42431204c34608fa55050df352ef0574",
+    "benchmarks/streamed_adjoint.py": "99b74e0471961c25e723a8c030563c90c7e3e2dbf83dbc229f20cc211469d98a"
+  },
+  "wheel_package_files_byte_verified": 71
+}

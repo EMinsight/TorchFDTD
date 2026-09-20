@@ -7,6 +7,18 @@ from photonweave import Source, Monitor
 from test_bloch_adjoint import scene
 
 
+def test_interior_bloch_tile_needs_no_phase_materialization():
+    p = scene()
+    host = _System(p, torch.ones(p.region.shape, dtype=torch.float64), prepare_updates=False)
+    operator = SlabBlockOperator(host, 4, 'cpu')
+    descriptors = list(operator.tiles(1))
+    assert operator._halo_phase(descriptors[0]) is not None
+    assert operator._halo_phase(descriptors[1]) is None
+    assert operator._halo_phase(descriptors[-1]) is not None
+    value = torch.randn(4,3,dtype=torch.complex128)
+    assert operator._phase_value(value, None) is value
+
+
 @pytest.mark.parametrize('dtype', [torch.float32, torch.float64])
 @pytest.mark.parametrize('depth,nonuniform,diagonal', [(3, False, False), (10, True, True)])
 @pytest.mark.parametrize('checkpoints', [0, 2])
