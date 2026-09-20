@@ -100,6 +100,36 @@ physical VRAM overflow.
 
 ## Required evidence
 
+### Reusable-packet rerun
+
+A [later matched capacity run](validation/beyond-vram-packets-5880.json) at
+source revision `3e06b66` completed the same 54 GiB E/H problem and ten-step
+VJP. Signals match exactly and the gradient crop differs by at most
+`3.39e-21`. All file banks were closed and released.
+
+| Measurement | Earlier completed run | Packet rerun |
+| --- | ---: | ---: |
+| Complete elapsed time, seconds | 3121.894 | 3170.042 |
+| Peak Torch CUDA bytes | 7,091,686,400 | 8,005,845,504 |
+| Sampled peak process RSS bytes | 22,506,119,168 | 23,094,059,008 |
+| Peak live file bytes | 175,519,039,488 | 175,519,039,488 |
+
+These are two individual runs with uncontrolled OS cache/storage state, not
+repeated timing statistics. The packet change does not demonstrate an overall
+speed or peak-memory improvement here. Backward's retained CUDA pools sum to
+7,090,898,144 bytes. The larger measured transient peak is consistent with the
+914,161,728-byte forward output pool still being owned while its larger
+transpose replacement is allocated.
+
+`TileWorkspace.array` now drops the expired pool owner before replacement
+allocation after normal slot drainage. Caller-held views retain their ownership.
+A CUDA allocator test checks this transition. A separate 64-cubed ADE driver
+check reduces the peak from 76,226,560 to 69,622,272 bytes with unchanged
+signals and material VJPs. That small check does not establish the corrected
+peak for this 54 GiB problem. A large rerun of the lifetime fix remains pending.
+
+### Earlier forward-only snapshot
+
 The [forward snapshot](validation/beyond-vram-forward-5880.json) records
 741.239 seconds for ten steps on 603,979,776 cells. The source's finite
 dependency cone permits comparison with a 56-cubed full-autograd reference.

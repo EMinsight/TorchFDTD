@@ -155,6 +155,11 @@ held-out measurements of deeper tiles.
 
 ## Dependency and transpose
 
+The [material-aware policy guide](STREAMED_POLICY.md) documents current
+budget fitting, global-checkpoint proposals, bounded gradient-reference caches
+and optional spectral calibration. The same scheduler now has a separate
+`tune_streamed_dispersive` entry point for coupled ADE materials.
+
 `model.spectrum(epsilon, frequency_hz, window=...)` accumulates a complex DFT
 on the host at each completed temporal block. It returns spectral point fields
 instead of a full time history. Backward creates only the current block's

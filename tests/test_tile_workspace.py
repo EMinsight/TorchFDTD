@@ -153,3 +153,20 @@ def test_async_pipeline_drains_after_partial_failure_and_can_retry(monkeypatch, 
     expected, observed = SlabBlockOperator(host, 3).forward(epsilon, host.state(), 0, 2)
     for actual, want in zip(got, expected):torch.testing.assert_close(actual, want, rtol=0, atol=0)
     torch.testing.assert_close(signals, observed, rtol=0, atol=0)
+@pytest.mark.skipif(not torch.cuda.is_available(),reason='CUDA unavailable')
+def test_output_growth_does_not_hold_expired_cuda_allocation():
+    from photonweave.tile_workspace import TileWorkspace
+    workspace=TileWorkspace('cuda')
+    count=1024**2
+    baseline=torch.cuda.memory_allocated()
+    workspace.array('output_packet',(count,),torch.uint8,invalidate_bindings=False)
+    torch.cuda.reset_peak_memory_stats()
+    value=workspace.array('output_packet',(2*count,),torch.uint8,invalidate_bindings=False)
+    assert torch.cuda.max_memory_allocated()-baseline==2*count
+    assert value.numel()==2*count
+    # A caller retaining an old view still owns it. Growth must not invalidate
+    # such a tensor merely to reduce the peak.
+    retained=value
+    grown=workspace.array('output_packet',(3*count,),torch.uint8,invalidate_bindings=False)
+    retained.fill_(7);grown.fill_(9)
+    assert bool((retained==7).all()) and bool((grown==9).all())

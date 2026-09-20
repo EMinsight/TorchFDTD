@@ -157,14 +157,14 @@ class DispersiveSimulation(DifferentiableSimulation):
     def __init__(self, project, options=None):
         options = options or AdjointOptions()
         if not isinstance(options, AdjointOptions):
-            raise ValueError('Dispersive differentiation requires resident AdjointOptions. ADE spatial streaming is pending.')
+            raise ValueError('DispersiveSimulation requires resident AdjointOptions. Use StreamedDispersiveSimulation for spatial streaming.')
         # Keep the Torch fallback as auto until application-scale performance
         # comparisons establish when native ADE kernels are beneficial.
         super().__init__(project, replace(options, backward_kernel='torch') if options.backward_kernel=='auto' else options)
         if any(s.enabled and s.injection != 'soft' for s in self.project.sources):
             raise ValueError('Dispersive differentiation currently requires soft source injection.')
 
-    def _pack(self, epsilon, strength, omega0, gamma, *, reference=False, streamed=False, admission=None):
+    def _inputs(self, epsilon, strength, omega0, gamma, *, reference=False, streamed=False):
         r = self.project.region
         if not streamed:r.require_resident()
         elif not isinstance(epsilon, torch.Tensor) or epsilon.device.type != 'cpu':
@@ -195,6 +195,13 @@ class DispersiveSimulation(DifferentiableSimulation):
             if value.shape not in ((), (count,), (count, *r.shape), (count, *r.shape, 3)):
                 raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3).')
         layout = _ParameterLayout(tuple(tuple(value.shape) for value in (epsilon, strength, omega0, gamma)), count)
+        return (epsilon, strength, omega0, gamma), layout
+
+    def _pack(self, epsilon, strength, omega0, gamma, *, reference=False, streamed=False, admission=None):
+        values, layout = DispersiveSimulation._inputs(self, epsilon, strength, omega0, gamma,
+                                                     reference=reference, streamed=streamed)
+        epsilon, strength, omega0, gamma = values
+        r = self.project.region
         if admission is not None:admission(layout)
         packed_bytes = (epsilon.numel()+sum(v.numel() for v in (strength,omega0,gamma)))*epsilon.element_size()
         if epsilon.is_cuda:

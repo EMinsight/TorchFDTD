@@ -96,6 +96,12 @@ class TileWorkspace:
         if value is None or value.numel() < count or value.dtype != dtype:
             # Cached views own allocations. Invalidate them before replacement.
             if invalidate_bindings:self.bindings.clear()
+            # The slot is drained before reuse. In particular, output buffers
+            # are not kernel arguments. Release the expired pool allocation
+            # before asking CUDA for its larger replacement, avoiding old+new
+            # peak memory at the forward-to-transpose size transition.
+            self.buffers.pop(name,None)
+            del value
             value = torch.empty(count, dtype=dtype, device=self.device)
             self.buffers[name] = value
             self.allocations += 1

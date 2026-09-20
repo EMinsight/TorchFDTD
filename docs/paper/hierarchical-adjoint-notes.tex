@@ -630,4 +630,44 @@ adjoints. Tests also cover repeated Bloch windings, shared and spatial
 material parameters, file-backed replay and asynchronous staging. These
 checks establish discrete consistency for the tested cases. They do not
 establish optical convergence, large dispersive capacity or a speed advantage.
+\subsection{Bounded material-aware policy calibration}
+Policy calibration now covers both dielectric and coupled ADE execution,
+using either point histories or online point spectra. Generated candidates
+vary spatial width, temporal depth and checkpoint capacity. A budget check
+includes the complete requested duration and the tuner comparison workspace.
+If a generated tile does not fit, a monotone search reduces its core width
+at fixed temporal depth. Depth is reduced only when a one-cell core is still
+inadmissible. File fallback requires an explicitly supplied directory and
+capacity. Explicit candidate lists are not modified.
+
+Calibration previously retained a complete reference gradient for each
+duration. The current implementation uses a byte-bounded reference cache.
+Oversized references bypass retention and are recomputed for comparison.
+Compact owned copies prevent a gradient view from retaining a larger packed
+material allocation. The reservation also includes the simultaneous candidate,
+reference and conversion workspace. Full host material-gradient buffers remain
+necessary, even with zero cache capacity. These checks do not include
+caller-owned geometry graphs or optimizer storage.
+
+For meaningful material checks, derivatives are compared in the coordinates
+\begin{equation}
+ \vartheta=(\epsilon_\infty,s\Delta t^2,\omega_0\Delta t,\gamma\Delta t).
+\end{equation}
+For example, the strength derivative is divided by $\Delta t^2$ before
+comparison. An absolute tolerance applied directly to an SI strength
+derivative could otherwise accept a substantial relative error.
+The Drude limit requires no division by $\omega_0$.
+Spectral calibration divides the DFT fields by the prefix duration before
+forming the proxy loss. Frequencies remain fixed and a supplied window is
+sliced to each prefix.
+
+Each measured candidate uses the same two-duration replay cost model, with
+optional longer calibration. Timing includes material packing, solver
+preparation, forward, the proxy objective, replay and backward. Gradient
+comparison, model construction, the caller's geometry graph and optimizer
+are excluded. Tests verify derivative disagreement even when forward values
+are unchanged, bounded cache ownership and admission before packing.
+This remains a bounded empirical search. Full-duration ranking on large
+dispersive applications, physical storage bandwidth and resident-versus-streamed
+selection require separate experiments.
 \end{document}

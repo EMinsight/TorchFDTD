@@ -46,8 +46,8 @@ from .streamed import (StreamedAdjointOptions, StreamedSimulation, estimate_stre
                        StreamedStoragePlan, select_streamed_storage)
 __all__ += ['StreamedAdjointOptions', 'StreamedSimulation', 'estimate_streamed_memory',
             'StreamedStoragePlan', 'select_streamed_storage']
-from .streamed_tuning import StreamedTuning, tune_streamed
-__all__ += ['StreamedTuning', 'tune_streamed']
+from .streamed_tuning import StreamedTuning, tune_streamed, tune_streamed_dispersive
+__all__ += ['StreamedTuning', 'tune_streamed', 'tune_streamed_dispersive']
 from .adjoint_planes import DifferentiablePlaneSimulation, DifferentiablePlaneResult
 __all__ += ['DifferentiablePlaneSimulation', 'DifferentiablePlaneResult']
 from .information import GaussianTargetResult, gaussian_target_information, shot_read_covariance

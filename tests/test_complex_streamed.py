@@ -53,7 +53,10 @@ def test_complex_policy_tuning_uses_real_loss():
     result = tune_streamed(p, eps, candidates=policies, probe_steps=10, repeats=1)
     assert all(row['status'] == 'measured' for row in result.report['candidates'])
     lengths=result.report['calibration_steps']
-    expected=((len(lengths)+1)*eps.numel()*eps.element_size()
-              +2*sum(lengths)*len(p.monitors)*2*eps.element_size())
-    assert result.report['tuning_reference_reservation_bytes'] == expected
+    cached=sum(eps.numel()*eps.element_size()+n*len(p.monitors)*2*eps.element_size() for n in lengths)
+    assert result.report['reference_cache_peak_bytes']==cached
+    extra=result.report['tuning_reference_reservation_bytes']
+    assert extra>=cached+2*eps.numel()*eps.element_size()
+    assert all(row['reservation']['host_reservation_bytes']+extra<=policy.host_budget_bytes
+               for row,policy in zip(result.report['candidates'],policies))
     assert eps.grad is None

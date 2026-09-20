@@ -124,6 +124,7 @@ by a capacity-evidence run.
 Soft sources, fixed boundaries and fixed observations are supported. TFSF,
 one-way dispersive sources, moving boundaries/monitors, coupled subpixel
 material tensors, sparse pole-state allocation and higher-order derivatives
-remain unsupported. Automatic performance selection for dispersive tile and
-checkpoint policies is also pending. `tune_streamed` still targets the
-nondispersive solver and must not be used as an ADE performance model.
+remain unsupported. The [material-aware tuner](STREAMED_POLICY.md) compares
+admitted ADE tile and checkpoint policies with bounded reference memory and
+separate material VJP checks. It calibrates point histories or point spectra.
+Full-duration policy quality on large dispersive domains remains unverified.

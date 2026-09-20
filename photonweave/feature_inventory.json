@@ -2485,7 +2485,7 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "n/a",
-      "scope": "실험적 실수/복소 Bloch slab·causal halo transpose·DRAM/파일 backing·비동기 staging·tile/K 실측 tuning 구현. 54GiB E/H의 10-step forward/gradient 검증 완료. ADE P/Q 공간 저장·재료 gradient를 추가. 분산 대규모 용량·속도, 장시간 응용·전체 메모리 계측·통합 자동 정책·UI는 미완료.",
+      "scope": "실험적 실수/복소 Bloch slab·causal halo transpose·DRAM/파일 backing·비동기 staging·tile/K 실측 tuning 구현. 54GiB E/H의 10-step forward/gradient 검증 완료. ADE P/Q 공간 저장·재료 gradient, 분산 비용 측정·기본 타일 예산 조정·기준 gradient 캐시 한도를 추가. 분산 대규모 용량·속도, 장시간 응용·전체 메모리 계측·통합 자동 정책·UI는 미완료.",
       "evidence": [
         "photonweave/streamed.py",
         "photonweave/streamed_dispersive.py",
