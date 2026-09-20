@@ -106,6 +106,9 @@ The CR evaluator and optimizer now default to one FP32 path for density,
 fields, information, gradients and Adam moments. `PeriodicLayerResponse` also
 defaults to FP32. FP64 remains an explicit validation option. See the
 [precision scope and checks](docs/validation/FP32_PRECISION.md).
+The full 144-case FP32 CR response and density-gradient comparison now passes
+against the archived FP64 reference. Physical convergence and completed
+original-protocol optimization remain pending.
 A [measured observation-setup improvement](docs/validation/PERIODIC_OBSERVATION_SETUP.md)
 removes repeated mesh-count derivation. On a synthetic periodic RTX 3060 case,
 full response/objective/VJP medians improve by 1.52x at 128 steps and 1.04x at

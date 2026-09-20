@@ -1,5 +1,14 @@
 name: Verify
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+  workflow_dispatch:
 jobs:
   cpu-and-ui:
     runs-on: ubuntu-latest

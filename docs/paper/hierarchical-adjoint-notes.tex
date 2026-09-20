@@ -1038,6 +1038,17 @@ gradient convergence. Subsequent beyond-VRAM capacity studies should exceed
 the available VRAM at FP32, with state size reported separately from transient
 and checkpoint allocations.
 
+A complete 144-case application comparison now evaluates nine wavelengths
+and sixteen pupil rays for the original binary seed at a 50 nm mesh and
+1,600 time steps. The FP32 RTX 3060 response and full density VJP differ from
+the archived FP64 RTX 5880 reference by relative Euclidean errors of
+$5.04\times10^{-7}$ and $1.75\times10^{-5}$. The information difference is
+$5.05\times10^{-6}$ bits per pixel. All meet the predeclared comparison
+limits. The archived reference already passed a directional derivative
+check. This result verifies this discrete application across precision and
+hardware, without establishing physical gradient convergence, completed
+optimization or hardware speedup.
+
 \section{Capacity-first periodic execution admission}
 The periodic response API now offers selection without calibration solves.
 It first attempts resident admission under shared GPU and host budgets.
