@@ -151,6 +151,23 @@ evaluation has started on the local GPU while the RTX 5880 independently
 executes FDTD directional validation. No additional GPU workload shares either
 solver's device. FDTD mesh, duration and PML refinement remain necessary.
 
+The (16,16) run subsequently completed. Its objective is
+1.2065752346315706 bits per pixel, a 0.0017193% change from (12,12), with
+maximum channel-response change 0.000483781. The smaller successive increment
+supports order stability for this seed and schedule, but does not bound the
+error of every optical observable or establish convergence after optimization.
+See [order-16 record](validation/cr-full-torcwa-order16.json).
+FDTD still differs by approximately 2.46% in the coarse information objective.
+
+After that local GPU job exited, a full 144-case FDTD forward evaluation began
+on RTX 3060 with 3200 steps, the same 50 nm mesh, 12 PML cells, fixed source,
+pupil weights and relaxed seed. This isolates duration sensitivity relative
+to the existing 1600-step evaluation. Its output is
+`results/cr-full-time3200-3060.json`. No gradients or directional probes are
+requested in this duration run. The RTX 5880 continues its separate discrete
+directional-gradient check. Duration results are pending, followed by mesh
+and PML refinement as required by their observed errors.
+
 Future evaluator runs persist the complete relaxed-density gradient as an NPY
 artifact, with its hash, shape and variable definition in the result JSON.
 Non-finite gradients fail the run. The completed gradient job predates
