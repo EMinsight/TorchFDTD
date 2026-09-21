@@ -1010,7 +1010,7 @@
       ],
       "required_by": [],
       "specifiers": [
-        ">=2.2"
+        ">=2.4"
       ],
       "version": "2.10.0+cu126",
       "installed": true,
@@ -1359,8 +1359,8 @@
       "docs/validation/sbom.json",
       "tests/test_provenance_inventory.py"
     ],
-    "files_scanned": 988,
-    "tracked_files": 1002,
+    "files_scanned": 1304,
+    "tracked_files": 1323,
     "findings": []
   },
   "history_note": {
