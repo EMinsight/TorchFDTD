@@ -355,6 +355,48 @@ FP64 on a 0.1 um mesh (7 x 3 um), 4 checkpoints, delta 0.001; the objective sums
 
 <!-- tiled-validation:end -->
 
+## Wide tile cores
+
+The 6 um record above has 3 um cores, so every core sample lies within a few
+micrometres of a cut. [benchmarks/tiled_stitching_scale.py](../benchmarks/tiled_stitching_scale.py)
+repeats the measurement on a 40 x 40 um array of 961 index-2 cylinders
+(period 1.3 um, radii 0.25 to 0.5 um, height 0.6 um) at a 0.1 um mesh, cut into
+2 x 2 tiles with 20 um cores, on the RTX 5880; the whole device (410 x 410 x 30 cells,
+1030 steps) is the reference on the same mesh and the focal plane lies 30 um above the output
+plane. The record is `docs/validation/tiled-stitching-scale-5880.json`.
+
+| Overlap (um) | Tile cells / device cells | Wall (s) | Near-field error hard / linear | Focal intensity error hard / linear | Central indicator |
+|---:|---:|---:|---|---|---:|
+| 2 | 1.26 | 4.4 | 0.233 / 0.216 | 0.168 / 0.166 | 0.76 |
+| 5 | 1.61 | 5.6 | 0.151 / 0.136 | 0.094 / 0.099 | 0.45 |
+| 10 | 2.29 | 8.4 | 0.060 / 0.072 | 0.040 / 0.051 | 0.22 |
+
+The whole device took 2.6 s resident with a 0.41 GB peak allocation.
+
+The error decays with the distance to the nearest cut on a scale of a few micrometres
+and every overlap shifts the whole curve down, so both the overlap and the core size
+set the accuracy of the core interior:
+
+| Distance to the nearest cut (um) | overlap 2 um | overlap 5 um | overlap 10 um |
+|---|---:|---:|---:|
+| 0 to 0.5 | 0.454 | 0.268 | 0.114 |
+| 0.5 to 1 | 0.405 | 0.266 | 0.109 |
+| 1 to 2 | 0.351 | 0.235 | 0.092 |
+| 2 to 3 | 0.296 | 0.198 | 0.077 |
+| 3 to 5 | 0.243 | 0.161 | 0.062 |
+| 5 to 7.5 | 0.175 | 0.111 | 0.043 |
+| 7.5 to 10 | 0.110 | 0.071 | 0.028 |
+| 10 to 15 | 0.060 | 0.040 | 0.017 |
+
+With 20 um cores and a 10 um overlap the stitched plane differs from the whole
+device by 6% overall and by 1.7% more than 10 um from the cuts, and the focal
+intensity by 4%. The array supports laterally propagating fields whose influence
+reaches several micrometres past any cut, so an interior accuracy of about 1%
+needs overlaps of 10 to 15 um and cores well beyond 20 um; the overlap rule of
+`suggest_overlap` covers the free-space diffraction spread only and is a lower
+bound for devices with lateral coupling. The central indicator stays two to four
+times the overall error.
+
 ## Limitations
 
 - The method is approximate. The error floor away from the cuts is set by
