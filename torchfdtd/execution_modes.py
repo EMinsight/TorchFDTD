@@ -620,7 +620,7 @@ def run_tiled_job(project, resolution, *, progress=None, cancel=None):
     report['pairs'] = [dict(q, mismatch=_finite(q['mismatch']), mismatch_center=_finite(q['mismatch_center'])) for q in report['pairs']]
     for key in ('max_mismatch', 'mean_mismatch', 'max_mismatch_center', 'mean_mismatch_center'):
         report[key] = _finite(report.get(key))
-    peak = float(max((float(np.sqrt(stitched.intensity()[0].max())) for _ in frames[:1]), default=0.))
+    peak = math.sqrt(float(stitched.intensity()[0].max())) if frames else 0.
     tile_cells = plan.report['total_tile_cells']
     stats.update(backend=resolution['backend'], precision=r.precision, gpu=resolution.get('gpu'),
                  cuda_graph=False, cuda_graph_steps=0, cuda_graph_replays=0,
