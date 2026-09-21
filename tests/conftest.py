@@ -32,6 +32,12 @@ import re
 import textwrap
 
 import pytest
+# The upstream grid package sets the Torch default dtype to float64 and disables
+# autograd when it is imported; torchfdtd restores both only when it is the first
+# importer. Sixteen test modules import fdtd before torchfdtd, so a subset that
+# starts with one of them would run under the leaked defaults. Importing torchfdtd
+# here, before any test module is collected, fixes the session defaults.
+import torchfdtd  # noqa: E402,F401  (must precede any test module import of fdtd)
 
 pytest_plugins = ['pytester']
 
