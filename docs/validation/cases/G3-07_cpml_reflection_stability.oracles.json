@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "kind": "oracle_bookkeeping",
+  "case_id": "G3-07_cpml_reflection_stability",
+  "task": "G3-07",
+  "case_file": "docs/validation/cases/G3-07_cpml_reflection_stability.json",
+  "declared": "2026-09-22",
+  "reason": "The case file is hash-bound to its recorded evidence runs and is not edited; this sidecar carries the oracle classes and layers that docs/ORACLE_BUDGET.md and tests/test_oracle_budget.py require.",
+  "oracle_class": [
+    "causal_reference",
+    "convergence_study",
+    "physical_invariant",
+    "shared_discrete_operator"
+  ],
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_a.py::TestG307::test_normal_reflection",
+      "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection",
+      "tests/test_physics_g3_a.py::TestG307::test_interface_reflection",
+      "tests/test_physics_g3_a.py::TestG307::test_depth_and_time_sweeps",
+      "tests/test_physics_g3_a.py::TestG307::test_long_time_stability",
+      "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32"
+    ],
+    "layers": {
+      "tests/test_physics_g3_a.py::TestG307::test_normal_reflection": {
+        "layer": "B",
+        "oracle_class": "causal_reference",
+        "oracle": "reflected over incident power at the monitor from short minus long domain, long domain exact by causality; 10 layers, vacuum and n = 2, band 1.3 to 1.8 um, limit 1e-6"
+      },
+      "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection": {
+        "layer": "B",
+        "oracle_class": "causal_reference",
+        "oracle": "30 and 60 degree Bloch sheets against the long domain, band 1.3 to 1.6 um, limit 1e-4"
+      },
+      "tests/test_physics_g3_a.py::TestG307::test_interface_reflection": {
+        "layer": "B",
+        "oracle_class": "causal_reference",
+        "oracle": "n = 2 half space crossing the absorber, both monitors against the long domain, limit 1e-4 (case budget)"
+      },
+      "tests/test_physics_g3_a.py::TestG307::test_depth_and_time_sweeps": {
+        "layer": "B",
+        "oracle_class": "convergence_study",
+        "oracle": "20 layers must not reflect more than 10; the 200 fs window agrees with 100 fs within 10 percent of R"
+      },
+      "tests/test_physics_g3_a.py::TestG307::test_long_time_stability": {
+        "layer": "B",
+        "oracle_class": "physical_invariant",
+        "oracle": "energy must not grow after the source ends: late growth at most 1 + 1e-6 over 20000 steps and decay below 1e-6 of the peak at normal incidence"
+      },
+      "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32": {
+        "layer": "A",
+        "oracle_class": "shared_discrete_operator",
+        "oracle": "CUDA float32 against CPU float64 on the short vacuum fixture, rtol 1e-4 and atol 1e-6"
+      }
+    }
+  }
+}

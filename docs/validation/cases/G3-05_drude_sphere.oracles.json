@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "oracle_bookkeeping",
+  "case_id": "G3-05_drude_sphere",
+  "task": "G3-05",
+  "case_file": "docs/validation/cases/G3-05_drude_sphere.json",
+  "declared": "2026-09-22",
+  "reason": "The case file is hash-bound to its recorded evidence runs and is not edited; this sidecar carries the oracle classes and layers that docs/ORACLE_BUDGET.md and tests/test_oracle_budget.py require.",
+  "oracle_class": [
+    "analytic_continuum",
+    "shared_discrete_operator"
+  ],
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a"
+    ],
+    "layers": {
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "complex-index Bohren-Huffman series with the analytic Drude permittivity: scattering and absorption per radius at h = 0.005 um against the case budgets (recorded FAILED); the ADE-sampled permittivity variant separates the time discretisation"
+      },
+      "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a": {
+        "layer": "A",
+        "oracle_class": "shared_discrete_operator",
+        "oracle": "CUDA float32 against CPU float64 scattering and absorption at h = 0.02 and 0.01 um, rtol 1e-4"
+      }
+    }
+  }
+}
