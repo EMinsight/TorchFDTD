@@ -20,13 +20,15 @@ GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-
 |---|---|---|
 | Lumerical FDTD, CPU 16 threads vs TorchFDTD on RTX 5880 | 128³, 2,000 steps, sphere | **15.2×** run wall time (6.5× at 64³) |
 | flaport/fdtd on CUDA vs TorchFDTD fused kernels | 64³ and 96³, 800 steps | **16 to 17×** and **10 to 12×** |
+| FDTDX 0.6.2 vs TorchFDTD on the same RTX 3060 | 64³ and 96³, 800 steps; 64³ adjoint, 128 steps | **6.8 to 7.3×** and **6.4 to 6.7×** full solve; gradient **2.0×** (reversible) and **52×** (two checkpoints) |
+| Meep 1.34, 12 CPU ranks, vs TorchFDTD on the same workstation (RTX 3060, i7-12700) | 64³ and 96³, 800 steps | **38×** and **44×** full solve |
 | 16-case parameter sweeps vs flaport/fdtd sequential | 32³ and 64³ | **31 to 44×** and **15 to 16×** |
 | Torch CPU vs GPU, differentiable forward and backward | 128 × 64 × 64, 32 steps | **69×** resident, **12×** with DRAM streaming |
 | CPU worker vs CUDA worker ensemble | 4 × 64³, 800 steps | **40×** |
 | Larger than the GPU, capacity run | 2.42 billion cells, 58 GB (54 GiB) of E/H on a 48 GiB GPU, 10 steps plus full material gradient | 2.23 GB peak CUDA memory, 58 min, gradient within 9.1e-8 of the oracle |
 | Larger than the GPU, crash and resume | 2.26 billion cells, 54 GB (50.6 GiB) of E/H, same policy | killed after the first backward record, resumed process finishes with 3.03 GB peak CUDA memory and the gradient within 9.1e-8 |
 
-Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations. The Lumerical rows are aggregate timings of earlier builds; no commercial data is redistributed.
+Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The FDTDX and Meep rows come from the same-hardware comparison in [docs/CROSS_SOLVER_COMPARISON.md](docs/CROSS_SOLVER_COMPARISON.md), whose slab and Mie-sphere accuracy agrees between the three solvers within 0.7 percent. The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations. The Lumerical rows are aggregate timings of earlier builds; no commercial data is redistributed.
 
 ## Execution modes
 
