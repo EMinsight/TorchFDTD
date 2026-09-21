@@ -10,7 +10,8 @@ export function setupMaterialFit({host,material,editable,api,esc,begin,current,i
  <label>Wavelength unit <select aria-label="Optical wavelength unit"><option value="um">µm</option><option value="nm">nm</option><option value="m">m</option></select></label>
  <label>CSV / text file <input aria-label="Optical data file" type="file" accept=".csv,.txt,.tsv"></label></div>
  <textarea aria-label="Optical data table" rows="5" placeholder="wavelength_um,n,k&#10;1.0,1.50,0.01&#10;1.5,1.49,0.01&#10;2.0,1.48,0.01"></textarea>
- <label class="fit-reference">Data reference <input aria-label="Optical data reference" maxlength="2000" value="${esc(material.samples?.reference||'')}" placeholder="Citation or measurement description"></label>
+ <label class="fit-reference">Data source / reference <input aria-label="Optical data reference" maxlength="200" value="${esc(material.provenance?.source||material.samples?.reference||'')}" placeholder="Publication, database entry or measurement"></label>
+ <label class="fit-reference">Licence / usage note <input aria-label="Optical data licence" maxlength="2000" value="${esc(material.provenance?.licence||'')}" placeholder="Licence of the table or how it may be used"></label>
  <button data-import>Import data</button><span data-data-status>${material.samples?`${material.samples.wavelength_um.length} samples retained`:'No samples imported'}</span>
  <div class="fit-controls"><label>Fit start (µm) <input aria-label="Fit wavelength start" type="number" step="any" min="0" value="${band[0]}"></label>
  <label>Fit stop (µm) <input aria-label="Fit wavelength stop" type="number" step="any" min="0" value="${band[1]}"></label>
@@ -21,7 +22,7 @@ export function setupMaterialFit({host,material,editable,api,esc,begin,current,i
  <button data-fit ${material.samples?'':'disabled'}>Fit optical data</button> <button data-use-fit disabled>Use fitted material</button>
  </fieldset><p class="fit-status" role="status">Fit accuracy applies inside the sampled band. Device accuracy also requires time and mesh convergence.</p>
  <canvas aria-label="Measured and fitted optical response"></canvas></details>`;
- let candidate=null;
+ let candidate=null,fileName=material.provenance?.file_name||'';
  const status=message=>{$('.fit-status').textContent=message;};
  function changed(){candidate=null;$('[data-use-fit]').disabled=true;invalidate();status('Inputs changed. Fit again to update the candidate.');const canvas=$('canvas');canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);}
  host.querySelectorAll('input,select,textarea').forEach(input=>input.oninput=changed);
@@ -29,16 +30,20 @@ export function setupMaterialFit({host,material,editable,api,esc,begin,current,i
  $('[aria-label="Optical data file"]').onchange=async e=>{
   const token=begin(),file=e.target.files[0];if(!file)return;
   if(file.size>2_000_000){status('Optical data file exceeds 2 MB.');return;}
-  try {const text=await file.text();if(!current(token))return;$('textarea').value=text;$('[aria-label="Optical data reference"]').value=file.name;changed();}
+  try {const text=await file.text();if(!current(token))return;$('textarea').value=text;$('[aria-label="Optical data reference"]').value=file.name;fileName=file.name;changed();}
   catch(e){if(current(token))status(e.message);}
  };
  $('[data-import]').onclick=async()=>{
   const token=begin();status('Reading optical samples…');
   try {
-   const data=await api('/materials/data',{text:$('textarea').value,kind:$('[aria-label="Optical data columns"]').value,
-    unit:$('[aria-label="Optical wavelength unit"]').value,reference:$('[aria-label="Optical data reference"]').value});
+   const request={text:$('textarea').value,kind:$('[aria-label="Optical data columns"]').value,
+    unit:$('[aria-label="Optical wavelength unit"]').value,reference:$('[aria-label="Optical data reference"]').value,
+    source:$('[aria-label="Optical data reference"]').value,licence:$('[aria-label="Optical data licence"]').value,file_name:fileName};
+   const data=await api('/materials/data',request);
+   // The server hashes the submitted text; provenance is null without a named source.
+   const provenance=await api('/materials/provenance',request);
    if(!current(token))return;
-   material.samples=data;material.fit_band_um=null;material.fit_dt_s=null;candidate=null;
+   material.samples=data;material.provenance=provenance;material.fit_band_um=null;material.fit_dt_s=null;candidate=null;
    $('[aria-label="Fit wavelength start"]').value=data.wavelength_um[0];$('[aria-label="Fit wavelength stop"]').value=data.wavelength_um.at(-1);
    $('[data-data-status]').textContent=`${data.wavelength_um.length} samples · ${data.wavelength_um[0]}–${data.wavelength_um.at(-1)} µm`;
    $('[data-fit]').disabled=!editable;$('[data-use-fit]').disabled=true;
@@ -53,7 +58,7 @@ export function setupMaterialFit({host,material,editable,api,esc,begin,current,i
     include_drude:$('[aria-label="Include Drude pole"]').checked,target:$('[aria-label="Fit response"]').value};
    const data=structuredClone(material.samples);data.reference=$('[aria-label="Optical data reference"]').value;
    options.dt_s=await timestep();if(!current(token))return;
-   const result=await api('/materials/fit',{data,options,name:material.name,color:material.color});if(!current(token))return;
+   const result=await api('/materials/fit',{data,options,name:material.name,color:material.color,provenance:material.provenance||null});if(!current(token))return;
    candidate=result;const r=result.report,key=r.target==='ade'?'numerical':'fitted';
    drawPlot($('canvas'),[['measured_n','n (data)'],['measured_k','k (data)'],[`${key}_n`,'n (fit)'],[`${key}_k`,'k (fit)']].map(([key,name])=>({name,wavelength_um:r.wavelength_um,spectrum:r[key],spectrum_label:'Wavelength (µm) · measured and fitted n + i k'})),true,true);
    status(`${r.converged?'Tolerance met':'Tolerance NOT met'} · ${r.pole_count} poles · ${r.sample_count} samples · analytic RMS ${r.analytic.normalized_rms.toExponential(3)} · FDTD RMS ${r.ade.normalized_rms.toExponential(3)} at Δt ${(r.dt_s*1e15).toPrecision(5)} fs · ${r.seconds.toFixed(2)} s. ${r.converged?'Use fitted material, then Apply materials to save.':'Adjust the fit band or pole limit. Current coefficients have not changed.'}`);

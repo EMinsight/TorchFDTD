@@ -1,0 +1,374 @@
+{
+  "schema": "torchfdtd-meep-comparison-v1",
+  "example": "microring",
+  "records": {
+    "torchfdtd": {
+      "date": "2026-09-22",
+      "geometry_sha256": "f7f2aaf2d0678e0dd1a21f525179549fc4723d27d51f713c8e3461ba6c6c2649",
+      "script_sha256": "d24e96784d73a0cc9597fcfe76bfd9123ded53eb368b19aa1ddd945589e0cf04"
+    },
+    "meep": {
+      "date": "2026-09-22",
+      "geometry_sha256": "f7f2aaf2d0678e0dd1a21f525179549fc4723d27d51f713c8e3461ba6c6c2649",
+      "script_sha256": "37700ebfd28131b129632252286fc7d668a23ac0b1a60ceae649d659d3e24b2c"
+    }
+  },
+  "grid": {
+    "cells": [
+      750,
+      626,
+      1
+    ],
+    "mesh_um": 0.024,
+    "dt_s": 5.604162704117249e-17,
+    "steps": 89219,
+    "pml_cells": 42,
+    "run_time_ps": 4.999977922986369,
+    "courant_number": 0.700035713374682,
+    "cells_total": 469500
+  },
+  "staircase": {
+    "torchfdtd": {
+      "interior_ez_epsilon_sha256": "b937c9bfeae3e805e301d3ec3c79be65e2e5ce65f91fbbd5ac2897d2cb0ba837",
+      "interior_core_nodes": 39853
+    },
+    "meep": {
+      "interior_ez_epsilon_sha256": "b937c9bfeae3e805e301d3ec3c79be65e2e5ce65f91fbbd5ac2897d2cb0ba837",
+      "interior_core_nodes": 39853
+    }
+  },
+  "resonances": {
+    "torchfdtd": [
+      {
+        "minimum_sample_nm": 1511.0000000000002,
+        "minimum_T": 0.7240167352684689,
+        "fit_points": 31,
+        "center_nm": 1511.085399314373,
+        "fwhm_nm": 1.261094823975982,
+        "depth": 0.2905402195495804,
+        "base": 1.0048808778274605,
+        "q_loaded": 1198.232972323382,
+        "extinction_db": 1.4820921232825937,
+        "fit_rms": 0.016011066015215784,
+        "valid": true
+      },
+      {
+        "minimum_sample_nm": 1535.4999999999998,
+        "minimum_T": 0.9233213621223662,
+        "fit_points": 32,
+        "center_nm": 1535.572604968893,
+        "fwhm_nm": null,
+        "depth": null,
+        "base": null,
+        "q_loaded": null,
+        "extinction_db": null,
+        "fit_rms": null,
+        "valid": false
+      },
+      {
+        "minimum_sample_nm": 1537.5000000000002,
+        "minimum_T": 0.6253556727378328,
+        "fit_points": 32,
+        "center_nm": 1537.5076538805133,
+        "fwhm_nm": 0.7840739018508325,
+        "depth": 0.4167560243714437,
+        "base": 1.0052477897266752,
+        "q_loaded": 1960.9218598542502,
+        "extinction_db": 2.3253273664938163,
+        "fit_rms": 0.041273118448191655,
+        "valid": true
+      },
+      {
+        "minimum_sample_nm": 1539.5,
+        "minimum_T": 0.9326732394546071,
+        "fit_points": 31,
+        "center_nm": 1539.4518411312056,
+        "fwhm_nm": null,
+        "depth": null,
+        "base": null,
+        "q_loaded": null,
+        "extinction_db": null,
+        "fit_rms": null,
+        "valid": false
+      },
+      {
+        "minimum_sample_nm": 1564.5,
+        "minimum_T": 0.5315987608416757,
+        "fit_points": 31,
+        "center_nm": 1564.4806865881926,
+        "fwhm_nm": 1.3327215832505606,
+        "depth": 0.5122869495305221,
+        "base": 1.0189953788279884,
+        "q_loaded": 1173.8991146015378,
+        "extinction_db": 3.0341408546025534,
+        "fit_rms": 0.017381292267918656,
+        "valid": true
+      },
+      {
+        "minimum_sample_nm": 1590.75,
+        "minimum_T": 0.9404768663023508,
+        "fit_points": 32,
+        "center_nm": 1590.6646574938873,
+        "fwhm_nm": null,
+        "depth": null,
+        "base": null,
+        "q_loaded": null,
+        "extinction_db": null,
+        "fit_rms": null,
+        "valid": false
+      },
+      {
+        "minimum_sample_nm": 1592.7500000000002,
+        "minimum_T": 0.8427112055324005,
+        "fit_points": 32,
+        "center_nm": 1592.6603809123128,
+        "fwhm_nm": 0.5664863985326994,
+        "depth": 0.1838428862998829,
+        "base": 0.9976711611105129,
+        "q_loaded": 2811.471528773836,
+        "extinction_db": 0.8845464413423333,
+        "fit_rms": 0.033266888203951135,
+        "valid": true
+      },
+      {
+        "minimum_sample_nm": 1594.75,
+        "minimum_T": 0.9407832082796529,
+        "fit_points": 32,
+        "center_nm": 1594.7129935720484,
+        "fwhm_nm": null,
+        "depth": null,
+        "base": null,
+        "q_loaded": null,
+        "extinction_db": null,
+        "fit_rms": null,
+        "valid": false
+      }
+    ],
+    "meep": [
+      {
+        "minimum_sample_nm": 1511.0000000000002,
+        "minimum_T": 0.7240097257497059,
+        "fit_points": 31,
+        "center_nm": 1511.085390771324,
+        "fwhm_nm": 1.261054808387054,
+        "depth": 0.29054546726395675,
+        "base": 1.0048798186174588,
+        "q_loaded": 1198.270987685357,
+        "extinction_db": 1.4821258896271836,
+        "fit_rms": 0.016013198081884287,
+        "valid": true
+      },
+      {
+        "minimum_sample_nm": 1535.4999999999998,
+        "minimum_T": 0.9233200692492765,
+        "fit_points": 32,
+        "center_nm": 1535.5725494601288,
+        "fwhm_nm": null,
+        "depth": null,
+        "base": null,
+        "q_loaded": null,
+        "extinction_db": null,
+        "fit_rms": null,
+        "valid": false
+      },
+      {
+        "minimum_sample_nm": 1537.5000000000002,
+        "minimum_T": 0.6253477383278868,
+        "fit_points": 32,
+        "center_nm": 1537.5076214480775,
+        "fwhm_nm": 0.7840806147884598,
+        "depth": 0.4167670624881151,
+        "base": 1.0052501105751157,
+        "q_loaded": 1960.9050299794594,
+        "extinction_db": 2.325401725254102,
+        "fit_rms": 0.041274216966719034,
+        "valid": true
+      },
+      {
+        "minimum_sample_nm": 1539.5,
+        "minimum_T": 0.9326739843368472,
+        "fit_points": 31,
+        "center_nm": 1539.451839332924,
+        "fwhm_nm": null,
+        "depth": null,
+        "base": null,
+        "q_loaded": null,
+        "extinction_db": null,
+        "fit_rms": null,
+        "valid": false
+      },
+      {
+        "minimum_sample_nm": 1564.5,
+        "minimum_T": 0.5316037656158409,
+        "fit_points": 31,
+        "center_nm": 1564.480661635812,
+        "fwhm_nm": 1.3327282355535903,
+        "depth": 0.5122836844024528,
+        "base": 1.0189960649849077,
+        "q_loaded": 1173.8932363700962,
+        "extinction_db": 3.0341099130759766,
+        "fit_rms": 0.017382186788290295,
+        "valid": true
+      },
+      {
+        "minimum_sample_nm": 1590.75,
+        "minimum_T": 0.9404822495274846,
+        "fit_points": 32,
+        "center_nm": 1590.6646600373413,
+        "fwhm_nm": null,
+        "depth": null,
+        "base": null,
+        "q_loaded": null,
+        "extinction_db": null,
+        "fit_rms": null,
+        "valid": false
+      },
+      {
+        "minimum_sample_nm": 1592.7500000000002,
+        "minimum_T": 0.8427185999816864,
+        "fit_points": 32,
+        "center_nm": 1592.6603669537246,
+        "fwhm_nm": 0.5664549261963308,
+        "depth": 0.18383796110723294,
+        "base": 0.9976705434527005,
+        "q_loaded": 2811.627709989613,
+        "extinction_db": 0.8845207657907196,
+        "fit_rms": 0.033266405602890785,
+        "valid": true
+      },
+      {
+        "minimum_sample_nm": 1594.75,
+        "minimum_T": 0.9407811445298021,
+        "fit_points": 32,
+        "center_nm": 1594.7129595381568,
+        "fwhm_nm": null,
+        "depth": null,
+        "base": null,
+        "q_loaded": null,
+        "extinction_db": null,
+        "fit_rms": null,
+        "valid": false
+      }
+    ]
+  },
+  "nearest_1550": {
+    "torchfdtd": {
+      "minimum_sample_nm": 1537.5000000000002,
+      "minimum_T": 0.6253556727378328,
+      "fit_points": 32,
+      "center_nm": 1537.5076538805133,
+      "fwhm_nm": 0.7840739018508325,
+      "depth": 0.4167560243714437,
+      "base": 1.0052477897266752,
+      "q_loaded": 1960.9218598542502,
+      "extinction_db": 2.3253273664938163,
+      "fit_rms": 0.041273118448191655,
+      "valid": true
+    },
+    "meep": {
+      "minimum_sample_nm": 1537.5000000000002,
+      "minimum_T": 0.6253477383278868,
+      "fit_points": 32,
+      "center_nm": 1537.5076214480775,
+      "fwhm_nm": 0.7840806147884598,
+      "depth": 0.4167670624881151,
+      "base": 1.0052501105751157,
+      "q_loaded": 1960.9050299794594,
+      "extinction_db": 2.325401725254102,
+      "fit_rms": 0.041274216966719034,
+      "valid": true
+    }
+  },
+  "fsr_nm": {
+    "torchfdtd": 27.19166053264659,
+    "meep": 27.191658727466876
+  },
+  "T_stats": {
+    "torchfdtd": {
+      "min": 0.5315987608416757,
+      "max": 1.051482731148975
+    },
+    "meep": {
+      "min": 0.5316037656158409,
+      "max": 1.0514852054747175
+    }
+  },
+  "max_abs_T_difference": 2.3545985536999048e-05,
+  "criteria": {
+    "resonance_wavelength_nm": {
+      "value": 5.5508764262413024e-05,
+      "limit": 0.2,
+      "passed": true,
+      "count": {
+        "torchfdtd": 8,
+        "meep": 8
+      },
+      "valid_fits": {
+        "torchfdtd": 4,
+        "meep": 4
+      }
+    },
+    "q_relative": {
+      "value": 8.582707746421257e-06,
+      "limit": 0.05,
+      "passed": true
+    },
+    "extinction_db": {
+      "value": 7.435876028560884e-05,
+      "limit": 1.0,
+      "passed": true
+    },
+    "rms_T": {
+      "value": 4.87108847201362e-06,
+      "limit": 0.02,
+      "passed": true
+    },
+    "grid_match": {
+      "value": true,
+      "limit": "equal",
+      "passed": true
+    }
+  },
+  "all_passed": true,
+  "timing": {
+    "torchfdtd": {
+      "mode": "development",
+      "repeats": 1,
+      "setup_seconds": 3.6660972259996925,
+      "stepping_seconds": 31.35756457000025,
+      "full_seconds": 35.09993084500093,
+      "straight_run_stepping_seconds": 41.26145349000035,
+      "straight_run_full_seconds": 41.38980425999944,
+      "host_load_note": "development run on a shared workstation: other GPU and CPU jobs may have been running; WSL load average before [2.70703125, 3.4658203125, 3.20654296875], after [1.447265625, 2.88232421875, 3.0205078125]; GPU memory used before the run 2737.0 MiB, GPU utilisation before the run 8.0 %.",
+      "samples": [
+        31.35756457000025
+      ]
+    },
+    "meep": {
+      "mode": "development",
+      "repeats": 1,
+      "setup_seconds": 0.05359089900048275,
+      "stepping_seconds": 217.0518485900011,
+      "full_seconds": 217.1067301840012,
+      "straight_run_stepping_seconds": 180.81390755699977,
+      "straight_run_full_seconds": 180.85515918300007,
+      "host_load_note": "development run with 4 MPI ranks on a shared workstation (20 logical CPUs; other jobs may have been running); WSL load average before [2.9169921875, 3.0263671875, 2.87890625], after [4.0, 3.76171875, 3.29150390625].",
+      "samples": [
+        217.0518485900011
+      ]
+    }
+  },
+  "environment": {
+    "torchfdtd": {
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "torch": "2.11.0+cu128",
+      "precision": "float32 fields, float64 plane DFT accumulators"
+    },
+    "meep": {
+      "version": "1.34.0",
+      "mpi_processes": 4,
+      "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+      "precision": "float64 (Meep build)"
+    }
+  }
+}

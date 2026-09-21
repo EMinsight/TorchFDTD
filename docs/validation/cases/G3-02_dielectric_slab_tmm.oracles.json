@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "kind": "oracle_bookkeeping",
+  "case_id": "G3-02_dielectric_slab_tmm",
+  "task": "G3-02",
+  "case_file": "docs/validation/cases/G3-02_dielectric_slab_tmm.json",
+  "declared": "2026-09-22",
+  "reason": "The case file is hash-bound to its recorded evidence runs and is not edited; this sidecar carries the oracle classes and layers that docs/ORACLE_BUDGET.md and tests/test_oracle_budget.py require.",
+  "superseded_by": "docs/validation/cases/G3-02r2_slab_tmm_40_cells.json",
+  "case_tests_not_in_tree": [
+    "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm"
+  ],
+  "note": "The first case listed the 20-cell R/T test that revision 2 replaced; its FAILED run 20260921T164814Z-g3-02-1e349534 stays on record. The bookkeeping lists the tests of the recorded revision-2 run, which the gate file requires for G3-02.",
+  "oracle_class": [
+    "analytic_continuum",
+    "convergence_study",
+    "physical_invariant",
+    "shared_discrete_operator"
+  ],
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells",
+      "tests/test_physics_g3_a.py::TestG302::test_slab_balance_20_cells",
+      "tests/test_physics_g3_a.py::TestG302::test_dispersion_order",
+      "tests/test_physics_g3_a.py::TestG302::test_layer_a_cuda_fp32"
+    ],
+    "layers": {
+      "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "Fresnel/Airy transfer matrix written in the test: R, T, R+T-1 and t phase at about 40 cells per material wavelength, four slabs, three angles, TE and TM"
+      },
+      "tests/test_physics_g3_a.py::TestG302::test_slab_balance_20_cells": {
+        "layer": "B",
+        "oracle_class": "physical_invariant",
+        "oracle": "lossless energy balance |R+T-1| at 20 cells per material wavelength; R, T and phase reported only"
+      },
+      "tests/test_physics_g3_a.py::TestG302::test_dispersion_order": {
+        "layer": "B",
+        "oracle_class": "convergence_study",
+        "oracle": "second-order convergence: 20-cell over 40-cell error ratio of max |dR| and t phase within 3 to 5"
+      },
+      "tests/test_physics_g3_a.py::TestG302::test_layer_a_cuda_fp32": {
+        "layer": "A",
+        "oracle_class": "shared_discrete_operator",
+        "oracle": "CUDA float32 against CPU float64 on the n = 1.5, d = 0.2 um, 45 degree slab at 20 cells, rtol 1e-4 and atol 1e-6"
+      }
+    }
+  }
+}

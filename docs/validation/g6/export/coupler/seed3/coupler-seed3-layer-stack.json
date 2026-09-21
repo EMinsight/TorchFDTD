@@ -1,0 +1,79 @@
+{
+ "format": "gdsii",
+ "cell": "DESIGN",
+ "unit_m": 1e-06,
+ "precision_m": 1e-09,
+ "source_sha256": "5c20874e4f7c3393d0a6fa360de6e24026862e40456eca4e23bad66636b2c525",
+ "structures": 7,
+ "omitted_disabled": 0,
+ "layer_stack": [
+  {
+   "structure_id": "coupler-seed3-0000",
+   "layer": 1,
+   "datatype": 0,
+   "material": "core",
+   "z_min": -0.5,
+   "z_max": 0.5,
+   "mesh_order": 2
+  },
+  {
+   "structure_id": "coupler-seed3-0001",
+   "layer": 1,
+   "datatype": 0,
+   "material": "core",
+   "z_min": -0.5,
+   "z_max": 0.5,
+   "mesh_order": 2
+  },
+  {
+   "structure_id": "coupler-seed3-0002",
+   "layer": 1,
+   "datatype": 0,
+   "material": "core",
+   "z_min": -0.5,
+   "z_max": 0.5,
+   "mesh_order": 2
+  },
+  {
+   "structure_id": "coupler-seed3-0003",
+   "layer": 1,
+   "datatype": 0,
+   "material": "core",
+   "z_min": -0.5,
+   "z_max": 0.5,
+   "mesh_order": 2
+  },
+  {
+   "structure_id": "coupler-seed3-0004",
+   "layer": 1,
+   "datatype": 0,
+   "material": "core",
+   "z_min": -0.5,
+   "z_max": 0.5,
+   "mesh_order": 2
+  },
+  {
+   "structure_id": "coupler-seed3-0005",
+   "layer": 1,
+   "datatype": 0,
+   "material": "core",
+   "z_min": -0.5,
+   "z_max": 0.5,
+   "mesh_order": 2
+  },
+  {
+   "structure_id": "coupler-seed3-0006",
+   "layer": 1,
+   "datatype": 0,
+   "material": "core",
+   "z_min": -0.5,
+   "z_max": 0.5,
+   "mesh_order": 2
+  }
+ ],
+ "maximum_rounding_um": 0.0005,
+ "limitations": [
+  "GDS contains XY geometry only. Retain this Z/material stack sidecar.",
+  "Sources, detectors, ports and solver settings are not exported."
+ ]
+}

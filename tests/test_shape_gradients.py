@@ -73,7 +73,7 @@ def test_polygon_fill_reduces_to_existing_sampling_and_voxelizer_is_bitwise_unch
     assert (faces > 0) == (sampling == 'yee')
 
 
-@pytest.mark.parametrize('device', ['cpu', 'cuda'])
+@pytest.mark.parametrize('device', ['cpu', pytest.param('cuda', marks=pytest.mark.cuda)])
 def test_polygon_vjp_taylor_remainder_and_central_difference(device):
     skip_without(device)
     r = region('float64')
@@ -151,7 +151,7 @@ def adjoint_scene(vertices, controls):
                                        kind='bspline', samples_per_segment=4)]
 
 
-@pytest.mark.parametrize('device', ['cpu', 'cuda'])
+@pytest.mark.parametrize('device', ['cpu', pytest.param('cuda', marks=pytest.mark.cuda)])
 def test_vertex_and_control_gradients_through_checkpointed_adjoint(device):
     skip_without(device)
     precision = 'float64' if device == 'cpu' else 'float32'

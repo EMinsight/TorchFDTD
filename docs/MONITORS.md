@@ -1,5 +1,7 @@
 # Point monitor spectra and apodization
 
+Reflection, transmission and absorption against a reference run, S-parameters with group delay, mode decomposition, diffraction orders and far-field projections are read from the recorded planes through one record type; see [RESULTS.md](RESULTS.md) and the guards of its normalizations in [NUMERICAL_GUARDS.md](NUMERICAL_GUARDS.md).
+
 Version 0.3 adds native point-trace DFT sampling and time apodization. A monitor's wavelength range does **not** change the source bandwidth. Source centre wavelength, [global temporal settings and custom tables](SOURCES.md), and [automatic broadband source ranges](BROADBAND.md) are configured separately.
 
 ## Workbench

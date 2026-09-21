@@ -1,0 +1,187 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T192925Z-g8-03-25de93db",
+  "task": "G8-03",
+  "stage": "G8",
+  "task_title": "GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다.",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_workbench_journeys.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-03.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T04:28:52.520827+09:00",
+  "recorded_at": "2026-09-21T19:29:25+00:00",
+  "source_commit": "579c27df75e58a12991f63fc0366966b79e7371d",
+  "source_tree_sha256": "c8ddcee306b9708cd24c2f5f3f270fb589b44f64440be1e946f3c9fe9437e18e",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_workbench_journeys.py": "ba422d57e384815cb3f4bfd8e0555b9df84ddacd57795acbfcf2bbcdda05d125"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G8-03_workbench_journey.json",
+  "fixture_sha256": "60cdeadc57528543b25048001adb929ba9704734f2aa0e38b6b1f24b223b339a",
+  "acceptance_criteria_path": "docs/validation/cases/G8-03_workbench_journey.json",
+  "acceptance_criteria_sha256": "60cdeadc57528543b25048001adb929ba9704734f2aa0e38b6b1f24b223b339a",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "physics_configuration": {
+    "spec": "tests/ui/g8-journey.spec.js, run by scripts/run_workbench_journeys.py against a server the script starts with CUDA_VISIBLE_DEVICES='' on a free loopback port; Chromium headless, viewport 1560 x 980, one worker",
+    "start": "the SiN waveguide 2D example (8 x 6 um, 0.05 um mesh, 160 x 120 x 1 cells, 1000 steps, point Ez source at x = -2.5 um, point monitors input and output)",
+    "gds": "a GDSII library written with gdstk by the spec's Python fixture: cell JOURNEY, one rectangle 3 x 0.5 um on layer 1 datatype 0",
+    "import": "layer 1/0 included with z from -0.2 to 0.2 um and the project's first material (SiN (constant n), index 2), replacing the example structures; unmapped geometry rejected",
+    "edits": "mesh order of the imported polygon set to 1; a sheet source added at x = -2.5 um with a 2 um y span; a time monitor added at x = 2.5 um; y min and y max boundaries PEC; 10 PML layers; CPU resource",
+    "runs": "20000 steps submitted and cancelled from the Stop button while running; then 400 steps submitted and completed",
+    "exports": "the NPZ download of the completed job, the project JSON through Save, the GDS cell EXPORTED with its layer-stack sidecar"
+  },
+  "reference_method": "the server's own responses captured by the spec: /api/mesh/preview (summary.shape, summary.cells), /api/validate (execution.mode, execution.backend, execution.reason, plan_hash, stored_content_sha256_matches), /api/jobs and /api/jobs/{id} (status, summary.cancelled, summary.steps, plan_hash); file inspection of the downloads (NPZ zip signature PK, GDSII header record 00 06 00 02, sidecar JSON fields); pixel sampling of the field canvas",
+  "observables": [
+    {
+      "name": "gds_import",
+      "unit": "text",
+      "definition": "cell select shows JOURNEY; status Ready to apply; after apply the tree lists JOURNEY:1/0:0 once and no waveguide"
+    },
+    {
+      "name": "materials",
+      "unit": "text",
+      "definition": "the imported polygon's material select equals the chosen material; the refractive index row is shown; mesh order 1 is kept"
+    },
+    {
+      "name": "source_monitor",
+      "unit": "count",
+      "definition": "the tree reports 2 sources and 3 monitors after the sheet source and the time monitor are added"
+    },
+    {
+      "name": "boundaries",
+      "unit": "text",
+      "definition": "y min bc and y max bc read pec; PML layers 10; the summary card shows a shape"
+    },
+    {
+      "name": "mesh_preview",
+      "unit": "cells",
+      "definition": "the dialog's cell count text equals summary.shape joined by ' x '; the summary card shows the same shape and summary.cells; cells equals the product of shape"
+    },
+    {
+      "name": "preflight",
+      "unit": "text",
+      "definition": "/api/validate resolves execution.mode resident on backend cpu; the status line reads 'Auto -> Resident on CPU' and starts with the reason the server gave; plan_hash is 64 hex digits"
+    },
+    {
+      "name": "queue_cancel",
+      "unit": "text",
+      "definition": "POST /api/jobs answers queued; the badge reads RUNNING and Stop is enabled; after Stop the log shows the request, the badge returns to ANALYSIS, the summary reads Cancelled, the job reports status cancelled with summary.cancelled true and fewer than 20000 steps, and its plan_hash equals the preflight hash"
+    },
+    {
+      "name": "resubmit",
+      "unit": "text",
+      "definition": "a second job id is issued; the summary reads Step limit reached and 400 / 400 steps; the stale banner is hidden"
+    },
+    {
+      "name": "results_overlay",
+      "unit": "colors",
+      "definition": "the results tree lists the field snapshots and the monitors; the frame label reads Step 400; the field canvas is wider than 100 px and a stride sample of its pixels holds more than 20 distinct colors; the spectrum axis select appears"
+    },
+    {
+      "name": "exports",
+      "unit": "bytes",
+      "definition": "NPZ download named torchfdtd-<8 hex>.npz starting with PK and longer than 1000 bytes; project JSON with revision > 0 and a 64-hex content_sha256 that /api/validate confirms, whose plan_hash equals the completed job's; GDS bytes starting 00 06 00 02; sidecar cell EXPORTED, 1 structure, layer 1/0, the material and z bounds of the import"
+    },
+    {
+      "name": "errors",
+      "unit": "count",
+      "definition": "page errors and console messages of type error collected for the whole journey"
+    },
+    {
+      "name": "wall_time_ms",
+      "unit": "ms",
+      "definition": "elapsed time at the end of each step and total_ms, attached as journey-timing and copied into the record"
+    }
+  ],
+  "acceptance_limits": {
+    "every_step": "every assertion above holds; the spec passes on its first attempt",
+    "errors": "exactly zero page errors and zero console errors",
+    "wall_time_ms": "recorded; total_ms below the spec timeout of 240000 ms",
+    "server": "CPU-only (cuda false in /api/health of the server the runner started)",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-03 lists the path; the visible-state assertions are this case's declaration; no numerical limit applies"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 5,
+    "passed": [
+      "tests/test_workbench_journeys.py::test_record_is_complete_and_every_journey_passed",
+      "tests/test_workbench_journeys.py::test_journey_covers_every_step_and_records_its_wall_time",
+      "tests/test_workbench_journeys.py::test_editing_behaviours_are_each_verified",
+      "tests/test_workbench_journeys.py::test_record_matches_the_committed_specs_and_bundle",
+      "tests/test_workbench_journeys.py::test_record_commit_is_in_the_history_of_head"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 0.09,
+    "suite_timestamp": "2026-09-22T04:28:52.520827+09:00"
+  },
+  "required_tests": [
+    "tests/test_workbench_journeys.py::test_record_is_complete_and_every_journey_passed",
+    "tests/test_workbench_journeys.py::test_journey_covers_every_step_and_records_its_wall_time",
+    "tests/test_workbench_journeys.py::test_record_matches_the_committed_specs_and_bundle",
+    "tests/test_workbench_journeys.py::test_record_commit_is_in_the_history_of_head"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/workbench/20260921T192723Z-eb209464.json",
+      "sha256": "17fe5f7daae5a14d3a7dee1fb59e1e257721c3bfcfee487bf1725e340e715dfe",
+      "bytes": 4034
+    },
+    {
+      "path": "docs/validation/workbench/20260921T192723Z-eb209464.playwright.json",
+      "sha256": "889d861bd4b39a8d76e2ca56617d6137c6211c613797daab6c085b18474eed86",
+      "bytes": 10015
+    },
+    {
+      "path": "docs/validation/runs/20260921T192925Z-g8-03-25de93db/junit.xml",
+      "sha256": "2d18645a1dc8472687e50639f6c9deeab6053fc33ce2c809e01f685ec4f70d67",
+      "bytes": 865,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G8-03.xml"
+    }
+  ],
+  "applicable_scope": "Chromium headless 1560 x 980 through Playwright 1.63.0 on Windows 11 against the bundled workbench served by the package on a loopback port with CUDA hidden; 2D CPU resident runs only; FSP import, CUDA, streamed and tiled paths are outside",
+  "note": "The journey itself is tests/ui/g8-journey.spec.js, run by scripts/run_workbench_journeys.py at eb20946 on a CPU-only server (record and Playwright JSON report attached, journey 8.7 s of a 52.4 s run of both specs); the pytest checks that record against the committed specs and bundle.",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

@@ -75,6 +75,13 @@ def render_markdown(data):
         when = '; '.join(f'{k}: {", ".join(v)}' for k, v in item['when'].items()) or 'otherwise'
         note = (' '+item['note']) if item['note'] else ''
         lines.append(f'| `{item["name"]}` | {when} | `{item["code_path"]}` | `{item["test"]}` | {item["description"]}{note} |')
+    lines += ['', '## Incidence definition of plane sources', '',
+              'The realized definition of an oblique source, served as the `incidence` block and reported by',
+              '`torchfdtd.source_preview.preview_source`; a fixed-angle source has no code path and is refused.', '',
+              '| Definition | Status | Code path | Statement |', '| --- | --- | --- | --- |']
+    for name, item in data['incidence'].items():
+        text = item.get('description') or item.get('message', '')
+        lines.append(f'| `{name}` | {item["status"]} | `{item["code_path"]}` | {text} |')
     lines += ['', '## Rules (rejections, in the order the code checks them)', '',
               '| # | Rule | Applies when | Stage | Code path | Exception | Message prefix |',
               '| --- | --- | --- | --- | --- | --- | --- |']

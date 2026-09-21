@@ -1,0 +1,24 @@
+{
+  "platform_id": "rtx3060-win11-lab",
+  "record_version": 1,
+  "recorded_at": "2026-09-21T15:53:07+00:00",
+  "os": "Windows-10-10.0.26200-SP0",
+  "machine": "AMD64",
+  "python": "3.10.2",
+  "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+  "torch": "2.10.0+cu126",
+  "cupy": "13.6.0",
+  "numpy": "2.2.6",
+  "cuda_runtime": "12.6",
+  "torch_cuda_available": true,
+  "driver": "591.86",
+  "gpus": [
+    {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3060",
+      "compute_capability": "8.6",
+      "total_memory_bytes": 12884377600,
+      "free_memory_bytes_at_record": 11791237120
+    }
+  ]
+}

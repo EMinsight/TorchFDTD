@@ -436,6 +436,17 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | `tensor_batch` | execution: tensor_batch | `torchfdtd/tensor_batch.py::run_tensor_batch` | `tests/test_capability_pairs.py::test_pairwise` | One-case fused CUDA cohort; radiation boxes project the stored planes through native_radiation_box. The cohort always runs the fused batch kernel; cuda_kernel="torch" is reported as fused_batch in the summary. |
 | `tiled` | execution: tiled | `torchfdtd/tiled.py::run_tiled` | `tests/test_capability_pairs.py::test_pairwise` | plan_tiles partitions the lateral extent; each tile runs Simulation.run and the output planes are stitched. |
 
+## Incidence definition of plane sources
+
+The realized definition of an oblique source, served as the `incidence` block and reported by
+`torchfdtd.source_preview.preview_source`; a fixed-angle source has no code path and is refused.
+
+| Definition | Status | Code path | Statement |
+| --- | --- | --- | --- |
+| `normal` | admitted | `torchfdtd/solver.py::source_profile` | No Bloch phase on a transverse axis: k_parallel = 0 at every frequency. |
+| `fixed_k_parallel` | admitted | `torchfdtd/solver.py::source_profile` | Bloch phase phi on a transverse axis of length L: k_parallel = phi / L is fixed and the angle asin(k_parallel / (n k0)) varies across the band; frequencies with k_parallel > n k0 are evanescent. |
+| `fixed_angle` | rejected | `torchfdtd/source_preview.py::preview_source` | Fixed-angle broadband injection is not implemented: a Bloch cell fixes k_parallel, so the incidence angle varies across the band (feature inventory source.angle and boundary.bfast are missing). Preview the fixed-k_parallel source instead. |
+
 ## Rules (rejections, in the order the code checks them)
 
 | # | Rule | Applies when | Stage | Code path | Exception | Message prefix |

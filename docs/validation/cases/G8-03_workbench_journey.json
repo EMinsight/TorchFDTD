@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G8-03_workbench_journey",
+  "task": "G8-03",
+  "title": "One browser journey from a GDS import through materials, source, boundaries, mesh preview, preflight, queue, cancel and resubmit to the results overlay and the data and GDS exports, on a CPU-only server",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2a5d8cc9c4f3b0722f49726a5f5677f0b9",
+  "declared_before_run": true,
+  "fixture": {
+    "spec": "tests/ui/g8-journey.spec.js, run by scripts/run_workbench_journeys.py against a server the script starts with CUDA_VISIBLE_DEVICES='' on a free loopback port; Chromium headless, viewport 1560 x 980, one worker",
+    "start": "the SiN waveguide 2D example (8 x 6 um, 0.05 um mesh, 160 x 120 x 1 cells, 1000 steps, point Ez source at x = -2.5 um, point monitors input and output)",
+    "gds": "a GDSII library written with gdstk by the spec's Python fixture: cell JOURNEY, one rectangle 3 x 0.5 um on layer 1 datatype 0",
+    "import": "layer 1/0 included with z from -0.2 to 0.2 um and the project's first material (SiN (constant n), index 2), replacing the example structures; unmapped geometry rejected",
+    "edits": "mesh order of the imported polygon set to 1; a sheet source added at x = -2.5 um with a 2 um y span; a time monitor added at x = 2.5 um; y min and y max boundaries PEC; 10 PML layers; CPU resource",
+    "runs": "20000 steps submitted and cancelled from the Stop button while running; then 400 steps submitted and completed",
+    "exports": "the NPZ download of the completed job, the project JSON through Save, the GDS cell EXPORTED with its layer-stack sidecar"
+  },
+  "seed": null,
+  "precision": ["float32"],
+  "backend": ["cpu"],
+  "reference_method": "the server's own responses captured by the spec: /api/mesh/preview (summary.shape, summary.cells), /api/validate (execution.mode, execution.backend, execution.reason, plan_hash, stored_content_sha256_matches), /api/jobs and /api/jobs/{id} (status, summary.cancelled, summary.steps, plan_hash); file inspection of the downloads (NPZ zip signature PK, GDSII header record 00 06 00 02, sidecar JSON fields); pixel sampling of the field canvas",
+  "observables": [
+    {"name": "gds_import", "unit": "text", "definition": "cell select shows JOURNEY; status Ready to apply; after apply the tree lists JOURNEY:1/0:0 once and no waveguide"},
+    {"name": "materials", "unit": "text", "definition": "the imported polygon's material select equals the chosen material; the refractive index row is shown; mesh order 1 is kept"},
+    {"name": "source_monitor", "unit": "count", "definition": "the tree reports 2 sources and 3 monitors after the sheet source and the time monitor are added"},
+    {"name": "boundaries", "unit": "text", "definition": "y min bc and y max bc read pec; PML layers 10; the summary card shows a shape"},
+    {"name": "mesh_preview", "unit": "cells", "definition": "the dialog's cell count text equals summary.shape joined by ' x '; the summary card shows the same shape and summary.cells; cells equals the product of shape"},
+    {"name": "preflight", "unit": "text", "definition": "/api/validate resolves execution.mode resident on backend cpu; the status line reads 'Auto -> Resident on CPU' and starts with the reason the server gave; plan_hash is 64 hex digits"},
+    {"name": "queue_cancel", "unit": "text", "definition": "POST /api/jobs answers queued; the badge reads RUNNING and Stop is enabled; after Stop the log shows the request, the badge returns to ANALYSIS, the summary reads Cancelled, the job reports status cancelled with summary.cancelled true and fewer than 20000 steps, and its plan_hash equals the preflight hash"},
+    {"name": "resubmit", "unit": "text", "definition": "a second job id is issued; the summary reads Step limit reached and 400 / 400 steps; the stale banner is hidden"},
+    {"name": "results_overlay", "unit": "colors", "definition": "the results tree lists the field snapshots and the monitors; the frame label reads Step 400; the field canvas is wider than 100 px and a stride sample of its pixels holds more than 20 distinct colors; the spectrum axis select appears"},
+    {"name": "exports", "unit": "bytes", "definition": "NPZ download named torchfdtd-<8 hex>.npz starting with PK and longer than 1000 bytes; project JSON with revision > 0 and a 64-hex content_sha256 that /api/validate confirms, whose plan_hash equals the completed job's; GDS bytes starting 00 06 00 02; sidecar cell EXPORTED, 1 structure, layer 1/0, the material and z bounds of the import"},
+    {"name": "errors", "unit": "count", "definition": "page errors and console messages of type error collected for the whole journey"},
+    {"name": "wall_time_ms", "unit": "ms", "definition": "elapsed time at the end of each step and total_ms, attached as journey-timing and copied into the record"}
+  ],
+  "acceptance": {
+    "every_step": "every assertion above holds; the spec passes on its first attempt",
+    "errors": "exactly zero page errors and zero console errors",
+    "wall_time_ms": "recorded; total_ms below the spec timeout of 240000 ms",
+    "server": "CPU-only (cuda false in /api/health of the server the runner started)",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-03 lists the path; the visible-state assertions are this case's declaration; no numerical limit applies"
+  },
+  "tests": {
+    "existing": [
+      "tests/ui/g8-journey.spec.js",
+      "tests/test_workbench_journeys.py"
+    ],
+    "not_yet_covered": [
+      "the same journey on a CUDA server, and with the streamed or tiled execution modes",
+      "FSP import as the CAD entry point",
+      "an HDF5 download from the workbench (the server serves NPZ only)",
+      "the field monitor image route (/api/jobs/{key}/field-monitors) is not exercised by the journey; the overlay checked is the Ez snapshot"
+    ]
+  },
+  "notes": "Declared on branch g8-gui from 73203d2 before the recorded run. The Playwright JSON report is referenced by the record (docs/validation/workbench/) and attached to the evidence with --artifact; the pytest that the recorder reads checks the record against the committed specs and bundle."
+}

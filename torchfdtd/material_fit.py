@@ -7,15 +7,18 @@ isotropic passive model. A finite data band does not validate extrapolation.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
+import hashlib
 import json
 from pathlib import Path
 import time
 from typing import Literal
+import warnings
 
 import numpy as np
 from pydantic import Field, model_validator
 
-from .models import Model, Material, LorentzPole
+from .models import Model, Material, LorentzPole, MaterialProvenance
 from .optical_data import OpticalData
 from .materials import permittivity
 
@@ -47,6 +50,10 @@ class OpticalDataRequest(Model):
     kind: Literal['nk','epsilon']='nk'
     unit: Literal['um','nm','m']='um'
     reference: str=Field(default='',max_length=2000)
+    # Provenance of the raw table (docs/MATERIAL_FITTING.md); the server hashes the submitted text.
+    source: str=Field(default='',max_length=200)
+    licence: str=Field(default='',max_length=2000)
+    file_name: str=Field(default='',max_length=260)
 
 
 class MaterialFitRequest(Model):
@@ -54,6 +61,7 @@ class MaterialFitRequest(Model):
     options: FitOptions=Field(default_factory=FitOptions)
     name: str=Field(default='Fitted material',min_length=1,max_length=100)
     color: str='#6ca8dd'
+    provenance: MaterialProvenance | None=None
 
 
 @dataclass
@@ -109,13 +117,15 @@ def material_fit_report(material,*,dt_s=0):
                 dt_s=dt_s,fit_band_um=list(band),sample_count=int(mask.sum()),data_sha256=data.fingerprint)
 
 
-def fit_material(data: OpticalData,*,name='Fitted material',color='#6ca8dd',options: FitOptions | dict | None=None):
+def fit_material(data: OpticalData,*,name='Fitted material',color='#6ca8dd',options: FitOptions | dict | None=None,
+                 provenance: MaterialProvenance | None=None):
     """Fit a passive isotropic material. Returns best fit plus explicit errors.
 
     The objective integrates squared complex-permittivity error over frequency,
     normalized pointwise by max(1, abs(epsilon)). `max_poles` is an upper bound.
     A tolerance failure is returned explicitly, never converted into success.
     ``target='ade'`` fits the bilinear discrete response at exactly ``dt_s``.
+    ``provenance`` is stored on the returned material unchanged.
     """
     from scipy.optimize import least_squares, nnls, lsq_linear
 
@@ -196,7 +206,8 @@ def fit_material(data: OpticalData,*,name='Fitted material',color='#6ca8dd',opti
                for (r,g),a in zip(rates,coeff[int(free_constant):]) if a>1e-14]
         return Material(name=name,color=color,model='multipole' if poles else 'dielectric',epsilon_inf=eps,
                         index=float(np.sqrt(eps)),poles=poles,samples=data,
-                        fit_band_um=(float(w[mask][0]),float(w[mask][-1])),fit_dt_s=opt.dt_s if opt.target=='ade' else None)
+                        fit_band_um=(float(w[mask][0]),float(w[mask][-1])),fit_dt_s=opt.dt_s if opt.target=='ade' else None,
+                        provenance=provenance)
 
     rates=[];coeff,cost=linear(rates);history=[];rng=np.random.default_rng(opt.seed)
     best=material(rates,coeff);quality=material_fit_report(best,dt_s=opt.dt_s)
@@ -247,3 +258,115 @@ def fit_material(data: OpticalData,*,name='Fitted material',color='#6ca8dd',opti
                                 'A passive finite-band fit does not prove consistency or uniqueness of measured data.',
                                 'Validate time/mesh convergence and device observables separately.'])
     return MaterialFitResult(best,quality)
+
+
+class MaterialBandWarning(UserWarning):
+    """The simulation band extends beyond the fitted wavelength band of a material."""
+
+
+def fit_band_extrapolation(material,wavelength_range_um,*,label=None):
+    """The extrapolation warning for a simulation band outside the fitted band, or None.
+
+    A material without a fitted band has nothing to check; the solver's estimate
+    warns separately that unfitted samples carry no accuracy statement.
+    """
+    if material.fit_band_um is None:return None
+    low,high=material.fit_band_um
+    start,stop=float(min(wavelength_range_um)),float(max(wavelength_range_um))
+    if not np.isfinite([start,stop]).all() or start<=0:raise ValueError('The simulation wavelength band must be finite and positive.')
+    if start>=low and stop<=high:return None
+    prefix=f'{label}: ' if label else ''
+    return (f'{prefix}source wavelength band {start:g}\u2013{stop:g} um lies outside the {material.name} fit band '
+            f'({low:g}\u2013{high:g} um). Extrapolated material accuracy is not validated.')
+
+
+def discretization_report(material,dt_s,*,band_um=None,count=201):
+    """n/k error of the trapezoidal ADE at timestep ``dt_s`` against the fitted continuum.
+
+    The discrete constitutive response replaces omega by (2/dt) tan(omega dt/2)
+    (``materials.permittivity(material, f, dt)``, the path tests/test_physics_g3_a.py
+    checks against an independent bilinear evaluation and a driven cell). The
+    band defaults to the fitted band, else the retained sample band. Frequencies
+    at or above the timestep Nyquist limit are refused by ``permittivity``.
+    """
+    if not np.isfinite(dt_s) or dt_s<=0:raise ValueError('A positive timestep is required for the discretization error.')
+    if band_um is None:
+        if material.fit_band_um is not None:band_um=material.fit_band_um
+        elif material.samples is not None:band_um=(material.samples.wavelength_um[0],material.samples.wavelength_um[-1])
+        else:raise ValueError('Declare a wavelength band: the material has neither a fitted band nor retained samples.')
+    low,high=float(min(band_um)),float(max(band_um))
+    if not np.isfinite([low,high]).all() or low<=0:raise ValueError('The wavelength band must be finite and positive.')
+    if not isinstance(count,int) or isinstance(count,bool) or count<2:raise ValueError('count must be an integer of at least 2.')
+    wavelength=np.linspace(low,high,count);f=299792458/(wavelength*1e-6)
+    analytic=permittivity(material,f);numerical=permittivity(material,f,dt_s)
+    if not np.all(np.isfinite(analytic)) or not np.all(np.isfinite(numerical)):
+        raise ValueError('A material resonance is singular in the comparison band.')
+    delta=np.sqrt(numerical)-np.sqrt(analytic)
+    n_at,k_at=int(np.argmax(abs(delta.real))),int(np.argmax(abs(delta.imag)))
+    return dict(dt_s=float(dt_s),band_um=[low,high],sample_count=count,
+                max_abs_n_error=float(abs(delta.real[n_at])),max_abs_n_error_at_um=float(wavelength[n_at]),
+                max_abs_k_error=float(abs(delta.imag[k_at])),max_abs_k_error_at_um=float(wavelength[k_at]),
+                definition='max over the band of |Re/Im(sqrt(eps_ADE(f; dt)) - sqrt(eps(f)))| with omega -> (2/dt) tan(omega dt/2); '
+                           'the constitutive error of the trapezoidal ADE only, not Yee spatial dispersion.')
+
+
+@dataclass
+class MaterialImportResult:
+    """One imported table: the fitted material with provenance, the fit report and its checks."""
+    material: Material
+    report: dict
+    provenance: MaterialProvenance
+    discretization: dict | None
+    warnings: list
+
+    @property
+    def converged(self):return self.report['converged']
+
+    def require_tolerance(self):
+        if not self.converged:raise ValueError('Material fit did not reach the requested tolerance. Inspect its report.')
+        return self.material
+
+    def as_dict(self):
+        return dict(material=self.material.model_dump(),report=self.report,provenance=self.provenance.model_dump(),
+                    discretization=self.discretization,warnings=list(self.warnings))
+
+
+def import_material_table(path=None,*,text=None,kind: Literal['nk','epsilon']='nk',unit: Literal['um','nm','m']='um',
+                          source,licence='',file_name=None,name='Fitted material',color='#6ca8dd',
+                          options: FitOptions | dict | None=None,dt_s=0.,simulation_band_um=None,imported=None):
+    """Import a CSV/text n/k or complex-permittivity table, fit it and record its provenance.
+
+    Exactly one of ``path`` (a file) or ``text`` (its contents) is read; the raw
+    bytes are hashed into ``MaterialProvenance.raw_sha256`` before any parsing.
+    The existing passive fitter (``fit_material``) runs over the declared band
+    (``options.wavelength_range_um``, default the whole table). With ``dt_s`` the
+    report carries the ADE error at that timestep and ``discretization`` the
+    n/k error of the discrete response against the fitted continuum. With
+    ``simulation_band_um`` a band outside the fitted band raises
+    ``MaterialBandWarning`` (``warnings.warn``) and the message is kept in
+    ``warnings``; the solver's estimate repeats the same check per source.
+    """
+    if (path is None)==(text is None):raise ValueError('Pass exactly one of path or text.')
+    if not source or not str(source).strip():raise ValueError('Name the source of the table (publication, database entry or measurement).')
+    if path is not None:
+        raw=Path(path).read_bytes();file_name=Path(path).name if file_name is None else file_name
+        text=raw.decode('utf-8-sig')
+    else:
+        raw=text.encode('utf-8');file_name=file_name or ''
+    provenance=MaterialProvenance(source=str(source).strip(),licence=licence,raw_sha256=hashlib.sha256(raw).hexdigest(),
+                                  file_name=file_name,columns=kind,wavelength_unit=unit,
+                                  imported=date.today().isoformat() if imported is None else imported)
+    data=OpticalData.from_text(text,kind=kind,unit=unit,reference=provenance.source)
+    opt=FitOptions.model_validate(options.model_dump() if isinstance(options,FitOptions) else options or {})
+    if dt_s and not opt.dt_s:opt=opt.model_copy(update=dict(dt_s=float(dt_s)))
+    fit=fit_material(data,name=name,color=color,options=opt,provenance=provenance)
+    messages=[]
+    if not fit.converged:
+        messages.append(f'{name}: the passive fit did not reach tolerance {opt.tolerance:g} '
+                        f'(normalized RMS {fit.report[opt.target]["normalized_rms"]:.3e} with {fit.report["pole_count"]} poles).')
+    discretization=discretization_report(fit.material,opt.dt_s) if opt.dt_s else None
+    if simulation_band_um is not None:
+        message=fit_band_extrapolation(fit.material,simulation_band_um)
+        if message:
+            messages.append(message);warnings.warn(message,MaterialBandWarning,stacklevel=2)
+    return MaterialImportResult(fit.material,fit.report,provenance,discretization,messages)

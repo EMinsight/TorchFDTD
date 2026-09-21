@@ -1,0 +1,145 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T195548Z-g6-02-9b5a95d6",
+  "task": "G6-02",
+  "stage": "G6",
+  "task_title": "source의 실제 공간 분포·위상·편광·시간 파형·유효 bandwidth를 preview한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_source_preview.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-02.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T04:53:13.002995+09:00",
+  "recorded_at": "2026-09-21T19:55:48+00:00",
+  "source_commit": "da70a70484c2d5f2481710576c594c06226f3a39",
+  "source_tree_sha256": "bc38f514d7c79796ce9b27343e7739f0f275c8b97bcdd547aef3e09fcdf86af3",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_source_preview.py": "6f12cbaf457aa8c655690a034149556525a7d3db671a7ea8973cc5b458e860d4"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G6-02_source_preview.json",
+  "fixture_sha256": "05a8711c7facaa5999b0b0e8519e7047f9ccffe3d5efd8d91658b934ca4b9e5f",
+  "acceptance_criteria_path": "docs/validation/cases/G6-02_source_preview.json",
+  "acceptance_criteria_sha256": "05a8711c7facaa5999b0b0e8519e7047f9ccffe3d5efd8d91658b934ca4b9e5f",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable",
+  "precision": "float64",
+  "backend": "cpu",
+  "physics_configuration": {
+    "function": "torchfdtd.source_preview.preview_source(project, source_id, incidence=None) and effective_bandwidth; POST /api/sources/{id}/preview?incidence=",
+    "bloch_sheet": "2D cell 1.2 x 2.2 um, mesh 0.03 um, 10 PML cells on y, Bloch on x with phase kx * 1.2 for kx = 2 pi sin(theta) / lambda; Ez soft sheet at y = -0.6 um spanning the cell; Gaussian 3 cycles at 1.02 um; theta 20 deg (propagating across the band) and 80 deg (evanescent at the long-wavelength edge); 1500 or 4000 steps",
+    "other_sources": "demo scatterer sheet (periodic y, normal incidence), demo point source, a one-way plane on a periodic 2D cell, a TFSF box, a theta/phi vector point source (60, 30 deg, amplitude 0.5)",
+    "bandwidth_definition": "outermost DFT bins where the single-sided amplitude spectrum of the injected samples is at least 0.01 of its peak (-40 dB), unwindowed, over the whole simulation interval",
+    "registry": "torchfdtd.capabilities.INCIDENCE served in /api/capabilities['combinations']['incidence']; feature inventory rows source.angle and boundary.bfast",
+    "workbench": "tests/ui/source-preview.spec.js: Bloch sheet at 20 deg on a 1.2 um cell, incidence text, spatial phase tab, fixed-angle refusal, normal-incidence sheet"
+  },
+  "reference_method": "closed forms: k_parallel = phi / L, sin(theta) = k_parallel lambda / (2 pi n), spatial phase phi (x - x0) / L; the Gaussian amplitude spectrum exp(-2 pi^2 sigma^2 (f - f0)^2) for the 1 percent band; the source polarization unit vector; the registry constants",
+  "observables": [
+    {
+      "name": "k_parallel_rad_per_um",
+      "unit": "rad/um",
+      "definition": "incidence['k_parallel_rad_per_um'] per Bloch axis"
+    },
+    {
+      "name": "angle_deg",
+      "unit": "degree",
+      "definition": "incidence['angle_deg'] at the carrier and at the band edges and peak"
+    },
+    {
+      "name": "phase_rad_by_axis",
+      "unit": "rad",
+      "definition": "spatial[k]['phase_rad_by_axis'] relative to the first cell of the line"
+    },
+    {
+      "name": "bandwidth_frequency_hz",
+      "unit": "Hz",
+      "definition": "bandwidth['frequency_hz'] low and high"
+    },
+    {
+      "name": "polarization_vector",
+      "unit": "dimensionless",
+      "definition": "polarization['vector']"
+    },
+    {
+      "name": "fixed_angle_refusal",
+      "unit": "text",
+      "definition": "the ValueError message of preview_source(incidence='fixed_angle') and the 422 detail of the route"
+    }
+  ],
+  "acceptance_limits": {
+    "incidence": "kind fixed_k_parallel on a Bloch cell, normal without Bloch phase, not applicable for a point source; carrier angle equals the declared angle to 1e-9 deg; band-edge angles follow asin(k_parallel lambda / 2 pi n) exactly and decrease with frequency; an edge with k_parallel > n k0 has angle None with the reason evanescent",
+    "spatial": "the Bloch phase line equals phi (x - x_first) / L to 1e-12 rad on every sheet cell; the one-way plane and the TFSF box report their cut or box cells and no spatial phase; vector sources report one term per nonzero component with amplitude |amplitude * weight|",
+    "bandwidth": "the 1 percent band edges of a 3-cycle Gaussian match f0 +- sqrt(ln 100 / 2) / (pi sigma) within 1.5 frequency bins; a disabled source has no band and says so",
+    "refusal": "a fixed-angle request raises ValueError with INCIDENCE['fixed_angle']['message'], the route answers 422 with that text, the registry marks fixed_angle rejected and the inventory rows source.angle and boundary.bfast missing; the workbench shows the refusal instead of a plot",
+    "source_of_limits": "G6-02 specification; the 1 percent bandwidth threshold and the bin tolerance are declared here before the run"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 6,
+    "passed": [
+      "tests/test_source_preview.py::test_bloch_sheet_is_fixed_k_parallel_with_the_angle_varying_across_the_band",
+      "tests/test_source_preview.py::test_evanescent_band_edge_is_named_not_clipped",
+      "tests/test_source_preview.py::test_normal_sheet_point_oneway_and_tfsf_spatial_records",
+      "tests/test_source_preview.py::test_vector_polarization_and_amplitude_weights",
+      "tests/test_source_preview.py::test_effective_bandwidth_matches_the_gaussian_spectrum_and_names_a_zero_spectrum",
+      "tests/test_source_preview.py::test_registry_and_server_refuse_the_fixed_angle_definition"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 6.416,
+    "suite_timestamp": "2026-09-22T04:53:13.002995+09:00"
+  },
+  "required_tests": [
+    "tests/test_source_preview.py"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "D:/TorchFDTD/.local/tmp/junit/G6-02-ui.xml",
+      "sha256": "bd934899a501d515a6aa2b3cb8588d1807d53b92fa3f5d7f23c76ba8a7c3904f",
+      "bytes": 423
+    },
+    {
+      "path": "docs/validation/runs/20260921T195548Z-g6-02-9b5a95d6/junit.xml",
+      "sha256": "7ab1b840a8a3f842af48bb809cd251332a0ebe0e2105159382753fe00cb050dc",
+      "bytes": 1037,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G6-02.xml"
+    }
+  ],
+  "applicable_scope": "CPU, float64 previews of 2D Bloch, periodic, one-way and TFSF sources and a 3D vector point source; FastAPI TestClient; the Playwright spec tests/ui/source-preview.spec.js ran against the bundle built from this commit on port 8772 and its JUnit report is the attached artifact (1 test, 0 failures)",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

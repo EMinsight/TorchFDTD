@@ -1,0 +1,452 @@
+{
+ "schema": "torchfdtd-meep-comparison-result-v1",
+ "example": "metalens",
+ "criteria_file": "criteria.json",
+ "criteria_sha256": "49e758a9f9d19a8ad6ba8a70c13549103712e82a84831752bcad910b5554fa7e",
+ "evaluated_at_wavelength_um": 1.55,
+ "2d": {
+  "records": {
+   "torchfdtd": "metalens_2d_torchfdtd.json",
+   "meep": "metalens_2d_meep.json"
+  },
+  "geometry_sha256": "a746d5538bf1da58709ada705f40839aefa2e3831ee0d7457b7ed99711c3dcaf",
+  "grid_agreement": {
+   "cells_per_axis": true,
+   "dt_relative_difference": 0.0,
+   "dt": true,
+   "steps": true,
+   "pml_cells": true,
+   "geometry_sha256": true,
+   "silicon_cells": true,
+   "silicon_cells_per_component": {
+    "torchfdtd": {
+     "Ex": 16560,
+     "Ey": 16769,
+     "Ez": 16360
+    },
+    "meep": {
+     "Ez": 16360
+    }
+   },
+   "source_support": true,
+   "all": true
+  },
+  "criteria_rows": [
+   {
+    "name": "focal_position",
+    "label": "Focal position (um)",
+    "torchfdtd": 5.599956369982503,
+    "meep": 5.599169303797459,
+    "difference": 0.0007870661850439831,
+    "unit": "um",
+    "limit": 0.1,
+    "pass": true,
+    "criterion": "absolute difference of the on-axis intensity peak position (three-point parabola through the largest sample of the axis line)"
+   },
+   {
+    "name": "fwhm",
+    "label": "Focal-plane FWHM (um)",
+    "torchfdtd": 1.162929177182911,
+    "meep": 1.1629130991961136,
+    "difference": 1.3825517715061213e-05,
+    "unit": "relative",
+    "limit": 0.03,
+    "pass": true,
+    "criterion": "relative difference of the focal-plane intensity FWHM (linear interpolation of the half-maximum crossings), |a-b| / mean(a,b)"
+   },
+   {
+    "name": "profile_rms",
+    "label": "Focal-plane profile RMS difference / peak",
+    "torchfdtd": 9.529615,
+    "meep": 9.530252,
+    "difference": 1.6678365555891494e-05,
+    "unit": "relative to the peak",
+    "limit": 0.03,
+    "note": "the two columns are the peak intensities relative to the incident intensity",
+    "pass": true,
+    "criterion": "RMS over the focal line of the difference of the two intensity profiles (each relative to its own bare-cell incident intensity), divided by the mean of the two peaks"
+   },
+   {
+    "name": "efficiency",
+    "label": "Focusing efficiency",
+    "torchfdtd": 0.5570571408000079,
+    "meep": 0.5570611007,
+    "difference": 3.959899992134197e-06,
+    "unit": "absolute",
+    "limit": 0.01,
+    "pass": true,
+    "criterion": "absolute difference of the focusing efficiency: y-directed power within 1.5 FWHM of the focal-plane peak divided by the bare-cell power through the aperture line"
+   }
+  ],
+  "information_rows": [
+   {
+    "label": "Transmission through the aperture plane",
+    "torchfdtd": 0.6739981,
+    "meep": 0.6741163,
+    "difference": 0.00011819999999995723
+   },
+   {
+    "label": "On-axis peak intensity / incident",
+    "torchfdtd": 9.5136661258726,
+    "meep": 9.514332848892407,
+    "difference": 0.0006667230198065255
+   }
+  ],
+  "all_pass": true,
+  "extra_wavelengths": [
+   {
+    "wavelength_um": 1.6,
+    "torchfdtd": {
+     "focal_position_um": 5.594914529914533,
+     "fwhm_um": 1.2159484073186841,
+     "efficiency": 0.5110812685250071,
+     "transmission": 0.6598526
+    },
+    "meep": {
+     "focal_position_um": 5.596731123388578,
+     "fwhm_um": 1.2158636390456896,
+     "efficiency": 0.5111726057,
+     "transmission": 0.6599531
+    }
+   },
+   {
+    "wavelength_um": 1.5,
+    "torchfdtd": {
+     "focal_position_um": 5.717590027700838,
+     "fwhm_um": 1.0670523528279676,
+     "efficiency": 0.4850229063250069,
+     "transmission": 0.6796195
+    },
+    "meep": {
+     "focal_position_um": 5.717828525641007,
+     "fwhm_um": 1.0670719414002756,
+     "efficiency": 0.4850053204,
+     "transmission": 0.679592
+    }
+   }
+  ],
+  "summary_consistency": {
+   "torchfdtd": {
+    "axis_peak_y_um": {
+     "script": 5.599956369982503,
+     "recomputed": 5.599956369982503,
+     "relative_difference": 0.0
+    },
+    "fwhm_um": {
+     "script": 1.162929177182911,
+     "recomputed": 1.162929177182911,
+     "relative_difference": 0.0
+    },
+    "efficiency": {
+     "script": 0.5570571408000079,
+     "recomputed": 0.5570571408000079,
+     "relative_difference": 0.0
+    }
+   },
+   "meep": {
+    "axis_peak_y_um": {
+     "script": 5.599169303797459,
+     "recomputed": 5.599169303797459,
+     "relative_difference": 0.0
+    },
+    "fwhm_um": {
+     "script": 1.1629130991961136,
+     "recomputed": 1.1629130991961136,
+     "relative_difference": 0.0
+    },
+    "efficiency": {
+     "script": 0.5570611007,
+     "recomputed": 0.5570611007,
+     "relative_difference": 0.0
+    }
+   }
+  },
+  "timing": {
+   "torchfdtd": {
+    "timing_mode": "development",
+    "setup_seconds": 0.06882263599982252,
+    "stepping_seconds": 1.5686460100005206,
+    "full_seconds": 1.6649630470001284,
+    "samples": 1,
+    "host_load_note": "development run on a shared host: other agents used the CPU and the GPU at the same time; the numbers bound the solver time from above",
+    "load_average_1_5_15": [
+     1.095703125,
+     2.1279296875,
+     2.03466796875
+    ],
+    "gpu_at_start": {
+     "memory_used_mb": 2420.0,
+     "utilization_percent": 2.0
+    },
+    "hardware": "NVIDIA GeForce RTX 3060",
+    "precision": "float32",
+    "cells": 825600,
+    "steps": 5200
+   },
+   "meep": {
+    "timing_mode": "development",
+    "setup_seconds": 0.09610513799998444,
+    "stepping_seconds": 13.290824592999343,
+    "full_seconds": 13.386931224000364,
+    "samples": 1,
+    "host_load_note": "development run on a shared host: other agents used the CPU and the GPU at the same time; the numbers bound the solver time from above",
+    "load_average_1_5_15": [
+     3.76171875,
+     4.02490234375,
+     3.5537109375
+    ],
+    "gpu_at_start": {
+     "memory_used_mb": 2411.0,
+     "utilization_percent": 26.0
+    },
+    "hardware": "4 MPI ranks, 12th Gen Intel(R) Core(TM) i7-12700",
+    "precision": "float64",
+    "cells": 825600,
+    "steps": 5200
+   },
+   "stepping_ratio_meep_over_torchfdtd": 8.472800433155044,
+   "full_ratio_meep_over_torchfdtd": 8.040377381420244
+  }
+ },
+ "3d": {
+  "records": {
+   "torchfdtd": "metalens_3d_torchfdtd.json",
+   "meep": "metalens_3d_meep.json"
+  },
+  "geometry_sha256": "6c318b9c25c31652c3036d9d0f0f5bfaef3f22ce3becb0ae8e20689033843034",
+  "grid_agreement": {
+   "cells_per_axis": true,
+   "dt_relative_difference": 0.0,
+   "dt": true,
+   "steps": true,
+   "pml_cells": true,
+   "geometry_sha256": true,
+   "silicon_cells": true,
+   "silicon_cells_per_component": {
+    "torchfdtd": {
+     "Ex": 35808,
+     "Ey": 35808,
+     "Ez": 36288
+    },
+    "meep": {
+     "Ex": 35808,
+     "Ey": 35808,
+     "Ez": 36288
+    }
+   },
+   "source_support": true,
+   "all": true
+  },
+  "criteria_rows": [
+   {
+    "name": "focal_position",
+    "label": "Focal position (um)",
+    "torchfdtd": 1.606069042316264,
+    "meep": 1.6087912087912157,
+    "difference": 0.002722166474951715,
+    "unit": "um",
+    "limit": 0.1,
+    "pass": true,
+    "criterion": "absolute difference of the on-axis intensity peak position (three-point parabola through the largest sample of the axis row of the xz section)"
+   },
+   {
+    "name": "fwhm_x",
+    "label": "Focal-plane FWHM along x (um)",
+    "torchfdtd": 1.3228512793156564,
+    "meep": 1.3228294256829425,
+    "difference": 1.6520234412722886e-05,
+    "unit": "relative",
+    "limit": 0.03,
+    "pass": true,
+    "criterion": "relative difference of the focal-plane FWHM along x through the peak, |a-b| / mean(a,b)"
+   },
+   {
+    "name": "fwhm_y",
+    "label": "Focal-plane FWHM along y (um)",
+    "torchfdtd": 1.1239250930860134,
+    "meep": 1.123937673023457,
+    "difference": 1.1192798451212584e-05,
+    "unit": "relative",
+    "limit": 0.03,
+    "pass": true,
+    "criterion": "relative difference of the focal-plane FWHM along y through the peak, |a-b| / mean(a,b)"
+   },
+   {
+    "name": "profile_rms",
+    "label": "Focal-plane profile RMS difference / peak",
+    "torchfdtd": 12.9387,
+    "meep": 12.93898,
+    "difference": 5.646542480817956e-06,
+    "unit": "relative to the peak",
+    "limit": 0.03,
+    "note": "the two columns are the peak intensities relative to the incident intensity",
+    "pass": true,
+    "criterion": "RMS over the focal-plane map of the difference of the two intensity maps (each relative to its own bare-cell incident intensity), divided by the mean of the two peaks"
+   },
+   {
+    "name": "efficiency",
+    "label": "Focusing efficiency",
+    "torchfdtd": 0.6232254843549955,
+    "meep": 0.6232276126399999,
+    "difference": 2.128285004454611e-06,
+    "unit": "absolute",
+    "limit": 0.01,
+    "pass": true,
+    "criterion": "absolute difference of the focusing efficiency: z-directed power within a rectangle of 1.5 FWHM_x by 1.5 FWHM_y around the focal-plane peak divided by the bare-cell power through the aperture plane"
+   }
+  ],
+  "information_rows": [
+   {
+    "label": "Transmission through the aperture plane",
+    "torchfdtd": 0.8407659,
+    "meep": 0.8407487,
+    "difference": 1.7199999999939486e-05
+   },
+   {
+    "label": "On-axis peak intensity / incident",
+    "torchfdtd": 12.874733652561249,
+    "meep": 12.87465815934066,
+    "difference": 7.54932205886405e-05
+   }
+  ],
+  "all_pass": true,
+  "extra_wavelengths": [
+   {
+    "wavelength_um": 1.6,
+    "torchfdtd": {
+     "focal_position_um": 1.717409470752094,
+     "fwhm_um": [
+      1.3747535004547884,
+      1.1612190063965384
+     ],
+     "efficiency": 0.6159089351549956,
+     "transmission": 0.8390635
+    },
+    "meep": {
+     "focal_position_um": 1.71768292682927,
+     "fwhm_um": [
+      1.3747284045171997,
+      1.161233561058924
+     ],
+     "efficiency": 0.6158895704199999,
+     "transmission": 0.8390345
+    }
+   },
+   {
+    "wavelength_um": 1.5,
+    "torchfdtd": {
+     "focal_position_um": 1.3986979166666695,
+     "fwhm_um": [
+      1.2548460651207782,
+      1.0959946110958074
+     ],
+     "efficiency": 0.6262852471349954,
+     "transmission": 0.876684
+    },
+    "meep": {
+     "focal_position_um": 1.39909228441755,
+     "fwhm_um": [
+      1.2548252475975101,
+      1.0960134989459562
+     ],
+     "efficiency": 0.6262943858899999,
+     "transmission": 0.8766805
+    }
+   }
+  ],
+  "summary_consistency": {
+   "torchfdtd": {
+    "axis_peak_z_um": {
+     "script": 1.606069042316264,
+     "recomputed": 1.606069042316264,
+     "relative_difference": 0.0
+    },
+    "fwhm_x_um": {
+     "script": 1.3228512793156564,
+     "recomputed": 1.3228512793156564,
+     "relative_difference": 0.0
+    },
+    "fwhm_y_um": {
+     "script": 1.1239250930860134,
+     "recomputed": 1.1239250930860134,
+     "relative_difference": 0.0
+    },
+    "efficiency": {
+     "script": 0.6232254843549955,
+     "recomputed": 0.6232254843549955,
+     "relative_difference": 0.0
+    }
+   },
+   "meep": {
+    "axis_peak_z_um": {
+     "script": 1.6087912087912157,
+     "recomputed": 1.6087912087912157,
+     "relative_difference": 0.0
+    },
+    "fwhm_x_um": {
+     "script": 1.3228294256829425,
+     "recomputed": 1.3228294256829425,
+     "relative_difference": 0.0
+    },
+    "fwhm_y_um": {
+     "script": 1.123937673023457,
+     "recomputed": 1.123937673023457,
+     "relative_difference": 0.0
+    },
+    "efficiency": {
+     "script": 0.6232276126399999,
+     "recomputed": 0.6232276126399999,
+     "relative_difference": 0.0
+    }
+   }
+  },
+  "timing": {
+   "torchfdtd": {
+    "timing_mode": "development",
+    "setup_seconds": 0.307469191000564,
+    "stepping_seconds": 6.0564109410006495,
+    "full_seconds": 6.585998861999542,
+    "samples": 1,
+    "host_load_note": "development run on a shared host: other agents used the CPU and the GPU at the same time; the numbers bound the solver time from above",
+    "load_average_1_5_15": [
+     5.41162109375,
+     3.33642578125,
+     3.11962890625
+    ],
+    "gpu_at_start": {
+     "memory_used_mb": 2411.0,
+     "utilization_percent": 3.0
+    },
+    "hardware": "NVIDIA GeForce RTX 3060",
+    "precision": "float32",
+    "cells": 3430400,
+    "steps": 2500
+   },
+   "meep": {
+    "timing_mode": "development",
+    "setup_seconds": 0.46732701399923826,
+    "stepping_seconds": 128.59909007899842,
+    "full_seconds": 129.06641999599924,
+    "samples": 1,
+    "host_load_note": "development run on a shared host: other agents used the CPU and the GPU at the same time; the numbers bound the solver time from above",
+    "load_average_1_5_15": [
+     5.43701171875,
+     3.50439453125,
+     3.181640625
+    ],
+    "gpu_at_start": {
+     "memory_used_mb": 2409.0,
+     "utilization_percent": 3.0
+    },
+    "hardware": "4 MPI ranks, 12th Gen Intel(R) Core(TM) i7-12700",
+    "precision": "float64",
+    "cells": 3430400,
+    "steps": 2500
+   },
+   "stepping_ratio_meep_over_torchfdtd": 21.23354761289548,
+   "full_ratio_meep_over_torchfdtd": 19.597091147509555
+  }
+ },
+ "all_pass": true,
+ "tables_markdown": "### 2D ridge lens (Part A): agreement at 1.55 um\n\n| Metric | TorchFDTD | Meep | Difference | Criterion | Pass |\n|---|---|---|---|---|---|\n| Focal position (um) | 5.6000 | 5.5992 | 7.87e-04 um | <= 0.1 um | yes |\n| Focal-plane FWHM (um) | 1.1629 | 1.1629 | 1.38e-05 (relative) | <= 0.03 (relative) | yes |\n| Focal-plane profile RMS difference / peak | 9.5296 | 9.5303 | 1.67e-05 of the peak | <= 0.03 of the peak | yes |\n| Focusing efficiency | 0.5571 | 0.5571 | 3.96e-06 | <= 0.01 | yes |\n| Transmission through the aperture plane | 0.6740 | 0.6741 | 1.18e-04 | (information) | - |\n| On-axis peak intensity / incident | 9.5137 | 9.5143 | 6.67e-04 | (information) | - |\n\n2D ridge lens (Part A): extra wavelengths (information, from the records)\n\n| Wavelength (um) | Focal position TorchFDTD / Meep (um) | FWHM (um) TorchFDTD / Meep | Efficiency TorchFDTD / Meep | Transmission TorchFDTD / Meep |\n|---|---|---|---|---|\n| 1.60 | 5.5949 / 5.5967 | 1.2159 / 1.2159 | 0.5111 / 0.5112 | 0.6599 / 0.6600 |\n| 1.50 | 5.7176 / 5.7178 | 1.0671 / 1.0671 | 0.4850 / 0.4850 | 0.6796 / 0.6796 |\n\n2D ridge lens (Part A): wall time of the lens run\n\n| Solver | Hardware | Precision | Cells | Steps | Setup (s) | Stepping (s) | Full (s) | Timing mode |\n|---|---|---|---|---|---|---|---|---|\n| TorchFDTD | NVIDIA GeForce RTX 3060 | float32 | 825600 | 5200 | 0.07 | 1.57 | 1.66 | development |\n| Meep | 4 MPI ranks, 12th Gen Intel(R) Core(TM) i7-12700 | float64 | 825600 | 5200 | 0.10 | 13.29 | 13.39 | development |\n\nStepping ratio Meep / TorchFDTD: 8.5; full-run ratio: 8.0. Load condition: development run on a shared host: other agents used the CPU and the GPU at the same time; the numbers bound the solver time from above\n\n### 3D pillar lens (Part B): agreement at 1.55 um\n\n| Metric | TorchFDTD | Meep | Difference | Criterion | Pass |\n|---|---|---|---|---|---|\n| Focal position (um) | 1.6061 | 1.6088 | 0.0027 um | <= 0.1 um | yes |\n| Focal-plane FWHM along x (um) | 1.3229 | 1.3228 | 1.65e-05 (relative) | <= 0.03 (relative) | yes |\n| Focal-plane FWHM along y (um) | 1.1239 | 1.1239 | 1.12e-05 (relative) | <= 0.03 (relative) | yes |\n| Focal-plane profile RMS difference / peak | 12.9387 | 12.9390 | 5.65e-06 of the peak | <= 0.03 of the peak | yes |\n| Focusing efficiency | 0.6232 | 0.6232 | 2.13e-06 | <= 0.01 | yes |\n| Transmission through the aperture plane | 0.8408 | 0.8407 | 1.72e-05 | (information) | - |\n| On-axis peak intensity / incident | 12.8747 | 12.8747 | 7.55e-05 | (information) | - |\n\n3D pillar lens (Part B): extra wavelengths (information, from the records)\n\n| Wavelength (um) | Focal position TorchFDTD / Meep (um) | FWHM x, y (um) TorchFDTD / Meep | Efficiency TorchFDTD / Meep | Transmission TorchFDTD / Meep |\n|---|---|---|---|---|\n| 1.60 | 1.7174 / 1.7177 | 1.3748, 1.1612 / 1.3747, 1.1612 | 0.6159 / 0.6159 | 0.8391 / 0.8390 |\n| 1.50 | 1.3987 / 1.3991 | 1.2548, 1.0960 / 1.2548, 1.0960 | 0.6263 / 0.6263 | 0.8767 / 0.8767 |\n\n3D pillar lens (Part B): wall time of the lens run\n\n| Solver | Hardware | Precision | Cells | Steps | Setup (s) | Stepping (s) | Full (s) | Timing mode |\n|---|---|---|---|---|---|---|---|---|\n| TorchFDTD | NVIDIA GeForce RTX 3060 | float32 | 3430400 | 2500 | 0.31 | 6.06 | 6.59 | development |\n| Meep | 4 MPI ranks, 12th Gen Intel(R) Core(TM) i7-12700 | float64 | 3430400 | 2500 | 0.47 | 128.60 | 129.07 | development |\n\nStepping ratio Meep / TorchFDTD: 21.2; full-run ratio: 19.6. Load condition: development run on a shared host: other agents used the CPU and the GPU at the same time; the numbers bound the solver time from above\n"
+}

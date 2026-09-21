@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-04_design_slab_memory_paths",
+  "task": "G5-04",
+  "title": "Geometry and density design slabs run the streamed adjoint without a full 3D epsilon or VJP on the device or the host, and the host budget counts the design tensor and the optimizer moments",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "tests/test_design_slab_memory_g5.py",
+    "region": "3D, 800 x 32 x 32 cells at 0.05 um (40 x 1.6 x 1.6 um), 4 CPML cells (geometry: on every face; density: periodic x and y, CPML z), Yee sampling, FP32, 10 steps, memory_mode streamed",
+    "geometry": "public synthetic solids of torchfdtd.streamed_geometry: a box 0.9 x 0.9 x 0.5 um rotated 20 degrees about z with epsilon p0 = 3.1 and centre (p1, 0, 0) = (0.1, 0, 0) um, and a sphere of radius p2 = 0.4 um, epsilon 2.4, at (-0.6, 0.2, 0.1) um; background 1; chunk_cells 65536; three differentiable parameters",
+    "density": "16 x 8 periodic density layer (torchfdtd.streamed_density_layer) between z = -0.2 and 0.2 um, background epsilon 1, design epsilon 4, cell-edge pixel origin, values from torch.rand with seed 3; 128 differentiable parameters",
+    "source_and_monitor": "Ez point source at (0, 0, -0.1) um, standard Gaussian pulse (0.8 um, FWHM 0.5 fs, centre 0.5 fs, amplitude 100); one Ez probe at (0, 0, 0.1) um; objective sum of squared time signals",
+    "policy": "StreamedAdjointOptions(device=cuda, slab_width=8, temporal_depth=5, checkpoints=0, gpu_budget_bytes=9600000, host_budget_bytes=8 GiB, state_storage=disk (private scratch, disk_budget_bytes 2 GiB), tile_transfers=sync)",
+    "full_epsilon": "the diagonal Yee-sampled FP32 material of the whole grid: 800*32*32*3*4 = 9,830,400 bytes, larger than the declared GPU budget of 9,600,000 bytes, so a path that materialized it on the device could not be admitted or would exceed its budget",
+    "instruments": "report['forward_memory'] and report['backward_memory'] peak_torch_allocated_bytes.delta_bytes (exact allocator peak after torch.cuda.reset_peak_memory_stats), the AllocationTrace TorchDispatchMode of tests/test_streamed_geometry.py listing every host tensor allocation with its shape and storage bytes (disk banks keep the field state out of host tensors), report['dense_material_storage_bytes'], report['dense_material_vjp_bytes'], report['design_tensor_bytes'], report['optimizer_state_reservation_bytes']",
+    "budget_checks": "torchfdtd/streamed.py::_reservation adds optimizer_moments * design_tensor_bytes to the host reservation for the dense, dispersive, geometry and density paths; estimate_streamed_memory, plan_streamed_work and the run report carry the same fields; Adam's exp_avg and exp_avg_sq of a leaf of the geometry packet's shape are compared with the declared two moments"
+  },
+  "seed": 3,
+  "precision": ["float32"],
+  "backend": ["cuda", "cpu"],
+  "reference_method": "a size bound, not a physics oracle: the byte size of the full diagonal epsilon array computed from the grid shape, and the parameter tensor sizes computed from their shapes; the design-slab physics itself is verified against the dense material in tests/test_streamed_geometry.py and tests/test_streamed_density.py",
+  "observables": [
+    {"name": "peak_torch_allocated_delta_bytes", "unit": "bytes", "definition": "max over the forward and backward phases of the exact Torch allocator peak minus the bytes allocated when the phase began"},
+    {"name": "peak_over_full_epsilon", "unit": "dimensionless", "definition": "peak_torch_allocated_delta_bytes / 9830400"},
+    {"name": "full_shape_host_allocations", "unit": "count", "definition": "host tensor allocations with shape (800,32,32), (800,32,32,3) or (800,32,32,1) and storage above 4 bytes during the run and its backward"},
+    {"name": "max_host_allocation_bytes", "unit": "bytes", "definition": "largest host tensor storage allocated during the run"},
+    {"name": "gradient_max_abs", "unit": "objective per parameter unit", "definition": "largest gradient magnitude of the design parameters, which must be finite and nonzero so that the VJP path really ran"}
+  ],
+  "acceptance": {
+    "full_epsilon_bytes": 9830400,
+    "gpu_budget_bytes": 9600000,
+    "device_rule": "for both paths the exact peak Torch allocated delta is below full_epsilon_bytes and at most gpu_budget_bytes, and gpu_reservation_bytes is at most gpu_budget_bytes",
+    "host_rule": "full_shape_host_allocations == 0; dense_material_storage_bytes == 0 and dense_material_vjp_bytes == 0 in the report; the gradient is finite and nonzero",
+    "budget_rule": "for the dense path (_reservation, estimate_streamed_memory, plan_streamed_work, the run report) and the geometry and density executions, host_reservation_bytes with optimizer_moments = k minus host_reservation_bytes with 0 moments equals exactly k * design_tensor_bytes for k in {1, 2}, gpu_reservation_bytes is unchanged, design_tensor_bytes equals the parameter tensor's numel times element size, the dense parameter reservation is an integer multiple (at least one) of it, a budget equal to the moment-free reservation refuses the run with moments, and the declared two moments equal the byte size of Adam's two state tensors",
+    "source_of_limits": "G5-04 specification: no full 3D epsilon/VJP in the geometry/density slab paths, the CPU design tensor and optimizer state reflected in the memory budget; the size bound is the array size itself and no numeric tolerance applies"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_design_slab_memory_g5.py::test_design_slabs_never_materialize_the_full_epsilon_or_vjp",
+      "tests/test_design_slab_memory_g5.py::test_dense_reservation_grows_by_the_design_tensor_and_optimizer_moments",
+      "tests/test_design_slab_memory_g5.py::test_design_path_reservations_grow_by_the_design_tensor_and_optimizer_moments",
+      "tests/test_design_slab_memory_g5.py::test_adam_moments_match_the_declared_optimizer_state",
+      "tests/test_design_slab_memory_g5.py::test_optimizer_moments_option_is_validated"
+    ],
+    "not_yet_covered": [
+      "host-bank runs of the design paths under the AllocationTrace: with host banks the E and H field banks are legitimately full-shape host tensors, so the host check is made with disk banks and the device check covers both",
+      "a design tensor held on a CUDA device (the streamed design paths take CPU parameters by contract)"
+    ]
+  },
+  "notes": "Declared before the recorded run on branch g5-memory from main 73203d2. A prototype at this commit measured a peak Torch allocated delta of 3,825,664 bytes (0.41 of the full epsilon) for the geometry path on 768 x 32 x 32 cells with a 10 MiB budget; the recorded fixture uses 800 x 32 x 32 cells so that the full epsilon exceeds the budget while the tile reservation (9,437,300 bytes) still fits. The record is docs/validation/g5/G5-04.json."
+}

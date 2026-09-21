@@ -46,6 +46,44 @@ Run `python examples/material_fitting.py` for a complete authored-data example,
 or pass `--csv` and `--unit` for your own file. Authored analytic samples are
 verification inputs, not measurements of a named physical substance.
 
+## Import workflow with provenance
+
+`import_material_table` runs the whole preparation in one call and records where
+the table came from:
+
+```python
+from torchfdtd import import_material_table, FitOptions
+
+result = import_material_table("sio2_sellmeier_malitson1965.csv", kind="nk", unit="um",
+                               source="Malitson, J. Opt. Soc. Am. 55, 1205 (1965)",
+                               licence="formula-generated table; see the file header",
+                               name="SiO2", options=FitOptions(max_poles=3, tolerance=1e-4),
+                               dt_s=5e-17, simulation_band_um=(0.5, 1.6))
+material = result.require_tolerance()   # the fitted Material with .provenance, .fit_band_um, .fit_dt_s
+result.report["analytic"]               # fit residual on the fitted band (normalized RMS and n/k errors)
+result.discretization                   # max |dn|, |dk| of the trapezoidal ADE at dt_s against the fitted continuum
+result.warnings                         # the extrapolation warning when simulation_band_um leaves the fitted band
+```
+
+Exactly one of a file path or `text=` is read; the raw bytes are hashed before
+parsing into `MaterialProvenance.raw_sha256`, next to the source name, the
+licence or usage note, the file name, the column kind, the wavelength unit and
+the import date. The provenance is a field of `Material`, so the project JSON,
+the generated Python script and the result NPZ keep it together with the
+samples, the fitted band and the ADE-target timestep. A band outside the fitted
+band raises `MaterialBandWarning` (a `warnings.warn`) with the same message the
+solver's estimate and the workbench validation report for each enabled source
+(`fit_band_extrapolation(material, wavelength_range_um)` is that check).
+`discretization_report(material, dt_s, band_um=None)` evaluates the n/k error of
+the discrete constitutive response (`omega -> (2/dt) tan(omega dt/2)`, the path
+verified in G3-03 against an independent bilinear evaluation and a driven cell)
+against the fitted continuum over the fitted band; it is second order in `dt`.
+Neither report covers the Yee spatial dispersion or interface error.
+
+`tests/fixtures/materials/sio2_sellmeier_malitson1965.csv` is a public table
+generated from the Sellmeier formula stated in its header; a two-pole fit reaches
+a normalized RMS of 2e-7 on 0.4 to 2.0 um (`tests/test_material_workflow.py`).
+
 ## Model and fitting algorithm
 
 With fields proportional to exp(−iωt), the model is
@@ -111,11 +149,21 @@ from current coefficients, including after manual edits.
 ## Workbench workflow and persistence
 
 Open **Materials → Measured optical data · import and fit**. Select columns
-and wavelength units, load or paste a table, and choose **Import data**.
-Set the fit band, pole limit, tolerance and continuous/FDTD response target.
-**Fit optical data** shows measured/fitted n/k and both response errors.
-Only a candidate meeting its requested tolerance enables **Use fitted material**.
-**Apply materials** commits the edited database to the project.
+and wavelength units, load or paste a table, name its source and licence, and
+choose **Import data**. The server hashes the submitted text into the
+provenance (`/api/materials/provenance`); without a source name no provenance
+is recorded and the panel says so. Set the fit band, pole limit, tolerance and
+continuous/FDTD response target. **Fit optical data** shows measured/fitted n/k
+and both response errors. Only a candidate meeting its requested tolerance
+enables **Use fitted material**. **Apply materials** commits the edited database
+to the project.
+
+The **Provenance and fitted band** panel of the dialog lists the source, the
+licence, the raw SHA-256, the file and columns, the fitted band with its
+ADE-target timestep, the discretization n/k error at the current timestep
+(filled by **Plot n / k** from `/api/materials/preview`) and the simulation-band
+check: the extrapolation warnings of `/api/validate` for this material, or the
+statement that every enabled source band lies inside the fitted band.
 
 The FDTD preview and fit use the validated project's actual timestep, including
 independent axis spacing, nonuniform nodes and explicit timestep overrides.

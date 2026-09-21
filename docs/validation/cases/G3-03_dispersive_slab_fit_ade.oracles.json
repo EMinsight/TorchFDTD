@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "kind": "oracle_bookkeeping",
+  "case_id": "G3-03_dispersive_slab_fit_ade",
+  "task": "G3-03",
+  "case_file": "docs/validation/cases/G3-03_dispersive_slab_fit_ade.json",
+  "declared": "2026-09-22",
+  "reason": "The case file is hash-bound to its recorded evidence runs and is not edited; this sidecar carries the oracle classes and layers that docs/ORACLE_BUDGET.md and tests/test_oracle_budget.py require.",
+  "oracle_class": [
+    "analytic_continuum",
+    "analytic_discrete"
+  ],
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm",
+      "tests/test_physics_g3_a.py::TestG303::test_fitted_material_slab",
+      "tests/test_physics_g3_a.py::TestG303::test_ade_constitutive_error"
+    ],
+    "layers": {
+      "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "complex-permittivity transfer matrix with the analytic Drude and Lorentz models written in the test: R, T, A and t phase at h = 0.02 and 0.01 um"
+      },
+      "tests/test_physics_g3_a.py::TestG303::test_fitted_material_slab": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "fit_material on analytic n,k samples, then the fitted slab against the transfer matrix with the fitted and with the analytic permittivity; the fit contribution is reported separately"
+      },
+      "tests/test_physics_g3_a.py::TestG303::test_ade_constitutive_error": {
+        "layer": "B",
+        "oracle_class": "analytic_discrete",
+        "oracle": "closed-form bilinear (trapezoidal) ADE response written in the test against the solver permittivity table and a driven single cell of the solver ADE; n,k error and its dt scaling"
+      }
+    }
+  }
+}

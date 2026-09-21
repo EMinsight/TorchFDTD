@@ -7,7 +7,10 @@ independent it is of the code under test, the precision floor of the
 comparison, and the time-window and PML budgets as they were recorded. It
 does not restate the acceptance limits; those live in the case files, and
 `tests/test_oracle_budget.py` checks that every G3 case names its oracle
-classes and that this document covers every case.
+classes and that this document covers every case. A case whose file is
+hash-bound to recorded evidence keeps its classes in a sidecar
+`<case_id>.oracles.json` next to it; the test reads the case first and the
+sidecar otherwise.
 
 ## Oracle classes and validation layers
 
@@ -19,7 +22,8 @@ the same code. The case files use these class names:
 | --- | --- | --- |
 | `analytic_continuum` | Closed-form solution of the continuous problem (Fresnel, Airy, Mie, slab or fiber dispersion, Hertzian dipole, transfer matrix) | B |
 | `analytic_discrete` | Closed-form solution of the Yee discretisation itself (discrete dispersion, discrete eigenfrequency, discrete interface algebra). It verifies that the implemented operator is the intended one; it closes to the continuum only when the case also compares against `analytic_continuum` or states the analytic numerical dispersion | B |
-| `independent_solver` | A separately written solver of the same continuum physics by another method (none is used by the fixtures recorded here) | B |
+| `independent_solver` | A separately written solver of the same continuum physics by another method (TORCWA rigorous coupled-wave analysis for the G3-08 grating) | B |
+| `causal_reference` | The same discretisation on a domain long enough that no boundary echo reaches the monitor within the window; exact for the discrete problem by causality, so it isolates the physical reflection of an absorber (G3-07) | B |
 | `physical_invariant` | A theorem that a correct solution must satisfy: reciprocity, passivity, Poynting flux balance through a closed surface, energy conservation | B |
 | `convergence_study` | Refinement of mesh, time window or PML of the same solver at fixed physical geometry, with the continuum limit or a stored fine reference as oracle | B |
 | `stored_record` | A benchmark record under `docs/validation/` whose numbers a test checks without recomputing; the record's own oracle class is stated next to it | either |
@@ -38,6 +42,111 @@ by the estimator, as asserted or measured. Time window and PML: what the
 fixture fixes, and whether a control run was made. Numbers are the recorded
 values of the pilot runs at commit 2b64f91 or of the stored records; none is
 an acceptance limit.
+
+### G3-01 `G3-01_uniform_propagation`
+
+Bookkeeping in `G3-01_uniform_propagation.oracles.json` (the case file is
+hash-bound to its evidence). Record `docs/validation/g3/G3-01.json`.
+
+| Fixture | Oracle (class) | Independence | Precision floor | Time window | PML |
+| --- | --- | --- | --- | --- | --- |
+| Seeded eigenmodes, oblique and on-axis, `tests/test_physics_g3_a.py::TestG301` | Exact Yee dispersion relation written in the test (`analytic_discrete`); polarization identity (`physical_invariant`) | Closed form, no solver code | float64: cos(omega dt) residual and polarization leak recorded 0 against 1e-12; continuum phase error per wavelength 3.3e-3 (2D) to 5.5e-3 (3D, n = 1.5) at N = 40, reported as numerical dispersion | 35 steps (eigenmode) | none |
+| Simulation propagation at N = 10, 20, 40, `test_propagation_phase_2d/3d` | Wavenumber from two monitors against the Yee relation (`analytic_discrete`) | Closed form | phase residual against the Yee relation 3.8e-7 rad at most (limit 1e-3, set by window truncation and the C1 taper); continuum error 2.4e-3 to 4.7e-3 rad per wavelength over the band at N = 40 | 553 to 1354 steps, one-cycle Gaussian | 20 layers at N = 40 |
+| Layer A, `test_layer_a_cuda_fp32` | CUDA float32 against CPU float64 (`shared_discrete_operator`) | Same operator | within rtol 1e-4, atol 1e-6 | 553 and 677 steps | 20 layers |
+
+### G3-02 `G3-02_dielectric_slab_tmm` and `G3-02r2_slab_tmm_40_cells`
+
+The first case judged R and T at 20 cells per material wavelength and its run
+FAILED on the dispersion of the coarse mesh; revision 2 judges at 40 cells and
+keeps the 20-cell rows as the balance and convergence-order finding. The
+sidecar of the first case lists the revision-2 tests, since its own 20-cell
+R/T test no longer exists. Record `docs/validation/g3/G3-02r2.json` (first run
+`G3-02.json`).
+
+| Fixture | Oracle (class) | Independence | Precision floor | Time window | PML |
+| --- | --- | --- | --- | --- | --- |
+| Four lossless slabs (n = 1.5 and 3.5, d = 0.2 and 0.5 um) at 0, 20 and 45 degrees, TE and TM, `TestG302::test_slab_r_t_against_tmm_40_cells` | Fresnel/Airy transfer matrix written in the test (`analytic_continuum`) | Closed form | over the 24 instances at 40 cells: R and T errors 5.0e-4 to 9.3e-3 against 0.01, t phase 1.2e-3 to 1.33e-2 rad against 0.02 (the worst is close to the limit) | 400 fs, 6852 to 15760 steps, three-cycle Gaussian | 0.5 um (20 to 46 layers) |
+| Energy balance at 20 cells, `test_slab_balance_20_cells` | |R+T-1| (`physical_invariant`) | Theorem | balance residual 5e-7 to 8.4e-5 at 20 cells and 1e-7 to 5.9e-5 at 40 cells against 0.01 | 400 fs | 0.5 um |
+| Convergence order, `test_dispersion_order` | 20-cell over 40-cell error ratio (`convergence_study`) | Same solver, two meshes | ratios 3.93 to 4.25 for R and t phase over the 24 instances against the 3 to 5 band | 400 fs | 0.5 um |
+| Layer A, `test_layer_a_cuda_fp32` | CUDA float32 against CPU float64 (`shared_discrete_operator`) | Same operator | within rtol 1e-4, atol 1e-6 on the 45 degree Bloch slab | 3426 steps | 0.5 um |
+
+### G3-03 `G3-03_dispersive_slab_fit_ade`
+
+Bookkeeping in `G3-03_dispersive_slab_fit_ade.oracles.json`. Record
+`docs/validation/g3/G3-03.json`.
+
+| Fixture | Oracle (class) | Independence | Precision floor | Time window | PML |
+| --- | --- | --- | --- | --- | --- |
+| Analytic Drude (0.1 um) and Lorentz (0.5 um) slabs at h = 0.02 and 0.01 um, TE and TM, `TestG303::test_analytic_slab_against_tmm` | Complex transfer matrix with the analytic permittivity (`analytic_continuum`) | Closed forms in the test | R, T, A errors 1.7e-4 to 2.7e-3, t phase 3.3e-4 to 5.1e-3 rad against 0.01 and 0.02 | 400 fs, 8565 and 17130 steps | 12 and 24 layers (0.24 um) |
+| Fitted materials (1 Drude pole, 2 Lorentz poles) at h = 0.02 um, `test_fitted_material_slab` | Transfer matrix with the fitted and with the analytic permittivity (`analytic_continuum`) | Closed forms; the fit's own contribution is reported | fit band n,k errors 4e-10 and 2e-16; slab errors equal to the analytic-material rows (R 6.8e-4 and 2.0e-3, T 1.1e-3 and 2.7e-3) | 400 fs | 12 layers |
+| ADE constitutive response, `test_ade_constitutive_error` | Bilinear ADE closed form against the solver table and a driven cell (`analytic_discrete`) | Closed form in the test | solver table against the closed form 1e-16 relative; driven cell 1e-15 to 9e-15; n,k error 3.4e-5 to 7.6e-4 at dt(h = 0.02 um) halving by 4.00 at h = 0.01 um | 32768 settling steps plus 32 periods | none |
+
+### G3-04 `G3-04_mie_cylinder_sphere`
+
+Bookkeeping in `G3-04_mie_cylinder_sphere.oracles.json`. Record
+`docs/validation/g3/G3-04.json`.
+
+| Fixture | Oracle (class) | Independence | Precision floor | Time window | PML |
+| --- | --- | --- | --- | --- | --- |
+| Cylinder r = 0.3 um, n = 1.5, TM and TE, h = 0.05, 0.025, 0.0125 um, `tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering` | Infinite-cylinder Mie series with SciPy Bessel functions (`analytic_continuum`), self-checked by `test_g3_04_reference_series_limits` | Written in the test, optical theorem and small-size limits | width error at the judged h = 0.0125 um 1.74 percent (TM) and 0.37 percent (TE) against 2 percent; non-monotone sequence recorded (TM 3.8, 5.1, 1.7 percent) | 120 fs, 1028 to 4112 steps | 0.4 um |
+| TE resonance of the n = 3.5, r = 0.25 um cylinder, `test_g3_04_cylinder_resonance` | Mie peak position and width (`analytic_continuum`) | Closed form | peak -0.58 percent (limit 1 percent), FWHM 5.7 percent (limit 15 percent) at h = 0.0125 um | 120 fs | 0.4 um |
+| Sphere r = 0.3 um, n = 1.5, h = 0.1, 0.05, 0.025 um, `test_g3_04_sphere_scattering` | Bohren-Huffman series (`analytic_continuum`), cross-checked against `examples/tfsf_sphere.py` | Written in the test | 0.31 percent at the judged h = 0.05 um; 1.05 percent at 0.025 um (non-monotone, recorded) | 120 fs, 630 to 2518 steps | 0.4 um |
+| Layer A, `test_g3_04_cylinder_cuda_layer_a`, `test_g3_04_sphere_cuda_layer_a` | CUDA float32 against CPU float64 (`shared_discrete_operator`) | Same operator | 9.2e-7 to 2.1e-6 relative against rtol 1e-4 | as above | 0.4 um |
+
+### G3-05 `G3-05_drude_sphere`
+
+Bookkeeping in `G3-05_drude_sphere.oracles.json`. Record
+`docs/validation/g3/G3-05.json`; the evidence run is FAILED and kept.
+
+| Fixture | Oracle (class) | Independence | Precision floor | Time window | PML |
+| --- | --- | --- | --- | --- | --- |
+| Staircased Drude spheres r = 0.02, 0.035, 0.05 um at h = 0.02, 0.01, 0.005 um, `tests/test_physics_g3_b.py::test_g3_05_drude_sphere` | Complex-index Bohren-Huffman series with the analytic Drude permittivity (`analytic_continuum`); an ADE-sampled permittivity variant separates the time discretisation | Closed form in the test | at h = 0.005 um the scattering errors are 138, 46 and 45 percent and the absorption errors 673, 499 and 345 percent against the case budgets of 50/30/20 and 100/60/40 percent: FAILED as the case anticipated; inner/outer surface consistency 3e-4 to 3.2e-3 | 48 fs, 1259 to 5036 steps | 0.08 um |
+| Layer A, `test_g3_05_drude_cuda_layer_a` | CUDA float32 against CPU float64 (`shared_discrete_operator`) | Same operator | 0 to 7e-5 relative against rtol 1e-4 | 1259 and 2518 steps | 0.08 um |
+
+Open residual: no conformal treatment of a dispersive interface exists
+(`tests/test_physics_g3_b_r2.py::test_g3_05_subpixel_rejects_dispersive`), so
+the staircase error dominates and the task stays FAILED.
+
+### G3-07 `G3-07_cpml_reflection_stability`
+
+Bookkeeping in `G3-07_cpml_reflection_stability.oracles.json`. Record
+`docs/validation/g3/G3-07.json`.
+
+| Fixture | Oracle (class) | Independence | Precision floor | Time window | PML |
+| --- | --- | --- | --- | --- | --- |
+| Normal incidence in vacuum and n = 2, 10 layers at h = 0.025 um, `tests/test_physics_g3_a.py::TestG307::test_normal_reflection` | Reflected over incident power against the 40.5 um long domain (`causal_reference`) | Exact for the discrete problem by causality | R 4.7e-10 and 2.1e-9 (-93 and -87 dB) against 1e-6; broadband energy ratio agrees | 100 fs, 1713 steps | 10 layers (0.25 um) |
+| Oblique 30 and 60 degree Bloch sheets, `test_oblique_reflection` | Long domain (`causal_reference`) | Causality | R 3.8e-10 and 8.6e-10 against 1e-4 | 150 fs, 2570 steps, three-cycle 1.45 um pulse | 10 layers |
+| n = 2 half space crossing the absorber, `test_interface_reflection` | Long domain (`causal_reference`) | Causality | R 1.2e-5 (vacuum side) and 8.9e-8 (dielectric side) against 1e-4 | 150 fs | 10 layers |
+| Depth and window controls, `test_depth_and_time_sweeps` | 20 versus 10 layers, 200 versus 100 fs (`convergence_study`) | Same solver | 20 layers 2.7e-12 (-116 dB); the window change moved R by 1.5e-6 relative | 100 and 200 fs | 10 and 20 layers |
+| Long-time stability, `test_long_time_stability` | Energy must not grow (`physical_invariant`) | Theorem | late-growth ratio 1.1e-5 (vacuum), 6.0e-4 (n = 2) and 1.0 (60 degrees) against 1 + 1e-6, judged above a floor of 1e-12 of the peak energy; energy at the end 0 and 9e-7 of the peak | 20000 steps | 10 layers |
+| Layer A, `test_layer_a_cuda_fp32` | CUDA float32 against CPU float64 (`shared_discrete_operator`) | Same operator | within rtol 1e-4, atol 1e-6 | 1713 steps | 10 layers |
+
+### G3-08 `G3-08_bloch_grating_rcwa` and `G3-08r2_bloch_grating_rcwa_layer_a`
+
+The first case's layer-A tolerance (rtol 1e-4, atol 0) failed on one instance
+(TM, 20 degrees, 0.92 um: 1.15e-4 relative on an efficiency of 0.022); its
+FAILED run stays. Revision 2 restates only that tolerance as the program pair
+rtol 1e-4, atol 1e-6 and carries its test in `tests/test_physics_g3_b_r2.py`.
+Records `docs/validation/g3/G3-08.json`, `docs/validation/g3/r2/G3-08r2.json`
+and the oracle `docs/validation/g3/G3-08_torcwa_reference.json`.
+
+| Fixture | Oracle (class) | Independence | Precision floor | Time window | PML |
+| --- | --- | --- | --- | --- | --- |
+| Binary grating, TE and TM, 0 and 20 degrees, 0.92, 1.02 and 1.06 um, subpixel interface, h = 0.005 um, CUDA float32, `tests/test_physics_g3_b.py::test_g3_08_grating_orders` | TORCWA 0.1.4.2 at 640 harmonics run in a separate interpreter by `benchmarks/g3_torcwa_grating.py` (`independent_solver`), converged per `test_g3_08_torcwa_reference_is_converged` | Independent RCWA code and method | efficiency error 1.6e-4 to 3.1e-3 against 0.01; dominant-order phase 4.4e-4 to 1.4e-2 rad against 0.02; efficiency sums 0.993 to 1.003 against the 0.01 balance; TM oracle uncertainty about 4e-4 (Laurent rule 1/N tail) | 300 fs; the 150 fs control rows are recorded only | 0.4 um |
+| Empty cell, `test_g3_08_empty_cell` | Unit zero-order transmission, no other orders (`analytic_continuum`) | Closed form | zero-order deficit 3.8e-12 (TE normal) and 2.7e-6 (TM 20 degrees) in CPU float64 against 1e-6 and 1e-4; CUDA float32 3.7e-7 and 6.6e-6 against the layer-A allowance | 150 fs | 0.4 um |
+| Layer A at h = 0.01 um, `test_g3_08_grating_cuda_layer_a` (first case) and `tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a` | CUDA float32 against CPU float64 (`shared_discrete_operator`) | Same operator | worst relative difference 1.15e-4; excess over rtol 1e-4 plus atol 1e-6 is -6.7e-7 (passes revision 2, failed the atol 0 first case) | 300 fs | 0.4 um |
+| Staircase and duration controls, `test_g3_08_staircase_and_duration_controls` | Recorded against TORCWA, not judged (`convergence_study`) | Independent solver | staircase at h = 0.005 um: TE phase error 3.3e-2 rad, TM efficiency error 3.7e-3 | 300 and 150 fs | 0.4 um |
+
+### G3-13 `G3-13_curved_interface_convergence`
+
+Bookkeeping in `G3-13_curved_interface_convergence.oracles.json`. Record
+`docs/validation/g3/G3-13.json`.
+
+| Fixture | Oracle (class) | Independence | Precision floor | Time window | PML |
+| --- | --- | --- | --- | --- | --- |
+| G3-04 cylinder with staircase and subpixel interfaces at h = 0.05, 0.025, 0.0125 um, `tests/test_physics_g3_b.py::test_g3_13_mesh_and_interface_convergence` | Mie series error under mesh refinement and interface method (`convergence_study`) | Closed-form reference, comparative criterion | at h = 0.05 um subpixel 1.0 percent (TM) and 2.0 percent (TE) against staircase 3.8 and 11.2 percent; subpixel order estimates 1.97 to 2.12, staircase -0.42 to 4.0 (non-monotone, recorded) | 120 fs | 0.4 um |
+| Sub-cell shifts 0, 0.25 and 0.5 cells at h = 0.05 um, `test_g3_13_subcell_shift` | Error spread against the Mie series (`convergence_study`) | Closed-form reference | spread 2.1 and 8.9 percent (staircase TM, TE) against 0.19 and 0.04 percent (subpixel) | 120 fs | 0.4 um |
+| Smoothing width 1e-6 to 2 cells at h = 0.05 um, `test_g3_13_smoothing_width_sweep` | Differentiable-solid width against the staircase image and the Mie series (`convergence_study`) | Closed-form reference | vanishing width equals the staircase image off the contour; the four contour Ez nodes take the half value and change the TM width by 2.7 percent; TE error falls from 11.2 to 1.9 percent at half a cell and rises again at two cells | 120 fs | 0.4 um |
 
 ### G3-06 `G3-06_pec_pmc_cavity`
 
@@ -136,13 +245,18 @@ for curved interfaces; no absolute-scale test of a near-zero derivative.
 ### G3-17 `G3-17_oracle_budget`
 
 This document and `tests/test_oracle_budget.py`. The test checks every
-`docs/validation/cases/G3-*.json` present in the tree, so G3 case files that
-other branches add must carry `oracle_class` and a `tests.layers` entry per
-listed test; the tasks recorded here (G3-06, G3-09, G3-10, G3-11, G3-12 and
-G3-16) must keep at least one layer-B entry.
+`docs/validation/cases/G3-*.json` present in the tree: each carries
+`oracle_class` and a `tests.layers` entry per listed test, in the case file or
+in its `<case_id>.oracles.json` sidecar; every physics task (G3-01 to G3-13
+and G3-16) keeps at least one layer-B entry and G3-14 and G3-15 are layer A
+only. Test ids may name a class (`file::Class::function`).
 
-## Other G3 tasks
+## Sidecar files
 
-G3-01 to G3-05, G3-07, G3-08 and G3-13 are recorded in their own case files by
-other sessions; add their rows here when those files merge. The test above
-already enforces the class naming on them.
+The ten cases of G3-01 to G3-05, G3-07, G3-08 and G3-13 were declared and
+recorded before the bookkeeping fields existed. Their evidence runs store the
+case file hash, so the files are not edited; each has a sidecar
+`docs/validation/cases/<case_id>.oracles.json` with `oracle_class` and
+`tests.layers`. The sidecar of the superseded `G3-02_dielectric_slab_tmm`
+lists the tests of the recorded revision-2 run and names the one test of the
+first case that no longer exists.

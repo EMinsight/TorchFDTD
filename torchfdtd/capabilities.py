@@ -322,6 +322,27 @@ def pair_tables(limit=4):
     return tables
 
 
+# Incidence definition of a plane source (docs/CONVENTIONS.md section 3, docs/SOURCES.md). The
+# solver realizes one definition: a soft sheet on a Bloch cell carries the spatial phase
+# exp(+i phi (x - x0) / L), so k_parallel = phi / L is fixed and the incidence angle
+# asin(k_parallel / (n k0)) varies across the band. A fixed-angle broadband source (the
+# vendor's BFAST) has no code path; the source preview and the workbench refuse it with the
+# message below instead of drawing it, and the feature inventory rows named here stay 'missing'.
+INCIDENCE = {
+    'normal': dict(status='admitted', code_path='torchfdtd/solver.py::source_profile',
+                   description='No Bloch phase on a transverse axis: k_parallel = 0 at every frequency.'),
+    'fixed_k_parallel': dict(status='admitted', code_path='torchfdtd/solver.py::source_profile',
+                             description='Bloch phase phi on a transverse axis of length L: k_parallel = phi / L is fixed and '
+                                         'the angle asin(k_parallel / (n k0)) varies across the band; frequencies with '
+                                         'k_parallel > n k0 are evanescent.'),
+    'fixed_angle': dict(status='rejected', code_path='torchfdtd/source_preview.py::preview_source', exception='ValueError',
+                        feature_inventory=('source.angle', 'boundary.bfast'),
+                        message='Fixed-angle broadband injection is not implemented: a Bloch cell fixes k_parallel, so the '
+                                'incidence angle varies across the band (feature inventory source.angle and boundary.bfast '
+                                'are missing). Preview the fixed-k_parallel source instead.'),
+}
+
+
 def registry_json():
     rules = [dict(name=r.name, when={k: sorted(v) for k, v in r.when.items()}, stage=r.stage, code_path=r.code_path,
                   message=r.message, format=r.format, exception=r.exception, executions=list(r.executions), note=r.note)
@@ -332,7 +353,7 @@ def registry_json():
     return dict(schema_version=1, kind='capability_registry', axes={k: list(v) for k, v in AXES.items()},
                 axis_labels=AXIS_LABELS, value_labels=VALUE_LABELS, recipe=__doc__.split('Scene recipe (one Project per combination):', 1)[1].strip(),
                 summary={k: v for k, v in summary.items() if k != 'by_name'}, rules=rules, lanes=lanes,
-                pairs=pair_tables(),
+                pairs=pair_tables(), incidence=INCIDENCE,
                 related=dict(feature_checklist='docs/FEATURE_CHECKLIST.md', tables='docs/CAPABILITIES.md',
                              tests='tests/test_capability_pairs.py'))
 

@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G6-07",
+  "task": "G6-07",
+  "title": "Exported binary and GDS designs re-imported and evaluated by an independent finer forward: final objective and holdout of three declared starts per example",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "oracle_class": ["convergence_study", "shared_discrete_operator"],
+  "fixture": {
+    "metagrating": "examples/design_metagrating.py as declared in cases/G6-05.json (1.5 um period, 0.5 um layer of epsilon 4 in air, 30 pixels of 0.05 um, filter radius 0.125 um, beta 4 doubled every 4 steps to 64, Adam 0.1), coarse mesh 0.05 um and 800 steps, 24 iterations; final evaluation at 0.025 um and 1600 steps with a fresh DifferentiablePlaneSimulation and its own background reference",
+    "coupler": "examples/design_mode_coupler.py as declared in cases/G6-05.json (two 0.6 um guides of epsilon 4 in 2.25 offset by 0.6 um, 6 x 10 pixels of 0.2 um, rotate180 symmetry, filter radius 0.4 um, beta 4 doubled every 4 steps to 64, Adam 0.1), coarse mesh 0.2 um and 500 steps, 16 iterations; final evaluation at 0.1 um and 1000 steps with fresh ModeNetworks at 1.55 um (objective) and 1.50 um (holdout)",
+    "stages": "coarse_smooth (last coarse evaluation of the continuous density), fine_smooth (continuous density through the density transfer at the fine mesh), fine_binary (density thresholded at 0.5, same transfer), fine_structures (binary_structures rectangles written to JSON, re-read by Structure.model_validate, staircase voxelized), fine_gds (the same rectangles written by export_gds at 1 nm precision, re-read by import_gds as polygons, staircase voxelized)",
+    "differences": "mesh_refinement = fine_smooth - coarse_smooth, thresholding = fine_binary - fine_smooth, smoothing = fine_structures - fine_binary, gds = fine_gds - fine_structures, total = fine_gds - coarse_smooth, per metric",
+    "starts": "seeds 1, 2 and 3 for each example; torch.Generator().manual_seed(seed) draws the initial logits; every start is run, recorded under docs/validation/g6/<example>-seed<n>.json and judged; no start is selected or dropped",
+    "devices": "CPU only, four Torch threads"
+  },
+  "seed": {"starts": [1, 2, 3], "note": "deterministic starts declared here; the same seeds are used for both examples"},
+  "precision": ["float32 FDTD and parameters"],
+  "backend": ["cpu"],
+  "reference_method": "Independent forward of the same solver at half the mesh and twice the steps, built from the declared physical configuration rather than the objective's model (convergence_study), applied to the exported geometry read back through the public structure and GDS paths. The pre-declared thresholds below were fixed after pilot runs at this commit and before the recorded runs; per-step monotonicity of the optimizer is not required and not asserted.",
+  "observables": [
+    {"name": "final_objective", "unit": "dimensionless", "definition": "metagrating: +1 transmitted efficiency at 1.0 um of the fine_gds stage; coupler: |S21|^2 at 1.55 um of the fine_gds stage"},
+    {"name": "holdout", "unit": "dimensionless", "definition": "metagrating: +1 transmitted efficiency at 0.95 um of the fine_gds stage (recorded from the same run, never optimized); coupler: |S21|^2 at 1.50 um of the fine GDS design through a second network (never optimized)"},
+    {"name": "stage_differences", "unit": "dimensionless", "definition": "the four consecutive differences and the total, per start, reported not judged"},
+    {"name": "feature_sizes_and_violations", "unit": "pixels and names", "definition": "measured minimum linewidth and gap of the thresholded design against the declared 2-pixel limits, per start, reported not judged"},
+    {"name": "perturbation_objective_change", "unit": "objective units", "definition": "coarse objective change under a one-pixel erosion and dilation, per start, reported not judged"}
+  ],
+  "acceptance": {
+    "metagrating": {"objective_key": "efficiency", "holdout_key": "holdout_efficiency", "holdout_stage": "fine_gds_metrics", "iterations": 24, "final_objective_min": 0.35, "holdout_min": 0.15},
+    "coupler": {"objective_key": "transmission", "holdout_key": "holdout_transmission", "holdout_stage": "holdout", "iterations": 16, "final_objective_min": 0.5, "holdout_min": 0.45},
+    "rule": "every declared start must reach both thresholds at the fine GDS stage; the test reports all starts and fails on any start below either threshold",
+    "context": "pilots at this commit with the declared settings: metagrating (24 iterations, filter 0.125 um) fine GDS efficiency 0.498, 0.519, 0.468 and holdout 0.592, 0.276, 0.473 for seeds 1, 2, 3; coupler (16 iterations, filter 0.4 um) fine GDS transmission 0.614, 0.576, 0.576 and holdout 0.578, 0.556, 0.556, against 0.34 for an empty design box at the coarse mesh. Earlier pilots with narrower filters: metagrating (16 iterations, filter 0.075 um) 0.498, 0.480, 0.462 with holdout 0.592, 0.238, 0.556; (24 iterations, filter 0.075 um) 0.594, 0.365, 0.495 with holdout 0.570, 0.389, 0.557; coupler (12 iterations, filter 0.3 um, seed 1) 0.608 with holdout 0.580. An unpatterned metagrating layer has zero +1 efficiency by symmetry",
+    "source_of_limits": "fixture-specific budgets declared before the recorded runs from the pilots above with margin for the sensitivity of one- and two-pixel features to the mesh; no program threshold applies to a design objective"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[coupler]",
+      "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[metagrating]",
+      "tests/test_design_reimport.py::test_recorded_starts_meet_the_declared_thresholds[coupler]",
+      "tests/test_design_reimport.py::test_recorded_starts_meet_the_declared_thresholds[metagrating]"
+    ],
+    "layers": {
+      "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[coupler]": {"layer": "B", "oracle_class": "convergence_study", "oracle": "independent fine-mesh ModeNetworks at the objective and holdout wavelengths on the re-imported GDS design"},
+      "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[metagrating]": {"layer": "B", "oracle_class": "convergence_study", "oracle": "independent fine-mesh plane adjoint forward with its own reference on the re-imported GDS design"},
+      "tests/test_design_reimport.py::test_recorded_starts_meet_the_declared_thresholds[coupler]": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "re-judges the recorded starts against this case"},
+      "tests/test_design_reimport.py::test_recorded_starts_meet_the_declared_thresholds[metagrating]": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "re-judges the recorded starts against this case"}
+    },
+    "not_yet_covered": [
+      "an independent solver (RCWA for the grating, eigenmode expansion for the coupler) on the exported designs; the finer forward is the same discretization refined",
+      "a third mesh level to estimate the remaining discretization error of the fine stage",
+      "a holdout angle (only a holdout wavelength is declared)",
+      "sub-pixel GDS geometry (the exported rectangles are pixel aligned, so the GDS polygon approximation is exact here and its recorded difference is zero by construction)"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float32; the fine stage repeats the coarse stage's arithmetic at twice the resolution",
+    "time_window": "coarse 800 (76 fs) and 500 (190 fs) steps; fine 1600 and 1000 steps at half the time step, so the same physical windows",
+    "pml": "0.4 um (metagrating z) and 1.0 um (coupler x) CPML at both meshes",
+    "mesh": "the metagrating pilots show fine-mesh stage differences of up to 0.19 in efficiency between the volume-averaged binary density and the staircase structures for one-pixel features; the declared limits leave that margin"
+  },
+  "notes": "tests/test_design_reimport.py, scripts/render_design_workflow.py and docs/validation/g6 are added with this case. The metagrating filter radius was raised from 1.5 to 2.5 pixels and the coupler's from 1.5 to 2 pixels after the pilots listed above, before the recorded runs, to reduce one-pixel features; the thresholds were then fixed and are not changed by the recorded outcome."
+}

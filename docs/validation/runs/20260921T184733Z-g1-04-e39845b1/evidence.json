@@ -1,0 +1,167 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T184733Z-g1-04-e39845b1",
+  "task": "G1-04",
+  "stage": "G1",
+  "task_title": "restart 코드 호환성 검사 누락.",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_streamed_restart.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G1-04-05.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T03:42:34.970787+09:00",
+  "recorded_at": "2026-09-21T18:47:33+00:00",
+  "source_commit": "dfdd44d279789ae312b53f9caeadfd2ccf92015a",
+  "source_tree_sha256": "c3c7e833491e46ca0981648cdd2a8e75dcdc23b7e44e20e84f7bacb76edecb49",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_streamed_restart.py": "a26eda65c69bf6ee53ee6681f90d354cc14b481dc53246af49e62079ceeafff3"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G1-04_restart_contract_compatibility.json",
+  "fixture_sha256": "a056b5f295a8192fb4486452fbe252e30eace7cba3eb567f8d5384063fa99356",
+  "acceptance_criteria_path": "docs/validation/cases/G1-04_restart_contract_compatibility.json",
+  "acceptance_criteria_sha256": "a056b5f295a8192fb4486452fbe252e30eace7cba3eb567f8d5384063fa99356",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "module": "torchfdtd.streamed_restart",
+    "contract": "runtime_sha256 over every .py file of the torchfdtd package (relative POSIX paths, content hashes) plus the Torch version, the project inputs (epsilon, effective waveform, steps, time step, Courant factor) and the signal adjoint (signal_bar_sha256)",
+    "journal": "tests/test_streamed_restart.py fixtures: a small streamed forward and backward run with a durable journal on a temporary directory on the D: volume",
+    "changes_injected": [
+      "boundaries.py",
+      "differentiable.py",
+      "waveforms.py",
+      "cuda_kernels.py",
+      "epsilon",
+      "waveform",
+      "steps",
+      "time_step",
+      "courant",
+      "signal adjoint"
+    ]
+  },
+  "reference_method": "behavioural: a resume against an unchanged tree and unchanged inputs succeeds and reproduces the uninterrupted result; every injected change is refused before any bank or field is read",
+  "observables": [
+    {
+      "name": "rejection_key",
+      "unit": "string",
+      "definition": "the contract key named in the refusal message for each injected change"
+    },
+    {
+      "name": "resume_agreement",
+      "unit": "dimensionless",
+      "definition": "relative difference between the resumed and the uninterrupted gradient"
+    },
+    {
+      "name": "volume_identity",
+      "unit": "boolean",
+      "definition": "journal and banks on one volume are charged once against that volume, decided by device identity (drive on Windows, st_dev elsewhere), not by path string"
+    }
+  ],
+  "acceptance_limits": {
+    "rejections": "each of the ten injected changes is refused with a message naming the changed key (file path, epsilon, waveform, steps, time_step, courant or signal_bar); no partial resume happens",
+    "resume": "the resumed backward gradient equals the uninterrupted gradient within rtol 1e-4 and atol 1e-6 (float32) on CPU and CUDA",
+    "dirty_install": "an editable install with a modified package file is detected by content hashing without relying on git; every module that contains a __global__ kernel source is part of the fingerprint",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 29,
+    "passed": [
+      "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt[1-cpu-host]",
+      "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt[1-cpu-disk]",
+      "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt[1-cuda-host]",
+      "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt[1-cuda-disk]",
+      "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt[3-cpu-host]",
+      "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt[3-cpu-disk]",
+      "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt[3-cuda-host]",
+      "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt[3-cuda-disk]",
+      "tests/test_streamed_restart.py::test_forward_resumes_after_interrupt[1-host]",
+      "tests/test_streamed_restart.py::test_forward_resumes_after_interrupt[1-disk]",
+      "tests/test_streamed_restart.py::test_forward_resumes_after_interrupt[3-host]",
+      "tests/test_streamed_restart.py::test_forward_resumes_after_interrupt[3-disk]",
+      "tests/test_streamed_restart.py::test_every_blocks_controls_record_count",
+      "tests/test_streamed_restart.py::test_contract_and_signal_adjoint_mismatch_are_rejected",
+      "tests/test_streamed_restart.py::test_changed_package_file_is_rejected_by_the_contract[boundaries.py]",
+      "tests/test_streamed_restart.py::test_changed_package_file_is_rejected_by_the_contract[differentiable.py]",
+      "tests/test_streamed_restart.py::test_changed_package_file_is_rejected_by_the_contract[waveforms.py]",
+      "tests/test_streamed_restart.py::test_changed_package_file_is_rejected_by_the_contract[cuda_kernels.py]",
+      "tests/test_streamed_restart.py::test_changed_inputs_are_rejected_with_the_contract_key_named[epsilon-epsilon_sha256]",
+      "tests/test_streamed_restart.py::test_changed_inputs_are_rejected_with_the_contract_key_named[waveform-project_sha256]",
+      "tests/test_streamed_restart.py::test_changed_inputs_are_rejected_with_the_contract_key_named[steps-project_sha256, starts]",
+      "tests/test_streamed_restart.py::test_changed_inputs_are_rejected_with_the_contract_key_named[time_step-project_sha256]",
+      "tests/test_streamed_restart.py::test_changed_inputs_are_rejected_with_the_contract_key_named[courant-project_sha256]",
+      "tests/test_streamed_restart.py::test_journal_and_banks_share_a_volume_by_identity_not_by_path",
+      "tests/test_streamed_restart.py::test_reservation_covers_the_signal_history_of_coexisting_records",
+      "tests/test_streamed_restart.py::test_stale_temporary_records_are_removed_only_inside_the_journal",
+      "tests/test_streamed_restart.py::test_restart_journal_space_is_checked",
+      "tests/test_streamed_restart.py::test_existing_journal_records_count_toward_the_reservation",
+      "tests/test_streamed_restart.py::test_killed_process_is_resumed_by_a_new_process"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 289.853,
+    "suite_timestamp": "2026-09-22T03:42:34.970787+09:00"
+  },
+  "required_tests": [
+    "tests/test_streamed_restart.py::test_contract_and_signal_adjoint_mismatch_are_rejected",
+    "tests/test_streamed_restart.py::test_changed_package_file_is_rejected_by_the_contract",
+    "tests/test_streamed_restart.py::test_changed_inputs_are_rejected_with_the_contract_key_named",
+    "tests/test_streamed_restart.py::test_journal_and_banks_share_a_volume_by_identity_not_by_path",
+    "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt",
+    "tests/test_streamed_restart.py::test_forward_resumes_after_interrupt",
+    "tests/test_streamed_restart.py::test_killed_process_is_resumed_by_a_new_process"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T184733Z-g1-04-e39845b1/junit.xml",
+      "sha256": "14c9b678c556ff9bd682034e087d20f87c9c6476a788834d6dde1520ec974ed4",
+      "bytes": 4093,
+      "original_path": ".local/tmp/junit/G1-04-05.xml"
+    }
+  ],
+  "applicable_scope": "Restart contract and journal reservation on the merged main tree (RTX 3060 workstation, CPU and CUDA streamed fixtures, temporary journals on the D: volume).",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

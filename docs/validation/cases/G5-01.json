@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-01_memory_path_equivalence",
+  "task": "G5-01",
+  "title": "Resident CUDA, streamed host banks, streamed disk banks and asynchronous streamed tiles give the same spectral fields, objective and gradient on one scatterer",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "tests/g5_support.py (scene, sphere, streamed_options) and tests/test_memory_paths_g5.py",
+    "region": "3D, 2.4 x 1.6 x 1.6 um, uniform mesh 0.1 um (24 x 16 x 16 cells), 3 CPML cells on every face, Yee material sampling, staircase interfaces, 40 steps at the CFL time step (1.9066e-16 s)",
+    "structure": "smooth sphere of radius 0.3 um, sigmoid transition width 0.08 um, at the origin: permittivity 4 in air (scalar or diagonal Yee-sampled); Drude variant: epsilon_inf 2 inside, one Drude pole (omega0 = 0, gamma = 1e14 rad/s) of strength s_hat * 4e30 (rad/s)^2 with s_hat the sphere mask; stored-face variant: PMC y faces, symmetric z_min, PEC z_max with the scalar sphere and the stored upper rows; tensor variant: the admissible SPD node-tensor field of tests/test_anisotropy_walls.py (seed 29), FP32, point observations only",
+    "source": "Ez point source at (-0.7, 0, 0) um, standard Gaussian pulse, wavelength 0.8 um, power FWHM 1.5 fs, envelope centre 2 fs, amplitude 100",
+    "observations": {
+      "history": "two point probes Ez (0.7, 0, 0) and Hy (0.5, 0.2, 0) as the full time history, then DifferentiableResult.spectrum at 3e14 Hz",
+      "online": "the same two probes accumulated as an online DFT at 3e14 Hz (StreamedSimulation.spectrum, DifferentiableSimulation.spectrum)",
+      "plane": "one x-normal spectral plane at x = 0.7 um, 0.8 x 0.8 um, downsample 2, all six components at 3e14 Hz (DifferentiablePlaneSimulation, DispersivePlaneSimulation)"
+    },
+    "objective": "sum over frequencies, samples and components of |F / dt|^2 where F is the spectral field and dt the time step, so that the objective and its gradients are dimensionless per-step amplitudes",
+    "paths": {
+      "resident": "DifferentiableSimulation / DispersiveSimulation / TensorDielectricSimulation with AdjointOptions(checkpoints=2) on a CUDA epsilon: the reference",
+      "host_sync": "StreamedAdjointOptions(device=cuda, slab_width=6, temporal_depth=4, checkpoints=2, state_storage=host, tile_transfers=sync)",
+      "disk_sync": "the same with state_storage=disk, a private scratch directory and disk_budget_bytes 256 MiB",
+      "host_async": "the same as host_sync with tile_transfers=async and tile_buffers=2"
+    },
+    "instances": "precision {float32, float64} x material {scalar, diagonal, drude, pmc} x observation {history, online, plane} x path {host_sync, disk_sync, host_async}, minus pmc x plane (refused by the registry), plus float32 x tensor x online x the three paths: 69 streamed runs against 23 resident references",
+    "refusals": "planes_pmc, streamed_dispersive_oneway, streamed_dispersive_planes_oneway and mode_network_streamed from torchfdtd/capabilities.py, built by example_project and constructed with StreamedAdjointOptions"
+  },
+  "seed": 29,
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": [
+    "cuda"
+  ],
+  "reference_method": "the resident CUDA discrete adjoint of the same scene (fused CUDA forward and transpose for real dielectric fields, Torch ADE and tensor transposes): a separate execution path over the same Yee discretization, not an analytic oracle; the agreement it establishes is that the streamed tiers reproduce the resident result",
+  "observables": [
+    {
+      "name": "max_abs_field_error",
+      "unit": "dimensionless (spectral amplitude per time step)",
+      "definition": "max |F_streamed - F_resident| / dt over frequencies, samples and components"
+    },
+    {
+      "name": "objective",
+      "unit": "dimensionless",
+      "definition": "sum |F / dt|^2 of the streamed run; objective_reference is the resident value"
+    },
+    {
+      "name": "max_abs_gradient_error",
+      "unit": "dimensionless per input unit",
+      "definition": "max |g_streamed - g_resident| for every differentiable input (epsilon, epsilon_inf and s_hat, or the node tensor)"
+    },
+    {
+      "name": "peak_block_checkpoints",
+      "unit": "count",
+      "definition": "report['peak_block_checkpoints'] of the streamed run"
+    }
+  ],
+  "acceptance": {
+    "tolerances": {
+      "float32": {
+        "rtol": 0.0001,
+        "atol": 1e-06
+      },
+      "float64": {
+        "rtol": 1e-07,
+        "atol": 1e-09
+      }
+    },
+    "rule": "torch.testing.assert_close(streamed, resident, rtol, atol) on the spectral amplitude per time step, on the objective and on every gradient, for every instance; the reference amplitude must exceed 1e-3 and every reference gradient 1e-6 so that the comparison is not vacuous",
+    "refusals": "each listed combination raises ValueError whose message starts with the registry rule's expected message before torchfdtd.streamed._Streamed.apply is reached",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 (rtol 1e-4, atol 1e-6) and discrete_dimensionless_fp64 (rtol 1e-7, atol 1e-9): layer A, the same discretization on two execution paths"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda",
+      "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule",
+      "tests/test_memory_paths_g5.py::test_admitted_combinations_name_the_streamed_lanes"
+    ],
+    "not_yet_covered": [
+      "disk banks with asynchronous tiles (the async variant is measured on host banks only)",
+      "tensor material with spectral planes (the Project schema rejects tensor media with plane monitors, see the registry)"
+    ]
+  },
+  "notes": "Declared before the recorded run on branch g5-memory from main 73203d2. Prototype runs on the RTX 3060 at this commit showed gradient differences of order 1e-9 (float32) and 1e-18 (float64) against limits of 1e-6 and 1e-9, which is why the layer-A thresholds are used unchanged. The instance count in \"instances\" was corrected from a miscount (96 against 21) to 69 against 23 before the recorded run; no limit changed. The record is docs/validation/g5/G5-01.json."
+}

@@ -10,7 +10,7 @@ against gate task G9-04. User-visible changes are listed in [CHANGELOG.md](CHANG
 ## Public API surface
 
 The public API is exactly the set of names exported by `torchfdtd/__init__.py` through
-`__all__`: 195 names at this version, listed below by area and defining module.
+`__all__`: 235 names at this version, listed below by area and defining module.
 Anything else, including every `torchfdtd.<module>` not named here, the `torchfdtd.server`
 routes, the CLI flags and the browser workbench, is an internal interface that may change
 without a deprecation period. The HTTP routes are stable only for the bundled workbench of
@@ -18,7 +18,7 @@ the same version; a client that targets `/api/...` pins the package version.
 
 | Area | Module | Exported names |
 | --- | --- | --- |
-| Project model | `torchfdtd.models` | `Project`, `Region`, `MeshRefinement`, `Structure`, `Source`, `SourceTimeSettings`, `TimeSignal`, `Monitor`, `FieldMonitor`, `Material`, `BoundaryFace`, `Boundaries`, `SpectrumSettings`, `LorentzPole`, `RunControl` |
+| Project model | `torchfdtd.models` | `Project`, `Region`, `MeshRefinement`, `Structure`, `Source`, `SourceTimeSettings`, `TimeSignal`, `Monitor`, `FieldMonitor`, `Material`, `BoundaryFace`, `Boundaries`, `SpectrumSettings`, `LorentzPole`, `RunControl`, `MaterialProvenance` |
 | Mesh | `torchfdtd.mesh` | `freeze_refinements` |
 | Monitors | `torchfdtd.field_monitors` | `normalize_flux` |
 | Forward solver | `torchfdtd.solver` | `Simulation`, `Result` |
@@ -31,7 +31,9 @@ the same version; a client that targets `/api/...` pins the package version.
 | Batches | `torchfdtd.tuning` | `TensorBatchTuning`, `tune_tensor_batch` |
 | FSP writeback | `torchfdtd.fsp_geometry` | `write_fsp_geometry`, `write_fsp_scene` |
 | Materials | `torchfdtd.optical_data` | `OpticalData` |
-| Materials | `torchfdtd.material_fit` | `FitOptions`, `MaterialFitResult`, `fit_material`, `material_fit_report` |
+| Materials | `torchfdtd.material_fit` | `FitOptions`, `MaterialFitResult`, `fit_material`, `material_fit_report`, `MaterialImportResult`, `MaterialBandWarning`, `import_material_table`, `discretization_report`, `fit_band_extrapolation` |
+| Sources | `torchfdtd.source_preview` | `preview_source`, `effective_bandwidth` |
+| Results | `torchfdtd.results` | `ResultRecord`, `guarded_ratio`, `reflection_transmission`, `s_parameters`, `mode_decomposition`, `diffraction_record`, `farfield_record`, `nearzone_record` |
 | Differentiation | `torchfdtd.differentiable` | `AdjointOptions`, `DifferentiableSimulation`, `DifferentiableResult`, `smooth_sphere_epsilon` |
 | Differentiation | `torchfdtd.adjoint_memory` | `estimate_adjoint_memory` |
 | Differentiation | `torchfdtd.adjoint_spectrum` | `DifferentiableSpectrum` |
@@ -44,7 +46,7 @@ the same version; a client that targets `/api/...` pins the package version.
 | Objectives | `torchfdtd.detector_allocation` | `quadrant_intensity_allocation` |
 | Objectives | `torchfdtd.polarization` | `calibrate_plane_polarization`, `mix_plane_fields` |
 | Objectives | `torchfdtd.electron_model` | `spectral_interpolate`, `spectral_electron_model`, `exposure_target_information`, `SpectralElectronModel`, `ExposureInformation` |
-| Periodic design | `torchfdtd.density_layer` | `periodic_density_layer` |
+| Periodic design | `torchfdtd.density_layer` | `periodic_density_layer`, `bounded_density_layer` |
 | Objectives | `torchfdtd.pupil_response` | `spectral_pupil_response` |
 | Periodic design | `torchfdtd.periodic_response` | `periodic_layer_response` |
 | Periodic design | `torchfdtd.reference_cache` | `PlaneReferenceCache` |
@@ -86,6 +88,9 @@ the same version; a client that targets `/api/...` pins the package version.
 | Streamed execution | `torchfdtd.streamed_planning` | `StreamedWorkPlan`, `plan_streamed_work` |
 | Tiled execution | `torchfdtd.tiled` | `TilePlan`, `TileSpec`, `StitchedPlane`, `plan_tiles`, `run_tiled`, `stitch_planes`, `propagate_plane`, `farfield_from_stitched`, `suggest_overlap`, `TiledPlaneSimulation` |
 | Angular-spectrum propagation | `torchfdtd.angular_spectrum` | `PlaneSpectrum`, `SectionResult`, `VolumeResult`, `PointsResult`, `plane_spectrum`, `propagate_section`, `propagate_volume`, `propagate_points`, `volume_bytes` |
+| Mode ports | `torchfdtd.ports` | `FixedPortSectionError`, `ModeTrackingWarning`, `WeakModeWarning`, `TrackedPortModes`, `PortDiagnostics`, `track_port_modes`, `port_diagnostics`, `degenerate_clusters`, `overlap_matrix`, `confinement_factor`, `shift_reference_plane`, `deembed_s_matrix`, `separate_directions`, `port_normalization`, `fixed_port_section` |
+| Design | `torchfdtd.fabrication` | `FeatureSizes`, `measure_feature_sizes`, `fabrication_perturbation`, `binary_structures`, `morphological_open`, `square_offsets` |
+| Design | `torchfdtd.design_problem` | `Continuation`, `DesignProblem` |
 
 ## Versioning and deprecation rule
 
@@ -109,13 +114,15 @@ the same version; a client that targets `/api/...` pins the package version.
 
 | Format | Version marker | Value at this version | Writer | Reader and its rule |
 | --- | --- | --- | --- | --- |
-| Project JSON | `schema_version` field of `Project` | `1` | `Project.save`, `/api/validate`, the workbench save | `Project.load` and `Project.model_validate_json` accept exactly the versions listed here; an unknown key, a missing required key or a non-finite number is a validation error, never a silent default. A future version `n+1` keeps a reader for every earlier version and migrates in memory; writers write the current version only |
+| Project JSON | `schema_version` field of `Project` | `1` | `Project.save`, `/api/validate`, the workbench save | `Project.load` and `Project.model_validate_json` accept exactly the versions listed here; an unknown key, a missing required key or a non-finite number is a validation error, never a silent default. A future version `n+1` keeps a reader for every earlier version and migrates in memory; writers write the current version only. Schema 1 gained the optional keys `revision` (edit counter, default 0) and `content_sha256` (SHA-256 of the canonical JSON of every other field, default null) in 0.14.0.dev0; a file without them loads with the defaults, a file with them is refused by builds older than that change. `Project.content_matches()` and `/api/validate` (`stored_content_sha256_matches`) report whether the stored hash still describes the content |
+| Result HDF5 | `format` and `layout` root attributes | `torchfdtd-result`, layout `1` | `Result.save(path, format='hdf5')` or a `.h5`/`.hdf5` path (optional extra `hdf5`, h5py) | `Result.open` returns `torchfdtd.result_store.ResultFile`, which reads frames, field plane slices, point spectra and one frequency and component of a plane monitor by chunk, and `load()` or `Result.load` reads the whole file; a layout newer than the reader's and a file without the `format` attribute are refused by name. Datasets: `mesh/{x,y,z}_um`, `frames`, `frame_steps`, `epsilon`, `signals`, `times`, `E`, `H`, `monitors/<k>/{frequency_hz,spectrum}`, `field_monitors/<k>/<array>`, `endpoint/<name>`; root attributes `project`, `summary`, `units`, `field_monitors`, `monitor_spectra`. A dataset added later is optional for older readers; a renamed or retyped dataset is a new layout number recorded here |
 | Result NPZ | none; identified by its member names | layout 1: `project` (the embedded project JSON with its schema version), `summary`, `field_monitors`, `mesh_x_um`, `mesh_y_um`, `mesh_z_um`, `frames`, `frame_steps`, `epsilon`, `signals`, `times`, `E`, `H`, `monitor_spectra`, and per monitor `monitor_<k>_frequency_hz`, `monitor_<k>_spectrum`, `field_monitor_<k>_<array>`, plus `endpoint_<name>` when PMC endpoint fields exist | `Result.save`, `/api/jobs/{key}/download`, batch outputs | `Result.load` reads every member with `allow_pickle=False`; `load_native_radiation_plane` and `load_native_radiation_box` read only the selected `field_monitor_<k>_*` members and the metadata, with bounded NPY v1/v2 headers. A member added later is optional for older readers; a renamed or retyped member is a new layout number recorded here |
 | Streamed restart journal | `marker` in every record and in `complete.json` | `torchfdtd-streamed-restart` | `RestartJournal` of `torchfdtd.streamed_restart` | `RestartJournal` resumes only when `contract.json` equals the contract of the new run (`project_sha256`, `epsilon_sha256`, `epsilon_shape`, `epsilon_dtype`, `options`, `starts`, `runtime_sha256`, `torch`); any difference is refused with the differing keys named, so a journal never resumes across a solver or Torch change |
 | Batch case metadata | fingerprint of project, parameters, solver sources, objective key and library versions in `<output>/<case>.json` | sha256 hex | `run_batch` and `BatchRunner` | `run_batch(..., resume=True)` reuses a case only when its fingerprint matches; `BatchItem.load` reads the case NPZ through `Result.load` |
 | Mode-network configuration | `version` field of `ModeNetworkConfig` | `1` | `mode_network_plan`, `/api/mode-networks/validate` | `ModeNetworkConfig` rejects any other version |
 | Periodic design result | none | JSON object returned by `run_periodic_design` | `run_periodic_design`, `/api/design/jobs/{key}/download` | read as data by the user; no reader in the package depends on it |
 | GDS | GDSII stream, no project marker | native `unit`/`precision` of the file | `export_gds` | `import_gds` under `GDSLimits` and the record audit described in [SECURITY.md](SECURITY.md) |
+| Design-problem state | `marker` key | `torchfdtd-design-problem` | `DesignProblem.save` (`torch.save`) | `DesignProblem.load` accepts a state only when its fingerprint (parameterization configuration, optimizer type and defaults, continuation) equals the problem's; the parameterization refuses a differing configuration on its own |
 
 ## Known limitations at this version
 
@@ -124,8 +131,9 @@ the same version; a client that targets `/api/...` pins the package version.
 - Excluded from differentiation: eigenmode and source-position derivatives, hole-vertex
   derivatives, second derivatives, fused CUDA adjoint kernels for PMC faces and tensors,
   differentiation through geometry-dependent mesh regeneration.
-- No chunked or lazy large-result format has been chosen; a result NPZ is read whole except
-  through the radiation loaders.
+- The chunked result format is HDF5 only (`Result.save(format='hdf5')`, `Result.open`); a
+  result NPZ is still read whole except through the radiation loaders, streamed, tensor-batch
+  and mode-network results keep their own loaders, and the workbench downloads NPZ only.
 - The workbench server is loopback-only and unauthenticated ([SECURITY.md](SECURITY.md)).
 - The distribution questions of [RELEASE_REVIEW.md](RELEASE_REVIEW.md) are open;
   [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) lists them as `BLOCKED_EXTERNAL` items.

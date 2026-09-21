@@ -1,0 +1,172 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T195559Z-g6-06-e9e7f257",
+  "task": "G6-06",
+  "stage": "G6",
+  "task_title": "density filter, projection, beta continuation, symmetry, mask, min linewidth/gap, fabrication perturbation, binary export를 실제 검사와 연결한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_workflow.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-05.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T04:52:23.255498+09:00",
+  "recorded_at": "2026-09-21T19:55:59+00:00",
+  "source_commit": "68d797bbb060d788ea5eeea7eb49dc78afbd0dcc",
+  "source_tree_sha256": "c4da19b2a2739842760da17062b68445407ed6dcb065ce532e3fb997947cedb8",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_design_workflow.py": "9ac6b7fd999d67bab82eb39683ae4007273ae9a7fb36bd0c97ef57875d4ed224"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G6-06.json",
+  "fixture_sha256": "cffb48756c05141a85c72549436a34a39d7c071f6703eef6823ef3397098390b",
+  "acceptance_criteria_path": "docs/validation/cases/G6-06.json",
+  "acceptance_criteria_sha256": "cffb48756c05141a85c72549436a34a39d7c071f6703eef6823ef3397098390b",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": {
+    "others": "deterministic (fixed logits and arrays)"
+  },
+  "precision": [
+    "exact integer pixel morphology",
+    "float32 objectives"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "physics_configuration": {
+    "gap_violation": "tests/test_design_workflow.py: 12 x 12 logits of +-8 forming two solid blocks (columns 1..4 and 6..10 of rows 1..10) separated by one 0.1 um pixel, DensityParameterization with filter_radius_um 0.15, truncate boundary, beta 64, eta 0.5; DesignProblem with a linear objective (density times a linspace weight); fabrication(spacing 0.1 um, min_linewidth 0.15 um, min_gap 0.15 um, perturbation 0.1 um)",
+    "feature_measurement": "tests/test_design_workflow.py: 30 x 1 periodic line with runs of 4, 1 and 8 pixels (0.05 um); 12 x 12 blocks of 5 x 5 and 4 x 5 pixels one pixel apart at the array edge (0.1 um), measured with extend and periodic boundaries; a uniform 5 x 5 design",
+    "binary_export": "tests/test_design_workflow.py: 6 x 5 binary with three rectangular runs, origin (-0.6, -0.5) um, 0.2 um pixels, z from -0.1 to 0.1 um",
+    "examples": "the fabrication reports of examples/design_metagrating.py (spacing 0.05 um, declared min linewidth and gap 0.1 um, perturbation 0.05 um, periodic x) and examples/design_mode_coupler.py (spacing 0.2 um, declared 0.4 um, perturbation 0.2 um) as run by the G6-05 end-to-end tests and the G6-07 recorded starts",
+    "measurement": "torchfdtd.fabrication: opening by digital squares of every integer side (odd sides centred on a pixel, even sides on a corner); the minimum linewidth is the largest side whose opening leaves the solid unchanged, the minimum gap the same on the void; erosion and dilation by the square of side 2 amount + 1"
+  },
+  "reference_method": "Analytic discrete morphology: a run of L pixels or a rectangle of W by H pixels survives the opening with side s exactly when min(W, H) >= s, so the measured values are known by construction (linewidth 4, gap 1 for the gap-violation blocks; 4 and 6 for the periodic line; 5 and 1 with extend, 4 with periodic for the edge blocks). The perturbation changes are the forward model's own responses to the eroded and dilated designs; they are recorded and required to be finite and nonzero, not compared to an external value.",
+  "observables": [
+    {
+      "name": "measured_gap_pixels",
+      "unit": "pixels",
+      "definition": "gap_pixels of the thresholded gap-violation design"
+    },
+    {
+      "name": "measured_linewidth_pixels",
+      "unit": "pixels",
+      "definition": "linewidth_pixels of the thresholded gap-violation design"
+    },
+    {
+      "name": "violations",
+      "unit": "names",
+      "definition": "FeatureSizes.violations against the declared 0.15 um limits"
+    },
+    {
+      "name": "perturbation_objective_change",
+      "unit": "objective units",
+      "definition": "objective(eroded) - objective(nominal) and objective(dilated) - objective(nominal)"
+    },
+    {
+      "name": "structure_tiling",
+      "unit": "boolean",
+      "definition": "the exported rectangles cover exactly the solid pixels without overlap"
+    }
+  ],
+  "acceptance_limits": {
+    "measured_gap_pixels": 1,
+    "measured_linewidth_pixels": 4,
+    "violations": [
+      "min_gap"
+    ],
+    "satisfies_declared_constraints": false,
+    "filter_radius_um_reported": 0.15,
+    "perturbation_objective_change": "finite and nonzero for both erosion and dilation; eroded solid fraction below dilated",
+    "feature_measurement_exact": {
+      "line": [
+        [
+          1,
+          1
+        ],
+        [
+          4,
+          6
+        ]
+      ],
+      "blocks_extend": [
+        5,
+        1
+      ],
+      "blocks_periodic_linewidth": 4,
+      "uniform_saturated": [
+        "min_linewidth",
+        "min_gap"
+      ]
+    },
+    "structure_tiling": true,
+    "source_of_limits": "analytic discrete morphology on declared arrays; the filter radius alone is explicitly not accepted as a minimum-feature guarantee"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 9,
+    "passed": [
+      "tests/test_design_workflow.py::test_design_problem_contracts_history_and_continuation",
+      "tests/test_design_workflow.py::test_toy_resume_reproduces_the_uninterrupted_history_bitwise",
+      "tests/test_design_workflow.py::test_metagrating_resume_reproduces_the_uninterrupted_history_bitwise",
+      "tests/test_design_workflow.py::test_coupler_resume_reproduces_the_uninterrupted_history_bitwise",
+      "tests/test_design_workflow.py::test_metagrating_example_runs_end_to_end_with_fine_reimport",
+      "tests/test_design_workflow.py::test_coupler_example_runs_end_to_end_with_fine_reimport_and_holdout",
+      "tests/test_design_workflow.py::test_measured_gap_violates_although_the_filter_radius_is_satisfied",
+      "tests/test_design_workflow.py::test_feature_size_measurement_is_exact_on_runs_and_rectangles",
+      "tests/test_design_workflow.py::test_binary_structures_tile_solid_pixels_exactly"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 141.314,
+    "suite_timestamp": "2026-09-22T04:52:23.255498+09:00"
+  },
+  "required_tests": [
+    "tests/test_design_workflow.py::test_measured_gap_violates_although_the_filter_radius_is_satisfied",
+    "tests/test_design_workflow.py::test_feature_size_measurement_is_exact_on_runs_and_rectangles",
+    "tests/test_design_workflow.py::test_binary_structures_tile_solid_pixels_exactly"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T195559Z-g6-06-e9e7f257/junit.xml",
+      "sha256": "55de81e428a8794846e058fd3a179464c2fe4bafc7cc714024379dc8fa8a85ff",
+      "bytes": 1452,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G6-05.xml"
+    }
+  ],
+  "applicable_scope": "G6-06 fabrication constraints: integer-pixel morphology on declared arrays and the examples' thresholded designs; the measurement reports, it does not constrain the optimization",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

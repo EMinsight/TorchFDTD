@@ -1,3 +1,7 @@
+# The cpu-pr suite only (docs/GPU_RUNNER_POLICY.md): CUDA tests are deselected
+# here and run by hand on the lab GPU hosts as gpu-nightly and release-full.
+# Every job runs on GitHub-hosted Ubuntu, and no trigger hands fork pull
+# requests repository secrets, so fork code never reaches a lab GPU host.
 name: Verify
 on:
   push:
@@ -27,7 +31,7 @@ jobs:
       - run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
       - run: python -m pip install -e '.[dev,gds]'
       - run: npm ci && npm run build
-      - run: python -m pytest -q --junitxml=test-results/pytest.xml
+      - run: python scripts/run_suite.py cpu-pr --junitxml=test-results/pytest.xml
       - name: Upload per-test pytest results
         if: always()
         uses: actions/upload-artifact@v4

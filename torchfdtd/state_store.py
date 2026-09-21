@@ -5,6 +5,7 @@ Only files created by this store are removed, and the private directory must be
 empty before it is removed. This is scratch storage, not a durable restart.
 """
 import math
+import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -33,7 +34,7 @@ class StateStore:
         self.free_reserve_bytes = free_reserve_bytes
         self.banks = weakref.WeakValueDictionary()
         self.closed = False
-        self.live_bytes = self.peak_bytes = self.created_banks = 0
+        self.live_bytes = self.peak_bytes = self.created_banks = self.created_file_bytes = 0
         self.read_bytes = self.written_bytes = self.max_read_bytes = 0
 
     def new_state(self,templates):
@@ -47,6 +48,7 @@ class StateStore:
         bank = _Bank(self,key,size)
         self.banks[key] = bank
         self.created_banks += 1
+        self.created_file_bytes += bank.file_bytes
         self.live_bytes += size
         self.peak_bytes = max(self.peak_bytes,self.live_bytes)
         offset, arrays = 0, []
@@ -58,7 +60,7 @@ class StateStore:
     def report(self):
         return dict(peak_logical_file_bytes=self.peak_bytes,live_logical_file_bytes=self.live_bytes,
                     free_reserve_bytes=self.free_reserve_bytes,
-                    created_banks=self.created_banks,logical_read_bytes=self.read_bytes,
+                    created_banks=self.created_banks,created_file_bytes=self.created_file_bytes,logical_read_bytes=self.read_bytes,
                     logical_written_bytes=self.written_bytes,max_single_read_bytes=self.max_read_bytes,
                     closed=self.closed,io_scope='Buffered file I/O. OS page cache and physical storage traffic are not measured. No whole-state file mapping.')
 
@@ -80,7 +82,11 @@ class _Bank:
         self.closed = True
         self.path = store.root/f'bank-{key}.bin'
         self.file = self.path.open('x+b',buffering=0)
-        try:self.file.truncate(size)
+        try:
+            self.file.truncate(size)
+            # The file size the OS reports is the bank's on-disk footprint.
+            self.file_bytes = os.fstat(self.file.fileno()).st_size
+            if self.file_bytes != size:raise OSError('Field bank file size differs from the bank size.')
         except BaseException:
             self.file.close()
             self.path.unlink()

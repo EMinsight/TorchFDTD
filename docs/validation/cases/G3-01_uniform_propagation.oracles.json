@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "kind": "oracle_bookkeeping",
+  "case_id": "G3-01_uniform_propagation",
+  "task": "G3-01",
+  "case_file": "docs/validation/cases/G3-01_uniform_propagation.json",
+  "declared": "2026-09-22",
+  "reason": "The case file is hash-bound to its recorded evidence runs and is not edited; this sidecar carries the oracle classes and layers that docs/ORACLE_BUDGET.md and tests/test_oracle_budget.py require.",
+  "oracle_class": [
+    "analytic_discrete",
+    "physical_invariant",
+    "shared_discrete_operator"
+  ],
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_a.py::TestG301::test_eigenmode_matches_yee_relation",
+      "tests/test_physics_g3_a.py::TestG301::test_eigenmode_mesh_sweep",
+      "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d",
+      "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d",
+      "tests/test_physics_g3_a.py::TestG301::test_polarizations_identical",
+      "tests/test_physics_g3_a.py::TestG301::test_layer_a_cuda_fp32"
+    ],
+    "layers": {
+      "tests/test_physics_g3_a.py::TestG301::test_eigenmode_matches_yee_relation": {
+        "layer": "B",
+        "oracle_class": "analytic_discrete",
+        "oracle": "exact Yee dispersion relation written in the test, oblique eigenmode seeded on the NumPy grid; cos(omega dt) residual and polarization leak at round-off"
+      },
+      "tests/test_physics_g3_a.py::TestG301::test_eigenmode_mesh_sweep": {
+        "layer": "B",
+        "oracle_class": "analytic_discrete",
+        "oracle": "axis eigenmode at N = 10, 20, 40 cells per wavelength against the Yee relation; the continuum phase error per wavelength is reported as the numerical dispersion"
+      },
+      "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d": {
+        "layer": "B",
+        "oracle_class": "analytic_discrete",
+        "oracle": "Simulation path: measured wavenumber from two monitors against the Yee relation within 1e-3 rad over the band; continuum error reported, N = 40 only with TORCHFDTD_G3_FINE"
+      },
+      "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d": {
+        "layer": "B",
+        "oracle_class": "analytic_discrete",
+        "oracle": "the 2D propagation check on a 3D grid with Ey and Ez"
+      },
+      "tests/test_physics_g3_a.py::TestG301::test_polarizations_identical": {
+        "layer": "B",
+        "oracle_class": "physical_invariant",
+        "oracle": "polarization symmetry of the isotropic scheme: the two polarizations give identical traces to 1e-12"
+      },
+      "tests/test_physics_g3_a.py::TestG301::test_layer_a_cuda_fp32": {
+        "layer": "A",
+        "oracle_class": "shared_discrete_operator",
+        "oracle": "CUDA float32 Simulation against CPU float64 on the N = 20 propagation fixture, rtol 1e-4 and atol 1e-6"
+      }
+    }
+  }
+}

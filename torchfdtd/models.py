@@ -29,6 +29,17 @@ class LorentzPole(Model):
         return self.resonance_rad_s, self.strength_rad_s_squared, self.damping_rad_s
 
 
+class MaterialProvenance(Model):
+    """Origin of an imported optical table, kept with the fitted material and the project."""
+    source: str = Field(min_length=1, max_length=200)      # publication, database entry or measurement
+    licence: str = Field(default='', max_length=2000)      # licence or usage note of the table
+    raw_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')     # SHA-256 of the raw file or text as imported
+    file_name: str = Field(default='', max_length=260)
+    columns: Literal['nk', 'epsilon'] = 'nk'
+    wavelength_unit: Literal['um', 'nm', 'm'] = 'um'
+    imported: str = Field(default='', max_length=40)       # ISO 8601 date of the import
+
+
 class Material(Model):
     name: str = Field(min_length=1, max_length=100)
     index: float = Field(default=1.5, ge=1, le=20)
@@ -45,6 +56,7 @@ class Material(Model):
     samples: OpticalData | None = None
     fit_band_um: tuple[float,float] | None = None
     fit_dt_s: float | None = Field(default=None,gt=0)
+    provenance: MaterialProvenance | None = None
 
     @model_validator(mode='after')
     def valid_poles(self):
@@ -601,11 +613,31 @@ class Project(Model):
     monitors: list[Monitor | FieldMonitor] = Field(default_factory=list, max_length=32)
     global_monitor: SpectrumSettings = Field(default_factory=lambda:SpectrumSettings(sampling='frequency',apodization='none'))
     import_provenance: ImportProvenance | None = None
+    # Edit counter and content hash of the saved file (G8-04). The workbench
+    # increments revision on every committed edit and stores the hash that
+    # /api/validate computed; a file whose content no longer matches its hash
+    # was changed outside the workbench, which content_matches() reports.
+    revision: int = Field(default=0, ge=0)
+    content_sha256: str | None = Field(default=None, pattern=r'^[a-f0-9]{64}$')
 
     @model_validator(mode='before')
     @classmethod
     def migrate(cls, data):
         return migrate_project(data)
+
+    def content_hash(self):
+        """SHA-256 of the canonical JSON of every field except the two version fields."""
+        import hashlib, json
+        payload = self.model_dump(mode='json', exclude={'revision', 'content_sha256'})
+        return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(',', ':'), allow_nan=False).encode('utf-8')).hexdigest()
+
+    def content_matches(self):
+        """True when the stored content_sha256 equals the content, None when no hash is stored."""
+        return None if self.content_sha256 is None else self.content_sha256 == self.content_hash()
+
+    def stamped(self, revision=None):
+        """A copy carrying the current content hash and, when given, a new revision."""
+        return self.model_copy(update={'content_sha256': self.content_hash(), **({} if revision is None else {'revision': revision})})
 
     @model_validator(mode='after')
     def valid_scene(self):

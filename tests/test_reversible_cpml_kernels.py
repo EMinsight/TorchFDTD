@@ -34,9 +34,9 @@ def relative(actual, expected):
     return float((actual.double()-expected.double()).norm()/expected.double().norm())
 
 
-@pytest.mark.parametrize('device', ['cpu', pytest.param('cuda', marks=pytest.mark.skipif(
+@pytest.mark.parametrize('device', ['cpu', pytest.param('cuda', marks=[pytest.mark.long, pytest.mark.skipif(
     os.environ.get('TORCHFDTD_RUN_CPML_KERNEL_CUDA_TEST') != '1',
-    reason='Explicit small CUDA helper gate only'))])
+    reason='Explicit small CUDA helper gate only')])])
 def test_reconstruction_full_cpml_transpose_and_material_vjp(device):
     torch.set_num_threads(1)
     if device == 'cuda':
