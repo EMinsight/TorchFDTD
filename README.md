@@ -28,6 +28,21 @@ GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-
 
 Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations. The Lumerical rows are aggregate timings of earlier builds; no commercial data is redistributed.
 
+<!-- meep-comparison:start -->
+## Compared with Meep
+
+Three devices were each set up once from one geometry file and run in TorchFDTD (NVIDIA GeForce RTX 3060, float32, fused CUDA kernels) and in Meep 1.34.0 (CPU, float64, MPI) on the same grid, time step, step count, source, monitors and staircase material sampling, with the agreement criteria declared before the first comparison run. Every number in the table is read from the records in `docs/validation/meep_comparison/` by `scripts/render_meep_comparison.py`; the timing rows are development runs on a shared host (Meep with four ranks) until the maintainer's `--timing` rerun on a quiet host replaces them.
+
+| Device | Cells x steps | Agreement versus its criterion | TorchFDTD GPU stepping (s) | Meep CPU stepping (s), 12 ranks when timed | Ratio |
+|---|---|---|---|---|---|
+| [2D microring resonator with a bus waveguide (Ez)](examples/meep_comparison/microring) | 469,500 x 89,219 | resonance wavelengths, max difference 5.6e-05 nm (limit 0.2 nm); 5/5 pass | 31.36 | 217.05 (4 ranks; development run, shared host) | 6.9 |
+| [2D silicon ridge metalens (Ez)](examples/meep_comparison/metalens) | 825,600 x 5,200 | focusing efficiency, difference 4.0e-06 (limit 0.01); 4/4 pass | 1.57 | 13.29 (4 ranks; development run, shared host) | 8.5 |
+| [3D silicon pillar metalens (Ex)](examples/meep_comparison/metalens) | 3,430,400 x 2,500 | focusing efficiency, difference 2.1e-06 (limit 0.01); 5/5 pass | 6.06 | 128.60 (4 ranks; development run, shared host) | 21.2 |
+| [2D silicon metagrating on silica, with an RCWA oracle (Ez)](examples/meep_comparison/metagrating) | 18,200 x 12,000 | order efficiencies, max difference 2.0e-04 (limit 0.01); 5/5 pass | 0.26 | 1.49 (4 ranks; development run, shared host) | 5.7 |
+
+Per-example device and fixture tables, all criteria, timing with load notes, figures, run commands and fairness limits: [docs/MEEP_COMPARISON.md](docs/MEEP_COMPARISON.md); the examples live under [examples/meep_comparison](examples/meep_comparison).
+<!-- meep-comparison:end -->
+
 ## Execution modes
 
 The workbench's FDTD panel has a **GPU** switch and a **Memory** selector; `/api/validate` reports the resolved mode before a run and the results panel reports what ran.
@@ -85,7 +100,7 @@ Lengths are in µm and time arrays in seconds. `dimension` defaults to `"2d"` an
 - [Python and batch API](docs/PYTHON_BATCH.md), [tensor batches](docs/TENSOR_BATCH.md), [differentiable FDTD](docs/DIFFERENTIABLE_FDTD.md), [shape gradients](docs/SHAPE_GRADIENTS.md)
 - [Streamed execution](docs/STREAMED_FDTD.md), [planner](docs/STREAMED_WORK_PLANNING.md), [restart journal](docs/STREAMED_RESTART.md), [beyond-VRAM records](docs/BEYOND_VRAM_RESTART.md)
 - [Mode ports](docs/OPEN_MODE_PORTS.md), [far field](docs/FARFIELD_WORKFLOW.md), [GDS](docs/GDS.md), [FSP](docs/FSP.md), [materials](docs/MATERIALS.md), [boundaries](docs/BOUNDARIES.md)
-- [Measurements and feature record](docs/MEASUREMENTS.md), [feature checklist](docs/FEATURE_CHECKLIST.md), [acceptance record](docs/ACCEPTANCE.md)
+- [Measurements and feature record](docs/MEASUREMENTS.md), [feature checklist](docs/FEATURE_CHECKLIST.md), [acceptance record](docs/ACCEPTANCE.md), [comparison with Meep](docs/MEEP_COMPARISON.md)
 - [Security model](docs/SECURITY.md), [compatibility and support policy](docs/COMPATIBILITY.md), [changelog](docs/CHANGELOG.md), [third-party notices and SBOM](docs/THIRD_PARTY_NOTICES.md)
 
 ## Verification

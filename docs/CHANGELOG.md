@@ -20,6 +20,7 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Added
 
+- Three worked comparisons with Meep 1.34.0 (microring resonator, 2D ridge and 3D pillar metalens, metagrating with an RCWA oracle) under `examples/meep_comparison/`, each with a shared geometry file, pre-declared criteria, records, a figure rendered from the records and a test; `scripts/render_meep_comparison.py` renders [MEEP_COMPARISON.md](MEEP_COMPARISON.md) and the README "Compared with Meep" block from the records (this commit).
 - Angular-spectrum propagation of a recorded output plane into sections, volumes and points with a shared transfer function and first-order gradients: `plane_spectrum`, `propagate_section`, `propagate_volume`, `propagate_points`; `propagate_plane` now delegates to it (8283506).
 - Tiled approximate execution mode in the workbench and an execution-modes README section (f09ec94).
 - Overlapping-tile decomposition with near-field stitching, angular-spectrum propagation and a tiled plane adjoint: `plan_tiles`, `run_tiled`, `stitch_planes`, `propagate_plane`, `TiledPlaneSimulation` (c10175b).
