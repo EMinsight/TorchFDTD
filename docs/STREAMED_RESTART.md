@@ -56,6 +56,18 @@ objective is rejected. The interrupted process may leave scratch banks behind
 in `state_directory`; the resumed process creates its own store and does not
 remove another process's files.
 
+## Operating a resume
+
+- Resume with the identical source tree. The contract hashes `streamed.py`,
+  `spacetime.py`, `state_store.py` and `streamed_restart.py`; updating the code
+  between the crash and the resume is rejected as `runtime_sha256`.
+- Remove the crashed process's scratch first. Its `torchfdtd-state-*`
+  directories under `state_directory` are not removed by anyone else, and they
+  consume the free space that the bank reservation checks again on resume.
+- Records already in the journal count toward the journal reservation
+  (`restart_journal_existing_bytes`), so a resume needs free space only for the
+  banks and for one more record, not for a second full journal.
+
 ## Verified scope
 
 CPU and CUDA tiles, host and file-backed banks, real scalar epsilon, point
@@ -71,4 +83,5 @@ Not covered: spectral observations (rejected at run time), ADE, tensor,
 density or geometry parameter paths, asynchronous tiles and the dispersive
 streamed solver. Journal writes cost one read and one write of the full state
 per record; `restart_every_blocks` trades that cost against replay after a
-crash. Large-run recovery timing is a separate measurement.
+crash. Large-run recovery timing is recorded in
+[BEYOND_VRAM_RESTART.md](BEYOND_VRAM_RESTART.md).

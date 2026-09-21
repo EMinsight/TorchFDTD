@@ -38,7 +38,7 @@ Diagnostic norms accumulate in FP64 in bounded chunks, without converting or
 storing the full simulation state or gradient in FP64.
 
 ```powershell
-python -m benchmarks.beyond_vram --execute --output results/beyond-vram-fp32-5880.json --scratch C:/Users/admin/torchfdtd/.local/beyond-vram-fp32-state
+python -m benchmarks.beyond_vram --execute --output results/beyond-vram-fp32-5880.json --scratch <scratch-directory-on-a-large-volume>
 ```
 
 This is a new precision/capacity condition, not a repeat of the completed FP64
@@ -127,7 +127,7 @@ this is not an exclusive filesystem reservation. The interrupted capacity
 job predates this per-bank option and must be identified accordingly.
 
 ```powershell
-python -m benchmarks.beyond_vram --execute --precision float64 --fields complex --nx 1024 --ny 1024 --nz 576 --width 16 --depth 2 --output results/beyond-vram-5880.json --scratch C:/Users/admin/torchfdtd/.local/beyond-vram-state --disk-gib 280 --host-gib 76
+python -m benchmarks.beyond_vram --execute --precision float64 --fields complex --nx 1024 --ny 1024 --nz 576 --width 16 --depth 2 --output results/beyond-vram-5880.json --scratch <scratch-directory-on-a-large-volume> --disk-gib 280 --host-gib 76
 ```
 
 Do not bypass admission checks or delete user data to make a case fit. The

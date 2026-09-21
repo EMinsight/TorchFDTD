@@ -69,6 +69,13 @@ class StreamedAdjointOptions:
             raise ValueError('restart_every_blocks must be a positive integer.')
 
 
+def _journal_bytes(directory):
+    """Bytes already held by restart records under the journal directory, if any."""
+    root = Path(directory).expanduser()
+    if not root.exists():return 0
+    return sum(p.stat().st_size for p in root.rglob('*') if p.is_file())
+
+
 def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, parameter_shapes=None):
     region = project.region
     n = math.prod(region.shape)
@@ -152,13 +159,17 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     # a full state plus the partial material gradient. Charge both on the journal
     # volume, together with the bank reservation when they share that volume.
     restart = 2*(state+parameter_count*material_item) if options.restart_directory else 0
+    existing_journal = 0
     if restart:
         from .state_store import disk_free
         journal_free = disk_free(options.restart_directory)
         shared = bool(disk) and Path(options.restart_directory).expanduser().resolve().anchor == Path(options.state_directory).expanduser().resolve().anchor
-        required = restart+(disk if shared else 0)
+        # Records already on disk from the interrupted run are part of the
+        # journal's reservation, not additional space that must still be free.
+        existing_journal = _journal_bytes(options.restart_directory)
+        required = max(0, restart-existing_journal)+(disk if shared else 0)
         if required+options.disk_free_reserve_bytes > journal_free:
-            raise ValueError(f'Restart journal reservation exceeds available disk space: required={required} bytes, free={journal_free} bytes.')
+            raise ValueError(f'Restart journal reservation exceeds available disk space: required={required} bytes, free={journal_free} bytes, existing journal={existing_journal} bytes.')
     if torch.device(options.device).type == 'cuda':
         gpu_limit=cuda_budget_limit(options.device,gpu,options.gpu_budget_bytes)
         if gpu > gpu_limit:
@@ -168,6 +179,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
                 state_bank_capacity=state_bank_capacity,
                 dense_parameter_multiplier=parameter_multiplier,dense_parameter_reservation_bytes=dense_parameters,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,restart_reservation_bytes=restart,
+                restart_journal_existing_bytes=existing_journal,
                 host_initial_state_reservation_bytes=initial_storage,
                 state_bytes=state, halo_cells_per_side=depth, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*(18+6*pole_count)*local_slots*tile_cells*item,
                 source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))

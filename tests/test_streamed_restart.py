@@ -162,6 +162,32 @@ def test_restart_journal_space_is_checked(tmp_path, monkeypatch):
     assert not (tmp_path / 'journal').exists()
 
 
+def test_existing_journal_records_count_toward_the_reservation(tmp_path, monkeypatch):
+    from torchfdtd.streamed import _reservation
+    p = scene()
+    eps = torch.full(p.region.shape, 1.7, dtype=torch.float64)
+    settings = options(tmp_path)
+    monkeypatch.setattr('torchfdtd.streamed.host_memory', lambda: dict(available_bytes=1024 ** 4))
+    monkeypatch.setattr('torchfdtd.streamed.cuda_budget_limit', lambda device, gpu, budget: budget)
+    fresh = _reservation(p, eps, settings)
+    restart = fresh['restart_reservation_bytes']
+    assert fresh['restart_journal_existing_bytes'] == 0
+    # Exactly the reservation free: admitted with an empty journal.
+    monkeypatch.setattr('torchfdtd.state_store.disk_free', lambda _: restart)
+    _reservation(p, eps, settings)
+    monkeypatch.setattr('torchfdtd.state_store.disk_free', lambda _: restart - 1)
+    with pytest.raises(ValueError, match='Restart journal reservation'):
+        _reservation(p, eps, settings)
+    # A surviving record on disk already holds part of that space.
+    record = tmp_path / 'journal' / 'backward-1'
+    record.mkdir(parents=True)
+    (record / 'adjoint-0.bin').write_bytes(bytes(4096))
+    again = _reservation(p, eps, settings)
+    assert again['restart_journal_existing_bytes'] == 4096
+    monkeypatch.setattr('torchfdtd.state_store.disk_free', lambda _: restart - 4096)
+    _reservation(p, eps, settings)
+
+
 CHILD = '''
 import sys, time, torch
 sys.path.insert(0, sys.argv[1]); sys.path.insert(0, sys.argv[2])

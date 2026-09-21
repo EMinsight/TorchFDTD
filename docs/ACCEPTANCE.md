@@ -1,5 +1,25 @@
 # Current acceptance record
 
+## Beyond-VRAM crash and resume on the RTX 5880, 21 September 2026
+
+A real FP32 streamed adjoint on a 1152 x 1024 x 1920 grid (2.26 billion
+cells, 54.4 GB of E/H against 51.5 GB of physical VRAM, ten steps, slab width
+4, temporal depth 4, no interior checkpoints, disk banks, one journal record
+per block) was run as two processes. The first exited right after publishing
+its first backward record, 1137.4 s after start, with a 559.1 s forward and
+96.6 s of forward journal writes. The second restored the completed forward in
+7.7 s, resumed the backward below the recorded block and finished in 957.5 s
+with a peak Torch CUDA allocation of 3.03 GB and a peak RSS of 30.0 GB. Its
+gradient matches the causal-cone oracle with a crop relative L2 of 9.08e-8
+and a norm error of 8.23e-8, the restored signals are equal bitwise, and no
+gradient appears outside the causal cone. Whole-machine counters over both
+processes peak at 38.9 GB in use of 137.1 GB, 46.2 GB committed and 0.27 GB
+of file cache, with a mean disk write rate of 0.59 GB/s, a 2.68 GB/s peak and
+1.52 TB written in total. Journal records already on disk now count toward
+the journal reservation, so a resume does not need space for a second full
+journal. [Record and scope](BEYOND_VRAM_RESTART.md).
+No competitor comparison or sustained-throughput claim follows from this record.
+
 ## Durable restart journal for streamed adjoints, 21 September 2026
 
 `StreamedAdjointOptions(restart_directory=...)` records forward state and

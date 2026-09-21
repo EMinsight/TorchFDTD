@@ -12,7 +12,7 @@ import paramiko
 
 
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--host',required=True);ap.add_argument('--user',default='admin');ap.add_argument('--port',type=int,default=8766);ap.add_argument('--remote-port',type=int,default=8765);ap.add_argument('--start-server',action='store_true');ap.add_argument('--remote-root',default='C:/Users/admin/torchfdtd');args=ap.parse_args()
+    ap=argparse.ArgumentParser();ap.add_argument('--host',required=True);ap.add_argument('--user',required=True);ap.add_argument('--port',type=int,default=8766);ap.add_argument('--remote-port',type=int,default=8765);ap.add_argument('--start-server',action='store_true');ap.add_argument('--remote-root',default='C:/torchfdtd');args=ap.parse_args()
     client=paramiko.SSHClient();client.load_system_host_keys()
     known=Path('.local/known_hosts')
     if known.exists():client.load_host_keys(str(known))

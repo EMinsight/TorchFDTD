@@ -8,3 +8,4 @@
 # Preserve the original line endings of this measured numerical record.
 docs/validation/mode_ports_cpu.json whitespace=cr-at-eol
 docs/validation/mode_injection_3060.json whitespace=cr-at-eol
+docs/validation/geometry-ensembles.json whitespace=cr-at-eol

@@ -72,8 +72,8 @@ require the review recorded in the distribution document. Private staging does
 not resolve those questions or provide a legal guarantee.
 
 The local and RTX 5880 Python results, browser evidence and package checks are
-recorded in [ACCEPTANCE.md](ACCEPTANCE.md). Linux CI for revision `ec3a28f`
-passed 1,180 Python and 28 browser tests, with 429 and 8 environment-dependent
-skips. It also passed the frontend and wheel builds. Subsequent solver changes
-require their own CI evidence. The acceptance
-record separates historical results from current feature completion gates.
+recorded in [ACCEPTANCE.md](ACCEPTANCE.md). Linux CI for revision `4dc3024`
+passed 1,590 Python and 42 browser tests, with 457 and 8 environment-dependent
+skips, plus the frontend and wheel builds. Subsequent solver changes require
+their own CI evidence. The acceptance record separates historical results from
+current feature completion gates.

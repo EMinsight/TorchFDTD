@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory=$true)][string]$GpuHost,
-    [string]$User = 'admin',
-    [string]$RemoteRoot = 'C:/Users/admin/torchfdtd',
+    [Parameter(Mandatory = $true)][string]$User,
+    [string]$RemoteRoot = 'C:/torchfdtd',
     [int]$LocalPort = 8766,
     [int]$RemotePort = 8765
 )

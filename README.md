@@ -46,7 +46,7 @@ Injected allocation, read, write, transfer and reduction failures leave no scrat
 files while their tracebacks are alive. These are lifetime measurements, not
 speed or capacity results, and other physics paths keep the earlier reservations.
 
-Interrupted streamed runs can now [resume from a durable journal](docs/STREAMED_RESTART.md).
+Interrupted streamed runs can now [resume from a durable journal](docs/STREAMED_RESTART.md), [measured](docs/BEYOND_VRAM_RESTART.md) on a 2.26-billion-cell FP32 run whose second process reproduced the oracle gradient within 9.1e-8.
 Forward and backward block boundaries are recorded with synced, renamed files
 and a strict input contract. A new process returns the recorded signals, restores
 the adjoint and partial gradient, and replays only the remaining blocks. Sixteen

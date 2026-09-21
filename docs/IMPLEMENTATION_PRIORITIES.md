@@ -41,7 +41,7 @@ Resident 후속: 명시적 byte 예산과 CUDA 인덱스 검사로 기본 800만
 | 2 | P0 | 필수 | 정확도·수렴 | 동일 영역·물리 시간·PML 조건과 독립 기준 |
 | 3 | P0 | 공개 전 필수 | 독립 배포 | 코드·데이터·라이선스·자격증명 확인, 물리 구현과 별도 출고 조건 |
 | 4 | P0 | 핵심 | Torch adjoint·자동미분 | 제한된 실수 유전체/CPML 경로 구현, 일반 물리·포트·형상 미분 확대 |
-| 5 | P0 | 핵심 | 계층형 메모리·대규모 실행 | 체크포인트 3계층, DRAM slab·비동기 전송·정책 선택 부분 구현. 54GiB 짧은 forward/VJP 검증 완료(complex FP64와 real FP32). 파일 bank 예약은 실측 수명 상한 C+3 상태로 축소(2S 절감), host dense parameter 예약은 실측 ledger 범위(contiguous real CPU scalar ε, real field, 동기 재사용 CUDA tile, 파일 bank, 점 관측)에서 8×→4×, 그 밖은 8× 유지. block 단위 durable restart journal 구현(16 test, CPU/CUDA·host/file bank·실제 프로세스 kill). 대규모 복구 실측·장시간 응용·전체 메모리 계측·통합 정책 검증은 남음 |
+| 5 | P0 | 핵심 | 계층형 메모리·대규모 실행 | 체크포인트 3계층, DRAM slab·비동기 전송·정책 선택 부분 구현. 54GiB 짧은 forward/VJP 검증 완료(complex FP64와 real FP32). 파일 bank 예약은 실측 수명 상한 C+3 상태로 축소(2S 절감), host dense parameter 예약은 실측 ledger 범위(contiguous real CPU scalar ε, real field, 동기 재사용 CUDA tile, 파일 bank, 점 관측)에서 8×→4×, 그 밖은 8× 유지. block 단위 durable restart journal 구현(16 test, CPU/CUDA·host/file bank·실제 프로세스 kill). 22.6억 셀 FP32의 중단·재개를 5880에서 실측(재개 gradient 상대 L2 9.1e-8, 두 프로세스 34.9분, 전체 머신 RAM 최대 38.9 GB, 디스크 쓰기 1.52 TB, [기록](BEYOND_VRAM_RESTART.md)). 장시간 응용·통합 정책 검증은 남음 |
 | 6 | P1 | 필수 | 측정·분산 재료 | passive fitting·ADE forward 및 resident Torch·fused CUDA ADE backward 구현, 실험적 공간 ADE 연결, 54GiB 10-step 용량/VJP 검증 완료, 장시간 수렴·속도 후속 |
 | 7 | P1 | 필수 | 계면·메시 | 실험적 subpixel의 개선·퇴행 기록, 고굴절률·분산·비균일 계면 및 gradient 수렴 |
 | 8 | P1 | 필수 | 모드·포트·정규화 | 독립 고유모드·전력 보존·S-parameter 검증 |
