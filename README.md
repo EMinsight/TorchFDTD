@@ -30,8 +30,7 @@ Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md]
 ## Compared with FDTDX
 
 Ahead: browser CAD, FSP interoperability, same-GPU structure batches, beyond-VRAM streaming with restart, GDS export and browser import, shape derivatives on top of density parameterization.
-Equal: nonuniform meshes, dispersive materials, boundaries, mode sources and ports, far-field projection.
-In progress: anisotropic media inside CPML with dispersion and streaming, and the last differentiable paths that depend on them.
+Equal: nonuniform meshes, dispersive materials, anisotropic materials, boundaries, mode sources and ports, far-field projection, differentiable physics with fixed eigenmodes.
 Behind: single-problem multi-GPU (verified with CPU ranks only). Row-by-row evidence: [docs/FDTDX_PARITY_KO.md](docs/FDTDX_PARITY_KO.md).
 
 ## Quick start

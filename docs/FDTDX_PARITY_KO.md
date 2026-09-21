@@ -30,12 +30,12 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 | 분산 재료 | ADE. 경로별 제한 확인 필요 | 다중 Drude/Lorentz·passive fit·resident/streamed ADE adjoint | 지원 모델 범위의 동등 후보. 이방성 ADE·응용 정확도·외부 실측은 남음 |
 | GDS | Layer stack(boolean NOT, z-slice 측벽 staircase), explicit port contracts | Layer/datatype·Z·재료 stack, 단위·계층·array·PATH, 구멍 polygon(even-odd, 독립 rasterization 대조), layer etch(NOT), z-node별 정확한 offset의 측벽 staircase, 구멍 포함 export, browser 구멍 표시·etch 입력, 한 번의 호출로 두 port ModeNetwork, N-port branch builder | **우위**. FDTDX의 layer stack·NOT·측벽·port 사양을 모두 구현했고 export와 browser preview는 FDTDX에 없다. 꼭짓점에서 외곽선과 맞닿는 구멍·중첩 구멍은 명시적 거부, 측벽 기준면은 z_min만, z-normal GDS 마커는 미구성 |
 | 단일 문제 multi-GPU | Sharding | 별도 periodic/Bloch 초기값 API의 rank-owned slab·halo transpose·재료 VJP·binomial checkpoint. 실제 Linux 2/3-process Gloo CPU 검사 통과 | **부분/GPU 미검증**. 실제 NCCL·2장 이상 GPU, source/monitor·물리 경계·scaling 검증 필요 |
-| 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 별도 lossless periodic 및 fixed-exterior CPML reversible API, 고정 Bloch·FP32 scalar/diagonal·비동기 CPU trace·online plane 관측, 고정 모드와 radiation 목적함수, resident soft E/H 점·면 소스 파형 VJP | **부분**. PMC/tensor의 추가 물리·실행 경로, source 위치·profile/eigenmode·분산/streamed 파형·동시 adjoint batch 확대 필요 |
+| 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요. 고유모드·source 위치는 stop_gradient | 유전체·고정 Bloch·CPML·ADE·PEC·PMC/symmetric(면 ADE 포함)·고정 검출면·밀도·box/ellipsoid/cylinder·polygon/spline 정점·tensor 재료(CPML 진입·tensor ADE 포함)·resident soft E/H 점·면 소스 파형. 별도 lossless periodic 및 fixed-exterior CPML reversible API. 목적함수: 점 신호·plane 스펙트럼·N-port \|S_ij\|²·far-field·near-zone. 모든 새 경로는 full autograd 대비 Taylor·central-difference 검사 | **동등**. 고유모드·source 위치 미분은 양쪽 모두 제외. 남은 것: fused CUDA adjoint kernel의 PMC 면·tensor 경로(Torch transpose로 실행), 동시 adjoint batch |
 | 설계 파라미터화 | Density, projection/binarization, symmetry. polygon·GDS 객체는 static | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수. 추가로 polygon 정점·z 한계·회전·중심과 spline 제어점의 미분 가능 solid(signed-distance smoothing, width→0에서 기존 sampler와 일치), checkpointed adjoint 연결, mesh 세분화 수렴 기록(0.04→0.01 um에서 11.6%→0.5%) | **우위**. FDTDX의 density workflow에 더해 shape derivative를 제공한다([기록](SHAPE_GRADIENTS.md)). 구멍 미분·streamed geometry·제작 제약·2차 미분은 남음. CR 응용은 현재 범위에서 제외 |
 | Mode source·detector·port | 고정 mode source/detector, overlap/S-parameter, 임의 개수·크기의 축 정렬 평면. 고유모드 재료·좌표의 미분은 중단 | 전벡터 sparse mode solver(축퇴 편광쌍은 Eu-power 정규 기저), 실제 CUDA 주입, directional detector, 두 port multimode 복소 S와 interior VJP, 임의 개수 port·좁은 aperture·여섯 cardinal normal의 [N-port network](OPEN_MODE_PORTS.md)와 전력 balance·상반성, streamed X-slab 주입·검출(resident 대비 S 8e-8), checkpointed adjoint의 |S_ij|² 목적함수(full autograd oracle 1e-15), GDS 마커 builder, 열린 CPML 횡단면 bound mode, Native CAD/Python/browser 흐름 | **동등**. 고유모드 자체 미분은 양쪽 모두 제외. 비축 normal·streamed 분산 guide·sub-cell aperture의 횡방향 CPML mode·z-normal GDS 마커는 남음. Y-branch 전력 손실은 staircase 접합의 물리이지 solver 결함이 아님 |
 | Far-field·회절 | Angle/Cartesian/k-space field projection(원거리 근사와 exact Green 함수), 복소 외부 매질, open surface·edge window, diffraction detectors | Closed-box 벡터 원거리장과 유한거리 exact Green 함수 near-zone(dipole 해석해 대비 2차 수렴), 각도·구면·Cartesian·k-space 관측, 스칼라·주파수별 복소 외부 매질(수동성 검사), open surface·edge window(approximation flag), TFSF provenance 허용, 둘 다 Torch 미분 가능(재료 VJP 3e-10), Bloch 회절 차수·전후 분리, 저장 결과/NPZ·browser | **동등**. 사다리꼴 quadrature·층상 외부 매질·browser의 near-zone은 남음([비교표](FARFIELD_WORKFLOW.md)) |
-| 이방성 | 대각·일반 tensor | Node-sampled SPD bulk tensor, periodic/Bloch CPU·CUDA와 고정 등방성 CPML 외부, 이산 transpose·6성분 VJP·checkpoint·고유파 검증. Native 재료 편집·Project/CLI·고정 geometry 재료표 미분 연결 | **부분**. 일반 anisotropic CPML·반사/장시간 안정성·interface·tensor ADE·streaming·mode 확대가 남음 |
-| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. Closed PMC native Project·CLI·browser·endpoint NPZ. 별도 uniform PMC+CPML CPU/CUDA API와 보조 상태·재료·파형 adjoint, 전체/절반 영역 일치와 checkpoint 절반 절감 | **부분**. 제한된 공통 PML profile의 혼합 경계를 Project·CLI·browser에 연결. 일반 profile·흡수 정확도·속도, ADE·streaming·tensor batch 확대가 남음 |
+| 이방성 | 대각·일반 tensor, PML 안 포함 | Node-sampled SPD bulk tensor(CPU·CUDA, transpose·6성분 VJP), CPML 안 tensor 매질(D-field 구성, Bécache–Fauqueux–Joly 기하 안정 조건을 node별 admission으로 강제, 4000-step 스윕·dense 스펙트럼 반경 1.000000000 기록), PEC 벽, full-tensor 대칭 PSD strength의 trapezoidal ADE(transpose·VJP·passivity), streamed X-slab(halo 2K, resident 대비 1e-10), 복굴절 slab 해석해 acceptance(채널 오차 1.37%/0.33%). Native 재료 편집·Project/CLI·재료표 미분 | **동등**. FDTDX가 PML 안에서 받아들이는 회전·중간축 tensor는 연속 PML 자체가 불안정하므로(스펙트럼 반경 1.0049–1.0089 실측) 명시적으로 거부하며 이를 열위로 보지 않는다. 남은 것: fused tensor kernel, tensor pole의 node별 ω0/γ, anisotropic mode/TFSF 주입, 2D·graded mesh([기록](ANISOTROPY_IMPLEMENTATION_PLAN.md)) |
+| 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction, 면별 자유 조합 | CPML(면별 독립 profile), periodic/Bloch, PEC/electric antisymmetry, PMC/symmetric 면을 ordinary checkpointed adjoint(CPU·CUDA, 저장 면 topology와 명시적 transpose), streamed X-slab(면 소유권·halo·checkpoint·restart journal), tensor batch(면 bank·CUDA graph)에서 허용. 면 위 ADE 분극 bank(resident·streamed·batch). 절반 영역 대 mirrored 전체 영역 신호 bitwise 일치·gradient 4.7e-10, FP64 adjoint 대 autograd 8e-20, PMC 옆 CPML 반사 1.7e-4 | **동등**. 남은 것: fused CUDA adjoint/ADE kernel의 면(Torch transpose로 실행), 2D PMC, browser 면 모델, plane adjoint의 면 ADE([기록](PMC_IMPLEMENTATION_PLAN.md)) |
 
 ## 이번 구현의 근거
 
@@ -175,12 +175,11 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
    [완료했다](BEYOND_VRAM_FP32.md). block 단위 [durable restart](STREAMED_RESTART.md)는
    구현했고 22.6억 셀 FP32의 중단·재개를 [실측했다](BEYOND_VRAM_RESTART.md). 남은 것은 장시간 실행과 지속 성능 계측이다. CR 응용 최적화와 CR 정밀 재계산은 현재 실행 범위에서 제외한다.
    기존 CR 기록은 보존하며 일반 inverse design과 solver gradient 검증은 계속한다.
-2. CPU·CUDA·브라우저에서 확인한 PMC+CPML native dispatch의 흡수 정확도를 검증한 뒤,
-   필요한 profile·ADE·streaming·batch 조합으로 확장한다.
-   이미 통과한 경로는 변경 없이 반복하지 않는다.
-3. [일반 이방성 tensor 계획](ANISOTROPY_IMPLEMENTATION_PLAN.md)의 고정 등방성
-   CPML 외부에서 반사·안정성 및 계면을 검증하고 streaming으로 확장한다.
-   6성분 재료 편집·Project/CLI·재료표 미분 연결은 완료했다.
+2. PMC/symmetric 면의 adjoint·streamed·tensor batch·면별 CPML profile·면 ADE는
+   [구현했다](PMC_IMPLEMENTATION_PLAN.md). 남은 것은 fused kernel의 면과 2D PMC다.
+3. [일반 이방성 tensor](ANISOTROPY_IMPLEMENTATION_PLAN.md)의 CPML 진입(기하 안정
+   조건)·PEC 벽·tensor ADE·streaming·복굴절 slab acceptance는 구현했다. 남은 것은
+   fused tensor kernel과 anisotropic mode/TFSF 주입이다.
 4. Mode port의 일반 단면/branch·streamed 경로·|S_ij|² adjoint와 GDS 마커
    builder는 [구현했다](OPEN_MODE_PORTS.md). source parameter 미분은 남았다.
 5. 단일 문제 multi-GPU의 물리 범위를 확장하고 실제 여러 장치에서 통신·peak memory·

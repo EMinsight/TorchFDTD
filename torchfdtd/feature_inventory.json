@@ -630,7 +630,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "Node-sampled symmetric SPD epsilon >= I. Periodic/Bloch and fixed isotropic CPML collar, CPU/CUDA FP32 fields and six-component material VJP. Native Project/CLI/browser material editor, tensor_from_project and fixed-geometry table gradients. General anisotropic absorbing boundaries, tensor ADE, streaming and modal integration remain unsupported.",
+      "scope": "Node-sampled symmetric SPD epsilon >= I. Periodic/Bloch, PEC walls, tensor media inside CPML under the Bécache–Fauqueux–Joly geometric stability admission (4000-step sweep and dense spectral radii recorded), full-tensor trapezoidal ADE with transpose and VJP, streamed X-slab execution matching resident to 1e-10, CPU/CUDA fields and six-component material VJP, birefringent slab acceptance. Native Project/CLI/browser material editor, tensor_from_project and fixed-geometry table gradients. Rotated or intermediate-axis tensors inside CPML are rejected because the continuum PML is unstable for them; fused tensor kernels, per-node pole rates and anisotropic modal/TFSF injection remain unsupported.",
       "evidence": [
         "torchfdtd/anisotropy.py",
         "tests/test_anisotropy.py",
@@ -1044,7 +1044,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "Native Project·CLI·browser에서 closed PEC/PMC 및 제한된 PMC+CPML 실행. CPML은 균일 등간격 FP32, 공통 깊이·세기와 명시적 cubic profile, 고정 등방성 collar, point source/monitor. CPU/CUDA endpoint adjoint와 upper DOF·보조 상태·재료/파형 VJP. 별도 direct endpoint API의 정상입사 CPU gate는 반사장 1%·반사 flux 0.1% 기준을 통과했으며 native Project·일반 흡수 검증은 아님. 일반 profile·흡수 정확도·복소장·ADE·streaming·tensor batch는 남음.",
+      "scope": "Native Project·CLI·browser에서 closed PEC/PMC 및 제한된 PMC+CPML 실행. CPML은 균일 등간격 FP32, 공통 깊이·세기와 명시적 cubic profile, 고정 등방성 collar, point source/monitor. CPU/CUDA endpoint adjoint와 upper DOF·보조 상태·재료/파형 VJP. 별도 direct endpoint API의 정상입사 CPU gate는 반사장 1%·반사 flux 0.1% 기준을 통과했으며 native Project·일반 흡수 검증은 아님. PMC/symmetric 면은 ordinary checkpointed adjoint(CPU·CUDA)·streamed X-slab·tensor batch에서 면별 독립 CPML profile과 면 ADE 분극 bank까지 지원(mirrored 전체 영역 대비 신호 bitwise, gradient 4.7e-10). fused CUDA kernel의 면·2D PMC·browser 면 모델은 남음.",
       "evidence": [
         "torchfdtd/pmc_simulation.py",
         "torchfdtd/endpoint_project.py",
@@ -1080,7 +1080,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "PMC/magnetic symmetry의 closed cavity와 제한된 native PMC+CPML workflow. CPU 전체/절반 영역 E/H와 재료·파형 gradient 일치, 완전 checkpoint 37,088→18,544 bytes. CUDA mixed-wall transpose 검증. 제한된 direct endpoint 정상입사 흡수 gate는 통과했지만 native Project·일반 흡수 정확도·속도·ADE·streaming은 남음.",
+      "scope": "PMC/magnetic symmetry의 closed cavity와 제한된 native PMC+CPML workflow. CPU 전체/절반 영역 E/H와 재료·파형 gradient 일치, 완전 checkpoint 37,088→18,544 bytes. CUDA mixed-wall transpose 검증. 제한된 direct endpoint 정상입사 흡수 gate를 통과했고, ordinary adjoint·streamed·tensor batch 경로와 면 ADE를 지원한다. fused CUDA kernel의 면·2D PMC·browser 면 모델은 남음.",
       "evidence": [
         "torchfdtd/pmc_simulation.py",
         "torchfdtd/endpoint_native.py",
