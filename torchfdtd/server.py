@@ -197,6 +197,8 @@ def create_app(result_dir=None):
     register_radiation_routes(app, get_job)
     from .farfield_api import register_farfield_routes
     register_farfield_routes(app, get_job)
+    from .propagation_api import register_propagation_routes
+    register_propagation_routes(app, get_job)
 
     @app.get('/api/jobs/{key}')
     def status(key: str):

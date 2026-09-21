@@ -15,6 +15,7 @@ import { geometryDefaults,geometryControls,rotationControls,setupGeometryEditor 
 import { setupMonitorTools, spectralControls, fieldMonitorControls } from './monitor_tools.js';
 import { setupBoundaryTools } from './boundary_tools.js';
 import { openModeNetwork } from './mode_network_tools.js';
+import { openPropagation } from './propagation_tools.js';
 
 // Preserve existing browser projects and design setups across the product rename.
 try {
@@ -205,7 +206,7 @@ async function poll(){
   $('#status-text').textContent='Calculation complete · loading field results…';
   const result=await api('/jobs/'+state.job+'/fields');let max=1e-20;result.frames.forEach(f=>f.forEach(row=>row.forEach(v=>max=Math.max(max,Math.abs(v)))));result.max=max;state.results=result;state.frame=Math.max(0,result.frames.length-1);state.monitors=job.monitors;
   localStorage.removeItem('torchfdtd.activeJob');setMode('analysis');$('#status-text').textContent=job.status;
-  $('#results-tree').innerHTML=`<button data-tab="fields">${icon('chart-no-axes-combined')} ${job.execution?.mode==='tiled'?'Stitched plane |E|²':esc(state.project.region.field)+' field snapshots'}</button>${job.monitors.map(m=>`<button data-tab="fields">${icon('activity')} ${esc(m.name)} · ${m.component}</button>`).join('')}<div class="run-summary"><b>${job.summary.seconds.toFixed(2)} s</b> solver loop<br>${job.summary.backend.toUpperCase()}${job.summary.cuda_graph?' · CUDA graph':''}${job.summary.cuda_kernel==='fused'?' · fused Yee / CPML':''}${job.summary.cuda_monitor_kernel==='fused'?' · shared plane DFT':''}<br>${job.summary.mcells_per_second.toFixed(1)} Mcells/s<br>${job.summary.gpu?esc(job.summary.gpu):'CPU'}<br>${job.summary.auto_shutoff?'Decay threshold reached':job.summary.cancelled?'Cancelled':'Step limit reached'}<br>${job.summary.steps} / ${job.summary.requested_steps??job.summary.steps} steps${executionSummary(job.execution)}</div>`;
+  $('#results-tree').innerHTML=`<button data-tab="fields">${icon('chart-no-axes-combined')} ${job.execution?.mode==='tiled'?'Stitched plane |E|²':esc(state.project.region.field)+' field snapshots'}</button>${job.monitors.map(m=>`<button data-tab="fields">${icon('activity')} ${esc(m.name)} · ${m.component}</button>`).join('')}${job.flux_monitors?.length?`<button data-action="propagation">${icon('chart-no-axes-combined')} Angular spectrum</button>`:''}<div class="run-summary"><b>${job.summary.seconds.toFixed(2)} s</b> solver loop<br>${job.summary.backend.toUpperCase()}${job.summary.cuda_graph?' · CUDA graph':''}${job.summary.cuda_kernel==='fused'?' · fused Yee / CPML':''}${job.summary.cuda_monitor_kernel==='fused'?' · shared plane DFT':''}<br>${job.summary.mcells_per_second.toFixed(1)} Mcells/s<br>${job.summary.gpu?esc(job.summary.gpu):'CPU'}<br>${job.summary.auto_shutoff?'Decay threshold reached':job.summary.cancelled?'Cancelled':'Step limit reached'}<br>${job.summary.steps} / ${job.summary.requested_steps??job.summary.steps} steps${executionSummary(job.execution)}</div>`;
   refreshIcons();renderResults();log(`${job.status}: ${job.summary.steps} steps in ${job.summary.seconds.toFixed(3)} s, ${job.summary.mcells_per_second.toFixed(1)} Mcells/s. Setup ${job.summary.setup_seconds.toFixed(2)} s.`+(job.execution?.mode?` Execution: ${modeLabels[job.execution.mode]}${job.execution.policy?` (slab ${job.execution.policy.slab_width} × depth ${job.execution.policy.temporal_depth}, ${job.execution.policy.state_storage} banks)`:''}.`:''));job.summary.warnings.forEach(w=>log(w,'warning'));return;
  }
  pollTimer=setTimeout(poll,400);
@@ -245,6 +246,7 @@ const actions={
  'inverse-design':()=>inverseDesign.open(),
  'global-monitor':()=>monitorTools.globals(),
  'flux-results':()=>monitorTools.flux(),
+ 'propagation':()=>openPropagation({state,api,esc,toast}),
  'mesh-preview':()=>meshTools.open(),
  'mesh-freeze':()=>meshTools.freeze(),
  'mesh-nodes':()=>meshTools.editNodes(),

@@ -1,5 +1,6 @@
 import {openDiffraction} from './radiation_tools.js';
 import {openFarfield} from './farfield_tools.js';
+import {openPropagation} from './propagation_tools.js';
 import {drawPlot} from './views.js';
 
 export function spectralControls(s,numeric,dropdown,{plane=false,prefix='spectrum.'}={}){
@@ -37,7 +38,7 @@ export function setupMonitorTools({state,api,esc,toast,commit,numeric,dropdown})
    const job=await api('/jobs/'+state.job),monitors=job.flux_monitors||[];
    // Diffraction may use six stored fields even when raw flux was disabled.
    const jobs=await api('/jobs');
-   dialog.innerHTML=`<div class="fsp-heading"><h2>Frequency fields / power flux</h2><button data-dismiss>Close</button></div><label>Monitor <select aria-label="Flux monitor">${monitors.map(m=>`<option value="${esc(m.id)}">${esc(m.name)} · +${m.normal}</option>`).join('')}</select></label><label>Reference run <select aria-label="Flux reference"><option value="">Raw signed flux</option>${jobs.filter(j=>j.id!==state.job&&j.flux_monitors.length).map(j=>`<option value="${j.id}">${esc(j.name)} · ${j.id.slice(0,8)}</option>`).join('')}</select></label><label class="enabled-row"><input type="checkbox" aria-label="Subtract incident fields"> Subtract reference E/H before computing flux (reflection)</label><button data-plot-flux>Plot flux</button><button data-diffraction>Diffraction orders</button><button data-farfield>Closed-box far field</button><a href="/api/jobs/${state.job}/flux.csv">Export raw flux CSV</a><canvas></canvas><p class="monitor-status"></p><p>Flux is signed along the positive monitor normal. A reflected wave can be negative. Reference normalization requires identical sources, mesh, duration and unapodized monitors. For an air reference, freeze graded refinements before removing structures, then run both scenes with the same monitor IDs. Absolute watt calibration is not provided.</p>`;
+   dialog.innerHTML=`<div class="fsp-heading"><h2>Frequency fields / power flux</h2><button data-dismiss>Close</button></div><label>Monitor <select aria-label="Flux monitor">${monitors.map(m=>`<option value="${esc(m.id)}">${esc(m.name)} · +${m.normal}</option>`).join('')}</select></label><label>Reference run <select aria-label="Flux reference"><option value="">Raw signed flux</option>${jobs.filter(j=>j.id!==state.job&&j.flux_monitors.length).map(j=>`<option value="${j.id}">${esc(j.name)} · ${j.id.slice(0,8)}</option>`).join('')}</select></label><label class="enabled-row"><input type="checkbox" aria-label="Subtract incident fields"> Subtract reference E/H before computing flux (reflection)</label><button data-plot-flux>Plot flux</button><button data-diffraction>Diffraction orders</button><button data-farfield>Closed-box far field</button><button data-propagate>Angular spectrum</button><a href="/api/jobs/${state.job}/flux.csv">Export raw flux CSV</a><canvas></canvas><p class="monitor-status"></p><p>Flux is signed along the positive monitor normal. A reflected wave can be negative. Reference normalization requires identical sources, mesh, duration and unapodized monitors. For an air reference, freeze graded refinements before removing structures, then run both scenes with the same monitor IDs. Absolute watt calibration is not provided.</p>`;
    dismiss();
    async function plot(){const token=++revision;try{
     const m=monitors.find(m=>m.id===$('[aria-label="Flux monitor"]').value),ref=$('[aria-label="Flux reference"]').value,subtract=$('[aria-label="Subtract incident fields"]').checked;
@@ -48,6 +49,7 @@ export function setupMonitorTools({state,api,esc,toast,commit,numeric,dropdown})
    }catch(e){if(token===revision){$('.monitor-status').textContent=e.message;toast(e.message);}}}
    $('[data-diffraction]').onclick=async()=>{try{await openDiffraction({state,api,esc,toast});dialog.close();}catch(error){toast(error.message);}};
    $('[data-farfield]').onclick=async()=>{try{await openFarfield({state,api,esc,toast});dialog.close();}catch(error){toast(error.message);}};
+   $('[data-propagate]').onclick=async()=>{try{await openPropagation({state,api,esc,toast});dialog.close();}catch(error){toast(error.message);}};
    $('[data-plot-flux]').onclick=plot;$('[data-plot-flux]').disabled=!monitors.length;dialog.showModal();if(monitors.length)await plot();else $('.monitor-status').textContent='No raw flux recorded. Diffraction orders can use a stored six-field plane.';
   }
  };

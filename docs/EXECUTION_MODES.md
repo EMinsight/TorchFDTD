@@ -203,6 +203,51 @@ whole device would; the near-field error falls from 12% at 0.25 um overlap to
 intensity error from 4.8% to 1 to 2%. The tiled adjoint is Python only
 (`TiledPlaneSimulation`); the browser runs no gradients.
 
+## Angular-spectrum post-processing
+
+Any finished forward run, resident, streamed or tiled, that stored a DFT plane
+can be propagated through the homogeneous exterior beyond that plane without
+another FDTD run: the **Angular spectrum** button in the results panel and in
+the flux dialog opens the panel. It calls the same implementation as the tiled
+focal plane ([ANGULAR_SPECTRUM.md](ANGULAR_SPECTRUM.md)): `propagate_section`
+for a section through the normal at one fixed transverse coordinate and
+`propagate_volume` at one distance for a plane parallel to the monitor. The
+computation runs on the run's device (CUDA for a GPU run) and the fields stay
+on the server; the panel receives an intensity image decimated to at most 512
+samples per axis.
+
+| Control | Meaning |
+| --- | --- |
+| Monitor, frequency | One stored plane and one of its recorded frequencies |
+| Direction | Auto infers the propagation side from the enabled sources (all behind the plane or all in front); +normal or −normal override it |
+| Exterior index | Real index of the homogeneous exterior, defaulting to the background index |
+| Zero padding factor | The plane is padded this many times before the FFT; light beyond `(pad - 1) x span / 2` wraps around |
+| Kind | A section `xz` or `yz` (the transverse axis with the normal; a 2D device offers one) or a plane parallel to the monitor |
+| Section offset, distance start/stop, planes | The fixed transverse coordinate and the uniform distance grid of a section |
+| Plane distance | The distance of the parallel plane |
+
+The report below the image gives the **focus** (peak intensity, its distance
+from the plane and absolute coordinate along the normal, its transverse
+position and the FWHM along the section through it by linear interpolation
+of the half-maximum crossings; on a parallel plane the peak position on both
+axes and the FWHM along the first) and the **spectrum** (largest angle the
+plane spacing can represent, `sin(theta) = wavelength / (2 spacing)`, the
+evanescent fraction of the padded spectrum, spacing, wavelength in the
+exterior, pad and padded shape). When the monitor spacing exceeds half the
+wavelength in the exterior the panel shows the aliasing warning: angles above
+the representable one alias instead of failing.
+
+The route refuses with the library's message (HTTP 422) when the selected id
+is not a stored DFT plane, when the plane holds no electric component or is
+not a uniform tensor-product grid, when the section axis is not transverse to
+the plane, and when the section or volume needs more than the budget: half of
+the free device memory on CUDA, a quarter of the available host memory on the
+CPU. The contract of the method applies: a homogeneous, lossless, source-free
+exterior with outgoing waves only, and a recorded window outside which the
+field is taken as zero; the focus report names the global intensity maximum
+of what was computed, hot spots included. The API is
+`GET /api/jobs/{id}/propagation-monitors` and `POST /api/jobs/{id}/propagate`.
+
 ## Limits of the browser streamed path
 
 - **Forward only.** No gradients, no inverse design; the Python
