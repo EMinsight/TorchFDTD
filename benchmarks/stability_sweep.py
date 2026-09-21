@@ -53,6 +53,11 @@ MATERIALS = dict(
                               poles=[LorentzPole(resonance_rad_s=w0, strength_rad_s_squared=s, damping_rad_s=g) for w0, s, g in LORENTZ_POLES]),
     drude_metal=Material(name='drude_metal', model='drude', epsilon_inf=1., plasma_rad_s=2e15, collision_rad_s=1e14))
 TENSORS = dict(tensor_admitted=(4., 2., 2.), tensor_rejected=(2., 3., 4.))
+# Single-pole Lorentz silicon nitride of the documented divergence (docs/BOUNDARIES.md): n = 2.05 at 550 nm,
+# negative permittivity between 1.4e16 and 2.8e16 rad/s, inside the band of a 20 nm grid.
+SIN = Material(name='sin_lorentz', model='lorentz', epsilon_inf=1., resonance_rad_s=1.4e16, linewidth_rad_s=1e13, delta_epsilon=3.)
+VISIBLE_PULSE = dict(pulse='gaussian', time_definition='standard', wavelength=.55, pulse_length=9.164e-15, pulse_offset=27e-15,
+                     eliminate_discontinuities=True)
 
 
 # ----------------------------------------------------------------------------------------------- fixtures
@@ -178,6 +183,17 @@ def reversible_project(material):
                    name='all-periodic reversible forward'+(' with an n=3.5 block' if material else ''))
 
 
+def sin_posts_project(mode, *, precision='float64', backend='cpu', cuda_kernel='torch'):
+    """The documented case: a 20 nm grid, 12-layer CPML, SiN posts whose array runs through the lateral (y) PML."""
+    r = Region(dimension='2d', size=(3., 4., 1.), mesh=.02, steps=STEPS, precision=precision, backend=backend, cuda_kernel=cuda_kernel,
+               pml_cells=12, material_sampling='yee', snapshot_interval=10000, pml_dispersion=mode,
+               run_control=RunControl(check_interval=SAMPLE))
+    posts = [Structure(name=f'post {k}', center=(0, -1.95+.3*k, 0), size=(.6, .1, 2.), material='sin_lorentz') for k in range(14)]
+    sheet = Source(kind='plane', component='Ez', center=(-1., 0, 0), size=(0, 3.4, 0), **VISIBLE_PULSE)
+    return Project(name=f'SiN post array through the lateral PML, {mode}', region=r, materials=[Material(name='void', index=1), SIN],
+                   structures=posts, sources=[sheet], monitors=[Monitor(component='Ez', center=(1., 0, 0))])
+
+
 def tensor_project():
     return project('3d', precision='float32', structures=[], name='node-tensor slab crossing the lateral PML')
 
@@ -214,6 +230,11 @@ def declare_rows():
         row(f'src-sheet-{d}', 'sources', 'soft sheet source', lambda d=d: sheet_project(d), dimension=d)
         row(f'src-oneway-{d}', 'sources', 'one-way plane with periodic transverse faces', lambda d=d: oneway_project(d), dimension=d)
         row(f'src-tfsf-{d}', 'sources', 'closed TFSF box in vacuum (leakage energy bounded)', lambda d=d: tfsf_project(d), dimension=d)
+    for mode in ('ade', 'frozen'):
+        row(f'sin-posts-{mode}-2d', 'dispersive in PML', f'SiN single-pole Lorentz post array through the lateral PML on a 20 nm grid (documented divergence fixture), pml_dispersion={mode}',
+            lambda mode=mode: sin_posts_project(mode), dimension='2d')
+        row(f'sin-posts-{mode}-2d-cuda', 'dispersive in PML', f'SiN post array through the lateral PML, 20 nm grid, pml_dispersion={mode} (CUDA float32, fused kernel)',
+            lambda mode=mode: sin_posts_project(mode, precision='float32', backend='cuda', cuda_kernel='fused'), dimension='2d', cuda=True, execution='cuda float32 fused')
     row('pec-2d', 'PEC/PMC', 'PEC x faces with an n=3.5 block touching the wall, CPML y faces', pec_project_2d, dimension='2d')
     row('pmc-pec-cpml-3d', 'PEC/PMC', 'PMC x faces, PEC y faces, CPML z faces, n=3.5 block touching both walls (exact-endpoint dispatch, FP32)',
         lambda: pmc_project_3d(False), dimension='3d', execution='cpu float32 endpoint')
@@ -421,8 +442,12 @@ def judge(samples, source_end_s, dt, closed, limits):
         peak = float(max(np.nanmax(values[window]), 1e-12*overall))
         growth = float(np.nanmax(values[later])/peak) if len(later) else 1.
         last = float(values[-1]/peak)
+        # Trend over the judged samples themselves: last sample over the first sample after the reference
+        # window. Reported, not judged; it shows a round-off floor that creeps while the ratios above stay small.
+        trend = float(values[-1]/values[later[0]]) if len(later) and values[later[0]] > 0 else None
         limit = limits['last_over_peak_max_closed'] if closed else limits['last_over_peak_max_open']
         out[name] = dict(post_source_peak=peak, growth_ratio=growth, last_over_peak=last, last=float(values[-1]),
+                         late_trend=trend, floor_over_peak=float(values[-1]/overall) if overall else None,
                          growth_pass=bool(growth <= limits['growth_ratio_max']), decay_pass=bool(last <= limit), last_limit=limit)
     return out
 
@@ -543,8 +568,8 @@ def render(record):
              f"Summary: {record['passed_rows']} of {record['rows_run']} rows pass; {record['failed_rows']} fail; {record['rejected_rows']} rejected as declared."
              + (f" Failing rows: {', '.join(record['failing_ids'])}." if record['failing_ids'] else ''), '',
              '## Matrix', '',
-             '| row | group | dim | execution | cells | steps | source end (fs) | state norm growth | state norm last/peak | interior growth | interior last/peak | peak field (last) | check fired | s | verdict |',
-             '| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | --- |']
+             '| row | group | dim | execution | cells | steps | source end (fs) | state norm growth | state norm last/peak | interior growth | interior last/peak | last / overall peak | late trend | peak field (last) | check fired | s | verdict |',
+             '| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | --- |']
     for out in record['rows']:
         j = out.get('judgement') or {}
         sn, ie = j.get('state_norm'), j.get('interior_energy')
@@ -555,7 +580,25 @@ def render(record):
             verdict_text = 'pass' if out['passed'] else 'FAIL'
         lines.append(f"| {out['id']} | {out['group']} | {out['dimension']} | {out['execution']} | {out['cells']} | {out['steps_completed']} | {fmt(out['source_end_fs'], 4)} | "
                      f"{fmt(sn and sn['growth_ratio'], 4)} | {fmt(sn and sn['last_over_peak'], 3)} | {fmt(ie and ie['growth_ratio'], 4)} | {fmt(ie and ie['last_over_peak'], 3)} | "
+                     f"{fmt(sn and sn.get('floor_over_peak'), 2)} | {fmt(sn and sn.get('late_trend'), 3)} | "
                      f"{fmt(last_peak, 3)} | {fmt(out['divergence_check_fired'])} | {fmt(out['seconds'], 3)} | {verdict_text} |")
+    lines += ['', '## Late trend of the settled rows', '',
+              'Rows whose state norm at the last sample exceeds its value at the first judged sample by more than 10 percent, with the level '
+              'they sit at relative to the overall peak and the peak field at the first judged and the last sample. A level of 1e-12 or below '
+              'of the overall peak is the float round-off floor of the fields (1e-6 in amplitude); a creep at that level with a constant peak field '
+              'is accumulated round-off, not a growing mode; a closed lossless cavity (all faces periodic, PEC or PMC) keeps its energy and its state '
+              'norm oscillates with the staggered E/H sampling. The growth and last/peak criteria above are what is judged.', '',
+              '| row | execution | state norm last / first judged | level: last / overall peak | peak field at first judged | peak field at last |',
+              '| --- | --- | ---: | ---: | ---: | ---: |']
+    for out in record['rows']:
+        j = out.get('judgement') or {}
+        sn = j.get('state_norm')
+        if not sn or sn.get('late_trend') is None or sn['late_trend'] <= 1.1:
+            continue
+        before = len([1 for s in out['samples'] if s['step']*out['dt_s'] < (out['source_end_fs'] or 0)*1e-15])
+        first = min(before+j['reference_samples'], len(out['samples'])-1)
+        lines.append(f"| {out['id']} | {out['execution']} | {fmt(sn['late_trend'], 3)} | {fmt(sn['floor_over_peak'], 2)} | "
+                     f"{fmt(out['samples'][first]['field_peak'], 3)} | {fmt(out['samples'][-1]['field_peak'], 3)} |")
     lines += ['', '## Rows with an error, a fired check or a rejection', '']
     noted = [out for out in record['rows'] if out['error'] or out['divergence_check_fired']]
     if not noted:
@@ -582,6 +625,7 @@ def main():
     parser.add_argument('--render', action='store_true', help='rewrite docs/STABILITY_SWEEP.md from the existing record and exit')
     parser.add_argument('--list', action='store_true')
     parser.add_argument('--merge', action='store_true', help='replace the selected rows inside the existing record instead of rewriting it')
+    parser.add_argument('--rejudge', action='store_true', help='recompute every verdict of the existing record from its samples and rerender')
     args = parser.parse_args()
     if args.list:
         for spec in ROWS:
@@ -594,6 +638,16 @@ def main():
         return
     case = json.loads(CASE.read_text(encoding='utf-8'))
     limits = case['acceptance']
+    if args.rejudge:
+        # Recompute every verdict from the recorded samples with the case limits; no simulation is rerun.
+        record = json.loads(Path(args.output).read_text(encoding='utf-8'))
+        record['rows'] = [verdict({k: v for k, v in row.items() if k not in ('judgement', 'passed', 'rejected_as_declared')}, limits) for row in record['rows']]
+        record['failing_ids'] = [o['id'] for o in record['rows'] if not o['passed']]
+        record.update(passed_rows=sum(o['passed'] for o in record['rows']), failed_rows=len(record['failing_ids']), acceptance=limits)
+        Path(args.output).write_text(json.dumps(record, indent=2)+'\n', encoding='utf-8', newline='\n')
+        DOCUMENT.write_text(render(record), encoding='utf-8', newline='\n')
+        print(json.dumps(dict(rejudged=len(record['rows']), failing=record['failing_ids'])))
+        return
     selected = [s for s in ROWS if (not args.rows or s['id'] in args.rows) and not (args.skip_cuda and s.get('cuda'))]
     if args.rows:
         missing = set(args.rows)-{s['id'] for s in ROWS}

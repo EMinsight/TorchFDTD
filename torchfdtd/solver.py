@@ -216,6 +216,12 @@ def estimate(p: Project, *, endpoint_dispatch=True):
     max_poles = max((len(m.oscillators) for m in dispersive), default=0)
     if dispersive:
         warnings.append('Dispersive materials use passive isotropic trapezoidal ADE. The epsilon field image stores epsilon-infinity; inspect wavelength-dependent n/k in Materials. Resolve skin depth and resonance with a mesh/time convergence study.')
+        inside = dispersive_structures_in_pml(p)
+        if inside and r.pml_dispersion == 'ade':
+            named = '; '.join(f'{name} ({", ".join(faces)})' for name, faces in inside)
+            warnings.append(f'Dispersive material inside PML layers: {named}. The coupled ADE/CPML update is not a stable absorber for '
+                            'dispersive media that reach the outer boundary (docs/BOUNDARIES.md); set region.pml_dispersion="frozen" or '
+                            'end the structure before the PML.')
     if r.material_sampling == 'cell' and any(m.model == 'drude' and any(s.enabled and s.material == m.name and s.kind != 'rectangle' for s in p.structures) for m in dispersive):
         warnings.append('Drude curved-interface accuracy is not established for legacy shared-cell staircase sampling. Compare physical Yee sampling and refine space/time before using quantitative results.')
     if any(r.boundaries.pair(i)[0].kind in ('periodic', 'bloch') for i in range(2 if r.dimension == '2d' else 3)):
@@ -256,6 +262,29 @@ def estimate(p: Project, *, endpoint_dispatch=True):
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
             'estimated_memory_mb': round((stored * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes}
+
+
+def dispersive_structures_in_pml(p: Project):
+    """(structure name, PML faces) of every enabled dispersive structure whose support bounds reach a PML layer."""
+    from .mesh import object_bounds
+    r = p.region
+    dispersive = {m.name for m in p.materials if m.oscillators}
+    active = 2 if r.dimension == '2d' else 3
+    found = []
+    for s in p.structures:
+        if not s.enabled or s.material not in dispersive:
+            continue
+        center, size = object_bounds(s)
+        faces = []
+        for axis in range(active):
+            low, high = r.interior_bounds(axis)
+            if r.pml_layers(axis, 0) and center[axis]-size[axis]/2 < low:
+                faces.append('xyz'[axis]+'_min')
+            if r.pml_layers(axis, 1) and center[axis]+size[axis]/2 > high:
+                faces.append('xyz'[axis]+'_max')
+        if faces:
+            found.append((s.name, faces))
+    return found
 
 
 def pulse_envelope_parameters(source):
