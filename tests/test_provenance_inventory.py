@@ -20,8 +20,37 @@ from packaging.requirements import Requirement  # noqa: E402
 from packaging.utils import canonicalize_name  # noqa: E402
 
 HANGUL_USER = chr(0xC5F0) + chr(0xAD6C) + chr(0xC2E4)
-# The samples are assembled here so that no tracked file spells the historic path.
+# The samples are assembled here so that no tracked file spells the historic path,
+# the addresses are synthetic, and the parametrized ids are short labels so that
+# no sample string reaches a test id, a JUnit report or an evidence record.
 ADMIN = 'ad' + 'min'
+POSITIVE = {
+    'admin_forward_slash': ('private_windows_user_path', 'scratch C:/Users/' + ADMIN + '/photonweave/.local'),
+    'admin_json_escaped': ('private_windows_user_path', json.dumps({'dir': 'C:\\Users\\' + ADMIN + '\\photonweave'})),
+    'hangul_drive_path': ('private_windows_user_path', 'c:\\Users\\' + HANGUL_USER + '\\Desktop'),
+    'hangul_user_path': ('hangul_user_path', 'C:/Users/' + HANGUL_USER + '/AppData'),
+    'address_ssh': ('address_100_x_x_x', 'ssh user@100.100.100.100'),
+    'address_url': ('address_100_x_x_x', 'http://100.64.1.2:9802/'),
+    'password_single_quoted': ('password_literal', "password = 'hunter2'"),
+    'passwd_double_quoted': ('password_literal', 'PASSWD: "1234"'),
+    'ssh_password_environment': ('ssh_password_environment', 'TORCHFDTD_SSH_PASSWORD="letmein"'),
+    'github_token': ('credential_token', 'token ghp_' + 'A' * 36 + ' end'),
+    'aws_key_id': ('credential_token', 'AKIA' + 'Q' * 16),
+    'tailscale_key': ('credential_token', 'tskey-auth-abcdefghijklmnop'),
+    'private_key_block': ('private_key_block', '-----BEGIN OPENSSH PRIVATE KEY-----'),
+    'ssh_public_key': ('ssh_public_key', 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIABCDEFGHIJKLMNOPQRSTUVWXYZ user@host'),
+}
+BENIGN = {
+    'administrator': 'C:/Users/' + ADMIN + 'istrator/x',
+    'public_user': 'C:/Users/public/x',
+    'project_scratch': 'D:/TorchFDTD/.local/tmp',
+    'version_number': 'version 100.0.1',
+    'four_part_version': 'numpy 1.100.2.3 is not an address',
+    'environment_read': "os.environ.get('TORCHFDTD_SSH_PASSWORD')",
+    'powershell_prompt': '$env:TORCHFDTD_SSH_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)',
+    'prose_password': 'the password is requested interactively',
+    'prose_key_type': 'ssh-ed25519 keys are accepted',
+}
 
 
 def test_inventory_check_passes_on_the_tracked_tree():
@@ -34,34 +63,15 @@ def test_inventory_check_passes_on_the_tracked_tree():
     assert summary['pip_check'] == 0
 
 
-@pytest.mark.parametrize('kind, sample', [
-    ('private_windows_user_path', 'scratch C:/Users/' + ADMIN + '/photonweave/.local'),
-    ('private_windows_user_path', json.dumps({'dir': 'C:\\Users\\' + ADMIN + '\\photonweave'})),
-    ('private_windows_user_path', 'c:\\Users\\' + HANGUL_USER + '\\Desktop'),
-    ('hangul_user_path', 'C:/Users/' + HANGUL_USER + '/AppData'),
-    ('address_100_x_x_x', 'ssh admin@100.123.54.121'),
-    ('address_100_x_x_x', 'http://100.79.210.20:9802/'),
-    ('password_literal', "password = 'hunter2'"),
-    ('password_literal', 'PASSWD: "1234"'),
-    ('ssh_password_environment', 'TORCHFDTD_SSH_PASSWORD="letmein"'),
-    ('credential_token', 'token ghp_' + 'A' * 36 + ' end'),
-    ('credential_token', 'AKIA' + 'Q' * 16),
-    ('credential_token', 'tskey-auth-abcdefghijklmnop'),
-    ('private_key_block', '-----BEGIN OPENSSH PRIVATE KEY-----'),
-    ('ssh_public_key', 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIABCDEFGHIJKLMNOPQRSTUVWXYZ user@host'),
-])
-def test_scan_patterns_catch_the_named_secrets(kind, sample):
-    assert re.search(inventory.SCAN_PATTERNS[kind], sample), (kind, sample)
+@pytest.mark.parametrize('label', sorted(POSITIVE))
+def test_scan_patterns_catch_the_named_secrets(label):
+    kind, sample = POSITIVE[label]
+    assert re.search(inventory.SCAN_PATTERNS[kind], sample), label
 
 
-@pytest.mark.parametrize('sample', [
-    'C:/Users/' + ADMIN + 'istrator/x', 'C:/Users/public/x', 'D:/TorchFDTD/.local/tmp', 'version 100.0.1',
-    'numpy 1.100.2.3 is not an address', "os.environ.get('TORCHFDTD_SSH_PASSWORD')",
-    '$env:TORCHFDTD_SSH_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)',
-    'the password is requested interactively', 'ssh-ed25519 keys are accepted',
-])
-def test_scan_patterns_ignore_benign_text(sample):
-    assert not [kind for kind, pattern in inventory.SCAN_PATTERNS.items() if re.search(pattern, sample)], sample
+@pytest.mark.parametrize('label', sorted(BENIGN))
+def test_scan_patterns_ignore_benign_text(label):
+    assert not [kind for kind, pattern in inventory.SCAN_PATTERNS.items() if re.search(pattern, BENIGN[label])], label
 
 
 def test_sbom_covers_every_declared_dependency_with_licence_and_source():

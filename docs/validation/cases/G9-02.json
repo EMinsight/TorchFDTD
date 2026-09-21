@@ -13,7 +13,7 @@
     "non_pip_assets": "the hand-maintained ASSETS table of the generator: frontend bundle libraries with versions from package-lock.json, fonts, material tables, own artwork, manuscript, validation records, reference outputs of other solvers, application records, examples and fixtures, and the three vendor-derived items",
     "scan_inputs": "every tracked path from git ls-files except binaries and the four files that spell the patterns; positions only, never the matched text",
     "scan_patterns": ["private_windows_user_path", "hangul_user_path", "address_100_x_x_x", "password_literal", "ssh_password_environment", "credential_token", "private_key_block", "ssh_public_key"],
-    "pattern_samples": "fourteen positive and eight negative strings in tests/test_provenance_inventory.py",
+    "pattern_samples": "fourteen positive and nine benign strings in tests/test_provenance_inventory.py, assembled at run time with synthetic addresses and parametrized under short labels so that no sample reaches a test id or a JUnit report",
     "history_query": "git log --pickaxe-regex -S'C:[/\\\\]+Users[/\\\\]+admin' HEAD, keeping the commits whose tree still contains the pattern",
     "dependency_check": "python -m pip check in the same interpreter",
     "vulnerability_audit": "pip-audit -r <pinned closure> --no-deps, recorded in the SBOM when run with --audit and carried forward otherwise"
