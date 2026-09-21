@@ -47,11 +47,16 @@ export function setupInverseDesign({esc}){
    ${field('Adam updates','iterations',config.iterations,1)}${field('Learning rate','learning_rate',config.learning_rate)}
   </fieldset><fieldset><legend>Memory & execution</legend>
    ${select('Compute device','device',[['cpu','CPU'],['cuda','CUDA GPU']])}
-   ${select('Execution mode','execution',[['auto','Automatic'],['resident','Resident'],['dram','DRAM streaming'],['file','File streaming']])}
+   ${select('Execution mode','execution',[['auto','Automatic'],['resident','Resident'],['recorded','Boundary-history adjoint'],['dram','DRAM streaming'],['file','File streaming']])}
    ${field('GPU budget (GiB)','gpu_budget_gib',config.gpu_budget_gib)}${field('DRAM budget (GiB)','host_budget_gib',config.host_budget_gib)}
-   ${field('Checkpoints','checkpoints',config.checkpoints,1)}${field('Maximum slab width','slab_width',config.slab_width,1)}${field('Temporal depth','temporal_depth',config.temporal_depth,1)}
-   <details><summary>Optional file backing</summary><label>State directory<input aria-label="State directory" data-key="state_directory" value="${esc(config.state_directory||'')}"></label>
-   ${field('File budget (GiB)','disk_budget_gib',config.disk_budget_gib??'')}${field('Keep disk free (GiB)','disk_free_reserve_gib',config.disk_free_reserve_gib)}<p>Used only when explicitly configured. Default free-space reserve: 100 GiB.</p></details>
+   ${config.execution==='recorded'?`
+    ${select('Boundary history','recorded_trace_storage',[['cpu','CPU RAM'],['device','Compute device']])}
+    ${field('Transfer block (steps)','recorded_trace_chunk_steps',config.recorded_trace_chunk_steps,1)}
+    ${field('Fixed collar (cells)','recorded_collar_cells',config.recorded_collar_cells,1)}
+    <p data-recorded-scope>Reconstruct the lossless design interior from boundary history. Fields remain on the compute device. The layer and source must fit inside the fixed exterior collar. CUDA with CPU history uses asynchronous transfers.</p>
+   `:`${field('Checkpoints','checkpoints',config.checkpoints,1)}${field('Maximum slab width','slab_width',config.slab_width,1)}${field('Temporal depth','temporal_depth',config.temporal_depth,1)}
+    <details><summary>Optional file backing</summary><label>State directory<input aria-label="State directory" data-key="state_directory" value="${esc(config.state_directory||'')}"></label>
+    ${field('File budget (GiB)','disk_budget_gib',config.disk_budget_gib??'')}${field('Keep disk free (GiB)','disk_free_reserve_gib',config.disk_free_reserve_gib)}<p>Used only when explicitly configured. Default free-space reserve: 100 GiB.</p></details>`}
   </fieldset></section>
   <section class="design-density"><h3>Design region</h3><canvas data-density width="512" height="512" aria-label="Density editor"></canvas><p data-density-caption></p>
    <fieldset><legend>Initial density</legend><div class="design-density-tools"><label>x pixels<input aria-label="Density x pixels" data-nx type="number" value="${config.initial_density.length}" min="1" max="1024"></label><label>y pixels<input aria-label="Density y pixels" data-ny type="number" value="${config.initial_density[0].length}" min="1" max="1024"></label><label>Paint value<input aria-label="Density paint value" data-paint type="number" value="0.5" min="0" max="1" step="0.1"></label></div><button data-reset-density>Fill / resize initial density</button><button data-show-initial>Show initial density</button><p>Click or drag to paint. x increases right and y increases upward.</p></fieldset>
@@ -67,7 +72,7 @@ export function setupInverseDesign({esc}){
    const [key,index]=input.dataset.key.split('.');let v=input.type==='number'?(input.value===''?null:Number(input.value)):input.value;
    if(key==='state_directory'&&!v)v=null;
    if(index!==undefined)config[key][Number(index)]=v;else config[key]=v;
-   save();showResult=false;draw();$('[data-plan-summary]').textContent='Settings changed. Check memory before running.';
+   save();showResult=false;if(key==='execution')render();else draw();$('[data-plan-summary]').textContent='Settings changed. Check memory before running.';
   });
   $('[data-reset-density]').onclick=()=>{try{
    const nx=Number($('[data-nx]').value),ny=Number($('[data-ny]').value),v=Number($('[data-paint]').value);

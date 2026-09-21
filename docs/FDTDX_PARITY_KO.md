@@ -133,6 +133,14 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
   경계 archive는 여전히 O(T*횡단면)이다. 일반 CPML·ADE·SSD·48GB 초과나
   FDTDX 대비 성능·전체 동등성의 근거로 확대하지 않는다.
 
+- [Recorded periodic workflow](validation/recorded_periodic_workflow.json): CPU 밀도 입력과
+  두 편광 calibration을 public recorded 정책에 연결하고 Python·브라우저에서 선택한다.
+  160-step 사입사 CUDA 응답은 checkpoint 경로와 정확히 일치하며 전체 밀도 VJP
+  상대 L2 차이는 3.00e-7, retained seed는 최대 4.05e-7이다. 한 case graph씩
+  재생하고 배경·전송 버퍼·cache와 실제 Yee layer support를 사전 검사한다.
+  브라우저의 실제 Adam 1회도 통과했다. 전체 필드는 여전히 device resident이며
+  원래 CR 수렴·대규모 용량·경쟁 성능 완료를 의미하지 않는다.
+
 ## 다음 구현 순서
 
 1. 진행 중인 원래 CR 24-cycle 결과와 실제 FP32 48 GB 초과 용량 검증을

@@ -1,5 +1,6 @@
 """Shared-budget, sequential case replay for coupled FDTD objectives."""
 from dataclasses import dataclass, replace
+from copy import deepcopy
 import math
 import time
 
@@ -19,6 +20,8 @@ class AdjointCase:
     parameter_indices selects epsilon, or epsilon_inf/strength/omega0/gamma,
     from the batch call's CPU tensors. Shared indices accumulate derivatives.
     Frequencies, mesh, monitors and sources are fixed during each graph.
+    Recorded plane cases require an explicit homogeneous fixed exterior value
+    in fixed_background_epsilon. Other algorithms reject that argument.
     """
     project: object
     policy: AdjointExecutionPolicy
@@ -26,6 +29,7 @@ class AdjointCase:
     frequency_hz: object = None
     quadrature_counts: dict | None = None
     block_size: int = 32
+    fixed_background_epsilon: float | None = None
 
     def __post_init__(self):
         if not isinstance(self.policy,AdjointExecutionPolicy):raise ValueError('Each case needs an AdjointExecutionPolicy.')
@@ -33,6 +37,15 @@ class AdjointCase:
         if len(indices) not in (1,4) or any(isinstance(i,bool) or not isinstance(i,int) or i<0 for i in indices):
             raise ValueError('Bind one dielectric or four ADE parameter indices.')
         object.__setattr__(self,'parameter_indices',indices)
+        recorded=getattr(self.policy,'recorded',None) is not None
+        background=self.fixed_background_epsilon
+        if recorded:
+            if type(background) is not float or not math.isfinite(background) or background<1:
+                raise ValueError('Recorded cases require finite Python float fixed_background_epsilon >= 1.')
+            if len(indices)!=1 or not plane_mode(self.project):
+                raise ValueError('Recorded cases support nondispersive field planes only.')
+        elif background is not None:
+            raise ValueError('fixed_background_epsilon requires a recorded execution policy.')
         if isinstance(self.block_size,bool) or not isinstance(self.block_size,int) or self.block_size<1:
             raise ValueError('block_size must be a positive integer.')
 
@@ -82,8 +95,12 @@ class _PreparedCase:
         self.spec=spec
         self.dispersive=len(spec.parameter_indices)==4
         self.planes=plane_mode(spec.project)
-        self.model=spec.policy.simulation(spec.project,dispersive=self.dispersive,
-            quadrature_counts=spec.quadrature_counts)
+        self.configuration=deepcopy((spec.policy,spec.fixed_background_epsilon,
+            spec.parameter_indices,spec.block_size,spec.quadrature_counts))
+        settings=dict(dispersive=self.dispersive,quadrature_counts=spec.quadrature_counts)
+        if getattr(spec.policy,'recorded',None) is not None:
+            settings['fixed_background_epsilon']=spec.fixed_background_epsilon
+        self.model=spec.policy.simulation(spec.project,**settings)
         self.project=self.model.project
         self.snapshot=self.project.model_dump()
         self.spectral=None
@@ -109,8 +126,13 @@ class _PreparedCase:
         self.output_bytes=sum(math.prod(shape)*item for shape in self.output_shapes)
 
     def check_fixed(self):
-        if self.project.model_dump()!=self.snapshot:
+        spec=self.spec
+        configuration=(spec.policy,spec.fixed_background_epsilon,
+            spec.parameter_indices,spec.block_size,spec.quadrature_counts)
+        if self.project.model_dump()!=self.snapshot or configuration!=self.configuration:
             raise RuntimeError('Batch case configuration changed. Rebuild the batch.')
+        if getattr(spec.policy,'recorded',None) is not None:
+            self.model.check_fixed()
 
     def inputs(self,parameters):
         if max(self.spec.parameter_indices)>=len(parameters):raise ValueError('Case parameter index exceeds the supplied tensors.')
@@ -126,6 +148,11 @@ class _PreparedCase:
         shapes=tuple(tuple(v.shape) for v in values)
         frequency=None if self.spectral is None else self.spectral.frequency
         policy=self.spec.policy
+        if getattr(policy,'recorded',None) is not None:
+            from .recorded_execution import _recorded_reservation
+            return _recorded_reservation(self.project,shapes,policy,frequency,
+                block_size=self.spec.block_size,quadrature_counts=self.spec.quadrature_counts,
+                plane=self.model.model,fixed_background_epsilon=self.spec.fixed_background_epsilon)
         if policy.resident is not None:
             return _resident_reservation(self.project,shapes,policy,frequency,block_size=self.spec.block_size,
                 quadrature_counts=self.spec.quadrature_counts,plane=self.model.model if self.planes else None)

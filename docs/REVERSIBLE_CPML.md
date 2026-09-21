@@ -156,6 +156,60 @@ print(model.interior_z, planes["detector"].fields.shape)
 
 For asynchronous CPU trace storage on CUDA, use `ReversibleCPMLOptions(trace_storage="cpu", trace_transfers="async", trace_chunk_steps=32)` and CUDA material tensors, with the stream and budget restrictions below. This is a resident plane solver. It does not select a `PeriodicLayerResponse` execution policy, build matched homogeneous references, or perform polarization calibration automatically.
 
+## Periodic responses and sequential case replay
+
+To build matched homogeneous references and calibrate both source polarizations, select the recorded algorithm explicitly through `AdjointExecutionPolicy`. `PeriodicLayerResponse` accepts a real FP32 CPU density tensor and returns a CPU `(2, 4)` response in R/G2/G1/B order. It derives the homogeneous fixed exterior as `spec["background_index"]**2` and rejects any component's Yee layer support outside the reconstruction interval before constructing material maps. This is a fixed-frequency density derivative, not a source, angle or geometry-boundary derivative.
+
+```python
+import torch
+from torchfdtd import (
+    AdjointBatchOptions, AdjointExecutionPolicy, PeriodicLayerResponse,
+    PeriodicDesignConfig, ReversibleCPMLOptions,
+)
+
+config = PeriodicDesignConfig(
+    execution="recorded", device="cpu", steps=160, mesh_um=0.1,
+    pml_cells=6, quadrature_counts=(4, 4), theta_deg=5.0, phi_deg=17.0,
+    initial_density=[[0.2, 0.4], [0.5, 0.3]], iterations=1,
+)
+budget = 1024**3
+policy = AdjointExecutionPolicy(
+    device=config.device, host_budget_bytes=budget,
+    recorded=ReversibleCPMLOptions(
+        trace_storage="cpu", host_budget_bytes=budget,
+        resident_budget_bytes=budget,
+    ),
+)
+response_model = PeriodicLayerResponse(
+    config.spec(), density_shape=(2, 2), policy=policy,
+    batch_options=AdjointBatchOptions(host_budget_bytes=budget),
+    mesh=config.mesh_um, steps=config.steps, pml_cells=config.pml_cells,
+    quadrature_counts=config.quadrature_counts, dtype=torch.float32,
+)
+density = torch.tensor(config.initial_density, dtype=torch.float32,
+                       requires_grad=True)
+response = response_model(density)
+loss = -response[:, 0].mean()
+loss.backward()
+```
+
+The shared batch runs the two source-basis cases sequentially and replays one case graph at a time during backward. Material gradients return through the CPU density-to-diagonal-Yee map. Compact spectra and homogeneous references may be cached, but live field, terminal and trace ownership is not cached across cases. Shared host admission includes the active solver, density/material construction, reference storage and batch carriers. Caller optimizer state and unrelated graphs remain outside this reservation.
+
+For lower-level `AdjointCase` construction, supply `fixed_background_epsilon=1.3`, for example, alongside the recorded policy and fixed field-plane frequencies. The value must be a finite Python `float` at least one. Recorded cases require it and non-recorded cases reject it. The same keyword is required by `policy.simulation(project, fixed_background_epsilon=...)`. This bridge supports a homogeneous exterior only. Its effective material uses that fixed value outside the reconstruction interval, so the supplied design tensor has zero derivatives there. Use the standalone plane API above when an explicitly resolved nonuniform fixed map is needed.
+
+The higher-level optimizer uses the same route:
+
+```python
+from torchfdtd import periodic_design_plan, run_periodic_design
+
+plan = periodic_design_plan(config)
+result = run_periodic_design(config)
+```
+
+In the browser's periodic density design dialog, choose **Execution mode → Boundary-history adjoint**. **Boundary history**, **Transfer block (steps)** and **Fixed collar (cells)** map to `recorded_trace_storage`, `recorded_trace_chunk_steps` and `recorded_collar_cells` in `PeriodicDesignConfig`. With CUDA and CPU boundary storage, this workflow selects asynchronous transfers. CPU execution uses synchronous transfers. This independent periodic layer is not an automatic conversion of an arbitrary CAD project.
+
+All forward and adjoint fields and CPML state remain resident on the compute device. Only the boundary archive can be placed on CPU, with `O(T*A)` storage. This is not spatial streaming or SSD recording. Recorded execution is opt-in, is excluded from automatic policy selection and tuning, and uses no volume checkpoints. Neither this example nor successful discrete-gradient checks establish mesh convergence or a throughput advantage.
+
 ## What is recorded and reconstructed
 
 For an interval `[a,b]`, each timestep stores four transverse component planes in a tensor of shape `(steps, 2, Nx, Ny, 2)`:

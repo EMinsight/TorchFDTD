@@ -1,0 +1,276 @@
+{
+  "status": "targeted_integration_passed",
+  "scope": "Explicit recorded CPML execution policy, CPU design bridge, shared sequential plane cases, calibrated periodic density response and browser single-frequency Adam workflow.",
+  "precision": "FP32 material/density and complex64 Bloch fields. FP64 error reductions only.",
+  "cpu": {
+    "unique_passed": 17,
+    "groups": {
+      "bridge": 7,
+      "shared_batch": 3,
+      "periodic_response": 3,
+      "policy_configuration": 4
+    },
+    "qualification": "Focused groups, not one full-suite run. Two mocked bridge budget fixtures were corrected after their first attempt without runtime changes.",
+    "checks": [
+      "Actual oblique 160-step response and full density VJP vs checkpoint with 1e-4 relative L2/peak bounds",
+      "Centered directional finite difference within 1%",
+      "One active case and released owners",
+      "Complete budgets rejected before allocation",
+      "Cache namespace and unchanged legacy hash",
+      "All Yee component layer support checked before geometry",
+      "Frozen background/policy and input-version guards"
+    ]
+  },
+  "cuda": {
+    "device_name": "NVIDIA GeForce RTX 3060",
+    "torch_version": "2.10.0+cu126",
+    "cuda_version": "12.6",
+    "spec": {
+      "wavelength_um": 0.5,
+      "background_index": 1.4,
+      "design_index": 1.8,
+      "period_um": [
+        0.8,
+        0.8
+      ],
+      "height_um": 0.2,
+      "detector_offset_um": 0.5,
+      "theta_inside_rad": 0.1,
+      "phi_rad": 0.3
+    },
+    "density": [
+      [
+        0.2,
+        0.4
+      ],
+      [
+        0.5,
+        0.3
+      ]
+    ],
+    "mesh_um": 0.1,
+    "steps": 160,
+    "pml_cells": 6,
+    "quadrature_counts": [
+      4,
+      4
+    ],
+    "trace_chunk_steps": 7,
+    "criteria": {
+      "response_relative_l2": 0.0001,
+      "response_relative_peak": 0.0001,
+      "gradient_relative_l2": 0.0001,
+      "gradient_relative_peak": 0.0001,
+      "retained_noncontiguous_seeds": 2,
+      "peak_not_above_reservation": true
+    },
+    "checkpointed": {
+      "shape": [
+        8,
+        8,
+        58
+      ],
+      "response": [
+        [
+          0.22581599652767181,
+          0.248121976852417,
+          0.18379750847816467,
+          0.270341694355011
+        ],
+        [
+          0.22255611419677734,
+          0.25082096457481384,
+          0.17930136620998383,
+          0.2776406705379486
+        ]
+      ],
+      "objective": 0.5027223825454712,
+      "full_density_gradient": [
+        [
+          -0.2696255147457123,
+          -0.08446566760540009
+        ],
+        [
+          -0.39483171701431274,
+          -0.09717932343482971
+        ]
+      ],
+      "retained_seed_gradients": [
+        [
+          [
+            0.7923557162284851,
+            -1.3716979026794434
+          ],
+          [
+            0.9973482489585876,
+            -0.9120978713035583
+          ]
+        ],
+        [
+          [
+            -0.1826181709766388,
+            -0.025149226188659668
+          ],
+          [
+            -0.1850593239068985,
+            0.14128378033638
+          ]
+        ]
+      ],
+      "peak_increment_bytes": 19245056,
+      "gpu_reservation_bytes": 31299627,
+      "host_reservation_bytes": 71976920,
+      "first_backward": {
+        "forward_cases": 2,
+        "replayed_cases": 2,
+        "full_case_graph_retention": false
+      },
+      "last_backward_replayed_cases": 2,
+      "backward_invocations": 3,
+      "case_trace_storage": null
+    },
+    "recorded": {
+      "shape": [
+        8,
+        8,
+        58
+      ],
+      "response": [
+        [
+          0.22581599652767181,
+          0.248121976852417,
+          0.18379750847816467,
+          0.270341694355011
+        ],
+        [
+          0.22255611419677734,
+          0.25082096457481384,
+          0.17930136620998383,
+          0.2776406705379486
+        ]
+      ],
+      "objective": 0.5027223825454712,
+      "full_density_gradient": [
+        [
+          -0.2696254849433899,
+          -0.08446559309959412
+        ],
+        [
+          -0.3948315978050232,
+          -0.09717928618192673
+        ]
+      ],
+      "retained_seed_gradients": [
+        [
+          [
+            0.7923557162284851,
+            -1.3716979026794434
+          ],
+          [
+            0.9973481893539429,
+            -0.9120980501174927
+          ]
+        ],
+        [
+          [
+            -0.1826181709766388,
+            -0.025149255990982056
+          ],
+          [
+            -0.18505923449993134,
+            0.14128385484218597
+          ]
+        ]
+      ],
+      "peak_increment_bytes": 1823744,
+      "gpu_reservation_bytes": 31959545,
+      "host_reservation_bytes": 72424408,
+      "first_backward": {
+        "forward_cases": 2,
+        "replayed_cases": 2,
+        "full_case_graph_retention": false
+      },
+      "last_backward_replayed_cases": 2,
+      "backward_invocations": 3,
+      "case_trace_storage": [
+        "cpu",
+        "cpu"
+      ]
+    },
+    "response_error": {
+      "relative_l2": 0.0,
+      "relative_peak": 0.0,
+      "maximum_absolute": 0.0
+    },
+    "density_vjp_error": {
+      "relative_l2": 2.9981491679454166e-07,
+      "relative_peak": 3.0192429942617777e-07,
+      "maximum_absolute": 1.1920928955078125e-07
+    },
+    "retained_seed_errors": [
+      {
+        "relative_l2": 9.051801631519526e-08,
+        "relative_peak": 1.303595594750716e-07,
+        "maximum_absolute": 1.7881393432617188e-07
+      },
+      {
+        "relative_l2": 4.0454540044067053e-07,
+        "relative_peak": 4.831259796889007e-07,
+        "maximum_absolute": 8.940696716308594e-08
+      }
+    ],
+    "recorded_case_owners_checked": 10,
+    "owners_released_without_gc": true,
+    "one_recorded_case_alive_at_a_time": true
+  },
+  "memory_qualification": "Tiny correctness fixture. Torch allocated-byte increments exclude non-Torch CUDA context and caller ownership. Checkpoint ran first and paid cold library initialization. Peak values are admission checks, not a comparative memory reduction or throughput measurement.",
+  "browser": {
+    "passed": 1,
+    "steps": 160,
+    "density_shape": [
+      2,
+      2
+    ],
+    "iterations": 1,
+    "checks": [
+      "Explicit mode selection",
+      "Memory admission without solves",
+      "Exact config Python export",
+      "Actual nonzero-gradient Adam update",
+      "Finite evaluated result",
+      "Setup retained as new seed"
+    ]
+  },
+  "limitations": [
+    "Full fields and CPML primal/adjoint remain compute-device resident",
+    "Boundary archive O(T*Nx*Ny), no spatial streaming or disk archive in recorded policy",
+    "Fixed nondispersive uniform-grid FP32 dielectric and Bloch settings, first derivatives only",
+    "Homogeneous fixed exterior in policy bridge, component support cannot cross fixed collar",
+    "Recorded policy excluded from auto selection and measured tuner",
+    "No final CR physical convergence, beyond-VRAM, performance leadership or overall FDTDX parity claim"
+  ],
+  "source_sha256": {
+    "torchfdtd/recorded_execution.py": "412bd35b7d4a3c3ba3dd2a11ec5630c17fef1df929efdfd6fcd520abc8c00d34",
+    "torchfdtd/execution_tuning.py": "a08810c911a6774fcf78e159e17c6ec85a8c703d86d0461b0b4cd7ed11633d63",
+    "torchfdtd/adjoint_batch.py": "176a46949d1bcbaa8e391e961268c682279f810f22fc56081421bf031f1f90cf",
+    "torchfdtd/periodic_adjoint.py": "f9f582562231b8dbc693786221b07e77b1dfd67fba77ed903b9aafe238e5d1af",
+    "torchfdtd/density_layer.py": "b85dda493e26f6406f2d33633886b0f70f95a2705ea45ed7665c9be1c64dad36",
+    "torchfdtd/reversible_cpml.py": "829f3db5b8a50c3dbd8d42b6e70668ffff43e35131f1c5738b479f7876457f9f",
+    "torchfdtd/reversible_cpml_planes.py": "6f09bcf2a17b6ac5bbf9a4730372eedfc0b5c7cf87f78ed83df5040abdbae59a",
+    "torchfdtd/reversible_cpml_memory.py": "c63d545110da4f1f94bd0fc249ce87658e33536abdfd9cec8f9adc507c310776",
+    "torchfdtd/reversible_trace.py": "65f8fd266a6beb7f293c07c22498573d846fa5cc96dca8f358995d64e73e9cd7",
+    "torchfdtd/reversible_cpml_kernels.py": "9f25e610bec07c07c500485c9ba1641f41518e096dbdf815f621aeb51d9b3183",
+    "torchfdtd/cuda_adjoint.py": "0be7744c399e4aed97b8f00f15d7a4649a28f842097ad2309bf262feb6a8ff5d",
+    "torchfdtd/cuda_complex_adjoint.py": "738d1ddb5900301d520e7ab1a3844dd3adfb8fc0770c28278c5fdde888d818fb",
+    "tests/test_recorded_periodic_response.py": "f9714c905b02a8c2d9c522375fec46f210d5091a88dbc8d4881af08bf6afa9ce",
+    "benchmarks/recorded_periodic_cuda.py": "60791d6b5c538ed2090bad67196a08efe229da7d4964bc7785482fec77addb27",
+    "torchfdtd/periodic_design.py": "1d09762ee98a9186ac217464047f8af96926ba9d8e5e6a4e94bc9e99d1228532",
+    "frontend/src/inverse_design.js": "cb57ca4d606a908d88cd91e206e0ba2e647451116488e2a9805b2d877bdd3e46",
+    "tests/test_recorded_execution.py": "a72c4ad02760ad81cc152f3d16cdf180e9dd4a2505c8979304477a52d8bcaef5",
+    "tests/test_recorded_adjoint_batch.py": "16fcf5aaef9269a91a8df80f33d533840fb4eac5241d7acbf85224f44ba5c05c",
+    "tests/test_recorded_policy_workflow.py": "8314d80c676eb137f948375fe3a528cab019922e05c35b903469836b543fd75c",
+    "tests/ui/inverse-design-recorded.spec.js": "d6a09e1fba4d742448ece9d4df40304902509efe5638590afb7a7e76b250e4b8"
+  },
+  "source_hash_scope": "Runtime hashes checked before/after CUDA gate. Measured script archived byte-for-byte under benchmarks. Additional policy/config/UI files identify the local tested integration. Full exact-source CI is recorded separately.",
+  "measured_script_sha256": "60791d6b5c538ed2090bad67196a08efe229da7d4964bc7785482fec77addb27"
+}

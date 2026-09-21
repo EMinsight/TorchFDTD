@@ -8,6 +8,7 @@ from .adjoint_memory import estimate_adjoint_memory
 from .differentiable import AdjointOptions, DifferentiableSimulation
 from .memory_profile import host_memory
 from .cuda_memory import cuda_budget_limit
+from .reversible_cpml import ReversibleCPMLOptions
 from .streamed import StreamedAdjointOptions, StreamedSimulation
 from .streamed_tuning import (_TuningWorkload, _DispersiveTuningWorkload,
                              _generated_candidates, _tune_streamed, _validate_tuning_arguments)
@@ -18,21 +19,25 @@ class AdjointExecutionPolicy:
     """One explicit execution candidate. host_budget_bytes bounds solver RAM.
 
     CPU caller inputs and geometry/optimizer graphs remain outside the budget.
-    Exactly one of resident or streamed must be supplied. Resident CUDA uses
-    differentiable input/output copies so both modes expose CPU design tensors.
+    Exactly one of resident, streamed or recorded must be supplied. Resident
+    and recorded CUDA use differentiable copies with CPU design tensors.
+    Recorded CPML is an explicit fixed-plane policy, excluded from tuning.
     """
     resident: AdjointOptions | None = None
     streamed: StreamedAdjointOptions | None = None
     device: str = 'cuda'
     host_budget_bytes: int = 8*1024**3
+    recorded: ReversibleCPMLOptions | None = None
 
     def __post_init__(self):
-        if (self.resident is None)==(self.streamed is None):
-            raise ValueError('Supply exactly one resident or streamed execution policy.')
+        if sum(value is not None for value in (self.resident, self.streamed, self.recorded)) != 1:
+            raise ValueError('Supply exactly one resident, streamed or recorded execution policy.')
         if self.resident is not None and not isinstance(self.resident,AdjointOptions):
             raise ValueError('resident must be AdjointOptions.')
         if self.streamed is not None and not isinstance(self.streamed,StreamedAdjointOptions):
             raise ValueError('streamed must be StreamedAdjointOptions.')
+        if self.recorded is not None and not isinstance(self.recorded,ReversibleCPMLOptions):
+            raise ValueError('recorded must be ReversibleCPMLOptions.')
         if torch.device(self.device).type not in ('cpu','cuda'):
             raise ValueError('Execution selection supports CPU or CUDA.')
         if self.streamed is not None and torch.device(self.streamed.device)!=torch.device(self.device):
@@ -41,16 +46,24 @@ class AdjointExecutionPolicy:
             raise ValueError('host_budget_bytes must be a positive integer.')
 
     @property
-    def temporal_depth(self):return 1 if self.resident is not None else self.streamed.temporal_depth
+    def temporal_depth(self):return self.streamed.temporal_depth if self.streamed is not None else 1
 
     @property
-    def checkpoints(self):return (self.resident or self.streamed).checkpoints
+    def checkpoints(self):return 0 if self.recorded is not None else (self.resident or self.streamed).checkpoints
 
-    def simulation(self,project,*,dispersive=False,quadrature_counts=None):
+    def simulation(self,project,*,dispersive=False,quadrature_counts=None,fixed_background_epsilon=None):
         from .plane_execution import plane_mode
         planes=plane_mode(project)
         if not planes and quadrature_counts is not None:
             raise ValueError('Quadrature counts require fixed field planes.')
+        if self.recorded is not None:
+            if not planes or dispersive:
+                raise ValueError('Recorded execution currently requires nondispersive fixed field planes.')
+            from .recorded_execution import _RecordedPlanesFromHost
+            return _RecordedPlanesFromHost(project,self,dispersive,quadrature_counts,
+                fixed_background_epsilon=fixed_background_epsilon)
+        if fixed_background_epsilon is not None:
+            raise ValueError('fixed_background_epsilon applies only to recorded execution.')
         if self.resident is not None:return _ResidentFromHost(project,self,dispersive,quadrature_counts)
         if planes:return _StreamedPlanesFromHost(project,self,dispersive,quadrature_counts)
         model=StreamedSimulation
@@ -204,6 +217,8 @@ class _ExecutionWorkload:
     def __getattr__(self,name):return getattr(self.workload,name)
 
     def reservation(self,policy):
+        if policy.recorded is not None:
+            raise ValueError('Recorded CPML policies are explicit and are not supported by execution tuning.')
         from .plane_execution import PlaneTuningWorkload
         if isinstance(self.workload,PlaneTuningWorkload):return self.workload.execution_reservation(policy)
         if policy.streamed is not None:return self.workload.reservation(_streamed_options(policy))
@@ -249,6 +264,10 @@ def tune_adjoint_execution(project,epsilon,*material_parameters,options=None,can
                                refine_candidates,reference_cache_bytes)
     if candidates is None and options is not None and not isinstance(options,StreamedAdjointOptions):
         raise ValueError('Default execution proposals require StreamedAdjointOptions budgets.')
+    if candidates is not None:
+        candidates=tuple(candidates)
+        if any(isinstance(p,AdjointExecutionPolicy) and p.recorded is not None for p in candidates):
+            raise ValueError('Recorded CPML policies are explicit and are not supported by execution tuning.')
     from .plane_execution import plane_mode, PlaneTuningWorkload
     planes=plane_mode(project)
     quadrature_counts=None if quadrature_counts is None else dict(quadrature_counts)

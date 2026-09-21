@@ -1,5 +1,26 @@
 # Current acceptance record
 
+## Recorded periodic policy and browser integration, 21 September 2026
+
+The explicit recorded CPML policy now supports the common CPU-design interface,
+shared sequential case replay, calibrated two-polarization periodic density
+responses and the browser's single-frequency optimizer. Admission includes
+the fixed-background allocation and transfer copies. Component-specific layer
+support must lie inside the reconstruction interval. Recorded cache keys are
+separate, while existing checkpointed/streamed reference identities are preserved.
+
+Seventeen focused CPU cases passed. The actual 160-step oblique CUDA response
+matches checkpointed execution exactly. Full density VJP relative L2 error is
+3.00e-7, and two retained noncontiguous seeds remain below 4.05e-7. Ten recorded
+solver/transport/archive ownership instances release without cycle collection.
+One browser check completes memory planning, Python export and an actual Adam
+update. See the [source-fingerprinted evidence](validation/recorded_periodic_workflow.json).
+
+These checks do not establish physical CR convergence, spatial out-of-core
+execution of this recorded policy, or comparative performance. The private
+release status and remaining FDTDX parity gates are unchanged.
+
+
 ## Async Bloch and online-plane CPML extension, 21 September 2026
 
 The [recorded CPML API](REVERSIBLE_CPML.md) now accepts real FP32 scalar or

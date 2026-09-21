@@ -1227,6 +1227,40 @@ identifies these scoped checks. They do not establish arbitrary Bloch-phase
 derivatives, physical reflection convergence, general CR workflow completion
 or a comparative performance advantage.
 
+\subsection{Recorded CPML policy for coupled periodic responses}
+
+The recorded-interface solver is exposed as an explicit execution policy
+for \code{RecomputedAdjointBatch} and \code{PeriodicLayerResponse}.
+The latter retains its component-specific Yee material transfer, two
+Cartesian electric source bases, matched homogeneous references and
+coherent polarization calibration before quadrant-response reduction.
+The exterior permittivity is a fixed homogeneous value supplied separately
+from the differentiable material map. Admission checks the nonzero
+volume-overlap support of every electric Yee component along $z$, using
+the same FP32 rounding as material transfer. Each supported row must lie
+inside the reconstruction interval. A layer extending into the excluded
+collar is rejected rather than clipped.
+
+The shared CPU-design interface transfers material tensors to the selected
+execution device without detaching their derivatives. Its reservation
+includes the generated fixed-background map, input and gradient transfers,
+compact plane outputs and the active recorded solver. Coupled objectives
+retain the compact outputs of both source cases. During backward execution,
+each case is regenerated and differentiated in sequence, releasing its
+solver state and boundary archive before the next case. This preserves
+one active case graph instead of retaining both basis trajectories.
+
+Reference and response cache identities distinguish the recorded policy,
+fixed exterior and material-support contract from checkpointed execution.
+Live admission remains required when cached references are available.
+The browser selects the same validated periodic-design configuration used
+by Python, and its Python export preserves that explicit policy. This
+connection does not change the default execution algorithm or establish
+completion of a converged CR optimization. Boundary recording is an
+established reconstruction approach, and this integration alone makes no
+claim of algorithmic novelty, comparative performance or overall feature
+parity.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.

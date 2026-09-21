@@ -28,6 +28,15 @@ state. Python configuration, result lists, runtime overhead and OS cache are
 additional. These limits are not exact process-RSS bounds. File backing needs
 a directory and budget, with 100 GiB free storage reserved by default.
 
+**Boundary-history adjoint** explicitly chooses the recorded CPML policy.
+The panel shows boundary storage, transfer-block length and fixed-collar width.
+CUDA with CPU history uses asynchronous transfers. Full fields stay on the
+compute device, while the boundary archive scales with timestep count and
+transverse area. This option is excluded from automatic policy selection.
+The fixed exterior is inferred from the background index, and the actual Yee
+layer support must fit inside the reconstruction interval. See the
+[recorded policy contract](REVERSIBLE_CPML.md).
+
 **Run inverse design** uses the same worker queue as ordinary forward jobs.
 Only one job runs at a time in this server instance, with up to two waiting.
 An unrelated Python process is outside that queue. Progress includes evaluated

@@ -15,6 +15,14 @@ def _overlap(centers,width,count,period,like,origin):
     return result
 
 
+def _layer_z_fraction(region, component, bottom_um, top_um, like):
+    """Exact dtype/device-rounded Yee overlap shared by transfer and admission."""
+    z = torch.tensor(field_axes(region, component)[2], device=like.device, dtype=like.dtype)
+    width = region.axis_steps[2]
+    return (torch.minimum(z+width/2, z.new_tensor(top_um))
+            - torch.maximum(z-width/2, z.new_tensor(bottom_um))).clamp_min(0)/width
+
+
 def periodic_density_layer(density,region,*,bottom_um,top_um,background_epsilon,design_epsilon,pixel_origin='cell_edges'):
     """Lift xy density pixels into an extruded layer with differentiable averages.
 
@@ -50,7 +58,6 @@ def periodic_density_layer(density,region,*,bottom_um,top_um,background_epsilon,
         wx=_overlap(x,step[0],density.shape[0],period[0],density,pixel_origin)
         wy=_overlap(y,step[1],density.shape[1],period[1],density,pixel_origin)
         xy=wx@density@wy.T
-        z=torch.tensor(z,device=density.device,dtype=density.dtype)
-        fraction=(torch.minimum(z+step[2]/2,z.new_tensor(top_um))-torch.maximum(z-step[2]/2,z.new_tensor(bottom_um))).clamp_min(0)/step[2]
+        fraction=_layer_z_fraction(region,component,bottom_um,top_um,density)
         fields.append(background_epsilon+(design_epsilon-background_epsilon)*xy[:,:,None]*fraction)
     return torch.stack(fields,-1)

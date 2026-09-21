@@ -88,6 +88,12 @@ can use a bounded asynchronous CUDA/pinned-CPU transport. The new
 regenerates small backward seed blocks. Its real and complex CUDA plane outputs
 match checkpointed spectra, with full material-gradient relative errors below
 3.2e-7 in the [recorded fixtures](docs/validation/reversible_cpml_extended_workflow.json).
+The explicit recorded policy now connects CPU density tensors to calibrated
+two-polarization `PeriodicLayerResponse` and the browser inverse-design panel.
+Cases replay one graph at a time. A 160-step oblique CUDA fixture matches
+checkpointed responses exactly, with density-gradient relative error 3.00e-7.
+[Policy and workflow evidence](docs/validation/recorded_periodic_workflow.json)
+separates these discrete checks from physical convergence and performance.
 The original real scalar CPU checks extend through 2,048 steps. General physical
 combinations, broad long-time acceptance and competitive throughput remain open.
 

@@ -11,6 +11,7 @@ from .differentiable import AdjointOptions
 from .execution_tuning import AdjointExecutionPolicy
 from .periodic_adjoint import PeriodicLayerResponse
 from .reference_cache import PlaneReferenceCache
+from .reversible_cpml import ReversibleCPMLOptions
 from .streamed import StreamedAdjointOptions
 
 
@@ -41,7 +42,7 @@ class PeriodicDesignConfig(BaseModel):
     iterations: int = Field(default=5, ge=1, le=10000, strict=True)
     learning_rate: float = Field(default=.01, gt=0, lt=1)
     device: Literal['cpu', 'cuda'] = 'cpu'
-    execution: Literal['auto', 'resident', 'dram', 'file'] = 'auto'
+    execution: Literal['auto', 'resident', 'dram', 'file', 'recorded'] = 'auto'
     gpu_budget_gib: float = Field(default=4, gt=0)
     host_budget_gib: float = Field(default=8, gt=0)
     checkpoints: int = Field(default=2, ge=0, strict=True)
@@ -50,6 +51,9 @@ class PeriodicDesignConfig(BaseModel):
     state_directory: str | None = None
     disk_budget_gib: float | None = Field(default=None, gt=0)
     disk_free_reserve_gib: float = Field(default=100, ge=0)
+    recorded_trace_storage: Literal['cpu', 'device'] = 'cpu'
+    recorded_trace_chunk_steps: int = Field(default=32, ge=1, le=1024, strict=True)
+    recorded_collar_cells: int = Field(default=1, ge=1, strict=True)
 
     @model_validator(mode='after')
     def valid(self):
@@ -102,7 +106,16 @@ def _prepare(config):
             state_directory=config.state_directory,disk_budget_bytes=disk,
             disk_free_reserve_bytes=int(config.disk_free_reserve_gib*1024**3))
     else:
-        if config.execution == 'resident':
+        if config.execution == 'recorded':
+            policy = AdjointExecutionPolicy(device=config.device,host_budget_bytes=host,
+                recorded=ReversibleCPMLOptions(
+                    trace_storage=config.recorded_trace_storage,
+                    trace_transfers='async' if config.device=='cuda' and config.recorded_trace_storage=='cpu' else 'sync',
+                    trace_chunk_steps=config.recorded_trace_chunk_steps,
+                    collar_cells=config.recorded_collar_cells,
+                    gpu_budget_bytes=gpu,host_budget_bytes=host,
+                    resident_budget_bytes=gpu if config.device=='cuda' else host))
+        elif config.execution == 'resident':
             policy = AdjointExecutionPolicy(device=config.device,host_budget_bytes=host,
                 resident=AdjointOptions(checkpoints=config.checkpoints,
                     gpu_budget_bytes=gpu,host_budget_bytes=host,

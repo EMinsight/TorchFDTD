@@ -63,6 +63,9 @@ class PeriodicLayerResponse(torch.nn.Module):
             raise ValueError('Expected PlaneReferenceCache.')
         if response_cache is not None and not isinstance(response_cache, PeriodicResponseCache):
             raise ValueError('Expected PeriodicResponseCache.')
+        recorded = policy.recorded is not None
+        if recorded and dtype != torch.float32:
+            raise ValueError('Recorded periodic responses require FP32 density and material maps.')
         self._response_cache = response_cache
         self._response_budget = 0 if response_cache is None else response_cache.budget_bytes
         self._response_entries = 0 if response_cache is None else response_cache.max_entries
@@ -78,6 +81,18 @@ class PeriodicLayerResponse(torch.nn.Module):
         lo, hi = region.interior_bounds(2)
         if -spec['height_um']/2 < lo or spec['height_um']/2 > hi:
             raise ValueError('Patterned layer must lie inside the non-PML region.')
+        if recorded:
+            from .density_layer import _layer_z_fraction
+            from .reversible_cpml import _interior_interval
+            a, b = _interior_interval(region, policy.recorded.collar_cells)
+            scalar = torch.empty((), dtype=dtype, device='cpu')
+            for component in ('Ex', 'Ey', 'Ez'):
+                fraction = _layer_z_fraction(region, component, -spec['height_um']/2,
+                                             spec['height_um']/2, scalar)
+                support = torch.nonzero(fraction > 0, as_tuple=False).flatten()
+                if support.numel() and (int(support[0]) < a or int(support[-1]) > b):
+                    raise ValueError(f'{component} layer support [{int(support[0])}, {int(support[-1])}] '
+                                     f'exceeds recorded reconstruction interval [{a}, {b}].')
         self._epsilon_shape = region.shape + (3,)
         self._streamed_density = policy.streamed is not None
         self._layer_settings = dict(bottom_um=-self._spec['height_um']/2,
@@ -106,17 +121,25 @@ class PeriodicLayerResponse(torch.nn.Module):
             project = self._project.model_copy(deep=True)
             project.sources[0].component = component
             cases.append(AdjointCase(project, policy, frequency_hz=frequency,
-                quadrature_counts={'incident':quadrature_counts, 'detector':quadrature_counts}))
+                quadrature_counts={'incident':quadrature_counts, 'detector':quadrature_counts},
+                **({'fixed_background_epsilon': self._spec['background_index']**2} if recorded else {})))
         batch_settings = replace(batch_options, host_budget_bytes=self._host_budget-self._outside_batch)
         if self._streamed_density:
             from .streamed_density import RecomputedDensityBatch
             self._batch = RecomputedDensityBatch(cases, batch_settings, layer=self._layer_settings)
         else:
             self._batch = RecomputedAdjointBatch(cases, batch_settings)
+        policy_identity = asdict(policy)
+        if not recorded:
+            policy_identity.pop('recorded', None)  # Keep previous cache identities.
         payload = dict(version='budgeted-periodic-density-streaming-1' if self._streamed_density else 'budgeted-periodic-response-1',
             projects=[c.project.model_dump(mode='json') for c in cases],
-            policy=asdict(policy), frequency=frequency, quadrature_counts=quadrature_counts,
+            policy=policy_identity, frequency=frequency, quadrature_counts=quadrature_counts,
             dtype=str(dtype))
+        if recorded:
+            payload.update(version='recorded-periodic-response-1',
+                           fixed_background_epsilon=self._spec['background_index']**2,
+                           material_support='all-component-yee-overlap-inside-recorded-interval')
         # Placement/kernel policy is part of the key. Numerically different
         # execution paths must not silently reuse another path's reference.
         self._reference_key = hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
