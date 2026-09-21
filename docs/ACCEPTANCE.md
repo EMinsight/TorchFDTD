@@ -1,5 +1,49 @@
 # Current acceptance record
 
+## FDTDX parity round and public repository, 21 September 2026
+
+Seven feature branches were merged on one day to bring every row of the
+[FDTDX comparison](FDTDX_PARITY_KO.md) except single-problem multi-GPU to equal
+or ahead: GDS polygons with holes, layer etching, staircased sidewalls, browser
+hole rendering and one-call two-port networks (bf9978c, b750d3e, 6b072e7),
+finite-distance near-zone projection, observation grids, TFSF admission, lossy
+and per-frequency exteriors and open surfaces (ed87202, 2e6efd8, e59a726),
+N-port aperture mode networks with streamed injection and a full-autograd modal
+oracle (1951bbe to 28e8bda), differentiable polygon and spline solids with a
+recorded shape-gradient convergence (3cbebb4), PMC/symmetric faces in the
+adjoint, streamed and tensor-batch paths with per-face CPML profiles and face
+ADE banks (2a7a3e5 to 232f4c6, 35414f3), and tensor media inside CPML under the
+geometric stability admission with PEC walls, tensor ADE, streaming and a
+birefringent slab acceptance (c753bdd to 1ad9166). Each branch was rerun by the
+integrator before merging, and five regressions found by the full suites were
+fixed the same day: a bitwise geometry regression check made tolerant of BLAS
+round-off (b12fb6d), four boundary tests aligned with the widened PMC admission
+and a restored two-dimensional PMC rejection (232f4c6), open-ended source slices
+in the tensor-batch face admission (a879e1b), a singular tensor pole strength
+rejected by one LAPACK build (86bcec4), and two browser tests whose server
+route returned 500 for a dispatch-time rejection (f6aacf3).
+
+Two solver defects surfaced by the RTX 5880 suite were fixed: the waveguide
+eigensolver returned an arbitrary basis of a degenerate polarization pair, which
+depends on the BLAS build and left the two ports of a uniform interface network
+with orthogonal polarizations on the workstation, so degenerate clusters now
+rotate onto a canonical basis ordered by transverse power (06d54eb), and the
+recorded benchmarks no longer require a Git checkout (128a5ff).
+
+The full suite passed on the local RTX 3060 at a879e1b with 2,141 passes and 7
+skips and at 1ad9166 with 2,181 passes and 7 skips, and on the RTX 5880 at
+a879e1b with 2,141 passes and 7 skips (JUnit SHA-256
+`894a231e12bcf466b7e38c344fd6df941b63d1d55788151ffceae9d60e62e629`) and at
+1ad9166 with 2,178 passes, 7 skips and the three singular-strength failures that
+86bcec4 removes, after which the five anisotropy files passed there with 59
+tests. The skips are the two-GPU NCCL case, three Gloo cases unsupported on
+Windows, the licensed Lumerical round trip and two opt-in CUDA gates.
+
+The repository became public on this day at the author's decision, with the
+README reduced to an overview and the measurement record moved to
+[MEASUREMENTS.md](MEASUREMENTS.md). The manuscript was rewritten as a software
+paper with a full bibliography (034bd98).
+
 ## Beyond-VRAM crash and resume on the RTX 5880, 21 September 2026
 
 A real FP32 streamed adjoint on a 1152 x 1024 x 1920 grid (2.26 billion

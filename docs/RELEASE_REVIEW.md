@@ -132,5 +132,11 @@ requested complete release without their direction.
 5. Review the manuscript's scientific claims and authorship statement before any
    public paper submission. No submission has occurred.
 
-Public publication remains deferred on these explicit task conditions. Native
-implementation, analytic validation and local documentation can continue.
+Status, 21 September 2026: the author made the repository public on this date
+after the parity round recorded in [ACCEPTANCE.md](ACCEPTANCE.md). Gate 3 was
+rerun before the switch (release audit with no findings over 950 files, no
+credentials, private paths or the workstation address in the tree or in the
+history), gate 4 passed on the RTX 5880 and the local workstation, and gate 2
+is met by the FDTDX comparison except for single-problem multi-GPU. Gate 1
+remains open as a contractual question that publication does not settle, and
+gate 5 applies to any paper submission.
