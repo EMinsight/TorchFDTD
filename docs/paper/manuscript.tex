@@ -1345,6 +1345,33 @@ discrete source, detector and material-adjoint workflow, not complete
 physical-gradient convergence, arbitrary routing, overall FDTDX parity or
 a performance advantage.
 
+\subsection{Native CAD and graphical modal execution}
+
+A versioned configuration connects the fixed opposing-port network to native
+CAD geometry and the browser. The same Project snapshot determines the
+Yee-sampled material map, overlap precedence, port sections and source timing.
+The Python and graphical workflows expose complex S entries and selected
+scalar material-permittivity derivatives. A shared material parameter receives
+the sum over its allowed interior cells. Mode profiles, port exteriors and
+calibration remain fixed. Returning a compact JSON result releases the field
+graph, while the lower-level network retains its PyTorch tensor interface.
+
+Admission combines sparse mode preparation, modal packets, rasterization,
+material graphs, field checkpoints and result serialization before expensive
+allocation. Live capacity is checked again after mode preparation. The
+graphical workflow uses the shared execution queue and an owned spawned
+worker. Cancellation and final result publication are synchronized, so a
+cancelled calculation does not publish a completed artifact. Edited setups
+cannot receive stale results from an earlier submitted snapshot.
+
+An actual browser check imports a native open-slab geometry, executes its
+two-port network and exports complex64 NPZ data, CSV and Python. On the same
+$20\times5\times30$ FP32 grid with 420 steps, CUDA and CPU complex S entries
+differ by at most $1.43\times10^{-7}$. The selected interior permittivity
+derivative is 0.2631390095 in both observed runs. These are integration checks
+on a coarse illustrative geometry. They establish neither optical mesh
+convergence nor a throughput or memory-capacity advantage.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.

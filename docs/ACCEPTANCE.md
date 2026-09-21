@@ -16,6 +16,13 @@ and Python. The same Project on CUDA differs from the CPU result by at most
 runs. Runtime fingerprints before and after the CUDA check are unchanged.
 This small fixture is a workflow check, not optical convergence or performance.
 
+All 122 installed package files match the audited source and isolated wheel.
+The wheel SHA-256 is
+`2941fdddd98794ac04bb49a0fd620be64dda945ffef464add4df51bfcb1bd3dd`.
+The source scan contains 878 allowlisted files and zero pattern findings.
+The 39-page manuscript preserves prior source bytes and adds the native CAD
+modal workflow. Its changed pages and references were rendered and inspected.
+
 See [usage and limits](MODE_NETWORK_WORKFLOW.md) and the
 [workflow record](validation/mode_network_project_workflow.json). Full CI for
 this integration is pending. General routing, streamed modes and complete

@@ -1487,5 +1487,31 @@
     "numerical_runs": 0
   },
   "frontend_build": "passed, existing large-chunk size warning retained",
-  "visual_review": "Setup and stored-result views inspected after scoped header-height correction. No new numerical run for screenshots."
+  "visual_review": "Setup and stored-result views inspected after scoped header-height correction. No new numerical run for screenshots.",
+  "paper": {
+    "pages": 39,
+    "changed_section_page": 37,
+    "rendered_pages": [
+      36,
+      37,
+      38,
+      39
+    ],
+    "tex_sha256": "d695a4dc37c8ef6b57b58dbb3e2b4dcbbf25efb3c9511157098c9a157b574bcd",
+    "pdf_sha256": "0b7a956c0e17fba63ca6472a6c743909aa8d8d36147b8fe2e9e80d733e6e6ea2",
+    "portable_source_sha256": "2a339fad17f3748849a0d2b3bc6e0b41aff113cad49a6e9f9bf0aea2a29591fd",
+    "build": "No unresolved references or overfull boxes",
+    "edit": {
+      "old_sha256": "6dd2692b7becf4b826c23b5f075ebbde61359387623a603ac6e03aacf1b7af66",
+      "new_sha256": "d695a4dc37c8ef6b57b58dbb3e2b4dcbbf25efb3c9511157098c9a157b574bcd",
+      "previous_bytes_preserved": true,
+      "inserted_lines": 27
+    },
+    "visual_review": "Rendered pages 36-39 inspected. Section transitions, equations, text and references legible without clipping."
+  },
+  "source_audit": {
+    "allowlisted_files": 878,
+    "findings": 0,
+    "scope": "Private source allowlist pattern scan, not publication clearance."
+  }
 }
