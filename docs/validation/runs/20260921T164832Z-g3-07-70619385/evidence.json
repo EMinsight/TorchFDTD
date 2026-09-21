@@ -1,0 +1,863 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T164832Z-g3-07-70619385",
+  "task": "G3-07",
+  "stage": "G3",
+  "task_title": "PML normal/oblique 반사·장시간 안정성",
+  "command": "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG307 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-07.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T01:43:20.841522+09:00",
+  "recorded_at": "2026-09-21T16:48:32+00:00",
+  "source_commit": "637e653935152e28e2c90029d8d2626a33a6d93f",
+  "source_tree_sha256": "beea09438171233003b32652052d3da3f21b62ef60959495d9a7f543a7098e4d",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_physics_g3_a.py": "fa38591a694950d64dafff2343a37e4208c58f7018fe5e8ee9efd4f4f0570f48"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G3-07_cpml_reflection_stability.json",
+  "fixture_sha256": "da30c508f259f54036af6a6f24efc7afc35ad48e3b70766c1201e6ae3028e218",
+  "acceptance_criteria_path": "docs/validation/cases/G3-07_cpml_reflection_stability.json",
+  "acceptance_criteria_sha256": "da30c508f259f54036af6a6f24efc7afc35ad48e3b70766c1201e6ae3028e218",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU oracle rows)",
+    "float32 (CUDA layer-A row)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "engine": "torchfdtd.Simulation, 2D TE (Ez), staircase Yee sampling, courant_factor 0.99, mesh 0.025 um (dt 5.837669e-17 s), precision float64 on CPU",
+    "pml_profile": "default BoundaryFace: layers 10 (0.25 um), sigma_scale 1, kappa 1, alpha 1e-8, polynomial 3, alpha_polynomial 0",
+    "short_domain": {
+      "x_um": [
+        -5.75,
+        5.75
+      ],
+      "source_x_um": 4.0,
+      "monitor_x_um": 5.0,
+      "x_max_pml_interior_edge_um": 5.5,
+      "distance_source_to_x_min_pml_um": 9.75
+    },
+    "long_reference_domain": {
+      "x_um": [
+        -20.25,
+        20.25
+      ],
+      "source_x_um": -10.5,
+      "monitor_x_um": -9.5,
+      "x_max_pml_interior_edge_um": 20.0,
+      "own_x_max_echo_at_monitor_fs": {
+        "vacuum": 200.2,
+        "dielectric": 400.3
+      },
+      "note": "same x_min distance, same mesh nodes, same source and monitor indices; its own x_max echo cannot reach the monitor within the run, so short - long is exactly the short domain's x_max CPML return and the x_min echo cancels"
+    },
+    "transverse": {
+      "normal_and_oblique": "0.3 um (12 cells), periodic or Bloch",
+      "interface": "2.0 um (80 cells), periodic"
+    },
+    "source": {
+      "kind": "plane",
+      "component": "Ez",
+      "spans_full_transverse_period": true,
+      "normal_and_interface": {
+        "pulse": "gaussian",
+        "time_definition": "standard",
+        "wavelength_um": 1.55,
+        "power_fwhm_s": 8.609020092789869e-15,
+        "sigma_s": 5.1702434755713565e-15,
+        "offset_s": 2.5e-14,
+        "eliminate_discontinuities": true,
+        "note": "one-cycle Gaussian at 193.4 THz with the C1 endpoint taper so the drive starts at exactly zero; amplitude 1; soft sheet (radiates both ways)"
+      },
+      "oblique": {
+        "pulse": "gaussian",
+        "time_definition": "standard",
+        "wavelength_um": 1.45,
+        "power_fwhm_s": 2.4160798324926404e-14,
+        "sigma_s": 1.4510038141119613e-14,
+        "offset_s": 7e-14,
+        "eliminate_discontinuities": true,
+        "note": "three-cycle Gaussian at 206.8 THz with the C1 endpoint taper, centred in the oblique band 1.3 to 1.6 um; the 60 deg design is grazing at 1.79 um where this pulse has 5e-4 of its peak amplitude"
+      }
+    },
+    "media": [
+      {
+        "name": "vacuum",
+        "background_index": 1.0
+      },
+      {
+        "name": "dielectric",
+        "background_index": 2.0
+      }
+    ],
+    "oblique": {
+      "angles_deg": [
+        30,
+        60
+      ],
+      "k_parallel_rad_per_um": [
+        2.0268339700579308,
+        3.510579414646873
+      ],
+      "bloch_phase_rad": [
+        0.6080501910173792,
+        1.0531738243940618
+      ],
+      "measurement_band_um": [
+        1.3,
+        1.6
+      ],
+      "angle_range_over_band_deg": {
+        "30": [
+          24.8,
+          31.1
+        ],
+        "60": [
+          46.6,
+          63.4
+        ]
+      },
+      "duration_fs": 150.0,
+      "steps": 2570,
+      "note": "fixed k_parallel; 1.8 um would be grazing (sin theta = 1.006) for the 60 deg design, so the oblique band stops at 1.6 um; R at exactly 1.55 um (the design angle) is recorded separately"
+    },
+    "interface": {
+      "description": "n=2 rectangle filling y from -0.9875 to 0.0125 um across the whole x range including both CPMLs; vacuum elsewhere; the interface enters the x CPML layers",
+      "monitors": {
+        "vacuum_side": [
+          5.0,
+          0.5
+        ],
+        "dielectric_side": [
+          5.0,
+          -0.5
+        ]
+      },
+      "duration_fs": 150.0
+    },
+    "duration_fs": 100.0,
+    "steps": 1713,
+    "frequencies": {
+      "wavelength_um": [
+        1.3,
+        1.8
+      ],
+      "points": 21,
+      "spacing": "uniform in frequency from c/1.8 um to c/1.3 um"
+    },
+    "depth_sweep": {
+      "layers": [
+        10,
+        20
+      ],
+      "medium": "vacuum, normal incidence",
+      "note": "separate sweep at fixed mesh and time; the criterion applies to the default 10 layers"
+    },
+    "time_sweep": {
+      "duration_fs": [
+        100.0,
+        200.0
+      ],
+      "medium": "vacuum, normal incidence, 10 layers",
+      "note": "separate sweep; the reflected pulse is fully recorded within 100 fs, so both durations should agree"
+    },
+    "stability": {
+      "steps": 20000,
+      "duration_fs": 1167.5,
+      "runs": [
+        "vacuum normal",
+        "n=2 normal",
+        "vacuum 60 deg Bloch"
+      ],
+      "energy": "state_norm of the run-control diagnostics every 100 steps: sum eps |E|^2 + |H|^2 over the volume including the CPML memory",
+      "note": "the 60 deg run uses the oblique pulse; its grazing components (about 5e-4 of the peak amplitude, beyond 1.79 um) are slow and are not absorbed like propagating waves, so that run is judged on non-growth only"
+    },
+    "layer_A": {
+      "description": "short vacuum normal fixture rerun on CUDA FP32 with the CUDA graph; raw trace / FP64 peak compared to CPU FP64"
+    }
+  },
+  "reference_method": "reflected/incident power ratio R(f) = |DFT(short - long)(f)|^2 / |DFT(long)(f)|^2 at the monitor, DFT written in the test; broadband energy ratio sum (short-long)^2 / sum long^2 over the whole trace; no analytic oracle is needed, the long domain is the reference",
+  "observables": [
+    {
+      "name": "R_max_on_band",
+      "unit": "power ratio",
+      "definition": "max over the declared band of R(f)"
+    },
+    {
+      "name": "R_at_design",
+      "unit": "power ratio",
+      "definition": "R at 1.55 um"
+    },
+    {
+      "name": "R_broadband",
+      "unit": "power ratio",
+      "definition": "time-domain energy ratio over the whole trace"
+    },
+    {
+      "name": "energy_last_over_peak",
+      "unit": "dimensionless",
+      "definition": "state_norm at the last diagnostic over the maximum state_norm of the run"
+    },
+    {
+      "name": "late_growth",
+      "unit": "dimensionless",
+      "definition": "max state_norm over the second half of the run divided by max(state_norm at the half-way diagnostic, 1e-12 x peak state_norm); the floor (1e-6 in field amplitude) keeps FP64 round-off noise, which the vacuum run reaches at about 1e-17 of its peak, from being read as growth"
+    },
+    {
+      "name": "layer_A_trace_error",
+      "unit": "dimensionless",
+      "definition": "CUDA FP32 trace / FP64 peak against CPU FP64 trace / FP64 peak"
+    }
+  ],
+  "acceptance_limits": {
+    "normal": {
+      "R_max_on_band": 1e-06,
+      "applies_to": "vacuum and n=2, 10 layers, band 1.3 to 1.8 um"
+    },
+    "oblique": {
+      "R_max_on_band": 0.0001,
+      "applies_to": "30 and 60 deg designs, band 1.3 to 1.6 um"
+    },
+    "interface": {
+      "R_max_on_band": 0.0001,
+      "applies_to": "both monitors, band 1.3 to 1.8 um",
+      "note": "this case's own budget: the declared-oblique limit, because the field at the interface reaches the layer at every angle"
+    },
+    "stability": {
+      "energy_last_over_peak_max": 1e-06,
+      "late_growth_max": 1.000001,
+      "applies_to": "energy_last_over_peak for the two normal-incidence runs; late_growth for all three runs (the 60 deg run reports energy_last_over_peak only)"
+    },
+    "sweeps": "reported only: 20 layers must not reflect more than 10 layers; 200 fs must agree with 100 fs to within 10 percent of R",
+    "layer_A": {
+      "rtol": 0.0001,
+      "atol": 1e-06
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds pml_normal_reflected_power_ratio and pml_declared_oblique_reflected_power_ratio; the interface and stability budgets are this case's own pre-declared limits"
+  },
+  "observed_metrics": {
+    "task": "G3-07",
+    "case": "docs/validation/cases/G3-07_cpml_reflection_stability.json",
+    "test_module": "tests/test_physics_g3_a.py",
+    "environment": {
+      "python": "3.10.2",
+      "numpy": "2.2.6",
+      "torch": "2.10.0+cu126",
+      "fdtd": "0.2.2",
+      "cuda_runtime": "12.6",
+      "cuda_available": true,
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "os": "Windows-10-10.0.26200-SP0",
+      "machine": "AMD64",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+      "commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+      "dirty_paths": 8,
+      "fine_meshes": true,
+      "recorded_at": "2026-09-21T16:43:27+00:00"
+    },
+    "entries": {
+      "normal n=1.0 L10": {
+        "background_index": 1.0,
+        "layers": 10,
+        "steps": 1713,
+        "shape_short": [
+          460,
+          12,
+          1
+        ],
+        "shape_long": [
+          1620,
+          12,
+          1
+        ],
+        "dt_s": 5.837669483455467e-17,
+        "seconds": 1.9096953002735972,
+        "wavelength_um": [
+          1.7999999999999998,
+          1.7660377358490567,
+          1.7333333333333332,
+          1.701818181818182,
+          1.6714285714285713,
+          1.6421052631578945,
+          1.6137931034482758,
+          1.5864406779661018,
+          1.56,
+          1.5344262295081967,
+          1.5096774193548388,
+          1.4857142857142858,
+          1.4625,
+          1.44,
+          1.4181818181818182,
+          1.3970149253731345,
+          1.3764705882352941,
+          1.356521739130435,
+          1.3371428571428572,
+          1.3183098591549298,
+          1.3
+        ],
+        "R": [
+          4.5926188468383575e-10,
+          4.594842572562975e-10,
+          4.5970034078450387e-10,
+          4.5992680234126627e-10,
+          4.6017665507439083e-10,
+          4.6044187553077873e-10,
+          4.60707178312891e-10,
+          4.6097254495017423e-10,
+          4.612524120714253e-10,
+          4.61554576130164e-10,
+          4.6186975564964157e-10,
+          4.6218592570420365e-10,
+          4.625061102733672e-10,
+          4.6284419455060316e-10,
+          4.6320505478825297e-10,
+          4.635776042054337e-10,
+          4.639510312933073e-10,
+          4.6433125945707837e-10,
+          4.647334899814529e-10,
+          4.6516040003802777e-10,
+          4.6559726898553687e-10
+        ],
+        "R_max_on_band": 4.6559726898553687e-10,
+        "R_at_design": 4.6136692070228405e-10,
+        "R_broadband": 4.616235803339106e-10,
+        "R_max_dB": -93.31989575755053,
+        "incident_peak": 0.693499650721637,
+        "limit": 1e-06
+      },
+      "normal n=2.0 L10": {
+        "background_index": 2.0,
+        "layers": 10,
+        "steps": 1713,
+        "shape_short": [
+          460,
+          12,
+          1
+        ],
+        "shape_long": [
+          1620,
+          12,
+          1
+        ],
+        "dt_s": 5.837669483455467e-17,
+        "seconds": 1.902001699898392,
+        "wavelength_um": [
+          1.7999999999999998,
+          1.7660377358490567,
+          1.7333333333333332,
+          1.701818181818182,
+          1.6714285714285713,
+          1.6421052631578945,
+          1.6137931034482758,
+          1.5864406779661018,
+          1.56,
+          1.5344262295081967,
+          1.5096774193548388,
+          1.4857142857142858,
+          1.4625,
+          1.44,
+          1.4181818181818182,
+          1.3970149253731345,
+          1.3764705882352941,
+          1.356521739130435,
+          1.3371428571428572,
+          1.3183098591549298,
+          1.3
+        ],
+        "R": [
+          1.998793350761074e-09,
+          2.006165388249015e-09,
+          2.0135870396239007e-09,
+          2.0210450988652954e-09,
+          2.0285342650954005e-09,
+          2.0360514396656793e-09,
+          2.043587542370369e-09,
+          2.0511271083798905e-09,
+          2.0586555596929804e-09,
+          2.0661646531852253e-09,
+          2.0736493333771347e-09,
+          2.081100164457826e-09,
+          2.0885010957751766e-09,
+          2.0958356675148376e-09,
+          2.103093963836389e-09,
+          2.110271138758621e-09,
+          2.1173586934354324e-09,
+          2.1243395556340074e-09,
+          2.1311944047613543e-09,
+          2.1379124511360268e-09,
+          2.1444923513104045e-09
+        ],
+        "R_max_on_band": 2.1444923513104045e-09,
+        "R_at_design": 2.0615648678924716e-09,
+        "R_broadband": 2.061141812810509e-09,
+        "R_max_dB": -86.6867549840584,
+        "incident_peak": 1.39418376413815,
+        "limit": 1e-06
+      },
+      "oblique 30deg L10": {
+        "angle_deg": 30,
+        "bloch_phase": 0.6080501910173792,
+        "steps": 2570,
+        "angle_deg_over_band": [
+          31.072950972153333,
+          30.67992585785145,
+          30.297305794056097,
+          29.92465803699997,
+          29.561574915024675,
+          29.207671941529938,
+          28.86258610376315,
+          28.525974307882862,
+          28.197511963257725,
+          27.87689169111913,
+          27.56382214453277,
+          27.258026928240668,
+          26.959243608292475,
+          26.66722280256628,
+          26.381727344303496,
+          26.102531511672474,
+          25.829420317151467,
+          25.562188851199256,
+          25.30064167527566,
+          25.044592259795287,
+          24.79386246305661
+        ],
+        "complex_fields": true,
+        "seconds": 7.126897699665278,
+        "wavelength_um": [
+          1.5999999999999999,
+          1.5817490494296578,
+          1.5639097744360901,
+          1.546468401486989,
+          1.5294117647058822,
+          1.512727272727273,
+          1.4964028776978417,
+          1.480427046263345,
+          1.4647887323943662,
+          1.4494773519163764,
+          1.4344827586206899,
+          1.4197952218430034,
+          1.4054054054054053,
+          1.391304347826087,
+          1.3774834437086092,
+          1.3639344262295081,
+          1.3506493506493509,
+          1.337620578778135,
+          1.3248407643312103,
+          1.3123028391167193,
+          1.3
+        ],
+        "R": [
+          3.4027779806396445e-10,
+          3.425239739783399e-10,
+          3.448008626773442e-10,
+          3.4729665424449073e-10,
+          3.4992373092189387e-10,
+          3.5249751033907167e-10,
+          3.548849664247182e-10,
+          3.570667038985203e-10,
+          3.591180754014738e-10,
+          3.6114480793514825e-10,
+          3.6321458648665034e-10,
+          3.653176158759571e-10,
+          3.6737334516218676e-10,
+          3.69281483878171e-10,
+          3.7099593785535163e-10,
+          3.725836513090458e-10,
+          3.742225893968645e-10,
+          3.7610448598804563e-10,
+          3.782513286079655e-10,
+          3.8033638702510195e-10,
+          3.8170172760586896e-10
+        ],
+        "R_max_on_band": 3.8170172760586896e-10,
+        "R_at_design": 3.4677061179434186e-10,
+        "R_broadband": 3.6064605477575996e-10,
+        "R_max_dB": -94.18275874402491,
+        "incident_peak": 0.8099414349613236,
+        "limit": 0.0001
+      },
+      "oblique 60deg L10": {
+        "angle_deg": 60,
+        "bloch_phase": 1.0531738243940618,
+        "steps": 2570,
+        "angle_deg_over_band": [
+          63.375374239530046,
+          62.09985247994985,
+          60.9029376777845,
+          59.774655337981066,
+          58.70699173393859,
+          57.693387653010475,
+          56.72838952409334,
+          55.807401843209306,
+          54.926507028877666,
+          54.082331474827846,
+          53.27194405388431,
+          52.492777921102245,
+          51.74256937150888,
+          51.0193093978911,
+          50.32120485264033,
+          49.64664697384735,
+          48.99418562959846,
+          48.36250805341842,
+          47.75042114418756,
+          47.1568366223349,
+          46.58075849513017
+        ],
+        "complex_fields": true,
+        "seconds": 7.122083100024611,
+        "wavelength_um": [
+          1.5999999999999999,
+          1.5817490494296578,
+          1.5639097744360901,
+          1.546468401486989,
+          1.5294117647058822,
+          1.512727272727273,
+          1.4964028776978417,
+          1.480427046263345,
+          1.4647887323943662,
+          1.4494773519163764,
+          1.4344827586206899,
+          1.4197952218430034,
+          1.4054054054054053,
+          1.391304347826087,
+          1.3774834437086092,
+          1.3639344262295081,
+          1.3506493506493509,
+          1.337620578778135,
+          1.3248407643312103,
+          1.3123028391167193,
+          1.3
+        ],
+        "R": [
+          6.569400843118378e-10,
+          2.5885994191905086e-11,
+          4.3201515552469116e-10,
+          6.846292829744871e-10,
+          6.0704207912751e-10,
+          3.592874633161311e-10,
+          1.3618130289835943e-10,
+          4.827165744366647e-11,
+          9.994803257805462e-11,
+          2.189189865741146e-10,
+          3.0868964807163394e-10,
+          3.028437953612257e-10,
+          2.024159455628743e-10,
+          8.111505582620136e-11,
+          5.134831409601409e-11,
+          1.973017546204537e-10,
+          4.994654645093319e-10,
+          7.981068230811174e-10,
+          8.643637142158179e-10,
+          6.431470808529779e-10,
+          6.796280745000067e-10
+        ],
+        "R_max_on_band": 8.643637142158179e-10,
+        "R_at_design": 6.618787109024974e-10,
+        "R_broadband": 1.1929189604946205e-09,
+        "R_max_dB": -90.63303472985709,
+        "incident_peak": 1.2528810207533267,
+        "limit": 0.0001
+      },
+      "interface n=2 half space L10": {
+        "steps": 2570,
+        "shape_short": [
+          460,
+          80,
+          1
+        ],
+        "seconds": 39.96422159997746,
+        "monitors": {
+          "vacuum side": {
+            "wavelength_um": [
+              1.7999999999999998,
+              1.7660377358490567,
+              1.7333333333333332,
+              1.701818181818182,
+              1.6714285714285713,
+              1.6421052631578945,
+              1.6137931034482758,
+              1.5864406779661018,
+              1.56,
+              1.5344262295081967,
+              1.5096774193548388,
+              1.4857142857142858,
+              1.4625,
+              1.44,
+              1.4181818181818182,
+              1.3970149253731345,
+              1.3764705882352941,
+              1.356521739130435,
+              1.3371428571428572,
+              1.3183098591549298,
+              1.3
+            ],
+            "R": [
+              2.393734411052398e-07,
+              1.0275451360025453e-06,
+              3.487294571797936e-06,
+              6.219538130768867e-06,
+              6.52981697595274e-06,
+              4.824847811594553e-06,
+              2.777347806192554e-06,
+              1.735292505595795e-06,
+              1.8021667718191003e-06,
+              3.8006660098627163e-06,
+              8.402804788395863e-06,
+              1.2018648235934407e-05,
+              5.8701652923338945e-06,
+              2.5269155868818675e-06,
+              9.871802808902637e-07,
+              5.566963303774964e-07,
+              4.588790071750998e-07,
+              2.673273587961807e-07,
+              2.313296683982462e-07,
+              2.415493525527852e-07,
+              1.7215662156400705e-07
+            ],
+            "R_max_on_band": 1.2018648235934407e-05,
+            "R_at_design": 2.2388392024631455e-06,
+            "R_broadband": 2.4459836951622655e-06,
+            "R_max_dB": -49.20144375651704,
+            "incident_peak": 0.2590923535106817
+          },
+          "dielectric side": {
+            "wavelength_um": [
+              1.7999999999999998,
+              1.7660377358490567,
+              1.7333333333333332,
+              1.701818181818182,
+              1.6714285714285713,
+              1.6421052631578945,
+              1.6137931034482758,
+              1.5864406779661018,
+              1.56,
+              1.5344262295081967,
+              1.5096774193548388,
+              1.4857142857142858,
+              1.4625,
+              1.44,
+              1.4181818181818182,
+              1.3970149253731345,
+              1.3764705882352941,
+              1.356521739130435,
+              1.3371428571428572,
+              1.3183098591549298,
+              1.3
+            ],
+            "R": [
+              5.1962621751032415e-09,
+              1.2142982508059855e-08,
+              4.025980561148184e-08,
+              8.924385650011367e-08,
+              8.846202279640964e-08,
+              4.1502480284641456e-08,
+              2.2146613433926858e-08,
+              1.9752657415445535e-08,
+              6.531498830271794e-09,
+              5.706496365684961e-09,
+              9.056204642889857e-09,
+              2.202404658653027e-09,
+              2.20213286385066e-09,
+              4.503512691485284e-09,
+              5.711278269031191e-10,
+              2.1848764871036567e-09,
+              3.2828514759540512e-09,
+              1.7682497324105107e-10,
+              2.8672079131333904e-09,
+              2.7643062925860253e-09,
+              3.259031002496311e-10
+            ],
+            "R_max_on_band": 8.924385650011367e-08,
+            "R_at_design": 3.9785113649582935e-09,
+            "R_broadband": 1.6964721556208718e-08,
+            "R_max_dB": -70.49421670789248,
+            "incident_peak": 2.4398796553863504
+          }
+        },
+        "limit": 0.0001
+      },
+      "sweeps vacuum normal": {
+        "depth": {
+          "L10": 4.6559726898553687e-10,
+          "L20": 2.66848745403026e-12,
+          "L10_dB": -93.31989575755053,
+          "L20_dB": -115.73734834703465
+        },
+        "time": {
+          "fs100": 4.6559726898553687e-10,
+          "fs200": 4.6559654818397244e-10,
+          "relative_change": 1.5481224062696697e-06
+        },
+        "policy": "reported only"
+      },
+      "stability vacuum normal": {
+        "background": 1.0,
+        "steps": 20000,
+        "duration_fs": 1167.5338966910933,
+        "source_end_fs": 49.40936706168464,
+        "energy_peak": 933.7369539970298,
+        "energy_last": 5.611943119747199e-15,
+        "energy_last_over_peak": 6.010197085725548e-18,
+        "late_growth": 1.0711666297770268e-05,
+        "late_growth_floor": 9.337369539970298e-10,
+        "energy_at_half_over_peak": 9.403366361624852e-18,
+        "energy_max_second_half_over_peak": 1.0711666297770268e-17,
+        "energy_at_half": 8.780270663821722e-15,
+        "field_peak_last": 1.7548074469732556e-09,
+        "termination": "max_steps",
+        "seconds": 6.938124100212008,
+        "checks": 200,
+        "limits": {
+          "energy_last_over_peak_max": 1e-06,
+          "late_growth_max": 1.000001,
+          "applies_to": "energy_last_over_peak for the two normal-incidence runs; late_growth for all three runs (the 60 deg run reports energy_last_over_peak only)"
+        },
+        "decay_criterion_applies": true
+      },
+      "stability n=2 normal": {
+        "background": 2.0,
+        "steps": 20000,
+        "duration_fs": 1167.5338966910933,
+        "source_end_fs": 49.40936706168464,
+        "energy_peak": 9416.115952232176,
+        "energy_last": 3.348124091077616e-12,
+        "energy_last_over_peak": 3.55573795826496e-16,
+        "late_growth": 0.0005956363602057846,
+        "late_growth_floor": 9.416115952232176e-09,
+        "energy_at_half_over_peak": 5.956363602057845e-16,
+        "energy_max_second_half_over_peak": 5.956363602057845e-16,
+        "energy_at_half": 5.608581033063198e-12,
+        "field_peak_last": 5.456220781754791e-08,
+        "termination": "max_steps",
+        "seconds": 6.966858699917793,
+        "checks": 200,
+        "limits": {
+          "energy_last_over_peak_max": 1e-06,
+          "late_growth_max": 1.000001,
+          "applies_to": "energy_last_over_peak for the two normal-incidence runs; late_growth for all three runs (the 60 deg run reports energy_last_over_peak only)"
+        },
+        "decay_criterion_applies": true
+      },
+      "stability vacuum 60deg": {
+        "angle_deg": 60,
+        "steps": 20000,
+        "duration_fs": 1167.5338966910933,
+        "source_end_fs": 138.50370756021172,
+        "energy_peak": 3835.7775901523837,
+        "energy_last": 0.0034529291312957104,
+        "energy_last_over_peak": 9.001901309816391e-07,
+        "late_growth": 1.0,
+        "late_growth_floor": 3.835777590152384e-09,
+        "energy_at_half_over_peak": 1.534924710144792e-06,
+        "energy_max_second_half_over_peak": 1.534924710144792e-06,
+        "energy_at_half": 0.005887629805744536,
+        "field_peak_last": 0.0011263260357196217,
+        "termination": "max_steps",
+        "seconds": 12.452854000031948,
+        "checks": 200,
+        "limits": {
+          "energy_last_over_peak_max": 1e-06,
+          "late_growth_max": 1.000001,
+          "applies_to": "energy_last_over_peak for the two normal-incidence runs; late_growth for all three runs (the 60 deg run reports energy_last_over_peak only)"
+        },
+        "decay_criterion_applies": false
+      },
+      "layer A cuda fp32 short vacuum normal": {
+        "steps": 1713,
+        "cuda_graph": true,
+        "gpu": "NVIDIA GeForce RTX 3060",
+        "max_abs_error": 7.347309008360128e-07,
+        "relative_l2": 8.865424047323437e-07,
+        "within": true,
+        "peak": 0.6934920335793184,
+        "limits": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        }
+      }
+    }
+  },
+  "test_results": {
+    "total": 10,
+    "passed": [
+      "tests/test_physics_g3_a.py::TestG307::test_normal_reflection[1.0]",
+      "tests/test_physics_g3_a.py::TestG307::test_normal_reflection[2.0]",
+      "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection[30]",
+      "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection[60]",
+      "tests/test_physics_g3_a.py::TestG307::test_interface_reflection",
+      "tests/test_physics_g3_a.py::TestG307::test_depth_and_time_sweeps",
+      "tests/test_physics_g3_a.py::TestG307::test_long_time_stability[vacuum normal-kwargs0]",
+      "tests/test_physics_g3_a.py::TestG307::test_long_time_stability[n=2 normal-kwargs1]",
+      "tests/test_physics_g3_a.py::TestG307::test_long_time_stability[vacuum 60deg-kwargs2]",
+      "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 99.61,
+    "suite_timestamp": "2026-09-22T01:43:20.841522+09:00"
+  },
+  "required_tests": [
+    "tests/test_physics_g3_a.py::TestG307::test_normal_reflection",
+    "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection",
+    "tests/test_physics_g3_a.py::TestG307::test_interface_reflection",
+    "tests/test_physics_g3_a.py::TestG307::test_depth_and_time_sweeps",
+    "tests/test_physics_g3_a.py::TestG307::test_long_time_stability",
+    "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/g3/G3-07.json",
+      "sha256": "e328b0fa779f41c7041be7ec01b272d4d9e0e452bc9cfdb310e58a199de9f2e4",
+      "bytes": 16296
+    },
+    {
+      "path": "docs/validation/runs/20260921T164832Z-g3-07-70619385/junit.xml",
+      "sha256": "1462575db5d728b4d4429f422fd0fa6e79360be7871581c67eb03c365533da18",
+      "bytes": 1353,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G3-07.xml"
+    }
+  ],
+  "applicable_scope": "layer B physics (CPU FP64, 2D TE, default 10-layer CPML: normal incidence in vacuum and n=2, 30 and 60 deg fixed k_parallel, an n=2 half space entering the layer, depth and duration sweeps, three 20,000-step stability runs) and layer A (CUDA FP32 with CUDA graph on the RTX 3060 against CPU FP64, short vacuum normal fixture)",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="12" skipped="0" tests="50" time="401.573" timestamp="2026-09-22T01:34:29.307492+09:00" hostname="DESKTOP-N5DFT8J"><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TE-0-20]" time="2.093" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TE-0-40]" time="3.422" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TE-20-20]" time="1.560" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TE-20-40]" time="5.023" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TE-45-20]" time="1.543" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TE-45-40]" time="5.113" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TM-0-20]" time="1.372" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TM-0-40]" time="3.317" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TM-20-20]" time="1.617" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TM-20-40]" time="5.578" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TM-45-20]" time="1.403" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.2-TM-45-40]" time="5.449" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TE-0-20]" time="1.276" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TE-0-40]" time="3.483" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TE-20-20]" time="1.452" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TE-20-40]" time="4.573" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TE-45-20]" time="1.315" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TE-45-40]" time="5.241" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TM-0-20]" time="1.253" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TM-0-40]" time="3.519" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TM-20-20]" time="1.690" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TM-20-40]" time="5.944" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TM-45-20]" time="1.656" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n1.5_d0.5-TM-45-40]" time="5.187" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TE-0-20]" time="3.124"><failure message="AssertionError: ('slab n=3.5 d=0.2 0deg TE N20', 'R', 0.02290623257240415)&#10;assert 0.02290623257240415 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B04D60&gt;
+slab = (3.5, 0.2), pol = 'TE', angle = 0, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.2 0deg TE N20', 'R', 0.02290623257240415)
+E       assert 0.02290623257240415 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TE-0-40]" time="11.251" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TE-20-20]" time="4.718"><failure message="AssertionError: ('slab n=3.5 d=0.2 20deg TE N20', 'R', 0.023566652060682203)&#10;assert 0.023566652060682203 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B04EE0&gt;
+slab = (3.5, 0.2), pol = 'TE', angle = 20, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.2 20deg TE N20', 'R', 0.023566652060682203)
+E       assert 0.023566652060682203 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TE-20-40]" time="23.576" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TE-45-20]" time="4.736"><failure message="AssertionError: ('slab n=3.5 d=0.2 45deg TE N20', 'R', 0.026883352811052613)&#10;assert 0.026883352811052613 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B05060&gt;
+slab = (3.5, 0.2), pol = 'TE', angle = 45, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.2 45deg TE N20', 'R', 0.026883352811052613)
+E       assert 0.026883352811052613 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TE-45-40]" time="23.718" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TM-0-20]" time="3.249"><failure message="AssertionError: ('slab n=3.5 d=0.2 0deg TM N20', 'R', 0.022906145526351535)&#10;assert 0.022906145526351535 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B051E0&gt;
+slab = (3.5, 0.2), pol = 'TM', angle = 0, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.2 0deg TM N20', 'R', 0.022906145526351535)
+E       assert 0.022906145526351535 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TM-0-40]" time="11.611" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TM-20-20]" time="3.922"><failure message="AssertionError: ('slab n=3.5 d=0.2 20deg TM N20', 'R', 0.020639857429824437)&#10;assert 0.020639857429824437 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B05360&gt;
+slab = (3.5, 0.2), pol = 'TM', angle = 20, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.2 20deg TM N20', 'R', 0.020639857429824437)
+E       assert 0.020639857429824437 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TM-20-40]" time="21.722" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TM-45-20]" time="4.863"><failure message="AssertionError: ('slab n=3.5 d=0.2 45deg TM N20', 'R', 0.012827002753299337)&#10;assert 0.012827002753299337 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B054E0&gt;
+slab = (3.5, 0.2), pol = 'TM', angle = 45, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.2 45deg TM N20', 'R', 0.012827002753299337)
+E       assert 0.012827002753299337 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.2-TM-45-40]" time="22.980" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TE-0-20]" time="3.593"><failure message="AssertionError: ('slab n=3.5 d=0.5 0deg TE N20', 'R', 0.02650026040660769)&#10;assert 0.02650026040660769 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B05660&gt;
+slab = (3.5, 0.5), pol = 'TE', angle = 0, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.5 0deg TE N20', 'R', 0.02650026040660769)
+E       assert 0.02650026040660769 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TE-0-40]" time="12.939" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TE-20-20]" time="5.764"><failure message="AssertionError: ('slab n=3.5 d=0.5 20deg TE N20', 'R', 0.028081963253920594)&#10;assert 0.028081963253920594 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B057E0&gt;
+slab = (3.5, 0.5), pol = 'TE', angle = 20, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.5 20deg TE N20', 'R', 0.028081963253920594)
+E       assert 0.028081963253920594 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TE-20-40]" time="27.569" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TE-45-20]" time="6.122"><failure message="AssertionError: ('slab n=3.5 d=0.5 45deg TE N20', 'R', 0.03730640931939189)&#10;assert 0.03730640931939189 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B05960&gt;
+slab = (3.5, 0.5), pol = 'TE', angle = 45, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.5 45deg TE N20', 'R', 0.03730640931939189)
+E       assert 0.03730640931939189 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TE-45-40]" time="29.933" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TM-0-20]" time="4.188"><failure message="AssertionError: ('slab n=3.5 d=0.5 0deg TM N20', 'R', 0.026499674808204032)&#10;assert 0.026499674808204032 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B05AE0&gt;
+slab = (3.5, 0.5), pol = 'TM', angle = 0, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.5 0deg TM N20', 'R', 0.026499674808204032)
+E       assert 0.026499674808204032 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TM-0-40]" time="15.385" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TM-20-20]" time="5.966"><failure message="AssertionError: ('slab n=3.5 d=0.5 20deg TM N20', 'R', 0.024938413945817584)&#10;assert 0.024938413945817584 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B05C60&gt;
+slab = (3.5, 0.5), pol = 'TM', angle = 20, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.5 20deg TM N20', 'R', 0.024938413945817584)
+E       assert 0.024938413945817584 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TM-20-40]" time="32.786" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TM-45-20]" time="6.078"><failure message="AssertionError: ('slab n=3.5 d=0.5 45deg TM N20', 'R', 0.020550881674294585)&#10;assert 0.020550881674294585 &lt;= 0.01">self = &lt;test_physics_g3_a.TestG302 object at 0x0000021BE0B05DE0&gt;
+slab = (3.5, 0.5), pol = 'TM', angle = 45, N = 20
+
+    @pytest.mark.parametrize('N', [20, 40])
+    @pytest.mark.parametrize('angle', [0, 20, 45])
+    @pytest.mark.parametrize('pol', ['TE', 'TM'])
+    @pytest.mark.parametrize('slab', SLABS, ids=lambda s: f'n{s[0]}_d{s[1]}')
+    def test_slab_r_t_against_tmm(self, slab, pol, angle, N):
+        if N == 40 and not FINE:
+            pytest.skip(FINE_REASON)
+        n, d = slab
+        geo = slab_geometry(n, d)
+        h = geo['h20'] if N == 20 else geo['h20']/2
+        sample = run(slab_project(n, d, N, angle, pol, True))
+        empty = run(slab_project(n, d, N, angle, pol, False))
+        f = band(21)
+        out = slab_response(sample, empty, d, angle, pol, h, f, geo['offset'])
+        r_ref, t_ref = tmm_slab(n**2+0j, d*1e-6, 2*np.pi*f/C0, out['ky'], pol)
+        metrics = slab_metrics(out['r'], out['t'], r_ref, t_ref)
+        cont = slab_metrics(out['r_continuum'], out['t_continuum'], r_ref, t_ref)
+        limit = limits(self.CASE)
+        key = f'slab n={n} d={d} {angle}deg {pol} N{N}'
+        self.record.add(key, index=n, thickness_um=d, angle_deg=angle, polarization=pol, N=N, mesh_um=h, cells_across_slab=geo['M']*(N//20),
+                        cells_per_material_wavelength_at_1p55=LAMBDA0/(n*h), pml_layers=sample.project.region.pml_cells, shape=sample.project.region.shape,
+                        steps=sample.project.region.steps, dt_s=sample.times[1]-sample.times[0], bloch_phase=sample.project.region.bloch_phase[1],
+                        angle_range_deg=[float(np.degrees(np.arcsin(out['ky']*C0/(2*np.pi*f[i])))) for i in (-1, 0)],
+                        wavelength_um=C0/f*1e6, seconds=sample.summary['seconds']+empty.summary['seconds'],
+                        **{k: v for k, v in metrics.items()}, continuum_corrected=dict(t_phase_error=cont['t_phase_error'], r_phase_error=cont['r_phase_error']),
+                        limits=dict(R=limit['R_abs_error_max'], T=limit['T_abs_error_max'], balance=limit['balance_residual_max'], t_phase=limit['t_phase_error_max_rad']),
+                        passed=bool(metrics['R_abs_error'] &lt;= limit['R_abs_error_max'] and metrics['T_abs_error'] &lt;= limit['T_abs_error_max']
+                                    and metrics['balance_residual'] &lt;= limit['balance_residual_max'] and metrics['t_phase_error'] &lt;= limit['t_phase_error_max_rad']))
+&gt;       assert metrics['R_abs_error'] &lt;= limit['R_abs_error_max'], (key, 'R', metrics['R_abs_error'])
+E       AssertionError: ('slab n=3.5 d=0.5 45deg TM N20', 'R', 0.020550881674294585)
+E       assert 0.020550881674294585 &lt;= 0.01
+
+tests\test_physics_g3_a.py:472: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_a.TestG302" name="test_slab_r_t_against_tmm[n3.5_d0.5-TM-45-40]" time="30.096" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_layer_a_cuda_fp32[TE]" time="2.125" /><testcase classname="tests.test_physics_g3_a.TestG302" name="test_layer_a_cuda_fp32[TM]" time="1.471" /></testsuite></testsuites>

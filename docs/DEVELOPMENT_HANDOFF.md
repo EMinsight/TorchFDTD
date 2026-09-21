@@ -138,7 +138,13 @@ D:/TorchFDTD/.venv/Scripts/python.exe scripts/render_physics_validation.py
 
 **Passed / failed / skipped / not run.** G3-01 38 passed; G3-02 38 passed, 12 failed (the n=3.5 N20 instances above); G3-03 12 passed; G3-07 10 passed. Skipped: none (fine meshes enabled). Wall time under the shared load: 492 s, 402 s, 87 s, 100 s.
 
-**Evidence paths and hashes.** Recorded after the commit of the files above with `scripts/record_gate_evidence.py --task G3-0X --fixture docs/validation/cases/<case>.json --observed docs/validation/g3/G3-0X.json`; run ids are in `docs/validation/completion_gates.json` and the run directories carry the JUnit and SHA-256 values.
+**Evidence paths and hashes.** Recorded on the clean tree at 637e653 with `scripts/record_gate_evidence.py --task G3-0X --command "<the command above>" --junit D:/TorchFDTD/.local/tmp/junit/G3-0X.xml --exit-code <0 or 1> --fixture docs/validation/cases/<case>.json --observed docs/validation/g3/G3-0X.json --scope "<layers and devices>"`:
+- G3-01: `docs/validation/runs/20260921T164808Z-g3-01-f6fd27b3/` (VERIFIED, 38 passed)
+- G3-02: `docs/validation/runs/20260921T164814Z-g3-02-1e349534/` (FAILED, 38 passed, 12 failed)
+- G3-03: `docs/validation/runs/20260921T164821Z-g3-03-35392fa4/` (VERIFIED, 12 passed)
+- G3-07: `docs/validation/runs/20260921T164832Z-g3-07-70619385/` (VERIFIED, 10 passed)
+
+Each `evidence.json` carries the fixture, criteria and test-source SHA-256 values, the observed metrics, the environment and the JUnit copy. `scripts/check_release_gates.py --task G3-0X` passes G3-01, G3-03 and G3-07 and fails G3-02 (verification_state FAILED); the four rows are now `implementation_state` IMPLEMENTED.
 
 **Remaining defects, risks, external blockers.**
 - G3-02 verification_state is FAILED by the recorder because 12 of 48 instances miss the pre-declared limits at about 20 cells per material wavelength for n=3.5 (the limits are met at about 40). The limits were not relaxed. A scientific decision on the required resolution (or a subpixel-interface fixture) is the owner's call and would need a new case file.
