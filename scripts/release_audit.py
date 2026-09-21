@@ -11,6 +11,18 @@ def file_sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+# A skip whose reason names a missing CUDA device, CuPy or GPU is a GPU-required test that did not run.
+# tests/conftest.py prefixes the reasons of ``optional``-marked tests so they are not counted.
+GPU_SKIP_REASON = re.compile(r'cuda|cupy|gpu', re.IGNORECASE)
+OPTIONAL_SKIP_PREFIX = 'optional platform check: '
+
+
+def gpu_required_skips(skipped_reasons):
+    """Test ids whose skip reason names CUDA, CuPy or a GPU and is not an optional platform check."""
+    return sorted(test for test, reason in (skipped_reasons or {}).items()
+                  if GPU_SKIP_REASON.search(reason or '') and not (reason or '').startswith(OPTIONAL_SKIP_PREFIX))
+
+
 def main():
     folders=['.github','torchfdtd','frontend','examples','tests','scripts','benchmarks','docs']
     files=sorted(p for folder in folders for p in Path(folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)

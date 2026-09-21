@@ -5,7 +5,9 @@ evidence record that still matches the current checkout. Anything else exits 1:
 a task that is not VERIFIED or is FAILED, a missing or unreadable evidence file,
 a VERIFIED state without evidence behind it, evidence whose source commit is
 not an ancestor of HEAD or whose test sources, fixtures or criteria have since
-changed, a skipped or absent required test, or an unresolved external blocker.
+changed, a skipped or absent required test, a skipped GPU-required test (a skip
+whose reason names CUDA, CuPy or a GPU and is not an optional platform check),
+or an unresolved external blocker.
 `--allow-stale` downgrades only the stale-evidence reasons and is reported loudly.
 """
 import argparse
@@ -15,7 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from release_audit import file_sha256  # noqa: E402
+from release_audit import file_sha256, gpu_required_skips  # noqa: E402
 
 GATE_FILE = Path('docs') / 'validation' / 'completion_gates.json'
 RUNS_DIR = Path('docs') / 'validation' / 'runs'
@@ -104,6 +106,11 @@ def judge_task(root, gates, task, runs_dir):
         failures.append(f"evidence exit code is {evidence.get('exit_code')}")
     if evidence.get('skipped_required_tests'):
         failures.append('required tests skipped: ' + ', '.join(evidence['skipped_required_tests']))
+    gpu_skips = evidence.get('gpu_required_skips')
+    if gpu_skips is None:  # evidence recorded before the field existed is classified from its skip reasons
+        gpu_skips = gpu_required_skips(results.get('skipped_reasons'))
+    if gpu_skips:
+        failures.append('GPU-required tests skipped in a required run: ' + ', '.join(gpu_skips))
     ran = [*results.get('passed', []), *results.get('failed', []), *results.get('errors', []), *results.get('skipped', [])]
     for required in task.get('required_tests') or []:
         if any(matches(required, s) for s in results.get('skipped', [])):

@@ -112,6 +112,7 @@ assert not record['retained_caller'] and record['retained_worker']
 """
 
 
+@pytest.mark.long
 def test_real_cuda_cold_subprocess_ownership():
     import os
     import subprocess

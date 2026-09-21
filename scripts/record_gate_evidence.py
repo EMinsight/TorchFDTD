@@ -19,7 +19,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from release_audit import file_sha256  # noqa: E402
+from release_audit import file_sha256, gpu_required_skips  # noqa: E402
 
 RECORDER_VERSION = 1
 GATE_FILE = Path('docs') / 'validation' / 'completion_gates.json'
@@ -107,7 +107,7 @@ def parse_junit(root, junit_path):
     tree = ET.parse(junit_path)
     top = tree.getroot()
     suites = [top] if top.tag == 'testsuite' else list(top.iter('testsuite'))
-    results = dict(total=0, passed=[], failed=[], errors=[], skipped=[], skipped_reasons={},
+    results = dict(total=0, passed=[], failed=[], errors=[], skipped=[], skipped_reasons={}, gpu_required_skips=[],
                    failure_messages={}, suite_time_seconds=0.0, suite_timestamp=None)
     sources, unresolved = {}, []
     for suite in suites:
@@ -136,6 +136,7 @@ def parse_junit(root, junit_path):
                 results['skipped_reasons'][test_id] = (case.find('skipped').get('message') or '')[:500]
             else:
                 results['passed'].append(test_id)
+    results['gpu_required_skips'] = gpu_required_skips(results['skipped_reasons'])
     return results, sources, unresolved
 
 
@@ -153,6 +154,9 @@ def decide(task, results, exit_code, unresolved):
     absent_required = [t for t in required if not any(matches(t, r) for r in ran)]
     if results['failed'] or results['errors']:
         return 'FAILED', f"{len(results['failed'])} failed and {len(results['errors'])} errored test cases", skipped_required
+    if results['gpu_required_skips']:
+        # A GPU-required test that skipped in a recorded run is a release failure, whether or not the task lists it.
+        return 'FAILED', 'GPU-required tests skipped in a required run: ' + ', '.join(results['gpu_required_skips']), skipped_required
     if exit_code != 0:
         return 'NOT_RUN', f'exit code {exit_code} although the report lists no failure; the run did not complete normally', skipped_required
     if results['total'] == 0:
@@ -375,6 +379,7 @@ def main(argv=None):
         environment=environment(), hardware=hardware_info,
         **case_values,
         test_results=results, required_tests=task.get('required_tests') or [], skipped_required_tests=skipped_required,
+        gpu_required_skips=results['gpu_required_skips'],
         artifact_paths_and_sha256=artifacts, applicable_scope=scope, note=args.note,
         verification_state_assigned=state, verification_reason=reason, null_reasons=null_reasons,
         gate_file=relative(root, gate_path),

@@ -1419,14 +1419,28 @@
           "title": "보유한 실제 GPU와 OS·driver·runtime부터 확인한다",
           "specification": "보유한 실제 GPU와 OS·driver·runtime부터 확인한다. 다른 GPU가 없으면 있다고 가정하지 않는다. WORKSTATION의 지원 플랫폼 matrix에 실제 검증한 범위를 기록한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "scripts/platform_report.py",
+            "docs/PLATFORM_MATRIX.md",
+            "docs/validation/platforms/rtx3060-win11-lab.json",
+            "tests/test_platform_matrix.py",
+            "docs/validation/cases/G4-01_platform_matrix.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_platform_matrix.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-01.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_platform_matrix.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-01.xml"
+          ],
+          "required_tests": [
+            "tests/test_platform_matrix.py"
+          ],
+          "evidence": [
+            "20260921T163708Z-g4-01-53b82748"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -1435,14 +1449,34 @@
           "title": "torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다.",
           "specification": "torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "tests/test_cuda_matrix.py",
+            "docs/validation/cases/G4-02_cuda_valid_path_matrix.json",
+            "torchfdtd/solver.py",
+            "torchfdtd/cuda_kernels.py",
+            "torchfdtd/cuda_graph.py",
+            "torchfdtd/cuda_monitors.py",
+            "torchfdtd/field_monitors.py",
+            "torchfdtd/differentiable.py",
+            "torchfdtd/cuda_adjoint.py",
+            "torchfdtd/cuda_complex.py",
+            "torchfdtd/cuda_complex_adjoint.py"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cuda_matrix.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-02.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cuda_matrix.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-02.xml"
+          ],
+          "required_tests": [
+            "tests/test_cuda_matrix.py"
+          ],
+          "evidence": [
+            "20260921T163724Z-g4-02-b5c11b4f"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -1451,14 +1485,32 @@
           "title": "noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다",
           "specification": "noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다. 불지원 입력은 명확히 거절한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "tests/test_cuda_robustness.py",
+            "docs/validation/cases/G4-03_cuda_robustness.json",
+            "torchfdtd/solver.py",
+            "torchfdtd/cuda_kernels.py",
+            "torchfdtd/cuda_graph.py",
+            "torchfdtd/cuda_monitors.py",
+            "torchfdtd/differentiable.py",
+            "torchfdtd/cuda_adjoint.py",
+            "torchfdtd/run_control.py"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cuda_robustness.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-03.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cuda_robustness.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-03.xml"
+          ],
+          "required_tests": [
+            "tests/test_cuda_robustness.py"
+          ],
+          "evidence": [
+            "20260921T163744Z-g4-03-5f80ac67"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -1467,14 +1519,36 @@
           "title": "최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다",
           "specification": "최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다. sanitizer 또는 동등 검사로 OOB와 race를 점검한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "tests/test_cuda_edge_fixtures.py",
+            "docs/validation/cases/G4-04_cuda_edge_fixtures.json",
+            "torchfdtd/solver.py",
+            "torchfdtd/boundaries.py",
+            "torchfdtd/materials.py",
+            "torchfdtd/cuda_kernels.py",
+            "torchfdtd/cuda_monitors.py",
+            "torchfdtd/streamed.py",
+            "torchfdtd/tile_workspace.py",
+            "torchfdtd/staging.py"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cuda_edge_fixtures.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-04.xml",
+            "PYTORCH_NO_CUDA_MEMORY_CACHING=1 CUDA_LAUNCH_BLOCKING=1 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cuda_edge_fixtures.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-04-oob.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cuda_edge_fixtures.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-04.xml",
+            "PYTORCH_NO_CUDA_MEMORY_CACHING=1 CUDA_LAUNCH_BLOCKING=1 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cuda_edge_fixtures.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-04-oob.xml"
+          ],
+          "required_tests": [
+            "tests/test_cuda_edge_fixtures.py"
+          ],
+          "evidence": [
+            "20260921T163749Z-g4-04-e68ad29a",
+            "20260921T163757Z-g4-04-7e1cdb0f"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -1483,14 +1557,37 @@
           "title": "CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다",
           "specification": "CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다. GPU 필수 검사의 skip는 출고 실패다. 혼합 플랫폼의 선택 검사 skip만 별도 허용한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "tests/conftest.py",
+            "scripts/run_suite.py",
+            "pyproject.toml",
+            ".github/workflows/test.yml",
+            "scripts/release_audit.py",
+            "scripts/record_gate_evidence.py",
+            "scripts/check_release_gates.py",
+            "tests/test_suite_policy.py",
+            "tests/test_release_gates.py",
+            "docs/GPU_RUNNER_POLICY.md",
+            "docs/validation/cases/G4-05_suite_separation.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_suite_policy.py tests/test_release_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-05.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_suite_policy.py tests/test_release_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-05.xml"
+          ],
+          "required_tests": [
+            "tests/test_suite_policy.py",
+            "tests/test_release_gates.py::test_gpu_required_skip_of_an_unlisted_test_is_a_failure",
+            "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not",
+            "tests/test_release_gates.py::test_judge_classifies_gpu_skips_in_evidence_recorded_without_the_field"
+          ],
+          "evidence": [
+            "20260921T164503Z-g4-05-300f0a95"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -1499,14 +1596,27 @@
           "title": "public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다",
           "specification": "public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다. 검토한 commit, 격리된 runner, 최소 권한·네트워크·비밀정보, 작업 후 정리 정책을 사용한다. 단순 실행 승인만으로 host 격리를 대체하지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            ".github/workflows/test.yml",
+            "docs/GPU_RUNNER_POLICY.md",
+            "tests/test_gpu_runner_policy.py",
+            "docs/validation/cases/G4-06_untrusted_code_policy.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_gpu_runner_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-06.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_gpu_runner_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-06.xml"
+          ],
+          "required_tests": [
+            "tests/test_gpu_runner_policy.py"
+          ],
+          "evidence": [
+            "20260921T163823Z-g4-06-f3d8a42a"
+          ],
           "blocker": null,
           "scope_change_approval": null
         }

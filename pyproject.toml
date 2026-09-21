@@ -29,3 +29,8 @@ torchfdtd = ["web/**/*", "web/*", "feature_inventory.json", "capabilities.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "cuda: needs a CUDA device (and CuPy for fused kernels); deselected in cpu-pr, a skip fails under --gpu-required",
+    "long: opt-in long or isolated test enabled only by the release-full suite",
+    "optional: mixed-platform check whose skip is permitted in every suite (two-GPU NCCL, Gloo, licensed tools)",
+]

@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "case_id": "G4-05_suite_separation",
+  "task": "G4-05",
+  "title": "Three declared suites, cuda/long/optional markers, and a GPU-required skip that fails the run and the gate",
+  "fixture": {
+    "suites": {
+      "cpu-pr": "-m 'not cuda and not long', CUDA_VISIBLE_DEVICES=-1, GitHub Actions",
+      "gpu-nightly": "-m 'not long' --gpu-required on a lab GPU host, trusted commits",
+      "release-full": "--gpu-required with TORCHFDTD_RUN_CUDA_BOOTSTRAP_TEST=1 and TORCHFDTD_RUN_CPML_KERNEL_CUDA_TEST=1 on an idle lab GPU host"
+    },
+    "runner": "scripts/run_suite.py",
+    "markers": "pyproject.toml [tool.pytest.ini_options] markers and tests/conftest.py (collection rules, --gpu-required, optional prefix)",
+    "recorder": "scripts/record_gate_evidence.py classifies skips via release_audit.gpu_required_skips; scripts/check_release_gates.py rejects evidence with such skips",
+    "synthetic_policy_tests": "tests/test_suite_policy.py runs tests/conftest.py on a synthetic module under pytester with CUDA hidden",
+    "marker_validation_on_2026_09_22": "pytest -m cuda with CUDA_VISIBLE_DEVICES=-1: 603 skipped, 0 passed, 0 failed (no CPU test carries the cuda marker); the cpu-pr suite with CUDA hidden is run separately and its skip reasons are recorded in the handoff"
+  },
+  "seed": null,
+  "precision": null,
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "behavioural specification: injected JUnit reports and synthetic test modules with known outcomes",
+  "observables": [
+    {
+      "name": "marker_selection",
+      "unit": "set",
+      "definition": "which synthetic tests carry the cuda marker"
+    },
+    {
+      "name": "gpu_required_outcomes",
+      "unit": "counts",
+      "definition": "passed/skipped/failed/error counts and JUnit messages under --gpu-required with CUDA hidden"
+    },
+    {
+      "name": "recorder_state",
+      "unit": "string",
+      "definition": "verification_state assigned to a run whose JUnit contains a CUDA skip"
+    },
+    {
+      "name": "judge_exit",
+      "unit": "integer",
+      "definition": "exit status of check_release_gates on such evidence"
+    }
+  ],
+  "acceptance": {
+    "markers": "explicit cuda marker, CUDA skipif reason, CUDA parameter with a gate idiom and an unconditional gate call are marked; conditional gates, CPU parameters and gate-free CUDA parameters are not",
+    "gpu_required": "a CUDA-reason skip or any skip of a cuda-marked test becomes a failure (or a setup error for skipif); optional tests keep skipping with the 'optional platform check: ' prefix; without the flag every skip stays a skip",
+    "recorder": "a CUDA-reason skip in a recorded run assigns FAILED even when required_tests does not list the test; an optional-prefixed skip does not; the judge exits 1 on such evidence and classifies evidence recorded before the field existed",
+    "workflow": "the CI job launches scripts/run_suite.py cpu-pr",
+    "gpu_suites": "refuse to start without a CUDA device (exit 2)",
+    "source_of_limits": "fixture-specific behavioural rules; no numerical threshold applies"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_suite_policy.py",
+      "tests/test_release_gates.py::test_gpu_required_skip_of_an_unlisted_test_is_a_failure",
+      "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not",
+      "tests/test_release_gates.py::test_judge_classifies_gpu_skips_in_evidence_recorded_without_the_field"
+    ],
+    "not_yet_covered": [
+      "a recorded gpu-nightly run on the RTX 5880 Ada workstation"
+    ]
+  },
+  "notes": "The existing G0-04 and G0-05 evidence hashes tests/test_release_gates.py and becomes stale with the new injection tests; those two tasks need re-recording after this change lands."
+}

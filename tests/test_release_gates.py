@@ -33,12 +33,18 @@ def git(root, *args):
 
 
 def junit(path, cases):
-    """Write a pytest-shaped JUnit file; cases are (classname, name, outcome) with outcome pass/fail/skip/error."""
+    """Write a pytest-shaped JUnit file; cases are (classname, name, outcome) with outcome pass/fail/skip/error.
+
+    ``outcome`` may also be ``('skip', reason)`` to inject a specific skip reason.
+    """
     rows = []
     for classname, name, outcome in cases:
+        reason = 'injected skip'
+        if isinstance(outcome, tuple):
+            outcome, reason = outcome
         inner = {'pass': '', 'fail': '<failure message="injected failure">assert False</failure>',
                  'error': '<error message="injected error">boom</error>',
-                 'skip': '<skipped type="pytest.skip" message="injected skip">skip</skipped>'}[outcome]
+                 'skip': f'<skipped type="pytest.skip" message="{reason}">{reason}</skipped>'}[outcome]
         rows.append(f'<testcase classname="{classname}" name="{name}" time="0.001">{inner}</testcase>')
     counts = dict(tests=len(cases), failures=sum(o == 'fail' for _, _, o in cases),
                   errors=sum(o == 'error' for _, _, o in cases), skipped=sum(o == 'skip' for _, _, o in cases))
@@ -166,6 +172,46 @@ def test_skipped_unrequired_test_still_verifies_but_required_absence_does_not(re
     absent = junit(tmp_path / 'absent.xml', [('tests.test_alpha', 'test_one', 'pass')])
     record(repo, 'G1-03', absent)
     assert task_of(repo, 'G1-03')['verification_state'] == 'NOT_RUN'
+
+
+def test_gpu_required_skip_of_an_unlisted_test_is_a_failure(repo, tmp_path, capsys):
+    """G4-05: a CUDA test that skipped in a recorded run fails the task even when required_tests does not name it."""
+    skipping = junit(tmp_path / 'gpu.xml', [('tests.test_alpha', 'test_one', ('skip', 'CUDA unavailable')), ('tests.test_alpha', 'test_two', 'pass')])
+    record(repo, 'G1-03', skipping)
+    out = capsys.readouterr().out
+    task = task_of(repo, 'G1-03')
+    assert task['verification_state'] == 'FAILED'
+    assert 'GPU-required tests skipped in a required run: tests/test_alpha.py::test_one' in out
+    evidence = json.loads((repo / 'docs' / 'validation' / 'runs' / task['evidence'][0] / 'evidence.json').read_text(encoding='utf-8'))
+    assert evidence['gpu_required_skips'] == ['tests/test_alpha.py::test_one'] and evidence['skipped_required_tests'] == []
+    code, out = judge_run(repo, capsys, '--task', 'G1-03')
+    assert code == 1 and 'verification_state is FAILED' in out
+
+
+@pytest.mark.parametrize('reason', ["could not import 'cupy': No module named cupy", 'Requires installed GPU', 'CUDA GPU not available'])
+def test_gpu_skip_reasons_are_classified_and_optional_checks_are_not(repo, tmp_path, reason):
+    record(repo, 'G0-01', junit(tmp_path / 'gpu.xml', [('tests.test_alpha', 'test_one', ('skip', reason)), ('tests.test_alpha', 'test_two', 'pass')]))
+    assert task_of(repo, 'G0-01')['verification_state'] == 'FAILED'
+    optional = junit(tmp_path / 'optional.xml', [('tests.test_alpha', 'test_one', ('skip', 'optional platform check: ' + reason)),
+                                                 ('tests.test_alpha', 'test_two', 'pass')])
+    record(repo, 'G1-03', optional)
+    task = task_of(repo, 'G1-03')
+    assert task['verification_state'] == 'VERIFIED'
+    evidence = json.loads((repo / 'docs' / 'validation' / 'runs' / task['evidence'][0] / 'evidence.json').read_text(encoding='utf-8'))
+    assert evidence['gpu_required_skips'] == []
+
+
+def test_judge_classifies_gpu_skips_in_evidence_recorded_without_the_field(repo, tmp_path, capsys):
+    record(repo, 'G1-03', passing_junit(tmp_path))
+    task = task_of(repo, 'G1-03')
+    path = repo / 'docs' / 'validation' / 'runs' / task['evidence'][0] / 'evidence.json'
+    evidence = json.loads(path.read_text(encoding='utf-8'))
+    del evidence['gpu_required_skips']
+    evidence['test_results']['skipped'] = ['tests/test_alpha.py::test_three']
+    evidence['test_results']['skipped_reasons'] = {'tests/test_alpha.py::test_three': 'CUDA unavailable'}
+    path.write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
+    code, out = judge_run(repo, capsys, '--task', 'G1-03')
+    assert code == 1 and 'GPU-required tests skipped in a required run: tests/test_alpha.py::test_three' in out
 
 
 def test_nonzero_exit_code_without_failures_does_not_verify(repo, tmp_path):

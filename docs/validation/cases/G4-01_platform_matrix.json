@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "case_id": "G4-01_platform_matrix",
+  "task": "G4-01",
+  "title": "Platform inventory of the real GPU hosts and a matrix that lists only recorded platforms",
+  "fixture": {
+    "report": "scripts/platform_report.py --id <platform id> writes docs/validation/platforms/<id>.json with the GPU name, compute capability, driver (nvidia-smi), CUDA runtime (torch.version.cuda), torch, CuPy, numpy, Python, OS and the free/total device memory at the time of the record",
+    "matrix": "docs/PLATFORM_MATRIX.md, one row per platform; hardware cells are copied from the record file or read 'not recorded'",
+    "recorded_platforms": [
+      "rtx3060-win11-lab"
+    ],
+    "unrecorded_platforms": [
+      "rtx5880-ada-win11-remote: partial facts exist in earlier measurement records but no platform record; the row stays 'not recorded' until scripts/platform_report.py is run on that machine"
+    ],
+    "assumed_platforms": "none"
+  },
+  "seed": null,
+  "precision": null,
+  "backend": [
+    "cuda"
+  ],
+  "reference_method": "the record file written by scripts/platform_report.py on the machine itself; the matrix test cross-checks every table cell against that file and rejects a row whose cells are not backed by a record",
+  "observables": [
+    {
+      "name": "record_fields",
+      "unit": "set",
+      "definition": "record_version, recorded_at, os, python, torch, cupy, cuda_runtime, torch_cuda_available, driver, gpus (name, compute_capability, total and free memory) present in a fresh report"
+    },
+    {
+      "name": "matrix_consistency",
+      "unit": "boolean",
+      "definition": "every hardware cell of a recorded row equals the record; every cell of an unrecorded row reads 'not recorded'; every record file has a row"
+    },
+    {
+      "name": "local_gpu_recorded",
+      "unit": "boolean",
+      "definition": "the GPU torch reports on the test host has a record file"
+    }
+  ],
+  "acceptance": {
+    "report": "the report exits 0 and contains every listed field; with CUDA available it lists at least one GPU with a d.d compute capability and 0 <= free <= total memory",
+    "matrix": "no matrix row carries a value without a record file; at least one row is recorded; the RTX 5880 row is 'not recorded' until a record exists",
+    "source_of_limits": "fixture-specific; no numerical threshold applies"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_platform_matrix.py"
+    ],
+    "not_yet_covered": [
+      "a platform record for the RTX 5880 Ada workstation, to be written there by scripts/platform_report.py --id rtx5880-ada-win11-remote"
+    ]
+  },
+  "notes": "An inventory, not a verification: the matrix's 'Verified by' column points at the G4 evidence runs recorded on each platform."
+}
