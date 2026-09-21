@@ -357,7 +357,7 @@
           "specification": "restart 코드 호환성 검사 누락.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "docs/STREAMED_RESTART.md",
@@ -366,7 +366,9 @@
             "torchfdtd/streamed_restart.py"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_streamed_restart.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G1-04-05.xml"
+          ],
           "required_tests": [
             "tests/test_streamed_restart.py::test_contract_and_signal_adjoint_mismatch_are_rejected",
             "tests/test_streamed_restart.py::test_changed_package_file_is_rejected_by_the_contract",
@@ -376,7 +378,9 @@
             "tests/test_streamed_restart.py::test_forward_resumes_after_interrupt",
             "tests/test_streamed_restart.py::test_killed_process_is_resumed_by_a_new_process"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T184733Z-g1-04-e39845b1"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -386,7 +390,7 @@
           "specification": "journal 저장공간 산정.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "docs/STREAMED_RESTART.md",
@@ -395,7 +399,9 @@
             "torchfdtd/streamed_restart.py"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_streamed_restart.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G1-04-05.xml"
+          ],
           "required_tests": [
             "tests/test_streamed_restart.py::test_reservation_covers_the_signal_history_of_coexisting_records",
             "tests/test_streamed_restart.py::test_stale_temporary_records_are_removed_only_inside_the_journal",
@@ -403,7 +409,9 @@
             "tests/test_streamed_restart.py::test_existing_journal_records_count_toward_the_reservation",
             "tests/test_streamed_restart.py::test_every_blocks_controls_record_count"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T184737Z-g1-05-c820d464"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
