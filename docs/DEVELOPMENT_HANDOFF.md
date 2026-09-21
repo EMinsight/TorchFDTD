@@ -607,3 +607,81 @@ the remaining G3 tasks:
 ```
 TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml
 ```
+
+---
+
+### 2026-09-22 G5-01 to G5-04 (memory-path equivalence, memory accounting, admission versus peak, design-slab memory paths), branch g5-memory from 73203d2
+
+**Problem or goal.** Compare the resident CUDA adjoint with the streamed
+host, disk and asynchronous tiers on one physical problem, report every
+memory quantity of a streamed run as its own instrumented field, match the
+byte admission against the measured peaks and make concurrent reservations
+atomic, and show that the geometry and density design slabs never
+materialize the full epsilon or its VJP while the design tensor and the
+optimizer moments are part of the host budget.
+
+**State found.** HEAD 73203d2 on branch g5-memory, clean tree, no
+uncommitted work from an earlier agent. The RTX 3060 was shared with about
+eight other agents throughout; every measured time below includes that
+contention.
+
+**Changed files (why).**
+- `torchfdtd/memory_accounting.py` (new): `MemoryMeter` around each forward and backward phase of the streamed operation; OS instruments through ctypes (`GetProcessMemoryInfo`, `GetPerformanceInfo`, `GetProcessIoCounters`) or `/proc`, no psutil dependency; nvidia-smi per-process memory is queried once and reported as null with the reason when the driver answers N/A (WDDM).
+- `torchfdtd/streamed.py`: the forward and backward bodies of `_Streamed` moved into `_forward` and `_backward` so that each phase runs under its reservation lease and its meter; `report['forward_memory']`, `report['backward_memory']`, `report['forward_bank_ledger']`, `report['backward_bank_ledger']`; `StreamedAdjointOptions.optimizer_moments` (0 to 8) and the `design_tensor_bytes`, `optimizer_moments`, `optimizer_state_reservation_bytes` fields of `_reservation`, which also raise the host reservation by `optimizer_moments * design_tensor_bytes` for the dense, dispersive, geometry and density paths.
+- `torchfdtd/reservation_registry.py` (new): the per-process registry of live reservations (host, gpu and disk tiers under one lock) and `streamed_lease`.
+- `torchfdtd/spacetime.py`: `SlabBlockOperator.new_state` keeps a host bank ledger (live, peak, created bytes) released through weak references; `bank_ledger()`.
+- `torchfdtd/state_store.py`: every bank file size is read back with `os.fstat` after truncation; `created_file_bytes` in the store report.
+- `tests/g5_support.py`, `tests/test_memory_paths_g5.py`, `tests/test_memory_accounting_g5.py`, `tests/test_admission_peak_g5.py`, `tests/test_design_slab_memory_g5.py`: the fixture, the tests and the write-through records `docs/validation/g5/G5-0X.json`.
+- `docs/validation/cases/G5-01.json` to `G5-04.json`: pre-declared cases (the G5-01 instance count was corrected from a miscount before the recorded run, e9e9458; no limit changed).
+- `docs/STREAMED_FDTD.md`: the section "Memory accounting, the reservation registry and optimizer state".
+- `docs/validation/completion_gates.json`: `code_paths`, `required_tests`, `planned_test_commands`, `implementation_note` and `implementation_state` IMPLEMENTED on the four tasks; the recorder wrote the evidence ids and VERIFIED states.
+
+**Commands run (device: local Windows 11, RTX 3060 12 GB shared with other agents, torch 2.10.0+cu126, CuPy; TMP and TEMP set to D:\TorchFDTD\.local\tmp; scratch banks under pytest's tmp_path there).**
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_paths_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-01.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_accounting_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-02.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_admission_peak_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-03.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_slab_memory_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-04.xml
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G5-0N --command "<the line above>" --junit D:/TorchFDTD/.local/tmp/junit/G5-0N.xml --exit-code 0 --fixture docs/validation/cases/G5-0N.json --observed docs/validation/g5/G5-0N.json --scope "<devices and tiers>"
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G5-0N
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider <one file at a time>: tests/test_streamed_admission.py tests/test_streamed_bank_bound.py tests/test_streamed_bank_failures.py tests/test_streamed_bank_lifetime.py tests/test_state_store.py tests/test_streamed_host_reservation.py tests/test_streamed_planning.py tests/test_streamed_work.py tests/test_streamed_restart.py tests/test_streamed_geometry.py tests/test_streamed_density.py tests/test_streamed_dispersive.py tests/test_streamed_tensor.py tests/test_complex_streamed.py tests/test_streamed_tuning.py tests/test_streamed_cost.py tests/test_pmc_general.py tests/test_beyond_vram_driver.py tests/test_recomputed_batch.py tests/test_mode_streamed_injection.py tests/test_execution_modes.py tests/test_streamed_policy_benchmark.py
+```
+
+**Measurements and pre-declared limits.**
+- G5-01 (74 passed in 261.7 s: 69 streamed instances against 23 resident references, 4 refusals, 1 lane check). Limits: FP32 rtol 1e-4, atol 1e-6; FP64 rtol 1e-7, atol 1e-9 on the spectral amplitude per time step, the objective and every gradient. Observed maxima over all instances: FP32 field error 7.25e-7 (smallest reference amplitude 0.125), gradient error 9.16e-5 on a gradient of magnitude 353 (Drude plane, epsilon_inf); FP64 field error 8.9e-16, gradient error 2.8e-14. Refusals `planes_pmc`, `streamed_dispersive_oneway`, `streamed_dispersive_planes_oneway`, `mode_network_streamed` raised the registry's message before the streamed operator.
+- G5-02 (7 passed in 25.4 s). Disk run, state 229,376 B: forward 10 banks, created file bytes 2,293,760 = logical written bytes; backward 25 banks, 5,734,400 created, 7,864,320 written, 13,926,400 read; peak file bytes 1,146,880 = 5 x state (capacity 5). Host backward phase: Torch allocated peak 728,064 B <= reserved 2,097,152 B; working set 955.6 MB (host domain, not device); host banks 1,146,880 B. nvidia-smi per-process memory: N/A under WDDM, reported as null.
+- G5-03 (7 passed in 39.2 s; limit: ratio >= 1.0 with exact allocator peaks). GPU reservation over measured peak Torch allocated delta: 2.769, 2.969, 2.908 (margins 5.36, 12.52, 22.02 MB); host reservation over peak host bank bytes: 2.962, 2.417, 2.097; disk reservation over peak file bytes: 1.333 on every rung (capacity 4, peak 3 live banks). Working-set ratio (informational): 1.01 to 8.3. Registry: one of two simultaneous 600-byte requests against 1000 bytes admitted; the second `StreamedSimulation` run against 1.5 reservations refused with `Concurrent streamed reservation refused` while the first was inside its forward, admitted afterwards; a failing phase released its lease.
+- G5-04 (6 passed in 102.7 s; limits: peak below 9,830,400 B and at most 9,600,000 B, zero full-shape host allocations, exact growth by k x design bytes). Geometry: peak Torch allocated delta 3,825,664 B (0.389 of the full epsilon), density 3,208,192 B (0.326), reservation 9,437,300 B, 0 full-shape host allocations, gradients 0.340 and 2.38; the dense, geometry and density reservations grew by exactly 1 and 2 design tensors for 1 and 2 moments and Adam's two state tensors matched the declared moments.
+- Regression of the touched engine, one file at a time: 17, 16, 10, 33, 21, 8, 6, 5, 17, 15, 11, 37, 16, 9, 12, 6, 25, 3, 12, 3, 9, 12 passed (streamed admission, bank bound, bank failures, bank lifetime, state store, host reservation, planning, work, restart, geometry, density, dispersive, tensor, complex streamed, tuning, cost, PMC general, beyond-VRAM driver, recomputed batch, mode streamed injection, execution modes, policy benchmark); 0 failed, 0 skipped.
+
+**Passed / failed / skipped / not run.** Passed: everything above. Failed:
+none. Skipped: none. Not run: the full test suite; disk banks with
+asynchronous tiles and CPU tiles in G5-01; Linux `/proc` instruments and
+nvidia-smi under TCC/Linux; the streamed execution mode of
+`torchfdtd/execution_modes.py`, which runs its own forward loop and is not
+metered; a cross-process reservation.
+
+**Evidence paths and hashes.** Runs
+`docs/validation/runs/20260921T200923Z-g5-01-d42add9e`,
+`20260921T200934Z-g5-02-e1aa0e9d`, `20260921T200952Z-g5-03-8f43e40b` and
+`20260921T201010Z-g5-04-c3e8d3fe`, all at source commit ed67736 with an
+empty dirty manifest; all four VERIFIED and judged PASS by
+`check_release_gates.py --task`. Cases `docs/validation/cases/G5-01.json`
+to `G5-04.json`; records `docs/validation/g5/G5-01.json` to `G5-04.json`.
+Commits: 649ad79 (implementation, tests, cases, documents), e9e9458 (case
+count correction), ed67736 (records), fe738b0 (runs and gate states).
+
+**Remaining defects, risks, external blockers.**
+- The reservation registry is per Python process and is admission, not a quota: two processes still rely on the live free-memory checks of `_reservation`, and an admitted run is not limited afterwards.
+- The allocator peak of a phase is exact only when the phase set a new process peak or began at it; otherwise the record carries the sampled lower bound with `exact: false`. Callers that want exact numbers call `torch.cuda.reset_peak_memory_stats()` before the run, as the G5-03 and G5-04 tests do. Benchmarks that read `torch.cuda.max_memory_allocated()` after a run are unaffected because the meter never resets the counters.
+- `cuda_process_memory_bytes` is the device-wide free-memory decrease and can be zero when another process released memory during the phase; the per-process value needs a TCC or Linux driver.
+- The judge reports G3-05 and G3-08 as FAILED outside the G5 selection; those states were already on main and were not touched here.
+- The RTX 3060 was shared during every measurement; the recorded wall times are not benchmarks.
+
+**Next first command and task id.** Merge g5-memory, then G5-05 (a meaningful beyond-VRAM case) can reuse `report['forward_memory']` and `report['backward_memory']` as its measurement vocabulary:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G5-01
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_accounting_g5.py
+```
