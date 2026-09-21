@@ -22,8 +22,12 @@ An isolated wheel and installed public API match all 119 package files
 byte-for-byte. The wheel SHA-256 is
 `965f0d3f2fd2c364ecd519974119e2c8fe15314fb00870ebedec29ab6616e64b`.
 The 38-page manuscript builds without reference or overfull-box failures,
-and its changed pages have been visually inspected. Full integration CI
-for this new runtime is pending. General routing, browser mode-network
+and its changed pages have been visually inspected. Linux CI [35552716219](https://github.com/hyoseokp/TorchFDTD/actions/runs/35552716219)
+at `874c32b` passed with 1,410 Python passes and 448 skips,
+33 browser passes and 8 skips. Frontend and wheel builds passed.
+The JUnit SHA-256 is `e8e8da319886d49d6cdbe850d9f95c8468c32d9239483092c6783f7b58f68f14`.
+The final source audit checked 864 allowlisted files with zero pattern findings.
+This evidence collection did not repeat numerical tests. General routing, browser mode-network
 editing, streamed modal injection and complete FDTDX parity remain open.
 Public release remains NOT_CLEARED_FOR_PUBLICATION.
 

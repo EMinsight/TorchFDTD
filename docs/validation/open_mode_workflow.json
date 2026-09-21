@@ -1,5 +1,5 @@
 {
-  "status": "focused_cpu_and_native_cuda_gates_passed_full_ci_pending",
+  "status": "focused_cpu_native_cuda_and_full_ci_passed",
   "scope": "Fixed bound modes with transverse CPML, opposing-port resident S matrices and interior isotropic material VJP. No full FDTDX parity, physical geometry-gradient convergence or performance ranking.",
   "native_runs": {
     "plus": {
@@ -473,5 +473,30 @@
     },
     "visual_review": "Rendered pages35-38 inspected. Equation, section transitions, margins and references legible without clipping. Build has no unresolved references or overfull boxes."
   },
-  "regression_tests_collected": 49
+  "regression_tests_collected": 49,
+  "completed_ci": {
+    "run_id": 35552716219,
+    "commit": "874c32b80b012558b9deaef5e1cfa61d8a521734",
+    "url": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35552716219",
+    "conclusion": "success",
+    "python": {
+      "tests": 1858,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 448,
+      "passed": 1410,
+      "junit_sha256": "e8e8da319886d49d6cdbe850d9f95c8468c32d9239483092c6783f7b58f68f14"
+    },
+    "browser": {
+      "passed": 33,
+      "skipped": 8
+    },
+    "frontend_build": "success",
+    "wheel_build": "success"
+  },
+  "final_source_audit": {
+    "allowlisted_files": 864,
+    "findings": 0,
+    "scope": "Exact private runtime commit source allowlist. Pattern scan is not legal clearance."
+  }
 }
