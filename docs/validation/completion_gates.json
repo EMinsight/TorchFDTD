@@ -1501,16 +1501,27 @@
           "title": "코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다",
           "specification": "코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다. proprietary runtime, vendor material database, 무단 benchmark 원시값, credentials/private paths를 배포물에서 점검한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
+            "scripts/provenance_inventory.py",
+            "docs/THIRD_PARTY_NOTICES.md",
+            "docs/validation/sbom.json",
+            "THIRD_PARTY_NOTICES.txt",
             "scripts/release_audit.py",
-            "scripts/verify_staged_release.py"
+            "scripts/verify_staged_release.py",
+            "tests/test_provenance_inventory.py",
+            "docs/validation/cases/G9-02.json"
           ],
-          "planned_test_commands": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py --check",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-02.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_provenance_inventory.py"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null

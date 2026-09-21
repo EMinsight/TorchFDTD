@@ -1,0 +1,1787 @@
+{
+  "schema_version": 1,
+  "kind": "sbom",
+  "generator": "scripts/provenance_inventory.py",
+  "project": {
+    "name": "torchfdtd",
+    "version": "0.14.0.dev0",
+    "license": "MIT",
+    "license_files": [
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.txt"
+    ],
+    "requires_python": ">=3.10"
+  },
+  "python": {
+    "version": "3.10.2",
+    "platform": "win32"
+  },
+  "components": [
+    {
+      "name": "annotated-doc",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "fastapi"
+      ],
+      "specifiers": [
+        ">=0.0.2"
+      ],
+      "version": "0.0.4",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/fastapi/annotated-doc"
+    },
+    {
+      "name": "annotated-types",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "pydantic"
+      ],
+      "specifiers": [
+        ">=0.6.0"
+      ],
+      "version": "0.7.0",
+      "installed": true,
+      "license": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/annotated-types/annotated-types"
+    },
+    {
+      "name": "anyio",
+      "groups": [
+        "runtime",
+        "dev"
+      ],
+      "required_by": [
+        "httpx",
+        "starlette"
+      ],
+      "specifiers": [
+        "<5,>=3.6.2"
+      ],
+      "version": "4.12.1",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/agronholm/anyio"
+    },
+    {
+      "name": "build",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [],
+      "specifiers": [
+        ">=1"
+      ],
+      "version": "1.6.1",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pypa/build"
+    },
+    {
+      "name": "certifi",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [
+        "httpcore",
+        "httpx"
+      ],
+      "specifiers": [],
+      "version": "2026.1.4",
+      "installed": true,
+      "license": "Mozilla Public License 2.0 (MPL 2.0)",
+      "license_classifiers": [
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/certifi/python-certifi"
+    },
+    {
+      "name": "click",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "uvicorn"
+      ],
+      "specifiers": [
+        ">=7.0"
+      ],
+      "version": "8.3.1",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE.txt"
+      ],
+      "source_url": "https://github.com/pallets/click/"
+    },
+    {
+      "name": "colorama",
+      "groups": [
+        "runtime",
+        "dev"
+      ],
+      "required_by": [
+        "build",
+        "click",
+        "pytest",
+        "tqdm"
+      ],
+      "specifiers": [
+        ">=0.4"
+      ],
+      "version": "0.4.4",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE.txt"
+      ],
+      "source_url": "https://github.com/tartley/colorama"
+    },
+    {
+      "name": "contourpy",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "matplotlib"
+      ],
+      "specifiers": [
+        ">=1.0.1"
+      ],
+      "version": "1.3.2",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/contourpy/contourpy"
+    },
+    {
+      "name": "cupy-cuda12x",
+      "groups": [
+        "cuda-kernels"
+      ],
+      "required_by": [],
+      "specifiers": [
+        "<14,>=13.6"
+      ],
+      "version": "13.6.0",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE",
+        "license.rst"
+      ],
+      "source_url": "https://github.com/cupy/cupy"
+    },
+    {
+      "name": "cycler",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "matplotlib"
+      ],
+      "specifiers": [
+        ">=0.10"
+      ],
+      "version": "0.11.0",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/matplotlib/cycler"
+    },
+    {
+      "name": "exceptiongroup",
+      "groups": [
+        "runtime",
+        "dev"
+      ],
+      "required_by": [
+        "anyio",
+        "pytest"
+      ],
+      "specifiers": [
+        ">=1.0.2",
+        ">=1"
+      ],
+      "version": "1.3.1",
+      "installed": true,
+      "license": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/agronholm/exceptiongroup"
+    },
+    {
+      "name": "fastapi",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [],
+      "specifiers": [
+        ">=0.115"
+      ],
+      "version": "0.128.8",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/fastapi/fastapi"
+    },
+    {
+      "name": "fastrlock",
+      "groups": [
+        "cuda-kernels"
+      ],
+      "required_by": [
+        "cupy-cuda12x"
+      ],
+      "specifiers": [
+        ">=0.5"
+      ],
+      "version": "0.8.3",
+      "installed": true,
+      "license": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/scoder/fastrlock"
+    },
+    {
+      "name": "fdtd",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [],
+      "specifiers": [
+        "==0.2.2"
+      ],
+      "version": "0.2.2",
+      "installed": true,
+      "license": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "http://github.com/flaport/fdtd"
+    },
+    {
+      "name": "filelock",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "torch"
+      ],
+      "specifiers": [],
+      "version": "3.20.3",
+      "installed": true,
+      "license": "Unlicense",
+      "license_classifiers": [
+        "License :: OSI Approved :: The Unlicense (Unlicense)"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/tox-dev/py-filelock"
+    },
+    {
+      "name": "fonttools",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "matplotlib"
+      ],
+      "specifiers": [
+        ">=4.22.0"
+      ],
+      "version": "4.29.1",
+      "installed": true,
+      "license": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "http://github.com/fonttools/fonttools"
+    },
+    {
+      "name": "fsspec",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "torch"
+      ],
+      "specifiers": [
+        ">=0.8.5"
+      ],
+      "version": "2026.2.0",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/fsspec/filesystem_spec"
+    },
+    {
+      "name": "gdstk",
+      "groups": [
+        "gds"
+      ],
+      "required_by": [],
+      "specifiers": [
+        "<1.1,>=0.9.62"
+      ],
+      "version": "0.9.62",
+      "installed": true,
+      "license": "Boost Software License 1.0 (BSL-1.0)",
+      "license_classifiers": [
+        "License :: OSI Approved :: Boost Software License 1.0 (BSL-1.0)"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/heitzmann/gdstk"
+    },
+    {
+      "name": "h11",
+      "groups": [
+        "runtime",
+        "dev"
+      ],
+      "required_by": [
+        "httpcore",
+        "uvicorn"
+      ],
+      "specifiers": [
+        ">=0.8",
+        ">=0.16"
+      ],
+      "version": "0.16.0",
+      "installed": true,
+      "license": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files": [
+        "LICENSE.txt"
+      ],
+      "source_url": "https://github.com/python-hyper/h11"
+    },
+    {
+      "name": "httpcore",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [
+        "httpx"
+      ],
+      "specifiers": [
+        "==1.*"
+      ],
+      "version": "1.0.9",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE.md"
+      ],
+      "source_url": "https://github.com/encode/httpcore"
+    },
+    {
+      "name": "httpx",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [],
+      "specifiers": [
+        ">=0.27"
+      ],
+      "version": "0.28.1",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE.md"
+      ],
+      "source_url": "https://github.com/encode/httpx"
+    },
+    {
+      "name": "idna",
+      "groups": [
+        "runtime",
+        "dev"
+      ],
+      "required_by": [
+        "anyio",
+        "httpx"
+      ],
+      "specifiers": [
+        ">=2.8"
+      ],
+      "version": "3.11",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE.md"
+      ],
+      "source_url": "https://github.com/kjd/idna"
+    },
+    {
+      "name": "iniconfig",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [
+        "pytest"
+      ],
+      "specifiers": [
+        ">=1.0.1"
+      ],
+      "version": "2.3.0",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pytest-dev/iniconfig"
+    },
+    {
+      "name": "jinja2",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "torch"
+      ],
+      "specifiers": [],
+      "version": "3.1.6",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE.txt"
+      ],
+      "source_url": "https://github.com/pallets/jinja/"
+    },
+    {
+      "name": "kiwisolver",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "matplotlib"
+      ],
+      "specifiers": [
+        ">=1.3.1"
+      ],
+      "version": "1.3.2",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/nucleic/kiwi"
+    },
+    {
+      "name": "markupsafe",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "jinja2"
+      ],
+      "specifiers": [
+        ">=2.0"
+      ],
+      "version": "3.0.3",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE.txt"
+      ],
+      "source_url": "https://github.com/pallets/markupsafe/"
+    },
+    {
+      "name": "matplotlib",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "fdtd"
+      ],
+      "specifiers": [],
+      "version": "3.10.8",
+      "installed": true,
+      "license": "Python Software Foundation License",
+      "license_classifiers": [
+        "License :: OSI Approved :: Python Software Foundation License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/matplotlib/matplotlib"
+    },
+    {
+      "name": "mpmath",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "sympy"
+      ],
+      "specifiers": [
+        "<1.4,>=1.1.0"
+      ],
+      "version": "1.3.0",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/fredrik-johansson/mpmath"
+    },
+    {
+      "name": "networkx",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "torch"
+      ],
+      "specifiers": [
+        ">=2.5.1"
+      ],
+      "version": "3.4.2",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE.txt"
+      ],
+      "source_url": "https://github.com/networkx/networkx"
+    },
+    {
+      "name": "numpy",
+      "groups": [
+        "runtime",
+        "gds",
+        "cuda-kernels"
+      ],
+      "required_by": [
+        "contourpy",
+        "cupy-cuda12x",
+        "fdtd",
+        "gdstk",
+        "matplotlib",
+        "scipy"
+      ],
+      "specifiers": [
+        "<2.5,>=1.23.5",
+        ">=1.23",
+        ">=1.24",
+        "<2.6,>=1.22"
+      ],
+      "version": "2.2.6",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE.txt"
+      ],
+      "source_url": "https://github.com/numpy/numpy"
+    },
+    {
+      "name": "packaging",
+      "groups": [
+        "runtime",
+        "dev"
+      ],
+      "required_by": [
+        "build",
+        "matplotlib",
+        "pytest"
+      ],
+      "specifiers": [
+        ">=20.0",
+        ">=22",
+        ">=24.0"
+      ],
+      "version": "26.2",
+      "installed": true,
+      "license": "Apache-2.0 OR BSD-2-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE",
+        "LICENSE.APACHE",
+        "LICENSE.BSD"
+      ],
+      "source_url": "https://github.com/pypa/packaging"
+    },
+    {
+      "name": "pillow",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "matplotlib"
+      ],
+      "specifiers": [
+        ">=8"
+      ],
+      "version": "12.1.1",
+      "installed": true,
+      "license": "MIT-CMU",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/python-pillow/Pillow"
+    },
+    {
+      "name": "pluggy",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [
+        "pytest"
+      ],
+      "specifiers": [
+        "<2,>=1.5"
+      ],
+      "version": "1.6.0",
+      "installed": true,
+      "license": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": null
+    },
+    {
+      "name": "psutil",
+      "groups": [
+        "dev",
+        "benchmark"
+      ],
+      "required_by": [],
+      "specifiers": [
+        ">=5.9"
+      ],
+      "version": "7.2.2",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/giampaolo/psutil"
+    },
+    {
+      "name": "pydantic",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "fastapi"
+      ],
+      "specifiers": [
+        ">=2.7.0",
+        ">=2.7"
+      ],
+      "version": "2.12.5",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pydantic/pydantic"
+    },
+    {
+      "name": "pydantic-core",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "pydantic"
+      ],
+      "specifiers": [
+        "==2.41.5"
+      ],
+      "version": "2.41.5",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pydantic/pydantic-core"
+    },
+    {
+      "name": "pygments",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [
+        "pytest"
+      ],
+      "specifiers": [
+        ">=2.7.2"
+      ],
+      "version": "2.20.0",
+      "installed": true,
+      "license": "BSD-2-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "AUTHORS",
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pygments/pygments"
+    },
+    {
+      "name": "pyparsing",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "matplotlib"
+      ],
+      "specifiers": [
+        ">=3"
+      ],
+      "version": "3.0.7",
+      "installed": true,
+      "license": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pyparsing/pyparsing/"
+    },
+    {
+      "name": "pyproject-hooks",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [
+        "build"
+      ],
+      "specifiers": [],
+      "version": "1.3.3",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pypa/pyproject-hooks"
+    },
+    {
+      "name": "pytest",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [],
+      "specifiers": [
+        ">=8"
+      ],
+      "version": "9.1.1",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pytest-dev/pytest"
+    },
+    {
+      "name": "python-dateutil",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "matplotlib"
+      ],
+      "specifiers": [
+        ">=2.7"
+      ],
+      "version": "2.8.2",
+      "installed": true,
+      "license": "BSD License / Apache Software License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License",
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/dateutil/dateutil"
+    },
+    {
+      "name": "scipy",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "fdtd"
+      ],
+      "specifiers": [
+        ">=1.10"
+      ],
+      "version": "1.15.3",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "LICENSE.txt"
+      ],
+      "source_url": "https://github.com/scipy/scipy"
+    },
+    {
+      "name": "six",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "python-dateutil"
+      ],
+      "specifiers": [
+        ">=1.5"
+      ],
+      "version": "1.16.0",
+      "installed": true,
+      "license": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/benjaminp/six"
+    },
+    {
+      "name": "starlette",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "fastapi"
+      ],
+      "specifiers": [
+        "<1.0.0,>=0.40.0"
+      ],
+      "version": "0.52.1",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE.md"
+      ],
+      "source_url": "https://github.com/Kludex/starlette"
+    },
+    {
+      "name": "sympy",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "torch"
+      ],
+      "specifiers": [
+        ">=1.13.3"
+      ],
+      "version": "1.14.0",
+      "installed": true,
+      "license": "BSD License",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files": [
+        "AUTHORS",
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/sympy/sympy"
+    },
+    {
+      "name": "tomli",
+      "groups": [
+        "dev"
+      ],
+      "required_by": [
+        "build",
+        "pytest"
+      ],
+      "specifiers": [
+        ">=1",
+        ">=1.1.0"
+      ],
+      "version": "2.4.1",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/hukkin/tomli"
+    },
+    {
+      "name": "torch",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [],
+      "specifiers": [
+        ">=2.2"
+      ],
+      "version": "2.10.0+cu126",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pytorch/pytorch"
+    },
+    {
+      "name": "tqdm",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "fdtd"
+      ],
+      "specifiers": [],
+      "version": "4.63.0",
+      "installed": true,
+      "license": "MIT License / Mozilla Public License 2.0 (MPL 2.0)",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
+      ],
+      "license_files": [
+        "LICENCE"
+      ],
+      "source_url": "https://github.com/tqdm/tqdm"
+    },
+    {
+      "name": "typing-extensions",
+      "groups": [
+        "runtime",
+        "gds"
+      ],
+      "required_by": [
+        "anyio",
+        "exceptiongroup",
+        "fastapi",
+        "gdstk",
+        "pydantic",
+        "pydantic-core",
+        "starlette",
+        "torch",
+        "typing-inspection",
+        "uvicorn"
+      ],
+      "specifiers": [
+        ">=4.10.0",
+        ">=4.6.0",
+        ">=4.5",
+        ">=4.14.1",
+        ">=4.12.0",
+        ">=4.8.0",
+        ">=4.0"
+      ],
+      "version": "4.15.0",
+      "installed": true,
+      "license": "PSF-2.0",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/python/typing_extensions"
+    },
+    {
+      "name": "typing-inspection",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [
+        "fastapi",
+        "pydantic"
+      ],
+      "specifiers": [
+        ">=0.4.2"
+      ],
+      "version": "0.4.2",
+      "installed": true,
+      "license": "MIT",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE"
+      ],
+      "source_url": "https://github.com/pydantic/typing-inspection"
+    },
+    {
+      "name": "uvicorn",
+      "groups": [
+        "runtime"
+      ],
+      "required_by": [],
+      "specifiers": [
+        ">=0.30"
+      ],
+      "version": "0.40.0",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE.md"
+      ],
+      "source_url": "https://github.com/Kludex/uvicorn"
+    }
+  ],
+  "assets": [
+    {
+      "name": "three.js",
+      "version": "0.180.0 (r180)",
+      "license": "MIT",
+      "status": "cleared",
+      "source": "https://github.com/mrdoob/three.js",
+      "paths": [
+        "torchfdtd/web/assets/index-*.js"
+      ],
+      "notes": "Bundled by the Vite build into the workbench script; the notice is kept in THIRD_PARTY_NOTICES.txt and shipped in the wheel."
+    },
+    {
+      "name": "lucide",
+      "version": "0.468.0",
+      "license": "ISC",
+      "status": "cleared",
+      "source": "https://github.com/lucide-icons/lucide",
+      "paths": [
+        "torchfdtd/web/assets/index-*.js"
+      ],
+      "notes": "Icon set bundled into the same script; its licence header survives minification and the notice is in THIRD_PARTY_NOTICES.txt."
+    },
+    {
+      "name": "vite",
+      "version": "6.4.3",
+      "license": "MIT",
+      "status": "cleared",
+      "source": "https://github.com/vitejs/vite",
+      "paths": [
+        "vite.config.js",
+        "package.json"
+      ],
+      "notes": "Build tool. Only its module-preload helper (a few lines) ends up in the bundle; the tool itself is not distributed."
+    },
+    {
+      "name": "@playwright/test",
+      "version": "1.63.0",
+      "license": "Apache-2.0",
+      "status": "cleared",
+      "source": "https://github.com/microsoft/playwright",
+      "paths": [
+        "playwright.config.js",
+        "tests/ui/*.spec.js"
+      ],
+      "notes": "Browser test runner for development only; not part of the wheel."
+    },
+    {
+      "name": "Workbench fonts",
+      "version": null,
+      "license": "not applicable",
+      "status": "cleared",
+      "source": null,
+      "paths": [
+        "torchfdtd/web/assets/index-*.css"
+      ],
+      "notes": "No font file is bundled. The stylesheet names system fonts (Inter, Segoe UI, Consolas) with generic fallbacks and loads nothing from the network."
+    },
+    {
+      "name": "Material tables",
+      "version": null,
+      "license": "not applicable",
+      "status": "cleared",
+      "source": null,
+      "paths": [
+        "torchfdtd/models.py",
+        "torchfdtd/materials.py",
+        "torchfdtd/material_fit.py"
+      ],
+      "notes": "No optical-constant database is bundled. The default materials are constant-index placeholders named as such; dispersive poles are fitted from data the user pastes at run time."
+    },
+    {
+      "name": "Hero artwork",
+      "version": null,
+      "license": "MIT (project licence)",
+      "status": "own",
+      "source": "docs/assets/hero-provenance.json",
+      "paths": [
+        "docs/assets/hero.png",
+        "README.md"
+      ],
+      "notes": "Rendered from a native computed field; the provenance file records the project and the script."
+    },
+    {
+      "name": "Manuscript and figures",
+      "version": null,
+      "license": "MIT (project licence)",
+      "status": "own",
+      "source": "docs/paper/asset-provenance.json",
+      "paths": [
+        "docs/paper/**"
+      ],
+      "notes": "Figures are built from the native validation records listed in the provenance file; the bibliography cites third-party work without reproducing it."
+    },
+    {
+      "name": "Native validation records",
+      "version": null,
+      "license": "MIT (project licence)",
+      "status": "own",
+      "source": "docs/validation/README.md",
+      "paths": [
+        "docs/validation/*.json",
+        "docs/validation/*.png",
+        "docs/validation/runs/**"
+      ],
+      "notes": "Measurements of this solver. The JUnit copies under runs/ keep the recording machine name in their hostname attribute, as docs/validation/runs/README.md states."
+    },
+    {
+      "name": "Reference outputs of other open-source solvers",
+      "version": null,
+      "license": "not applicable (numerical output; the tools are not bundled)",
+      "status": "own",
+      "source": "flaport/fdtd (MIT), FDTDX (MIT), TORCWA (GitHub kch3782/torcwa)",
+      "paths": [
+        "docs/validation/open-source-flaport.json",
+        "docs/validation/fdtdx_*.json",
+        "docs/validation/cr-full-torcwa-*.json"
+      ],
+      "notes": "Comparison numbers produced by running those tools on synthetic fixtures; no source code of theirs is included."
+    },
+    {
+      "name": "Colour-router application records",
+      "version": null,
+      "license": "MIT (project licence)",
+      "status": "own",
+      "source": "docs/CR_VALIDATION_PLAN.md",
+      "paths": [
+        "docs/validation/cr-*.json"
+      ],
+      "notes": "The author's own research fixtures and native results, published with the repository on 2026-09-21. New application runs are outside the completion program."
+    },
+    {
+      "name": "Examples and test fixtures",
+      "version": null,
+      "license": "MIT (project licence)",
+      "status": "own",
+      "source": null,
+      "paths": [
+        "examples/*.json",
+        "tests/**"
+      ],
+      "notes": "Synthetic projects and GDS layouts generated by the tests themselves; no binary fixture is tracked."
+    },
+    {
+      "name": "Installed-API property catalogue",
+      "version": "collected 2026-09-18",
+      "license": "unclear",
+      "status": "open",
+      "source": "names queried from a locally installed vendor API",
+      "paths": [
+        "docs/validation/installed-property-catalog.json",
+        "torchfdtd/feature_inventory.json",
+        "benchmarks/build_feature_inventory.py"
+      ],
+      "notes": "Object and property names of a commercial solver, turned into the feature inventory that the wheel ships and /api/capabilities serves. docs/RELEASE_REVIEW.md lists the permitted use of this extraction as an unresolved decision."
+    },
+    {
+      "name": "FSP layout support",
+      "version": null,
+      "license": "unclear",
+      "status": "open",
+      "source": "independently observed file layout, docs/FSP_BINARY.md",
+      "paths": [
+        "torchfdtd/fsp_binary.py",
+        "torchfdtd/fsp_native.py",
+        "torchfdtd/fsp_geometry.py",
+        "torchfdtd/fsp_objects.py",
+        "torchfdtd/fsp_instruments.py",
+        "torchfdtd/fsp_settings.py",
+        "torchfdtd/fsp_service.py",
+        "docs/FSP*.md"
+      ],
+      "notes": "Reader and writer of a documented subset of a vendor project format. docs/RELEASE_REVIEW.md gate 1 keeps the contract and interoperability question open."
+    },
+    {
+      "name": "Aggregate commercial timing table",
+      "version": null,
+      "license": "unclear",
+      "status": "open",
+      "source": "docs/RELEASE_REVIEW.md, timing-table exception",
+      "paths": [
+        "README.md"
+      ],
+      "notes": "Three paired timing facts against a commercial solver, kept by the owner's instruction; the public academic-use terms restrict benchmarking and the governing agreement is unknown."
+    }
+  ],
+  "open_items": [
+    {
+      "name": "Installed-API property catalogue",
+      "paths": [
+        "docs/validation/installed-property-catalog.json",
+        "torchfdtd/feature_inventory.json",
+        "benchmarks/build_feature_inventory.py"
+      ],
+      "why": "Object and property names of a commercial solver, turned into the feature inventory that the wheel ships and /api/capabilities serves. docs/RELEASE_REVIEW.md lists the permitted use of this extraction as an unresolved decision.",
+      "state": "BLOCKED_EXTERNAL",
+      "decision": "owner or counsel decision recorded in docs/RELEASE_REVIEW.md; tracked by gate task G9-03"
+    },
+    {
+      "name": "FSP layout support",
+      "paths": [
+        "torchfdtd/fsp_binary.py",
+        "torchfdtd/fsp_native.py",
+        "torchfdtd/fsp_geometry.py",
+        "torchfdtd/fsp_objects.py",
+        "torchfdtd/fsp_instruments.py",
+        "torchfdtd/fsp_settings.py",
+        "torchfdtd/fsp_service.py",
+        "docs/FSP*.md"
+      ],
+      "why": "Reader and writer of a documented subset of a vendor project format. docs/RELEASE_REVIEW.md gate 1 keeps the contract and interoperability question open.",
+      "state": "BLOCKED_EXTERNAL",
+      "decision": "owner or counsel decision recorded in docs/RELEASE_REVIEW.md; tracked by gate task G9-03"
+    },
+    {
+      "name": "Aggregate commercial timing table",
+      "paths": [
+        "README.md"
+      ],
+      "why": "Three paired timing facts against a commercial solver, kept by the owner's instruction; the public academic-use terms restrict benchmarking and the governing agreement is unknown.",
+      "state": "BLOCKED_EXTERNAL",
+      "decision": "owner or counsel decision recorded in docs/RELEASE_REVIEW.md; tracked by gate task G9-03"
+    }
+  ],
+  "scan": {
+    "patterns": [
+      "address_100_x_x_x",
+      "credential_token",
+      "hangul_user_path",
+      "password_literal",
+      "private_key_block",
+      "private_windows_user_path",
+      "ssh_password_environment",
+      "ssh_public_key"
+    ],
+    "excluded": [
+      "scripts/provenance_inventory.py",
+      "docs/THIRD_PARTY_NOTICES.md",
+      "docs/validation/sbom.json",
+      "tests/test_provenance_inventory.py"
+    ],
+    "files_scanned": 987,
+    "tracked_files": 997,
+    "findings": []
+  },
+  "history_note": {
+    "pattern": "C:[/\\\\]+Users[/\\\\]+admin",
+    "commits": [
+      {
+        "commit": "c5e83c8148bb",
+        "date": "2026-09-21",
+        "subject": "Record the beyond-VRAM crash and resume and count existing journal records toward the reservation"
+      },
+      {
+        "commit": "61326d2663f6",
+        "date": "2026-09-21",
+        "subject": "Prepare real FP32 beyond-VRAM capacity validation [skip ci]"
+      },
+      {
+        "commit": "149fb1b0f40c",
+        "date": "2026-09-20",
+        "subject": "Record completed beyond VRAM gradient and matched RTX 5880 CPU comparison"
+      },
+      {
+        "commit": "3b4bf39bf787",
+        "date": "2026-09-20",
+        "subject": "Add matched CPU adjoint comparisons and preserve capacity retry evidence"
+      },
+      {
+        "commit": "dd613072bb7a",
+        "date": "2026-09-20",
+        "subject": "Reduce adjoint file reads and record full spectral gradient evidence"
+      },
+      {
+        "commit": "ccf6757aea42",
+        "date": "2026-09-20",
+        "subject": "Bound streamed state banks and preserve disk headroom"
+      },
+      {
+        "commit": "3301e38ad27a",
+        "date": "2026-09-20",
+        "subject": "Add experimental Python and CUDA FDTD workbench"
+      }
+    ],
+    "note": "The path was the scratch directory of the remote workstation, recorded by three beyond-VRAM records and by early scripts. The current tree carries a redacted placeholder in the records. The listed commits are those at which occurrences were added or changed; the string is present in every commit from the first listed one up to the redaction, and stays in the public history as a known fact, not as a finding."
+  },
+  "dependency_check": {
+    "tool": "pip check",
+    "exit_code": 0,
+    "output": "No broken requirements found."
+  },
+  "vulnerability_audit": {
+    "tool": "pip-audit 2.10.1",
+    "date": "2026-09-22",
+    "exit_code": 1,
+    "audited": 51,
+    "status": "FINDINGS",
+    "vulnerable": [
+      {
+        "name": "anyio",
+        "version": "4.12.1",
+        "vulnerabilities": [
+          {
+            "id": "CVE-2026-63374",
+            "fix_versions": [
+              "4.14.2"
+            ]
+          },
+          {
+            "id": "CVE-2026-64847",
+            "fix_versions": [
+              "4.14.2"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "click",
+        "version": "8.3.1",
+        "vulnerabilities": [
+          {
+            "id": "PYSEC-2026-2132",
+            "fix_versions": [
+              "8.3.3"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fonttools",
+        "version": "4.29.1",
+        "vulnerabilities": [
+          {
+            "id": "CVE-2023-45139",
+            "fix_versions": [
+              "4.43.0"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "idna",
+        "version": "3.11",
+        "vulnerabilities": [
+          {
+            "id": "PYSEC-2026-215",
+            "fix_versions": [
+              "3.15"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-215",
+            "fix_versions": [
+              "3.15"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "pillow",
+        "version": "12.1.1",
+        "vulnerabilities": [
+          {
+            "id": "PYSEC-2026-2250",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-165",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2251",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2874",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2252",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-165",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2250",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2253",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2251",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2255",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2257",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2256",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2254",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2252",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2874",
+            "fix_versions": [
+              "12.2.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3453",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3451",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3452",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3493",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2254",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2253",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2256",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2255",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3454",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3451",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3494",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3452",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3495",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3496",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3453",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3454",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3495",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3496",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3494",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-3493",
+            "fix_versions": [
+              "12.3.0"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "starlette",
+        "version": "0.52.1",
+        "vulnerabilities": [
+          {
+            "id": "PYSEC-2026-161",
+            "fix_versions": [
+              "1.0.1"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-161",
+            "fix_versions": [
+              "1.0.1"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2281",
+            "fix_versions": [
+              "1.1.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2280",
+            "fix_versions": [
+              "1.1.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-249",
+            "fix_versions": [
+              "1.3.1"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-248",
+            "fix_versions": [
+              "1.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-249",
+            "fix_versions": [
+              "1.3.1"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-248",
+            "fix_versions": [
+              "1.3.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2281",
+            "fix_versions": [
+              "1.1.0"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-2280",
+            "fix_versions": [
+              "1.1.0"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "tqdm",
+        "version": "4.63.0",
+        "vulnerabilities": [
+          {
+            "id": "PYSEC-2026-1976",
+            "fix_versions": [
+              "4.66.3"
+            ]
+          },
+          {
+            "id": "PYSEC-2026-1976",
+            "fix_versions": [
+              "4.66.3"
+            ]
+          }
+        ]
+      }
+    ],
+    "skipped": [
+      {
+        "name": "torch",
+        "reason": "Dependency not found on PyPI and could not be audited: torch (2.10.0+cu126)"
+      }
+    ]
+  }
+}
