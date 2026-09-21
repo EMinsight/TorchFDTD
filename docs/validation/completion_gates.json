@@ -436,13 +436,29 @@
           "specification": "기존 구조를 활용하여 immutable resolved/compiled simulation plan을 만든다. 필수 포함 항목: 실현 mesh nodes, E/H 좌표, dt와 half-step convention, boundary/ADE coefficients, sampled material, source의 실제 지원 영역·파형, monitor interpolation·DFT 설정, resource plan.",
           "required_by_current_plan": true,
           "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/plan.py",
+            "torchfdtd/boundaries.py",
+            "tests/test_plan.py",
+            "docs/validation/cases/G2-01_resolved_plan.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_plan.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-01.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_plan.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-01.xml"
+          ],
+          "required_tests": [
+            "tests/test_plan.py::test_resolved_plan_is_immutable_and_placement_stays_outside_the_hash",
+            "tests/test_plan.py::test_plan_json_and_diff_name_the_changed_keys",
+            "tests/test_plan.py::test_plan_covers_ade_oneway_tfsf_bloch_and_endpoint_faces",
+            "tests/test_plan.py::test_tensor_material_projects_resolve_but_defer_their_node_tensor"
+          ],
+          "evidence": [
+            "20260921T164040Z-g2-01-2739bbf9"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -452,13 +468,35 @@
           "specification": "forward/adjoint/streamed/tensor batch/GUI가 서로 다른 규칙으로 물리 입력을 다시 해석하지 않도록 한다. 계획 재생성은 명시적 invalidation을 거치며, 미분 중 geometry-dependent mesh 변경은 금지하거나 별도 지원 계약으로 다룬다.",
           "required_by_current_plan": true,
           "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/plan.py",
+            "torchfdtd/solver.py",
+            "torchfdtd/differentiable.py",
+            "torchfdtd/streamed.py",
+            "torchfdtd/adjoint_planes.py",
+            "torchfdtd/tensor_batch.py",
+            "torchfdtd/server.py",
+            "tests/test_plan.py",
+            "docs/validation/cases/G2-02_entry_points_share_the_plan.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_plan.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-02.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_plan.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-02.xml"
+          ],
+          "required_tests": [
+            "tests/test_plan.py::test_entry_points_share_the_plan_for_point_monitors",
+            "tests/test_plan.py::test_entry_points_share_the_plan_for_field_monitors",
+            "tests/test_plan.py::test_tensor_batch_reports_the_shared_plan_hash",
+            "tests/test_plan.py::test_runtime_grid_and_system_arrays_equal_the_plan",
+            "tests/test_plan.py::test_project_mutation_after_construction_is_rejected"
+          ],
+          "evidence": [
+            "20260921T164046Z-g2-02-fc7ab609"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -500,13 +538,26 @@
           "specification": "\"+/- DFT\", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다.",
           "required_by_current_plan": true,
           "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "docs/CONVENTIONS.md",
+            "tests/test_conventions.py",
+            "torchfdtd/plan.py",
+            "docs/validation/cases/G2-05_conventions.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_conventions.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-05.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_conventions.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-05.xml"
+          ],
+          "required_tests": [
+            "tests/test_conventions.py"
+          ],
+          "evidence": [
+            "20260921T164112Z-g2-05-657bc5cb"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -516,13 +567,27 @@
           "specification": "cache/reference/restart마다 필요한 동일성 조건을 분리한다. eps·실제 파형·mesh·정밀도·kernel scheme 변경에 따른 invalidation과 deterministic replay를 검사한다.",
           "required_by_current_plan": true,
           "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/identity.py",
+            "docs/IDENTITY_CONDITIONS.md",
+            "tests/test_identity.py",
+            "torchfdtd/plan.py",
+            "docs/validation/cases/G2-06_identity_conditions.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_identity.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-06.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_identity.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-06.xml"
+          ],
+          "required_tests": [
+            "tests/test_identity.py"
+          ],
+          "evidence": [
+            "20260921T164116Z-g2-06-c78e74ff"
+          ],
           "blocker": null,
           "scope_change_approval": null
         }

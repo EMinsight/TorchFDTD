@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "case_id": "G2-06_identity_conditions",
+  "task": "G2-06",
+  "title": "Reference, cache and restart identity conditions on the plan, and deterministic replay",
+  "fixture": {
+    "scene": "tests/test_plan.py::scene: 2D region 1.6 x 1.5 x 1.4 um, uniform mesh 0.1 um (16 x 15 cells), Yee material sampling, 3 PML cells (x_min: 4 layers, kappa 2, alpha 0.03, alpha_polynomial 1), courant_factor 0.99, 24 steps, one SiN (n = 2) rectangle 0.3 x 0.4 um at (-0.3, 0.1), one continuous Ez point source at (-0.2, 0) with wavelength 1.1 um, either two point monitors (Ez at (0.1, 0), Hy at (0, 0.1)) or one x-normal field monitor 0.65 x 0.55 um at x = 0.12 um with downsample 2; the identity scene carries both the Ez point monitor and the x-normal field monitor in float32",
+    "variants": [
+      "labels",
+      "placement",
+      "precision",
+      "kernel_scheme",
+      "monitor_kernel",
+      "scatterer_size",
+      "scatterer_removed",
+      "material_index",
+      "interface_method",
+      "waveform_phase",
+      "waveform_amplitude",
+      "source_moved",
+      "mesh",
+      "time_step",
+      "steps",
+      "background",
+      "pml",
+      "bloch",
+      "plane_geometry",
+      "plane_apodization",
+      "plane_downsample",
+      "inert_source_setting",
+      "plane_frequencies",
+      "point_monitor_moved"
+    ],
+    "graded": "tests/test_adjoint_planes.py::graded_scene with a 0.2 um cube, its frozen mesh and its air reference",
+    "restart": "epsilon 1.7 on the scene grid (float32 and float64, scaled by 1.0001) and StreamedAdjointOptions variants",
+    "replay": "two Simulation runs of the identity scene on CPU (float32) and on CUDA with the torch and the fused kernel; two DifferentiableSimulation forwards of the point-monitor scene on CPU"
+  },
+  "seed": null,
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "the invalidation matrix of docs/IDENTITY_CONDITIONS.md declared before the run; the legacy _plane_signature and _run_fingerprint keys as cross-checks; bitwise equality of CPU replays",
+  "observables": [
+    {
+      "name": "invalidated_conditions",
+      "unit": "subset of {reference, cache, restart}",
+      "definition": "torchfdtd.identity.invalidated(before, after) per variant"
+    },
+    {
+      "name": "legacy_agreement",
+      "unit": "boolean",
+      "definition": "whether _plane_signature and _run_fingerprint change, per variant, as the document declares"
+    },
+    {
+      "name": "reference_sharing",
+      "unit": "boolean",
+      "definition": "scatterer, frozen scatterer and air reference share reference_key; cache_key separates the air reference"
+    },
+    {
+      "name": "restart_sensitivity",
+      "unit": "boolean",
+      "definition": "restart_key changes with epsilon bytes, dtype, options and kernel scheme only"
+    },
+    {
+      "name": "cpu_replay",
+      "unit": "boolean",
+      "definition": "signals, E, H, frames, plane fields and flux bitwise equal between two CPU runs"
+    },
+    {
+      "name": "cuda_replay",
+      "unit": "reduced field",
+      "definition": "the same arrays between two CUDA runs per kernel"
+    }
+  ],
+  "acceptance": {
+    "matrix": "exact set equality per variant",
+    "cpu_replay": "bitwise (np.array_equal, dtype equal)",
+    "cuda_replay": {
+      "rtol": 0.0001,
+      "atol": 1e-06
+    },
+    "source_of_limits": "cuda_replay from completion_gates.json proposed_thresholds discrete_dimensionless_fp32; everything else is exact"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_identity.py"
+    ],
+    "not_yet_covered": [
+      "the streamed restart journal (streamed_restart.journal_contract) still uses its own project-JSON contract rather than restart_key; see docs/IDENTITY_CONDITIONS.md",
+      "replay of a streamed run with a restart journal"
+    ]
+  },
+  "notes": "Placement never enters a key; precision enters the cache and restart keys; the kernel scheme enters the restart key only. Bitwise CUDA agreement is observed but the declared tolerance is the fp32 discrete threshold."
+}

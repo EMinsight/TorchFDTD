@@ -380,6 +380,16 @@ class Simulation:
         self.project = Project.model_validate(project.model_dump())
         self.project.region.require_resident()
 
+    @cached_property
+    def plan(self):
+        """The resolved plan of this project (torchfdtd.plan.resolve_plan), shared with every entry point."""
+        from .plan import resolve_plan
+        return resolve_plan(self.project)
+
+    @property
+    def plan_hash(self):
+        return self.plan.plan_hash
+
     def run(self, progress=None, cancel=None, cuda_graph=True, cuda_graph_steps=1):
         with ENGINE_LOCK:
             old_dtype = torch.get_default_dtype()
@@ -404,7 +414,9 @@ class Simulation:
         validate_graph_steps(cuda_graph_steps, use_cuda and cuda_graph)
         if use_cuda and not torch.cuda.is_available():
             raise RuntimeError('CUDA requested but unavailable. Install a CUDA-enabled PyTorch build or choose CPU.')
-        stats = estimate(p)
+        from .plan import resources_copy
+        plan = self.plan
+        stats = resources_copy(plan)
         if use_cuda:
             free, _ = torch.cuda.mem_get_info()
             if stats['estimated_memory_mb']*2**20 > free*.75:
@@ -425,17 +437,19 @@ class Simulation:
                     return np.ones(shape, dtype=dtype or cpu_dtype)
             fdtd.backend.__class__ = PrecisionNumpyBackend
         started = time.perf_counter()
-        from .subpixel import prepare_interfaces,configure_interfaces
-        interface_plan=prepare_interfaces(p)
+        from .subpixel import configure_interfaces
+        material=plan.material
+        interface_plan=material.interface
         if interface_plan is not None:stats['subpixel']=interface_plan.metadata
-        eps, counts, ownership = voxelize(p, with_ownership=True,interface_plan=interface_plan)
-        from .injection import source_terms, validate_oneway_materials
+        eps, counts, ownership = material.epsilon, material.counts, material.ownership
+        from .injection import validate_oneway_materials
         validate_oneway_materials(p, eps, ownership)
         for obj in p.structures:
             if obj.enabled and counts.get(obj.id) == 0:
                 message='no Yee component centers intersect this object; subpixel integration may still include it. Check quadrature and mesh convergence.' if interface_plan is not None else 'no cells intersect this object. Refine mesh or reposition it.'
                 stats['warnings'].append(f'{obj.name}: {message}')
         g = YeeGrid(r)
+        plan.verify_grid(g)
         if use_cuda:
             g.inverse_permittivity[:] = torch.as_tensor(1/(eps if eps.ndim == 4 else eps[..., None]), device='cuda', dtype=dtype)
         else:
@@ -454,15 +468,15 @@ class Simulation:
         if control.auto_shutoff and not math.isfinite(source_end):
             stats['warnings'].append('Automatic decay shutoff is inactive while a continuous source is enabled.')
         sources = {'E': [], 'H': []}
-        for source in p.sources:
-            for field, loc, values, profile in source_terms(p, source):
-                if isinstance(profile, np.ndarray):
-                    profile = torch.as_tensor(profile, device='cuda', dtype=g.E.dtype) if use_cuda else profile.astype(g.E.dtype)
-                values = torch.as_tensor(values, device='cuda', dtype=dtype) if use_cuda else values.astype(g.E.real.dtype)
-                sources[field[0]].append((values, loc, 'xyz'.index(field[1].lower()), profile))
+        for field, loc, values, profile in plan.source_terms:
+            if isinstance(profile, np.ndarray):
+                profile = torch.tensor(profile, device='cuda', dtype=g.E.dtype) if use_cuda else profile.astype(g.E.dtype)
+            values = torch.tensor(values, device='cuda', dtype=dtype) if use_cuda else values.astype(g.E.real.dtype)
+            sources[field[0]].append((values, loc, 'xyz'.index(field[1].lower()), profile))
         monitors = [(m, index_at(m.center, r, m.component), 'xyz'.index(m.component[1].lower())) for m in p.monitors if m.enabled and m.kind=='point']
         frequency_monitors=[FrequencyPlane(g,p.resolved_monitor(m)) for m in p.monitors if m.enabled and m.kind=='field']
         frequency_updates=FrequencyUpdates(frequency_monitors)
+        plan.verify_planes(frequency_monitors)
         if use_cuda:
             counter = torch.zeros(1, device='cuda', dtype=torch.long)
             traces = torch.zeros((r.steps, len(monitors)), device='cuda', dtype=g.E.dtype)
@@ -523,7 +537,7 @@ class Simulation:
                 indices = display_indices if isinstance(data,torch.Tensor) else [v.cpu().numpy() if isinstance(v,torch.Tensor) else v for v in display_indices]
                 return data[indices[0][:,None],indices[1][None,:]]
             return data[::max(1, math.ceil(data.shape[0]/256)), ::max(1, math.ceil(data.shape[1]/256))]
-        eps_plane = plane(eps[...,component] if eps.ndim == 4 else eps)
+        eps_plane = np.array(plane(eps[...,component] if eps.ndim == 4 else eps))
         interval = max(r.snapshot_interval, math.ceil(r.steps/100))
         frames, frame_steps = [], []
         if use_cuda:
@@ -576,7 +590,7 @@ class Simulation:
         e, h = host(g.E), host(g.H)
         if not np.isfinite(e).all() or not np.isfinite(h).all():
             raise FloatingPointError('Non-finite fields detected.')
-        stats.update(backend='cuda' if use_cuda else 'cpu', precision=r.precision,
+        stats.update(plan_hash=plan.plan_hash, backend='cuda' if use_cuda else 'cpu', precision=r.precision,
                      gpu=torch.cuda.get_device_name() if use_cuda else None, cuda_graph=graph is not None,
                      cuda_graph_steps=width, cuda_graph_replays=graph_replays,
                      cuda_kernel=r.cuda_kernel if use_cuda else None,

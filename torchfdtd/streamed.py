@@ -12,6 +12,7 @@ from .differentiable import DifferentiableResult, DifferentiableSimulation, _Sys
 from .spacetime import SlabBlockOperator
 from .memory_profile import host_memory
 from .cuda_memory import cuda_budget_limit
+from .plan import check_snapshot
 
 
 @dataclass(frozen=True)
@@ -427,6 +428,7 @@ class StreamedSimulation(DifferentiableSimulation):
         return self._run(epsilon, None)
 
     def _run(self, epsilon, spectral, *, execution=None):
+        check_snapshot(self.project, self._plan_snapshot, type(self).__name__)
         region = self.project.region
         if not isinstance(epsilon, torch.Tensor) or epsilon.device.type != 'cpu':
             raise ValueError('Streamed epsilon must be a CPU tensor to avoid full-volume VRAM allocation.')

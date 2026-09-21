@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "case_id": "G2-02_entry_points_share_the_plan",
+  "task": "G2-02",
+  "title": "Every public entry point reports the same plan and rejects a changed scene during differentiation",
+  "fixture": {
+    "scene": "tests/test_plan.py::scene: 2D region 1.6 x 1.5 x 1.4 um, uniform mesh 0.1 um (16 x 15 cells), Yee material sampling, 3 PML cells (x_min: 4 layers, kappa 2, alpha 0.03, alpha_polynomial 1), courant_factor 0.99, 24 steps, one SiN (n = 2) rectangle 0.3 x 0.4 um at (-0.3, 0.1), one continuous Ez point source at (-0.2, 0) with wavelength 1.1 um, either two point monitors (Ez at (0.1, 0), Hy at (0, 0.1)) or one x-normal field monitor 0.65 x 0.55 um at x = 0.12 um with downsample 2",
+    "entry_points": [
+      "Simulation (plan, plan_hash, run().summary[plan_hash])",
+      "DifferentiableSimulation",
+      "StreamedSimulation (device cpu, slab_width 4, temporal_depth 2)",
+      "DifferentiablePlaneSimulation (field-monitor variant)",
+      "run_tensor_batch (CUDA, two copies of each variant, cuda_graph False)",
+      "POST /api/validate through fastapi TestClient"
+    ],
+    "mutation_scene": "the same scene on a 4.8 x 4.8 um graded mesh (mesh_max 0.3, mesh_ppw 6, wavelength 3 um, 10 steps) whose automatic refinement boxes follow the structure",
+    "runtime_checks": "YeeGrid and differentiable _System prepared from the same project compared to the plan: CPML b, c, 1/kappa, time step, wrap phases, source locations and waveform samples"
+  },
+  "seed": null,
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "exact comparison of the plans (hash and every array) across entry points; the runtime grid coefficients and source tensors are compared to the plan cast to the runtime dtype; the differentiable signals of the plan material equal the native traces within fp32 tolerance",
+  "observables": [
+    {
+      "name": "shared_plan_hash",
+      "unit": "boolean",
+      "definition": "one hash across all entry points for each monitor variant"
+    },
+    {
+      "name": "shared_arrays",
+      "unit": "boolean",
+      "definition": "nodes, Yee axes, dt, CPML profiles and coefficients, source locations/samples/profiles, ADE coefficients, monitor points/weights/frequencies equal across entry points"
+    },
+    {
+      "name": "runtime_agreement",
+      "unit": "boolean",
+      "definition": "prepared grid coefficients and source tensors equal the plan; a grid of another scene raises PlanInvalidated"
+    },
+    {
+      "name": "mutation_rejection",
+      "unit": "boolean",
+      "definition": "moving the refined structure after construction raises PlanInvalidated on the next forward of the resident, streamed and plane wrappers"
+    },
+    {
+      "name": "native_vs_differentiable_signals",
+      "unit": "reduced field",
+      "definition": "DifferentiableSimulation on the plan material versus Simulation traces"
+    }
+  ],
+  "acceptance": {
+    "hashes": "identical strings",
+    "arrays": "exact equality",
+    "native_vs_differentiable": {
+      "rtol": 1e-05,
+      "atol": 1e-06
+    },
+    "source_of_limits": "exact identities; the native-versus-differentiable signal tolerance is tighter than completion_gates.json discrete_dimensionless_fp32 (rtol 1e-4, atol 1e-6)"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_plan.py::test_entry_points_share_the_plan_for_point_monitors",
+      "tests/test_plan.py::test_entry_points_share_the_plan_for_field_monitors",
+      "tests/test_plan.py::test_tensor_batch_reports_the_shared_plan_hash",
+      "tests/test_plan.py::test_runtime_grid_and_system_arrays_equal_the_plan",
+      "tests/test_plan.py::test_project_mutation_after_construction_is_rejected"
+    ],
+    "not_yet_covered": [
+      "the browser streamed and tiled jobs (execution_modes.run_streamed_job, run_tiled_job) do not report plan_hash yet",
+      "EndpointSimulation, TensorDielectricSimulation and the reversible wrappers do not expose plan_hash yet"
+    ]
+  },
+  "notes": "Simulation and run_tensor_batch run from plan.material and plan.source_terms and verify the prepared YeeGrid and FrequencyPlanes against the plan; the differentiable wrappers keep their own _System preparation and enforce the plan by a construction-time snapshot of the scene and its realized nodes."
+}

@@ -199,7 +199,9 @@ class YeeGrid(fdtd.Grid):
                                      'shape':tuple(shape),
                                      'psi': psi, 'b': self._coefficient(decay.reshape(coeff_shape)),
                                      'c': self._coefficient(coupling.reshape(coeff_shape)),
-                                     'inv_k': self._coefficient((1/kappa).reshape(coeff_shape))})
+                                     'inv_k': self._coefficient((1/kappa).reshape(coeff_shape)),
+                                     # Host-side profile kept for the resolved plan (torchfdtd.plan).
+                                     'side': side, 'kappa': kappa, 'sigma': sigma, 'alpha': alpha})
                 self.cpml[forward, axis, component] = segments
 
     def _zeros(self, shape):

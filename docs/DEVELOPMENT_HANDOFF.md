@@ -181,4 +181,70 @@ G9-06 and refresh the audit:
 ```
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py --audit
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py --check
+
+---
+
+### 2026-09-22 G2-01, G2-02, G2-05, G2-06 (resolved plan, shared entry points, conventions, identity conditions), branch g2-plan from 2b64f91
+
+**Problem or goal.** One immutable resolved plan that every public entry
+point consumes and reports (`plan_hash`), a public specification of the sign,
+timing and unit conventions fixed by tests, and the three identity conditions
+(reference compatibility, cache validity, restart contract) expressed on the
+plan with an invalidation matrix and deterministic-replay checks.
+
+**State found.** HEAD 2b64f91 on branch g2-plan, clean tree, no uncommitted
+work from an earlier agent. The gate rows G2-01, G2-02, G2-05 and G2-06 were
+NOT_ASSESSED / NOT_RUN with empty code paths and required tests.
+
+**Changed files (why).**
+- `torchfdtd/plan.py` (new): `resolve_plan(project) -> SimulationPlan`, a frozen dataclass with read-only arrays built from the existing resolvers (`mesh_nodes`, `field_axes`, `BoundaryDescription`, `MaterialADE`, `source_terms`, `plane_plan`/`interpolation_map`, `frequency_samples`, `voxelize`, `estimate`); `plan_hash` over the canonical mesh/time/exterior/material/sources/monitors sections; `placement` and the resource estimate carried outside the hash; `plan.material` materialized on demand; `to_json`, `diff`, `verify_grid`, `verify_planes`; `PlanInvalidated`; `project_snapshot`/`check_snapshot` for the differentiable wrappers.
+- `torchfdtd/boundaries.py`: each CPML segment dict also keeps its host-side `side`, `kappa`, `sigma`, `alpha` so the plan records the profile without re-deriving it.
+- `torchfdtd/solver.py`: `Simulation.plan`/`plan_hash`; `_run` takes the estimate, the sampled material and the source terms from the plan, verifies the prepared `YeeGrid` and `FrequencyPlane`s against it and writes `summary['plan_hash']`.
+- `torchfdtd/differentiable.py`, `torchfdtd/streamed.py`: `plan`/`plan_hash` on `DifferentiableSimulation` (inherited by the streamed, dispersive, modal, source and geometry wrappers); a construction-time snapshot of the scene and its realized nodes that `_run` checks, raising `PlanInvalidated`.
+- `torchfdtd/adjoint_planes.py`: `plan`/`plan_hash` on `DifferentiablePlaneSimulation`; its existing configuration check raises `PlanInvalidated`; `SAMPLE_TIME_STEPS` now lives in `torchfdtd.plan`.
+- `torchfdtd/tensor_batch.py`: cohorts resolve one plan per case, run from its material and verify grids and planes; `summary['plan_hash']`.
+- `torchfdtd/server.py`: `/api/validate` returns `plan_hash`.
+- `torchfdtd/identity.py` (new): `reference_key`, `cache_key`, `restart_key`, `identity`, `invalidated` on the plan sections.
+- `docs/CONVENTIONS.md` (new), `docs/IDENTITY_CONDITIONS.md` (new): the specifications, each statement mapped to its test.
+- `tests/test_plan.py`, `tests/test_identity.py`, `tests/test_conventions.py` (new).
+- `docs/validation/cases/G2-01_resolved_plan.json`, `G2-02_entry_points_share_the_plan.json`, `G2-05_conventions.json`, `G2-06_identity_conditions.json` (new): pre-declared cases.
+- `docs/validation/completion_gates.json`: `code_paths`, `required_tests` and `planned_test_commands` of the four tasks; states written by the recorder only.
+
+**Commands run (device: local Windows 11, 12th Gen Intel Core i7-12700, RTX 3060 12 GB shared with seven other agents, Python 3.10.2, torch 2.10.0+cu126, CuPy 13.6.0; TMP and TEMP set to D:\TorchFDTD\.local\tmp).**
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -p no:cacheprovider tests/test_solver.py tests/test_physics.py tests/test_subpixel.py tests/test_oneway_sources.py tests/test_tfsf.py tests/test_field_monitors.py
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -p no:cacheprovider tests/test_api.py tests/test_tensor_batch.py tests/test_differentiable.py tests/test_adjoint_planes.py tests/test_streamed_restart.py
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -p no:cacheprovider -q tests/test_execution_modes.py tests/test_mode_network_project.py tests/test_mode_injection.py tests/test_source_adjoint.py tests/test_dispersive_adjoint.py tests/test_streamed_geometry.py tests/test_streamed_density.py tests/test_anisotropy.py tests/test_reversible_cpml_planes.py tests/test_session.py tests/test_batch.py tests/test_endpoint_native.py tests/test_pmc_simulation.py tests/test_pec_boundaries.py tests/test_materials.py tests/test_multipole.py tests/test_broadband.py tests/test_sources.py tests/test_vector_sources.py tests/test_run_control.py tests/test_monitor_outputs.py tests/test_spectra.py tests/test_rectilinear.py tests/test_mesh.py tests/test_plane_mesh_combinations.py tests/test_plane_execution.py tests/test_resident_allocations.py tests/test_streamed_admission.py tests/test_streamed_dispersive.py tests/test_tiled.py tests/test_periodic_design.py tests/test_adjoint_batch.py tests/test_recomputed_batch.py tests/test_grouped_batch.py tests/test_tensor_project.py tests/test_tensor_native.py tests/test_completion_program_documents.py tests/test_release_gates.py
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_plan.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-01.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_plan.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-02.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_conventions.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-05.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_identity.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-06.xml
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G2-01 --command "<the G2-01 command above>" --junit D:/TorchFDTD/.local/tmp/junit/G2-01.xml --exit-code 0 --fixture docs/validation/cases/G2-01_resolved_plan.json --scope "..."   (and likewise G2-02, G2-05, G2-06 with their cases)
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G2-01   (and G2-02, G2-05, G2-06)
+```
+
+**Measurements and pre-declared limits.** The three new modules on the committed tree 7847737: tests/test_plan.py 11 passed in 9.88 s (recorded for G2-01) and 10.01 s (recorded for G2-02), tests/test_conventions.py 9 passed in 8.10 s, tests/test_identity.py 29 passed in 11.10 s; the CUDA instances (tensor batch cohorts, torch and fused replays) ran on the RTX 3060. Regression on the changed entry points before the commit: the six solver modules 80 passed in 85.84 s; the five entry-point modules 80 passed in 228.39 s; the 38-module targeted subset 549 passed in 1133.05 s. Pre-declared limits: exact equality for hashes, plans, resolver arrays, sample times and unit strings; native-versus-differentiable signals rtol 1e-5, atol 1e-6; plane DFT rtol 1e-10; whole-cycle DFT identities 1e-9; 2D flux width doubling 1e-6, impedance and sheet power 2 %, reversed wave 5 %; far-field decay 1e-6; CUDA replay rtol 1e-4, atol 1e-6 (proposed_thresholds discrete_dimensionless_fp32). A full-suite probe was stopped at 6 % (157 tests, no failure) because it would have taken hours on the shared machine.
+
+**Passed / failed / skipped / not run.** Passed: every test listed above (11 + 11 + 9 + 29 recorded; 80 + 80 + 549 regression). Failed: none. Skipped: none in the recorded runs. Not run: the rest of the Python suite and the frontend tests.
+
+**Evidence paths and hashes.**
+
+- G2-01: `docs/validation/runs/20260921T164040Z-g2-01-2739bbf9/evidence.json` (source commit 7847737, clean tree, VERIFIED; `scripts/check_release_gates.py --task G2-01` passes)
+- G2-02: `docs/validation/runs/20260921T164046Z-g2-02-fc7ab609/evidence.json` (source commit 7847737, clean tree, VERIFIED; `scripts/check_release_gates.py --task G2-02` passes)
+- G2-05: `docs/validation/runs/20260921T164112Z-g2-05-657bc5cb/evidence.json` (source commit 7847737, clean tree, VERIFIED; `scripts/check_release_gates.py --task G2-05` passes)
+- G2-06: `docs/validation/runs/20260921T164116Z-g2-06-c78e74ff/evidence.json` (source commit 7847737, clean tree, VERIFIED; `scripts/check_release_gates.py --task G2-06` passes)
+
+**Remaining defects, risks, external blockers.**
+- The sampled material enters `plan_hash` through its rasterization inputs on the hashed nodes, not through the voxel bytes, so that resolving a plan for a beyond-VRAM streamed scene allocates no full volume; `plan.material` materializes the arrays on demand and is what `Simulation` and the tensor batch run from. The resource estimate is carried but not hashed because it depends on the precision, which the brief keeps outside the hash.
+- The browser streamed and tiled jobs (`execution_modes.run_streamed_job`, `run_tiled_job`), `EndpointSimulation`, `TensorDielectricSimulation` and the reversible wrappers do not report `plan_hash` yet (listed as `not_yet_covered` in the G2-02 case).
+- `streamed_restart.journal_contract` still hashes the project JSON without ids: a renamed object or a changed placement invalidates a journal that `restart_key` would accept. Moving the journal onto `restart_key` belongs with the G1-04 restart work (worktree of another agent) and was not done here.
+- Legacy `_plane_signature`/`_run_fingerprint` differ from the plan keys on three rows of the matrix (inert source settings, monitor frequency samples, point monitors); the plan keys are the specification, the legacy keys are unchanged and still drive `DifferentiablePlaneResult.run_signature` and `PlaneReferenceCache`.
+- `/api/validate` now resolves a plan on every call; the material is not materialized, so the added cost is the CPML, source, monitor and estimate resolution the endpoint already did through `estimate`.
+- The full Python test suite was not run to completion on this shared machine; the modules listed above plus a targeted regression subset were run (see measurements).
+
+**Next first command and task id.** G2-03 (capability registry) can start from the plan sections; for the restart contract, G1-04 should replace `journal_contract`'s project JSON by `torchfdtd.identity.restart_key`:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_plan.py tests/test_identity.py tests/test_conventions.py
 ```

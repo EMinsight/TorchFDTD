@@ -18,6 +18,7 @@ from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .models import Project, Material, demo_project
+from .plan import resolve_plan
 from .solver import Simulation, estimate, hardware
 from .execution_modes import execution_resources, resolve_execution, run_streamed_job, run_tiled_job, scratch_directory
 from .material_fit import OpticalDataRequest, MaterialFitRequest, fit_material, material_fit_report
@@ -96,9 +97,9 @@ def create_app(result_dir=None):
     @app.post('/api/validate')
     def validate(project: Project):
         # Dispatch-time contracts (exact-endpoint PMC, tensor media) are rejections, not server faults.
-        try:summary=estimate(project)
+        try:summary=estimate(project);plan_hash=resolve_plan(project).plan_hash
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
-        return {**summary, 'execution': resolution(project, summary), 'project': project.model_dump()}
+        return {**summary, 'plan_hash': plan_hash, 'execution': resolution(project, summary), 'project': project.model_dump()}
 
     def resolution(project, summary=None):
         # Auto/streamed selection reads live resources; a scene that fits nothing

@@ -21,7 +21,8 @@ from .batch import BatchCase, BatchItem, BatchReport
 from .boundaries import YeeGrid, pmc_faces
 from .materials import configure_materials
 from .models import Project
-from .solver import ENGINE_LOCK, Result, estimate, voxelize, index_at, field_axes
+from .plan import resolve_plan, resources_copy
+from .solver import ENGINE_LOCK, Result, index_at, field_axes
 from .field_monitors import FrequencyPlane,FrequencyUpdates
 from .run_control import StateDiagnostics, DecayDecision, source_end_time
 from .cuda_graph import CudaStepGraphs, observation_schedule, validate_graph_steps
@@ -118,8 +119,9 @@ def _validate_pmc_case(p):
 def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_graph,cancel,progress,cuda_graph_steps):
     from .cuda_batch import FusedBatchYeeCUDA,FusedBatchIO
     started=time.perf_counter();wall_started=time.time()
-    # The estimate describes this volume-plus-face Yee grid, not the endpoint dispatch.
-    stats=[estimate(p,endpoint_dispatch=False) for p in projects]
+    # The plan's estimate describes this volume-plus-face Yee grid, not the endpoint dispatch.
+    resolved=[resolve_plan(p) for p in projects]
+    stats=[resources_copy(plan) for plan in resolved]
     first=projects[0].region
     baseline=_topology(first)
     if any(_topology(p.region)!=baseline for p in projects):
@@ -131,12 +133,14 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
     dtype=torch.float32 if first.precision=='float32' else torch.float64
     fdtd.set_backend(f'torch.cuda.{first.precision}');fdtd.backend.float=dtype
     grids=[];epsilon=[];traces=[];planes=[];diagnostics=[];decisions=[]
-    for p,s in zip(projects,stats):
+    for p,s,plan in zip(projects,stats,resolved):
         g=YeeGrid(p.region)
-        from .subpixel import prepare_interfaces,configure_interfaces
-        interface_plan=prepare_interfaces(p)
+        plan.verify_grid(g)
+        from .subpixel import configure_interfaces
+        material=plan.material
+        interface_plan=material.interface
         if interface_plan is not None:s['subpixel']=interface_plan.metadata
-        eps,counts,ownership=voxelize(p,with_ownership=True,interface_plan=interface_plan)
+        eps,counts,ownership=material.epsilon,material.counts,material.ownership
         shape=p.region.shape
         # Stored upper PMC rows are cropped for the volume banks and sliced per face below.
         volume_ownership=ownership[:shape[0],:shape[1],:shape[2]]
@@ -167,6 +171,7 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
         monitors=[m for m in p.monitors if m.enabled and m.kind=='point']
         traces.append(torch.zeros((p.region.steps,len(monitors)),device=g.E.device,dtype=dtype))
         planes.append([FrequencyPlane(g,p.resolved_monitor(m)) for m in p.monitors if m.enabled and m.kind=='field'])
+        plan.verify_planes(planes[-1])
         c=p.region.run_control
         diagnostics.append(StateDiagnostics(g) if c.divergence_check else None)
         decisions.append(DecayDecision(c,source_end_time(p),g.time_step))
@@ -254,12 +259,12 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
     root=Path(output_dir) if output_dir is not None else None
     if root:root.mkdir(parents=True,exist_ok=True)
     items=[]
-    for i,(case,p,g,s,trace) in enumerate(zip(cases,projects,grids,stats,traces)):
+    for i,(case,p,g,s,trace,plan) in enumerate(zip(cases,projects,grids,stats,traces,resolved)):
         e,h=(v.detach().cpu().numpy().copy() for v in (g.E,g.H))
         if not np.isfinite(e).all() or not np.isfinite(h).all():raise FloatingPointError(f'Case {case.id}: non-finite final fields.')
         r=p.region;axis,component,index,_,_=slices[i]
         end=source_end_time(p)
-        s.update(backend='cuda',precision=r.precision,gpu=torch.cuda.get_device_name(),cuda_graph=graph is not None,
+        s.update(plan_hash=plan.plan_hash,backend='cuda',precision=r.precision,gpu=torch.cuda.get_device_name(),cuda_graph=graph is not None,
                  cuda_graph_steps=width,cuda_graph_replays=graph_replays,
                  cuda_kernel='fused_batch',batch_size=len(cases),batch_index=i,timing_scope='whole_cohort',
                  cuda_monitor_kernel=r.cuda_monitor_kernel,
