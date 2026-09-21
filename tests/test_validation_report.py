@@ -68,8 +68,7 @@ def test_consistency_section_reports_no_mismatch(rendered):
 
 
 def test_platform_section_lists_every_record_with_its_g4_evidence(rendered):
-    section = rendered['report'].split('## Platform records', 1)[1].split('
-## ', 1)[0]
+    section = rendered['report'].split('## Platform records', 1)[1].split('\n## ', 1)[0]
     records = sorted((ROOT / 'docs' / 'validation' / 'platforms').glob('*.json'))
     assert len(records) >= 2
     for path in records:

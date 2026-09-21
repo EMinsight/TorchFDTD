@@ -960,6 +960,7 @@ fail of 83, both still NOT RELEASABLE).
 - The physics headlines of the report encode which rows of the G3-04, G3-05 and G3-08 records are the judged ones (the meshes named in the cases' `judged_at`); a new record layout needs the corresponding headline function updated.
 - The known-limitations list is a hand-maintained JSON that cites its records; the report labels it as such. The README rows without a machine record (Lumerical, flaport/fdtd, sweep, CPU-versus-GPU, ensemble) are not checked by the report.
 - `docs/RELEASE_REVIEW.md` keeps its mixed line endings; the appended section uses CRLF like the lines around it.
+- Commit 2de687d carried a syntax error in tests/test_validation_report.py (a line break written into a string literal by the editing shell); a recording attempt against it produced a collection error, was discarded before commit, and the fix is the next commit with a fresh G9-07 run.
 
 **Next first command and task id.** After merging, the maintainer's G9-06 run
 starts with step 1 of docs/RELEASE_PROCEDURE.md on the release-candidate
