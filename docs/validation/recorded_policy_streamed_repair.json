@@ -1,0 +1,70 @@
+{
+  "status": "targeted_repair_passed",
+  "failed_ci": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35550370749",
+  "failed_commit": "ed7e8f5b8a20e4d1d47e2dd6a1c23e3444e4f2bc",
+  "failed_cases": [
+    {
+      "file": "tests.test_design_parameterization",
+      "test": "test_parameterized_optimizer_connects_to_real_streamed_fdtd",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    },
+    {
+      "file": "tests.test_periodic_adjoint",
+      "test": "test_coupled_polarization_response_and_density_gradient_match_legacy[dram-cpu]",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    },
+    {
+      "file": "tests.test_periodic_adjoint",
+      "test": "test_coupled_polarization_response_and_density_gradient_match_legacy[file-cpu]",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    },
+    {
+      "file": "tests.test_periodic_auto",
+      "test": "test_auto_shrinks_tiles_and_selects_admitted_storage[1073741824-dram]",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    },
+    {
+      "file": "tests.test_periodic_auto",
+      "test": "test_auto_shrinks_tiles_and_selects_admitted_storage[41943040-file]",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    },
+    {
+      "file": "tests.test_periodic_auto",
+      "test": "test_auto_never_uses_unconfigured_or_insufficient_disk",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    },
+    {
+      "file": "tests.test_streamed_density",
+      "test": "test_periodic_response_routes_density_without_dense_material_and_matches_reference[host]",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    },
+    {
+      "file": "tests.test_streamed_density",
+      "test": "test_periodic_response_routes_density_without_dense_material_and_matches_reference[disk]",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    },
+    {
+      "file": "tests.test_streamed_density",
+      "test": "test_periodic_density_full_response_trace_has_no_global_epsilon_or_vjp",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    },
+    {
+      "file": "tests.test_streamed_density",
+      "test": "test_density_plan_never_synthesizes_material_and_tiny_budget_is_rejected",
+      "message": "AttributeError: '_DensityPreparedCase' object has no attribute 'configuration'"
+    }
+  ],
+  "failed_junit_sha256": "d5b3c04106722520ebeee28d45bd20efd94bdd50e8047d303225d011f6b6dd0f",
+  "cause": "The streamed-density prepared-case subclass bypasses the parent constructor. The newly required immutable configuration snapshot was missing in that subclass.",
+  "correction": "Initialize the identical deep-copied configuration tuple in the subclass. Keep the guard active and reject nested quadrature mutation before material preparation.",
+  "targeted_validation": {
+    "previously_failed_cpu_cases_passed": 10,
+    "new_mutation_guard_passed": 1,
+    "note": "The new test first used a four-step fixture below the Region minimum. Only that test was corrected to ten steps and rerun. Successful numerical cases were not repeated."
+  },
+  "source_sha256": {
+    "torchfdtd/streamed_density.py": "26fc263fddb55180f2a8d9ba0db29b63a47de869a0e7d0ec4dc4098d798f98a8",
+    "tests/test_streamed_density.py": "abce608c36f40ea1aa6f55bba44e36c41ba9a08e904dc55a1771ecdeecff91be"
+  },
+  "unchanged": "Recorded CPML numerical kernels and the already measured CPU/CUDA recorded response remain unchanged. No GPU run for this snapshot initialization fix."
+}

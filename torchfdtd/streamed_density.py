@@ -1,5 +1,6 @@
 """Bounded periodic density-layer material production and exact linear VJP."""
 from dataclasses import dataclass
+from copy import deepcopy
 import math
 
 import torch
@@ -194,6 +195,8 @@ class _DensityPreparedCase(_PreparedCase):
         if spec.policy.streamed is None or spec.parameter_indices != (0,):
             raise ValueError('Density cases require one density input and an explicit streamed policy.')
         self.spec, self.dispersive, self.planes = spec, False, True
+        self.configuration = deepcopy((spec.policy, spec.fixed_background_epsilon,
+            spec.parameter_indices, spec.block_size, spec.quadrature_counts))
         self.model = _DensityPlaneCaseModel(spec.project, _streamed_options(spec.policy),
             layer=layer, quadrature_counts=spec.quadrature_counts)
         self.project = self.model.project

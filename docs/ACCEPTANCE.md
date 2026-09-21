@@ -21,6 +21,13 @@ execution of this recorded policy, or comparative performance. The private
 release status and remaining FDTDX parity gates are unchanged.
 
 
+The first full CI run at `ed7e8f5` found ten existing streamed-density
+failures caused by a missing subclass configuration snapshot. The subclass
+initialization is repaired, with the configuration guard preserved. All ten
+affected CPU cases and a new nested-mutation regression pass. The
+[failure and repair record](validation/recorded_policy_streamed_repair.json)
+retains the failed CI evidence rather than treating it as a successful gate.
+
 ## Async Bloch and online-plane CPML extension, 21 September 2026
 
 The [recorded CPML API](REVERSIBLE_CPML.md) now accepts real FP32 scalar or

@@ -69,6 +69,22 @@ def objective(response):
     return (response*response.new_tensor([[.1, .3, -.2, .7], [.4, -.1, .5, .2]])).sum()
 
 
+def test_density_prepared_case_snapshots_mutable_quadrature_configuration(tmp_path, monkeypatch):
+    model, _ = make_model(tmp_path, steps=10)
+    case = model._batch._cases[0]
+    case.check_fixed()
+    original = dict(case.spec.quadrature_counts)
+    identifier = next(iter(original))
+    case.spec.quadrature_counts[identifier] = (5, 5)
+    monkeypatch.setattr(case.model, 'prepare',
+        lambda *args: pytest.fail('Prepared material after configuration mutation.'))
+    with pytest.raises(RuntimeError, match='Batch case configuration changed'):
+        case.reservation((torch.full((3, 2), .4),))
+    case.spec.quadrature_counts.clear()
+    case.spec.quadrature_counts.update(original)
+    case.check_fixed()
+
+
 @pytest.mark.parametrize('storage', ['host', 'disk'])
 def test_periodic_response_routes_density_without_dense_material_and_matches_reference(tmp_path, monkeypatch, storage):
     import torchfdtd.periodic_adjoint as implementation
