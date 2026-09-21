@@ -1302,5 +1302,25 @@
       "scratch_empty": true,
       "gradient_finite": true
     }
-  ]
+  ],
+  "completed_ci": {
+    "run_id": 35563523607,
+    "commit": "98029a3d51d6f0eb9a5e4e63a1f87965e0e5d227",
+    "url": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35563523607",
+    "conclusion": "success",
+    "python": {
+      "tests": 2031,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 453,
+      "passed": 1578,
+      "junit_sha256": "d4f21b8fdc529fb582c91677f590292ee4eab9a8b410930febdbc474240231e4"
+    },
+    "browser": {
+      "passed": 42,
+      "skipped": 8
+    },
+    "frontend_build": "success",
+    "wheel_build": "success"
+  }
 }

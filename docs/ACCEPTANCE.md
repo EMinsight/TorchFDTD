@@ -58,6 +58,10 @@ dense-parameter host reservation is four copies instead of eight; every other
 path keeps eight and the metadata estimate reports the multiplier it applied.
 [Records](validation/streamed_host_ledger_3060.json),
 [larger grid](validation/streamed_host_ledger_3060_768.json).
+Linux CI [35563523607](https://github.com/hyoseokp/TorchFDTD/actions/runs/35563523607) at `98029a3` passed with
+1,578 Python passes and 453 skips, 42 browser passes and
+8 skips. Frontend and wheel builds passed. The JUnit SHA-256 is
+`d4f21b8fdc529fb582c91677f590292ee4eab9a8b410930febdbc474240231e4`. No numerical experiment was rerun.
 
 ## Real FP32 state larger than physical VRAM, 21 September 2026
 
