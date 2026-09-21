@@ -6,6 +6,11 @@ from pathlib import Path
 import re
 
 
+def file_sha256(path):
+    """SHA-256 of a file's exact bytes, shared with the completion-gate tools."""
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
 def main():
     folders=['.github','torchfdtd','frontend','examples','tests','scripts','benchmarks','docs']
     files=sorted(p for folder in folders for p in Path(folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
@@ -43,7 +48,7 @@ def main():
                 scan_scope='Exact current source-archive allowlist. Pattern scan is not proof of absence of all secrets or intellectual-property issues.',
                 dependency_scope='Direct Python dependencies are installed separately, not bundled in the source archive. Frontend notices retained. This is not a complete transitive SBOM.',
                 dependencies=dependencies,findings=checks,
-                files=[dict(path=p.as_posix(),bytes=p.stat().st_size,sha256=hashlib.sha256(p.read_bytes()).hexdigest()) for p in files])
+                files=[dict(path=p.as_posix(),bytes=p.stat().st_size,sha256=file_sha256(p)) for p in files])
     out=Path('results/release-review');out.mkdir(parents=True,exist_ok=True)
     (out/'source-audit.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
     print(json.dumps(dict(status=report['status'],source_files=len(files),findings=checks),indent=2))
