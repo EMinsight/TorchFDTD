@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-04_mie_cylinder_sphere",
+  "task": "G3-04",
+  "title": "Closed-box TFSF scattering of a dielectric cylinder (2D, TM and TE) and a dielectric sphere (3D) against the Mie series",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f91",
+  "declared_before_run": true,
+  "fixture": {
+    "method": "Closed TFSF box, six (3D) or four (2D) scattered-field monitor planes outside the box, matched empty-box reference run subtracted, incident intensity from a monitor inside the box of the empty run; cross section = outward scattered power / incident intensity. Yee material sampling, staircase interface, native CPML with the physical thickness below on every face.",
+    "cylinder": {
+      "dimension": "2d, propagation along +x, cylinder axis along the invariant z",
+      "domain_um": 3.2,
+      "pml_um": 0.4,
+      "tfsf_um": 1.6,
+      "monitor_half_um": 1.1,
+      "radius_um": 0.3,
+      "index": 1.5,
+      "polarizations": {"TM": "Ez (E parallel to the axis)", "TE": "Ey (H parallel to the axis)"},
+      "band": [1.3, 1.8, 9],
+      "pulse": "Gaussian, centre 1.55 um, power FWHM 8 fs, offset 30 fs",
+      "duration_fs": 120,
+      "mesh_sequence_um": [0.05, 0.025, 0.0125],
+      "judged_mesh_um": 0.0125,
+      "cells_per_radius_at_judged_mesh": 24
+    },
+    "sphere": {
+      "dimension": "3d, propagation along +x, Ez polarization",
+      "domain_um": 2.4,
+      "pml_um": 0.4,
+      "tfsf_um": 1.0,
+      "monitor_half_um": 0.65,
+      "radius_um": 0.3,
+      "index": 1.5,
+      "band": [1.3, 1.8, 9],
+      "pulse": "Gaussian, centre 1.55 um, power FWHM 8 fs, offset 30 fs",
+      "duration_fs": 120,
+      "mesh_sequence_um": [0.1, 0.05, 0.025],
+      "judged_mesh_um": 0.05,
+      "grid_at_judged_mesh": "48^3 (the CUDA cap of the recorded run); 0.025 um is 96^3 and runs on the CPU in FP64 only"
+    },
+    "resonance": {
+      "dimension": "2d, TE (Ey), same domain, box, monitors and PML as the cylinder",
+      "radius_um": 0.25,
+      "index": 3.5,
+      "band": [1.0, 1.3, 61],
+      "pulse_wavelength_um": 1.15,
+      "pulse_length_s": 5e-15,
+      "pulse_offset_s": 1.5e-14,
+      "duration_fs": 120,
+      "mesh_sequence_um": [0.025, 0.0125],
+      "judged_mesh_um": 0.0125,
+      "resonance": "TE peak of the Mie scattering width near 1.136 um, full width at half maximum about 0.065 um (Q about 17); the sharper TM peak near 1.10 um is outside this band's pulse and not judged",
+      "peak_definition": "parabolic refinement through the three samples around the maximum of the sampled curve; FWHM by linear interpolation of the sampled curve at half of the refined peak height; the same procedure is applied to the Mie curve sampled at the same 61 wavelengths"
+    },
+    "layer_a": "the same discrete problem on fused CUDA FP32 (RTX 3060) and the CPU FP64 reference path at every mesh at or below 48^3 cells; the cross-section observable is compared"
+  },
+  "seed": null,
+  "precision": ["float64 (CPU reference)", "float32 (CUDA, layer A)"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "Infinite-cylinder Mie series (TM and TE coefficients from continuity of the axial field and of its normal derivative divided by mu or epsilon; C = (4/k) sum over all integer orders of |c_n|^2) and Bohren-Huffman sphere series, both written in tests/test_physics_g3_b.py with SciPy Bessel functions and checked against the optical theorem, the small-size limits and the repository's independent real-index sphere series in examples/tfsf_sphere.py. No solver routine enters the reference.",
+  "observables": [
+    {"name": "scattering_width_um", "unit": "um per unit length", "definition": "2D outward scattered power per unit length through the four monitor lines divided by the incident intensity, nine wavelengths"},
+    {"name": "scattering_cross_section_um2", "unit": "um^2", "definition": "3D outward scattered power through the six monitor planes divided by the incident intensity, nine wavelengths"},
+    {"name": "max_relative_error", "unit": "dimensionless", "definition": "max over the nine wavelengths of |measured/Mie - 1|"},
+    {"name": "resonance_peak_um", "unit": "um", "definition": "refined peak wavelength of the TE scattering width of the 0.25 um, n = 3.5 cylinder"},
+    {"name": "resonance_fwhm_um", "unit": "um", "definition": "full width at half maximum of that peak"},
+    {"name": "layer_a_relative_difference", "unit": "dimensionless", "definition": "CUDA FP32 cross section divided by the CPU FP64 cross section minus one, per wavelength"}
+  ],
+  "acceptance": {
+    "integrated_cross_section_relative_error": 0.02,
+    "judged_at": "cylinder: h = 0.0125 um for TM and TE; sphere: h = 0.05 um; the coarser meshes of each sequence are recorded and not judged",
+    "monotonicity": "not required; staircased curved surfaces are allowed a non-monotone error sequence and the record keeps every mesh",
+    "resonance": {
+      "peak_position_relative_error": 0.01,
+      "fwhm_relative_error": 0.15,
+      "justification": "the staircase perturbs the effective radius by a fraction of the cell and the internal wavelength is resolved by about 26 cells at the judged mesh; both shift the resonance by a few tenths of a percent, so 1 percent on the position is a first engineering target; the width of a Q = 17 resonance is the difference of two flank positions and is given a proportionally looser 15 percent"
+    },
+    "layer_a_cuda_fp32_vs_cpu_fp64": {"rtol": 0.0001, "atol": 0.0, "source": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 applied to the cross-section observable"},
+    "source_of_limits": "completion_gates.json proposed_thresholds mie_integrated_cross_section_relative_error; the resonance and layer-A budgets are fixture-specific and stated above"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_b.py::test_g3_04_reference_series_limits",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_cuda_layer_a",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_resonance",
+      "tests/test_physics_g3_b.py::test_g3_04_sphere_scattering",
+      "tests/test_physics_g3_b.py::test_g3_04_sphere_cuda_layer_a"
+    ],
+    "not_yet_covered": [
+      "absorbing dielectric cylinder or sphere (lossy Mie)",
+      "oblique incidence on the cylinder",
+      "the sharper TM resonance of the high-index cylinder"
+    ]
+  },
+  "notes": "Exploratory probes at the three cylinder meshes and at the sphere meshes 0.1 and 0.05 um preceded this declaration and informed the domain size (the 48^3 CUDA cap of the recorded run) and the choice of the judged meshes; the 2 percent limit is the program threshold and was not adjusted. The case is added in the commit following 2b64f91. The recorded run sets TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3."
+}

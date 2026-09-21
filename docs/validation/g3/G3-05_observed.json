@@ -1,0 +1,162 @@
+{
+ "task": "G3-05",
+ "case_id": "G3-05_drude_sphere",
+ "generated": "2026-09-21T18:18:04+00:00",
+ "full_mode": true,
+ "environment": {
+  "python": "3.10.2",
+  "torch": "2.10.0+cu126",
+  "numpy": "2.2.6",
+  "os": "Windows-10-10.0.26200-SP0",
+  "gpu": "NVIDIA GeForce RTX 3060"
+ },
+ "rows": {
+  "r=0.02/h=0.02/cpu-float64": {
+   "mesh_um": 0.02,
+   "backend": "cpu",
+   "precision": "float64",
+   "radius_um": 0.02,
+   "max_scattering_relative_error": 16.579790426366554,
+   "max_absorption_relative_error": 36.8213454127296,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0031978381560167413
+  },
+  "r=0.02/h=0.01/cpu-float64": {
+   "mesh_um": 0.01,
+   "backend": "cpu",
+   "precision": "float64",
+   "radius_um": 0.02,
+   "max_scattering_relative_error": 2.7076801962681256,
+   "max_absorption_relative_error": 25.05892925025228,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0016009475533963378
+  },
+  "r=0.02/h=0.005/cpu-float64": {
+   "mesh_um": 0.005,
+   "backend": "cpu",
+   "precision": "float64",
+   "radius_um": 0.02,
+   "max_scattering_relative_error": 1.3755483259310735,
+   "max_absorption_relative_error": 6.732652383483259,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0011947337708007922
+  },
+  "r=0.035/h=0.02/cpu-float64": {
+   "mesh_um": 0.02,
+   "backend": "cpu",
+   "precision": "float64",
+   "radius_um": 0.035,
+   "max_scattering_relative_error": 4.778925780190351,
+   "max_absorption_relative_error": 18.125646751466594,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0011444821634693984
+  },
+  "r=0.035/h=0.01/cpu-float64": {
+   "mesh_um": 0.01,
+   "backend": "cpu",
+   "precision": "float64",
+   "radius_um": 0.035,
+   "max_scattering_relative_error": 0.6915887566970722,
+   "max_absorption_relative_error": 5.592692056743043,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.000524618471182035
+  },
+  "r=0.035/h=0.005/cpu-float64": {
+   "mesh_um": 0.005,
+   "backend": "cpu",
+   "precision": "float64",
+   "radius_um": 0.035,
+   "max_scattering_relative_error": 0.4575794104349067,
+   "max_absorption_relative_error": 4.985014779022332,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0009411614197897044
+  },
+  "r=0.05/h=0.02/cpu-float64": {
+   "mesh_um": 0.02,
+   "backend": "cpu",
+   "precision": "float64",
+   "radius_um": 0.05,
+   "max_scattering_relative_error": 0.8543822422755055,
+   "max_absorption_relative_error": 3.086695932375382,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0003212877895142314
+  },
+  "r=0.05/h=0.01/cpu-float64": {
+   "mesh_um": 0.01,
+   "backend": "cpu",
+   "precision": "float64",
+   "radius_um": 0.05,
+   "max_scattering_relative_error": 0.6428486664492836,
+   "max_absorption_relative_error": 3.403375300518804,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0008120670396600765
+  },
+  "r=0.05/h=0.005/cpu-float64": {
+   "mesh_um": 0.005,
+   "backend": "cpu",
+   "precision": "float64",
+   "radius_um": 0.05,
+   "max_scattering_relative_error": 0.44515140757153315,
+   "max_absorption_relative_error": 3.4457902742333006,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0006183579412756158
+  },
+  "r=0.02/h=0.02/cuda-float32": {
+   "mesh_um": 0.02,
+   "backend": "cuda",
+   "precision": "float32",
+   "radius_um": 0.02,
+   "max_scattering_relative_error": 16.579624150063996,
+   "max_absorption_relative_error": 36.82120779414041,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0031967551785135537,
+   "layer_a_max_relative_difference": 7.003595222498937e-05,
+   "layer_a_rtol": 0.0001
+  },
+  "r=0.035/h=0.02/cuda-float32": {
+   "mesh_um": 0.02,
+   "backend": "cuda",
+   "precision": "float32",
+   "radius_um": 0.035,
+   "max_scattering_relative_error": 4.778886006460136,
+   "max_absorption_relative_error": 18.12564544302922,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0011451122387738768,
+   "layer_a_max_relative_difference": 1.1985633829647568e-05,
+   "layer_a_rtol": 0.0001
+  },
+  "r=0.05/h=0.02/cuda-float32": {
+   "mesh_um": 0.02,
+   "backend": "cuda",
+   "precision": "float32",
+   "radius_um": 0.05,
+   "max_scattering_relative_error": 0.8543820492275882,
+   "max_absorption_relative_error": 3.086701568661425,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0003215425532894256,
+   "layer_a_max_relative_difference": 5.287913496854202e-06,
+   "layer_a_rtol": 0.0001
+  },
+  "r=0.02/h=0.01/cuda-float32": {
+   "mesh_um": 0.01,
+   "backend": "cuda",
+   "precision": "float32",
+   "radius_um": 0.02,
+   "max_scattering_relative_error": 2.707676725634984,
+   "max_absorption_relative_error": 25.058774250275064,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0016045858749310351,
+   "layer_a_max_relative_difference": 1.714710889100246e-05,
+   "layer_a_rtol": 0.0001
+  },
+  "r=0.035/h=0.01/cuda-float32": {
+   "mesh_um": 0.01,
+   "backend": "cuda",
+   "precision": "float32",
+   "radius_um": 0.035,
+   "max_scattering_relative_error": 0.6915894873792462,
+   "max_absorption_relative_error": 5.5926851958679045,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0005241814352107051,
+   "layer_a_max_relative_difference": 4.549300306133652e-06,
+   "layer_a_rtol": 0.0001
+  },
+  "r=0.05/h=0.01/cuda-float32": {
+   "mesh_um": 0.01,
+   "backend": "cuda",
+   "precision": "float32",
+   "radius_um": 0.05,
+   "max_scattering_relative_error": 0.6428492510246514,
+   "max_absorption_relative_error": 3.403370679682938,
+   "inner_outer_scattering_max_difference_over_band_maximum": 0.0008115115246298713,
+   "layer_a_max_relative_difference": 7.71698240342733e-06,
+   "layer_a_rtol": 0.0001
+  }
+ }
+}
