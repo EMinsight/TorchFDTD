@@ -59,7 +59,7 @@ def main():
     args=p.parse_args();source=Path(args.input);record=json.loads(source.read_text(encoding='utf8'))
     section=tables(record)
     raw=Path('docs/validation/graph-ensembles.json');raw.write_bytes(source.read_bytes())
-    path=Path('README.md');text=path.read_text(encoding='utf8');block=BEGIN+'\n'+section+'\n'+END
+    path=Path('docs/MEASUREMENTS.md');text=path.read_text(encoding='utf8');block=BEGIN+'\n'+section+'\n'+END
     if BEGIN in text:
         start=text.index(BEGIN);end=text.index(END,start)+len(END);text=text[:start]+block+text[end:]
     else:

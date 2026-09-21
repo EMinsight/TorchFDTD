@@ -28,7 +28,7 @@ def main():
         'Longer propagation runs or large overlapping solids may benefit less. No geometry-result cache is used in either mode. Three repetitions do not establish confidence intervals.', '',
         '[Geometry controls and conventions](docs/ANALYTIC_GEOMETRY.md), [Python batch example](examples/analytic_solids.py), [inputs, repetitions and source hashes](docs/validation/geometry-ensembles.json).']
     table='\n'.join(lines)
-    readme=Path('README.md');text=readme.read_text(encoding='utf8')
+    readme=Path('docs/MEASUREMENTS.md');text=readme.read_text(encoding='utf8')
     begin='<!-- BEGIN GEOMETRY MEASUREMENTS -->';end='<!-- END GEOMETRY MEASUREMENTS -->';block=begin+'\n'+table+'\n'+end
     if begin in text:text=text[:text.index(begin)]+block+text[text.index(end)+len(end):]
     else:text=text.replace('<!-- BEGIN RECTILINEAR MEASUREMENTS -->',block+'\n\n<!-- BEGIN RECTILINEAR MEASUREMENTS -->',1)

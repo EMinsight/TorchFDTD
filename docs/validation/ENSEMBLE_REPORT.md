@@ -1,7 +1,7 @@
 # Four-workload ensembles and complete design loops
 
 This follow-up uses independently authored native projects on the RTX 5880 Ada,
-Windows, float32 and 800 fixed time steps. The [README tables](../../README.md#four-workloads-with-16-independent-cases-each)
+Windows, float32 and 800 fixed time steps. The [measurement tables](../MEASUREMENTS.md#four-workloads-with-16-independent-cases-each)
 are generated from [all ensemble samples](ensembles.json) and
 [all design histories](design-throughput.json). It extends the earlier
 [external comparison](OPEN_SOURCE_REPORT.md), whose boundary caveats still apply.

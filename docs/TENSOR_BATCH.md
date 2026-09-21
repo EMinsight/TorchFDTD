@@ -42,7 +42,7 @@ For interleaved projects with different topologies, use [`plan_grouped_batch` an
 
 Omit `cohort_size` to run the supplied 1–64 cases in one cohort. Set it to an integer from 1 to 64 to split a larger list into consecutive cohorts. The final partial cohort is allowed. The solve does not tune implicitly. Use the explicit measurement API below when useful. Smaller cohorts reduce resident device state, but extra setup and transfers can offset the benefit.
 
-On the measured RTX 5880, 32³ × 16 is 2.40 times faster than native sequential full wall time. At 64³, one 16-case cohort regresses. Four cohorts of four recover a modest 1.10 times improvement against the sequential baseline in the follow-up experiment. These choices are measurements for these inputs, not defaults guaranteed optimal on other GPUs. All sizes and the regressions are in the [README tables](../README.md#measured-cuda-comparisons).
+On the measured RTX 5880, 32³ × 16 is 2.40 times faster than native sequential full wall time. At 64³, one 16-case cohort regresses. Four cohorts of four recover a modest 1.10 times improvement against the sequential baseline in the follow-up experiment. These choices are measurements for these inputs, not defaults guaranteed optimal on other GPUs. All sizes and the regressions are in the [measurement tables](MEASUREMENTS.md#measured-cuda-comparisons).
 
 `memory_fraction` limits estimated cohort memory against currently free device memory, by default 60%. This is an admission estimate, not an allocation guarantee. It excludes interference from other applications. `keep_results=True` retains full results in host RAM even when device cohorts are small. Save to `output_dir` with `keep_results=False` to avoid retaining all host arrays.
 

@@ -15,7 +15,7 @@ adjoint까지 연결했다. 일반 anisotropic CPML·반사/안정성 검증, PM
 
 이번에는 실제 계산 비교로 진행했다. 5880에서 vacuum/sphere/slab/waveguide 각각 64³와 96³, 총 8개를 flaport/fdtd 0.2.2와 실행했다. 상대 기준선에도 CUDA Graph를 적용했고 전체 wall time은 9.64–17.09배 단축됐다. 점 신호 상대 L2 차이는 0.012–0.037%다. 경계 stencil 차이 때문에 최종 전체 장은 동일하지 않으며, 약한 최종 H의 상대 오차가 큰 사례도 [상세 보고서](validation/OPEN_SOURCE_REPORT.md)에 공개했다. 다른 세 라이브러리의 속도는 아직 측정하지 않았다.
 
-새 `run_tensor_batch()`는 E/H CUDA launch의 실제 batch 축으로 여러 구조물을 처리한다. 32³/64³와 B=1/2/4/8/16의 모든 E/H·점 신호가 독립 native 계산과 bitwise 일치했다. 32³ B=16은 native 순차 실행 대비 2.40배 빠르다. 64³ B=16은 느려져서 `cohort_size=4` 분할 기능을 추가했다. 후속 실험에서 분할은 순차 대비 1.10배, 16개 동시 대비 1.43배 빨랐다. [전체 성능표](../README.md#measured-cuda-comparisons), [Python 사용법](TENSOR_BATCH.md).
+새 `run_tensor_batch()`는 E/H CUDA launch의 실제 batch 축으로 여러 구조물을 처리한다. 32³/64³와 B=1/2/4/8/16의 모든 E/H·점 신호가 독립 native 계산과 bitwise 일치했다. 32³ B=16은 native 순차 실행 대비 2.40배 빠르다. 64³ B=16은 느려져서 `cohort_size=4` 분할 기능을 추가했다. 후속 실험에서 분할은 순차 대비 1.10배, 16개 동시 대비 1.43배 빨랐다. [전체 성능표](MEASUREMENTS.md#measured-cuda-comparisons), [Python 사용법](TENSOR_BATCH.md).
 
 후속 개발에서 `tune_tensor_batch`를 추가해 실제 전체 계산의 중앙값으로 묶음 크기를 고를 수 있게 했다. 준비 비용과 후보별 장·신호 동일성 검사를 보고하며, 일반 실행에 숨겨서 자동 수행하지 않는다. `optimize(execution='tensor')`도 추가해 DE의 각 population을 같은 CUDA 배치로 처리한다. 새 4종 예제의 16-case 비교와 64회 forward solve를 포함한 전체 역설계 루프는 [추가 검증 보고서](validation/ENSEMBLE_REPORT.md)에 정리한다. 자동 선택이 후속 실행에서 고정 크기보다 느려진 경우도 유지한다.
 

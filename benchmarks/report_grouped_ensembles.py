@@ -80,7 +80,7 @@ def main():
     content = render(record)
     dest = ROOT/'docs/validation/grouped-ensembles.json'
     if source.resolve() != dest.resolve(): shutil.copyfile(source, dest)
-    readme = ROOT/'README.md'
+    readme = ROOT/'docs/MEASUREMENTS.md'
     old = readme.read_text(encoding='utf8')
     if BEGIN in old:
         head, tail = old.split(BEGIN, 1)
