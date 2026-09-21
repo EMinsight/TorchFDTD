@@ -83,6 +83,50 @@ def test_broken_cupy_is_an_error_with_the_import_message(monkeypatch):
     assert report['ok'] is False
 
 
+class _Distribution:
+    def __init__(self, name, version):
+        self.metadata, self.version = {'Name': name}, version
+
+
+def _installed(monkeypatch, *distributions):
+    """Replace the installed-distribution listing that probe_cupy reads."""
+    monkeypatch.setattr(doctor.metadata, 'distributions',
+                        lambda: [_Distribution(name, version) for name, version in distributions] + [_Distribution('numpy', '1.26.4')])
+
+
+@pytest.mark.parametrize('name', ['cupy-cuda11x', 'cupy-cuda13x', 'cupy-rocm-5-0', 'cupy'])
+def test_any_cupy_distribution_that_fails_to_import_is_an_error(monkeypatch, name):
+    """A CuPy wheel other than cupy-cuda12x is found by the probe, and its import failure is not reported as absence."""
+    monkeypatch.setattr(torch.cuda, 'is_available', lambda: False)
+    monkeypatch.setattr(doctor, '_nvidia_smi', lambda: (None, None))
+    _installed(monkeypatch, (name, '12.3.0'))
+    import torchfdtd.cuda_bootstrap as bootstrap
+    def failing_import():
+        raise RuntimeError('CUDA kernel dependency initialization failed. Import reported ImportError: DLL load failed: nvrtc64_111_0.dll')
+    monkeypatch.setattr(bootstrap, 'prepare_cuda_kernels', failing_import)
+    record = doctor.probe_cupy()
+    assert record['version'] == '12.3.0' and record['distributions'] == {name: '12.3.0'} and record['importable'] is False
+    assert 'nvrtc64_111_0.dll' in record['error']
+    report = doctor.diagnose(probe=_no_probe)
+    cupy = _check(report, 'cupy')
+    assert cupy['status'] == 'error' and name in cupy['message'] and 'nvrtc64_111_0.dll' in cupy['message']
+    assert report['ok'] is False
+
+
+def test_no_cupy_distribution_at_all_stays_a_notice(monkeypatch):
+    monkeypatch.setattr(torch.cuda, 'is_available', lambda: False)
+    monkeypatch.setattr(doctor, '_nvidia_smi', lambda: (None, None))
+    _installed(monkeypatch)
+    import torchfdtd.cuda_bootstrap as bootstrap
+    def failing_import():
+        raise RuntimeError("CUDA kernel dependency initialization failed. Import reported ModuleNotFoundError: No module named 'cupy'")
+    monkeypatch.setattr(bootstrap, 'prepare_cuda_kernels', failing_import)
+    record = doctor.probe_cupy()
+    assert record['version'] is None and record['distributions'] == {} and record['importable'] is False
+    cupy = _check(doctor.diagnose(probe=_no_probe), 'cupy')
+    assert cupy['status'] == 'notice' and 'torchfdtd[cuda-kernels]' in cupy['message']
+
+
 def test_kernel_compile_failure_is_reported_and_falls_back_to_the_torch_kernel(monkeypatch):
     monkeypatch.setattr(torch.cuda, 'is_available', lambda: True)
     monkeypatch.setattr(torch.cuda, 'device_count', lambda: 1)

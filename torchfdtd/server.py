@@ -224,6 +224,9 @@ def create_app(result_dir=None):
         # compares it with the current project's hash from /api/validate.
         try:plan_hash=resolve_plan(project).plan_hash
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+        # A scene the preflight already rejects is refused here, not queued to fail at dispatch.
+        preflight=resolution(project)
+        if preflight.get('error'):raise HTTPException(422,preflight['error'])
         with lock:
             if sum(j['status'] in ('queued', 'running') for j in jobs.values()) >= 3:
                 raise HTTPException(409, 'The run queue is full (one running and two waiting).')

@@ -116,3 +116,17 @@ def test_readme_block_parser_reads_markers_and_languages():
     assert blocks[3]['code'] == 'print(1)\n' and blocks[1]['line'] == 7
     with pytest.raises(ValueError, match='never closed'):
         parse_blocks('```python\nprint(1)\n')
+
+
+def test_block_timeout_is_recorded_as_failed_with_its_output(tmp_path, monkeypatch):
+    """A block that exceeds the timeout yields a failed record with the captured output; the runner does not die."""
+    import run_readme_examples as runner
+    monkeypatch.setattr(runner, 'TIMEOUT_SECONDS', 2)
+    monkeypatch.setattr(runner, 'check_interpreter', lambda python, workdir, checkout: dict(prefix=sys.prefix, file='stub', python='3'))
+    blocks = parse_blocks("```python\nimport time\nprint('started', flush=True)\ntime.sleep(30)\n```\n```python\nprint('next')\n```\n")
+    result = runner.run_blocks(blocks, sys.executable, workdir=tmp_path / 'work')
+    timed_out, following = result['blocks']
+    assert timed_out['status'] == 'failed' and timed_out['exit_code'] is None
+    assert timed_out['stderr_tail'] == 'timeout after 2 s' and timed_out['stdout_tail'] == 'started\n'
+    assert following['status'] == 'passed' and following['stdout_tail'] == 'next\n'
+    assert result['runnable_blocks'] == 2 and result['all_runnable_passed'] is False

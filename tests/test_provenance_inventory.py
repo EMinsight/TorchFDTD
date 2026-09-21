@@ -29,6 +29,11 @@ POSITIVE = {
     'admin_json_escaped': ('private_windows_user_path', json.dumps({'dir': 'C:\\Users\\' + ADMIN + '\\photonweave'})),
     'hangul_drive_path': ('private_windows_user_path', 'c:\\Users\\' + HANGUL_USER + '\\Desktop'),
     'hangul_user_path': ('hangul_user_path', 'C:/Users/' + HANGUL_USER + '/AppData'),
+    'driveless_backslash': ('private_driveless_user_path', 'saved under \\Users\\' + ADMIN + '\\photonweave'),
+    'driveless_json_escaped': ('private_driveless_user_path', json.dumps({'dir': '\\Users\\' + ADMIN + '\\photonweave'})),
+    'unc_admin_share': ('private_unc_user_path', '\\\\server\\c$\\Users\\' + ADMIN + '\\x'),
+    'unc_json_escaped': ('private_unc_user_path', json.dumps({'dir': '\\\\server\\c$\\Users\\' + ADMIN + '\\x'})),
+    'macos_home': ('private_macos_user_path', 'scp results /Users/bot_s/runs/'),
     'address_ssh': ('address_100_x_x_x', 'ssh user@100.100.100.100'),
     'address_url': ('address_100_x_x_x', 'http://100.64.1.2:9802/'),
     'password_single_quoted': ('password_literal', "password = 'hunter2'"),
@@ -40,8 +45,20 @@ POSITIVE = {
     'private_key_block': ('private_key_block', '-----BEGIN OPENSSH PRIVATE KEY-----'),
     'ssh_public_key': ('ssh_public_key', 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIABCDEFGHIJKLMNOPQRSTUVWXYZ user@host'),
 }
+# Encodings a file may wrap a path in: the pattern alone misses them, scan_text decodes them first.
+ENCODED = {
+    'json_escaped_hangul': ('private_windows_user_path', 'json_escaped', json.dumps({'dir': 'C:\\Users\\' + HANGUL_USER + '\\Desktop'})),
+    'json_escaped_hangul_driveless': ('private_driveless_user_path', 'json_escaped', json.dumps({'dir': '\\Users\\' + HANGUL_USER + '\\x'})),
+    'percent_encoded_hangul': ('private_windows_user_path', 'percent_encoded',
+                               'file:///C:/Users/' + ''.join('%%%02X' % b for b in HANGUL_USER.encode('utf-8')) + '/x'),
+    'percent_encoded_macos': ('private_macos_user_path', 'percent_encoded', 'http://host/Users/bot%5Fs/runs'),
+}
 BENIGN = {
     'administrator': 'C:/Users/' + ADMIN + 'istrator/x',
+    'program_files_users': 'C:\\Program Files\\Users\\shared',
+    'users_word': 'the Users directory of every account',
+    'web_admin_route': 'https://example.org/Users/' + ADMIN + 'istration',
+    'percent_progress': '100%20done',
     'public_user': 'C:/Users/public/x',
     'project_scratch': 'D:/TorchFDTD/.local/tmp',
     'version_number': 'version 100.0.1',
@@ -72,6 +89,24 @@ def test_scan_patterns_catch_the_named_secrets(label):
 @pytest.mark.parametrize('label', sorted(BENIGN))
 def test_scan_patterns_ignore_benign_text(label):
     assert not [kind for kind, pattern in inventory.SCAN_PATTERNS.items() if re.search(pattern, BENIGN[label])], label
+    assert inventory.scan_text(BENIGN[label]) == [], label
+
+
+@pytest.mark.parametrize('label', sorted(ENCODED))
+def test_scan_decodes_json_and_percent_escapes_before_matching(label):
+    kind, encoding, sample = ENCODED[label]
+    assert HANGUL_USER not in sample or 'json' not in label
+    assert not re.search(inventory.SCAN_PATTERNS[kind], sample), label      # the pattern alone misses the encoded form
+    findings = inventory.scan_text(sample)
+    assert (kind, encoding) in {(f['kind'], f['encoding']) for f in findings}, (label, findings)
+    assert all(f['line'] == 1 for f in findings)
+
+
+def test_scan_reports_each_position_once_and_keeps_line_numbers():
+    text = 'line one\nC:/Users/' + ADMIN + '/x\n%0A%0A\n' + json.dumps({'p': 'C:\\Users\\' + ADMIN}) + '\n'
+    findings = inventory.scan_text(text)
+    assert [(f['kind'], f['line'], f['encoding']) for f in findings] == [
+        ('private_windows_user_path', 2, 'verbatim'), ('private_windows_user_path', 4, 'verbatim')]
 
 
 def test_sbom_covers_every_declared_dependency_with_licence_and_source():
@@ -117,6 +152,5 @@ def test_notices_document_matches_the_sbom_and_names_the_open_items():
 def test_generated_outputs_carry_no_private_path_or_credential():
     for path in (inventory.SBOM, inventory.NOTICES):
         text = path.read_text(encoding='utf-8')
-        hits = [(kind, text[:m.start()].count('\n') + 1) for kind, pattern in inventory.SCAN_PATTERNS.items() for m in re.finditer(pattern, text)]
-        assert hits == [], (path.name, hits)
+        assert inventory.scan_text(text) == [], path.name
         assert HANGUL_USER not in text and 'site-packages' not in text and '.venv' not in text, path.name

@@ -313,8 +313,12 @@ def resolve_execution(project, *, health, scratch, summary=None):
         else:
             record['error'] = 'Tiling rejected the scene. '+candidate['reason']
         return record
-    if r.memory_mode == 'budgeted' or requested == 'resident' or (requested == 'auto' and resident['fits']):
-        record.update(mode='resident', reason=resident['reason'] if r.memory_mode != 'budgeted' else 'budgeted scenes use the adjoint API')
+    if r.memory_mode == 'budgeted':
+        # The same refusal Region.require_resident raises at dispatch, reported before the job is accepted.
+        record['error'] = 'Budgeted scenes require the adjoint API and an explicit resident byte budget.'
+        return record
+    if requested == 'resident' or (requested == 'auto' and resident['fits']):
+        record.update(mode='resident', reason=resident['reason'])
         if requested == 'resident' and not resident['fits']:
             record['warnings'].append('Resident execution was requested but '+resident['reason']+'.')
         return record

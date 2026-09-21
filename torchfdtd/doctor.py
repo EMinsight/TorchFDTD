@@ -44,9 +44,20 @@ def _version_tuple(text):
     return tuple(int(part) for part in text.split('.')[:2])
 
 
+def _cupy_distributions():
+    """Every installed distribution named cupy or cupy-* (cupy-cuda11x/12x/13x, cupy-rocm-*), name -> version."""
+    found = {}
+    for distribution in metadata.distributions():
+        name = (distribution.metadata['Name'] or '').lower()
+        if name.startswith('cupy'):
+            found[name] = distribution.version
+    return dict(sorted(found.items()))
+
+
 def probe_cupy():
     """Import CuPy the way the solver does; report the version or the failure text."""
-    record = dict(version=_package_version('cupy-cuda12x') or _package_version('cupy'), importable=False, error=None)
+    distributions = _cupy_distributions()
+    record = dict(version=next(iter(distributions.values()), None), distributions=distributions, importable=False, error=None)
     try:
         from .cuda_bootstrap import prepare_cuda_kernels
         module = prepare_cuda_kernels()
@@ -122,7 +133,8 @@ def diagnose(probe=probe_fused_kernels):
         check('cupy', 'notice', 'CuPy is not installed, so the fused CUDA kernels and streamed GPU tiles are unavailable '
                                 'and CUDA projects run the torch kernels. Install the extra: pip install "torchfdtd[cuda-kernels]".')
     else:
-        check('cupy', 'error', f'CuPy {cupy["version"]} is installed but cannot be imported: {cupy["error"]} '
+        installed = ', '.join(cupy.get('distributions') or ()) or 'cupy'
+        check('cupy', 'error', f'CuPy {cupy["version"]} ({installed}) is installed but cannot be imported: {cupy["error"]} '
                                'Install a cupy-cuda12x build that matches the CUDA runtime of this torch and the driver.')
     fused = report['fused_kernels'] = dict(status='not_applicable', detail=None, seconds=None)
     if cuda and cupy['importable']:

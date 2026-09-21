@@ -90,10 +90,19 @@ ASSETS = [
          notes='Three paired timing facts against a commercial solver, kept by the owner\'s instruction; the public academic-use terms restrict benchmarking and the governing agreement is unknown.'),
 ]
 
+# The Hangul account name is spelled with escapes so this file never carries it verbatim.
+_HANGUL_USER = '\\uc5f0\\uad6c\\uc2e4'
+_PRIVATE_USER = r'(?:admin|' + _HANGUL_USER + r')\b'
+_SEP = r'(?:[\\/]|\\\\)+'
 SCAN_PATTERNS = {
-    # The Hangul account name is spelled with escapes so this file never carries it verbatim.
-    'private_windows_user_path': r'(?i)[A-Z]:(?:[\\/]|\\\\)+Users(?:[\\/]|\\\\)+(?:admin|' + '\\uc5f0\\uad6c\\uc2e4' + r')\b',
-    'hangul_user_path': r'Users(?:[\\/]|\\\\)+' + '\\uc5f0\\uad6c\\uc2e4',
+    'private_windows_user_path': r'(?i)[A-Z]:' + _SEP + 'Users' + _SEP + _PRIVATE_USER,
+    # Without a drive letter, not the tail of a drive or UNC path already matched by the rules above and below.
+    'private_driveless_user_path': r'(?i)(?<![A-Za-z0-9:$\\])\\+Users\\+' + _PRIVATE_USER,
+    # UNC administrative share (server, drive$), also with doubled JSON-escaped backslashes.
+    'private_unc_user_path': r'(?i)\\{2,}[^\\/\s]+\\+[a-z]\$\\+Users\\+' + _PRIVATE_USER,
+    # macOS home directories of the lab accounts; with a drive-letter prefix it is the Windows form above.
+    'private_macos_user_path': r'(?<!:)/Users/(?:bot_s|admin|' + _HANGUL_USER + r')\b',
+    'hangul_user_path': r'Users' + _SEP + _HANGUL_USER,
     'address_100_x_x_x': r'\b100\.\d{1,3}\.\d{1,3}\.\d{1,3}\b',
     'password_literal': r'(?i)\b(?:password|passwd)\s*[:=]\s*["\'][^"\'\s]{3,}["\']',
     'ssh_password_environment': r'TORCHFDTD_SSH_PASSWORD\s*=\s*["\'][^"\']{2,}["\']',
@@ -193,6 +202,42 @@ def runtime_closure(pyproject):
     return ordered
 
 
+def _json_unescaped(text):
+    """JSON \\uXXXX escapes decoded: json.dumps writes non-ASCII path characters this way unless ensure_ascii=False."""
+    def decode(match):
+        try:
+            return json.loads('"' + match.group(0) + '"')
+        except ValueError:
+            return match.group(0)
+    return re.sub(r'(?:\\u[0-9A-Fa-f]{4})+', decode, text)
+
+
+def _percent_decoded(text):
+    """Percent-encoded UTF-8 decoded (URL and file-URI paths); line breaks stay encoded so line numbers hold."""
+    def decode(match):
+        raw = bytes.fromhex(match.group(0).replace('%', ''))
+        return raw.decode('utf-8', 'replace').replace('\n', '%0A').replace('\r', '%0D')
+    return re.sub(r'(?:%[0-9A-Fa-f]{2})+', decode, text)
+
+
+def scan_text(text):
+    """Every pattern match in the text as written and in its JSON-unescaped and percent-decoded forms; positions only."""
+    findings, seen = [], set()
+    views = [('verbatim', text)]
+    for encoding, decode in (('json_escaped', _json_unescaped), ('percent_encoded', _percent_decoded)):
+        view = decode(text)
+        if view != text:
+            views.append((encoding, view))
+    for encoding, view in views:
+        for kind, pattern in SCAN_PATTERNS.items():
+            for match in re.finditer(pattern, view):
+                line = view[:match.start()].count('\n') + 1
+                if (kind, line) not in seen:
+                    seen.add((kind, line))
+                    findings.append(dict(kind=kind, line=line, encoding=encoding))
+    return findings
+
+
 def scan_tree(paths):
     """Match the credential and private-path patterns in every tracked text file; report positions only."""
     findings, scanned = [], 0
@@ -204,9 +249,7 @@ def scan_tree(paths):
             continue
         text = data.decode('utf-8', 'replace')
         scanned += 1
-        for kind, pattern in SCAN_PATTERNS.items():
-            for match in re.finditer(pattern, text):
-                findings.append(dict(file=relative, kind=kind, line=text[:match.start()].count('\n') + 1))
+        findings.extend(dict(file=relative, **finding) for finding in scan_text(text))
     return scanned, findings
 
 
