@@ -40,18 +40,23 @@ def test_field_and_total_transmission_gradcheck():
     assert torch.autograd.gradcheck(lambda e,t:quadrant_intensity_allocation(plane(e),t),(fields,t))
 
 
-def dft_scale_plane(amplitude,a,dtype,device):
-    """One sample per quadrant, E_x = amplitude*[a,1,1,1], areas of 1e-14 m^2."""
-    real=torch.empty(0,dtype=dtype).real.dtype
-    points=torch.tensor([[-1.,-1.,0.],[1.,-1.,0.],[-1.,1.,0.],[1.,1.,0.]],dtype=real,device=device)
-    fields=torch.zeros(1,4,6,dtype=dtype,device=device)
-    fields[0,:,0]=amplitude*torch.cat((a[None],torch.ones(3,dtype=real,device=device))).to(dtype)
-    return SimpleNamespace(fields=fields,points_um=points,weights=torch.full((4,),1e-14,dtype=real,device=device),
+def quadrant_plane(ex,weights):
+    """xy plane with only E_x set; points cycle through R, G2, G1, B, one group per quadrant."""
+    per=ex.shape[1]//4
+    corners=torch.tensor([[-1.,-1.,0.],[1.,-1.,0.],[-1.,1.,0.],[1.,1.,0.]],dtype=ex.real.dtype,device=ex.device)
+    fields=torch.stack((ex,)+(torch.zeros_like(ex),)*5,-1)
+    return SimpleNamespace(fields=fields,points_um=corners.repeat_interleave(per,0),weights=weights,
                            normal='z',components=('Ex','Ey','Ez','Hx','Hy','Hz'))
 
 
+def dft_scale_plane(amplitude,a,dtype,device):
+    """One sample per quadrant, E_x = amplitude*[a,1,1,1], areas of 1e-14 m^2."""
+    ex=(amplitude*torch.cat((a[None],torch.ones(3,dtype=a.dtype,device=device)))).to(dtype)[None]
+    return quadrant_plane(ex,torch.full((4,),1e-14,dtype=a.dtype,device=device))
+
+
 @pytest.mark.parametrize('device',['cpu','cuda'])
-@pytest.mark.parametrize('amplitude',[1.,1e-14,1e-16])
+@pytest.mark.parametrize('amplitude',[1.,1e-8,1e-14,1e-16])
 def test_fp32_dft_scale_ratio_and_gradient(device,amplitude):
     if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
     # Time-integrated DFT fields (~1e-14) times m^2 areas (~1e-14) fall below the
@@ -90,6 +95,93 @@ def test_scaled_ratio_matches_unscaled_formula_on_unit_fields(device):
     seed=torch.arange(1.,9.,dtype=torch.float64,device=device).reshape(2,4)
     torch.testing.assert_close(torch.autograd.grad((actual*seed).sum(),(fields,t)),
                                torch.autograd.grad((expected*seed).sum(),(fields,t)),rtol=1e-7,atol=1e-7)
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_fp32_nonuniform_areas_weight_the_ratio(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    # Two samples per quadrant with areas 1e-14 and 1e-13 m^2. E_x is 1e-14*[a,1]
+    # in R and 1e-14*[1,1] elsewhere, so R integrates a^2*w1+w2 against 3*(w1+w2).
+    a=torch.tensor(1.5,dtype=torch.float32,device=device,requires_grad=True)
+    ex=(1e-14*torch.cat((a[None],torch.ones(7,dtype=a.dtype,device=device)))).to(torch.complex64)[None]
+    weights=torch.tensor([1e-14,1e-13]*4,dtype=torch.float32,device=device)
+    output=quadrant_intensity_allocation(quadrant_plane(ex,weights),torch.ones(1,dtype=torch.float32,device=device))
+    gradient,=torch.autograd.grad(output[0,0],a)
+    w1,w2=1.,10.;first=1.5**2*w1+w2;others=3*(w1+w2);total=first+others
+    expected=torch.tensor([first,w1+w2,w1+w2,w1+w2],device=device)/total
+    torch.testing.assert_close(output[0],expected,rtol=0,atol=1e-6)
+    assert abs(gradient.item()-2*1.5*w1*others/total**2)<1e-5
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_fp32_per_frequency_scales_stay_independent(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    # Three frequencies at field scales 1, 1e-8 and 1e-14 in one call, each with
+    # its own parameter and total transmission; no frequency sees another's gradient.
+    a=torch.tensor([1.5,.5,2.],dtype=torch.float32,device=device,requires_grad=True)
+    amplitude=torch.tensor([1.,1e-8,1e-14],dtype=torch.float32,device=device)
+    t=torch.tensor([1.,.5,2.],dtype=torch.float32,device=device)
+    ex=(amplitude[:,None]*torch.cat((a[:,None],torch.ones(3,3,dtype=a.dtype,device=device)),1)).to(torch.complex64)
+    output=quadrant_intensity_allocation(quadrant_plane(ex,torch.full((4,),1e-14,dtype=torch.float32,device=device)),t)
+    ratio=torch.stack((a.detach().square(),)+(torch.ones_like(a),)*3,1)/(a.detach().square()+3)[:,None]
+    torch.testing.assert_close(output,ratio*t[:,None],rtol=0,atol=1e-6)
+    for f in range(3):
+        gradient,=torch.autograd.grad(output[f,0],a,retain_graph=True)
+        assert abs(gradient[f].item()-t[f].item()*6*a[f].item()/(a[f].item()**2+3)**2)<1e-5
+        assert bool((gradient[[g for g in range(3) if g!=f]]==0).all())
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_fp32_point_phases_leave_ratio_and_gradient_unchanged(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    a=torch.tensor(1.5,dtype=torch.float32,device=device,requires_grad=True)
+    t=torch.ones(1,dtype=torch.float32,device=device)
+    plain=quadrant_intensity_allocation(dft_scale_plane(1e-14,a,torch.complex64,device),t)
+    phase=torch.polar(torch.ones(4,dtype=torch.float32,device=device),torch.tensor([.3,-1.2,2.5,4.],dtype=torch.float32,device=device))
+    ex=(1e-14*torch.cat((a[None],torch.ones(3,dtype=a.dtype,device=device)))).to(torch.complex64)[None]*phase
+    phased=quadrant_intensity_allocation(quadrant_plane(ex,torch.full((4,),1e-14,dtype=torch.float32,device=device)),t)
+    torch.testing.assert_close(phased,plain,rtol=0,atol=1e-6)
+    seed=torch.tensor([[1.,2.,3.,4.]],device=device)
+    torch.testing.assert_close(torch.autograd.grad((phased*seed).sum(),a)[0],
+                               torch.autograd.grad((plain*seed).sum(),a)[0],rtol=0,atol=1e-5)
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_common_source_scale_only_enters_through_total_transmission(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    # A common complex factor on every field leaves the ratio, the gradient of a
+    # geometry-like gain and the gradient of total transmission unchanged, and
+    # receives no gradient itself. Only the caller's total transmission carries it.
+    p=plane();base=p.fields.to(device);points=p.points_um.to(device);weights=p.weights.to(device)
+    mask=((points[:,0]<0)&(points[:,1]<0)).to(torch.complex128)[None,:,None]
+    gain=torch.tensor(.4,dtype=torch.float64,device=device,requires_grad=True)
+    t=torch.tensor([.7,1.1],dtype=torch.float64,device=device,requires_grad=True)
+    scale=torch.polar(torch.tensor(1e-14,dtype=torch.float64,device=device),torch.tensor(.7,dtype=torch.float64,device=device)).requires_grad_()
+    def response(factor):
+        q=plane(base*(1+gain*mask)*factor);q.points_um=points;q.weights=weights
+        return quadrant_intensity_allocation(q,t)
+    plain=response(torch.ones((),dtype=torch.complex128,device=device));scaled=response(scale)
+    torch.testing.assert_close(scaled,plain,rtol=1e-12,atol=0)
+    seed=torch.arange(1.,9.,dtype=torch.float64,device=device).reshape(2,4)
+    plain_gradients=torch.autograd.grad((plain*seed).sum(),(gain,t))
+    *scaled_gradients,scale_gradient=torch.autograd.grad((scaled*seed).sum(),(gain,t,scale))
+    torch.testing.assert_close(tuple(scaled_gradients),plain_gradients,rtol=1e-12,atol=0)
+    assert (scale_gradient*scale).abs().item()<1e-12
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_zero_intensity_raises_and_zero_transmission_keeps_finite_gradients(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    a=torch.tensor(1.5,dtype=torch.float32,device=device,requires_grad=True)
+    with pytest.raises(ValueError,match='finite and positive'):
+        quadrant_intensity_allocation(dft_scale_plane(0.,a,torch.complex64,device),torch.ones(1,dtype=torch.float32,device=device))
+    t=torch.zeros(1,dtype=torch.float32,device=device,requires_grad=True)
+    output=quadrant_intensity_allocation(dft_scale_plane(1e-14,a,torch.complex64,device),t)
+    assert bool((output==0).all())
+    seed=torch.tensor([[1.,2.,3.,4.]],device=device)
+    gradient_a,gradient_t=torch.autograd.grad((output*seed).sum(),(a,t))
+    assert bool(torch.isfinite(gradient_a)) and gradient_a.item()==0
+    assert abs(gradient_t.item()-(1.5**2+2+3+4)/(1.5**2+3))<1e-5
 
 
 @pytest.mark.parametrize('kind',['zero','negative_t','weights','missing_quadrant','normal','nan'])
