@@ -635,7 +635,8 @@
             "tests/test_physics_g3_a.py::TestG301::test_layer_a_cuda_fp32"
           ],
           "evidence": [
-            "20260921T164808Z-g3-01-f6fd27b3"
+            "20260921T164808Z-g3-01-f6fd27b3",
+            "20260921T172232Z-g3-01-05fb5cda"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -713,7 +714,8 @@
             "tests/test_physics_g3_a.py::TestG303::test_ade_constitutive_error"
           ],
           "evidence": [
-            "20260921T164821Z-g3-03-35392fa4"
+            "20260921T164821Z-g3-03-35392fa4",
+            "20260921T172237Z-g3-03-562cfaf5"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -829,7 +831,8 @@
             "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32"
           ],
           "evidence": [
-            "20260921T164832Z-g3-07-70619385"
+            "20260921T164832Z-g3-07-70619385",
+            "20260921T172247Z-g3-07-fcf2441e"
           ],
           "blocker": null,
           "scope_change_approval": null,
