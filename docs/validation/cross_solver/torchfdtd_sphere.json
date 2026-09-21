@@ -1,0 +1,151 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "torchfdtd",
+  "fixture": "sphere",
+  "fixture_sha256": "44af18789e485e661e15487e855733011910adbc61fafd8f359a1be00434f7e4",
+  "date": "2026-09-21",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.12.14",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2746",
+      "utilization.gpu": "99"
+    },
+    "packages": {
+      "torchfdtd": "0.14.0.dev0",
+      "torch": "2.11.0+cu128",
+      "cupy-cuda12x": "14.2.0",
+      "fdtd": "0.2.2",
+      "numpy": "2.4.6",
+      "scipy": "1.18.1"
+    },
+    "torch_hardware": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "gpu_memory_gb": 12.0,
+      "torch": "2.11.0+cu128",
+      "engine": "TorchFDTD Yee/CPML on fdtd grid",
+      "cpu_threads": 10
+    },
+    "torch_cuda": "12.8"
+  },
+  "driver_sha256": {
+    "torchfdtd_driver.py": "78d12115209a5d9422b4362d27c3b3da2324dcd454921361229d68f4c82f5fb6",
+    "common.py": "21bd4de1e20e137891f3feeb8af76d9825fca9cc9967b3cea736f80d46f7509e"
+  },
+  "method": "Closed TFSF box (live 1D Yee incident line, 96 auxiliary CPML cells), six scattered-field plane monitors at +-1.1 um, matched empty-box reference subtracted field-wise, incident intensity from the empty-box centre plane.",
+  "grid": {
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "mesh_um": 0.05,
+    "dt_s": 9.532874347655028e-17,
+    "steps": 2518,
+    "duration_fs": 240.0377760739536,
+    "courant_number": 0.5715767664977295,
+    "pml_cells": 8,
+    "precision": "float32",
+    "cuda_kernel": "fused"
+  },
+  "pml": {
+    "formulation": "stretched-coordinate CPML, cubic sigma profile, kappa=1, alpha=1e-8",
+    "layers": 8
+  },
+  "tfsf": {
+    "source_id": "c03e34b62c27",
+    "normal": "x",
+    "direction": "+",
+    "lower_node_indices": [
+      16,
+      16,
+      16
+    ],
+    "upper_node_indices": [
+      48,
+      48,
+      48
+    ],
+    "lower_um": [
+      -0.8,
+      -0.8,
+      -0.8
+    ],
+    "upper_um": [
+      0.8000000000000003,
+      0.8000000000000003,
+      0.8000000000000003
+    ],
+    "incident_line_cells": 288,
+    "incident_pml_cells": 96,
+    "incident_drive_offset_cells": 8,
+    "total_field": "inside the staggered box",
+    "scattered_field": "outside the staggered box"
+  },
+  "sphere_cells": 7224,
+  "shared_epsilon_sha256": "7c39a1cfb60da1ebf404463098456652a0c5ed564f759c465ee912a84af241dc",
+  "wavelength_um": [
+    1.3,
+    1.3625,
+    1.4249999999999998,
+    1.4875,
+    1.55,
+    1.6125,
+    1.675,
+    1.7375,
+    1.7999999999999998
+  ],
+  "scattering_cross_section_um2": [
+    3.905363567076911,
+    5.031971209615128,
+    4.890194921849735,
+    4.222157877910653,
+    4.490046790524988,
+    4.990812644335833,
+    5.627784877128032,
+    6.308964336175096,
+    6.511056946654233
+  ],
+  "mie_cross_section_um2": [
+    3.8532764361030734,
+    4.973312685172012,
+    4.90486236736327,
+    4.254980250480165,
+    4.505422724444023,
+    4.982147477597055,
+    5.594873578508073,
+    6.259724976718905,
+    6.477298078717622
+  ],
+  "relative_error": [
+    0.01351762113037358,
+    0.011794658441245165,
+    -0.00299038880502156,
+    -0.007713871895365099,
+    -0.0034127616562178442,
+    0.001739243323836126,
+    0.005882402552648047,
+    0.007866057956111838,
+    0.005211875001944533
+  ],
+  "max_relative_error": 0.01351762113037358,
+  "max_empty_box_cross_section_um2": 1.1022556506313123e-14,
+  "timing": {
+    "sample_setup_seconds": 0.5438192729998264,
+    "sample_loop_seconds": 1.8956330849996448,
+    "reference_setup_seconds": 0.07141221399979258,
+    "reference_loop_seconds": 1.867527056000199
+  },
+  "gpu_context": {
+    "before_mb": 2547.0,
+    "after_mb": 2668.0,
+    "own_mb": 121.0
+  }
+}

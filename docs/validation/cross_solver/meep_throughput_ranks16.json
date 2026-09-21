@@ -1,0 +1,380 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "meep",
+  "fixture": "throughput",
+  "fixture_sha256": "2c8a687efbada9c7ca7b7d4419161b9c7866840fb0847004edaa8687605511db",
+  "date": "2026-09-21",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.13.15",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2443",
+      "utilization.gpu": "1"
+    },
+    "packages": {
+      "meep": null,
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "mpich": null,
+      "mpi4py": "4.1.2"
+    },
+    "meep_version": "1.34.0",
+    "conda_packages": {
+      "mpich": "4.3.2 h23078de_105",
+      "numpy": "2.5.3 py313hb5f73ae_0",
+      "pymeep": "1.34.0 mpi_mpich_py313h5c06767_1",
+      "python": "3.13.15 hf47f18c_103_cp313",
+      "scipy": "1.18.1 py313he2a5f1a_0"
+    },
+    "mpich_version": "4.3.2 h23078de_105",
+    "meep_mpi": true,
+    "mpi_processes": 16,
+    "omp_num_threads": "1",
+    "precision": "float64 (Meep build)"
+  },
+  "driver_sha256": {
+    "meep_driver.py": "9f1d6e0b0bd60a0c80605a5c3013e7ffe9273cba2c20f5d90e23e88dadd54dd3",
+    "common.py": "21bd4de1e20e137891f3feeb8af76d9825fca9cc9967b3cea736f80d46f7509e"
+  },
+  "method": "mp.Simulation with the shared point Ez CustomSource, sphere geometry rasterised by Meep (eps_averaging=False), same PML thickness (Meep PML formulation), all MPI ranks on the CPU. Full solve = init_sim + run(until=steps*dt) with a per-step get_field_point probe + get_array of all six field components. Stepping = run() alone. One warm-up solve per case, then the listed repetitions. Wall time measured on the master rank after MPI barriers.",
+  "cases": [
+    {
+      "name": "vacuum-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "load_average_before": [
+        11.61669921875,
+        8.353515625,
+        4.57861328125
+      ],
+      "runs": [
+        {
+          "wall_seconds": 4.9450324030003685,
+          "setup_seconds": 0.012266290000297886,
+          "loop_seconds": 4.845695699999851,
+          "transfer_seconds": 0.08702422900023521,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458913706867724,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "finite": true
+        },
+        {
+          "wall_seconds": 5.1905967560001045,
+          "setup_seconds": 0.012537826000425412,
+          "loop_seconds": 5.069961115999831,
+          "transfer_seconds": 0.10805861200014988,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458913706867724,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "finite": true
+        },
+        {
+          "wall_seconds": 5.23189882700035,
+          "setup_seconds": 0.013812983000207169,
+          "loop_seconds": 5.1170656709996365,
+          "transfer_seconds": 0.10098062800034313,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458913706867724,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "finite": true
+        }
+      ],
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/meep_throughput_vacuum-64_trace.npy",
+      "median_wall_seconds": 5.1905967560001045,
+      "median_loop_seconds": 5.069961115999831,
+      "median_setup_seconds": 0.012537826000425412,
+      "steps_run": 801,
+      "cell_steps_per_second_full": 40453411.01815996,
+      "cell_steps_per_second_stepping": 41415967.34092329,
+      "load_average_after": [
+        12.86181640625,
+        8.849609375,
+        4.82275390625
+      ]
+    },
+    {
+      "name": "sphere-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "load_average_before": [
+        12.86181640625,
+        8.849609375,
+        4.82275390625
+      ],
+      "runs": [
+        {
+          "wall_seconds": 4.99289527899964,
+          "setup_seconds": 0.013300236999839399,
+          "loop_seconds": 4.8946992709998085,
+          "transfer_seconds": 0.08484746900012397,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458705407853952,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "finite": true
+        },
+        {
+          "wall_seconds": 4.970067726000252,
+          "setup_seconds": 0.013264703999993799,
+          "loop_seconds": 4.873040704000232,
+          "transfer_seconds": 0.08368916199970045,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458705407853952,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "finite": true
+        },
+        {
+          "wall_seconds": 5.028475479000008,
+          "setup_seconds": 0.0129177730000265,
+          "loop_seconds": 4.92237162299989,
+          "transfer_seconds": 0.09315322000020387,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458705407853952,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "finite": true
+        }
+      ],
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/meep_throughput_sphere-64_trace.npy",
+      "median_wall_seconds": 4.99289527899964,
+      "median_loop_seconds": 4.8946992709998085,
+      "median_setup_seconds": 0.013264703999993799,
+      "steps_run": 801,
+      "cell_steps_per_second_full": 42055226.930790015,
+      "cell_steps_per_second_stepping": 42898926.44560966,
+      "load_average_after": [
+        13.75341796875,
+        9.314453125,
+        5.0615234375
+      ]
+    },
+    {
+      "name": "vacuum-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "load_average_before": [
+        13.75341796875,
+        9.314453125,
+        5.0615234375
+      ],
+      "runs": [
+        {
+          "wall_seconds": 14.599837912000112,
+          "setup_seconds": 0.03514218300006178,
+          "loop_seconds": 14.256468058999872,
+          "transfer_seconds": 0.30817758100010906,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.096346384202181,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "finite": true
+        },
+        {
+          "wall_seconds": 15.081136739000158,
+          "setup_seconds": 0.07500346699998772,
+          "loop_seconds": 14.710708269000406,
+          "transfer_seconds": 0.2953975039999932,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.096346384202181,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "finite": true
+        },
+        {
+          "wall_seconds": 14.116032095999799,
+          "setup_seconds": 0.03884178599992083,
+          "loop_seconds": 13.783486385000288,
+          "transfer_seconds": 0.293649367999933,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.096346384202181,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "finite": true
+        }
+      ],
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/meep_throughput_vacuum-96_trace.npy",
+      "median_wall_seconds": 14.599837912000112,
+      "median_loop_seconds": 14.256468058999872,
+      "median_setup_seconds": 0.03884178599992083,
+      "steps_run": 800,
+      "cell_steps_per_second_full": 48479223.143857226,
+      "cell_steps_per_second_stepping": 49646854.82202478,
+      "load_average_after": [
+        15.17626953125,
+        10.5341796875,
+        5.7490234375
+      ]
+    },
+    {
+      "name": "sphere-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "load_average_before": [
+        15.17626953125,
+        10.5341796875,
+        5.7490234375
+      ],
+      "runs": [
+        {
+          "wall_seconds": 14.452876490000108,
+          "setup_seconds": 0.03446456000028775,
+          "loop_seconds": 14.113584114999867,
+          "transfer_seconds": 0.30477584799973556,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.09207769540608897,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "finite": true
+        },
+        {
+          "wall_seconds": 14.35072161800008,
+          "setup_seconds": 0.037785914999858505,
+          "loop_seconds": 14.036934821000159,
+          "transfer_seconds": 0.27596342400011054,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.09207769540608897,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "finite": true
+        },
+        {
+          "wall_seconds": 14.578634493999743,
+          "setup_seconds": 0.033037855999737076,
+          "loop_seconds": 14.244945383999948,
+          "transfer_seconds": 0.30058086700000786,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.09207769540608897,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "finite": true
+        }
+      ],
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/meep_throughput_sphere-96_trace.npy",
+      "median_wall_seconds": 14.452876490000108,
+      "median_loop_seconds": 14.113584114999867,
+      "median_setup_seconds": 0.03446456000028775,
+      "steps_run": 800,
+      "cell_steps_per_second_full": 48972175.22682882,
+      "cell_steps_per_second_stepping": 50149472.6097083,
+      "load_average_after": [
+        15.69970703125,
+        11.53125,
+        6.39306640625
+      ]
+    }
+  ]
+}

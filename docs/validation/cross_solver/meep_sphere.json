@@ -1,0 +1,130 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "meep",
+  "fixture": "sphere",
+  "fixture_sha256": "44af18789e485e661e15487e855733011910adbc61fafd8f359a1be00434f7e4",
+  "date": "2026-09-21",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.13.15",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2391",
+      "utilization.gpu": "1"
+    },
+    "packages": {
+      "meep": null,
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "mpich": null,
+      "mpi4py": "4.1.2"
+    },
+    "meep_version": "1.34.0",
+    "conda_packages": {
+      "mpich": "4.3.2 h23078de_105",
+      "numpy": "2.5.3 py313hb5f73ae_0",
+      "pymeep": "1.34.0 mpi_mpich_py313h5c06767_1",
+      "python": "3.13.15 hf47f18c_103_cp313",
+      "scipy": "1.18.1 py313he2a5f1a_0"
+    },
+    "mpich_version": "4.3.2 h23078de_105",
+    "meep_mpi": true,
+    "mpi_processes": 12,
+    "omp_num_threads": "1",
+    "precision": "float64 (Meep build)"
+  },
+  "driver_sha256": {
+    "meep_driver.py": "9f1d6e0b0bd60a0c80605a5c3013e7ffe9273cba2c20f5d90e23e88dadd54dd3",
+    "common.py": "21bd4de1e20e137891f3feeb8af76d9825fca9cc9967b3cea736f80d46f7509e"
+  },
+  "method": "No TFSF box: Meep Mie-tutorial setup. Ez current sheet spanning the full cell (including the PML, hence is_integrated=True) at x=-1.2 um with the shared waveform as the integrated current, six DFT flux planes at +-1.1 um, empty-cell run subtracted with load_minus_flux_data, incident intensity from the empty-cell centre plane (0.4 x 0.4 um). Sphere geometry rasterised by Meep at each Yee component position with eps_averaging=False.",
+  "grid": {
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "epsilon_array_shape": [
+      64,
+      64,
+      64
+    ],
+    "mesh_um": 0.05,
+    "resolution_per_um": 20.0,
+    "dt_s": 9.532874347655028e-17,
+    "courant_number": 0.5715767664977295,
+    "requested_steps": 2518,
+    "steps_run": {
+      "empty": 2518,
+      "sphere": 2518
+    },
+    "duration_fs": 240.0377760739536,
+    "pml_cells": 8,
+    "precision": "float64"
+  },
+  "pml": {
+    "formulation": "Meep PML (stretched-coordinate, quadratic profile by default, R_asymptotic=1e-15), same thickness 0.4 um",
+    "thickness_um": 0.4
+  },
+  "sphere_cells_from_epsilon": 7304,
+  "wavelength_um": [
+    1.3,
+    1.3625,
+    1.4249999999999998,
+    1.4874999999999998,
+    1.55,
+    1.6125,
+    1.675,
+    1.7375,
+    1.7999999999999998
+  ],
+  "scattering_cross_section_um2": [
+    3.8975495018087107,
+    5.020452475032902,
+    4.881393647654392,
+    4.2173076756339585,
+    4.485467447058732,
+    4.9857874884193585,
+    5.622015633666446,
+    6.3024631186385145,
+    6.505139372024434
+  ],
+  "mie_cross_section_um2": [
+    3.8532764361030734,
+    4.973312685172012,
+    4.90486236736327,
+    4.2549802504801635,
+    4.505422724444023,
+    4.982147477597055,
+    5.594873578508073,
+    6.259724976718905,
+    6.477298078717622
+  ],
+  "relative_error": [
+    0.011489719577558288,
+    0.009478549378452827,
+    -0.0047847865956519575,
+    -0.008853760212389594,
+    -0.004429168716405751,
+    0.00073061081364445,
+    0.004851236543151671,
+    0.006827479174973394,
+    0.004298288108476989
+  ],
+  "max_relative_error": 0.011489719577558288,
+  "max_empty_box_cross_section_um2": 9.692018457935577,
+  "empty_box_note": "Sum of |flux| over the six faces in the empty run divided by the incident intensity: the incident flux crossing the box in this total-field setup, not a TFSF leakage figure.",
+  "frequency_match": {
+    "max_relative_difference": 0.0
+  },
+  "timing": {
+    "reference_run_seconds": 13.886401717999888,
+    "sample_run_seconds": 14.258466204999877,
+    "mpi_processes": 12
+  }
+}

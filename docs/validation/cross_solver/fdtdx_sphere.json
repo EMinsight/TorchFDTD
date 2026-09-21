@@ -1,0 +1,138 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "fdtdx",
+  "fixture": "sphere",
+  "fixture_sha256": "44af18789e485e661e15487e855733011910adbc61fafd8f359a1be00434f7e4",
+  "date": "2026-09-21",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.12.14",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2757",
+      "utilization.gpu": "100"
+    },
+    "packages": {
+      "fdtdx": "0.6.2",
+      "jax": "0.11.2",
+      "jaxlib": "0.11.2",
+      "jax-cuda12-plugin": "0.11.2",
+      "jax-cuda12-pjrt": "0.11.2",
+      "equinox": "0.13.8",
+      "optax": "0.2.8",
+      "numpy": "2.4.6",
+      "scipy": "1.18.1"
+    },
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_x64": false,
+    "xla_preallocate": "false"
+  },
+  "driver_sha256": {
+    "fdtdx_driver.py": "0151c5df68905651fedad6c37c7fd38fd8537fafbdb00ae02e066e9395b7196c",
+    "common.py": "21bd4de1e20e137891f3feeb8af76d9825fca9cc9967b3cea736f80d46f7509e"
+  },
+  "method": "No closed TFSF box in fdtdx 0.6.2: native one-way UniformPlaneSource (single-plane TFSF) spanning the full transverse domain including the PML, at the first interior x cell; total field downstream. Six PhasorDetector planes at +-1.1 um with exact_interpolation, empty-domain reference subtracted phasor-wise (removes the incident field), incident intensity from the empty-domain centre plane; shared per-component staircase permittivity array.",
+  "grid": {
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "mesh_um": 0.05,
+    "dt_s": 9.532874347655028e-17,
+    "steps": 2518,
+    "duration_fs": 240.0377760739536,
+    "courant_number": 0.5715767664977295,
+    "pml_cells": 8,
+    "precision": "float32",
+    "backend": "gpu"
+  },
+  "pml": {
+    "formulation": "FDTDX CPML, cubic sigma with sigma_end matched to TorchFDTD maximum, kappa=1, alpha matched",
+    "layers": 8,
+    "sigma_end_S_per_m": 235948.33150560645
+  },
+  "source": {
+    "kind": "UniformPlaneSource one-way plane",
+    "grid_slice": [
+      [
+        8,
+        9
+      ],
+      [
+        0,
+        64
+      ],
+      [
+        0,
+        64
+      ]
+    ]
+  },
+  "sphere_cells": 7224,
+  "shared_epsilon_sha256": "7c39a1cfb60da1ebf404463098456652a0c5ed564f759c465ee912a84af241dc",
+  "wavelength_um": [
+    1.3,
+    1.3625,
+    1.4249999999999998,
+    1.4875,
+    1.55,
+    1.6125,
+    1.675,
+    1.7375,
+    1.7999999999999998
+  ],
+  "scattering_cross_section_um2": [
+    3.897603543828203,
+    5.0220520455716136,
+    4.883196614483825,
+    4.209363043737112,
+    4.470707230970201,
+    4.963856544075965,
+    5.5928815937957115,
+    6.267396933759499,
+    6.467037238264636
+  ],
+  "mie_cross_section_um2": [
+    3.8532764361030734,
+    4.973312685172012,
+    4.90486236736327,
+    4.254980250480165,
+    4.505422724444023,
+    4.982147477597055,
+    5.594873578508073,
+    6.259724976718905,
+    6.477298078717622
+  ],
+  "relative_error": [
+    0.011503744530189763,
+    0.009800180178680007,
+    -0.004417198946010892,
+    -0.010720897409078445,
+    -0.007705268871991633,
+    -0.0036712950797496147,
+    -0.00035603748403068014,
+    0.0012256060879873854,
+    -0.0015841235540324794
+  ],
+  "max_relative_error": 0.011503744530189763,
+  "max_empty_box_cross_section_um2": 9.678950066302663,
+  "empty_box_note": "Sum of |flux| over the six faces in the empty run divided by the incident intensity. For this one-way plane setup the faces lie in the total-field region, so this is the incident flux crossing the box (about twice the face area), not a TFSF leakage figure.",
+  "timing": {
+    "sample_run_seconds_including_compile": 2.6124668130000828,
+    "reference_run_seconds_including_compile": 2.2303755559996716
+  },
+  "sample_field_peak": 3.6468932194111403e-06,
+  "gpu_context": {
+    "before_mb": 2662.0,
+    "after_mb": 2664.0,
+    "own_mb": 2.0
+  }
+}

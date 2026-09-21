@@ -1,0 +1,380 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "meep",
+  "fixture": "throughput",
+  "fixture_sha256": "2c8a687efbada9c7ca7b7d4419161b9c7866840fb0847004edaa8687605511db",
+  "date": "2026-09-21",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.13.15",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2443",
+      "utilization.gpu": "1"
+    },
+    "packages": {
+      "meep": null,
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "mpich": null,
+      "mpi4py": "4.1.2"
+    },
+    "meep_version": "1.34.0",
+    "conda_packages": {
+      "mpich": "4.3.2 h23078de_105",
+      "numpy": "2.5.3 py313hb5f73ae_0",
+      "pymeep": "1.34.0 mpi_mpich_py313h5c06767_1",
+      "python": "3.13.15 hf47f18c_103_cp313",
+      "scipy": "1.18.1 py313he2a5f1a_0"
+    },
+    "mpich_version": "4.3.2 h23078de_105",
+    "meep_mpi": true,
+    "mpi_processes": 4,
+    "omp_num_threads": "1",
+    "precision": "float64 (Meep build)"
+  },
+  "driver_sha256": {
+    "meep_driver.py": "9f1d6e0b0bd60a0c80605a5c3013e7ffe9273cba2c20f5d90e23e88dadd54dd3",
+    "common.py": "21bd4de1e20e137891f3feeb8af76d9825fca9cc9967b3cea736f80d46f7509e"
+  },
+  "method": "mp.Simulation with the shared point Ez CustomSource, sphere geometry rasterised by Meep (eps_averaging=False), same PML thickness (Meep PML formulation), all MPI ranks on the CPU. Full solve = init_sim + run(until=steps*dt) with a per-step get_field_point probe + get_array of all six field components. Stepping = run() alone. One warm-up solve per case, then the listed repetitions. Wall time measured on the master rank after MPI barriers.",
+  "cases": [
+    {
+      "name": "vacuum-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "load_average_before": [
+        11.20458984375,
+        5.482421875,
+        2.40087890625
+      ],
+      "runs": [
+        {
+          "wall_seconds": 3.4567133280002054,
+          "setup_seconds": 0.024414306000380748,
+          "loop_seconds": 3.3994598049998785,
+          "transfer_seconds": 0.032825070999933814,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458913706867724,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "finite": true
+        },
+        {
+          "wall_seconds": 3.531711081999674,
+          "setup_seconds": 0.024137038999924698,
+          "loop_seconds": 3.479102434000197,
+          "transfer_seconds": 0.02845428799992078,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458913706867724,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "finite": true
+        },
+        {
+          "wall_seconds": 3.4852141609999308,
+          "setup_seconds": 0.023523459999978513,
+          "loop_seconds": 3.4349171669996394,
+          "transfer_seconds": 0.02675839499988797,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458913706867724,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "finite": true
+        }
+      ],
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/meep_throughput_vacuum-64_trace.npy",
+      "median_wall_seconds": 3.4852141609999308,
+      "median_loop_seconds": 3.4349171669996394,
+      "median_setup_seconds": 0.024137038999924698,
+      "steps_run": 801,
+      "cell_steps_per_second_full": 60248046.260593675,
+      "cell_steps_per_second_stepping": 61130249.665791154,
+      "load_average_after": [
+        9.6083984375,
+        5.4091796875,
+        2.42724609375
+      ]
+    },
+    {
+      "name": "sphere-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "load_average_before": [
+        9.6083984375,
+        5.4091796875,
+        2.42724609375
+      ],
+      "runs": [
+        {
+          "wall_seconds": 3.5574079539997,
+          "setup_seconds": 0.02436099499982447,
+          "loop_seconds": 3.501438656999653,
+          "transfer_seconds": 0.03159312200023123,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458705407853952,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "finite": true
+        },
+        {
+          "wall_seconds": 3.5331883740000194,
+          "setup_seconds": 0.027820199999951,
+          "loop_seconds": 3.474099618999844,
+          "transfer_seconds": 0.03125050300013754,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458705407853952,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "finite": true
+        },
+        {
+          "wall_seconds": 3.544498214000214,
+          "setup_seconds": 0.026575559000320936,
+          "loop_seconds": 3.488362976999724,
+          "transfer_seconds": 0.029545473999860405,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458705407853952,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "finite": true
+        }
+      ],
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/meep_throughput_sphere-64_trace.npy",
+      "median_wall_seconds": 3.544498214000214,
+      "median_loop_seconds": 3.488362976999724,
+      "median_setup_seconds": 0.026575559000320936,
+      "steps_run": 801,
+      "cell_steps_per_second_full": 59240358.24609032,
+      "cell_steps_per_second_stepping": 60193662.58169544,
+      "load_average_after": [
+        8.365234375,
+        5.33935546875,
+        2.45361328125
+      ]
+    },
+    {
+      "name": "vacuum-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "load_average_before": [
+        8.365234375,
+        5.33935546875,
+        2.45361328125
+      ],
+      "runs": [
+        {
+          "wall_seconds": 10.905802704000052,
+          "setup_seconds": 0.07693126599997413,
+          "loop_seconds": 10.73071264300006,
+          "transfer_seconds": 0.09814345699987825,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.096346384202181,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "finite": true
+        },
+        {
+          "wall_seconds": 10.97005286700005,
+          "setup_seconds": 0.0815167359996849,
+          "loop_seconds": 10.790829335000126,
+          "transfer_seconds": 0.09768427700009852,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.096346384202181,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "finite": true
+        },
+        {
+          "wall_seconds": 11.483739510000305,
+          "setup_seconds": 0.07874934000028588,
+          "loop_seconds": 11.299171246000242,
+          "transfer_seconds": 0.10580143099969064,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.096346384202181,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "finite": true
+        }
+      ],
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/meep_throughput_vacuum-96_trace.npy",
+      "median_wall_seconds": 10.97005286700005,
+      "median_loop_seconds": 10.790829335000126,
+      "median_setup_seconds": 0.07874934000028588,
+      "steps_run": 800,
+      "cell_steps_per_second_full": 64520090.156462215,
+      "cell_steps_per_second_stepping": 65591696.2475055,
+      "load_average_after": [
+        6.05859375,
+        5.14990234375,
+        2.52880859375
+      ]
+    },
+    {
+      "name": "sphere-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "load_average_before": [
+        6.05859375,
+        5.14990234375,
+        2.52880859375
+      ],
+      "runs": [
+        {
+          "wall_seconds": 11.497852383999998,
+          "setup_seconds": 0.07881488299972261,
+          "loop_seconds": 11.320706369000163,
+          "transfer_seconds": 0.09831147400018381,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.09207769540608897,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "finite": true
+        },
+        {
+          "wall_seconds": 11.25842820600019,
+          "setup_seconds": 0.08266954999999143,
+          "loop_seconds": 11.078546978999839,
+          "transfer_seconds": 0.09717814499981614,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.09207769540608897,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "finite": true
+        },
+        {
+          "wall_seconds": 11.252895852000165,
+          "setup_seconds": 0.07880205600031331,
+          "loop_seconds": 11.074565768999946,
+          "transfer_seconds": 0.09950801700006195,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.09207769540608897,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "finite": true
+        }
+      ],
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/meep_throughput_sphere-96_trace.npy",
+      "median_wall_seconds": 11.25842820600019,
+      "median_loop_seconds": 11.078546978999839,
+      "median_setup_seconds": 0.07881488299972261,
+      "steps_run": 800,
+      "cell_steps_per_second_full": 62867461.34089866,
+      "cell_steps_per_second_stepping": 63888233.83984048,
+      "load_average_after": [
+        5.0185546875,
+        5.001953125,
+        2.60595703125
+      ]
+    }
+  ]
+}
