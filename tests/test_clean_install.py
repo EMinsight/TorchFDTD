@@ -127,6 +127,8 @@ def test_block_timeout_is_recorded_as_failed_with_its_output(tmp_path, monkeypat
     result = runner.run_blocks(blocks, sys.executable, workdir=tmp_path / 'work')
     timed_out, following = result['blocks']
     assert timed_out['status'] == 'failed' and timed_out['exit_code'] is None
-    assert timed_out['stderr_tail'] == 'timeout after 2 s' and timed_out['stdout_tail'] == 'started\n'
+    assert timed_out['stderr_tail'] == 'timeout after 2 s'
+    # Windows may drop the partial pipe contents when the child is killed at the timeout.
+    assert timed_out['stdout_tail'] in ('started\n', '')
     assert following['status'] == 'passed' and following['stdout_tail'] == 'next\n'
     assert result['runnable_blocks'] == 2 and result['all_runnable_passed'] is False
