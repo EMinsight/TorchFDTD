@@ -60,7 +60,10 @@ def create_app(result_dir=None):
 
     @app.post('/api/validate')
     def validate(project: Project):
-        return {**estimate(project), 'project': project.model_dump()}
+        # Dispatch-time contracts (exact-endpoint PMC, tensor media) are rejections, not server faults.
+        try:summary=estimate(project)
+        except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+        return {**summary, 'project': project.model_dump()}
 
     @app.post('/api/python')
     def python(project: Project):
@@ -74,7 +77,9 @@ def create_app(result_dir=None):
         for nodes in r.mesh_nodes:
             stride=max(1,(len(nodes)+999)//1000)
             axes.append(sorted(set(nodes[::stride].tolist()+[float(nodes[-1])])))
-        return dict(summary=estimate(project), nodes_um=axes,
+        try:summary=estimate(project)
+        except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+        return dict(summary=summary, nodes_um=axes,
                     preview_decimated=any(len(v)>1000 for v in r.mesh_nodes),
                     structures=[dict(center=object_bounds(s)[0],size=object_bounds(s)[1],name=s.name) for s in project.structures if s.enabled],
                     refinements=[dict(center=c,size=s) for c,s in r._auto_boxes]+[b.model_dump() for b in r.mesh_refinements if b.enabled])

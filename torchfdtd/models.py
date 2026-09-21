@@ -674,7 +674,7 @@ class Project(Model):
 def demo_project(name='waveguide'):
     if name == 'pmc':
         return Project(name='Closed PMC cavity | exact endpoints',
-            region=Region(dimension='3d',size=(3.2,3.2,3.2),mesh=.2,steps=160,
+            region=Region(dimension='3d',size=(3.2,3.2,3.2),mesh=.2,steps=160,pml_cells=3,
                 backend='cpu',material_sampling='yee',snapshot_interval=8,
                 boundaries={a+'_'+side:BoundaryFace(kind='pmc') for a in 'xyz' for side in ('min','max')}),
             sources=[Source(id='source',name='electric pulse',component='Ez',center=(0,0,0),pulse_cycles=1)],
