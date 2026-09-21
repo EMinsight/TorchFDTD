@@ -7,7 +7,8 @@ import pytest
 import torch
 
 from torchfdtd import AdjointOptions, BoundaryFace, DifferentiableSimulation, Monitor, Project, Region, Source
-from torchfdtd.anisotropy import TensorConstitutive, TensorDielectricSimulation, _TensorSystem
+from torchfdtd.anisotropy import (TensorConstitutive, TensorDielectricSimulation, _TensorSystem,
+                                  _cpml_faces, cpml_face_admissible)
 
 
 def scene(faces, precision='float32', steps=14, mesh=.1, size=1.2, bloch_phase=(0, 0, 0), pml_cells=3):
@@ -207,14 +208,37 @@ def test_pec_cavity_exact_discrete_standing_wave_with_transverse_coupling():
         assert abs(omega/continuum-1) < .03  # 12-cell Yee dispersion, mode 3 is 2.2%
 
 
-def tensor_field(r, generator, dtype, walls=None):
-    """Smooth spatially varying SPD field with nonzero off-diagonals everywhere."""
+def tensor_field(r, generator, dtype):
+    """Smooth spatially varying SPD field: arbitrary rotations in the interior,
+    the geometric CPML criterion in every face's PML layers plus collar.
+
+    A node touched by one CPML face is rotated only about that face normal,
+    whose eigenvalue is the largest. A node touched by several faces is
+    axis-aligned uniaxial, admissible for every face. Off-diagonals stay
+    nonzero in single-face PML regions.
+    """
     grid = torch.stack(torch.meshgrid(*(torch.linspace(-1, 1, n, dtype=dtype) for n in r.shape), indexing='ij'), -1)
     angles = .6*torch.sin(2*grid)+.2*torch.randn(3, dtype=dtype, generator=generator)
     values = 1.2+torch.tensor([.3, 1.1, 2.4], dtype=dtype)+.3*torch.cos(3*grid)
+    faces = torch.zeros(r.shape+(3,), dtype=torch.bool)
+    for axis, side, index in _cpml_faces(r):
+        faces[index+(axis,)] = True
     out = torch.empty(r.shape+(3, 3), dtype=dtype)
     for index in product(*(range(n) for n in r.shape)):
-        out[index] = spd(values[index], angles[index].tolist(), dtype)
+        touched = [a for a in range(3) if faces[index+(a,)]]
+        if not touched:
+            out[index] = spd(values[index], angles[index].tolist(), dtype)
+        elif len(touched) == 1:
+            axis = touched[0]
+            angle = [0., 0., 0.]
+            angle[axis] = float(angles[index][axis])
+            order = sorted(values[index].tolist())
+            eigen = [order[0], order[1], order[2]]
+            eigen[axis], eigen[2] = eigen[2], eigen[axis]  # largest along the face normal
+            out[index] = spd(eigen, angle, dtype)
+        else:
+            low, high = float(values[index].min()), float(values[index].max())
+            out[index] = torch.diag(torch.tensor([low, low, high], dtype=dtype))
     return out
 
 
@@ -243,11 +267,13 @@ def test_tensor_into_cpml_checkpoint_vjp_matches_full_autograd(faces):
 
 
 def test_tensor_cpml_rotation_taylor_and_central_difference_and_isotropic_parity():
-    p = scene(dict(x='pml', y='pml', z='pml'), 'float64', steps=16)
+    # Uniform tensor through the x CPML faces: x is a principal axis with the
+    # largest eigenvalue, the yz block rotates by the design angle.
+    p = scene(dict(x='pml', y='periodic', z='periodic'), 'float64', steps=16)
     model = TensorDielectricSimulation(p, AdjointOptions(checkpoints=3), cpml_material='tensor')
     shape = p.region.shape+(3, 3)
     def loss(angle):
-        epsilon = spd((1.5, 2.4, 3.3), (angle, .2, -.5)).expand(shape)
+        epsilon = spd((3.3, 1.5, 2.4), (angle, 0., 0.)).expand(shape)
         return model(epsilon).signals.abs().square().sum()
     theta = torch.tensor(.4, dtype=torch.float64, requires_grad=True)
     value = loss(theta)
@@ -260,10 +286,12 @@ def test_tensor_cpml_rotation_taylor_and_central_difference_and_isotropic_parity
         remainders.append(float((loss(theta.detach()+h)-value.detach()-h*derivative).abs()))
     assert remainders[1] < .3*remainders[0] and remainders[2] < .3*remainders[1]
     assert abs(float(derivative)) > 1e-8
-    # Constant isotropic tensor through the CPML equals the scalar solver.
-    scalar = torch.full(p.region.shape, 2., dtype=torch.float64)
-    native = DifferentiableSimulation(p)(scalar).signals
-    tensor = model((2*torch.eye(3, dtype=torch.float64)).expand(shape).clone()).signals
+    # Constant isotropic tensor through six CPML faces equals the scalar solver.
+    q = scene(dict(x='pml', y='pml', z='pml'), 'float64', steps=16)
+    scalar = torch.full(q.region.shape, 2., dtype=torch.float64)
+    native = DifferentiableSimulation(q)(scalar).signals
+    tensor = TensorDielectricSimulation(q, AdjointOptions(checkpoints=3), cpml_material='tensor')(
+        (2*torch.eye(3, dtype=torch.float64)).expand(shape).clone()).signals
     torch.testing.assert_close(tensor, native, rtol=2e-12, atol=2e-14)
 
 
@@ -297,3 +325,77 @@ def test_cuda_walls_and_tensor_cpml_match_cpu_and_reservation(faces):
     torch.testing.assert_close(actual.signals.cpu(), expected.signals, rtol=5e-5, atol=3e-7)
     torch.testing.assert_close(got.cpu(), gradient, rtol=5e-4, atol=3e-7)
     assert torch.cuda.max_memory_allocated() <= actual.report['gpu_reservation_bytes']
+
+
+def one_step_matrix(system, epsilon):
+    """Dense one-step map of the source-free linear update, a tiny diagnostic only."""
+    system.sources = {'E': [], 'H': []}
+    state = system.state()
+    sizes = [v.numel() for v in state]
+    total = sum(sizes)
+    matrix = torch.zeros((total, total), dtype=state[0].dtype)
+    with torch.no_grad():
+        for column in range(total):
+            unit = torch.zeros(total, dtype=state[0].dtype)
+            unit[column] = 1
+            parts = tuple(part.reshape(v.shape) for part, v in zip(unit.split(sizes), state))
+            matrix[:, column] = torch.cat([o.reshape(-1) for o in system.reference_step(parts, 0, epsilon)])
+    return matrix
+
+
+def bloch_scene(faces, shape, phases, pml_cells=3):
+    boundaries = {a+'_'+side: dict(kind=faces[a]) for a in 'xyz' for side in ('min', 'max')}
+    r = Region(dimension='3d', size=tuple(.1*n for n in shape), mesh=.1, steps=10, precision='float64',
+               pml_cells=pml_cells, material_sampling='yee', boundaries=boundaries, bloch_phase=phases)
+    assert r.shape == tuple(shape)
+    return Project(region=r, sources=[], monitors=[Monitor(component='Ez', center=(0, 0, 0))])
+
+
+@pytest.mark.parametrize('eigenvalues,angles,admissible', [
+    ((2., 1., 4.), (0., .5, 0.), True),   # y principal with the smallest eigenvalue, xz block rotated
+    ((1., 4., 2.), (0., .5, 0.), True),   # y principal with the largest eigenvalue
+    ((1.5, 3., 6.), (0., .5, 0.), False),  # y principal but strictly intermediate: optic-axis cone
+    ((1., 1., 4.), (.5, 0., 0.), False),  # y is not a principal axis
+])
+def test_cpml_face_criterion_matches_dense_one_step_spectral_radius(eigenvalues, angles, admissible):
+    # y CPML faces, x and z Bloch phases place a mode at (kx, kz) = (pi, pi/2)
+    # per cell, near the discrete optic-axis direction of these tensors. The
+    # geometric criterion of Becache, Fauqueux and Joly separates exactly
+    # unit spectral radius from growth, and admission reproduces the split.
+    p = bloch_scene(dict(x='bloch', y='pml', z='bloch'), (5, 11, 5), (math.pi, 0., math.pi/2))
+    epsilon = spd(eigenvalues, angles).expand(p.region.shape+(3, 3)).contiguous()
+    assert bool(cpml_face_admissible(epsilon, 1).all()) == admissible
+    model = TensorDielectricSimulation(p, cpml_material='tensor')
+    if admissible:
+        model._validate_epsilon(epsilon)
+    else:
+        with pytest.raises(ValueError, match='y_min'):
+            model._validate_epsilon(epsilon)
+    radius = float(torch.linalg.eigvals(one_step_matrix(_TensorSystem(p, epsilon), epsilon)).abs().max())
+    if admissible:
+        assert radius <= 1+1e-9, radius
+    else:
+        assert radius > 1+1e-3, radius
+
+
+def test_tensor_cpml_admission_names_face_and_keeps_interior_free():
+    p = scene(dict(x='pml', y='pml', z='pml'), 'float64')
+    model = TensorDielectricSimulation(p, cpml_material='tensor')
+    generator = torch.Generator().manual_seed(3)
+    epsilon = tensor_field(p.region, generator, torch.float64)
+    model._validate_epsilon(epsilon)
+    layers = p.region.pml_layers(0, 0)
+    interior = epsilon[layers+1:-layers-1, layers+1:-layers-1, layers+1:-layers-1]
+    assert interior.shape[0] > 0 and (interior[..., 0, 1] != 0).any() and (interior[..., 0, 2] != 0).any()
+    # A rotated interior tensor leaking one node row into the z_max collar is rejected by name.
+    leaked = epsilon.clone()
+    leaked[layers+1:-layers-1, layers+1:-layers-1, -layers-1] = spd((1.5, 2.4, 3.3), (.4, .2, -.5))
+    with pytest.raises(ValueError, match='z_max'):
+        model._validate_epsilon(leaked)
+    # Biaxial with the face normal strictly intermediate is rejected even when diagonal.
+    biaxial = torch.diag(torch.tensor([1., 2., 4.], dtype=torch.float64)).expand(p.region.shape+(3, 3)).contiguous()
+    with pytest.raises(ValueError, match='y_min'):
+        model._validate_epsilon(biaxial)
+    # The same biaxial tensor is admissible when only the extreme axes carry CPML.
+    q = scene(dict(x='pml', y='periodic', z='pml'), 'float64')
+    TensorDielectricSimulation(q, cpml_material='tensor')._validate_epsilon(biaxial)

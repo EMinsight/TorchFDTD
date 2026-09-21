@@ -1,7 +1,9 @@
 """Experimental full-tensor Yee dielectric and discrete adjoint.
 
 Node-sampled real symmetric epsilon >= I. Normalized incident edge triplets define
-an SPD inverse constitutive operator. CPML requires a fixed isotropic exterior. Not anisotropic interface homogenization.
+an SPD inverse constitutive operator. CPML takes either a fixed isotropic exterior or
+tensors satisfying the geometric PML stability criterion on each face. PEC walls
+use a nodal closure. Not anisotropic interface homogenization.
 Soft sources are impressed field increments, not calibrated current sources.
 """
 from dataclasses import replace
@@ -23,7 +25,7 @@ def _shift(value, axis, forward, phase):
     return result
 
 
-def _cpml_collar_slices(region):
+def _cpml_faces(region):
     # CPML derivatives target the outer `layers` field rows. R reads an
     # incident edge at node n or n-1, so one additional node row contains
     # every tensor coefficient that can act on a CPML-supported curl.
@@ -34,7 +36,29 @@ def _cpml_collar_slices(region):
                 index = [slice(None)]*3
                 width = min(layers+1, region.shape[axis])
                 index[axis] = slice(0, width) if side == 0 else slice(-width, None)
-                yield tuple(index)
+                yield axis, side, tuple(index)
+
+
+def _cpml_collar_slices(region):
+    for _, _, index in _cpml_faces(region):
+        yield index
+
+
+def cpml_face_admissible(epsilon, axis):
+    """Geometric PML stability criterion of node tensors for a face normal to `axis`.
+
+    Stretched-coordinate PML is unstable when a slowness sheet carries energy
+    against its phase along the face normal (Becache, Fauqueux and Joly, JCP
+    188, 2003). For a symmetric tensor that holds at the normal-incidence
+    optic-axis cone unless the normal is a principal axis whose eigenvalue is
+    not strictly between the two transverse eigenvalues. Returns a boolean
+    node mask; ties are exact, nothing is clipped.
+    """
+    b, c = [k for k in range(3) if k != axis]
+    aligned = (epsilon[..., axis, b] == 0) & (epsilon[..., axis, c] == 0)
+    a_a, b_b, c_c, b_c = epsilon[..., axis, axis], epsilon[..., b, b], epsilon[..., c, c], epsilon[..., b, c]
+    extreme = (a_a-b_b)*(a_a-c_c)-b_c*b_c >= 0
+    return aligned & extreme
 
 
 def _fold(value, axis):
@@ -218,9 +242,11 @@ class TensorDielectricSimulation(DifferentiableSimulation):
     """Checkpointed epsilon-to-point-signals for node-sampled full tensors.
 
     CPU/CUDA FP32 (default) or FP64 diagnostics, uniform rectangular 3D grids, all
-    axes periodic/Bloch or CPML with explicit fixed cpml_background_epsilon.
-    CPML layers plus one node row must equal that scalar times I; their VJP is
-    zero. Interior nondispersive tensors require eigenvalues >= 1.
+    axes periodic/Bloch, PEC or CPML. With cpml_material='isotropic' CPML layers
+    plus one node row must equal the explicit cpml_background_epsilon times I
+    and their VJP is zero. With cpml_material='tensor' they hold node tensors
+    whose face normal is a principal axis with a non-intermediate eigenvalue,
+    and every node has a VJP. Nondispersive tensors require eigenvalues >= 1.
     forward() and spectrum() return the native result types. First derivatives
     only. Caller optimizer/material-construction graphs are outside admission.
     host_budget_bytes bounds total host reservation for this API.
@@ -264,6 +290,14 @@ class TensorDielectricSimulation(DifferentiableSimulation):
             raise ValueError('Only soft impressed-field sources are supported, not one-way/modal/current injection.')
 
     def _validate_cpml_collar(self, epsilon):
+        if self.cpml_material == 'tensor':
+            for axis, side, index in _cpml_faces(self.project.region):
+                if not bool(cpml_face_admissible(epsilon[index], axis).all()):
+                    raise ValueError(
+                        'Tensor CPML face %s_%s: every node tensor in its PML layers plus one-node collar must have '
+                        'the face normal as a principal axis with an eigenvalue not strictly between the two transverse '
+                        'eigenvalues (geometric PML stability criterion).' % ('xyz'[axis], ('min', 'max')[side]))
+            return
         if self.cpml_background_epsilon is None:
             return
         fixed = epsilon.new_tensor(self.cpml_background_epsilon)*torch.eye(3, dtype=epsilon.dtype, device=epsilon.device)
@@ -354,7 +388,8 @@ class TensorDielectricSimulation(DifferentiableSimulation):
                       tensor_sampling='common mesh nodes, normalized finite/periodic edge triplets',
                       cpml_contract='fixed isotropic exterior with one-node collar; tensor interior'
                       if self.cpml_background_epsilon is not None else
-                      'D-field composition: CPML memories on the curl, S on the complete curl; tensors extend into CPML',
+                      'D-field composition: CPML memories on the curl, S on the complete curl; tensors extend into CPML '
+                      'where each face normal is a principal axis with a non-intermediate eigenvalue',
                       cpml_background_epsilon=self.cpml_background_epsilon,
                       cpml_collar_material_vjp='zero: fixed coefficients, not design variables'
                       if self.cpml_background_epsilon is not None else 'full tensor VJP in every node, including CPML',
