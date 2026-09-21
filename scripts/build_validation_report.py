@@ -619,8 +619,9 @@ def provenance_check(root):
         summary = json.loads(text[text.rindex('{'):] if '{' in text else text)
     except ValueError:
         return False, f'provenance_inventory.py --check exit {completed.returncode} without a summary: {cell(text[-200:])}'
-    detail = (f"{summary['components']} components, {summary['open_items']} open items, {summary['files_scanned']} files scanned, "
-              f"{len(summary['findings'])} findings, pip check exit {summary['pip_check']}")
+    # The scanned-file count changes with every commit that adds a tracked file (each evidence run does), so it stays out of the report.
+    detail = (f"{summary['components']} components, {summary['open_items']} open items, {len(summary['findings'])} scan findings, "
+              f"pip check exit {summary['pip_check']}")
     if summary['problems'] or completed.returncode != 0:
         return False, detail + '; problems: ' + '; '.join(summary['problems'] or [f'exit {completed.returncode}'])
     return True, detail

@@ -293,7 +293,7 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 | README row check `test_readme_restart_row_matches_the_restart_record` | ok | reproduced from its record |
 | README "Compared with Meep" block | ok | equals the renderer output for the committed records |
 | MEEP_COMPARISON.md | ok | equals the renderer output for the committed records |
-| third-party notices and SBOM | ok | 52 components, 3 open items, 1332 files scanned, 0 findings, pip check exit 0 |
+| third-party notices and SBOM | ok | 52 components, 3 open items, 0 scan findings, pip check exit 0 |
 | RELEASE_SCOPE.md support claims | ok | 24 verification cells and the stage-status block rendered from the gate file |
 | attestation wording | ok | no line uses the words that tests/test_validation_report.py forbids |
 
