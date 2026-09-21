@@ -47,7 +47,9 @@ def setup(monkeypatch):
             return FarFieldResult(field,torch.as_tensor(directions,dtype=torch.float32),
                 torch.tensor([3e14],dtype=torch.float32),1.,torch.tensor(kwargs['phase_origin_um'],dtype=torch.float32))
     def prepare(*args,**kwargs):
-        calls.append(kwargs);return Box()
+        calls.append(kwargs);box=Box()
+        box.report=dict(Box.report,field_kind='scattered' if kwargs.get('reference') is not None else 'total')
+        return box
     module=ModuleType('torchfdtd.radiation_box');module.native_radiation_box=prepare
     monkeypatch.setitem(sys.modules,'torchfdtd.radiation_box',module)
     app=FastAPI();register_farfield_routes(app,get_job)

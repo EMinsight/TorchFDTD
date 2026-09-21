@@ -11,7 +11,27 @@ the selected geometry and angular convention.
 This is a restricted isolated-object workflow. A periodic unit-cell diffraction
 plane, a substrate-crossing box, or a single open plane is not a closed radiation
 surface. [Stored-plane diffraction](RADIATION_WORKFLOW.md) remains a separate
-operation.
+operation. The same stored box also evaluates exact finite-distance fields at
+Cartesian or spherical-grid points through Python; the browser exposes the
+angular far field only.
+
+## Comparison with FDTDX field projection
+
+FDTDX `FieldProjectionAngleDetector`, `FieldProjectionCartesianDetector`,
+`FieldProjectionKSpaceDetector` and `DiffractiveDetector` were read against
+`torchfdtd.radiation` and `torchfdtd.radiation_box`. The table records the gap
+before this revision and the state after it. "Now" entries are implemented,
+tested and documented here; nothing else is claimed.
+
+| Aspect | FDTDX | TorchFDTD before | TorchFDTD now |
+|---|---|---|---|
+| Observation specification | Tensor-product theta x phi angles at one `projection_distance`; Cartesian plane (`x`, `y` at a distance along `projection_axis`, per-point radius); k-space direction cosines `ux`, `uy` inside the unit disk | Unit direction vectors only; the browser builds a theta x phi grid | Direction vectors; `spherical_directions` theta x phi grid; `spherical_points` and `cartesian_plane_points`, or any fixed `(P, 3)` micrometre points, for `farfield_at_points` and `project_nearzone`. Direction cosines are not a separate API: pass `(ux, uy, sqrt(1-ux^2-uy^2))` directions |
+| Propagation models | Far field: separable Fourier integrals, prefactor `-i k exp(ikr)/(4 pi r)`, `H` from the medium impedance, `E_r = 0`. Exact (`far_field_approx=False`): dyadic Green function with `G`, `dG/dr`, `d2G/dr2` terms at finite distance, radial components retained | Asymptotic far field only (`electric_amplitude`, `fields_at_radius` with one scalar radius) | Both. `fields_at_radius` takes one radius per direction; `project_nearzone` evaluates the exact free-space Green function of the equivalent currents at finite distance, with radial `E` |
+| Radiation surface and quadrature | One plane with an outward `direction` or a box with `exclude_surfaces`; trapezoidal weights on physical coordinates, optional Gaussian edge window, interval subsampling | Six-face closed box, complete uniform midpoint quadrature | Unchanged. Single planes and boxes with excluded faces are not closed surfaces and give no exact exterior field, so they stay unsupported |
+| Exterior assumptions | Homogeneous isotropic medium; real or complex permittivity/permeability through `projection_medium`, per-frequency index and impedance overrides | Real lossless isotropic index, `mu_r = 1`, matching the native background | Unchanged. Lossy or magnetic exteriors and layered backgrounds remain unsupported |
+| Differentiability | Detector state is a JAX pytree; `project` runs inside `jax.grad` | Torch graph through `project_farfield` on differentiable planes; stored NPZ data have no graph | Far field and near zone are both linear Torch maps of the plane fields. One native material VJP test checks both against central differences; stored boxes remain graph-free |
+| Admission rules | No provenance checks. The exact path rejects observation points coinciding with source samples; `DiffractiveDetector` rejects symmetry-plane clipping | Rejected TFSF, one-way, non-soft, cancelled/failed runs, substrates, periodic cells, external sources without a reference | TFSF boxes admitted (see below). One-way planes remain impossible in this contract because they need a periodic transverse cell. Cancelled runs stay rejected. Observation points inside or on the box are rejected |
+| Diffraction orders | FFT per order on one plane, power from `|E_t x H_t*|` after projecting transverse to `k`, one `k0` for every frequency, no forward/backward separation | `diffraction_orders` separates forward/backward branches from `E` and `H`, keeps Bloch phase, flags evanescent orders, `diffraction_efficiency` with a matched reference | Unchanged |
 
 ## Required native data and geometry
 
@@ -30,12 +50,32 @@ conservative support bounds must be inside the measurement box and one mesh
 cell clear of its faces. This also rejects substrates and outside scatterers.
 Rotated objects can be rejected conservatively by their support bounds.
 
-The initial source contract supports ordinary native **soft** sources. Total
-radiation requires their actual Yee support to be enclosed and clear of the
-faces. Matched incident subtraction permits external sources only when their
-support stays separated from the measurement surface. TFSF scattered-side and
-one-way source provenance are not yet admitted by this adapter. Cancelled or
-failed runs and missing completed-step metadata are rejected.
+Ordinary native **soft** sources: total radiation requires their actual Yee
+support to be enclosed and clear of the faces. Matched incident subtraction
+permits external sources only when their support stays separated from the
+measurement surface.
+
+**TFSF boxes** are admitted by their staggered face positions. The box corrects
+E on its lo/hi node faces and H one half cell outside them. When every
+measurement face is at least one cell outside that shell, the faces lie in the
+scattered-field region; the stored fields are the scattered field and the report
+records `field_kind: scattered` with `incident_removal: tfsf scattered-field
+region`. No reference is required, but a matched empty-box reference may still
+be subtracted to remove the finite injection error. When the measurement box lies
+at least one cell inside the TFSF box, the faces carry total fields and a matched
+reference is mandatory; the report then records `matched reference`. A TFSF box
+whose faces cross or approach the measurement faces is rejected, because such a
+surface mixes total and scattered samples. Objects between the TFSF box and the
+measurement faces are not checked beyond the existing enclosure rule.
+
+**One-way planes** stay rejected. They span a complete periodic transverse
+cell, and the isolated closed-box contract requires PML on all six faces, so the
+Project itself fails validation before the adapter runs.
+
+**Cancelled or failed runs** and missing completed-step metadata stay rejected.
+Their stored DFT covers an arbitrary truncated window in which the source may
+not have finished and fields may not have decayed, so the six faces are not a
+consistent spectral radiation surface. The field arrays cannot reveal this.
 
 ## Python and NPZ
 
@@ -70,6 +110,27 @@ The example command itself never starts FDTD.
 field and metadata snapshots. Caller edits cannot alter subsequent projections.
 Its public metadata includes bounds, index, frequency tuple, field dtype, and a
 copied JSON report. Projection returns the existing FarFieldResult type.
+
+### Finite-distance near zone and observation grids
+
+```python
+from torchfdtd import spherical_directions, spherical_points, cartesian_plane_points
+import math, torch
+
+theta, phi = torch.linspace(0, math.pi, 19), torch.linspace(0, 2*math.pi, 36)[:-1]
+far = box.project(spherical_directions(theta, phi))          # angular grid
+near = box.nearzone(spherical_points(theta, phi, 5.))          # sphere of 5 um
+plane = box.nearzone(cartesian_plane_points('z', 3., torch.linspace(-2, 2, 41),
+                                            torch.linspace(-2, 2, 41)))
+print(near.fields.shape, near.poynting().shape)                # (F, P, 6), (F, P, 3)
+```
+
+`nearzone` evaluates the exact free-space Green function of the six-face
+equivalent currents at fixed CPU points strictly outside the box, in the plane
+field units. It is charged against the same host budget as `project`, runs
+without autograd, and keeps the stored dtype. Its cost is proportional to
+(faces x face samples x observation points), so a 41 x 41 plane over a 24^3
+example box is a few seconds on one CPU core; the browser does not expose it.
 
 For scattering, pass `reference=` to the in-memory adapter or `reference_path=`
 to the loader. The reference must be homogeneous with the same native source,
@@ -130,8 +191,12 @@ accuracy claim. See the [native workflow record](validation/native_farfield_work
 
 [Adapter tests](../tests/test_radiation_box.py) use an independent analytic
 vector dipole for dtype-preserving amplitude checks, coherent incident
-subtraction, immutable snapshots and admission/metadata failures.
+subtraction, immutable snapshots, admission/metadata failures, the five TFSF
+placements above, the one-way rejection reason, and stored near-zone output
+equal to the direct transform under the host budget.
 [Loader tests](../tests/test_radiation_box_io.py) check bounded selected-member
 loading and malformed archives. Browser and API integration use the actual
-stored six-face native example. No overall FDTDX parity, substrate/lattice
-far-field support, or performance advantage is inferred from these checks.
+stored six-face native example. The near-zone and observation-grid analytics,
+tolerances and gradient checks are recorded in [RADIATION.md](RADIATION.md).
+No overall FDTDX parity, substrate/lattice far-field support, lossy exterior,
+single-plane projection, or performance advantage is inferred from these checks.

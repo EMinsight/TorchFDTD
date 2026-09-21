@@ -104,13 +104,16 @@ from .mode_ports import WaveguideMode, solve_waveguide_modes, mode_power_overlap
 from .mode_injection import (ModalLaunch, prepare_modal_launch, ModeInjectedPlaneSimulation,
                              modal_plane_amplitudes, modal_s_parameters)
 from .radiation import (DiffractionResult, diffraction_orders, diffraction_efficiency,
-                        FarFieldResult, project_farfield, normalized_farfield_intensity)
+                        FarFieldResult, project_farfield, normalized_farfield_intensity,
+                        NearZoneResult, project_nearzone, farfield_at_points,
+                        spherical_directions, spherical_points, cartesian_plane_points)
 __all__ += ['DensityParameterization', 'GDSLayer', 'GDSPortLayer', 'GDSPort', 'GDSLimits',
             'GDSImport', 'import_gds', 'export_gds', 'WaveguideMode', 'solve_waveguide_modes',
             'mode_power_overlap', 'normalized_mode_power', 'ModalLaunch', 'prepare_modal_launch',
             'ModeInjectedPlaneSimulation', 'modal_plane_amplitudes', 'modal_s_parameters',
             'DiffractionResult', 'diffraction_orders', 'diffraction_efficiency', 'FarFieldResult',
-            'project_farfield', 'normalized_farfield_intensity']
+            'project_farfield', 'normalized_farfield_intensity', 'NearZoneResult', 'project_nearzone',
+            'farfield_at_points', 'spherical_directions', 'spherical_points', 'cartesian_plane_points']
 
 from .anisotropy import TensorDielectricSimulation
 from .tensor_project import TensorProject, tensor_from_project

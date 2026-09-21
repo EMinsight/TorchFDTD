@@ -220,32 +220,27 @@ class FarFieldResult:
         return .5 * self.refractive_index * self.electric_amplitude.abs().square().sum(-1)
 
     def fields_at_radius(self, radius_m):
-        """Leading 1/r term only. Radius is measured from the phase origin."""
-        r = float(radius_m)
-        if not math.isfinite(r) or r <= 0:
-            raise ValueError('Radius must be finite and positive.')
+        """Leading 1/r term only. Radius is measured from the phase origin.
+
+        ``radius_m`` is one scalar or one fixed radius per direction, in metres.
+        """
+        device = self.electric_amplitude.device
+        r = torch.as_tensor(radius_m, dtype=torch.float64, device=device)
+        if (r.requires_grad or r.ndim > 1 or (r.ndim == 1 and r.shape != (len(self.directions),)) or
+                not bool(torch.isfinite(r).all()) or bool((r <= 0).any())):
+            raise ValueError('Radius must be finite and positive, one scalar or one fixed value per direction.')
         # A macroscopic radius spans millions of optical radians. Evaluate
-        # this fixed scalar phase in double precision, then retain the field
+        # this fixed phase in double precision, then retain the field
         # dtype. FP32 phase rounding would corrupt coherent fields at .5 m.
         k = 2 * math.pi * self.frequency_hz.double() / C0 * self.refractive_index
-        propagation = (torch.exp(1j * k * r) / r).to(self.electric_amplitude.dtype)
-        e = self.electric_amplitude * propagation[:, None, None]
+        propagation = (torch.exp(1j * k[:, None] * r) / r).to(self.electric_amplitude.dtype)
+        e = self.electric_amplitude * propagation[:, :, None]
         h = self.refractive_index * torch.linalg.cross(self.directions.to(e.dtype)[None].expand_as(e), e)
         return torch.cat((e, h), -1)
 
 
-def project_farfield(faces, directions, *, bounds_um, refractive_index=1.,
-                     phase_origin_um=(0., 0., 0.), direction_chunk=16, point_chunk=2048):
-    """Closed-box vector equivalence-current integral into arbitrary directions.
-
-    ``faces`` maps x_min/x_max/y_min/y_max/z_min/z_max to collocated spectral
-    planes with positive-axis component conventions. Outward signs are supplied
-    here. The box must enclose all scatterers/sources of the supplied fields and
-    lie in the declared homogeneous exterior, outside PML. For scattering,
-    subtract matched incident fields on ALL six faces before projection.
-    An open plane, periodic cell or a box intersecting a substrate is not a
-    valid isolated-object closed surface for this API.
-    """
+def _closed_box(faces, bounds_um, refractive_index):
+    """Validate six named faces against one declared closed box and exterior index."""
     names = tuple(d + side for d in 'xyz' for side in ('_min', '_max'))
     if set(faces) != set(names):
         raise ValueError('Far-field projection requires all six named closed-box faces.')
@@ -253,16 +248,6 @@ def project_farfield(faces, directions, *, bounds_um, refractive_index=1.,
     _plane(first)
     n = _index(refractive_index)
     device, dtype = first.fields.device, first.fields.real.dtype
-    direction = _real_metadata(directions, first.points_um, 'Directions')
-    origin = _real_metadata(phase_origin_um, first.points_um, 'Phase origin')
-    if (direction.ndim != 2 or direction.shape[1] != 3 or not len(direction) or direction.requires_grad or
-            not bool(torch.isfinite(direction).all()) or
-            not torch.allclose(direction.norm(dim=-1), torch.ones(len(direction), device=device, dtype=dtype), rtol=2e-5, atol=2e-6)):
-        raise ValueError('Directions must be fixed finite unit vectors with shape (N, 3).')
-    if origin.shape != (3,) or origin.requires_grad or not bool(torch.isfinite(origin).all()):
-        raise ValueError('Phase origin must be a fixed finite point in micrometres.')
-    if any(not isinstance(x, int) or isinstance(x, bool) or x <= 0 for x in (direction_chunk, point_chunk)):
-        raise ValueError('Projection chunk sizes must be positive integers.')
     bound = _real_metadata(bounds_um, first.points_um, 'Bounds')
     if bound.shape != (3, 2) or not bool(torch.isfinite(bound).all()) or bool((bound[:, 1] <= bound[:, 0]).any()):
         raise ValueError('Closed-box bounds must have three positive finite spans.')
@@ -278,6 +263,198 @@ def project_farfield(faces, directions, *, bounds_um, refractive_index=1.,
         tolerance = 32 * torch.finfo(dtype).eps * max(1., float(bound.abs().max()))
         if not torch.allclose(face.points_um[:, a], bound[a, side].expand(len(face.points_um)), rtol=0, atol=tolerance):
             raise ValueError('Surface plane does not coincide with its declared closed-box face.')
+    return names, first, n, bound
+
+
+def _observation_points(points_um, like, bound):
+    """Fixed finite (P, 3) micrometre points strictly outside the closed box."""
+    points = _real_metadata(points_um, like.points_um, 'Observation points')
+    if (points.ndim != 2 or points.shape[1] != 3 or not len(points) or points.requires_grad or
+            not bool(torch.isfinite(points).all())):
+        raise ValueError('Observation points must be a fixed finite (P, 3) array in micrometres.')
+    tolerance = 32 * torch.finfo(points.dtype).eps * max(1., float(bound.abs().max()))
+    inside = ((points >= bound[:, 0] - tolerance) & (points <= bound[:, 1] + tolerance)).all(-1)
+    if bool(inside.any()):
+        raise ValueError('Observation points must lie strictly outside the closed box.')
+    return points
+
+
+def _chunks(*sizes):
+    if any(not isinstance(x, int) or isinstance(x, bool) or x <= 0 for x in sizes):
+        raise ValueError('Projection chunk sizes must be positive integers.')
+
+
+def spherical_directions(theta_rad, phi_rad):
+    """Unit vectors on the tensor-product theta x phi grid, theta varying slowest.
+
+    Theta is measured from +z in [0, pi] and phi from +x toward +y, in radians.
+    """
+    theta = torch.as_tensor(theta_rad, dtype=torch.float64).reshape(-1)
+    phi = torch.as_tensor(phi_rad, dtype=torch.float64).reshape(-1)
+    # Single-precision pi exceeds math.pi by one FP32 ulp; admit that roundoff.
+    slack = 4 * torch.finfo(torch.float32).eps
+    if (not len(theta) or not len(phi) or not bool(torch.isfinite(theta).all()) or not bool(torch.isfinite(phi).all()) or
+            bool((theta < -slack).any()) or bool((theta > math.pi + slack).any())):
+        raise ValueError('Theta must be finite radians in [0, pi] and phi finite radians, both nonempty.')
+    t, p = torch.meshgrid(theta.clamp(0., math.pi), phi, indexing='ij')
+    return torch.stack((torch.sin(t) * torch.cos(p), torch.sin(t) * torch.sin(p), torch.cos(t)), -1).reshape(-1, 3)
+
+
+def _origin(origin_um):
+    origin = torch.as_tensor(origin_um, dtype=torch.float64)
+    if origin.shape != (3,) or not bool(torch.isfinite(origin).all()):
+        raise ValueError('Origin must be a finite point in micrometres.')
+    return origin
+
+
+def spherical_points(theta_rad, phi_rad, radius_um, origin_um=(0., 0., 0.)):
+    """Cartesian micrometre points at one radius on the spherical grid around ``origin_um``."""
+    r = float(radius_um)
+    if not math.isfinite(r) or r <= 0:
+        raise ValueError('Radius must be finite and positive.')
+    return _origin(origin_um) + r * spherical_directions(theta_rad, phi_rad)
+
+
+def cartesian_plane_points(normal, offset_um, u_um, v_um, origin_um=(0., 0., 0.)):
+    """Points of a u x v grid on the plane ``offset_um`` along ``normal`` from ``origin_um``.
+
+    ``u`` and ``v`` follow the cyclic transverse axes used by the plane APIs:
+    y,z for an x-normal plane, z,x for y-normal and x,y for z-normal. ``u``
+    varies slowest. Coordinates are micrometres relative to ``origin_um``.
+    """
+    if normal not in ('x', 'y', 'z'):
+        raise ValueError('Plane normal must be x, y or z.')
+    a = 'xyz'.index(normal)
+    origin = _origin(origin_um)
+    offset = float(offset_um)
+    u = torch.as_tensor(u_um, dtype=torch.float64).reshape(-1)
+    v = torch.as_tensor(v_um, dtype=torch.float64).reshape(-1)
+    if (not math.isfinite(offset) or not len(u) or not len(v) or
+            not bool(torch.isfinite(u).all()) or not bool(torch.isfinite(v).all())):
+        raise ValueError('Plane offset and transverse coordinates must be finite and nonempty.')
+    ug, vg = torch.meshgrid(u, v, indexing='ij')
+    points = torch.empty((ug.numel(), 3), dtype=torch.float64)
+    points[:, a] = origin[a] + offset
+    points[:, (a + 1) % 3] = origin[(a + 1) % 3] + ug.reshape(-1)
+    points[:, (a + 2) % 3] = origin[(a + 2) % 3] + vg.reshape(-1)
+    return points
+
+
+def farfield_at_points(faces, points_um, *, bounds_um, refractive_index=1., phase_origin_um=(0., 0., 0.), **kwargs):
+    """Far-field model at Cartesian points: leading 1/r term along each point's direction.
+
+    Directions and radii are measured from ``phase_origin_um``. Returns (F, P, 6)
+    E/H in the plane field units. Points must lie strictly outside the box.
+    """
+    names, first, n, bound = _closed_box(faces, bounds_um, refractive_index)
+    points = _observation_points(points_um, first, bound)
+    origin = _real_metadata(phase_origin_um, first.points_um, 'Phase origin')
+    if origin.shape != (3,) or origin.requires_grad or not bool(torch.isfinite(origin).all()):
+        raise ValueError('Phase origin must be a fixed finite point in micrometres.')
+    offset = (points - origin).double()
+    radius = offset.norm(dim=-1)
+    if bool((radius <= 0).any()):
+        raise ValueError('Far-field observation points must not coincide with the phase origin.')
+    far = project_farfield(faces, offset / radius[:, None], bounds_um=bounds_um, refractive_index=refractive_index,
+                           phase_origin_um=phase_origin_um, **kwargs)
+    return far.fields_at_radius(radius * 1e-6)
+
+
+@dataclass
+class NearZoneResult:
+    fields: torch.Tensor  # F, point, Ex..Hz in the plane field units (reduced field * s)
+    points_um: torch.Tensor
+    frequency_hz: torch.Tensor
+    refractive_index: float
+
+    def poynting(self):
+        """Time-averaged Poynting vector .5 Re(E x H*), reduced E*H * s^2 per point."""
+        e, h = self.fields[..., :3], self.fields[..., 3:]
+        return .5 * torch.linalg.cross(e, h.conj()).real
+
+
+def project_nearzone(faces, points_um, *, bounds_um, refractive_index=1., point_chunk=2048, observation_chunk=64):
+    """Exact homogeneous Green-function fields of the closed-box currents at finite distance.
+
+    With ``A = int J g dS``, ``F = int M g dS``, ``g = exp(ikR)/(4 pi R)``,
+    ``J = outward x H`` and ``M = -outward x E`` in reduced units (mu_r = 1):
+    ``E = i k0 [A + grad div A / k^2] - curl F`` and
+    ``H = i k0 n^2 [F + grad div F / k^2] + curl A``. The gradient and curl act
+    on the free-space Green function, so near-, intermediate- and far-zone
+    terms are all retained and E gains a radial component. Points must lie
+    strictly outside the box: inside, the same integral returns the negative
+    field of exterior sources, not the interior field. The Green function and
+    its derivatives are evaluated in double precision before casting to the
+    field dtype, so macroscopic radii keep a coherent phase.
+    """
+    names, first, n, bound = _closed_box(faces, bounds_um, refractive_index)
+    points = _observation_points(points_um, first, bound)
+    _chunks(point_chunk, observation_chunk)
+    device, cdtype, rdtype = first.fields.device, first.fields.dtype, first.fields.real.dtype
+    k0 = 2 * math.pi * first.frequency_hz.double() / C0
+    k = n * k0
+    ik0 = (1j * k0).to(cdtype)[:, None, None, None]
+    inverse_k2 = (1 / k.square()).to(rdtype)[:, None, None, None]
+    output = []
+    for start in range(0, len(points), observation_chunk):
+        observed = points[start:start + observation_chunk].double() * 1e-6
+        e = torch.zeros((len(k), len(observed), 3), device=device, dtype=cdtype)
+        h = torch.zeros_like(e)
+        for name in names:
+            face = faces[name]
+            normal = torch.zeros(3, device=device, dtype=rdtype)
+            normal['xyz'.index(name[0])] = -1 if name.endswith('min') else 1
+            for offset in range(0, len(face.points_um), point_chunk):
+                section = slice(offset, offset + point_chunk)
+                fields = face.fields[:, section]
+                outward = normal.to(cdtype).expand_as(fields[..., :3])
+                weight = face.weights[section][None, :, None]
+                j = (torch.linalg.cross(outward, fields[..., 3:]) * weight)[:, None]
+                m = (-torch.linalg.cross(outward, fields[..., :3]) * weight)[:, None]
+                displacement = observed[:, None, :] - (face.points_um[section].double() * 1e-6)[None]
+                r = displacement.norm(dim=-1)
+                rhat = (displacement / r[..., None]).to(rdtype)[None]
+                ikr = 1j * k[:, None, None] * r[None]
+                g = torch.exp(ikr) / (4 * math.pi * r[None])
+                g1 = g * (ikr - 1) / r[None]
+                g2 = g1 * (ikr - 1) / r[None] + g / r[None].square()
+                g, g1, g1r, g2 = [x.to(cdtype)[..., None] for x in (g, g1, g1 / r[None], g2)]
+                rj = (rhat * j).sum(-1, keepdim=True)
+                rm = (rhat * m).sum(-1, keepdim=True)
+                potential_a = g * j + (g2 * rhat * rj + g1r * (j - rhat * rj)) * inverse_k2
+                potential_f = g * m + (g2 * rhat * rm + g1r * (m - rhat * rm)) * inverse_k2
+                complex_rhat = rhat.to(cdtype)
+                curl_a = g1 * torch.linalg.cross(*torch.broadcast_tensors(complex_rhat, j))
+                curl_f = g1 * torch.linalg.cross(*torch.broadcast_tensors(complex_rhat, m))
+                e = e + (ik0 * potential_a - curl_f).sum(2)
+                h = h + (ik0 * n**2 * potential_f + curl_a).sum(2)
+        output.append(torch.cat((e, h), -1))
+    return NearZoneResult(torch.cat(output, dim=1), points, first.frequency_hz, n)
+
+
+def project_farfield(faces, directions, *, bounds_um, refractive_index=1.,
+                     phase_origin_um=(0., 0., 0.), direction_chunk=16, point_chunk=2048):
+    """Closed-box vector equivalence-current integral into arbitrary directions.
+
+    ``faces`` maps x_min/x_max/y_min/y_max/z_min/z_max to collocated spectral
+    planes with positive-axis component conventions. Outward signs are supplied
+    here. The box must enclose all scatterers/sources of the supplied fields and
+    lie in the declared homogeneous exterior, outside PML. For scattering,
+    subtract matched incident fields on ALL six faces before projection.
+    An open plane, periodic cell or a box intersecting a substrate is not a
+    valid isolated-object closed surface for this API.
+    """
+    names, first, n, _ = _closed_box(faces, bounds_um, refractive_index)
+    device, dtype = first.fields.device, first.fields.real.dtype
+    direction = _real_metadata(directions, first.points_um, 'Directions')
+    origin = _real_metadata(phase_origin_um, first.points_um, 'Phase origin')
+    if (direction.ndim != 2 or direction.shape[1] != 3 or not len(direction) or direction.requires_grad or
+            not bool(torch.isfinite(direction).all()) or
+            not torch.allclose(direction.norm(dim=-1), torch.ones(len(direction), device=device, dtype=dtype), rtol=2e-5, atol=2e-6)):
+        raise ValueError('Directions must be fixed finite unit vectors with shape (N, 3).')
+    if origin.shape != (3,) or origin.requires_grad or not bool(torch.isfinite(origin).all()):
+        raise ValueError('Phase origin must be a fixed finite point in micrometres.')
+    _chunks(direction_chunk, point_chunk)
     k = 2 * math.pi * first.frequency_hz / C0 * n
     output = []
     for start in range(0, len(direction), direction_chunk):

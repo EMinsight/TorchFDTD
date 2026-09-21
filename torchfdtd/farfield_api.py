@@ -158,7 +158,7 @@ def register_farfield_routes(app, get_job):
                 relative = intensity / maximum if maximum > 0 else torch.zeros_like(intensity)
             result = dict(request=snapshot,
                 request_digest=hashlib.sha256(json.dumps(snapshot, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest(),
-                job_id=key, reference=request.reference, field_kind='scattered' if reference else 'total',
+                job_id=key, reference=request.reference, field_kind=box.report['field_kind'],
                 frequency_hz=float(far.frequency_hz[0]), frequency_thz=float(far.frequency_hz[0]) * 1e-12,
                 refractive_index=request.refractive_index, phase_origin_um=far.phase_origin_um.tolist(),
                 bounds_um=snapshot['bounds_um'], theta_deg=theta.tolist(), phi_deg=phi.tolist(),

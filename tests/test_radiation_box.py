@@ -67,11 +67,17 @@ def test_coherent_matched_incident_subtraction_on_every_face():
 @pytest.mark.parametrize('defect,reason',[
     ('duplicate','distinct'),('cancelled','Cancelled'),('periodic','isolated'),
     ('face_position','closed box'),('partial','rectangle'),('apodization','unapodized'),
-    ('object','contrast-object'),('source','source support'),('index','background')])
+    ('object','contrast-object'),('source','source support'),('index','background'),
+    ('oneway','periodic transverse')])
 def test_geometry_metadata_and_completion_rejections(defect,reason):
     result,ids,bounds,_,_=data();index=1.3
     if defect=='duplicate': ids['x_max']=ids['x_min']
     elif defect=='cancelled': result['summary']['cancelled']=True
+    elif defect=='oneway':
+        # A one-way plane needs a periodic transverse cell, which the isolated
+        # all-PML closed-box contract excludes at Project validation.
+        result['project']['sources']=[Source(kind='plane',injection='oneway',normal='x',direction='+',
+            size=(0.,4.,4.),component='Ez').model_dump()]
     elif defect=='periodic':
         for s in ('min','max'): result['project']['region']['boundaries']['x_'+s]['kind']='periodic'
     elif defect=='face_position': result['frequency_fields'][0]['points_um'][:,0]+=.01
@@ -83,6 +89,45 @@ def test_geometry_metadata_and_completion_rejections(defect,reason):
     elif defect=='source': result['project']['sources'][0]['center']=[1.1,0,0]
     else: index=1.
     with pytest.raises(ValueError,match=reason): native_radiation_box(result,ids,bounds_um=bounds,refractive_index=index)
+
+
+@pytest.mark.parametrize('span,reference,outcome',[
+    (.6,False,'tfsf scattered-field region'),(.6,True,'matched reference'),
+    (2.,True,'matched reference'),(2.,False,'matched reference for incident'),(1.,True,'cross or approach')])
+def test_tfsf_box_provenance_admission(span,reference,outcome):
+    # Mesh .1 um: a .6 um box has E faces at +-.3 and H faces at +-.35, clear
+    # of the +-.65/.7/.6 measurement faces by more than one cell. A 2 um box
+    # surrounds the measurement box, so its faces carry total fields and need
+    # a matched reference. A 1 um box (+-.5) approaches the x faces at +-.65.
+    result,ids,bounds,faces,_=data()
+    result['project']['sources']=[Source(kind='tfsf',size=(span,)*3,normal='x',direction='+',component='Ez').model_dump()]
+    ref=deepcopy(result) if reference else None
+    if outcome in ('tfsf scattered-field region','matched reference'):
+        packet=native_radiation_box(result,ids,bounds_um=bounds,refractive_index=1.3,reference=ref)
+        assert packet.report['field_kind']=='scattered' and packet.report['incident_removal']==outcome
+        expected=project_farfield(faces,[[1.,0,0]],bounds_um=bounds,refractive_index=1.3).electric_amplitude
+        got=packet.project([[1.,0,0]]).electric_amplitude
+        torch.testing.assert_close(got,torch.zeros_like(got) if reference else expected,rtol=1e-12,atol=1e-18)
+    else:
+        with pytest.raises(ValueError,match=outcome):
+            native_radiation_box(result,ids,bounds_um=bounds,refractive_index=1.3,reference=ref)
+
+
+def test_stored_nearzone_matches_direct_transform_and_is_budgeted(monkeypatch):
+    from torchfdtd.radiation import project_nearzone
+    result,ids,bounds,faces,_=data()
+    packet=native_radiation_box(result,ids,bounds_um=bounds,refractive_index=1.3)
+    assert packet.report['incident_removal'] is None
+    points=[[1.5,.2,-.1],[0.,0.,-2.],[-1.,1.,1.]]
+    got=packet.nearzone(points,point_chunk=61,observation_chunk=2)
+    expected=project_nearzone(faces,points,bounds_um=bounds,refractive_index=1.3,point_chunk=61,observation_chunk=2)
+    torch.testing.assert_close(got.fields,expected.fields,rtol=0,atol=0)
+    assert not got.fields.requires_grad and got.points_um.shape==(3,3)
+    with pytest.raises(ValueError,match='strictly outside'): packet.nearzone([[0.,0.,0.]])
+    with pytest.raises(ValueError,match='fixed CPU metadata'): packet.nearzone(torch.tensor(points,requires_grad=True))
+    def forbidden(*a,**k): raise AssertionError('copied before budget')
+    monkeypatch.setattr('torchfdtd.radiation_box.native_radiation_plane',forbidden)
+    with pytest.raises(ValueError,match='budget'): packet.nearzone(points,host_budget_bytes=1)
 
 
 def test_preparation_and_projection_budget_precede_copies(monkeypatch):

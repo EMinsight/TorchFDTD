@@ -11,7 +11,7 @@ from types import MappingProxyType
 import numpy as np
 import torch
 from .models import Project
-from .radiation import project_farfield, _plane, _rectangle
+from .radiation import project_farfield, project_nearzone, _plane, _rectangle
 from .radiation_io import native_radiation_plane
 
 _NAMES=tuple(a+s for a in 'xyz' for s in ('_min','_max'))
@@ -141,13 +141,30 @@ def _geometry(project,bounds,index,reference):
 
 
 def _sources(project,bounds,subtracted):
+    """Admit source provenance; return True when every face lies in a TFSF scattered-field region."""
     from .solver import source_slice,field_axes
-    r=project.region
+    r=project.region;scattered=False
     for raw in project.sources:
         source=project.resolved_source(raw)
         if not source.enabled: continue
-        if source.kind=='tfsf': raise ValueError('Stored TFSF scattered-side provenance is not yet supported; use matched ordinary sources.')
-        if source.injection!='soft': raise ValueError('Stored closed-box source validation currently supports soft native sources only.')
+        if source.kind=='tfsf':
+            # The staggered box corrects E on the lo/hi node faces and H one
+            # half cell outside them. Faces are admitted only when clear of
+            # that shell by one cell on the scattered side (fields are the
+            # scattered field) or on the total-field side (matched reference
+            # subtraction removes the incident wave). A crossing box mixes
+            # total and scattered samples and is not a closed radiation surface.
+            from .tfsf import tfsf_plan
+            _,lo,hi,_=tfsf_plan(source,r);nodes=r.mesh_nodes;step=r.axis_steps
+            outer=[(float(nodes[a][lo[a]])-step[a],float(nodes[a][hi[a]])+step[a]) for a in range(3)]
+            inner=[(float(nodes[a][lo[a]])+step[a],float(nodes[a][hi[a]])-step[a]) for a in range(3)]
+            if all(bounds[a][0]+step[a]<outer[a][0] and outer[a][1]<bounds[a][1]-step[a] for a in range(3)):
+                scattered=True;continue
+            if not all(inner[a][0]<bounds[a][0]-step[a] and bounds[a][1]+step[a]<inner[a][1] for a in range(3)):
+                raise ValueError('TFSF box faces cross or approach the measurement faces; enclose the TFSF box with one cell clearance or place the box inside its total-field region.')
+            if not subtracted: raise ValueError('A measurement box inside a TFSF total-field region needs a matched reference for incident subtraction.')
+            continue
+        if source.injection!='soft': raise ValueError('One-way planes span a periodic transverse cell and are not isolated closed-box sources.')
         for component,_ in source.polarization_components:
             scalar=source.model_copy(update={'component':component,'theta':None})
             loc=source_slice(scalar,r);axes=field_axes(r,component)
@@ -158,6 +175,7 @@ def _sources(project,bounds,subtracted):
             disjoint=any(support[a][1]<bounds[a][0]-r.axis_steps[a] or support[a][0]>bounds[a][1]+r.axis_steps[a] for a in range(3))
             if not subtracted: raise ValueError('Total-field source support must be enclosed and clear of the measurement faces.')
             if not disjoint: raise ValueError('Incident source support crosses or approaches the measurement faces; move the source or box.')
+    return scattered
 
 
 def _support(project,plane):
@@ -191,21 +209,36 @@ class StoredRadiationBox:
     @property
     def report(self): return json.loads(self._report_json)
 
+    @staticmethod
+    def _rows(value,name):
+        if isinstance(value,torch.Tensor) and (value.requires_grad or value.device.type!='cpu'):
+            raise ValueError(f'Stored projection {name} must be fixed CPU metadata.')
+        shape=getattr(value,'shape',None)
+        if shape is None:
+            if not isinstance(value,(list,tuple)): raise ValueError(f'{name} must have shape (N,3).')
+            count=len(value)
+            if any(not isinstance(row,(list,tuple)) or len(row)!=3 for row in value): raise ValueError(f'{name} must have shape (N,3).')
+        else:
+            if len(shape)!=2 or shape[1]!=3: raise ValueError(f'{name} must have shape (N,3).')
+            count=int(shape[0])
+        if count<1: raise ValueError(f'At least one row of {name} is required.')
+        return count
+
+    def _faces(self,required,host_budget_bytes):
+        _budget(required,host_budget_bytes)
+        faces={}
+        for name,record in self._records:
+            plane=native_radiation_plane({k:(v.copy() if isinstance(v,np.ndarray) else v) for k,v in record.items()},
+                                         frequency_index=None,max_samples=record['fields'].size)
+            faces[name]=plane
+        return faces
+
     def project(self,directions,*,phase_origin_um=(0,0,0),direction_chunk=16,point_chunk=2048,host_budget_bytes=512*1024**2):
         if type(direction_chunk) is not int or direction_chunk<1 or type(point_chunk) is not int or point_chunk<1:
             raise ValueError('Projection chunks must be positive integers.')
-        for value in (directions,phase_origin_um):
-            if isinstance(value,torch.Tensor) and (value.requires_grad or value.device.type!='cpu'):
-                raise ValueError('Stored projection directions and phase origin must be fixed CPU metadata.')
-        shape=getattr(directions,'shape',None)
-        if shape is None:
-            if not isinstance(directions,(list,tuple)): raise ValueError('Directions must have shape (D,3).')
-            count=len(directions)
-            if any(not isinstance(row,(list,tuple)) or len(row)!=3 for row in directions): raise ValueError('Directions must have shape (D,3).')
-        else:
-            if len(shape)!=2 or shape[1]!=3: raise ValueError('Directions must have shape (D,3).')
-            count=int(shape[0])
-        if count<1: raise ValueError('At least one direction is required.')
+        if isinstance(phase_origin_um,torch.Tensor) and (phase_origin_um.requires_grad or phase_origin_um.device.type!='cpu'):
+            raise ValueError('Stored projection directions and phase origin must be fixed CPU metadata.')
+        count=self._rows(directions,'directions')
         f=len(self.frequency_hz);item=self._records[0][1]['fields'].dtype.itemsize
         retained=self.report['retained_bytes'];points=self.report['points']
         d=min(count,direction_chunk);p=min(max(v['fields'].shape[1] for _,v in self._records),point_chunk)
@@ -213,16 +246,28 @@ class StoredRadiationBox:
         # phase/factor/equivalence currents/einsum temporary engineering bound.
         output=2*f*count*3*item
         workspace=32*f*d*p*item+64*f*(p+d)*item+512*points+count*3*8+65536
-        required=2*retained+output+workspace
-        _budget(required,host_budget_bytes)
-        faces={}
-        for name,record in self._records:
-            plane=native_radiation_plane({k:(v.copy() if isinstance(v,np.ndarray) else v) for k,v in record.items()},
-                                         frequency_index=None,max_samples=record['fields'].size)
-            faces[name]=plane
+        faces=self._faces(2*retained+output+workspace,host_budget_bytes)
         with torch.no_grad():
             return project_farfield(faces,directions,bounds_um=self.bounds_um,refractive_index=self.refractive_index,
                 phase_origin_um=phase_origin_um,direction_chunk=direction_chunk,point_chunk=point_chunk)
+
+    def nearzone(self,points_um,*,point_chunk=2048,observation_chunk=64,host_budget_bytes=512*1024**2):
+        """Exact finite-distance E/H at fixed CPU points strictly outside the box, without autograd."""
+        if type(observation_chunk) is not int or observation_chunk<1 or type(point_chunk) is not int or point_chunk<1:
+            raise ValueError('Projection chunks must be positive integers.')
+        count=self._rows(points_um,'observation points')
+        f=len(self.frequency_hz);item=self._records[0][1]['fields'].dtype.itemsize
+        retained=self.report['retained_bytes'];points=self.report['points']
+        o=min(count,observation_chunk);p=min(max(v['fields'].shape[1] for _,v in self._records),point_chunk)
+        # Output chunks plus cat, tensor snapshots, double-precision geometry
+        # and Green-function kernels, weighted currents and the broadcast
+        # (F, O, S, 3) potential/curl temporaries.
+        output=2*f*count*6*item
+        workspace=96*f*o*p*item+128*o*p*8+64*f*(p+o)*item+512*points+count*3*8+65536
+        faces=self._faces(2*retained+output+workspace,host_budget_bytes)
+        with torch.no_grad():
+            return project_nearzone(faces,points_um,bounds_um=self.bounds_um,refractive_index=self.refractive_index,
+                point_chunk=point_chunk,observation_chunk=observation_chunk)
 
 
 def native_radiation_box(result,monitor_ids,*,bounds_um,refractive_index,frequency_index=0,
@@ -249,7 +294,7 @@ def native_radiation_box(result,monitor_ids,*,bounds_um,refractive_index,frequen
     required=6*numeric+16*metadata+512*points+65536+axis_workspace
     _budget(required,host_budget_bytes)
     project=Project.model_validate(data[0]);_complete(data[1]);_geometry(project,bounds,refractive_index,False)
-    _sources(project,bounds,ref is not None)
+    tfsf_scattered=_sources(project,bounds,ref is not None)
     if ref is not None:
         reference_project=Project.model_validate(ref[0]);_complete(ref[1]);_geometry(reference_project,bounds,refractive_index,True)
         _sources(reference_project,bounds,True)
@@ -296,7 +341,9 @@ def native_radiation_box(result,monitor_ids,*,bounds_um,refractive_index,frequen
         owned['settings']=MappingProxyType(dict(spectrum=MappingProxyType(dict(apodization='none')),time_downsample=1))
         stored.append((name,MappingProxyType(owned)))
     retained=sum(v[k].nbytes for _,v in stored for k in _ARRAYS)
-    report=dict(field_kind='scattered' if ref is not None else 'total',retained_bytes=retained,
+    report=dict(field_kind='scattered' if ref is not None or tfsf_scattered else 'total',
+        incident_removal='matched reference' if ref is not None else 'tfsf scattered-field region' if tfsf_scattered else None,
+        retained_bytes=retained,
         points=data[4],monitor_ids=ids,run_signature=signature,reference_run_signature=signature if ref is not None else None,
         preparation_reservation_bytes=required,input_payload_bytes=numeric,metadata_bytes=metadata,
         axis_workspace_reservation_bytes=axis_workspace,

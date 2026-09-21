@@ -6,7 +6,8 @@ import pytest
 import torch
 from torchfdtd.adjoint_planes import DifferentiablePlaneResult
 from torchfdtd.radiation import (C0, diffraction_orders, diffraction_efficiency,
-    project_farfield, normalized_farfield_intensity)
+    project_farfield, normalized_farfield_intensity, project_nearzone, farfield_at_points,
+    spherical_directions, spherical_points, cartesian_plane_points)
 
 
 def plane(normal='z', bounds=((-1, 1), (-1, 1), (-1, 1)), side=1, count=16,
@@ -87,23 +88,30 @@ def test_fp32_grazing_cutoff_roundoff_is_rejected_for_multiple_indices():
             diffraction_orders(p, [(1, 0)], period_um=(2, 2), refractive_index=n)
 
 
+def analytic_dipole(points, *, n=1.3, shift=(.12, -.08, .05)):
+    """Exact E/H of a vector dipole at 1.55 um, all near/intermediate/far terms, shape (1, P, 6)."""
+    dtype = points.dtype
+    dipole = torch.tensor([.3 + .1j, -.2j, 1.], dtype=torch.complex64 if dtype == torch.float32 else torch.complex128)
+    rvec = points - torch.tensor(shift, dtype=dtype)
+    r = rvec.norm(dim=-1)
+    unit = rvec.to(dipole.dtype) / r[:, None]
+    dot = (unit * dipole).sum(-1, keepdim=True)
+    transverse = dipole - unit * dot
+    k = 2*math.pi*n/1.55
+    wave = torch.exp(1j*k*r)[:, None]
+    electric = wave/n**2 * (k*k*transverse/r[:, None] + (3*unit*dot-dipole)*(1/r**3-1j*k/r**2)[:, None])
+    magnetic = wave*k*k/n * torch.linalg.cross(unit, dipole.expand_as(unit)) * (1/r + 1j/(k*r*r))[:, None]
+    return torch.cat((electric, magnetic), -1)[None], dipole
+
+
 def dipole_faces(count, *, n=1.3, shift=(.12, -.08, .05), dtype=torch.float64, amplitude=1.):
     bounds = ((-.65, .65), (-.7, .7), (-.6, .6))
     faces = {}
-    dipole = torch.tensor([.3 + .1j, -.2j, 1.], dtype=torch.complex64 if dtype == torch.float32 else torch.complex128)
     for d in 'xyz':
         for side in (0, 1):
             p = plane(d, bounds, side, count, wavelength=1.55, dtype=dtype)
-            rvec = p.points_um - torch.tensor(shift, dtype=dtype)
-            r = rvec.norm(dim=-1)
-            unit = rvec.to(dipole.dtype) / r[:, None]
-            dot = (unit * dipole).sum(-1, keepdim=True)
-            transverse = dipole - unit * dot
-            k = 2*math.pi*n/1.55
-            wave = torch.exp(1j*k*r)[:, None]
-            electric = wave/n**2 * (k*k*transverse/r[:, None] + (3*unit*dot-dipole)*(1/r**3-1j*k/r**2)[:, None])
-            magnetic = wave*k*k/n * torch.linalg.cross(unit, dipole.expand_as(unit)) * (1/r + 1j/(k*r*r))[:, None]
-            faces[d + ('_min' if side == 0 else '_max')] = replace(p, fields=amplitude*torch.cat((electric, magnetic), -1)[None])
+            fields, dipole = analytic_dipole(p.points_um, n=n, shift=shift)
+            faces[d + ('_min' if side == 0 else '_max')] = replace(p, fields=amplitude*fields)
     return faces, bounds, dipole
 
 
@@ -194,7 +202,140 @@ def test_complex_radiation_geometry_is_rejected_without_silent_real_cast():
         project_farfield(faces, [[1., 0, 0]], bounds_um=bounds, phase_origin_um=torch.tensor([1j, 0j, 0j]))
 
 
-def test_native_fdtd_closed_surface_objective_material_vjp_matches_difference():
+def test_nearzone_dipole_fields_converge_with_radial_component():
+    # Every point is at least .55 um (about 24 count-56 cells) outside the
+    # box. The midpoint rule needs the face spacing small against the
+    # distance to the face and the wavelength; second order is then observed.
+    points = torch.tensor([[1.2, .3, -.4], [0., -1.6, .2], [.5, .5, 1.3], [-2., .1, .1], [1., 1., 1.]], dtype=torch.float64)
+    expected, _ = analytic_dipole(points)
+    errors = []
+    for count in (14, 28, 56):
+        faces, bounds, _ = dipole_faces(count)
+        got = project_nearzone(faces, points, bounds_um=bounds, refractive_index=1.3, point_chunk=97, observation_chunk=2)
+        assert got.fields.shape == (1, 5, 6) and got.fields.dtype == torch.complex128
+        errors.append(float((got.fields - expected).norm()/expected.norm()))
+    assert errors[0]/errors[1] > 3.5 and errors[1]/errors[2] > 3.5
+    assert errors[-1] < 5e-4
+    unit = points - torch.tensor([.12, -.08, .05], dtype=torch.float64)
+    unit = (unit / unit.norm(dim=-1, keepdim=True)).to(got.fields.dtype)
+    radial = (got.fields[0, :, :3]*unit).sum(-1).abs() / got.fields[0, :, :3].norm(dim=-1)
+    assert radial.max() > .2
+    poynting = got.poynting()
+    assert poynting.shape == (1, 5, 3) and poynting.dtype == torch.float64
+    torch.testing.assert_close(poynting, .5*torch.linalg.cross(expected[..., :3], expected[..., 3:].conj()).real, rtol=2e-3, atol=0)
+    # FP32 faces give the same fields at FP32 accuracy with an FP32 result.
+    faces, bounds, _ = dipole_faces(28, dtype=torch.float32)
+    single = project_nearzone(faces, points.float(), bounds_um=bounds, refractive_index=1.3)
+    assert single.fields.dtype == torch.complex64
+    assert float((single.fields - expected.to(torch.complex64)).norm()/expected.norm()) < 2e-3
+
+
+def test_nearzone_cuda_matches_cpu():
+    if not torch.cuda.is_available():
+        pytest.skip('CUDA unavailable')
+    faces, bounds, _ = dipole_faces(12, dtype=torch.float32)
+    points = torch.tensor([[1.5, .2, .1], [0., 0., -2.]], dtype=torch.float32)
+    host = project_nearzone(faces, points, bounds_um=bounds, refractive_index=1.3)
+    moved = {name: replace(face, fields=face.fields.cuda(), frequency_hz=face.frequency_hz.cuda(),
+                           points_um=face.points_um.cuda(), weights=face.weights.cuda()) for name, face in faces.items()}
+    device = project_nearzone(moved, points.cuda(), bounds_um=bounds, refractive_index=1.3, observation_chunk=1)
+    assert device.fields.device.type == 'cuda' and device.fields.dtype == torch.complex64
+    torch.testing.assert_close(device.fields.cpu(), host.fields, rtol=1e-5, atol=0)
+    far = farfield_at_points(moved, points.cuda(), bounds_um=bounds, refractive_index=1.3)
+    torch.testing.assert_close(far.cpu(), farfield_at_points(faces, points, bounds_um=bounds, refractive_index=1.3), rtol=1e-5, atol=0)
+
+
+def test_nearzone_converges_to_farfield_model_at_large_radius():
+    faces, bounds, _ = dipole_faces(28)
+    theta, phi = torch.linspace(.2, 2.9, 5), torch.linspace(0, 2*math.pi, 7)[:-1]
+    differences, analytic = [], []
+    for radius in (200., 2000.):
+        points = spherical_points(theta, phi, radius)
+        near = project_nearzone(faces, points, bounds_um=bounds, refractive_index=1.3)
+        far = farfield_at_points(faces, points, bounds_um=bounds, refractive_index=1.3)
+        expected, _ = analytic_dipole(points)
+        differences.append(float((near.fields - far).norm()/far.norm()))
+        analytic.append(float((near.fields - expected).norm()/expected.norm()))
+    # The far-field model omits the box-size phase k a^2/(2r) and the 1/(kr)
+    # terms, so the model difference falls as 1/r while the near-zone result
+    # stays at the count-28 quadrature floor.
+    assert differences[0]/differences[1] > 8 and differences[1] < 4e-4
+    assert max(analytic) < 1e-3
+
+
+def test_observation_grids_and_cartesian_far_field_are_consistent():
+    theta = torch.tensor([0., math.pi/3, math.pi], dtype=torch.float64)
+    phi = torch.tensor([0., math.pi/2, math.pi, 1.5*math.pi], dtype=torch.float64)
+    directions = spherical_directions(theta, phi)
+    assert torch.equal(directions, spherical_directions(theta.float(), phi.float()).to(directions.dtype)) or \
+        float((directions - spherical_directions(theta.float(), phi.float())).abs().max()) < 1e-6
+    t, p = np.meshgrid(theta.numpy(), phi.numpy(), indexing='ij')
+    expected = np.stack((np.sin(t)*np.cos(p), np.sin(t)*np.sin(p), np.cos(t)), -1).reshape(-1, 3)
+    np.testing.assert_allclose(directions.numpy(), expected, atol=1e-15)
+    sphere = spherical_points(theta, phi, 3., origin_um=(.1, -.2, .3))
+    torch.testing.assert_close(sphere, torch.tensor([.1, -.2, .3], dtype=torch.float64) + 3*directions)
+    grid = cartesian_plane_points('x', 2.5, [-1., 1.], [-.5, 0., .5], origin_um=(.1, 0., 0.))
+    assert grid.shape == (6, 3) and torch.equal(grid[:, 0], torch.full((6,), 2.6, dtype=torch.float64))
+    torch.testing.assert_close(grid[:, 1], torch.tensor([-1., -1., -1., 1., 1., 1.], dtype=torch.float64))
+    torch.testing.assert_close(grid[:, 2], torch.tensor([-.5, 0., .5]*2, dtype=torch.float64))
+    faces, bounds, _ = dipole_faces(12)
+    origin = (.1, 0., 0.)
+    at_points = farfield_at_points(faces, grid, bounds_um=bounds, refractive_index=1.3, phase_origin_um=origin)
+    offset = grid - torch.tensor(origin, dtype=torch.float64)
+    radius = offset.norm(dim=-1)
+    far = project_farfield(faces, offset/radius[:, None], bounds_um=bounds, refractive_index=1.3, phase_origin_um=origin)
+    torch.testing.assert_close(at_points, far.fields_at_radius(radius*1e-6), rtol=0, atol=0)
+    same = far.fields_at_radius(float(radius[0])*1e-6)
+    torch.testing.assert_close(at_points[:, 0], same[:, 0], rtol=1e-12, atol=0)
+    electric = at_points[0, :, :3]
+    longitudinal = (electric*offset.to(electric.dtype)).sum(-1).abs() / (electric.norm(dim=-1)*radius)
+    assert at_points.shape == (1, 6, 6) and float(longitudinal.max()) < 1e-12
+    # Radial per-point far fields at one sphere reduce to the scalar radius form.
+    points = spherical_points(theta, phi, 400.)
+    sphere_fields = farfield_at_points(faces, points, bounds_um=bounds, refractive_index=1.3)
+    torch.testing.assert_close(sphere_fields, project_farfield(faces, directions, bounds_um=bounds, refractive_index=1.3).fields_at_radius(400e-6), rtol=1e-12, atol=0)
+
+
+def test_nearzone_and_observation_inputs_are_rejected_explicitly():
+    faces, bounds, _ = dipole_faces(4)
+    with pytest.raises(ValueError, match='strictly outside'):
+        project_nearzone(faces, [[.2, .1, 0.], [3., 0., 0.]], bounds_um=bounds)
+    with pytest.raises(ValueError, match='strictly outside'):
+        farfield_at_points(faces, [[.65, 0., 0.]], bounds_um=bounds)
+    with pytest.raises(ValueError, match='must be real'):
+        project_nearzone(faces, torch.tensor([[3+1j, 0j, 0j]]), bounds_um=bounds)
+    with pytest.raises(ValueError, match='fixed'):
+        project_nearzone(faces, torch.tensor([[3., 0., 0.]], requires_grad=True), bounds_um=bounds)
+    with pytest.raises(ValueError, match='chunk'):
+        project_nearzone(faces, [[3., 0., 0.]], bounds_um=bounds, observation_chunk=0)
+    with pytest.raises(ValueError, match='six'):
+        project_nearzone({'x_min': faces['x_min']}, [[3., 0., 0.]], bounds_um=bounds)
+    with pytest.raises(ValueError, match='phase origin'):
+        farfield_at_points(faces, [[3., 0., 0.]], bounds_um=bounds, phase_origin_um=(3., 0., 0.))
+    with pytest.raises(ValueError, match='Theta'):
+        spherical_directions([3.2], [0.])
+    with pytest.raises(ValueError, match='Radius'):
+        spherical_points([1.], [0.], 0.)
+    with pytest.raises(ValueError, match='normal'):
+        cartesian_plane_points('w', 1., [0.], [0.])
+    far = project_farfield(faces, [[1., 0, 0], [0, 1., 0]], bounds_um=bounds)
+    with pytest.raises(ValueError, match='per direction'):
+        far.fields_at_radius([1., 2., 3.])
+    with pytest.raises(ValueError, match='per direction'):
+        far.fields_at_radius(-1.)
+
+
+@pytest.mark.parametrize('dtype', [torch.float32, torch.float64])
+def test_nearzone_objective_preserves_field_graph(dtype):
+    a = torch.tensor(1.7, dtype=dtype, requires_grad=True)
+    faces, bounds, _ = dipole_faces(10, dtype=dtype, amplitude=a)
+    near = project_nearzone(faces, torch.tensor([[1.5, .2, .1], [0., 0., -2.]], dtype=dtype), bounds_um=bounds, refractive_index=1.3)
+    objective = near.poynting().norm(dim=-1).sum()
+    gradient, = torch.autograd.grad(objective, a)
+    torch.testing.assert_close(gradient, 2*objective.detach()/a.detach(), rtol=2e-6 if dtype == torch.float32 else 1e-12, atol=0)
+
+
+def test_native_fdtd_far_and_nearzone_objective_material_vjp_matches_difference():
     from torchfdtd import FieldMonitor, DifferentiablePlaneSimulation, AdjointOptions
     from test_differentiable import project
     p = project('3d', steps=35)
@@ -212,15 +353,17 @@ def test_native_fdtd_closed_surface_objective_material_vjp_matches_difference():
     mask = torch.zeros_like(base)
     mask[9:11, 6:9, 6:9] = 1
     frequency = torch.tensor([C0/1.1e-6], dtype=torch.float64)
+    points = [[.5, .1, -.1], [-.4, .3, .2]]
     def objective(parameter):
         faces = model(base + parameter*mask, frequency)
         faces = {key: replace(face, fields=face.fields/p.region.time_step) for key, face in faces.items()}
         far = project_farfield(faces, [[1., 0, 0], [0., 1, 0]], bounds_um=bounds)
-        return far.intensity().sum()*1e12
+        near = project_nearzone(faces, points, bounds_um=bounds)
+        return torch.stack((far.intensity().sum()*1e12, near.poynting()[..., 0].sum()))
     x = torch.tensor(.3, dtype=torch.float64, requires_grad=True)
     value = objective(x)
-    gradient, = torch.autograd.grad(value, x)
+    gradient = torch.stack([torch.autograd.grad(v, x, retain_graph=True)[0] for v in value])
     h = 1e-4
     difference = (objective(x.detach()+h) - objective(x.detach()-h))/(2*h)
-    assert abs(float(gradient)) > 1e-8
+    assert bool((gradient.abs() > 1e-8).all())
     torch.testing.assert_close(gradient, difference, rtol=2e-6, atol=1e-10)
