@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "case_id": "G2-01_resolved_plan",
+  "task": "G2-01",
+  "title": "Immutable resolved simulation plan built from the existing resolvers",
+  "fixture": {
+    "function": "torchfdtd.plan.resolve_plan",
+    "scene": "tests/test_plan.py::scene: 2D region 1.6 x 1.5 x 1.4 um, uniform mesh 0.1 um (16 x 15 cells), Yee material sampling, 3 PML cells (x_min: 4 layers, kappa 2, alpha 0.03, alpha_polynomial 1), courant_factor 0.99, 24 steps, one SiN (n = 2) rectangle 0.3 x 0.4 um at (-0.3, 0.1), one continuous Ez point source at (-0.2, 0) with wavelength 1.1 um, either two point monitors (Ez at (0.1, 0), Hy at (0, 0.1)) or one x-normal field monitor 0.65 x 0.55 um at x = 0.12 um with downsample 2",
+    "variants": [
+      "placement, display and label changes",
+      "structure moved",
+      "mesh refined",
+      "source phase changed",
+      "inert source setting",
+      "dispersive Drude and two-pole Lorentz materials with a one-way sheet on a periodic 2D cell (3 x 1 um, 0.05 um, 40 steps)",
+      "TFSF box of benchmarks/tfsf_sources.box_project with 30 steps",
+      "Bloch y axis with phase 0.3 and an Ez sheet",
+      "demo_project(pmc) endpoint faces",
+      "tensor-material periodic 0.6 um cube"
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "reference_method": "the resolvers the solver itself runs: mesh_nodes, field_axes, BoundaryDescription, MaterialADE on a live YeeGrid, source_terms and oneway_tables, source_time_signal, plane_plan, interpolation_map, frequency_samples, voxelize, estimate; equality is exact array equality",
+  "observables": [
+    {
+      "name": "plan_hash",
+      "unit": "sha256 hex",
+      "definition": "SHA-256 of the canonical mesh/time/exterior/material/sources/monitors sections"
+    },
+    {
+      "name": "placement_independence",
+      "unit": "boolean",
+      "definition": "backend, kernels, memory/execution mode, tiling, precision, display fields, ids, names and colors leave plan_hash unchanged and appear only under placement. in plan.diff"
+    },
+    {
+      "name": "array_immutability",
+      "unit": "boolean",
+      "definition": "every array of the plan and of plan.material has writeable == False; the dataclass rejects attribute assignment"
+    },
+    {
+      "name": "resolver_agreement",
+      "unit": "boolean",
+      "definition": "ADE coefficients, one-way E/H tables, TFSF drive, Bloch wrap phase and sheet profile, PMC endpoint faces, point-monitor indices equal the live resolvers exactly"
+    },
+    {
+      "name": "diff_keys",
+      "unit": "list of dotted keys",
+      "definition": "plan.diff names exactly the changed canonical keys for a moved structure, a refined mesh, a changed phase and an inert setting"
+    }
+  ],
+  "acceptance": {
+    "equality": "exact: np.testing.assert_array_equal on every compared array, string equality on hashes",
+    "placement": "plan_hash identical across the placement variant; diff restricted to placement.* keys",
+    "immutability": "no writeable array; FrozenInstanceError or TypeError on assignment",
+    "source_of_limits": "exact identities; no numerical threshold from completion_gates.json applies"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_plan.py::test_resolved_plan_is_immutable_and_placement_stays_outside_the_hash",
+      "tests/test_plan.py::test_plan_json_and_diff_name_the_changed_keys",
+      "tests/test_plan.py::test_plan_covers_ade_oneway_tfsf_bloch_and_endpoint_faces",
+      "tests/test_plan.py::test_tensor_material_projects_resolve_but_defer_their_node_tensor"
+    ],
+    "not_yet_covered": [
+      "explicit (mesh_coordinates) and axis-step meshes in the CPML profile record",
+      "subpixel interface plans in plan.material"
+    ]
+  },
+  "notes": "The sampled material enters plan_hash through its rasterization inputs on the hashed nodes; the voxel arrays are materialized on demand (plan.material) so that resolving a plan never allocates a full volume for a streamed scene. The resource estimate is carried but not hashed because it depends on the precision."
+}

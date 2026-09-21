@@ -9,6 +9,7 @@ This module does not promise derivatives for unsupported scene features.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from functools import cached_property
 import math
 from pathlib import Path
 import tempfile
@@ -20,6 +21,7 @@ import torch
 from .boundaries import (BoundaryDescription, CURL_TERMS, _slice, extended_shape, face_index,
                          is_nodal, material_shape)
 from .models import Project
+from .plan import check_snapshot, project_snapshot
 from .solver import field_axes, index_at
 
 
@@ -714,6 +716,18 @@ class DifferentiableSimulation(torch.nn.Module):
             raise ValueError('The differentiable API currently requires point monitors only.')
         if r.run_control.auto_shutoff:
             raise ValueError('Differentiable simulations require a fixed number of timesteps.')
+        # The scene and its realized mesh are fixed here; _run rejects any later change.
+        self._plan_snapshot=project_snapshot(self.project)
+
+    @cached_property
+    def plan(self):
+        """The resolved plan of the fixed project (torchfdtd.plan.resolve_plan), shared with every entry point."""
+        from .plan import resolve_plan
+        return resolve_plan(self.project)
+
+    @property
+    def plan_hash(self):
+        return self.plan.plan_hash
 
     def spectrum(self,epsilon,frequency_hz,*,window=None,block_size=32):
         """Online DFT with fixed settings and a bounded observation transpose."""
@@ -727,6 +741,7 @@ class DifferentiableSimulation(torch.nn.Module):
 
     def _run(self,epsilon,spectral,*,system_factory=None,autograd_input=None,
              pole_count=0,material_parameter_elements=0):
+        check_snapshot(self.project,self._plan_snapshot,type(self).__name__)
         r=self.project.region
         from .adjoint_memory import _resident_contract
         _resident_contract(r,self.options)

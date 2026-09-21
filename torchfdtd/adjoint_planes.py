@@ -1,5 +1,6 @@
 """Differentiable collocated spectral planes on the real Yee/CPML contract."""
 from dataclasses import dataclass
+from functools import cached_property
 import hashlib
 import json
 import numpy as np
@@ -9,14 +10,14 @@ from .differentiable import DifferentiableSimulation
 from .field_monitors import plane_plan, interpolation_map
 from .mesh import freeze_refinements
 from .models import Project, Monitor
+from .plan import SAMPLE_TIME_STEPS, PlanInvalidated
 from .solver import field_axes
 from .streamed import StreamedSimulation, StreamedAdjointOptions
 from .waveforms import source_time_signal
 
 COMPONENTS = ('Ex','Ey','Ez','Hx','Hy','Hz')
 # E is observed after its update at (n+1) dt and H half a step later, as in
-# the spectral kernel and the native frequency planes.
-SAMPLE_TIME_STEPS = {'E':1.,'H':1.5}
+# the spectral kernel and the native frequency planes (torchfdtd.plan.SAMPLE_TIME_STEPS).
 
 
 def _reference_payload(project):
@@ -216,6 +217,16 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         self._project_snapshot=self.project.model_dump()
         self._internal_snapshot=self.model.project.model_dump()
 
+    @cached_property
+    def plan(self):
+        """The resolved plan of the user's project; the internal solver carries its own plan of the same mesh and sources."""
+        from .plan import resolve_plan
+        return resolve_plan(self.project)
+
+    @property
+    def plan_hash(self):
+        return self.plan.plan_hash
+
     def forward(self,epsilon,frequency_hz,*,block_size=32):
         """Return an ordered mapping from monitor IDs to spectral plane results."""
         return self._planes(epsilon,frequency_hz,block_size,lambda spectral:self.model._run(epsilon,spectral))
@@ -238,7 +249,7 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
 
     def _planes(self,epsilon,frequency_hz,block_size,run):
         if self.project.model_dump()!=self._project_snapshot or self.model.project.model_dump()!=self._internal_snapshot:
-            raise ValueError('Plane configuration changed. Rebuild the model to regenerate fixed interpolation and source plans.')
+            raise PlanInvalidated('Plane configuration changed. Rebuild the model to regenerate fixed interpolation and source plans.')
         spectral=self._spectral(epsilon,frequency_hz,block_size)
         result=run(spectral)
         output={}

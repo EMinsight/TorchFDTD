@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "case_id": "G2-05_conventions",
+  "task": "G2-05",
+  "title": "Public sign, timing and unit conventions fixed by tiny computations",
+  "fixture": {
+    "dft": "400 samples at dt = 1e-16 s, ten whole cycles (f0 = 2.5e14 Hz); complex exponentials and sin traces through direct_transform, point_spectrum (custom and fft) and DifferentiableResult.spectrum",
+    "planes": "tests/test_plan.py::scene field-monitor variant in float64 without structures, 11 steps, one custom frequency 2e14 Hz; native Simulation and DifferentiablePlaneSimulation against a full-state _System reference applying the documented sample times",
+    "bloch": "the same scene with Bloch y faces, phase 0.7, an Ez sheet; BoundaryDescription wrap, source_profile, interpolation_map at both seams, YeeGrid.curl forward and backward on exp(i k y) with k = (0.7 + 2 pi)/L",
+    "half_step": "the scene with 40 steps, an Ez and an Hy continuous point source, Ez and Hy point monitors",
+    "flux": "synthetic plane_result with E_y = 1, H_z = +/-1 on one 2e-12 m^2 point; a 2D y-periodic sheet run (3 x 0.6 um, 0.05 um, 800 steps, 8 PML cells, float64) with an Ez sheet at x = -1 um and x-normal monitors of width 0.3 and 0.6 um at x = 0.5 um windowed by a full Gaussian apodization (center 60 fs, width 20 fs), then the sheet at x = +1 um",
+    "units": "dt of the 2D scene; a 3D 1.6 um cube with a 1 x 0.8 um x-normal plane; Drude (wp 1.3e16, gamma 1e14, eps_inf 1.5) permittivity at 2e14 Hz; Lorentz ADE coefficient at the plan dt",
+    "exterior": "tests/test_radiation.py::dipole_faces with n = 1.3 + 0.05i, far field at 50 and 60 um"
+  },
+  "seed": null,
+  "precision": [
+    "float64"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "reference_method": "closed-form identities: geometric sums over whole cycles, the documented DFT and sample-time formulas evaluated by explicit stepping, Bloch difference formulas, the Poynting density formula, linear scaling of a y-uniform wave, eta_0 = 1 plane-wave impedance, the SI CFL formula, the Drude formula, the far-field (r1/r2) exp(-Im k (r2 - r1)) decay",
+  "observables": [
+    {
+      "name": "dft_sign_and_scale",
+      "unit": "reduced field * s",
+      "definition": "value at +f0 for exp(-2 pi i f0 t) and the phase of sin under the native, legacy FFT and differentiable transforms"
+    },
+    {
+      "name": "plane_dft_agreement",
+      "unit": "reduced field * s",
+      "definition": "native and differentiable plane fields versus the explicit-formula reference"
+    },
+    {
+      "name": "bloch_phase",
+      "unit": "dimensionless",
+      "definition": "wrap factor, sheet profile, seam interpolation weights and seam curl values"
+    },
+    {
+      "name": "sample_times",
+      "unit": "s",
+      "definition": "Result.times, H spectra time shift, source sample times"
+    },
+    {
+      "name": "flux_sign_and_scaling",
+      "unit": "reduced E*H * s^2 * m per invariant length",
+      "definition": "flux of the 0.3 and 0.6 um monitors, |Hy|/|Ez|, flux versus 0.5 sum |Ez|^2 width, flux of the reversed wave"
+    },
+    {
+      "name": "units",
+      "unit": "strings and SI values",
+      "definition": "dt formula, 3D weights in m^2, permittivity, ADE coefficient, unit strings"
+    },
+    {
+      "name": "exterior_decay",
+      "unit": "dimensionless",
+      "definition": "|E(r2)| / |E(r1)| of the far-field model"
+    }
+  ],
+  "acceptance": {
+    "exact_identities": "1e-9 relative on whole-cycle DFT values and phases; 1e-12 relative on Bloch and permittivity formulas; exact equality on sample times and unit strings",
+    "plane_dft": {
+      "rtol": 1e-10,
+      "atol": "1e-14 of the peak"
+    },
+    "flux_scaling": {
+      "width_doubling_rtol": 1e-06,
+      "impedance_rtol": 0.02,
+      "sheet_power_rtol": 0.02,
+      "reversed_wave_rtol": 0.05
+    },
+    "exterior_decay": {
+      "rtol": 1e-06
+    },
+    "source_of_limits": "identities tighter than completion_gates.json discrete_dimensionless_fp64 (rtol 1e-7, atol 1e-9) where a formula is exact; the 2 % impedance and sheet-power budgets are fixture-specific Yee dispersion and windowing allowances declared before the run"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_conventions.py"
+    ],
+    "not_yet_covered": [
+      "oblique-incidence flux sign on y-normal and z-normal monitors in 3D",
+      "the tiled and stitched plane conventions"
+    ]
+  },
+  "notes": "docs/CONVENTIONS.md lists every statement with the test that fixes it; the closed-box outward-normal statement is fixed by the existing tests/test_radiation.py dipole convergence test."
+}
