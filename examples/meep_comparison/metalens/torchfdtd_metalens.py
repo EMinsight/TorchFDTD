@@ -1,7 +1,7 @@
 """TorchFDTD side of the metalens comparison (Part A: 2D ridge lens, Part B: 3D pillar lens).
 
 Run inside the WSL2 distribution torchfdtd-bench from the worktree root:
-    PYTHONPATH=/mnt/d/TorchFDTD/.local/worktrees/meep-examples /root/torchfdtd-bench/venv/bin/python \
+    PYTHONPATH=$PWD python \
         examples/meep_comparison/metalens/torchfdtd_metalens.py --part 2d
     ... --part 3d
 Each part writes docs/validation/meep_comparison/metalens_<part>_torchfdtd.json. The lens run and the
@@ -29,7 +29,7 @@ from torchfdtd import FieldMonitor, Material, Project, Region, Simulation, Sourc
 from torchfdtd.solver import field_axes, hardware, source_slice, voxelize  # noqa: E402
 from torchfdtd.waveforms import source_time_signal  # noqa: E402
 
-EXPECTED_ROOT = '/mnt/d/TorchFDTD/.local/worktrees/meep-examples'
+EXPECTED_ROOT = str(Path(__file__).resolve().parents[3])  # the repository that holds this example
 PACKAGES = ('torchfdtd', 'torch', 'cupy-cuda12x', 'numpy', 'scipy')
 
 

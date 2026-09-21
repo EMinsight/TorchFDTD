@@ -6,7 +6,7 @@ f = 6 um, 0.5 um period, 0.6 um tall silicon cylinders, 0.05 um mesh), and the (
 structure is copied. The cell, source and monitors of the comparison are declared here; one TorchFDTD run
 with the two section monitors locates the focus and the focal-plane monitor is declared at that node.
 
-    PYTHONPATH=/mnt/d/TorchFDTD/.local/worktrees/meep-examples /root/torchfdtd-bench/venv/bin/python \
+    PYTHONPATH=$PWD python \
         examples/meep_comparison/metalens/extract_3d.py
 """
 from __future__ import annotations

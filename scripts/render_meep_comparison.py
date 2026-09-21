@@ -25,9 +25,9 @@ END = '<!-- meep-comparison:end -->'
 
 WSL = ('From the repository root inside the WSL2 distribution `torchfdtd-bench` (on Windows: '
        '`wsl.exe -d torchfdtd-bench -- bash -lc "<command>"`); `compare.py` needs only numpy, scipy and matplotlib.')
-MEEP_CMD = ('OMP_NUM_THREADS=1 MAMBA_ROOT_PREFIX=/root/torchfdtd-bench/micromamba /root/torchfdtd-bench/bin/micromamba run -n meep '
+MEEP_CMD = ('OMP_NUM_THREADS=1 '
             'mpirun -np 4 python ')
-TORCH_CMD = 'PYTHONPATH=$PWD /root/torchfdtd-bench/venv/bin/python '
+TORCH_CMD = 'PYTHONPATH=$PWD python '
 
 
 def load(name):

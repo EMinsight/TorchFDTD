@@ -74,8 +74,8 @@ Through-port transmission of both solvers overlaid, with the difference; rendere
 From the repository root inside the WSL2 distribution `torchfdtd-bench` (on Windows: `wsl.exe -d torchfdtd-bench -- bash -lc "<command>"`); `compare.py` needs only numpy, scipy and matplotlib.
 
 ```bash
-PYTHONPATH=$PWD /root/torchfdtd-bench/venv/bin/python examples/meep_comparison/microring/torchfdtd_microring.py
-OMP_NUM_THREADS=1 MAMBA_ROOT_PREFIX=/root/torchfdtd-bench/micromamba /root/torchfdtd-bench/bin/micromamba run -n meep mpirun -np 4 python examples/meep_comparison/microring/meep_microring.py --ranks 4
+PYTHONPATH=$PWD python examples/meep_comparison/microring/torchfdtd_microring.py
+OMP_NUM_THREADS=1 mpirun -np 4 python examples/meep_comparison/microring/meep_microring.py --ranks 4
 python examples/meep_comparison/microring/compare.py
 ```
 
@@ -145,8 +145,8 @@ Focal-plane profiles and on-axis intensity of both parts, both solvers overlaid;
 From the repository root inside the WSL2 distribution `torchfdtd-bench` (on Windows: `wsl.exe -d torchfdtd-bench -- bash -lc "<command>"`); `compare.py` needs only numpy, scipy and matplotlib.
 
 ```bash
-PYTHONPATH=$PWD /root/torchfdtd-bench/venv/bin/python examples/meep_comparison/metalens/torchfdtd_metalens.py --part 2d
-OMP_NUM_THREADS=1 MAMBA_ROOT_PREFIX=/root/torchfdtd-bench/micromamba /root/torchfdtd-bench/bin/micromamba run -n meep mpirun -np 4 python examples/meep_comparison/metalens/meep_metalens.py --part 2d --ranks 4
+PYTHONPATH=$PWD python examples/meep_comparison/metalens/torchfdtd_metalens.py --part 2d
+OMP_NUM_THREADS=1 mpirun -np 4 python examples/meep_comparison/metalens/meep_metalens.py --part 2d --ranks 4
 python examples/meep_comparison/metalens/compare.py
 ```
 
@@ -217,8 +217,8 @@ Focal-plane profiles and on-axis intensity of both parts, both solvers overlaid;
 From the repository root inside the WSL2 distribution `torchfdtd-bench` (on Windows: `wsl.exe -d torchfdtd-bench -- bash -lc "<command>"`); `compare.py` needs only numpy, scipy and matplotlib.
 
 ```bash
-PYTHONPATH=$PWD /root/torchfdtd-bench/venv/bin/python examples/meep_comparison/metalens/torchfdtd_metalens.py --part 3d
-OMP_NUM_THREADS=1 MAMBA_ROOT_PREFIX=/root/torchfdtd-bench/micromamba /root/torchfdtd-bench/bin/micromamba run -n meep mpirun -np 4 python examples/meep_comparison/metalens/meep_metalens.py --part 3d --ranks 4
+PYTHONPATH=$PWD python examples/meep_comparison/metalens/torchfdtd_metalens.py --part 3d
+OMP_NUM_THREADS=1 mpirun -np 4 python examples/meep_comparison/metalens/meep_metalens.py --part 3d --ranks 4
 python examples/meep_comparison/metalens/compare.py
 ```
 
@@ -297,8 +297,8 @@ Diffraction-order efficiencies over the band for the three methods; rendered by 
 From the repository root inside the WSL2 distribution `torchfdtd-bench` (on Windows: `wsl.exe -d torchfdtd-bench -- bash -lc "<command>"`); `compare.py` needs only numpy, scipy and matplotlib.
 
 ```bash
-PYTHONPATH=$PWD /root/torchfdtd-bench/venv/bin/python examples/meep_comparison/metagrating/torchfdtd_metagrating.py --out docs/validation/meep_comparison/metagrating_torchfdtd.json
-OMP_NUM_THREADS=1 MAMBA_ROOT_PREFIX=/root/torchfdtd-bench/micromamba /root/torchfdtd-bench/bin/micromamba run -n meep mpirun -np 4 python examples/meep_comparison/metagrating/meep_metagrating.py --ranks 4 --out docs/validation/meep_comparison/metagrating_meep.json
+PYTHONPATH=$PWD python examples/meep_comparison/metagrating/torchfdtd_metagrating.py --out docs/validation/meep_comparison/metagrating_torchfdtd.json
+OMP_NUM_THREADS=1 mpirun -np 4 python examples/meep_comparison/metagrating/meep_metagrating.py --ranks 4 --out docs/validation/meep_comparison/metagrating_meep.json
 python examples/meep_comparison/metagrating/compare.py
 ```
 

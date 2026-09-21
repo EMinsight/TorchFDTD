@@ -34,8 +34,12 @@ def log(*args):
         print(*args, flush=True)
 
 
-def conda_versions(names, listing=Path('/root/torchfdtd-bench/meep-list.txt')):
+def conda_versions(names, listing=None):
+    """Versions of conda-forge packages from a `micromamba list` dump named by TORCHFDTD_MEEP_LIST, when present."""
     out = {}
+    listing = Path(os.environ['TORCHFDTD_MEEP_LIST']) if listing is None and os.environ.get('TORCHFDTD_MEEP_LIST') else listing
+    if listing is None:
+        return out
     try:
         for line in listing.read_text(encoding='utf-8').splitlines():
             parts = line.split()

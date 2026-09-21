@@ -76,8 +76,8 @@ same grid, time step, step count, source, monitors and material sampling. The re
 From the worktree root inside the WSL2 distribution `torchfdtd-bench` (`wsl.exe -d torchfdtd-bench`):
 
 ```
-PYTHONPATH=/mnt/d/TorchFDTD/.local/worktrees/meep-examples /root/torchfdtd-bench/venv/bin/python examples/meep_comparison/metalens/torchfdtd_metalens.py --part 2d
-OMP_NUM_THREADS=1 MAMBA_ROOT_PREFIX=/root/torchfdtd-bench/micromamba /root/torchfdtd-bench/bin/micromamba run -n meep mpirun -np 4 python examples/meep_comparison/metalens/meep_metalens.py --part 2d --ranks 4
+PYTHONPATH=$PWD python examples/meep_comparison/metalens/torchfdtd_metalens.py --part 2d
+OMP_NUM_THREADS=1 mpirun -np 4 python examples/meep_comparison/metalens/meep_metalens.py --part 2d --ranks 4
 python examples/meep_comparison/metalens/compare.py
 ```
 

@@ -126,8 +126,8 @@ From the worktree root inside the WSL distribution `torchfdtd-bench` (TorchFDTD 
 micromamba environment), and from Windows for the RCWA oracle:
 
 ```bash
-PYTHONPATH=$PWD /root/torchfdtd-bench/venv/bin/python examples/meep_comparison/metagrating/torchfdtd_metagrating.py --out docs/validation/meep_comparison/metagrating_torchfdtd.json
-OMP_NUM_THREADS=1 MAMBA_ROOT_PREFIX=/root/torchfdtd-bench/micromamba /root/torchfdtd-bench/bin/micromamba run -n meep mpirun -np 4 python examples/meep_comparison/metagrating/meep_metagrating.py --ranks 4 --out docs/validation/meep_comparison/metagrating_meep.json
+PYTHONPATH=$PWD python examples/meep_comparison/metagrating/torchfdtd_metagrating.py --out docs/validation/meep_comparison/metagrating_torchfdtd.json
+OMP_NUM_THREADS=1 mpirun -np 4 python examples/meep_comparison/metagrating/meep_metagrating.py --ranks 4 --out docs/validation/meep_comparison/metagrating_meep.json
 python examples/meep_comparison/metagrating/compare.py
 ```
 

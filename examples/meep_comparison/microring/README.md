@@ -99,16 +99,16 @@ Different, by construction of the two codes:
 
 ## Running it
 
-From the repository root inside the WSL2 distribution `torchfdtd-bench` (on Windows:
-`wsl.exe -d torchfdtd-bench -- bash -lc "<command>"` with the repository at
-`/mnt/d/TorchFDTD/.local/worktrees/meep-examples`):
+From the repository root, with `python` resolving to an environment that has torchfdtd with CUDA
+PyTorch and CuPy for the first command, and to the Meep environment (a conda-forge `pymeep=*=mpi*`
+install) for the second (the record was taken in a WSL2 Ubuntu distribution on the Windows host):
 
 ```bash
 # 1. TorchFDTD on the GPU (20 to 40 s per run on a shared RTX 3060, two runs)
-PYTHONPATH=$PWD /root/torchfdtd-bench/venv/bin/python examples/meep_comparison/microring/torchfdtd_microring.py
+PYTHONPATH=$PWD python examples/meep_comparison/microring/torchfdtd_microring.py
 
 # 2. Meep on the CPU, 4 MPI ranks (100 to 220 s per run on the shared host, two runs)
-OMP_NUM_THREADS=1 MAMBA_ROOT_PREFIX=/root/torchfdtd-bench/micromamba /root/torchfdtd-bench/bin/micromamba run -n meep \
+OMP_NUM_THREADS=1 \
     mpirun -np 4 python examples/meep_comparison/microring/meep_microring.py --ranks 4
 
 # 3. Compare the two records, write the comparison JSON, print the tables, render the figure

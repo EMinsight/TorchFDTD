@@ -8,7 +8,7 @@
 3. One lens run with the on-axis line monitor locates the focus; the focal-plane monitor of the
    comparison is declared at that node. The comparison scripts read geometry.json only.
 
-    PYTHONPATH=/mnt/d/TorchFDTD/.local/worktrees/meep-examples /root/torchfdtd-bench/venv/bin/python \
+    PYTHONPATH=$PWD python \
         examples/meep_comparison/metalens/design_2d.py --height 1.0
 """
 from __future__ import annotations
