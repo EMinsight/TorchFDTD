@@ -217,13 +217,15 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit_release_gates.xml"
           ],
           "actual_test_commands": [
-            "python -m pytest -q -p no:cacheprovider tests/test_release_gates.py"
+            "python -m pytest -q -p no:cacheprovider tests/test_release_gates.py",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G0-04.xml"
           ],
           "required_tests": [
             "tests/test_release_gates.py"
           ],
           "evidence": [
-            "20260921T140942Z-g0-04-77aa7663"
+            "20260921T140942Z-g0-04-77aa7663",
+            "20260921T190225Z-g0-04-74cad931"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -244,13 +246,15 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit_release_gates.xml"
           ],
           "actual_test_commands": [
-            "python -m pytest -q -p no:cacheprovider tests/test_release_gates.py"
+            "python -m pytest -q -p no:cacheprovider tests/test_release_gates.py",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G0-05.xml"
           ],
           "required_tests": [
             "tests/test_release_gates.py"
           ],
           "evidence": [
-            "20260921T140946Z-g0-05-52cd7c65"
+            "20260921T140946Z-g0-05-52cd7c65",
+            "20260921T190327Z-g0-05-ed168636"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -1319,7 +1323,8 @@
           ],
           "evidence": [
             "20260921T165032Z-g3-15-12732135",
-            "20260921T185512Z-g3-15-26591fff"
+            "20260921T185512Z-g3-15-26591fff",
+            "20260921T190441Z-g3-15-ca5f7da9"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -1364,7 +1369,8 @@
             "tests/test_differentiable_geometry.py::test_fp32_geometry_to_fdtd_adjoint_and_streamed_chain"
           ],
           "evidence": [
-            "20260921T165045Z-g3-16-aa46cfa9"
+            "20260921T165045Z-g3-16-aa46cfa9",
+            "20260921T190545Z-g3-16-7cf64e2d"
           ],
           "blocker": null,
           "scope_change_approval": null,
