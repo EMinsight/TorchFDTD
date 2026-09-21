@@ -36,8 +36,12 @@ A separate 1152 x 1024 x 2048 metadata-only estimate creates no field banks and
 performs no device/storage admission. Its hypothetical traffic reduction is
 not a measured improvement of the independent frozen RTX 5880 capacity run.
 [API and exclusions](STREAMED_WORK_PLANNING.md),
-[machine evidence](validation/streamed_work_planning.json). Installed wheel and
-full CI verification are pending this planner integration.
+[machine evidence](validation/streamed_work_planning.json). All 130 wheel package files
+matched source and installed bytes, and the installed planner API smoke
+check passed. Linux CI [35562094767](https://github.com/hyoseokp/TorchFDTD/actions/runs/35562094767) at `815db6f` passed with
+1,529 Python passes and 451 skips, 42 browser passes and
+8 skips. Frontend and wheel builds passed. The JUnit SHA-256 is
+`18bff47adff869b3d083e4de7abf61a06312844372dce8cd7a3ce51016247e71`. No numerical experiment was rerun.
 
 ## Resident soft-source waveform adjoints, 21 September 2026
 

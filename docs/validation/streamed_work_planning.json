@@ -1,5 +1,5 @@
 {
-  "status": "local_cpu_cuda_passed_pending_ci",
+  "status": "local_cpu_cuda_installed_wheel_and_full_ci_passed",
   "cuda_validation": {
     "status": "passed",
     "scope": "Small real FP32 CUDA correctness and logical-work integration, not capacity or speed evidence.",
@@ -725,5 +725,31 @@
     },
     "exact_match": true,
     "scope": "Only K2 baseline was executed at large scale. K4 remains a metadata prediction."
+  },
+  "completed_ci": {
+    "run_id": 35562094767,
+    "commit": "815db6f452eee8ef43915e281b4b864e4f278d21",
+    "url": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35562094767",
+    "conclusion": "success",
+    "python": {
+      "tests": 1980,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 451,
+      "passed": 1529,
+      "junit_sha256": "18bff47adff869b3d083e4de7abf61a06312844372dce8cd7a3ce51016247e71"
+    },
+    "browser": {
+      "passed": 42,
+      "skipped": 8
+    },
+    "frontend_build": "success",
+    "wheel_build": "success"
+  },
+  "installed_wheel": {
+    "wheel": "torchfdtd-0.14.0.dev0-py3-none-any.whl",
+    "wheel_sha256": "1fecb9ebb8a29266524361a7b455e13c204e7152802ce1d3e1ab96f6954a8c54",
+    "package_files": 130,
+    "scope": "Source, wheel archive and target-installed bytes matched for every package file. Metadata planner API smoke passed from the installed copy."
   }
 }
