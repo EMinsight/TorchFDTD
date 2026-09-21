@@ -1,0 +1,4045 @@
+{
+ "dimension": "2d",
+ "device": "cpu",
+ "gpu": null,
+ "torch": "2.10.0+cu126",
+ "wavelength_um": 1.55,
+ "mesh_um": 0.05,
+ "tile_um": 3.0,
+ "focal_um": 10.0,
+ "pad": 4,
+ "scope": "Overlapping-tile stitching of one pillar array against its whole-device reference. Relative L2 errors of the six-component output plane and of the focal intensity after angular-spectrum propagation.",
+ "project": {
+  "schema_version": 1,
+  "name": "Untitled",
+  "region": {
+   "dimension": "2d",
+   "size": [
+    7.0,
+    3.0,
+    1.0
+   ],
+   "mesh": 0.05,
+   "mesh_steps": null,
+   "mesh_coordinates": null,
+   "material_sampling": "cell",
+   "interface_method": "staircase",
+   "subpixel_quadrature": 8,
+   "mesh_type": "uniform",
+   "mesh_max": 0.15,
+   "mesh_grading": 1.25,
+   "mesh_ppw": 24.0,
+   "mesh_auto_refine": true,
+   "mesh_refinements": [],
+   "courant_factor": 0.99,
+   "time_step_override": null,
+   "steps": 1681,
+   "run_control": {
+    "auto_shutoff": false,
+    "decay_threshold": 1e-06,
+    "check_interval": 50,
+    "consecutive_checks": 3,
+    "min_steps": 100,
+    "source_tail_amplitude": 1e-08,
+    "after_source_s": 0.0,
+    "divergence_check": true,
+    "growth_limit": 1000000.0,
+    "field_limit": null
+   },
+   "pml_cells": 10,
+   "boundaries": {
+    "x_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "x_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "y_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "y_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "z_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "z_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    }
+   },
+   "bloch_phase": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "background_index": 1.0,
+   "backend": "cpu",
+   "memory_mode": "resident",
+   "cuda_kernel": "torch",
+   "cuda_monitor_kernel": "torch",
+   "precision": "float32",
+   "snapshot_interval": 20,
+   "field": "Ez",
+   "slice_axis": "z",
+   "slice_position": 0.0,
+   "complex_display": "real"
+  },
+  "materials": [
+   {
+    "name": "Air",
+    "index": 1.0,
+    "color": "#b7c5d7",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "SiO2 (constant n)",
+    "index": 1.444,
+    "color": "#80c4d7",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "SiN (constant n)",
+    "index": 2.0,
+    "color": "#69a1e8",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "Si (constant n)",
+    "index": 3.48,
+    "color": "#cc8bdc",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   }
+  ],
+  "structures": [
+   {
+    "id": "fdfad735b1bf",
+    "name": "object",
+    "center": [
+     -2.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.18398176680021483,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "7049b778cb71",
+    "name": "object",
+    "center": [
+     -2.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.22630694184690792,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e99e5ace4c1c",
+    "name": "object",
+    "center": [
+     -1.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.38435685025779115,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "d0f29475c09c",
+    "name": "object",
+    "center": [
+     -1.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.323005370098023,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "97e659ffd86d",
+    "name": "object",
+    "center": [
+     -0.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.1863560198273118,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "bf2699b02bc2",
+    "name": "object",
+    "center": [
+     -0.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.2812755432662127,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "bf9d6bec49ad",
+    "name": "object",
+    "center": [
+     0.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.29413436347943356,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "edf56ecc3dac",
+    "name": "object",
+    "center": [
+     0.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.20472689609838202,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "68b70426ab53",
+    "name": "object",
+    "center": [
+     1.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.3656816023945801,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "89474b00248c",
+    "name": "object",
+    "center": [
+     1.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.19182816557799295,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "6ee9307f123c",
+    "name": "object",
+    "center": [
+     2.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.26954389333878537,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c828e7e8cdb9",
+    "name": "object",
+    "center": [
+     2.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.3046872511339819,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   }
+  ],
+  "sources": [
+   {
+    "wavelength": 1.55,
+    "pulse": "gaussian",
+    "pulse_cycles": 3.0,
+    "time_definition": "cycles",
+    "pulse_length": 2e-14,
+    "pulse_offset": 5e-14,
+    "signal": null,
+    "wavelength_start": 1.3,
+    "wavelength_stop": 1.8,
+    "optimize_for_short_pulse": true,
+    "eliminate_discontinuities": false,
+    "chirp_bandwidth_hz": 100000000000000.0,
+    "id": "cde1fce72f0f",
+    "name": "source",
+    "center": [
+     0.0,
+     -0.85,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "plane",
+    "injection": "soft",
+    "normal": "y",
+    "direction": "+",
+    "incident_pml_cells": 96,
+    "size": [
+     7.0,
+     0.0,
+     0.0
+    ],
+    "component": "Ex",
+    "theta": null,
+    "phi": 0.0,
+    "amplitude": 1.0,
+    "phase": 0.0,
+    "use_global_source": false,
+    "extend_through_pml": true
+   }
+  ],
+  "global_source": {
+   "wavelength": 1.55,
+   "pulse": "gaussian",
+   "pulse_cycles": 3.0,
+   "time_definition": "cycles",
+   "pulse_length": 2e-14,
+   "pulse_offset": 5e-14,
+   "signal": null,
+   "wavelength_start": 1.3,
+   "wavelength_stop": 1.8,
+   "optimize_for_short_pulse": true,
+   "eliminate_discontinuities": false,
+   "chirp_bandwidth_hz": 100000000000000.0
+  },
+  "monitors": [
+   {
+    "id": "out",
+    "name": "frequency monitor",
+    "center": [
+     0.0,
+     0.5,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "field",
+    "component": "Ez",
+    "spectrum": {
+     "sampling": "custom",
+     "chebyshev_wavelength": false,
+     "chebyshev_nodes": "roots",
+     "use_source_limits": false,
+     "custom_frequencies_hz": [
+      193414489032258.06
+     ],
+     "wavelength_start": 1.3,
+     "wavelength_stop": 1.8,
+     "frequency_points": 101,
+     "apodization": "none",
+     "apodization_center": 2e-14,
+     "apodization_time_width": 1e-14
+    },
+    "use_global_monitor": false,
+    "inherit_apodization": true,
+    "time_downsample": 1,
+    "normal": "y",
+    "size": [
+     6.0,
+     0.0,
+     1.0
+    ],
+    "downsample": 1,
+    "downsample_xyz": null,
+    "record_fields": [
+     "Ex",
+     "Ey",
+     "Ez",
+     "Hx",
+     "Hy",
+     "Hz"
+    ],
+    "record_poynting": [
+     "x",
+     "y",
+     "z"
+    ],
+    "record_flux": true,
+    "dft_precision": "field",
+    "spatial_interpolation": "specified"
+   }
+  ],
+  "global_monitor": {
+   "sampling": "frequency",
+   "chebyshev_wavelength": false,
+   "chebyshev_nodes": "roots",
+   "use_source_limits": false,
+   "custom_frequencies_hz": [],
+   "wavelength_start": 1.3,
+   "wavelength_stop": 1.8,
+   "frequency_points": 101,
+   "apodization": "none",
+   "apodization_center": 2e-14,
+   "apodization_time_width": 1e-14
+  },
+  "import_provenance": null
+ },
+ "reference": {
+  "wall_seconds": 0.5771498000249267,
+  "loop_seconds": 0.5692070997320116,
+  "setup_seconds": 0.004181399941444397,
+  "cells": 8400,
+  "shape": [
+   140,
+   60,
+   1
+  ],
+  "steps": 1681,
+  "peak_torch_bytes": null,
+  "mcells_per_second": 24.80713962747131
+ },
+ "through_pml": [
+  {
+   "overlap_um": 0.25,
+   "overlap_cells": 5,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     85,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5100,
+   "total_tile_cells": 10200,
+   "wall_seconds": 1.072400400415063,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.0882537744742237,
+   "near_error_linear": 0.08586222322873549,
+   "mismatch_max": 0.20709534035366603,
+   "mismatch_mean": 0.20709534035366603,
+   "mismatch_center_max": 0.18482823063210943,
+   "mismatch_center_mean": 0.18482823063210943,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.20709534035366603,
+     "mismatch_center": 0.18482823063210943
+    }
+   ],
+   "focal_intensity_error_hard": 0.01564218962217313,
+   "focal_peak_error_hard": 0.019493076790500666,
+   "focal_intensity_error_linear": 0.016413863052935303,
+   "focal_peak_error_linear": 0.01871102681564802
+  },
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 10,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     90,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5400,
+   "total_tile_cells": 10800,
+   "wall_seconds": 1.039774099830538,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.07211367621928227,
+   "near_error_linear": 0.06891362019475966,
+   "mismatch_max": 0.2354125172786266,
+   "mismatch_mean": 0.2354125172786266,
+   "mismatch_center_max": 0.17827872514527593,
+   "mismatch_center_mean": 0.17827872514527593,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.2354125172786266,
+     "mismatch_center": 0.17827872514527593
+    }
+   ],
+   "focal_intensity_error_hard": 0.024868683805957744,
+   "focal_peak_error_hard": 0.014825024218611132,
+   "focal_intensity_error_linear": 0.03192571339846633,
+   "focal_peak_error_linear": 0.0202115289787688
+  },
+  {
+   "overlap_um": 1.0,
+   "overlap_cells": 20,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     100,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 6000,
+   "total_tile_cells": 12000,
+   "wall_seconds": 1.0820937003009021,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.0920063730499854,
+   "near_error_linear": 0.08701710035262179,
+   "mismatch_max": 0.3263620261859882,
+   "mismatch_mean": 0.3263620261859882,
+   "mismatch_center_max": 0.23509177515390228,
+   "mismatch_center_mean": 0.23509177515390228,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       50,
+       90
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.3263620261859882,
+     "mismatch_center": 0.23509177515390228
+    }
+   ],
+   "focal_intensity_error_hard": 0.01404903023195369,
+   "focal_peak_error_hard": 0.013903440198495244,
+   "focal_intensity_error_linear": 0.025439334670312518,
+   "focal_peak_error_linear": 0.0028498912998137166
+  },
+  {
+   "overlap_um": 1.5,
+   "overlap_cells": 30,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     110,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 6600,
+   "total_tile_cells": 13200,
+   "wall_seconds": 1.1369504001922905,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.06015845558409811,
+   "near_error_linear": 0.05992965215957965,
+   "mismatch_max": 0.24612372313280317,
+   "mismatch_mean": 0.24612372313280317,
+   "mismatch_center_max": 0.1499168954812175,
+   "mismatch_center_mean": 0.1499168954812175,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       40,
+       100
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.24612372313280317,
+     "mismatch_center": 0.1499168954812175
+    }
+   ],
+   "focal_intensity_error_hard": 0.02471187928242282,
+   "focal_peak_error_hard": 0.021298734905182064,
+   "focal_intensity_error_linear": 0.027586244216243002,
+   "focal_peak_error_linear": 0.021755539898495196,
+   "error_by_distance": [
+    {
+     "distance_um": [
+      0,
+      0.25
+     ],
+     "rms_relative_error": 0.07849816496822917
+    },
+    {
+     "distance_um": [
+      0.25,
+      0.5
+     ],
+     "rms_relative_error": 0.060989991698573796
+    },
+    {
+     "distance_um": [
+      0.5,
+      1.0
+     ],
+     "rms_relative_error": 0.057279568257442334
+    },
+    {
+     "distance_um": [
+      1.0,
+      1.5
+     ],
+     "rms_relative_error": 0.04521176140902479
+    },
+    {
+     "distance_um": [
+      1.5,
+      2.0
+     ],
+     "rms_relative_error": 0.05203070136003043
+    },
+    {
+     "distance_um": [
+      2.0,
+      3.0
+     ],
+     "rms_relative_error": 0.06611021850181507
+    }
+   ]
+  },
+  {
+   "overlap_um": 2.0,
+   "overlap_cells": 40,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     120,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 7200,
+   "total_tile_cells": 14400,
+   "wall_seconds": 1.1743163000792265,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.03426320597952214,
+   "near_error_linear": 0.03334472606083126,
+   "mismatch_max": 0.19504916233525388,
+   "mismatch_mean": 0.19504916233525388,
+   "mismatch_center_max": 0.10501931456190945,
+   "mismatch_center_mean": 0.10501931456190945,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       30,
+       110
+      ]
+     ],
+     "band_um": 4.0,
+     "mismatch": 0.19504916233525388,
+     "mismatch_center": 0.10501931456190945
+    }
+   ],
+   "focal_intensity_error_hard": 0.00619393208501356,
+   "focal_peak_error_hard": 0.005983447096908218,
+   "focal_intensity_error_linear": 0.004208919557030201,
+   "focal_peak_error_linear": 0.003669946369296789
+  },
+  {
+   "overlap_um": 2.5,
+   "overlap_cells": 50,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     130,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 7800,
+   "total_tile_cells": 15600,
+   "wall_seconds": 1.179088399745524,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.0676373540420123,
+   "near_error_linear": 0.06365456653127942,
+   "mismatch_max": 0.2711479262508554,
+   "mismatch_mean": 0.2711479262508554,
+   "mismatch_center_max": 0.13386684859569334,
+   "mismatch_center_mean": 0.13386684859569334,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       20,
+       120
+      ]
+     ],
+     "band_um": 5.0,
+     "mismatch": 0.2711479262508554,
+     "mismatch_center": 0.13386684859569334
+    }
+   ],
+   "focal_intensity_error_hard": 0.014874641012795278,
+   "focal_peak_error_hard": 0.013073905523810724,
+   "focal_intensity_error_linear": 0.014726630522174145,
+   "focal_peak_error_linear": 0.01430990509016627
+  }
+ ],
+ "through_pml_empty": [
+  {
+   "overlap_um": 0.25,
+   "overlap_cells": 5,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     85,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5100,
+   "total_tile_cells": 10200,
+   "wall_seconds": 1.0557929002679884,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.0,
+   "near_error_linear": 2.069271313494191e-17,
+   "mismatch_max": 0.0,
+   "mismatch_mean": 0.0,
+   "mismatch_center_max": 0.0,
+   "mismatch_center_mean": 0.0,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    }
+   ],
+   "focal_intensity_error_hard": 0.0,
+   "focal_peak_error_hard": 0.0,
+   "focal_intensity_error_linear": 1.5268363174029718e-16,
+   "focal_peak_error_linear": 0.0
+  },
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 10,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     90,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5400,
+   "total_tile_cells": 10800,
+   "wall_seconds": 1.0819927002303302,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.0,
+   "near_error_linear": 3.103906970241286e-17,
+   "mismatch_max": 0.0,
+   "mismatch_mean": 0.0,
+   "mismatch_center_max": 0.0,
+   "mismatch_center_mean": 0.0,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    }
+   ],
+   "focal_intensity_error_hard": 0.0,
+   "focal_peak_error_hard": 0.0,
+   "focal_intensity_error_linear": 1.0618125215875072e-16,
+   "focal_peak_error_linear": 0.0
+  }
+ ],
+ "truncated_sheet": [
+  {
+   "overlap_um": 0.25,
+   "overlap_cells": 5,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     85,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5100,
+   "total_tile_cells": 10200,
+   "wall_seconds": 1.0792938000522554,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.22028502382986748,
+   "near_error_linear": 0.21807389349689488,
+   "mismatch_max": 0.45103256237419703,
+   "mismatch_mean": 0.45103256237419703,
+   "mismatch_center_max": 0.39896242416996963,
+   "mismatch_center_mean": 0.39896242416996963,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.45103256237419703,
+     "mismatch_center": 0.39896242416996963
+    }
+   ],
+   "focal_intensity_error_hard": 0.12726197358008737,
+   "focal_peak_error_hard": 0.10999892175378698,
+   "focal_intensity_error_linear": 0.1294786135657266,
+   "focal_peak_error_linear": 0.11057205903320157
+  },
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 10,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     90,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5400,
+   "total_tile_cells": 10800,
+   "wall_seconds": 1.1347264000214636,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.162468215006073,
+   "near_error_linear": 0.1567318844901768,
+   "mismatch_max": 0.4204980865639729,
+   "mismatch_mean": 0.4204980865639729,
+   "mismatch_center_max": 0.3215724207621305,
+   "mismatch_center_mean": 0.3215724207621305,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.4204980865639729,
+     "mismatch_center": 0.3215724207621305
+    }
+   ],
+   "focal_intensity_error_hard": 0.06412551208494154,
+   "focal_peak_error_hard": 0.054968776337023996,
+   "focal_intensity_error_linear": 0.07446299132399804,
+   "focal_peak_error_linear": 0.06288326788836544
+  },
+  {
+   "overlap_um": 1.0,
+   "overlap_cells": 20,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     100,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 6000,
+   "total_tile_cells": 12000,
+   "wall_seconds": 1.082463400438428,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.08279798329731117,
+   "near_error_linear": 0.08194589346393738,
+   "mismatch_max": 0.35733981195395864,
+   "mismatch_mean": 0.35733981195395864,
+   "mismatch_center_max": 0.21127070583031063,
+   "mismatch_center_mean": 0.21127070583031063,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       50,
+       90
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.35733981195395864,
+     "mismatch_center": 0.21127070583031063
+    }
+   ],
+   "focal_intensity_error_hard": 0.019816585470733415,
+   "focal_peak_error_hard": 0.01026427140946065,
+   "focal_intensity_error_linear": 0.03335138601894695,
+   "focal_peak_error_linear": 0.017369031212885275
+  },
+  {
+   "overlap_um": 1.5,
+   "overlap_cells": 30,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     110,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 6600,
+   "total_tile_cells": 13200,
+   "wall_seconds": 1.276150899939239,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.065944014663488,
+   "near_error_linear": 0.0729852842112952,
+   "mismatch_max": 0.4063736147132792,
+   "mismatch_mean": 0.4063736147132792,
+   "mismatch_center_max": 0.2080409924815382,
+   "mismatch_center_mean": 0.2080409924815382,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       40,
+       100
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.4063736147132792,
+     "mismatch_center": 0.2080409924815382
+    }
+   ],
+   "focal_intensity_error_hard": 0.0199618060714393,
+   "focal_peak_error_hard": 0.01768933016883102,
+   "focal_intensity_error_linear": 0.027528828201506757,
+   "focal_peak_error_linear": 0.024600385671689626
+  }
+ ],
+ "truncated_sheet_empty": [
+  {
+   "overlap_um": 0.25,
+   "overlap_cells": 5,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     85,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5100,
+   "total_tile_cells": 10200,
+   "wall_seconds": 1.003819199744612,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.19134868220189025,
+   "near_error_linear": 0.1910914135485548,
+   "mismatch_max": 0.43289969861015065,
+   "mismatch_mean": 0.43289969861015065,
+   "mismatch_center_max": 0.3627260423547572,
+   "mismatch_center_mean": 0.3627260423547572,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.43289969861015065,
+     "mismatch_center": 0.3627260423547572
+    }
+   ],
+   "focal_intensity_error_hard": 0.1048322013059191,
+   "focal_peak_error_hard": 0.12862822092026965,
+   "focal_intensity_error_linear": 0.10830322668064231,
+   "focal_peak_error_linear": 0.13287923916579014
+  },
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 10,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     90,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5400,
+   "total_tile_cells": 10800,
+   "wall_seconds": 1.1268742000684142,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.15338974432669117,
+   "near_error_linear": 0.15137587789417747,
+   "mismatch_max": 0.43567883611815206,
+   "mismatch_mean": 0.43567883611815206,
+   "mismatch_center_max": 0.306655146294824,
+   "mismatch_center_mean": 0.306655146294824,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.43567883611815206,
+     "mismatch_center": 0.306655146294824
+    }
+   ],
+   "focal_intensity_error_hard": 0.03953991830004085,
+   "focal_peak_error_hard": 0.049067792676215485,
+   "focal_intensity_error_linear": 0.05273041619216761,
+   "focal_peak_error_linear": 0.06391432976676965
+  }
+ ],
+ "sparse_project": {
+  "schema_version": 1,
+  "name": "Untitled",
+  "region": {
+   "dimension": "2d",
+   "size": [
+    7.0,
+    3.0,
+    1.0
+   ],
+   "mesh": 0.05,
+   "mesh_steps": null,
+   "mesh_coordinates": null,
+   "material_sampling": "cell",
+   "interface_method": "staircase",
+   "subpixel_quadrature": 8,
+   "mesh_type": "uniform",
+   "mesh_max": 0.15,
+   "mesh_grading": 1.25,
+   "mesh_ppw": 24.0,
+   "mesh_auto_refine": true,
+   "mesh_refinements": [],
+   "courant_factor": 0.99,
+   "time_step_override": null,
+   "steps": 1681,
+   "run_control": {
+    "auto_shutoff": false,
+    "decay_threshold": 1e-06,
+    "check_interval": 50,
+    "consecutive_checks": 3,
+    "min_steps": 100,
+    "source_tail_amplitude": 1e-08,
+    "after_source_s": 0.0,
+    "divergence_check": true,
+    "growth_limit": 1000000.0,
+    "field_limit": null
+   },
+   "pml_cells": 10,
+   "boundaries": {
+    "x_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "x_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "y_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "y_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "z_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "z_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    }
+   },
+   "bloch_phase": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "background_index": 1.0,
+   "backend": "cpu",
+   "memory_mode": "resident",
+   "cuda_kernel": "torch",
+   "cuda_monitor_kernel": "torch",
+   "precision": "float32",
+   "snapshot_interval": 20,
+   "field": "Ez",
+   "slice_axis": "z",
+   "slice_position": 0.0,
+   "complex_display": "real"
+  },
+  "materials": [
+   {
+    "name": "Air",
+    "index": 1.0,
+    "color": "#b7c5d7",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "SiO2 (constant n)",
+    "index": 1.444,
+    "color": "#80c4d7",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "SiN (constant n)",
+    "index": 2.0,
+    "color": "#69a1e8",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "Si (constant n)",
+    "index": 3.48,
+    "color": "#cc8bdc",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   }
+  ],
+  "structures": [
+   {
+    "id": "099ea5c9d542",
+    "name": "object",
+    "center": [
+     -1.875,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.280500292374538,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "3af3b5e5cb3c",
+    "name": "object",
+    "center": [
+     -0.625,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.2807940789736494,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e334b9e3820b",
+    "name": "object",
+    "center": [
+     0.625,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.2515325561042142,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "f63daaf1edd2",
+    "name": "object",
+    "center": [
+     1.875,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.22858013800881416,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   }
+  ],
+  "sources": [
+   {
+    "wavelength": 1.55,
+    "pulse": "gaussian",
+    "pulse_cycles": 3.0,
+    "time_definition": "cycles",
+    "pulse_length": 2e-14,
+    "pulse_offset": 5e-14,
+    "signal": null,
+    "wavelength_start": 1.3,
+    "wavelength_stop": 1.8,
+    "optimize_for_short_pulse": true,
+    "eliminate_discontinuities": false,
+    "chirp_bandwidth_hz": 100000000000000.0,
+    "id": "3446fb51edc8",
+    "name": "source",
+    "center": [
+     0.0,
+     -0.85,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "plane",
+    "injection": "soft",
+    "normal": "y",
+    "direction": "+",
+    "incident_pml_cells": 96,
+    "size": [
+     7.0,
+     0.0,
+     0.0
+    ],
+    "component": "Ex",
+    "theta": null,
+    "phi": 0.0,
+    "amplitude": 1.0,
+    "phase": 0.0,
+    "use_global_source": false,
+    "extend_through_pml": true
+   }
+  ],
+  "global_source": {
+   "wavelength": 1.55,
+   "pulse": "gaussian",
+   "pulse_cycles": 3.0,
+   "time_definition": "cycles",
+   "pulse_length": 2e-14,
+   "pulse_offset": 5e-14,
+   "signal": null,
+   "wavelength_start": 1.3,
+   "wavelength_stop": 1.8,
+   "optimize_for_short_pulse": true,
+   "eliminate_discontinuities": false,
+   "chirp_bandwidth_hz": 100000000000000.0
+  },
+  "monitors": [
+   {
+    "id": "out",
+    "name": "frequency monitor",
+    "center": [
+     0.0,
+     0.5,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "field",
+    "component": "Ez",
+    "spectrum": {
+     "sampling": "custom",
+     "chebyshev_wavelength": false,
+     "chebyshev_nodes": "roots",
+     "use_source_limits": false,
+     "custom_frequencies_hz": [
+      193414489032258.06
+     ],
+     "wavelength_start": 1.3,
+     "wavelength_stop": 1.8,
+     "frequency_points": 101,
+     "apodization": "none",
+     "apodization_center": 2e-14,
+     "apodization_time_width": 1e-14
+    },
+    "use_global_monitor": false,
+    "inherit_apodization": true,
+    "time_downsample": 1,
+    "normal": "y",
+    "size": [
+     6.0,
+     0.0,
+     1.0
+    ],
+    "downsample": 1,
+    "downsample_xyz": null,
+    "record_fields": [
+     "Ex",
+     "Ey",
+     "Ez",
+     "Hx",
+     "Hy",
+     "Hz"
+    ],
+    "record_poynting": [
+     "x",
+     "y",
+     "z"
+    ],
+    "record_flux": true,
+    "dft_precision": "field",
+    "spatial_interpolation": "specified"
+   }
+  ],
+  "global_monitor": {
+   "sampling": "frequency",
+   "chebyshev_wavelength": false,
+   "chebyshev_nodes": "roots",
+   "use_source_limits": false,
+   "custom_frequencies_hz": [],
+   "wavelength_start": 1.3,
+   "wavelength_stop": 1.8,
+   "frequency_points": 101,
+   "apodization": "none",
+   "apodization_center": 2e-14,
+   "apodization_time_width": 1e-14
+  },
+  "import_provenance": null
+ },
+ "sparse_reference": {
+  "wall_seconds": 0.6626710998825729,
+  "loop_seconds": 0.6578336004167795,
+  "setup_seconds": 0.0024943999014794827,
+  "cells": 8400,
+  "shape": [
+   140,
+   60,
+   1
+  ],
+  "steps": 1681,
+  "peak_torch_bytes": null,
+  "mcells_per_second": 21.465002686171438
+ },
+ "sparse": [
+  {
+   "overlap_um": 0.25,
+   "overlap_cells": 5,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     85,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5100,
+   "total_tile_cells": 10200,
+   "wall_seconds": 0.9941175999119878,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.16901497926521475,
+   "near_error_linear": 0.16363129828764414,
+   "mismatch_max": 0.5479603940152452,
+   "mismatch_mean": 0.5479603940152452,
+   "mismatch_center_max": 0.49906026116345237,
+   "mismatch_center_mean": 0.49906026116345237,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.5479603940152452,
+     "mismatch_center": 0.49906026116345237
+    }
+   ],
+   "focal_intensity_error_hard": 0.023152599925099868,
+   "focal_peak_error_hard": 0.014703296420617504,
+   "focal_intensity_error_linear": 0.025668843243485617,
+   "focal_peak_error_linear": 0.01981703387533688
+  },
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 10,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     90,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 5400,
+   "total_tile_cells": 10800,
+   "wall_seconds": 1.0501685999333858,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.11882401299170689,
+   "near_error_linear": 0.11296709607701842,
+   "mismatch_max": 0.30711801741773775,
+   "mismatch_mean": 0.30711801741773775,
+   "mismatch_center_max": 0.2790606480947618,
+   "mismatch_center_mean": 0.2790606480947618,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.30711801741773775,
+     "mismatch_center": 0.2790606480947618
+    }
+   ],
+   "focal_intensity_error_hard": 0.019854993856826958,
+   "focal_peak_error_hard": 0.022035775992582385,
+   "focal_intensity_error_linear": 0.023455939641543678,
+   "focal_peak_error_linear": 0.027432285427225284
+  },
+  {
+   "overlap_um": 1.0,
+   "overlap_cells": 20,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     100,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 6000,
+   "total_tile_cells": 12000,
+   "wall_seconds": 1.1334898001514375,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.055153275014266666,
+   "near_error_linear": 0.05018164303485802,
+   "mismatch_max": 0.15059697646352502,
+   "mismatch_mean": 0.15059697646352502,
+   "mismatch_center_max": 0.13752334571523486,
+   "mismatch_center_mean": 0.13752334571523486,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       50,
+       90
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.15059697646352502,
+     "mismatch_center": 0.13752334571523486
+    }
+   ],
+   "focal_intensity_error_hard": 0.009540948381393796,
+   "focal_peak_error_hard": 0.01353775705764688,
+   "focal_intensity_error_linear": 0.008847075916754583,
+   "focal_peak_error_linear": 0.00519259627179149
+  },
+  {
+   "overlap_um": 1.5,
+   "overlap_cells": 30,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     110,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 6600,
+   "total_tile_cells": 13200,
+   "wall_seconds": 1.1508098002523184,
+   "peak_torch_bytes": null,
+   "near_error_hard": 0.06702558157441707,
+   "near_error_linear": 0.06010485792686404,
+   "mismatch_max": 0.2628263321595241,
+   "mismatch_mean": 0.2628263321595241,
+   "mismatch_center_max": 0.1774872418632156,
+   "mismatch_center_mean": 0.1774872418632156,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       40,
+       100
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.2628263321595241,
+     "mismatch_center": 0.1774872418632156
+    }
+   ],
+   "focal_intensity_error_hard": 0.00795959669953458,
+   "focal_peak_error_hard": 0.009827812196736768,
+   "focal_intensity_error_linear": 0.010923243152529575,
+   "focal_peak_error_linear": 0.008213743207708063
+  },
+  {
+   "overlap_um": 2.0,
+   "overlap_cells": 40,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     120,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 7200,
+   "total_tile_cells": 14400,
+   "wall_seconds": 1.1029918999411166,
+   "peak_torch_bytes": null,
+   "near_error_hard": 1.4856930257373704e-06,
+   "near_error_linear": 1.3315002114846027e-06,
+   "mismatch_max": 1.7343200321408302e-05,
+   "mismatch_mean": 1.7343200321408302e-05,
+   "mismatch_center_max": 1.98164521608735e-06,
+   "mismatch_center_mean": 1.98164521608735e-06,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       30,
+       110
+      ]
+     ],
+     "band_um": 4.0,
+     "mismatch": 1.7343200321408302e-05,
+     "mismatch_center": 1.98164521608735e-06
+    }
+   ],
+   "focal_intensity_error_hard": 2.0009198590455306e-07,
+   "focal_peak_error_hard": 1.1777845015400228e-07,
+   "focal_intensity_error_linear": 1.9526351954627145e-07,
+   "focal_peak_error_linear": 2.3509093402886042e-07
+  },
+  {
+   "overlap_um": 2.5,
+   "overlap_cells": 50,
+   "tiles": 2,
+   "tile_shapes": [
+    [
+     130,
+     60,
+     1
+    ]
+   ],
+   "largest_tile_cells": 7800,
+   "total_tile_cells": 15600,
+   "wall_seconds": 1.2933105998672545,
+   "peak_torch_bytes": null,
+   "near_error_hard": 2.370531692054222e-06,
+   "near_error_linear": 1.9390088128144613e-06,
+   "mismatch_max": 4.162941258013164e-06,
+   "mismatch_mean": 4.162941258013164e-06,
+   "mismatch_center_max": 4.277661609894793e-06,
+   "mismatch_center_mean": 4.277661609894793e-06,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0",
+      "tile-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       20,
+       120
+      ]
+     ],
+     "band_um": 5.0,
+     "mismatch": 4.162941258013164e-06,
+     "mismatch_center": 4.277661609894793e-06
+    }
+   ],
+   "focal_intensity_error_hard": 1.651465808529e-07,
+   "focal_peak_error_hard": 1.1530471960780069e-07,
+   "focal_intensity_error_linear": 1.4747158831747234e-07,
+   "focal_peak_error_linear": 7.935532908153638e-08
+  }
+ ],
+ "throughput": {
+  "overlap_um": 1.5,
+  "executors": {
+   "sequential": {
+    "wall_seconds": 1.314849200192839,
+    "peak_torch_bytes": null,
+    "tiles": 2,
+    "largest_tile_cells": 6600,
+    "total_tile_cells": 13200,
+    "execution": {
+     "method": "sequential Simulation.run",
+     "options": {}
+    },
+    "tiles_run": [
+     {
+      "id": "tile-0",
+      "seconds": 0.6344234002754092,
+      "setup_seconds": 0.003570099826902151,
+      "steps": 1681,
+      "shape": [
+       110,
+       60,
+       1
+      ],
+      "cells": 6600,
+      "backend": "cpu",
+      "cuda_kernel": null,
+      "mcells_per_second": 17.487690389704618
+     },
+     {
+      "id": "tile-1",
+      "seconds": 0.6671493998728693,
+      "setup_seconds": 0.0027592997066676617,
+      "steps": 1681,
+      "shape": [
+       110,
+       60,
+       1
+      ],
+      "cells": 6600,
+      "backend": "cpu",
+      "cuda_kernel": null,
+      "mcells_per_second": 16.62985832275974
+     }
+    ],
+    "options": {}
+   }
+  }
+ },
+ "gradient_project": {
+  "schema_version": 1,
+  "name": "Untitled",
+  "region": {
+   "dimension": "2d",
+   "size": [
+    7.0,
+    3.0,
+    1.0
+   ],
+   "mesh": 0.1,
+   "mesh_steps": null,
+   "mesh_coordinates": null,
+   "material_sampling": "cell",
+   "interface_method": "staircase",
+   "subpixel_quadrature": 8,
+   "mesh_type": "uniform",
+   "mesh_max": 0.15,
+   "mesh_grading": 1.25,
+   "mesh_ppw": 24.0,
+   "mesh_auto_refine": true,
+   "mesh_refinements": [],
+   "courant_factor": 0.99,
+   "time_step_override": null,
+   "steps": 841,
+   "run_control": {
+    "auto_shutoff": false,
+    "decay_threshold": 1e-06,
+    "check_interval": 50,
+    "consecutive_checks": 3,
+    "min_steps": 100,
+    "source_tail_amplitude": 1e-08,
+    "after_source_s": 0.0,
+    "divergence_check": true,
+    "growth_limit": 1000000.0,
+    "field_limit": null
+   },
+   "pml_cells": 5,
+   "boundaries": {
+    "x_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "x_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "y_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "y_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "z_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "z_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    }
+   },
+   "bloch_phase": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "background_index": 1.0,
+   "backend": "cpu",
+   "memory_mode": "resident",
+   "cuda_kernel": "torch",
+   "cuda_monitor_kernel": "torch",
+   "precision": "float64",
+   "snapshot_interval": 20,
+   "field": "Ez",
+   "slice_axis": "z",
+   "slice_position": 0.0,
+   "complex_display": "real"
+  },
+  "materials": [
+   {
+    "name": "Air",
+    "index": 1.0,
+    "color": "#b7c5d7",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "SiO2 (constant n)",
+    "index": 1.444,
+    "color": "#80c4d7",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "SiN (constant n)",
+    "index": 2.0,
+    "color": "#69a1e8",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "Si (constant n)",
+    "index": 3.48,
+    "color": "#cc8bdc",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   }
+  ],
+  "structures": [
+   {
+    "id": "22ef1697b54f",
+    "name": "object",
+    "center": [
+     -2.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.18398176680021483,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "60ada5d2cf05",
+    "name": "object",
+    "center": [
+     -2.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.22630694184690792,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "72b013921070",
+    "name": "object",
+    "center": [
+     -1.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.38435685025779115,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "fb61f52d7ee5",
+    "name": "object",
+    "center": [
+     -1.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.323005370098023,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "63081e5772af",
+    "name": "object",
+    "center": [
+     -0.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.1863560198273118,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1c9fa91dbbf3",
+    "name": "object",
+    "center": [
+     -0.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.2812755432662127,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "0c899ea50f18",
+    "name": "object",
+    "center": [
+     0.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.29413436347943356,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c2ad9dba6a9e",
+    "name": "object",
+    "center": [
+     0.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.20472689609838202,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "06bbee6e85ad",
+    "name": "object",
+    "center": [
+     1.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.3656816023945801,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "dbaaf7bdbd3c",
+    "name": "object",
+    "center": [
+     1.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.19182816557799295,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "9f6834cbbed6",
+    "name": "object",
+    "center": [
+     2.25,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.26954389333878537,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "641a5abff950",
+    "name": "object",
+    "center": [
+     2.75,
+     -0.3,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "rectangle",
+    "size": [
+     0.3046872511339819,
+     0.6,
+     1.0
+    ],
+    "radius": 0.5,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   }
+  ],
+  "sources": [
+   {
+    "wavelength": 1.55,
+    "pulse": "gaussian",
+    "pulse_cycles": 3.0,
+    "time_definition": "cycles",
+    "pulse_length": 2e-14,
+    "pulse_offset": 5e-14,
+    "signal": null,
+    "wavelength_start": 1.3,
+    "wavelength_stop": 1.8,
+    "optimize_for_short_pulse": true,
+    "eliminate_discontinuities": false,
+    "chirp_bandwidth_hz": 100000000000000.0,
+    "id": "f20bb91a36de",
+    "name": "source",
+    "center": [
+     0.0,
+     -0.85,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "plane",
+    "injection": "soft",
+    "normal": "y",
+    "direction": "+",
+    "incident_pml_cells": 96,
+    "size": [
+     7.0,
+     0.0,
+     0.0
+    ],
+    "component": "Ex",
+    "theta": null,
+    "phi": 0.0,
+    "amplitude": 1.0,
+    "phase": 0.0,
+    "use_global_source": false,
+    "extend_through_pml": true
+   }
+  ],
+  "global_source": {
+   "wavelength": 1.55,
+   "pulse": "gaussian",
+   "pulse_cycles": 3.0,
+   "time_definition": "cycles",
+   "pulse_length": 2e-14,
+   "pulse_offset": 5e-14,
+   "signal": null,
+   "wavelength_start": 1.3,
+   "wavelength_stop": 1.8,
+   "optimize_for_short_pulse": true,
+   "eliminate_discontinuities": false,
+   "chirp_bandwidth_hz": 100000000000000.0
+  },
+  "monitors": [
+   {
+    "id": "out",
+    "name": "frequency monitor",
+    "center": [
+     0.0,
+     0.5,
+     0.0
+    ],
+    "enabled": true,
+    "kind": "field",
+    "component": "Ez",
+    "spectrum": {
+     "sampling": "custom",
+     "chebyshev_wavelength": false,
+     "chebyshev_nodes": "roots",
+     "use_source_limits": false,
+     "custom_frequencies_hz": [
+      193414489032258.06
+     ],
+     "wavelength_start": 1.3,
+     "wavelength_stop": 1.8,
+     "frequency_points": 101,
+     "apodization": "none",
+     "apodization_center": 2e-14,
+     "apodization_time_width": 1e-14
+    },
+    "use_global_monitor": false,
+    "inherit_apodization": true,
+    "time_downsample": 1,
+    "normal": "y",
+    "size": [
+     6.0,
+     0.0,
+     1.0
+    ],
+    "downsample": 1,
+    "downsample_xyz": null,
+    "record_fields": [
+     "Ex",
+     "Ey",
+     "Ez",
+     "Hx",
+     "Hy",
+     "Hz"
+    ],
+    "record_poynting": [
+     "x",
+     "y",
+     "z"
+    ],
+    "record_flux": true,
+    "dft_precision": "field",
+    "spatial_interpolation": "specified"
+   }
+  ],
+  "global_monitor": {
+   "sampling": "frequency",
+   "chebyshev_wavelength": false,
+   "chebyshev_nodes": "roots",
+   "use_source_limits": false,
+   "custom_frequencies_hz": [],
+   "wavelength_start": 1.3,
+   "wavelength_stop": 1.8,
+   "frequency_points": 101,
+   "apodization": "none",
+   "apodization_center": 2e-14,
+   "apodization_time_width": 1e-14
+  },
+  "import_provenance": null
+ },
+ "gradient": [
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 5,
+   "tiles": 2,
+   "delta": 0.001,
+   "precision": "float64",
+   "checkpoints": 4,
+   "window_cells": 5,
+   "parameters": [
+    {
+     "kind": "cell",
+     "target": [
+      18,
+      12,
+      0
+     ],
+     "cells": 1,
+     "tiled_adjoint": -0.007666163464895036,
+     "tiled_central_difference": -0.007666163416075733,
+     "tiled_adjoint_vs_central_difference": 6.368153157893644e-09,
+     "full_adjoint": 0.002747107958825945,
+     "full_central_difference": 0.002747108183598357,
+     "full_adjoint_vs_central_difference": 8.182146352900117e-08,
+     "tiled_vs_full": 3.790630575789744
+    },
+    {
+     "kind": "pillar",
+     "target": 3,
+     "cells": 18,
+     "tiled_adjoint": 0.17081202227967468,
+     "tiled_central_difference": 0.17081197849222463,
+     "tiled_adjoint_vs_central_difference": 2.5634882542342464e-07,
+     "full_adjoint": -0.04091867723443482,
+     "full_central_difference": -0.04091873342559893,
+     "full_adjoint_vs_central_difference": 1.3732381089646286e-06,
+     "tiled_vs_full": 5.174426785622704
+    },
+    {
+     "kind": "pillar",
+     "target": 1,
+     "cells": 18,
+     "tiled_adjoint": -0.974463126650652,
+     "tiled_central_difference": -0.974463166866002,
+     "tiled_adjoint_vs_central_difference": 4.1269235520076154e-08,
+     "full_adjoint": -1.12853614833626,
+     "full_central_difference": -1.1285362002553256,
+     "full_adjoint_vs_central_difference": 4.6005671507558745e-08,
+     "tiled_vs_full": 0.13652466685515519
+    }
+   ],
+   "tiled_adjoint_seconds": 13.629354800097644,
+   "tiled_objective": 33.802891235545175,
+   "tiled_gradient_norm": 10.760142559857076,
+   "full_adjoint_seconds": 7.025807099882513,
+   "full_objective": 33.320017124963,
+   "full_gradient_norm": 10.688389697350106,
+   "gradient_relative_l2_tiled_vs_full": 0.12614313497523133,
+   "design_cells": 180,
+   "design_gradient_relative_l2_tiled_vs_full": 0.40381229226980114,
+   "objective_relative_difference": 0.014492012677280688,
+   "pillar_derivatives": [
+    {
+     "index": 0,
+     "center": [
+      -2.75,
+      -0.3
+     ],
+     "cells": 6,
+     "tiled": -0.13229730317986338,
+     "full": -0.14518382197100776
+    },
+    {
+     "index": 1,
+     "center": [
+      -2.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.974463126650652,
+     "full": -1.12853614833626
+    },
+    {
+     "index": 2,
+     "center": [
+      -1.75,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.6348203840826526,
+     "full": -0.41046242699756347
+    },
+    {
+     "index": 3,
+     "center": [
+      -1.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.17081202227967468,
+     "full": -0.04091867723443482
+    },
+    {
+     "index": 4,
+     "center": [
+      -0.75,
+      -0.3
+     ],
+     "cells": 6,
+     "tiled": 0.007829249232800747,
+     "full": -0.05357873375208177
+    },
+    {
+     "index": 5,
+     "center": [
+      -0.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.5908475340161172,
+     "full": 0.541544231934073
+    },
+    {
+     "index": 6,
+     "center": [
+      0.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.18011545260624756,
+     "full": -0.10827837396603182
+    },
+    {
+     "index": 7,
+     "center": [
+      0.75,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.5065183559886595,
+     "full": 0.40750701644069054
+    },
+    {
+     "index": 8,
+     "center": [
+      1.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.29512198884188445,
+     "full": -0.044011068538444845
+    },
+    {
+     "index": 9,
+     "center": [
+      1.75,
+      -0.3
+     ],
+     "cells": 6,
+     "tiled": 0.030393581933068594,
+     "full": 0.0010184730159280254
+    },
+    {
+     "index": 10,
+     "center": [
+      2.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.6303673505043019,
+     "full": -0.612153332818241
+    },
+    {
+     "index": 11,
+     "center": [
+      2.75,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.6181431816565216,
+     "full": -0.9230596190277196
+    }
+   ],
+   "pillar_vector_relative_l2": 0.3673458993434906
+  },
+  {
+   "overlap_um": 1.5,
+   "overlap_cells": 15,
+   "tiles": 2,
+   "delta": 0.001,
+   "precision": "float64",
+   "checkpoints": 4,
+   "window_cells": 5,
+   "parameters": [
+    {
+     "kind": "cell",
+     "target": [
+      18,
+      12,
+      0
+     ],
+     "cells": 1,
+     "tiled_adjoint": -0.0046830049497157454,
+     "tiled_central_difference": -0.004683004945604807,
+     "tiled_adjoint_vs_central_difference": 8.778419412623094e-10,
+     "full_adjoint": 0.002747107958825945,
+     "full_central_difference": 0.002747108183598357,
+     "full_adjoint_vs_central_difference": 8.182146352900117e-08,
+     "tiled_vs_full": 2.7047036446711625
+    },
+    {
+     "kind": "pillar",
+     "target": 3,
+     "cells": 18,
+     "tiled_adjoint": -0.0019853282728526872,
+     "tiled_central_difference": -0.0019853587005513873,
+     "tiled_adjoint_vs_central_difference": 1.5326045964193794e-05,
+     "full_adjoint": -0.04091867723443482,
+     "full_central_difference": -0.04091873342559893,
+     "full_adjoint_vs_central_difference": 1.3732381089646286e-06,
+     "tiled_vs_full": 0.9514811228750585
+    },
+    {
+     "kind": "pillar",
+     "target": 1,
+     "cells": 18,
+     "tiled_adjoint": -0.8434954756916374,
+     "tiled_central_difference": -0.843495512864223,
+     "tiled_adjoint_vs_central_difference": 4.40696897592398e-08,
+     "full_adjoint": -1.12853614833626,
+     "full_central_difference": -1.1285362002553256,
+     "full_adjoint_vs_central_difference": 4.6005671507558745e-08,
+     "tiled_vs_full": 0.25257558037892064
+    }
+   ],
+   "tiled_adjoint_seconds": 15.817122099921107,
+   "tiled_objective": 33.385060477547974,
+   "tiled_gradient_norm": 10.611732889115137,
+   "full_adjoint_seconds": 8.083188999909908,
+   "full_objective": 33.320017124963,
+   "full_gradient_norm": 10.688389697350106,
+   "gradient_relative_l2_tiled_vs_full": 0.08118518455549376,
+   "design_cells": 180,
+   "design_gradient_relative_l2_tiled_vs_full": 0.3147516231961494,
+   "objective_relative_difference": 0.001952080406832753,
+   "pillar_derivatives": [
+    {
+     "index": 0,
+     "center": [
+      -2.75,
+      -0.3
+     ],
+     "cells": 6,
+     "tiled": -0.15310561419617918,
+     "full": -0.14518382197100776
+    },
+    {
+     "index": 1,
+     "center": [
+      -2.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.8434954756916374,
+     "full": -1.12853614833626
+    },
+    {
+     "index": 2,
+     "center": [
+      -1.75,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.7053818132461949,
+     "full": -0.41046242699756347
+    },
+    {
+     "index": 3,
+     "center": [
+      -1.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.0019853282728526872,
+     "full": -0.04091867723443482
+    },
+    {
+     "index": 4,
+     "center": [
+      -0.75,
+      -0.3
+     ],
+     "cells": 6,
+     "tiled": -0.0024614850807416124,
+     "full": -0.05357873375208177
+    },
+    {
+     "index": 5,
+     "center": [
+      -0.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.41766626751154756,
+     "full": 0.541544231934073
+    },
+    {
+     "index": 6,
+     "center": [
+      0.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.02120300893885764,
+     "full": -0.10827837396603182
+    },
+    {
+     "index": 7,
+     "center": [
+      0.75,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.4378466849617988,
+     "full": 0.40750701644069054
+    },
+    {
+     "index": 8,
+     "center": [
+      1.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.09748378205549639,
+     "full": -0.044011068538444845
+    },
+    {
+     "index": 9,
+     "center": [
+      1.75,
+      -0.3
+     ],
+     "cells": 6,
+     "tiled": 0.04060816921505809,
+     "full": 0.0010184730159280254
+    },
+    {
+     "index": 10,
+     "center": [
+      2.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.54979706169687,
+     "full": -0.612153332818241
+    },
+    {
+     "index": 11,
+     "center": [
+      2.75,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.7030999429612895,
+     "full": -0.9230596190277196
+    }
+   ],
+   "pillar_vector_relative_l2": 0.2876841425895691
+  },
+  {
+   "overlap_um": 2.5,
+   "overlap_cells": 25,
+   "tiles": 2,
+   "delta": 0.001,
+   "precision": "float64",
+   "checkpoints": 4,
+   "window_cells": 5,
+   "parameters": [
+    {
+     "kind": "cell",
+     "target": [
+      18,
+      12,
+      0
+     ],
+     "cells": 1,
+     "tiled_adjoint": 3.818303325726132e-05,
+     "tiled_central_difference": 3.818304250557958e-05,
+     "tiled_adjoint_vs_central_difference": 2.422100924958416e-07,
+     "full_adjoint": 0.002747107958825945,
+     "full_central_difference": 0.002747108183598357,
+     "full_adjoint_vs_central_difference": 8.182146352900117e-08,
+     "tiled_vs_full": 0.9861006433567394
+    },
+    {
+     "kind": "pillar",
+     "target": 3,
+     "cells": 18,
+     "tiled_adjoint": 0.045511142700661235,
+     "tiled_central_difference": 0.0455110878583298,
+     "tiled_adjoint_vs_central_difference": 1.2050323122097135e-06,
+     "full_adjoint": -0.04091867723443482,
+     "full_central_difference": -0.04091873342559893,
+     "full_adjoint_vs_central_difference": 1.3732381089646286e-06,
+     "tiled_vs_full": 2.11223396689768
+    },
+    {
+     "kind": "pillar",
+     "target": 1,
+     "cells": 18,
+     "tiled_adjoint": -0.9268261591712479,
+     "tiled_central_difference": -0.9268262119519477,
+     "tiled_adjoint_vs_central_difference": 5.694778495698812e-08,
+     "full_adjoint": -1.12853614833626,
+     "full_central_difference": -1.1285362002553256,
+     "full_adjoint_vs_central_difference": 4.6005671507558745e-08,
+     "tiled_vs_full": 0.17873595760524127
+    }
+   ],
+   "tiled_adjoint_seconds": 16.31942450022325,
+   "tiled_objective": 34.05584386706484,
+   "tiled_gradient_norm": 10.783157470986843,
+   "full_adjoint_seconds": 8.420676300302148,
+   "full_objective": 33.320017124963,
+   "full_gradient_norm": 10.688389697350106,
+   "gradient_relative_l2_tiled_vs_full": 0.07110928681939578,
+   "design_cells": 180,
+   "design_gradient_relative_l2_tiled_vs_full": 0.2960789715878682,
+   "objective_relative_difference": 0.0220836243673645,
+   "pillar_derivatives": [
+    {
+     "index": 0,
+     "center": [
+      -2.75,
+      -0.3
+     ],
+     "cells": 6,
+     "tiled": -0.12926302389872565,
+     "full": -0.14518382197100776
+    },
+    {
+     "index": 1,
+     "center": [
+      -2.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.9268261591712479,
+     "full": -1.12853614833626
+    },
+    {
+     "index": 2,
+     "center": [
+      -1.75,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.6327132724081085,
+     "full": -0.41046242699756347
+    },
+    {
+     "index": 3,
+     "center": [
+      -1.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.045511142700661235,
+     "full": -0.04091867723443482
+    },
+    {
+     "index": 4,
+     "center": [
+      -0.75,
+      -0.3
+     ],
+     "cells": 6,
+     "tiled": 0.012744736823610336,
+     "full": -0.05357873375208177
+    },
+    {
+     "index": 5,
+     "center": [
+      -0.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.5226001201728321,
+     "full": 0.541544231934073
+    },
+    {
+     "index": 6,
+     "center": [
+      0.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.010702950837444835,
+     "full": -0.10827837396603182
+    },
+    {
+     "index": 7,
+     "center": [
+      0.75,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.35482388482356475,
+     "full": 0.40750701644069054
+    },
+    {
+     "index": 8,
+     "center": [
+      1.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": 0.0619307561156338,
+     "full": -0.044011068538444845
+    },
+    {
+     "index": 9,
+     "center": [
+      1.75,
+      -0.3
+     ],
+     "cells": 6,
+     "tiled": 0.06615152414880186,
+     "full": 0.0010184730159280254
+    },
+    {
+     "index": 10,
+     "center": [
+      2.25,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.5541516454553903,
+     "full": -0.612153332818241
+    },
+    {
+     "index": 11,
+     "center": [
+      2.75,
+      -0.3
+     ],
+     "cells": 18,
+     "tiled": -0.7126703275163272,
+     "full": -0.9230596190277196
+    }
+   ],
+   "pillar_vector_relative_l2": 0.24009448289871216
+  }
+ ],
+ "total_seconds": 144.02674230001867
+}

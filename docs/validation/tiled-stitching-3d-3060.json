@@ -1,0 +1,11133 @@
+{
+ "dimension": "3d",
+ "device": "cuda",
+ "gpu": "NVIDIA GeForce RTX 3060",
+ "torch": "2.10.0+cu126",
+ "wavelength_um": 1.55,
+ "mesh_um": 0.05,
+ "tile_um": 3.0,
+ "focal_um": 10.0,
+ "pad": 4,
+ "scope": "Overlapping-tile stitching of one pillar array against its whole-device reference. Relative L2 errors of the six-component output plane and of the focal intensity after angular-spectrum propagation.",
+ "project": {
+  "schema_version": 1,
+  "name": "Untitled",
+  "region": {
+   "dimension": "3d",
+   "size": [
+    7.0,
+    7.0,
+    3.0
+   ],
+   "mesh": 0.05,
+   "mesh_steps": null,
+   "mesh_coordinates": null,
+   "material_sampling": "cell",
+   "interface_method": "staircase",
+   "subpixel_quadrature": 8,
+   "mesh_type": "uniform",
+   "mesh_max": 0.15,
+   "mesh_grading": 1.25,
+   "mesh_ppw": 24.0,
+   "mesh_auto_refine": true,
+   "mesh_refinements": [],
+   "courant_factor": 0.99,
+   "time_step_override": null,
+   "steps": 2059,
+   "run_control": {
+    "auto_shutoff": false,
+    "decay_threshold": 1e-06,
+    "check_interval": 50,
+    "consecutive_checks": 3,
+    "min_steps": 100,
+    "source_tail_amplitude": 1e-08,
+    "after_source_s": 0.0,
+    "divergence_check": true,
+    "growth_limit": 1000000.0,
+    "field_limit": null
+   },
+   "pml_cells": 10,
+   "boundaries": {
+    "x_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "x_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "y_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "y_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "z_min": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    },
+    "z_max": {
+     "kind": "pml",
+     "layers": null,
+     "sigma_scale": 1.0,
+     "kappa": 1.0,
+     "alpha": 1e-08,
+     "polynomial": 3.0,
+     "alpha_polynomial": 0.0
+    }
+   },
+   "bloch_phase": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "background_index": 1.0,
+   "backend": "cuda",
+   "memory_mode": "resident",
+   "cuda_kernel": "fused",
+   "cuda_monitor_kernel": "torch",
+   "precision": "float32",
+   "snapshot_interval": 20,
+   "field": "Ez",
+   "slice_axis": "z",
+   "slice_position": 0.0,
+   "complex_display": "real"
+  },
+  "materials": [
+   {
+    "name": "Air",
+    "index": 1.0,
+    "color": "#b7c5d7",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "SiO2 (constant n)",
+    "index": 1.444,
+    "color": "#80c4d7",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "SiN (constant n)",
+    "index": 2.0,
+    "color": "#69a1e8",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   },
+   {
+    "name": "Si (constant n)",
+    "index": 3.48,
+    "color": "#cc8bdc",
+    "model": "dielectric",
+    "epsilon_tensor": [
+     2.25,
+     2.25,
+     2.25,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "epsilon_inf": 1.0,
+    "plasma_rad_s": 2000000000000000.0,
+    "collision_rad_s": 100000000000000.0,
+    "resonance_rad_s": 2000000000000000.0,
+    "linewidth_rad_s": 100000000000000.0,
+    "delta_epsilon": 1.0,
+    "poles": [],
+    "samples": null,
+    "fit_band_um": null,
+    "fit_dt_s": null
+   }
+  ],
+  "structures": [
+   {
+    "id": "7083809b8725",
+    "name": "object",
+    "center": [
+     -2.75,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.09199088340010741,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "4738e4641084",
+    "name": "object",
+    "center": [
+     -2.75,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.11315347092345396,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "5f2362557e05",
+    "name": "object",
+    "center": [
+     -2.75,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19217842512889557,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "5b42b294a8b2",
+    "name": "object",
+    "center": [
+     -2.75,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1615026850490115,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "a28769f5a3ab",
+    "name": "object",
+    "center": [
+     -2.75,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.0931780099136559,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "03365237d6e2",
+    "name": "object",
+    "center": [
+     -2.75,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14063777163310634,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "64b32c928cbe",
+    "name": "object",
+    "center": [
+     -2.75,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14706718173971678,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1b2ef45a937a",
+    "name": "object",
+    "center": [
+     -2.75,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10236344804919101,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1632fcf5a1be",
+    "name": "object",
+    "center": [
+     -2.75,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.18284080119729004,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "f29d3943f981",
+    "name": "object",
+    "center": [
+     -2.75,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.09591408278899648,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "deb28b5943a7",
+    "name": "object",
+    "center": [
+     -2.75,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.13477194666939268,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "0afe481ffdb7",
+    "name": "object",
+    "center": [
+     -2.75,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.15234362556699094,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "8ea54e0261af",
+    "name": "object",
+    "center": [
+     -2.25,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14028792285798491,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "89e43d88bd5c",
+    "name": "object",
+    "center": [
+     -2.25,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.16215180000133972,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1f797c1bf43b",
+    "name": "object",
+    "center": [
+     -2.25,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.18329729022090244,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e89eed43cbbd",
+    "name": "object",
+    "center": [
+     -2.25,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.21387741567705382,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "daacc87f9766",
+    "name": "object",
+    "center": [
+     -2.25,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1197881629248308,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "59220cca91f7",
+    "name": "object",
+    "center": [
+     -2.25,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17079660899117552,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "78509f275102",
+    "name": "object",
+    "center": [
+     -2.25,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17747023953382177,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "45d44ec2d16c",
+    "name": "object",
+    "center": [
+     -2.25,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1209809048617482,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "88665c02b8dc",
+    "name": "object",
+    "center": [
+     -2.25,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.08020861169123707,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "8dfe3b8ac547",
+    "name": "object",
+    "center": [
+     -2.25,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.21628443846729778,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "8a5d72dfb024",
+    "name": "object",
+    "center": [
+     -2.25,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.12177617122236259,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "076fd39694cf",
+    "name": "object",
+    "center": [
+     -2.25,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.12395804028480716,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "a125e29486ea",
+    "name": "object",
+    "center": [
+     -1.75,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.204839549862322,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1082a4e43e9d",
+    "name": "object",
+    "center": [
+     -1.75,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.16192281158472716,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "ba0d704afd86",
+    "name": "object",
+    "center": [
+     -1.75,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1459833531254564,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c7bb642502eb",
+    "name": "object",
+    "center": [
+     -1.75,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1882587813508343,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "589603851e69",
+    "name": "object",
+    "center": [
+     -1.75,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.08424844107274597,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "42191730b1f4",
+    "name": "object",
+    "center": [
+     -1.75,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1789751133917873,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "38de7d49fec2",
+    "name": "object",
+    "center": [
+     -1.75,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1323941366869859,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "db1384c758e1",
+    "name": "object",
+    "center": [
+     -1.75,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.0927193798905961,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "b3d57dfa5cb3",
+    "name": "object",
+    "center": [
+     -1.75,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1724700094399053,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "417874f1511c",
+    "name": "object",
+    "center": [
+     -1.75,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.21040493966378965,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "bccca2ecfe7f",
+    "name": "object",
+    "center": [
+     -1.75,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10900676353134017,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "37ded60eb6b7",
+    "name": "object",
+    "center": [
+     -1.75,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.16821262796994801,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1c6f91aeb7a9",
+    "name": "object",
+    "center": [
+     -1.25,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.12174283269203948,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1ac593c1aa1c",
+    "name": "object",
+    "center": [
+     -1.25,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.18384593520970627,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "65a3a97e0a82",
+    "name": "object",
+    "center": [
+     -1.25,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.18110307313989646,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "95eccd5e0aff",
+    "name": "object",
+    "center": [
+     -1.25,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.11062015943963265,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "daedb7bd515b",
+    "name": "object",
+    "center": [
+     -1.25,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19618416239840375,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "d1ea13fa760a",
+    "name": "object",
+    "center": [
+     -1.25,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17207130952225408,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "4bb7e1335a31",
+    "name": "object",
+    "center": [
+     -1.25,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17559184710044906,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "045c7808a0fe",
+    "name": "object",
+    "center": [
+     -1.25,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19481060502387493,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c6cd11c804ef",
+    "name": "object",
+    "center": [
+     -1.25,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1400002066017847,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "4fa003d2f30c",
+    "name": "object",
+    "center": [
+     -1.25,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.18621876456168868,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "b485e9d1e31c",
+    "name": "object",
+    "center": [
+     -1.25,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.20298722585327555,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c97557b7a880",
+    "name": "object",
+    "center": [
+     -1.25,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.09432478906909042,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "90791e732ff6",
+    "name": "object",
+    "center": [
+     -0.75,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19896756724526155,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c7ca4c0b3223",
+    "name": "object",
+    "center": [
+     -0.75,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.13514982656852692,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "11675ffc2857",
+    "name": "object",
+    "center": [
+     -0.75,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14715574929171849,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "ce2515a66da2",
+    "name": "object",
+    "center": [
+     -0.75,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10048683976614779,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "2a700134f8ff",
+    "name": "object",
+    "center": [
+     -0.75,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1777796882925931,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "67ec581dfbda",
+    "name": "object",
+    "center": [
+     -0.75,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.12087700623829914,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "78b57436d433",
+    "name": "object",
+    "center": [
+     -0.75,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.2019594809711025,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "5acf02bf8cf7",
+    "name": "object",
+    "center": [
+     -0.75,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.11855241277273079,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "b9a32a959ff0",
+    "name": "object",
+    "center": [
+     -0.75,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1586533606223246,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "71cb1774f788",
+    "name": "object",
+    "center": [
+     -0.75,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1359518709582634,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "27f1483af2a9",
+    "name": "object",
+    "center": [
+     -0.75,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.16580732886634147,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e1096982aa30",
+    "name": "object",
+    "center": [
+     -0.75,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10752949356809732,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "f4cd273186c1",
+    "name": "object",
+    "center": [
+     -0.25,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10524025571803333,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "02773fec6031",
+    "name": "object",
+    "center": [
+     -0.25,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1845604539909773,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e93e776baae5",
+    "name": "object",
+    "center": [
+     -0.25,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.18531127857169885,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "6c0085fbd85b",
+    "name": "object",
+    "center": [
+     -0.25,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.15937690242340774,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "8b2ad8f196fe",
+    "name": "object",
+    "center": [
+     -0.25,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.20895115481961019,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "d08b56086389",
+    "name": "object",
+    "center": [
+     -0.25,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10880850675206263,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "ac10515438d3",
+    "name": "object",
+    "center": [
+     -0.25,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19912615744283121,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1ebb2ed465f7",
+    "name": "object",
+    "center": [
+     -0.25,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10365822358579208,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "fd5ef1e77de4",
+    "name": "object",
+    "center": [
+     -0.25,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.2150100809251992,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "031ed064cfdc",
+    "name": "object",
+    "center": [
+     -0.25,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.16731698193486125,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c39a5c7f8e43",
+    "name": "object",
+    "center": [
+     -0.25,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.16496373032140207,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "d981e5ccc975",
+    "name": "object",
+    "center": [
+     -0.25,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.21587822683856733,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c51f9002b5a8",
+    "name": "object",
+    "center": [
+     0.25,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19018457993042798,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "7a7bdbc7052b",
+    "name": "object",
+    "center": [
+     0.25,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1905884466523976,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "818f1f1c8094",
+    "name": "object",
+    "center": [
+     0.25,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.08757312610193514,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "ff407c89511a",
+    "name": "object",
+    "center": [
+     0.25,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1317000828532188,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "9eb731b5bedd",
+    "name": "object",
+    "center": [
+     0.25,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.09188526810316552,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "49e343d4f540",
+    "name": "object",
+    "center": [
+     0.25,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10709386140517202,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "83ac983bde59",
+    "name": "object",
+    "center": [
+     0.25,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10994137869690061,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "a559e04eb0ba",
+    "name": "object",
+    "center": [
+     0.25,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.20020987050322664,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "9d6cab51c22d",
+    "name": "object",
+    "center": [
+     0.25,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.09774569716056276,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1efb4871922f",
+    "name": "object",
+    "center": [
+     0.25,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.12154608757452293,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "ee08b3706508",
+    "name": "object",
+    "center": [
+     0.25,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14899857704940656,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "6b7d0b00e014",
+    "name": "object",
+    "center": [
+     0.25,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19892445756653518,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1b7a53b4b04b",
+    "name": "object",
+    "center": [
+     0.75,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.21513239891723257,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "ee6a54f85e08",
+    "name": "object",
+    "center": [
+     0.75,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17914026789621385,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e1ec53ffe8f9",
+    "name": "object",
+    "center": [
+     0.75,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10991621072027674,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "473749ed76db",
+    "name": "object",
+    "center": [
+     0.75,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1562975754041206,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1f0841457d70",
+    "name": "object",
+    "center": [
+     0.75,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17883426601816418,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "9a66400dc6b1",
+    "name": "object",
+    "center": [
+     0.75,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.08726355388172752,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "b640cc017c58",
+    "name": "object",
+    "center": [
+     0.75,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17518378341137,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e8849550d4f5",
+    "name": "object",
+    "center": [
+     0.75,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.13155945691947135,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "d810abb0c0db",
+    "name": "object",
+    "center": [
+     0.75,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.16255804014908917,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "0f5d3b758754",
+    "name": "object",
+    "center": [
+     0.75,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17373465935983312,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e26665d8710e",
+    "name": "object",
+    "center": [
+     0.75,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17367784946043102,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "23b097cbaf51",
+    "name": "object",
+    "center": [
+     0.75,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1532269685736199,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "5420ccb12fd9",
+    "name": "object",
+    "center": [
+     1.25,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1576632405451125,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "efc1d005fcb2",
+    "name": "object",
+    "center": [
+     1.25,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10774095990589462,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "d98331a04c9f",
+    "name": "object",
+    "center": [
+     1.25,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14932623481495633,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "b5297c80b828",
+    "name": "object",
+    "center": [
+     1.25,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.09755732617033544,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "ef688429fecb",
+    "name": "object",
+    "center": [
+     1.25,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14730458026964904,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c881c48217ae",
+    "name": "object",
+    "center": [
+     1.25,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.15507428957977362,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "d199f643c704",
+    "name": "object",
+    "center": [
+     1.25,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1883746742834446,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "6a6d1c9da2f0",
+    "name": "object",
+    "center": [
+     1.25,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.13511307101918602,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "15877469a1c1",
+    "name": "object",
+    "center": [
+     1.25,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.08274405859722533,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "6cc68ab51f88",
+    "name": "object",
+    "center": [
+     1.25,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.15388499064989047,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "8dcb3ef23468",
+    "name": "object",
+    "center": [
+     1.25,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1087325489430123,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "fb731085ad25",
+    "name": "object",
+    "center": [
+     1.25,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.18377605324721163,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "fb3bf8f070c4",
+    "name": "object",
+    "center": [
+     1.75,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.13441761225834314,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "f14111005b48",
+    "name": "object",
+    "center": [
+     1.75,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.13326624297859235,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "68b54b27ab0b",
+    "name": "object",
+    "center": [
+     1.75,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.20732364116770158,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "79d0ebf34744",
+    "name": "object",
+    "center": [
+     1.75,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.13501586215372927,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "5664353edb28",
+    "name": "object",
+    "center": [
+     1.75,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.12883922080121796,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "0a56d865555b",
+    "name": "object",
+    "center": [
+     1.75,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.12872276295015586,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "231c55e5065b",
+    "name": "object",
+    "center": [
+     1.75,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14730717984236147,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e33a9b3667a3",
+    "name": "object",
+    "center": [
+     1.75,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.09306089522519793,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "55ec7afa1066",
+    "name": "object",
+    "center": [
+     1.75,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.15654463711240008,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c33ae0299b73",
+    "name": "object",
+    "center": [
+     1.75,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.20899984468472943,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "de393df533ff",
+    "name": "object",
+    "center": [
+     1.75,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.15880908908316316,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "25231934fe81",
+    "name": "object",
+    "center": [
+     1.75,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1841474290290766,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c407dcc12180",
+    "name": "object",
+    "center": [
+     2.25,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.21259969284319485,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "e189c92d8256",
+    "name": "object",
+    "center": [
+     2.25,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19789615419384798,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "1c9656ff137a",
+    "name": "object",
+    "center": [
+     2.25,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.18416088810574738,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "bee50c53f105",
+    "name": "object",
+    "center": [
+     2.25,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19384292348723853,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "fa780b549837",
+    "name": "object",
+    "center": [
+     2.25,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.19481946582777396,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "33d2b3c37c03",
+    "name": "object",
+    "center": [
+     2.25,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.11552572726668466,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "8bcc7c2e5025",
+    "name": "object",
+    "center": [
+     2.25,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14747482660637357,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "ebd7393f2832",
+    "name": "object",
+    "center": [
+     2.25,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1279803450921921,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "18c95bac1117",
+    "name": "object",
+    "center": [
+     2.25,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.11664266110801158,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "8af4fe324324",
+    "name": "object",
+    "center": [
+     2.25,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1600172216371683,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "fe31d07fb99a",
+    "name": "object",
+    "center": [
+     2.25,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.1245040291977293,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "a90aece74a96",
+    "name": "object",
+    "center": [
+     2.25,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.16661191640817133,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "7bcc94756519",
+    "name": "object",
+    "center": [
+     2.75,
+     -2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.161538314238046,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "0a07b1e14114",
+    "name": "object",
+    "center": [
+     2.75,
+     -2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.09461585641347599,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "cc343f6ed38f",
+    "name": "object",
+    "center": [
+     2.75,
+     -1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.14193847121827174,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "c32d87755fca",
+    "name": "object",
+    "center": [
+     2.75,
+     -1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.13457968235723075,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "464454215648",
+    "name": "object",
+    "center": [
+     2.75,
+     -0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17893133755405385,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "813d5369af09",
+    "name": "object",
+    "center": [
+     2.75,
+     -0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.092338598133454,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "448c43a1aaea",
+    "name": "object",
+    "center": [
+     2.75,
+     0.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10365414414439961,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "548d50154c3b",
+    "name": "object",
+    "center": [
+     2.75,
+     0.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.15176364383376878,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "59479fa7f6c5",
+    "name": "object",
+    "center": [
+     2.75,
+     1.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.13664312203869416,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "52d6fbfe0b35",
+    "name": "object",
+    "center": [
+     2.75,
+     1.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.17314853522544071,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "f511b4861f8a",
+    "name": "object",
+    "center": [
+     2.75,
+     2.25,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.12659993628581906,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   },
+   {
+    "id": "337882111cef",
+    "name": "object",
+    "center": [
+     2.75,
+     2.75,
+     -0.3
+    ],
+    "enabled": true,
+    "kind": "circle",
+    "size": [
+     1.0,
+     1.0,
+     0.6
+    ],
+    "radius": 0.10761062756829944,
+    "inner_radius": 0.3,
+    "rotation": 0.0,
+    "rotation_axes": [
+     "z",
+     "x",
+     "y"
+    ],
+    "rotation_angles": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "make_ellipsoid": false,
+    "radius_2": 0.5,
+    "radius_3": 0.5,
+    "inner_radius_2": 0.3,
+    "theta_start": 0.0,
+    "theta_stop": 360.0,
+    "vertices": [
+     [
+      -0.5,
+      -0.5
+     ],
+     [
+      0.5,
+      -0.5
+     ],
+     [
+      0.0,
+      0.5
+     ]
+    ],
+    "holes": [],
+    "material": "SiN (constant n)",
+    "mesh_order": 2
+   }
+  ],
+  "sources": [
+   {
+    "wavelength": 1.55,
+    "pulse": "gaussian",
+    "pulse_cycles": 3.0,
+    "time_definition": "cycles",
+    "pulse_length": 2e-14,
+    "pulse_offset": 5e-14,
+    "signal": null,
+    "wavelength_start": 1.3,
+    "wavelength_stop": 1.8,
+    "optimize_for_short_pulse": true,
+    "eliminate_discontinuities": false,
+    "chirp_bandwidth_hz": 100000000000000.0,
+    "id": "a05486cc31c9",
+    "name": "source",
+    "center": [
+     0.0,
+     0.0,
+     -0.85
+    ],
+    "enabled": true,
+    "kind": "plane",
+    "injection": "soft",
+    "normal": "z",
+    "direction": "+",
+    "incident_pml_cells": 96,
+    "size": [
+     7.0,
+     7.0,
+     0.0
+    ],
+    "component": "Ex",
+    "theta": null,
+    "phi": 0.0,
+    "amplitude": 1.0,
+    "phase": 0.0,
+    "use_global_source": false,
+    "extend_through_pml": true
+   }
+  ],
+  "global_source": {
+   "wavelength": 1.55,
+   "pulse": "gaussian",
+   "pulse_cycles": 3.0,
+   "time_definition": "cycles",
+   "pulse_length": 2e-14,
+   "pulse_offset": 5e-14,
+   "signal": null,
+   "wavelength_start": 1.3,
+   "wavelength_stop": 1.8,
+   "optimize_for_short_pulse": true,
+   "eliminate_discontinuities": false,
+   "chirp_bandwidth_hz": 100000000000000.0
+  },
+  "monitors": [
+   {
+    "id": "out",
+    "name": "frequency monitor",
+    "center": [
+     0.0,
+     0.0,
+     0.5
+    ],
+    "enabled": true,
+    "kind": "field",
+    "component": "Ez",
+    "spectrum": {
+     "sampling": "custom",
+     "chebyshev_wavelength": false,
+     "chebyshev_nodes": "roots",
+     "use_source_limits": false,
+     "custom_frequencies_hz": [
+      193414489032258.06
+     ],
+     "wavelength_start": 1.3,
+     "wavelength_stop": 1.8,
+     "frequency_points": 101,
+     "apodization": "none",
+     "apodization_center": 2e-14,
+     "apodization_time_width": 1e-14
+    },
+    "use_global_monitor": false,
+    "inherit_apodization": true,
+    "time_downsample": 1,
+    "normal": "z",
+    "size": [
+     6.0,
+     6.0,
+     0.0
+    ],
+    "downsample": 1,
+    "downsample_xyz": null,
+    "record_fields": [
+     "Ex",
+     "Ey",
+     "Ez",
+     "Hx",
+     "Hy",
+     "Hz"
+    ],
+    "record_poynting": [
+     "x",
+     "y",
+     "z"
+    ],
+    "record_flux": true,
+    "dft_precision": "field",
+    "spatial_interpolation": "specified"
+   }
+  ],
+  "global_monitor": {
+   "sampling": "frequency",
+   "chebyshev_wavelength": false,
+   "chebyshev_nodes": "roots",
+   "use_source_limits": false,
+   "custom_frequencies_hz": [],
+   "wavelength_start": 1.3,
+   "wavelength_stop": 1.8,
+   "frequency_points": 101,
+   "apodization": "none",
+   "apodization_center": 2e-14,
+   "apodization_time_width": 1e-14
+  },
+  "import_provenance": null
+ },
+ "reference": {
+  "wall_seconds": 2.276666899677366,
+  "loop_seconds": 1.4527354999445379,
+  "setup_seconds": 0.7984463996253908,
+  "cells": 1176000,
+  "shape": [
+   140,
+   140,
+   60
+  ],
+  "steps": 2059,
+  "peak_torch_bytes": 85206016,
+  "mcells_per_second": 1666.7755417916358
+ },
+ "through_pml": [
+  {
+   "overlap_um": 0.25,
+   "overlap_cells": 5,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     85,
+     85,
+     60
+    ]
+   ],
+   "largest_tile_cells": 433500,
+   "total_tile_cells": 1734000,
+   "wall_seconds": 2.7778241001069546,
+   "peak_torch_bytes": 31089664,
+   "near_error_hard": 0.12002154919526133,
+   "near_error_linear": 0.11596783502164991,
+   "mismatch_max": 0.2400687509943367,
+   "mismatch_mean": 0.20918792629811367,
+   "mismatch_center_max": 0.22815126358851862,
+   "mismatch_center_mean": 0.1996581052192815,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ],
+      [
+       10,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.2008407163982112,
+     "mismatch_center": 0.19465852395049965
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ],
+      [
+       65,
+       130
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.16914079318178596,
+     "mismatch_center": 0.15986806925524097
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       75
+      ],
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.2267014446181208,
+     "mismatch_center": 0.21595456408286673
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       65,
+       130
+      ],
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.2400687509943367,
+     "mismatch_center": 0.22815126358851862
+    }
+   ],
+   "focal_intensity_error_hard": 0.04764307201073355,
+   "focal_peak_error_hard": 0.06330084518522001,
+   "focal_intensity_error_linear": 0.044526793789981325,
+   "focal_peak_error_linear": 0.060874033466993556
+  },
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 10,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     90,
+     90,
+     60
+    ]
+   ],
+   "largest_tile_cells": 486000,
+   "total_tile_cells": 1944000,
+   "wall_seconds": 2.973584800027311,
+   "peak_torch_bytes": 34757120,
+   "near_error_hard": 0.10858363411630569,
+   "near_error_linear": 0.1020772371013595,
+   "mismatch_max": 0.37165618964595454,
+   "mismatch_mean": 0.2803345965256246,
+   "mismatch_center_max": 0.31373373954049993,
+   "mismatch_center_mean": 0.24227169772186163,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ],
+      [
+       10,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.37165618964595454,
+     "mismatch_center": 0.31373373954049993
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ],
+      [
+       60,
+       130
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.3018885949979864,
+     "mismatch_center": 0.2491400832842391
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       80
+      ],
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.24800196002446162,
+     "mismatch_center": 0.22842878056363966
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       60,
+       130
+      ],
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.1997916414340957,
+     "mismatch_center": 0.1777841874990679
+    }
+   ],
+   "focal_intensity_error_hard": 0.022402044685743014,
+   "focal_peak_error_hard": 0.020774515089853018,
+   "focal_intensity_error_linear": 0.02880950948933896,
+   "focal_peak_error_linear": 0.028703483756004813
+  },
+  {
+   "overlap_um": 1.0,
+   "overlap_cells": 20,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     100,
+     100,
+     60
+    ]
+   ],
+   "largest_tile_cells": 600000,
+   "total_tile_cells": 2400000,
+   "wall_seconds": 3.483750599902123,
+   "peak_torch_bytes": 43285504,
+   "near_error_hard": 0.0947269424602072,
+   "near_error_linear": 0.08625881285673499,
+   "mismatch_max": 0.2689399974957655,
+   "mismatch_mean": 0.22429653484792572,
+   "mismatch_center_max": 0.21009205748110082,
+   "mismatch_center_mean": 0.18869299036365775,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       50,
+       90
+      ],
+      [
+       10,
+       90
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.2603826709906335,
+     "mismatch_center": 0.208020784814753
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       50,
+       90
+      ],
+      [
+       50,
+       130
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.2689399974957655,
+     "mismatch_center": 0.21009205748110082
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       90
+      ],
+      [
+       50,
+       90
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.18325083452462584,
+     "mismatch_center": 0.1622828435385956
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       50,
+       130
+      ],
+      [
+       50,
+       90
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.18461263638067799,
+     "mismatch_center": 0.17437627562018157
+    }
+   ],
+   "focal_intensity_error_hard": 0.020241350336075273,
+   "focal_peak_error_hard": 0.02465945960563155,
+   "focal_intensity_error_linear": 0.018632356695092642,
+   "focal_peak_error_linear": 0.002826082519111004
+  },
+  {
+   "overlap_um": 1.5,
+   "overlap_cells": 30,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     110,
+     110,
+     60
+    ]
+   ],
+   "largest_tile_cells": 726000,
+   "total_tile_cells": 2904000,
+   "wall_seconds": 4.048685200046748,
+   "peak_torch_bytes": 51540992,
+   "near_error_hard": 0.07927822300789536,
+   "near_error_linear": 0.07099806283859185,
+   "mismatch_max": 0.18751531766419083,
+   "mismatch_mean": 0.1634931795050828,
+   "mismatch_center_max": 0.17145774242833933,
+   "mismatch_center_mean": 0.12406626875917755,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       40,
+       100
+      ],
+      [
+       10,
+       100
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.14104758584216556,
+     "mismatch_center": 0.08966304591535888
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       40,
+       100
+      ],
+      [
+       40,
+       130
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.15723781772857778,
+     "mismatch_center": 0.09354127268857074
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       100
+      ],
+      [
+       40,
+       100
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.168171996785397,
+     "mismatch_center": 0.14160301400444125
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       40,
+       130
+      ],
+      [
+       40,
+       100
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.18751531766419083,
+     "mismatch_center": 0.17145774242833933
+    }
+   ],
+   "focal_intensity_error_hard": 0.020724042705376082,
+   "focal_peak_error_hard": 0.0019015329328124192,
+   "focal_intensity_error_linear": 0.015672753888253763,
+   "focal_peak_error_linear": 0.008926677461358268,
+   "error_by_distance": [
+    {
+     "distance_um": [
+      0,
+      0.25
+     ],
+     "rms_relative_error": 0.09203366569225628
+    },
+    {
+     "distance_um": [
+      0.25,
+      0.5
+     ],
+     "rms_relative_error": 0.08675808898975934
+    },
+    {
+     "distance_um": [
+      0.5,
+      1.0
+     ],
+     "rms_relative_error": 0.08278943028547488
+    },
+    {
+     "distance_um": [
+      1.0,
+      1.5
+     ],
+     "rms_relative_error": 0.0781598104199589
+    },
+    {
+     "distance_um": [
+      1.5,
+      2.0
+     ],
+     "rms_relative_error": 0.0673115341898859
+    },
+    {
+     "distance_um": [
+      2.0,
+      3.0
+     ],
+     "rms_relative_error": 0.052291036468773526
+    }
+   ]
+  },
+  {
+   "overlap_um": 2.0,
+   "overlap_cells": 40,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     120,
+     120,
+     60
+    ]
+   ],
+   "largest_tile_cells": 864000,
+   "total_tile_cells": 3456000,
+   "wall_seconds": 4.658817999996245,
+   "peak_torch_bytes": 62026240,
+   "near_error_hard": 0.056836668768751736,
+   "near_error_linear": 0.054548847449195616,
+   "mismatch_max": 0.19746408467251692,
+   "mismatch_mean": 0.15705251071382983,
+   "mismatch_center_max": 0.10248248520085879,
+   "mismatch_center_mean": 0.09445225611217067,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       30,
+       110
+      ],
+      [
+       10,
+       110
+      ]
+     ],
+     "band_um": 4.0,
+     "mismatch": 0.19746408467251692,
+     "mismatch_center": 0.10248248520085879
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       30,
+       110
+      ],
+      [
+       30,
+       130
+      ]
+     ],
+     "band_um": 4.0,
+     "mismatch": 0.1913774343389321,
+     "mismatch_center": 0.09872869864006785
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       110
+      ],
+      [
+       30,
+       110
+      ]
+     ],
+     "band_um": 4.0,
+     "mismatch": 0.11882819561655227,
+     "mismatch_center": 0.08719662843462594
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       30,
+       130
+      ],
+      [
+       30,
+       110
+      ]
+     ],
+     "band_um": 4.0,
+     "mismatch": 0.12054032822731811,
+     "mismatch_center": 0.08940121217313016
+    }
+   ],
+   "focal_intensity_error_hard": 0.012047358809249403,
+   "focal_peak_error_hard": 0.004106707954817546,
+   "focal_intensity_error_linear": 0.009613135203202271,
+   "focal_peak_error_linear": 0.001831992940984694
+  },
+  {
+   "overlap_um": 2.5,
+   "overlap_cells": 50,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     130,
+     130,
+     60
+    ]
+   ],
+   "largest_tile_cells": 1014000,
+   "total_tile_cells": 4056000,
+   "wall_seconds": 5.439381800126284,
+   "peak_torch_bytes": 72886272,
+   "near_error_hard": 0.0631712315226041,
+   "near_error_linear": 0.05973036108845076,
+   "mismatch_max": 0.1932911199240224,
+   "mismatch_mean": 0.19163060089087214,
+   "mismatch_center_max": 0.13256095651280267,
+   "mismatch_center_mean": 0.1158620985591386,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       20,
+       120
+      ],
+      [
+       10,
+       120
+      ]
+     ],
+     "band_um": 5.0,
+     "mismatch": 0.1932911199240224,
+     "mismatch_center": 0.10078408229315584
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       20,
+       120
+      ],
+      [
+       20,
+       130
+      ]
+     ],
+     "band_um": 5.0,
+     "mismatch": 0.19072858653216232,
+     "mismatch_center": 0.09863815000396883
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       120
+      ],
+      [
+       20,
+       120
+      ]
+     ],
+     "band_um": 5.0,
+     "mismatch": 0.1895059615622577,
+     "mismatch_center": 0.13146520542662704
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       20,
+       130
+      ],
+      [
+       20,
+       120
+      ]
+     ],
+     "band_um": 5.0,
+     "mismatch": 0.1929967355450462,
+     "mismatch_center": 0.13256095651280267
+    }
+   ],
+   "focal_intensity_error_hard": 0.016404782600132516,
+   "focal_peak_error_hard": 0.022465769595665232,
+   "focal_intensity_error_linear": 0.012760007247256018,
+   "focal_peak_error_linear": 0.018434357763834005
+  }
+ ],
+ "through_pml_empty": [
+  {
+   "overlap_um": 0.25,
+   "overlap_cells": 5,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     85,
+     85,
+     60
+    ]
+   ],
+   "largest_tile_cells": 433500,
+   "total_tile_cells": 1734000,
+   "wall_seconds": 2.68343080021441,
+   "peak_torch_bytes": 31089664,
+   "near_error_hard": 0.0,
+   "near_error_linear": 2.540773371424058e-17,
+   "mismatch_max": 0.0,
+   "mismatch_mean": 0.0,
+   "mismatch_center_max": 0.0,
+   "mismatch_center_mean": 0.0,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ],
+      [
+       10,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ],
+      [
+       65,
+       130
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       75
+      ],
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       65,
+       130
+      ],
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    }
+   ],
+   "focal_intensity_error_hard": 0.0,
+   "focal_peak_error_hard": 0.0,
+   "focal_intensity_error_linear": 1.866695014232866e-16,
+   "focal_peak_error_linear": 0.0
+  },
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 10,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     90,
+     90,
+     60
+    ]
+   ],
+   "largest_tile_cells": 486000,
+   "total_tile_cells": 1944000,
+   "wall_seconds": 3.0022053997963667,
+   "peak_torch_bytes": 34757120,
+   "near_error_hard": 0.0,
+   "near_error_linear": 3.745147748254457e-17,
+   "mismatch_max": 0.0,
+   "mismatch_mean": 0.0,
+   "mismatch_center_max": 0.0,
+   "mismatch_center_mean": 0.0,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ],
+      [
+       10,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ],
+      [
+       60,
+       130
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       80
+      ],
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       60,
+       130
+      ],
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.0,
+     "mismatch_center": 0.0
+    }
+   ],
+   "focal_intensity_error_hard": 0.0,
+   "focal_peak_error_hard": 0.0,
+   "focal_intensity_error_linear": 2.0409345250889512e-16,
+   "focal_peak_error_linear": 0.0
+  }
+ ],
+ "truncated_sheet": [
+  {
+   "overlap_um": 0.25,
+   "overlap_cells": 5,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     85,
+     85,
+     60
+    ]
+   ],
+   "largest_tile_cells": 433500,
+   "total_tile_cells": 1734000,
+   "wall_seconds": 2.7611646000295877,
+   "peak_torch_bytes": 31089664,
+   "near_error_hard": 0.3179824428316321,
+   "near_error_linear": 0.31355678755944383,
+   "mismatch_max": 0.594789348678644,
+   "mismatch_mean": 0.5761781008407625,
+   "mismatch_center_max": 0.5443820487797497,
+   "mismatch_center_mean": 0.5230509115238463,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ],
+      [
+       10,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.5827343258904608,
+     "mismatch_center": 0.5276043668326456
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ],
+      [
+       65,
+       130
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.5405629626323856,
+     "mismatch_center": 0.48150011018716227
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       75
+      ],
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.5866257661615594,
+     "mismatch_center": 0.5387171202958276
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       65,
+       130
+      ],
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.594789348678644,
+     "mismatch_center": 0.5443820487797497
+    }
+   ],
+   "focal_intensity_error_hard": 0.17492663154162996,
+   "focal_peak_error_hard": 0.24453134272085428,
+   "focal_intensity_error_linear": 0.18000353692007212,
+   "focal_peak_error_linear": 0.24834806366489995
+  },
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 10,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     90,
+     90,
+     60
+    ]
+   ],
+   "largest_tile_cells": 486000,
+   "total_tile_cells": 1944000,
+   "wall_seconds": 2.92211339995265,
+   "peak_torch_bytes": 34757120,
+   "near_error_hard": 0.31108910870720413,
+   "near_error_linear": 0.2981659676883857,
+   "mismatch_max": 0.6184917322236912,
+   "mismatch_mean": 0.5777232078264778,
+   "mismatch_center_max": 0.4937516043661722,
+   "mismatch_center_mean": 0.4614571527629887,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ],
+      [
+       10,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.5763016414755305,
+     "mismatch_center": 0.4658487352057135
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ],
+      [
+       60,
+       130
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.5315353705487275,
+     "mismatch_center": 0.4143658534118734
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       80
+      ],
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.5845640870579621,
+     "mismatch_center": 0.47186241806819573
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       60,
+       130
+      ],
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.6184917322236912,
+     "mismatch_center": 0.4937516043661722
+    }
+   ],
+   "focal_intensity_error_hard": 0.08011259654888048,
+   "focal_peak_error_hard": 0.11885272061692453,
+   "focal_intensity_error_linear": 0.09934757657025339,
+   "focal_peak_error_linear": 0.1477011422498635
+  },
+  {
+   "overlap_um": 1.0,
+   "overlap_cells": 20,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     100,
+     100,
+     60
+    ]
+   ],
+   "largest_tile_cells": 600000,
+   "total_tile_cells": 2400000,
+   "wall_seconds": 3.4202726003713906,
+   "peak_torch_bytes": 43285504,
+   "near_error_hard": 0.20603328631770557,
+   "near_error_linear": 0.18712081772126338,
+   "mismatch_max": 0.3970782657080298,
+   "mismatch_mean": 0.3933649875723532,
+   "mismatch_center_max": 0.2884651322292722,
+   "mismatch_center_mean": 0.2760068480068592,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       50,
+       90
+      ],
+      [
+       10,
+       90
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.39250221448171935,
+     "mismatch_center": 0.2884651322292722
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       50,
+       90
+      ],
+      [
+       50,
+       130
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.3970782657080298,
+     "mismatch_center": 0.2787867436465682
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       90
+      ],
+      [
+       50,
+       90
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.39581255630911616,
+     "mismatch_center": 0.2765999780591693
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       50,
+       130
+      ],
+      [
+       50,
+       90
+      ]
+     ],
+     "band_um": 2.0,
+     "mismatch": 0.3880669137905477,
+     "mismatch_center": 0.26017553809242716
+    }
+   ],
+   "focal_intensity_error_hard": 0.06560149456571376,
+   "focal_peak_error_hard": 0.07627531813592901,
+   "focal_intensity_error_linear": 0.05714789409168875,
+   "focal_peak_error_linear": 0.0009310810564902536
+  },
+  {
+   "overlap_um": 1.5,
+   "overlap_cells": 30,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     110,
+     110,
+     60
+    ]
+   ],
+   "largest_tile_cells": 726000,
+   "total_tile_cells": 2904000,
+   "wall_seconds": 4.022347699850798,
+   "peak_torch_bytes": 51540992,
+   "near_error_hard": 0.11481803458344673,
+   "near_error_linear": 0.1102502917629995,
+   "mismatch_max": 0.40260815574563086,
+   "mismatch_mean": 0.3729833570898719,
+   "mismatch_center_max": 0.24425971288789722,
+   "mismatch_center_mean": 0.2132947544126772,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       40,
+       100
+      ],
+      [
+       10,
+       100
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.3386100314577017,
+     "mismatch_center": 0.1800373806978256
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       40,
+       100
+      ],
+      [
+       40,
+       130
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.3564454392797528,
+     "mismatch_center": 0.19281401471548784
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       100
+      ],
+      [
+       40,
+       100
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.40260815574563086,
+     "mismatch_center": 0.2360679093494982
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       40,
+       130
+      ],
+      [
+       40,
+       100
+      ]
+     ],
+     "band_um": 3.0,
+     "mismatch": 0.3942698018764022,
+     "mismatch_center": 0.24425971288789722
+    }
+   ],
+   "focal_intensity_error_hard": 0.01791539514219858,
+   "focal_peak_error_hard": 0.02958291291285757,
+   "focal_intensity_error_linear": 0.022684093769579167,
+   "focal_peak_error_linear": 0.03952009365095921
+  }
+ ],
+ "truncated_sheet_empty": [
+  {
+   "overlap_um": 0.25,
+   "overlap_cells": 5,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     85,
+     85,
+     60
+    ]
+   ],
+   "largest_tile_cells": 433500,
+   "total_tile_cells": 1734000,
+   "wall_seconds": 2.7197900996543467,
+   "peak_torch_bytes": 31089664,
+   "near_error_hard": 0.34631739245699233,
+   "near_error_linear": 0.34440317910907825,
+   "mismatch_max": 0.45577544691438804,
+   "mismatch_mean": 0.43869548023604354,
+   "mismatch_center_max": 0.39341702787812904,
+   "mismatch_center_mean": 0.37259654928643027,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ],
+      [
+       10,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.4216155135576991,
+     "mismatch_center": 0.35177607069473144
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       65,
+       75
+      ],
+      [
+       65,
+       130
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.4216155135576991,
+     "mismatch_center": 0.35177607069473144
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       75
+      ],
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.45577544691438804,
+     "mismatch_center": 0.39341702787812904
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       65,
+       130
+      ],
+      [
+       65,
+       75
+      ]
+     ],
+     "band_um": 0.5,
+     "mismatch": 0.45577544691438804,
+     "mismatch_center": 0.39341702787812904
+    }
+   ],
+   "focal_intensity_error_hard": 0.2063252458063099,
+   "focal_peak_error_hard": 0.28128688216403014,
+   "focal_intensity_error_linear": 0.2094592498797933,
+   "focal_peak_error_linear": 0.2856146828047317
+  },
+  {
+   "overlap_um": 0.5,
+   "overlap_cells": 10,
+   "tiles": 4,
+   "tile_shapes": [
+    [
+     90,
+     90,
+     60
+    ]
+   ],
+   "largest_tile_cells": 486000,
+   "total_tile_cells": 1944000,
+   "wall_seconds": 2.9028842002153397,
+   "peak_torch_bytes": 34757120,
+   "near_error_hard": 0.30676545195371924,
+   "near_error_linear": 0.2996098398702567,
+   "mismatch_max": 0.4450152063949409,
+   "mismatch_mean": 0.4374060023636187,
+   "mismatch_center_max": 0.32084724786441626,
+   "mismatch_center_mean": 0.31054191370988515,
+   "pairs": [
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-1-0"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ],
+      [
+       10,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.4297967983322965,
+     "mismatch_center": 0.3002365795553541
+    },
+    {
+     "tiles": [
+      "tile-0-1",
+      "tile-1-1"
+     ],
+     "axis": "x",
+     "band_cells": [
+      [
+       60,
+       80
+      ],
+      [
+       60,
+       130
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.4297967983322965,
+     "mismatch_center": 0.3002365795553541
+    },
+    {
+     "tiles": [
+      "tile-0-0",
+      "tile-0-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       10,
+       80
+      ],
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.4450152063949409,
+     "mismatch_center": 0.32084724786441626
+    },
+    {
+     "tiles": [
+      "tile-1-0",
+      "tile-1-1"
+     ],
+     "axis": "y",
+     "band_cells": [
+      [
+       60,
+       130
+      ],
+      [
+       60,
+       80
+      ]
+     ],
+     "band_um": 1.0,
+     "mismatch": 0.4450152063949409,
+     "mismatch_center": 0.32084724786441626
+    }
+   ],
+   "focal_intensity_error_hard": 0.10036522189560694,
+   "focal_peak_error_hard": 0.14412549254805782,
+   "focal_intensity_error_linear": 0.11357703865109216,
+   "focal_peak_error_linear": 0.16557399380115106
+  }
+ ],
+ "throughput": {
+  "overlap_um": 1.5,
+  "executors": {
+   "sequential": {
+    "wall_seconds": 4.026752799749374,
+    "peak_torch_bytes": 51540992,
+    "tiles": 4,
+    "largest_tile_cells": 726000,
+    "total_tile_cells": 2904000,
+    "execution": {
+     "method": "sequential Simulation.run",
+     "options": {}
+    },
+    "tiles_run": [
+     {
+      "id": "tile-0-0",
+      "seconds": 0.9412199999205768,
+      "setup_seconds": 0.04504649993032217,
+      "steps": 2059,
+      "shape": [
+       110,
+       110,
+       60
+      ],
+      "cells": 726000,
+      "backend": "cuda",
+      "cuda_kernel": "fused",
+      "mcells_per_second": 1588.187671454218
+     },
+     {
+      "id": "tile-0-1",
+      "seconds": 0.9389761001802981,
+      "setup_seconds": 0.039264800027012825,
+      "steps": 2059,
+      "shape": [
+       110,
+       110,
+       60
+      ],
+      "cells": 726000,
+      "backend": "cuda",
+      "cuda_kernel": "fused",
+      "mcells_per_second": 1591.983011828489
+     },
+     {
+      "id": "tile-1-0",
+      "seconds": 0.9430327001027763,
+      "setup_seconds": 0.03610279969871044,
+      "steps": 2059,
+      "shape": [
+       110,
+       110,
+       60
+      ],
+      "cells": 726000,
+      "backend": "cuda",
+      "cuda_kernel": "fused",
+      "mcells_per_second": 1585.1348525211117
+     },
+     {
+      "id": "tile-1-1",
+      "seconds": 0.9574082000181079,
+      "setup_seconds": 0.03733209986239672,
+      "steps": 2059,
+      "shape": [
+       110,
+       110,
+       60
+      ],
+      "cells": 726000,
+      "backend": "cuda",
+      "cuda_kernel": "fused",
+      "mcells_per_second": 1561.334026564351
+     }
+    ],
+    "options": {}
+   },
+   "tensor": {
+    "wall_seconds": 5.6167591996490955,
+    "peak_torch_bytes": 206816256,
+    "tiles": 4,
+    "largest_tile_cells": 726000,
+    "total_tile_cells": 2904000,
+    "execution": {
+     "execution": "grouped_fused_cuda",
+     "total_cases": 4,
+     "cohort_size": 4,
+     "group_count": 1,
+     "groups": [
+      {
+       "group": 0,
+       "signature": "43bfa0f0c743ee611048af137fdd053326c934123cfe66ce6aff6cf50a83ea45",
+       "shape": [
+        110,
+        110,
+        60
+       ],
+       "precision": "float32",
+       "steps": 2059,
+       "indices": [
+        0,
+        1,
+        2,
+        3
+       ],
+       "estimated_bytes": [
+        156132967,
+        156132967,
+        156132967,
+        156132967
+       ]
+      }
+     ],
+     "cohorts": [
+      {
+       "group": 0,
+       "indices": [
+        0,
+        1,
+        2,
+        3
+       ],
+       "estimated_bytes": 624531868
+      }
+     ],
+     "memory_limit_bytes": 7006794547,
+     "padding_cells": 0,
+     "resume": false,
+     "result_order": "input",
+     "objective_order": "cohort execution",
+     "planning_seconds": 0.029619799926877022,
+     "executions": [
+      {
+       "cohort": 0,
+       "execution": "fused_cuda_batch",
+       "batch_size": 4,
+       "device": "cuda:0",
+       "estimated_memory_mb": 595.6,
+       "memory_fraction": 0.6,
+       "loop_seconds": 5.031640300061554,
+       "setup_seconds": 0.41885250015184283,
+       "graph": true,
+       "cuda_graph_steps": 1,
+       "cuda_graph_replays": 2059,
+       "resume": false,
+       "total_cases": 4,
+       "cohort_size": 4,
+       "cohorts_completed": 1
+      }
+     ],
+     "cohorts_started": 1,
+     "loop_seconds": 5.031640300061554,
+     "setup_seconds": 0.41885250015184283,
+     "seconds": 5.57082170015201
+    },
+    "tiles_run": [
+     {
+      "id": "tile-0-0",
+      "seconds": 5.031640300061554,
+      "setup_seconds": 0.41885250015184283,
+      "steps": 2059,
+      "shape": [
+       110,
+       110,
+       60
+      ],
+      "cells": 726000,
+      "backend": "cuda",
+      "cuda_kernel": "fused_batch",
+      "mcells_per_second": 297.08681679445834,
+      "timing_scope": "whole_cohort"
+     },
+     {
+      "id": "tile-0-1",
+      "seconds": 5.031640300061554,
+      "setup_seconds": 0.41885250015184283,
+      "steps": 2059,
+      "shape": [
+       110,
+       110,
+       60
+      ],
+      "cells": 726000,
+      "backend": "cuda",
+      "cuda_kernel": "fused_batch",
+      "mcells_per_second": 297.08681679445834,
+      "timing_scope": "whole_cohort"
+     },
+     {
+      "id": "tile-1-0",
+      "seconds": 5.031640300061554,
+      "setup_seconds": 0.41885250015184283,
+      "steps": 2059,
+      "shape": [
+       110,
+       110,
+       60
+      ],
+      "cells": 726000,
+      "backend": "cuda",
+      "cuda_kernel": "fused_batch",
+      "mcells_per_second": 297.08681679445834,
+      "timing_scope": "whole_cohort"
+     },
+     {
+      "id": "tile-1-1",
+      "seconds": 5.031640300061554,
+      "setup_seconds": 0.41885250015184283,
+      "steps": 2059,
+      "shape": [
+       110,
+       110,
+       60
+      ],
+      "cells": 726000,
+      "backend": "cuda",
+      "cuda_kernel": "fused_batch",
+      "mcells_per_second": 297.08681679445834,
+      "timing_scope": "whole_cohort"
+     }
+    ],
+    "options": {
+     "cohort_size": 4
+    }
+   }
+  }
+ },
+ "gradient": [
+  {
+   "overlap_um": 1.5,
+   "overlap_cells": 30,
+   "tiles": 4,
+   "delta": 0.05,
+   "precision": "float32",
+   "checkpoints": 4,
+   "window_cells": 10,
+   "parameters": [
+    {
+     "kind": "pillar",
+     "target": 26,
+     "cells": 384,
+     "tiled_adjoint": -0.5857428908348083,
+     "tiled_central_difference": -0.5859375,
+     "tiled_adjoint_vs_central_difference": 0.00033213297526041665,
+     "full_adjoint": 0.1734330952167511,
+     "full_central_difference": 0.17822265625,
+     "full_adjoint_vs_central_difference": 0.026874030126284247,
+     "tiled_vs_full": 4.3773420816988
+    },
+    {
+     "kind": "pillar",
+     "target": 66,
+     "cells": 624,
+     "tiled_adjoint": 22.653181076049805,
+     "tiled_central_difference": 22.65625,
+     "tiled_adjoint_vs_central_difference": 0.0001354559536637931,
+     "full_adjoint": 21.619400024414062,
+     "full_central_difference": 21.62109375,
+     "full_adjoint_vs_central_difference": 7.833672086720868e-05,
+     "tiled_vs_full": 0.04781728681037994
+    }
+   ],
+   "tiled_adjoint_seconds": 54.00621430017054,
+   "tiled_objective": 3207.282958984375,
+   "tiled_gradient_norm": 65.7794418334961,
+   "full_adjoint_seconds": 20.27069430006668,
+   "full_objective": 3211.71923828125,
+   "full_gradient_norm": 67.24629211425781,
+   "gradient_relative_l2_tiled_vs_full": 0.1920316368341446,
+   "design_cells": 52800,
+   "design_gradient_relative_l2_tiled_vs_full": 0.27248284220695496,
+   "objective_relative_difference": 0.0013812786759184693,
+   "pillar_derivatives": [
+    {
+     "index": 0,
+     "center": [
+      -2.75,
+      -2.75
+     ],
+     "cells": 144,
+     "tiled": -1.2200371026992798,
+     "full": -1.3824374675750732
+    },
+    {
+     "index": 1,
+     "center": [
+      -2.75,
+      -2.25
+     ],
+     "cells": 192,
+     "tiled": -1.0334482192993164,
+     "full": -1.5082128047943115
+    },
+    {
+     "index": 2,
+     "center": [
+      -2.75,
+      -1.75
+     ],
+     "cells": 624,
+     "tiled": -14.549844741821289,
+     "full": -12.633411407470703
+    },
+    {
+     "index": 3,
+     "center": [
+      -2.75,
+      -1.25
+     ],
+     "cells": 384,
+     "tiled": -2.1290037631988525,
+     "full": -2.1628499031066895
+    },
+    {
+     "index": 4,
+     "center": [
+      -2.75,
+      -0.75
+     ],
+     "cells": 144,
+     "tiled": 0.32893258333206177,
+     "full": 0.3238328993320465
+    },
+    {
+     "index": 5,
+     "center": [
+      -2.75,
+      -0.25
+     ],
+     "cells": 288,
+     "tiled": 0.7352460622787476,
+     "full": 0.5052297115325928
+    },
+    {
+     "index": 6,
+     "center": [
+      -2.75,
+      0.25
+     ],
+     "cells": 384,
+     "tiled": 0.6238054633140564,
+     "full": 0.49212518334388733
+    },
+    {
+     "index": 7,
+     "center": [
+      -2.75,
+      0.75
+     ],
+     "cells": 144,
+     "tiled": 0.21487227082252502,
+     "full": 0.28369998931884766
+    },
+    {
+     "index": 8,
+     "center": [
+      -2.75,
+      1.25
+     ],
+     "cells": 528,
+     "tiled": -1.8401681184768677,
+     "full": -2.315723419189453
+    },
+    {
+     "index": 9,
+     "center": [
+      -2.75,
+      1.75
+     ],
+     "cells": 144,
+     "tiled": -1.132663369178772,
+     "full": -1.165740728378296
+    },
+    {
+     "index": 10,
+     "center": [
+      -2.75,
+      2.25
+     ],
+     "cells": 288,
+     "tiled": -1.792040228843689,
+     "full": -1.934308648109436
+    },
+    {
+     "index": 11,
+     "center": [
+      -2.75,
+      2.75
+     ],
+     "cells": 384,
+     "tiled": -6.100139617919922,
+     "full": -6.3698883056640625
+    },
+    {
+     "index": 12,
+     "center": [
+      -2.25,
+      -2.75
+     ],
+     "cells": 288,
+     "tiled": -4.919658184051514,
+     "full": -5.0725908279418945
+    },
+    {
+     "index": 13,
+     "center": [
+      -2.25,
+      -2.25
+     ],
+     "cells": 384,
+     "tiled": -3.7083282470703125,
+     "full": -4.198235988616943
+    },
+    {
+     "index": 14,
+     "center": [
+      -2.25,
+      -1.75
+     ],
+     "cells": 528,
+     "tiled": -11.546960830688477,
+     "full": -8.169937133789062
+    },
+    {
+     "index": 15,
+     "center": [
+      -2.25,
+      -1.25
+     ],
+     "cells": 624,
+     "tiled": -5.78237247467041,
+     "full": -4.86491584777832
+    },
+    {
+     "index": 16,
+     "center": [
+      -2.25,
+      -0.75
+     ],
+     "cells": 192,
+     "tiled": 0.4378301501274109,
+     "full": 0.5298222303390503
+    },
+    {
+     "index": 17,
+     "center": [
+      -2.25,
+      -0.25
+     ],
+     "cells": 384,
+     "tiled": 2.589446544647217,
+     "full": 2.7253153324127197
+    },
+    {
+     "index": 18,
+     "center": [
+      -2.25,
+      0.25
+     ],
+     "cells": 528,
+     "tiled": 2.362415313720703,
+     "full": 2.6557719707489014
+    },
+    {
+     "index": 19,
+     "center": [
+      -2.25,
+      0.75
+     ],
+     "cells": 192,
+     "tiled": 0.6880898475646973,
+     "full": 0.8090502023696899
+    },
+    {
+     "index": 20,
+     "center": [
+      -2.25,
+      1.25
+     ],
+     "cells": 144,
+     "tiled": -0.08867062628269196,
+     "full": -0.09792406857013702
+    },
+    {
+     "index": 21,
+     "center": [
+      -2.25,
+      1.75
+     ],
+     "cells": 720,
+     "tiled": -20.512685775756836,
+     "full": -18.766376495361328
+    },
+    {
+     "index": 22,
+     "center": [
+      -2.25,
+      2.25
+     ],
+     "cells": 192,
+     "tiled": -1.0211282968521118,
+     "full": -1.0861960649490356
+    },
+    {
+     "index": 23,
+     "center": [
+      -2.25,
+      2.75
+     ],
+     "cells": 192,
+     "tiled": -2.305359363555908,
+     "full": -2.716618537902832
+    },
+    {
+     "index": 24,
+     "center": [
+      -1.75,
+      -2.75
+     ],
+     "cells": 624,
+     "tiled": -12.255481719970703,
+     "full": -12.919046401977539
+    },
+    {
+     "index": 25,
+     "center": [
+      -1.75,
+      -2.25
+     ],
+     "cells": 384,
+     "tiled": -3.5239124298095703,
+     "full": -4.540361404418945
+    },
+    {
+     "index": 26,
+     "center": [
+      -1.75,
+      -1.75
+     ],
+     "cells": 384,
+     "tiled": -0.5857428908348083,
+     "full": 0.1734330952167511
+    },
+    {
+     "index": 27,
+     "center": [
+      -1.75,
+      -1.25
+     ],
+     "cells": 528,
+     "tiled": 0.33946263790130615,
+     "full": -1.0063225030899048
+    },
+    {
+     "index": 28,
+     "center": [
+      -1.75,
+      -0.75
+     ],
+     "cells": 144,
+     "tiled": 0.5344518423080444,
+     "full": 0.767868161201477
+    },
+    {
+     "index": 29,
+     "center": [
+      -1.75,
+      -0.25
+     ],
+     "cells": 528,
+     "tiled": 9.032196998596191,
+     "full": 8.040658950805664
+    },
+    {
+     "index": 30,
+     "center": [
+      -1.75,
+      0.25
+     ],
+     "cells": 288,
+     "tiled": 2.9899415969848633,
+     "full": 2.2920727729797363
+    },
+    {
+     "index": 31,
+     "center": [
+      -1.75,
+      0.75
+     ],
+     "cells": 144,
+     "tiled": 1.375749945640564,
+     "full": 1.4607735872268677
+    },
+    {
+     "index": 32,
+     "center": [
+      -1.75,
+      1.25
+     ],
+     "cells": 384,
+     "tiled": 2.0762534141540527,
+     "full": 2.1489782333374023
+    },
+    {
+     "index": 33,
+     "center": [
+      -1.75,
+      1.75
+     ],
+     "cells": 624,
+     "tiled": -13.130804061889648,
+     "full": -9.40369987487793
+    },
+    {
+     "index": 34,
+     "center": [
+      -1.75,
+      2.25
+     ],
+     "cells": 192,
+     "tiled": -0.7892084121704102,
+     "full": -0.5606627464294434
+    },
+    {
+     "index": 35,
+     "center": [
+      -1.75,
+      2.75
+     ],
+     "cells": 384,
+     "tiled": -2.499816417694092,
+     "full": -3.9106900691986084
+    },
+    {
+     "index": 36,
+     "center": [
+      -1.25,
+      -2.75
+     ],
+     "cells": 192,
+     "tiled": -0.9458497762680054,
+     "full": -1.0663652420043945
+    },
+    {
+     "index": 37,
+     "center": [
+      -1.25,
+      -2.25
+     ],
+     "cells": 528,
+     "tiled": -4.489569664001465,
+     "full": -6.02451229095459
+    },
+    {
+     "index": 38,
+     "center": [
+      -1.25,
+      -1.75
+     ],
+     "cells": 528,
+     "tiled": 3.318676710128784,
+     "full": 4.385946273803711
+    },
+    {
+     "index": 39,
+     "center": [
+      -1.25,
+      -1.25
+     ],
+     "cells": 192,
+     "tiled": 0.8846844434738159,
+     "full": 0.8262448310852051
+    },
+    {
+     "index": 40,
+     "center": [
+      -1.25,
+      -0.75
+     ],
+     "cells": 624,
+     "tiled": 8.922401428222656,
+     "full": 9.667903900146484
+    },
+    {
+     "index": 41,
+     "center": [
+      -1.25,
+      -0.25
+     ],
+     "cells": 384,
+     "tiled": 5.336266994476318,
+     "full": 5.219730377197266
+    },
+    {
+     "index": 42,
+     "center": [
+      -1.25,
+      0.25
+     ],
+     "cells": 384,
+     "tiled": 5.633358955383301,
+     "full": 5.600980758666992
+    },
+    {
+     "index": 43,
+     "center": [
+      -1.25,
+      0.75
+     ],
+     "cells": 624,
+     "tiled": 10.587054252624512,
+     "full": 10.821752548217773
+    },
+    {
+     "index": 44,
+     "center": [
+      -1.25,
+      1.25
+     ],
+     "cells": 288,
+     "tiled": 2.63362979888916,
+     "full": 2.608107089996338
+    },
+    {
+     "index": 45,
+     "center": [
+      -1.25,
+      1.75
+     ],
+     "cells": 528,
+     "tiled": -1.9512344598770142,
+     "full": -1.0887255668640137
+    },
+    {
+     "index": 46,
+     "center": [
+      -1.25,
+      2.25
+     ],
+     "cells": 624,
+     "tiled": -3.6000871658325195,
+     "full": -4.147953987121582
+    },
+    {
+     "index": 47,
+     "center": [
+      -1.25,
+      2.75
+     ],
+     "cells": 144,
+     "tiled": -0.1599525660276413,
+     "full": -0.23761039972305298
+    },
+    {
+     "index": 48,
+     "center": [
+      -0.75,
+      -2.75
+     ],
+     "cells": 624,
+     "tiled": -0.928583562374115,
+     "full": -2.07171630859375
+    },
+    {
+     "index": 49,
+     "center": [
+      -0.75,
+      -2.25
+     ],
+     "cells": 288,
+     "tiled": -1.306096076965332,
+     "full": -1.971907377243042
+    },
+    {
+     "index": 50,
+     "center": [
+      -0.75,
+      -1.75
+     ],
+     "cells": 384,
+     "tiled": 3.188443660736084,
+     "full": 4.227386474609375
+    },
+    {
+     "index": 51,
+     "center": [
+      -0.75,
+      -1.25
+     ],
+     "cells": 144,
+     "tiled": 0.8933528065681458,
+     "full": 0.9414675235748291
+    },
+    {
+     "index": 52,
+     "center": [
+      -0.75,
+      -0.75
+     ],
+     "cells": 528,
+     "tiled": 8.220809936523438,
+     "full": 10.042283058166504
+    },
+    {
+     "index": 53,
+     "center": [
+      -0.75,
+      -0.25
+     ],
+     "cells": 192,
+     "tiled": 1.6152995824813843,
+     "full": 1.6021510362625122
+    },
+    {
+     "index": 54,
+     "center": [
+      -0.75,
+      0.25
+     ],
+     "cells": 624,
+     "tiled": 16.647518157958984,
+     "full": 15.031213760375977
+    },
+    {
+     "index": 55,
+     "center": [
+      -0.75,
+      0.75
+     ],
+     "cells": 192,
+     "tiled": 1.2526211738586426,
+     "full": 1.1259636878967285
+    },
+    {
+     "index": 56,
+     "center": [
+      -0.75,
+      1.25
+     ],
+     "cells": 384,
+     "tiled": 5.7682881355285645,
+     "full": 6.210003852844238
+    },
+    {
+     "index": 57,
+     "center": [
+      -0.75,
+      1.75
+     ],
+     "cells": 288,
+     "tiled": 1.699732780456543,
+     "full": 1.9527106285095215
+    },
+    {
+     "index": 58,
+     "center": [
+      -0.75,
+      2.25
+     ],
+     "cells": 384,
+     "tiled": -0.6013134717941284,
+     "full": -1.5118038654327393
+    },
+    {
+     "index": 59,
+     "center": [
+      -0.75,
+      2.75
+     ],
+     "cells": 192,
+     "tiled": -0.1947607547044754,
+     "full": -0.11316260695457458
+    },
+    {
+     "index": 60,
+     "center": [
+      -0.25,
+      -2.75
+     ],
+     "cells": 144,
+     "tiled": 0.03370103985071182,
+     "full": -0.23046956956386566
+    },
+    {
+     "index": 61,
+     "center": [
+      -0.25,
+      -2.25
+     ],
+     "cells": 528,
+     "tiled": -2.7379543781280518,
+     "full": -4.395673751831055
+    },
+    {
+     "index": 62,
+     "center": [
+      -0.25,
+      -1.75
+     ],
+     "cells": 528,
+     "tiled": 7.468121528625488,
+     "full": 7.8232831954956055
+    },
+    {
+     "index": 63,
+     "center": [
+      -0.25,
+      -1.25
+     ],
+     "cells": 384,
+     "tiled": 5.245160102844238,
+     "full": 5.8729071617126465
+    },
+    {
+     "index": 64,
+     "center": [
+      -0.25,
+      -0.75
+     ],
+     "cells": 624,
+     "tiled": 14.368217468261719,
+     "full": 15.442207336425781
+    },
+    {
+     "index": 65,
+     "center": [
+      -0.25,
+      -0.25
+     ],
+     "cells": 192,
+     "tiled": 2.3801960945129395,
+     "full": 2.3440585136413574
+    },
+    {
+     "index": 66,
+     "center": [
+      -0.25,
+      0.25
+     ],
+     "cells": 624,
+     "tiled": 22.653181076049805,
+     "full": 21.619400024414062
+    },
+    {
+     "index": 67,
+     "center": [
+      -0.25,
+      0.75
+     ],
+     "cells": 144,
+     "tiled": 1.1473679542541504,
+     "full": 1.200584053993225
+    },
+    {
+     "index": 68,
+     "center": [
+      -0.25,
+      1.25
+     ],
+     "cells": 624,
+     "tiled": 15.168761253356934,
+     "full": 16.921451568603516
+    },
+    {
+     "index": 69,
+     "center": [
+      -0.25,
+      1.75
+     ],
+     "cells": 384,
+     "tiled": 6.380604267120361,
+     "full": 7.1445465087890625
+    },
+    {
+     "index": 70,
+     "center": [
+      -0.25,
+      2.25
+     ],
+     "cells": 384,
+     "tiled": 0.4883599579334259,
+     "full": -0.000569559633731842
+    },
+    {
+     "index": 71,
+     "center": [
+      -0.25,
+      2.75
+     ],
+     "cells": 720,
+     "tiled": -9.789499282836914,
+     "full": -8.036396026611328
+    },
+    {
+     "index": 72,
+     "center": [
+      0.25,
+      -2.75
+     ],
+     "cells": 528,
+     "tiled": -4.179967880249023,
+     "full": -4.504473686218262
+    },
+    {
+     "index": 73,
+     "center": [
+      0.25,
+      -2.25
+     ],
+     "cells": 624,
+     "tiled": -5.074892044067383,
+     "full": -5.444743633270264
+    },
+    {
+     "index": 74,
+     "center": [
+      0.25,
+      -1.75
+     ],
+     "cells": 144,
+     "tiled": 1.5171575546264648,
+     "full": 1.1970726251602173
+    },
+    {
+     "index": 75,
+     "center": [
+      0.25,
+      -1.25
+     ],
+     "cells": 288,
+     "tiled": 4.349297523498535,
+     "full": 4.776299953460693
+    },
+    {
+     "index": 76,
+     "center": [
+      0.25,
+      -0.75
+     ],
+     "cells": 144,
+     "tiled": 2.0174202919006348,
+     "full": 1.8910927772521973
+    },
+    {
+     "index": 77,
+     "center": [
+      0.25,
+      -0.25
+     ],
+     "cells": 192,
+     "tiled": 2.7498021125793457,
+     "full": 2.551762104034424
+    },
+    {
+     "index": 78,
+     "center": [
+      0.25,
+      0.25
+     ],
+     "cells": 192,
+     "tiled": 4.056552886962891,
+     "full": 4.210184097290039
+    },
+    {
+     "index": 79,
+     "center": [
+      0.25,
+      0.75
+     ],
+     "cells": 624,
+     "tiled": 11.434584617614746,
+     "full": 12.37398910522461
+    },
+    {
+     "index": 80,
+     "center": [
+      0.25,
+      1.25
+     ],
+     "cells": 144,
+     "tiled": 1.6501121520996094,
+     "full": 1.9021775722503662
+    },
+    {
+     "index": 81,
+     "center": [
+      0.25,
+      1.75
+     ],
+     "cells": 192,
+     "tiled": 2.682838201522827,
+     "full": 2.9349923133850098
+    },
+    {
+     "index": 82,
+     "center": [
+      0.25,
+      2.25
+     ],
+     "cells": 384,
+     "tiled": 1.1861133575439453,
+     "full": 1.0486862659454346
+    },
+    {
+     "index": 83,
+     "center": [
+      0.25,
+      2.75
+     ],
+     "cells": 624,
+     "tiled": -10.196990966796875,
+     "full": -9.488380432128906
+    },
+    {
+     "index": 84,
+     "center": [
+      0.75,
+      -2.75
+     ],
+     "cells": 720,
+     "tiled": -11.294221878051758,
+     "full": -13.623699188232422
+    },
+    {
+     "index": 85,
+     "center": [
+      0.75,
+      -2.25
+     ],
+     "cells": 528,
+     "tiled": -2.725499153137207,
+     "full": -0.8874381184577942
+    },
+    {
+     "index": 86,
+     "center": [
+      0.75,
+      -1.75
+     ],
+     "cells": 192,
+     "tiled": 1.8541196584701538,
+     "full": 1.391901969909668
+    },
+    {
+     "index": 87,
+     "center": [
+      0.75,
+      -1.25
+     ],
+     "cells": 384,
+     "tiled": 4.347186088562012,
+     "full": 4.825734615325928
+    },
+    {
+     "index": 88,
+     "center": [
+      0.75,
+      -0.75
+     ],
+     "cells": 528,
+     "tiled": 10.202259063720703,
+     "full": 10.924753189086914
+    },
+    {
+     "index": 89,
+     "center": [
+      0.75,
+      -0.25
+     ],
+     "cells": 144,
+     "tiled": 1.4400265216827393,
+     "full": 1.5009033679962158
+    },
+    {
+     "index": 90,
+     "center": [
+      0.75,
+      0.25
+     ],
+     "cells": 384,
+     "tiled": 7.869661808013916,
+     "full": 8.51282024383545
+    },
+    {
+     "index": 91,
+     "center": [
+      0.75,
+      0.75
+     ],
+     "cells": 288,
+     "tiled": 3.6617562770843506,
+     "full": 3.948911190032959
+    },
+    {
+     "index": 92,
+     "center": [
+      0.75,
+      1.25
+     ],
+     "cells": 384,
+     "tiled": 4.2702484130859375,
+     "full": 4.836836814880371
+    },
+    {
+     "index": 93,
+     "center": [
+      0.75,
+      1.75
+     ],
+     "cells": 384,
+     "tiled": 3.925180196762085,
+     "full": 4.382599353790283
+    },
+    {
+     "index": 94,
+     "center": [
+      0.75,
+      2.25
+     ],
+     "cells": 384,
+     "tiled": 1.2818965911865234,
+     "full": 1.1333730220794678
+    },
+    {
+     "index": 95,
+     "center": [
+      0.75,
+      2.75
+     ],
+     "cells": 384,
+     "tiled": -2.072627544403076,
+     "full": -2.3295321464538574
+    },
+    {
+     "index": 96,
+     "center": [
+      1.25,
+      -2.75
+     ],
+     "cells": 384,
+     "tiled": -1.9641262292861938,
+     "full": -3.9125876426696777
+    },
+    {
+     "index": 97,
+     "center": [
+      1.25,
+      -2.25
+     ],
+     "cells": 192,
+     "tiled": -0.22405023872852325,
+     "full": 0.10025262832641602
+    },
+    {
+     "index": 98,
+     "center": [
+      1.25,
+      -1.75
+     ],
+     "cells": 384,
+     "tiled": 3.123866558074951,
+     "full": 2.739103317260742
+    },
+    {
+     "index": 99,
+     "center": [
+      1.25,
+      -1.25
+     ],
+     "cells": 144,
+     "tiled": 0.5993022918701172,
+     "full": 0.8282114863395691
+    },
+    {
+     "index": 100,
+     "center": [
+      1.25,
+      -0.75
+     ],
+     "cells": 384,
+     "tiled": 5.873954772949219,
+     "full": 6.838834762573242
+    },
+    {
+     "index": 101,
+     "center": [
+      1.25,
+      -0.25
+     ],
+     "cells": 384,
+     "tiled": 5.600734710693359,
+     "full": 5.124988079071045
+    },
+    {
+     "index": 102,
+     "center": [
+      1.25,
+      0.25
+     ],
+     "cells": 528,
+     "tiled": 10.408829689025879,
+     "full": 9.882257461547852
+    },
+    {
+     "index": 103,
+     "center": [
+      1.25,
+      0.75
+     ],
+     "cells": 288,
+     "tiled": 3.349153995513916,
+     "full": 3.5925631523132324
+    },
+    {
+     "index": 104,
+     "center": [
+      1.25,
+      1.25
+     ],
+     "cells": 144,
+     "tiled": 1.145521879196167,
+     "full": 1.5369760990142822
+    },
+    {
+     "index": 105,
+     "center": [
+      1.25,
+      1.75
+     ],
+     "cells": 384,
+     "tiled": 0.7980303764343262,
+     "full": 1.3368403911590576
+    },
+    {
+     "index": 106,
+     "center": [
+      1.25,
+      2.25
+     ],
+     "cells": 192,
+     "tiled": -0.2851191759109497,
+     "full": -0.31707924604415894
+    },
+    {
+     "index": 107,
+     "center": [
+      1.25,
+      2.75
+     ],
+     "cells": 528,
+     "tiled": -5.4679155349731445,
+     "full": -4.998837471008301
+    },
+    {
+     "index": 108,
+     "center": [
+      1.75,
+      -2.75
+     ],
+     "cells": 288,
+     "tiled": -2.212545156478882,
+     "full": -2.790005683898926
+    },
+    {
+     "index": 109,
+     "center": [
+      1.75,
+      -2.25
+     ],
+     "cells": 288,
+     "tiled": -2.7645649909973145,
+     "full": -2.502387046813965
+    },
+    {
+     "index": 110,
+     "center": [
+      1.75,
+      -1.75
+     ],
+     "cells": 624,
+     "tiled": -7.599605560302734,
+     "full": -4.219485282897949
+    },
+    {
+     "index": 111,
+     "center": [
+      1.75,
+      -1.25
+     ],
+     "cells": 288,
+     "tiled": 0.028067775070667267,
+     "full": 0.2041315734386444
+    },
+    {
+     "index": 112,
+     "center": [
+      1.75,
+      -0.75
+     ],
+     "cells": 288,
+     "tiled": 2.1314544677734375,
+     "full": 3.0339503288269043
+    },
+    {
+     "index": 113,
+     "center": [
+      1.75,
+      -0.25
+     ],
+     "cells": 288,
+     "tiled": 3.7671804428100586,
+     "full": 2.834902048110962
+    },
+    {
+     "index": 114,
+     "center": [
+      1.75,
+      0.25
+     ],
+     "cells": 384,
+     "tiled": 5.419863700866699,
+     "full": 4.563472747802734
+    },
+    {
+     "index": 115,
+     "center": [
+      1.75,
+      0.75
+     ],
+     "cells": 144,
+     "tiled": 0.8170019388198853,
+     "full": 1.0113303661346436
+    },
+    {
+     "index": 116,
+     "center": [
+      1.75,
+      1.25
+     ],
+     "cells": 384,
+     "tiled": 1.5687942504882812,
+     "full": 2.4429337978363037
+    },
+    {
+     "index": 117,
+     "center": [
+      1.75,
+      1.75
+     ],
+     "cells": 624,
+     "tiled": -6.323473930358887,
+     "full": -4.28018856048584
+    },
+    {
+     "index": 118,
+     "center": [
+      1.75,
+      2.25
+     ],
+     "cells": 384,
+     "tiled": -3.0083837509155273,
+     "full": -2.435141086578369
+    },
+    {
+     "index": 119,
+     "center": [
+      1.75,
+      2.75
+     ],
+     "cells": 528,
+     "tiled": -8.94489860534668,
+     "full": -9.289685249328613
+    },
+    {
+     "index": 120,
+     "center": [
+      2.25,
+      -2.75
+     ],
+     "cells": 624,
+     "tiled": -15.527710914611816,
+     "full": -14.510229110717773
+    },
+    {
+     "index": 121,
+     "center": [
+      2.25,
+      -2.25
+     ],
+     "cells": 624,
+     "tiled": -14.3297700881958,
+     "full": -16.043212890625
+    },
+    {
+     "index": 122,
+     "center": [
+      2.25,
+      -1.75
+     ],
+     "cells": 528,
+     "tiled": -8.840618133544922,
+     "full": -4.580324172973633
+    },
+    {
+     "index": 123,
+     "center": [
+      2.25,
+      -1.25
+     ],
+     "cells": 624,
+     "tiled": -6.306678771972656,
+     "full": -6.083273410797119
+    },
+    {
+     "index": 124,
+     "center": [
+      2.25,
+      -0.75
+     ],
+     "cells": 624,
+     "tiled": -6.776392459869385,
+     "full": -5.715909004211426
+    },
+    {
+     "index": 125,
+     "center": [
+      2.25,
+      -0.25
+     ],
+     "cells": 192,
+     "tiled": 1.104438066482544,
+     "full": 1.210891604423523
+    },
+    {
+     "index": 126,
+     "center": [
+      2.25,
+      0.25
+     ],
+     "cells": 384,
+     "tiled": 4.7098388671875,
+     "full": 5.023497581481934
+    },
+    {
+     "index": 127,
+     "center": [
+      2.25,
+      0.75
+     ],
+     "cells": 288,
+     "tiled": 0.5857191681861877,
+     "full": 1.027054786682129
+    },
+    {
+     "index": 128,
+     "center": [
+      2.25,
+      1.25
+     ],
+     "cells": 192,
+     "tiled": -0.4039768576622009,
+     "full": -0.21304087340831757
+    },
+    {
+     "index": 129,
+     "center": [
+      2.25,
+      1.75
+     ],
+     "cells": 384,
+     "tiled": -4.461472511291504,
+     "full": -2.4454944133758545
+    },
+    {
+     "index": 130,
+     "center": [
+      2.25,
+      2.25
+     ],
+     "cells": 192,
+     "tiled": -1.2609177827835083,
+     "full": -0.858932614326477
+    },
+    {
+     "index": 131,
+     "center": [
+      2.25,
+      2.75
+     ],
+     "cells": 384,
+     "tiled": -6.253546237945557,
+     "full": -7.066956520080566
+    },
+    {
+     "index": 132,
+     "center": [
+      2.75,
+      -2.75
+     ],
+     "cells": 384,
+     "tiled": -6.031594276428223,
+     "full": -5.925013542175293
+    },
+    {
+     "index": 133,
+     "center": [
+      2.75,
+      -2.25
+     ],
+     "cells": 144,
+     "tiled": -1.133895754814148,
+     "full": -1.5684272050857544
+    },
+    {
+     "index": 134,
+     "center": [
+      2.75,
+      -1.75
+     ],
+     "cells": 288,
+     "tiled": -1.3067137002944946,
+     "full": -0.5221583247184753
+    },
+    {
+     "index": 135,
+     "center": [
+      2.75,
+      -1.25
+     ],
+     "cells": 288,
+     "tiled": -1.6302690505981445,
+     "full": -1.8168985843658447
+    },
+    {
+     "index": 136,
+     "center": [
+      2.75,
+      -0.75
+     ],
+     "cells": 528,
+     "tiled": -7.8818254470825195,
+     "full": -8.05473518371582
+    },
+    {
+     "index": 137,
+     "center": [
+      2.75,
+      -0.25
+     ],
+     "cells": 144,
+     "tiled": 0.4954046308994293,
+     "full": 0.48262447118759155
+    },
+    {
+     "index": 138,
+     "center": [
+      2.75,
+      0.25
+     ],
+     "cells": 144,
+     "tiled": 0.9300678968429565,
+     "full": 0.9384067058563232
+    },
+    {
+     "index": 139,
+     "center": [
+      2.75,
+      0.75
+     ],
+     "cells": 384,
+     "tiled": -0.7501581907272339,
+     "full": -0.5752863883972168
+    },
+    {
+     "index": 140,
+     "center": [
+      2.75,
+      1.25
+     ],
+     "cells": 288,
+     "tiled": -0.8854780793190002,
+     "full": -0.7191550731658936
+    },
+    {
+     "index": 141,
+     "center": [
+      2.75,
+      1.75
+     ],
+     "cells": 384,
+     "tiled": -2.6999919414520264,
+     "full": -1.0299694538116455
+    },
+    {
+     "index": 142,
+     "center": [
+      2.75,
+      2.25
+     ],
+     "cells": 192,
+     "tiled": -1.0661160945892334,
+     "full": -1.2062596082687378
+    },
+    {
+     "index": 143,
+     "center": [
+      2.75,
+      2.75
+     ],
+     "cells": 192,
+     "tiled": -1.809017300605774,
+     "full": -2.382380247116089
+    }
+   ],
+   "pillar_vector_relative_l2": 0.166158527135849
+  }
+ ],
+ "total_seconds": 212.92537919990718
+}
