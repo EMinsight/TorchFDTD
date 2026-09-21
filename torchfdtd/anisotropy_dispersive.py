@@ -271,8 +271,11 @@ class TensorDispersiveSimulation(TensorDielectricSimulation):
                 raise ValueError('strength must be finite.')
             if not torch.equal(strength, strength.transpose(-1, -2)):
                 raise ValueError('strength must be exactly symmetric. Construct it symmetrically.')
-            lowest, _ = self._eigenvalue_bounds(strength)
-            if bool(lowest < 0):
+            lowest, highest = self._eigenvalue_bounds(strength)
+            # A singular PSD tensor assembled as R diag(0, ...) R^T carries a rounding
+            # eigenvalue of either sign whose size depends on the LAPACK build.
+            tolerance = 64*torch.finfo(strength.dtype).eps*max(float(highest.abs()), 1.)
+            if bool(lowest < -tolerance):
                 raise ValueError('Passive tensor poles require positive semidefinite strength.')
             self._validate_cpml_collar(epsilon, strength)
             d = 1+.5*gamma*dt+.25*(omega0*dt).square()
