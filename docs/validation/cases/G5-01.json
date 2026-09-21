@@ -24,23 +24,50 @@
       "disk_sync": "the same with state_storage=disk, a private scratch directory and disk_budget_bytes 256 MiB",
       "host_async": "the same as host_sync with tile_transfers=async and tile_buffers=2"
     },
-    "instances": "precision {float32, float64} x material {scalar, diagonal, drude, pmc} x observation {history, online, plane} x path {host_sync, disk_sync, host_async}, minus pmc x plane (refused by the registry), plus float32 x tensor x online x the three paths: 96 streamed runs against 21 resident references",
+    "instances": "precision {float32, float64} x material {scalar, diagonal, drude, pmc} x observation {history, online, plane} x path {host_sync, disk_sync, host_async}, minus pmc x plane (refused by the registry), plus float32 x tensor x online x the three paths: 69 streamed runs against 23 resident references",
     "refusals": "planes_pmc, streamed_dispersive_oneway, streamed_dispersive_planes_oneway and mode_network_streamed from torchfdtd/capabilities.py, built by example_project and constructed with StreamedAdjointOptions"
   },
   "seed": 29,
-  "precision": ["float32", "float64"],
-  "backend": ["cuda"],
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": [
+    "cuda"
+  ],
   "reference_method": "the resident CUDA discrete adjoint of the same scene (fused CUDA forward and transpose for real dielectric fields, Torch ADE and tensor transposes): a separate execution path over the same Yee discretization, not an analytic oracle; the agreement it establishes is that the streamed tiers reproduce the resident result",
   "observables": [
-    {"name": "max_abs_field_error", "unit": "dimensionless (spectral amplitude per time step)", "definition": "max |F_streamed - F_resident| / dt over frequencies, samples and components"},
-    {"name": "objective", "unit": "dimensionless", "definition": "sum |F / dt|^2 of the streamed run; objective_reference is the resident value"},
-    {"name": "max_abs_gradient_error", "unit": "dimensionless per input unit", "definition": "max |g_streamed - g_resident| for every differentiable input (epsilon, epsilon_inf and s_hat, or the node tensor)"},
-    {"name": "peak_block_checkpoints", "unit": "count", "definition": "report['peak_block_checkpoints'] of the streamed run"}
+    {
+      "name": "max_abs_field_error",
+      "unit": "dimensionless (spectral amplitude per time step)",
+      "definition": "max |F_streamed - F_resident| / dt over frequencies, samples and components"
+    },
+    {
+      "name": "objective",
+      "unit": "dimensionless",
+      "definition": "sum |F / dt|^2 of the streamed run; objective_reference is the resident value"
+    },
+    {
+      "name": "max_abs_gradient_error",
+      "unit": "dimensionless per input unit",
+      "definition": "max |g_streamed - g_resident| for every differentiable input (epsilon, epsilon_inf and s_hat, or the node tensor)"
+    },
+    {
+      "name": "peak_block_checkpoints",
+      "unit": "count",
+      "definition": "report['peak_block_checkpoints'] of the streamed run"
+    }
   ],
   "acceptance": {
     "tolerances": {
-      "float32": {"rtol": 0.0001, "atol": 1e-06},
-      "float64": {"rtol": 1e-07, "atol": 1e-09}
+      "float32": {
+        "rtol": 0.0001,
+        "atol": 1e-06
+      },
+      "float64": {
+        "rtol": 1e-07,
+        "atol": 1e-09
+      }
     },
     "rule": "torch.testing.assert_close(streamed, resident, rtol, atol) on the spectral amplitude per time step, on the objective and on every gradient, for every instance; the reference amplitude must exceed 1e-3 and every reference gradient 1e-6 so that the comparison is not vacuous",
     "refusals": "each listed combination raises ValueError whose message starts with the registry rule's expected message before torchfdtd.streamed._Streamed.apply is reached",
@@ -57,5 +84,5 @@
       "tensor material with spectral planes (the Project schema rejects tensor media with plane monitors, see the registry)"
     ]
   },
-  "notes": "Declared before the recorded run on branch g5-memory from main 73203d2. Prototype runs on the RTX 3060 at this commit showed gradient differences of order 1e-9 (float32) and 1e-18 (float64) against limits of 1e-6 and 1e-9, which is why the layer-A thresholds are used unchanged. The record is docs/validation/g5/G5-01.json."
+  "notes": "Declared before the recorded run on branch g5-memory from main 73203d2. Prototype runs on the RTX 3060 at this commit showed gradient differences of order 1e-9 (float32) and 1e-18 (float64) against limits of 1e-6 and 1e-9, which is why the layer-A thresholds are used unchanged. The instance count in \"instances\" was corrected from a miscount (96 against 21) to 69 against 23 before the recorded run; no limit changed. The record is docs/validation/g5/G5-01.json."
 }

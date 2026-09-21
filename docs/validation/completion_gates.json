@@ -1524,7 +1524,7 @@
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "tests/test_memory_paths_g5.py runs one scatterer (tests/g5_support.py) through the resident CUDA adjoint and the streamed host, disk and asynchronous tiers with time-history, online-DFT and spectral-plane observations for scalar, diagonal, Drude ADE, stored-face and node-tensor materials (96 streamed instances against 21 references) and asserts the layer-A agreement declared in docs/validation/cases/G5-01.json; refused combinations are checked against the registry rule."
+          "implementation_note": "tests/test_memory_paths_g5.py runs one scatterer (tests/g5_support.py) through the resident CUDA adjoint and the streamed host, disk and asynchronous tiers with time-history, online-DFT and spectral-plane observations for scalar, diagonal, Drude ADE, stored-face and node-tensor materials (69 streamed instances against 23 references) and asserts the layer-A agreement declared in docs/validation/cases/G5-01.json; refused combinations are checked against the registry rule."
         },
         {
           "id": "G5-02",
