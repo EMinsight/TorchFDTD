@@ -1,0 +1,309 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T203823Z-g5-10-0fade0c0",
+  "task": "G5-10",
+  "stage": "G5",
+  "task_title": "경량 fixture에서 1e5 steps, 반복 실행, 최소 100 optimizer updates 및 승인된 장시간 soak를 수행한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_restart_soak_record.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-10.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T05:38:18.669717+09:00",
+  "recorded_at": "2026-09-21T20:38:23+00:00",
+  "source_commit": "b61ad034a0ece481302058eb8ee9a56249daa278",
+  "source_tree_sha256": "c2ea0e9128779e3960aac5f664d0ac6ff3a0836434ac1370cdf6e0c817b8850a",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_restart_soak_record.py": "1255ff01f293c119b883837f58c840d9360cbc84584bfa872a32d4c4ff680828"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G5-10_restart_soak.json",
+  "fixture_sha256": "abe0fd65b409daedf5adf7f30605c410c5f6d465895efad4141ef256f8df8a1b",
+  "acceptance_criteria_path": "docs/validation/cases/G5-10_restart_soak.json",
+  "acceptance_criteria_sha256": "abe0fd65b409daedf5adf7f30605c410c5f6d465895efad4141ef256f8df8a1b",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": 3,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "physics_configuration": {
+    "module": "benchmarks/restart_soak.py",
+    "scene": "2D 16 x 15 cells (1.6 x 1.5 um, mesh 0.1 um), three-cell PML on every wall, one Gaussian point source (wavelength 1.1 um, 20 fs FWHM, 50 fs centre) at (-0.2, 0, 0), three point monitors, float32, epsilon 1.7, CPU tiles, slab width 16 (one tile), four torch threads",
+    "long_forward": "100000 steps in blocks of 100 with a journal record every 10 blocks (100 records); RSS, torch allocated, torch reserved and journal bytes sampled at every record; sum eps E^2 + sum H^2 and the peak field after every block, judged by torchfdtd.run_control.DecayDecision with the growth limit below after source_end_time",
+    "repeated_runs": "8 forward-plus-backward runs of 600 steps (blocks of 20, checkpoints 4, a record every 2 blocks) in one process, each with its own journal removed afterwards; counters sampled after each run",
+    "optimization": "100 projected Adam updates (lr 0.02) of a 16 x 15 density (truncate filter 0.15 um, beta 1 doubled every 25 updates up to 16, eta 0.5) through the streamed adjoint, 120 steps per solve (blocks of 20, a record every 3 blocks), a journal per iteration and a DesignCheckpoint per update; counters sampled after each update",
+    "growth_metric": "least-squares slope of each counter over the samples at or after the warm-up, in bytes per 1000 steps, per run or per update; no sample is required to decrease"
+  },
+  "reference_method": "self-referential soak: the counters of the same process over time, the state norm relative to its post-source peak, and the journal size against the planner's reservation; no external oracle",
+  "observables": [
+    {
+      "name": "rss_growth",
+      "unit": "bytes per 1000 steps, per run, per update",
+      "definition": "slope of psutil.Process().memory_info().rss after warm-up"
+    },
+    {
+      "name": "torch_growth",
+      "unit": "bytes per unit",
+      "definition": "slope of torch.cuda.memory_allocated and memory_reserved after warm-up (zero on CPU)"
+    },
+    {
+      "name": "journal_bytes",
+      "unit": "bytes",
+      "definition": "largest size of the journal directory at a record against restart_reservation_bytes"
+    },
+    {
+      "name": "relative_norm",
+      "unit": "dimensionless",
+      "definition": "state norm divided by the peak frozen at the first block boundary after the source ends"
+    }
+  ],
+  "acceptance_limits": {
+    "long_forward": {
+      "min_steps": 100000,
+      "warmup_steps": 5000,
+      "max_rss_growth_mb_per_1000_steps": 1.0,
+      "energy_growth_limit": 1.5,
+      "max_relative_norm_last_half": 1e-06
+    },
+    "repeated_runs": {
+      "min_runs": 8,
+      "warmup_runs": 2,
+      "max_rss_growth_mb_per_run": 1.0
+    },
+    "optimization": {
+      "min_updates": 100,
+      "warmup_updates": 5,
+      "max_rss_growth_mb_per_update": 0.25
+    },
+    "max_torch_growth_bytes_per_unit": 0,
+    "other": "journal bytes never exceed the reservation; every state norm and signal is finite; the eight repeated runs return bitwise identical gradients; every optimization objective and gradient norm is finite",
+    "source_of_limits": "fixture-specific budgets declared from a 5000-step, 8-run, 30-update pilot on the same fixture and machine (RSS slopes 0.02 MB per 1000 steps, 0.36 MB per run with one 2.5 MB jump at the third run, 0.0006 MB per update; relative norm 2e-11 one block after the source ends and 3e-14 at step 5000): the RSS bounds are the brief's 1 MB per 1000 steps and margins of about three times and four hundred times the pilot slopes; the energy growth limit 1.5 bounds any excursion above the post-source peak without demanding monotone decay, and the last-half ceiling 1e-6 sits eight orders above the pilot's decayed level so that only an exponential late-time instability reaches it"
+  },
+  "observed_metrics": {
+    "task": "G5-10",
+    "record": "docs/validation/g5/G5-10_soak_3060.json",
+    "commit": "767bc8fa5a88c42a284ce14f2e86fd29002f88aa",
+    "recorded_at": "2026-09-21T20:08:15+00:00",
+    "long_forward": {
+      "steps": 100000,
+      "blocks": 1000,
+      "records": {
+        "forward": 100,
+        "backward": 0
+      },
+      "elapsed_s": 259.2042068000883,
+      "journal_seconds": 149.48760510142893,
+      "max_journal_bytes": 2446949,
+      "restart_reservation_bytes": 2508800,
+      "memory_growth": {
+        "rss_bytes": {
+          "slope_bytes_per_unit": 48108.55344547091,
+          "first_after_warmup": 636002304,
+          "last": 639197184,
+          "max_after_warmup": 639610880,
+          "samples_after_warmup": 96
+        },
+        "torch_allocated_bytes": {
+          "slope_bytes_per_unit": 0.0,
+          "first_after_warmup": 0,
+          "last": 0,
+          "max_after_warmup": 0,
+          "samples_after_warmup": 96
+        },
+        "torch_reserved_bytes": {
+          "slope_bytes_per_unit": 0.0,
+          "first_after_warmup": 0,
+          "last": 0,
+          "max_after_warmup": 0,
+          "samples_after_warmup": 96
+        }
+      },
+      "energy": {
+        "source_end_s": 1.1084347594856418e-13,
+        "source_end_step": 475,
+        "frozen_peak": 10.32823330075708,
+        "max_relative_norm_after_source": 1.9734891804271876e-11,
+        "max_relative_norm_last_half": 3.163914389417341e-14,
+        "final_relative_norm": 3.163689379954243e-14,
+        "samples_after_source": 996,
+        "nonfinite": false
+      },
+      "signals_finite": true
+    },
+    "repeated_runs": {
+      "runs": 8,
+      "steps": 600,
+      "elapsed_s": 438.62071920000017,
+      "memory_growth": {
+        "rss_bytes": {
+          "slope_bytes_per_unit": 9508.571428584095,
+          "first_after_warmup": 639557632,
+          "last": 639598592,
+          "max_after_warmup": 639606784,
+          "samples_after_warmup": 7
+        },
+        "torch_allocated_bytes": {
+          "slope_bytes_per_unit": 0.0,
+          "first_after_warmup": 0,
+          "last": 0,
+          "max_after_warmup": 0,
+          "samples_after_warmup": 7
+        },
+        "torch_reserved_bytes": {
+          "slope_bytes_per_unit": 0.0,
+          "first_after_warmup": 0,
+          "last": 0,
+          "max_after_warmup": 0,
+          "samples_after_warmup": 7
+        }
+      },
+      "gradients_identical": true,
+      "rss_bytes": [
+        641658880,
+        639451136,
+        639557632,
+        639512576,
+        639557632,
+        639569920,
+        639512576,
+        639606784,
+        639598592
+      ]
+    },
+    "optimization": {
+      "updates": 100,
+      "steps": 120,
+      "elapsed_s": 397.08401549980044,
+      "memory_growth": {
+        "rss_bytes": {
+          "slope_bytes_per_unit": 2887.5355398774277,
+          "first_after_warmup": 692461568,
+          "last": 692662272,
+          "max_after_warmup": 692752384,
+          "samples_after_warmup": 96
+        },
+        "torch_allocated_bytes": {
+          "slope_bytes_per_unit": 0.0,
+          "first_after_warmup": 0,
+          "last": 0,
+          "max_after_warmup": 0,
+          "samples_after_warmup": 96
+        },
+        "torch_reserved_bytes": {
+          "slope_bytes_per_unit": 0.0,
+          "first_after_warmup": 0,
+          "last": 0,
+          "max_after_warmup": 0,
+          "samples_after_warmup": 96
+        }
+      },
+      "objectives_finite": true,
+      "final_beta": 8.0,
+      "first_objective": 0.06368308514356613,
+      "last_objective": 0.003775117453187704
+    },
+    "verdicts": {
+      "long_forward_steps": true,
+      "long_forward_rss_growth": true,
+      "long_forward_journal_bounded": true,
+      "long_forward_energy_growth": true,
+      "long_forward_late_norm": true,
+      "repeated_runs_count": true,
+      "repeated_runs_rss_growth": true,
+      "repeated_runs_gradients_identical": true,
+      "optimization_updates": true,
+      "optimization_rss_growth": true,
+      "optimization_finite": true,
+      "long_forward_torch_allocated_bytes_growth": true,
+      "long_forward_torch_reserved_bytes_growth": true,
+      "repeated_runs_torch_allocated_bytes_growth": true,
+      "repeated_runs_torch_reserved_bytes_growth": true,
+      "optimization_torch_allocated_bytes_growth": true,
+      "optimization_torch_reserved_bytes_growth": true,
+      "all": true
+    }
+  },
+  "test_results": {
+    "total": 5,
+    "passed": [
+      "tests/test_restart_soak_record.py::test_record_was_produced_under_the_declared_criteria",
+      "tests/test_restart_soak_record.py::test_long_forward_meets_the_declared_bounds",
+      "tests/test_restart_soak_record.py::test_repeated_runs_meet_the_declared_bounds",
+      "tests/test_restart_soak_record.py::test_optimization_meets_the_declared_bounds",
+      "tests/test_restart_soak_record.py::test_recorded_verdicts_match_a_fresh_judgement_and_the_document"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 2.804,
+    "suite_timestamp": "2026-09-22T05:38:18.669717+09:00"
+  },
+  "required_tests": [
+    "tests/test_restart_soak_record.py::test_record_was_produced_under_the_declared_criteria",
+    "tests/test_restart_soak_record.py::test_long_forward_meets_the_declared_bounds",
+    "tests/test_restart_soak_record.py::test_repeated_runs_meet_the_declared_bounds",
+    "tests/test_restart_soak_record.py::test_optimization_meets_the_declared_bounds",
+    "tests/test_restart_soak_record.py::test_recorded_verdicts_match_a_fresh_judgement_and_the_document"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/g5/G5-10_soak_3060.json",
+      "sha256": "29026175323206a28a8703cb661b3d147189a1583c0a1f5b3e7eb88f71195593",
+      "bytes": 100683
+    },
+    {
+      "path": "docs/RESTART_SOAK.md",
+      "sha256": "2b23f4c78e1fbfc723b5765b40787508d8b9897bd5814734dda5ab977532176c",
+      "bytes": 3055
+    },
+    {
+      "path": "docs/validation/g5/G5-10_observed.json",
+      "sha256": "2b6d33f6b333e4d5f70f8bd3613da78f9a80b81ff85dd71bec979bd81028eb54",
+      "bytes": 3724
+    },
+    {
+      "path": "docs/validation/runs/20260921T203823Z-g5-10-0fade0c0/junit.xml",
+      "sha256": "ee68fadb67d0fbabe43d20eda413729875ff5d9942426ea84ec1cb1ac76d26dc",
+      "bytes": 875,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G5-10.xml"
+    }
+  ],
+  "applicable_scope": "One light 2D fixture on the workstation CPU: memory growth and post-source energy of the journaled engine; not CUDA, not large domains, not multi-hour",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

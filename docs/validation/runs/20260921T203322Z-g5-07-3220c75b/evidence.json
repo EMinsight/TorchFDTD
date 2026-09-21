@@ -1,0 +1,183 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T203322Z-g5-07-3220c75b",
+  "task": "G5-07",
+  "stage": "G5",
+  "task_title": "forward 중단, backward 중단, process kill, simulated ENOSPC/OOM, read/write fault, truncate/checksum 오류, CUDA transfer failure, cancellation을 주입한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_restart_faults.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-07.xml",
+  "exit_code": 1,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T05:27:44.742757+09:00",
+  "recorded_at": "2026-09-21T20:33:22+00:00",
+  "source_commit": "b61ad034a0ece481302058eb8ee9a56249daa278",
+  "source_tree_sha256": "05b94d114a71014c677961b1cef8e29974727f1dd3d5e55b0735bc2d4475fd6a",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_restart_faults.py": "b7321993da6390468832962f0ea8015c27b181a8519e46cef6b1ce70c52d491b"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G5-07_restart_fault_injection.json",
+  "fixture_sha256": "243aa498ff2527abd1f2f6ff1f8514e5b05b5d417f03718eca275caf9b7c5439",
+  "acceptance_criteria_path": "docs/validation/cases/G5-07_restart_fault_injection.json",
+  "acceptance_criteria_sha256": "243aa498ff2527abd1f2f6ff1f8514e5b05b5d417f03718eca275caf9b7c5439",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "module": "tests/test_restart_faults.py",
+    "scene": "tests/test_differentiable.py::project(steps=13): 2D 16 x 15 cells, mesh 0.1 um, three-cell PML with a four-layer CPML on x_min, one continuous point source, three point monitors, float64, epsilon 1.7",
+    "policy": "slab width 4, temporal depth 3 (five blocks, the last partial), checkpoints 1, local checkpoints 1, restart_every_blocks 1 (2 in one cancellation instance), host or file-backed banks, CPU or CUDA tiles",
+    "faults": [
+      "forward interruption after two blocks (host and disk banks)",
+      "backward interruption after two transposes (CPU host, CUDA disk)",
+      "process kill of a child process during forward and during backward (subprocess, disk banks)",
+      "ENOSPC raised by the write of state-0.bin, meta.json, latest-forward.json of the second forward record and gradient.bin of the second backward record",
+      "torch.cuda.OutOfMemoryError raised inside the 25th slab update (first update of the third block, CUDA)",
+      "EIO raised by the next file-bank read (index_select) and write (index_copy_) once the journal holds backward-3",
+      "state-0.bin truncated to half and one byte of signals.bin flipped in the newest forward record; adjoint-1.bin flipped, gradient.bin truncated in the newest backward record with a fallback, gradient.bin flipped in a first backward record without a fallback; a checksum removed from meta.json; meta.json unreadable with a truncated fallback",
+      "RuntimeError raised by the next host-to-device (_copy_into) and device-to-host (to_host) tile transfer once the journal holds backward-3 (CUDA)",
+      "cancel event set during the third forward block (every 1 and every 2) and during the third transpose"
+    ]
+  },
+  "reference_method": "behavioural: the same scene run uninterrupted without a journal in the same process; after the fault, the pointer names the last record published before it, the journal's status names the fault, and a second run resumes from that record",
+  "observables": [
+    {
+      "name": "surviving_record",
+      "unit": "block index",
+      "definition": "block named by latest-<kind>.json after the fault, and the fallback it names"
+    },
+    {
+      "name": "rollback",
+      "unit": "record name, reason, fallback",
+      "definition": "entries of report['restart_rollbacks'] for a damaged newest record"
+    },
+    {
+      "name": "terminal_state",
+      "unit": "string",
+      "definition": "status.json state after the fault (failed or cancelled) and after the resume (completed), with the failure reason text"
+    },
+    {
+      "name": "resume_agreement",
+      "unit": "dimensionless",
+      "definition": "difference between the resumed and the uninterrupted signals and gradient"
+    },
+    {
+      "name": "leaks",
+      "unit": "files, bytes",
+      "definition": "entries under the scratch directory and torch.cuda.memory_allocated after the faulty run and after the resume, against the values before the faulty run"
+    }
+  ],
+  "acceptance_limits": {
+    "last_valid_record": "after every fault the pointer of the interrupted kind names a record published before the fault and that record passes the integrity checks; for a fault while writing record N, the pointer names N-1 (block 1 for the forward faults, block 4 for the backward faults)",
+    "damaged_newest_record": "a truncated, corrupted or checksum-less newest record is rolled back to its fallback (the previous record of that kind) or, without one, to the empty journal of that kind; report['restart_rollbacks'] names the record, the reason (file and check) and the fallback",
+    "terminal_state": "an exception leaves status.json as failed with the exception type and message; a cancel event leaves it cancelled with the phase and block; the resume ends with completed",
+    "resume": "the resumed signals and gradient agree with the uninterrupted run within rtol 1e-4, atol 1e-6 on CPU and CUDA (proposed_thresholds discrete_dimensionless_fp32), and bitwise on CPU",
+    "no_leaks": "the scratch directory is empty after the faulty run and after the resume (the killed process's own bank excepted and removed by the test), and torch.cuda.memory_allocated returns to the value measured before the faulty run",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32; file and byte counts are exact"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 25,
+    "passed": [
+      "tests/test_restart_faults.py::test_forward_interruption[host]",
+      "tests/test_restart_faults.py::test_forward_interruption[disk]",
+      "tests/test_restart_faults.py::test_backward_interruption[cpu-host]",
+      "tests/test_restart_faults.py::test_backward_interruption[cuda-disk]",
+      "tests/test_restart_faults.py::test_enospc_while_writing_a_record[forward-state-0.bin-2]",
+      "tests/test_restart_faults.py::test_enospc_while_writing_a_record[forward-meta.json.tmp-2]",
+      "tests/test_restart_faults.py::test_enospc_while_writing_a_record[forward-latest-forward.json.tmp-2]",
+      "tests/test_restart_faults.py::test_enospc_while_writing_a_record[backward-gradient.bin-2]",
+      "tests/test_restart_faults.py::test_device_out_of_memory_inside_a_slab_update",
+      "tests/test_restart_faults.py::test_cuda_transfer_failure[h2d-_copy_into]",
+      "tests/test_restart_faults.py::test_cuda_transfer_failure[d2h-to_host]",
+      "tests/test_restart_faults.py::test_bank_fault[read-index_select]",
+      "tests/test_restart_faults.py::test_bank_fault[write-index_copy_]",
+      "tests/test_restart_faults.py::test_damaged_newest_forward_record_rolls_back_to_the_previous[truncate-state-0.bin]",
+      "tests/test_restart_faults.py::test_damaged_newest_forward_record_rolls_back_to_the_previous[checksum-signals.bin]",
+      "tests/test_restart_faults.py::test_damaged_newest_backward_record_rolls_back[2-checksum-adjoint-1.bin-backward-4]",
+      "tests/test_restart_faults.py::test_damaged_newest_backward_record_rolls_back[2-truncate-gradient.bin-backward-4]",
+      "tests/test_restart_faults.py::test_damaged_newest_backward_record_rolls_back[1-checksum-gradient.bin-None]",
+      "tests/test_restart_faults.py::test_damaged_meta_and_missing_checksum_are_named",
+      "tests/test_restart_faults.py::test_cancellation_records_the_boundary[forward-1]",
+      "tests/test_restart_faults.py::test_cancellation_records_the_boundary[forward-2]",
+      "tests/test_restart_faults.py::test_cancellation_records_the_boundary[transpose-1]",
+      "tests/test_restart_faults.py::test_cancel_event_is_validated_and_without_a_journal_nothing_is_kept"
+    ],
+    "failed": [
+      "tests/test_restart_faults.py::test_process_kill[forward]",
+      "tests/test_restart_faults.py::test_process_kill[transpose]"
+    ],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {
+      "tests/test_restart_faults.py::test_process_kill[forward]": "AssertionError: Traceback (most recent call last):\r\n    File \"<string>\", line 16, in <module>\r\n  NameError: name 'StreamedAdjointOptions' is not defined\r\n  \nassert 1 is None\n +  where 1 = poll()\n +    where poll = <Popen: returncode: 1 args: ['D:\\\\TorchFDTD\\\\.venv\\\\Scripts\\\\python.exe', '-...>.poll",
+      "tests/test_restart_faults.py::test_process_kill[transpose]": "AssertionError: Traceback (most recent call last):\r\n    File \"<string>\", line 16, in <module>\r\n  NameError: name 'StreamedAdjointOptions' is not defined\r\n  \nassert 1 is None\n +  where 1 = poll()\n +    where poll = <Popen: returncode: 1 args: ['D:\\\\TorchFDTD\\\\.venv\\\\Scripts\\\\python.exe', '-...>.poll"
+    },
+    "suite_time_seconds": 322.654,
+    "suite_timestamp": "2026-09-22T05:27:44.742757+09:00"
+  },
+  "required_tests": [
+    "tests/test_restart_faults.py::test_forward_interruption",
+    "tests/test_restart_faults.py::test_backward_interruption",
+    "tests/test_restart_faults.py::test_process_kill",
+    "tests/test_restart_faults.py::test_enospc_while_writing_a_record",
+    "tests/test_restart_faults.py::test_device_out_of_memory_inside_a_slab_update",
+    "tests/test_restart_faults.py::test_cuda_transfer_failure",
+    "tests/test_restart_faults.py::test_bank_fault",
+    "tests/test_restart_faults.py::test_damaged_newest_forward_record_rolls_back_to_the_previous",
+    "tests/test_restart_faults.py::test_damaged_newest_backward_record_rolls_back",
+    "tests/test_restart_faults.py::test_damaged_meta_and_missing_checksum_are_named",
+    "tests/test_restart_faults.py::test_cancellation_records_the_boundary",
+    "tests/test_restart_faults.py::test_cancel_event_is_validated_and_without_a_journal_nothing_is_kept"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T203322Z-g5-07-3220c75b/junit.xml",
+      "sha256": "d5bf9cf3e2d503f6e52db00f9146c424068cc049fd57d8786cab04777eb0cb72",
+      "bytes": 7836,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G5-07.xml"
+    }
+  ],
+  "applicable_scope": "Streamed X-slab restart journal on one Windows workstation: CPU and CUDA tiles (RTX 3060), host and file-backed banks, float64 test scene; faults raised by monkeypatched methods or a killed child process",
+  "note": null,
+  "verification_state_assigned": "FAILED",
+  "verification_reason": "2 failed and 0 errored test cases",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
