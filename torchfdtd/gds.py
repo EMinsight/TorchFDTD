@@ -52,6 +52,12 @@ class GDSLayer:
     ``etch_by`` lists (layer, datatype) pairs whose polygons are subtracted
     from this pair by a boolean NOT before extrusion (etched holes, vias).
     Etch pairs count as mapped geometry and are not extruded by this entry.
+
+    ``sidewall_angle_deg`` is measured from vertical. The drawn polygon is
+    the footprint at ``z_min``; a positive angle shrinks the footprint toward
+    ``z_max`` (a regular etch), a negative angle grows it (re-entrant). The
+    taper is staircased: every z slice of ``import_gds(sidewall_z_nodes_um)``
+    receives the polygon offset evaluated at its own centre.
     """
     layer: int
     datatype: int
@@ -60,11 +66,14 @@ class GDSLayer:
     material: str
     mesh_order: int = 2
     etch_by: tuple[tuple[int,int],...] = ()
+    sidewall_angle_deg: float = 0.
 
     def __post_init__(self):
         _pair(self.layer,self.datatype);_span(self.z_min,self.z_max)
         if not isinstance(self.material,str) or not self.material or isinstance(self.mesh_order,bool) or not isinstance(self.mesh_order,int) or not 1<=self.mesh_order<=100:
             raise ValueError('Provide a material name and mesh_order in [1, 100].')
+        if isinstance(self.sidewall_angle_deg,bool) or not isinstance(self.sidewall_angle_deg,(int,float)) or not math.isfinite(self.sidewall_angle_deg) or not abs(self.sidewall_angle_deg)<90:
+            raise ValueError('sidewall_angle_deg must be a finite angle from vertical inside (-90, 90).')
         etch=tuple(tuple(pair) for pair in self.etch_by)
         if any(len(pair)!=2 for pair in etch):raise ValueError('etch_by entries must be (layer, datatype) pairs.')
         for pair in etch:_pair(*pair)
@@ -296,18 +305,31 @@ def _preflight(cell,limits):
     return totals,sorted(visited)
 
 
+def _sidewall_slices(layer,nodes):
+    """(z0, z1, offset_um) per native z slice of a tapered layer, base footprint at z_min."""
+    edges=sorted({layer.z_min,layer.z_max,*(float(z) for z in nodes if layer.z_min<z<layer.z_max)})
+    slope=math.tan(math.radians(layer.sidewall_angle_deg))
+    return [(a,b,-((a+b)/2-layer.z_min)*slope) for a,b in zip(edges,edges[1:])]
+
+
 def import_gds(path,*,cell,layers,port_layers=(),unmapped='error',limits=None,
-               xy_bounds_um=None,path_tolerance_um=.001):
+               xy_bounds_um=None,path_tolerance_um=.001,sidewall_z_nodes_um=None):
     """Selected GDS cell -> explicit physical layer stack and marker metadata.
 
     ``unmapped='error'`` rejects unselected BOUNDARY/PATH layer pairs.
     ``'report'`` explicitly admits their omission and records counts. Labels
     outside port contracts are always counted as ignored descriptive metadata.
+    ``sidewall_z_nodes_um`` (typically ``project.region.mesh_nodes[2]``) sets
+    the z slices of every layer with a nonzero ``sidewall_angle_deg``.
     """
     gdstk=_gdstk();limits=GDSLimits() if limits is None else limits
     layers=tuple(layers);port_layers=tuple(port_layers)
     if not layers or not all(isinstance(x,GDSLayer) for x in layers):raise ValueError('Provide an explicit nonempty GDSLayer stack.')
     if len(layers)>limits.max_structures:raise ValueError('Layer stack exceeds max_structures.')
+    if any(x.sidewall_angle_deg for x in layers):
+        nodes=None if sidewall_z_nodes_um is None else np.asarray(sidewall_z_nodes_um,dtype=float).reshape(-1)
+        if nodes is None or len(nodes)<2 or not np.isfinite(nodes).all() or np.any(np.diff(nodes)<=0):
+            raise ValueError('Tapered sidewalls require sidewall_z_nodes_um: finite, increasing native z mesh nodes.')
     if not all(isinstance(x,GDSPortLayer) for x in port_layers):raise ValueError('Port contracts must be GDSPortLayer instances.')
     if unmapped not in ('error','report'):raise ValueError('unmapped must be error or report.')
     if not math.isfinite(path_tolerance_um) or path_tolerance_um<1e-6:raise ValueError('Path tolerance must be at least 1e-6 um.')
@@ -355,33 +377,50 @@ def import_gds(path,*,cell,layers,port_layers=(),unmapped='error',limits=None,
         else:ignored[key]=ignored.get(key,0)+1
     if ignored and unmapped=='error':raise ValueError(f'Unmapped GDS geometry layer/datatype pairs: {sorted(ignored)}. Map them or explicitly choose unmapped="report".')
     layer_counts={key:len(group) for key,group in groups.items() if key in stack}
-    converted=[];converted_vertices=0;hole_count=0;etched=[];plain={}
+    converted=[];converted_vertices=0;hole_count=0;etched=[];tapered=[];plain={}
+    def admit(key,pieces,layer,z0,z1):
+        nonlocal converted_vertices,hole_count
+        for outer,holes in pieces:
+            _admit_xy(outer,limits,xy_bounds_um)
+            if len(converted)>=limits.max_structures:raise ValueError('Converted stack exceeds max_structures.')
+            converted_vertices+=len(outer)+sum(len(h) for h in holes);hole_count+=len(holes)
+            if converted_vertices>limits.max_total_vertices:raise ValueError('Converted stack exceeds max_total_vertices.')
+            converted.append((key,tuple(map(tuple,outer)),tuple(tuple(map(tuple,h)) for h in holes),layer,(z0,z1)))
     for layer in layers:
         key=(layer.layer,layer.datatype);source=groups.get(key,[])
         if layer.etch_by:
             etch=[p for pair in layer.etch_by for p in groups.get(pair,[])]
             # Boolean NOT on the file precision grid, as any GDS tool applies it.
             if source and etch:source=gdstk.boolean(source,etch,'not',precision=precision/1e-6)
+        if layer.sidewall_angle_deg:
+            # Exact polygon offset (mitered joins) per native z slice; erosion may split or
+            # remove a footprint, dilation may merge footprints. Nothing is rasterized here.
+            slices=_sidewall_slices(layer,nodes);count=0
+            for z0,z1,offset in slices:
+                pieces=[pair for polygon in gdstk.offset(source,offset,use_union=True,precision=precision/1e-6) for pair in _gds_polygons(polygon)]
+                admit(key,pieces,layer,z0,z1);count+=len(pieces)
+            tapered.append(dict(layer=key[0],datatype=key[1],sidewall_angle_deg=layer.sidewall_angle_deg,slices=len(slices),polygons=count))
+            if layer.etch_by:etched.append(dict(layer=key[0],datatype=key[1],etch_by=[list(pair) for pair in layer.etch_by],polygons=count))
+            continue
+        if layer.etch_by:
             pieces=[pair for polygon in source for pair in _gds_polygons(polygon)]
             etched.append(dict(layer=key[0],datatype=key[1],etch_by=[list(pair) for pair in layer.etch_by],polygons=len(pieces)))
         else:
             if key not in plain:plain[key]=[pair for polygon in source for pair in _gds_polygons(polygon)]
             pieces=plain[key]
-        for outer,holes in pieces:
-            _admit_xy(outer,limits,xy_bounds_um)
-            if len(converted)>=limits.max_structures:raise ValueError('Converted stack exceeds max_structures.')
-            converted_vertices+=len(outer)+sum(len(h) for h in holes);hole_count+=len(holes)
-            if converted_vertices>limits.max_total_vertices:raise ValueError('Converted stack exceeds max_total_vertices.')
-            converted.append((key,tuple(map(tuple,outer)),tuple(tuple(map(tuple,h)) for h in holes),layer))
+        admit(key,pieces,layer,layer.z_min,layer.z_max)
     if not converted:raise ValueError('The selected cell has no geometry on the requested layer stack.')
     positions={id(layer):i for i,layer in enumerate(layers)}
-    converted.sort(key=lambda item:(positions[id(item[3])],item[0],item[1],item[2]))
+    converted.sort(key=lambda item:(positions[id(item[3])],item[4],item[0],item[1],item[2]))
     structures=[];all_points=[]
-    for i,(key,points,holes,layer) in enumerate(converted):
+    for i,(key,points,holes,layer,(z0,z1)) in enumerate(converted):
         points=np.asarray(points);lower=points.min(axis=0);upper=points.max(axis=0);center=(lower+upper)/2
-        token=hashlib.sha256(repr((key,tuple(map(tuple,points)),holes,asdict(layer))).encode()).hexdigest()[:12]
+        # Vertical layers keep the identity they had before sidewall support.
+        record={k:v for k,v in asdict(layer).items() if k!='sidewall_angle_deg' or v}
+        if layer.sidewall_angle_deg:record['z_slice']=(z0,z1)
+        token=hashlib.sha256(repr((key,tuple(map(tuple,points)),holes,record)).encode()).hexdigest()[:12]
         structures.append(Structure(id=f'gds-{token}-{i}',name=f'{cell}:{key[0]}/{key[1]}:{i}'[:100],kind='polygon',
-            center=(*center,(layer.z_min+layer.z_max)/2),size=(*(upper-lower),layer.z_max-layer.z_min),
+            center=(*center,(z0+z1)/2),size=(*(upper-lower),z1-z0),
             vertices=tuple(map(tuple,points-center)),holes=tuple(tuple(map(tuple,np.asarray(h)-center)) for h in holes),
             material=layer.material,mesh_order=layer.mesh_order))
         all_points.extend(points)
@@ -408,11 +447,12 @@ def import_gds(path,*,cell,layers,port_layers=(),unmapped='error',limits=None,
         visited_cells=visited,expanded_polygon_count=len(polygons),expanded_path_count=totals[3],
         expanded_cell_instances=totals[4],structures=len(structures),native_vertex_count=converted_vertices,hole_count=hole_count,
         layer_stack=[asdict(x) for x in layers],mapped_layers=[dict(layer=k[0],datatype=k[1],polygons=v) for k,v in sorted(layer_counts.items())],
-        etched_layers=etched,ignored_geometry=[dict(layer=k[0],datatype=k[1],polygons=v) for k,v in sorted(ignored.items())],
+        etched_layers=etched,tapered_layers=tapered,ignored_geometry=[dict(layer=k[0],datatype=k[1],polygons=v) for k,v in sorted(ignored.items())],
         ignored_label_count=ignored_labels,ignored_metadata_records=ignored_records,ports=[asdict(p) for p in ports],
-        bounds_um=[[*np.min(all_points,axis=0),min(x.z_min for *_,x in converted)],
-                   [*np.max(all_points,axis=0),max(x.z_max for *_,x in converted)]],
-        limitations=['Vertical polygon extrusions with explicit holes; contours touching their holes are rejected.',
+        bounds_um=[[*np.min(all_points,axis=0),min(z[0] for *_,z in converted)],
+                   [*np.max(all_points,axis=0),max(z[1] for *_,z in converted)]],
+        limitations=['Polygon extrusions with explicit holes; tapered sidewalls are staircased per native z slice.',
+                     'Contours touching their holes are rejected.',
                      'Separate contours on one layer are unioned as in GDS, not treated as holes; use etch_by for that.',
                      'Port metadata does not create a mode source or detector; see gds_ports.prepare_gds_two_port.',
                      'GDS properties and presentation metadata do not define simulation physics.'])

@@ -1,4 +1,5 @@
 """Hole-bearing GDS geometry: keyhole contours, layer NOT, export and native sampling."""
+import math
 import tempfile
 from pathlib import Path
 from datetime import datetime
@@ -22,7 +23,7 @@ def write(tmp_path,polygons,name='layout.gds'):
 
 
 def scene(steps=60,**region):
-    return Project(region=Region(size=(4,4,1),mesh=.1,pml_cells=3,steps=steps,backend='cpu',precision='float32',
+    return Project(region=Region(dimension='3d',size=(4,4,1.4),mesh=.1,pml_cells=3,steps=steps,backend='cpu',precision='float32',
                                  material_sampling='yee',**region),materials=[Material(name='core',index=2.)],
                    sources=[Source(center=(-1.65,0,0),pulse='continuous',wavelength=1.)],monitors=[Monitor(center=(1.65,0,0))])
 
@@ -42,12 +43,15 @@ def even_odd(x,y,contours):
     return inside
 
 
-def assert_matches_even_odd(project,structures,z_min,z_max):
+def assert_matches_even_odd(project,structures):
+    """Each structure fills its own z extent (inclusive, like native membership) with its even-odd footprint."""
     eps,counts=voxelize(project)
-    contours=[c for obj in structures for c in world_contours(obj)]
     for c,component in enumerate(('Ex','Ey','Ez')):
         x,y,z=np.meshgrid(*field_axes(project.region,component),indexing='ij',sparse=True)
-        expected=np.where(even_odd(x,y,contours)&(z>z_min)&(z<z_max),4.,1.)
+        expected=np.ones(np.broadcast_shapes(x.shape,y.shape,z.shape))
+        for obj in structures:
+            z0,z1=obj.center[2]-obj.size[2]/2,obj.center[2]+obj.size[2]/2
+            expected[even_odd(x,y,world_contours(obj))&(z>=z0-1e-9)&(z<=z1+1e-9)]=4.
         np.testing.assert_array_equal(eps[...,c],expected.astype(eps.dtype))
     return eps,counts
 
@@ -61,7 +65,7 @@ def test_keyhole_ring_matches_independent_even_odd_rasterization(tmp_path):
     assert len(ring.vertices)==4 and len(ring.holes)==1 and len(ring.holes[0])==4
     np.testing.assert_allclose(sorted(map(tuple,world_contours(ring)[1])),[(-.62,-.62),(-.62,.62),(.62,-.62),(.62,.62)],atol=1e-9)
     project=result.add_to(scene())
-    eps,counts=assert_matches_even_odd(project,result.structures,-.23,.23)
+    eps,counts=assert_matches_even_odd(project,result.structures)
     assert counts[ring.id]>0 and result.report==import_gds(path,cell='TOP',layers=[GDSLayer(1,0,-.23,.23,'core')]).report
 
 
@@ -74,7 +78,7 @@ def test_etched_via_through_slab_and_cpu_simulation(tmp_path):
     assert result.report['etched_layers']==[dict(layer=1,datatype=0,etch_by=[[2,0]],polygons=1)]
     assert result.report['ignored_geometry']==[]
     project=result.add_to(scene())
-    eps,_=assert_matches_even_odd(project,result.structures,-.23,.23)
+    eps,_=assert_matches_even_odd(project,result.structures)
     x,y,z=np.meshgrid(*field_axes(project.region,'Ez'),indexing='ij')
     via=(np.hypot(x-.07,y-.03)<.25)&(abs(z)<.2);slab_mask=(abs(x)<1.4)&(abs(y)<.5)&(abs(z)<.2)&(np.hypot(x-.07,y-.03)>.45)
     assert np.all(eps[...,2][via]==1) and np.all(eps[...,2][slab_mask]==4)
@@ -90,10 +94,10 @@ def test_nested_islands_and_multiple_holes(tmp_path):
                       [gdstk.rectangle((-1.12,-.43),(-.37,.43)),gdstk.rectangle((.37,-.43),(1.12,.43))],'not',layer=1)
     result=import_gds(write(tmp_path,nested),cell='TOP',layers=[GDSLayer(1,0,-.23,.23,'core')])
     assert sorted(len(s.holes) for s in result.structures)==[1,1] and result.report['hole_count']==2
-    assert_matches_even_odd(result.add_to(scene()),result.structures,-.23,.23)
+    assert_matches_even_odd(result.add_to(scene()),result.structures)
     result=import_gds(write(tmp_path,two,'two.gds'),cell='TOP',layers=[GDSLayer(1,0,-.23,.23,'core')])
     assert len(result.structures)==1 and len(result.structures[0].holes)==2
-    assert_matches_even_odd(result.add_to(scene()),result.structures,-.23,.23)
+    assert_matches_even_odd(result.add_to(scene()),result.structures)
 
 
 def test_hole_touching_the_outer_boundary_is_never_silently_filled(tmp_path):
@@ -102,7 +106,7 @@ def test_hole_touching_the_outer_boundary_is_never_silently_filled(tmp_path):
     result=import_gds(write(tmp_path,gdstk.boolean(outer,gdstk.rectangle((-.62,-.62),(1.53,.62)),'not',layer=1)),
                       cell='TOP',layers=[GDSLayer(1,0,-.23,.23,'core')])
     assert len(result.structures)==1 and result.structures[0].holes==()
-    eps,_=assert_matches_even_odd(result.add_to(scene()),result.structures,-.23,.23)
+    eps,_=assert_matches_even_odd(result.add_to(scene()),result.structures)
     x,y,z=np.meshgrid(*field_axes(scene().region,'Ez'),indexing='ij')
     assert np.all(eps[...,2][(abs(x-.5)<.4)&(abs(y)<.5)&(abs(z)<.2)]==1)
     # A hole touching the outer contour at isolated vertices is rejected explicitly.
@@ -171,3 +175,51 @@ def test_subpixel_interfaces_include_hole_edges(tmp_path):
     edge=(abs(abs(x)-.62)<.06)&(abs(y)<.4)&(abs(z)<.15)
     assert np.allclose(eps[...,2][hole],1) and np.allclose(eps[...,2][ring],4)
     assert np.all((eps[...,2][edge]>1)&(eps[...,2][edge]<4))
+
+
+def test_sidewall_slices_match_independent_gdstk_offset(tmp_path):
+    outer=gdstk.rectangle((-1.53,-1.53),(1.53,1.53));inner=gdstk.rectangle((-.62,-.62),(.62,.62))
+    ring=gdstk.boolean(outer,inner,'not',layer=1);path=write(tmp_path,ring)
+    region=scene().region;nodes=region.mesh_nodes[2]
+    with pytest.raises(ValueError,match='sidewall_z_nodes_um'):
+        import_gds(path,cell='TOP',layers=[GDSLayer(1,0,-.23,.23,'core',sidewall_angle_deg=20.)])
+    with pytest.raises(ValueError,match='sidewall_angle_deg'):GDSLayer(1,0,-.23,.23,'core',sidewall_angle_deg=90.)
+    for angle in (20.,-15.):
+        result=import_gds(path,cell='TOP',layers=[GDSLayer(1,0,-.23,.23,'core',sidewall_angle_deg=angle)],sidewall_z_nodes_um=nodes)
+        edges=[-.23,*(z for z in nodes if -.23<z<.23),.23]
+        assert len(edges)==7 and len(result.structures)==6
+        assert result.report['tapered_layers']==[dict(layer=1,datatype=0,sidewall_angle_deg=angle,slices=6,polygons=6)]
+        for obj,(z0,z1) in zip(result.structures,zip(edges,edges[1:])):
+            assert obj.center[2]==pytest.approx((z0+z1)/2) and obj.size[2]==pytest.approx(z1-z0)
+            # Independent expectation: gdstk offset of the drawn ring at the slice centre.
+            expected=gdstk.offset(ring,-((z0+z1)/2+.23)*math.tan(math.radians(angle)),precision=1e-3)
+            assert len(expected)==1 and len(obj.holes)==1
+            pts=np.asarray(expected[0].points);half=np.ptp(pts,axis=0)/2
+            # The bridged expectation holds outer corners, bridge points on the outer
+            # edge and hole corners; only the hole corners lie strictly inside.
+            interior=pts[np.all(np.abs(pts)<half-1e-9,axis=1)]
+            assert len(interior)>=4 and (interior.max()>.62)==(angle>0) and abs(interior.max()-.62)>.004
+            np.testing.assert_allclose(obj.size[:2],2*half,atol=1e-9)
+            outer_pts,hole_pts=world_contours(obj)
+            box=lambda pts:(pts.min(axis=0),pts.max(axis=0))
+            np.testing.assert_allclose(box(outer_pts),(-half,half),atol=1e-9)
+            np.testing.assert_allclose(box(hole_pts),box(interior),atol=1e-9)
+        assert_matches_even_odd(result.add_to(scene()),result.structures)
+    vertical=import_gds(path,cell='TOP',layers=[GDSLayer(1,0,-.23,.23,'core')],sidewall_z_nodes_um=nodes)
+    assert vertical.structures==import_gds(path,cell='TOP',layers=[GDSLayer(1,0,-.23,.23,'core')]).structures
+    assert 'tapered_layers' in vertical.report and vertical.report['tapered_layers']==[]
+
+
+def test_tapered_sidewall_changes_the_cpu_simulation(tmp_path):
+    path=write(tmp_path,[gdstk.rectangle((-.83,-.83),(.83,.83),layer=1)])
+    project=scene(steps=80);nodes=project.region.mesh_nodes[2]
+    vertical=import_gds(path,cell='TOP',layers=[GDSLayer(1,0,-.43,.43,'core')]).add_to(project)
+    tapered=import_gds(path,cell='TOP',layers=[GDSLayer(1,0,-.43,.43,'core',sidewall_angle_deg=35.)],sidewall_z_nodes_um=nodes).add_to(project)
+    eps_v,_=voxelize(vertical);eps_t,_=voxelize(tapered)
+    x,y,z=np.meshgrid(*field_axes(project.region,'Ez'),indexing='ij')
+    top=(abs(x)<.9)&(abs(y)<.9)&(z>.3)&(z<.43);bottom=(abs(x)<.7)&(abs(y)<.7)&(z>-.43)&(z<-.3)
+    assert np.count_nonzero(eps_t[...,2][top]==4)<np.count_nonzero(eps_v[...,2][top]==4)
+    assert np.all(eps_t[...,2][bottom]==4) and np.all(eps_v[...,2][bottom]==4)
+    a=Simulation(vertical).run();b=Simulation(tapered).run()
+    assert np.isfinite(a.electric).all() and np.isfinite(b.electric).all()
+    assert np.max(np.abs(a.signals-b.signals))>1e-3*np.max(np.abs(a.signals))
