@@ -1,5 +1,5 @@
 {
-  "status": "targeted_repair_passed",
+  "status": "full_ci_repair_passed",
   "failed_ci": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35550370749",
   "failed_commit": "ed7e8f5b8a20e4d1d47e2dd6a1c23e3444e4f2bc",
   "failed_cases": [
@@ -66,5 +66,32 @@
     "torchfdtd/streamed_density.py": "26fc263fddb55180f2a8d9ba0db29b63a47de869a0e7d0ec4dc4098d798f98a8",
     "tests/test_streamed_density.py": "abce608c36f40ea1aa6f55bba44e36c41ba9a08e904dc55a1771ecdeecff91be"
   },
-  "unchanged": "Recorded CPML numerical kernels and the already measured CPU/CUDA recorded response remain unchanged. No GPU run for this snapshot initialization fix."
+  "unchanged": "Recorded CPML numerical kernels and the already measured CPU/CUDA recorded response remain unchanged. No GPU run for this snapshot initialization fix.",
+  "completed_ci": {
+    "url": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35551466707",
+    "run_id": 35551466707,
+    "commit": "17fd8faf59f99d01d147fa9bca1b144df3d280ee",
+    "conclusion": "success",
+    "python": {
+      "tests": 1809,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 446,
+      "passed": 1363,
+      "junit_sha256": "c85a46e1301fd7be0e3fdc4fb19967bdd2beabad5238c0172a2afd8320c8749d"
+    },
+    "browser": {
+      "passed": 33,
+      "skipped": 8
+    },
+    "frontend_build": "success",
+    "wheel_build": "success"
+  },
+  "local_release_verification": {
+    "allowlisted_files": 847,
+    "source_audit_findings": 0,
+    "package_files": 116,
+    "wheel_sha256": "f827d61f89e5b5d644bfaf160b2869adb4d2882a3bf4f45915ea19ec637e4b3b",
+    "scope": "Separate local audited wheel and isolated install, not the CI-built wheel."
+  }
 }

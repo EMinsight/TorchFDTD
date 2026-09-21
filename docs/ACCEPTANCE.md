@@ -28,6 +28,19 @@ affected CPU cases and a new nested-mutation regression pass. The
 [failure and repair record](validation/recorded_policy_streamed_repair.json)
 retains the failed CI evidence rather than treating it as a successful gate.
 
+Linux repair CI [35551466707](https://github.com/hyoseokp/TorchFDTD/actions/runs/35551466707)
+at `17fd8fa` completed successfully with **1,363 Python passes**,
+446 environment-dependent skips, **33 browser passes**, and 8 browser skips.
+Frontend and wheel builds passed. The Python JUnit SHA-256 is
+`c85a46e1301fd7be0e3fdc4fb19967bdd2beabad5238c0172a2afd8320c8749d`.
+
+The local runtime source audit checked 847 allowlisted files without pattern
+findings. A separate isolated wheel and install matched all 116 package files
+byte-for-byte. That local wheel's SHA-256 is
+`f827d61f89e5b5d644bfaf160b2869adb4d2882a3bf4f45915ea19ec637e4b3b`.
+The failed run remains in the repair record. This acceptance update collected
+completed CI evidence without rerunning numerical tests.
+
 ## Async Bloch and online-plane CPML extension, 21 September 2026
 
 The [recorded CPML API](REVERSIBLE_CPML.md) now accepts real FP32 scalar or
