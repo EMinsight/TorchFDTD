@@ -606,7 +606,7 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "missing",
-      "scope": "Adjoint API의 Yee component epsilon과 별도 node-sampled bulk tensor diagonal limit. Native Material/GUI의 일반 이방성 입력은 아직 없음.",
+      "scope": "Adjoint API의 Yee component epsilon과 별도 node-sampled bulk tensor diagonal limit. Native tensor 재료 편집·Project/CLI·재료표 VJP는 tensor 항목의 제한 범위로 지원하며, 독립 Yee diagonal map 입력과 동일한 샘플링 계약은 아님.",
       "evidence": [
         "torchfdtd/differentiable.py",
         "torchfdtd/anisotropy.py",
@@ -1044,7 +1044,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "Native Project·CLI·browser에서 closed PEC/PMC 및 제한된 PMC+CPML 실행. CPML은 균일 등간격 FP32, 공통 깊이·세기와 명시적 cubic profile, 고정 등방성 collar, point source/monitor. CPU/CUDA endpoint adjoint와 upper DOF·보조 상태·재료/파형 VJP. 일반 profile·흡수 정확도·복소장·ADE·streaming·tensor batch는 남음.",
+      "scope": "Native Project·CLI·browser에서 closed PEC/PMC 및 제한된 PMC+CPML 실행. CPML은 균일 등간격 FP32, 공통 깊이·세기와 명시적 cubic profile, 고정 등방성 collar, point source/monitor. CPU/CUDA endpoint adjoint와 upper DOF·보조 상태·재료/파형 VJP. 별도 direct endpoint API의 정상입사 CPU gate는 반사장 1%·반사 flux 0.1% 기준을 통과했으며 native Project·일반 흡수 검증은 아님. 일반 profile·흡수 정확도·복소장·ADE·streaming·tensor batch는 남음.",
       "evidence": [
         "torchfdtd/pmc_simulation.py",
         "torchfdtd/endpoint_project.py",
@@ -1080,7 +1080,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "PMC/magnetic symmetry의 closed cavity와 제한된 native PMC+CPML workflow. CPU 전체/절반 영역 E/H와 재료·파형 gradient 일치, 완전 checkpoint 37,088→18,544 bytes. CUDA mixed-wall transpose 검증. 일반 흡수 정확도·속도·ADE·streaming은 남음.",
+      "scope": "PMC/magnetic symmetry의 closed cavity와 제한된 native PMC+CPML workflow. CPU 전체/절반 영역 E/H와 재료·파형 gradient 일치, 완전 checkpoint 37,088→18,544 bytes. CUDA mixed-wall transpose 검증. 제한된 direct endpoint 정상입사 흡수 gate는 통과했지만 native Project·일반 흡수 정확도·속도·ADE·streaming은 남음.",
       "evidence": [
         "torchfdtd/pmc_simulation.py",
         "torchfdtd/endpoint_native.py",
@@ -2554,8 +2554,12 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "n/a",
-      "scope": "제한된 uniform 3D FP32 periodic ReversibleSimulation의 terminal-state 복원·메모리 사전 검사·drift 거부·전체 재료 VJP를 CPU/CUDA 512-step까지 검증. 별도 ReversibleCPMLSimulation은 periodic x/y·z CPML·고정 외부 재료에서 경계 이력과 전체 CPML adjoint로 내부 VJP를 계산하며 CPU 2048-step, CUDA device/CPU trace 저장을 검증. Trace 전송은 동기식이며 일반 CPML·Bloch/ADE 조합은 미완료. 고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph와 ADE 미분 지원. 공유 메모리 예산의 순차 case replay로 서로 다른 격자·관측·재료를 하나의 목적함수에 연결. PeriodicLayerResponse가 밀도→편광 합성→검출 응답을 같은 예산의 resident/DRAM/파일 실행에 연결하며 source graph를 하나씩 재계산. 512³ resident 및 54GiB 상태의 짧은 용량/VJP 검증 완료. 장시간 응용, 동시 adjoint microbatch, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음. 고정 단일 파장 주기 밀도 설계 UI에서 메모리 사전 확인·자동/명시적 실행·Adam·Python/JSON 내보내기를 지원. 일반 CAD 변환·다파장 UI·optimizer 재시작은 후속.",
+      "scope": "제한된 uniform 3D FP32 periodic ReversibleSimulation의 terminal-state 복원·메모리 사전 검사·drift 거부·전체 재료 VJP를 CPU/CUDA 512-step까지 검증. 별도 ReversibleCPMLSimulation은 periodic/Bloch x/y·z CPML·고정 외부 재료에서 FP32 scalar/diagonal 재료와 실수/complex64 장의 경계 이력·전체 CPML adjoint로 내부 VJP를 계산. CPU 2048-step baseline과 CUDA device/CPU 저장, 2-slot 비동기 pinned CPU trace, z soft plane source 및 online 6-field plane spectrum을 제한된 public workflow에서 검증. CUDA point 48-step과 plane 32-step 검증은 일반 CPML·ADE·SSD·48GB 초과·성능 동등성 근거가 아님. 고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph와 ADE 미분 지원. 공유 메모리 예산의 순차 case replay로 서로 다른 격자·관측·재료를 하나의 목적함수에 연결. PeriodicLayerResponse가 밀도→편광 합성→검출 응답을 같은 예산의 resident/DRAM/파일 실행에 연결하며 source graph를 하나씩 재계산. 512³ resident 및 54GiB 상태의 짧은 용량/VJP 검증 완료. 장시간 응용, 동시 adjoint microbatch, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음. 고정 단일 파장 주기 밀도 설계 UI에서 메모리 사전 확인·자동/명시적 실행·Adam·Python/JSON 내보내기를 지원. 일반 CAD 변환·다파장 UI·optimizer 재시작은 후속.",
       "evidence": [
+        "torchfdtd/reversible_cpml.py",
+        "torchfdtd/reversible_trace.py",
+        "docs/REVERSIBLE_CPML.md",
+        "docs/validation/reversible_cpml_extended_workflow.json",
         "torchfdtd/differentiable.py",
         "tests/test_differentiable.py",
         "torchfdtd/dispersive_adjoint.py",

@@ -1171,6 +1171,62 @@ are not throughput benchmarks, and physical reflection convergence,
 beyond-VRAM transport and broader material or boundary scopes remain
 separate validation tasks.
 
+\subsection{Bloch fields, asynchronous traces and online plane spectra}
+
+A subsequent recorded-interface extension admits real FP32 scalar or
+Cartesian diagonal permittivity, complex64 Bloch fields and fixed soft
+electric sources on $z$-normal planes. The Bloch phases, source settings
+and observation geometry remain fixed. Diagonal material VJPs retain three
+separate Yee-component derivatives. The effective interior assignment
+preserves exactly zero design cotangents in the explicit fixed exterior.
+The reconstruction still reads only lossless interior stencils and the
+full resident field and CPML auxiliary transpose remains active.
+
+An optional CPU trace archive uses a pinned two-slot staging ring with
+CUDA event ordering. Forward recording captures the same four tangential
+planes before their working fields change, and backward staging supplies
+chunks in reverse order. For $A=N_xN_y$, archive storage is $16TA$ bytes
+for real fields or $32TA$ bytes for complex fields, in addition to the
+bounded staging and resident solver state. This transport does not provide
+SSD recording or spatial out-of-core fields. Asynchronous transfers are
+implemented, but their throughput or overlap benefit is not established
+by the correctness checks reported here.
+
+The \code{ReversibleCPMLPlaneSimulation} adapter accumulates plane spectra
+without retaining a complete time history for every plane sample. It uses
+blocks of $BM$ prepared Yee observations in forward execution and a stable
+$BM$ cotangent buffer in reverse execution, together with $FM$ spectral
+accumulators for $F$ fixed frequencies. Phase kernels, interpolation maps
+and transpose scratch have separate admitted allowances. The online
+transform preserves the native positive exponential
+$\exp(+2\pi\mathrm{i}ft)$ and the magnetic sample clock displaced by half
+a timestep from the electric clock. The reverse observation block selects
+seed rows independently of the descending physical reconstruction index.
+This removes the full $TM$ observation history without truncating the
+CPML adjoint or the recorded boundary history.
+
+Public 48-step CUDA point-observation checks compare synchronous and
+asynchronous recording. Their field histories and boundary archives are
+bitwise equal. The real material-gradient relative $L_2$ error is
+$2.89\times10^{-7}$, with retained-seed errors at most
+$3.37\times10^{-7}$. A Bloch diagonal-material case driven by a plane
+source gives $1.51\times10^{-7}$ for the material gradient and at most
+$5.80\times10^{-7}$ for retained seeds. Five CPU online-plane tests cover
+real and complex fields, both electric polarizations and bounded blocks.
+
+Two additional public CUDA plane cases use $6\times7\times20$ cells,
+32 steps, seven-step observation and trace chunks, two frequencies and
+two planes with $3\times4$ quadrature points each. The prepared observation
+count is $M=924$. All six-component spectra agree exactly with checkpointed
+execution. The real and Bloch diagonal-material gradient relative $L_2$
+errors are $3.10\times10^{-7}$ and $2.48\times10^{-7}$, respectively.
+The largest retained-seed errors are $3.02\times10^{-7}$ and
+$2.65\times10^{-7}$. Their boundary archives occupy 21,504 and 43,008 bytes.
+The record \code{docs/validation/reversible_cpml_extended_workflow.json}
+identifies these scoped checks. They do not establish arbitrary Bloch-phase
+derivatives, physical reflection convergence, general CR workflow completion
+or a comparative performance advantage.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.

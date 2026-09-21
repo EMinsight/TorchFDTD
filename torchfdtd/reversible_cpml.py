@@ -7,6 +7,7 @@ not O(steps * volume). This is a scoped alternative to checkpoint replay.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from contextlib import nullcontext
 import math
 import threading
 import time
@@ -17,24 +18,32 @@ from .boundaries import BoundaryDescription
 from .differentiable import DifferentiableResult, _System
 from .models import Project
 from .reversible import ReversibleOptions
-from .solver import index_at
+from .solver import source_slice
 
 
 @dataclass(frozen=True)
 class ReversibleCPMLOptions(ReversibleOptions):
     """Resident state budgets and lossless boundary-history storage.
 
-    CPU trace transfers are synchronous. They reduce device history storage,
-    but do not promise copy/compute overlap. No files are created by this API.
+    Optional asynchronous CPU traces use a bounded pinned two-slot ring.
+    No files are created by this API. Fields and CPML remain resident.
     """
 
     trace_storage: str = 'device'
     collar_cells: int = 1
+    trace_transfers: str = 'sync'
+    trace_chunk_steps: int = 32
 
     def __post_init__(self):
         super().__post_init__()
         if self.trace_storage not in ('device', 'cpu'):
             raise ValueError('trace_storage must be device or cpu.')
+        if self.trace_transfers not in ('sync', 'async'):
+            raise ValueError('trace_transfers must be sync or async.')
+        if self.trace_transfers == 'async' and self.trace_storage != 'cpu':
+            raise ValueError('Asynchronous traces require trace_storage=cpu.')
+        if type(self.trace_chunk_steps) is not int or not 1 <= self.trace_chunk_steps <= 1024:
+            raise ValueError('trace_chunk_steps must be an integer in [1, 1024].')
         if (isinstance(self.collar_cells, bool) or not isinstance(self.collar_cells, int)
                 or self.collar_cells < 1):
             raise ValueError('collar_cells must be a positive integer.')
@@ -74,22 +83,25 @@ def _validate_project(project, options):
             or r.interface_method != 'staircase' or r.run_control.auto_shutoff
             or r.memory_mode == 'streamed'):
         raise ValueError('ReversibleCPMLSimulation requires uniform 3D FP32 Yee staircase sampling and fixed resident steps.' + recommendation)
-    if (any(f.kind != 'periodic' for axis in (0, 1) for f in r.boundaries.pair(axis))
-            or any(f.kind != 'pml' for f in r.boundaries.pair(2)) or any(r.bloch_phase)):
-        raise ValueError('ReversibleCPMLSimulation requires periodic x/y and CPML on both z faces, without Bloch phase.' + recommendation)
+    if (any(f.kind not in ('periodic', 'bloch') for axis in (0, 1) for f in r.boundaries.pair(axis))
+            or any(f.kind != 'pml' for f in r.boundaries.pair(2))):
+        raise ValueError('ReversibleCPMLSimulation requires periodic or Bloch x/y and CPML on both z faces.' + recommendation)
     if any(m.model != 'dielectric' or m.oscillators for m in project.materials):
-        raise ValueError('ReversibleCPMLSimulation supports only scalar nondispersive dielectric declarations.' + recommendation)
+        raise ValueError('ReversibleCPMLSimulation supports only nondispersive dielectric declarations.' + recommendation)
     a, b = _interior_interval(r, options.collar_cells)
     for raw in project.sources:
         source = project.resolved_source(raw)
         if not source.enabled:
             continue
-        if (source.kind != 'point' or source.injection != 'soft'
+        if (source.kind not in ('point', 'plane') or source.injection != 'soft'
+                or (source.kind == 'plane' and source.normal != 'z')
                 or any(not name.startswith('E') for name, _ in source.polarization_components)):
-            raise ValueError('ReversibleCPMLSimulation supports fixed soft electric point sources only.' + recommendation)
+            raise ValueError('ReversibleCPMLSimulation supports fixed soft electric point or z-normal plane sources only.' + recommendation)
         for component, _ in source.polarization_components:
-            location = index_at(source.center, r, component)
-            if not a <= location[2] <= b:
+            resolved = source.model_copy(update={'component': component, 'theta': None})
+            z = source_slice(resolved, r)[2]
+            lo, hi = (z.start, z.stop - 1) if isinstance(z, slice) else (z, z)
+            if not a <= lo <= hi <= b:
                 raise ValueError('Every electric source component must lie inside the reconstruction interval.')
     monitors = [m for m in project.monitors if m.enabled]
     if not monitors or any(m.kind != 'point' or m.time_downsample != 1 for m in monitors):
@@ -99,11 +111,12 @@ def _validate_project(project, options):
 
 def _interior_blocks(field, a, b):
     # Reshape only the complete contiguous native field. Each copied rectangle
-    # contains at most 65536 scalars, even for a very long z axis.
+    # contains at most 65536 real lanes, even for a very long z axis.
+    capacity = 32768 if field.is_complex() else 65536
     rows = field.view(-1, field.shape[2], 3)
-    for z in range(a, b + 1, 65536 // 3):
-        end = min(b + 1, z + 65536 // 3)
-        row_count = max(1, 65536 // (3 * (end - z)))
+    for z in range(a, b + 1, capacity // 3):
+        end = min(b + 1, z + capacity // 3)
+        row_count = max(1, capacity // (3 * (end - z)))
         for row in range(0, rows.shape[0], row_count):
             yield rows[row:row + row_count, z:end].reshape(-1)
 
@@ -114,7 +127,8 @@ def _interior_scale(system, a, b):
     for field in system.state()[:2]:
         for block in _interior_blocks(field, a, b):
             peak = torch.maximum(peak, block.abs().amax())
-            converted = block.to(torch.float64)
+            lanes = torch.view_as_real(block) if block.is_complex() else block
+            converted = lanes.to(torch.float64)
             square.add_(converted.square().sum())
             del converted
     maximum, norm = float(peak), math.sqrt(float(square))
@@ -125,6 +139,7 @@ def _interior_scale(system, a, b):
 
 def _require_finite(value, message, chunk):
     flat = value.reshape(-1)
+    chunk = max(1, chunk // 2) if value.is_complex() else chunk
     for start in range(0, flat.numel(), chunk):
         if not bool(torch.isfinite(flat[start:start + chunk]).all()):
             raise RuntimeError(message)
@@ -157,31 +172,58 @@ def _advance_recorded(system, step, frame, a, b):
 
 class _RecordedCPML(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, epsilon, project, options, interval, report):
-        system = _System(project, epsilon.detach(), prepare_kernels=False)
+    def forward(ctx, epsilon, project, options, interval, report, spectral):
+        system = _System(project, epsilon.detach(), prepare_kernels=False,
+                         observation_monitors=None if spectral is None else spectral.observers)
         if epsilon.is_cuda:
             from .cuda_kernels import FusedYeeCUDA
-            system.kernel = FusedYeeCUDA(system.grid, direct_views=True)
+            from .cuda_complex import FusedComplexYeeCUDA
+            kernel = FusedComplexYeeCUDA if system.field_dtype == torch.complex64 else FusedYeeCUDA
+            system.kernel = kernel(system.grid, direct_views=True)
         a, b = interval
         trace_device = epsilon.device if options.trace_storage == 'device' else torch.device('cpu')
-        archive = torch.empty((project.region.steps, 2, *epsilon.shape[:2], 2),
-                              dtype=torch.float32, device=trace_device)
-        signals = epsilon.new_empty((project.region.steps, len(system.monitors)))
+        shape = (project.region.steps, 2, *epsilon.shape[:2], 2)
+        transport = None
+        if options.trace_transfers == 'async':
+            from .reversible_trace import AsyncBoundaryTrace
+            transport = AsyncBoundaryTrace(shape, epsilon.device,
+                chunk_steps=report['trace_chunk_steps'], dtype=system.field_dtype)
+            archive = transport.archive
+        else:
+            archive = torch.empty(shape, dtype=system.field_dtype, device=trace_device)
+        block_size = project.region.steps if spectral is None else spectral.block_size
+        samples = system.grid.E.new_empty((block_size, len(system.monitors)))
+        signals = samples if spectral is None else spectral.zeros()
         maximum = norm = 0.
         started = time.perf_counter()
-        for step in range(project.region.steps):
-            _advance_recorded(system, step, archive[step], a, b)
-            signals[step] = system.observe(system.state())
-            if (step + 1) % 64 == 0 or step + 1 == project.region.steps:
-                current_maximum, current_norm = _interior_scale(system, a, b)
-                maximum = max(maximum, current_maximum)
-                norm = max(norm, current_norm)
-        chunk = report['diagnostic_chunk_elements']
-        _require_finite(signals, 'Recorded CPML observations became nonfinite.', chunk)
-        _require_finite(archive, 'Recorded CPML boundary trace became nonfinite.', chunk)
-        terminal = tuple(value[:, :, a:b + 1].clone() for value in system.state()[:2])
+        try:
+            for step in range(project.region.steps):
+                frame = transport.frame(step) if transport is not None else archive[step]
+                _advance_recorded(system, step, frame, a, b)
+                if transport is not None:
+                    transport.commit(step)
+                row = step % block_size
+                samples[row] = system.observe(system.state())
+                if spectral is not None and (row + 1 == block_size or step + 1 == project.region.steps):
+                    spectral.accumulate(signals, samples[:row + 1], step - row)
+                if (step + 1) % 64 == 0 or step + 1 == project.region.steps:
+                    current_maximum, current_norm = _interior_scale(system, a, b)
+                    maximum = max(maximum, current_maximum)
+                    norm = max(norm, current_norm)
+            if transport is not None:
+                transport.finish()
+            chunk = report['diagnostic_chunk_elements']
+            _require_finite(signals, 'Recorded CPML observations became nonfinite.', chunk)
+            _require_finite(archive, 'Recorded CPML boundary trace became nonfinite.', chunk)
+            terminal = tuple(value[:, :, a:b + 1].clone() for value in system.state()[:2])
+        except BaseException as error:
+            if transport is not None:
+                transport.__exit__(type(error), error, error.__traceback__)
+            raise
         ctx.save_for_backward(epsilon, archive, *terminal)
         ctx.system, ctx.options, ctx.report = system, options, report
+        ctx.transport = transport
+        ctx.spectral = spectral
         ctx.interval, ctx.scale = interval, (maximum, norm)
         ctx.lock = threading.Lock()
         if epsilon.is_cuda:
@@ -189,6 +231,8 @@ class _RecordedCPML(torch.autograd.Function):
         report.update(forward_seconds=time.perf_counter() - started,
                       sampled_forward_peak=maximum, sampled_forward_l2=norm,
                       diagnostic_cadence_steps=64, terminal_copies=1,
+                      observation_block_shape=list(samples.shape),
+                      observation_history_retained=spectral is None,
                       checkpoint_replays=0, backward_calls=0)
         return signals
 
@@ -210,15 +254,32 @@ class _RecordedCPML(torch.autograd.Function):
                 target[:, :, a:b + 1].copy_(value)
             gradient = torch.zeros_like(epsilon)
             from .reversible_cpml_kernels import InteriorReconstruction
-            inverse = InteriorReconstruction(system, a, b, gradient, signal_bar)
-            staging = (epsilon.new_empty(archive.shape[1:])
-                       if archive.device != epsilon.device else None)
-            for step in range(system.region.steps - 1, -1, -1):
-                frame = archive[step]
-                if staging is not None:
-                    staging.copy_(frame)
-                    frame = staging
-                inverse.step(step, frame)
+            spectral = ctx.spectral
+            seed_buffer = signal_bar if spectral is None else system.grid.E.new_empty(
+                (spectral.block_size, len(system.monitors)))
+            inverse = InteriorReconstruction(system, a, b, gradient, seed_buffer)
+            staging = (system.grid.E.new_empty(archive.shape[1:])
+                       if ctx.transport is None and archive.device != epsilon.device else None)
+            reader = ctx.transport.reverse() if ctx.transport is not None else nullcontext(archive)
+            current_block, regenerated_blocks = -1, 0
+            with reader as frames:
+                for step in range(system.region.steps - 1, -1, -1):
+                    frame = frames[step]
+                    if staging is not None:
+                        staging.copy_(frame)
+                        frame = staging
+                    if spectral is None:
+                        inverse.step(step, frame)
+                    else:
+                        begin = step // spectral.block_size * spectral.block_size
+                        if begin != current_block:
+                            values = spectral.transpose(signal_bar, begin,
+                                min(begin + spectral.block_size, system.region.steps))
+                            seed_buffer[:len(values)].copy_(values)
+                            del values
+                            current_block = begin
+                            regenerated_blocks += 1
+                        inverse.step(step, frame, observation_index=step - begin)
             absolute, l2 = _interior_scale(system, a, b)
             forward_peak, forward_l2 = ctx.scale
             relative_peak = absolute / forward_peak if forward_peak else (0. if absolute == 0 else math.inf)
@@ -226,6 +287,8 @@ class _RecordedCPML(torch.autograd.Function):
             diagnostics = dict(initial_max_abs=absolute, initial_l2=l2,
                                initial_relative_peak=relative_peak,
                                initial_relative_l2=relative_l2,
+                               regenerated_seed_blocks=regenerated_blocks,
+                               seed_buffer_shape=list(inverse.signal_bar.shape),
                                inverse_steps=system.region.steps,
                                transpose_steps=system.region.steps)
             report['last_backward'] = diagnostics
@@ -237,21 +300,22 @@ class _RecordedCPML(torch.autograd.Function):
                 torch.cuda.synchronize(epsilon.device)
             report['backward_calls'] += 1
             diagnostics['seconds'] = time.perf_counter() - started
-            return gradient, None, None, None, None
+            return gradient, None, None, None, None, None
         finally:
             ctx.lock.release()
 
 
 class ReversibleCPMLSimulation(torch.nn.Module):
-    """Scalar material differentiation in a fixed, absorbing exterior.
+    """Scalar or diagonal material differentiation in a fixed absorbing exterior.
 
     ``model(epsilon, fixed_epsilon=background)`` uses epsilon only on
     ``interior_z`` (inclusive indices). All other material values come from
     background, which must not require gradients. Consequently epsilon's
     exterior gradient is exactly zero by the actual forward definition.
 
-    Both maps have the complete grid shape. Point sources are fixed impressed
-    electric increments inside the reconstructed interval. The full resident
+    Both FP32 maps have the grid shape or grid shape plus three components.
+    Point or z-plane sources are fixed impressed electric increments inside
+    the reconstructed interval. Bloch fields use complex64. The full resident
     CPML forward and adjoint are retained, while only four boundary planes
     per timestep and one interior terminal state replace checkpoint replay.
     """
@@ -274,25 +338,33 @@ class ReversibleCPMLSimulation(torch.nn.Module):
     def interior_z(self):
         return self._snapshot()[1]
 
-    def plan(self, *, device='cpu'):
+    def plan(self, *, device='cpu', material_components=1):
         project, interval = self._snapshot()
         from .reversible_cpml_memory import _cpml_reversible_reservation
-        return _cpml_reversible_reservation(project, self.options, torch.device(device), interval)
+        return _cpml_reversible_reservation(project, self.options, torch.device(device), interval,
+                                           material_components=material_components)
 
     def forward(self, epsilon, *, fixed_epsilon):
+        return self._run(epsilon, None, fixed_epsilon=fixed_epsilon)
+
+    def _run(self, epsilon, spectral, *, fixed_epsilon):
         project, interval = self._snapshot()
         for name, value in (('epsilon', epsilon), ('fixed_epsilon', fixed_epsilon)):
             if (not isinstance(value, torch.Tensor) or value.dtype != torch.float32
                     or value.device.type not in ('cpu', 'cuda') or value.layout != torch.strided
                     or not value.is_contiguous() or value.is_conj() or value.is_neg()
-                    or tuple(value.shape) != project.region.shape):
-                raise ValueError(f'{name} must be a contiguous resolved scalar FP32 CPU/CUDA tensor matching the region shape.')
+                    or tuple(value.shape) not in (project.region.shape, (*project.region.shape, 3))):
+                raise ValueError(f'{name} must be a contiguous resolved scalar FP32 or diagonal FP32 CPU/CUDA tensor matching the region shape.')
         if fixed_epsilon.requires_grad:
             raise ValueError('fixed_epsilon must not require gradients. Only the explicit reconstruction interior is differentiable.')
         if fixed_epsilon.device != epsilon.device:
             raise ValueError('epsilon and fixed_epsilon must use the same device.')
+        if fixed_epsilon.shape != epsilon.shape:
+            raise ValueError('epsilon and fixed_epsilon must have the same scalar or diagonal shape.')
         from .reversible_cpml_memory import _cpml_reversible_reservation
-        reservation = _cpml_reversible_reservation(project, self.options, epsilon.device, interval)
+        reservation = _cpml_reversible_reservation(project, self.options, epsilon.device, interval,
+                                                   material_components=3 if epsilon.ndim == 4 else 1,
+                                                   spectral=spectral)
         chunk = reservation['diagnostic_chunk_elements']
         for value in (epsilon, fixed_epsilon):
             flat = value.reshape(-1)
@@ -312,8 +384,10 @@ class ReversibleCPMLSimulation(torch.nn.Module):
                       reconstruction_tolerance=self.options.reconstruction_tolerance,
                       material_gradient_scope='interior only, exterior fixed by explicit background',
                       source_material_gradient='unrestricted interior, fixed impressed increments',
-                      trace_transfers='synchronous', cpml_primal_inverted=False,
+                      cpml_primal_inverted=False,
                       backend='fused CUDA' if epsilon.is_cuda else 'torch CPU', **reservation)
-        signals = _RecordedCPML.apply(effective, project, self.options, interval, report)
+        signals = _RecordedCPML.apply(effective, project, self.options, interval, report, spectral)
+        if spectral is not None:
+            return spectral.result(signals, report)
         return DifferentiableResult(signals, project.region.time_step,
                                     tuple(m.component for m in project.monitors if m.enabled), report)

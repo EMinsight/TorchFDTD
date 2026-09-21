@@ -30,7 +30,7 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 | 분산 재료 | ADE. 경로별 제한 확인 필요 | 다중 Drude/Lorentz·passive fit·resident/streamed ADE adjoint | 지원 모델 범위의 동등 후보. 이방성 ADE·응용 정확도·외부 실측은 남음 |
 | GDS | Layer stack, explicit port contracts | Layer/datatype·Z·재료 stack, 단위·계층·array·PATH, 제한 export, 명시적 full-cell TEXT 두 port→실제 ModeNetwork·native 재료 샘플링·S/VJP | 기본 geometry와 제한 port 연결 구현. 좁은 aperture·일반 hole/branch·자동 포트 추론은 남음 |
 | 단일 문제 multi-GPU | Sharding | 별도 periodic/Bloch 초기값 API의 rank-owned slab·halo transpose·재료 VJP·binomial checkpoint. 실제 Linux 2/3-process Gloo CPU 검사 통과 | **부분/GPU 미검증**. 실제 NCCL·2장 이상 GPU, source/monitor·물리 경계·scaling 검증 필요 |
-| 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 별도 lossless periodic 및 fixed-exterior CPML FP32 reversible API, 고정 모드와 radiation 목적함수 | **부분**. PMC/tensor의 추가 물리·실행 경로, 일반 source/eigenmode·동시 adjoint batch 확대 필요 |
+| 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 별도 lossless periodic 및 fixed-exterior CPML reversible API, 고정 Bloch·FP32 scalar/diagonal·비동기 CPU trace·online plane 관측, 고정 모드와 radiation 목적함수 | **부분**. PMC/tensor의 추가 물리·실행 경로, 일반 source/eigenmode·동시 adjoint batch 확대 필요 |
 | 설계 파라미터화 | Density, projection/binarization, symmetry | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수 | 기본 topology workflow 구현. 일반 spline/polygon shape derivative·제작 제약·최종 CR 물리 수렴은 별도 |
 | Mode source·detector·port | 고정 mode source/detector, overlap/S-parameter. 고유모드 재료·좌표의 미분은 중단 | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 서로 다른 고정 exterior 단면과 입사 포트별 calibration을 지원하며 추가 CPU 물리 검증을 기록. 일반 branch·open/PML 횡단면·streamed injection·일반 물리 수렴·UI가 남음. 고유모드 자체 미분은 별도 연구 목표 |
 | Far-field·회절 | Field projection, diffraction detectors | Closed-box 벡터 원거리장, Bloch 회절 차수·방향별 효율, field graph와 재료 VJP, FP32 방사 패턴 수렴. 저장 결과/NPZ adapter와 실제 회절 browser workflow | 기본 homogeneous exterior 기능과 회절 UI 구현. substrate/periodic lattice far-field·일반 응용·closed-box UI는 남음 |
@@ -98,6 +98,9 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
   [혼합 경계 native workflow](PMC_NATIVE_CPML.md)는 공통 PML 깊이·세기,
   명시적 cubic profile과 균일 등간격 격자에서 Python·CLI·browser를 연결한다.
   지원하지 않는 PML 값은 거부하며 실제 보조 상태와 적용 profile을 결과에 기록한다.
+  [제한된 흡수 gate](PMC_CPML_ABSORPTION.md)는 direct endpoint API의 정상입사
+  CPU 사례에서 반사장 1%·반사 flux 0.1% 기준을 통과했다. 두 셀 횡단면의
+  직접 API 검사이며 native Project나 일반 흡수 수렴 검증으로 확대하지 않는다.
 - [Bulk tensor API](ANISOTROPY_IMPLEMENTATION_PLAN.md): periodic/Bloch
   CPU/CUDA, 6성분 유한차분, 독립 Fourier symbol·에너지·mesh dispersion.
   고정 등방성 CPML/collar 안의 tensor에 비주기 정규화 연산자와 전체
@@ -116,11 +119,19 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
   CUDA의 checkpoint 기준 전체 gradient 상대 L2 차이는 4.91e-7이며,
   메모리 사전 검사·retained backward·드리프트 거부와 해제를 검증했다.
   일반 경계 조합·장시간 정확도·외부 solver 대비 속도 우위는 아직 확립하지 않았다.
-- [Recorded CPML API](REVERSIBLE_CPML.md): periodic x/y와 z CPML에서 경계 이력으로
-  lossless 내부만 복원하고 전체 CPML adjoint를 유지한다. 외부 재료는 별도 고정
-  입력이며 내부 재료 VJP만 계산한다. CPU 2,048-step 검증과 CUDA 96-step의
-  device/CPU trace 저장이 통과했다. CUDA gradient 상대 L2 차이는 5.34e-7이다.
-  이 API의 CPU trace 전송은 동기식이며, 일반 CPML·비동기 trace·SSD는 별도다.
+- [Recorded CPML API](REVERSIBLE_CPML.md): periodic/Bloch x/y와 z CPML에서
+  lossless 내부만 복원하고 전체 CPML adjoint를 유지한다. FP32 scalar/diagonal
+  재료, 실수/complex64 장, 별도 고정 외부 입력과 내부 재료 VJP를 지원한다.
+  CPU 2,048-step과 CUDA 96-step device/CPU trace baseline 검증을 보존한다.
+  [확장 public workflow](validation/reversible_cpml_extended_workflow.json)는
+  2-slot pinned CPU 비동기 trace, z soft plane source와 online 6-field plane을
+  검증했다. CUDA point 48-step의 history·동기 archive는 정확히 일치하며
+  gradient 상대 L2 차이는 복소 1.52e-7, 실수 2.90e-7 이하, 두 retained seed는
+  최대 5.81e-7이다. CUDA plane 32-step의 실수/복소 diagonal spectrum도
+  정확히 일치하며 gradient·seed 상대 L2 차이는 최대 3.11e-7·3.02e-7이다.
+  관측 seed는 B=7, M=924의 block으로 재생성하며 T*M 이력을 보관하지 않는다.
+  경계 archive는 여전히 O(T*횡단면)이다. 일반 CPML·ADE·SSD·48GB 초과나
+  FDTDX 대비 성능·전체 동등성의 근거로 확대하지 않는다.
 
 ## 다음 구현 순서
 

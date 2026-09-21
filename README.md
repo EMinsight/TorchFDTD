@@ -80,10 +80,15 @@ lossless periodic FP32 fields from one terminal state without checkpoint
 replay. The Python API includes memory admission, retained-backward
 ownership and drift rejection. CPU and native CUDA full-gradient checks
 pass through 512 steps. A separate [recorded-interface CPML API](docs/REVERSIBLE_CPML.md)
-now supports an interior scalar design with fixed absorbing exterior material.
-Four tangential planes per timestep replace full-volume replay. CPU checks
-extend through 2,048 steps, and native CUDA gradients agree with checkpointed
-execution for both device and synchronous CPU trace storage. General physical
+supports scalar or componentwise diagonal FP32 designs with fixed absorbing
+exterior material, fixed Bloch phases and soft electric plane sources.
+Four tangential planes per timestep replace full-volume replay. Boundary history
+can use a bounded asynchronous CUDA/pinned-CPU transport. The new
+`ReversibleCPMLPlaneSimulation` accumulates all six spectral fields online and
+regenerates small backward seed blocks. Its real and complex CUDA plane outputs
+match checkpointed spectra, with full material-gradient relative errors below
+3.2e-7 in the [recorded fixtures](docs/validation/reversible_cpml_extended_workflow.json).
+The original real scalar CPU checks extend through 2,048 steps. General physical
 combinations, broad long-time acceptance and competitive throughput remain open.
 
 Experimental [resident/streamed adjoint selection](docs/EXECUTION_SELECTION.md)

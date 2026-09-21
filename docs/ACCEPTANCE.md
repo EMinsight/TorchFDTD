@@ -1,5 +1,28 @@
 # Current acceptance record
 
+## Async Bloch and online-plane CPML extension, 21 September 2026
+
+The [recorded CPML API](REVERSIBLE_CPML.md) now accepts real FP32 scalar or
+diagonal maps, complex64 fixed Bloch fields and fixed soft electric z-plane
+sources. Asynchronous CPU boundary traces use two device chunks, two pinned
+chunks and eight reusable events. The public plane wrapper accumulates compact
+six-field spectra and regenerates bounded seed blocks during backward.
+
+Five new native CUDA tests passed. The 48-step point-observation cases match
+synchronous archives and histories exactly, with material VJP and retained-seed
+relative errors below 5.9e-7. The 32-step real and Bloch-diagonal online plane
+spectra match checkpointed results exactly. Their material-gradient relative
+errors are 3.10e-7 and 2.48e-7. Forward failure cleanup, backward retry, owner
+release and conservative allocation admission are also checked. CPU focused
+groups cover 51 unique helper, transport, metadata and public workflow cases,
+including existing admission cases. Their fixture corrections are retained in
+the [new evidence record](validation/reversible_cpml_extended_workflow.json).
+
+These are discrete correctness and ownership gates. They are not a throughput,
+physical convergence, beyond-VRAM or final CR acceptance result. Full CPML fields
+and adjoints remain resident. Public release is not cleared.
+
+
 ## Recorded-interface CPML integration, 21 September 2026
 
 The separate [CPML reversible API](REVERSIBLE_CPML.md) admits a scalar interior

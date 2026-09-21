@@ -137,3 +137,5 @@ __all__ += ["ReversibleOptions", "ReversibleSimulation"]
 
 from .reversible_cpml import ReversibleCPMLOptions, ReversibleCPMLSimulation
 __all__ += ["ReversibleCPMLOptions", "ReversibleCPMLSimulation"]
+from .reversible_cpml_planes import ReversibleCPMLPlaneSimulation
+__all__ += ["ReversibleCPMLPlaneSimulation"]

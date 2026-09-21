@@ -1,0 +1,230 @@
+{
+  "status": "targeted_integration_passed",
+  "scope": "Public recorded-interface CPML material gradients with scalar/diagonal FP32 maps, periodic or fixed Bloch x/y, z CPML, fixed exterior, soft electric point/z-plane sources, point histories or online collocated spectral planes.",
+  "precision": "Real FP32 material and gradients. Real FP32 or complex64 fields. Bounded FP64 diagnostic reductions only.",
+  "algorithms": {
+    "full_primal_cpml_resident": true,
+    "full_cpml_transpose": true,
+    "cpml_primal_inverted": false,
+    "material_gradient": "Explicit reconstruction interior only",
+    "trace": "Four transverse component planes per step, 16*T*A bytes real or 32*T*A complex",
+    "observation": "Point T*M history, or online B*M samples/seed blocks and F*M spectra",
+    "asynchronous": "Two device chunks, two pinned host chunks, eight reusable events, one copy stream, pageable CPU archive",
+    "external_storage": false,
+    "spatial_streaming": false
+  },
+  "cpu": {
+    "public_workflows": [
+      {
+        "complex_fields": true,
+        "zero_phase": false,
+        "storage": "device",
+        "history_bitwise_equal": true,
+        "gradient_relative_l2": 1.59953699876637e-07,
+        "retained_seed_relative_l2": [
+          5.068410753429391e-07,
+          2.654382416336126e-07
+        ],
+        "initial_relative_l2": 4.720339989300884e-07,
+        "source_kind": "z-normal soft E plane",
+        "material_shape": [
+          6,
+          7,
+          20,
+          3
+        ],
+        "trace_bytes": 64512,
+        "terminal_bytes": 22176
+      },
+      {
+        "complex_fields": true,
+        "zero_phase": false,
+        "storage": "cpu",
+        "history_bitwise_equal": true,
+        "gradient_relative_l2": 1.59953699876637e-07,
+        "retained_seed_relative_l2": [
+          5.068410753429391e-07,
+          2.654382416336126e-07
+        ],
+        "initial_relative_l2": 4.720339989300884e-07,
+        "source_kind": "z-normal soft E plane",
+        "material_shape": [
+          6,
+          7,
+          20,
+          3
+        ],
+        "trace_bytes": 64512,
+        "terminal_bytes": 22176
+      },
+      {
+        "complex_fields": true,
+        "zero_phase": true,
+        "storage": "device",
+        "history_bitwise_equal": true,
+        "gradient_relative_l2": 2.58029824205853e-07,
+        "retained_seed_relative_l2": [
+          2.7461194285157103e-07,
+          2.446272509567487e-07
+        ],
+        "initial_relative_l2": 2.929128928224695e-07,
+        "source_kind": "z-normal soft E plane",
+        "material_shape": [
+          6,
+          7,
+          20,
+          3
+        ],
+        "trace_bytes": 64512,
+        "terminal_bytes": 22176
+      },
+      {
+        "complex_fields": false,
+        "zero_phase": true,
+        "storage": "device",
+        "history_bitwise_equal": true,
+        "gradient_relative_l2": 2.58029824205853e-07,
+        "retained_seed_relative_l2": [
+          7.308898515377078e-07,
+          3.6445009702667777e-07
+        ],
+        "initial_relative_l2": 2.929128928224695e-07,
+        "source_kind": "z-normal soft E plane",
+        "material_shape": [
+          6,
+          7,
+          20,
+          3
+        ],
+        "trace_bytes": 32256,
+        "terminal_bytes": 11088
+      }
+    ],
+    "groups": {
+      "public_extended": 6,
+      "public_planes": 5,
+      "helper": 7,
+      "admission": 22,
+      "trace_protocol": 11
+    },
+    "group_note": "Unique focused cases passed across initial groups and targeted fixture corrections, not a claim of one full-suite run.",
+    "plane_cases": "Real Ex/Ey scalar and fixed nonzero Bloch Ex/Ey diagonal, B=1/7, all six fields, two retained noncontiguous complex seeds and fixed exterior zeros.",
+    "diagnostics": "Imaginary-only norm and packed reduction blocks limited to 65536 real lanes.",
+    "plane_example": "The documented CPU Bloch-diagonal public plane example executed with finite material gradient and output shape [2,12,6]."
+  },
+  "cuda": {
+    "device": "NVIDIA GeForce RTX 3060",
+    "field_shape": [
+      6,
+      7,
+      20
+    ],
+    "point_cases": [
+      {
+        "complex_diagonal": false,
+        "gradient_relative_l2": [
+          2.892731054383795e-07,
+          3.370005397501675e-07,
+          3.2484852738892625e-07
+        ],
+        "torch_peak_increment_bytes": 152576,
+        "reservation": 8592583,
+        "reconstruction_relative_l2": 5.80692203848847e-07
+      },
+      {
+        "complex_diagonal": true,
+        "gradient_relative_l2": [
+          1.5117914202799155e-07,
+          4.4907044347908946e-07,
+          5.803686398589751e-07
+        ],
+        "torch_peak_increment_bytes": 283648,
+        "reservation": 8767722,
+        "reconstruction_relative_l2": 4.6593641236347413e-07
+      }
+    ],
+    "point_steps": 48,
+    "point_chunk_steps": 7,
+    "point_acceptance": "History and CPU archive exactly equal synchronous path. Full admitted VJP and two retained seeds agree with checkpoint reference. Owners release without cycle collection.",
+    "failure_injection": "In-flight forward failure drains/closes owned transport. Mid-backward injected compute failure drains reader, releases lock and permits a correct retained retry.",
+    "plane_cases": [
+      {
+        "complex_fields": false,
+        "fields_relative_l2": 0.0,
+        "gradient_relative_l2": [
+          3.1030375940483643e-07,
+          2.8706355966440695e-07,
+          3.018956000777156e-07
+        ],
+        "torch_peak_increment_bytes": 17360384,
+        "reservation": 29009497,
+        "trace_bytes": 21504,
+        "observation_block_shape": [
+          7,
+          924
+        ]
+      },
+      {
+        "complex_fields": true,
+        "fields_relative_l2": 0.0,
+        "gradient_relative_l2": [
+          2.477559957872816e-07,
+          2.646471381285707e-07,
+          2.3704878640626129e-07
+        ],
+        "torch_peak_increment_bytes": 450560,
+        "reservation": 29353678,
+        "trace_bytes": 43008,
+        "observation_block_shape": [
+          7,
+          924
+        ]
+      }
+    ],
+    "plane_steps": 32,
+    "plane_chunk_steps": 7,
+    "plane_spectral_block": 7,
+    "plane_acceptance": "Two frequencies, two 3x4 quadrature planes, six complex fields, full masked material VJP and two retained spectral seeds against checkpointed planes. No T*M observer history.",
+    "passed": 5,
+    "numerical_relative_l2_limit": 0.0001,
+    "memory_scope": "Torch allocation increments for tiny correctness fixtures exclude caller inputs and non-Torch context. The real plane case paid cold library allocations, whereas complex followed warm. Do not compare these peaks as an algorithmic advantage."
+  },
+  "corrections": [
+    "Initial transport metadata tests had two expected-value fixture mistakes, corrected without changing runtime.",
+    "Public z-plane fixture inherited point-source dimensions and was corrected before computation.",
+    "An assertion incorrectly required nonzero derivatives for unexcited normal-incidence polarization components. The corrected physical expectation requires those derivatives to be exactly zero.",
+    "A helper singleton test initially violated the minimum Project grid shape and was replaced with a direct local-curl singleton check.",
+    "A test-only relative-error helper detached tensors after a harmless scalar-conversion warning. Numerical criteria were unchanged."
+  ],
+  "limitations": [
+    "First derivatives only, fixed sources/mesh/monitor and Bloch settings",
+    "No full tensor, ADE, general boundary combinations or spatial out-of-core in this API",
+    "Plane construction allocates fixed host maps before plan, then counts their allowance in solver admission",
+    "Captured compute stream required for async trace consumers",
+    "No measured copy/compute overlap, throughput advantage, beyond-VRAM proof or full CR acceptance",
+    "No overall FDTDX parity or algorithmic novelty claim"
+  ],
+  "source_sha256": {
+    "torchfdtd/__init__.py": "0f172f7cc608252fbed255396fa0dcb5989a157972630b4ff82e4bf3cd0b74d7",
+    "torchfdtd/reversible_cpml.py": "829f3db5b8a50c3dbd8d42b6e70668ffff43e35131f1c5738b479f7876457f9f",
+    "torchfdtd/reversible_cpml_kernels.py": "9f25e610bec07c07c500485c9ba1641f41518e096dbdf815f621aeb51d9b3183",
+    "torchfdtd/reversible_cpml_memory.py": "c63d545110da4f1f94bd0fc249ce87658e33536abdfd9cec8f9adc507c310776",
+    "torchfdtd/reversible_trace.py": "65f8fd266a6beb7f293c07c22498573d846fa5cc96dca8f358995d64e73e9cd7",
+    "torchfdtd/reversible_cpml_planes.py": "6f09bcf2a17b6ac5bbf9a4730372eedfc0b5c7cf87f78ed83df5040abdbae59a",
+    "torchfdtd/adjoint_planes.py": "edbb64361a748d1f04f852d2ddd5de341aa32f59123cd71a539ff855679bac68",
+    "torchfdtd/adjoint_spectrum.py": "08dcc8a81b04fec8a14f43e2e8b1006d1f5da89e5755aa70fd5a75fd0e15173f",
+    "torchfdtd/adjoint_memory.py": "3a7cff0062a8b7f84ab88b3f36a465c67b61ef1d379825f387064f8f5aec23a0",
+    "torchfdtd/differentiable.py": "4b20a33eeaa0e2d27d2499db3435ee623cc246bdd3569245f7156597840385e3",
+    "torchfdtd/cuda_adjoint.py": "0be7744c399e4aed97b8f00f15d7a4649a28f842097ad2309bf262feb6a8ff5d",
+    "torchfdtd/cuda_complex_adjoint.py": "738d1ddb5900301d520e7ab1a3844dd3adfb8fc0770c28278c5fdde888d818fb",
+    "tests/test_reversible_trace.py": "ed767a2ef7ccd6c3e8a9507d5d22132ef19ec2314fd3d1eef27a781475ce2bb1",
+    "tests/test_reversible_cpml_memory.py": "10a7f98cafcdc4c78eeaac4e3ec16f0fc0532dae85b2399f829bec311d9e7693",
+    "tests/test_reversible_cpml_complex_kernels.py": "0151f4cd3c56fd214ca65701fc9bda1898d6a66c8f7910df7b38d823b9eeb37f",
+    "tests/test_reversible_cpml_extended.py": "84d7d0058556e1eadc6038990c7079e5d3cad4a74870615cef8a4b2a3fd8bcb4",
+    "tests/test_reversible_cpml_planes.py": "bdd77719555e6ce380b19d2542167429b982366826bafeb75325a15b08aaefdc",
+    "tests/test_reversible_cpml_async_cuda.py": "a13fe3fae51c77492dea4e2276e103bfffa77123ded33e85a8b1eaedff255c6e",
+    "tests/test_reversible_cpml_planes_cuda.py": "49d9b712dc9585ae9e111d9af8a4ec41f73eb18ea34b8a970d88e2c8d819ea7e"
+  },
+  "source_hash_scope": "Final integration snapshot. Targeted tests preceded final documentation and test-helper cleanup. Final exact-runtime CI is recorded separately in ACCEPTANCE.md.",
+  "prior_record": "reversible_cpml_workflow.json"
+}
