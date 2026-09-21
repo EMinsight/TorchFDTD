@@ -1,0 +1,214 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T201010Z-g5-04-c3e8d3fe",
+  "task": "G5-04",
+  "stage": "G5",
+  "task_title": "전체 3D epsilon/VJP를 만들지 않는 geometry/density slab 생성·gradient 축약 경로를 공개 합성 구조로 시험한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_slab_memory_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-04.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T05:05:38.632650+09:00",
+  "recorded_at": "2026-09-21T20:10:10+00:00",
+  "source_commit": "ed67736f91ca31a6552d1eef2052197de5abf44d",
+  "source_tree_sha256": "485280a71cc7bf39cfff9ca27a875bc1b1be8712cd5e21e8686a47383e8c3e20",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_design_slab_memory_g5.py": "7aea71de6ee4984887c2cbc6a909514435068cfd6ca44a60f178d9640d9c32f8"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G5-04.json",
+  "fixture_sha256": "b234cd6342d1c13c14b5500e53daa5859c135fdf1daf57243bbdd79e4fec9210",
+  "acceptance_criteria_path": "docs/validation/cases/G5-04.json",
+  "acceptance_criteria_sha256": "b234cd6342d1c13c14b5500e53daa5859c135fdf1daf57243bbdd79e4fec9210",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": 3,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cuda",
+    "cpu"
+  ],
+  "physics_configuration": {
+    "module": "tests/test_design_slab_memory_g5.py",
+    "region": "3D, 800 x 32 x 32 cells at 0.05 um (40 x 1.6 x 1.6 um), 4 CPML cells (geometry: on every face; density: periodic x and y, CPML z), Yee sampling, FP32, 10 steps, memory_mode streamed",
+    "geometry": "public synthetic solids of torchfdtd.streamed_geometry: a box 0.9 x 0.9 x 0.5 um rotated 20 degrees about z with epsilon p0 = 3.1 and centre (p1, 0, 0) = (0.1, 0, 0) um, and a sphere of radius p2 = 0.4 um, epsilon 2.4, at (-0.6, 0.2, 0.1) um; background 1; chunk_cells 65536; three differentiable parameters",
+    "density": "16 x 8 periodic density layer (torchfdtd.streamed_density_layer) between z = -0.2 and 0.2 um, background epsilon 1, design epsilon 4, cell-edge pixel origin, values from torch.rand with seed 3; 128 differentiable parameters",
+    "source_and_monitor": "Ez point source at (0, 0, -0.1) um, standard Gaussian pulse (0.8 um, FWHM 0.5 fs, centre 0.5 fs, amplitude 100); one Ez probe at (0, 0, 0.1) um; objective sum of squared time signals",
+    "policy": "StreamedAdjointOptions(device=cuda, slab_width=8, temporal_depth=5, checkpoints=0, gpu_budget_bytes=9600000, host_budget_bytes=8 GiB, state_storage=disk (private scratch, disk_budget_bytes 2 GiB), tile_transfers=sync)",
+    "full_epsilon": "the diagonal Yee-sampled FP32 material of the whole grid: 800*32*32*3*4 = 9,830,400 bytes, larger than the declared GPU budget of 9,600,000 bytes, so a path that materialized it on the device could not be admitted or would exceed its budget",
+    "instruments": "report['forward_memory'] and report['backward_memory'] peak_torch_allocated_bytes.delta_bytes (exact allocator peak after torch.cuda.reset_peak_memory_stats), the AllocationTrace TorchDispatchMode of tests/test_streamed_geometry.py listing every host tensor allocation with its shape and storage bytes (disk banks keep the field state out of host tensors), report['dense_material_storage_bytes'], report['dense_material_vjp_bytes'], report['design_tensor_bytes'], report['optimizer_state_reservation_bytes']",
+    "budget_checks": "torchfdtd/streamed.py::_reservation adds optimizer_moments * design_tensor_bytes to the host reservation for the dense, dispersive, geometry and density paths; estimate_streamed_memory, plan_streamed_work and the run report carry the same fields; Adam's exp_avg and exp_avg_sq of a leaf of the geometry packet's shape are compared with the declared two moments"
+  },
+  "reference_method": "a size bound, not a physics oracle: the byte size of the full diagonal epsilon array computed from the grid shape, and the parameter tensor sizes computed from their shapes; the design-slab physics itself is verified against the dense material in tests/test_streamed_geometry.py and tests/test_streamed_density.py",
+  "observables": [
+    {
+      "name": "peak_torch_allocated_delta_bytes",
+      "unit": "bytes",
+      "definition": "max over the forward and backward phases of the exact Torch allocator peak minus the bytes allocated when the phase began"
+    },
+    {
+      "name": "peak_over_full_epsilon",
+      "unit": "dimensionless",
+      "definition": "peak_torch_allocated_delta_bytes / 9830400"
+    },
+    {
+      "name": "full_shape_host_allocations",
+      "unit": "count",
+      "definition": "host tensor allocations with shape (800,32,32), (800,32,32,3) or (800,32,32,1) and storage above 4 bytes during the run and its backward"
+    },
+    {
+      "name": "max_host_allocation_bytes",
+      "unit": "bytes",
+      "definition": "largest host tensor storage allocated during the run"
+    },
+    {
+      "name": "gradient_max_abs",
+      "unit": "objective per parameter unit",
+      "definition": "largest gradient magnitude of the design parameters, which must be finite and nonzero so that the VJP path really ran"
+    }
+  ],
+  "acceptance_limits": {
+    "full_epsilon_bytes": 9830400,
+    "gpu_budget_bytes": 9600000,
+    "device_rule": "for both paths the exact peak Torch allocated delta is below full_epsilon_bytes and at most gpu_budget_bytes, and gpu_reservation_bytes is at most gpu_budget_bytes",
+    "host_rule": "full_shape_host_allocations == 0; dense_material_storage_bytes == 0 and dense_material_vjp_bytes == 0 in the report; the gradient is finite and nonzero",
+    "budget_rule": "for the dense path (_reservation, estimate_streamed_memory, plan_streamed_work, the run report) and the geometry and density executions, host_reservation_bytes with optimizer_moments = k minus host_reservation_bytes with 0 moments equals exactly k * design_tensor_bytes for k in {1, 2}, gpu_reservation_bytes is unchanged, design_tensor_bytes equals the parameter tensor's numel times element size, the dense parameter reservation is an integer multiple (at least one) of it, a budget equal to the moment-free reservation refuses the run with moments, and the declared two moments equal the byte size of Adam's two state tensors",
+    "source_of_limits": "G5-04 specification: no full 3D epsilon/VJP in the geometry/density slab paths, the CPU design tensor and optimizer state reflected in the memory budget; the size bound is the array size itself and no numeric tolerance applies"
+  },
+  "observed_metrics": {
+    "task": "G5-04",
+    "case": "docs/validation/cases/G5-04.json",
+    "test_module": "tests/test_design_slab_memory_g5.py",
+    "environment": {
+      "python": "3.10.2",
+      "numpy": "2.2.6",
+      "torch": "2.10.0+cu126",
+      "cuda_runtime": "12.6",
+      "cuda_available": true,
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "os": "Windows-10-10.0.26200-SP0",
+      "machine": "AMD64",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+      "commit": "e9e945856aa268b6a37231abd75b8d00fbfad569",
+      "dirty_paths": 1,
+      "recorded_at": "2026-09-21T20:06:55+00:00"
+    },
+    "entries": {
+      "geometry": {
+        "path": "geometry",
+        "shape": [
+          800,
+          32,
+          32
+        ],
+        "cells": 819200,
+        "full_epsilon_bytes": 9830400,
+        "gpu_budget_bytes": 9600000,
+        "gpu_reservation_bytes": 9437300,
+        "peak_torch_allocated_delta_bytes": 3825664,
+        "peak_over_full_epsilon": 0.38916666666666666,
+        "max_host_allocation_bytes": 801468,
+        "full_shape_host_allocations": 0,
+        "design_parameters": 21,
+        "gradient_max_abs": 0.3403807580471039,
+        "forward_seconds": 12.579892800189555,
+        "backward_seconds": 55.043436200357974,
+        "max_extended_tile_cells": 18432
+      },
+      "density": {
+        "path": "density",
+        "shape": [
+          800,
+          32,
+          32
+        ],
+        "cells": 819200,
+        "full_epsilon_bytes": 9830400,
+        "gpu_budget_bytes": 9600000,
+        "gpu_reservation_bytes": 9437300,
+        "peak_torch_allocated_delta_bytes": 3208192,
+        "peak_over_full_epsilon": 0.32635416666666667,
+        "max_host_allocation_bytes": 728424,
+        "full_shape_host_allocations": 0,
+        "design_parameters": 128,
+        "gradient_max_abs": 2.379479169845581,
+        "forward_seconds": 6.199053700082004,
+        "backward_seconds": 16.531717100180686,
+        "max_extended_tile_cells": 18432
+      }
+    }
+  },
+  "test_results": {
+    "total": 6,
+    "passed": [
+      "tests/test_design_slab_memory_g5.py::test_design_slabs_never_materialize_the_full_epsilon_or_vjp[geometry]",
+      "tests/test_design_slab_memory_g5.py::test_design_slabs_never_materialize_the_full_epsilon_or_vjp[density]",
+      "tests/test_design_slab_memory_g5.py::test_dense_reservation_grows_by_the_design_tensor_and_optimizer_moments",
+      "tests/test_design_slab_memory_g5.py::test_design_path_reservations_grow_by_the_design_tensor_and_optimizer_moments",
+      "tests/test_design_slab_memory_g5.py::test_adam_moments_match_the_declared_optimizer_state",
+      "tests/test_design_slab_memory_g5.py::test_optimizer_moments_option_is_validated"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 102.012,
+    "suite_timestamp": "2026-09-22T05:05:38.632650+09:00"
+  },
+  "required_tests": [
+    "tests/test_design_slab_memory_g5.py::test_design_slabs_never_materialize_the_full_epsilon_or_vjp",
+    "tests/test_design_slab_memory_g5.py::test_dense_reservation_grows_by_the_design_tensor_and_optimizer_moments",
+    "tests/test_design_slab_memory_g5.py::test_design_path_reservations_grow_by_the_design_tensor_and_optimizer_moments",
+    "tests/test_design_slab_memory_g5.py::test_adam_moments_match_the_declared_optimizer_state",
+    "tests/test_design_slab_memory_g5.py::test_optimizer_moments_option_is_validated"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/g5/G5-04.json",
+      "sha256": "f8ba9e706d9091c8feae3fe97b69f6bea5a32b1b5166ba8c40cfa737d4ddce9e",
+      "bytes": 1857
+    },
+    {
+      "path": "docs/validation/runs/20260921T201010Z-g5-04-c3e8d3fe/junit.xml",
+      "sha256": "47251efee0d276e9ae9faf6fec5939f53a4524f3b905c3cf64e764dd754e0b8e",
+      "bytes": 1102,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G5-04.xml"
+    }
+  ],
+  "applicable_scope": "RTX 3060, FP32, disk banks, synchronous CUDA tiles: geometry and density design slabs on 800 x 32 x 32 cells whose full diagonal epsilon exceeds the declared GPU budget; the optimizer-moment budget checks on CPU metadata for the dense, geometry and density paths",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

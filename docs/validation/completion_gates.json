@@ -1497,8 +1497,8 @@
           "title": "resident/host/disk/async 경로를 같은 물리 문제·관측자·목적함수에서 비교한다",
           "specification": "resident/host/disk/async 경로를 같은 물리 문제·관측자·목적함수에서 비교한다. full-history와 online DFT, scalar/diagonal/ADE/face states 중 지원 조합을 포함한다.",
           "required_by_current_plan": true,
-          "implementation_state": "IN_PROGRESS",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "tests/test_memory_paths_g5.py",
@@ -1515,13 +1515,17 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_paths_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-01.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_paths_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-01.xml"
+          ],
           "required_tests": [
             "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda",
             "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule",
             "tests/test_memory_paths_g5.py::test_admitted_combinations_name_the_streamed_lanes"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T200923Z-g5-01-d42add9e"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "tests/test_memory_paths_g5.py runs one scatterer (tests/g5_support.py) through the resident CUDA adjoint and the streamed host, disk and asynchronous tiers with time-history, online-DFT and spectral-plane observations for scalar, diagonal, Drude ADE, stored-face and node-tensor materials (69 streamed instances against 23 references) and asserts the layer-A agreement declared in docs/validation/cases/G5-01.json; refused combinations are checked against the registry rule."
@@ -1531,8 +1535,8 @@
           "title": "peak Torch allocated/reserved, CUDA 전체 process memory(가용한 계측 사용), RSS/PSS 또는 플랫폼 동등량, committed memory, OS cache, 디스크 사용량·총 읽기/쓰기·실효 대역폭을 구분한다",
           "specification": "peak Torch allocated/reserved, CUDA 전체 process memory(가용한 계측 사용), RSS/PSS 또는 플랫폼 동등량, committed memory, OS cache, 디스크 사용량·총 읽기/쓰기·실효 대역폭을 구분한다. 중복 집계한 숫자를 전체 메모리로 합치지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "IN_PROGRESS",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "torchfdtd/memory_accounting.py",
@@ -1547,7 +1551,9 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_accounting_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-02.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_accounting_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-02.xml"
+          ],
           "required_tests": [
             "tests/test_memory_accounting_g5.py::test_streamed_report_exposes_instrumented_memory_fields",
             "tests/test_memory_accounting_g5.py::test_disk_bytes_match_the_bank_file_sizes",
@@ -1555,7 +1561,9 @@
             "tests/test_memory_accounting_g5.py::test_operating_system_instruments_return_integers",
             "tests/test_memory_accounting_g5.py::test_allocator_peak_is_exact_only_when_the_phase_sets_a_new_process_peak"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T200934Z-g5-02-e1aa0e9d"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "torchfdtd/memory_accounting.py meters every forward and backward phase of StreamedSimulation (report forward_memory and backward_memory): peak Torch allocated and reserved, device-wide free-memory decrease with the nvidia-smi per-process value when the driver exposes it, working set, private and committed bytes, OS file cache change, scratch bank bytes written and read with their effective rate, and the host bank ledger of SlabBlockOperator, each with instrument, caveat and domain and never summed; StateStore reads back every bank file size."
@@ -1565,8 +1573,8 @@
           "title": "planner의 byte admission과 실제 peak를 맞추고 원자적 동시 reservation 또는 동등 admission으로 여러 작업이 각각 free memory를 보고 동시에 초과하는 문제를 다룬다",
           "specification": "planner의 byte admission과 실제 peak를 맞추고 원자적 동시 reservation 또는 동등 admission으로 여러 작업이 각각 free memory를 보고 동시에 초과하는 문제를 다룬다. 예측은 quota 보장과 구분한다.",
           "required_by_current_plan": true,
-          "implementation_state": "IN_PROGRESS",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "torchfdtd/reservation_registry.py",
@@ -1580,7 +1588,9 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_admission_peak_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-03.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_admission_peak_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-03.xml"
+          ],
           "required_tests": [
             "tests/test_admission_peak_g5.py::test_reservation_bounds_measured_peaks_on_every_rung",
             "tests/test_admission_peak_g5.py::test_registry_admits_only_one_of_two_simultaneous_requests",
@@ -1589,7 +1599,9 @@
             "tests/test_admission_peak_g5.py::test_second_concurrent_run_is_refused_and_the_lease_is_released",
             "tests/test_admission_peak_g5.py::test_failed_phase_releases_its_lease"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T200952Z-g5-03-8f43e40b"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "A three-rung CUDA ladder (65,536 to 1,048,576 cells, host and disk banks) compares the reservation with the measured exact peak Torch allocated delta and the measured peak bank bytes and records the ratio and margin; torchfdtd/reservation_registry.py holds the live reservations of every streamed phase per process under one lock and refuses a second run whose combined reservation exceeds its budget on any tier (admission, not a quota, per process)."
@@ -1599,8 +1611,8 @@
           "title": "전체 3D epsilon/VJP를 만들지 않는 geometry/density slab 생성·gradient 축약 경로를 공개 합성 구조로 시험한다",
           "specification": "전체 3D epsilon/VJP를 만들지 않는 geometry/density slab 생성·gradient 축약 경로를 공개 합성 구조로 시험한다. CPU design tensor·optimizer state까지 memory budget에 반영한다.",
           "required_by_current_plan": true,
-          "implementation_state": "IN_PROGRESS",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "torchfdtd/streamed.py",
@@ -1614,7 +1626,9 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_slab_memory_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-04.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_slab_memory_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-04.xml"
+          ],
           "required_tests": [
             "tests/test_design_slab_memory_g5.py::test_design_slabs_never_materialize_the_full_epsilon_or_vjp",
             "tests/test_design_slab_memory_g5.py::test_dense_reservation_grows_by_the_design_tensor_and_optimizer_moments",
@@ -1622,7 +1636,9 @@
             "tests/test_design_slab_memory_g5.py::test_adam_moments_match_the_declared_optimizer_state",
             "tests/test_design_slab_memory_g5.py::test_optimizer_moments_option_is_validated"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T201010Z-g5-04-c3e8d3fe"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "The geometry and density design slabs run the CUDA streamed adjoint on an 800 x 32 x 32 grid whose full diagonal epsilon exceeds the declared GPU budget, with the exact peak Torch allocated delta measured against the full array and no full-shape host allocation under the AllocationTrace; StreamedAdjointOptions.optimizer_moments charges parameter-sized optimizer state to the host reservation of the dense, dispersive, geometry and density paths together with the design tensor."
