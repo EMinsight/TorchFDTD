@@ -1,6 +1,6 @@
 # Exact-endpoint PMC implementation plan
 
-Status: bounded native closed-cavity integration implemented. Native Project JSON and Simulation now admit PMC/symmetric only for the supported resident real FP32 3D point-source/point-monitor contract described below. Other numerical paths reject these labels explicitly. Full boundary parity remains incomplete. This plan contains no vendor execution or equivalence claims.
+Status: the stored upper face/edge topology is implemented in the general Yee operators. `DifferentiableSimulation` (CPU and CUDA, Torch explicit transpose), `StreamedSimulation` (CPU and CUDA tiles, host or disk banks, restart journal) and `run_tensor_batch` admit PMC/symmetric faces next to PEC and per-face CPML, with the material and admission contract in the final section of this document. Native `Simulation(project).run()` keeps the bounded exact-endpoint forward dispatch described below, checked at run time rather than at schema validation. The fused CUDA backward kernels, ADE materials, plane/reversible/geometry/source-waveform/adjoint-batch paths, subpixel interfaces and periodic/Bloch mixing still reject PMC explicitly. This plan contains no vendor execution or equivalence claims.
 
 The existing mesh has N cell intervals with endpoints x_0 and x_N. E_a occupies half nodes along a and integer nodes along transverse axes. H_a occupies integer nodes along a and half nodes along transverse axes. Existing arrays omit every upper integer node. PMC has even tangential E and normal H, and odd normal E and tangential H. Replacing the missing E_t(N) with E_t(N-1) freezes the last H sample and shifts the wall to x_(N-1/2). That shortcut is prohibited.
 
@@ -18,7 +18,7 @@ Upper PMC E_t(N) evolves from the normal derivative -2 H_t(N-1/2)/dx_last plus i
 
 The transpose scatters the interior last-half derivative seed to both volume E_t(N-1) and face E_t(N), and scatters face E normal-derivative seed with coefficient -2/dx_last onto volume H_t(N-1/2). Tangential face curls transpose within face arrays and into edge arrays using the same signed incidence. Identity paths and ADE states transpose on each disjoint array. All coefficients use the actual local time-step and material scaling. Euclidean adjoint tests require no arbitrary energy half weights. Energy diagnostics separately need dual-cell quadrature at endpoint nodes.
 
-For X-slab streaming only the global last tile owns X-upper face arrays. Y/Z face arrays extend over slab X and participate in usual halos, while E edges shared with X upper face appear only on the last tile. Stores/checkpoints must include these state tensors explicitly. Byte accounting is the sum of each tensor's unique element count, not a padded N+1 volume approximation. CUDA batch compatibility includes the face topology and every face material-state bank. Production streaming remains unimplemented.
+For X-slab streaming only the global last tile owns X-upper face arrays. Y/Z face arrays extend over slab X and participate in usual halos, while E edges shared with X upper face appear only on the last tile. Stores/checkpoints must include these state tensors explicitly. Byte accounting is the sum of each tensor's unique element count, not a padded N+1 volume approximation. CUDA batch compatibility includes the face topology and every face material-state bank. The final section records how the streamed operator and the tensor batch implement this.
 
 
 ## Direct CUDA foundation
@@ -250,9 +250,11 @@ and enabled point E/H monitors sampled every step. At least one point monitor
 is required. Source polarization terms must address unique active electric DOFs.
 Mixed PML/periodic walls, ADE, subpixel, complex/FP64 fields, graded meshes,
 plane/TFSF/current sources, disabled source/monitor entries, field monitors,
-adaptive shutoff and streamed storage are rejected before dispatch. Ordinary
-YeeGrid and BoundaryDescription also reject PMC, preventing unimplemented
-adjoint, tensor-batch and streamed paths from silently using different walls.
+adaptive shutoff and streamed storage are rejected by this forward dispatch at
+run time (`Simulation.run`, `estimate`), not by Project validation, because the
+Yee adjoint, streamed and tensor-batch paths admit several of them. The plain
+`YeeGrid.curl` used by the ordinary CPU/NumPy forward solver still raises on
+PMC faces; only the fused CUDA kernel and `_System` implement the stored faces.
 
 ```python
 from torchfdtd import demo_project, Simulation
@@ -476,3 +478,110 @@ memory was 107,520 bytes against a 297,428-byte plan, including rounding reserve
 Five affected CPU/CUDA tests passed in 6.89 seconds. This small correctness
 case is not a throughput, large-grid capacity, broad CPML absorption or complete
 boundary-parity benchmark. No native Project/CLI/UI admission was changed.
+
+## General Yee admission: adjoint, streamed and tensor batch
+
+The stored-face topology of the "Concrete PMC state topology" section is now
+carried by `boundaries.pmc_blocks`: for every family and component, one block
+per nonempty subset of the component's nodal axes that end on an upper PMC or
+symmetric wall, shaped `1` on the selected axes and the full cell count
+elsewhere. E components have face blocks and one edge block per pair of upper
+nodal axes; H components have the face block on their own axis only. The state
+tuple is `(E, H, psi..., E blocks..., H blocks...)`. Lower walls stay inside
+the volume arrays. Wall derivatives use the mirrored half cell, `+-2 H_wall /
+dx_wall`, and the last magnetic half cell differences the stored wall E.
+
+### Contract
+
+- Epsilon has `material_shape(region)`: the grid plus one row on every axis
+  whose upper face is PMC/symmetric, optionally with three Yee components.
+  `voxelize`, `smooth_sphere_epsilon` and `field_axes` produce that shape.
+  Rows of a half-cell component at its own upper wall are inert padding with
+  an exactly zero gradient. Cell material sampling is also admitted.
+- Point sources and point monitors may address stored upper faces and edges;
+  their nearest-sample coordinates include the true upper endpoints. Plane
+  sources must end below an upper PMC wall. Magnetic point sources are
+  admitted on faces and in the volume.
+- Every CPML face keeps its own `layers`, `sigma_scale`, `kappa`, `alpha`,
+  `polynomial` and `alpha_polynomial`, independent of the neighbouring face
+  kind. Auxiliary rows follow their derivative target onto stored faces, so a
+  transverse CPML slab intersecting an upper PMC face owns psi on that row.
+- The explicit transpose of `curl_faces` scatters the last-half-cell seed to
+  both the volume row and the stored face, scatters the wall-derivative seed
+  with `-+2/dx_wall`, and applies the CPML relations `memory_bar = psi_bar +
+  out_bar`, `D_bar = inv_k * out_bar + c * memory_bar`, `old_psi_bar = b *
+  memory_bar` on face rows exactly as on volume rows.
+- The resident adjoint on CUDA runs the fused forward kernel and the Torch
+  explicit transpose on the device; `backward_kernel='fused'` is rejected.
+- Streamed X-slab tiles: Y/Z face blocks travel with the ordinary halos. A
+  tile whose halo reaches the last row reads the X-upper blocks, the epsilon
+  row and the transverse CPML rows on that plane as inputs; only the tile
+  whose core ends there commits them, observes monitors on them and adds the
+  gradient of that epsilon row. Host and disk field banks, block checkpoints
+  and the restart journal carry every block; `state_bytes` is the exact sum
+  of element bytes of the state tuple.
+- Tensor-batch cohorts bind the face blocks and one inverse-permittivity bank
+  per stored E face/edge, inject point sources and record monitors on faces,
+  include the blocks in CUDA-graph state, and keep them in the NPZ as
+  `endpoint_E_upper`/`endpoint_H_upper` in `summary.endpoint_blocks` order.
+  Base E/H volumes and plots crop the faces; the state-norm diagnostic covers
+  the volume arrays only.
+
+### Supported combinations
+
+| Path | PMC/symmetric with PEC and per-face CPML | Sources/monitors on faces and edges | Still rejected explicitly |
+| --- | --- | --- | --- |
+| `DifferentiableSimulation` CPU, FP32/FP64 | yes | point sources and monitors | ADE, subpixel, periodic/Bloch mixing, plane sources reaching a wall, complex fields |
+| `DifferentiableSimulation` CUDA | fused forward, Torch transpose | point sources and monitors | `backward_kernel='fused'`, as above |
+| `StreamedSimulation` CPU/CUDA, host/disk banks, restart journal | yes | point sources and monitors | as above; `estimate_streamed_work` and `plan_streamed_work` do not model faces |
+| `run_tensor_batch` | yes, with CUDA graphs | point sources and monitors | ADE, TFSF and one-way sources, field monitors |
+| `Simulation.run()` exact-endpoint forward | closed PEC/PMC, or the restricted equal-profile CPML | point electric sources, point monitors | every other combination, checked at run time |
+| Plane, reversible, reversible-CPML, dispersive, streamed-dispersive, geometry, density, source-waveform, mode-injected, adjoint-batch simulations, `TensorDielectricSimulation`, `_System` subclasses, `YeeGrid.curl` | no | - | any PMC/symmetric face |
+
+### Evidence
+
+`tests/test_pmc_general.py`, 24 checks on the local RTX 3060, records:
+
+- Discrete cavity dispersion for a PMC/PMC, PEC/PEC, PMC/PMC box on every
+  axis, including the stored face values, within `4e-6` after 35 steps.
+- The exact-endpoint solver and the Yee face topology agree within `5e-8`
+  (CPU) and `3e-8` (CUDA) on a PEC/PMC cavity with a dielectric block and
+  monitors on an x/y edge, a y/z edge, an upper H face and a lower wall.
+- Face curl transposes against autograd with random volume, face and psi
+  seeds, uniform and explicit nonuniform meshes, next to per-face CPML with
+  `kappa=3`, `alpha=.05`, `polynomial=2`.
+- Half domains with PMC on the y/z upper faces (edge) and on the x upper and
+  z lower faces reproduce mirrored full PEC domains with x or y CPML: signals
+  bitwise equal, folded material gradients within `1.4e-9` of `4.5e-3`, wall
+  rows nonzero and padding rows exactly zero.
+- FP64 CPU: adjoint minus autograd `8e-20`; central differences of the
+  directional derivative `-4.37e-4` converge at second order, errors
+  `2.1e-8`, `5.1e-9`, `1.3e-9`, `3.2e-10` for steps `8e-3` to `1e-3`.
+- CUDA FP32: adjoint minus autograd `1.2e-10` of `3.1e-4`, central difference
+  within `7e-4` relative; CUDA FP64 within `4e-7` relative.
+- Streamed CPU and CUDA, host and disk banks, restart journal, slab width 3
+  and depth 3 with an edge source: signals bitwise equal to the resident
+  reference, gradients within `7.5e-9` of `2.4e-2`, `state_bytes` equal to
+  the exact state sum (11,376 bytes for the 10x6x6 case).
+- Tensor batch of two cohorts with CUDA graphs equals the single fused run and
+  the exact-endpoint solver on the closed cavity.
+- Reflection from an eight-layer x-upper CPML whose four neighbours are PMC
+  faces, measured against a domain too long for its own CPML return to
+  arrive: `1.7e-4` for the default profile, `3.5e-4` with `kappa=3`,
+  `alpha=.05`, `polynomial=2`, and `2.1e-3` for a deliberately weak
+  three-layer `sigma_scale=.1` profile. These are normal-incidence pulse
+  measurements on a 5x5 cell PMC duct, not a broadband or oblique study.
+
+### Remaining limitations
+
+- No face ADE state banks: dispersive materials are rejected with PMC faces
+  at schema validation.
+- The fused CUDA adjoint kernels, the complex Bloch kernels and the ordinary
+  CPU/NumPy `YeeGrid` forward do not implement the stored faces.
+- Native `Simulation.run()` keeps the exact-endpoint contract; per-face CPML
+  profiles with PMC run through `run_tensor_batch` or the adjoint APIs.
+- Streamed work planning and the browser have no face model.
+- Symmetric reduction is a boundary condition only; geometry and excitation
+  are not mirrored automatically. PML profiles sampled by the uniform formula
+  are offset half a cell along the axis and are therefore not mirror images
+  of each other; the mirrored-domain checks place CPML on a non-mirrored axis.

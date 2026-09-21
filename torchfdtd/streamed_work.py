@@ -159,7 +159,7 @@ def estimate_streamed_work(project, options, diagonal=False):
         raise ValueError('Work estimates require a fixed number of timesteps.')
     if any(face.kind in ('pmc', 'symmetric') for axis in range(3)
            for face in region.boundaries.pair(axis)):
-        raise ValueError('PMC/symmetric endpoint work estimates are unsupported.')
+        raise ValueError('PMC/symmetric faces are not implemented by the streamed work estimator; StreamedSimulation executes them directly.')
     if region.precision not in ('float32', 'float64'):
         raise ValueError('Work estimates require float32 or float64 precision.')
     shape = tuple(_positive(n, 'grid dimension') for n in region.shape)

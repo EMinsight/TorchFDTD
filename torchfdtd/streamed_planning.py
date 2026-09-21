@@ -52,7 +52,7 @@ def plan_streamed_work(project,options=None,*,diagonal=False,candidates=None,
     # Constructor validates source/material/observer scope without field banks.
     StreamedSimulation(snapshot,base)
     if any(face.kind in ('pmc','symmetric') for a in range(3) for face in snapshot.region.boundaries.pair(a)):
-        raise ValueError('Endpoint PMC/symmetric is unsupported by streamed execution.')
+        raise ValueError('PMC/symmetric faces are not implemented by the streamed work planner; StreamedSimulation executes them directly.')
     if candidates is not None and temporal_depths is not None:
         raise ValueError('Supply candidates or temporal_depths, not both.')
     if candidates is None:

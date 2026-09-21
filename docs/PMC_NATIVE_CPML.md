@@ -10,6 +10,13 @@ This connects the existing `EndpointCPMLSimulation` physics to native results.
 It does not establish equivalence to the ordinary scalar-Yee PML sampling,
 nor add general combinations of sources, ports or materials.
 
+The restrictions below apply to this forward dispatch only and are checked
+when `Simulation.run()` or `estimate()` is called, not by Project validation.
+`DifferentiableSimulation`, `StreamedSimulation` and `run_tensor_batch` run
+PMC/symmetric faces with the ordinary scalar-Yee CPML, including independent
+per-face `layers`, `sigma_scale`, `kappa`, `alpha` and `polynomial`; see the
+[general Yee admission](PMC_IMPLEMENTATION_PLAN.md#general-yee-admission-adjoint-streamed-and-tensor-batch).
+
 ## Admitted project
 
 - Three-dimensional, real FP32, resident, fixed-duration execution with

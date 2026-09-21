@@ -25,6 +25,7 @@ The executable [example](../examples/tensor_batch.py) constructs its own project
 ## Supported scope
 
 - Real float32/float64, 2D and 3D, periodic and face-specific CPML boundaries.
+- PEC and PMC/symmetric walls at the mesh endpoints, with point sources and monitors on the stored upper PMC faces and edges. Those cohorts reject ADE materials, TFSF/one-way sources and field monitors, and keep the stored face values in the NPZ as `endpoint_E_upper`/`endpoint_H_upper`.
 - Uniform, graded and explicit rectilinear grids, including independent dx/dy/dz, with matching node coordinates and actual time steps within each cohort. Freeze a common mesh before changing geometry if automatic refinement would change nodes. [Controls and matched-dt measurements](RECTILINEAR_MESH.md).
 - Different geometry, passive multipole material parameters, source positions/amplitudes and point/plane monitors between cases. Electric/magnetic Cartesian and theta/phi sources are supported, including [normal-incidence one-way planes](ONEWAY_SOURCES.md) with paired E/H corrections. Source supports on the same field family and component within one case must not overlap. Collocated E and H sources are allowed. See [source definitions](DIPOLE_SOURCES.md).
 - Native snapshots, full final E/H, point time traces, spectra, planar six-component DFT/flux and NPZ results.

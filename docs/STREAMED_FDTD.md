@@ -78,6 +78,10 @@ Targeted checks cover exact mixed-packet bytes, strided and scalar-backed inputs
 conjugate views, empty arrays and alias rejection. CUDA tests include FP32/FP64
 complex fields, CPML and Bloch boundaries, host/file banks, one to three async
 slots, nondefault streams, replayed gradients and recovery after partial failure.
+PMC/symmetric faces carry their stored upper face and edge arrays through the
+same banks, checkpoints and restart journal; only the tile whose core ends at
+the last row owns the X-upper faces, and `tests/test_pmc_general.py` compares
+CPU and CUDA tiles with host and disk banks against the resident adjoint.
 The packet/workspace/complex-CUDA suites passed 50 checks on RTX 3060. Their
 runtime is not used as a benchmark because a separate CR validation was active.
 
