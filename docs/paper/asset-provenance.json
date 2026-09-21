@@ -21,8 +21,9 @@
     "docs/validation/graph-ensembles.json": "4eaa7d2886da4bef67a361c0befbb729a66337391fd121ac009e1414f7ab5adf",
     "docs/validation/selective-monitors.json": "65e4e07a373cb74d7a7fc150360fb4c6014f983245a8b6ec04647495a40a4fdd",
     "docs/validation/rectilinear-ensembles.json": "710c1c227433856b2eef184471fefac739c32a45c83ef8e5d1a5cf56e540a3cd",
-    "docs/validation/geometry-ensembles.json": "9c881db0dbaf50287851d4168bb80d6298d3021a149e5144a5ec15fd356cf5c2",
-    "docs/validation/grouped-ensembles.json": "b9c311df4248abe768c08a0e809c7ead88411edabe1aef4882bb48872f3bbf1c"
+    "docs/validation/geometry-ensembles.json": "9c392bf2457f4a9d84610e0d1664fda3f0e67e929fe90296c02d5783d6d53cb8",
+    "docs/validation/grouped-ensembles.json": "b9c311df4248abe768c08a0e809c7ead88411edabe1aef4882bb48872f3bbf1c",
+    "docs/validation/cross_solver_3060.json": "d4010552f95e8ca88c48ad801685bfe2facce79f0b56160c0b76e0d5b623eb9d"
   },
   "generator": "scripts/build_paper_assets.py"
 }
