@@ -1,0 +1,1578 @@
+{
+ "task": "G3-08",
+ "case_id": "G3-08_bloch_grating_rcwa",
+ "fixture_path": "docs/validation/cases/G3-08_bloch_grating_rcwa.json",
+ "environment": {
+  "python": "3.10.2",
+  "torch": "2.10.0+cu126",
+  "numpy": "2.2.6",
+  "os": "Windows-10-10.0.26200-SP0",
+  "gpu": "NVIDIA GeForce RTX 3060"
+ },
+ "rows": {
+  "empty/TE/0deg/1.02um/h=0.01/cpu-float64": {
+   "polarization": "TE",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.01,
+   "backend": "cpu",
+   "precision": "float64",
+   "duration_fs": 150,
+   "zero_order_transmission": 0.9999999999961929,
+   "other_orders": [
+    0.0,
+    3.4571107822951196e-33,
+    6.075091712409337e-33,
+    0.0
+   ],
+   "backward_zero_order": 5.630209483404908e-08,
+   "zero_order_limit": 1e-06,
+   "other_order_limit": 1e-06
+  },
+  "empty/TM/20deg/1.02um/h=0.01/cpu-float64": {
+   "polarization": "TM",
+   "angle_deg": 20.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.01,
+   "backend": "cpu",
+   "precision": "float64",
+   "duration_fs": 150,
+   "zero_order_transmission": 0.9999973174085071,
+   "other_orders": [
+    0.0,
+    2.9654441718188966e-31,
+    0.0,
+    0.0
+   ],
+   "backward_zero_order": 4.1735616124928976e-08,
+   "zero_order_limit": 0.0001,
+   "other_order_limit": 0.0001
+  },
+  "empty/TE/0deg/1.02um/h=0.01/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.01,
+   "backend": "cuda",
+   "precision": "float32",
+   "duration_fs": 150,
+   "zero_order_transmission": 1.000000372919116,
+   "other_orders": [
+    0.0,
+    1.6765741898888182e-33,
+    3.249668451943085e-33,
+    0.0
+   ],
+   "backward_zero_order": 5.6469039385577686e-08,
+   "zero_order_limit": 0.0001,
+   "other_order_limit": 0.0001
+  },
+  "empty/TM/20deg/1.02um/h=0.01/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 20.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.01,
+   "backend": "cuda",
+   "precision": "float32",
+   "duration_fs": 150,
+   "zero_order_transmission": 0.9999934051806708,
+   "other_orders": [
+    0.0,
+    1.307906245429146e-12,
+    0.0,
+    0.0
+   ],
+   "backward_zero_order": 4.21751220386101e-08,
+   "zero_order_limit": 0.0001,
+   "other_order_limit": 0.0001
+  },
+  "TE/0deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 0.0,
+   "wavelength_um": 0.92,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.35028003065259466,
+      "torcwa_efficiency": 0.35042699220889334,
+      "efficiency_error": -0.0001469615562986748,
+      "phase_rad": 0.6651896517379041,
+      "torcwa_phase_rad": 0.6641186184360632,
+      "phase_error_rad": 0.0010710333018408846,
+      "dominant": true,
+      "counter_direction_power": 4.7023115908791394e-08
+     },
+     "reflection": {
+      "efficiency": 0.06135481160656243,
+      "torcwa_efficiency": 0.06116610801959139,
+      "efficiency_error": 0.00018870358697103962,
+      "phase_rad": 2.462738858668515,
+      "torcwa_phase_rad": 2.4617778034850555,
+      "phase_error_rad": 0.0009610551834593473,
+      "dominant": true,
+      "counter_direction_power": 2.621294171666369e-09
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.0934227131408945,
+      "torcwa_efficiency": 0.09348703050254781,
+      "efficiency_error": -6.43173616533127e-05,
+      "phase_rad": -0.5379311548784265,
+      "torcwa_phase_rad": -0.5388211038779409,
+      "phase_error_rad": 0.000889948999514445,
+      "dominant": true,
+      "counter_direction_power": 4.874650947924336e-10
+     },
+     "reflection": {
+      "efficiency": 0.08341935342805896,
+      "torcwa_efficiency": 0.08332676904698308,
+      "efficiency_error": 9.258438107588585e-05,
+      "phase_rad": 0.19155252137740617,
+      "torcwa_phase_rad": 0.1896584950071302,
+      "phase_error_rad": 0.0018940263702759697,
+      "dominant": true,
+      "counter_direction_power": 3.398989443158442e-10
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.3502800294428621,
+      "torcwa_efficiency": 0.35042699221454005,
+      "efficiency_error": -0.000146962771677972,
+      "phase_rad": 0.6651896506386644,
+      "torcwa_phase_rad": 0.664118618436003,
+      "phase_error_rad": 0.0010710322026614705,
+      "dominant": true,
+      "counter_direction_power": 4.7023629034705e-08
+     },
+     "reflection": {
+      "efficiency": 0.061354812797103475,
+      "torcwa_efficiency": 0.06116610801836043,
+      "efficiency_error": 0.00018870477874304709,
+      "phase_rad": 2.4627388589568344,
+      "torcwa_phase_rad": 2.4617778034713758,
+      "phase_error_rad": 0.0009610554854586617,
+      "dominant": true,
+      "counter_direction_power": 2.621343769976823e-09
+     }
+    }
+   },
+   "efficiency_sum": 1.0001117510680761,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.00018870477874304709,
+   "max_dominant_phase_error_rad": 0.0018940263702759697,
+   "wall_s": 21.02492170035839
+  },
+  "TE/0deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.3703701568980472,
+      "torcwa_efficiency": 0.3698546349867413,
+      "efficiency_error": 0.0005155219113058829,
+      "phase_rad": -0.3218578520182454,
+      "torcwa_phase_rad": -0.32248532386921247,
+      "phase_error_rad": 0.0006274718509670651,
+      "dominant": true,
+      "counter_direction_power": 4.678090927628594e-07
+     },
+     "reflection": {
+      "efficiency": 0.010578290155381176,
+      "torcwa_efficiency": 0.01060176659244689,
+      "efficiency_error": -2.3476437065714922e-05,
+      "phase_rad": -2.999494640708776,
+      "torcwa_phase_rad": -3.0001580464053186,
+      "phase_error_rad": 0.0006634056965424406,
+      "dominant": false,
+      "counter_direction_power": 2.541272838417109e-08
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.080363901216202,
+      "torcwa_efficiency": 0.08034689326707364,
+      "efficiency_error": 1.700794912835868e-05,
+      "phase_rad": -1.426447228324024,
+      "torcwa_phase_rad": -1.42778997647448,
+      "phase_error_rad": 0.0013427481504559857,
+      "dominant": true,
+      "counter_direction_power": 2.8566374320017897e-10
+     },
+     "reflection": {
+      "efficiency": 0.15818304299907265,
+      "torcwa_efficiency": 0.15874030357586139,
+      "efficiency_error": -0.0005572605767887318,
+      "phase_rad": -1.2963916532929993,
+      "torcwa_phase_rad": -1.2990734740836594,
+      "phase_error_rad": 0.002681820790660039,
+      "dominant": true,
+      "counter_direction_power": 6.739084902714544e-10
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.3703701579463032,
+      "torcwa_efficiency": 0.3698546349841225,
+      "efficiency_error": 0.000515522962180659,
+      "phase_rad": -0.3218578525395446,
+      "torcwa_phase_rad": -0.322485323865423,
+      "phase_error_rad": 0.0006274713258784259,
+      "dominant": true,
+      "counter_direction_power": 4.6780980060810377e-07
+     },
+     "reflection": {
+      "efficiency": 0.010578290036700943,
+      "torcwa_efficiency": 0.010601766591875209,
+      "efficiency_error": -2.347655517426564e-05,
+      "phase_rad": -2.9994946349617706,
+      "torcwa_phase_rad": -3.000158046387553,
+      "phase_error_rad": 0.0006634114257821899,
+      "dominant": false,
+      "counter_direction_power": 2.5412669942185238e-08
+     }
+    }
+   },
+   "efficiency_sum": 1.0004438392517072,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0005572605767887318,
+   "max_dominant_phase_error_rad": 0.002681820790660039,
+   "wall_s": 21.061122099868953
+  },
+  "TE/0deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.06,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.33153310543292,
+      "torcwa_efficiency": 0.33092300782539474,
+      "efficiency_error": 0.0006100976075252285,
+      "phase_rad": -0.5617973395556587,
+      "torcwa_phase_rad": -0.5616984735427507,
+      "phase_error_rad": -9.886601290798325e-05,
+      "dominant": true,
+      "counter_direction_power": 1.1084529382440772e-06
+     },
+     "reflection": {
+      "efficiency": 0.019629246148566898,
+      "torcwa_efficiency": 0.019612521648585696,
+      "efficiency_error": 1.6724499981201485e-05,
+      "phase_rad": -3.0608438032565033,
+      "torcwa_phase_rad": -3.061377778066292,
+      "phase_error_rad": 0.0005339748097887842,
+      "dominant": false,
+      "counter_direction_power": 5.247490355343903e-08
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.07654970018938752,
+      "torcwa_efficiency": 0.076479485523062,
+      "efficiency_error": 7.021466632552154e-05,
+      "phase_rad": -1.8502129792313888,
+      "torcwa_phase_rad": -1.8507576879253052,
+      "phase_error_rad": 0.0005447086939163182,
+      "dominant": true,
+      "counter_direction_power": 2.168629033510184e-10
+     },
+     "reflection": {
+      "efficiency": 0.22192307812995238,
+      "torcwa_efficiency": 0.22244945552909756,
+      "efficiency_error": -0.0005263773991451837,
+      "phase_rad": -1.701853050410519,
+      "torcwa_phase_rad": -1.7051275641767747,
+      "phase_error_rad": 0.00327451376625576,
+      "dominant": true,
+      "counter_direction_power": 7.60723235671842e-10
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.3315331068660522,
+      "torcwa_efficiency": 0.33092300782318956,
+      "efficiency_error": 0.0006100990428626329,
+      "phase_rad": -0.5617973418434677,
+      "torcwa_phase_rad": -0.5616984735435347,
+      "phase_error_rad": -9.886829993299706e-05,
+      "dominant": true,
+      "counter_direction_power": 1.108454960125993e-06
+     },
+     "reflection": {
+      "efficiency": 0.019629245939678134,
+      "torcwa_efficiency": 0.019612521648511592,
+      "efficiency_error": 1.6724291166541477e-05,
+      "phase_rad": -3.0608438045673734,
+      "torcwa_phase_rad": -3.06137777806967,
+      "phase_error_rad": 0.0005339735022964476,
+      "dominant": false,
+      "counter_direction_power": 5.247525509189168e-08
+     }
+    }
+   },
+   "efficiency_sum": 1.000797482706557,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0006100990428626329,
+   "max_dominant_phase_error_rad": 0.00327451376625576,
+   "wall_s": 21.091586399823427
+  },
+  "TE/20deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 20.0,
+   "wavelength_um": 0.92,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.4601748722594368,
+      "torcwa_efficiency": 0.4632305063246826,
+      "efficiency_error": -0.0030556340652457825,
+      "phase_rad": 0.0017699381378296502,
+      "torcwa_phase_rad": 0.0027140520701912254,
+      "phase_error_rad": -0.0009441139323615752,
+      "dominant": true,
+      "counter_direction_power": 1.6716421030924191e-09
+     },
+     "reflection": {
+      "efficiency": 0.12975684976464735,
+      "torcwa_efficiency": 0.13010920369574755,
+      "efficiency_error": -0.00035235393110019664,
+      "phase_rad": 0.7156147579455434,
+      "torcwa_phase_rad": 0.7206069483307477,
+      "phase_error_rad": -0.004992190385204265,
+      "dominant": true,
+      "counter_direction_power": 4.321456539803231e-10
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.28641002719201936,
+      "torcwa_efficiency": 0.2876340658757551,
+      "efficiency_error": -0.0012240386837357176,
+      "phase_rad": 1.3283776221524253,
+      "torcwa_phase_rad": 1.331293558186243,
+      "phase_error_rad": -0.0029159360338177898,
+      "dominant": true,
+      "counter_direction_power": 1.3521297171170114e-09
+     },
+     "reflection": {
+      "efficiency": 0.11674529762391166,
+      "torcwa_efficiency": 0.11902622410331275,
+      "efficiency_error": -0.002280926479401091,
+      "phase_rad": -1.7885158746289347,
+      "torcwa_phase_rad": -1.7742426238855225,
+      "phase_error_rad": -0.014273250743412236,
+      "dominant": true,
+      "counter_direction_power": 6.685944516892989e-10
+     }
+    }
+   },
+   "efficiency_sum": 0.9930870468400151,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0030556340652457825,
+   "max_dominant_phase_error_rad": 0.014273250743412236,
+   "wall_s": 20.956722399685532
+  },
+  "TE/20deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 20.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.13646137587186058,
+      "torcwa_efficiency": 0.13569612128651026,
+      "efficiency_error": 0.0007652545853503168,
+      "phase_rad": -1.7412710323279916,
+      "torcwa_phase_rad": -1.742863806393649,
+      "phase_error_rad": 0.0015927740656573874,
+      "dominant": true,
+      "counter_direction_power": 2.3392505326338366e-10
+     },
+     "reflection": {
+      "efficiency": 0.1434906030382293,
+      "torcwa_efficiency": 0.14328744650987765,
+      "efficiency_error": 0.0002031565283516501,
+      "phase_rad": -1.7357710487935634,
+      "torcwa_phase_rad": -1.7406047480162359,
+      "phase_error_rad": 0.004833699222672516,
+      "dominant": true,
+      "counter_direction_power": 4.3446881183514374e-10
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.5456728945389279,
+      "torcwa_efficiency": 0.5443968731925837,
+      "efficiency_error": 0.0012760213463441916,
+      "phase_rad": -0.26491577621086615,
+      "torcwa_phase_rad": -0.26703780846768815,
+      "phase_error_rad": 0.002122032256822004,
+      "dominant": true,
+      "counter_direction_power": 2.914921876659571e-09
+     },
+     "reflection": {
+      "efficiency": 0.17734659170946282,
+      "torcwa_efficiency": 0.1766195590112097,
+      "efficiency_error": 0.0007270326982531106,
+      "phase_rad": -2.3043206945377617,
+      "torcwa_phase_rad": -2.30424801401487,
+      "phase_error_rad": -7.268052289166604e-05,
+      "dominant": true,
+      "counter_direction_power": 9.401638571837691e-10
+     }
+    }
+   },
+   "efficiency_sum": 1.0029714651584805,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0012760213463441916,
+   "max_dominant_phase_error_rad": 0.004833699222672516,
+   "wall_s": 53.02708620019257
+  },
+  "TE/20deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 20.0,
+   "wavelength_um": 1.06,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.027647323846340357,
+      "torcwa_efficiency": 0.027558184712755833,
+      "efficiency_error": 8.913913358452388e-05,
+      "phase_rad": 0.7604295270009112,
+      "torcwa_phase_rad": 0.7547204959341004,
+      "phase_error_rad": 0.005709031066810755,
+      "dominant": false,
+      "counter_direction_power": 2.029266951187882e-11
+     },
+     "reflection": {
+      "efficiency": 0.013353273217944984,
+      "torcwa_efficiency": 0.013231594940717446,
+      "efficiency_error": 0.00012167827722753786,
+      "phase_rad": -1.5969654968058205,
+      "torcwa_phase_rad": -1.5971204239462948,
+      "phase_error_rad": 0.00015492714047438128,
+      "dominant": false,
+      "counter_direction_power": 5.265593418227522e-10
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.3382024672662576,
+      "torcwa_efficiency": 0.3366668745905451,
+      "efficiency_error": 0.0015355926757124605,
+      "phase_rad": -1.252230442438238,
+      "torcwa_phase_rad": -1.2522495686326975,
+      "phase_error_rad": 1.9126194459540002e-05,
+      "dominant": true,
+      "counter_direction_power": 3.33431462939725e-09
+     },
+     "reflection": {
+      "efficiency": 0.6238893125680071,
+      "torcwa_efficiency": 0.6225433457543835,
+      "efficiency_error": 0.0013459668136235337,
+      "phase_rad": -2.794505784575619,
+      "torcwa_phase_rad": -2.7936765097856187,
+      "phase_error_rad": -0.0008292747900005004,
+      "dominant": true,
+      "counter_direction_power": 1.1839753746249024e-08
+     }
+    }
+   },
+   "efficiency_sum": 1.00309237689855,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0015355926757124605,
+   "max_dominant_phase_error_rad": 0.0008292747900005004,
+   "wall_s": 21.4784696996212
+  },
+  "TM/0deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 0.0,
+   "wavelength_um": 0.92,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.4811333145458009,
+      "torcwa_efficiency": 0.48108728345418605,
+      "efficiency_error": 4.603109161482877e-05,
+      "phase_rad": 0.2094125518968027,
+      "torcwa_phase_rad": 0.2089757920321877,
+      "phase_error_rad": 0.0004367598646149995,
+      "dominant": true,
+      "counter_direction_power": 7.574002619518675e-09
+     },
+     "reflection": {
+      "efficiency": 0.00015418404791987694,
+      "torcwa_efficiency": 0.00015611782283500168,
+      "efficiency_error": -1.9337749151247406e-06,
+      "phase_rad": 0.3091067262952675,
+      "torcwa_phase_rad": 0.3070369988385668,
+      "phase_error_rad": 0.0020697274567006985,
+      "dominant": false,
+      "counter_direction_power": 3.4345844557185835e-08
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.015450370636904983,
+      "torcwa_efficiency": 0.015607308554140668,
+      "efficiency_error": -0.00015693791723568433,
+      "phase_rad": -0.8534099925719755,
+      "torcwa_phase_rad": -0.8560570099974395,
+      "phase_error_rad": 0.0026470174254640266,
+      "dominant": false,
+      "counter_direction_power": 7.786667370067189e-11
+     },
+     "reflection": {
+      "efficiency": 0.02191918871264882,
+      "torcwa_efficiency": 0.0219058889204593,
+      "efficiency_error": 1.3299792189520182e-05,
+      "phase_rad": 2.6525171347052994,
+      "torcwa_phase_rad": 2.6539655541121983,
+      "phase_error_rad": -0.001448419406898882,
+      "dominant": false,
+      "counter_direction_power": 1.3526877804047927e-10
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.4811370462204397,
+      "torcwa_efficiency": 0.4810872834279994,
+      "efficiency_error": 4.9762792440288806e-05,
+      "phase_rad": 0.20940995138065224,
+      "torcwa_phase_rad": 0.2089757921219596,
+      "phase_error_rad": 0.00043415925869264016,
+      "dominant": true,
+      "counter_direction_power": 7.564636079703006e-09
+     },
+     "reflection": {
+      "efficiency": 0.00015423093374527136,
+      "torcwa_efficiency": 0.00015611782194939588,
+      "efficiency_error": -1.8868882041245228e-06,
+      "phase_rad": 0.30883348550497475,
+      "torcwa_phase_rad": 0.307037003397376,
+      "phase_error_rad": 0.0017964821075987514,
+      "dominant": false,
+      "counter_direction_power": 3.4407183866962726e-08
+     }
+    }
+   },
+   "efficiency_sum": 0.9999483350974594,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.00015693791723568433,
+   "max_dominant_phase_error_rad": 0.0004367598646149995,
+   "wall_s": 21.517886700108647
+  },
+  "TM/0deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.4267311832769224,
+      "torcwa_efficiency": 0.4263538388548103,
+      "efficiency_error": 0.0003773444221120692,
+      "phase_rad": -0.4289269913384033,
+      "torcwa_phase_rad": -0.42892795732348193,
+      "phase_error_rad": 9.659850786492008e-07,
+      "dominant": true,
+      "counter_direction_power": 6.113956421562715e-08
+     },
+     "reflection": {
+      "efficiency": 0.016295904839032364,
+      "torcwa_efficiency": 0.01622343013673235,
+      "efficiency_error": 7.247470230001274e-05,
+      "phase_rad": -1.943581512763719,
+      "torcwa_phase_rad": -1.944371823215898,
+      "phase_error_rad": 0.0007903104521789217,
+      "dominant": false,
+      "counter_direction_power": 3.6286807657810674e-07
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.07796040586637716,
+      "torcwa_efficiency": 0.07846195249670815,
+      "efficiency_error": -0.0005015466303309873,
+      "phase_rad": -1.4134779194625378,
+      "torcwa_phase_rad": -1.4152429739148287,
+      "phase_error_rad": 0.001765054452290915,
+      "dominant": true,
+      "counter_direction_power": 2.9735498128852237e-10
+     },
+     "reflection": {
+      "efficiency": 0.03618896747699412,
+      "torcwa_efficiency": 0.036383509594981246,
+      "efficiency_error": -0.00019454211798712595,
+      "phase_rad": 3.122477874414108,
+      "torcwa_phase_rad": 3.1240485609145763,
+      "phase_error_rad": -0.0015706865004680992,
+      "dominant": false,
+      "counter_direction_power": 1.433061222429102e-10
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.42673475339373873,
+      "torcwa_efficiency": 0.4263538388143941,
+      "efficiency_error": 0.0003809145793446378,
+      "phase_rad": -0.4289232717957069,
+      "torcwa_phase_rad": -0.4289279573073345,
+      "phase_error_rad": 4.685511627633421e-06,
+      "dominant": true,
+      "counter_direction_power": 6.118649607784993e-08
+     },
+     "reflection": {
+      "efficiency": 0.016296591251298117,
+      "torcwa_efficiency": 0.01622343013056843,
+      "efficiency_error": 7.316112072968534e-05,
+      "phase_rad": -1.9435506348904916,
+      "torcwa_phase_rad": -1.9443718232577945,
+      "phase_error_rad": 0.0008211883673028275,
+      "dominant": false,
+      "counter_direction_power": 3.6287872260039347e-07
+     }
+    }
+   },
+   "efficiency_sum": 1.0002078061043627,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0005015466303309873,
+   "max_dominant_phase_error_rad": 0.001765054452290915,
+   "wall_s": 21.651902599725872
+  },
+  "TM/0deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.06,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.39609325226506836,
+      "torcwa_efficiency": 0.39595605417991003,
+      "efficiency_error": 0.00013719808515832987,
+      "phase_rad": -0.6406065066006869,
+      "torcwa_phase_rad": -0.6402221568179324,
+      "phase_error_rad": -0.0003843497827544784,
+      "dominant": true,
+      "counter_direction_power": 1.395902031593699e-07
+     },
+     "reflection": {
+      "efficiency": 0.026295543454299342,
+      "torcwa_efficiency": 0.02618573092866405,
+      "efficiency_error": 0.00010981252563529303,
+      "phase_rad": -2.1520197982678626,
+      "torcwa_phase_rad": -2.1505359040674623,
+      "phase_error_rad": -0.001483894200400293,
+      "dominant": false,
+      "counter_direction_power": 8.33260977078371e-07
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.10608820222103768,
+      "torcwa_efficiency": 0.10654741712524671,
+      "efficiency_error": -0.00045921490420902655,
+      "phase_rad": -1.56092375644567,
+      "torcwa_phase_rad": -1.5641429741138664,
+      "phase_error_rad": 0.003219217668196439,
+      "dominant": true,
+      "counter_direction_power": 3.421606581676301e-10
+     },
+     "reflection": {
+      "efficiency": 0.04884743491090941,
+      "torcwa_efficiency": 0.049169012725883914,
+      "efficiency_error": -0.00032157781497450105,
+      "phase_rad": 2.9777294992297616,
+      "torcwa_phase_rad": 2.9773427559269465,
+      "phase_error_rad": 0.0003867433028150735,
+      "dominant": false,
+      "counter_direction_power": 1.4787696565816022e-10
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.3960965677994082,
+      "torcwa_efficiency": 0.3959560542037059,
+      "efficiency_error": 0.00014051359570232957,
+      "phase_rad": -0.640599991640086,
+      "torcwa_phase_rad": -0.6402221568204843,
+      "phase_error_rad": -0.0003778348196016301,
+      "dominant": true,
+      "counter_direction_power": 1.3951351989775946e-07
+     },
+     "reflection": {
+      "efficiency": 0.026295827459131026,
+      "torcwa_efficiency": 0.026185730931468188,
+      "efficiency_error": 0.00011009652766283753,
+      "phase_rad": -2.151980288260557,
+      "torcwa_phase_rad": -2.1505359040678234,
+      "phase_error_rad": -0.0014443841927338497,
+      "dominant": false,
+      "counter_direction_power": 8.333468738736375e-07
+     }
+    }
+   },
+   "efficiency_sum": 0.999716828109854,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.00045921490420902655,
+   "max_dominant_phase_error_rad": 0.003219217668196439,
+   "wall_s": 21.462077599950135
+  },
+  "TM/20deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 20.0,
+   "wavelength_um": 0.92,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.7276583153106155,
+      "torcwa_efficiency": 0.7279066794599368,
+      "efficiency_error": -0.0002483641493212785,
+      "phase_rad": 0.458293945021274,
+      "torcwa_phase_rad": 0.4568033679421084,
+      "phase_error_rad": 0.0014905770791656114,
+      "dominant": true,
+      "counter_direction_power": 2.262052794954833e-09
+     },
+     "reflection": {
+      "efficiency": 0.13737595161856728,
+      "torcwa_efficiency": 0.1364574772737635,
+      "efficiency_error": 0.0009184743448037713,
+      "phase_rad": 2.016077732452708,
+      "torcwa_phase_rad": 2.0111414307552176,
+      "phase_error_rad": 0.004936301697490375,
+      "dominant": true,
+      "counter_direction_power": 4.908674702409996e-10
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.11486450541537106,
+      "torcwa_efficiency": 0.11423390488633015,
+      "efficiency_error": 0.0006306005290409172,
+      "phase_rad": -0.7227981442021494,
+      "torcwa_phase_rad": -0.7281307628019478,
+      "phase_error_rad": 0.005332618599798389,
+      "dominant": true,
+      "counter_direction_power": 4.496843311540993e-10
+     },
+     "reflection": {
+      "efficiency": 0.022179216379961172,
+      "torcwa_efficiency": 0.02140193838060529,
+      "efficiency_error": 0.0007772779993558826,
+      "phase_rad": 0.9602291960270934,
+      "torcwa_phase_rad": 0.947759245706895,
+      "phase_error_rad": 0.012469950320198486,
+      "dominant": false,
+      "counter_direction_power": 1.9047751612809237e-11
+     }
+    }
+   },
+   "efficiency_sum": 1.002077988724515,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0009184743448037713,
+   "max_dominant_phase_error_rad": 0.005332618599798389,
+   "wall_s": 21.419898400083184
+  },
+  "TM/20deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 20.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.5528480902709128,
+      "torcwa_efficiency": 0.5538528748271506,
+      "efficiency_error": -0.0010047845562378699,
+      "phase_rad": -0.0865955288167596,
+      "torcwa_phase_rad": -0.0864182144655129,
+      "phase_error_rad": -0.00017731435124669626,
+      "dominant": true,
+      "counter_direction_power": 4.553266308449071e-09
+     },
+     "reflection": {
+      "efficiency": 0.0281381508418945,
+      "torcwa_efficiency": 0.028103523946669103,
+      "efficiency_error": 3.462689522539669e-05,
+      "phase_rad": -1.6126791440401336,
+      "torcwa_phase_rad": -1.6177613643953812,
+      "phase_error_rad": 0.005082220355247635,
+      "dominant": false,
+      "counter_direction_power": 2.4886180145197203e-09
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.3277090874485121,
+      "torcwa_efficiency": 0.3294450284574653,
+      "efficiency_error": -0.0017359410089531901,
+      "phase_rad": -2.207615873038822,
+      "torcwa_phase_rad": -2.2078856366509583,
+      "phase_error_rad": 0.0002697636121364866,
+      "dominant": true,
+      "counter_direction_power": 1.5065733484580726e-09
+     },
+     "reflection": {
+      "efficiency": 0.08783321273434941,
+      "torcwa_efficiency": 0.08859857280745453,
+      "efficiency_error": -0.0007653600731051258,
+      "phase_rad": -0.6116547459320892,
+      "torcwa_phase_rad": -0.6082820379820497,
+      "phase_error_rad": -0.003372707950039522,
+      "dominant": true,
+      "counter_direction_power": 1.9507482161943466e-10
+     }
+    }
+   },
+   "efficiency_sum": 0.9965285412956688,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0017359410089531901,
+   "max_dominant_phase_error_rad": 0.003372707950039522,
+   "wall_s": 21.169625100214034
+  },
+  "TM/20deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 20.0,
+   "wavelength_um": 1.06,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.5448256018417305,
+      "torcwa_efficiency": 0.544884588236893,
+      "efficiency_error": -5.898639516255244e-05,
+      "phase_rad": -0.5280637272900666,
+      "torcwa_phase_rad": -0.5298400104017086,
+      "phase_error_rad": 0.0017762831116420186,
+      "dominant": true,
+      "counter_direction_power": 1.508664992027723e-08
+     },
+     "reflection": {
+      "efficiency": 0.00533363301424166,
+      "torcwa_efficiency": 0.005217792102717784,
+      "efficiency_error": 0.00011584091152387621,
+      "phase_rad": -2.7575466677161846,
+      "torcwa_phase_rad": -2.7669952002452494,
+      "phase_error_rad": 0.009448532529064746,
+      "dominant": false,
+      "counter_direction_power": 1.8562038634347808e-08
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.30999953637621813,
+      "torcwa_efficiency": 0.31097849141390216,
+      "efficiency_error": -0.0009789550376840261,
+      "phase_rad": -2.5824845103958713,
+      "torcwa_phase_rad": -2.5856282789534717,
+      "phase_error_rad": 0.003143768557600346,
+      "dominant": true,
+      "counter_direction_power": 2.2981913528490014e-09
+     },
+     "reflection": {
+      "efficiency": 0.13714206544376015,
+      "torcwa_efficiency": 0.13891912830254505,
+      "efficiency_error": -0.0017770628587849002,
+      "phase_rad": -1.1734538025218395,
+      "torcwa_phase_rad": -1.1740766073695397,
+      "phase_error_rad": 0.0006228048477001646,
+      "dominant": true,
+      "counter_direction_power": 9.389090470973191e-10
+     }
+    }
+   },
+   "efficiency_sum": 0.9973008366759504,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0017770628587849002,
+   "max_dominant_phase_error_rad": 0.003143768557600346,
+   "wall_s": 21.257915600202978
+  },
+  "TE/0deg/1.02um/staircase/h=0.01/300fs/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.01,
+   "grid": [
+    120,
+    220,
+    1
+   ],
+   "steps": 12848,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "staircase",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.37026500557436137,
+      "torcwa_efficiency": 0.3698546349867413,
+      "efficiency_error": 0.00041037058762005696,
+      "phase_rad": -0.33167911746093676,
+      "torcwa_phase_rad": -0.32248532386921247,
+      "phase_error_rad": -0.009193793591724286,
+      "dominant": true,
+      "counter_direction_power": 5.872501649368627e-07
+     },
+     "reflection": {
+      "efficiency": 0.010526413021658718,
+      "torcwa_efficiency": 0.01060176659244689,
+      "efficiency_error": -7.535357078817216e-05,
+      "phase_rad": -2.980997927758367,
+      "torcwa_phase_rad": -3.0001580464053186,
+      "phase_error_rad": 0.019160118646951663,
+      "dominant": false,
+      "counter_direction_power": 3.000748262854512e-08
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.08022042856389958,
+      "torcwa_efficiency": 0.08034689326707364,
+      "efficiency_error": -0.00012646470317406733,
+      "phase_rad": -1.4223618646150433,
+      "torcwa_phase_rad": -1.42778997647448,
+      "phase_error_rad": 0.005428111859436591,
+      "dominant": true,
+      "counter_direction_power": 4.415503409791649e-09
+     },
+     "reflection": {
+      "efficiency": 0.15836650146981415,
+      "torcwa_efficiency": 0.15874030357586139,
+      "efficiency_error": -0.00037380210604723296,
+      "phase_rad": -1.2307543808547552,
+      "torcwa_phase_rad": -1.2990734740836594,
+      "phase_error_rad": 0.06831909322890417,
+      "dominant": true,
+      "counter_direction_power": 9.397070330365267e-09
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.3702650053652188,
+      "torcwa_efficiency": 0.3698546349841225,
+      "efficiency_error": 0.0004103703810962589,
+      "phase_rad": -0.27931924186016877,
+      "torcwa_phase_rad": -0.322485323865423,
+      "phase_error_rad": 0.043166082005254236,
+      "dominant": true,
+      "counter_direction_power": 5.87251961862471e-07
+     },
+     "reflection": {
+      "efficiency": 0.010526413000935032,
+      "torcwa_efficiency": 0.010601766591875209,
+      "efficiency_error": -7.535359094017723e-05,
+      "phase_rad": -2.9286380411281234,
+      "torcwa_phase_rad": -3.000158046387553,
+      "phase_error_rad": 0.07152000525942936,
+      "dominant": false,
+      "counter_direction_power": 3.0007271971907596e-08
+     }
+    }
+   },
+   "efficiency_sum": 1.0001697669958876,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.00041037058762005696,
+   "max_dominant_phase_error_rad": 0.06831909322890417,
+   "wall_s": 5.722379799932241,
+   "judged_against_torcwa": false,
+   "failures": [
+    "dominant phase error 0.0683 > 0.02"
+   ]
+  },
+  "TE/0deg/1.02um/staircase/h=0.005/300fs/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "staircase",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.37026835491523896,
+      "torcwa_efficiency": 0.3698546349867413,
+      "efficiency_error": 0.0004137199284976467,
+      "phase_rad": -0.32761676454481425,
+      "torcwa_phase_rad": -0.32248532386921247,
+      "phase_error_rad": -0.005131440675601784,
+      "dominant": true,
+      "counter_direction_power": 4.686559253006378e-07
+     },
+     "reflection": {
+      "efficiency": 0.01059457625375481,
+      "torcwa_efficiency": 0.01060176659244689,
+      "efficiency_error": -7.190338692080259e-06,
+      "phase_rad": -2.989124100087245,
+      "torcwa_phase_rad": -3.0001580464053186,
+      "phase_error_rad": 0.011033946318073529,
+      "dominant": false,
+      "counter_direction_power": 2.5562689976375903e-08
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.08040648042325549,
+      "torcwa_efficiency": 0.08034689326707364,
+      "efficiency_error": 5.958715618184507e-05,
+      "phase_rad": -1.4266446659340526,
+      "torcwa_phase_rad": -1.42778997647448,
+      "phase_error_rad": 0.0011453105404273245,
+      "dominant": true,
+      "counter_direction_power": 2.826911819492133e-10
+     },
+     "reflection": {
+      "efficiency": 0.15831276723145715,
+      "torcwa_efficiency": 0.15874030357586139,
+      "efficiency_error": -0.0004275363444042335,
+      "phase_rad": -1.265745999780432,
+      "torcwa_phase_rad": -1.2990734740836594,
+      "phase_error_rad": 0.03332747430322747,
+      "dominant": true,
+      "counter_direction_power": 6.823995559716602e-10
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.3702683528722561,
+      "torcwa_efficiency": 0.3698546349841225,
+      "efficiency_error": 0.00041371788813360233,
+      "phase_rad": -0.3014368225307407,
+      "torcwa_phase_rad": -0.322485323865423,
+      "phase_error_rad": 0.02104850133468228,
+      "dominant": true,
+      "counter_direction_power": 4.6865273439610053e-07
+     },
+     "reflection": {
+      "efficiency": 0.010594575763173355,
+      "torcwa_efficiency": 0.010601766591875209,
+      "efficiency_error": -7.190828701854335e-06,
+      "phase_rad": -2.9629441934438896,
+      "torcwa_phase_rad": -3.000158046387553,
+      "phase_error_rad": 0.037213852943663195,
+      "dominant": false,
+      "counter_direction_power": 2.556399275679401e-08
+     }
+    }
+   },
+   "efficiency_sum": 1.0004451074591358,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0004275363444042335,
+   "max_dominant_phase_error_rad": 0.03332747430322747,
+   "wall_s": 20.968364800326526,
+   "judged_against_torcwa": false,
+   "failures": [
+    "dominant phase error 0.0333 > 0.02"
+   ]
+  },
+  "TE/0deg/1.02um/subpixel/h=0.01/150fs/cuda-float32": {
+   "polarization": "TE",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.01,
+   "grid": [
+    120,
+    220,
+    1
+   ],
+   "steps": 6424,
+   "duration_fs": 150,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.3714262678814532,
+      "torcwa_efficiency": 0.3698546349867413,
+      "efficiency_error": 0.0015716328947119051,
+      "phase_rad": -0.31849113244314475,
+      "torcwa_phase_rad": -0.32248532386921247,
+      "phase_error_rad": 0.003994191426067717,
+      "dominant": true,
+      "counter_direction_power": 4.125355554186466e-06
+     },
+     "reflection": {
+      "efficiency": 0.010413835987359213,
+      "torcwa_efficiency": 0.01060176659244689,
+      "efficiency_error": -0.00018793060508767723,
+      "phase_rad": -2.9985206131646764,
+      "torcwa_phase_rad": -3.0001580464053186,
+      "phase_error_rad": 0.0016374332406421388,
+      "dominant": false,
+      "counter_direction_power": 1.8541806727671577e-07
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.08029454542864946,
+      "torcwa_efficiency": 0.08034689326707364,
+      "efficiency_error": -5.2347838424185444e-05,
+      "phase_rad": -1.4198337044243405,
+      "torcwa_phase_rad": -1.42778997647448,
+      "phase_error_rad": 0.007956272050139379,
+      "dominant": true,
+      "counter_direction_power": 4.681749560652334e-09
+     },
+     "reflection": {
+      "efficiency": 0.156406642969226,
+      "torcwa_efficiency": 0.15874030357586139,
+      "efficiency_error": -0.002333660606635396,
+      "phase_rad": -1.2942336251719673,
+      "torcwa_phase_rad": -1.2990734740836594,
+      "phase_error_rad": 0.004839848911692091,
+      "dominant": true,
+      "counter_direction_power": 8.288131158109926e-09
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.3714262686898223,
+      "torcwa_efficiency": 0.3698546349841225,
+      "efficiency_error": 0.001571633705699793,
+      "phase_rad": -0.31849113090460335,
+      "torcwa_phase_rad": -0.322485323865423,
+      "phase_error_rad": 0.003994192960819654,
+      "dominant": true,
+      "counter_direction_power": 4.1253560596332955e-06
+     },
+     "reflection": {
+      "efficiency": 0.010413835185379,
+      "torcwa_efficiency": 0.010601766591875209,
+      "efficiency_error": -0.00018793140649620878,
+      "phase_rad": -2.9985205752714976,
+      "torcwa_phase_rad": -3.000158046387553,
+      "phase_error_rad": 0.001637471116055167,
+      "dominant": false,
+      "counter_direction_power": 1.8541454593518016e-07
+     }
+    }
+   },
+   "efficiency_sum": 1.0003813961418893,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.002333660606635396,
+   "max_dominant_phase_error_rad": 0.007956272050139379,
+   "wall_s": 3.3189475000835955,
+   "judged_against_torcwa": false,
+   "failures": []
+  },
+  "TM/0deg/1.02um/staircase/h=0.01/300fs/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.01,
+   "grid": [
+    120,
+    220,
+    1
+   ],
+   "steps": 12848,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "staircase",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.4334722737116787,
+      "torcwa_efficiency": 0.4263538388548103,
+      "efficiency_error": 0.007118434856868361,
+      "phase_rad": -0.43596226607904115,
+      "torcwa_phase_rad": -0.42892795732348193,
+      "phase_error_rad": -0.007034308755559215,
+      "dominant": true,
+      "counter_direction_power": 1.451727277080319e-07
+     },
+     "reflection": {
+      "efficiency": 0.017577334169250662,
+      "torcwa_efficiency": 0.01622343013673235,
+      "efficiency_error": 0.0013539040325183105,
+      "phase_rad": -1.8688029373452597,
+      "torcwa_phase_rad": -1.944371823215898,
+      "phase_error_rad": 0.07556888587063826,
+      "dominant": false,
+      "counter_direction_power": 6.532044532673187e-07
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.07761284050551955,
+      "torcwa_efficiency": 0.07846195249670815,
+      "efficiency_error": -0.000849111991188603,
+      "phase_rad": -1.4119442219326201,
+      "torcwa_phase_rad": -1.4152429739148287,
+      "phase_error_rad": 0.0032987519822085254,
+      "dominant": true,
+      "counter_direction_power": 4.523285223464809e-09
+     },
+     "reflection": {
+      "efficiency": 0.03255857135865528,
+      "torcwa_efficiency": 0.036383509594981246,
+      "efficiency_error": -0.0038249382363259657,
+      "phase_rad": -3.1359373308898126,
+      "torcwa_phase_rad": 3.1240485609145763,
+      "phase_error_rad": 0.02319941537519732,
+      "dominant": false,
+      "counter_direction_power": 1.743083739542602e-09
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.4226290633308146,
+      "torcwa_efficiency": 0.4263538388143941,
+      "efficiency_error": -0.0037247754835794677,
+      "phase_rad": -0.4147367421636062,
+      "torcwa_phase_rad": -0.4289279573073345,
+      "phase_error_rad": 0.014191215143728342,
+      "dominant": true,
+      "counter_direction_power": 1.6351294914271257e-07
+     },
+     "reflection": {
+      "efficiency": 0.016376778021526973,
+      "torcwa_efficiency": 0.01622343013056843,
+      "efficiency_error": 0.00015334789095854118,
+      "phase_rad": -1.8831050953837545,
+      "torcwa_phase_rad": -1.9443718232577945,
+      "phase_error_rad": 0.06126672787403997,
+      "dominant": false,
+      "counter_direction_power": 3.3113312576373296e-07
+     }
+    }
+   },
+   "efficiency_sum": 1.0002268610974459,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.007118434856868361,
+   "max_dominant_phase_error_rad": 0.014191215143728342,
+   "wall_s": 7.1369690001010895,
+   "judged_against_torcwa": false,
+   "failures": []
+  },
+  "TM/0deg/1.02um/staircase/h=0.005/300fs/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.005,
+   "grid": [
+    240,
+    440,
+    1
+   ],
+   "steps": 25696,
+   "duration_fs": 300,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "staircase",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.4300850971345766,
+      "torcwa_efficiency": 0.4263538388548103,
+      "efficiency_error": 0.0037312582797662808,
+      "phase_rad": -0.4332975219978595,
+      "torcwa_phase_rad": -0.42892795732348193,
+      "phase_error_rad": -0.004369564674377546,
+      "dominant": true,
+      "counter_direction_power": 9.167666577640044e-08
+     },
+     "reflection": {
+      "efficiency": 0.01692841398186232,
+      "torcwa_efficiency": 0.01622343013673235,
+      "efficiency_error": 0.0007049838451299688,
+      "phase_rad": -1.907483127329818,
+      "torcwa_phase_rad": -1.944371823215898,
+      "phase_error_rad": 0.0368886958860799,
+      "dominant": false,
+      "counter_direction_power": 4.753088169042486e-07
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.0779622324693926,
+      "torcwa_efficiency": 0.07846195249670815,
+      "efficiency_error": -0.0004997200273155478,
+      "phase_rad": -1.4142583031508804,
+      "torcwa_phase_rad": -1.4152429739148287,
+      "phase_error_rad": 0.0009846707639482588,
+      "dominant": true,
+      "counter_direction_power": 2.920337020870452e-10
+     },
+     "reflection": {
+      "efficiency": 0.03436213134914387,
+      "torcwa_efficiency": 0.036383509594981246,
+      "efficiency_error": -0.0020213782458373755,
+      "phase_rad": 3.134903040905807,
+      "torcwa_phase_rad": 3.1240485609145763,
+      "phase_error_rad": 0.010854479991230903,
+      "dominant": false,
+      "counter_direction_power": 1.2961983653603084e-10
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.42450619805201545,
+      "torcwa_efficiency": 0.4263538388143941,
+      "efficiency_error": -0.001847640762378644,
+      "phase_rad": -0.42258712637879664,
+      "torcwa_phase_rad": -0.4289279573073345,
+      "phase_error_rad": 0.006340830928537877,
+      "dominant": true,
+      "counter_direction_power": 1.1079999332636142e-07
+     },
+     "reflection": {
+      "efficiency": 0.016371004841409485,
+      "torcwa_efficiency": 0.01622343013056843,
+      "efficiency_error": 0.0001475747108410537,
+      "phase_rad": -1.9141426153381527,
+      "torcwa_phase_rad": -1.9443718232577945,
+      "phase_error_rad": 0.030229207919641787,
+      "dominant": false,
+      "counter_direction_power": 3.407271011852033e-07
+     }
+    }
+   },
+   "efficiency_sum": 1.0002150778284002,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0037312582797662808,
+   "max_dominant_phase_error_rad": 0.006340830928537877,
+   "wall_s": 21.102561499923468,
+   "judged_against_torcwa": false,
+   "failures": []
+  },
+  "TM/0deg/1.02um/subpixel/h=0.01/150fs/cuda-float32": {
+   "polarization": "TM",
+   "angle_deg": 0.0,
+   "wavelength_um": 1.02,
+   "mesh_um": 0.01,
+   "grid": [
+    120,
+    220,
+    1
+   ],
+   "steps": 6424,
+   "duration_fs": 150,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "subpixel",
+   "orders": {
+    "-1": {
+     "transmission": {
+      "efficiency": 0.4276187277485045,
+      "torcwa_efficiency": 0.4263538388548103,
+      "efficiency_error": 0.0012648888936941938,
+      "phase_rad": -0.4256628499389599,
+      "torcwa_phase_rad": -0.42892795732348193,
+      "phase_error_rad": 0.0032651073845220147,
+      "dominant": true,
+      "counter_direction_power": 5.250017514685308e-07
+     },
+     "reflection": {
+      "efficiency": 0.016125728113919324,
+      "torcwa_efficiency": 0.01622343013673235,
+      "efficiency_error": -9.770202281302737e-05,
+      "phase_rad": -1.9306390759996923,
+      "torcwa_phase_rad": -1.944371823215898,
+      "phase_error_rad": 0.013732747216205654,
+      "dominant": false,
+      "counter_direction_power": 4.993788473207395e-06
+     }
+    },
+    "0": {
+     "transmission": {
+      "efficiency": 0.07770973817710553,
+      "torcwa_efficiency": 0.07846195249670815,
+      "efficiency_error": -0.0007522143196026232,
+      "phase_rad": -1.4171237858000068,
+      "torcwa_phase_rad": -1.4152429739148287,
+      "phase_error_rad": -0.0018808118851780797,
+      "dominant": true,
+      "counter_direction_power": 3.6533450570961112e-09
+     },
+     "reflection": {
+      "efficiency": 0.03641528856922113,
+      "torcwa_efficiency": 0.036383509594981246,
+      "efficiency_error": 3.177897423988635e-05,
+      "phase_rad": 3.1150420400356245,
+      "torcwa_phase_rad": 3.1240485609145763,
+      "phase_error_rad": -0.009006520878951818,
+      "dominant": false,
+      "counter_direction_power": 2.0343140985771603e-09
+     }
+    },
+    "1": {
+     "transmission": {
+      "efficiency": 0.42762849054227314,
+      "torcwa_efficiency": 0.4263538388143941,
+      "efficiency_error": 0.0012746517278790503,
+      "phase_rad": -0.4256466860361418,
+      "torcwa_phase_rad": -0.4289279573073345,
+      "phase_error_rad": 0.0032812712711927094,
+      "dominant": true,
+      "counter_direction_power": 5.249722921579007e-07
+     },
+     "reflection": {
+      "efficiency": 0.016126325911708646,
+      "torcwa_efficiency": 0.01622343013056843,
+      "efficiency_error": -9.71042188597851e-05,
+      "phase_rad": -1.9305126943866067,
+      "torcwa_phase_rad": -1.9443718232577945,
+      "phase_error_rad": 0.013859128871187787,
+      "dominant": false,
+      "counter_direction_power": 4.994468009550307e-06
+     }
+    }
+   },
+   "efficiency_sum": 1.0016242990627324,
+   "torcwa_harmonics": 640,
+   "max_efficiency_error": 0.0012746517278790503,
+   "max_dominant_phase_error_rad": 0.0032812712711927094,
+   "wall_s": 3.3276560995727777,
+   "judged_against_torcwa": false,
+   "failures": []
+  }
+ },
+ "generated": "2026-09-21T18:49:03+00:00",
+ "full_mode": true
+}

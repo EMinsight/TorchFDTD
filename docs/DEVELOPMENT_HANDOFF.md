@@ -723,6 +723,154 @@ Then re-record G0-04 and G0-05 and continue with G5-01.
 
 ---
 
+### 2026-09-22 G3-08 revision 2 and G3-05 limitation, branch g3-fixtures-b on top of ff72020
+
+**Problem or goal.** Follow-up requested after the merge 73203d2: (1) a
+separately declared revision-2 case for G3-08 whose only change is the layer-A
+tolerance stated as the program pair rtol 1e-4 and atol 1e-6, recorded again
+with the first case and its FAILED run kept; (2) decide whether the subpixel
+interface can treat the G3-05 Drude sphere and, if not, state the limitation.
+
+**Changed files (why).**
+- `docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json` (75f781d): the revision-2 case; fixture, observables and physics limits are identical to `G3-08_bloch_grating_rcwa.json` (checked by loading both), the layer-A block carries the pair and an applicability note quoting the failing instance.
+- `tests/test_physics_g3_b_r2.py` (75f781d): `test_g3_08r2_grating_cuda_layer_a` (twelve instances, criterion abs(cuda - cpu) <= rtol abs(cpu) + atol) and `test_g3_05_subpixel_rejects_dispersive`. A new module keeps `tests/test_physics_g3_b.py` byte-identical, so the G3-04, G3-05 and G3-13 evidence stays valid; revision-2 records are written under `docs/validation/g3/r2` so the first record `docs/validation/g3/G3-08.json` is not rewritten.
+- `benchmarks/render_g3_b.py`, `docs/PHYSICS_VALIDATION.md` (75f781d, 6e4f71a, spacing fix after): the G3-08 section gains the revision-2 table and the re-run summary; the G3-05 section gains the limitation paragraph with the convergence sequence from the record and the rejection message from `docs/validation/g3/G3-05_subpixel.json`.
+- `docs/RELEASE_SCOPE.md` (75f781d): the Materials row of the WORKSTATION physics table lists subpixel interfaces on dispersive materials as rejected and carries the G3-05 known limitation.
+- `docs/validation/completion_gates.json`: G3-08 required tests point at the revision-2 layer-A test, code paths and planned command extended (75f781d); the recorder appended the revision-2 evidence and set VERIFIED (024249a). G3-05 was not touched and stays FAILED.
+
+**Commands run (same host as the previous entry; the GPU was shared).**
+
+```
+TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b_r2.py -k g3_05
+TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3/r2 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py tests/test_physics_g3_b_r2.py -k "g3_08 and not g3_08_grating_cuda_layer_a" --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08r2.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.render_g3_b
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G3-08 --command "<the command above>" --junit D:/TorchFDTD/.local/tmp/junit/G3-08r2.xml --exit-code 0 --fixture docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json --observed docs/validation/g3/r2/G3-08r2_observed.json --artifact docs/validation/g3/r2/G3-08.json --artifact docs/validation/g3/r2/G3-08r2.json --scope "..." --note "..."
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G3-08   (and G3-04, G3-05, G3-13)
+```
+
+**Measurements and pre-declared limits.**
+- G3-08 revision 2: all twelve layer-A instances pass the pair; the former failing instance TM 20 degrees 0.92 um has relative difference 1.15e-4 and sits 6.7e-7 inside rtol abs(cpu) + atol, the largest margin is 1.4e-5. The re-run of the twelve judged physics rows (subpixel, h = 0.005 um, 300 fs, CUDA FP32) gives efficiency errors at most 0.0031, dominant phase errors at most 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits; staircase and duration controls re-recorded. 28 passed, 0 failed, 0 skipped, 2638 s.
+- G3-05: the subpixel operator rejects dispersive materials at project validation ("Subpixel interfaces currently require lossless nondispersive materials. Choose staircase for dispersive materials.", from `torchfdtd/models.py` and `torchfdtd/subpixel_geometry.py`), so no subpixel run was possible. The rendered limitation states the sequence from the record: scattering 1658, 271, 138 percent (20 nm), 478, 69, 46 (35 nm), 85, 64, 45 (50 nm) and absorption 3682, 2506, 673; 1813, 559, 499; 309, 340, 345 percent at h = 0.02, 0.01, 0.005 um.
+
+**Passed / failed / skipped / not run.** Revision-2 run 28 passed; the fast run of the new module 1 passed (subpixel rejection) with the twelve layer-A instances skipped behind TORCHFDTD_G3_FULL. Not run: no G3-05 subpixel simulation (rejected by the package); G3-05 was not re-recorded.
+
+**Evidence paths and hashes.** Run 20260921T192159Z-g3-08-12eb742b (VERIFIED) at source commit 6e4f71a plus the spacing fix commit, fixture SHA-256 in its evidence.json; the first run 20260921T181948Z-g3-08-6ccad85a (FAILED) remains first in the task's evidence list. The judge now passes G3-04, G3-08 and G3-13 and fails G3-05.
+
+**Remaining defects, risks, external blockers.** G3-05 stays FAILED by design of the fixture; a conformal or subpixel treatment of dispersive interfaces does not exist in the package. The merged `scripts/render_physics_validation.py` on main imports `RENDERERS` from `benchmarks/render_g3_b.py`, so after merging this branch one run of that script renders the revision-2 table and the limitation paragraph; `docs/validation/g3/r2` and `G3-05_subpixel.json` are read by those functions.
+
+**Next first command and task id.** Merge, rerun `python scripts/render_physics_validation.py` on main, then continue with the remaining G3 tasks.
+---
+
+### 2026-09-22 G8-02, G8-03, G8-04 (chunked result storage, workbench journey, editing integrity), branch g8-gui from 73203d2
+
+**Problem or goal.** Choose one chunked result format and read it lazily
+with a measured memory bound (G8-02); test the workbench from a GDS import
+through materials, source, boundaries, mesh preview, resource preflight, the
+job queue with cancel and resubmit, the results overlay and the data and GDS
+exports on a CPU-only server (G8-03); implement or verify undo/redo,
+multi-select and copy, autosave and recovery, a versioned project, field
+validation and stale-result marking (G8-04).
+
+**State found.** HEAD 73203d2, clean worktree, no earlier partial work. The
+workbench already had undo/redo (80 snapshots in `remember()`), Duplicate of
+one object and autosave to `localStorage` with recovery on load; it had no
+multi-selection, no field validation beyond the HTML `min` attribute, no
+version fields, no GDS export and cleared the results on Layout. `h5py` 3.16.0
+was importable from the interpreter's user site-packages (installed for
+tidy3d), not from the project venv; no Zarr. Several source files carry mixed
+CRLF/LF endings (`solver.py`, `server.py`, `main.js`, `views.js`,
+`style.css`, `pyproject.toml`); edits were re-applied line by line so that only
+changed lines differ.
+
+**Changed files (why).**
+- `torchfdtd/result_store.py` (new): HDF5 layout 1, `save_hdf5`, `ResultFile`, `PlaneFile`; the format decision (HDF5 over Zarr) in the module docstring. `torchfdtd/solver.py`: `Result.save(path, format=None)`, `Result.open`, `Result.load` dispatch on `.h5`/`.hdf5`. `pyproject.toml`: extra `hdf5 = ["h5py>=3.8"]`; `scripts/provenance_inventory.py` group list, `docs/THIRD_PARTY_NOTICES.md` and `docs/validation/sbom.json` regenerated (h5py BSD-3-Clause; the torch `>=2.4` specifier of the merged packaging branch now appears in the SBOM).
+- `torchfdtd/models.py`: `Project.revision`, `Project.content_sha256`, `content_hash`, `content_matches`, `stamped`. `torchfdtd/server.py`: `/api/validate` returns `revision`, `content_sha256`, `stored_content_sha256_matches` and echoes the stamped project; `POST /api/jobs` resolves the plan before taking the queue lock and stores `plan_hash` and `revision` on the job. `torchfdtd/gds_service.py`: `POST /api/gds/export` (base64 GDS plus the layer-stack sidecar, temporary file removed).
+- `frontend/src/main.js`: multi-selection (`state.multi`, Ctrl/Cmd+click in the tree and the viewports), Copy/Paste (Ctrl+C/Ctrl+V, ribbon buttons, `placeCopies`), Duplicate and Delete over the selection, `acceptNumber` field validation with `.field-error`, `persist` advancing the revision and clearing the hash, `validate` storing the server hash and the plan hash, `markStale`, the stale banner, Layout keeping results, Save after validation, the recovery message, the Export GDS action. `frontend/src/views.js`: Ctrl-click passes through, every selected object is highlighted. `frontend/src/gds.js`: `setupGdsExport`. `frontend/src/style.css`: stale, field-error, revision, selection and export styles.
+- `tests/test_result_store.py` (7), `tests/test_project_versioning.py` (5), `tests/test_workbench_journeys.py` (5), `tests/ui/g8-journey.spec.js` (1), `tests/ui/g8-editing.spec.js` (6), `scripts/run_workbench_journeys.py` (runner and record writer), `docs/validation/workbench/` (the record and its Playwright JSON report).
+- `docs/validation/cases/G8-02_chunked_result_storage.json`, `G8-03_workbench_journey.json`, `G8-04_editing_integrity.json`; `docs/validation/completion_gates.json`: `code_paths`, `planned_test_commands`, `required_tests`, `implementation_state` IMPLEMENTED and an `implementation_note` on the three tasks (metadata; states written by the recorder).
+- `docs/COMPATIBILITY.md` (Result HDF5 row, the version keys in the Project JSON row, the limitation rewritten), `docs/CHANGELOG.md`, `docs/GDS.md` (browser export), `docs/SECURITY.md` (export path).
+- `torchfdtd/web/*`: the bundle is rebuilt in its own commit, the last code commit of the branch, so that other branches rebuilding it conflict on one commit only.
+
+**Commands run (device: local Windows 11, i7-12700, RTX 3060 12 GB shared with other agents, Python 3.10.2 in D:/TorchFDTD/.venv, torch 2.10.0+cu126, Node 22.18.0, Playwright 1.63.0 Chromium headless; TMP and TEMP under D:/TorchFDTD/.local/tmp; `node_modules` was a junction to D:/TorchFDTD/node_modules, removed afterwards).**
+
+```
+TORCHFDTD_G8_OBSERVED=D:/TorchFDTD/.local/tmp/junit/G8-02_observed.json D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_result_store.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-02.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_project_versioning.py tests/test_project_compatibility.py tests/test_api.py tests/test_compatibility_policy.py tests/test_gds.py tests/test_provenance_inventory.py tests/test_completion_program_documents.py tests/test_release_gates.py tests/test_server_security.py
+npm.cmd run build; D:/TorchFDTD/.venv/Scripts/python.exe -m torchfdtd.cli serve --port 8771            (development server for the spec runs below)
+TORCHFDTD_URL=http://127.0.0.1:8771 TORCHFDTD_TEST_PYTHON=D:/TorchFDTD/.venv/Scripts/python.exe npx.cmd playwright test tests/ui/g8-journey.spec.js tests/ui/g8-editing.spec.js
+TORCHFDTD_URL=http://127.0.0.1:8771 TORCHFDTD_TEST_PYTHON=... npx.cmd playwright test tests/ui/workbench.spec.js tests/ui/gds.spec.js tests/ui/geometry.spec.js tests/ui/materials.spec.js tests/ui/mesh.spec.js tests/ui/execution-modes.spec.js tests/ui/sources.spec.js tests/ui/monitor-outputs.spec.js tests/ui/boundaries.spec.js tests/ui/spectra.spec.js
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py; ... --check
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/run_workbench_journeys.py                                  (on the clean tree after the bundle commit: its own CPU-only server on a free port)
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_workbench_journeys.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-03.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_project_versioning.py tests/test_workbench_journeys.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-04.xml
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G8-0N --command "<the line above>" --junit D:/TorchFDTD/.local/tmp/junit/G8-0N.xml --exit-code 0 --fixture docs/validation/cases/<case>.json [--observed ... --artifact ...] --scope "..."
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G8-0N
+```
+
+**Measurements and pre-declared limits.** G8-02: the synthetic E dataset is
+(512, 512, 512, 3) float32, 1,610,612,736 bytes nominal; the file with one
+written plane is 1,201,056 bytes (0.075% of the volume, limit 1%); opening it
+and reading the stored x plane and a y plane across all 512 x chunks grew the
+working set by 3,690,496 bytes (0.23% of the volume) and the peak working set
+by 10,047,488 bytes (0.62%) in the development run (5,627,904 and 11,956,224
+bytes in the recorded run), both against the declared 5%; every round trip is
+exact and the spectra recompute within rtol 1e-12. G8-03: the journey passed
+in 9.3 s on the development server (GDS import at 1.8 s, materials 2.1 s,
+source and monitor 2.9 s, boundaries 3.6 s, mesh preview 3.8 s, preflight
+4.0 s, cancel 5.2 s, rerun 7.4 s, overlay 7.6 s, exports 9.2 s cumulative) and
+in 13.9 s in the runner's dry run; the recorded run's numbers are in
+`docs/validation/workbench/`. The mesh preview, the summary card and
+`/api/mesh/preview` agreed on 160 x 120 x 1 cells (19,200); the cancelled job
+reported `cancelled` with fewer than 20000 steps, the rerun 400 / 400 steps;
+zero page errors and zero console errors. G8-04: 85 edits then 80 undos land
+on the fifth edit's value and an 81st undo changes nothing; three edits raise
+the revision by exactly 3 and `/api/validate` confirms the saved hash; the
+six editing specs took 32.4, 2.8, 3.4, 2.2, 2.6 and 5.4 s in the dry run.
+
+**Passed / failed / skipped / not run.** Passed: tests/test_result_store.py
+7, tests/test_project_versioning.py 5, tests/test_workbench_journeys.py 5
+(after the record), the two new specs 7 of 7, the regression selection of
+ten existing specs 13 passed and 2 skipped (the two FSP-file tests, skipped
+before this branch too), and the 39 tests of the compatibility, API, GDS and
+policy files plus 27 provenance and 37 document, gate and security tests.
+Failed: none. Skipped: the two pre-existing FSP skips above. Not run: the
+full UI suite (40 specs) and the CUDA variants of the journey; the
+clean-install check (`tests/test_clean_install.py`) was not rerun and fails
+by design on this branch because `pyproject.toml` and the bundle changed
+(G8-05 and G8-07 records need the 12-minute rerun after merging).
+
+**Evidence paths and hashes.** Runs 20260921T192908Z-g8-02-76c35baa,
+20260921T192925Z-g8-03-25de93db and 20260921T192929Z-g8-04-705af196, all
+VERIFIED at source commit 579c27d (the record commit after the bundle commit
+eb20946) with an empty dirty manifest; evidence.json SHA-256 prefixes
+f495beffc83b1826, 7fd01c2f4f81049f and d1e8839e8eeb9683. The journey record
+is `docs/validation/workbench/20260921T192723Z-eb209464.json` (7 of 7 passed,
+52.4 s wall, journey 8.7 s: GDS import 1.65 s, materials 2.03 s, source and
+monitor 2.79 s, boundaries 3.44 s, mesh preview 3.69 s, preflight 3.85 s,
+cancel 5.03 s, rerun 7.17 s, overlay 7.32 s, exports 8.70 s cumulative; the
+editing specs 28.3, 2.4, 1.8, 1.7, 1.8 and 4.3 s) with its Playwright JSON
+report beside it (SHA-256 889d861bd4b39a8d). The recorded G8-02
+metrics: working-set growth 5,627,904 bytes (0.35% of the nominal volume),
+peak working-set growth 11,956,224 bytes (0.74%), stored file 1,201,056 bytes.
+The judge passes all three tasks; its two failures are G3-05 and G3-08, outside
+this branch.
+
+**Remaining defects, risks, external blockers.**
+- `tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel` fails until `scripts/clean_install_check.py` is rerun (pyproject extra and the bundle changed), as every bundle rebuild does.
+- Project JSON files that carry `revision` and `content_sha256` are refused by builds before this branch (`extra='forbid'`); schema 1 keeps its number because files without the keys load unchanged. The G8-01 fixtures and their evidence are untouched.
+- Stale marking follows `plan_hash`; a precision or backend change alone does not mark results stale (the run summary prints both). Dragging in a viewport moves the dragged object only, not the whole selection.
+- The workbench downloads NPZ only; the HDF5 form is reachable from Python. h5py came from the user site-packages of the interpreter, not from the venv; a clean venv needs `pip install torchfdtd[hdf5]`.
+- `scripts/run_workbench_journeys.py` needs Node, `npm ci` and the Playwright Chromium; it starts the server with `CUDA_VISIBLE_DEVICES=-1` so the record is CPU-only by construction (an empty value leaves `torch.cuda.is_available()` true with no device and `/api/health` fails on `get_device_name(0)`).
+
+**Next first command and task id.** Rerun the clean-install check after the
+merge so the G8-05 and G8-07 records match the merged bundle and pyproject:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/TorchFDTD/.local --find-links D:/TorchFDTD/.local/wheels --cuda-torch "torch==2.10.0+cu126"
+```
+
+---
+
 ### 2026-09-22 G9-07 and the tooling of G9-06 (validation report, release-candidate gate runner), branch g9-report from 67cfd88
 
 **Problem or goal.** Generate the validation report from machine outputs

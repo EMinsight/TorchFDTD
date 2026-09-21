@@ -38,8 +38,8 @@ not domain decomposition.
 | Row | Implemented scope and record | Verified for release |
 | --- | --- | --- |
 | Grids | 3D and 2D Yee grids; uniform, graded and rectilinear meshes with independent dx/dy/dz and explicit node API ([MESH.md](MESH.md), [RECTILINEAR_MESH.md](RECTILINEAR_MESH.md)). The invariant 2D axis has no boundary | VERIFIED (G2-01, G3-01, G3-13) |
-| Materials | Constant-index dielectrics; multi-pole Drude/Lorentz ADE with passive fitting ([MATERIALS.md](MATERIALS.md), [MATERIAL_FITTING.md](MATERIAL_FITTING.md)); node-sampled SPD anisotropic tensors in bulk, inside CPML under the geometric stability admission, with PEC walls and trapezoidal tensor ADE ([ANISOTROPY_IMPLEMENTATION_PLAN.md](ANISOTROPY_IMPLEMENTATION_PLAN.md)); subpixel interfaces for lossless curved dielectrics ([SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md)). Rejected: rotated or mid-axis tensors inside PML, subpixel interfaces next to PEC/PMC walls, fused tensor kernels | MIXED: VERIFIED G3-02, G3-03, G3-04, G3-12, G3-13; FAILED G3-05; NOT_RUN G6-01 |
-| Boundaries | Per-face CPML with independent profiles; periodic and fixed-phase Bloch pairs (not BFAST); PEC/antisymmetric faces; PMC/symmetric faces as a closed cavity in the ordinary forward solver and next to CPML in the differentiable, dispersive, streamed and tensor-batch paths ([BOUNDARIES.md](BOUNDARIES.md), [PMC_IMPLEMENTATION_PLAN.md](PMC_IMPLEMENTATION_PLAN.md)). Rejected: 2D PMC, PMC with periodic/Bloch mixing, PMC in the fused CUDA backward/ADE kernels | MIXED: VERIFIED G3-06, G3-07; FAILED G3-08 |
+| Materials | Constant-index dielectrics; multi-pole Drude/Lorentz ADE with passive fitting ([MATERIALS.md](MATERIALS.md), [MATERIAL_FITTING.md](MATERIAL_FITTING.md)); node-sampled SPD anisotropic tensors in bulk, inside CPML under the geometric stability admission, with PEC walls and trapezoidal tensor ADE ([ANISOTROPY_IMPLEMENTATION_PLAN.md](ANISOTROPY_IMPLEMENTATION_PLAN.md)); subpixel interfaces for lossless curved dielectrics ([SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md)). Rejected: rotated or mid-axis tensors inside PML, subpixel interfaces next to PEC/PMC walls, subpixel interfaces on dispersive materials, fused tensor kernels. Known limitation (G3-05, [PHYSICS_VALIDATION.md](PHYSICS_VALIDATION.md)): a staircased Drude sphere at 4 to 10 cells per radius misses its scattering and absorption budgets at every recorded mesh, so plasmonic nanoparticle cross sections below the recorded errors need a conformal or subpixel treatment of dispersive interfaces that the package does not provide | MIXED: VERIFIED G3-02, G3-03, G3-04, G3-12, G3-13; FAILED G3-05; NOT_RUN G6-01 |
+| Boundaries | Per-face CPML with independent profiles; periodic and fixed-phase Bloch pairs (not BFAST); PEC/antisymmetric faces; PMC/symmetric faces as a closed cavity in the ordinary forward solver and next to CPML in the differentiable, dispersive, streamed and tensor-batch paths ([BOUNDARIES.md](BOUNDARIES.md), [PMC_IMPLEMENTATION_PLAN.md](PMC_IMPLEMENTATION_PLAN.md)). Rejected: 2D PMC, PMC with periodic/Bloch mixing, PMC in the fused CUDA backward/ADE kernels | VERIFIED (G3-06, G3-07, G3-08) |
 | Sources | Point, sheet/plane, one-way, TFSF, dipole and fixed-eigenmode sources; soft E/H waveform parameters differentiable ([SOURCES.md](SOURCES.md), [TFSF_SOURCES.md](TFSF_SOURCES.md), [MODE_INJECTION.md](MODE_INJECTION.md), [DIFFERENTIABLE_SOURCES.md](DIFFERENTIABLE_SOURCES.md)). The Bloch phase is fixed across the spectrum | MIXED: VERIFIED G2-05; NOT_RUN G6-02 |
 | Monitors and analysis | Point time traces, selective plane DFT spectra, two-port and N-port mode networks with complex S, closed-box far field, finite-distance near zone, Bloch diffraction orders ([MONITORS.md](MONITORS.md), [OPEN_MODE_PORTS.md](OPEN_MODE_PORTS.md), [RADIATION.md](RADIATION.md), [FARFIELD_WORKFLOW.md](FARFIELD_WORKFLOW.md)). Remaining: trapezoidal quadrature, layered exteriors, off-axis port normals | MIXED: VERIFIED G3-09, G3-10, G3-11; NOT_RUN G6-03, G6-04 |
 
@@ -57,8 +57,8 @@ not domain decomposition.
 
 | Row | Implemented scope and record | Verified for release |
 | --- | --- | --- |
-| Project model | One `Project` JSON shared by the browser CAD and Python; CLI `torchfdtd serve` on loopback only | MIXED: VERIFIED G8-01, G9-01; NOT_RUN G8-03 |
-| Results | NPZ fields and monitors, JSON/CSV monitor export, browser field viewer; complex fields kept in NPZ ([BOUNDARIES.md](BOUNDARIES.md)). No chunked/lazy large-result format has been chosen yet | MIXED: VERIFIED G8-01; NOT_RUN G8-02 |
+| Project model | One `Project` JSON shared by the browser CAD and Python; CLI `torchfdtd serve` on loopback only | VERIFIED (G8-01, G8-03, G9-01) |
+| Results | NPZ fields and monitors, JSON/CSV monitor export, browser field viewer; complex fields kept in NPZ ([BOUNDARIES.md](BOUNDARIES.md)). No chunked/lazy large-result format has been chosen yet | VERIFIED (G8-01, G8-02) |
 | GDS | Import and export with layers/datatypes, units, hierarchy, arrays, PATH, even-odd holes, layer etch, z-node sidewall staircase, port markers and N-port builders ([GDS.md](GDS.md), [GDS_MODE_PORTS.md](GDS_MODE_PORTS.md)). Rejected: holes touching the outline at a vertex, nested holes | NOT_RUN (G6-07, G7-03) |
 | FSP | Independent read and writeback of a documented layout subset ([FSP.md](FSP.md)); general FSP compatibility is not claimed and the provenance question stays open in RELEASE_REVIEW.md | Not a gate row; distribution decision pending (G9-03) |
 | Packaging | Wheel built from a fresh staging directory with the browser assets included (`scripts/build_preview.py`); `cuda-kernels`, `gds`, `dev` extras | MIXED: VERIFIED G8-05, G8-07; NOT_RUN G9-06 |
@@ -100,12 +100,12 @@ Rendered from [validation/completion_gates.json](validation/completion_gates.jso
 | G0 | 기준선·범위·증거 체계 | WORKSTATION | 5 | 5 | 0 | 0 | 0 | 5 pass, 0 fail |
 | G1 | 과거 리뷰 회귀 및 수정 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
 | G2 | 물리·격자·실행 계약 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
-| G3 | 독립 물리·gradient 검증 | WORKSTATION | 17 | 15 | 2 | 0 | 0 | 15 pass, 2 fail |
+| G3 | 독립 물리·gradient 검증 | WORKSTATION | 17 | 16 | 1 | 0 | 0 | 15 pass, 2 fail |
 | G4 | CUDA·CI·환경 검증 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
 | G5 | 메모리·재시작·장기 안정성 | WORKSTATION | 10 | 0 | 0 | 10 | 0 | 0 pass, 10 fail |
 | G6 | 사용자 물리·역설계 API | WORKSTATION | 8 | 0 | 0 | 8 | 0 | 0 pass, 8 fail |
 | G7 | 대표 응용·동일 정확도 비용 | WORKSTATION | 5 | 0 | 0 | 5 | 0 | 0 pass, 5 fail |
-| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 4 | 0 | 3 | 0 | 4 pass, 3 fail |
+| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 4 pass, 3 fail |
 | G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 4 | 0 | 3 | 0 | 4 pass, 3 fail |
 | H1 | 실제 단일 문제 multi-GPU | HPC | 6 | 0 | 0 | 1 | 5 | 0 pass, 6 fail |
 

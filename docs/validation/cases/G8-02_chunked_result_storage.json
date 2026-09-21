@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G8-02_chunked_result_storage",
+  "task": "G8-02",
+  "title": "Chunked HDF5 result files round-trip a run, read by slice and keep a plane read of a multi-gigabyte-shaped volume out of memory",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2a5d8cc9c4f3b0722f49726a5f5677f0b9",
+  "declared_before_run": true,
+  "fixture": {
+    "format_decision": "HDF5 through h5py (BSD-3-Clause, one binary wheel, native complex compound type, one file per result), declared as the optional extra torchfdtd[hdf5]; Zarr was not implemented because it would add zarr and numcodecs and spread a result over a directory tree. h5py 3.16.0 was present in the interpreter's user site-packages (installed for another package), not in the project venv.",
+    "round_trip_run": "tests/test_result_store.py::plane_project: 2D, 2.4 x 2 um at 0.1 um (24 x 20 x 1 cells), 3 PML cells, 60 steps, snapshot every 20 steps, one dielectric slab 0.4 x 2 um at x = 0.5 um, a point source at x = -0.6 um (wavelength 1 um, 1 cycle), a point Ez monitor at x = 0.2 um and an x-normal frequency plane at x = 0.8 um, 1 x 1 um, recording Ez and Hy, the x Poynting density and flux; CPU float32",
+    "endpoint_run": "demo_project('pmc'): closed PMC cavity, 3D 3.2 um cube at 0.2 um (16 x 16 x 16 cells), 160 steps, exact endpoints, so endpoint_fields E_upper and H_upper exist",
+    "synthetic_volume": "the E dataset of the round-trip file replaced by a chunked (512, 512, 512, 3) float32 dataset, 1,610,612,736 bytes nominal, chunks (1, 512, 512, 1), with one x plane (index 100, component Ez) written from a seeded standard normal (numpy default_rng(7)); every other chunk is unwritten and therefore not stored",
+    "reads_measured": "Result.open(path).field_slice('E', 'Ez', 'x', 100) (one stored chunk) and field_slice('E', 'Ez', 'y', 200) (a plane crossing all 512 x chunks, 511 of them unallocated)",
+    "layout": "torchfdtd/result_store.py layout 1: root attributes project, summary, units, field_monitors, monitor_spectra; datasets mesh/{x,y,z}_um, frames, frame_steps, epsilon, signals, times, E, H, monitors/<k>/{frequency_hz,spectrum}, field_monitors/<k>/<array>, endpoint/<name>"
+  },
+  "seed": 7,
+  "precision": ["float32 (runs)", "complex128 (plane fields and spectra)"],
+  "backend": ["cpu"],
+  "reference_method": "the in-memory Result of the same run: every array must be equal after Result.save(format='hdf5') and Result.open(path).load() or Result.load(path), with the same dtype and shape; chunk shapes are read back from the file with h5py; process memory is read with psutil.Process().memory_info() (rss and, on Windows, peak_wset) immediately before opening the file and immediately after the two plane reads, after gc.collect()",
+  "observables": [
+    {"name": "array_round_trip", "unit": "boolean", "definition": "numpy array equality with dtype and shape equality for frames, frame_steps, epsilon, signals, times, E, H, every plane array (fields, poynting, points_um, weights, frequency_hz, flux) and endpoint fields; project model_dump equality; summary and plane metadata equality after a JSON round trip"},
+    {"name": "coordinate_and_unit_metadata", "unit": "text", "definition": "mesh/{x,y,z}_um equal Region.mesh_nodes with attribute units = 'um'; times carries units = 's'; the root units attribute equals summary['units']; field_units and flux_units of every plane are restored"},
+    {"name": "spectrum_recomputation", "unit": "relative", "definition": "Result.spectra recomputed from the restored signals against the original spectra"},
+    {"name": "lazy_slice_equality", "unit": "boolean", "definition": "frame(i), field_slice(field, component, axis, index), signal(k), monitor_spectrum(k), PlaneFile.fields(f, component) and PlaneFile.plane(f, component) equal the corresponding slices of the in-memory arrays"},
+    {"name": "chunk_shapes", "unit": "cells", "definition": "E and H chunks (1, ny, nz, 1); frames (1, a, b); plane fields (1, points, 1); signals (steps, 1)"},
+    {"name": "stored_file_bytes", "unit": "bytes", "definition": "size of the synthetic file on disk divided by the nominal volume bytes"},
+    {"name": "rss_growth_fraction", "unit": "fraction of the nominal volume", "definition": "(rss after the two plane reads - rss before opening) / 1,610,612,736"},
+    {"name": "peak_working_set_growth_fraction", "unit": "fraction of the nominal volume", "definition": "(peak_wset after - peak_wset before) / 1,610,612,736, Windows only"}
+  ],
+  "acceptance": {
+    "array_round_trip": "exact (assert_array_equal, dtype and shape equal)",
+    "coordinate_and_unit_metadata": "exact",
+    "spectrum_recomputation": {"rtol": 1e-12, "atol": 0},
+    "lazy_slice_equality": "exact",
+    "chunk_shapes": "exactly as listed",
+    "stored_file_bytes": "< 0.01 of the nominal volume (16.1 MB)",
+    "rss_growth_fraction": "< 0.05 (80.5 MB of the 1.61 GB nominal volume); the read itself needs 1 MiB per plane plus the 1 MiB h5py chunk cache",
+    "peak_working_set_growth_fraction": "< 0.05, asserted only where peak_wset exists",
+    "npz_path": "Result.save(path) with a .npz suffix or format='npz' still writes the layout of COMPATIBILITY.md and Result.load reads it; format='npz' keeps numpy's rule of appending .npz to another suffix",
+    "refusals": "a file without the format attribute and a file with layout 2 raise ValueError naming the file and the layout",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-02 asks that a partial read not load the full volume; the 5% budget is this case's own declaration, fixed before the run, chosen as an order of magnitude above the expected 2 to 10 MB of chunk cache, output arrays and allocator noise"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_result_store.py"
+    ],
+    "not_yet_covered": [
+      "streamed, tensor-batch and mode-network results keep their own loaders and are not written to HDF5",
+      "the workbench downloads NPZ only; no route serves the HDF5 form",
+      "compression is not applied (NPZ is compressed, HDF5 is not), so file sizes differ between the two formats",
+      "reads of an NPZ file stay whole-file except through the radiation loaders"
+    ]
+  },
+  "notes": "Declared on branch g8-gui from 73203d2 before the recorded run. The observed memory numbers are attached to the evidence through --observed from the file the test writes when TORCHFDTD_G8_OBSERVED names a path."
+}

@@ -63,7 +63,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G3-05 | 금속/분산 곡면 산란·흡수 수렴 | IMPLEMENTED | FAILED | `20260921T181951Z-g3-05-8fafa59e` | `487de42640e4` | FAIL | verification_state is FAILED |
 | G3-06 | PEC/PMC cavity·symmetry와 gradient mapping | IMPLEMENTED | VERIFIED | `20260921T185058Z-g3-06-8e377c95` | `5218de5b6b52` | PASS | evidence matches the current checkout |
 | G3-07 | PML normal/oblique 반사·장시간 안정성 | IMPLEMENTED | VERIFIED | `20260921T172247Z-g3-07-fcf2441e` | `ce5f049d4375` | PASS | evidence matches the current checkout |
-| G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | FAILED | `20260921T181948Z-g3-08-6ccad85a` | `487de42640e4` | FAIL | verification_state is FAILED |
+| G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | VERIFIED | `20260921T192159Z-g3-08-12eb742b` | `4a5f5cd6d19d` | FAIL | STALE: source commit 4a5f5cd6d19d5aa7021200fce43299d0f31674ad is not an ancestor of HEAD |
 | G3-09 | mode neff·field·confinement·power oracle | IMPLEMENTED | VERIFIED | `20260921T164916Z-g3-09-a7e7b272` | `5c0172da60d2` | PASS | evidence matches the current checkout |
 | G3-10 | PIC S·수동성·상반성과 누락 방사 채널 | IMPLEMENTED | VERIFIED | `20260921T164946Z-g3-10-ea83b20f` | `5c0172da60d2` | PASS | evidence matches the current checkout |
 | G3-11 | dipole far/near field와 표면/격자 수렴 | IMPLEMENTED | VERIFIED | `20260921T165000Z-g3-11-74c48d39` | `5c0172da60d2` | PASS | evidence matches the current checkout |
@@ -128,9 +128,9 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G8-01 | 기존 Project JSON/NPZ compatibility와 schema migration을 시험한다 | IMPLEMENTED | VERIFIED | `20260921T170627Z-g8-01-d8b628a7` | `656c5075eabd` | PASS | evidence matches the current checkout |
-| G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
+| G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260921T192908Z-g8-02-76c35baa` | `579c27df75e5` | FAIL | STALE: source commit 579c27df75e58a12991f63fc0366966b79e7371d is not an ancestor of HEAD |
+| G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260921T192925Z-g8-03-25de93db` | `579c27df75e5` | FAIL | STALE: source commit 579c27df75e58a12991f63fc0366966b79e7371d is not an ancestor of HEAD |
+| G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260921T192929Z-g8-04-705af196` | `579c27df75e5` | FAIL | STALE: source commit 579c27df75e58a12991f63fc0366966b79e7371d is not an ancestor of HEAD |
 | G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260921T170637Z-g8-05-29a464aa` | `656c5075eabd` | PASS | evidence matches the current checkout |
 | G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260921T170706Z-g8-06-7b7e68da` | `656c5075eabd` | PASS | evidence matches the current checkout |
 | G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260921T170718Z-g8-07-b934b710` | `656c5075eabd` | PASS | evidence matches the current checkout |
@@ -165,6 +165,7 @@ Every record written by `scripts/platform_report.py` under `docs/validation/plat
 | Platform id | GPU | Driver | CUDA runtime | torch | CuPy | Python | OS | Recorded |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | rtx3060-win11-lab | NVIDIA GeForce RTX 3060 (cc 8.6, 12287 MiB) | 591.86 | 12.6 | 2.10.0+cu126 | 13.6.0 | 3.10.2 | Windows-10-10.0.26200-SP0 | 2026-09-21T15:53:07+00:00 |
+| rtx5880-ada-win11-remote | NVIDIA RTX 5880 Ada Generation (cc 8.9, 49139 MiB) | 581.80 | 12.8 | 2.10.0 | 13.6.0 | 3.11.14 | Windows-10-10.0.26100-SP0 | 2026-09-21T19:27:38+00:00 |
 
 ## Clean-install record
 

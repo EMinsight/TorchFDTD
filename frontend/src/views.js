@@ -45,8 +45,9 @@ export class Views {
     if (e.button!==0) return;
     const m=this.metrics(name), point=this.world(e,name), objects=this.objects().filter(o=>o.enabled);
     const hit=objects.reverse().find(o=>this.hit(o,point,m.axes,7/m.scale));
-    this.select(hit?.id||'fdtd');
-    if (hit&&this.state.mode==='layout') { this.drag={id:hit.id,start:point,center:[...hit.center],axes:m.axes,name,moved:false}; e.target.setPointerCapture(e.pointerId); }
+    const extend=e.ctrlKey||e.metaKey;
+    this.select(hit?.id||'fdtd',extend);
+    if (hit&&!extend&&this.state.mode==='layout') { this.drag={id:hit.id,start:point,center:[...hit.center],axes:m.axes,name,moved:false}; e.target.setPointerCapture(e.pointerId); }
   }
   move(e,name) {
     if (!this.drag||this.drag.name!==name) return;
@@ -84,7 +85,7 @@ export class Views {
     for(const o of this.objects()) {
       if(!o.enabled)continue;
       const s=this.bounds(o),x=tx(o.center[axes[0]]),y=ty(o.center[axes[1]]),w=Math.max(s[axes[0]]*m.scale,3),h=Math.max(s[axes[1]]*m.scale,3);
-      const selected=o.id===this.state.selected, mat=p.materials.find(a=>a.name===o.material);
+      const selected=o.id===this.state.selected||this.state.multi?.includes(o.id), mat=p.materials.find(a=>a.name===o.material);
       ctx.save();ctx.translate(x,y);
       ctx.strokeStyle=selected?colors.selected:o.category==='source'?colors.source:o.category==='monitor'?colors.monitor:mat?.color||'#69a1e8';ctx.lineWidth=selected?2:1.5;
       ctx.fillStyle=o.kind==='tfsf'?'#3ba89710':o.category==='structure'?(mat?.color||'#69a1e8')+'55':'#ffffff88';ctx.beginPath();
@@ -144,7 +145,7 @@ export class Views {
       const color=o.category==='source'?colors.source:o.category==='monitor'?colors.monitor:p.materials.find(m=>m.name===o.material)?.color||'#69a1e8';
       const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color,transparent:true,opacity:o.kind==='tfsf'?.08:o.category==='structure'?.66:.9,roughness:.5,metalness:.08,side:THREE.DoubleSide}));
       mesh.position.fromArray(o.center);mesh.userData.id=o.id;
-      mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geometry),new THREE.LineBasicMaterial({color:o.id===this.state.selected?'#147be7':color,transparent:true,opacity:.7})));
+      mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geometry),new THREE.LineBasicMaterial({color:o.id===this.state.selected||this.state.multi?.includes(o.id)?'#147be7':color,transparent:true,opacity:.7})));
       this.group.add(mesh);
       if(o.id===this.state.selected&&this.state.mode==='layout'){this.transform.attach(mesh);this.transform.showZ=p.region.dimension!=='2d';this.transform.setTranslationSnap(this.state.snap&&!p.region.mesh_steps&&p.region.mesh_type!=='explicit'?p.region.mesh:null);}
     }

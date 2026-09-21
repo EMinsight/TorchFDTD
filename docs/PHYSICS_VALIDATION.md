@@ -358,6 +358,8 @@ Layer A (CUDA FP32 against CPU FP64 on scattering and absorption, rtol 1e-4):
 | 0.035 | 0.02 | 1.20e-05 | pass |
 | 0.05 | 0.01 | 7.72e-06 | pass |
 | 0.05 | 0.02 | 5.29e-06 | pass |
+
+**Limitation.** The staircased Drude sphere converges slowly and does not reach the budgets: r = 0.02 um: scattering 1657.979%, 270.768%, 137.555% and absorption 3682.135%, 2505.893%, 673.265% at h = 0.02, 0.01, 0.005 um; r = 0.035 um: scattering 477.893%, 69.159%, 45.758% and absorption 1812.565%, 559.269%, 498.501% at h = 0.02, 0.01, 0.005 um; r = 0.05 um: scattering 85.438%, 64.285%, 44.515% and absorption 308.670%, 340.338%, 344.579% at h = 0.02, 0.01, 0.005 um. The subpixel interface operator rejects the same sphere with `interface_method = "subpixel"` at validation ("Subpixel interfaces currently require lossless nondispersive materials. Choose staircase for dispersive materials.", recorded in `docs/validation/g3/G3-05_subpixel.json`), so the package offers no conformal or subpixel treatment of a dispersive interface. Plasmonic nanoparticle cross sections below the recorded errors need a conformal or subpixel treatment of dispersive interfaces that the package does not provide; until then metallic curved scatterers are outside the accuracy claims of this release, and the task stays FAILED in the gate file.
 ## G3-08 Bloch grating diffraction orders against RCWA
 
 Case `G3-08_bloch_grating_rcwa`, record `docs/validation/g3/G3-08.json` generated 2026-09-21T17:46:00+00:00. Freestanding binary grating, period 1.2 um, fill 0.5, height 0.5 um, n = 2.0, wavelengths [0.92, 1.02, 1.06] um at [0.0, 20.0] degrees, TE and TM. Oracle: TORCWA rigorous coupled-wave analysis, Kim and Lee, Comput. Phys. Commun. 282, 108552 (2023), version 0.1.4.2, complex128, harmonics [20, 40, 80, 160, 320, 640] with the oracle at 640; empty-layer phase check error 8.9e-10. Limits: efficiency error at most 0.01 per propagating order, phase error at most 0.02 rad on orders whose oracle efficiency is at least 0.05, lossless balance within 0.01.
@@ -456,6 +458,23 @@ Empty cell (no grating): forward zero-order transmission relative to the inciden
 | TE | 0 | cuda float32 | 1.00000037 | 3.2e-33 | 5.6e-08 | 1e-04 |
 | TM | 20 | cpu float64 | 0.99999732 | 3.0e-31 | 4.2e-08 | 1e-04 |
 | TM | 20 | cuda float32 | 0.99999341 | 1.3e-12 | 4.2e-08 | 1e-04 |
+
+**Revision 2 (case `G3-08r2_bloch_grating_rcwa_layer_a`, records under `docs/validation/g3/r2`, generated 2026-09-21T19:20:04+00:00).** Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record. The re-run of the 12 judged physics rows gives a largest efficiency error of 0.0031, a largest dominant phase error of 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits.
+
+| Pol | Angle | Wavelength (um) | Max relative difference | Largest excess over rtol abs(cpu) + atol | Result |
+|---|---:|---:|---:|---:|---|
+| TE | 0 | 0.92 | 3.38e-06 | -7.0e-06 | pass |
+| TE | 0 | 1.02 | 1.38e-06 | -2.0e-06 | pass |
+| TE | 0 | 1.06 | 2.34e-06 | -2.9e-06 | pass |
+| TE | 20 | 0.92 | 4.26e-05 | -7.6e-06 | pass |
+| TE | 20 | 1.02 | 8.85e-06 | -1.4e-05 | pass |
+| TE | 20 | 1.06 | 8.97e-06 | -2.2e-06 | pass |
+| TM | 0 | 0.92 | 1.60e-05 | -1.0e-06 | pass |
+| TM | 0 | 1.02 | 7.09e-06 | -2.6e-06 | pass |
+| TM | 0 | 1.06 | 5.22e-06 | -3.5e-06 | pass |
+| TM | 20 | 0.92 | 1.15e-04 | -6.7e-07 | pass |
+| TM | 20 | 1.02 | 3.40e-05 | -3.3e-06 | pass |
+| TM | 20 | 1.06 | 9.52e-05 | -1.0e-06 | pass |
 ## G3-13 Curved-interface convergence
 
 Case `G3-13_curved_interface_convergence`, record `docs/validation/g3/G3-13.json` generated 2026-09-21T16:55:45+00:00. The G3-04 cylinder (radius 0.3 um, n = 1.5) at h = [0.05, 0.025, 0.0125] um with the staircase and the subpixel interface, centre shifts of [0.0, 0.25, 0.5] h at h = 0.05 um, and the differentiable-solid transition width [1e-06, 0.125, 0.25, 0.5, 1.0, 2.0] h at h = 0.05 um. Pass/fail item: the subpixel error at h is below the staircase error at h; everything else is reported.

@@ -301,8 +301,14 @@ class Result:
         return [point_spectrum((self.times + (dt/2 if m.component.startswith('H') else 0))[::m.time_downsample], self.signals[::m.time_downsample, k], m.spectrum)
                 for k, m in enumerate(self.point_monitors)]
 
-    def save(self, path):
+    def save(self, path, format=None):
+        """Write the NPZ layout, or with ``format='hdf5'`` (or a .h5/.hdf5 path)
+        the chunked HDF5 layout of torchfdtd.result_store that ``open`` reads lazily."""
+        from .result_store import storage_format, save_hdf5
         path = Path(path)
+        if storage_format(path, format) == 'hdf5':
+            save_hdf5(self, path)
+            return
         path.parent.mkdir(parents=True, exist_ok=True)
         spectral_arrays = {}
         metadata = []
@@ -346,8 +352,19 @@ class Result:
         return output
 
     @classmethod
+    def open(cls, path):
+        """Open a chunked HDF5 result for lazy reads (torchfdtd.result_store.ResultFile)."""
+        from .result_store import ResultFile
+        return ResultFile(path)
+
+    @classmethod
     def load(cls, path):
-        """Load our NPZ result without pickle or an installed CAD application."""
+        """Load our NPZ result without pickle or an installed CAD application;
+        a .h5/.hdf5 path is read whole through ``open``."""
+        from .result_store import storage_format
+        if storage_format(path) == 'hdf5':
+            with cls.open(path) as stored:
+                return stored.load()
         with np.load(path, allow_pickle=False) as data:
             planes = json.loads(str(data['field_monitors'])) if 'field_monitors' in data else []
             for k, plane in enumerate(planes):

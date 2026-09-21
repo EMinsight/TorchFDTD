@@ -103,7 +103,13 @@ def create_app(result_dir=None):
         # Dispatch-time contracts (exact-endpoint PMC, tensor media) are rejections, not server faults.
         try:summary=estimate(project);plan_hash=resolve_plan(project).plan_hash
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
-        return {**summary, 'plan_hash': plan_hash, 'execution': resolution(project, summary), 'project': project.model_dump()}
+        # The echoed project carries the hash of its own content; the workbench
+        # keeps it with the revision counter and compares plan hashes to mark
+        # results of an earlier run as stale (G8-04).
+        stamped = project.stamped()
+        return {**summary, 'plan_hash': plan_hash, 'execution': resolution(project, summary), 'project': stamped.model_dump(),
+                'revision': project.revision, 'content_sha256': stamped.content_sha256,
+                'stored_content_sha256_matches': project.content_matches()}
 
     def resolution(project, summary=None):
         # Auto/streamed selection reads live resources; a scene that fits nothing
@@ -214,6 +220,10 @@ def create_app(result_dir=None):
 
     @app.post('/api/jobs', status_code=202)
     def run(project: Project):
+        # The plan hash identifies the physics the job computes; the workbench
+        # compares it with the current project's hash from /api/validate.
+        try:plan_hash=resolve_plan(project).plan_hash
+        except ValueError as exc:raise HTTPException(422,str(exc)) from exc
         with lock:
             if sum(j['status'] in ('queued', 'running') for j in jobs.values()) >= 3:
                 raise HTTPException(409, 'The run queue is full (one running and two waiting).')
@@ -223,7 +233,8 @@ def create_app(result_dir=None):
                     del jobs[old]
             key = uuid4().hex
             jobs[key] = {'id': key, 'status': 'queued', 'progress': {'step':0,'total':project.region.steps},
-                         'cancel': threading.Event(), 'project': project.model_dump(), 'created': time.time()}
+                         'cancel': threading.Event(), 'project': project.model_dump(), 'created': time.time(),
+                         'plan_hash': plan_hash, 'revision': project.revision}
             pool.submit(work, key, project)
         return {'id':key, 'status':'queued'}
 
