@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G4-04_cuda_edge_fixtures",
+  "task": "G4-04",
+  "title": "Boundary and seeded random CUDA fixtures against the CPU path, with allocator-level out-of-bounds checking",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "mesh_um": 0.1,
+    "named": {
+      "minimum_grid": "11 x 11 x 11 cells with 3 CPML cells per face, the smallest grid Region admits (five interior cells); Ez point source and monitor at the centre, x-normal plane at x = 0",
+      "odd_sizes": "13 x 15 x 17 cells, x_min CPML 5 layers kappa 2.5, z_max 4 layers kappa 1.5, index-1.5 sphere, Hy source",
+      "index_boundaries": "14 x 13 x 12 cells; an index-2 box whose +x face lies one cell beyond the PML interface and whose -y face lies on it; Ex source on the last interior cell of x and z; Ex monitor on the last interior cells of x, y and z corners; x-normal plane at the last interior x cell spanning the interior",
+      "strong_contrast": "15 x 13 x 13 cells, 4 CPML cells, epsilon 16 sphere (index 4) in epsilon 1, PEC wall on x_max (the solver has no PEC volume material; PEC is a boundary face)",
+      "ade_odd": "15 x 13 x 17 cells, Lorentz box (ADE P/Q states), y_min CPML 5 layers kappa 2, z_max 4 layers"
+    },
+    "lorentz": {
+      "epsilon_inf": 2.0,
+      "resonance_rad_s": 2100000000000000.0,
+      "linewidth_rad_s": 400000000000000.0,
+      "delta_epsilon": 1.5
+    },
+    "random": {
+      "master_seed": 20260922,
+      "seeds": [
+        2026092200,
+        2026092201,
+        2026092202,
+        2026092203,
+        2026092204,
+        2026092205,
+        2026092206,
+        2026092207,
+        2026092208,
+        2026092209,
+        2026092210,
+        2026092211,
+        2026092212,
+        2026092213,
+        2026092214,
+        2026092215,
+        2026092216,
+        2026092217,
+        2026092218,
+        2026092219
+      ],
+      "generator": "numpy.random.default_rng(seed) in tests/test_cuda_edge_fixtures.py::random_project",
+      "draws": "PML depth 3-5; one extra face with 3-5 layers and kappa in [1, 3]; a PEC face with probability 0.35; cells per axis from 2*pml+5 to 2*pml+11 (odd and even); steps 20-40; Lorentz material with probability 0.3 else epsilon uniform in [1, 16]; box or sphere with a face on or one cell beyond the PML interface with probability 0.4; source component among Ex..Hz; source on the last interior cell of one axis with probability 0.4; random monitor; x-normal plane spanning the interior (one cell short of a PEC wall)",
+      "precision": "float64 so that any indexing defect is visible at the float64 tolerance"
+    },
+    "streamed": {
+      "cells": [
+        13,
+        11,
+        12
+      ],
+      "steps": 20,
+      "epsilon_seed": 11,
+      "epsilon": "1 + 3 * torch.rand on the full grid",
+      "configurations": [
+        [
+          5,
+          3,
+          "sync",
+          2
+        ],
+        [
+          5,
+          3,
+          "async",
+          2
+        ],
+        [
+          4,
+          7,
+          "async",
+          3
+        ]
+      ],
+      "meaning": "slab_width 5 on 13 cells leaves a 3-cell remainder slab; temporal_depth 3 on 20 steps leaves a 2-step remainder; slab 4 with depth 7 leaves a 1-cell slab and a 6-step remainder with three asynchronous tile buffers"
+    },
+    "cuda_paths": [
+      "cuda_kernel torch + cuda_monitor_kernel torch, eager",
+      "cuda_kernel fused + cuda_monitor_kernel fused, CUDA graph"
+    ],
+    "out_of_bounds_check": {
+      "method": "the whole file run with PYTORCH_NO_CUDA_MEMORY_CACHING=1 (every tensor is a fresh cudaMalloc, so an out-of-bounds access has no cached neighbour to land in) and CUDA_LAUNCH_BLOCKING=1 (a faulting launch is reported at that launch, not later); CUDA graphs cannot be captured under a non-caching allocator, so this run launches the fused kernels and monitors eagerly while the ordinary run captures them in a graph",
+      "compute_sanitizer": "not usable on this host: the installed compute-sanitizer is CUDA 11.6 and reports 'Target application terminated before first instrumented API call' against the CUDA 12.6 runtime torch 2.10.0+cu126 uses",
+      "race_check": "the fused path is run twice per fixture and must be bitwise identical; this detects nondeterministic races only, not benign ones"
+    }
+  },
+  "seed": [
+    2026092200,
+    2026092201,
+    2026092202,
+    2026092203,
+    2026092204,
+    2026092205,
+    2026092206,
+    2026092207,
+    2026092208,
+    2026092209,
+    2026092210,
+    2026092211,
+    2026092212,
+    2026092213,
+    2026092214,
+    2026092215,
+    2026092216,
+    2026092217,
+    2026092218,
+    2026092219
+  ],
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": [
+    "cpu float64 reference",
+    "cuda"
+  ],
+  "reference_method": "Simulation with backend='cpu' (numpy Yee/CPML/ADE backend of the fdtd grid package) at the fixture precision for the named and random fixtures; DifferentiableSimulation on CPU (torch) for the streamed fixture; a layer-A discrete comparison, not an independent physics oracle",
+  "observables": [
+    {
+      "name": "electric",
+      "unit": "dimensionless",
+      "definition": "final E divided by max |E_ref|"
+    },
+    {
+      "name": "magnetic",
+      "unit": "dimensionless",
+      "definition": "final H divided by max |H_ref|"
+    },
+    {
+      "name": "signals",
+      "unit": "dimensionless",
+      "definition": "point monitor trace divided by max |signal_ref|"
+    },
+    {
+      "name": "plane",
+      "unit": "dimensionless",
+      "definition": "x-normal plane DFT fields divided by max |field_ref|"
+    },
+    {
+      "name": "streamed signals and gradient",
+      "unit": "dimensionless",
+      "definition": "StreamedSimulation signals and epsilon gradient divided by the resident CPU maxima"
+    },
+    {
+      "name": "determinism",
+      "unit": "boolean",
+      "definition": "two fused graph runs are bitwise identical"
+    }
+  ],
+  "acceptance": {
+    "float32": {
+      "rtol": 0.0001,
+      "atol": 1e-06
+    },
+    "float64": {
+      "rtol": 1e-07,
+      "atol": 1e-09
+    },
+    "comparison": "numpy.testing.assert_allclose on the normalized observables",
+    "determinism": "bitwise identity of the repeated fused run",
+    "out_of_bounds": "the file passes under PYTORCH_NO_CUDA_MEMORY_CACHING=1 and CUDA_LAUNCH_BLOCKING=1 with no CUDA error",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 and discrete_dimensionless_fp64"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_cuda_edge_fixtures.py"
+    ],
+    "not_yet_covered": [
+      "compute-sanitizer memcheck and racecheck on a host with a CUDA 12.x toolkit: not available here",
+      "the same fixtures on a second CUDA platform (RTX 5880 Ada): prepared, not run here"
+    ]
+  },
+  "notes": "Every grid is at most 21 cells per axis. The CPU reference for the named and random fixtures is the numpy backend, the same discretization the torch path evaluates; the streamed fixture's reference is the torch CPU resident path."
+}

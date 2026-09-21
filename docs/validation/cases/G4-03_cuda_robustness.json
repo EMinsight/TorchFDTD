@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G4-03_cuda_robustness",
+  "task": "G4-03",
+  "title": "CUDA paths under noncontiguous inputs, duplicate observers, repeated calls, released host inputs, a caller stream, cancellation and exceptions",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "problem": "the G4-02 problem: 20 x 18 x 16 cells, 0.1 um mesh, 4 CPML cells, index-1.5 sphere, Ez point source, Ez point monitor, x-normal plane DFT with three frequencies, float64",
+    "size_um": [2.0, 1.8, 1.6],
+    "mesh_um": 0.1,
+    "pml_cells": 4,
+    "steps": 60,
+    "sphere_index": 1.5,
+    "sphere_center_um": [0.2, 0.1, -0.1],
+    "sphere_radius_um": 0.3,
+    "source_um": [-0.4, 0.0, 0.1],
+    "wavelength_um": 1.0,
+    "point_monitor_um": [0.5, -0.1, 0.2],
+    "plane_x_um": 0.6,
+    "plane_size_um": [1.0, 0.8],
+    "plane_frequency_points": 3,
+    "adjoint_checkpoints": 2,
+    "cancel_after_steps": 5,
+    "checks": {
+      "noncontiguous_inputs": "epsilon as a permuted view of a transposed copy and as a stride-2 slice of a larger tensor, through DifferentiableSimulation forward and backward",
+      "noncontiguous_rejection": "FusedYeeCUDA on a grid whose E is a transposed view, and _direct_cuda_view on a strided or CPU tensor",
+      "duplicate_observers": "the point monitor and the plane monitor registered twice under different ids in Simulation (torch/torch/eager and fused/fused/graph); duplicate point monitors in the adjoint with torch and fused backward",
+      "repeated_calls": "two runs of one Simulation object with the same graph setting and one with the opposite setting; two forward calls of one DifferentiableSimulation, two torch.autograd.grad calls on one graph with retain_graph, one on the other graph, and a .backward accumulation",
+      "input_lifetime": "the host numpy array and its CPU tensor are deleted after the CUDA upload and confirmed collected by a weak reference before the run",
+      "stream_synchronization": "the whole run inside torch.cuda.stream(side) for torch/fused kernels with graphs off and on, and the adjoint with torch and fused backward",
+      "cancellation": "threading.Event set from the first progress callback at step 5; the run must report cancelled at that step",
+      "exception": "a progress callback that raises RuntimeError at step 5; a backward with create_graph=True which the discrete adjoint refuses",
+      "allocator": "torch.cuda.memory_allocated() after gc.collect() and torch.cuda.synchronize(), against a baseline taken after one warm-up run of the same configuration"
+    }
+  },
+  "seed": null,
+  "precision": ["float64"],
+  "backend": ["cuda"],
+  "reference_method": "self-consistency of the CUDA path: the contiguous, single-observer, first-call, default-stream, uncancelled run of the same discrete problem on the same device; the G4-02 case ties that run to the CPU float64 solution",
+  "observables": [
+    {"name": "forward identity", "unit": "boolean", "definition": "numpy.testing.assert_array_equal on E, H, signals, frames, frame steps, plane DFT fields and flux (bitwise)"},
+    {"name": "signal identity", "unit": "boolean", "definition": "torch.equal on adjoint signals (bitwise)"},
+    {"name": "gradient agreement", "unit": "dimensionless", "definition": "epsilon gradient against the reference gradient, or against twice it for duplicate observers and accumulation"},
+    {"name": "leaked_bytes", "unit": "bytes", "definition": "torch.cuda.memory_allocated() after cleanup minus the warm baseline"},
+    {"name": "termination", "unit": "string", "definition": "summary.termination_reason, summary.cancelled and summary.steps of the cancelled run"}
+  ],
+  "acceptance": {
+    "float64": {"rtol": 1e-07, "atol": 1e-09},
+    "identity": "forward results and adjoint signals are bitwise identical to the reference run; noncontiguous epsilon views give bitwise identical signals and gradients",
+    "gradients": "duplicate-observer, repeated-call, accumulated and side-stream gradients agree with the reference gradient within rtol 1e-7 and atol 1e-9 times max |gradient_ref|",
+    "allocator": {"tolerance_bytes": 0, "definition": "no torch CUDA bytes remain allocated after a cancelled run or after an exception, relative to the warm baseline"},
+    "cancellation": "termination_reason 'cancelled', cancelled true, 0 < steps < 60, exactly one progress event at the cancelled step, signals truncated to that step",
+    "rejection_policy": "numpy input, float16, complex, mismatched precision, wrong shape, epsilon < 1, NaN, a string cuda_graph_steps and an unknown checkpoint storage each raise ValueError with the named message; noncontiguous fused-kernel grid arrays raise ValueError 'Fused CUDA arrays must be contiguous'; strided or CPU tensors raise ValueError 'Direct CUDA views require contiguous'",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp64; the allocator tolerance of zero bytes and the bitwise identities are fixture-specific budgets declared here before the run"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_cuda_robustness.py"
+    ],
+    "not_yet_covered": [
+      "the same checks on a second CUDA platform (RTX 5880 Ada): prepared, not run here"
+    ]
+  },
+  "notes": "Runs on the shared RTX 3060 with a 5760-cell grid. memory_allocated counts torch allocations only; CuPy holds no device memory for these kernels beyond compiled modules, which are not allocator bytes."
+}

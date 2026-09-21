@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "case_id": "G4-06_untrusted_code_policy",
+  "task": "G4-06",
+  "title": "Fork code never runs on a lab GPU host: workflow structure and the maintainer procedure",
+  "fixture": {
+    "workflow": ".github/workflows/test.yml",
+    "policy": "docs/GPU_RUNNER_POLICY.md",
+    "required_workflow_properties": [
+      "no 'self-hosted' token",
+      "no 'pull_request_target' token",
+      "every runs-on is a GitHub-hosted ubuntu image",
+      "triggers are exactly push, pull_request, workflow_dispatch",
+      "tests launched through scripts/run_suite.py cpu-pr without --gpu-required"
+    ],
+    "required_policy_statements": [
+      "names cpu-pr, gpu-nightly and release-full",
+      "fork pull requests never execute on the lab hosts",
+      "checkout by commit hash into an isolated worktree and venv under .local",
+      "no credentials in the environment",
+      "cleanup of worktree and venv after the run"
+    ]
+  },
+  "seed": null,
+  "precision": null,
+  "backend": null,
+  "reference_method": "textual specification checked by tests/test_gpu_runner_policy.py",
+  "observables": [
+    {
+      "name": "workflow_structure",
+      "unit": "boolean",
+      "definition": "the workflow properties above hold"
+    },
+    {
+      "name": "policy_statements",
+      "unit": "boolean",
+      "definition": "the policy statements above are present"
+    }
+  ],
+  "acceptance": {
+    "rule": "every listed property and statement holds; a self-hosted runner or a pull_request_target trigger anywhere in the workflow file fails the test",
+    "source_of_limits": "fixture-specific; no numerical threshold applies"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_gpu_runner_policy.py"
+    ],
+    "not_yet_covered": []
+  },
+  "notes": "A workflow approval click is not a review; the policy says so explicitly."
+}

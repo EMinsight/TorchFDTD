@@ -51,6 +51,7 @@ def test_unsupported_physics_cannot_be_silently_accepted():
             'unsupported_object', 'apodization_mapping_required', 'material_mapping_required'} <= {i['code'] for i in issues}
 
 
+@pytest.mark.optional
 @pytest.mark.skipif(os.environ.get('TORCHFDTD_LUMERICAL_TESTS') != '1', reason='Requires installed licensed Lumerical')
 def test_installed_lumerical_fsp_roundtrip(tmp_path):
     api = fsp.load_api()

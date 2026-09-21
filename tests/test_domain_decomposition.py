@@ -150,6 +150,7 @@ def launch_emulated(monkeypatch, tmp_path, world, complex_fields, precision, dia
     return [torch.load(tmp_path/f'{rank}.pt', weights_only=True) for rank in range(world)]
 
 
+@pytest.mark.optional
 @pytest.mark.parametrize('world,complex_fields,precision,diagonal,checkpoints',
     [(2, False, 'float64', False, 0), (3, True, 'float64', True, 2),
          (2, True, 'float32', False, 1)])
@@ -204,6 +205,7 @@ def test_admission_capabilities_ownership_and_fixed_memory_contract():
         plan_domain_decomposition(r, 2)
 
 
+@pytest.mark.optional
 @pytest.mark.skipif(torch.cuda.device_count() < 2 or not dist.is_nccl_available(),
                     reason='Requires at least two visible CUDA GPUs and NCCL; not emulated by CPU ranks.')
 def test_two_cuda_devices_single_problem(tmp_path):
