@@ -1409,7 +1409,8 @@
             "tests/test_oracle_budget.py::test_oracle_budget_document_covers_every_g3_case_and_class"
           ],
           "evidence": [
-            "20260921T165050Z-g3-17-bb3742d1"
+            "20260921T165050Z-g3-17-bb3742d1",
+            "20260921T210000Z-g3-17-dc84d85f"
           ],
           "blocker": null,
           "scope_change_approval": null,

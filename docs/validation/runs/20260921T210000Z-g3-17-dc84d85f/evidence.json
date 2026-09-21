@@ -1,0 +1,117 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T210000Z-g3-17-dc84d85f",
+  "task": "G3-17",
+  "stage": "G3",
+  "task_title": "oracle 독립성·정밀도·시간·PML 오차 budget 확인",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_oracle_budget.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-17.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T05:59:56.718358+09:00",
+  "recorded_at": "2026-09-21T21:00:00+00:00",
+  "source_commit": "e13fe664c7a706450d1b17053591f7c7a7e4e663",
+  "source_tree_sha256": "f789086aa7f847c6e606dd1c2a6e77cae8d2a465c0edaa22c9bbbfe0e9d28b78",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_oracle_budget.py": "63094eb1ee9af2f38b502ca729ce7d54618e19f44c49533eb84184dca5d13d3e"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G3-17_oracle_budget.json",
+  "fixture_sha256": "17c79aef26d455caec581daa2c73bb3033be61f3b7a825a0de6fa688e84fc22b",
+  "acceptance_criteria_path": "docs/validation/cases/G3-17_oracle_budget.json",
+  "acceptance_criteria_sha256": "17c79aef26d455caec581daa2c73bb3033be61f3b7a825a0de6fa688e84fc22b",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable",
+  "precision": "not applicable",
+  "backend": "cpu (file checks only)",
+  "physics_configuration": {
+    "document": "docs/ORACLE_BUDGET.md: one row per fixture of every G3 case file present under docs/validation/cases, giving the oracle class, its independence from the code under test, the precision floor, the time window and the PML budget as recorded, plus the open residuals per task",
+    "case_files": "docs/validation/cases/G3-*.json with the fields oracle_class (list) and tests.layers (one entry per tests.existing id with layer, oracle_class and oracle)",
+    "classes": "analytic_continuum, analytic_discrete, independent_solver, physical_invariant, convergence_study (layer B); shared_discrete_operator, finite_difference_same_discretisation, independent_implementation_same_scheme (layer A); stored_record (either)"
+  },
+  "reference_method": "Consistency of the documents of record with each other: every G3 case names allowed oracle classes, every listed test carries a layer consistent with its class and exists in its source file, the tasks G3-06, G3-09, G3-10, G3-11, G3-12 and G3-16 keep at least one layer-B entry, G3-14 and G3-15 are layer A only, and docs/ORACLE_BUDGET.md names every case id and every class.",
+  "observables": [
+    {
+      "name": "case_files_consistent",
+      "unit": "boolean",
+      "definition": "tests/test_oracle_budget.py passes on every docs/validation/cases/G3-*.json present"
+    },
+    {
+      "name": "document_coverage",
+      "unit": "boolean",
+      "definition": "every G3 case_id and every oracle class appears in docs/ORACLE_BUDGET.md"
+    }
+  ],
+  "acceptance_limits": {
+    "all_checks": "pass/fail assertions of tests/test_oracle_budget.py",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md section 1 rule 8 (oracle classes must be distinguished) and section 5 (fixture-specific error budgets are declared before the run and differences from the common criteria are reported)"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 4,
+    "passed": [
+      "tests/test_oracle_budget.py::test_the_recorded_g3_cases_are_present",
+      "tests/test_oracle_budget.py::test_every_g3_case_names_allowed_oracle_classes_and_layers",
+      "tests/test_oracle_budget.py::test_every_listed_test_exists_in_its_source_file",
+      "tests/test_oracle_budget.py::test_oracle_budget_document_covers_every_g3_case_and_class"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 0.185,
+    "suite_timestamp": "2026-09-22T05:59:56.718358+09:00"
+  },
+  "required_tests": [
+    "tests/test_oracle_budget.py::test_the_recorded_g3_cases_are_present",
+    "tests/test_oracle_budget.py::test_every_g3_case_names_allowed_oracle_classes_and_layers",
+    "tests/test_oracle_budget.py::test_every_listed_test_exists_in_its_source_file",
+    "tests/test_oracle_budget.py::test_oracle_budget_document_covers_every_g3_case_and_class"
+  ],
+  "skipped_required_tests": [],
+  "gpu_required_skips": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T210000Z-g3-17-dc84d85f/junit.xml",
+      "sha256": "6fea0793e93b6734b79f25aef7ef96b888574b3dbe2694c1691797c697286a35",
+      "bytes": 733,
+      "original_path": ".local/tmp/junit/G3-17.xml"
+    }
+  ],
+  "applicable_scope": "Re-recorded on the merged main tree after a shared test module changed in a merged branch.",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
