@@ -11,6 +11,14 @@ from torchfdtd.boundaries import YeeGrid
 from torchfdtd.differentiable import _System
 
 
+@pytest.fixture(autouse=True)
+def restore_torch_default_dtype():
+    """fdtd.set_backend('numpy') sets the global Torch default dtype to float64; leave the session as found."""
+    previous = torch.get_default_dtype()
+    yield
+    torch.set_default_dtype(previous)
+
+
 def scene(axis=0, kind="pec", dimension="3d", complex_fields=False):
     faces={a+"_"+s:BoundaryFace(kind=kind if i==axis else "bloch" if complex_fields else "periodic")
            for i,a in enumerate("xyz"[:2 if dimension=="2d" else 3]) for s in ("min","max")}
