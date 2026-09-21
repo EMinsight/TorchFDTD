@@ -936,4 +936,58 @@ Each `evidence.json` carries the fixture and test-source SHA-256 values, the env
 
 ```
 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_material_workflow.py tests/test_source_preview.py tests/test_results.py tests/test_numerical_guards.py
+---
+
+### 2026-09-22 G6-04 to G6-07 (port diagnostics, design interface, fabrication, export and re-import), branch g6-api-b from 73203d2
+
+**Problem or goal.** Give users a public port API with per-port diagnostics, one
+minimal design entry point that runs objective to final re-evaluation on the
+existing differentiable APIs, real fabrication measurements on the binarized
+design, and an export/re-import path judged by an independent finer forward on
+three declared starts per example, without private-function assembly.
+
+**State found.** HEAD 73203d2 on branch g6-api-b, clean tree, no uncommitted work
+from an earlier agent.
+
+**Changed files (why).**
+- `torchfdtd/ports.py` (new, commit 68d797b): `track_port_modes` (candidates assigned to tracks by `linear_sum_assignment` on the absolute power overlaps, reported `minimum_overlap`, `ModeTrackingWarning`), `port_normalization`, `shift_reference_plane`, `deembed_s_matrix`, `separate_directions`, `port_diagnostics` (degenerate clusters, overlap matrix, `confinement_factor`, `WeakModeWarning`), `FixedPortSectionError` and `fixed_port_section`. `torchfdtd/mode_network.py`: `_fixed_section` delegates to `fixed_port_section`, so `ModeNetwork` and `ModeBranchNetwork` raise the named error for a trainable section. `docs/PORTS.md` states the fixed-basis gradient rule; `tests/test_ports.py` (7 tests).
+- `torchfdtd/design_problem.py` (new): `DesignProblem` (objective, `DensityParameterization`, torch optimizer, history, `save`/`load`/`run(..., checkpoint, resume)`, `fabrication`, `export`, `reimport`, `final_evaluation`) and `Continuation`. `torchfdtd/fabrication.py` (new): `measure_feature_sizes` by openings with digital squares of every integer side, `fabrication_perturbation`, `binary_structures` (rectangles widened by 1e-9 um), `morphological_open`, `square_offsets`. `torchfdtd/density_layer.py`: `bounded_density_layer` (volume-averaged density box inside a fixed epsilon, z invariant when the layer spans a periodic z axis). `examples/design_metagrating.py` (periodic plane adjoint, `diffraction_efficiency`, holdout wavelength from the same run) and `examples/design_mode_coupler.py` (two-port `ModeNetwork` between 0.6 um guides offset by 0.6 um, `port_permittivities`, holdout network at 1.50 um). `tests/test_design_workflow.py` (9 tests: contracts, bitwise resume on the toy problem and both examples, end-to-end records, the gap-violation case, exact morphology, rectangle tiling), `tests/test_design_reimport.py` (judged three-start runs behind `TORCHFDTD_G6_FULL=1`, record re-judging otherwise), `scripts/render_design_workflow.py`, `docs/DESIGN_WORKFLOW.md` with the rendered table, `docs/validation/g6/`.
+- `torchfdtd/__init__.py`, `docs/COMPATIBILITY.md` (219 public names, rows for `torchfdtd.ports`, `torchfdtd.fabrication`, `torchfdtd.design_problem`, `bounded_density_layer`, and the design-state format), `docs/CHANGELOG.md`.
+- `docs/validation/cases/G6-04.json` to `G6-07.json` (pre-declared; the G6-07 thresholds were fixed from the pilots listed in the case before the recorded run), `docs/validation/completion_gates.json` (`code_paths`, `required_tests`, `planned_test_commands`, IMPLEMENTED and notes in 68d797b; evidence ids and VERIFIED states by the recorder), `docs/validation/runs/`.
+
+**Commands run (device: local Windows 11, i7-12700, RTX 3060 12 GB shared with other agents but unused here, Python 3.10.2, torch 2.10.0+cu126; TMP and TEMP set to D:/TorchFDTD/.local/tmp; four Torch threads in the examples, two in the fast tests).**
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_ports.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-04.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_workflow.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-05.xml
+TORCHFDTD_G6_FULL=1 TORCHFDTD_G6_RECORD=docs/validation/g6 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_reimport.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-07.xml
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/render_design_workflow.py
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G6-04 --command "<the first line>" --junit D:/TorchFDTD/.local/tmp/junit/G6-04.xml --exit-code 0 --fixture docs/validation/cases/G6-04.json --scope "..."
+    (G6-05 and G6-06 with the second line and the same G6-05.xml; G6-07 with the third line, --observed docs/validation/g6/G6-07_observed.json and the six start records as --artifact)
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G6-07
+```
+
+Pilot runs before the declaration of the G6-07 thresholds (`python -m examples.design_metagrating --seed <n> --iterations <k>` and `design_mode_coupler`, outputs under `.local/tmp/g6pilot`, not tracked) are summarized in the `context` field of `docs/validation/cases/G6-07.json`.
+
+**Measurements and pre-declared limits.**
+- G6-04: TE0/TM0 tracking of the 0.05 um slab over 1.45 to 1.65 um, minimum overlap above 0.99 (limit 0.99), effective index within 2e-3 of the analytic dispersion at every wavelength (limit 2e-3); the square guide reports the degenerate cluster (0, 1) with an overlap matrix within 2e-4 of the identity and the u-polarized mode first; the 0.1 um core of epsilon 2.3 in 2.25 has confinement below 0.5 and warns, the slab core 0.762 (limit 0.7) and does not; the de-embedded straight guide equals the identity within 1e-6; synthetic forward and backward amplitudes and their gradients within 2e-5 relative; a trainable section raises `FixedPortSectionError` in `track_port_modes`, `fixed_port_section` and `ModeNetwork`.
+- G6-05: resumed histories equal the uninterrupted ones bitwise on the toy problem (4 + 5 of 9 steps), the metagrating (2 + 2 of 4, 300 steps) and the coupler (1 + 2 of 3, 200 steps); both example `main()` runs complete with the five stages, the four differences summing to the total, an exact GDS round trip (difference 0.0 in every metric) and, for the coupler, a rotation-symmetric thresholded design.
+- G6-06: two blocks through a 0.15 um filter radius and beta 64 keep a one-pixel (0.1 um) gap: measured gap 1 pixel, linewidth 4 pixels, `violations == ['min_gap']` against the declared 0.15 um; erosion and dilation by one pixel change the objective by nonzero recorded amounts; run lengths and rectangle sides measure exactly (4 and 6 pixels on the periodic line, 5 and 1 with extend and 4 with periodic on the edge blocks, saturation on the uniform design); rectangles tile the solid pixels exactly.
+- G6-07 (all starts, judged at the fine GDS stage; thresholds metagrating 0.35 and holdout 0.15, coupler 0.5 and holdout 0.45): metagrating seeds 1, 2, 3 efficiency 0.4985, 0.5185, 0.4684 with holdout 0.5917, 0.2765, 0.4731 (coarse last 0.5531, 0.5837, 0.4554); coupler seeds 1, 2, 3 transmission 0.6136, 0.5760, 0.5760 with holdout 0.5783, 0.5562, 0.5562 (coarse last 0.6980, 0.7223, 0.7252). Stage differences in the judged metric: metagrating mesh refinement +0.0116, -0.0141, -0.0310; thresholding +0.0026, -0.0305, -0.0040; smoothing (staircase structures minus volume-averaged binary) -0.0711, -0.0324, +0.0480; GDS 0.0 for every start. Coupler mesh refinement -0.0871, -0.1056, -0.1148; thresholding -0.0032, +0.0018, +0.0077; smoothing +0.0036, -0.0484, -0.0484; GDS 0.0. Feature sizes: metagrating 4/2, 2/2, 17/13 pixels (no violation of the 2-pixel limits); coupler 1/1, 1/2, 1/2 pixels (violations recorded). One-pixel erosion raises the coarse loss by 0.21 to 0.29, dilation by 0.02 to 0.21. Coupler seeds 2 and 3 converge to the same design; metagrating seed 3 is a symmetric splitter (+1 equals -1 at 0.468). Wall times 283 to 356 s per start on the shared CPU.
+
+**Passed / failed / skipped / not run.** `tests/test_ports.py` 7 passed (4.2 s); `tests/test_design_workflow.py` 9 passed (141 s); `tests/test_design_reimport.py` with `TORCHFDTD_G6_FULL=1` 4 passed (1862 s); without the flag the two judged tests skip and the two record tests re-judge `docs/validation/g6`. Also run: `tests/test_compatibility_policy.py` 5 passed, `tests/test_completion_program_documents.py` and `tests/test_release_gates.py` (27 passed together), `tests/test_mode_ports.py`, `tests/test_density_layer.py`, `tests/test_mode_network_unequal.py` and the two CPU tests of `tests/test_mode_network.py` (25 passed). Not run: the CUDA network and branch tests (the GPU is shared; nothing in this change touches their code paths beyond the `fixed_port_section` delegation, which the CPU unequal-port test covers).
+
+**Evidence paths and hashes.** Runs 20260921T195524Z-g6-04-cd77e84a, 20260921T195542Z-g6-05-9f485769 and 20260921T195559Z-g6-06-e9e7f257 (source commit 68d797b) and 20260921T202810Z-g6-07-e5631996 (source commit cbe9d4d), all VERIFIED with an empty dirty manifest; case SHA-256 prefixes G6-04 d4b6c932124fe108, G6-05 51df753a92b04691, G6-06 cffb48756c05141a, G6-07 7b653bb293a0a0d6; the six start records and `G6-07_observed.json` are listed with their hashes in the G6-07 evidence. The judge passes all four tasks.
+
+**Remaining defects, risks, external blockers.**
+- The coupler's optimum keeps one-pixel (0.2 um) features at both filter radii tried; the fabrication report says so and nothing enforces the constraint during the optimization (`not_yet_covered` of G6-06). A penalty or a projection that acts on the measured feature size is the next step for a fabricable coupler.
+- The fine forward is the same discretization refined; an RCWA (grating) or eigenmode-expansion (coupler) oracle on the exported designs would make the G6-07 judgement independent of the solver (`not_yet_covered` of G6-07).
+- The coarse coupler mesh resolves the core wavelength with about four cells, and the mesh-refinement differences of -0.09 to -0.11 in transmission are the measured cost; the coarse metagrating (about ten cells) loses at most 0.03.
+- `separate_directions` on float32 SI-scale planes must be divided by a reference scale before squaring (documented in PORTS.md); the objective `normalized_mode_power` already does this.
+- The `DesignProblem` state file is a `torch.save` pickle read with `weights_only=False`; it carries the optimizer state and history and must be treated as trusted input, like every checkpoint of this kind.
+
+**Next first command and task id.** G6-01 to G6-03 and G6-08 are on branch g6-api-a; after merging both G6 branches, re-run the fast suite and re-judge the recorded starts:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_ports.py tests/test_design_workflow.py tests/test_design_reimport.py
 ```

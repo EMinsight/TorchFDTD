@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G6-04",
+  "task": "G6-04",
+  "title": "Per-port mode tracking, normalization, reference planes, direction separation and degenerate/weak-mode diagnostics on the analytic slab and a degenerate square guide",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "oracle_class": ["analytic_continuum", "shared_discrete_operator", "analytic_identity"],
+  "fixture": {
+    "slab": "tests/test_ports.py: symmetric slab, core epsilon 4 (interface samples 3.125), cladding 2.25, thickness 0.5 um, transverse grid 80 x 4 cells of 0.05 um, normal z, periodic full-vector solver solve_waveguide_modes, float32, CPU; tracked at 1.45, 1.5, 1.55, 1.6, 1.65 um with num_modes 2 and 4 candidates",
+    "square_guide": "tests/test_ports.py: 0.6 um square core of epsilon 4 in 2.25, 16 x 16 cells of 0.1 um, 1.55 um, two modes (the degenerate fundamental pair)",
+    "weak_guide": "tests/test_ports.py: 0.1 um core of epsilon 2.3 in 2.25, 40 x 4 cells of 0.1 um, normal z, 1.55 um, one mode; declared core |u| < 0.05 um",
+    "uniform_section": "tests/test_ports.py: epsilon 2.25, 5 x 5 cells of 0.2 um (reference-plane and de-embedding checks) and 8 x 6 cells of 0.1 um (direction separation on synthetic plane fields)",
+    "network_rejection": "tests/test_ports.py: ModeNetwork on the 8 x 1 x 1 um, 0.2 um straight-guide fixture of tests/test_mode_network.py with a section tensor that requires grad"
+  },
+  "seed": {"others": "deterministic; the eigensolver uses its fixed start vector"},
+  "precision": ["float32 modes", "complex64 synthetic plane fields"],
+  "backend": ["cpu"],
+  "reference_method": "Analytic continuum slab TE0/TM0 dispersion at every tracked wavelength (root finding, tests/test_mode_ports.py slab_neff); the analytic identities exp(i beta d) exp(-i beta d) = 1 and S21 = exp(2 i beta L) of a straight guide de-embedded to the identity; synthetic plane fields a * mode + b * backward whose separated amplitudes must equal a and b with analytic gradients 2a and 2b; the canonical degenerate basis of the same discrete operator.",
+  "observables": [
+    {"name": "tracked_neff_error", "unit": "dimensionless", "definition": "|neff_track - neff_analytic| for TE0 and TM0 at each of the five wavelengths"},
+    {"name": "minimum_overlap", "unit": "dimensionless", "definition": "smallest absolute power overlap between consecutive wavelengths of one track"},
+    {"name": "degenerate_cluster", "unit": "indices", "definition": "cluster tuple of the square guide's fundamental pair and the max deviation of its overlap matrix from the identity"},
+    {"name": "confinement", "unit": "dimensionless", "definition": "fraction of the summed squared six-component amplitude inside the declared core"},
+    {"name": "reference_plane_identity", "unit": "dimensionless", "definition": "|shift(shift(1, d), -d) - 1| and |deembed(S_straight, L, L) - [[0,1],[1,0]]|"},
+    {"name": "separated_amplitudes", "unit": "dimensionless", "definition": "|a+/scale - a|, |a-/scale - b| and the gradient error of |a+|^2 + |a-|^2 against 2a, 2b"},
+    {"name": "fixed_section_rejection", "unit": "boolean", "definition": "FixedPortSectionError raised by track_port_modes, fixed_port_section and ModeNetwork for a section with requires_grad"}
+  ],
+  "acceptance": {
+    "tracked_neff_error_max": {"value": 2e-3, "where": "tests/test_ports.py; the 0.05 um slab at 1.45 to 1.65 um; mode_ports.md records 7.9e-4 (TE) and 1.6e-3 (TM) at 1.55 um on this mesh", "difference_from_common_criterion": "absolute 2e-3 at neff about 1.75 is relative 1.1e-3, inside the program's analytic_mode_neff_relative_error 0.005"},
+    "minimum_overlap_min": 0.99,
+    "tracking_warning": "ModeTrackingWarning must be issued when the declared minimum exceeds the measured overlap (declared 0.99999 on the 1.55 to 1.6 um pair)",
+    "degenerate_cluster": {"expected": [[0, 1]], "overlap_identity_atol": 2e-4, "polarization_ratio_min": 100},
+    "confinement": {"square_guide_min": 0.5, "slab_min": 0.7, "weak_guide_max": 0.5, "warning": "WeakModeWarning for the weak guide, none for the slab"},
+    "reference_plane_identity_atol": 1e-6,
+    "separated_amplitudes": {"rtol": 2e-5, "atol": 1e-5},
+    "fixed_section_rejection": true,
+    "source_of_limits": "completion_gates.json proposed_thresholds analytic_mode_neff_relative_error 0.005 for the tracked indices; the remaining limits are identities of the fixed-basis algebra at float32 precision"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_ports.py::test_slab_tracking_follows_te0_and_tm0_across_the_band_with_reported_overlaps",
+      "tests/test_ports.py::test_tracking_warns_below_the_declared_minimum_and_rejects_bad_inputs",
+      "tests/test_ports.py::test_design_variable_port_section_is_rejected_by_a_named_error",
+      "tests/test_ports.py::test_degenerate_square_guide_reports_the_cluster_canonical_basis_and_overlap_matrix",
+      "tests/test_ports.py::test_weak_mode_warning_uses_a_measured_confinement_factor",
+      "tests/test_ports.py::test_reference_plane_shift_and_de_embedding_cancel_a_straight_guide_phase",
+      "tests/test_ports.py::test_direction_separation_recovers_synthetic_forward_and_backward_amplitudes"
+    ],
+    "layers": {
+      "tests/test_ports.py::test_slab_tracking_follows_te0_and_tm0_across_the_band_with_reported_overlaps": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "analytic slab TE0/TM0 dispersion at five wavelengths"},
+      "tests/test_ports.py::test_tracking_warns_below_the_declared_minimum_and_rejects_bad_inputs": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "the declared minimum against the measured overlap"},
+      "tests/test_ports.py::test_design_variable_port_section_is_rejected_by_a_named_error": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "contract: named rejection before any eigenproblem"},
+      "tests/test_ports.py::test_degenerate_square_guide_reports_the_cluster_canonical_basis_and_overlap_matrix": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "canonical basis and Gram identity of the same discrete operator"},
+      "tests/test_ports.py::test_weak_mode_warning_uses_a_measured_confinement_factor": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "confinement of the solver's own fields against the declared threshold"},
+      "tests/test_ports.py::test_reference_plane_shift_and_de_embedding_cancel_a_straight_guide_phase": {"layer": "A", "oracle_class": "analytic_identity", "oracle": "phase identities with the mode's beta"},
+      "tests/test_ports.py::test_direction_separation_recovers_synthetic_forward_and_backward_amplitudes": {"layer": "A", "oracle_class": "analytic_identity", "oracle": "synthetic superposition of the fixed mode and its backward partner with analytic gradients"}
+    },
+    "not_yet_covered": [
+      "tracking through an actual mode crossing or anti-crossing of a multimode guide (the slab pair never crosses)",
+      "reference-plane shift applied to a measured FDTD network rather than the analytic straight-guide S",
+      "direction separation on a measured FDTD plane with a partially reflected mode (only synthetic planes)",
+      "open (CPML) port modes are not tracked by this module"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float32 eigenvectors: overlap identities within 2e-4; complex64 synthetic amplitudes within 2e-5 relative",
+    "time_window": "not applicable (frequency-domain eigenproblem and algebraic identities)",
+    "pml": "not applicable (periodic supercell modes)"
+  },
+  "notes": "tests/test_ports.py is added with this case. The gradient statement of the task (fixed-basis gradients only, no eigenmode derivative, a trainable section rejected by name) is documented in docs/PORTS.md and enforced by fixed_port_section, which ModeNetwork and ModeBranchNetwork now call. The slab confinement limit of 0.7 follows the measured 0.762 of the 0.5 um slab core at 1.55 um on this mesh, observed before the recorded run."
+}

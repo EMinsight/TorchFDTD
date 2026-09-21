@@ -1,0 +1,544 @@
+{
+ "example": "metagrating",
+ "seed": 2,
+ "iterations": 24,
+ "declared": {
+  "period_um": 1.5,
+  "slab_um": 0.25,
+  "height_um": 0.5,
+  "wavelength_um": 1.0,
+  "holdout_um": 0.95,
+  "design_epsilon": 4.0,
+  "pixels": 30,
+  "pixel_um": 0.05,
+  "coarse_mesh_um": 0.05,
+  "coarse_steps": 800,
+  "fine_mesh_um": 0.025,
+  "fine_steps": 1600,
+  "filter_radius_um": 0.125,
+  "learning_rate": 0.1,
+  "beta_initial": 4.0,
+  "continuation": "x2 every 4 steps to 64",
+  "objective": "+1 transmitted order efficiency at 1.0 um, maximized",
+  "holdout": "+1 transmitted order efficiency at 0.95 um, recorded and never optimized"
+ },
+ "history": [
+  {
+   "iteration": 1,
+   "objective": -0.011875107884407043,
+   "metrics": {
+    "efficiency": 0.011875107884407043,
+    "holdout_efficiency": 0.015783557668328285,
+    "zero_order": 0.8203970193862915,
+    "minus_one": 0.008397664874792099
+   },
+   "gradient_norm": 0.033857982605695724,
+   "beta": 4.0,
+   "beta_next": 4.0,
+   "elapsed_s": 10.154152399860322
+  },
+  {
+   "iteration": 2,
+   "objective": -0.02930448390543461,
+   "metrics": {
+    "efficiency": 0.02930448390543461,
+    "holdout_efficiency": 0.04700898006558418,
+    "zero_order": 0.7952561378479004,
+    "minus_one": 0.021831020712852478
+   },
+   "gradient_norm": 0.0443442165851593,
+   "beta": 4.0,
+   "beta_next": 4.0,
+   "elapsed_s": 10.141201300080866
+  },
+  {
+   "iteration": 3,
+   "objective": -0.0465138778090477,
+   "metrics": {
+    "efficiency": 0.0465138778090477,
+    "holdout_efficiency": 0.0912286713719368,
+    "zero_order": 0.7633765339851379,
+    "minus_one": 0.03722107410430908
+   },
+   "gradient_norm": 0.051872916519641876,
+   "beta": 4.0,
+   "beta_next": 4.0,
+   "elapsed_s": 11.090263599995524
+  },
+  {
+   "iteration": 4,
+   "objective": -0.06667342036962509,
+   "metrics": {
+    "efficiency": 0.06667342036962509,
+    "holdout_efficiency": 0.12974250316619873,
+    "zero_order": 0.7366096377372742,
+    "minus_one": 0.043486516922712326
+   },
+   "gradient_norm": 0.07357867807149887,
+   "beta": 4.0,
+   "beta_next": 8.0,
+   "elapsed_s": 10.373720599804074
+  },
+  {
+   "iteration": 5,
+   "objective": -0.3020913898944855,
+   "metrics": {
+    "efficiency": 0.3020913898944855,
+    "holdout_efficiency": 0.14781111478805542,
+    "zero_order": 0.4239981174468994,
+    "minus_one": 0.20695535838603973
+   },
+   "gradient_norm": 0.17967037856578827,
+   "beta": 8.0,
+   "beta_next": 8.0,
+   "elapsed_s": 9.942344900220633
+  },
+  {
+   "iteration": 6,
+   "objective": -0.34242376685142517,
+   "metrics": {
+    "efficiency": 0.34242376685142517,
+    "holdout_efficiency": 0.1542164832353592,
+    "zero_order": 0.37228575348854065,
+    "minus_one": 0.215410977602005
+   },
+   "gradient_norm": 0.17202603816986084,
+   "beta": 8.0,
+   "beta_next": 8.0,
+   "elapsed_s": 9.785397899802774
+  },
+  {
+   "iteration": 7,
+   "objective": -0.38271671533584595,
+   "metrics": {
+    "efficiency": 0.38271671533584595,
+    "holdout_efficiency": 0.16838562488555908,
+    "zero_order": 0.3408612906932831,
+    "minus_one": 0.21153947710990906
+   },
+   "gradient_norm": 0.14233292639255524,
+   "beta": 8.0,
+   "beta_next": 8.0,
+   "elapsed_s": 10.767288099974394
+  },
+  {
+   "iteration": 8,
+   "objective": -0.41973796486854553,
+   "metrics": {
+    "efficiency": 0.41973796486854553,
+    "holdout_efficiency": 0.18901985883712769,
+    "zero_order": 0.3273657262325287,
+    "minus_one": 0.193949356675148
+   },
+   "gradient_norm": 0.1051180362701416,
+   "beta": 8.0,
+   "beta_next": 16.0,
+   "elapsed_s": 10.205672100186348
+  },
+  {
+   "iteration": 9,
+   "objective": -0.49344977736473083,
+   "metrics": {
+    "efficiency": 0.49344977736473083,
+    "holdout_efficiency": 0.2009224146604538,
+    "zero_order": 0.16596205532550812,
+    "minus_one": 0.2944914996623993
+   },
+   "gradient_norm": 0.0787927433848381,
+   "beta": 16.0,
+   "beta_next": 16.0,
+   "elapsed_s": 10.417911500204355
+  },
+  {
+   "iteration": 10,
+   "objective": -0.5141294598579407,
+   "metrics": {
+    "efficiency": 0.5141294598579407,
+    "holdout_efficiency": 0.21045459806919098,
+    "zero_order": 0.19729501008987427,
+    "minus_one": 0.24790558218955994
+   },
+   "gradient_norm": 0.09334873408079147,
+   "beta": 16.0,
+   "beta_next": 16.0,
+   "elapsed_s": 11.286659899633378
+  },
+  {
+   "iteration": 11,
+   "objective": -0.5363219976425171,
+   "metrics": {
+    "efficiency": 0.5363219976425171,
+    "holdout_efficiency": 0.23551121354103088,
+    "zero_order": 0.24321967363357544,
+    "minus_one": 0.16793178021907806
+   },
+   "gradient_norm": 0.11591550707817078,
+   "beta": 16.0,
+   "beta_next": 16.0,
+   "elapsed_s": 11.040004500187933
+  },
+  {
+   "iteration": 12,
+   "objective": -0.5480809807777405,
+   "metrics": {
+    "efficiency": 0.5480809807777405,
+    "holdout_efficiency": 0.2593024969100952,
+    "zero_order": 0.2810293436050415,
+    "minus_one": 0.07707655429840088
+   },
+   "gradient_norm": 0.1711851805448532,
+   "beta": 16.0,
+   "beta_next": 32.0,
+   "elapsed_s": 10.329377299640328
+  },
+  {
+   "iteration": 13,
+   "objective": -0.5342440009117126,
+   "metrics": {
+    "efficiency": 0.5342440009117126,
+    "holdout_efficiency": 0.1877136528491974,
+    "zero_order": 0.26787668466567993,
+    "minus_one": 0.07051526010036469
+   },
+   "gradient_norm": 0.15821732580661774,
+   "beta": 32.0,
+   "beta_next": 32.0,
+   "elapsed_s": 10.599068300332874
+  },
+  {
+   "iteration": 14,
+   "objective": -0.5418894290924072,
+   "metrics": {
+    "efficiency": 0.5418894290924072,
+    "holdout_efficiency": 0.19857244193553925,
+    "zero_order": 0.25008171796798706,
+    "minus_one": 0.04320038482546806
+   },
+   "gradient_norm": 0.13299855589866638,
+   "beta": 32.0,
+   "beta_next": 32.0,
+   "elapsed_s": 11.108625600114465
+  },
+  {
+   "iteration": 15,
+   "objective": -0.5406327843666077,
+   "metrics": {
+    "efficiency": 0.5406327843666077,
+    "holdout_efficiency": 0.22266574203968048,
+    "zero_order": 0.21755371987819672,
+    "minus_one": 0.023957137018442154
+   },
+   "gradient_norm": 0.2638220191001892,
+   "beta": 32.0,
+   "beta_next": 32.0,
+   "elapsed_s": 10.318084700033069
+  },
+  {
+   "iteration": 16,
+   "objective": -0.5487653613090515,
+   "metrics": {
+    "efficiency": 0.5487653613090515,
+    "holdout_efficiency": 0.22936539351940155,
+    "zero_order": 0.21447820961475372,
+    "minus_one": 0.050854671746492386
+   },
+   "gradient_norm": 0.31808850169181824,
+   "beta": 32.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.657183799892664
+  },
+  {
+   "iteration": 17,
+   "objective": -0.5598747730255127,
+   "metrics": {
+    "efficiency": 0.5598747730255127,
+    "holdout_efficiency": 0.2184782475233078,
+    "zero_order": 0.21887220442295074,
+    "minus_one": 0.09144026041030884
+   },
+   "gradient_norm": 0.42846018075942993,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.548484500031918
+  },
+  {
+   "iteration": 18,
+   "objective": -0.5452717542648315,
+   "metrics": {
+    "efficiency": 0.5452717542648315,
+    "holdout_efficiency": 0.29147395491600037,
+    "zero_order": 0.2839212417602539,
+    "minus_one": 0.05028166621923447
+   },
+   "gradient_norm": 0.6473395228385925,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.184401399921626
+  },
+  {
+   "iteration": 19,
+   "objective": -0.5594746470451355,
+   "metrics": {
+    "efficiency": 0.5594746470451355,
+    "holdout_efficiency": 0.28454020619392395,
+    "zero_order": 0.2711925208568573,
+    "minus_one": 0.05674260854721069
+   },
+   "gradient_norm": 0.5701737403869629,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 9.862422300036997
+  },
+  {
+   "iteration": 20,
+   "objective": -0.5825271010398865,
+   "metrics": {
+    "efficiency": 0.5825271010398865,
+    "holdout_efficiency": 0.24487385153770447,
+    "zero_order": 0.22796966135501862,
+    "minus_one": 0.07729308307170868
+   },
+   "gradient_norm": 0.19396325945854187,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 9.773437299765646
+  },
+  {
+   "iteration": 21,
+   "objective": -0.5692846775054932,
+   "metrics": {
+    "efficiency": 0.5692846775054932,
+    "holdout_efficiency": 0.25400468707084656,
+    "zero_order": 0.21875517070293427,
+    "minus_one": 0.10825330764055252
+   },
+   "gradient_norm": 0.6470588445663452,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.239682899788022
+  },
+  {
+   "iteration": 22,
+   "objective": -0.5925077199935913,
+   "metrics": {
+    "efficiency": 0.5925077199935913,
+    "holdout_efficiency": 0.27337881922721863,
+    "zero_order": 0.22339296340942383,
+    "minus_one": 0.08776446431875229
+   },
+   "gradient_norm": 0.24376972019672394,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.358831400051713
+  },
+  {
+   "iteration": 23,
+   "objective": -0.5843067169189453,
+   "metrics": {
+    "efficiency": 0.5843067169189453,
+    "holdout_efficiency": 0.35367918014526367,
+    "zero_order": 0.24544741213321686,
+    "minus_one": 0.06615623831748962
+   },
+   "gradient_norm": 0.505141019821167,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 9.7801911002025
+  },
+  {
+   "iteration": 24,
+   "objective": -0.5836865901947021,
+   "metrics": {
+    "efficiency": 0.5836865901947021,
+    "holdout_efficiency": 0.37274956703186035,
+    "zero_order": 0.24446965754032135,
+    "minus_one": 0.06291253864765167
+   },
+   "gradient_norm": 0.46554359793663025,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 9.958469099830836
+  }
+ ],
+ "fabrication": {
+  "feature_sizes": {
+   "min_linewidth_um": 0.1,
+   "min_gap_um": 0.1,
+   "linewidth_pixels": 2,
+   "gap_pixels": 2,
+   "spacing_um": 0.05,
+   "maximum_side_pixels": 30,
+   "saturated": [],
+   "solid_fraction": 0.5,
+   "definition": "largest digital-square side whose morphological opening leaves the solid (linewidth) or the void (gap) unchanged"
+  },
+  "declared": {
+   "min_linewidth_um": 0.1,
+   "min_gap_um": 0.1,
+   "perturbation_um": 0.05,
+   "boundary": [
+    "periodic",
+    "extend"
+   ]
+  },
+  "violations": [],
+  "satisfies_declared_constraints": true,
+  "filter_radius_um": 0.125,
+  "perturbation": {
+   "realized_um": 0.05,
+   "nominal": {
+    "objective": -0.5765394568443298,
+    "metrics": {
+     "efficiency": 0.5765394568443298,
+     "holdout_efficiency": 0.2675495445728302,
+     "zero_order": 0.22428907454013824,
+     "minus_one": 0.11760998517274857
+    }
+   },
+   "eroded": {
+    "objective": -0.35954219102859497,
+    "metrics": {
+     "efficiency": 0.35954219102859497,
+     "holdout_efficiency": 0.38154715299606323,
+     "zero_order": 0.23859360814094543,
+     "minus_one": 0.326967716217041
+    },
+    "objective_change": 0.21699726581573486,
+    "solid_fraction": 0.3
+   },
+   "dilated": {
+    "objective": -0.447687029838562,
+    "metrics": {
+     "efficiency": 0.447687029838562,
+     "holdout_efficiency": 0.44865405559539795,
+     "zero_order": 0.25812920928001404,
+     "minus_one": 0.2539459466934204
+    },
+    "objective_change": 0.12885242700576782,
+    "solid_fraction": 0.7
+   }
+  }
+ },
+ "binary": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  0,
+  0,
+  0,
+  1,
+  1,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  0,
+  0,
+  0,
+  0
+ ],
+ "export": {
+  "gds": "docs\\validation\\g6\\export\\metagrating\\seed2\\metagrating-seed2.gds",
+  "structures": "docs\\validation\\g6\\export\\metagrating\\seed2\\metagrating-seed2-structures.json",
+  "structure_count": 3
+ },
+ "final_evaluation": {
+  "coarse_objective": -0.5954874753952026,
+  "stages": {
+   "coarse_smooth": {
+    "efficiency": 0.5954874753952026,
+    "holdout_efficiency": 0.33695700764656067,
+    "zero_order": 0.22760127484798431,
+    "minus_one": 0.077158622443676
+   },
+   "fine_smooth": {
+    "efficiency": 0.5814079642295837,
+    "holdout_efficiency": 0.3057291805744171,
+    "zero_order": 0.2348821759223938,
+    "minus_one": 0.08349848538637161
+   },
+   "fine_binary": {
+    "efficiency": 0.5509262084960938,
+    "holdout_efficiency": 0.26197922229766846,
+    "zero_order": 0.242043137550354,
+    "minus_one": 0.10756880044937134
+   },
+   "fine_structures": {
+    "efficiency": 0.518540620803833,
+    "holdout_efficiency": 0.27646946907043457,
+    "zero_order": 0.24144846200942993,
+    "minus_one": 0.15811443328857422
+   },
+   "fine_gds": {
+    "efficiency": 0.518540620803833,
+    "holdout_efficiency": 0.27646946907043457,
+    "zero_order": 0.24144846200942993,
+    "minus_one": 0.15811443328857422
+   }
+  },
+  "differences": {
+   "mesh_refinement": {
+    "efficiency": -0.014079511165618896,
+    "holdout_efficiency": -0.031227827072143555,
+    "zero_order": 0.007280901074409485,
+    "minus_one": 0.006339862942695618
+   },
+   "thresholding": {
+    "efficiency": -0.03048175573348999,
+    "holdout_efficiency": -0.04374995827674866,
+    "zero_order": 0.007160961627960205,
+    "minus_one": 0.024070315062999725
+   },
+   "smoothing": {
+    "efficiency": -0.03238558769226074,
+    "holdout_efficiency": 0.014490246772766113,
+    "zero_order": -0.0005946755409240723,
+    "minus_one": 0.05054563283920288
+   },
+   "gds": {
+    "efficiency": 0.0,
+    "holdout_efficiency": 0.0,
+    "zero_order": 0.0,
+    "minus_one": 0.0
+   },
+   "total": {
+    "efficiency": -0.07694685459136963,
+    "holdout_efficiency": -0.0604875385761261,
+    "zero_order": 0.013847187161445618,
+    "minus_one": 0.08095581084489822
+   }
+  },
+  "holdout": null,
+  "binary_solid_fraction": 0.5,
+  "export": {
+   "structure_count": 3,
+   "reimported_structure_count": 3,
+   "gds_structure_count": 3,
+   "gds_sha256": "c796aa29e51b9e73cc8b83d44c15178e2b862436432c21634cc555452ce9e804",
+   "gds_maximum_rounding_um": 0.0005,
+   "gds_native_vertex_count": 12
+  },
+  "conventions": {
+   "difference": "after minus before; a negative difference of a maximized metric is a loss",
+   "fine_density": "the evaluator transfers the same pixel density at its own mesh",
+   "fine_structures": "inclusive staircase voxelization of the exported rectangles",
+   "fine_gds": "polygons read back by import_gds from the exported file"
+  }
+ },
+ "wall_time_s": 283.4588591000065,
+ "device": "cpu"
+}

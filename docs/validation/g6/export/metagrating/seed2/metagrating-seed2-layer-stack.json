@@ -1,0 +1,43 @@
+{
+ "format": "gdsii",
+ "cell": "DESIGN",
+ "unit_m": 1e-06,
+ "precision_m": 1e-09,
+ "source_sha256": "c796aa29e51b9e73cc8b83d44c15178e2b862436432c21634cc555452ce9e804",
+ "structures": 3,
+ "omitted_disabled": 0,
+ "layer_stack": [
+  {
+   "structure_id": "metagrating-seed2-0000",
+   "layer": 1,
+   "datatype": 0,
+   "material": "tio2-like",
+   "z_min": -0.25,
+   "z_max": 0.25,
+   "mesh_order": 2
+  },
+  {
+   "structure_id": "metagrating-seed2-0001",
+   "layer": 1,
+   "datatype": 0,
+   "material": "tio2-like",
+   "z_min": -0.25,
+   "z_max": 0.25,
+   "mesh_order": 2
+  },
+  {
+   "structure_id": "metagrating-seed2-0002",
+   "layer": 1,
+   "datatype": 0,
+   "material": "tio2-like",
+   "z_min": -0.25,
+   "z_max": 0.25,
+   "mesh_order": 2
+  }
+ ],
+ "maximum_rounding_um": 0.0005,
+ "limitations": [
+  "GDS contains XY geometry only. Retain this Z/material stack sidecar.",
+  "Sources, detectors, ports and solver settings are not exported."
+ ]
+}
