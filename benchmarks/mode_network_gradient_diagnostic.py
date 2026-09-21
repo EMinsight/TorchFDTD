@@ -8,9 +8,9 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import numpy as np
 from benchmarks.mode_network_slab_oracle import continuum_slab, discrete_slab, C_UM_S
+from benchmarks.provenance import git_revision
 
 
 def objective(s):
@@ -48,7 +48,7 @@ def run():
     descent_step = 1e-3
     proposed_change = -np.sign(coarse_native_ad)*descent_step
     result = dict(recorded_utc=datetime.now(timezone.utc).isoformat(),
-        revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
+        revision=git_revision(root),
         computation='FP64 scalar NumPy continuity/lattice oracle calculations only. No new FDTD or native adjoint.',
         objective='Re(S21) + 0.3 Im(S12)', parameter='Slab relative permittivity epsilon = 2.25 + increment',
         epsilon=epsilon, background_epsilon=2.25, wavelength_um=1.55,

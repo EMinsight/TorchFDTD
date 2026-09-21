@@ -8,10 +8,10 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import time
 
 import numpy as np
+from benchmarks.provenance import git_revision
 
 C_UM_S=299792458.0*1e6
 MAX_COMPLEX_ERROR=.004  # Declared before the new native measurement.
@@ -98,7 +98,7 @@ def run_native_case():
     changes=[name for name,value in hashes.items() if hashlib.sha256((root/name).read_bytes()).hexdigest()!=value]
     if changes:raise RuntimeError('Measured source changed: '+', '.join(changes))
     return dict(recorded_utc=datetime.now(timezone.utc).isoformat(),device='cpu',precision='float32',
-        revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
+        revision=git_revision(root),
         torch_version=torch.__version__,source_sha256=hashes,configuration=config,
         criterion=criterion,accepted=bool(errors.max()<=MAX_COMPLEX_ERROR),
         measured_s_real_imag=packed(measured),oracle_s_real_imag=packed(oracle),

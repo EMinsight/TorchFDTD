@@ -8,7 +8,6 @@ import hashlib
 import json
 import math
 from pathlib import Path
-import subprocess
 import sys
 import time
 
@@ -19,6 +18,7 @@ REPOSITORY = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPOSITORY))
 from torchfdtd.pmc_cpml import EndpointCPMLSimulation
 from torchfdtd.pmc_simulation import C_UM_S
+from benchmarks.provenance import git_revision
 
 DX, DT, STEPS = .1, .05, 240
 TIME = np.arange(1, STEPS+1)*DT
@@ -104,7 +104,7 @@ def main():
             tensor_plan_bytes=memory['tensor_upper_bound_bytes']))
         arrays['depth'+str(layers)]=trace
     record=dict(contract=CONTRACT,contract_sha256=hashlib.sha256(contract.encode()).hexdigest(),
-        revision=subprocess.check_output(['git','-C',str(REPOSITORY),'rev-parse','HEAD'],text=True).strip(),
+        revision=git_revision(REPOSITORY),
         source_sha256=hashes,post_run_hashes_match=all(hashlib.sha256((REPOSITORY/k).read_bytes()).hexdigest()==v for k,v in hashes.items()),
         api='direct EndpointCPMLSimulation; native translated coefficients, not native Project dispatch',
         backend='CPU FP32 sparse endpoint reference',torch_version=torch.__version__,

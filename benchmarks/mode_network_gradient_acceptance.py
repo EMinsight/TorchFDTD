@@ -11,7 +11,6 @@ import gc
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import time
 
 import numpy as np
@@ -23,6 +22,7 @@ import torchfdtd.mode_network as network_module
 from torchfdtd.solver import field_axes
 from benchmarks.mode_network_refinement import make, digest, summarize
 from benchmarks.mode_network_slab_oracle import continuum_slab, discrete_slab
+from benchmarks.provenance import git_revision
 
 
 CRITERIA = dict(discrete_derivative_relative_error_max=1e-4,
@@ -66,7 +66,7 @@ def run(device, output):
         objective='Re(S21) + 0.3 Im(S12)', target_slab_epsilon=2.6,
         planned_native_network_calls=dict(forward_with_backward=1, additional_forward_for_descent=1),
         planned_native_fdtd_finite_difference_calls=0,
-        revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
+        revision=git_revision(root),
         source_sha256=hashes, source_manifest_sha256=manifest,
         raw_source_snapshot_directory=str(snapshot.relative_to(root)).replace('\\', '/'),
         previous_gradient_record_sha256=hashlib.sha256(prior_bytes).hexdigest(),

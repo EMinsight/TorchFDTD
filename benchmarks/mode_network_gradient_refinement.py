@@ -11,7 +11,6 @@ import gc
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import time
 
 import numpy as np
@@ -22,6 +21,7 @@ import torchfdtd.mode_network as network_module
 from torchfdtd.solver import field_axes
 from benchmarks.mode_network_refinement import make, digest, summarize
 from benchmarks.mode_network_slab_oracle import continuum_slab, discrete_slab
+from benchmarks.provenance import git_revision
 
 
 def objective(s):
@@ -165,7 +165,7 @@ def run(device, output_path):
     previous = root/'docs/validation/mode_network_gradient_diagnostic.json'
     previous_bytes = previous.read_bytes()
     report = dict(recorded_utc=datetime.now(timezone.utc).isoformat(),
-        revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
+        revision=git_revision(root),
         hardware=hardware, device=str(device), torch_version=torch.__version__, cuda_version=torch.version.cuda,
         objective='Re(S21) + 0.3 Im(S12)', precision='float32',
         scope='Exactly one native network forward/backward per mesh, fixed homogeneous slab epsilon parameter. Matched calibration and per-column recomputation are part of each invocation. No eigenmode or exterior material gradients, no FDTD finite differences, no physical optimization step.',

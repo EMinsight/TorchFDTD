@@ -7,7 +7,6 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import time
 from datetime import datetime, timezone
 import numpy as np
@@ -15,6 +14,7 @@ import torch
 from torchfdtd import Project, Region, Source, Boundaries, BoundaryFace, AdjointOptions
 from torchfdtd.mode_network import FixedModePort, ModeNetwork
 from torchfdtd.solver import field_axes
+from benchmarks.provenance import git_revision
 
 
 COARSE_S = [[[.04124605283141136, .020350085571408272],
@@ -92,7 +92,7 @@ def run(device):
     coarse = np.array(COARSE_S)[..., 0]+1j*np.array(COARSE_S)[..., 1]
     fine = summarize(s)
     output = dict(recorded_utc=datetime.now(timezone.utc).isoformat(),
-        revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
+        revision=git_revision(root),
         device=device, hardware=torch.cuda.get_device_name() if device == 'cuda' else 'CPU',
         torch_version=torch.__version__, source_sha256=hashes,
         source_hash_scope='Measured finer run driver/runtime bytes. Not attributed to the historical coarse run.',

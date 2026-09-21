@@ -5,7 +5,6 @@ import copy
 import gc
 import hashlib
 import json
-import subprocess
 import sys
 import traceback
 import weakref
@@ -18,6 +17,7 @@ from torchfdtd import (AdjointBatchOptions, AdjointExecutionPolicy, AdjointOptio
 from test_recorded_periodic_response import SPEC, objective
 import torchfdtd.reversible_cpml as core
 from torchfdtd.cuda_bootstrap import prepare_cuda_kernels
+from benchmarks.provenance import git_revision
 
 OUTPUT = Path(__file__).with_suffix('.json')
 PATHS = [Path(__file__), *[ROOT/'torchfdtd'/name for name in (
@@ -70,8 +70,7 @@ def main():
                       retained_noncontiguous_seeds=2, peak_not_above_reservation=True),
         spec=SPEC, density=[[.2, .4], [.5, .3]], mesh_um=.1, steps=160,
         pml_cells=6, quadrature_counts=[4, 4], trace_chunk_steps=7,
-        source_sha256_before=hashes(), revision=subprocess.check_output(
-            ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+        source_sha256_before=hashes(), revision=git_revision(ROOT),
         working_tree_sources=True)
     original = core._RecordedCPML.forward
     owners = []

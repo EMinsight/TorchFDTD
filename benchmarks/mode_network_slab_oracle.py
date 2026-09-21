@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import time
 import numpy as np
 import torch
@@ -17,6 +16,7 @@ from torchfdtd import AdjointOptions
 from torchfdtd.mode_network import ModeNetwork
 from torchfdtd.solver import field_axes
 from benchmarks.mode_network_refinement import make, summarize, digest
+from benchmarks.provenance import git_revision
 
 
 C_UM_S = 299792458.0 * 1e6
@@ -135,7 +135,7 @@ def run(device):
         changed_yee_coordinates=coordinates, network_call_seconds=solve_seconds)
     rows.append(row)
     output = dict(recorded_utc=datetime.now(timezone.utc).isoformat(),
-        revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
+        revision=git_revision(root),
         device=device, hardware=torch.cuda.get_device_name() if device == 'cuda' else 'CPU',
         torch_version=torch.__version__, source_sha256=hashes,
         prior_record_sha256=hashlib.sha256(previous_bytes).hexdigest(),

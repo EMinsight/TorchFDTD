@@ -8,7 +8,6 @@ import hashlib
 import json
 import math
 from pathlib import Path
-import subprocess
 import time
 
 import numpy as np
@@ -16,6 +15,7 @@ import torch
 
 from torchfdtd import AdjointOptions, Monitor, Project, Region, Source
 from torchfdtd.anisotropy import TensorDielectricSimulation
+from benchmarks.provenance import git_revision
 
 SPEC = dict(background_index=1.2, eigen_indices=[1.5,2.0], rotation_deg=25.,
     slab_thickness_um=.6, wavelength_um=1.55, domain_um=[.5,.5,6.],
@@ -165,7 +165,7 @@ def main():
         accepted=all(checks.values()),checks=checks,meshes=rows,wall_seconds=time.perf_counter()-start,
         torch_version=torch.__version__,cuda_version=torch.version.cuda,device=torch.cuda.get_device_name(),
         device_uuid=str(getattr(torch.cuda.get_device_properties(0),'uuid','unavailable')),
-        revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
+        revision=git_revision(root),
         source_sha256_before=source_before,source_sha256=source_after,
         limitations=['Fixed isotropic exterior/collar only','Normal incidence and homogeneous transverse plane',
             'No general anisotropic CPML matching or long-time stability claim','Two meshes do not establish asymptotic convergence'])

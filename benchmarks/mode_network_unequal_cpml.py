@@ -10,7 +10,6 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import time
 import numpy as np
 import torch
@@ -19,6 +18,7 @@ from benchmarks.mode_network_unequal_oracle import yee_interface,packed,MAX_COMP
 from torchfdtd import Project,Region,Source,AdjointOptions
 from torchfdtd.mode_network import FixedModePort,ModeNetwork
 from torchfdtd.boundaries import BoundaryDescription
+from benchmarks.provenance import git_revision
 
 
 def make(domain_um,pml_cells):
@@ -128,7 +128,7 @@ def run():
     changed=[name for name,value in hashes.items() if hashlib.sha256((root/name).read_bytes()).hexdigest()!=value]
     if changed:raise RuntimeError('Source changed during followup: '+', '.join(changed))
     return dict(recorded_utc=datetime.now(timezone.utc).isoformat(),device='cpu',precision='float32',
-        revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
+        revision=git_revision(root),
         source_sha256=hashes,prior_record=prior_path.relative_to(root).as_posix(),
         prior_record_sha256=hashlib.sha256(prior_bytes).hexdigest(),diagnosis=diagnosis,
         harmonic_trials=[trial],criterion=prior['criterion'],accepted=bool(errors.max()<=MAX_COMPLEX_ERROR),
