@@ -50,6 +50,7 @@ or source archive the run installed, `--artifact` references raw result files,
 | --- | --- | --- |
 | No failures or errors, exit code 0, no test named in the task's `required_tests` skipped or absent, every test source resolved | VERIFIED | passes while the source commit is an ancestor of HEAD and the test, fixture and criteria files are unchanged |
 | Any failure or error | FAILED | fails |
+| A skip whose reason names CUDA, CuPy or a GPU and does not start with `optional platform check:` (G4-05: a GPU-required test that did not run), whether or not `required_tests` names it | FAILED, listed in `gpu_required_skips` | fails; evidence recorded before the field existed is classified from its skip reasons |
 | A required test skipped or absent, a nonzero exit code, an empty report or an unresolved test source | NOT_RUN, with the reason printed | fails |
 
 `required_tests` entries are `tests/<file>.py`, `tests/<file>.py::<function>` or

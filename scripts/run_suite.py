@@ -70,7 +70,7 @@ def main(argv=None):
     spec = SUITES[args.suite]
     shown = {key: env[key] for key in [*spec['environment'], *(['CUDA_VISIBLE_DEVICES'] if spec['hide_cuda'] else [])]}
     print(f'suite: {args.suite}')
-    print('command: ' + ' '.join(command))
+    print('command: ' + subprocess.list2cmdline(command))
     print('environment: ' + (', '.join(f'{k}={v!r}' for k, v in shown.items()) or 'inherited'))
     if args.dry_run:
         return 0

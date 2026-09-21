@@ -128,13 +128,13 @@ def dry_run(suite, *extra):
 
 def test_cpu_pr_suite_hides_cuda_and_deselects_cuda_and_long_tests():
     command, environment = dry_run('cpu-pr', '--junitxml=out.xml')
-    assert '-m not cuda and not long' in command and '--gpu-required' not in command and command.endswith('--junitxml=out.xml')
+    assert '-m "not cuda and not long"' in command and '--gpu-required' not in command and command.endswith('--junitxml=out.xml')
     assert "CUDA_VISIBLE_DEVICES='-1'" in environment
 
 
 def test_gpu_nightly_suite_requires_the_gpu_and_excludes_long_tests():
     command, environment = dry_run('gpu-nightly')
-    assert '-m not long' in command and '--gpu-required' in command
+    assert '-m "not long"' in command and '--gpu-required' in command
     assert environment == 'inherited'
 
 
