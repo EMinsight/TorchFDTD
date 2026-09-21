@@ -1,0 +1,220 @@
+{
+  "schema": "torchfdtd.tensor_cpml_birefringent_slab.v1",
+  "dft_convention": "DifferentiableResult.spectrum: exp(-i omega t); forward +z phase exp(-i k z)",
+  "spec": {
+    "exterior_indices": [
+      1.2,
+      1.4
+    ],
+    "exterior_normal_permittivity": 2.25,
+    "slab_indices": [
+      1.5,
+      2.0
+    ],
+    "slab_normal_permittivity": 4.5,
+    "rotation_deg": 25.0,
+    "slab_thickness_um": 0.6,
+    "wavelength_um": 1.55,
+    "domain_um": [
+      0.5,
+      0.5,
+      6.0
+    ],
+    "transverse_mesh_um": 0.1,
+    "normal_meshes_um": [
+      0.05,
+      0.025
+    ],
+    "pml_thickness_um": 1.0,
+    "source_z_um": -1.2,
+    "probe_z_um": 1.2,
+    "pulse_fwhm_s": 6e-15,
+    "pulse_offset_s": 1.8e-14,
+    "duration_s": 8e-14,
+    "precision": "float32"
+  },
+  "predeclared_criteria": {
+    "coarse_channel_vector_relative_error_max": 0.05,
+    "fine_channel_vector_relative_error_max": 0.03,
+    "fine_to_coarse_error_ratio_max": 0.8,
+    "fine_channel_power_absolute_error_max": 0.03,
+    "tail_rms_to_peak_max": 0.001,
+    "index_vjp_relative_error_max": 0.15
+  },
+  "accepted": true,
+  "checks": {
+    "coarse_accuracy": true,
+    "fine_accuracy": true,
+    "refinement": true,
+    "power": true,
+    "tail": true,
+    "memory": true,
+    "index_vjp": true,
+    "source_integrity": true
+  },
+  "meshes": [
+    {
+      "dz_um": 0.05,
+      "shape": [
+        5,
+        5,
+        120
+      ],
+      "steps": 594,
+      "time_step_s": 1.3481520190852315e-16,
+      "actual_duration_s": 8.008022993366275e-14,
+      "geometry": {
+        "first_node": 54,
+        "last_node": 65,
+        "effective_faces_um": [
+          -0.32499999999999984,
+          0.275
+        ],
+        "effective_thickness_um": 0.6000000000000001
+      },
+      "channel_transmission": [
+        [
+          0.729160487651825,
+          -0.6750174164772034
+        ],
+        [
+          0.09558095037937164,
+          -0.9330744743347168
+        ]
+      ],
+      "oracle_channel_transmission": [
+        [
+          0.7339671604497774,
+          -0.6704547666701264
+        ],
+        [
+          0.11312708965443864,
+          -0.9340361235655217
+        ]
+      ],
+      "channel_vector_relative_error": 0.013721178069275253,
+      "channel_power": [
+        0.987323522567749,
+        0.879763662815094
+      ],
+      "oracle_channel_power": [
+        0.9882173867694027,
+        0.8852212185389899
+      ],
+      "oracle_index_vjp_per_unit_index": -0.17277099734203105,
+      "records": [
+        {
+          "case": "reference",
+          "forward_seconds": 4.206352999899536,
+          "tail_rms_to_peak": 9.083908736329249e-08,
+          "cuda_peak_allocated_bytes": 17163264,
+          "gpu_reservation_bytes": 71349800,
+          "cpml_contract": "D-field composition: CPML memories on the curl, S on the complete curl; tensors extend into CPML where each face normal is a principal axis with a non-intermediate eigenvalue"
+        },
+        {
+          "case": "slab",
+          "forward_seconds": 4.186409799847752,
+          "tail_rms_to_peak": 8.46436094548153e-08,
+          "cuda_peak_allocated_bytes": 18918912,
+          "gpu_reservation_bytes": 71349800,
+          "cpml_contract": "D-field composition: CPML memories on the curl, S on the complete curl; tensors extend into CPML where each face normal is a principal axis with a non-intermediate eigenvalue",
+          "backward_seconds": 21.080067500006407,
+          "index_vjp_per_unit_index": -0.18468144536018372,
+          "replayed_steps": 2158
+        }
+      ]
+    },
+    {
+      "dz_um": 0.025,
+      "shape": [
+        5,
+        5,
+        240
+      ],
+      "steps": 1028,
+      "time_step_s": 7.783559311273959e-17,
+      "actual_duration_s": 8.00149897198963e-14,
+      "geometry": {
+        "first_node": 108,
+        "last_node": 131,
+        "effective_faces_um": [
+          -0.31249999999999983,
+          0.28750000000000037
+        ],
+        "effective_thickness_um": 0.6000000000000001
+      },
+      "channel_transmission": [
+        [
+          0.7328363060951233,
+          -0.6715394258499146
+        ],
+        [
+          0.10889392346143723,
+          -0.9338122010231018
+        ]
+      ],
+      "oracle_channel_transmission": [
+        [
+          0.7339671604497774,
+          -0.6704547666701264
+        ],
+        [
+          0.11312708965443864,
+          -0.9340361235655217
+        ]
+      ],
+      "channel_vector_relative_error": 0.003301892590834018,
+      "channel_power": [
+        0.9880142211914062,
+        0.8838631510734558
+      ],
+      "oracle_channel_power": [
+        0.9882173867694027,
+        0.8852212185389899
+      ],
+      "oracle_index_vjp_per_unit_index": -0.17277099734203105,
+      "records": [
+        {
+          "case": "reference",
+          "forward_seconds": 6.6585809998214245,
+          "tail_rms_to_peak": 7.91796423982305e-08,
+          "cuda_peak_allocated_bytes": 25790976,
+          "gpu_reservation_bytes": 75590480,
+          "cpml_contract": "D-field composition: CPML memories on the curl, S on the complete curl; tensors extend into CPML where each face normal is a principal axis with a non-intermediate eigenvalue"
+        },
+        {
+          "case": "slab",
+          "forward_seconds": 6.397488800343126,
+          "tail_rms_to_peak": 8.329213585511752e-08,
+          "cuda_peak_allocated_bytes": 25792000,
+          "gpu_reservation_bytes": 75590480,
+          "cpml_contract": "D-field composition: CPML memories on the curl, S on the complete curl; tensors extend into CPML where each face normal is a principal axis with a non-intermediate eigenvalue"
+        }
+      ]
+    }
+  ],
+  "wall_seconds": 42.86980549991131,
+  "torch_version": "2.10.0+cu126",
+  "cuda_version": "12.6",
+  "device": "NVIDIA GeForce RTX 3060",
+  "device_uuid": "47b34d79-df05-5d4f-0667-bb41ed5e7a39",
+  "revision": "0f9cea78e81aa4f504a0fc16ad63411681a53c78",
+  "source_sha256_before": {
+    "benchmarks/tensor_cpml_birefringent_slab.py": "9555c71ddd0f13cc3295a9dc773daf2148708c8c18f431669b82c86097f61d20",
+    "torchfdtd/anisotropy.py": "b5ede3d7934922364267de609b3f2c99994c2bd19f3b31856e39f1e17dcb304b",
+    "torchfdtd/differentiable.py": "98637a6eb8e20d10e18df2460f8813dc7276fc24dd60e7970da103f2dac99a3a",
+    "torchfdtd/boundaries.py": "43ed7dc65066160cd7519cff73a391d612ae61102e08b195976f98b3b43581c3"
+  },
+  "source_sha256": {
+    "benchmarks/tensor_cpml_birefringent_slab.py": "9555c71ddd0f13cc3295a9dc773daf2148708c8c18f431669b82c86097f61d20",
+    "torchfdtd/anisotropy.py": "b5ede3d7934922364267de609b3f2c99994c2bd19f3b31856e39f1e17dcb304b",
+    "torchfdtd/differentiable.py": "98637a6eb8e20d10e18df2460f8813dc7276fc24dd60e7970da103f2dac99a3a",
+    "torchfdtd/boundaries.py": "43ed7dc65066160cd7519cff73a391d612ae61102e08b195976f98b3b43581c3"
+  },
+  "limitations": [
+    "Normal incidence with slab and exterior sharing principal axes; no cross-channel coupling",
+    "Homogeneous transverse plane; abrupt node-tensor slab faces",
+    "Two meshes do not establish asymptotic convergence",
+    "No isolated CPML reflection measurement; tail decay bounds finite-duration contamination only"
+  ]
+}

@@ -52,9 +52,11 @@ selected field component's diagonal permittivity, labeled in result metadata.
 
 Supported scope is resident FP32 on CPU/CUDA, uniform 3D grids, staircase
 geometry, point electric soft sources and point E/H monitors at every step.
-Periodic/Bloch fields may be complex64. CPML requires a fixed isotropic
-background through the PML and one additional node row. Material gradients in
-that collar are zero. Tensor computation uses Torch operations, with no fused
+Periodic/Bloch fields may be complex64. In this native workflow CPML requires
+a fixed isotropic background through the PML and one additional node row, and
+material gradients in that collar are zero; the explicit
+`TensorDielectricSimulation(..., cpml_material='tensor')` API admits tensors
+inside CPML under the geometric criterion documented in the plan. Tensor computation uses Torch operations, with no fused
 tensor-kernel or throughput claim.
 
 Dispersive tensors, PEC/PMC mixing, spatial streaming, nonuniform grids,

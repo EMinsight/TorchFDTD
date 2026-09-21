@@ -137,3 +137,55 @@ metadata-integrity gate. No physics, input, oracle, numerical criterion or
 measured result changed. No physical rerun was justified by these harness-only
 changes. A mocked failure path checks JSON retention and the nonzero exit
 without executing FDTD or touching CUDA.
+
+## Birefringent slab inside a birefringent exterior that fills the CPML
+
+The second record, [tensor_cpml_birefringent_slab_3060.json](validation/tensor_cpml_birefringent_slab_3060.json)
+from [tensor_cpml_birefringent_slab.py](../benchmarks/tensor_cpml_birefringent_slab.py),
+replaces the fixed isotropic exterior by a tensor exterior that extends through
+both z CPML faces with `cpml_material='tensor'`. The exterior has transverse
+principal indices 1.2 and 1.4 and normal permittivity 2.25 (the largest
+eigenvalue, so z is an admissible face normal); the slab has principal indices
+1.5 and 2.0 and normal permittivity 4.5; both are rotated 25 degrees about z.
+Because slab and exterior share principal axes, each transverse eigenpolarization
+`v_j` is an exact scalar channel at normal incidence,
+
+```text
+tj = exp(+i*k0*n0j*d) / [cos(k0*nj*d) + (i/2)*(nj/n0j+n0j/nj)*sin(k0*nj*d)]
+```
+
+with the exterior index `n0j` of that channel. The observable is
+`Tj = (E_slab . v_j)/(E_ref . v_j)` from the Ex/Ey probe spectra of the slab run
+and the slab-free run, so the polarization-dependent calibration of an impressed
+Ex field in a birefringent medium cancels per channel. The independent derivative
+is `d|t1|^2/dn1` by central difference of the formula in double precision; the
+FDTD value differentiates the slab index through the rotated tensor field,
+checkpointed history and normalized spectrum, with the exterior fixed.
+
+Geometry, pulse, meshes and duration are those of the first record. The gates
+were fixed before execution and passed on the first run:
+
+| Gate | Threshold | Observed |
+| --- | ---: | ---: |
+| Coarse channel-vector relative error | <=5% | 1.3721% |
+| Fine channel-vector relative error | <=3% | 0.3302% |
+| Fine/coarse error ratio | <=0.8 | 0.2406 |
+| Fine channel power absolute error | <=0.03 | 0.0002032, 0.001358 |
+| Last-10%-time field RMS / peak, every run | <=0.001 | maximum 9.084e-08 |
+| Coarse slab-index VJP relative error | <=15% | 6.89% |
+| Each CUDA allocated peak | <=reported reservation | passed |
+
+The continuum channel powers are 0.9882 and 0.8852; the fine values are
+0.9880 and 0.8839. The continuum index derivative is -0.1728 per unit index;
+the coarse FDTD value is -0.1847. The run took 42.9 seconds at revision
+`0f9cea78e81aa4f504a0fc16ad63411681a53c78`; the forward and backward times in the record are
+small-case timings, not a throughput measurement. The
+maximum allocated peak was 25792000 bytes against reservations of
+71349800 and 75590480 bytes.
+
+This validates tensor media that fill the CPML for a normal-incidence,
+co-aligned birefringent configuration. It does not exercise cross-channel
+coupling from a slab rotated relative to its exterior, oblique incidence,
+general interfaces, an isolated CPML reflection measurement or large-grid
+speed; the stability of tensors inside CPML is covered separately by the
+geometric criterion and the recorded sweep.

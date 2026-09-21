@@ -1,0 +1,2015 @@
+{
+  "schema": "torchfdtd.tensor_cpml_stability_sweep.v2",
+  "spec": {
+    "cells": 20,
+    "mesh_um": 0.1,
+    "pml_cells": 5,
+    "steps": 4000,
+    "precision": "float32",
+    "wavelength_um": 0.7,
+    "pulse_fwhm_s": 5e-16,
+    "pulse_offset_s": 7e-16,
+    "dense_shape": [
+      5,
+      11,
+      5
+    ],
+    "dense_pml_cells": 3,
+    "dense_phases": [
+      0.0,
+      1.5707963267948966,
+      3.141592653589793
+    ],
+    "dense_ade_shape": [
+      3,
+      7,
+      3
+    ]
+  },
+  "predeclared_criteria": {
+    "last_window_to_mid_window_max": 1.0,
+    "six_face_h_last_window_to_mid_window_max": 0.5,
+    "rejected_last_window_to_mid_window_min": 10.0,
+    "dense_radius_max": 1.000000001,
+    "rejected_dense_radius_min": 1.001,
+    "rejected_dense_ade_radius_min": 1.00001
+  },
+  "criteria_history": [
+    "First execution declared six_face_late_h_to_peak_h_max=1e-4. Two admitted high-contrast six-face cases (uniaxial x 1:16, spatially varying) decayed monotonically but only to 5e-4 and 1e-3 of their |H|^2 peak within 4000 steps, while every non-growth check passed. The decay criterion was replaced by the windowed |H|^2 trend above and the sweep rerun in full.",
+    "The second execution admitted dispersive tensors inside CPML faces when epsilon_inf and every strength were uniaxial about the normal. Its Drude case (16,2,2) with strength (.2,.8,.8) grew to overflow: non-proportional dispersion opens a hyperbolic band with a negative transverse and positive normal permittivity, which the geometric criterion forbids. Dense radii confirmed growth for that class and for proportional poles on tensors rotated about the normal, where the forward and inverse node assemblies are not inverses of each other. Admission now requires axis-aligned epsilon_inf with strengths proportional to it wherever a pole enters a face; the former case is kept as a rejected long run and the dense ADE cases were added. The sweep was rerun in full."
+  ],
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce RTX 3060",
+  "torch_version": "2.10.0+cu126",
+  "cuda_version": "12.6",
+  "revision": "0f9cea78e81aa4f504a0fc16ad63411681a53c78",
+  "source_sha256": {
+    "benchmarks/tensor_cpml_stability_sweep.py": "3600739f5727d2e104abb2829c220da0c0f9d0dc471692dca0fa25eaf4720437",
+    "torchfdtd/anisotropy.py": "b5ede3d7934922364267de609b3f2c99994c2bd19f3b31856e39f1e17dcb304b",
+    "torchfdtd/anisotropy_dispersive.py": "18d773e8729bb7d3c5ddfdd5d500012fc99be8bdfef923bf41fd48677d7ae2d2",
+    "torchfdtd/differentiable.py": "98637a6eb8e20d10e18df2460f8813dc7276fc24dd60e7970da103f2dac99a3a",
+    "torchfdtd/boundaries.py": "43ed7dc65066160cd7519cff73a391d612ae61102e08b195976f98b3b43581c3"
+  },
+  "accepted": true,
+  "long_runs": [
+    {
+      "label": "isotropic",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 1.0,
+      "steps": 4000,
+      "peak_total": 2.3936413526535034,
+      "peak_step": 5,
+      "peak_h2": 1.9614979028701782,
+      "total_at": [
+        0.0026445973198860884,
+        0.0017817345215007663,
+        0.001708071369876052,
+        0.0017024529929585697
+      ],
+      "h2_at": [
+        0.0006708882283419371,
+        4.833005368709564e-05,
+        3.000877995873452e-06,
+        2.4096289052977227e-07
+      ],
+      "last_window_to_mid_window": 0.9517608080025467,
+      "h_last_window_to_mid_window": 0.026285485285497477,
+      "late_h_to_peak_h": 3.8093775389517406e-06,
+      "seconds": 32.203219500370324,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true,
+        "six_face_h_decay": true
+      }
+    },
+    {
+      "label": "uniaxial z 1:4",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        1.0,
+        1.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 4.0,
+      "steps": 4000,
+      "peak_total": 3.2043964862823486,
+      "peak_step": 6,
+      "peak_h2": 2.322950839996338,
+      "total_at": [
+        0.006304271402768791,
+        0.0055696525159874,
+        0.005481957854044595,
+        0.005474932346402284
+      ],
+      "h2_at": [
+        0.000492451130412519,
+        7.000598270678893e-05,
+        3.7699242056987714e-06,
+        3.607421206197614e-07
+      ],
+      "last_window_to_mid_window": 0.9811826874551863,
+      "h_last_window_to_mid_window": 0.021308723566431556,
+      "late_h_to_peak_h": 2.7840932603117135e-06,
+      "seconds": 31.854361899662763,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true,
+        "six_face_h_decay": true
+      }
+    },
+    {
+      "label": "uniaxial z 1:16",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        1.0,
+        1.0,
+        16.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 16.0,
+      "steps": 4000,
+      "peak_total": 5.154651761054993,
+      "peak_step": 9,
+      "peak_h2": 3.3843302726745605,
+      "total_at": [
+        0.015541754430159926,
+        0.012163920298917219,
+        0.011729469840247475,
+        0.011701606302494838
+      ],
+      "h2_at": [
+        0.001303002005442977,
+        0.00013757680426351726,
+        8.873958904587198e-06,
+        1.5833368252060609e-06
+      ],
+      "last_window_to_mid_window": 0.953285875235029,
+      "h_last_window_to_mid_window": 0.027975789188071046,
+      "late_h_to_peak_h": 6.7954574549906885e-06,
+      "seconds": 32.306340200360864,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true,
+        "six_face_h_decay": true
+      }
+    },
+    {
+      "label": "uniaxial z 16:1",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        16.0,
+        16.0,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 16.0,
+      "steps": 4000,
+      "peak_total": 1.5262183547019958,
+      "peak_step": 4,
+      "peak_h2": 0.9763684868812561,
+      "total_at": [
+        0.00037273537600412965,
+        7.638976239832118e-05,
+        6.303463521817321e-05,
+        6.070801548219151e-05
+      ],
+      "h2_at": [
+        0.0001423230569344014,
+        1.07642263174057e-05,
+        7.730581046416773e-07,
+        2.302924428931874e-08
+      ],
+      "last_window_to_mid_window": 0.7089027754280416,
+      "h_last_window_to_mid_window": 0.014030886024480698,
+      "late_h_to_peak_h": 9.123572369607483e-07,
+      "seconds": 30.92116149980575,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true,
+        "six_face_h_decay": true
+      }
+    },
+    {
+      "label": "uniaxial x 1:16",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        1.0,
+        16.0,
+        16.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 16.0,
+      "steps": 4000,
+      "peak_total": 7.904851347208023,
+      "peak_step": 10,
+      "peak_h2": 7.499049186706543,
+      "total_at": [
+        0.022838801611214876,
+        0.012961630709469318,
+        0.0077161421068012714,
+        0.004584365524351597
+      ],
+      "h2_at": [
+        0.016591442748904228,
+        0.008804073557257652,
+        0.0037726503796875477,
+        0.0006316541694104671
+      ],
+      "last_window_to_mid_window": 0.4085850571898818,
+      "h_last_window_to_mid_window": 0.19708337341019175,
+      "late_h_to_peak_h": 0.0005057421297208731,
+      "seconds": 29.60406959988177,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true,
+        "six_face_h_decay": true
+      }
+    },
+    {
+      "label": "biaxial diag(1,2,4) xz faces",
+      "faces": {
+        "x": "pml",
+        "y": "periodic",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        1.0,
+        2.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 4.0,
+      "steps": 4000,
+      "peak_total": 3.535586416721344,
+      "peak_step": 5,
+      "peak_h2": 2.7709641456604004,
+      "total_at": [
+        0.015186633914709091,
+        0.00679638353176415,
+        0.004565535607980564,
+        0.0042442813428351656
+      ],
+      "h2_at": [
+        0.007639997638761997,
+        0.002054294804111123,
+        0.00029354405705817044,
+        6.935176497790962e-05
+      ],
+      "last_window_to_mid_window": 0.6496813655914832,
+      "h_last_window_to_mid_window": 0.07488227471490487,
+      "late_h_to_peak_h": 0.0001295648926366317,
+      "seconds": 27.423836800269783,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true
+      }
+    },
+    {
+      "label": "biaxial diag(1,4,16) xz faces",
+      "faces": {
+        "x": "pml",
+        "y": "periodic",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        1.0,
+        4.0,
+        16.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 16.0,
+      "steps": 4000,
+      "peak_total": 5.88722825050354,
+      "peak_step": 10,
+      "peak_h2": 4.998989105224609,
+      "total_at": [
+        0.046356840059161186,
+        0.0164231532253325,
+        0.009532730677165091,
+        0.008251336286775768
+      ],
+      "h2_at": [
+        0.03470689803361893,
+        0.007637653965502977,
+        0.0014820365468040109,
+        0.00048001750838011503
+      ],
+      "last_window_to_mid_window": 0.501629221587212,
+      "h_last_window_to_mid_window": 0.12180819722153952,
+      "late_h_to_peak_h": 0.00043011635830625145,
+      "seconds": 28.717460099607706,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true
+      }
+    },
+    {
+      "label": "biaxial diag(16,4,1) xz faces",
+      "faces": {
+        "x": "pml",
+        "y": "periodic",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        16.0,
+        4.0,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 16.0,
+      "steps": 4000,
+      "peak_total": 1.3665346503257751,
+      "peak_step": 4,
+      "peak_h2": 0.9059262275695801,
+      "total_at": [
+        0.005919229472056031,
+        0.0011451957980170846,
+        0.00041159601823892444,
+        0.0002281837587361224
+      ],
+      "h2_at": [
+        0.0031870033126324415,
+        0.0005456823273561895,
+        0.00012180644262116402,
+        4.0938488382380456e-05
+      ],
+      "last_window_to_mid_window": 0.2240878729622069,
+      "h_last_window_to_mid_window": 0.13522260931919264,
+      "late_h_to_peak_h": 0.00019704725846166207,
+      "seconds": 27.97966630011797,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true
+      }
+    },
+    {
+      "label": "(16,1,4) rotated 0.7 about x, x faces",
+      "faces": {
+        "x": "pml",
+        "y": "periodic",
+        "z": "periodic"
+      },
+      "eigenvalues": [
+        16.0,
+        1.0,
+        4.0
+      ],
+      "rotation": [
+        0.7,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 1.4781745949826903,
+      "contrast": 16.0,
+      "steps": 4000,
+      "peak_total": 2.6714171171188354,
+      "peak_step": 6,
+      "peak_h2": 1.9384033679962158,
+      "total_at": [
+        0.13626150786876678,
+        0.046161165460944176,
+        0.016824811697006226,
+        0.007546367589384317
+      ],
+      "h2_at": [
+        0.09428387880325317,
+        0.030912579968571663,
+        0.010991574265062809,
+        0.004732816945761442
+      ],
+      "last_window_to_mid_window": 0.2254981892922115,
+      "h_last_window_to_mid_window": 0.21871908578559118,
+      "late_h_to_peak_h": 0.006259839888285149,
+      "seconds": 23.917355900164694,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true
+      }
+    },
+    {
+      "label": "(1,4,16) rotated 1.1 about x, x faces",
+      "faces": {
+        "x": "pml",
+        "y": "periodic",
+        "z": "periodic"
+      },
+      "eigenvalues": [
+        1.0,
+        4.0,
+        16.0
+      ],
+      "rotation": [
+        1.1,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 4.8509784229175406,
+      "contrast": 16.0,
+      "steps": 4000,
+      "peak_total": 5.345816254615784,
+      "peak_step": 7,
+      "peak_h2": 4.803738594055176,
+      "total_at": [
+        0.4749218001961708,
+        0.2817143201828003,
+        0.17238856106996536,
+        0.1059311181306839
+      ],
+      "h2_at": [
+        0.36733049154281616,
+        0.2179981917142868,
+        0.13607394695281982,
+        0.08242928981781006
+      ],
+      "last_window_to_mid_window": 0.4475760225950152,
+      "h_last_window_to_mid_window": 0.43985647168391584,
+      "late_h_to_peak_h": 0.0291901373760816,
+      "seconds": 24.024916799739003,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true
+      }
+    },
+    {
+      "label": "(16,1,4) rotated 0.7 about x, x faces, y PEC",
+      "faces": {
+        "x": "pml",
+        "y": "pec",
+        "z": "periodic"
+      },
+      "eigenvalues": [
+        16.0,
+        1.0,
+        4.0
+      ],
+      "rotation": [
+        0.7,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 1.4781745949826903,
+      "contrast": 16.0,
+      "steps": 4000,
+      "peak_total": 2.6714171171188354,
+      "peak_step": 6,
+      "peak_h2": 1.9384033679962158,
+      "total_at": [
+        0.1302795112133026,
+        0.04329442419111729,
+        0.015795011073350906,
+        0.006420062854886055
+      ],
+      "h2_at": [
+        0.08521690964698792,
+        0.028863495215773582,
+        0.010509220883250237,
+        0.0038739126175642014
+      ],
+      "last_window_to_mid_window": 0.20771265534681402,
+      "h_last_window_to_mid_window": 0.19918968666696116,
+      "late_h_to_peak_h": 0.005632672770146267,
+      "seconds": 22.54848810005933,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true
+      }
+    },
+    {
+      "label": "spatially varying: rotated biaxial interior, admissible collars",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        1.0,
+        4.0,
+        16.0
+      ],
+      "rotation": [
+        0.4,
+        0.7,
+        -0.3
+      ],
+      "admissible": true,
+      "spatially_varying": true,
+      "max_off_diagonal": 5.231328745204253,
+      "contrast": 16.0,
+      "steps": 4000,
+      "peak_total": 2.745864748954773,
+      "peak_step": 7,
+      "peak_h2": 2.0334410667419434,
+      "total_at": [
+        0.008265010081231594,
+        0.006162935169413686,
+        0.0029257237911224365,
+        0.0025593019963707775
+      ],
+      "h2_at": [
+        0.004242495633661747,
+        0.0025730819907039404,
+        0.0012773987837135792,
+        0.0002887606096919626
+      ],
+      "last_window_to_mid_window": 0.55170037547355,
+      "h_last_window_to_mid_window": 0.405193548919387,
+      "late_h_to_peak_h": 0.0010507257033683828,
+      "seconds": 31.398175700102,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true,
+        "six_face_h_decay": true
+      }
+    },
+    {
+      "label": "rejected: biaxial diag(1,2,4) six faces",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        1.0,
+        2.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": false,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 4.0,
+      "steps": 4000,
+      "peak_total": 8337974.75,
+      "peak_step": 3997,
+      "peak_h2": 6327067.0,
+      "total_at": [
+        0.2211101371794939,
+        90.51160049438477,
+        19303.7685546875,
+        5336854.0
+      ],
+      "h2_at": [
+        0.19100140035152435,
+        57.464332580566406,
+        9422.2060546875,
+        2091766.0
+      ],
+      "last_window_to_mid_window": 7892.851685038483,
+      "h_last_window_to_mid_window": 7704.408183705351,
+      "late_h_to_peak_h": 1.0,
+      "seconds": 28.496125500183553,
+      "passed": true,
+      "checks": {
+        "grows": true
+      }
+    },
+    {
+      "label": "rejected: biaxial diag(1,2,4) xy faces",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "periodic"
+      },
+      "eigenvalues": [
+        1.0,
+        2.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": false,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 4.0,
+      "steps": 4000,
+      "peak_total": 3.18039699486592e+29,
+      "peak_step": 3998,
+      "peak_h2": 2.2436367394684618e+29,
+      "total_at": [
+        482955.34375,
+        26162944802816.0,
+        2.3415958903867373e+21,
+        2.4424051115202908e+29
+      ],
+      "h2_at": [
+        271164.5625,
+        19991676059648.0,
+        1.3210825369931408e+21,
+        1.819279787161994e+29
+      ],
+      "last_window_to_mid_window": 7564267996410.235,
+      "h_last_window_to_mid_window": 6952746616522.161,
+      "late_h_to_peak_h": 1.0,
+      "seconds": 25.42833810020238,
+      "passed": true,
+      "checks": {
+        "grows": true
+      }
+    },
+    {
+      "label": "ADE uniaxial z with a proportional Lorentz pole through the z faces, six faces",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        2.0,
+        2.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 2.0,
+      "steps": 4000,
+      "pole_strength": [
+        5e+29,
+        5e+29,
+        1e+30
+      ],
+      "pole_rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "omega0": 1500000000000000.0,
+      "gamma": 100000000000000.0,
+      "pole_free_collars": "xy",
+      "coupling_bound": 0.008823053911328316,
+      "neumann_terms": 4,
+      "peak_total": 4.06426739692688,
+      "peak_step": 5,
+      "peak_h2": 3.260554790496826,
+      "total_at": [
+        0.004842066788114607,
+        0.003160766267683357,
+        0.002699075259442907,
+        0.00263193347655033
+      ],
+      "h2_at": [
+        0.0016388391377404332,
+        0.0004718917771242559,
+        3.233411553082988e-05,
+        6.639912498940248e-06
+      ],
+      "last_window_to_mid_window": 0.8141406859504114,
+      "h_last_window_to_mid_window": 0.0686614642573578,
+      "late_h_to_peak_h": 3.161828559826789e-05,
+      "seconds": 172.37772250035778,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true,
+        "six_face_h_decay": true
+      }
+    },
+    {
+      "label": "ADE biaxial (16,2,4) with a proportional Drude pole, x faces",
+      "faces": {
+        "x": "pml",
+        "y": "periodic",
+        "z": "periodic"
+      },
+      "eigenvalues": [
+        16.0,
+        2.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 8.0,
+      "steps": 4000,
+      "pole_strength": [
+        8e+29,
+        1e+29,
+        2e+29
+      ],
+      "pole_rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "omega0": 0.0,
+      "gamma": 50000000000000.0,
+      "pole_free_collars": "",
+      "coupling_bound": 0.00723556661978364,
+      "neumann_terms": 4,
+      "peak_total": 5.287173211574554,
+      "peak_step": 6,
+      "peak_h2": 4.590690612792969,
+      "total_at": [
+        0.368654265999794,
+        0.1243234034627676,
+        0.05339289642870426,
+        0.02328586857765913
+      ],
+      "h2_at": [
+        0.30229756236076355,
+        0.09371554851531982,
+        0.041099198162555695,
+        0.018341563642024994
+      ],
+      "last_window_to_mid_window": 0.22774334709682134,
+      "h_last_window_to_mid_window": 0.22199743458910723,
+      "late_h_to_peak_h": 0.009877715836069974,
+      "seconds": 156.58490150002763,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true
+      }
+    },
+    {
+      "label": "ADE spatially varying: rotated biaxial interior with an interior rotated Lorentz pole, admissible collars",
+      "faces": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "eigenvalues": [
+        1.25,
+        4.0,
+        16.0
+      ],
+      "rotation": [
+        0.4,
+        0.7,
+        -0.3
+      ],
+      "admissible": true,
+      "spatially_varying": true,
+      "max_off_diagonal": 5.113649234547134,
+      "contrast": 12.8,
+      "steps": 4000,
+      "pole_strength": [
+        1e+29,
+        6e+29,
+        1.2e+30
+      ],
+      "pole_rotation": [
+        -0.5,
+        0.3,
+        0.8
+      ],
+      "omega0": 1200000000000000.0,
+      "gamma": 80000000000000.0,
+      "pole_free_collars": "xyz",
+      "coupling_bound": 0.010683797299861908,
+      "neumann_terms": 4,
+      "peak_total": 3.215434432029724,
+      "peak_step": 8,
+      "peak_h2": 2.571465015411377,
+      "total_at": [
+        0.030342882499098778,
+        0.005713026883313432,
+        0.005129944300279021,
+        0.005361175280995667
+      ],
+      "h2_at": [
+        0.018115829676389694,
+        0.0004437197057995945,
+        0.003654900472611189,
+        0.003591547254472971
+      ],
+      "last_window_to_mid_window": 0.3912749694340108,
+      "h_last_window_to_mid_window": 0.33736757328377115,
+      "late_h_to_peak_h": 0.002616943024045418,
+      "seconds": 164.3148356997408,
+      "passed": true,
+      "checks": {
+        "finite": true,
+        "no_late_growth": true,
+        "no_late_h_growth": true,
+        "six_face_h_decay": true
+      }
+    },
+    {
+      "label": "rejected: ADE uniaxial x (16,2,2) with a non-proportional Drude pole (.2,.8,.8), x faces",
+      "faces": {
+        "x": "pml",
+        "y": "periodic",
+        "z": "periodic"
+      },
+      "eigenvalues": [
+        16.0,
+        2.0,
+        2.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": false,
+      "spatially_varying": false,
+      "max_off_diagonal": 0.0,
+      "contrast": 8.0,
+      "steps": 4000,
+      "pole_strength": [
+        2e+29,
+        8e+29,
+        8e+29
+      ],
+      "pole_rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "omega0": 0.0,
+      "gamma": 50000000000000.0,
+      "pole_free_collars": "",
+      "coupling_bound": 0.00723556661978364,
+      "neumann_terms": 4,
+      "peak_total": Infinity,
+      "peak_step": 2887,
+      "peak_h2": Infinity,
+      "total_at": [
+        20429417472.0,
+        1.2195007615313346e+25,
+        Infinity,
+        Infinity
+      ],
+      "h2_at": [
+        9001803776.0,
+        3.87355454229746e+24,
+        Infinity,
+        Infinity
+      ],
+      "last_window_to_mid_window": Infinity,
+      "h_last_window_to_mid_window": Infinity,
+      "late_h_to_peak_h": NaN,
+      "seconds": 136.44598559988663,
+      "passed": true,
+      "checks": {
+        "grows": true
+      }
+    }
+  ],
+  "dense": [
+    {
+      "label": "isotropic",
+      "eigenvalues": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "max_radius": 1.0000000000000395,
+      "radii": [
+        {
+          "phases": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000224
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000253
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000189
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000182
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000258
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000226
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.000000000000029
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000218
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000395
+        }
+      ],
+      "seconds": 119.07920009968802,
+      "passed": true
+    },
+    {
+      "label": "uniaxial z 1:4",
+      "eigenvalues": [
+        1.0,
+        1.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admissible": true,
+      "max_radius": 1.0000000000000324,
+      "radii": [
+        {
+          "phases": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.000000000000023
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000215
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000238
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.000000000000027
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000187
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000169
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000324
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000313
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000189
+        }
+      ],
+      "seconds": 117.52433679997921,
+      "passed": true
+    },
+    {
+      "label": "(2,1,4) rotated 0.5 about y",
+      "eigenvalues": [
+        2.0,
+        1.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "admissible": true,
+      "max_radius": 1.0000000000000278,
+      "radii": [
+        {
+          "phases": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.000000000000015
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000195
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.000000000000025
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000213
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000218
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000233
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000195
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000278
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000193
+        }
+      ],
+      "seconds": 126.40531529998407,
+      "passed": true
+    },
+    {
+      "label": "(1,4,2) rotated 0.5 about y",
+      "eigenvalues": [
+        1.0,
+        4.0,
+        2.0
+      ],
+      "rotation": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "admissible": true,
+      "max_radius": 1.0000000000000315,
+      "radii": [
+        {
+          "phases": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.000000000000019
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000142
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000195
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000167
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000147
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000315
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.000000000000018
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000189
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0000000000000246
+        }
+      ],
+      "seconds": 125.37638529995456,
+      "passed": true
+    },
+    {
+      "label": "rejected: (1.5,3,6) rotated 0.5 about y",
+      "eigenvalues": [
+        1.5,
+        3.0,
+        6.0
+      ],
+      "rotation": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "admissible": false,
+      "max_radius": 1.004886054467966,
+      "radii": [
+        {
+          "phases": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.0013726292598761
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0026911838945367
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.0015225542908004
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.0035544205133793
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.003097824255051
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.004886054467966
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "states": 2150,
+          "radius": 1.0036694132123096
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 2150,
+          "radius": 1.0034413936881494
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 2150,
+          "radius": 1.00151285189599
+        }
+      ],
+      "seconds": 115.53373700007796,
+      "passed": true
+    },
+    {
+      "label": "ADE aligned (2,1,4) with a proportional lossless Drude pole",
+      "eigenvalues": [
+        2.0,
+        1.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pole_strength": [
+        6e+29,
+        3e+29,
+        1.2e+30
+      ],
+      "pole_rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "omega0": 0.0,
+      "gamma": 0.0,
+      "admissible": true,
+      "max_radius": 1.000000000000018,
+      "radii": [
+        {
+          "phases": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010905083199381514,
+          "radius": 1.0000000000000115
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010905083199381514,
+          "radius": 1.0000000000000115
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010905083199381514,
+          "radius": 1.0000000000000115
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010905083199381514,
+          "radius": 1.0000000000000135
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010905083199381514,
+          "radius": 1.0000000000000093
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010905083199381514,
+          "radius": 1.0000000000000078
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010905083199381514,
+          "radius": 1.0000000000000142
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010905083199381514,
+          "radius": 1.000000000000018
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010905083199381514,
+          "radius": 1.0000000000000095
+        }
+      ],
+      "seconds": 264.1889373003505,
+      "passed": true
+    },
+    {
+      "label": "ADE aligned (2,4,2) with a proportional lossless Lorentz pole",
+      "eigenvalues": [
+        2.0,
+        4.0,
+        2.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pole_strength": [
+        5e+29,
+        1e+30,
+        5e+29
+      ],
+      "pole_rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "omega0": 1500000000000000.0,
+      "gamma": 0.0,
+      "admissible": true,
+      "max_radius": 1.0000000000000202,
+      "radii": [
+        {
+          "phases": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.008905478733102665,
+          "radius": 1.0000000000000124
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.008905478733102665,
+          "radius": 1.0000000000000122
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.008905478733102665,
+          "radius": 1.000000000000017
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.008905478733102665,
+          "radius": 1.000000000000014
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.008905478733102665,
+          "radius": 1.0000000000000158
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.008905478733102665,
+          "radius": 1.0000000000000133
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.008905478733102665,
+          "radius": 1.000000000000012
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.008905478733102665,
+          "radius": 1.000000000000013
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.008905478733102665,
+          "radius": 1.0000000000000202
+        }
+      ],
+      "seconds": 266.8748812000267,
+      "passed": true
+    },
+    {
+      "label": "rejected: ADE uniaxial (2,16,2) with a non-proportional lossless Drude pole (.8,.2,.8)",
+      "eigenvalues": [
+        2.0,
+        16.0,
+        2.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pole_strength": [
+        8e+29,
+        2e+29,
+        8e+29
+      ],
+      "pole_rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "omega0": 0.0,
+      "gamma": 0.0,
+      "admissible": false,
+      "max_radius": 1.0272730609477774,
+      "radii": [
+        {
+          "phases": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.007270055466254342,
+          "radius": 1.0216295639644715
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.007270055466254342,
+          "radius": 1.0254233270704036
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.007270055466254342,
+          "radius": 1.0272510900569158
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.007270055466254342,
+          "radius": 1.0254233270704096
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.007270055466254342,
+          "radius": 1.0248448697736239
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.007270055466254342,
+          "radius": 1.0272730609477774
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.007270055466254342,
+          "radius": 1.0272510900569054
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.007270055466254342,
+          "radius": 1.0272730609477756
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.007270055466254342,
+          "radius": 1.025423327070417
+        }
+      ],
+      "seconds": 254.62519189994782,
+      "passed": true
+    },
+    {
+      "label": "rejected: ADE (2,1,4) rotated 0.5 about y with a proportional lossless Lorentz pole",
+      "eigenvalues": [
+        2.0,
+        1.0,
+        4.0
+      ],
+      "rotation": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "pole_strength": [
+        6e+29,
+        3e+29,
+        1.2e+30
+      ],
+      "pole_rotation": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "omega0": 1500000000000000.0,
+      "gamma": 0.0,
+      "admissible": false,
+      "max_radius": 1.000089052644672,
+      "radii": [
+        {
+          "phases": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010686574479723201,
+          "radius": 1.0000832153338572
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010686574479723201,
+          "radius": 1.0000831686459746
+        },
+        {
+          "phases": [
+            0.0,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010686574479723201,
+          "radius": 1.0000725761016118
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010686574479723201,
+          "radius": 1.0000876726251446
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010686574479723201,
+          "radius": 1.000078380291217
+        },
+        {
+          "phases": [
+            1.5707963267948966,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010686574479723201,
+          "radius": 1.0000716896328117
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010686574479723201,
+          "radius": 1.000089052644672
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            1.5707963267948966
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010686574479723201,
+          "radius": 1.0000823545059057
+        },
+        {
+          "phases": [
+            3.141592653589793,
+            0.0,
+            3.141592653589793
+          ],
+          "states": 936,
+          "neumann_terms": 8,
+          "coupling_bound": 0.010686574479723201,
+          "radius": 1.0000682773640268
+        }
+      ],
+      "seconds": 245.91348570026457,
+      "passed": true
+    }
+  ],
+  "wall_seconds": 2663.2113153003156,
+  "measured": [
+    "sum|E|^2 and sum|H|^2 per step on the long runs (E and H only for the ADE cases); |E|^2 keeps the static residual of the soft pulse",
+    "spectral radius of the dense source-free one-step map on the small Bloch grid, CPU FP64"
+  ],
+  "limitations": [
+    "Bounded 20-cell grids and 4000 steps; empirical non-growth, not a spectral proof for the CPML-coupled operator",
+    "Dense radii sample nine transverse Bloch phase pairs on a 5x11x5 grid with y CPML faces only (3x7x3 for the ADE cases)",
+    "Rotated tensors of the rejected class can look stable on the long runs; the dense radius above one is the evidence for rejecting them",
+    "The geometric criterion is necessary for the continuum PML; discrete sufficiency rests on these measurements"
+  ]
+}
