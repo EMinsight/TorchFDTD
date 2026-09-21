@@ -126,6 +126,7 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Changed
 
+- The workbench's automatic memory policy is resident, then DRAM banks, then the approximate tiles only when the new `Region.tiling.allow_approximate` consent is set for a planar device, then a refusal naming the options; disk streaming stays available as the explicit `streamed_disk` mode (1.9 to 2.4 times the DRAM time in the records) but Auto never selects it, and `/api/validate` reports the rungs it walked ([EXECUTION_MODES.md](EXECUTION_MODES.md), this commit).
 - Restart journal layout: `meta.json` array descriptions gained `file` and `sha256`, pointers gained `previous`, and `owner.json` and `status.json` were added; journals written before this change are rejected by the runtime contract as before, and the previous record of a kind is now kept until the next one is published, within the unchanged reservation (this commit).
 - The workbench's Layout button no longer clears the results of the last run; they stay visible and are marked stale as soon as the project plan differs from the run (this commit).
 - Project JSON files written by the workbench or `Project.stamped` carry `revision` and `content_sha256`; builds before this commit refuse those keys (schema 1 keeps its number because a file without them loads unchanged) (this commit).

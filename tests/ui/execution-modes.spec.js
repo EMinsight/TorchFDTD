@@ -149,7 +149,7 @@ test('tiled mode shows its panel, the suggested overlap and the mismatch indicat
  await page.locator('#run-button').click();
  const response=await submitted,body=response.request().postDataJSON();
  expect(body.region.execution_mode).toBe('tiled');
- expect(body.region.tiling).toEqual({size_um:2,overlap_um:0.5,max_angle_deg:45,propagation_um:10});
+ expect(body.region.tiling).toEqual({size_um:2,overlap_um:0.5,max_angle_deg:45,propagation_um:10,allow_approximate:false});
  expect(body.sources[0].extend_through_pml).toBe(true);
  const job=await response.json();
  await expect(page.locator('#mode-badge')).toHaveText('ANALYSIS',{timeout:120000});

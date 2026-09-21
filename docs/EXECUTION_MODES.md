@@ -39,8 +39,8 @@ for `auto` on a CUDA host, and off for `cpu`.
 | Auto (recommended) | The server picks resident, then streamed host, then streamed disk, from the live resources. |
 | Resident (GPU or CPU memory) | The whole grid lives in device memory (GPU) or RAM (CPU). Limited to 8,000,000 cells. |
 | Streamed through host memory (DRAM) | Global E/H/CPML banks stay in RAM; extended x slabs move to the compute device one temporal block at a time. |
-| Streamed through disk | Same slabs, but the global banks are scratch files. Needs a scratch disk. |
-| Tiled (approximate, large devices) | Overlapping resident tiles of a planar device with near-field stitching. Never chosen by Auto; see below. |
+| Streamed through disk (slow, opt-in) | Same slabs, but the global banks are scratch files. Needs a scratch disk. An explicit choice that Auto never makes. |
+| Tiled (approximate, large devices) | Overlapping resident tiles of a planar device with near-field stitching. Auto chooses it only with the **Allow approximate tiling in Auto** consent; see below. |
 
 `Region.memory_mode="streamed"` (the Python opt-in) is treated as a streamed
 request in the workbench. A `Resident` request with more than 8,000,000 cells is
@@ -49,7 +49,9 @@ rejected when the project is validated, exactly as before.
 ### How Auto decides
 
 Every `/api/validate` call and every job submission resolves the mode again
-from the resources at that moment.
+from the resources at that moment. The policy is resident, then DRAM banks,
+then the approximate tiles with the user's consent, then a refusal; disk
+streaming is never chosen automatically.
 
 1. **Resident** when all of the following hold:
    - `memory_mode` is `resident` and the grid has at most 8,000,000 cells;
@@ -61,12 +63,23 @@ from the resources at that moment.
    with DRAM banks: its host reservation must fit **80% of available host
    memory**, and on the GPU its tile workspace must fit **80% of free device
    memory**.
-3. Otherwise **streamed through disk** when the same admission passes with file
-   banks: host reservation within 80% of available RAM, tile workspace within
-   80% of free device memory, and the bank reservation within **80% of the free
-   space** on the scratch volume.
-4. Otherwise no mode fits. The status line shows every rejection reason and the
-   Run button reports it.
+3. Otherwise **tiled (approximate)**, only when the project's **Allow
+   approximate tiling in Auto** box (`Region.tiling.allow_approximate`, default
+   off) is ticked, the device passes the [tiled admission](#tiled-approximate-large-devices)
+   (a planar device with sheet sources and one output plane) and the largest
+   tile's resident estimate fits the resident margin of step 1. The run then
+   carries the warning to read the mismatch indicator.
+4. Otherwise Auto **refuses**: the status line and the Run button name the
+   three options, allowing approximate tiling for a planar device, selecting
+   **Streamed through disk** explicitly (its file banks ran 1.9 to 2.4 times
+   slower than DRAM banks in the records, so it is an opt-in, never an automatic
+   tier), or coarsening the mesh, and list the reason each tier was rejected.
+
+`/api/validate` returns the rungs Auto walked (`execution.auto.rungs`, each with
+its tier, whether it was chosen and why); the status line prints them under
+the chosen tier. An explicit `execution_mode` (`resident`, `streamed_host`,
+`streamed_disk`, `tiled`) bypasses the policy and runs that mode or reports its
+own rejection.
 
 The streamed reservation is the same conservative
 `estimate_streamed_memory` accounting the Python API uses: `checkpoints + 3`
@@ -126,6 +139,15 @@ more often.
   seconds here before the progress bar moves.
 
 ## Choosing a scratch disk
+
+Disk streaming is an explicit choice: select **Streamed through disk (slow,
+opt-in)** in the Memory selector, or `execution_mode='streamed_disk'` in the
+project. Auto never falls back to it, because the file banks ran 1.9 to 2.4
+times slower than DRAM banks in the records (2.4x on the 128 x 128 x 64,
+32-step case on the RTX 3060, 1.9x in the interleaved small-grid record) and
+the OS page cache, not the solver, decides how much of that traffic reaches
+the disk. When a scene fits no automatic tier, the refusal names this option
+next to approximate tiling and a coarser mesh.
 
 File banks are written under `<results>/scratch` by default, where `<results>`
 is the server's results directory (`TORCHFDTD_RESULTS`, default `results` under

@@ -295,8 +295,10 @@ def resolve_execution(project, *, health, scratch, summary=None):
     """Resolve Region.execution_mode against a resource record.
 
     Auto picks resident when the estimate fits the documented margin, then a
-    streamed host policy, then streamed disk. The record is JSON-compatible and
-    carries the reasons; it never raises for a scene that fits nothing.
+    streamed DRAM policy, then the approximate tiles when the project allows
+    them, and otherwise refuses with the options named. The record is
+    JSON-compatible and carries the reasons; it never raises for a scene that
+    fits nothing.
     """
     r = project.region
     requested = r.execution_mode
@@ -323,20 +325,69 @@ def resolve_execution(project, *, health, scratch, summary=None):
         if requested == 'resident' and not resident['fits']:
             record['warnings'].append('Resident execution was requested but '+resident['reason']+'.')
         return record
-    storages = {'streamed_host': ('host',), 'streamed_disk': ('disk',), 'auto': ('host', 'disk')}[requested]
-    reasons = [] if requested != 'auto' else ['resident: '+resident['reason']]
-    for storage in storages:
-        candidate = record['streamed_'+storage] = _streamed_candidate(project, storage, backend, health, scratch)
-        if candidate['admitted']:
-            record.update(mode='streamed_'+storage, reason=candidate['reason'], policy=candidate['policy'],
-                          reservation=candidate['reservation'], options=candidate['options'])
-            if backend == 'cuda' and candidate['policy']['tile_device'] == 'cpu':
-                record['warnings'].append('CuPy is unavailable, so streamed tiles run on the CPU. Install the cuda-kernels extra for GPU tiles.')
-            if candidate['policy']['observers'] > OBSERVER_WARNING:
-                record['warnings'].append(f'{candidate["policy"]["observers"]:,} plane observation cells slow every streamed tile. Increase the monitor downsample.')
+    if requested == 'auto':
+        return _resolve_auto(project, record, resident, backend, health, scratch)
+    storage = {'streamed_host': 'host', 'streamed_disk': 'disk'}[requested]
+    candidate = record['streamed_'+storage] = _streamed_candidate(project, storage, backend, health, scratch)
+    if candidate['admitted']:
+        _choose_streamed(record, storage, candidate, backend)
+    else:
+        record['error'] = 'No execution mode fits. '+f'{storage}: {candidate["reason"]}'
+    return record
+
+
+def _choose_streamed(record, storage, candidate, backend):
+    record.update(mode='streamed_'+storage, reason=candidate['reason'], policy=candidate['policy'],
+                  reservation=candidate['reservation'], options=candidate['options'])
+    if backend == 'cuda' and candidate['policy']['tile_device'] == 'cpu':
+        record['warnings'].append('CuPy is unavailable, so streamed tiles run on the CPU. Install the cuda-kernels extra for GPU tiles.')
+    if candidate['policy']['observers'] > OBSERVER_WARNING:
+        record['warnings'].append(f'{candidate["policy"]["observers"]:,} plane observation cells slow every streamed tile. Increase the monitor downsample.')
+
+
+DISK_SLOWDOWN = 'measured 1.9 to 2.4 times the DRAM time'
+
+
+def _resolve_auto(project, record, resident, backend, health, scratch):
+    """Auto after resident was rejected: DRAM banks, then consented tiles, then refuse.
+
+    Disk streaming is never selected automatically; it stays an explicit
+    execution_mode='streamed_disk' choice (docs/EXECUTION_MODES.md).
+    """
+    r = project.region
+    rungs = [dict(tier='resident', chosen=False, reason=resident['reason'])]
+    candidate = record['streamed_host'] = _streamed_candidate(project, 'host', backend, health, scratch)
+    if candidate['admitted']:
+        _choose_streamed(record, 'host', candidate, backend)
+        rungs.append(dict(tier='streamed_host', chosen=True, reason=candidate['reason']))
+        record['auto'] = dict(rungs=rungs, chosen='streamed_host')
+        record['reason'] = f'resident: {resident["reason"]} -> DRAM banks: {candidate["reason"]}'
+        return record
+    rungs.append(dict(tier='streamed_host', chosen=False, reason=candidate['reason']))
+    if r.tiling.allow_approximate:
+        tiled = record['tiled'] = _tiled_candidate(project, backend, health)
+        if tiled['admitted']:
+            free = health.get('gpu_free_bytes') if backend == 'cuda' else health.get('host_available_bytes')
+            fraction = RESIDENT_DEVICE_FRACTION if backend == 'cuda' else RESIDENT_HOST_FRACTION
+            largest = tiled['plan']['largest_tile_estimate_bytes']
+            if free is not None and largest > int(free*fraction):
+                tiled['admitted'] = False
+                tiled['reason'] = f'the largest tile ({_gib(largest)}) exceeds {fraction:.0%} of the free memory ({_gib(free)}); reduce the tile size'
+        if tiled['admitted']:
+            record.update(mode='tiled', reason=f'resident: {resident["reason"]} -> DRAM banks: {candidate["reason"]} -> approximate tiles (allowed): {tiled["reason"]}')
+            record['warnings'].extend(tiled['notes'])
+            record['warnings'].append('Auto chose the approximate tiles: read the mismatch indicator of the finished run and compare overlaps before trusting the result.')
+            rungs.append(dict(tier='tiled', chosen=True, reason=tiled['reason']))
+            record['auto'] = dict(rungs=rungs, chosen='tiled')
             return record
-        reasons.append(f'{storage}: {candidate["reason"]}')
-    record['error'] = 'No execution mode fits. '+' | '.join(reasons)
+        rungs.append(dict(tier='tiled', chosen=False, reason=tiled['reason']))
+    else:
+        rungs.append(dict(tier='tiled', chosen=False, reason='approximate tiling not allowed (tick "Allow approximate tiling" for a planar device)'))
+    record['auto'] = dict(rungs=rungs, chosen=None)
+    skipped = ' | '.join(f'{rung["tier"]}: {rung["reason"]}' for rung in rungs)
+    record['error'] = ('No automatic tier fits this scene. Options: allow approximate tiling for a planar device '
+                       '(one sheet source, one output plane, read the mismatch indicator), select Streamed through disk '
+                       f'explicitly ({DISK_SLOWDOWN} on the records), or coarsen the mesh. '+skipped)
     return record
 
 

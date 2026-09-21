@@ -154,6 +154,9 @@ class Tiling(Model):
     overlap_um: float = Field(default=2, gt=0)
     max_angle_deg: float = Field(default=45, ge=0, lt=90)
     propagation_um: float | None = Field(default=None, ge=0)
+    # Consent for the automatic policy to fall back to the approximate tiles when
+    # neither resident nor DRAM-streamed execution fits.
+    allow_approximate: bool = False
 
 
 class Region(Model):
