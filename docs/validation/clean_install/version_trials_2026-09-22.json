@@ -1,0 +1,135 @@
+{
+  "kind": "version_trials",
+  "schema_version": 1,
+  "date": "2026-09-22",
+  "host": "Windows 11 (10.0.26200), 12th Gen Intel Core i7-12700, RTX 3060 12 GB, driver 591.86",
+  "venv": "python -m venv (no system site-packages) under D:/TorchFDTD/.local/venvs",
+  "wheel": "torchfdtd-0.14.0.dev0-py3-none-any.whl built from the g8-packaging working tree (D:/TorchFDTD/.local/dist/dev) with the package code of this commit and the pyproject bound torch>=2.2 that preceded this commit, so that pip would install the old torch builds under trial",
+  "probe": "D:/TorchFDTD/.local/tmp/g8/probe_trial.py: import from the venv prefix, 2D CPU run (20 x 20 cells, 80 steps), Result.save/load, torch.from_numpy interop",
+  "subset": "tests/test_solver.py tests/test_api.py tests/test_torch_interop.py tests/test_project_compatibility.py tests/test_doctor.py via the venv pytest entry point (checkout not on sys.path)",
+  "trials": [
+    {
+      "name": "torch222-np2",
+      "python": "3.10.2",
+      "install": "pip install --find-links D:/TorchFDTD/.local/wheels torch==2.2.2+cpu <wheel>",
+      "resolved": [
+        "numpy==2.2.6",
+        "scipy==1.15.3",
+        "torch==2.2.2+cpu"
+      ],
+      "probe": {
+        "status": "failed",
+        "error": "RuntimeError: Numpy is not available",
+        "seconds": null
+      },
+      "subset": null,
+      "note": "the numpy backend 2D run passed; torch.from_numpy raised RuntimeError: Numpy is not available; no subset run",
+      "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials.log"
+    },
+    {
+      "name": "torch222-np1",
+      "python": "3.10.2",
+      "install": "pip install --find-links D:/TorchFDTD/.local/wheels torch==2.2.2+cpu \"numpy<2\" <wheel>",
+      "resolved": [
+        "numpy==1.26.4",
+        "scipy==1.15.3",
+        "torch==2.2.2+cpu"
+      ],
+      "probe": {
+        "status": "passed",
+        "error": null,
+        "seconds": 8.22
+      },
+      "subset": {
+        "path": "docs/validation/clean_install/version_trials/trial-torch222-np1.xml",
+        "sha256": "3bdb5470e680a97ccf8700b0db7ade1eb0bd4a0d8287dd6e85c22be0a39b5862",
+        "tests": 36,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 5,
+        "seconds": 102.29
+      },
+      "note": null,
+      "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials.log"
+    },
+    {
+      "name": "torch231-np2",
+      "python": "3.10.2",
+      "install": "pip install --find-links D:/TorchFDTD/.local/wheels torch==2.3.1+cpu <wheel>",
+      "resolved": [
+        "numpy==2.2.6",
+        "scipy==1.15.3",
+        "torch==2.3.1+cpu"
+      ],
+      "probe": {
+        "status": "failed",
+        "error": "RuntimeError: Numpy is not available",
+        "seconds": null
+      },
+      "subset": null,
+      "note": "same failure as torch222-np2; no subset run",
+      "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials.log"
+    },
+    {
+      "name": "torch241-np2",
+      "python": "3.10.2",
+      "install": "pip install --find-links D:/TorchFDTD/.local/wheels torch==2.4.1+cpu <wheel>",
+      "resolved": [
+        "numpy==2.2.6",
+        "scipy==1.15.3",
+        "torch==2.4.1+cpu"
+      ],
+      "probe": {
+        "status": "passed",
+        "error": null,
+        "seconds": 31.34
+      },
+      "subset": {
+        "path": "docs/validation/clean_install/version_trials/trial-torch241-np2.xml",
+        "sha256": "739f203b8776c2a5546e82c620d205a0041ac978f4f0d231de8462ccf2f438ec",
+        "tests": 36,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 5,
+        "seconds": 65.938
+      },
+      "note": null,
+      "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials2.log"
+    },
+    {
+      "name": "py312-torch2140",
+      "python": "3.12.7 (C:/anaconda3 base interpreter)",
+      "install": "pip install torch --index-url https://download.pytorch.org/whl/cpu; pip install <wheel> \"pytest>=8\" \"httpx>=0.27\"",
+      "resolved": [
+        "numpy==2.5.3",
+        "scipy==1.18.1",
+        "torch==2.14.0+cpu"
+      ],
+      "probe": {
+        "status": "passed",
+        "error": null,
+        "seconds": 63.53
+      },
+      "subset": {
+        "path": "docs/validation/clean_install/version_trials/trial-py312.xml",
+        "sha256": "43d9954e9289f76ac80fe5316529ddc15ac262e1a2e7408a5f29e3990551bc57",
+        "tests": 36,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 5,
+        "seconds": 73.493
+      },
+      "note": null,
+      "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials3.log"
+    }
+  ],
+  "not_tried": [
+    "Python 3.9 (the host has no 3.9 interpreter; the py launcher entry is broken)",
+    "Python 3.11 and 3.13",
+    "torch builds between 2.4.1 and 2.10.0 and between 2.10.0 and 2.14.0",
+    "CuPy other than 13.6.0, CUDA runtimes other than 12.6",
+    "Linux and macOS"
+  ],
+  "conclusion": "torch>=2.4 is the oldest CPU build that works with the NumPy 2 pip resolves on Windows; torch 2.2.2 works only with numpy<2; Python 3.10.2 and 3.12.7 pass the probe and the subset with 0 failures",
+  "wheel_sha256": "dd3c87adaae59830a006981458dedfd1f5c5e38a1fe0eec0d107450a17cb74cc"
+}

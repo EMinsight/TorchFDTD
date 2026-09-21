@@ -50,7 +50,21 @@ Behind: single-problem multi-GPU (verified with CPU ranks only). Row-by-row evid
 
 ## Quick start
 
-Python 3.10+ and Node.js 20.19+ / 22.12+. Install a [CUDA-enabled PyTorch](https://pytorch.org/get-started/locally/) first; CPU execution also works. The `cuda-kernels` extra installs CuPy, which the fused CUDA kernels and the real-field CUDA adjoint use; without it the `torch` kernel runs.
+Python 3.10 or 3.12 and a [PyTorch](https://pytorch.org/get-started/locally/) build for the machine: CUDA for GPU execution, CPU otherwise. The versions that were installed and run are listed in [docs/INSTALL.md](docs/INSTALL.md). The `cuda-kernels` extra installs CuPy, which the fused CUDA kernels and the real-field CUDA adjoint use; without it the `torch` kernel runs.
+
+Install the wheel; it carries the built browser workbench, so no Node.js and no checkout are needed:
+
+```powershell
+python -m venv torchfdtd-env
+torchfdtd-env/Scripts/python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu126
+torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-0.14.0.dev0-py3-none-any.whl[cuda-kernels]"
+torchfdtd-env/Scripts/torchfdtd doctor
+torchfdtd-env/Scripts/torchfdtd serve
+```
+
+`torchfdtd doctor` reports Python, torch, CuPy, the CUDA runtime and driver, the device, a fused-kernel launch and the backend a project will use, with one message per unsupported situation. Open http://127.0.0.1:8765 (loopback only; use SSH forwarding for a remote GPU).
+
+To develop from a checkout instead, Node.js 20.19+ / 22.12+ rebuilds the workbench assets under `torchfdtd/web`:
 
 ```powershell
 python -m venv --system-site-packages .venv
@@ -60,8 +74,7 @@ npm.cmd run build
 .venv/Scripts/python.exe -m torchfdtd.cli serve
 ```
 
-Open http://127.0.0.1:8765 (loopback only; use SSH forwarding for a remote GPU).
-
+<!-- readme-example: cuda -->
 ```python
 from torchfdtd import Project, Region, Structure, Source, Monitor, Simulation
 
@@ -78,7 +91,20 @@ result = Simulation(project).run()
 result.save("results/run.npz")
 ```
 
-Lengths are in µm and time arrays in seconds. `dimension` defaults to `"2d"` and `cuda_kernel` to `"torch"`, so the example sets both to run the measured 3D fused path. `Project.load()` runs browser-made scenes; `Result.load()` restores saved results.
+Lengths are in µm and time arrays in seconds. `dimension` defaults to `"2d"` and `cuda_kernel` to `"torch"`, so the example sets both to run the measured 3D fused path; it needs a CUDA device and the `cuda-kernels` extra. The 2D default runs on any install, and `Result.load()` restores a saved result:
+
+```python
+from torchfdtd import Project, Structure, Source, Monitor, Simulation, Result
+
+project = Project(name="Any install", structures=[Structure(name="core", size=(8, 0.65, 0.4))],
+                  sources=[Source(center=(-2.5, 0, 0), wavelength=1.55)],
+                  monitors=[Monitor(name="output", center=(2, 0, 0))])
+result = Simulation(project).run()    # 2D, on the CPU or the CUDA device torch reports
+result.save("results/first.npz")
+print(Result.load("results/first.npz").summary["backend"])
+```
+
+`Project.load()` runs browser-made scenes.
 
 ## Documentation
 

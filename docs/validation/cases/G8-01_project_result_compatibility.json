@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G8-01_project_result_compatibility",
+  "task": "G8-01",
+  "title": "Saved project JSON and result NPZ files load, round-trip and refuse a newer schema by name",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "project_files": [
+      "examples/native_farfield.json (shipped 3D far-field scene)",
+      "examples/open_mode_network.json (project nested under a mode-network wrapper)",
+      "tests/fixtures/projects/demo_waveguide.json, demo_scatterer.json, demo_3d.json, demo_pmc.json (the four workbench examples frozen at schema 1)",
+      "tests/fixtures/projects/graded_ade_plane.json (graded Yee mesh with a refinement box, multipole ADE material, broadband plane source with a wavelength range, point and x-normal plane monitors, PEC y walls, float64 on the CPU)",
+      "tests/fixtures/projects/minimal_defaults.json (hand-written file with no schema_version and no region: every absent field takes its default)",
+      "tests/fixtures/projects/tiny_result.json (the project of the two result files)"
+    ],
+    "result_files": [
+      "tests/fixtures/npz/tiny_2d_complete.npz (2D 20 x 20 cells, 40 steps, snapshot every 10 steps, one Ez point monitor, CPU float32)",
+      "tests/fixtures/npz/tiny_2d_cancelled.npz (the same run cancelled after step 20: partial state)"
+    ],
+    "generator": "tests/fixtures/generate_fixtures.py; frozen files are never regenerated in place, a schema change adds new files beside them",
+    "older_schema": "none exists: schema_version has been 1 since the field was introduced, so no hand-written older version and no migration beyond the stub are possible",
+    "future_schema": "schema_version 2 injected into demo_waveguide.json and into the project string of tiny_2d_complete.npz"
+  },
+  "seed": null,
+  "precision": ["float32 (results)", "float64 (graded fixture)"],
+  "backend": ["cpu"],
+  "reference_method": "the file's own contents: every field present in a file must be present and equal after Project.model_validate, model_dump_json, model_validate_json and save/load; derived mesh coordinates, time step, shape and resolved sources and monitors must be identical between the loaded and the validated project; the result arrays, summary and recomputed spectra must equal the stored ones after Result.load and after a save/load cycle",
+  "observables": [
+    {"name": "field_subset_equality", "unit": "boolean", "definition": "recursive equality of every key present in the source file against the model dump (lists elementwise, scalars exact)"},
+    {"name": "mesh_nodes_equality", "unit": "um", "definition": "numpy array equality of Region.mesh_nodes per axis between the loaded and the validated project"},
+    {"name": "time_step_equality", "unit": "s", "definition": "Region.time_step exact equality"},
+    {"name": "result_state", "unit": "mixed", "definition": "summary backend, precision, units string, steps, requested_steps, cancelled, termination_reason, warnings list; times and signals lengths equal the completed steps; frames count equals frame_steps"},
+    {"name": "spectrum_recomputation", "unit": "relative", "definition": "Result.spectra recomputed from the restored signals against the stored monitor_0_spectrum"},
+    {"name": "future_version_error", "unit": "text", "definition": "the ValidationError message names schema_version 2 and schema 1"}
+  ],
+  "acceptance": {
+    "field_subset_equality": "exact for every file listed in the fixture",
+    "mesh_nodes_equality": "exact (assert_array_equal)",
+    "time_step_equality": "exact",
+    "result_state": "exact values as listed in tests/test_project_compatibility.py; cancelled file has cancelled true, termination_reason cancelled, steps 20 of 40",
+    "spectrum_recomputation": {"rtol": 1e-12, "atol": 0},
+    "future_version_error": "Project.model_validate, Project.load and Result.load all raise pydantic.ValidationError matching 'schema_version 2 is newer than schema 1'",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-01; exact equality because the files are the reference, no numerical tolerance beyond the float64 spectrum recomputation"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_project_compatibility.py"
+    ],
+    "not_yet_covered": [
+      "result files written by an earlier torchfdtd release (none are archived; the frozen NPZ files start with this case)",
+      "streamed, tensor-batch and mode-network result formats (their own loaders, outside Result.load)",
+      "warnings raised during a run are stored in summary['warnings'] and restored as a list; no fixture yet carries a non-empty warning list"
+    ]
+  },
+  "notes": "Declared on branch g8-packaging from 2b64f91 before the recorded run. migrate_project in torchfdtd/models.py is the migration stub; Project runs it as a before-validator so every loader (JSON, NPZ, API payloads) refuses a newer schema with the same message."
+}

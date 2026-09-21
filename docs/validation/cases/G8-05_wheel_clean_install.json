@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G8-05_wheel_clean_install",
+  "task": "G8-05",
+  "title": "The wheel carries the committed browser assets and installs into clean CPU-only and CUDA environments",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "script": "scripts/clean_install_check.py, run from the checkout root on a clean tree; every venv, wheel, scratch file and the pip cache under --local-root (D:/TorchFDTD/.local on this host)",
+    "wheel": "python -m build --wheel from a fresh staging copy of torchfdtd/, pyproject.toml, README.md, LICENSE and THIRD_PARTY_NOTICES.txt into <local-root>/dist/<commit>",
+    "cpu_environment": "python -m venv (no system site-packages) from the base interpreter of D:/TorchFDTD/.venv; pip install torch --index-url https://download.pytorch.org/whl/cpu with --find-links to the local wheel cache; pip install <wheel>; the venv's bundled pip, not upgraded",
+    "cuda_environment": "python -m venv as above; pip install torch==2.10.0+cu126 from the local wheel cache (cu126 index as fallback); pip install '<wheel>[cuda-kernels]'",
+    "working_directory": "<local-root>/tmp/clean_install/work/<env>, outside the checkout; PYTHONPATH removed from the environment",
+    "cpu_probe": "import torchfdtd (file inside sys.prefix, outside the checkout); 2D region 2 x 2 um, mesh 0.1 um, 3 PML cells, 80 steps, one Ez point source (wavelength 1 um, 1 cycle), one point monitor at x 0.4 um; Result.save then Result.load",
+    "server": "python -m torchfdtd.cli serve --port <free loopback port>; GET /, every /assets/ file the index references, /api/health, /api/capabilities; then terminate",
+    "cuda_probe": "the same 2D region with backend cuda, cuda_kernel fused, cuda_monitor_kernel fused, 20 steps",
+    "doctor": "torchfdtd doctor --json in both environments",
+    "host": "Windows 11, RTX 3060 12 GB, driver 591.86, base Python 3.10.2"
+  },
+  "seed": null,
+  "precision": ["float32"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "git HEAD blobs of torchfdtd/web for the packaged assets; the working tree for the wheel payload; the fresh venv's own sys.prefix for the import location; finite nonzero fields and an equal save/load cycle for the runs; HTTP status codes for the server",
+  "observables": [
+    {"name": "wheel_sha256", "unit": "hex", "definition": "SHA-256 of the built wheel file"},
+    {"name": "wheel_payload_equals_tree", "unit": "boolean", "definition": "the torchfdtd/ entries of the wheel are exactly the package files of the tree and byte-identical"},
+    {"name": "web_assets_match_committed", "unit": "boolean", "definition": "every torchfdtd/web entry of the wheel is byte-identical to git HEAD"},
+    {"name": "frontend_assets_current", "unit": "boolean", "definition": "no commit touching frontend/, vite.config.js, package.json or package-lock.json after the last commit touching torchfdtd/web"},
+    {"name": "step_status", "unit": "passed|failed|skipped", "definition": "one entry per step of scripts/clean_install_check.py with its duration"},
+    {"name": "package_list", "unit": "pip freeze lines", "definition": "every package in each environment"},
+    {"name": "server_routes", "unit": "HTTP status", "definition": "status of /, each referenced asset, /api/health and /api/capabilities"}
+  ],
+  "acceptance": {
+    "wheel": "one wheel built; payload equals the tree; torchfdtd/web/index.html and at least one torchfdtd/web/assets/ file present; web_assets_match_committed true; frontend_assets_current true",
+    "cpu_environment": "every step passed: venv, torch install, wheel install with the bundled pip, package list, import outside the checkout, 2D run with finite nonzero fields and signals, NPZ save then load with equal electric field and summary steps 80 and backend cpu, server 200 on / with /assets/ links, 200 on every asset, 200 on /api/health with a version, 200 on /api/capabilities, doctor exit 0 with backend cpu",
+    "cuda_environment": "every step passed: venv, CUDA torch install, wheel install with the cuda-kernels extra (cupy-cuda12x in the package list), fused 2D run with summary backend cuda and cuda_kernel fused, doctor exit 0 with fused_kernels ok and backend cuda/fused",
+    "record": "written to docs/validation/clean_install/<time>-<commit>.json with dirty_paths empty; all_passed true; tests/test_clean_install.py reads the newest record and checks it against the current packaging inputs, the committed assets and, when the file is on this host, the wheel hash",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-05 and the G8 pass rule (no manual path edits, no source edits, no frontend build for a clean-install user); pass/fail only, no numeric threshold"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_clean_install.py::test_record_is_complete_and_every_step_passed",
+      "tests/test_clean_install.py::test_wheel_in_the_record_carries_the_committed_browser_assets",
+      "tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel"
+    ],
+    "not_yet_covered": [
+      "Linux and macOS clean installs (the record covers Windows only; the same script runs unchanged on Linux)",
+      "a browser session against the packaged UI (only HTTP GETs of the index, assets and two API routes are checked; tests/ui covers the workbench from a checkout)",
+      "an environment without network access (pip resolves the wheel's dependencies from PyPI during the check)"
+    ]
+  },
+  "notes": "Declared on branch g8-packaging from 2b64f91 before the recorded run. The wheel is never committed; the record carries its hash, size and entry count. The CUDA torch wheel was downloaded once to D:/TorchFDTD/.local/wheels because no cached copy existed on D:."
+}

@@ -6,7 +6,7 @@ from .models import Project, demo_project
 from .solver import Simulation, hardware
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(prog='torchfdtd')
     sub = parser.add_subparsers(dest='command', required=True)
     serve = sub.add_parser('serve', help='Open the local web workbench')
@@ -28,6 +28,8 @@ def main():
     example.add_argument('name', choices=['waveguide','scatterer','3d','pmc'])
     example.add_argument('--output', default='project.json')
     sub.add_parser('hardware')
+    doctor = sub.add_parser('doctor', help='Report Python, torch, CuPy, CUDA runtime/driver, the device and the selected backend')
+    doctor.add_argument('--json', action='store_true', help='Print the report as JSON')
     inspect = sub.add_parser('fsp-inspect', help='Inspect FSP using an installed, licensed Lumerical API')
     inspect.add_argument('project')
     inspect.add_argument('--output', default='inspection.json')
@@ -58,7 +60,7 @@ def main():
     scene_write.add_argument('scene', help='Edited native JSON retaining its original import fingerprint')
     scene_write.add_argument('--output', required=True)
     scene_write.add_argument('--report', required=True)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.command == 'serve':
         import uvicorn
         from .server import create_app
@@ -81,6 +83,9 @@ def main():
     elif args.command == 'example':
         demo_project(args.name).save(args.output)
         print(args.output)
+    elif args.command == 'doctor':
+        from .doctor import main as doctor_main
+        parser.exit(doctor_main(as_json=args.json))
     elif args.command == 'fsp-inspect':
         from .fsp import inspect_fsp, write_inspection, archive_fsp
         manifest = inspect_fsp(args.project)

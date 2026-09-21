@@ -1349,10 +1349,19 @@
           "implementation_state": "NOT_ASSESSED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/models.py",
+            "tests/fixtures/generate_fixtures.py",
+            "tests/fixtures/projects",
+            "tests/fixtures/npz"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_project_compatibility.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-01.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_project_compatibility.py"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -1415,11 +1424,22 @@
           "owner": null,
           "code_paths": [
             "scripts/build_preview.py",
-            "pyproject.toml"
+            "pyproject.toml",
+            "scripts/clean_install_check.py",
+            "torchfdtd/web",
+            "docs/validation/clean_install",
+            "docs/INSTALL.md"
           ],
-          "planned_test_commands": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/TorchFDTD/.local --find-links D:/TorchFDTD/.local/wheels",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_clean_install.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-05.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_clean_install.py::test_record_is_complete_and_every_step_passed",
+            "tests/test_clean_install.py::test_wheel_in_the_record_carries_the_committed_browser_assets",
+            "tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -1432,10 +1452,21 @@
           "implementation_state": "NOT_ASSESSED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/doctor.py",
+            "torchfdtd/cli.py",
+            "pyproject.toml",
+            "docs/INSTALL.md",
+            "docs/validation/clean_install"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_doctor.py tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-06.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_doctor.py",
+            "tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -1448,10 +1479,20 @@
           "implementation_state": "NOT_ASSESSED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "scripts/run_readme_examples.py",
+            "scripts/clean_install_check.py",
+            "README.md",
+            "docs/validation/clean_install"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_clean_install.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-07.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_clean_install.py::test_every_runnable_readme_block_passed_on_the_installed_wheel",
+            "tests/test_clean_install.py::test_readme_block_parser_reads_markers_and_languages"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
