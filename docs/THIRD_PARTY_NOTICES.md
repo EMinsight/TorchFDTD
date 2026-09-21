@@ -101,7 +101,7 @@ These need a decision that this program cannot make. They stay listed until
 
 ## Credential and private-path scan
 
-1332 text files of 1351 tracked paths were scanned for: `address_100_x_x_x`, `credential_token`, `hangul_user_path`, `password_literal`, `private_key_block`, `private_windows_user_path`, `ssh_password_environment`, `ssh_public_key`.
+1504 text files of 1529 tracked paths were scanned for: `address_100_x_x_x`, `credential_token`, `hangul_user_path`, `password_literal`, `private_driveless_user_path`, `private_key_block`, `private_macos_user_path`, `private_unc_user_path`, `private_windows_user_path`, `ssh_password_environment`, `ssh_public_key`.
 Excluded because they name the patterns themselves: `scripts/provenance_inventory.py`, `docs/THIRD_PARTY_NOTICES.md`, `docs/validation/sbom.json`, `tests/test_provenance_inventory.py`.
 
 No finding in the tracked tree.
@@ -112,6 +112,7 @@ The path was the scratch directory of the remote workstation, recorded by three 
 
 Commits on the current branch whose tree contains `C:[/\\]+Users[/\\]+admin`:
 
+- 78a1bcd33367 (2026-09-22) Record the local rehearsal of the propagated beyond-VRAM case and the workstation launch note
 - c5e83c8148bb (2026-09-21) Record the beyond-VRAM crash and resume and count existing journal records toward the reservation
 - 61326d2663f6 (2026-09-21) Prepare real FP32 beyond-VRAM capacity validation [skip ci]
 - 149fb1b0f40c (2026-09-20) Record completed beyond VRAM gradient and matched RTX 5880 CPU comparison
