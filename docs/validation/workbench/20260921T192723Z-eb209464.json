@@ -1,0 +1,127 @@
+{
+  "kind": "workbench_journey_record",
+  "schema_version": 1,
+  "timestamp": "20260921T192723Z",
+  "commit": "eb2094647d43e4f144b53d5e1f972bf5d012670e",
+  "dirty_paths": [],
+  "server_url": "http://127.0.0.1:62050",
+  "server_started_here": true,
+  "server_health": {
+    "cuda": false,
+    "gpu": null,
+    "gpu_memory_gb": 0,
+    "torch": "2.10.0+cu126",
+    "engine": "TorchFDTD Yee/CPML on fdtd grid",
+    "cpu_threads": 12,
+    "cupy": false,
+    "gpu_free_bytes": 0,
+    "gpu_total_bytes": 0,
+    "host_total_bytes": 85628207104,
+    "host_available_bytes": 33471565824,
+    "hostname": "DESKTOP-N5DFT8J",
+    "version": "0.14.0.dev0"
+  },
+  "environment": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.10.2",
+    "node": "v22.18.0",
+    "playwright": "1.63.0",
+    "torch": "2.10.0+cu126",
+    "cuda_visible_to_server": false
+  },
+  "backend": "cpu (every spec selects the CPU resource)",
+  "specs": {
+    "tests/ui/g8-journey.spec.js": "6a7089b107de1b7267f2cda3dc2047cd033173ed6bc4b4444535d1e451c7473e",
+    "tests/ui/g8-editing.spec.js": "f17796593bdd6456a9d04433fc8d6e994301eaf4057b0b868aa3fa4075b0e4aa"
+  },
+  "bundle": {
+    "torchfdtd/web/assets/index-DfjDoFj9.css": "404ceab9c7ed97e90e18810465564097f99c74076954220cd3786ae528434ab6",
+    "torchfdtd/web/assets/index-DFleM371.js": "e44cbfdbe1bcd0c409a22fae7caf851bfb7d73f6adc18d63c1dac80adcc63cb4",
+    "torchfdtd/web/index.html": "e0b22681d411aa8750af3e3b31ff85d381e11c299e0e52b1503d9b623bda0eea"
+  },
+  "playwright_exit_code": 0,
+  "wall_seconds": 52.391,
+  "tests": [
+    {
+      "file": "tests/ui/g8-editing.spec.js",
+      "title": "undo and redo restore edits and the history is bounded",
+      "status": "expected",
+      "outcome": "passed",
+      "duration_ms": 28337,
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "file": "tests/ui/g8-editing.spec.js",
+      "title": "multi-select, duplicate all, copy, paste and delete all",
+      "status": "expected",
+      "outcome": "passed",
+      "duration_ms": 2354,
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "file": "tests/ui/g8-editing.spec.js",
+      "title": "autosave to browser storage and recovery after reload",
+      "status": "expected",
+      "outcome": "passed",
+      "duration_ms": 1764,
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "file": "tests/ui/g8-editing.spec.js",
+      "title": "the saved project carries a monotonic revision and a content hash the server confirms",
+      "status": "expected",
+      "outcome": "passed",
+      "duration_ms": 1733,
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "file": "tests/ui/g8-editing.spec.js",
+      "title": "non-finite and out-of-range values are refused with a visible message",
+      "status": "expected",
+      "outcome": "passed",
+      "duration_ms": 1763,
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "file": "tests/ui/g8-editing.spec.js",
+      "title": "results are marked stale when the plan changes after a run and current again when it is restored",
+      "status": "expected",
+      "outcome": "passed",
+      "duration_ms": 4344,
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "file": "tests/ui/g8-journey.spec.js",
+      "title": "workbench journey: GDS import, materials, source, boundaries, mesh preview, preflight, queue, cancel, results, exports",
+      "status": "expected",
+      "outcome": "passed",
+      "duration_ms": 8771,
+      "attempts": 1,
+      "error": null,
+      "journey_timing_ms": {
+        "gds_import": 1650,
+        "materials": 2032,
+        "source_monitor": 2789,
+        "boundaries": 3437,
+        "mesh_preview": 3687,
+        "preflight": 3849,
+        "cancel": 5030,
+        "rerun": 7166,
+        "results_overlay": 7319,
+        "exports": 8696,
+        "total_ms": 8696
+      }
+    }
+  ],
+  "all_passed": true,
+  "report": {
+    "path": "docs/validation/workbench/20260921T192723Z-eb209464.playwright.json",
+    "sha256": "889d861bd4b39a8d76e2ca56617d6137c6211c613797daab6c085b18474eed86"
+  }
+}

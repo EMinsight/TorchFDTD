@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G8-04_editing_integrity",
+  "task": "G8-04",
+  "title": "Undo/redo with a bounded history, multi-select with copy and paste, autosave and recovery, a versioned project, field validation with a visible message, and stale-result marking tied to the plan hash",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2a5d8cc9c4f3b0722f49726a5f5677f0b9",
+  "declared_before_run": true,
+  "fixture": {
+    "spec": "tests/ui/g8-editing.spec.js (six tests, each in a fresh browser context with empty storage) run by scripts/run_workbench_journeys.py against a CPU-only server; tests/test_project_versioning.py against FastAPI's TestClient",
+    "start": "the SiN waveguide 2D example of the workbench (structure waveguide 8 x 0.65 x 0.4 um, point source, monitors input and output, 1000 steps)",
+    "history": "y span edits 0.8 then 0.9; then 85 edits of the region's time steps 200 .. 284 followed by 80 undo clicks and one more",
+    "selection": "Ctrl+click on waveguide and source; Duplicate all; Ctrl+C; Ctrl+V; Delete all from the selection panel; Paste from the ribbon",
+    "autosave": "y span 0.8 and a duplicate, then page.reload(); then one more edit",
+    "versioning": "three edits (y span 0.8, x span 7, y span 0.75), Ctrl+S, the downloaded JSON posted to /api/validate unchanged and with steps + 1, then one undo",
+    "validation": "y span -1, '', 1e999, 0.8; region time steps 5; the autosaved project with steps 5 posted to /api/validate",
+    "stale": "CPU run of 300 steps; Layout; y span 0.8; open the field visualizer; undo; time steps 320; y span -3",
+    "api": "demo projects through Project.content_hash, stamped, content_matches, Project.save/load, /api/validate, /api/jobs, /api/gds/export"
+  },
+  "seed": null,
+  "precision": ["float32"],
+  "backend": ["cpu"],
+  "reference_method": "the browser's own storage (localStorage torchfdtd.project.v1) read by the spec, the server's /api/validate (plan_hash, revision, content_sha256, stored_content_sha256_matches) and /api/jobs/{id} (plan_hash, revision), and Python recomputation of the content hash in tests/test_project_versioning.py",
+  "observables": [
+    {"name": "undo_redo", "unit": "um", "definition": "y span after undo, undo, redo, Ctrl+Y: 0.8, 0.65, 0.8, 0.9"},
+    {"name": "history_bound", "unit": "steps", "definition": "after 85 time-step edits, 80 undos restore the value of the fifth edit (204) and an 81st undo changes nothing"},
+    {"name": "multi_select", "unit": "count", "definition": "two tree rows selected, the panel reads '2 objects selected'; Duplicate all adds waveguide_copy and source_copy (object count 7); Ctrl+C then Ctrl+V adds waveguide_copy_copy and source_copy_copy (9), the pasted structure at x + 0.4 um with the original size and a new id; Delete all removes them (7); Paste from the ribbon restores 9"},
+    {"name": "autosave_recovery", "unit": "text", "definition": "localStorage holds the project with a 64-hex content_sha256 and revision >= 2; after reload the tree lists waveguide_copy, the log reads 'Recovered the autosaved project \"<name>\" at revision <n>' with no mismatch warning, the title shows rev <n>, y span reads 0.8 and the next edit is revision n + 1"},
+    {"name": "versioned_project", "unit": "count", "definition": "three edits raise revision by exactly 3; the saved JSON carries that revision, schema_version 1 and a 64-hex content_sha256; /api/validate reports stored_content_sha256_matches true for the file and false after steps + 1; the log names the revision and the first 12 hex digits of the hash; an undo raises the revision to start + 4"},
+    {"name": "field_validation", "unit": "text", "definition": "'y span must be at least 0.001 um.' for -1 with aria-invalid, a toast ending 'The previous value is kept.' and a log line; 'y span must be a finite number in um.' for '' and 1e999; the stored size stays 0.65 until 0.8 is accepted; 'time steps must be at least 10.' for 5 with the stored steps still 1000; /api/validate answers 422 for steps 5"},
+    {"name": "stale_marking", "unit": "text", "definition": "after the run the banner is hidden and the field label has no STALE; after Layout the results stay listed and the banner stays hidden; after y span 0.8 the validate plan_hash differs from the job's, the banner reads 'Stale results: the project changed since run revision <r>', the results tree and the field view carry the stale class and the field label starts with STALE; after undo the plan_hash equals the job's and the banner is hidden; after time steps 320 it is visible; after y span -3 (rejected) it stays visible with the field error shown"},
+    {"name": "content_hash_api", "unit": "text", "definition": "content_hash ignores revision and content_sha256, changes with steps; stamped() sets the hash; content_matches() is None, True, False as documented; revision -1 and a malformed hash are refused; Project.save/load keeps both fields; /api/jobs carries the plan_hash and revision of the submitted project, unchanged after completion; names, the revision and precision do not change the plan_hash, geometry and steps do"}
+  ],
+  "acceptance": {
+    "all_observables": "exact values as listed; every spec passes on its first attempt with zero page errors",
+    "history_bound": "80 snapshots (main.js remember())",
+    "stale_scope": "staleness follows plan_hash of torchfdtd.plan: geometry, mesh, materials, sources, monitors, boundaries and steps; placement (backend, kernels, execution mode, precision) is outside the hash by design and is printed in the run summary instead",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-04; the values are this case's declaration"
+  },
+  "tests": {
+    "existing": [
+      "tests/ui/g8-editing.spec.js",
+      "tests/test_project_versioning.py",
+      "tests/test_workbench_journeys.py"
+    ],
+    "not_yet_covered": [
+      "dragging in a viewport moves the dragged object only, not the whole multi-selection",
+      "undo of edits made in the materials, boundary, mesh-node and source-signal dialogs is exercised only through the same remember() path, not by a spec",
+      "a precision or backend change alone does not mark results stale (documented, not asserted)",
+      "the browser-storage-full path (persist() toast) is not simulated"
+    ]
+  },
+  "notes": "Declared on branch g8-gui from 73203d2 before the recorded run. The version fields revision and content_sha256 are additions to schema 1 with defaults; a file that carries them is refused by builds before this change (extra keys are errors), which COMPATIBILITY.md records."
+}

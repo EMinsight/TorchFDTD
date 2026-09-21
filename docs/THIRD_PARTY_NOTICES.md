@@ -36,6 +36,7 @@ development interpreter. Group `runtime` is the base install; the other groups a
 | fsspec | 2026.2.0 | BSD-3-Clause | runtime | torch | https://github.com/fsspec/filesystem_spec |
 | gdstk | 0.9.62 | Boost Software License 1.0 (BSL-1.0) | gds | pyproject.toml | https://github.com/heitzmann/gdstk |
 | h11 | 0.16.0 | MIT License | runtime, dev | httpcore, uvicorn | https://github.com/python-hyper/h11 |
+| h5py | 3.16.0 | BSD-3-Clause | hdf5 | pyproject.toml | https://github.com/h5py/h5py |
 | httpcore | 1.0.9 | BSD-3-Clause | dev | httpx | https://github.com/encode/httpcore |
 | httpx | 0.28.1 | BSD License | dev | pyproject.toml | https://github.com/encode/httpx |
 | idna | 3.11 | BSD-3-Clause | runtime, dev | anyio, httpx | https://github.com/kjd/idna |
@@ -46,7 +47,7 @@ development interpreter. Group `runtime` is the base install; the other groups a
 | matplotlib | 3.10.8 | Python Software Foundation License | runtime | fdtd | https://github.com/matplotlib/matplotlib |
 | mpmath | 1.3.0 | BSD License | runtime | sympy | https://github.com/fredrik-johansson/mpmath |
 | networkx | 3.4.2 | BSD License | runtime | torch | https://github.com/networkx/networkx |
-| numpy | 2.2.6 | BSD License | runtime, gds, cuda-kernels | contourpy, cupy-cuda12x, fdtd, gdstk, matplotlib, scipy | https://github.com/numpy/numpy |
+| numpy | 2.2.6 | BSD License | runtime, gds, hdf5, cuda-kernels | contourpy, cupy-cuda12x, fdtd, gdstk, h5py, matplotlib, scipy | https://github.com/numpy/numpy |
 | packaging | 26.2 | Apache-2.0 OR BSD-2-Clause | runtime, dev | build, matplotlib, pytest | https://github.com/pypa/packaging |
 | pillow | 12.1.1 | MIT-CMU | runtime | matplotlib | https://github.com/python-pillow/Pillow |
 | pluggy | 1.6.0 | MIT License | dev | pytest |  |
@@ -100,7 +101,7 @@ These need a decision that this program cannot make. They stay listed until
 
 ## Credential and private-path scan
 
-1304 text files of 1323 tracked paths were scanned for: `address_100_x_x_x`, `credential_token`, `hangul_user_path`, `password_literal`, `private_key_block`, `private_windows_user_path`, `ssh_password_environment`, `ssh_public_key`.
+1322 text files of 1341 tracked paths were scanned for: `address_100_x_x_x`, `credential_token`, `hangul_user_path`, `password_literal`, `private_key_block`, `private_windows_user_path`, `ssh_password_environment`, `ssh_public_key`.
 Excluded because they name the patterns themselves: `scripts/provenance_inventory.py`, `docs/THIRD_PARTY_NOTICES.md`, `docs/validation/sbom.json`, `tests/test_provenance_inventory.py`.
 
 No finding in the tracked tree.

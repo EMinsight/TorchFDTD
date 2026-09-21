@@ -23,6 +23,15 @@ class GDSConversion(Model):
     replace_geometry: bool = False
 
 
+class GDSExport(Model):
+    project: Project
+    cell: str = Field(default='TOP', min_length=1, max_length=32)
+    # structure id -> [layer, datatype] for every enabled structure
+    layers: dict[str, tuple[int, int]] = Field(min_length=1, max_length=1000)
+    unit_m: float = Field(default=1e-6, gt=0)
+    precision_m: float = Field(default=1e-9, gt=0)
+
+
 def attach_gds_routes(app, root):
     folder = Path(root) / 'gds'
     folder.mkdir(parents=True, exist_ok=True)
@@ -63,6 +72,23 @@ def attach_gds_routes(app, root):
         path.write_bytes(data)
         uploads[key] = path
         return {**result, 'id': key, 'filename': unquote(request.headers.get('x-filename', 'layout.gds'))[:512]}
+
+    @app.post('/api/gds/export')
+    def export(payload: GDSExport):
+        # XY geometry only; the returned sidecar carries the Z/material stack the file cannot hold.
+        import base64
+        path = folder / ('export-' + uuid4().hex + '.gds')
+        try:
+            sidecar = gds.export_gds(path, payload.project.structures, layers=payload.layers, cell=payload.cell,
+                                     unit_m=payload.unit_m, precision_m=payload.precision_m)
+            data = path.read_bytes()
+        except ImportError as exc:
+            raise HTTPException(503, str(exc)) from exc
+        except (TypeError, ValueError, RuntimeError, OSError) as exc:
+            raise HTTPException(422, str(exc)) from exc
+        finally:
+            path.unlink(missing_ok=True)
+        return {'gds_base64': base64.b64encode(data).decode('ascii'), 'sidecar': sidecar, 'bytes': len(data)}
 
     @app.post('/api/gds/{key}/convert')
     def convert(key: str, payload: GDSConversion):
