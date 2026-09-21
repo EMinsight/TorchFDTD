@@ -46,7 +46,9 @@ def environment_section(c):
               f"| Execution | GPU, one process | CPU, {m.get('mpi_processes')} MPI ranks (OMP_NUM_THREADS={m.get('omp_num_threads')}) |", '']
     lines += ['Environment build: `benchmarks/cross_solver/setup_env.sh`; verification: `benchmarks/cross_solver/verify_env.sh`. '
               'The per-solver records under `docs/validation/cross_solver/` carry the full package lists, the SHA-256 of every driver script and '
-              'fixture file, the raw timing samples and the GPU idle checks; `docs/validation/cross_solver_3060.json` combines them.', '']
+              'fixture file, the raw timing samples and the GPU idle checks; `docs/validation/cross_solver_3060.json` combines them. '
+              'The recorded driver hashes refer to the driver versions that ran; the environment root and the repository path were '
+              'moved from constants into `TORCHFDTD_BENCH_ROOT` and the script location afterwards, which changed no computation.', '']
     return lines
 
 
