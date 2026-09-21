@@ -23,6 +23,18 @@ physical convergence, beyond-VRAM or final CR acceptance result. Full CPML field
 and adjoints remain resident. Public release is not cleared.
 
 
+Linux CI [35548429393](https://github.com/hyoseokp/TorchFDTD/actions/runs/35548429393)
+at `23b71ab` completed successfully with **1,345 Python passes**,
+446 environment-dependent skips, **32 browser passes**, and 8 browser skips.
+Frontend and wheel builds passed. The Python JUnit SHA-256 is
+`dd88a4d8cc23d733d0906c9ae1b8717eabe11f6c0ed04a5c13daa5587e88b5f2`.
+
+The runtime source audit checked 837 allowlisted files without pattern
+findings. A clean isolated wheel and install matched all 115 package files
+byte-for-byte. The wheel SHA-256 is
+`7111e293bb524a7606630793c182d4937b8910a99578504312fecfca8af6bb52`.
+No unchanged numerical suite was rerun for this acceptance-record update.
+
 ## Recorded-interface CPML integration, 21 September 2026
 
 The separate [CPML reversible API](REVERSIBLE_CPML.md) admits a scalar interior

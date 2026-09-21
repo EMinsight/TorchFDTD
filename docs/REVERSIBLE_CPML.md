@@ -155,6 +155,7 @@ print(model.interior_z, planes["detector"].fields.shape)
 ```
 
 For asynchronous CPU trace storage on CUDA, use `ReversibleCPMLOptions(trace_storage="cpu", trace_transfers="async", trace_chunk_steps=32)` and CUDA material tensors, with the stream and budget restrictions below. This is a resident plane solver. It does not select a `PeriodicLayerResponse` execution policy, build matched homogeneous references, or perform polarization calibration automatically.
+
 ## What is recorded and reconstructed
 
 For an interval `[a,b]`, each timestep stores four transverse component planes in a tensor of shape `(steps, 2, Nx, Ny, 2)`:
