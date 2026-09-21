@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G1-05_journal_reservation",
+  "task": "G1-05",
+  "title": "Journal reservation bounds the measured journal bytes including the signal history and temporary records",
+  "declared": "2026-09-22",
+  "declared_at_commit": "35ac180b57c00cd49bb10652280164a43558ba9c",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "torchfdtd.streamed",
+    "reservation": "restart = max(2(B+S), S+2(B+G)) + 64 KiB + 16*(steps//depth+2) + 2*(512+256*(arrays+1)) bytes, with B the bank bytes, S the signal history bytes and G the gradient bytes, reported as restart_signal_history_bytes and restart_journal_metadata_bytes",
+    "journal": "tests/test_streamed_restart.py: durable journal with every-block records, coexisting forward and backward records, existing records from an earlier run, stale .tmp leftovers"
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "reference_method": "measured peak bytes under the journal directory, sampled while a .tmp record is being written and at every removal, compared with the reservation charged to the volume",
+  "observables": [
+    {
+      "name": "peak_journal_bytes",
+      "unit": "bytes",
+      "definition": "largest total size of the journal directory observed during the run"
+    },
+    {
+      "name": "reservation_bytes",
+      "unit": "bytes",
+      "definition": "restart reservation charged by the planner for the same run"
+    },
+    {
+      "name": "existing_bytes_credit",
+      "unit": "bytes",
+      "definition": "bytes of records already present that are counted toward the reservation, excluding .tmp leftovers"
+    }
+  ],
+  "acceptance": {
+    "bound": "peak_journal_bytes <= reservation_bytes for every recorded fixture, including the moment a .tmp record coexists with its predecessor",
+    "space_check": "a journal directory whose free space is below the reservation is refused before the run starts",
+    "leftovers": ".tmp leftovers are removed only directly under the journal directory, are not credited as existing bytes, and a pointer naming a record outside the journal is refused",
+    "shared_volume": "when journal and banks share a volume the two reservations are summed against it",
+    "source_of_limits": "byte accounting is exact; no tolerance"
+  },
+  "applicability": "Durable restart journals on local volumes; network shares and quota-managed volumes are not measured.",
+  "not_yet_covered": [
+    "power-loss durability (only process-kill consistency is exercised)"
+  ]
+}

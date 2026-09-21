@@ -356,16 +356,26 @@
           "title": "restart 코드 호환성 검사 누락.",
           "specification": "restart 코드 호환성 검사 누락.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
-            "torchfdtd/streamed_restart.py",
-            "tests/test_streamed_restart.py"
+            "docs/STREAMED_RESTART.md",
+            "tests/test_streamed_restart.py",
+            "torchfdtd/streamed.py",
+            "torchfdtd/streamed_restart.py"
           ],
           "planned_test_commands": [],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_streamed_restart.py::test_contract_and_signal_adjoint_mismatch_are_rejected",
+            "tests/test_streamed_restart.py::test_changed_package_file_is_rejected_by_the_contract",
+            "tests/test_streamed_restart.py::test_changed_inputs_are_rejected_with_the_contract_key_named",
+            "tests/test_streamed_restart.py::test_journal_and_banks_share_a_volume_by_identity_not_by_path",
+            "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt",
+            "tests/test_streamed_restart.py::test_forward_resumes_after_interrupt",
+            "tests/test_streamed_restart.py::test_killed_process_is_resumed_by_a_new_process"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -375,17 +385,24 @@
           "title": "journal 저장공간 산정.",
           "specification": "journal 저장공간 산정.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
+            "docs/STREAMED_RESTART.md",
+            "tests/test_streamed_restart.py",
             "torchfdtd/streamed.py",
-            "torchfdtd/streamed_restart.py",
-            "tests/test_streamed_restart.py"
+            "torchfdtd/streamed_restart.py"
           ],
           "planned_test_commands": [],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_streamed_restart.py::test_reservation_covers_the_signal_history_of_coexisting_records",
+            "tests/test_streamed_restart.py::test_stale_temporary_records_are_removed_only_inside_the_journal",
+            "tests/test_streamed_restart.py::test_restart_journal_space_is_checked",
+            "tests/test_streamed_restart.py::test_existing_journal_records_count_toward_the_reservation",
+            "tests/test_streamed_restart.py::test_every_blocks_controls_record_count"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
