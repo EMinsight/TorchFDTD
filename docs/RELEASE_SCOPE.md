@@ -97,20 +97,20 @@ Rendered from [validation/completion_gates.json](validation/completion_gates.jso
 
 | Stage | Title | Profile | Tasks | VERIFIED | FAILED | NOT_RUN | BLOCKED_EXTERNAL | Judge |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| G0 | 기준선·범위·증거 체계 | WORKSTATION | 5 | 5 | 0 | 0 | 0 | 5 pass, 0 fail |
-| G1 | 과거 리뷰 회귀 및 수정 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
-| G2 | 물리·격자·실행 계약 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
-| G3 | 독립 물리·gradient 검증 | WORKSTATION | 17 | 16 | 1 | 0 | 0 | 16 pass, 1 fail |
-| G4 | CUDA·CI·환경 검증 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
+| G0 | 기준선·범위·증거 체계 | WORKSTATION | 5 | 5 | 0 | 0 | 0 | 0 pass, 5 fail |
+| G1 | 과거 리뷰 회귀 및 수정 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 5 pass, 1 fail |
+| G2 | 물리·격자·실행 계약 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 4 pass, 2 fail |
+| G3 | 독립 물리·gradient 검증 | WORKSTATION | 17 | 16 | 1 | 0 | 0 | 5 pass, 12 fail |
+| G4 | CUDA·CI·환경 검증 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 3 pass, 3 fail |
 | G5 | 메모리·재시작·장기 안정성 | WORKSTATION | 10 | 0 | 0 | 10 | 0 | 0 pass, 10 fail |
 | G6 | 사용자 물리·역설계 API | WORKSTATION | 8 | 0 | 0 | 8 | 0 | 0 pass, 8 fail |
 | G7 | 대표 응용·동일 정확도 비용 | WORKSTATION | 5 | 0 | 0 | 5 | 0 | 0 pass, 5 fail |
-| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 7 pass, 0 fail |
-| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 4 | 0 | 3 | 0 | 4 pass, 3 fail |
+| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 1 pass, 6 fail |
+| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 4 | 0 | 3 | 0 | 1 pass, 6 fail |
 | H1 | 실제 단일 문제 multi-GPU | HPC | 6 | 0 | 0 | 1 | 5 | 0 pass, 6 fail |
 
-- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 50 of 77 required tasks pass the judge, 27 fail; NOT RELEASABLE.
-- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 50 of 83 required tasks pass the judge, 33 fail; NOT RELEASABLE.
+- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 19 of 77 required tasks pass the judge, 58 fail; NOT RELEASABLE.
+- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 19 of 83 required tasks pass the judge, 64 fail; NOT RELEASABLE.
 <!-- stage-status:end -->
 
 ## Scope changes

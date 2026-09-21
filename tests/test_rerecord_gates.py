@@ -1,4 +1,5 @@
 """The release-candidate re-recorder replays recorded commands on a temporary repository with a tiny test module."""
+import datetime
 import hashlib
 import importlib.util
 import json
@@ -27,10 +28,14 @@ recorder = rerecord.recorder
 # The module passes only when the environment variable of the recorded command prefix is set.
 TEST_SOURCE = ('import os\n\n\ndef test_flag_from_the_recorded_prefix():\n'
                "    assert os.environ.get('RERECORD_FLAG') == '1'\n\n\ndef test_two():\n    assert True\n")
-JUNIT = ('<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" tests="2" failures="0" errors="0" skipped="0" '
-         'time="0.01" timestamp="2026-09-21T12:00:00.000000+09:00">'
-         '<testcase classname="tests.test_alpha" name="test_flag_from_the_recorded_prefix" time="0.001"></testcase>'
-         '<testcase classname="tests.test_alpha" name="test_two" time="0.001"></testcase></testsuite></testsuites>')
+
+
+def junit_text():
+    """A passing two-test report timestamped now, so it postdates the fixture repository's commits as a real run would."""
+    return ('<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" tests="2" failures="0" errors="0" skipped="0" '
+            f'time="0.01" timestamp="{datetime.datetime.now().astimezone().isoformat()}">'
+            '<testcase classname="tests.test_alpha" name="test_flag_from_the_recorded_prefix" time="0.001"></testcase>'
+            '<testcase classname="tests.test_alpha" name="test_two" time="0.001"></testcase></testsuite></testsuites>')
 
 
 def git(root, *args):
@@ -76,7 +81,7 @@ def repo(tmp_path):
     git(root, 'add', '.')
     git(root, 'commit', '-q', '-m', 'baseline')
     junit = tmp_path / 'first.xml'
-    junit.write_text(JUNIT, encoding='utf-8')
+    junit.write_text(junit_text(), encoding='utf-8')
     command = "$env:RERECORD_FLAG='1'; python -m pytest -q -p no:cacheprovider tests/test_alpha.py --junitxml=D:/elsewhere/first.xml"
     assert recorder.main(['--root', str(root), '--task', 'G1-03', '--command', command, '--junit', str(junit), '--exit-code', '0',
                           '--fixture', str(case), '--scope', 'first run of the flag check']) == 0
@@ -225,13 +230,13 @@ def test_wheel_option_runs_with_the_installed_interpreter_outside_the_tree_and_r
     def fake_run(argv, env, cwd):
         calls['run'] = dict(argv=argv, env=env, cwd=Path(cwd))
         junit = next(token for token in argv if token.startswith('--junitxml='))[len('--junitxml='):]
-        Path(junit).write_text(JUNIT, encoding='utf-8')
+        Path(junit).write_text(junit_text(), encoding='utf-8')
         return 0
 
     monkeypatch.setattr(rerecord, 'create_rc_venv', fake_venv)
     monkeypatch.setattr(rerecord, 'probe_installed_package', fake_probe)
     monkeypatch.setattr(rerecord, 'run_command', fake_run)
-    monkeypatch.setattr(recorder, 'environment_of', lambda interpreter: dict(recorder.environment(), python_executable=str(interpreter)))
+    monkeypatch.setattr(recorder, 'environment_of', lambda interpreter, root: dict(recorder.environment(), python_executable=str(interpreter)))
     monkeypatch.setenv('PYTHONPATH', str(repo))
     code = rerecord.main(['--root', str(repo), '--tasks', 'G1-03', '--wheel', str(wheel), '--torch', 'torch==2.10.0+cu126', '--platform', 'lab'])
     assert code == 0
@@ -253,7 +258,7 @@ def test_wheel_option_runs_with_the_installed_interpreter_outside_the_tree_and_r
 
 def test_recorder_refuses_a_platform_without_a_record_and_records_none_otherwise(repo, tmp_path):
     junit = tmp_path / 'again.xml'
-    junit.write_text(JUNIT, encoding='utf-8')
+    junit.write_text(junit_text(), encoding='utf-8')
     with pytest.raises(SystemExit):
         recorder.main(['--root', str(repo), '--task', 'G1-03', '--command', 'pytest', '--junit', str(junit), '--platform', 'nowhere'])
     assert recorder.main(['--root', str(repo), '--task', 'G1-03', '--command', 'pytest', '--junit', str(junit)]) == 0

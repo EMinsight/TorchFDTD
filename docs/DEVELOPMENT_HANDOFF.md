@@ -974,3 +974,71 @@ D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/TorchFDTD/.local --find-links D:/TorchFDTD/.local/wheels --cuda-torch "torch==2.10.0+cu126"
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all --platform rtx3060-win11-lab --wheel D:/TorchFDTD/.local/dist/<commit12>/torchfdtd-0.14.0.dev0-py3-none-any.whl --torch "torch==2.10.0+cu126" --find-links D:/TorchFDTD/.local/wheels
 ```
+
+---
+
+### 2026-09-22 gate tooling hardening from the evidence review (recorder, judge, report), branch g9-report
+
+**Problem or goal.** Close the eight gate-tooling defects the independent
+review of the evidence on main found: (1) twelve VERIFIED runs started before
+their source commit was made; (2) the judge hashed only test sources and the
+case file, so G3-17, G8-05 and G8-07 judged PASS while their tests fail on HEAD
+because the data they read changed; (3) revised cases and looser fixture
+budgets are scope changes without any recorded owner approval; (4) a file-level
+`required_tests` entry was satisfied by one test of the file, so a partial run
+recorded VERIFIED; (5) an uncommitted weakened test recorded VERIFIED with only
+a warning; (6) a hand-edited evidence.json passed because the judge never
+re-read the JUnit copy; (7) an `optional platform check:` skip inside a
+file-level entry gave NOT_RUN against the conftest policy; (8) the environment
+block lacked the `fdtd` version and the package locations actually used, and
+nothing verified that a case was declared before its run.
+
+**State found.** Branch g9-report at 20a8f93 (main merged at 6eb7996), clean.
+`git show -s --format=%cI` confirms the twelve pre-commit runs (for example the
+G0 runs at 2026-09-21T23:07:30+09:00 against commit 1be01cca made later); the
+first case files were committed together with their evidence.
+
+**Changed files (why).**
+- `scripts/record_gate_evidence.py` (recorder version 2): refuses a JUnit older than HEAD's committer time unless `--allow-precommit-junit "<reason>"` (stores `junit_started_before_commit`, `precommit_junit_reason`, `source_commit_time`); refuses a dirty required test file, code path, fixture or criteria file unless `--allow-dirty "<reason>"` (stores `dirty_allowed`, `dirty_guarded_paths`, the reason); enumerates every file-level required test with `pytest --collect-only -q --rootdir=<root>` under the command's interpreter and environment prefix (`enumerated_required_tests`; a missing or hard-skipped collected test is NOT_RUN, an `optional platform check:` skip is allowed); hashes the task's `watch_paths` into `watch_sha256`; records `fdtd`, `fdtd_location`, `torchfdtd_location` (found from a process started in the checkout), `junit_original_path`, and `declared_before_run_verified` with `case_first_commit`, `case_first_commit_time` and a `declaration_note`. `parse_command` moved here from the re-recorder.
+- `scripts/check_release_gates.py`: re-parses `runs/<id>/junit.xml`, verifies its stored SHA-256 and compares passed/failed/errors/skipped with evidence.json ("evidence does not match its junit"); re-checks the enumerated tests; fails `dirty_allowed` evidence; marks changed, missing or newly matching watched files STALE (and evidence that predates a task's watch list); allows optional skips in required entries; warns on runs that predate their commit (stored flag, or derived from `execution_timestamp` for older evidence), unverified declaration order, un-enumerated file-level entries, and scope changes pending approval (`scope_change_reasons`, `pending_scope_changes`: a case declaring `supersedes`, `superseded_by`, `revision_of`, `revises` or `replaces`, a `difference_from_common_criterion` or `looser_than_program_thresholds` entry, an `rtol`/`atol` above the loosest program threshold, or a threshold "declared not applicable"); prints every warning and the pending list after the table; validates `watch_paths`.
+- `docs/validation/completion_gates.json`: `watch_paths` on 33 tasks (the lead's lists for G3-17, G8-05, G8-07, G1-06, G9-02 plus the data files and code under test found by scanning every required test module; the gate file, the runs directory, the G3 records the fixtures write, the handoff, the scope and the report are excluded because they are outputs of the recording and rendering cycle).
+- `scripts/build_validation_report.py`: "Evidence warnings" and "Pending owner approvals" sections. `scripts/rerecord_gates.py`: uses the recorder's `parse_command`.
+- `tests/test_release_gates.py`: 34 tests (14 new or rewritten failure injections: pre-commit JUnit refused and warned, derived warning for old evidence, watched files changed, missing or newly matching, evidence predating the watch list, partial run of a file-level entry, judge re-check of the enumeration, optional skip allowed and plain skip not, un-enumerable command, hand-edited evidence and JUnit copy, package locations and original path, declaration order, scope changes warned and listed until approved). The fixture repository gained a whole-file task, a watched task, data files and the program thresholds; the JUnit helper stamps the current time so runs postdate the fixture commits.
+- `tests/test_validation_report.py`: the two new sections and the pending list. `tests/test_rerecord_gates.py`: JUnit stamped now; mock signature.
+- `docs/validation/runs/README.md`, `docs/validation/cases/README.md`, `docs/RELEASE_PROCEDURE.md`, `docs/CHANGELOG.md`.
+
+**Commands run (device: local Windows 11 host, CPU only with `CUDA_VISIBLE_DEVICES=-1`; TMP and TEMP set to D:\TorchFDTD\.local\tmp).**
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_gates.py
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_rerecord_gates.py
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_suite_policy.py tests/test_completion_program_documents.py
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all --platform rtx3060-win11-lab --tasks <the CPU-only tasks below>
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/build_validation_report.py
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py
+```
+
+**Measurements and pre-declared limits.** The rules are the failure
+injections themselves. On the committed tree before any re-recording the new
+judge reported the truth of the record: 31 tasks STALE because their evidence
+predates the watch list or their test module changed (G0-04, G0-05, G4-05 by
+this branch's tests/test_release_gates.py; G9-07 by its test), 14 runs
+warned as predating their commit (the review counted twelve VERIFIED ones;
+G0-01 to G0-03 and G1-01 to G1-03 share two JUnit reports), 28 file-level
+entries warned as not enumerated, and 11 tasks with scope changes pending approval (G3-02 and G3-08
+revised cases; G3-05 threshold declared not applicable; G3-06, G3-09, G3-10,
+G3-11, G3-12, G3-14, G3-15, G3-16 with `rtol`/`atol` above the program's
+float32 pair or an explicit looser-than-program entry). The numeric rule
+compares every `rtol`/`atol` leaf of a case's acceptance block with the loosest
+program pair (rtol 1e-4, atol 1e-6); G3-06, G3-11 and G3-16 are therefore
+listed beyond the review's five, each with the path and value, for the owner
+to approve or reject.
+
+RERECORD_PLACEHOLDER
+
+**Remaining defects, risks, external blockers.**
+- The G3, G4 (except G4-05 and G4-06), G2-06, G8-03, G8-04 and G8-06 evidence stays STALE under the watch rule until the release-candidate round of docs/RELEASE_PROCEDURE.md re-records it on the GPU host; this branch re-recorded only the CPU-only tasks listed above.
+- The twelve pre-commit runs keep their warning until re-recorded; `--allow-precommit-junit` is never used in the RC round.
+- No `scope_change_approval` was set; the eleven pending tasks wait for the owner.
+- `scripts/provenance_inventory.py` prints a `UnicodeDecodeError` from a cp949 reader thread of one of its subprocesses on this host; its exit status and JSON summary are unaffected (the report reads the summary).

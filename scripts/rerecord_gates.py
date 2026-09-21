@@ -27,7 +27,6 @@ import importlib.util
 import json
 import os
 import re
-import shlex
 import shutil
 import subprocess
 import sys
@@ -38,8 +37,6 @@ GATE_FILE = Path('docs') / 'validation' / 'completion_gates.json'
 RUNS_DIR = Path('docs') / 'validation' / 'runs'
 RC_NOTE = 're-recorded on {commit} for the release candidate'
 RC_NOTE_PATTERN = re.compile(r'\s*re-recorded on [0-9a-f]{7,40} for the release candidate\.?\s*$')
-PS_ENV = re.compile(r"^\s*\$env:([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:'([^']*)'|\"([^\"]*)\"|([^;\s]+))\s*;\s*")
-POSIX_ENV = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)=([^\s]*)$')
 IMPORT_PROBE = ('import pathlib, sys, torchfdtd; print(pathlib.Path(torchfdtd.__file__).resolve()); '
                 'print(pathlib.Path(sys.prefix).resolve())')
 
@@ -62,35 +59,8 @@ def load_json(path):
     return json.loads(Path(path).read_text(encoding='utf-8'))
 
 
-def parse_command(command):
-    """Split a recorded command into its environment assignments and its argument vector."""
-    env = {}
-    rest = command
-    while True:
-        match = PS_ENV.match(rest)
-        if match is None:
-            break
-        name, single, double, bare = match.groups()
-        env[name] = single if single is not None else double if double is not None else bare
-        rest = rest[match.end():]
-    lexer = shlex.shlex(rest, posix=True)
-    lexer.whitespace_split = True
-    lexer.escape = ''  # Windows paths keep their backslashes; quotes still group
-    tokens = list(lexer)
-    while tokens:
-        match = POSIX_ENV.match(tokens[0])
-        if match is None:
-            break
-        env[match.group(1)] = match.group(2)
-        tokens = tokens[1:]
-    if not tokens:
-        raise ValueError(f'the recorded command has no executable: {command!r}')
-    return env, tokens
-
-
-def is_python(token):
-    name = Path(token).name.lower()
-    return name in ('python', 'python.exe', 'python3', 'python3.exe')
+parse_command = recorder.parse_command
+is_python = recorder.is_python
 
 
 def absolute_under(root, token):

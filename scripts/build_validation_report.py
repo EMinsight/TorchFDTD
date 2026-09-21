@@ -98,15 +98,15 @@ def display_state(task):
 
 
 def judgement(root, gates, task, runs_dir):
-    """(label, reason) with the rules of check_release_gates.judge_task, stale evidence never accepted."""
+    """(label, reason, warnings) with the rules of check_release_gates.judge_task, stale evidence never accepted."""
     if task.get('required_by_current_plan') is False:
-        return 'optional', 'not required by the current plan'
+        return 'optional', 'not required by the current plan', []
     failures, stale, warnings = judge.judge_task(root, gates, task, runs_dir)
     if failures:
-        return 'FAIL', failures[0]
+        return 'FAIL', failures[0], warnings
     if stale:
-        return 'FAIL', judge.STALE + ': ' + stale[0]
-    return 'PASS', warnings[0] if warnings else 'evidence matches the current checkout'
+        return 'FAIL', judge.STALE + ': ' + stale[0], warnings
+    return 'PASS', warnings[0] if warnings else 'evidence matches the current checkout', warnings
 
 
 def newest_run(root, task, runs_dir):
@@ -299,7 +299,7 @@ def section_gates(root, gates, runs_dir, verdicts):
         rows = []
         for task in stage['tasks']:
             run_id, evidence = newest_run(root, task, runs_dir)
-            label, reason = verdicts[task['id']]
+            label, reason, _ = verdicts[task['id']]
             rows.append([task['id'], cell(task['title']), task.get('implementation_state'), display_state(task),
                          f'`{run_id}`' if run_id else 'none', f"`{evidence['source_commit'][:12]}`" if evidence else 'none',
                          label, cell(reason)])
@@ -580,6 +580,35 @@ def section_comparisons(root):
     return lines
 
 
+def section_warnings(gates, verdicts):
+    lines = ['## Evidence warnings', '',
+             'Every warning the judge attaches to a task; a warning never passes or fails a task by itself. The kinds: a run that started '
+             'before its source commit was made (the tests ran on a tree that is not that commit), a case file first committed with or after '
+             'its evidence (declaration order not verified), evidence recorded on a dirty tree, a file-level required test recorded before '
+             'the recorder enumerated such files, and a scope change awaiting the owner (listed again below).', '']
+    rows = [[task['id'], cell(warning)] for _, task in all_tasks(gates) for warning in verdicts[task['id']][2]]
+    if rows:
+        lines += table(['Task', 'Warning'], rows)
+    else:
+        lines.append('No warnings.')
+    lines.append('')
+    return lines
+
+
+def section_pending_approvals(root, gates):
+    lines = ['## Pending owner approvals', '',
+             'Tasks whose case files declare a scope change (a revised case, or a limit looser than the program thresholds of the gate '
+             'file) while `scope_change_approval` is still null. Section 0 of the program requires the owner\'s recorded approval for such '
+             'changes; nothing here grants it, and the tasks keep their recorded states until it is given.', '']
+    pending = judge.pending_scope_changes(root, gates)
+    if pending:
+        lines += table(['Task', 'Declared change'], [[task_id, cell('; '.join(reasons))] for task_id, reasons in pending.items()])
+    else:
+        lines.append('None: every declared scope change carries an approval.')
+    lines.append('')
+    return lines
+
+
 def section_limitations(root):
     lines = ['## Known limitations', '',
              f'From [validation/known_limitations.json](validation/known_limitations.json); each entry names the record or document it comes from.', '']
@@ -681,6 +710,8 @@ def render(root, provisional=False, dirty=(), check_scope=False):
     lines += section_physics(root, gates, runs_dir)
     lines += section_comparisons(root)
     lines += section_limitations(root)
+    lines += section_warnings(gates, verdicts)
+    lines += section_pending_approvals(root, gates)
     forbidden = [line for line in lines if FORBIDDEN_WORDS.search(line)]
     checks.append(('attestation wording', not forbidden, 'no line uses the words that tests/test_validation_report.py forbids'
                    if not forbidden else 'found in: ' + cell(forbidden[0][:120])))

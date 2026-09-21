@@ -9,9 +9,13 @@ import argparse
 import datetime
 import hashlib
 import importlib
+import importlib.metadata
+import importlib.util
 import json
 import os
 import platform
+import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -21,9 +25,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from release_audit import file_sha256, gpu_required_skips  # noqa: E402
 
-RECORDER_VERSION = 1
+RECORDER_VERSION = 2
 GATE_FILE = Path('docs') / 'validation' / 'completion_gates.json'
 RUNS_DIR = Path('docs') / 'validation' / 'runs'
+OPTIONAL_SKIP_PREFIX = 'optional platform check: '
+PS_ENV = re.compile(r"^\s*\$env:([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:'([^']*)'|\"([^\"]*)\"|([^;\s]+))\s*;\s*")
+POSIX_ENV = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)=([^\s]*)$')
 CASE_FIELDS = {
     'seed': 'seed', 'precision': 'precision', 'backend': 'backend',
     'physics_configuration': 'fixture', 'reference_method': 'reference_method',
@@ -147,11 +154,96 @@ def matches(required, test_id):
     return test_id == required or test_id.startswith(required + '[')
 
 
-def decide(task, results, exit_code, unresolved):
+def parse_command(command):
+    """Split a recorded command into its environment assignments (``$env:NAME='1';`` or ``NAME=1``) and its argument vector."""
+    env = {}
+    rest = command
+    while True:
+        match = PS_ENV.match(rest)
+        if match is None:
+            break
+        name, single, double, bare = match.groups()
+        env[name] = single if single is not None else double if double is not None else bare
+        rest = rest[match.end():]
+    lexer = shlex.shlex(rest, posix=True)
+    lexer.whitespace_split = True
+    lexer.escape = ''  # Windows paths keep their backslashes; quotes still group
+    tokens = list(lexer)
+    while tokens:
+        match = POSIX_ENV.match(tokens[0])
+        if match is None:
+            break
+        env[match.group(1)] = match.group(2)
+        tokens = tokens[1:]
+    if not tokens:
+        raise ValueError(f'the recorded command has no executable: {command!r}')
+    return env, tokens
+
+
+def is_python(token):
+    return Path(token).name.lower() in ('python', 'python.exe', 'python3', 'python3.exe')
+
+
+def optional_skip(reason):
+    return (reason or '').startswith(OPTIONAL_SKIP_PREFIX)
+
+
+def parse_timestamp(text):
+    """An ISO 8601 timestamp as an aware datetime; a naive one is taken as local time."""
+    if not text:
+        return None
+    value = datetime.datetime.fromisoformat(text.replace('Z', '+00:00'))
+    return value if value.tzinfo else value.astimezone()
+
+
+def commit_time(root, commit):
+    return parse_timestamp(git_text(root, 'show', '-s', '--format=%cI', commit))
+
+
+def expand_watch_paths(root, patterns):
+    """Every tracked-or-not file under root matched by the task's watch_paths (files or globs), sorted."""
+    matched = set()
+    for pattern in patterns or []:
+        if pattern.endswith('**'):
+            pattern += '/*'  # Path.glob('dir/**') yields directories only; 'dir/**/*' yields every file below
+        if any(char in pattern for char in '*?['):
+            matched.update(p for p in root.glob(pattern) if p.is_file())
+        elif (root / pattern).is_file():
+            matched.add(root / pattern)
+    return sorted(relative(root, p) for p in matched)
+
+
+def enumerate_tests(root, command, files):
+    """The test ids pytest collects for each required file, with the interpreter and environment prefix of the command."""
+    env_extra, argv = parse_command(command)
+    if is_python(argv[0]):
+        launcher = [argv[0], '-m', 'pytest']
+    elif Path(argv[0]).name.lower().startswith('pytest'):
+        launcher = [argv[0]]
+    else:
+        raise ValueError(f'cannot enumerate the tests of {", ".join(files)}: the command does not start with python or pytest: {command!r}')
+    env = dict(os.environ, **env_extra)
+    enumerated = {}
+    for file in files:
+        completed = subprocess.run([*launcher, '--collect-only', '-q', '-p', 'no:cacheprovider', f'--rootdir={root}', file],
+                                   cwd=str(root), env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
+        ids = [line.strip() for line in completed.stdout.splitlines() if line.strip().startswith(file + '::')]
+        if completed.returncode not in (0, 5) or not ids:
+            raise ValueError(f'collecting {file} with {launcher[0]} failed (exit {completed.returncode}):\n{completed.stdout[-1500:]}{completed.stderr[-1500:]}')
+        enumerated[file] = ids
+    return enumerated
+
+
+def decide(task, results, exit_code, unresolved, enumerated=None):
     ran = results['passed'] + results['failed'] + results['errors'] + results['skipped']
     required = task.get('required_tests') or []
-    skipped_required = sorted({t for t in required for s in results['skipped'] if matches(t, s)})
+    reasons = results.get('skipped_reasons') or {}
+    hard_skips = [s for s in results['skipped'] if not optional_skip(reasons.get(s))]
+    skipped_required = sorted({t for t in required for s in hard_skips if matches(t, s)})
     absent_required = [t for t in required if not any(matches(t, r) for r in ran)]
+    # A file-level entry needs every test pytest collects for that file, not just one of them (optional platform skips allowed).
+    absent_enumerated = sorted(test for ids in (enumerated or {}).values() for test in ids if test not in ran)
+    skipped_enumerated = sorted(test for ids in (enumerated or {}).values() for test in ids if test in hard_skips)
     if results['failed'] or results['errors']:
         return 'FAILED', f"{len(results['failed'])} failed and {len(results['errors'])} errored test cases", skipped_required
     if results['gpu_required_skips']:
@@ -165,9 +257,51 @@ def decide(task, results, exit_code, unresolved):
         return 'NOT_RUN', 'required tests were skipped: ' + ', '.join(skipped_required), skipped_required
     if absent_required:
         return 'NOT_RUN', 'required tests are absent from the report: ' + ', '.join(absent_required), skipped_required
+    if skipped_enumerated:
+        return 'NOT_RUN', 'collected tests of a required file were skipped: ' + ', '.join(skipped_enumerated), skipped_required
+    if absent_enumerated:
+        return 'NOT_RUN', 'collected tests of a required file are absent from the report (partial run): ' + ', '.join(absent_enumerated), skipped_required
     if unresolved:
         return 'NOT_RUN', 'test sources could not be resolved for: ' + ', '.join(unresolved), skipped_required
     return 'VERIFIED', 'no failures or errors, and no required test skipped or absent', skipped_required
+
+
+def package_locations(root):
+    """Where ``fdtd`` and ``torchfdtd`` resolve for a process started in root (as ``python -m pytest`` is), without importing them."""
+    inserted = str(root) not in sys.path
+    if inserted:
+        sys.path.insert(0, str(root))
+    try:
+        out = {}
+        for name in ('fdtd', 'torchfdtd'):
+            try:
+                spec = importlib.util.find_spec(name)
+            except (ImportError, ValueError):
+                spec = None
+            out[f'{name}_location'] = spec.origin if spec and spec.origin else None
+        try:
+            out['fdtd'] = importlib.metadata.version('fdtd')
+        except importlib.metadata.PackageNotFoundError:
+            out['fdtd'] = None
+        return out
+    finally:
+        if inserted:
+            sys.path.remove(str(root))
+
+
+def case_declaration(root, fixture, commit, junit_started):
+    """The case file's first commit and whether it was declared (committed) before the run and within the source commit's history."""
+    log = git_text(root, 'log', '--diff-filter=A', '--reverse', '--format=%H %cI', '--', fixture)
+    first = log.splitlines()[0].split() if log else None
+    if first is None:
+        return dict(case_first_commit=None, case_first_commit_time=None, declared_before_run_verified=False,
+                    declaration_note='the case file has no commit adding it; it was declared in the working tree only')
+    first_commit, first_time = first
+    ancestor = subprocess.run(['git', 'merge-base', '--is-ancestor', first_commit, commit], cwd=root, capture_output=True).returncode == 0
+    earlier = junit_started is not None and parse_timestamp(first_time) < junit_started
+    return dict(case_first_commit=first_commit, case_first_commit_time=first_time, declared_before_run_verified=bool(ancestor and earlier),
+                declaration_note=None if ancestor and earlier else
+                ('the case file was first committed after the run started' if ancestor else 'the case file\'s first commit is not an ancestor of the source commit'))
 
 
 def command_output(*command):
@@ -201,13 +335,13 @@ def environment():
     return env
 
 
-def environment_of(interpreter):
-    """The environment of the interpreter that ran the command; this interpreter's when none or the same is given."""
+def environment_of(interpreter, root):
+    """The environment of the interpreter that ran the command, with the fdtd and torchfdtd locations a process started in root sees."""
     if interpreter is None or Path(interpreter).resolve() == Path(sys.executable).resolve():
-        return environment()
-    code = (f'import json, sys; sys.path.insert(0, {str(Path(__file__).resolve().parent)!r}); '
-            'import record_gate_evidence; print(json.dumps(record_gate_evidence.environment()))')
-    completed = subprocess.run([str(interpreter), '-c', code], capture_output=True, text=True)
+        return dict(environment(), **package_locations(root))
+    code = (f'import json, pathlib, sys; sys.path.insert(0, {str(Path(__file__).resolve().parent)!r}); '
+            'import record_gate_evidence as r; print(json.dumps(dict(r.environment(), **r.package_locations(pathlib.Path.cwd()))))')
+    completed = subprocess.run([str(interpreter), '-c', code], cwd=str(root), capture_output=True, text=True)
     if completed.returncode != 0:
         raise SystemExit(f'cannot query the environment of {interpreter}:\n{completed.stderr[-2000:]}')
     return json.loads(completed.stdout.strip().splitlines()[-1])
@@ -294,6 +428,10 @@ def main(argv=None):
     parser.add_argument('--dist', help='wheel or source archive the run installed, hashed as package_or_wheel_sha256')
     parser.add_argument('--interpreter', default=None, help='interpreter that ran the command, when it is not this one; its Python, torch and CuPy versions are recorded')
     parser.add_argument('--platform', default=None, help='platform id of the host that ran the command (a record under docs/validation/platforms), written as platform_id')
+    parser.add_argument('--allow-precommit-junit', metavar='REASON', default=None,
+                        help='record a JUnit report that started before the source commit was made (the tests ran on a tree that is not this commit); the reason is stored')
+    parser.add_argument('--allow-dirty', metavar='REASON', default=None,
+                        help='record although a required test file, a code path or the fixture is dirty in git; the reason is stored and the judge fails such evidence')
     parser.add_argument('--note', default=None, help='free-text note kept with the evidence')
     parser.add_argument('--scope', default=None, help='applicable-scope statement; a conservative default is written otherwise')
     parser.add_argument('--root', default=None, help='repository root (default: the checkout containing this script)')
@@ -318,7 +456,38 @@ def main(argv=None):
         exit_code_source = 'derived_from_junit'
     else:
         exit_code, exit_code_source = args.exit_code, 'argument'
-    state, reason, skipped_required = decide(task, results, exit_code, unresolved)
+
+    commit = git_text(root, 'rev-parse', 'HEAD')
+    committed_at = commit_time(root, commit)
+    junit_started = parse_timestamp(results['suite_timestamp'])
+    precommit = junit_started is not None and junit_started < committed_at
+    if precommit and args.allow_precommit_junit is None:
+        raise SystemExit(f'the JUnit report started at {junit_started.isoformat()}, before the source commit {commit[:12]} was made at '
+                         f'{committed_at.isoformat()}: the tests did not run on this commit. Rerun them on the committed tree, or pass '
+                         '--allow-precommit-junit "<reason>" to record the run with that fact stored.')
+
+    manifest = dirty_source_manifest(root, [relative(root, gate_path), relative(root, runs_dir)])
+    guarded = [entry.split('::')[0] for entry in task.get('required_tests') or []] + list(task.get('code_paths') or [])
+    guarded += [relative(root, args.fixture)] if args.fixture else []
+    guarded += [relative(root, args.criteria)] if args.criteria else []
+    # git status collapses an untracked directory to one row ending in '/', so a guarded file inside it matches that row.
+    dirty_guarded = sorted({row['path'] for row in manifest
+                            if any(row['path'] == item or row['path'].startswith(item.rstrip('/') + '/')
+                                   or (row['path'].endswith('/') and item.startswith(row['path'])) for item in guarded)})
+    if dirty_guarded and args.allow_dirty is None:
+        raise SystemExit('refusing to record: required test files, code paths or the case file are dirty in git, so the run is not tied to '
+                         f'commit {commit[:12]}: {", ".join(dirty_guarded)}. Commit them and rerun, or pass --allow-dirty "<reason>" '
+                         '(the judge fails such evidence for the release judgement).')
+
+    required_files = [entry for entry in task.get('required_tests') or [] if entry.endswith('.py')]
+    try:
+        enumerated = enumerate_tests(root, args.command, required_files) if required_files else {}
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
+    state, reason, skipped_required = decide(task, results, exit_code, unresolved, enumerated)
+
+    watch_patterns = list(task.get('watch_paths') or [])
+    watch_sha256 = {path: file_sha256(root / path) for path in expand_watch_paths(root, watch_patterns)}
 
     null_reasons = {}
     fixture, criteria = None, None
@@ -358,10 +527,10 @@ def main(argv=None):
     if args.platform is None:
         null_reasons['platform_id'] = 'no --platform was given; the hardware block identifies the host'
 
-    commit = git_text(root, 'rev-parse', 'HEAD')
     tree_sha = source_tree_sha256(root, tracked_paths(root))
-    manifest = dirty_source_manifest(root, [relative(root, gate_path), relative(root, runs_dir)])
     execution_timestamp = results['suite_timestamp'] or datetime.datetime.now(datetime.timezone.utc).isoformat()
+    declaration = (case_declaration(root, relative(root, args.fixture), commit, junit_started) if args.fixture
+                   else dict(case_first_commit=None, case_first_commit_time=None, declared_before_run_verified=None, declaration_note=None))
     recorded_at = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
     short = hashlib.sha256(f'{args.task}\n{args.command}\n{commit}\n{execution_timestamp}'.encode('utf-8')).hexdigest()[:8]
     run_id = f"{recorded_at.strftime('%Y%m%dT%H%M%SZ')}-{args.task.lower()}-{short}"
@@ -387,18 +556,24 @@ def main(argv=None):
         recorder_version=RECORDER_VERSION, run_id=run_id, task=task['id'], stage=stage['id'], task_title=task['title'],
         command=args.command, exit_code=exit_code, exit_code_source=exit_code_source,
         execution_timestamp=execution_timestamp, recorded_at=recorded_at.isoformat(),
-        source_commit=commit, source_tree_sha256=tree_sha,
-        dirty_source_manifest=manifest, package_or_wheel_sha256=package_sha,
+        source_commit=commit, source_commit_time=committed_at.isoformat(), source_tree_sha256=tree_sha,
+        junit_started_before_commit=precommit, precommit_junit_reason=args.allow_precommit_junit if precommit else None,
+        dirty_source_manifest=manifest, dirty_guarded_paths=dirty_guarded,
+        dirty_allowed=bool(dirty_guarded), dirty_allowed_reason=args.allow_dirty if dirty_guarded else None,
+        package_or_wheel_sha256=package_sha,
         package_path=relative(root, args.dist) if args.dist else None,
         platform_id=args.platform,
         test_source_sha256=test_sources, unresolved_test_classnames=unresolved,
+        watch_paths=watch_patterns, watch_sha256=watch_sha256,
         fixture_path=relative(root, args.fixture) if args.fixture else None, fixture_sha256=fixture_sha,
         acceptance_criteria_path=relative(root, args.criteria) if args.criteria else (relative(root, args.fixture) if criteria is not None else None),
         acceptance_criteria_sha256=criteria_sha,
-        environment=environment_of(args.interpreter), hardware=hardware_info,
+        **declaration,
+        environment=environment_of(args.interpreter, root), hardware=hardware_info,
         **case_values,
         test_results=results, required_tests=task.get('required_tests') or [], skipped_required_tests=skipped_required,
-        gpu_required_skips=results['gpu_required_skips'],
+        enumerated_required_tests=enumerated, gpu_required_skips=results['gpu_required_skips'],
+        junit_original_path=relative(root, junit_path),
         artifact_paths_and_sha256=artifacts, applicable_scope=scope, note=args.note,
         verification_state_assigned=state, verification_reason=reason, null_reasons=null_reasons,
         gate_file=relative(root, gate_path),
@@ -421,6 +596,12 @@ def main(argv=None):
     print(f"{task['id']} verification_state -> {state}: {reason}")
     if evidence['dirty_source_manifest']:
         print(f"warning: {len(evidence['dirty_source_manifest'])} dirty or untracked paths at recording time; the run is not tied to commit {commit[:12]} alone")
+    if dirty_guarded:
+        print(f"warning: recorded with --allow-dirty ({args.allow_dirty}); dirty guarded paths: {', '.join(dirty_guarded)}; the judge fails this evidence")
+    if precommit:
+        print(f'warning: the run started before commit {commit[:12]} was made ({args.allow_precommit_junit}); the judge reports it')
+    if declaration['declared_before_run_verified'] is False:
+        print(f"warning: declaration order not verified: {declaration['declaration_note']}")
     return 0
 
 

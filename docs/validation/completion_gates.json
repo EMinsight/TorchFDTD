@@ -145,7 +145,11 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "HEAD, dirty tree, plan inputs and local hardware were checked and written to docs/DEVELOPMENT_HANDOFF.md; the recorder captures the same facts for every later run."
+          "implementation_note": "HEAD, dirty tree, plan inputs and local hardware were checked and written to docs/DEVELOPMENT_HANDOFF.md; the recorder captures the same facts for every later run.",
+          "watch_paths": [
+            "docs/COMPLETION_PROGRAM_KO.md",
+            "docs/COMPLETION_PLAN_KO.md"
+          ]
         },
         {
           "id": "G0-02",
@@ -169,7 +173,11 @@
             "20260921T140934Z-g0-02-39132c5d"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "docs/COMPLETION_PROGRAM_KO.md",
+            "docs/COMPLETION_PLAN_KO.md"
+          ]
         },
         {
           "id": "G0-03",
@@ -199,7 +207,11 @@
             "20260921T140938Z-g0-03-786bc0b9"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "docs/COMPLETION_PROGRAM_KO.md",
+            "docs/COMPLETION_PLAN_KO.md"
+          ]
         },
         {
           "id": "G0-04",
@@ -228,7 +240,12 @@
             "20260921T190225Z-g0-04-74cad931"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "scripts/record_gate_evidence.py",
+            "scripts/check_release_gates.py",
+            "scripts/release_audit.py"
+          ]
         },
         {
           "id": "G0-05",
@@ -257,7 +274,12 @@
             "20260921T190327Z-g0-05-ed168636"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "scripts/record_gate_evidence.py",
+            "scripts/check_release_gates.py",
+            "scripts/release_audit.py"
+          ]
         }
       ]
     },
@@ -448,7 +470,13 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "README rows and quick start corrected in ca79616 (separate capacity and crash-resume rows, GB/GiB, explicit dimension and cuda_kernel). Recomputation of cells/GB/GiB/dtype/peak/time from the raw records is not yet recorded as evidence."
+          "implementation_note": "README rows and quick start corrected in ca79616 (separate capacity and crash-resume rows, GB/GiB, explicit dimension and cuda_kernel). Recomputation of cells/GB/GiB/dtype/peak/time from the raw records is not yet recorded as evidence.",
+          "watch_paths": [
+            "README.md",
+            "docs/BEYOND_VRAM_FP32.md",
+            "docs/validation/beyond_vram_restart_5880.json",
+            "docs/validation/cross_solver_3060.json"
+          ]
         }
       ]
     },
@@ -626,7 +654,10 @@
             "20260921T164112Z-g2-05-657bc5cb"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "docs/CONVENTIONS.md"
+          ]
         },
         {
           "id": "G2-06",
@@ -656,7 +687,10 @@
             "20260921T164116Z-g2-06-c78e74ff"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "docs/IDENTITY_CONDITIONS.md"
+          ]
         }
       ]
     },
@@ -707,7 +741,10 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture, in-test Yee-relation oracle, records and rendered document added in 637e653; eigenmode rows at round-off, Simulation-path rows within 3.8e-7 rad of the discrete relation."
+          "implementation_note": "Fixture, in-test Yee-relation oracle, records and rendered document added in 637e653; eigenmode rows at round-off, Simulation-path rows within 3.8e-7 rad of the discrete relation.",
+          "watch_paths": [
+            "docs/validation/cases/G3-01_*.json"
+          ]
         },
         {
           "id": "G3-02",
@@ -748,7 +785,10 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture, in-test transfer-matrix oracle, records and rendered document added in 637e653. The recorded run fails 12 of 48 instances: the n=3.5 slabs at about 20 cells per material wavelength exceed the 0.01 R/T and 0.02 rad limits (0.013 to 0.037, 0.031 to 0.054 rad); at about 40 cells they pass. The limits were not relaxed. Revision 2 (docs/validation/cases/G3-02r2_slab_tmm_40_cells.json) fixes the mesh at about 40 cells per material wavelength for every index with unchanged limits; the 20-cell instances remain as reported measurements with the energy-balance and convergence-order tests. The first case and its FAILED evidence run stay in place."
+          "implementation_note": "Fixture, in-test transfer-matrix oracle, records and rendered document added in 637e653. The recorded run fails 12 of 48 instances: the n=3.5 slabs at about 20 cells per material wavelength exceed the 0.01 R/T and 0.02 rad limits (0.013 to 0.037, 0.031 to 0.054 rad); at about 40 cells they pass. The limits were not relaxed. Revision 2 (docs/validation/cases/G3-02r2_slab_tmm_40_cells.json) fixes the mesh at about 40 cells per material wavelength for every index with unchanged limits; the 20-cell instances remain as reported measurements with the energy-balance and convergence-order tests. The first case and its FAILED evidence run stay in place.",
+          "watch_paths": [
+            "docs/validation/cases/G3-02*.json"
+          ]
         },
         {
           "id": "G3-03",
@@ -786,7 +826,10 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture with analytic materials, the passive fit round trip and the bilinear ADE error, records and rendered document added in 637e653."
+          "implementation_note": "Fixture with analytic materials, the passive fit round trip and the bilinear ADE error, records and rendered document added in 637e653.",
+          "watch_paths": [
+            "docs/validation/cases/G3-03_*.json"
+          ]
         },
         {
           "id": "G3-04",
@@ -824,7 +867,11 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-04_mie_cylinder_sphere.json. The record docs/validation/g3/G3-04.json is written by the full run."
+          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-04_mie_cylinder_sphere.json. The record docs/validation/g3/G3-04.json is written by the full run.",
+          "watch_paths": [
+            "docs/validation/cases/G3-04_*.json",
+            "examples/tfsf_sphere.py"
+          ]
         },
         {
           "id": "G3-05",
@@ -857,7 +904,11 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-05_drude_sphere.json. The record docs/validation/g3/G3-05.json is written by the full run."
+          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-05_drude_sphere.json. The record docs/validation/g3/G3-05.json is written by the full run.",
+          "watch_paths": [
+            "docs/validation/cases/G3-05_*.json",
+            "examples/tfsf_sphere.py"
+          ]
         },
         {
           "id": "G3-06",
@@ -943,7 +994,10 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture with the short/long reference-domain subtraction, records and rendered document added in 637e653; default profile reaches -87 to -94 dB at normal and oblique incidence, -49 dB on the vacuum side of an interface entering the layer."
+          "implementation_note": "Fixture with the short/long reference-domain subtraction, records and rendered document added in 637e653; default profile reaches -87 to -94 dB at normal and oblique incidence, -49 dB on the vacuum side of an interface entering the layer.",
+          "watch_paths": [
+            "docs/validation/cases/G3-07_*.json"
+          ]
         },
         {
           "id": "G3-08",
@@ -988,7 +1042,12 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-08_bloch_grating_rcwa.json. The record docs/validation/g3/G3-08.json is written by the full run. Revision 2 (docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json) restates only the layer-A tolerance as the program pair rtol 1e-4, atol 1e-6 after run 20260921T181948Z-g3-08-6ccad85a failed one layer-A instance; its layer-A test lives in tests/test_physics_g3_b_r2.py and its records under docs/validation/g3/r2."
+          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-08_bloch_grating_rcwa.json. The record docs/validation/g3/G3-08.json is written by the full run. Revision 2 (docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json) restates only the layer-A tolerance as the program pair rtol 1e-4, atol 1e-6 after run 20260921T181948Z-g3-08-6ccad85a failed one layer-A instance; its layer-A test lives in tests/test_physics_g3_b_r2.py and its records under docs/validation/g3/r2.",
+          "watch_paths": [
+            "docs/validation/cases/G3-08*.json",
+            "docs/validation/g3/G3-08_torcwa_reference.json",
+            "benchmarks/g3_torcwa_grating.py"
+          ]
         },
         {
           "id": "G3-09",
@@ -1132,7 +1191,10 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Layer B: near-to-far and near-zone projection against analytic Hertzian fields including phase, Poynting theorem, native dipole pattern convergence against sin^2 theta (tests/test_radiation_dipole_pattern.py, added 2026-09-22, wraps the benchmark). Not covered: surface-position dependence, native far-field phase."
+          "implementation_note": "Layer B: near-to-far and near-zone projection against analytic Hertzian fields including phase, Poynting theorem, native dipole pattern convergence against sin^2 theta (tests/test_radiation_dipole_pattern.py, added 2026-09-22, wraps the benchmark). Not covered: surface-position dependence, native far-field phase.",
+          "watch_paths": [
+            "benchmarks/radiation_dipole.py"
+          ]
         },
         {
           "id": "G3-12",
@@ -1179,7 +1241,11 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Layer B: birefringent slab channel transmission and index VJP against the scalar transfer matrix (tests/test_tensor_slab_acceptance.py, added 2026-09-22, wraps the benchmark), coupled eigenpolarization standing wave, Fourier symbol and continuum refinement, CPML face criterion. Layer A: tensor and rotation gradients against finite differences, CUDA parity. Not covered: reflection and channel balance, oblique incidence."
+          "implementation_note": "Layer B: birefringent slab channel transmission and index VJP against the scalar transfer matrix (tests/test_tensor_slab_acceptance.py, added 2026-09-22, wraps the benchmark), coupled eigenpolarization standing wave, Fourier symbol and continuum refinement, CPML face criterion. Layer A: tensor and rotation gradients against finite differences, CUDA parity. Not covered: reflection and channel balance, oblique incidence.",
+          "watch_paths": [
+            "benchmarks/tensor_cpml_birefringent_slab.py",
+            "docs/TENSOR_CPML_SLAB_ACCEPTANCE.md"
+          ]
         },
         {
           "id": "G3-13",
@@ -1213,7 +1279,11 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-13_curved_interface_convergence.json. The record docs/validation/g3/G3-13.json is written by the full run."
+          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-13_curved_interface_convergence.json. The record docs/validation/g3/G3-13.json is written by the full run.",
+          "watch_paths": [
+            "docs/validation/cases/G3-13_*.json",
+            "examples/tfsf_sphere.py"
+          ]
         },
         {
           "id": "G3-14",
@@ -1380,7 +1450,12 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Layer B: slab thickness and permittivity derivatives against the Airy formula under joint mesh/width refinement with duration and PML controls (tests/test_gradient_mesh_slab.py, added 2026-09-22, wraps the benchmark; 1.63 and 1.78 percent at the followup within the 3 percent limit), polygon vertex derivatives under mesh refinement against fine-mesh differences (stored record). Not covered: sharp-interface shape derivative, curved-interface analytic derivatives."
+          "implementation_note": "Layer B: slab thickness and permittivity derivatives against the Airy formula under joint mesh/width refinement with duration and PML controls (tests/test_gradient_mesh_slab.py, added 2026-09-22, wraps the benchmark; 1.63 and 1.78 percent at the followup within the 3 percent limit), polygon vertex derivatives under mesh refinement against fine-mesh differences (stored record). Not covered: sharp-interface shape derivative, curved-interface analytic derivatives.",
+          "watch_paths": [
+            "benchmarks/gradient_mesh.py",
+            "benchmarks/shape_gradient_polygon.py",
+            "docs/validation/shape_gradient_polygon_3060.json"
+          ]
         },
         {
           "id": "G3-17",
@@ -1413,7 +1488,12 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "docs/ORACLE_BUDGET.md records, for every G3 fixture with a case file on this branch, the oracle class, its independence, the precision floor and the time-window and PML budgets; tests/test_oracle_budget.py enforces that every G3 case names allowed oracle classes with a layer per test. Rows for the G3 tasks recorded on other branches are still to be added."
+          "implementation_note": "docs/ORACLE_BUDGET.md records, for every G3 fixture with a case file on this branch, the oracle class, its independence, the precision floor and the time-window and PML budgets; tests/test_oracle_budget.py enforces that every G3 case names allowed oracle classes with a layer per test. Rows for the G3 tasks recorded on other branches are still to be added.",
+          "watch_paths": [
+            "docs/validation/cases/G3-*.json",
+            "docs/validation/cases/*.oracles.json",
+            "docs/ORACLE_BUDGET.md"
+          ]
         }
       ]
     },
@@ -1454,7 +1534,12 @@
             "20260921T163708Z-g4-01-53b82748"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "docs/PLATFORM_MATRIX.md",
+            "docs/validation/platforms/*.json",
+            "scripts/platform_report.py"
+          ]
         },
         {
           "id": "G4-02",
@@ -1601,7 +1686,15 @@
             "20260921T164503Z-g4-05-300f0a95"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "scripts/record_gate_evidence.py",
+            "scripts/check_release_gates.py",
+            "scripts/release_audit.py",
+            "pyproject.toml",
+            "scripts/run_suite.py",
+            "tests/conftest.py"
+          ]
         },
         {
           "id": "G4-06",
@@ -1630,7 +1723,12 @@
             "20260921T163823Z-g4-06-f3d8a42a"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            ".github/workflows/test.yml",
+            "docs/GPU_RUNNER_POLICY.md",
+            "scripts/run_suite.py"
+          ]
         }
       ]
     },
@@ -2084,7 +2182,12 @@
             "20260921T170627Z-g8-01-d8b628a7"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "examples/native_farfield.json",
+            "examples/open_mode_network.json",
+            "tests/fixtures/**"
+          ]
         },
         {
           "id": "G8-02",
@@ -2155,7 +2258,11 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "The Playwright journey is the verification; the recorder reads pytest, so tests/test_workbench_journeys.py checks the committed journey record (every spec passed on a CPU-only server, the ten timed steps, the spec and bundle hashes) and the Playwright JSON report is attached as an artifact. The GDS export needed a new route (/api/gds/export) and dialog; the results overlay check samples the field canvas pixels."
+          "implementation_note": "The Playwright journey is the verification; the recorder reads pytest, so tests/test_workbench_journeys.py checks the committed journey record (every spec passed on a CPU-only server, the ten timed steps, the spec and bundle hashes) and the Playwright JSON report is attached as an artifact. The GDS export needed a new route (/api/gds/export) and dialog; the results overlay check samples the field canvas pixels.",
+          "watch_paths": [
+            "torchfdtd/web/**",
+            "docs/validation/workbench/*.json"
+          ]
         },
         {
           "id": "G8-04",
@@ -2194,7 +2301,11 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Undo/redo (80 snapshots) and autosave existed; added Ctrl+click multi-selection with duplicate/copy/paste/delete of the whole selection, numeric field validation with a visible message, the revision counter and content hash in the project JSON (server-computed hash, /api/validate reports a mismatch), the recovery message, and stale marking of the last run against the plan hash the job carries; Layout keeps the results instead of clearing them."
+          "implementation_note": "Undo/redo (80 snapshots) and autosave existed; added Ctrl+click multi-selection with duplicate/copy/paste/delete of the whole selection, numeric field validation with a visible message, the revision counter and content hash in the project JSON (server-computed hash, /api/validate reports a mismatch), the recovery message, and stale marking of the last run against the plan hash the job carries; Layout keeps the results instead of clearing them.",
+          "watch_paths": [
+            "torchfdtd/web/**",
+            "docs/validation/workbench/*.json"
+          ]
         },
         {
           "id": "G8-05",
@@ -2228,7 +2339,15 @@
             "20260921T170637Z-g8-05-29a464aa"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "pyproject.toml",
+            "torchfdtd/web/**",
+            "scripts/clean_install_check.py",
+            "scripts/run_readme_examples.py",
+            "README.md",
+            "docs/validation/clean_install/*.json"
+          ]
         },
         {
           "id": "G8-06",
@@ -2259,7 +2378,15 @@
             "20260921T170706Z-g8-06-7b7e68da"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "pyproject.toml",
+            "torchfdtd/web/**",
+            "scripts/clean_install_check.py",
+            "scripts/run_readme_examples.py",
+            "README.md",
+            "docs/validation/clean_install/*.json"
+          ]
         },
         {
           "id": "G8-07",
@@ -2289,7 +2416,15 @@
             "20260921T170718Z-g8-07-b934b710"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "pyproject.toml",
+            "torchfdtd/web/**",
+            "scripts/clean_install_check.py",
+            "scripts/run_readme_examples.py",
+            "README.md",
+            "docs/validation/clean_install/*.json"
+          ]
         }
       ]
     },
@@ -2367,7 +2502,14 @@
             "20260921T163044Z-g9-02-158d1eda"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "docs/validation/sbom.json",
+            "docs/THIRD_PARTY_NOTICES.md",
+            "pyproject.toml",
+            "THIRD_PARTY_NOTICES.txt",
+            "package-lock.json"
+          ]
         },
         {
           "id": "G9-03",
@@ -2419,7 +2561,15 @@
             "20260921T163104Z-g9-04-f2b9d65e"
           ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "docs/COMPATIBILITY.md",
+            "docs/CHANGELOG.md",
+            ".github/ISSUE_TEMPLATE/bug_report.md",
+            "pyproject.toml",
+            "torchfdtd/server.py",
+            "torchfdtd/__init__.py"
+          ]
         },
         {
           "id": "G9-05",
@@ -2466,7 +2616,11 @@
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "The tooling exists and is tested (scripts/rerecord_gates.py re-records every replayable gate on one commit and, with --wheel, with the installed wheel); the task itself is the maintainer's release-candidate run of docs/RELEASE_PROCEDURE.md on the exact RC tree and wheel, which has not been performed. Its verification stays NOT_RUN until that run is recorded."
+          "implementation_note": "The tooling exists and is tested (scripts/rerecord_gates.py re-records every replayable gate on one commit and, with --wheel, with the installed wheel); the task itself is the maintainer's release-candidate run of docs/RELEASE_PROCEDURE.md on the exact RC tree and wheel, which has not been performed. Its verification stays NOT_RUN until that run is recorded.",
+          "watch_paths": [
+            "scripts/rerecord_gates.py",
+            "scripts/record_gate_evidence.py"
+          ]
         },
         {
           "id": "G9-07",
@@ -2499,7 +2653,13 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "docs/VALIDATION_REPORT.md is rendered by scripts/build_validation_report.py from the gate file, the evidence runs, the platform, clean-install, G3, cross-solver and Meep records, the suite policy and the version strings; the same run regenerates the verification cells and the stage-status block of docs/RELEASE_SCOPE.md. The consistency section reports version, README-number and scope mismatches instead of hiding them."
+          "implementation_note": "docs/VALIDATION_REPORT.md is rendered by scripts/build_validation_report.py from the gate file, the evidence runs, the platform, clean-install, G3, cross-solver and Meep records, the suite policy and the version strings; the same run regenerates the verification cells and the stage-status block of docs/RELEASE_SCOPE.md. The consistency section reports version, README-number and scope mismatches instead of hiding them.",
+          "watch_paths": [
+            "scripts/build_validation_report.py",
+            "scripts/check_release_gates.py",
+            "docs/validation/known_limitations.json",
+            "docs/validation/platforms/*.json"
+          ]
         }
       ]
     },

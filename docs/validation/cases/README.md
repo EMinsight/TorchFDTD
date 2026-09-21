@@ -8,6 +8,14 @@ has changed since the run. Editing a case after the run therefore invalidates
 that evidence; a scientific correction to a limit is a new case file, with the
 old file and its failing evidence preserved, as
 [COMPLETION_PROGRAM_KO.md](../../COMPLETION_PROGRAM_KO.md) section 1 rule 7 requires.
+Commit the case before the run: the recorder refuses an uncommitted case file
+(unless `--allow-dirty`, which the judge fails) and stores
+`declared_before_run_verified` from the case's first commit against the suite
+timestamp; a case first committed with or after its evidence is a warning in
+the judge and the validation report. A revised case (`supersedes`,
+`revision_of`) or a limit looser than the program thresholds is a scope change
+that the judge lists as pending until the owner records
+`scope_change_approval` in the task.
 
 ## File format
 

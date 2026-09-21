@@ -99,6 +99,13 @@ warning. Re-render `docs/PHYSICS_VALIDATION.md` with
 `scripts/render_physics_validation.py` and commit the regenerated records with
 the evidence.
 
+Every recording of this round runs after the candidate commit, so none needs
+`--allow-precommit-junit`, and every guarded file is committed, so none needs
+`--allow-dirty`; a run that would need either is not a release-candidate run.
+The recorder enumerates every file-level required test with
+`pytest --collect-only` under the wheel interpreter and hashes the task's
+`watch_paths`, so a partial run or a changed data file cannot pass as VERIFIED.
+
 Tasks that fail here are findings of the candidate. A FAILED task is not
 re-run until the defect is fixed, and a fix restarts the procedure at step 1.
 Commit the gate file and the new run directories ("Record the release-candidate
@@ -187,7 +194,11 @@ The judge's exit status is the technical answer for the WORKSTATION profile:
 VERIFIED by evidence tied to this commit, no required test skipped, no
 GPU-required skip, no stale hash and no external blocker. HPC stays
 `NOT RELEASABLE` while the two-GPU blocker stands. Any other result names the
-first failing reason per task.
+first failing reason per task. The judge's warnings (runs that predate their
+commit, cases declared with their evidence, scope changes pending approval)
+do not change the exit status; the report lists them, and the pending scope
+changes need the owner's `scope_change_approval` in the gate file before the
+candidate is called RC_READY.
 
 ## 7. What the result means
 

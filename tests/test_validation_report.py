@@ -93,6 +93,27 @@ def test_report_lists_every_gate_task_and_every_g3_task_once(rendered):
     assert '**FAIL**' in physics or 'FAILED' in physics  # the recorded G3-05 and G3-08 findings stay visible
 
 
+def test_report_lists_evidence_warnings_and_pending_approvals(rendered):
+    report = rendered['report']
+    assert '## Evidence warnings' in report and '## Pending owner approvals' in report
+    pending = report.split('## Pending owner approvals', 1)[1].split('## Consistency', 1)[0]
+    gates = json.loads((ROOT / 'docs' / 'validation' / 'completion_gates.json').read_text(encoding='utf-8'))
+    expected = builder.judge.pending_scope_changes(ROOT, gates)
+    for task_id in expected:
+        assert f'| {task_id} |' in pending
+    assert 'G3-02' in expected and 'G3-08' in expected  # the revised cases of the record
+    warnings = report.split('## Evidence warnings', 1)[1].split('## Pending owner approvals', 1)[0]
+    for _, task in builder.all_tasks(gates):
+        for warning in rendered_warnings(task['id']):
+            assert warning[:60] in warnings
+
+
+def rendered_warnings(task_id):
+    gates = json.loads((ROOT / 'docs' / 'validation' / 'completion_gates.json').read_text(encoding='utf-8'))
+    task = next(t for _, t in builder.all_tasks(gates) if t['id'] == task_id)
+    return builder.judge.judge_task(ROOT, gates, task, ROOT / 'docs' / 'validation' / 'runs')[2]
+
+
 def test_check_mode_passes_on_the_committed_tree(capsys):
     assert builder.main(['--check']) == 0
     out = capsys.readouterr().out
