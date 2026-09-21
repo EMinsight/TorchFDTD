@@ -115,20 +115,25 @@ far = project_farfield(faces, directions, bounds_um=bounds,
 near = project_nearzone(faces, points, bounds_um=bounds, refractive_index=1.3 + .05j)
 ```
 
-`refractive_index` and `relative_permeability` are one fixed scalar each, real
-or complex. They set `k = k0 n`, the reduced impedance `mu_r / n`, and
+`refractive_index` and `relative_permeability` are fixed, real or complex, one
+scalar each or one `(F,)` tensor, list or tuple aligned with the plane
+frequencies (a dispersive exterior). They set `k = k0 n`, the reduced impedance `mu_r / n`, and
 `eps_r = n^2 / mu_r`; the far field carries `exp(ikr)/r` with complex `k`, the
 H field is `(n / mu_r) s x E`, and `intensity()` is the source-referred
 `.5 Re(n / mu_r) |A|^2` without the `exp(-2 Im(k) r)` attenuation. With the
 `exp(-i omega t)` phasors a passive exterior needs `Im(n) >= 0`,
 `Im(mu_r) >= 0` and `Im(n^2 / mu_r) >= 0`; a negative imaginary part is a
-growing exterior and is rejected by name, as are non-positive real parts,
-per-frequency arrays and trainable values. Real inputs keep Python floats and
-the real lossless path is bitwise unchanged (checked against saved outputs
-of the previous revision for FP32/FP64 amplitude, intensity, radius fields,
-point fields and near zone). Per-frequency exteriors are not supported: select
-one frequency per call. The stored adapter does not take a complex exterior
-because the projection medium must equal the real native background.
+growing exterior and is rejected by name, elementwise for arrays, as are
+non-positive real parts, arrays of the wrong length and trainable values.
+Real scalars and one-element tensors keep Python floats and the scalar path
+is bitwise unchanged (checked against the previous revision for FP32/FP64
+real and complex scalars: amplitude, intensity, radius fields, point fields,
+near zone, open surface and diffraction orders). A per-frequency array is
+kept in double precision for admission, then cast to the field precision and
+broadcast over the frequency axis; a real array keeps a real wavenumber.
+Results store the array in `refractive_index`/`relative_permeability`. The
+stored adapter does not take a complex or per-frequency exterior because the
+projection medium must equal the real native background.
 
 ## Open surfaces (approximation)
 
@@ -171,11 +176,14 @@ objective.backward()
 
 `spherical_directions(theta, phi)` returns unit vectors on the tensor-product
 grid with theta from +z, phi from +x toward +y and theta varying slowest, the
-same ordering the browser uses. `spherical_points` places that grid at one
-radius around an origin and `cartesian_plane_points(normal, offset, u, v)`
-builds a plane grid with the cyclic transverse axes of the plane APIs. All
-three return fixed float64 micrometre coordinates; any fixed finite `(P, 3)`
-array is accepted as well.
+same ordering the browser uses. `kspace_directions(ux, uy, axis)` returns
+unit vectors on the tensor-product grid of direction cosines along the cyclic
+transverse axes of a signed axis ('z', '-x', ...), on that axis's hemisphere,
+with `ux` varying slowest; points with `ux^2 + uy^2 > 1` are evanescent and
+rejected. `spherical_points` places the angular grid at one radius around an
+origin and `cartesian_plane_points(normal, offset, u, v)` builds a plane grid
+with the cyclic transverse axes of the plane APIs. All return fixed float64
+coordinates; any fixed finite `(P, 3)` array is accepted as well.
 
 `project_nearzone` evaluates the exact free-space Green function
 `g = exp(ikR)/(4 pi R)` of the same equivalent currents. With `A = int J g dS`
@@ -200,7 +208,7 @@ through the plane adjoint, into material parameters.
 
 ## Validation and limits
 
-[Twenty-four focused tests](../tests/test_radiation.py) cover Bloch Fourier waves
+[Twenty-seven focused tests](../tests/test_radiation.py) cover Bloch Fourier waves
 in all three normals, counterpropagating separation, propagating power sums,
 evanescent orders, FP32 cutoff/normalization, complex metadata rejection and
 coherent radius phase. A translated vector dipole verifies complex amplitude,
@@ -239,7 +247,14 @@ The same dipole in a lossy exterior, `n = 1.3 + .05i` (`Im k = .2/um`) with
 7.2e-4 and 1.8e-4 (both gated at ratios above 3.5 and 5e-4). The radius
 fields satisfy `H = (n/mu_r) s x E` to roundoff and the near-zone/far-field
 model difference halves from 30 to 60 um (1.25e-2 to 6.3e-3) while both stay
-within 1.9e-4 of the analytic fields; FP32 gives 1.0e-3 at 28 samples.
+within 1.9e-4 of the analytic fields; FP32 gives 1.0e-3 at 28 samples. A
+two-frequency call with `n = [1.3+.05i, 1.45+.05i]` and `mu_r = [1, 1.1+.02i]`
+equals the two single-frequency calls with the respective values for the
+amplitude, intensity, radius fields, near zone and point fields (relative
+1e-12 in FP64, 1e-5 in FP32), and the elementwise passivity, length and
+shape rejections are checked. `kspace_directions` is checked against
+`spherical_directions` at the angles of each cosine pair, for the signed and
+sideways axes, at grazing incidence and for the evanescent rejection.
 
 Open surfaces are checked on a fixed 8 x 8 x 6 wavelength box around a
 Gaussian-apodized sheet of Huygens pairs radiating toward +z, with 64 samples

@@ -78,28 +78,48 @@ def _rectangle(plane, bounds_um):
     return bounds, area
 
 
-def _passive(value, name):
-    """One fixed scalar with positive real part and non-negative imaginary part.
+_GROWING = ('has a negative imaginary part: with exp(-i omega t) phasors that is a growing '
+            'exterior, not a passive lossy one. Use a non-negative imaginary part.')
+
+
+def _passive(value, name, count=None):
+    """A fixed passive scalar, or with ``count`` a fixed (count,) per-frequency array.
 
     With exp(-i omega t) phasors a passive exterior has Im(n) >= 0 and
     Im(mu_r) >= 0, so exp(ikr) decays. A negative imaginary part describes a
-    growing exterior and is rejected. A real value is returned as float so the
-    lossless path is unchanged.
+    growing exterior and is rejected, elementwise for an array. A real scalar
+    or one-element tensor is returned as float so the lossless scalar path is
+    unchanged; an array is returned as a CPU float64 or complex128 tensor.
     """
-    if isinstance(value, torch.Tensor):
-        if value.requires_grad:
-            raise ValueError(f'{name} is fixed metadata, not a design variable.')
-        if value.numel() != 1:
-            raise ValueError(f'{name} must be one scalar; per-frequency exteriors are not supported.')
-        value = value.item()
-    if isinstance(value, bool):
+    if isinstance(value, torch.Tensor) and value.requires_grad:
+        raise ValueError(f'{name} is fixed metadata, not a design variable.')
+    if isinstance(value, bool) or (isinstance(value, torch.Tensor) and value.dtype == torch.bool):
         raise ValueError(f'{name} must be a number.')
+    if isinstance(value, (list, tuple)):
+        # Python doubles stay exact; the default float32 tensor dtype would round them.
+        array = torch.as_tensor(value, dtype=torch.complex128)
+    elif isinstance(value, torch.Tensor):
+        array = value.detach().cpu().to(torch.complex128 if value.is_complex() else torch.float64)
+    else:
+        array = None
+    if array is not None and array.numel() != 1:
+        if count is None:
+            raise ValueError(f'{name} must be one scalar.')
+        if array.shape != (count,):
+            raise ValueError(f'{name} must be one scalar or one value per plane frequency, shape ({count},).')
+        z = array.real if array.is_complex() and not bool((array.imag != 0).any()) else array
+        if not bool(torch.isfinite(z).all()) or bool((z.real <= 0).any()):
+            raise ValueError(f'{name} must be finite with a positive real part.')
+        if z.is_complex() and bool((z.imag < 0).any()):
+            raise ValueError(f'{name} {_GROWING}')
+        return z
+    if array is not None:
+        value = array.item()
     z = complex(value)
     if not math.isfinite(z.real) or not math.isfinite(z.imag) or z.real <= 0:
         raise ValueError(f'{name} must be finite with a positive real part.')
     if z.imag < 0:
-        raise ValueError(f'{name} has a negative imaginary part: with exp(-i omega t) phasors that is a growing '
-                         'exterior, not a passive lossy one. Use a non-negative imaginary part.')
+        raise ValueError(f'{name} {_GROWING}')
     return z.real if z.imag == 0 else z
 
 
@@ -107,13 +127,26 @@ def _index(value):
     return _passive(value, 'Exterior refractive index')
 
 
-def _exterior(refractive_index, relative_permeability):
-    """Return (n, mu_r, admittance n/mu_r); the lossless path keeps Python floats."""
-    n = _index(refractive_index)
-    mu = _passive(relative_permeability, 'Exterior relative permeability')
-    if (isinstance(n, complex) or isinstance(mu, complex)) and (n**2 / mu).imag < 0:
+def _exterior(refractive_index, relative_permeability, count=None):
+    """Return (n, mu_r, admittance n/mu_r); the lossless scalar path keeps Python floats."""
+    n = _passive(refractive_index, 'Exterior refractive index', count)
+    mu = _passive(relative_permeability, 'Exterior relative permeability', count)
+    epsilon = n**2 / mu
+    if isinstance(epsilon, torch.Tensor):
+        growing = epsilon.is_complex() and bool((epsilon.imag < 0).any())
+    else:
+        growing = isinstance(epsilon, complex) and epsilon.imag < 0
+    if growing:
         raise ValueError('Exterior permittivity n^2/mu_r has a negative imaginary part; the exterior is not passive.')
     return n, mu, n / mu
+
+
+def _broadcast(value, like, ndim):
+    """Scalars pass through; a per-frequency tensor is cast to the field precision and shaped (F, 1, ...)."""
+    if not isinstance(value, torch.Tensor):
+        return value
+    dtype = like.dtype if value.is_complex() else like.real.dtype
+    return value.to(device=like.device, dtype=dtype).reshape((-1,) + (1,) * (ndim - 1))
 
 
 def _reference_scale(reference, threshold):
@@ -246,7 +279,7 @@ class FarFieldResult:
     electric_amplitude: torch.Tensor  # F, direction, xyz, E_spectral * metres
     directions: torch.Tensor
     frequency_hz: torch.Tensor
-    refractive_index: float  # complex for a lossy exterior
+    refractive_index: float  # complex for a lossy exterior, (F,) tensor per frequency
     phase_origin_um: torch.Tensor
     relative_permeability: float = 1.
     approximation: str = None  # 'open surface' when faces were omitted
@@ -258,7 +291,8 @@ class FarFieldResult:
         For a lossy exterior this is the source-referred pattern
         `.5 Re(n/mu_r) |A|^2`, without the exp(-2 Im(k) r) attenuation.
         """
-        return .5 * (self.refractive_index / self.relative_permeability).real * self.electric_amplitude.abs().square().sum(-1)
+        ratio = _broadcast(self.refractive_index / self.relative_permeability, self.electric_amplitude, 2)
+        return .5 * ratio.real * self.electric_amplitude.abs().square().sum(-1)
 
     def fields_at_radius(self, radius_m):
         """Leading 1/r term only. Radius is measured from the phase origin.
@@ -276,7 +310,7 @@ class FarFieldResult:
         k = 2 * math.pi * self.frequency_hz.double() / C0 * self.refractive_index
         propagation = (torch.exp(1j * k[:, None] * r) / r).to(self.electric_amplitude.dtype)
         e = self.electric_amplitude * propagation[:, :, None]
-        admittance = self.refractive_index / self.relative_permeability
+        admittance = _broadcast(self.refractive_index / self.relative_permeability, e, 3)
         h = admittance * torch.linalg.cross(self.directions.to(e.dtype)[None].expand_as(e), e)
         return torch.cat((e, h), -1)
 
@@ -298,7 +332,8 @@ def _closed_box(faces, bounds_um, refractive_index, relative_permeability=1., op
             raise ValueError('Far-field projection requires all six named closed-box faces.')
     first = faces[names[0]]
     _plane(first)
-    exterior = _exterior(refractive_index, relative_permeability)
+    exterior = tuple(v.to(first.fields.device) if isinstance(v, torch.Tensor) else v
+                     for v in _exterior(refractive_index, relative_permeability, len(first.frequency_hz)))
     device, dtype = first.fields.device, first.fields.real.dtype
     bound = _real_metadata(bounds_um, first.points_um, 'Bounds')
     if bound.shape != (3, 2) or not bool(torch.isfinite(bound).all()) or bool((bound[:, 1] <= bound[:, 0]).any()):
@@ -387,6 +422,35 @@ def spherical_directions(theta_rad, phi_rad):
     return torch.stack((torch.sin(t) * torch.cos(p), torch.sin(t) * torch.sin(p), torch.cos(t)), -1).reshape(-1, 3)
 
 
+def kspace_directions(ux, uy, axis='z'):
+    """Unit directions on the tensor-product grid of direction cosines, ``ux`` varying slowest.
+
+    ``axis`` names the hemisphere: 'z' (or '+z') has a non-negative z
+    component and '-z' a non-positive one, likewise for x and y. ``ux`` and
+    ``uy`` are the cosines along the cyclic transverse axes of that axis
+    (y,z for x; z,x for y; x,y for z). Points with ``ux^2 + uy^2 > 1`` are
+    evanescent, not directions, and are rejected.
+    """
+    sign = -1. if str(axis).startswith('-') else 1.
+    name = str(axis).lstrip('+-')
+    if name not in ('x', 'y', 'z') or len(str(axis)) > 2:
+        raise ValueError("axis must be one of x, y, z, optionally signed, such as '-z'.")
+    a = 'xyz'.index(name)
+    u = torch.as_tensor(ux, dtype=torch.float64).reshape(-1)
+    v = torch.as_tensor(uy, dtype=torch.float64).reshape(-1)
+    if not len(u) or not len(v) or not bool(torch.isfinite(u).all()) or not bool(torch.isfinite(v).all()):
+        raise ValueError('Direction cosines must be finite and nonempty.')
+    ug, vg = torch.meshgrid(u, v, indexing='ij')
+    transverse = ug.square() + vg.square()
+    if bool((transverse > 1).any()):
+        raise ValueError('ux^2 + uy^2 must not exceed 1: such points are evanescent, not propagating directions.')
+    directions = torch.empty(ug.shape + (3,), dtype=torch.float64)
+    directions[..., a] = sign * torch.sqrt((1 - transverse).clamp(min=0.))
+    directions[..., (a + 1) % 3] = ug
+    directions[..., (a + 2) % 3] = vg
+    return directions.reshape(-1, 3)
+
+
 def _origin(origin_um):
     origin = torch.as_tensor(origin_um, dtype=torch.float64)
     if origin.shape != (3,) or not bool(torch.isfinite(origin).all()):
@@ -454,7 +518,7 @@ class NearZoneResult:
     fields: torch.Tensor  # F, point, Ex..Hz in the plane field units (reduced field * s)
     points_um: torch.Tensor
     frequency_hz: torch.Tensor
-    refractive_index: float  # complex for a lossy exterior
+    refractive_index: float  # complex for a lossy exterior, (F,) tensor per frequency
     relative_permeability: float = 1.
     approximation: str = None  # 'open surface' when faces were omitted
     surfaces: tuple = _FACES
@@ -489,7 +553,8 @@ def project_nearzone(faces, points_um, *, bounds_um, refractive_index=1., relati
     device, cdtype, rdtype = first.fields.device, first.fields.dtype, first.fields.real.dtype
     k0 = 2 * math.pi * first.frequency_hz.double() / C0
     k = n * k0
-    epsilon = n**2 / mu
+    epsilon = _broadcast(n**2 / mu, first.fields, 4)
+    permeability = _broadcast(mu, first.fields, 4)
     ik0 = (1j * k0).to(cdtype)[:, None, None, None]
     scale = 1 / k.square()
     inverse_k2 = scale.to(cdtype if scale.is_complex() else rdtype)[:, None, None, None]
@@ -525,7 +590,7 @@ def project_nearzone(faces, points_um, *, bounds_um, refractive_index=1., relati
                 complex_rhat = rhat.to(cdtype)
                 curl_a = g1 * torch.linalg.cross(*torch.broadcast_tensors(complex_rhat, j))
                 curl_f = g1 * torch.linalg.cross(*torch.broadcast_tensors(complex_rhat, m))
-                e = e + (ik0 * mu * potential_a - curl_f).sum(2)
+                e = e + (ik0 * permeability * potential_a - curl_f).sum(2)
                 h = h + (ik0 * epsilon * potential_f + curl_a).sum(2)
         output.append(torch.cat((e, h), -1))
     return NearZoneResult(torch.cat(output, dim=1), points, first.frequency_hz, n, mu,
@@ -562,6 +627,9 @@ def project_farfield(faces, directions, *, bounds_um, refractive_index=1., relat
         raise ValueError('Phase origin must be a fixed finite point in micrometres.')
     _chunks(direction_chunk, point_chunk)
     k = 2 * math.pi * first.frequency_hz / C0 * n
+    if isinstance(n, torch.Tensor):
+        k = k.to(first.fields.dtype if k.is_complex() else dtype)
+    admittance = _broadcast(admittance, first.fields, 3)
     output = []
     for start in range(0, len(direction), direction_chunk):
         s = direction[start:start + direction_chunk]

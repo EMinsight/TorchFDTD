@@ -7,7 +7,7 @@ import torch
 from torchfdtd.adjoint_planes import DifferentiablePlaneResult
 from torchfdtd.radiation import (C0, diffraction_orders, diffraction_efficiency,
     project_farfield, normalized_farfield_intensity, project_nearzone, farfield_at_points,
-    spherical_directions, spherical_points, cartesian_plane_points)
+    spherical_directions, spherical_points, cartesian_plane_points, kspace_directions)
 
 
 def plane(normal='z', bounds=((-1, 1), (-1, 1), (-1, 1)), side=1, count=16,
@@ -402,6 +402,92 @@ def test_lossy_exterior_dipole_near_and_far_fields(n, mu):
     assert float((single.fields - expected.to(torch.complex64)).norm()/expected.norm()) < 2e-3
 
 
+def two_frequency_faces(count=10, dtype=torch.float64):
+    """Two stored frequencies per face: the dipole fields and a rescaled conjugate copy."""
+    faces, bounds, _ = dipole_faces(count, dtype=dtype)
+    stacked = {}
+    for name, face in faces.items():
+        fields = torch.cat((face.fields, (.6 - .3j)*face.fields.conj()), 0)
+        frequency = torch.cat((face.frequency_hz, 1.2*face.frequency_hz), 0)
+        stacked[name] = replace(face, fields=fields, frequency_hz=frequency)
+    return stacked, bounds
+
+
+def frequency_slice(faces, index):
+    return {name: replace(face, fields=face.fields[index:index+1], frequency_hz=face.frequency_hz[index:index+1])
+            for name, face in faces.items()}
+
+
+@pytest.mark.parametrize('dtype', [torch.float64, torch.float32])
+def test_per_frequency_exterior_equals_single_frequency_calls(dtype):
+    faces, bounds = two_frequency_faces(dtype=dtype)
+    n = torch.tensor([1.3+.05j, 1.45+.05j], dtype=torch.complex128)  # Im(n^2/mu) > 0 at both frequencies
+    mu = [1., 1.1+.02j]
+    directions = torch.tensor([[1., 0, 0], [0, 0, 1.], [.6, 0, .8]], dtype=dtype)
+    points = torch.tensor([[1.5, .2, .1], [0., 0., -2.]], dtype=dtype)
+    tolerance = dict(rtol=1e-12, atol=0) if dtype == torch.float64 else dict(rtol=1e-5, atol=0)
+    far = project_farfield(faces, directions, bounds_um=bounds, refractive_index=n, relative_permeability=mu)
+    near = project_nearzone(faces, points, bounds_um=bounds, refractive_index=n, relative_permeability=mu)
+    at = farfield_at_points(faces, points, bounds_um=bounds, refractive_index=n, relative_permeability=mu)
+    assert far.electric_amplitude.shape == (2, 3, 3) and near.fields.shape == (2, 2, 6) and at.shape == (2, 2, 6)
+    assert far.electric_amplitude.dtype == near.fields.dtype == at.dtype == faces['x_min'].fields.dtype
+    assert torch.equal(far.refractive_index.cpu(), n) and near.relative_permeability.shape == (2,)
+    for index in range(2):
+        single = frequency_slice(faces, index)
+        ni, mi = complex(n[index]), mu[index]
+        one = project_farfield(single, directions, bounds_um=bounds, refractive_index=ni, relative_permeability=mi)
+        torch.testing.assert_close(far.electric_amplitude[index], one.electric_amplitude[0], **tolerance)
+        torch.testing.assert_close(far.intensity()[index], one.intensity()[0], **tolerance)
+        torch.testing.assert_close(far.fields_at_radius(2e-3)[index], one.fields_at_radius(2e-3)[0], **tolerance)
+        torch.testing.assert_close(near.fields[index], project_nearzone(single, points, bounds_um=bounds, refractive_index=ni, relative_permeability=mi).fields[0], **tolerance)
+        torch.testing.assert_close(at[index], farfield_at_points(single, points, bounds_um=bounds, refractive_index=ni, relative_permeability=mi)[0], **tolerance)
+    # A real per-frequency array keeps a real wavenumber and a real result index.
+    real = project_farfield(faces, directions, bounds_um=bounds, refractive_index=[1.3, 1.45])
+    assert not real.refractive_index.is_complex() and real.electric_amplitude.dtype == far.electric_amplitude.dtype
+    torch.testing.assert_close(real.electric_amplitude[1], project_farfield(frequency_slice(faces, 1), directions, bounds_um=bounds, refractive_index=1.45).electric_amplitude[0], **tolerance)
+    with pytest.raises(ValueError, match='growing exterior'):
+        project_farfield(faces, directions, bounds_um=bounds, refractive_index=[1.3, 1.3-.05j])
+    with pytest.raises(ValueError, match='not passive'):
+        project_nearzone(faces, points, bounds_um=bounds, refractive_index=[1.3, 1.3], relative_permeability=[1., 1.1+.02j])
+    with pytest.raises(ValueError, match=r'shape \(2,\)'):
+        project_farfield(faces, directions, bounds_um=bounds, refractive_index=[1.3, 1.4, 1.5])
+    with pytest.raises(ValueError, match=r'shape \(2,\)'):
+        project_farfield(faces, directions, bounds_um=bounds, relative_permeability=torch.ones(2, 1))
+    with pytest.raises(ValueError, match='design variable'):
+        project_farfield(faces, directions, bounds_um=bounds, refractive_index=torch.tensor([1.3, 1.4], requires_grad=True))
+
+
+def test_kspace_directions_match_spherical_directions():
+    ux, uy = torch.tensor([-.6, 0., .3, .8]), torch.tensor([0., .5, -.25])
+    directions = kspace_directions(ux, uy, 'z')
+    assert directions.shape == (12, 3) and directions.dtype == torch.float64
+    torch.testing.assert_close(directions.norm(dim=-1), torch.ones(12, dtype=torch.float64))
+    assert bool((directions[:, 2] >= 0).all())
+    ug, vg = torch.meshgrid(ux.double(), uy.double(), indexing='ij')
+    torch.testing.assert_close(directions[:, 0], ug.reshape(-1))
+    torch.testing.assert_close(directions[:, 1], vg.reshape(-1))
+    for row, u, v in zip(directions, ug.reshape(-1).tolist(), vg.reshape(-1).tolist()):
+        theta, phi = math.asin(math.hypot(u, v)), math.atan2(v, u)
+        torch.testing.assert_close(row, spherical_directions([theta], [phi])[0])
+    lower = kspace_directions(ux, uy, '-z')
+    torch.testing.assert_close(lower[:, :2], directions[:, :2])
+    torch.testing.assert_close(lower[:, 2], -directions[:, 2])
+    sideways = kspace_directions(ux, uy, 'x')
+    torch.testing.assert_close(sideways[:, 1], ug.reshape(-1))
+    torch.testing.assert_close(sideways[:, 2], vg.reshape(-1))
+    torch.testing.assert_close(sideways[:, 0], directions[:, 2])
+    grazing = kspace_directions([1.], [0.], 'y')
+    torch.testing.assert_close(grazing, torch.tensor([[0., 0., 1.]], dtype=torch.float64))
+    faces, bounds, _ = dipole_faces(6)
+    assert project_farfield(faces, kspace_directions(ux, uy), bounds_um=bounds, refractive_index=1.3).electric_amplitude.shape == (1, 12, 3)
+    with pytest.raises(ValueError, match='evanescent'):
+        kspace_directions([.8], [.7])
+    with pytest.raises(ValueError, match='axis'):
+        kspace_directions([0.], [0.], 'w')
+    with pytest.raises(ValueError, match='finite'):
+        kspace_directions([float('nan')], [0.])
+
+
 def test_growing_or_per_frequency_exterior_is_rejected():
     faces, bounds, _ = dipole_faces(4)
     with pytest.raises(ValueError, match='growing exterior'):
@@ -410,7 +496,7 @@ def test_growing_or_per_frequency_exterior_is_rejected():
         project_nearzone(faces, [[3., 0, 0]], bounds_um=bounds, relative_permeability=1.-.1j)
     with pytest.raises(ValueError, match='not passive'):
         project_farfield(faces, [[1., 0, 0]], bounds_um=bounds, refractive_index=1.3, relative_permeability=1.1+.02j)
-    with pytest.raises(ValueError, match='per-frequency'):
+    with pytest.raises(ValueError, match=r'shape \(1,\)'):
         project_farfield(faces, [[1., 0, 0]], bounds_um=bounds, refractive_index=torch.tensor([1.3, 1.4]))
     with pytest.raises(ValueError, match='positive real part'):
         project_farfield(faces, [[1., 0, 0]], bounds_um=bounds, refractive_index=.1j)
