@@ -1,0 +1,103 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T140931Z-g0-01-c3d27260",
+  "task": "G0-01",
+  "stage": "G0",
+  "task_title": "실제 HEAD/dirty tree/기존 계획/자원·권한 확인",
+  "command": "python -m pytest -q -p no:cacheprovider tests/test_completion_program_documents.py",
+  "exit_code": 0,
+  "exit_code_source": "derived_from_junit",
+  "execution_timestamp": "2026-09-21T23:07:30.152849+09:00",
+  "recorded_at": "2026-09-21T14:09:31+00:00",
+  "source_commit": "1be01cca38dd1b9dbc51b81df2669ff964e2dd36",
+  "source_tree_sha256": "9dc4da124dc22e0fe335d08e57125756f1f011a229497ae130da33e57dc2f0ba",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_completion_program_documents.py": "e78bc0ae27ad88ac95fdc197db2618c176e2aa509337aedf1cba7b70146ec9e7"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": null,
+  "fixture_sha256": null,
+  "acceptance_criteria_path": null,
+  "acceptance_criteria_sha256": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": null,
+  "backend": null,
+  "physics_configuration": null,
+  "reference_method": null,
+  "observables": null,
+  "acceptance_limits": null,
+  "observed_metrics": null,
+  "test_results": {
+    "total": 4,
+    "passed": [
+      "tests/test_completion_program_documents.py::test_program_text_matches_the_recorded_specification_hash",
+      "tests/test_completion_program_documents.py::test_gate_file_lists_every_stage_with_dependencies_and_profiles",
+      "tests/test_completion_program_documents.py::test_release_scope_separates_profiles_and_blocks_hpc_without_two_devices",
+      "tests/test_completion_program_documents.py::test_plan_points_to_the_program_and_handoff_has_the_required_sections"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 0.063,
+    "suite_timestamp": "2026-09-21T23:07:30.152849+09:00"
+  },
+  "required_tests": [
+    "tests/test_completion_program_documents.py::test_plan_points_to_the_program_and_handoff_has_the_required_sections"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T140931Z-g0-01-c3d27260/junit.xml",
+      "sha256": "113297f3fe6fb8f8b6199553410db25a962c97ea092bca1029446fd52b562d93",
+      "bytes": 852,
+      "original_path": ".local/tmp/junit/program_documents.xml"
+    }
+  ],
+  "applicable_scope": "documents of record at the adopted commit",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "fixture_sha256": "no pre-declared fixture file was supplied; the test module fixes its own inputs",
+    "acceptance_criteria_sha256": "no acceptance-criteria file was supplied; the pass/fail assertions inside the test sources are the criteria",
+    "seed": "not declared: no case file supplied the \"seed\" entry for this run",
+    "precision": "not declared: no case file supplied the \"precision\" entry for this run",
+    "backend": "not declared: no case file supplied the \"backend\" entry for this run",
+    "physics_configuration": "not declared: no case file supplied the \"fixture\" entry for this run",
+    "reference_method": "not declared: no case file supplied the \"reference_method\" entry for this run",
+    "observables": "not declared: no case file supplied the \"observables\" entry for this run",
+    "acceptance_limits": "not declared: no case file supplied the \"acceptance\" entry for this run",
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

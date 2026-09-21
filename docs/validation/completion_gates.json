@@ -127,18 +127,22 @@
           "specification": "실제 HEAD/dirty tree/기존 계획/자원·권한 확인",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "scripts/record_gate_evidence.py",
             "docs/DEVELOPMENT_HANDOFF.md"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "python -m pytest -q -p no:cacheprovider tests/test_completion_program_documents.py"
+          ],
           "required_tests": [
             "tests/test_completion_program_documents.py::test_plan_points_to_the_program_and_handoff_has_the_required_sections"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T140931Z-g0-01-c3d27260"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "HEAD, dirty tree, plan inputs and local hardware were checked and written to docs/DEVELOPMENT_HANDOFF.md; the recorder captures the same facts for every later run."
@@ -149,17 +153,21 @@
           "specification": "RELEASE_SCOPE와 기능·검증 상태 분리",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "docs/RELEASE_SCOPE.md"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "python -m pytest -q -p no:cacheprovider tests/test_completion_program_documents.py"
+          ],
           "required_tests": [
             "tests/test_completion_program_documents.py::test_release_scope_separates_profiles_and_blocks_hpc_without_two_devices"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T140934Z-g0-02-39132c5d"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -169,7 +177,7 @@
           "specification": "기존 완료 계획·gate·fixture·raw evidence 단일 추적",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "docs/COMPLETION_PROGRAM_KO.md",
@@ -180,12 +188,16 @@
             "scripts/record_gate_evidence.py"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "python -m pytest -q -p no:cacheprovider tests/test_completion_program_documents.py"
+          ],
           "required_tests": [
             "tests/test_completion_program_documents.py::test_program_text_matches_the_recorded_specification_hash",
             "tests/test_completion_program_documents.py::test_gate_file_lists_every_stage_with_dependencies_and_profiles"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T140938Z-g0-03-786bc0b9"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -195,7 +207,7 @@
           "specification": "필수 누락/실패/skip/source 불일치에서 출고 실패 판정기",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "scripts/check_release_gates.py",
@@ -204,11 +216,15 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit_release_gates.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "python -m pytest -q -p no:cacheprovider tests/test_release_gates.py"
+          ],
           "required_tests": [
             "tests/test_release_gates.py"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T140942Z-g0-04-77aa7663"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -218,7 +234,7 @@
           "specification": "판정기 자체 failure injection과 세션 인계 구조",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "tests/test_release_gates.py",
@@ -227,11 +243,15 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit_release_gates.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "python -m pytest -q -p no:cacheprovider tests/test_release_gates.py"
+          ],
           "required_tests": [
             "tests/test_release_gates.py"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T140946Z-g0-05-52cd7c65"
+          ],
           "blocker": null,
           "scope_change_approval": null
         }
@@ -252,7 +272,7 @@
           "specification": "자동 graded mesh와 미분 평면 모델의 격자 불일치.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "torchfdtd/adjoint_planes.py",
@@ -261,12 +281,16 @@
             "tests/test_plane_mesh_combinations.py"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "python -m pytest -q -p no:cacheprovider tests/test_adjoint_planes.py tests/test_plane_mesh_combinations.py"
+          ],
           "required_tests": [
             "tests/test_adjoint_planes.py::test_internal_solver_keeps_the_auto_refined_plane_mesh",
             "tests/test_plane_mesh_combinations.py"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T140954Z-g1-01-202f68c3"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -276,7 +300,7 @@
           "specification": "reference signature의 실제 격자 누락.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "torchfdtd/adjoint_planes.py",
@@ -284,12 +308,16 @@
             "tests/test_adjoint_planes.py"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "python -m pytest -q -p no:cacheprovider tests/test_adjoint_planes.py tests/test_plane_mesh_combinations.py"
+          ],
           "required_tests": [
             "tests/test_adjoint_planes.py::test_plane_signature_tracks_realized_mesh_not_placement_or_structure",
             "tests/test_adjoint_planes.py::test_reference_fingerprint_ignores_ids_names_and_display_options"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T140958Z-g1-02-2afa31eb"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -299,7 +327,7 @@
           "specification": "quadrant_intensity_allocation의 FP32 불안정.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "torchfdtd/detector_allocation.py",
@@ -310,11 +338,15 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_detector_allocation.py --junitxml=D:/TorchFDTD/.local/tmp/junit_detector_allocation.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "python -m pytest -q -p no:cacheprovider tests/test_detector_allocation.py"
+          ],
           "required_tests": [
             "tests/test_detector_allocation.py"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T140949Z-g1-03-72ef3ff6"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "Fixed in f3efd34: fields and areas are scaled before the quadrant ratio so float32 DFT magnitudes near 1e-14 differentiate. Verification evidence on the current candidate is still required."
@@ -364,7 +396,7 @@
           "specification": "문서/실행 경로 일치.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "README.md",
@@ -374,11 +406,15 @@
             "tests/test_readme_measurements.py"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "python -m pytest -q -p no:cacheprovider tests/test_readme_measurements.py"
+          ],
           "required_tests": [
             "tests/test_readme_measurements.py"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T141006Z-g1-06-70005cd1"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "README rows and quick start corrected in ca79616 (separate capacity and crash-resume rows, GB/GiB, explicit dimension and cuda_kernel). Recomputation of cells/GB/GiB/dtype/peak/time from the raw records is not yet recorded as evidence."
