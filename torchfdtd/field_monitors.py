@@ -120,21 +120,26 @@ class FrequencyPlane:
 
     def result(self):
         values=self.value.detach().cpu().numpy() if self.torch else self.value
-        values=values.astype(np.complex128)
-        by_component={c:values[...,i] for i,c in enumerate(self.components)}
-        density={}
-        for axis in set(self.monitor.record_poynting)|({self.monitor.normal} if self.monitor.record_flux else set()):
-            i='xyz'.index(axis);b='xyz'[(i+1)%3];c='xyz'[(i+2)%3]
-            density[axis]=.5*np.real(by_component['E'+b]*by_component['H'+c].conj()-by_component['E'+c]*by_component['H'+b].conj())
-        flux=density[self.monitor.normal]@self.plan['weights'] if self.monitor.record_flux else None
-        fields=values[..., [self.components.index(c) for c in self.monitor.record_fields]]
-        poynting=np.stack([density[c] for c in self.monitor.record_poynting],axis=-1) if self.monitor.record_poynting else np.empty((*values.shape[:2],0))
-        return dict(id=self.monitor.id,name=self.monitor.name,
-                    frequency_hz=self.frequency,fields=fields,poynting=poynting,flux=flux,**self.plan,
-                    components=list(self.monitor.record_fields),poynting_components=list(self.monitor.record_poynting),
-                    accumulated_components=list(self.components),time_downsample=self.monitor.time_downsample,
-                    settings=self.monitor.model_dump(),flux_units='reduced E*H * s^2 * '+('m per invariant length' if self.grid.region.dimension=='2d' else 'm^2'),
-                    field_units='reduced field * s',normal_axis=self.monitor.normal)
+        return plane_result(self.monitor,self.plan,self.frequency,self.components,values,self.grid.region.dimension)
+
+
+def plane_result(monitor,plan,frequency,components,values,dimension):
+    """Plane record from accumulated (frequency, point, component) DFT values."""
+    values=np.asarray(values).astype(np.complex128)
+    by_component={c:values[...,i] for i,c in enumerate(components)}
+    density={}
+    for axis in set(monitor.record_poynting)|({monitor.normal} if monitor.record_flux else set()):
+        i='xyz'.index(axis);b='xyz'[(i+1)%3];c='xyz'[(i+2)%3]
+        density[axis]=.5*np.real(by_component['E'+b]*by_component['H'+c].conj()-by_component['E'+c]*by_component['H'+b].conj())
+    flux=density[monitor.normal]@plan['weights'] if monitor.record_flux else None
+    fields=values[..., [components.index(c) for c in monitor.record_fields]]
+    poynting=np.stack([density[c] for c in monitor.record_poynting],axis=-1) if monitor.record_poynting else np.empty((*values.shape[:2],0))
+    return dict(id=monitor.id,name=monitor.name,
+                frequency_hz=frequency,fields=fields,poynting=poynting,flux=flux,**plan,
+                components=list(monitor.record_fields),poynting_components=list(monitor.record_poynting),
+                accumulated_components=list(components),time_downsample=monitor.time_downsample,
+                settings=monitor.model_dump(),flux_units='reduced E*H * s^2 * '+('m per invariant length' if dimension=='2d' else 'm^2'),
+                field_units='reduced field * s',normal_axis=monitor.normal)
 
 
 class FrequencyUpdates:

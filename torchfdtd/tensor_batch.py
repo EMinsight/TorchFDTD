@@ -6,7 +6,6 @@ termination, overlapping sources, fault isolation or checksum-validated resume.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import math
 import os
@@ -277,9 +276,8 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
                  units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad',engine='TorchFDTD batched Yee/CPML CUDA')
         frequency=[m.result() for m in planes[i]]
         if frequency:
-            config=dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
-                        sources=[p.resolved_source(src).model_dump() for src in p.sources],steps=completed,nodes=[a.tolist() for a in r.mesh_nodes])
-            signature=hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest()
+            from .solver import run_signature
+            signature=run_signature(p,completed)
             for m in frequency:m['run_signature']=signature
         eps=epsilon[i][...,component] if epsilon[i].ndim==4 else epsilon[i]
         eps=eps[:r.shape[0],:r.shape[1],:r.shape[2]]

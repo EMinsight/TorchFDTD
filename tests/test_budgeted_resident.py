@@ -40,7 +40,10 @@ def test_default_workbench_guard_remains_and_budgeted_mode_roundtrips():
     p=large_scene()
     assert Project.model_validate(p.model_dump()).region.memory_mode=='budgeted'
     with pytest.raises(ValueError,match='8 million'):
-        Region.model_validate({**p.region.model_dump(),'memory_mode':'resident'})
+        Region.model_validate({**p.region.model_dump(),'memory_mode':'resident','execution_mode':'resident'})
+    # The workbench default execution_mode='auto' keeps the guard at the resident entry points.
+    with pytest.raises(ValueError,match='8 million'):
+        Region.model_validate({**p.region.model_dump(),'memory_mode':'resident'}).require_resident()
 
 
 def test_index_rejection_precedes_boundary_arrays_and_memory_query(monkeypatch):

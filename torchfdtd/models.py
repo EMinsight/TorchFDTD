@@ -171,6 +171,9 @@ class Region(Model):
     background_index: float = Field(default=1, ge=1, le=20)
     backend: Literal['auto', 'cuda', 'cpu'] = 'auto'
     memory_mode: Literal['resident', 'streamed', 'budgeted'] = 'resident'
+    # Browser execution selection. 'auto' lets the server choose resident or
+    # streamed host/disk execution from the live resources; see docs/EXECUTION_MODES.md.
+    execution_mode: Literal['auto', 'resident', 'streamed_host', 'streamed_disk'] = 'auto'
     cuda_kernel: Literal['torch', 'fused'] = 'torch'
     cuda_monitor_kernel: Literal['torch', 'fused'] = 'torch'
     precision: Literal['float32', 'float64'] = 'float32'
@@ -294,7 +297,9 @@ class Region(Model):
             raise ValueError('The invariant z axis has no boundary condition in 2D; keep its defaults.')
         if max(self.shape) > 1_000_000:
             raise ValueError('A grid axis may contain at most one million cells.')
-        if self.memory_mode == 'resident':self.require_resident()
+        # The eight-million-cell guard applies to explicitly resident regions at
+        # construction. Resident entry points still call require_resident().
+        if self.memory_mode == 'resident' and self.execution_mode == 'resident':self.require_resident()
         if self.dimension == '2d' and self.slice_axis != 'z':
             raise ValueError('2D simulations use the XY (z-normal) field plane.')
         if abs(self.slice_position) > self.size['xyz'.index(self.slice_axis)] / 2:

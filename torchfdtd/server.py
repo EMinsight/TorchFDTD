@@ -17,6 +17,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .models import Project, Material, demo_project
 from .solver import Simulation, estimate, hardware
+from .execution_modes import execution_resources, resolve_execution, run_streamed_job, scratch_directory
 from .material_fit import OpticalDataRequest, MaterialFitRequest, fit_material, material_fit_report
 from .optical_data import OpticalData
 
@@ -45,7 +46,7 @@ def create_app(result_dir=None):
 
     @app.get('/api/health')
     def health():
-        return {**hardware(), 'hostname': socket.gethostname(), 'version': '0.14.0.dev0'}
+        return {**hardware(), **execution_resources(), 'hostname': socket.gethostname(), 'version': '0.14.0.dev0'}
 
     @app.get('/api/capabilities')
     def capabilities():
@@ -63,7 +64,14 @@ def create_app(result_dir=None):
         # Dispatch-time contracts (exact-endpoint PMC, tensor media) are rejections, not server faults.
         try:summary=estimate(project)
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
-        return {**summary, 'project': project.model_dump()}
+        return {**summary, 'execution': resolution(project, summary), 'project': project.model_dump()}
+
+    def resolution(project, summary=None):
+        # Auto/streamed selection reads live resources; a scene that fits nothing
+        # is reported in the record, not raised.
+        try:return resolve_execution(project, health=execution_resources(), scratch=scratch_directory(root), summary=summary)
+        except Exception as exc:
+            return dict(requested=project.region.execution_mode, mode=None, error=str(exc), warnings=[])
 
     @app.post('/api/python')
     def python(project: Project):
@@ -141,7 +149,14 @@ def create_app(result_dir=None):
         def update(data):
             job['progress'] = data
         try:
-            result = Simulation(project).run(progress=update, cancel=job['cancel'])
+            job['execution'] = execution = resolution(project)
+            if execution.get('error'):
+                raise ValueError(execution['error'])
+            if execution['mode'] == 'resident':
+                result = Simulation(project).run(progress=update, cancel=job['cancel'])
+            else:
+                result = run_streamed_job(project, execution, progress=update, cancel=job['cancel'])
+                job['execution'] = {**execution, 'report': result.summary['execution']['report']}
             result.save(root / f'{key}.npz')
             job['summary'] = result.summary
             job['monitors'] = result.monitor_data() if len(result.times)>1 else []

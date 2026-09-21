@@ -180,7 +180,7 @@ def estimate(p: Project, *, endpoint_dispatch=True):
     active_materials = [m for m in p.materials if any(s.enabled and s.material == m.name for s in p.structures)]
     warnings = list(p.import_provenance.differences) if p.import_provenance else []
     if r.memory_mode == 'streamed':
-        warnings.append('Streamed scenes require the Python StreamedSimulation API. This estimate describes resident storage, not streamed budget admission.')
+        warnings.append('Streamed scenes run through the workbench streamed path or the Python StreamedSimulation API. This estimate describes resident storage, not streamed budget admission.')
     for material in active_materials:
         if material.fit_dt_s is not None and not math.isclose(material.fit_dt_s,dt,rel_tol=1e-10,abs_tol=0):
             warnings.append(f'{material.name}: ADE-target material was fitted at a different timestep. Refit or inspect the numerical n/k error at the current timestep.')
@@ -261,6 +261,19 @@ def estimate(p: Project, *, endpoint_dispatch=True):
 def pulse_envelope_parameters(source):
     p = pulse_parameters(source)
     return p.sigma_s, p.offset_s
+
+
+def run_signature(p: Project, steps):
+    """Physical identity of a run for matched frequency-plane references.
+
+    Execution placement (backend, kernels, execution mode) and display settings
+    are excluded, so resident and streamed runs of one scene share a signature."""
+    import hashlib
+    r = p.region
+    config = dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
+                  sources=[p.resolved_source(s).model_dump() for s in p.sources], steps=steps,
+                  nodes=[a.tolist() for a in r.mesh_nodes])
+    return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
 
 
 @dataclass
@@ -586,11 +599,7 @@ class Simulation:
                      units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad', engine='TorchFDTD Yee/CPML on fdtd grid')
         frequency_results=[m.result() for m in frequency_monitors]
         if frequency_results:
-            import hashlib
-            config=dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
-                        sources=[p.resolved_source(s).model_dump() for s in p.sources],steps=completed,
-                        nodes=[a.tolist() for a in r.mesh_nodes])
-            signature=hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest()
+            signature=run_signature(p,completed)
             for m in frequency_results:m['run_signature']=signature
         return Result(p, stats, np.array(frames), np.array(frame_steps), eps_plane,
                       host(traces[:completed]), np.arange(1,completed+1)*g.time_step, e,h,frequency_results)

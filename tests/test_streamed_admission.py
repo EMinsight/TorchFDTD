@@ -2,7 +2,7 @@
 import pytest
 import torch
 
-from torchfdtd import Region, Simulation, DifferentiableSimulation, StreamedSimulation, StreamedAdjointOptions
+from torchfdtd import Project, Region, Simulation, Source, DifferentiableSimulation, StreamedSimulation, StreamedAdjointOptions
 from torchfdtd.boundaries import YeeGrid
 from test_differentiable import project
 
@@ -129,7 +129,10 @@ def test_public_memory_plan_matches_execution_without_domain_allocation(diagonal
 def test_large_region_requires_explicit_streamed_mode():
     settings = dict(dimension='3d', size=(25.6,25.6,12.8), mesh=.1, pml_cells=3)
     with pytest.raises(ValueError,match='8 million'):
-        Region(**settings)
+        Region(**settings,execution_mode='resident')
+    # The default workbench execution_mode='auto' defers the guard to the resident entry points.
+    with pytest.raises(ValueError,match='8 million'):
+        Simulation(Project(region=Region(**settings),sources=[Source(center=(0,0,0))]))
     region = Region(**settings,memory_mode='streamed')
     assert region.shape == (256,256,128)
     assert Region.model_validate(region.model_dump()).memory_mode == 'streamed'
