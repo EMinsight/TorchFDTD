@@ -110,8 +110,9 @@ class _SlabMaterial:
         return torch.stack([axis[i] for axis, i in zip(axes, index)], -1)
 
     def evaluate(self, points, packet):
-        return _evaluate(points, packet[1:].reshape(-1, 10), packet[0],
-                         self.geometry.kinds, self.geometry.width)
+        # Streamed solids keep the ten-value rows; polygons are not streamed.
+        layout = tuple((kind, 10*i, 10) for i, kind in enumerate(self.geometry.kinds))
+        return _evaluate(points, packet[1:], packet[0], layout, self.geometry.width)
 
     def index_select(self, axis, indices):
         if axis != 0:

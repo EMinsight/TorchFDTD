@@ -1,9 +1,11 @@
 # Parameterized geometry with bounded backward replay
 
 `DifferentiableSolid` and `smooth_geometry_epsilon` connect box dimensions,
-ellipsoid radii, cylinder radius and height, positions, rotations and scalar
+ellipsoid radii, cylinder radius and height, extruded polygon vertices and z
+limits, closed spline control points, positions, rotations and scalar
 permittivities to the existing FDTD adjoint. Shared Torch parameters accumulate
 all their contributions, including parameters reused by several solids.
+Polygons and splines are described in [Shape gradients](SHAPE_GRADIENTS.md).
 
 ```python
 import torch
@@ -52,6 +54,9 @@ level set multiplied by the smallest radius. Cylinders multiply the analogous
 elliptical occupancy by the axial slab occupancy. The radial level set is not
 the exact Euclidean distance to an ellipsoid. The smallest-radius scaling is
 piecewise differentiable, with Torch's shared subgradient at equal radii.
+Polygons multiply the exact signed in-plane distance occupancy by the local
+z slab occupancy; the distance is C1 away from the medial axis and only
+Lipschitz across it.
 
 Later solids overlay earlier ones with arithmetic interpolation:
 `epsilon_next = (1 - occupancy) * epsilon_previous + occupancy * epsilon_solid`.
@@ -70,8 +75,10 @@ outside the FDTD execution-policy budgets. This does not yet provide a streamed
 material-map producer that avoids the dense output.
 
 Only first derivatives are supported by this replay implementation. Shape
-creation, topology changes, smoothing width, mesh locations and periodic phase
-are fixed. Splines, polygons and arbitrary imported CAD are follow-up work.
+creation, topology changes, vertex count, smoothing width, mesh locations and
+periodic phase are fixed. Polygons and sampled closed splines are covered by
+the same replay; contours with holes, rings with trainable sectors and
+arbitrary imported CAD remain follow-up work.
 
 ## Example and focused validation
 

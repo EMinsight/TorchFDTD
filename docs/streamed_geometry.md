@@ -69,7 +69,10 @@ maps or observers. This bound can exceed the eventual deduplicated layout size.
 
 This is a first-order, nondispersive staircase-coefficient API. One-way source
 injection is currently rejected because its material validator expects a dense
-array. TFSF and dispersive geometry are outside this path. Automatic execution
+array. Only box, ellipsoid and cylinder solids are streamed; the
+[polygon and spline solids](SHAPE_GRADIENTS.md) are rejected here and use the
+dense `smooth_geometry_epsilon` path. TFSF and dispersive geometry are
+outside this path. Automatic execution
 tuning and `PeriodicDesignConfig` do not yet route to this producer. Existing
 manual point and plane runs can use it directly.
 

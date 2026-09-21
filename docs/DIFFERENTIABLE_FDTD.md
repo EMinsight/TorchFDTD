@@ -59,9 +59,11 @@ chain. Independent physical-gradient convergence remains required.
 
 The [bounded geometry replay API](DIFFERENTIABLE_GEOMETRY.md) extends this chain
 to ordered boxes, ellipsoids and cylinders, including dimensions, positions,
-rotations and scalar materials. It replays small geometry chunks in backward
-instead of retaining a full-domain geometry graph. The dense epsilon and its
-incoming material gradient remain part of caller-owned storage.
+rotations and scalar materials, and to extruded polygons and sampled closed
+splines whose [vertex and control-point gradients](SHAPE_GRADIENTS.md) carry a
+recorded mesh-refinement convergence check. It replays small geometry chunks in
+backward instead of retaining a full-domain geometry graph. The dense epsilon
+and its incoming material gradient remain part of caller-owned storage.
 
 The point-field objective above is deliberately simple. It is **not normalized
 transmission**. `result.spectrum(frequency_hz, window=...)` provides a Torch
