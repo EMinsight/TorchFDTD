@@ -40,7 +40,8 @@ OBSERVER_WARNING = 50_000
 
 def execution_resources():
     """Live resource record: the /api/health fields the resolver reads."""
-    cuda = torch.cuda.is_available()
+    # With CUDA_VISIBLE_DEVICES="" this torch build reports is_available() but no device.
+    cuda = torch.cuda.is_available() and torch.cuda.device_count() > 0
     record = dict(cuda=cuda, cupy=False, gpu=None, gpu_free_bytes=0, gpu_total_bytes=0)
     if cuda:
         free, total = torch.cuda.mem_get_info()

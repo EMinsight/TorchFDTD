@@ -27,7 +27,8 @@ ENGINE_LOCK = threading.Lock()
 
 
 def hardware():
-    cuda = torch.cuda.is_available()
+    # With CUDA_VISIBLE_DEVICES="" this torch build reports is_available() but no device.
+    cuda = torch.cuda.is_available() and torch.cuda.device_count() > 0
     return {'cuda': cuda, 'gpu': torch.cuda.get_device_name(0) if cuda else None,
             'gpu_memory_gb': round(torch.cuda.get_device_properties(0).total_memory / 2**30, 1) if cuda else 0,
             'torch': torch.__version__, 'engine': 'TorchFDTD Yee/CPML on fdtd grid', 'cpu_threads': torch.get_num_threads()}
