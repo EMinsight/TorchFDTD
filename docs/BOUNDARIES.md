@@ -76,17 +76,27 @@ Still required for full parity: independent FSP mapping, named Lumerical PML-pro
 
 ## Dispersive materials inside PML
 
-`Region.pml_dispersion = 'frozen'` (default `'ade'`) removes the Drude/Lorentz pole update
-from cells that lie inside a PML layer and gives those cells the real permittivity
-of the material at the source centre frequency (the static permittivity when no
-pulsed source is enabled). The interior keeps the full ADE. This is done in
-`configure_materials`, so it applies to the resident CPU/CUDA solvers and to
-`run_tensor_batch`. The reason is a measured instability: with the pole updated
-inside the CPML, a lossless Lorentz silicon-nitride post array on a 20 nm grid
-diverged after about 1000–1500 steps once the domain exceeded a few micrometres,
-independently of the fused/torch kernel, the graded mesh and the pole linewidth,
-while the same posts kept out of the PML ran stably. The negative-permittivity
-band of such a pole lies inside the grid band and the standard CPML is not a
-stable absorber for it. The default `'ade'` keeps the pole update everywhere. The differentiable,
-dispersive-adjoint and streamed solvers reject `'frozen'` rather than silently
-running the unfrozen update.
+`Region.pml_dispersion = 'frozen'` (default `'ade'`) removes the Drude/Lorentz pole
+update from cells that lie inside a PML layer and gives those cells the real
+permittivity of the material at the source centre frequency (the static
+permittivity when no pulsed source is enabled). The interior keeps the full ADE.
+This is done in `configure_materials`, so it applies to the resident CPU/CUDA
+solvers and to `run_tensor_batch`. The differentiable, dispersive-adjoint and
+streamed solvers reject `'frozen'` rather than silently running the unfrozen
+update.
+
+Measured reason (single-pole Lorentz silicon nitride posts, 20 nm grid, 12-layer
+CPML, 4000 steps, RTX 5880): posts that cross the whole lateral PML diverge after
+about 1450 steps once the domain exceeds a few micrometres, with either kernel,
+with or without the graded mesh and for linewidths of 1e13 and 1e14 rad/s. The
+same posts stopped six cells short of the outer boundary, i.e. absent from the
+outer half of the PML, run stably; a CFS profile (`alpha` 0.05–0.5,
+`alpha_polynomial` 1) only delays the growth to 1600 steps; freezing only the
+outermost one or two cell layers does not help; freezing the whole PML does. The
+unstable cells are therefore the pole cells in the high-conductivity part of the
+CPML, and the stretched-coordinate CPML as implemented is not a stable absorber
+for them. Freezing has two known limits: a step in permittivity at the interior/
+PML interface for frequencies away from the centre frequency, and no meaning for
+media whose real permittivity is negative at that frequency. An adiabatic
+conductivity absorber on the faces touched by dispersive media is the more
+general fix and is not implemented.
