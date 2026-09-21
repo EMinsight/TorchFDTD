@@ -20,6 +20,7 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Added
 
+- Same-hardware comparison of TorchFDTD with Meep 1.34 and FDTDX 0.6.2 on one RTX 3060 workstation, with drivers, fixtures, records and [CROSS_SOLVER_COMPARISON.md](CROSS_SOLVER_COMPARISON.md) (fa57986), and its ratios in the README table, the manuscript and the FDTDX parity document (this commit).
 - Angular-spectrum propagation of a recorded output plane into sections, volumes and points with a shared transfer function and first-order gradients: `plane_spectrum`, `propagate_section`, `propagate_volume`, `propagate_points`; `propagate_plane` now delegates to it (8283506).
 - Tiled approximate execution mode in the workbench and an execution-modes README section (f09ec94).
 - Overlapping-tile decomposition with near-field stitching, angular-spectrum propagation and a tiled plane adjoint: `plan_tiles`, `run_tiled`, `stitch_planes`, `propagate_plane`, `TiledPlaneSimulation` (c10175b).

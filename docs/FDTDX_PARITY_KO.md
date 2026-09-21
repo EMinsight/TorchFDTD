@@ -187,6 +187,10 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
    multi-GPU 완료 근거로 대체하지 않는다.
 6. 같은 물리의 FDTDX checkpointed/reversible 두 경로를 구분해 속도와 메모리를
    비교한다. 현재 정확도 gate만 완료했으며 전체 속도 우위는 확립되지 않았다.
+   한 RTX 3060 워크스테이션의 [측정](CROSS_SOLVER_COMPARISON.md)에서는 64³·96³ sphere
+   full solve가 FDTDX 0.6.2 대비 6.8배·6.4배, i7-12700 12 rank Meep 1.34 대비 38배·44배,
+   64³·128 step adjoint의 gradient 도달 시간이 FDTDX checkpointed(2) 대비 52배·reversible
+   대비 2.0배 빠르고 gradient 상대 차이는 1.1e-7 이내다.
    필요한 UI, Python 예제·문서, 동일 정확도의 FDTDX benchmark와 공개
    패키지 검토를 마친다. 공개 전환과 홍보는 사용자 승인 후 진행한다.
 
