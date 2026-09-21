@@ -414,6 +414,9 @@ class Simulation:
         validate_graph_steps(cuda_graph_steps, use_cuda and cuda_graph)
         if use_cuda and not torch.cuda.is_available():
             raise RuntimeError('CUDA requested but unavailable. Install a CUDA-enabled PyTorch build or choose CPU.')
+        if use_cuda and r.cuda_kernel == 'fused' and r.complex_fields:
+            # The same refusal as FusedYeeCUDA, before the grid is allocated.
+            raise ValueError('The fused CUDA kernel currently supports real fields. Select cuda_kernel="torch" for Bloch fields.')
         from .plan import resources_copy
         plan = self.plan
         stats = resources_copy(plan)

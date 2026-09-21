@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G2-03_capability_registry",
+  "task": "G2-03",
+  "title": "Capability registry: every combination of the nine contract axes has one verdict, one rule or lane, and rendered tables",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "registry": "torchfdtd/capabilities.py: AXES, RULES (ordered rejections with code path and exact message prefix), LANES (admitted entry points with code path and test), verdict(config)",
+    "axes": {
+      "dimension": ["2d", "3d"],
+      "mesh": ["uniform", "graded", "explicit"],
+      "material": ["dielectric", "dispersive_ade", "anisotropic_tensor", "tensor_ade", "pec"],
+      "boundary": ["cpml", "periodic", "bloch", "pec", "antisymmetric", "pmc", "symmetric"],
+      "source": ["point", "sheet", "plane_oneway", "tfsf", "mode", "tiled_sheet"],
+      "monitor": ["point", "plane_dft", "mode_port", "radiation_box"],
+      "execution": ["forward", "checkpointed_adjoint", "reversible_adjoint", "streamed", "streamed_adjoint", "tensor_batch", "tiled"],
+      "precision": ["float32", "float64"],
+      "backend": ["cpu", "cuda_torch", "cuda_fused"]
+    },
+    "combinations": 211680,
+    "scene_recipe": "example_project(config): 2.4 x 2.4 um transverse, 2.4 um along the propagation axis, 0.1 um mesh, 3 PML cells (alpha 0), 12 steps, Yee sampling, a 0.45 um block (a straight guide for mode scenes), one source and one monitor set per axis value, boundary kind on the transverse faces of directional scenes; see the module docstring",
+    "rendered_outputs": ["docs/CAPABILITIES.md", "torchfdtd/capabilities.json", "GET /api/capabilities -> combinations"],
+    "renderer": "scripts/build_capability_tables.py"
+  },
+  "seed": null,
+  "precision": ["float32", "float64"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "static inspection of the code: every rule's code path is imported and its source must contain the message it raises (pydantic literal messages are derived from the field's Literal); every lane's code path is imported; every 'unavailable' rule names a schema field or signature that the test inspects; the registry is evaluated over the full 211,680-combination product",
+  "observables": [
+    {"name": "registry_rules", "unit": "count", "definition": "len(torchfdtd.capabilities.RULES)"},
+    {"name": "registry_lanes", "unit": "count", "definition": "len(torchfdtd.capabilities.LANES)"},
+    {"name": "admitted_combinations", "unit": "count", "definition": "registry_summary()['admitted'] over the full product"},
+    {"name": "rejected_combinations", "unit": "count", "definition": "registry_summary()['rejected'] over the full product"},
+    {"name": "unused_entries", "unit": "count", "definition": "rules and lanes that no combination reaches"},
+    {"name": "rendered_files_current", "unit": "boolean", "definition": "docs/CAPABILITIES.md and torchfdtd/capabilities.json equal the renderer output"},
+    {"name": "api_serves_registry", "unit": "boolean", "definition": "/api/capabilities returns the Lumerical inventory plus a combinations block with kind capability_registry"}
+  ],
+  "acceptance": {
+    "coverage": "every combination of the product receives exactly one verdict; unused_entries == 0; admitted + rejected == 211680",
+    "code_paths": "every rule and lane code path resolves to a real module attribute; every non-unavailable rule's message fragments (placeholders removed) appear in that code's source",
+    "rendered": "rendered_files_current and api_serves_registry are true",
+    "source_of_limits": "G2-03 specification: the registry states the valid combinations and the documents and UI tables are generated from it; no numeric threshold applies"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_capability_pairs.py::test_registry_is_complete_and_every_rule_names_real_code",
+      "tests/test_capability_pairs.py::test_rendered_tables_and_json_match_the_registry",
+      "tests/test_capability_pairs.py::test_api_capabilities_serves_the_registry"
+    ],
+    "not_yet_covered": []
+  },
+  "notes": "The registry describes project-declared scenes built by the recipe. The explicit node-tensor APIs also take FP64 tensors and PEC walls on projects that declare no tensor material; those diagnostics are noted on the rules, not represented as axis values. Declared at the base commit of the g2-registry branch; the implementation lands in the same commit series."
+}

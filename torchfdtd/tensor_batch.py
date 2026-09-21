@@ -73,9 +73,11 @@ def run_tensor_batch(cases, *, objective=None, output_dir=None, keep_results=Tru
     if not torch.cuda.is_available():raise RuntimeError('Tensor batch requires CUDA.')
     if not isinstance(device,int) or not 0<=device<torch.cuda.device_count():raise ValueError('Invalid CUDA device.')
     projects=[Project.model_validate(c.project.model_dump()) for c in cases]
+    from .tensor_project import uses_tensor
     for p in projects:
         p.region.require_resident()
         if p.region.backend=='cpu':raise ValueError('Tensor batch cannot execute a CPU project. Set backend="cuda" or "auto" explicitly.')
+        if uses_tensor(p):raise ValueError('Tensor batch does not implement tensor materials; run the native tensor solver per project.')
         if p.region.complex_fields:raise ValueError('Tensor batch currently requires real fields. Use BatchRunner for complex Bloch fields.')
         if p.region.run_control.auto_shutoff:raise ValueError('Tensor batch requires fixed-duration runs. Set auto_shutoff=False or use BatchRunner.')
         _validate_pmc_case(p)
@@ -114,6 +116,12 @@ def _validate_pmc_case(p):
         raise ValueError('Tensor batch does not implement TFSF or one-way sources with PMC/symmetric faces.')
     if any(m.enabled and m.kind!='point' for m in p.monitors):
         raise ValueError('Tensor batch does not implement field monitors with PMC/symmetric faces; use point monitors.')
+    from .injection import source_terms
+    for raw in p.sources:
+        for field,loc,waveform,profile in source_terms(p,raw):
+            # The same stored-face contract as FusedBatchIO, before any cohort grid is allocated.
+            if any(((n if part.stop is None else part.stop) if isinstance(part,slice) else part+1)>n for part,n in zip(loc,p.region.shape)) and not all(isinstance(part,int) for part in loc):
+                raise ValueError(f'{raw.name}: only point sources may address a stored upper PMC/symmetric face; plane sources must end below the wall.')
 
 
 def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_graph,cancel,progress,cuda_graph_steps):

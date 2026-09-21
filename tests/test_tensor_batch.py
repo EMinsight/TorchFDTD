@@ -41,6 +41,16 @@ def test_tensor_cohort_isolated_and_matches_independent_fields(dimension,precisi
     assert not np.array_equal(report.items[0].load().electric,report.items[1].load().electric)
 
 
+def test_tensor_material_is_rejected_before_any_grid_is_built():
+    from torchfdtd import Material
+    p=small('cuda','3d','float32');p.region.material_sampling='yee'
+    p.materials.append(Material(name='tensor',model='tensor',epsilon_tensor=(2.4,2.1,2.7,.15,0.,.1)))
+    p.structures[0].material='tensor';p.sources[0].component='Ez'
+    torch.cuda.synchronize();allocated=torch.cuda.memory_allocated()
+    with pytest.raises(ValueError,match='does not implement tensor materials'):run_tensor_batch([p])
+    assert torch.cuda.memory_allocated()==allocated
+
+
 def test_tensor_graded_multipole_frequency_planes_and_eager():
     pytest.importorskip('cupy')
     projects=cases(2,'float64')

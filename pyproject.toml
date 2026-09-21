@@ -25,7 +25,7 @@ torchfdtd = "torchfdtd.cli:main"
 include = ["torchfdtd*"]
 
 [tool.setuptools.package-data]
-torchfdtd = ["web/**/*", "web/*", "feature_inventory.json"]
+torchfdtd = ["web/**/*", "web/*", "feature_inventory.json", "capabilities.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G2-04_pairwise_combinations",
+  "task": "G2-04",
+  "title": "Risk-based pairwise execution of the capability registry: every admitted case runs, every rejected case is refused with the registry's error before field allocation",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "cases": "tests/test_capability_pairs.py: a greedy pairwise covering array over the nine registry axes (seed 20260922, 60 candidates per step) so that every value pair of every axis pair (660 pairs) appears in at least one case, plus one case per registry rule and lane not reached by the array (systematic enumeration with the entry's axes fixed), plus four hand-picked high-risk combinations",
+    "high_risk": {
+      "ade_pmc_streamed_cuda": "3d uniform dispersive_ade pmc point point streamed float32 cuda_torch",
+      "tensor_cpml_checkpointed_fp32": "3d uniform anisotropic_tensor cpml point point checkpointed_adjoint float32 cpu",
+      "bloch_plane_tensor_batch": "3d uniform dielectric bloch point plane_dft tensor_batch float32 cuda_fused",
+      "graded_mode_port_reversible": "3d graded dielectric periodic sheet mode_port reversible_adjoint float32 cpu"
+    },
+    "scene": "torchfdtd.capabilities.example_project(config): 24 x 24 x 24 cells at most (2.4 um cube, 0.1 um mesh), 12 steps, one block or guide, one source, one monitor set; every entry point runs the whole scene",
+    "entry_points": "execute(config): Simulation.run / run_endpoint / run_tensor / ModeNetwork / ModeInjectedPlaneSimulation / TensorDispersiveSimulation (forward, no gradient); DifferentiableSimulation, DispersiveSimulation, TensorProject, TensorDispersiveSimulation, DifferentiablePlaneSimulation, DispersivePlaneSimulation, ModeInjectedPlaneSimulation, ModeNetwork (checkpointed adjoint); the same with StreamedAdjointOptions and the streamed tensor and ADE classes (streamed, streamed adjoint); ReversibleSimulation, ReversibleCPMLSimulation, ReversibleCPMLPlaneSimulation (reversible adjoint); run_tensor_batch (tensor batch); plan_tiles + run_tiled (tiled); native_radiation_box or project_farfield for radiation boxes",
+    "devices": "CPU cases on the host CPU; CUDA cases on the RTX 3060 with the fused CuPy kernels available; CUDA cases skip when CUDA is absent (a skipped required test leaves the task NOT_RUN)"
+  },
+  "seed": 20260922,
+  "precision": ["float32", "float64"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "the code itself is the oracle: an admitted case must run to completion with finite outputs (and finite gradients on the adjoint executions); a rejected case must raise the registry's exception type whose message starts with the registry's prefix (source-name and normal-axis placeholders filled from the recipe), from the registry's code path (innermost torchfdtd frame for non-schema rules; static source check for every rule), and on CUDA torch.cuda.memory_allocated may grow by no more than the test's own input tensors plus less than one E/H field set (6 x cells x itemsize); 'unavailable' verdicts are checked against the schema Literal or signature they name",
+  "observables": [
+    {"name": "pairwise_cases", "unit": "count", "definition": "cases in the covering array"},
+    {"name": "coverage_cases", "unit": "count", "definition": "extra cases added so that every rule and lane is exercised"},
+    {"name": "high_risk_cases", "unit": "count", "definition": "hand-picked triples/quadruples; four are required"},
+    {"name": "pair_coverage", "unit": "boolean", "definition": "every value pair of every axis pair appears in at least one case"},
+    {"name": "disagreements", "unit": "count", "definition": "cases where the registry says admitted but the code raised, or the registry says rejected but the code ran, or the exception, message prefix, code path or CUDA allocation differs"}
+  ],
+  "acceptance": {
+    "disagreements": 0,
+    "pair_coverage": true,
+    "high_risk_cases": 4,
+    "rejections": "raised before any field allocation: CUDA growth < 6 x cells x itemsize beyond the test's inputs; post-processing rules (stored radiation box) are exempt from the allocation check because the run precedes them by design",
+    "source_of_limits": "G2-04 specification: pairwise checks with high-risk combinations, admitted combinations run a normal example, unsupported inputs are rejected with a concrete reason before field allocation or long computation"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_capability_pairs.py::test_pairwise",
+      "tests/test_capability_pairs.py::test_high_risk_combinations",
+      "tests/test_capability_pairs.py::test_covering_array_covers_every_pair_rule_and_lane"
+    ],
+    "not_yet_covered": []
+  },
+  "notes": "Three late rejections found by this case were moved before field allocation with the same messages (Simulation.run with the fused kernel on Bloch fields; a plane source reaching a stored PMC face in _System and in run_tensor_batch) and one missing rejection was added (run_tensor_batch with a tensor material). The differentiable far-field transform accepts non-isolated plane sets that the stored-result adapter rejects; that difference is recorded in the registry, not changed."
+}
