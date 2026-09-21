@@ -947,12 +947,14 @@ the parent session); `rerecord_gates.py --wheel` against a real wheel (its
 venv creation is mocked in the tests; the interpreter switch, the working
 directory, the absolute paths and the recorded wheel hash are asserted).
 
-**Evidence paths and hashes.** G9-07 run id 20260921T201139Z-g9-07-856d0eb3
-at source commit 5c1288b (clean tree, 7 passed in 12.92 s), JUnit SHA-256
-`082765a4968ec9e41d99ee74bea1c1984f8e894d9fb579fcbb95e066aee52931`; the judge reports G9-07 PASS. The
-report and the scope stage table were re-rendered with that evidence in the
-evidence commit (WORKSTATION 46 pass and 31 fail of 77, HPC 46 pass and 37
-fail of 83, both still NOT RELEASABLE).
+**Evidence paths and hashes.** G9-07 run ids 20260921T201139Z-g9-07-856d0eb3
+(source commit 5c1288b, 7 passed in 12.92 s, JUnit SHA-256
+`082765a4968ec9e41d99ee74bea1c1984f8e894d9fb579fcbb95e066aee52931`) and, after the
+platform and SBOM additions, 20260921T202555Z-g9-07-f8fe342e (source commit
+1c191f4, clean tree, 8 passed in 34.53 s, `platform_id` rtx3060-win11-lab, JUnit
+SHA-256 `5192e3ee407627017c04b8ff272d0601b69370bd0629bd406968143af7f0b940`); the judge reads the
+newest and reports G9-07 PASS. The report and the scope stage table were
+re-rendered with that evidence in the evidence commit.
 
 **Remaining defects, risks, external blockers.**
 - G9-06 is IN_PROGRESS: the tooling exists, the RC run (build wheel, clean install, `rerecord_gates.py --all --wheel`, release-full on both hosts, report, judge) has not been performed. Its evidence will come from the release-full JUnit files recorded against G9-06.

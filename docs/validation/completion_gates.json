@@ -2494,7 +2494,8 @@
             "tests/test_validation_report.py"
           ],
           "evidence": [
-            "20260921T201139Z-g9-07-856d0eb3"
+            "20260921T201139Z-g9-07-856d0eb3",
+            "20260921T202555Z-g9-07-f8fe342e"
           ],
           "blocker": null,
           "scope_change_approval": null,
