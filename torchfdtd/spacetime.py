@@ -7,6 +7,7 @@ and pointwise ADE does not widen this support. Only owned cells are committed.
 The transpose accumulates all replicated halo inputs on the host.
 """
 from types import SimpleNamespace
+import weakref
 
 import torch
 
@@ -50,6 +51,12 @@ class SlabBlockOperator:
         self.workspaces = [TileWorkspace(self.device, asynchronous=tile_transfers == 'async')
                            for _ in range(tile_buffers if tile_transfers == 'async' else 1)] if reuse_buffers else []
         self.workspace = self.workspaces[0] if self.workspaces else None
+        self.bank_bytes_live = self.bank_bytes_peak = self.bank_bytes_created = self.banks_created = 0
+
+    def bank_ledger(self):
+        """Host field banks this operator created: live, peak and total bytes; zero for disk banks."""
+        return dict(storage='disk' if self.state_factory is not None else 'host', live_bytes=self.bank_bytes_live,
+                    peak_bytes=self.bank_bytes_peak, created_bytes=self.bank_bytes_created, banks_created=self.banks_created)
 
     def workspace_report(self):
         def sizes(pool):
@@ -104,7 +111,22 @@ class SlabBlockOperator:
 
     def new_state(self):
         templates = self.host.state()
-        return self.state_factory(templates) if self.state_factory is not None else tuple(torch.zeros_like(s) for s in templates)
+        if self.state_factory is not None:return self.state_factory(templates)
+        bank = tuple(torch.zeros_like(s) for s in templates)
+        # The ledger counts a host bank until its E tensor is collected; the
+        # callback holds no reference to the operator, so a retained bank
+        # cannot keep tile workspaces alive.
+        size = sum(s.numel()*s.element_size() for s in bank)
+        self.banks_created += 1
+        self.bank_bytes_created += size
+        self.bank_bytes_live += size
+        self.bank_bytes_peak = max(self.bank_bytes_peak, self.bank_bytes_live)
+        owner = weakref.ref(self)
+        def released(owner=owner, size=size):
+            operator = owner()
+            if operator is not None:operator.bank_bytes_live -= size
+        weakref.finalize(bank[0], released)
+        return bank
 
     def tiles(self, depth):
         n = self.host.region.shape[0]

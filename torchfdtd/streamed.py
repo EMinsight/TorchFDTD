@@ -12,8 +12,10 @@ from .boundaries import BoundaryDescription, material_shape
 from .differentiable import DifferentiableResult, DifferentiableSimulation, _System, _split
 from .spacetime import SlabBlockOperator
 from .memory_profile import host_memory
+from .memory_accounting import MemoryMeter
 from .cuda_memory import cuda_budget_limit
 from .plan import check_snapshot
+from .reservation_registry import streamed_lease
 
 
 @dataclass(frozen=True)
@@ -35,6 +37,7 @@ class StreamedAdjointOptions:
     disk_free_reserve_bytes: int = 0
     restart_directory: str | Path | None = None
     restart_every_blocks: int = 1
+    optimizer_moments: int = 0
 
     def __post_init__(self):
         if isinstance(self.disk_free_reserve_bytes,bool) or not isinstance(self.disk_free_reserve_bytes,int) or self.disk_free_reserve_bytes<0:
@@ -69,6 +72,8 @@ class StreamedAdjointOptions:
             object.__setattr__(self,'restart_directory',str(self.restart_directory))
         if isinstance(self.restart_every_blocks,bool) or not isinstance(self.restart_every_blocks,int) or self.restart_every_blocks < 1:
             raise ValueError('restart_every_blocks must be a positive integer.')
+        if isinstance(self.optimizer_moments,bool) or not isinstance(self.optimizer_moments,int) or not 0 <= self.optimizer_moments <= 8:
+            raise ValueError('optimizer_moments must be an integer between zero and eight.')
 
 
 def _journal_bytes(directory):
@@ -166,7 +171,12 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
                       and options.tile_transfers == 'sync' and options.reuse_tile_buffers)
     parameter_multiplier = 4 if measured_scope else 8
     dense_parameters = parameter_multiplier*parameter_count*material_item
-    host = (0 if disk else state_banks)+initial_storage+dense_parameters+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
+    # The caller's CPU design tensor is the first of those copies. Optimizer
+    # state (Adam keeps two moments) is parameter-sized host memory the caller
+    # holds through the whole optimization; charge the declared count here.
+    design = parameter_count*material_item
+    optimizer_state = options.optimizer_moments*design
+    host = (0 if disk else state_banks)+initial_storage+dense_parameters+optimizer_state+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
     gpu = buffers*(tile_workspace+tile_history)
     cuda=torch.device(options.device).type=='cuda'
     observer_layout=32*monitors+8 if cuda and monitors and not region.complex_fields else 0
@@ -218,6 +228,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
                 observer_layout_bytes=buffers*observer_layout,observer_preparation_bytes=buffers*observer_preparation,
                 state_bank_capacity=state_bank_capacity,
                 dense_parameter_multiplier=parameter_multiplier,dense_parameter_reservation_bytes=dense_parameters,
+                design_tensor_bytes=design,optimizer_moments=options.optimizer_moments,optimizer_state_reservation_bytes=optimizer_state,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,restart_reservation_bytes=restart,
                 restart_journal_existing_bytes=existing_journal,
                 restart_signal_history_bytes=signal_history if options.restart_directory else 0,
@@ -323,6 +334,46 @@ def _journal(project, epsilon, options, spectral, starts):
                           options.restart_every_blocks)
 
 
+def _forward(ctx, epsilon, project, options, report, spectral, execution):
+    """The forward phase of _Streamed, run under its reservation lease and memory meter."""
+    host = execution.host(project, epsilon, spectral)
+    report['host_initial_state_storage_bytes'] = sum(s.untyped_storage().nbytes() for s in host.state())
+    report['host_inverse_permittivity_bytes'] = 0
+    starts = list(range(0, project.region.steps, options.temporal_depth))+[project.region.steps]
+    journal = _journal(project, epsilon, options, spectral, starts)
+    ctx.journal = journal
+    with _backing(options,report,'forward') as store:
+        operator = execution.operator(host, options, store)
+        state = host.state()
+        signals = torch.empty((project.region.steps, len(host.monitors)), dtype=host.field_dtype,
+                              device='cpu') if spectral is None else spectral.zeros()
+        first = 0
+        resumed = journal.load_forward(operator.new_state, signals) if journal is not None else None
+        if resumed is not None:
+            completed, saved_state, signals = resumed
+            if completed is None:
+                first = len(starts)-1
+                report['forward_resumed_from_block'] = 'complete'
+            else:
+                first, state = completed, saved_state
+                report['forward_resumed_from_block'] = completed
+        for index in range(first, len(starts)-1):
+            start = starts[index]
+            depth = starts[index+1]-start
+            state, values = operator.forward(epsilon, state, start, depth)
+            if spectral is None:signals[start:start+depth].copy_(values)
+            else:spectral.accumulate(signals, values, start)
+            if journal is not None and journal.forward_due(index+1, len(starts)-1):
+                journal.record_forward(index+1, state, signals)
+        if journal is not None and first < len(starts)-1:
+            journal.record_signals(signals)
+        if operator.workspace is not None:
+            report['forward_workspace'] = operator.workspace_report()
+        if journal is not None:report.update(journal.report())
+        report['forward_bank_ledger'] = operator.bank_ledger()
+    return signals
+
+
 class _Streamed(torch.autograd.Function):
     @staticmethod
     def forward(ctx, epsilon, project, options, report, spectral, execution):
@@ -331,41 +382,12 @@ class _Streamed(torch.autograd.Function):
         ctx.spectral = spectral
         ctx.execution = execution
         started = time.perf_counter()
-        host = execution.host(project, epsilon, spectral)
-        report['host_initial_state_storage_bytes'] = sum(s.untyped_storage().nbytes() for s in host.state())
-        report['host_inverse_permittivity_bytes'] = 0
-        starts = list(range(0, project.region.steps, options.temporal_depth))+[project.region.steps]
-        journal = _journal(project, epsilon, options, spectral, starts)
-        ctx.journal = journal
-        with _backing(options,report,'forward') as store:
-            operator = execution.operator(host, options, store)
-            state = host.state()
-            signals = torch.empty((project.region.steps, len(host.monitors)), dtype=host.field_dtype,
-                                  device='cpu') if spectral is None else spectral.zeros()
-            first = 0
-            resumed = journal.load_forward(operator.new_state, signals) if journal is not None else None
-            if resumed is not None:
-                completed, saved_state, signals = resumed
-                if completed is None:
-                    first = len(starts)-1
-                    report['forward_resumed_from_block'] = 'complete'
-                else:
-                    first, state = completed, saved_state
-                    report['forward_resumed_from_block'] = completed
-            for index in range(first, len(starts)-1):
-                start = starts[index]
-                depth = starts[index+1]-start
-                state, values = operator.forward(epsilon, state, start, depth)
-                if spectral is None:signals[start:start+depth].copy_(values)
-                else:spectral.accumulate(signals, values, start)
-                if journal is not None and journal.forward_due(index+1, len(starts)-1):
-                    journal.record_forward(index+1, state, signals)
-            if journal is not None and first < len(starts)-1:
-                journal.record_signals(signals)
-            if operator.workspace is not None:
-                report['forward_workspace'] = operator.workspace_report()
-            if journal is not None:report.update(journal.report())
+        # The phase holds its reservation in the process registry while it runs.
+        with streamed_lease(options, report), MemoryMeter(options.device) as meter:
+            signals = _forward(ctx, epsilon, project, options, report, spectral, execution)
         report['forward_seconds'] = time.perf_counter()-started
+        report['forward_memory'] = meter.record(report['forward_seconds'], store=report.get('forward_backing_store'),
+                                                banks=report['forward_bank_ledger'])
         # No physical time history is retained by the autograd context.
         return signals
 
@@ -374,69 +396,79 @@ class _Streamed(torch.autograd.Function):
         if torch.is_grad_enabled():raise RuntimeError('Higher-order streamed derivatives are not implemented.')
         epsilon, = ctx.saved_tensors
         options, project, report = ctx.options, ctx.project, ctx.report
-        ctx.execution.reservation(project, epsilon, options, ctx.spectral)
+        reservation = ctx.execution.reservation(project, epsilon, options, ctx.spectral)
         started = time.perf_counter()
-        host = ctx.execution.host(project, epsilon, ctx.spectral)
-        with _backing(options,report,'backward') as store:
-            operator = ctx.execution.operator(host, options, store)
-            steps = project.region.steps
-            starts = list(range(0, steps, options.temporal_depth))+[steps]
-            journal = getattr(ctx, 'journal', None)
-            signal_bar_sha256 = None
-            resumed = None
-            if journal is not None:
-                from .streamed_restart import sha256_tensor
-                signal_bar_sha256 = sha256_tensor(signal_bar.detach().contiguous())
-                resumed = journal.load_backward(signal_bar_sha256, operator.new_state, epsilon)
-            if resumed is not None:
-                limit, adjoint, gradient = resumed
-                report['backward_resumed_from_block'] = limit
-            else:
-                limit = len(starts)-1
-                gradient = torch.zeros_like(epsilon)
-                adjoint = host.state()
-            live = 0
-            report.update(peak_block_checkpoints=0, replayed_blocks=0)
-
-            def replay(state, begin, end):
-                for block in range(begin, end):
-                    state, _ = operator.forward(epsilon, state, starts[block], starts[block+1]-starts[block])
-                    report['replayed_blocks'] += 1
-                return state
-
-            def reverse(begin, end, restart, slots):
-                nonlocal adjoint, live
-                while end > begin:
-                    if end-begin == 1 or slots == 0:
-                        for block in reversed(range(begin, end)):
-                            state = replay(restart, begin, block)
-                            start, stop = starts[block], starts[block+1]
-                            adjoint, contribution = operator.transpose(epsilon, state, start, stop-start,
-                                                                       adjoint, signal_bar[start:stop] if ctx.spectral is None else ctx.spectral.transpose(signal_bar,start,stop))
-                            gradient.add_(contribution)
-                            del state, contribution
-                            if journal is not None and journal.backward_due(block, len(starts)-1):
-                                journal.record_backward(block, adjoint, gradient, signal_bar_sha256)
-                        return
-                    middle = begin+_split(end-begin, slots)
-                    saved = replay(restart, begin, middle)
-                    live += 1
-                    report['peak_block_checkpoints'] = max(live, report['peak_block_checkpoints'])
-                    try:reverse(middle, end, saved, slots-1)
-                    finally:
-                        del saved
-                        live -= 1
-                    end = middle
-
-            try:reverse(0, limit, host.state(), options.checkpoints)
-            finally:reverse=None  # Release recursive replay captures without cyclic GC.
-            if journal is not None:
-                journal.complete()
-                report.update(journal.report())
-            if operator.workspace is not None:
-                report['backward_workspace'] = operator.workspace_report()
+        with streamed_lease(options, reservation), MemoryMeter(options.device) as meter:
+            gradient = _backward(ctx, signal_bar, epsilon, project, options, report)
         report['backward_seconds'] = time.perf_counter()-started
+        report['backward_memory'] = meter.record(report['backward_seconds'], store=report.get('backward_backing_store'),
+                                                 banks=report['backward_bank_ledger'])
         return gradient, None, None, None, None, None
+
+
+def _backward(ctx, signal_bar, epsilon, project, options, report):
+    """The backward phase of _Streamed, run under its reservation lease and memory meter."""
+    host = ctx.execution.host(project, epsilon, ctx.spectral)
+    with _backing(options,report,'backward') as store:
+        operator = ctx.execution.operator(host, options, store)
+        steps = project.region.steps
+        starts = list(range(0, steps, options.temporal_depth))+[steps]
+        journal = getattr(ctx, 'journal', None)
+        signal_bar_sha256 = None
+        resumed = None
+        if journal is not None:
+            from .streamed_restart import sha256_tensor
+            signal_bar_sha256 = sha256_tensor(signal_bar.detach().contiguous())
+            resumed = journal.load_backward(signal_bar_sha256, operator.new_state, epsilon)
+        if resumed is not None:
+            limit, adjoint, gradient = resumed
+            report['backward_resumed_from_block'] = limit
+        else:
+            limit = len(starts)-1
+            gradient = torch.zeros_like(epsilon)
+            adjoint = host.state()
+        live = 0
+        report.update(peak_block_checkpoints=0, replayed_blocks=0)
+
+        def replay(state, begin, end):
+            for block in range(begin, end):
+                state, _ = operator.forward(epsilon, state, starts[block], starts[block+1]-starts[block])
+                report['replayed_blocks'] += 1
+            return state
+
+        def reverse(begin, end, restart, slots):
+            nonlocal adjoint, live
+            while end > begin:
+                if end-begin == 1 or slots == 0:
+                    for block in reversed(range(begin, end)):
+                        state = replay(restart, begin, block)
+                        start, stop = starts[block], starts[block+1]
+                        adjoint, contribution = operator.transpose(epsilon, state, start, stop-start,
+                                                                   adjoint, signal_bar[start:stop] if ctx.spectral is None else ctx.spectral.transpose(signal_bar,start,stop))
+                        gradient.add_(contribution)
+                        del state, contribution
+                        if journal is not None and journal.backward_due(block, len(starts)-1):
+                            journal.record_backward(block, adjoint, gradient, signal_bar_sha256)
+                    return
+                middle = begin+_split(end-begin, slots)
+                saved = replay(restart, begin, middle)
+                live += 1
+                report['peak_block_checkpoints'] = max(live, report['peak_block_checkpoints'])
+                try:reverse(middle, end, saved, slots-1)
+                finally:
+                    del saved
+                    live -= 1
+                end = middle
+
+        try:reverse(0, limit, host.state(), options.checkpoints)
+        finally:reverse=None  # Release recursive replay captures without cyclic GC.
+        if journal is not None:
+            journal.complete()
+            report.update(journal.report())
+        if operator.workspace is not None:
+            report['backward_workspace'] = operator.workspace_report()
+        report['backward_bank_ledger'] = operator.bank_ledger()
+    return gradient
 
 
 class StreamedSimulation(DifferentiableSimulation):

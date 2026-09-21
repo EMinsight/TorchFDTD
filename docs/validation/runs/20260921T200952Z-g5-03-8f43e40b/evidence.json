@@ -1,0 +1,365 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T200952Z-g5-03-8f43e40b",
+  "task": "G5-03",
+  "stage": "G5",
+  "task_title": "planner의 byte admission과 실제 peak를 맞추고 원자적 동시 reservation 또는 동등 admission으로 여러 작업이 각각 free memory를 보고 동시에 초과하는 문제를 다룬다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_admission_peak_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-03.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T05:04:57.853722+09:00",
+  "recorded_at": "2026-09-21T20:09:52+00:00",
+  "source_commit": "ed67736f91ca31a6552d1eef2052197de5abf44d",
+  "source_tree_sha256": "9f9d0bc6f694bc54e5248bc2268ca6c51fb31bb4f60cf4dd0984e3703d3450a6",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_admission_peak_g5.py": "5bd5fb8621b4a4c05534872b695d567f6938bde0e55d6e389825e8957a73e450"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G5-03.json",
+  "fixture_sha256": "56e798b65c5ee9b14018e3c0602a7c188a49392ceef2f00d8473a5cd61fbddab",
+  "acceptance_criteria_path": "docs/validation/cases/G5-03.json",
+  "acceptance_criteria_sha256": "56e798b65c5ee9b14018e3c0602a7c188a49392ceef2f00d8473a5cd61fbddab",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cuda",
+    "cpu"
+  ],
+  "physics_configuration": {
+    "module": "tests/test_admission_peak_g5.py",
+    "ladder": [
+      {
+        "shape": [
+          64,
+          32,
+          32
+        ],
+        "cells": 65536
+      },
+      {
+        "shape": [
+          128,
+          48,
+          48
+        ],
+        "cells": 294912
+      },
+      {
+        "shape": [
+          256,
+          64,
+          64
+        ],
+        "cells": 1048576
+      }
+    ],
+    "region": "3D, uniform mesh 0.05 um, 4 CPML cells on every face, Yee sampling, FP32, 12 steps, memory_mode streamed",
+    "structure": "smooth sphere of radius 0.3 um (width 0.08 um), permittivity 4 in air, scalar epsilon",
+    "source_and_monitors": "Ez point source at (-0.3, 0, 0) um, standard Gaussian pulse (0.8 um, FWHM 0.5 fs, centre 0.5 fs, amplitude 100); point probes Ez (0.3, 0, 0) and Hy (0.2, 0.1, 0); full time history; objective sum of squared signals",
+    "policy": "StreamedAdjointOptions(device=cuda, slab_width=8, temporal_depth=4, checkpoints=1, tile_transfers=sync) with state_storage host and disk (private scratch directory, disk_budget_bytes 4 GiB), gpu_budget_bytes 2 GiB, host_budget_bytes 16 GiB; one small warm-up run precedes the ladder so the CUDA kernels are loaded",
+    "instruments": "report['forward_memory'] and report['backward_memory'] of torchfdtd/memory_accounting.py: peak_torch_allocated_bytes.delta_bytes (exact allocator peak after torch.cuda.reset_peak_memory_stats before each rung), host_bank_bytes.bytes (SlabBlockOperator bank ledger), scratch_disk_peak_file_bytes.bytes (StateStore), peak_process_rss_bytes.delta_bytes (working set, informational)",
+    "registry": "torchfdtd/reservation_registry.py: ReservationRegistry.acquire under one threading.Lock; StreamedSimulation forward and backward phases hold a lease on the host, gpu and disk tiers for the duration of the phase; the concurrency tests run the scatterer of tests/g5_support.py on CPU tiles with host and disk banks and a budget of 1.5 times one reservation"
+  },
+  "reference_method": "the planner's own reservation (torchfdtd/streamed.py::_reservation) compared with the measured peaks of the same run; a bound check, not a physics oracle. The registry is checked by construction: two threads released together by a barrier, and a run blocked inside its first tile while a second run is admitted against the same budget",
+  "observables": [
+    {
+      "name": "gpu_ratio",
+      "unit": "dimensionless",
+      "definition": "gpu_reservation_bytes / max over phases of peak_torch_allocated_bytes.delta_bytes"
+    },
+    {
+      "name": "bank_ratio",
+      "unit": "dimensionless",
+      "definition": "host_reservation_bytes / peak host_bank_bytes for host banks; disk_reservation_bytes / peak scratch_disk_peak_file_bytes for disk banks"
+    },
+    {
+      "name": "gpu_margin_bytes",
+      "unit": "bytes",
+      "definition": "gpu_reservation_bytes minus the measured peak Torch allocated delta"
+    },
+    {
+      "name": "bank_margin_bytes",
+      "unit": "bytes",
+      "definition": "the tier reservation minus the measured peak bank bytes"
+    },
+    {
+      "name": "rss_ratio_informational",
+      "unit": "dimensionless",
+      "definition": "host_reservation_bytes / working-set delta of the phase; recorded, not a criterion: the working set also holds pinned staging, Torch host tensors of the caller, allocator arenas and runtime pages that the reservation does not model"
+    }
+  ],
+  "acceptance_limits": {
+    "minimum_ratio": 1.0,
+    "rule": "on every rung and for both bank tiers, gpu_ratio >= minimum_ratio and bank_ratio >= minimum_ratio, with the allocator peak flagged exact; the measured peak Torch allocated delta never exceeds the measured peak Torch reserved bytes",
+    "registry": "of two simultaneous requests of 600 bytes against a 1000-byte budget exactly one is admitted and the other raises ValueError starting with 'Concurrent streamed reservation refused'; a request that overflows one tier registers nothing on any tier; a second StreamedSimulation run against a budget of 1.5 reservations is refused with that message while the first run is inside its forward phase, and is admitted after the first run finishes; a failed phase releases its lease",
+    "scope_statement": "the registry guarantee is per Python process and is admission, not a quota: it does not see other processes, does not limit later allocations of an admitted run and does not replace the live free-memory checks",
+    "source_of_limits": "G5-03 specification: the byte admission is matched against the actual peak (ratio at least one) and concurrent admission is atomic; the margin is recorded rather than bounded above because the reservation is a documented conservative bound (docs/STREAMED_FDTD.md)"
+  },
+  "observed_metrics": {
+    "task": "G5-03",
+    "case": "docs/validation/cases/G5-03.json",
+    "test_module": "tests/test_admission_peak_g5.py",
+    "environment": {
+      "python": "3.10.2",
+      "numpy": "2.2.6",
+      "torch": "2.10.0+cu126",
+      "cuda_runtime": "12.6",
+      "cuda_available": true,
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "os": "Windows-10-10.0.26200-SP0",
+      "machine": "AMD64",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+      "commit": "e9e945856aa268b6a37231abd75b8d00fbfad569",
+      "dirty_paths": 1,
+      "recorded_at": "2026-09-21T20:05:13+00:00"
+    },
+    "entries": {
+      "64x32x32/host": {
+        "shape": [
+          64,
+          32,
+          32
+        ],
+        "cells": 65536,
+        "storage": "host",
+        "state_bytes": 2146304,
+        "state_bank_capacity": 4,
+        "gpu_reservation_bytes": 8388776,
+        "host_reservation_bytes": 19072584,
+        "disk_reservation_bytes": 0,
+        "peak_torch_allocated_delta": 3030016,
+        "exact": true,
+        "peak_torch_reserved": 4194304,
+        "peak_host_bank_bytes": 6438912,
+        "peak_file_bytes": 0,
+        "rss_delta": 18927616,
+        "gpu_ratio": 2.768558317843866,
+        "gpu_margin_bytes": 5358760,
+        "bank_ratio": 2.9620817927003817,
+        "bank_margin_bytes": 12633672,
+        "rss_ratio_informational": 1.0076590733877948,
+        "minimum_ratio": 1.0,
+        "forward_seconds": 0.7638582000508904,
+        "backward_seconds": 1.5849445997737348
+      },
+      "64x32x32/disk": {
+        "shape": [
+          64,
+          32,
+          32
+        ],
+        "cells": 65536,
+        "storage": "disk",
+        "state_bytes": 2146304,
+        "state_bank_capacity": 4,
+        "gpu_reservation_bytes": 8388776,
+        "host_reservation_bytes": 11798088,
+        "disk_reservation_bytes": 8585216,
+        "peak_torch_allocated_delta": 3030016,
+        "exact": true,
+        "peak_torch_reserved": 4194304,
+        "peak_host_bank_bytes": 0,
+        "peak_file_bytes": 6438912,
+        "rss_delta": 1421312,
+        "gpu_ratio": 2.768558317843866,
+        "gpu_margin_bytes": 5358760,
+        "bank_ratio": 1.3333333333333333,
+        "bank_margin_bytes": 2146304,
+        "rss_ratio_informational": 8.30084316462536,
+        "minimum_ratio": 1.0,
+        "forward_seconds": 0.40764160035178065,
+        "backward_seconds": 1.6056367000564933
+      },
+      "128x48x48/host": {
+        "shape": [
+          128,
+          48,
+          48
+        ],
+        "cells": 294912,
+        "storage": "host",
+        "state_bytes": 8712192,
+        "state_bank_capacity": 4,
+        "gpu_reservation_bytes": 18874536,
+        "host_reservation_bytes": 63161928,
+        "disk_reservation_bytes": 0,
+        "peak_torch_allocated_delta": 6356992,
+        "exact": true,
+        "peak_torch_reserved": 27262976,
+        "peak_host_bank_bytes": 26136576,
+        "peak_file_bytes": 0,
+        "rss_delta": 16932864,
+        "gpu_ratio": 2.9690985925418816,
+        "gpu_margin_bytes": 12517544,
+        "bank_ratio": 2.416610653208745,
+        "bank_margin_bytes": 37025352,
+        "rss_ratio_informational": 3.73013850462627,
+        "minimum_ratio": 1.0,
+        "forward_seconds": 1.6238832999952137,
+        "backward_seconds": 2.9998945998959243
+      },
+      "128x48x48/disk": {
+        "shape": [
+          128,
+          48,
+          48
+        ],
+        "cells": 294912,
+        "storage": "disk",
+        "state_bytes": 8712192,
+        "state_bank_capacity": 4,
+        "gpu_reservation_bytes": 18874536,
+        "host_reservation_bytes": 28902984,
+        "disk_reservation_bytes": 34848768,
+        "peak_torch_allocated_delta": 6356992,
+        "exact": true,
+        "peak_torch_reserved": 27262976,
+        "peak_host_bank_bytes": 0,
+        "peak_file_bytes": 26136576,
+        "rss_delta": 5259264,
+        "gpu_ratio": 2.9690985925418816,
+        "gpu_margin_bytes": 12517544,
+        "bank_ratio": 1.3333333333333333,
+        "bank_margin_bytes": 8712192,
+        "rss_ratio_informational": 5.495632849007009,
+        "minimum_ratio": 1.0,
+        "forward_seconds": 0.8105489001609385,
+        "backward_seconds": 2.2723758998326957
+      },
+      "256x64x64/host": {
+        "shape": [
+          256,
+          64,
+          64
+        ],
+        "cells": 1048576,
+        "storage": "host",
+        "state_bytes": 29294592,
+        "state_bank_capacity": 4,
+        "gpu_reservation_bytes": 33554600,
+        "host_reservation_bytes": 184288840,
+        "disk_reservation_bytes": 0,
+        "peak_torch_allocated_delta": 11537408,
+        "exact": true,
+        "peak_torch_reserved": 27262976,
+        "peak_host_bank_bytes": 87883776,
+        "peak_file_bytes": 0,
+        "rss_delta": 45277184,
+        "gpu_ratio": 2.908330883331854,
+        "gpu_margin_bytes": 22017192,
+        "bank_ratio": 2.0969608770565342,
+        "bank_margin_bytes": 96405064,
+        "rss_ratio_informational": 4.07023634685408,
+        "minimum_ratio": 1.0,
+        "forward_seconds": 1.5508091002702713,
+        "backward_seconds": 3.6645764000713825
+      },
+      "256x64x64/disk": {
+        "shape": [
+          256,
+          64,
+          64
+        ],
+        "cells": 1048576,
+        "storage": "disk",
+        "state_bytes": 29294592,
+        "state_bank_capacity": 4,
+        "gpu_reservation_bytes": 33554600,
+        "host_reservation_bytes": 59770440,
+        "disk_reservation_bytes": 117178368,
+        "peak_torch_allocated_delta": 11537408,
+        "exact": true,
+        "peak_torch_reserved": 27262976,
+        "peak_host_bank_bytes": 0,
+        "peak_file_bytes": 87883776,
+        "rss_delta": 14135296,
+        "gpu_ratio": 2.908330883331854,
+        "gpu_margin_bytes": 22017192,
+        "bank_ratio": 1.3333333333333333,
+        "bank_margin_bytes": 29294592,
+        "rss_ratio_informational": 4.22845336949435,
+        "minimum_ratio": 1.0,
+        "forward_seconds": 1.617427000310272,
+        "backward_seconds": 4.107286999933422
+      }
+    }
+  },
+  "test_results": {
+    "total": 7,
+    "passed": [
+      "tests/test_admission_peak_g5.py::test_reservation_bounds_measured_peaks_on_every_rung",
+      "tests/test_admission_peak_g5.py::test_registry_admits_only_one_of_two_simultaneous_requests",
+      "tests/test_admission_peak_g5.py::test_registry_requests_are_all_or_nothing_across_tiers",
+      "tests/test_admission_peak_g5.py::test_streamed_requests_name_every_tier_of_the_options",
+      "tests/test_admission_peak_g5.py::test_second_concurrent_run_is_refused_and_the_lease_is_released[host]",
+      "tests/test_admission_peak_g5.py::test_second_concurrent_run_is_refused_and_the_lease_is_released[disk]",
+      "tests/test_admission_peak_g5.py::test_failed_phase_releases_its_lease"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 39.145,
+    "suite_timestamp": "2026-09-22T05:04:57.853722+09:00"
+  },
+  "required_tests": [
+    "tests/test_admission_peak_g5.py::test_reservation_bounds_measured_peaks_on_every_rung",
+    "tests/test_admission_peak_g5.py::test_registry_admits_only_one_of_two_simultaneous_requests",
+    "tests/test_admission_peak_g5.py::test_registry_requests_are_all_or_nothing_across_tiers",
+    "tests/test_admission_peak_g5.py::test_streamed_requests_name_every_tier_of_the_options",
+    "tests/test_admission_peak_g5.py::test_second_concurrent_run_is_refused_and_the_lease_is_released",
+    "tests/test_admission_peak_g5.py::test_failed_phase_releases_its_lease"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/g5/G5-03.json",
+      "sha256": "041f13d15cfd7ab81d691e50f162cdf8eac2961e0ec35f03d948745704f5ca12",
+      "bytes": 5643
+    },
+    {
+      "path": "docs/validation/runs/20260921T200952Z-g5-03-8f43e40b/junit.xml",
+      "sha256": "1cf54b44cc38ad3c1df4982cbfa8b55a97d2589f8c0aad0304addb77d3fe3fb1",
+      "bytes": 1162,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G5-03.xml"
+    }
+  ],
+  "applicable_scope": "RTX 3060 three-rung ladder (65,536 to 1,048,576 cells, FP32, host and disk banks, synchronous CUDA tiles) for the admission-versus-peak ratios; the concurrent-reservation registry on CPU tiles with host and disk banks; the registry guarantee is per Python process and is admission, not a quota",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

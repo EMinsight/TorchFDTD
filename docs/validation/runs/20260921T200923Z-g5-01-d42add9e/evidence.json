@@ -1,0 +1,1872 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T200923Z-g5-01-d42add9e",
+  "task": "G5-01",
+  "stage": "G5",
+  "task_title": "resident/host/disk/async 경로를 같은 물리 문제·관측자·목적함수에서 비교한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_paths_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-01.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T05:00:06.173976+09:00",
+  "recorded_at": "2026-09-21T20:09:23+00:00",
+  "source_commit": "ed67736f91ca31a6552d1eef2052197de5abf44d",
+  "source_tree_sha256": "0174ba788e6cbd9a9230f5f4edd38b03cd634b9e98498981d810165f741b6ce6",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_memory_paths_g5.py": "6c24fcd4d43a69a4f9e623fcd7524e618467c3f376041cc33b63b922919f2f53"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G5-01.json",
+  "fixture_sha256": "ce3e7edfc5c662d692d2717760b821234bdd1a3fae03b9edd90d15316128219d",
+  "acceptance_criteria_path": "docs/validation/cases/G5-01.json",
+  "acceptance_criteria_sha256": "ce3e7edfc5c662d692d2717760b821234bdd1a3fae03b9edd90d15316128219d",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": 29,
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": [
+    "cuda"
+  ],
+  "physics_configuration": {
+    "module": "tests/g5_support.py (scene, sphere, streamed_options) and tests/test_memory_paths_g5.py",
+    "region": "3D, 2.4 x 1.6 x 1.6 um, uniform mesh 0.1 um (24 x 16 x 16 cells), 3 CPML cells on every face, Yee material sampling, staircase interfaces, 40 steps at the CFL time step (1.9066e-16 s)",
+    "structure": "smooth sphere of radius 0.3 um, sigmoid transition width 0.08 um, at the origin: permittivity 4 in air (scalar or diagonal Yee-sampled); Drude variant: epsilon_inf 2 inside, one Drude pole (omega0 = 0, gamma = 1e14 rad/s) of strength s_hat * 4e30 (rad/s)^2 with s_hat the sphere mask; stored-face variant: PMC y faces, symmetric z_min, PEC z_max with the scalar sphere and the stored upper rows; tensor variant: the admissible SPD node-tensor field of tests/test_anisotropy_walls.py (seed 29), FP32, point observations only",
+    "source": "Ez point source at (-0.7, 0, 0) um, standard Gaussian pulse, wavelength 0.8 um, power FWHM 1.5 fs, envelope centre 2 fs, amplitude 100",
+    "observations": {
+      "history": "two point probes Ez (0.7, 0, 0) and Hy (0.5, 0.2, 0) as the full time history, then DifferentiableResult.spectrum at 3e14 Hz",
+      "online": "the same two probes accumulated as an online DFT at 3e14 Hz (StreamedSimulation.spectrum, DifferentiableSimulation.spectrum)",
+      "plane": "one x-normal spectral plane at x = 0.7 um, 0.8 x 0.8 um, downsample 2, all six components at 3e14 Hz (DifferentiablePlaneSimulation, DispersivePlaneSimulation)"
+    },
+    "objective": "sum over frequencies, samples and components of |F / dt|^2 where F is the spectral field and dt the time step, so that the objective and its gradients are dimensionless per-step amplitudes",
+    "paths": {
+      "resident": "DifferentiableSimulation / DispersiveSimulation / TensorDielectricSimulation with AdjointOptions(checkpoints=2) on a CUDA epsilon: the reference",
+      "host_sync": "StreamedAdjointOptions(device=cuda, slab_width=6, temporal_depth=4, checkpoints=2, state_storage=host, tile_transfers=sync)",
+      "disk_sync": "the same with state_storage=disk, a private scratch directory and disk_budget_bytes 256 MiB",
+      "host_async": "the same as host_sync with tile_transfers=async and tile_buffers=2"
+    },
+    "instances": "precision {float32, float64} x material {scalar, diagonal, drude, pmc} x observation {history, online, plane} x path {host_sync, disk_sync, host_async}, minus pmc x plane (refused by the registry), plus float32 x tensor x online x the three paths: 69 streamed runs against 23 resident references",
+    "refusals": "planes_pmc, streamed_dispersive_oneway, streamed_dispersive_planes_oneway and mode_network_streamed from torchfdtd/capabilities.py, built by example_project and constructed with StreamedAdjointOptions"
+  },
+  "reference_method": "the resident CUDA discrete adjoint of the same scene (fused CUDA forward and transpose for real dielectric fields, Torch ADE and tensor transposes): a separate execution path over the same Yee discretization, not an analytic oracle; the agreement it establishes is that the streamed tiers reproduce the resident result",
+  "observables": [
+    {
+      "name": "max_abs_field_error",
+      "unit": "dimensionless (spectral amplitude per time step)",
+      "definition": "max |F_streamed - F_resident| / dt over frequencies, samples and components"
+    },
+    {
+      "name": "objective",
+      "unit": "dimensionless",
+      "definition": "sum |F / dt|^2 of the streamed run; objective_reference is the resident value"
+    },
+    {
+      "name": "max_abs_gradient_error",
+      "unit": "dimensionless per input unit",
+      "definition": "max |g_streamed - g_resident| for every differentiable input (epsilon, epsilon_inf and s_hat, or the node tensor)"
+    },
+    {
+      "name": "peak_block_checkpoints",
+      "unit": "count",
+      "definition": "report['peak_block_checkpoints'] of the streamed run"
+    }
+  ],
+  "acceptance_limits": {
+    "tolerances": {
+      "float32": {
+        "rtol": 0.0001,
+        "atol": 1e-06
+      },
+      "float64": {
+        "rtol": 1e-07,
+        "atol": 1e-09
+      }
+    },
+    "rule": "torch.testing.assert_close(streamed, resident, rtol, atol) on the spectral amplitude per time step, on the objective and on every gradient, for every instance; the reference amplitude must exceed 1e-3 and every reference gradient 1e-6 so that the comparison is not vacuous",
+    "refusals": "each listed combination raises ValueError whose message starts with the registry rule's expected message before torchfdtd.streamed._Streamed.apply is reached",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 (rtol 1e-4, atol 1e-6) and discrete_dimensionless_fp64 (rtol 1e-7, atol 1e-9): layer A, the same discretization on two execution paths"
+  },
+  "observed_metrics": {
+    "task": "G5-01",
+    "case": "docs/validation/cases/G5-01.json",
+    "test_module": "tests/test_memory_paths_g5.py",
+    "environment": {
+      "python": "3.10.2",
+      "numpy": "2.2.6",
+      "torch": "2.10.0+cu126",
+      "cuda_runtime": "12.6",
+      "cuda_available": true,
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "os": "Windows-10-10.0.26200-SP0",
+      "machine": "AMD64",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+      "commit": "e9e945856aa268b6a37231abd75b8d00fbfad569",
+      "dirty_paths": 0,
+      "recorded_at": "2026-09-21T20:00:19+00:00"
+    },
+    "entries": {
+      "float32/scalar/history/host_sync": {
+        "precision": "float32",
+        "material": "scalar",
+        "observation": "history",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 15.170397758483887,
+        "objective_reference": 15.170395851135254,
+        "max_abs_field_error": 2.6656007889869215e-07,
+        "max_abs_field": 3.3211917877197266,
+        "max_abs_gradient_error": [
+          9.5367431640625e-06
+        ],
+        "max_abs_gradient": [
+          21.053272247314453
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/scalar/history/disk_sync": {
+        "precision": "float32",
+        "material": "scalar",
+        "observation": "history",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 15.170397758483887,
+        "objective_reference": 15.170395851135254,
+        "max_abs_field_error": 2.6656007889869215e-07,
+        "max_abs_field": 3.3211917877197266,
+        "max_abs_gradient_error": [
+          9.5367431640625e-06
+        ],
+        "max_abs_gradient": [
+          21.053272247314453
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/scalar/history/host_async": {
+        "precision": "float32",
+        "material": "scalar",
+        "observation": "history",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 15.170397758483887,
+        "objective_reference": 15.170395851135254,
+        "max_abs_field_error": 2.6656007889869215e-07,
+        "max_abs_field": 3.3211917877197266,
+        "max_abs_gradient_error": [
+          9.5367431640625e-06
+        ],
+        "max_abs_gradient": [
+          21.053272247314453
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/scalar/online/host_sync": {
+        "precision": "float32",
+        "material": "scalar",
+        "observation": "online",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 15.170397758483887,
+        "objective_reference": 15.170397758483887,
+        "max_abs_field_error": 1.1920928955078125e-07,
+        "max_abs_field": 3.3211920261383057,
+        "max_abs_gradient_error": [
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          21.05327796936035
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/scalar/online/disk_sync": {
+        "precision": "float32",
+        "material": "scalar",
+        "observation": "online",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 15.170397758483887,
+        "objective_reference": 15.170397758483887,
+        "max_abs_field_error": 1.1920928955078125e-07,
+        "max_abs_field": 3.3211920261383057,
+        "max_abs_gradient_error": [
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          21.05327796936035
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/scalar/online/host_async": {
+        "precision": "float32",
+        "material": "scalar",
+        "observation": "online",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 15.170397758483887,
+        "objective_reference": 15.170397758483887,
+        "max_abs_field_error": 1.1920928955078125e-07,
+        "max_abs_field": 3.3211920261383057,
+        "max_abs_gradient_error": [
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          21.05327796936035
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/scalar/plane/host_sync": {
+        "precision": "float32",
+        "material": "scalar",
+        "observation": "plane",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 77.68844604492188,
+        "objective_reference": 77.68841552734375,
+        "max_abs_field_error": 3.3717478231665154e-07,
+        "max_abs_field": 2.3291473388671875,
+        "max_abs_gradient_error": [
+          1.52587890625e-05
+        ],
+        "max_abs_gradient": [
+          108.48655700683594
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/scalar/plane/disk_sync": {
+        "precision": "float32",
+        "material": "scalar",
+        "observation": "plane",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 77.68844604492188,
+        "objective_reference": 77.68841552734375,
+        "max_abs_field_error": 3.3717478231665154e-07,
+        "max_abs_field": 2.3291473388671875,
+        "max_abs_gradient_error": [
+          1.52587890625e-05
+        ],
+        "max_abs_gradient": [
+          108.48655700683594
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/scalar/plane/host_async": {
+        "precision": "float32",
+        "material": "scalar",
+        "observation": "plane",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 77.68844604492188,
+        "objective_reference": 77.68841552734375,
+        "max_abs_field_error": 3.3717478231665154e-07,
+        "max_abs_field": 2.3291473388671875,
+        "max_abs_gradient_error": [
+          1.52587890625e-05
+        ],
+        "max_abs_gradient": [
+          108.48655700683594
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/diagonal/history/host_sync": {
+        "precision": "float32",
+        "material": "diagonal",
+        "observation": "history",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 16.670255661010742,
+        "objective_reference": 16.67025375366211,
+        "max_abs_field_error": 2.6656007889869215e-07,
+        "max_abs_field": 3.408135175704956,
+        "max_abs_gradient_error": [
+          3.814697265625e-06
+        ],
+        "max_abs_gradient": [
+          23.908418655395508
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/diagonal/history/disk_sync": {
+        "precision": "float32",
+        "material": "diagonal",
+        "observation": "history",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 16.670255661010742,
+        "objective_reference": 16.67025375366211,
+        "max_abs_field_error": 2.6656007889869215e-07,
+        "max_abs_field": 3.408135175704956,
+        "max_abs_gradient_error": [
+          3.814697265625e-06
+        ],
+        "max_abs_gradient": [
+          23.908418655395508
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/diagonal/history/host_async": {
+        "precision": "float32",
+        "material": "diagonal",
+        "observation": "history",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 16.670255661010742,
+        "objective_reference": 16.67025375366211,
+        "max_abs_field_error": 2.6656007889869215e-07,
+        "max_abs_field": 3.408135175704956,
+        "max_abs_gradient_error": [
+          3.814697265625e-06
+        ],
+        "max_abs_gradient": [
+          23.908418655395508
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/diagonal/online/host_sync": {
+        "precision": "float32",
+        "material": "diagonal",
+        "observation": "online",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 16.670255661010742,
+        "objective_reference": 16.670251846313477,
+        "max_abs_field_error": 5.331201577973843e-07,
+        "max_abs_field": 3.408134937286377,
+        "max_abs_gradient_error": [
+          7.62939453125e-06
+        ],
+        "max_abs_gradient": [
+          23.908414840698242
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/diagonal/online/disk_sync": {
+        "precision": "float32",
+        "material": "diagonal",
+        "observation": "online",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 16.670255661010742,
+        "objective_reference": 16.670251846313477,
+        "max_abs_field_error": 5.331201577973843e-07,
+        "max_abs_field": 3.408134937286377,
+        "max_abs_gradient_error": [
+          7.62939453125e-06
+        ],
+        "max_abs_gradient": [
+          23.908414840698242
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/diagonal/online/host_async": {
+        "precision": "float32",
+        "material": "diagonal",
+        "observation": "online",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 16.670255661010742,
+        "objective_reference": 16.670251846313477,
+        "max_abs_field_error": 5.331201577973843e-07,
+        "max_abs_field": 3.408134937286377,
+        "max_abs_gradient_error": [
+          7.62939453125e-06
+        ],
+        "max_abs_gradient": [
+          23.908414840698242
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/diagonal/plane/host_sync": {
+        "precision": "float32",
+        "material": "diagonal",
+        "observation": "plane",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 73.14791107177734,
+        "objective_reference": 73.14789581298828,
+        "max_abs_field_error": 3.769728778024728e-07,
+        "max_abs_field": 2.0429162979125977,
+        "max_abs_gradient_error": [
+          1.52587890625e-05
+        ],
+        "max_abs_gradient": [
+          104.92723846435547
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/diagonal/plane/disk_sync": {
+        "precision": "float32",
+        "material": "diagonal",
+        "observation": "plane",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 73.14791107177734,
+        "objective_reference": 73.14789581298828,
+        "max_abs_field_error": 3.769728778024728e-07,
+        "max_abs_field": 2.0429162979125977,
+        "max_abs_gradient_error": [
+          1.52587890625e-05
+        ],
+        "max_abs_gradient": [
+          104.92723846435547
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/diagonal/plane/host_async": {
+        "precision": "float32",
+        "material": "diagonal",
+        "observation": "plane",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 73.14791107177734,
+        "objective_reference": 73.14789581298828,
+        "max_abs_field_error": 3.769728778024728e-07,
+        "max_abs_field": 2.0429162979125977,
+        "max_abs_gradient_error": [
+          1.52587890625e-05
+        ],
+        "max_abs_gradient": [
+          104.92723846435547
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/drude/history/host_sync": {
+        "precision": "float32",
+        "material": "drude",
+        "observation": "history",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 21.002056121826172,
+        "objective_reference": 21.00204849243164,
+        "max_abs_field_error": 7.251218221426825e-07,
+        "max_abs_field": 3.307741165161133,
+        "max_abs_gradient_error": [
+          3.814697265625e-06,
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          31.50523567199707,
+          7.3068013191223145
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/drude/history/disk_sync": {
+        "precision": "float32",
+        "material": "drude",
+        "observation": "history",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 21.002056121826172,
+        "objective_reference": 21.00204849243164,
+        "max_abs_field_error": 7.251218221426825e-07,
+        "max_abs_field": 3.307741165161133,
+        "max_abs_gradient_error": [
+          3.814697265625e-06,
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          31.50523567199707,
+          7.3068013191223145
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/drude/history/host_async": {
+        "precision": "float32",
+        "material": "drude",
+        "observation": "history",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 21.002056121826172,
+        "objective_reference": 21.00204849243164,
+        "max_abs_field_error": 7.251218221426825e-07,
+        "max_abs_field": 3.307741165161133,
+        "max_abs_gradient_error": [
+          3.814697265625e-06,
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          31.50523567199707,
+          7.3068013191223145
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/drude/online/host_sync": {
+        "precision": "float32",
+        "material": "drude",
+        "observation": "online",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 21.002052307128906,
+        "objective_reference": 21.00204849243164,
+        "max_abs_field_error": 4.915124804938387e-07,
+        "max_abs_field": 3.307741165161133,
+        "max_abs_gradient_error": [
+          5.7220458984375e-06,
+          2.384185791015625e-06
+        ],
+        "max_abs_gradient": [
+          31.505233764648438,
+          7.30679988861084
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/drude/online/disk_sync": {
+        "precision": "float32",
+        "material": "drude",
+        "observation": "online",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 21.002052307128906,
+        "objective_reference": 21.00204849243164,
+        "max_abs_field_error": 4.915124804938387e-07,
+        "max_abs_field": 3.307741165161133,
+        "max_abs_gradient_error": [
+          5.7220458984375e-06,
+          2.384185791015625e-06
+        ],
+        "max_abs_gradient": [
+          31.505233764648438,
+          7.30679988861084
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/drude/online/host_async": {
+        "precision": "float32",
+        "material": "drude",
+        "observation": "online",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 21.002052307128906,
+        "objective_reference": 21.00204849243164,
+        "max_abs_field_error": 4.915124804938387e-07,
+        "max_abs_field": 3.307741165161133,
+        "max_abs_gradient_error": [
+          5.7220458984375e-06,
+          2.384185791015625e-06
+        ],
+        "max_abs_gradient": [
+          31.505233764648438,
+          7.30679988861084
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/drude/plane/host_sync": {
+        "precision": "float32",
+        "material": "drude",
+        "observation": "plane",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 227.52981567382812,
+        "objective_reference": 227.52975463867188,
+        "max_abs_field_error": 7.158763537518098e-07,
+        "max_abs_field": 3.290313720703125,
+        "max_abs_gradient_error": [
+          9.1552734375e-05,
+          1.52587890625e-05
+        ],
+        "max_abs_gradient": [
+          353.44580078125,
+          80.38567352294922
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/drude/plane/disk_sync": {
+        "precision": "float32",
+        "material": "drude",
+        "observation": "plane",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 227.52981567382812,
+        "objective_reference": 227.52975463867188,
+        "max_abs_field_error": 7.158763537518098e-07,
+        "max_abs_field": 3.290313720703125,
+        "max_abs_gradient_error": [
+          9.1552734375e-05,
+          1.52587890625e-05
+        ],
+        "max_abs_gradient": [
+          353.44580078125,
+          80.38567352294922
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/drude/plane/host_async": {
+        "precision": "float32",
+        "material": "drude",
+        "observation": "plane",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 227.52981567382812,
+        "objective_reference": 227.52975463867188,
+        "max_abs_field_error": 7.158763537518098e-07,
+        "max_abs_field": 3.290313720703125,
+        "max_abs_gradient_error": [
+          9.1552734375e-05,
+          1.52587890625e-05
+        ],
+        "max_abs_gradient": [
+          353.44580078125,
+          80.38567352294922
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/pmc/history/host_sync": {
+        "precision": "float32",
+        "material": "pmc",
+        "observation": "history",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 13.066761016845703,
+        "objective_reference": 13.066758155822754,
+        "max_abs_field_error": 4.915124804938387e-07,
+        "max_abs_field": 3.0345754623413086,
+        "max_abs_gradient_error": [
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          17.165822982788086
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/pmc/history/disk_sync": {
+        "precision": "float32",
+        "material": "pmc",
+        "observation": "history",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 13.066761016845703,
+        "objective_reference": 13.066758155822754,
+        "max_abs_field_error": 4.915124804938387e-07,
+        "max_abs_field": 3.0345754623413086,
+        "max_abs_gradient_error": [
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          17.165822982788086
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/pmc/history/host_async": {
+        "precision": "float32",
+        "material": "pmc",
+        "observation": "history",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 13.066761016845703,
+        "objective_reference": 13.066758155822754,
+        "max_abs_field_error": 4.915124804938387e-07,
+        "max_abs_field": 3.0345754623413086,
+        "max_abs_gradient_error": [
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          17.165822982788086
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/pmc/online/host_sync": {
+        "precision": "float32",
+        "material": "pmc",
+        "observation": "online",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 13.066761016845703,
+        "objective_reference": 13.066757202148438,
+        "max_abs_field_error": 2.6656007889869215e-07,
+        "max_abs_field": 3.0345757007598877,
+        "max_abs_gradient_error": [
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          17.165822982788086
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/pmc/online/disk_sync": {
+        "precision": "float32",
+        "material": "pmc",
+        "observation": "online",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 13.066761016845703,
+        "objective_reference": 13.066757202148438,
+        "max_abs_field_error": 2.6656007889869215e-07,
+        "max_abs_field": 3.0345757007598877,
+        "max_abs_gradient_error": [
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          17.165822982788086
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/pmc/online/host_async": {
+        "precision": "float32",
+        "material": "pmc",
+        "observation": "online",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 13.066761016845703,
+        "objective_reference": 13.066757202148438,
+        "max_abs_field_error": 2.6656007889869215e-07,
+        "max_abs_field": 3.0345757007598877,
+        "max_abs_gradient_error": [
+          1.9073486328125e-06
+        ],
+        "max_abs_gradient": [
+          17.165822982788086
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/scalar/history/host_sync": {
+        "precision": "float64",
+        "material": "scalar",
+        "observation": "history",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 15.170396135669282,
+        "objective_reference": 15.170396135669286,
+        "max_abs_field_error": 2.220446049250313e-16,
+        "max_abs_field": 3.321192011343294,
+        "max_abs_gradient_error": [
+          8.881784197001252e-16
+        ],
+        "max_abs_gradient": [
+          21.05327831220675
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/scalar/history/disk_sync": {
+        "precision": "float64",
+        "material": "scalar",
+        "observation": "history",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 15.170396135669282,
+        "objective_reference": 15.170396135669286,
+        "max_abs_field_error": 2.220446049250313e-16,
+        "max_abs_field": 3.321192011343294,
+        "max_abs_gradient_error": [
+          8.881784197001252e-16
+        ],
+        "max_abs_gradient": [
+          21.05327831220675
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/scalar/history/host_async": {
+        "precision": "float64",
+        "material": "scalar",
+        "observation": "history",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 15.170396135669282,
+        "objective_reference": 15.170396135669286,
+        "max_abs_field_error": 2.220446049250313e-16,
+        "max_abs_field": 3.321192011343294,
+        "max_abs_gradient_error": [
+          8.881784197001252e-16
+        ],
+        "max_abs_gradient": [
+          21.05327831220675
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/scalar/online/host_sync": {
+        "precision": "float64",
+        "material": "scalar",
+        "observation": "online",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 15.170396135669286,
+        "objective_reference": 15.17039613566929,
+        "max_abs_field_error": 1.1102230246251565e-16,
+        "max_abs_field": 3.3211920113432942,
+        "max_abs_gradient_error": [
+          1.7763568394002505e-15
+        ],
+        "max_abs_gradient": [
+          21.05327831220675
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/scalar/online/disk_sync": {
+        "precision": "float64",
+        "material": "scalar",
+        "observation": "online",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 15.170396135669286,
+        "objective_reference": 15.17039613566929,
+        "max_abs_field_error": 1.1102230246251565e-16,
+        "max_abs_field": 3.3211920113432942,
+        "max_abs_gradient_error": [
+          1.7763568394002505e-15
+        ],
+        "max_abs_gradient": [
+          21.05327831220675
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/scalar/online/host_async": {
+        "precision": "float64",
+        "material": "scalar",
+        "observation": "online",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 15.170396135669286,
+        "objective_reference": 15.17039613566929,
+        "max_abs_field_error": 1.1102230246251565e-16,
+        "max_abs_field": 3.3211920113432942,
+        "max_abs_gradient_error": [
+          1.7763568394002505e-15
+        ],
+        "max_abs_gradient": [
+          21.05327831220675
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/scalar/plane/host_sync": {
+        "precision": "float64",
+        "material": "scalar",
+        "observation": "plane",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 77.68842483409287,
+        "objective_reference": 77.68842483409288,
+        "max_abs_field_error": 5.551115123125783e-16,
+        "max_abs_field": 2.329147192304459,
+        "max_abs_gradient_error": [
+          1.4210854715202004e-14
+        ],
+        "max_abs_gradient": [
+          108.48655705903896
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/scalar/plane/disk_sync": {
+        "precision": "float64",
+        "material": "scalar",
+        "observation": "plane",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 77.68842483409287,
+        "objective_reference": 77.68842483409288,
+        "max_abs_field_error": 5.551115123125783e-16,
+        "max_abs_field": 2.329147192304459,
+        "max_abs_gradient_error": [
+          1.4210854715202004e-14
+        ],
+        "max_abs_gradient": [
+          108.48655705903896
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/scalar/plane/host_async": {
+        "precision": "float64",
+        "material": "scalar",
+        "observation": "plane",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 77.68842483409287,
+        "objective_reference": 77.68842483409288,
+        "max_abs_field_error": 5.551115123125783e-16,
+        "max_abs_field": 2.329147192304459,
+        "max_abs_gradient_error": [
+          1.4210854715202004e-14
+        ],
+        "max_abs_gradient": [
+          108.48655705903896
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/diagonal/history/host_sync": {
+        "precision": "float64",
+        "material": "diagonal",
+        "observation": "history",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 16.67026129006318,
+        "objective_reference": 16.67026129006318,
+        "max_abs_field_error": 2.220446049250313e-16,
+        "max_abs_field": 3.408136144598405,
+        "max_abs_gradient_error": [
+          3.552713678800501e-15
+        ],
+        "max_abs_gradient": [
+          23.908429563241967
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/diagonal/history/disk_sync": {
+        "precision": "float64",
+        "material": "diagonal",
+        "observation": "history",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 16.67026129006318,
+        "objective_reference": 16.67026129006318,
+        "max_abs_field_error": 2.220446049250313e-16,
+        "max_abs_field": 3.408136144598405,
+        "max_abs_gradient_error": [
+          3.552713678800501e-15
+        ],
+        "max_abs_gradient": [
+          23.908429563241967
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/diagonal/history/host_async": {
+        "precision": "float64",
+        "material": "diagonal",
+        "observation": "history",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 16.67026129006318,
+        "objective_reference": 16.67026129006318,
+        "max_abs_field_error": 2.220446049250313e-16,
+        "max_abs_field": 3.408136144598405,
+        "max_abs_gradient_error": [
+          3.552713678800501e-15
+        ],
+        "max_abs_gradient": [
+          23.908429563241967
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/diagonal/online/host_sync": {
+        "precision": "float64",
+        "material": "diagonal",
+        "observation": "online",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 16.67026129006318,
+        "objective_reference": 16.67026129006318,
+        "max_abs_field_error": 4.440892098500626e-16,
+        "max_abs_field": 3.408136144598405,
+        "max_abs_gradient_error": [
+          7.105427357601002e-15
+        ],
+        "max_abs_gradient": [
+          23.90842956324197
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/diagonal/online/disk_sync": {
+        "precision": "float64",
+        "material": "diagonal",
+        "observation": "online",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 16.67026129006318,
+        "objective_reference": 16.67026129006318,
+        "max_abs_field_error": 4.440892098500626e-16,
+        "max_abs_field": 3.408136144598405,
+        "max_abs_gradient_error": [
+          7.105427357601002e-15
+        ],
+        "max_abs_gradient": [
+          23.90842956324197
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/diagonal/online/host_async": {
+        "precision": "float64",
+        "material": "diagonal",
+        "observation": "online",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 16.67026129006318,
+        "objective_reference": 16.67026129006318,
+        "max_abs_field_error": 4.440892098500626e-16,
+        "max_abs_field": 3.408136144598405,
+        "max_abs_gradient_error": [
+          7.105427357601002e-15
+        ],
+        "max_abs_gradient": [
+          23.90842956324197
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/diagonal/plane/host_sync": {
+        "precision": "float64",
+        "material": "diagonal",
+        "observation": "plane",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 73.1479264320872,
+        "objective_reference": 73.1479264320872,
+        "max_abs_field_error": 4.47545209131181e-16,
+        "max_abs_field": 2.0429165710844623,
+        "max_abs_gradient_error": [
+          2.842170943040401e-14
+        ],
+        "max_abs_gradient": [
+          104.9272695983075
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/diagonal/plane/disk_sync": {
+        "precision": "float64",
+        "material": "diagonal",
+        "observation": "plane",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 73.1479264320872,
+        "objective_reference": 73.1479264320872,
+        "max_abs_field_error": 4.47545209131181e-16,
+        "max_abs_field": 2.0429165710844623,
+        "max_abs_gradient_error": [
+          2.842170943040401e-14
+        ],
+        "max_abs_gradient": [
+          104.9272695983075
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/diagonal/plane/host_async": {
+        "precision": "float64",
+        "material": "diagonal",
+        "observation": "plane",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 73.1479264320872,
+        "objective_reference": 73.1479264320872,
+        "max_abs_field_error": 4.47545209131181e-16,
+        "max_abs_field": 2.0429165710844623,
+        "max_abs_gradient_error": [
+          2.842170943040401e-14
+        ],
+        "max_abs_gradient": [
+          104.9272695983075
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/drude/history/host_sync": {
+        "precision": "float64",
+        "material": "drude",
+        "observation": "history",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 21.00206631003067,
+        "objective_reference": 21.00206631003067,
+        "max_abs_field_error": 4.577566798522237e-16,
+        "max_abs_field": 3.307744210676502,
+        "max_abs_gradient_error": [
+          1.7763568394002505e-15,
+          1.9984014443252818e-15
+        ],
+        "max_abs_gradient": [
+          31.505259853127423,
+          7.306802331735395
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/drude/history/disk_sync": {
+        "precision": "float64",
+        "material": "drude",
+        "observation": "history",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 21.00206631003067,
+        "objective_reference": 21.00206631003067,
+        "max_abs_field_error": 4.577566798522237e-16,
+        "max_abs_field": 3.307744210676502,
+        "max_abs_gradient_error": [
+          1.7763568394002505e-15,
+          1.9984014443252818e-15
+        ],
+        "max_abs_gradient": [
+          31.505259853127423,
+          7.306802331735395
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/drude/history/host_async": {
+        "precision": "float64",
+        "material": "drude",
+        "observation": "history",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 21.00206631003067,
+        "objective_reference": 21.00206631003067,
+        "max_abs_field_error": 4.577566798522237e-16,
+        "max_abs_field": 3.307744210676502,
+        "max_abs_gradient_error": [
+          1.7763568394002505e-15,
+          1.9984014443252818e-15
+        ],
+        "max_abs_gradient": [
+          31.505259853127423,
+          7.306802331735395
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/drude/online/host_sync": {
+        "precision": "float64",
+        "material": "drude",
+        "observation": "online",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 21.00206631003067,
+        "objective_reference": 21.00206631003067,
+        "max_abs_field_error": 3.3306690738754696e-16,
+        "max_abs_field": 3.307744210676502,
+        "max_abs_gradient_error": [
+          3.552713678800501e-15,
+          1.7763568394002505e-15
+        ],
+        "max_abs_gradient": [
+          31.50525985312742,
+          7.306802331735395
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/drude/online/disk_sync": {
+        "precision": "float64",
+        "material": "drude",
+        "observation": "online",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 21.00206631003067,
+        "objective_reference": 21.00206631003067,
+        "max_abs_field_error": 3.3306690738754696e-16,
+        "max_abs_field": 3.307744210676502,
+        "max_abs_gradient_error": [
+          3.552713678800501e-15,
+          1.7763568394002505e-15
+        ],
+        "max_abs_gradient": [
+          31.50525985312742,
+          7.306802331735395
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/drude/online/host_async": {
+        "precision": "float64",
+        "material": "drude",
+        "observation": "online",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 21.00206631003067,
+        "objective_reference": 21.00206631003067,
+        "max_abs_field_error": 3.3306690738754696e-16,
+        "max_abs_field": 3.307744210676502,
+        "max_abs_gradient_error": [
+          3.552713678800501e-15,
+          1.7763568394002505e-15
+        ],
+        "max_abs_gradient": [
+          31.50525985312742,
+          7.306802331735395
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/drude/plane/host_sync": {
+        "precision": "float64",
+        "material": "drude",
+        "observation": "plane",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 227.5298041771097,
+        "objective_reference": 227.5298041771097,
+        "max_abs_field_error": 8.934752161915345e-16,
+        "max_abs_field": 3.290313966688639,
+        "max_abs_gradient_error": [
+          2.842170943040401e-14,
+          2.842170943040401e-14
+        ],
+        "max_abs_gradient": [
+          353.4458574243124,
+          80.38564627338118
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/drude/plane/disk_sync": {
+        "precision": "float64",
+        "material": "drude",
+        "observation": "plane",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 227.5298041771097,
+        "objective_reference": 227.5298041771097,
+        "max_abs_field_error": 8.934752161915345e-16,
+        "max_abs_field": 3.290313966688639,
+        "max_abs_gradient_error": [
+          2.842170943040401e-14,
+          2.842170943040401e-14
+        ],
+        "max_abs_gradient": [
+          353.4458574243124,
+          80.38564627338118
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/drude/plane/host_async": {
+        "precision": "float64",
+        "material": "drude",
+        "observation": "plane",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 227.5298041771097,
+        "objective_reference": 227.5298041771097,
+        "max_abs_field_error": 8.934752161915345e-16,
+        "max_abs_field": 3.290313966688639,
+        "max_abs_gradient_error": [
+          2.842170943040401e-14,
+          2.842170943040401e-14
+        ],
+        "max_abs_gradient": [
+          353.4458574243124,
+          80.38564627338118
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/pmc/history/host_sync": {
+        "precision": "float64",
+        "material": "pmc",
+        "observation": "history",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 13.066756868879342,
+        "objective_reference": 13.066756868879343,
+        "max_abs_field_error": 6.661338147750939e-16,
+        "max_abs_field": 3.0345756354669327,
+        "max_abs_gradient_error": [
+          1.3322676295501878e-15
+        ],
+        "max_abs_gradient": [
+          17.1658231607437
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/pmc/history/disk_sync": {
+        "precision": "float64",
+        "material": "pmc",
+        "observation": "history",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 13.066756868879342,
+        "objective_reference": 13.066756868879343,
+        "max_abs_field_error": 6.661338147750939e-16,
+        "max_abs_field": 3.0345756354669327,
+        "max_abs_gradient_error": [
+          1.3322676295501878e-15
+        ],
+        "max_abs_gradient": [
+          17.1658231607437
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/pmc/history/host_async": {
+        "precision": "float64",
+        "material": "pmc",
+        "observation": "history",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 13.066756868879342,
+        "objective_reference": 13.066756868879343,
+        "max_abs_field_error": 6.661338147750939e-16,
+        "max_abs_field": 3.0345756354669327,
+        "max_abs_gradient_error": [
+          1.3322676295501878e-15
+        ],
+        "max_abs_gradient": [
+          17.1658231607437
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float64/pmc/online/host_sync": {
+        "precision": "float64",
+        "material": "pmc",
+        "observation": "online",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 13.066756868879342,
+        "objective_reference": 13.066756868879343,
+        "max_abs_field_error": 4.440892098500626e-16,
+        "max_abs_field": 3.0345756354669327,
+        "max_abs_gradient_error": [
+          1.7763568394002505e-15
+        ],
+        "max_abs_gradient": [
+          17.165823160743695
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/pmc/online/disk_sync": {
+        "precision": "float64",
+        "material": "pmc",
+        "observation": "online",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 13.066756868879342,
+        "objective_reference": 13.066756868879343,
+        "max_abs_field_error": 4.440892098500626e-16,
+        "max_abs_field": 3.0345756354669327,
+        "max_abs_gradient_error": [
+          1.7763568394002505e-15
+        ],
+        "max_abs_gradient": [
+          17.165823160743695
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float64/pmc/online/host_async": {
+        "precision": "float64",
+        "material": "pmc",
+        "observation": "online",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 1e-07,
+          "atol": 1e-09
+        },
+        "objective": 13.066756868879342,
+        "objective_reference": 13.066756868879343,
+        "max_abs_field_error": 4.440892098500626e-16,
+        "max_abs_field": 3.0345756354669327,
+        "max_abs_gradient_error": [
+          1.7763568394002505e-15
+        ],
+        "max_abs_gradient": [
+          17.165823160743695
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      },
+      "float32/tensor/online/host_sync": {
+        "precision": "float32",
+        "material": "tensor",
+        "observation": "online",
+        "path": "host_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 0.016460908576846123,
+        "objective_reference": 0.016460904851555824,
+        "max_abs_field_error": 1.666000493116826e-08,
+        "max_abs_field": 0.12542715668678284,
+        "max_abs_gradient_error": [
+          3.725290298461914e-09
+        ],
+        "max_abs_gradient": [
+          0.010531378909945488
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/tensor/online/disk_sync": {
+        "precision": "float32",
+        "material": "tensor",
+        "observation": "online",
+        "path": "disk_sync",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 0.016460908576846123,
+        "objective_reference": 0.016460904851555824,
+        "max_abs_field_error": 1.666000493116826e-08,
+        "max_abs_field": 0.12542715668678284,
+        "max_abs_gradient_error": [
+          3.725290298461914e-09
+        ],
+        "max_abs_gradient": [
+          0.010531378909945488
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 1
+      },
+      "float32/tensor/online/host_async": {
+        "precision": "float32",
+        "material": "tensor",
+        "observation": "online",
+        "path": "host_async",
+        "tolerance": {
+          "rtol": 0.0001,
+          "atol": 1e-06
+        },
+        "objective": 0.016460908576846123,
+        "objective_reference": 0.016460904851555824,
+        "max_abs_field_error": 1.666000493116826e-08,
+        "max_abs_field": 0.12542715668678284,
+        "max_abs_gradient_error": [
+          3.725290298461914e-09
+        ],
+        "max_abs_gradient": [
+          0.010531378909945488
+        ],
+        "peak_block_checkpoints": 2,
+        "replayed_blocks": 15,
+        "tile_buffers": 2
+      }
+    }
+  },
+  "test_results": {
+    "total": 74,
+    "passed": [
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-tensor-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-tensor-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-tensor-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule[planes_pmc-overrides0-<lambda>]",
+      "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule[streamed_dispersive_oneway-overrides1-<lambda>]",
+      "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule[streamed_dispersive_planes_oneway-overrides2-<lambda>]",
+      "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule[mode_network_streamed-overrides3-<lambda>]",
+      "tests/test_memory_paths_g5.py::test_admitted_combinations_name_the_streamed_lanes"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 261.685,
+    "suite_timestamp": "2026-09-22T05:00:06.173976+09:00"
+  },
+  "required_tests": [
+    "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda",
+    "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule",
+    "tests/test_memory_paths_g5.py::test_admitted_combinations_name_the_streamed_lanes"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/g5/G5-01.json",
+      "sha256": "82a5958b26abd22704b72ff13e2190724598f575531600a13645209003a41f91",
+      "bytes": 46111
+    },
+    {
+      "path": "docs/validation/runs/20260921T200923Z-g5-01-d42add9e/junit.xml",
+      "sha256": "ff5bf2769769e7d0c0d0abcb162b90ff6c39d617a6a6a7cb969a4653537d5f0c",
+      "bytes": 11133,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G5-01.xml"
+    }
+  ],
+  "applicable_scope": "Layer A on the RTX 3060 (CUDA 12.6, torch 2.10): resident CUDA adjoint versus streamed host, disk and asynchronous CUDA tiles, FP32 and FP64, scalar/diagonal/Drude ADE/stored-face materials with time-history, online-DFT and spectral-plane observations, and the FP32 node-tensor material with point observations; disk banks with asynchronous tiles and CPU tiles are not covered",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
