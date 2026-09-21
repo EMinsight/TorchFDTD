@@ -1549,13 +1549,27 @@
           "title": "API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다.",
           "specification": "API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "docs/COMPATIBILITY.md",
+            "docs/CHANGELOG.md",
+            ".github/ISSUE_TEMPLATE/bug_report.md",
+            "torchfdtd/__init__.py",
+            "torchfdtd/models.py",
+            "torchfdtd/streamed_restart.py",
+            "torchfdtd/mode_network_project.py",
+            "tests/test_compatibility_policy.py",
+            "docs/validation/cases/G9-04.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_compatibility_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-04.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_compatibility_policy.py"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
