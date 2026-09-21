@@ -102,3 +102,23 @@ refuses such a material inside the PML with a `ValueError` naming the material,
 the frequency and the value. An adiabatic
 conductivity absorber on the faces touched by dispersive media is the more
 general fix and is not implemented.
+
+Validation warns about the configuration: `/api/validate` (and so the
+workbench) and the summary printed by `torchfdtd run` list every enabled
+dispersive structure whose support bounds reach a PML layer, with the faces,
+whenever `pml_dispersion` is `'ade'`
+(`torchfdtd.stability_checks.stability_warnings`, appended to the estimate's
+warnings; the numeric modules are untouched). The check uses the structure's
+bounding box, so a rotated or curved object that only nearly reaches the layer
+is also named; nothing is rejected.
+
+The [stability sweep](STABILITY_SWEEP.md) (20,000 steps, 120 x 80 and 32^3
+cells, CPU float64 and RTX 3060 float32) did not reproduce the divergence on its
+bounded fixtures: Drude, two-pole Lorentz and Drude-metal slabs crossing the
+lateral PML with `'ade'` ended at most 8.7e-7 of their post-source peak in
+float64 (growth ratio at most 2.7e-5) and on the float32 round-off floor
+(1.7e-13 to 3.1e-13 of the peak) on CUDA, and the 20 nm SiN post array of the
+paragraph above on a 3 x 4 um domain ended at 5.9e-17 (float64) and 4.5e-11
+(float32) of its peak. The divergence remains what it was measured to be, a
+property of domains larger than a few micrometres, and the warning stands for
+every domain size.

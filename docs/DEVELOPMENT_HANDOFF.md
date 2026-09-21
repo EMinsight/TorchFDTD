@@ -1706,3 +1706,98 @@ After the render the judge reports WORKSTATION 32 pass and 45 fail of 77, HPC
 - The development venv resolves `fdtd` from the base interpreter's site-packages (system site-packages), not from the venv; the RC round's wheel environment installs its own `fdtd==0.2.2`.
 - No `scope_change_approval` was set; the eleven pending tasks wait for the owner.
 - `scripts/provenance_inventory.py` prints a `UnicodeDecodeError` from a cp949 reader thread of one of its subprocesses on this host; its exit status and JSON summary are unaffected (the report reads the summary).
+
+---
+
+### 2026-09-22 stability sweep and adjoint leak soak, branch soak-stability from 6eb7996
+
+**Problem or goal.** Hunt two defect classes seen before: field-energy
+divergence in long runs and unbounded memory or cache growth across repeated
+adjoint calls. Declare the criteria first, run a bounded matrix on the shared
+RTX 3060 and the CPU, record everything, render the documents from the
+records, and add the validation-time warning for dispersive media inside the
+PML that the default `pml_dispersion='ade'` still needs.
+
+**State found.** HEAD 6eb7996, clean worktree, no earlier partial work. The
+recorded dispersive-in-PML divergence (docs/BOUNDARIES.md: 20 nm SiN posts,
+12-layer CPML, RTX 5880, domains beyond a few micrometres) had the opt-in
+`'frozen'` remedy but no warning. The per-process reservation registry named
+in the brief is on branch g5-memory (649ad79), not in this tree.
+
+**Changed files (why).**
+- `benchmarks/stability_sweep.py` (new): 56 rows of 20,000 steps sampled every 250 steps (state norm through a wrapped `DecayDecision.update`, interior epsilon|E|^2+|H|^2 through a wrapped `StateDiagnostics.measure`, manual loops for the reversible, streamed and tensor-media paths), `--rows`, `--skip-cuda`, `--quick`, `--merge`, `--rejudge`, `--render`. `docs/validation/cases/STABILITY_SWEEP.json` (criteria before the run, commit 8167030), `docs/validation/stability_sweep_3060.json`, `docs/STABILITY_SWEEP.md` (rendered).
+- `torchfdtd/stability_checks.py` (new): `dispersive_structures_in_pml` and `stability_warnings`; `torchfdtd/server.py` appends them to the `/api/validate` warnings and `torchfdtd/cli.py` to the printed and saved `run` summary (two lines each, endings preserved). The numeric modules owned by fix-review-core and `solver.py` are untouched: an earlier commit of this branch put the warning into `estimate()`, and d1a0018 moved it out again. `docs/BOUNDARIES.md`: the warning and the sweep's numbers under "Dispersive materials inside PML".
+- `benchmarks/adjoint_leak_soak.py` (new): eight paths, 150 forward+backward+Adam iterations, samples every 10 after `synchronize` and two `gc.collect`, `--paths`, `--iterations`, `--merge`, `--rejudge`, `--note`, `--render`. `docs/validation/cases/ADJOINT_LEAK_SOAK.json` (declared at 8167030), `docs/validation/adjoint_leak_soak_3060.json`, `docs/ADJOINT_LEAK_SOAK.md` (rendered, with the module-level state statement).
+- `tests/test_stability_sweep.py` (16): the record covers the matrix, every verdict re-derived from the samples, failing rows need findings, the document equals `render(record)`, the warning through `stability_warnings`, `/api/validate` and the CLI, five 3000-step fixture regressions, the rejected tensor admission, the capture of a fired check, the interior mask. `tests/test_adjoint_leak_soak.py` (12): record and document checks plus 30-iteration CPU regressions of the seven differentiable families asserting zero growth of live tensors and solver state holders.
+- `docs/CHANGELOG.md` (three lines).
+
+**Commands run (device: local Windows 11, i7-12700, RTX 3060 12 GB shared with other agents and a running suite, Python 3.10.2 in D:/TorchFDTD/.venv, torch 2.10.0+cu126, CuPy 13.6.0, psutil 7.2.2; TMP and TEMP under D:/TorchFDTD/.local/tmp; CPU rows with 4 torch threads).**
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.stability_sweep --skip-cuda                       (43 rows, 1703 s)
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.stability_sweep --merge --rows sin-posts-ade-2d sin-posts-frozen-2d sin-posts-ade-2d-cuda sin-posts-frozen-2d-cuda tensorbatch-vacuum-2d tensorbatch-n35-2d vacuum-2d-cuda slab-n35-2d-cuda drude-slab-ade-2d-cuda drude-slab-frozen-2d-cuda lorentz-slab-ade-2d-cuda lorentz-slab-frozen-2d-cuda metal-slab-ade-2d-cuda
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.stability_sweep --rejudge                         (adds the reported late-trend columns, no rerun)
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.adjoint_leak_soak                                 (8 paths, 738 s)
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.adjoint_leak_soak --rejudge; ... --note "..." (five notes)
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_stability_sweep.py tests/test_adjoint_leak_soak.py
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_solver.py tests/test_api.py tests/test_materials.py tests/test_multipole.py tests/test_run_control.py tests/test_capability_pairs.py tests/test_plan.py tests/test_boundaries.py tests/test_completion_program_documents.py tests/test_provenance_inventory.py tests/test_compatibility_policy.py
+```
+
+**Measurements and pre-declared limits.** Stability: 56 of 56 rows pass
+(growth ratio limit 1.5; last/peak limit 1.0 open, 1.001 closed; no fired
+check). Float64 CPU rows: worst growth ratio 0.192 (subpixel-3d, still
+draining after 20,000 steps), worst last/peak 0.0639 (subpixel-2d); the
+dispersive slabs crossing the lateral PML with `ade` end at 7.7e-9 to 8.7e-7
+of their post-source peak; the 20 nm SiN post array ends at 5.9e-17 (float64)
+and 4.5e-11 (CUDA float32). Float32 rows settle on a round-off floor of 1.7e-13
+to 3.1e-13 of the overall peak whose state norm creeps 17 to 39 percent over
+the last 15,000 steps with a constant peak field (recorded in the late-trend
+table, judged ratios at most 0.25). Closed cavities: pmc-pec-cavity-3d growth
+1.034 and last/peak 0.891, reversible-vacuum-3d 1.003 / 0.999, reversible-n35-3d
+1.005 / 0.892. The rejected tensor diag(2,3,4) is refused by the y_min face
+admission. Leak soak: after the 20-iteration warm-up every path has exactly
+zero growth of torch allocated and reserved bytes, CuPy pool (0 bytes, unused),
+live tensors, CUDA graphs, the four `lru_cache` sizes and every counted state
+holder; gc objects grow by one per sample (the sample dict). Three paths fail
+the 2 MiB host allowance by one step each: differentiable_cuda_torch RSS
++2,670,592 B (iteration 40 to 50), dispersive_cuda private +33,353,728 B with
+RSS +49,152 B (iteration 30 to 40), tensor_project_cuda RSS +2,146,304 B
+(iteration 20 to 30); over iterations 50 to 150 the same measures move by at
+most 61,440 B. Unrecorded probes: 500 iterations of differentiable_cuda_torch
+in a fresh process moved RSS by 0.8 MiB with no step above 0.5 MiB; 80
+iterations of dispersive_cuda showed no step above 1.1 MiB; a 200 s pure-torch
+CUDA autograd loop showed none.
+
+**Passed / failed / skipped / not run.** Passed: tests/test_stability_sweep.py
+16, tests/test_adjoint_leak_soak.py 12, the eight existing solver/API/material
+suites 219, the three document/provenance/policy suites 36. Failed: none in
+tests; three leak-soak paths fail the declared host allowance by one-time
+steps and are recorded as findings, not fixed (no Python reference holds
+anything). Not run: 3D variants of the streamed and tensor-batch rows (2D only),
+CUDA variants of the 3D rows, the RTX 5880 fixture of the documented
+divergence (domains beyond 200 x 200 cells are outside the shared-GPU budget),
+CuPy-pool paths (the fused kernels allocate through torch, so the pool stays at
+zero and its allowance was never exercised).
+
+**Evidence paths and hashes.** `docs/validation/stability_sweep_3060.json`
+(run at 8167030 with the working files dirty, 1757 s wall),
+`docs/validation/adjoint_leak_soak_3060.json` (run at a248548, 738 s wall);
+both carry the SHA-256 of the driver and the solver modules they exercise;
+the recorded hash of `torchfdtd/solver.py` is that of the LF-normalized
+working copy the runs used, which carried the warning inside `estimate()`
+(warnings only; no numerical path differs from the committed 6eb7996 file the
+branch now keeps).
+
+**Remaining defects, risks, external blockers.**
+- The documented `ade` divergence is not reproduced within the sweep's bounded fixtures; the warning is the only behavioural change. Reproducing it needs the larger domain of the BOUNDARIES.md paragraph on a GPU that is not shared.
+- No patch is pending for the files owned by fix-review-core (`plan.py`, `identity.py`, `materials.py`, `models.py`, `capabilities.py`, `streamed_restart.py`, `execution_modes.py`); neither the sweep nor the soak needed a change inside them.
+- Float32 rows show a linear creep of the state norm on the round-off floor (1e-13 of the peak) with a constant peak field; it is recorded, not judged, and needs a longer run to separate accumulated round-off from a very slow mode.
+- The 31.8 MiB private-bytes step is consistent with WDDM relocating device allocations on the shared display GPU but was not proven with driver tools; rerun the soak on a dedicated GPU to confirm it disappears.
+- When g5-memory's live-reservation registry merges, add its size to `benchmarks/adjoint_leak_soak.py::cache_sizes` and to the case's measure list.
+
+**Next first command and task id.** After merging, rerun the soak on a GPU
+without display clients to settle the host-step attribution:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.adjoint_leak_soak --paths differentiable_cuda_torch dispersive_cuda tensor_project_cuda --merge
+```

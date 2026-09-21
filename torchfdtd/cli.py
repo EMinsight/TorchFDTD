@@ -4,6 +4,7 @@ from pathlib import Path
 
 from .models import Project, demo_project
 from .solver import Simulation, hardware
+from .stability_checks import stability_warnings
 
 
 def main(argv=None):
@@ -71,7 +72,9 @@ def main(argv=None):
         from .server import create_app
         uvicorn.run(create_app(), host=args.host, port=args.port)
     elif args.command == 'run':
-        result = Simulation(Project.load(args.project)).run()
+        project = Project.load(args.project)
+        result = Simulation(project).run()
+        result.summary['warnings'] = list(result.summary['warnings'])+stability_warnings(project)
         result.save(args.output)
         print(json.dumps(result.summary, indent=2))
     elif args.command == 'batch':
