@@ -2405,7 +2405,7 @@
           "specification": "validation report를 기계 산출물에서 생성한다. 내부 검증 보고서를 제3자 인증서라고 부르지 않는다. 숫자·지원 표·README·API docs·wheel 버전을 일치시킨다.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "scripts/build_validation_report.py",
@@ -2418,11 +2418,15 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml"
+          ],
           "required_tests": [
             "tests/test_validation_report.py"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T201139Z-g9-07-856d0eb3"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "docs/VALIDATION_REPORT.md is rendered by scripts/build_validation_report.py from the gate file, the evidence runs, the platform, clean-install, G3, cross-solver and Meep records, the suite policy and the version strings; the same run regenerates the verification cells and the stage-status block of docs/RELEASE_SCOPE.md. The consistency section reports version, README-number and scope mismatches instead of hiding them."

@@ -781,17 +781,24 @@ physics table (G3-05 scattering 1.38, 0.458, 0.445 against budgets 0.5, 0.3,
 **Passed / failed / skipped / not run.** tests/test_rerecord_gates.py: 8
 passed, 0 failed, 0 skipped (72.6 s, real pytest subprocesses on the temporary
 repository). tests/test_validation_report.py: 7 passed, 0 failed, 0 skipped on
-the committed tree (the evidence run). Not run: the G9-06 release-candidate
+the committed tree (the evidence run). The neighbouring document and gate
+tests (tests/test_completion_program_documents.py, test_release_gates.py,
+test_compatibility_policy.py, test_readme_measurements.py,
+test_readme_meep_comparison.py, test_platform_matrix.py,
+test_suite_policy.py): 56 passed, 1 skipped (the platform report's CUDA
+branch, hidden on purpose). Not run: the G9-06 release-candidate
 procedure itself (no wheel was built and no gate was re-recorded here; the
 RTX 3060 was in use by the other agents and the RTX 5880 is reachable only by
 the parent session); `rerecord_gates.py --wheel` against a real wheel (its
 venv creation is mocked in the tests; the interpreter switch, the working
 directory, the absolute paths and the recorded wheel hash are asserted).
 
-**Evidence paths and hashes.** Filled in by the evidence commit: run id and
-JUnit SHA-256 of the G9-07 record are in
-`docs/validation/runs/<run id>/evidence.json`; the gate file lists it under
-G9-07.
+**Evidence paths and hashes.** G9-07 run id 20260921T201139Z-g9-07-856d0eb3
+at source commit 5c1288b (clean tree, 7 passed in 12.92 s), JUnit SHA-256
+`082765a4968ec9e41d99ee74bea1c1984f8e894d9fb579fcbb95e066aee52931`; the judge reports G9-07 PASS. The
+report and the scope stage table were re-rendered with that evidence in the
+evidence commit (WORKSTATION 46 pass and 31 fail of 77, HPC 46 pass and 37
+fail of 83, both still NOT RELEASABLE).
 
 **Remaining defects, risks, external blockers.**
 - G9-06 is IN_PROGRESS: the tooling exists, the RC run (build wheel, clean install, `rerecord_gates.py --all --wheel`, release-full on both hosts, report, judge) has not been performed. Its evidence will come from the release-full JUnit files recorded against G9-06.
