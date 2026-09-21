@@ -10,7 +10,7 @@ against gate task G9-04. User-visible changes are listed in [CHANGELOG.md](CHANG
 ## Public API surface
 
 The public API is exactly the set of names exported by `torchfdtd/__init__.py` through
-`__all__`: 186 names at this version, listed below by area and defining module.
+`__all__`: 195 names at this version, listed below by area and defining module.
 Anything else, including every `torchfdtd.<module>` not named here, the `torchfdtd.server`
 routes, the CLI flags and the browser workbench, is an internal interface that may change
 without a deprecation period. The HTTP routes are stable only for the bundled workbench of
@@ -85,6 +85,7 @@ the same version; a client that targets `/api/...` pins the package version.
 | Streamed execution | `torchfdtd.streamed_work` | `estimate_streamed_work` |
 | Streamed execution | `torchfdtd.streamed_planning` | `StreamedWorkPlan`, `plan_streamed_work` |
 | Tiled execution | `torchfdtd.tiled` | `TilePlan`, `TileSpec`, `StitchedPlane`, `plan_tiles`, `run_tiled`, `stitch_planes`, `propagate_plane`, `farfield_from_stitched`, `suggest_overlap`, `TiledPlaneSimulation` |
+| Angular-spectrum propagation | `torchfdtd.angular_spectrum` | `PlaneSpectrum`, `SectionResult`, `VolumeResult`, `PointsResult`, `plane_spectrum`, `propagate_section`, `propagate_volume`, `propagate_points`, `volume_bytes` |
 
 ## Versioning and deprecation rule
 
