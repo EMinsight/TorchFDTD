@@ -22,6 +22,10 @@ insufficient journal volume is rejected before any directory is created.
 Spectral observations, ADE, tensor, geometry and asynchronous tile paths are
 not covered, and the recovery cost of a large file-backed run is unmeasured.
 [API and limits](STREAMED_RESTART.md).
+Linux CI [35564752901](https://github.com/hyoseokp/TorchFDTD/actions/runs/35564752901) at `4dc3024` passed with
+1,590 Python passes and 457 skips, 42 browser passes and
+8 skips. Frontend and wheel builds passed. The JUnit SHA-256 is
+`5af0c761bcb8314d2da6377aa1bfea9f93df4ae957da6f64c91c5771b5ca251e`. No numerical experiment was rerun.
 
 ## Streamed file-bank lifetime and reservation, 21 September 2026
 
