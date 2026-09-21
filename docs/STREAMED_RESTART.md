@@ -272,7 +272,7 @@ inputs still resume, counts records for `restart_every_blocks=2`, checks the
 journal space reservation, decides the shared volume by identity, removes
 only the journal's own `.tmp` leftovers, and measures at every write and
 removal that the reservation covers the coexisting records of a run whose
-signal history exceeds its state. `tests/test_restart_faults.py` (26 tests)
+signal history exceeds its state. `tests/test_restart_faults.py` (25 tests)
 injects one fault per test: forward and backward interruptions, a killed
 child process during forward and during backward, ENOSPC while writing an
 array, `meta.json`, a pointer or a gradient, a device out-of-memory error
