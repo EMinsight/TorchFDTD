@@ -62,6 +62,8 @@ def validate_pmc_project(project):
         raise ValueError('PMC/symmetric faces combine with PEC/PMC/PML faces only; periodic or Bloch mixing is unsupported.')
     if r.interface_method!='staircase':
         raise ValueError('PMC/symmetric faces currently require staircase interfaces.')
+    if r.dimension!='3d':
+        raise ValueError('PMC/symmetric faces require a 3D region; two-dimensional PMC walls are not implemented by any path.')
     for item in [*project.sources,*project.monitors]:
         if not item.enabled or getattr(item,'kind','point')!='point':continue
         for field,component,indices in _nearest_samples(project,item):

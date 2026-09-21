@@ -27,7 +27,7 @@ def test_familiar_pec_aliases_preserve_independent_faces(tmp_path):
     assert f.project.region.boundaries.x_max.kind=="symmetric"
     # The editing facade permits sequential region edits. Save/run must still
     # reject this unsupported two-dimensional PMC configuration before execution.
-    with pytest.raises(ValueError,match="real FP32 3D"):
+    with pytest.raises(ValueError,match="3D region"):
         f.save(tmp_path/"unsupported.json")
 
 
@@ -78,5 +78,10 @@ def test_familiar_pmc_facade_runs_and_preserves_endpoint_results(tmp_path):
         f.set('z max bc','PEC')
     f.switchtolayout()
     f.set('z max bc','PML')
+    # Ten default layers reach the source: the ordinary placement rule rejects first.
+    with pytest.raises(ValueError,match='non-PML region'):
+        f.run()
+    # With the source outside the PML, the endpoint forward still enforces its CPML contract at run time.
+    f.project.region.boundaries.z_max.layers=3
     with pytest.raises(ValueError,match='alpha=0'):
         f.run()

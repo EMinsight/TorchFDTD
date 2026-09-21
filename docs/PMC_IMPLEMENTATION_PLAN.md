@@ -616,6 +616,8 @@ Lorentz poles with spatial strength on the stored rows:
   PMC ADE runs on CUDA through the Torch reference step and transpose.
 - `DispersivePlaneSimulation` and the exact-endpoint forward have no ADE
   face path; `Simulation.run()` rejects dispersive materials with PMC.
+- Two-dimensional PMC/symmetric walls are rejected at schema validation; no
+  path implements or tests them.
 - Native `Simulation.run()` keeps the exact-endpoint contract; per-face CPML
   profiles with PMC run through `run_tensor_batch` or the adjoint APIs.
 - Streamed work planning and the browser have no face model.

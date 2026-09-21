@@ -465,8 +465,12 @@ def test_rejected_combinations_raise_explicitly():
     eps = random_epsilon(p.region, 1)
     with pytest.raises(ValueError, match='stored row'):
         DifferentiableSimulation(p)(torch.ones(p.region.shape+(3,)))
+    # The PMC rejection precedes the CUDA-tensor requirement, so it holds without a GPU.
     with pytest.raises(ValueError, match='fused CUDA backward'):
-        DifferentiableSimulation(p, AdjointOptions(backward_kernel='fused'))(eps.cuda() if torch.cuda.is_available() else eps)
+        DifferentiableSimulation(p, AdjointOptions(backward_kernel='fused'))(eps)
+    if torch.cuda.is_available():
+        with pytest.raises(ValueError, match='fused CUDA backward'):
+            DifferentiableSimulation(p, AdjointOptions(backward_kernel='fused'))(eps.cuda())
     plane = p.model_copy(deep=True)
     plane.sources = [Source(kind='plane', normal='x', center=(0, 0, .05), size=(0, .6, .5), component='Ey', pulse='gaussian', wavelength=.5)]
     with pytest.raises(ValueError, match='plane sources must end below the wall'):

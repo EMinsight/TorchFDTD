@@ -734,14 +734,14 @@ class DifferentiableSimulation(torch.nn.Module):
             raise ValueError('epsilon must be a real float32 or float64 torch Tensor.')
         if epsilon.device.type not in ('cpu','cuda'):
             raise ValueError('Only CPU and CUDA tensors are supported.')
-        if epsilon.device.type!='cuda' and self.options.backward_kernel=='fused':
-            raise ValueError('The fused backward requires a CUDA tensor.')
-        if epsilon.device.type!='cuda' and self.options.checkpoint_transfers=='async':
-            raise ValueError('Asynchronous checkpoints require a CUDA tensor.')
         from .endpoint_native import uses_endpoint
         pmc=uses_endpoint(r)
         if pmc and self.options.backward_kernel=='fused':
             raise ValueError('The fused CUDA backward kernel does not implement PMC/symmetric faces. Use backward_kernel="auto" or "torch".')
+        if epsilon.device.type!='cuda' and self.options.backward_kernel=='fused':
+            raise ValueError('The fused backward requires a CUDA tensor.')
+        if epsilon.device.type!='cuda' and self.options.checkpoint_transfers=='async':
+            raise ValueError('Asynchronous checkpoints require a CUDA tensor.')
         if tuple(epsilon.shape) not in (material_shape(r),material_shape(r,True)):
             raise ValueError('epsilon shape must match the scene grid plus one stored row on every upper PMC/symmetric axis, optionally with three Yee components.'
                              if pmc else 'epsilon shape must match the scene grid, optionally with three Yee components.')

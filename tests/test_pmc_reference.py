@@ -137,8 +137,11 @@ def test_actual_endpoint_geometry_sampler_and_gradient():
 def test_magnetic_wall_never_falls_through_to_ordinary_yee():
     region=Region(dimension='3d',size=(1,1,1),mesh=.1,material_sampling='yee',
         boundaries={a+'_'+side:BoundaryFace(kind='pmc') for a in 'xyz' for side in ('min','max')})
-    with pytest.raises(ValueError,match='endpoint'):
-        YeeGrid(region)
+    grid=YeeGrid(region)
+    assert grid.pmc_blocks['E'] and len(grid.faces['E'])==len(grid.pmc_blocks['E'])
+    for update in (grid.update_E,grid.update_H):
+        with pytest.raises(ValueError,match='Torch/NumPy grid curl'):
+            update()
 
 
 def test_nonuniform_endpoint_material_sharing_is_explicit():
