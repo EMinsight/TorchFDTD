@@ -5,7 +5,7 @@ import pytest
 import torch
 
 from torchfdtd import AdjointOptions, DispersiveSimulation
-from torchfdtd.anisotropy import _cpml_faces
+from torchfdtd.anisotropy import TensorDielectricSimulation, _cpml_faces
 from torchfdtd.anisotropy_dispersive import (TensorDispersiveSimulation, _TensorDispersiveSystem, _TensorPoleLayout,
                                              cpml_face_dispersive_admissible)
 from test_anisotropy_walls import bloch_scene, one_step_matrix, scene, spd, tensor_field
@@ -163,22 +163,30 @@ def test_tensor_ade_admission_passivity_and_dispersive_face_criterion():
         model._pack(epsilon, 1e4*good, omega0, gamma)
     with pytest.raises(ValueError, match="cpml_material='tensor'"):
         TensorDispersiveSimulation(p, cpml_material='isotropic')
-    # A pole active in the x CPML region must be uniaxial about x, as must epsilon_inf.
-    aligned = torch.diag(torch.tensor([3., 2., 2.], dtype=torch.float64)).expand(shape+(3, 3)).clone()
+    # A pole active in the x CPML region: aligned epsilon_inf with x extreme and
+    # every strength a scalar multiple of epsilon_inf (frequency-independent anisotropy).
+    aligned = torch.diag(torch.tensor([3., 2., 2.5], dtype=torch.float64)).expand(shape+(3, 3)).clone()
+    proportional = (.2e30*aligned)[None].clone()
+    model._pack(aligned, proportional, omega0, gamma)
+    assert bool(cpml_face_dispersive_admissible(aligned, proportional, 0).all())
+    # The multiple may vary per node, and eight ulps of rounding are tolerated.
+    varying = proportional*(1+.1*torch.linspace(0, 1, shape[0], dtype=torch.float64))[None, :, None, None, None, None]
+    varying = varying*(1+4*torch.finfo(torch.float64).eps)
+    model._pack(aligned, varying, omega0, gamma)
     uniaxial = torch.diag(torch.tensor([.1e30, .5e30, .5e30], dtype=torch.float64)).expand((1,)+shape+(3, 3)).clone()
-    model._pack(aligned, uniaxial, omega0, gamma)
-    assert bool(cpml_face_dispersive_admissible(aligned, uniaxial, 0).all())
-    biaxial_pole = torch.diag(torch.tensor([.1e30, .5e30, .7e30], dtype=torch.float64)).expand((1,)+shape+(3, 3)).clone()
+    with pytest.raises(ValueError, match='scalar multiple'):
+        model._pack(torch.diag(torch.tensor([3., 2., 2.], dtype=torch.float64)).expand(shape+(3, 3)).clone(), uniaxial, omega0, gamma)
     with pytest.raises(ValueError, match='x_min'):
-        model._pack(aligned, biaxial_pole, omega0, gamma)
-    transverse = torch.diag(torch.tensor([3., 2., 2.5], dtype=torch.float64)).expand(shape+(3, 3)).clone()
-    with pytest.raises(ValueError, match='uniaxial about the face normal'):
-        model._pack(transverse, uniaxial, omega0, gamma)
-    # The same transverse-anisotropic epsilon_inf is admissible where the pole is inactive.
-    inactive = uniaxial.clone()
+        model._pack(aligned, uniaxial, omega0, gamma)
+    rotated = spd((3., 2., 2.5), (.4, 0., 0.)).expand(shape+(3, 3)).clone()
+    with pytest.raises(ValueError, match='axis-aligned'):
+        model._pack(rotated, (.2e30*rotated)[None].clone(), omega0, gamma)
+    # The rotated tensor is admissible without dispersion, and with a pole that is inactive in the collars.
+    TensorDielectricSimulation(p, cpml_material='tensor')._validate_epsilon(rotated)
+    inactive = (.2e30*rotated)[None].clone()
     for _, _, index in _cpml_faces(p.region):
         inactive[(slice(None),)+index] = 0
-    model._pack(transverse, inactive, omega0, gamma)
+    model._pack(rotated, inactive, omega0, gamma)
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')

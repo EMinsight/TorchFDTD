@@ -321,6 +321,7 @@ class _TensorValidation:
             raise ValueError('The conservative CFL requires eigenvalues of epsilon >= 1.')
         self._validate_cpml_collar(epsilon)
 
+
 class TensorDielectricSimulation(_TensorValidation, DifferentiableSimulation):
     """Checkpointed epsilon-to-point-signals for node-sampled full tensors.
 

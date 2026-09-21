@@ -24,7 +24,7 @@ import torch
 
 from .anisotropy import (TensorConstitutive, TensorDielectricSimulation, _TensorSystem, _cpml_faces,
                          cpml_face_admissible)
-from .differentiable import AdjointOptions, DifferentiableResult, _FDTD, _Checkpoints
+from .differentiable import DifferentiableResult, _FDTD, _Checkpoints
 
 
 @dataclass(frozen=True)
@@ -48,19 +48,31 @@ def cpml_face_dispersive_admissible(epsilon, chi, axis):
     """Frequency-independent geometric criterion for dispersive node tensors.
 
     Where no pole has strength the nondispersive criterion applies. Where any
-    pole is active, epsilon_inf and every chi_p must be uniaxial about the face
-    normal: the normal is a principal axis and the transverse block is a scalar
-    multiple of the identity, so epsilon(omega) is uniaxial about the normal at
-    every frequency and no slowness sheet carries energy against its phase.
+    pole is active, epsilon_inf must be axis-aligned (diagonal) and satisfy the
+    nondispersive criterion, and every chi_p must be a nonnegative scalar
+    multiple of epsilon_inf at that node. Then epsilon(omega) is a real scalar
+    times epsilon_inf at every frequency: the same admissible ellipsoid when the
+    scalar is positive, evanescent when it is negative, never a hyperbolic
+    band. Aligned tensors also make the node assemblies pointwise, so the
+    discrete scheme keeps this proportionality exactly; rotated or
+    non-proportional dispersion inside a face is rejected because it is not.
+    Proportionality is compared to within eight units of the input precision.
     """
-    b, c = [k for k in range(3) if k != axis]
     active = (chi != 0).any(-1).any(-1).any(0)
-    def uniaxial(value):
-        return ((value[..., axis, b] == 0) & (value[..., axis, c] == 0) & (value[..., b, c] == 0)
-                & (value[..., b, b] == value[..., c, c]))
-    dispersive = uniaxial(epsilon)
+    diagonal = torch.ones(epsilon.shape[:-2], dtype=torch.bool, device=epsilon.device)
+    for a in range(3):
+        for b in range(a+1, 3):
+            diagonal = diagonal & (epsilon[..., a, b] == 0)
+            for pole in chi:
+                diagonal = diagonal & (pole[..., a, b] == 0)
+    tolerance = 8*torch.finfo(epsilon.dtype).eps
+    proportional = diagonal
     for pole in chi:
-        dispersive = dispersive & uniaxial(pole)
+        for a in range(3):
+            b = (a+1) % 3
+            left, right = pole[..., a, a]*epsilon[..., b, b], pole[..., b, b]*epsilon[..., a, a]
+            proportional = proportional & ((left-right).abs() <= tolerance*torch.maximum(left.abs(), right.abs()))
+    dispersive = proportional & cpml_face_admissible(epsilon, axis)
     return torch.where(active, dispersive, cpml_face_admissible(epsilon, axis))
 
 
@@ -210,10 +222,11 @@ class TensorDispersiveSimulation(TensorDielectricSimulation):
     have shape (P,) in rad/s and are nonnegative (omega0=0 is Drude). One
     resonance and damping per pole apply to all its principal directions.
     Same face contract as the nondispersive path, plus: where a pole is active
-    in a CPML face region, epsilon_inf and every strength tensor are uniaxial
-    about that face normal. The implicit step uses a fixed Neumann series; the
-    admitted coupling bound ||K S|| decides its length and rejects inputs that
-    would need more than 64 terms.
+    in a CPML face region, epsilon_inf is axis-aligned and every strength tensor
+    is a scalar multiple of epsilon_inf, so the anisotropy there is frequency
+    independent. The implicit step uses a fixed Neumann series; the admitted
+    coupling bound ||K S|| decides its length and rejects inputs that would
+    need more than 64 terms.
     """
     def __init__(self, project, options=None, *, cpml_material='tensor'):
         if cpml_material != 'tensor':
@@ -228,9 +241,9 @@ class TensorDispersiveSimulation(TensorDielectricSimulation):
         for axis, side, index in _cpml_faces(self.project.region):
             if not bool(cpml_face_dispersive_admissible(epsilon[index], chi[(slice(None),)+index], axis).all()):
                 raise ValueError(
-                    'Tensor CPML face %s_%s: where a pole is active, epsilon_inf and every strength tensor must '
-                    'be uniaxial about the face normal in its PML layers plus one-node collar.'
-                    % ('xyz'[axis], ('min', 'max')[side]))
+                    'Tensor CPML face %s_%s: where a pole is active in its PML layers plus one-node collar, '
+                    'epsilon_inf must be axis-aligned with a non-intermediate normal eigenvalue and every strength '
+                    'tensor a nonnegative scalar multiple of epsilon_inf.' % ('xyz'[axis], ('min', 'max')[side]))
 
     def _pack(self, epsilon, strength, omega0, gamma):
         self._validate_input_shape(epsilon)
@@ -294,7 +307,7 @@ class TensorDispersiveSimulation(TensorDielectricSimulation):
                       forward_backend='torch '+epsilon.device.type.upper(), backward_backend='torch explicit transpose',
                       tensor_sampling='common mesh nodes, normalized finite/periodic edge triplets',
                       cpml_contract='D-field composition; tensors extend into CPML where each face normal is a principal '
-                                    'axis with a non-intermediate eigenvalue, uniaxial about the normal where poles are active',
+                                    'axis with a non-intermediate eigenvalue; axis-aligned proportional dispersion where poles are active',
                       oscillator_count=count, neumann_terms=layout.iterations+1, coupling_bound=bound,
                       material_parameters='epsilon_inf, strength [(rad/s)^2 node tensors], omega0 [rad/s], gamma [rad/s]',
                       source_contract='soft impressed-field increments', steps=system.region.steps)

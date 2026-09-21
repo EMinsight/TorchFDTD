@@ -2,11 +2,10 @@
 from itertools import product
 import math
 
-import numpy as np
 import pytest
 import torch
 
-from torchfdtd import AdjointOptions, BoundaryFace, DifferentiableSimulation, Monitor, Project, Region, Source
+from torchfdtd import AdjointOptions, DifferentiableSimulation, Monitor, Project, Region, Source
 from torchfdtd.anisotropy import (TensorConstitutive, TensorDielectricSimulation, _TensorSystem,
                                   _cpml_faces, cpml_face_admissible)
 
