@@ -1,39 +1,3 @@
-@misc{fdtd,
-  author = {Laporte, Floris and others},
-  title = {{fdtd}: A three-dimensional electromagnetic {FDTD} simulator in {Python}},
-  howpublished = {MIT-licensed software},
-  url = {https://github.com/flaport/fdtd},
-  note = {Accessed 19 September 2026}
-}
-
-@misc{pytorch-cuda,
-  author = {{PyTorch contributors}},
-  title = {{CUDA} semantics and {CUDA Graphs}},
-  howpublished = {PyTorch documentation},
-  url = {https://docs.pytorch.org/docs/2.10/notes/cuda.html},
-  note = {Accessed 19 September 2026}
-}
-
-@inproceedings{paszke2019,
-  author = {Paszke, Adam and others},
-  title = {{PyTorch}: An Imperative Style, High-Performance Deep Learning Library},
-  booktitle = {Advances in Neural Information Processing Systems},
-  volume = {32},
-  year = {2019},
-  url = {https://proceedings.neurips.cc/paper_files/paper/2019/hash/bdbca288fee7f92f2bfa9f7012727740-Abstract.html}
-}
-
-@article{kim2023,
-  author = {Kim, Changhyun and Lee, Byoungho},
-  title = {{TORCWA}: {GPU}-accelerated {Fourier} modal method and gradient-based optimization for metasurface design},
-  journal = {Computer Physics Communications},
-  volume = {282},
-  pages = {108552},
-  year = {2023},
-  doi = {10.1016/j.cpc.2022.108552},
-  note = {Code: \url{https://github.com/kch3782/torcwa}}
-}
-
 @article{yee1966,
   author = {Yee, Kane S.},
   title = {Numerical solution of initial boundary value problems involving {Maxwell's} equations in isotropic media},
@@ -43,6 +7,26 @@
   pages = {302--307},
   year = {1966},
   doi = {10.1109/TAP.1966.1138693}
+}
+
+@book{taflove2005,
+  author = {Taflove, Allen and Hagness, Susan C.},
+  title = {Computational Electrodynamics: The Finite-Difference Time-Domain Method},
+  edition = {3},
+  publisher = {Artech House},
+  address = {Norwood, MA},
+  year = {2005}
+}
+
+@article{berenger1994,
+  author = {B\'{e}renger, Jean-Pierre},
+  title = {A perfectly matched layer for the absorption of electromagnetic waves},
+  journal = {Journal of Computational Physics},
+  volume = {114},
+  number = {2},
+  pages = {185--200},
+  year = {1994},
+  doi = {10.1006/jcph.1994.1159}
 }
 
 @article{roden2000,
@@ -56,45 +40,240 @@
   url = {https://onlinelibrary.wiley.com/doi/10.1002/1098-2760%2820001205%2927%3A5%3C334%3A%3AAID-MOP14%3E3.0.CO%3B2-A}
 }
 
+@article{okoniewski1997,
+  author = {Okoniewski, Michal and Mrozowski, Michal and Stuchly, Maria A.},
+  title = {Simple treatment of multi-term dispersion in {FDTD}},
+  journal = {IEEE Microwave and Guided Wave Letters},
+  volume = {7},
+  number = {5},
+  pages = {121--123},
+  year = {1997},
+  doi = {10.1109/75.569723}
+}
+
+@article{becache2003,
+  author = {B\'{e}cache, Eliane and Fauqueux, Sandrine and Joly, Patrick},
+  title = {Stability of perfectly matched layers, group velocities and anisotropic waves},
+  journal = {Journal of Computational Physics},
+  volume = {188},
+  number = {2},
+  pages = {399--433},
+  year = {2003},
+  doi = {10.1016/S0021-9991(03)00184-0}
+}
+
+@article{farjadpour2006,
+  author = {Farjadpour, Ardavan and Roundy, David and Rodriguez, Alejandro and Ibanescu, Mihai and Bermel, Peter and Joannopoulos, John D. and Johnson, Steven G. and Burr, Geoffrey W.},
+  title = {Improving accuracy by subpixel smoothing in the finite-difference time domain},
+  journal = {Optics Letters},
+  volume = {31},
+  number = {20},
+  pages = {2972--2974},
+  year = {2006},
+  doi = {10.1364/OL.31.002972}
+}
+
+@article{oskooi2010,
+  author = {Oskooi, Ardavan F. and Roundy, David and Ibanescu, Mihai and Bermel, Peter and Joannopoulos, John D. and Johnson, Steven G.},
+  title = {{Meep}: A flexible free-software package for electromagnetic simulations by the {FDTD} method},
+  journal = {Computer Physics Communications},
+  volume = {181},
+  number = {3},
+  pages = {687--702},
+  year = {2010},
+  doi = {10.1016/j.cpc.2009.11.008}
+}
+
+@article{zhu2002,
+  author = {Zhu, Zhaoming and Brown, Thomas G.},
+  title = {Full-vectorial finite-difference analysis of microstructured optical fibers},
+  journal = {Optics Express},
+  volume = {10},
+  number = {17},
+  pages = {853--864},
+  year = {2002},
+  doi = {10.1364/OE.10.000853}
+}
+
+@article{jensen2011,
+  author = {Jensen, Jakob S. and Sigmund, Ole},
+  title = {Topology optimization for nano-photonics},
+  journal = {Laser \& Photonics Reviews},
+  volume = {5},
+  number = {2},
+  pages = {308--321},
+  year = {2011},
+  doi = {10.1002/lpor.201000014}
+}
+
+@article{piggott2015,
+  author = {Piggott, Alexander Y. and Lu, Jesse and Lagoudakis, Konstantinos G. and Petykiewicz, Jan and Babinec, Thomas M. and Vu\v{c}kovi\'{c}, Jelena},
+  title = {Inverse design and demonstration of a compact and broadband on-chip wavelength demultiplexer},
+  journal = {Nature Photonics},
+  volume = {9},
+  pages = {374--377},
+  year = {2015},
+  doi = {10.1038/nphoton.2015.69}
+}
+
+@article{molesky2018,
+  author = {Molesky, Sean and Lin, Zin and Piggott, Alexander Y. and Jin, Weiliang and Vu\v{c}kovi\'{c}, Jelena and Rodriguez, Alejandro W.},
+  title = {Inverse design in nanophotonics},
+  journal = {Nature Photonics},
+  volume = {12},
+  pages = {659--670},
+  year = {2018},
+  doi = {10.1038/s41566-018-0246-9}
+}
+
+@article{hughes2018,
+  author = {Hughes, Tyler W. and Minkov, Momchil and Williamson, Ian A. D. and Fan, Shanhui},
+  title = {Adjoint method and inverse design for nonlinear nanophotonic devices},
+  journal = {ACS Photonics},
+  volume = {5},
+  number = {12},
+  pages = {4781--4787},
+  year = {2018},
+  doi = {10.1021/acsphotonics.8b01522}
+}
+
+@article{hammond2022,
+  author = {Hammond, Alec M. and Oskooi, Ardavan and Chen, Mo and Lin, Zin and Johnson, Steven G. and Ralph, Stephen E.},
+  title = {High-performance hybrid time/frequency-domain topology optimization for large-scale photonics inverse design},
+  journal = {Optics Express},
+  volume = {30},
+  number = {3},
+  pages = {4467--4491},
+  year = {2022},
+  doi = {10.1364/OE.442074}
+}
+
+@article{griewank2000,
+  author = {Griewank, Andreas and Walther, Andrea},
+  title = {Algorithm 799: revolve: an implementation of checkpointing for the reverse or adjoint mode of computational differentiation},
+  journal = {ACM Transactions on Mathematical Software},
+  volume = {26},
+  number = {1},
+  pages = {19--45},
+  year = {2000},
+  doi = {10.1145/347837.347846}
+}
+
+@article{kim2023,
+  author = {Kim, Changhyun and Lee, Byoungho},
+  title = {{TORCWA}: {GPU}-accelerated {Fourier} modal method and gradient-based optimization for metasurface design},
+  journal = {Computer Physics Communications},
+  volume = {282},
+  pages = {108552},
+  year = {2023},
+  doi = {10.1016/j.cpc.2022.108552}
+}
+
+@misc{mahlau2024,
+  author = {Mahlau, Yannik and Schubert, Frederik and Bethmann, Konrad and Caspary, Reinhard and Cal\`{a} Lesina, Antonio and Munderloh, Marco and Ostermann, J\"{o}rn and Rosenhahn, Bodo},
+  title = {A flexible framework for large-scale {FDTD} simulations: open-source inverse design for {3D} nanostructures},
+  howpublished = {arXiv:2412.12360},
+  year = {2024},
+  doi = {10.48550/arXiv.2412.12360}
+}
+
+@inproceedings{paszke2019,
+  author = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and Desmaison, Alban and K\"{o}pf, Andreas and Yang, Edward and DeVito, Zachary and Raison, Martin and Tejani, Alykhan and Chilamkurthy, Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and Chintala, Soumith},
+  title = {{PyTorch}: An imperative style, high-performance deep learning library},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume = {32},
+  pages = {8024--8035},
+  year = {2019}
+}
+
+@inproceedings{sheng2023,
+  author = {Sheng, Ying and Zheng, Lianmin and Yuan, Binhang and Li, Zhuohan and Ryabinin, Max and Chen, Beidi and Liang, Percy and R\'{e}, Christopher and Stoica, Ion and Zhang, Ce},
+  title = {{FlexGen}: High-throughput generative inference of large language models with a single {GPU}},
+  booktitle = {Proceedings of the 40th International Conference on Machine Learning},
+  series = {Proceedings of Machine Learning Research},
+  volume = {202},
+  pages = {31094--31116},
+  year = {2023}
+}
+
+@inproceedings{kwon2023,
+  author = {Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E. and Zhang, Hao and Stoica, Ion},
+  title = {Efficient memory management for large language model serving with {PagedAttention}},
+  booktitle = {Proceedings of the 29th Symposium on Operating Systems Principles},
+  pages = {611--626},
+  year = {2023},
+  doi = {10.1145/3600006.3613165}
+}
+
 @article{storn1997,
   author = {Storn, Rainer and Price, Kenneth},
-  title = {Differential Evolution - A Simple and Efficient Heuristic for Global Optimization over Continuous Spaces},
+  title = {Differential evolution: A simple and efficient heuristic for global optimization over continuous spaces},
   journal = {Journal of Global Optimization},
   volume = {11},
+  number = {4},
   pages = {341--359},
   year = {1997},
   doi = {10.1023/A:1008202821328}
 }
 
-@misc{cupy-dlpack,
-  author = {{CuPy contributors}},
-  title = {Interoperability with {PyTorch} and {DLPack}},
-  howpublished = {CuPy documentation},
-  url = {https://docs.cupy.dev/en/stable/user_guide/interoperability.html},
-  note = {Accessed 19 September 2026}
+@book{bohren1983,
+  author = {Bohren, Craig F. and Huffman, Donald R.},
+  title = {Absorption and Scattering of Light by Small Particles},
+  publisher = {Wiley},
+  address = {New York},
+  year = {1983}
 }
 
-@misc{oskooi2013sources,
-  author = {Oskooi, Ardavan and Johnson, Steven G.},
-  title = {Electromagnetic Wave Source Conditions},
-  year = {2013},
-  howpublished = {arXiv:1301.5366},
-  doi = {10.48550/arXiv.1301.5366},
-  url = {https://arxiv.org/abs/1301.5366}
-}
-
-@misc{prahl-mie,
-  author = {Prahl, Scott},
-  title = {Mie Scattering Algorithms},
-  howpublished = {miepython documentation},
-  url = {https://miepython.readthedocs.io/en/latest/07_algorithm.html},
-  note = {Accessed 19 September 2026}
-}
-
-@misc{fdtdx-source,
-  author = {{FDTDX contributors}},
-  title = {{FDTDX}: differentiable electromagnetic simulation},
+@misc{fdtd,
+  author = {Laporte, Floris and others},
+  title = {{fdtd}: A three-dimensional electromagnetic {FDTD} simulator in {Python}, version 0.2.2},
   howpublished = {MIT-licensed software},
-  url = {https://github.com/ymahlau/fdtdx},
-  note = {Revision 60c1c27, accessed 21 September 2026}
+  url = {https://github.com/flaport/fdtd},
+  year = {2023},
+  note = {Accessed 19 September 2026}
+}
+
+@misc{fdtdz,
+  author = {Lu, Jesse},
+  title = {{fdtdz}: A fast {FDTD} solver for photonics on {GPUs}},
+  howpublished = {Software},
+  url = {https://github.com/spinsphotonics/fdtdz},
+  year = {2023},
+  note = {Accessed 21 September 2026}
+}
+
+@misc{tidy3d,
+  author = {{Flexcompute}},
+  title = {{Tidy3D}: hardware-accelerated electromagnetic solver},
+  howpublished = {Software},
+  url = {https://www.flexcompute.com/tidy3d/},
+  year = {2025},
+  note = {Accessed 21 September 2026}
+}
+
+@misc{lumerical,
+  author = {{Ansys}},
+  title = {{Ansys Lumerical FDTD}},
+  howpublished = {Software},
+  url = {https://www.ansys.com/products/optics/fdtd},
+  year = {2025},
+  note = {Accessed 21 September 2026}
+}
+
+@misc{gdstk,
+  author = {Gabrielli, Lucas Heitzmann},
+  title = {{gdstk}: {GDSII} and {OASIS} library for {Python} and {C++}},
+  howpublished = {Software},
+  url = {https://github.com/heitzmann/gdstk},
+  year = {2024},
+  note = {Accessed 21 September 2026}
+}
+
+@misc{torchfdtd,
+  author = {Park, Hyoseok},
+  title = {{TorchFDTD} source code and validation records},
+  howpublished = {GitHub repository, MIT licence},
+  url = {https://github.com/hyoseokp/TorchFDTD},
+  year = {2026},
+  note = {Accessed 21 September 2026}
 }

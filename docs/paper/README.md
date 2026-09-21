@@ -1,9 +1,14 @@
 # TorchFDTD manuscript
 
 `manuscript.tex` is the canonical editable manuscript. The author is **Hyoseok Park**.
-`references.bib` holds the bibliography. The source preserves the established prose style and uses neither em dashes nor semicolons.
+`references.bib` holds the bibliography. The source uses neither em dashes nor semicolons.
 
-The manuscript is a technical draft. It describes implemented behavior, measured validation and remaining limitations. Its measurements compare native implementations, analytic optical solutions and a graph-adapted flaport/fdtd 0.2.2 baseline. It documents a true CUDA batch axis, explicit and measured cohort selection, tuning overhead and complete forward-only design loops, including measured slowdowns. Normal-incidence one-way and closed TFSF injection are derived and checked against independent discrete propagation, analytic slab spectra and Mie sphere scattering. Non-monotonic sphere mesh errors and a duration control are retained. A separate monitor-fusion study records complete complex spatial spectra and gives the same fused observation adapter to the upstream baseline. The external comparison does not establish a ranking against FDTDX, fdtdz or fdtd3d.
+The manuscript is a software paper in the form of a Computer Physics Communications
+article: introduction, discrete formulation, execution, discrete adjoint,
+tiered-memory execution, workbench, validation, performance, discussion and
+conclusion. Every number in it comes from a JSON record under `docs/validation`.
+The earlier technical draft that listed every development step is kept in
+`archive/` for reference and is not built.
 
 ## Compile this folder
 
