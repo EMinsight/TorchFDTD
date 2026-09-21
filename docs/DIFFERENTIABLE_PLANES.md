@@ -93,6 +93,20 @@ well-supported frequency band instead of optimizing NaN or ill-conditioned
 ratios. Normalization remains differentiable through either input when requested.
 It is not directional mode decomposition or mode-port normalization.
 
+Each plane carries two fingerprints. `run_signature` is the reference
+compatibility fingerprint that `normalized_flux` compares: the realized mesh
+nodes of every axis, the time step, duration and sample time origin, the
+effective source waveforms with their phase and polarization, the background
+index, the boundary faces and the plane interpolation and DFT settings. It
+leaves out structures and materials, so a scatterer and its air reference
+agree, and it leaves out ids, names, display options, execution placement and
+mesh generation settings, so a sample on an automatic graded mesh matches a
+reference on the same nodes after `freeze_refinements`. `run_fingerprint` adds
+the enabled structures, their materials, the precision and the interface
+method for caches and restarts. With automatic graded refinement the internal
+solver receives the frozen refinements, and construction rejects any solver
+whose nodes, time step or Yee sampling positions differ from the plane plans.
+
 ## Storage and validation
 
 Yee support samples shared between planes are deduplicated. Interpolation uses

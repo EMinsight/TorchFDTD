@@ -225,5 +225,7 @@ class SourceWaveformPlaneSimulation(DifferentiablePlaneSimulation):
             block=detached[start:start+rows_per_block]
             digest.update(block.resolve_conj().contiguous().cpu().numpy().tobytes())
         signature=self.signature+':source-waveforms:'+digest.hexdigest()
-        for plane in result.values():plane.run_signature=signature
+        for plane in result.values():
+            plane.run_signature=signature
+            plane.run_fingerprint=self.fingerprint+':source-waveforms:'+digest.hexdigest()
         return result

@@ -9,20 +9,64 @@ from .differentiable import DifferentiableSimulation
 from .field_monitors import plane_plan, interpolation_map
 from .mesh import freeze_refinements
 from .models import Project, Monitor
+from .solver import field_axes
 from .streamed import StreamedSimulation, StreamedAdjointOptions
+from .waveforms import source_time_signal
 
 COMPONENTS = ('Ex','Ey','Ez','Hx','Hy','Hz')
+# E is observed after its update at (n+1) dt and H half a step later, as in
+# the spectral kernel and the native frequency planes.
+SAMPLE_TIME_STEPS = {'E':1.,'H':1.5}
+
+
+def _reference_payload(project):
+    """What a matched reference must share: mesh, time base, sources, exterior and observation.
+
+    Ids, names, display options, execution placement and mesh generation
+    settings are left out. Automatic refinement boxes are private state that
+    model_dump omits, so the realized nodes identify the mesh, as in the
+    Simulation signature. Structures and materials are left out so a
+    scatterer and its air reference stay compatible.
+    """
+    r=project.region
+    times=np.arange(1,r.steps+1)*r.time_step
+    sources=[]
+    for raw in project.sources:
+        if not raw.enabled:continue
+        s=project.resolved_source(raw)
+        waveform=np.asarray(source_time_signal(s,times+s.time_offset_steps*r.time_step),dtype=np.float64)
+        # The sampled waveform digest stands in for any long sampled signal.
+        sources.append(dict(s.model_dump(mode='json',exclude={'id','name','enabled','signal'}),
+            polarization=[[field,float(weight)] for field,weight in s.polarization_components],
+            waveform_sha256=hashlib.sha256(waveform.tobytes()).hexdigest()))
+    faces=[dict(face.model_dump(mode='json'),layers=r.pml_layers(axis,side))
+           for axis in range(3) for side,face in enumerate(r.boundaries.pair(axis))]
+    monitors=[]
+    for raw in project.monitors:
+        if not raw.enabled or raw.kind!='field':continue
+        m=project.resolved_monitor(raw)
+        monitors.append(dict(m.model_dump(mode='json',include={'normal','center','size','spatial_interpolation',
+                'downsample','downsample_xyz','dft_precision','time_downsample'}),
+            apodization=m.spectrum.model_dump(mode='json',include={'apodization','apodization_center','apodization_time_width'})))
+    return dict(dimension=r.dimension,size=list(r.size),nodes=[a.tolist() for a in r.mesh_nodes],
+        time_step=r.time_step,steps=r.steps,sample_time_steps=SAMPLE_TIME_STEPS,fourier_convention='exp(+2 pi i f t)',
+        material_sampling=r.material_sampling,background_index=r.background_index,boundaries=faces,
+        bloch_phase=list(r.bloch_phase),sources=sources,monitors=monitors)
 
 
 def _plane_signature(project):
-    # Execution placement must not invalidate a physically matched reference.
-    region=project.region.model_dump(mode='json')
-    for key in ('memory_mode','backend','cuda_kernel','cuda_monitor_kernel'):
-        region.pop(key,None)
-    # Automatic refinement boxes are private state that model_dump omits, so
-    # the realized nodes identify the mesh, as in the Simulation signature.
-    payload=dict(region=region,sources=[project.resolved_source(s).model_dump(mode='json') for s in project.sources],
-                 nodes=[a.tolist() for a in project.region.mesh_nodes])
+    """Reference-compatibility fingerprint shared by a sample and its reference."""
+    return hashlib.sha256(json.dumps(_reference_payload(project),sort_keys=True).encode()).hexdigest()
+
+
+def _run_fingerprint(project):
+    """Full run fingerprint for caches and restarts: the reference payload plus the scene."""
+    r=project.region
+    structures=[s.model_dump(mode='json',exclude={'id','name','enabled'}) for s in project.structures if s.enabled]
+    used={s['material'] for s in structures}
+    payload=dict(_reference_payload(project),precision=r.precision,interface_method=r.interface_method,
+        subpixel_quadrature=r.subpixel_quadrature,structures=structures,
+        materials=[m.model_dump(mode='json',exclude={'color'}) for m in sorted(project.materials,key=lambda m:m.name) if m.name in used])
     return hashlib.sha256(json.dumps(payload,sort_keys=True).encode()).hexdigest()
 
 
@@ -40,6 +84,7 @@ class DifferentiablePlaneResult:
     field_units: str = 'reduced field * s'
     flux_units: str = 'reduced E*H * s^2 * m^2'
     fourier_convention: str = 'exp(+2 pi i f t)'
+    run_fingerprint: str = ''  # full scene fingerprint for caches; run_signature is reference compatibility
 
     def poynting(self, normal=None):
         normal=self.normal if normal is None else normal
@@ -150,6 +195,7 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         self.observers=tuple(observers)
         self.components=tuple(o[0] for o in observers)
         self.signature=_plane_signature(self.project)
+        self.fingerprint=_run_fingerprint(self.project)
         # Indexed internal observations avoid thousands of UI point objects.
         # Freeze automatic refinements first: replacing the planes by a point
         # monitor must not re-mesh the internal solver away from the plans.
@@ -157,9 +203,16 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         internal=freeze_refinements(self.project) if region.mesh_type=='graded' and region.mesh_auto_refine else self.project.model_copy(deep=True)
         internal.monitors=[Monitor()]
         self.model=getattr(self, '_streamed_model_type', StreamedSimulation)(internal,options) if isinstance(options,StreamedAdjointOptions) else self._resident_model_type(internal,options)
-        for axis,(planned,solved) in enumerate(zip(region.mesh_nodes,self.model.project.region.mesh_nodes)):
+        inner=self.model.project.region
+        for axis,(planned,solved) in enumerate(zip(region.mesh_nodes,inner.mesh_nodes)):
             if not np.array_equal(planned,solved):
                 raise ValueError(f'Internal solver mesh differs from the plane plan on the {"xyz"[axis]} axis.')
+        if inner.time_step!=region.time_step:
+            raise ValueError('Internal solver time step differs from the plane plan.')
+        for component in COMPONENTS:
+            for axis,(planned,solved) in enumerate(zip(field_axes(region,component),field_axes(inner,component))):
+                if not np.array_equal(planned,solved):
+                    raise ValueError(f'Internal solver {component} sampling positions differ from the plane plan on the {"xyz"[axis]} axis.')
         self._project_snapshot=self.project.model_dump()
         self._internal_snapshot=self.model.project.model_dump()
 
@@ -200,5 +253,6 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
                 torch.as_tensor(plan['points_um'],device=epsilon.device,dtype=epsilon.dtype).clone(),
                 torch.as_tensor(plan['weights'],device=epsilon.device,dtype=epsilon.dtype).clone(),
                 plan['shape'],normal,self.signature,result.report,
-                flux_units='reduced E*H * s^2 * '+('m per invariant length' if self.project.region.dimension=='2d' else 'm^2'))
+                flux_units='reduced E*H * s^2 * '+('m per invariant length' if self.project.region.dimension=='2d' else 'm^2'),
+                run_fingerprint=self.fingerprint)
         return output

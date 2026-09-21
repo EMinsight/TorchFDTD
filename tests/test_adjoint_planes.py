@@ -241,31 +241,89 @@ def graded_scene(**changes):
 
 
 def test_internal_solver_keeps_the_auto_refined_plane_mesh(monkeypatch):
+    from torchfdtd.solver import field_axes
     p=graded_scene()
     assert p.region.shape==(30,30,30)
     model=DifferentiablePlaneSimulation(p)
-    assert model.model.project.region.shape==p.region.shape
-    for planned,solved in zip(p.region.mesh_nodes,model.model.project.region.mesh_nodes):
+    inner=model.model.project.region
+    assert inner.shape==p.region.shape and inner.time_step==p.region.time_step
+    for planned,solved in zip(p.region.mesh_nodes,inner.mesh_nodes):
         np.testing.assert_array_equal(solved,planned)
+    for c in COMPONENTS:
+        for planned,solved in zip(field_axes(p.region,c),field_axes(inner,c)):
+            np.testing.assert_array_equal(solved,planned)
     assert model.project.model_dump()==p.model_dump()
     # Without frozen refinements the point monitor re-meshes the solver.
     monkeypatch.setattr('torchfdtd.adjoint_planes.freeze_refinements',lambda project:project.model_copy(deep=True))
     with pytest.raises(ValueError,match='plane plan on the x axis'):DifferentiablePlaneSimulation(p)
+    # Identical nodes are insufficient if the solver time step differs.
+    def shortened(project):
+        from torchfdtd import freeze_refinements
+        frozen=freeze_refinements(project);frozen.region.time_step_override=.5*project.region.time_step
+        return frozen
+    monkeypatch.setattr('torchfdtd.adjoint_planes.freeze_refinements',shortened)
+    with pytest.raises(ValueError,match='time step'):DifferentiablePlaneSimulation(p)
+    # Identical nodes and time step are insufficient if Yee positions differ.
+    monkeypatch.undo()
+    def shifted(region,component):
+        axes=field_axes(region,component)
+        return axes if region.mesh_auto_refine else [axes[0]+1e-3,axes[1],axes[2]]
+    monkeypatch.setattr('torchfdtd.adjoint_planes.field_axes',shifted)
+    with pytest.raises(ValueError,match='Ex sampling positions differ from the plane plan on the x axis'):
+        DifferentiablePlaneSimulation(p)
 
 
 def test_plane_signature_tracks_realized_mesh_not_placement_or_structure():
     from torchfdtd import Structure,freeze_refinements
-    from torchfdtd.adjoint_planes import _plane_signature
+    from torchfdtd.adjoint_planes import _plane_signature,_run_fingerprint
     p=graded_scene();p.structures=[Structure(center=(.9,0,0),size=(.2,.2,.2))]
     q=graded_scene();q.structures=[Structure(center=(.9,0,0),size=(.2,2,.2))]
     p=type(p).model_validate(p.model_dump());q=type(q).model_validate(q.model_dump())
     assert p.region.model_dump()==q.region.model_dump()
     assert (p.region.shape,q.region.shape)==((31,30,30),(31,32,30))
-    assert _plane_signature(p)!=_plane_signature(q)
+    assert _plane_signature(p)!=_plane_signature(q) and _run_fingerprint(p)!=_run_fingerprint(q)
     placed=graded_scene(backend='cuda',cuda_kernel='fused',cuda_monitor_kernel='fused',memory_mode='streamed')
     placed.structures=list(p.structures);placed=type(p).model_validate(placed.model_dump())
-    assert _plane_signature(placed)==_plane_signature(p)
+    assert _plane_signature(placed)==_plane_signature(p) and _run_fingerprint(placed)==_run_fingerprint(p)
+    # A scatterer and its air reference on the frozen mesh stay compatible,
+    # and so does the unfrozen scatterer, while the full fingerprint differs.
     frozen=freeze_refinements(p);air=frozen.model_copy(deep=True);air.structures=[]
     air=type(p).model_validate(air.model_dump())
     for a,b in zip(frozen.region.mesh_nodes,air.region.mesh_nodes):np.testing.assert_array_equal(a,b)
-    assert _plane_signature(air)==_plane_signature(frozen)
+    assert _plane_signature(air)==_plane_signature(frozen)==_plane_signature(p)
+    assert _run_fingerprint(air)!=_run_fingerprint(frozen)==_run_fingerprint(p)
+    model=DifferentiablePlaneSimulation(p)
+    plane=model(torch.ones(p.region.shape,dtype=torch.float64),[1e14])['plane']
+    assert (plane.run_signature,plane.run_fingerprint)==(model.signature,model.fingerprint)==(_plane_signature(p),_run_fingerprint(p))
+
+
+def test_reference_fingerprint_ignores_ids_names_and_display_options():
+    from torchfdtd import Structure,BoundaryFace
+    from torchfdtd.adjoint_planes import _plane_signature,_run_fingerprint
+    base=graded_scene();base.structures=[Structure(center=(.9,0,0),size=(.2,.2,.2))]
+    base=type(base).model_validate(base.model_dump())
+    signature,fingerprint=_plane_signature(base),_run_fingerprint(base)
+    cosmetic=base.model_copy(deep=True)
+    for item in cosmetic.structures+cosmetic.sources+cosmetic.monitors:item.id='new-'+item.id;item.name='renamed'
+    cosmetic.name='Renamed project';cosmetic.materials[2].color='#123456'
+    cosmetic.region.field='Hy';cosmetic.region.slice_axis='y';cosmetic.region.slice_position=.3
+    cosmetic.region.snapshot_interval=7;cosmetic.region.complex_display='magnitude'
+    cosmetic=type(base).model_validate(cosmetic.model_dump())
+    assert cosmetic.model_dump()!=base.model_dump()
+    assert _plane_signature(cosmetic)==signature and _run_fingerprint(cosmetic)==fingerprint
+    def changed(**region):
+        other=base.model_copy(deep=True)
+        for key,value in region.items():setattr(other.region,key,value)
+        return type(base).model_validate(other.model_dump())
+    # A different mesh, time step, duration, source or exterior is rejected.
+    variants=dict(mesh=changed(mesh=.08),time_step=changed(courant_factor=.8),duration=changed(steps=12),
+                  background=changed(background_index=1.2),bloch=changed(bloch_phase=(0,.3,0),
+                      boundaries=base.region.boundaries.model_copy(update=dict(y_min=BoundaryFace(kind='bloch'),y_max=BoundaryFace(kind='bloch')))),
+                  pml=changed(boundaries=base.region.boundaries.model_copy(update=dict(x_min=BoundaryFace(kappa=3)))))
+    source=base.model_copy(deep=True);source.sources[0].wavelength=2.5;variants['wavelength']=type(base).model_validate(source.model_dump())
+    source=base.model_copy(deep=True);source.sources[0].phase=30;variants['phase']=type(base).model_validate(source.model_dump())
+    source=base.model_copy(deep=True);source.sources[0].theta=45;variants['polarization']=type(base).model_validate(source.model_dump())
+    monitor=base.model_copy(deep=True);monitor.monitors[0].spatial_interpolation='nearest';variants['interpolation']=type(base).model_validate(monitor.model_dump())
+    for name,other in variants.items():
+        assert _plane_signature(other)!=signature,name
+        assert _run_fingerprint(other)!=fingerprint,name
