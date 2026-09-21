@@ -1,0 +1,141 @@
+{
+ "task": "G3-04",
+ "case_id": "G3-04_mie_cylinder_sphere",
+ "generated": "2026-09-21T17:23:11+00:00",
+ "full_mode": true,
+ "environment": {
+  "python": "3.10.2",
+  "torch": "2.10.0+cu126",
+  "numpy": "2.2.6",
+  "os": "Windows-10-10.0.26200-SP0",
+  "gpu": "NVIDIA GeForce RTX 3060"
+ },
+ "rows": {
+  "cylinder/TM/staircase/h=0.05/cpu-float64": {
+   "mesh_um": 0.05,
+   "backend": "cpu",
+   "precision": "float64",
+   "interface": "staircase",
+   "max_relative_error": 0.038301924320013114
+  },
+  "cylinder/TM/staircase/h=0.025/cpu-float64": {
+   "mesh_um": 0.025,
+   "backend": "cpu",
+   "precision": "float64",
+   "interface": "staircase",
+   "max_relative_error": 0.05117280287836523
+  },
+  "cylinder/TM/staircase/h=0.0125/cpu-float64": {
+   "mesh_um": 0.0125,
+   "backend": "cpu",
+   "precision": "float64",
+   "interface": "staircase",
+   "max_relative_error": 0.01737345357698228
+  },
+  "cylinder/TE/staircase/h=0.05/cpu-float64": {
+   "mesh_um": 0.05,
+   "backend": "cpu",
+   "precision": "float64",
+   "interface": "staircase",
+   "max_relative_error": 0.11162988915161443
+  },
+  "cylinder/TE/staircase/h=0.025/cpu-float64": {
+   "mesh_um": 0.025,
+   "backend": "cpu",
+   "precision": "float64",
+   "interface": "staircase",
+   "max_relative_error": 0.0069970113415503965
+  },
+  "cylinder/TE/staircase/h=0.0125/cpu-float64": {
+   "mesh_um": 0.0125,
+   "backend": "cpu",
+   "precision": "float64",
+   "interface": "staircase",
+   "max_relative_error": 0.003728880057663475
+  },
+  "cylinder/TM/staircase/h=0.025/cuda-float32": {
+   "mesh_um": 0.025,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "staircase",
+   "max_relative_error": 0.051173263577428796,
+   "layer_a_max_relative_difference": 1.5434634665911773e-06,
+   "layer_a_rtol": 0.0001
+  },
+  "cylinder/TM/staircase/h=0.0125/cuda-float32": {
+   "mesh_um": 0.0125,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "staircase",
+   "max_relative_error": 0.01737523235206062,
+   "layer_a_max_relative_difference": 1.8102249372820012e-06,
+   "layer_a_rtol": 0.0001
+  },
+  "cylinder/TE/staircase/h=0.025/cuda-float32": {
+   "mesh_um": 0.025,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "staircase",
+   "max_relative_error": 0.00699853155189889,
+   "layer_a_max_relative_difference": 2.0773665092566063e-06,
+   "layer_a_rtol": 0.0001
+  },
+  "cylinder/TE/staircase/h=0.0125/cuda-float32": {
+   "mesh_um": 0.0125,
+   "backend": "cuda",
+   "precision": "float32",
+   "interface": "staircase",
+   "max_relative_error": 0.0037308046320467803,
+   "layer_a_max_relative_difference": 1.931777750874275e-06,
+   "layer_a_rtol": 0.0001
+  },
+  "resonance/TE/h=0.025/cpu-float64": {
+   "mesh_um": 0.025,
+   "backend": "cpu",
+   "precision": "float64",
+   "peak_relative_error": -0.013264457945886599,
+   "fwhm_relative_error": 0.19086012084432258
+  },
+  "resonance/TE/h=0.0125/cuda-float32": {
+   "mesh_um": 0.0125,
+   "backend": "cuda",
+   "precision": "float32",
+   "peak_relative_error": -0.005828928873428452,
+   "fwhm_relative_error": 0.05720352358322289
+  },
+  "sphere/h=0.1/cpu-float64": {
+   "mesh_um": 0.1,
+   "backend": "cpu",
+   "precision": "float64",
+   "max_relative_error": 0.09586578834052828
+  },
+  "sphere/h=0.05/cpu-float64": {
+   "mesh_um": 0.05,
+   "backend": "cpu",
+   "precision": "float64",
+   "max_relative_error": 0.003093257292040019
+  },
+  "sphere/h=0.025/cpu-float64": {
+   "mesh_um": 0.025,
+   "backend": "cpu",
+   "precision": "float64",
+   "max_relative_error": 0.010474619012450948
+  },
+  "sphere/h=0.1/cuda-float32": {
+   "mesh_um": 0.1,
+   "backend": "cuda",
+   "precision": "float32",
+   "max_relative_error": 0.09586542886361693,
+   "layer_a_max_relative_difference": 9.162520545613617e-07,
+   "layer_a_rtol": 0.0001
+  },
+  "sphere/h=0.05/cuda-float32": {
+   "mesh_um": 0.05,
+   "backend": "cuda",
+   "precision": "float32",
+   "max_relative_error": 0.0030947523488467077,
+   "layer_a_max_relative_difference": 1.4996957515833742e-06,
+   "layer_a_rtol": 0.0001
+  }
+ }
+}
