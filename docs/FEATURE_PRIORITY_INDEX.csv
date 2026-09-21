@@ -911,7 +911,7 @@ analysis.cross_sections,산란·흡수 cross-section,P1,10,required,관측량·�
 analysis.diffraction,회절 차수·grating projection,P1,10,required,관측량·주파수 공간장,True,partial,partial,partial,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.directivity,Directivity·편광 분석,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.mode_area,Mode area·volume,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
-analysis.nearfar,Near-to-far field,P1,10,required,관측량·주파수 공간장,True,partial,partial,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
+analysis.nearfar,Near-to-far field,P1,10,required,관측량·주파수 공간장,True,partial,partial,partial,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 analysis.resonance,공진 주파수·Q 분석,P1,10,required,관측량·주파수 공간장,True,missing,missing,missing,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 monitor.chebyshev,Chebyshev frequency sampling,P1,10,required,관측량·주파수 공간장,False,implemented,implemented,implemented,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.
 monitor.custom,사용자 주파수 표,P1,10,required,관측량·주파수 공간장,False,implemented,implemented,implemented,전송·흡수·회절·방사와 성분 선택은 장 그림을 물리적 설계 지표로 바꾼다.

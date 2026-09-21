@@ -1,5 +1,32 @@
 # Current acceptance record
 
+## Stored closed-box far-field workflow, 21 September 2026
+
+Six native spectral faces now connect to Python, bounded NPZ loading and the
+browser's Closed-box far field dialog. Matched incident fields are subtracted
+coherently on every face. Angular plots and JSON/CSV exports use explicit raw
+spectral units. Saved arrays have no autograd graph and no new FDTD job is
+started for projection. Source, geometry, exact raw quadrature and aggregate
+metadata/field/axis/workspace budgets are checked before their admitted work.
+
+The final CPU FP32 native fixture uses 24^3 cells, 525 steps, 864 face points
+and 684 directions. Its normalized dipole-pattern relative L2 error is 2.073%
+against the predeclared 5% integration gate. The coarse-mesh warning remains.
+NPZ/Python and browser complex amplitudes agree exactly, including from the
+installed wheel. The native fields remain FP32 and existing spectral archive
+storage remains complex128. This small check is not a convergence or speed
+claim and does not add material gradients to saved data.
+
+Forty-three focused Python cases and four distinct browser cases passed.
+All 125 wheel/installed package files match source bytes. The wheel SHA-256 is
+`adc96e49683fc7256af0ae06322a334393454579bcb90f6d8e3458238b750e69`.
+See [usage and limits](FARFIELD_WORKFLOW.md) and the
+[machine-readable record](validation/native_farfield_workflow.json).
+Full CI for this stored closed-box integration is pending.
+General substrate/lattice radiation and complete FDTDX parity remain unfinished.
+Public release remains NOT_CLEARED_FOR_PUBLICATION.
+
+
 ## Native CAD mode-network API and browser, 21 September 2026
 
 The versioned native Project adapter and browser editor now share two opposing

@@ -33,7 +33,7 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 | 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 별도 lossless periodic 및 fixed-exterior CPML reversible API, 고정 Bloch·FP32 scalar/diagonal·비동기 CPU trace·online plane 관측, 고정 모드와 radiation 목적함수 | **부분**. PMC/tensor의 추가 물리·실행 경로, 일반 source/eigenmode·동시 adjoint batch 확대 필요 |
 | 설계 파라미터화 | Density, projection/binarization, symmetry | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수 | 기본 topology workflow 구현. 일반 spline/polygon shape derivative·제작 제약·최종 CR 물리 수렴은 별도 |
 | Mode source·detector·port | 고정 mode source/detector, overlap/S-parameter. 고유모드 재료·좌표의 미분은 중단 | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 서로 다른 고정 exterior 단면과 입사 포트별 calibration을 지원하며 추가 CPU 물리 검증을 기록. 열린 CPML 횡단면의 고정 bound mode·4-channel CUDA 전파와 내부 재료 VJP도 검증. Native CAD/Python/browser의 설정·S 행렬·재료 VJP·취소·내보내기와 실제 CPU/CUDA 흐름도 연결했다. 일반 branch·leaky mode·streamed injection·일반 물리 수렴은 남음. 고유모드 자체 미분은 별도 연구 목표 |
-| Far-field·회절 | Field projection, diffraction detectors | Closed-box 벡터 원거리장, Bloch 회절 차수·방향별 효율, field graph와 재료 VJP, FP32 방사 패턴 수렴. 저장 결과/NPZ adapter와 실제 회절 browser workflow | 기본 homogeneous exterior 기능과 회절 UI 구현. substrate/periodic lattice far-field·일반 응용·closed-box UI는 남음 |
+| Far-field·회절 | Field projection, diffraction detectors | Closed-box 벡터 원거리장, Bloch 회절 차수·방향별 효율, field graph와 재료 VJP, FP32 방사 패턴 수렴. 저장 결과/NPZ adapter와 실제 회절·6-face closed-box browser workflow | Homogeneous exterior의 제한된 closed-box Python/UI 및 회절 구현. Soft source·uniform isolated PML·완전한 6면 조건. substrate/periodic lattice far-field·일반 응용은 남음 |
 | 이방성 | 대각·일반 tensor | Node-sampled SPD bulk tensor, periodic/Bloch CPU·CUDA와 고정 등방성 CPML 외부, 이산 transpose·6성분 VJP·checkpoint·고유파 검증. Native 재료 편집·Project/CLI·고정 geometry 재료표 미분 연결 | **부분**. 일반 anisotropic CPML·반사/장시간 안정성·interface·tensor ADE·streaming·mode 확대가 남음 |
 | 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. Closed PMC native Project·CLI·browser·endpoint NPZ. 별도 uniform PMC+CPML CPU/CUDA API와 보조 상태·재료·파형 adjoint, 전체/절반 영역 일치와 checkpoint 절반 절감 | **부분**. 제한된 공통 PML profile의 혼합 경계를 Project·CLI·browser에 연결. 일반 profile·흡수 정확도·속도, ADE·streaming·tensor batch 확대가 남음 |
 
@@ -84,6 +84,10 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
   [저장 결과 회절 workflow](RADIATION_WORKFLOW.md)는 실제 native 6-field plane을
   browser와 NPZ/Python에서 계산한다. 참조 정규화, 비전파 차수, cutoff와
   외부 매질 조건을 구분하고 기존 필드로 계산해 FDTD를 다시 실행하지 않는다.
+  [Closed-box 저장 결과 workflow](FARFIELD_WORKFLOW.md)는 6면의 복소 E/H,
+  일치하는 incident 참조 차감, isolated PML·soft source 조건과 CPU/NPZ 메모리
+  admission을 검사한다. 100 fs native 예제의 864점·684방향 pattern 오차는
+  2.073%이며 사전 5% gate를 통과했다. 일반 far-field 동등성으로 확대하지 않는다.
 
 - [FDTDX 동일 조건 정확도 gate](FDTDX_MATCHED_CORRECTNESS.md): 같은 Linux·RTX 3060에서
   16³, 64-step FP32 periodic 소스 문제의 두 Ex history, 목적함수와 한 재료

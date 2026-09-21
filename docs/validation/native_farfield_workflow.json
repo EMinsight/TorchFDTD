@@ -1,0 +1,90 @@
+{
+  "status": "focused_cpu_browser_and_installed_wheel_passed_full_ci_pending",
+  "npz_http_complex_amplitude_relative_l2": 0.0,
+  "predeclared_limit": 2e-12,
+  "fdtd_precision": "float32",
+  "stored_field_dtype": "complex128",
+  "shape": [
+    24,
+    24,
+    24
+  ],
+  "steps": 525,
+  "duration_fs": 100.0951806503778,
+  "warnings": [
+    "source: only 11.0 cells per material wavelength on the least-resolved fine axis. Run a mesh convergence study (15+ recommended)."
+  ],
+  "pattern_relative_l2": 0.02072905013678808,
+  "pattern_limit": 0.05,
+  "face_points": 864,
+  "directions": 684,
+  "report": {
+    "field_kind": "total",
+    "retained_bytes": 110640,
+    "points": 864,
+    "monitor_ids": {
+      "x_min": "x_min",
+      "x_max": "x_max",
+      "y_min": "y_min",
+      "y_max": "y_max",
+      "z_min": "z_min",
+      "z_max": "z_max"
+    },
+    "run_signature": "b9a96d898de59313f6332d405092950675c3b4b1bf53e35d5c22f705f163d4ad",
+    "reference_run_signature": null,
+    "preparation_reservation_bytes": 1539520,
+    "input_payload_bytes": 110640,
+    "metadata_bytes": 21738,
+    "axis_workspace_reservation_bytes": 19968,
+    "source": "owned native stored frequency faces",
+    "autograd": false,
+    "normalization": "none",
+    "scope": "Isolated homogeneous isotropic exterior, uniform complete closed box; continuum projection of native fields."
+  },
+  "all_solver_source_hashes_unchanged": true,
+  "solver_source_count": 121,
+  "files": {
+    "torchfdtd/radiation_box.py": "09892061951b9500a97f8d78065ec96ae68ea0f1384be9d69059a405a3e8833f",
+    "torchfdtd/radiation_box_io.py": "e0319343f2fc70a8377ea0ffd85644d8930e88b5baf21081e275c136e89ec95b",
+    "torchfdtd/farfield_api.py": "86e4a2d7689263133bafe476631d8079a0074c283944c528f25481eace37fef8",
+    "frontend/src/farfield_tools.js": "d5728486418f7360bb227e83da356667717593e30ed4b319dc93ec843fcc2874",
+    "frontend/src/farfield_tools.css": "44647f91eff3ae9c3637aed81754e9fd7134b9a7e30d8d52e1dcf816280db2db",
+    "tests/ui/farfield-native.spec.js": "7599908f46abc30d8771b917e26fedffda4e4c9166a74065746612b67d6e1063",
+    "examples/native_farfield.py": "31b37ea6b82397bd03a094d6a3c7d7079f41f139b8b57a07ee18bae291d562b2",
+    "examples/native_farfield.json": "2323d4eb533b718b8d35b0611e66e33dbb28b80716a8115876d50ee0a3152784"
+  },
+  "npz_sha256": "bae9cf256edab9d6ada3d1e0b0a87e0b27067a3e87df1402d77440fceee3b97f",
+  "scope": "Stored native six-face radiation workflow. No new solver or projection algorithm.",
+  "fixture": "examples/native_farfield.json",
+  "tests": {
+    "focused_python_passed": 43,
+    "focused_python_seconds": 4.5,
+    "browser_unique_passed": 4,
+    "browser_native_passed": 1,
+    "python_junit_sha256": "80dd3217013cf8f57ed3c1bb88fcf6d215c4612d7cd98909a1f257baca30a344"
+  },
+  "wheel": {
+    "files": 125,
+    "sha256": "adc96e49683fc7256af0ae06322a334393454579bcb90f6d8e3458238b750e69",
+    "source_installed_archive_bytes_equal": true
+  },
+  "installed_npz_http_relative_l2": 0.0,
+  "development_corrections": [
+    "Initial zero-pattern browser test exposed a selector collision between a cut selector and canvas. Distinct canvas selectors repair both nonzero and zero rendering.",
+    "Initial 50 fs fixture ended before the source tail. The final example uses 100 fs and retains the earlier private evidence. The remaining coarse-mesh warning is preserved.",
+    "Independent review added a raw-quadrature equality check before dtype conversion and an axis-workspace admission bound before geometry allocation."
+  ],
+  "limits": [
+    "Stored NPZ has no autograd graph. Existing direct differentiable radiation APIs remain separate.",
+    "Uniform isolated six-PML domain, complete midpoint faces, homogeneous lossless isotropic exterior and ordinary soft sources only.",
+    "Coarse dipole pattern gate is not mesh convergence, absolute-power calibration, competitive throughput or 48 GB capacity evidence.",
+    "No general substrate, periodic-lattice far field, TFSF provenance or one-way-source support in this adapter.",
+    "Full FDTDX parity and public release remain incomplete."
+  ],
+  "fixture_newline_normalization": {
+    "observed_sha256": "0d32d5362414db62f073a1cce24f68da921c956a884d66d1204d1f9981fcb97b",
+    "packaged_sha256": "2323d4eb533b718b8d35b0611e66e33dbb28b80716a8115876d50ee0a3152784",
+    "only_crlf_to_lf": true,
+    "json_equal": true
+  }
+}

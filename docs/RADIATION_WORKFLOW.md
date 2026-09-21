@@ -70,18 +70,20 @@ All adapted fields retain the native positive-time DFT convention
 `exp(+2*pi*i*f*t)`, corresponding to the radiation API's `exp(-i*omega*t)`
 phasors. No conjugation or unit conversion is invented by the adapter.
 
-## Closed-box far field remains a distinct Python operation
+## Closed-box far field from six stored faces
 
-The same loader can supply six correctly positioned native field monitors to
-`project_farfield`, using keys `x_min`, `x_max`, `y_min`, `y_max`, `z_min`,
-`z_max` and explicit physical box bounds. Every face must have compatible
-frequency/run metadata and full uniform midpoint quadrature. The closed surface
-must enclose all sources/scatterers and lie entirely in a homogeneous exterior
-outside PML. For scattered fields, subtract matched incident fields on every
-face before projection. A substrate-crossing box, periodic unit cell or single
-open plane is not an isolated-object far-field surface. This browser workflow
-therefore exposes diffraction only; it does not relabel a plane intensity plot
-as far-field radiation.
+The separate [closed-box workflow](FARFIELD_WORKFLOW.md) now connects
+`native_radiation_box` and `load_native_radiation_box` to `project_farfield`.
+The browser exposes **Flux results → Closed-box far field**, with six explicit
+monitor IDs, physical box bounds, exterior properties and optional coherent
+matched incident subtraction on all six faces. It operates on stored fields
+without starting FDTD and exports setup/results as JSON or CSV.
+
+This path requires an isolated uniform 3D domain with six outer PML faces,
+complete midpoint quadrature, homogeneous exterior and admitted soft-source
+support. Substrates, periodic unit cells and individual open planes remain
+unsupported closed surfaces. The diffraction workflow above retains its own
+periodic/Bloch contract and reference-efficiency semantics.
 
 ## Focused verification
 
