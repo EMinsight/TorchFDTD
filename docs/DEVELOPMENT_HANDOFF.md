@@ -99,3 +99,86 @@ D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G0-0
 Then G1-01: run `tests/test_adjoint_planes.py` and `tests/test_plane_execution.py`
 with `--junitxml`, reproduce the graded-mesh regeneration on the current
 candidate, and record the result.
+
+---
+
+### 2026-09-22 G9-01, G9-02, G9-04 (server security, provenance inventory, compatibility policy), branch g9-security from 2b64f91
+
+**Problem or goal.** Start the G9 checks that the program allows before the
+physics stages finish: test and close the local server's controls, inventory
+the provenance and licences of everything distributed, and state the API,
+format and support policy with a changelog and a bug template. G9-03 stays
+with the contract gate and was not touched.
+
+**State found.** HEAD 2b64f91 on branch g9-security, clean tree. The tracked
+tree still carried the remote workstation account path in three beyond-VRAM
+records (`scratch_directory` of `beyond-vram-complete-5880.json`,
+`beyond-vram-forward-5880.json`, `beyond-vram-forward-retry-5880.json`); the
+earlier audit only searched the forward-slash spelling.
+
+**Changed files (why).**
+- `torchfdtd/server.py`: chunked bodies without `Content-Length` answer 411 (the 32 MB limit only inspected the header), a malformed `Content-Length` answers 400 instead of a server error, a `NaN`/`Infinity` body answers 422 (the default handler re-emitted the nonfinite input and failed), `MAX_REQUEST_BYTES` is a module constant, and `WorkbenchFiles` rejects drive-letter and UNC static paths (on Windows `os.path.join` let them replace the web directory and `realpath` probed the drive or a network share).
+- `torchfdtd/cli.py`: `serve --host` restricted to `127.0.0.1` and `localhost` (IPv6 loopback is not offered because `TrustedHostMiddleware` cannot match a bracketed `Host`).
+- `tests/test_server_security.py`, `docs/SECURITY.md`, `docs/validation/cases/G9-01.json`.
+- `scripts/provenance_inventory.py` (SBOM, notices, scan, history note, pip check, optional pip-audit), `docs/THIRD_PARTY_NOTICES.md`, `docs/validation/sbom.json`, `tests/test_provenance_inventory.py`, `docs/validation/cases/G9-02.json`; the three records above redacted to `<redacted workstation home>\...`; `.gitattributes` marks the two CRLF records `cr-at-eol`.
+- `docs/COMPATIBILITY.md`, `docs/CHANGELOG.md`, `.github/ISSUE_TEMPLATE/bug_report.md`, `tests/test_compatibility_policy.py`, `docs/validation/cases/G9-04.json`, one README line.
+- `docs/validation/completion_gates.json`: code paths, planned commands and required tests of G9-01, G9-02, G9-04; the recorder wrote their VERIFIED states.
+
+**Commands run (device: local Windows 11, CPU only; the RTX 3060 was left to other agents and no test creates a CUDA context; TMP and TEMP set to D:\TorchFDTD\.local\tmp).**
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_server_security.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-01.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-02.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_compatibility_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-04.xml
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py --audit
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py --check
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G9-0N ... --fixture docs/validation/cases/G9-0N.json
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G9-0N
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_api.py tests/test_gds_api.py tests/test_fsp_api.py tests/test_farfield_api.py tests/test_fsp_geometry_write.py tests/test_completion_program_documents.py tests/test_release_gates.py
+```
+
+**Measurements and pre-declared limits.** The limits are the status codes
+and file-system states of the three case files. tests/test_server_security.py:
+10 passed in 33.8 s; tests/test_provenance_inventory.py: 27 passed in 21.0 s;
+tests/test_compatibility_policy.py: 5 passed in 56.4 s (import time dominates);
+the neighbouring API suites 42 passed in 29.2 s and the document and gate
+tests 22 passed in 100.8 s, before the evidence commit. The inventory resolves
+51 distributions in the closure, all installed with a licence label and a
+source URL, 987 text files scanned with no finding, 7 historic commits in the
+history note, `pip check` exit 0. `pip-audit` 2.10.1 (installed into the venv
+for this task) reports advisories against the development interpreter for
+anyio 4.12.1, click 8.3.1, fonttools 4.29.1, idna 3.11, pillow 12.1.1,
+starlette 0.52.1 and tqdm 4.63.0, fixes listed in THIRD_PARTY_NOTICES.md; torch
+2.10.0+cu126 cannot be audited on PyPI. The advisories are recorded, not gated.
+
+**Passed / failed / skipped / not run.** Passed: the 42 tests above and the
+neighbouring suites. Failed: none at the recorded commit. Skipped: none. Not
+run: a live uvicorn process probed over TCP, the vendor bridge routes, a
+clean-environment SBOM of the wheel (all listed as `not_yet_covered`). One
+earlier evidence commit was undone before any push because pytest had put the
+scan sample strings, including a real address used as a sample, into the G9-02
+JUnit ids; the samples are now labelled and synthetic and the tree scan covers
+the run directories.
+
+**Evidence paths and hashes.** Recorded at e132fdd on a clean tree, committed in d55adb5:
+- `docs/validation/runs/20260921T163013Z-g9-01-57458fee/` evidence.json `c545db9ce82474d428535a64ddf7be10ce57c39b5390ebcca3a3f32024c81fee`
+- `docs/validation/runs/20260921T163044Z-g9-02-158d1eda/` evidence.json `bb456aa1074ce59fc8c4543f0c390b755436fd422cb371c0d2a12407196d89ea`
+- `docs/validation/runs/20260921T163104Z-g9-04-f2b9d65e/` evidence.json `e649a71223294f0461a2c798c6182e4ae3161adb4718dd3d768260a6fe26acc7`
+The judge passes G9-01, G9-02 and G9-04 at d55adb5.
+
+**Remaining defects, risks, external blockers.**
+- BLOCKED_EXTERNAL (G9-03): the installed-API property catalogue that `torchfdtd/feature_inventory.json` and `/api/capabilities` ship, the FSP layout support, and the README timing table; listed as open items in THIRD_PARTY_NOTICES.md and sbom.json.
+- The seven advisories above concern the development interpreter; the release environment of G9-06 must resolve at or above the fixes, and starlette's fixed versions are excluded by the installed fastapi's `starlette<1.0.0` bound, so that bound is a G9-06 decision.
+- The historic workstation path stays in seven commits of the public history (history note in THIRD_PARTY_NOTICES.md); only a history rewrite would remove it, which nothing here does.
+- `docs/validation/runs/*/junit.xml` keep the recording machine's hostname, as before.
+- `Result.load` bounds nothing beyond `allow_pickle=False`; a plausible large declared shape allocates what it declares (documented in SECURITY.md, not changed).
+- The `sbom.json` stable sections depend on the development interpreter; after a dependency change run `scripts/provenance_inventory.py` and commit both outputs, or the G9-02 test fails as stale.
+
+**Next first command and task id.** Merge g9-security, then G9-03 with the
+contract gate; on the release candidate rerun the three commands above under
+G9-06 and refresh the audit:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py --audit
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py --check
+```
