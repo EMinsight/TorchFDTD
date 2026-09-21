@@ -65,7 +65,7 @@ def test_auto_streams_through_host_above_the_injected_device_memory(tmp_path):
     assert 'streamed_disk' not in record
 
 
-def test_auto_streams_through_disk_when_host_memory_is_short(tmp_path):
+def test_auto_refuses_instead_of_disk_and_explicit_disk_still_works(tmp_path):
     from torchfdtd.streamed import _reservation
     from torchfdtd.streamed_planning import plan_streamed_work
     from torchfdtd.boundaries import material_shape
@@ -83,19 +83,121 @@ def test_auto_streams_through_disk_when_host_memory_is_short(tmp_path):
     assert disk_default < smallest_host
     available = int((disk_default+smallest_host)/2/.8)
     short = dict(CPU_RECORD, host_available_bytes=available)
+    # Disk banks would fit, but Auto never selects them: it refuses and names the options.
     record = resolve_execution(p, health=short, scratch=tmp_path/'scratch', summary=summary)
-    assert record['mode'] == 'streamed_disk'
+    assert record['mode'] is None and 'streamed_disk' not in record
     assert not record['resident']['fits'] and 'exceeds 80%' in record['resident']['reason']
     assert not record['streamed_host']['admitted'] and 'host budget' in record['streamed_host']['reason']
-    assert record['policy']['state_storage'] == 'disk' and record['options']['state_directory'] == str(tmp_path/'scratch')
-    assert record['options']['host_budget_bytes'] == int(available*.8)
-    assert record['reservation']['disk_reservation_bytes'] > 0
-    assert record['scratch_directory'] == str(tmp_path/'scratch')
+    assert record['error'].startswith('No automatic tier fits')
+    for option in ('allow approximate tiling', 'Streamed through disk', '1.9 to 2.4 times the DRAM time', 'coarsen the mesh'):
+        assert option in record['error']
+    assert [rung['tier'] for rung in record['auto']['rungs']] == ['resident', 'streamed_host', 'tiled'] and record['auto']['chosen'] is None
+    assert 'not allowed' in record['auto']['rungs'][2]['reason']
+    p.region.execution_mode = 'streamed_disk'
+    explicit = resolve_execution(p, health=short, scratch=tmp_path/'scratch', summary=summary)
+    assert explicit['mode'] == 'streamed_disk' and explicit['policy']['state_storage'] == 'disk'
+    assert explicit['options']['state_directory'] == str(tmp_path/'scratch') and explicit['options']['host_budget_bytes'] == int(available*.8)
+    assert explicit['reservation']['disk_reservation_bytes'] > 0 and explicit['scratch_directory'] == str(tmp_path/'scratch')
+    p.region.execution_mode = 'auto'
     nothing = resolve_execution(p, health=dict(CPU_RECORD, host_available_bytes=1), scratch=tmp_path/'scratch', summary=summary)
-    assert nothing['mode'] is None and nothing['error'].startswith('No execution mode fits')
+    assert nothing['mode'] is None and nothing['error'].startswith('No automatic tier fits')
     p.region.execution_mode = 'resident'
     forced = resolve_execution(p, health=dict(CPU_RECORD, host_available_bytes=1), scratch=tmp_path/'scratch', summary=summary)
     assert forced['mode'] == 'resident' and forced['warnings']
+
+
+def _planar_row(**tiling):
+    """The 2D sparse pillar row of the tiling record under the automatic policy."""
+    from test_tiled import pillar_row
+    p = pillar_row(period=1.25, count=4, half=(.1, .15), seed=5)
+    p.region.tiling = p.region.tiling.model_copy(update={**dict(size_um=1.5, overlap_um=.5), **tiling})
+    return Project.model_validate(p.model_dump())
+
+
+def _rung_thresholds(p, tmp_path):
+    """Resident estimate, the smallest admitted DRAM reservation and the largest tile estimate of a planar scene."""
+    from torchfdtd.streamed import _reservation
+    from torchfdtd.streamed_planning import plan_streamed_work
+    from torchfdtd.boundaries import material_shape
+    from torchfdtd.execution_modes import _tiled_candidate
+    resident = int(estimate(p)['estimated_memory_mb']*2**20)
+    internal, observations = _browser_scene(p)
+    epsilon = torch.empty(material_shape(internal.region), device='meta')
+    base = _base_options('host', 'cpu', CPU_RECORD, tmp_path/'scratch')
+    host = min(_reservation(internal, epsilon, replace(base, slab_width=c['options']['slab_width'], temporal_depth=c['options']['temporal_depth']), observations)['host_reservation_bytes']
+               for c in plan_streamed_work(internal, base).report['candidates'])
+    tile = _tiled_candidate(p, 'cpu', CPU_RECORD)['plan']['largest_tile_estimate_bytes']
+    return resident, host, tile
+
+
+def test_auto_policy_rungs_resident_dram_tiled_with_consent_then_refuse(tmp_path):
+    p = _planar_row()
+    summary = estimate(p)
+    resident, host, tile = _rung_thresholds(p, tmp_path)
+    assert tile < host < resident
+    # Rung 1: the estimate fits the device (GPU record) or the RAM (CPU record).
+    gpu = dict(CPU_RECORD, cuda=True, cupy=True, gpu='fake', gpu_free_bytes=8*2**30, gpu_total_bytes=12*2**30)
+    q = Project.model_validate(p.model_dump())
+    q.region.backend = 'auto'
+    record = resolve_execution(q, health=gpu, scratch=tmp_path/'scratch', summary=summary)
+    assert record['mode'] == 'resident' and record['backend'] == 'cuda'
+    record = resolve_execution(p, health=CPU_RECORD, scratch=tmp_path/'scratch', summary=summary)
+    assert record['mode'] == 'resident'
+    # Rung 2: only the DRAM banks fit.
+    ram_only = dict(CPU_RECORD, host_available_bytes=int((host+resident)/2/.8))
+    record = resolve_execution(p, health=ram_only, scratch=tmp_path/'scratch', summary=summary)
+    assert record['mode'] == 'streamed_host' and record['auto']['chosen'] == 'streamed_host'
+    assert record['reason'].startswith('resident: ') and '-> DRAM banks:' in record['reason']
+    assert 'tiled' not in record
+    # Rung 3: neither fits; the planar device tiles only with consent.
+    tiles_only = dict(CPU_RECORD, host_available_bytes=int((tile+host)/2/.8))
+    record = resolve_execution(p, health=tiles_only, scratch=tmp_path/'scratch', summary=summary)
+    assert record['mode'] is None and 'No automatic tier fits' in record['error'] and 'allow approximate tiling' in record['error']
+    assert record['auto']['rungs'][2]['reason'].startswith('approximate tiling not allowed')
+    consented = _planar_row(allow_approximate=True)
+    record = resolve_execution(consented, health=tiles_only, scratch=tmp_path/'scratch', summary=estimate(consented))
+    assert record['mode'] == 'tiled' and record['auto']['chosen'] == 'tiled' and record['tiled']['plan']['tiles'] == 4
+    assert '-> approximate tiles (allowed):' in record['reason']
+    assert any('read the mismatch indicator' in w for w in record['warnings'])
+    # Rung 4: nothing fits, with consent but without the memory for one tile, and for a device the planner rejects.
+    record = resolve_execution(consented, health=dict(CPU_RECORD, host_available_bytes=int(tile/2/.8)), scratch=tmp_path/'scratch', summary=estimate(consented))
+    assert record['mode'] is None and 'largest tile' in record['auto']['rungs'][2]['reason'] and 'coarsen the mesh' in record['error']
+    point = Project.model_validate(consented.model_dump())
+    point.sources[0] = Source(kind='point', center=(0, -.85, 0), component='Ex', wavelength=1.55)
+    point = Project.model_validate(point.model_dump())
+    record = resolve_execution(point, health=tiles_only, scratch=tmp_path/'scratch', summary=estimate(point))
+    assert record['mode'] is None and 'not partitioned' in record['auto']['rungs'][2]['reason']
+    assert record['error'].startswith('No automatic tier fits')
+
+
+def test_auto_policy_through_the_validate_route(tmp_path, monkeypatch):
+    p = _planar_row()
+    resident, host, tile = _rung_thresholds(p, tmp_path)
+    tiles_only = dict(CPU_RECORD, host_available_bytes=int((tile+host)/2/.8))
+    from torchfdtd import server
+    monkeypatch.setattr(server, 'execution_resources', lambda: tiles_only)
+    app = create_app(tmp_path)
+    with TestClient(app) as client:
+        response = client.post('/api/validate', json=p.model_dump())
+        assert response.status_code == 200
+        execution = response.json()['execution']
+        assert execution['mode'] is None and execution['requested'] == 'auto' and 'allow approximate tiling' in execution['error']
+        assert [rung['tier'] for rung in execution['auto']['rungs']] == ['resident', 'streamed_host', 'tiled']
+        refused = client.post('/api/jobs', json=p.model_dump())
+        assert refused.status_code == 422 and 'No automatic tier fits' in refused.json()['detail']
+        consented = _planar_row(allow_approximate=True)
+        assert consented.region.tiling.allow_approximate and not p.region.tiling.allow_approximate
+        execution = client.post('/api/validate', json=consented.model_dump()).json()['execution']
+        assert execution['mode'] == 'tiled' and execution['auto']['chosen'] == 'tiled'
+        job = client.post('/api/jobs', json=consented.model_dump()).json()['id']
+        finished = _finished(client, job)
+        assert finished['status'] == 'completed' and finished['execution']['mode'] == 'tiled' and finished['execution']['requested'] == 'auto'
+        assert finished['execution']['indicator']['max_mismatch_center'] is not None
+        disk = Project.model_validate(p.model_dump())
+        disk.region.execution_mode = 'streamed_disk'
+        execution = client.post('/api/validate', json=disk.model_dump()).json()['execution']
+        assert execution['mode'] == 'streamed_disk'
+    app.state.pool.shutdown()
 
 
 def test_resident_cell_guard_applies_to_explicit_resident_regions():
@@ -215,7 +317,7 @@ def test_large_auto_scene_validates_and_resolves_streamed(tmp_path):
         assert response.status_code == 200
         execution = response.json()['execution']
         assert not execution['resident']['fits'] and 'exceed the resident limit' in execution['resident']['reason']
-        assert execution['mode'] in ('streamed_host', 'streamed_disk'), execution
+        assert execution['mode'] == 'streamed_host', execution
         p.region.execution_mode = 'resident'
         assert client.post('/api/validate', json=p.model_dump()).status_code == 422
     app.state.pool.shutdown()
