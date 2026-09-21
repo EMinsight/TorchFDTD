@@ -19,7 +19,7 @@ def test_direct_cuda_pulse_material_source_vjp_and_compact_construction(monkeypa
     # CUDA preparation cannot silently construct the CPU sparse reference.
     import torchfdtd.pmc_simulation as module
     monkeypatch.setattr(module,'EndpointTopology',lambda *a,**kw:pytest.fail('CPU sparse topology on CUDA path'))
-    torch.cuda.reset_peak_memory_stats()
+    torch.cuda.reset_peak_memory_stats();base=torch.cuda.memory_allocated()
     gpu=EndpointCPMLSimulation(**arguments,device='cuda')
     assert gpu._psi_count==cpu._psi_count
     assert all(sum(gpu.backend.psi_lengths[k] for k in keys)>0
@@ -50,7 +50,7 @@ def test_direct_cuda_pulse_material_source_vjp_and_compact_construction(monkeypa
     assert gpu.last_report['peak_checkpoints']<=2
     assert gpu.last_report['reverse_steps']==17
     torch.cuda.synchronize()
-    peak=torch.cuda.max_memory_allocated()
+    peak=torch.cuda.max_memory_allocated()-base
     assert peak<=gpu.memory_plan(17)['tensor_upper_bound_bytes']
     print(dict(trace_error=float((result.cpu()-expected).abs().max().detach()),
         material_vjp=float(actual[0]),material_vjp_error=float((actual[0].cpu()-reference[0]).abs()),

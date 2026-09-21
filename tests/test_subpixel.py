@@ -138,7 +138,7 @@ def test_interface_buffers_do_not_keep_finished_grids_alive(cuda):
     import weakref
     from torchfdtd.cuda_kernels import configure_cuda_kernel
     if cuda and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
-    p=periodic_project();plan=prepare_interfaces(p)
+    p=periodic_project();plan=prepare_interfaces(p);old=torch.get_default_dtype()
     try:
         fdtd.set_backend('torch.cuda.float64' if cuda else 'numpy')
         fdtd.backend.float=torch.float64 if cuda else np.float64
@@ -147,7 +147,7 @@ def test_interface_buffers_do_not_keep_finished_grids_alive(cuda):
         reference=weakref.ref(grid)
         del grid
         assert reference() is None
-    finally:fdtd.set_backend('numpy');fdtd.backend.float=np.float64
+    finally:fdtd.set_backend('numpy');fdtd.backend.float=np.float64;torch.set_default_dtype(old)
 
 
 def test_python_facade_roundtrip_and_result_metadata(tmp_path):
