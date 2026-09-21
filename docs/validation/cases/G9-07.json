@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G9-07",
+  "task": "G9-07",
+  "title": "Validation report generated from machine outputs: reproducible from the records, free of attestation wording, version and README numbers consistent",
+  "declared": "2026-09-22",
+  "declared_at_commit": "67cfd88",
+  "declared_before_run": true,
+  "fixture": {
+    "documents": ["docs/VALIDATION_REPORT.md", "docs/RELEASE_SCOPE.md"],
+    "renderer": "scripts/build_validation_report.py",
+    "inputs": [
+      "docs/validation/completion_gates.json and docs/validation/runs/<run_id>/evidence.json",
+      "docs/validation/platforms/*.json",
+      "the newest clean_install_record under docs/validation/clean_install/",
+      "scripts/run_suite.py SUITES",
+      "docs/validation/g3/*.json with the limits of docs/validation/cases/G3-*.json",
+      "docs/validation/cross_solver_3060.json and docs/validation/meep_comparison/*.json",
+      "docs/validation/known_limitations.json",
+      "pyproject.toml, docs/COMPATIBILITY.md, docs/CHANGELOG.md, README.md, docs/MEEP_COMPARISON.md"
+    ],
+    "judgement_rules": "check_release_gates.judge_task imported as a function; stale evidence is a failure",
+    "tree_state": "clean tree; the renderer refuses a dirty tree unless --allow-dirty, which marks the report PROVISIONAL"
+  },
+  "seed": "not applicable",
+  "precision": "not applicable: the report renders recorded numbers and runs no simulation",
+  "backend": "cpu",
+  "reference_method": "the records themselves are the reference; the committed documents must equal a fresh render of them",
+  "observables": [
+    {"name": "report_bytes_equal", "unit": "boolean", "definition": "a fresh render into a temporary path equals docs/VALIDATION_REPORT.md byte for byte"},
+    {"name": "scope_drift", "unit": "boolean", "definition": "the verification cells and the stage-status block of docs/RELEASE_SCOPE.md equal their regeneration from the gate file"},
+    {"name": "forbidden_words", "unit": "count", "definition": "occurrences of certificate, certified, certification or certify in the report (case-insensitive)"},
+    {"name": "consistency_mismatches", "unit": "count", "definition": "checks of the consistency section that report MISMATCH: package version across pyproject, COMPATIBILITY.md, CHANGELOG.md and the clean-install wheel name; every README row test of tests/test_readme_measurements.py; the README Meep block and MEEP_COMPARISON.md against the renderer; the RELEASE_SCOPE.md cells against the gate file"}
+  ],
+  "acceptance": {
+    "reproducible": "report_bytes_equal is true and scope_drift is false on the committed tree, and --check exits 0",
+    "wording": "the title reads 'internal validation report' and forbidden_words is 0",
+    "consistency": "consistency_mismatches is 0; the report lists every gate task once and every G3 task once with the FAILED findings visible",
+    "source_of_limits": "G9-07 in docs/COMPLETION_PROGRAM_KO.md section 11: report from machine outputs, no third-party attestation wording, numbers, support tables, README and wheel version consistent"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_validation_report.py::test_report_is_the_renderer_output_for_the_current_tree",
+      "tests/test_validation_report.py::test_release_scope_cells_and_stage_block_match_the_gate_file",
+      "tests/test_validation_report.py::test_report_title_and_forbidden_words",
+      "tests/test_validation_report.py::test_consistency_section_reports_no_mismatch",
+      "tests/test_validation_report.py::test_report_lists_every_gate_task_and_every_g3_task_once",
+      "tests/test_validation_report.py::test_check_mode_passes_on_the_committed_tree",
+      "tests/test_validation_report.py::test_scope_cells_are_regenerated_only_where_they_state_a_gate_result"
+    ],
+    "not_yet_covered": [
+      "API documentation version strings (no generated API documentation exists at this version; COMPATIBILITY.md is the API document and is checked)",
+      "README rows without a machine record (Lumerical, flaport/fdtd, sweep, CPU-versus-GPU and ensemble rows are documented in MEASUREMENTS.md and have no record-backed test)"
+    ]
+  },
+  "notes": "Declared at 67cfd88 before the recorded run. The known-limitations list is a hand-maintained JSON whose entries cite their records; the report labels it as such."
+}

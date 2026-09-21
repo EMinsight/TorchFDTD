@@ -140,3 +140,12 @@ history), gate 4 passed on the RTX 5880 and the local workstation, and gate 2
 is met by the FDTDX comparison except for single-problem multi-GPU. Gate 1
 remains open as a contractual question that publication does not settle, and
 gate 5 applies to any paper submission.
+
+## Release-candidate procedure
+
+The technical gate run of a candidate (build the wheel, clean install,
+re-record every gate with that wheel, the release-full suite on both lab
+hosts, the validation report and the judge) is written in
+[RELEASE_PROCEDURE.md](RELEASE_PROCEDURE.md). Its exit status answers gate 4
+above for one commit and one wheel. It does not answer gate 1, and a passing
+run is not an authorization of a public release.

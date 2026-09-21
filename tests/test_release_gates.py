@@ -1,4 +1,6 @@
 """Failure-injection tests of the completion-gate recorder and judge on a temporary repository."""
+import datetime
+import hashlib
 import importlib.util
 import json
 import subprocess
@@ -32,10 +34,15 @@ def git(root, *args):
                           cwd=root, capture_output=True, text=True, check=True).stdout.strip()
 
 
-def junit(path, cases):
+def now_iso():
+    return datetime.datetime.now().astimezone().isoformat()
+
+
+def junit(path, cases, timestamp=None):
     """Write a pytest-shaped JUnit file; cases are (classname, name, outcome) with outcome pass/fail/skip/error.
 
-    ``outcome`` may also be ``('skip', reason)`` to inject a specific skip reason.
+    ``outcome`` may also be ``('skip', reason)`` to inject a specific skip reason. The suite timestamp is
+    now unless given, so the run postdates the fixture repository's commits as a real run would.
     """
     rows = []
     for classname, name, outcome in cases:
@@ -50,7 +57,7 @@ def junit(path, cases):
                   errors=sum(o == 'error' for _, _, o in cases), skipped=sum(o == 'skip' for _, _, o in cases))
     path.write_text('<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" '
                     + ' '.join(f'{k}="{v}"' for k, v in counts.items())
-                    + ' time="0.01" timestamp="2026-09-21T12:00:00.000000+09:00">' + ''.join(rows)
+                    + f' time="0.01" timestamp="{timestamp or now_iso()}">' + ''.join(rows)
                     + '</testsuite></testsuites>', encoding='utf-8')
     return path
 
@@ -71,7 +78,7 @@ def repo(tmp_path):
                     blocker=None, scope_change_approval=None)
 
     gates = {key: real[key] for key in ('schema_version', 'kind', 'profiles', 'implementation_states', 'verification_states',
-                                        'required_evidence_fields', 'release_rule')}
+                                        'required_evidence_fields', 'release_rule', 'proposed_thresholds')}
     gates['adopted_commit'] = None
     gates['profiles'] = {'WORKSTATION': {'required_stages': ['G0', 'G1'], 'scope_status': 'TEST'},
                          'HPC': {'required_stages': ['G0', 'G1', 'H1'], 'scope_status': 'TEST'}}
@@ -79,23 +86,41 @@ def repo(tmp_path):
         dict(id='G0', title='baseline', depends_on_stages=[], profile='WORKSTATION', priority='P0',
              tasks=[task('G0-01', 'baseline check')]),
         dict(id='G1', title='regressions', depends_on_stages=['G0'], profile='WORKSTATION', priority='P0',
-             tasks=[task('G1-03', 'allocation scaling', ['tests/test_alpha.py::test_two'])]),
+             tasks=[task('G1-03', 'allocation scaling', ['tests/test_alpha.py::test_two']),
+                    task('G1-05', 'whole file required', ['tests/test_alpha.py']),
+                    dict(task('G1-06', 'reads data files', ['tests/test_alpha.py::test_one']), watch_paths=['data/*.json', 'data/notes.md'])]),
         dict(id='H1', title='hpc', depends_on_stages=['G1'], profile='HPC', priority='P1',
              tasks=[dict(task('H1-02', 'two gpu'), blocker='BLOCKED_EXTERNAL: no second GPU')]),
     ]
     gate_path = root / 'docs' / 'validation' / 'completion_gates.json'
     gate_path.write_text(json.dumps(gates, indent=2) + '\n', encoding='utf-8')
+    (root / 'data').mkdir()
+    (root / 'data' / 'a.json').write_text('{"a": 1}\n', encoding='utf-8')
+    (root / 'data' / 'notes.md').write_text('notes\n', encoding='utf-8')
     git(root, 'init', '-q')
     git(root, 'add', '.')
     git(root, 'commit', '-q', '-m', 'baseline')
     return root
 
 
-def record(root, task_id, junit_path, **extra):
-    argv = ['--root', str(root), '--task', task_id, '--command', f'pytest tests/test_alpha.py ({task_id})', '--junit', str(junit_path)]
+def record(root, task_id, junit_path, command=None, **extra):
+    argv = ['--root', str(root), '--task', task_id, '--command', command or f'pytest tests/test_alpha.py ({task_id})', '--junit', str(junit_path)]
     for key, value in extra.items():
         argv += [f'--{key.replace("_", "-")}', str(value)]
     return recorder.main(argv)
+
+
+PYTEST_ALPHA = f'{Path(sys.executable).as_posix()} -m pytest -q -p no:cacheprovider tests/test_alpha.py'
+
+
+def evidence_of(root, task_id, index=-1):
+    run_id = task_of(root, task_id)['evidence'][index]
+    run_dir = root / 'docs' / 'validation' / 'runs' / run_id
+    return run_dir, json.loads((run_dir / 'evidence.json').read_text(encoding='utf-8'))
+
+
+def rewrite_evidence(run_dir, evidence):
+    (run_dir / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
 
 
 def gates_of(root):
@@ -203,13 +228,19 @@ def test_gpu_skip_reasons_are_classified_and_optional_checks_are_not(repo, tmp_p
 
 def test_judge_classifies_gpu_skips_in_evidence_recorded_without_the_field(repo, tmp_path, capsys):
     record(repo, 'G1-03', passing_junit(tmp_path))
-    task = task_of(repo, 'G1-03')
-    path = repo / 'docs' / 'validation' / 'runs' / task['evidence'][0] / 'evidence.json'
-    evidence = json.loads(path.read_text(encoding='utf-8'))
+    run_dir, evidence = evidence_of(repo, 'G1-03')
     del evidence['gpu_required_skips']
     evidence['test_results']['skipped'] = ['tests/test_alpha.py::test_three']
     evidence['test_results']['skipped_reasons'] = {'tests/test_alpha.py::test_three': 'CUDA unavailable'}
-    path.write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
+    # An old-format record is consistent with its junit copy; only the classification field is absent.
+    copy = run_dir / 'junit.xml'
+    text = copy.read_text(encoding='utf-8').replace('</testsuite>', '<testcase classname="tests.test_alpha" name="test_three" time="0.001">'
+                                                    '<skipped type="pytest.skip" message="CUDA unavailable">CUDA unavailable</skipped></testcase></testsuite>')
+    copy.write_text(text, encoding='utf-8')
+    for artifact in evidence['artifact_paths_and_sha256']:
+        if artifact['path'].endswith('/junit.xml'):
+            artifact['sha256'] = hashlib.sha256(copy.read_bytes()).hexdigest()
+    rewrite_evidence(run_dir, evidence)
     code, out = judge_run(repo, capsys, '--task', 'G1-03')
     assert code == 1 and 'GPU-required tests skipped in a required run: tests/test_alpha.py::test_three' in out
 
@@ -282,6 +313,8 @@ def test_profile_judgement_needs_every_required_task_and_reports_blockers(repo, 
     code, out = judge_run(repo, capsys)
     assert code == 1 and 'G0-01' in out and 'verification_state is NOT_RUN' in out
     record(repo, 'G0-01', junit(tmp_path / 'g0.xml', [('tests.test_alpha', 'test_one', 'pass')]))
+    record(repo, 'G1-05', passing_junit(tmp_path), command=PYTEST_ALPHA)
+    record(repo, 'G1-06', junit(tmp_path / 'g1-06.xml', [('tests.test_alpha', 'test_one', 'pass')]))
     code, out = judge_run(repo, capsys)
     assert code == 0 and 'all judged tasks pass' in out
     code, out = judge_run(repo, capsys, '--profile', 'HPC')
@@ -291,20 +324,35 @@ def test_profile_judgement_needs_every_required_task_and_reports_blockers(repo, 
 def test_failed_task_outside_the_profile_blocks_release(repo, tmp_path, capsys):
     record(repo, 'G1-03', passing_junit(tmp_path))
     record(repo, 'G0-01', junit(tmp_path / 'g0.xml', [('tests.test_alpha', 'test_one', 'pass')]))
+    record(repo, 'G1-05', passing_junit(tmp_path), command=PYTEST_ALPHA)
+    record(repo, 'G1-06', junit(tmp_path / 'g1-06.xml', [('tests.test_alpha', 'test_one', 'pass')]))
     record(repo, 'H1-02', junit(tmp_path / 'h1.xml', [('tests.test_alpha', 'test_one', 'fail')]))
     code, out = judge_run(repo, capsys)
     assert code == 1 and 'FAILED tasks outside the selection: H1-02' in out
 
 
-def test_dirty_tree_is_recorded_in_the_manifest(repo, tmp_path):
-    (repo / 'tests' / 'test_alpha.py').write_text(TEST_SOURCE + '\n# uncommitted\n', encoding='utf-8')
+def test_dirty_required_test_is_refused_and_allow_dirty_evidence_fails_the_judge(repo, tmp_path, capsys):
     (repo / 'untracked.txt').write_text('x\n', encoding='utf-8')
-    record(repo, 'G1-03', passing_junit(tmp_path))
-    run_id = task_of(repo, 'G1-03')['evidence'][0]
-    evidence = json.loads((repo / 'docs' / 'validation' / 'runs' / run_id / 'evidence.json').read_text(encoding='utf-8'))
+    record(repo, 'G1-03', passing_junit(tmp_path))  # an unrelated untracked file is a warning, not a refusal
+    run_dir, evidence = evidence_of(repo, 'G1-03')
+    manifest = {row['path']: row for row in evidence['dirty_source_manifest']}
+    assert manifest['untracked.txt']['status'] == '??' and manifest['untracked.txt']['head_sha256'] is None
+    assert evidence['dirty_allowed'] is False and evidence['dirty_guarded_paths'] == []
+    code, out = judge_run(repo, capsys, '--task', 'G1-03')
+    assert code == 0 and 'recorded on a dirty tree' in out
+    (repo / 'tests' / 'test_alpha.py').write_text(TEST_SOURCE + '\n# uncommitted weakening\n', encoding='utf-8')
+    with pytest.raises(SystemExit, match='refusing to record'):
+        record(repo, 'G1-03', passing_junit(tmp_path))
+    assert len(task_of(repo, 'G1-03')['evidence']) == 1
+    assert record(repo, 'G1-03', passing_junit(tmp_path), allow_dirty='reviewing an unmerged fix') == 0
+    run_dir, evidence = evidence_of(repo, 'G1-03')
     manifest = {row['path']: row for row in evidence['dirty_source_manifest']}
     assert manifest['tests/test_alpha.py']['status'] == 'M' and manifest['tests/test_alpha.py']['head_sha256']
-    assert manifest['untracked.txt']['status'] == '??' and manifest['untracked.txt']['head_sha256'] is None
+    assert evidence['dirty_allowed'] is True and evidence['dirty_allowed_reason'] == 'reviewing an unmerged fix'
+    assert evidence['dirty_guarded_paths'] == ['tests/test_alpha.py']
+    assert task_of(repo, 'G1-03')['verification_state'] == 'VERIFIED'
+    code, out = judge_run(repo, capsys, '--task', 'G1-03')
+    assert code == 1 and 'recorded with --allow-dirty (reviewing an unmerged fix)' in out
 
 
 def test_fixture_and_criteria_hashes_are_recorded_and_checked(repo, tmp_path, capsys):
@@ -312,11 +360,15 @@ def test_fixture_and_criteria_hashes_are_recorded_and_checked(repo, tmp_path, ca
     case.parent.mkdir(parents=True)
     case.write_text(json.dumps(dict(fixture=dict(mesh=0.05), seed=7, precision='float32', backend='cpu',
                                     reference_method='analytic', observables=['ratio'], acceptance=dict(rtol=1e-4))) + '\n', encoding='utf-8')
+    with pytest.raises(SystemExit, match='refusing to record'):  # the case file must be committed before the run counts
+        record(repo, 'G1-03', passing_junit(tmp_path), fixture=case)
+    git(repo, 'add', '.')
+    git(repo, 'commit', '-q', '-m', 'declare the case')
     record(repo, 'G1-03', passing_junit(tmp_path), fixture=case)
-    run_id = task_of(repo, 'G1-03')['evidence'][0]
-    evidence = json.loads((repo / 'docs' / 'validation' / 'runs' / run_id / 'evidence.json').read_text(encoding='utf-8'))
+    run_dir, evidence = evidence_of(repo, 'G1-03')
     assert evidence['fixture_sha256'] == evidence['acceptance_criteria_sha256'] == recorder.file_sha256(case)
     assert evidence['seed'] == 7 and evidence['acceptance_limits'] == dict(rtol=1e-4) and evidence['physics_configuration'] == dict(mesh=0.05)
+    assert evidence['declared_before_run_verified'] is True and evidence['case_first_commit'] == git(repo, 'rev-parse', 'HEAD')
     assert judge_run(repo, capsys, '--task', 'G1-03')[0] == 0
     edited = case.read_text(encoding='utf-8').replace('0.0001', '0.01')
     assert edited != case.read_text(encoding='utf-8')
@@ -338,3 +390,189 @@ def test_repository_gate_file_is_adopted_and_not_yet_releasable(capsys):
     code = judge.main(['--root', str(ROOT)])
     out = capsys.readouterr().out
     assert code == 1 and 'NOT RELEASABLE' in out and 'verification_state is NOT_RUN' in out
+
+
+def test_junit_older_than_the_commit_is_refused_unless_allowed_and_then_warned(repo, tmp_path, capsys):
+    stale_start = (datetime.datetime.now().astimezone() - datetime.timedelta(hours=1)).isoformat()
+    early = junit(tmp_path / 'early.xml', [('tests.test_alpha', 'test_one', 'pass'), ('tests.test_alpha', 'test_two', 'pass')], timestamp=stale_start)
+    with pytest.raises(SystemExit, match='before the source commit'):
+        record(repo, 'G1-03', early)
+    assert task_of(repo, 'G1-03')['evidence'] == []
+    assert record(repo, 'G1-03', early, allow_precommit_junit='historic run kept for the record') == 0
+    _, evidence = evidence_of(repo, 'G1-03')
+    assert evidence['junit_started_before_commit'] is True and evidence['precommit_junit_reason'] == 'historic run kept for the record'
+    assert evidence['source_commit_time']
+    code, out = judge_run(repo, capsys, '--task', 'G1-03')
+    assert code == 0 and 'run predates its commit' in out and 'historic run kept for the record' in out
+    later = passing_junit(tmp_path)
+    assert record(repo, 'G1-03', later) == 0
+    _, evidence = evidence_of(repo, 'G1-03')
+    assert evidence['junit_started_before_commit'] is False and evidence['precommit_junit_reason'] is None
+    code, out = judge_run(repo, capsys, '--task', 'G1-03')
+    assert code == 0 and 'run predates its commit' not in out
+
+
+def test_judge_derives_the_precommit_warning_for_evidence_without_the_field(repo, tmp_path, capsys):
+    record(repo, 'G1-03', passing_junit(tmp_path))
+    run_dir, evidence = evidence_of(repo, 'G1-03')
+    del evidence['junit_started_before_commit']
+    evidence['execution_timestamp'] = (datetime.datetime.now().astimezone() - datetime.timedelta(days=1)).isoformat()
+    rewrite_evidence(run_dir, evidence)
+    code, out = judge_run(repo, capsys, '--task', 'G1-03')
+    assert code == 0 and 'run predates its commit' in out
+
+
+def test_watched_data_files_are_hashed_and_a_change_or_a_new_match_is_stale(repo, tmp_path, capsys):
+    record(repo, 'G1-06', junit(tmp_path / 'w.xml', [('tests.test_alpha', 'test_one', 'pass')]))
+    _, evidence = evidence_of(repo, 'G1-06')
+    assert evidence['watch_paths'] == ['data/*.json', 'data/notes.md']
+    assert set(evidence['watch_sha256']) == {'data/a.json', 'data/notes.md'}
+    assert evidence['watch_sha256']['data/notes.md'] == recorder.file_sha256(repo / 'data' / 'notes.md')
+    assert judge_run(repo, capsys, '--task', 'G1-06')[0] == 0
+    (repo / 'data' / 'notes.md').write_text('notes changed\n', encoding='utf-8')
+    code, out = judge_run(repo, capsys, '--task', 'G1-06')
+    assert code == 1 and 'STALE: watched file changed since the run: data/notes.md' in out
+    git(repo, 'checkout', '--', 'data/notes.md')
+    (repo / 'data' / 'b.json').write_text('{"b": 2}\n', encoding='utf-8')
+    code, out = judge_run(repo, capsys, '--task', 'G1-06')
+    assert code == 1 and 'a file matching a watched pattern did not exist at recording: data/b.json' in out
+    (repo / 'data' / 'b.json').unlink()
+    (repo / 'data' / 'a.json').unlink()
+    code, out = judge_run(repo, capsys, '--task', 'G1-06')
+    assert code == 1 and 'watched file missing: data/a.json' in out
+
+
+def test_evidence_that_predates_the_watch_list_is_stale(repo, tmp_path, capsys):
+    record(repo, 'G1-06', junit(tmp_path / 'w.xml', [('tests.test_alpha', 'test_one', 'pass')]))
+    run_dir, evidence = evidence_of(repo, 'G1-06')
+    del evidence['watch_sha256']
+    rewrite_evidence(run_dir, evidence)
+    code, out = judge_run(repo, capsys, '--task', 'G1-06')
+    assert code == 1 and 'evidence predates the watch list' in out
+
+
+def test_file_level_required_tests_are_enumerated_and_a_partial_run_is_not_verified(repo, tmp_path, capsys):
+    partial = junit(tmp_path / 'partial.xml', [('tests.test_alpha', 'test_one', 'pass')])
+    record(repo, 'G1-05', partial, command=PYTEST_ALPHA + ' -k test_one')
+    out = capsys.readouterr().out
+    assert task_of(repo, 'G1-05')['verification_state'] == 'NOT_RUN'
+    assert 'partial run' in out and 'tests/test_alpha.py::test_two' in out
+    record(repo, 'G1-05', passing_junit(tmp_path), command=PYTEST_ALPHA)
+    assert task_of(repo, 'G1-05')['verification_state'] == 'VERIFIED'
+    run_dir, evidence = evidence_of(repo, 'G1-05')
+    assert evidence['enumerated_required_tests'] == {'tests/test_alpha.py': ['tests/test_alpha.py::test_one', 'tests/test_alpha.py::test_two']}
+    assert judge_run(repo, capsys, '--task', 'G1-05')[0] == 0
+    # The judge checks the stored enumeration against the junit again: a test dropped from the copy is a partial run.
+    copy = run_dir / 'junit.xml'
+    text = copy.read_text(encoding='utf-8')
+    kept = text[:text.index('<testcase classname="tests.test_alpha" name="test_two"')] + '</testsuite></testsuites>'
+    copy.write_text(kept, encoding='utf-8')
+    evidence['test_results']['passed'] = ['tests/test_alpha.py::test_one']
+    for artifact in evidence['artifact_paths_and_sha256']:
+        if artifact['path'].endswith('/junit.xml'):
+            artifact['sha256'] = hashlib.sha256(copy.read_bytes()).hexdigest()
+    rewrite_evidence(run_dir, evidence)
+    code, out = judge_run(repo, capsys, '--task', 'G1-05')
+    assert code == 1 and 'collected tests of tests/test_alpha.py absent from the junit (partial run): tests/test_alpha.py::test_two' in out
+
+
+def test_optional_platform_skip_inside_a_file_level_entry_is_allowed_but_another_skip_is_not(repo, tmp_path, capsys):
+    optional = junit(tmp_path / 'opt.xml', [('tests.test_alpha', 'test_one', 'pass'),
+                                            ('tests.test_alpha', 'test_two', ('skip', 'optional platform check: no second GPU'))])
+    record(repo, 'G1-05', optional, command=PYTEST_ALPHA)
+    assert task_of(repo, 'G1-05')['verification_state'] == 'VERIFIED'
+    assert judge_run(repo, capsys, '--task', 'G1-05')[0] == 0
+    plain = junit(tmp_path / 'plain.xml', [('tests.test_alpha', 'test_one', 'pass'), ('tests.test_alpha', 'test_two', 'skip')])
+    record(repo, 'G1-05', plain, command=PYTEST_ALPHA)
+    out = capsys.readouterr().out
+    assert task_of(repo, 'G1-05')['verification_state'] == 'NOT_RUN' and 'required tests were skipped: tests/test_alpha.py' in out
+
+
+def test_file_level_entry_needs_an_enumerable_command(repo, tmp_path):
+    with pytest.raises(SystemExit, match='cannot enumerate'):
+        record(repo, 'G1-05', passing_junit(tmp_path), command='make check')
+    assert task_of(repo, 'G1-05')['evidence'] == []
+
+
+def test_hand_edited_evidence_or_junit_copy_is_rejected_by_the_judge(repo, tmp_path, capsys):
+    failing = junit(tmp_path / 'fail.xml', [('tests.test_alpha', 'test_one', 'pass'), ('tests.test_alpha', 'test_two', 'fail')])
+    record(repo, 'G1-03', failing)
+    run_dir, evidence = evidence_of(repo, 'G1-03')
+    evidence['test_results']['failed'] = []
+    evidence['test_results']['passed'].append('tests/test_alpha.py::test_two')
+    evidence['verification_state_assigned'] = 'VERIFIED'
+    evidence['exit_code'] = 0
+    rewrite_evidence(run_dir, evidence)
+    gate_path = repo / 'docs' / 'validation' / 'completion_gates.json'
+    gate_path.write_text(gate_path.read_text(encoding='utf-8').replace('"verification_state": "FAILED"', '"verification_state": "VERIFIED"'), encoding='utf-8')
+    code, out = judge_run(repo, capsys, '--task', 'G1-03')
+    assert code == 1 and 'evidence does not match its junit: passed, failed differ' in out
+    record(repo, 'G0-01', passing_junit(tmp_path))
+    run_dir, _ = evidence_of(repo, 'G0-01')
+    copy = run_dir / 'junit.xml'
+    copy.write_text(copy.read_text(encoding='utf-8').replace('time="0.001"', 'time="0.002"', 1), encoding='utf-8')
+    code, out = judge_run(repo, capsys, '--task', 'G0-01')
+    assert code == 1 and 'junit copy does not match the SHA-256 stored in the evidence' in out
+    copy.unlink()
+    code, out = judge_run(repo, capsys, '--task', 'G0-01')
+    assert code == 1 and 'junit copy missing' in out
+
+
+def test_environment_records_package_locations_and_the_original_junit_path(repo, tmp_path):
+    report = passing_junit(tmp_path)
+    record(repo, 'G1-03', report)
+    _, evidence = evidence_of(repo, 'G1-03')
+    for key in ('fdtd', 'fdtd_location', 'torchfdtd_location'):
+        assert key in evidence['environment'], key
+    assert evidence['junit_original_path'] == recorder.redact_home(report.resolve().as_posix())
+    assert evidence['recorder_version'] == 2
+    home = str(Path.home())
+    for value in (evidence['junit_original_path'], evidence['environment']['python_executable'],
+                  evidence['environment']['fdtd_location'], evidence['environment']['torchfdtd_location']):
+        assert value is None or home.lower() not in str(value).lower(), value  # the account name never enters the evidence
+    assert recorder.redact_home(home + '/x/y.py') == '<user home>/x/y.py'
+
+
+def test_case_first_committed_after_the_run_is_a_declaration_warning_not_a_failure(repo, tmp_path, capsys):
+    case = repo / 'docs' / 'validation' / 'cases' / 'late.json'
+    case.parent.mkdir(parents=True)
+    case.write_text(json.dumps(dict(seed=1, acceptance=dict(limit=1))) + '\n', encoding='utf-8')
+    started = (datetime.datetime.now().astimezone() - datetime.timedelta(seconds=5)).isoformat()  # the run started, then the case is committed
+    report = junit(tmp_path / 'pass.xml', [('tests.test_alpha', 'test_one', 'pass'), ('tests.test_alpha', 'test_two', 'pass')], timestamp=started)
+    git(repo, 'add', '.')
+    git(repo, 'commit', '-q', '-m', 'declare the case after the run')
+    record(repo, 'G1-03', report, fixture=case, allow_precommit_junit='the run started before this commit')
+    _, evidence = evidence_of(repo, 'G1-03')
+    assert evidence['declared_before_run_verified'] is False and 'after the run started' in evidence['declaration_note']
+    code, out = judge_run(repo, capsys, '--task', 'G1-03')
+    assert code == 0 and 'declaration order not verified' in out
+
+
+def test_scope_changes_without_approval_are_warned_and_listed(repo, tmp_path, capsys):
+    cases = repo / 'docs' / 'validation' / 'cases'
+    cases.mkdir(parents=True)
+    (cases / 'G1-03_r2.json').write_text(json.dumps(dict(task='G1-03', supersedes=dict(case='G1-03_first.json'),
+                                                         acceptance=dict(rtol=1e-4))) + '\n', encoding='utf-8')
+    (cases / 'G0-01_loose.json').write_text(json.dumps(dict(task='G0-01', acceptance=dict(gradient=dict(rtol=1e-3)))) + '\n', encoding='utf-8')
+    git(repo, 'add', '.')
+    git(repo, 'commit', '-q', '-m', 'cases')
+    record(repo, 'G1-03', passing_junit(tmp_path))
+    record(repo, 'G0-01', junit(tmp_path / 'g0.xml', [('tests.test_alpha', 'test_one', 'pass')]))
+    record(repo, 'G1-05', passing_junit(tmp_path), command=PYTEST_ALPHA)
+    record(repo, 'G1-06', junit(tmp_path / 'g1-06.xml', [('tests.test_alpha', 'test_one', 'pass')]))
+    code, out = judge_run(repo, capsys)
+    assert code == 0
+    assert 'G1-03: scope change pending approval (1 declaration(s), scope_change_approval is null): docs/validation/cases/G1-03_r2.json declares supersedes' in out
+    assert 'G0-01: scope change pending approval (1 declaration(s), scope_change_approval is null): docs/validation/cases/G0-01_loose.json acceptance/gradient/rtol = 0.001 is looser' in out
+    assert 'scope changes pending owner approval (scope_change_approval is null): G0-01, G1-03' in out
+    pending = judge.pending_scope_changes(repo, gates_of(repo))
+    assert set(pending) == {'G0-01', 'G1-03'}
+    gate_path = repo / 'docs' / 'validation' / 'completion_gates.json'
+    gates = gates_of(repo)
+    for stage in gates['stages']:
+        for task in stage['tasks']:
+            if task['id'] == 'G1-03':
+                task['scope_change_approval'] = 'owner, 2026-09-22: revision accepted'
+    gate_path.write_text(json.dumps(gates, indent=2) + '\n', encoding='utf-8')
+    code, out = judge_run(repo, capsys)
+    assert code == 0 and 'G1-03: scope change pending approval' not in out and 'G0-01: scope change pending approval' in out

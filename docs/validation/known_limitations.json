@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "kind": "known_limitations",
+  "notice": "Limitations of the WORKSTATION and HPC profiles at this version, each tied to the record or document that establishes it. build_validation_report.py renders this list into VALIDATION_REPORT.md; a limitation is removed only when the record that established it is superseded by a passing one.",
+  "limitations": [
+    {
+      "id": "plasmonic-nanoparticle-staircase",
+      "statement": "Scattering and absorption of a staircased Drude metal sphere resolved by 4 to 10 cells per radius fail the case's own loose budgets at h = 0.005 um (scattering 1.376, 0.458 and 0.445 against budgets 0.5, 0.3 and 0.2; absorption 6.733, 4.985 and 3.446 against 1.0, 0.6 and 0.4 for radii 0.02, 0.035 and 0.05 um). Plasmonic nanoparticle cross sections are not a supported accuracy claim of the staircase material sampling.",
+      "status": "FAILED gate, kept as a finding",
+      "tasks": ["G3-05"],
+      "sources": ["docs/validation/g3/G3-05.json", "docs/validation/cases/G3-05_drude_sphere.json", "docs/validation/runs/20260921T181951Z-g3-05-8fafa59e/evidence.json"]
+    },
+    {
+      "id": "high-index-slab-resolution",
+      "statement": "At about 20 cells per material wavelength the n = 3.5 slabs exceed the 0.01 R/T and 0.02 rad phase limits (max abs dR 0.0128 to 0.0373, phase 0.0315 to 0.0539 rad) because of the second-order Yee phase error; the limits are met at about 40 cells per material wavelength (revision 2 of the case). Users of high-index structures need that resolution for 1 percent transmission accuracy.",
+      "status": "resolution requirement of the staircase Yee scheme; first case FAILED and kept, revision-2 case VERIFIED",
+      "tasks": ["G3-02", "G3-01"],
+      "sources": ["docs/validation/g3/G3-02.json", "docs/validation/g3/G3-02r2.json", "docs/PHYSICS_VALIDATION.md"]
+    },
+    {
+      "id": "frozen-pml-dispersion",
+      "statement": "Drude/Lorentz pole cells inside the high-conductivity part of the CPML diverge after about 1500 steps on domains larger than a few micrometres; Region.pml_dispersion = 'frozen' avoids this by giving PML cells the real permittivity at the source centre frequency, at the price of a permittivity step at the interior/PML interface away from that frequency and no meaning for media whose real permittivity is negative there. The differentiable, dispersive-adjoint and streamed solvers reject 'frozen'; an adiabatic conductivity absorber is not implemented.",
+      "status": "documented limit of the default 'ade' and the 'frozen' PML modes",
+      "tasks": [],
+      "sources": ["docs/BOUNDARIES.md"]
+    },
+    {
+      "id": "grating-cuda-fp32-layer-a",
+      "statement": "One Bloch grating configuration (TM, 20 degrees, 0.92 um) exceeds the CUDA FP32 layer-A tolerance against CPU FP64 by 15 percent (relative difference 1.15e-4 against rtol 1e-4); the efficiency and phase agreement with TORCWA is within its limits.",
+      "status": "FAILED gate, kept as a finding",
+      "tasks": ["G3-08"],
+      "sources": ["docs/validation/g3/G3-08.json", "docs/validation/runs/20260921T181948Z-g3-08-6ccad85a/evidence.json"]
+    },
+    {
+      "id": "multi-gpu",
+      "statement": "Single-problem multi-GPU forward, adjoint and scaling (the HPC profile, stage H1) cannot be verified: no host with two or more NVIDIA GPUs is available to the program. The domain decomposition is verified with two and three Linux CPU Gloo ranks only, which do not count as CUDA verification.",
+      "status": "BLOCKED_EXTERNAL",
+      "tasks": ["H1-02", "H1-03", "H1-04", "H1-05", "H1-06"],
+      "sources": ["docs/validation/completion_gates.json", "docs/RELEASE_SCOPE.md", "docs/DOMAIN_DECOMPOSITION.md"]
+    }
+  ]
+}
