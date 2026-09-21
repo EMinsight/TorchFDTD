@@ -52,3 +52,18 @@ Example: [G1-03_quadrant_allocation_scaling.json](G1-03_quadrant_allocation_scal
 - Physical size, simulation time, source, monitor placement and PML thickness
   are fixed per case so that mesh refinement changes one thing at a time.
 - Cases never contain vendor solver outputs or private research data.
+
+## Records written by test runs
+
+`tests/test_physics_g3_a.py` (`docs/validation/g3/G3-01.json`, `G3-02r2.json`,
+`G3-03.json`, `G3-07.json`) and the G5 memory-tier modules through
+`tests/g5_support.py` (`docs/validation/g5/G5-01.json` to `G5-04.json`) write
+their measurements as JSON records. The committed records are refreshed only
+when the run sets `TORCHFDTD_WRITE_RECORDS=1`; without it `tests/record_output.py`
+redirects the same relative path under the pytest session's temporary
+directory, so an ordinary test run leaves the tree clean and the recorder's
+dirty-tree check applies to deliberate changes only. The other record writers
+keep their own opt-in variables: `TORCHFDTD_G3_RECORD=<dir>` for
+`tests/test_physics_g3_b.py` and `tests/test_physics_g3_b_r2.py`,
+`TORCHFDTD_G6_RECORD=<dir>` for `tests/test_design_reimport.py` and
+`TORCHFDTD_G8_OBSERVED=<file>` for `tests/test_result_store.py`.

@@ -8,7 +8,8 @@ Every oracle here (the Yee relation, the Fresnel/Airy transfer matrix, the analy
 permittivities, the bilinear ADE response and the DFT) is written in this module and shares
 no code with the solver. The pre-declared fixtures and limits are docs/validation/cases/G3-0*.json;
 the limits below are copied from them, not the other way round. Each test writes its measurements
-to docs/validation/g3/<task>.json before asserting, so a failed criterion is still recorded.
+to docs/validation/g3/<task>.json before asserting, so a failed criterion is still recorded; the
+committed file is touched only with TORCHFDTD_WRITE_RECORDS=1 (tests/record_output.py).
 The finest meshes run only with TORCHFDTD_G3_FINE=1 (the recorded run sets it).
 """
 from __future__ import annotations
@@ -31,10 +32,10 @@ from torchfdtd import (Project, Region, Structure, Source, Monitor, Material, Lo
                        Boundaries, BoundaryFace, RunControl, OpticalData, FitOptions, fit_material)
 from torchfdtd.boundaries import YeeGrid
 from torchfdtd.materials import MaterialADE, permittivity
+from record_output import record_path
 
 C0 = 299792458.0
 ROOT = Path(__file__).resolve().parents[1]
-RECORD_DIR = ROOT / 'docs' / 'validation' / 'g3'
 CASES = ROOT / 'docs' / 'validation' / 'cases'
 FINE = os.environ.get('TORCHFDTD_G3_FINE') == '1'
 FINE_REASON = 'finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)'
@@ -100,10 +101,13 @@ class Record:
     """Write-through JSON record of one task: one entry per measured instance."""
     def __init__(self, task, case):
         self.task, self.case = task, case
-        self.path = RECORD_DIR / f'{task}.json'
+
+    @property
+    def path(self):
+        return record_path(f'docs/validation/g3/{self.task}.json')
 
     def add(self, key, **values):
-        RECORD_DIR.mkdir(parents=True, exist_ok=True)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.task in _RESET and self.path.is_file():
             data = json.loads(self.path.read_text(encoding='utf-8'))
         else:
