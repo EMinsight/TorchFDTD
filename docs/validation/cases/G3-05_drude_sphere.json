@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-05_drude_sphere",
+  "task": "G3-05",
+  "title": "Drude metal sphere at three sizes below and near the plasmon resonance: scattering and absorption against Mie with a complex index, mesh sequence h, h/2, h/4",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f91",
+  "declared_before_run": true,
+  "fixture": {
+    "method": "Closed TFSF box; six inner monitor planes inside the box (total field) give the absorption as the net inward total-field power and, after matched-reference subtraction, the scattered power; six outer planes outside the box give the scattered power independently (the two scattered powers must agree). The Drude sphere is staircased at the Yee sampling positions and advanced with the native trapezoidal ADE. Physical domain, PML thickness, source, monitors and duration are fixed across the mesh sequence.",
+    "drude": {
+      "model": "epsilon(omega) = epsilon_inf - plasma_rad_s^2 / (omega^2 + i collision_rad_s omega), exp(-i omega t)",
+      "epsilon_inf": 5.0,
+      "plasma_rad_s": 1.37e16,
+      "collision_rad_s": 1.5e14,
+      "description": "silver-like analytic model (plasma energy about 9 eV, damping about 0.1 eV, epsilon_inf 5); quasi-static dipole resonance where Re epsilon = -2, near 0.364 um; the model is analytic and identical in the solver and in the Mie series"
+    },
+    "radii_um": [0.02, 0.035, 0.05],
+    "size_parameters_at_0.39um": [0.32, 0.56, 0.81],
+    "domain_um": 0.48,
+    "pml_um": 0.08,
+    "tfsf_um": 0.24,
+    "inner_monitor_half_um": 0.09,
+    "outer_monitor_half_um": 0.15,
+    "band": [0.33, 0.45, 9],
+    "pulse_wavelength_um": 0.39,
+    "pulse_length_s": 2e-15,
+    "pulse_offset_s": 8e-15,
+    "duration_fs": 48,
+    "duration_note": "the Drude relaxation time 1/collision_rad_s is 6.7 fs, so 48 fs leaves exp(-7.2) of the polarization energy",
+    "mesh_sequence_um": [0.02, 0.01, 0.005],
+    "judged_mesh_um": 0.005,
+    "cells_per_radius_at_judged_mesh": [4, 7, 10],
+    "grids": ["24^3", "48^3", "96^3 (CPU FP64 only, above the CUDA cap of the recorded run)"],
+    "layer_a": "fused CUDA FP32 against CPU FP64 at 24^3 and 48^3 on the scattering and absorption observables",
+    "ade_diagnostic": "the record also stores the Mie result evaluated with the ADE-sampled permittivity at (2/dt) tan(omega dt/2), which separates the time-discretisation of the material from the grid error"
+  },
+  "seed": null,
+  "precision": ["float64 (CPU reference)", "float32 (CUDA, layer A)"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "Bohren-Huffman sphere series with the complex index sqrt(epsilon(omega)) of the same analytic Drude model, written in tests/test_physics_g3_b.py with SciPy spherical Bessel functions; checked against the real-index repository series and against the quasi-static absorption and scattering limits of a Drude sphere",
+  "observables": [
+    {"name": "scattering_um2", "unit": "um^2", "definition": "outward scattered power through the outer planes divided by the incident intensity"},
+    {"name": "inner_scattering_um2", "unit": "um^2", "definition": "the same from the inner planes after subtracting the matched reference fields; its difference from the outer value over the band maximum is the self-consistency check"},
+    {"name": "absorption_um2", "unit": "um^2", "definition": "net inward total-field power through the inner planes divided by the incident intensity"},
+    {"name": "max_scattering_relative_error", "unit": "dimensionless", "definition": "max over the nine wavelengths of |scattering/Mie - 1|"},
+    {"name": "max_absorption_relative_error", "unit": "dimensionless", "definition": "max over the nine wavelengths of |absorption/Mie - 1|"},
+    {"name": "peak_scattering_um, peak_absorption_um", "unit": "um", "definition": "refined peak wavelengths of the measured and Mie curves (diagnostic, not judged)"}
+  ],
+  "acceptance": {
+    "judged_at": "h/4 = 0.005 um, CPU FP64",
+    "per_radius": {
+      "0.02": {"scattering_relative_error": 0.5, "absorption_relative_error": 1.0},
+      "0.035": {"scattering_relative_error": 0.3, "absorption_relative_error": 0.6},
+      "0.05": {"scattering_relative_error": 0.2, "absorption_relative_error": 0.4}
+    },
+    "justification": "The 2 percent Mie threshold of the program is declared not applicable: a staircased metal sphere resolved by 4 to 10 cells per radius has an effective-radius uncertainty of about h/(2a) (12.5, 7 and 5 percent), the quasi-static scattering scales with a^6 and the absorption with a^3, and the plasmon peak shifts with the effective shape so that fixed-wavelength errors on the flanks are amplified by the peak steepness (Q about 10). The scattering budgets are roughly 6 h/(2a) rounded down to the values above; the absorption budgets are doubled because the absorption is the small difference of the inward and outward total-field powers and is the hard observable. These are loose engineering budgets, not a claim of accuracy; the expected outcome is FAIL at least for the smallest sphere, and a recorded failure with the numbers is the deliverable.",
+    "self_consistency": {"inner_outer_scattering_max_difference_over_band_maximum": 0.02, "definition": "max over the band of |inner - outer| scattered cross section divided by the band maximum of the outer value; a per-wavelength relative form was replaced before the recorded run because it is amplified where the coarse-mesh cross section is nearly zero"},
+    "layer_a_cuda_fp32_vs_cpu_fp64": {"rtol": 0.0001, "atol": 0.0},
+    "convergence_reporting": "the error at h, h/2 and h/4 is reported for every radius and observable; no order or monotonicity is required",
+    "source_of_limits": "fixture-specific budgets declared here; the program's 2 percent Mie threshold is recorded as not met by design of the fixture"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a"
+    ],
+    "not_yet_covered": [
+      "a subpixel or conformal treatment of the dispersive interface (not supported by the solver)",
+      "a finer mesh sequence (h/8 needs 192^3 cells)",
+      "Lorentz or multipole metals"
+    ]
+  },
+  "notes": "Exploratory probes at 0.02 and 0.01 um preceded this declaration; they showed errors of order one for every radius, which is consistent with the budgets being missed at h/4 as well. The budgets were fixed from the geometric argument above, not from those probe values. The case is added in the commit following 2b64f91."
+}
