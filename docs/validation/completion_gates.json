@@ -607,48 +607,117 @@
           "title": "균일 매질 2D/3D 전파·위상·분산",
           "specification": "균일 매질 2D/3D 전파·위상·분산",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/boundaries.py",
+            "torchfdtd/solver.py",
+            "torchfdtd/injection.py",
+            "tests/test_physics_g3_a.py",
+            "scripts/render_physics_validation.py",
+            "docs/validation/cases/G3-01_uniform_propagation.json",
+            "docs/validation/g3/G3-01.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG301 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-01.xml"
+          ],
+          "actual_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG301 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-01.xml"
+          ],
+          "required_tests": [
+            "tests/test_physics_g3_a.py::TestG301::test_eigenmode_matches_yee_relation",
+            "tests/test_physics_g3_a.py::TestG301::test_eigenmode_mesh_sweep",
+            "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d",
+            "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d",
+            "tests/test_physics_g3_a.py::TestG301::test_polarizations_identical",
+            "tests/test_physics_g3_a.py::TestG301::test_layer_a_cuda_fp32"
+          ],
+          "evidence": [
+            "20260921T164808Z-g3-01-f6fd27b3"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Fixture, in-test Yee-relation oracle, records and rendered document added in 637e653; eigenmode rows at round-off, Simulation-path rows within 3.8e-7 rad of the discrete relation."
         },
         {
           "id": "G3-02",
           "title": "유전체 slab normal/oblique TE/TM과 TMM",
           "specification": "유전체 slab normal/oblique TE/TM과 TMM",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/boundaries.py",
+            "torchfdtd/solver.py",
+            "torchfdtd/injection.py",
+            "torchfdtd/geometry.py",
+            "tests/test_physics_g3_a.py",
+            "scripts/render_physics_validation.py",
+            "docs/validation/cases/G3-02_dielectric_slab_tmm.json",
+            "docs/validation/g3/G3-02.json",
+            "docs/PHYSICS_VALIDATION.md",
+            "docs/validation/cases/G3-02r2_slab_tmm_40_cells.json",
+            "docs/validation/g3/G3-02r2.json"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG302 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-02.xml"
+          ],
+          "actual_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG302 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-02.xml"
+          ],
+          "required_tests": [
+            "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells",
+            "tests/test_physics_g3_a.py::TestG302::test_slab_balance_20_cells",
+            "tests/test_physics_g3_a.py::TestG302::test_dispersion_order",
+            "tests/test_physics_g3_a.py::TestG302::test_layer_a_cuda_fp32"
+          ],
+          "evidence": [
+            "20260921T164814Z-g3-02-1e349534",
+            "20260921T170604Z-g3-02-ef141f60"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Fixture, in-test transfer-matrix oracle, records and rendered document added in 637e653. The recorded run fails 12 of 48 instances: the n=3.5 slabs at about 20 cells per material wavelength exceed the 0.01 R/T and 0.02 rad limits (0.013 to 0.037, 0.031 to 0.054 rad); at about 40 cells they pass. The limits were not relaxed. Revision 2 (docs/validation/cases/G3-02r2_slab_tmm_40_cells.json) fixes the mesh at about 40 cells per material wavelength for every index with unchanged limits; the 20-cell instances remain as reported measurements with the energy-balance and convergence-order tests. The first case and its FAILED evidence run stay in place."
         },
         {
           "id": "G3-03",
           "title": "Drude/Lorentz slab fit/ADE 오차 분리",
           "specification": "Drude/Lorentz slab fit/ADE 오차 분리",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/materials.py",
+            "torchfdtd/material_fit.py",
+            "torchfdtd/optical_data.py",
+            "torchfdtd/solver.py",
+            "tests/test_physics_g3_a.py",
+            "scripts/render_physics_validation.py",
+            "docs/validation/cases/G3-03_dispersive_slab_fit_ade.json",
+            "docs/validation/g3/G3-03.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG303 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-03.xml"
+          ],
+          "actual_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG303 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-03.xml"
+          ],
+          "required_tests": [
+            "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm",
+            "tests/test_physics_g3_a.py::TestG303::test_fitted_material_slab",
+            "tests/test_physics_g3_a.py::TestG303::test_ade_constitutive_error"
+          ],
+          "evidence": [
+            "20260921T164821Z-g3-03-35392fa4"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Fixture with analytic materials, the passive fit round trip and the bilinear ADE error, records and rendered document added in 637e653."
         },
         {
           "id": "G3-04",
@@ -732,16 +801,39 @@
           "title": "PML normal/oblique 반사·장시간 안정성",
           "specification": "PML normal/oblique 반사·장시간 안정성",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/boundaries.py",
+            "torchfdtd/run_control.py",
+            "torchfdtd/solver.py",
+            "tests/test_physics_g3_a.py",
+            "scripts/render_physics_validation.py",
+            "docs/validation/cases/G3-07_cpml_reflection_stability.json",
+            "docs/validation/g3/G3-07.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG307 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-07.xml"
+          ],
+          "actual_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG307 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-07.xml"
+          ],
+          "required_tests": [
+            "tests/test_physics_g3_a.py::TestG307::test_normal_reflection",
+            "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection",
+            "tests/test_physics_g3_a.py::TestG307::test_interface_reflection",
+            "tests/test_physics_g3_a.py::TestG307::test_depth_and_time_sweeps",
+            "tests/test_physics_g3_a.py::TestG307::test_long_time_stability",
+            "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32"
+          ],
+          "evidence": [
+            "20260921T164832Z-g3-07-70619385"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Fixture with the short/long reference-domain subtraction, records and rendered document added in 637e653; default profile reaches -87 to -94 dB at normal and oblique incidence, -49 dB on the vacuum side of an interface entering the layer."
         },
         {
           "id": "G3-08",
