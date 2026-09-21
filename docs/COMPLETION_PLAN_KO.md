@@ -21,9 +21,9 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 | 제외 | 원래 CR 응용 최적화·정밀 재계산 | 이번 완성 범위에서 제외. 기존 계산·진단 기록 보존. 일반 Torch inverse design 기능과 solver gradient 검증은 계속 필수 |
 | 3 · P0 | 실제 FP32 48GB 초과 및 계층 메모리 | 54GiB E/H FP32 10-step forward·backward 용량 gate 완료([기록](BEYOND_VRAM_FP32.md), 디스크 정리·메모리/시간 기록 포함). block 단위 durable restart journal 구현([문서](STREAMED_RESTART.md)). 대규모 중단·복구와 OS cache를 포함한 전체 메모리·디스크 처리량은 [실측했다](BEYOND_VRAM_RESTART.md). 남은 증거: 의미 있는 물리 시간의 실행. dense epsilon/VJP가 DRAM 한계가 되는 경로도 공간 생산·축약으로 개선 |
 | 4 · P1 | PEC/PMC·대칭/반대칭 경계 | CPU·CUDA·adjoint·DRAM/파일·배치에서 일치. 독립 반사/공진 해와 전체 영역 대비 축소 영역 결과·gradient·비용 확인 |
-| 5 · P1 | Eigenmode source·mode port | 모드 전력 정규화, 전진/후진 분리, S-parameter, 전력 보존·상반성, 설계 영역의 Torch 미분과 UI/Python 연결 |
-| 6 · P1 | Near-to-far field | 적절한 외부 매질과 폐곡면/주기 조건의 원거리장, 각도·방사 전력·위상, 독립 해석 기준과 목적함수의 adjoint 확인 |
-| 7 · P1 | GDS와 일반 형상 설계 | GDS 레이어·단위·계층·변환의 보존과 입출력, 제조 구조 연결. Polygon/spline 및 일반 형상 미분 확대 |
+| 5 · P1 | Eigenmode source·mode port | 모드 전력 정규화, 전진/후진 분리, S-parameter, 전력 보존·상반성, 설계 영역의 Torch 미분과 UI/Python 연결 완료. N-port·좁은 aperture·streamed 주입·|S_ij|² adjoint·GDS 마커 builder 완료([기록](OPEN_MODE_PORTS.md)). 남은 것: source parameter·고유모드 미분, 비축 normal |
+| 6 · P1 | Near-to-far field | 폐곡면 원거리장·유한거리 exact Green 함수·각도/구면/Cartesian/k-space 관측·복소(주파수별) 외부 매질·open surface·목적함수 adjoint 완료([기록](RADIATION.md)). 남은 것: 층상 외부 매질, 사다리꼴 quadrature |
+| 7 · P1 | GDS와 일반 형상 설계 | GDS 레이어·단위·계층·변환·구멍·etch·측벽 staircase·입출력·port 연결 완료([기록](GDS.md)). Polygon/spline 정점·제어점 미분과 수렴 기록 완료([기록](SHAPE_GRADIENTS.md)). 남은 것: 구멍 미분, 제조 제약 |
 | 8 · P1/P2 | 일반 이방성·비선형·여러 소스 미분 | 회전된 물성 텐서, 지정한 비선형 모델과 안정성, forward/backward 일치, 진폭·위상 등 source 파라미터의 Torch 연결. 범위를 명시한 독립 물리 문제로 검증 |
 | 9 · P1 | 배치·자동 스케줄러 성능 | 동시 adjoint microbatch, 재계산·전송·I/O를 포함한 선택. resident가 빠른 조건과 streaming이 필요한 조건을 모두 보고, 선택 비용이 이득을 없애지 않는지 확인 |
 | 10 · 출고 조건 | 경쟁 비교·UI·API·논문·배포 | 같은 정확도와 관측량에서 FDTDX 및 다른 solver의 전체 forward/backward/optimizer 시간·메모리·최대 크기 비교. 필수 기능의 UI/API/저장/재시작, 독립 설치와 문서, 논문 및 공개 자료 검토 |
@@ -57,9 +57,9 @@ periodic/Bloch bulk 경로에서 CPU/CUDA·6성분 VJP·고유파를 검증했�
 CPML·tensor ADE·streaming·anisotropic mode·UI는 남았다. [Mode source 연결](MODE_INJECTION.md)은 실제 CUDA 전파,
 방향별 복소 t/r 및 국소 산란체 material VJP까지 검증했다.
 [ModeNetwork](MODE_NETWORK.md)는 같은 exterior 단면의 opposing port를
-다중 모드 복소 S 행렬로 묶고 backward에서 각 case를 하나씩 재생한다.
-일반 branch/서로 다른 단면·횡방향 PML·streamed source·eigenmode 미분과
-전력 보존의 물리 수렴은 남아 있다.
+다중 모드 복소 S 행렬로 묶고 backward에서 각 case를 하나씩 재생하며,
+[ModeBranchNetwork](OPEN_MODE_PORTS.md)는 임의 개수 port·좁은 aperture·
+streamed 주입·|S_ij|² adjoint를 더한다. eigenmode 미분과 비축 normal은 남아 있다.
 [회절·원거리장](RADIATION.md), [density 제약](DESIGN_PARAMETERIZATION.md),
 [GDS](GDS.md)도 추가했다. 항목별 FDTDX 동등성의 정확한 완료 기준은
 [별도 추적표](FDTDX_PARITY_KO.md)를 따른다.

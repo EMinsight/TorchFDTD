@@ -47,7 +47,7 @@ Resident 후속: 명시적 byte 예산과 CUDA 인덱스 검사로 기본 800만
 | 8 | P1 | 필수 | 모드·포트·정규화 | 독립 고유모드·전력 보존·S-parameter 검증 |
 | 9 | P1 | 필수 | CUDA tensor batch | forward cohort와 공유 메모리 예산의 순차 adjoint case replay 구현, 동시 gradient microbatch 후속 |
 | 10 | P1 | 필수 | 주파수장·흡수·회절·방사 | 물리 관측량과 differentiable observer 연결 |
-| 11 | P1 | 필수 | 핵심 CAD·설계 영역 | 분석 형상·회전 구현, 일반 geometry VJP·제조 조건 |
+| 11 | P1 | 필수 | 핵심 CAD·설계 영역 | 분석 형상·회전 구현, polygon/spline 정점·제어점 VJP와 mesh 세분화 수렴 기록, GDS 구멍·etch·측벽 완료. 남은 것: 구멍 미분·제조 조건 |
 | 12 | P2 | 후속 필수 | UI·workflow | GUI 설계·sweep, 영구 checkpoint/restart |
 | 13 | P2 | 조건부 | 비선형·특수 물성 | 구체적 연구에 필요할 때 |
 | 14 | P2 | 조건부 | 단일 grid multi-GPU | 단일 GPU·DRAM 경로 뒤, backward까지 분할 검증 |

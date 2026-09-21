@@ -364,7 +364,7 @@
       "native": "partial",
       "ui": "implemented",
       "fsp": "missing",
-      "scope": "Python 및 browser 선택 cell, layer/datatype→명시적 Z/material, 단위·계층·회전·반사·array·PATH와 제한 export. Preview/report→CAD 적용→JSON/Python 저장 검증. 별도 Python adapter가 full-cell TEXT 두 port를 ModeNetwork에 연결. Native voxelize 후 sample epsilon은 caller가 제공. Hole·narrow-aperture·일반 branch 연결은 미지원.",
+      "scope": "Python 및 browser 선택 cell, layer/datatype→명시적 Z/material, 단위·계층·회전·반사·array·PATH, 구멍 polygon(even-odd), layer etch(NOT), z-node별 측벽 staircase, 구멍 포함 export. Preview/report→CAD 적용→JSON/Python 저장 검증. prepare_gds_two_port가 한 번의 호출로 두 port ModeNetwork를, branch_network_from_ports가 N-port network를 만든다. Browser는 구멍 표시와 etch 입력을 지원. Native voxelize 후 sample epsilon은 caller가 제공. 꼭짓점에서 외곽선과 맞닿는 구멍·중첩 구멍·z-normal 마커는 미지원.",
       "evidence": [
         "torchfdtd/gds.py",
         "torchfdtd/gds_service.py",
@@ -1342,7 +1342,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "고정 opposing dielectric port의 native CAD Python·browser workflow. Periodic 또는 고정 cladding의 open CPML 횡단면, 실수 FP32 uniform Yee와 longitudinal CPML. Port 설정 편집, 고정 full-vector mode 주입·검출, S 표와 선택한 내부 material epsilon 미분, JSON/Python import·export, 공유 queue의 owned-worker 취소를 지원. Native geometry·exterior 검증과 CPU/API/browser 및 제한 CUDA 비교 근거를 유지. 일반 branch·leaky channel·streamed 실행·mode profile 자체 미분은 미지원.",
+      "scope": "고정 opposing dielectric port의 native CAD Python·browser workflow. Periodic 또는 고정 cladding의 open CPML 횡단면, 실수 FP32 uniform Yee와 longitudinal CPML. Port 설정 편집, 고정 full-vector mode 주입·검출, S 표와 선택한 내부 material epsilon 미분, JSON/Python import·export, 공유 queue의 owned-worker 취소를 지원. Native geometry·exterior 검증과 CPU/API/browser 및 제한 CUDA 비교 근거를 유지. ModeBranchNetwork의 임의 개수 port·좁은 aperture·streamed X-slab 주입·|S_ij|² adjoint를 지원(축퇴 편광쌍은 정규 기저). leaky channel·비축 normal·mode profile 자체 미분은 미지원.",
       "evidence": [
         "torchfdtd/mode_ports.py",
         "torchfdtd/mode_injection.py",
@@ -1383,7 +1383,7 @@
       "native": "partial",
       "ui": "missing",
       "fsp": "missing",
-      "scope": "고정 directional mode·matched-reference complex t/r와 opposing 두 port의 multimode S. Shared-section CUDA 4-channel/상반성/VJP와 port별 서로 다른 고정 단면의 CPU complex S·interior VJP 검증. GDS full-cell TEXT helper는 shared calibration subset. 일반 branch/open 횡단면·streaming·자동 GDS 배치·UI는 남음.",
+      "scope": "고정 directional mode·matched-reference complex t/r와 opposing 두 port의 multimode S. Shared-section CUDA 4-channel/상반성/VJP와 port별 서로 다른 고정 단면의 CPU complex S·interior VJP 검증. GDS 마커에서 두 port와 ModeBranchNetwork의 N-port(임의 개수 port·좁은 aperture·여섯 cardinal normal·streamed 주입·|S_ij|² adjoint, full-autograd oracle 1e-15)를 한 번의 호출로 구성. 비축 normal·z-normal 마커·UI는 남음.",
       "evidence": [
         "torchfdtd/mode_injection.py",
         "torchfdtd/mode_network.py",
@@ -1778,7 +1778,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "마주보는 fixed dielectric mode port의 복소 multimode S와 선택한 내부 material epsilon VJP. Periodic/open CPML 횡단면과 port별 고정 단면·calibration, 한 case graph만 재생. Native CAD Python·browser에서 port 설정 편집, S 표, JSON/Python import·export, NPZ/CSV 결과와 공유 queue의 owned-worker 취소를 지원. 기존 shared/unequal·open 4-channel 근거 및 실제 browser CPU, 제한 native Project CPU/CUDA 비교를 유지. 일반 branch·leaky channel·streamed 실행·mode profile 미분과 일반 S sweep은 미지원.",
+      "scope": "마주보는 fixed dielectric mode port의 복소 multimode S와 선택한 내부 material epsilon VJP. Periodic/open CPML 횡단면과 port별 고정 단면·calibration, 한 case graph만 재생. Native CAD Python·browser에서 port 설정 편집, S 표, JSON/Python import·export, NPZ/CSV 결과와 공유 queue의 owned-worker 취소를 지원. 기존 shared/unequal·open 4-channel 근거 및 실제 browser CPU, 제한 native Project CPU/CUDA 비교를 유지. ModeBranchNetwork의 N-port S 행렬·전력 balance·상반성·streamed 실행을 지원. leaky channel·mode profile 미분과 일반 S sweep은 미지원.",
       "evidence": [
         "torchfdtd/mode_injection.py",
         "torchfdtd/mode_network.py",
@@ -1821,7 +1821,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "missing",
-      "scope": "균질·무손실·등방 외부의 6면 closed-box vector transform. 복소 진폭·편광·방사 전력·실제 material VJP와 FP32 dipole 메시 수렴. Native 저장 6면/NPZ/Python/browser 후처리, 복소 입사장 차감, 각도 plot·JSON/CSV, 통합 host 예산 검사. 저장 결과에는 autograd graph가 없다. Substrate·periodic lattice·유한 거리 near field는 미지원.",
+      "scope": "균질 등방 외부(스칼라·주파수별 복소 수동 매질)의 6면 closed-box vector transform과 유한거리 exact Green 함수 near-zone, 각도·구면·Cartesian·k-space 관측, open surface·edge window(approximation flag). 복소 진폭·편광·방사 전력·실제 material VJP와 FP32 dipole 메시 수렴. Native 저장 6면/NPZ/Python/browser 후처리, 복소 입사장 차감, 각도 plot·JSON/CSV, 통합 host 예산 검사. 저장 결과에는 autograd graph가 없다. Substrate·periodic lattice·층상 외부·browser의 near-zone은 미지원.",
       "evidence": [
         "torchfdtd/radiation.py",
         "tests/test_radiation.py",
