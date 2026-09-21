@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-05",
+  "task": "G5-05",
+  "title": "Propagated beyond-VRAM case: a 120 um silicon-nitride pillar-array lens lit by a plane-wave pulse, a downsampled six-component output plane at three wavelengths, an angular-spectrum focal objective and the dense epsilon VJP through the streamed plane adjoint on the RTX 5880",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "fixture": {
+    "driver": "benchmarks/beyond_vram_propagated.py",
+    "device": "Square array of cylindrical pillars (epsilon 4.0, silicon nitride at 1.55 um) on a 1.0 um period, 0.6 um tall, in air with no substrate. The radius of each pillar is the hyperbolic lens phase of a 150 um focal length at 1.55 um wrapped onto 0.15 to 0.42 um; the array is lens-like and its focusing efficiency is not claimed. The geometry is rasterized on cell centres into the epsilon tensor (no project structures).",
+    "mesh_um": 0.05,
+    "footprint_um": 120.0,
+    "lateral_size_um": 122.0,
+    "z_size_um": 3.2,
+    "grid": [2440, 2440, 64],
+    "cells": 381030400,
+    "pillars": 14400,
+    "pillar_layers": [24, 36],
+    "pml_cells": 10,
+    "source": "soft Ex plane sheet at z = -0.8 um spanning the lateral CPML (extend_through_pml), Gaussian pulse of 15 fs power FWHM centred at 30 fs, carrier 1.55 um; the source envelope ends at 84.7 fs",
+    "monitor": "z-normal FieldMonitor at z = +0.6 um (0.4 um above the pillar tops), 120 x 120 um, downsample 8 (0.4 um samples, 300 x 300 points, sin(theta_max) = 1.55/0.8 covers every propagating angle), six components, DFT at 1.65, 1.55 and 1.45 um",
+    "observers": 4320000,
+    "time_step_fs": 0.09532874347655028,
+    "duration_fs": 175.02,
+    "steps": 1836,
+    "objective": "sum over the three wavelengths of |E|^2 on the axis 150 um beyond the monitor plane, evaluated by torchfdtd.angular_spectrum.propagate_points (pad 3) on the plane spectrum divided by dt x steps so that FP32 seeds stay of order one",
+    "design_variable": "dense cell-centred epsilon (float32, 381,030,400 values); the design slab is the pillar layers 24 to 35",
+    "execution": {
+      "mode": "streamed, DifferentiablePlaneSimulation over StreamedSimulation, fused CUDA tiles, synchronous transfers",
+      "slab_width": 128,
+      "temporal_depth": 32,
+      "checkpoints": 2,
+      "local_checkpoints": 1,
+      "state_storage": "host",
+      "restart_journal": "none: the streamed spectral path rejects a restart journal (torchfdtd.streamed._journal), so the run is unjournaled and a crash means rerunning it; crash and resume are covered by docs/validation/beyond_vram_restart_5880.json",
+      "host_budget_gib": 100,
+      "gpu_budget_gib": 40
+    },
+    "planner": {
+      "source": "python -m benchmarks.beyond_vram_propagated --footprint 120 --duration-fs 175 --checkpoints 2 --host-gib 100 --plan --assume-5880 (metadata only, resources of the workstation as recorded in beyond_vram_restart_5880.json)",
+      "eh_bytes": 9144729600,
+      "state_bytes_with_cpml": 11049569280,
+      "state_bank_capacity": 5,
+      "host_reservation_bytes": 91586260172,
+      "gpu_reservation_bytes": 18270228744,
+      "dense_parameter_reservation_bytes": 12192972800,
+      "max_extended_tile_cells": 29982720,
+      "blocks": 58,
+      "tiles": 20,
+      "global_replayed_blocks": 267,
+      "forward_cell_steps": 1039943147520,
+      "global_replay_cell_steps": 4845927137280,
+      "local_replay_cell_steps": 4734014760960,
+      "total_cell_steps": 11659828193280
+    },
+    "physical_vram": {
+      "workstation": "NVIDIA RTX 5880 Ada Generation, 51,526,500,352 bytes",
+      "eh_over_vram": 0.177,
+      "live_adjoint_state_bytes": "5 state banks x 11.05 GB plus the dense parameter reservation 12.19 GB = 67.4 GB, above the 51.5 GB of physical VRAM",
+      "resident_alternative": "a resident adjoint holds one primal and one adjoint E/H state, epsilon, its inverse and the gradient (60 bytes per cell, 22.9 GB) plus 11.05 GB per checkpoint; with the two checkpoints of this schedule it would need 45 GB and 267 block replays, with three 56 GB; the public resident path also refuses scenes above eight million cells",
+      "statement": "The E/H state of one bank (9.1 GB) does not exceed physical VRAM; the live state of the adjoint at the declared checkpoint schedule does. This case therefore meets the program's requirement in the working-set sense only, which the record states plainly."
+    },
+    "wall_time_model": "benchmarks.beyond_vram_propagated.TIME_MODEL, fitted on compact-host-large-5880.json and compact-host-capacity-5880.json: forward 493 s, backward 4023 s, one finite-difference forward 493 s, total 5008 s (1.39 h); the fit scatters by about 30 percent on those records",
+    "rehearsal": {
+      "footprint_um": 14.0,
+      "grid": [320, 320, 64],
+      "cells": 6553600,
+      "pillars": 196,
+      "steps": 1836,
+      "modes": "resident (AdjointOptions checkpoints 8 on host) and streamed (slab width 32, temporal depth 16, checkpoints 2, local checkpoints 1, host banks, 6 GiB host and 1.5 GiB GPU budgets) on the local RTX 3060",
+      "command": "python -m benchmarks.beyond_vram_propagated --rehearsal --mode both --duration-fs 175 --output docs/validation/g5/G5-05_rehearsal_3060.json"
+    }
+  },
+  "seed": null,
+  "precision": "float32",
+  "backend": "cuda",
+  "reference_method": "Directional finite difference of the same objective along the pillar direction delta (indicator of the pillar cells whose centres lie within 10 um of the axis, over the design slab): on the workstation a one-sided difference with one extra streamed forward, in the rehearsal a central difference; in the rehearsal the resident DifferentiablePlaneSimulation on the same grid, sources, monitor and objective is the second reference for the objective and the design-slab gradient.",
+  "observables": [
+    {"name": "objective", "unit": "reduced field^2 (time-normalized)", "definition": "sum over the wavelengths of the on-axis focal intensity"},
+    {"name": "focal_intensity_per_frequency", "unit": "reduced field^2", "definition": "the three terms of the objective"},
+    {"name": "plane_electric_energy_per_frequency", "unit": "reduced field^2 m^2", "definition": "|E|^2 integrated over the plane quadrature at each wavelength"},
+    {"name": "energy_history", "unit": "reduced field^2", "definition": "per time step, the sum of squares of the electric Yee samples feeding the plane interpolation (artifact streamed_energy_history.npy)"},
+    {"name": "energy_peak_step, energy_rise_step, energy_decayed_fraction", "unit": "step, step, dimensionless", "definition": "argmax of the history, first step above 1e-3 of the peak, final value over the peak"},
+    {"name": "gradient_norm, design_slab_gradient_norm, gradient_nonzero", "unit": "reduced, reduced, cells", "definition": "L2 norms of the dense VJP and of its pillar-layer slab (artifact streamed_design_slab_gradient.npy), count of nonzero entries"},
+    {"name": "directional_derivative, finite_difference, relative_error, relative_response", "unit": "reduced per epsilon unit", "definition": "sum of the gradient over the direction cells, (J(eps + h delta) - J(eps)) / h or the central form, |fd - d| / |d|, |delta J| / J"},
+    {"name": "frequency_resolution_hz, source_amplitude_ratio", "unit": "Hz, dimensionless", "definition": "1 / duration; amplitude spectrum of the sampled source waveform at each wavelength over its peak"}
+  ],
+  "acceptance": {
+    "fixture_of_record": {
+      "workstation": {"grid": [2440, 2440, 64], "steps": 1836, "minimum_eh_bytes": 9144729600},
+      "rehearsal": {"grid": [320, 320, 64], "steps": 1836, "minimum_eh_bytes": 157286400}
+    },
+    "propagation": {
+      "energy_rise_before_peak": true,
+      "energy_decayed_fraction_max": 0.001,
+      "justification": "Exploratory streamed forwards of 12 um and 20 um members of the same family reached 1.7e-4 and 2.1e-4 at 160 fs and about 1.5e-4 at 175 fs; the limit leaves a factor of about six for slower lateral leakage of the larger array. A tail of 1e-3 in energy is 3 percent in field amplitude, the truncation error accepted for the spectrum."
+    },
+    "spectrum": {
+      "frequency_resolution_max_fraction_of_separation": 0.5,
+      "source_amplitude_ratio_min": 0.5,
+      "justification": "1 / 175 fs = 5.71 THz against the 11.72 THz between 1.65 and 1.55 um (0.487); the source amplitude at the three wavelengths is 0.80, 0.99 and 0.75 of its peak."
+    },
+    "gradient": {
+      "finite": true,
+      "nonzero": true,
+      "finite_difference": {
+        "step": 0.05,
+        "radius_um": 10.0,
+        "relative_response_min": 0.0002,
+        "workstation": {"kind": "forward", "relative_error_max": 0.05},
+        "rehearsal": {"kind": "central", "relative_error_max": 0.03}
+      },
+      "justification": "The step changes the pillar index by 0.6 percent over 316 pillars (2.2 percent of the array) on the workstation and over all 196 pillars in the rehearsal. The one-sided truncation error is of the order of the relative field change (about one percent for a phase response), so 5 percent is declared for it and the program's 3 percent physical-parameter threshold for the central difference. A response below 2e-4 of the objective would sit near the FP32 floor of a 1836-step spectrum and is declared inconclusive (FAIL)."
+    },
+    "resident_agreement": {
+      "objective_relative_difference_max": 0.0001,
+      "design_slab_gradient_relative_l2_max": 0.0001,
+      "source_of_limits": "proposed_thresholds.discrete_dimensionless_fp32.rtol",
+      "applies_to": "rehearsal only; the workstation run has no resident reference"
+    },
+    "source_of_limits": "fixture-specific budgets declared here; resident agreement from proposed_thresholds.discrete_dimensionless_fp32"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_beyond_vram_propagated.py"
+    ],
+    "not_yet_covered": [
+      "the workstation run itself: tests/test_beyond_vram_propagated.py judges the rehearsal record and the report rendering; the RTX 5880 record must be rendered with benchmarks/report_beyond_vram_propagated.py --context workstation and recorded by the maintainer",
+      "a restart journal on the spectral path",
+      "an E/H state that exceeds physical VRAM by itself: at the recorded streamed throughput such a case (at least 2.1 billion cells at this duration) needs about six times the declared three-hour budget and disk banks with tens of terabytes of traffic"
+    ]
+  },
+  "notes": "Applicability: the rehearsal verifies the driver, the criteria machinery, the resident/streamed agreement and the central finite difference at 1/58 of the cells on the local RTX 3060 shared with other agents; it does not verify the workstation run, so G5-05 stays NOT_RUN until the RTX 5880 record is judged in the workstation context. The 1.2 to 1.6 billion cell target of the brief was reduced to 381 million cells: host banks of five states plus eight dense parameter copies exceed the 103 GB admissible on the workstation above about 0.45 billion cells with this schedule, and the fitted wall-time model gives 1.39 h here against a declared budget of 3 h. Exploratory probes before this declaration: resident 12 um at 2600 steps and streamed 20 um at 2518 steps for the energy decay, and an 8 um, 300-step run of the driver in both modes (finite-difference relative error 5e-4 at a 2.9 percent response, resident/streamed gradient relative L2 3.9e-7). The case is added in the commit following 73203d2 together with the driver."
+}
