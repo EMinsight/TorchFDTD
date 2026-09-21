@@ -422,6 +422,30 @@
       "source_url": "https://github.com/python-hyper/h11"
     },
     {
+      "name": "h5py",
+      "groups": [
+        "hdf5"
+      ],
+      "required_by": [],
+      "specifiers": [
+        ">=3.8"
+      ],
+      "version": "3.16.0",
+      "installed": true,
+      "license": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files": [
+        "LICENSE",
+        "LICENSE.txt",
+        "hdf5.txt",
+        "license.txt",
+        "pytables.txt",
+        "python.txt",
+        "stdint.txt"
+      ],
+      "source_url": "https://github.com/h5py/h5py"
+    },
+    {
       "name": "httpcore",
       "groups": [
         "dev"
@@ -636,6 +660,7 @@
       "groups": [
         "runtime",
         "gds",
+        "hdf5",
         "cuda-kernels"
       ],
       "required_by": [
@@ -643,6 +668,7 @@
         "cupy-cuda12x",
         "fdtd",
         "gdstk",
+        "h5py",
         "matplotlib",
         "scipy"
       ],
@@ -650,6 +676,7 @@
         "<2.5,>=1.23.5",
         ">=1.23",
         ">=1.24",
+        ">=1.21.2",
         "<2.6,>=1.22"
       ],
       "version": "2.2.6",
@@ -1010,7 +1037,7 @@
       ],
       "required_by": [],
       "specifiers": [
-        ">=2.2"
+        ">=2.4"
       ],
       "version": "2.10.0+cu126",
       "installed": true,
@@ -1359,8 +1386,8 @@
       "docs/validation/sbom.json",
       "tests/test_provenance_inventory.py"
     ],
-    "files_scanned": 988,
-    "tracked_files": 1002,
+    "files_scanned": 1197,
+    "tracked_files": 1213,
     "findings": []
   },
   "history_note": {

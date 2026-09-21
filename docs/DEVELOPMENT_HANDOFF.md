@@ -607,3 +607,103 @@ the remaining G3 tasks:
 ```
 TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml
 ```
+
+---
+
+### 2026-09-22 G8-02, G8-03, G8-04 (chunked result storage, workbench journey, editing integrity), branch g8-gui from 73203d2
+
+**Problem or goal.** Choose one chunked result format and read it lazily
+with a measured memory bound (G8-02); test the workbench from a GDS import
+through materials, source, boundaries, mesh preview, resource preflight, the
+job queue with cancel and resubmit, the results overlay and the data and GDS
+exports on a CPU-only server (G8-03); implement or verify undo/redo,
+multi-select and copy, autosave and recovery, a versioned project, field
+validation and stale-result marking (G8-04).
+
+**State found.** HEAD 73203d2, clean worktree, no earlier partial work. The
+workbench already had undo/redo (80 snapshots in `remember()`), Duplicate of
+one object and autosave to `localStorage` with recovery on load; it had no
+multi-selection, no field validation beyond the HTML `min` attribute, no
+version fields, no GDS export and cleared the results on Layout. `h5py` 3.16.0
+was importable from the interpreter's user site-packages (installed for
+tidy3d), not from the project venv; no Zarr. Several source files carry mixed
+CRLF/LF endings (`solver.py`, `server.py`, `main.js`, `views.js`,
+`style.css`, `pyproject.toml`); edits were re-applied line by line so that only
+changed lines differ.
+
+**Changed files (why).**
+- `torchfdtd/result_store.py` (new): HDF5 layout 1, `save_hdf5`, `ResultFile`, `PlaneFile`; the format decision (HDF5 over Zarr) in the module docstring. `torchfdtd/solver.py`: `Result.save(path, format=None)`, `Result.open`, `Result.load` dispatch on `.h5`/`.hdf5`. `pyproject.toml`: extra `hdf5 = ["h5py>=3.8"]`; `scripts/provenance_inventory.py` group list, `docs/THIRD_PARTY_NOTICES.md` and `docs/validation/sbom.json` regenerated (h5py BSD-3-Clause; the torch `>=2.4` specifier of the merged packaging branch now appears in the SBOM).
+- `torchfdtd/models.py`: `Project.revision`, `Project.content_sha256`, `content_hash`, `content_matches`, `stamped`. `torchfdtd/server.py`: `/api/validate` returns `revision`, `content_sha256`, `stored_content_sha256_matches` and echoes the stamped project; `POST /api/jobs` resolves the plan before taking the queue lock and stores `plan_hash` and `revision` on the job. `torchfdtd/gds_service.py`: `POST /api/gds/export` (base64 GDS plus the layer-stack sidecar, temporary file removed).
+- `frontend/src/main.js`: multi-selection (`state.multi`, Ctrl/Cmd+click in the tree and the viewports), Copy/Paste (Ctrl+C/Ctrl+V, ribbon buttons, `placeCopies`), Duplicate and Delete over the selection, `acceptNumber` field validation with `.field-error`, `persist` advancing the revision and clearing the hash, `validate` storing the server hash and the plan hash, `markStale`, the stale banner, Layout keeping results, Save after validation, the recovery message, the Export GDS action. `frontend/src/views.js`: Ctrl-click passes through, every selected object is highlighted. `frontend/src/gds.js`: `setupGdsExport`. `frontend/src/style.css`: stale, field-error, revision, selection and export styles.
+- `tests/test_result_store.py` (7), `tests/test_project_versioning.py` (5), `tests/test_workbench_journeys.py` (5), `tests/ui/g8-journey.spec.js` (1), `tests/ui/g8-editing.spec.js` (6), `scripts/run_workbench_journeys.py` (runner and record writer), `docs/validation/workbench/` (the record and its Playwright JSON report).
+- `docs/validation/cases/G8-02_chunked_result_storage.json`, `G8-03_workbench_journey.json`, `G8-04_editing_integrity.json`; `docs/validation/completion_gates.json`: `code_paths`, `planned_test_commands`, `required_tests`, `implementation_state` IMPLEMENTED and an `implementation_note` on the three tasks (metadata; states written by the recorder).
+- `docs/COMPATIBILITY.md` (Result HDF5 row, the version keys in the Project JSON row, the limitation rewritten), `docs/CHANGELOG.md`, `docs/GDS.md` (browser export), `docs/SECURITY.md` (export path).
+- `torchfdtd/web/*`: the bundle is rebuilt in its own commit, the last code commit of the branch, so that other branches rebuilding it conflict on one commit only.
+
+**Commands run (device: local Windows 11, i7-12700, RTX 3060 12 GB shared with other agents, Python 3.10.2 in D:/TorchFDTD/.venv, torch 2.10.0+cu126, Node 22.18.0, Playwright 1.63.0 Chromium headless; TMP and TEMP under D:/TorchFDTD/.local/tmp; `node_modules` was a junction to D:/TorchFDTD/node_modules, removed afterwards).**
+
+```
+TORCHFDTD_G8_OBSERVED=D:/TorchFDTD/.local/tmp/junit/G8-02_observed.json D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_result_store.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-02.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_project_versioning.py tests/test_project_compatibility.py tests/test_api.py tests/test_compatibility_policy.py tests/test_gds.py tests/test_provenance_inventory.py tests/test_completion_program_documents.py tests/test_release_gates.py tests/test_server_security.py
+npm.cmd run build; D:/TorchFDTD/.venv/Scripts/python.exe -m torchfdtd.cli serve --port 8771            (development server for the spec runs below)
+TORCHFDTD_URL=http://127.0.0.1:8771 TORCHFDTD_TEST_PYTHON=D:/TorchFDTD/.venv/Scripts/python.exe npx.cmd playwright test tests/ui/g8-journey.spec.js tests/ui/g8-editing.spec.js
+TORCHFDTD_URL=http://127.0.0.1:8771 TORCHFDTD_TEST_PYTHON=... npx.cmd playwright test tests/ui/workbench.spec.js tests/ui/gds.spec.js tests/ui/geometry.spec.js tests/ui/materials.spec.js tests/ui/mesh.spec.js tests/ui/execution-modes.spec.js tests/ui/sources.spec.js tests/ui/monitor-outputs.spec.js tests/ui/boundaries.spec.js tests/ui/spectra.spec.js
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py; ... --check
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/run_workbench_journeys.py                                  (on the clean tree after the bundle commit: its own CPU-only server on a free port)
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_workbench_journeys.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-03.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_project_versioning.py tests/test_workbench_journeys.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-04.xml
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G8-0N --command "<the line above>" --junit D:/TorchFDTD/.local/tmp/junit/G8-0N.xml --exit-code 0 --fixture docs/validation/cases/<case>.json [--observed ... --artifact ...] --scope "..."
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G8-0N
+```
+
+**Measurements and pre-declared limits.** G8-02: the synthetic E dataset is
+(512, 512, 512, 3) float32, 1,610,612,736 bytes nominal; the file with one
+written plane is 1,201,056 bytes (0.075% of the volume, limit 1%); opening it
+and reading the stored x plane and a y plane across all 512 x chunks grew the
+working set by 3,690,496 bytes (0.23% of the volume) and the peak working set
+by 10,047,488 bytes (0.62%), both against the declared 5%; every round trip is
+exact and the spectra recompute within rtol 1e-12. G8-03: the journey passed
+in 9.3 s on the development server (GDS import at 1.8 s, materials 2.1 s,
+source and monitor 2.9 s, boundaries 3.6 s, mesh preview 3.8 s, preflight
+4.0 s, cancel 5.2 s, rerun 7.4 s, overlay 7.6 s, exports 9.2 s cumulative) and
+in 13.9 s in the runner's dry run; the recorded run's numbers are in
+`docs/validation/workbench/`. The mesh preview, the summary card and
+`/api/mesh/preview` agreed on 160 x 120 x 1 cells (19,200); the cancelled job
+reported `cancelled` with fewer than 20000 steps, the rerun 400 / 400 steps;
+zero page errors and zero console errors. G8-04: 85 edits then 80 undos land
+on the fifth edit's value and an 81st undo changes nothing; three edits raise
+the revision by exactly 3 and `/api/validate` confirms the saved hash; the
+six editing specs took 32.4, 2.8, 3.4, 2.2, 2.6 and 5.4 s in the dry run.
+
+**Passed / failed / skipped / not run.** Passed: tests/test_result_store.py
+7, tests/test_project_versioning.py 5, tests/test_workbench_journeys.py 5
+(after the record), the two new specs 7 of 7, the regression selection of
+ten existing specs 13 passed and 2 skipped (the two FSP-file tests, skipped
+before this branch too), and the 39 tests of the compatibility, API, GDS and
+policy files plus 27 provenance and 37 document, gate and security tests.
+Failed: none. Skipped: the two pre-existing FSP skips above. Not run: the
+full UI suite (40 specs) and the CUDA variants of the journey; the
+clean-install check (`tests/test_clean_install.py`) was not rerun and fails
+by design on this branch because `pyproject.toml` and the bundle changed
+(G8-05 and G8-07 records need the 12-minute rerun after merging).
+
+**Evidence paths and hashes.** Recorded on the clean tree after the bundle
+commit; the run ids are appended to the G8-02, G8-03 and G8-04 rows of the
+gate file by the recorder and listed in the evidence commit. The Playwright
+JSON report is `docs/validation/workbench/<time>-<commit>.playwright.json`,
+referenced by SHA-256 from the record and attached with `--artifact`; the
+G8-02 observed metrics are attached with `--observed`.
+
+**Remaining defects, risks, external blockers.**
+- `tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel` fails until `scripts/clean_install_check.py` is rerun (pyproject extra and the bundle changed), as every bundle rebuild does.
+- Project JSON files that carry `revision` and `content_sha256` are refused by builds before this branch (`extra='forbid'`); schema 1 keeps its number because files without the keys load unchanged. The G8-01 fixtures and their evidence are untouched.
+- Stale marking follows `plan_hash`; a precision or backend change alone does not mark results stale (the run summary prints both). Dragging in a viewport moves the dragged object only, not the whole selection.
+- The workbench downloads NPZ only; the HDF5 form is reachable from Python. h5py came from the user site-packages of the interpreter, not from the venv; a clean venv needs `pip install torchfdtd[hdf5]`.
+- `scripts/run_workbench_journeys.py` needs Node, `npm ci` and the Playwright Chromium; it starts the server with `CUDA_VISIBLE_DEVICES=''` so the record is CPU-only by construction.
+
+**Next first command and task id.** Rerun the clean-install check after the
+merge so the G8-05 and G8-07 records match the merged bundle and pyproject:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/TorchFDTD/.local --find-links D:/TorchFDTD/.local/wheels --cuda-torch "torch==2.10.0+cu126"
+```

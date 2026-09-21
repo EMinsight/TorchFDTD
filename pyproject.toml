@@ -14,6 +14,7 @@ dependencies = ["fdtd==0.2.2", "numpy>=1.24", "scipy>=1.10", "torch>=2.4", "fast
 
 [project.optional-dependencies]
 gds = ["gdstk>=0.9.62,<1.1"]
+hdf5 = ["h5py>=3.8"]
 dev = ["pytest>=8", "httpx>=0.27", "build>=1", "psutil>=5.9"]
 cuda-kernels = ["cupy-cuda12x>=13.6,<14"]
 benchmark = ["psutil>=5.9"]

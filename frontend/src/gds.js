@@ -48,3 +48,34 @@ export function setupGds({esc,toast,log,getProject,loadProject}) {
  });
  return {open(){upload=null;candidate=null;render();dialog.showModal();}};
 }
+// GDS export: XY outlines of enabled rectangles and polygons with an explicit layer per structure; the Z/material stack goes to a JSON sidecar.
+export function setupGdsExport({esc,toast,log,api,getProject,download}) {
+ const dialog=document.createElement('dialog');dialog.id='gds-export-dialog';dialog.className='gds-dialog';document.body.append(dialog);
+ let busy=false;
+ function render(){
+  const project=getProject(),rows=project.structures.filter(s=>s.enabled),exportable=rows.filter(s=>['rectangle','polygon'].includes(s.kind)),other=rows.filter(s=>!['rectangle','polygon'].includes(s.kind));
+  dialog.innerHTML=`<div class="fsp-heading"><h2>Export GDS</h2><button data-gds-export="close">Close</button></div>
+   <p>Writes the XY outline of every enabled rectangle and polygon to one GDSII cell. GDS holds no extrusion or material, so the Z bounds, materials and mesh orders are returned in a JSON sidecar next to the file. Sources, monitors and solver settings are not exported.</p>
+   <label>Cell name <input id="gds-export-cell" aria-label="GDS cell name" value="TOP" maxlength="32"></label>
+   <table class="gds-export-table"><thead><tr><th>Structure</th><th>Kind</th><th>Material</th><th>Layer</th><th>Datatype</th></tr></thead><tbody>${exportable.map((s,i)=>`<tr data-id="${esc(s.id)}"><td>${esc(s.name)}</td><td>${esc(s.kind)}</td><td>${esc(s.material)}</td><td><input type="number" min="0" max="65535" step="1" value="${i+1}" aria-label="Layer ${esc(s.name)}"></td><td><input type="number" min="0" max="65535" step="1" value="0" aria-label="Datatype ${esc(s.name)}"></td></tr>`).join('')}</tbody></table>
+   ${other.length?`<p class="warning">Not exportable and must be disabled first: ${esc(other.map(s=>s.name+' ('+s.kind+')').join(', '))}. GDS export supports rectangles and polygons only.</p>`:''}
+   <p id="gds-export-status" role="status">${exportable.length?`${exportable.length} structure${exportable.length===1?'':'s'} ready.`:'No enabled rectangle or polygon to export.'}</p>
+   <button data-gds-export="run" ${exportable.length?'':'disabled'}>Export .gds and sidecar</button>`;
+ }
+ dialog.addEventListener('click',async event=>{
+  const action=event.target.closest('[data-gds-export]')?.dataset.gdsExport;if(!action||busy)return;
+  if(action==='close'){dialog.close();return;}
+  busy=true;const status=dialog.querySelector('#gds-export-status');
+  try{
+   const layers={};
+   for(const row of dialog.querySelectorAll('tbody tr')){const [layer,datatype]=[...row.querySelectorAll('input')].map(el=>Number(el.value));if(![layer,datatype].every(v=>Number.isInteger(v)&&v>=0&&v<=65535))throw Error('Layer and datatype must be integers from 0 to 65535.');layers[row.dataset.id]=[layer,datatype];}
+   const cell=dialog.querySelector('#gds-export-cell').value.trim();status.textContent='Exporting…';
+   const result=await api('/gds/export',{project:getProject(),layers,cell});
+   const bytes=Uint8Array.from(atob(result.gds_base64),c=>c.charCodeAt(0)),name=getProject().name.replace(/[^a-z0-9]/gi,'_');
+   download(bytes,name+'.gds','application/octet-stream');download(JSON.stringify(result.sidecar,null,2),name+'.gds.json');
+   status.textContent=`Exported ${result.sidecar.structures} structure${result.sidecar.structures===1?'':'s'} (${result.bytes} bytes) with the layer stack sidecar.`;
+   log(`Exported GDS cell ${cell}: ${result.sidecar.structures} structures, ${result.bytes} bytes, sidecar ${name}.gds.json.`);toast('GDS exported with its layer stack sidecar');
+  }catch(error){status.textContent=error.message;}finally{busy=false;}
+ });
+ return {open(){render();dialog.showModal();}};
+}

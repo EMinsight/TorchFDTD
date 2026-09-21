@@ -601,11 +601,31 @@ class Project(Model):
     monitors: list[Monitor | FieldMonitor] = Field(default_factory=list, max_length=32)
     global_monitor: SpectrumSettings = Field(default_factory=lambda:SpectrumSettings(sampling='frequency',apodization='none'))
     import_provenance: ImportProvenance | None = None
+    # Edit counter and content hash of the saved file (G8-04). The workbench
+    # increments revision on every committed edit and stores the hash that
+    # /api/validate computed; a file whose content no longer matches its hash
+    # was changed outside the workbench, which content_matches() reports.
+    revision: int = Field(default=0, ge=0)
+    content_sha256: str | None = Field(default=None, pattern=r'^[a-f0-9]{64}$')
 
     @model_validator(mode='before')
     @classmethod
     def migrate(cls, data):
         return migrate_project(data)
+
+    def content_hash(self):
+        """SHA-256 of the canonical JSON of every field except the two version fields."""
+        import hashlib, json
+        payload = self.model_dump(mode='json', exclude={'revision', 'content_sha256'})
+        return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(',', ':'), allow_nan=False).encode('utf-8')).hexdigest()
+
+    def content_matches(self):
+        """True when the stored content_sha256 equals the content, None when no hash is stored."""
+        return None if self.content_sha256 is None else self.content_sha256 == self.content_hash()
+
+    def stamped(self, revision=None):
+        """A copy carrying the current content hash and, when given, a new revision."""
+        return self.model_copy(update={'content_sha256': self.content_hash(), **({} if revision is None else {'revision': revision})})
 
     @model_validator(mode='after')
     def valid_scene(self):
