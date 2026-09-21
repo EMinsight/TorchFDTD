@@ -13,10 +13,10 @@
     "os": "Windows-10-10.0.26200-SP0",
     "machine": "AMD64",
     "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
-    "commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
-    "dirty_paths": 8,
+    "commit": "6ef12687dd2de738c1e4d73b4f5de3f57b73c18b",
+    "dirty_paths": 5,
     "fine_meshes": true,
-    "recorded_at": "2026-09-21T16:43:27+00:00"
+    "recorded_at": "2026-09-21T17:19:37+00:00"
   },
   "entries": {
     "normal n=1.0 L10": {
@@ -34,7 +34,7 @@
         1
       ],
       "dt_s": 5.837669483455467e-17,
-      "seconds": 1.9096953002735972,
+      "seconds": 2.9730579000897706,
       "wavelength_um": [
         1.7999999999999998,
         1.7660377358490567,
@@ -103,7 +103,7 @@
         1
       ],
       "dt_s": 5.837669483455467e-17,
-      "seconds": 1.902001699898392,
+      "seconds": 2.787958500441164,
       "wavelength_um": [
         1.7999999999999998,
         1.7660377358490567,
@@ -185,7 +185,7 @@
         24.79386246305661
       ],
       "complex_fields": true,
-      "seconds": 7.126897699665278,
+      "seconds": 9.897367700003088,
       "wavelength_um": [
         1.5999999999999999,
         1.5817490494296578,
@@ -267,7 +267,7 @@
         46.58075849513017
       ],
       "complex_fields": true,
-      "seconds": 7.122083100024611,
+      "seconds": 8.81684930017218,
       "wavelength_um": [
         1.5999999999999999,
         1.5817490494296578,
@@ -328,7 +328,7 @@
         80,
         1
       ],
-      "seconds": 39.96422159997746,
+      "seconds": 67.35691119963303,
       "monitors": {
         "vacuum side": {
           "wavelength_um": [
@@ -468,7 +468,7 @@
       "energy_at_half": 8.780270663821722e-15,
       "field_peak_last": 1.7548074469732556e-09,
       "termination": "max_steps",
-      "seconds": 6.938124100212008,
+      "seconds": 7.347394600044936,
       "checks": 200,
       "limits": {
         "energy_last_over_peak_max": 1e-06,
@@ -492,7 +492,7 @@
       "energy_at_half": 5.608581033063198e-12,
       "field_peak_last": 5.456220781754791e-08,
       "termination": "max_steps",
-      "seconds": 6.966858699917793,
+      "seconds": 7.393426800146699,
       "checks": 200,
       "limits": {
         "energy_last_over_peak_max": 1e-06,
@@ -516,7 +516,7 @@
       "energy_at_half": 0.005887629805744536,
       "field_peak_last": 0.0011263260357196217,
       "termination": "max_steps",
-      "seconds": 12.452854000031948,
+      "seconds": 14.014132999815047,
       "checks": 200,
       "limits": {
         "energy_last_over_peak_max": 1e-06,

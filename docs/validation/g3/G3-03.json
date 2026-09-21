@@ -13,10 +13,10 @@
     "os": "Windows-10-10.0.26200-SP0",
     "machine": "AMD64",
     "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
-    "commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
-    "dirty_paths": 8,
+    "commit": "6ef12687dd2de738c1e4d73b4f5de3f57b73c18b",
+    "dirty_paths": 3,
     "fine_meshes": true,
-    "recorded_at": "2026-09-21T16:41:54+00:00"
+    "recorded_at": "2026-09-21T17:17:34+00:00"
   },
   "entries": {
     "analytic drude TE h20": {
@@ -194,7 +194,7 @@
         0.05750305785028653,
         0.05630084086927478
       ],
-      "seconds": 3.9167329999618232,
+      "seconds": 4.019326099660248,
       "material_update": "trapezoidal ADE",
       "R_abs_error": 0.0006838059615855707,
       "T_abs_error": 0.0010870454420276454,
@@ -523,7 +523,7 @@
         0.05750305785028653,
         0.05630084086927478
       ],
-      "seconds": 14.137907800264657,
+      "seconds": 15.156600200105458,
       "material_update": "trapezoidal ADE",
       "R_abs_error": 0.0001735842358197015,
       "T_abs_error": 0.00027306074792043944,
@@ -852,7 +852,7 @@
         0.057503057850285755,
         0.05630084086927545
       ],
-      "seconds": 3.8287933003157377,
+      "seconds": 4.198587199673057,
       "material_update": "trapezoidal ADE",
       "R_abs_error": 0.000689152296833917,
       "T_abs_error": 0.0010870454419894537,
@@ -1181,7 +1181,7 @@
         0.057503057850285755,
         0.05630084086927545
       ],
-      "seconds": 13.62166849989444,
+      "seconds": 15.547853200230747,
       "material_update": "trapezoidal ADE",
       "R_abs_error": 0.00017401490076307535,
       "T_abs_error": 0.0002730607480462277,
@@ -1510,7 +1510,7 @@
         0.22626181588330518,
         0.23827166657673549
       ],
-      "seconds": 4.182544500101358,
+      "seconds": 4.331108200363815,
       "material_update": "trapezoidal ADE",
       "R_abs_error": 0.0020413423518940987,
       "T_abs_error": 0.0026952891606889517,
@@ -1839,7 +1839,7 @@
         0.22626181588330518,
         0.23827166657673549
       ],
-      "seconds": 15.010771399829537,
+      "seconds": 16.59042440028861,
       "material_update": "trapezoidal ADE",
       "R_abs_error": 0.0005105445974379064,
       "T_abs_error": 0.0006714296328531599,
@@ -2168,7 +2168,7 @@
         0.22626181588330507,
         0.23827166657673582
       ],
-      "seconds": 3.493544699624181,
+      "seconds": 4.167189900297672,
       "material_update": "trapezoidal ADE",
       "R_abs_error": 0.0020408442091582046,
       "T_abs_error": 0.0026952891797988876,
@@ -2497,7 +2497,7 @@
         0.22626181588330507,
         0.23827166657673582
       ],
-      "seconds": 12.952859999611974,
+      "seconds": 16.304552200250328,
       "material_update": "trapezoidal ADE",
       "R_abs_error": 0.0005105886512434821,
       "T_abs_error": 0.0006714296368383055,
@@ -2766,7 +2766,7 @@
         0.7650310174113926,
         0.770276322073003
       ],
-      "seconds": 1.9142828998155892,
+      "seconds": 2.0514899003319442,
       "limits": {
         "fit_converged": "fit_material must report converged at tolerance 1e-3 (normalized rms)",
         "fdtd_fitted_vs_tmm_fitted": {
@@ -2904,7 +2904,7 @@
         0.5761351861945191,
         0.5527998605412712
       ],
-      "seconds": 1.8455926002934575,
+      "seconds": 2.28106340020895,
       "limits": {
         "fit_converged": "fit_material must report converged at tolerance 1e-3 (normalized rms)",
         "fdtd_fitted_vs_tmm_fitted": {
