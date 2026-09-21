@@ -46,6 +46,14 @@ Injected allocation, read, write, transfer and reduction failures leave no scrat
 files while their tracebacks are alive. These are lifetime measurements, not
 speed or capacity results, and other physics paths keep the earlier reservations.
 
+Interrupted streamed runs can now [resume from a durable journal](docs/STREAMED_RESTART.md).
+Forward and backward block boundaries are recorded with synced, renamed files
+and a strict input contract. A new process returns the recorded signals, restores
+the adjoint and partial gradient, and replays only the remaining blocks. Sixteen
+tests interrupt the forward pass, a retained backward pass and a real child
+process, and the resumed results equal the uninterrupted run. Large-run recovery
+cost and the ADE, tensor, geometry and spectral paths are not yet covered.
+
 Experimental [file-backed spatial execution](docs/validation/STATE_BACKING_REPORT.md)
 now extends the streamed adjoint beyond application-owned DRAM field banks.
 Supported gradients match the DRAM path exactly in the recorded tests, while

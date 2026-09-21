@@ -8,6 +8,7 @@ import gc
 import hashlib
 import json
 import math
+import os
 import shutil
 from pathlib import Path
 import threading
@@ -72,6 +73,11 @@ def main(argv=None):
     parser.add_argument('--gpu-gib',type=int,default=32)
     parser.add_argument('--host-gib',type=int,default=88)
     parser.add_argument('--disk-gib',type=int,default=280)
+    parser.add_argument('--checkpoints',type=int,default=0,help='Global replay checkpoints; the bank reservation is checkpoints+3 states')
+    parser.add_argument('--restart-dir',default=None,help='Durable restart journal directory; rerunning the same command resumes')
+    parser.add_argument('--restart-every',type=int,default=1)
+    parser.add_argument('--kill-after-backward-records',type=int,default=0,
+        help='Testing only: exit the process abruptly after this many published backward records')
     args=parser.parse_args(argv)
     dtype=getattr(torch,args.precision)
     tolerance=2e-4 if dtype==torch.float32 else 1e-9
@@ -90,7 +96,8 @@ def main(argv=None):
         disk_budget_bytes=args.disk_gib*1024**3,disk_free_reserve_bytes=100*1024**3,
         host_budget_bytes=args.host_gib*1024**3,
         gpu_budget_bytes=args.gpu_gib*1024**3,slab_width=args.width,temporal_depth=args.depth,
-        checkpoints=0,local_checkpoints=0)
+        checkpoints=args.checkpoints,local_checkpoints=0,
+        restart_directory=args.restart_dir,restart_every_blocks=args.restart_every)
     reservation=estimate_streamed_memory(p,options)
     scratch=Path(args.scratch).resolve()
     scratch.mkdir(parents=True,exist_ok=True)
@@ -110,6 +117,8 @@ def main(argv=None):
         hardware=torch.cuda.get_device_name(),physical_vram_bytes=total,free_vram_bytes=free,
         eh_bytes=field_bytes,reservation=reservation,physical_vram_exceeded=field_bytes>total,
         driver_smoke=args.smoke,precision=args.precision,complex_fields=p.region.complex_fields,
+        checkpoints=args.checkpoints,restart_journal=args.restart_dir,restart_every_blocks=args.restart_every,
+        kill_after_backward_records=args.kill_after_backward_records,
         comparison_tolerance_relative_l2=tolerance,
         scratch_directory=str(scratch),initial_disk_free_bytes=disk_free,
         initial_available_ram_bytes=ram_free,disk_headroom_bytes=disk_floor,
@@ -139,6 +148,21 @@ def main(argv=None):
         while not stop.wait(.1):peak[0]=max(peak[0],process.memory_info().rss)
     sampler=threading.Thread(target=sample,daemon=True);sampler.start()
     started=time.perf_counter();torch.cuda.reset_peak_memory_stats()
+    if args.kill_after_backward_records:
+        # Simulated crash for recovery measurements: the record is published,
+        # then the process exits without any cleanup, like a power loss.
+        from torchfdtd import streamed_restart
+        original_record=streamed_restart.RestartJournal.record_backward
+        published=[0]
+        def record_then_exit(self,*record_args,**record_kwargs):
+            original_record(self,*record_args,**record_kwargs)
+            published[0]+=1
+            if published[0]>=args.kill_after_backward_records:
+                record.update(stage='killed_after_backward_record',killed_after_backward_records=published[0],
+                    elapsed_seconds=time.perf_counter()-started,peak_process_rss_bytes=peak[0])
+                save();print('Simulated crash after a published backward record',flush=True)
+                os._exit(75)
+        streamed_restart.RestartJournal.record_backward=record_then_exit
     try:
         epsilon=torch.full(p.region.shape,1.7,dtype=dtype,requires_grad=True)
         result=StreamedSimulation(p,options)(epsilon)

@@ -31,6 +31,8 @@ class StreamedAdjointOptions:
     state_directory: str | Path | None = None
     disk_budget_bytes: int | None = None
     disk_free_reserve_bytes: int = 0
+    restart_directory: str | Path | None = None
+    restart_every_blocks: int = 1
 
     def __post_init__(self):
         if isinstance(self.disk_free_reserve_bytes,bool) or not isinstance(self.disk_free_reserve_bytes,int) or self.disk_free_reserve_bytes<0:
@@ -60,6 +62,11 @@ class StreamedAdjointOptions:
             raise ValueError('tile_buffers must be between one and three.')
         if self.tile_transfers == 'async' and (not self.reuse_tile_buffers or torch.device(self.device).type != 'cuda'):
             raise ValueError('Asynchronous tiles require reusable CUDA buffers.')
+        if self.restart_directory is not None:
+            if not isinstance(self.restart_directory,(str,Path)):raise ValueError('restart_directory must be a path or string.')
+            object.__setattr__(self,'restart_directory',str(self.restart_directory))
+        if isinstance(self.restart_every_blocks,bool) or not isinstance(self.restart_every_blocks,int) or self.restart_every_blocks < 1:
+            raise ValueError('restart_every_blocks must be a positive integer.')
 
 
 def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, parameter_shapes=None):
@@ -141,6 +148,17 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
         disk_limit=min(options.disk_budget_bytes,int(free_disk*.8),free_disk-options.disk_free_reserve_bytes)
         if disk > disk_limit:
             raise ValueError(f'Field bank reservation exceeds the disk budget or available disk space: required={disk} bytes, admissible={max(0,disk_limit)} bytes, free={free_disk} bytes.')
+    # A restart journal holds one published record and one being written: each is
+    # a full state plus the partial material gradient. Charge both on the journal
+    # volume, together with the bank reservation when they share that volume.
+    restart = 2*(state+parameter_count*material_item) if options.restart_directory else 0
+    if restart:
+        from .state_store import disk_free
+        journal_free = disk_free(options.restart_directory)
+        shared = bool(disk) and Path(options.restart_directory).expanduser().resolve().anchor == Path(options.state_directory).expanduser().resolve().anchor
+        required = restart+(disk if shared else 0)
+        if required+options.disk_free_reserve_bytes > journal_free:
+            raise ValueError(f'Restart journal reservation exceeds available disk space: required={required} bytes, free={journal_free} bytes.')
     if torch.device(options.device).type == 'cuda':
         gpu_limit=cuda_budget_limit(options.device,gpu,options.gpu_budget_bytes)
         if gpu > gpu_limit:
@@ -149,7 +167,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
                 observer_layout_bytes=buffers*observer_layout,observer_preparation_bytes=buffers*observer_preparation,
                 state_bank_capacity=state_bank_capacity,
                 dense_parameter_multiplier=parameter_multiplier,dense_parameter_reservation_bytes=dense_parameters,
-                disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,
+                disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,restart_reservation_bytes=restart,
                 host_initial_state_reservation_bytes=initial_storage,
                 state_bytes=state, halo_cells_per_side=depth, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*(18+6*pole_count)*local_slots*tile_cells*item,
                 source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))
@@ -243,6 +261,15 @@ class _StreamedExecution:
             state_factory=store.new_state if store is not None else None)
 
 
+def _journal(project, epsilon, options, spectral, starts):
+    """Open the durable restart journal when configured, with a strict input contract."""
+    if options.restart_directory is None:return None
+    if spectral is not None:raise ValueError('Restart journals support time-history observations only.')
+    from .streamed_restart import RestartJournal, journal_contract
+    return RestartJournal(options.restart_directory, journal_contract(project, epsilon, options, starts),
+                          options.restart_every_blocks)
+
+
 class _Streamed(torch.autograd.Function):
     @staticmethod
     def forward(ctx, epsilon, project, options, report, spectral, execution):
@@ -254,18 +281,37 @@ class _Streamed(torch.autograd.Function):
         host = execution.host(project, epsilon, spectral)
         report['host_initial_state_storage_bytes'] = sum(s.untyped_storage().nbytes() for s in host.state())
         report['host_inverse_permittivity_bytes'] = 0
+        starts = list(range(0, project.region.steps, options.temporal_depth))+[project.region.steps]
+        journal = _journal(project, epsilon, options, spectral, starts)
+        ctx.journal = journal
         with _backing(options,report,'forward') as store:
             operator = execution.operator(host, options, store)
             state = host.state()
             signals = torch.empty((project.region.steps, len(host.monitors)), dtype=host.field_dtype,
                                   device='cpu') if spectral is None else spectral.zeros()
-            for start in range(0, project.region.steps, options.temporal_depth):
-                depth = min(options.temporal_depth, project.region.steps-start)
+            first = 0
+            resumed = journal.load_forward(operator.new_state, signals) if journal is not None else None
+            if resumed is not None:
+                completed, saved_state, signals = resumed
+                if completed is None:
+                    first = len(starts)-1
+                    report['forward_resumed_from_block'] = 'complete'
+                else:
+                    first, state = completed, saved_state
+                    report['forward_resumed_from_block'] = completed
+            for index in range(first, len(starts)-1):
+                start = starts[index]
+                depth = starts[index+1]-start
                 state, values = operator.forward(epsilon, state, start, depth)
                 if spectral is None:signals[start:start+depth].copy_(values)
                 else:spectral.accumulate(signals, values, start)
+                if journal is not None and journal.forward_due(index+1, len(starts)-1):
+                    journal.record_forward(index+1, state, signals)
+            if journal is not None and first < len(starts)-1:
+                journal.record_signals(signals)
             if operator.workspace is not None:
                 report['forward_workspace'] = operator.workspace_report()
+            if journal is not None:report.update(journal.report())
         report['forward_seconds'] = time.perf_counter()-started
         # No physical time history is retained by the autograd context.
         return signals
@@ -282,8 +328,20 @@ class _Streamed(torch.autograd.Function):
             operator = ctx.execution.operator(host, options, store)
             steps = project.region.steps
             starts = list(range(0, steps, options.temporal_depth))+[steps]
-            gradient = torch.zeros_like(epsilon)
-            adjoint = host.state()
+            journal = getattr(ctx, 'journal', None)
+            signal_bar_sha256 = None
+            resumed = None
+            if journal is not None:
+                from .streamed_restart import sha256_tensor
+                signal_bar_sha256 = sha256_tensor(signal_bar.detach().contiguous())
+                resumed = journal.load_backward(signal_bar_sha256, operator.new_state, epsilon)
+            if resumed is not None:
+                limit, adjoint, gradient = resumed
+                report['backward_resumed_from_block'] = limit
+            else:
+                limit = len(starts)-1
+                gradient = torch.zeros_like(epsilon)
+                adjoint = host.state()
             live = 0
             report.update(peak_block_checkpoints=0, replayed_blocks=0)
 
@@ -304,6 +362,8 @@ class _Streamed(torch.autograd.Function):
                                                                        adjoint, signal_bar[start:stop] if ctx.spectral is None else ctx.spectral.transpose(signal_bar,start,stop))
                             gradient.add_(contribution)
                             del state, contribution
+                            if journal is not None and journal.backward_due(block, len(starts)-1):
+                                journal.record_backward(block, adjoint, gradient, signal_bar_sha256)
                         return
                     middle = begin+_split(end-begin, slots)
                     saved = replay(restart, begin, middle)
@@ -315,8 +375,11 @@ class _Streamed(torch.autograd.Function):
                         live -= 1
                     end = middle
 
-            try:reverse(0, len(starts)-1, host.state(), options.checkpoints)
+            try:reverse(0, limit, host.state(), options.checkpoints)
             finally:reverse=None  # Release recursive replay captures without cyclic GC.
+            if journal is not None:
+                journal.complete()
+                report.update(journal.report())
             if operator.workspace is not None:
                 report['backward_workspace'] = operator.workspace_report()
         report['backward_seconds'] = time.perf_counter()-started

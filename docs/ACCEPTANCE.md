@@ -1,5 +1,28 @@
 # Current acceptance record
 
+## Durable restart journal for streamed adjoints, 21 September 2026
+
+`StreamedAdjointOptions(restart_directory=...)` records forward state and
+partial signals, the completed forward signals, and the adjoint state with the
+partial material gradient at block boundaries. Records are written to a
+temporary directory, synced, renamed and then published through per-phase
+pointer files, and the previous record of the same phase is removed afterwards.
+The reservation charges two states plus two parameter gradients on the journal
+volume. A resumed backward replays only the blocks below the recorded one from
+the all-zero initial state, so no restart bank has to survive the crash.
+
+Sixteen tests on CPU and CUDA tiles with host and file banks interrupt the
+forward pass after one or three blocks, interrupt a retained backward pass
+after one or three transposes, and kill a real child process during backward
+and resume it from a new process. Resumed signals and gradients equal the
+uninterrupted run bitwise on CPU and within 1e-6 relative on CUDA. Changed
+inputs and a different signal adjoint are rejected with the differing contract
+keys named, `restart_every_blocks=2` writes the expected record counts, and an
+insufficient journal volume is rejected before any directory is created.
+Spectral observations, ADE, tensor, geometry and asynchronous tile paths are
+not covered, and the recovery cost of a large file-backed run is unmeasured.
+[API and limits](STREAMED_RESTART.md).
+
 ## Streamed file-bank lifetime and reservation, 21 September 2026
 
 Distinct live file-bank identities of the streamed adjoint were counted through

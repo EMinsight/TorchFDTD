@@ -172,8 +172,8 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 ## 다음 구현 순서
 
 1. 실제 FP32 48 GB 초과 forward/backward의 짧은 10-step 용량 gate는
-   [완료했다](BEYOND_VRAM_FP32.md). 남은 것은 장시간 실행, 중단 후 복구,
-   성능과 전체 메모리 계측이다. CR 응용 최적화와 CR 정밀 재계산은 현재 실행 범위에서 제외한다.
+   [완료했다](BEYOND_VRAM_FP32.md). block 단위 [durable restart](STREAMED_RESTART.md)는
+   구현했다. 남은 것은 대규모 복구 실측, 장시간 실행, 성능과 전체 메모리 계측이다. CR 응용 최적화와 CR 정밀 재계산은 현재 실행 범위에서 제외한다.
    기존 CR 기록은 보존하며 일반 inverse design과 solver gradient 검증은 계속한다.
 2. CPU·CUDA·브라우저에서 확인한 PMC+CPML native dispatch의 흡수 정확도를 검증한 뒤,
    필요한 profile·ADE·streaming·batch 조합으로 확장한다.

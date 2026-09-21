@@ -19,7 +19,7 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 | 0 | TorchFDTD 이름 통일 | 저장소·폴더·패키지·CLI·UI·문서 변경, 기존 입력 보존, 배포물 설치/실행 확인. 기존 실행과 실험 기록 보존 |
 | 1 · P0 | 물리 출력과 gradient 메시 수렴 | 같은 물리 크기·시간·소스·PML 두께에서 메시를 세분화하고 출력과 동일 형상 파라미터의 gradient를 비교. 독립 해석 기준 및 시간/PML 오차 분리 |
 | 제외 | 원래 CR 응용 최적화·정밀 재계산 | 이번 완성 범위에서 제외. 기존 계산·진단 기록 보존. 일반 Torch inverse design 기능과 solver gradient 검증은 계속 필수 |
-| 3 · P0 | 실제 FP32 48GB 초과 및 계층 메모리 | 54GiB E/H FP32 10-step forward·backward 용량 gate 완료([기록](BEYOND_VRAM_FP32.md), 디스크 정리·메모리/시간 기록 포함). 남은 증거: 의미 있는 물리 시간의 실행, 중단 후 복구, OS cache를 포함한 전체 메모리와 처리량 계측. dense epsilon/VJP가 DRAM 한계가 되는 경로도 공간 생산·축약으로 개선 |
+| 3 · P0 | 실제 FP32 48GB 초과 및 계층 메모리 | 54GiB E/H FP32 10-step forward·backward 용량 gate 완료([기록](BEYOND_VRAM_FP32.md), 디스크 정리·메모리/시간 기록 포함). block 단위 durable restart journal 구현([문서](STREAMED_RESTART.md)). 남은 증거: 의미 있는 물리 시간의 실행, 대규모 중단·복구 실측, OS cache를 포함한 전체 메모리와 처리량 계측. dense epsilon/VJP가 DRAM 한계가 되는 경로도 공간 생산·축약으로 개선 |
 | 4 · P1 | PEC/PMC·대칭/반대칭 경계 | CPU·CUDA·adjoint·DRAM/파일·배치에서 일치. 독립 반사/공진 해와 전체 영역 대비 축소 영역 결과·gradient·비용 확인 |
 | 5 · P1 | Eigenmode source·mode port | 모드 전력 정규화, 전진/후진 분리, S-parameter, 전력 보존·상반성, 설계 영역의 Torch 미분과 UI/Python 연결 |
 | 6 · P1 | Near-to-far field | 적절한 외부 매질과 폐곡면/주기 조건의 원거리장, 각도·방사 전력·위상, 독립 해석 기준과 목적함수의 adjoint 확인 |

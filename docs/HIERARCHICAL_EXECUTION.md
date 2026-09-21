@@ -185,6 +185,7 @@ bounded slab I/O. Checkpoint references retain immutable versions. See the
 [implementation contract](STREAMED_FDTD.md#experimental-file-backed-spatial-state)
 and [recorded validation](validation/STATE_BACKING_REPORT.md). This implements
 the basic spatial backing path in priority 7. Sustained cold NVMe measurements,
-asynchronous disk prefetch, automatic tier selection, durable restart and
-single-domain multi-GPU remain open. Material and gradient tensors still occupy
+asynchronous disk prefetch, automatic tier selection and single-domain
+multi-GPU remain open. A block-granular [durable restart journal](STREAMED_RESTART.md)
+is implemented; its large-run recovery cost is unmeasured. Material and gradient tensors still occupy
 CPU memory, and the host admission estimate excludes the OS page cache.

@@ -325,6 +325,17 @@ eight copies until they are measured. The report states
 `dense_parameter_multiplier`. Sampled RSS excludes the OS file cache and can
 miss transients shorter than the sampling interval.
 
+A [durable restart journal](STREAMED_RESTART.md) records forward and backward
+block boundaries when `restart_directory` is set, so an interrupted run
+continues from a new process: a completed forward returns its recorded signals,
+and a recorded backward restores the adjoint and partial gradient and replays
+only the remaining blocks from the all-zero initial state. A strict contract
+rejects journals written for other inputs, options, runtimes or objectives.
+The journal reservation charges two full states plus two parameter gradients on
+its volume. Verified on CPU and CUDA tiles with host and file banks, including
+a killed child process; ADE, tensor, geometry, spectral and asynchronous paths
+are not covered, and large-run recovery cost is unmeasured.
+
 File I/O is synchronous and buffered by
 the OS. Its page cache is outside the host reservation, so this is not a cap on
 whole-machine RAM usage or measured physical SSD traffic. No GPUDirect Storage,
