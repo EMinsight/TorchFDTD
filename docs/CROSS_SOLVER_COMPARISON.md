@@ -11,7 +11,7 @@ Linux side: WSL2 Ubuntu 22.04 distribution torchfdtd-bench on D: (imported becau
 | Component | TorchFDTD and FDTDX (venv) | Meep (micromamba) |
 |---|---|---|
 | Python | 3.12.14 | 3.13.15 |
-| Solver | torchfdtd 0.14.0.dev0 (worktree HEAD `f6aacf359e52` when the drivers ran), fdtdx 0.6.2 | meep 1.34.0 (MPI build, mpich 4.3.2 h23078de_105) |
+| Solver | torchfdtd 0.14.0.dev0 (worktree HEAD `fa57986a3c11` when the drivers ran), fdtdx 0.6.2 | meep 1.34.0 (MPI build, mpich 4.3.2 h23078de_105) |
 | Frameworks | torch 2.11.0+cu128 (CUDA 12.8), cupy-cuda12x 14.2.0, jax 0.11.2, jaxlib 0.11.2, jax-cuda12-plugin 0.11.2, equinox 0.13.8, optax 0.2.8 | numpy 2.5.3, scipy 1.18.1 |
 | numpy, scipy | 2.4.6, 1.18.1 | 2.5.3, 1.18.1 |
 | Field precision | float32 | float64 (the conda-forge build is double precision) |
@@ -170,6 +170,16 @@ FDTDX compilation (excluded): FDTDX, checkpointed (num_checkpoints=2) 1.7 s, FDT
 | FDTDX, checkpointed (num_checkpoints=2) vs FDTDX, reversible (Recorder(modules=[])) | 1.072e-07 | 4.547e-13 | 0.000e+00 | 0.000e+00 |
 | FDTDX, checkpointed (num_checkpoints=2) vs FDTDX, checkpointed (num_checkpoints=16, supplementary) | 0.000e+00 | 0.000e+00 | 0.000e+00 | 0.000e+00 |
 | FDTDX, reversible (Recorder(modules=[])) vs FDTDX, checkpointed (num_checkpoints=16, supplementary) | 1.072e-07 | 4.547e-13 | 0.000e+00 | 0.000e+00 |
+
+## Rerunning the Meep timing block
+
+The Meep throughput rows and the rank sweep are retaken, and the combined record and this document regenerated, by one command from a Windows shell (the GPU records are left untouched):
+
+```
+wsl.exe -d torchfdtd-bench -- bash /mnt/d/TorchFDTD/.local/worktrees/cross-solver/benchmarks/cross_solver/run_meep_timing.sh
+```
+
+The script runs `run_meep.sh 12 --fixture throughput` (the primary 12-rank block), `meep_rank_sweep.sh` (4, 8, 12 and 16 ranks), `combine.py` and `report.py`. Idle criterion of a block: the master rank polls the Windows host CPU load through `powershell.exe (Get-CimInstance Win32_Processor).LoadPercentage` every 5 s and starts the block after two consecutive samples at or below 50 percent (`--cpu-idle-limit`, 30 min limit per block); the other ranks sleep on a token file meanwhile. The block (one warm-up plus three timed solves) is accepted when its wall times spread by at most a factor 1.25, otherwise it is retaken after the gate, up to four times; every attempt and the host load before and after each block are stored in the record. `combine.py` prefers `meep_throughput.json` when it exists and otherwise falls back to `meep_throughput_ranks12.json` (currently used: `meep_throughput_ranks12.json`). A quiet GPU is not required for this block.
 
 ## Differences between the solvers that the reader must know
 
