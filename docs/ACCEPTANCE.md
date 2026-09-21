@@ -16,7 +16,20 @@ histories match their checkpoint reference exactly. Eleven metadata-only
 admission cases also passed. The [source-fingerprinted record](validation/reversible_cpml_workflow.json)
 keeps scope, corrections and conservative memory allowances. This is not a
 general CPML physical-convergence, large-capacity or throughput result.
-Full integration CI is recorded separately after delivery.
+Linux CI [35546493019](https://github.com/hyoseokp/TorchFDTD/actions/runs/35546493019)
+at `ef1b158` completed successfully with **1,305 Python passes**, 441
+environment-dependent skips, **32 browser passes**, and 8 browser skips.
+Frontend and wheel builds passed. The Python JUnit SHA-256 is
+`7c65b969828d327b9f0aa0fc17f2ed9ffbd5b70f6d7f64e211777efc855a6414`.
+
+The runtime source audit checked 828 allowlisted files without pattern
+findings. A clean isolated wheel and install matched all 113 package files
+byte-for-byte. Its SHA-256 is
+`e8c3b336c4c26cd2df41545057804c3e107a6cfab4f8d6ef1b22c13ebea40e4a`.
+The first local build attempt rejected the environment's older setuptools
+before building a wheel. The successful build used the declared isolated
+build environment and a fresh copy of the audited source. No unchanged
+numerical suite was rerun for this acceptance-record update.
 
 ## 21 September 2026 integration
 
