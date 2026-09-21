@@ -1,6 +1,6 @@
 """Opposing fixed-mode ports with sequential, recomputed S-matrix columns.
 
-Experimental two-port network on one periodic-transverse propagation axis.
+Experimental two-port network on one shared propagation axis.
 Physical port phases are retained. This is not arbitrary multi-branch routing.
 """
 from dataclasses import dataclass, replace
@@ -56,22 +56,28 @@ def _decompose(plane, launches, gram_tolerance):
             raise ValueError('Port basis has no positive sampled forward power.')
         bases.append(basis / power.sqrt())
         powers.append(power)
-    # Independent Hermitian power Gram, with signed backward partners implicit.
-    # Refuse nonorthogonal channel bases rather than label |S|^2 as powers.
-    gram = []
+    # Both signed blocks are needed. The Hermitian forward Gram alone can
+    # hide an anti-Hermitian E/H overlap that leaks into backward channels.
+    gram, reverse_gram = [], []
     for first in bases:
-        row = []
+        row, reverse_row = [], []
         for second in bases:
-            value = .25 * ((first[:, u]*second[:, 3+v].conj()
-                            - first[:, v]*second[:, 3+u].conj()
-                            + second[:, u].conj()*first[:, 3+v]
-                            - second[:, v].conj()*first[:, 3+u]) * plane.weights).sum()
-            row.append(value)
+            electric = ((first[:, u]*second[:, 3+v].conj()
+                         - first[:, v]*second[:, 3+u].conj()) * plane.weights).sum()
+            magnetic = ((second[:, u].conj()*first[:, 3+v]
+                         - second[:, v].conj()*first[:, 3+u]) * plane.weights).sum()
+            row.append(.25*(electric+magnetic))
+            reverse_row.append(.25*(electric-magnetic))
         gram.append(torch.stack(row))
+        reverse_gram.append(torch.stack(reverse_row))
     gram = torch.stack(gram)
     if not torch.allclose(gram, torch.eye(len(bases), device=gram.device, dtype=gram.dtype),
                           rtol=gram_tolerance, atol=gram_tolerance):
         raise ValueError('Sampled port modes are not power orthogonal. Refine or select a validated basis.')
+    reverse_gram = torch.stack(reverse_gram)
+    if not torch.allclose(reverse_gram, torch.zeros_like(reverse_gram),
+                          rtol=0., atol=gram_tolerance):
+        raise ValueError('Sampled port modes fail signed forward/backward orthogonality. Refine or select a validated basis.')
     forward, backward = [], []
     for basis in bases:
         # Scale all products to avoid squared SI-area/DFT underflow in FP32.
@@ -98,7 +104,9 @@ def _fixed_section(section):
 class ModeNetwork:
     """Complex S[outgoing channel, incident channel] from independent launches.
 
-    Supports two opposing complete-cell ports on project.sources[0].normal.
+    Supports two opposing ports on project.sources[0].normal. Periodic ports
+    cover the complete cell. Explicit OpenPortOptions use the physical CPML
+    aperture and fixed homogeneous cladding, including source tails in CPML.
     Each port has a fixed straight calibration cross-section. Use permittivity
     for a shared section, or port_permittivities keyed by the two port names. All port
     and source exterior material remains fixed. Only the interior design
@@ -110,10 +118,15 @@ class ModeNetwork:
     """
     def __init__(self, project, ports, permittivity=None, options=None, *, num_modes=2,
                  port_permittivities=None,
-                 network_budget_bytes=256*1024**2, gram_tolerance=1e-4):
+                 network_budget_bytes=256*1024**2, gram_tolerance=1e-4, open_ports=None):
         self.project = Project.model_validate(project.model_dump())
         self.ports = tuple(ports)
         self.options = options or AdjointOptions(checkpoints=4)
+        if open_ports is not None:
+            from .open_mode_injection import OpenPortOptions
+            if not isinstance(open_ports,OpenPortOptions):
+                raise ValueError('open_ports must be explicit OpenPortOptions.')
+        self.open_ports = open_ports
         if not isinstance(self.options, AdjointOptions):
             raise ValueError('Mode networks require resident AdjointOptions, not streaming.')
         if len(self.ports) != 2 or not all(isinstance(p, FixedModePort) for p in self.ports):
@@ -167,25 +180,51 @@ class ModeNetwork:
                 source = active[0].model_copy(deep=True)
                 center = [0., 0., 0.]; center[self.axis] = port.source_coordinate_um
                 size = list(r.actual_size); size[self.axis] = 0.
+                if open_ports is not None:
+                    for a in range(3):
+                        if a != self.axis:
+                            lo,hi = r.interior_bounds(a)
+                            center[a],size[a] = (lo+hi)/2,hi-lo
                 source.center, source.size = tuple(center), tuple(size)
                 source.direction = '+' if port.direction == 1 else '-'
                 p.sources = [source]
                 p.monitors = [FieldMonitor(id=q.name, normal=self.normal,
-                    center=tuple(q.coordinate_um if a == self.axis else 0. for a in range(3)),
+                    center=tuple(q.coordinate_um if a == self.axis else center[a] for a in range(3)),
                     size=tuple(size)) for q in self.ports]
-                launch = prepare_modal_launch(p, _fixed_section(sections[port.name]), mode_index=mode_index, num_modes=num_modes,
-                                              source_budget_bytes=network_budget_bytes)
+                if open_ports is None:
+                    launch = prepare_modal_launch(p, _fixed_section(sections[port.name]), mode_index=mode_index, num_modes=num_modes,
+                                                  source_budget_bytes=network_budget_bytes)
+                else:
+                    from .open_mode_injection import prepare_open_modal_launch
+                    launch = prepare_open_modal_launch(p, _fixed_section(sections[port.name]),options=open_ports,
+                        mode_index=mode_index,num_modes=num_modes,source_budget_bytes=network_budget_bytes)
                 projects.append(p); launches.append(launch)
         self._projects, self._launches = tuple(projects), tuple(launches)
         self._packet_bytes = sum(x.storage_bytes for x in launches)
         self._admit()
+        if open_ports is not None:
+            # Check the complete signed basis on the actual detector rule
+            # before creating any volume fields or running a calibration.
+            from types import SimpleNamespace
+            from .field_monitors import plane_plan
+            offset = 0
+            for port in self.ports:
+                monitor = next(m for m in projects[0].monitors if m.id == port.name)
+                plan = plane_plan(r, monitor)
+                plane = SimpleNamespace(normal=self.normal,
+                    points_um=torch.tensor(plan['points_um'], dtype=torch.float32),
+                    weights=torch.tensor(plan['weights'], dtype=torch.float32),
+                    fields=torch.zeros((1,len(plan['weights']),6), dtype=torch.complex64))
+                count = len(port.mode_indices)
+                _decompose(plane, launches[offset:offset+count], self.gram_tolerance)
+                offset += count
         self._project_snapshot = self.project.model_dump()
         self._configuration_snapshot = self._configuration()
         self._prepared_snapshot = tuple(p.model_dump() for p in self._projects)
 
     def _configuration(self):
         return (self.ports, self.normal, self.axis, self.indices, self.channels, self.options,
-                self.gram_tolerance, self.network_budget_bytes, self._shared_section,
+                self.gram_tolerance, self.network_budget_bytes, self._shared_section,self.open_ports,
                 tuple(launch.identity for launch in self._launches))
 
     def _guard_configuration(self):
@@ -316,6 +355,7 @@ class ModeNetwork:
         return ModeNetworkResult(columns.transpose(0, 1), self.channels,
             tuple(p.coordinate_um for p in ports),
             dict(scope='opposing two-port fixed-mode network', wrapper_reservation_bytes=reserved,
+                 transverse_boundary='cpml' if self.open_ports is not None else 'periodic',
                  calibration_volume_bytes=3*math.prod(r.shape)*epsilon.element_size(),
                  calibration_volume_limit=1, per_port_sections=not self._shared_section,
                  calibration=reports, calibration_policy='fresh matched-guide solve per column per call', case_graphs_retained=0, backward_case_graph_limit=1,

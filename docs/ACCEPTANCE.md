@@ -1,5 +1,33 @@
 # Current acceptance record
 
+## Open transverse CPML mode ports, 21 September 2026
+
+The fixed bound-mode workflow now includes native CPML eigenoperators,
+complete modal source tails, physical-aperture signed detectors and
+opposing-port complex S matrices with interior material adjoints. Degenerate
+polarizations are orthogonalized only inside their eigenspace and must pass
+fresh residuals. Both signed Gram blocks are checked before volume allocation.
+
+Forty-seven new focused CPU cases passed. Native FP32 CUDA fiber checks
+cover both launch directions, two plane separations, a longer pulse, an
+interior perturbation VJP and an actual four-channel network. Maximum
+four-channel complex S error is 4.15e-6. The material VJP differs from a
+step-halving finite-difference pair by at most 2.06e-5 relatively, with exact
+zero fixed-region gradient. Independent slab/fiber and fixed-mesh padding
+checks remain distinct from physical geometry-gradient convergence.
+See [scope and usage](OPEN_MODE_PORTS.md) and the
+[measurement/provenance record](validation/open_mode_workflow.json).
+
+An isolated wheel and installed public API match all 119 package files
+byte-for-byte. The wheel SHA-256 is
+`965f0d3f2fd2c364ecd519974119e2c8fe15314fb00870ebedec29ab6616e64b`.
+The 38-page manuscript builds without reference or overfull-box failures,
+and its changed pages have been visually inspected. Full integration CI
+for this new runtime is pending. General routing, browser mode-network
+editing, streamed modal injection and complete FDTDX parity remain open.
+Public release remains NOT_CLEARED_FOR_PUBLICATION.
+
+
 ## Recorded periodic policy and browser integration, 21 September 2026
 
 The explicit recorded CPML policy now supports the common CPU-design interface,

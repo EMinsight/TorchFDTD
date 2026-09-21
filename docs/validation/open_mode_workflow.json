@@ -1,0 +1,477 @@
+{
+  "status": "focused_cpu_and_native_cuda_gates_passed_full_ci_pending",
+  "scope": "Fixed bound modes with transverse CPML, opposing-port resident S matrices and interior isotropic material VJP. No full FDTDX parity, physical geometry-gradient convergence or performance ranking.",
+  "native_runs": {
+    "plus": {
+      "report": {
+        "direction": "+",
+        "cycles": 2,
+        "grid": [
+          80,
+          40,
+          40
+        ],
+        "steps": 1300,
+        "beta_per_um": [
+          7.311263320357341,
+          -3.1240177914815926e-08
+        ],
+        "measurements": [
+          {
+            "detector": "middle",
+            "distance_um": 1.0,
+            "ratio": [
+              0.5164659023284912,
+              0.8563080430030823
+            ],
+            "expected": [
+              0.5164656265712273,
+              0.8563079580680933
+            ],
+            "complex_error": 2.8854119453741033e-07,
+            "phase_error_rad": 1.9226708392453717e-07,
+            "transmitted_power_defect": 4.927797510045906e-07,
+            "reverse_power": 1.6156970161773643e-07
+          },
+          {
+            "detector": "far",
+            "distance_um": 2.0,
+            "ratio": [
+              -0.4665270447731018,
+              0.8845061659812927
+            ],
+            "expected": [
+              -0.46652657562113714,
+              0.884507252203132
+            ],
+            "complex_error": 1.1832081177964533e-06,
+            "phase_error_rad": 9.217202388027627e-07,
+            "transmitted_power_defect": 1.3588363501071399e-06,
+            "reverse_power": 1.615293001577811e-07
+          }
+        ],
+        "elapsed_seconds": 3.3296818998642266,
+        "outside_power": 1.6040377204262768e-07,
+        "mode_residual": 3.4431679978297325e-06,
+        "tail": 1.2431398120209502e-05,
+        "packet_storage_bytes": 188800,
+        "accepted": true
+      },
+      "report_sha256": "549a70a893b850b9c6f143049741adb2edad23713c9c8004616dcff771b8d43b"
+    },
+    "minus": {
+      "report": {
+        "direction": "-",
+        "cycles": 2,
+        "grid": [
+          80,
+          40,
+          40
+        ],
+        "steps": 1300,
+        "beta_per_um": [
+          7.311263320357341,
+          -3.1240177914815926e-08
+        ],
+        "measurements": [
+          {
+            "detector": "middle",
+            "distance_um": 1.0,
+            "ratio": [
+              0.5164659023284912,
+              0.8563079833984375
+            ],
+            "expected": [
+              0.5164656265712273,
+              0.8563079580680933
+            ],
+            "complex_error": 2.7691820982993875e-07,
+            "phase_error_rad": 2.2305083695072968e-07,
+            "transmitted_power_defect": 3.906998813363316e-07,
+            "reverse_power": 1.6080333864465501e-07
+          },
+          {
+            "detector": "far",
+            "distance_um": 2.0,
+            "ratio": [
+              -0.4665271043777466,
+              0.8845061659812927
+            ],
+            "expected": [
+              -0.46652657562113714,
+              0.884507252203132
+            ],
+            "complex_error": 1.2080817174750286e-06,
+            "phase_error_rad": 9.74440984800571e-07,
+            "transmitted_power_defect": 1.3032219889907992e-06,
+            "reverse_power": 1.6100595701118436e-07
+          }
+        ],
+        "elapsed_seconds": 3.064061800017953,
+        "outside_power": 1.59999032689484e-07,
+        "mode_residual": 3.4431679978297325e-06,
+        "tail": 1.2431398120209502e-05,
+        "packet_storage_bytes": 188800,
+        "accepted": true
+      },
+      "report_sha256": "af5a0964498ab4050b9bfacb539e8d0c3f3316ae17fda625a8d5fae07bb2fab1"
+    },
+    "longer-pulse": {
+      "report": {
+        "direction": "+",
+        "cycles": 4,
+        "grid": [
+          80,
+          40,
+          40
+        ],
+        "steps": 1300,
+        "beta_per_um": [
+          7.311263320357341,
+          -3.1240177914815926e-08
+        ],
+        "measurements": [
+          {
+            "detector": "middle",
+            "distance_um": 1.0,
+            "ratio": [
+              0.5164653658866882,
+              0.8563085198402405
+            ],
+            "expected": [
+              0.5164656265712273,
+              0.8563079580680933
+            ],
+            "complex_error": 6.19309594793892e-07,
+            "phase_error_rad": 5.133620394113073e-07,
+            "transmitted_power_defect": 7.553114542702133e-07,
+            "reverse_power": 1.609366222510289e-07
+          },
+          {
+            "detector": "far",
+            "distance_um": 2.0,
+            "ratio": [
+              -0.4665270447731018,
+              0.88450688123703
+            ],
+            "expected": [
+              -0.46652657562113714,
+              0.884507252203132
+            ],
+            "complex_error": 5.980964928374511e-07,
+            "phase_error_rad": 5.880338510883923e-07,
+            "transmitted_power_defect": 9.353961871738647e-08,
+            "reverse_power": 1.6051004081418796e-07
+          }
+        ],
+        "elapsed_seconds": 2.9151512002572417,
+        "outside_power": 1.5938825015382463e-07,
+        "mode_residual": 3.4431679978297325e-06,
+        "tail": 1.2431398120209502e-05,
+        "packet_storage_bytes": 188800,
+        "accepted": true
+      },
+      "report_sha256": "8350d54d2a6a0ead193bc1a63ca0f421ce8471d6b8d69a32c5e449fdeef5ce3e"
+    },
+    "network": {
+      "report": {
+        "device": "cuda",
+        "hardware": "NVIDIA GeForce RTX 3060",
+        "precision": "float32",
+        "grid": [
+          80,
+          40,
+          40
+        ],
+        "steps": 1300,
+        "scope": "Two opposing fixed bound-mode ports and interior scalar dielectric VJP. No eigenmode derivative or general routing.",
+        "straight_s": [
+          [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -0.46652722358703613,
+              0.884506344795227
+            ]
+          ],
+          [
+            [
+              -0.4665271043777466,
+              0.8845061659812927
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ]
+        ],
+        "straight_complex_error": 1.2080817174750286e-06,
+        "perturbed_s": [
+          [
+            [
+              -0.003249708330258727,
+              0.0005491389892995358
+            ],
+            [
+              -0.5643643736839294,
+              0.8241981863975525
+            ]
+          ],
+          [
+            [
+              -0.5642604231834412,
+              0.8241590261459351
+            ],
+            [
+              0.0003844878519885242,
+              -0.0029682116582989693
+            ]
+          ]
+        ],
+        "reciprocity_error": 0.00011108209582744166,
+        "guided_power_sums": [
+          0.9976388216018677,
+          0.9978187084197998
+        ],
+        "objective": -0.31700095534324646,
+        "gradient": -0.3769431710243225,
+        "finite_differences": [
+          {
+            "step": 0.008,
+            "finite_difference": -0.3769509196281433,
+            "relative_error": 2.055600270978175e-05
+          },
+          {
+            "step": 0.004,
+            "finite_difference": -0.37694719433784485,
+            "relative_error": 1.0673414180928376e-05
+          }
+        ],
+        "fixed_gradient_max": 0.0,
+        "elapsed_seconds": 45.238200599793345,
+        "accepted": true
+      },
+      "report_sha256": "1a56abbeb47857e04aa53c1bbc69fead33f4c0c963b48665c2c17f24c9763faa"
+    },
+    "four-channel": {
+      "report": {
+        "device": "cuda",
+        "hardware": "NVIDIA GeForce RTX 3060",
+        "scope": "Actual four-channel straight confined fiber. Fixed degenerate polarization basis, no mode derivative.",
+        "complex_error": 4.148521838942543e-06,
+        "reciprocity_error": 1.8128045553567063e-07,
+        "column_power_defect": 1.6689300537109375e-06,
+        "s": [
+          [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -0.4665270447731018,
+              0.8845061659812927
+            ],
+            [
+              1.3125900011345948e-07,
+              -5.629534527429314e-08
+            ]
+          ],
+          [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.403367804186928e-07,
+              -5.787006784885307e-08
+            ],
+            [
+              -0.46652716398239136,
+              0.8845061659812927
+            ]
+          ],
+          [
+            [
+              -0.46652698516845703,
+              0.8845060467720032
+            ],
+            [
+              1.310042847535442e-07,
+              -5.293595606303825e-08
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          [
+            [
+              1.397090585442129e-07,
+              -5.6080128985058764e-08
+            ],
+            [
+              -0.46652719378471375,
+              0.884506344795227
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ]
+        ],
+        "beta_per_um": [
+          [
+            7.311263320357341,
+            -3.4711310907616163e-08
+          ],
+          [
+            7.311261788633548,
+            -1.1064249642230695e-08
+          ]
+        ],
+        "accepted": true,
+        "source_sha256_before": {
+          "torchfdtd/open_mode_ports.py": "6ba1cd619e5b4dc229ccaef277900730716710533b31c464af1c86e87779e284",
+          "torchfdtd/open_mode_operators.py": "00e24ae794bc18474b97a47fee361210c2a1f686feda529c91da79bc42fbee58",
+          "torchfdtd/open_mode_injection.py": "2bd4f2439fa95ce871038b17eb699b988098d4b4bd0ced47dca91bd298837480",
+          "torchfdtd/mode_injection.py": "24b669b14a592ec2d4d4a3b96fdedde38e88af232ad576bb825a3629b9e9b714",
+          "torchfdtd/mode_network.py": "82633341904923e4ad7af0a942f567418d63537da22669c843b81a490f913155",
+          "torchfdtd/mode_ports.py": "9232e10c2a061114da2e996d7dd9be97179b18429689ccdae641f8e8c1855dbc",
+          "benchmarks/open_mode_injection.py": "84836a322b5f74df7592ed19dfd6c7a0fa9e3a21cf8956dcf1de7d5997b4a874",
+          "benchmarks/open_mode_network.py": "42ac2b0ae8de8ea89bdf5fb454abe3e005d9903262d6c8719c96429ba88c902c"
+        },
+        "source_sha256_after": {
+          "torchfdtd/open_mode_ports.py": "6ba1cd619e5b4dc229ccaef277900730716710533b31c464af1c86e87779e284",
+          "torchfdtd/open_mode_operators.py": "00e24ae794bc18474b97a47fee361210c2a1f686feda529c91da79bc42fbee58",
+          "torchfdtd/open_mode_injection.py": "2bd4f2439fa95ce871038b17eb699b988098d4b4bd0ced47dca91bd298837480",
+          "torchfdtd/mode_injection.py": "24b669b14a592ec2d4d4a3b96fdedde38e88af232ad576bb825a3629b9e9b714",
+          "torchfdtd/mode_network.py": "82633341904923e4ad7af0a942f567418d63537da22669c843b81a490f913155",
+          "torchfdtd/mode_ports.py": "9232e10c2a061114da2e996d7dd9be97179b18429689ccdae641f8e8c1855dbc",
+          "benchmarks/open_mode_injection.py": "84836a322b5f74df7592ed19dfd6c7a0fa9e3a21cf8956dcf1de7d5997b4a874",
+          "benchmarks/open_mode_network.py": "42ac2b0ae8de8ea89bdf5fb454abe3e005d9903262d6c8719c96429ba88c902c"
+        }
+      },
+      "report_sha256": "5028adee2f36921d5506894be79fec82fa77bca98a00bf94b7938eef58d811a8"
+    }
+  },
+  "measurement_provenance": "The four-channel report records identical contemporaneous before/after source hashes. Earlier single-mode runs did not record source fingerprints at launch. Current integration hashes below are not relabelled as their measured hashes. Subsequent changes add signed-basis admission, eigenspace-only degenerate handling, public exports and documentation. Single-mode update algebra is unchanged.",
+  "integration_sha256": {
+    "torchfdtd/open_mode_operators.py": "00e24ae794bc18474b97a47fee361210c2a1f686feda529c91da79bc42fbee58",
+    "torchfdtd/open_mode_ports.py": "6ba1cd619e5b4dc229ccaef277900730716710533b31c464af1c86e87779e284",
+    "torchfdtd/open_mode_injection.py": "2bd4f2439fa95ce871038b17eb699b988098d4b4bd0ced47dca91bd298837480",
+    "torchfdtd/mode_injection.py": "24b669b14a592ec2d4d4a3b96fdedde38e88af232ad576bb825a3629b9e9b714",
+    "torchfdtd/mode_ports.py": "9232e10c2a061114da2e996d7dd9be97179b18429689ccdae641f8e8c1855dbc",
+    "torchfdtd/mode_network.py": "82633341904923e4ad7af0a942f567418d63537da22669c843b81a490f913155",
+    "tests/test_open_mode_degeneracy.py": "ce8351edd18b19d7334ca909de6cd1bea67b9f3922cfb987b9c1c33f20210ed7",
+    "tests/test_open_mode_injection.py": "13054e0dacdd03b75cc1a134742bc8ed229fc3859425882a050cb6c4f6e84193",
+    "tests/test_open_mode_network_contracts.py": "63f520f12fd4efc8d029698900a6160c74d782def931aab421c848aca2efe861",
+    "tests/test_open_mode_operators.py": "50ded8c6e4449ade2306da8db3584992dac238bb12e2b6e56eac8a535070155a",
+    "tests/test_open_mode_oracles.py": "fd3ea63aad60e27b2ac92c0ceed432e04285f17bda4a2cf4e467ca6d1004f860",
+    "tests/test_open_mode_padding.py": "e21fc8f456f8b7dd5e0249f665d718402b006f7a3bd22da54f248b432079ab1e",
+    "tests/test_open_mode_ports.py": "0dde10935605e508cceec87d7f468a523500f23a051f2a6f0847893c73979336",
+    "tests/test_open_mode_signed_gram.py": "8f3b9d8b94a471963131d78870d8aa1cd6d19da5c36e94786a372ea0cdc7b0a5"
+  },
+  "cpu_validation": {
+    "unique_new_passes": 47,
+    "counts": {
+      "operators": 5,
+      "mode_solver": 9,
+      "continuum_oracles": 9,
+      "injection_contracts": 4,
+      "network_contracts": 13,
+      "signed_gram": 3,
+      "degenerate_pair": 3,
+      "padding": 1
+    },
+    "notes": "Targeted groups were executed by bounded parallel agents. Test-only fixture corrections and added focused cases were rerun, not a repeated full suite. Four existing periodic injection admission cases also passed. Two CUDA regression wrappers were added after their benchmark functions passed and are not rerun locally."
+  },
+  "continuum": {
+    "slab_finest_relative_beta_error_TE": 0.0014978,
+    "slab_finest_relative_beta_error_TM": 0.0001185,
+    "fiber_relative_beta_errors": [
+      0.0055093,
+      0.0032954
+    ],
+    "fiber_mesh_um": [
+      0.1,
+      0.08
+    ],
+    "limits": "Slab absolute errors are nonmonotone due to competing staircase/dispersion errors. Two fiber meshes do not establish convergence order."
+  },
+  "padding": {
+    "mesh_um": 0.1,
+    "baseline_beta": [
+      7.311263320357341,
+      -3.1240177914815926e-08
+    ],
+    "baseline_recomputed": false,
+    "predeclared_relative_beta_shift_limit": 0.0001,
+    "predeclared_tail_limit": 0.0001,
+    "cases": [
+      {
+        "outer_size_um": 4.8,
+        "pml_thickness_um": 0.8,
+        "beta": [
+          7.31126229920814,
+          -6.184950547088026e-08
+        ],
+        "relative_shift": 1.3973068893555983e-07,
+        "tail": 1.0170986766030777e-07
+      },
+      {
+        "outer_size_um": 4.8,
+        "pml_thickness_um": 1.0,
+        "beta": [
+          7.311261788633548,
+          4.706806321197623e-08
+        ],
+        "relative_shift": 2.0977554014895533e-07,
+        "tail": 1.1188932937980593e-06
+      }
+    ],
+    "relative_shift_between_new_cases": 7.140527415753251e-08,
+    "provenance": "Two CPU eigensolves recorded by the independent physics agent. Baseline reused from previous mode test. Not a convergence-order or general-boundary guarantee."
+  },
+  "deployment": "Private repository only. NOT_CLEARED_FOR_PUBLICATION.",
+  "local_install": {
+    "status": "verified",
+    "package_files": 119,
+    "wheel_sha256": "965f0d3f2fd2c364ecd519974119e2c8fe15314fb00870ebedec29ab6616e64b",
+    "verification": "Isolated public open-mode imports. Every package file equals audited source, wheel, isolated install and current runtime."
+  },
+  "paper": {
+    "pages": 38,
+    "rendered_pages": [
+      35,
+      36,
+      37,
+      38
+    ],
+    "source_bundle_byte_exact": true,
+    "sha256": {
+      "torchfdtd-manuscript.pdf": "22a69729ee3bc0c3dd6d1c851ef5a48ddbb7773377b22e542e5de8bc3e428f42",
+      "torchfdtd-latex-source.zip": "34044a0982d7e530527972b16144504cdc64922c0abe92413aa653c78f8fae12",
+      "manuscript.tex": "6dd2692b7becf4b826c23b5f075ebbde61359387623a603ac6e03aacf1b7af66"
+    },
+    "visual_review": "Rendered pages35-38 inspected. Equation, section transitions, margins and references legible without clipping. Build has no unresolved references or overfull boxes."
+  },
+  "regression_tests_collected": 49
+}

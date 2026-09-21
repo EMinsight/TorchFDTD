@@ -139,3 +139,8 @@ from .reversible_cpml import ReversibleCPMLOptions, ReversibleCPMLSimulation
 __all__ += ["ReversibleCPMLOptions", "ReversibleCPMLSimulation"]
 from .reversible_cpml_planes import ReversibleCPMLPlaneSimulation
 __all__ += ["ReversibleCPMLPlaneSimulation"]
+
+from .open_mode_ports import OpenWaveguideMode, solve_open_waveguide_modes
+from .open_mode_injection import OpenPortOptions, OpenModalLaunch, prepare_open_modal_launch
+__all__ += ["OpenWaveguideMode", "solve_open_waveguide_modes", "OpenPortOptions",
+            "OpenModalLaunch", "prepare_open_modal_launch"]

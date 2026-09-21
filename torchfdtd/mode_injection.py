@@ -178,19 +178,32 @@ class _ModalSimulation(DifferentiableSimulation):
                               dtype=epsilon.dtype,device=epsilon.device)
         if not torch.allclose(epsilon[tuple(selection)],expected.expand_as(epsilon[tuple(selection)]),rtol=2e-6,atol=1e-7):
             raise ValueError('Injection-neighborhood epsilon must match the fixed modal cross-section.')
+        fixed_transverse = []
+        for axis, begin, end in getattr(launch,'fixed_transverse_slices',()):
+            slab = [slice(None)]*3
+            slab[axis] = slice(begin,end)
+            slab = tuple(slab)
+            if not torch.allclose(epsilon[slab],epsilon.new_tensor(launch.cladding_epsilon),rtol=2e-6,atol=1e-7):
+                raise ValueError('Transverse CPML and its fixed collar must retain the modal cladding epsilon.')
+            fixed_transverse.append(slab)
         # Keep source-neighborhood material derivatives excluded, since its fixed
         # electric sheet contains inverse epsilon and the eigenmode is frozen.
         if epsilon.requires_grad:
             epsilon=epsilon.clone()
             epsilon[tuple(selection)]=epsilon[tuple(selection)].detach()
+            for slab in fixed_transverse:
+                epsilon[slab]=epsilon[slab].detach()
         factory=lambda p,e,**kwargs:_ModalSystem(p,e,launch=launch,**kwargs)
         result=super()._run(epsilon,spectral,system_factory=factory)
         result.report['memory_reservation_bytes']+=extra
         result.report['host_reservation_bytes']+=extra
         if epsilon.is_cuda:result.report['gpu_reservation_bytes']+=extra
         result.report.update(modal_source=True,modal_source_storage_bytes=launch.storage_bytes,modal_source_extra_reservation_bytes=extra,
-            modal_beta_per_um=launch.mode.beta_per_um,modal_beta_tilde_per_um=launch.beta_tilde_per_um,
+            modal_beta_per_um=float(launch.mode.beta_per_um.real),modal_beta_tilde_per_um=float(launch.beta_tilde_per_um.real),
             source_neighborhood_gradient='frozen',modal_source_identity=launch.identity)
+        if fixed_transverse:
+            result.report.update(transverse_boundary='cpml',transverse_cpml_cladding_gradient='frozen',
+                                 mode_beta_complex=[float(launch.mode.beta_per_um.real),float(launch.mode.beta_per_um.imag)])
         return result
 
 
@@ -205,6 +218,13 @@ class ModeInjectedPlaneSimulation(DifferentiablePlaneSimulation):
         self.model.launch=launch
         self.launch=launch
         self.signature=hashlib.sha256((self.signature+launch.identity).encode()).hexdigest()
+        if launch.mode.boundary == 'cpml':
+            from types import SimpleNamespace
+            normal_axis='xyz'.index(launch.mode.normal)
+            for _,normal,plan,_ in self.plans:
+                mode=launch.detector_mode(float(plan['points_um'][0,normal_axis]))
+                mode.validate_quadrature(SimpleNamespace(normal=normal,
+                    points_um=plan['points_um'],weights=plan['weights']))
 
 
 def modal_plane_amplitudes(plane,launch):

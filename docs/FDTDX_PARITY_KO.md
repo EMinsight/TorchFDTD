@@ -32,7 +32,7 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 | 단일 문제 multi-GPU | Sharding | 별도 periodic/Bloch 초기값 API의 rank-owned slab·halo transpose·재료 VJP·binomial checkpoint. 실제 Linux 2/3-process Gloo CPU 검사 통과 | **부분/GPU 미검증**. 실제 NCCL·2장 이상 GPU, source/monitor·물리 경계·scaling 검증 필요 |
 | 자동미분 범위 | JAX reversible/checkpointed, 물리·source별 계약 확인 필요 | 유전체·고정 Bloch·CPML·ADE·PEC·고정 검출면·밀도·일부 CAD. 별도 lossless periodic 및 fixed-exterior CPML reversible API, 고정 Bloch·FP32 scalar/diagonal·비동기 CPU trace·online plane 관측, 고정 모드와 radiation 목적함수 | **부분**. PMC/tensor의 추가 물리·실행 경로, 일반 source/eigenmode·동시 adjoint batch 확대 필요 |
 | 설계 파라미터화 | Density, projection/binarization, symmetry | Trainable logits/density, 물리 길이 filter, 정확한 mask·대칭, beta continuation, 명시적 STE, optimizer 재시작, 실제 streamed 목적함수 | 기본 topology workflow 구현. 일반 spline/polygon shape derivative·제작 제약·최종 CR 물리 수렴은 별도 |
-| Mode source·detector·port | 고정 mode source/detector, overlap/S-parameter. 고유모드 재료·좌표의 미분은 중단 | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 서로 다른 고정 exterior 단면과 입사 포트별 calibration을 지원하며 추가 CPU 물리 검증을 기록. 일반 branch·open/PML 횡단면·streamed injection·일반 물리 수렴·UI가 남음. 고유모드 자체 미분은 별도 연구 목표 |
+| Mode source·detector·port | 고정 mode source/detector, overlap/S-parameter. 고유모드 재료·좌표의 미분은 중단 | 전벡터 sparse mode solver, 실제 CUDA 주입, directional detector, 서로 마주보는 두 port의 multimode 복소 S 행렬·interior material VJP | **부분**. 서로 다른 고정 exterior 단면과 입사 포트별 calibration을 지원하며 추가 CPU 물리 검증을 기록. 열린 CPML 횡단면의 고정 bound mode·4-channel CUDA 전파와 내부 재료 VJP도 검증. 일반 branch·leaky mode·streamed injection·일반 물리 수렴·UI가 남음. 고유모드 자체 미분은 별도 연구 목표 |
 | Far-field·회절 | Field projection, diffraction detectors | Closed-box 벡터 원거리장, Bloch 회절 차수·방향별 효율, field graph와 재료 VJP, FP32 방사 패턴 수렴. 저장 결과/NPZ adapter와 실제 회절 browser workflow | 기본 homogeneous exterior 기능과 회절 UI 구현. substrate/periodic lattice far-field·일반 응용·closed-box UI는 남음 |
 | 이방성 | 대각·일반 tensor | Node-sampled SPD bulk tensor, periodic/Bloch CPU·CUDA와 고정 등방성 CPML 외부, 이산 transpose·6성분 VJP·checkpoint·고유파 검증. Native 재료 편집·Project/CLI·고정 geometry 재료표 미분 연결 | **부분**. 일반 anisotropic CPML·반사/장시간 안정성·interface·tensor ADE·streaming·mode 확대가 남음 |
 | 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. Closed PMC native Project·CLI·browser·endpoint NPZ. 별도 uniform PMC+CPML CPU/CUDA API와 보조 상태·재료·파형 adjoint, 전체/절반 영역 일치와 checkpoint 절반 절감 | **부분**. 제한된 공통 PML profile의 혼합 경계를 Project·CLI·browser에 연결. 일반 profile·흡수 정확도·속도, ADE·streaming·tensor batch 확대가 남음 |
@@ -69,6 +69,12 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
   2% 기준을 통과했다. Native gradient +0.249719의 연속계 오차는 1.58%이며,
   epsilon을 0.001 줄인 실제 forward와 해석 기준 모두 목적함수가 감소했다.
   앞선 메시의 오차를 보존하며 CR·일반 형상 미분의 완료로 확대하지 않는다.
+- [열린 경계 mode port](OPEN_MODE_PORTS.md): 실제 native CPML 점화식의
+  고유모드, 완전한 계산 단면의 source sheet와 물리 단면의 검출을 연결했다.
+  Fiber 양방향 전파 오차는 1.21e-6 이하, 4-channel 복소 S 오차는 4.15e-6,
+  내부 재료 gradient의 유한차분 상대오차는 2.06e-5 이하다. 고정 영역 VJP는 0.
+  독립 slab·vector fiber 해석해와 padding 검증을 분리하며 전체 모드 미분이나
+  일반 branch/UI·streamed 지원의 완료로 표시하지 않는다.
 - [원거리장·회절](RADIATION.md): 해석 vector dipole의 복소 진폭과 전력,
   Bloch 차수·방향 분리, FP32 normalization, 실제 material VJP.
   native dipole 방사 패턴의 100→75→50 nm 메시 오차는 1.03→0.54→0.23%다.

@@ -60,6 +60,11 @@ and receiving-port-specific normalization. Its CPU checks and open-boundary
 accuracy limits are recorded separately from the earlier CUDA evidence.
 Arbitrary branch ports, source/eigenmode gradients and streamed injection remain open. The measured coarse-mesh power defect is reported in
 the validation record, rather than interpreted as exact conservation.
+[Open transverse CPML ports](docs/OPEN_MODE_PORTS.md) now add confined fixed
+waveguide modes, full-plane modal tails, four-channel CUDA propagation and
+interior-material S-matrix gradients. An independent vector fiber oracle,
+slab roots and padding checks bound the tested mode accuracy. General routing,
+mode-profile differentiation and the browser port editor remain incomplete.
 A [fixed-slab physical-gradient check](docs/MODE_NETWORK_GRADIENT_ACCEPTANCE.md)
 at 25 nm spacing passes a predeclared 2% derivative criterion and an actual
 descent step. It does not establish general shape or CR convergence.

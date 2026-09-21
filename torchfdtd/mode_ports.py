@@ -250,6 +250,8 @@ def _amplitudes(fields, basis, weights, normal):
 
 def _uniform_cell_quadrature(plane, mode):
     """Require one complete, nonduplicated uniform midpoint tensor product."""
+    if mode.boundary == 'cpml':
+        return mode.validate_quadrature(plane)
     points = plane.points_um.detach().cpu().numpy()
     weights = plane.weights.detach().cpu().numpy()
     if points.ndim!=2 or points.shape[1]!=3 or weights.shape!=(len(points),):
@@ -284,7 +286,7 @@ def normalized_mode_power(plane, reference, mode, *, direction='forward'):
     This overlap has not yet been validated as an injected time-domain port.
     """
     import torch
-    if direction not in ('forward','backward') or mode.beta_per_um<=0:
+    if direction not in ('forward','backward') or mode.beta_per_um.real<=0:
         raise ValueError('Use a forward mode and direction forward/backward.')
     if plane.normal!=mode.normal or reference.normal!=mode.normal or plane.run_signature!=reference.run_signature:
         raise ValueError('Mode normal and sample/reference configurations must match.')

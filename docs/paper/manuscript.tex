@@ -1261,6 +1261,90 @@ established reconstruction approach, and this integration alone makes no
 claim of algorithmic novelty, comparative performance or overall feature
 parity.
 
+\subsection{Fixed guided modes with transverse CPML}
+
+A separate fixed-port extension admits straight isotropic dielectric guides
+with transverse CPML and a homogeneous cladding collar. The cross-section
+uses real FP32 permittivity sampled at the three electric Yee locations,
+and the sparse mode solve uses complex64 fields. Only confined bound modes
+with acceptable eigenpair, six-field Maxwell and tail residuals are admitted.
+Modes, source profiles, port geometry and the cladding collar remain fixed
+when differentiating an interior material parameter. Leaky-mode channels,
+general anisotropic guides and mode-profile derivatives are outside this
+contract.
+
+The transverse operator uses the harmonic response of the native CPML
+recurrence rather than an independently selected continuum stretch. For
+$\psi_n=b\psi_{n-1}+cD_n$ and the convention
+$\exp(\mathrm{i}\beta z-\mathrm{i}\omega t)$, its exact steady-state factor is
+\begin{equation}
+g(\omega)=\kappa^{-1}+\frac{c}{1-b\exp(\mathrm{i}\omega\Delta t)}.
+\end{equation}
+Separate electric and magnetic target rows supply the staggered factors.
+The nonperiodic outer rows use the native truncated differences, without
+assuming the periodic negative-transpose relation. Temporal and longitudinal
+Yee dispersion determine the carrier mode and its half-cell propagation
+phase. An independent harmonic check advances the auxiliary recurrence and
+forms the native electric and magnetic time increments for both propagation
+directions. It does not reuse the sparse mode operator for its derivatives.
+
+The prepared source packet supplies both electric and magnetic sheets over
+the complete computational cross-section, including transverse PML tails.
+Its ordinary source object defines the timing and physical aperture.
+The packet is separately validated and immutable. Paired currents respect
+the native electric-then-magnetic update order. Detection uses the positive
+DFT convention, the magnetic half-step clock and component-aware spatial
+collocation on longitudinal electric-node planes. Power normalization and
+quadrature use the non-PML physical rectangle, not an artificial PML energy
+integral. Basis rotation is restricted to numerically degenerate eigenspaces
+and is followed by residual checks. Distinct propagation constants are not
+mixed to manufacture orthogonality. Admission checks both the forward power
+Gram and the reverse cross-overlap block, so individual reactive-flux checks
+cannot conceal spurious coupling between opposite propagation directions.
+
+Independent continuum oracles solve the symmetric slab TE/TM dispersion
+relations and the circular-fiber vector Bessel boundary conditions. The
+fiber oracle retains both longitudinal field components, checks tangential
+E/H and normal D/B continuity, and satisfies independently differenced
+Maxwell equations. The finest slab comparison gives relative propagation-
+constant errors of 0.150\% for TE and 0.0119\% for TM. The slab sequence is
+not uniformly monotone and is not used to infer a convergence order. For
+the circular guide, 100 and 80 nm meshes give relative propagation-constant
+errors of 0.551\% and 0.330\%, respectively. A separate fixed-mesh padding
+check uses a 0.4~\micron
+radius fiber with core and cladding indices 2.2 and 1.0 at 1.55~\micron.
+At 0.1~\micron\ spacing, expanding the transverse box from 4.0 to
+4.8~\micron\ with 0.8~\micron\ PML changes the complex propagation constant
+by $1.40\times10^{-7}$ relative to the previous result. Increasing PML
+thickness to 1.0~\micron\ in the 4.8~\micron\ box gives a relative change
+of $2.10\times10^{-7}$ from the same baseline. The corresponding collar
+field-norm fractions are $1.02\times10^{-7}$ and $1.12\times10^{-6}$.
+Both satisfy the predeclared $10^{-4}$ sensitivity and tail criteria.
+These two comparisons isolate fixed-mesh box/PML sensitivity from mesh
+refinement and do not establish a convergence order.
+
+Native RTX 3060 checks use real FP32 fields on an $80\times40\times40$
+grid for 1300 steps. Forward and backward fiber launches, including a
+longer-pulse check, give a largest complex propagation-ratio error of
+$1.21\times10^{-6}$ against the discrete modal phase and reverse modal
+power at most $1.62\times10^{-7}$. These leakage observations precede the
+matched-reference subtraction used for network reflection coefficients.
+A two-port interior perturbation gives guided-channel power sums of
+0.997639 and 0.997819, with complex reciprocity error
+$1.11\times10^{-4}$. For the chosen complex S-matrix objective, the native
+material derivative is $-0.37694317$. Centered finite differences with
+parameter steps 0.008 and 0.004 give relative derivative errors of
+$2.06\times10^{-5}$ and $1.07\times10^{-5}$. Fixed-region gradients are
+exactly zero. A straight-guide four-channel CUDA case additionally gives a
+maximum complex S-matrix error of $4.15\times10^{-6}$, reciprocity error
+$1.81\times10^{-7}$ and column-power defect $1.67\times10^{-6}$. Its
+independent CPU signed-Gram error is $2.30\times10^{-8}$. Missing
+guided-channel power in the perturbed case is not classified as absorption
+without an independent radiation balance. These results validate the stated
+discrete source, detector and material-adjoint workflow, not complete
+physical-gradient convergence, arbitrary routing, overall FDTDX parity or
+a performance advantage.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.
