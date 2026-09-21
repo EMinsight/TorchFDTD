@@ -20,7 +20,11 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[2]  # the repository that holds this example
 sys.path.insert(0, str(HERE))
+# Import torchfdtd from the checkout that holds this example, as the microring script does.
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
 import metalens_common as mc  # noqa: E402
 
 import torch  # noqa: E402
@@ -29,7 +33,13 @@ from torchfdtd import FieldMonitor, Material, Project, Region, Simulation, Sourc
 from torchfdtd.solver import field_axes, hardware, source_slice, voxelize  # noqa: E402
 from torchfdtd.waveforms import source_time_signal  # noqa: E402
 
-EXPECTED_ROOT = str(Path(__file__).resolve().parents[3])  # the repository that holds this example
+
+def require_checkout_import():
+    """The records name the commit of the checkout that holds this example; an installed wheel would misattribute them."""
+    imported = Path(torchfdtd.__file__).resolve()
+    if not str(imported).startswith(str(REPO)):
+        raise SystemExit(f'torchfdtd was imported from {imported}, not from the checkout {REPO} that holds this example. '
+                         f'Run the script from that checkout: cd {REPO} && python {HERE.relative_to(REPO).as_posix()}/{Path(__file__).name} --part 2d')
 PACKAGES = ('torchfdtd', 'torch', 'cupy-cuda12x', 'numpy', 'scipy')
 
 
@@ -250,7 +260,7 @@ def main():
     parser.add_argument('--timing', action='store_true', help='one warm-up, then three timed lens solves; medians are reported')
     parser.add_argument('--backend', choices=('cuda', 'cpu'), default='cuda')
     args = parser.parse_args()
-    assert torchfdtd.__file__.startswith(EXPECTED_ROOT), torchfdtd.__file__
+    require_checkout_import()
     spec = mc.load_geometry(args.part)
     build = build_2d if args.part == '2d' else build_3d
     lens_project = build(spec, with_lens=True, backend=args.backend)

@@ -349,10 +349,25 @@ def anchor(title):
     return re.sub(r'[^a-z0-9 -]', '', title.lower()).replace(' ', '-')
 
 
+def _joined(values):
+    values = sorted({str(v) for v in values})
+    return values[0] if len(values) == 1 else ' / '.join(values)
+
+
 def render_readme_block(records):
     sections = build(records)
     meep_version = records['microring']['meep']['environment']['meep']
     gpu = records['microring']['torchfdtd']['environment']['gpu']['name']
+    # Precision and MPI ranks come from the records: the grid precision of each solver run and
+    # the mpi_processes of the Meep timing runs (timing_summary), never from a fixed string.
+    torch_precision = _joined(records[stem]['torchfdtd']['grid']['precision'] for stem in records)
+    meep_precision = _joined(records[stem]['meep']['grid']['precision'] for stem in records)
+    ranks = _joined(s['timing']['ranks'] for s in sections)
+    if all(s['timing']['m_mode'] == 'development' for s in sections):
+        timing_note = (f'the timing rows are development runs on a shared host (Meep with {ranks} ranks) until the maintainer\'s '
+                       '`--timing` rerun on a quiet host replaces them.')
+    else:
+        timing_note = f'the timing rows are the recorded `--timing` runs (Meep with {ranks} ranks); the mode of each row is given with it.'
     rows = []
     for s in sections:
         t = s['timing']
@@ -361,12 +376,11 @@ def render_readme_block(records):
                      f'{s["headline"]}; {criteria}', f'{t["t_step"]:.2f}',
                      f'{t["m_step"]:.2f} ({t["ranks"]} ranks; {mode_text(t["m_mode"])})', f'{t["ratio"]:.1f}'))
     lines = [START, '## Compared with Meep', '',
-             f'Three devices were each set up once from one geometry file and run in TorchFDTD ({gpu}, float32, fused CUDA kernels) and in '
-             f'Meep {meep_version} (CPU, float64, MPI) on the same grid, time step, step count, source, monitors and staircase material '
+             f'Three devices were each set up once from one geometry file and run in TorchFDTD ({gpu}, {torch_precision}, fused CUDA kernels) and in '
+             f'Meep {meep_version} (CPU, {meep_precision}, MPI) on the same grid, time step, step count, source, monitors and staircase material '
              'sampling, with the agreement criteria declared before the first comparison run. Every number in the table is read from the '
-             'records in `docs/validation/meep_comparison/` by `scripts/render_meep_comparison.py`; the timing rows are development runs on a '
-             'shared host (Meep with four ranks) until the maintainer\'s `--timing` rerun on a quiet host replaces them.', '',
-             table(['Device', 'Cells x steps', 'Agreement versus its criterion', 'TorchFDTD GPU stepping (s)', 'Meep CPU stepping (s), 12 ranks when timed', 'Ratio'], rows), '',
+             f'records in `docs/validation/meep_comparison/` by `scripts/render_meep_comparison.py`; {timing_note}', '',
+             table(['Device', 'Cells x steps', 'Agreement versus its criterion', 'TorchFDTD GPU stepping (s)', f'Meep CPU stepping (s), {ranks} ranks', 'Ratio'], rows), '',
              'Per-example device and fixture tables, all criteria, timing with load notes, figures, run commands and fairness limits: '
              '[docs/MEEP_COMPARISON.md](docs/MEEP_COMPARISON.md); the examples live under [examples/meep_comparison](examples/meep_comparison).',
              END]

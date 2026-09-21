@@ -148,7 +148,7 @@ def test_every_number_in_the_readme_block_comes_from_the_records(records, readme
         group = list(group)
         derived.add(str(len(group)))
         derived.add(str(sum(1 for item in group if item.get('passed', item.get('pass')))))
-    body = [line for line in readme_block.splitlines() if not line.startswith('| Device') and not line.startswith('<!--')]
+    body = [line for line in readme_block.splitlines() if not line.startswith('<!--')]   # the header row counts too
     text = '\n'.join(body)
     text = re.sub(r'\]\([^)]*\)', '', text)
     text = re.sub(r'`[^`]*`', '', text)
@@ -173,3 +173,55 @@ def test_every_number_in_the_readme_block_comes_from_the_records(records, readme
         if not found:
             missing.append(token)
     assert not missing, f'numbers in the README block absent from the records: {missing}'
+
+
+def _ranks_and_precisions(records):
+    ranks = {str(records[stem]['meep_timing']['environment']['mpi_processes']) for stem in records}
+    precisions = {records[stem][solver]['grid']['precision'] for stem in records for solver in ('torchfdtd', 'meep')}
+    return ranks, precisions
+
+
+def test_rank_and_precision_tokens_in_the_readme_block_come_from_the_records(records, readme_block):
+    """Every "<n> ranks" (digits or a spelled-out word) and every float<nn> in the block, header row included, is a record value."""
+    ranks, precisions = _ranks_and_precisions(records)
+    assert set(re.findall(r'(\w+) ranks', readme_block)) <= ranks
+    assert set(re.findall(r'float\d+', readme_block)) <= precisions
+    assert 'when timed' not in readme_block
+
+
+def test_readme_block_follows_the_records_for_precision_and_ranks(renderer, records):
+    """Rendering altered records changes the precision and rank strings; a string fixed in the renderer would not."""
+    import copy
+    altered = copy.deepcopy(records)
+    for stem in altered:
+        altered[stem]['torchfdtd']['grid']['precision'] = 'float64'
+        altered[stem]['meep']['grid']['precision'] = 'float32'
+        altered[stem]['meep_timing']['environment']['mpi_processes'] = 12
+    block = renderer.render_readme_block(altered)
+    ranks, precisions = _ranks_and_precisions(altered)
+    assert ranks == {'12'} and set(re.findall(r'(\w+) ranks', block)) == {'12'}
+    assert re.search(r'TorchFDTD \([^)]*float64, fused CUDA kernels\)', block) and re.search(r'Meep [\d.]+ \(CPU, float32, MPI\)', block)
+    assert set(re.findall(r'float\d+', block)) <= precisions
+    assert '| Meep CPU stepping (s), 12 ranks |' in block
+    original = renderer.render_readme_block(records)
+    assert '12 ranks' not in original and '(CPU, float32, MPI)' not in original
+
+
+@pytest.mark.parametrize('example', ['metagrating', 'metalens', 'microring'])
+def test_example_scripts_import_torchfdtd_from_this_checkout_or_say_where_it_came_from(example, monkeypatch):
+    """The three solver scripts put this checkout first on sys.path; an import from elsewhere exits with the path named."""
+    import torchfdtd
+    path = ROOT / 'examples' / 'meep_comparison' / example / f'torchfdtd_{example}.py'
+    spec = importlib.util.spec_from_file_location(f'torchfdtd_{example}', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert Path(module.torchfdtd.__file__).resolve() == Path(torchfdtd.__file__).resolve()
+    assert str(Path(torchfdtd.__file__).resolve()).startswith(str(ROOT))
+    if example == 'microring':
+        return   # asserts at import time, from the checkout it puts first on sys.path
+    module.require_checkout_import()
+    elsewhere = str(Path('/opt/venv/lib/site-packages/torchfdtd/__init__.py').resolve())
+    monkeypatch.setattr(module.torchfdtd, '__file__', elsewhere)
+    with pytest.raises(SystemExit) as info:
+        module.require_checkout_import()
+    assert elsewhere in str(info.value) and str(ROOT) in str(info.value) and 'cd ' in str(info.value)
