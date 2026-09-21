@@ -506,24 +506,27 @@ class ModeBranchNetwork:
                  mode_profile_gradients=False, exterior_material_gradients='frozen'))
 
 
-def branch_network_from_ports(ports, project, *, normal_convention, wavelength_um, core_epsilon,
-                              cladding_epsilon, source_offset_um, aperture_um=None,
-                              mode_indices=None, options=None, num_modes=1, **network_kwargs):
+def branch_network_from_ports(ports, project, *, normal_convention, wavelength_um, source_offset_um,
+                              core_epsilon=None, cladding_epsilon=None, aperture_um=None,
+                              mode_indices=(0,), options=None, num_modes=1, **network_kwargs):
     """Build a ModeBranchNetwork from in-plane port markers such as GDSImport.ports.
 
     Each marker needs name, center_um, normal, width_um and height_um. Only
     cardinal x or y normals are accepted; normal_convention declares whether
-    they point outward from or inward into the device. A port's fixed guide is
-    a rectangle of core_epsilon, width_um across the in-plane transverse axis
-    and height_um along z, inside cladding_epsilon. aperture_um gives the
-    (in-plane, z) aperture extents shared by all ports; None uses the marker
-    width and height themselves. Both must align with Yee cell boundaries.
-    source_offset_um is one outward distance or a mapping by name, and
-    mode_indices an optional mapping by name, default (0,). The project holds
-    one Gaussian plane pulse template whose wavelength is replaced. Marker
-    layers and geometry are not rasterized; the caller's runtime epsilon,
-    built from reference_epsilon or native voxelization, stays authoritative.
-    Remaining keyword arguments pass to ModeBranchNetwork.
+    they point outward from or inward into the device. With core_epsilon and
+    cladding_epsilon, a port's fixed guide is a rectangle of core_epsilon,
+    width_um across the in-plane transverse axis and height_um along z, inside
+    cladding_epsilon. Without them, pass ModeBranchNetwork's own permittivity
+    or port_permittivities sections, each in that port's cyclic transverse
+    coordinates. aperture_um gives the (in-plane, z) aperture extents shared
+    by all ports; None uses the marker width and height themselves. Both must
+    align with Yee cell boundaries. source_offset_um is one outward distance
+    or a mapping by name. mode_indices is one index sequence for every port
+    or a mapping by name. The project holds one Gaussian plane pulse template
+    whose wavelength is replaced. Marker layers and geometry are not
+    rasterized; the caller's runtime epsilon, built from reference_epsilon or
+    native voxelization, stays authoritative. Remaining keyword arguments pass
+    to ModeBranchNetwork.
     """
     if normal_convention not in ('outward', 'inward'):
         raise ValueError('Declare normal_convention as outward or inward.')
@@ -535,15 +538,21 @@ def branch_network_from_ports(ports, project, *, normal_convention, wavelength_u
         raise ValueError('Port marker names must be unique.')
     if isinstance(wavelength_um, bool) or not isinstance(wavelength_um, (int, float)) or not math.isfinite(wavelength_um) or wavelength_um <= 0:
         raise ValueError('Provide a finite positive wavelength_um.')
-    for value in (core_epsilon, cladding_epsilon):
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 1:
-            raise ValueError('core_epsilon and cladding_epsilon must be finite scalars at least one.')
+    rectangles = core_epsilon is not None or cladding_epsilon is not None
+    if rectangles:
+        for value in (core_epsilon, cladding_epsilon):
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 1:
+                raise ValueError('core_epsilon and cladding_epsilon must both be finite scalars at least one.')
+        if 'permittivity' in network_kwargs or 'port_permittivities' in network_kwargs:
+            raise ValueError('Use either core/cladding rectangles or explicit sections, not both.')
+    elif 'permittivity' not in network_kwargs and 'port_permittivities' not in network_kwargs:
+        raise ValueError('Provide core_epsilon and cladding_epsilon, or permittivity or port_permittivities sections.')
     offsets = dict(source_offset_um) if isinstance(source_offset_um, Mapping) else {n: source_offset_um for n in names}
     if set(offsets) != set(names):
         raise ValueError('source_offset_um must be one distance or a mapping of every port name.')
-    modes = {} if mode_indices is None else dict(mode_indices)
-    if set(modes)-set(names):
-        raise ValueError('mode_indices names must be port marker names.')
+    modes = dict(mode_indices) if isinstance(mode_indices, Mapping) else {n: tuple(mode_indices) for n in names}
+    if set(modes) != set(names):
+        raise ValueError('mode_indices must be one index sequence or a mapping of every port name.')
     if aperture_um is not None and (len(aperture_um) != 2 or any(not math.isfinite(a) or a <= 0 for a in aperture_um)):
         raise ValueError('aperture_um must be two positive (in-plane, z) extents.')
     close = lambda a, b: math.isclose(a, b, rel_tol=0, abs_tol=1e-8)
@@ -569,7 +578,7 @@ def branch_network_from_ports(ports, project, *, normal_convention, wavelength_u
             inside = (np.abs(in_coord-c_in) < half_w-1e-9) & (np.abs(z_coord-c_z) < half_h-1e-9)
             return np.where(inside, core_epsilon, cladding_epsilon)
         built.append(ModePort(m.name, 'xyz'[axis], direction, tuple(m.center_um), tuple(size),
-                              offsets[m.name], tuple(modes.get(m.name, (0,)))))
+                              offsets[m.name], tuple(modes[m.name])))
         sections[m.name] = section
     copied = Project.model_validate(project.model_dump())
     active = [copied.resolved_source(s) for s in copied.sources if s.enabled]
@@ -578,5 +587,6 @@ def branch_network_from_ports(ports, project, *, normal_convention, wavelength_u
     source = active[0].model_copy(deep=True)
     source.wavelength = float(wavelength_um)
     copied.sources = [source]
-    return ModeBranchNetwork(copied, built, options=options, num_modes=num_modes,
-                             port_permittivities=sections, **network_kwargs)
+    if rectangles:
+        network_kwargs['port_permittivities'] = sections
+    return ModeBranchNetwork(copied, built, options=options, num_modes=num_modes, **network_kwargs)

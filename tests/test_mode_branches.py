@@ -297,6 +297,88 @@ def test_branch_network_from_gds_markers_matches_explicit_ports():
     with pytest.raises(ValueError, match='every port name'):
         branch_network_from_ports(markers, p, normal_convention='outward', wavelength_um=1.55,
             core_epsilon=CORE, cladding_epsilon=CLAD, source_offset_um={'in': .4})
+    with pytest.raises(ValueError, match='every port name'):
+        branch_network_from_ports(markers, p, normal_convention='outward', wavelength_um=1.55,
+            core_epsilon=CORE, cladding_epsilon=CLAD, source_offset_um=.4, mode_indices={'in': (0,)})
+    with pytest.raises(ValueError, match='both be finite'):
+        branch_network_from_ports(markers, p, normal_convention='outward', wavelength_um=1.55,
+            core_epsilon=CORE, source_offset_um=.4)
+    with pytest.raises(ValueError, match='not both'):
+        branch_network_from_ports(markers, p, normal_convention='outward', wavelength_um=1.55,
+            core_epsilon=CORE, cladding_epsilon=CLAD, source_offset_um=.4, permittivity=guide)
+    with pytest.raises(ValueError, match='Provide core_epsilon'):
+        branch_network_from_ports(markers, p, normal_convention='outward', wavelength_um=1.55, source_offset_um=.4)
+    # Explicit sections in each port's own transverse coordinates, as the
+    # two-port GDS helper passes them, replace the core/cladding rectangles.
+    sectioned = branch_network_from_ports(markers, p, normal_convention='outward', wavelength_um=1.55,
+        source_offset_um=.4, aperture_um=(1.2, .5), mode_indices=(0,), options=AdjointOptions(checkpoints=2),
+        port_permittivities=ybranch_sections())
+    assert [l.identity for l in sectioned._launches] == [l.identity for l in manual._launches]
+
+
+def test_z_normal_ports_match_cyclic_relabelling_of_x_normal_ports():
+    """Ports on the z faces: the scene relabelled (x, y, z) -> (z, x, y) keeps Yee handedness."""
+    device = device_name()
+    options = AdjointOptions(checkpoints=2)
+    along_x = ModeBranchNetwork(tiny_project('float32', steps=400), (
+        ModePort('in', 'x', 1, (-.3, 0., 0.), (0., 1.2, .5), .2),
+        ModePort('out', 'x', -1, (.3, 0., 0.), (0., 1.2, .5), .2)), guide, options)
+    faces = {a+'_'+s: dict(kind='periodic') for a in 'xy' for s in ('min', 'max')}
+    r = Region(dimension='3d', size=(1.4, .5, 2.4), mesh=.1, pml_cells=5, steps=400,
+               material_sampling='yee', boundaries=faces, precision='float32')
+    p = Project(region=r, sources=[Source(kind='plane', normal='z', center=(0., 0., -.5), size=(1.2, .5, 0.),
+                pulse_cycles=2)], monitors=[])
+    along_z = ModeBranchNetwork(p, (ModePort('in', 'z', 1, (0., 0., -.3), (1.2, .5, 0.), .2),
+                                    ModePort('out', 'z', -1, (0., 0., .3), (1.2, .5, 0.), .2)), guide, options)
+    assert along_z.apertures == (((1, 13, False), (0, 5, True)),)*2
+    assert along_z._footprint(0) == (slice(1, 13), slice(0, 5), slice(None, 11))
+    relabel = lambda e: e.permute(1, 2, 0, 3)[..., [1, 2, 0]].contiguous()
+    base = along_x.reference_epsilon(port='in', device=device)
+    assert torch.equal(along_z.reference_epsilon(port='in', device=device), relabel(base))
+    mask = torch.zeros_like(base)
+    mask[11:14, 4:10] = 1
+    parameter = torch.tensor(.4, device=device, requires_grad=True)
+    sx = along_x(base+parameter*mask).s
+    sz = along_z(relabel(base+parameter*mask)).s
+    torch.testing.assert_close(sz, sx, rtol=1e-4, atol=1e-5)
+    score = lambda s: s[1, 0].abs().square()+.3*s[0, 1].imag
+    gx, = torch.autograd.grad(score(sx), parameter)
+    gz, = torch.autograd.grad(score(sz), parameter)
+    assert gx.abs() > 0
+    torch.testing.assert_close(gz, gx, rtol=1e-3, atol=1e-6)
+    print({'device': device, 's_difference': float((sz-sx).detach().abs().max()),
+           'gradient': [float(gx), float(gz)]})
+
+
+def test_branch_network_power_objective_taylor_and_central_difference_cpu():
+    """|S21|^2 plus a phase term through the N-port wrapper, FP64 resident adjoint."""
+    p = tiny_project('float64', steps=400)
+    network = ModeBranchNetwork(p, (ModePort('in', 'x', 1, (-.3, 0., 0.), (0., 1.2, .5), .2),
+                                    ModePort('out', 'x', -1, (.3, 0., 0.), (0., 1.2, .5), .2)),
+                                guide, AdjointOptions(checkpoints=2))
+    base = network.reference_epsilon(port='in')
+    mask = torch.zeros_like(base)
+    mask[11:14, 4:10] = 1
+    direction = torch.randn(base.shape, generator=torch.Generator().manual_seed(5), dtype=base.dtype)*mask
+    score = lambda s: s[1, 0].abs().square()+.3*s[0, 1].real
+    x = base.clone().requires_grad_()
+    value = score(network(x).s)
+    gradient, = torch.autograd.grad(value, x)
+    value = float(value.detach())
+    for index in range(2):
+        assert torch.count_nonzero(gradient[network._footprint(index)]) == 0
+    slope = float((gradient*direction).sum())
+    residuals, central = [], []
+    with torch.no_grad():
+        for h in (2e-3, 1e-3, 5e-4):
+            plus = float(score(network(base+h*direction).s))
+            minus = float(score(network(base-h*direction).s))
+            residuals.append(abs(plus-value-h*slope))
+            central.append((plus-minus)/(2*h))
+    assert residuals[1] < .3*residuals[0] and residuals[2] < .3*residuals[1]
+    assert abs(central[-1]-slope) < 1e-6*abs(slope)
+    print({'value': value, 'directional_derivative': slope, 'central_difference': central[-1],
+           'taylor_residuals': residuals})
 
 
 def test_streamed_branch_network_matches_resident():
