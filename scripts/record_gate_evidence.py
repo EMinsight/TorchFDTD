@@ -201,6 +201,18 @@ def environment():
     return env
 
 
+def environment_of(interpreter):
+    """The environment of the interpreter that ran the command; this interpreter's when none or the same is given."""
+    if interpreter is None or Path(interpreter).resolve() == Path(sys.executable).resolve():
+        return environment()
+    code = (f'import json, sys; sys.path.insert(0, {str(Path(__file__).resolve().parent)!r}); '
+            'import record_gate_evidence; print(json.dumps(record_gate_evidence.environment()))')
+    completed = subprocess.run([str(interpreter), '-c', code], capture_output=True, text=True)
+    if completed.returncode != 0:
+        raise SystemExit(f'cannot query the environment of {interpreter}:\n{completed.stderr[-2000:]}')
+    return json.loads(completed.stdout.strip().splitlines()[-1])
+
+
 def cpu_model():
     if sys.platform == 'win32':
         try:
@@ -280,6 +292,7 @@ def main(argv=None):
     parser.add_argument('--observed', help='JSON file of observed metrics produced by the run')
     parser.add_argument('--artifact', action='append', default=[], help='raw result or log file to reference by path and SHA-256')
     parser.add_argument('--dist', help='wheel or source archive the run installed, hashed as package_or_wheel_sha256')
+    parser.add_argument('--interpreter', default=None, help='interpreter that ran the command, when it is not this one; its Python, torch and CuPy versions are recorded')
     parser.add_argument('--note', default=None, help='free-text note kept with the evidence')
     parser.add_argument('--scope', default=None, help='applicable-scope statement; a conservative default is written otherwise')
     parser.add_argument('--root', default=None, help='repository root (default: the checkout containing this script)')
@@ -376,7 +389,7 @@ def main(argv=None):
         fixture_path=relative(root, args.fixture) if args.fixture else None, fixture_sha256=fixture_sha,
         acceptance_criteria_path=relative(root, args.criteria) if args.criteria else (relative(root, args.fixture) if criteria is not None else None),
         acceptance_criteria_sha256=criteria_sha,
-        environment=environment(), hardware=hardware_info,
+        environment=environment_of(args.interpreter), hardware=hardware_info,
         **case_values,
         test_results=results, required_tests=task.get('required_tests') or [], skipped_required_tests=skipped_required,
         gpu_required_skips=results['gpu_required_skips'],

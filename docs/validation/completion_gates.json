@@ -2374,32 +2374,58 @@
           "title": "최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다",
           "specification": "최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다. 이전 커밋의 통과와 이후 부분검사를 합쳐 현재 전체 통과라고 쓰지 않는다. 긴 검사 증거의 재사용은 동일 관련 hash와 명시한 정책이 있을 때만 허용한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IN_PROGRESS",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "scripts/rerecord_gates.py",
+            "scripts/record_gate_evidence.py",
+            "scripts/check_release_gates.py",
+            "scripts/clean_install_check.py",
+            "scripts/run_suite.py",
+            "docs/RELEASE_PROCEDURE.md",
+            "tests/test_rerecord_gates.py"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_rerecord_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-06.xml",
+            "the release-candidate run of docs/RELEASE_PROCEDURE.md (build the wheel, clean_install_check, rerecord_gates --all --wheel, run_suite release-full --gpu-required on both hosts, build_validation_report, check_release_gates)"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_rerecord_gates.py"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "The tooling exists and is tested (scripts/rerecord_gates.py re-records every replayable gate on one commit and, with --wheel, with the installed wheel); the task itself is the maintainer's release-candidate run of docs/RELEASE_PROCEDURE.md on the exact RC tree and wheel, which has not been performed. Its verification stays NOT_RUN until that run is recorded."
         },
         {
           "id": "G9-07",
           "title": "validation report를 기계 산출물에서 생성한다",
           "specification": "validation report를 기계 산출물에서 생성한다. 내부 검증 보고서를 제3자 인증서라고 부르지 않는다. 숫자·지원 표·README·API docs·wheel 버전을 일치시킨다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "scripts/build_validation_report.py",
+            "docs/VALIDATION_REPORT.md",
+            "docs/RELEASE_SCOPE.md",
+            "docs/validation/known_limitations.json",
+            "tests/test_validation_report.py",
+            "docs/validation/cases/G9-07.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_validation_report.py"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "docs/VALIDATION_REPORT.md is rendered by scripts/build_validation_report.py from the gate file, the evidence runs, the platform, clean-install, G3, cross-solver and Meep records, the suite policy and the version strings; the same run regenerates the verification cells and the stage-status block of docs/RELEASE_SCOPE.md. The consistency section reports version, README-number and scope mismatches instead of hiding them."
         }
       ]
     },

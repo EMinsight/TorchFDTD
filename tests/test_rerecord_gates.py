@@ -1,0 +1,248 @@
+"""The release-candidate re-recorder replays recorded commands on a temporary repository with a tiny test module."""
+import hashlib
+import importlib.util
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / 'scripts'
+REAL_GATES = ROOT / 'docs' / 'validation' / 'completion_gates.json'
+
+
+def load_script(name):
+    spec = importlib.util.spec_from_file_location(name, SCRIPTS / f'{name}.py')
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+rerecord = load_script('rerecord_gates')
+recorder = rerecord.recorder
+
+# The module passes only when the environment variable of the recorded command prefix is set.
+TEST_SOURCE = ('import os\n\n\ndef test_flag_from_the_recorded_prefix():\n'
+               "    assert os.environ.get('RERECORD_FLAG') == '1'\n\n\ndef test_two():\n    assert True\n")
+JUNIT = ('<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" tests="2" failures="0" errors="0" skipped="0" '
+         'time="0.01" timestamp="2026-09-21T12:00:00.000000+09:00">'
+         '<testcase classname="tests.test_alpha" name="test_flag_from_the_recorded_prefix" time="0.001"></testcase>'
+         '<testcase classname="tests.test_alpha" name="test_two" time="0.001"></testcase></testsuite></testsuites>')
+
+
+def git(root, *args):
+    return subprocess.run(['git', '-c', 'user.name=gate', '-c', 'user.email=gate@example.invalid', '-c', 'core.autocrlf=false',
+                           '-c', 'commit.gpgsign=false', *args], cwd=root, capture_output=True, text=True, check=True).stdout.strip()
+
+
+def task(task_id, title, required_tests=()):
+    return dict(id=task_id, title=title, specification=title, required_by_current_plan=True, implementation_state='IMPLEMENTED',
+                verification_state='NOT_RUN', owner=None, code_paths=[], planned_test_commands=[], actual_test_commands=[],
+                required_tests=list(required_tests), evidence=[], blocker=None, scope_change_approval=None)
+
+
+@pytest.fixture
+def repo(tmp_path):
+    """A committed miniature repository with one recorded task whose command carries a PowerShell environment prefix."""
+    root = tmp_path / 'repo'
+    (root / 'tests').mkdir(parents=True)
+    (root / 'docs' / 'validation' / 'runs').mkdir(parents=True)
+    (root / 'docs' / 'validation' / 'cases').mkdir()
+    (root / 'tests' / 'test_alpha.py').write_text(TEST_SOURCE, encoding='utf-8')
+    (root / '.gitignore').write_text('.local/\n__pycache__/\n', encoding='utf-8')
+    # The same pytest root as the real repository, so JUnit class names read tests.test_alpha.
+    (root / 'pyproject.toml').write_text('[tool.pytest.ini_options]\ntestpaths = ["tests"]\n', encoding='utf-8')
+    case = root / 'docs' / 'validation' / 'cases' / 'G1-03.json'
+    case.write_text(json.dumps(dict(kind='acceptance_case', seed=1, acceptance=dict(limit=1))), encoding='utf-8')
+    real = json.loads(REAL_GATES.read_text(encoding='utf-8'))
+    gates = {key: real[key] for key in ('schema_version', 'kind', 'implementation_states', 'verification_states',
+                                        'required_evidence_fields', 'release_rule')}
+    gates['adopted_commit'] = None
+    gates['profiles'] = {'WORKSTATION': {'required_stages': ['G0', 'G1'], 'scope_status': 'TEST'}}
+    gates['stages'] = [
+        dict(id='G0', title='baseline', depends_on_stages=[], profile='WORKSTATION', priority='P0',
+             tasks=[task('G0-01', 'no evidence yet')]),
+        dict(id='G1', title='regressions', depends_on_stages=['G0'], profile='WORKSTATION', priority='P0',
+             tasks=[task('G1-03', 'flag check', ['tests/test_alpha.py::test_flag_from_the_recorded_prefix']),
+                    task('G1-04', 'recorded on a GPU host', ['tests/test_alpha.py::test_two'])]),
+    ]
+    (root / 'docs' / 'validation' / 'completion_gates.json').write_text(json.dumps(gates, indent=2) + '\n', encoding='utf-8')
+    git(root, 'init', '-q')
+    git(root, 'add', '.')
+    git(root, 'commit', '-q', '-m', 'baseline')
+    junit = tmp_path / 'first.xml'
+    junit.write_text(JUNIT, encoding='utf-8')
+    command = "$env:RERECORD_FLAG='1'; python -m pytest -q -p no:cacheprovider tests/test_alpha.py --junitxml=D:/elsewhere/first.xml"
+    assert recorder.main(['--root', str(root), '--task', 'G1-03', '--command', command, '--junit', str(junit), '--exit-code', '0',
+                          '--fixture', str(case), '--scope', 'first run of the flag check']) == 0
+    assert recorder.main(['--root', str(root), '--task', 'G1-04', '--command', 'python -m pytest -q tests/test_alpha.py::test_two',
+                          '--junit', str(junit), '--exit-code', '0']) == 0
+    # G1-04 pretends to have been recorded on a CUDA host.
+    gates_path = root / 'docs' / 'validation' / 'completion_gates.json'
+    run_id = task_of(root, 'G1-04')['evidence'][-1]
+    evidence_path = root / 'docs' / 'validation' / 'runs' / run_id / 'evidence.json'
+    evidence = json.loads(evidence_path.read_text(encoding='utf-8'))
+    evidence['environment']['torch_cuda_available'] = True
+    evidence_path.write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
+    assert gates_path.is_file()
+    git(root, 'add', '.')
+    git(root, 'commit', '-q', '-m', 'first evidence')
+    return root
+
+
+def gates_of(root):
+    return json.loads((root / 'docs' / 'validation' / 'completion_gates.json').read_text(encoding='utf-8'))
+
+
+def task_of(root, task_id):
+    return next(t for s in gates_of(root)['stages'] for t in s['tasks'] if t['id'] == task_id)
+
+
+def evidence_of(root, task_id, index=-1):
+    run_id = task_of(root, task_id)['evidence'][index]
+    return run_id, json.loads((root / 'docs' / 'validation' / 'runs' / run_id / 'evidence.json').read_text(encoding='utf-8'))
+
+
+def test_parse_command_reads_powershell_and_posix_environment_prefixes():
+    env, argv = rerecord.parse_command("$env:TORCHFDTD_G3_FINE='1'; D:/x/.venv/Scripts/python.exe -m pytest -q tests/test_a.py::TestG301 --junitxml=D:/x/j.xml")
+    assert env == {'TORCHFDTD_G3_FINE': '1'}
+    assert argv == ['D:/x/.venv/Scripts/python.exe', '-m', 'pytest', '-q', 'tests/test_a.py::TestG301', '--junitxml=D:/x/j.xml']
+    env, argv = rerecord.parse_command('TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 python -m pytest -q tests/test_b.py -k g3_04')
+    assert env == {'TORCHFDTD_G3_FULL': '1', 'TORCHFDTD_G3_RECORD': 'docs/validation/g3'}
+    assert argv[:3] == ['python', '-m', 'pytest'] and argv[-2:] == ['-k', 'g3_04']
+    env, argv = rerecord.parse_command('$env:A="x y"; $env:B=2; python -m pytest')
+    assert env == {'A': 'x y', 'B': '2'} and argv == ['python', '-m', 'pytest']
+    env, argv = rerecord.parse_command(r'D:\x\.venv\Scripts\python.exe -m pytest "tests/test a.py"')
+    assert argv == [r'D:\x\.venv\Scripts\python.exe', '-m', 'pytest', 'tests/test a.py']
+    with pytest.raises(ValueError):
+        rerecord.parse_command("$env:A='1'; ")
+
+
+def test_prepare_replaces_the_interpreter_and_the_junit_path_and_keeps_the_prefix(tmp_path):
+    env, argv = rerecord.prepare("$env:F='1'; python -m pytest -q tests/test_a.py --junitxml old.xml -k x", tmp_path, Path('/venv/python.exe'),
+                                 tmp_path / 'new.xml', absolute_paths=False)
+    assert env == {'F': '1'}
+    assert argv[0] == '/venv/python.exe' and 'old.xml' not in argv and '--junitxml' not in argv
+    assert argv[-1] == f'--junitxml={(tmp_path / "new.xml").as_posix()}' and argv[-3:-1] == ['-k', 'x']
+    shown = rerecord.shown_command(env, argv)
+    assert shown.startswith("$env:F='1'; ") and shown.endswith('new.xml')
+    with pytest.raises(ValueError):
+        rerecord.prepare('make check', tmp_path, Path('/venv/python.exe'), tmp_path / 'new.xml', absolute_paths=True)
+
+
+def test_selection_skips_tasks_without_evidence_and_cuda_runs_on_a_host_without_a_device(repo):
+    runs = repo / 'docs' / 'validation' / 'runs'
+    rows = {row[1]['id']: row[4] for row in rerecord.select(gates_of(repo), repo, runs, cuda=False)}
+    assert rows['G0-01'] == 'no evidence run to replay'
+    assert rows['G1-03'] is None
+    assert 'CUDA' in rows['G1-04']
+    rows = {row[1]['id']: row[4] for row in rerecord.select(gates_of(repo), repo, runs, cuda=False, everything=True)}
+    assert rows['G1-04'] is None and rows['G0-01'] == 'no evidence run to replay'
+    rows = {row[1]['id']: row[4] for row in rerecord.select(gates_of(repo), repo, runs, cuda=True, stage='G1')}
+    assert set(rows) == {'G1-03', 'G1-04'} and rows['G1-04'] is None
+    with pytest.raises(SystemExit):
+        rerecord.select(gates_of(repo), repo, runs, tasks=['G7-99'])
+    (repo / 'tests' / 'test_alpha.py').unlink()
+    rows = {row[1]['id']: row[4] for row in rerecord.select(gates_of(repo), repo, runs, cuda=True)}
+    assert rows['G1-03'].startswith('recorded test sources missing')
+
+
+def test_rerecord_replays_the_command_with_its_environment_prefix_and_appends_a_verified_run(repo, capsys):
+    previous, first = evidence_of(repo, 'G1-03')
+    code = rerecord.main(['--root', str(repo), '--tasks', 'G1-03'])
+    out = capsys.readouterr().out
+    assert code == 0, out
+    new_id, evidence = evidence_of(repo, 'G1-03')
+    assert new_id != previous and task_of(repo, 'G1-03')['evidence'] == [previous, new_id]
+    assert evidence['verification_state_assigned'] == 'VERIFIED' and evidence['exit_code'] == 0
+    assert evidence['test_results']['passed'] == ['tests/test_alpha.py::test_flag_from_the_recorded_prefix', 'tests/test_alpha.py::test_two']
+    assert evidence['command'].startswith("$env:RERECORD_FLAG='1'; ") and Path(sys.executable).as_posix() in evidence['command']
+    assert '--junitxml=' in evidence['command'] and 'D:/elsewhere/first.xml' not in evidence['command']
+    assert evidence['fixture_path'] == first['fixture_path'] and evidence['fixture_sha256'] == first['fixture_sha256']
+    commit = git(repo, 'rev-parse', 'HEAD')
+    assert evidence['applicable_scope'] == f'first run of the flag check re-recorded on {commit[:12]} for the release candidate.'
+    assert evidence['note'] == f'rerecord_gates.py replay of {previous}'
+    assert evidence['dirty_source_manifest'] == []
+    assert f'G1-03   {previous}' in out and new_id in out and 'VERIFIED' in out
+    # A second re-record replaces the release-candidate note instead of chaining it.
+    git(repo, 'add', '.')
+    git(repo, 'commit', '-q', '-m', 'second evidence')
+    assert rerecord.main(['--root', str(repo), '--tasks', 'G1-03']) == 0
+    _, again = evidence_of(repo, 'G1-03')
+    assert again['applicable_scope'].count('re-recorded on') == 1
+
+
+def test_a_failing_replay_is_recorded_as_failed_and_the_exit_status_says_so(repo, capsys):
+    (repo / 'tests' / 'test_alpha.py').write_text(TEST_SOURCE.replace("== '1'", "== '2'"), encoding='utf-8')
+    git(repo, 'commit', '-q', '-am', 'break the flag test')
+    assert rerecord.main(['--root', str(repo), '--tasks', 'G1-03']) == 1
+    _, evidence = evidence_of(repo, 'G1-03')
+    assert evidence['verification_state_assigned'] == 'FAILED' and evidence['exit_code'] != 0
+    assert task_of(repo, 'G1-03')['verification_state'] == 'FAILED'
+    assert 'FAILED' in capsys.readouterr().out
+
+
+def test_dirty_tree_is_refused_before_anything_runs(repo, capsys):
+    (repo / 'tests' / 'test_alpha.py').write_text(TEST_SOURCE + '\n', encoding='utf-8')
+    before = task_of(repo, 'G1-03')['evidence']
+    assert rerecord.main(['--root', str(repo), '--tasks', 'G1-03']) == 2
+    assert 'dirty' in capsys.readouterr().out and task_of(repo, 'G1-03')['evidence'] == before
+    # The gate file and the runs directory are the recorder's own outputs and do not count.
+    git(repo, 'checkout', '--', 'tests/test_alpha.py')
+    (repo / 'docs' / 'validation' / 'runs' / 'scratch').mkdir()
+    (repo / 'docs' / 'validation' / 'runs' / 'scratch' / 'x.txt').write_text('x', encoding='utf-8')
+    assert rerecord.main(['--root', str(repo), '--tasks', 'G1-03', '--dry-run']) == 0
+    assert rerecord.main(['--root', str(repo), '--tasks', 'G1-03']) == 0
+
+
+def test_dry_run_prints_the_plan_and_records_nothing(repo, capsys):
+    before = task_of(repo, 'G1-03')['evidence']
+    assert rerecord.main(['--root', str(repo), '--dry-run', '--all']) == 0
+    out = capsys.readouterr().out
+    assert 'G1-03' in out and 'G1-04' in out and "$env:RERECORD_FLAG='1'; " in out and 'skip G0-01' in out
+    assert task_of(repo, 'G1-03')['evidence'] == before and task_of(repo, 'G1-04')['evidence']
+
+
+def test_wheel_option_runs_with_the_installed_interpreter_outside_the_tree_and_records_the_wheel_hash(repo, tmp_path, monkeypatch):
+    wheel = tmp_path / 'torchfdtd-9.9.9-py3-none-any.whl'
+    wheel.write_bytes(b'not a real wheel')
+    fake_python = tmp_path / 'rc-venv' / 'Scripts' / 'python.exe'
+    calls = {}
+
+    def fake_venv(root, wheel_path, base_python, torch_spec, torch_index, find_links, extras):
+        calls['venv'] = dict(root=root, wheel=wheel_path, torch=torch_spec, extras=extras)
+        return fake_python
+
+    def fake_probe(python, root, cwd, env):
+        calls['probe'] = dict(python=python, cwd=cwd)
+        return Path('site-packages/torchfdtd/__init__.py')
+
+    def fake_run(argv, env, cwd):
+        calls['run'] = dict(argv=argv, env=env, cwd=Path(cwd))
+        junit = next(token for token in argv if token.startswith('--junitxml='))[len('--junitxml='):]
+        Path(junit).write_text(JUNIT, encoding='utf-8')
+        return 0
+
+    monkeypatch.setattr(rerecord, 'create_rc_venv', fake_venv)
+    monkeypatch.setattr(rerecord, 'probe_installed_package', fake_probe)
+    monkeypatch.setattr(rerecord, 'run_command', fake_run)
+    monkeypatch.setattr(recorder, 'environment_of', lambda interpreter: dict(recorder.environment(), python_executable=str(interpreter)))
+    monkeypatch.setenv('PYTHONPATH', str(repo))
+    code = rerecord.main(['--root', str(repo), '--tasks', 'G1-03', '--wheel', str(wheel), '--torch', 'torch==2.10.0+cu126'])
+    assert code == 0
+    assert calls['venv']['wheel'] == wheel.resolve() and calls['venv']['torch'] == 'torch==2.10.0+cu126'
+    assert calls['probe']['python'] == fake_python
+    argv, env, cwd = calls['run']['argv'], calls['run']['env'], calls['run']['cwd']
+    assert argv[0] == fake_python.as_posix()
+    assert (repo / '.local' / 'tmp' / 'rc-work') in cwd.parents and 'PYTHONPATH' not in env
+    assert env['RERECORD_FLAG'] == '1' and env['TMP'] == str(repo / '.local' / 'tmp')
+    test_arg = next(token for token in argv if token.endswith('test_alpha.py'))
+    assert Path(test_arg).is_absolute() and Path(test_arg) == (repo / 'tests' / 'test_alpha.py').resolve()
+    _, evidence = evidence_of(repo, 'G1-03')
+    assert evidence['package_or_wheel_sha256'] == hashlib.sha256(wheel.read_bytes()).hexdigest()
+    assert evidence['command'].startswith(f"$env:RERECORD_FLAG='1'; {fake_python.as_posix()}")
+    assert evidence['environment']['python_executable'] == str(fake_python)
+    assert evidence['verification_state_assigned'] == 'VERIFIED'
