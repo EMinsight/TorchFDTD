@@ -11,7 +11,7 @@
     "same_as": "docs/validation/cases/G5-05.json",
     "driver": "benchmarks/beyond_vram_propagated.py",
     "report": "benchmarks/report_beyond_vram_propagated.py renders docs/BEYOND_VRAM_PROPAGATED.md and the sanitized evidence record from the driver record and optionally the whole-machine counter CSV of scripts/sample_system_counters.ps1",
-    "budget_basis": "The wall-time model of the driver (fitted on the recorded host-bank runs of the same workstation) predicts 5008 s for the forward, the VJP and one finite-difference forward; the budget is declared at twice that with margin for the unfitted plane-observation cost and a shared machine. Host banks write no state files; the only scratch writes are the .npy artifacts (about 0.3 GB) and the record.",
+    "budget_basis": "The wall-time model of the driver (fitted on the recorded host-bank runs of the same workstation) predicts 5501 s for the forward, the VJP and two finite-difference forwards; the budget is declared at about twice that with margin for the unfitted plane-observation cost and a shared machine. Host banks write no state files; the only scratch writes are the .npy artifacts (about 0.3 GB) and the record.",
     "scratch": "none for the state (host banks); artifacts next to the record on the workstation D: drive"
   },
   "seed": null,
@@ -32,7 +32,7 @@
     "budget": {
       "workstation": {"wall_seconds_max": 10800, "disk_write_bytes_max": 2000000000000},
       "rehearsal": {"wall_seconds_max": 3600, "disk_write_bytes_max": 100000000000},
-      "justification": "Three hours and two terabytes of writes were set by the program owner for this case; the fitted model predicts 1.39 h and host banks write nothing. The rehearsal limits are generous bounds for a shared RTX 3060."
+      "justification": "Three hours and two terabytes of writes were set by the program owner for this case; the fitted model predicts 1.53 h (1.39 h before the workstation finite difference became central) and host banks write nothing. The rehearsal limits are generous bounds for a shared RTX 3060."
     },
     "vram": {
       "physical_vram_bytes_min": 51000000000,
@@ -59,5 +59,5 @@
       "a physical-disk write measurement of the artifacts (the psutil counters are machine-wide and include other processes)"
     ]
   },
-  "notes": "Applicability: the rehearsal record exercises every criterion of this case in the rehearsal context on the local RTX 3060; the workstation criteria (three-hour wall, two-terabyte writes, live state above physical VRAM) can only be judged on the RTX 5880 record, so G5-06 stays NOT_RUN until then. The case is added in the commit following 73203d2 together with G5-05."
+  "notes": "Applicability: the rehearsal record exercises every criterion of this case in the rehearsal context on the local RTX 3060; the workstation criteria (three-hour wall, two-terabyte writes, live state above physical VRAM) can only be judged on the RTX 5880 record, so G5-06 stays NOT_RUN until then. The case was added in the commit following 73203d2 together with G5-05 and its budget basis updated with G5-05's central-difference revision before any judged run."
 }

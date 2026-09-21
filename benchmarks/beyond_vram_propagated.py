@@ -459,7 +459,7 @@ def main(argv=None):
     parser.add_argument('--gpu-gib', type=float, default=40.)
     parser.add_argument('--disk-gib', type=float, default=250.)
     parser.add_argument('--disk-reserve-gib', type=float, default=50.)
-    parser.add_argument('--fd-check', choices=['none', 'forward', 'central'], default='forward')
+    parser.add_argument('--fd-check', choices=['none', 'forward', 'central'], default='central')
     parser.add_argument('--fd-step', type=float, default=.05, help='Epsilon perturbation of the finite-difference direction')
     parser.add_argument('--fd-radius-um', type=float, default=10., help='Pillars within this distance of the axis form the direction')
     parser.add_argument('--output', required=True)
@@ -470,7 +470,6 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.rehearsal:
         args.footprint, args.host_gib, args.gpu_gib, args.width, args.depth = 14., 6., 1.5, 32, 16
-        args.fd_check = 'central' if args.fd_check == 'forward' else args.fd_check
     if args.mode != 'streamed' and args.journal:
         raise ValueError('The restart journal applies to the streamed mode only.')
     spec = fixture(args.footprint, args.mesh, downsample=args.downsample, duration_fs=args.duration_fs, steps=args.steps)

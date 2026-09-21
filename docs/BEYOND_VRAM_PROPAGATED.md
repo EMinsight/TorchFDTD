@@ -99,7 +99,7 @@ RSS and private bytes are this process, sampled every half second; device in use
 | G5-06 | backward memory and disk measurements recorded separately | True  | True | PASS |
 | G5-06 | driver stage complete | complete  | complete | PASS |
 
-Case files: G5-05 `0dacf04da79cf80a4fb242ba6c9183d65bff0ed6bc219d1afa8446cb26bfaaa4`, G5-06 `d29736519b1b6fff5b4f13e147eb1fd8085504e61b24d5b7f717f750df0f654e`.
+Case files: G5-05 `a9373c4b38b09f2ad6b7435c2f7aa08f5834c84d4273fa3fba7b695cc860d994`, G5-06 `f910ff64a8d1ac71d6e6a64aee7e7ea9f95ab593c3a7a32ec7b118d5cc45bdc6`.
 
 ## What this does and does not show
 

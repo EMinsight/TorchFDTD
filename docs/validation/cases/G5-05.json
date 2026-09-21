@@ -62,7 +62,7 @@
       "resident_alternative": "a resident adjoint holds one primal and one adjoint E/H state, epsilon, its inverse and the gradient (60 bytes per cell, 22.9 GB) plus 11.05 GB per checkpoint; with the two checkpoints of this schedule it would need 45 GB and 267 block replays, with three 56 GB; the public resident path also refuses scenes above eight million cells",
       "statement": "The E/H state of one bank (9.1 GB) does not exceed physical VRAM; the live state of the adjoint at the declared checkpoint schedule does. This case therefore meets the program's requirement in the working-set sense only, which the record states plainly."
     },
-    "wall_time_model": "benchmarks.beyond_vram_propagated.TIME_MODEL, fitted on compact-host-large-5880.json and compact-host-capacity-5880.json: forward 493 s, backward 4023 s, one finite-difference forward 493 s, total 5008 s (1.39 h); the fit scatters by about 30 percent on those records",
+    "wall_time_model": "benchmarks.beyond_vram_propagated.TIME_MODEL, fitted on compact-host-large-5880.json and compact-host-capacity-5880.json: forward 493 s, backward 4023 s, two finite-difference forwards 985 s, total 5501 s (1.53 h); the fit scatters by about 30 percent on those records",
     "rehearsal": {
       "footprint_um": 14.0,
       "grid": [320, 320, 64],
@@ -70,13 +70,14 @@
       "pillars": 196,
       "steps": 1836,
       "modes": "resident (AdjointOptions checkpoints 8 on host) and streamed (slab width 32, temporal depth 16, checkpoints 2, local checkpoints 1, host banks, 6 GiB host and 1.5 GiB GPU budgets) on the local RTX 3060",
-      "command": "python -m benchmarks.beyond_vram_propagated --rehearsal --mode both --duration-fs 175 --output docs/validation/g5/G5-05_rehearsal_3060.json"
+      "command": "python -m benchmarks.beyond_vram_propagated --rehearsal --mode both --duration-fs 175 --output docs/validation/g5/G5-05_rehearsal_3060.json",
+      "supplementary": "a 24 um streamed-only member (520 x 520 x 64, 17.3 million cells, 172,800 observers, W=32, K=16, C=4, L=1) with the one-sided difference, docs/validation/g5/G5-05_rehearsal_3060_streamed_24um.json; not judged by this case"
     }
   },
   "seed": null,
   "precision": "float32",
   "backend": "cuda",
-  "reference_method": "Directional finite difference of the same objective along the pillar direction delta (indicator of the pillar cells whose centres lie within 10 um of the axis, over the design slab): on the workstation a one-sided difference with one extra streamed forward, in the rehearsal a central difference; in the rehearsal the resident DifferentiablePlaneSimulation on the same grid, sources, monitor and objective is the second reference for the objective and the design-slab gradient.",
+  "reference_method": "Directional central finite difference of the same objective along the pillar direction delta (indicator of the pillar cells whose centres lie within 10 um of the axis, over the design slab), two extra streamed forwards on the workstation and in the rehearsal; in the rehearsal the resident DifferentiablePlaneSimulation on the same grid, sources, monitor and objective is the second reference for the objective and the design-slab gradient.",
   "observables": [
     {"name": "objective", "unit": "reduced field^2 (time-normalized)", "definition": "sum over the wavelengths of the on-axis focal intensity"},
     {"name": "focal_intensity_per_frequency", "unit": "reduced field^2", "definition": "the three terms of the objective"},
@@ -109,10 +110,10 @@
         "step": 0.05,
         "radius_um": 10.0,
         "relative_response_min": 0.0002,
-        "workstation": {"kind": "forward", "relative_error_max": 0.05},
+        "workstation": {"kind": "central", "relative_error_max": 0.05},
         "rehearsal": {"kind": "central", "relative_error_max": 0.03}
       },
-      "justification": "The step changes the pillar index by 0.6 percent over 316 pillars (2.2 percent of the array) on the workstation and over all 196 pillars in the rehearsal. The one-sided truncation error is of the order of the relative field change (about one percent for a phase response), so 5 percent is declared for it and the program's 3 percent physical-parameter threshold for the central difference. A response below 2e-4 of the objective would sit near the FP32 floor of a 1836-step spectrum and is declared inconclusive (FAIL)."
+      "justification": "The step changes the pillar index by 0.6 percent over 316 pillars (2.2 percent of the array) on the workstation and over all 196 pillars in the rehearsal. Both contexts use the central difference: the 14 um rehearsal gave a central relative error of 9.1e-3 at a 26 percent response, while the supplementary 24 um streamed run showed that the one-sided difference at this step carries a 14.7 percent truncation error at a 1.9 percent response (the pillar transmission is strongly nonlinear in epsilon near its resonances), so the one-sided form first declared for the workstation was replaced by the central form before the judged run at the cost of one more forward. The workstation keeps the 5 percent originally declared for it and the rehearsal the program's 3 percent physical-parameter threshold. A response below 2e-4 of the objective would sit near the FP32 floor of a 1836-step spectrum and is declared inconclusive (FAIL)."
     },
     "resident_agreement": {
       "objective_relative_difference_max": 0.0001,
@@ -132,5 +133,5 @@
       "an E/H state that exceeds physical VRAM by itself: at the recorded streamed throughput such a case (at least 2.1 billion cells at this duration) needs about six times the declared three-hour budget and disk banks with tens of terabytes of traffic"
     ]
   },
-  "notes": "Applicability: the rehearsal verifies the driver, the criteria machinery, the resident/streamed agreement and the central finite difference at 1/58 of the cells on the local RTX 3060 shared with other agents; it does not verify the workstation run, so G5-05 stays NOT_RUN until the RTX 5880 record is judged in the workstation context. The 1.2 to 1.6 billion cell target of the brief was reduced to 381 million cells: host banks of five states plus eight dense parameter copies exceed the 103 GB admissible on the workstation above about 0.45 billion cells with this schedule, and the fitted wall-time model gives 1.39 h here against a declared budget of 3 h. Exploratory probes before this declaration: resident 12 um at 2600 steps and streamed 20 um at 2518 steps for the energy decay, and an 8 um, 300-step run of the driver in both modes (finite-difference relative error 5e-4 at a 2.9 percent response, resident/streamed gradient relative L2 3.9e-7). The case is added in the commit following 73203d2 together with the driver."
+  "notes": "Applicability: the rehearsal verifies the driver, the criteria machinery, the resident/streamed agreement and the central finite difference at 1/58 of the cells on the local RTX 3060 shared with other agents; it does not verify the workstation run, so G5-05 stays NOT_RUN until the RTX 5880 record is judged in the workstation context. The 1.2 to 1.6 billion cell target of the brief was reduced to 381 million cells: host banks of five states plus eight dense parameter copies exceed the 103 GB admissible on the workstation above about 0.45 billion cells with this schedule, and the fitted wall-time model gives 1.39 h here against a declared budget of 3 h. Exploratory probes before this declaration: resident 12 um at 2600 steps and streamed 20 um at 2518 steps for the energy decay, and an 8 um, 300-step run of the driver in both modes (finite-difference relative error 5e-4 at a 2.9 percent response, resident/streamed gradient relative L2 3.9e-7). The case was added in the commit following 73203d2 together with the driver; before any judged run, the workstation finite difference was changed from one-sided to central (commit after 3b0deb0) on the evidence of the supplementary 24 um streamed rehearsal (one-sided relative error 0.147 at a 0.019 response); no limit was relaxed and the wall-time estimate grew by one forward to 5501 s."
 }

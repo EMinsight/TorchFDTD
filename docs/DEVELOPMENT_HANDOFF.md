@@ -639,7 +639,7 @@ evidence.
 - `tests/test_beyond_vram_propagated.py` (6cdb3e4, 4904b05): cases against the generator, the rehearsal record against every rehearsal criterion, the rendering, the time model against the records it was fitted on, planning without a device, and two workstation tests that skip until the RTX 5880 record exists.
 - `docs/validation/completion_gates.json` (4904b05): code paths, planned commands and required tests of G5-05 and G5-06; both stay NOT_RUN and IN_PROGRESS.
 - `docs/DIFFERENTIABLE_PLANES.md`, `docs/BEYOND_VRAM_VALIDATION.md` (4904b05): pointers and the corrected large-plane sentence.
-- `docs/validation/g5/G5-05_rehearsal_3060.json`, `docs/BEYOND_VRAM_PROPAGATED.md`: the rehearsal record and the document rendered from it (see below).
+- `docs/validation/g5/G5-05_rehearsal_3060.json`, `docs/BEYOND_VRAM_PROPAGATED.md`: the rehearsal record and the document rendered from it (see below); `docs/validation/g5/G5-05_rehearsal_3060_streamed_24um.json`: the supplementary 24 um streamed-only run that exposed the one-sided finite-difference error.
 
 **Fixture and budget (declared in the cases).** 120 um pillar-array lens at
 50 nm mesh: 2440 x 2440 x 64 = 381,030,400 cells, 14,400 pillars, 1836 steps
@@ -649,9 +649,14 @@ state with CPML 11.05 GB; policy W=128, K=32, C=2, L=1, host banks; planner:
 host reservation 91.6 GB, GPU reservation 18.3 GB, 58 blocks, 20 tiles, 267
 replayed blocks, 1.17e13 cell-steps. Wall-time model (fit to
 compact-host-large-5880 and compact-host-capacity-5880, 8 timings within 35
-percent): forward 493 s, VJP 4023 s, one finite-difference forward 493 s,
-total 5008 s = 1.39 h against the declared 3 h; host banks write no state, so
-the 2 TB write budget is bounded by the 0.3 GB of artifacts. The brief's 1.2
+percent): forward 493 s, VJP 4023 s, two finite-difference forwards 985 s,
+total 5501 s = 1.53 h against the declared 3 h; host banks write no state, so
+the 2 TB write budget is bounded by the 0.3 GB of artifacts. The workstation
+finite difference was first declared one-sided (one forward, 1.39 h) and
+changed to central before any judged run: the supplementary 24 um streamed
+rehearsal below showed a one-sided truncation error of 14.7 percent at this
+step, far above the 5 percent limit, while the central form's error in the
+14 um rehearsal is 0.9 percent; the case notes record the revision. The brief's 1.2
 to 1.6 billion cells were reduced: with host banks the five state banks plus
 eight dense parameter copies exceed the 103 GB admissible on the workstation
 above about 0.45 billion cells at this schedule, and disk banks would move
@@ -676,11 +681,11 @@ $sampler = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfi
 Register-ScheduledTask -TaskName torchfdtd-g5-05-counters -Action $sampler -Force | Out-Null
 Start-ScheduledTask -TaskName torchfdtd-g5-05-counters
 
-# 2. The run, as a scheduled task so that it outlives the SSH session (about 1.4 h predicted, 3 h budget)
+# 2. The run, as a scheduled task so that it outlives the SSH session (about 1.5 h predicted, 3 h budget)
 @'
 Set-Location <checkout>
 $env:TMP = 'D:/torchfdtd-tmp'; $env:TEMP = 'D:/torchfdtd-tmp'
-.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --footprint 120 --duration-fs 175 --mode streamed --banks host --width 128 --depth 32 --checkpoints 2 --local-checkpoints 1 --host-gib 100 --gpu-gib 40 --fd-check forward --fd-step 0.05 --fd-radius-um 10 --output .local/runs/g5-05/G5-05_5880.json --artifacts D:/torchfdtd-runs/g5-05/artifacts *> .local/runs/g5-05/run.log
+.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --footprint 120 --duration-fs 175 --mode streamed --banks host --width 128 --depth 32 --checkpoints 2 --local-checkpoints 1 --host-gib 100 --gpu-gib 40 --fd-check central --fd-step 0.05 --fd-radius-um 10 --output .local/runs/g5-05/G5-05_5880.json --artifacts D:/torchfdtd-runs/g5-05/artifacts *> .local/runs/g5-05/run.log
 New-Item -ItemType File -Force .local/runs/g5-05/stop.txt | Out-Null
 '@ | Set-Content -Encoding ascii .local/runs/g5-05/run.ps1
 $run = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -ExecutionPolicy Bypass -File <checkout>/.local/runs/g5-05/run.ps1'
@@ -752,6 +757,16 @@ energy history relative L2 1.2e-16. Machine disk writes over the phases
 0.17 GB. All 23 criteria PASS in the rehearsal context; the same record fails
 the workstation context by construction (grid, VRAM rows).
 
+**Supplementary 24 um streamed run (520 x 520 x 64 = 17,305,600 cells, 1836
+steps, 172,800 observers, W=32, K=16, C=4, L=1, 5.62 GB host and 1.26 GB GPU
+reservation, peak Torch 0.48 GB, peak RSS 6.94 GB).** Forward 122.7 s,
+backward 826.4 s, one-sided finite-difference forward 124.0 s, total 1075 s;
+objective 2.7034e-2 (focal 1.13e-2, 1.05e-2, 5.22e-3), plane energy decayed
+to 1.221e-4 of its peak, gradient norm 4.6343e-4, design-slab norm 1.0027e-4;
+one-sided finite difference -1.0498e-2 against the directional derivative
+-9.1537e-3, relative error 0.147 at a 0.019 response. Not judged by the cases
+(a different grid); it is the reason the workstation check became central.
+
 **Passed / failed / skipped / not run.** `tests/test_beyond_vram_propagated.py`:
 6 passed, 2 skipped (the two workstation tests, skipped with the reason
 until the RTX 5880 record exists). Regression: `test_spacetime.py`,
@@ -765,8 +780,8 @@ the judged run.
 **Evidence paths and hashes.** `docs/validation/g5/G5-05_rehearsal_3060.json`
 (driver record, source hashes inside, driver `7dd620b3e8028d8b...`),
 `docs/validation/g5/G5-05_rehearsal_3060_evidence.json` (sanitized record plus
-the 23 verdict rows and the case hashes G5-05 `0dacf04da79cf80a...`, G5-06
-`d29736519b1b6fff...`), `docs/BEYOND_VRAM_PROPAGATED.md` (rendered from it;
+the 23 verdict rows and the case hashes G5-05 `a9373c4b38b09f2a...`, G5-06
+`f910ff64a8d1ac71...` after the central-difference revision), `docs/BEYOND_VRAM_PROPAGATED.md` (rendered from it;
 the workstation render replaces it). The raw record, log and artifacts stay
 under D:/TorchFDTD/.local/tmp/g5/final.
 
@@ -775,7 +790,7 @@ under D:/TorchFDTD/.local/tmp/g5/final.
 - The streamed spectral path has no restart journal, so the 1.4 h workstation run is unjournaled; a crash means a rerun.
 - The wall-time model is a fit with about 30 percent scatter and does not include the plane-observation cost (4.3 million observers: the per-block host DFT and the observation transfer); the rehearsal's streamed backward was 10 times its forward against the model's 8, on a shared GPU.
 - The host reservation (91.6 GB) is 89 percent of the 103 GB admissible on the day of the recorded resources; less available RAM on the workstation refuses admission at planning time (`--plan` first). C=3 would reduce the replays but needs 102.6 GB.
-- The rehearsal fits the resident cap at 1/58 of the cells, not the brief's 1/20; a 24 um streamed-only run with the workstation's one-sided finite difference was started after the record above and is reported separately if it finished.
+- The rehearsal that the cases judge fits the resident cap at 1/58 of the cells; the supplementary streamed run at 1/22 of the cells has no resident reference and no central difference. The nonlinearity it exposed (one-sided error 0.147 at a 0.019 response, step 0.05) also means the central error on the workstation, where the direction covers 2.2 percent of the pillars, is not predicted by the rehearsal; the 5 percent limit stands as declared.
 
 **Next first command and task id.** G5-05 and G5-06: after merging, deploy
 and run step 0 of the workstation commands above; if `--plan` admits the
