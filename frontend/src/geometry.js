@@ -3,7 +3,7 @@ import * as THREE from 'three';
 export function geometryDefaults(o){
  o.rotation??=0;o.rotation_axes??=['z','x','y'];o.rotation_angles??=[0,0,0];
  o.make_ellipsoid??=false;o.radius_2??=.5;o.radius_3??=.5;o.inner_radius_2??=.3;
- o.theta_start??=0;o.theta_stop??=360;o.vertices??=[[-.5,-.5],[.5,-.5],[0,.5]];
+ o.theta_start??=0;o.theta_stop??=360;o.vertices??=[[-.5,-.5],[.5,-.5],[0,.5]];o.holes??=[];
  return o;
 }
 export function rotationMatrix(o){
@@ -20,7 +20,10 @@ function localGeometry(o){
  if(o.kind==='sphere')return new THREE.SphereGeometry(1,48,32).scale(rx,ry,rz);
  if(o.kind==='circle')return new THREE.CylinderGeometry(1,1,o.size[2],96).rotateX(Math.PI/2).scale(rx,ry,1);
  let shape;
- if(o.kind==='polygon')shape=new THREE.Shape(o.vertices.map(v=>new THREE.Vector2(...v)));
+ if(o.kind==='polygon'){
+  shape=new THREE.Shape(o.vertices.map(v=>new THREE.Vector2(...v)));
+  for(const hole of o.holes||[])shape.holes.push(new THREE.Path(hole.map(v=>new THREE.Vector2(...v))));
+ }
  else if(o.kind==='ring'){
   const delta=(o.theta_stop??360)-(o.theta_start??0),span=((delta%360)+360)%360||360;
   const full=span===360,count=Math.max(3,Math.ceil(96*span/360));
@@ -39,7 +42,7 @@ function localGeometry(o){
 const cache=new Map();
 function entry(o){
  geometryDefaults(o);
- const key=JSON.stringify([o.kind,o.size,o.radius,o.inner_radius,o.make_ellipsoid,o.radius_2,o.radius_3,o.inner_radius_2,o.theta_start,o.theta_stop,o.vertices,o.rotation,o.rotation_axes,o.rotation_angles]);
+ const key=JSON.stringify([o.kind,o.size,o.radius,o.inner_radius,o.make_ellipsoid,o.radius_2,o.radius_3,o.inner_radius_2,o.theta_start,o.theta_stop,o.vertices,o.holes,o.rotation,o.rotation_axes,o.rotation_angles]);
  if(cache.has(key))return cache.get(key);
  const geometry=localGeometry(o).applyMatrix4(rotationMatrix(o));
  const flat=geometry.index?geometry.toNonIndexed():geometry.clone();
@@ -75,7 +78,7 @@ export function geometryControls(o,numeric){
   if(o.make_ellipsoid)html+=numeric('radius 2','radius_2',o.radius_2,'µm',{min:.001})+(o.kind==='sphere'?numeric('radius 3','radius_3',o.radius_3,'µm',{min:.001}):'')+(o.kind==='ring'?numeric('inner radius 2','inner_radius_2',o.inner_radius_2,'µm',{min:0}):'');
  }
  if(o.kind==='ring')html+=numeric('theta start','theta_start',o.theta_start,'deg')+numeric('theta stop','theta_stop',o.theta_stop,'deg')+'<p class="property-help">Counterclockwise arc in the local XY plane, wrapping through 360°. Angles are polar angles even for elliptical rings.</p>';
- if(o.kind==='polygon')html+=`<button data-action="geometry-vertices">Edit polygon vertices</button><p class="property-help">${o.vertices.length} local XY vertices, extruded along local z. One simple contour without holes.</p>`;
+ if(o.kind==='polygon')html+=`<button data-action="geometry-vertices">Edit polygon vertices</button><p class="property-help">${o.vertices.length} local XY vertices${o.holes.length?` and ${o.holes.length} hole contour${o.holes.length>1?'s':''}`:''}, extruded along local z. Holes are simple contours strictly inside the outer contour.</p>`;
  return html;
 }
 export function rotationControls(o,numeric,dropdown){
@@ -86,13 +89,16 @@ export function setupGeometryEditor({state,api,esc,commit}){
  const dialog=document.createElement('dialog');dialog.className='geometry-dialog';document.body.append(dialog);
  return {open(id){
   const obj=state.project.structures.find(o=>o.id===id);if(!obj||obj.kind!=='polygon')return;
-  dialog.innerHTML=`<div class="fsp-heading"><h2>Polygon vertices</h2><button data-dismiss>Close</button></div><p>Local x, y pairs in µm, one pair per line. Clockwise or counterclockwise. Do not repeat the first vertex.</p><textarea aria-label="Polygon vertices" rows="12" style="width:100%;font-family:monospace">${esc(obj.vertices.map(v=>v.join(', ')).join('\n'))}</textarea><p role="alert"></p><button data-apply>Apply vertices</button>`;
+  const contour=points=>points.map(v=>v.join(', ')).join('\n');
+  dialog.innerHTML=`<div class="fsp-heading"><h2>Polygon vertices</h2><button data-dismiss>Close</button></div><p>Local x, y pairs in µm, one pair per line. Clockwise or counterclockwise. Do not repeat the first vertex. A blank line starts a hole contour, which must lie strictly inside the outer contour.</p><textarea aria-label="Polygon vertices" rows="12" style="width:100%;font-family:monospace">${esc([obj.vertices,...(obj.holes||[])].map(contour).join('\n\n'))}</textarea><p role="alert"></p><button data-apply>Apply vertices</button>`;
   dialog.querySelector('[data-dismiss]').onclick=()=>dialog.close();
   dialog.querySelector('[data-apply]').onclick=async()=>{
    try{
-    const vertices=dialog.querySelector('textarea').value.trim().split(/\r?\n/).map(line=>line.trim().split(/[\s,]+/).map(Number));
-    if(vertices.some(v=>v.length!==2||v.some(n=>!Number.isFinite(n))))throw Error('Each row needs two finite numbers.');
-    const p=structuredClone(state.project);p.structures.find(o=>o.id===id).vertices=vertices;
+    const blocks=dialog.querySelector('textarea').value.split(/\r?\n[ \t]*(?:\r?\n[ \t]*)+/).map(b=>b.trim()).filter(Boolean);
+    if(!blocks.length)throw Error('Enter at least three vertex rows.');
+    const [vertices,...holes]=blocks.map(block=>block.split(/\r?\n/).map(line=>line.trim().split(/[\s,]+/).map(Number)));
+    if([vertices,...holes].some(rows=>rows.some(v=>v.length!==2||v.some(n=>!Number.isFinite(n)))))throw Error('Each row needs two finite numbers.');
+    const p=structuredClone(state.project);Object.assign(p.structures.find(o=>o.id===id),{vertices,holes});
     const checked=await api('/validate',p);commit(checked.project);dialog.close();
    }catch(e){dialog.querySelector('[role="alert"]').textContent=e.message;}
   };dialog.showModal();
