@@ -661,41 +661,46 @@ below physical VRAM (0.18 of it) and the case claims only that the live
 adjoint state (5 x 11.05 GB banks plus 12.2 GB of dense parameters, 67 GB)
 exceeds it; both cases state this in the open.
 
-**Exact workstation commands (deployed checkout `C:/Users/admin/torchfdtd`, outputs on D:, PowerShell).**
+**Exact workstation commands (from the deployed checkout root, written `<checkout>` below; the small record, log and counters under `<checkout>/.local/runs/g5-05` so that `scripts/remote.py fetch` reaches them, the 0.3 GB of artifacts on the workstation's D: drive; PowerShell). `remote.py sync` deploys `torchfdtd`, `benchmarks` and `tests` but not `docs`, so the judging and rendering happen locally after the fetch.**
 
 ```powershell
 # 0. Deploy this branch (from the local checkout), then on the workstation confirm the admission for the day (metadata only, about a minute)
-D:/TorchFDTD/.venv/Scripts/python.exe scripts/remote.py sync --host <workstation> --user admin --root C:/Users/admin/torchfdtd
-Set-Location C:/Users/admin/torchfdtd
-New-Item -ItemType Directory -Force D:/torchfdtd-tmp, D:/torchfdtd-runs/g5-05 | Out-Null
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/remote.py sync --host <workstation> --user <user> --root <checkout>
+Set-Location <checkout>
+New-Item -ItemType Directory -Force D:/torchfdtd-tmp, D:/torchfdtd-runs/g5-05, .local/runs/g5-05 | Out-Null
 $env:TMP = 'D:/torchfdtd-tmp'; $env:TEMP = 'D:/torchfdtd-tmp'
-.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --footprint 120 --duration-fs 175 --checkpoints 2 --host-gib 100 --plan --output D:/torchfdtd-runs/g5-05/plan.json
+.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --footprint 120 --duration-fs 175 --checkpoints 2 --host-gib 100 --plan --output .local/runs/g5-05/plan.json
 
 # 1. Whole-machine counters, as their own scheduled task (they stop when the run creates stop.txt)
-$sampler = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -ExecutionPolicy Bypass -File C:/Users/admin/torchfdtd/scripts/sample_system_counters.ps1 -Output D:/torchfdtd-runs/g5-05/counters.csv -StopFile D:/torchfdtd-runs/g5-05/stop.txt'
+$sampler = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -ExecutionPolicy Bypass -File <checkout>/scripts/sample_system_counters.ps1 -Output <checkout>/.local/runs/g5-05/counters.csv -StopFile <checkout>/.local/runs/g5-05/stop.txt'
 Register-ScheduledTask -TaskName torchfdtd-g5-05-counters -Action $sampler -Force | Out-Null
 Start-ScheduledTask -TaskName torchfdtd-g5-05-counters
 
 # 2. The run, as a scheduled task so that it outlives the SSH session (about 1.4 h predicted, 3 h budget)
 @'
-Set-Location C:/Users/admin/torchfdtd
+Set-Location <checkout>
 $env:TMP = 'D:/torchfdtd-tmp'; $env:TEMP = 'D:/torchfdtd-tmp'
-.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --footprint 120 --duration-fs 175 --mode streamed --banks host --width 128 --depth 32 --checkpoints 2 --local-checkpoints 1 --host-gib 100 --gpu-gib 40 --fd-check forward --fd-step 0.05 --fd-radius-um 10 --output D:/torchfdtd-runs/g5-05/G5-05_5880.json --artifacts D:/torchfdtd-runs/g5-05/artifacts *> D:/torchfdtd-runs/g5-05/run.log
-New-Item -ItemType File -Force D:/torchfdtd-runs/g5-05/stop.txt | Out-Null
-'@ | Set-Content -Encoding ascii D:/torchfdtd-runs/g5-05/run.ps1
-$run = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -ExecutionPolicy Bypass -File D:/torchfdtd-runs/g5-05/run.ps1'
+.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --footprint 120 --duration-fs 175 --mode streamed --banks host --width 128 --depth 32 --checkpoints 2 --local-checkpoints 1 --host-gib 100 --gpu-gib 40 --fd-check forward --fd-step 0.05 --fd-radius-um 10 --output .local/runs/g5-05/G5-05_5880.json --artifacts D:/torchfdtd-runs/g5-05/artifacts *> .local/runs/g5-05/run.log
+New-Item -ItemType File -Force .local/runs/g5-05/stop.txt | Out-Null
+'@ | Set-Content -Encoding ascii .local/runs/g5-05/run.ps1
+$run = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -ExecutionPolicy Bypass -File <checkout>/.local/runs/g5-05/run.ps1'
 Register-ScheduledTask -TaskName torchfdtd-g5-05 -Action $run -Force | Out-Null
 Start-ScheduledTask -TaskName torchfdtd-g5-05
-# progress: Get-Content D:/torchfdtd-runs/g5-05/run.log -Tail 3 ; the record's "stage" ends at "complete"
-
-# 3. Judge and render from the record, on the workstation checkout (installed RAM from the recorded 127.7 GiB)
-.venv/Scripts/python.exe -m benchmarks.report_beyond_vram_propagated --record D:/torchfdtd-runs/g5-05/G5-05_5880.json --context workstation --counters D:/torchfdtd-runs/g5-05/counters.csv --total-ram-gib 127.7 --evidence docs/validation/beyond_vram_propagated_5880.json --output docs/BEYOND_VRAM_PROPAGATED.md
+# progress: Get-Content .local/runs/g5-05/run.log -Tail 3 ; the record's "stage" ends at "complete"
 ```
 
-Then locally: fetch `docs/validation/beyond_vram_propagated_5880.json` and
-`docs/BEYOND_VRAM_PROPAGATED.md` (`scripts/remote.py fetch --file <path>`),
-keep the raw `G5-05_5880.json`, `run.log`, `counters.csv` and the artifacts
-privately, commit the two files, and record both tasks:
+Then locally, from the worktree root (installed RAM from the recorded
+127.7 GiB; the raw record, log and counters stay private under
+`.local/`, the artifacts stay on the workstation):
+
+```powershell
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/remote.py fetch --host <workstation> --user <user> --root <checkout> --file .local/runs/g5-05/G5-05_5880.json
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/remote.py fetch --host <workstation> --user <user> --root <checkout> --file .local/runs/g5-05/counters.csv
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/remote.py fetch --host <workstation> --user <user> --root <checkout> --file .local/runs/g5-05/run.log
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.report_beyond_vram_propagated --record .local/runs/g5-05/G5-05_5880.json --context workstation --counters .local/runs/g5-05/counters.csv --total-ram-gib 127.7 --evidence docs/validation/beyond_vram_propagated_5880.json --output docs/BEYOND_VRAM_PROPAGATED.md
+```
+
+Commit the two rendered files, then record both tasks:
 
 ```powershell
 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_beyond_vram_propagated.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-05.xml
@@ -714,8 +719,8 @@ torchfdtd-g5-05` (or ending the python process) leaves the record at its
 last saved stage (`planned`, then `complete` only at the end) and the
 artifacts written so far; there is no journal on the spectral path, so a
 stopped run is rerun from the start, and the host banks are released with the
-process. Create `D:/torchfdtd-runs/g5-05/stop.txt` by hand to end the counter
-sampler after a stop.
+process. Create `<checkout>/.local/runs/g5-05/stop.txt` by hand to end the
+counter sampler after a stop.
 
 **Commands run (device: local Windows 11, RTX 3060 12 GB shared with about eight other agents, driver 591.86, Python 3.10.2, torch 2.10.0+cu126, CuPy 13.6.0; TMP and TEMP under D:/TorchFDTD/.local/tmp; PYTHONPATH set to the worktree so the editable install does not resolve to another checkout).**
 
