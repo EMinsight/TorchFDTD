@@ -51,7 +51,11 @@ def _uniform(coordinates, name):
         return values, None
     steps = values[1:] - values[:-1]
     spacing = float(steps.mean())
-    if spacing <= 0 or float((steps - spacing).abs().max()) > 1e-6 * spacing:
+    # A DifferentiablePlaneResult stores its points in the field precision, so
+    # float32 coordinates tens of micrometres from the origin carry rounding of
+    # a few 1e-6 um; accept that as uniform rather than only 1e-6 of the spacing.
+    tolerance = max(1e-6 * spacing, 2. ** -20 * float(values.abs().max()))
+    if spacing <= 0 or float((steps - spacing).abs().max()) > tolerance:
         raise ValueError(f'The plane must be sampled uniformly along {name}.')
     return values, spacing
 
