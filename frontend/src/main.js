@@ -14,6 +14,7 @@ import { runControls } from './run_control.js';
 import { geometryDefaults,geometryControls,rotationControls,setupGeometryEditor } from './geometry.js';
 import { setupMonitorTools, spectralControls, fieldMonitorControls } from './monitor_tools.js';
 import { setupBoundaryTools } from './boundary_tools.js';
+import { openModeNetwork } from './mode_network_tools.js';
 
 // Preserve existing browser projects and design setups across the product rename.
 try {
@@ -33,7 +34,7 @@ const messages=[];
 
 $('#app').innerHTML=`
 <header><div class="brand"><span class="brand-mark">${icon('waves')}</span><strong>TorchFDTD</strong><span class="product">Workbench</span></div><div class="project-title" id="project-title"></div><div class="connection" id="connection"><span class="dot"></span>Connecting to solver…</div></header>
-<nav class="menubar"><button data-action="new">File</button><button data-action="undo">Edit</button><button data-action="fit">View</button><button data-action="materials">Materials</button><button data-action="region">Simulation</button><button data-action="inverse-design">Inverse design</button><button data-action="capabilities">Feature checklist</button><button data-action="flux-results">Flux results</button><button data-action="help">Help</button><span class="version">DEVELOPMENT</span></nav>
+<nav class="menubar"><button data-action="new">File</button><button data-action="undo">Edit</button><button data-action="fit">View</button><button data-action="materials">Materials</button><button data-action="region">Simulation</button><button data-action="inverse-design">Inverse design</button><button data-action="mode-ports">Mode ports</button><button data-action="capabilities">Feature checklist</button><button data-action="flux-results">Flux results</button><button data-action="help">Help</button><span class="version">DEVELOPMENT</span></nav>
 <div class="ribbon-tabs"><button class="active" data-ribbon="design">Design</button><button data-ribbon="simulation">FDTD</button><button data-ribbon="view">View</button><span class="ribbon-note">Geometry and wavelength in µm</span></div>
 <div class="ribbon">
  <div class="tool-group"><div class="tool-row"><button class="tool" data-action="open">${icon('folder-open')}<span>Open</span></button><button class="tool" data-action="save">${icon('save')}<span>Save</span></button><button class="tool" data-action="fsp">${icon('folder-open')}<span>FSP inspect</span></button><button class="tool editable" data-action="fsp-native">${icon('folder-open')}<span>FSP → GPU</span></button><button class="tool editable" data-action="gds">${icon('folder-open')}<span>GDS</span></button><button class="tool" data-action="python">${icon('file-code-2')}<span>Python</span></button></div><label>Project</label></div>
@@ -235,6 +236,7 @@ const actions={
  layout:()=>{if(state.mode==='running')return;state.results=null;state.liveFrame=null;state.monitors=null;state.job=null;$('#results-tree').innerHTML='<div class="muted empty-hint">Run again to calculate this layout.</div>';setMode('layout');setTab('geometry');log('Layout mode. Prior result downloads remain on the solver; the current visualizer was cleared.');},
  run,stop:async()=>{if(state.job){await api('/jobs/'+state.job+'/cancel',{});log('Stop requested. Waiting for the current time step to finish.');}},validate,
  python:()=>setBottom('python'),'export-python':async()=>{download(await api('/python',state.project),'simulation.py','text/x-python');},
+ 'mode-ports':()=>openModeNetwork(state.project,{toast}),
  download:()=>{if(state.results)window.location.href='/api/jobs/'+state.job+'/download';else toast('Run the simulation first.');},
  csv:()=>{if(state.results)window.location.href='/api/jobs/'+state.job+(state.spectrum?'/spectra.csv':'/monitors.csv');else toast('Run the simulation first.');},
  playback:()=>{if(playTimer){clearInterval(playTimer);playTimer=null;return;}if(!state.results?.frames.length)return;playTimer=setInterval(()=>{if(!state.results){clearInterval(playTimer);playTimer=null;return;}state.frame=(state.frame+1)%state.results.frames.length;renderResults();},80);},

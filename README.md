@@ -64,7 +64,12 @@ the validation record, rather than interpreted as exact conservation.
 waveguide modes, full-plane modal tails, four-channel CUDA propagation and
 interior-material S-matrix gradients. An independent vector fiber oracle,
 slab roots and padding checks bound the tested mode accuracy. General routing,
-mode-profile differentiation and the browser port editor remain incomplete.
+mode-profile differentiation and streamed injection remain incomplete.
+The [native CAD mode-network workflow](docs/MODE_NETWORK_WORKFLOW.md) now connects
+the same Project snapshot to Python and a browser port editor, with complex S
+tables, selected interior material derivatives, cancellation and JSON/Python/NPZ/CSV
+exports. Its actual open-guide CPU/CUDA workflow check is separate from optical
+convergence and comparative performance.
 A [fixed-slab physical-gradient check](docs/MODE_NETWORK_GRADIENT_ACCEPTANCE.md)
 at 25 nm spacing passes a predeclared 2% derivative criterion and an actual
 descent step. It does not establish general shape or CR convergence.

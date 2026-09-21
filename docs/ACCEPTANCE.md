@@ -1,5 +1,27 @@
 # Current acceptance record
 
+## Native CAD mode-network API and browser, 21 September 2026
+
+The versioned native Project adapter and browser editor now share two opposing
+fixed dielectric ports, complex S objectives and selected interior material
+permittivity derivatives. Metadata and live capacity admission precede expensive
+allocation. Modal jobs share the native queue and own a spawned, interruptible
+worker. Atomic publication and generic/modal cancellation are synchronized.
+
+Thirty-three focused CPU contract/integration cases and five browser cases pass
+across targeted runs. The actual browser case imports an open-guide CAD setup,
+computes complex S and a nonzero material derivative, and downloads NPZ, CSV
+and Python. The same Project on CUDA differs from the CPU result by at most
+1.43e-7 in complex S, with the selected material derivative identical in these
+runs. Runtime fingerprints before and after the CUDA check are unchanged.
+This small fixture is a workflow check, not optical convergence or performance.
+
+See [usage and limits](MODE_NETWORK_WORKFLOW.md) and the
+[workflow record](validation/mode_network_project_workflow.json). Full CI for
+this integration is pending. General routing, streamed modes and complete
+FDTDX parity remain unfinished. Public release remains NOT_CLEARED_FOR_PUBLICATION.
+
+
 ## Open transverse CPML mode ports, 21 September 2026
 
 The fixed bound-mode workflow now includes native CPML eigenoperators,

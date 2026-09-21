@@ -130,6 +130,7 @@ and collar-tail gates. This checks finite-box sensitivity at one mesh.
 
 Current exclusions are general multi-branch routing, leaky/resonant channel
 normalization, eigenmode differentiation, anisotropic or dispersive mode
-profiles, nonuniform grids, spatially streamed modal injection, and a browser
-mode-network editor. FDTDX feature parity remains a separate checklist with
-these restrictions explicit.
+profiles, nonuniform grids and spatially streamed modal injection. A restricted
+[native CAD and browser workflow](MODE_NETWORK_WORKFLOW.md) now exposes the same
+fixed opposing ports, complex S and interior material derivatives. FDTDX feature
+parity remains a separate checklist with these restrictions explicit.

@@ -144,3 +144,6 @@ from .open_mode_ports import OpenWaveguideMode, solve_open_waveguide_modes
 from .open_mode_injection import OpenPortOptions, OpenModalLaunch, prepare_open_modal_launch
 __all__ += ["OpenWaveguideMode", "solve_open_waveguide_modes", "OpenPortOptions",
             "OpenModalLaunch", "prepare_open_modal_launch"]
+
+from .mode_network_project import ModeNetworkConfig, mode_network_plan, run_mode_network
+__all__ += ["ModeNetworkConfig", "mode_network_plan", "run_mode_network"]

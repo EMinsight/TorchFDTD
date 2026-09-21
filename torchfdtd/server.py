@@ -227,10 +227,13 @@ def create_app(result_dir=None):
 
     @app.post('/api/jobs/{key}/cancel')
     def cancel(key: str):
-        job = get_job(key)
-        if job['status'] in ('running','queued'):
-            job['cancel'].set()
-        return {'status':job['status'], 'cancel_requested':job['cancel'].is_set()}
+        # Modal publication uses this same lock. Alternate generic-route
+        # cancellation must linearize with its final status/file publication.
+        with lock:
+            job = get_job(key)
+            if job['status'] in ('running','queued'):
+                job['cancel'].set()
+            return {'status':job['status'], 'cancel_requested':job['cancel'].is_set()}
 
     @app.get('/api/jobs/{key}/fields')
     def fields(key: str):
@@ -278,6 +281,8 @@ def create_app(result_dir=None):
 
     from .design_service import attach_design_routes
     attach_design_routes(app, root, pool, jobs, lock)
+    from .mode_network_service import attach_mode_network_routes
+    attach_mode_network_routes(app, root, pool, jobs, lock)
     from .fsp_service import attach_fsp_routes
     attach_fsp_routes(app, root)
     from .gds_service import attach_gds_routes
