@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G6-08_numerical_guards",
+  "task": "G6-08",
+  "title": "Numerical guards: near-zero references, frequency cutoff, evanescent orders, backflow and invalid phases refuse or flag with a reason in every normalization path",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2a5d8cc9c4f3b0722f49726a5f5677f0b9",
+  "declared_before_run": true,
+  "fixture": {
+    "table": "docs/NUMERICAL_GUARDS.md: every path, its guard, its declared threshold and its test",
+    "paths": ["torchfdtd.results.guarded_ratio", "torchfdtd.field_monitors.normalize_flux", "torchfdtd.results.reflection_transmission", "torchfdtd.results.s_parameters (phase, group delay)", "torchfdtd.mode_injection.modal_s_parameters", "torchfdtd.results.mode_decomposition", "torchfdtd.radiation.diffraction_orders and diffraction_efficiency", "torchfdtd.results.diffraction_record", "torchfdtd.radiation.normalized_farfield_intensity", "torchfdtd.results.farfield_record", "torchfdtd.detector_allocation.quadrant_intensity_allocation"],
+    "injections": "zero reference, reference at 5e-3 of the peak, reference against its dominant direction, negative numerator with a declared direction, NaN; synthetic monitor records with a zero reference and a reversed transmission flux; S at 1e-20, a phase step of 3.14 rad between neighbours, two frequencies; a Rayleigh order at grazing cutoff (order 1 at lambda 2 um, period 2 um) and an evanescent order 2; a two-frequency reference weak at one frequency for diffraction and far field; a 12-step modal run whose far plane carries no signal; a zero-intensity allocation plane",
+    "thresholds": {
+      "REFERENCE_FRACTION": 0.01,
+      "rounding_floor": "32 * eps(dtype) of the largest magnitude",
+      "phase_magnitude_floor": "rounding floor of the S dtype times max |S|",
+      "resolved_phase_step_rad": 1.5707963267948966,
+      "group_delay_minimum_frequencies": 3,
+      "cutoff_tolerance": 1e-05
+    }
+  },
+  "seed": "not applicable",
+  "precision": ["float32", "float64"],
+  "backend": "cpu",
+  "reference_method": "each injected situation has a known correct outcome (NaN with a named reason, or a ValueError with a named message); the valid entries of the same arrays are compared with the unguarded quotient to show that nothing else changed",
+  "observables": [
+    {"name": "reason", "unit": "text", "definition": "record.reasons[name][index] or the ValueError message for every injected situation"},
+    {"name": "valid_mask", "unit": "boolean", "definition": "record.valid[name] per entry"},
+    {"name": "untouched_ratio", "unit": "dimensionless", "definition": "the ratio at valid entries equals numerator / |reference| exactly"}
+  ],
+  "acceptance": {
+    "reasons": "every injected situation yields the reason listed in docs/NUMERICAL_GUARDS.md for its path; no injected situation yields a finite clipped number or an absolute value",
+    "no_epsilon": "no denominator is offset: a zero reference is refused or flagged, never divided",
+    "precision": "a float32 reference at 1e-8 of its peak is flagged by the rounding floor while a float64 one at 1e-6 with a 1e-9 fraction is not",
+    "source_of_limits": "G6-08 specification; thresholds declared in the fixture above and in docs/NUMERICAL_GUARDS.md before the run"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_numerical_guards.py::test_guarded_ratio_names_every_refusal_and_never_clips",
+      "tests/test_numerical_guards.py::test_normalize_flux_reports_the_reason_of_every_nan",
+      "tests/test_numerical_guards.py::test_reflection_transmission_zero_reference_and_backflow_injections",
+      "tests/test_numerical_guards.py::test_s_parameter_phase_floor_aliasing_and_frequency_count",
+      "tests/test_numerical_guards.py::test_diffraction_order_at_cutoff_is_refused_and_evanescent_orders_are_flagged",
+      "tests/test_numerical_guards.py::test_farfield_weak_reference_frequency_is_flagged_and_zero_reference_refused",
+      "tests/test_numerical_guards.py::test_mode_decomposition_of_a_plane_without_signal_and_the_modal_reference_refusal",
+      "tests/test_numerical_guards.py::test_allocation_ratio_refuses_zero_intensity_instead_of_dividing",
+      "tests/test_numerical_guards.py::test_differentiable_efficiencies_refuse_a_weak_reference_band"
+    ],
+    "not_yet_covered": [
+      "the mode-network calibration refusals (unsupported incident channel, several incident channels) by injection",
+      "the weak-mode flag of mode_decomposition by injection (only the zero-plane branch is injected)",
+      "a negative absorbed power through a closed box by injection (the lossy slab measures a positive one)"
+    ]
+  },
+  "notes": "Declared at 73203d2 before the run. The differentiable paths keep their whole-call refusals; the numpy records carry per-entry reasons."
+}

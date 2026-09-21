@@ -10,7 +10,7 @@ against gate task G9-04. User-visible changes are listed in [CHANGELOG.md](CHANG
 ## Public API surface
 
 The public API is exactly the set of names exported by `torchfdtd/__init__.py` through
-`__all__`: 195 names at this version, listed below by area and defining module.
+`__all__`: 211 names at this version, listed below by area and defining module.
 Anything else, including every `torchfdtd.<module>` not named here, the `torchfdtd.server`
 routes, the CLI flags and the browser workbench, is an internal interface that may change
 without a deprecation period. The HTTP routes are stable only for the bundled workbench of
@@ -18,7 +18,7 @@ the same version; a client that targets `/api/...` pins the package version.
 
 | Area | Module | Exported names |
 | --- | --- | --- |
-| Project model | `torchfdtd.models` | `Project`, `Region`, `MeshRefinement`, `Structure`, `Source`, `SourceTimeSettings`, `TimeSignal`, `Monitor`, `FieldMonitor`, `Material`, `BoundaryFace`, `Boundaries`, `SpectrumSettings`, `LorentzPole`, `RunControl` |
+| Project model | `torchfdtd.models` | `Project`, `Region`, `MeshRefinement`, `Structure`, `Source`, `SourceTimeSettings`, `TimeSignal`, `Monitor`, `FieldMonitor`, `Material`, `BoundaryFace`, `Boundaries`, `SpectrumSettings`, `LorentzPole`, `RunControl`, `MaterialProvenance` |
 | Mesh | `torchfdtd.mesh` | `freeze_refinements` |
 | Monitors | `torchfdtd.field_monitors` | `normalize_flux` |
 | Forward solver | `torchfdtd.solver` | `Simulation`, `Result` |
@@ -31,7 +31,9 @@ the same version; a client that targets `/api/...` pins the package version.
 | Batches | `torchfdtd.tuning` | `TensorBatchTuning`, `tune_tensor_batch` |
 | FSP writeback | `torchfdtd.fsp_geometry` | `write_fsp_geometry`, `write_fsp_scene` |
 | Materials | `torchfdtd.optical_data` | `OpticalData` |
-| Materials | `torchfdtd.material_fit` | `FitOptions`, `MaterialFitResult`, `fit_material`, `material_fit_report` |
+| Materials | `torchfdtd.material_fit` | `FitOptions`, `MaterialFitResult`, `fit_material`, `material_fit_report`, `MaterialImportResult`, `MaterialBandWarning`, `import_material_table`, `discretization_report`, `fit_band_extrapolation` |
+| Sources | `torchfdtd.source_preview` | `preview_source`, `effective_bandwidth` |
+| Results | `torchfdtd.results` | `ResultRecord`, `guarded_ratio`, `reflection_transmission`, `s_parameters`, `mode_decomposition`, `diffraction_record`, `farfield_record`, `nearzone_record` |
 | Differentiation | `torchfdtd.differentiable` | `AdjointOptions`, `DifferentiableSimulation`, `DifferentiableResult`, `smooth_sphere_epsilon` |
 | Differentiation | `torchfdtd.adjoint_memory` | `estimate_adjoint_memory` |
 | Differentiation | `torchfdtd.adjoint_spectrum` | `DifferentiableSpectrum` |

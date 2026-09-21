@@ -13294,6 +13294,28 @@
    }
   }
  },
+ "incidence": {
+  "normal": {
+   "status": "admitted",
+   "code_path": "torchfdtd/solver.py::source_profile",
+   "description": "No Bloch phase on a transverse axis: k_parallel = 0 at every frequency."
+  },
+  "fixed_k_parallel": {
+   "status": "admitted",
+   "code_path": "torchfdtd/solver.py::source_profile",
+   "description": "Bloch phase phi on a transverse axis of length L: k_parallel = phi / L is fixed and the angle asin(k_parallel / (n k0)) varies across the band; frequencies with k_parallel > n k0 are evanescent."
+  },
+  "fixed_angle": {
+   "status": "rejected",
+   "code_path": "torchfdtd/source_preview.py::preview_source",
+   "exception": "ValueError",
+   "feature_inventory": [
+    "source.angle",
+    "boundary.bfast"
+   ],
+   "message": "Fixed-angle broadband injection is not implemented: a Bloch cell fixes k_parallel, so the incidence angle varies across the band (feature inventory source.angle and boundary.bfast are missing). Preview the fixed-k_parallel source instead."
+  }
+ },
  "related": {
   "feature_checklist": "docs/FEATURE_CHECKLIST.md",
   "tables": "docs/CAPABILITIES.md",

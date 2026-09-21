@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G6-03_integrated_results",
+  "task": "G6-03",
+  "title": "Integrated results: R/T/A with reference bookkeeping, complex S with phase and group delay, mode decomposition, diffraction orders, far-field and near-zone projections through one record naming its units",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2a5d8cc9c4f3b0722f49726a5f5677f0b9",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "torchfdtd.results: ResultRecord, reflection_transmission, s_parameters, mode_decomposition, diffraction_record, farfield_record, nearzone_record",
+    "slab_flux": "tests/test_field_monitors.py::slab_project (2D, 8 x 0.5 um, mesh 0.025 um, 1600 steps, float64, periodic y, n = 1.5 slab 0.2 um thick, reflection monitor at x = -0.8 um, transmission at +0.8 um, 31 frequencies) plus two y-normal faces at y = +-0.2 um closing a box; the same monitor set for the sample, the empty reference and a lossy slab (Lorentz pole 1.2e15 rad/s, 4e29 rad^2/s^2, 8e14 rad/s, epsilon_inf 2.25)",
+    "straight_guide": "tests/test_mode_branches.py::straight_project at 600 steps, aperture ports at x = +-1 um, carriers 1.5, 1.55 and 1.6 um; the fundamental mode of the 2.4 x 0.5 um cell from solve_waveguide_modes",
+    "y_branch": "tests/test_mode_branches.py::branch_project, ybranch_ports, ybranch_sections, ybranch_epsilon at one carrier (1.55 um)",
+    "slab_guide": "benchmarks/mode_injection.py::make_case('slab', steps=600), modal launch and the far plane at 1.55 um",
+    "grating": "tests/test_physics_g3_b.py::grating_project(0.03 um, TE, 20 deg, 1.02 um, duration 150 fs) with and without the ridge: the G3-08 geometry at a coarse mesh for the interface, not the RCWA comparison",
+    "dipole": "tests/test_radiation.py::dipole_faces(10) analytic dipole in n = 1.3 on a closed box; a Rayleigh plane as the incident reference"
+  },
+  "seed": "not applicable",
+  "precision": "float64 (slab, grating, dipole), float32 (mode-port fixtures)",
+  "backend": "cpu",
+  "reference_method": "Fabry-Perot transmission of the n = 1.5 slab; the balance 1 - R - T against the closed-box absorption of the lossy slab; the Yee longitudinal wavenumber (2/h) asin(beta h / 2) of the mode solver's beta for the group delay; the existing public functions (normalize_flux, modal_plane_amplitudes, diffraction_orders, project_farfield, project_nearzone) for the values the records wrap",
+  "observables": [
+    {"name": "R_T_balance", "unit": "dimensionless", "definition": "record['R'], ['T'], ['balance'] of the lossless slab against the reference run"},
+    {"name": "A_vs_balance", "unit": "dimensionless", "definition": "record['A'] from the four box faces of the lossy slab against record['balance']"},
+    {"name": "group_delay_s", "unit": "s", "definition": "record['group_delay_s'][1, 1, 0] of the straight-guide S21 sweep"},
+    {"name": "forward_fraction", "unit": "dimensionless", "definition": "mode_decomposition forward_fraction on the far plane of the slab guide"},
+    {"name": "efficiency_sum", "unit": "dimensionless", "definition": "sum of the valid transmitted and reflected order efficiencies of the coarse grating"},
+    {"name": "units", "unit": "string", "definition": "record.units and record.calibration of every named value"}
+  ],
+  "acceptance": {
+    "slab": "T and R within 0.004 of the Fabry-Perot formula and its complement; |1 - R - T| below 0.004; A not measured with the reason; the lossy slab's A above 0.02 and within 0.01 of the balance",
+    "s_parameters": "the FDTD group delay is positive and within 3 percent of 2 um * d beta_yee / d omega, and between 1.2 and 1.35 times the continuum value at this mesh; the reflection channels have no phase (magnitude floor); the single-carrier Y branch has |S21| = |S31| within 1e-3 and no group delay with the three-frequency reason",
+    "modes": "forward fraction between 0.9 and 1.15; backward fraction below 0.02 or flagged weak",
+    "diffraction": "orders -1 and 0 propagating and valid at 1.02 um and 20 deg with period 1.2 um; orders -2, 1, 2 evanescent with NaN efficiency and the reason; transmitted plus reflected efficiencies within 0.05 of 1 at the coarse mesh; a synthetic order at cutoff refuses",
+    "radiation": "reduced intensity positive on 56 directions; the normalized intensity equals the reduced one over the reference flux magnitude to 1e-10; a zero reference refuses; the near-zone record carries the six fields and the Poynting vector in reduced units",
+    "units": "ratios are 'dimensionless' with calibration 'dimensionless ratio to the matched reference run'; fluxes carry the record's flux_units with calibration 'reduced'; group delay is 's'; positions 'um'",
+    "source_of_limits": "completion_gates.json proposed_thresholds slab_R_T_absolute_error (0.01, tightened to 0.004 by the existing slab test) and lossless_complete_channel_balance_absolute_error (0.01); the group-delay, fraction and coarse-grating budgets are fixture-specific and declared here before the run"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_results.py::test_slab_reflection_transmission_against_the_reference_run",
+      "tests/test_results.py::test_wrong_incident_direction_and_reversed_flux_are_backflow_not_a_sign_fix",
+      "tests/test_results.py::test_absorption_is_measured_from_a_closed_box_and_agrees_with_the_balance",
+      "tests/test_results.py::test_straight_guide_group_delay_matches_the_mode_solver_dispersion",
+      "tests/test_results.py::test_y_branch_single_carrier_s_record",
+      "tests/test_results.py::test_slab_guide_mode_decomposition_on_the_far_plane",
+      "tests/test_results.py::test_grating_diffraction_record_flags_evanescent_orders_and_balances",
+      "tests/test_results.py::test_synthetic_orders_refuse_cutoff_and_name_evanescent_orders",
+      "tests/test_results.py::test_dipole_farfield_and_nearzone_records_name_reduced_units_and_the_reference_guard"
+    ],
+    "not_yet_covered": [
+      "a 3D closed absorption box (the 2D slab uses four faces)",
+      "a multi-frequency mode decomposition (the fixed mode basis is single-carrier)",
+      "a workbench view of the records (the browser keeps its raw flux, normalize-flux, diffraction and far-field dialogs)",
+      "SI-calibrated absolute powers, which the solver does not provide"
+    ]
+  },
+  "notes": "Declared at 73203d2 before the run. The group delay of an FDTD sweep is the Yee grid's, not the continuum's; the case states the expected 27 percent excess at eight cells per guided wavelength instead of hiding it in a tolerance."
+}

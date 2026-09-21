@@ -29,6 +29,17 @@ class LorentzPole(Model):
         return self.resonance_rad_s, self.strength_rad_s_squared, self.damping_rad_s
 
 
+class MaterialProvenance(Model):
+    """Origin of an imported optical table, kept with the fitted material and the project."""
+    source: str = Field(min_length=1, max_length=200)      # publication, database entry or measurement
+    licence: str = Field(default='', max_length=2000)      # licence or usage note of the table
+    raw_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')     # SHA-256 of the raw file or text as imported
+    file_name: str = Field(default='', max_length=260)
+    columns: Literal['nk', 'epsilon'] = 'nk'
+    wavelength_unit: Literal['um', 'nm', 'm'] = 'um'
+    imported: str = Field(default='', max_length=40)       # ISO 8601 date of the import
+
+
 class Material(Model):
     name: str = Field(min_length=1, max_length=100)
     index: float = Field(default=1.5, ge=1, le=20)
@@ -45,6 +56,7 @@ class Material(Model):
     samples: OpticalData | None = None
     fit_band_um: tuple[float,float] | None = None
     fit_dt_s: float | None = Field(default=None,gt=0)
+    provenance: MaterialProvenance | None = None
 
     @model_validator(mode='after')
     def valid_poles(self):

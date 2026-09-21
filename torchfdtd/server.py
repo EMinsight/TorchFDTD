@@ -21,7 +21,7 @@ from .models import Project, Material, demo_project
 from .plan import resolve_plan
 from .solver import Simulation, estimate, hardware
 from .execution_modes import execution_resources, resolve_execution, run_streamed_job, run_tiled_job, scratch_directory
-from .material_fit import OpticalDataRequest, MaterialFitRequest, fit_material, material_fit_report
+from .material_fit import OpticalDataRequest, MaterialFitRequest, fit_material, material_fit_report, discretization_report
 from .optical_data import OpticalData
 
 # Bytes accepted in one request body on every route except the FSP uploads,
@@ -146,10 +146,29 @@ def create_app(result_dir=None):
         try:return OpticalData.from_text(request.text,kind=request.kind,unit=request.unit,reference=request.reference).model_dump()
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
 
+    @app.post('/api/materials/provenance')
+    def optical_provenance(request: OpticalDataRequest):
+        # The provenance hashes the text exactly as submitted (the raw file
+        # when the browser loaded one); the source name is the declared source
+        # or, failing that, the data reference. Without either, no provenance.
+        import hashlib
+        from datetime import date
+        from .models import MaterialProvenance
+        source=(request.source or request.reference).strip()
+        if not source:return None
+        try:OpticalData.from_text(request.text,kind=request.kind,unit=request.unit,reference=request.reference)
+        except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+        return MaterialProvenance(source=source,licence=request.licence,raw_sha256=hashlib.sha256(request.text.encode('utf-8')).hexdigest(),
+                                  file_name=request.file_name,columns=request.kind,wavelength_unit=request.unit,
+                                  imported=date.today().isoformat()).model_dump()
+
     @app.post('/api/materials/fit')
     def fit_optical_data(request: MaterialFitRequest):
-        try:return fit_material(request.data,name=request.name,color=request.color,options=request.options).as_dict()
+        try:
+            result=fit_material(request.data,name=request.name,color=request.color,options=request.options,provenance=request.provenance)
+            discretization=discretization_report(result.material,request.options.dt_s) if request.options.dt_s else None
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+        return dict(result.as_dict(),discretization=discretization)
 
     @app.post('/api/materials/preview')
     def material_preview(material: Material, wavelength_start: float = Query(1.3, gt=0),
@@ -165,19 +184,24 @@ def create_app(result_dir=None):
         if not np.isfinite(epsilon).all() or not np.isfinite(numerical).all():
             raise HTTPException(422, 'Undamped resonance is singular in this range. Add damping or change the range.')
         n, numerical_n = np.sqrt(epsilon), np.sqrt(numerical)
-        try:sampled=material_fit_report(material,dt_s=dt_fs*1e-15) if material.samples else None
+        try:
+            sampled=material_fit_report(material,dt_s=dt_fs*1e-15) if material.samples else None
+            # The time-discretization n/k error on the fitted band (else the sample band) at the current timestep.
+            discretization=discretization_report(material,dt_fs*1e-15) if dt_fs and material.samples else None
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
         return dict(wavelength_um=wavelength.tolist(), epsilon_real=epsilon.real.tolist(), epsilon_imag=epsilon.imag.tolist(),
                     n=n.real.tolist(), k=n.imag.tolist(), numerical_n=numerical_n.real.tolist(), numerical_k=numerical_n.imag.tolist(),
-                    samples=sampled,fit_dt_s=material.fit_dt_s)
+                    samples=sampled,fit_dt_s=material.fit_dt_s,fit_band_um=material.fit_band_um,discretization=discretization,
+                    provenance=material.provenance.model_dump() if material.provenance else None)
 
     @app.post('/api/sources/{source_id}/preview')
-    def source_preview(source_id: str, project: Project):
+    def source_preview(source_id: str, project: Project, incidence: str | None = Query(None)):
         from .source_preview import preview_source
         try:
-            return preview_source(project, source_id)
+            return preview_source(project, source_id, incidence=incidence)
         except ValueError as exc:
-            raise HTTPException(404, str(exc)) from exc
+            # A missing source is 404; a refused incidence definition (registry message) is 422.
+            raise HTTPException(404 if 'not found' in str(exc) else 422, str(exc)) from exc
 
     def work(key, project):
         job = jobs[key]
@@ -274,7 +298,8 @@ def create_app(result_dir=None):
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
         return dict(frequency_thz=(result['frequency_hz']*1e-12).tolist(),
                     wavelength_um=(299792458/result['frequency_hz']*1e6).tolist(),valid=result['valid'].tolist(),
-                    ratio=[float(v) if ok else None for v,ok in zip(result['ratio'],result['valid'])],subtract_incident=subtract_incident)
+                    ratio=[float(v) if ok else None for v,ok in zip(result['ratio'],result['valid'])],subtract_incident=subtract_incident,
+                    reasons=result['reasons'].tolist())
 
     @app.get('/api/jobs/{key}/field-monitors/{monitor}')
     def frequency_field(key:str,monitor:str,frequency_index:int=Query(0,ge=0),component:str='Ez'):

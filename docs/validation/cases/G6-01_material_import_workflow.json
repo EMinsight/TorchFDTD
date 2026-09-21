@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G6-01_material_import_workflow",
+  "task": "G6-01",
+  "title": "Material import workflow: raw table hash and provenance, passive fit over a declared band, ADE n/k discretization error, extrapolation warning, project persistence",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2a5d8cc9c4f3b0722f49726a5f5677f0b9",
+  "declared_before_run": true,
+  "fixture": {
+    "function": "torchfdtd.material_fit.import_material_table (fit_material, discretization_report, fit_band_extrapolation, MaterialProvenance)",
+    "public_table": "tests/fixtures/materials/sio2_sellmeier_malitson1965.csv: 81 wavelengths from 0.4 to 2.0 um of n from the Sellmeier equation of Malitson, J. Opt. Soc. Am. 55, 1205 (1965) stated in the file header, k = 0",
+    "synthetic_table": "authored two-pole Lorentz permittivity (epsilon_inf 2.3; poles (1.7e15 rad/s, 4e30 rad^2/s^2, 2e14 rad/s) and (3e15, 2e30, 5e14)) at 61 wavelengths from 0.8 to 2.0 um, written as wavelength_nm or wavelength_um, epsilon_real, epsilon_imag text",
+    "fit_options": "max_poles 3, tolerance 1e-4 (SiO2); max_poles 2 or 3, tolerance 1e-6 or 1e-4, include_drude False (Lorentz); ADE-target fit at dt 4e-17 s on 0.9 to 1.9 um for the persistence test",
+    "discretization": "dt 5e-17 s and 2.5e-17 s over 0.4 to 2.0 um, 201 samples",
+    "simulation_bands_um": [[0.5, 1.6], [0.3, 1.0], [2.5, 2.5], [0.35, 0.8]],
+    "server_routes": ["/api/materials/data", "/api/materials/provenance", "/api/materials/fit", "/api/materials/preview", "/api/validate"],
+    "workbench": "tests/ui/material-provenance.spec.js: import the SiO2 table with source and licence, fit, use, read the provenance and band panel, move the source to 2.5 um, save the project"
+  },
+  "seed": 0,
+  "precision": "float64 (numpy fitter)",
+  "backend": "cpu",
+  "reference_method": "the Sellmeier formula itself at held-out wavelengths; hashlib.sha256 of the raw bytes; an independent evaluation of the fitted poles with omega -> (2/dt) tan(omega dt/2) for the discretization error; the second-order scaling of that error with dt",
+  "observables": [
+    {"name": "raw_sha256", "unit": "hex", "definition": "MaterialProvenance.raw_sha256 against hashlib.sha256 of the file bytes or the submitted text"},
+    {"name": "fit_normalized_rms", "unit": "dimensionless", "definition": "report['analytic']['normalized_rms'] over the fitted band"},
+    {"name": "held_out_n_error", "unit": "dimensionless", "definition": "max |Re sqrt(eps_fit) - n_Sellmeier| at 97 wavelengths not in the table"},
+    {"name": "discretization_n_error", "unit": "dimensionless", "definition": "discretization_report max_abs_n_error at dt and at dt/2, and their ratio"},
+    {"name": "extrapolation_warning", "unit": "text", "definition": "MaterialBandWarning message and its presence in estimate(project)['warnings'] and /api/validate"},
+    {"name": "persisted_fields", "unit": "equality", "definition": "provenance, fit_band_um, fit_dt_s, samples and poles after Project.save/load"}
+  ],
+  "acceptance": {
+    "provenance": "raw_sha256 equals the SHA-256 of the raw bytes; source, licence, file name, columns, unit and date are kept on the Material and in the project JSON",
+    "fit": "SiO2 converges within 3 poles at tolerance 1e-4; held-out n error below 2e-4 and |k| below 1e-6; the Lorentz table converges within 2 poles at 1e-6 with permittivity error below 1e-5",
+    "discretization": "max_abs_n_error equals the independent bilinear evaluation to 1e-12 relative; error ratio dt over dt/2 between 3.8 and 4.2; k error below 1e-8 for the lossless table",
+    "extrapolation": "a band inside the fitted band gives no warning; a band outside raises MaterialBandWarning naming both bands and the material, and the same text is in the estimate and validation warnings",
+    "failure_is_explicit": "an unconverged fit is returned with converged False and require_tolerance raises",
+    "source_of_limits": "G6-01 specification; the fit tolerance and error limits are fixture-specific budgets declared here before the run"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_material_workflow.py::test_fixture_table_is_the_stated_sellmeier_formula",
+      "tests/test_material_workflow.py::test_public_sio2_table_records_provenance_and_fits_within_the_band",
+      "tests/test_material_workflow.py::test_discretization_error_is_the_bilinear_ade_response_and_second_order_in_dt",
+      "tests/test_material_workflow.py::test_extrapolation_warning_is_raised_kept_and_shared_with_the_estimate",
+      "tests/test_material_workflow.py::test_synthetic_epsilon_text_table_hashes_the_text_and_fits",
+      "tests/test_material_workflow.py::test_project_json_keeps_provenance_fit_band_and_timestep",
+      "tests/test_material_workflow.py::test_server_routes_surface_provenance_discretization_and_extrapolation",
+      "tests/test_material_workflow.py::test_fit_material_accepts_and_keeps_provenance_without_changing_the_fit",
+      "tests/ui/material-provenance.spec.js (Playwright, recorded as an artifact)"
+    ],
+    "not_yet_covered": [
+      "a measured (non-formula) public table with noise and its licence text",
+      "the spectral tails of a pulse beyond the declared source range (the band check uses the declared range, as the estimate does)",
+      "FSP writeback of the provenance (native FSP export of fitted materials remains unsupported)"
+    ]
+  },
+  "notes": "Declared at 73203d2 before the run; the workflow, the fixture table and the tests land in the same commit as this case."
+}
