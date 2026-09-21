@@ -25,7 +25,7 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 | Browser CAD·결과 | 대응하는 공식 browser CAD workflow는 확인되지 않음 | Tree, 여러 CAD view, 속성, 결과, Python export | 사용성 차별점. 새 물리 기능의 UI와 전체 작업 흐름 검증은 계속 필요 |
 | 독립 FSP 읽기/쓰기 | 공식 대응 기능 확인되지 않음 | 문서화한 layout subset, 독립 import/writeback | 제한 범위의 상호운용성 차별점. 전체 FSP 호환 아님 |
 | 같은 GPU batch | JAX composition 가능. 동일 workload 미측정 | CUDA tensor batch·cohort grouping·선택, 32³ B=16의 자체 순차 대비 2.40배 | FDTDX 대비 속도 우위 미확인. 동일 물리·출력·준비비용을 포함한 batch/adjoint 측정 필요 |
-| VRAM 초과 streaming | 공개 JAX 경로에서 단일 GPU CPU/disk 공간 streaming 확인되지 않음. multi-GPU는 별도 지원 | DRAM/file 공간·시간 tile, 비동기 staging, 재료·밀도 직접 생성, 기존 54 GiB 복소 FP64 짧은 용량 검증 | 차별 기능. 실제 FP32 48 GB 초과 작업·장시간·회복·전체 메모리 계측이 남음 |
+| VRAM 초과 streaming | 공개 JAX 경로에서 단일 GPU CPU/disk 공간 streaming 확인되지 않음. multi-GPU는 별도 지원 | DRAM/file 공간·시간 tile, 비동기 staging, 재료·밀도 직접 생성, 기존 복소 FP64 및 실제 54 GiB E/H 실수 FP32의 10-step forward/VJP 완료, FP32 최대 Torch GPU2.23 GB | 차별 기능. 짧은 FP32 용량 gate 통과. 장시간·회복·전체 메모리 계측·성능은 남음 |
 | 비균일 mesh | Uniform/QuasiUniform/Rectilinear | Graded/rectilinear, 독립 dx/dy/dz, node API/UI | 기능 동등 범주. 같은 오차에서 속도·메모리 우위는 별도 측정 |
 | 분산 재료 | ADE. 경로별 제한 확인 필요 | 다중 Drude/Lorentz·passive fit·resident/streamed ADE adjoint | 지원 모델 범위의 동등 후보. 이방성 ADE·응용 정확도·외부 실측은 남음 |
 | GDS | Layer stack, explicit port contracts | Layer/datatype·Z·재료 stack, 단위·계층·array·PATH, 제한 export, 명시적 full-cell TEXT 두 port→실제 ModeNetwork·native 재료 샘플링·S/VJP | 기본 geometry와 제한 port 연결 구현. 좁은 aperture·일반 hole/branch·자동 포트 추론은 남음 |
@@ -38,6 +38,15 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 | 경계 | PML, Bloch/periodic, PEC/PMC 및 symmetry reduction | CPML, periodic/Bloch, PEC/electric antisymmetry. Closed PMC native Project·CLI·browser·endpoint NPZ. 별도 uniform PMC+CPML CPU/CUDA API와 보조 상태·재료·파형 adjoint, 전체/절반 영역 일치와 checkpoint 절반 절감 | **부분**. 제한된 공통 PML profile의 혼합 경계를 Project·CLI·browser에 연결. 일반 profile·흡수 정확도·속도, ADE·streaming·tensor batch 확대가 남음 |
 
 ## 이번 구현의 근거
+
+- [실수 FP32 48GB 초과 검증](BEYOND_VRAM_FP32.md): 24.16억 셀, E/H54GiB에서
+  forward와 전체 epsilon VJP가 완료됐다. 최대 Torch GPU2.23GB, gradient 상대L2
+  오차9.12e-8이며 58.41분의10-step 용량 검증이다. 장시간·속도 우위는 별도다.
+
+- [필드 할당 없는 streamed 정책 계획](STREAMED_WORK_PLANNING.md): 실제 CPML row와 halo,
+  부분 시간 블록, checkpoint 재계산 및 파일 reduction을 정수식으로 계산한다.
+  작은 CUDA 사례에서 시간 깊이 2→4의 논리 파일 I/O가 45.16% 줄고 출력/gradient가
+  일치했다. 예측치와 실행 counter도 같다. 대형 문제의 속도 개선이나 최적 정책 보장은 아니다.
 
 - [여러 소스 파형 미분](DIFFERENTIABLE_SOURCES.md): 고정 위치·profile의 soft E/H 소스에서
   진폭·위상·주파수·delay·폭을 Torch 파형에 연결한다. 실제 FP32/complex64 CUDA의
@@ -162,8 +171,9 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 
 ## 다음 구현 순서
 
-1. 실제 FP32 48 GB 초과 forward/backward 용량 검증을 완료하고 장시간·복구·비용을
-   확인한다. CR 응용 최적화와 CR 정밀 재계산은 현재 실행 범위에서 제외한다.
+1. 실제 FP32 48 GB 초과 forward/backward의 짧은 10-step 용량 gate는
+   [완료했다](BEYOND_VRAM_FP32.md). 남은 것은 장시간 실행, 중단 후 복구,
+   성능과 전체 메모리 계측이다. CR 응용 최적화와 CR 정밀 재계산은 현재 실행 범위에서 제외한다.
    기존 CR 기록은 보존하며 일반 inverse design과 solver gradient 검증은 계속한다.
 2. CPU·CUDA·브라우저에서 확인한 PMC+CPML native dispatch의 흡수 정확도를 검증한 뒤,
    필요한 profile·ADE·streaming·batch 조합으로 확장한다.

@@ -2585,7 +2585,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "n/a",
-      "scope": "제한된 uniform 3D FP32 periodic ReversibleSimulation의 terminal-state 복원·메모리 사전 검사·drift 거부·전체 재료 VJP를 CPU/CUDA 512-step까지 검증. 별도 ReversibleCPMLSimulation은 periodic/Bloch x/y·z CPML·고정 외부 재료에서 FP32 scalar/diagonal 재료와 실수/complex64 장의 경계 이력·전체 CPML adjoint로 내부 VJP를 계산. CPU 2048-step baseline과 CUDA device/CPU 저장, 2-slot 비동기 pinned CPU trace, z soft plane source 및 online 6-field plane spectrum을 제한된 public workflow에서 검증. CUDA point 48-step과 plane 32-step 검증은 일반 CPML·ADE·SSD·48GB 초과·성능 동등성 근거가 아님. 고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph와 ADE 미분 지원. 공유 메모리 예산의 순차 case replay로 서로 다른 격자·관측·재료를 하나의 목적함수에 연결. PeriodicLayerResponse가 밀도→편광 합성→검출 응답을 같은 예산의 resident/DRAM/파일 및 명시적 recorded CPML 실행에 연결하며 source graph를 하나씩 재계산. Recorded 경로의 실제 160-step 사입사 CPU/CUDA 밀도 VJP와 브라우저 Adam 1회, 고정 배경·Yee 지지영역·cache 분리·전송 포함 예산을 검증. 512³ resident 및 54GiB 상태의 짧은 용량/VJP 검증 완료. 장시간 응용, 동시 adjoint microbatch, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음. 고정 단일 파장 주기 밀도 설계 UI에서 메모리 사전 확인·자동/명시적 실행·Adam·Python/JSON 내보내기를 지원. 일반 CAD 변환·다파장 UI·optimizer 재시작은 후속.",
+      "scope": "고정 profile의 resident soft E/H 점·면 소스 파형을 재료와 함께 미분. 실제 FP32/complex64 CUDA 점·스펙트럼·검출면 9개 검증과 기본 파형 일치. Source 위치·profile·eigenmode·ADE/streamed 파형은 미지원. 제한된 uniform 3D FP32 periodic ReversibleSimulation의 terminal-state 복원·메모리 사전 검사·drift 거부·전체 재료 VJP를 CPU/CUDA 512-step까지 검증. 별도 ReversibleCPMLSimulation은 periodic/Bloch x/y·z CPML·고정 외부 재료에서 FP32 scalar/diagonal 재료와 실수/complex64 장의 경계 이력·전체 CPML adjoint로 내부 VJP를 계산. CPU 2048-step baseline과 CUDA device/CPU 저장, 2-slot 비동기 pinned CPU trace, z soft plane source 및 online 6-field plane spectrum을 제한된 public workflow에서 검증. CUDA point 48-step과 plane 32-step 검증은 일반 CPML·ADE·SSD·48GB 초과·성능 동등성 근거가 아님. 고정 실수/복소 Bloch의 diagonal epsilon→Yee/CPML→점·주파수·고정 plane 관측→Torch backward. Fused transpose·제한 checkpoint·공간 slab·형상 graph와 ADE 미분 지원. 공유 메모리 예산의 순차 case replay로 서로 다른 격자·관측·재료를 하나의 목적함수에 연결. PeriodicLayerResponse가 밀도→편광 합성→검출 응답을 같은 예산의 resident/DRAM/파일 및 명시적 recorded CPML 실행에 연결하며 source graph를 하나씩 재계산. Recorded 경로의 실제 160-step 사입사 CPU/CUDA 밀도 VJP와 브라우저 Adam 1회, 고정 배경·Yee 지지영역·cache 분리·전송 포함 예산을 검증. 512³ resident 및 54GiB 상태의 짧은 용량/VJP 검증 완료. 장시간 응용, 동시 adjoint microbatch, TFSF·mode port·coupled subpixel 및 물리 shape-gradient 수렴은 남음. 고정 단일 파장 주기 밀도 설계 UI에서 메모리 사전 확인·자동/명시적 실행·Adam·Python/JSON 내보내기를 지원. 일반 CAD 변환·다파장 UI·optimizer 재시작은 후속.",
       "evidence": [
         "torchfdtd/reversible_cpml.py",
         "torchfdtd/reversible_trace.py",
@@ -2610,7 +2610,11 @@
         "frontend/src/inverse_design.js",
         "tests/test_periodic_design.py",
         "tests/ui/inverse-design.spec.js",
-        "docs/PERIODIC_DESIGN_UI.md"
+        "docs/PERIODIC_DESIGN_UI.md",
+        "torchfdtd/source_adjoint.py",
+        "tests/test_source_adjoint.py",
+        "tests/test_source_adjoint_cuda.py",
+        "docs/DIFFERENTIABLE_SOURCES.md"
       ],
       "reference": "",
       "priority": 0,
@@ -2630,7 +2634,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "n/a",
-      "scope": "명시적인 tier별 slot, binomial 재계산, 무손실 state 저장과 byte 한도, 비동기 checkpoint staging 및 혼합 tier 구현. 별도 slab API에서 DRAM/파일 공간 backing·비동기 전송 지원. Resident/streamed 후보의 실측 선택과 여러 case의 출력·gradient·활성 solver 공동 예산 추가. 전체 host RSS·OS cache 한도, 장시간 응용에서의 성능 선택 검증은 미완료. 고정 단일 파장 주기 밀도 설계 UI에서 메모리 사전 확인·자동/명시적 실행·Adam·Python/JSON 내보내기를 지원. 일반 CAD 변환·다파장 UI·optimizer 재시작은 후속.",
+      "scope": "필드·epsilon·gradient 할당 없는 streamed work planner가 부분 블록·CPML·halo·재계산·논리 파일 traffic과 후보 예산을 비교. 선택은 명시적 I/O 또는 cell-work 기준이며 실행 시간 최적성은 주장하지 않음. 명시적인 tier별 slot, binomial 재계산, 무손실 state 저장과 byte 한도, 비동기 checkpoint staging 및 혼합 tier 구현. 별도 slab API에서 DRAM/파일 공간 backing·비동기 전송 지원. Resident/streamed 후보의 실측 선택과 여러 case의 출력·gradient·활성 solver 공동 예산 추가. 전체 host RSS·OS cache 한도, 장시간 응용에서의 성능 선택 검증은 미완료. 고정 단일 파장 주기 밀도 설계 UI에서 메모리 사전 확인·자동/명시적 실행·Adam·Python/JSON 내보내기를 지원. 일반 CAD 변환·다파장 UI·optimizer 재시작은 후속.",
       "evidence": [
         "torchfdtd/differentiable.py",
         "tests/test_differentiable.py",
@@ -2646,7 +2650,12 @@
         "frontend/src/inverse_design.js",
         "tests/test_periodic_design.py",
         "tests/ui/inverse-design.spec.js",
-        "docs/PERIODIC_DESIGN_UI.md"
+        "docs/PERIODIC_DESIGN_UI.md",
+        "torchfdtd/streamed_planning.py",
+        "torchfdtd/streamed_work.py",
+        "tests/test_streamed_planning.py",
+        "tests/test_streamed_work.py",
+        "docs/STREAMED_WORK_PLANNING.md"
       ],
       "reference": "",
       "priority": 0,
@@ -2666,7 +2675,7 @@
       "native": "partial",
       "ui": "partial",
       "fsp": "n/a",
-      "scope": "실험적 실수/복소 Bloch slab·causal halo transpose·DRAM/파일 backing·비동기 staging·tile/K 실측 tuning 구현. 54GiB E/H와 별도 54GiB E/H+ADE P/Q의 10-step forward/gradient 검증 완료. 점 스펙트럼·고정 검출면의 resident/streamed 통합 선택과 기준 gradient 캐시 한도 지원. 용량과 속도는 별도이며 장시간 응용·전체 메모리 계측·동시 microbatch 공동 튜닝은 미완료. 고정 단일 파장 주기 밀도 설계 UI에서 메모리 사전 확인·자동/명시적 실행·Adam·Python/JSON 내보내기를 지원. 일반 CAD 변환·다파장 UI·optimizer 재시작은 후속.",
+      "scope": "메타데이터 planner가 더 깊은 시간 블록과 좁은 slab을 포함한 후보를 사전 비교. 64x32x32 FP32 CUDA 10-step의 K2→K4에서 논리 파일 I/O 45.16% 감소, 출력 일치와 gradient 상대차7.30e-9. 대규모 속도 검증 아님. 실험적 실수/복소 Bloch slab·causal halo transpose·DRAM/파일 backing·비동기 staging·tile/K 실측 tuning 구현. 54GiB E/H와 별도 54GiB E/H+ADE P/Q의 10-step forward/gradient 검증 완료. 점 스펙트럼·고정 검출면의 resident/streamed 통합 선택과 기준 gradient 캐시 한도 지원. 용량과 속도는 별도이며 장시간 응용·전체 메모리 계측·동시 microbatch 공동 튜닝은 미완료. 고정 단일 파장 주기 밀도 설계 UI에서 메모리 사전 확인·자동/명시적 실행·Adam·Python/JSON 내보내기를 지원. 일반 CAD 변환·다파장 UI·optimizer 재시작은 후속.",
       "evidence": [
         "torchfdtd/streamed.py",
         "torchfdtd/streamed_dispersive.py",
@@ -2685,7 +2694,11 @@
         "frontend/src/inverse_design.js",
         "tests/test_periodic_design.py",
         "tests/ui/inverse-design.spec.js",
-        "docs/PERIODIC_DESIGN_UI.md"
+        "docs/PERIODIC_DESIGN_UI.md",
+        "torchfdtd/streamed_work.py",
+        "torchfdtd/streamed_planning.py",
+        "benchmarks/streamed_work_validation.py",
+        "docs/STREAMED_WORK_PLANNING.md"
       ],
       "reference": "",
       "priority": 0,

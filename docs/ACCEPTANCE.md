@@ -1,5 +1,44 @@
 # Current acceptance record
 
+## Real FP32 state larger than physical VRAM, 21 September 2026
+
+Frozen revision `61326d2` completed 1152 x 1024 x 2048 cells, ten real-FP32
+forward steps and a full dense epsilon VJP on RTX 5880. E/H alone is 54 GiB,
+above 47.9878 GiB reported physical VRAM. Peak Torch CUDA allocation is
+2,225,672,704 bytes and sampled process RSS is 31,949,930,496 bytes. Total
+timed wall cost is 3,504.525 seconds. Signal error is zero, gradient crop
+relative L2 error is 9.12e-8, norm error is 7.90e-8 and the gradient outside
+the causal cone is zero. All gates pass the declared 2e-4 threshold.
+
+Both file stores closed. All 80 runtime source hashes match the frozen Git
+revision, and original evidence bytes are preserved. This is short-run capacity
+with buffered disk backing, not sustained speed, physical application convergence
+or total-system memory proof. [Measurement and timing scope](BEYOND_VRAM_FP32.md).
+
+## Metadata-only streamed work planning, 21 September 2026
+
+The structural planner counts actual slab halo coverage, partial final blocks,
+binomial replay and CPML state-file reduction traffic. It uses metadata and
+existing live reservations, including explicit planning-time RAM headroom and
+disk free-space floors. Candidates include larger temporal depths and narrower
+slabs. Selection is opt-in by logical I/O or cell-work, with no timing prediction.
+
+Five independent CPU file-bank cases exactly match observed per-phase bytes,
+replay counts, tile visits and cell-work, including asymmetric CPML, repeated
+Bloch/periodic winds and a one-block 2D PEC/PML case. Six planner tests cover
+admission, immutable reports and no field allocation. The actual CUDA check
+uses 64 x 32 x 32 FP32 cells for ten steps. Selected depth four reduces logical
+file bytes from 117,833,728 to 64,618,496 (45.16%) while increasing counted cell
+work. Histories are identical and the material VJP differs by 7.30e-9 relative
+L2. Every predicted file counter matches execution.
+
+A separate 1152 x 1024 x 2048 metadata-only estimate creates no field banks and
+performs no device/storage admission. Its hypothetical traffic reduction is
+not a measured improvement of the independent frozen RTX 5880 capacity run.
+[API and exclusions](STREAMED_WORK_PLANNING.md),
+[machine evidence](validation/streamed_work_planning.json). Installed wheel and
+full CI verification are pending this planner integration.
+
 ## Resident soft-source waveform adjoints, 21 September 2026
 
 Multiple electric/magnetic temporal terms now share the material checkpoint

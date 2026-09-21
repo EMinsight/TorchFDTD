@@ -1,5 +1,8 @@
 # Physical VRAM capacity validation
 
+The later [real FP32 capacity gate](BEYOND_VRAM_FP32.md) is complete. The
+earlier frozen measurements below retain their original precision and scope.
+
 The author clarified that the target is a problem exceeding the RTX 5880's
 physical memory, not an artificial small allocation budget. The earlier
 256 x 96 x 96 measurements validate correctness and overhead only. They do not

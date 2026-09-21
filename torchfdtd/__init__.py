@@ -155,3 +155,7 @@ __all__ += ["StoredRadiationBox", "native_radiation_box", "load_native_radiation
 from .source_adjoint import SourceWaveformSimulation, SourceWaveformPlaneSimulation
 from .source_parameters import gaussian_waveform
 __all__ += ["SourceWaveformSimulation", "SourceWaveformPlaneSimulation", "gaussian_waveform"]
+
+from .streamed_work import estimate_streamed_work
+from .streamed_planning import StreamedWorkPlan, plan_streamed_work
+__all__ += ["estimate_streamed_work", "StreamedWorkPlan", "plan_streamed_work"]
