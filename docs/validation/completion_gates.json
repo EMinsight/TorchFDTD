@@ -432,13 +432,15 @@
           ],
           "planned_test_commands": [],
           "actual_test_commands": [
-            "python -m pytest -q -p no:cacheprovider tests/test_readme_measurements.py"
+            "python -m pytest -q -p no:cacheprovider tests/test_readme_measurements.py",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_readme_measurements.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G1-06.xml"
           ],
           "required_tests": [
             "tests/test_readme_measurements.py"
           ],
           "evidence": [
-            "20260921T141006Z-g1-06-70005cd1"
+            "20260921T141006Z-g1-06-70005cd1",
+            "20260921T184824Z-g1-06-7d8dff9d"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -892,7 +894,8 @@
             "tests/test_pmc_general.py::test_cuda_adjoint_matches_autograd_and_central_differences"
           ],
           "evidence": [
-            "20260921T164848Z-g3-06-3343e41b"
+            "20260921T164848Z-g3-06-3343e41b",
+            "20260921T185058Z-g3-06-8e377c95"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -1256,7 +1259,8 @@
             "tests/test_reversible_cuda.py::test_native_reversible_cuda_gradient_memory_and_owned_states"
           ],
           "evidence": [
-            "20260921T165025Z-g3-14-bfa848be"
+            "20260921T165025Z-g3-14-bfa848be",
+            "20260921T185333Z-g3-14-1bd80f8e"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -1314,7 +1318,8 @@
             "tests/test_cr_directional_check.py::test_direction_sweep_detects_incorrect_gradient_and_taylor_order"
           ],
           "evidence": [
-            "20260921T165032Z-g3-15-12732135"
+            "20260921T165032Z-g3-15-12732135",
+            "20260921T185512Z-g3-15-26591fff"
           ],
           "blocker": null,
           "scope_change_approval": null,
