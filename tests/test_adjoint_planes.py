@@ -229,3 +229,43 @@ def test_mutated_fixed_configuration_is_rejected(internal):
     target.sources[0].amplitude=2
     with pytest.raises(ValueError,match='Rebuild'):
         model(torch.ones(p.region.shape,dtype=torch.float64),[1e12])
+
+
+def graded_scene(**changes):
+    from torchfdtd import Project,Region,Source,SpectrumSettings
+    region=dict(dimension='3d',size=(3.2,3.2,3.2),mesh=.1,mesh_type='graded',material_sampling='yee',
+                mesh_max=.3,mesh_ppw=6,pml_cells=3,steps=10,backend='cpu',precision='float64')
+    return Project(region=Region(**(region|changes)),sources=[Source(id='source',center=(-.4,0,0),wavelength=3)],
+        monitors=[FieldMonitor(id='plane',center=(.4,0,0),size=(0,1,1),
+            spectrum=SpectrumSettings(sampling='custom',custom_frequencies_hz=[1e14],apodization='none'))])
+
+
+def test_internal_solver_keeps_the_auto_refined_plane_mesh(monkeypatch):
+    p=graded_scene()
+    assert p.region.shape==(30,30,30)
+    model=DifferentiablePlaneSimulation(p)
+    assert model.model.project.region.shape==p.region.shape
+    for planned,solved in zip(p.region.mesh_nodes,model.model.project.region.mesh_nodes):
+        np.testing.assert_array_equal(solved,planned)
+    assert model.project.model_dump()==p.model_dump()
+    # Without frozen refinements the point monitor re-meshes the solver.
+    monkeypatch.setattr('torchfdtd.adjoint_planes.freeze_refinements',lambda project:project.model_copy(deep=True))
+    with pytest.raises(ValueError,match='plane plan on the x axis'):DifferentiablePlaneSimulation(p)
+
+
+def test_plane_signature_tracks_realized_mesh_not_placement_or_structure():
+    from torchfdtd import Structure,freeze_refinements
+    from torchfdtd.adjoint_planes import _plane_signature
+    p=graded_scene();p.structures=[Structure(center=(.9,0,0),size=(.2,.2,.2))]
+    q=graded_scene();q.structures=[Structure(center=(.9,0,0),size=(.2,2,.2))]
+    p=type(p).model_validate(p.model_dump());q=type(q).model_validate(q.model_dump())
+    assert p.region.model_dump()==q.region.model_dump()
+    assert (p.region.shape,q.region.shape)==((31,30,30),(31,32,30))
+    assert _plane_signature(p)!=_plane_signature(q)
+    placed=graded_scene(backend='cuda',cuda_kernel='fused',cuda_monitor_kernel='fused',memory_mode='streamed')
+    placed.structures=list(p.structures);placed=type(p).model_validate(placed.model_dump())
+    assert _plane_signature(placed)==_plane_signature(p)
+    frozen=freeze_refinements(p);air=frozen.model_copy(deep=True);air.structures=[]
+    air=type(p).model_validate(air.model_dump())
+    for a,b in zip(frozen.region.mesh_nodes,air.region.mesh_nodes):np.testing.assert_array_equal(a,b)
+    assert _plane_signature(air)==_plane_signature(frozen)

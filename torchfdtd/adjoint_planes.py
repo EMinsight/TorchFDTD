@@ -7,6 +7,7 @@ import torch
 from .adjoint_spectrum import SpectralObservation
 from .differentiable import DifferentiableSimulation
 from .field_monitors import plane_plan, interpolation_map
+from .mesh import freeze_refinements
 from .models import Project, Monitor
 from .streamed import StreamedSimulation, StreamedAdjointOptions
 
@@ -18,7 +19,10 @@ def _plane_signature(project):
     region=project.region.model_dump(mode='json')
     for key in ('memory_mode','backend','cuda_kernel','cuda_monitor_kernel'):
         region.pop(key,None)
-    payload=dict(region=region,sources=[project.resolved_source(s).model_dump(mode='json') for s in project.sources])
+    # Automatic refinement boxes are private state that model_dump omits, so
+    # the realized nodes identify the mesh, as in the Simulation signature.
+    payload=dict(region=region,sources=[project.resolved_source(s).model_dump(mode='json') for s in project.sources],
+                 nodes=[a.tolist() for a in project.region.mesh_nodes])
     return hashlib.sha256(json.dumps(payload,sort_keys=True).encode()).hexdigest()
 
 
@@ -147,9 +151,15 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         self.components=tuple(o[0] for o in observers)
         self.signature=_plane_signature(self.project)
         # Indexed internal observations avoid thousands of UI point objects.
-        internal=self.project.model_copy(deep=True)
+        # Freeze automatic refinements first: replacing the planes by a point
+        # monitor must not re-mesh the internal solver away from the plans.
+        region=self.project.region
+        internal=freeze_refinements(self.project) if region.mesh_type=='graded' and region.mesh_auto_refine else self.project.model_copy(deep=True)
         internal.monitors=[Monitor()]
         self.model=getattr(self, '_streamed_model_type', StreamedSimulation)(internal,options) if isinstance(options,StreamedAdjointOptions) else self._resident_model_type(internal,options)
+        for axis,(planned,solved) in enumerate(zip(region.mesh_nodes,self.model.project.region.mesh_nodes)):
+            if not np.array_equal(planned,solved):
+                raise ValueError(f'Internal solver mesh differs from the plane plan on the {"xyz"[axis]} axis.')
         self._project_snapshot=self.project.model_dump()
         self._internal_snapshot=self.model.project.model_dump()
 
