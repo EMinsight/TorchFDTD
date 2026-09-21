@@ -1473,15 +1473,25 @@
           "title": "local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다",
           "specification": "local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다. 외부 노출/remote execution은 별도 인증·권한 계약 없이 허용하지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
-            "torchfdtd/server.py"
+            "torchfdtd/server.py",
+            "torchfdtd/cli.py",
+            "torchfdtd/gds_service.py",
+            "torchfdtd/fsp_service.py",
+            "docs/SECURITY.md",
+            "tests/test_server_security.py",
+            "docs/validation/cases/G9-01.json"
           ],
-          "planned_test_commands": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_server_security.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-01.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_server_security.py"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
