@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-01_uniform_propagation",
+  "task": "G3-01",
+  "title": "Plane-wave propagation in vacuum and in a uniform n=1.5 dielectric, 2D and 3D, against the exact Yee dispersion relation and the continuum",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "engine": "torchfdtd.boundaries.YeeGrid update_E/update_H (part A) and torchfdtd.Simulation (part B); staircase, uniform mesh, courant_factor 0.99 (c dt/h = 0.99/sqrt(2) in 2D, 0.99/sqrt(3) in 3D)",
+    "media": [
+      {
+        "name": "vacuum",
+        "index": 1.0
+      },
+      {
+        "name": "dielectric",
+        "index": 1.5,
+        "realised_as": "region.background_index=1.5 (part B) and inverse_permittivity=1/2.25 (part A)"
+      }
+    ],
+    "part_A_eigenmode": {
+      "description": "all-periodic cell, E initialised to the real discrete plane wave with amplitude vector orthogonal to the discrete wavevector K_a = 2 sin(k_a h/2)/h, H = 0; cos(omega dt) measured from the three-term recurrence E[n+1]+E[n-1] = 2 cos(omega dt) E[n] over every cell after 3 steps; polarization purity measured after 40 steps",
+      "mesh_sweep": [
+        {
+          "cells_per_wavelength": 10,
+          "cell_counts_2d": [
+            10,
+            6,
+            1
+          ],
+          "cell_counts_3d": [
+            10,
+            6,
+            6
+          ],
+          "wavevector": "(2 pi / (N h), 0, 0): one wavelength across the periodic x axis"
+        },
+        {
+          "cells_per_wavelength": 20,
+          "cell_counts_2d": [
+            20,
+            6,
+            1
+          ],
+          "cell_counts_3d": [
+            20,
+            6,
+            6
+          ],
+          "wavevector": "(2 pi / (N h), 0, 0): one wavelength across the periodic x axis"
+        },
+        {
+          "cells_per_wavelength": 40,
+          "cell_counts_2d": [
+            40,
+            6,
+            1
+          ],
+          "cell_counts_3d": [
+            40,
+            6,
+            6
+          ],
+          "wavevector": "(2 pi / (N h), 0, 0): one wavelength across the periodic x axis"
+        }
+      ],
+      "oblique": {
+        "cell_counts_2d": [
+          24,
+          20,
+          1
+        ],
+        "cell_counts_3d": [
+          24,
+          20,
+          16
+        ],
+        "wavevector": "q = 2 pi m / N per axis with m = (1, -2, 1) (m_z = 0 in 2D)"
+      },
+      "mesh_um": 0.155,
+      "polarizations": {
+        "two_d": [
+          "TE: E along z",
+          "TM: E in-plane orthogonal to K"
+        ],
+        "three_d": [
+          "pol1 = K x z normalised",
+          "pol2 = K x pol1 normalised"
+        ]
+      },
+      "wavelength_definition": "part A fixes k; N = cells per wavelength 2 pi / k in the medium"
+    },
+    "part_B_propagation": {
+      "description": "pulsed sheet source, two point monitors on the propagation axis at a fixed physical separation, phase difference of the +f DFT of the raw traces gives k_measured(f) D; the run ends before the far-end PML echo (the only -x wave) can reach the second monitor; the near-end echo travels +x and is consistent with the measurement",
+      "domain_um": {
+        "x": [
+          -12.4,
+          12.4
+        ],
+        "y_2d": "0.775 periodic",
+        "y_z_3d": "0.775 x 0.775 periodic"
+      },
+      "mesh_sweep": [
+        {
+          "cells_per_vacuum_wavelength": 10,
+          "mesh_um": 0.155,
+          "pml_layers": 5,
+          "pml_thickness_um": 0.775
+        },
+        {
+          "cells_per_vacuum_wavelength": 20,
+          "mesh_um": 0.0775,
+          "pml_layers": 10,
+          "pml_thickness_um": 0.775
+        },
+        {
+          "cells_per_vacuum_wavelength": 40,
+          "mesh_um": 0.03875,
+          "pml_layers": 20,
+          "pml_thickness_um": 0.775
+        }
+      ],
+      "source": {
+        "kind": "plane",
+        "x_um": -11.005,
+        "components_2d": [
+          "Ez (TE)",
+          "Ey (TM)"
+        ],
+        "components_3d": [
+          "Ey",
+          "Ez"
+        ],
+        "pulse": "gaussian",
+        "time_definition": "standard",
+        "wavelength_um": 1.55,
+        "power_fwhm_s": 8.609020092789869e-15,
+        "sigma_s": 5.1702434755713565e-15,
+        "offset_s": 2.5e-14,
+        "eliminate_discontinuities": true,
+        "note": "one-cycle Gaussian at 193.4 THz with the C1 endpoint taper so the drive starts at exactly zero; amplitude 1; soft sheet (radiates both ways)"
+      },
+      "monitors": {
+        "kind": "point",
+        "same_component_as_source": true,
+        "x_a_um": -9.92,
+        "x_b_um": -6.82,
+        "separation_um": 3.1,
+        "separation_in_vacuum_wavelengths": 2.0
+      },
+      "duration_fs": 100.0,
+      "steps": "round(100 fs / dt) at each mesh",
+      "echo_arrival_at_x_b_fs": {
+        "vacuum": 137.0,
+        "dielectric": 205.5
+      },
+      "frequencies": {
+        "wavelength_um": [
+          1.3,
+          1.8
+        ],
+        "points": 11,
+        "spacing": "uniform in frequency"
+      },
+      "wavelength_definition": "part B fixes the vacuum wavelength 1.55 um; in the dielectric the material wavelength has N/1.5 cells"
+    },
+    "layer_A": {
+      "description": "part B fixture at N=20 rerun on CUDA FP32 with the CUDA graph, 2D TE vacuum and 3D Ey dielectric; raw traces divided by the FP64 peak are compared to the CPU FP64 traces"
+    }
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU oracle rows)",
+    "float32 (CUDA layer-A rows)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "exact Yee dispersion relation (n/(c dt))^2 sin^2(omega dt/2) = sum_a sin^2(k_a h/2)/h^2, written in the test; continuum omega = c |k| / n; both evaluated in the test, no solver code",
+  "observables": [
+    {
+      "name": "cos_omega_dt_residual",
+      "unit": "dimensionless",
+      "definition": "|cos(omega dt) from the recurrence - cos(omega dt) from the Yee relation| per part-A case"
+    },
+    {
+      "name": "polarization_leak",
+      "unit": "dimensionless",
+      "definition": "max |E - (E.pol) pol| / max |E| after 40 steps (part A)"
+    },
+    {
+      "name": "phase_velocity_error_vs_continuum",
+      "unit": "dimensionless",
+      "definition": "(omega_num / |k|) / (c/n) - 1 (part A, per N)"
+    },
+    {
+      "name": "phase_error_per_wavelength",
+      "unit": "rad",
+      "definition": "2 pi (k_measured / k_continuum - 1) (part B) and 2 pi (k_Yee / k_continuum - 1) (prediction)"
+    },
+    {
+      "name": "phase_residual_vs_yee",
+      "unit": "rad",
+      "definition": "|k_measured - k_Yee| D at each of the 11 frequencies (part B)"
+    },
+    {
+      "name": "trace_end_over_peak",
+      "unit": "dimensionless",
+      "definition": "|trace at the last step| / max |trace| at monitor b (window-truncation floor, part B)"
+    },
+    {
+      "name": "polarization_trace_difference",
+      "unit": "dimensionless",
+      "definition": "max |trace(pol 1) - trace(pol 2)| / peak, 2D TE vs TM and 3D Ey vs Ez (identical discrete problems by grid symmetry)"
+    },
+    {
+      "name": "layer_A_trace_error",
+      "unit": "dimensionless",
+      "definition": "CUDA FP32 trace / FP64 peak against CPU FP64 trace / FP64 peak"
+    }
+  ],
+  "acceptance": {
+    "part_A_discrete_relation": {
+      "cos_omega_dt_residual_max": 1e-12,
+      "polarization_leak_max": 1e-12,
+      "note": "round-off level in FP64; the relation is exact, so any mesh passes"
+    },
+    "part_B_discrete_relation": {
+      "phase_residual_vs_yee_max_rad": 0.001,
+      "note": "not round-off: window truncation and the C1 taper set the floor; the continuum error is 3.3e-3 rad per vacuum wavelength at N=40 (6.6e-3 over D) and larger at coarser meshes, so 1e-3 separates the two"
+    },
+    "part_B_polarization": {
+      "polarization_trace_difference_max": 1e-12
+    },
+    "continuum": {
+      "policy": "reported only; the continuum phase error is the numerical dispersion of the scheme, expected to fall by about 4x per mesh halving; no pass/fail"
+    },
+    "layer_A": {
+      "rtol": 0.0001,
+      "atol": 1e-06,
+      "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32"
+    },
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md section 5 (discrete forward tolerances); the round-off tolerances are this case's own pre-declared budget"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_a.py::TestG301::test_eigenmode_matches_yee_relation",
+      "tests/test_physics_g3_a.py::TestG301::test_eigenmode_mesh_sweep",
+      "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d",
+      "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d",
+      "tests/test_physics_g3_a.py::TestG301::test_polarizations_identical",
+      "tests/test_physics_g3_a.py::TestG301::test_layer_a_cuda_fp32"
+    ],
+    "not_yet_covered": []
+  },
+  "notes": "The N=40 meshes of part B (2D and 3D) run only when TORCHFDTD_G3_FINE=1; the recorded run sets it. tests/test_boundaries.py::test_discrete_plane_wave_eigenmode already checks the vacuum eigenmode with H initialised; this case adds the dielectric, both 3D polarizations, the mesh sweep, the continuum error and the Simulation path."
+}

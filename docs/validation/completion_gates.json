@@ -545,10 +545,28 @@
           "implementation_state": "NOT_ASSESSED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/boundaries.py",
+            "torchfdtd/solver.py",
+            "torchfdtd/injection.py",
+            "tests/test_physics_g3_a.py",
+            "scripts/render_physics_validation.py",
+            "docs/validation/cases/G3-01_uniform_propagation.json",
+            "docs/validation/g3/G3-01.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG301 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-01.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_physics_g3_a.py::TestG301::test_eigenmode_matches_yee_relation",
+            "tests/test_physics_g3_a.py::TestG301::test_eigenmode_mesh_sweep",
+            "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d",
+            "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d",
+            "tests/test_physics_g3_a.py::TestG301::test_polarizations_identical",
+            "tests/test_physics_g3_a.py::TestG301::test_layer_a_cuda_fp32"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -561,10 +579,25 @@
           "implementation_state": "NOT_ASSESSED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/boundaries.py",
+            "torchfdtd/solver.py",
+            "torchfdtd/injection.py",
+            "torchfdtd/geometry.py",
+            "tests/test_physics_g3_a.py",
+            "scripts/render_physics_validation.py",
+            "docs/validation/cases/G3-02_dielectric_slab_tmm.json",
+            "docs/validation/g3/G3-02.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG302 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-02.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm",
+            "tests/test_physics_g3_a.py::TestG302::test_layer_a_cuda_fp32"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -577,10 +610,26 @@
           "implementation_state": "NOT_ASSESSED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/materials.py",
+            "torchfdtd/material_fit.py",
+            "torchfdtd/optical_data.py",
+            "torchfdtd/solver.py",
+            "tests/test_physics_g3_a.py",
+            "scripts/render_physics_validation.py",
+            "docs/validation/cases/G3-03_dispersive_slab_fit_ade.json",
+            "docs/validation/g3/G3-03.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG303 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-03.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm",
+            "tests/test_physics_g3_a.py::TestG303::test_fitted_material_slab",
+            "tests/test_physics_g3_a.py::TestG303::test_ade_constitutive_error"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -641,10 +690,28 @@
           "implementation_state": "NOT_ASSESSED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/boundaries.py",
+            "torchfdtd/run_control.py",
+            "torchfdtd/solver.py",
+            "tests/test_physics_g3_a.py",
+            "scripts/render_physics_validation.py",
+            "docs/validation/cases/G3-07_cpml_reflection_stability.json",
+            "docs/validation/g3/G3-07.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG307 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-07.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_physics_g3_a.py::TestG307::test_normal_reflection",
+            "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection",
+            "tests/test_physics_g3_a.py::TestG307::test_interface_reflection",
+            "tests/test_physics_g3_a.py::TestG307::test_depth_and_time_sweeps",
+            "tests/test_physics_g3_a.py::TestG307::test_long_time_stability",
+            "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null

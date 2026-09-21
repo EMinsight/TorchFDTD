@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-03_dispersive_slab_fit_ade",
+  "task": "G3-03",
+  "title": "Drude and two-pole Lorentz slabs: complex R, T and absorption against TMM with the same analytic permittivity; fitting error and ADE time-discretization error separated",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "engine": "torchfdtd.Simulation with the passive trapezoidal ADE (MaterialADE), 2D normal incidence, y periodic, staircase Yee sampling, courant_factor 0.99, precision float64 on CPU",
+    "materials": [
+      {
+        "name": "G3-03 Drude",
+        "model": "drude",
+        "epsilon_inf": 1.0,
+        "plasma_rad_s": 2000000000000000.0,
+        "collision_rad_s": 100000000000000.0,
+        "permittivity": "eps_inf - wp^2 / (w^2 + i gamma w)",
+        "thickness_um": 0.1,
+        "expected_at_1p55um": "eps about -1.70 + 0.22 i, skin depth about 0.20 um, so the 0.1 um slab is partially transmitting"
+      },
+      {
+        "name": "G3-03 Lorentz two-pole",
+        "model": "multipole",
+        "epsilon_inf": 2.25,
+        "poles": [
+          {
+            "resonance_rad_s": 1900000000000000.0,
+            "strength_rad_s_squared": 1.805e+30,
+            "damping_rad_s": 200000000000000.0
+          },
+          {
+            "resonance_rad_s": 750000000000000.0,
+            "strength_rad_s_squared": 1.6875e+29,
+            "damping_rad_s": 100000000000000.0
+          }
+        ],
+        "permittivity": "eps_inf + sum_j A_j / (w0_j^2 - w^2 - i gamma_j w)",
+        "thickness_um": 0.5,
+        "expected_at_1p55um": "eps about 2.93 + 0.13 i between the two resonances (0.99 um and 2.51 um)"
+      }
+    ],
+    "domain_um": {
+      "x": [
+        -3.0,
+        3.0
+      ],
+      "y": "6 coarse cells periodic"
+    },
+    "mesh_sweep": [
+      {
+        "label": "h20",
+        "mesh_um": 0.02,
+        "pml_layers": 12,
+        "pml_thickness_um": 0.24
+      },
+      {
+        "label": "h10",
+        "mesh_um": 0.01,
+        "pml_layers": 24,
+        "pml_thickness_um": 0.24
+      }
+    ],
+    "slab_faces": "centered at x = 0.0025 um (h20/8) at both meshes so that no Yee sample lies on a face; Drude 5 (h20) or 10 (h10) cells thick, Lorentz 25 or 50 cells",
+    "source": {
+      "kind": "plane",
+      "x_um": -2.0,
+      "TE": "Ez sheet",
+      "TM": "Ey sheet",
+      "pulse": "gaussian",
+      "time_definition": "standard",
+      "wavelength_um": 1.55,
+      "power_fwhm_s": 2.5827060278369606e-14,
+      "sigma_s": 1.551073042671407e-14,
+      "offset_s": 7.5e-14,
+      "eliminate_discontinuities": true,
+      "note": "three-cycle Gaussian at 193.4 THz with the C1 endpoint taper; a fixed-k_parallel sheet at 45 deg is grazing beyond 1.55/sin(45 deg) = 2.19 um, where three cycles leave 2.5e-7 of the peak amplitude (one cycle would leave 17 percent and a non-decaying grazing residual); amplitude 1; soft sheet"
+    },
+    "monitors": {
+      "kind": "point",
+      "reflection_x_um": -1.0,
+      "transmission_x_um": 1.0,
+      "TE": "Ez",
+      "TM": "Hz at x+h/2, y=h/2"
+    },
+    "polarizations": [
+      "TE (Ez)",
+      "TM (Ey source, Hz monitor)"
+    ],
+    "duration_fs": 400.0,
+    "steps": "round(400 fs / dt)",
+    "frequencies": {
+      "wavelength_um": [
+        1.3,
+        1.8
+      ],
+      "points": 21,
+      "spacing": "uniform in frequency from c/1.8 um to c/1.3 um"
+    },
+    "part_a": "analytic materials given directly, both meshes, both polarizations",
+    "part_b": {
+      "description": "the analytic permittivity sampled to n/k at 61 wavelengths from 1.2 to 1.9 um, fitted with torchfdtd.fit_material (FitOptions max_poles=4, include_drude=True, tolerance=1e-3, wavelength_range_um=[1.2, 1.9], target=analytic, seed 0); the slab is rerun with the fitted material at h20, TE; three comparisons: FDTD(fitted) vs TMM(fitted eps) (discretization only), TMM(fitted) vs TMM(analytic) (fit only), FDTD(fitted) vs TMM(analytic) (total)"
+    },
+    "part_c": {
+      "description": "constitutive error of the trapezoidal ADE at the 21 band frequencies for the two time steps dt(h20) and dt(h10): the bilinear response eps_ADE(w) = eps_exact((2/dt) tan(w dt/2)) written in the test against eps_exact(w); the solver permittivity(material, f, dt) is checked against the bilinear formula; a directly driven single MaterialADE cell is checked against the bilinear prediction at f = 1/(128 dt) (h20) and 1/(256 dt) (h10), 167.3 THz"
+    }
+  },
+  "seed": 0,
+  "precision": [
+    "float64 (CPU)"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "reference_method": "TMM (Fresnel/Airy) as in G3-02 with complex eps and kx2 = sqrt(eps k0^2) taken with positive imaginary part; A_tmm = 1 - |r|^2 - |t|^2; analytic permittivity and the bilinear ADE response written in the test; no solver code in the oracles",
+  "observables": [
+    {
+      "name": "R_abs_error",
+      "unit": "dimensionless",
+      "definition": "max over the band of | |r_fdtd|^2 - |r_tmm|^2 |"
+    },
+    {
+      "name": "T_abs_error",
+      "unit": "dimensionless",
+      "definition": "max over the band of | |t_fdtd|^2 - |t_tmm|^2 |"
+    },
+    {
+      "name": "A_abs_error",
+      "unit": "dimensionless",
+      "definition": "max over the band of |(1 - R_fdtd - T_fdtd) - (1 - R_tmm - T_tmm)|"
+    },
+    {
+      "name": "t_phase_error",
+      "unit": "rad",
+      "definition": "max over the band where |t_tmm| > 0.1 of |arg(t_fdtd / t_tmm)| (Yee-corrected)"
+    },
+    {
+      "name": "fit_error_on_band",
+      "unit": "dimensionless",
+      "definition": "fit report analytic normalized_rms, max_abs_n_error, max_abs_k_error on 1.2 to 1.9 um, plus max |n| and |k| errors on the 21 band samples computed in the test"
+    },
+    {
+      "name": "ade_constitutive_error",
+      "unit": "dimensionless",
+      "definition": "max over the band of |n_ADE - n_exact| and |k_ADE - k_exact| for each dt; ratio between the two dt"
+    },
+    {
+      "name": "ade_driven_cell_error",
+      "unit": "dimensionless",
+      "definition": "|eps_driven / eps_bilinear - 1| at the drive frequency"
+    }
+  ],
+  "acceptance": {
+    "part_a": {
+      "R_abs_error_max": 0.01,
+      "T_abs_error_max": 0.01,
+      "A_abs_error_max": 0.01,
+      "t_phase_error_max_rad": 0.02,
+      "applies_to": "each (material, polarization, mesh) instance"
+    },
+    "part_b": {
+      "fit_converged": "fit_material must report converged at tolerance 1e-3 (normalized rms)",
+      "fdtd_fitted_vs_tmm_fitted": {
+        "R_abs_error_max": 0.01,
+        "T_abs_error_max": 0.01,
+        "A_abs_error_max": 0.01,
+        "t_phase_error_max_rad": 0.02
+      },
+      "fdtd_fitted_vs_tmm_analytic": {
+        "R_abs_error_max": 0.01,
+        "T_abs_error_max": 0.01,
+        "A_abs_error_max": 0.01,
+        "t_phase_error_max_rad": 0.02
+      },
+      "tmm_fitted_vs_tmm_analytic": "reported (the fit's own contribution)"
+    },
+    "part_c": {
+      "ade_constitutive_error_max": 0.001,
+      "note": "so that the ADE time error is negligible against the 0.01 slab limits",
+      "solver_permittivity_vs_bilinear_rel": 1e-12,
+      "ade_driven_cell_rel": 1e-09
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds slab_R_T_absolute_error and phase_error_radians_on_predeclared_supported_signal_band; the absorption limit and the part-c budgets are this case's own pre-declared limits"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm",
+      "tests/test_physics_g3_a.py::TestG303::test_fitted_material_slab",
+      "tests/test_physics_g3_a.py::TestG303::test_ade_constitutive_error"
+    ],
+    "not_yet_covered": []
+  },
+  "notes": "Harness shakedown before the recorded run adopted the three-cycle pulse and 400 fs of G3-02 for uniformity and lengthened the driven-cell settling to 32768 steps (the slowest pole, gamma 1e14 /s, needs 0.5 ps to decay below 1e-10). No limit changed. The h10 instances of part a run only when TORCHFDTD_G3_FINE=1; the recorded run sets it. Existing coverage: tests/test_materials.py::test_discrete_constitutive_response (driven cell at 1/(64 dt))."
+}

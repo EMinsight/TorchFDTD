@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-07_cpml_reflection_stability",
+  "task": "G3-07",
+  "title": "Default CPML reflection at normal and oblique incidence in vacuum and in n=2, next to a dielectric interface, and 20,000-step stability",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "engine": "torchfdtd.Simulation, 2D TE (Ez), staircase Yee sampling, courant_factor 0.99, mesh 0.025 um (dt 5.837669e-17 s), precision float64 on CPU",
+    "pml_profile": "default BoundaryFace: layers 10 (0.25 um), sigma_scale 1, kappa 1, alpha 1e-8, polynomial 3, alpha_polynomial 0",
+    "short_domain": {
+      "x_um": [
+        -5.75,
+        5.75
+      ],
+      "source_x_um": 4.0,
+      "monitor_x_um": 5.0,
+      "x_max_pml_interior_edge_um": 5.5,
+      "distance_source_to_x_min_pml_um": 9.75
+    },
+    "long_reference_domain": {
+      "x_um": [
+        -20.25,
+        20.25
+      ],
+      "source_x_um": -10.5,
+      "monitor_x_um": -9.5,
+      "x_max_pml_interior_edge_um": 20.0,
+      "own_x_max_echo_at_monitor_fs": {
+        "vacuum": 200.2,
+        "dielectric": 400.3
+      },
+      "note": "same x_min distance, same mesh nodes, same source and monitor indices; its own x_max echo cannot reach the monitor within the run, so short - long is exactly the short domain's x_max CPML return and the x_min echo cancels"
+    },
+    "transverse": {
+      "normal_and_oblique": "0.3 um (12 cells), periodic or Bloch",
+      "interface": "2.0 um (80 cells), periodic"
+    },
+    "source": {
+      "kind": "plane",
+      "component": "Ez",
+      "spans_full_transverse_period": true,
+      "normal_and_interface": {
+        "pulse": "gaussian",
+        "time_definition": "standard",
+        "wavelength_um": 1.55,
+        "power_fwhm_s": 8.609020092789869e-15,
+        "sigma_s": 5.1702434755713565e-15,
+        "offset_s": 2.5e-14,
+        "eliminate_discontinuities": true,
+        "note": "one-cycle Gaussian at 193.4 THz with the C1 endpoint taper so the drive starts at exactly zero; amplitude 1; soft sheet (radiates both ways)"
+      },
+      "oblique": {
+        "pulse": "gaussian",
+        "time_definition": "standard",
+        "wavelength_um": 1.45,
+        "power_fwhm_s": 2.4160798324926404e-14,
+        "sigma_s": 1.4510038141119613e-14,
+        "offset_s": 7e-14,
+        "eliminate_discontinuities": true,
+        "note": "three-cycle Gaussian at 206.8 THz with the C1 endpoint taper, centred in the oblique band 1.3 to 1.6 um; the 60 deg design is grazing at 1.79 um where this pulse has 5e-4 of its peak amplitude"
+      }
+    },
+    "media": [
+      {
+        "name": "vacuum",
+        "background_index": 1.0
+      },
+      {
+        "name": "dielectric",
+        "background_index": 2.0
+      }
+    ],
+    "oblique": {
+      "angles_deg": [
+        30,
+        60
+      ],
+      "k_parallel_rad_per_um": [
+        2.0268339700579308,
+        3.510579414646873
+      ],
+      "bloch_phase_rad": [
+        0.6080501910173792,
+        1.0531738243940618
+      ],
+      "measurement_band_um": [
+        1.3,
+        1.6
+      ],
+      "angle_range_over_band_deg": {
+        "30": [
+          24.8,
+          31.1
+        ],
+        "60": [
+          46.6,
+          63.4
+        ]
+      },
+      "duration_fs": 150.0,
+      "steps": 2570,
+      "note": "fixed k_parallel; 1.8 um would be grazing (sin theta = 1.006) for the 60 deg design, so the oblique band stops at 1.6 um; R at exactly 1.55 um (the design angle) is recorded separately"
+    },
+    "interface": {
+      "description": "n=2 rectangle filling y from -0.9875 to 0.0125 um across the whole x range including both CPMLs; vacuum elsewhere; the interface enters the x CPML layers",
+      "monitors": {
+        "vacuum_side": [
+          5.0,
+          0.5
+        ],
+        "dielectric_side": [
+          5.0,
+          -0.5
+        ]
+      },
+      "duration_fs": 150.0
+    },
+    "duration_fs": 100.0,
+    "steps": 1713,
+    "frequencies": {
+      "wavelength_um": [
+        1.3,
+        1.8
+      ],
+      "points": 21,
+      "spacing": "uniform in frequency from c/1.8 um to c/1.3 um"
+    },
+    "depth_sweep": {
+      "layers": [
+        10,
+        20
+      ],
+      "medium": "vacuum, normal incidence",
+      "note": "separate sweep at fixed mesh and time; the criterion applies to the default 10 layers"
+    },
+    "time_sweep": {
+      "duration_fs": [
+        100.0,
+        200.0
+      ],
+      "medium": "vacuum, normal incidence, 10 layers",
+      "note": "separate sweep; the reflected pulse is fully recorded within 100 fs, so both durations should agree"
+    },
+    "stability": {
+      "steps": 20000,
+      "duration_fs": 1167.5,
+      "runs": [
+        "vacuum normal",
+        "n=2 normal",
+        "vacuum 60 deg Bloch"
+      ],
+      "energy": "state_norm of the run-control diagnostics every 100 steps: sum eps |E|^2 + |H|^2 over the volume including the CPML memory",
+      "note": "the 60 deg run uses the oblique pulse; its grazing components (about 5e-4 of the peak amplitude, beyond 1.79 um) are slow and are not absorbed like propagating waves, so that run is judged on non-growth only"
+    },
+    "layer_A": {
+      "description": "short vacuum normal fixture rerun on CUDA FP32 with the CUDA graph; raw trace / FP64 peak compared to CPU FP64"
+    }
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU oracle rows)",
+    "float32 (CUDA layer-A row)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "reflected/incident power ratio R(f) = |DFT(short - long)(f)|^2 / |DFT(long)(f)|^2 at the monitor, DFT written in the test; broadband energy ratio sum (short-long)^2 / sum long^2 over the whole trace; no analytic oracle is needed, the long domain is the reference",
+  "observables": [
+    {
+      "name": "R_max_on_band",
+      "unit": "power ratio",
+      "definition": "max over the declared band of R(f)"
+    },
+    {
+      "name": "R_at_design",
+      "unit": "power ratio",
+      "definition": "R at 1.55 um"
+    },
+    {
+      "name": "R_broadband",
+      "unit": "power ratio",
+      "definition": "time-domain energy ratio over the whole trace"
+    },
+    {
+      "name": "energy_last_over_peak",
+      "unit": "dimensionless",
+      "definition": "state_norm at the last diagnostic over the maximum state_norm of the run"
+    },
+    {
+      "name": "late_growth",
+      "unit": "dimensionless",
+      "definition": "max state_norm over the second half of the run divided by max(state_norm at the half-way diagnostic, 1e-12 x peak state_norm); the floor (1e-6 in field amplitude) keeps FP64 round-off noise, which the vacuum run reaches at about 1e-17 of its peak, from being read as growth"
+    },
+    {
+      "name": "layer_A_trace_error",
+      "unit": "dimensionless",
+      "definition": "CUDA FP32 trace / FP64 peak against CPU FP64 trace / FP64 peak"
+    }
+  ],
+  "acceptance": {
+    "normal": {
+      "R_max_on_band": 1e-06,
+      "applies_to": "vacuum and n=2, 10 layers, band 1.3 to 1.8 um"
+    },
+    "oblique": {
+      "R_max_on_band": 0.0001,
+      "applies_to": "30 and 60 deg designs, band 1.3 to 1.6 um"
+    },
+    "interface": {
+      "R_max_on_band": 0.0001,
+      "applies_to": "both monitors, band 1.3 to 1.8 um",
+      "note": "this case's own budget: the declared-oblique limit, because the field at the interface reaches the layer at every angle"
+    },
+    "stability": {
+      "energy_last_over_peak_max": 1e-06,
+      "late_growth_max": 1.000001,
+      "applies_to": "energy_last_over_peak for the two normal-incidence runs; late_growth for all three runs (the 60 deg run reports energy_last_over_peak only)"
+    },
+    "sweeps": "reported only: 20 layers must not reflect more than 10 layers; 200 fs must agree with 100 fs to within 10 percent of R",
+    "layer_A": {
+      "rtol": 0.0001,
+      "atol": 1e-06
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds pml_normal_reflected_power_ratio and pml_declared_oblique_reflected_power_ratio; the interface and stability budgets are this case's own pre-declared limits"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_a.py::TestG307::test_normal_reflection",
+      "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection",
+      "tests/test_physics_g3_a.py::TestG307::test_interface_reflection",
+      "tests/test_physics_g3_a.py::TestG307::test_depth_and_time_sweeps",
+      "tests/test_physics_g3_a.py::TestG307::test_long_time_stability",
+      "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32"
+    ],
+    "not_yet_covered": []
+  },
+  "notes": "Harness shakedown before the recorded run changed three fixture definitions, none of them a limit: the long reference domain grew from 30.5 to 40.5 um so that its own echo stays outside a 150 fs window, the oblique fixtures use the three-cycle 1.45 um pulse instead of the one-cycle 1.55 um pulse (grazing content), and late_growth gained the 1e-12 floor. Existing coverage: tests/test_boundaries.py::test_custom_cpml_absorbs_periodic_sheet_pulse (custom profile, 0.5 percent field residual) and tests/test_pmc_general.py::test_cpml_reflection_next_to_pmc_faces (PMC neighbours). Neither measures the default profile as a power ratio."
+}
