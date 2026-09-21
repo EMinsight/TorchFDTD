@@ -178,10 +178,10 @@ def render_g3_08(record):
         judged = [r for k, r in rows_with(rerun, 'T') if r['mesh_um'] == case['fixture']['judged_mesh_um'] and r['interface'] == 'subpixel'
                   and r['duration_fs'] == case['fixture']['duration_fs']] if rerun else []
         out += ['', f'**Revision 2 (case `{r2["case_id"]}`, records under `docs/validation/g3/r2`, generated {r2["generated"]}).** '
-                'Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record. '
+                'Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record.'
                 + (f'The re-run of the {len(judged)} judged physics rows gives a largest efficiency error of {max(r["max_efficiency_error"] for r in judged):.4f}, '
                    f'a largest dominant phase error of {max(r["max_dominant_phase_error_rad"] for r in judged):.4f} rad and sums of T and R within '
-                   f'{max(abs(r["efficiency_sum"]-1) for r in judged):.4f} of one, all within the unchanged limits. ' if judged else ''),
+                   f'{max(abs(r["efficiency_sum"]-1) for r in judged):.4f} of one, all within the unchanged limits.' if judged else ''),
                 '', '| Pol | Angle | Wavelength (um) | Max relative difference | Largest excess over rtol abs(cpu) + atol | Result |', '|---|---:|---:|---:|---:|---|']
         for key, r in rows_with(r2, 'T'):
             if 'layer_a_r2_pass' in r:
@@ -229,7 +229,7 @@ SUMMARY_KEYS = ('mesh_um', 'backend', 'precision', 'interface', 'polarization', 
 def summary(task, record):
     """Compact observed metrics for record_gate_evidence.py --observed: the scalar metrics of every row."""
     rows = {key: {k: v for k, v in row.items() if k in SUMMARY_KEYS} for key, row in record['rows'].items()}
-    return dict(task=task, case_id=record['case_id'], generated=record['generated'], full_mode=record['full_mode'],
+    return dict(task=task, case_id=record['case_id'], generated=record['generated'], full_mode=record.get('full_mode', True),
                 environment=record['environment'], rows=rows)
 
 

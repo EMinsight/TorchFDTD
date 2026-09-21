@@ -143,6 +143,23 @@ Empty cell (no grating): forward zero-order transmission relative to the inciden
 | TE | 0 | cuda float32 | 1.00000037 | 3.2e-33 | 5.6e-08 | 1e-04 |
 | TM | 20 | cpu float64 | 0.99999732 | 3.0e-31 | 4.2e-08 | 1e-04 |
 | TM | 20 | cuda float32 | 0.99999341 | 1.3e-12 | 4.2e-08 | 1e-04 |
+
+**Revision 2 (case `G3-08r2_bloch_grating_rcwa_layer_a`, records under `docs/validation/g3/r2`, generated 2026-09-21T19:20:04+00:00).** Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record.The re-run of the 12 judged physics rows gives a largest efficiency error of 0.0031, a largest dominant phase error of 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits.
+
+| Pol | Angle | Wavelength (um) | Max relative difference | Largest excess over rtol abs(cpu) + atol | Result |
+|---|---:|---:|---:|---:|---|
+| TE | 0 | 0.92 | 3.38e-06 | -7.0e-06 | pass |
+| TE | 0 | 1.02 | 1.38e-06 | -2.0e-06 | pass |
+| TE | 0 | 1.06 | 2.34e-06 | -2.9e-06 | pass |
+| TE | 20 | 0.92 | 4.26e-05 | -7.6e-06 | pass |
+| TE | 20 | 1.02 | 8.85e-06 | -1.4e-05 | pass |
+| TE | 20 | 1.06 | 8.97e-06 | -2.2e-06 | pass |
+| TM | 0 | 0.92 | 1.60e-05 | -1.0e-06 | pass |
+| TM | 0 | 1.02 | 7.09e-06 | -2.6e-06 | pass |
+| TM | 0 | 1.06 | 5.22e-06 | -3.5e-06 | pass |
+| TM | 20 | 0.92 | 1.15e-04 | -6.7e-07 | pass |
+| TM | 20 | 1.02 | 3.40e-05 | -3.3e-06 | pass |
+| TM | 20 | 1.06 | 9.52e-05 | -1.0e-06 | pass |
 <!-- g3-b:G3-08 end -->
 
 <!-- g3-b:G3-13 begin -->
