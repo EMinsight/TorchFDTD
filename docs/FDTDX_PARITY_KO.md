@@ -156,8 +156,9 @@ gradient의 조합도 거부한다. 따라서 **고유모드 자체의 미분은
 
 ## 다음 구현 순서
 
-1. 진행 중인 원래 CR 24-cycle 결과와 실제 FP32 48 GB 초과 용량 검증을
-   보존하며 완료한다. 최적 CR 후보의 세밀한 메시 재검증은 별도 단계다.
+1. 실제 FP32 48 GB 초과 forward/backward 용량 검증을 완료하고 장시간·복구·비용을
+   확인한다. CR 응용 최적화와 CR 정밀 재계산은 현재 실행 범위에서 제외한다.
+   기존 CR 기록은 보존하며 일반 inverse design과 solver gradient 검증은 계속한다.
 2. CPU·CUDA·브라우저에서 확인한 PMC+CPML native dispatch의 흡수 정확도를 검증한 뒤,
    필요한 profile·ADE·streaming·batch 조합으로 확장한다.
    이미 통과한 경로는 변경 없이 반복하지 않는다.

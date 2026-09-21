@@ -1,5 +1,12 @@
 # TorchFDTD 완료 조건과 남은 계획
 
+현재 실행 범위는 2026-09-21 지시에 따라 **CR 응용 최적화와 CR 정밀 재계산을 제외**한다.
+기존 CR 결과와 진단은 보존하며 추가 CR 실행을 예약하지 않는다. 시뮬레이터의
+일반 inverse design API, 물리·gradient 정확도, 메모리 계층과 비교 검증은 계속 필수다.
+현재 기능 범위의 상세 근거는 [FDTDX 대응표](FDTDX_PARITY_KO.md)를 우선한다.
+아래 과거 실행·시간 기록은 새 CR 실행 계획을 뜻하지 않는다.
+
+
 기준일: 2026-09-21. 목표는 Lumerical FDTD와 FDTDX를 대체할 수 있는
 Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 완성도로
 환산하지 않는다. 기능 구현, 물리 검증, 실행 비용과 사용자 흐름을 함께
@@ -11,7 +18,7 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 | --- | --- | --- |
 | 0 | TorchFDTD 이름 통일 | 저장소·폴더·패키지·CLI·UI·문서 변경, 기존 입력 보존, 배포물 설치/실행 확인. 기존 실행과 실험 기록 보존 |
 | 1 · P0 | 물리 출력과 gradient 메시 수렴 | 같은 물리 크기·시간·소스·PML 두께에서 메시를 세분화하고 출력과 동일 형상 파라미터의 gradient를 비교. 독립 해석 기준 및 시간/PML 오차 분리 |
-| 2 · P0 | 원래 CR 목적함수의 inverse design | 고정한 TORCWA 연구의 지오메트리·정보량 목적함수·제작 제약으로 24 cycle 완료, checkpoint 재시작, 선택된 구조의 별도 확인, 세밀한 메시에서 개선 유지 |
+| 제외 | 원래 CR 응용 최적화·정밀 재계산 | 이번 완성 범위에서 제외. 기존 계산·진단 기록 보존. 일반 Torch inverse design 기능과 solver gradient 검증은 계속 필수 |
 | 3 · P0 | 실제 FP32 48GB 초과 및 계층 메모리 | 54GiB E/H FP32 forward와 backward 완료, 디스크 정리·메모리/시간 기록. 이후 의미 있는 물리 시간의 실행. dense epsilon/VJP가 DRAM 한계가 되는 경로도 공간 생산·축약으로 개선 |
 | 4 · P1 | PEC/PMC·대칭/반대칭 경계 | CPU·CUDA·adjoint·DRAM/파일·배치에서 일치. 독립 반사/공진 해와 전체 영역 대비 축소 영역 결과·gradient·비용 확인 |
 | 5 · P1 | Eigenmode source·mode port | 모드 전력 정규화, 전진/후진 분리, S-parameter, 전력 보존·상반성, 설계 영역의 Torch 미분과 UI/Python 연결 |

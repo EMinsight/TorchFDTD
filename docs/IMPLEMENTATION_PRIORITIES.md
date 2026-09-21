@@ -1,5 +1,10 @@
 # 구현 우선순위와 제외 기준
 
+현재 실행에서는 CR 응용 최적화와 CR 정밀 재계산을 제외한다.
+메모리 계층, 일반 Torch 미분, 경계·모드·재료, batch와 비교 검증을 우선한다.
+과거 CR 설명은 구현·실험 기록으로 보존하며 추가 CR 실행을 뜻하지 않는다.
+
+
 현재 남은 작업 순서와 항목별 완료 증거는 [전체 완료 계획](COMPLETION_PLAN_KO.md)에 정리한다. 핵심 gradient와 메모리 계층을 우선하고, 전체 목표가 검증되기 전에는 완료로 표시하지 않는다.
 
 핵심 목표는 **Torch에서 형상·재료부터 loss.backward와 optimizer까지 연결하는 inverse design**, 그리고 **VRAM·DRAM·저장장치 계층으로 메모리 병목과 큰 격자의 한계를 줄이는 실행 엔진**이다. 속성 수를 채우는 것으로 완료를 판단하지 않는다. 모든 행의 중요도·필요 여부는 [분류 CSV](FEATURE_PRIORITY_INDEX.csv)와 UI의 Feature checklist에서 확인한다.
