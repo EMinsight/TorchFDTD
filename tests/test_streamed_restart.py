@@ -19,7 +19,7 @@ import pytest
 import torch
 
 import torchfdtd
-from torchfdtd import StreamedSimulation, StreamedAdjointOptions
+from torchfdtd import Project, StreamedSimulation, StreamedAdjointOptions
 from torchfdtd.spacetime import SlabBlockOperator
 from test_differentiable import project, gpu
 
@@ -212,6 +212,31 @@ def test_changed_inputs_are_rejected_with_the_contract_key_named(tmp_path, monke
     assert json.loads((tmp_path / 'journal' / 'latest-forward.json').read_text())['block'] == 1
     # Identical inputs in a fresh scene object still resume the journal.
     resumed = StreamedSimulation(p.model_copy(deep=True), settings)(eps)
+    assert resumed.report['forward_resumed_from_block'] == 1
+    torch.testing.assert_close(resumed.signals.detach(), signals, rtol=0, atol=0)
+    later, = torch.autograd.grad(resumed.signals.square().sum(), eps)
+    torch.testing.assert_close(later, gradient, rtol=0, atol=0)
+
+
+def test_stamped_or_replaced_project_resumes_the_journal(tmp_path, monkeypatch):
+    """A workbench save between the interruption and the resume changes labels, placement, revision and content hash only."""
+    p = scene()
+    eps = torch.full(p.region.shape, 1.7, dtype=torch.float64, requires_grad=True)
+    signals, gradient = reference(p, eps, 'host', 'cpu', tmp_path)
+    settings = options(tmp_path)
+    interrupt(monkeypatch, 'forward', 1)
+    with pytest.raises(Interrupted):
+        StreamedSimulation(p, settings)(eps)
+    monkeypatch.undo()
+    saved = p.model_copy(deep=True)
+    saved.name = 'renamed'
+    saved.region.backend = 'auto'; saved.region.execution_mode = 'streamed_host'; saved.region.snapshot_interval = 7
+    saved.region.tiling.size_um = 12; saved.region.field = 'Hy'; saved.region.slice_position = .1
+    for item in saved.structures + saved.sources + saved.monitors:
+        item.id = 'new-' + item.id; item.name = 'renamed'
+    saved = Project.model_validate(saved.model_dump()).stamped(p.revision + 1)
+    assert saved.content_matches() and saved.revision == p.revision + 1 and saved.content_sha256 != p.content_sha256
+    resumed = StreamedSimulation(saved, settings)(eps)
     assert resumed.report['forward_resumed_from_block'] == 1
     torch.testing.assert_close(resumed.signals.detach(), signals, rtol=0, atol=0)
     later, = torch.autograd.grad(resumed.signals.square().sum(), eps)

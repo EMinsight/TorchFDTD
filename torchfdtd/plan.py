@@ -237,6 +237,7 @@ class SimulationPlan:
     axes: dict
     time_step: float
     steps: int
+    run_control: dict
     sample_time_steps: dict
     fourier_convention: str
     background_index: float
@@ -244,6 +245,7 @@ class SimulationPlan:
     interface_method: str
     subpixel_quadrature: int
     boundaries: BoundaryPlan
+    pml_dispersion: str
     structures: tuple
     materials: tuple
     ade: tuple
@@ -279,10 +281,10 @@ class SimulationPlan:
     # ---- public API ------------------------------------------------------------
     def to_json(self):
         payload = {name: _json_value(getattr(self, name)) for name in
-                   ('dimension', 'size', 'shape', 'nodes', 'axes', 'time_step', 'steps', 'sample_time_steps',
+                   ('dimension', 'size', 'shape', 'nodes', 'axes', 'time_step', 'steps', 'run_control', 'sample_time_steps',
                     'fourier_convention', 'background_index', 'material_sampling', 'interface_method',
-                    'subpixel_quadrature', 'boundaries', 'structures', 'materials', 'ade', 'sources', 'monitors',
-                    'placement')}
+                    'subpixel_quadrature', 'boundaries', 'pml_dispersion', 'structures', 'materials', 'ade', 'sources',
+                    'monitors', 'placement')}
         payload['resources'] = json.loads(json.dumps(self.resources, default=str))
         payload['plan_hash'] = self.plan_hash
         return payload
@@ -344,6 +346,20 @@ def check_snapshot(project, snapshot, owner):
     if project_snapshot(project) != snapshot:
         raise PlanInvalidated(f'{owner}: the project or its realized mesh changed after the plan was fixed. '
                               'Rebuild the model instead of mutating its project during differentiation.')
+
+
+def _run_control(region):
+    """The run-control settings the completed step count depends on.
+
+    With auto_shutoff the decay test decides when the run stops, so the settings it reads
+    enter the time base. The divergence checks abort a run and never change a result.
+    """
+    c = region.run_control
+    if not c.auto_shutoff:
+        return dict(auto_shutoff=False)
+    return dict(auto_shutoff=True, decay_threshold=float(c.decay_threshold), check_interval=int(c.check_interval),
+                consecutive_checks=int(c.consecutive_checks), min_steps=int(c.min_steps),
+                source_tail_amplitude=float(c.source_tail_amplitude), after_source_s=float(c.after_source_s))
 
 
 def _boundary_plan(region):
@@ -459,16 +475,19 @@ def resolve_plan(project):
                       for m in project.materials if m.name in active)
     placement = {k: (r.tiling.model_dump(mode='json') if k == 'tiling' else getattr(r, k)) for k in PLACEMENT_FIELDS}
     values = dict(dimension=r.dimension, size=tuple(float(v) for v in r.size), shape=tuple(int(n) for n in r.shape),
-                  nodes=nodes, axes=axes, time_step=float(r.time_step), steps=int(r.steps),
+                  nodes=nodes, axes=axes, time_step=float(r.time_step), steps=int(r.steps), run_control=_run_control(r),
                   sample_time_steps=dict(SAMPLE_TIME_STEPS), fourier_convention=FOURIER_CONVENTION,
                   background_index=float(r.background_index), material_sampling=r.material_sampling,
                   interface_method=r.interface_method, subpixel_quadrature=int(r.subpixel_quadrature),
-                  boundaries=_boundary_plan(r), structures=structures, materials=materials, ade=_ade_plans(project),
-                  sources=_source_plans(project), monitors=_monitor_plans(project))
+                  boundaries=_boundary_plan(r), pml_dispersion=r.pml_dispersion, structures=structures,
+                  materials=materials, ade=_ade_plans(project), sources=_source_plans(project),
+                  monitors=_monitor_plans(project))
+    # The PML dispersion mode changes the absorber update (docs/BOUNDARIES.md), so it is hashed with the exterior.
     canonical = dict(
         mesh={k: _canonical(values[k]) for k in ('dimension', 'size', 'shape', 'nodes', 'axes')},
-        time={k: _canonical(values[k]) for k in ('time_step', 'steps', 'sample_time_steps', 'fourier_convention')},
-        exterior=dict(background_index=values['background_index'], boundaries=_canonical(values['boundaries'])),
+        time={k: _canonical(values[k]) for k in ('time_step', 'steps', 'run_control', 'sample_time_steps', 'fourier_convention')},
+        exterior=dict(background_index=values['background_index'], boundaries=_canonical(values['boundaries']),
+                      pml_dispersion=values['pml_dispersion']),
         material={k: _canonical(values[k]) for k in ('material_sampling', 'interface_method', 'subpixel_quadrature',
                                                        'background_index', 'structures', 'materials', 'ade')},
         sources=_canonical(values['sources']),

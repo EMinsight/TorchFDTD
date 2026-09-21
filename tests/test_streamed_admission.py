@@ -140,6 +140,87 @@ def test_large_region_requires_explicit_streamed_mode():
         Region(dimension='3d',size=(100001,2,2),mesh=.1,pml_cells=3,memory_mode='streamed')
 
 
+def _auto_mode_scene(faces, **extra):
+    """9.26 million cells with the workbench default execution_mode='auto', which Region validation admits."""
+    import math
+    from torchfdtd import Material, Monitor, Structure
+    from torchfdtd.models import Boundaries, BoundaryFace
+    region = Region(dimension='3d', size=(21., 21., 21.), mesh=.1, pml_cells=3, steps=10, backend='cpu', material_sampling='yee',
+                    boundaries=Boundaries(**{f'{a}_{side}': BoundaryFace(kind=faces[a]) for a in 'xyz' for side in ('min', 'max')}))
+    assert math.prod(region.shape) == 9_261_000 and region.execution_mode == 'auto' and region.memory_mode == 'resident'
+    p = Project(name='big', region=region, **dict(dict(materials=[Material(name='Air', index=1)],
+                sources=[Source(id='s', kind='point', component='Ez', center=(0, 0, -1.), wavelength=1., pulse_cycles=2)],
+                monitors=[Monitor(id='m', component='Ez', center=(.3, .2, 1.))]), **extra))
+    return Project.model_validate(p.model_dump())
+
+
+def _reversible(p):
+    from torchfdtd.reversible import ReversibleSimulation
+    ReversibleSimulation(p)
+
+
+def _reversible_cpml(p):
+    from torchfdtd.reversible_cpml import ReversibleCPMLSimulation
+    ReversibleCPMLSimulation(p)
+
+
+def _tensor(p):
+    from torchfdtd.anisotropy import TensorDielectricSimulation
+    TensorDielectricSimulation(p)
+
+
+def _mode_network(p):
+    from torchfdtd.mode_network import ModeNetwork
+    ModeNetwork(p, ports=[])
+
+
+def _run_tensor(p):
+    from torchfdtd.tensor_native import run_tensor
+    run_tensor(p)
+
+
+def _run_endpoint(p):
+    from torchfdtd.endpoint_native import run_endpoint
+    run_endpoint(p)
+
+
+PERIODIC = dict(x='periodic', y='periodic', z='periodic')
+ENTRY_POINTS = {
+    'ReversibleSimulation': (_reversible, PERIODIC, {}),
+    'ReversibleCPMLSimulation': (_reversible_cpml, dict(x='periodic', y='periodic', z='pml'), {}),
+    'TensorDielectricSimulation': (_tensor, PERIODIC, {}),
+    # The checkpointed API keeps its contract at forward (before allocation); its constructor stays usable for reference().
+    'DifferentiableSimulation.forward': (lambda p: DifferentiableSimulation(p)(None), PERIODIC, {}),
+    'ModeNetwork': (_mode_network, PERIODIC, {}),
+    'run_tensor': (_run_tensor, PERIODIC, 'tensor'),
+    'run_endpoint': (_run_endpoint, dict(x='pmc', y='pmc', z='pmc'), {}),
+}
+
+
+@pytest.mark.parametrize('name', list(ENTRY_POINTS), ids=list(ENTRY_POINTS))
+def test_auto_execution_mode_keeps_the_guard_at_every_resident_entry_point(name, monkeypatch):
+    """Region validation admits the scene under execution_mode='auto'; each resident entry point refuses it before allocating."""
+    import numpy as np
+    from torchfdtd import Material, Structure
+    entry, faces, extra = ENTRY_POINTS[name]
+    if extra == 'tensor':
+        extra = dict(materials=[Material(name='Air', index=1), Material(name='t', model='tensor', epsilon_tensor=(2., 2., 2., 0, 0, 0))],
+                     structures=[Structure(id='b', size=(1., 1., 1.), material='t')])
+    p = _auto_mode_scene(faces, **extra)
+    def tripwire(original):
+        def guarded(*args, **kwargs):
+            shape = args[0] if args and isinstance(args[0], (tuple, list, torch.Size)) else args
+            if all(isinstance(n, int) for n in shape) and np.prod(shape, dtype=np.int64) >= 1_000_000:
+                pytest.fail(f'{name} allocated {tuple(shape)} before refusing the scene')
+            return original(*args, **kwargs)
+        return guarded
+    for module in (torch, np):
+        for attribute in ('zeros', 'empty', 'ones', 'full'):
+            monkeypatch.setattr(module, attribute, tripwire(getattr(module, attribute)))
+    with pytest.raises(ValueError, match='Resident execution is limited to 8 million cells'):
+        entry(p)
+
+
 def test_streamed_mode_rejects_resident_entry_points_before_allocation(monkeypatch):
     p = project(steps=10)
     p.region.memory_mode = 'streamed'

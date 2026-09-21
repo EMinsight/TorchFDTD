@@ -97,6 +97,8 @@ unstable cells are therefore the pole cells in the high-conductivity part of the
 CPML, and the stretched-coordinate CPML as implemented is not a stable absorber
 for them. Freezing has two known limits: a step in permittivity at the interior/
 PML interface for frequencies away from the centre frequency, and no meaning for
-media whose real permittivity is negative at that frequency. An adiabatic
+media whose real permittivity is negative at that frequency; `configure_materials`
+refuses such a material inside the PML with a `ValueError` naming the material,
+the frequency and the value. An adiabatic
 conductivity absorber on the faces touched by dispersive media is the more
 general fix and is not implemented.

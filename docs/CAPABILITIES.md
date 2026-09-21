@@ -19,7 +19,7 @@ else one of them); the rules table gives the code path and the exact
 message prefix. "Rejected" is a contract, not a defect: the code refuses the input before
 allocating fields, with that message.
 
-Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. Lanes: 25.
+Axes: 9. Combinations: 211,680 (11,879 admitted, 199,801 rejected). Rules: 86. Lanes: 25.
 
 ## Axes
 
@@ -77,62 +77,62 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | Dimension \ Mesh | uniform | graded | explicit nodes |
 | --- | --- | --- | --- |
 | 2D | ✓ 1736/35280 | ✓ 1724/35280 | ✓ 1724/35280 |
-| 3D | ✓ 2396/35280 | ✓ 2146/35280 | ✓ 2152/35280 |
+| 3D | ✓ 2397/35280 | ✓ 2146/35280 | ✓ 2152/35280 |
 
 ### Dimension × Material
 
 | Dimension \ Material | dielectric | dispersive ADE | anisotropic tensor | tensor ADE | PEC material |
 | --- | --- | --- | --- | --- | --- |
 | 2D | ✓ 2646/21168 | ✓ 2538/21168 | ✗ tensor_project_2d | ✗ tensor_project_2d | ✗ material_pec_schema |
-| 3D | ✓ 3493/21168 | ✓ 3154/21168 | ✓ 35/21168 | ✓ 12/21168 | ✗ material_pec_schema |
+| 3D | ✓ 3493/21168 | ✓ 3154/21168 | ✓ 36/21168 | ✓ 12/21168 | ✗ material_pec_schema |
 
 ### Dimension × Boundaries
 
 | Dimension \ Boundaries | CPML | periodic | Bloch | PEC | antisymmetric | PMC | symmetric |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2D | ✓ 1140/15120 | ✓ 1236/15120 | ✓ 792/15120 | ✓ 1008/15120 | ✓ 1008/15120 | ✗ pmc_2d_schema | ✗ pmc_2d_schema |
-| 3D | ✓ 1530/15120 | ✓ 1741/15120 | ✓ 1155/15120 | ✓ 888/15120 | ✓ 888/15120 | ✓ 246/15120 | ✓ 246/15120 |
+| 3D | ✓ 1530/15120 | ✓ 1741/15120 | ✓ 1156/15120 | ✓ 888/15120 | ✓ 888/15120 | ✓ 246/15120 | ✓ 246/15120 |
 
 ### Dimension × Source
 
 | Dimension \ Source | point | sheet | plane one-way | TFSF | mode | tiled sheet |
 | --- | --- | --- | --- | --- | --- | --- |
 | 2D | ✓ 1608/17640 | ✓ 1608/17640 | ✓ 228/17640 | ✓ 120/17640 | ✗ modal_periodic_launch_region | ✓ 1620/17640 |
-| 3D | ✓ 2482/17640 | ✓ 2424/17640 | ✓ 282/17640 | ✓ 120/17640 | ✓ 78/17640 | ✓ 1308/17640 |
+| 3D | ✓ 2483/17640 | ✓ 2424/17640 | ✓ 282/17640 | ✓ 120/17640 | ✓ 78/17640 | ✓ 1308/17640 |
 
 ### Dimension × Monitor
 
 | Dimension \ Monitor | point | plane DFT | mode port | radiation box |
 | --- | --- | --- | --- | --- |
 | 2D | ✓ 2586/26460 | ✓ 2598/26460 | ✗ port_periodic_launch_region | ✗ radiation_box_2d_schema |
-| 3D | ✓ 2804/26460 | ✓ 2316/26460 | ✓ 54/26460 | ✓ 1520/26460 |
+| 3D | ✓ 2805/26460 | ✓ 2316/26460 | ✓ 54/26460 | ✓ 1520/26460 |
 
 ### Dimension × Execution
 
 | Dimension \ Execution | forward | checkpointed adjoint | reversible adjoint | streamed | streamed adjoint | tensor batch | tiled |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2D | ✓ 1152/15120 | ✓ 1116/15120 | ✗ reversible_cpml_region | ✓ 1116/15120 | ✓ 1116/15120 | ✓ 672/15120 | ✓ 12/15120 |
-| 3D | ✓ 1088/15120 | ✓ 1611/15120 | ✓ 51/15120 | ✓ 1626/15120 | ✓ 1626/15120 | ✓ 680/15120 | ✓ 12/15120 |
+| 3D | ✓ 1089/15120 | ✓ 1611/15120 | ✓ 51/15120 | ✓ 1626/15120 | ✓ 1626/15120 | ✓ 680/15120 | ✓ 12/15120 |
 
 ### Dimension × Precision
 
 | Dimension \ Precision | float32 | float64 |
 | --- | --- | --- |
 | 2D | ✓ 2592/52920 | ✓ 2592/52920 |
-| 3D | ✓ 3417/52920 | ✓ 3277/52920 |
+| 3D | ✓ 3418/52920 | ✓ 3277/52920 |
 
 ### Dimension × Backend
 
 | Dimension \ Backend | CPU | CUDA Torch | CUDA fused |
 | --- | --- | --- | --- |
 | 2D | ✓ 1528/35280 | ✓ 1864/35280 | ✓ 1792/35280 |
-| 3D | ✓ 2047/35280 | ✓ 2387/35280 | ✓ 2260/35280 |
+| 3D | ✓ 2047/35280 | ✓ 2387/35280 | ✓ 2261/35280 |
 
 ### Mesh × Material
 
 | Mesh \ Material | dielectric | dispersive ADE | anisotropic tensor | tensor ADE | PEC material |
 | --- | --- | --- | --- | --- | --- |
-| uniform | ✓ 2173/14112 | ✓ 1912/14112 | ✓ 35/14112 | ✓ 12/14112 | ✗ material_pec_schema |
+| uniform | ✓ 2173/14112 | ✓ 1912/14112 | ✓ 36/14112 | ✓ 12/14112 | ✗ material_pec_schema |
 | graded | ✓ 1980/14112 | ✓ 1890/14112 | ✗ tensor_project_mesh | ✗ tensor_project_mesh | ✗ material_pec_schema |
 | explicit nodes | ✓ 1986/14112 | ✓ 1890/14112 | ✗ tensor_project_mesh | ✗ tensor_project_mesh | ✗ material_pec_schema |
 
@@ -140,7 +140,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Mesh \ Boundaries | CPML | periodic | Bloch | PEC | antisymmetric | PMC | symmetric |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| uniform | ✓ 950/10080 | ✓ 1077/10080 | ✓ 675/10080 | ✓ 632/10080 | ✓ 632/10080 | ✓ 83/10080 | ✓ 83/10080 |
+| uniform | ✓ 950/10080 | ✓ 1077/10080 | ✓ 676/10080 | ✓ 632/10080 | ✓ 632/10080 | ✓ 83/10080 | ✓ 83/10080 |
 | graded | ✓ 860/10080 | ✓ 950/10080 | ✓ 636/10080 | ✓ 632/10080 | ✓ 632/10080 | ✓ 80/10080 | ✓ 80/10080 |
 | explicit nodes | ✓ 860/10080 | ✓ 950/10080 | ✓ 636/10080 | ✓ 632/10080 | ✓ 632/10080 | ✓ 83/10080 | ✓ 83/10080 |
 
@@ -148,7 +148,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Mesh \ Source | point | sheet | plane one-way | TFSF | mode | tiled sheet |
 | --- | --- | --- | --- | --- | --- | --- |
-| uniform | ✓ 1420/11760 | ✓ 1368/11760 | ✓ 170/11760 | ✓ 80/11760 | ✓ 78/11760 | ✓ 1016/11760 |
+| uniform | ✓ 1421/11760 | ✓ 1368/11760 | ✓ 170/11760 | ✓ 80/11760 | ✓ 78/11760 | ✓ 1016/11760 |
 | graded | ✓ 1332/11760 | ✓ 1332/11760 | ✓ 170/11760 | ✓ 80/11760 | ✗ modal_periodic_launch_mesh | ✓ 956/11760 |
 | explicit nodes | ✓ 1338/11760 | ✓ 1332/11760 | ✓ 170/11760 | ✓ 80/11760 | ✗ modal_periodic_launch_mesh | ✓ 956/11760 |
 
@@ -156,7 +156,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Mesh \ Monitor | point | plane DFT | mode port | radiation box |
 | --- | --- | --- | --- | --- |
-| uniform | ✓ 1840/17640 | ✓ 1690/17640 | ✓ 54/17640 | ✓ 548/17640 |
+| uniform | ✓ 1841/17640 | ✓ 1690/17640 | ✓ 54/17640 | ✓ 548/17640 |
 | graded | ✓ 1772/17640 | ✓ 1612/17640 | ✗ port_periodic_launch_mesh | ✓ 486/17640 |
 | explicit nodes | ✓ 1778/17640 | ✓ 1612/17640 | ✗ port_periodic_launch_mesh | ✓ 486/17640 |
 
@@ -164,7 +164,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Mesh \ Execution | forward | checkpointed adjoint | reversible adjoint | streamed | streamed adjoint | tensor batch | tiled |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| uniform | ✓ 794/10080 | ✓ 947/10080 | ✓ 51/10080 | ✓ 930/10080 | ✓ 930/10080 | ✓ 456/10080 | ✓ 24/10080 |
+| uniform | ✓ 795/10080 | ✓ 947/10080 | ✓ 51/10080 | ✓ 930/10080 | ✓ 930/10080 | ✓ 456/10080 | ✓ 24/10080 |
 | graded | ✓ 720/10080 | ✓ 890/10080 | ✗ reversible_cpml_mesh | ✓ 906/10080 | ✓ 906/10080 | ✓ 448/10080 | ✗ tiled_mesh |
 | explicit nodes | ✓ 726/10080 | ✓ 890/10080 | ✗ reversible_cpml_mesh | ✓ 906/10080 | ✓ 906/10080 | ✓ 448/10080 | ✗ tiled_mesh |
 
@@ -172,7 +172,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Mesh \ Precision | float32 | float64 |
 | --- | --- | --- |
-| uniform | ✓ 2133/35280 | ✓ 1999/35280 |
+| uniform | ✓ 2134/35280 | ✓ 1999/35280 |
 | graded | ✓ 1935/35280 | ✓ 1935/35280 |
 | explicit nodes | ✓ 1941/35280 | ✓ 1935/35280 |
 
@@ -180,7 +180,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Mesh \ Backend | CPU | CUDA Torch | CUDA fused |
 | --- | --- | --- | --- |
-| uniform | ✓ 1249/23520 | ✓ 1477/23520 | ✓ 1406/23520 |
+| uniform | ✓ 1249/23520 | ✓ 1477/23520 | ✓ 1407/23520 |
 | graded | ✓ 1162/23520 | ✓ 1386/23520 | ✓ 1322/23520 |
 | explicit nodes | ✓ 1164/23520 | ✓ 1388/23520 | ✓ 1324/23520 |
 
@@ -190,7 +190,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | dielectric | ✓ 1342/6048 | ✓ 1671/6048 | ✓ 978/6048 | ✓ 948/6048 | ✓ 948/6048 | ✓ 126/6048 | ✓ 126/6048 |
 | dispersive ADE | ✓ 1312/6048 | ✓ 1290/6048 | ✓ 954/6048 | ✓ 948/6048 | ✓ 948/6048 | ✓ 120/6048 | ✓ 120/6048 |
-| anisotropic tensor | ✓ 12/6048 | ✓ 12/6048 | ✓ 11/6048 | ✗ tensor_project_faces | ✗ tensor_project_faces | ✗ tensor_project_faces | ✗ tensor_project_faces |
+| anisotropic tensor | ✓ 12/6048 | ✓ 12/6048 | ✓ 12/6048 | ✗ tensor_project_faces | ✗ tensor_project_faces | ✗ tensor_project_faces | ✗ tensor_project_faces |
 | tensor ADE | ✓ 4/6048 | ✓ 4/6048 | ✓ 4/6048 | ✗ tensor_project_faces | ✗ tensor_project_faces | ✗ tensor_project_faces | ✗ tensor_project_faces |
 | PEC material | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema |
 
@@ -200,7 +200,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- | --- | --- | --- | --- |
 | dielectric | ✓ 2035/7056 | ✓ 2034/7056 | ✓ 390/7056 | ✓ 120/7056 | ✓ 78/7056 | ✓ 1482/7056 |
 | dispersive ADE | ✓ 2008/7056 | ✓ 1998/7056 | ✓ 120/7056 | ✓ 120/7056 | ✗ modal_periodic_launch_materials | ✓ 1446/7056 |
-| anisotropic tensor | ✓ 35/7056 | ✗ tensor_project_sources | ✗ tensor_project_sources | ✗ tensor_project_sources | ✗ tensor_project_sources | ✗ tensor_project_sources |
+| anisotropic tensor | ✓ 36/7056 | ✗ tensor_project_sources | ✗ tensor_project_sources | ✗ tensor_project_sources | ✗ tensor_project_sources | ✗ tensor_project_sources |
 | tensor ADE | ✓ 12/7056 | ✗ tensor_project_sources | ✗ tensor_project_sources | ✗ tensor_project_sources | ✗ tensor_project_sources | ✗ tensor_project_sources |
 | PEC material | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema |
 
@@ -210,7 +210,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- | --- | --- |
 | dielectric | ✓ 2739/10584 | ✓ 2538/10584 | ✓ 54/10584 | ✓ 808/10584 |
 | dispersive ADE | ✓ 2604/10584 | ✓ 2376/10584 | ✗ port_periodic_launch_materials | ✓ 712/10584 |
-| anisotropic tensor | ✓ 35/10584 | ✗ tensor_project_monitors | ✗ tensor_project_monitors | ✗ tensor_project_monitors |
+| anisotropic tensor | ✓ 36/10584 | ✗ tensor_project_monitors | ✗ tensor_project_monitors | ✗ tensor_project_monitors |
 | tensor ADE | ✓ 12/10584 | ✗ tensor_project_monitors | ✗ tensor_project_monitors | ✗ tensor_project_monitors |
 | PEC material | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema |
 
@@ -220,7 +220,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | dielectric | ✓ 1140/6048 | ✓ 1422/6048 | ✓ 51/6048 | ✓ 1419/6048 | ✓ 1419/6048 | ✓ 676/6048 | ✓ 12/6048 |
 | dispersive ADE | ✓ 1086/6048 | ✓ 1290/6048 | ✗ reversible_cpml_materials | ✓ 1314/6048 | ✓ 1314/6048 | ✓ 676/6048 | ✓ 12/6048 |
-| anisotropic tensor | ✓ 8/6048 | ✓ 9/6048 | ✗ reversible_materials | ✓ 9/6048 | ✓ 9/6048 | ✗ tensor_batch_tensor_material | ✗ tensor_project_2d |
+| anisotropic tensor | ✓ 9/6048 | ✓ 9/6048 | ✗ reversible_materials | ✓ 9/6048 | ✓ 9/6048 | ✗ tensor_batch_tensor_material | ✗ tensor_project_2d |
 | tensor ADE | ✓ 6/6048 | ✓ 6/6048 | ✗ tensor_ade_unavailable | ✗ tensor_ade_streamed_unavailable | ✗ tensor_ade_streamed_unavailable | ✗ tensor_ade_unavailable | ✗ tensor_ade_unavailable |
 | PEC material | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema |
 
@@ -230,7 +230,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- |
 | dielectric | ✓ 3116/21168 | ✓ 3023/21168 |
 | dispersive ADE | ✓ 2846/21168 | ✓ 2846/21168 |
-| anisotropic tensor | ✓ 35/21168 | ✗ tensor_project_fp64 |
+| anisotropic tensor | ✓ 36/21168 | ✗ tensor_project_fp64 |
 | tensor ADE | ✓ 12/21168 | ✗ tensor_project_fp64 |
 | PEC material | ✗ material_pec_schema | ✗ material_pec_schema |
 
@@ -240,7 +240,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- | --- |
 | dielectric | ✓ 1853/14112 | ✓ 2191/14112 | ✓ 2095/14112 |
 | dispersive ADE | ✓ 1704/14112 | ✓ 2042/14112 | ✓ 1946/14112 |
-| anisotropic tensor | ✓ 12/14112 | ✓ 12/14112 | ✓ 11/14112 |
+| anisotropic tensor | ✓ 12/14112 | ✓ 12/14112 | ✓ 12/14112 |
 | tensor ADE | ✓ 6/14112 | ✓ 6/14112 | ✗ tensor_ade_fused_backward |
 | PEC material | ✗ material_pec_schema | ✗ material_pec_schema | ✗ material_pec_schema |
 
@@ -250,7 +250,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- | --- | --- | --- | --- |
 | CPML | ✓ 816/5040 | ✓ 786/5040 | ✗ oneway_needs_periodic_transverse | ✓ 240/5040 | ✓ 18/5040 | ✓ 810/5040 |
 | periodic | ✓ 805/5040 | ✓ 801/5040 | ✓ 510/5040 | ✗ tfsf_needs_pml_everywhere | ✓ 60/5040 | ✓ 801/5040 |
-| Bloch | ✓ 657/5040 | ✓ 645/5040 | ✗ oneway_needs_periodic_transverse | ✗ tfsf_needs_pml_everywhere | ✗ modal_periodic_launch_region | ✓ 645/5040 |
+| Bloch | ✓ 658/5040 | ✓ 645/5040 | ✗ oneway_needs_periodic_transverse | ✗ tfsf_needs_pml_everywhere | ✗ modal_periodic_launch_region | ✓ 645/5040 |
 | PEC | ✓ 780/5040 | ✓ 780/5040 | ✗ oneway_needs_periodic_transverse | ✗ tfsf_needs_pml_everywhere | ✗ sheet_writes_pec_wall | ✓ 336/5040 |
 | antisymmetric | ✓ 780/5040 | ✓ 780/5040 | ✗ oneway_needs_periodic_transverse | ✗ tfsf_needs_pml_everywhere | ✗ sheet_writes_pec_wall | ✓ 336/5040 |
 | PMC | ✓ 126/5040 | ✓ 120/5040 | ✗ oneway_needs_periodic_transverse | ✗ tfsf_needs_pml_everywhere | ✗ modal_periodic_launch_mesh | ✗ pmc_sheet_reaches_wall |
@@ -262,7 +262,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- | --- | --- |
 | CPML | ✓ 1144/7560 | ✓ 1164/7560 | ✓ 18/7560 | ✓ 344/7560 |
 | periodic | ✓ 1261/7560 | ✓ 1269/7560 | ✓ 36/7560 | ✓ 411/7560 |
-| Bloch | ✓ 813/7560 | ✓ 801/7560 | ✗ port_periodic_launch_region | ✓ 333/7560 |
+| Bloch | ✓ 814/7560 | ✓ 801/7560 | ✗ port_periodic_launch_region | ✓ 333/7560 |
 | PEC | ✓ 840/7560 | ✓ 840/7560 | ✗ port_periodic_launch_region | ✓ 216/7560 |
 | antisymmetric | ✓ 840/7560 | ✓ 840/7560 | ✗ port_periodic_launch_region | ✓ 216/7560 |
 | PMC | ✓ 246/7560 | ✗ planes_pmc | ✗ port_periodic_launch_mesh | ✗ planes_pmc |
@@ -274,7 +274,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | CPML | ✓ 605/4320 | ✓ 557/4320 | ✗ reversible_cpml_region | ✓ 546/4320 | ✓ 546/4320 | ✓ 392/4320 | ✓ 24/4320 |
 | periodic | ✓ 611/4320 | ✓ 665/4320 | ✓ 27/4320 | ✓ 645/4320 | ✓ 645/4320 | ✓ 384/4320 | ✗ tiled_faces |
-| Bloch | ✓ 292/4320 | ✓ 545/4320 | ✓ 24/4320 | ✓ 543/4320 | ✓ 543/4320 | ✗ tensor_batch_complex | ✗ tiled_complex |
+| Bloch | ✓ 293/4320 | ✓ 545/4320 | ✓ 24/4320 | ✓ 543/4320 | ✓ 543/4320 | ✗ tensor_batch_complex | ✗ tiled_complex |
 | PEC | ✓ 360/4320 | ✓ 432/4320 | ✗ reversible_cpml_region | ✓ 432/4320 | ✓ 432/4320 | ✓ 240/4320 | ✗ tiled_faces |
 | antisymmetric | ✓ 360/4320 | ✓ 432/4320 | ✗ reversible_cpml_region | ✓ 432/4320 | ✓ 432/4320 | ✓ 240/4320 | ✗ tiled_faces |
 | PMC | ✓ 6/4320 | ✓ 48/4320 | ✗ reversible_cpml_pmc_planes | ✓ 72/4320 | ✓ 72/4320 | ✓ 48/4320 | ✗ tiled_faces |
@@ -286,7 +286,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- |
 | CPML | ✓ 1358/15120 | ✓ 1312/15120 |
 | periodic | ✓ 1510/15120 | ✓ 1467/15120 |
-| Bloch | ✓ 993/15120 | ✓ 954/15120 |
+| Bloch | ✓ 994/15120 | ✓ 954/15120 |
 | PEC | ✓ 948/15120 | ✓ 948/15120 |
 | antisymmetric | ✓ 948/15120 | ✓ 948/15120 |
 | PMC | ✓ 126/15120 | ✓ 120/15120 |
@@ -298,7 +298,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 | --- | --- | --- | --- |
 | CPML | ✓ 760/10080 | ✓ 956/10080 | ✓ 954/10080 |
 | periodic | ✓ 865/10080 | ✓ 1057/10080 | ✓ 1055/10080 |
-| Bloch | ✓ 698/10080 | ✓ 698/10080 | ✓ 551/10080 |
+| Bloch | ✓ 698/10080 | ✓ 698/10080 | ✓ 552/10080 |
 | PEC | ✓ 552/10080 | ✓ 672/10080 | ✓ 672/10080 |
 | antisymmetric | ✓ 552/10080 | ✓ 672/10080 | ✓ 672/10080 |
 | PMC | ✓ 74/10080 | ✓ 98/10080 | ✓ 74/10080 |
@@ -308,7 +308,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Source \ Monitor | point | plane DFT | mode port | radiation box |
 | --- | --- | --- | --- | --- |
-| point | ✓ 1910/8820 | ✓ 1614/8820 | ✗ port_periodic_launch_template | ✓ 566/8820 |
+| point | ✓ 1911/8820 | ✓ 1614/8820 | ✗ port_periodic_launch_template | ✓ 566/8820 |
 | sheet | ✓ 1854/8820 | ✓ 1614/8820 | ✓ 18/8820 | ✓ 546/8820 |
 | plane one-way | ✓ 228/8820 | ✓ 228/8820 | ✗ port_periodic_launch_template | ✓ 54/8820 |
 | TFSF | ✓ 120/8820 | ✓ 120/8820 | ✗ port_open_launch_tfsf_template | ✗ radiation_box_mesh |
@@ -319,7 +319,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Source \ Execution | forward | checkpointed adjoint | reversible adjoint | streamed | streamed adjoint | tensor batch | tiled |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| point | ✓ 710/5040 | ✓ 963/5040 | ✓ 15/5040 | ✓ 981/5040 | ✓ 981/5040 | ✓ 440/5040 | ✗ tiled_sources |
+| point | ✓ 711/5040 | ✓ 963/5040 | ✓ 15/5040 | ✓ 981/5040 | ✓ 981/5040 | ✓ 440/5040 | ✗ tiled_sources |
 | sheet | ✓ 681/5040 | ✓ 957/5040 | ✓ 18/5040 | ✓ 972/5040 | ✓ 972/5040 | ✓ 432/5040 | ✗ tiled_sheet_span |
 | plane one-way | ✓ 144/5040 | ✓ 90/5040 | ✗ reversible_cpml_sources | ✓ 90/5040 | ✓ 90/5040 | ✓ 96/5040 | ✗ mode_port_unavailable |
 | TFSF | ✓ 144/5040 | ✗ differentiable_tfsf | ✗ mode_port_unavailable | ✗ differentiable_tfsf | ✗ differentiable_tfsf | ✓ 96/5040 | ✗ tiled_sources |
@@ -330,7 +330,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Source \ Precision | float32 | float64 |
 | --- | --- | --- |
-| point | ✓ 2082/17640 | ✓ 2008/17640 |
+| point | ✓ 2083/17640 | ✓ 2008/17640 |
 | sheet | ✓ 2028/17640 | ✓ 2004/17640 |
 | plane one-way | ✓ 255/17640 | ✓ 255/17640 |
 | TFSF | ✓ 120/17640 | ✓ 120/17640 |
@@ -341,7 +341,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Source \ Backend | CPU | CUDA Torch | CUDA fused |
 | --- | --- | --- | --- |
-| point | ✓ 1243/11760 | ✓ 1463/11760 | ✓ 1384/11760 |
+| point | ✓ 1243/11760 | ✓ 1463/11760 | ✓ 1385/11760 |
 | sheet | ✓ 1224/11760 | ✓ 1440/11760 | ✓ 1368/11760 |
 | plane one-way | ✓ 138/11760 | ✓ 186/11760 | ✓ 186/11760 |
 | TFSF | ✓ 48/11760 | ✓ 96/11760 | ✓ 96/11760 |
@@ -352,7 +352,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Monitor \ Execution | forward | checkpointed adjoint | reversible adjoint | streamed | streamed adjoint | tensor batch | tiled |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| point | ✓ 1106/7560 | ✓ 1155/7560 | ✓ 15/7560 | ✓ 1197/7560 | ✓ 1197/7560 | ✓ 720/7560 | ✗ tiled_monitor |
+| point | ✓ 1107/7560 | ✓ 1155/7560 | ✓ 15/7560 | ✓ 1197/7560 | ✓ 1197/7560 | ✓ 720/7560 | ✗ tiled_monitor |
 | plane DFT | ✓ 1089/7560 | ✓ 1053/7560 | ✓ 18/7560 | ✓ 1053/7560 | ✓ 1053/7560 | ✓ 624/7560 | ✓ 24/7560 |
 | mode port | ✓ 27/7560 | ✓ 27/7560 | ✗ mode_port_unavailable | ✗ mode_network_streamed | ✗ mode_network_streamed | ✗ mode_port_unavailable | ✗ mode_port_unavailable |
 | radiation box | ✓ 18/7560 | ✓ 492/7560 | ✓ 18/7560 | ✓ 492/7560 | ✓ 492/7560 | ✓ 8/7560 | ✗ tiled_monitor |
@@ -361,7 +361,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Monitor \ Precision | float32 | float64 |
 | --- | --- | --- |
-| point | ✓ 2732/26460 | ✓ 2658/26460 |
+| point | ✓ 2733/26460 | ✓ 2658/26460 |
 | plane DFT | ✓ 2472/26460 | ✓ 2442/26460 |
 | mode port | ✓ 36/26460 | ✓ 18/26460 |
 | radiation box | ✓ 769/26460 | ✓ 751/26460 |
@@ -370,7 +370,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Monitor \ Backend | CPU | CUDA Torch | CUDA fused |
 | --- | --- | --- | --- |
-| point | ✓ 1599/17640 | ✓ 1959/17640 | ✓ 1832/17640 |
+| point | ✓ 1599/17640 | ✓ 1959/17640 | ✓ 1833/17640 |
 | plane DFT | ✓ 1454/17640 | ✓ 1766/17640 | ✓ 1694/17640 |
 | mode port | ✓ 18/17640 | ✓ 18/17640 | ✓ 18/17640 |
 | radiation box | ✓ 504/17640 | ✓ 508/17640 | ✓ 508/17640 |
@@ -379,7 +379,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Execution \ Precision | float32 | float64 |
 | --- | --- | --- |
-| forward | ✓ 1139/15120 | ✓ 1101/15120 |
+| forward | ✓ 1140/15120 | ✓ 1101/15120 |
 | checkpointed adjoint | ✓ 1377/15120 | ✓ 1350/15120 |
 | reversible adjoint | ✓ 51/15120 | ✗ reversible_cpml_fp64 |
 | streamed | ✓ 1377/15120 | ✓ 1365/15120 |
@@ -391,7 +391,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Execution \ Backend | CPU | CUDA Torch | CUDA fused |
 | --- | --- | --- | --- |
-| forward | ✓ 796/10080 | ✓ 796/10080 | ✓ 648/10080 |
+| forward | ✓ 796/10080 | ✓ 796/10080 | ✓ 649/10080 |
 | checkpointed adjoint | ✓ 926/10080 | ✓ 926/10080 | ✓ 875/10080 |
 | reversible adjoint | ✓ 17/10080 | ✓ 17/10080 | ✓ 17/10080 |
 | streamed | ✓ 914/10080 | ✓ 914/10080 | ✓ 914/10080 |
@@ -403,7 +403,7 @@ Axes: 9. Combinations: 211,680 (11,878 admitted, 199,802 rejected). Rules: 86. L
 
 | Precision \ Backend | CPU | CUDA Torch | CUDA fused |
 | --- | --- | --- | --- |
-| float32 | ✓ 1812/35280 | ✓ 2150/35280 | ✓ 2047/35280 |
+| float32 | ✓ 1812/35280 | ✓ 2150/35280 | ✓ 2048/35280 |
 | float64 | ✓ 1763/35280 | ✓ 2101/35280 | ✓ 2005/35280 |
 
 ## Lanes (admitted entry points)
@@ -497,7 +497,7 @@ The realized definition of an oblique source, served as the `incidence` block an
 | 44 | `endpoint_ade` | boundary: pmc, symmetric; material: dispersive_ade (executions: forward) | entry | `torchfdtd/endpoint_native.py::validate_endpoint_project` | ValueError | PMC native dispatch does not support ADE/dispersive materials. |
 | 45 | `endpoint_sources` | boundary: pmc, symmetric; source: plane_oneway, sheet, tfsf, tiled_sheet (executions: forward) | entry | `torchfdtd/endpoint_native.py::validate_endpoint_project` | ValueError | PMC native dispatch accepts enabled point soft electric sources only. |
 | 46 | `endpoint_monitors` | boundary: pmc, symmetric; monitor: plane_dft, radiation_box (executions: forward) | entry | `torchfdtd/endpoint_native.py::validate_endpoint_project` | ValueError | PMC native dispatch accepts enabled point E/H monitors at every timestep only. |
-| 47 | `forward_fused_complex` | backend: cuda_fused; boundary: bloch (executions: forward) | entry | `torchfdtd/solver.py::Simulation._run` | ValueError | The fused CUDA kernel currently supports real fields. Select cuda_kernel="torch" for Bloch fields. Refused before the grid is allocated; FusedYeeCUDA repeats the refusal. |
+| 47 | `forward_fused_complex` | backend: cuda_fused; boundary: bloch; material: dielectric, dispersive_ade, pec (executions: forward) | entry | `torchfdtd/solver.py::Simulation._run` | ValueError | The fused CUDA kernel currently supports real fields. Select cuda_kernel="torch" for Bloch fields. Refused before the grid is allocated; FusedYeeCUDA repeats the refusal. Tensor materials are dispatched to run_tensor before this check and ignore the kernel choice. |
 | 48 | `differentiable_tfsf` | source: tfsf (executions: checkpointed_adjoint, streamed, streamed_adjoint) | entry | `torchfdtd/differentiable.py::DifferentiableSimulation.__init__` | ValueError | Live TFSF incident-state derivatives are not implemented yet. |
 | 49 | `dispersive_pmc_fused` | material: dispersive_ade; boundary: pmc, symmetric; backend: cuda_fused; monitor: point (executions: checkpointed_adjoint) | entry | `torchfdtd/dispersive_adjoint.py::DispersiveSimulation.__init__` | ValueError | The fused CUDA ADE kernels do not implement stored PMC/symmetric faces. Use cuda_kernel="torch" and backward_kernel="torch". |
 | 50 | `dispersive_oneway` | material: dispersive_ade; source: plane_oneway; monitor: point (executions: checkpointed_adjoint) | entry | `torchfdtd/dispersive_adjoint.py::DispersiveSimulation.__init__` | ValueError | Dispersive differentiation currently requires soft source injection. |
@@ -523,9 +523,9 @@ The realized definition of an oblique source, served as the `incidence` block an
 | 70 | `reversible_cpml_materials` | boundary: bloch, periodic; material: anisotropic_tensor, dispersive_ade (executions: reversible_adjoint) | entry | `torchfdtd/reversible_cpml.py::_validate_project` | ValueError | ReversibleCPMLSimulation supports only nondispersive dielectric declarations. |
 | 71 | `reversible_cpml_sources` | boundary: bloch, periodic; source: plane_oneway, tfsf (executions: reversible_adjoint) | entry | `torchfdtd/reversible_cpml.py::_validate_project` | ValueError | ReversibleCPMLSimulation supports fixed soft electric point or z-normal plane sources only. |
 | 72 | `tensor_batch_cpu` | backend: cpu (executions: tensor_batch) | entry | `torchfdtd/tensor_batch.py::run_tensor_batch` | ValueError | Tensor batch cannot execute a CPU project. Set backend="cuda" or "auto" explicitly. |
-| 73 | `tensor_batch_complex` | boundary: bloch (executions: tensor_batch) | entry | `torchfdtd/tensor_batch.py::run_tensor_batch` | ValueError | Tensor batch currently requires real fields. Use BatchRunner for complex Bloch fields. |
-| 74 | `tensor_batch_pmc_planes` | boundary: pmc, symmetric; monitor: plane_dft, radiation_box (executions: tensor_batch) | entry | `torchfdtd/tensor_batch.py::_validate_pmc_case` | ValueError | Tensor batch does not implement field monitors with PMC/symmetric faces; use point monitors. |
-| 75 | `tensor_batch_tensor_material` | material: anisotropic_tensor (executions: tensor_batch) | entry | `torchfdtd/tensor_batch.py::run_tensor_batch` | ValueError | Tensor batch does not implement tensor materials; run the native tensor solver per project. |
+| 73 | `tensor_batch_tensor_material` | material: anisotropic_tensor (executions: tensor_batch) | entry | `torchfdtd/tensor_batch.py::run_tensor_batch` | ValueError | Tensor batch does not implement tensor materials; run the native tensor solver per project. |
+| 74 | `tensor_batch_complex` | boundary: bloch (executions: tensor_batch) | entry | `torchfdtd/tensor_batch.py::run_tensor_batch` | ValueError | Tensor batch currently requires real fields. Use BatchRunner for complex Bloch fields. |
+| 75 | `tensor_batch_pmc_planes` | boundary: pmc, symmetric; monitor: plane_dft, radiation_box (executions: tensor_batch) | entry | `torchfdtd/tensor_batch.py::_validate_pmc_case` | ValueError | Tensor batch does not implement field monitors with PMC/symmetric faces; use point monitors. |
 | 76 | `tensor_batch_pmc_sheet_reaches_wall` | boundary: pmc, symmetric; source: tiled_sheet (executions: tensor_batch) | entry | `torchfdtd/tensor_batch.py::_validate_pmc_case` | ValueError | {source}: only point sources may address a stored upper PMC/symmetric face; plane sources must end below the wall. Checked from the prepared source terms before the cohort grids are allocated; FusedBatchIO repeats the refusal. |
 | 77 | `tiled_mesh` | mesh: explicit, graded (executions: tiled) | entry | `torchfdtd/tiled.py::plan_tiles` | ValueError | Tiling requires a uniform mesh with one spacing on every axis. |
 | 78 | `tiled_complex` | boundary: bloch (executions: tiled) | entry | `torchfdtd/tiled.py::plan_tiles` | ValueError | Tiling requires real fields; a Bloch phase describes a periodic cell, not a finite device. |

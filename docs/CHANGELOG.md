@@ -137,6 +137,21 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Fixed
 
+- `Region.pml_dispersion` enters the plan's `exterior` section, so the frozen and ADE absorber updates no longer share a plan hash, reference, cache or restart key (this commit).
+- `pml_dispersion='frozen'` refuses a dispersive material inside the PML whose real permittivity at the reference frequency is not positive, naming the material, the frequency and the value, instead of clamping to 1e-3 and diverging (this commit).
+- The capability registry checks the tensor material before complex fields for the tensor batch and lets tensor materials with Bloch faces reach `run_tensor` under the fused kernel choice, as the code does (this commit).
+- `ReversibleSimulation`, `ReversibleCPMLSimulation`, `TensorDielectricSimulation`, `ModeNetwork` and `run_endpoint` apply the resident contract (byte budget or the eight-million-cell guard) at construction or dispatch, before any allocation, since Region validation applies it only to `execution_mode='resident'` (this commit).
+- The streamed restart journal hashes the scene through the identity field selection of `torchfdtd.identity`, so a workbench save (revision, content hash, placement, labels) between an interruption and the resume no longer refuses the journal (this commit).
+- `scripts/run_readme_examples.py` records a block timeout as a failed block with the captured output instead of dying on the text-mode output (this commit).
+- `torchfdtd doctor` probes every installed `cupy*` distribution and reports its import failure as an error; the "not installed" notice is kept only when no CuPy distribution exists (this commit).
+- The execution preflight reports `memory_mode='budgeted'` as the dispatch refusal it would be, `/api/validate` shows the error and `/api/jobs` refuses a scene the preflight rejects with 422 instead of queuing a job that fails at dispatch (this commit).
+- The provenance scan decodes JSON `\uXXXX` and percent-encoded paths before matching and recognises drive-less, UNC administrative-share and macOS home forms of the private user paths (this commit).
+- `/api/health` and `torchfdtd hardware` report CPU execution when torch says CUDA is available but no device is visible (`CUDA_VISIBLE_DEVICES=""`), instead of failing on the device query (this commit).
+- The README "Compared with Meep" block renders the solver precisions and the Meep rank count from the records instead of fixed strings; the tests refuse a rank or precision token that is not a record value (this commit).
+- The server's `Host` allowlist is the loopback names only; the test suite admits `testserver` through `TORCHFDTD_ALLOWED_HOSTS` from `tests/conftest.py` (this commit).
+- The run-control settings the automatic shutoff reads enter the plan's `time` section, so `auto_shutoff` and its decay settings change the plan hash and every identity key; the divergence checks stay outside (this commit).
+- `ResultFile` closes the HDF5 handle when a metadata attribute fails to parse after the format check (this commit).
+- The metagrating and metalens comparison scripts import torchfdtd from the checkout that holds them, as the microring script does, and exit with the imported path named instead of a bare assertion (this commit).
 - Plane fingerprints split; the solver time base and Yee positions are checked (c05d0ff).
 - Pre-existing geometry gradients compared at round-off tolerance instead of bitwise (b12fb6d).
 - Torch default dtype restored after the PEC boundary tests and after the CUDA subpixel lifetime test (da848f7, 50fa68b).

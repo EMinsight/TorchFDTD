@@ -5,6 +5,7 @@ import torch
 
 from torchfdtd import (Project, Structure, Monitor, FieldMonitor, BoundaryFace, SpectrumSettings,
                        Simulation, DifferentiableSimulation, StreamedAdjointOptions)
+from torchfdtd.models import RunControl
 from torchfdtd.identity import (reference_key, cache_key, restart_key, identity, invalidated,
                                 REFERENCE_SECTIONS, CACHE_SECTIONS, KERNEL_SCHEME_FIELDS)
 from torchfdtd.plan import resolve_plan
@@ -67,8 +68,11 @@ MATRIX = {
     'mesh': (lambda p: setattr(p.region, 'mesh', .08), ('reference', 'cache', 'restart'), True, True),
     'time_step': (lambda p: setattr(p.region, 'courant_factor', .8), ('reference', 'cache', 'restart'), True, True),
     'steps': (lambda p: setattr(p.region, 'steps', 30), ('reference', 'cache', 'restart'), True, True),
+    'auto_shutoff': (lambda p: setattr(p.region, 'run_control', RunControl(auto_shutoff=True)), ('reference', 'cache', 'restart'), False, False),
+    'inert_divergence_setting': (lambda p: setattr(p.region, 'run_control', RunControl(field_limit=1e3, growth_limit=10)), (), False, False),
     'background': (lambda p: setattr(p.region, 'background_index', 1.2), ('reference', 'cache', 'restart'), True, True),
     'pml': (lambda p: setattr(p.region.boundaries, 'x_max', BoundaryFace(kappa=3)), ('reference', 'cache', 'restart'), True, True),
+    'pml_dispersion': (lambda p: setattr(p.region, 'pml_dispersion', 'frozen'), ('reference', 'cache', 'restart'), False, False),
     'bloch': (bloch, ('reference', 'cache', 'restart'), True, True),
     'plane_geometry': (lambda p: setattr(p.monitors[1], 'size', (0, .45, .55)), ('reference', 'cache', 'restart'), True, True),
     'plane_apodization': (apodize, ('reference', 'cache', 'restart'), True, True),

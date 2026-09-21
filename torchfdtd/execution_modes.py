@@ -40,7 +40,8 @@ OBSERVER_WARNING = 50_000
 
 def execution_resources():
     """Live resource record: the /api/health fields the resolver reads."""
-    cuda = torch.cuda.is_available()
+    # With CUDA_VISIBLE_DEVICES="" this torch build reports is_available() but no device.
+    cuda = torch.cuda.is_available() and torch.cuda.device_count() > 0
     record = dict(cuda=cuda, cupy=False, gpu=None, gpu_free_bytes=0, gpu_total_bytes=0)
     if cuda:
         free, total = torch.cuda.mem_get_info()
@@ -313,8 +314,12 @@ def resolve_execution(project, *, health, scratch, summary=None):
         else:
             record['error'] = 'Tiling rejected the scene. '+candidate['reason']
         return record
-    if r.memory_mode == 'budgeted' or requested == 'resident' or (requested == 'auto' and resident['fits']):
-        record.update(mode='resident', reason=resident['reason'] if r.memory_mode != 'budgeted' else 'budgeted scenes use the adjoint API')
+    if r.memory_mode == 'budgeted':
+        # The same refusal Region.require_resident raises at dispatch, reported before the job is accepted.
+        record['error'] = 'Budgeted scenes require the adjoint API and an explicit resident byte budget.'
+        return record
+    if requested == 'resident' or (requested == 'auto' and resident['fits']):
+        record.update(mode='resident', reason=resident['reason'])
         if requested == 'resident' and not resident['fits']:
             record['warnings'].append('Resident execution was requested but '+resident['reason']+'.')
         return record

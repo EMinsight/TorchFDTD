@@ -178,19 +178,22 @@ class ResultFile:
         h5py = _h5py()
         self.path = Path(path)
         self._file = h5py.File(self.path, 'r')
-        attrs = self._file.attrs
-        if attrs.get('format') != FORMAT:
+        try:
+            attrs = self._file.attrs
+            if attrs.get('format') != FORMAT:
+                raise ValueError(f'{self.path} is not a torchfdtd result file.')
+            self.layout = int(attrs.get('layout', 0))
+            if self.layout > LAYOUT:
+                raise ValueError(f'{self.path} uses result layout {self.layout}, newer than layout {LAYOUT} this torchfdtd reads.')
+            self.project = Project.model_validate_json(str(attrs['project']))
+            self.summary = json.loads(str(attrs['summary']))
+            self.units = str(attrs['units'])
+            self.monitor_spectra = json.loads(str(attrs['monitor_spectra']))
+            self._plane_metadata = json.loads(str(attrs['field_monitors']))
+        except BaseException:
+            # A corrupted or foreign metadata attribute must not leave the handle open.
             self._file.close()
-            raise ValueError(f'{self.path} is not a torchfdtd result file.')
-        self.layout = int(attrs.get('layout', 0))
-        if self.layout > LAYOUT:
-            self._file.close()
-            raise ValueError(f'{self.path} uses result layout {self.layout}, newer than layout {LAYOUT} this torchfdtd reads.')
-        self.project = Project.model_validate_json(str(attrs['project']))
-        self.summary = json.loads(str(attrs['summary']))
-        self.units = str(attrs['units'])
-        self.monitor_spectra = json.loads(str(attrs['monitor_spectra']))
-        self._plane_metadata = json.loads(str(attrs['field_monitors']))
+            raise
 
     def __enter__(self):
         return self

@@ -133,8 +133,8 @@
  "recipe": "* Region 2.4 x 2.4 um transverse and 2.4 um along the propagation axis d\n  (z in 3D, y in 2D), mesh 0.1 um, 3 PML cells, 12 steps, Yee material\n  sampling, staircase interfaces. ``graded`` refines the mesh around the\n  structure (mesh_max 0.2 um, 6 points per wavelength); ``explicit`` freezes\n  those graded nodes as fixed coordinates.\n* The material sits in one block of 0.45 x 0.45 x 0.45 um at the centre; mode\n  scenes (mode source or mode-port monitor) stretch it into a straight guide\n  along d instead.\n  ``dielectric`` is a constant index 2; ``dispersive_ade`` a two-pole\n  Drude/Lorentz multipole material; ``anisotropic_tensor`` a symmetric tensor\n  material; ``tensor_ade`` the same tensor material whose Lorentz pole is\n  passed to the tensor-ADE API as explicit pole tensors; ``pec`` an ideal\n  conductor material, which the schema does not offer.\n* The boundary kind applies to every active face. Directional scenes (sheet,\n  one-way, TFSF, mode and tiled-sheet sources, plane, mode-port and\n  radiation-box monitors, tiled execution) carry CPML on the two d faces and\n  the boundary kind on the transverse faces. CPML faces use alpha = 0 so that the PMC\n  endpoint profile contract can accept them. Bloch faces carry a phase of\n  0.3 rad on their axis.\n* Sources are Gaussian, 1 um carrier, two cycles. ``point`` is an Ez point\n  source; ``sheet`` a soft plane through the interior; ``plane_oneway`` a\n  one-way plane over the whole transverse cell; ``tfsf`` a 0.8 um box;\n  ``mode`` the soft plane template of a fixed-eigenmode launch;\n  ``tiled_sheet`` a soft plane extended through the lateral PML.\n* Monitors: ``point`` one Ez probe; ``plane_dft`` one d-normal frequency plane\n  over the transverse interior (one cell short of PEC/PMC walls);\n  ``mode_port`` two opposing fixed mode ports (no project monitors);\n  ``radiation_box`` six frequency planes on a closed 0.8 um box, projected\n  to the far field after the run.\n* ``precision`` is Region.precision; ``cpu`` is backend cpu, ``cuda_torch`` is\n  backend cuda with the Torch kernels, ``cuda_fused`` backend cuda with the\n  fused CuPy kernels.",
  "summary": {
   "total": 211680,
-  "admitted": 11878,
-  "rejected": 199802,
+  "admitted": 11879,
+  "rejected": 199801,
   "rules": 86,
   "lanes": 25,
   "unused": []
@@ -1246,6 +1246,11 @@
     ],
     "boundary": [
      "bloch"
+    ],
+    "material": [
+     "dielectric",
+     "dispersive_ade",
+     "pec"
     ]
    },
    "stage": "entry",
@@ -1256,7 +1261,7 @@
    "executions": [
     "forward"
    ],
-   "note": "Refused before the grid is allocated; FusedYeeCUDA repeats the refusal."
+   "note": "Refused before the grid is allocated; FusedYeeCUDA repeats the refusal. Tensor materials are dispatched to run_tensor before this check and ignore the kernel choice."
   },
   {
    "name": "differentiable_tfsf",
@@ -1872,6 +1877,23 @@
    "note": ""
   },
   {
+   "name": "tensor_batch_tensor_material",
+   "when": {
+    "material": [
+     "anisotropic_tensor"
+    ]
+   },
+   "stage": "entry",
+   "code_path": "torchfdtd/tensor_batch.py::run_tensor_batch",
+   "message": "Tensor batch does not implement tensor materials; run the native tensor solver per project.",
+   "format": {},
+   "exception": "ValueError",
+   "executions": [
+    "tensor_batch"
+   ],
+   "note": ""
+  },
+  {
    "name": "tensor_batch_complex",
    "when": {
     "boundary": [
@@ -1903,23 +1925,6 @@
    "stage": "entry",
    "code_path": "torchfdtd/tensor_batch.py::_validate_pmc_case",
    "message": "Tensor batch does not implement field monitors with PMC/symmetric faces; use point monitors.",
-   "format": {},
-   "exception": "ValueError",
-   "executions": [
-    "tensor_batch"
-   ],
-   "note": ""
-  },
-  {
-   "name": "tensor_batch_tensor_material",
-   "when": {
-    "material": [
-     "anisotropic_tensor"
-    ]
-   },
-   "stage": "entry",
-   "code_path": "torchfdtd/tensor_batch.py::run_tensor_batch",
-   "message": "Tensor batch does not implement tensor materials; run the native tensor solver per project.",
    "format": {},
    "exception": "ValueError",
    "executions": [
@@ -2605,7 +2610,7 @@
    },
    "3d|uniform": {
     "status": "admitted",
-    "admitted": 2396,
+    "admitted": 2397,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -2770,13 +2775,13 @@
    },
    "3d|anisotropic_tensor": {
     "status": "admitted",
-    "admitted": 35,
+    "admitted": 36,
     "total": 21168,
     "reason": null,
     "lanes": {
      "streamed.tensor": 18,
-     "checkpointed.tensor": 9,
-     "forward.tensor": 8
+     "forward.tensor": 9,
+     "checkpointed.tensor": 9
     },
     "rules": {
      "tensor_project_fp64": 8883,
@@ -2969,7 +2974,7 @@
    },
    "3d|bloch": {
     "status": "admitted",
-    "admitted": 1155,
+    "admitted": 1156,
     "total": 15120,
     "reason": null,
     "lanes": {
@@ -3162,7 +3167,7 @@
    },
    "3d|point": {
     "status": "admitted",
-    "admitted": 2482,
+    "admitted": 2483,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -3332,7 +3337,7 @@
    },
    "3d|point": {
     "status": "admitted",
-    "admitted": 2804,
+    "admitted": 2805,
     "total": 26460,
     "reason": null,
     "lanes": {
@@ -3516,7 +3521,7 @@
    },
    "3d|forward": {
     "status": "admitted",
-    "admitted": 1088,
+    "admitted": 1089,
     "total": 15120,
     "reason": null,
     "lanes": {
@@ -3673,7 +3678,7 @@
    },
    "3d|float32": {
     "status": "admitted",
-    "admitted": 3417,
+    "admitted": 3418,
     "total": 52920,
     "reason": null,
     "lanes": {
@@ -3801,7 +3806,7 @@
    },
    "3d|cuda_fused": {
     "status": "admitted",
-    "admitted": 2260,
+    "admitted": 2261,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -3857,13 +3862,13 @@
    },
    "uniform|anisotropic_tensor": {
     "status": "admitted",
-    "admitted": 35,
+    "admitted": 36,
     "total": 14112,
     "reason": null,
     "lanes": {
      "streamed.tensor": 18,
-     "checkpointed.tensor": 9,
-     "forward.tensor": 8
+     "forward.tensor": 9,
+     "checkpointed.tensor": 9
     },
     "rules": {
      "tensor_project_2d": 5922,
@@ -4088,7 +4093,7 @@
    },
    "uniform|bloch": {
     "status": "admitted",
-    "admitted": 675,
+    "admitted": 676,
     "total": 10080,
     "reason": null,
     "lanes": {
@@ -4432,7 +4437,7 @@
   "mesh|source": {
    "uniform|point": {
     "status": "admitted",
-    "admitted": 1420,
+    "admitted": 1421,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -4742,7 +4747,7 @@
   "mesh|monitor": {
    "uniform|point": {
     "status": "admitted",
-    "admitted": 1840,
+    "admitted": 1841,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -4948,14 +4953,14 @@
   "mesh|execution": {
    "uniform|forward": {
     "status": "admitted",
-    "admitted": 794,
+    "admitted": 795,
     "total": 10080,
     "reason": null,
     "lanes": {
      "forward.grid": 732,
      "forward.mode_network": 27,
      "forward.modal_planes": 15,
-     "forward.tensor": 8
+     "forward.tensor": 9
     },
     "rules": {
      "tensor_project_2d": 2016,
@@ -5290,7 +5295,7 @@
   "mesh|precision": {
    "uniform|float32": {
     "status": "admitted",
-    "admitted": 2133,
+    "admitted": 2134,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -5436,7 +5441,7 @@
    },
    "uniform|cuda_fused": {
     "status": "admitted",
-    "admitted": 1406,
+    "admitted": 1407,
     "total": 23520,
     "reason": null,
     "lanes": {
@@ -5848,13 +5853,13 @@
    },
    "anisotropic_tensor|bloch": {
     "status": "admitted",
-    "admitted": 11,
+    "admitted": 12,
     "total": 6048,
     "reason": null,
     "lanes": {
      "streamed.tensor": 6,
-     "checkpointed.tensor": 3,
-     "forward.tensor": 2
+     "forward.tensor": 3,
+     "checkpointed.tensor": 3
     },
     "rules": {
      "tensor_project_2d": 2538,
@@ -6308,13 +6313,13 @@
    },
    "anisotropic_tensor|point": {
     "status": "admitted",
-    "admitted": 35,
+    "admitted": 36,
     "total": 7056,
     "reason": null,
     "lanes": {
      "streamed.tensor": 18,
-     "checkpointed.tensor": 9,
-     "forward.tensor": 8
+     "forward.tensor": 9,
+     "checkpointed.tensor": 9
     },
     "rules": {
      "tensor_project_2d": 3150,
@@ -6676,13 +6681,13 @@
    },
    "anisotropic_tensor|point": {
     "status": "admitted",
-    "admitted": 35,
+    "admitted": 36,
     "total": 10584,
     "reason": null,
     "lanes": {
      "streamed.tensor": 18,
-     "checkpointed.tensor": 9,
-     "forward.tensor": 8
+     "forward.tensor": 9,
+     "checkpointed.tensor": 9
     },
     "rules": {
      "tensor_project_2d": 4914,
@@ -7057,11 +7062,11 @@
    },
    "anisotropic_tensor|forward": {
     "status": "admitted",
-    "admitted": 8,
+    "admitted": 9,
     "total": 6048,
     "reason": null,
     "lanes": {
-     "forward.tensor": 8
+     "forward.tensor": 9
     },
     "rules": {
      "tensor_project_2d": 3024,
@@ -7392,13 +7397,13 @@
    },
    "anisotropic_tensor|float32": {
     "status": "admitted",
-    "admitted": 35,
+    "admitted": 36,
     "total": 21168,
     "reason": null,
     "lanes": {
      "streamed.tensor": 18,
-     "checkpointed.tensor": 9,
-     "forward.tensor": 8
+     "forward.tensor": 9,
+     "checkpointed.tensor": 9
     },
     "rules": {
      "tensor_project_2d": 8883,
@@ -7619,13 +7624,13 @@
    },
    "anisotropic_tensor|cuda_fused": {
     "status": "admitted",
-    "admitted": 11,
+    "admitted": 12,
     "total": 14112,
     "reason": null,
     "lanes": {
      "streamed.tensor": 6,
-     "checkpointed.tensor": 3,
-     "forward.tensor": 2
+     "forward.tensor": 3,
+     "checkpointed.tensor": 3
     },
     "rules": {
      "tensor_project_2d": 5922,
@@ -7923,7 +7928,7 @@
    },
    "bloch|point": {
     "status": "admitted",
-    "admitted": 657,
+    "admitted": 658,
     "total": 5040,
     "reason": null,
     "lanes": {
@@ -8520,7 +8525,7 @@
    },
    "bloch|point": {
     "status": "admitted",
-    "admitted": 813,
+    "admitted": 814,
     "total": 7560,
     "reason": null,
     "lanes": {
@@ -9069,12 +9074,12 @@
    },
    "bloch|forward": {
     "status": "admitted",
-    "admitted": 292,
+    "admitted": 293,
     "total": 4320,
     "reason": null,
     "lanes": {
      "forward.grid": 288,
-     "forward.tensor": 2,
+     "forward.tensor": 3,
      "forward.tensor_ade": 2
     },
     "rules": {
@@ -9684,7 +9689,7 @@
    },
    "bloch|float32": {
     "status": "admitted",
-    "admitted": 993,
+    "admitted": 994,
     "total": 15120,
     "reason": null,
     "lanes": {
@@ -10010,7 +10015,7 @@
    },
    "bloch|cuda_fused": {
     "status": "admitted",
-    "admitted": 551,
+    "admitted": 552,
     "total": 10080,
     "reason": null,
     "lanes": {
@@ -10246,7 +10251,7 @@
   "source|monitor": {
    "point|point": {
     "status": "admitted",
-    "admitted": 1910,
+    "admitted": 1911,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10641,13 +10646,13 @@
   "source|execution": {
    "point|forward": {
     "status": "admitted",
-    "admitted": 710,
+    "admitted": 711,
     "total": 5040,
     "reason": null,
     "lanes": {
      "forward.grid": 684,
      "forward.endpoint": 12,
-     "forward.tensor": 8,
+     "forward.tensor": 9,
      "forward.tensor_ade": 6
     },
     "rules": {
@@ -11280,7 +11285,7 @@
   "source|precision": {
    "point|float32": {
     "status": "admitted",
-    "admitted": 2082,
+    "admitted": 2083,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -11530,7 +11535,7 @@
    },
    "point|cuda_fused": {
     "status": "admitted",
-    "admitted": 1384,
+    "admitted": 1385,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11813,13 +11818,13 @@
   "monitor|execution": {
    "point|forward": {
     "status": "admitted",
-    "admitted": 1106,
+    "admitted": 1107,
     "total": 7560,
     "reason": null,
     "lanes": {
      "forward.grid": 1080,
      "forward.endpoint": 12,
-     "forward.tensor": 8,
+     "forward.tensor": 9,
      "forward.tensor_ade": 6
     },
     "rules": {
@@ -12240,7 +12245,7 @@
   "monitor|precision": {
    "point|float32": {
     "status": "admitted",
-    "admitted": 2732,
+    "admitted": 2733,
     "total": 26460,
     "reason": null,
     "lanes": {
@@ -12418,7 +12423,7 @@
    },
    "point|cuda_fused": {
     "status": "admitted",
-    "admitted": 1832,
+    "admitted": 1833,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12594,7 +12599,7 @@
   "execution|precision": {
    "forward|float32": {
     "status": "admitted",
-    "admitted": 1139,
+    "admitted": 1140,
     "total": 15120,
     "reason": null,
     "lanes": {
@@ -12865,7 +12870,7 @@
    },
    "forward|cuda_fused": {
     "status": "admitted",
-    "admitted": 648,
+    "admitted": 649,
     "total": 10080,
     "reason": null,
     "lanes": {
@@ -13222,7 +13227,7 @@
    },
    "float32|cuda_fused": {
     "status": "admitted",
-    "admitted": 2047,
+    "admitted": 2048,
     "total": 35280,
     "reason": null,
     "lanes": {

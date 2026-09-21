@@ -112,6 +112,33 @@ def test_plan_json_and_diff_name_the_changed_keys():
         plan.diff(object())
 
 
+def test_pml_dispersion_enters_the_exterior_section_and_the_hash():
+    plan = resolve_plan(scene())
+    frozen = resolve_plan(scene(pml_dispersion='frozen'))
+    assert plan.pml_dispersion == 'ade' and frozen.pml_dispersion == 'frozen'
+    assert frozen.plan_hash != plan.plan_hash
+    assert frozen.diff(plan) == ['exterior.pml_dispersion']
+    assert frozen.sections['exterior']['pml_dispersion'] == 'frozen'
+    assert frozen.to_json()['pml_dispersion'] == 'frozen'
+
+
+def test_run_control_enters_the_time_section_through_the_shutoff_decision():
+    """The settings the automatic shutoff reads change the completed step count; the divergence checks never change a result."""
+    from torchfdtd.models import RunControl
+    plan = resolve_plan(scene())
+    assert plan.run_control == {'auto_shutoff': False} and plan.sections['time']['run_control'] == {'auto_shutoff': False}
+    inert = resolve_plan(scene(run_control=RunControl(min_steps=20, check_interval=5, field_limit=1e3, growth_limit=10)))
+    assert inert.plan_hash == plan.plan_hash and inert.diff(plan) == []
+    on = resolve_plan(scene(run_control=RunControl(auto_shutoff=True)))
+    keys = on.diff(plan)
+    assert on.plan_hash != plan.plan_hash and 'time.run_control.auto_shutoff' in keys and all(k.startswith('time.run_control.') for k in keys)
+    assert on.to_json()['run_control']['auto_shutoff'] is True and on.to_json()['run_control']['min_steps'] == 100
+    tuned = resolve_plan(scene(run_control=RunControl(auto_shutoff=True, min_steps=20)))
+    assert tuned.diff(on) == ['time.run_control.min_steps']
+    divergence = resolve_plan(scene(run_control=RunControl(auto_shutoff=True, field_limit=1e3, divergence_check=False)))
+    assert divergence.plan_hash == on.plan_hash and divergence.diff(on) == []
+
+
 def test_entry_points_share_the_plan_for_point_monitors(tmp_path):
     from fastapi.testclient import TestClient
     from torchfdtd.server import create_app

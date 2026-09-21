@@ -26,13 +26,17 @@ from pathlib import Path
 import numpy as np
 import torch
 
-import torchfdtd
-from torchfdtd import (Boundaries, BoundaryFace, FieldMonitor, Material, Project, Region, Simulation, Source, SpectrumSettings,
-                       Structure)
-from torchfdtd.solver import field_axes, source_slice, voxelize
-from torchfdtd.waveforms import source_time_signal
-
 HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[2]
+# Import torchfdtd from the checkout that holds this example, as the microring script does.
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
+import torchfdtd  # noqa: E402
+from torchfdtd import (Boundaries, BoundaryFace, FieldMonitor, Material, Project, Region, Simulation, Source, SpectrumSettings,  # noqa: E402
+                       Structure)
+from torchfdtd.solver import field_axes, source_slice, voxelize  # noqa: E402
+from torchfdtd.waveforms import source_time_signal  # noqa: E402
+
 GEOMETRY = HERE / 'geometry.json'
 C0 = 299792458.0
 
@@ -171,14 +175,21 @@ def timed_run(project):
     return result, dict(setup_seconds=result.summary['setup_seconds'], stepping_seconds=result.summary['seconds'], full_seconds=full)
 
 
+def require_checkout_import():
+    """The records name the commit of the checkout that holds this example; an installed wheel would misattribute them."""
+    imported = Path(torchfdtd.__file__).resolve()
+    if not str(imported).startswith(str(REPO)):
+        raise SystemExit(f'torchfdtd was imported from {imported}, not from the checkout {REPO} that holds this example. '
+                         f'Run the script from that checkout: cd {REPO} && python {HERE.relative_to(REPO).as_posix()}/{Path(__file__).name} ...')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', required=True)
     parser.add_argument('--timing', action='store_true', help='one warm-up, then three timed grating solves')
     parser.add_argument('--geometry', default=str(GEOMETRY))
     args = parser.parse_args()
-    worktree = str(HERE.parents[2])
-    assert torchfdtd.__file__.startswith(worktree), (torchfdtd.__file__, worktree)
+    require_checkout_import()
     g = load_geometry(args.geometry)
     assert g['ridges'], 'geometry.json carries no ridges; run design.py first'
     torch.backends.cudnn.benchmark = False

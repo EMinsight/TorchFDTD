@@ -12,7 +12,11 @@ caches, references and journals that hold state apply them.
 
 `torchfdtd.plan.resolve_plan(project)` runs the existing resolvers once and
 freezes their outputs in a `SimulationPlan`: realized mesh nodes and the six
-Yee component coordinates, `dt`, the step count and the half-step convention,
+Yee component coordinates, `dt`, the step count, the run-control settings the
+automatic shutoff reads (`auto_shutoff` and, when it is on, the decay threshold,
+check interval, consecutive checks, minimum steps, source tail amplitude and
+post-source delay; the divergence checks abort a run and are not hashed) and the
+half-step convention,
 the per-face boundary kinds with the CPML profiles (`kappa`, `sigma`,
 `alpha`) and update coefficients (`b`, `c`) of every segment, the Bloch
 phases and wrap factors, the ADE coefficients of every dispersive material,
@@ -45,8 +49,8 @@ all six sections; `plan.diff(other)` names the differing keys.
 | Cache validity | reference sections plus `material`, `monitors` | `precision` | `cache_key(plan)` |
 | Restart contract | cache sections | kernel scheme (`cuda_kernel`, `cuda_monitor_kernel`), the exact epsilon tensor (bytes, shape, dtype), the execution options (without the journal path and cadence), the runtime source hashes, the torch version | `restart_key(plan, epsilon=..., options=...)` |
 
-`exterior` holds the background index, the boundary faces and every CPML
-coefficient array; `material` holds the sampling mode, the interface method
+`exterior` holds the background index, the boundary faces, every CPML
+coefficient array and the PML dispersion mode (`pml_dispersion`); `material` holds the sampling mode, the interface method
 and quadrature, the enabled structures with their rasterization order, the
 effective parameters of the materials they use and the ADE coefficients.
 
@@ -63,7 +67,10 @@ What each change invalidates (`invalidated(before, after)`), as
 | effective waveform: amplitude, phase, source position, polarization | yes | yes | yes |
 | a source setting the sampled waveform does not read | | | |
 | mesh nodes, time step, step count | yes | yes | yes |
+| automatic shutoff and its decay settings (`run_control`) | yes | yes | yes |
+| a divergence check setting (`field_limit`, `growth_limit`) | | | |
 | background index, PML profile, Bloch phase | yes | yes | yes |
+| PML dispersion mode (`pml_dispersion`) | yes | yes | yes |
 | field-monitor geometry, downsampling, apodization | yes | yes | yes |
 | field-monitor frequency samples, point-monitor position | | yes | yes |
 | the epsilon tensor handed to a differentiable run | | | yes |

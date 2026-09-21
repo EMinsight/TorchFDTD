@@ -123,7 +123,11 @@ def run_blocks(blocks, python, cuda_python=None, workdir=None, checkout=None):
                                            timeout=TIMEOUT_SECONDS)
                 exit_code, stdout, stderr = completed.returncode, completed.stdout, completed.stderr
             except subprocess.TimeoutExpired as exc:
-                exit_code, stdout, stderr = None, (exc.stdout or b'').decode('utf-8', 'replace'), f'timeout after {TIMEOUT_SECONDS} s'
+                # The partial output is str on Windows (run() re-reads it in text mode) and bytes on POSIX.
+                stdout = exc.stdout or ''
+                if isinstance(stdout, bytes):
+                    stdout = stdout.decode('utf-8', 'replace')
+                exit_code, stderr = None, f'timeout after {TIMEOUT_SECONDS} s'
             record.update(status='passed' if exit_code == 0 else 'failed', interpreter=executable, exit_code=exit_code,
                           seconds=round(time.perf_counter() - started, 2), stdout_tail=stdout[-2000:], stderr_tail=stderr[-2000:])
         records.append(record)

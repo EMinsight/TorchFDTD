@@ -28,6 +28,7 @@ apart from a missing GPU.
 """
 import ast
 import inspect
+import os
 import re
 import textwrap
 
@@ -52,6 +53,8 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
+    # The server allows loopback Host headers only; the TestClient default host is admitted here, for the tests alone.
+    os.environ.setdefault('TORCHFDTD_ALLOWED_HOSTS', 'testserver')
     config.addinivalue_line('markers', 'cuda: needs a CUDA device (and CuPy for fused kernels); deselected in cpu-pr, a skip fails under --gpu-required')
     config.addinivalue_line('markers', 'long: opt-in long or isolated test enabled only by the release-full suite')
     config.addinivalue_line('markers', 'optional: mixed-platform check whose skip is permitted in every suite (two-GPU NCCL, Gloo, licensed tools)')

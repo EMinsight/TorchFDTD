@@ -29,7 +29,7 @@ This is an engineering description, not a certification.
 
 | Control | Where | Behaviour |
 | --- | --- | --- |
-| Host header | `TrustedHostMiddleware` in `torchfdtd/server.py` | Requests whose `Host` is not `localhost`, `127.0.0.1` or the test host answer 400 before any route runs, so a DNS-rebinding page cannot reach the API through a name it controls |
+| Host header | `TrustedHostMiddleware` in `torchfdtd/server.py` | Requests whose `Host` is not `localhost`, `127.0.0.1` or `[::1]` answer 400 before any route runs, so a DNS-rebinding page cannot reach the API through a name it controls. `TORCHFDTD_ALLOWED_HOSTS` (comma-separated) adds names; the test suite sets it to `testserver`, the `TestClient` default host, in `tests/conftest.py`, and no deployment sets it |
 | Origin header | `local_origin` middleware | Any request carrying an `Origin` that differs from the server's own origin, including `null`, answers 403 on every route. A browser page on another site therefore cannot start jobs, upload files or read results through the victim's server |
 | Body size | `local_origin` middleware | A declared `Content-Length` above `MAX_REQUEST_BYTES` (32 MB) answers 413; the FSP upload routes use `fsp.MAX_FSP_BYTES` (128 MiB). A body without a declared length (`Transfer-Encoding: chunked`) answers 411, because the limit could not be applied before a JSON route reads the whole body. A malformed `Content-Length` answers 400 |
 | Upload streaming | `/api/gds/inspect`, `/api/fsp/import`, `/api/fsp/native-import` | Bodies are read in chunks and the request is refused at 413 as soon as the running total passes the route's limit |

@@ -34,9 +34,9 @@ Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md]
 <!-- meep-comparison:start -->
 ## Compared with Meep
 
-Three devices were each set up once from one geometry file and run in TorchFDTD (NVIDIA GeForce RTX 3060, float32, fused CUDA kernels) and in Meep 1.34.0 (CPU, float64, MPI) on the same grid, time step, step count, source, monitors and staircase material sampling, with the agreement criteria declared before the first comparison run. Every number in the table is read from the records in `docs/validation/meep_comparison/` by `scripts/render_meep_comparison.py`; the timing rows are development runs on a shared host (Meep with four ranks) until the maintainer's `--timing` rerun on a quiet host replaces them.
+Three devices were each set up once from one geometry file and run in TorchFDTD (NVIDIA GeForce RTX 3060, float32, fused CUDA kernels) and in Meep 1.34.0 (CPU, float64, MPI) on the same grid, time step, step count, source, monitors and staircase material sampling, with the agreement criteria declared before the first comparison run. Every number in the table is read from the records in `docs/validation/meep_comparison/` by `scripts/render_meep_comparison.py`; the timing rows are development runs on a shared host (Meep with 4 ranks) until the maintainer's `--timing` rerun on a quiet host replaces them.
 
-| Device | Cells x steps | Agreement versus its criterion | TorchFDTD GPU stepping (s) | Meep CPU stepping (s), 12 ranks when timed | Ratio |
+| Device | Cells x steps | Agreement versus its criterion | TorchFDTD GPU stepping (s) | Meep CPU stepping (s), 4 ranks | Ratio |
 |---|---|---|---|---|---|
 | [2D microring resonator with a bus waveguide (Ez)](examples/meep_comparison/microring) | 469,500 x 89,219 | resonance wavelengths, max difference 5.6e-05 nm (limit 0.2 nm); 5/5 pass | 31.36 | 217.05 (4 ranks; development run, shared host) | 6.9 |
 | [2D silicon ridge metalens (Ez)](examples/meep_comparison/metalens) | 825,600 x 5,200 | focusing efficiency, difference 4.0e-06 (limit 0.01); 4/4 pass | 1.57 | 13.29 (4 ranks; development run, shared host) | 8.5 |

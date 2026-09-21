@@ -689,10 +689,15 @@ def journal_contract(project, epsilon, options, starts):
     settings.pop('restart_directory', None)
     settings.pop('restart_every_blocks', None)
     settings = {k: (str(v) if isinstance(v, Path) else v) for k, v in settings.items()}
-    # Item ids are generated labels that differ between processes; the physics
-    # contract hashes the scene without them.
-    labels = {'__all__': {'id'}}
-    scene = project.model_dump_json(exclude={'structures': labels, 'sources': labels, 'monitors': labels})
+    # The scene enters through the restart-contract field selection of torchfdtd.identity
+    # (docs/IDENTITY_CONDITIONS.md): the resolved plan's cache sections plus the kernel
+    # scheme. Labels, placement, display settings, the revision and the content hash a
+    # workbench save adds between the interruption and the resume are not hashed.
+    from .identity import cache_payload, KERNEL_SCHEME_FIELDS
+    from .plan import resolve_plan
+    plan = resolve_plan(project)
+    scene = json.dumps(dict(cache_payload(plan), kernel_scheme={k: plan.placement[k] for k in KERNEL_SCHEME_FIELDS}),
+                       sort_keys=True, allow_nan=False)
     return dict(project_sha256=hashlib.sha256(scene.encode('utf-8')).hexdigest(),
                 epsilon_sha256=sha256_tensor(epsilon), epsilon_shape=list(epsilon.shape), epsilon_dtype=str(epsilon.dtype),
                 options=settings, starts=list(starts), runtime_sha256=runtime_sources(), torch=torch.__version__)

@@ -1,5 +1,6 @@
 """Workbench execution modes: Auto resolution from a resource record and streamed browser jobs."""
 from dataclasses import replace
+import re
 import time
 
 import numpy as np
@@ -220,6 +221,25 @@ def test_large_auto_scene_validates_and_resolves_streamed(tmp_path):
     app.state.pool.shutdown()
 
 
+def test_budgeted_scene_is_refused_by_the_preflight_before_a_job_is_accepted(tmp_path):
+    """memory_mode='budgeted' belongs to the adjoint API; the preflight reports the dispatch refusal and the job route returns 422."""
+    p = scene(memory_mode='budgeted')
+    message = 'Budgeted scenes require the adjoint API and an explicit resident byte budget.'
+    with pytest.raises(ValueError, match=re.escape(message)):
+        p.region.require_resident()
+    record = resolve_execution(p, health=CPU_RECORD, scratch=tmp_path, summary=estimate(p))
+    assert record['mode'] is None and record['error'] == message
+    app = create_app(tmp_path)
+    with TestClient(app) as client:
+        response = client.post('/api/validate', json=p.model_dump())
+        assert response.status_code == 200
+        assert response.json()['execution']['mode'] is None and response.json()['execution']['error'] == message
+        response = client.post('/api/jobs', json=p.model_dump())
+        assert response.status_code == 422 and response.json()['detail'] == message
+        assert client.get('/api/jobs').json() == []
+    app.state.pool.shutdown()
+
+
 def _sparse_row(**overrides):
     """The 2D sparse pillar row of the tiling record: two 3 um tiles at 2 um overlap stitch it exactly."""
     from test_tiled import pillar_row
@@ -287,7 +307,8 @@ def test_tiled_mode_reports_the_planner_rejection(tmp_path):
     assert any('below the suggested' in w for w in record['warnings'])
     app = create_app(tmp_path)
     with TestClient(app) as client:
-        key = client.post('/api/jobs', json=q.model_dump()).json()['id']
-        job = _finished(client, key)
-        assert job['status'] == 'failed' and 'Tiling rejected the scene' in job['error']
+        # The preflight rejection refuses the submission; nothing is queued to fail at dispatch.
+        response = client.post('/api/jobs', json=q.model_dump())
+        assert response.status_code == 422 and 'Tiling rejected the scene' in response.json()['detail']
+        assert client.get('/api/jobs').json() == []
     app.state.pool.shutdown()
