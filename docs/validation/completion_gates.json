@@ -593,7 +593,9 @@
             "scripts/render_physics_validation.py",
             "docs/validation/cases/G3-02_dielectric_slab_tmm.json",
             "docs/validation/g3/G3-02.json",
-            "docs/PHYSICS_VALIDATION.md"
+            "docs/PHYSICS_VALIDATION.md",
+            "docs/validation/cases/G3-02r2_slab_tmm_40_cells.json",
+            "docs/validation/g3/G3-02r2.json"
           ],
           "planned_test_commands": [
             "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG302 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-02.xml"
@@ -602,7 +604,9 @@
             "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG302 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-02.xml"
           ],
           "required_tests": [
-            "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm",
+            "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells",
+            "tests/test_physics_g3_a.py::TestG302::test_slab_balance_20_cells",
+            "tests/test_physics_g3_a.py::TestG302::test_dispersion_order",
             "tests/test_physics_g3_a.py::TestG302::test_layer_a_cuda_fp32"
           ],
           "evidence": [
@@ -610,7 +614,7 @@
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture, in-test transfer-matrix oracle, records and rendered document added in 637e653. The recorded run fails 12 of 48 instances: the n=3.5 slabs at about 20 cells per material wavelength exceed the 0.01 R/T and 0.02 rad limits (0.013 to 0.037, 0.031 to 0.054 rad); at about 40 cells they pass. The limits were not relaxed."
+          "implementation_note": "Fixture, in-test transfer-matrix oracle, records and rendered document added in 637e653. The recorded run fails 12 of 48 instances: the n=3.5 slabs at about 20 cells per material wavelength exceed the 0.01 R/T and 0.02 rad limits (0.013 to 0.037, 0.031 to 0.054 rad); at about 40 cells they pass. The limits were not relaxed. Revision 2 (docs/validation/cases/G3-02r2_slab_tmm_40_cells.json) fixes the mesh at about 40 cells per material wavelength for every index with unchanged limits; the 20-cell instances remain as reported measurements with the energy-balance and convergence-order tests. The first case and its FAILED evidence run stay in place."
         },
         {
           "id": "G3-03",

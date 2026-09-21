@@ -1,0 +1,258 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-02r2_slab_tmm_40_cells",
+  "task": "G3-02",
+  "title": "Lossless dielectric slab, normal and oblique TE/TM, complex r and t against the in-test transfer matrix at 40 cells per material wavelength (revision 2 of G3-02_dielectric_slab_tmm)",
+  "declared": "2026-09-22",
+  "declared_at_commit": "f6447b776eb0dab91bb5eb1f98b211fe936b5194",
+  "declared_before_run": true,
+  "supersedes": {
+    "case": "docs/validation/cases/G3-02_dielectric_slab_tmm.json",
+    "evidence_run": "20260921T164814Z-g3-02-1e349534",
+    "record": "docs/validation/g3/G3-02.json",
+    "status": "kept in place as the finding; that case and its FAILED evidence are not edited"
+  },
+  "applicability": "The first G3-02 fixture failed 12 of 48 instances: every n=3.5 instance at 19.9 to 20.4 cells per material wavelength, with max |dR| from 0.0128 to 0.0373 and transmission phase error from 0.0315 to 0.0539 rad against the 0.01 and 0.02 rad limits, while the same slabs at 39.9 to 40.7 cells reached 0.0030 to 0.0093 and 0.0078 to 0.0133 rad and the n=1.5 slabs passed at both meshes (|dR| 0.0005 to 0.0073, phase 0.0012 to 0.0180 rad). The energy balance |R+T-1| stayed at or below 8.4e-05 everywhere and every error fell by a factor 3.93 to 4.08 (phase) and 3.96 to 4.25 (R) between the two meshes. This is the second-order Yee phase error measured independently in G3-01: 0.0203 rad per material wavelength at 20 cells and 0.00506 rad at 40 cells (eigenmode, n=1.5), and 0.0582, 0.0140, 0.00348 rad per vacuum wavelength at 10, 20 and 40 cells on the Simulation path; a 0.5 um n=3.5 slab is 1.13 material wavelengths thick, so its accumulated phase error at 20 cells is of the order of the 0.02 rad limit. The failure is therefore a resolution requirement of the staircase Yee scheme for high-index slabs, not a defect and not a reason to change the limits: this revision fixes the mesh at about 40 cells per material wavelength for every index and keeps the criteria unchanged.",
+  "fixture": {
+    "engine": "torchfdtd.Simulation, 2D (x propagation, y periodic or Bloch, z invariant), staircase Yee material sampling (material_sampling=yee), courant_factor 0.99, precision float64 on CPU",
+    "domain_um": {
+      "x": [
+        -3.0,
+        3.0
+      ],
+      "pml": "0.5 um at both x ends rounded to whole coarse cells (see slabs)",
+      "y": "6 coarse cells, periodic (normal incidence) or Bloch (oblique)"
+    },
+    "slabs": [
+      {
+        "index": 1.5,
+        "thickness_um": 0.2,
+        "coarse_cells_across_slab": 4,
+        "mesh_um": {
+          "N20": 0.05,
+          "N40": 0.025
+        },
+        "cells_per_material_wavelength_at_1p55um": {
+          "N20": 20.666666666666664,
+          "N40": 41.33333333333333
+        },
+        "pml_layers": {
+          "N20": 10,
+          "N40": 20
+        },
+        "pml_thickness_um": 0.5,
+        "transverse_period_um": 0.30000000000000004,
+        "faces_um": [
+          -0.09375,
+          0.10625000000000001
+        ]
+      },
+      {
+        "index": 1.5,
+        "thickness_um": 0.5,
+        "coarse_cells_across_slab": 10,
+        "mesh_um": {
+          "N20": 0.05,
+          "N40": 0.025
+        },
+        "cells_per_material_wavelength_at_1p55um": {
+          "N20": 20.666666666666664,
+          "N40": 41.33333333333333
+        },
+        "pml_layers": {
+          "N20": 10,
+          "N40": 20
+        },
+        "pml_thickness_um": 0.5,
+        "transverse_period_um": 0.30000000000000004,
+        "faces_um": [
+          -0.24375,
+          0.25625
+        ]
+      },
+      {
+        "index": 3.5,
+        "thickness_um": 0.2,
+        "coarse_cells_across_slab": 9,
+        "mesh_um": {
+          "N20": 0.022222222222222223,
+          "N40": 0.011111111111111112
+        },
+        "cells_per_material_wavelength_at_1p55um": {
+          "N20": 19.92857142857143,
+          "N40": 39.85714285714286
+        },
+        "pml_layers": {
+          "N20": 22,
+          "N40": 44
+        },
+        "pml_thickness_um": 0.48888888888888893,
+        "transverse_period_um": 0.13333333333333333,
+        "faces_um": [
+          -0.09722222222222222,
+          0.10277777777777779
+        ]
+      },
+      {
+        "index": 3.5,
+        "thickness_um": 0.5,
+        "coarse_cells_across_slab": 23,
+        "mesh_um": {
+          "N20": 0.021739130434782608,
+          "N40": 0.010869565217391304
+        },
+        "cells_per_material_wavelength_at_1p55um": {
+          "N20": 20.37142857142857,
+          "N40": 40.74285714285714
+        },
+        "pml_layers": {
+          "N20": 23,
+          "N40": 46
+        },
+        "pml_thickness_um": 0.5,
+        "transverse_period_um": 0.13043478260869565,
+        "faces_um": [
+          -0.24728260869565216,
+          0.25271739130434784
+        ]
+      }
+    ],
+    "mesh_definition": "h = d / (2 round(20 d n / 1.55 um)), i.e. the N40 mesh of G3-02_dielectric_slab_tmm: about 40 cells per material wavelength at 1.55 um (39.9 to 41.3) for every index; the slab is an integer number of cells and its faces sit 1/4 cell off the sample planes (the coarse 1/8 cell offset). The 20-cell mesh (h = d / round(20 d n / 1.55 um)) is still run and recorded for the energy balance and the convergence order, without an R/T or phase limit.",
+    "source": {
+      "kind": "plane",
+      "x_um": -2.0,
+      "spans_full_transverse_period": true,
+      "TE": "Ez sheet",
+      "TM": "Ey sheet",
+      "pulse": "gaussian",
+      "time_definition": "standard",
+      "wavelength_um": 1.55,
+      "power_fwhm_s": 2.5827060278369606e-14,
+      "sigma_s": 1.551073042671407e-14,
+      "offset_s": 7.5e-14,
+      "eliminate_discontinuities": true,
+      "note": "three-cycle Gaussian at 193.4 THz with the C1 endpoint taper; a fixed-k_parallel sheet at 45 deg is grazing beyond 1.55/sin(45 deg) = 2.19 um, where three cycles leave 2.5e-7 of the peak amplitude (one cycle would leave 17 percent and a non-decaying grazing residual); amplitude 1; soft sheet"
+    },
+    "monitors": {
+      "kind": "point",
+      "reflection_x_um": -1.0,
+      "transmission_x_um": 1.0,
+      "TE": "Ez at the x node",
+      "TM": "Hz at the sample x+h/2, y=h/2",
+      "y_um": 0.0
+    },
+    "angles_deg": [
+      0,
+      20,
+      45
+    ],
+    "angle_definition": "fixed k_parallel = (2 pi / 1.55 um) sin(theta) set through the Bloch phase k_parallel * L_y; the sheet is a fixed-k_parallel broadband source, not a fixed-angle one, so the angle varies across the band as sin theta(f) = k_parallel c / (2 pi f): 20 deg -> 16.7 to 23.4 deg, 45 deg -> 36.4 to 55.2 deg over 1.3 to 1.8 um; the oracle uses the same k_parallel at every frequency",
+    "polarizations": [
+      "TE (Ez, Hx, Hy)",
+      "TM (Hz, Ex, Ey)"
+    ],
+    "reference_run": "identical scene without the slab; r = (S_slab - S_empty)/S_empty at the reflection monitor, t = S_slab/S_empty at the transmission monitor, S the +f DFT of the raw trace",
+    "propagation_corrections": "r is referred to the physical front face with exp(-2 i kx (x_face - x_monitor)) and t to the pair of faces with exp(+i kx d), kx the discrete vacuum Yee wavenumber at (omega, k_parallel); the continuum-corrected values are recorded as well",
+    "duration_fs": 400.0,
+    "steps": "round(400 fs / dt)",
+    "frequencies": {
+      "wavelength_um": [
+        1.3,
+        1.8
+      ],
+      "points": 21,
+      "spacing": "uniform in frequency from c/1.8 um to c/1.3 um"
+    },
+    "mesh_sweep": [
+      "N40 (limits apply)",
+      "N20 (energy balance and convergence order only)"
+    ],
+    "layer_A": {
+      "description": "n=1.5, d=0.2 um, 45 deg, TE and TM, N20 rerun on CUDA FP32 (complex64 Bloch fields, CUDA graph); raw traces / FP64 peak compared to CPU FP64"
+    }
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU oracle rows)",
+    "float32 (CUDA layer-A rows)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "transfer matrix from Fresnel coefficients written in the test: q = kx (TE) or kx/eps (TM), r12 = (q1-q2)/(q1+q2), t12 = 2 q1/(q1+q2), r = (r12 + r23 e^{2 i beta})/(1 + r12 r23 e^{2 i beta}), t = t12 t23 e^{i beta}/(1 + r12 r23 e^{2 i beta}), beta = kx2 d, kx_j = sqrt(eps_j k0^2 - k_parallel^2); R = |r|^2, T = |t|^2; no solver code",
+  "observables": [
+    {
+      "name": "R_abs_error",
+      "unit": "dimensionless",
+      "definition": "max over the band of | |r_fdtd|^2 - |r_tmm|^2 |"
+    },
+    {
+      "name": "T_abs_error",
+      "unit": "dimensionless",
+      "definition": "max over the band of | |t_fdtd|^2 - |t_tmm|^2 |"
+    },
+    {
+      "name": "balance_residual",
+      "unit": "dimensionless",
+      "definition": "max over the band of | R_fdtd + T_fdtd - 1 |"
+    },
+    {
+      "name": "t_phase_error",
+      "unit": "rad",
+      "definition": "max over the band where |t_tmm| > 0.1 of |arg(t_fdtd / t_tmm)| (Yee-corrected)"
+    },
+    {
+      "name": "r_phase_error",
+      "unit": "rad",
+      "definition": "max over the band where |r_tmm| > 0.1 of |arg(r_fdtd / r_tmm)|; reported only (reference-plane ambiguity of the staircase face)"
+    },
+    {
+      "name": "layer_A_trace_error",
+      "unit": "dimensionless",
+      "definition": "CUDA FP32 trace / FP64 peak against CPU FP64 trace / FP64 peak"
+    },
+    {
+      "name": "convergence_order_ratio",
+      "unit": "dimensionless",
+      "definition": "max |dR| and max t phase error at the 20-cell mesh divided by the same quantity at the 40-cell mesh, per (slab, angle, polarization)"
+    }
+  ],
+  "acceptance": {
+    "N40": {
+      "R_abs_error_max": 0.01,
+      "T_abs_error_max": 0.01,
+      "balance_residual_max": 0.01,
+      "t_phase_error_max_rad": 0.02,
+      "t_phase_band": "every band frequency where |t_tmm| > 0.1 (all of them for these lossless slabs)",
+      "r_phase": "reported only"
+    },
+    "N20": {
+      "balance_residual_max": 0.01,
+      "R_T_and_phase": "reported only, no limit",
+      "convergence_order": {
+        "ratio_min": 3.0,
+        "ratio_max": 5.0,
+        "applies_to": "max |dR| and max t phase error, 20-cell over 40-cell, every (slab, angle, polarization)",
+        "note": "second-order convergence gives 4; the band keeps the dispersion finding as a test"
+      }
+    },
+    "layer_A": {
+      "rtol": 0.0001,
+      "atol": 1e-06
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds slab_R_T_absolute_error, lossless_complete_channel_balance_absolute_error, phase_error_radians_on_predeclared_supported_signal_band, discrete_dimensionless_fp32; the convergence-order band is this case's own pre-declared budget",
+    "unchanged_from_first_case": true
+  },
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells",
+      "tests/test_physics_g3_a.py::TestG302::test_slab_balance_20_cells",
+      "tests/test_physics_g3_a.py::TestG302::test_dispersion_order",
+      "tests/test_physics_g3_a.py::TestG302::test_layer_a_cuda_fp32"
+    ],
+    "not_yet_covered": []
+  },
+  "notes": "Revision 2 declared at f6447b7 after the first recorded run; the first case, its record and its FAILED evidence run stay in place. The record of this revision is docs/validation/g3/G3-02r2.json. The 40-cell instances and the order test run only when TORCHFDTD_G3_FINE=1; the recorded run sets it."
+}

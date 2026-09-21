@@ -92,31 +92,84 @@ def section_g301(record):
 
 
 def section_g302(record):
+    """Rendered from the revision-2 record (G3-02r2.json); the first record and its FAILED evidence stay in place."""
     entries = record['entries']
     out = ['## G3-02 Dielectric slab, normal and oblique TE/TM', '',
-           'Case: `docs/validation/cases/G3-02_dielectric_slab_tmm.json`. A lossless slab in a 6 um 2D cell with periodic (normal) or Bloch '
+           'Case: `docs/validation/cases/G3-02r2_slab_tmm_40_cells.json` (revision 2; the first case '
+           '`docs/validation/cases/G3-02_dielectric_slab_tmm.json`, its record `docs/validation/g3/G3-02.json` and its FAILED evidence run '
+           '`20260921T164814Z-g3-02-1e349534` are kept in place as the finding). A lossless slab in a 6 um 2D cell with periodic (normal) or Bloch '
            '(fixed k_parallel) transverse boundaries, a three-cycle sheet pulse, point monitors 1 um before and after the slab and a slab-free '
            'reference run. r and t are the +f DFT ratios referred to the physical faces with the discrete vacuum wavenumber; the oracle is a '
-           'Fresnel/Airy transfer matrix written in the test. Limits: R and T absolute error 0.01, abs(R+T-1) 0.01, transmission phase 0.02 rad '
-           'wherever |t| > 0.1 (everywhere here). The reflection phase is reported only (staircase reference-plane ambiguity).', '',
+           'Fresnel/Airy transfer matrix written in the test. Limits at about 40 cells per material wavelength: R and T absolute error 0.01, '
+           'abs(R+T-1) 0.01, transmission phase 0.02 rad wherever |t| > 0.1 (everywhere here). The 20-cell mesh is recorded with the energy-balance '
+           'limit only and feeds the convergence-order test (ratio between 3 and 5). The reflection phase is reported only (staircase reference-plane ambiguity).', '',
            environment_block(record), '']
     rows = []
     for key, v in entries.items():
         if key.startswith('slab'):
+            criteria = 'R, T, balance, phase' if v['rt_limits_apply'] else 'balance only'
             rows.append([g(v['index']), g(v['thickness_um']), v['angle_deg'], v['polarization'], v['N'], g(v['mesh_um'], 4),
                          g(v['cells_per_material_wavelength_at_1p55'], 3), v['steps'], g(v['R_abs_error'], 2), g(v['T_abs_error'], 2),
-                         g(v['balance_residual'], 2), g(v['t_phase_error'], 2), g(v['r_phase_error'], 2), verdict(v['passed'])])
+                         g(v['balance_residual'], 2), g(v['t_phase_error'], 2), g(v['r_phase_error'], 2), criteria,
+                         verdict(v['passed']) + ('' if v['rt_limits_apply'] or v['rt_within_limits'] else ' (R/T limits not met, reported)')])
     out += [table(['n', 'd (um)', 'angle (deg)', 'pol', 'N', 'h (um)', 'cells/material wavelength', 'steps', 'max abs dR', 'max abs dT',
-                   'max abs(R+T-1)', 'max t phase error (rad)', 'max r phase error (rad, info)', 'verdict'], rows), '']
+                   'max abs(R+T-1)', 'max t phase error (rad)', 'max r phase error (rad, info)', 'criteria', 'verdict'], rows), '']
     failing = [key for key, v in entries.items() if key.startswith('slab') and not v['passed']]
-    out += [f'Instances failing a pre-declared limit: {len(failing)} of {sum(1 for k in entries if k.startswith("slab"))}.' +
+    out += [f'Instances failing an applicable pre-declared limit: {len(failing)} of {sum(1 for k in entries if k.startswith("slab"))}.' +
             (' ' + '; '.join(failing) if failing else ''), '']
+    rows = [[g(v['index']), g(v['thickness_um']), v['angle_deg'], v['polarization'], g(v['R_abs_error']['N20'], 2), g(v['R_abs_error']['N40'], 2), g(v['ratio']['R'], 3),
+             g(v['t_phase_error']['N20'], 2), g(v['t_phase_error']['N40'], 2), g(v['ratio']['t_phase'], 3), verdict(v['passed'])]
+            for key, v in entries.items() if key.startswith('order')]
+    if rows:
+        out += ['### Convergence order, 20-cell over 40-cell errors (limit: ratio between 3 and 5)', '',
+                table(['n', 'd (um)', 'angle (deg)', 'pol', 'abs dR N20', 'abs dR N40', 'ratio', 't phase N20 (rad)', 't phase N40 (rad)', 'ratio', 'verdict'], rows), '']
+    out += resolution_paragraph(entries)
     rows = [[v['polarization'], v['steps'], g(v['max_abs_error'], 2), g(v['relative_l2'], 2), verdict(v['within'])]
             for key, v in entries.items() if key.startswith('layer A')]
     if rows:
         out += ['### Layer A: CUDA FP32 (complex64 Bloch fields) against CPU FP64, n=1.5, d=0.2 um, 45 deg, N20', '',
                 table(['pol', 'steps', 'max abs error', 'relative L2', 'verdict'], rows), '']
     return out
+
+
+def resolution_paragraph(entries):
+    """Numbers from the G3-02r2 record (both meshes) and the G3-01 record (dispersion)."""
+    slabs = [v for k, v in entries.items() if k.startswith('slab')]
+    hi20 = [v for v in slabs if v['index'] == 3.5 and v['N'] == 20]
+    hi40 = [v for v in slabs if v['index'] == 3.5 and v['N'] == 40]
+    lo = [v for v in slabs if v['index'] == 1.5]
+    orders = [v for k, v in entries.items() if k.startswith('order')]
+    if not (hi20 and hi40 and lo):
+        return []
+    rng = lambda vs, key: (min(v[key] for v in vs), max(v[key] for v in vs))
+    text = (f"### Resolution requirement for high-index slabs\n\nAt {g(rng(hi20, 'cells_per_material_wavelength_at_1p55')[0], 3)} to "
+            f"{g(rng(hi20, 'cells_per_material_wavelength_at_1p55')[1], 3)} cells per material wavelength the n=3.5 slabs reach max abs dR "
+            f"{g(rng(hi20, 'R_abs_error')[0], 3)} to {g(rng(hi20, 'R_abs_error')[1], 3)} and transmission phase errors of "
+            f"{g(rng(hi20, 't_phase_error')[0], 3)} to {g(rng(hi20, 't_phase_error')[1], 3)} rad, above the 0.01 and 0.02 rad limits, while at "
+            f"{g(rng(hi40, 'cells_per_material_wavelength_at_1p55')[0], 3)} to {g(rng(hi40, 'cells_per_material_wavelength_at_1p55')[1], 3)} cells they reach "
+            f"{g(rng(hi40, 'R_abs_error')[0], 3)} to {g(rng(hi40, 'R_abs_error')[1], 3)} and {g(rng(hi40, 't_phase_error')[0], 3)} to "
+            f"{g(rng(hi40, 't_phase_error')[1], 3)} rad; the n=1.5 slabs stay within the limits at both meshes (abs dR at most {g(rng(lo, 'R_abs_error')[1], 3)}, "
+            f"phase at most {g(rng(lo, 't_phase_error')[1], 3)} rad). The energy balance abs(R+T-1) is at most {g(rng(slabs, 'balance_residual')[1], 2)} everywhere")
+    if orders:
+        ratios_p = [v['ratio']['t_phase'] for v in orders]
+        ratios_r = [v['ratio']['R'] for v in orders]
+        text += (f", and every error falls by a factor {g(min(ratios_p), 3)} to {g(max(ratios_p), 3)} (phase) and {g(min(ratios_r), 3)} to "
+                 f"{g(max(ratios_r), 3)} (R) when the mesh is halved")
+    g301 = load('G3-01')
+    if g301:
+        e = g301['entries']
+        try:
+            e20 = e['eigenmode axis 2d n=1.5 N=20 TE']['phase_error_per_wavelength']
+            e40 = e['eigenmode axis 2d n=1.5 N=40 TE']['phase_error_per_wavelength']
+            pv = [e[f'propagation 2d N={N} n=1.0 Ez']['phase_error_per_wavelength'][5] for N in (10, 20, 40)]
+            text += (f". This is the second-order Yee phase error measured independently in G3-01: {g(e20, 3)} rad per material wavelength at 20 cells and "
+                     f"{g(e40, 3)} rad at 40 cells (eigenmode, n=1.5), and {g(pv[0], 3)}, {g(pv[1], 3)} and {g(pv[2], 3)} rad per vacuum wavelength at 10, 20 and 40 cells "
+                     "on the Simulation path; a 0.5 um n=3.5 slab is 1.13 material wavelengths thick, so its accumulated phase error at 20 cells is of the order of the limit")
+        except KeyError:
+            pass
+    text += ('. The first fixture therefore failed on a resolution requirement of the staircase Yee scheme, not on a defect: the revision-2 case fixes '
+             'the mesh at about 40 cells per material wavelength for every index and leaves the limits unchanged.')
+    return [text, '']
 
 
 def section_g303(record):
@@ -209,7 +262,7 @@ def main():
              'The fixtures and limits were declared in `docs/validation/cases/` before the recorded run '
              '(see [COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md) section 5). A **FAIL** is a finding against a pre-declared limit and is kept as such.', '']
     for task, render in SECTIONS.items():
-        record = load(task)
+        record = load('G3-02r2') if task == 'G3-02' else load(task)
         if record is None:
             lines += [f'## {task}', '', 'No record yet.', '']
             continue

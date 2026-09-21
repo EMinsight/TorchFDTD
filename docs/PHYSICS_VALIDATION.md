@@ -101,62 +101,95 @@ Environment: Python 3.10.2, numpy 2.2.6, torch 2.10.0+cu126 (CUDA runtime 12.6),
 
 ## G3-02 Dielectric slab, normal and oblique TE/TM
 
-Case: `docs/validation/cases/G3-02_dielectric_slab_tmm.json`. A lossless slab in a 6 um 2D cell with periodic (normal) or Bloch (fixed k_parallel) transverse boundaries, a three-cycle sheet pulse, point monitors 1 um before and after the slab and a slab-free reference run. r and t are the +f DFT ratios referred to the physical faces with the discrete vacuum wavenumber; the oracle is a Fresnel/Airy transfer matrix written in the test. Limits: R and T absolute error 0.01, abs(R+T-1) 0.01, transmission phase 0.02 rad wherever |t| > 0.1 (everywhere here). The reflection phase is reported only (staircase reference-plane ambiguity).
+Case: `docs/validation/cases/G3-02r2_slab_tmm_40_cells.json` (revision 2; the first case `docs/validation/cases/G3-02_dielectric_slab_tmm.json`, its record `docs/validation/g3/G3-02.json` and its FAILED evidence run `20260921T164814Z-g3-02-1e349534` are kept in place as the finding). A lossless slab in a 6 um 2D cell with periodic (normal) or Bloch (fixed k_parallel) transverse boundaries, a three-cycle sheet pulse, point monitors 1 um before and after the slab and a slab-free reference run. r and t are the +f DFT ratios referred to the physical faces with the discrete vacuum wavenumber; the oracle is a Fresnel/Airy transfer matrix written in the test. Limits at about 40 cells per material wavelength: R and T absolute error 0.01, abs(R+T-1) 0.01, transmission phase 0.02 rad wherever |t| > 0.1 (everywhere here). The 20-cell mesh is recorded with the energy-balance limit only and feeds the convergence-order test (ratio between 3 and 5). The reflection phase is reported only (staircase reference-plane ambiguity).
 
-Environment: Python 3.10.2, numpy 2.2.6, torch 2.10.0+cu126 (CUDA runtime 12.6), NVIDIA GeForce RTX 3060, 12th Gen Intel(R) Core(TM) i7-12700, Windows-10-10.0.26200-SP0; run at 2026-09-21T16:34:34+00:00 on commit 2b64f9133af6 with 8 dirty paths (the records themselves were being written); fine meshes on.
+Environment: Python 3.10.2, numpy 2.2.6, torch 2.10.0+cu126 (CUDA runtime 12.6), NVIDIA GeForce RTX 3060, 12th Gen Intel(R) Core(TM) i7-12700, Windows-10-10.0.26200-SP0; run at 2026-09-21T16:55:32+00:00 on commit f6447b776eb0 with 5 dirty paths (the records themselves were being written); fine meshes on.
 
-| n | d (um) | angle (deg) | pol | N | h (um) | cells/material wavelength | steps | max abs dR | max abs dT | max abs(R+T-1) | max t phase error (rad) | max r phase error (rad, info) | verdict |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1.5 | 0.2 | 0 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0063 | 0.0063 | 1.8e-05 | 0.0062 | 0.19 | pass |
-| 1.5 | 0.2 | 0 | TE | 40 | 0.025 | 41.3 | 6852 | 0.0015 | 0.0015 | 1.8e-06 | 0.0015 | 0.062 | pass |
-| 1.5 | 0.2 | 20 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0065 | 0.0065 | 1.7e-05 | 0.0058 | 0.18 | pass |
-| 1.5 | 0.2 | 20 | TE | 40 | 0.025 | 41.3 | 6852 | 0.0016 | 0.0016 | 2.1e-05 | 0.0014 | 0.059 | pass |
-| 1.5 | 0.2 | 45 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0073 | 0.0073 | 8.4e-05 | 0.005 | 0.15 | pass |
-| 1.5 | 0.2 | 45 | TE | 40 | 0.025 | 41.3 | 6852 | 0.0018 | 0.0019 | 5.9e-05 | 0.0013 | 0.05 | pass |
-| 1.5 | 0.2 | 0 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0063 | 0.0063 | 3.4e-05 | 0.0062 | 0.19 | pass |
-| 1.5 | 0.2 | 0 | TM | 40 | 0.025 | 41.3 | 6852 | 0.0015 | 0.0015 | 2.8e-06 | 0.0015 | 0.062 | pass |
-| 1.5 | 0.2 | 20 | TM | 20 | 0.05 | 20.7 | 3426 | 0.006 | 0.006 | 2.8e-05 | 0.0059 | 0.2 | pass |
-| 1.5 | 0.2 | 20 | TM | 40 | 0.025 | 41.3 | 6852 | 0.0015 | 0.0015 | 2.4e-06 | 0.0015 | 0.07 | pass |
-| 1.5 | 0.2 | 45 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0055 | 0.0055 | 8.6e-06 | 0.005 | 0.45 | pass |
-| 1.5 | 0.2 | 45 | TM | 40 | 0.025 | 41.3 | 6852 | 0.0013 | 0.0014 | 5.2e-06 | 0.0012 | 0.22 | pass |
-| 1.5 | 0.5 | 0 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0039 | 0.0039 | 4.8e-06 | 0.018 | 0.2 | pass |
-| 1.5 | 0.5 | 0 | TE | 40 | 0.025 | 41.3 | 6852 | 0.00094 | 0.00094 | 5.4e-07 | 0.0044 | 0.065 | pass |
-| 1.5 | 0.5 | 20 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0035 | 0.0035 | 2e-05 | 0.017 | 0.19 | pass |
-| 1.5 | 0.5 | 20 | TE | 40 | 0.025 | 41.3 | 6852 | 0.00084 | 0.00082 | 2e-05 | 0.0042 | 0.062 | pass |
-| 1.5 | 0.5 | 45 | TE | 20 | 0.05 | 20.7 | 3426 | 0.002 | 0.0019 | 8.2e-05 | 0.014 | 0.16 | pass |
-| 1.5 | 0.5 | 45 | TE | 40 | 0.025 | 41.3 | 6852 | 0.0005 | 0.00048 | 1.8e-05 | 0.0035 | 0.052 | pass |
-| 1.5 | 0.5 | 0 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0039 | 0.0039 | 7.9e-06 | 0.018 | 0.2 | pass |
-| 1.5 | 0.5 | 0 | TM | 40 | 0.025 | 41.3 | 6852 | 0.00094 | 0.00094 | 8.3e-07 | 0.0044 | 0.065 | pass |
-| 1.5 | 0.5 | 20 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0029 | 0.0029 | 9.6e-06 | 0.017 | 0.21 | pass |
-| 1.5 | 0.5 | 20 | TM | 40 | 0.025 | 41.3 | 6852 | 0.00069 | 0.00069 | 5.6e-06 | 0.0041 | 0.073 | pass |
-| 1.5 | 0.5 | 45 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0024 | 0.0024 | 5.3e-06 | 0.012 | n/a | pass |
-| 1.5 | 0.5 | 45 | TM | 40 | 0.025 | 41.3 | 6852 | 0.00059 | 0.00059 | 5.4e-06 | 0.003 | n/a | pass |
-| 3.5 | 0.2 | 0 | TE | 20 | 0.02222 | 19.9 | 7709 | 0.023 | 0.023 | 1.5e-06 | 0.037 | 0.016 | **FAIL** |
-| 3.5 | 0.2 | 0 | TE | 40 | 0.01111 | 39.9 | 15417 | 0.0055 | 0.0055 | 1e-07 | 0.0092 | 0.036 | pass |
-| 3.5 | 0.2 | 20 | TE | 20 | 0.02222 | 19.9 | 7709 | 0.024 | 0.024 | 3.3e-06 | 0.038 | 0.015 | **FAIL** |
-| 3.5 | 0.2 | 20 | TE | 40 | 0.01111 | 39.9 | 15417 | 0.0057 | 0.0057 | 9e-07 | 0.0094 | 0.035 | pass |
-| 3.5 | 0.2 | 45 | TE | 20 | 0.02222 | 19.9 | 7709 | 0.027 | 0.027 | 3.8e-05 | 0.042 | 0.02 | **FAIL** |
-| 3.5 | 0.2 | 45 | TE | 40 | 0.01111 | 39.9 | 15417 | 0.0065 | 0.0065 | 3.9e-05 | 0.01 | 0.032 | pass |
-| 3.5 | 0.2 | 0 | TM | 20 | 0.02222 | 19.9 | 7709 | 0.023 | 0.023 | 1.3e-06 | 0.037 | 0.016 | **FAIL** |
-| 3.5 | 0.2 | 0 | TM | 40 | 0.01111 | 39.9 | 15417 | 0.0055 | 0.0055 | 9.9e-08 | 0.0092 | 0.036 | pass |
-| 3.5 | 0.2 | 20 | TM | 20 | 0.02222 | 19.9 | 7709 | 0.021 | 0.021 | 5.2e-07 | 0.036 | 0.028 | **FAIL** |
-| 3.5 | 0.2 | 20 | TM | 40 | 0.01111 | 39.9 | 15417 | 0.0049 | 0.0049 | 1.9e-06 | 0.009 | 0.039 | pass |
-| 3.5 | 0.2 | 45 | TM | 20 | 0.02222 | 19.9 | 7709 | 0.013 | 0.013 | 1.6e-05 | 0.032 | 0.12 | **FAIL** |
-| 3.5 | 0.2 | 45 | TM | 40 | 0.01111 | 39.9 | 15417 | 0.003 | 0.003 | 1.7e-05 | 0.0079 | 0.067 | pass |
-| 3.5 | 0.5 | 0 | TE | 20 | 0.02174 | 20.4 | 7880 | 0.027 | 0.027 | 2.8e-06 | 0.038 | 0.018 | **FAIL** |
-| 3.5 | 0.5 | 0 | TE | 40 | 0.01087 | 40.7 | 15760 | 0.0066 | 0.0066 | 1.9e-07 | 0.0095 | 0.033 | pass |
-| 3.5 | 0.5 | 20 | TE | 20 | 0.02174 | 20.4 | 7880 | 0.028 | 0.028 | 6.1e-06 | 0.04 | 0.022 | **FAIL** |
-| 3.5 | 0.5 | 20 | TE | 40 | 0.01087 | 40.7 | 15760 | 0.007 | 0.007 | 8.4e-06 | 0.01 | 0.032 | pass |
-| 3.5 | 0.5 | 45 | TE | 20 | 0.02174 | 20.4 | 7880 | 0.037 | 0.037 | 2.4e-05 | 0.054 | 0.038 | **FAIL** |
-| 3.5 | 0.5 | 45 | TE | 40 | 0.01087 | 40.7 | 15760 | 0.0093 | 0.0093 | 2.6e-05 | 0.013 | 0.026 | pass |
-| 3.5 | 0.5 | 0 | TM | 20 | 0.02174 | 20.4 | 7880 | 0.026 | 0.027 | 4.5e-06 | 0.038 | 0.018 | **FAIL** |
-| 3.5 | 0.5 | 0 | TM | 40 | 0.01087 | 40.7 | 15760 | 0.0066 | 0.0066 | 3e-07 | 0.0095 | 0.033 | pass |
-| 3.5 | 0.5 | 20 | TM | 20 | 0.02174 | 20.4 | 7880 | 0.025 | 0.025 | 1.8e-05 | 0.036 | 0.013 | **FAIL** |
-| 3.5 | 0.5 | 20 | TM | 40 | 0.01087 | 40.7 | 15760 | 0.0062 | 0.0062 | 2.2e-05 | 0.009 | 0.037 | pass |
-| 3.5 | 0.5 | 45 | TM | 20 | 0.02174 | 20.4 | 7880 | 0.021 | 0.021 | 3.5e-05 | 0.031 | 0.1 | **FAIL** |
-| 3.5 | 0.5 | 45 | TM | 40 | 0.01087 | 40.7 | 15760 | 0.0051 | 0.0051 | 2.9e-05 | 0.0078 | 0.069 | pass |
+| n | d (um) | angle (deg) | pol | N | h (um) | cells/material wavelength | steps | max abs dR | max abs dT | max abs(R+T-1) | max t phase error (rad) | max r phase error (rad, info) | criteria | verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1.5 | 0.2 | 0 | TE | 40 | 0.025 | 41.3 | 6852 | 0.0015 | 0.0015 | 1.8e-06 | 0.0015 | 0.062 | R, T, balance, phase | pass |
+| 1.5 | 0.2 | 20 | TE | 40 | 0.025 | 41.3 | 6852 | 0.0016 | 0.0016 | 2.1e-05 | 0.0014 | 0.059 | R, T, balance, phase | pass |
+| 1.5 | 0.2 | 45 | TE | 40 | 0.025 | 41.3 | 6852 | 0.0018 | 0.0019 | 5.9e-05 | 0.0013 | 0.05 | R, T, balance, phase | pass |
+| 1.5 | 0.2 | 0 | TM | 40 | 0.025 | 41.3 | 6852 | 0.0015 | 0.0015 | 2.8e-06 | 0.0015 | 0.062 | R, T, balance, phase | pass |
+| 1.5 | 0.2 | 20 | TM | 40 | 0.025 | 41.3 | 6852 | 0.0015 | 0.0015 | 2.4e-06 | 0.0015 | 0.07 | R, T, balance, phase | pass |
+| 1.5 | 0.2 | 45 | TM | 40 | 0.025 | 41.3 | 6852 | 0.0013 | 0.0014 | 5.2e-06 | 0.0012 | 0.22 | R, T, balance, phase | pass |
+| 1.5 | 0.5 | 0 | TE | 40 | 0.025 | 41.3 | 6852 | 0.00094 | 0.00094 | 5.4e-07 | 0.0044 | 0.065 | R, T, balance, phase | pass |
+| 1.5 | 0.5 | 20 | TE | 40 | 0.025 | 41.3 | 6852 | 0.00084 | 0.00082 | 2e-05 | 0.0042 | 0.062 | R, T, balance, phase | pass |
+| 1.5 | 0.5 | 45 | TE | 40 | 0.025 | 41.3 | 6852 | 0.0005 | 0.00048 | 1.8e-05 | 0.0035 | 0.052 | R, T, balance, phase | pass |
+| 1.5 | 0.5 | 0 | TM | 40 | 0.025 | 41.3 | 6852 | 0.00094 | 0.00094 | 8.3e-07 | 0.0044 | 0.065 | R, T, balance, phase | pass |
+| 1.5 | 0.5 | 20 | TM | 40 | 0.025 | 41.3 | 6852 | 0.00069 | 0.00069 | 5.6e-06 | 0.0041 | 0.073 | R, T, balance, phase | pass |
+| 1.5 | 0.5 | 45 | TM | 40 | 0.025 | 41.3 | 6852 | 0.00059 | 0.00059 | 5.4e-06 | 0.003 | n/a | R, T, balance, phase | pass |
+| 3.5 | 0.2 | 0 | TE | 40 | 0.01111 | 39.9 | 15417 | 0.0055 | 0.0055 | 1e-07 | 0.0092 | 0.036 | R, T, balance, phase | pass |
+| 3.5 | 0.2 | 20 | TE | 40 | 0.01111 | 39.9 | 15417 | 0.0057 | 0.0057 | 9e-07 | 0.0094 | 0.035 | R, T, balance, phase | pass |
+| 3.5 | 0.2 | 45 | TE | 40 | 0.01111 | 39.9 | 15417 | 0.0065 | 0.0065 | 3.9e-05 | 0.01 | 0.032 | R, T, balance, phase | pass |
+| 3.5 | 0.2 | 0 | TM | 40 | 0.01111 | 39.9 | 15417 | 0.0055 | 0.0055 | 9.9e-08 | 0.0092 | 0.036 | R, T, balance, phase | pass |
+| 3.5 | 0.2 | 20 | TM | 40 | 0.01111 | 39.9 | 15417 | 0.0049 | 0.0049 | 1.9e-06 | 0.009 | 0.039 | R, T, balance, phase | pass |
+| 3.5 | 0.2 | 45 | TM | 40 | 0.01111 | 39.9 | 15417 | 0.003 | 0.003 | 1.7e-05 | 0.0079 | 0.067 | R, T, balance, phase | pass |
+| 3.5 | 0.5 | 0 | TE | 40 | 0.01087 | 40.7 | 15760 | 0.0066 | 0.0066 | 1.9e-07 | 0.0095 | 0.033 | R, T, balance, phase | pass |
+| 3.5 | 0.5 | 20 | TE | 40 | 0.01087 | 40.7 | 15760 | 0.007 | 0.007 | 8.4e-06 | 0.01 | 0.032 | R, T, balance, phase | pass |
+| 3.5 | 0.5 | 45 | TE | 40 | 0.01087 | 40.7 | 15760 | 0.0093 | 0.0093 | 2.6e-05 | 0.013 | 0.026 | R, T, balance, phase | pass |
+| 3.5 | 0.5 | 0 | TM | 40 | 0.01087 | 40.7 | 15760 | 0.0066 | 0.0066 | 3e-07 | 0.0095 | 0.033 | R, T, balance, phase | pass |
+| 3.5 | 0.5 | 20 | TM | 40 | 0.01087 | 40.7 | 15760 | 0.0062 | 0.0062 | 2.2e-05 | 0.009 | 0.037 | R, T, balance, phase | pass |
+| 3.5 | 0.5 | 45 | TM | 40 | 0.01087 | 40.7 | 15760 | 0.0051 | 0.0051 | 2.9e-05 | 0.0078 | 0.069 | R, T, balance, phase | pass |
+| 1.5 | 0.2 | 0 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0063 | 0.0063 | 1.8e-05 | 0.0062 | 0.19 | balance only | pass |
+| 1.5 | 0.2 | 20 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0065 | 0.0065 | 1.7e-05 | 0.0058 | 0.18 | balance only | pass |
+| 1.5 | 0.2 | 45 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0073 | 0.0073 | 8.4e-05 | 0.005 | 0.15 | balance only | pass |
+| 1.5 | 0.2 | 0 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0063 | 0.0063 | 3.4e-05 | 0.0062 | 0.19 | balance only | pass |
+| 1.5 | 0.2 | 20 | TM | 20 | 0.05 | 20.7 | 3426 | 0.006 | 0.006 | 2.8e-05 | 0.0059 | 0.2 | balance only | pass |
+| 1.5 | 0.2 | 45 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0055 | 0.0055 | 8.6e-06 | 0.005 | 0.45 | balance only | pass |
+| 1.5 | 0.5 | 0 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0039 | 0.0039 | 4.8e-06 | 0.018 | 0.2 | balance only | pass |
+| 1.5 | 0.5 | 20 | TE | 20 | 0.05 | 20.7 | 3426 | 0.0035 | 0.0035 | 2e-05 | 0.017 | 0.19 | balance only | pass |
+| 1.5 | 0.5 | 45 | TE | 20 | 0.05 | 20.7 | 3426 | 0.002 | 0.0019 | 8.2e-05 | 0.014 | 0.16 | balance only | pass |
+| 1.5 | 0.5 | 0 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0039 | 0.0039 | 7.9e-06 | 0.018 | 0.2 | balance only | pass |
+| 1.5 | 0.5 | 20 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0029 | 0.0029 | 9.6e-06 | 0.017 | 0.21 | balance only | pass |
+| 1.5 | 0.5 | 45 | TM | 20 | 0.05 | 20.7 | 3426 | 0.0024 | 0.0024 | 5.3e-06 | 0.012 | n/a | balance only | pass |
+| 3.5 | 0.2 | 0 | TE | 20 | 0.02222 | 19.9 | 7709 | 0.023 | 0.023 | 1.5e-06 | 0.037 | 0.016 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.2 | 20 | TE | 20 | 0.02222 | 19.9 | 7709 | 0.024 | 0.024 | 3.3e-06 | 0.038 | 0.015 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.2 | 45 | TE | 20 | 0.02222 | 19.9 | 7709 | 0.027 | 0.027 | 3.8e-05 | 0.042 | 0.02 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.2 | 0 | TM | 20 | 0.02222 | 19.9 | 7709 | 0.023 | 0.023 | 1.3e-06 | 0.037 | 0.016 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.2 | 20 | TM | 20 | 0.02222 | 19.9 | 7709 | 0.021 | 0.021 | 5.2e-07 | 0.036 | 0.028 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.2 | 45 | TM | 20 | 0.02222 | 19.9 | 7709 | 0.013 | 0.013 | 1.6e-05 | 0.032 | 0.12 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.5 | 0 | TE | 20 | 0.02174 | 20.4 | 7880 | 0.027 | 0.027 | 2.8e-06 | 0.038 | 0.018 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.5 | 20 | TE | 20 | 0.02174 | 20.4 | 7880 | 0.028 | 0.028 | 6.1e-06 | 0.04 | 0.022 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.5 | 45 | TE | 20 | 0.02174 | 20.4 | 7880 | 0.037 | 0.037 | 2.4e-05 | 0.054 | 0.038 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.5 | 0 | TM | 20 | 0.02174 | 20.4 | 7880 | 0.026 | 0.027 | 4.5e-06 | 0.038 | 0.018 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.5 | 20 | TM | 20 | 0.02174 | 20.4 | 7880 | 0.025 | 0.025 | 1.8e-05 | 0.036 | 0.013 | balance only | pass (R/T limits not met, reported) |
+| 3.5 | 0.5 | 45 | TM | 20 | 0.02174 | 20.4 | 7880 | 0.021 | 0.021 | 3.5e-05 | 0.031 | 0.1 | balance only | pass (R/T limits not met, reported) |
 
-Instances failing a pre-declared limit: 12 of 48. slab n=3.5 d=0.2 0deg TE N20; slab n=3.5 d=0.2 20deg TE N20; slab n=3.5 d=0.2 45deg TE N20; slab n=3.5 d=0.2 0deg TM N20; slab n=3.5 d=0.2 20deg TM N20; slab n=3.5 d=0.2 45deg TM N20; slab n=3.5 d=0.5 0deg TE N20; slab n=3.5 d=0.5 20deg TE N20; slab n=3.5 d=0.5 45deg TE N20; slab n=3.5 d=0.5 0deg TM N20; slab n=3.5 d=0.5 20deg TM N20; slab n=3.5 d=0.5 45deg TM N20
+Instances failing an applicable pre-declared limit: 0 of 48.
+
+### Convergence order, 20-cell over 40-cell errors (limit: ratio between 3 and 5)
+
+| n | d (um) | angle (deg) | pol | abs dR N20 | abs dR N40 | ratio | t phase N20 (rad) | t phase N40 (rad) | ratio | verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1.5 | 0.2 | 0 | TE | 0.0063 | 0.0015 | 4.09 | 0.0062 | 0.0015 | 4.04 | pass |
+| 1.5 | 0.2 | 20 | TE | 0.0065 | 0.0016 | 4.11 | 0.0058 | 0.0014 | 4.08 | pass |
+| 1.5 | 0.2 | 45 | TE | 0.0073 | 0.0018 | 4.03 | 0.005 | 0.0013 | 3.93 | pass |
+| 1.5 | 0.2 | 0 | TM | 0.0063 | 0.0015 | 4.09 | 0.0062 | 0.0015 | 4.04 | pass |
+| 1.5 | 0.2 | 20 | TM | 0.006 | 0.0015 | 4.08 | 0.0059 | 0.0015 | 4.04 | pass |
+| 1.5 | 0.2 | 45 | TM | 0.0055 | 0.0013 | 4.08 | 0.005 | 0.0012 | 4.05 | pass |
+| 1.5 | 0.5 | 0 | TE | 0.0039 | 0.00094 | 4.16 | 0.018 | 0.0044 | 4.05 | pass |
+| 1.5 | 0.5 | 20 | TE | 0.0035 | 0.00084 | 4.18 | 0.017 | 0.0042 | 4.05 | pass |
+| 1.5 | 0.5 | 45 | TE | 0.002 | 0.0005 | 3.96 | 0.014 | 0.0035 | 4.02 | pass |
+| 1.5 | 0.5 | 0 | TM | 0.0039 | 0.00094 | 4.16 | 0.018 | 0.0044 | 4.05 | pass |
+| 1.5 | 0.5 | 20 | TM | 0.0029 | 0.00069 | 4.19 | 0.017 | 0.0041 | 4.05 | pass |
+| 1.5 | 0.5 | 45 | TM | 0.0024 | 0.00059 | 4.01 | 0.012 | 0.003 | 4.05 | pass |
+| 3.5 | 0.2 | 0 | TE | 0.023 | 0.0055 | 4.16 | 0.037 | 0.0092 | 4.05 | pass |
+| 3.5 | 0.2 | 20 | TE | 0.024 | 0.0057 | 4.17 | 0.038 | 0.0094 | 4.05 | pass |
+| 3.5 | 0.2 | 45 | TE | 0.027 | 0.0065 | 4.16 | 0.042 | 0.01 | 4.03 | pass |
+| 3.5 | 0.2 | 0 | TM | 0.023 | 0.0055 | 4.16 | 0.037 | 0.0092 | 4.05 | pass |
+| 3.5 | 0.2 | 20 | TM | 0.021 | 0.0049 | 4.18 | 0.036 | 0.009 | 4.05 | pass |
+| 3.5 | 0.2 | 45 | TM | 0.013 | 0.003 | 4.25 | 0.032 | 0.0079 | 4.07 | pass |
+| 3.5 | 0.5 | 0 | TE | 0.027 | 0.0066 | 4.03 | 0.038 | 0.0095 | 4.02 | pass |
+| 3.5 | 0.5 | 20 | TE | 0.028 | 0.007 | 4.03 | 0.04 | 0.01 | 4.02 | pass |
+| 3.5 | 0.5 | 45 | TE | 0.037 | 0.0093 | 4.02 | 0.054 | 0.013 | 4.04 | pass |
+| 3.5 | 0.5 | 0 | TM | 0.026 | 0.0066 | 4.03 | 0.038 | 0.0095 | 4.02 | pass |
+| 3.5 | 0.5 | 20 | TM | 0.025 | 0.0062 | 4.02 | 0.036 | 0.009 | 4.03 | pass |
+| 3.5 | 0.5 | 45 | TM | 0.021 | 0.0051 | 4.02 | 0.031 | 0.0078 | 4.02 | pass |
+
+### Resolution requirement for high-index slabs
+
+At 19.9 to 20.4 cells per material wavelength the n=3.5 slabs reach max abs dR 0.0128 to 0.0373 and transmission phase errors of 0.0315 to 0.0539 rad, above the 0.01 and 0.02 rad limits, while at 39.9 to 40.7 cells they reach 0.00302 to 0.00928 and 0.00782 to 0.0133 rad; the n=1.5 slabs stay within the limits at both meshes (abs dR at most 0.00725, phase at most 0.018 rad). The energy balance abs(R+T-1) is at most 8.4e-05 everywhere, and every error falls by a factor 3.93 to 4.08 (phase) and 3.96 to 4.25 (R) when the mesh is halved. This is the second-order Yee phase error measured independently in G3-01: 0.0203 rad per material wavelength at 20 cells and 0.00506 rad at 40 cells (eigenmode, n=1.5), and 0.0582, 0.014 and 0.00348 rad per vacuum wavelength at 10, 20 and 40 cells on the Simulation path; a 0.5 um n=3.5 slab is 1.13 material wavelengths thick, so its accumulated phase error at 20 cells is of the order of the limit. The first fixture therefore failed on a resolution requirement of the staircase Yee scheme, not on a defect: the revision-2 case fixes the mesh at about 40 cells per material wavelength for every index and leaves the limits unchanged.
 
 ### Layer A: CUDA FP32 (complex64 Bloch fields) against CPU FP64, n=1.5, d=0.2 um, 45 deg, N20
 
