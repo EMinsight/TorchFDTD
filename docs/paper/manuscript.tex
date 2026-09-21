@@ -205,6 +205,10 @@ The discrete adjoint of a shape parameter converges to the physical shape deriva
 
 The behaviour above is fixed by 2,141 tests that run on a Linux CPU continuous-integration host and on two CUDA workstations, and every device path is compared with its CPU counterpart. Recorded numerical fixtures carry the SHA-256 of the source files that produced them, so a change in a kernel that alters a recorded number is caught by the test that reads the record.
 
+\subsection{AI-assisted development}
+
+During the development of TorchFDTD, OpenAI GPT-6 Astra and Anthropic Claude Fable 5.1 were used as AI-assisted programming tools to support code prototyping, implementation, refactoring, debugging, test generation, and documentation. The authors defined the numerical formulations, physical assumptions, validation criteria, benchmark protocols, and acceptance thresholds, and reviewed the resulting implementation and numerical results. Solver correctness was independently assessed using analytical reference solutions, numerical convergence studies, finite-difference and automatic-differentiation gradient checks, independently implemented reference calculations, and CPU--GPU parity tests. The authors take full responsibility for the software, methodology, and results reported in this work.
+
 \section{Performance}
 \label{sec:performance}
 
@@ -276,6 +280,10 @@ Several directions follow from the records. The tensor and magnetic-wall paths r
 \section{Conclusion}
 
 TorchFDTD provides an FDTD engine whose forward kernels, transposes and storage tiers are designed together, so that inverse design on one graphics processor is limited by host memory and storage rather than by device memory. The package, its validation records and the source hashes of every measurement are available under the MIT licence \citep{torchfdtd}. Extending the fused transposes to tensor media and magnetic walls, measuring multi-device execution on real hardware, and running the streamed adjoint through a complete multi-hour optimization are the next steps toward design problems of ten billion cells on a single workstation.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
+
+During the preparation of this work, the authors used generative AI tools to improve the language and readability of the manuscript. After using these tools, the authors reviewed and edited the content as needed and take full responsibility for the content of the publication.
 
 \section*{Data and code availability}
 
