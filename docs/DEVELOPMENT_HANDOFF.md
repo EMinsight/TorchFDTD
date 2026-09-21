@@ -661,7 +661,8 @@ D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G8-0
 written plane is 1,201,056 bytes (0.075% of the volume, limit 1%); opening it
 and reading the stored x plane and a y plane across all 512 x chunks grew the
 working set by 3,690,496 bytes (0.23% of the volume) and the peak working set
-by 10,047,488 bytes (0.62%), both against the declared 5%; every round trip is
+by 10,047,488 bytes (0.62%) in the development run (5,627,904 and 11,956,224
+bytes in the recorded run), both against the declared 5%; every round trip is
 exact and the spectra recompute within rtol 1e-12. G8-03: the journey passed
 in 9.3 s on the development server (GDS import at 1.8 s, materials 2.1 s,
 source and monitor 2.9 s, boundaries 3.6 s, mesh preview 3.8 s, preflight
@@ -687,12 +688,21 @@ clean-install check (`tests/test_clean_install.py`) was not rerun and fails
 by design on this branch because `pyproject.toml` and the bundle changed
 (G8-05 and G8-07 records need the 12-minute rerun after merging).
 
-**Evidence paths and hashes.** Recorded on the clean tree after the bundle
-commit; the run ids are appended to the G8-02, G8-03 and G8-04 rows of the
-gate file by the recorder and listed in the evidence commit. The Playwright
-JSON report is `docs/validation/workbench/<time>-<commit>.playwright.json`,
-referenced by SHA-256 from the record and attached with `--artifact`; the
-G8-02 observed metrics are attached with `--observed`.
+**Evidence paths and hashes.** Runs 20260921T192908Z-g8-02-76c35baa,
+20260921T192925Z-g8-03-25de93db and 20260921T192929Z-g8-04-705af196, all
+VERIFIED at source commit 579c27d (the record commit after the bundle commit
+eb20946) with an empty dirty manifest; evidence.json SHA-256 prefixes
+f495beffc83b1826, 7fd01c2f4f81049f and d1e8839e8eeb9683. The journey record
+is `docs/validation/workbench/20260921T192723Z-eb209464.json` (7 of 7 passed,
+52.4 s wall, journey 8.7 s: GDS import 1.65 s, materials 2.03 s, source and
+monitor 2.79 s, boundaries 3.44 s, mesh preview 3.69 s, preflight 3.85 s,
+cancel 5.03 s, rerun 7.17 s, overlay 7.32 s, exports 8.70 s cumulative; the
+editing specs 28.3, 2.4, 1.8, 1.7, 1.8 and 4.3 s) with its Playwright JSON
+report beside it (SHA-256 889d861bd4b39a8d). The recorded G8-02
+metrics: working-set growth 5,627,904 bytes (0.35% of the nominal volume),
+peak working-set growth 11,956,224 bytes (0.74%), stored file 1,201,056 bytes.
+The judge passes all three tasks; its two failures are G3-05 and G3-08, outside
+this branch.
 
 **Remaining defects, risks, external blockers.**
 - `tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel` fails until `scripts/clean_install_check.py` is rerun (pyproject extra and the bundle changed), as every bundle rebuild does.
