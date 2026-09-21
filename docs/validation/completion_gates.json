@@ -468,7 +468,7 @@
           "specification": "capability registry를 만들고 dimensions × mesh × materials × boundaries × sources × monitors × forward/backward × resident/streamed × precision/backend의 유효 조합을 명시한다. 문서와 UI 지원 표를 이 registry로 생성한다.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "torchfdtd/capabilities.py",
@@ -482,13 +482,17 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_capability_pairs.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-03.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_capability_pairs.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-03.xml -p no:warnings"
+          ],
           "required_tests": [
             "tests/test_capability_pairs.py::test_registry_is_complete_and_every_rule_names_real_code",
             "tests/test_capability_pairs.py::test_rendered_tables_and_json_match_the_registry",
             "tests/test_capability_pairs.py::test_api_capabilities_serves_the_registry"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T171604Z-g2-03-53e2e466"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "torchfdtd/capabilities.py holds the nine axes, 86 ordered rejection rules (code path, exact message prefix) and 25 admitted lanes (code path, test) with a one-Project recipe per combination; scripts/build_capability_tables.py renders docs/CAPABILITIES.md and torchfdtd/capabilities.json, which /api/capabilities serves next to the Lumerical inventory and the workbench checklist dialog displays. FEATURE_CHECKLIST.md stays the Lumerical property inventory and links here."
@@ -499,7 +503,7 @@
           "specification": "전수 조합 대신 위험 기반 pairwise 검사와 고위험 3~4개 기능 조합을 설계한다. 각 지원 조합은 정상 예제와 부적합 입력 거절 검사를 갖는다. 미지원 입력은 장 할당/장시간 계산 전에 구체적 이유로 거절한다.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "tests/test_capability_pairs.py",
@@ -511,13 +515,17 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_capability_pairs.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-04.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_capability_pairs.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G2-04.xml -p no:warnings"
+          ],
           "required_tests": [
             "tests/test_capability_pairs.py::test_pairwise",
             "tests/test_capability_pairs.py::test_high_risk_combinations",
             "tests/test_capability_pairs.py::test_covering_array_covers_every_pair_rule_and_lane"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T171624Z-g2-04-481b2694"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "tests/test_capability_pairs.py builds a pairwise covering array over the registry axes plus one case per rule and lane and four high-risk combinations; admitted cases run their entry point, rejected cases must raise the registry exception, prefix and code path before field allocation (CUDA allocation checked). Three late rejections were moved before allocation and one missing rejection (tensor batch with tensor materials) was added, with regression tests."
