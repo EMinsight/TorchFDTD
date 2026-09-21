@@ -1,0 +1,25 @@
+{
+  "platform_id": "rtx5880-ada-win11-remote",
+  "record_version": 1,
+  "recorded_at": "2026-09-21T19:27:38+00:00",
+  "os": "Windows-10-10.0.26100-SP0",
+  "machine": "AMD64",
+  "python": "3.11.14",
+  "python_executable": "<deployment root>\\.venv\\Scripts\\python.exe",
+  "torch": "2.10.0",
+  "cupy": "13.6.0",
+  "numpy": "1.26.4",
+  "cuda_runtime": "12.8",
+  "torch_cuda_available": true,
+  "driver": "581.80",
+  "gpus": [
+    {
+      "index": 0,
+      "name": "NVIDIA RTX 5880 Ada Generation",
+      "compute_capability": "8.9",
+      "total_memory_bytes": 51526500352,
+      "free_memory_bytes_at_record": 49643782144
+    }
+  ],
+  "python_executable_note": "the deployment root is redacted; it is the checkout root on the remote workstation"
+}

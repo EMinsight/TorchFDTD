@@ -12,7 +12,7 @@ platform with a record but no evidence is inventoried, not verified.
 | Platform id | GPU | Compute capability | Driver | CUDA runtime | torch | CuPy | Python | OS | Record | Verified by |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | rtx3060-win11-lab | NVIDIA GeForce RTX 3060 | 8.6 | 591.86 | 12.6 | 2.10.0+cu126 | 13.6.0 | 3.10.2 | Windows-10-10.0.26200-SP0 | [rtx3060-win11-lab](validation/platforms/rtx3060-win11-lab.json) | G4-01 to G4-06 evidence runs listed in [validation/completion_gates.json](validation/completion_gates.json) |
-| rtx5880-ada-win11-remote | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | not recorded | none: the G4 tests have not been run there |
+| rtx5880-ada-win11-remote | NVIDIA RTX 5880 Ada Generation | 8.9 | 581.80 | 12.8 | 2.10.0 | 13.6.0 | 3.11.14 | Windows-10-10.0.26100-SP0 | [rtx5880-ada-win11-remote](validation/platforms/rtx5880-ada-win11-remote.json) | none yet: the G4 tests have not been recorded on this platform
 
 ## Notes
 
@@ -20,12 +20,10 @@ platform with a record but no evidence is inventoried, not verified.
   tests keep every CUDA grid at or below 32^3 cells so they run beside other
   work. The record's `free_memory_bytes_at_record` is the free memory at the
   moment of the inventory, not a guarantee.
-- The remote RTX 5880 Ada workstation appears in earlier measurement records
-  (for example `validation/tiled-stitching-scale-5880.json` names the GPU and
-  torch 2.10.0, and [ACCEPTANCE.md](ACCEPTANCE.md) records full-suite passes
-  there), but no `platform_report.py` record exists for it, so its row stays
-  `not recorded` until one is written on that machine with
-  `python scripts/platform_report.py --id rtx5880-ada-win11-remote`.
+- The remote RTX 5880 Ada workstation record was written on that machine with
+  `python scripts/platform_report.py --id rtx5880-ada-win11-remote` (deployment
+  root redacted in the record); its G4 evidence is recorded separately when the
+  G4 tests run there.
 - Linux appears only as the CPU-only GitHub Actions job (`cpu-pr` suite, no
   GPU); it is not a CUDA platform and has no row here. macOS has no test
   record of any kind.
