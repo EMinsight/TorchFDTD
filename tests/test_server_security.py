@@ -294,7 +294,11 @@ def test_npz_readers_never_unpickle_and_fail_closed_on_hostile_archives(tmp_path
     loads = [(name, match.group(0)) for name, text in sources.items() for match in re.finditer(r'\bnp\.load\([^\n]*', text)]
     assert loads, 'the package loads NPZ files somewhere'
     assert all('allow_pickle=False' in call for _, call in loads), [name for name, call in loads if 'allow_pickle=False' not in call]
-    for pattern in ['allow_pickle=True', 'pickle.load', 'torch.load(', 'joblib.load', 'numpy.load(']:
+    # Checkpoints are the only torch.load callers; each restores tensors and plain containers only.
+    checkpoints = [(name, match.group(0)) for name, text in sources.items() for match in re.finditer(r'\btorch\.load\([^\n]*', text)]
+    assert {name for name, _ in checkpoints} == {'design_checkpoint.py', 'design_problem.py'}
+    assert all('weights_only=True' in call for _, call in checkpoints), [name for name, call in checkpoints if 'weights_only=True' not in call]
+    for pattern in ['allow_pickle=True', 'weights_only=False', 'pickle.load', 'joblib.load', 'numpy.load(']:
         assert not [name for name, text in sources.items() if pattern in text], pattern
     project = demo_project()
     strings = dict(project=np.asarray(project.model_dump_json()), summary=np.asarray('{"cancelled": false}'),

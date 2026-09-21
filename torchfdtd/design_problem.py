@@ -14,6 +14,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import pickle
 import time
 
 import numpy as np
@@ -156,7 +157,12 @@ class DesignProblem:
         return path
 
     def load(self, path):
-        state = torch.load(Path(path), map_location='cpu', weights_only=False)
+        # The state holds tensors and plain containers only; a pickled object is refused, not executed.
+        try:
+            state = torch.load(Path(path), map_location='cpu', weights_only=True)
+        except pickle.UnpicklingError as exc:
+            raise ValueError('DesignProblem state file holds a pickled object that is not a tensor or a plain container; '
+                             'it was refused and nothing in it was executed.') from exc
         if not isinstance(state, dict) or state.get('marker') != STATE_MARKER:
             raise ValueError('Not a DesignProblem state file.')
         if state['fingerprint'] != self.fingerprint():

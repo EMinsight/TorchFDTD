@@ -9,10 +9,13 @@ so that a resumed loop reproduces the uninterrupted history. `DesignCheckpoint`
 writes those as one file with a checksum beside a JSON description, renamed
 into place, and refuses a checkpoint that lacks any of them by name, that was
 written for another configuration, or that fails its checksum
-(docs/STREAMED_RESTART.md).
+(docs/STREAMED_RESTART.md). The file holds tensors and plain containers only
+and is read with `weights_only=True`, so a pickled object in it is refused
+rather than executed.
 """
 import os
 from pathlib import Path
+import pickle
 import random
 import time
 
@@ -26,17 +29,21 @@ REQUIRED_STATES = ('iteration', 'parameters', 'optimizer', 'projection', 'rng', 
 
 
 def rng_state():
-    """Every generator a loop may draw from: torch CPU and CUDA, NumPy and Python."""
+    """Every generator a loop may draw from: torch CPU and CUDA, NumPy and Python.
+
+    The NumPy key array is stored as a tensor; the Python state is plain ints."""
+    name, key, *rest = np.random.get_state()
     return dict(torch=torch.get_rng_state(),
                 cuda=torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
-                numpy=np.random.get_state(), python=random.getstate())
+                numpy=(name, torch.from_numpy(key.astype(np.int64)), *rest), python=random.getstate())
 
 
 def set_rng_state(state):
     torch.set_rng_state(state['torch'])
     if state['cuda'] and torch.cuda.is_available() and len(state['cuda']) == torch.cuda.device_count():
         torch.cuda.set_rng_state_all(state['cuda'])
-    np.random.set_state(state['numpy'])
+    name, key, *rest = state['numpy']
+    np.random.set_state((name, key.numpy().astype(np.uint32), *rest))
     random.setstate(state['python'])
 
 
@@ -108,8 +115,11 @@ class DesignCheckpoint:
         digest = sha256_file(self.path)
         if digest != meta.get('sha256'):
             raise ValueError('Design checkpoint is damaged: checksum mismatch in checkpoint.pt.')
-        # Our own checksummed file; it carries NumPy and Python generator states.
-        payload = torch.load(self.path, map_location='cpu', weights_only=False)
+        try:
+            payload = torch.load(self.path, map_location='cpu', weights_only=True)
+        except pickle.UnpicklingError as exc:
+            raise ValueError('Design checkpoint holds a pickled object that is not a tensor or a plain container; '
+                             'it was refused and nothing in it was executed.') from exc
         if not isinstance(payload, dict) or payload.get('marker') != MARKER:
             raise ValueError('Design checkpoint was not written by this module.')
         missing = [name for name in REQUIRED_STATES if name not in payload]
