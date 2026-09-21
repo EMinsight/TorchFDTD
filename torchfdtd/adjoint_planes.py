@@ -183,14 +183,24 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
             maps=[]
             for component in COMPONENTS:
                 indices,weights=interpolation_map(self.project.region,component,plan['points_um'])
-                samples=np.empty_like(indices)
-                for position,index in np.ndenumerate(indices):
-                    key=(component,int(index))
-                    if key not in lookup:
-                        loc=tuple(int(v) for v in np.unravel_index(int(index)//3,self.project.region.shape))
-                        lookup[key]=len(observers)
-                        observers.append((component,loc,COMPONENTS.index(component)%3))
-                    samples[position]=lookup[key]
+                # One observer per distinct Yee location of this component, numbered
+                # in first-occurrence order across all planes. Vectorised: a Python
+                # loop over every interpolation index took minutes for a
+                # million-point plane while the GPU idled.
+                flat=np.asarray(indices,dtype=np.int64).reshape(-1)
+                known=lookup.setdefault(component,{})
+                unique,first,inverse=np.unique(flat,return_index=True,return_inverse=True)
+                numbers=np.empty(len(unique),dtype=np.int64)
+                locations=np.unravel_index(unique//3,self.project.region.shape)
+                slot=COMPONENTS.index(component)%3
+                for rank in np.argsort(first,kind='stable'):
+                    index=int(unique[rank])
+                    number=known.get(index)
+                    if number is None:
+                        number=known[index]=len(observers)
+                        observers.append((component,tuple(int(axis[rank]) for axis in locations),slot))
+                    numbers[rank]=number
+                samples=numbers[inverse].reshape(np.shape(indices))
                 maps.append((samples,weights))
             self.plans.append((monitor.id,monitor.normal,plan,maps))
         self.observers=tuple(observers)

@@ -20,6 +20,7 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Added
 
+- `DifferentiablePlaneSimulation` builds its observer table with vectorised NumPy unique/inverse maps instead of a Python loop over every interpolation index; a 1050x1050-point plane with six components previously took more than ten minutes of single-core setup while the GPU idled. Observer numbering (first occurrence per component) and results are unchanged (this commit).
 - `Region.pml_dispersion = 'frozen'` removes the Drude/Lorentz pole (ADE) update from PML cells and gives them the real permittivity at the source centre frequency, for the resident CPU/CUDA solvers and `run_tensor_batch`. Pole cells in the outer, high-conductivity part of the CPML diverge after about 1500 steps on grids larger than a few micrometres, and neither a CFS `alpha` profile nor freezing the wall layer alone prevents it; the default `'ade'` is unchanged and the differentiable/streamed solvers reject `'frozen'`. Evidence and limits in [BOUNDARIES.md](BOUNDARIES.md#dispersive-materials-inside-pml) (this commit).
 - Angular-spectrum propagation of a recorded output plane into sections, volumes and points with a shared transfer function and first-order gradients: `plane_spectrum`, `propagate_section`, `propagate_volume`, `propagate_points`; `propagate_plane` now delegates to it (8283506).
 - Tiled approximate execution mode in the workbench and an execution-modes README section (f09ec94).
