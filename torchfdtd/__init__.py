@@ -176,3 +176,17 @@ from .angular_spectrum import (PlaneSpectrum, SectionResult, VolumeResult, Point
                                propagate_volume, propagate_points, volume_bytes)
 __all__ += ["PlaneSpectrum", "SectionResult", "VolumeResult", "PointsResult", "plane_spectrum", "propagate_section",
             "propagate_volume", "propagate_points", "volume_bytes"]
+
+from .ports import (FixedPortSectionError, ModeTrackingWarning, WeakModeWarning, TrackedPortModes, PortDiagnostics,
+                    track_port_modes, port_diagnostics, degenerate_clusters, overlap_matrix, confinement_factor,
+                    shift_reference_plane, deembed_s_matrix, separate_directions, port_normalization, fixed_port_section)
+__all__ += ["FixedPortSectionError", "ModeTrackingWarning", "WeakModeWarning", "TrackedPortModes", "PortDiagnostics",
+            "track_port_modes", "port_diagnostics", "degenerate_clusters", "overlap_matrix", "confinement_factor",
+            "shift_reference_plane", "deembed_s_matrix", "separate_directions", "port_normalization", "fixed_port_section"]
+
+from .density_layer import bounded_density_layer
+from .fabrication import (FeatureSizes, measure_feature_sizes, fabrication_perturbation, binary_structures,
+                          morphological_open, square_offsets)
+from .design_problem import Continuation, DesignProblem
+__all__ += ["bounded_density_layer", "FeatureSizes", "measure_feature_sizes", "fabrication_perturbation",
+            "binary_structures", "morphological_open", "square_offsets", "Continuation", "DesignProblem"]

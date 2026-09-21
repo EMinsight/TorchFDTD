@@ -10,7 +10,7 @@ against gate task G9-04. User-visible changes are listed in [CHANGELOG.md](CHANG
 ## Public API surface
 
 The public API is exactly the set of names exported by `torchfdtd/__init__.py` through
-`__all__`: 195 names at this version, listed below by area and defining module.
+`__all__`: 219 names at this version, listed below by area and defining module.
 Anything else, including every `torchfdtd.<module>` not named here, the `torchfdtd.server`
 routes, the CLI flags and the browser workbench, is an internal interface that may change
 without a deprecation period. The HTTP routes are stable only for the bundled workbench of
@@ -44,7 +44,7 @@ the same version; a client that targets `/api/...` pins the package version.
 | Objectives | `torchfdtd.detector_allocation` | `quadrant_intensity_allocation` |
 | Objectives | `torchfdtd.polarization` | `calibrate_plane_polarization`, `mix_plane_fields` |
 | Objectives | `torchfdtd.electron_model` | `spectral_interpolate`, `spectral_electron_model`, `exposure_target_information`, `SpectralElectronModel`, `ExposureInformation` |
-| Periodic design | `torchfdtd.density_layer` | `periodic_density_layer` |
+| Periodic design | `torchfdtd.density_layer` | `periodic_density_layer`, `bounded_density_layer` |
 | Objectives | `torchfdtd.pupil_response` | `spectral_pupil_response` |
 | Periodic design | `torchfdtd.periodic_response` | `periodic_layer_response` |
 | Periodic design | `torchfdtd.reference_cache` | `PlaneReferenceCache` |
@@ -86,6 +86,9 @@ the same version; a client that targets `/api/...` pins the package version.
 | Streamed execution | `torchfdtd.streamed_planning` | `StreamedWorkPlan`, `plan_streamed_work` |
 | Tiled execution | `torchfdtd.tiled` | `TilePlan`, `TileSpec`, `StitchedPlane`, `plan_tiles`, `run_tiled`, `stitch_planes`, `propagate_plane`, `farfield_from_stitched`, `suggest_overlap`, `TiledPlaneSimulation` |
 | Angular-spectrum propagation | `torchfdtd.angular_spectrum` | `PlaneSpectrum`, `SectionResult`, `VolumeResult`, `PointsResult`, `plane_spectrum`, `propagate_section`, `propagate_volume`, `propagate_points`, `volume_bytes` |
+| Mode ports | `torchfdtd.ports` | `FixedPortSectionError`, `ModeTrackingWarning`, `WeakModeWarning`, `TrackedPortModes`, `PortDiagnostics`, `track_port_modes`, `port_diagnostics`, `degenerate_clusters`, `overlap_matrix`, `confinement_factor`, `shift_reference_plane`, `deembed_s_matrix`, `separate_directions`, `port_normalization`, `fixed_port_section` |
+| Design | `torchfdtd.fabrication` | `FeatureSizes`, `measure_feature_sizes`, `fabrication_perturbation`, `binary_structures`, `morphological_open`, `square_offsets` |
+| Design | `torchfdtd.design_problem` | `Continuation`, `DesignProblem` |
 
 ## Versioning and deprecation rule
 
@@ -116,6 +119,7 @@ the same version; a client that targets `/api/...` pins the package version.
 | Mode-network configuration | `version` field of `ModeNetworkConfig` | `1` | `mode_network_plan`, `/api/mode-networks/validate` | `ModeNetworkConfig` rejects any other version |
 | Periodic design result | none | JSON object returned by `run_periodic_design` | `run_periodic_design`, `/api/design/jobs/{key}/download` | read as data by the user; no reader in the package depends on it |
 | GDS | GDSII stream, no project marker | native `unit`/`precision` of the file | `export_gds` | `import_gds` under `GDSLimits` and the record audit described in [SECURITY.md](SECURITY.md) |
+| Design-problem state | `marker` key | `torchfdtd-design-problem` | `DesignProblem.save` (`torch.save`) | `DesignProblem.load` accepts a state only when its fingerprint (parameterization configuration, optimizer type and defaults, continuation) equals the problem's; the parameterization refuses a differing configuration on its own |
 
 ## Known limitations at this version
 

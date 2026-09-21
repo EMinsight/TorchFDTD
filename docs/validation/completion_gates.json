@@ -1726,64 +1726,126 @@
           "title": "포트별 mode tracking, normalization, reference plane, forward/backward separation과 퇴화/약한 모드 진단을 제공한다",
           "specification": "포트별 mode tracking, normalization, reference plane, forward/backward separation과 퇴화/약한 모드 진단을 제공한다. fixed-mode gradient와 eigenmode 자체의 gradient를 구분한다. port 단면을 설계 변수로 바꾸면 재계산/미분 지원 여부를 명시한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/ports.py",
+            "torchfdtd/mode_network.py",
+            "torchfdtd/mode_ports.py",
+            "docs/PORTS.md",
+            "tests/test_ports.py"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_ports.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-04.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_ports.py::test_slab_tracking_follows_te0_and_tm0_across_the_band_with_reported_overlaps",
+            "tests/test_ports.py::test_tracking_warns_below_the_declared_minimum_and_rejects_bad_inputs",
+            "tests/test_ports.py::test_design_variable_port_section_is_rejected_by_a_named_error",
+            "tests/test_ports.py::test_degenerate_square_guide_reports_the_cluster_canonical_basis_and_overlap_matrix",
+            "tests/test_ports.py::test_weak_mode_warning_uses_a_measured_confinement_factor",
+            "tests/test_ports.py::test_reference_plane_shift_and_de_embedding_cancel_a_straight_guide_phase",
+            "tests/test_ports.py::test_direction_separation_recovers_synthetic_forward_and_backward_amplitudes"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "torchfdtd.ports: track_port_modes (overlap matching with a reported minimum), port_normalization, shift_reference_plane and deembed_s_matrix, separate_directions, port_diagnostics (degenerate clusters, overlap matrix, confinement, weak-mode warning) and FixedPortSectionError raised by fixed_port_section, which ModeNetwork and ModeBranchNetwork call; gradients are with respect to a fixed basis (docs/PORTS.md)."
         },
         {
           "id": "G6-05",
           "title": "기존 design/periodic/mode-network API를 재사용해 objective→parameterization→optimizer→history→resume→final evaluation의 최소 고수준 인터페이스를 통합한다",
           "specification": "기존 design/periodic/mode-network API를 재사용해 objective→parameterization→optimizer→history→resume→final evaluation의 최소 고수준 인터페이스를 통합한다. 존재하지 않는 class 이름을 문서에 먼저 확정하지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/design_problem.py",
+            "torchfdtd/density_layer.py",
+            "examples/design_metagrating.py",
+            "examples/design_mode_coupler.py",
+            "docs/DESIGN_WORKFLOW.md",
+            "tests/test_design_workflow.py"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_workflow.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-05.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_design_workflow.py::test_design_problem_contracts_history_and_continuation",
+            "tests/test_design_workflow.py::test_toy_resume_reproduces_the_uninterrupted_history_bitwise",
+            "tests/test_design_workflow.py::test_metagrating_resume_reproduces_the_uninterrupted_history_bitwise",
+            "tests/test_design_workflow.py::test_coupler_resume_reproduces_the_uninterrupted_history_bitwise",
+            "tests/test_design_workflow.py::test_metagrating_example_runs_end_to_end_with_fine_reimport",
+            "tests/test_design_workflow.py::test_coupler_example_runs_end_to_end_with_fine_reimport_and_holdout"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "DesignProblem (objective, DensityParameterization, torch optimizer, history, checkpoint/resume, fabrication, export, reimport, final_evaluation) with Continuation; bounded_density_layer for a design box inside a fixed epsilon; examples design_metagrating.py (periodic plane adjoint, diffraction_efficiency) and design_mode_coupler.py (ModeNetwork), both CPU, resumed histories bitwise equal."
         },
         {
           "id": "G6-06",
           "title": "density filter, projection, beta continuation, symmetry, mask, min linewidth/gap, fabrication perturbation, binary export를 실제 검사와 연결한다",
           "specification": "density filter, projection, beta continuation, symmetry, mask, min linewidth/gap, fabrication perturbation, binary export를 실제 검사와 연결한다. filter radius만으로 min feature 보장을 주장하지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/fabrication.py",
+            "torchfdtd/design_problem.py",
+            "docs/DESIGN_WORKFLOW.md",
+            "tests/test_design_workflow.py"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_workflow.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-05.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_design_workflow.py::test_measured_gap_violates_although_the_filter_radius_is_satisfied",
+            "tests/test_design_workflow.py::test_feature_size_measurement_is_exact_on_runs_and_rectangles",
+            "tests/test_design_workflow.py::test_binary_structures_tile_solid_pixels_exactly"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "measure_feature_sizes (morphological opening by digital squares on the binarized design, periodic or extended boundaries), fabrication_perturbation (erosion and dilation by a declared whole-pixel amount evaluated with the forward through DesignProblem.fabrication), binary_structures (rectangles) and DesignProblem.export (structures JSON and GDS); the filter radius is reported, never used as a feature guarantee."
         },
         {
           "id": "G6-07",
           "title": "export된 binary/GDS 구조를 다시 import하여 독립 finer forward로 평가한다",
           "specification": "export된 binary/GDS 구조를 다시 import하여 독립 finer forward로 평가한다. geometry smoothing·thresholding·GDS 근사의 성능 손실을 보고한다. optimizer의 매 step 단조 개선은 요구하지 않되, 사전 정의한 최종 목표와 holdout 성능을 판정한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "torchfdtd/design_problem.py",
+            "examples/design_metagrating.py",
+            "examples/design_mode_coupler.py",
+            "scripts/render_design_workflow.py",
+            "docs/DESIGN_WORKFLOW.md",
+            "docs/validation/g6",
+            "tests/test_design_reimport.py"
+          ],
+          "planned_test_commands": [
+            "TORCHFDTD_G6_FULL=1 TORCHFDTD_G6_RECORD=docs/validation/g6 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_reimport.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-07.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[coupler]",
+            "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[metagrating]",
+            "tests/test_design_reimport.py::test_recorded_starts_meet_the_declared_thresholds[coupler]",
+            "tests/test_design_reimport.py::test_recorded_starts_meet_the_declared_thresholds[metagrating]"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "DesignProblem.final_evaluation: the smooth and thresholded density, the exported rectangles re-read from JSON and the GDS polygons re-read by import_gds are evaluated with an independent forward at half the mesh and twice the steps; the mesh-refinement, thresholding, smoothing and GDS differences and the holdout metric are recorded per start in docs/validation/g6 and rendered into docs/DESIGN_WORKFLOW.md; three declared starts per example are all reported and all judged."
         },
         {
           "id": "G6-08",

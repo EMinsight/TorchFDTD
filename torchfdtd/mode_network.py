@@ -90,15 +90,8 @@ def _decompose(plane, launches, gram_tolerance):
 
 
 def _fixed_section(section):
-    def checked(value):
-        if isinstance(value, torch.Tensor):
-            if value.requires_grad:
-                raise ValueError('Port cross-sections are fixed. Trainable profile tensors are unsupported.')
-            return value.detach().cpu().numpy()
-        return value
-    if callable(section):
-        return lambda u, v: checked(section(u, v))
-    return checked(section)
+    from .ports import fixed_port_section
+    return fixed_port_section(section)
 
 
 class ModeNetwork:

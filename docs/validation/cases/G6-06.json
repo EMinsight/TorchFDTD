@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G6-06",
+  "task": "G6-06",
+  "title": "Fabrication constraints connected to the design interface: measured minimum linewidth and gap by morphological opening, perturbation evaluated with the forward, binary export",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "oracle_class": ["analytic_discrete", "shared_discrete_operator"],
+  "fixture": {
+    "gap_violation": "tests/test_design_workflow.py: 12 x 12 logits of +-8 forming two solid blocks (columns 1..4 and 6..10 of rows 1..10) separated by one 0.1 um pixel, DensityParameterization with filter_radius_um 0.15, truncate boundary, beta 64, eta 0.5; DesignProblem with a linear objective (density times a linspace weight); fabrication(spacing 0.1 um, min_linewidth 0.15 um, min_gap 0.15 um, perturbation 0.1 um)",
+    "feature_measurement": "tests/test_design_workflow.py: 30 x 1 periodic line with runs of 4, 1 and 8 pixels (0.05 um); 12 x 12 blocks of 5 x 5 and 4 x 5 pixels one pixel apart at the array edge (0.1 um), measured with extend and periodic boundaries; a uniform 5 x 5 design",
+    "binary_export": "tests/test_design_workflow.py: 6 x 5 binary with three rectangular runs, origin (-0.6, -0.5) um, 0.2 um pixels, z from -0.1 to 0.1 um",
+    "examples": "the fabrication reports of examples/design_metagrating.py (spacing 0.05 um, declared min linewidth and gap 0.1 um, perturbation 0.05 um, periodic x) and examples/design_mode_coupler.py (spacing 0.2 um, declared 0.4 um, perturbation 0.2 um) as run by the G6-05 end-to-end tests and the G6-07 recorded starts",
+    "measurement": "torchfdtd.fabrication: opening by digital squares of every integer side (odd sides centred on a pixel, even sides on a corner); the minimum linewidth is the largest side whose opening leaves the solid unchanged, the minimum gap the same on the void; erosion and dilation by the square of side 2 amount + 1"
+  },
+  "seed": {"others": "deterministic (fixed logits and arrays)"},
+  "precision": ["exact integer pixel morphology", "float32 objectives"],
+  "backend": ["cpu"],
+  "reference_method": "Analytic discrete morphology: a run of L pixels or a rectangle of W by H pixels survives the opening with side s exactly when min(W, H) >= s, so the measured values are known by construction (linewidth 4, gap 1 for the gap-violation blocks; 4 and 6 for the periodic line; 5 and 1 with extend, 4 with periodic for the edge blocks). The perturbation changes are the forward model's own responses to the eroded and dilated designs; they are recorded and required to be finite and nonzero, not compared to an external value.",
+  "observables": [
+    {"name": "measured_gap_pixels", "unit": "pixels", "definition": "gap_pixels of the thresholded gap-violation design"},
+    {"name": "measured_linewidth_pixels", "unit": "pixels", "definition": "linewidth_pixels of the thresholded gap-violation design"},
+    {"name": "violations", "unit": "names", "definition": "FeatureSizes.violations against the declared 0.15 um limits"},
+    {"name": "perturbation_objective_change", "unit": "objective units", "definition": "objective(eroded) - objective(nominal) and objective(dilated) - objective(nominal)"},
+    {"name": "structure_tiling", "unit": "boolean", "definition": "the exported rectangles cover exactly the solid pixels without overlap"}
+  ],
+  "acceptance": {
+    "measured_gap_pixels": 1,
+    "measured_linewidth_pixels": 4,
+    "violations": ["min_gap"],
+    "satisfies_declared_constraints": false,
+    "filter_radius_um_reported": 0.15,
+    "perturbation_objective_change": "finite and nonzero for both erosion and dilation; eroded solid fraction below dilated",
+    "feature_measurement_exact": {"line": [[1, 1], [4, 6]], "blocks_extend": [5, 1], "blocks_periodic_linewidth": 4, "uniform_saturated": ["min_linewidth", "min_gap"]},
+    "structure_tiling": true,
+    "source_of_limits": "analytic discrete morphology on declared arrays; the filter radius alone is explicitly not accepted as a minimum-feature guarantee"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_design_workflow.py::test_measured_gap_violates_although_the_filter_radius_is_satisfied",
+      "tests/test_design_workflow.py::test_feature_size_measurement_is_exact_on_runs_and_rectangles",
+      "tests/test_design_workflow.py::test_binary_structures_tile_solid_pixels_exactly"
+    ],
+    "layers": {
+      "tests/test_design_workflow.py::test_measured_gap_violates_although_the_filter_radius_is_satisfied": {"layer": "A", "oracle_class": "analytic_discrete", "oracle": "gap and linewidth known by construction; perturbation change recorded from the objective"},
+      "tests/test_design_workflow.py::test_feature_size_measurement_is_exact_on_runs_and_rectangles": {"layer": "A", "oracle_class": "analytic_discrete", "oracle": "run lengths and rectangle sides known by construction, both boundary rules"},
+      "tests/test_design_workflow.py::test_binary_structures_tile_solid_pixels_exactly": {"layer": "A", "oracle_class": "analytic_discrete", "oracle": "pixel coverage recomputed from the rectangles"}
+    },
+    "not_yet_covered": [
+      "a fabrication-constrained optimization (penalty or projection that enforces the measured minimum feature during the optimization); the measurement reports, it does not constrain",
+      "sub-pixel perturbation amounts (the erosion and dilation move whole pixels)",
+      "curved or diagonal features, for which the square element is a Manhattan measure"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "none for the morphology (integer pixels); float32 for the objective changes",
+    "time_window": "not applicable",
+    "pml": "not applicable"
+  },
+  "notes": "torchfdtd/fabrication.py is added with this case. The first draft measured with digital disks and reported a 5 x 5 square as 3 pixels wide because a disk cannot fill a right-angle corner; the element was changed to digital squares before the recorded run and the definition is stated in the module and in docs/DESIGN_WORKFLOW.md. Exported rectangles are widened by 1e-9 um so that a Yee node on a pixel edge is material whichever side it rounds to (the same rule the polygon importer applies); the first coupler pilot without this widening showed a 0.026 GDS difference that was floating-point rounding, not geometry."
+}

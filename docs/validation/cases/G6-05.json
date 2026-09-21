@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G6-05",
+  "task": "G6-05",
+  "title": "DesignProblem: objective, parameterization, optimizer step, history, resume and final evaluation on two runnable CPU examples",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "oracle_class": ["exact_reproduction", "shared_discrete_operator"],
+  "fixture": {
+    "interface": "torchfdtd.design_problem.DesignProblem(parameterization, objective, optimizer, continuation) built on DensityParameterization (filter, symmetry, projection, beta continuation, masks), torch.optim, PeriodicLayerResponse-style density transfers (periodic_density_layer, bounded_density_layer), DifferentiablePlaneSimulation + diffraction_efficiency and ModeNetwork; run(iterations, checkpoint, resume) saves after every step",
+    "toy": "tests/test_design_workflow.py: 6 x 4 logits, filter 0.15 um, beta 2 doubled every 3 steps to 16, Adam 0.05, quadratic objective against a linear target; 9 steps straight against 4 + resume to 9",
+    "metagrating": "examples/design_metagrating.py: 1.5 um period, thin 0.25 um (five cells) invariant y, 3.6 um along z with 0.4 um CPML, 0.5 um layer of epsilon 4 in air, plane source at z = -1.2 um, transmitted plane at +1.2 um, 30 pixels of 0.05 um, filter radius 0.125 um, beta 4 doubled every 4 steps to 64, Adam 0.1, initial logits 0.5 randn(seed); test runs: mesh 0.05 um, 300 steps, 4 steps straight against 2 + resume to 4, and the full main() with 2 iterations and 300 steps including the fine evaluation at 0.025 um and 600 steps",
+    "coupler": "examples/design_mode_coupler.py: 6.4 x 2.4 x 1.0 um, 1.0 um x CPML, periodic y and z, two slab guides of epsilon 4 (0.6 um wide) in 2.25 offset by 0.6 um (left guide y in (0, 0.6) um, right guide y in (-0.6, 0) um), opposing fixed-mode ports at x = -1 and +1 um with their own port_permittivities and sources at -1.8 and +1.8 um, 2-cycle Gaussian at 1.55 um, design box x in [-0.6, 0.6] um and y in [-1, 1] um of 6 x 10 pixels (0.2 um), bounded_density_layer on the base epsilon assembled from the two reference guides split at x = 0, rotate180 symmetry, filter radius 0.4 um, beta 4 doubled every 4 steps to 64, Adam 0.1, initial logits 0.5 randn(seed); test runs: mesh 0.2 um, 200 steps, 3 steps straight against 1 + resume to 3, and the full main() with 2 iterations and 200 steps including the fine evaluation at 0.1 um and 400 steps and the holdout network at 1.5 um",
+    "devices": "CPU only, two Torch threads in the test module, four in the example main()"
+  },
+  "seed": {"toy": 3, "metagrating_resume": 1, "coupler_resume": 2, "example_main": 1, "note": "torch.Generator().manual_seed(seed) for the initial logits; the eigensolver uses its fixed start vector"},
+  "precision": ["float32 FDTD and parameters"],
+  "backend": ["cpu"],
+  "reference_method": "Exact reproduction: the history (iteration, objective, metrics, gradient norm, beta, beta_next) and the parameters of a resumed run must equal those of the uninterrupted run bitwise, on the toy problem and on both FDTD examples. Structural completion: each example's main() returns a record with two history entries, a fabrication report, an export whose GDS and structure files exist, and a final evaluation with the five stages and four differences whose sum equals the total difference.",
+  "observables": [
+    {"name": "resume_history_equality", "unit": "boolean", "definition": "strip_times(resumed.history) == strip_times(straight.history) and torch.equal on the design parameters"},
+    {"name": "continuation_schedule", "unit": "beta", "definition": "beta used per step on the toy problem: 2, 2, 2, 4, 4, 4, 8"},
+    {"name": "record_completeness", "unit": "boolean", "definition": "stages coarse_smooth, fine_smooth, fine_binary, fine_structures, fine_gds with finite metrics; differences mesh_refinement + thresholding + smoothing + gds == total"},
+    {"name": "gds_round_trip", "unit": "dimensionless", "definition": "fine_gds minus fine_structures for every metric"}
+  ],
+  "acceptance": {
+    "resume_history_equality": {"value": true, "tolerance": "bitwise (exact float equality) on the CPU"},
+    "continuation_schedule": [2, 2, 2, 4, 4, 4, 8],
+    "record_completeness": true,
+    "gds_round_trip_difference": {"value": 0.0, "where": "pixel-aligned rectangles survive the 1 nm GDS rounding and voxelize identically to the re-imported polygons"},
+    "coupler_symmetry": "the thresholded design equals its 180-degree rotated image",
+    "source_of_limits": "exact reproduction and structural completeness; no physical threshold is judged here (G6-07 judges the final objective and holdout)"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_design_workflow.py::test_design_problem_contracts_history_and_continuation",
+      "tests/test_design_workflow.py::test_toy_resume_reproduces_the_uninterrupted_history_bitwise",
+      "tests/test_design_workflow.py::test_metagrating_resume_reproduces_the_uninterrupted_history_bitwise",
+      "tests/test_design_workflow.py::test_coupler_resume_reproduces_the_uninterrupted_history_bitwise",
+      "tests/test_design_workflow.py::test_metagrating_example_runs_end_to_end_with_fine_reimport",
+      "tests/test_design_workflow.py::test_coupler_example_runs_end_to_end_with_fine_reimport_and_holdout"
+    ],
+    "layers": {
+      "tests/test_design_workflow.py::test_design_problem_contracts_history_and_continuation": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "interface contracts and the declared continuation schedule"},
+      "tests/test_design_workflow.py::test_toy_resume_reproduces_the_uninterrupted_history_bitwise": {"layer": "A", "oracle_class": "exact_reproduction", "oracle": "uninterrupted run of the same problem"},
+      "tests/test_design_workflow.py::test_metagrating_resume_reproduces_the_uninterrupted_history_bitwise": {"layer": "A", "oracle_class": "exact_reproduction", "oracle": "uninterrupted run of the same FDTD problem"},
+      "tests/test_design_workflow.py::test_coupler_resume_reproduces_the_uninterrupted_history_bitwise": {"layer": "A", "oracle_class": "exact_reproduction", "oracle": "uninterrupted run of the same mode-network problem"},
+      "tests/test_design_workflow.py::test_metagrating_example_runs_end_to_end_with_fine_reimport": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "structural completeness of the record; GDS round trip against the rectangle voxelization"},
+      "tests/test_design_workflow.py::test_coupler_example_runs_end_to_end_with_fine_reimport_and_holdout": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "structural completeness of the record with the holdout network; rotation symmetry of the thresholded design"}
+    },
+    "not_yet_covered": [
+      "resume determinism on CUDA (the examples and tests are CPU only)",
+      "a streamed or reversible adjoint execution behind the objective (the examples use the resident checkpointed adjoint)",
+      "the browser workbench does not expose DesignProblem"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "none: equality is exact; the CPU FDTD and Adam are deterministic for a fixed thread count",
+    "time_window": "the test runs use 300 (metagrating) and 200 (coupler) coarse steps, shorter than the declared 800 and 500 of the recorded starts; they exercise the interface, not the physics",
+    "pml": "as declared per example"
+  },
+  "notes": "tests/test_design_workflow.py and both examples are added with this case. The names DesignProblem, Continuation, bounded_density_layer, measure_feature_sizes, fabrication_perturbation and binary_structures exist in the code before this document names them."
+}
