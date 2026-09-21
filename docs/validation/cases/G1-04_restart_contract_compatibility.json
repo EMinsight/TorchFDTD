@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G1-04_restart_contract_compatibility",
+  "task": "G1-04",
+  "title": "Restart contract: a journal is resumed only by the code and inputs that wrote it",
+  "declared": "2026-09-22",
+  "declared_at_commit": "35ac180b57c00cd49bb10652280164a43558ba9c",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "torchfdtd.streamed_restart",
+    "contract": "runtime_sha256 over every .py file of the torchfdtd package (relative POSIX paths, content hashes) plus the Torch version, the project inputs (epsilon, effective waveform, steps, time step, Courant factor) and the signal adjoint (signal_bar_sha256)",
+    "journal": "tests/test_streamed_restart.py fixtures: a small streamed forward and backward run with a durable journal on a temporary directory on the D: volume",
+    "changes_injected": [
+      "boundaries.py",
+      "differentiable.py",
+      "waveforms.py",
+      "cuda_kernels.py",
+      "epsilon",
+      "waveform",
+      "steps",
+      "time_step",
+      "courant",
+      "signal adjoint"
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "behavioural: a resume against an unchanged tree and unchanged inputs succeeds and reproduces the uninterrupted result; every injected change is refused before any bank or field is read",
+  "observables": [
+    {
+      "name": "rejection_key",
+      "unit": "string",
+      "definition": "the contract key named in the refusal message for each injected change"
+    },
+    {
+      "name": "resume_agreement",
+      "unit": "dimensionless",
+      "definition": "relative difference between the resumed and the uninterrupted gradient"
+    },
+    {
+      "name": "volume_identity",
+      "unit": "boolean",
+      "definition": "journal and banks on one volume are charged once against that volume, decided by device identity (drive on Windows, st_dev elsewhere), not by path string"
+    }
+  ],
+  "acceptance": {
+    "rejections": "each of the ten injected changes is refused with a message naming the changed key (file path, epsilon, waveform, steps, time_step, courant or signal_bar); no partial resume happens",
+    "resume": "the resumed backward gradient equals the uninterrupted gradient within rtol 1e-4 and atol 1e-6 (float32) on CPU and CUDA",
+    "dirty_install": "an editable install with a modified package file is detected by content hashing without relying on git; every module that contains a __global__ kernel source is part of the fingerprint",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32"
+  },
+  "applicability": "Resident and streamed restart on one workstation; the POSIX st_dev branch of the volume decision is exercised on the Linux CI host only.",
+  "not_yet_covered": [
+    "compiler and driver versions (CuPy, NVRTC, CUDA) are outside the contract and documented as such"
+  ]
+}

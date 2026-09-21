@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-08_bloch_grating_rcwa",
+  "task": "G3-08",
+  "title": "Bloch-periodic binary dielectric grating: forward and backward diffraction efficiencies and phases against TORCWA at normal and 20-degree incidence, TE and TM, three wavelengths",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f91",
+  "declared_before_run": true,
+  "fixture": {
+    "method": "2D TorchFDTD run (period along x, propagation along +y, ridges along the invariant z) with Bloch boundaries on x, native CPML on y, a soft Bloch plane sheet below the grating and three line monitors: incident (empty run only), reflection between source and grating, transmission beyond the grating. The lines are lifted to a two-sample z-invariant plane and decomposed with the native torchfdtd.radiation.diffraction_orders (E and H separation into forward and backward Rayleigh orders). Efficiency = order power / forward zero-order power of the incident monitor in the matched empty-cell run; the reflected field is the sample minus the empty-cell field. Phases: transmitted amplitude propagated from the transmission line to the grating exit face, reflected amplitude propagated from the reflection line to the grating entrance face, both divided by the incident amplitude propagated from the incident line to the entrance face, using the continuum k_y of each order; TE compares Ez, TM compares Ex. Interface method subpixel (axis-aligned faces have exact fractions), Yee material sampling; the staircase interface is recorded as a control.",
+    "period_um": 1.2,
+    "fill": 0.5,
+    "height_um": 0.5,
+    "index": 2.0,
+    "superstrate_and_substrate": "vacuum on both sides (freestanding grating)",
+    "wavelengths_um": [0.92, 1.02, 1.06],
+    "angles_deg": [0.0, 20.0],
+    "wavelength_selection": "chosen from a TORCWA zero-order scan (0.55 to 1.2 um, both angles) so that no propagating order lies within 10 percent of grazing and no sharp guided-mode resonance (width below 0.02 um) falls on the three points; the scan is not part of the record",
+    "incidence": "the Bloch wavevector is fixed per run at k_x = k_0 sin(20 deg) of the run's own wavelength, so each oblique run is judged at its own wavelength only (fixed-k Bloch injection is not fixed-angle); the normal-incidence runs are judged at all three wavelengths",
+    "propagating_orders": {"0deg": [-1, 0, 1], "20deg": [-1, 0]},
+    "domain_y_um": 2.2,
+    "pml_um": 0.4,
+    "source_y_um": -0.6,
+    "incident_y_um": -0.45,
+    "reflection_y_um": -0.3,
+    "grating_center_y_um": 0.15,
+    "transmission_y_um": 0.6,
+    "pulse_length_s": 5e-15,
+    "pulse_offset_s": 1.5e-14,
+    "duration_fs": 300,
+    "fast_duration_fs": 150,
+    "duration_note": "150 fs left zero-order efficiency offsets of about 0.002 in an exploratory run; 300 fs is declared for every judged and layer-A row and 150 fs is recorded as a control",
+    "mesh_sequence_um": [0.01, 0.005],
+    "judged_mesh_um": 0.005,
+    "grids": ["120 x 220", "240 x 440 (105,600 cells, below the 48^3 cap)"],
+    "judged_execution": "CUDA FP32 (torch kernel, complex Bloch fields) at h = 0.005 um",
+    "layer_a": "the same discrete problem at h = 0.01 um in CPU FP64 and CUDA FP32 for all eight configurations; the CPU FP64 rows are also compared with TORCWA and recorded",
+    "controls": "staircase interface at both meshes and the 150 fs duration at h = 0.01 um, normal incidence, both polarizations, recorded and not judged"
+  },
+  "seed": null,
+  "precision": ["float32 (CUDA, judged)", "float64 (CPU, layer A at h = 0.01 um)"],
+  "backend": ["cuda", "cpu"],
+  "reference_method": "TORCWA 0.1.4.2 rigorous coupled-wave analysis (Kim and Lee, Comput. Phys. Commun. 282, 108552, 2023) run in the C:/anaconda3 interpreter by benchmarks/g3_torcwa_grating.py, complex128, profile sampled at 16384 points with the two edge samples averaged, harmonic sequence 20, 40, 80, 160, 320, 640, oracle at 640 harmonics, stored in docs/validation/g3/G3-08_torcwa_reference.json with the change at the last doubling and a 1/N Richardson estimate per value; empty-layer phase check t = exp(i k_z d) recorded",
+  "observables": [
+    {"name": "efficiency", "unit": "dimensionless", "definition": "transmitted (forward) and reflected (backward) power of every propagating order divided by the incident power"},
+    {"name": "phase_rad", "unit": "rad", "definition": "argument of the face-referenced complex amplitude ratio defined in the method"},
+    {"name": "efficiency_sum", "unit": "dimensionless", "definition": "sum of all propagating transmitted and reflected efficiencies (lossless balance)"},
+    {"name": "empty_cell", "unit": "dimensionless", "definition": "with no grating: forward zero-order transmission at the transmission line relative to the incident line, other orders and the backward zero order"}
+  ],
+  "acceptance": {
+    "efficiency_absolute_error": 0.01,
+    "dominant_order_phase_error_rad": 0.02,
+    "dominant_order_efficiency": 0.05,
+    "lossless_balance_absolute_error": 0.01,
+    "empty_cell": {"normal_incidence": 1e-06, "oblique_incidence": 0.0001, "applies_to": "zero-order transmission error, every other order and the backward zero order", "execution": "CPU FP64 at h = 0.01 um and 150 fs; the same check on CUDA FP32 is recorded against max(limit, layer-A rtol 1e-4) because FP32 roundoff of the DFT fields is of order 1e-5", "source": "completion_gates.json proposed_thresholds pml_normal_reflected_power_ratio and pml_declared_oblique_reflected_power_ratio; a first draft of this case used 1e-6 for both angles, which contradicts the program's oblique PML target and was corrected before the recorded run after a CPU FP64 empty-cell run at 20 degrees returned a 2.7e-6 zero-order deficit"},
+    "oracle_convergence": {
+      "efficiency_change_at_last_doubling": {"TE": 1e-06, "TM": 0.0005},
+      "phase_change_at_last_doubling": {"TE": 1e-06, "TM": 0.002},
+      "note": "TORCWA forms the Toeplitz matrix of epsilon directly (Laurent rule), so its TM sequence converges like 1/N; the TM oracle uncertainty at 640 harmonics is about 4e-4 in efficiency and 1e-3 rad, well inside the limits above"
+    },
+    "judged_at": "subpixel interface, h = 0.005 um, 300 fs, CUDA FP32; the layer-A rows at h = 0.01 um are compared with TORCWA and recorded but not judged",
+    "layer_a_cuda_fp32_vs_cpu_fp64": {"rtol": 0.0001, "atol": 0.0, "applied_to": "every propagating efficiency, relative to the CPU value"},
+    "source_of_limits": "completion_gates.json proposed_thresholds slab_R_T_absolute_error, lossless_complete_channel_balance_absolute_error and phase_error_radians_on_predeclared_supported_signal_band; the dominance threshold and the oracle-convergence limits are fixture-specific"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_b.py::test_g3_08_torcwa_reference_is_converged",
+      "tests/test_physics_g3_b.py::test_g3_08_empty_cell",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a",
+      "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls"
+    ],
+    "not_yet_covered": [
+      "a substrate (asymmetric grating)",
+      "conical (out-of-plane) incidence and 2D-periodic gratings",
+      "broadband fixed-angle injection",
+      "a Li-factorised TM oracle"
+    ]
+  },
+  "notes": "Exploratory runs at h = 0.01 um with both interface methods and at h = 0.005 um for normal-incidence TE preceded this declaration; they motivated the subpixel interface (the staircase has an O(h) half-cell asymmetry of the ridge on the Yee sub-lattices) and the 300 fs duration. The limits are the program thresholds and were not adjusted. The case is added in the commit following 2b64f91."
+}

@@ -1,0 +1,386 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T181951Z-g3-05-8fafa59e",
+  "task": "G3-05",
+  "stage": "G3",
+  "task_title": "금속/분산 곡면 산란·흡수 수렴",
+  "command": "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05.xml",
+  "exit_code": 1,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T01:48:13.466402+09:00",
+  "recorded_at": "2026-09-21T18:19:51+00:00",
+  "source_commit": "487de42640e4f50f3378d859cfa4207d96b16902",
+  "source_tree_sha256": "254d13d94c5df5df9afb260df38614adddc01018ca0fb6ce4539b19d1bc14970",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_physics_g3_b.py": "3da123fb78f105e86f670c8e4f8bd56d372558fb6cecdfa5717d7beefd139339"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G3-05_drude_sphere.json",
+  "fixture_sha256": "c3f43172902e7f6f4747bc26a1bec2a58b2c948d864f068357fd756ab9981a26",
+  "acceptance_criteria_path": "docs/validation/cases/G3-05_drude_sphere.json",
+  "acceptance_criteria_sha256": "c3f43172902e7f6f4747bc26a1bec2a58b2c948d864f068357fd756ab9981a26",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU reference)",
+    "float32 (CUDA, layer A)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "method": "Closed TFSF box; six inner monitor planes inside the box (total field) give the absorption as the net inward total-field power and, after matched-reference subtraction, the scattered power; six outer planes outside the box give the scattered power independently (the two scattered powers must agree). The Drude sphere is staircased at the Yee sampling positions and advanced with the native trapezoidal ADE. Physical domain, PML thickness, source, monitors and duration are fixed across the mesh sequence.",
+    "drude": {
+      "model": "epsilon(omega) = epsilon_inf - plasma_rad_s^2 / (omega^2 + i collision_rad_s omega), exp(-i omega t)",
+      "epsilon_inf": 5.0,
+      "plasma_rad_s": 1.37e+16,
+      "collision_rad_s": 150000000000000.0,
+      "description": "silver-like analytic model (plasma energy about 9 eV, damping about 0.1 eV, epsilon_inf 5); quasi-static dipole resonance where Re epsilon = -2, near 0.364 um; the model is analytic and identical in the solver and in the Mie series"
+    },
+    "radii_um": [
+      0.02,
+      0.035,
+      0.05
+    ],
+    "size_parameters_at_0.39um": [
+      0.32,
+      0.56,
+      0.81
+    ],
+    "domain_um": 0.48,
+    "pml_um": 0.08,
+    "tfsf_um": 0.24,
+    "inner_monitor_half_um": 0.09,
+    "outer_monitor_half_um": 0.15,
+    "band": [
+      0.33,
+      0.45,
+      9
+    ],
+    "pulse_wavelength_um": 0.39,
+    "pulse_length_s": 2e-15,
+    "pulse_offset_s": 8e-15,
+    "duration_fs": 48,
+    "duration_note": "the Drude relaxation time 1/collision_rad_s is 6.7 fs, so 48 fs leaves exp(-7.2) of the polarization energy",
+    "mesh_sequence_um": [
+      0.02,
+      0.01,
+      0.005
+    ],
+    "judged_mesh_um": 0.005,
+    "cells_per_radius_at_judged_mesh": [
+      4,
+      7,
+      10
+    ],
+    "grids": [
+      "24^3",
+      "48^3",
+      "96^3 (CPU FP64 only, above the CUDA cap of the recorded run)"
+    ],
+    "layer_a": "fused CUDA FP32 against CPU FP64 at 24^3 and 48^3 on the scattering and absorption observables",
+    "ade_diagnostic": "the record also stores the Mie result evaluated with the ADE-sampled permittivity at (2/dt) tan(omega dt/2), which separates the time-discretisation of the material from the grid error"
+  },
+  "reference_method": "Bohren-Huffman sphere series with the complex index sqrt(epsilon(omega)) of the same analytic Drude model, written in tests/test_physics_g3_b.py with SciPy spherical Bessel functions; checked against the real-index repository series and against the quasi-static absorption and scattering limits of a Drude sphere",
+  "observables": [
+    {
+      "name": "scattering_um2",
+      "unit": "um^2",
+      "definition": "outward scattered power through the outer planes divided by the incident intensity"
+    },
+    {
+      "name": "inner_scattering_um2",
+      "unit": "um^2",
+      "definition": "the same from the inner planes after subtracting the matched reference fields; its difference from the outer value over the band maximum is the self-consistency check"
+    },
+    {
+      "name": "absorption_um2",
+      "unit": "um^2",
+      "definition": "net inward total-field power through the inner planes divided by the incident intensity"
+    },
+    {
+      "name": "max_scattering_relative_error",
+      "unit": "dimensionless",
+      "definition": "max over the nine wavelengths of |scattering/Mie - 1|"
+    },
+    {
+      "name": "max_absorption_relative_error",
+      "unit": "dimensionless",
+      "definition": "max over the nine wavelengths of |absorption/Mie - 1|"
+    },
+    {
+      "name": "peak_scattering_um, peak_absorption_um",
+      "unit": "um",
+      "definition": "refined peak wavelengths of the measured and Mie curves (diagnostic, not judged)"
+    }
+  ],
+  "acceptance_limits": {
+    "judged_at": "h/4 = 0.005 um, CPU FP64",
+    "per_radius": {
+      "0.02": {
+        "scattering_relative_error": 0.5,
+        "absorption_relative_error": 1.0
+      },
+      "0.035": {
+        "scattering_relative_error": 0.3,
+        "absorption_relative_error": 0.6
+      },
+      "0.05": {
+        "scattering_relative_error": 0.2,
+        "absorption_relative_error": 0.4
+      }
+    },
+    "justification": "The 2 percent Mie threshold of the program is declared not applicable: a staircased metal sphere resolved by 4 to 10 cells per radius has an effective-radius uncertainty of about h/(2a) (12.5, 7 and 5 percent), the quasi-static scattering scales with a^6 and the absorption with a^3, and the plasmon peak shifts with the effective shape so that fixed-wavelength errors on the flanks are amplified by the peak steepness (Q about 10). The scattering budgets are roughly 6 h/(2a) rounded down to the values above; the absorption budgets are doubled because the absorption is the small difference of the inward and outward total-field powers and is the hard observable. These are loose engineering budgets, not a claim of accuracy; the expected outcome is FAIL at least for the smallest sphere, and a recorded failure with the numbers is the deliverable.",
+    "self_consistency": {
+      "inner_outer_scattering_max_difference_over_band_maximum": 0.02,
+      "definition": "max over the band of |inner - outer| scattered cross section divided by the band maximum of the outer value; a per-wavelength relative form was replaced before the recorded run because it is amplified where the coarse-mesh cross section is nearly zero"
+    },
+    "layer_a_cuda_fp32_vs_cpu_fp64": {
+      "rtol": 0.0001,
+      "atol": 0.0
+    },
+    "convergence_reporting": "the error at h, h/2 and h/4 is reported for every radius and observable; no order or monotonicity is required",
+    "source_of_limits": "fixture-specific budgets declared here; the program's 2 percent Mie threshold is recorded as not met by design of the fixture"
+  },
+  "observed_metrics": {
+    "task": "G3-05",
+    "case_id": "G3-05_drude_sphere",
+    "generated": "2026-09-21T18:18:04+00:00",
+    "full_mode": true,
+    "environment": {
+      "python": "3.10.2",
+      "torch": "2.10.0+cu126",
+      "numpy": "2.2.6",
+      "os": "Windows-10-10.0.26200-SP0",
+      "gpu": "NVIDIA GeForce RTX 3060"
+    },
+    "rows": {
+      "r=0.02/h=0.02/cpu-float64": {
+        "mesh_um": 0.02,
+        "backend": "cpu",
+        "precision": "float64",
+        "radius_um": 0.02,
+        "max_scattering_relative_error": 16.579790426366554,
+        "max_absorption_relative_error": 36.8213454127296,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0031978381560167413
+      },
+      "r=0.02/h=0.01/cpu-float64": {
+        "mesh_um": 0.01,
+        "backend": "cpu",
+        "precision": "float64",
+        "radius_um": 0.02,
+        "max_scattering_relative_error": 2.7076801962681256,
+        "max_absorption_relative_error": 25.05892925025228,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0016009475533963378
+      },
+      "r=0.02/h=0.005/cpu-float64": {
+        "mesh_um": 0.005,
+        "backend": "cpu",
+        "precision": "float64",
+        "radius_um": 0.02,
+        "max_scattering_relative_error": 1.3755483259310735,
+        "max_absorption_relative_error": 6.732652383483259,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0011947337708007922
+      },
+      "r=0.035/h=0.02/cpu-float64": {
+        "mesh_um": 0.02,
+        "backend": "cpu",
+        "precision": "float64",
+        "radius_um": 0.035,
+        "max_scattering_relative_error": 4.778925780190351,
+        "max_absorption_relative_error": 18.125646751466594,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0011444821634693984
+      },
+      "r=0.035/h=0.01/cpu-float64": {
+        "mesh_um": 0.01,
+        "backend": "cpu",
+        "precision": "float64",
+        "radius_um": 0.035,
+        "max_scattering_relative_error": 0.6915887566970722,
+        "max_absorption_relative_error": 5.592692056743043,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.000524618471182035
+      },
+      "r=0.035/h=0.005/cpu-float64": {
+        "mesh_um": 0.005,
+        "backend": "cpu",
+        "precision": "float64",
+        "radius_um": 0.035,
+        "max_scattering_relative_error": 0.4575794104349067,
+        "max_absorption_relative_error": 4.985014779022332,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0009411614197897044
+      },
+      "r=0.05/h=0.02/cpu-float64": {
+        "mesh_um": 0.02,
+        "backend": "cpu",
+        "precision": "float64",
+        "radius_um": 0.05,
+        "max_scattering_relative_error": 0.8543822422755055,
+        "max_absorption_relative_error": 3.086695932375382,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0003212877895142314
+      },
+      "r=0.05/h=0.01/cpu-float64": {
+        "mesh_um": 0.01,
+        "backend": "cpu",
+        "precision": "float64",
+        "radius_um": 0.05,
+        "max_scattering_relative_error": 0.6428486664492836,
+        "max_absorption_relative_error": 3.403375300518804,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0008120670396600765
+      },
+      "r=0.05/h=0.005/cpu-float64": {
+        "mesh_um": 0.005,
+        "backend": "cpu",
+        "precision": "float64",
+        "radius_um": 0.05,
+        "max_scattering_relative_error": 0.44515140757153315,
+        "max_absorption_relative_error": 3.4457902742333006,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0006183579412756158
+      },
+      "r=0.02/h=0.02/cuda-float32": {
+        "mesh_um": 0.02,
+        "backend": "cuda",
+        "precision": "float32",
+        "radius_um": 0.02,
+        "max_scattering_relative_error": 16.579624150063996,
+        "max_absorption_relative_error": 36.82120779414041,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0031967551785135537,
+        "layer_a_max_relative_difference": 7.003595222498937e-05,
+        "layer_a_rtol": 0.0001
+      },
+      "r=0.035/h=0.02/cuda-float32": {
+        "mesh_um": 0.02,
+        "backend": "cuda",
+        "precision": "float32",
+        "radius_um": 0.035,
+        "max_scattering_relative_error": 4.778886006460136,
+        "max_absorption_relative_error": 18.12564544302922,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0011451122387738768,
+        "layer_a_max_relative_difference": 1.1985633829647568e-05,
+        "layer_a_rtol": 0.0001
+      },
+      "r=0.05/h=0.02/cuda-float32": {
+        "mesh_um": 0.02,
+        "backend": "cuda",
+        "precision": "float32",
+        "radius_um": 0.05,
+        "max_scattering_relative_error": 0.8543820492275882,
+        "max_absorption_relative_error": 3.086701568661425,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0003215425532894256,
+        "layer_a_max_relative_difference": 5.287913496854202e-06,
+        "layer_a_rtol": 0.0001
+      },
+      "r=0.02/h=0.01/cuda-float32": {
+        "mesh_um": 0.01,
+        "backend": "cuda",
+        "precision": "float32",
+        "radius_um": 0.02,
+        "max_scattering_relative_error": 2.707676725634984,
+        "max_absorption_relative_error": 25.058774250275064,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0016045858749310351,
+        "layer_a_max_relative_difference": 1.714710889100246e-05,
+        "layer_a_rtol": 0.0001
+      },
+      "r=0.035/h=0.01/cuda-float32": {
+        "mesh_um": 0.01,
+        "backend": "cuda",
+        "precision": "float32",
+        "radius_um": 0.035,
+        "max_scattering_relative_error": 0.6915894873792462,
+        "max_absorption_relative_error": 5.5926851958679045,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0005241814352107051,
+        "layer_a_max_relative_difference": 4.549300306133652e-06,
+        "layer_a_rtol": 0.0001
+      },
+      "r=0.05/h=0.01/cuda-float32": {
+        "mesh_um": 0.01,
+        "backend": "cuda",
+        "precision": "float32",
+        "radius_um": 0.05,
+        "max_scattering_relative_error": 0.6428492510246514,
+        "max_absorption_relative_error": 3.403370679682938,
+        "inner_outer_scattering_max_difference_over_band_maximum": 0.0008115115246298713,
+        "layer_a_max_relative_difference": 7.71698240342733e-06,
+        "layer_a_rtol": 0.0001
+      }
+    }
+  },
+  "test_results": {
+    "total": 4,
+    "passed": [
+      "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a"
+    ],
+    "failed": [
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.02]",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.035]",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.05]"
+    ],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.02]": "AssertionError: r=0.02 um at h=0.005 um: scattering 1.376 > 0.5; absorption 6.733 > 1.0\nassert not ['scattering 1.376 > 0.5', 'absorption 6.733 > 1.0']",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.035]": "AssertionError: r=0.035 um at h=0.005 um: scattering 0.458 > 0.3; absorption 4.985 > 0.6\nassert not ['scattering 0.458 > 0.3', 'absorption 4.985 > 0.6']",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.05]": "AssertionError: r=0.05 um at h=0.005 um: scattering 0.445 > 0.2; absorption 3.446 > 0.4\nassert not ['scattering 0.445 > 0.2', 'absorption 3.446 > 0.4']"
+    },
+    "suite_time_seconds": 5390.966,
+    "suite_timestamp": "2026-09-22T01:48:13.466402+09:00"
+  },
+  "required_tests": [
+    "tests/test_physics_g3_b.py::test_g3_05_drude_sphere",
+    "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "sha256": "34b3d7927bd9f9e481209d2189e6694e25cac4113234601a76ed3fb70a276075",
+      "bytes": 54205
+    },
+    {
+      "path": "docs/validation/g3/G3-05_observed.json",
+      "sha256": "9a754260f18133fe61c5a20267a08a62dfee931f1c290cf0e5d85e6b6d5e3f59",
+      "bytes": 5696
+    },
+    {
+      "path": "docs/validation/runs/20260921T181951Z-g3-05-8fafa59e/junit.xml",
+      "sha256": "df79dba68074921c1288f03955d45a92541fc9344b424e226e0fd0ddd832db9d",
+      "bytes": 6231,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G3-05.xml"
+    }
+  ],
+  "applicable_scope": "Layer B physics of a staircased Drude sphere with the trapezoidal ADE at three radii and three meshes on CPU FP64 against the complex-index Mie series, and layer A CUDA FP32 (fused kernel, RTX 3060) against CPU FP64 at 24^3 and 48^3; the fixture-specific budgets of the case, not the program's 2 percent threshold.",
+  "note": "Run in Git Bash with TMP and TEMP set to D:/TorchFDTD/.local/tmp; the four task runs executed concurrently on the shared workstation while other agents used the GPU, so wall times in the record are not performance measurements. The hostname attribute was removed from the JUnit report before recording.",
+  "verification_state_assigned": "FAILED",
+  "verification_reason": "3 failed and 0 errored test cases",
+  "null_reasons": {
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

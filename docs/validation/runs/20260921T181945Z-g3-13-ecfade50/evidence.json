@@ -1,0 +1,482 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T181945Z-g3-13-ecfade50",
+  "task": "G3-13",
+  "stage": "G3",
+  "task_title": "곡면 grid offset/mesh/smoothing 폭 물리 수렴",
+  "command": "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_13 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-13.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T01:48:13.267855+09:00",
+  "recorded_at": "2026-09-21T18:19:45+00:00",
+  "source_commit": "487de42640e4f50f3378d859cfa4207d96b16902",
+  "source_tree_sha256": "48d551eac1e274879247d097226104cca0ca98c2d3159289262855cc345afa90",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_physics_g3_b.py": "3da123fb78f105e86f670c8e4f8bd56d372558fb6cecdfa5717d7beefd139339"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G3-13_curved_interface_convergence.json",
+  "fixture_sha256": "9bb9127cacfbecca753ecbfdc84204eb3de4f20c3b99057d6b55f7b5b18af24e",
+  "acceptance_criteria_path": "docs/validation/cases/G3-13_curved_interface_convergence.json",
+  "acceptance_criteria_sha256": "9bb9127cacfbecca753ecbfdc84204eb3de4f20c3b99057d6b55f7b5b18af24e",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "physics_configuration": {
+    "base": "the G3-04 cylinder fixture (2D, radius 0.3 um, n = 1.5, domain 3.2 um, PML 0.4 um, TFSF box 1.6 um, monitors at 1.1 um, 1.3 to 1.8 um in nine samples, 120 fs), TM (Ez) and TE (Ey), CPU FP64",
+    "mesh_sequence_um": [
+      0.05,
+      0.025,
+      0.0125
+    ],
+    "a_staircase": "scattering width error against Mie at h, h/2, h/4 with the staircase interface",
+    "b_subpixel": "the same with interface_method subpixel (quadrature 8)",
+    "shift_mesh_um": 0.05,
+    "shift_fractions": [
+      0.0,
+      0.25,
+      0.5
+    ],
+    "c_shift": "cylinder centre shifted along x by 0, h/4 and h/2 at the fixed mesh above, staircase and subpixel; the TFSF box and monitors stay fixed, so any change of the width is grid-registration error",
+    "smoothing_mesh_um": 0.05,
+    "smoothing_width_fractions": [
+      1e-06,
+      0.125,
+      0.25,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "d_smoothing": "DifferentiableSolid.cylinder rasterised by smooth_geometry_epsilon at the Yee positions with transition width w = fraction x h, injected into the standard TFSF solver through the voxelize hook of torchfdtd.solver (test-side override, same solver, same source and monitors); off the contour the vanishing width reproduces the staircase image exactly, while samples lying on the contour to 1e-9 um (four Ez nodes at h = 0.05 um for the 0.3 um radius) take the documented half value, so the vanishing-width row is a second staircase variant and its difference from row (a) is recorded",
+    "cost_metric": "single-run wall seconds of Simulation.run including preparation, on a shared workstation; reported as a diagnostic only"
+  },
+  "reference_method": "the infinite-cylinder Mie series of tests/test_physics_g3_b.py (see G3-04)",
+  "observables": [
+    {
+      "name": "max_relative_error",
+      "unit": "dimensionless",
+      "definition": "max over the nine wavelengths of |width/Mie - 1| for each row"
+    },
+    {
+      "name": "convergence_order_estimates",
+      "unit": "dimensionless",
+      "definition": "log2 of the ratio of successive max_relative_error values of a mesh sequence"
+    },
+    {
+      "name": "max_relative_error_spread",
+      "unit": "dimensionless",
+      "definition": "largest minus smallest max_relative_error over the three centre shifts"
+    },
+    {
+      "name": "width_variation_relative",
+      "unit": "dimensionless",
+      "definition": "largest per-wavelength spread of the width over the shifts divided by the mean width"
+    },
+    {
+      "name": "max_relative_difference_from_staircase",
+      "unit": "dimensionless",
+      "definition": "max over wavelengths of |width(w)/width(staircase) - 1| for a smoothing width w"
+    }
+  ],
+  "acceptance_limits": {
+    "pass_fail": "subpixel max_relative_error at h = 0.05 um is below the staircase max_relative_error at h = 0.05 um for the centred cylinder, for TM and for TE",
+    "sharp_limit": "the w = 1e-6 h image equals the staircase image at every sample off the contour and takes the half value on the contour; the resulting width difference from row (a) is recorded, not limited",
+    "reported_not_judged": "convergence order estimates, monotonicity, shift spreads, the smoothing-width sweep and whether the subpixel error at h is below the staircase error at h/2 at lower wall time",
+    "source_of_limits": "fixture-specific expectation declared here; no second-order or monotone criterion is imposed on staircased curved surfaces"
+  },
+  "observed_metrics": {
+    "task": "G3-13",
+    "case_id": "G3-13_curved_interface_convergence",
+    "generated": "2026-09-21T16:55:45+00:00",
+    "full_mode": true,
+    "environment": {
+      "python": "3.10.2",
+      "torch": "2.10.0+cu126",
+      "numpy": "2.2.6",
+      "os": "Windows-10-10.0.26200-SP0",
+      "gpu": "NVIDIA GeForce RTX 3060"
+    },
+    "rows": {
+      "mesh/TM/staircase/h=0.05": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.038301924320013114
+      },
+      "mesh/TM/staircase/h=0.025": {
+        "mesh_um": 0.025,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.05117280287836523
+      },
+      "mesh/TM/staircase/h=0.0125": {
+        "mesh_um": 0.0125,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.01737345357698228
+      },
+      "mesh/TM/subpixel/h=0.05": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.009970805268260552
+      },
+      "mesh/TM/subpixel/h=0.025": {
+        "mesh_um": 0.025,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.002525146797647926
+      },
+      "mesh/TM/subpixel/h=0.0125": {
+        "mesh_um": 0.0125,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.0006435086548592928
+      },
+      "verdict/TM": {
+        "polarization": "TM",
+        "staircase_order_estimates": [
+          -0.41796037982766465,
+          1.5584926877019087
+        ],
+        "subpixel_order_estimates": [
+          1.981342764773807,
+          1.9723358031795661
+        ],
+        "subpixel_at_h_beats_staircase_at_h": true
+      },
+      "mesh/TE/staircase/h=0.05": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.11162988915161443
+      },
+      "mesh/TE/staircase/h=0.025": {
+        "mesh_um": 0.025,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.0069970113415503965
+      },
+      "mesh/TE/staircase/h=0.0125": {
+        "mesh_um": 0.0125,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.003728880057663475
+      },
+      "mesh/TE/subpixel/h=0.05": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.019740450791148056
+      },
+      "mesh/TE/subpixel/h=0.025": {
+        "mesh_um": 0.025,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.0045379489677543905
+      },
+      "mesh/TE/subpixel/h=0.0125": {
+        "mesh_um": 0.0125,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.0010608565721019758
+      },
+      "verdict/TE": {
+        "polarization": "TE",
+        "staircase_order_estimates": [
+          3.995840723339475,
+          0.9079964376922705
+        ],
+        "subpixel_order_estimates": [
+          2.121042645272281,
+          2.0968107680931403
+        ],
+        "subpixel_at_h_beats_staircase_at_h": true
+      },
+      "shift/TM/staircase/h=0.05/shift=0h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.038301924320013114
+      },
+      "shift/TM/staircase/h=0.05/shift=0.25h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.01766605353524131
+      },
+      "shift/TM/staircase/h=0.05/shift=0.5h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.03273043857838942
+      },
+      "shift/TM/staircase/summary": {
+        "polarization": "TM",
+        "interface": "staircase",
+        "mesh_um": 0.05,
+        "max_relative_error_spread": 0.020635870784771804
+      },
+      "shift/TM/subpixel/h=0.05/shift=0h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.009970805268260552
+      },
+      "shift/TM/subpixel/h=0.05/shift=0.25h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.01053247881809627
+      },
+      "shift/TM/subpixel/h=0.05/shift=0.5h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.011886728270563252
+      },
+      "shift/TM/subpixel/summary": {
+        "polarization": "TM",
+        "interface": "subpixel",
+        "mesh_um": 0.05,
+        "max_relative_error_spread": 0.0019159230023026996
+      },
+      "shift/TE/staircase/h=0.05/shift=0h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.11162988915161443
+      },
+      "shift/TE/staircase/h=0.05/shift=0.25h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.04801588942167112
+      },
+      "shift/TE/staircase/h=0.05/shift=0.5h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "staircase",
+        "max_relative_error": 0.0221379212822298
+      },
+      "shift/TE/staircase/summary": {
+        "polarization": "TE",
+        "interface": "staircase",
+        "mesh_um": 0.05,
+        "max_relative_error_spread": 0.08949196786938463
+      },
+      "shift/TE/subpixel/h=0.05/shift=0h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.019740450791148056
+      },
+      "shift/TE/subpixel/h=0.05/shift=0.25h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.020160753296518008
+      },
+      "shift/TE/subpixel/h=0.05/shift=0.5h": {
+        "mesh_um": 0.05,
+        "backend": "cpu",
+        "precision": "float64",
+        "interface": "subpixel",
+        "max_relative_error": 0.020117721347191253
+      },
+      "shift/TE/subpixel/summary": {
+        "polarization": "TE",
+        "interface": "subpixel",
+        "mesh_um": 0.05,
+        "max_relative_error_spread": 0.0004203025053699516
+      },
+      "smoothing/TM/h=0.05/w=1e-06h": {
+        "polarization": "TM",
+        "mesh_um": 0.05,
+        "width_fraction": 1e-06,
+        "max_relative_error": 0.013430176568864804,
+        "max_relative_difference_from_staircase": 0.026818046873749113
+      },
+      "smoothing/TM/h=0.05/w=0.125h": {
+        "polarization": "TM",
+        "mesh_um": 0.05,
+        "width_fraction": 0.125,
+        "max_relative_error": 0.013430176468546495,
+        "max_relative_difference_from_staircase": 0.026818046983674737
+      },
+      "smoothing/TM/h=0.05/w=0.25h": {
+        "polarization": "TM",
+        "mesh_um": 0.05,
+        "width_fraction": 0.25,
+        "max_relative_error": 0.0064159373464448555,
+        "max_relative_difference_from_staircase": 0.03516112258458315
+      },
+      "smoothing/TM/h=0.05/w=0.5h": {
+        "polarization": "TM",
+        "mesh_um": 0.05,
+        "width_fraction": 0.5,
+        "max_relative_error": 0.00828099772945734,
+        "max_relative_difference_from_staircase": 0.046495062679168475
+      },
+      "smoothing/TM/h=0.05/w=1h": {
+        "polarization": "TM",
+        "mesh_um": 0.05,
+        "width_fraction": 1.0,
+        "max_relative_error": 0.004184349771248597,
+        "max_relative_difference_from_staircase": 0.0431219880377991
+      },
+      "smoothing/TM/h=0.05/w=2h": {
+        "polarization": "TM",
+        "mesh_um": 0.05,
+        "width_fraction": 2.0,
+        "max_relative_error": 0.018234844651065396,
+        "max_relative_difference_from_staircase": 0.05878848091809186
+      },
+      "smoothing/TE/h=0.05/w=1e-06h": {
+        "polarization": "TE",
+        "mesh_um": 0.05,
+        "width_fraction": 1e-06,
+        "max_relative_error": 0.11162988915161443,
+        "max_relative_difference_from_staircase": 0.0
+      },
+      "smoothing/TE/h=0.05/w=0.125h": {
+        "polarization": "TE",
+        "mesh_um": 0.05,
+        "width_fraction": 0.125,
+        "max_relative_error": 0.062316062854657406,
+        "max_relative_difference_from_staircase": 0.05571313696606106
+      },
+      "smoothing/TE/h=0.05/w=0.25h": {
+        "polarization": "TE",
+        "mesh_um": 0.05,
+        "width_fraction": 0.25,
+        "max_relative_error": 0.03985285432495178,
+        "max_relative_difference_from_staircase": 0.08095808435255658
+      },
+      "smoothing/TE/h=0.05/w=0.5h": {
+        "polarization": "TE",
+        "mesh_um": 0.05,
+        "width_fraction": 0.5,
+        "max_relative_error": 0.019003571779477202,
+        "max_relative_difference_from_staircase": 0.11751577957555437
+      },
+      "smoothing/TE/h=0.05/w=1h": {
+        "polarization": "TE",
+        "mesh_um": 0.05,
+        "width_fraction": 1.0,
+        "max_relative_error": 0.046104358194642536,
+        "max_relative_difference_from_staircase": 0.1655836246918665
+      },
+      "smoothing/TE/h=0.05/w=2h": {
+        "polarization": "TE",
+        "mesh_um": 0.05,
+        "width_fraction": 2.0,
+        "max_relative_error": 0.08705013715929377,
+        "max_relative_difference_from_staircase": 0.20250661611783793
+      }
+    }
+  },
+  "test_results": {
+    "total": 5,
+    "passed": [
+      "tests/test_physics_g3_b.py::test_g3_13_mesh_and_interface_convergence[TM]",
+      "tests/test_physics_g3_b.py::test_g3_13_mesh_and_interface_convergence[TE]",
+      "tests/test_physics_g3_b.py::test_g3_13_subcell_shift[TM]",
+      "tests/test_physics_g3_b.py::test_g3_13_subcell_shift[TE]",
+      "tests/test_physics_g3_b.py::test_g3_13_smoothing_width_sweep"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 451.75,
+    "suite_timestamp": "2026-09-22T01:48:13.267855+09:00"
+  },
+  "required_tests": [
+    "tests/test_physics_g3_b.py::test_g3_13_mesh_and_interface_convergence",
+    "tests/test_physics_g3_b.py::test_g3_13_subcell_shift",
+    "tests/test_physics_g3_b.py::test_g3_13_smoothing_width_sweep"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "sha256": "805292c474b7a1fb5d97adac64c729c47eec607bcfd7766cdd1346c3dfc26601",
+      "bytes": 47563
+    },
+    {
+      "path": "docs/validation/g3/G3-13_observed.json",
+      "sha256": "79525beaf41d3235c68b6474e47bbc60960c6f0d47b5153e37554691aa16dc0e",
+      "bytes": 8617
+    },
+    {
+      "path": "docs/validation/runs/20260921T181945Z-g3-13-ecfade50/junit.xml",
+      "sha256": "5c1a6684d3e82e16861d84d696884f59815ef90b7c0bf35e3f31b0a14c8598c3",
+      "bytes": 754,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G3-13.xml"
+    }
+  ],
+  "applicable_scope": "Layer B convergence study of the G3-04 cylinder on CPU FP64 only: staircase and subpixel mesh sequences, sub-cell centre shifts and the differentiable-solid transition width through the standard TFSF solver.",
+  "note": "Run in Git Bash with TMP and TEMP set to D:/TorchFDTD/.local/tmp; the four task runs executed concurrently on the shared workstation while other agents used the GPU, so wall times in the record are not performance measurements. The hostname attribute was removed from the JUnit report before recording.",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

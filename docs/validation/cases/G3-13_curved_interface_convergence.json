@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-13_curved_interface_convergence",
+  "task": "G3-13",
+  "title": "Curved-interface convergence on the G3-04 dielectric cylinder: mesh sequence with staircase and subpixel interfaces, sub-cell centre shifts and the differentiable-solid smoothing width",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f91",
+  "declared_before_run": true,
+  "fixture": {
+    "base": "the G3-04 cylinder fixture (2D, radius 0.3 um, n = 1.5, domain 3.2 um, PML 0.4 um, TFSF box 1.6 um, monitors at 1.1 um, 1.3 to 1.8 um in nine samples, 120 fs), TM (Ez) and TE (Ey), CPU FP64",
+    "mesh_sequence_um": [0.05, 0.025, 0.0125],
+    "a_staircase": "scattering width error against Mie at h, h/2, h/4 with the staircase interface",
+    "b_subpixel": "the same with interface_method subpixel (quadrature 8)",
+    "shift_mesh_um": 0.05,
+    "shift_fractions": [0.0, 0.25, 0.5],
+    "c_shift": "cylinder centre shifted along x by 0, h/4 and h/2 at the fixed mesh above, staircase and subpixel; the TFSF box and monitors stay fixed, so any change of the width is grid-registration error",
+    "smoothing_mesh_um": 0.05,
+    "smoothing_width_fractions": [1e-06, 0.125, 0.25, 0.5, 1.0, 2.0],
+    "d_smoothing": "DifferentiableSolid.cylinder rasterised by smooth_geometry_epsilon at the Yee positions with transition width w = fraction x h, injected into the standard TFSF solver through the voxelize hook of torchfdtd.solver (test-side override, same solver, same source and monitors); off the contour the vanishing width reproduces the staircase image exactly, while samples lying on the contour to 1e-9 um (four Ez nodes at h = 0.05 um for the 0.3 um radius) take the documented half value, so the vanishing-width row is a second staircase variant and its difference from row (a) is recorded",
+    "cost_metric": "single-run wall seconds of Simulation.run including preparation, on a shared workstation; reported as a diagnostic only"
+  },
+  "seed": null,
+  "precision": ["float64"],
+  "backend": ["cpu"],
+  "reference_method": "the infinite-cylinder Mie series of tests/test_physics_g3_b.py (see G3-04)",
+  "observables": [
+    {"name": "max_relative_error", "unit": "dimensionless", "definition": "max over the nine wavelengths of |width/Mie - 1| for each row"},
+    {"name": "convergence_order_estimates", "unit": "dimensionless", "definition": "log2 of the ratio of successive max_relative_error values of a mesh sequence"},
+    {"name": "max_relative_error_spread", "unit": "dimensionless", "definition": "largest minus smallest max_relative_error over the three centre shifts"},
+    {"name": "width_variation_relative", "unit": "dimensionless", "definition": "largest per-wavelength spread of the width over the shifts divided by the mean width"},
+    {"name": "max_relative_difference_from_staircase", "unit": "dimensionless", "definition": "max over wavelengths of |width(w)/width(staircase) - 1| for a smoothing width w"}
+  ],
+  "acceptance": {
+    "pass_fail": "subpixel max_relative_error at h = 0.05 um is below the staircase max_relative_error at h = 0.05 um for the centred cylinder, for TM and for TE",
+    "sharp_limit": "the w = 1e-6 h image equals the staircase image at every sample off the contour and takes the half value on the contour; the resulting width difference from row (a) is recorded, not limited",
+    "reported_not_judged": "convergence order estimates, monotonicity, shift spreads, the smoothing-width sweep and whether the subpixel error at h is below the staircase error at h/2 at lower wall time",
+    "source_of_limits": "fixture-specific expectation declared here; no second-order or monotone criterion is imposed on staircased curved surfaces"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_b.py::test_g3_13_mesh_and_interface_convergence",
+      "tests/test_physics_g3_b.py::test_g3_13_subcell_shift",
+      "tests/test_physics_g3_b.py::test_g3_13_smoothing_width_sweep"
+    ],
+    "not_yet_covered": [
+      "3D sphere shifts and smoothing widths",
+      "shifts along the transverse axis and diagonal shifts",
+      "higher subpixel quadrature orders",
+      "the smoothing width as a convergence parameter jointly with the mesh"
+    ]
+  },
+  "notes": "An exploratory run at h = 0.05 um with both interfaces and the three shifts preceded this declaration. A first draft required the vanishing-width row to match row (a) to 1e-6; the fast suite showed the documented half value on the four contour-coincident Ez nodes (a 2.7 percent TM width change at h = 0.05 um), so the check was restated as above before the recorded run. The case is added in the commit following 2b64f91."
+}

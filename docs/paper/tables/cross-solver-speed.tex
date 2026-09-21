@@ -3,21 +3,28 @@
 \centering
 \small
 \renewcommand{\arraystretch}{1.15}
-\caption{Speed of the three solvers on the same fixtures and hardware: the 800-step vacuum and sphere scenes of Table~\ref{tab:open-source} and the periodic full-gradient adjoint. Full solves are medians of three warmed repetitions including setup and the final field transfer, and stepping rates cover the time loop alone. Meep uses 12 MPI ranks on the CPU. The FDTDX adjoint entry lists the reversible method first and the two-checkpoint method second. TorchFDTD uses two device checkpoints and Meep has no time-domain adjoint. Conditions and every sample are in docs/CROSS\_SOLVER\_COMPARISON.md.}
+\caption{Forward throughput and time to gradient on the workstation of Table~\ref{tab:cross-solver-accuracy}. The forward rows are the sphere scene at 800 steps as medians of three warmed solves, where the full solve includes setup and the final field transfer and the stepping column is the time-stepping loop alone. The adjoint rows are the permittivity gradient of a periodic dielectric slab at $64^{3}$ cells and 128 steps, and the last column is the relative $L_2$ difference of each gradient from the TorchFDTD gradient. Meep ran in double precision on twelve MPI ranks with other processes present on the host, and its adjoint is excluded because it is a frequency-domain method. The GPU solvers ran in single precision.}
 \label{tab:cross-solver-speed}
-\begin{tabular}{@{}llrrr@{}}
+\begin{tabular}{@{}llrrrr@{}}
 \toprule
-Fixture & Quantity & TorchFDTD & FDTDX & Meep \\
+Grid & Solver & \shortstack{Full solve\\(s)} & \shortstack{Stepping\\(s)} & \shortstack{Cell-steps/s\\stepping} & \shortstack{Peak device\\(MiB)} \\
 \midrule
-Vacuum, $64^3$ & full solve (s) & 0.117 & 0.849 & 4.395 \\
-Sphere, $64^3$ & full solve (s) & 0.114 & 0.780 & 4.373 \\
-Vacuum, $96^3$ & full solve (s) & 0.302 & 2.022 & 13.242 \\
-Sphere, $96^3$ & full solve (s) & 0.310 & 1.998 & 13.602 \\
-Vacuum, $64^3$ & stepping (Gcell-steps/s) & 2.197 & 0.503 & 0.049 \\
-Sphere, $64^3$ & stepping (Gcell-steps/s) & 2.220 & 0.502 & 0.049 \\
-Vacuum, $96^3$ & stepping (Gcell-steps/s) & 2.669 & 0.469 & 0.054 \\
-Sphere, $96^3$ & stepping (Gcell-steps/s) & 2.625 & 0.470 & 0.053 \\
-Adjoint, $64^3$, 128 steps & time to gradient (s) & 0.102 & 0.209 / 5.27 & -- \\
+$64^3$ & TorchFDTD & 0.114 & 0.094 & $2.22\times10^{9}$ & 18 \\
+$64^3$ & FDTDX & 0.780 & 0.418 & $5.02\times10^{8}$ & 89 \\
+$64^3$ & Meep & 4.373 & 4.298 & $4.89\times10^{7}$ & CPU \\
+$96^3$ & TorchFDTD & 0.310 & 0.270 & $2.63\times10^{9}$ & 57 \\
+$96^3$ & FDTDX & 1.998 & 1.507 & $4.70\times10^{8}$ & 288 \\
+$96^3$ & Meep & 13.602 & 13.356 & $5.30\times10^{7}$ & CPU \\
+\bottomrule
+\end{tabular}
+\par\vspace{6pt}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Adjoint method & \shortstack{Time to\\gradient (s)} & \shortstack{Peak device\\(MiB)} & \shortstack{Gradient relative\\$L_2$ difference} \\
+\midrule
+TorchFDTD, checkpointed, 2 checkpoints & 0.102 & 40 & reference \\
+FDTDX, checkpointed, 2 checkpoints & 5.268 & 303 & $7.1\times10^{-8}$ \\
+FDTDX, reversible & 0.209 & 111 & $1.0\times10^{-7}$ \\
 \bottomrule
 \end{tabular}
 \end{table}

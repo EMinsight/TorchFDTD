@@ -356,17 +356,31 @@
           "title": "restart 코드 호환성 검사 누락.",
           "specification": "restart 코드 호환성 검사 누락.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
-            "torchfdtd/streamed_restart.py",
-            "tests/test_streamed_restart.py"
+            "docs/STREAMED_RESTART.md",
+            "tests/test_streamed_restart.py",
+            "torchfdtd/streamed.py",
+            "torchfdtd/streamed_restart.py"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_streamed_restart.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G1-04-05.xml"
+          ],
+          "required_tests": [
+            "tests/test_streamed_restart.py::test_contract_and_signal_adjoint_mismatch_are_rejected",
+            "tests/test_streamed_restart.py::test_changed_package_file_is_rejected_by_the_contract",
+            "tests/test_streamed_restart.py::test_changed_inputs_are_rejected_with_the_contract_key_named",
+            "tests/test_streamed_restart.py::test_journal_and_banks_share_a_volume_by_identity_not_by_path",
+            "tests/test_streamed_restart.py::test_backward_resumes_after_interrupt",
+            "tests/test_streamed_restart.py::test_forward_resumes_after_interrupt",
+            "tests/test_streamed_restart.py::test_killed_process_is_resumed_by_a_new_process"
+          ],
+          "evidence": [
+            "20260921T184733Z-g1-04-e39845b1"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -375,18 +389,29 @@
           "title": "journal 저장공간 산정.",
           "specification": "journal 저장공간 산정.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
+            "docs/STREAMED_RESTART.md",
+            "tests/test_streamed_restart.py",
             "torchfdtd/streamed.py",
-            "torchfdtd/streamed_restart.py",
-            "tests/test_streamed_restart.py"
+            "torchfdtd/streamed_restart.py"
           ],
           "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_streamed_restart.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G1-04-05.xml"
+          ],
+          "required_tests": [
+            "tests/test_streamed_restart.py::test_reservation_covers_the_signal_history_of_coexisting_records",
+            "tests/test_streamed_restart.py::test_stale_temporary_records_are_removed_only_inside_the_journal",
+            "tests/test_streamed_restart.py::test_restart_journal_space_is_checked",
+            "tests/test_streamed_restart.py::test_existing_journal_records_count_toward_the_reservation",
+            "tests/test_streamed_restart.py::test_every_blocks_controls_record_count"
+          ],
+          "evidence": [
+            "20260921T184737Z-g1-05-c820d464"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -762,32 +787,71 @@
           "title": "dielectric cylinder/sphere Mie 산란",
           "specification": "dielectric cylinder/sphere Mie 산란",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "tests/test_physics_g3_b.py",
+            "examples/tfsf_sphere.py",
+            "torchfdtd/tfsf.py",
+            "torchfdtd/field_monitors.py",
+            "docs/validation/cases/G3-04_mie_cylinder_sphere.json",
+            "docs/validation/g3/G3-04.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_04 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-04.xml"
+          ],
+          "actual_test_commands": [
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_04 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-04.xml"
+          ],
+          "required_tests": [
+            "tests/test_physics_g3_b.py::test_g3_04_reference_series_limits",
+            "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering",
+            "tests/test_physics_g3_b.py::test_g3_04_cylinder_cuda_layer_a",
+            "tests/test_physics_g3_b.py::test_g3_04_cylinder_resonance",
+            "tests/test_physics_g3_b.py::test_g3_04_sphere_scattering",
+            "tests/test_physics_g3_b.py::test_g3_04_sphere_cuda_layer_a"
+          ],
+          "evidence": [
+            "20260921T181942Z-g3-04-b95d2106"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-04_mie_cylinder_sphere.json. The record docs/validation/g3/G3-04.json is written by the full run."
         },
         {
           "id": "G3-05",
           "title": "금속/분산 곡면 산란·흡수 수렴",
           "specification": "금속/분산 곡면 산란·흡수 수렴",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "FAILED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "tests/test_physics_g3_b.py",
+            "torchfdtd/materials.py",
+            "torchfdtd/tfsf.py",
+            "docs/validation/cases/G3-05_drude_sphere.json",
+            "docs/validation/g3/G3-05.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05.xml"
+          ],
+          "actual_test_commands": [
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05.xml"
+          ],
+          "required_tests": [
+            "tests/test_physics_g3_b.py::test_g3_05_drude_sphere",
+            "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a"
+          ],
+          "evidence": [
+            "20260921T181951Z-g3-05-8fafa59e"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-05_drude_sphere.json. The record docs/validation/g3/G3-05.json is written by the full run."
         },
         {
           "id": "G3-06",
@@ -879,16 +943,39 @@
           "title": "Bloch grating·회절과 독립 RCWA",
           "specification": "Bloch grating·회절과 독립 RCWA",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "FAILED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "tests/test_physics_g3_b.py",
+            "benchmarks/g3_torcwa_grating.py",
+            "torchfdtd/radiation.py",
+            "torchfdtd/boundaries.py",
+            "torchfdtd/subpixel.py",
+            "docs/validation/cases/G3-08_bloch_grating_rcwa.json",
+            "docs/validation/g3/G3-08_torcwa_reference.json",
+            "docs/validation/g3/G3-08.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml"
+          ],
+          "actual_test_commands": [
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml"
+          ],
+          "required_tests": [
+            "tests/test_physics_g3_b.py::test_g3_08_torcwa_reference_is_converged",
+            "tests/test_physics_g3_b.py::test_g3_08_empty_cell",
+            "tests/test_physics_g3_b.py::test_g3_08_grating_orders",
+            "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a",
+            "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls"
+          ],
+          "evidence": [
+            "20260921T181948Z-g3-08-6ccad85a"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-08_bloch_grating_rcwa.json. The record docs/validation/g3/G3-08.json is written by the full run."
         },
         {
           "id": "G3-09",
@@ -1086,16 +1173,34 @@
           "title": "곡면 grid offset/mesh/smoothing 폭 물리 수렴",
           "specification": "곡면 grid offset/mesh/smoothing 폭 물리 수렴",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "tests/test_physics_g3_b.py",
+            "torchfdtd/subpixel.py",
+            "torchfdtd/differentiable_geometry.py",
+            "docs/validation/cases/G3-13_curved_interface_convergence.json",
+            "docs/validation/g3/G3-13.json",
+            "docs/PHYSICS_VALIDATION.md"
+          ],
+          "planned_test_commands": [
+            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_13 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-13.xml"
+          ],
+          "actual_test_commands": [
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_13 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-13.xml"
+          ],
+          "required_tests": [
+            "tests/test_physics_g3_b.py::test_g3_13_mesh_and_interface_convergence",
+            "tests/test_physics_g3_b.py::test_g3_13_subcell_shift",
+            "tests/test_physics_g3_b.py::test_g3_13_smoothing_width_sweep"
+          ],
+          "evidence": [
+            "20260921T181945Z-g3-13-ecfade50"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-13_curved_interface_convergence.json. The record docs/validation/g3/G3-13.json is written by the full run."
         },
         {
           "id": "G3-14",

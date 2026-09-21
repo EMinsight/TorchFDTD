@@ -3,6 +3,7 @@ from dataclasses import dataclass, replace
 from contextlib import contextmanager
 from pathlib import Path
 import math
+import os
 import time
 
 import torch
@@ -71,10 +72,30 @@ class StreamedAdjointOptions:
 
 
 def _journal_bytes(directory):
-    """Bytes already held by restart records under the journal directory, if any."""
+    """Bytes already held by restart records under the journal directory, if any.
+
+    `*.tmp` entries are interrupted writes that the journal removes when it
+    opens, so they are not part of the space the records will occupy.
+    """
     root = Path(directory).expanduser()
     if not root.exists():return 0
-    return sum(p.stat().st_size for p in root.rglob('*') if p.is_file())
+    total = 0
+    for child in root.iterdir():
+        if child.name.endswith('.tmp'):continue
+        total += sum(p.stat().st_size for p in ([child] if child.is_file() else child.rglob('*')) if p.is_file())
+    return total
+
+
+def _volume(directory):
+    """Identity of the volume that files under directory will occupy.
+
+    The drive of the resolved path on Windows, the device number of the
+    nearest existing ancestor elsewhere; never a path-prefix comparison.
+    """
+    path = Path(os.path.realpath(Path(directory).expanduser()))
+    if os.name == 'nt':return os.path.splitdrive(str(path))[0].lower()
+    while not path.exists() and path.parent != path:path = path.parent
+    return os.stat(path).st_dev
 
 
 def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, parameter_shapes=None):
@@ -114,9 +135,10 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     # bound for both CPU and native CUDA execution until large runs calibrate it.
     tile_workspace = (128+144*pole_count+(18+6*pole_count)*local_slots)*tile_cells*item
     buffers = options.tile_buffers if options.tile_transfers == 'async' else 1
-    initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values())
-                       +sum(len(blocks) for blocks in boundary.pmc_blocks.values())
-                       +((2+2*len(boundary.pmc_blocks['E'])) if pole_count else 0))*item
+    state_arrays = (2+sum(len(segments) for segments in boundary.cpml.values())
+                    +sum(len(blocks) for blocks in boundary.pmc_blocks.values())
+                    +((2+2*len(boundary.pmc_blocks['E'])) if pole_count else 0))
+    initial_storage = state_arrays*item
     # The immutable all-zero host initial bank is represented by scalar views.
     # At most C saved block states, one current adjoint and two evolving
     # primal banks coexist during replay. Transpose instead holds a primal,
@@ -163,15 +185,25 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
         disk_limit=min(options.disk_budget_bytes,int(free_disk*.8),free_disk-options.disk_free_reserve_bytes)
         if disk > disk_limit:
             raise ValueError(f'Field bank reservation exceeds the disk budget or available disk space: required={disk} bytes, admissible={max(0,disk_limit)} bytes, free={free_disk} bytes.')
-    # A restart journal holds one published record and one being written: each is
-    # a full state plus the partial material gradient. Charge both on the journal
-    # volume, together with the bank reservation when they share that volume.
-    restart = 2*(state+parameter_count*material_item) if options.restart_directory else 0
+    # A restart journal holds one published record while the next is written.
+    # Forward records carry a full state and the whole signal history (steps x
+    # monitors, field dtype); the completed forward record keeps that history
+    # while backward records, each an adjoint state plus the partial material
+    # gradient, rotate beside it. Arrays are raw bytes; the JSON metadata is
+    # bounded per record array, per block start (the contract lists them) and
+    # a fixed allowance for the contract's hashes, options and pointers.
+    # Charge the largest coexisting set on the journal volume, together with
+    # the bank reservation when they share that volume.
+    signal_history = region.steps*monitors*item if spectral is None else 0
+    material_gradient = parameter_count*material_item
+    journal_metadata = 64*1024+16*(region.steps//options.temporal_depth+2)+2*(512+256*(state_arrays+1))
+    restart = (max(2*(state+signal_history), signal_history+2*(state+material_gradient))
+               +journal_metadata) if options.restart_directory else 0
     existing_journal = 0
     if restart:
         from .state_store import disk_free
         journal_free = disk_free(options.restart_directory)
-        shared = bool(disk) and Path(options.restart_directory).expanduser().resolve().anchor == Path(options.state_directory).expanduser().resolve().anchor
+        shared = bool(disk) and _volume(options.restart_directory) == _volume(options.state_directory)
         # Records already on disk from the interrupted run are part of the
         # journal's reservation, not additional space that must still be free.
         existing_journal = _journal_bytes(options.restart_directory)
@@ -188,6 +220,8 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
                 dense_parameter_multiplier=parameter_multiplier,dense_parameter_reservation_bytes=dense_parameters,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,restart_reservation_bytes=restart,
                 restart_journal_existing_bytes=existing_journal,
+                restart_signal_history_bytes=signal_history if options.restart_directory else 0,
+                restart_journal_metadata_bytes=journal_metadata if options.restart_directory else 0,
                 host_initial_state_reservation_bytes=initial_storage,
                 state_bytes=state, halo_cells_per_side=depth, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*(18+6*pole_count)*local_slots*tile_cells*item,
                 source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))

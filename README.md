@@ -20,15 +20,16 @@ GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-
 |---|---|---|
 | Lumerical FDTD, CPU 16 threads vs TorchFDTD on RTX 5880 | 128³, 2,000 steps, sphere | **15.2×** run wall time (6.5× at 64³) |
 | flaport/fdtd on CUDA vs TorchFDTD fused kernels | 64³ and 96³, 800 steps | **16 to 17×** and **10 to 12×** |
-| FDTDX 0.6.2 vs TorchFDTD on the same RTX 3060 | 64³ and 96³, 800 steps; 64³ adjoint, 128 steps | **6.8 to 7.3×** and **6.4 to 6.7×** full solve; gradient **2.0×** (reversible) and **52×** (two checkpoints) |
-| Meep 1.34, 12 CPU ranks, vs TorchFDTD on the same workstation (RTX 3060, i7-12700) | 64³ and 96³, 800 steps | **38×** and **44×** full solve |
 | 16-case parameter sweeps vs flaport/fdtd sequential | 32³ and 64³ | **31 to 44×** and **15 to 16×** |
 | Torch CPU vs GPU, differentiable forward and backward | 128 × 64 × 64, 32 steps | **69×** resident, **12×** with DRAM streaming |
 | CPU worker vs CUDA worker ensemble | 4 × 64³, 800 steps | **40×** |
+| Meep 1.34, 12 MPI ranks on i7-12700 vs TorchFDTD on RTX 3060 | 64³ and 96³, 800 steps, sphere, Meep in double precision with other processes on the host | **38×** and **44×** full solve |
+| FDTDX 0.6.2 on the same RTX 3060 vs TorchFDTD | 64³ and 96³, 800 steps, sphere | **6.8×** and **6.4×** full solve |
+| FDTDX adjoint (checkpointed, reversible) vs TorchFDTD checkpointed adjoint | 64³, 128 steps, full permittivity gradient, 2 checkpoints, same RTX 3060 | **52×** and **2.0×** time to gradient, gradients within 1.1e-7 relative |
 | Larger than the GPU, capacity run | 2.42 billion cells, 58 GB (54 GiB) of E/H on a 48 GiB GPU, 10 steps plus full material gradient | 2.23 GB peak CUDA memory, 58 min, gradient within 9.1e-8 of the oracle |
 | Larger than the GPU, crash and resume | 2.26 billion cells, 54 GB (50.6 GiB) of E/H, same policy | killed after the first backward record, resumed process finishes with 3.03 GB peak CUDA memory and the gradient within 9.1e-8 |
 
-Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The FDTDX and Meep rows come from the same-hardware comparison in [docs/CROSS_SOLVER_COMPARISON.md](docs/CROSS_SOLVER_COMPARISON.md), whose slab and Mie-sphere accuracy agrees between the three solvers within 0.7 percent. The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations. The Lumerical rows are aggregate timings of earlier builds; no commercial data is redistributed.
+Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The Meep and FDTDX rows come from the same-hardware comparison in [docs/CROSS_SOLVER_COMPARISON.md](docs/CROSS_SOLVER_COMPARISON.md), which also lists the solver differences behind them. The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations. The Lumerical rows are aggregate timings of earlier builds; no commercial data is redistributed.
 
 ## Execution modes
 
@@ -113,7 +114,7 @@ print(Result.load("results/first.npz").summary["backend"])
 - [Python and batch API](docs/PYTHON_BATCH.md), [tensor batches](docs/TENSOR_BATCH.md), [differentiable FDTD](docs/DIFFERENTIABLE_FDTD.md), [shape gradients](docs/SHAPE_GRADIENTS.md)
 - [Streamed execution](docs/STREAMED_FDTD.md), [planner](docs/STREAMED_WORK_PLANNING.md), [restart journal](docs/STREAMED_RESTART.md), [beyond-VRAM records](docs/BEYOND_VRAM_RESTART.md)
 - [Mode ports](docs/OPEN_MODE_PORTS.md), [far field](docs/FARFIELD_WORKFLOW.md), [GDS](docs/GDS.md), [FSP](docs/FSP.md), [materials](docs/MATERIALS.md), [boundaries](docs/BOUNDARIES.md)
-- [Measurements and feature record](docs/MEASUREMENTS.md), [feature checklist](docs/FEATURE_CHECKLIST.md), [acceptance record](docs/ACCEPTANCE.md)
+- [Measurements and feature record](docs/MEASUREMENTS.md), [cross-solver comparison with Meep and FDTDX](docs/CROSS_SOLVER_COMPARISON.md), [feature checklist](docs/FEATURE_CHECKLIST.md), [acceptance record](docs/ACCEPTANCE.md)
 - [Security model](docs/SECURITY.md), [compatibility and support policy](docs/COMPATIBILITY.md), [changelog](docs/CHANGELOG.md), [third-party notices and SBOM](docs/THIRD_PARTY_NOTICES.md)
 
 ## Verification
@@ -124,6 +125,10 @@ npm run test:ui
 ```
 
 Validation uses analytic solutions and independently authored CPU/CUDA references; no commercial solver results are used.
+
+## AI-assisted development
+
+During the development of TorchFDTD, OpenAI GPT-6 Astra and Anthropic Claude Fable 5.1 were used as AI-assisted programming tools to support code prototyping, implementation, refactoring, debugging, test generation, and documentation. The authors defined the numerical formulations, physical assumptions, validation criteria, benchmark protocols, and acceptance thresholds, and reviewed the resulting implementation and numerical results. Solver correctness was independently assessed using analytical reference solutions, numerical convergence studies, finite-difference and automatic-differentiation gradient checks, independently implemented reference calculations, and CPU–GPU parity tests. The authors take full responsibility for the software, methodology, and results reported in this work.
 
 ## Attribution
 
