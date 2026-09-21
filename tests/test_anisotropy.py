@@ -144,9 +144,10 @@ def test_budget_rejects_before_inverse_or_fields_and_unsupported_contracts(monke
     monkeypatch.setattr(torch.linalg, 'eigvalsh', forbidden)
     with pytest.raises(ValueError, match='budget'):
         model(epsilon)
-    p.region.boundaries.x_min = BoundaryFace(kind='pec')
-    p.region.boundaries.x_max = BoundaryFace(kind='pec')
-    with pytest.raises(ValueError, match='periodic/Bloch'):
+    for a in 'xyz':
+        for side in ('min', 'max'):
+            setattr(p.region.boundaries, a + '_' + side, BoundaryFace(kind='pmc'))
+    with pytest.raises(ValueError, match='PMC/symmetric/antisymmetric'):
         TensorDielectricSimulation(p)
 
 

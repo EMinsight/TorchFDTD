@@ -179,7 +179,7 @@ def test_full_cpml_state_transpose_with_nonzero_memories():
     p=scene('float64',True)
     coefficient=torch.tensor([[2.4,.2,.1],[.2,2.1,-.1],[.1,-.1,2.8]],dtype=torch.float64,requires_grad=True)
     epsilon=material(p.region,coefficient)
-    system=_TensorSystem(p,epsilon)
+    system=_TensorSystem(p,epsilon,fixed_collar=True)
     generator=torch.Generator().manual_seed(192)
     state=tuple(torch.randn(v.shape,dtype=v.dtype,generator=generator).requires_grad_() for v in system.state())
     seeds=tuple(torch.randn(v.shape,dtype=v.dtype,generator=generator) for v in state)

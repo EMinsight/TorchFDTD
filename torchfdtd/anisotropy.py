@@ -37,26 +37,69 @@ def _cpml_collar_slices(region):
                 yield tuple(index)
 
 
+def _fold(value, axis):
+    """Add a replicated ghost row back onto the last real row."""
+    n = value.shape[axis]
+    tail = value.narrow(axis, n-2, 1)+value.narrow(axis, n-1, 1)
+    return torch.cat((value.narrow(axis, 0, n-2), tail), axis)
+
+
 class TensorConstitutive:
     """Matrix-free S = sum R^dagger epsilon^-1 R / 8.
 
     epsilon has shape (Nx,Ny,Nz,3,3), at common mesh nodes. Caller must admit
     storage and validate epsilon first. No global sparse/dense matrix is built.
+    pec[a] = (lower, upper) marks PEC walls on a finite axis. Wall-tangential
+    components are zero states; each wall node keeps the admissible closure
+    e_a e_a^T / epsilon_aa (its normal component), and a node on two or more
+    walls contributes nothing. The upper wall is a replicated ghost node row
+    whose fields are zero, so both walls share one closure.
+
+    With inverse=False the node matrices are applied directly, giving the
+    forward operator T = sum R^dagger chi R / 8 used for ADE coupling tensors.
+    Its wall closure is the projection chi_aa e_a e_a^T.
     """
-    def __init__(self, epsilon, phases=(1., 1., 1.), periodic=(True, True, True)):
-        self.inverse = torch.linalg.inv(epsilon)
+    def __init__(self, epsilon, phases=(1., 1., 1.), periodic=(True, True, True), pec=((False, False),)*3,
+                 *, inverse=True):
         self.phases = tuple(phases)
         self.periodic = tuple(periodic)
+        self.pec = tuple((bool(lo), bool(hi)) for lo, hi in pec)
+        self.inverse_mode = bool(inverse)
+        if any(self.periodic[a] and any(self.pec[a]) for a in range(3)):
+            raise ValueError('PEC walls require a nonperiodic axis.')
+        self.pad = tuple(int(self.pec[a][1]) for a in range(3))
+        for axis, pad in enumerate(self.pad):
+            if pad:
+                epsilon = torch.cat((epsilon, epsilon.narrow(axis, epsilon.shape[axis]-1, 1)), axis)
+        self.inverse = torch.linalg.inv(epsilon) if inverse else epsilon
+        if any(any(p) for p in self.pec):
+            shape = epsilon.shape[:3]
+            walls = []
+            for axis in range(3):
+                index = torch.zeros(shape[axis], dtype=torch.bool, device=epsilon.device)
+                index[0], index[-1] = self.pec[axis]
+                view = [1, 1, 1]
+                view[axis] = shape[axis]
+                walls.append(index.reshape(view).expand(shape))
+            count = sum(w.to(torch.int8) for w in walls)
+            closure = torch.zeros_like(self.inverse)
+            for axis in range(3):
+                single = walls[axis] & (count == 1)
+                diagonal = 1/epsilon[..., axis, axis] if inverse else epsilon[..., axis, axis]
+                closure[..., axis, axis] = torch.where(single, diagonal, closure[..., axis, axis])
+            self.inverse = torch.where((count > 0)[..., None, None], closure, self.inverse)
 
     def _normalize(self, field):
-        if all(self.periodic):
+        # Terminal edges of a finite axis without an upper wall have half
+        # coverage. Scaling both gather and scatter keeps S Hermitian, S <= I.
+        scaled = [a for a in range(3) if not self.periodic[a] and not self.pec[a][1]]
+        if not scaled:
             return field
         field = field.clone()
-        for axis in range(3):
-            if not self.periodic[axis]:
-                edge = [slice(None)] * 4
-                edge[axis], edge[3] = -1, axis
-                field[tuple(edge)] *= math.sqrt(2.)
+        for axis in scaled:
+            edge = [slice(None)] * 4
+            edge[axis], edge[3] = -1, axis
+            field[tuple(edge)] *= math.sqrt(2.)
         return field
 
     def _neighbor(self, value, axis, forward):
@@ -69,6 +112,19 @@ class TensorConstitutive:
         target[axis] = slice(None, -1) if forward else slice(1, None)
         result[tuple(target)] = value[tuple(source)]
         return result
+
+    def _pad(self, field):
+        for axis, pad in enumerate(self.pad):
+            if pad:
+                ghost = torch.zeros_like(field.narrow(axis, 0, 1))
+                field = torch.cat((field, ghost), axis)
+        return field
+
+    def _crop(self, field):
+        for axis, pad in enumerate(self.pad):
+            if pad:
+                field = field.narrow(axis, 0, field.shape[axis]-1)
+        return field
 
     def gather(self, field, signs):
         field = self._normalize(field)
@@ -84,28 +140,46 @@ class TensorConstitutive:
         return sum(self.inverse[..., :, a] * field[..., a, None] for a in range(3))
 
     def apply(self, field):
+        field = self._pad(field)
         result = torch.zeros_like(field)
         for signs in product((0, 1), repeat=3):
             result = result + self.scatter(self.multiply(self.gather(field, signs)), signs) / 8
-        return result
+        return self._crop(result)
 
     def epsilon_vjp(self, field, output_bar):
+        field, output_bar = self._pad(field), self._pad(output_bar)
         gradient = torch.zeros_like(self.inverse)
         for signs in product((0, 1), repeat=3):
-            right = self.multiply(self.gather(field, signs))
-            left = self.multiply(self.gather(output_bar, signs))
-            gradient -= (left.conj()[..., :, None] * right[..., None, :]).real / 8
+            right, left = self.gather(field, signs), self.gather(output_bar, signs)
+            if self.inverse_mode:
+                # dK = -K dEpsilon K
+                right, left = self.multiply(right), self.multiply(left)
+                gradient -= (left.conj()[..., :, None] * right[..., None, :]).real / 8
+            else:
+                gradient += (left.conj()[..., :, None] * right[..., None, :]).real / 8
+        for axis, pad in enumerate(self.pad):
+            if pad:
+                gradient = _fold(gradient, axis)
         return (gradient + gradient.transpose(-1, -2)) / 2
 
 
+def _pec_faces(region):
+    return tuple(tuple(face.kind == 'pec' for face in region.boundaries.pair(a)) for a in range(3))
+
+
 class _TensorSystem(_System):
-    def __init__(self, project, epsilon, observation_monitors=None):
+    def __init__(self, project, epsilon, observation_monitors=None, *, fixed_collar=False, prepare_updates=True):
         carrier = epsilon.new_ones(()).expand(project.region.shape)
-        super().__init__(project, carrier, prepare_kernels=False,
-                         prepare_permittivity=False, observation_monitors=observation_monitors)
+        super().__init__(project, carrier, prepare_kernels=False, prepare_permittivity=False,
+                         prepare_updates=prepare_updates, observation_monitors=observation_monitors)
         self.epsilon = epsilon
-        self.operator = TensorConstitutive(epsilon, tuple(self.grid.wrap.get(a, 1.) for a in range(3)),
-                                           tuple(a in self.grid.wrap for a in range(3)))
+        self.fixed_collar = fixed_collar
+        self.operator = self.constitutive(epsilon, project.region.shape) if prepare_updates else None
+
+    def constitutive(self, epsilon, shape, pec=None):
+        return TensorConstitutive(epsilon, tuple(self.grid.wrap.get(a, 1.) for a in range(3)),
+                                  tuple(a in self.grid.wrap for a in range(3)),
+                                  _pec_faces(self.region) if pec is None else pec)
 
     def reference_step(self, state, step, epsilon):
         e, h, *psis = state
@@ -133,8 +207,9 @@ class _TensorSystem(_System):
         e_bar = e_bar + contribution
         curl, _ = self.curl(state[1], state[2:], False)
         gradient = courant * self.operator.epsilon_vjp(curl, e_bar)
-        for index in _cpml_collar_slices(self.region):
-            gradient[index] = 0  # Fixed exterior is not a design variable.
+        if self.fixed_collar:
+            for index in _cpml_collar_slices(self.region):
+                gradient[index] = 0  # Fixed exterior is not a design variable.
         contribution, psi_bar = self.curl_transpose(courant * self.operator.apply(e_bar), psi_bar, False)
         return (e_bar, h_bar + contribution, *psi_bar), gradient
 
@@ -150,8 +225,11 @@ class TensorDielectricSimulation(DifferentiableSimulation):
     only. Caller optimizer/material-construction graphs are outside admission.
     host_budget_bytes bounds total host reservation for this API.
     """
-    def __init__(self, project, options=None, *, cpml_background_epsilon=None):
+    def __init__(self, project, options=None, *, cpml_background_epsilon=None, cpml_material='isotropic'):
+        if cpml_material not in ('isotropic', 'tensor'):
+            raise ValueError("cpml_material must be 'isotropic' (fixed collar) or 'tensor' (media extend into CPML).")
         self.cpml_background_epsilon = cpml_background_epsilon
+        self.cpml_material = cpml_material
         options = options or AdjointOptions()
         if options.backward_kernel == 'fused':
             raise ValueError('Full-tensor fused kernels are not validated.')
@@ -164,13 +242,18 @@ class TensorDielectricSimulation(DifferentiableSimulation):
             raise ValueError('Tensor dielectric requires a uniform rectangular 3D grid.')
         if r.memory_mode == 'streamed':
             raise ValueError('Tensor spatial streaming is not implemented.')
-        if any(face.kind not in ('periodic', 'bloch', 'pml')
-               for a in range(3) for face in r.boundaries.pair(a)):
-            raise ValueError('Tensor dielectric supports periodic/Bloch or isotropic-collar CPML faces, without walls.')
-        if any(face.kind == 'pml' for a in range(3) for face in r.boundaries.pair(a)):
+        kinds = {face.kind for a in range(3) for face in r.boundaries.pair(a)}
+        if kinds & {'pmc', 'symmetric', 'antisymmetric'}:
+            raise ValueError('PMC/symmetric/antisymmetric faces are not supported with tensor media; only PEC walls are.')
+        if kinds - {'periodic', 'bloch', 'pml', 'pec'}:
+            raise ValueError('Tensor dielectric supports periodic/Bloch, CPML or PEC faces.')
+        if 'pml' in kinds:
             value = self.cpml_background_epsilon
-            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 1:
-                raise ValueError('CPML requires explicit fixed cpml_background_epsilon >= 1.')
+            if self.cpml_material == 'isotropic':
+                if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 1:
+                    raise ValueError("CPML requires explicit fixed cpml_background_epsilon >= 1, or cpml_material='tensor'.")
+            elif value is not None:
+                raise ValueError("cpml_material='tensor' takes no fixed cpml_background_epsilon.")
         if any(n < 2 for n in r.shape):
             raise ValueError('Tensor dielectric requires at least two cells on every axis.')
         if r.interface_method != 'staircase' or r.material_sampling != 'yee':
@@ -232,32 +315,51 @@ class TensorDielectricSimulation(DifferentiableSimulation):
                     gpu_reservation_bytes=active if device.type == 'cuda' else 0,
                     tensor_reservation_bytes=extra, tensor_cuda_library_allowance_bytes=library)
 
+    @staticmethod
+    def _eigenvalue_bounds(value):
+        """Bounded-workspace extreme eigenvalues of a batch of symmetric 3x3 tensors."""
+        # CUDA batched eigvalsh scratch grows far faster than the 3x3
+        # coefficients. Fixed batches keep validation workspace bounded.
+        lowest = torch.full((), math.inf, dtype=value.dtype, device=value.device)
+        highest = torch.full((), -math.inf, dtype=value.dtype, device=value.device)
+        for batch in value.reshape(-1, 3, 3).split(64):
+            eigenvalues = torch.linalg.eigvalsh(batch)
+            lowest = torch.minimum(lowest, eigenvalues.min())
+            highest = torch.maximum(highest, eigenvalues.max())
+        return lowest, highest
+
+    def _validate_epsilon(self, epsilon):
+        """Finite, exactly symmetric, eigenvalues >= 1 and any fixed collar. No inverse yet."""
+        if not bool(torch.isfinite(epsilon).all()):
+            raise ValueError('epsilon must be finite.')
+        if not torch.equal(epsilon, epsilon.transpose(-1, -2)):
+            raise ValueError('epsilon must be exactly symmetric. Construct it symmetrically.')
+        lowest, _ = self._eigenvalue_bounds(epsilon)
+        if bool(lowest < 1):
+            raise ValueError('The conservative CFL requires eigenvalues of epsilon >= 1.')
+        self._validate_cpml_collar(epsilon)
+
     def _run(self, epsilon, spectral):
         self._validate_input_shape(epsilon)
         report = self.reservation(spectral, device=epsilon.device)
         # No full-volume validation temporary or inverse before admission.
         with torch.no_grad():
-            if not bool(torch.isfinite(epsilon).all()):
-                raise ValueError('epsilon must be finite.')
-            if not torch.equal(epsilon, epsilon.transpose(-1, -2)):
-                raise ValueError('epsilon must be exactly symmetric. Construct it symmetrically.')
-            # CUDA batched eigvalsh scratch grows far faster than the 3x3
-            # coefficients. Fixed batches keep validation workspace bounded.
-            invalid = torch.zeros((), dtype=torch.bool, device=epsilon.device)
-            for batch in epsilon.reshape(-1, 3, 3).split(64):
-                invalid.logical_or_((torch.linalg.eigvalsh(batch) < 1).any())
-            if bool(invalid):
-                raise ValueError('The conservative CFL requires eigenvalues of epsilon >= 1.')
-            self._validate_cpml_collar(epsilon)
+            self._validate_epsilon(epsilon)
             system = _TensorSystem(self.project.model_copy(deep=True), epsilon,
-                                   None if spectral is None else spectral.observers)
+                                   None if spectral is None else spectral.observers,
+                                   fixed_collar=self.cpml_background_epsilon is not None)
         report.update(experimental=True, adjoint='full-tensor Yee explicit transpose',
                       higher_order=False, spatial_streaming=False, full_time_autograd=False,
                       forward_backend='torch ' + epsilon.device.type.upper(), backward_backend='torch explicit transpose',
                       tensor_sampling='common mesh nodes, normalized finite/periodic edge triplets',
-                      cpml_contract='fixed isotropic exterior with one-node collar; tensor interior',
+                      cpml_contract='fixed isotropic exterior with one-node collar; tensor interior'
+                      if self.cpml_background_epsilon is not None else
+                      'D-field composition: CPML memories on the curl, S on the complete curl; tensors extend into CPML',
                       cpml_background_epsilon=self.cpml_background_epsilon,
-                      cpml_collar_material_vjp='zero: fixed coefficients, not design variables',
+                      cpml_collar_material_vjp='zero: fixed coefficients, not design variables'
+                      if self.cpml_background_epsilon is not None else 'full tensor VJP in every node, including CPML',
+                      pec_walls=_pec_faces(self.project.region),
+                      wall_closure='wall nodes keep e_a e_a^T/epsilon_aa; tangential wall components are zero states',
                       source_contract='soft impressed-field increments',
                       steps=system.region.steps)
         admission = _Checkpoints(system, self.options, report, admission=True)
