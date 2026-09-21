@@ -6,6 +6,7 @@ the prose here only names the fixtures and the pre-declared limits. Run after th
     python scripts/render_physics_validation.py
 """
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -253,6 +254,14 @@ def section_g307(record):
 
 
 SECTIONS = {'G3-01': section_g301, 'G3-02': section_g302, 'G3-03': section_g303, 'G3-07': section_g307}
+# Sections of the other G3 branch plug in after the merge: benchmarks/render_g3_b.py exposes RENDERERS with the
+# same (record) -> lines contract; absent before the merge, it is simply skipped.
+sys.path.insert(0, str(ROOT))
+try:
+    from benchmarks.render_g3_b import RENDERERS as G3_B_SECTIONS
+except ImportError:
+    G3_B_SECTIONS = {}
+SECTIONS.update(G3_B_SECTIONS)
 
 
 BEGIN = '<!-- g3-a begin -->'
