@@ -216,7 +216,8 @@ class Check:
                     web_assets[name] = dict(sha256=sha256_bytes(data), bytes=len(data),
                                             committed_sha256=(sha256_bytes(committed_bytes(name)) if committed_bytes(name) is not None else None))
             metadata = next(n for n in names if n.endswith('.dist-info/METADATA'))
-            requires = re.findall(r'^Requires-Dist: (.*)$', archive.read(metadata).decode('utf-8'), re.M)
+            # setuptools writes METADATA with the platform's line endings (CRLF on Windows).
+            requires = re.findall(r'^Requires-Dist: (.*?)\r?$', archive.read(metadata).decode('utf-8'), re.M)
         if mismatched:
             raise RuntimeError('wheel bytes differ from the tree for ' + ', '.join(mismatched))
         if not any(n.startswith('torchfdtd/web/assets/') for n in web_assets) or 'torchfdtd/web/index.html' not in web_assets:
