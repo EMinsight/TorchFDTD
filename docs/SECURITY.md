@@ -62,8 +62,12 @@ This is an engineering description, not a certification.
 - **NPZ results** (`Result.load`, `load_native_radiation_plane`,
   `load_native_radiation_box`, the streamed restart and staging readers) are
   opened with `allow_pickle=False` everywhere; an archive that would need
-  pickle raises `ValueError` and never unpickles. `torch.load` and
-  `pickle.load` are not used on any file. The radiation-box loader checks
+  pickle raises `ValueError` and never unpickles. `pickle.load` is not used on
+  any file. The design checkpoint (`DesignCheckpoint`) and the `DesignProblem`
+  state file are loaded without unpickling: `torch.load(...,
+  weights_only=True)` restores tensors and plain containers only, and a file
+  that holds any other pickled object raises `ValueError` before anything in
+  it runs. The radiation-box loader checks
   every NPY header against a bounded size and against the ZIP entry size
   before allocating, so a small archive that declares a huge array is refused
   as a header error. `Result.load` relies on numpy: an absurd declared shape

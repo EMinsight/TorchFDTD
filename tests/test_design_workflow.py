@@ -2,6 +2,7 @@
 checks and binary export on the two runnable examples, CPU only. The judged
 three-start runs of G6-07 live in tests/test_design_reimport.py."""
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -75,7 +76,20 @@ def test_toy_resume_reproduces_the_uninterrupted_history_bitwise(tmp_path):
         other.run(2, resume=True)
 
 
-def test_metagrating_resume_reproduces_the_uninterrupted_history_bitwise(tmp_path):
+def test_state_file_with_a_pickled_object_is_refused_without_executing_it(tmp_path):
+    executed = tmp_path/'executed'
+
+    class Hostile:
+        def __reduce__(self):
+            return os.makedirs, (str(executed),)
+
+    hostile = tmp_path/'hostile.pt'
+    torch.save(dict(marker='torchfdtd-design-problem', rng=Hostile()), hostile)
+    with pytest.raises(ValueError, match='pickled object'):
+        toy_problem().load(hostile)
+    assert not executed.exists()
+    torch.load(hostile, weights_only=False)   # control: an unrestricted load runs the payload
+    assert executed.is_dir()
     straight, _ = design_metagrating.build_problem(1, **FAST_METAGRATING)
     straight.run(4)
     checkpoint = tmp_path/'metagrating.pt'

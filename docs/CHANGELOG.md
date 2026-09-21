@@ -144,6 +144,7 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Fixed
 
+- `DesignCheckpoint.load` and `DesignProblem.load` read their files with `torch.load(..., weights_only=True)` instead of an unrestricted unpickle: the checkpoint stores the NumPy generator key as a tensor so both files hold tensors and plain containers only, and a file that carries any other pickled object is refused with `ValueError` before anything in it runs; a `checkpoint.pt` written before this change carries a NumPy array in its generator state and is refused the same way (remove it to start the loop over), while earlier `DesignProblem` state files load unchanged (this commit).
 - `Region.pml_dispersion` enters the plan's `exterior` section, so the frozen and ADE absorber updates no longer share a plan hash, reference, cache or restart key (this commit).
 - `pml_dispersion='frozen'` refuses a dispersive material inside the PML whose real permittivity at the reference frequency is not positive, naming the material, the frequency and the value, instead of clamping to 1e-3 and diverging (this commit).
 - The capability registry checks the tensor material before complex fields for the tensor batch and lets tensor materials with Bloch faces reach `run_tensor` under the fused kernel choice, as the code does (this commit).

@@ -10,6 +10,7 @@ listed state is refused by name.
 """
 from dataclasses import replace
 import json
+import os
 import shutil
 
 import pytest
@@ -287,3 +288,26 @@ def test_checkpoint_refuses_another_configuration_waveform_or_damage(tmp_path):
                                     boundary='truncate', beta=1., eta=.5, dtype=torch.float64)
     with pytest.raises(ValueError, match='configuration differs'):
         checkpoint.load(wrong, optimizer)
+
+
+def test_checkpoint_with_a_pickled_object_is_refused_without_executing_it(tmp_path):
+    p = scene()
+    settings = options(tmp_path, 'host', restart_directory=None)
+    plan = StreamedSimulation(p, settings).plan
+    param = parameterization()
+    optimizer = torch.optim.Adam(param.parameters(), lr=.05, foreach=False)
+    checkpoint = DesignCheckpoint(tmp_path / 'checkpoint', plan, options=settings)
+    checkpoint.save(iteration=1, parameterization=param, optimizer=optimizer, history=[])
+    executed = tmp_path / 'executed'
+
+    class Hostile:
+        def __reduce__(self):
+            return os.makedirs, (str(executed),)
+
+    # A complete, correctly checksummed checkpoint whose extra state is a pickled object.
+    rewrite(tmp_path / 'checkpoint', lambda payload: payload.update(extra=Hostile()))
+    with pytest.raises(ValueError, match='pickled object'):
+        checkpoint.load(parameterization(), optimizer)
+    assert not executed.exists()
+    torch.load(tmp_path / 'checkpoint' / 'checkpoint.pt', weights_only=False)   # control: an unrestricted load runs the payload
+    assert executed.is_dir()
