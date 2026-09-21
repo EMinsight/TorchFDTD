@@ -432,6 +432,8 @@ class StreamedSimulation(DifferentiableSimulation):
             raise ValueError('Streamed epsilon must be a CPU tensor to avoid full-volume VRAM allocation.')
         if epsilon.dtype not in (torch.float32, torch.float64) or (epsilon.dtype == torch.float64) != (region.precision == 'float64'):
             raise ValueError('Epsilon dtype must match the real project precision.')
+        if tuple(epsilon.shape) == region.shape+(3, 3):
+            raise ValueError('Node permittivity tensors stream through StreamedTensorSimulation in torchfdtd.streamed_tensor.')
         if tuple(epsilon.shape) not in (material_shape(region), material_shape(region, True)):
             raise ValueError('Epsilon shape must match the project grid plus one stored row on every upper PMC/symmetric axis.')
         options = self.streaming_options

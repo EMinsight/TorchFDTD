@@ -453,6 +453,7 @@ class SlabBlockOperator:
                 adjoint = tuple(torch.zeros_like(s) for s in local.state())
                 for target, value in zip(adjoint[:2], endpoint_bar[:2]):target[core].copy_(value[lo:hi])
                 for target, (global_id, _, owned, destination) in zip(adjoint[2:], mapping):
+                    # Torch transposes may run on CUDA tiles; the index maps live on the host.
                     target.index_copy_(0, owned.to(target.device), endpoint_bar[global_id].index_select(0, destination).to(target.device))
             def restore(saved, begin, end):
                 for target, value in zip(local.state(), saved):target.copy_(value)

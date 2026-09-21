@@ -238,36 +238,16 @@ class _TensorSystem(_System):
         return (e_bar, h_bar + contribution, *psi_bar), gradient
 
 
-class TensorDielectricSimulation(DifferentiableSimulation):
-    """Checkpointed epsilon-to-point-signals for node-sampled full tensors.
-
-    CPU/CUDA FP32 (default) or FP64 diagnostics, uniform rectangular 3D grids, all
-    axes periodic/Bloch, PEC or CPML. With cpml_material='isotropic' CPML layers
-    plus one node row must equal the explicit cpml_background_epsilon times I
-    and their VJP is zero. With cpml_material='tensor' they hold node tensors
-    whose face normal is a principal axis with a non-intermediate eigenvalue,
-    and every node has a VJP. Nondispersive tensors require eigenvalues >= 1.
-    forward() and spectrum() return the native result types. First derivatives
-    only. Caller optimizer/material-construction graphs are outside admission.
-    host_budget_bytes bounds total host reservation for this API.
-    """
-    def __init__(self, project, options=None, *, cpml_background_epsilon=None, cpml_material='isotropic'):
-        if cpml_material not in ('isotropic', 'tensor'):
-            raise ValueError("cpml_material must be 'isotropic' (fixed collar) or 'tensor' (media extend into CPML).")
-        self.cpml_background_epsilon = cpml_background_epsilon
-        self.cpml_material = cpml_material
-        options = options or AdjointOptions()
-        if options.backward_kernel == 'fused':
-            raise ValueError('Full-tensor fused kernels are not validated.')
-        super().__init__(project, replace(options, backward_kernel='torch'))
-        self._validate_project()
+class _TensorValidation:
+    """Project and node-tensor admission shared by the resident and streamed tensor paths."""
+    _streamed = False
 
     def _validate_project(self):
         p, r = self.project, self.project.region
         if r.dimension != '3d' or r.mesh_type != 'uniform':
             raise ValueError('Tensor dielectric requires a uniform rectangular 3D grid.')
-        if r.memory_mode == 'streamed':
-            raise ValueError('Tensor spatial streaming is not implemented.')
+        if r.memory_mode == 'streamed' and not self._streamed:
+            raise ValueError('Streamed tensor scenes use StreamedTensorSimulation.')
         kinds = {face.kind for a in range(3) for face in r.boundaries.pair(a)}
         if kinds & {'pmc', 'symmetric', 'antisymmetric'}:
             raise ValueError('PMC/symmetric/antisymmetric faces are not supported with tensor media; only PEC walls are.')
@@ -317,6 +297,54 @@ class TensorDielectricSimulation(DifferentiableSimulation):
         if (epsilon.dtype == torch.float64) != (r.precision == 'float64'):
             raise ValueError('epsilon precision must match the region.')
 
+    @staticmethod
+    def _eigenvalue_bounds(value):
+        """Bounded-workspace extreme eigenvalues of a batch of symmetric 3x3 tensors."""
+        # CUDA batched eigvalsh scratch grows far faster than the 3x3
+        # coefficients. Fixed batches keep validation workspace bounded.
+        lowest = torch.full((), math.inf, dtype=value.dtype, device=value.device)
+        highest = torch.full((), -math.inf, dtype=value.dtype, device=value.device)
+        for batch in value.reshape(-1, 3, 3).split(64):
+            eigenvalues = torch.linalg.eigvalsh(batch)
+            lowest = torch.minimum(lowest, eigenvalues.min())
+            highest = torch.maximum(highest, eigenvalues.max())
+        return lowest, highest
+
+    def _validate_epsilon(self, epsilon):
+        """Finite, exactly symmetric, eigenvalues >= 1 and any fixed collar. No inverse yet."""
+        if not bool(torch.isfinite(epsilon).all()):
+            raise ValueError('epsilon must be finite.')
+        if not torch.equal(epsilon, epsilon.transpose(-1, -2)):
+            raise ValueError('epsilon must be exactly symmetric. Construct it symmetrically.')
+        lowest, _ = self._eigenvalue_bounds(epsilon)
+        if bool(lowest < 1):
+            raise ValueError('The conservative CFL requires eigenvalues of epsilon >= 1.')
+        self._validate_cpml_collar(epsilon)
+
+class TensorDielectricSimulation(_TensorValidation, DifferentiableSimulation):
+    """Checkpointed epsilon-to-point-signals for node-sampled full tensors.
+
+    CPU/CUDA FP32 (default) or FP64 diagnostics, uniform rectangular 3D grids, all
+    axes periodic/Bloch, PEC or CPML. With cpml_material='isotropic' CPML layers
+    plus one node row must equal the explicit cpml_background_epsilon times I
+    and their VJP is zero. With cpml_material='tensor' they hold node tensors
+    whose face normal is a principal axis with a non-intermediate eigenvalue,
+    and every node has a VJP. Nondispersive tensors require eigenvalues >= 1.
+    forward() and spectrum() return the native result types. First derivatives
+    only. Caller optimizer/material-construction graphs are outside admission.
+    host_budget_bytes bounds total host reservation for this API.
+    """
+    def __init__(self, project, options=None, *, cpml_background_epsilon=None, cpml_material='isotropic'):
+        if cpml_material not in ('isotropic', 'tensor'):
+            raise ValueError("cpml_material must be 'isotropic' (fixed collar) or 'tensor' (media extend into CPML).")
+        self.cpml_background_epsilon = cpml_background_epsilon
+        self.cpml_material = cpml_material
+        options = options or AdjointOptions()
+        if options.backward_kernel == 'fused':
+            raise ValueError('Full-tensor fused kernels are not validated.')
+        super().__init__(project, replace(options, backward_kernel='torch'))
+        self._validate_project()
+
     def reservation(self, spectral=None, *, device='cpu'):
         """Preallocation bound, including tensor coefficients and VJP workspace."""
         from .adjoint_memory import _resident_reservation
@@ -348,30 +376,6 @@ class TensorDielectricSimulation(DifferentiableSimulation):
                     memory_reservation_bytes=active,
                     gpu_reservation_bytes=active if device.type == 'cuda' else 0,
                     tensor_reservation_bytes=extra, tensor_cuda_library_allowance_bytes=library)
-
-    @staticmethod
-    def _eigenvalue_bounds(value):
-        """Bounded-workspace extreme eigenvalues of a batch of symmetric 3x3 tensors."""
-        # CUDA batched eigvalsh scratch grows far faster than the 3x3
-        # coefficients. Fixed batches keep validation workspace bounded.
-        lowest = torch.full((), math.inf, dtype=value.dtype, device=value.device)
-        highest = torch.full((), -math.inf, dtype=value.dtype, device=value.device)
-        for batch in value.reshape(-1, 3, 3).split(64):
-            eigenvalues = torch.linalg.eigvalsh(batch)
-            lowest = torch.minimum(lowest, eigenvalues.min())
-            highest = torch.maximum(highest, eigenvalues.max())
-        return lowest, highest
-
-    def _validate_epsilon(self, epsilon):
-        """Finite, exactly symmetric, eigenvalues >= 1 and any fixed collar. No inverse yet."""
-        if not bool(torch.isfinite(epsilon).all()):
-            raise ValueError('epsilon must be finite.')
-        if not torch.equal(epsilon, epsilon.transpose(-1, -2)):
-            raise ValueError('epsilon must be exactly symmetric. Construct it symmetrically.')
-        lowest, _ = self._eigenvalue_bounds(epsilon)
-        if bool(lowest < 1):
-            raise ValueError('The conservative CFL requires eigenvalues of epsilon >= 1.')
-        self._validate_cpml_collar(epsilon)
 
     def _run(self, epsilon, spectral):
         self._validate_input_shape(epsilon)
