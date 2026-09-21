@@ -1,0 +1,1883 @@
+{
+  "status": "passed_local_pending_ci",
+  "scope": "Small FP32 derivative integration. No performance, physical convergence or capacity claim.",
+  "cuda_integration": {
+    "status": "passed",
+    "scope": "Small FP32 derivative integration. No performance, physical convergence or capacity claim.",
+    "hardware": "NVIDIA GeForce RTX 3060",
+    "torch_version": "2.10.0+cu126",
+    "relative_l2_gate": 8e-05,
+    "native_compatibility": {
+      "native": {
+        "relative_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "legacy": {
+        "relative_l2": 0.0,
+        "max_abs": 0.0
+      }
+    },
+    "cases": [
+      {
+        "complex_fields": false,
+        "complex_waveforms": false,
+        "observation": "point",
+        "errors": {
+          "fields": {
+            "relative_l2": 0.0,
+            "max_abs": 0.0
+          },
+          "epsilon_vjp": {
+            "relative_l2": 1.0100696865580512e-07,
+            "max_abs": 9.094947017729282e-11
+          },
+          "waveform_vjp": {
+            "relative_l2": 1.9585736108317487e-07,
+            "max_abs": 7.450580596923828e-09
+          }
+        },
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 18,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose",
+          "checkpoint_transfers": "sync",
+          "memory_reservation_bytes": 9180523,
+          "workspace_reservation_bytes": 425300,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 131040,
+            "primal_and_adjoint_cpml": 97200,
+            "replay_and_conversion_allowance": 97920,
+            "dielectric_coefficients_and_gradient": 98280,
+            "boundary_coefficients": 488,
+            "source_profiles": 0,
+            "source_injection": 336,
+            "observation_gathers": 36
+          },
+          "allocation_headroom_bytes": 8426319,
+          "device_checkpoint_reservation_bytes": 195840,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 0,
+          "history_reservation_bytes": 720,
+          "output_history_bytes": 216,
+          "source_history_bytes": 288,
+          "observation_index_bytes": 152,
+          "observer_layout_bytes": 104,
+          "observer_preparation_bytes": 1544,
+          "material_packing_reservation_bytes": 132192,
+          "restart_state_bytes": 97920,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 1544,
+          "gpu_reservation_bytes": 9180523,
+          "budgeted_resident": false,
+          "restart_bytes": 97920,
+          "checkpoint_capacity": 2,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 2,
+          "checkpoint_bytes_written": 881280,
+          "checkpoint_bytes_read": 1370880,
+          "checkpoint_io_seconds": 0.0038165999576449394,
+          "replayed_steps": 40,
+          "checkpoint_tiers": [
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 2,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "time_history",
+          "forward_seconds": 0.047449400182813406,
+          "source_waveform_shape": [
+            18,
+            4
+          ],
+          "source_waveform_complex": false,
+          "source_parameter_elements": 8262,
+          "source_term_layout": [
+            {
+              "source_id": "eplane",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hplane",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            },
+            {
+              "source_id": "epoint",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hpoint",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            }
+          ],
+          "source_reduction": "one support and one row at a time",
+          "backward_seconds": 0.1577916000969708
+        }
+      },
+      {
+        "complex_fields": false,
+        "complex_waveforms": false,
+        "observation": "spectrum",
+        "errors": {
+          "fields": {
+            "relative_l2": 1.9646891961826386e-07,
+            "max_abs": 9.06402249678704e-08
+          },
+          "epsilon_vjp": {
+            "relative_l2": 1.9531316418498028e-07,
+            "max_abs": 7.450580596923828e-09
+          },
+          "waveform_vjp": {
+            "relative_l2": 2.326366723199454e-07,
+            "max_abs": 1.7881393432617188e-07
+          }
+        },
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 18,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose",
+          "checkpoint_transfers": "sync",
+          "memory_reservation_bytes": 29274566,
+          "workspace_reservation_bytes": 425300,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 131040,
+            "primal_and_adjoint_cpml": 97200,
+            "replay_and_conversion_allowance": 97920,
+            "dielectric_coefficients_and_gradient": 98280,
+            "boundary_coefficients": 488,
+            "source_profiles": 0,
+            "source_injection": 336,
+            "observation_gathers": 36
+          },
+          "allocation_headroom_bytes": 9383178,
+          "device_checkpoint_reservation_bytes": 195840,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 19136512,
+          "history_reservation_bytes": 1392,
+          "output_history_bytes": 0,
+          "source_history_bytes": 288,
+          "observation_index_bytes": 152,
+          "observer_layout_bytes": 104,
+          "observer_preparation_bytes": 1544,
+          "material_packing_reservation_bytes": 132192,
+          "restart_state_bytes": 97920,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 1544,
+          "gpu_reservation_bytes": 29274566,
+          "budgeted_resident": false,
+          "restart_bytes": 97920,
+          "checkpoint_capacity": 2,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 2,
+          "checkpoint_bytes_written": 881280,
+          "checkpoint_bytes_read": 1370880,
+          "checkpoint_io_seconds": 0.0043266997672617435,
+          "replayed_steps": 40,
+          "checkpoint_tiers": [
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 2,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "online_spectrum",
+          "spectral_output_bytes": 48,
+          "spectral_workspace_bytes": 1000,
+          "spectral_settings_bytes": 8,
+          "spectral_reservation_bytes": 1104,
+          "spectral_block_size": 5,
+          "forward_seconds": 0.3425578000023961,
+          "source_waveform_shape": [
+            18,
+            4
+          ],
+          "source_waveform_complex": false,
+          "source_parameter_elements": 8262,
+          "source_term_layout": [
+            {
+              "source_id": "eplane",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hplane",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            },
+            {
+              "source_id": "epoint",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hpoint",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            }
+          ],
+          "source_reduction": "one support and one row at a time",
+          "backward_seconds": 0.02857330022379756
+        }
+      },
+      {
+        "complex_fields": false,
+        "complex_waveforms": false,
+        "observation": "plane",
+        "errors": {
+          "fields": {
+            "relative_l2": 3.577817959732918e-07,
+            "max_abs": 1.3328003749250113e-07
+          },
+          "epsilon_vjp": {
+            "relative_l2": 5.653325683876481e-07,
+            "max_abs": 2.3283064365386963e-10
+          },
+          "waveform_vjp": {
+            "relative_l2": 3.775872013959768e-07,
+            "max_abs": 2.9802322387695312e-08
+          }
+        },
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 18,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose",
+          "checkpoint_transfers": "sync",
+          "memory_reservation_bytes": 29341988,
+          "workspace_reservation_bytes": 427784,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 131040,
+            "primal_and_adjoint_cpml": 97200,
+            "replay_and_conversion_allowance": 97920,
+            "dielectric_coefficients_and_gradient": 98280,
+            "boundary_coefficients": 488,
+            "source_profiles": 0,
+            "source_injection": 336,
+            "observation_gathers": 2520
+          },
+          "allocation_headroom_bytes": 9386388,
+          "device_checkpoint_reservation_bytes": 195840,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 19136512,
+          "history_reservation_bytes": 53184,
+          "output_history_bytes": 0,
+          "source_history_bytes": 288,
+          "observation_index_bytes": 10088,
+          "observer_layout_bytes": 6728,
+          "observer_preparation_bytes": 107528,
+          "material_packing_reservation_bytes": 132192,
+          "restart_state_bytes": 97920,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 107528,
+          "gpu_reservation_bytes": 29341988,
+          "budgeted_resident": false,
+          "restart_bytes": 97920,
+          "checkpoint_capacity": 2,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 2,
+          "checkpoint_bytes_written": 881280,
+          "checkpoint_bytes_read": 1370880,
+          "checkpoint_io_seconds": 0.0038230977952480316,
+          "replayed_steps": 40,
+          "checkpoint_tiers": [
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 2,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "online_spectrum",
+          "spectral_output_bytes": 3360,
+          "spectral_workspace_bytes": 30808,
+          "spectral_settings_bytes": 8,
+          "spectral_reservation_bytes": 52896,
+          "plane_workspace_reservation_bytes": 15360,
+          "plane_output_bytes": 576,
+          "spectral_block_size": 5,
+          "forward_seconds": 0.016571500338613987,
+          "source_waveform_shape": [
+            18,
+            4
+          ],
+          "source_waveform_complex": false,
+          "source_parameter_elements": 8262,
+          "source_term_layout": [
+            {
+              "source_id": "eplane",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hplane",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            },
+            {
+              "source_id": "epoint",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hpoint",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            }
+          ],
+          "source_reduction": "one support and one row at a time",
+          "backward_seconds": 0.02641290007159114
+        }
+      },
+      {
+        "complex_fields": true,
+        "complex_waveforms": false,
+        "observation": "point",
+        "errors": {
+          "fields": {
+            "relative_l2": 0.0,
+            "max_abs": 0.0
+          },
+          "epsilon_vjp": {
+            "relative_l2": 3.2873298567108105e-07,
+            "max_abs": 9.458744898438454e-11
+          },
+          "waveform_vjp": {
+            "relative_l2": 2.3077136883600996e-07,
+            "max_abs": 4.6566128730773926e-09
+          }
+        },
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 18,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA complex transpose",
+          "checkpoint_transfers": "sync",
+          "memory_reservation_bytes": 9730366,
+          "workspace_reservation_bytes": 752504,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 262080,
+            "primal_and_adjoint_cpml": 194400,
+            "replay_and_conversion_allowance": 195840,
+            "dielectric_coefficients_and_gradient": 98280,
+            "boundary_coefficients": 488,
+            "source_profiles": 672,
+            "source_injection": 672,
+            "observation_gathers": 72
+          },
+          "allocation_headroom_bytes": 8452502,
+          "device_checkpoint_reservation_bytes": 391680,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 0,
+          "history_reservation_bytes": 1440,
+          "output_history_bytes": 432,
+          "source_history_bytes": 576,
+          "observation_index_bytes": 48,
+          "observer_layout_bytes": 0,
+          "observer_preparation_bytes": 0,
+          "material_packing_reservation_bytes": 132192,
+          "restart_state_bytes": 195840,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 0,
+          "gpu_reservation_bytes": 9730366,
+          "budgeted_resident": false,
+          "restart_bytes": 195840,
+          "checkpoint_capacity": 2,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 2,
+          "checkpoint_bytes_written": 1762560,
+          "checkpoint_bytes_read": 2741760,
+          "checkpoint_io_seconds": 0.004195200279355049,
+          "replayed_steps": 40,
+          "checkpoint_tiers": [
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 2,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "time_history",
+          "forward_seconds": 0.005907199811190367,
+          "source_waveform_shape": [
+            18,
+            4
+          ],
+          "source_waveform_complex": false,
+          "source_parameter_elements": 8262,
+          "source_term_layout": [
+            {
+              "source_id": "eplane",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hplane",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            },
+            {
+              "source_id": "epoint",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hpoint",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            }
+          ],
+          "source_reduction": "one support and one row at a time",
+          "backward_seconds": 0.1652250001206994
+        }
+      },
+      {
+        "complex_fields": true,
+        "complex_waveforms": false,
+        "observation": "spectrum",
+        "errors": {
+          "fields": {
+            "relative_l2": 1.87551293767402e-07,
+            "max_abs": 6.143906154658885e-08
+          },
+          "epsilon_vjp": {
+            "relative_l2": 3.05291279229492e-07,
+            "max_abs": 3.725290298461914e-09
+          },
+          "waveform_vjp": {
+            "relative_l2": 2.3655943898650245e-07,
+            "max_abs": 1.7881393432617188e-07
+          }
+        },
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 18,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA complex transpose",
+          "checkpoint_transfers": "sync",
+          "memory_reservation_bytes": 29825005,
+          "workspace_reservation_bytes": 752504,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 262080,
+            "primal_and_adjoint_cpml": 194400,
+            "replay_and_conversion_allowance": 195840,
+            "dielectric_coefficients_and_gradient": 98280,
+            "boundary_coefficients": 488,
+            "source_profiles": 672,
+            "source_injection": 672,
+            "observation_gathers": 72
+          },
+          "allocation_headroom_bytes": 9409389,
+          "device_checkpoint_reservation_bytes": 391680,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 19136512,
+          "history_reservation_bytes": 2680,
+          "output_history_bytes": 0,
+          "source_history_bytes": 576,
+          "observation_index_bytes": 48,
+          "observer_layout_bytes": 0,
+          "observer_preparation_bytes": 0,
+          "material_packing_reservation_bytes": 132192,
+          "restart_state_bytes": 195840,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 0,
+          "gpu_reservation_bytes": 29825005,
+          "budgeted_resident": false,
+          "restart_bytes": 195840,
+          "checkpoint_capacity": 2,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 2,
+          "checkpoint_bytes_written": 1762560,
+          "checkpoint_bytes_read": 2741760,
+          "checkpoint_io_seconds": 0.007995299063622952,
+          "replayed_steps": 40,
+          "checkpoint_tiers": [
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 2,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "online_spectrum",
+          "spectral_output_bytes": 48,
+          "spectral_workspace_bytes": 2000,
+          "spectral_settings_bytes": 8,
+          "spectral_reservation_bytes": 2104,
+          "spectral_block_size": 5,
+          "forward_seconds": 0.019047699868679047,
+          "source_waveform_shape": [
+            18,
+            4
+          ],
+          "source_waveform_complex": false,
+          "source_parameter_elements": 8262,
+          "source_term_layout": [
+            {
+              "source_id": "eplane",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hplane",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            },
+            {
+              "source_id": "epoint",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hpoint",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            }
+          ],
+          "source_reduction": "one support and one row at a time",
+          "backward_seconds": 0.04719780012965202
+        }
+      },
+      {
+        "complex_fields": true,
+        "complex_waveforms": false,
+        "observation": "plane",
+        "errors": {
+          "fields": {
+            "relative_l2": 4.980439164879851e-07,
+            "max_abs": 7.990400336236376e-08
+          },
+          "epsilon_vjp": {
+            "relative_l2": 8.506864682243257e-07,
+            "max_abs": 7.275957614183426e-11
+          },
+          "waveform_vjp": {
+            "relative_l2": 8.549389672024719e-07,
+            "max_abs": 2.7474015951156616e-08
+          }
+        },
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 18,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA complex transpose",
+          "checkpoint_transfers": "sync",
+          "memory_reservation_bytes": 29924218,
+          "workspace_reservation_bytes": 757472,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 262080,
+            "primal_and_adjoint_cpml": 194400,
+            "replay_and_conversion_allowance": 195840,
+            "dielectric_coefficients_and_gradient": 98280,
+            "boundary_coefficients": 488,
+            "source_profiles": 672,
+            "source_injection": 672,
+            "observation_gathers": 5040
+          },
+          "allocation_headroom_bytes": 9414114,
+          "device_checkpoint_reservation_bytes": 391680,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 19136512,
+          "history_reservation_bytes": 88888,
+          "output_history_bytes": 0,
+          "source_history_bytes": 576,
+          "observation_index_bytes": 3360,
+          "observer_layout_bytes": 0,
+          "observer_preparation_bytes": 0,
+          "material_packing_reservation_bytes": 132192,
+          "restart_state_bytes": 195840,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 0,
+          "gpu_reservation_bytes": 29924218,
+          "budgeted_resident": false,
+          "restart_bytes": 195840,
+          "checkpoint_capacity": 2,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 2,
+          "checkpoint_bytes_written": 1762560,
+          "checkpoint_bytes_read": 2741760,
+          "checkpoint_io_seconds": 0.006033299490809441,
+          "replayed_steps": 40,
+          "checkpoint_tiers": [
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 2,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "online_spectrum",
+          "spectral_output_bytes": 3360,
+          "spectral_workspace_bytes": 61616,
+          "spectral_settings_bytes": 8,
+          "spectral_reservation_bytes": 88312,
+          "plane_workspace_reservation_bytes": 19968,
+          "plane_output_bytes": 576,
+          "spectral_block_size": 5,
+          "forward_seconds": 0.011289299931377172,
+          "source_waveform_shape": [
+            18,
+            4
+          ],
+          "source_waveform_complex": false,
+          "source_parameter_elements": 8262,
+          "source_term_layout": [
+            {
+              "source_id": "eplane",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hplane",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            },
+            {
+              "source_id": "epoint",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hpoint",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            }
+          ],
+          "source_reduction": "one support and one row at a time",
+          "backward_seconds": 0.04122300026938319
+        }
+      },
+      {
+        "complex_fields": true,
+        "complex_waveforms": true,
+        "observation": "point",
+        "errors": {
+          "fields": {
+            "relative_l2": 5.020989924767228e-08,
+            "max_abs": 7.679882693323606e-09
+          },
+          "epsilon_vjp": {
+            "relative_l2": 1.8380207888090747e-07,
+            "max_abs": 1.1641532182693481e-10
+          },
+          "waveform_vjp": {
+            "relative_l2": 1.1946003124918433e-07,
+            "max_abs": 1.9199706733309015e-09
+          }
+        },
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 18,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA complex transpose",
+          "checkpoint_transfers": "sync",
+          "memory_reservation_bytes": 9731575,
+          "workspace_reservation_bytes": 752504,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 262080,
+            "primal_and_adjoint_cpml": 194400,
+            "replay_and_conversion_allowance": 195840,
+            "dielectric_coefficients_and_gradient": 98280,
+            "boundary_coefficients": 488,
+            "source_profiles": 672,
+            "source_injection": 672,
+            "observation_gathers": 72
+          },
+          "allocation_headroom_bytes": 8452559,
+          "device_checkpoint_reservation_bytes": 391680,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 0,
+          "history_reservation_bytes": 1440,
+          "output_history_bytes": 432,
+          "source_history_bytes": 576,
+          "observation_index_bytes": 48,
+          "observer_layout_bytes": 0,
+          "observer_preparation_bytes": 0,
+          "material_packing_reservation_bytes": 133344,
+          "restart_state_bytes": 195840,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 0,
+          "gpu_reservation_bytes": 9731575,
+          "budgeted_resident": false,
+          "restart_bytes": 195840,
+          "checkpoint_capacity": 2,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 2,
+          "checkpoint_bytes_written": 1762560,
+          "checkpoint_bytes_read": 2741760,
+          "checkpoint_io_seconds": 0.004433799535036087,
+          "replayed_steps": 40,
+          "checkpoint_tiers": [
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 2,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "time_history",
+          "forward_seconds": 0.00870959972962737,
+          "source_waveform_shape": [
+            18,
+            4
+          ],
+          "source_waveform_complex": true,
+          "source_parameter_elements": 8334,
+          "source_term_layout": [
+            {
+              "source_id": "eplane",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hplane",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            },
+            {
+              "source_id": "epoint",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hpoint",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            }
+          ],
+          "source_reduction": "one support and one row at a time",
+          "backward_seconds": 0.027865600306540728
+        }
+      },
+      {
+        "complex_fields": true,
+        "complex_waveforms": true,
+        "observation": "spectrum",
+        "errors": {
+          "fields": {
+            "relative_l2": 1.4775232768635194e-07,
+            "max_abs": 4.7706993203109864e-08
+          },
+          "epsilon_vjp": {
+            "relative_l2": 3.640227617309507e-07,
+            "max_abs": 7.450580596923828e-09
+          },
+          "waveform_vjp": {
+            "relative_l2": 1.9784432336792807e-07,
+            "max_abs": 1.501712528671799e-07
+          }
+        },
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 18,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA complex transpose",
+          "checkpoint_transfers": "sync",
+          "memory_reservation_bytes": 29826215,
+          "workspace_reservation_bytes": 752504,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 262080,
+            "primal_and_adjoint_cpml": 194400,
+            "replay_and_conversion_allowance": 195840,
+            "dielectric_coefficients_and_gradient": 98280,
+            "boundary_coefficients": 488,
+            "source_profiles": 672,
+            "source_injection": 672,
+            "observation_gathers": 72
+          },
+          "allocation_headroom_bytes": 9409447,
+          "device_checkpoint_reservation_bytes": 391680,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 19136512,
+          "history_reservation_bytes": 2680,
+          "output_history_bytes": 0,
+          "source_history_bytes": 576,
+          "observation_index_bytes": 48,
+          "observer_layout_bytes": 0,
+          "observer_preparation_bytes": 0,
+          "material_packing_reservation_bytes": 133344,
+          "restart_state_bytes": 195840,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 0,
+          "gpu_reservation_bytes": 29826215,
+          "budgeted_resident": false,
+          "restart_bytes": 195840,
+          "checkpoint_capacity": 2,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 2,
+          "checkpoint_bytes_written": 1762560,
+          "checkpoint_bytes_read": 2741760,
+          "checkpoint_io_seconds": 0.005094000604003668,
+          "replayed_steps": 40,
+          "checkpoint_tiers": [
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 2,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "online_spectrum",
+          "spectral_output_bytes": 48,
+          "spectral_workspace_bytes": 2000,
+          "spectral_settings_bytes": 8,
+          "spectral_reservation_bytes": 2104,
+          "spectral_block_size": 5,
+          "forward_seconds": 0.00962910009548068,
+          "source_waveform_shape": [
+            18,
+            4
+          ],
+          "source_waveform_complex": true,
+          "source_parameter_elements": 8334,
+          "source_term_layout": [
+            {
+              "source_id": "eplane",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hplane",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            },
+            {
+              "source_id": "epoint",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hpoint",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            }
+          ],
+          "source_reduction": "one support and one row at a time",
+          "backward_seconds": 0.03352169971913099
+        }
+      },
+      {
+        "complex_fields": true,
+        "complex_waveforms": true,
+        "observation": "plane",
+        "errors": {
+          "fields": {
+            "relative_l2": 1.938611058898116e-07,
+            "max_abs": 7.078051567077637e-08
+          },
+          "epsilon_vjp": {
+            "relative_l2": 4.7392402980660523e-07,
+            "max_abs": 1.7462298274040222e-10
+          },
+          "waveform_vjp": {
+            "relative_l2": 2.794596783508176e-07,
+            "max_abs": 4.272933955101096e-08
+          }
+        },
+        "report": {
+          "experimental": true,
+          "adjoint": "discrete Yee/CPML",
+          "higher_order": false,
+          "spatial_streaming": false,
+          "full_time_autograd": false,
+          "steps": 18,
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA complex transpose",
+          "checkpoint_transfers": "sync",
+          "memory_reservation_bytes": 29925427,
+          "workspace_reservation_bytes": 757472,
+          "workspace_model": "fused_cuda_allocations",
+          "workspace_components_bytes": {
+            "primal_and_adjoint_fields": 262080,
+            "primal_and_adjoint_cpml": 194400,
+            "replay_and_conversion_allowance": 195840,
+            "dielectric_coefficients_and_gradient": 98280,
+            "boundary_coefficients": 488,
+            "source_profiles": 672,
+            "source_injection": 672,
+            "observation_gathers": 5040
+          },
+          "allocation_headroom_bytes": 9414171,
+          "device_checkpoint_reservation_bytes": 391680,
+          "device_staging_reservation_bytes": 0,
+          "spectral_library_reservation_bytes": 19136512,
+          "history_reservation_bytes": 88888,
+          "output_history_bytes": 0,
+          "source_history_bytes": 576,
+          "observation_index_bytes": 3360,
+          "observer_layout_bytes": 0,
+          "observer_preparation_bytes": 0,
+          "material_packing_reservation_bytes": 133344,
+          "restart_state_bytes": 195840,
+          "host_checkpoint_reservation_bytes": 0,
+          "disk_checkpoint_reservation_bytes": 0,
+          "host_source_validation_bytes": 0,
+          "host_reservation_bytes": 0,
+          "gpu_reservation_bytes": 29925427,
+          "budgeted_resident": false,
+          "restart_bytes": 195840,
+          "checkpoint_capacity": 2,
+          "checkpoint_storage": "device",
+          "peak_checkpoints": 2,
+          "checkpoint_bytes_written": 1762560,
+          "checkpoint_bytes_read": 2741760,
+          "checkpoint_io_seconds": 0.005389801692217588,
+          "replayed_steps": 40,
+          "checkpoint_tiers": [
+            "device",
+            "device"
+          ],
+          "peak_checkpoints_by_tier": {
+            "device": 2,
+            "host": 0,
+            "disk": 0
+          },
+          "observation_storage": "online_spectrum",
+          "spectral_output_bytes": 3360,
+          "spectral_workspace_bytes": 61616,
+          "spectral_settings_bytes": 8,
+          "spectral_reservation_bytes": 88312,
+          "plane_workspace_reservation_bytes": 19968,
+          "plane_output_bytes": 576,
+          "spectral_block_size": 5,
+          "forward_seconds": 0.016706400085240602,
+          "source_waveform_shape": [
+            18,
+            4
+          ],
+          "source_waveform_complex": true,
+          "source_parameter_elements": 8334,
+          "source_term_layout": [
+            {
+              "source_id": "eplane",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hplane",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            },
+            {
+              "source_id": "epoint",
+              "component": "Ex",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.0
+            },
+            {
+              "source_id": "hpoint",
+              "component": "Hy",
+              "ordinal": 0,
+              "polarization_weight": 1.0,
+              "time_offset_steps": 0.5
+            }
+          ],
+          "source_reduction": "one support and one row at a time",
+          "backward_seconds": 0.0356844998896122
+        }
+      }
+    ],
+    "source_sha256": {
+      "__init__.py": "1b3e5e4b989fafe8401804621e339bfc7cddcae4a49fb46fbf4925b7dc8e2a1c",
+      "adjoint_batch.py": "176a46949d1bcbaa8e391e961268c682279f810f22fc56081421bf031f1f90cf",
+      "adjoint_memory.py": "3a7cff0062a8b7f84ab88b3f36a465c67b61ef1d379825f387064f8f5aec23a0",
+      "adjoint_planes.py": "edbb64361a748d1f04f852d2ddd5de341aa32f59123cd71a539ff855679bac68",
+      "adjoint_spectrum.py": "08dcc8a81b04fec8a14f43e2e8b1006d1f5da89e5755aa70fd5a75fd0e15173f",
+      "anisotropy.py": "edd41cfebba16d681e8f41e026898ac6da6cb0b54b37afc291a9fa6db348779a",
+      "batch.py": "5c680b62fedbb4a681ba616d04aaa0ac6784b462d13b178113d6aef5a70a5f3d",
+      "boundaries.py": "43ed7dc65066160cd7519cff73a391d612ae61102e08b195976f98b3b43581c3",
+      "cli.py": "7a8b7ad893e9dc5fe6b3ea3cd87635f7df395d839a3c2c43dcb7462a426b54ff",
+      "convergence.py": "30343476a2d2ec454a2d0af981998c96177ff3204257d6e886b7a891ee612cbe",
+      "cuda_adjoint.py": "0be7744c399e4aed97b8f00f15d7a4649a28f842097ad2309bf262feb6a8ff5d",
+      "cuda_batch.py": "a8d940341e2d4593d5258e5b86ca9745dbd13605161cf494682fe7185ed3a5ea",
+      "cuda_bootstrap.py": "b2b6a06f2bf25f5a28d1737dbd488c1aafd3be0e44c58ec54243b735cb5d3e4c",
+      "cuda_complex.py": "c9acabe748ab6629a64276b2d29f1f4617aaa6fcb9a9cc917f0251afe0c1ca49",
+      "cuda_complex_adjoint.py": "738d1ddb5900301d520e7ab1a3844dd3adfb8fc0770c28278c5fdde888d818fb",
+      "cuda_diagnostics.py": "e4b007fe4d721fa29e7955a5403040003c27c0a32df6747a6966df97b6b29eae",
+      "cuda_dispersive_adjoint.py": "d54f9054eb1f92810e8cef6b4da495fbb4715525637ea4512c64b9b6d5b22072",
+      "cuda_graph.py": "791feb844c4e833550fb4632c351d81f4d7183a5ab73bbd9efa98ddd294f1825",
+      "cuda_kernels.py": "634e16f3979ef9c8aff925b8b30b3bad4433f969118dbe4f39ad7aa9ae6db1b9",
+      "cuda_memory.py": "fcb115a9c771935a89ea25e4fa66f62a26f6180795bfd1f3a1935b9529613821",
+      "cuda_monitors.py": "2eb755e8e51f2e3339fcbe8e469d8bcfc8835e398c6c62bc08c037b8d7008976",
+      "cuda_subpixel.py": "66858d156b8569d778d0b45e14aed5dd23d10818aadeac62d0365a7173f7bcaa",
+      "cuda_tfsf.py": "30459e4bd250cd18fdb8797ff32b864012f21d837ca303accd7ad8e3d6ce5b6f",
+      "density_layer.py": "b85dda493e26f6406f2d33633886b0f70f95a2705ea45ed7665c9be1c64dad36",
+      "design.py": "ded601ec4770d78c390e890fb5b848150a426be307423709bb042ef3bb167699",
+      "design_parameterization.py": "f7b1f860d2ab16c2aa9d05056823230ddbebd301945a1b3157ed914d91b7fff4",
+      "design_service.py": "21d9d6c045758603dcff5f3caba12fdcc82add0ae782d5843eefa8324d4a27d0",
+      "detector_allocation.py": "4040a34d9852906c7376eb3b13f5864714f2ae12cb59dd448a135cf91d02a239",
+      "differentiable.py": "98637a6eb8e20d10e18df2460f8813dc7276fc24dd60e7970da103f2dac99a3a",
+      "differentiable_geometry.py": "3ae26cc994e3974bdf52db286803706bd92e4b4a1593d568326d52fa3a0b8012",
+      "dispersive_adjoint.py": "1da1d8759532f377f76229bbbc71c90ebd3140b5136f0707d07138ce212b2589",
+      "domain_decomposition.py": "ededcc62951f223a7c729a622028a96daa08e5e68a954b0c382c904cab17a1ad",
+      "electron_model.py": "e3e7f65547d797d75f9aaa8513b000a216bed82d2d994d65aced7a8035b5ead4",
+      "endpoint_native.py": "5a9a91dcf442c4a88d79f70d00ddbbfedabdba8240f3016bc1fdde1c8d7d1b55",
+      "endpoint_project.py": "7a215c22591b944df6778893988f820fd9f6c6e48de9184b4784c9c499791eb6",
+      "execution_tuning.py": "a08810c911a6774fcf78e159e17c6ec85a8c703d86d0461b0b4cd7ed11633d63",
+      "farfield_api.py": "86e4a2d7689263133bafe476631d8079a0074c283944c528f25481eace37fef8",
+      "field_monitors.py": "23e73d2b971af0dabcf6649e0cfc3d3d4049ee9187f06ffebb50c9e8d5eb25af",
+      "fsp.py": "028bc3265fbea9a7bc6a8cb14e384d5121f3b5440455af1eb1340c1fd74bc395",
+      "fsp_binary.py": "21f14568d781c46848219ba6de00c6b94fb8dd245dcda0ab73440a928f886041",
+      "fsp_geometry.py": "0a526dfbba23b6d58c0af4a43faf3e4a0740a231b772130b7cf82ec23c899e73",
+      "fsp_instruments.py": "a3353960dfd9eab2156785c097b1242016e6794499ae1e219cd3d117e436294a",
+      "fsp_native.py": "57548ce934aba38935c58e731b154503b0e9d26efdc2565381eec03d548a1151",
+      "fsp_objects.py": "f95cbbc95cb48a2c8055cbad391cc0acf477acdf669775db8cffc1cb5a704c58",
+      "fsp_service.py": "3fdc3f1570e8aec80f9b78b75f4e3bdbc07717f79ada5e1df4409dc91e784d24",
+      "fsp_settings.py": "b548c77190055e6133f03e219b43353e63e7566e97dc60b300756f171f691486",
+      "gds.py": "bdac9059581e6b0eaf0c2082182ff7af1230296cd07e98a0f7bdbb3805dbf6b3",
+      "gds_ports.py": "e27b3583582447326a625267d692dfb8b1e7a0de9d2146862e5d7364d0616692",
+      "gds_service.py": "6438587b164fe97ccabdcea5c7a3964e1d2a3b85756d65c6f5b71f7faa6b6eb7",
+      "geometry.py": "b31b863c3d6b085a4b019e064edf8073c3c50c8b926a31e4eb5e80738ba51c1d",
+      "grouped_batch.py": "cf6ac6d7ca893220f4c75915b5f3350a0e1c6d4b4b6002e76ddf5e89d8fc6e59",
+      "information.py": "0f8f71f093a7b9aeb10b92499e069416a9c494d2cfafa85252ddc421e721ff26",
+      "injection.py": "3c1b41a678c6356e9f08acebc3f6411693535b4111b815fa6b3ce33966961552",
+      "material_fit.py": "e0168888ab4a557e1e1cdd19b83e948fd1b468b3b3bc529a8e4f54c5ee9e58fe",
+      "materials.py": "dfda96462a54794e6b1e52f91080d890158b0e9f23dd7c2338f7b8a089441526",
+      "memory_profile.py": "fdcbd0eb8126974c61304754cbd22d0c9bd1f921f3234e8f3adbb28c6ea444bf",
+      "mesh.py": "aa7db979920db1aeefb7178efbf717c0ced61b1fdbca17daed44cb52fb609217",
+      "mode_injection.py": "24b669b14a592ec2d4d4a3b96fdedde38e88af232ad576bb825a3629b9e9b714",
+      "mode_network.py": "82633341904923e4ad7af0a942f567418d63537da22669c843b81a490f913155",
+      "mode_network_project.py": "33e089340910f7ea087f3f5b7caa229047502782acc91d3537a36ed5cf17ea4a",
+      "mode_network_service.py": "c629eb6487ab66c783c5d1d6bde01782c8a79baea8f8354248326e09f26d2b6d",
+      "mode_network_worker.py": "0c624244a07e88105ea3aa267d662562ec155f5a9674e30ab1b7c2703915a267",
+      "mode_ports.py": "9232e10c2a061114da2e996d7dd9be97179b18429689ccdae641f8e8c1855dbc",
+      "models.py": "ca00322e4dbd98397e02e46c752fb0d7a1fe355eb0c6be7e0c5b5d42ccfaf3b9",
+      "open_mode_injection.py": "2bd4f2439fa95ce871038b17eb699b988098d4b4bd0ced47dca91bd298837480",
+      "open_mode_operators.py": "00e24ae794bc18474b97a47fee361210c2a1f686feda529c91da79bc42fbee58",
+      "open_mode_ports.py": "6ba1cd619e5b4dc229ccaef277900730716710533b31c464af1c86e87779e284",
+      "optical_data.py": "51c152c1195033d7b61ba99b61e77149fe13bbffcaf17b417319e4f7624b7307",
+      "periodic_adjoint.py": "f9f582562231b8dbc693786221b07e77b1dfd67fba77ed903b9aafe238e5d1af",
+      "periodic_design.py": "1d09762ee98a9186ac217464047f8af96926ba9d8e5e6a4e94bc9e99d1228532",
+      "periodic_response.py": "8d8d324751ac5987622e86b84b188e5f65cfb612577bc59189462339c9d520f7",
+      "plane_execution.py": "2f428067f1113b087ea0f21f4cdc765c5df532ecce77c146b9e759715dd1636d",
+      "pmc_cpml.py": "fc38199b7551203460cec9a5bb881c3650bc8f58994c0ead5e1905a2e37a33d2",
+      "pmc_cpml_cuda.py": "c639f98dd3f029316a48b38a0e331a5f660d25c415f0ee26926da0a5032747c6",
+      "pmc_cuda.py": "d152b52082aa9d7e9d1952ea55a4ce70015448d5cc73a1cf8923b0b1eaf387e3",
+      "pmc_reference.py": "d9662e9607fce57ab8d4502a20b075ae6434d43926fca8a60de6f62d2ec8122c",
+      "pmc_simulation.py": "f9dc70304b7e18964b0e3393dc7aeec62f972ef0eeefe48770ea025754c8b3cf",
+      "polarization.py": "225f8bf7d2be2a6111ee6d59c9498eb3dcd799e64237de7ff1957b8e0c12543e",
+      "priorities.py": "a0ea510918a2fec256a931c50b50a2b811328511a42fd808593589114f478726",
+      "pupil_response.py": "c7645bae6200a6f41a1e8b555fa8fac8a949a2c6bfec8222400521868ea936c4",
+      "radiation.py": "2323202c43602a81f2431ffdd207e7eec80db9987495c9235b658b904811c7cd",
+      "radiation_api.py": "0034effd54114410ae8c8d8192b905d2fedc0746f9d1c4e1a701bebd5e9d5514",
+      "radiation_box.py": "09892061951b9500a97f8d78065ec96ae68ea0f1384be9d69059a405a3e8833f",
+      "radiation_box_io.py": "e0319343f2fc70a8377ea0ffd85644d8930e88b5baf21081e275c136e89ec95b",
+      "radiation_io.py": "d5808043ae410cc68f1f0930f38b0f0dc4e7a7b49715fa10114a7775402604b9",
+      "recomputed_batch.py": "7547c431d6fb958f8ae1f390606f82a391647e9bdcd518703404af04adae8378",
+      "recorded_execution.py": "412bd35b7d4a3c3ba3dd2a11ec5630c17fef1df929efdfd6fcd520abc8c00d34",
+      "reference_cache.py": "89f5dea495dc0b785f1ad8a7ea888cc778e10b904403bb5649c1d3ddcdb40244",
+      "response_cache.py": "15c5ddc802cd71613cef28c18d3c09256447d657dfe3c55b1c4d4b09954191b1",
+      "reversible.py": "74f777f57f90d88ec4ae7fbb553cf42c3822b9add6201e0b4803b1ba4a8fa9d1",
+      "reversible_cpml.py": "829f3db5b8a50c3dbd8d42b6e70668ffff43e35131f1c5738b479f7876457f9f",
+      "reversible_cpml_kernels.py": "9f25e610bec07c07c500485c9ba1641f41518e096dbdf815f621aeb51d9b3183",
+      "reversible_cpml_memory.py": "c63d545110da4f1f94bd0fc249ce87658e33536abdfd9cec8f9adc507c310776",
+      "reversible_cpml_planes.py": "6f09bcf2a17b6ac5bbf9a4730372eedfc0b5c7cf87f78ed83df5040abdbae59a",
+      "reversible_memory.py": "59e602e443c279f40662d169359b3bfe38dfc3f321925125a57e8f39099e4222",
+      "reversible_trace.py": "65f8fd266a6beb7f293c07c22498573d846fa5cc96dca8f358995d64e73e9cd7",
+      "run_control.py": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3",
+      "server.py": "abff08ad9e1db99043852613d7d9d0687052ceb25a6ac952b26882710c884824",
+      "session.py": "5da2c11d6001397fdf97062f01b4f07fb47d165c8b0cd261a1ef565555f7a01e",
+      "solver.py": "39dbd26ac73f06e3d966f8cbf4267175c605a593fba68765a49c74c8b33e4f13",
+      "source_adjoint.py": "e268b0f07fcccfc1e4e357be0511fce270582e8e11f4554ba013e975f1fc888f",
+      "source_adjoint_cuda.py": "07ba9d25a9cd55ee12a114925b93420b10a83c8a7a3fc8006810f75163ef9dc3",
+      "source_parameters.py": "8a31e5bec89c09f8118ca5c7910c17627cf366ffc96f1fc373413d2314fb3f2e",
+      "source_preview.py": "041ba4db6e9d07b3af565719933fb1265c4295768bc542e89876057b2c7797d3",
+      "spacetime.py": "70346bbab98b2e944f08975a85d4487b73b05efffa4027b29856ff5c7a51114a",
+      "spectra.py": "21c011b26b6209fd147f4b70edfd1722cd5aaf14917f42a0997be40e37d95527",
+      "staging.py": "a4018d7a5ef26082ebf14b8354612710c02a72e3910192519126ba17531b4d9f",
+      "state_store.py": "66dfe4a8ca94034630fdcbea0076768aed6658cb9add9aecf88b4294ac35c9f6",
+      "streamed.py": "9c95619d67bb00ae485ac4420d4ce46e55bd291cd03e83a79c3f06dc3c485e54",
+      "streamed_cost.py": "76956e288bc94d07c439d1f5ed11f004c6038c5bbd04662a805322924d9fea94",
+      "streamed_density.py": "26fc263fddb55180f2a8d9ba0db29b63a47de869a0e7d0ec4dc4098d798f98a8",
+      "streamed_dispersive.py": "2800349e46b1c49f5ee61956c649814125efc43559b835bb096ec76f3d96a159",
+      "streamed_geometry.py": "95702f69f2f4d56646af970560ae8a792fe3e3c5693d9e2770dd3e36821cdafe",
+      "streamed_tuning.py": "c8bbc74590f4bb4cbc005b0b3b4913d8218f35e20329703b2f88d74174243af1",
+      "subpixel.py": "b066387a644d7fced60ba4801e717fe2a1a0a2aa3289902e71561925f20d0fca",
+      "subpixel_geometry.py": "9f2303105b3fc1bbdd93409e3272b700868d044685efbc7b6b3ed9bb2975324c",
+      "tensor_batch.py": "5fcd830c68f1698c4beb030baab4511a97081c39fa53166e337a30e172b467e4",
+      "tensor_native.py": "14ac330d2e4765b6a7ff5118af24fb73e14fb86c2d218d151b50487aa89af836",
+      "tensor_packet.py": "26ecfd0b04eb0641df02c8632eb361d1ddfb834f3628e3f14d0ae6fc1639ffe0",
+      "tensor_project.py": "792372ff221b03d1dd58b8015dcd38a66c195a55503de23a307d4c395945278e",
+      "tfsf.py": "bbbaf2aa055d6425a67f2b826d929791a38fa26e8a2b914a42dcee0907222218",
+      "tile_workspace.py": "823d2f1bbcc13dc805a2159057dc377d75148537894db541313ad38e7f73a90c",
+      "tuning.py": "7d722ef872d2c8cc1db479b4c3edfa0dadd6466732b88f738ad42bcc658c22fa",
+      "waveforms.py": "654333e8afa4da1310afc714a1c15ad60663ef21f3533f4b55c1a7489a0809b9"
+    },
+    "wall_seconds": 2.8018449996598065
+  },
+  "source_result_sha256": "2a880d3e8cdc7a6dbb669de20b00900314ea4a72b973c0a91c46125236f7d88b",
+  "cuda_nondefault_stream": {
+    "passed": 3,
+    "junit_sha256": "5ba69253a8fc05da3f07fca7d8a69d917f41ea41daf819488d7e2ddd62a634a1"
+  },
+  "cpu_focused": {
+    "source_cases_passed": 10,
+    "waveform_helper_cases_passed": 20,
+    "cuda_protocol_cases_passed": 2,
+    "provenance": "Focused author runs, final full CI recorded separately",
+    "vector_integration_junit_sha256": "59e98bab777e8eff41e32ed9d8a9528835458d6583109e089ebe13d74c528b4f"
+  },
+  "example": {
+    "scope": "Fixed positions and profiles, joint first-order temporal/material derivatives",
+    "device": "cuda",
+    "precision": "float32",
+    "term_layout": [
+      {
+        "source_id": "electric",
+        "component": "Ex",
+        "ordinal": 0,
+        "polarization_weight": 1.0,
+        "time_offset_steps": 0.0
+      },
+      {
+        "source_id": "magnetic",
+        "component": "Hy",
+        "ordinal": 0,
+        "polarization_weight": 1.0,
+        "time_offset_steps": 0.5
+      }
+    ],
+    "iterations": [
+      {
+        "iteration": 0,
+        "loss": 9.172529189527268e-07,
+        "amplitude": [
+          0.019999999552965164,
+          0.009999999776482582
+        ],
+        "phase_rad": [
+          0.0,
+          0.4000000059604645
+        ],
+        "material_parameter": 0.20000000298023224,
+        "amplitude_gradient": [
+          8.627992428955622e-06,
+          -8.037007319217082e-06
+        ],
+        "phase_gradient": [
+          2.308269557715903e-07,
+          -1.155699251853548e-07
+        ],
+        "material_gradient": -8.751195679224111e-08
+      },
+      {
+        "iteration": 1,
+        "loss": 8.178505481737375e-07,
+        "amplitude": [
+          0.010011577047407627,
+          0.019987571984529495
+        ],
+        "phase_rad": [
+          -0.009584764018654823,
+          0.4092036485671997
+        ],
+        "material_parameter": 0.20897449553012848,
+        "amplitude_gradient": [
+          2.8097513222746784e-06,
+          9.080883955903118e-08
+        ],
+        "phase_gradient": [
+          3.420761629513436e-08,
+          -3.7877475733694155e-07
+        ],
+        "material_gradient": 9.190656413693432e-08
+      },
+      {
+        "iteration": 2,
+        "loss": 8.27797293823096e-07,
+        "amplitude": [
+          0.0013488724362105131,
+          0.026591986417770386
+        ],
+        "phase_rad": [
+          -0.016863077878952026,
+          0.4179632067680359
+        ],
+        "material_parameter": 0.2082807868719101,
+        "amplitude_gradient": [
+          -2.8326030587777495e-06,
+          4.239659119775752e-06
+        ],
+        "phase_gradient": [
+          -2.401391085982141e-09,
+          -6.669561116723344e-07
+        ],
+        "material_gradient": 1.628506396400553e-07
+      }
+    ]
+  },
+  "max_relative_l2": {
+    "fields": 4.980439164879851e-07,
+    "epsilon_vjp": 8.506864682243257e-07,
+    "waveform_vjp": 8.549389672024719e-07
+  },
+  "limitations": [
+    "Fixed positions and profiles",
+    "Resident dielectric only in this API",
+    "No all-physics parity or performance claim",
+    "CR application excluded by user"
+  ],
+  "installed_wheel": {
+    "wheel_sha256": "3afe6ed10748ec84623ce94d43e2e7ab6579cf349f469098db3a9779d0d55fe3",
+    "verified_files": [
+      {
+        "path": "torchfdtd/__init__.py",
+        "sha256": "1b3e5e4b989fafe8401804621e339bfc7cddcae4a49fb46fbf4925b7dc8e2a1c"
+      },
+      {
+        "path": "torchfdtd/adjoint_batch.py",
+        "sha256": "176a46949d1bcbaa8e391e961268c682279f810f22fc56081421bf031f1f90cf"
+      },
+      {
+        "path": "torchfdtd/adjoint_memory.py",
+        "sha256": "3a7cff0062a8b7f84ab88b3f36a465c67b61ef1d379825f387064f8f5aec23a0"
+      },
+      {
+        "path": "torchfdtd/adjoint_planes.py",
+        "sha256": "edbb64361a748d1f04f852d2ddd5de341aa32f59123cd71a539ff855679bac68"
+      },
+      {
+        "path": "torchfdtd/adjoint_spectrum.py",
+        "sha256": "08dcc8a81b04fec8a14f43e2e8b1006d1f5da89e5755aa70fd5a75fd0e15173f"
+      },
+      {
+        "path": "torchfdtd/anisotropy.py",
+        "sha256": "edd41cfebba16d681e8f41e026898ac6da6cb0b54b37afc291a9fa6db348779a"
+      },
+      {
+        "path": "torchfdtd/batch.py",
+        "sha256": "5c680b62fedbb4a681ba616d04aaa0ac6784b462d13b178113d6aef5a70a5f3d"
+      },
+      {
+        "path": "torchfdtd/boundaries.py",
+        "sha256": "43ed7dc65066160cd7519cff73a391d612ae61102e08b195976f98b3b43581c3"
+      },
+      {
+        "path": "torchfdtd/cli.py",
+        "sha256": "7a8b7ad893e9dc5fe6b3ea3cd87635f7df395d839a3c2c43dcb7462a426b54ff"
+      },
+      {
+        "path": "torchfdtd/convergence.py",
+        "sha256": "30343476a2d2ec454a2d0af981998c96177ff3204257d6e886b7a891ee612cbe"
+      },
+      {
+        "path": "torchfdtd/cuda_adjoint.py",
+        "sha256": "0be7744c399e4aed97b8f00f15d7a4649a28f842097ad2309bf262feb6a8ff5d"
+      },
+      {
+        "path": "torchfdtd/cuda_batch.py",
+        "sha256": "a8d940341e2d4593d5258e5b86ca9745dbd13605161cf494682fe7185ed3a5ea"
+      },
+      {
+        "path": "torchfdtd/cuda_bootstrap.py",
+        "sha256": "b2b6a06f2bf25f5a28d1737dbd488c1aafd3be0e44c58ec54243b735cb5d3e4c"
+      },
+      {
+        "path": "torchfdtd/cuda_complex.py",
+        "sha256": "c9acabe748ab6629a64276b2d29f1f4617aaa6fcb9a9cc917f0251afe0c1ca49"
+      },
+      {
+        "path": "torchfdtd/cuda_complex_adjoint.py",
+        "sha256": "738d1ddb5900301d520e7ab1a3844dd3adfb8fc0770c28278c5fdde888d818fb"
+      },
+      {
+        "path": "torchfdtd/cuda_diagnostics.py",
+        "sha256": "e4b007fe4d721fa29e7955a5403040003c27c0a32df6747a6966df97b6b29eae"
+      },
+      {
+        "path": "torchfdtd/cuda_dispersive_adjoint.py",
+        "sha256": "d54f9054eb1f92810e8cef6b4da495fbb4715525637ea4512c64b9b6d5b22072"
+      },
+      {
+        "path": "torchfdtd/cuda_graph.py",
+        "sha256": "791feb844c4e833550fb4632c351d81f4d7183a5ab73bbd9efa98ddd294f1825"
+      },
+      {
+        "path": "torchfdtd/cuda_kernels.py",
+        "sha256": "634e16f3979ef9c8aff925b8b30b3bad4433f969118dbe4f39ad7aa9ae6db1b9"
+      },
+      {
+        "path": "torchfdtd/cuda_memory.py",
+        "sha256": "fcb115a9c771935a89ea25e4fa66f62a26f6180795bfd1f3a1935b9529613821"
+      },
+      {
+        "path": "torchfdtd/cuda_monitors.py",
+        "sha256": "2eb755e8e51f2e3339fcbe8e469d8bcfc8835e398c6c62bc08c037b8d7008976"
+      },
+      {
+        "path": "torchfdtd/cuda_subpixel.py",
+        "sha256": "66858d156b8569d778d0b45e14aed5dd23d10818aadeac62d0365a7173f7bcaa"
+      },
+      {
+        "path": "torchfdtd/cuda_tfsf.py",
+        "sha256": "30459e4bd250cd18fdb8797ff32b864012f21d837ca303accd7ad8e3d6ce5b6f"
+      },
+      {
+        "path": "torchfdtd/density_layer.py",
+        "sha256": "b85dda493e26f6406f2d33633886b0f70f95a2705ea45ed7665c9be1c64dad36"
+      },
+      {
+        "path": "torchfdtd/design.py",
+        "sha256": "ded601ec4770d78c390e890fb5b848150a426be307423709bb042ef3bb167699"
+      },
+      {
+        "path": "torchfdtd/design_parameterization.py",
+        "sha256": "f7b1f860d2ab16c2aa9d05056823230ddbebd301945a1b3157ed914d91b7fff4"
+      },
+      {
+        "path": "torchfdtd/design_service.py",
+        "sha256": "21d9d6c045758603dcff5f3caba12fdcc82add0ae782d5843eefa8324d4a27d0"
+      },
+      {
+        "path": "torchfdtd/detector_allocation.py",
+        "sha256": "4040a34d9852906c7376eb3b13f5864714f2ae12cb59dd448a135cf91d02a239"
+      },
+      {
+        "path": "torchfdtd/differentiable.py",
+        "sha256": "98637a6eb8e20d10e18df2460f8813dc7276fc24dd60e7970da103f2dac99a3a"
+      },
+      {
+        "path": "torchfdtd/differentiable_geometry.py",
+        "sha256": "3ae26cc994e3974bdf52db286803706bd92e4b4a1593d568326d52fa3a0b8012"
+      },
+      {
+        "path": "torchfdtd/dispersive_adjoint.py",
+        "sha256": "1da1d8759532f377f76229bbbc71c90ebd3140b5136f0707d07138ce212b2589"
+      },
+      {
+        "path": "torchfdtd/domain_decomposition.py",
+        "sha256": "ededcc62951f223a7c729a622028a96daa08e5e68a954b0c382c904cab17a1ad"
+      },
+      {
+        "path": "torchfdtd/electron_model.py",
+        "sha256": "e3e7f65547d797d75f9aaa8513b000a216bed82d2d994d65aced7a8035b5ead4"
+      },
+      {
+        "path": "torchfdtd/endpoint_native.py",
+        "sha256": "5a9a91dcf442c4a88d79f70d00ddbbfedabdba8240f3016bc1fdde1c8d7d1b55"
+      },
+      {
+        "path": "torchfdtd/endpoint_project.py",
+        "sha256": "7a215c22591b944df6778893988f820fd9f6c6e48de9184b4784c9c499791eb6"
+      },
+      {
+        "path": "torchfdtd/execution_tuning.py",
+        "sha256": "a08810c911a6774fcf78e159e17c6ec85a8c703d86d0461b0b4cd7ed11633d63"
+      },
+      {
+        "path": "torchfdtd/farfield_api.py",
+        "sha256": "86e4a2d7689263133bafe476631d8079a0074c283944c528f25481eace37fef8"
+      },
+      {
+        "path": "torchfdtd/feature_inventory.json",
+        "sha256": "85433ab0ab7409db0f16b6d0dfd10d4771508a90502b41333d697a4725cdf27a"
+      },
+      {
+        "path": "torchfdtd/field_monitors.py",
+        "sha256": "23e73d2b971af0dabcf6649e0cfc3d3d4049ee9187f06ffebb50c9e8d5eb25af"
+      },
+      {
+        "path": "torchfdtd/fsp.py",
+        "sha256": "028bc3265fbea9a7bc6a8cb14e384d5121f3b5440455af1eb1340c1fd74bc395"
+      },
+      {
+        "path": "torchfdtd/fsp_binary.py",
+        "sha256": "21f14568d781c46848219ba6de00c6b94fb8dd245dcda0ab73440a928f886041"
+      },
+      {
+        "path": "torchfdtd/fsp_geometry.py",
+        "sha256": "0a526dfbba23b6d58c0af4a43faf3e4a0740a231b772130b7cf82ec23c899e73"
+      },
+      {
+        "path": "torchfdtd/fsp_instruments.py",
+        "sha256": "a3353960dfd9eab2156785c097b1242016e6794499ae1e219cd3d117e436294a"
+      },
+      {
+        "path": "torchfdtd/fsp_native.py",
+        "sha256": "57548ce934aba38935c58e731b154503b0e9d26efdc2565381eec03d548a1151"
+      },
+      {
+        "path": "torchfdtd/fsp_objects.py",
+        "sha256": "f95cbbc95cb48a2c8055cbad391cc0acf477acdf669775db8cffc1cb5a704c58"
+      },
+      {
+        "path": "torchfdtd/fsp_service.py",
+        "sha256": "3fdc3f1570e8aec80f9b78b75f4e3bdbc07717f79ada5e1df4409dc91e784d24"
+      },
+      {
+        "path": "torchfdtd/fsp_settings.py",
+        "sha256": "b548c77190055e6133f03e219b43353e63e7566e97dc60b300756f171f691486"
+      },
+      {
+        "path": "torchfdtd/gds.py",
+        "sha256": "bdac9059581e6b0eaf0c2082182ff7af1230296cd07e98a0f7bdbb3805dbf6b3"
+      },
+      {
+        "path": "torchfdtd/gds_ports.py",
+        "sha256": "e27b3583582447326a625267d692dfb8b1e7a0de9d2146862e5d7364d0616692"
+      },
+      {
+        "path": "torchfdtd/gds_service.py",
+        "sha256": "6438587b164fe97ccabdcea5c7a3964e1d2a3b85756d65c6f5b71f7faa6b6eb7"
+      },
+      {
+        "path": "torchfdtd/geometry.py",
+        "sha256": "b31b863c3d6b085a4b019e064edf8073c3c50c8b926a31e4eb5e80738ba51c1d"
+      },
+      {
+        "path": "torchfdtd/grouped_batch.py",
+        "sha256": "cf6ac6d7ca893220f4c75915b5f3350a0e1c6d4b4b6002e76ddf5e89d8fc6e59"
+      },
+      {
+        "path": "torchfdtd/information.py",
+        "sha256": "0f8f71f093a7b9aeb10b92499e069416a9c494d2cfafa85252ddc421e721ff26"
+      },
+      {
+        "path": "torchfdtd/injection.py",
+        "sha256": "3c1b41a678c6356e9f08acebc3f6411693535b4111b815fa6b3ce33966961552"
+      },
+      {
+        "path": "torchfdtd/material_fit.py",
+        "sha256": "e0168888ab4a557e1e1cdd19b83e948fd1b468b3b3bc529a8e4f54c5ee9e58fe"
+      },
+      {
+        "path": "torchfdtd/materials.py",
+        "sha256": "dfda96462a54794e6b1e52f91080d890158b0e9f23dd7c2338f7b8a089441526"
+      },
+      {
+        "path": "torchfdtd/memory_profile.py",
+        "sha256": "fdcbd0eb8126974c61304754cbd22d0c9bd1f921f3234e8f3adbb28c6ea444bf"
+      },
+      {
+        "path": "torchfdtd/mesh.py",
+        "sha256": "aa7db979920db1aeefb7178efbf717c0ced61b1fdbca17daed44cb52fb609217"
+      },
+      {
+        "path": "torchfdtd/mode_injection.py",
+        "sha256": "24b669b14a592ec2d4d4a3b96fdedde38e88af232ad576bb825a3629b9e9b714"
+      },
+      {
+        "path": "torchfdtd/mode_network.py",
+        "sha256": "82633341904923e4ad7af0a942f567418d63537da22669c843b81a490f913155"
+      },
+      {
+        "path": "torchfdtd/mode_network_project.py",
+        "sha256": "33e089340910f7ea087f3f5b7caa229047502782acc91d3537a36ed5cf17ea4a"
+      },
+      {
+        "path": "torchfdtd/mode_network_service.py",
+        "sha256": "c629eb6487ab66c783c5d1d6bde01782c8a79baea8f8354248326e09f26d2b6d"
+      },
+      {
+        "path": "torchfdtd/mode_network_worker.py",
+        "sha256": "0c624244a07e88105ea3aa267d662562ec155f5a9674e30ab1b7c2703915a267"
+      },
+      {
+        "path": "torchfdtd/mode_ports.py",
+        "sha256": "9232e10c2a061114da2e996d7dd9be97179b18429689ccdae641f8e8c1855dbc"
+      },
+      {
+        "path": "torchfdtd/models.py",
+        "sha256": "ca00322e4dbd98397e02e46c752fb0d7a1fe355eb0c6be7e0c5b5d42ccfaf3b9"
+      },
+      {
+        "path": "torchfdtd/open_mode_injection.py",
+        "sha256": "2bd4f2439fa95ce871038b17eb699b988098d4b4bd0ced47dca91bd298837480"
+      },
+      {
+        "path": "torchfdtd/open_mode_operators.py",
+        "sha256": "00e24ae794bc18474b97a47fee361210c2a1f686feda529c91da79bc42fbee58"
+      },
+      {
+        "path": "torchfdtd/open_mode_ports.py",
+        "sha256": "6ba1cd619e5b4dc229ccaef277900730716710533b31c464af1c86e87779e284"
+      },
+      {
+        "path": "torchfdtd/optical_data.py",
+        "sha256": "51c152c1195033d7b61ba99b61e77149fe13bbffcaf17b417319e4f7624b7307"
+      },
+      {
+        "path": "torchfdtd/periodic_adjoint.py",
+        "sha256": "f9f582562231b8dbc693786221b07e77b1dfd67fba77ed903b9aafe238e5d1af"
+      },
+      {
+        "path": "torchfdtd/periodic_design.py",
+        "sha256": "1d09762ee98a9186ac217464047f8af96926ba9d8e5e6a4e94bc9e99d1228532"
+      },
+      {
+        "path": "torchfdtd/periodic_response.py",
+        "sha256": "8d8d324751ac5987622e86b84b188e5f65cfb612577bc59189462339c9d520f7"
+      },
+      {
+        "path": "torchfdtd/plane_execution.py",
+        "sha256": "2f428067f1113b087ea0f21f4cdc765c5df532ecce77c146b9e759715dd1636d"
+      },
+      {
+        "path": "torchfdtd/pmc_cpml.py",
+        "sha256": "fc38199b7551203460cec9a5bb881c3650bc8f58994c0ead5e1905a2e37a33d2"
+      },
+      {
+        "path": "torchfdtd/pmc_cpml_cuda.py",
+        "sha256": "c639f98dd3f029316a48b38a0e331a5f660d25c415f0ee26926da0a5032747c6"
+      },
+      {
+        "path": "torchfdtd/pmc_cuda.py",
+        "sha256": "d152b52082aa9d7e9d1952ea55a4ce70015448d5cc73a1cf8923b0b1eaf387e3"
+      },
+      {
+        "path": "torchfdtd/pmc_reference.py",
+        "sha256": "d9662e9607fce57ab8d4502a20b075ae6434d43926fca8a60de6f62d2ec8122c"
+      },
+      {
+        "path": "torchfdtd/pmc_simulation.py",
+        "sha256": "f9dc70304b7e18964b0e3393dc7aeec62f972ef0eeefe48770ea025754c8b3cf"
+      },
+      {
+        "path": "torchfdtd/polarization.py",
+        "sha256": "225f8bf7d2be2a6111ee6d59c9498eb3dcd799e64237de7ff1957b8e0c12543e"
+      },
+      {
+        "path": "torchfdtd/priorities.py",
+        "sha256": "a0ea510918a2fec256a931c50b50a2b811328511a42fd808593589114f478726"
+      },
+      {
+        "path": "torchfdtd/pupil_response.py",
+        "sha256": "c7645bae6200a6f41a1e8b555fa8fac8a949a2c6bfec8222400521868ea936c4"
+      },
+      {
+        "path": "torchfdtd/radiation.py",
+        "sha256": "2323202c43602a81f2431ffdd207e7eec80db9987495c9235b658b904811c7cd"
+      },
+      {
+        "path": "torchfdtd/radiation_api.py",
+        "sha256": "0034effd54114410ae8c8d8192b905d2fedc0746f9d1c4e1a701bebd5e9d5514"
+      },
+      {
+        "path": "torchfdtd/radiation_box.py",
+        "sha256": "09892061951b9500a97f8d78065ec96ae68ea0f1384be9d69059a405a3e8833f"
+      },
+      {
+        "path": "torchfdtd/radiation_box_io.py",
+        "sha256": "e0319343f2fc70a8377ea0ffd85644d8930e88b5baf21081e275c136e89ec95b"
+      },
+      {
+        "path": "torchfdtd/radiation_io.py",
+        "sha256": "d5808043ae410cc68f1f0930f38b0f0dc4e7a7b49715fa10114a7775402604b9"
+      },
+      {
+        "path": "torchfdtd/recomputed_batch.py",
+        "sha256": "7547c431d6fb958f8ae1f390606f82a391647e9bdcd518703404af04adae8378"
+      },
+      {
+        "path": "torchfdtd/recorded_execution.py",
+        "sha256": "412bd35b7d4a3c3ba3dd2a11ec5630c17fef1df929efdfd6fcd520abc8c00d34"
+      },
+      {
+        "path": "torchfdtd/reference_cache.py",
+        "sha256": "89f5dea495dc0b785f1ad8a7ea888cc778e10b904403bb5649c1d3ddcdb40244"
+      },
+      {
+        "path": "torchfdtd/response_cache.py",
+        "sha256": "15c5ddc802cd71613cef28c18d3c09256447d657dfe3c55b1c4d4b09954191b1"
+      },
+      {
+        "path": "torchfdtd/reversible.py",
+        "sha256": "74f777f57f90d88ec4ae7fbb553cf42c3822b9add6201e0b4803b1ba4a8fa9d1"
+      },
+      {
+        "path": "torchfdtd/reversible_cpml.py",
+        "sha256": "829f3db5b8a50c3dbd8d42b6e70668ffff43e35131f1c5738b479f7876457f9f"
+      },
+      {
+        "path": "torchfdtd/reversible_cpml_kernels.py",
+        "sha256": "9f25e610bec07c07c500485c9ba1641f41518e096dbdf815f621aeb51d9b3183"
+      },
+      {
+        "path": "torchfdtd/reversible_cpml_memory.py",
+        "sha256": "c63d545110da4f1f94bd0fc249ce87658e33536abdfd9cec8f9adc507c310776"
+      },
+      {
+        "path": "torchfdtd/reversible_cpml_planes.py",
+        "sha256": "6f09bcf2a17b6ac5bbf9a4730372eedfc0b5c7cf87f78ed83df5040abdbae59a"
+      },
+      {
+        "path": "torchfdtd/reversible_memory.py",
+        "sha256": "59e602e443c279f40662d169359b3bfe38dfc3f321925125a57e8f39099e4222"
+      },
+      {
+        "path": "torchfdtd/reversible_trace.py",
+        "sha256": "65f8fd266a6beb7f293c07c22498573d846fa5cc96dca8f358995d64e73e9cd7"
+      },
+      {
+        "path": "torchfdtd/run_control.py",
+        "sha256": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3"
+      },
+      {
+        "path": "torchfdtd/server.py",
+        "sha256": "abff08ad9e1db99043852613d7d9d0687052ceb25a6ac952b26882710c884824"
+      },
+      {
+        "path": "torchfdtd/session.py",
+        "sha256": "5da2c11d6001397fdf97062f01b4f07fb47d165c8b0cd261a1ef565555f7a01e"
+      },
+      {
+        "path": "torchfdtd/solver.py",
+        "sha256": "39dbd26ac73f06e3d966f8cbf4267175c605a593fba68765a49c74c8b33e4f13"
+      },
+      {
+        "path": "torchfdtd/source_adjoint.py",
+        "sha256": "e268b0f07fcccfc1e4e357be0511fce270582e8e11f4554ba013e975f1fc888f"
+      },
+      {
+        "path": "torchfdtd/source_adjoint_cuda.py",
+        "sha256": "07ba9d25a9cd55ee12a114925b93420b10a83c8a7a3fc8006810f75163ef9dc3"
+      },
+      {
+        "path": "torchfdtd/source_parameters.py",
+        "sha256": "8a31e5bec89c09f8118ca5c7910c17627cf366ffc96f1fc373413d2314fb3f2e"
+      },
+      {
+        "path": "torchfdtd/source_preview.py",
+        "sha256": "041ba4db6e9d07b3af565719933fb1265c4295768bc542e89876057b2c7797d3"
+      },
+      {
+        "path": "torchfdtd/spacetime.py",
+        "sha256": "70346bbab98b2e944f08975a85d4487b73b05efffa4027b29856ff5c7a51114a"
+      },
+      {
+        "path": "torchfdtd/spectra.py",
+        "sha256": "21c011b26b6209fd147f4b70edfd1722cd5aaf14917f42a0997be40e37d95527"
+      },
+      {
+        "path": "torchfdtd/staging.py",
+        "sha256": "a4018d7a5ef26082ebf14b8354612710c02a72e3910192519126ba17531b4d9f"
+      },
+      {
+        "path": "torchfdtd/state_store.py",
+        "sha256": "66dfe4a8ca94034630fdcbea0076768aed6658cb9add9aecf88b4294ac35c9f6"
+      },
+      {
+        "path": "torchfdtd/streamed.py",
+        "sha256": "9c95619d67bb00ae485ac4420d4ce46e55bd291cd03e83a79c3f06dc3c485e54"
+      },
+      {
+        "path": "torchfdtd/streamed_cost.py",
+        "sha256": "76956e288bc94d07c439d1f5ed11f004c6038c5bbd04662a805322924d9fea94"
+      },
+      {
+        "path": "torchfdtd/streamed_density.py",
+        "sha256": "26fc263fddb55180f2a8d9ba0db29b63a47de869a0e7d0ec4dc4098d798f98a8"
+      },
+      {
+        "path": "torchfdtd/streamed_dispersive.py",
+        "sha256": "2800349e46b1c49f5ee61956c649814125efc43559b835bb096ec76f3d96a159"
+      },
+      {
+        "path": "torchfdtd/streamed_geometry.py",
+        "sha256": "95702f69f2f4d56646af970560ae8a792fe3e3c5693d9e2770dd3e36821cdafe"
+      },
+      {
+        "path": "torchfdtd/streamed_tuning.py",
+        "sha256": "c8bbc74590f4bb4cbc005b0b3b4913d8218f35e20329703b2f88d74174243af1"
+      },
+      {
+        "path": "torchfdtd/subpixel.py",
+        "sha256": "b066387a644d7fced60ba4801e717fe2a1a0a2aa3289902e71561925f20d0fca"
+      },
+      {
+        "path": "torchfdtd/subpixel_geometry.py",
+        "sha256": "9f2303105b3fc1bbdd93409e3272b700868d044685efbc7b6b3ed9bb2975324c"
+      },
+      {
+        "path": "torchfdtd/tensor_batch.py",
+        "sha256": "5fcd830c68f1698c4beb030baab4511a97081c39fa53166e337a30e172b467e4"
+      },
+      {
+        "path": "torchfdtd/tensor_native.py",
+        "sha256": "14ac330d2e4765b6a7ff5118af24fb73e14fb86c2d218d151b50487aa89af836"
+      },
+      {
+        "path": "torchfdtd/tensor_packet.py",
+        "sha256": "26ecfd0b04eb0641df02c8632eb361d1ddfb834f3628e3f14d0ae6fc1639ffe0"
+      },
+      {
+        "path": "torchfdtd/tensor_project.py",
+        "sha256": "792372ff221b03d1dd58b8015dcd38a66c195a55503de23a307d4c395945278e"
+      },
+      {
+        "path": "torchfdtd/tfsf.py",
+        "sha256": "bbbaf2aa055d6425a67f2b826d929791a38fa26e8a2b914a42dcee0907222218"
+      },
+      {
+        "path": "torchfdtd/tile_workspace.py",
+        "sha256": "823d2f1bbcc13dc805a2159057dc377d75148537894db541313ad38e7f73a90c"
+      },
+      {
+        "path": "torchfdtd/tuning.py",
+        "sha256": "7d722ef872d2c8cc1db479b4c3edfa0dadd6466732b88f738ad42bcc658c22fa"
+      },
+      {
+        "path": "torchfdtd/waveforms.py",
+        "sha256": "654333e8afa4da1310afc714a1c15ad60663ef21f3533f4b55c1a7489a0809b9"
+      },
+      {
+        "path": "torchfdtd/web/index.html",
+        "sha256": "47a43d8217eb747b8b174f5a748c9e597e191f3945eff5359bc7fc302def6acd"
+      },
+      {
+        "path": "torchfdtd/web/assets/index-BSYi1u-9.js",
+        "sha256": "257c1eb76c81636bfc9d9faed30629f2c9849de2a9acecc83da643f51510b231"
+      },
+      {
+        "path": "torchfdtd/web/assets/index-DwNCx_-H.css",
+        "sha256": "1d3c8721bd37d4bd3c6af5b1272f6afa05fcc2ded48467205d4daa2864dfb298"
+      }
+    ],
+    "installed_smoke": {
+      "status": "passed",
+      "dtype": "torch.float32",
+      "amplitude_gradient": 0.13201551139354706
+    },
+    "unchanged_runtime": true
+  }
+}

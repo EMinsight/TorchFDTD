@@ -151,3 +151,7 @@ __all__ += ["ModeNetworkConfig", "mode_network_plan", "run_mode_network"]
 from .radiation_box import StoredRadiationBox, native_radiation_box
 from .radiation_box_io import load_native_radiation_box
 __all__ += ["StoredRadiationBox", "native_radiation_box", "load_native_radiation_box"]
+
+from .source_adjoint import SourceWaveformSimulation, SourceWaveformPlaneSimulation
+from .source_parameters import gaussian_waveform
+__all__ += ["SourceWaveformSimulation", "SourceWaveformPlaneSimulation", "gaussian_waveform"]

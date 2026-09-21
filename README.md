@@ -14,6 +14,15 @@ This is a **development preview**. The required-workflow checklist remains incom
 
 **Comparison guide:** **[Lumerical FDTD speed comparison](#primary-speed-comparison-lumerical-fdtd)**, [capabilities and batch support](#capability-comparison), [mixed-grid ensembles](#mixed-meshes-and-durations-in-one-python-batch), [single-case measurements](#measured-cuda-comparisons), [remaining competitiveness work](docs/OPEN_SOURCE_COMPARISON_KO.md#비교우위-개발-프로젝트의-현재-작업). Measured gains below establish a specific forward-workflow advantage against flaport/fdtd, not leadership over every CUDA solver.
 
+[Trainable source waveforms](docs/DIFFERENTIABLE_SOURCES.md) now connect multiple
+soft electric/magnetic sources and dielectric parameters to checkpointed Torch
+and fused CUDA gradients. Point, online spectrum and six-field plane outputs
+are supported with fixed source positions/profiles. The FP32/complex64 CUDA
+integration covers nine cases with maximum waveform-gradient relative L2 error
+8.55e-7 against full-state CPU autograd. This is an implementation check, not a
+physical convergence or performance claim. A [runnable example](examples/differentiable_sources.py)
+jointly updates source amplitude/phase and an interior material parameter.
+
 Experimental [file-backed spatial execution](docs/validation/STATE_BACKING_REPORT.md)
 now extends the streamed adjoint beyond application-owned DRAM field banks.
 Supported gradients match the DRAM path exactly in the recorded tests, while
@@ -305,7 +314,7 @@ Reviewed external public source on 19 September 2026. TorchFDTD implementation s
 
 | Project | GPU/backend | Independent ensemble / same-GPU batch | Adjoint/autodiff | Relevant scope | RTX 5880 comparison |
 |---|---|---|---|---|---|
-| **TorchFDTD** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **Partial**. Dielectric/Bloch/CPML/ADE/PEC discrete adjoints, analytic geometry and density, fixed-plane/mode/radiation objectives and hierarchical replay. Source/eigenmode derivatives remain limited | Browser + Python CAD, independent FSP subset, GDS geometry, multipole ADE, rectilinear/graded mesh, selective plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
+| **TorchFDTD** | PyTorch + native CUDA, Windows tested | Process jobs with resume and device assignment. **Shared CUDA E/H/source/trace launches**, cohort splitting, exact mixed-topology grouping and measured size selection. DE population evaluation | **Partial**. Dielectric/Bloch/CPML/ADE/PEC discrete adjoints, analytic geometry and density, fixed-plane/mode/radiation objectives and hierarchical replay. Fixed-profile soft-source waveform VJPs are supported. Eigenmode/source-position derivatives remain limited | Browser + Python CAD, independent FSP subset, GDS geometry, multipole ADE, rectilinear/graded mesh, selective plane DFT | Single-case, ensemble, design-loop, native mesh and preparation ablations below |
 | [FDTDX](https://github.com/ymahlau/fdtdx) | **JAX currently**, CUDA/ROCm installation paths | JAX composition. Same-GPU cohort throughput not measured here | Reversible/checkpointed with restrictions. ADE uses checkpointing, reference eigenmodes are held fixed | Dispersive/anisotropic materials and rectilinear grids | Matched Linux GPU correctness below. Comparative throughput pending |
 | [fdtdz](https://github.com/spinsphotonics/fdtdz) | JAX wrapper + specialized CUDA | README proposes distributing independent jobs through JAX. Fused batch-axis throughput not verified | Reviewed primitive has no registered JVP/VJP/transpose rule | Fast specialized dielectric scope, constrained z size, x/y adiabatic absorption, z PML. TorchFDTD adds dispersion, graded grids and online plane DFT | Not measured, compatible package setup pending |
 | [flaport/fdtd](https://github.com/flaport/fdtd) | NumPy / PyTorch CUDA | Public `Grid` represents one case. Our external graph adapter runs its updates. Dedicated upstream cohort API not verified | Default backend disables gradients, so default autodiff is not established | Readable grid foundation used and attributed by TorchFDTD | PyPI 0.2.2 measured, including eager and graph-adapted baselines |
@@ -345,8 +354,8 @@ ranking. Ambient desktop activity prevented the primary quiet timing criterion.
 |---|---|---|
 | GDS | Explicit layer stack, hierarchy/units/PATH conversion, limited export and explicit full-cell opposing mode ports | General holes, narrow/branch ports and automatic port mapping |
 | Design parameters | Density filters, fixed masks, exact symmetry, projection/continuation and optimizer resume | General shape derivatives and fabrication guarantees |
-| Mode ports | Fixed-mode CUDA launch, opposing-port multimode S matrices and interior material VJPs, plus unequal fixed sections with separate CPU complex-S checks | Arbitrary branch ports, open cross-sections, streamed injection, source parameters and broader physical convergence. Eigenmode differentiation is a separate research extension |
-| Radiation | Differentiable Bloch orders, closed-box homogeneous far fields, native FP32 mesh convergence, stored-plane browser/NPZ diffraction | Layered/periodic-lattice far fields and closed-box UI |
+| Mode ports | Fixed-mode CUDA launch, opposing-port multimode S matrices and interior material VJPs, plus open bound modes, unequal fixed sections and native CAD/Python/browser workflows | Arbitrary branch/leaky ports, streamed injection, modal source parameters and broader physical convergence. Eigenmode differentiation is a separate research extension |
+| Radiation | Differentiable Bloch orders, closed-box homogeneous far fields, native FP32 mesh convergence, stored-plane browser/NPZ diffraction and six-face closed-box UI | Layered/periodic-lattice far fields and broader physical convergence |
 | Boundaries / tensors / multi-GPU | PEC, native closed-PMC and restricted PMC+CPML GUI/CLI/API, endpoint CPU/CUDA adjoints, tensor adjoints with fixed isotropic CPML exterior | General PML profiles/absorption, streaming combinations and verified single-problem multi-GPU |
 
 The [complete row-by-row parity gates](docs/FDTDX_PARITY_KO.md) retain failed,

@@ -501,6 +501,8 @@ class _FDTD(torch.autograd.Function):
                             seed=spectral_seed[observation_index]
                         if fused:
                             fused.step(step,observation_index=observation_index)
+                        elif hasattr(system,"transpose_accumulate"):
+                            adjoint=system.transpose_accumulate(system.state(),adjoint,seed,gradient,step)
                         else:
                             adjoint,part=system.transpose_step(system.state(),adjoint,seed)
                             gradient.add_(part)

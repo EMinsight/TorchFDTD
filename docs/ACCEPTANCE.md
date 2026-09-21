@@ -1,5 +1,29 @@
 # Current acceptance record
 
+## Resident soft-source waveform adjoints, 21 September 2026
+
+Multiple electric/magnetic temporal terms now share the material checkpoint
+adjoint. Actual additive waveform columns retain Torch parameter graphs, including
+complex inputs and Gaussian amplitude/phase/frequency/delay/width. Source spatial
+profiles and positions remain fixed. Carrier packing owns replay values, odd
+complex alignment is admitted, source reductions touch one time row, and plane
+reference identity includes actual waveforms with bounded host hash blocks.
+
+Nine FP32/complex64 CUDA integration cases cover point, online spectrum and
+six-field plane outputs. Maximum relative L2 errors against full-state CPU
+autograd are 4.98e-7 for fields, 8.51e-7 for epsilon VJPs and 8.55e-7 for waveform
+VJPs, against the predeclared 8e-5 gate. Native default waveforms and legacy
+dielectric forward histories agree exactly. Three separate nondefault-stream
+CUDA tests check full random state, CPML, material and waveform cotangents.
+The public example executed three joint source/material Adam updates on CUDA.
+This is API/discrete-transpose evidence, not a device optimization, physical
+convergence, speed or capacity result. CR application work is excluded.
+
+See [API limits](DIFFERENTIABLE_SOURCES.md) and the
+[machine record](validation/source_waveform_adjoint.json). All 128 wheel package files matched source and installed bytes. Installed public
+imports and a parameter-gradient smoke check passed. Full CI is pending integration.
+
+
 ## Stored closed-box far-field workflow, 21 September 2026
 
 Six native spectral faces now connect to Python, bounded NPZ loading and the
