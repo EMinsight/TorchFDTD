@@ -8,6 +8,8 @@ their state records on completion.
 """
 import json
 import os
+import re
+import shutil
 import subprocess
 import sys
 import time
@@ -78,7 +80,10 @@ def test_backward_resumes_after_interrupt(tmp_path, monkeypatch, storage, device
     settings = options(tmp_path, storage, device)
     result = StreamedSimulation(p, settings)(eps)
     _same(result.signals.detach(), signals, device)
-    assert result.report['restart_reservation_bytes'] == 2 * (result.report['state_bytes'] + eps.numel() * eps.element_size())
+    history = result.report['restart_signal_history_bytes']
+    assert history == signals.numel() * signals.element_size()
+    state, parameter = result.report['state_bytes'], eps.numel() * eps.element_size()
+    assert result.report['restart_reservation_bytes'] >= max(2 * (state + history), history + 2 * (state + parameter))
     calls = interrupt(monkeypatch, 'transpose', transposes)
     with pytest.raises(Interrupted):
         torch.autograd.grad(result.signals.square().sum(), eps)
@@ -151,6 +156,59 @@ def test_contract_and_signal_adjoint_mismatch_are_rejected(tmp_path, monkeypatch
     later, = torch.autograd.grad(resumed.signals.square().sum(), eps)
     assert resumed.report['backward_resumed_from_block'] == 3
     assert torch.isfinite(later).all()
+
+
+@pytest.mark.parametrize('name', ['boundaries.py', 'differentiable.py', 'waveforms.py', 'cuda_kernels.py'])
+def test_changed_package_file_is_rejected_by_the_contract(tmp_path, name):
+    from torchfdtd.streamed_restart import RestartJournal, journal_contract, runtime_sources
+    package = Path(torchfdtd.__file__).resolve().parent
+    copy = tmp_path / 'torchfdtd'
+    shutil.copytree(package, copy, ignore=shutil.ignore_patterns('__pycache__', 'web'))
+    p = scene()
+    eps = torch.full(p.region.shape, 1.7, dtype=torch.float64)
+    contract = journal_contract(p, eps, options(tmp_path), [0, 3, 6, 9, 12, 13])
+    assert contract['runtime_sha256'] == runtime_sources(copy)
+    assert len(contract['runtime_sha256']) > 100
+    RestartJournal(tmp_path / 'journal', contract)
+    with open(copy / name, 'a', encoding='utf-8') as handle:
+        handle.write('\n# a comment appended between the crash and the resume\n')
+    changed = dict(contract, runtime_sha256=runtime_sources(copy))
+    with pytest.raises(ValueError, match=re.escape(f'Differences: runtime_sha256, runtime_sha256.{name}')):
+        RestartJournal(tmp_path / 'journal', changed)
+    # The unchanged tree still opens the same journal.
+    RestartJournal(tmp_path / 'journal', contract)
+
+
+def test_reservation_covers_the_signal_history_of_coexisting_records(tmp_path, monkeypatch):
+    from torchfdtd import Monitor
+    from torchfdtd.streamed import _journal_bytes
+    p = scene()
+    p.region.steps = 250
+    p.monitors = [Monitor(component='Ez', center=(.1 * i - .35, .1 * j - .15, 0)) for i in range(8) for j in range(4)]
+    eps = torch.full(p.region.shape, 1.7, dtype=torch.float64, requires_grad=True)
+    settings = options(tmp_path, temporal_depth=25, checkpoints=3, restart_every_blocks=2)
+    # Every removal in the journal happens while the record it replaces and the
+    # new one coexist; the journal size at those moments is its peak footprint.
+    peaks = []
+    original = shutil.rmtree
+
+    def measured(path, *args, **kwargs):
+        peaks.append(_journal_bytes(Path(path).parent))
+        return original(path, *args, **kwargs)
+    monkeypatch.setattr('torchfdtd.streamed_restart.shutil.rmtree', measured)
+    result = StreamedSimulation(p, settings)(eps)
+    torch.autograd.grad(result.signals.square().sum(), eps)
+    report = result.report
+    assert report['journal_records_written'] == dict(forward=5, backward=4)
+    state, history = report['state_bytes'], report['restart_signal_history_bytes']
+    gradient = eps.numel() * eps.element_size()
+    assert history == 250 * 32 * 8 == result.signals.numel() * result.signals.element_size()
+    assert history > state
+    # Two forward records with the history exceed the former two-state charge.
+    assert max(peaks) > 2 * (state + gradient)
+    assert max(peaks) >= 2 * (state + history)
+    assert report['restart_reservation_bytes'] >= max(2 * (state + history), history + 2 * (state + gradient))
+    assert report['restart_reservation_bytes'] >= max(peaks)
 
 
 def test_restart_journal_space_is_checked(tmp_path, monkeypatch):

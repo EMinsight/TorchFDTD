@@ -336,9 +336,11 @@ block boundaries when `restart_directory` is set, so an interrupted run
 continues from a new process: a completed forward returns its recorded signals,
 and a recorded backward restores the adjoint and partial gradient and replays
 only the remaining blocks from the all-zero initial state. A strict contract
-rejects journals written for other inputs, options, runtimes or objectives.
-The journal reservation charges two full states plus two parameter gradients on
-its volume. Verified on CPU and CUDA tiles with host and file banks, including
+rejects journals written for other inputs, options, runtimes or objectives,
+hashing every Python file of the package as the runtime. The journal
+reservation charges `max(2(B+S), S+2(B+G))` on its volume for state bytes B,
+signal-history bytes S and parameter-gradient bytes G, plus bounded JSON
+metadata. Verified on CPU and CUDA tiles with host and file banks, including
 a killed child process; ADE, tensor, geometry, spectral and asynchronous paths
 are not covered, and large-run recovery cost is unmeasured.
 

@@ -45,9 +45,15 @@ def sha256_file(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def runtime_sources():
-    here = Path(__file__).resolve().parent
-    return {name: sha256_file(here / name) for name in ('streamed.py', 'spacetime.py', 'state_store.py', 'streamed_restart.py')}
+def runtime_sources(package=None):
+    """SHA-256 of every Python file under the package, keyed by relative POSIX path.
+
+    Boundaries, waveforms, differentiable systems and the inline CUDA kernel
+    sources all take part in the numerics, so the whole package is the runtime
+    contract rather than the streamed modules alone.
+    """
+    root = Path(package if package is not None else Path(__file__).resolve().parent)
+    return {path.relative_to(root).as_posix(): sha256_file(path) for path in sorted(root.rglob('*.py'))}
 
 
 def _write_array(path, array):
@@ -124,9 +130,10 @@ class RestartJournal:
             existing = json.loads(self.contract_path.read_text(encoding='utf-8'))
             if existing != contract:
                 changed = sorted(k for k in set(existing) | set(contract) if existing.get(k) != contract.get(k))
-                if 'options' in changed:
-                    old, new = existing.get('options') or {}, contract.get('options') or {}
-                    changed += [f'options.{k}' for k in sorted(set(old) | set(new)) if old.get(k) != new.get(k)]
+                for group in ('options', 'runtime_sha256'):
+                    if group in changed:
+                        old, new = existing.get(group) or {}, contract.get(group) or {}
+                        changed += [f'{group}.{k}' for k in sorted(set(old) | set(new)) if old.get(k) != new.get(k)]
                 raise ValueError('Restart journal contract mismatch. Use a new directory for changed inputs, options or runtime. Differences: '+', '.join(changed))
         else:
             _atomic_json(self.contract_path, contract)

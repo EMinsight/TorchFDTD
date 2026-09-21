@@ -28,10 +28,16 @@ print(result.report['forward_resumed_from_block'], result.report['backward_resum
 Each record is written to a temporary directory, every file is synced, the
 directory is renamed and only then does `latest-forward.json` or
 `latest-backward.json` point at it. The previous record of the same kind is
-removed afterwards, so the journal briefly holds two records. The reservation
-therefore charges two full states plus two parameter gradients on the journal
-volume, added to the bank reservation when both share one volume, and the run
-is rejected when that space is not free.
+removed afterwards, so the journal briefly holds two records. Every forward
+record carries the whole signal history, `steps x monitors` in the field
+dtype, and the completed forward record keeps it while backward records
+rotate. For state bytes B, signal-history bytes S and parameter-gradient
+bytes G the reservation is `max(2(B+S), S+2(B+G))` plus a bound on the JSON
+metadata (256 bytes per record array, 16 bytes per block start listed in the
+contract and 64 KiB for the hashes, options and pointers), reported as
+`restart_reservation_bytes` with `restart_signal_history_bytes` for S. It is
+added to the bank reservation when both share one volume, and the run is
+rejected when that space is not free.
 
 ## How a resume works
 
@@ -49,7 +55,8 @@ the contract.
 
 `contract.json` stores the scene without generated item labels, the SHA-256 of
 the epsilon bytes, the options except the journal settings, the block starts,
-the runtime source hashes and the Torch version. A journal opened with a
+the SHA-256 of every Python file under the `torchfdtd` package keyed by its
+relative path (`runtime_sha256`) and the Torch version. A journal opened with a
 different contract is rejected and the differing keys are reported. A backward
 record also stores the SHA-256 of the signal adjoint; resuming with another
 objective is rejected. The interrupted process may leave scratch banks behind
@@ -58,9 +65,11 @@ remove another process's files.
 
 ## Operating a resume
 
-- Resume with the identical source tree. The contract hashes `streamed.py`,
-  `spacetime.py`, `state_store.py` and `streamed_restart.py`; updating the code
-  between the crash and the resume is rejected as `runtime_sha256`.
+- Resume with the identical source tree. The contract hashes every Python
+  file under the package, including the inline CUDA kernel sources; updating
+  any of them between the crash and the resume is rejected as
+  `runtime_sha256` with the changed file named, `runtime_sha256.boundaries.py`
+  for example.
 - Remove the crashed process's scratch first. Its `torchfdtd-state-*`
   directories under `state_directory` are not removed by anyone else, and they
   consume the free space that the bank reservation checks again on resume.
@@ -71,13 +80,15 @@ remove another process's files.
 ## Verified scope
 
 CPU and CUDA tiles, host and file-backed banks, real scalar epsilon, point
-observations and time-history outputs. Sixteen tests interrupt the forward pass
-after one or three blocks, interrupt a retained backward pass after one or three
-transposes, kill a real child process during backward and resume it from a new
-process, reject changed inputs and a different signal adjoint, count records for
-`restart_every_blocks=2`, and check the journal space reservation. Resumed
-signals and gradients equal the uninterrupted run bitwise on CPU and within
-1e-6 relative on CUDA.
+observations and time-history outputs. Twenty-two tests interrupt the forward
+pass after one or three blocks, interrupt a retained backward pass after one or
+three transposes, kill a real child process during backward and resume it from
+a new process, reject changed inputs, a different signal adjoint and a package
+file changed between the crash and the resume, count records for
+`restart_every_blocks=2`, check the journal space reservation and measure that
+it covers the coexisting records of a run whose signal history exceeds its
+state. Resumed signals and gradients equal the uninterrupted run bitwise on CPU
+and within 1e-6 relative on CUDA.
 
 Not covered: spectral observations (rejected at run time), ADE, tensor,
 density or geometry parameter paths, asynchronous tiles and the dispersive
