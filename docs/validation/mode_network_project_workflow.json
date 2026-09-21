@@ -1,5 +1,5 @@
 {
-  "status": "focused_cpu_browser_and_native_cuda_passed_full_ci_pending",
+  "status": "focused_cpu_browser_native_cuda_and_full_ci_passed",
   "scope": "Versioned native CAD fixed opposing dielectric mode-network adapter and owned browser jobs",
   "fixture": "examples/open_mode_network.json",
   "cpu_result": {
@@ -1513,5 +1513,25 @@
     "allowlisted_files": 878,
     "findings": 0,
     "scope": "Private source allowlist pattern scan, not publication clearance."
+  },
+  "completed_ci": {
+    "run_id": 35554303419,
+    "commit": "8c11f05babb6cbf7125c25abcfbeb40f58737b8d",
+    "url": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35554303419",
+    "conclusion": "success",
+    "python": {
+      "tests": 1891,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 448,
+      "passed": 1443,
+      "junit_sha256": "1fab6969c54a370a860e30baf8dd677ac7efa256971b7d16111233ce92369713"
+    },
+    "browser": {
+      "passed": 38,
+      "skipped": 8
+    },
+    "frontend_build": "success",
+    "wheel_build": "success"
   }
 }

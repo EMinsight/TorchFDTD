@@ -24,8 +24,11 @@ The 39-page manuscript preserves prior source bytes and adds the native CAD
 modal workflow. Its changed pages and references were rendered and inspected.
 
 See [usage and limits](MODE_NETWORK_WORKFLOW.md) and the
-[workflow record](validation/mode_network_project_workflow.json). Full CI for
-this integration is pending. General routing, streamed modes and complete
+[workflow record](validation/mode_network_project_workflow.json). Linux CI [35554303419](https://github.com/hyoseokp/TorchFDTD/actions/runs/35554303419)
+at `8c11f05` passed with 1,443 Python passes and 448 skips,
+38 browser passes and 8 skips. Frontend and wheel builds passed.
+The JUnit SHA-256 is `1fab6969c54a370a860e30baf8dd677ac7efa256971b7d16111233ce92369713`.
+The completed CI evidence was collected without another numerical sweep. General routing, streamed modes and complete
 FDTDX parity remain unfinished. Public release remains NOT_CLEARED_FOR_PUBLICATION.
 
 
