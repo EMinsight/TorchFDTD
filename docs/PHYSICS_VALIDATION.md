@@ -1,6 +1,8 @@
 # Physics validation records (stage G3)
 
-Rendered by `scripts/render_physics_validation.py` from `docs/validation/g3/<task>.json`, which `tests/test_physics_g3_a.py` writes before it asserts. Every number below comes from those records; none is typed by hand. The fixtures and limits were declared in `docs/validation/cases/` before the recorded run (see [COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md) section 5). A **FAIL** is a finding against a pre-declared limit and is kept as such.
+Sections between the `g3-a begin` and `g3-a end` HTML comment markers are rendered by `scripts/render_physics_validation.py` from `docs/validation/g3/<task>.json`, which `tests/test_physics_g3_a.py` writes before it asserts; other agents' sections carry their own markers and are preserved by this script. Every number below comes from those records; none is typed by hand. The fixtures and limits were declared in `docs/validation/cases/` before the recorded run (see [COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md) section 5). A **FAIL** is a finding against a pre-declared limit and is kept as such.
+
+<!-- g3-a begin -->
 
 ## G3-01 Uniform-medium propagation
 
@@ -272,3 +274,4 @@ Environment: Python 3.10.2, numpy 2.2.6, torch 2.10.0+cu126 (CUDA runtime 12.6),
 | steps | max abs error | relative L2 | verdict |
 | --- | --- | --- | --- |
 | 1713 | 7.3e-07 | 8.9e-07 | pass |
+<!-- g3-a end -->

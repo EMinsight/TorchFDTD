@@ -255,20 +255,44 @@ def section_g307(record):
 SECTIONS = {'G3-01': section_g301, 'G3-02': section_g302, 'G3-03': section_g303, 'G3-07': section_g307}
 
 
-def main():
-    lines = ['# Physics validation records (stage G3)', '',
-             'Rendered by `scripts/render_physics_validation.py` from `docs/validation/g3/<task>.json`, which '
-             '`tests/test_physics_g3_a.py` writes before it asserts. Every number below comes from those records; none is typed by hand. '
-             'The fixtures and limits were declared in `docs/validation/cases/` before the recorded run '
-             '(see [COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md) section 5). A **FAIL** is a finding against a pre-declared limit and is kept as such.', '']
+BEGIN = '<!-- g3-a begin -->'
+END = '<!-- g3-a end -->'
+HEADER = ['# Physics validation records (stage G3)', '',
+          'Sections between the `g3-a begin` and `g3-a end` HTML comment markers are rendered by `scripts/render_physics_validation.py` from '
+          '`docs/validation/g3/<task>.json`, which `tests/test_physics_g3_a.py` writes before it asserts; other agents\' sections carry their own markers '
+          'and are preserved by this script. Every number below comes from those records; none is typed by hand. The fixtures and limits were declared in '
+          '`docs/validation/cases/` before the recorded run (see [COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md) section 5). '
+          'A **FAIL** is a finding against a pre-declared limit and is kept as such.', '']
+
+
+def own_region():
+    lines = [BEGIN, '']
     for task, render in SECTIONS.items():
         record = load('G3-02r2') if task == 'G3-02' else load(task)
         if record is None:
             lines += [f'## {task}', '', 'No record yet.', '']
             continue
         lines += render(record)
+    return '\n'.join(lines).rstrip('\n') + '\n' + END + '\n'
+
+
+def main():
+    """Regenerate only the g3-a region; keep any other content of the file (other agents' marked sections) as it is."""
+    region = own_region()
+    if OUTPUT.is_file():
+        text = OUTPUT.read_text(encoding='utf-8')
+        lines = text.split('\n')
+        if BEGIN in lines and END in lines:
+            first, last = lines.index(BEGIN), lines.index(END)
+            head = '\n'.join(lines[:first])
+            tail = '\n'.join(lines[last+1:])
+            text = (head + '\n' if head else '') + region + tail
+        else:
+            text = text.rstrip('\n') + '\n\n' + region
+    else:
+        text = '\n'.join(HEADER) + '\n' + region
     with open(OUTPUT, 'w', encoding='utf-8', newline='\n') as handle:
-        handle.write('\n'.join(lines).rstrip('\n') + '\n')
+        handle.write(text.rstrip('\n') + '\n')
     print(f'wrote {OUTPUT.relative_to(ROOT).as_posix()}')
 
 
