@@ -76,7 +76,7 @@ Still required for full parity: independent FSP mapping, named Lumerical PML-pro
 
 ## Dispersive materials inside PML
 
-`Region.pml_dispersion` (default `'frozen'`) removes the Drude/Lorentz pole update
+`Region.pml_dispersion = 'frozen'` (default `'ade'`) removes the Drude/Lorentz pole update
 from cells that lie inside a PML layer and gives those cells the real permittivity
 of the material at the source centre frequency (the static permittivity when no
 pulsed source is enabled). The interior keeps the full ADE. This is done in
@@ -87,4 +87,6 @@ diverged after about 1000–1500 steps once the domain exceeded a few micrometre
 independently of the fused/torch kernel, the graded mesh and the pole linewidth,
 while the same posts kept out of the PML ran stably. The negative-permittivity
 band of such a pole lies inside the grid band and the standard CPML is not a
-stable absorber for it. `'ade'` restores the previous behaviour.
+stable absorber for it. The default `'ade'` keeps the pole update everywhere. The differentiable,
+dispersive-adjoint and streamed solvers reject `'frozen'` rather than silently
+running the unfrozen update.

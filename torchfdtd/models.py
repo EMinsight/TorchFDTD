@@ -174,11 +174,11 @@ class Region(Model):
     steps: int = Field(default=1000, ge=10, le=100000)
     run_control: RunControl = Field(default_factory=RunControl)
     pml_cells: int = Field(default=10, ge=3, le=50)
-    # Dispersive (ADE) material inside a PML layer. 'frozen' replaces the pole
-    # response there by the real permittivity at the source centre frequency;
-    # 'ade' keeps the pole update, which is unstable for poles whose negative-
-    # permittivity band lies inside the grid band (see docs/BOUNDARIES.md).
-    pml_dispersion: Literal['frozen', 'ade'] = 'frozen'
+    # Dispersive (ADE) material inside a PML layer. 'ade' keeps the pole update
+    # there (unstable for poles whose negative-permittivity band lies inside the
+    # grid band); 'frozen' replaces it by the real permittivity at the source
+    # centre frequency. Resident forward solvers only; see docs/BOUNDARIES.md.
+    pml_dispersion: Literal['ade', 'frozen'] = 'ade'
     boundaries: Boundaries = Field(default_factory=Boundaries)
     bloch_phase: tuple[float, float, float] = (0, 0, 0)  # radians per positive unit-cell translation
     background_index: float = Field(default=1, ge=1, le=20)

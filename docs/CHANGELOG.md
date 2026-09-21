@@ -16,11 +16,11 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Results change
 
-- Dispersive materials inside PML layers: the pole (ADE) update is no longer applied in PML cells, which keep the real permittivity at the source centre frequency (`Region.pml_dispersion`, default `'frozen'`; `'ade'` restores the old update). Scenes whose Drude/Lorentz structures reached into a PML diverged after roughly a thousand steps on grids larger than a few micrometres and now run stably; results away from the PML are unchanged (this commit).
 - Float32 quadrant intensity allocation at DFT field scales: fields and areas are scaled before the ratio, so ratios and gradients that underflowed to zero or non-finite values are now finite and match the FP64 closed form. Affects `quadrant_intensity_allocation` on float32 inputs of order 1e-14 and below; earlier numbers from that path should be re-run (f3efd34, case `G1-03_quadrant_allocation_scaling`).
 
 ### Added
 
+- `Region.pml_dispersion = 'frozen'` removes the Drude/Lorentz pole (ADE) update from PML cells and gives them the real permittivity at the source centre frequency, for the resident CPU/CUDA solvers and `run_tensor_batch`. Scenes whose dispersive structures reach into a PML diverged after roughly a thousand steps on grids larger than a few micrometres and run stably with it; the default `'ade'` is unchanged and the differentiable/streamed solvers reject `'frozen'` (this commit).
 - Angular-spectrum propagation of a recorded output plane into sections, volumes and points with a shared transfer function and first-order gradients: `plane_spectrum`, `propagate_section`, `propagate_volume`, `propagate_points`; `propagate_plane` now delegates to it (8283506).
 - Tiled approximate execution mode in the workbench and an execution-modes README section (f09ec94).
 - Overlapping-tile decomposition with near-field stitching, angular-spectrum propagation and a tiled plane adjoint: `plan_tiles`, `run_tiled`, `stitch_planes`, `propagate_plane`, `TiledPlaneSimulation` (c10175b).

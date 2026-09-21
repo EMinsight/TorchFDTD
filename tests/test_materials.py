@@ -146,7 +146,7 @@ def test_dispersive_material_is_frozen_inside_pml(sampling):
     """A Lorentz slab reaching into the PML keeps its ADE only in the interior."""
     fdtd.set_backend('numpy')
     from torchfdtd.materials import configure_materials, pml_cell_mask, frozen_pml_frequency_hz
-    p = small(dimension='3d'); p.region.material_sampling = sampling
+    p = small(dimension='3d'); p.region.material_sampling = sampling; p.region.pml_dispersion = 'frozen'
     p.materials.append(Material(name='sin', model='lorentz', epsilon_inf=1, resonance_rad_s=1.37e16,
                                 linewidth_rad_s=1e13, delta_epsilon=3.0))
     p.structures = [Structure(material='sin', size=(4, 4, 1))]          # spans the whole x/y extent, PML included

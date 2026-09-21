@@ -712,6 +712,8 @@ class DifferentiableSimulation(torch.nn.Module):
         p=self.project;r=p.region
         if r.interface_method!='staircase':
             raise ValueError('DifferentiableSimulation currently requires staircase coefficients.')
+        if r.pml_dispersion!='ade':
+            raise ValueError('pml_dispersion="frozen" is implemented for the resident forward solver only.')
         active={s.material for s in p.structures if s.enabled}
         if not self._explicit_dispersive_parameters and any(m.oscillators and m.name in active for m in p.materials):
             raise ValueError('Dispersive ADE derivatives are not implemented yet.')
