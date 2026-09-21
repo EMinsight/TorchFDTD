@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "oracle_bookkeeping",
+  "case_id": "G3-08_bloch_grating_rcwa",
+  "task": "G3-08",
+  "case_file": "docs/validation/cases/G3-08_bloch_grating_rcwa.json",
+  "declared": "2026-09-22",
+  "reason": "The case file is hash-bound to its recorded evidence runs and is not edited; this sidecar carries the oracle classes and layers that docs/ORACLE_BUDGET.md and tests/test_oracle_budget.py require.",
+  "oracle_class": [
+    "analytic_continuum",
+    "convergence_study",
+    "independent_solver",
+    "shared_discrete_operator"
+  ],
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_b.py::test_g3_08_torcwa_reference_is_converged",
+      "tests/test_physics_g3_b.py::test_g3_08_empty_cell",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a",
+      "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls"
+    ],
+    "layers": {
+      "tests/test_physics_g3_b.py::test_g3_08_torcwa_reference_is_converged": {
+        "layer": "B",
+        "oracle_class": "independent_solver",
+        "oracle": "oracle self-check: TORCWA harmonic sequence 20 to 640 converged within the declared per-polarization changes at the last doubling; empty-layer phase check"
+      },
+      "tests/test_physics_g3_b.py::test_g3_08_empty_cell": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "no grating: unit zero-order transmission, no other orders and no backward power at the PML thresholds (CPU float64) and at the layer-A allowance (CUDA float32)"
+      },
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders": {
+        "layer": "B",
+        "oracle_class": "independent_solver",
+        "oracle": "TORCWA 0.1.4.2 order efficiencies and dominant-order phases: absolute efficiency error 0.01, phase 0.02 rad, balance 0.01 at h = 0.005 um, subpixel, CUDA float32"
+      },
+      "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a": {
+        "layer": "A",
+        "oracle_class": "shared_discrete_operator",
+        "oracle": "first-case layer A: CUDA float32 against CPU float64 order efficiencies at h = 0.01 um with rtol 1e-4 and atol 0; one instance failed at 1.15e-4 and the FAILED run stays on record"
+      },
+      "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls": {
+        "layer": "B",
+        "oracle_class": "convergence_study",
+        "oracle": "recorded-only controls: staircase interface at both meshes and the 150 fs window at normal incidence, compared with TORCWA but not judged"
+      }
+    }
+  }
+}

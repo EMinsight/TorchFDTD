@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "kind": "oracle_bookkeeping",
+  "case_id": "G3-04_mie_cylinder_sphere",
+  "task": "G3-04",
+  "case_file": "docs/validation/cases/G3-04_mie_cylinder_sphere.json",
+  "declared": "2026-09-22",
+  "reason": "The case file is hash-bound to its recorded evidence runs and is not edited; this sidecar carries the oracle classes and layers that docs/ORACLE_BUDGET.md and tests/test_oracle_budget.py require.",
+  "oracle_class": [
+    "analytic_continuum",
+    "shared_discrete_operator"
+  ],
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_b.py::test_g3_04_reference_series_limits",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_cuda_layer_a",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_resonance",
+      "tests/test_physics_g3_b.py::test_g3_04_sphere_scattering",
+      "tests/test_physics_g3_b.py::test_g3_04_sphere_cuda_layer_a"
+    ],
+    "layers": {
+      "tests/test_physics_g3_b.py::test_g3_04_reference_series_limits": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "oracle self-check: optical theorem, small-size limits of the cylinder and sphere series, agreement with the repository real-index sphere series and the quasi-static Drude limits"
+      },
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "infinite-cylinder Mie series with SciPy Bessel functions: scattering width within 2 percent at h = 0.0125 um, TM and TE, coarser meshes recorded"
+      },
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_cuda_layer_a": {
+        "layer": "A",
+        "oracle_class": "shared_discrete_operator",
+        "oracle": "CUDA float32 against CPU float64 scattering widths at two meshes, rtol 1e-4"
+      },
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_resonance": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "TE Mie resonance of the n = 3.5 cylinder: peak position within 1 percent and FWHM within 15 percent at h = 0.0125 um"
+      },
+      "tests/test_physics_g3_b.py::test_g3_04_sphere_scattering": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "Bohren-Huffman sphere series: scattering cross section within 2 percent at h = 0.05 um (48^3 cells)"
+      },
+      "tests/test_physics_g3_b.py::test_g3_04_sphere_cuda_layer_a": {
+        "layer": "A",
+        "oracle_class": "shared_discrete_operator",
+        "oracle": "CUDA float32 against CPU float64 sphere cross sections, rtol 1e-4"
+      }
+    }
+  }
+}

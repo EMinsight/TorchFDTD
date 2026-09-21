@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "kind": "oracle_bookkeeping",
+  "case_id": "G3-13_curved_interface_convergence",
+  "task": "G3-13",
+  "case_file": "docs/validation/cases/G3-13_curved_interface_convergence.json",
+  "declared": "2026-09-22",
+  "reason": "The case file is hash-bound to its recorded evidence runs and is not edited; this sidecar carries the oracle classes and layers that docs/ORACLE_BUDGET.md and tests/test_oracle_budget.py require.",
+  "oracle_class": [
+    "convergence_study"
+  ],
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_b.py::test_g3_13_mesh_and_interface_convergence",
+      "tests/test_physics_g3_b.py::test_g3_13_subcell_shift",
+      "tests/test_physics_g3_b.py::test_g3_13_smoothing_width_sweep"
+    ],
+    "layers": {
+      "tests/test_physics_g3_b.py::test_g3_13_mesh_and_interface_convergence": {
+        "layer": "B",
+        "oracle_class": "convergence_study",
+        "oracle": "staircase and subpixel cylinder widths against the Mie series at h = 0.05, 0.025, 0.0125 um; the subpixel error at h must be below the staircase error at h; order estimates recorded"
+      },
+      "tests/test_physics_g3_b.py::test_g3_13_subcell_shift": {
+        "layer": "B",
+        "oracle_class": "convergence_study",
+        "oracle": "cylinder centre shifted by 0, 0.25 and 0.5 cells at h = 0.05 um for both interfaces; error spread against the Mie series recorded"
+      },
+      "tests/test_physics_g3_b.py::test_g3_13_smoothing_width_sweep": {
+        "layer": "B",
+        "oracle_class": "convergence_study",
+        "oracle": "differentiable-solid transition width from 1e-6 to 2 cells at h = 0.05 um through the TFSF solver; the vanishing width must reproduce the staircase image off the contour"
+      }
+    }
+  }
+}
