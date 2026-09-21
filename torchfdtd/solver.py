@@ -196,8 +196,10 @@ def estimate(p: Project, *, endpoint_dispatch=True):
                     low,high=material.fit_band_um
                     if s.pulse=='sampled':
                         warnings.append(f'{material.name}: supplied time signal may extend beyond its material fit band ({low:g}–{high:g} um). Inspect its spectrum.')
-                    elif min(wavelengths)<low or max(wavelengths)>high:
-                        warnings.append(f'{s.name}: source wavelength lies outside {material.name} fit band ({low:g}–{high:g} um). Extrapolated material accuracy is not validated.')
+                    else:
+                        from .material_fit import fit_band_extrapolation
+                        message=fit_band_extrapolation(material,(min(wavelengths),max(wavelengths)),label=s.name)
+                        if message:warnings.append(message)
         max_n = max([r.background_index] + [float(np.max(abs(np.sqrt(permittivity(m, C0/(wavelengths*1e-6)))))) for m in active_materials])
         finest=max(r.axis_steps[:2 if r.dimension=='2d' else 3])
         if s.enabled and shortest / (max_n*finest) < 15:

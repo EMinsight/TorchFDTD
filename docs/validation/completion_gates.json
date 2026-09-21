@@ -1830,48 +1830,105 @@
           "title": "재료 CSV/nk/epsilon import, passive fitting, 원자료 출처·사용권·해시, fit band, 시간 이산화에 따른 n/k 오차, extrapolation 경고를 하나의 workflow로 묶는다",
           "specification": "재료 CSV/nk/epsilon import, passive fitting, 원자료 출처·사용권·해시, fit band, 시간 이산화에 따른 n/k 오차, extrapolation 경고를 하나의 workflow로 묶는다. 재료 fitting이 이미 있으면 재구현하지 말고 검증·UI·저장 경로를 완성한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/material_fit.py",
+            "torchfdtd/models.py",
+            "torchfdtd/solver.py",
+            "torchfdtd/server.py",
+            "frontend/src/material_fit.js",
+            "frontend/src/materials.js",
+            "tests/test_material_workflow.py",
+            "tests/fixtures/materials/sio2_sellmeier_malitson1965.csv",
+            "tests/ui/material-provenance.spec.js",
+            "docs/MATERIAL_FITTING.md",
+            "docs/validation/cases/G6-01_material_import_workflow.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_material_workflow.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-01.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_material_workflow.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-01.xml"
+          ],
+          "required_tests": [
+            "tests/test_material_workflow.py"
+          ],
+          "evidence": [
+            "20260921T195534Z-g6-01-bdd21c2c"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "import_material_table with MaterialProvenance (raw SHA-256, source, licence), the existing passive fitter over the declared band, discretization_report (ADE n/k error at dt) and fit_band_extrapolation shared with the estimate; provenance and band panel in the materials dialog; project JSON keeps provenance and fit band."
         },
         {
           "id": "G6-02",
           "title": "source의 실제 공간 분포·위상·편광·시간 파형·유효 bandwidth를 preview한다",
           "specification": "source의 실제 공간 분포·위상·편광·시간 파형·유효 bandwidth를 preview한다. oblique broadband에서는 fixed k_parallel/Bloch phase와 fixed incidence angle을 구분한다. 미지원 조합을 정상적인 fixed-angle source처럼 표시하지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/source_preview.py",
+            "torchfdtd/capabilities.py",
+            "torchfdtd/capabilities.json",
+            "torchfdtd/server.py",
+            "frontend/src/sources.js",
+            "tests/test_source_preview.py",
+            "tests/ui/source-preview.spec.js",
+            "docs/SOURCES.md",
+            "docs/CAPABILITIES.md",
+            "docs/validation/cases/G6-02_source_preview.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_source_preview.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-02.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_source_preview.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-02.xml"
+          ],
+          "required_tests": [
+            "tests/test_source_preview.py"
+          ],
+          "evidence": [
+            "20260921T195548Z-g6-02-9b5a95d6"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "preview_source reports the source cells with amplitude and Bloch phase per axis, the polarization vector, the 1 percent effective bandwidth and the incidence definition (fixed k_parallel with the angle range across the band); a fixed-angle request is refused with the registry INCIDENCE message on the function, the route and the source dialog."
         },
         {
           "id": "G6-03",
           "title": "reference를 포함한 R/T/A, 복소 S, phase/group delay, mode decomposition, diffraction, far-field/near-zone을 기존 결과와 통합한다",
           "specification": "reference를 포함한 R/T/A, 복소 S, phase/group delay, mode decomposition, diffraction, far-field/near-zone을 기존 결과와 통합한다. 절대 SI calibration이 없는 값에는 reduced units를 명시한다. 1-R-T만으로 독립 absorption 검증을 대체하지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/results.py",
+            "torchfdtd/__init__.py",
+            "tests/test_results.py",
+            "docs/RESULTS.md",
+            "docs/COMPATIBILITY.md",
+            "docs/validation/cases/G6-03_integrated_results.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_results.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-03.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_results.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-03.xml"
+          ],
+          "required_tests": [
+            "tests/test_results.py"
+          ],
+          "evidence": [
+            "20260921T195559Z-g6-03-b314c028"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "torchfdtd.results: ResultRecord with units, calibration, valid masks and reasons; reflection_transmission (A only from a closed box, 1-R-T labelled a balance), s_parameters (phase and group delay), mode_decomposition, diffraction_record, farfield_record, nearzone_record; tested on the slab flux, straight guide, Y branch, slab guide, coarse grating and analytic dipole fixtures."
         },
         {
           "id": "G6-04",
@@ -1942,16 +1999,33 @@
           "title": "low-intensity/near-zero reference/frequency cutoff/evanescent/backflow에서 NaN·음의 국소 flux·invalid phase를 임의 clipping으로 숨기지 않는다",
           "specification": "low-intensity/near-zero reference/frequency cutoff/evanescent/backflow에서 NaN·음의 국소 flux·invalid phase를 임의 clipping으로 숨기지 않는다. 수학적으로 부적절한 정규화는 이유를 알려 거절한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/results.py",
+            "torchfdtd/field_monitors.py",
+            "torchfdtd/server.py",
+            "frontend/src/monitor_tools.js",
+            "tests/test_numerical_guards.py",
+            "docs/NUMERICAL_GUARDS.md",
+            "docs/validation/cases/G6-08_numerical_guards.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_numerical_guards.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-08.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_numerical_guards.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-08.xml"
+          ],
+          "required_tests": [
+            "tests/test_numerical_guards.py"
+          ],
+          "evidence": [
+            "20260921T195609Z-g6-08-374a45a0"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "guarded_ratio names zero, weak, backflowing references and backflow through a monitor; normalize_flux returns reasons; phase, group delay, evanescent orders, cutoff and allocation guards tabled in docs/NUMERICAL_GUARDS.md with declared thresholds and injection tests."
         }
       ]
     },

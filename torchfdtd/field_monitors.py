@@ -199,4 +199,7 @@ does not infer direction, absolute source calibration or absorption.
     denominator=abs(reference['flux'])
     valid=(denominator>min_reference_fraction*denominator.max())&(denominator>0)
     ratio=np.full(len(flux),np.nan);ratio[valid]=flux[valid]/denominator[valid]
-    return dict(frequency_hz=sample['frequency_hz'],ratio=ratio,valid=valid,subtract_incident=subtract_incident)
+    # Every NaN names its guard (docs/NUMERICAL_GUARDS.md); nothing is clipped to the threshold.
+    reasons=np.where(denominator<=0,'reference is zero',
+                     np.where(valid,None,f'reference below {min_reference_fraction:g} of its band peak: no supported ratio')).astype(object)
+    return dict(frequency_hz=sample['frequency_hz'],ratio=ratio,valid=valid,subtract_incident=subtract_incident,reasons=reasons)

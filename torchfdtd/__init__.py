@@ -176,3 +176,15 @@ from .angular_spectrum import (PlaneSpectrum, SectionResult, VolumeResult, Point
                                propagate_volume, propagate_points, volume_bytes)
 __all__ += ["PlaneSpectrum", "SectionResult", "VolumeResult", "PointsResult", "plane_spectrum", "propagate_section",
             "propagate_volume", "propagate_points", "volume_bytes"]
+
+from .models import MaterialProvenance
+from .material_fit import (MaterialImportResult, MaterialBandWarning, import_material_table, discretization_report,
+                           fit_band_extrapolation)
+__all__ += ["MaterialProvenance", "MaterialImportResult", "MaterialBandWarning", "import_material_table",
+            "discretization_report", "fit_band_extrapolation"]
+from .source_preview import preview_source, effective_bandwidth
+__all__ += ["preview_source", "effective_bandwidth"]
+from .results import (ResultRecord, guarded_ratio, reflection_transmission, s_parameters, mode_decomposition,
+                      diffraction_record, farfield_record, nearzone_record)
+__all__ += ["ResultRecord", "guarded_ratio", "reflection_transmission", "s_parameters", "mode_decomposition",
+            "diffraction_record", "farfield_record", "nearzone_record"]

@@ -124,15 +124,35 @@ export function setupSourceTools({state,api,esc,commit,toast}) {
    $('[data-apply]').onclick=async()=>{try{const valid=await api('/validate',draft);commit(valid.project);close();}catch(e){fail(e);}};
   };render();dialog.showModal();
  }
- async function preview(sourceId) {
+ // The preview reports what the solver realizes (docs/SOURCES.md): the mesh-time samples, the spectrum and its
+ // effective bandwidth, the polarization vector, the amplitude and Bloch phase on the source cells and the incidence
+ // definition. The incidence select asks the server for a definition; a fixed-angle request is refused with the
+ // registry message (torchfdtd/capabilities.py INCIDENCE) and nothing is drawn as if it were supported.
+ const angleText=a=>a.angle_deg==null?`${a.wavelength_um.toFixed(4)} µm: ${a.reason}`:`${a.wavelength_um.toFixed(4)} µm: ${a.angle_deg.toFixed(3)}°`;
+ function incidenceText(i){
+  if(i.kind==='fixed_k_parallel')return `Fixed k∥ (Bloch phase): |k∥| = ${i.k_parallel_magnitude_rad_per_um.toPrecision(5)} rad/µm in the exterior index ${i.exterior_index}. ${i.statement} Angle across the band · ${Object.values(i.angle_deg).map(angleText).join(' · ')}.`;
+  if(i.kind==='normal')return `Normal incidence: ${i.statement}`;
+  return i.statement;
+ }
+ function bandwidthText(bw){
+  if(!bw.frequency_hz)return `Effective bandwidth: ${bw.reason}.`;
+  return `Effective bandwidth (${bw.definition}): ${(bw.frequency_hz[0]*1e-12).toFixed(2)}–${(bw.frequency_hz[1]*1e-12).toFixed(2)} THz, ${bw.wavelength_um[0].toFixed(4)}–${bw.wavelength_um[1].toFixed(4)} µm, peak at ${bw.center_wavelength_um.toFixed(4)} µm, resolution ${(bw.frequency_resolution_hz*1e-12).toFixed(3)} THz${bw.declared_wavelength_um?`; declared range ${bw.declared_wavelength_um[0]}–${bw.declared_wavelength_um[1]} µm`:''}.`;
+ }
+ function spatialText(terms){
+  if(!terms.length)return 'Spatial profile: disabled source, nothing is injected.';
+  return terms.map(t=>{const phase=Object.entries(t.phase_rad_by_axis||{}).map(([axis,line])=>`${axis}: ${line[0].toFixed(3)} → ${line.at(-1).toFixed(3)} rad over ${line.length} cells`).join(', ');return `${t.component} ${t.kind}: amplitude ${t.amplitude.toPrecision(4)} (weight ${t.weight.toPrecision(4)}), cells ${t.cells.map(([a,b])=>`[${a},${b})`).join('×')}; ${t.profile}${phase?`; phase ${phase}`:''}.`;}).join(' ');
+ }
+ async function preview(sourceId,incidence='') {
   const project=structuredClone(state.project);
   open('<h2>Source time signal and spectrum</h2><p>Computing the injection at the current mesh time step…</p><p role="alert" class="error"></p><div class="dialog-actions"><button data-source-close>Close</button></div>');
   try {
-   const data=await api('/sources/'+encodeURIComponent(sourceId)+'/preview',project);if(!dialog.open)return;
-   dialog.innerHTML=`<h2>Source preview · ${esc(data.name)}</h2><p>${data.inherited?'Global':'Local'} pulse settings · ${data.enabled?'Enabled':'Disabled: zero injection'} · Δt ${data.dt_fs.toFixed(5)} fs · ${data.signal.length.toLocaleString()} samples</p>${data.pulse_parameters?`<p>${data.pulse_parameters.chirped?'Chirped':'Unchirped'} carrier · center ${data.pulse_parameters.center_wavelength_um.toFixed(5)} µm · power FWHM ${(data.pulse_parameters.pulse_length_s*1e15).toFixed(4)} fs</p>`:''}<div class="source-plot-tabs"><button data-mode="time" class="active">Time signal</button><button data-mode="spectrum">Spectrum</button><select aria-label="Source spectrum axis" hidden><option value="frequency">Frequency</option><option value="wavelength">Wavelength</option></select></div><canvas aria-label="Source waveform"></canvas><p>${esc(data.note)}</p><div class="dialog-actions"><button data-source-close>Close</button></div>`;
-   let spectrum=false;const draw=()=>drawPlot($('canvas'),[data],spectrum,$('select').value==='wavelength');
-   dialog.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{spectrum=b.dataset.mode==='spectrum';$('select').hidden=!spectrum;dialog.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));draw();});
-   $('select').onchange=draw;$('[data-source-close]').onclick=close;draw();
+   const data=await api('/sources/'+encodeURIComponent(sourceId)+'/preview'+(incidence?`?incidence=${incidence}`:''),project);if(!dialog.open)return;
+   const phaseSeries=(data.spatial||[]).flatMap(t=>Object.entries(t.phase_rad_by_axis||{}).map(([axis,line])=>({name:`${t.component} phase along ${axis}`,frequency_thz:t.positions_um[axis],wavelength_um:t.positions_um[axis],spectrum:line,signed:true,spectrum_label:`Position (µm) · Bloch phase on the source cells (rad, ${t.phase_reference})`})));
+   dialog.innerHTML=`<h2>Source preview · ${esc(data.name)}</h2><p>${data.inherited?'Global':'Local'} pulse settings · ${data.enabled?'Enabled':'Disabled: zero injection'} · Δt ${data.dt_fs.toFixed(5)} fs · ${data.signal.length.toLocaleString()} samples</p>${data.pulse_parameters?`<p>${data.pulse_parameters.chirped?'Chirped':'Unchirped'} carrier · center ${data.pulse_parameters.center_wavelength_um.toFixed(5)} µm · power FWHM ${(data.pulse_parameters.pulse_length_s*1e15).toFixed(4)} fs</p>`:''}<p data-preview-bandwidth>${esc(bandwidthText(data.bandwidth))}</p><p data-preview-polarization>Polarization: ${esc(data.polarization.family)} vector (${data.polarization.vector.map(v=>v.toFixed(4)).join(', ')})${data.polarization.theta_deg!=null?` from θ ${data.polarization.theta_deg}°, φ ${data.polarization.phi_deg}°`:''}.</p><p data-preview-spatial>${esc(spatialText(data.spatial||[]))}</p><label class="property-row"><span>incidence definition</span><select aria-label="Incidence definition"><option value="" ${!incidence?'selected':''}>As realized</option><option value="fixed_k_parallel" ${incidence==='fixed_k_parallel'?'selected':''}>Fixed k∥ (Bloch phase)</option><option value="fixed_angle">Fixed angle (broadband)</option></select></label><p data-preview-incidence>${esc(incidenceText(data.incidence))}</p><div class="source-plot-tabs"><button data-mode="time" class="active">Time signal</button><button data-mode="spectrum">Spectrum</button>${phaseSeries.length?'<button data-mode="phase">Spatial phase</button>':''}<select aria-label="Source spectrum axis" hidden><option value="frequency">Frequency</option><option value="wavelength">Wavelength</option></select></div><canvas aria-label="Source waveform"></canvas><p>${esc(data.note)}</p><p role="alert" class="error"></p><div class="dialog-actions"><button data-source-close>Close</button></div>`;
+   let mode='time';const draw=()=>mode==='phase'?drawPlot($('canvas'),phaseSeries,true,false):drawPlot($('canvas'),[data],mode==='spectrum',$('select[aria-label="Source spectrum axis"]').value==='wavelength');
+   dialog.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;$('select[aria-label="Source spectrum axis"]').hidden=mode!=='spectrum';dialog.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));draw();});
+   $('select[aria-label="Source spectrum axis"]').onchange=draw;$('[data-source-close]').onclick=close;draw();
+   $('select[aria-label="Incidence definition"]').onchange=async e=>{const value=e.target.value;if(value==='fixed_angle'){try{await api('/sources/'+encodeURIComponent(sourceId)+'/preview?incidence=fixed_angle',project);fail(Error('The server accepted a fixed-angle source; the registry has changed.'));}catch(err){$('[data-preview-incidence]').textContent='Refused: '+err.message;fail(err);}return;}preview(sourceId,value);};
   }catch(e){if(dialog.open)fail(e);else toast(e.message);}
  }
  return {signal,globals,preview};

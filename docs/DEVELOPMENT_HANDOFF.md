@@ -867,4 +867,73 @@ merge so the G8-05 and G8-07 records match the merged bundle and pyproject:
 
 ```
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/TorchFDTD/.local --find-links D:/TorchFDTD/.local/wheels --cuda-torch "torch==2.10.0+cu126"
+---
+
+### 2026-09-22 G6-01, G6-02, G6-03, G6-08 (material import workflow, source preview, integrated results, numerical guards), branch g6-api-a from 73203d2
+
+**Problem or goal.** The user-facing physics API of stage G6: one material
+workflow from a raw table to a fitted material with provenance and band checks
+(G6-01), a source preview that reports what the solver realizes and refuses
+what it does not (G6-02), one record type for R/T/A, S-parameters, mode
+decomposition, diffraction and radiation with named units (G6-03), and explicit
+guards on every normalization path (G6-08).
+
+**State found.** HEAD 73203d2 on branch g6-api-a, clean tree. The passive
+fitter (`material_fit.py`), `OpticalData`, the source preview module, the
+radiation and mode-port decompositions, `normalize_flux` and the capability
+registry existed; no provenance fields, no realized-space preview, no integrated
+record, and `normalize_flux` returned NaN without a reason.
+
+**Changed files (why).**
+- `torchfdtd/models.py`: `MaterialProvenance` (source, licence, raw SHA-256, file, columns, unit, date) and `Material.provenance`.
+- `torchfdtd/material_fit.py`: `import_material_table`, `MaterialImportResult`, `discretization_report`, `fit_band_extrapolation`, `MaterialBandWarning`; `fit_material(provenance=...)`; `OpticalDataRequest.source/licence/file_name`, `MaterialFitRequest.provenance`. `torchfdtd/solver.py`: the estimate's extrapolation warning goes through `fit_band_extrapolation`.
+- `torchfdtd/source_preview.py`: `spatial`, `polarization`, `bandwidth` (1 percent of peak, declared) and `incidence` blocks; `effective_bandwidth`; `incidence='fixed_angle'` refused. `torchfdtd/capabilities.py`: `INCIDENCE` block served in the registry JSON; `scripts/build_capability_tables.py` renders it; `docs/CAPABILITIES.md` and `torchfdtd/capabilities.json` regenerated.
+- `torchfdtd/results.py` (new): `ResultRecord`, `guarded_ratio`, `reflection_transmission`, `s_parameters`, `mode_decomposition`, `diffraction_record`, `farfield_record`, `nearzone_record`. `torchfdtd/field_monitors.py`: `normalize_flux` returns `reasons`.
+- `torchfdtd/server.py`: `/api/materials/provenance`; `/api/materials/fit` and `/preview` return `discretization`, `provenance`, `fit_band_um`; `?incidence=` on the source preview (422 with the registry message); `reasons` on `/normalize-flux`.
+- `frontend/src/material_fit.js`, `materials.js`, `style.css`: source and licence inputs, provenance and fitted-band panel (discretization error from the preview, band warnings from `/api/validate`). `frontend/src/sources.js`: bandwidth, polarization, spatial and incidence text, spatial-phase tab, incidence selector with the refusal. `frontend/src/monitor_tools.js`: invalid-entry reasons in the flux status.
+- `torchfdtd/__init__.py`, `docs/COMPATIBILITY.md`: 16 new public names (211). `docs/RESULTS.md`, `docs/NUMERICAL_GUARDS.md` (new); `docs/MATERIAL_FITTING.md`, `docs/SOURCES.md`, `docs/MONITORS.md`, `docs/CHANGELOG.md`.
+- `tests/test_material_workflow.py`, `tests/test_source_preview.py`, `tests/test_results.py`, `tests/test_numerical_guards.py`, `tests/ui/material-provenance.spec.js`, `tests/ui/source-preview.spec.js`, `tests/fixtures/materials/sio2_sellmeier_malitson1965.csv` (formula stated in the header).
+- `docs/validation/cases/G6-01_material_import_workflow.json`, `G6-02_source_preview.json`, `G6-03_integrated_results.json`, `G6-08_numerical_guards.json`; gate metadata for the four tasks; four evidence runs.
+- `torchfdtd/web/`: bundle rebuilt in the last commit of the branch.
+
+**Commands run (device: local Windows 11, i7-12700 shared with other sessions, CPU only; Python 3.10, torch 2.10.0+cu126; TMP and TEMP set to D:/TorchFDTD/.local/tmp).** From the worktree root, one task at a time:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_material_workflow.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-01.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_source_preview.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-02.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_results.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-03.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_numerical_guards.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G6-08.xml
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G6-0X --command "<the line above>" --junit D:/TorchFDTD/.local/tmp/junit/G6-0X.xml --exit-code 0 --fixture docs/validation/cases/<case>.json [--artifact D:/TorchFDTD/.local/tmp/junit/G6-0X-ui.xml] --scope "<devices>"
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G6-0X
+```
+
+The Playwright specs ran against the bundle built from da70a70 with `python -m torchfdtd.cli serve --port 8772`, `TORCHFDTD_URL=http://127.0.0.1:8772` and a `node_modules` junction to `D:\TorchFDTD\node_modules` (removed afterwards): `npx playwright test tests/ui/material-provenance.spec.js tests/ui/source-preview.spec.js tests/ui/material-fit.spec.js tests/ui/materials.spec.js tests/ui/sources.spec.js` gave 6 passed in 39.3 s; the JUnit reports of the two new specs (`--reporter=junit`, 1 test and 0 failures each) are attached as artifacts to the G6-01 and G6-02 evidence.
+
+**Measurements and pre-declared limits.**
+- G6-01: the SiO2 Sellmeier table (81 points, 0.4 to 2.0 um) fits with 2 poles at normalized RMS 1.9e-7 (tolerance 1e-4); held-out n error below 2e-4; `discretization_report` at dt 5e-17 s gives max |dn| 2.0e-4 at 0.4 um and |dk| 2.3e-10, ratio 4.0 against dt/2 (limits 3.8 to 4.2), equal to the independent bilinear evaluation to 1e-12; the extrapolation warning is raised for (0.3, 1.0) um and absent for (0.5, 1.6); provenance and fit band survive `Project.save/load`, `/api/validate` and the browser save. 8 tests in 8.8 s.
+- G6-02: on the 1.2 um Bloch cell at 20 deg and 1.02 um, `k_parallel` 2.107 rad/um, carrier angle 20.000 deg, band-edge angles 48.97 deg (2.25 um) and 12.92 deg (0.667 um) as `asin(k_parallel lambda / 2 pi)`; the spatial phase line equals `phi (x - x_first) / L` to 1e-12 rad; the 1 percent band of the 3-cycle Gaussian matches `f0 +- sqrt(ln 100 / 2) / (pi sigma)` within 1.5 bins; the fixed-angle request raises the registry message and the route answers 422. 6 tests in 6.4 s.
+- G6-03: lossless slab max |T - Fabry-Perot| 1.5e-3 and max |1 - R - T| 4.4e-6 (limit 0.004); lossy slab A from the four-face box 0.150 to 0.192 with max |A - balance| 3.5e-6 (limit 0.01); straight-guide S21 group delay 3.104e-14 s against the Yee-dispersion oracle 3.130e-14 s (0.85 percent, limit 3 percent) and the continuum 2.437e-14 s (ratio 1.27, declared 1.2 to 1.35); slab-guide forward fraction 1.09 (0.9 to 1.15); coarse grating (0.03 um, 150 fs) efficiencies at 0.92/1.02/1.06 um: T(-1) 0.013/0.144/0.523, T(0) 0.417/0.545/0.285, R(-1) 0.028/0.149/0.088, R(0) 0.541/0.161/0.093, sums 0.999/0.998/0.988 (limit 0.05), orders -2, 1, 2 evanescent and NaN with the reason; dipole far field 56 directions, normalized intensity equal to reduced over reference flux to 1e-10. 9 tests in 66.6 s.
+- G6-08: every injected situation of docs/NUMERICAL_GUARDS.md returns its reason; a float32 reference at 1e-8 of its peak is flagged by the rounding floor (32 eps) while a float64 one at 1e-6 with fraction 1e-9 is not; the group delay of a dispersive line (tau0 5e-14 s, D 2e-28 s^2) is recovered to 1e-6 relative at interior points and 5 percent at the one-sided ends; a 3.14 rad phase step gives no group delay; `diffraction_efficiency` and `normalized_farfield_intensity` refuse a two-frequency reference weak at one frequency. 9 tests in 10.3 s.
+
+**Passed / failed / skipped / not run.** Passed: 32 tests of the four recorded runs, 6 Playwright tests, and the regression files tests/test_material_fit.py, test_materials.py, test_project_compatibility.py, test_compatibility_policy.py, test_sources.py, test_oneway_sources.py, test_tfsf.py, test_capability_pairs.py (registry, rendered tables and API tests), test_release_gates.py, test_field_monitors.py, test_monitor_outputs.py, test_server_security.py, test_solver.py. Failed: none of this branch's tests. Pre-existing at 73203d2 and unchanged: tests/test_oracle_budget.py (3 failures: the merged G3 cases lack `oracle_class` and list class-qualified test ids) and a test-order leak in which tests/test_monitor_outputs.py leaves torch state that fails 6 tests of tests/test_radiation.py and 3 of tests/test_mode_ports.py when those files follow it in one session (all pass alone). Skipped: none. Not run: CUDA instances (none declared), the `not_yet_covered` items of the four cases.
+
+**Evidence paths and hashes.** Recorded on the clean tree at da70a70:
+- G6-01 `docs/validation/runs/20260921T195534Z-g6-01-bdd21c2c/` (VERIFIED, 8 passed)
+- G6-02 `docs/validation/runs/20260921T195548Z-g6-02-9b5a95d6/` (VERIFIED, 6 passed)
+- G6-03 `docs/validation/runs/20260921T195559Z-g6-03-b314c028/` (VERIFIED, 9 passed)
+- G6-08 `docs/validation/runs/20260921T195609Z-g6-08-374a45a0/` (VERIFIED, 9 passed)
+
+Each `evidence.json` carries the fixture and test-source SHA-256 values, the environment and the JUnit copy; `scripts/check_release_gates.py --task G6-0X` passes each of the four (the two failures it reports outside the selection are the pre-existing G3-05 and G3-08 records). The four rows are `implementation_state` IMPLEMENTED.
+
+**Remaining defects, risks, external blockers.**
+- A fixed-angle broadband source does not exist; the registry `incidence` block and the preview refuse it by name (feature inventory `source.angle`, `boundary.bfast` stay missing). Implementing BFAST-like injection is a separate task.
+- The group delay of a mode-port sweep is the Yee grid's; at eight cells per guided wavelength it exceeds the continuum by 27 percent. The record states the convention (`+d arg S / d omega` under `exp(-i omega t)`); a user comparing with a continuum mode solver must refine the mesh or apply the `(2/h) asin(beta h / 2)` map.
+- `mode_decomposition` fractions are overlap estimates on the sampled basis and reach 1.09 on the 0.1 um slab guide; the weak-mode branch and the negative-absorption branch of the guards are declared but not injected (listed as `not_yet_covered`).
+- The differentiable paths (`diffraction_efficiency`, `normalized_farfield_intensity`, `normalized_mode_power`) keep whole-call refusals rather than per-frequency reasons.
+- The browser keeps its raw flux, normalize-flux (now with reasons), diffraction and far-field dialogs; no dialog renders a `ResultRecord` yet.
+
+**Next first command and task id.** G6-04 (per-port mode tracking, reference planes, forward/backward separation) can build on `s_parameters` and `mode_decomposition`; to re-verify this branch after a merge:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_material_workflow.py tests/test_source_preview.py tests/test_results.py tests/test_numerical_guards.py
 ```
