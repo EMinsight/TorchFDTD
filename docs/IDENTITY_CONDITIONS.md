@@ -12,7 +12,11 @@ caches, references and journals that hold state apply them.
 
 `torchfdtd.plan.resolve_plan(project)` runs the existing resolvers once and
 freezes their outputs in a `SimulationPlan`: realized mesh nodes and the six
-Yee component coordinates, `dt`, the step count and the half-step convention,
+Yee component coordinates, `dt`, the step count, the run-control settings the
+automatic shutoff reads (`auto_shutoff` and, when it is on, the decay threshold,
+check interval, consecutive checks, minimum steps, source tail amplitude and
+post-source delay; the divergence checks abort a run and are not hashed) and the
+half-step convention,
 the per-face boundary kinds with the CPML profiles (`kappa`, `sigma`,
 `alpha`) and update coefficients (`b`, `c`) of every segment, the Bloch
 phases and wrap factors, the ADE coefficients of every dispersive material,
@@ -63,6 +67,8 @@ What each change invalidates (`invalidated(before, after)`), as
 | effective waveform: amplitude, phase, source position, polarization | yes | yes | yes |
 | a source setting the sampled waveform does not read | | | |
 | mesh nodes, time step, step count | yes | yes | yes |
+| automatic shutoff and its decay settings (`run_control`) | yes | yes | yes |
+| a divergence check setting (`field_limit`, `growth_limit`) | | | |
 | background index, PML profile, Bloch phase | yes | yes | yes |
 | PML dispersion mode (`pml_dispersion`) | yes | yes | yes |
 | field-monitor geometry, downsampling, apodization | yes | yes | yes |

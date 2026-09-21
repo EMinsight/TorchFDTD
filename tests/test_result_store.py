@@ -161,6 +161,28 @@ def test_foreign_and_newer_files_are_refused(stored, tmp_path):
         Result.open(newer)
 
 
+def test_a_corrupted_metadata_attribute_does_not_leak_the_handle(stored, tmp_path, monkeypatch):
+    """A project or summary attribute that fails to parse after the format check closes the file before raising."""
+    import shutil
+    opened = []
+
+    class Recording(h5py.File):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            opened.append(self)
+    monkeypatch.setattr(h5py, 'File', Recording)
+    for attribute, value in [('project', '{"region": {"mesh": -1}}'), ('summary', 'not json'), ('field_monitors', '[unterminated')]:
+        corrupt = tmp_path / f'corrupt_{attribute}.h5'
+        shutil.copy(stored, corrupt)
+        with Recording(corrupt, 'a') as file:
+            file.attrs[attribute] = value
+        with pytest.raises(ValueError):
+            ResultFile(corrupt)
+        assert len(opened) == 2 and not any(opened), attribute   # a closed h5py.File is falsy
+        opened.clear()
+        corrupt.unlink()   # an open read handle keeps the file locked on Windows
+
+
 def test_plane_slice_of_a_multi_gigabyte_shaped_volume_stays_within_the_declared_memory(result, tmp_path):
     """The E volume is replaced by a (512, 512, 512, 3) float32 dataset, 1.6 GB nominal,
     of which one x plane of Ez is written; the file stores only that chunk. Opening the
