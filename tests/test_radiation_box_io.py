@@ -76,6 +76,22 @@ def test_selected_six_faces_reference_and_full_frequency_forwarding(tmp_path, ad
     assert not {'E.npy', 'frames.npy'} & set(opened)
 
 
+def test_open_surface_subset_is_forwarded_and_flag_required(tmp_path, adapter):
+    path = archive(tmp_path/'sample.npz')
+    subset = {'z_max': 'z_max', 'x_min': 'x_min'}
+    load_native_radiation_box(path, subset, open_surface=True, **KW)
+    sample, mapping, kwargs = adapter[0]
+    assert mapping == subset and kwargs['open_surface'] is True
+    assert [face['id'] for face in sample['frequency_fields']] == ['z_max', 'x_min']
+    with pytest.raises(ValueError, match='Exactly six'):
+        load_native_radiation_box(path, subset, **KW)
+    with pytest.raises(ValueError, match='one to five'):
+        load_native_radiation_box(path, IDS, open_surface=True, **KW)
+    with pytest.raises(ValueError, match='boolean'):
+        load_native_radiation_box(path, subset, open_surface=1, **KW)
+    assert len(adapter) == 1
+
+
 def test_aggregate_reference_and_full_frequency_bytes_before_numeric_load(tmp_path, adapter, monkeypatch):
     path = archive(tmp_path/'many-frequencies.npz', frequencies=64, points=64)
     budget = 10*1024**2

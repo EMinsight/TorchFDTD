@@ -78,13 +78,42 @@ def _rectangle(plane, bounds_um):
     return bounds, area
 
 
+def _passive(value, name):
+    """One fixed scalar with positive real part and non-negative imaginary part.
+
+    With exp(-i omega t) phasors a passive exterior has Im(n) >= 0 and
+    Im(mu_r) >= 0, so exp(ikr) decays. A negative imaginary part describes a
+    growing exterior and is rejected. A real value is returned as float so the
+    lossless path is unchanged.
+    """
+    if isinstance(value, torch.Tensor):
+        if value.requires_grad:
+            raise ValueError(f'{name} is fixed metadata, not a design variable.')
+        if value.numel() != 1:
+            raise ValueError(f'{name} must be one scalar; per-frequency exteriors are not supported.')
+        value = value.item()
+    if isinstance(value, bool):
+        raise ValueError(f'{name} must be a number.')
+    z = complex(value)
+    if not math.isfinite(z.real) or not math.isfinite(z.imag) or z.real <= 0:
+        raise ValueError(f'{name} must be finite with a positive real part.')
+    if z.imag < 0:
+        raise ValueError(f'{name} has a negative imaginary part: with exp(-i omega t) phasors that is a growing '
+                         'exterior, not a passive lossy one. Use a non-negative imaginary part.')
+    return z.real if z.imag == 0 else z
+
+
 def _index(value):
-    if isinstance(value, torch.Tensor) and value.requires_grad:
-        raise ValueError('Exterior refractive index is fixed metadata, not a design variable.')
-    n = float(value)
-    if not math.isfinite(n) or n <= 0:
-        raise ValueError('Exterior refractive index must be finite, real and positive.')
-    return n
+    return _passive(value, 'Exterior refractive index')
+
+
+def _exterior(refractive_index, relative_permeability):
+    """Return (n, mu_r, admittance n/mu_r); the lossless path keeps Python floats."""
+    n = _index(refractive_index)
+    mu = _passive(relative_permeability, 'Exterior relative permeability')
+    if (isinstance(n, complex) or isinstance(mu, complex)) and (n**2 / mu).imag < 0:
+        raise ValueError('Exterior permittivity n^2/mu_r has a negative imaginary part; the exterior is not passive.')
+    return n, mu, n / mu
 
 
 def _reference_scale(reference, threshold):
@@ -127,6 +156,8 @@ def diffraction_orders(plane, orders, *, period_um, refractive_index=1.,
     a = _plane(plane)
     b, c = (a + 1) % 3, (a + 2) % 3
     n = _index(refractive_index)
+    if isinstance(n, complex):
+        raise ValueError('Diffraction orders require a real lossless exterior index.')
     period = _real_metadata(period_um, plane.points_um, 'Period')
     bloch = _real_metadata(bloch_wavevector_per_um, period, 'Bloch wavevector')
     raw_orders = torch.as_tensor(orders, device=period.device)
@@ -207,17 +238,27 @@ def diffraction_efficiency(plane, reference, orders, *, direction='forward',
     return getattr(result, direction + '_power') / denominator[:, None]
 
 
+_FACES = tuple(d + side for d in 'xyz' for side in ('_min', '_max'))
+
+
 @dataclass
 class FarFieldResult:
     electric_amplitude: torch.Tensor  # F, direction, xyz, E_spectral * metres
     directions: torch.Tensor
     frequency_hz: torch.Tensor
-    refractive_index: float
+    refractive_index: float  # complex for a lossy exterior
     phase_origin_um: torch.Tensor
+    relative_permeability: float = 1.
+    approximation: str = None  # 'open surface' when faces were omitted
+    surfaces: tuple = _FACES
 
     def intensity(self):
-        """Reduced spectral power per steradian, not normalized efficiency."""
-        return .5 * self.refractive_index * self.electric_amplitude.abs().square().sum(-1)
+        """Reduced spectral power per steradian, not normalized efficiency.
+
+        For a lossy exterior this is the source-referred pattern
+        `.5 Re(n/mu_r) |A|^2`, without the exp(-2 Im(k) r) attenuation.
+        """
+        return .5 * (self.refractive_index / self.relative_permeability).real * self.electric_amplitude.abs().square().sum(-1)
 
     def fields_at_radius(self, radius_m):
         """Leading 1/r term only. Radius is measured from the phase origin.
@@ -235,18 +276,29 @@ class FarFieldResult:
         k = 2 * math.pi * self.frequency_hz.double() / C0 * self.refractive_index
         propagation = (torch.exp(1j * k[:, None] * r) / r).to(self.electric_amplitude.dtype)
         e = self.electric_amplitude * propagation[:, :, None]
-        h = self.refractive_index * torch.linalg.cross(self.directions.to(e.dtype)[None].expand_as(e), e)
+        admittance = self.refractive_index / self.relative_permeability
+        h = admittance * torch.linalg.cross(self.directions.to(e.dtype)[None].expand_as(e), e)
         return torch.cat((e, h), -1)
 
 
-def _closed_box(faces, bounds_um, refractive_index):
-    """Validate six named faces against one declared closed box and exterior index."""
-    names = tuple(d + side for d in 'xyz' for side in ('_min', '_max'))
-    if set(faces) != set(names):
-        raise ValueError('Far-field projection requires all six named closed-box faces.')
-    first = faces['x_min']
+def _closed_box(faces, bounds_um, refractive_index, relative_permeability=1., open_surface=False):
+    """Validate named faces against one declared box and exterior; return the retained face names.
+
+    With ``open_surface`` one to five named faces are admitted. Each name still
+    fixes the outward normal and the face must coincide with that face of the
+    declared box, so a single plane is ``{'z_max': plane}`` with outward +z.
+    """
+    if open_surface:
+        names = tuple(name for name in _FACES if name in faces)
+        if not names or len(names) == 6 or set(faces) - set(_FACES):
+            raise ValueError('Open-surface projection takes one to five named box faces; use the closed box for all six.')
+    else:
+        names = _FACES
+        if set(faces) != set(names):
+            raise ValueError('Far-field projection requires all six named closed-box faces.')
+    first = faces[names[0]]
     _plane(first)
-    n = _index(refractive_index)
+    exterior = _exterior(refractive_index, relative_permeability)
     device, dtype = first.fields.device, first.fields.real.dtype
     bound = _real_metadata(bounds_um, first.points_um, 'Bounds')
     if bound.shape != (3, 2) or not bool(torch.isfinite(bound).all()) or bool((bound[:, 1] <= bound[:, 0]).any()):
@@ -263,7 +315,42 @@ def _closed_box(faces, bounds_um, refractive_index):
         tolerance = 32 * torch.finfo(dtype).eps * max(1., float(bound.abs().max()))
         if not torch.allclose(face.points_um[:, a], bound[a, side].expand(len(face.points_um)), rtol=0, atol=tolerance):
             raise ValueError('Surface plane does not coincide with its declared closed-box face.')
-    return names, first, n, bound
+    return names, first, exterior, bound
+
+
+_EDGE_TAPER_DECAY = 15.  # aperture-edge amplitude exp(-.5 * 15) ~ 5e-4
+
+
+def _face_weights(face, name, bound, edge_window):
+    """Quadrature weights, optionally tapered by a Gaussian edge window on one open plane.
+
+    ``edge_window`` holds the fractional width of the tapered region over both
+    edges of each cyclic transverse axis. The centre keeps unit weight.
+    """
+    window = torch.as_tensor(edge_window, dtype=torch.float64)
+    if window.shape != (2,) or not bool(torch.isfinite(window).all()) or bool((window < 0).any()) or bool((window > 1).any()):
+        raise ValueError('edge_window must hold two fractions in [0, 1].')
+    if not bool((window > 0).any()):
+        return face.weights
+    weights = face.weights
+    a = 'xyz'.index(name[0])
+    for fraction, d in zip(window.tolist(), ((a + 1) % 3, (a + 2) % 3)):
+        if fraction <= 0:
+            continue
+        lo, hi = bound[d].double()
+        transition = fraction * float(hi - lo) / 2
+        x = face.points_um[:, d].double()
+        lower, upper = lo + transition, hi - transition
+        taper = torch.ones_like(x)
+        taper = torch.where(x < lower, torch.exp(-.5 * _EDGE_TAPER_DECAY * ((x - lower) / transition).square()), taper)
+        taper = torch.where(x > upper, torch.exp(-.5 * _EDGE_TAPER_DECAY * ((x - upper) / transition).square()), taper)
+        weights = weights * taper.to(weights.dtype)
+    return weights
+
+
+def _window(edge_window, names):
+    if len(names) > 1 and bool((torch.as_tensor(edge_window, dtype=torch.float64) != 0).any()):
+        raise ValueError('An edge window is only defined for a single open plane, not for several faces.')
 
 
 def _observation_points(points_um, like, bound):
@@ -340,13 +427,14 @@ def cartesian_plane_points(normal, offset_um, u_um, v_um, origin_um=(0., 0., 0.)
     return points
 
 
-def farfield_at_points(faces, points_um, *, bounds_um, refractive_index=1., phase_origin_um=(0., 0., 0.), **kwargs):
+def farfield_at_points(faces, points_um, *, bounds_um, refractive_index=1., relative_permeability=1.,
+                       phase_origin_um=(0., 0., 0.), open_surface=False, **kwargs):
     """Far-field model at Cartesian points: leading 1/r term along each point's direction.
 
     Directions and radii are measured from ``phase_origin_um``. Returns (F, P, 6)
     E/H in the plane field units. Points must lie strictly outside the box.
     """
-    names, first, n, bound = _closed_box(faces, bounds_um, refractive_index)
+    names, first, _, bound = _closed_box(faces, bounds_um, refractive_index, relative_permeability, open_surface)
     points = _observation_points(points_um, first, bound)
     origin = _real_metadata(phase_origin_um, first.points_um, 'Phase origin')
     if origin.shape != (3,) or origin.requires_grad or not bool(torch.isfinite(origin).all()):
@@ -356,7 +444,8 @@ def farfield_at_points(faces, points_um, *, bounds_um, refractive_index=1., phas
     if bool((radius <= 0).any()):
         raise ValueError('Far-field observation points must not coincide with the phase origin.')
     far = project_farfield(faces, offset / radius[:, None], bounds_um=bounds_um, refractive_index=refractive_index,
-                           phase_origin_um=phase_origin_um, **kwargs)
+                           relative_permeability=relative_permeability, phase_origin_um=phase_origin_um,
+                           open_surface=open_surface, **kwargs)
     return far.fields_at_radius(radius * 1e-6)
 
 
@@ -365,7 +454,10 @@ class NearZoneResult:
     fields: torch.Tensor  # F, point, Ex..Hz in the plane field units (reduced field * s)
     points_um: torch.Tensor
     frequency_hz: torch.Tensor
-    refractive_index: float
+    refractive_index: float  # complex for a lossy exterior
+    relative_permeability: float = 1.
+    approximation: str = None  # 'open surface' when faces were omitted
+    surfaces: tuple = _FACES
 
     def poynting(self):
         """Time-averaged Poynting vector .5 Re(E x H*), reduced E*H * s^2 per point."""
@@ -373,28 +465,34 @@ class NearZoneResult:
         return .5 * torch.linalg.cross(e, h.conj()).real
 
 
-def project_nearzone(faces, points_um, *, bounds_um, refractive_index=1., point_chunk=2048, observation_chunk=64):
-    """Exact homogeneous Green-function fields of the closed-box currents at finite distance.
+def project_nearzone(faces, points_um, *, bounds_um, refractive_index=1., relative_permeability=1.,
+                     open_surface=False, edge_window=(0., 0.), point_chunk=2048, observation_chunk=64):
+    """Exact homogeneous Green-function fields of the box currents at finite distance.
 
     With ``A = int J g dS``, ``F = int M g dS``, ``g = exp(ikR)/(4 pi R)``,
-    ``J = outward x H`` and ``M = -outward x E`` in reduced units (mu_r = 1):
-    ``E = i k0 [A + grad div A / k^2] - curl F`` and
-    ``H = i k0 n^2 [F + grad div F / k^2] + curl A``. The gradient and curl act
-    on the free-space Green function, so near-, intermediate- and far-zone
-    terms are all retained and E gains a radial component. Points must lie
-    strictly outside the box: inside, the same integral returns the negative
-    field of exterior sources, not the interior field. The Green function and
-    its derivatives are evaluated in double precision before casting to the
-    field dtype, so macroscopic radii keep a coherent phase.
+    ``J = outward x H`` and ``M = -outward x E`` in reduced units:
+    ``E = i k0 mu_r [A + grad div A / k^2] - curl F`` and
+    ``H = i k0 eps_r [F + grad div F / k^2] + curl A`` with ``k = k0 n`` and
+    ``eps_r = n^2 / mu_r``. The gradient and curl act on the Green function,
+    so near-, intermediate- and far-zone terms are all retained and E gains a
+    radial component. A complex passive ``n`` or ``mu_r`` gives a complex ``k``.
+    Points must lie strictly outside the box: inside, the same integral
+    returns the negative field of exterior sources, not the interior field.
+    The Green function and its derivatives are evaluated in double precision
+    before casting to the field dtype, so macroscopic radii keep a coherent
+    phase. ``open_surface`` admits one to five faces as an approximation.
     """
-    names, first, n, bound = _closed_box(faces, bounds_um, refractive_index)
+    names, first, (n, mu, _), bound = _closed_box(faces, bounds_um, refractive_index, relative_permeability, open_surface)
+    _window(edge_window, names)
     points = _observation_points(points_um, first, bound)
     _chunks(point_chunk, observation_chunk)
     device, cdtype, rdtype = first.fields.device, first.fields.dtype, first.fields.real.dtype
     k0 = 2 * math.pi * first.frequency_hz.double() / C0
     k = n * k0
+    epsilon = n**2 / mu
     ik0 = (1j * k0).to(cdtype)[:, None, None, None]
-    inverse_k2 = (1 / k.square()).to(rdtype)[:, None, None, None]
+    scale = 1 / k.square()
+    inverse_k2 = scale.to(cdtype if scale.is_complex() else rdtype)[:, None, None, None]
     output = []
     for start in range(0, len(points), observation_chunk):
         observed = points[start:start + observation_chunk].double() * 1e-6
@@ -404,11 +502,12 @@ def project_nearzone(faces, points_um, *, bounds_um, refractive_index=1., point_
             face = faces[name]
             normal = torch.zeros(3, device=device, dtype=rdtype)
             normal['xyz'.index(name[0])] = -1 if name.endswith('min') else 1
+            weights = _face_weights(face, name, bound, edge_window)
             for offset in range(0, len(face.points_um), point_chunk):
                 section = slice(offset, offset + point_chunk)
                 fields = face.fields[:, section]
                 outward = normal.to(cdtype).expand_as(fields[..., :3])
-                weight = face.weights[section][None, :, None]
+                weight = weights[section][None, :, None]
                 j = (torch.linalg.cross(outward, fields[..., 3:]) * weight)[:, None]
                 m = (-torch.linalg.cross(outward, fields[..., :3]) * weight)[:, None]
                 displacement = observed[:, None, :] - (face.points_um[section].double() * 1e-6)[None]
@@ -426,14 +525,16 @@ def project_nearzone(faces, points_um, *, bounds_um, refractive_index=1., point_
                 complex_rhat = rhat.to(cdtype)
                 curl_a = g1 * torch.linalg.cross(*torch.broadcast_tensors(complex_rhat, j))
                 curl_f = g1 * torch.linalg.cross(*torch.broadcast_tensors(complex_rhat, m))
-                e = e + (ik0 * potential_a - curl_f).sum(2)
-                h = h + (ik0 * n**2 * potential_f + curl_a).sum(2)
+                e = e + (ik0 * mu * potential_a - curl_f).sum(2)
+                h = h + (ik0 * epsilon * potential_f + curl_a).sum(2)
         output.append(torch.cat((e, h), -1))
-    return NearZoneResult(torch.cat(output, dim=1), points, first.frequency_hz, n)
+    return NearZoneResult(torch.cat(output, dim=1), points, first.frequency_hz, n, mu,
+                          'open surface' if open_surface else None, names)
 
 
-def project_farfield(faces, directions, *, bounds_um, refractive_index=1.,
-                     phase_origin_um=(0., 0., 0.), direction_chunk=16, point_chunk=2048):
+def project_farfield(faces, directions, *, bounds_um, refractive_index=1., relative_permeability=1.,
+                     phase_origin_um=(0., 0., 0.), open_surface=False, edge_window=(0., 0.),
+                     direction_chunk=16, point_chunk=2048):
     """Closed-box vector equivalence-current integral into arbitrary directions.
 
     ``faces`` maps x_min/x_max/y_min/y_max/z_min/z_max to collocated spectral
@@ -441,10 +542,15 @@ def project_farfield(faces, directions, *, bounds_um, refractive_index=1.,
     here. The box must enclose all scatterers/sources of the supplied fields and
     lie in the declared homogeneous exterior, outside PML. For scattering,
     subtract matched incident fields on ALL six faces before projection.
-    An open plane, periodic cell or a box intersecting a substrate is not a
-    valid isolated-object closed surface for this API.
+    A periodic cell or a box intersecting a substrate is not a valid
+    isolated-object closed surface for this API. ``open_surface=True`` admits a
+    subset of the named faces (a single plane is one named face) as the
+    documented open-surface approximation, flagged in the result. A complex
+    passive ``refractive_index`` or ``relative_permeability`` gives a lossy
+    exterior with complex wavenumber and impedance.
     """
-    names, first, n, _ = _closed_box(faces, bounds_um, refractive_index)
+    names, first, (n, mu, admittance), bound = _closed_box(faces, bounds_um, refractive_index, relative_permeability, open_surface)
+    _window(edge_window, names)
     device, dtype = first.fields.device, first.fields.real.dtype
     direction = _real_metadata(directions, first.points_um, 'Directions')
     origin = _real_metadata(phase_origin_um, first.points_um, 'Phase origin')
@@ -464,6 +570,7 @@ def project_farfield(faces, directions, *, bounds_um, refractive_index=1.,
             face = faces[name]
             normal = torch.zeros(3, device=device, dtype=dtype)
             normal['xyz'.index(name[0])] = -1 if name.endswith('min') else 1
+            weights = _face_weights(face, name, bound, edge_window)
             for offset in range(0, len(face.points_um), point_chunk):
                 section = slice(offset, offset + point_chunk)
                 fields = face.fields[:, section]
@@ -471,13 +578,14 @@ def project_farfield(faces, directions, *, bounds_um, refractive_index=1.,
                 j = torch.linalg.cross(outward, fields[..., 3:])
                 m = -torch.linalg.cross(outward, fields[..., :3])
                 phase = torch.exp(-1j * k[:, None, None] * (s @ ((face.points_um[section] - origin) * 1e-6).T)[None])
-                factor = phase * face.weights[section]
+                factor = phase * weights[section]
                 ji = torch.einsum('fdp,fpc->fdc', factor, j)
                 mi = torch.einsum('fdp,fpc->fdc', factor, m)
                 sc = s.to(fields.dtype)[None].expand_as(ji)
-                integral = integral + (ji - sc * (sc * ji).sum(-1, keepdim=True)) / n - torch.linalg.cross(sc, mi)
+                integral = integral + (ji - sc * (sc * ji).sum(-1, keepdim=True)) / admittance - torch.linalg.cross(sc, mi)
         output.append(1j * k[:, None, None] / (4 * math.pi) * integral)
-    return FarFieldResult(torch.cat(output, dim=1), direction, first.frequency_hz, n, origin)
+    return FarFieldResult(torch.cat(output, dim=1), direction, first.frequency_hz, n, origin, mu,
+                          'open surface' if open_surface else None, names)
 
 
 def normalized_farfield_intensity(faces, reference, directions, *, min_reference_fraction=.01, **kwargs):

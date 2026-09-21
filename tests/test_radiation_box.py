@@ -130,6 +130,35 @@ def test_stored_nearzone_matches_direct_transform_and_is_budgeted(monkeypatch):
     with pytest.raises(ValueError,match='budget'): packet.nearzone(points,host_budget_bytes=1)
 
 
+def test_open_surface_stored_faces_are_flagged_and_match_direct_transform():
+    from torchfdtd.radiation import project_nearzone
+    result,ids,bounds,faces,_=data()
+    subset={'z_max':'z_max','x_min':'x_min'}
+    packet=native_radiation_box(result,subset,bounds_um=bounds,refractive_index=1.3,open_surface=True)
+    assert packet.open_surface and packet.report['approximation']=='open surface' and packet.report['surfaces']==['x_min','z_max']
+    assert packet.report['points']==2*faces['z_max'].fields.shape[1]
+    retained={name:faces[name] for name in subset}
+    got=packet.project([[0.,0,1.],[1.,0,0]])
+    expected=project_farfield(retained,[[0.,0,1.],[1.,0,0]],bounds_um=bounds,refractive_index=1.3,open_surface=True)
+    torch.testing.assert_close(got.electric_amplitude,expected.electric_amplitude,rtol=0,atol=0)
+    assert got.approximation=='open surface' and got.surfaces==('x_min','z_max')
+    near=packet.nearzone([[0.,0,2.]])
+    torch.testing.assert_close(near.fields,project_nearzone(retained,[[0.,0,2.]],bounds_um=bounds,refractive_index=1.3,open_surface=True).fields,rtol=0,atol=0)
+    with pytest.raises(ValueError,match='single open plane'): packet.project([[0.,0,1.]],edge_window=(.2,.2))
+    single=native_radiation_box(result,{'z_max':'z_max'},bounds_um=bounds,refractive_index=1.3,open_surface=True)
+    windowed=single.project([[0.,0,1.]],edge_window=(.2,.2))
+    direct=project_farfield({'z_max':faces['z_max']},[[0.,0,1.]],bounds_um=bounds,refractive_index=1.3,open_surface=True,edge_window=(.2,.2))
+    torch.testing.assert_close(windowed.electric_amplitude,direct.electric_amplitude,rtol=0,atol=0)
+    closed=native_radiation_box(result,ids,bounds_um=bounds,refractive_index=1.3)
+    assert closed.report['approximation'] is None and not closed.open_surface and closed.project([[0.,0,1.]]).approximation is None
+    with pytest.raises(ValueError,match='one to five'): native_radiation_box(result,ids,bounds_um=bounds,refractive_index=1.3,open_surface=True)
+    with pytest.raises(ValueError,match='exactly six'): native_radiation_box(result,subset,bounds_um=bounds,refractive_index=1.3)
+    with pytest.raises(ValueError,match='same faces'):
+        native_radiation_box(result,subset,bounds_um=bounds,refractive_index=1.3,open_surface=True,reference=deepcopy(result),reference_monitor_ids={'z_max':'z_max'})
+    # The stored exterior must equal the real native background; a lossy exterior is not admitted here.
+    with pytest.raises(ValueError,match='positive finite fixed scalar'): native_radiation_box(result,ids,bounds_um=bounds,refractive_index=1.3+.05j)
+
+
 def test_preparation_and_projection_budget_precede_copies(monkeypatch):
     result,ids,bounds,_,_=data()
     def forbidden(*a,**k): raise AssertionError('copied before budget')

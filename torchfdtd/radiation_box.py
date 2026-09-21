@@ -31,19 +31,23 @@ def _parts(result):
     return result.project,result.summary,result.frequency_fields
 
 
-def _ids(mapping):
-    if not isinstance(mapping,Mapping) or set(mapping)!=set(_NAMES):
+def _ids(mapping,open_surface=False):
+    if not isinstance(mapping,Mapping): raise ValueError('Provide named box faces: '+', '.join(_NAMES))
+    if open_surface:
+        if not mapping or set(mapping)-set(_NAMES) or len(mapping)==6:
+            raise ValueError('Open-surface projection takes one to five named box faces; use the closed box for all six.')
+    elif set(mapping)!=set(_NAMES):
         raise ValueError('Provide exactly six named closed-box faces: '+', '.join(_NAMES))
-    if any(not isinstance(v,str) or not v for v in mapping.values()) or len(set(mapping.values()))!=6:
+    if any(not isinstance(v,str) or not v for v in mapping.values()) or len(set(mapping.values()))!=len(mapping):
         raise ValueError('Each box face must select a distinct nonempty stored monitor ID.')
-    return {name:mapping[name] for name in _NAMES}
+    return {name:mapping[name] for name in _NAMES if name in mapping}
 
 
 def _preflight(result,ids,index):
     project,summary,records=_parts(result)
     if not isinstance(summary,Mapping): raise ValueError('Native run summary is required.')
     selected=[];numeric=points=0
-    for name in _NAMES:
+    for name in ids:
         matches=[v for v in records if v.get('id')==ids[name]]
         if len(matches)!=1: raise ValueError('Each selected monitor ID must identify exactly one stored face.')
         record=matches[0]
@@ -205,6 +209,7 @@ class StoredRadiationBox:
     frequency_hz: tuple
     field_dtype: str
     _report_json: str
+    open_surface: bool=False
 
     @property
     def report(self): return json.loads(self._report_json)
@@ -233,7 +238,7 @@ class StoredRadiationBox:
             faces[name]=plane
         return faces
 
-    def project(self,directions,*,phase_origin_um=(0,0,0),direction_chunk=16,point_chunk=2048,host_budget_bytes=512*1024**2):
+    def project(self,directions,*,phase_origin_um=(0,0,0),edge_window=(0.,0.),direction_chunk=16,point_chunk=2048,host_budget_bytes=512*1024**2):
         if type(direction_chunk) is not int or direction_chunk<1 or type(point_chunk) is not int or point_chunk<1:
             raise ValueError('Projection chunks must be positive integers.')
         if isinstance(phase_origin_um,torch.Tensor) and (phase_origin_um.requires_grad or phase_origin_um.device.type!='cpu'):
@@ -249,9 +254,10 @@ class StoredRadiationBox:
         faces=self._faces(2*retained+output+workspace,host_budget_bytes)
         with torch.no_grad():
             return project_farfield(faces,directions,bounds_um=self.bounds_um,refractive_index=self.refractive_index,
-                phase_origin_um=phase_origin_um,direction_chunk=direction_chunk,point_chunk=point_chunk)
+                phase_origin_um=phase_origin_um,open_surface=self.open_surface,edge_window=edge_window,
+                direction_chunk=direction_chunk,point_chunk=point_chunk)
 
-    def nearzone(self,points_um,*,point_chunk=2048,observation_chunk=64,host_budget_bytes=512*1024**2):
+    def nearzone(self,points_um,*,edge_window=(0.,0.),point_chunk=2048,observation_chunk=64,host_budget_bytes=512*1024**2):
         """Exact finite-distance E/H at fixed CPU points strictly outside the box, without autograd."""
         if type(observation_chunk) is not int or observation_chunk<1 or type(point_chunk) is not int or point_chunk<1:
             raise ValueError('Projection chunks must be positive integers.')
@@ -267,20 +273,25 @@ class StoredRadiationBox:
         faces=self._faces(2*retained+output+workspace,host_budget_bytes)
         with torch.no_grad():
             return project_nearzone(faces,points_um,bounds_um=self.bounds_um,refractive_index=self.refractive_index,
-                point_chunk=point_chunk,observation_chunk=observation_chunk)
+                open_surface=self.open_surface,edge_window=edge_window,point_chunk=point_chunk,observation_chunk=observation_chunk)
 
 
 def native_radiation_box(result,monitor_ids,*,bounds_um,refractive_index,frequency_index=0,
-                         reference=None,reference_monitor_ids=None,host_budget_bytes=512*1024**2):
-    """Snapshot six completed native faces and optionally subtract a matched incident run.
+                         reference=None,reference_monitor_ids=None,open_surface=False,host_budget_bytes=512*1024**2):
+    """Snapshot completed native faces and optionally subtract a matched incident run.
 
     Full selected input payloads are charged even when selecting one frequency.
     Background-only reference and conservative CAD/source support checks enforce
     the restricted isolated-domain contract. No efficiency normalization occurs.
+    ``open_surface`` admits one to five faces of the declared box as the
+    documented open-surface approximation; the declared box must still enclose
+    the sources and contrast objects.
     """
-    ids=_ids(monitor_ids)
+    if type(open_surface) is not bool: raise ValueError('open_surface must be a boolean.')
+    ids=_ids(monitor_ids,open_surface)
     if reference is None and reference_monitor_ids is not None: raise ValueError('Reference monitor IDs require a reference result.')
-    ref_ids=_ids(ids if reference_monitor_ids is None else reference_monitor_ids) if reference is not None else None
+    ref_ids=_ids(ids if reference_monitor_ids is None else reference_monitor_ids,open_surface) if reference is not None else None
+    if ref_ids is not None and set(ref_ids)!=set(ids): raise ValueError('Reference monitor IDs must name the same faces as the sample.')
     if isinstance(refractive_index,(bool,torch.Tensor)) or not isinstance(refractive_index,(float,int,np.floating)) or not math.isfinite(refractive_index) or refractive_index<=0:
         raise ValueError('Exterior refractive index must be a positive finite fixed scalar.')
     if np.shape(bounds_um)!=(3,2): raise ValueError('bounds_um must have shape (3,2).')
@@ -303,7 +314,7 @@ def native_radiation_box(result,monitor_ids,*,bounds_um,refractive_index,frequen
         if project.region.model_dump(exclude=ignored)!=reference_project.region.model_dump(exclude=ignored) or [project.resolved_source(s).model_dump() for s in project.sources]!=[reference_project.resolved_source(s).model_dump() for s in reference_project.sources]:
             raise ValueError('Incident reference mesh/background/source metadata must match.')
     stored=[];signature=None;frequency=None;dtype=None;raw_frequency=None
-    for i,name in enumerate(_NAMES):
+    for i,name in enumerate(ids):
         record=data[2][i]
         plane=native_radiation_plane(record,frequency_index=frequency_index,max_samples=record['fields'].size)
         _rectangle(plane,bounds);_support(project,plane)
@@ -343,10 +354,10 @@ def native_radiation_box(result,monitor_ids,*,bounds_um,refractive_index,frequen
     retained=sum(v[k].nbytes for _,v in stored for k in _ARRAYS)
     report=dict(field_kind='scattered' if ref is not None or tfsf_scattered else 'total',
         incident_removal='matched reference' if ref is not None else 'tfsf scattered-field region' if tfsf_scattered else None,
-        retained_bytes=retained,
+        retained_bytes=retained,approximation='open surface' if open_surface else None,surfaces=list(ids),
         points=data[4],monitor_ids=ids,run_signature=signature,reference_run_signature=signature if ref is not None else None,
         preparation_reservation_bytes=required,input_payload_bytes=numeric,metadata_bytes=metadata,
         axis_workspace_reservation_bytes=axis_workspace,
         source='owned native stored frequency faces',autograd=False,normalization='none',
         scope='Isolated homogeneous isotropic exterior, uniform complete closed box; continuum projection of native fields.')
-    return StoredRadiationBox(tuple(stored),bounds,float(refractive_index),tuple(float(v) for v in frequency),str(dtype).removeprefix('torch.'),json.dumps(report,allow_nan=False))
+    return StoredRadiationBox(tuple(stored),bounds,float(refractive_index),tuple(float(v) for v in frequency),str(dtype).removeprefix('torch.'),json.dumps(report,allow_nan=False),open_surface)

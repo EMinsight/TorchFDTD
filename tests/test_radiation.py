@@ -88,10 +88,15 @@ def test_fp32_grazing_cutoff_roundoff_is_rejected_for_multiple_indices():
             diffraction_orders(p, [(1, 0)], period_um=(2, 2), refractive_index=n)
 
 
-def analytic_dipole(points, *, n=1.3, shift=(.12, -.08, .05)):
-    """Exact E/H of a vector dipole at 1.55 um, all near/intermediate/far terms, shape (1, P, 6)."""
+def analytic_dipole(points, *, n=1.3, shift=(.12, -.08, .05), mu=1., dipole=None):
+    """Exact E/H of a vector dipole at 1.55 um, all near/intermediate/far terms, shape (1, P, 6).
+
+    The closed forms hold for complex ``n`` (lossy exterior, ``k = 2 pi n / wavelength``)
+    and relative permeability ``mu``: E carries ``mu / n^2 = 1 / eps_r``, H carries ``k^2 / n``.
+    """
     dtype = points.dtype
-    dipole = torch.tensor([.3 + .1j, -.2j, 1.], dtype=torch.complex64 if dtype == torch.float32 else torch.complex128)
+    cdtype = torch.complex64 if dtype == torch.float32 else torch.complex128
+    dipole = torch.tensor([.3 + .1j, -.2j, 1.], dtype=cdtype) if dipole is None else dipole.to(cdtype)
     rvec = points - torch.tensor(shift, dtype=dtype)
     r = rvec.norm(dim=-1)
     unit = rvec.to(dipole.dtype) / r[:, None]
@@ -99,20 +104,51 @@ def analytic_dipole(points, *, n=1.3, shift=(.12, -.08, .05)):
     transverse = dipole - unit * dot
     k = 2*math.pi*n/1.55
     wave = torch.exp(1j*k*r)[:, None]
-    electric = wave/n**2 * (k*k*transverse/r[:, None] + (3*unit*dot-dipole)*(1/r**3-1j*k/r**2)[:, None])
+    electric = wave*mu/n**2 * (k*k*transverse/r[:, None] + (3*unit*dot-dipole)*(1/r**3-1j*k/r**2)[:, None])
     magnetic = wave*k*k/n * torch.linalg.cross(unit, dipole.expand_as(unit)) * (1/r + 1j/(k*r*r))[:, None]
     return torch.cat((electric, magnetic), -1)[None], dipole
 
 
-def dipole_faces(count, *, n=1.3, shift=(.12, -.08, .05), dtype=torch.float64, amplitude=1.):
+def dipole_faces(count, *, n=1.3, shift=(.12, -.08, .05), dtype=torch.float64, amplitude=1., mu=1.):
     bounds = ((-.65, .65), (-.7, .7), (-.6, .6))
     faces = {}
     for d in 'xyz':
         for side in (0, 1):
             p = plane(d, bounds, side, count, wavelength=1.55, dtype=dtype)
-            fields, dipole = analytic_dipole(p.points_um, n=n, shift=shift)
+            fields, dipole = analytic_dipole(p.points_um, n=n, shift=shift, mu=mu)
             faces[d + ('_min' if side == 0 else '_max')] = replace(p, fields=amplitude*fields)
     return faces, bounds, dipole
+
+
+def huygens_sheet(points, waist, spacing=.5*1.55):
+    """Gaussian-apodized sheet of Huygens pairs (p = x, m = -y) in z = 0 radiating toward +z.
+
+    The magnetic dipole fields follow from the electric ones by duality,
+    (E, H) -> (H/n, -n E), in vacuum. Backward radiation cancels on axis and
+    the sheet is truncated at 2.5 waists (amplitude 2e-3).
+    """
+    extent = 2.5*waist
+    coords = torch.arange(-extent, extent + 1e-9, spacing, dtype=torch.float64)
+    x, y = torch.meshgrid(coords, coords, indexing='ij')
+    amplitude = torch.exp(-(x**2 + y**2)/waist**2).reshape(-1)
+    px = torch.tensor([1., 0, 0], dtype=torch.complex128)
+    py = torch.tensor([0, 1., 0], dtype=torch.complex128)
+    fields = torch.zeros((1, len(points), 6), dtype=torch.complex128)
+    for xi, yi, a in zip(x.reshape(-1).tolist(), y.reshape(-1).tolist(), amplitude.tolist()):
+        ex, _ = analytic_dipole(points, n=1., shift=(xi, yi, 0.), dipole=px)
+        ey, _ = analytic_dipole(points, n=1., shift=(xi, yi, 0.), dipole=py)
+        fields = fields + a*torch.cat((ex[..., :3] - ey[..., 3:], ex[..., 3:] + ey[..., :3]), -1)
+    return fields
+
+
+def beam_faces(waist, count, half=4*1.55, height=3*1.55):
+    bounds = ((-half, half), (-half, half), (-height, height))
+    faces = {}
+    for d in 'xyz':
+        for side in (0, 1):
+            p = plane(d, bounds, side, count, wavelength=1.55)
+            faces[d + ('_min' if side == 0 else '_max')] = replace(p, fields=huygens_sheet(p.points_um, waist))
+    return faces, bounds
 
 
 def test_closed_surface_dipole_complex_amplitude_converges_and_translation_phase():
@@ -323,6 +359,114 @@ def test_nearzone_and_observation_inputs_are_rejected_explicitly():
         far.fields_at_radius([1., 2., 3.])
     with pytest.raises(ValueError, match='per direction'):
         far.fields_at_radius(-1.)
+
+
+@pytest.mark.parametrize('n,mu', [(1.3+.05j, 1.), (1.3+.05j, 1.1+.02j)])
+def test_lossy_exterior_dipole_near_and_far_fields(n, mu):
+    # Same closed forms with complex k = 2 pi n / wavelength; Im(k) = .2/um.
+    points = torch.tensor([[1.2, .3, -.4], [0., -1.6, .2], [.5, .5, 1.3], [-2., .1, .1], [1., 1., 1.]], dtype=torch.float64)
+    directions = torch.tensor([[1., 0, 0], [0, 1., 0], [0, 0, 1.], [-1., 0, 0], [1., 2., 3.]], dtype=torch.float64)
+    directions = directions / directions.norm(dim=-1, keepdim=True)
+    expected, dipole = analytic_dipole(points, n=n, mu=mu)
+    near_errors, far_errors = [], []
+    for count in (14, 28, 56):
+        faces, bounds, _ = dipole_faces(count, n=n, mu=mu)
+        near = project_nearzone(faces, points, bounds_um=bounds, refractive_index=n, relative_permeability=mu)
+        far = project_farfield(faces, directions, bounds_um=bounds, refractive_index=n, relative_permeability=mu)
+        near_errors.append(float((near.fields - expected).norm()/expected.norm()))
+        transverse = dipole - directions.to(dipole.dtype)*(directions.to(dipole.dtype)*dipole).sum(-1, keepdim=True)
+        phase = torch.exp(-1j*(2*math.pi*n/1.55)*(directions @ torch.tensor([.12, -.08, .05], dtype=torch.float64)))
+        amplitude = (2*math.pi/1.55)**2*mu*transverse*phase[:, None]*1e-6
+        far_errors.append(float((far.electric_amplitude[0] - amplitude).norm()/amplitude.norm()))
+    for errors in (near_errors, far_errors):
+        assert errors[0]/errors[1] > 3.5 and errors[1]/errors[2] > 3.5 and errors[-1] < 5e-4
+    assert near.fields.dtype == torch.complex128 and near.refractive_index == n and far.relative_permeability == mu
+    remote = far.fields_at_radius(1e-3)
+    e = remote[..., :3]
+    torch.testing.assert_close(remote[..., 3:], (n/mu)*torch.linalg.cross(directions.to(e.dtype)[None].expand_as(e), e))
+    torch.testing.assert_close(far.intensity(), .5*(n/mu).real*far.electric_amplitude.abs().square().sum(-1))
+    # The finite-distance model still tends to the far-field model as 1/r while exp(ikr) decays.
+    theta, phi = torch.linspace(.2, 2.9, 5), torch.linspace(0, 2*math.pi, 7)[:-1]
+    differences = []
+    for radius in (30., 60.):
+        sphere = spherical_points(theta, phi, radius)
+        nz = project_nearzone(faces, sphere, bounds_um=bounds, refractive_index=n, relative_permeability=mu)
+        ff = farfield_at_points(faces, sphere, bounds_um=bounds, refractive_index=n, relative_permeability=mu)
+        analytic, _ = analytic_dipole(sphere, n=n, mu=mu)
+        differences.append(float((nz.fields - ff).norm()/ff.norm()))
+        assert float((nz.fields - analytic).norm()/analytic.norm()) < 5e-4
+    assert differences[0]/differences[1] > 1.8
+    faces, bounds, _ = dipole_faces(28, n=n, mu=mu, dtype=torch.float32)
+    single = project_nearzone(faces, points.float(), bounds_um=bounds, refractive_index=n, relative_permeability=mu)
+    assert single.fields.dtype == torch.complex64
+    assert float((single.fields - expected.to(torch.complex64)).norm()/expected.norm()) < 2e-3
+
+
+def test_growing_or_per_frequency_exterior_is_rejected():
+    faces, bounds, _ = dipole_faces(4)
+    with pytest.raises(ValueError, match='growing exterior'):
+        project_farfield(faces, [[1., 0, 0]], bounds_um=bounds, refractive_index=1.3-.05j)
+    with pytest.raises(ValueError, match='growing exterior'):
+        project_nearzone(faces, [[3., 0, 0]], bounds_um=bounds, relative_permeability=1.-.1j)
+    with pytest.raises(ValueError, match='not passive'):
+        project_farfield(faces, [[1., 0, 0]], bounds_um=bounds, refractive_index=1.3, relative_permeability=1.1+.02j)
+    with pytest.raises(ValueError, match='per-frequency'):
+        project_farfield(faces, [[1., 0, 0]], bounds_um=bounds, refractive_index=torch.tensor([1.3, 1.4]))
+    with pytest.raises(ValueError, match='positive real part'):
+        project_farfield(faces, [[1., 0, 0]], bounds_um=bounds, refractive_index=.1j)
+    with pytest.raises(ValueError, match='design variable'):
+        project_farfield(faces, [[1., 0, 0]], bounds_um=bounds, refractive_index=torch.tensor(1.3, requires_grad=True))
+    with pytest.raises(ValueError, match='lossless'):
+        diffraction_orders(plane(), [(0, 0)], period_um=(2, 2), refractive_index=1.4+.1j)
+
+
+def test_open_surface_converges_for_directional_emitter_and_not_for_dipole():
+    # Fixed 8 x 8 x 6 wavelength box around a Gaussian Huygens sheet in z = 0.
+    # Narrow waists diverge fast, so the beam still has a sizeable amplitude on
+    # the side faces and the single z_max plane misses it; wider waists leave
+    # negligible fields on the excluded faces and the plane result converges.
+    directions = spherical_directions(torch.tensor([0., 10., 20., 30.])*math.pi/180, torch.tensor([0., 90., 180., 270.])*math.pi/180)
+    points = torch.tensor([[0., 0., 3*1.55 + 4.], [1.55, -1.55, 3*1.55 + 3.]], dtype=torch.float64)
+    single_errors, five_errors, near_errors, levels = [], [], [], []
+    for waist in (.4*1.55, .6*1.55, .8*1.55):
+        faces, bounds = beam_faces(waist, 64)
+        closed = project_farfield(faces, directions, bounds_um=bounds)
+        top = {'z_max': faces['z_max']}
+        single = project_farfield(top, directions, bounds_um=bounds, open_surface=True)
+        five = project_farfield({k: v for k, v in faces.items() if k != 'z_min'}, directions, bounds_um=bounds, open_surface=True)
+        windowed = project_farfield(top, directions, bounds_um=bounds, open_surface=True, edge_window=(.2, .2))
+        reference = closed.electric_amplitude.norm()
+        single_errors.append(float((single.electric_amplitude - closed.electric_amplitude).norm()/reference))
+        five_errors.append(float((five.electric_amplitude - closed.electric_amplitude).norm()/reference))
+        assert float((windowed.electric_amplitude - closed.electric_amplitude).norm()/reference) < 3*single_errors[-1]
+        near_closed = project_nearzone(faces, points, bounds_um=bounds)
+        near_single = project_nearzone(top, points, bounds_um=bounds, open_surface=True)
+        near_errors.append(float((near_single.fields - near_closed.fields).norm()/near_closed.fields.norm()))
+        levels.append(max(float(v.fields.abs().max()/faces['z_max'].fields.abs().max()) for k, v in faces.items() if k != 'z_max'))
+        assert closed.approximation is None and closed.surfaces == tuple(faces)
+        assert single.approximation == near_single.approximation == 'open surface' and single.surfaces == near_single.surfaces == ('z_max',)
+        assert five.surfaces == ('x_min', 'x_max', 'y_min', 'y_max', 'z_max')
+    for errors in (single_errors, five_errors, near_errors, levels):
+        assert errors[0] > errors[1] > errors[2]
+    assert single_errors[0] > 3e-2 and single_errors[2] < 8e-3 and near_errors[2] < 3e-3
+    assert all(five < single for five, single in zip(five_errors, single_errors))
+    # A dipole leaves comparable fields on every face: the single plane is far
+    # off and refining the face sampling does not help.
+    dipole_errors = []
+    for count in (16, 32):
+        faces, bounds, _ = dipole_faces(count)
+        closed = project_farfield(faces, directions, bounds_um=bounds, refractive_index=1.3)
+        single = project_farfield({'z_max': faces['z_max']}, directions, bounds_um=bounds, refractive_index=1.3, open_surface=True)
+        dipole_errors.append(float((single.electric_amplitude - closed.electric_amplitude).norm()/closed.electric_amplitude.norm()))
+    assert min(dipole_errors) > .5 and abs(dipole_errors[0] - dipole_errors[1]) < .05
+    with pytest.raises(ValueError, match='one to five'):
+        project_farfield(faces, directions, bounds_um=bounds, refractive_index=1.3, open_surface=True)
+    with pytest.raises(ValueError, match='six'):
+        project_farfield({'z_max': faces['z_max']}, directions, bounds_um=bounds, refractive_index=1.3)
+    with pytest.raises(ValueError, match='single open plane'):
+        project_farfield({'z_max': faces['z_max'], 'z_min': faces['z_min']}, directions, bounds_um=bounds, refractive_index=1.3, open_surface=True, edge_window=(.1, 0.))
+    with pytest.raises(ValueError, match=r'\[0, 1\]'):
+        project_nearzone({'z_max': faces['z_max']}, points, bounds_um=bounds, refractive_index=1.3, open_surface=True, edge_window=(1.5, 0.))
 
 
 @pytest.mark.parametrize('dtype', [torch.float32, torch.float64])

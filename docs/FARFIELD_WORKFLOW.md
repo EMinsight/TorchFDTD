@@ -27,8 +27,8 @@ tested and documented here; nothing else is claimed.
 |---|---|---|---|
 | Observation specification | Tensor-product theta x phi angles at one `projection_distance`; Cartesian plane (`x`, `y` at a distance along `projection_axis`, per-point radius); k-space direction cosines `ux`, `uy` inside the unit disk | Unit direction vectors only; the browser builds a theta x phi grid | Direction vectors; `spherical_directions` theta x phi grid; `spherical_points` and `cartesian_plane_points`, or any fixed `(P, 3)` micrometre points, for `farfield_at_points` and `project_nearzone`. Direction cosines are not a separate API: pass `(ux, uy, sqrt(1-ux^2-uy^2))` directions |
 | Propagation models | Far field: separable Fourier integrals, prefactor `-i k exp(ikr)/(4 pi r)`, `H` from the medium impedance, `E_r = 0`. Exact (`far_field_approx=False`): dyadic Green function with `G`, `dG/dr`, `d2G/dr2` terms at finite distance, radial components retained | Asymptotic far field only (`electric_amplitude`, `fields_at_radius` with one scalar radius) | Both. `fields_at_radius` takes one radius per direction; `project_nearzone` evaluates the exact free-space Green function of the equivalent currents at finite distance, with radial `E` |
-| Radiation surface and quadrature | One plane with an outward `direction` or a box with `exclude_surfaces`; trapezoidal weights on physical coordinates, optional Gaussian edge window, interval subsampling | Six-face closed box, complete uniform midpoint quadrature | Unchanged. Single planes and boxes with excluded faces are not closed surfaces and give no exact exterior field, so they stay unsupported |
-| Exterior assumptions | Homogeneous isotropic medium; real or complex permittivity/permeability through `projection_medium`, per-frequency index and impedance overrides | Real lossless isotropic index, `mu_r = 1`, matching the native background | Unchanged. Lossy or magnetic exteriors and layered backgrounds remain unsupported |
+| Radiation surface and quadrature | One plane with an outward `direction` or a box with `exclude_surfaces`; trapezoidal weights on physical coordinates, optional Gaussian edge window, interval subsampling | Six-face closed box, complete uniform midpoint quadrature | Closed box by default. `open_surface=True` admits one to five named faces (a single plane is one named face, its name fixes the outward normal) as a documented approximation flagged `approximation: open surface` in the result and report, with an optional Gaussian `edge_window` on a single plane. Quadrature stays complete uniform midpoint; trapezoidal weights and interval subsampling are not added |
+| Exterior assumptions | Homogeneous isotropic medium; real or complex permittivity/permeability through `projection_medium`, per-frequency index and impedance overrides | Real lossless isotropic index, `mu_r = 1`, matching the native background | Differentiable/plane APIs take a complex passive `refractive_index` and `relative_permeability` (complex `k = k0 n`, impedance `mu_r / n`); the real path is bitwise unchanged. Growing exteriors (`Im n < 0`, `Im mu_r < 0`, or `Im(n^2/mu_r) < 0`) are rejected. One scalar per call, not per frequency. The stored adapter keeps requiring the real native background. Layered backgrounds remain unsupported |
 | Differentiability | Detector state is a JAX pytree; `project` runs inside `jax.grad` | Torch graph through `project_farfield` on differentiable planes; stored NPZ data have no graph | Far field and near zone are both linear Torch maps of the plane fields. One native material VJP test checks both against central differences; stored boxes remain graph-free |
 | Admission rules | No provenance checks. The exact path rejects observation points coinciding with source samples; `DiffractiveDetector` rejects symmetry-plane clipping | Rejected TFSF, one-way, non-soft, cancelled/failed runs, substrates, periodic cells, external sources without a reference | TFSF boxes admitted (see below). One-way planes remain impossible in this contract because they need a periodic transverse cell. Cancelled runs stay rejected. Observation points inside or on the box are rejected |
 | Diffraction orders | FFT per order on one plane, power from `|E_t x H_t*|` after projecting transverse to `k`, one `k0` for every frequency, no forward/backward separation | `diffraction_orders` separates forward/backward branches from `E` and `H`, keeps Bloch phase, flags evanescent orders, `diffraction_efficiency` with a matched reference | Unchanged |
@@ -132,6 +132,30 @@ without autograd, and keeps the stored dtype. Its cost is proportional to
 (faces x face samples x observation points), so a 41 x 41 plane over a 24^3
 example box is a few seconds on one CPU core; the browser does not expose it.
 
+### Open surfaces (approximation)
+
+```python
+top = native_radiation_box(result, {"z_max": "z_max"}, bounds_um=[[-0.6, 0.6]] * 3,
+                           refractive_index=1.0, open_surface=True)
+far = top.project(directions, edge_window=(0.2, 0.2))
+print(top.report["approximation"], top.report["surfaces"], far.approximation)
+# 'open surface' ['z_max'] 'open surface'
+```
+
+With `open_surface=True`, `monitor_ids` names one to five faces of the declared
+box; a single plane is one named face and the name fixes its outward normal.
+The retained faces are integrated with the same equivalence currents and the
+omitted faces are assumed to carry negligible fields. The declared box must
+still enclose the sources and contrast objects, and the same geometry, source
+and completion admission applies. `edge_window` tapers both edges of a single
+plane with FDTDX's Gaussian window (fractions of each transverse span) and is
+rejected for several faces. Passing all six IDs with the flag, or a subset
+without it, is rejected, so the closed box remains the default. The loader
+`load_native_radiation_box` takes the same `open_surface` flag and reads only
+the named monitors. The browser keeps the six-face closed box. A lossy exterior
+is not accepted by the stored adapter because the projection medium must equal
+the real native background; use the plane API for that case.
+
 For scattering, pass `reference=` to the in-memory adapter or `reference_path=`
 to the loader. The reference must be homogeneous with the same native source,
 mesh, completed duration, run signature and monitor settings. All six raw
@@ -192,11 +216,15 @@ accuracy claim. See the [native workflow record](validation/native_farfield_work
 [Adapter tests](../tests/test_radiation_box.py) use an independent analytic
 vector dipole for dtype-preserving amplitude checks, coherent incident
 subtraction, immutable snapshots, admission/metadata failures, the five TFSF
-placements above, the one-way rejection reason, and stored near-zone output
-equal to the direct transform under the host budget.
+placements above, the one-way rejection reason, stored near-zone output
+equal to the direct transform under the host budget, and open-surface subsets
+whose report and results carry the approximation flag and equal the direct
+open-surface transform bitwise, with the six-ID/no-flag/lossy rejections.
 [Loader tests](../tests/test_radiation_box_io.py) check bounded selected-member
-loading and malformed archives. Browser and API integration use the actual
-stored six-face native example. The near-zone and observation-grid analytics,
-tolerances and gradient checks are recorded in [RADIATION.md](RADIATION.md).
-No overall FDTDX parity, substrate/lattice far-field support, lossy exterior,
-single-plane projection, or performance advantage is inferred from these checks.
+loading, malformed archives and open-surface subset forwarding. Browser and API
+integration use the actual stored six-face native example. The near-zone,
+lossy-exterior, open-surface and observation-grid analytics, tolerances and
+gradient checks are recorded in [RADIATION.md](RADIATION.md). No overall FDTDX
+parity, substrate/lattice far-field support, per-frequency exterior,
+trapezoidal or subsampled quadrature, or performance advantage is inferred
+from these checks.

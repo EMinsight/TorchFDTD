@@ -5,13 +5,15 @@ resident, streamed and dispersive fixed-plane adjoints. They operate on all
 six collocated complex E/H components and preserve the field computation
 graph. They do not require a commercial runtime.
 
-They are **continuum radiation transforms**, with a real isotropic homogeneous
-exterior, relative permeability one, and the native positive-time DFT
-convention. They do not correct Yee dispersion or interpolation errors.
-Their frequency, quadrature, exterior index and projection directions are
-fixed metadata. Material/geometry derivatives reach the objective through
-the FDTD fields. Differentiation of the exterior index or monitor geometry
-is not implemented here.
+They are **continuum radiation transforms**, with an isotropic homogeneous
+exterior and the native positive-time DFT convention. Diffraction orders
+require a real lossless exterior with relative permeability one; the
+closed-box and near-zone projections also accept a complex passive exterior.
+They do not correct Yee dispersion or interpolation errors. Their frequency,
+quadrature, exterior index and projection directions are fixed metadata.
+Material/geometry derivatives reach the objective through the FDTD fields.
+Differentiation of the exterior index or monitor geometry is not implemented
+here.
 
 ## Periodic diffraction orders
 
@@ -102,8 +104,55 @@ a substrate, a periodic unit cell or an incomplete aperture is outside this
 API's physical contract. Those facts cannot be inferred from field arrays.
 For isolated scattering, subtract matched incident fields on **every face**.
 `project_farfield` returns the asymptotic far field; finite-distance fields
-come from `project_nearzone` below. Layered backgrounds, lossy or magnetic
-exteriors, single open planes and periodic lattice sums remain unsupported.
+come from `project_nearzone` below. Layered backgrounds and periodic lattice
+sums remain unsupported.
+
+## Lossy exterior
+
+```python
+far = project_farfield(faces, directions, bounds_um=bounds,
+                       refractive_index=1.3 + .05j, relative_permeability=1.1 + .02j)
+near = project_nearzone(faces, points, bounds_um=bounds, refractive_index=1.3 + .05j)
+```
+
+`refractive_index` and `relative_permeability` are one fixed scalar each, real
+or complex. They set `k = k0 n`, the reduced impedance `mu_r / n`, and
+`eps_r = n^2 / mu_r`; the far field carries `exp(ikr)/r` with complex `k`, the
+H field is `(n / mu_r) s x E`, and `intensity()` is the source-referred
+`.5 Re(n / mu_r) |A|^2` without the `exp(-2 Im(k) r)` attenuation. With the
+`exp(-i omega t)` phasors a passive exterior needs `Im(n) >= 0`,
+`Im(mu_r) >= 0` and `Im(n^2 / mu_r) >= 0`; a negative imaginary part is a
+growing exterior and is rejected by name, as are non-positive real parts,
+per-frequency arrays and trainable values. Real inputs keep Python floats and
+the real lossless path is bitwise unchanged (checked against saved outputs
+of the previous revision for FP32/FP64 amplitude, intensity, radius fields,
+point fields and near zone). Per-frequency exteriors are not supported: select
+one frequency per call. The stored adapter does not take a complex exterior
+because the projection medium must equal the real native background.
+
+## Open surfaces (approximation)
+
+```python
+single = project_farfield({'z_max': faces['z_max']}, directions, bounds_um=bounds,
+                          open_surface=True, edge_window=(.2, .2))
+five = project_nearzone({k: v for k, v in faces.items() if k != 'z_min'}, points,
+                        bounds_um=bounds, open_surface=True)
+assert single.approximation == 'open surface' and single.surfaces == ('z_max',)
+```
+
+`open_surface=True` admits one to five of the named box faces; the name fixes
+the outward normal, so a single plane is `{'z_max': plane}` radiating toward
++z. The retained faces are integrated with the same equivalence currents and
+the omitted faces are assumed to carry negligible fields. This is the
+Kirchhoff-type approximation FDTDX makes with a planar detector or
+`exclude_surfaces`; it is exact only when the omitted fields vanish. Results
+carry `approximation='open surface'` and `surfaces`; the closed box remains
+the default and passing all six faces with the flag, or a subset without it,
+is rejected. `edge_window=(u, v)` multiplies a single plane's weights by
+FDTDX's Gaussian taper over the fractions `u`, `v` of both edges of each
+cyclic transverse span (amplitude 5e-4 at the edge) and is rejected for
+several faces. It suppresses truncation ringing; it does not recover the
+omitted faces and slightly widens the error for a smooth beam.
 
 ## Finite-distance near zone and observation grids
 
@@ -151,7 +200,7 @@ through the plane adjoint, into material parameters.
 
 ## Validation and limits
 
-[Twenty focused tests](../tests/test_radiation.py) cover Bloch Fourier waves
+[Twenty-four focused tests](../tests/test_radiation.py) cover Bloch Fourier waves
 in all three normals, counterpropagating separation, propagating power sums,
 evanescent orders, FP32 cutoff/normalization, complex metadata rejection and
 coherent radius phase. A translated vector dipole verifies complex amplitude,
@@ -182,6 +231,29 @@ radius form exactly, and inside-box points, complex or trainable coordinates,
 bad chunk sizes and out-of-range angles are rejected. A CUDA variant compares
 FP32 near-zone and per-point far fields with the CPU result and skips without
 a GPU.
+
+The same dipole in a lossy exterior, `n = 1.3 + .05i` (`Im k = .2/um`) with
+`mu_r = 1` and with `mu_r = 1.1 + .02i`, uses the closed forms with complex
+`k`. Near-zone relative L2 errors at the five points are 4.1e-3, 1.0e-3 and
+2.6e-4 for 14, 28 and 56 samples; far-field amplitude errors are 2.9e-3,
+7.2e-4 and 1.8e-4 (both gated at ratios above 3.5 and 5e-4). The radius
+fields satisfy `H = (n/mu_r) s x E` to roundoff and the near-zone/far-field
+model difference halves from 30 to 60 um (1.25e-2 to 6.3e-3) while both stay
+within 1.9e-4 of the analytic fields; FP32 gives 1.0e-3 at 28 samples.
+
+Open surfaces are checked on a fixed 8 x 8 x 6 wavelength box around a
+Gaussian-apodized sheet of Huygens pairs radiating toward +z, with 64 samples
+per face axis and the far field in the forward 30 degree cone. As the waist
+grows from .4 to .6 to .8 wavelengths, the largest field on an omitted face
+falls from .23 to .057 to .015 of the top-face field, and the single-plane
+error against the closed box falls from 9.6e-2 to 2.4e-2 to 3.8e-3 (near zone
+2.2e-2 to 5.6e-3 to 1.0e-3; five faces without `z_min` 6.8e-3 to 1.7e-3 to
+3.0e-4; the .2 edge window gives 1.0e-1, 3.0e-2 and 6.2e-3). The gates are
+monotone decrease, a first error above 3e-2, a last below 8e-3 (near zone
+3e-3) and the windowed error within three times the plain one. A single
+dipole, whose fields on every face are comparable, gives a single-plane
+error of .79 at both 16 and 32 samples per axis: the approximation does not
+converge under face refinement when the omitted fields are not negligible.
 
 The separate [native FP32 dipole study](validation/radiation_dipole_3060.json)
 holds domain, PML thickness and approximate physical duration fixed. Meshes

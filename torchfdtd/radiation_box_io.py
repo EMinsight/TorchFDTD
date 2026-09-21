@@ -72,11 +72,16 @@ def _admit(required, budget, message):
         raise ValueError(message + ' (host budget or available RAM).')
 
 
-def _ids(mapping):
-    if not isinstance(mapping, dict) or set(mapping) != set(_FACES):
+def _ids(mapping, open_surface=False):
+    if not isinstance(mapping, dict):
+        raise ValueError('Face keys must be a dict of named box faces.')
+    if open_surface:
+        if not mapping or set(mapping) - set(_FACES) or len(mapping) == 6:
+            raise ValueError('Open-surface projection takes one to five named box faces; use the closed box for all six.')
+    elif set(mapping) != set(_FACES):
         raise ValueError('Exactly six closed-box face keys are required.')
-    if any(not isinstance(value, str) or not value for value in mapping.values()) or len(set(mapping.values())) != 6:
-        raise ValueError('Select six distinct monitor IDs.')
+    if any(not isinstance(value, str) or not value for value in mapping.values()) or len(set(mapping.values())) != len(mapping):
+        raise ValueError('Select distinct monitor IDs for the named faces.')
     return dict(mapping)
 
 
@@ -177,22 +182,25 @@ def _face_headers(archive, metadata, mapping, frequency_index):
 
 
 def load_native_radiation_box(path, monitor_ids, *, bounds_um, refractive_index,
-        frequency_index=0, reference_path=None, reference_monitor_ids=None,
+        frequency_index=0, reference_path=None, reference_monitor_ids=None, open_surface=False,
         host_budget_bytes=512*1024**2, archive_metadata_budget_bytes=4*1024**2):
     """Read only selected monitor arrays after aggregate sample/reference admission.
 
     Full stored frequency arrays count toward decompression, even when only one
     frequency is requested. Main E/H/epsilon/frame members are never opened.
+    ``open_surface`` selects one to five named faces for the approximate mode.
     """
     _positive_bytes(host_budget_bytes, 'host_budget_bytes')
     _positive_bytes(archive_metadata_budget_bytes, 'archive_metadata_budget_bytes')
     if type(frequency_index) is not int or frequency_index < 0:
         raise ValueError('frequency_index must be a nonnegative integer.')
-    mappings = [_ids(monitor_ids)]
+    if type(open_surface) is not bool:
+        raise ValueError('open_surface must be a boolean.')
+    mappings = [_ids(monitor_ids, open_surface)]
     paths = [path]
     if reference_path is not None:
         paths.append(reference_path)
-        mappings.append(_ids(reference_monitor_ids if reference_monitor_ids is not None else monitor_ids))
+        mappings.append(_ids(reference_monitor_ids if reference_monitor_ids is not None else monitor_ids, open_surface))
     elif reference_monitor_ids is not None:
         raise ValueError('Reference monitor IDs require a reference archive.')
     with ExitStack() as stack:
@@ -230,5 +238,5 @@ def load_native_radiation_box(path, monitor_ids, *, bounds_um, refractive_index,
             refractive_index=refractive_index, frequency_index=frequency_index,
             reference=inputs[1] if len(inputs) == 2 else None,
             reference_monitor_ids=mappings[1] if len(inputs) == 2 else None,
-            host_budget_bytes=host_budget_bytes)
+            open_surface=open_surface, host_budget_bytes=host_budget_bytes)
         return result
