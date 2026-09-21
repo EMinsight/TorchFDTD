@@ -2,6 +2,10 @@
 
 The later [real FP32 capacity gate](BEYOND_VRAM_FP32.md) is complete. The
 earlier frozen measurements below retain their original precision and scope.
+The [propagated case](BEYOND_VRAM_PROPAGATED.md), a pillar-array lens whose
+pulse crosses the device and whose spectrum feeds a focal objective and a
+dense VJP, is the separate physical-duration gate; its E/H state is below
+physical VRAM and its live adjoint state above it, as its record states.
 
 The author clarified that the target is a problem exceeding the RTX 5880's
 physical memory, not an artificial small allocation budget. The earlier

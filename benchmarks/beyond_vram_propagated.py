@@ -281,6 +281,22 @@ def time_estimate(work, *, fd_forwards=0, journal_records=0, parameter_bytes=0):
                 journal_seconds=journal_seconds, journal_write_gb=journal_gb, total_seconds=total, total_hours=total/3600, model=m)
 
 
+def plane_reservation(plane, spec, options):
+    """The streamed reservation with the plane's own observers, from metadata only.
+
+    A point-spectrum estimate on the internal project would reserve for one
+    observer; the plane's spectral observation carries the true count.
+    """
+    from torchfdtd.streamed import _reservation
+    meta = torch.empty(plane.model.project.region.shape, dtype=torch.float32, device='meta')
+    spectral = plane._spectral(torch.empty((), dtype=torch.float32), spec['frequencies_hz'], 32)
+    reservation = _reservation(plane.model.project, meta, options, spectral)
+    reservation.update(spectral.reservation(min(options.temporal_depth, spec['project'].region.steps)))
+    reservation['plane_layout_reservation_bytes'] = plane.layout_reservation_bytes
+    reservation['observers'] = len(plane.observers)
+    return reservation
+
+
 def plan(args, spec, options):
     """Reservation, work counts and the wall-time estimate; no domain allocation."""
     import torchfdtd.streamed as streamed_module
@@ -295,16 +311,9 @@ def plan(args, spec, options):
         streamed_module.cuda_budget_limit = lambda device, required, budget=None: min(budget or assumed['physical_vram_bytes'], int(assumed['free_vram_bytes']*.8))
     try:
         plane = energy_plane_model(project, options)
-        # The plane's own spectral observation carries the true observer count; a
-        # point-spectrum estimate on the internal project would reserve for one.
-        meta = torch.empty(plane.model.project.region.shape, dtype=torch.float32, device='meta')
-        spectral = plane._spectral(torch.empty((), dtype=torch.float32), spec['frequencies_hz'], 32)
-        reservation = streamed_module._reservation(plane.model.project, meta, options, spectral)
+        reservation = plane_reservation(plane, spec, options)
     finally:
         streamed_module.host_memory, streamed_module.cuda_budget_limit = original
-    reservation.update(spectral.reservation(min(options.temporal_depth, project.region.steps)))
-    reservation['plane_layout_reservation_bytes'] = plane.layout_reservation_bytes
-    reservation['observers'] = len(plane.observers)
     work = estimate_streamed_work(plane.model.project, options)
     fd_forwards = {'none': 0, 'forward': 1, 'central': 2}[args.fd_check]
     estimate = time_estimate(work, fd_forwards=fd_forwards, journal_records=work['blocks']//args.journal_every if args.journal else 0,
@@ -369,8 +378,7 @@ def execute(args, spec, mode, record, artifacts):
                  fd_cells=int(fd_mask.sum())*(k_hi-k_lo), fd_radius_um=args.fd_radius_um, fd_step=args.fd_step, fd_check=args.fd_check)
     record['executions'][mode] = entry
     if mode == 'streamed':
-        from torchfdtd import estimate_streamed_memory
-        entry['reservation'] = estimate_streamed_memory(model.model.project, options, frequency_hz=spec['frequencies_hz'])
+        entry['reservation'] = plane_reservation(model, spec, options)
     design = epsilon.to(device).requires_grad_(True)
     plane, J, scaled, history, forward = run_forward(model, design, spec, mode+'_forward', record, args, mode)
     np.save(artifacts/f'{mode}_energy_history.npy', history)

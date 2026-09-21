@@ -124,8 +124,12 @@ when host workspace admission is required.
 
 Pass `StreamedAdjointOptions` to select the same DRAM/file policies described in
 [the streamed guide](STREAMED_FDTD.md). `block_size` controls resident spectral
-buffering. Streamed execution uses its `temporal_depth`. Large detector planes
-still need performance work on sampling and CUDA observation injection.
+buffering. Streamed execution uses its `temporal_depth`, and selects and
+prepares each tile's observers once per operator rather than on every tile
+visit, so a plane of millions of point samples pays for the scan once per
+phase; the per-step gather and the host DFT still scale with the sample count
+([propagated case](BEYOND_VRAM_PROPAGATED.md)). CUDA observation injection
+still needs performance work for large planes.
 
 [Recorded checks](validation/PLANE_ADJOINT_REPORT.md) include native complex-field
 parity, full-autograd and finite-difference derivatives, and a dielectric slab

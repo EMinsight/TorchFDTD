@@ -17,6 +17,7 @@ from benchmarks.report_beyond_vram_propagated import evaluate, load_cases, rende
 
 ROOT = Path(__file__).resolve().parents[1]
 REHEARSAL = ROOT/'docs/validation/g5/G5-05_rehearsal_3060.json'
+WORKSTATION = ROOT/'docs/validation/beyond_vram_propagated_5880.json'
 
 
 @pytest.fixture(scope='module')
@@ -58,12 +59,42 @@ def test_rehearsal_record_passes_every_rehearsal_criterion(cases, rehearsal):
     failed = [row['name'] for row in verdict['criteria'] if not row['passed']]
     assert not failed, failed
     assert verdict['all_passed']
+    assert {row['case'] for row in verdict['criteria']} == {'G5-05', 'G5-06'}
     streamed = rehearsal['executions']['streamed']
     assert streamed['fd']['kind'] == 'central' and streamed['fd']['relative_error'] <= .03
     assert rehearsal['comparison']['design_slab_gradient_relative_l2'] <= 1e-4
     assert rehearsal['runs']['streamed_forward']['energy_decayed_fraction'] <= 1e-3
     assert rehearsal['environment']['hardware'].startswith('NVIDIA GeForce RTX 3060')
     assert set(rehearsal['executions']) == {'resident', 'streamed'}
+
+
+def _workstation_evidence():
+    if not WORKSTATION.exists():
+        pytest.skip('The RTX 5880 record has not been produced yet; G5-05 and G5-06 stay NOT_RUN (see docs/DEVELOPMENT_HANDOFF.md).')
+    return json.loads(WORKSTATION.read_text(encoding='utf-8'))
+
+
+def _workstation_rows(cases, case):
+    evidence = _workstation_evidence()
+    assert evidence['context'] == 'workstation'
+    verdict = evaluate(evidence['record'], cases, 'workstation')
+    assert verdict['criteria'] == evidence['verdict']['criteria'], 'the stored verdict must be reproducible from the stored record'
+    return [row for row in verdict['criteria'] if row['case'] == case]
+
+
+def test_workstation_record_meets_g5_05(cases):
+    rows = _workstation_rows(cases, 'G5-05')
+    failed = [row['name'] for row in rows if not row['passed']]
+    assert rows and not failed, failed
+
+
+def test_workstation_record_meets_g5_06(cases):
+    rows = _workstation_rows(cases, 'G5-06')
+    failed = [row['name'] for row in rows if not row['passed']]
+    assert rows and not failed, failed
+    evidence = _workstation_evidence()
+    assert evidence['record']['environment']['hardware'] == 'NVIDIA RTX 5880 Ada Generation'
+    assert 'system_counters' in evidence['record'], 'the whole-machine counter CSV must be supplied to the report'
 
 
 def test_rehearsal_record_is_complete_for_the_report_and_carries_no_machine_paths(rehearsal):

@@ -1561,13 +1561,29 @@
           "title": "meaningful beyond-VRAM 사례 하나를 추가한다",
           "specification": "meaningful beyond-VRAM 사례 하나를 추가한다. dtype를 바꾸어 용량만 부풀리지 않고 실제 state가 물리 VRAM을 넘도록 한다. 수십 step의 local causal-cone capacity 테스트와 달리 파가 목적 구조·출력에 도달하고 필요한 시간/주파수 해상도를 갖게 한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IN_PROGRESS",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "benchmarks/beyond_vram_propagated.py",
+            "benchmarks/report_beyond_vram_propagated.py",
+            "torchfdtd/spacetime.py",
+            "torchfdtd/adjoint_planes.py",
+            "torchfdtd/angular_spectrum.py",
+            "tests/test_beyond_vram_propagated.py",
+            "docs/validation/cases/G5-05.json",
+            "docs/validation/g5/G5-05_rehearsal_3060.json",
+            "docs/BEYOND_VRAM_PROPAGATED.md"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_beyond_vram_propagated.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-05.xml   (after the RTX 5880 record docs/validation/beyond_vram_propagated_5880.json exists; the workstation tests skip until then)"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_beyond_vram_propagated.py::test_cases_are_declared_before_the_run_and_match_the_fixture_generator",
+            "tests/test_beyond_vram_propagated.py::test_rehearsal_record_passes_every_rehearsal_criterion",
+            "tests/test_beyond_vram_propagated.py::test_workstation_record_meets_g5_05"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -1577,13 +1593,26 @@
           "title": "위 대규모 사례는 승인된 실행/디스크 쓰기 예산 안에서 수행한다",
           "specification": "위 대규모 사례는 승인된 실행/디스크 쓰기 예산 안에서 수행한다. 충분히 전파한 장·spectrum과 실제 VJP가 있어야 한다. 1e-7의 작은 영역 오차만으로 응용 수렴 완료를 선언하지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IN_PROGRESS",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "benchmarks/beyond_vram_propagated.py",
+            "benchmarks/report_beyond_vram_propagated.py",
+            "tests/test_beyond_vram_propagated.py",
+            "docs/validation/cases/G5-06.json",
+            "docs/validation/g5/G5-05_rehearsal_3060.json",
+            "docs/BEYOND_VRAM_PROPAGATED.md"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_beyond_vram_propagated.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-06.xml   (after the RTX 5880 record docs/validation/beyond_vram_propagated_5880.json exists; the workstation tests skip until then)"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_beyond_vram_propagated.py::test_report_renders_from_the_record_alone",
+            "tests/test_beyond_vram_propagated.py::test_time_model_reproduces_the_records_it_was_fitted_on",
+            "tests/test_beyond_vram_propagated.py::test_workstation_record_meets_g5_06"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null

@@ -41,8 +41,8 @@ def sanitize(record):
     return clean
 
 
-def _criterion(name, value, limit, ok, unit=''):
-    return dict(name=name, value=value, limit=limit, unit=unit, passed=bool(ok))
+def _criterion(name, value, limit, ok, unit='', case='G5-05'):
+    return dict(name=name, value=value, limit=limit, unit=unit, passed=bool(ok), case=case)
 
 
 def evaluate(record, cases, context):
@@ -93,25 +93,25 @@ def evaluate(record, cases, context):
                                bool(resident_fd) and resident_fd['relative_error'] <= kind['relative_error_max']))
     b = c06['budget'][context]
     rows.append(_criterion('wall time of the driver', record.get('elapsed_seconds'), b['wall_seconds_max'],
-                           record.get('elapsed_seconds') is not None and record['elapsed_seconds'] <= b['wall_seconds_max'], 's'))
+                           record.get('elapsed_seconds') is not None and record['elapsed_seconds'] <= b['wall_seconds_max'], 's', case='G5-06'))
     writes = sum(run['memory']['machine_disk_write_bytes'] for run in record['runs'].values())+backward['memory']['machine_disk_write_bytes']
-    rows.append(_criterion('machine disk writes over the run phases', writes, b['disk_write_bytes_max'], writes <= b['disk_write_bytes_max'], 'bytes'))
+    rows.append(_criterion('machine disk writes over the run phases', writes, b['disk_write_bytes_max'], writes <= b['disk_write_bytes_max'], 'bytes', case='G5-06'))
     counters = record.get('system_counters')
     if counters is not None:
         rows.append(_criterion('integrated machine disk writes from the counters', counters['integrated_write_bytes'], b['disk_write_bytes_max'],
-                               counters['integrated_write_bytes'] <= b['disk_write_bytes_max'], 'bytes'))
+                               counters['integrated_write_bytes'] <= b['disk_write_bytes_max'], 'bytes', case='G5-06'))
     for phase, holder in (('forward', forward), ('backward', backward)):
         present = all(k in holder or k in holder['memory'] for k in MEMORY_KEYS)
-        rows.append(_criterion(f'{phase} memory and disk measurements recorded separately', present, True, present))
+        rows.append(_criterion(f'{phase} memory and disk measurements recorded separately', present, True, present, case='G5-06'))
     if context == 'workstation':
         v = c06['vram']
         rows.append(_criterion('physical VRAM recorded', record['environment'].get('physical_vram_bytes'), v['physical_vram_bytes_min'],
-                               (record['environment'].get('physical_vram_bytes') or 0) >= v['physical_vram_bytes_min'], 'bytes'))
+                               (record['environment'].get('physical_vram_bytes') or 0) >= v['physical_vram_bytes_min'], 'bytes', case='G5-06'))
         live = execution['reservation']['state_bank_capacity']*execution['reservation']['state_bytes']+execution['reservation']['dense_parameter_reservation_bytes']
         rows.append(_criterion('live adjoint state (checkpoint banks plus dense parameters) over physical VRAM', live/record['environment']['physical_vram_bytes'], 1.,
-                               live > record['environment']['physical_vram_bytes']))
-        rows.append(_criterion('E/H bytes over physical VRAM (reported, below one by design of the budget)', record['eh_bytes']/record['environment']['physical_vram_bytes'], None, True))
-    rows.append(_criterion('driver stage complete', record.get('stage'), 'complete', record.get('stage') == 'complete'))
+                               live > record['environment']['physical_vram_bytes'], case='G5-06'))
+        rows.append(_criterion('E/H bytes over physical VRAM (reported, below one by design of the budget)', record['eh_bytes']/record['environment']['physical_vram_bytes'], None, True, case='G5-06'))
+    rows.append(_criterion('driver stage complete', record.get('stage'), 'complete', record.get('stage') == 'complete', case='G5-06'))
     return dict(context=context, criteria=rows, all_passed=all(r['passed'] for r in rows),
                 case_sha256={k: v for k, v in cases['sha256'].items()})
 
@@ -206,13 +206,13 @@ def render(evidence):
                   f"| Disk write mean, peak, integrated | {c['mean_write_bytes_per_second']/1e9:.2f} GB/s, {c['max_write_bytes_per_second']/1e9:.2f} GB/s, {gb(c['integrated_write_bytes'])} |",
                   f"| Disk read mean, peak, integrated | {c['mean_read_bytes_per_second']/1e9:.2f} GB/s, {c['max_read_bytes_per_second']/1e9:.2f} GB/s, {gb(c['integrated_read_bytes'])} |",
                   f"| CPU mean, peak | {c['mean_cpu_percent']:.1f} %, {c['max_cpu_percent']:.1f} % |", '', c['scope'], '']
-    lines += ['## Criteria', '', '| Criterion | Value | Limit | Result |', '|---|---|---|---|']
+    lines += ['## Criteria', '', '| Case | Criterion | Value | Limit | Result |', '|---|---|---|---|---|']
     for row in verdict['criteria']:
         value = row['value']
         value = f'{value:.4e}' if isinstance(value, float) else str(value)
         limit = row['limit']
         limit = f'{limit:.4e}' if isinstance(limit, float) else str(limit)
-        lines.append(f"| {row['name']} | {value} {row['unit']} | {limit} | {'PASS' if row['passed'] else 'FAIL'} |")
+        lines.append(f"| {row['case']} | {row['name']} | {value} {row['unit']} | {limit} | {'PASS' if row['passed'] else 'FAIL'} |")
     lines += ['', f"Case files: {', '.join(f'{k} `{v}`' for k, v in verdict['case_sha256'].items())}.", '',
               '## What this does and does not show', '',
               '- The pulse crosses the pillar layer and reaches the output plane: the plane energy history rises, peaks and decays to the recorded fraction within the declared duration; the spectrum is accumulated online at three wavelengths whose separation exceeds twice the DFT resolution.',
