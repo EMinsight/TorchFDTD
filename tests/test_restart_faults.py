@@ -143,7 +143,7 @@ def test_backward_interruption(tmp_path, monkeypatch, device, storage):
 CHILD = '''
 import sys, time, torch
 sys.path.insert(0, sys.argv[1]); sys.path.insert(0, sys.argv[2])
-from torchfdtd import StreamedSimulation
+from torchfdtd import StreamedSimulation, StreamedAdjointOptions
 from torchfdtd.spacetime import SlabBlockOperator
 from test_differentiable import project
 phase = sys.argv[5]
