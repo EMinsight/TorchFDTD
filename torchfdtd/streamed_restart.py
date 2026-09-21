@@ -168,7 +168,16 @@ class RestartJournal:
         final = self.root / name
         if final.exists():
             shutil.rmtree(final)
-        os.replace(temp, final)
+        for attempt in range(5):
+            try:
+                os.replace(temp, final)
+                break
+            except PermissionError:
+                # Windows can briefly deny renaming a directory whose fresh
+                # files an indexer still holds open. Retry before giving up.
+                if attempt == 4:
+                    raise
+                time.sleep(.05*(attempt+1))
         previous = self._latest(meta['kind'])
         _atomic_json(self._pointer(meta['kind']), dict(directory=name, kind=meta['kind'], block=meta['block']))
         if previous is not None and previous['directory'] != final and previous['directory'].exists():
