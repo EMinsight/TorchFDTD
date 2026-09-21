@@ -699,7 +699,7 @@ G8-02 observed metrics are attached with `--observed`.
 - Project JSON files that carry `revision` and `content_sha256` are refused by builds before this branch (`extra='forbid'`); schema 1 keeps its number because files without the keys load unchanged. The G8-01 fixtures and their evidence are untouched.
 - Stale marking follows `plan_hash`; a precision or backend change alone does not mark results stale (the run summary prints both). Dragging in a viewport moves the dragged object only, not the whole selection.
 - The workbench downloads NPZ only; the HDF5 form is reachable from Python. h5py came from the user site-packages of the interpreter, not from the venv; a clean venv needs `pip install torchfdtd[hdf5]`.
-- `scripts/run_workbench_journeys.py` needs Node, `npm ci` and the Playwright Chromium; it starts the server with `CUDA_VISIBLE_DEVICES=''` so the record is CPU-only by construction.
+- `scripts/run_workbench_journeys.py` needs Node, `npm ci` and the Playwright Chromium; it starts the server with `CUDA_VISIBLE_DEVICES=-1` so the record is CPU-only by construction (an empty value leaves `torch.cuda.is_available()` true with no device and `/api/health` fails on `get_device_name(0)`).
 
 **Next first command and task id.** Rerun the clean-install check after the
 merge so the G8-05 and G8-07 records match the merged bundle and pyproject:

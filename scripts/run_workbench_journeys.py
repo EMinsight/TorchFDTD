@@ -116,7 +116,7 @@ def main(argv=None):
             port = free_port()
             url = f'http://127.0.0.1:{port}'
             scratch = tempfile.mkdtemp(prefix='torchfdtd-journeys-', dir=str(ROOT / '.local' / 'tmp') if (ROOT / '.local' / 'tmp').is_dir() else None)
-            env = {**os.environ, 'TORCHFDTD_RESULTS': scratch, 'CUDA_VISIBLE_DEVICES': ''}
+            env = {**os.environ, 'TORCHFDTD_RESULTS': scratch, 'CUDA_VISIBLE_DEVICES': '-1'}
             server = subprocess.Popen([args.python, '-m', 'torchfdtd.cli', 'serve', '--port', str(port)], cwd=ROOT, env=env,
                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         health = wait_for(url)
