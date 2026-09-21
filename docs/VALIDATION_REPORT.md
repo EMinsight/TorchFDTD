@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.14.0.dev0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260921T202555Z-g9-07-f8fe342e` recorded 2026-09-21T20:25:55+00:00 at commit `1c191f4f2ae1`.
+Package version `0.14.0.dev0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260921T212831Z-g9-04-f826cb57` recorded 2026-09-21T21:28:31+00:00 at commit `32af0e2bffa2`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 19 | 58 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 19 | 64 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 31 | 46 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 31 | 52 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -24,11 +24,11 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G0-01 | 실제 HEAD/dirty tree/기존 계획/자원·권한 확인 | IMPLEMENTED | VERIFIED | `20260921T140931Z-g0-01-c3d27260` | `1be01cca38dd` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/COMPLETION_PROGRAM_KO.md, docs/COMPLETION_PLAN_KO.md |
-| G0-02 | RELEASE_SCOPE와 기능·검증 상태 분리 | IMPLEMENTED | VERIFIED | `20260921T140934Z-g0-02-39132c5d` | `1be01cca38dd` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/COMPLETION_PROGRAM_KO.md, docs/COMPLETION_PLAN_KO.md |
-| G0-03 | 기존 완료 계획·gate·fixture·raw evidence 단일 추적 | IMPLEMENTED | VERIFIED | `20260921T140938Z-g0-03-786bc0b9` | `1be01cca38dd` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/COMPLETION_PROGRAM_KO.md, docs/COMPLETION_PLAN_KO.md |
-| G0-04 | 필수 누락/실패/skip/source 불일치에서 출고 실패 판정기 | IMPLEMENTED | VERIFIED | `20260921T190225Z-g0-04-74cad931` | `d6fb1f86dbc1` | FAIL | STALE: test source changed since the run: tests/test_release_gates.py |
-| G0-05 | 판정기 자체 failure injection과 세션 인계 구조 | IMPLEMENTED | VERIFIED | `20260921T190327Z-g0-05-ed168636` | `d6fb1f86dbc1` | FAIL | STALE: test source changed since the run: tests/test_release_gates.py |
+| G0-01 | 실제 HEAD/dirty tree/기존 계획/자원·권한 확인 | IMPLEMENTED | VERIFIED | `20260921T212112Z-g0-01-78c4f2c1` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G0-02 | RELEASE_SCOPE와 기능·검증 상태 분리 | IMPLEMENTED | VERIFIED | `20260921T212114Z-g0-02-a4700f5a` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G0-03 | 기존 완료 계획·gate·fixture·raw evidence 단일 추적 | IMPLEMENTED | VERIFIED | `20260921T212115Z-g0-03-9d45ae2d` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G0-04 | 필수 누락/실패/skip/source 불일치에서 출고 실패 판정기 | IMPLEMENTED | VERIFIED | `20260921T212305Z-g0-04-4a232a3c` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G0-05 | 판정기 자체 failure injection과 세션 인계 구조 | IMPLEMENTED | VERIFIED | `20260921T212525Z-g0-05-d0b1a9fe` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 
 ### G1 과거 리뷰 회귀 및 수정 (WORKSTATION, P0)
 
@@ -39,7 +39,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G1-03 | quadrant_intensity_allocation의 FP32 불안정. | IMPLEMENTED | VERIFIED | `20260921T140949Z-g1-03-72ef3ff6` | `1be01cca38dd` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260921T184733Z-g1-04-e39845b1` | `dfdd44d27978` | PASS | evidence matches the current checkout |
 | G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260921T184737Z-g1-05-c820d464` | `dfdd44d27978` | PASS | evidence matches the current checkout |
-| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260921T184824Z-g1-06-7d8dff9d` | `db1548f7676d` | FAIL | STALE: the task watches data files but the evidence predates the watch list: README.md, docs/BEYOND_VRAM_FP32.md, docs/validation/beyond_vram_restart_5880.json, docs/validation/cross_solver_3060.json |
+| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260921T212526Z-g1-06-c5adc0f5` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 
 ### G2 물리·격자·실행 계약 (WORKSTATION, P0)
 
@@ -49,7 +49,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G2-02 | forward/adjoint/streamed/tensor batch/GUI가 서로 다른 규칙으로 물리 입력을 다시 해석하지 않도록 한다 | IMPLEMENTED | VERIFIED | `20260921T164046Z-g2-02-fc7ab609` | `7847737ba636` | PASS | evidence matches the current checkout |
 | G2-03 | capability registry를 만들고 dimensions × mesh × materials × boundaries × sources × monitors × forward/backward × resident/streamed × precision/backend의 유효 조합을 명시한다 | IMPLEMENTED | VERIFIED | `20260921T171604Z-g2-03-53e2e466` | `bca0a7b29e6a` | PASS | evidence matches the current checkout |
 | G2-04 | 전수 조합 대신 위험 기반 pairwise 검사와 고위험 3~4개 기능 조합을 설계한다 | IMPLEMENTED | VERIFIED | `20260921T171624Z-g2-04-481b2694` | `bca0a7b29e6a` | PASS | evidence matches the current checkout |
-| G2-05 | "+/- DFT", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다. | IMPLEMENTED | VERIFIED | `20260921T164112Z-g2-05-657bc5cb` | `7847737ba636` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/CONVENTIONS.md |
+| G2-05 | "+/- DFT", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다. | IMPLEMENTED | VERIFIED | `20260921T212539Z-g2-05-d33352b2` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 | G2-06 | cache/reference/restart마다 필요한 동일성 조건을 분리한다 | IMPLEMENTED | VERIFIED | `20260921T164116Z-g2-06-c78e74ff` | `7847737ba636` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/IDENTITY_CONDITIONS.md |
 
 ### G3 독립 물리·gradient 검증 (WORKSTATION, P0)
@@ -72,7 +72,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G3-14 | 무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교 | IMPLEMENTED | VERIFIED | `20260921T185333Z-g3-14-1bd80f8e` | `5218de5b6b52` | PASS | scope change pending approval (9 declaration(s), scope_change_approval is null): docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_solver.py/float32/atol = 2e-06 is looser than the loosest program atol 1e-06; and 8 more |
 | G3-15 | full-autograd·directional VJP·FD sweep·Taylor 검사 | IMPLEMENTED | VERIFIED | `20260921T190441Z-g3-15-ca5f7da9` | `d6fb1f86dbc1` | PASS | scope change pending approval (3 declaration(s), scope_change_approval is null): docs/validation/cases/G3-15_gradient_checks.json acceptance/waveform/float32/rtol = 0.003 is looser than the loosest program rtol 0.0001; and 2 more |
 | G3-16 | 실제 shape/material 파라미터의 물리 gradient 수렴 | IMPLEMENTED | VERIFIED | `20260921T190545Z-g3-16-7cf64e2d` | `d6fb1f86dbc1` | FAIL | STALE: the task watches data files but the evidence predates the watch list: benchmarks/gradient_mesh.py, benchmarks/shape_gradient_polygon.py, docs/validation/shape_gradient_polygon_3060.json |
-| G3-17 | oracle 독립성·정밀도·시간·PML 오차 budget 확인 | IMPLEMENTED | VERIFIED | `20260921T165050Z-g3-17-bb3742d1` | `5c0172da60d2` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/validation/cases/G3-*.json, docs/validation/cases/*.oracles.json, docs/ORACLE_BUDGET.md |
+| G3-17 | oracle 독립성·정밀도·시간·PML 오차 budget 확인 | IMPLEMENTED | FAILED | `20260921T212540Z-g3-17-2222cfe9` | `32af0e2bffa2` | FAIL | verification_state is FAILED |
 
 ### G4 CUDA·CI·환경 검증 (WORKSTATION, P0)
 
@@ -82,8 +82,8 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G4-02 | torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다. | IMPLEMENTED | VERIFIED | `20260921T163724Z-g4-02-b5c11b4f` | `a73f47920e9c` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-03 | noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다 | IMPLEMENTED | VERIFIED | `20260921T163744Z-g4-03-5f80ac67` | `a73f47920e9c` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-04 | 최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다 | IMPLEMENTED | VERIFIED | `20260921T163757Z-g4-04-7e1cdb0f` | `a73f47920e9c` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260921T164503Z-g4-05-300f0a95` | `e66e499d9db7` | FAIL | STALE: test source changed since the run: tests/test_release_gates.py |
-| G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260921T163823Z-g4-06-f3d8a42a` | `a73f47920e9c` | FAIL | STALE: the task watches data files but the evidence predates the watch list: .github/workflows/test.yml, docs/GPU_RUNNER_POLICY.md, scripts/run_suite.py |
+| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260921T212749Z-g4-05-d9c1df76` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260921T212752Z-g4-06-c6698b17` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 
 ### G5 메모리·재시작·장기 안정성 (WORKSTATION, P0)
 
@@ -127,22 +127,22 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G8-01 | 기존 Project JSON/NPZ compatibility와 schema migration을 시험한다 | IMPLEMENTED | VERIFIED | `20260921T170627Z-g8-01-d8b628a7` | `656c5075eabd` | FAIL | STALE: the task watches data files but the evidence predates the watch list: examples/native_farfield.json, examples/open_mode_network.json, tests/fixtures/** |
+| G8-01 | 기존 Project JSON/NPZ compatibility와 schema migration을 시험한다 | IMPLEMENTED | VERIFIED | `20260921T212803Z-g8-01-21814658` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 | G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260921T192908Z-g8-02-76c35baa` | `579c27df75e5` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260921T192925Z-g8-03-25de93db` | `579c27df75e5` | FAIL | STALE: the task watches data files but the evidence predates the watch list: torchfdtd/web/**, docs/validation/workbench/*.json |
 | G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260921T192929Z-g8-04-705af196` | `579c27df75e5` | FAIL | STALE: the task watches data files but the evidence predates the watch list: torchfdtd/web/**, docs/validation/workbench/*.json |
-| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260921T170637Z-g8-05-29a464aa` | `656c5075eabd` | FAIL | STALE: the task watches data files but the evidence predates the watch list: pyproject.toml, torchfdtd/web/**, scripts/clean_install_check.py, scripts/run_readme_examples.py, README.md, docs/validation/clean_install/*.json |
+| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | FAILED | `20260921T212804Z-g8-05-bbac99d9` | `32af0e2bffa2` | FAIL | verification_state is FAILED |
 | G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260921T170706Z-g8-06-7b7e68da` | `656c5075eabd` | FAIL | STALE: the task watches data files but the evidence predates the watch list: pyproject.toml, torchfdtd/web/**, scripts/clean_install_check.py, scripts/run_readme_examples.py, README.md, docs/validation/clean_install/*.json |
-| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260921T170718Z-g8-07-b934b710` | `656c5075eabd` | FAIL | STALE: the task watches data files but the evidence predates the watch list: pyproject.toml, torchfdtd/web/**, scripts/clean_install_check.py, scripts/run_readme_examples.py, README.md, docs/validation/clean_install/*.json |
+| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | FAILED | `20260921T212806Z-g8-07-0ede6bb6` | `32af0e2bffa2` | FAIL | verification_state is FAILED |
 
 ### G9 보안·운영·출고 판정 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260921T163013Z-g9-01-57458fee` | `e132fdd4155b` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260921T163044Z-g9-02-158d1eda` | `e132fdd4155b` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/validation/sbom.json, docs/THIRD_PARTY_NOTICES.md, pyproject.toml, THIRD_PARTY_NOTICES.txt, package-lock.json |
+| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260921T212820Z-g9-02-ae84c532` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 | G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260921T163104Z-g9-04-f2b9d65e` | `e132fdd4155b` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/COMPATIBILITY.md, docs/CHANGELOG.md, .github/ISSUE_TEMPLATE/bug_report.md, pyproject.toml, torchfdtd/server.py, torchfdtd/__init__.py |
+| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260921T212831Z-g9-04-f826cb57` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | VERIFIED | `20260921T202555Z-g9-07-f8fe342e` | `1c191f4f2ae1` | FAIL | STALE: test source changed since the run: tests/test_validation_report.py |
@@ -169,7 +169,7 @@ Every record written by `scripts/platform_report.py` under `docs/validation/plat
 
 | Platform id | G4 evidence runs recorded on this platform | Other tasks whose newest run was recorded here |
 | --- | --- | --- |
-| rtx3060-win11-lab | G4-01 `20260921T163708Z-g4-01-53b82748` (GPU name); G4-02 `20260921T163724Z-g4-02-b5c11b4f` (GPU name); G4-03 `20260921T163744Z-g4-03-5f80ac67` (GPU name); G4-04 `20260921T163757Z-g4-04-7e1cdb0f` (GPU name); G4-05 `20260921T164503Z-g4-05-300f0a95` (GPU name); G4-06 `20260921T163823Z-g4-06-f3d8a42a` (GPU name) | 45 |
+| rtx3060-win11-lab | G4-01 `20260921T163708Z-g4-01-53b82748` (GPU name); G4-02 `20260921T163724Z-g4-02-b5c11b4f` (GPU name); G4-03 `20260921T163744Z-g4-03-5f80ac67` (GPU name); G4-04 `20260921T163757Z-g4-04-7e1cdb0f` (GPU name); G4-05 `20260921T212749Z-g4-05-d9c1df76` (platform_id); G4-06 `20260921T212752Z-g4-06-c6698b17` (platform_id) | 45 |
 | rtx5880-ada-win11-remote | none | 0 |
 
 Newest runs that match no platform record: none.
@@ -235,7 +235,7 @@ One line per G3 task. Where `docs/validation/g3/<task>.json` exists, the criteri
 | G3-14 | Small discrete problems: CPU torch, CUDA torch, fused CUDA, streamed and reversible forward and VJP agreement | none (the test assertions are the record) | the pass/fail assertions of the required tests | 75 passed, 0 failed, 0 skipped in `20260921T185333Z-g3-14-1bd80f8e` | VERIFIED |
 | G3-15 | Full-autograd oracle, explicit adjoint, central-difference step sweep, Taylor remainder and directional VJP checks | none (the test assertions are the record) | the pass/fail assertions of the required tests | 34 passed, 0 failed, 0 skipped in `20260921T190441Z-g3-15-ca5f7da9` | VERIFIED |
 | G3-16 | Physical shape and material parameter gradients: slab thickness and permittivity against the Airy derivative, polygon vertices under mesh refinement | none (the test assertions are the record) | the pass/fail assertions of the required tests | 19 passed, 0 failed, 0 skipped in `20260921T190545Z-g3-16-7cf64e2d` | VERIFIED |
-| G3-17 | Oracle independence, precision floor, time-window and PML error budgets of every G3 fixture | none (the test assertions are the record) | the pass/fail assertions of the required tests | 4 passed, 0 failed, 0 skipped in `20260921T165050Z-g3-17-bb3742d1` | VERIFIED |
+| G3-17 | Oracle independence, precision floor, time-window and PML error budgets of every G3 fixture | none (the test assertions are the record) | the pass/fail assertions of the required tests | 1 passed, 3 failed, 0 skipped in `20260921T212540Z-g3-17-2222cfe9`; KeyError: 'oracle_class'; AssertionError: ('G3-01_uniform_propagation.json', 'tests/test_physics_g3_a.py::TestG301::test_eigenmode_matches_yee_relation'); AssertionError: G3-01_uniform_propagation | FAILED |
 
 ## Cross-solver and Meep comparison headlines
 
@@ -284,18 +284,11 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 
 | Task | Warning |
 | --- | --- |
-| G0-01 | run predates its commit: the tests started at 2026-09-21T23:07:30.152849+09:00 before commit 1be01cca38dd was made |
-| G0-02 | run predates its commit: the tests started at 2026-09-21T23:07:30.152849+09:00 before commit 1be01cca38dd was made |
-| G0-03 | run predates its commit: the tests started at 2026-09-21T23:07:30.152849+09:00 before commit 1be01cca38dd was made |
-| G0-04 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G0-05 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G1-01 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G1-01 | run predates its commit: the tests started at 2026-09-21T23:07:46.449202+09:00 before commit 1be01cca38dd was made |
 | G1-02 | run predates its commit: the tests started at 2026-09-21T23:07:46.449202+09:00 before commit 1be01cca38dd was made |
 | G1-03 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G1-03 | run predates its commit: the tests started at 2026-09-21T23:07:32.017315+09:00 before commit 1be01cca38dd was made |
-| G1-06 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G2-05 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G2-06 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G3-01 | run predates its commit: the tests started at 2026-09-22T02:08:12.938239+09:00 before commit ce5f049d4375 was made |
 | G3-02 | run predates its commit: the tests started at 2026-09-22T01:55:21.819372+09:00 before commit 88c577519350 was made |
@@ -318,15 +311,10 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | G4-02 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-03 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-04 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G4-05 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G4-06 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G8-01 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G8-02 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G8-04 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G8-06 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G9-01 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G9-02 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G9-04 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G9-07 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 
 ## Pending owner approvals

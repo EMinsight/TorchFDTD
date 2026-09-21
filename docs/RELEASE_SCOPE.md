@@ -47,7 +47,7 @@ not domain decomposition.
 
 | Row | Implemented scope and record | Verified for release |
 | --- | --- | --- |
-| Operating systems | Windows 11 (local development host and the RTX 5880 workstation); Linux for the CPU CI job and the FDTDX matched fixture ([FDTDX_MATCHED_CORRECTNESS.md](FDTDX_MATCHED_CORRECTNESS.md)). macOS is documented for CPU install only and has no test record | VERIFIED (G4-01, G8-06, G8-07) |
+| Operating systems | Windows 11 (local development host and the RTX 5880 workstation); Linux for the CPU CI job and the FDTDX matched fixture ([FDTDX_MATCHED_CORRECTNESS.md](FDTDX_MATCHED_CORRECTNESS.md)). macOS is documented for CPU install only and has no test record | MIXED: VERIFIED G4-01, G8-06; FAILED G8-07 |
 | Python and dependencies | Python 3.10 or newer (3.10.2 local, 3.11 CI, 3.12.7 trial); torch 2.4 or newer (2.4.1+cpu, 2.14.0+cpu and 2.10.0+cu126 installed and run; 2.2 and 2.3 fail with NumPy 2, see [INSTALL.md](INSTALL.md)); numpy, scipy, fastapi, uvicorn, pydantic per `pyproject.toml`; CuPy `cupy-cuda12x` 13.6 for the fused kernels and the real-field CUDA adjoint; gdstk for GDS. The tried versions and the untried ones are listed in [INSTALL.md](INSTALL.md) | VERIFIED (G8-06) |
 | GPUs actually exercised | RTX 3060 12 GB (local) and RTX 5880 Ada 48 GB (remote), CUDA 12.6 runtime. Full suites passed on the RTX 3060 at 1ad9166 with 2,181 passes and 7 skips and on the RTX 5880 at a879e1b with 2,141 passes and 7 skips ([ACCEPTANCE.md](ACCEPTANCE.md)); those runs predate the gate file and are not gate evidence | VERIFIED (G4-01, G4-02, G4-03, G4-04, G4-05) |
 | Execution backends | CPU/Torch; CUDA Torch kernel; fused CUDA kernels with CUDA Graphs; FP32/FP64; real and complex fields; nondefault streams ([COMPLEX_CUDA.md](COMPLEX_CUDA.md), [CUDA_SPECTRA.md](CUDA_SPECTRA.md)). CPU fallback when CuPy is absent is printed, not hidden (G1-06) | VERIFIED (G4-02, G4-03, G4-04) |
@@ -61,7 +61,7 @@ not domain decomposition.
 | Results | NPZ fields and monitors, JSON/CSV monitor export, browser field viewer; complex fields kept in NPZ ([BOUNDARIES.md](BOUNDARIES.md)). No chunked/lazy large-result format has been chosen yet | VERIFIED (G8-01, G8-02) |
 | GDS | Import and export with layers/datatypes, units, hierarchy, arrays, PATH, even-odd holes, layer etch, z-node sidewall staircase, port markers and N-port builders ([GDS.md](GDS.md), [GDS_MODE_PORTS.md](GDS_MODE_PORTS.md)). Rejected: holes touching the outline at a vertex, nested holes | NOT_RUN (G6-07, G7-03) |
 | FSP | Independent read and writeback of a documented layout subset ([FSP.md](FSP.md)); general FSP compatibility is not claimed and the provenance question stays open in RELEASE_REVIEW.md | Not a gate row; distribution decision pending (G9-03) |
-| Packaging | Wheel built from a fresh staging directory with the browser assets included (`scripts/build_preview.py`); `cuda-kernels`, `gds`, `dev` extras | MIXED: VERIFIED G8-05, G8-07; NOT_RUN G9-06 |
+| Packaging | Wheel built from a fresh staging directory with the browser assets included (`scripts/build_preview.py`); `cuda-kernels`, `gds`, `dev` extras | MIXED: FAILED G8-05, G8-07; NOT_RUN G9-06 |
 
 ## Differentiation (WORKSTATION)
 
@@ -97,20 +97,20 @@ Rendered from [validation/completion_gates.json](validation/completion_gates.jso
 
 | Stage | Title | Profile | Tasks | VERIFIED | FAILED | NOT_RUN | BLOCKED_EXTERNAL | Judge |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| G0 | 기준선·범위·증거 체계 | WORKSTATION | 5 | 5 | 0 | 0 | 0 | 0 pass, 5 fail |
-| G1 | 과거 리뷰 회귀 및 수정 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 5 pass, 1 fail |
-| G2 | 물리·격자·실행 계약 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 4 pass, 2 fail |
-| G3 | 독립 물리·gradient 검증 | WORKSTATION | 17 | 16 | 1 | 0 | 0 | 5 pass, 12 fail |
-| G4 | CUDA·CI·환경 검증 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 3 pass, 3 fail |
+| G0 | 기준선·범위·증거 체계 | WORKSTATION | 5 | 5 | 0 | 0 | 0 | 5 pass, 0 fail |
+| G1 | 과거 리뷰 회귀 및 수정 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
+| G2 | 물리·격자·실행 계약 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 5 pass, 1 fail |
+| G3 | 독립 물리·gradient 검증 | WORKSTATION | 17 | 15 | 2 | 0 | 0 | 5 pass, 12 fail |
+| G4 | CUDA·CI·환경 검증 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 5 pass, 1 fail |
 | G5 | 메모리·재시작·장기 안정성 | WORKSTATION | 10 | 0 | 0 | 10 | 0 | 0 pass, 10 fail |
 | G6 | 사용자 물리·역설계 API | WORKSTATION | 8 | 0 | 0 | 8 | 0 | 0 pass, 8 fail |
 | G7 | 대표 응용·동일 정확도 비용 | WORKSTATION | 5 | 0 | 0 | 5 | 0 | 0 pass, 5 fail |
-| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 1 pass, 6 fail |
-| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 4 | 0 | 3 | 0 | 1 pass, 6 fail |
+| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 5 | 2 | 0 | 0 | 2 pass, 5 fail |
+| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 4 | 0 | 3 | 0 | 3 pass, 4 fail |
 | H1 | 실제 단일 문제 multi-GPU | HPC | 6 | 0 | 0 | 1 | 5 | 0 pass, 6 fail |
 
-- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 19 of 77 required tasks pass the judge, 58 fail; NOT RELEASABLE.
-- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 19 of 83 required tasks pass the judge, 64 fail; NOT RELEASABLE.
+- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 31 of 77 required tasks pass the judge, 46 fail; NOT RELEASABLE.
+- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 31 of 83 required tasks pass the judge, 52 fail; NOT RELEASABLE.
 <!-- stage-status:end -->
 
 ## Scope changes
