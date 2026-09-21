@@ -11,10 +11,11 @@ epsilon tensor, not in project structures.
 The case files docs/validation/cases/G5-05.json and G5-06.json fix the
 acceptance criteria before the judged run. ``--plan`` prints the reservation,
 the work counts and the wall-time estimate without allocating the domain;
-``--rehearsal`` selects the small footprint and budgets of the local rehearsal.
+``--preset`` selects the rehearsal (14 um, both modes), the judged RTX 3060
+run (64 um) or the optional RTX 5880 run (120 um).
 
-python -m benchmarks.beyond_vram_propagated --rehearsal --mode both --output results/rehearsal.json
-python -m benchmarks.beyond_vram_propagated --footprint 120 --plan --assume-5880
+python -m benchmarks.beyond_vram_propagated --preset rehearsal --mode both --output results/rehearsal.json
+python -m benchmarks.beyond_vram_propagated --preset workstation-3060 --plan --assume rtx3060 --output results/plan.json
 """
 import argparse
 import gc
@@ -23,6 +24,7 @@ import json
 import math
 from pathlib import Path
 import platform
+import sys
 import threading
 import time
 
@@ -43,9 +45,33 @@ TIME_MODEL = dict(payload_gb_per_s=5.46, gcell_steps_per_s=4.68, seconds_per_til
                   journal_gb_per_s=1.5,
                   scope='Least-squares fit of the eight forward/backward timings of the two host-bank records above; '
                         'an estimate with about 30 percent scatter on those records, not a measurement of this fixture.')
-# Resources of the RTX 5880 workstation as recorded in docs/validation/beyond_vram_restart_5880.json.
-WORKSTATION_5880 = dict(total_ram_bytes=137116830924, available_ram_bytes=129165385728,
-                        physical_vram_bytes=51526500352, free_vram_bytes=49643782144, hardware='NVIDIA RTX 5880 Ada Generation')
+# The same model with the payload and compute rates refitted on the two RTX 3060
+# streamed rehearsals of this case (docs/validation/g5/G5-05_rehearsal_3060.json
+# and G5-05_rehearsal_3060_streamed_24um.json, four timings within 16 percent);
+# the GPU was shared with other agents during both.
+TIME_MODEL_3060 = dict(TIME_MODEL, payload_gb_per_s=4.26, gcell_steps_per_s=.82,
+                       scope='Least-squares refit of the payload and compute rates on the two RTX 3060 streamed rehearsal '
+                             'records of this case (four timings within 16 percent) on a GPU shared with other agents; '
+                             'an estimate, not a measurement of this fixture.')
+TIME_MODELS = {'rtx5880': TIME_MODEL, 'rtx3060': TIME_MODEL_3060}
+# Resources assumed by --assume: the RTX 5880 workstation as recorded in
+# docs/validation/beyond_vram_restart_5880.json, and the local RTX 3060 machine
+# (85.6 GB of RAM) with 70 GiB of RAM and 11.5 GB of VRAM taken as free at launch.
+WORKSTATIONS = {
+    'rtx5880': dict(total_ram_bytes=137116830924, available_ram_bytes=129165385728,
+                    physical_vram_bytes=51526500352, free_vram_bytes=49643782144, hardware='NVIDIA RTX 5880 Ada Generation'),
+    'rtx3060': dict(total_ram_bytes=85628207104, available_ram_bytes=70*1024**3,
+                    physical_vram_bytes=12884377600, free_vram_bytes=11500000000, hardware='NVIDIA GeForce RTX 3060'),
+}
+# Presets: the local rehearsal, the judged run on the RTX 3060 and the optional larger run on the RTX 5880.
+PRESETS = {
+    'rehearsal': dict(footprint=14., duration_fs=175., width=32, depth=16, checkpoints=2, local_checkpoints=1,
+                      host_gib=6., gpu_gib=1.5, fd_check='central', time_model='rtx3060'),
+    'workstation-3060': dict(footprint=64., duration_fs=175., width=64, depth=32, checkpoints=6, local_checkpoints=1,
+                             host_gib=56., gpu_gib=8., fd_check='central', time_model='rtx3060'),
+    'workstation-5880': dict(footprint=120., duration_fs=175., width=128, depth=32, checkpoints=2, local_checkpoints=1,
+                             host_gib=100., gpu_gib=40., fd_check='central', time_model='rtx5880'),
+}
 
 
 def fixture(footprint_um, mesh_um, *, period_um=1., height_um=.6, focal_um=150., downsample=8,
@@ -262,9 +288,9 @@ def resident_options(args):
     return AdjointOptions(checkpoints=args.resident_checkpoints, storage='host')
 
 
-def time_estimate(work, *, fd_forwards=0, journal_records=0, parameter_bytes=0):
-    """Wall-time estimate of one streamed forward, its VJP and the extra forwards from the work counts and TIME_MODEL."""
-    m = TIME_MODEL
+def time_estimate(work, *, fd_forwards=0, journal_records=0, parameter_bytes=0, model='rtx5880'):
+    """Wall-time estimate of one streamed forward, its VJP and the extra forwards from the work counts and a TIME_MODELS entry."""
+    m = TIME_MODELS[model] if isinstance(model, str) else model
     block = work['block_work'][0]
     gathered, owned = block['gathered_state_bytes']/1e9, block['owned_state_bytes']/1e9
     tiles, blocks, replayed = work['tile_count'], work['blocks'], work['global_replayed_blocks']
@@ -305,8 +331,8 @@ def plan(args, spec, options):
     cells = math.prod(project.region.shape)
     assumed = None
     original = streamed_module.host_memory, streamed_module.cuda_budget_limit
-    if args.assume_5880:
-        assumed = WORKSTATION_5880
+    if args.assume:
+        assumed = dict(WORKSTATIONS[args.assume], name=args.assume)
         streamed_module.host_memory = lambda: dict(total_bytes=assumed['total_ram_bytes'], available_bytes=assumed['available_ram_bytes'])
         streamed_module.cuda_budget_limit = lambda device, required, budget=None: min(budget or assumed['physical_vram_bytes'], int(assumed['free_vram_bytes']*.8))
     try:
@@ -317,7 +343,7 @@ def plan(args, spec, options):
     work = estimate_streamed_work(plane.model.project, options)
     fd_forwards = {'none': 0, 'forward': 1, 'central': 2}[args.fd_check]
     estimate = time_estimate(work, fd_forwards=fd_forwards, journal_records=work['blocks']//args.journal_every if args.journal else 0,
-                             parameter_bytes=cells*4)
+                             parameter_bytes=cells*4, model=args.time_model)
     eh_bytes = 6*cells*4
     resident = dict(eh_bytes=eh_bytes, primal_adjoint_material_gradient_bytes=60*cells,
                     bytes_per_resident_checkpoint=work['state_bytes'],
@@ -465,11 +491,25 @@ def main(argv=None):
     parser.add_argument('--output', required=True)
     parser.add_argument('--artifacts', default=None, help='Directory of the .npy artifacts (default: next to --output)')
     parser.add_argument('--plan', action='store_true', help='Print the reservation, work and time estimate only')
-    parser.add_argument('--assume-5880', action='store_true', help='Plan against the recorded RTX 5880 resources instead of this machine')
-    parser.add_argument('--rehearsal', action='store_true', help='Local preset: 14 um footprint, 6 GiB host, 1.5 GiB GPU, W=32 K=16')
+    parser.add_argument('--assume', choices=sorted(WORKSTATIONS), default=None,
+                        help='Plan against the assumed resources of that machine instead of the live ones')
+    parser.add_argument('--time-model', choices=sorted(TIME_MODELS), default=None,
+                        help="Wall-time model of --plan (default: the preset's machine, else rtx5880)")
+    parser.add_argument('--preset', choices=sorted(PRESETS), default=None,
+                        help='Footprint, duration, policy, budgets and finite-difference kind of one declared run; explicit arguments still override')
+    parser.add_argument('--rehearsal', action='store_true', help='Same as --preset rehearsal')
     args = parser.parse_args(argv)
     if args.rehearsal:
-        args.footprint, args.host_gib, args.gpu_gib, args.width, args.depth = 14., 6., 1.5, 32, 16
+        args.preset = 'rehearsal'
+    if args.preset:
+        given = set(sys.argv[1:] if argv is None else argv)
+        for key, value in PRESETS[args.preset].items():
+            if key != 'time_model' and not any(option in given for option in ('--'+key.replace('_', '-'),)):
+                setattr(args, key, value)
+        if args.time_model is None:
+            args.time_model = PRESETS[args.preset]['time_model']
+    if args.time_model is None:
+        args.time_model = 'rtx5880'
     if args.mode != 'streamed' and args.journal:
         raise ValueError('The restart journal applies to the streamed mode only.')
     spec = fixture(args.footprint, args.mesh, downsample=args.downsample, duration_fs=args.duration_fs, steps=args.steps)

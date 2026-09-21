@@ -17,7 +17,7 @@ from benchmarks.report_beyond_vram_propagated import evaluate, load_cases, rende
 
 ROOT = Path(__file__).resolve().parents[1]
 REHEARSAL = ROOT/'docs/validation/g5/G5-05_rehearsal_3060.json'
-WORKSTATION = ROOT/'docs/validation/beyond_vram_propagated_5880.json'
+JUDGED = ROOT/'docs/validation/beyond_vram_propagated_3060.json'
 
 
 @pytest.fixture(scope='module')
@@ -34,22 +34,26 @@ def test_cases_are_declared_before_the_run_and_match_the_fixture_generator(cases
     for task in ('G5-05', 'G5-06'):
         case = cases[task]
         assert case['kind'] == 'acceptance_case' and case['task'] == task and case['declared_before_run'] is True
-    declared = cases['G5-05']['fixture']
-    spec = fixture(declared['footprint_um'], declared['mesh_um'], duration_fs=175.)
-    region = spec['project'].region
-    assert list(region.shape) == declared['grid'] and region.steps == declared['steps']
-    assert math.prod(region.shape) == declared['cells'] and len(spec['radii']) == declared['pillars']
-    assert list(spec['pillar_layers']) == declared['pillar_layers']
-    assert 6*math.prod(region.shape)*4 == declared['planner']['eh_bytes']
-    workstation = cases['G5-05']['acceptance']['fixture_of_record']['workstation']
-    assert workstation['grid'] == declared['grid'] and workstation['steps'] == declared['steps']
-    rehearsal = cases['G5-05']['fixture']['rehearsal']
-    small = fixture(rehearsal['footprint_um'], declared['mesh_um'], duration_fs=175.)
+    family = cases['G5-05']['fixture']
+    radius = cases['G5-05']['acceptance']['gradient']['finite_difference']['radius_um']
+    for context, key in (('rtx3060', 'judged_run_rtx3060'), ('rtx5880', 'optional_run_rtx5880')):
+        declared = family[key]
+        spec = fixture(declared['footprint_um'], family['mesh_um'], duration_fs=175.)
+        region = spec['project'].region
+        assert list(region.shape) == declared['grid'] and region.steps == family['steps']
+        assert math.prod(region.shape) == declared['cells'] and len(spec['radii']) == declared['pillars']
+        assert list(spec['pillar_layers']) == family['pillar_layers']
+        assert 6*math.prod(region.shape)*4 == declared['planner']['eh_bytes']
+        of_record = cases['G5-05']['acceptance']['fixture_of_record'][context]
+        assert of_record['grid'] == declared['grid'] and of_record['steps'] == family['steps']
+        assert of_record['minimum_eh_bytes'] == declared['planner']['eh_bytes']
+        # The finite-difference direction covers the same 316 pillars in both instances.
+        assert sum(math.hypot(*c) <= radius for c in spec['centres']) == 316
+    assert family['judged_run_rtx3060']['execution']['preset'] == 'workstation-3060'
+    rehearsal = family['rehearsal']
+    small = fixture(rehearsal['footprint_um'], family['mesh_um'], duration_fs=175.)
     assert list(small['project'].region.shape) == rehearsal['grid'] and small['project'].region.steps == rehearsal['steps']
     assert len(small['radii']) == rehearsal['pillars']
-    # The finite-difference direction covers 316 pillars on the workstation and every pillar in the rehearsal.
-    radius = cases['G5-05']['acceptance']['gradient']['finite_difference']['radius_um']
-    assert sum(math.hypot(*c) <= radius for c in spec['centres']) == 316
     assert sum(math.hypot(*c) <= radius for c in small['centres']) == rehearsal['pillars']
     assert pillar_mask(small, radius).sum() == pillar_mask(small).sum()
 
@@ -68,32 +72,34 @@ def test_rehearsal_record_passes_every_rehearsal_criterion(cases, rehearsal):
     assert set(rehearsal['executions']) == {'resident', 'streamed'}
 
 
-def _workstation_evidence():
-    if not WORKSTATION.exists():
-        pytest.skip('The RTX 5880 record has not been produced yet; G5-05 and G5-06 stay NOT_RUN (see docs/DEVELOPMENT_HANDOFF.md).')
-    return json.loads(WORKSTATION.read_text(encoding='utf-8'))
+def _judged_evidence():
+    if not JUDGED.exists():
+        pytest.skip('The RTX 3060 record of the 64 um run has not been produced yet; G5-05 and G5-06 stay NOT_RUN (see docs/DEVELOPMENT_HANDOFF.md).')
+    return json.loads(JUDGED.read_text(encoding='utf-8'))
 
 
-def _workstation_rows(cases, case):
-    evidence = _workstation_evidence()
-    assert evidence['context'] == 'workstation'
-    verdict = evaluate(evidence['record'], cases, 'workstation')
+def _judged_rows(cases, case):
+    evidence = _judged_evidence()
+    assert evidence['context'] == 'rtx3060'
+    verdict = evaluate(evidence['record'], cases, 'rtx3060')
     assert verdict['criteria'] == evidence['verdict']['criteria'], 'the stored verdict must be reproducible from the stored record'
     return [row for row in verdict['criteria'] if row['case'] == case]
 
 
-def test_workstation_record_meets_g5_05(cases):
-    rows = _workstation_rows(cases, 'G5-05')
+def test_judged_record_meets_g5_05(cases):
+    rows = _judged_rows(cases, 'G5-05')
     failed = [row['name'] for row in rows if not row['passed']]
     assert rows and not failed, failed
+    record = _judged_evidence()['record']
+    assert record['arguments']['preset'] == 'workstation-3060' and record['executions']['streamed']['fd']['kind'] == 'central'
 
 
-def test_workstation_record_meets_g5_06(cases):
-    rows = _workstation_rows(cases, 'G5-06')
+def test_judged_record_meets_g5_06(cases):
+    rows = _judged_rows(cases, 'G5-06')
     failed = [row['name'] for row in rows if not row['passed']]
     assert rows and not failed, failed
-    evidence = _workstation_evidence()
-    assert evidence['record']['environment']['hardware'] == 'NVIDIA RTX 5880 Ada Generation'
+    evidence = _judged_evidence()
+    assert evidence['record']['environment']['hardware'].startswith('NVIDIA GeForce RTX 3060')
     assert 'system_counters' in evidence['record'], 'the whole-machine counter CSV must be supplied to the report'
 
 
@@ -121,16 +127,30 @@ def test_report_renders_from_the_record_alone(cases, rehearsal, tmp_path):
     assert f"{rehearsal['runs']['streamed_forward']['objective']:.6e}" in document
     assert '| plane energy decayed fraction at the final step |' in document
     assert 'not added together' in document
-    # A workstation context refuses to judge a rehearsal record as the workstation run.
-    workstation = evaluate(rehearsal, cases, 'workstation')
-    assert not workstation['all_passed']
-    failed = {row['name'] for row in workstation['criteria'] if not row['passed']}
-    assert 'grid equals the declared grid' in failed and 'physical VRAM recorded' in failed
+    # The judged contexts refuse a rehearsal record as the judged run.
+    for context in ('rtx3060', 'rtx5880'):
+        judged = evaluate(rehearsal, cases, context)
+        assert not judged['all_passed']
+        failed = {row['name'] for row in judged['criteria'] if not row['passed']}
+        assert 'grid equals the declared grid' in failed
+        assert ('physical VRAM recorded' in failed) == (context == 'rtx5880')
+    with pytest.raises(ValueError, match='context'):
+        evaluate(rehearsal, cases, 'workstation')
 
 
 def test_time_model_reproduces_the_records_it_was_fitted_on():
     from torchfdtd import Monitor, Project, Region, Source, StreamedAdjointOptions
     from torchfdtd.streamed_work import estimate_streamed_work
+    # The RTX 3060 refit against the two streamed rehearsals of this case.
+    for name, policy in (('G5-05_rehearsal_3060', dict(slab_width=32, temporal_depth=16, checkpoints=2)),
+                         ('G5-05_rehearsal_3060_streamed_24um', dict(slab_width=32, temporal_depth=16, checkpoints=4))):
+        record = json.loads((ROOT/'docs/validation/g5'/f'{name}.json').read_text(encoding='utf-8'))
+        spec = fixture(record['fixture']['footprint_um'], record['fixture']['mesh_um'], duration_fs=175.)
+        options = StreamedAdjointOptions(device='cuda', local_checkpoints=1, host_budget_bytes=64*1024**3, gpu_budget_bytes=8*1024**3, **policy)
+        assert {k: record['executions']['streamed']['options'][k] for k in policy} == policy
+        estimate = time_estimate(estimate_streamed_work(spec['project'], options), model='rtx3060')
+        assert abs(estimate['forward_seconds']/record['runs']['streamed_forward']['seconds']-1) < .2
+        assert abs(estimate['backward_seconds']/record['executions']['streamed']['backward']['seconds']-1) < .2
     for name in ('compact-host-large-5880', 'compact-host-capacity-5880'):
         record = json.loads((ROOT/'docs/validation'/f'{name}.json').read_text(encoding='utf-8'))
         shape, steps = record['grid'], record['steps']
@@ -155,11 +175,13 @@ def test_plan_against_the_recorded_workstation_needs_no_device(cases):
     spec = fixture(declared['rehearsal']['footprint_um'], declared['mesh_um'], duration_fs=175.)
     options = StreamedAdjointOptions(device='cuda', slab_width=32, temporal_depth=16, checkpoints=2, local_checkpoints=1,
                                      host_budget_bytes=100*1024**3, gpu_budget_bytes=40*1024**3, state_storage='host')
-    args = Namespace(assume_5880=True, fd_check='central', journal=None, journal_every=4, banks='host')
+    args = Namespace(assume='rtx5880', time_model='rtx5880', fd_check='central', journal=None, journal_every=4, banks='host')
     result = plan(args, spec, options)
     assert result['assumed_workstation']['hardware'] == 'NVIDIA RTX 5880 Ada Generation'
     assert result['reservation']['observers'] == 58800 and result['reservation']['host_reservation_bytes'] > 0
     assert result['estimate']['fd_forward_seconds'] == pytest.approx(2*result['estimate']['forward_seconds'])
+    slower = plan(Namespace(assume='rtx3060', time_model='rtx3060', fd_check='central', journal=None, journal_every=4, banks='host'), spec, options)
+    assert slower['assumed_workstation']['name'] == 'rtx3060' and slower['estimate']['total_seconds'] > result['estimate']['total_seconds']
     assert result['eh_bytes'] == 6*result['cells']*4 and result['disk_writes_estimate_gb'] == 0.
     import torchfdtd.streamed as streamed_module
     from torchfdtd.memory_profile import host_memory

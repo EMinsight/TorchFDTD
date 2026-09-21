@@ -1572,17 +1572,18 @@
             "torchfdtd/angular_spectrum.py",
             "tests/test_beyond_vram_propagated.py",
             "docs/validation/cases/G5-05.json",
+            "docs/BEYOND_VRAM_PROPAGATED.md",
             "docs/validation/g5/G5-05_rehearsal_3060.json",
-            "docs/BEYOND_VRAM_PROPAGATED.md"
+            "docs/validation/g5/G5-05_rehearsal_3060_streamed_24um.json"
           ],
           "planned_test_commands": [
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_beyond_vram_propagated.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-05.xml   (after the RTX 5880 record docs/validation/beyond_vram_propagated_5880.json exists; the workstation tests skip until then)"
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_beyond_vram_propagated.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-05.xml   (after the RTX 3060 record docs/validation/beyond_vram_propagated_3060.json exists; the judged-record tests skip until then)"
           ],
           "actual_test_commands": [],
           "required_tests": [
             "tests/test_beyond_vram_propagated.py::test_cases_are_declared_before_the_run_and_match_the_fixture_generator",
             "tests/test_beyond_vram_propagated.py::test_rehearsal_record_passes_every_rehearsal_criterion",
-            "tests/test_beyond_vram_propagated.py::test_workstation_record_meets_g5_05"
+            "tests/test_beyond_vram_propagated.py::test_judged_record_meets_g5_05"
           ],
           "evidence": [],
           "blocker": null,
@@ -1605,13 +1606,13 @@
             "docs/BEYOND_VRAM_PROPAGATED.md"
           ],
           "planned_test_commands": [
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_beyond_vram_propagated.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-06.xml   (after the RTX 5880 record docs/validation/beyond_vram_propagated_5880.json exists; the workstation tests skip until then)"
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_beyond_vram_propagated.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-06.xml   (after the RTX 3060 record docs/validation/beyond_vram_propagated_3060.json exists; the judged-record tests skip until then)"
           ],
           "actual_test_commands": [],
           "required_tests": [
             "tests/test_beyond_vram_propagated.py::test_report_renders_from_the_record_alone",
             "tests/test_beyond_vram_propagated.py::test_time_model_reproduces_the_records_it_was_fitted_on",
-            "tests/test_beyond_vram_propagated.py::test_workstation_record_meets_g5_06"
+            "tests/test_beyond_vram_propagated.py::test_judged_record_meets_g5_06"
           ],
           "evidence": [],
           "blocker": null,

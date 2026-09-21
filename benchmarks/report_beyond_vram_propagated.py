@@ -6,9 +6,13 @@ written by scripts/sample_system_counters.ps1 during the run. The output is a
 sanitized evidence record (absolute machine paths dropped) with the criteria
 verdicts, and a Markdown document rendered from that record alone.
 
-python -m benchmarks.report_beyond_vram_propagated --record results/run.json --context workstation \
-    --counters counters.csv --total-ram-gib 127.7 \
-    --evidence docs/validation/beyond_vram_propagated_5880.json --output docs/BEYOND_VRAM_PROPAGATED.md
+python -m benchmarks.report_beyond_vram_propagated --record results/run.json --context rtx3060 \
+    --counters counters.csv --total-ram-gib 79.75 \
+    --evidence docs/validation/beyond_vram_propagated_3060.json --output docs/BEYOND_VRAM_PROPAGATED.md
+
+Contexts: ``rehearsal`` (the 14 um record with its resident reference),
+``rtx3060`` (the judged run on the local RTX 3060) and ``rtx5880`` (the optional
+larger run); the cases carry the grid, budgets and VRAM figure of each.
 """
 import argparse
 import hashlib
@@ -18,6 +22,7 @@ from pathlib import Path
 from benchmarks.report_beyond_vram_restart import load_counters, summarize_counters
 
 CASES = ('docs/validation/cases/G5-05.json', 'docs/validation/cases/G5-06.json')
+CONTEXTS = ('rehearsal', 'rtx3060', 'rtx5880')
 PRIVATE_ARGUMENTS = ('scratch', 'journal', 'output', 'artifacts')
 MEMORY_KEYS = ('peak_torch_allocated_bytes', 'peak_torch_reserved_bytes', 'peak_process_rss_bytes',
                'peak_process_private_bytes', 'peak_device_in_use_bytes', 'machine_disk_read_bytes', 'machine_disk_write_bytes')
@@ -46,7 +51,9 @@ def _criterion(name, value, limit, ok, unit='', case='G5-05'):
 
 
 def evaluate(record, cases, context):
-    """Criteria verdicts of one record in one context ('rehearsal' or 'workstation'); nothing is rerun."""
+    """Criteria verdicts of one record in one context (a CONTEXTS entry); nothing is rerun."""
+    if context not in CONTEXTS:
+        raise ValueError(f'context must be one of {CONTEXTS}.')
     c05, c06 = cases['G5-05']['acceptance'], cases['G5-06']['acceptance']
     fixture = c05['fixture_of_record'][context]
     rows = []
@@ -103,8 +110,8 @@ def evaluate(record, cases, context):
     for phase, holder in (('forward', forward), ('backward', backward)):
         present = all(k in holder or k in holder['memory'] for k in MEMORY_KEYS)
         rows.append(_criterion(f'{phase} memory and disk measurements recorded separately', present, True, present, case='G5-06'))
-    if context == 'workstation':
-        v = c06['vram']
+    if context != 'rehearsal':
+        v = c06['vram'][context]
         rows.append(_criterion('physical VRAM recorded', record['environment'].get('physical_vram_bytes'), v['physical_vram_bytes_min'],
                                (record['environment'].get('physical_vram_bytes') or 0) >= v['physical_vram_bytes_min'], 'bytes', case='G5-06'))
         live = execution['reservation']['state_bank_capacity']*execution['reservation']['state_bytes']+execution['reservation']['dense_parameter_reservation_bytes']
@@ -225,7 +232,7 @@ def render(evidence):
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--record', required=True)
-    parser.add_argument('--context', choices=['rehearsal', 'workstation'], required=True)
+    parser.add_argument('--context', choices=list(CONTEXTS), required=True)
     parser.add_argument('--root', default='.')
     parser.add_argument('--counters', default=None)
     parser.add_argument('--total-ram-gib', type=float, default=None)

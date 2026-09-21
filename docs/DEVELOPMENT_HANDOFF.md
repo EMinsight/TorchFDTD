@@ -795,3 +795,92 @@ under D:/TorchFDTD/.local/tmp/g5/final.
 **Next first command and task id.** G5-05 and G5-06: after merging, deploy
 and run step 0 of the workstation commands above; if `--plan` admits the
 policy, run steps 1 to 3, then the local recording block.
+
+---
+
+### 2026-09-22 G5-05 and G5-06 re-scoped to the local RTX 3060 (judged run at 64 um), branch g5-beyond at a4a13f1
+
+**Problem or goal.** The owner decided that verification on the local RTX
+3060 is sufficient and the RTX 5880 optional. Re-scope the judged run of the
+same fixture family to this machine without changing the physics, the
+criteria or the central finite difference: the live adjoint state must
+exceed the 3060's 12.9 GB of VRAM by a clear margin, the host reservation must
+stay under 60 GB of the 85.6 GB of RAM, and the run is not started here (the
+GPU is shared); the lead launches it and records the evidence.
+
+**State found.** HEAD a4a13f1, clean tree; the 120 um RTX 5880 declaration,
+the 14 um rehearsal and the 24 um supplementary run of the entry above.
+
+**Changed files (why).**
+- `benchmarks/beyond_vram_propagated.py`: `--preset {rehearsal, workstation-3060, workstation-5880}` (explicit arguments still override; `--rehearsal` is the first preset), `--assume {rtx3060, rtx5880}` in place of `--assume-5880`, `TIME_MODEL_3060` (the RTX 5880 model with payload 4.26 GB/s and compute 0.82 Gcell-steps/s refitted on the two RTX 3060 streamed rehearsals, four timings within 16 percent) selected by `--time-model` or the preset.
+- `benchmarks/report_beyond_vram_propagated.py`: contexts `rehearsal`, `rtx3060` (judged) and `rtx5880` (optional); each judged context reads its own grid, budgets and VRAM figure from the cases.
+- `docs/validation/cases/G5-05.json`, `G5-06.json`: `judged_run_rtx3060` with the planner numbers of the 64 um instance, `optional_run_rtx5880` with the earlier 120 um numbers, per-context `fixture_of_record`, `finite_difference`, `budget` and `vram`; limits unchanged, the RTX 3060 wall budget declared at four hours; the notes carry the history.
+- `tests/test_beyond_vram_propagated.py`: the judged-record tests read `docs/validation/beyond_vram_propagated_3060.json` (context `rtx3060`) and check the preset and the central difference; the time-model test also checks the RTX 3060 refit against the two rehearsal records; the planning test covers both assumed machines.
+- `docs/validation/completion_gates.json` (metadata only, both tasks still NOT_RUN), `docs/RELEASE_SCOPE.md`, `docs/validation/g5/G5-05_rehearsal_3060_evidence.json` and `docs/BEYOND_VRAM_PROPAGATED.md` re-rendered against the revised case hashes.
+
+**Judged instance (rtx3060-win11-lab, from `--preset workstation-3060 --plan --assume rtx3060`).**
+64 um footprint: 1320 x 1320 x 64 = 111,513,600 cells, 4096 pillars, 1836
+steps (175 fs), 160 x 160 plane samples (1,228,800 observers), finite
+difference over the 316 pillars within 10 um of the axis (7.7 percent of the
+array). E/H 2.68 GB, state with CPML 3.26 GB; policy W=64, K=32, C=6, L=1,
+host banks; reservation: host 41.1 GB, GPU 6.53 GB (the Torch peak is
+expected near one quarter of that), 9 state banks, dense parameters 3.57 GB,
+extended tile 10.8 million cells; live adjoint state 32.9 GB = 2.55 times the
+12.88 GB of VRAM; 58 blocks, 21 tiles, 135 replayed blocks, 3.59e12
+cell-steps. RTX 3060 time model: forward 476 s, VJP 3923 s, two
+finite-difference forwards 952 s, total 5351 s = 1.49 h against the declared
+4 h; host banks write no state (artifacts about 0.1 GB, 2 TB limit).
+Admission needs about 52 GB of available RAM (0.8 x available must cover the
+41.1 GB reservation) and about 8.2 GB of free VRAM at launch; other agents'
+processes on this machine can refuse it, so run `--plan` (without `--assume`)
+first.
+
+**Exact commands (this machine, PowerShell, from the worktree root, TMP and TEMP under D:).**
+
+```powershell
+$env:TMP = 'D:/TorchFDTD/.local/tmp'; $env:TEMP = 'D:/TorchFDTD/.local/tmp'; $env:PYTHONPATH = (Get-Location).Path
+New-Item -ItemType Directory -Force D:/TorchFDTD/.local/runs/g5-05 | Out-Null
+# 0. Admission for the day, live resources (about 30 s)
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --preset workstation-3060 --plan --output D:/TorchFDTD/.local/runs/g5-05/plan.json
+# 1. Whole-machine counters in a second PowerShell (stops when stop.txt appears)
+powershell -NoProfile -File scripts/sample_system_counters.ps1 -Output D:/TorchFDTD/.local/runs/g5-05/counters.csv -StopFile D:/TorchFDTD/.local/runs/g5-05/stop.txt
+# 2. The judged run (about 1.5 h predicted, 4 h budget); then create stop.txt
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --preset workstation-3060 --mode streamed --output D:/TorchFDTD/.local/runs/g5-05/G5-05_3060.json --artifacts D:/TorchFDTD/.local/runs/g5-05/artifacts *> D:/TorchFDTD/.local/runs/g5-05/run.log
+New-Item -ItemType File -Force D:/TorchFDTD/.local/runs/g5-05/stop.txt | Out-Null
+# 3. Judge and render (installed RAM 85,628,207,104 bytes = 79.75 GiB)
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.report_beyond_vram_propagated --record D:/TorchFDTD/.local/runs/g5-05/G5-05_3060.json --context rtx3060 --counters D:/TorchFDTD/.local/runs/g5-05/counters.csv --total-ram-gib 79.75 --evidence docs/validation/beyond_vram_propagated_3060.json --output docs/BEYOND_VRAM_PROPAGATED.md
+# 4. Commit the two rendered files, then record both tasks
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_beyond_vram_propagated.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-05.xml
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G5-05 --command "<the pytest line above>" --junit D:/TorchFDTD/.local/tmp/junit/G5-05.xml --exit-code $LASTEXITCODE --fixture docs/validation/cases/G5-05.json --observed docs/validation/beyond_vram_propagated_3060.json --artifact docs/BEYOND_VRAM_PROPAGATED.md --scope "RTX 3060 streamed run at 64 um; rehearsal at 14 um with a resident reference"
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G5-06 --command "<the pytest line above>" --junit D:/TorchFDTD/.local/tmp/junit/G5-05.xml --exit-code $LASTEXITCODE --fixture docs/validation/cases/G5-06.json --observed docs/validation/beyond_vram_propagated_3060.json --artifact docs/BEYOND_VRAM_PROPAGATED.md --scope "RTX 3060 streamed run at 64 um; rehearsal at 14 um with a resident reference"
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G5-05 ; D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G5-06
+```
+
+Interrupting: end the python process; the record stays at `planned`, host
+banks are released with the process, there is no journal on the spectral
+path, and the run is repeated from the start. The optional RTX 5880 run keeps
+the commands of the previous entry with `--preset workstation-5880` in place
+of the explicit policy arguments and `--context rtx5880` for the report.
+
+**Commands run (device: local Windows 11, CPU only for the planning and tests; no simulation was started).**
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --preset workstation-3060 --plan --assume rtx3060 --output D:/TorchFDTD/.local/tmp/g5/plan3060.json
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.report_beyond_vram_propagated --record docs/validation/g5/G5-05_rehearsal_3060.json --context rehearsal --evidence docs/validation/g5/G5-05_rehearsal_3060_evidence.json --output docs/BEYOND_VRAM_PROPAGATED.md
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_beyond_vram_propagated.py tests/test_release_gates.py tests/test_completion_program_documents.py
+```
+
+**Passed / failed / skipped / not run.** `tests/test_beyond_vram_propagated.py`
+6 passed, 2 skipped (the judged-record tests, until the RTX 3060 record
+exists); the rehearsal record still passes all 23 rehearsal criteria against
+the revised cases. Not run: the judged 64 um run.
+
+**Remaining defects, risks, external blockers.** The RTX 3060 time model is a
+refit on two runs of a shared GPU; the 4 h budget covers a 2.7 times miss.
+Admission depends on the RAM and VRAM other agents hold at launch. The E/H
+state (2.68 GB) is 0.21 of the 3060's VRAM; only the live adjoint state
+(32.9 GB) exceeds it, as the cases state. No restart journal on the spectral
+path.
+
+**Next first command and task id.** G5-05 and G5-06: step 0 above when the
+GPU and RAM are free, then steps 1 to 4.
