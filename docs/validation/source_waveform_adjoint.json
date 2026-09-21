@@ -1,5 +1,5 @@
 {
-  "status": "passed_local_pending_ci",
+  "status": "focused_cpu_cuda_installed_wheel_and_full_ci_passed",
   "scope": "Small FP32 derivative integration. No performance, physical convergence or capacity claim.",
   "cuda_integration": {
     "status": "passed",
@@ -1879,5 +1879,25 @@
       "amplitude_gradient": 0.13201551139354706
     },
     "unchanged_runtime": true
+  },
+  "completed_ci": {
+    "run_id": 35557874803,
+    "commit": "2bc2adae50ade353ffc22c80cf8c6dfb64d91155",
+    "url": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35557874803",
+    "conclusion": "success",
+    "python": {
+      "tests": 1969,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 451,
+      "passed": 1518,
+      "junit_sha256": "255b15ce0bf4c56aaa0ac28686d07530556ccb9c64d338d65616b05b83eb4ed3"
+    },
+    "browser": {
+      "passed": 42,
+      "skipped": 8
+    },
+    "frontend_build": "success",
+    "wheel_build": "success"
   }
 }

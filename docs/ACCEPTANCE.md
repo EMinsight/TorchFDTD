@@ -21,7 +21,11 @@ convergence, speed or capacity result. CR application work is excluded.
 
 See [API limits](DIFFERENTIABLE_SOURCES.md) and the
 [machine record](validation/source_waveform_adjoint.json). All 128 wheel package files matched source and installed bytes. Installed public
-imports and a parameter-gradient smoke check passed. Full CI is pending integration.
+imports and a parameter-gradient smoke check passed. Linux CI [35557874803](https://github.com/hyoseokp/TorchFDTD/actions/runs/35557874803)
+at `2bc2ada` passed with 1,518 Python passes and 451 skips,
+42 browser passes and 8 skips. Frontend and wheel builds passed.
+The JUnit SHA-256 is `255b15ce0bf4c56aaa0ac28686d07530556ccb9c64d338d65616b05b83eb4ed3`.
+The completed CI evidence was collected without another numerical sweep.
 
 
 ## Stored closed-box far-field workflow, 21 September 2026
