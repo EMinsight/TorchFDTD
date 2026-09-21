@@ -62,11 +62,6 @@ def device(dimension, *, through_pml=True, period=.5, count=12, radius=(.08, .22
     return Project.model_validate(project.model_dump())
 
 
-def plane_tensor(result, monitor_id, plan):
-    """Reference plane as (F, Nu, Nv, 6) on the same grid as a stitched plane."""
-    return stitch_planes(plan, [result.field_monitor(monitor_id)]).fields
-
-
 def relative(a, b):
     return float((a - b).norm() / b.norm())
 
