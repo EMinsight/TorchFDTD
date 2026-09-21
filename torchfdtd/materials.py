@@ -79,7 +79,65 @@ class MaterialADE:
             flat[self.indices] = new
 
 
+def pml_cell_mask(region, shape):
+    """True at cells inside a PML layer of `shape` (region.shape or its Yee padding)."""
+    mask = np.zeros(shape[:3], dtype=bool)
+    for axis in range(3 if region.dimension == '3d' else 2):
+        lo, hi = region.pml_layers(axis, 0), region.pml_layers(axis, 1)
+        index = [slice(None)]*3
+        if lo:
+            index[axis] = slice(0, lo); mask[tuple(index)] = True
+        if hi:
+            index[axis] = slice(shape[axis]-hi, None); mask[tuple(index)] = True
+    return mask
+
+
+def frozen_pml_frequency_hz(project):
+    """Centre frequency of the enabled pulsed sources, or None without one."""
+    from .waveforms import pulse_parameters
+    values = []
+    for source in project.sources:
+        s = project.resolved_source(source)
+        if s.enabled and s.amplitude != 0 and s.pulse != 'sampled':
+            values.append(pulse_parameters(s).frequency_hz)
+    return float(np.mean(values)) if values else None
+
+
 def configure_materials(grid, project, ownership):
-    grid.material_states = [MaterialADE(grid, m, np.flatnonzero(ownership.reshape(-1) == i), ownership.ndim == 4)
-                            for i, m in enumerate(project.materials)
-                            if m.oscillators and np.any(ownership == i)]
+    """Attach one ADE state per dispersive material.
+
+    With region.pml_dispersion == 'frozen' the pole update is not applied inside
+    PML layers: those cells keep the real part of the material permittivity at
+    the source centre frequency, so the absorber sees a constant dielectric.
+    The coupled ADE/CPML update is unstable there for poles whose negative-
+    permittivity band lies inside the grid band (surface-plasmon-like modes
+    grow after the source has ended, a lossless Lorentz SiN post array in a
+    20 nm grid diverges after ~1000 steps once the domain exceeds a few µm).
+    """
+    region = project.region
+    frozen = region.pml_dispersion == 'frozen'
+    pml = pml_cell_mask(region, ownership.shape).reshape(-1) if frozen else None
+    if frozen and ownership.ndim == 4:
+        pml = np.repeat(pml, ownership.shape[3])
+    reference_hz = frozen_pml_frequency_hz(project) if frozen else None
+    states = []
+    for i, m in enumerate(project.materials):
+        if not m.oscillators or not np.any(ownership == i):
+            continue
+        owned = ownership.reshape(-1) == i
+        if frozen and np.any(owned & pml):
+            eps = (permittivity(m, reference_hz).real if reference_hz else
+                   m.instantaneous_epsilon + sum(s/(w0*w0) for w0, s, _ in m.oscillators if w0))
+            eps = float(max(eps, 1e-3))
+            inverse = grid.inverse_permittivity
+            flat = inverse.reshape(-1) if ownership.ndim == 4 else inverse.reshape(-1, inverse.shape[-1])
+            cells = np.flatnonzero(owned & pml)
+            if grid.is_torch:
+                flat[torch.as_tensor(cells, device=inverse.device, dtype=torch.long)] = 1/eps
+            else:
+                flat[cells] = 1/eps
+            owned = owned & ~pml
+            if not np.any(owned):
+                continue
+        states.append(MaterialADE(grid, m, np.flatnonzero(owned), ownership.ndim == 4))
+    grid.material_states = states

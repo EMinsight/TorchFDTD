@@ -139,3 +139,34 @@ def test_fsp_database_material_mapping_and_priority(kind, monkeypatch):
     record['permittivity'].value[1,1] = 2
     record['type'].value = 7
     assert convert_fsp(doc).project is None
+
+
+@pytest.mark.parametrize('sampling', ['cell', 'yee'])
+def test_dispersive_material_is_frozen_inside_pml(sampling):
+    """A Lorentz slab reaching into the PML keeps its ADE only in the interior."""
+    fdtd.set_backend('numpy')
+    from torchfdtd.materials import configure_materials, pml_cell_mask, frozen_pml_frequency_hz
+    p = small(dimension='3d'); p.region.material_sampling = sampling
+    p.materials.append(Material(name='sin', model='lorentz', epsilon_inf=1, resonance_rad_s=1.37e16,
+                                linewidth_rad_s=1e13, delta_epsilon=3.0))
+    p.structures = [Structure(material='sin', size=(4, 4, 1))]          # spans the whole x/y extent, PML included
+    p = Project.model_validate(p.model_dump())
+    eps, _, owner = voxelize(p, with_ownership=True)
+    g = YeeGrid(p.region); g.inverse_permittivity[:] = 1/(eps if eps.ndim == 4 else eps[..., None])
+    configure_materials(g, p, owner)
+    pml = pml_cell_mask(p.region, owner.shape).reshape(-1)
+    if owner.ndim == 4:
+        pml = np.repeat(pml, owner.shape[3])
+    sin = owner.reshape(-1) == len(p.materials)-1
+    assert np.any(sin & pml) and np.any(sin & ~pml)
+    (state,) = g.material_states
+    assert not np.any(pml[state.indices])                           # no ADE state inside the PML
+    assert np.count_nonzero(sin & ~pml) == len(state.indices)      # every interior cell keeps it
+    expected = 1/permittivity(p.materials[-1], frozen_pml_frequency_hz(p)).real
+    flat = g.inverse_permittivity.reshape(-1) if owner.ndim == 4 else g.inverse_permittivity.reshape(-1, 3)[:, 0]
+    assert np.allclose(flat[sin & pml], expected)
+    assert np.allclose(flat[sin & ~pml], 1/p.materials[-1].epsilon_inf)
+    p.region.pml_dispersion = 'ade'
+    g2 = YeeGrid(p.region); g2.inverse_permittivity[:] = 1/(eps if eps.ndim == 4 else eps[..., None])
+    configure_materials(g2, p, owner)
+    assert len(g2.material_states[0].indices) == np.count_nonzero(sin)

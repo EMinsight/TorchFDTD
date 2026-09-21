@@ -16,6 +16,7 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Results change
 
+- Dispersive materials inside PML layers: the pole (ADE) update is no longer applied in PML cells, which keep the real permittivity at the source centre frequency (`Region.pml_dispersion`, default `'frozen'`; `'ade'` restores the old update). Scenes whose Drude/Lorentz structures reached into a PML diverged after roughly a thousand steps on grids larger than a few micrometres and now run stably; results away from the PML are unchanged (this commit).
 - Float32 quadrant intensity allocation at DFT field scales: fields and areas are scaled before the ratio, so ratios and gradients that underflowed to zero or non-finite values are now finite and match the FP64 closed form. Affects `quadrant_intensity_allocation` on float32 inputs of order 1e-14 and below; earlier numbers from that path should be re-run (f3efd34, case `G1-03_quadrant_allocation_scaling`).
 
 ### Added

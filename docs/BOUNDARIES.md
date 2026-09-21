@@ -73,3 +73,18 @@ Real traces use a one-sided Hann FFT scaled by 2/N. Complex traces use the posit
 ## Verification and remaining scope
 
 Still required for full parity: independent FSP mapping, named Lumerical PML-profile equivalence, PMC/symmetric coverage in the ordinary forward solver and plane adjoints, PEC/subpixel coupling, automatic angle-to-Bloch source settings, BFAST, dispersive-medium and grazing-angle coverage, and the other families in the parity roadmap.
+
+## Dispersive materials inside PML
+
+`Region.pml_dispersion` (default `'frozen'`) removes the Drude/Lorentz pole update
+from cells that lie inside a PML layer and gives those cells the real permittivity
+of the material at the source centre frequency (the static permittivity when no
+pulsed source is enabled). The interior keeps the full ADE. This is done in
+`configure_materials`, so it applies to the resident CPU/CUDA solvers and to
+`run_tensor_batch`. The reason is a measured instability: with the pole updated
+inside the CPML, a lossless Lorentz silicon-nitride post array on a 20 nm grid
+diverged after about 1000–1500 steps once the domain exceeded a few micrometres,
+independently of the fused/torch kernel, the graded mesh and the pole linewidth,
+while the same posts kept out of the PML ran stably. The negative-permittivity
+band of such a pole lies inside the grid band and the standard CPML is not a
+stable absorber for it. `'ade'` restores the previous behaviour.
