@@ -563,6 +563,28 @@ class ImportProvenance(Model):
     differences: list[str] = Field(default_factory=list, max_length=1000)
 
 
+SCHEMA_VERSION = 1
+
+
+def migrate_project(payload):
+    """Bring a saved project dictionary to the current schema.
+
+    Schema 1 is the only version so far, so a version-1 or version-less file
+    passes through unchanged. A newer version is refused with the version named,
+    instead of failing on whichever field changed. Migrations for later schemas
+    belong here, oldest first.
+    """
+    if not isinstance(payload, dict):
+        return payload
+    version = payload.get('schema_version', SCHEMA_VERSION)
+    if version == SCHEMA_VERSION:
+        return payload
+    if isinstance(version, int) and version > SCHEMA_VERSION:
+        raise ValueError(f'Project schema_version {version} is newer than schema {SCHEMA_VERSION}, the latest this '
+                         'torchfdtd reads. Upgrade torchfdtd, or save the project from the newer version as schema 1.')
+    raise ValueError(f'Unknown project schema_version {version!r}; this torchfdtd reads schema {SCHEMA_VERSION}.')
+
+
 class Project(Model):
     schema_version: Literal[1] = 1
     name: str = Field(default='Untitled', min_length=1, max_length=120)
@@ -574,6 +596,11 @@ class Project(Model):
     monitors: list[Monitor | FieldMonitor] = Field(default_factory=list, max_length=32)
     global_monitor: SpectrumSettings = Field(default_factory=lambda:SpectrumSettings(sampling='frequency',apodization='none'))
     import_provenance: ImportProvenance | None = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def migrate(cls, data):
+        return migrate_project(data)
 
     @model_validator(mode='after')
     def valid_scene(self):

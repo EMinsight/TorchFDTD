@@ -1,0 +1,295 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T170706Z-g8-06-7b7e68da",
+  "task": "G8-06",
+  "stage": "G8",
+  "task_title": "지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_doctor.py tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-06.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T02:06:47.772287+09:00",
+  "recorded_at": "2026-09-21T17:07:06+00:00",
+  "source_commit": "656c5075eabd4d1cb11aec250a10c9e1ce87b2e6",
+  "source_tree_sha256": "7bd799cff75088822d7d790ddda284d9b1e5021490ca788c680957ccbdea2596",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_doctor.py": "4019db15bc6d65ecc0a7610363ad5b2b8aca277d36f42e0fd9af1b8e57b07f78",
+    "tests/test_clean_install.py": "34107a1ded8667dadc401d06bc4814dd46e9ce057ca6574d8c1152868f218ee7"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G8-06_version_bounds_doctor.json",
+  "fixture_sha256": "56ab0fd82431ebc5fdf248ab2d5c670d023e49c69d677261d4dc342b2a1b0b76",
+  "acceptance_criteria_path": "docs/validation/cases/G8-06_version_bounds_doctor.json",
+  "acceptance_criteria_sha256": "56ab0fd82431ebc5fdf248ab2d5c670d023e49c69d677261d4dc342b2a1b0b76",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "trials": "one fresh venv per trial from the base interpreter (Python 3.10.2) on D:/TorchFDTD/.local/venvs, the wheel of the current tree installed with pip --find-links D:/TorchFDTD/.local/wheels, then (a) the probe script D:/TorchFDTD/.local/tmp/g8/probe_trial.py from a directory outside the checkout: import torchfdtd from the venv prefix, a 2D CPU run (20 x 20 cells, 80 steps), Result.save and Result.load, torch.from_numpy interop; (b) for trials whose probe passes, the CPU subset tests/test_solver.py tests/test_api.py tests/test_torch_interop.py tests/test_project_compatibility.py tests/test_doctor.py run by the venv's pytest entry point (so the checkout is not on sys.path)",
+    "trial_matrix": [
+      "torch 2.2.2+cpu (the oldest torch the old pyproject allowed) with the numpy pip resolves (2.2.6)",
+      "torch 2.2.2+cpu with numpy<2 (1.26.4)",
+      "torch 2.3.1+cpu with numpy 2.2.6",
+      "torch 2.4.1+cpu with numpy 2.2.6",
+      "torch 2.14.0+cpu (the newest CPU build for Python 3.10 on the day of the run) with numpy 2.2.6: the clean-install record",
+      "torch 2.10.0+cu126 with cupy-cuda12x 13.6.0 on CUDA runtime 12.6, driver 591.86, RTX 3060: the clean-install record and the development host",
+      "Python 3.12.7 (Anaconda base interpreter) with the newest CPU torch for 3.12, if the download succeeds",
+      "Python 3.9 (installed on the host) must be refused by pip through Requires-Python"
+    ],
+    "doctor": "torchfdtd doctor and --json; tests/test_doctor.py monkeypatches torch.cuda.is_available, torch.version.cuda, nvidia-smi parsing, the CuPy probe and the fused-kernel probe to cover: no CUDA torch build, CUDA build without a driver, CUDA build with a driver but no device, driver too old for the torch runtime, CuPy missing, CuPy broken, kernel compile failure; the real fused launch runs on the development host",
+    "not_tried": "cupy-cuda12x other than 13.6.0; CUDA runtimes other than 12.6; drivers other than 591.86; torch builds between 2.4.1 and 2.10.0 and between 2.10.0 and 2.14.0; Python 3.11 and 3.13; Linux and macOS"
+  },
+  "reference_method": "actual pip installations and executions; a version is supported only when its probe passed and its CPU subset had no failures; a version is excluded from pyproject.toml when its probe failed",
+  "observables": [
+    {
+      "name": "probe_status",
+      "unit": "passed|failed",
+      "definition": "per trial: import location, run, save/load, torch/numpy interop"
+    },
+    {
+      "name": "subset_results",
+      "unit": "counts",
+      "definition": "per trial with a passing probe: passed, failed, skipped of the CPU subset"
+    },
+    {
+      "name": "doctor_checks",
+      "unit": "status per check",
+      "definition": "cuda, driver, cupy, fused_kernels, backend entries and the exit code"
+    }
+  ],
+  "acceptance_limits": {
+    "bounds": "pyproject.toml lower bounds equal the oldest trial that passed the probe and the subset with the numpy that pip resolves; a numpy constraint is added when the oldest torch needs one; docs/INSTALL.md lists every trial with its outcome and does not claim untried versions",
+    "doctor": "exit 0 and backend cpu/torch in the CPU environment; exit 0, fused_kernels ok and backend cuda/fused in the CUDA environment; every monkeypatched situation in tests/test_doctor.py yields the expected status and message; the real launch on the RTX 3060 reports 20 steps on 400 cells",
+    "subset": "0 failed, 0 errors in every trial that is claimed supported (CUDA-only tests skip)",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-06; pass/fail on real installations, no numeric threshold"
+  },
+  "observed_metrics": {
+    "kind": "version_trials",
+    "schema_version": 1,
+    "date": "2026-09-22",
+    "host": "Windows 11 (10.0.26200), 12th Gen Intel Core i7-12700, RTX 3060 12 GB, driver 591.86",
+    "venv": "python -m venv (no system site-packages) under D:/TorchFDTD/.local/venvs",
+    "wheel": "torchfdtd-0.14.0.dev0-py3-none-any.whl built from the g8-packaging working tree (D:/TorchFDTD/.local/dist/dev) with the package code of this commit and the pyproject bound torch>=2.2 that preceded this commit, so that pip would install the old torch builds under trial",
+    "probe": "D:/TorchFDTD/.local/tmp/g8/probe_trial.py: import from the venv prefix, 2D CPU run (20 x 20 cells, 80 steps), Result.save/load, torch.from_numpy interop",
+    "subset": "tests/test_solver.py tests/test_api.py tests/test_torch_interop.py tests/test_project_compatibility.py tests/test_doctor.py via the venv pytest entry point (checkout not on sys.path)",
+    "trials": [
+      {
+        "name": "torch222-np2",
+        "python": "3.10.2",
+        "install": "pip install --find-links D:/TorchFDTD/.local/wheels torch==2.2.2+cpu <wheel>",
+        "resolved": [
+          "numpy==2.2.6",
+          "scipy==1.15.3",
+          "torch==2.2.2+cpu"
+        ],
+        "probe": {
+          "status": "failed",
+          "error": "RuntimeError: Numpy is not available",
+          "seconds": null
+        },
+        "subset": null,
+        "note": "the numpy backend 2D run passed; torch.from_numpy raised RuntimeError: Numpy is not available; no subset run",
+        "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials.log"
+      },
+      {
+        "name": "torch222-np1",
+        "python": "3.10.2",
+        "install": "pip install --find-links D:/TorchFDTD/.local/wheels torch==2.2.2+cpu \"numpy<2\" <wheel>",
+        "resolved": [
+          "numpy==1.26.4",
+          "scipy==1.15.3",
+          "torch==2.2.2+cpu"
+        ],
+        "probe": {
+          "status": "passed",
+          "error": null,
+          "seconds": 8.22
+        },
+        "subset": {
+          "path": "docs/validation/clean_install/version_trials/trial-torch222-np1.xml",
+          "sha256": "3bdb5470e680a97ccf8700b0db7ade1eb0bd4a0d8287dd6e85c22be0a39b5862",
+          "tests": 36,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 5,
+          "seconds": 102.29
+        },
+        "note": null,
+        "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials.log"
+      },
+      {
+        "name": "torch231-np2",
+        "python": "3.10.2",
+        "install": "pip install --find-links D:/TorchFDTD/.local/wheels torch==2.3.1+cpu <wheel>",
+        "resolved": [
+          "numpy==2.2.6",
+          "scipy==1.15.3",
+          "torch==2.3.1+cpu"
+        ],
+        "probe": {
+          "status": "failed",
+          "error": "RuntimeError: Numpy is not available",
+          "seconds": null
+        },
+        "subset": null,
+        "note": "same failure as torch222-np2; no subset run",
+        "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials.log"
+      },
+      {
+        "name": "torch241-np2",
+        "python": "3.10.2",
+        "install": "pip install --find-links D:/TorchFDTD/.local/wheels torch==2.4.1+cpu <wheel>",
+        "resolved": [
+          "numpy==2.2.6",
+          "scipy==1.15.3",
+          "torch==2.4.1+cpu"
+        ],
+        "probe": {
+          "status": "passed",
+          "error": null,
+          "seconds": 31.34
+        },
+        "subset": {
+          "path": "docs/validation/clean_install/version_trials/trial-torch241-np2.xml",
+          "sha256": "739f203b8776c2a5546e82c620d205a0041ac978f4f0d231de8462ccf2f438ec",
+          "tests": 36,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 5,
+          "seconds": 65.938
+        },
+        "note": null,
+        "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials2.log"
+      },
+      {
+        "name": "py312-torch2140",
+        "python": "3.12.7 (C:/anaconda3 base interpreter)",
+        "install": "pip install torch --index-url https://download.pytorch.org/whl/cpu; pip install <wheel> \"pytest>=8\" \"httpx>=0.27\"",
+        "resolved": [
+          "numpy==2.5.3",
+          "scipy==1.18.1",
+          "torch==2.14.0+cpu"
+        ],
+        "probe": {
+          "status": "passed",
+          "error": null,
+          "seconds": 63.53
+        },
+        "subset": {
+          "path": "docs/validation/clean_install/version_trials/trial-py312.xml",
+          "sha256": "43d9954e9289f76ac80fe5316529ddc15ac262e1a2e7408a5f29e3990551bc57",
+          "tests": 36,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 5,
+          "seconds": 73.493
+        },
+        "note": null,
+        "log": "D:\\TorchFDTD\\.local\\tmp\\g8\\version_trials3.log"
+      }
+    ],
+    "not_tried": [
+      "Python 3.9 (the host has no 3.9 interpreter; the py launcher entry is broken)",
+      "Python 3.11 and 3.13",
+      "torch builds between 2.4.1 and 2.10.0 and between 2.10.0 and 2.14.0",
+      "CuPy other than 13.6.0, CUDA runtimes other than 12.6",
+      "Linux and macOS"
+    ],
+    "conclusion": "torch>=2.4 is the oldest CPU build that works with the NumPy 2 pip resolves on Windows; torch 2.2.2 works only with numpy<2; Python 3.10.2 and 3.12.7 pass the probe and the subset with 0 failures",
+    "wheel_sha256": "dd3c87adaae59830a006981458dedfd1f5c5e38a1fe0eec0d107450a17cb74cc"
+  },
+  "test_results": {
+    "total": 10,
+    "passed": [
+      "tests/test_doctor.py::test_no_cuda_device_reports_cpu_execution_and_skips_the_kernel_probe",
+      "tests/test_doctor.py::test_cuda_build_without_driver_names_the_driver",
+      "tests/test_doctor.py::test_cuda_build_with_driver_but_no_device_is_an_error",
+      "tests/test_doctor.py::test_old_driver_is_reported_against_the_torch_runtime",
+      "tests/test_doctor.py::test_missing_cupy_is_a_notice_with_the_extra_to_install",
+      "tests/test_doctor.py::test_broken_cupy_is_an_error_with_the_import_message",
+      "tests/test_doctor.py::test_kernel_compile_failure_is_reported_and_falls_back_to_the_torch_kernel",
+      "tests/test_doctor.py::test_cli_doctor_prints_json_and_exits_with_the_report_status",
+      "tests/test_doctor.py::test_real_fused_kernel_probe_launches_on_this_device",
+      "tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 16.368,
+    "suite_timestamp": "2026-09-22T02:06:47.772287+09:00"
+  },
+  "required_tests": [
+    "tests/test_doctor.py",
+    "tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/clean_install/version_trials/trial-torch222-np1.xml",
+      "sha256": "3bdb5470e680a97ccf8700b0db7ade1eb0bd4a0d8287dd6e85c22be0a39b5862",
+      "bytes": 5777
+    },
+    {
+      "path": "docs/validation/clean_install/version_trials/trial-torch241-np2.xml",
+      "sha256": "739f203b8776c2a5546e82c620d205a0041ac978f4f0d231de8462ccf2f438ec",
+      "bytes": 5776
+    },
+    {
+      "path": "docs/validation/clean_install/version_trials/trial-py312.xml",
+      "sha256": "43d9954e9289f76ac80fe5316529ddc15ac262e1a2e7408a5f29e3990551bc57",
+      "bytes": 5776
+    },
+    {
+      "path": "docs/validation/clean_install/version_trials_2026-09-22.json",
+      "sha256": "90afc67c7098c40484d3b8961c4be2a23b4ad66a7689282f5a2dac97404aa00d",
+      "bytes": 5097
+    },
+    {
+      "path": "docs/validation/runs/20260921T170706Z-g8-06-7b7e68da/junit.xml",
+      "sha256": "3852a6cf1170d1184fab09edd68304b4ee9ba46b81854b1bf8715d171dad13de",
+      "bytes": 1460,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G8-06.xml"
+    }
+  ],
+  "applicable_scope": "G8-06 on Windows 11 only: doctor paths by monkeypatching plus the real fused launch on the RTX 3060; version bounds from the installation trials in docs/validation/clean_install/version_trials_2026-09-22.json (Python 3.10.2 and 3.12.7; torch 2.2.2, 2.3.1, 2.4.1, 2.14.0 CPU builds and 2.10.0+cu126; cupy-cuda12x 13.6.0 only). Linux not run; Python 3.11 and 3.13 not tried.",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

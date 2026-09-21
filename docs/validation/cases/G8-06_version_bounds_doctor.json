@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G8-06_version_bounds_doctor",
+  "task": "G8-06",
+  "title": "Dependency bounds fixed by installation trials and a doctor command that names each unsupported situation",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "trials": "one fresh venv per trial from the base interpreter (Python 3.10.2) on D:/TorchFDTD/.local/venvs, the wheel of the current tree installed with pip --find-links D:/TorchFDTD/.local/wheels, then (a) the probe script D:/TorchFDTD/.local/tmp/g8/probe_trial.py from a directory outside the checkout: import torchfdtd from the venv prefix, a 2D CPU run (20 x 20 cells, 80 steps), Result.save and Result.load, torch.from_numpy interop; (b) for trials whose probe passes, the CPU subset tests/test_solver.py tests/test_api.py tests/test_torch_interop.py tests/test_project_compatibility.py tests/test_doctor.py run by the venv's pytest entry point (so the checkout is not on sys.path)",
+    "trial_matrix": [
+      "torch 2.2.2+cpu (the oldest torch the old pyproject allowed) with the numpy pip resolves (2.2.6)",
+      "torch 2.2.2+cpu with numpy<2 (1.26.4)",
+      "torch 2.3.1+cpu with numpy 2.2.6",
+      "torch 2.4.1+cpu with numpy 2.2.6",
+      "torch 2.14.0+cpu (the newest CPU build for Python 3.10 on the day of the run) with numpy 2.2.6: the clean-install record",
+      "torch 2.10.0+cu126 with cupy-cuda12x 13.6.0 on CUDA runtime 12.6, driver 591.86, RTX 3060: the clean-install record and the development host",
+      "Python 3.12.7 (Anaconda base interpreter) with the newest CPU torch for 3.12, if the download succeeds",
+      "Python 3.9 (installed on the host) must be refused by pip through Requires-Python"
+    ],
+    "doctor": "torchfdtd doctor and --json; tests/test_doctor.py monkeypatches torch.cuda.is_available, torch.version.cuda, nvidia-smi parsing, the CuPy probe and the fused-kernel probe to cover: no CUDA torch build, CUDA build without a driver, CUDA build with a driver but no device, driver too old for the torch runtime, CuPy missing, CuPy broken, kernel compile failure; the real fused launch runs on the development host",
+    "not_tried": "cupy-cuda12x other than 13.6.0; CUDA runtimes other than 12.6; drivers other than 591.86; torch builds between 2.4.1 and 2.10.0 and between 2.10.0 and 2.14.0; Python 3.11 and 3.13; Linux and macOS"
+  },
+  "seed": null,
+  "precision": ["float32"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "actual pip installations and executions; a version is supported only when its probe passed and its CPU subset had no failures; a version is excluded from pyproject.toml when its probe failed",
+  "observables": [
+    {"name": "probe_status", "unit": "passed|failed", "definition": "per trial: import location, run, save/load, torch/numpy interop"},
+    {"name": "subset_results", "unit": "counts", "definition": "per trial with a passing probe: passed, failed, skipped of the CPU subset"},
+    {"name": "doctor_checks", "unit": "status per check", "definition": "cuda, driver, cupy, fused_kernels, backend entries and the exit code"}
+  ],
+  "acceptance": {
+    "bounds": "pyproject.toml lower bounds equal the oldest trial that passed the probe and the subset with the numpy that pip resolves; a numpy constraint is added when the oldest torch needs one; docs/INSTALL.md lists every trial with its outcome and does not claim untried versions",
+    "doctor": "exit 0 and backend cpu/torch in the CPU environment; exit 0, fused_kernels ok and backend cuda/fused in the CUDA environment; every monkeypatched situation in tests/test_doctor.py yields the expected status and message; the real launch on the RTX 3060 reports 20 steps on 400 cells",
+    "subset": "0 failed, 0 errors in every trial that is claimed supported (CUDA-only tests skip)",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-06; pass/fail on real installations, no numeric threshold"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_doctor.py",
+      "tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment"
+    ],
+    "not_yet_covered": [
+      "the upper torch bound beyond 2.14.0 (nothing newer exists to try on this day)",
+      "CuPy builds other than 13.6.0 and CUDA runtimes other than 12.6",
+      "Python 3.11 and 3.13 installations",
+      "a genuinely old driver (the driver check is covered by monkeypatching only)"
+    ]
+  },
+  "notes": "Declared on branch g8-packaging from 2b64f91 before the recorded run. The trial outcomes are copied verbatim from the pip and probe logs into docs/validation/clean_install/version_trials_2026-09-22.json, attached as --observed."
+}

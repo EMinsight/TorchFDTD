@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G8-07_readme_examples_installed_wheel",
+  "task": "G8-07",
+  "title": "Every runnable README code block executes on the installed wheel from a directory outside the checkout",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "fixture": {
+    "marker_rule": "a fenced ```python block is runnable in the CPU environment unless the nearest non-blank line above it is <!-- readme-example: cuda --> (runs in the CUDA environment) or <!-- readme-example: skip: reason --> (never runs, reason recorded); blocks in other languages are listed, not executed",
+    "runner": "scripts/run_readme_examples.py, called by scripts/clean_install_check.py after both environments exist; blocks run in README order in one working directory <local-root>/tmp/clean_install/work/readme, each in a fresh interpreter process with PYTHONPATH removed and TMP/TEMP under that directory",
+    "blocks_on_declaration": [
+      "powershell: wheel install (not executed)",
+      "powershell: checkout development install (not executed)",
+      "python, cuda: the 3D waveguide, 8 x 6 x 2 um at 0.05 um, 1000 steps, backend cuda, cuda_kernel fused; project.save('project.json'), Simulation.run, result.save('results/run.npz')",
+      "python, cpu: the 2D default waveguide, backend auto, Simulation.run, result.save('results/first.npz'), Result.load and print of summary['backend']",
+      "powershell: verification commands (not executed)"
+    ],
+    "interpreter_check": "each interpreter must import torchfdtd from its own sys.prefix and not from the checkout before any block runs",
+    "platforms": "Windows 11 on this host; Linux NOT_RUN (the same command runs unchanged in WSL: python scripts/clean_install_check.py --local-root <dir> --find-links <wheels> --skip-cuda)"
+  },
+  "seed": null,
+  "precision": ["float32"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "the exit code of each block's process; the block text itself is the reference and is hashed into the record so that a changed block invalidates it",
+  "observables": [
+    {"name": "block_status", "unit": "passed|failed|skipped|not_executed", "definition": "per block with its mode, line, SHA-256, interpreter, exit code, duration and output tails"},
+    {"name": "runnable_blocks_sha256", "unit": "hex", "definition": "digest over the code of every cpu and cuda block in README order"},
+    {"name": "interpreter_location", "unit": "path", "definition": "torchfdtd.__file__ and sys.prefix of each interpreter"}
+  ],
+  "acceptance": {
+    "blocks": "every cpu block exits 0 in the CPU environment and every cuda block exits 0 in the CUDA environment; at least one block saves a result and one loads it back; skipped blocks carry a reason",
+    "record": "readme_examples.all_runnable_passed true in the newest docs/validation/clean_install record and readme.runnable_blocks_sha256 equal to the digest of the current README",
+    "isolation": "every interpreter's torchfdtd.__file__ lies inside its sys.prefix and outside the checkout",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-07 (install, first computation, save, load on every advertised platform, from a changed working directory); pass/fail only"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_clean_install.py::test_every_runnable_readme_block_passed_on_the_installed_wheel",
+      "tests/test_clean_install.py::test_readme_block_parser_reads_markers_and_languages"
+    ],
+    "not_yet_covered": [
+      "Linux: the record is Windows only; the Linux column stays NOT_RUN until the same script is run there",
+      "macOS: documented for CPU install only, no record",
+      "the powershell blocks are not executed by the runner; the clean-install steps exercise the same commands (pip install of the wheel, torchfdtd doctor, torchfdtd serve) individually"
+    ]
+  },
+  "notes": "Declared on branch g8-packaging from 2b64f91 before the recorded run. The README's first python block requires a CUDA device and the cuda-kernels extra by design (it selects the measured 3D fused path, and tests/test_readme_measurements.py fixes that); it is therefore marked cuda and runs in the CUDA environment, and a second block that runs on any install was added for the CPU environment."
+}
