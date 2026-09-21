@@ -123,6 +123,14 @@ class _System:
             raise ValueError(f'PMC/symmetric faces are not implemented by {type(self).__name__}; only the plain and dispersive Yee systems carry the stored face topology.')
         if tuple(epsilon.shape[:3])!=material_shape(r) or epsilon.ndim not in (3,4) or (epsilon.ndim==4 and epsilon.shape[3]!=3):
             raise ValueError(f'epsilon shape must be {material_shape(r)} or {material_shape(r,True)}, including stored upper PMC rows.')
+        from .injection import source_terms,validate_oneway_materials
+        # Prepared source terms and the stored-face contract precede every field allocation.
+        terms=[(source,list(source_terms(project,source))) for source in project.sources]
+        if self.pmc:
+            for source,items in terms:
+                for component,loc,waveform,profile in items:
+                    if any((sl.stop if isinstance(sl,slice) else sl+1)>n for sl,n in zip(loc,r.shape)) and not all(isinstance(sl,int) for sl in loc):
+                        raise ValueError(f'{source.name}: only point sources may address a stored upper PMC/symmetric face; plane sources must end below the wall.')
         volume=self._volume(epsilon)
         self.eps4=volume[...,None] if epsilon.ndim==3 else volume
         g=self.grid=_Grid()
@@ -161,15 +169,12 @@ class _System:
                 g.cpml[key].append(item)
         self.sources={'E':[],'H':[]}
         self.face_sources={'E':[],'H':[]}
-        from .injection import source_terms,validate_oneway_materials
         if any(s.enabled and s.injection=='oneway' for s in project.sources):
             validate_oneway_materials(project,epsilon.detach().cpu().numpy(),np.broadcast_to(np.array(-1,dtype=np.int32),r.shape))
-        for source in project.sources:
-            for component,loc,waveform,profile in source_terms(project,source):
+        for source,items in terms:
+            for component,loc,waveform,profile in items:
                 family=component[0];comp='xyz'.index(component[1].lower())
                 if self.pmc and any((sl.stop if isinstance(sl,slice) else sl+1)>n for sl,n in zip(loc,r.shape)):
-                    if not all(isinstance(sl,int) for sl in loc):
-                        raise ValueError(f'{source.name}: only point sources may address a stored upper PMC/symmetric face; plane sources must end below the wall.')
                     block,index=face_index(g.pmc_blocks,r.shape,family,comp,loc)
                     self.face_sources[family].append((block,loc,index,self.tensor(waveform)))
                     continue

@@ -501,6 +501,20 @@ def test_rejected_combinations_raise_explicitly():
 
 
 @CUDA
+def test_plane_source_on_a_stored_face_is_refused_before_any_field_allocation():
+    from torchfdtd import StreamedSimulation, StreamedAdjointOptions
+    p = gradient_scene('float32')
+    plane = p.model_copy(deep=True)
+    plane.sources = [Source(kind='plane', normal='x', center=(0, 0, .05), size=(0, .6, .5), component='Ey', pulse='gaussian', wavelength=.5)]
+    plane = Project.model_validate(plane.model_dump())
+    eps = random_epsilon(p.region, 1, device='cuda')
+    torch.cuda.synchronize();allocated = torch.cuda.memory_allocated()
+    for factory in (lambda: DifferentiableSimulation(plane)(eps), lambda: StreamedSimulation(plane, StreamedAdjointOptions(device='cuda', slab_width=4))(eps.cpu())):
+        with pytest.raises(ValueError, match='plane sources must end below the wall'):factory()
+        assert torch.cuda.memory_allocated() == allocated
+
+
+@CUDA
 def test_tensor_batch_rejects_unsupported_pmc_features():
     from torchfdtd.tensor_batch import run_tensor_batch
     base = gradient_scene('float32', backend='cuda')
@@ -512,3 +526,8 @@ def test_tensor_batch_rejects_unsupported_pmc_features():
     oneway = base.model_copy(deep=True)
     oneway.sources = [Source(kind='plane', injection='oneway', normal='x', center=(-.05, 0, 0), size=(0, .2, .2), component='Ez', pulse='gaussian', wavelength=.5)]
     with pytest.raises(ValueError):run_tensor_batch([Project.model_validate(oneway.model_dump())])
+    plane = base.model_copy(deep=True)
+    plane.sources = [Source(kind='plane', normal='x', center=(0, 0, .05), size=(0, .6, .5), component='Ey', pulse='gaussian', wavelength=.5)]
+    torch.cuda.synchronize();allocated = torch.cuda.memory_allocated()
+    with pytest.raises(ValueError, match='plane sources must end below the wall'):run_tensor_batch([Project.model_validate(plane.model_dump())])
+    assert torch.cuda.memory_allocated() == allocated   # refused before the cohort grids exist

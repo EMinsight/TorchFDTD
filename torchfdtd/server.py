@@ -51,7 +51,11 @@ def create_app(result_dir=None):
     @app.get('/api/capabilities')
     def capabilities():
         import json
-        return json.loads(Path(__file__).with_name('feature_inventory.json').read_text(encoding='utf-8'))
+        # The Lumerical property inventory plus the combination registry
+        # (torchfdtd/capabilities.py rendered by scripts/build_capability_tables.py).
+        inventory = json.loads(Path(__file__).with_name('feature_inventory.json').read_text(encoding='utf-8'))
+        inventory['combinations'] = json.loads(Path(__file__).with_name('capabilities.json').read_text(encoding='utf-8'))
+        return inventory
 
     @app.get('/api/examples/{name}')
     def example(name: str):

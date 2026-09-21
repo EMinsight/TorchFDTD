@@ -87,8 +87,10 @@ def test_fused_rejects_cpu_and_complex_fields():
     p.region.backend = 'cuda'
     p.region.boundaries.y_min = BoundaryFace(kind='bloch')
     p.region.boundaries.y_max = BoundaryFace(kind='bloch')
+    torch.cuda.synchronize();allocated = torch.cuda.memory_allocated()
     with pytest.raises(ValueError, match='Bloch'):
         Simulation(p).run()
+    assert torch.cuda.memory_allocated() == allocated   # refused before the grid is built
 
 
 def test_fused_preserves_subnormal_fields():

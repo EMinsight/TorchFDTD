@@ -208,6 +208,7 @@ def build():
            '체크는 해당 행의 명시된 native 범위만 의미합니다. Python은 native Project/Simulation 또는 workflow API로 그 범위를 사용할 수 있다는 뜻이며, 동일한 LSF 명령을 모두 지원한다는 뜻이 아닙니다. UI와 FSP를 별도로 확인해야 합니다. API bridge로 읽히는 기능은 독립 GPU 엔진 구현으로 세지 않습니다.','',
            f"전체 {len(rows)}행: "+', '.join(f'{inventory["status_labels"][k]} {v}' for k,v in inventory['counts'].items()),'',
            '구현 우선순위와 제외 기준: [개발 우선순위](IMPLEMENTATION_PRIORITIES.md). 모든 행의 분류: [CSV](FEATURE_PRIORITY_INDEX.csv). UI 체크리스트에서도 중요도로 필터할 수 있습니다.','']
+    lines += ['조합 지원표(차원·메시·재료·경계·소스·모니터·실행·정밀도·백엔드의 허용/거절 조합과 거절 코드 경로): [CAPABILITIES.md](CAPABILITIES.md). 이 체크리스트는 Lumerical 속성 목록이며 조합 계약은 다루지 않습니다.','']
     categories=list(dict.fromkeys(r['category'] for r in rows))
     for category in categories:
         lines += ['## '+category,'','| 체크 | 기능/속성 | 엔진 | Python | UI | 독립 FSP | 범위·검증 근거 |','| --- | --- | --- | --- | --- | --- | --- |']

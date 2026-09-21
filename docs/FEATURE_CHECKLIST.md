@@ -10,6 +10,8 @@
 
 구현 우선순위와 제외 기준: [개발 우선순위](IMPLEMENTATION_PRIORITIES.md). 모든 행의 분류: [CSV](FEATURE_PRIORITY_INDEX.csv). UI 체크리스트에서도 중요도로 필터할 수 있습니다.
 
+조합 지원표(차원·메시·재료·경계·소스·모니터·실행·정밀도·백엔드의 허용/거절 조합과 거절 코드 경로): [CAPABILITIES.md](CAPABILITIES.md). 이 체크리스트는 Lumerical 속성 목록이며 조합 계약은 다루지 않습니다.
+
 ## CAD
 
 | 체크 | 기능/속성 | 엔진 | Python | UI | 독립 FSP | 범위·검증 근거 |
