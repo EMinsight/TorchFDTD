@@ -72,7 +72,7 @@ git diff --stat <wheel source_commit> HEAD -- torchfdtd pyproject.toml README.md
 ## 4. Re-record every gate with the wheel
 
 ```powershell
-D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all --platform rtx3060-win11-lab `
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all --exclude G9-07 --platform rtx3060-win11-lab `
     --wheel D:/TorchFDTD/.local/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl `
     --torch "torch==2.10.0+cu126" --find-links D:/TorchFDTD/.local/wheels
 ```
@@ -90,7 +90,9 @@ the interpreter's environment (`--interpreter`), the host's platform id
 replayed run and a scope ending in `re-recorded on <commit> for the release
 candidate`. The
 table it prints lists task, previous run id, new run id and the state written
-to the gate file; the exit status is 0 only when every task is VERIFIED.
+to the gate file; the exit status is 0 only when every task is VERIFIED. G9-07
+is excluded here because its tests compare the committed report with a fresh
+render; step 6 records it after the report is rebuilt from this batch.
 
 Tasks whose recorded command writes records into the tree (the G3 fixtures with
 `TORCHFDTD_G3_RECORD=docs/validation/g3`) leave those files modified; the

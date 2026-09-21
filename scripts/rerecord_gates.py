@@ -8,8 +8,10 @@ on the same commit instead of on a mixture of earlier passes and later partial c
 
 Selection: every task whose newest evidence exists and whose recorded tests can run on this
 host (the test files are present and, when the recorded run used CUDA, this host has a CUDA
-device); ``--tasks``, ``--stage`` and ``--all`` narrow or widen it. ``--dry-run`` prints the
-plan without running anything.
+device); ``--tasks``, ``--stage``, ``--exclude`` and ``--all`` narrow or widen it. ``--dry-run``
+prints the plan without running anything. G9-07's tests compare the committed validation report
+with a fresh render, so that task is recorded after the report is rebuilt from the batch's
+evidence (docs/RELEASE_PROCEDURE.md step 6), not inside the batch: pass ``--exclude G9-07``.
 
 ``--wheel <path>`` installs that wheel into a fresh virtual environment under
 ``.local/venvs/rc`` and runs every command with that interpreter from a working directory
@@ -205,6 +207,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--tasks', nargs='+', default=None, help='task ids to re-record (default: every replayable task)')
     parser.add_argument('--stage', default=None, help='re-record the tasks of one stage only')
+    parser.add_argument('--exclude', nargs='+', default=[], help='task ids left out (G9-07 is recorded after the report is rendered, not in the batch)')
     parser.add_argument('--all', action='store_true', help='include tasks whose recorded run used CUDA even when this host has none')
     parser.add_argument('--dry-run', action='store_true', help='print the plan and run nothing')
     parser.add_argument('--wheel', default=None, help='wheel to install into a fresh .local/venvs/rc environment and run the commands with')
@@ -236,6 +239,7 @@ def main(argv=None):
     commit = recorder.git_text(root, 'rev-parse', 'HEAD')
 
     rows = select(gates, root, runs_dir, tasks=args.tasks, stage=args.stage, everything=args.all)
+    rows = [row for row in rows if row[1]['id'] not in set(args.exclude)]
     planned = [row for row in rows if row[4] is None]
     skipped = [row for row in rows if row[4] is not None]
     print(f'HEAD {commit[:12]}; {len(planned)} task(s) to re-record, {len(skipped)} skipped')

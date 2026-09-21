@@ -211,6 +211,9 @@ def test_dry_run_prints_the_plan_and_records_nothing(repo, capsys):
     out = capsys.readouterr().out
     assert 'G1-03' in out and 'G1-04' in out and "$env:RERECORD_FLAG='1'; " in out and 'skip G0-01' in out
     assert task_of(repo, 'G1-03')['evidence'] == before and task_of(repo, 'G1-04')['evidence']
+    assert rerecord.main(['--root', str(repo), '--dry-run', '--all', '--exclude', 'G1-04']) == 0
+    out = capsys.readouterr().out
+    assert '== G1-03' in out and '== G1-04' not in out
 
 
 def test_wheel_option_runs_with_the_installed_interpreter_outside_the_tree_and_records_the_wheel_hash(repo, tmp_path, monkeypatch):

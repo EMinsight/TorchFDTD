@@ -11,3 +11,5 @@ docs/validation/mode_injection_3060.json whitespace=cr-at-eol
 docs/validation/geometry-ensembles.json whitespace=cr-at-eol
 docs/validation/beyond-vram-forward-5880.json whitespace=cr-at-eol
 docs/validation/beyond-vram-forward-retry-5880.json whitespace=cr-at-eol
+# Raw JUnit copies are hashed by the recorder and kept byte for byte, failure text included.
+docs/validation/runs/*/junit.xml -whitespace

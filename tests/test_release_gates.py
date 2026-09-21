@@ -524,8 +524,13 @@ def test_environment_records_package_locations_and_the_original_junit_path(repo,
     _, evidence = evidence_of(repo, 'G1-03')
     for key in ('fdtd', 'fdtd_location', 'torchfdtd_location'):
         assert key in evidence['environment'], key
-    assert evidence['junit_original_path'] == report.resolve().as_posix()
+    assert evidence['junit_original_path'] == recorder.redact_home(report.resolve().as_posix())
     assert evidence['recorder_version'] == 2
+    home = str(Path.home())
+    for value in (evidence['junit_original_path'], evidence['environment']['python_executable'],
+                  evidence['environment']['fdtd_location'], evidence['environment']['torchfdtd_location']):
+        assert value is None or home.lower() not in str(value).lower(), value  # the account name never enters the evidence
+    assert recorder.redact_home(home + '/x/y.py') == '<user home>/x/y.py'
 
 
 def test_case_first_committed_after_the_run_is_a_declaration_warning_not_a_failure(repo, tmp_path, capsys):

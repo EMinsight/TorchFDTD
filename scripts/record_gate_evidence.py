@@ -266,6 +266,18 @@ def decide(task, results, exit_code, unresolved, enumerated=None):
     return 'VERIFIED', 'no failures or errors, and no required test skipped or absent', skipped_required
 
 
+def redact_home(path):
+    """A path with the user's home directory replaced by ``<user home>``, so evidence never carries the account name."""
+    if path is None:
+        return None
+    text = str(path)
+    home = str(Path.home())
+    for candidate in (home, home.replace('\\', '/')):
+        if text.lower().startswith(candidate.lower()):
+            return '<user home>' + text[len(candidate):]
+    return text
+
+
 def package_locations(root):
     """Where ``fdtd`` and ``torchfdtd`` resolve for a process started in root (as ``python -m pytest`` is), without importing them."""
     inserted = str(root) not in sys.path
@@ -278,7 +290,7 @@ def package_locations(root):
                 spec = importlib.util.find_spec(name)
             except (ImportError, ValueError):
                 spec = None
-            out[f'{name}_location'] = spec.origin if spec and spec.origin else None
+            out[f'{name}_location'] = redact_home(spec.origin) if spec and spec.origin else None
         try:
             out['fdtd'] = importlib.metadata.version('fdtd')
         except importlib.metadata.PackageNotFoundError:
@@ -320,7 +332,7 @@ def module_version(name):
 
 
 def environment():
-    env = dict(python=sys.version.split()[0], python_executable=sys.executable,
+    env = dict(python=sys.version.split()[0], python_executable=redact_home(sys.executable),
                os=platform.platform(), machine=platform.machine())
     for name in ('torch', 'cupy', 'numpy', 'scipy'):
         env[name] = module_version(name)
@@ -573,7 +585,7 @@ def main(argv=None):
         **case_values,
         test_results=results, required_tests=task.get('required_tests') or [], skipped_required_tests=skipped_required,
         enumerated_required_tests=enumerated, gpu_required_skips=results['gpu_required_skips'],
-        junit_original_path=relative(root, junit_path),
+        junit_original_path=redact_home(relative(root, junit_path)),
         artifact_paths_and_sha256=artifacts, applicable_scope=scope, note=args.note,
         verification_state_assigned=state, verification_reason=reason, null_reasons=null_reasons,
         gate_file=relative(root, gate_path),
