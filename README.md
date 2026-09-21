@@ -23,9 +23,10 @@ GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-
 | 16-case parameter sweeps vs flaport/fdtd sequential | 32³ and 64³ | **31 to 44×** and **15 to 16×** |
 | Torch CPU vs GPU, differentiable forward and backward | 128 × 64 × 64, 32 steps | **69×** resident, **12×** with DRAM streaming |
 | CPU worker vs CUDA worker ensemble | 4 × 64³, 800 steps | **40×** |
-| Larger than the GPU | 2.26 billion cells, 54 GiB of E/H on a 48 GB GPU | 2.2 GB peak CUDA memory; a killed run resumes with the gradient matched to 9e-8 |
+| Larger than the GPU, capacity run | 2.42 billion cells, 58 GB (54 GiB) of E/H on a 48 GiB GPU, 10 steps plus full material gradient | 2.23 GB peak CUDA memory, 58 min, gradient within 9.1e-8 of the oracle |
+| Larger than the GPU, crash and resume | 2.26 billion cells, 54 GB (50.6 GiB) of E/H, same policy | killed after the first backward record, resumed process finishes with 3.03 GB peak CUDA memory and the gradient within 9.1e-8 |
 
-Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The Lumerical rows are aggregate timings of earlier builds; no commercial data is redistributed.
+Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations. The Lumerical rows are aggregate timings of earlier builds; no commercial data is redistributed.
 
 ## Compared with FDTDX
 
@@ -35,11 +36,11 @@ Behind: single-problem multi-GPU (verified with CPU ranks only). Row-by-row evid
 
 ## Quick start
 
-Python 3.10+ and Node.js 20.19+ / 22.12+. Install a [CUDA-enabled PyTorch](https://pytorch.org/get-started/locally/) first; CPU execution also works.
+Python 3.10+ and Node.js 20.19+ / 22.12+. Install a [CUDA-enabled PyTorch](https://pytorch.org/get-started/locally/) first; CPU execution also works. The `cuda-kernels` extra installs CuPy, which the fused CUDA kernels and the real-field CUDA adjoint use; without it the `torch` kernel runs.
 
 ```powershell
 python -m venv --system-site-packages .venv
-.venv/Scripts/python.exe -m pip install -e ".[dev]"
+.venv/Scripts/python.exe -m pip install -e ".[dev,cuda-kernels]"
 npm.cmd ci
 npm.cmd run build
 .venv/Scripts/python.exe -m torchfdtd.cli serve
@@ -52,7 +53,8 @@ from torchfdtd import Project, Region, Structure, Source, Monitor, Simulation
 
 project = Project(
     name="My waveguide",
-    region=Region(size=(8, 6, 2), mesh=0.05, steps=1000, backend="cuda"),
+    region=Region(dimension="3d", size=(8, 6, 2), mesh=0.05, steps=1000,
+                  backend="cuda", cuda_kernel="fused"),
     structures=[Structure(name="core", size=(8, 0.65, 0.4))],
     sources=[Source(center=(-2.5, 0, 0), wavelength=1.55)],
     monitors=[Monitor(name="output", center=(2, 0, 0))],
@@ -62,7 +64,7 @@ result = Simulation(project).run()
 result.save("results/run.npz")
 ```
 
-Lengths are in µm and time arrays in seconds. `Project.load()` runs browser-made scenes; `Result.load()` restores saved results.
+Lengths are in µm and time arrays in seconds. `dimension` defaults to `"2d"` and `cuda_kernel` to `"torch"`, so the example sets both to run the measured 3D fused path. `Project.load()` runs browser-made scenes; `Result.load()` restores saved results.
 
 ## Documentation
 
