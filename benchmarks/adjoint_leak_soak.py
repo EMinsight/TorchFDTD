@@ -231,6 +231,10 @@ def judge(samples, limits):
     base, rest = flatten(warm), [flatten(s) for s in later]
     growth = {k: max(f[k] for f in rest)-base[k] for k in base if isinstance(base[k], (int, float))}
     last = {k: rest[-1][k]-base[k] for k in growth}
+    # Reported, not judged: the change over the second half of the run (iteration 50 to the last sample),
+    # which separates a one-time step after the warm-up from growth that continues per iteration.
+    half = next((flatten(s) for s in later if s['iteration'] >= 50), rest[0])
+    steady = {k: rest[-1][k]-half[k] for k in growth}
     rules = dict(torch_reserved=limits['torch_reserved_growth_max_bytes'], torch_allocated=limits['torch_allocated_growth_max_bytes'],
                  cupy_pool_total=limits['cupy_pool_total_growth_max_bytes'], cupy_pool_used=limits['cupy_pool_used_growth_max_bytes'],
                  rss=limits['rss_growth_max_bytes'], private=limits['private_growth_max_bytes'], gc_objects=limits['gc_objects_growth_max'],
@@ -242,7 +246,7 @@ def judge(samples, limits):
         if limit is None:
             limit = limits['cache_growth_max'] if k.startswith('cache:') else limits['instances_growth_max'] if k.startswith('instances:') else None
         if limit is not None:
-            checks[k] = dict(growth=g, last_minus_warm=last[k], limit=limit, passed=bool(g <= limit))
+            checks[k] = dict(growth=g, last_minus_warm=last[k], steady_state=steady[k], limit=limit, passed=bool(g <= limit))
     return dict(warm_up_iteration=WARM_UP, checks=checks, passed=bool(all(c['passed'] for c in checks.values())))
 
 
@@ -341,6 +345,16 @@ def render(record):
         verdict_text = 'pass' if out.get('passed') else ('ERROR' if out['error'] else 'FAIL')
         lines.append(f"| {out['path']} | {out['seconds']:.1f} | {g('torch_allocated')} | {g('torch_reserved')} | {g('cupy_pool_used')} | {g('cupy_pool_total')} | "
                      f"{g('rss')} | {g('private')} | {g('gc_objects', str)} | {g('live_tensors', str)} | {g('cuda_graphs', str)} | {caches:+d} | {instances:+d} | {verdict_text} |")
+    lines += ['', '## Second half of the run (iteration 50 to 150, reported, not judged)', '',
+              'Change of each host measure between the sample at iteration 50 and the last sample. A one-time step that lands after the '
+              'warm-up fails the judged growth above but shows zero here; a leak that continues per iteration shows here as well.', '',
+              '| path | torch allocated | torch reserved | RSS | private | gc objects | tensors |',
+              '| --- | ---: | ---: | ---: | ---: | ---: | ---: |']
+    for out in record['paths']:
+        c = (out.get('judgement') or {}).get('checks', {})
+        def st(key, fmt=mib):
+            return fmt(c[key]['steady_state']) if key in c and 'steady_state' in c[key] else 'n/a'
+        lines.append(f"| {out['path']} | {st('torch_allocated')} | {st('torch_reserved')} | {st('rss')} | {st('private')} | {st('gc_objects', str)} | {st('live_tensors', str)} |")
     lines += ['', '## Warm-up absolute values', '',
               '| path | torch allocated | torch reserved | CuPy total | RSS | gc objects | live tensors | _System | _Checkpoints | FusedYeeCUDA | FusedAdjointCUDA | SlabBlockOperator |',
               '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
@@ -385,7 +399,8 @@ MODULE_STATE = [
     '`torchfdtd/solver.py` `ENGINE_LOCK`, `torchfdtd/fsp.py` `BRIDGE_LOCK`, `torchfdtd/cuda_bootstrap.py` `_lock`: locks, no payload.',
     '`torchfdtd/spacetime.py`: no module-level container; observer maps live on each `SlabBlockOperator`/`_System` instance and die with it.',
     '`torchfdtd/server.py` `jobs` dict: per-application job registry created in `create_app`; entries are Result records the workbench serves and are the intended lifetime of a job, bounded by the single-worker pool and explicit cancellation/deletion, not by iteration count.',
-    'No `weakref`-less module-level registry of solver objects exists in this tree (the reservation registry named in the brief is not present at commit 6eb7996); `FusedYeeCUDA` holds its grid through `weakref.ref`.',
+    '`torchfdtd/tile_workspace.py` `TileWorkspace`: per-operator `buffers`, `pinned` and `host_staging` dicts keyed by a fixed set of slot names (replaced in place when a larger slot is needed), a `bindings` OrderedDict evicted above `cache_entries=32`, and an `events` list cleared by `drain()`; all bounded per operator and freed with it.',
+    'No `weakref`-less module-level registry of solver objects exists in this tree. The per-process live-reservation registry of branch g5-memory (commit 649ad79, not merged at 6eb7996) is absent here and must be added to the sampled measures when it lands; `FusedYeeCUDA` holds its grid through `weakref.ref`.',
 ]
 
 
@@ -397,6 +412,8 @@ def main():
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--render', action='store_true')
     parser.add_argument('--merge', action='store_true', help='replace the selected paths inside the existing record')
+    parser.add_argument('--rejudge', action='store_true', help='recompute every verdict of the existing record from its samples and rerender')
+    parser.add_argument('--note', action='append', default=[], help='append a finding to the existing record (the text must quote numbers of the record) and rerender')
     args = parser.parse_args()
     if args.render:
         record = json.loads(Path(args.output).read_text(encoding='utf-8'))
@@ -405,6 +422,19 @@ def main():
         return
     case = json.loads(CASE.read_text(encoding='utf-8'))
     limits = case['acceptance']
+    if args.rejudge or args.note:
+        record = json.loads(Path(args.output).read_text(encoding='utf-8'))
+        if args.rejudge:
+            for out in record['paths']:
+                out['judgement'] = judge(out['samples'], limits)
+                out['passed'] = bool(out['judgement']['passed'] and out['error'] is None)
+            record['failing'] = [o['path'] for o in record['paths'] if not o['passed']]
+            record.update(passed_paths=sum(o['passed'] for o in record['paths']), acceptance=limits, module_state=MODULE_STATE)
+        record['findings'] = record.get('findings', [])+list(args.note)
+        Path(args.output).write_text(json.dumps(record, indent=2)+'\n', encoding='utf-8', newline='\n')
+        DOCUMENT.write_text(render(record), encoding='utf-8', newline='\n')
+        print(json.dumps(dict(rejudged=args.rejudge, notes=len(args.note), failing=record['failing'])))
+        return
     if args.device == 'cuda':
         if not torch.cuda.is_available():
             raise SystemExit('CUDA is unavailable')
