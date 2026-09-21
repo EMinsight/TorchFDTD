@@ -435,7 +435,7 @@
           "title": "기존 구조를 활용하여 immutable resolved/compiled simulation plan을 만든다",
           "specification": "기존 구조를 활용하여 immutable resolved/compiled simulation plan을 만든다. 필수 포함 항목: 실현 mesh nodes, E/H 좌표, dt와 half-step convention, boundary/ADE coefficients, sampled material, source의 실제 지원 영역·파형, monitor interpolation·DFT 설정, resource plan.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
@@ -467,7 +467,7 @@
           "title": "forward/adjoint/streamed/tensor batch/GUI가 서로 다른 규칙으로 물리 입력을 다시 해석하지 않도록 한다",
           "specification": "forward/adjoint/streamed/tensor batch/GUI가 서로 다른 규칙으로 물리 입력을 다시 해석하지 않도록 한다. 계획 재생성은 명시적 invalidation을 거치며, 미분 중 geometry-dependent mesh 변경은 금지하거나 별도 지원 계약으로 다룬다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
@@ -537,7 +537,7 @@
           "title": "\"+/- DFT\", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다.",
           "specification": "\"+/- DFT\", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
@@ -566,7 +566,7 @@
           "title": "cache/reference/restart마다 필요한 동일성 조건을 분리한다",
           "specification": "cache/reference/restart마다 필요한 동일성 조건을 분리한다. eps·실제 파형·mesh·정밀도·kernel scheme 변경에 따른 invalidation과 deterministic replay를 검사한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
