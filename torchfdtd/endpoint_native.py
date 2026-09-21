@@ -84,6 +84,7 @@ def validate_endpoint_project(project):
         raise ValueError('PMC native dispatch requires fixed uniform/explicit real FP32 3D meshes.')
     if r.memory_mode!='resident' or r.run_control.auto_shutoff:
         raise ValueError('PMC native dispatch requires resident fixed-duration execution, without automatic shutoff.')
+    r.require_resident()
     if r.interface_method!='staircase' or r.material_sampling!='yee':
         raise ValueError('PMC native dispatch requires staircase Yee material sampling.')
     active={obj.material for obj in project.structures if obj.enabled}

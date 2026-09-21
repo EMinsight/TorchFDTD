@@ -479,9 +479,11 @@ rule('endpoint_monitors', dict(boundary=PMC, monitor=['plane_dft', 'radiation_bo
      'PMC native dispatch accepts enabled point E/H monitors at every timestep only.', executions=('forward',))
 
 # Native forward on the Yee grid (fused kernel choice)
-rule('forward_fused_complex', dict(backend=['cuda_fused'], boundary=['bloch']), 'entry', 'torchfdtd/solver.py::Simulation._run',
+rule('forward_fused_complex', dict(backend=['cuda_fused'], boundary=['bloch'], material=['dielectric', 'dispersive_ade', 'pec']),
+     'entry', 'torchfdtd/solver.py::Simulation._run',
      'The fused CUDA kernel currently supports real fields. Select cuda_kernel="torch" for Bloch fields.', executions=('forward',),
-     note='Refused before the grid is allocated; FusedYeeCUDA repeats the refusal.')
+     note='Refused before the grid is allocated; FusedYeeCUDA repeats the refusal. Tensor materials are dispatched to '
+          'run_tensor before this check and ignore the kernel choice.')
 
 # Differentiable APIs: constructors
 rule('differentiable_tfsf', dict(source=['tfsf']), 'entry', 'torchfdtd/differentiable.py::DifferentiableSimulation.__init__',
@@ -567,13 +569,13 @@ rule('reversible_cpml_sources', dict(boundary=['periodic', 'bloch'], source=['pl
 TB = ('tensor_batch',)
 rule('tensor_batch_cpu', dict(backend=['cpu']), 'entry', 'torchfdtd/tensor_batch.py::run_tensor_batch',
      'Tensor batch cannot execute a CPU project. Set backend="cuda" or "auto" explicitly.', executions=TB)
+rule('tensor_batch_tensor_material', dict(material=['anisotropic_tensor']), 'entry', 'torchfdtd/tensor_batch.py::run_tensor_batch',
+     'Tensor batch does not implement tensor materials; run the native tensor solver per project.', executions=TB)
 rule('tensor_batch_complex', dict(boundary=['bloch']), 'entry', 'torchfdtd/tensor_batch.py::run_tensor_batch',
      'Tensor batch currently requires real fields. Use BatchRunner for complex Bloch fields.', executions=TB)
 rule('tensor_batch_pmc_planes', dict(boundary=PMC, monitor=['plane_dft', 'radiation_box']), 'entry',
      'torchfdtd/tensor_batch.py::_validate_pmc_case',
      'Tensor batch does not implement field monitors with PMC/symmetric faces; use point monitors.', executions=TB)
-rule('tensor_batch_tensor_material', dict(material=['anisotropic_tensor']), 'entry', 'torchfdtd/tensor_batch.py::run_tensor_batch',
-     'Tensor batch does not implement tensor materials; run the native tensor solver per project.', executions=TB)
 rule('tensor_batch_pmc_sheet_reaches_wall', dict(boundary=PMC, source=['tiled_sheet']), 'entry', 'torchfdtd/tensor_batch.py::_validate_pmc_case',
      '{source}: only point sources may address a stored upper PMC/symmetric face; plane sources must end below the wall.', executions=TB,
      note='Checked from the prepared source terms before the cohort grids are allocated; FusedBatchIO repeats the refusal.')

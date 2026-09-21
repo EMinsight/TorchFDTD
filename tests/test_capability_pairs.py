@@ -3,7 +3,7 @@
 Every combination of the registry axes is one small Project (the recipe in
 torchfdtd/capabilities.py) executed through the entry point of its execution
 mode. The covering array below exercises every value pair of every axis pair
-at least once, plus one case per registry rule and lane and four hand-picked
+at least once, plus one case per registry rule and lane and six hand-picked
 high-risk combinations. An admitted case runs and must produce finite output;
 a rejected case must raise the registry's exception with the registry's
 message prefix from the registry's code path before any field allocation.
@@ -357,6 +357,12 @@ HIGH_RISK = {
                                      monitor='plane_dft', execution='tensor_batch', precision='float32', backend='cuda_fused'),
     'graded_mode_port_reversible': dict(dimension='3d', mesh='graded', material='dielectric', boundary='periodic', source='sheet',
                                         monitor='mode_port', execution='reversible_adjoint', precision='float32', backend='cpu'),
+    # run_tensor_batch checks the tensor material before the complex fields.
+    'tensor_bloch_tensor_batch': dict(dimension='3d', mesh='uniform', material='anisotropic_tensor', boundary='bloch', source='point',
+                                      monitor='point', execution='tensor_batch', precision='float32', backend='cuda_torch'),
+    # Simulation.run dispatches tensor materials to run_tensor before the fused complex refusal.
+    'tensor_bloch_forward_fused': dict(dimension='3d', mesh='uniform', material='anisotropic_tensor', boundary='bloch', source='point',
+                                       monitor='point', execution='forward', precision='float32', backend='cuda_fused'),
 }
 
 

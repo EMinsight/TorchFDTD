@@ -129,6 +129,8 @@ class ModeNetwork:
         self.open_ports = open_ports
         if not isinstance(self.options, AdjointOptions):
             raise ValueError('Mode networks require resident AdjointOptions, not streaming.')
+        from .adjoint_memory import _resident_contract
+        _resident_contract(self.project.region, self.options)
         if len(self.ports) != 2 or not all(isinstance(p, FixedModePort) for p in self.ports):
             raise ValueError('Exactly two opposing fixed mode ports are supported.')
         self._shared_section = port_permittivities is None
