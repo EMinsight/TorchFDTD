@@ -1,0 +1,93 @@
+# Release scope by profile
+
+Adopted 21 September 2026 at commit f3efd34 as part of stage G0 of the
+[completion program](COMPLETION_PROGRAM_KO.md). This document states what each
+release profile claims to support, and separates two columns that earlier
+documents mixed: **implemented** means the code path exists and has its own
+development record, **verified for release** means a gate task in
+[validation/completion_gates.json](validation/completion_gates.json) holds
+evidence recorded by `scripts/record_gate_evidence.py` and accepted by
+`scripts/check_release_gates.py`. At adoption every verification cell is
+NOT_RUN. An implemented row is not a released row.
+
+The rows are derived from [FDTDX_PARITY_KO.md](FDTDX_PARITY_KO.md),
+[FEATURE_CHECKLIST.md](FEATURE_CHECKLIST.md), [PREVIEW_RELEASE.md](PREVIEW_RELEASE.md),
+[STREAMED_FDTD.md](STREAMED_FDTD.md), [BOUNDARIES.md](BOUNDARIES.md) and
+[ACCEPTANCE.md](ACCEPTANCE.md). Where those documents record a rejection, the
+rejection is part of the supported contract, not a defect. Nothing here is a
+claim of vendor equivalence or a legal clearance; see
+[RELEASE_REVIEW.md](RELEASE_REVIEW.md) for the open distribution questions.
+
+## Profiles
+
+| Profile | Definition | Required stages | Status at adoption |
+| --- | --- | --- | --- |
+| WORKSTATION | One declared CPU/NVIDIA GPU host: forward, Torch inverse design, verified VRAM/DRAM/disk execution, browser and Python workflows, save/restart, packaged wheel | G0 to G9 | NOT_RUN: no gate task verified yet |
+| HPC | WORKSTATION plus single-problem multi-GPU forward, adjoint and scaling on two or more real GPUs | G0 to G9 and H1 | **BLOCKED_EXTERNAL**: no host with two NVIDIA GPUs is available to this program. The local machine has one RTX 3060 and the remote workstation one RTX 5880 Ada; the NCCL two-rank case skips on both. CPU Gloo ranks do not count. H1-02 to H1-06 carry this blocker in the gate file |
+
+Passing WORKSTATION is never reported as HPC completion or as a replacement of
+every function of another solver. Batches of independent cases across GPUs are
+not domain decomposition.
+
+## Physics (WORKSTATION)
+
+| Row | Implemented scope and record | Verified for release |
+| --- | --- | --- |
+| Grids | 3D and 2D Yee grids; uniform, graded and rectilinear meshes with independent dx/dy/dz and explicit node API ([MESH.md](MESH.md), [RECTILINEAR_MESH.md](RECTILINEAR_MESH.md)). The invariant 2D axis has no boundary | NOT_RUN (G2-01, G3-01, G3-13) |
+| Materials | Constant-index dielectrics; multi-pole Drude/Lorentz ADE with passive fitting ([MATERIALS.md](MATERIALS.md), [MATERIAL_FITTING.md](MATERIAL_FITTING.md)); node-sampled SPD anisotropic tensors in bulk, inside CPML under the geometric stability admission, with PEC walls and trapezoidal tensor ADE ([ANISOTROPY_IMPLEMENTATION_PLAN.md](ANISOTROPY_IMPLEMENTATION_PLAN.md)); subpixel interfaces for lossless curved dielectrics ([SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md)). Rejected: rotated or mid-axis tensors inside PML, subpixel interfaces next to PEC/PMC walls, fused tensor kernels | NOT_RUN (G3-02 to G3-05, G3-12, G3-13, G6-01) |
+| Boundaries | Per-face CPML with independent profiles; periodic and fixed-phase Bloch pairs (not BFAST); PEC/antisymmetric faces; PMC/symmetric faces as a closed cavity in the ordinary forward solver and next to CPML in the differentiable, dispersive, streamed and tensor-batch paths ([BOUNDARIES.md](BOUNDARIES.md), [PMC_IMPLEMENTATION_PLAN.md](PMC_IMPLEMENTATION_PLAN.md)). Rejected: 2D PMC, PMC with periodic/Bloch mixing, PMC in the fused CUDA backward/ADE kernels | NOT_RUN (G3-06, G3-07, G3-08) |
+| Sources | Point, sheet/plane, one-way, TFSF, dipole and fixed-eigenmode sources; soft E/H waveform parameters differentiable ([SOURCES.md](SOURCES.md), [TFSF_SOURCES.md](TFSF_SOURCES.md), [MODE_INJECTION.md](MODE_INJECTION.md), [DIFFERENTIABLE_SOURCES.md](DIFFERENTIABLE_SOURCES.md)). The Bloch phase is fixed across the spectrum | NOT_RUN (G2-05, G6-02) |
+| Monitors and analysis | Point time traces, selective plane DFT spectra, two-port and N-port mode networks with complex S, closed-box far field, finite-distance near zone, Bloch diffraction orders ([MONITORS.md](MONITORS.md), [OPEN_MODE_PORTS.md](OPEN_MODE_PORTS.md), [RADIATION.md](RADIATION.md), [FARFIELD_WORKFLOW.md](FARFIELD_WORKFLOW.md)). Remaining: trapezoidal quadrature, layered exteriors, off-axis port normals | NOT_RUN (G3-09 to G3-11, G6-03, G6-04) |
+
+## Platforms (WORKSTATION)
+
+| Row | Implemented scope and record | Verified for release |
+| --- | --- | --- |
+| Operating systems | Windows 11 (local development host and the RTX 5880 workstation); Linux for the CPU CI job and the FDTDX matched fixture ([FDTDX_MATCHED_CORRECTNESS.md](FDTDX_MATCHED_CORRECTNESS.md)). macOS is documented for CPU install only and has no test record | NOT_RUN (G4-01, G8-06, G8-07) |
+| Python and dependencies | Python 3.10 or newer (3.10.2 local, 3.11 CI); torch 2.2 or newer (2.10.0+cu126 tested); numpy, scipy, fastapi, uvicorn, pydantic per `pyproject.toml`; CuPy `cupy-cuda12x` 13.6 for the fused kernels and the real-field CUDA adjoint; gdstk for GDS. Minimum and maximum versions are not yet fixed by installation tests | NOT_RUN (G8-06) |
+| GPUs actually exercised | RTX 3060 12 GB (local) and RTX 5880 Ada 48 GB (remote), CUDA 12.6 runtime. Full suites passed on the RTX 3060 at 1ad9166 with 2,181 passes and 7 skips and on the RTX 5880 at a879e1b with 2,141 passes and 7 skips ([ACCEPTANCE.md](ACCEPTANCE.md)); those runs predate the gate file and are not gate evidence | NOT_RUN (G4-01 to G4-05) |
+| Execution backends | CPU/Torch; CUDA Torch kernel; fused CUDA kernels with CUDA Graphs; FP32/FP64; real and complex fields; nondefault streams ([COMPLEX_CUDA.md](COMPLEX_CUDA.md), [CUDA_SPECTRA.md](CUDA_SPECTRA.md)). CPU fallback when CuPy is absent is printed, not hidden (G1-06) | NOT_RUN (G4-02 to G4-04) |
+| Continuous integration | Linux CPU PR suite plus browser tests and a wheel build (`.github/workflows/test.yml`). No GPU runner; public-fork code is never run on a personal GPU host | NOT_RUN (G4-05, G4-06) |
+
+## Inputs and outputs (WORKSTATION)
+
+| Row | Implemented scope and record | Verified for release |
+| --- | --- | --- |
+| Project model | One `Project` JSON shared by the browser CAD and Python; CLI `torchfdtd serve` on loopback only | NOT_RUN (G8-01, G8-03, G9-01) |
+| Results | NPZ fields and monitors, JSON/CSV monitor export, browser field viewer; complex fields kept in NPZ ([BOUNDARIES.md](BOUNDARIES.md)). No chunked/lazy large-result format has been chosen yet | NOT_RUN (G8-01, G8-02) |
+| GDS | Import and export with layers/datatypes, units, hierarchy, arrays, PATH, even-odd holes, layer etch, z-node sidewall staircase, port markers and N-port builders ([GDS.md](GDS.md), [GDS_MODE_PORTS.md](GDS_MODE_PORTS.md)). Rejected: holes touching the outline at a vertex, nested holes | NOT_RUN (G6-07, G7-03) |
+| FSP | Independent read and writeback of a documented layout subset ([FSP.md](FSP.md)); general FSP compatibility is not claimed and the provenance question stays open in RELEASE_REVIEW.md | Not a gate row; distribution decision pending (G9-03) |
+| Packaging | Wheel built from a fresh staging directory with the browser assets included (`scripts/build_preview.py`); `cuda-kernels`, `gds`, `dev` extras | NOT_RUN (G8-05, G8-07, G9-06) |
+
+## Differentiation (WORKSTATION)
+
+| Row | Implemented scope and record | Verified for release |
+| --- | --- | --- |
+| Parameters | Dielectric epsilon, fixed-Bloch, CPML, ADE, PEC/PMC faces including face ADE banks, density with filter/projection/beta continuation/symmetry/mask, box/ellipsoid/cylinder and polygon/spline shape parameters, tensor media, resident soft E/H source waveforms ([DIFFERENTIABLE_FDTD.md](DIFFERENTIABLE_FDTD.md), [DESIGN_PARAMETERIZATION.md](DESIGN_PARAMETERIZATION.md), [SHAPE_GRADIENTS.md](SHAPE_GRADIENTS.md)) | NOT_RUN (G3-14 to G3-16, G6-05, G6-06) |
+| Objectives | Point signals, plane spectra, N-port \|S_ij\|², far field, near zone, target information ([TARGET_INFORMATION.md](TARGET_INFORMATION.md)) | NOT_RUN (G3-15, G6-03) |
+| Adjoint modes | Checkpointed adjoints; reversible adjoints for lossless periodic and fixed-exterior CPML APIs ([REVERSIBLE_ADJOINT.md](REVERSIBLE_ADJOINT.md), [REVERSIBLE_CPML.md](REVERSIBLE_CPML.md)); streamed and tensor-batch adjoints | NOT_RUN (G3-14, G5-01) |
+| Excluded from both profiles | Eigenmode and source-position derivatives, hole-vertex derivatives, second derivatives, fused CUDA adjoint kernels for PMC faces and tensors (the Torch transpose path runs instead), differentiation through geometry-dependent mesh regeneration (G1-01) | Not claimed |
+
+## Capacity (WORKSTATION)
+
+| Row | Implemented scope and record | Verified for release |
+| --- | --- | --- |
+| Resident | Whole problem in VRAM with measured allocation planning ([RESIDENT_ALLOCATION_MODEL.md](RESIDENT_ALLOCATION_MODEL.md), [CUDA_CACHE_ADMISSION.md](CUDA_CACHE_ADMISSION.md)) | NOT_RUN (G5-02, G5-03) |
+| Streamed | DRAM and NVMe space-time tiles with a causal halo, async staging, direct geometry/density slab generation without a global epsilon or VJP ([STREAMED_FDTD.md](STREAMED_FDTD.md), [STREAMED_WORK_PLANNING.md](STREAMED_WORK_PLANNING.md), [streamed_geometry.md](streamed_geometry.md)) | NOT_RUN (G5-01, G5-04) |
+| Beyond VRAM | Ten-step capacity gates only: 2.42 billion cells with 54 GiB of FP32 E/H and a full material gradient, and a 2.26 billion cell crash-and-resume run, both on the RTX 5880 ([BEYOND_VRAM_FP32.md](BEYOND_VRAM_FP32.md), [BEYOND_VRAM_RESTART.md](BEYOND_VRAM_RESTART.md)). A meaningful physical-duration case is still required and is not replaced by these gates | NOT_RUN (G5-05, G5-06) |
+| Restart | Block-level durable journal with per-phase pointer files, checksum and contract checks, forward/backward interruption and child-process kill tests ([STREAMED_RESTART.md](STREAMED_RESTART.md)). Process-kill consistency is tested; power-loss durability is not claimed | NOT_RUN (G1-04, G1-05, G5-07 to G5-09) |
+| Batches | `BatchRunner` process jobs with resume; `run_tensor_batch` shared CUDA cohorts ([TENSOR_BATCH.md](TENSOR_BATCH.md), [PYTHON_BATCH.md](PYTHON_BATCH.md)). These are independent cases, not one decomposed problem | NOT_RUN (G7-05) |
+| Long runs | 1e5-step, repeated and 100-update soak evidence does not exist yet | NOT_RUN (G5-10) |
+
+## HPC additions
+
+| Row | Implemented scope and record | Verified for release |
+| --- | --- | --- |
+| Single-problem domain decomposition | Rank-owned x slabs with halo transpose and material VJP for uniform cubic staircase dielectric grids with periodic/Bloch faces on every axis ([DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md)). PML, mirror walls, sources, monitors, ADE and nonuniform metrics are rejected. Verified with two and three Linux CPU Gloo ranks only | BLOCKED_EXTERNAL until a two-GPU host exists (H1-01 to H1-06) |
+| Multi-GPU with out-of-core execution | Not implemented | Not claimed |
+
+## Scope changes
+
+Removing or demoting a row that the existing plan calls required needs the
+owner's approval recorded in the task's `scope_change_approval` field. A row
+that is hard or that lacks hardware is BLOCKED_EXTERNAL, not removed.

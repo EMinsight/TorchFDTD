@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G1-03_quadrant_allocation_scaling",
+  "task": "G1-03",
+  "title": "quadrant_intensity_allocation ratio and gradient at DFT field scales and SI areas",
+  "declared": "2026-09-21",
+  "declared_at_commit": "f3efd3409aaafb1ef87ac050ffedf2c36c5fe6fa",
+  "declared_before_run": true,
+  "fixture": {
+    "function": "torchfdtd.quadrant_intensity_allocation",
+    "plane": "z-normal plane, one sample per quadrant at (x, y) = (-1, -1), (1, -1), (-1, 1), (1, 1) um; electric x component A * [a, 1, 1, 1]; other components zero",
+    "a": 1.5,
+    "amplitude_scales_A": [1.0, 1e-08, 1e-14, 1e-16],
+    "quadrature_area_m2": 1e-14,
+    "total_transmission": 1.0,
+    "variants_required_by_specification": [
+      "nonuniform quadrature areas at DFT scale",
+      "several frequencies at DFT scale",
+      "complex phases on the samples",
+      "whole-source scale invariance of the ratio and of every gradient"
+    ],
+    "gradcheck_fixture": "16-point plane from tests/test_detector_allocation.py::plane with complex128 fields scaled by 1e-14 and areas of 1e-14 m^2"
+  },
+  "seed": 12,
+  "precision": ["float32 with complex64 fields", "float64 with complex128 fields"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "closed form for A * [a, 1, 1, 1] with equal areas and unit total transmission: first quadrant ratio a^2 / (a^2 + 3) and derivative 6 a / (a^2 + 3)^2; float64 torch.autograd.gradcheck at the DFT scale; unscaled formula on unit-scale fields for the ratio and its gradients",
+  "observables": [
+    {"name": "first_quadrant_ratio", "unit": "dimensionless", "definition": "output[0, 0] of quadrant_intensity_allocation"},
+    {"name": "d_ratio_d_a", "unit": "dimensionless", "definition": "autograd derivative of output[0, 0] with respect to a"},
+    {"name": "gradient_finiteness", "unit": "boolean", "definition": "every gradient with respect to fields and transmission is finite at every amplitude scale"},
+    {"name": "scale_invariance", "unit": "dimensionless", "definition": "ratio and gradients unchanged when every field sample is multiplied by one positive constant"}
+  ],
+  "acceptance": {
+    "float32": {"rtol": 0.0001, "atol": 1e-06},
+    "float64": {"rtol": 1e-07, "atol": 1e-09},
+    "gradients": "finite at every declared amplitude scale; no NaN and no exception at 1e-16",
+    "zero_policy": "a zero total electric intensity, a zero or negative area, a negative transmission or a nonfinite input raises ValueError before any division; no epsilon is added to a denominator",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 and discrete_dimensionless_fp64",
+    "tightening_note": "tests/test_detector_allocation.py asserts absolute errors of 1e-6 on the ratio and 1e-5 on the derivative in float32; those are tighter than the declared limits and are not loosened by this case"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_detector_allocation.py::test_fp32_dft_scale_ratio_and_gradient",
+      "tests/test_detector_allocation.py::test_dft_scale_field_and_total_transmission_gradcheck",
+      "tests/test_detector_allocation.py::test_scaled_ratio_matches_unscaled_formula_on_unit_fields",
+      "tests/test_detector_allocation.py::test_invalid_contract"
+    ],
+    "not_yet_covered": [
+      "amplitude scale 1e-8",
+      "nonuniform areas, several frequencies and complex phases at DFT scale",
+      "whole-source scale invariance of every gradient"
+    ]
+  },
+  "notes": "The fix landed in f3efd34. Recording evidence against this case does not close the not_yet_covered items; they need tests before G1-03 is judged complete against the specification."
+}

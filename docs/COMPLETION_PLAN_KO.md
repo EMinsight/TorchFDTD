@@ -28,6 +28,21 @@ Torch 기반 GPU FDTD다. 기능 개수나 현재 통과한 테스트 개수를 
 | 9 · P1 | 배치·자동 스케줄러 성능 | 동시 adjoint microbatch, 재계산·전송·I/O를 포함한 선택. resident가 빠른 조건과 streaming이 필요한 조건을 모두 보고, 선택 비용이 이득을 없애지 않는지 확인 |
 | 10 · 출고 조건 | 경쟁 비교·UI·API·논문·배포 | 같은 정확도와 관측량에서 FDTDX 및 다른 solver의 전체 forward/backward/optimizer 시간·메모리·최대 크기 비교. 필수 기능의 UI/API/저장/재시작, 독립 설치와 문서, 논문 및 공개 자료 검토 |
 
+## 완성 프로그램과 출고 gate (2026-09-21 채택)
+
+위 표의 항목은 소유자가 제공한 완성 프로그램의 단계 G0–G9·H1로 재편되었다.
+사양서 원문은 [COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)에 그대로
+수록했고, 83개 작업의 구현/검증 상태와 증거 목록은
+[validation/completion_gates.json](validation/completion_gates.json)이 단일 기준이다.
+이 문서는 작업 목록을 중복 기술하지 않는다. 프로파일별 지원 범위는
+[RELEASE_SCOPE.md](RELEASE_SCOPE.md), 사전 고정 fixture는
+[validation/cases/](validation/cases/README.md), 원시 증거는
+[validation/runs/](validation/runs/README.md), 최신 실제 상태와 다음 명령은
+[DEVELOPMENT_HANDOFF.md](DEVELOPMENT_HANDOFF.md)에 있다. 검증 후
+`scripts/record_gate_evidence.py`로 증거를 기록하고
+`scripts/check_release_gates.py`로 판정한다. 모든 작업은 NOT_RUN에서
+시작하며 사람이 적은 VERIFIED는 판정기가 거부한다.
+
 단일 grid multi-GPU는 단일 GPU/DRAM 경로 다음 확장으로 유지하며,
 실제 복수 GPU 실측 없이 완료로 표시하지 않는다. LSF는 필요한 명령의
 독립 Python 변환을 우선하고 미지원 구문은 명시적으로 거절한다. 전용
