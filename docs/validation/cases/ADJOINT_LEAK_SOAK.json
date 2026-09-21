@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "ADJOINT_LEAK_SOAK",
+  "task": "adjoint leak soak",
+  "title": "No growth of device, host, Python-object or cache footprint across 150 repeated forward+backward+Adam iterations of every differentiable path",
+  "declared": "2026-09-22",
+  "declared_at_commit": "8167030",
+  "declared_before_run": true,
+  "driver": "benchmarks/adjoint_leak_soak.py",
+  "record": "docs/validation/adjoint_leak_soak_3060.json",
+  "fixture": {
+    "iterations": 150,
+    "warm_up_iterations": 20,
+    "sample_every": 10,
+    "loop": "optimizer.zero_grad(set_to_none=True); result = model(parameters); loss = objective(result); loss.backward(); optimizer.step(); the parameters are clamped back into the path's contract (epsilon >= 1, passive oscillators); result and loss are deleted; every tenth iteration torch.cuda.synchronize(), gc.collect() twice and the sample is taken",
+    "optimizer": "torch.optim.Adam, lr 1e-3, on every trainable input of the path so the autograd graph and optimizer state are those of a real design loop",
+    "paths": {
+      "differentiable_cuda_fused": "DifferentiableSimulation, 2D 40 x 30 cells, 60 steps, float32 on CUDA, AdjointOptions(checkpoints=3, backward_kernel='fused'); parameter epsilon (Nx,Ny,Nz)",
+      "differentiable_cuda_torch": "the same with backward_kernel='torch'",
+      "plane_cuda": "DifferentiablePlaneSimulation on the same grid with two x-normal FieldMonitors, two frequencies, block_size 8; parameter epsilon",
+      "reversible_cuda": "ReversibleSimulation, all-periodic 3D 12^3 cells, 40 steps, float32 on CUDA (fused forward, fused adjoint); parameter epsilon",
+      "dispersive_cuda": "DispersiveSimulation on the 2D grid with two poles, AdjointOptions(checkpoints=2); parameters epsilon_inf, strength, omega0, gamma",
+      "tensor_project_cuda": "tensor_from_project (TensorProject: TensorDielectricSimulation with the fixed isotropic CPML collar), 3D 16^3 cells (3 CPML layers, the tensor block inside the interior collar), 40 steps, float32 on CUDA, checkpoints 2; parameter the [materials, 6] tensor table",
+      "streamed_host_banks_cuda": "StreamedSimulation on the 2D grid, StreamedAdjointOptions(device='cuda', slab_width=8, temporal_depth=4, checkpoints=2, state_storage='host'); parameter epsilon on the CPU",
+      "source_waveform_cuda": "SourceWaveformSimulation on the 2D grid with two soft sources, AdjointOptions(checkpoints=3); parameters epsilon and the waveform table"
+    },
+    "device_memory_bound": "every fixture stays far below 1.5 GB of device memory; the driver refuses to start if less than 2 GB is free"
+  },
+  "measures": [
+    "torch.cuda.memory_allocated and memory_reserved (bytes)",
+    "CuPy default device pool used_bytes and total_bytes when CuPy is importable",
+    "process RSS and private bytes (psutil memory_info on Windows)",
+    "len(gc.get_objects()) after gc.collect()",
+    "live torch tensors: objects in gc.get_objects() whose type has torch.Tensor in its MRO",
+    "captured CUDA graphs: torch.cuda.CUDAGraph objects in gc.get_objects()",
+    "module caches: cuda_kernels._compile, injection._incident_line, streamed_cost.replay_blocks and streamed_work._replay_summary cache_info().currsize; cuda_bootstrap._module presence; capabilities.RULES and LANES lengths; batch._WORKER_CANCEL presence; live PlaneReferenceCache instances and their tensor_bytes",
+    "live instances of the solver's own state holders: _System (and subclasses), _Checkpoints, FusedYeeCUDA, FusedAdjointCUDA, SlabBlockOperator, TileWorkspace, StateStore"
+  ],
+  "growth": "for every measure, growth = max over the samples taken after the warm-up (iterations 30 to 150) minus the value at the warm-up sample (iteration 20); a negative growth is reported as measured",
+  "acceptance": {
+    "torch_reserved_growth_max_bytes": 20971520,
+    "torch_reserved_note": "one large-pool segment of the CUDA caching allocator (20 MiB); the small pool grows by 2 MiB segments, so any growth above zero is reported and anything above one large segment fails",
+    "cupy_pool_total_growth_max_bytes": 2097152,
+    "cupy_pool_note": "CuPy's pool rounds allocations to 512-byte units and keeps freed chunks; 2 MiB is the allowance for one late first-touch chunk",
+    "torch_allocated_growth_max_bytes": 0,
+    "cupy_pool_used_growth_max_bytes": 0,
+    "rss_growth_max_bytes": 2097152,
+    "private_growth_max_bytes": 2097152,
+    "gc_objects_growth_max": 100,
+    "live_tensors_growth_max": 0,
+    "cuda_graphs_growth_max": 0,
+    "cache_growth_max": 0,
+    "instances_growth_max": 0,
+    "verdict": "a path passes only if every measure satisfies its limit; a failing path is a leak to be traced to the reference that keeps tensors alive and fixed with a regression test"
+  },
+  "notes": "Python's object count and RSS fluctuate by allocator bookkeeping; the 100-object and 2 MiB allowances cover that noise, not a real per-iteration retention. A lru_cache whose currsize reaches its maxsize is bounded, not leaking; the register-level statement of every module-level container is in docs/ADJOINT_LEAK_SOAK.md."
+}
