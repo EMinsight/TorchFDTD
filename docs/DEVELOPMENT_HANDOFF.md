@@ -1035,10 +1035,51 @@ program pair (rtol 1e-4, atol 1e-6); G3-06, G3-11 and G3-16 are therefore
 listed beyond the review's five, each with the path and value, for the owner
 to approve or reject.
 
-RERECORD_PLACEHOLDER
+**Passed / failed / skipped / not run.** tests/test_release_gates.py 34
+passed; tests/test_rerecord_gates.py 9 passed; tests/test_suite_policy.py and
+tests/test_completion_program_documents.py 12 passed (55 passed in 153.9 s
+together, CUDA hidden); tests/test_validation_report.py 9 passed on the
+committed tree (the G9-07 evidence run). Replayed with
+`scripts/rerecord_gates.py --all --platform rtx3060-win11-lab --tasks ...` on
+commit 32af0e2 (CUDA hidden, every file-level entry enumerated, watch lists
+hashed, `platform_id` written): G0-01, G0-02, G0-03, G0-04, G0-05, G1-06,
+G2-05, G4-05, G4-06, G8-01, G9-02, G9-04 VERIFIED again; G3-17, G8-05 and G8-07
+FAILED on HEAD, which is the review's finding made explicit: G3-17
+(tests/test_oracle_budget.py: `oracle_class` missing from a merged G3 case, a
+listed test id absent from its source file, ORACLE_BUDGET.md not covering
+G3-01_uniform_propagation), G8-05 and G8-07 (tests/test_clean_install.py: the
+record 20260921T165132Z-b768cc74 predates the rebuilt browser bundle and the
+current pyproject, so the wheel no longer carries the committed assets). Those
+three stay FAILED until their owners fix the cause and the RC round records
+them again; nothing was weakened to pass them. G9-07 is recorded after the
+report render (`--exclude G9-07` in the batch) because its tests compare the
+committed report with a fresh render. Not run: the GPU-dependent tasks (G2-06,
+G3-01 to G3-16, G4-01 to G4-04, G8-03, G8-04, G8-06), which stay STALE under
+the watch rule until the RC round on the GPU host.
+
+**Evidence paths and hashes.** New run ids: G0-01
+20260921T212112Z-g0-01-78c4f2c1, G0-02 20260921T212114Z-g0-02-a4700f5a, G0-03
+20260921T212115Z-g0-03-9d45ae2d, G0-04 20260921T212305Z-g0-04-4a232a3c, G0-05
+20260921T212525Z-g0-05-d0b1a9fe, G1-06 20260921T212526Z-g1-06-c5adc0f5, G2-05
+20260921T212539Z-g2-05-d33352b2, G3-17 20260921T212540Z-g3-17-2222cfe9
+(FAILED), G4-05 20260921T212749Z-g4-05-d9c1df76, G4-06
+20260921T212752Z-g4-06-c6698b17, G8-01 20260921T212803Z-g8-01-21814658, G8-05
+20260921T212804Z-g8-05-bbac99d9 (FAILED), G8-07 20260921T212806Z-g8-07-0ede6bb6
+(FAILED), G9-02 20260921T212820Z-g9-02-ae84c532, G9-04
+20260921T212831Z-g9-04-f826cb57, G9-07 20260921T213007Z-g9-07-31e7a456 (source
+commit 15122d2). Every new record carries `enumerated_required_tests`,
+`watch_sha256`, `platform_id`, `junit_started_before_commit: false`,
+`fdtd 0.2.2` and the package locations. A first replay batch had written the
+account name into `fdtd_location` (the development venv resolves `fdtd` from
+the base interpreter's site-packages under the user home); the recorder now
+writes `<user home>` for that prefix and the batch was discarded before any
+push (its two commits were dropped from this unpushed branch and re-done).
+After the render the judge reports WORKSTATION 32 pass and 45 fail of 77, HPC
+32 pass and 51 fail of 83, both NOT RELEASABLE.
 
 **Remaining defects, risks, external blockers.**
 - The G3, G4 (except G4-05 and G4-06), G2-06, G8-03, G8-04 and G8-06 evidence stays STALE under the watch rule until the release-candidate round of docs/RELEASE_PROCEDURE.md re-records it on the GPU host; this branch re-recorded only the CPU-only tasks listed above.
-- The twelve pre-commit runs keep their warning until re-recorded; `--allow-precommit-junit` is never used in the RC round.
+- The pre-commit runs that were not replayed here (G1-01 to G1-03 and the G3 fixtures) keep their warning until re-recorded; `--allow-precommit-junit` is never used in the RC round.
+- The development venv resolves `fdtd` from the base interpreter's site-packages (system site-packages), not from the venv; the RC round's wheel environment installs its own `fdtd==0.2.2`.
 - No `scope_change_approval` was set; the eleven pending tasks wait for the owner.
 - `scripts/provenance_inventory.py` prints a `UnicodeDecodeError` from a cp949 reader thread of one of its subprocesses on this host; its exit status and JSON summary are unaffected (the report reads the summary).
