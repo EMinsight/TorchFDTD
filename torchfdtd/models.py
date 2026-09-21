@@ -413,6 +413,9 @@ class Source(Item, SourceTimeSettings):
     amplitude: float = Field(default=1, gt=0, le=100)
     phase: float = 0  # degrees
     use_global_source: bool = False
+    # A soft sheet may span the lateral CPML so that its edge wave is absorbed
+    # instead of diffracting into the interior (a plane wave through the PML).
+    extend_through_pml: bool = False
 
     @model_validator(mode='before')
     @classmethod
@@ -429,6 +432,8 @@ class Source(Item, SourceTimeSettings):
             raise ValueError('Source spans cannot be negative.')
         if self.kind=='tfsf' and self.injection!='oneway':
             raise ValueError('A TFSF box requires paired one-way E/H injection.')
+        if self.extend_through_pml and (self.kind != 'plane' or self.injection != 'soft'):
+            raise ValueError('extend_through_pml applies to soft plane sources only.')
         if self.injection == 'oneway':
             if self.kind not in ('plane','tfsf') or not self.component.startswith('E'):
                 raise ValueError('One-way injection requires an electric polarization and kind="plane" or "tfsf".')
@@ -626,6 +631,8 @@ class Project(Model):
             for axis in range(2 if r.dimension == '2d' else 3):
                 half = obj.size[axis] / 2 if (isinstance(obj, Source) and obj.kind in ('plane','tfsf')) or isinstance(obj,FieldMonitor) else 0
                 lower, upper = r.interior_bounds(axis)
+                if isinstance(obj, Source) and obj.extend_through_pml and 'xyz'[axis] != obj.normal:
+                    lower, upper = -r.actual_size[axis]/2, r.actual_size[axis]/2
                 tolerance=16*math.ulp(max(abs(lower),abs(upper),r.size[axis]))
                 if obj.center[axis]-half < lower-tolerance or obj.center[axis]+half > upper+tolerance or (half == 0 and obj.center[axis] >= upper and not endpoint):
                     raise ValueError(f'{obj.name} must lie entirely inside the non-PML region.')

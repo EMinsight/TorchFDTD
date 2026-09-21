@@ -166,3 +166,8 @@ __all__ += ["SourceWaveformSimulation", "SourceWaveformPlaneSimulation", "gaussi
 from .streamed_work import estimate_streamed_work
 from .streamed_planning import StreamedWorkPlan, plan_streamed_work
 __all__ += ["estimate_streamed_work", "StreamedWorkPlan", "plan_streamed_work"]
+
+from .tiled import (TilePlan, TileSpec, StitchedPlane, plan_tiles, run_tiled, stitch_planes, propagate_plane,
+                    farfield_from_stitched, suggest_overlap, TiledPlaneSimulation)
+__all__ += ["TilePlan", "TileSpec", "StitchedPlane", "plan_tiles", "run_tiled", "stitch_planes", "propagate_plane",
+            "farfield_from_stitched", "suggest_overlap", "TiledPlaneSimulation"]
