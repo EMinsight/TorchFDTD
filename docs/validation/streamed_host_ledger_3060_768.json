@@ -1,0 +1,95 @@
+{
+  "scope": "One nondispersive real FP32 scalar-epsilon streamed adjoint with CUDA tiles, reusable buffers, file-backed banks and point observations. Python-level CPU allocations of at least half the parameter size are counted by identity; C-level temporaries appear only in sampled RSS. Not a guarantee for ADE, tensor, spectral-plane or geometry paths.",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "torch_version": "2.10.0+cu126",
+  "device": "NVIDIA GeForce RTX 3060",
+  "runtime_source_sha256": {
+    "streamed.py": "207406d323040d5fa9edecc00e26228ae07bd30ca1947042c210724bb5dd8d27",
+    "spacetime.py": "70346bbab98b2e944f08975a85d4487b73b05efffa4027b29856ff5c7a51114a",
+    "state_store.py": "66dfe4a8ca94034630fdcbea0076768aed6658cb9add9aecf88b4294ac35c9f6"
+  },
+  "grid": [
+    768,
+    192,
+    192
+  ],
+  "cells": 28311552,
+  "steps": 20,
+  "periodic_x": false,
+  "options": {
+    "slab_width": 16,
+    "temporal_depth": 2,
+    "checkpoints": 1,
+    "local_checkpoints": 1,
+    "state_storage": "disk",
+    "device": "cuda"
+  },
+  "parameter_bytes": 113246208,
+  "state_bytes": 737869824,
+  "full_size_host_tensors": {
+    "forward_peak_live": 0,
+    "backward_peak_live": 2,
+    "includes_caller_epsilon": false,
+    "allocation_sites": {
+      "streamed.py:269 backward": {
+        "count": 1,
+        "bytes": 113246208
+      },
+      "spacetime.py:362 transpose": {
+        "count": 10,
+        "bytes": 113246208
+      }
+    },
+    "forward_allocations": 0,
+    "total_allocations": 11
+  },
+  "reservation": {
+    "host_bytes": 1442711208,
+    "gpu_bytes": 430571656,
+    "disk_bytes": 2951479296,
+    "dense_parameter_term_bytes": 905969664,
+    "dense_parameter_multiplier": 8
+  },
+  "measured": {
+    "rss_before_parameter": 710909952,
+    "rss_baseline_with_parameter": 830607360,
+    "forward_rss_peak_delta": 321789952,
+    "rss_peak_delta": 590553088,
+    "rss_peak_delta_over_parameter_bytes": 5.214771412037037,
+    "rss_samples": 4686,
+    "cuda_peak_allocated_delta": 149348864,
+    "cuda_peak_reserved": 192937984,
+    "cuda_peak_over_gpu_reservation": 0.34686181015129336,
+    "forward_seconds": 15.851389500312507,
+    "backward_seconds": 55.70557360025123,
+    "elapsed_seconds": 71.61394289974123
+  },
+  "backing": {
+    "forward": {
+      "peak_logical_file_bytes": 1475739648,
+      "live_logical_file_bytes": 0,
+      "free_reserve_bytes": 0,
+      "created_banks": 10,
+      "logical_read_bytes": 8252153856,
+      "logical_written_bytes": 7378698240,
+      "max_single_read_bytes": 8847360,
+      "closed": true,
+      "io_scope": "Buffered file I/O. OS page cache and physical storage traffic are not measured. No whole-state file mapping."
+    },
+    "backward": {
+      "peak_logical_file_bytes": 2951479296,
+      "live_logical_file_bytes": 0,
+      "free_reserve_bytes": 0,
+      "created_banks": 30,
+      "logical_read_bytes": 32270745600,
+      "logical_written_bytes": 23926456320,
+      "max_single_read_bytes": 8847360,
+      "closed": true,
+      "io_scope": "Buffered file I/O. OS page cache and physical storage traffic are not measured. No whole-state file mapping."
+    }
+  },
+  "gradient_finite": true,
+  "gradient_norm": 1.5257667485002457e-07,
+  "peak_block_checkpoints": 1,
+  "replayed_blocks": 20
+}

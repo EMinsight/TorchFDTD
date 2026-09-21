@@ -293,11 +293,37 @@ shared system drive. Admission and every new file-bank allocation check this
 floor. The default is zero, and another process can still consume space after
 a check. This is not a filesystem quota or an exclusive reservation.
 
-The conservative bank capacity is `checkpoints + 5` complete states, including
-two banks of lifetime margin above the replay bound. Tile workspaces, gradients
-and I/O buffers are charged separately. Tests cover repeated backward with
-cyclic garbage collection disabled and uneven temporal blocks. The actual
-physical-VRAM-overflow validation is tracked [separately](BEYOND_VRAM_VALIDATION.md).
+The bank capacity is `checkpoints + 3` complete states: two evolving primal
+banks during forward, and during backward at most `checkpoints` saved restart
+states plus one adjoint and two rolling primal banks, or one primal and two
+adjoint banks during transpose. Tile workspaces, gradients and I/O buffers are
+charged separately. The [lifetime record](validation/streamed_bank_lifetime.json)
+counts distinct live bank identities with cyclic garbage collection disabled
+across checkpoint counts, uneven and partial temporal blocks, local checkpoints,
+the ADE path and repeated backward passes. The bound is reached exactly when the
+block count allows full checkpoint nesting. Injected allocation, read, write,
+transfer and reduction failures leave no scratch files while their tracebacks
+are still referenced, and asynchronous CUDA tiles drain before the error
+propagates. Two concurrent backward passes of one graph are not covered by a
+single budget. The actual physical-VRAM-overflow validation is tracked
+[separately](BEYOND_VRAM_VALIDATION.md).
+
+The dense-parameter host term follows a measured ledger. The
+[ledger benchmark](../benchmarks/streamed_host_ledger.py) counts every
+Python-level CPU tensor of at least half the parameter size by identity and
+samples process RSS. Two RTX 3060 runs with the same tile size and 14.2 or 28.3
+million cells ([records](validation/streamed_host_ledger_3060.json),
+[larger grid](validation/streamed_host_ledger_3060_768.json)) show no full-size
+host tensor in forward and exactly two in backward, the accumulated gradient and
+one block contribution, and the RSS peak grows by 2.00 parameter bytes per
+parameter byte between the runs. In that scope, a contiguous real CPU scalar
+epsilon with real fields, synchronous reusable CUDA tiles, file-backed banks and
+point observations, the reservation charges four parameter copies: input,
+gradient, contribution and one margin. Diagonal or ADE parameters, complex
+fields, CPU tiles, host banks, asynchronous tiles and spectral objectives keep
+eight copies until they are measured. The report states
+`dense_parameter_multiplier`. Sampled RSS excludes the OS file cache and can
+miss transients shorter than the sampling interval.
 
 File I/O is synchronous and buffered by
 the OS. Its page cache is outside the host reservation, so this is not a cap on

@@ -102,7 +102,7 @@ def test_public_plan_handles_beyond_vram_shape_without_allocating_fields(tmp_pat
         slab_width=16,temporal_depth=2,checkpoints=0)
     result=estimate_streamed_memory(p,options)
     assert result['state_bytes']==58506346496
-    assert result['disk_reservation_bytes']==5*result['state_bytes']
+    assert result['disk_reservation_bytes']==3*result['state_bytes']
     assert not (tmp_path/'absent').exists()
 
 

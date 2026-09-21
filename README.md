@@ -36,6 +36,16 @@ work metric. In a small FP32 CUDA check, depth four reduced logical file I/O by
 45.16% versus depth two, with identical histories and a 7.30e-9 gradient difference.
 The deeper policy performs more field-update work. This is not a speed ranking.
 
+Streamed reservations now follow measured lifetimes. Distinct live file banks,
+counted by identity with cyclic garbage collection disabled, never exceed two in
+forward and `checkpoints + 3` in backward, so the disk reservation charges that
+bound instead of `checkpoints + 5`. A [host allocation ledger](docs/STREAMED_FDTD.md)
+on two RTX 3060 runs found no full-size host tensor in forward and exactly two in
+backward, so the measured scope reserves four parameter copies instead of eight.
+Injected allocation, read, write, transfer and reduction failures leave no scratch
+files while their tracebacks are alive. These are lifetime measurements, not
+speed or capacity results, and other physics paths keep the earlier reservations.
+
 Experimental [file-backed spatial execution](docs/validation/STATE_BACKING_REPORT.md)
 now extends the streamed adjoint beyond application-owned DRAM field banks.
 Supported gradients match the DRAM path exactly in the recorded tests, while

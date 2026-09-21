@@ -139,7 +139,7 @@ def test_complex_reservation_counts_field_bytes_and_rejects_small_budget(tmp_pat
     actual_bytes = sum(s.numel()*s.element_size() for s in host.state())
     assert record['state_bytes'] == actual_bytes
     assert record['disk_reservation_bytes'] == actual_bytes*record['state_bank_capacity']
-    assert record['state_bank_capacity'] == options.checkpoints+5
+    assert record['state_bank_capacity'] == options.checkpoints+3
     with pytest.raises(ValueError, match='disk budget'):
         _reservation(p, eps, replace(options, disk_budget_bytes=record['disk_reservation_bytes']-1))
     with pytest.raises(ValueError, match='host budget'):

@@ -96,17 +96,33 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     buffers = options.tile_buffers if options.tile_transfers == 'async' else 1
     initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values())+(2 if pole_count else 0))*item
     # The immutable all-zero host initial bank is represented by scalar views.
-    # Retain the remaining conservative headroom for replay and transpose banks.
     # At most C saved block states, one current adjoint and two evolving
     # primal banks coexist during replay. Transpose instead holds a primal,
-    # old adjoint and new adjoint. Reserve two additional lifetime margins.
+    # old adjoint and new adjoint, and forward holds two banks. Distinct live
+    # bank identities are counted in benchmarks/streamed_bank_lifetime.py and
+    # tests/test_streamed_bank_lifetime.py; they reach exactly this bound.
     # The initial all-zero bank is scalar-backed and charged separately.
-    state_bank_capacity = options.checkpoints+5
+    state_bank_capacity = options.checkpoints+3
     state_banks = state_bank_capacity*state
     disk = state_banks if options.state_storage == 'disk' else 0
     disk_io_workspace = (36+12*pole_count)*tile_cells*item if disk else 0
     parameter_count = sum(math.prod(s) for s in parameter_shapes) if parameter_shapes is not None else epsilon.numel()
-    host = (0 if disk else state_banks)+initial_storage+8*parameter_count*material_item+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
+    # Host ledger (benchmarks/streamed_host_ledger.py, docs/validation/
+    # streamed_host_ledger_3060*.json): with a contiguous real CPU scalar epsilon,
+    # real fields, synchronous reusable CUDA tiles, file-backed banks and point
+    # observations, forward allocates no full-size host tensor and backward adds
+    # exactly two, the accumulated gradient and one block contribution, to the
+    # caller's input. Reserve four there: input, gradient, contribution and one
+    # margin for accumulation temporaries. Every other path keeps eight. The
+    # metadata estimate passes a meta tensor and must select the same figure.
+    measured_scope = (pole_count == 0 and parameter_shapes is None and spectral is None
+                      and epsilon.device.type in ('cpu', 'meta') and epsilon.is_contiguous()
+                      and epsilon.ndim == 3 and not epsilon.is_complex() and not region.complex_fields
+                      and torch.device(options.device).type == 'cuda' and options.state_storage == 'disk'
+                      and options.tile_transfers == 'sync' and options.reuse_tile_buffers)
+    parameter_multiplier = 4 if measured_scope else 8
+    dense_parameters = parameter_multiplier*parameter_count*material_item
+    host = (0 if disk else state_banks)+initial_storage+dense_parameters+history+buffers*(tile_workspace+2*tile_history)+disk_io_workspace+16*monitors
     gpu = buffers*(tile_workspace+tile_history)
     cuda=torch.device(options.device).type=='cuda'
     observer_layout=32*monitors+8 if cuda and monitors and not region.complex_fields else 0
@@ -132,6 +148,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     return dict(host_reservation_bytes=host, gpu_reservation_bytes=gpu,observation_index_bytes=16*monitors,
                 observer_layout_bytes=buffers*observer_layout,observer_preparation_bytes=buffers*observer_preparation,
                 state_bank_capacity=state_bank_capacity,
+                dense_parameter_multiplier=parameter_multiplier,dense_parameter_reservation_bytes=dense_parameters,
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,
                 host_initial_state_reservation_bytes=initial_storage,
                 state_bytes=state, halo_cells_per_side=depth, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*(18+6*pole_count)*local_slots*tile_cells*item,

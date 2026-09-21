@@ -103,12 +103,14 @@ can miss transient peaks and excludes OS file cache. Logical file traffic is
 not measured physical SSD traffic. Complete system-level all-tier accounting
 and useful-duration application throughput remain open.
 
-The reservation now charges `checkpoints + 5` complete field banks. Instrumented
-file-backed replay tests disable cyclic garbage collection and exercise repeated
-backward calls, multiple checkpoint counts and uneven temporal blocks. They
-observe at most two forward banks and `checkpoints + 3` backward banks. The
-reservation retains two additional banks of margin and separately charges
-tile, I/O, material and gradient workspaces.
+The reservation now charges `checkpoints + 3` complete field banks, the
+measured replay bound. Instrumented file-backed tests disable cyclic garbage
+collection, exercise repeated backward calls, multiple checkpoint counts and
+uneven temporal blocks, and count distinct live bank identities: at most two
+forward banks and `checkpoints + 3` backward banks, reached exactly when the
+block count allows full nesting ([record](validation/streamed_bank_lifetime.json)).
+Tile, I/O, material and gradient workspaces are charged separately. The
+`checkpoints + 5` figures quoted for the earlier runs below are historical.
 
 The admitted case reserves 292,531,732,480 disk bytes, 75,799,463,264 host bytes
 and 28,991,029,376 device bytes. The user selected the GPU PC's C drive. Its

@@ -1,5 +1,41 @@
 # Current acceptance record
 
+## Streamed file-bank lifetime and reservation, 21 September 2026
+
+Distinct live file-bank identities of the streamed adjoint were counted through
+weak references at every allocation with cyclic garbage collection disabled.
+Sixty nondispersive CPU cases over checkpoints 0/1/2/4, local checkpoints
+0/1/2 and five block layouts, plus ADE cases, hold at most two forward banks
+and `checkpoints + 3` backward banks. The bound is reached for every checkpoint
+count when the block count allows full nesting, and local checkpoints create
+no file banks. Injected allocation, slab write, transfer-wait, slab read and
+reduction failures in the forward phase and in a retained backward pass leave
+no scratch files while the exception traceback still references banks, and a
+later backward pass on the same graph reproduces the first gradient exactly.
+Asynchronous CUDA tiles drain after forward and backward failures, device
+allocation returns to its baseline, and a retry succeeds.
+
+On this evidence the disk bank reservation is `checkpoints + 3` states instead
+of `checkpoints + 5`. For the recorded 54.26 GiB FP32 state this lowers the
+checkpoint-one reservation from 325.6 to 217.1 GiB by calculation only. No
+large run was executed, the host dense-parameter reservation is unchanged, and
+concurrent backward passes of one graph remain outside a single budget.
+[Record](validation/streamed_bank_lifetime.json), [limits](STREAMED_FDTD.md).
+
+A host allocation ledger then counted every Python-level CPU tensor of at
+least half the parameter size by identity and sampled process RSS on two RTX
+3060 runs with the same tile size, 384 x 192 x 192 and 768 x 192 x 192 real
+FP32 cells, twenty steps, one checkpoint, file-backed banks and synchronous
+reusable CUDA tiles. Forward allocated no full-size host tensor. Backward held
+exactly two, the accumulated gradient and one block contribution. The RSS peak
+grew by 2.00 parameter bytes per parameter byte between the runs, and the
+tile-scaled remainder stayed below the separate tile and I/O reservations. The
+CUDA peak was 35% of the device reservation. In that measured scope the
+dense-parameter host reservation is four copies instead of eight; every other
+path keeps eight and the metadata estimate reports the multiplier it applied.
+[Records](validation/streamed_host_ledger_3060.json),
+[larger grid](validation/streamed_host_ledger_3060_768.json).
+
 ## Real FP32 state larger than physical VRAM, 21 September 2026
 
 Frozen revision `61326d2` completed 1152 x 1024 x 2048 cells, ten real-FP32

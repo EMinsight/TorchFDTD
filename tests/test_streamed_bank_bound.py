@@ -27,6 +27,6 @@ def test_file_bank_bound_without_cyclic_gc(tmp_path, steps, depth, checkpoints):
                 assert store['peak_logical_file_bytes'] <= bound*result.report['state_bytes']
                 assert store['closed'] and store['live_logical_file_bytes']==0
             assert not list(tmp_path.iterdir())
-        assert result.report['disk_reservation_bytes']==(checkpoints+5)*result.report['state_bytes']
+        assert result.report['disk_reservation_bytes']==(checkpoints+3)*result.report['state_bytes']
     finally:
         if was_enabled:gc.enable()
