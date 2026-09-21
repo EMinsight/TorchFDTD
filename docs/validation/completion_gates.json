@@ -736,7 +736,7 @@
             "docs/PHYSICS_VALIDATION.md"
           ],
           "planned_test_commands": [
-            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG301 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-01.xml"
+            "$env:TORCHFDTD_WRITE_RECORDS='1'; $env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG301 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-01.xml"
           ],
           "actual_test_commands": [
             "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG301 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-01.xml"
@@ -782,7 +782,7 @@
             "docs/validation/g3/G3-02r2.json"
           ],
           "planned_test_commands": [
-            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG302 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-02.xml"
+            "$env:TORCHFDTD_WRITE_RECORDS='1'; $env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG302 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-02.xml"
           ],
           "actual_test_commands": [
             "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG302 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-02.xml"
@@ -824,7 +824,7 @@
             "docs/PHYSICS_VALIDATION.md"
           ],
           "planned_test_commands": [
-            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG303 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-03.xml"
+            "$env:TORCHFDTD_WRITE_RECORDS='1'; $env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG303 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-03.xml"
           ],
           "actual_test_commands": [
             "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG303 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-03.xml"
@@ -989,7 +989,7 @@
             "docs/PHYSICS_VALIDATION.md"
           ],
           "planned_test_commands": [
-            "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG307 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-07.xml"
+            "$env:TORCHFDTD_WRITE_RECORDS='1'; $env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG307 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-07.xml"
           ],
           "actual_test_commands": [
             "$env:TORCHFDTD_G3_FINE='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_a.py::TestG307 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-07.xml"
@@ -1782,7 +1782,7 @@
             "docs/validation/g5/G5-01.json"
           ],
           "planned_test_commands": [
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_paths_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-01.xml"
+            "$env:TORCHFDTD_WRITE_RECORDS='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_paths_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-01.xml"
           ],
           "actual_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_paths_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-01.xml"
@@ -1818,7 +1818,7 @@
             "docs/STREAMED_FDTD.md"
           ],
           "planned_test_commands": [
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_accounting_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-02.xml"
+            "$env:TORCHFDTD_WRITE_RECORDS='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_accounting_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-02.xml"
           ],
           "actual_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_accounting_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-02.xml"
@@ -1855,7 +1855,7 @@
             "docs/STREAMED_FDTD.md"
           ],
           "planned_test_commands": [
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_admission_peak_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-03.xml"
+            "$env:TORCHFDTD_WRITE_RECORDS='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_admission_peak_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-03.xml"
           ],
           "actual_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_admission_peak_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-03.xml"
@@ -1893,7 +1893,7 @@
             "docs/STREAMED_FDTD.md"
           ],
           "planned_test_commands": [
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_slab_memory_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-04.xml"
+            "$env:TORCHFDTD_WRITE_RECORDS='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_slab_memory_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-04.xml"
           ],
           "actual_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_design_slab_memory_g5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-04.xml"

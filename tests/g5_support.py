@@ -4,7 +4,8 @@ One public synthetic scatterer serves G5-01 to G5-04: a smooth sphere of
 permittivity 4 in air, a Gaussian point source and either two point probes or
 one x-normal spectral plane behind the sphere. Limits are read from the case
 files so the assertions and the evidence agree; records are written through to
-docs/validation/g5/<task>.json, one entry per measured instance.
+docs/validation/g5/<task>.json, one entry per measured instance (the committed
+file only with TORCHFDTD_WRITE_RECORDS=1, see tests/record_output.py).
 """
 import datetime
 import json
@@ -18,9 +19,9 @@ import torch
 
 from torchfdtd import (BoundaryFace, FieldMonitor, Monitor, Project, Region, Source, StreamedAdjointOptions,
                        smooth_sphere_epsilon)
+from record_output import record_path
 
 ROOT = Path(__file__).resolve().parents[1]
-RECORD_DIR = ROOT / 'docs' / 'validation' / 'g5'
 CASES = ROOT / 'docs' / 'validation' / 'cases'
 CUDA = torch.cuda.is_available()
 
@@ -131,10 +132,13 @@ class Record:
     """Write-through JSON record of one task: one entry per measured instance."""
     def __init__(self, task, case, module):
         self.task, self.case, self.module = task, case, module
-        self.path = RECORD_DIR / f'{task}.json'
+
+    @property
+    def path(self):
+        return record_path(f'docs/validation/g5/{self.task}.json')
 
     def add(self, key, **values):
-        RECORD_DIR.mkdir(parents=True, exist_ok=True)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.task in _RESET and self.path.is_file():
             data = json.loads(self.path.read_text(encoding='utf-8'))
         else:
