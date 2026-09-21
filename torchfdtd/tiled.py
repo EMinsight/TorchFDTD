@@ -241,7 +241,8 @@ def _tile_project(p, identifier, lateral, extended, full, center, size, sources,
         data.update(center=position, size=span, **extra)
         return cls.model_validate(data)
     region = r.model_dump()
-    region.update(size=tuple(size), memory_mode='resident', mesh_refinements=[], slice_position=0.)
+    # Tiles are resident; the explicit mode keeps the resident cell guard at plan time.
+    region.update(size=tuple(size), memory_mode='resident', execution_mode='resident', mesh_refinements=[], slice_position=0.)
     monitor_data = dict(record_fields=COMPONENTS, downsample=1, downsample_xyz=None, use_global_monitor=False,
                         spatial_interpolation='specified')
     return Project.model_validate(dict(
@@ -389,7 +390,7 @@ def _weights(plan, tile, blend):
 
 def _signature(plan):
     region = plan.project.region.model_dump(mode='json')
-    for key in ('memory_mode', 'backend', 'cuda_kernel', 'cuda_monitor_kernel'):
+    for key in ('memory_mode', 'execution_mode', 'tiling', 'backend', 'cuda_kernel', 'cuda_monitor_kernel'):
         region.pop(key, None)
     payload = dict(region=region, sources=[plan.project.resolved_source(s).model_dump(mode='json') for s in plan.project.sources],
                    normal=plan.normal, offset=plan.offset_um, tiles=[(t.id, t.core, t.extended) for t in plan.tiles])

@@ -5,7 +5,9 @@ resources the server reports. Resident scenes keep running through
 `Simulation`. Scenes resolved to a streamed mode run the `StreamedSimulation`
 slab operator forward only, with DRAM or file-backed field banks, point and
 plane monitors as tile observations and one field snapshot at the final step.
-Thresholds are documented in docs/EXECUTION_MODES.md.
+The explicit tiled mode runs the approximate overlapping-tile decomposition of
+`torchfdtd.tiled` forward only. Thresholds are documented in
+docs/EXECUTION_MODES.md.
 """
 from __future__ import annotations
 
@@ -15,6 +17,7 @@ import os
 from pathlib import Path
 import time
 from types import SimpleNamespace
+import warnings
 
 import numpy as np
 import torch
@@ -302,6 +305,14 @@ def resolve_execution(project, *, health, scratch, summary=None):
                   cells=cells, reason=None, error=None, warnings=[], scratch_directory=str(scratch),
                   policy=None, reservation=None, options=None)
     record['resident'] = resident = _resident_fit(project, summary, backend, health, cells)
+    if requested == 'tiled':
+        candidate = record['tiled'] = _tiled_candidate(project, backend, health)
+        if candidate['admitted']:
+            record.update(mode='tiled', reason=candidate['reason'])
+            record['warnings'].extend(candidate['notes'])
+        else:
+            record['error'] = 'Tiling rejected the scene. '+candidate['reason']
+        return record
     if r.memory_mode == 'budgeted' or requested == 'resident' or (requested == 'auto' and resident['fits']):
         record.update(mode='resident', reason=resident['reason'] if r.memory_mode != 'budgeted' else 'budgeted scenes use the adjoint API')
         if requested == 'resident' and not resident['fits']:
@@ -472,3 +483,163 @@ def run_streamed_job(project, resolution, *, progress=None, cancel=None):
     empty = np.zeros((0, 0, 0, 3), dtype=eps.dtype)
     return Result(p, stats, np.array([field]), np.array([completed]), eps_plane,
                   observations.signals[:completed], np.arange(1, completed+1)*r.time_step, empty, empty, frequency_results)
+
+
+def _tiled_plan(project):
+    """Plan the tiles from Region.tiling; returns the plan and the planner's warnings."""
+    from .tiled import plan_tiles
+    t = project.region.tiling
+    monitors = [m for m in project.monitors if m.enabled and m.kind == 'field']
+    normal = monitors[0].normal if len(monitors) == 1 else None
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter('always')
+        plan = plan_tiles(project, t.size_um, t.overlap_um, normal=normal, max_angle_deg=t.max_angle_deg)
+    return plan, [str(w.message) for w in caught]
+
+
+def _propagation_pad(plan, distance_um):
+    """Zero padding so that rays at the planned angle stay inside the padded window."""
+    angle = plan.project.region.tiling.max_angle_deg
+    span = min((hi-lo) for lo, hi in plan.interior)*plan.spacing_um
+    return int(min(8, max(2, math.ceil(2*distance_um*math.tan(math.radians(angle))/span)+1)))
+
+
+def _tiled_candidate(project, backend, health):
+    from .solver import estimate
+    result = dict(admitted=False, reason=None, notes=[], plan=None)
+    try:
+        plan, notes = _tiled_plan(project)
+        largest = max(plan.tiles, key=lambda tile: math.prod(tile.project.region.shape))
+        largest_bytes = int(estimate(largest.project)['estimated_memory_mb']*2**20)
+    except (ValueError, RuntimeError) as exc:
+        result['reason'] = str(exc)
+        return result
+    report = plan.report
+    t = project.region.tiling
+    suggestion = report['suggestion']
+    free = health.get('gpu_free_bytes') if backend == 'cuda' else health.get('host_available_bytes')
+    fraction = RESIDENT_DEVICE_FRACTION if backend == 'cuda' else RESIDENT_HOST_FRACTION
+    if free is not None and largest_bytes > int(free*fraction):
+        notes.append(f'The largest tile ({_gib(largest_bytes)}) exceeds {fraction:.0%} of the free memory ({_gib(free)}). Reduce the tile size.')
+    propagation = None
+    if t.propagation_um is not None:
+        propagation = dict(distance_um=t.propagation_um, index=project.region.background_index, pad=_propagation_pad(plan, t.propagation_um))
+    result.update(admitted=True, notes=notes,
+                  plan=dict(tiles=report['tiles'], counts=report['counts'], tile_um=report['tile_um'], overlap_um=report['overlap_um'],
+                            tile_cells=report['tile_cells'], overlap_cells=report['overlap_cells'], normal=plan.normal,
+                            lateral_axes=list(plan.lateral_axes), global_cells=report['global_cells'],
+                            largest_tile_cells=report['largest_tile_cells'], total_tile_cells=report['total_tile_cells'],
+                            largest_tile_estimate_bytes=largest_bytes, suggestion=suggestion,
+                            below_suggestion=bool(suggestion and report['overlap_um'] < suggestion['overlap_um']),
+                            propagation=propagation, monitor_id=plan.monitor_id))
+    counts = ' x '.join(str(c) for c in report['counts'])
+    parts = [f'{report["tiles"]} tiles ({counts}) of {report["tile_um"]:g} um with {report["overlap_um"]:g} um overlap',
+             f'largest tile {report["largest_tile_cells"]:,} cells, {_gib(largest_bytes)} resident',
+             f'{report["total_tile_cells"]/max(1, report["global_cells"]):.2f} x the device cells']
+    if suggestion:
+        parts.append(f'suggested overlap {suggestion["overlap_um"]:.3g} um')
+    if propagation:
+        parts.append(f'focal plane at {propagation["distance_um"]:g} um (pad {propagation["pad"]})')
+    result['reason'] = ' · '.join(parts)
+    return result
+
+
+def _stitched_record(stitched, monitor, dimension, **extra):
+    """Native plane record (as FrequencyPlane.result) of a stitched or propagated plane."""
+    from .adjoint_planes import COMPONENTS
+    from .field_monitors import plane_result
+    plane = stitched.as_plane()
+    plan = dict(points_um=plane.points_um.numpy(), weights=plane.weights.numpy(), shape=tuple(plane.shape),
+                normal='xyz'.index(stitched.normal))
+    record = plane_result(monitor, plan, stitched.frequency_hz.numpy(), COMPONENTS, plane.fields.numpy(), dimension)
+    record.update(run_signature=stitched.run_signature, **extra)
+    return record
+
+
+def _finite(value):
+    return value if isinstance(value, (int, float)) and math.isfinite(value) else None
+
+
+def _relative(values):
+    peak = float(np.max(values)) if values.size else 0.
+    return values/peak if peak > 0 else values
+
+
+def run_tiled_job(project, resolution, *, progress=None, cancel=None):
+    """Forward-only overlapping-tile execution of a browser job; returns a solver Result."""
+    from .tiled import propagate_plane, run_tiled
+    from .solver import Result, estimate
+    started = time.perf_counter()
+    p = Project.model_validate(project.model_dump())
+    r = p.region
+    plan, notes = _tiled_plan(p)
+    stats = estimate(p)
+    stats['warnings'].extend(notes)
+    monitor = p.resolved_monitor(next(m for m in p.monitors if m.id == plan.monitor_id))
+    tiles, steps = len(plan.tiles), r.steps
+    done, last_step = 0, None
+    compute_start = time.perf_counter()
+
+    def tile_progress(data):
+        # Simulation.run reports increasing steps within one tile; a step that
+        # does not increase means the next tile has started.
+        nonlocal done, last_step
+        if last_step is not None and data['step'] <= last_step:
+            done += 1
+        last_step = data['step']
+        if progress:
+            progress(dict(step=done*steps+data['step'], total=tiles*steps, frame=None, elapsed=time.perf_counter()-compute_start,
+                          tile=done+1, tiles=tiles, mode='tiled'))
+    stitched = run_tiled(p, plan, backend=resolution['backend'], executor='sequential',
+                         options=dict(progress=tile_progress, cancel=cancel))
+    cancelled = cancel is not None and cancel.is_set()
+    seconds = time.perf_counter()-compute_start
+    records, frames, labels = [], [], []
+    propagation = resolution['tiled']['plan']['propagation']
+    if not cancelled:
+        records.append(_stitched_record(stitched, monitor, r.dimension, tiled=dict(plane='stitched output plane', blend=stitched.blend)))
+        # DFT values are reduced field x seconds, far below the viewer's floor: show each map relative to its peak.
+        frames.append(_relative(stitched.intensity()[0].numpy()))
+        labels.append(dict(label=f'stitched |E|^2 / peak at {float(stitched.frequency_hz[0])*1e-12:.4g} THz', plane='stitched'))
+        if propagation:
+            focal = propagate_plane(stitched, propagation['distance_um'], propagation['index'], pad=propagation['pad'])
+            focal_monitor = monitor.model_copy(update=dict(id=monitor.id+'-focal', name=f'{monitor.name} focal plane +{propagation["distance_um"]:g} um'))
+            records.append(_stitched_record(focal, focal_monitor, r.dimension,
+                                            tiled=dict(plane='angular-spectrum focal plane', **propagation)))
+            frames.append(_relative(focal.intensity()[0].numpy()))
+            labels.append(dict(label=f'focal plane |E|^2 / peak at {propagation["distance_um"]:g} um', plane='focal'))
+    u_span = float(stitched.u_um[-1]-stitched.u_um[0])+stitched.spacing_um[0]
+    v_span = float(stitched.v_um[-1]-stitched.v_um[0])+stitched.spacing_um[1] if len(stitched.v_um) > 1 else float(r.size[2])
+    for label in labels:
+        label['span_um'] = [u_span, v_span]
+        label['axes'] = list(stitched.axes)
+    report = dict(stitched.report)
+    # The executor record echoes Simulation.run's keyword arguments; keep the JSON-compatible ones.
+    report['execution'] = {**report['execution'], 'options': {k: v for k, v in report['execution'].get('options', {}).items()
+                                                              if isinstance(v, (int, float, str, bool)) or v is None}}
+    report['pairs'] = [dict(q, mismatch=_finite(q['mismatch']), mismatch_center=_finite(q['mismatch_center'])) for q in report['pairs']]
+    for key in ('max_mismatch', 'mean_mismatch', 'max_mismatch_center', 'mean_mismatch_center'):
+        report[key] = _finite(report.get(key))
+    peak = float(max((float(np.sqrt(stitched.intensity()[0].max())) for _ in frames[:1]), default=0.))
+    tile_cells = plan.report['total_tile_cells']
+    stats.update(backend=resolution['backend'], precision=r.precision, gpu=resolution.get('gpu'),
+                 cuda_graph=False, cuda_graph_steps=0, cuda_graph_replays=0,
+                 cuda_kernel=r.cuda_kernel if resolution['backend'] == 'cuda' else None, cuda_monitor_kernel=None,
+                 steps=steps if not cancelled else 0, requested_steps=steps, cancelled=cancelled,
+                 termination_reason='cancelled' if cancelled else 'max_steps', auto_shutoff=False, diagnostics=[],
+                 diagnostic_seconds=0., diagnostic_backend=None, source_end_s=None, seconds=seconds,
+                 setup_seconds=compute_start-started, mcells_per_second=tile_cells*steps/max(seconds, 1e-9)/1e6,
+                 field_peak=peak, field_peak_scope='stitched and focal plane |E|', slice_index=None, slice_position=None,
+                 complex_fields=False, complex_display=r.complex_display, material_update='resident tiles',
+                 dispersive_samples=0, material_sampling=r.material_sampling,
+                 epsilon_definition='instantaneous relative permittivity', boundaries=r.boundaries.model_dump(),
+                 bloch_phase=r.bloch_phase, units='geometry: um; time: s; E/H: reduced fields',
+                 engine='TorchFDTD resident tiles with near-field stitching (approximate)',
+                 execution=dict(mode='tiled', plan=resolution['tiled']['plan'], report=report, frames=labels,
+                                indicator=dict(max_mismatch=report['max_mismatch'], max_mismatch_center=report['max_mismatch_center'],
+                                               mean_mismatch=report['mean_mismatch'], mean_mismatch_center=report['mean_mismatch_center'],
+                                               explanation='Relative L2 disagreement of neighbouring tiles inside their shared overlap: the error indicator of an approximate method, not the error against the whole device.'),
+                                propagation=propagation, full_fields_saved=False))
+    empty = np.zeros((0, 0, 0, 3), dtype=np.float32)
+    frame_array = np.array(frames) if frames and len({f.shape for f in frames}) == 1 else np.zeros((0, 0, 0))
+    return Result(p, stats, frame_array, np.full(len(frames), steps), np.zeros((0, 0)), np.zeros((0, 0)), np.zeros(0), empty, empty, records)

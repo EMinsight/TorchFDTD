@@ -28,6 +28,20 @@ GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-
 
 Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations. The Lumerical rows are aggregate timings of earlier builds; no commercial data is redistributed.
 
+## Execution modes
+
+The workbench's FDTD panel has a **GPU** switch and a **Memory** selector; `/api/validate` reports the resolved mode before a run and the results panel reports what ran.
+
+| Mode | When | What it costs | Limits |
+|---|---|---|---|
+| GPU switch ([docs](docs/EXECUTION_MODES.md#gpu-switch)) | A CUDA device is reported; CuPy adds the fused kernels | Nothing beyond the device | Without CuPy the PyTorch kernels run and streamed tiles fall back to the CPU |
+| Resident ([docs](docs/EXECUTION_MODES.md#memory-modes)) | The estimate fits 75% of free VRAM (80% of RAM on CPU) and at most 8 million cells | The fastest path, live frames | The whole grid in one memory |
+| Streamed DRAM ([docs](docs/EXECUTION_MODES.md#how-auto-decides)) | The grid exceeds the device but the conservative reservation fits 80% of available RAM | Slab traffic every temporal block; 5.5 to 11 times the resident time in the records | Forward only, one final snapshot, no dispersive/TFSF/subpixel/PMC scenes |
+| Streamed disk ([docs](docs/EXECUTION_MODES.md#choosing-a-scratch-disk)) | The DRAM banks do not fit; scratch space is admitted up to 80% of the free volume | The same slabs through buffered file I/O; 1.9 to 2.4 times the DRAM time in the records | As above, plus a scratch directory to manage |
+| Tiled approximate ([docs](docs/TILED_STITCHING.md)) | A planar device fits no tier at all | Overlapping resident tiles: about 2.5 times the device cells at 1.5 um overlap, longer than the whole device would take | Exact only for an empty region or when every tile holds every scatterer; near-field error of 5 to 12% in the records, read the mismatch indicator; forward only in the browser |
+
+**Large devices.** Auto keeps a scene resident when it fits, then streams it through DRAM or disk: the streamed X-slab engine stitches its halos exactly, step by step, so a scene that fits either tier gives the resident answer. Tiling is for a device that fits no tier. It is an approximate method: in the recorded 3D pillar array the stitched near field differs from the whole device by 12% at 0.25 um overlap and 5.7% at 2 um, with a floor of about 5% two to three micrometres from the cuts, and the focal intensity by 1 to 2%. The neighbour mismatch inside the shared overlap is the indicator the workbench shows; it bounds the error (two to three times the stitched error in the record) but does not calibrate it. The tiled adjoint remains a Python API.
+
 ## Compared with FDTDX
 
 Ahead: browser CAD, FSP interoperability, same-GPU structure batches, beyond-VRAM streaming with restart, GDS export and browser import, shape derivatives on top of density parameterization.

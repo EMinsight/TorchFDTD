@@ -136,6 +136,14 @@ class RunControl(Model):
     field_limit: float | None = Field(default=None, gt=0)
 
 
+class Tiling(Model):
+    """Workbench settings for the approximate overlapping-tile mode (docs/TILED_STITCHING.md)."""
+    size_um: float = Field(default=20, gt=0)
+    overlap_um: float = Field(default=2, gt=0)
+    max_angle_deg: float = Field(default=45, ge=0, lt=90)
+    propagation_um: float | None = Field(default=None, ge=0)
+
+
 class Region(Model):
     def __eq__(self,other):
         if not isinstance(other,Region):return NotImplemented
@@ -173,7 +181,8 @@ class Region(Model):
     memory_mode: Literal['resident', 'streamed', 'budgeted'] = 'resident'
     # Browser execution selection. 'auto' lets the server choose resident or
     # streamed host/disk execution from the live resources; see docs/EXECUTION_MODES.md.
-    execution_mode: Literal['auto', 'resident', 'streamed_host', 'streamed_disk'] = 'auto'
+    execution_mode: Literal['auto', 'resident', 'streamed_host', 'streamed_disk', 'tiled'] = 'auto'
+    tiling: Tiling = Field(default_factory=Tiling)
     cuda_kernel: Literal['torch', 'fused'] = 'torch'
     cuda_monitor_kernel: Literal['torch', 'fused'] = 'torch'
     precision: Literal['float32', 'float64'] = 'float32'

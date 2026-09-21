@@ -17,7 +17,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .models import Project, Material, demo_project
 from .solver import Simulation, estimate, hardware
-from .execution_modes import execution_resources, resolve_execution, run_streamed_job, scratch_directory
+from .execution_modes import execution_resources, resolve_execution, run_streamed_job, run_tiled_job, scratch_directory
 from .material_fit import OpticalDataRequest, MaterialFitRequest, fit_material, material_fit_report
 from .optical_data import OpticalData
 
@@ -154,6 +154,9 @@ def create_app(result_dir=None):
                 raise ValueError(execution['error'])
             if execution['mode'] == 'resident':
                 result = Simulation(project).run(progress=update, cancel=job['cancel'])
+            elif execution['mode'] == 'tiled':
+                result = run_tiled_job(project, execution, progress=update, cancel=job['cancel'])
+                job['execution'] = {**execution, 'report': result.summary['execution']['report'], 'indicator': result.summary['execution']['indicator']}
             else:
                 result = run_streamed_job(project, execution, progress=update, cancel=job['cancel'])
                 job['execution'] = {**execution, 'report': result.summary['execution']['report']}

@@ -218,3 +218,76 @@ def test_large_auto_scene_validates_and_resolves_streamed(tmp_path):
         p.region.execution_mode = 'resident'
         assert client.post('/api/validate', json=p.model_dump()).status_code == 422
     app.state.pool.shutdown()
+
+
+def _sparse_row(**overrides):
+    """The 2D sparse pillar row of the tiling record: two 3 um tiles at 2 um overlap stitch it exactly."""
+    from test_tiled import pillar_row
+    p = pillar_row(period=1.25, count=4, half=(.1, .15), seed=5)
+    p.region.execution_mode = 'tiled'
+    p.region.tiling = p.region.tiling.model_copy(update={**dict(size_um=3., overlap_um=2., propagation_um=10.), **overrides})
+    return Project.model_validate(p.model_dump())
+
+
+def test_tiled_browser_job_matches_the_whole_device_plane(tmp_path):
+    app = create_app(tmp_path)
+    with TestClient(app) as client:
+        p = _sparse_row()
+        validated = client.post('/api/validate', json=p.model_dump())
+        assert validated.status_code == 200
+        execution = validated.json()['execution']
+        assert execution['mode'] == 'tiled' and execution['requested'] == 'tiled'
+        plan = execution['tiled']['plan']
+        assert plan['tiles'] == 2 and plan['overlap_um'] == pytest.approx(2.) and plan['propagation']['distance_um'] == 10.
+        assert plan['suggestion']['overlap_um'] > 0 and not plan['below_suggestion']
+        whole = Project.model_validate(p.model_dump())
+        whole.region.execution_mode = 'resident'
+        reference = client.post('/api/jobs', json=whole.model_dump()).json()['id']
+        key = client.post('/api/jobs', json=p.model_dump()).json()['id']
+        assert _finished(client, reference)['status'] == 'completed'
+        job = _finished(client, key)
+        assert job['status'] == 'completed', job.get('error')
+        assert job['execution']['mode'] == 'tiled' and job['summary']['engine'].startswith('TorchFDTD resident tiles')
+        report = job['execution']['report']
+        assert len(report['pairs']) == 1 and set(report['pairs'][0]) >= {'tiles', 'axis', 'mismatch', 'mismatch_center', 'band_um'}
+        indicator = job['execution']['indicator']
+        # The record: this row stitches to machine precision once both tiles hold all four pillars.
+        assert 0 <= indicator['max_mismatch_center'] < 1e-3 and 0 <= indicator['max_mismatch'] < 1e-3
+        assert 'approximate' in indicator['explanation']
+        ids = [m['id'] for m in job['flux_monitors']]
+        assert ids == ['out', 'out-focal'] and job['monitors'] == []
+        stitched = client.get(f'/api/jobs/{key}/field-monitors/out', params=dict(component='Ex')).json()
+        direct = client.get(f'/api/jobs/{reference}/field-monitors/out', params=dict(component='Ex')).json()
+        assert stitched['shape'] == direct['shape']
+        a, b = np.array(stitched['real'])+1j*np.array(stitched['imag']), np.array(direct['real'])+1j*np.array(direct['imag'])
+        assert np.linalg.norm(a-b)/np.linalg.norm(b) < 1e-3
+        flux_tiled = [m for m in job['flux_monitors'] if m['id'] == 'out'][0]['flux']
+        flux_whole = _finished(client, reference)['flux_monitors'][0]['flux']
+        np.testing.assert_allclose(flux_tiled, flux_whole, rtol=1e-3)
+        focal = client.get(f'/api/jobs/{key}/field-monitors/out-focal', params=dict(component='Ex')).json()
+        assert focal['shape'] == stitched['shape'] and np.max(np.abs(focal['magnitude'])) > 0
+        fields = client.get(f'/api/jobs/{key}/fields').json()
+        assert len(fields['frames']) == 2 and job['summary']['execution']['frames'][1]['plane'] == 'focal'
+        assert 'wavelength_um,signed_flux' in client.get(f'/api/jobs/{key}/flux.csv').text
+        assert client.get(f'/api/jobs/{key}/download').content[:2] == b'PK'
+    app.state.pool.shutdown()
+
+
+def test_tiled_mode_reports_the_planner_rejection(tmp_path):
+    p = _sparse_row()
+    q = Project.model_validate(p.model_dump())
+    q.sources[0] = Source(kind='point', center=(0, -.85, 0), component='Ex', wavelength=1.55)
+    q = Project.model_validate(q.model_dump())
+    record = resolve_execution(q, health=CPU_RECORD, scratch=tmp_path, summary=estimate(q))
+    assert record['mode'] is None and 'Tiling rejected the scene' in record['error']
+    assert 'point, one-way and TFSF sources are not partitioned' in record['error']
+    below = _sparse_row(overlap_um=.25)
+    record = resolve_execution(below, health=CPU_RECORD, scratch=tmp_path, summary=estimate(below))
+    assert record['mode'] == 'tiled' and record['tiled']['plan']['below_suggestion']
+    assert any('below the suggested' in w for w in record['warnings'])
+    app = create_app(tmp_path)
+    with TestClient(app) as client:
+        key = client.post('/api/jobs', json=q.model_dump()).json()['id']
+        job = _finished(client, key)
+        assert job['status'] == 'failed' and 'Tiling rejected the scene' in job['error']
+    app.state.pool.shutdown()

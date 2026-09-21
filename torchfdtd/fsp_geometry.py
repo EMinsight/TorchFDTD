@@ -111,7 +111,7 @@ def _write_fsp(document,project,*,settings):
         from .fsp_settings import plan_settings, verify_settings
         settings_patches,settings_native_only,instruments=plan_settings(document,base,project,conversion)
         native_only.extend(settings_native_only)
-    allowed_region={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','precision','snapshot_interval',
+    allowed_region={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','precision','snapshot_interval',
                     'field','slice_axis','slice_position','complex_display'}
     region_values=project.region.model_dump()
     for key,before in base.region.model_dump().items():

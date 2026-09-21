@@ -40,6 +40,7 @@ for `auto` on a CUDA host, and off for `cpu`.
 | Resident (GPU or CPU memory) | The whole grid lives in device memory (GPU) or RAM (CPU). Limited to 8,000,000 cells. |
 | Streamed through host memory (DRAM) | Global E/H/CPML banks stay in RAM; extended x slabs move to the compute device one temporal block at a time. |
 | Streamed through disk | Same slabs, but the global banks are scratch files. Needs a scratch disk. |
+| Tiled (approximate, large devices) | Overlapping resident tiles of a planar device with near-field stitching. Never chosen by Auto; see below. |
 
 `Region.memory_mode="streamed"` (the Python opt-in) is treated as a streamed
 request in the workbench. A `Resident` request with more than 8,000,000 cells is
@@ -144,6 +145,63 @@ server admits banks only up to 80% of the free space at validation time, and
 other programs can consume that space later. Each job creates one private
 `torchfdtd-state-*` directory and removes it when the job finishes, fails or is
 cancelled. The banks are scratch, not a restart journal.
+
+## Tiled (approximate, large devices)
+
+The fifth Memory entry runs the [overlapping-tile decomposition](TILED_STITCHING.md)
+forward only. It is not an exact method and Auto never selects it: use it for a
+planar device that fits no memory tier, and read the indicator.
+
+The panel that appears holds `Region.tiling`:
+
+| Control | Field | Meaning |
+| --- | --- | --- |
+| tile size | `tiling.size_um` | Core of each tile along every lateral axis; `round(size / mesh)` cells |
+| tile overlap | `tiling.overlap_um` | Margin on every lateral side; `ceil(overlap / mesh)` cells |
+| max diffraction angle | `tiling.max_angle_deg` | Steepest ray leaving the device, default 45 degrees, for the suggestion |
+| suggested overlap | read-only | `suggest_overlap`: output-plane distance x tan(angle) plus the tile absorber, from the farthest device point, the first source's wavelength and the CPML thickness |
+| propagate to a focal plane / distance | `tiling.propagation_um` | Optional angular-spectrum propagation of the stitched plane by that distance in the background medium |
+
+The scene contract is the planner's: a uniform mesh, CPML on the lateral and
+normal faces, soft `plane` sheet sources normal to the output plane that span
+the whole non-PML lateral extent (tick **Extend sheet through PML** on the
+sheet, which makes the empty region stitch exactly) and exactly one enabled
+frequency-plane monitor, the output plane, with no enabled point monitors.
+Point, one-way and TFSF sources, Bloch phases and graded meshes are rejected
+with the planner's message in the status line before anything runs. Dispersive
+materials are not rejected by the planner; the resident tiles run them.
+
+The status line shows the tile count and layout, the largest tile's cells and
+resident estimate, the total tile cells relative to the device, the
+suggestion, the focal-plane settings and a warning when the overlap is below
+the suggestion or the largest tile exceeds the resident margin.
+
+The job runs `run_tiled(project, plan, executor='sequential')`: one resident
+`Simulation.run` per tile, CPU or GPU as the switch says, with progress and
+Stop per tile. Its outputs are
+
+- the stitched output plane as a frequency-plane record under the monitor's id
+  (all six components, Poynting density and flux, `flux.csv`, the
+  field-monitor endpoint, normalization against another tiled run of the same
+  plan), the same outputs a plane monitor of the whole device gives;
+- the per-pair mismatch table (`mismatch` over the full shared band,
+  `mismatch_center` over its central half) with `max_mismatch_center` in the
+  results panel, the error indicator of an approximate method: it bounds the
+  stitched error, at two to three times that error in the record, but does not
+  calibrate it;
+- with a distance, the propagated plane as a second record under
+  `<monitor id>-focal`, zero padded so that rays at the entered angle stay in
+  the window (`pad` between 2 and 8);
+- the field visualizer shows |E|^2 of the stitched plane and, when present,
+  the focal plane at the first frequency, each relative to its own peak (the
+  DFT values themselves are reduced field x seconds).
+
+Costs from the record: with 1.5 um overlaps the tiles of the 3D pillar array
+simulate about 2.5 times the cells of the whole device and take longer than the
+whole device would; the near-field error falls from 12% at 0.25 um overlap to
+5.7% at 2 um with a floor of about 5% away from the cuts, and the focal
+intensity error from 4.8% to 1 to 2%. The tiled adjoint is Python only
+(`TiledPlaneSimulation`); the browser runs no gradients.
 
 ## Limits of the browser streamed path
 

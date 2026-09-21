@@ -270,7 +270,7 @@ def run_signature(p: Project, steps):
     are excluded, so resident and streamed runs of one scene share a signature."""
     import hashlib
     r = p.region
-    config = dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
+    config = dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
                   sources=[p.resolved_source(s).model_dump() for s in p.sources], steps=steps,
                   nodes=[a.tolist() for a in r.mesh_nodes])
     return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
