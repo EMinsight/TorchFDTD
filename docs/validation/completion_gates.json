@@ -951,7 +951,7 @@
           "specification": "Bloch grating·회절과 독립 RCWA",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "FAILED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "tests/test_physics_g3_b.py",
@@ -962,27 +962,33 @@
             "docs/validation/cases/G3-08_bloch_grating_rcwa.json",
             "docs/validation/g3/G3-08_torcwa_reference.json",
             "docs/validation/g3/G3-08.json",
-            "docs/PHYSICS_VALIDATION.md"
+            "docs/PHYSICS_VALIDATION.md",
+            "tests/test_physics_g3_b_r2.py",
+            "docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json",
+            "docs/validation/g3/r2/G3-08r2.json"
           ],
           "planned_test_commands": [
-            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml"
+            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml",
+            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3/r2; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py tests/test_physics_g3_b_r2.py -k \"g3_08 and not g3_08_grating_cuda_layer_a\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08r2.xml"
           ],
           "actual_test_commands": [
-            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml"
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml",
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3/r2 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py tests/test_physics_g3_b_r2.py -k \"g3_08 and not g3_08_grating_cuda_layer_a\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08r2.xml"
           ],
           "required_tests": [
             "tests/test_physics_g3_b.py::test_g3_08_torcwa_reference_is_converged",
             "tests/test_physics_g3_b.py::test_g3_08_empty_cell",
             "tests/test_physics_g3_b.py::test_g3_08_grating_orders",
-            "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a",
+            "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a",
             "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls"
           ],
           "evidence": [
-            "20260921T181948Z-g3-08-6ccad85a"
+            "20260921T181948Z-g3-08-6ccad85a",
+            "20260921T192159Z-g3-08-12eb742b"
           ],
           "blocker": null,
           "scope_change_approval": null,
-          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-08_bloch_grating_rcwa.json. The record docs/validation/g3/G3-08.json is written by the full run."
+          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-08_bloch_grating_rcwa.json. The record docs/validation/g3/G3-08.json is written by the full run. Revision 2 (docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json) restates only the layer-A tolerance as the program pair rtol 1e-4, atol 1e-6 after run 20260921T181948Z-g3-08-6ccad85a failed one layer-A instance; its layer-A test lives in tests/test_physics_g3_b_r2.py and its records under docs/validation/g3/r2."
         },
         {
           "id": "G3-09",

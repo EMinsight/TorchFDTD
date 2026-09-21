@@ -720,3 +720,42 @@ evidence commands above with `-5880` in the JUnit names, record each with
 `scripts/record_gate_evidence.py --task G4-0X ... --scope "... RTX 5880 Ada ..."`,
 and run `python scripts/run_suite.py gpu-nightly --junitxml=...` there once.
 Then re-record G0-04 and G0-05 and continue with G5-01.
+
+---
+
+### 2026-09-22 G3-08 revision 2 and G3-05 limitation, branch g3-fixtures-b on top of ff72020
+
+**Problem or goal.** Follow-up requested after the merge 73203d2: (1) a
+separately declared revision-2 case for G3-08 whose only change is the layer-A
+tolerance stated as the program pair rtol 1e-4 and atol 1e-6, recorded again
+with the first case and its FAILED run kept; (2) decide whether the subpixel
+interface can treat the G3-05 Drude sphere and, if not, state the limitation.
+
+**Changed files (why).**
+- `docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json` (75f781d): the revision-2 case; fixture, observables and physics limits are identical to `G3-08_bloch_grating_rcwa.json` (checked by loading both), the layer-A block carries the pair and an applicability note quoting the failing instance.
+- `tests/test_physics_g3_b_r2.py` (75f781d): `test_g3_08r2_grating_cuda_layer_a` (twelve instances, criterion abs(cuda - cpu) <= rtol abs(cpu) + atol) and `test_g3_05_subpixel_rejects_dispersive`. A new module keeps `tests/test_physics_g3_b.py` byte-identical, so the G3-04, G3-05 and G3-13 evidence stays valid; revision-2 records are written under `docs/validation/g3/r2` so the first record `docs/validation/g3/G3-08.json` is not rewritten.
+- `benchmarks/render_g3_b.py`, `docs/PHYSICS_VALIDATION.md` (75f781d, 6e4f71a, spacing fix after): the G3-08 section gains the revision-2 table and the re-run summary; the G3-05 section gains the limitation paragraph with the convergence sequence from the record and the rejection message from `docs/validation/g3/G3-05_subpixel.json`.
+- `docs/RELEASE_SCOPE.md` (75f781d): the Materials row of the WORKSTATION physics table lists subpixel interfaces on dispersive materials as rejected and carries the G3-05 known limitation.
+- `docs/validation/completion_gates.json`: G3-08 required tests point at the revision-2 layer-A test, code paths and planned command extended (75f781d); the recorder appended the revision-2 evidence and set VERIFIED (024249a). G3-05 was not touched and stays FAILED.
+
+**Commands run (same host as the previous entry; the GPU was shared).**
+
+```
+TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b_r2.py -k g3_05
+TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3/r2 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py tests/test_physics_g3_b_r2.py -k "g3_08 and not g3_08_grating_cuda_layer_a" --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08r2.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.render_g3_b
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G3-08 --command "<the command above>" --junit D:/TorchFDTD/.local/tmp/junit/G3-08r2.xml --exit-code 0 --fixture docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json --observed docs/validation/g3/r2/G3-08r2_observed.json --artifact docs/validation/g3/r2/G3-08.json --artifact docs/validation/g3/r2/G3-08r2.json --scope "..." --note "..."
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G3-08   (and G3-04, G3-05, G3-13)
+```
+
+**Measurements and pre-declared limits.**
+- G3-08 revision 2: all twelve layer-A instances pass the pair; the former failing instance TM 20 degrees 0.92 um has relative difference 1.15e-4 and sits 6.7e-7 inside rtol abs(cpu) + atol, the largest margin is 1.4e-5. The re-run of the twelve judged physics rows (subpixel, h = 0.005 um, 300 fs, CUDA FP32) gives efficiency errors at most 0.0031, dominant phase errors at most 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits; staircase and duration controls re-recorded. 28 passed, 0 failed, 0 skipped, 2638 s.
+- G3-05: the subpixel operator rejects dispersive materials at project validation ("Subpixel interfaces currently require lossless nondispersive materials. Choose staircase for dispersive materials.", from `torchfdtd/models.py` and `torchfdtd/subpixel_geometry.py`), so no subpixel run was possible. The rendered limitation states the sequence from the record: scattering 1658, 271, 138 percent (20 nm), 478, 69, 46 (35 nm), 85, 64, 45 (50 nm) and absorption 3682, 2506, 673; 1813, 559, 499; 309, 340, 345 percent at h = 0.02, 0.01, 0.005 um.
+
+**Passed / failed / skipped / not run.** Revision-2 run 28 passed; the fast run of the new module 1 passed (subpixel rejection) with the twelve layer-A instances skipped behind TORCHFDTD_G3_FULL. Not run: no G3-05 subpixel simulation (rejected by the package); G3-05 was not re-recorded.
+
+**Evidence paths and hashes.** Run 20260921T192159Z-g3-08-12eb742b (VERIFIED) at source commit 6e4f71a plus the spacing fix commit, fixture SHA-256 in its evidence.json; the first run 20260921T181948Z-g3-08-6ccad85a (FAILED) remains first in the task's evidence list. The judge now passes G3-04, G3-08 and G3-13 and fails G3-05.
+
+**Remaining defects, risks, external blockers.** G3-05 stays FAILED by design of the fixture; a conformal or subpixel treatment of dispersive interfaces does not exist in the package. The merged `scripts/render_physics_validation.py` on main imports `RENDERERS` from `benchmarks/render_g3_b.py`, so after merging this branch one run of that script renders the revision-2 table and the limitation paragraph; `docs/validation/g3/r2` and `G3-05_subpixel.json` are read by those functions.
+
+**Next first command and task id.** Merge, rerun `python scripts/render_physics_validation.py` on main, then continue with the remaining G3 tasks.
