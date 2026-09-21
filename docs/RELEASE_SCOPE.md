@@ -102,15 +102,15 @@ Rendered from [validation/completion_gates.json](validation/completion_gates.jso
 | G2 | 물리·격자·실행 계약 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 1 pass, 5 fail |
 | G3 | 독립 물리·gradient 검증 | WORKSTATION | 17 | 16 | 1 | 0 | 0 | 5 pass, 12 fail |
 | G4 | CUDA·CI·환경 검증 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 4 pass, 2 fail |
-| G5 | 메모리·재시작·장기 안정성 | WORKSTATION | 10 | 8 | 0 | 2 | 0 | 8 pass, 2 fail |
-| G6 | 사용자 물리·역설계 API | WORKSTATION | 8 | 8 | 0 | 0 | 0 | 8 pass, 0 fail |
+| G5 | 메모리·재시작·장기 안정성 | WORKSTATION | 10 | 8 | 0 | 2 | 0 | 7 pass, 3 fail |
+| G6 | 사용자 물리·역설계 API | WORKSTATION | 8 | 8 | 0 | 0 | 0 | 6 pass, 2 fail |
 | G7 | 대표 응용·동일 정확도 비용 | WORKSTATION | 5 | 0 | 0 | 5 | 0 | 0 pass, 5 fail |
 | G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 0 pass, 7 fail |
 | G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 4 | 0 | 3 | 0 | 1 pass, 6 fail |
 | H1 | 실제 단일 문제 multi-GPU | HPC | 6 | 0 | 0 | 1 | 5 | 0 pass, 6 fail |
 
-- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 35 of 77 required tasks pass the judge, 42 fail; NOT RELEASABLE.
-- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 35 of 83 required tasks pass the judge, 48 fail; NOT RELEASABLE.
+- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 32 of 77 required tasks pass the judge, 45 fail; NOT RELEASABLE.
+- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 32 of 83 required tasks pass the judge, 51 fail; NOT RELEASABLE.
 <!-- stage-status:end -->
 
 ## Scope changes

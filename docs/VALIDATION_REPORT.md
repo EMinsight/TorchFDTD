@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 35 | 42 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 35 | 48 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 32 | 45 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 32 | 51 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -56,13 +56,13 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G3-01 | 균일 매질 2D/3D 전파·위상·분산 | IMPLEMENTED | VERIFIED | `20260921T172232Z-g3-01-05fb5cda` | `ce5f049d4375` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/validation/cases/G3-01_*.json |
-| G3-02 | 유전체 slab normal/oblique TE/TM과 TMM | IMPLEMENTED | VERIFIED | `20260921T170604Z-g3-02-ef141f60` | `88c577519350` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/validation/cases/G3-02*.json |
-| G3-03 | Drude/Lorentz slab fit/ADE 오차 분리 | IMPLEMENTED | VERIFIED | `20260921T172237Z-g3-03-562cfaf5` | `ce5f049d4375` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/validation/cases/G3-03_*.json |
+| G3-01 | 균일 매질 2D/3D 전파·위상·분산 | IMPLEMENTED | VERIFIED | `20260921T172232Z-g3-01-05fb5cda` | `ce5f049d4375` | FAIL | STALE: test source changed since the run: tests/test_physics_g3_a.py |
+| G3-02 | 유전체 slab normal/oblique TE/TM과 TMM | IMPLEMENTED | VERIFIED | `20260921T170604Z-g3-02-ef141f60` | `88c577519350` | FAIL | STALE: test source changed since the run: tests/test_physics_g3_a.py |
+| G3-03 | Drude/Lorentz slab fit/ADE 오차 분리 | IMPLEMENTED | VERIFIED | `20260921T172237Z-g3-03-562cfaf5` | `ce5f049d4375` | FAIL | STALE: test source changed since the run: tests/test_physics_g3_a.py |
 | G3-04 | dielectric cylinder/sphere Mie 산란 | IMPLEMENTED | VERIFIED | `20260921T181942Z-g3-04-b95d2106` | `487de42640e4` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/validation/cases/G3-04_*.json, examples/tfsf_sphere.py |
 | G3-05 | 금속/분산 곡면 산란·흡수 수렴 | IMPLEMENTED | FAILED | `20260921T181951Z-g3-05-8fafa59e` | `487de42640e4` | FAIL | verification_state is FAILED |
 | G3-06 | PEC/PMC cavity·symmetry와 gradient mapping | IMPLEMENTED | VERIFIED | `20260921T185058Z-g3-06-8e377c95` | `5218de5b6b52` | PASS | scope change pending approval (6 declaration(s), scope_change_approval is null): docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/eigenmode_phase_advance/float32/atol = 3e-06 is looser than the loosest program atol 1e-06; and 5 more |
-| G3-07 | PML normal/oblique 반사·장시간 안정성 | IMPLEMENTED | VERIFIED | `20260921T172247Z-g3-07-fcf2441e` | `ce5f049d4375` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/validation/cases/G3-07_*.json |
+| G3-07 | PML normal/oblique 반사·장시간 안정성 | IMPLEMENTED | VERIFIED | `20260921T172247Z-g3-07-fcf2441e` | `ce5f049d4375` | FAIL | STALE: test source changed since the run: tests/test_physics_g3_a.py |
 | G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | VERIFIED | `20260921T192159Z-g3-08-12eb742b` | `4a5f5cd6d19d` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/validation/cases/G3-08*.json, docs/validation/g3/G3-08_torcwa_reference.json, benchmarks/g3_torcwa_grating.py |
 | G3-09 | mode neff·field·confinement·power oracle | IMPLEMENTED | VERIFIED | `20260921T164916Z-g3-09-a7e7b272` | `5c0172da60d2` | PASS | scope change pending approval (4 declaration(s), scope_change_approval is null): docs/validation/cases/G3-09_mode_solver_oracles.json acceptance/fiber_beta_relative_error_max/difference_from_common_criterion states a limit looser than the program threshold; and 3 more |
 | G3-10 | PIC S·수동성·상반성과 누락 방사 채널 | IMPLEMENTED | VERIFIED | `20260921T164946Z-g3-10-ea83b20f` | `5c0172da60d2` | PASS | scope change pending approval (2 declaration(s), scope_change_approval is null): docs/validation/cases/G3-10_pic_networks.json acceptance/material_vjp/y_branch/rtol = 0.001 is looser than the loosest program rtol 0.0001; and 1 more |
@@ -96,7 +96,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G5-05 | meaningful beyond-VRAM 사례 하나를 추가한다 | IN_PROGRESS | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G5-06 | 위 대규모 사례는 승인된 실행/디스크 쓰기 예산 안에서 수행한다 | IN_PROGRESS | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G5-07 | forward 중단, backward 중단, process kill, simulated ENOSPC/OOM, read/write fault, truncate/checksum 오류, CUDA transfer failure, cancellation을 주입한다 | IMPLEMENTED | VERIFIED | `20260921T204924Z-g5-07-b25fc657` | `5dfa656c5fff` | PASS | evidence matches the current checkout |
-| G5-08 | checkpoint에 solver와 필요한 auxiliary states, optimizer state, scheduler/projection state, RNG, effective source, configuration fingerprint를 보존한다 | IMPLEMENTED | VERIFIED | `20260921T203532Z-g5-08-bbf1867e` | `b61ad034a0ec` | PASS | evidence matches the current checkout |
+| G5-08 | checkpoint에 solver와 필요한 auxiliary states, optimizer state, scheduler/projection state, RNG, effective source, configuration fingerprint를 보존한다 | IMPLEMENTED | VERIFIED | `20260921T203532Z-g5-08-bbf1867e` | `b61ad034a0ec` | FAIL | STALE: test source changed since the run: tests/test_checkpoint_completeness.py |
 | G5-09 | journal은 run별 소유권과 동시 writer 잠금을 갖는다 | IMPLEMENTED | VERIFIED | `20260921T203815Z-g5-09-939acc1a` | `b61ad034a0ec` | PASS | evidence matches the current checkout |
 | G5-10 | 경량 fixture에서 1e5 steps, 반복 실행, 최소 100 optimizer updates 및 승인된 장시간 soak를 수행한다 | IMPLEMENTED | VERIFIED | `20260921T203823Z-g5-10-0fade0c0` | `b61ad034a0ec` | PASS | evidence matches the current checkout |
 
@@ -108,8 +108,8 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G6-02 | source의 실제 공간 분포·위상·편광·시간 파형·유효 bandwidth를 preview한다 | IMPLEMENTED | VERIFIED | `20260921T195548Z-g6-02-9b5a95d6` | `da70a70484c2` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G6-03 | reference를 포함한 R/T/A, 복소 S, phase/group delay, mode decomposition, diffraction, far-field/near-zone을 기존 결과와 통합한다 | IMPLEMENTED | VERIFIED | `20260921T195559Z-g6-03-b314c028` | `da70a70484c2` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G6-04 | 포트별 mode tracking, normalization, reference plane, forward/backward separation과 퇴화/약한 모드 진단을 제공한다 | IMPLEMENTED | VERIFIED | `20260921T195524Z-g6-04-cd77e84a` | `68d797bbb060` | PASS | scope change pending approval (2 declaration(s), scope_change_approval is null): docs/validation/cases/G6-04.json acceptance/tracked_neff_error_max/difference_from_common_criterion states a limit looser than the program threshold; and 1 more |
-| G6-05 | 기존 design/periodic/mode-network API를 재사용해 objective→parameterization→optimizer→history→resume→final evaluation의 최소 고수준 인터페이스를 통합한다 | IMPLEMENTED | VERIFIED | `20260921T195542Z-g6-05-9f485769` | `68d797bbb060` | PASS | evidence matches the current checkout |
-| G6-06 | density filter, projection, beta continuation, symmetry, mask, min linewidth/gap, fabrication perturbation, binary export를 실제 검사와 연결한다 | IMPLEMENTED | VERIFIED | `20260921T195559Z-g6-06-e9e7f257` | `68d797bbb060` | PASS | evidence matches the current checkout |
+| G6-05 | 기존 design/periodic/mode-network API를 재사용해 objective→parameterization→optimizer→history→resume→final evaluation의 최소 고수준 인터페이스를 통합한다 | IMPLEMENTED | VERIFIED | `20260921T195542Z-g6-05-9f485769` | `68d797bbb060` | FAIL | STALE: test source changed since the run: tests/test_design_workflow.py |
+| G6-06 | density filter, projection, beta continuation, symmetry, mask, min linewidth/gap, fabrication perturbation, binary export를 실제 검사와 연결한다 | IMPLEMENTED | VERIFIED | `20260921T195559Z-g6-06-e9e7f257` | `68d797bbb060` | FAIL | STALE: test source changed since the run: tests/test_design_workflow.py |
 | G6-07 | export된 binary/GDS 구조를 다시 import하여 독립 finer forward로 평가한다 | IMPLEMENTED | VERIFIED | `20260921T202810Z-g6-07-e5631996` | `cbe9d4d9fc6a` | PASS | run predates its commit: the tests started at 2026-09-22T04:56:18.896576+09:00 before commit cbe9d4d9fc6a was made |
 | G6-08 | low-intensity/near-zero reference/frequency cutoff/evanescent/backflow에서 NaN·음의 국소 flux·invalid phase를 임의 clipping으로 숨기지 않는다 | IMPLEMENTED | VERIFIED | `20260921T195609Z-g6-08-374a45a0` | `da70a70484c2` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 
@@ -176,9 +176,9 @@ Newest runs that match no platform record: none.
 
 ## Clean-install record
 
-Newest record `20260921T165132Z-b768cc74.json` (kind `clean_install_record`), taken at commit `b768cc74102e` on 2026-09-21T16:51:32+00:00 with 0 dirty packaging paths; all steps passed: yes.
+Newest record `20260921T222259Z-4120a653.json` (kind `clean_install_record`), taken at commit `4120a6530685` on 2026-09-21T22:22:59+00:00 with 0 dirty packaging paths; all steps passed: yes.
 
-Wheel `torchfdtd-0.14.0.dev0-py3-none-any.whl`, SHA-256 `0cc7b719bc14df32d16cf831b555686846e91732b59621ee7dfca08057316526`, 832,871 bytes, 144 entries, 137 package files; browser assets match the committed ones: yes; frontend assets current: yes.
+Wheel `torchfdtd-0.14.0.dev0-py3-none-any.whl`, SHA-256 `8c7df04a88a73fda38b50475fc106c13cdc92bfe19e43b87feeebfe66e721332`, 960,864 bytes, 159 entries, 152 package files; browser assets match the committed ones: yes; frontend assets current: yes.
 
 | Environment | Python | torch | cupy-cuda12x | numpy | torchfdtd | Packages |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -187,21 +187,21 @@ Wheel `torchfdtd-0.14.0.dev0-py3-none-any.whl`, SHA-256 `0cc7b719bc14df32d16cf83
 
 | Step | Status | Seconds |
 | --- | --- | --- |
-| build_wheel | passed | 14.92 |
-| cpu_venv_create | passed | 26.08 |
-| cpu_pip_install_torch | passed | 125.68 |
-| cpu_pip_install_wheel | passed | 76.65 |
-| cpu_package_list | passed | 1.21 |
-| cpu_import_run_save_load | passed | 13.96 |
-| cpu_server_index_assets_api | passed | 5.04 |
-| cpu_doctor | passed | 18.09 |
-| cuda_venv_create | passed | 25.43 |
-| cuda_pip_install_torch | passed | 173.29 |
-| cuda_pip_install_wheel_extras | passed | 137.58 |
-| cuda_package_list | passed | 4.76 |
-| cuda_fused_forward_run | passed | 68.95 |
-| cuda_doctor | passed | 69.26 |
-| readme_examples | passed | 64.82 |
+| build_wheel | passed | 12.52 |
+| cpu_venv_create | passed | 7.48 |
+| cpu_pip_install_torch | passed | 84.12 |
+| cpu_pip_install_wheel | passed | 53.9 |
+| cpu_package_list | passed | 1.04 |
+| cpu_import_run_save_load | passed | 10.82 |
+| cpu_server_index_assets_api | passed | 3.42 |
+| cpu_doctor | passed | 3.38 |
+| cuda_venv_create | passed | 7.05 |
+| cuda_pip_install_torch | passed | 241.96 |
+| cuda_pip_install_wheel_extras | passed | 60.25 |
+| cuda_package_list | passed | 0.92 |
+| cuda_fused_forward_run | passed | 17.25 |
+| cuda_doctor | passed | 4.47 |
+| readme_examples | passed | 15.76 |
 
 ## Suite policy
 
