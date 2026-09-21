@@ -193,6 +193,27 @@ def test_volume_budget_rejection_and_npz_chunks(tmp_path):
         propagate_volume(plane, distances, components=('Ex',), output=path)
 
 
+def test_float32_plane_coordinates_far_from_the_origin_count_as_uniform():
+    from torchfdtd.angular_spectrum import plane_grid
+    from torchfdtd import DifferentiablePlaneResult
+    # 0.4 um samples of a 120 um plane held in float32: the coordinate rounding
+    # near 60 um is about 4e-6 um, above the old 1e-6 x spacing tolerance.
+    axis = torch.arange(-59.8, 60., .4, dtype=torch.float64)
+    points = torch.stack(torch.meshgrid(axis, axis, torch.zeros(1, dtype=torch.float64), indexing='ij'), -1).reshape(-1, 3)
+    stored = points.to(torch.float32)
+    steps = stored.reshape(len(axis), len(axis), 3)[:, 0, 0].double().diff()
+    assert float((steps - .4).abs().max()) > 1e-6 * .4
+    plane = DifferentiablePlaneResult(torch.zeros((1, len(axis)**2, 6), dtype=torch.complex64), torch.tensor([2e14], dtype=torch.float64),
+                                      stored, torch.full((len(axis)**2,), .16e-12, dtype=torch.float32), (len(axis), len(axis), 1), 'z', 'sig', {})
+    grid = plane_grid(plane)
+    assert grid.spacing_um == pytest.approx((.4, .4), rel=1e-5) and grid.fields.shape == (1, len(axis), len(axis), 6)
+    uneven = stored.clone().reshape(len(axis), len(axis), 3)
+    uneven[::2, :, 0] += .01
+    uneven = uneven.reshape(-1, 3)
+    with pytest.raises(ValueError, match='uniformly'):
+        plane_grid(replace(plane, points_um=uneven))
+
+
 def test_small_metalens_fdtd_versus_asm_on_cpu():
     record = fdtd_comparison('2d', 'cpu', mesh=.1, aperture=4., focal=4., radii=[.06, .1, .14, .18, .22], empty=False,
                              distances_um=(.5, 1.5, 3., 4.5), extra_fs=30.)

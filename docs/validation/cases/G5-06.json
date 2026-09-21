@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-06",
+  "task": "G5-06",
+  "title": "Budget, VJP and measurement vocabulary of the propagated beyond-VRAM case of G5-05: the judged run on the RTX 3060 finishes within the declared wall and disk-write budgets, produces a propagated spectrum and a real dense VJP, and records memory and disk figures separately",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "fixture": {
+    "same_as": "docs/validation/cases/G5-05.json",
+    "driver": "benchmarks/beyond_vram_propagated.py",
+    "report": "benchmarks/report_beyond_vram_propagated.py renders docs/BEYOND_VRAM_PROPAGATED.md and the sanitized evidence record from the driver record and optionally the whole-machine counter CSV of scripts/sample_system_counters.ps1",
+    "budget_basis": "Judged run (rtx3060): the RTX 3060 wall-time model of the driver (refitted on the two streamed rehearsals of this case) predicts 5351 s for the forward, the VJP and two finite-difference forwards; four hours are declared, about 2.7 times the estimate, for a GPU shared with other agents. Optional run (rtx5880): the RTX 5880 model predicts 5501 s against the owner's three hours. Host banks write no state files; the only scratch writes are the .npy artifacts (about 0.1 GB on the RTX 3060, 0.3 GB on the RTX 5880) and the record.",
+    "scratch": "none for the state (host banks); artifacts next to the record (D:/TorchFDTD/.local/runs/g5-05 on the RTX 3060 machine)"
+  },
+  "seed": null,
+  "precision": "float32",
+  "backend": "cuda",
+  "reference_method": "Budgets are compared with the driver's own elapsed time and with psutil machine-wide disk counters over the phases; when the counter CSV is supplied, the integrated write bytes of the whole machine are judged as well. The VJP criteria are the gradient criteria of G5-05 (finite, nonzero, directional finite difference).",
+  "observables": [
+    {
+      "name": "elapsed_seconds",
+      "unit": "s",
+      "definition": "driver wall time from the first forward to the completed record, including the finite-difference forward"
+    },
+    {
+      "name": "machine_disk_write_bytes",
+      "unit": "bytes",
+      "definition": "psutil.disk_io_counters write bytes over each phase, summed over the forward, the backward and the finite-difference forward; whole machine"
+    },
+    {
+      "name": "integrated_write_bytes",
+      "unit": "bytes",
+      "definition": "rate times interval over the counter CSV when supplied"
+    },
+    {
+      "name": "peak_torch_allocated_bytes, peak_torch_reserved_bytes",
+      "unit": "bytes",
+      "definition": "Torch allocator peaks per phase"
+    },
+    {
+      "name": "peak_process_rss_bytes, peak_process_private_bytes",
+      "unit": "bytes",
+      "definition": "this process, sampled every half second"
+    },
+    {
+      "name": "peak_device_in_use_bytes",
+      "unit": "bytes",
+      "definition": "whole GPU, every process, from cudaMemGetInfo"
+    },
+    {
+      "name": "machine_disk_read_bytes",
+      "unit": "bytes",
+      "definition": "psutil machine-wide read bytes per phase"
+    },
+    {
+      "name": "system_counters",
+      "unit": "mixed",
+      "definition": "available, cache, standby and committed memory, disk read and write rates, CPU, from the whole-machine sampler when supplied"
+    }
+  ],
+  "acceptance": {
+    "budget": {
+      "rtx3060": {
+        "wall_seconds_max": 14400,
+        "disk_write_bytes_max": 2000000000000
+      },
+      "rtx5880": {
+        "wall_seconds_max": 10800,
+        "disk_write_bytes_max": 2000000000000
+      },
+      "rehearsal": {
+        "wall_seconds_max": 3600,
+        "disk_write_bytes_max": 100000000000
+      },
+      "justification": "Two terabytes of writes and, for the RTX 5880, three hours were set by the program owner; the RTX 3060 wall budget of four hours is declared here at about 2.7 times the fitted estimate of 1.49 h because the GPU is shared. Host banks write nothing. The rehearsal limits are generous bounds for a shared RTX 3060. The disk figure is machine-wide and includes other processes."
+    },
+    "vram": {
+      "rtx3060": {
+        "physical_vram_bytes_min": 12500000000
+      },
+      "rtx5880": {
+        "physical_vram_bytes_min": 51000000000
+      },
+      "live_state_must_exceed_vram": "state_bank_capacity x state_bytes plus dense_parameter_reservation_bytes of the streamed reservation must exceed the recorded physical VRAM",
+      "eh_over_vram": "reported and not judged: expected 0.21 on the RTX 3060 and 0.18 on the RTX 5880; see the statement in G5-05"
+    },
+    "vjp": {
+      "definition": "the dense epsilon gradient of the streamed backward must be finite with at least one nonzero entry, its design-slab norm positive, and its directional derivative must pass the finite-difference criteria of G5-05",
+      "no_convergence_claim": "a passing first-derivative check on one direction does not declare an optimized or converged design; the record states this"
+    },
+    "measurement_vocabulary": {
+      "required_per_phase": [
+        "peak_torch_allocated_bytes",
+        "peak_torch_reserved_bytes",
+        "peak_process_rss_bytes",
+        "peak_process_private_bytes",
+        "peak_device_in_use_bytes",
+        "machine_disk_read_bytes",
+        "machine_disk_write_bytes"
+      ],
+      "rule": "each figure is recorded for the forward and the backward separately and none are summed into a total memory figure; the whole-machine counters, when present, are reported beside them with their own scope text"
+    },
+    "completion": {
+      "driver_stage": "complete"
+    },
+    "source_of_limits": "fixture-specific budgets declared here"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_beyond_vram_propagated.py"
+    ],
+    "not_yet_covered": [
+      "the judged run itself (judged by benchmarks/report_beyond_vram_propagated.py --context rtx3060 after the run; test_judged_record_meets_g5_06 then reads docs/validation/beyond_vram_propagated_3060.json)",
+      "a physical-disk write measurement of the artifacts (the psutil counters are machine-wide and include other processes)"
+    ]
+  },
+  "notes": "Applicability: the rehearsal record exercises every criterion of this case in the rehearsal context on the local RTX 3060; the judged criteria (four-hour wall, two-terabyte writes, live state above the RTX 3060 physical VRAM) can only be judged on the RTX 3060 record of the 64 um instance, so G5-06 stays NOT_RUN until then; the RTX 5880 entries describe the optional larger run. The case was added in the commit following 73203d2 together with G5-05, its budget basis updated with G5-05's central-difference revision, and re-scoped to the RTX 3060 judged run on the owner's decision before any judged run."
+}

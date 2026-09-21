@@ -52,6 +52,7 @@ class SlabBlockOperator:
                            for _ in range(tile_buffers if tile_transfers == 'async' else 1)] if reuse_buffers else []
         self.workspace = self.workspaces[0] if self.workspaces else None
         self.bank_bytes_live = self.bank_bytes_peak = self.bank_bytes_created = self.banks_created = 0
+        self._observers = {}
 
     def bank_ledger(self):
         """Host field banks this operator created: live, peak and total bytes; zero for disk banks."""
@@ -348,11 +349,19 @@ class SlabBlockOperator:
                     selection = position if isinstance(loc[0], int) else slice(position, group[-1]+1)
                     image_wave = wave if phase is None else wave*phase[position]
                     local.sources[family].append(((selection, *loc[1:]), component, image_wave, value))
-        local.monitors, observer_ids = [], []
-        for m, (name, loc, component) in enumerate(host.monitors):
-            if lo <= loc[0] < hi or (loc[0] == n_x and owns_extra):
-                local.monitors.append((name, (loc[0]-lo+core.start, *loc[1:]), component))
-                observer_ids.append(m)
+        # A tile's observers depend only on its row range, so they are selected
+        # and prepared once per operator: a large plane holds millions of point
+        # observations and every tile visit used to scan all of them.
+        observer_key = (lo, hi, core.start, owns_extra)
+        observers = self._observers.get(observer_key)
+        if observers is None:
+            local.monitors, observer_ids = [], []
+            for m, (name, loc, component) in enumerate(host.monitors):
+                if lo <= loc[0] < hi or (loc[0] == n_x and owns_extra):
+                    local.monitors.append((name, (loc[0]-lo+core.start, *loc[1:]), component))
+                    observer_ids.append(m)
+        else:
+            local.monitors, observer_ids = observers[:2]
         payload = self._extra_payload(local, material, state, rows, phase, mapping, descriptor)
         # Pack small CPML/metric/source arrays with the fields to avoid one
         # blocking PCIe transaction for every individual boundary coefficient.
@@ -390,7 +399,11 @@ class SlabBlockOperator:
         self._restore_payload(local, views)
         local.kernel = None
         local.gradient_rows = rows_take
-        local.prepare_observations()
+        if observers is None:
+            local.prepare_observations()
+            self._observers[observer_key] = (local.monitors, observer_ids, local.observation_maps, local.face_observation_maps)
+        else:
+            local.observation_maps, local.face_observation_maps = observers[2:]
         self._prepare_kernel(local)
         return local, mapping, observer_ids
 
