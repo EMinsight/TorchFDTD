@@ -22,6 +22,7 @@ import argparse
 import importlib.util
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -307,18 +308,45 @@ def section_gates(root, gates, runs_dir, verdicts):
     return lines
 
 
-def section_platforms(root):
+def platform_of(evidence, records):
+    """The platform id an evidence run belongs to: its platform_id field, else the record whose GPU names equal the run's."""
+    if evidence.get('platform_id'):
+        return evidence['platform_id'], 'platform_id'
+    names = sorted(gpu['name'] for gpu in (evidence.get('hardware') or {}).get('gpus') or [])
+    matches = [record['platform_id'] for record in records if sorted(gpu['name'] for gpu in record['gpus']) == names and names]
+    return (matches[0], 'GPU name') if len(matches) == 1 else (None, None)
+
+
+def section_platforms(root, gates, runs_dir):
     lines = ['## Platform records', '',
              'Every record written by `scripts/platform_report.py` under `docs/validation/platforms/`; a platform without a record is not '
-             'listed, as in [PLATFORM_MATRIX.md](PLATFORM_MATRIX.md).', '']
+             'listed, as in [PLATFORM_MATRIX.md](PLATFORM_MATRIX.md). The evidence rows name, per platform, the newest G4 evidence run of '
+             'each task that was recorded there (by the `platform_id` the recorder writes with `--platform`, or, for older evidence, by the '
+             'GPU names of the run equalling those of exactly one record) and count the other tasks whose newest run was recorded there.', '']
+    records = [load_json(path) for path in sorted((root / PLATFORMS).glob('*.json'))]
     rows = []
-    for path in sorted((root / PLATFORMS).glob('*.json')):
-        record = load_json(path)
+    for record in records:
         gpus = '; '.join(f"{gpu['name']} (cc {gpu['compute_capability']}, {gpu['total_memory_bytes'] // 2**20} MiB)" for gpu in record['gpus']) or 'no CUDA device'
         rows.append([record['platform_id'], gpus, record.get('driver') or 'n/a', record.get('cuda_runtime') or 'n/a', record['torch'],
                      record.get('cupy') or 'absent', record['python'], record['os'], record['recorded_at']])
     lines += table(['Platform id', 'GPU', 'Driver', 'CUDA runtime', 'torch', 'CuPy', 'Python', 'OS', 'Recorded'], rows)
     lines.append('')
+    assigned = {record['platform_id']: dict(g4=[], other=0) for record in records}
+    unassigned = []
+    for stage, task in all_tasks(gates):
+        run_id, evidence = newest_run(root, task, runs_dir)
+        if evidence is None:
+            continue
+        platform_id, how = platform_of(evidence, records)
+        if platform_id is None:
+            unassigned.append(task['id'])
+        elif stage['id'] == 'G4':
+            assigned[platform_id]['g4'].append(f"{task['id']} `{run_id}` ({how})")
+        else:
+            assigned[platform_id]['other'] += 1
+    rows = [[platform_id, '; '.join(entry['g4']) or 'none', entry['other']] for platform_id, entry in assigned.items()]
+    lines += table(['Platform id', 'G4 evidence runs recorded on this platform', 'Other tasks whose newest run was recorded here'], rows)
+    lines += ['', 'Newest runs that match no platform record: ' + (', '.join(unassigned) if unassigned else 'none') + '.', '']
     return lines
 
 
@@ -582,6 +610,22 @@ def readme_checks(root):
     return results
 
 
+def provenance_check(root):
+    """(ok, detail) of scripts/provenance_inventory.py --check: stale notices or SBOM, scan findings, broken requirements."""
+    completed = subprocess.run([sys.executable, str(root / 'scripts' / 'provenance_inventory.py'), '--check'], cwd=str(root),
+                               capture_output=True, text=True, encoding='utf-8', errors='replace')
+    text = completed.stdout
+    try:
+        summary = json.loads(text[text.rindex('{'):] if '{' in text else text)
+    except ValueError:
+        return False, f'provenance_inventory.py --check exit {completed.returncode} without a summary: {cell(text[-200:])}'
+    detail = (f"{summary['components']} components, {summary['open_items']} open items, {summary['files_scanned']} files scanned, "
+              f"{len(summary['findings'])} findings, pip check exit {summary['pip_check']}")
+    if summary['problems'] or completed.returncode != 0:
+        return False, detail + '; problems: ' + '; '.join(summary['problems'] or [f'exit {completed.returncode}'])
+    return True, detail
+
+
 def consistency_checks(root, versions, wheel_name, scope_ok, scope_cells):
     checks = []
     wheel = wheel_version(wheel_name)
@@ -596,6 +640,7 @@ def consistency_checks(root, versions, wheel_name, scope_ok, scope_cells):
     checks.append(('README "Compared with Meep" block', block == meep.render_readme_block(records), 'equals the renderer output for the committed records'))
     doc = (root / 'docs' / 'MEEP_COMPARISON.md').read_bytes().decode('utf-8')
     checks.append(('MEEP_COMPARISON.md', doc == meep.render_doc(records), 'equals the renderer output for the committed records'))
+    checks.append(('third-party notices and SBOM', *provenance_check(root)))
     checks.append(('RELEASE_SCOPE.md support claims', scope_ok,
                    f'{scope_cells} verification cells and the stage-status block rendered from the gate file'))
     return checks
@@ -629,7 +674,7 @@ def render(root, provisional=False, dirty=(), check_scope=False):
     lines += section_header(root, gates, runs_dir, versions, provisional, dirty)
     lines += section_judgement(gates, verdicts)
     lines += section_gates(root, gates, runs_dir, verdicts)
-    lines += section_platforms(root)
+    lines += section_platforms(root, gates, runs_dir)
     lines += section_clean_install(clean_path, clean)
     lines += section_suites()
     lines += section_physics(root, gates, runs_dir)

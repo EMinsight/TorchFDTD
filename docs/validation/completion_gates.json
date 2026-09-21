@@ -2449,6 +2449,7 @@
             "scripts/rerecord_gates.py",
             "scripts/record_gate_evidence.py",
             "scripts/check_release_gates.py",
+            "scripts/provenance_inventory.py",
             "scripts/clean_install_check.py",
             "scripts/run_suite.py",
             "docs/RELEASE_PROCEDURE.md",
@@ -2456,7 +2457,7 @@
           ],
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_rerecord_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-06.xml",
-            "the release-candidate run of docs/RELEASE_PROCEDURE.md (build the wheel, clean_install_check, rerecord_gates --all --wheel, run_suite release-full --gpu-required on both hosts, build_validation_report, check_release_gates)"
+            "the release-candidate run of docs/RELEASE_PROCEDURE.md (regenerate the notices and SBOM, build the wheel, clean_install_check, rerecord_gates --all --wheel --platform, run_suite release-full --gpu-required on both hosts recorded with --platform, build_validation_report, check_release_gates)"
           ],
           "actual_test_commands": [],
           "required_tests": [

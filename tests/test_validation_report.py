@@ -64,6 +64,22 @@ def test_consistency_section_reports_no_mismatch(rendered):
     names = [name for name, _, _ in rendered['checks']]
     assert 'package version' in names and 'RELEASE_SCOPE.md support claims' in names and 'attestation wording' in names
     assert sum(name.startswith('README row check') for name in names) >= 5
+    assert 'third-party notices and SBOM' in names
+
+
+def test_platform_section_lists_every_record_with_its_g4_evidence(rendered):
+    section = rendered['report'].split('## Platform records', 1)[1].split('
+## ', 1)[0]
+    records = sorted((ROOT / 'docs' / 'validation' / 'platforms').glob('*.json'))
+    assert len(records) >= 2
+    for path in records:
+        platform_id = json.loads(path.read_text(encoding='utf-8'))['platform_id']
+        assert section.count(f'| {platform_id} |') == 2, platform_id
+    gates = json.loads((ROOT / 'docs' / 'validation' / 'completion_gates.json').read_text(encoding='utf-8'))
+    g4 = next(stage for stage in gates['stages'] if stage['id'] == 'G4')
+    for task in g4['tasks']:
+        if task['evidence']:
+            assert f"{task['id']} `{task['evidence'][-1]}`" in section
 
 
 def test_report_lists_every_gate_task_and_every_g3_task_once(rendered):

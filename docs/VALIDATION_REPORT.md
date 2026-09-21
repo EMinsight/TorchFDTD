@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 46 | 31 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 46 | 37 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 49 | 28 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 49 | 34 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -63,7 +63,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G3-05 | 금속/분산 곡면 산란·흡수 수렴 | IMPLEMENTED | FAILED | `20260921T181951Z-g3-05-8fafa59e` | `487de42640e4` | FAIL | verification_state is FAILED |
 | G3-06 | PEC/PMC cavity·symmetry와 gradient mapping | IMPLEMENTED | VERIFIED | `20260921T185058Z-g3-06-8e377c95` | `5218de5b6b52` | PASS | evidence matches the current checkout |
 | G3-07 | PML normal/oblique 반사·장시간 안정성 | IMPLEMENTED | VERIFIED | `20260921T172247Z-g3-07-fcf2441e` | `ce5f049d4375` | PASS | evidence matches the current checkout |
-| G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | VERIFIED | `20260921T192159Z-g3-08-12eb742b` | `4a5f5cd6d19d` | FAIL | STALE: source commit 4a5f5cd6d19d5aa7021200fce43299d0f31674ad is not an ancestor of HEAD |
+| G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | VERIFIED | `20260921T192159Z-g3-08-12eb742b` | `4a5f5cd6d19d` | PASS | evidence matches the current checkout |
 | G3-09 | mode neff·field·confinement·power oracle | IMPLEMENTED | VERIFIED | `20260921T164916Z-g3-09-a7e7b272` | `5c0172da60d2` | PASS | evidence matches the current checkout |
 | G3-10 | PIC S·수동성·상반성과 누락 방사 채널 | IMPLEMENTED | VERIFIED | `20260921T164946Z-g3-10-ea83b20f` | `5c0172da60d2` | PASS | evidence matches the current checkout |
 | G3-11 | dipole far/near field와 표면/격자 수렴 | IMPLEMENTED | VERIFIED | `20260921T165000Z-g3-11-74c48d39` | `5c0172da60d2` | PASS | evidence matches the current checkout |
@@ -128,9 +128,9 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G8-01 | 기존 Project JSON/NPZ compatibility와 schema migration을 시험한다 | IMPLEMENTED | VERIFIED | `20260921T170627Z-g8-01-d8b628a7` | `656c5075eabd` | PASS | evidence matches the current checkout |
-| G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260921T192908Z-g8-02-76c35baa` | `579c27df75e5` | FAIL | STALE: source commit 579c27df75e58a12991f63fc0366966b79e7371d is not an ancestor of HEAD |
-| G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260921T192925Z-g8-03-25de93db` | `579c27df75e5` | FAIL | STALE: source commit 579c27df75e58a12991f63fc0366966b79e7371d is not an ancestor of HEAD |
-| G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260921T192929Z-g8-04-705af196` | `579c27df75e5` | FAIL | STALE: source commit 579c27df75e58a12991f63fc0366966b79e7371d is not an ancestor of HEAD |
+| G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260921T192908Z-g8-02-76c35baa` | `579c27df75e5` | PASS | evidence matches the current checkout |
+| G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260921T192925Z-g8-03-25de93db` | `579c27df75e5` | PASS | evidence matches the current checkout |
+| G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260921T192929Z-g8-04-705af196` | `579c27df75e5` | PASS | evidence matches the current checkout |
 | G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260921T170637Z-g8-05-29a464aa` | `656c5075eabd` | PASS | evidence matches the current checkout |
 | G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260921T170706Z-g8-06-7b7e68da` | `656c5075eabd` | PASS | evidence matches the current checkout |
 | G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260921T170718Z-g8-07-b934b710` | `656c5075eabd` | PASS | evidence matches the current checkout |
@@ -145,7 +145,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260921T163104Z-g9-04-f2b9d65e` | `e132fdd4155b` | PASS | evidence matches the current checkout |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | VERIFIED | `20260921T201139Z-g9-07-856d0eb3` | `5c1288b89926` | PASS | evidence matches the current checkout |
+| G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | VERIFIED | `20260921T201139Z-g9-07-856d0eb3` | `5c1288b89926` | FAIL | STALE: test source changed since the run: tests/test_validation_report.py |
 
 ### H1 실제 단일 문제 multi-GPU (HPC, P1)
 
@@ -160,12 +160,19 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 ## Platform records
 
-Every record written by `scripts/platform_report.py` under `docs/validation/platforms/`; a platform without a record is not listed, as in [PLATFORM_MATRIX.md](PLATFORM_MATRIX.md).
+Every record written by `scripts/platform_report.py` under `docs/validation/platforms/`; a platform without a record is not listed, as in [PLATFORM_MATRIX.md](PLATFORM_MATRIX.md). The evidence rows name, per platform, the newest G4 evidence run of each task that was recorded there (by the `platform_id` the recorder writes with `--platform`, or, for older evidence, by the GPU names of the run equalling those of exactly one record) and count the other tasks whose newest run was recorded there.
 
 | Platform id | GPU | Driver | CUDA runtime | torch | CuPy | Python | OS | Recorded |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | rtx3060-win11-lab | NVIDIA GeForce RTX 3060 (cc 8.6, 12287 MiB) | 591.86 | 12.6 | 2.10.0+cu126 | 13.6.0 | 3.10.2 | Windows-10-10.0.26200-SP0 | 2026-09-21T15:53:07+00:00 |
 | rtx5880-ada-win11-remote | NVIDIA RTX 5880 Ada Generation (cc 8.9, 49139 MiB) | 581.80 | 12.8 | 2.10.0 | 13.6.0 | 3.11.14 | Windows-10-10.0.26100-SP0 | 2026-09-21T19:27:38+00:00 |
+
+| Platform id | G4 evidence runs recorded on this platform | Other tasks whose newest run was recorded here |
+| --- | --- | --- |
+| rtx3060-win11-lab | G4-01 `20260921T163708Z-g4-01-53b82748` (GPU name); G4-02 `20260921T163724Z-g4-02-b5c11b4f` (GPU name); G4-03 `20260921T163744Z-g4-03-5f80ac67` (GPU name); G4-04 `20260921T163757Z-g4-04-7e1cdb0f` (GPU name); G4-05 `20260921T164503Z-g4-05-300f0a95` (GPU name); G4-06 `20260921T163823Z-g4-06-f3d8a42a` (GPU name) | 45 |
+| rtx5880-ada-win11-remote | none | 0 |
+
+Newest runs that match no platform record: none.
 
 ## Clean-install record
 
@@ -286,7 +293,8 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 | README row check `test_readme_restart_row_matches_the_restart_record` | ok | reproduced from its record |
 | README "Compared with Meep" block | ok | equals the renderer output for the committed records |
 | MEEP_COMPARISON.md | ok | equals the renderer output for the committed records |
+| third-party notices and SBOM | ok | 52 components, 3 open items, 1332 files scanned, 0 findings, pip check exit 0 |
 | RELEASE_SCOPE.md support claims | ok | 24 verification cells and the stage-status block rendered from the gate file |
 | attestation wording | ok | no line uses the words that tests/test_validation_report.py forbids |
 
-11 checks, 0 mismatch(es).
+12 checks, 0 mismatch(es).

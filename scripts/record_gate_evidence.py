@@ -293,6 +293,7 @@ def main(argv=None):
     parser.add_argument('--artifact', action='append', default=[], help='raw result or log file to reference by path and SHA-256')
     parser.add_argument('--dist', help='wheel or source archive the run installed, hashed as package_or_wheel_sha256')
     parser.add_argument('--interpreter', default=None, help='interpreter that ran the command, when it is not this one; its Python, torch and CuPy versions are recorded')
+    parser.add_argument('--platform', default=None, help='platform id of the host that ran the command (a record under docs/validation/platforms), written as platform_id')
     parser.add_argument('--note', default=None, help='free-text note kept with the evidence')
     parser.add_argument('--scope', default=None, help='applicable-scope statement; a conservative default is written otherwise')
     parser.add_argument('--root', default=None, help='repository root (default: the checkout containing this script)')
@@ -306,6 +307,8 @@ def main(argv=None):
     junit_path = Path(args.junit)
     if not junit_path.is_file():
         raise SystemExit(f'JUnit report not found: {junit_path}')
+    if args.platform is not None and not (root / 'docs' / 'validation' / 'platforms' / f'{args.platform}.json').is_file():
+        raise SystemExit(f'no platform record docs/validation/platforms/{args.platform}.json; write one with scripts/platform_report.py first')
     gates = load_json(gate_path)
     stage, task = find_task(gates, args.task)
 
@@ -352,6 +355,8 @@ def main(argv=None):
     else:
         package_sha = None
         null_reasons['package_or_wheel_sha256'] = 'no distribution file was supplied; the evidence applies to the source tree at source_commit'
+    if args.platform is None:
+        null_reasons['platform_id'] = 'no --platform was given; the hardware block identifies the host'
 
     commit = git_text(root, 'rev-parse', 'HEAD')
     tree_sha = source_tree_sha256(root, tracked_paths(root))
@@ -385,6 +390,7 @@ def main(argv=None):
         source_commit=commit, source_tree_sha256=tree_sha,
         dirty_source_manifest=manifest, package_or_wheel_sha256=package_sha,
         package_path=relative(root, args.dist) if args.dist else None,
+        platform_id=args.platform,
         test_source_sha256=test_sources, unresolved_test_classnames=unresolved,
         fixture_path=relative(root, args.fixture) if args.fixture else None, fixture_sha256=fixture_sha,
         acceptance_criteria_path=relative(root, args.criteria) if args.criteria else (relative(root, args.fixture) if criteria is not None else None),

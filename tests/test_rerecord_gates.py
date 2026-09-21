@@ -51,6 +51,8 @@ def repo(tmp_path):
     (root / 'tests').mkdir(parents=True)
     (root / 'docs' / 'validation' / 'runs').mkdir(parents=True)
     (root / 'docs' / 'validation' / 'cases').mkdir()
+    (root / 'docs' / 'validation' / 'platforms').mkdir()
+    (root / 'docs' / 'validation' / 'platforms' / 'lab.json').write_text(json.dumps(dict(platform_id='lab', gpus=[])), encoding='utf-8')
     (root / 'tests' / 'test_alpha.py').write_text(TEST_SOURCE, encoding='utf-8')
     (root / '.gitignore').write_text('.local/\n__pycache__/\n', encoding='utf-8')
     # The same pytest root as the real repository, so JUnit class names read tests.test_alpha.
@@ -231,7 +233,7 @@ def test_wheel_option_runs_with_the_installed_interpreter_outside_the_tree_and_r
     monkeypatch.setattr(rerecord, 'run_command', fake_run)
     monkeypatch.setattr(recorder, 'environment_of', lambda interpreter: dict(recorder.environment(), python_executable=str(interpreter)))
     monkeypatch.setenv('PYTHONPATH', str(repo))
-    code = rerecord.main(['--root', str(repo), '--tasks', 'G1-03', '--wheel', str(wheel), '--torch', 'torch==2.10.0+cu126'])
+    code = rerecord.main(['--root', str(repo), '--tasks', 'G1-03', '--wheel', str(wheel), '--torch', 'torch==2.10.0+cu126', '--platform', 'lab'])
     assert code == 0
     assert calls['venv']['wheel'] == wheel.resolve() and calls['venv']['torch'] == 'torch==2.10.0+cu126'
     assert calls['probe']['python'] == fake_python
@@ -246,3 +248,14 @@ def test_wheel_option_runs_with_the_installed_interpreter_outside_the_tree_and_r
     assert evidence['command'].startswith(f"$env:RERECORD_FLAG='1'; {fake_python.as_posix()}")
     assert evidence['environment']['python_executable'] == str(fake_python)
     assert evidence['verification_state_assigned'] == 'VERIFIED'
+    assert evidence['platform_id'] == 'lab' and 'platform_id' not in evidence['null_reasons']
+
+
+def test_recorder_refuses_a_platform_without_a_record_and_records_none_otherwise(repo, tmp_path):
+    junit = tmp_path / 'again.xml'
+    junit.write_text(JUNIT, encoding='utf-8')
+    with pytest.raises(SystemExit):
+        recorder.main(['--root', str(repo), '--task', 'G1-03', '--command', 'pytest', '--junit', str(junit), '--platform', 'nowhere'])
+    assert recorder.main(['--root', str(repo), '--task', 'G1-03', '--command', 'pytest', '--junit', str(junit)]) == 0
+    _, evidence = evidence_of(repo, 'G1-03')
+    assert evidence['platform_id'] is None and 'platform_id' in evidence['null_reasons']

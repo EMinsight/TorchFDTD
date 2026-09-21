@@ -243,6 +243,7 @@ def main(argv=None):
     parser.add_argument('--torch-index', default='https://download.pytorch.org/whl/cu126', help='index for the torch requirement')
     parser.add_argument('--find-links', action='append', default=[], help='local wheel directory consulted before any index')
     parser.add_argument('--extras', default='dev,cuda-kernels,gds', help='extras installed with the wheel (default dev,cuda-kernels,gds)')
+    parser.add_argument('--platform', default=None, help='platform id of this host (docs/validation/platforms/<id>.json), written into every new evidence record')
     parser.add_argument('--root', default=None, help='repository root (default: the checkout containing this script)')
     parser.add_argument('--gates', default=None, help='gate file (default: docs/validation/completion_gates.json under root)')
     parser.add_argument('--runs-dir', default=None, help='evidence directory (default: docs/validation/runs under root)')
@@ -325,6 +326,8 @@ def main(argv=None):
             record_argv += ['--dist', str(dist)]
         if args.wheel:
             record_argv += ['--interpreter', str(interpreter)]
+        if args.platform:
+            record_argv += ['--platform', args.platform]
         recorder.main(record_argv)
         updated = next(t for s in load_json(gate_path)['stages'] for t in s['tasks'] if t['id'] == task['id'])
         new_id = updated['evidence'][-1]

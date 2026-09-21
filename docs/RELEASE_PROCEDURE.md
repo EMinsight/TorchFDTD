@@ -26,10 +26,26 @@ D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py    # the st
 
 Any change to code, tests, fixtures or documents after this point starts the
 procedure again from step 1. The only commits allowed during the procedure add
-files under `docs/validation/` (records, evidence runs, the gate file) and the
-two rendered documents of step 5.
+files under `docs/validation/` (records, evidence runs, the gate file), the
+notices and SBOM of step 2 and the two rendered documents of step 6.
 
-## 2. Build the wheel and check the clean install
+## 2. Regenerate the third-party notices and the SBOM
+
+```powershell
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py --check   # must exit 0 with problems: []
+```
+
+The write mode rewrites `docs/THIRD_PARTY_NOTICES.md` and
+`docs/validation/sbom.json` from the interpreter's package metadata and the
+tracked tree; `--check` is stale whenever the tracked tree changed since the
+last write (it compares the committed outputs with a fresh build), so the
+candidate must carry outputs written from its own tree. Commit both files
+("Regenerate the third-party notices and the SBOM for the release candidate")
+before the wheel is built, so the wheel and the notices describe the same tree.
+The report of step 6 runs the same check and prints its result.
+
+## 3. Build the wheel and check the clean install
 
 ```powershell
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/TorchFDTD/.local `
@@ -46,17 +62,17 @@ The record must say `all_passed: true` and `dirty_paths: []`. Commit the record
 its SHA-256 from the record; the wheel is the release artifact and is not
 rebuilt afterwards.
 
-Check before step 3 that the candidate commit and the wheel's commit differ only
+Check before step 4 that the candidate commit and the wheel's commit differ only
 under `docs/validation/`:
 
 ```powershell
 git diff --stat <wheel source_commit> HEAD -- torchfdtd pyproject.toml README.md LICENSE THIRD_PARTY_NOTICES.txt   # must print nothing
 ```
 
-## 3. Re-record every gate with the wheel
+## 4. Re-record every gate with the wheel
 
 ```powershell
-D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all `
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all --platform rtx3060-win11-lab `
     --wheel D:/TorchFDTD/.local/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl `
     --torch "torch==2.10.0+cu126" --find-links D:/TorchFDTD/.local/wheels
 ```
@@ -69,8 +85,10 @@ every task whose newest evidence exists, reruns the recorded command with that
 interpreter from a working directory under `.local/tmp/rc-work`, with the
 recorded environment variables, a fresh JUnit report and absolute test paths.
 Each run is recorded with the same case file, the wheel's SHA-256 (`--dist`),
-the interpreter's environment (`--interpreter`), a note naming the replayed run
-and a scope ending in `re-recorded on <commit> for the release candidate`. The
+the interpreter's environment (`--interpreter`), the host's platform id
+(`--platform`, a record under `docs/validation/platforms/`), a note naming the
+replayed run and a scope ending in `re-recorded on <commit> for the release
+candidate`. The
 table it prints lists task, previous run id, new run id and the state written
 to the gate file; the exit status is 0 only when every task is VERIFIED.
 
@@ -86,9 +104,9 @@ re-run until the defect is fixed, and a fix restarts the procedure at step 1.
 Commit the gate file and the new run directories ("Record the release-candidate
 gate runs at <commit12>").
 
-## 4. Run the release-full suite on both hosts
+## 5. Run the release-full suite on both hosts
 
-On the RTX 3060 host, with the wheel interpreter of step 3 so that the suite
+On the RTX 3060 host, with the wheel interpreter of step 4 so that the suite
 sees the installed package's dependencies and the `--gpu-required` policy:
 
 ```powershell
@@ -98,29 +116,30 @@ D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G9-
     --command "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-<commit12>.xml" `
     --junit D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-<commit12>.xml --exit-code $LASTEXITCODE `
     --dist D:/TorchFDTD/.local/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl `
-    --interpreter D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe `
+    --interpreter D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe --platform rtx3060-win11-lab `
     --scope "G9-06: release-full suite with --gpu-required on rtx3060-win11-lab at commit <commit12> against wheel <sha256 head>"
 ```
 
 `run_suite.py` launches pytest from the checkout root, so this suite exercises
 the source tree of the candidate; its identity with the wheel is the byte
-comparison of step 2, and the installed-package import of step 3 covers the
+comparison of step 3, and the installed-package import of step 4 covers the
 package as installed. The suite includes the opt-in `long` tests and sets
 `TORCHFDTD_RUN_CUDA_BOOTSTRAP_TEST` and `TORCHFDTD_RUN_CPML_KERNEL_CUDA_TEST`;
 a CUDA test that skips is a failure. Under `--gpu-required` the only permitted
 skips are `optional platform check:` ones (the two-GPU NCCL case, Gloo,
 licensed tools).
 
-On the RTX 5880 Ada host, check out the same commit by hash, write its platform
-record if `docs/validation/platforms/rtx5880-ada-win11-remote.json` does not
-exist yet, install the same wheel into a fresh environment there, run the same
-suite and record it against G9-06 with that checkout's recorder (its hardware
-and environment are then the ones written into the evidence):
+On the RTX 5880 Ada host (platform record
+`docs/validation/platforms/rtx5880-ada-win11-remote.json`; rewrite it with
+`python scripts/platform_report.py --id rtx5880-ada-win11-remote` when the
+driver, torch or CuPy there changed), check out the same commit by hash,
+install the same wheel into a fresh environment, run the same suite and record
+it against G9-06 with that checkout's recorder (its hardware and environment
+are then the ones written into the evidence):
 
 ```powershell
 git worktree add D:/TorchFDTD/.local/worktrees/rc-<commit12> <commit>
 cd D:/TorchFDTD/.local/worktrees/rc-<commit12>
-python scripts/platform_report.py --id rtx5880-ada-win11-remote
 python -m venv D:/TorchFDTD/.local/venvs/rc
 D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pip install "torch==2.10.0+cu126" --index-url https://download.pytorch.org/whl/cu126
 D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pip install "<wheel path on this host>[dev,cuda-kernels,gds]"
@@ -128,7 +147,7 @@ D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-ful
     --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx5880-<commit12>.xml
 python scripts/record_gate_evidence.py --task G9-06 --command "..." `
     --junit D:/TorchFDTD/.local/tmp/junit/release-full-rtx5880-<commit12>.xml --exit-code $LASTEXITCODE `
-    --dist <wheel path on this host> --interpreter D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe `
+    --dist <wheel path on this host> --interpreter D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe --platform rtx5880-ada-win11-remote `
     --scope "G9-06: release-full suite with --gpu-required on rtx5880-ada-win11-remote at commit <commit12> against wheel <sha256 head>"
 git add docs/validation && git commit -m "Record the release-full suite on rtx5880-ada-win11-remote at <commit12>"
 ```
@@ -140,7 +159,7 @@ and the newest one is the judged one, so verify with
 VERIFIED. The remote wheel must have the same SHA-256 as the local one; copy
 the file, do not rebuild it.
 
-## 5. Render the report and judge
+## 6. Render the report and judge
 
 ```powershell
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/build_validation_report.py
@@ -156,7 +175,10 @@ D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --profile H
 `build_validation_report.py` writes `docs/VALIDATION_REPORT.md` and the
 verification cells and stage-status block of `docs/RELEASE_SCOPE.md` from the
 gate file, the evidence runs and the records, and prints its consistency
-checks; a MISMATCH is a finding to fix at its source, never in the report.
+checks (version strings, README numbers, the notices and SBOM check of step 2,
+the scope cells); a MISMATCH is a finding to fix at its source, never in the
+report. The platform section lists, per platform record, the G4 evidence runs
+recorded there.
 Commit the two documents with the G9-07 evidence ("Render the validation
 report of the release candidate at <commit12>").
 
@@ -167,9 +189,9 @@ GPU-required skip, no stale hash and no external blocker. HPC stays
 `NOT RELEASABLE` while the two-GPU blocker stands. Any other result names the
 first failing reason per task.
 
-## 6. What the result means
+## 7. What the result means
 
-- Exit 0 of step 5 is `RC_READY` in the sense of section 11 of the program:
+- Exit 0 of step 6 is `RC_READY` in the sense of section 11 of the program:
   the technical gates hold on this tree and this wheel. It is recorded in the
   handoff entry with the commit, the wheel hash and the run ids.
 - `PUBLIC_RELEASE_AUTHORIZED` is a separate decision of the owner that no file
