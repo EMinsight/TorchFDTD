@@ -152,6 +152,9 @@ __all__ += ["OpenWaveguideMode", "solve_open_waveguide_modes", "OpenPortOptions"
 from .mode_network_project import ModeNetworkConfig, mode_network_plan, run_mode_network
 __all__ += ["ModeNetworkConfig", "mode_network_plan", "run_mode_network"]
 
+from .mode_branches import ModePort, ModeBranchNetwork, prepare_aperture_modal_launch, branch_network_from_ports
+__all__ += ["ModePort", "ModeBranchNetwork", "prepare_aperture_modal_launch", "branch_network_from_ports"]
+
 from .radiation_box import StoredRadiationBox, native_radiation_box
 from .radiation_box_io import load_native_radiation_box
 __all__ += ["StoredRadiationBox", "native_radiation_box", "load_native_radiation_box"]

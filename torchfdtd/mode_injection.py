@@ -13,6 +13,7 @@ from .mode_ports import solve_waveguide_modes, _amplitudes, _uniform_cell_quadra
 from .adjoint_planes import DifferentiablePlaneSimulation
 from .differentiable import DifferentiableSimulation, _System
 from .injection import oneway_plan
+from .streamed import StreamedSimulation, _StreamedExecution, _reservation
 from .waveforms import source_time_signal
 
 
@@ -51,6 +52,61 @@ class ModalLaunch:
     @property
     def storage_bytes(self):
         return self.epsilon.nbytes+self.mode.fields.nbytes+sum(w.nbytes+p.nbytes for _,_,w,p in self.terms)
+
+
+@dataclass(frozen=True)
+class ApertureModalLaunch(ModalLaunch):
+    """A periodic-supercell mode on a transverse sub-rectangle of the cell.
+
+    aperture holds (begin, end) Yee cell index ranges in cyclic transverse
+    order. Injection, the fixed-material check and the detector quadrature are
+    restricted to that rectangle. The profile is a fixed periodic eigenmode of
+    the aperture, so its tails must be confined inside it; edge_energy_fraction
+    records the share of squared field amplitude in the outermost cell ring.
+    """
+    aperture: tuple
+    edge_energy_fraction: float
+
+
+def _check_launch_signatures(project,launch,epsilon):
+    region=project.region
+    if json.dumps(region.model_dump(mode='json'),sort_keys=True)!=launch.region_signature:
+        raise ValueError('Modal launch region changed. Rebuild its fixed tables.')
+    active=[project.resolved_source(s) for s in project.sources if s.enabled]
+    if len(active)!=1 or json.dumps(active[0].model_dump(mode='json'),sort_keys=True)!=launch.source_signature:
+        raise ValueError('Modal launch source changed. Rebuild its fixed tables.')
+    if not isinstance(epsilon,torch.Tensor):raise ValueError('Modal epsilon must be a Torch tensor.')
+    if epsilon.shape!=region.shape+(3,):raise ValueError('Modal propagation requires explicit Yee diagonal epsilon.')
+
+
+def _frozen_launch_material(launch,epsilon):
+    """Check the fixed source neighbourhood/collars and detach their derivatives."""
+    w='xyz'.index(launch.mode.normal)
+    selection=[slice(None)]*3
+    selection[w]=slice(launch.electric_index-1,launch.electric_index+2)
+    for axis,(begin,end) in zip(((w+1)%3,(w+2)%3),getattr(launch,'aperture',((None,None),(None,None)))):
+        selection[axis]=slice(begin,end)
+    selection=tuple(selection)
+    expected=torch.tensor(np.stack([_profile(launch.epsilon[...,c],launch.mode.normal) for c in range(3)],axis=-1),
+                          dtype=epsilon.dtype,device=epsilon.device)
+    if not torch.allclose(epsilon[selection],expected.expand_as(epsilon[selection]),rtol=2e-6,atol=1e-7):
+        raise ValueError('Injection-neighborhood epsilon must match the fixed modal cross-section.')
+    fixed_transverse=[]
+    for axis,begin,end in getattr(launch,'fixed_transverse_slices',()):
+        slab=[slice(None)]*3
+        slab[axis]=slice(begin,end)
+        slab=tuple(slab)
+        if not torch.allclose(epsilon[slab],epsilon.new_tensor(launch.cladding_epsilon),rtol=2e-6,atol=1e-7):
+            raise ValueError('Transverse CPML and its fixed collar must retain the modal cladding epsilon.')
+        fixed_transverse.append(slab)
+    # Keep source-neighborhood material derivatives excluded, since its fixed
+    # electric sheet contains inverse epsilon and the eigenmode is frozen.
+    if epsilon.requires_grad:
+        epsilon=epsilon.clone()
+        epsilon[selection]=epsilon[selection].detach()
+        for slab in fixed_transverse:
+            epsilon[slab]=epsilon[slab].detach()
+    return epsilon,selection,tuple(fixed_transverse)
 
 
 def prepare_modal_launch(project, permittivity, *, mode_index=0, num_modes=2, source_budget_bytes=256*1024**2):
@@ -133,8 +189,8 @@ def prepare_modal_launch(project, permittivity, *, mode_index=0, num_modes=2, so
 
 
 class _ModalSystem(_System):
-    def __init__(self,project,epsilon,*,launch,observation_monitors=None):
-        super().__init__(project,epsilon,observation_monitors=observation_monitors)
+    def __init__(self,project,epsilon,*,launch,observation_monitors=None,**kwargs):
+        super().__init__(project,epsilon,observation_monitors=observation_monitors,**kwargs)
         self.sources={'E':[],'H':[]}
         for component,loc,waveform,profile in launch.terms:
             self.sources[component[0]].append((loc,'xyz'.index(component[1].lower()),
@@ -144,14 +200,7 @@ class _ModalSystem(_System):
 class _ModalSimulation(DifferentiableSimulation):
     def _run(self,epsilon,spectral):
         launch=self.launch
-        region=self.project.region
-        if json.dumps(region.model_dump(mode='json'),sort_keys=True)!=launch.region_signature:
-            raise ValueError('Modal launch region changed. Rebuild its fixed tables.')
-        active=[self.project.resolved_source(s) for s in self.project.sources if s.enabled]
-        if len(active)!=1 or json.dumps(active[0].model_dump(mode='json'),sort_keys=True)!=launch.source_signature:
-            raise ValueError('Modal launch source changed. Rebuild its fixed tables.')
-        if not isinstance(epsilon,torch.Tensor):raise ValueError('Modal epsilon must be a Torch tensor.')
-        if epsilon.shape!=region.shape+(3,):raise ValueError('Modal propagation requires explicit Yee diagonal epsilon.')
+        _check_launch_signatures(self.project,launch,epsilon)
         from .adjoint_memory import _resident_reservation
         from .memory_profile import host_memory
         base=_resident_reservation(self.project,self.options,epsilon.device,spectral)
@@ -171,49 +220,78 @@ class _ModalSimulation(DifferentiableSimulation):
         if available is not None and host_required>int(available*.8):raise ValueError('Modal source storage exceeds available host memory.')
         if self.options.resident_budget_bytes is not None and (device_required+extra if epsilon.is_cuda else host_required)>self.options.resident_budget_bytes:
             raise ValueError('Modal source storage exceeds the resident budget.')
-        w='xyz'.index(launch.mode.normal)
-        selection=[slice(None)]*3
-        selection[w]=slice(launch.electric_index-1,launch.electric_index+2)
-        expected=torch.tensor(np.stack([_profile(launch.epsilon[...,c],launch.mode.normal) for c in range(3)],axis=-1),
-                              dtype=epsilon.dtype,device=epsilon.device)
-        if not torch.allclose(epsilon[tuple(selection)],expected.expand_as(epsilon[tuple(selection)]),rtol=2e-6,atol=1e-7):
-            raise ValueError('Injection-neighborhood epsilon must match the fixed modal cross-section.')
-        fixed_transverse = []
-        for axis, begin, end in getattr(launch,'fixed_transverse_slices',()):
-            slab = [slice(None)]*3
-            slab[axis] = slice(begin,end)
-            slab = tuple(slab)
-            if not torch.allclose(epsilon[slab],epsilon.new_tensor(launch.cladding_epsilon),rtol=2e-6,atol=1e-7):
-                raise ValueError('Transverse CPML and its fixed collar must retain the modal cladding epsilon.')
-            fixed_transverse.append(slab)
-        # Keep source-neighborhood material derivatives excluded, since its fixed
-        # electric sheet contains inverse epsilon and the eigenmode is frozen.
-        if epsilon.requires_grad:
-            epsilon=epsilon.clone()
-            epsilon[tuple(selection)]=epsilon[tuple(selection)].detach()
-            for slab in fixed_transverse:
-                epsilon[slab]=epsilon[slab].detach()
+        epsilon,_,fixed_transverse=_frozen_launch_material(launch,epsilon)
         factory=lambda p,e,**kwargs:_ModalSystem(p,e,launch=launch,**kwargs)
         result=super()._run(epsilon,spectral,system_factory=factory)
         result.report['memory_reservation_bytes']+=extra
         result.report['host_reservation_bytes']+=extra
         if epsilon.is_cuda:result.report['gpu_reservation_bytes']+=extra
-        result.report.update(modal_source=True,modal_source_storage_bytes=launch.storage_bytes,modal_source_extra_reservation_bytes=extra,
-            modal_beta_per_um=float(launch.mode.beta_per_um.real),modal_beta_tilde_per_um=float(launch.beta_tilde_per_um.real),
-            source_neighborhood_gradient='frozen',modal_source_identity=launch.identity)
-        if fixed_transverse:
-            result.report.update(transverse_boundary='cpml',transverse_cpml_cladding_gradient='frozen',
-                                 mode_beta_complex=[float(launch.mode.beta_per_um.real),float(launch.mode.beta_per_um.imag)])
+        _modal_report(result.report,launch,extra,fixed_transverse)
+        return result
+
+
+def _modal_report(report,launch,extra,fixed_transverse):
+    report.update(modal_source=True,modal_source_storage_bytes=launch.storage_bytes,modal_source_extra_reservation_bytes=extra,
+        modal_beta_per_um=float(launch.mode.beta_per_um.real),modal_beta_tilde_per_um=float(launch.beta_tilde_per_um.real),
+        source_neighborhood_gradient='frozen',modal_source_identity=launch.identity)
+    aperture=getattr(launch,'aperture',None)
+    if aperture is not None:
+        report.update(modal_aperture_cells=[list(item) for item in aperture],
+                      modal_aperture_edge_energy_fraction=launch.edge_energy_fraction)
+    if fixed_transverse:
+        report.update(transverse_boundary='cpml',transverse_cpml_cladding_gradient='frozen',
+                      mode_beta_complex=[float(launch.mode.beta_per_um.real),float(launch.mode.beta_per_um.imag)])
+
+
+class _ModalStreamedExecution(_StreamedExecution):
+    """Streamed physics factories whose host system carries the fixed sheets."""
+    def __init__(self,launch):
+        self.launch=launch
+
+    def host(self,project,value,spectral):
+        return _ModalSystem(project,value,launch=self.launch,prepare_updates=False,
+                            observation_monitors=None if spectral is None else spectral.observers)
+
+
+class _ModalStreamedSimulation(StreamedSimulation):
+    """Streamed X-slab execution of the fixed modal sheets and plane observers.
+
+    Tiles receive only their rows of each sheet and accumulate only their own
+    plane observers; the transposes are the existing tile transposes. The
+    source neighbourhood is frozen exactly as in the resident path.
+    """
+    def _run(self,epsilon,spectral):
+        launch=self.launch
+        _check_launch_signatures(self.project,launch,epsilon)
+        if epsilon.device.type!='cpu':raise ValueError('Streamed modal epsilon must be a CPU tensor.')
+        options=self.streaming_options
+        base=_reservation(self.project,epsilon,options,spectral)
+        # The host system and every packed tile slot copy the fixed sheets; the
+        # gradient-freezing carrier is one more full host volume.
+        buffers=options.tile_buffers if options.tile_transfers=='async' else 1
+        extra=(1+buffers)*launch.storage_bytes+(epsilon.numel()*epsilon.element_size() if epsilon.requires_grad else 0)
+        from .memory_profile import host_memory
+        available=host_memory()['available_bytes']
+        limit=min(options.host_budget_bytes,int(available*.8)) if available is not None else options.host_budget_bytes
+        if base['host_reservation_bytes']+extra>limit:
+            raise ValueError('Modal source storage exceeds the streamed host budget.')
+        epsilon,_,fixed_transverse=_frozen_launch_material(launch,epsilon)
+        result=super()._run(epsilon,spectral,execution=_ModalStreamedExecution(launch))
+        result.report['host_reservation_bytes']+=extra
+        _modal_report(result.report,launch,extra,fixed_transverse)
         return result
 
 
 class ModeInjectedPlaneSimulation(DifferentiablePlaneSimulation):
-    """Native resident Yee/CPML forward and adjoint with fixed modal sheets."""
+    """Native Yee/CPML forward and adjoint with fixed modal sheets.
+
+    Resident AdjointOptions use the checkpointed resident adjoint. Streamed
+    options run the same sheets and plane observers through bounded X slabs.
+    """
     _resident_model_type=_ModalSimulation
+    _streamed_model_type=_ModalStreamedSimulation
 
     def __init__(self,project,launch,options=None,*,quadrature_counts=None):
-        from .streamed import StreamedAdjointOptions
-        if isinstance(options,StreamedAdjointOptions):raise ValueError('Modal sources are not yet supported by streamed execution.')
         super().__init__(project,options,quadrature_counts=quadrature_counts)
         self.model.launch=launch
         self.launch=launch
@@ -225,6 +303,31 @@ class ModeInjectedPlaneSimulation(DifferentiablePlaneSimulation):
                 mode=launch.detector_mode(float(plan['points_um'][0,normal_axis]))
                 mode.validate_quadrature(SimpleNamespace(normal=normal,
                     points_um=plan['points_um'],weights=plan['weights']))
+
+    def reference(self,epsilon,frequency_hz,*,block_size=32):
+        """Small-problem full Torch autograd oracle through the same fixed sheets.
+
+        Every timestep stays in the autograd graph. This is the check for the
+        checkpointed resident adjoint, not a large-simulation path.
+        """
+        if isinstance(self.model,_ModalStreamedSimulation):
+            raise ValueError('The full-autograd oracle uses resident systems.')
+        region=self.model.project.region
+        if math.prod(region.shape)*region.steps>2_000_000:
+            raise ValueError('Full-autograd reference is restricted to at most two million cell-steps.')
+        launch=self.launch
+        _check_launch_signatures(self.model.project,launch,epsilon)
+        material,_,_=_frozen_launch_material(launch,epsilon)
+        def run(spectral):
+            system=_ModalSystem(self.model.project.model_copy(deep=True),material,launch=launch,
+                                observation_monitors=spectral.observers,prepare_kernels=False)
+            state=tuple(torch.zeros_like(x) for x in system.state())
+            signals=spectral.zeros()
+            for step in range(region.steps):
+                state=system.reference_step(state,step,material)
+                spectral.accumulate(signals,system.observe(state)[None],step)
+            return spectral.result(signals,dict(full_time_autograd=True,modal_source=True))
+        return self._planes(epsilon,frequency_hz,block_size,run)
 
 
 def modal_plane_amplitudes(plane,launch):

@@ -420,7 +420,7 @@ class StreamedSimulation(DifferentiableSimulation):
     def forward(self, epsilon):
         return self._run(epsilon, None)
 
-    def _run(self, epsilon, spectral):
+    def _run(self, epsilon, spectral, *, execution=None):
         region = self.project.region
         if not isinstance(epsilon, torch.Tensor) or epsilon.device.type != 'cpu':
             raise ValueError('Streamed epsilon must be a CPU tensor to avoid full-volume VRAM allocation.')
@@ -445,7 +445,7 @@ class StreamedSimulation(DifferentiableSimulation):
                       policy='manual', precision=str(epsilon.dtype), **reservation)
         report['observation_storage'] = 'time_history' if spectral is None else 'online_spectrum'
         if spectral is not None:report.update(spectral.reservation(min(options.temporal_depth,region.steps)))
-        signals = _Streamed.apply(epsilon, self.project, options, report, spectral, _StreamedExecution())
+        signals = _Streamed.apply(epsilon, self.project, options, report, spectral, execution or _StreamedExecution())
         if spectral is not None:return spectral.result(signals,report)
         return DifferentiableResult(signals, region.time_step,
                                     tuple(m.component for m in self.project.monitors if m.enabled), report)
