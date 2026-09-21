@@ -324,6 +324,7 @@ class Structure(Item):
     theta_start: float = 0
     theta_stop: float = 360
     vertices: tuple[tuple[float,float],...] = ((-.5,-.5),(.5,-.5),(0,.5))
+    holes: tuple[tuple[tuple[float,float],...],...] = ()
     material: str = 'SiN (constant n)'
     mesh_order: int = Field(default=2, ge=1, le=100)
 
@@ -338,8 +339,10 @@ class Structure(Item):
                 raise ValueError('Inner ellipse radii must both be zero or positive and smaller than the corresponding outer radii.')
             if not 0<abs(self.theta_stop-self.theta_start)<=360:raise ValueError('Ring angles must define a nonzero arc of at most 360 degrees.')
         if self.kind=='polygon':
-            from .geometry import validate_polygon
+            from .geometry import validate_polygon,validate_polygon_holes
             validate_polygon(self.vertices)
+            if self.holes:validate_polygon_holes(self.vertices,self.holes)
+        elif self.holes:raise ValueError('Only polygons carry holes.')
         return self
 
     @property

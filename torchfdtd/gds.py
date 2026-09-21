@@ -16,7 +16,7 @@ from contextlib import contextmanager
 import numpy as np
 
 from .models import Structure
-from .geometry import validate_polygon, rotation_matrix
+from .geometry import validate_polygon, validate_polygon_holes, polygon_contains, rotation_matrix
 
 
 def _gdstk():
@@ -47,17 +47,29 @@ def _span(low,high):
 
 @dataclass(frozen=True)
 class GDSLayer:
+    """One extruded layer/datatype pair.
+
+    ``etch_by`` lists (layer, datatype) pairs whose polygons are subtracted
+    from this pair by a boolean NOT before extrusion (etched holes, vias).
+    Etch pairs count as mapped geometry and are not extruded by this entry.
+    """
     layer: int
     datatype: int
     z_min: float
     z_max: float
     material: str
     mesh_order: int = 2
+    etch_by: tuple[tuple[int,int],...] = ()
 
     def __post_init__(self):
         _pair(self.layer,self.datatype);_span(self.z_min,self.z_max)
         if not isinstance(self.material,str) or not self.material or isinstance(self.mesh_order,bool) or not isinstance(self.mesh_order,int) or not 1<=self.mesh_order<=100:
             raise ValueError('Provide a material name and mesh_order in [1, 100].')
+        etch=tuple(tuple(pair) for pair in self.etch_by)
+        if any(len(pair)!=2 for pair in etch):raise ValueError('etch_by entries must be (layer, datatype) pairs.')
+        for pair in etch:_pair(*pair)
+        if (self.layer,self.datatype) in etch or len(set(etch))!=len(etch):raise ValueError('etch_by pairs must be unique and differ from the etched pair.')
+        object.__setattr__(self,'etch_by',etch)
 
 
 @dataclass(frozen=True)
@@ -164,12 +176,83 @@ def _canonical(points):
     if not np.isfinite(points).all():raise ValueError('GDS polygon coordinates must be finite.')
     try:validate_polygon(points)
     except ValueError as exc:
-        raise ValueError('GDS contour is not an admitted simple polygon (holes, touching bridges, self-intersections or excessive vertices are unsupported): '+str(exc)) from exc
+        raise ValueError('GDS contour is not an admitted simple polygon (self-intersections, touching edges or excessive vertices are unsupported): '+str(exc)) from exc
     shifted=points-points[0]
     area=np.sum(shifted[:,0]*np.roll(shifted[:,1],-1)-shifted[:,1]*np.roll(shifted[:,0],-1))
     if area<0:points=points[::-1]
     first=min(range(len(points)),key=lambda i:tuple(points[i]))
     return np.roll(points,-first,axis=0)
+
+
+def _collapse(points):
+    """Drop cyclic consecutive duplicates and X,Y,X back-tracks left by cut bridges."""
+    while len(points)>=3:
+        n=len(points);cut=None
+        for i in range(n):
+            if points[i]==points[(i+1)%n]:cut={(i+1)%n};break
+            if points[(i-1)%n]==points[(i+1)%n]:cut={i,(i+1)%n};break
+        if cut is None:break
+        for k in sorted(cut,reverse=True):del points[k]
+    return points
+
+
+def _strip_collinear(points):
+    """Remove vertices lying on the straight segment between their neighbours."""
+    points=np.asarray(points,dtype=float);span=np.ptp(points,axis=0).max();tol=64*np.finfo(float).eps*max(span,1e-300)
+    keep=[]
+    for i,p in enumerate(points):
+        a=points[i-1]-p;b=points[(i+1)%len(points)]-p
+        if not (abs(a[0]*b[1]-a[1]*b[0])<=tol*span and a@b<0):keep.append(i)
+    return points[keep]
+
+
+def _split_contour(points):
+    """Split one closed GDS contour at repeated vertices into simple loops.
+
+    gdstk and other GDS tools store holes as a zero-width bridge whose
+    endpoints appear twice in the contour. A simple contour is returned as
+    is. Otherwise the repeated pair with the smallest span is cut out first,
+    bridge remnants collapse, and every recovered loop drops collinear
+    attachment vertices before simple-polygon admission.
+    """
+    points=np.asarray(points,dtype=float)
+    if not np.isfinite(points).all():raise ValueError('GDS polygon coordinates must be finite.')
+    remaining=[tuple(map(float,p)) for p in points]
+    if len(set(remaining))==len(remaining):return [points]
+    loops=[]
+    while True:
+        remaining=_collapse(remaining);seen={};pair=None
+        for j,p in enumerate(remaining):
+            if p in seen and (pair is None or j-seen[p]<pair[1]-pair[0]):pair=(seen[p],j)
+            seen[p]=j
+        if pair is None:break
+        i,j=pair;loops.append(remaining[i:j]);remaining=remaining[:i]+remaining[j:]
+    loops.append(remaining)
+    loops=[_strip_collinear(loop) for loop in loops if len(loop)>=3]
+    if not loops:raise ValueError('GDS contour collapses to a degenerate bridge.')
+    return loops
+
+
+def _polygons_with_holes(loops):
+    """Group simple loops by even-odd nesting depth into (outer, holes) pairs."""
+    loops=[_canonical(loop) for loop in loops]
+    parents=[[j for j,b in enumerate(loops) if i!=j and np.all(polygon_contains(a[:,0],a[:,1],b))] for i,a in enumerate(loops)]
+    result=[];assigned=0
+    for i,a in enumerate(loops):
+        if len(parents[i])%2:continue
+        holes=[loops[j] for j in range(len(loops)) if len(parents[j])==len(parents[i])+1 and i in parents[j]]
+        result.append((a,holes));assigned+=1+len(holes)
+    if assigned!=len(loops):raise ValueError('GDS contour loops have ambiguous nesting (coincident or overlapping loops).')
+    return result
+
+
+def _gds_polygons(polygon):
+    """Native (outer, holes) pairs of one GDS polygon, canonical and admitted."""
+    pairs=_polygons_with_holes(_split_contour(polygon.points))
+    for outer,holes in pairs:
+        try:validate_polygon_holes(outer,holes)
+        except ValueError as exc:raise ValueError('GDS hole contour is not admitted: '+str(exc)) from exc
+    return pairs
 
 
 def _admit_xy(points,limits,bounds):
@@ -258,36 +341,49 @@ def import_gds(path,*,cell,layers,port_layers=(),unmapped='error',limits=None,
         polygons.extend(flat_path.to_polygons())
     if len(polygons)>limits.max_instances or sum(len(p.points) for p in polygons)>limits.max_total_vertices:
         raise ValueError('Flattened GDS geometry exceeds instance/vertex admission limits.')
-    stack={}
-    for entry in layers:stack.setdefault((entry.layer,entry.datatype),[]).append(entry)
+    stack={(entry.layer,entry.datatype) for entry in layers}
+    etch_pairs={pair for entry in layers for pair in entry.etch_by}
     ports_by_pair={}
     for entry in port_layers:
         key=(entry.layer,entry.datatype)
         if key in ports_by_pair:raise ValueError('Each port TEXT layer/type requires one unambiguous contract.')
         ports_by_pair[key]=entry
-    converted=[];ignored={};layer_counts={};converted_vertices=0
+    groups={};ignored={}
     for polygon in polygons:
         key=(polygon.layer,polygon.datatype)
-        if key not in stack:
-            ignored[key]=ignored.get(key,0)+1;continue
-        points=_canonical(polygon.points);_admit_xy(points,limits,xy_bounds_um)
-        layer_counts[key]=layer_counts.get(key,0)+1
-        if len(converted)+len(stack[key])>limits.max_structures:raise ValueError('Converted stack exceeds max_structures.')
-        converted_vertices+=len(points)*len(stack[key])
-        if converted_vertices>limits.max_total_vertices:raise ValueError('Converted stack exceeds max_total_vertices.')
-        for layer in stack[key]:converted.append((key,tuple(map(tuple,points)),layer))
+        if key in stack or key in etch_pairs:groups.setdefault(key,[]).append(polygon)
+        else:ignored[key]=ignored.get(key,0)+1
     if ignored and unmapped=='error':raise ValueError(f'Unmapped GDS geometry layer/datatype pairs: {sorted(ignored)}. Map them or explicitly choose unmapped="report".')
-    if len(converted)>limits.max_structures:raise ValueError('Converted stack exceeds max_structures.')
+    layer_counts={key:len(group) for key,group in groups.items() if key in stack}
+    converted=[];converted_vertices=0;hole_count=0;etched=[];plain={}
+    for layer in layers:
+        key=(layer.layer,layer.datatype);source=groups.get(key,[])
+        if layer.etch_by:
+            etch=[p for pair in layer.etch_by for p in groups.get(pair,[])]
+            # Boolean NOT on the file precision grid, as any GDS tool applies it.
+            if source and etch:source=gdstk.boolean(source,etch,'not',precision=precision/1e-6)
+            pieces=[pair for polygon in source for pair in _gds_polygons(polygon)]
+            etched.append(dict(layer=key[0],datatype=key[1],etch_by=[list(pair) for pair in layer.etch_by],polygons=len(pieces)))
+        else:
+            if key not in plain:plain[key]=[pair for polygon in source for pair in _gds_polygons(polygon)]
+            pieces=plain[key]
+        for outer,holes in pieces:
+            _admit_xy(outer,limits,xy_bounds_um)
+            if len(converted)>=limits.max_structures:raise ValueError('Converted stack exceeds max_structures.')
+            converted_vertices+=len(outer)+sum(len(h) for h in holes);hole_count+=len(holes)
+            if converted_vertices>limits.max_total_vertices:raise ValueError('Converted stack exceeds max_total_vertices.')
+            converted.append((key,tuple(map(tuple,outer)),tuple(tuple(map(tuple,h)) for h in holes),layer))
     if not converted:raise ValueError('The selected cell has no geometry on the requested layer stack.')
     positions={id(layer):i for i,layer in enumerate(layers)}
-    converted.sort(key=lambda item:(positions[id(item[2])],item[0],item[1]))
+    converted.sort(key=lambda item:(positions[id(item[3])],item[0],item[1],item[2]))
     structures=[];all_points=[]
-    for i,(key,points,layer) in enumerate(converted):
+    for i,(key,points,holes,layer) in enumerate(converted):
         points=np.asarray(points);lower=points.min(axis=0);upper=points.max(axis=0);center=(lower+upper)/2
-        token=hashlib.sha256(repr((key,tuple(map(tuple,points)),asdict(layer))).encode()).hexdigest()[:12]
+        token=hashlib.sha256(repr((key,tuple(map(tuple,points)),holes,asdict(layer))).encode()).hexdigest()[:12]
         structures.append(Structure(id=f'gds-{token}-{i}',name=f'{cell}:{key[0]}/{key[1]}:{i}'[:100],kind='polygon',
             center=(*center,(layer.z_min+layer.z_max)/2),size=(*(upper-lower),layer.z_max-layer.z_min),
-            vertices=tuple(map(tuple,points-center)),material=layer.material,mesh_order=layer.mesh_order))
+            vertices=tuple(map(tuple,points-center)),holes=tuple(tuple(map(tuple,np.asarray(h)-center)) for h in holes),
+            material=layer.material,mesh_order=layer.mesh_order))
         all_points.extend(points)
     _admit_xy(all_points,limits,xy_bounds_um)
     ports=[];ignored_labels=0
@@ -310,14 +406,15 @@ def import_gds(path,*,cell,layers,port_layers=(),unmapped='error',limits=None,
     report=dict(format='gdsii',source_sha256=hashlib.sha256(data).hexdigest(),cell=cell,
         file_unit_m=unit,file_precision_m=precision,coordinate_unit='um',path_tolerance_um=path_tolerance_um,
         visited_cells=visited,expanded_polygon_count=len(polygons),expanded_path_count=totals[3],
-        expanded_cell_instances=totals[4],structures=len(structures),native_vertex_count=converted_vertices,
+        expanded_cell_instances=totals[4],structures=len(structures),native_vertex_count=converted_vertices,hole_count=hole_count,
         layer_stack=[asdict(x) for x in layers],mapped_layers=[dict(layer=k[0],datatype=k[1],polygons=v) for k,v in sorted(layer_counts.items())],
-        ignored_geometry=[dict(layer=k[0],datatype=k[1],polygons=v) for k,v in sorted(ignored.items())],
+        etched_layers=etched,ignored_geometry=[dict(layer=k[0],datatype=k[1],polygons=v) for k,v in sorted(ignored.items())],
         ignored_label_count=ignored_labels,ignored_metadata_records=ignored_records,ports=[asdict(p) for p in ports],
-        bounds_um=[[*np.min(all_points,axis=0),min(x.z_min for _,_,x in converted)],
-                   [*np.max(all_points,axis=0),max(x.z_max for _,_,x in converted)]],
-        limitations=['Simple polygon extrusions only; hole/bridge contours are rejected.',
-                     'Port metadata does not create a mode source or detector.',
+        bounds_um=[[*np.min(all_points,axis=0),min(x.z_min for *_,x in converted)],
+                   [*np.max(all_points,axis=0),max(x.z_max for *_,x in converted)]],
+        limitations=['Vertical polygon extrusions with explicit holes; contours touching their holes are rejected.',
+                     'Separate contours on one layer are unioned as in GDS, not treated as holes; use etch_by for that.',
+                     'Port metadata does not create a mode source or detector; see gds_ports.prepare_gds_two_port.',
                      'GDS properties and presentation metadata do not define simulation physics.'])
     return GDSImport(tuple(structures),tuple(ports),report)
 
@@ -350,12 +447,20 @@ def export_gds(path,structures,*,layers,cell='TOP',unit_m=1e-6,precision_m=1e-9)
         if obj.kind=='polygon':points=np.asarray(obj.vertices)
         else:
             x,y=np.asarray(obj.size[:2])/2;points=np.array([[-x,-y],[x,-y],[x,y],[-x,y]])
-        points=points@matrix[:2,:2].T+np.asarray(obj.center[:2])
-        points=_canonical(points)
-        integer=np.rint(points*1e-6/precision_m)
-        if np.max(np.abs(integer))>2147483647:raise ValueError('Coordinates exceed GDS signed 32-bit precision range.')
-        rounded=_canonical(integer*precision_m/1e-6)
-        target.add(gdstk.Polygon(rounded*1e-6/unit_m,layer=pair[0],datatype=pair[1]))
+        def rounded(local):
+            world=_canonical(np.asarray(local)@matrix[:2,:2].T+np.asarray(obj.center[:2]))
+            integer=np.rint(world*1e-6/precision_m)
+            if np.max(np.abs(integer))>2147483647:raise ValueError('Coordinates exceed GDS signed 32-bit precision range.')
+            return _canonical(integer*precision_m/1e-6)
+        outer=rounded(points);holes=[rounded(h) for h in obj.holes]
+        if holes:
+            # Holes are written the way GDS tools store them: one bridged contour.
+            try:validate_polygon_holes(outer,holes)
+            except ValueError as exc:raise ValueError('Rounded polygon holes are no longer admitted: '+str(exc)) from exc
+            scale=1e-6/unit_m
+            target.add(*gdstk.boolean(gdstk.Polygon(outer*scale),[gdstk.Polygon(h*scale) for h in holes],'not',
+                                      precision=precision_m/unit_m,layer=pair[0],datatype=pair[1]))
+        else:target.add(gdstk.Polygon(outer*1e-6/unit_m,layer=pair[0],datatype=pair[1]))
         stack.append(dict(structure_id=obj.id,layer=pair[0],datatype=pair[1],material=obj.material,
                           z_min=obj.center[2]-obj.size[2]/2,z_max=obj.center[2]+obj.size[2]/2,mesh_order=obj.mesh_order))
     path=Path(path)

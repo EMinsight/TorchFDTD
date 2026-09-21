@@ -3,8 +3,11 @@
 python examples/gds_workflow.py chip.gds TOP stack.json --output scene.json
 
 stack.json: {"layers": [{"layer": 1, "datatype": 0, "z_min": -0.11,
-"z_max": 0.11, "material": "core"}], "materials": [{"name": "core",
-"index": 2.0}], "port_layers": []}
+"z_max": 0.11, "material": "core", "etch_by": [[2, 0]]}], "materials":
+[{"name": "core", "index": 2.0}], "port_layers": []}
+
+"etch_by" is optional: polygons on the listed pairs are subtracted from the
+layer before extrusion. Bridged hole contours import as explicit holes.
 
 The index above is illustrative. Supply the actual device materials. No
 excitation or detector is invented from the layout or its text markers.

@@ -94,12 +94,11 @@ def test_port_texttype_nested_transform_and_repeated_names(tmp_path):
         import_gds(path,cell='TOP',layers=[GDSLayer(1,0,0,.2,'core')],port_layers=ports)
 
 
-def test_holes_unsupported_records_cycles_and_bounds_are_not_silent(tmp_path):
+def test_self_intersections_unsupported_records_cycles_and_bounds_are_not_silent(tmp_path):
     lib=gdstk.Library();cell=lib.new_cell('TOP')
-    outer=gdstk.rectangle((-2,-2),(2,2));inner=gdstk.rectangle((-1,-1),(1,1))
-    cell.add(*gdstk.boolean(outer,inner,'not',layer=1))
+    cell.add(gdstk.Polygon([(-2,-2),(2,2),(2,-2),(-2,2)],layer=1))
     path=write(tmp_path,lib)
-    with pytest.raises(ValueError,match='holes'):
+    with pytest.raises(ValueError,match='simple polygon'):
         import_gds(path,cell='TOP',layers=[GDSLayer(1,0,0,.2,'core')])
     path=rectangle_file(tmp_path)
     with pytest.raises(ValueError,match='XY bounds'):

@@ -100,6 +100,7 @@ def _write_fsp(document,project,*,settings):
     base=conversion.project
     if base is None:raise ValueError('Original FSP has unsupported native mappings: '+str(conversion.issues))
     if tuple(provenance.origin_m)!=tuple(conversion.origin_m):raise ValueError('FSP coordinate origin was changed.')
+    if any(s.holes for s in project.structures):raise ValueError('FSP polygons are single contours; polygon holes cannot be written.')
     native_only=[];instruments=None
     for material in project.materials:
         if material.model=='tensor':

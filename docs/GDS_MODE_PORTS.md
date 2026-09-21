@@ -10,6 +10,37 @@ isotropic modal permittivity, per-name source offsets and mode indices. The
 caller must declare whether marker normals point outward or inward. No process
 index, source timing, normalization, or normal convention is inferred.
 
+## One call from markers to a runnable network
+
+```python
+from torchfdtd.gds_ports import prepare_gds_two_port
+
+two_port = prepare_gds_two_port(imported, project, wavelength_um=1.55)
+result = two_port.run()          # ModeNetworkResult with complex S
+gradient_carrier = two_port.epsilon   # Yee-sampled imported geometry
+```
+
+`prepare_gds_two_port` wraps the adapter with defaults taken from the import
+and the project: both markers when `imported.ports` holds exactly two (pass
+`port_names` otherwise), outward marker normals, the wavelength of the
+project's plane source template (a zero-size Gaussian plane template is added
+when the project has no source, and `wavelength_um` is then required), source
+planes four mesh cells outside each phase plane, the fundamental mode, and a
+modal cross-section sampled from the imported structures and project
+materials on the lower phase plane with the same mesh-order rule as native
+voxelization. It returns the `ModeNetwork` together with `voxelize` of the
+network project as a float tensor, so `run()` is the complete two-port
+simulation and the tensor is the carrier for material gradients. Every
+keyword of `prepare_gds_mode_network` can still be passed explicitly, and
+`permittivity` overrides the sampled section.
+
+The adapter contract is unchanged: full-cell marker apertures, cardinal
+opposing normals on one axis, phase planes on E nodes, and exterior guides
+that are straight from each boundary through its phase plane so the sampled
+section equals the runtime material there. Branches and more than two ports
+are not part of this helper; it selects from `layout.ports` so a wider port
+model can extend the same entry point.
+
 The supported markers have opposing cardinal x or y normals. Their transverse
 centers must be zero. Width must equal the entire other XY cell extent and
 height must equal the entire z cell extent. This makes the finite GDS aperture
@@ -90,3 +121,13 @@ convergence or continuum-gradient accuracy claim. The test also checks
 reciprocity, straight-guide discrete phase, and rejection of an altered
 exterior guide. No GPU was used. Metadata tests reject unsupported apertures,
 centers and normals before constructing a network.
+
+The one-call test imports a straight 0.6 um wide guide of index 1.7 spanning
+the same 8 by 1 by 1 um cell with two TEXT markers at -1 and +1 um and no
+project source. `prepare_gds_two_port` with `wavelength_um=1.55` places the
+source planes at -1.8 and +1.8 um, samples the guide itself as the modal
+section, and its calibration guide equals the sampled runtime epsilon
+everywhere. The CPU FP32 run gives a finite, reciprocal S matrix with
+|S21| above 0.5 and S21 within 0.05 of the discrete straight-guide phase. A
+supplied template source provides the default wavelength, and a single
+marker is rejected with a request for explicit `port_names`.

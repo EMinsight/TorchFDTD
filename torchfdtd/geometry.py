@@ -54,13 +54,52 @@ def validate_polygon(vertices):
         if np.any(boxes&straddle):raise ValueError('Polygon edges must not cross or touch nonadjacent edges.')
 
 
-def polygon_contains(x,y,vertices):
+def _edges_cross(p,q):
+    """True when an edge of contour p crosses or touches an edge of contour q."""
+    span=max(np.ptp(p,axis=0).max(),np.ptp(q,axis=0).max());tol=64*np.finfo(float).eps*max(span,1e-300);eps=tol*span
+    cross=lambda a,b:a[...,0]*b[...,1]-a[...,1]*b[...,0]
+    c=q[None];d=np.roll(q,-1,axis=0)[None]
+    for start in range(0,len(p),256):
+        a=p[start:start+256,None];b=np.roll(p,-1,axis=0)[start:start+256,None]
+        f=cross(b-a,c-a);g=cross(b-a,d-a);h=cross(d-c,a-c);k=cross(d-c,b-c)
+        boxes=(np.maximum(np.minimum(a,b),np.minimum(c,d))<=np.minimum(np.maximum(a,b),np.maximum(c,d))+tol).all(axis=-1)
+        straddle=((f<=eps)&(g>=-eps)|(g<=eps)&(f>=-eps))&((h<=eps)&(k>=-eps)|(k<=eps)&(h>=-eps))
+        if np.any(boxes&straddle):return True
+    return False
+
+
+def validate_polygon_holes(vertices,holes):
+    """Simple hole contours strictly inside the outer contour and strictly apart from each other."""
+    if len(holes)>1024:raise ValueError('A polygon admits at most 1024 holes.')
+    outer=np.asarray(vertices,dtype=float);loops=[]
+    for hole in holes:
+        validate_polygon(hole);loop=np.asarray(hole,dtype=float)
+        inside,edge=_polygon_parity(loop[:,0],loop[:,1],outer)
+        if not np.all(inside&~edge) or _edges_cross(outer,loop):
+            raise ValueError('Polygon holes must lie strictly inside the outer contour without touching it.')
+        for other in loops:
+            if (np.any(np.logical_or(*_polygon_parity(loop[:,0],loop[:,1],other)))
+                    or np.any(np.logical_or(*_polygon_parity(other[:,0],other[:,1],loop))) or _edges_cross(loop,other)):
+                raise ValueError('Polygon holes must not overlap, nest or touch each other.')
+        loops.append(loop)
+
+
+def _polygon_parity(x,y,vertices):
+    """Crossing parity and boundary membership of one closed contour."""
     shape=np.broadcast_shapes(x.shape,y.shape);inside=np.zeros(shape,bool);boundary=np.zeros(shape,bool)
     v=np.asarray(vertices);span=np.ptp(v,axis=0).max();tol=64*np.finfo(float).eps*max(span,1e-300)
     for (ax,ay),(bx,by) in zip(v,np.roll(v,-1,axis=0)):
         cross=(bx-ax)*(y-ay)-(by-ay)*(x-ax)
         boundary|=(abs(cross)<=tol*max(abs(bx-ax),abs(by-ay)))&(x>=min(ax,bx)-tol)&(x<=max(ax,bx)+tol)&(y>=min(ay,by)-tol)&(y<=max(ay,by)+tol)
         if by!=ay:inside^=((ay>y)!=(by>y))&(x<(bx-ax)*(y-ay)/(by-ay)+ax)
+    return inside,boundary
+
+
+def polygon_contains(x,y,vertices,holes=()):
+    """Even-odd membership of the outer contour and its holes. Every contour boundary is material."""
+    inside,boundary=_polygon_parity(x,y,vertices)
+    for hole in holes:
+        parity,edge=_polygon_parity(x,y,hole);inside^=parity;boundary|=edge
     return inside|boundary
 
 
@@ -79,7 +118,7 @@ def contains(obj,x,y,z):
         matrix=rotation_matrix(obj)
         u,v,w=[sum(matrix[a,b]*delta[a] for a in range(3) if matrix[a,b]!=0) for b in range(3)]
     if obj.kind=='rectangle':return (abs(u)<=obj.size[0]/2)&(abs(v)<=obj.size[1]/2)&(abs(w)<=obj.size[2]/2)
-    if obj.kind=='polygon':return polygon_contains(u,v,obj.vertices)&(abs(w)<=obj.size[2]/2)
+    if obj.kind=='polygon':return polygon_contains(u,v,obj.vertices,obj.holes)&(abs(w)<=obj.size[2]/2)
     rx,ry,rz=radii(obj)
     if obj.kind=='sphere':
         return (u/rx)**2+(v/ry)**2+(w/rz)**2<=1 if obj.make_ellipsoid else u*u+v*v+w*w<=rx*rx

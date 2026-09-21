@@ -68,9 +68,10 @@ class DielectricGeometry:
         else:
             for side in (-1,1):plane(np.array([0.,0.,1.]),side*obj.size[2]/2)
             if obj.kind=='polygon':
-                vertices=np.asarray(obj.vertices)
-                for p,q in zip(vertices,np.roll(vertices,-1,axis=0)):
-                    n=np.array([q[1]-p[1],p[0]-q[0],0.]);plane(n,float(n[:2]@p))
+                for contour in (obj.vertices,*obj.holes):
+                    vertices=np.asarray(contour)
+                    for p,q in zip(vertices,np.roll(vertices,-1,axis=0)):
+                        n=np.array([q[1]-p[1],p[0]-q[0],0.]);plane(n,float(n[:2]@p))
             else:
                 rx,ry,_=radii(obj);quad(np.array([rx,ry,np.inf]))
                 if obj.kind=='ring':
@@ -171,12 +172,13 @@ class DielectricGeometry:
                 else:
                     face(2,obj.size[2]/2)
                     if obj.kind=='polygon':
-                        vertices=np.asarray(obj.vertices)
-                        for a,b in zip(vertices,np.roll(vertices,-1,axis=0)):
-                            v=b-a;t=np.clip((u[:,:2]-a)@v/(v@v),0,1);delta=u[:,:2]-a-t[:,None]*v
-                            n=np.zeros_like(u);n[:,:2]=np.array([v[1],-v[0]])
-                            location=u.copy();location[:,:2]=a+t[:,None]*v
-                            surface(np.linalg.norm(delta,axis=1),n,location)
+                        for contour in (obj.vertices,*obj.holes):
+                            vertices=np.asarray(contour)
+                            for a,b in zip(vertices,np.roll(vertices,-1,axis=0)):
+                                v=b-a;t=np.clip((u[:,:2]-a)@v/(v@v),0,1);delta=u[:,:2]-a-t[:,None]*v
+                                n=np.zeros_like(u);n[:,:2]=np.array([v[1],-v[0]])
+                                location=u.copy();location[:,:2]=a+t[:,None]*v
+                                surface(np.linalg.norm(delta,axis=1),n,location)
                     else:
                         rx,ry,_=radii(obj);radial(np.array([rx,ry,np.inf]))
                         if obj.kind=='ring':

@@ -132,3 +132,42 @@ def test_synthetic_gds_to_native_cpu_scatterer_and_material_vjp(tmp_path):
     with pytest.raises(ValueError,match='exterior material'):network(bad)
     print(dict(device='cpu',slab_voxels=int(mask.sum()),gradient=float(gradient),
                scattering_change=float((result.s-baseline.s).abs().max().detach())))
+
+
+def test_one_call_two_port_from_straight_waveguide(tmp_path):
+    gdstk=pytest.importorskip('gdstk')
+    from torchfdtd.gds_ports import GDSTwoPort, prepare_gds_two_port
+    lib=gdstk.Library(); cell=lib.new_cell('TOP')
+    cell.add(gdstk.rectangle((-4.,-.3),(4.,.3),layer=1))
+    cell.add(gdstk.Label('west',(-1.,0.),layer=10),gdstk.Label('east',(1.,0.),layer=11))
+    with tempfile.TemporaryDirectory(prefix='.gds-two-port-fixture-',dir='.') as directory:
+        path=Path(directory)/'layout.gds';lib.write_gds(path)
+        raw=path.read_bytes()
+    path=tmp_path/'layout.gds';path.write_bytes(raw)
+    imported=import_gds(path,cell='TOP',layers=[GDSLayer(1,0,-.3,.3,'slab')],
+        port_layers=[GDSPortLayer(10,0,-.5,.5,1.,(-1.,0.)),GDSPortLayer(11,0,-.5,.5,1.,(1.,0.))])
+    project=scene().model_copy(update={'sources':[]})
+    with pytest.raises(ValueError,match='wavelength_um'):prepare_gds_two_port(imported,project)
+    two_port=prepare_gds_two_port(imported,project,wavelength_um=1.55,options=AdjointOptions(checkpoints=2))
+    assert isinstance(two_port,GDSTwoPort)
+    network=two_port.network
+    assert network.channels==(('west',0),('east',0))
+    assert [(q.coordinate_um,q.source_coordinate_um) for q in network.ports]==[(-1.,-1.8),(1.,1.8)]
+    assert network.project.sources[0].wavelength==1.55
+    assert tuple(two_port.epsilon.shape)==project.region.shape+(3,) and two_port.epsilon.dtype==torch.float32
+    # The default modal section is the imported guide itself: the straight
+    # calibration guide equals the sampled runtime geometry everywhere.
+    assert torch.allclose(network.reference_epsilon(),two_port.epsilon)
+    assert float(two_port.epsilon.max())==pytest.approx(1.7**2,rel=1e-6)
+    result=two_port.run()
+    s=result.s
+    assert s.shape==(2,2) and torch.isfinite(s).all()
+    assert abs(complex(s[1,0]))>.5 and abs(complex(s[0,1]))>.5
+    assert (s-s.T).abs().max()<.01
+    expected=np.exp(2j*network._launches[0].mode.beta_per_um)
+    assert abs(complex(s[1,0])-expected)<.05
+    # A supplied template source and its wavelength are the defaults instead.
+    defaults=prepare_gds_two_port(imported,scene(),options=AdjointOptions(checkpoints=2))
+    assert defaults.network.project.sources[0].wavelength==scene().sources[0].wavelength
+    with pytest.raises(ValueError,match='port_names'):
+        prepare_gds_two_port(replace(imported,ports=imported.ports[:1]),scene(),wavelength_um=1.55)

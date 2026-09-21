@@ -1,6 +1,10 @@
 """Explicit full-supercell GDS TEXT adapter for opposing fixed mode ports."""
+from dataclasses import dataclass
 import math
 from collections.abc import Mapping
+
+import numpy as np
+import torch
 
 from .gds import GDSImport
 from .mode_network import FixedModePort, ModeNetwork
@@ -83,3 +87,80 @@ def prepare_gds_mode_network(imported, project, *, port_names, normal_convention
     copied.sources = [source]
     return ModeNetwork(copied, ports, permittivity, options, num_modes=num_modes,
                        network_budget_bytes=network_budget_bytes, gram_tolerance=gram_tolerance)
+
+
+@dataclass(frozen=True)
+class GDSTwoPort:
+    """A runnable two-port network with the Yee-sampled imported geometry."""
+    network: ModeNetwork
+    epsilon: torch.Tensor
+
+    def run(self, **kwargs):
+        """Complex S matrix of the imported geometry; kwargs go to ModeNetwork."""
+        return self.network(self.epsilon, **kwargs)
+
+
+def prepare_gds_two_port(imported, project, *, port_names=None, wavelength_um=None,
+                         normal_convention='outward', source_offset_um=None,
+                         mode_indices=(0,), permittivity=None, options=None, **network):
+    """One call from two imported TEXT markers to a runnable two-port network.
+
+    Defaults: both markers when ``imported.ports`` holds exactly two, the
+    wavelength of the project's plane source template (a Gaussian plane
+    template is added when the project has no source), source planes four
+    mesh cells outside each phase plane, and a modal cross-section sampled
+    from the imported structures on the left phase plane with the same Yee
+    sampling as the runtime epsilon. The full-cell marker aperture, cardinal
+    opposing normals and straight exterior guides of
+    ``prepare_gds_mode_network`` still apply. Extra keywords reach that adapter.
+    """
+    if not isinstance(imported, GDSImport):
+        raise ValueError('Provide an explicit GDSImport with TEXT port metadata.')
+    if port_names is None:
+        if len(imported.ports) != 2:
+            raise ValueError('Select port_names explicitly unless the import holds exactly two markers.')
+        port_names = tuple(p.name for p in imported.ports)
+    names = tuple(port_names)
+    by_name = {p.name: p for p in imported.ports}
+    if len(names) != 2 or any(name not in by_name for name in names):
+        raise ValueError('Select exactly two imported GDS port names.')
+    active = [project.resolved_source(s) for s in project.sources if s.enabled]
+    if not active:
+        if wavelength_um is None:
+            raise ValueError('Provide wavelength_um when the project has no plane source template.')
+        from .models import Source
+        # A zero-size template: the adapter sets its normal, plane and extent.
+        project = project.model_copy(update={'sources': [Source(kind='plane', wavelength=float(wavelength_um), size=(0., 0., 0.))]})
+    elif wavelength_um is None:
+        wavelength_um = active[0].wavelength
+    r = project.region
+    if source_offset_um is None:
+        source_offset_um = 4*r.mesh
+    close = lambda a, b: math.isclose(a, b, rel_tol=0, abs_tol=1e-8)
+    port = by_name[names[0]]
+    axis = next((a for a in (0, 1) if close(abs(port.normal[a]), 1)), None)
+    if axis is None:
+        raise ValueError('Only cardinal x/y GDS port normals are supported.')
+    if permittivity is None:
+        from .geometry import contains
+        copied = imported.add_to(project)
+        values = {m.name: m.instantaneous_epsilon for m in copied.materials}
+        plane = min(by_name[name].center_um[axis] for name in names)
+        u, v = (axis+1) % 3, (axis+2) % 3
+
+        def permittivity(*coords):
+            grid = [None]*3
+            grid[axis] = np.full(np.shape(coords[0]), plane); grid[u], grid[v] = coords
+            epsilon = np.full(np.shape(coords[0]), r.background_index**2)
+            for obj in sorted(copied.structures, key=lambda s: -s.mesh_order):
+                if obj.enabled:
+                    epsilon[contains(obj, *grid)] = values[obj.material]
+            return epsilon
+    network = prepare_gds_mode_network(
+        imported, project, port_names=names, normal_convention=normal_convention,
+        source_offsets_um={name: source_offset_um for name in names},
+        mode_indices={name: tuple(mode_indices) for name in names},
+        wavelength_um=wavelength_um, permittivity=permittivity, options=options, **network)
+    from .solver import voxelize
+    epsilon, _ = voxelize(network.project)
+    return GDSTwoPort(network, torch.from_numpy(epsilon))
