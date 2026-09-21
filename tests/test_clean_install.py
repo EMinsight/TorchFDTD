@@ -69,8 +69,10 @@ def test_record_matches_the_current_packaging_inputs_and_wheel():
     record, path = _record()
     assert record['packaging_inputs_sha256'] == packaging_inputs_sha256(), \
         f'{path.name} predates a change to pyproject.toml, torchfdtd/web or the clean-install scripts; rerun scripts/clean_install_check.py'
-    ancestry = subprocess.run(['git', 'merge-base', '--is-ancestor', record['source_commit'], 'HEAD'], cwd=ROOT, capture_output=True)
-    assert ancestry.returncode == 0, f'record commit {record["source_commit"][:12]} is not an ancestor of HEAD'
+    known = subprocess.run(['git', 'cat-file', '-e', record['source_commit'] + '^{commit}'], cwd=ROOT, capture_output=True)
+    if known.returncode == 0:  # a shallow clone cannot judge ancestry
+        ancestry = subprocess.run(['git', 'merge-base', '--is-ancestor', record['source_commit'], 'HEAD'], cwd=ROOT, capture_output=True)
+        assert ancestry.returncode == 0, f'record commit {record["source_commit"][:12]} is not an ancestor of HEAD'
     wheel = Path(record['wheel']['path'])
     if not wheel.is_file():
         pytest.skip(f'the recorded wheel is not on this host: {wheel}')
