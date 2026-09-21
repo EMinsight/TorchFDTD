@@ -1,6 +1,6 @@
 """Render the G3-04, G3-05, G3-08 and G3-13 sections of docs/PHYSICS_VALIDATION.md from docs/validation/g3/<task>.json.
 
-Run: python -m benchmarks.render_g3_b [--tasks G3-04 ...]
+Run: python -m benchmarks.render_g3_b [--tasks G3-04 ...] [--summaries-only]
 The sections are replaced between the markers "<!-- g3-b:<task> begin -->" and
 "<!-- g3-b:<task> end -->"; a missing marker pair is appended at the end of the
 file, and a missing file is created with a two-line header.
@@ -200,16 +200,26 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument('--tasks', nargs='+', default=list(RENDERERS), help='tasks to render (default: all with a record)')
+    parser.add_argument('--summaries-only', action='store_true', help='write the observed-metric summaries and leave the document alone')
     args = parser.parse_args()
+    # After the G3 branches merge, scripts/render_physics_validation.py imports RENDERERS and owns the
+    # document; writing the marked regions here as well would duplicate the sections.
+    shared = ROOT/'scripts'/'render_physics_validation.py'
+    document = not args.summaries_only and not shared.exists()
     text = DOC.read_text(encoding='utf-8') if DOC.exists() else HEADER
     for task, renderer in RENDERERS.items():
         record = load(task) if task in args.tasks else None
         if record is None:
             continue
         (RECORDS/f'{task}_observed.json').write_text(json.dumps(summary(task, record), indent=1)+'\n', encoding='utf-8', newline='\n')
+        if not document:
+            continue
         body = f'<!-- g3-b:{task} begin -->\n'+'\n'.join(renderer(record))+f'\n<!-- g3-b:{task} end -->'
         pattern = re.compile(rf'<!-- g3-b:{task} begin -->.*?<!-- g3-b:{task} end -->', re.S)
         text = pattern.sub(lambda _: body, text) if pattern.search(text) else text.rstrip('\n')+'\n\n'+body+'\n'
+    if not document:
+        print('wrote the observed-metric summaries only; render the document with', shared if shared.exists() else 'this script without --summaries-only')
+        return
     DOC.write_text(text if text.endswith('\n') else text+'\n', encoding='utf-8', newline='\n')
     print('rendered', DOC)
 
