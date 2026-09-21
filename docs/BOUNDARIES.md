@@ -101,12 +101,14 @@ media whose real permittivity is negative at that frequency. An adiabatic
 conductivity absorber on the faces touched by dispersive media is the more
 general fix and is not implemented.
 
-Validation warns about the configuration: `estimate()`, `/api/validate` and the
-summary printed by `torchfdtd run` list every enabled dispersive structure whose
-support bounds reach a PML layer, with the faces, whenever `pml_dispersion` is
-`'ade'` (`torchfdtd.solver.dispersive_structures_in_pml`). The check uses the
-structure's bounding box, so a rotated or curved object that only nearly reaches
-the layer is also named; nothing is rejected.
+Validation warns about the configuration: `/api/validate` (and so the
+workbench) and the summary printed by `torchfdtd run` list every enabled
+dispersive structure whose support bounds reach a PML layer, with the faces,
+whenever `pml_dispersion` is `'ade'`
+(`torchfdtd.stability_checks.stability_warnings`, appended to the estimate's
+warnings; the numeric modules are untouched). The check uses the structure's
+bounding box, so a rotated or curved object that only nearly reaches the layer
+is also named; nothing is rejected.
 
 The [stability sweep](STABILITY_SWEEP.md) (20,000 steps, 120 x 80 and 32^3
 cells, CPU float64 and RTX 3060 float32) did not reproduce the divergence on its

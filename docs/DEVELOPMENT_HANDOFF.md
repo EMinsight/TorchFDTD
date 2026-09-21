@@ -888,9 +888,9 @@ in the brief is on branch g5-memory (649ad79), not in this tree.
 
 **Changed files (why).**
 - `benchmarks/stability_sweep.py` (new): 56 rows of 20,000 steps sampled every 250 steps (state norm through a wrapped `DecayDecision.update`, interior epsilon|E|^2+|H|^2 through a wrapped `StateDiagnostics.measure`, manual loops for the reversible, streamed and tensor-media paths), `--rows`, `--skip-cuda`, `--quick`, `--merge`, `--rejudge`, `--render`. `docs/validation/cases/STABILITY_SWEEP.json` (criteria before the run, commit 8167030), `docs/validation/stability_sweep_3060.json`, `docs/STABILITY_SWEEP.md` (rendered).
-- `torchfdtd/solver.py`: `dispersive_structures_in_pml` and the warning in `estimate()` (reaches `/api/validate` and the `torchfdtd run` summary through the plan's resource copy). `docs/BOUNDARIES.md`: the warning and the sweep's numbers under "Dispersive materials inside PML".
+- `torchfdtd/stability_checks.py` (new): `dispersive_structures_in_pml` and `stability_warnings`; `torchfdtd/server.py` appends them to the `/api/validate` warnings and `torchfdtd/cli.py` to the printed and saved `run` summary (two lines each, endings preserved). The numeric modules owned by fix-review-core and `solver.py` are untouched: an earlier commit of this branch put the warning into `estimate()`, and 0e0e0e0 moved it out again. `docs/BOUNDARIES.md`: the warning and the sweep's numbers under "Dispersive materials inside PML".
 - `benchmarks/adjoint_leak_soak.py` (new): eight paths, 150 forward+backward+Adam iterations, samples every 10 after `synchronize` and two `gc.collect`, `--paths`, `--iterations`, `--merge`, `--rejudge`, `--note`, `--render`. `docs/validation/cases/ADJOINT_LEAK_SOAK.json` (declared at 8167030), `docs/validation/adjoint_leak_soak_3060.json`, `docs/ADJOINT_LEAK_SOAK.md` (rendered, with the module-level state statement).
-- `tests/test_stability_sweep.py` (16): the record covers the matrix, every verdict re-derived from the samples, failing rows need findings, the document equals `render(record)`, the warning through `estimate`, `/api/validate`, `Simulation.run` and the CLI, five 3000-step fixture regressions, the rejected tensor admission, the capture of a fired check, the interior mask. `tests/test_adjoint_leak_soak.py` (12): record and document checks plus 30-iteration CPU regressions of the seven differentiable families asserting zero growth of live tensors and solver state holders.
+- `tests/test_stability_sweep.py` (16): the record covers the matrix, every verdict re-derived from the samples, failing rows need findings, the document equals `render(record)`, the warning through `stability_warnings`, `/api/validate` and the CLI, five 3000-step fixture regressions, the rejected tensor admission, the capture of a fired check, the interior mask. `tests/test_adjoint_leak_soak.py` (12): record and document checks plus 30-iteration CPU regressions of the seven differentiable families asserting zero growth of live tensors and solver state holders.
 - `docs/CHANGELOG.md` (three lines).
 
 **Commands run (device: local Windows 11, i7-12700, RTX 3060 12 GB shared with other agents and a running suite, Python 3.10.2 in D:/TorchFDTD/.venv, torch 2.10.0+cu126, CuPy 13.6.0, psutil 7.2.2; TMP and TEMP under D:/TorchFDTD/.local/tmp; CPU rows with 4 torch threads).**
@@ -946,11 +946,13 @@ zero and its allowance was never exercised).
 `docs/validation/adjoint_leak_soak_3060.json` (run at a248548, 738 s wall);
 both carry the SHA-256 of the driver and the solver modules they exercise;
 the recorded hash of `torchfdtd/solver.py` is that of the LF-normalized
-working copy the runs used (its mixed CRLF/LF endings were restored, content
-unchanged, in the commit after the records).
+working copy the runs used, which carried the warning inside `estimate()`
+(warnings only; no numerical path differs from the committed 6eb7996 file the
+branch now keeps).
 
 **Remaining defects, risks, external blockers.**
 - The documented `ade` divergence is not reproduced within the sweep's bounded fixtures; the warning is the only behavioural change. Reproducing it needs the larger domain of the BOUNDARIES.md paragraph on a GPU that is not shared.
+- No patch is pending for the files owned by fix-review-core (`plan.py`, `identity.py`, `materials.py`, `models.py`, `capabilities.py`, `streamed_restart.py`, `execution_modes.py`); neither the sweep nor the soak needed a change inside them.
 - Float32 rows show a linear creep of the state norm on the round-off floor (1e-13 of the peak) with a constant peak field; it is recorded, not judged, and needs a longer run to separate accumulated round-off from a very slow mode.
 - The 31.8 MiB private-bytes step is consistent with WDDM relocating device allocations on the shared display GPU but was not proven with driver tools; rerun the soak on a dedicated GPU to confirm it disappears.
 - When g5-memory's live-reservation registry merges, add its size to `benchmarks/adjoint_leak_soak.py::cache_sizes` and to the case's measure list.

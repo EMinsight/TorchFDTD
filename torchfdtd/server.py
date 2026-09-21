@@ -20,6 +20,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from .models import Project, Material, demo_project
 from .plan import resolve_plan
 from .solver import Simulation, estimate, hardware
+from .stability_checks import stability_warnings
 from .execution_modes import execution_resources, resolve_execution, run_streamed_job, run_tiled_job, scratch_directory
 from .material_fit import OpticalDataRequest, MaterialFitRequest, fit_material, material_fit_report
 from .optical_data import OpticalData
@@ -103,6 +104,7 @@ def create_app(result_dir=None):
         # Dispatch-time contracts (exact-endpoint PMC, tensor media) are rejections, not server faults.
         try:summary=estimate(project);plan_hash=resolve_plan(project).plan_hash
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+        summary['warnings']=list(summary['warnings'])+stability_warnings(project)
         # The echoed project carries the hash of its own content; the workbench
         # keeps it with the revision counter and compares plan hashes to mark
         # results of an earlier run as stale (G8-04).

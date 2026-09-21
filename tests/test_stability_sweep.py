@@ -9,9 +9,9 @@ import torch
 from fastapi.testclient import TestClient
 
 from benchmarks import stability_sweep as sweep
-from torchfdtd import Project, Region, Structure, Source, Monitor, Material, Simulation
+from torchfdtd import Project, Region, Structure, Source, Monitor, Material
 from torchfdtd.server import create_app
-from torchfdtd.solver import estimate, dispersive_structures_in_pml
+from torchfdtd.stability_checks import dispersive_structures_in_pml, stability_warnings
 
 ROOT = Path(__file__).resolve().parents[1]
 CASE = json.loads((ROOT/'docs'/'validation'/'cases'/'STABILITY_SWEEP.json').read_text(encoding='utf-8'))
@@ -84,39 +84,39 @@ def pml_warnings(summary):
     return [w for w in summary['warnings'] if 'Dispersive material inside PML layers' in w]
 
 
-def test_validation_warns_for_dispersive_structures_inside_the_pml_and_names_them():
+def test_stability_checks_warn_for_dispersive_structures_inside_the_pml_and_name_them():
     p = dispersive_project()
     assert dispersive_structures_in_pml(p) == [('drude slab', ['y_min', 'y_max'])]
-    warnings = pml_warnings(estimate(p))
+    warnings = stability_warnings(p)
     assert len(warnings) == 1
     assert 'drude slab (y_min, y_max)' in warnings[0] and 'pml_dispersion="frozen"' in warnings[0] and 'end the structure before the PML' in warnings[0]
     three = dispersive_project(dimension='3d')
     assert dispersive_structures_in_pml(three) == [('drude slab', ['y_min', 'y_max', 'z_min', 'z_max'])]
-    assert pml_warnings(estimate(three))
+    assert len(stability_warnings(three)) == 1
 
 
-def test_validation_does_not_warn_when_frozen_interior_or_nondispersive():
-    assert not pml_warnings(estimate(dispersive_project(mode='frozen')))
-    assert not pml_warnings(estimate(dispersive_project(crossing=False)))
+def test_stability_checks_stay_silent_when_frozen_interior_or_nondispersive():
+    assert stability_warnings(dispersive_project(mode='frozen')) == []
+    assert stability_warnings(dispersive_project(crossing=False)) == []
     nondispersive = dispersive_project()
     nondispersive.materials[1] = Material(name='metal', index=3.5)
-    assert not dispersive_structures_in_pml(nondispersive) and not pml_warnings(estimate(nondispersive))
+    assert dispersive_structures_in_pml(nondispersive) == [] and stability_warnings(nondispersive) == []
     disabled = dispersive_project()
     disabled.structures[0].enabled = False
-    assert not pml_warnings(estimate(disabled))
+    assert stability_warnings(disabled) == []
 
 
-def test_api_validate_returns_the_warning_and_the_run_summary_carries_it(tmp_path):
+def test_api_validate_returns_the_warning_with_the_estimate_warnings(tmp_path):
     p = dispersive_project()
     app = create_app(tmp_path)
     with TestClient(app) as client:
         response = client.post('/api/validate', json=p.model_dump())
         assert response.status_code == 200
-        assert pml_warnings(response.json())
+        body = response.json()
+        assert pml_warnings(body) == stability_warnings(p)
+        assert any('trapezoidal ADE' in w for w in body['warnings'])   # the estimate's own warnings are kept
         assert not pml_warnings(client.post('/api/validate', json=dispersive_project(mode='frozen').model_dump()).json())
     app.state.pool.shutdown()
-    result = Simulation(p).run()
-    assert pml_warnings(result.summary)
 
 
 def test_cli_run_prints_the_warning(tmp_path, capsys):
@@ -125,7 +125,8 @@ def test_cli_run_prints_the_warning(tmp_path, capsys):
     path.write_text(dispersive_project().model_dump_json(), encoding='utf-8')
     main(['run', str(path), '--output', str(tmp_path/'out.npz')])
     printed = json.loads(capsys.readouterr().out)
-    assert pml_warnings(printed)
+    assert pml_warnings(printed) == stability_warnings(dispersive_project())
+    assert printed['termination_reason'] == 'max_steps'
 
 
 # ----------------------------------------------------------------------------------------------- short regressions
