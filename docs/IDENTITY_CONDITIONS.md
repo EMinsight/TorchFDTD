@@ -45,8 +45,8 @@ all six sections; `plan.diff(other)` names the differing keys.
 | Cache validity | reference sections plus `material`, `monitors` | `precision` | `cache_key(plan)` |
 | Restart contract | cache sections | kernel scheme (`cuda_kernel`, `cuda_monitor_kernel`), the exact epsilon tensor (bytes, shape, dtype), the execution options (without the journal path and cadence), the runtime source hashes, the torch version | `restart_key(plan, epsilon=..., options=...)` |
 
-`exterior` holds the background index, the boundary faces and every CPML
-coefficient array; `material` holds the sampling mode, the interface method
+`exterior` holds the background index, the boundary faces, every CPML
+coefficient array and the PML dispersion mode (`pml_dispersion`); `material` holds the sampling mode, the interface method
 and quadrature, the enabled structures with their rasterization order, the
 effective parameters of the materials they use and the ADE coefficients.
 
@@ -64,6 +64,7 @@ What each change invalidates (`invalidated(before, after)`), as
 | a source setting the sampled waveform does not read | | | |
 | mesh nodes, time step, step count | yes | yes | yes |
 | background index, PML profile, Bloch phase | yes | yes | yes |
+| PML dispersion mode (`pml_dispersion`) | yes | yes | yes |
 | field-monitor geometry, downsampling, apodization | yes | yes | yes |
 | field-monitor frequency samples, point-monitor position | | yes | yes |
 | the epsilon tensor handed to a differentiable run | | | yes |

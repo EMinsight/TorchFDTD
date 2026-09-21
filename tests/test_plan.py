@@ -112,6 +112,16 @@ def test_plan_json_and_diff_name_the_changed_keys():
         plan.diff(object())
 
 
+def test_pml_dispersion_enters_the_exterior_section_and_the_hash():
+    plan = resolve_plan(scene())
+    frozen = resolve_plan(scene(pml_dispersion='frozen'))
+    assert plan.pml_dispersion == 'ade' and frozen.pml_dispersion == 'frozen'
+    assert frozen.plan_hash != plan.plan_hash
+    assert frozen.diff(plan) == ['exterior.pml_dispersion']
+    assert frozen.sections['exterior']['pml_dispersion'] == 'frozen'
+    assert frozen.to_json()['pml_dispersion'] == 'frozen'
+
+
 def test_entry_points_share_the_plan_for_point_monitors(tmp_path):
     from fastapi.testclient import TestClient
     from torchfdtd.server import create_app

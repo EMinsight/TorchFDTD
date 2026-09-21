@@ -170,3 +170,32 @@ def test_dispersive_material_is_frozen_inside_pml(sampling):
     g2 = YeeGrid(p.region); g2.inverse_permittivity[:] = 1/(eps if eps.ndim == 4 else eps[..., None])
     configure_materials(g2, p, owner)
     assert len(g2.material_states[0].indices) == np.count_nonzero(sin)
+
+
+def test_frozen_pml_rejects_negative_permittivity_before_the_run_diverges():
+    """A Drude slab reaching into the PML has Re(eps) < 0 at the source centre; freezing it must refuse, not clamp."""
+    from torchfdtd import Region, Source, Monitor
+    from torchfdtd.materials import configure_materials, frozen_pml_frequency_hz
+    metal = Material(name='metal', model='drude', epsilon_inf=1.0, plasma_rad_s=1.2e16, collision_rad_s=1e14)
+    p = Project(name='t', region=Region(dimension='2d', size=(2., 2., .1), mesh=.1, pml_cells=3, steps=120,
+                                        material_sampling='yee', backend='cpu', pml_dispersion='frozen'),
+                materials=[Material(name='Air', index=1), metal],
+                structures=[Structure(id='b', name='b', kind='rectangle', center=(0., .6, 0.), size=(4., .4, .1), material='metal')],
+                sources=[Source(id='s', name='s', kind='point', component='Ez', center=(-.3, 0., 0.), wavelength=1.0, pulse_cycles=2)],
+                monitors=[Monitor(id='m', name='m', component='Ez', center=(.3, .2, 0.))])
+    f0 = frozen_pml_frequency_hz(p)
+    eps = permittivity(metal, f0).real
+    assert eps < 0
+    fdtd.set_backend('numpy')
+    epsilon, _, owner = voxelize(p, with_ownership=True)
+    g = YeeGrid(p.region); g.inverse_permittivity[:] = 1/(epsilon if epsilon.ndim == 4 else epsilon[..., None])
+    with pytest.raises(ValueError, match=r'metal: pml_dispersion="frozen" has no meaning for a real permittivity of -39\.47') as info:
+        configure_materials(g, p, owner)
+    assert f'{f0:.6g} Hz' in str(info.value)
+    assert np.all(g.inverse_permittivity > 0) and np.all(g.inverse_permittivity <= 1)   # nothing clamped to 1/1e-3
+    with pytest.raises(ValueError, match='metal: pml_dispersion="frozen" has no meaning'):
+        Simulation(p).run()
+    # The same slab off the PML is allowed: the frozen path never touches it.
+    p.structures[0].center = (0., .3, 0.); p.structures[0].size = (1.0, .4, .1)
+    p = Project.model_validate(p.model_dump())
+    assert Simulation(p).run().summary['steps'] == 120

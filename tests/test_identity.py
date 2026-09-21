@@ -69,6 +69,7 @@ MATRIX = {
     'steps': (lambda p: setattr(p.region, 'steps', 30), ('reference', 'cache', 'restart'), True, True),
     'background': (lambda p: setattr(p.region, 'background_index', 1.2), ('reference', 'cache', 'restart'), True, True),
     'pml': (lambda p: setattr(p.region.boundaries, 'x_max', BoundaryFace(kappa=3)), ('reference', 'cache', 'restart'), True, True),
+    'pml_dispersion': (lambda p: setattr(p.region, 'pml_dispersion', 'frozen'), ('reference', 'cache', 'restart'), False, False),
     'bloch': (bloch, ('reference', 'cache', 'restart'), True, True),
     'plane_geometry': (lambda p: setattr(p.monitors[1], 'size', (0, .45, .55)), ('reference', 'cache', 'restart'), True, True),
     'plane_apodization': (apodize, ('reference', 'cache', 'restart'), True, True),

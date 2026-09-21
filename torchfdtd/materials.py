@@ -126,9 +126,14 @@ def configure_materials(grid, project, ownership):
             continue
         owned = ownership.reshape(-1) == i
         if frozen and np.any(owned & pml):
-            eps = (permittivity(m, reference_hz).real if reference_hz else
-                   m.instantaneous_epsilon + sum(s/(w0*w0) for w0, s, _ in m.oscillators if w0))
-            eps = float(max(eps, 1e-3))
+            eps = float(permittivity(m, reference_hz).real if reference_hz else
+                        m.instantaneous_epsilon + sum(s/(w0*w0) for w0, s, _ in m.oscillators if w0))
+            if eps <= 0:
+                # A frozen cell with 1/eps <= 0 has no meaning (docs/BOUNDARIES.md) and diverges.
+                at = f'at the reference frequency {reference_hz:.6g} Hz' if reference_hz else 'in the static limit'
+                raise ValueError(f'{m.name}: pml_dispersion="frozen" has no meaning for a real permittivity of {eps:.6g} '
+                                 f'{at}. Keep the material out of the PML or use pml_dispersion="ade".')
+            eps = max(eps, 1e-3)
             inverse = grid.inverse_permittivity
             flat = inverse.reshape(-1) if ownership.ndim == 4 else inverse.reshape(-1, inverse.shape[-1])
             cells = np.flatnonzero(owned & pml)

@@ -244,6 +244,7 @@ class SimulationPlan:
     interface_method: str
     subpixel_quadrature: int
     boundaries: BoundaryPlan
+    pml_dispersion: str
     structures: tuple
     materials: tuple
     ade: tuple
@@ -281,8 +282,8 @@ class SimulationPlan:
         payload = {name: _json_value(getattr(self, name)) for name in
                    ('dimension', 'size', 'shape', 'nodes', 'axes', 'time_step', 'steps', 'sample_time_steps',
                     'fourier_convention', 'background_index', 'material_sampling', 'interface_method',
-                    'subpixel_quadrature', 'boundaries', 'structures', 'materials', 'ade', 'sources', 'monitors',
-                    'placement')}
+                    'subpixel_quadrature', 'boundaries', 'pml_dispersion', 'structures', 'materials', 'ade', 'sources',
+                    'monitors', 'placement')}
         payload['resources'] = json.loads(json.dumps(self.resources, default=str))
         payload['plan_hash'] = self.plan_hash
         return payload
@@ -463,12 +464,15 @@ def resolve_plan(project):
                   sample_time_steps=dict(SAMPLE_TIME_STEPS), fourier_convention=FOURIER_CONVENTION,
                   background_index=float(r.background_index), material_sampling=r.material_sampling,
                   interface_method=r.interface_method, subpixel_quadrature=int(r.subpixel_quadrature),
-                  boundaries=_boundary_plan(r), structures=structures, materials=materials, ade=_ade_plans(project),
-                  sources=_source_plans(project), monitors=_monitor_plans(project))
+                  boundaries=_boundary_plan(r), pml_dispersion=r.pml_dispersion, structures=structures,
+                  materials=materials, ade=_ade_plans(project), sources=_source_plans(project),
+                  monitors=_monitor_plans(project))
+    # The PML dispersion mode changes the absorber update (docs/BOUNDARIES.md), so it is hashed with the exterior.
     canonical = dict(
         mesh={k: _canonical(values[k]) for k in ('dimension', 'size', 'shape', 'nodes', 'axes')},
         time={k: _canonical(values[k]) for k in ('time_step', 'steps', 'sample_time_steps', 'fourier_convention')},
-        exterior=dict(background_index=values['background_index'], boundaries=_canonical(values['boundaries'])),
+        exterior=dict(background_index=values['background_index'], boundaries=_canonical(values['boundaries']),
+                      pml_dispersion=values['pml_dispersion']),
         material={k: _canonical(values[k]) for k in ('material_sampling', 'interface_method', 'subpixel_quadrature',
                                                        'background_index', 'structures', 'materials', 'ade')},
         sources=_canonical(values['sources']),
