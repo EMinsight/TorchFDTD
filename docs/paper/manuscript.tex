@@ -227,6 +227,13 @@ The fused engine is compared with the PyTorch FDTD package it builds on, execute
 
 A $256^{3}$ problem with 128 steps and two checkpoints, timed from construction through the plane-flux objective and every material cotangent, takes 407.7 s for a dielectric and 742.0 s for a two-pole material on the same Torch model with twelve CPU threads, 2.28 s and 5.00 s resident on the device, and 9.44 s and 23.9 s in the streamed mode with host banks. The resident device adjoint is therefore 179 and 149 times faster than the CPU model, and the streamed mode retains 43 and 31 of those factors while holding only the active slabs on the device.
 
+\subsection{Meep and FDTDX on one workstation}
+
+The comparisons above use the package's own baselines. Tables~\ref{tab:cross-solver-accuracy} and~\ref{tab:cross-solver-speed} place TorchFDTD next to Meep \citep{oskooi2010} and FDTDX \citep{mahlau2024} on one workstation with an RTX 3060 and a twelve-core processor, on fixtures that are defined once and instantiated by one driver per solver with the same mesh, time step, absorber thickness, source waveform and duration: the analytic slab and the Mie sphere of Section~\ref{sec:validation}, the vacuum and sphere scenes of Table~\ref{tab:open-source} at $64^{3}$ and $96^{3}$ cells, and a periodic full-material-gradient adjoint. TorchFDTD and FDTDX receive the same sampled permittivity arrays and the same additive source samples, and their point traces and material gradients agree to the relative $L_2$ differences listed in the record. Meep runs in double precision on twelve MPI ranks with its own absorber and current-source conventions, offers no closed TFSF box, and its frequency-domain adjoint is not comparable, so it is absent from the adjoint row. FDTDX 0.6.2 offers no closed TFSF box and no two-dimensional mode either. The records, the solver-by-solver differences and the rerun commands are in docs/CROSS\_SOLVER\_COMPARISON.md.
+
+\input{tables/cross-solver-accuracy}
+\input{tables/cross-solver-speed}
+
 \subsection{Beyond the device memory}
 
 Two runs exceed the 51.5 GB of the processor. The first advances a $1152\times1024\times2048$ real single-precision grid of 2.42 billion cells, whose electric and magnetic state occupies 58.0 GB and 58.3 GB with the absorber memories, for ten steps and a full spatial permittivity gradient with file banks on solid-state storage. The peak device allocation is 2.23 GB, the process peak resident memory is 31.9 GB, the run completes in 58.4 minutes, and the gradient over the causal cone of a point source agrees with a reference computed on the cone alone to a relative $L_2$ error of $9.1\times10^{-8}$ while no cell outside the cone receives a gradient.

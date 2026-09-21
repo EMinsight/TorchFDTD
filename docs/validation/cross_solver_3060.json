@@ -1,7 +1,7 @@
 {
   "schema": "torchfdtd-cross-solver-combined-v1",
   "date": "2026-09-22",
-  "worktree_head_at_run": "f6aacf359e52278db73ed8526cda94d717e20ca7",
+  "worktree_head_at_run": "fa57986a3c11886033a416c809db125b281a032a",
   "hardware": {
     "gpu": "NVIDIA GeForce RTX 3060 12 GB (WSL2, driver from Windows)",
     "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
@@ -546,7 +546,7 @@
     "fdtdx_driver.py": "0151c5df68905651fedad6c37c7fd38fd8537fafbdb00ae02e066e9395b7196c",
     "meep_driver.py": "860264cb7ec94fedcda05c02ff8dfa1cdac688af275f6329c2926fc41a6d0d42",
     "combine.py": "0b428ff8f089eab32da334acd09b0c4702e41748894ee1c1870a41a8619c1e01",
-    "report.py": "3494762036c4a4bb786304df704e36b8e06c57eef6ed728a55b7014ab274f09c"
+    "report.py": "b5a0f77d4c860049bba2c68fabc5f95cd044b525db1d3cebe40bf41e66f330e4"
   },
   "records": {
     "fdtdx_adjoint_checkpointed.json": "662c18ecd0265c3fbf298730f26458e5493eb3ec1d91fb1773fa089bf1477279",

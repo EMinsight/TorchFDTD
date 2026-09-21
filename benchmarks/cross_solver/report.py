@@ -225,6 +225,22 @@ def adjoint_section(c):
     return lines
 
 
+def rerun_section(c):
+    src = (c.get('throughput') or {}).get('source_records', {}).get('meep')
+    return ['## Rerunning the Meep timing block', '',
+            'The Meep throughput rows and the rank sweep are retaken, and the combined record and this document regenerated, by one command '
+            'from a Windows shell (the GPU records are left untouched):', '',
+            '```', 'wsl.exe -d torchfdtd-bench -- bash /mnt/d/TorchFDTD/.local/worktrees/cross-solver/benchmarks/cross_solver/run_meep_timing.sh', '```', '',
+            'The script runs `run_meep.sh 12 --fixture throughput` (the primary 12-rank block), `meep_rank_sweep.sh` (4, 8, 12 and 16 ranks), '
+            '`combine.py` and `report.py`. Idle criterion of a block: the master rank polls the Windows host CPU load through '
+            '`powershell.exe (Get-CimInstance Win32_Processor).LoadPercentage` every 5 s and starts the block after two consecutive samples at or '
+            'below 50 percent (`--cpu-idle-limit`, 30 min limit per block); the other ranks sleep on a token file meanwhile. The block '
+            '(one warm-up plus three timed solves) is accepted when its wall times spread by at most a factor 1.25, otherwise it is retaken '
+            'after the gate, up to four times; every attempt and the host load before and after each block are stored in the record. '
+            f"`combine.py` prefers `meep_throughput.json` when it exists and otherwise falls back to `meep_throughput_ranks12.json` "
+            f"(currently used: `{src}`). A quiet GPU is not required for this block.", '']
+
+
 def differences_section(c):
     s = c['fixtures']['slab']
     return ['## Differences between the solvers that the reader must know', '',
@@ -273,6 +289,7 @@ def main():
     lines += sphere_section(c)
     lines += throughput_section(c)
     lines += adjoint_section(c)
+    lines += rerun_section(c)
     lines += differences_section(c)
     OUTPUT.write_bytes(('\n'.join(lines).rstrip('\n') + '\n').encode('utf-8'))
     print('wrote', OUTPUT)
