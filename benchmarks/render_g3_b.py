@@ -22,6 +22,12 @@ def load(task):
     return json.loads(path.read_text(encoding='utf-8')) if path.exists() else None
 
 
+def load_r2(name):
+    """Revision-2 records live under docs/validation/g3/r2 so that the first records stay as recorded."""
+    path = RECORDS/'r2'/f'{name}.json'
+    return json.loads(path.read_text(encoding='utf-8')) if path.exists() else None
+
+
 def pct(value):
     return f'{100*value:.3f}%'
 
@@ -97,6 +103,22 @@ def render_g3_05(record):
     for key, r in rows_with(record, 'r='):
         if 'layer_a_max_relative_difference' in r:
             out.append(f'| {r["radius_um"]} | {r["mesh_um"]} | {r["layer_a_max_relative_difference"]:.2e} | {verdict(r["layer_a_max_relative_difference"] <= r["layer_a_rtol"])} |')
+    # Limitation statement, numbers from the CPU FP64 rows of the record and the subpixel rejection record.
+    sequences = []
+    for radius in case['fixture']['radii_um']:
+        rows = sorted((r for k, r in rows_with(record, f'r={radius}/') if r['backend'] == 'cpu'), key=lambda r: -r['mesh_um'])
+        if rows:
+            sequences.append(f'r = {radius} um: scattering {", ".join(pct(r["max_scattering_relative_error"]) for r in rows)} and absorption '
+                             f'{", ".join(pct(r["max_absorption_relative_error"]) for r in rows)} at h = {", ".join(str(r["mesh_um"]) for r in rows)} um')
+    subpixel = load('G3-05_subpixel')
+    rejection = ''
+    if subpixel:
+        row = next(iter(subpixel['rows'].values()))
+        rejection = (f' The subpixel interface operator rejects the same sphere with `interface_method = "subpixel"` at validation '
+                     f'("{row["rejection"]}", recorded in `docs/validation/g3/G3-05_subpixel.json`), so the package offers no conformal or subpixel treatment of a dispersive interface.')
+    out += ['', '**Limitation.** The staircased Drude sphere converges slowly and does not reach the budgets: '+'; '.join(sequences)+'.'+rejection+
+            ' Plasmonic nanoparticle cross sections below the recorded errors need a conformal or subpixel treatment of dispersive interfaces that the package does not provide; '
+            'until then metallic curved scatterers are outside the accuracy claims of this release, and the task stays FAILED in the gate file.']
     return out
 
 
@@ -150,6 +172,20 @@ def render_g3_08(record):
             '| Pol | Angle | Execution | T0 | Other orders (max) | Backward zero order | Limit |', '|---|---:|---|---:|---:|---:|---:|']
     for key, r in rows_with(record, 'empty/'):
         out.append(f'| {r["polarization"]} | {r["angle_deg"]:g} | {r["backend"]} {r["precision"]} | {r["zero_order_transmission"]:.8f} | {max(r["other_orders"]+[0.]):.1e} | {r["backward_zero_order"]:.1e} | {r["zero_order_limit"]:.0e} |')
+    r2 = load_r2('G3-08r2')
+    if r2 is not None:
+        rerun = load_r2('G3-08')
+        judged = [r for k, r in rows_with(rerun, 'T') if r['mesh_um'] == case['fixture']['judged_mesh_um'] and r['interface'] == 'subpixel'
+                  and r['duration_fs'] == case['fixture']['duration_fs']] if rerun else []
+        out += ['', f'**Revision 2 (case `{r2["case_id"]}`, records under `docs/validation/g3/r2`, generated {r2["generated"]}).** '
+                'Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record. '
+                + (f'The re-run of the {len(judged)} judged physics rows gives a largest efficiency error of {max(r["max_efficiency_error"] for r in judged):.4f}, '
+                   f'a largest dominant phase error of {max(r["max_dominant_phase_error_rad"] for r in judged):.4f} rad and sums of T and R within '
+                   f'{max(abs(r["efficiency_sum"]-1) for r in judged):.4f} of one, all within the unchanged limits. ' if judged else ''),
+                '', '| Pol | Angle | Wavelength (um) | Max relative difference | Largest excess over rtol abs(cpu) + atol | Result |', '|---|---:|---:|---:|---:|---|']
+        for key, r in rows_with(r2, 'T'):
+            if 'layer_a_r2_pass' in r:
+                out.append(f'| {r["polarization"]} | {r["angle_deg"]:g} | {r["wavelength_um"]} | {r["layer_a_max_relative_difference"]:.2e} | {r["layer_a_r2_max_excess"]:+.1e} | {verdict(r["layer_a_r2_pass"])} |')
     return out
 
 
@@ -186,7 +222,8 @@ SUMMARY_KEYS = ('mesh_um', 'backend', 'precision', 'interface', 'polarization', 
                 'max_dominant_phase_error_rad', 'efficiency_sum', 'peak_relative_error', 'fwhm_relative_error', 'layer_a_max_relative_difference',
                 'layer_a_rtol', 'inner_outer_scattering_max_difference_over_band_maximum', 'subpixel_at_h_beats_staircase_at_h',
                 'staircase_order_estimates', 'subpixel_order_estimates', 'max_relative_error_spread', 'max_relative_difference_from_staircase',
-                'width_fraction', 'zero_order_transmission', 'zero_order_limit', 'failures')
+                'width_fraction', 'zero_order_transmission', 'zero_order_limit', 'failures',
+                'layer_a_r2_rtol', 'layer_a_r2_atol', 'layer_a_r2_max_excess', 'layer_a_r2_pass')
 
 
 def summary(task, record):
@@ -206,6 +243,12 @@ def main():
     # document; writing the marked regions here as well would duplicate the sections.
     shared = ROOT/'scripts'/'render_physics_validation.py'
     document = not args.summaries_only and not shared.exists()
+    r2 = load_r2('G3-08r2')
+    if r2 is not None and 'G3-08' in args.tasks:
+        # The revision-2 observed metrics combine the re-run physics rows and the revision-2 layer-A rows.
+        rerun = load_r2('G3-08') or dict(rows={})
+        combined = dict(r2, rows={**{'rerun/'+k: v for k, v in rerun['rows'].items()}, **r2['rows']})
+        (RECORDS/'r2'/'G3-08r2_observed.json').write_text(json.dumps(summary('G3-08', combined), indent=1)+'\n', encoding='utf-8', newline='\n')
     text = DOC.read_text(encoding='utf-8') if DOC.exists() else HEADER
     for task, renderer in RENDERERS.items():
         record = load(task) if task in args.tasks else None

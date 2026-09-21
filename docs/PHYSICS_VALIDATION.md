@@ -242,4 +242,6 @@ Layer A (CUDA FP32 against CPU FP64 on scattering and absorption, rtol 1e-4):
 | 0.035 | 0.02 | 1.20e-05 | pass |
 | 0.05 | 0.01 | 7.72e-06 | pass |
 | 0.05 | 0.02 | 5.29e-06 | pass |
+
+**Limitation.** The staircased Drude sphere converges slowly and does not reach the budgets: r = 0.02 um: scattering 1657.979%, 270.768%, 137.555% and absorption 3682.135%, 2505.893%, 673.265% at h = 0.02, 0.01, 0.005 um; r = 0.035 um: scattering 477.893%, 69.159%, 45.758% and absorption 1812.565%, 559.269%, 498.501% at h = 0.02, 0.01, 0.005 um; r = 0.05 um: scattering 85.438%, 64.285%, 44.515% and absorption 308.670%, 340.338%, 344.579% at h = 0.02, 0.01, 0.005 um. The subpixel interface operator rejects the same sphere with `interface_method = "subpixel"` at validation ("Subpixel interfaces currently require lossless nondispersive materials. Choose staircase for dispersive materials.", recorded in `docs/validation/g3/G3-05_subpixel.json`), so the package offers no conformal or subpixel treatment of a dispersive interface. Plasmonic nanoparticle cross sections below the recorded errors need a conformal or subpixel treatment of dispersive interfaces that the package does not provide; until then metallic curved scatterers are outside the accuracy claims of this release, and the task stays FAILED in the gate file.
 <!-- g3-b:G3-05 end -->

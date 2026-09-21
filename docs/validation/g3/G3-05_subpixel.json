@@ -1,0 +1,23 @@
+{
+ "task": "G3-05",
+ "case_id": "G3-05_drude_sphere",
+ "fixture_path": "docs/validation/cases/G3-05_drude_sphere.json",
+ "environment": {
+  "python": "3.10.2",
+  "torch": "2.10.0+cu126",
+  "numpy": "2.2.6",
+  "os": "Windows-10-10.0.26200-SP0",
+  "gpu": "NVIDIA GeForce RTX 3060"
+ },
+ "rows": {
+  "r=0.05/h=0.01/subpixel": {
+   "radius_um": 0.05,
+   "mesh_um": 0.01,
+   "interface": "subpixel",
+   "supported": false,
+   "rejection": "Subpixel interfaces currently require lossless nondispersive materials. Choose staircase for dispersive materials.",
+   "source": "torchfdtd/models.py Project.valid_scene and torchfdtd/subpixel_geometry.py"
+  }
+ },
+ "generated": "2026-09-21T18:35:39+00:00"
+}
