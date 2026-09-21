@@ -3,6 +3,7 @@ from dataclasses import dataclass, replace
 from contextlib import contextmanager
 from pathlib import Path
 import math
+import os
 import time
 
 import torch
@@ -70,10 +71,30 @@ class StreamedAdjointOptions:
 
 
 def _journal_bytes(directory):
-    """Bytes already held by restart records under the journal directory, if any."""
+    """Bytes already held by restart records under the journal directory, if any.
+
+    `*.tmp` entries are interrupted writes that the journal removes when it
+    opens, so they are not part of the space the records will occupy.
+    """
     root = Path(directory).expanduser()
     if not root.exists():return 0
-    return sum(p.stat().st_size for p in root.rglob('*') if p.is_file())
+    total = 0
+    for child in root.iterdir():
+        if child.name.endswith('.tmp'):continue
+        total += sum(p.stat().st_size for p in ([child] if child.is_file() else child.rglob('*')) if p.is_file())
+    return total
+
+
+def _volume(directory):
+    """Identity of the volume that files under directory will occupy.
+
+    The drive of the resolved path on Windows, the device number of the
+    nearest existing ancestor elsewhere; never a path-prefix comparison.
+    """
+    path = Path(os.path.realpath(Path(directory).expanduser()))
+    if os.name == 'nt':return os.path.splitdrive(str(path))[0].lower()
+    while not path.exists() and path.parent != path:path = path.parent
+    return os.stat(path).st_dev
 
 
 def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, parameter_shapes=None):
@@ -181,7 +202,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     if restart:
         from .state_store import disk_free
         journal_free = disk_free(options.restart_directory)
-        shared = bool(disk) and Path(options.restart_directory).expanduser().resolve().anchor == Path(options.state_directory).expanduser().resolve().anchor
+        shared = bool(disk) and _volume(options.restart_directory) == _volume(options.state_directory)
         # Records already on disk from the interrupted run are part of the
         # journal's reservation, not additional space that must still be free.
         existing_journal = _journal_bytes(options.restart_directory)
@@ -199,6 +220,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
                 disk_reservation_bytes=disk,disk_io_workspace_bytes=disk_io_workspace,restart_reservation_bytes=restart,
                 restart_journal_existing_bytes=existing_journal,
                 restart_signal_history_bytes=signal_history if options.restart_directory else 0,
+                restart_journal_metadata_bytes=journal_metadata if options.restart_directory else 0,
                 host_initial_state_reservation_bytes=initial_storage,
                 state_bytes=state, halo_cells_per_side=depth, max_extended_tile_cells=tile_cells, local_checkpoint_reservation_bytes=buffers*(18+6*pole_count)*local_slots*tile_cells*item,
                 source_and_output_history_bytes=history, host_tile_reservation_bytes=buffers*(tile_workspace+2*tile_history))

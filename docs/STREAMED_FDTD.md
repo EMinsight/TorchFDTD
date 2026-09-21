@@ -340,7 +340,9 @@ rejects journals written for other inputs, options, runtimes or objectives,
 hashing every Python file of the package as the runtime. The journal
 reservation charges `max(2(B+S), S+2(B+G))` on its volume for state bytes B,
 signal-history bytes S and parameter-gradient bytes G, plus bounded JSON
-metadata. Verified on CPU and CUDA tiles with host and file banks, including
+metadata, and adds the bank reservation when the two directories resolve to
+one volume (drive on Windows, device number elsewhere). Verified on CPU and
+CUDA tiles with host and file banks, including
 a killed child process; ADE, tensor, geometry, spectral and asynchronous paths
 are not covered, and large-run recovery cost is unmeasured.
 

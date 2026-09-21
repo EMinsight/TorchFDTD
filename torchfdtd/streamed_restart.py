@@ -137,6 +137,14 @@ class RestartJournal:
                 raise ValueError('Restart journal contract mismatch. Use a new directory for changed inputs, options or runtime. Differences: '+', '.join(changed))
         else:
             _atomic_json(self.contract_path, contract)
+        # A crash leaves the record it was writing as `<name>.tmp` beside the
+        # published records, never pointed at by a latest-*.json. Only such
+        # entries directly under this journal's own directory are removed.
+        for stale in self.root.glob('*.tmp'):
+            if stale.is_dir():
+                shutil.rmtree(stale)
+            else:
+                stale.unlink()
 
     # ---- helpers -----------------------------------------------------------------
     def _pointer(self, kind):
@@ -150,6 +158,8 @@ class RestartJournal:
             return None
         latest = json.loads(pointer.read_text(encoding='utf-8'))
         record = self.root / latest['directory']
+        if record.parent != self.root or record.name.endswith('.tmp'):
+            raise ValueError('Restart pointer names a record outside this journal directory.')
         meta = record / 'meta.json'
         if not meta.exists():
             return None
@@ -240,7 +250,7 @@ class RestartJournal:
         if latest is None:
             return None
         if latest['signal_bar_sha256'] != signal_bar_sha256:
-            raise ValueError('Restart journal was written for a different signal adjoint. Use a new directory.')
+            raise ValueError('Restart journal was written for a different signal adjoint. Use a new directory. Differences: signal_bar_sha256')
         directory = latest['directory']
         adjoint = adjoint_factory()
         for i, (value, description) in enumerate(zip(adjoint, latest['arrays'][:-1])):
