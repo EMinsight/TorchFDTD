@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-14_discrete_backend_agreement",
+  "task": "G3-14",
+  "title": "Small discrete problems: CPU torch, CUDA torch, fused CUDA, streamed and reversible forward and VJP agreement",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "oracle_class": ["shared_discrete_operator"],
+  "fixture": {
+    "native_forward": "tests/test_solver.py: 40x40x1 (2d) and 40x40x40 (3d) cells, 180 steps, float32 and float64, CPU NumPy backend against CUDA torch kernel with and without CUDA graphs",
+    "fused_kernels": "tests/test_cuda_kernels.py: random E, H, inverse epsilon and all CPML psi states (seed 615) on 32x28x1 or 32x28x24 cells with pml2d, pml3d, mixed and graded CPML layouts, 23 steps, float32 and float64, CUDA torch YeeGrid against FusedYeeCUDA; complete fused graph 40x30x1 cells, 180 steps, dielectric and Lorentz; subnormal fields; CPU float64 Simulation against fused CUDA frequency plane on 320x20x40 cells, 1600 steps",
+    "fused_adjoint": "tests/test_cuda_adjoint.py: random physical and adjoint states (seed 82) on the 16x15x14 project of tests/test_differentiable.py, 3 transposed steps, float32 and float64, FusedAdjointCUDA.step against _System.transpose_step",
+    "explicit_adjoint": "tests/test_differentiable.py: 16x15x1 and 16x15x14 cells, 24 steps, float64, seed 82 epsilon and weights, checkpoints 3, cpu and cuda, explicit adjoint against full autograd",
+    "tensor_native": "tests/test_tensor_native_cuda.py: 16x6x6 cells, 12 steps, float32, periodic, Bloch and CPML, CPU against CUDA forward and material-table VJP",
+    "endpoint_cpml": "tests/test_endpoint_native_cpml_cuda.py: 16x6x6 nodes, 20 steps, float32, CPU against CUDA forward, interior epsilon and waveform VJPs",
+    "streamed": "tests/test_spacetime.py: SlabBlockOperator forward and transpose on 16x15x14 cells with temporal depths 1, 3, 9 and local checkpoints, float32 and float64, cpu and cuda, against the host reference step by autograd (seed 608); tests/test_streamed_density.py: CPU dense resident reference against CUDA asynchronous streamed periodic density response and gradient, float32; tests/test_pec_boundaries.py: 2D 16x16 PEC scene, resident (fused on CUDA) and streamed against the reference, real and complex",
+    "all_modes_driver": "tests/test_cpu_gpu_adjoint_benchmark.py via benchmarks/cpu_gpu_adjoint.py: 16^3 cells, 19 steps, float32, x periodic, two plane monitors, modes cpu_t1, cpu_t2 (torch backward), cuda_resident (fused) and cuda_dram (streamed async), dielectric and dispersive, every mode's outputs and material VJPs against cpu_t1 by relative L2",
+    "reversible": "tests/test_reversible.py: 6^3 periodic cells, 80 and 512 steps, float32 CPU, reversible backward against the stored full gradient, two random cotangent seeds (generator 37) and a central difference; tests/test_reversible_cuda.py: fused CUDA reversible on 12^3 x 96 steps and 64^3 x 512 steps (generator 74)",
+    "pml": "CPML layers 3 to 4 in the differentiable fixtures; pml2d/pml3d/mixed/graded layouts in the kernel test; part of the compared operator"
+  },
+  "seed": {"fused_kernels": 615, "fused_adjoint": 82, "explicit_adjoint": 82, "streamed_block": 608, "reversible_cotangents": [37, 74], "endpoint_and_tensor": "deterministic"},
+  "precision": ["float32", "float64"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "The same discrete problem executed through another path of the same Yee/CPML discretisation: NumPy or torch CPU against CUDA torch, torch against fused CUDA kernels, explicit transpose against torch autograd, resident against streamed or reversible execution. No path is independent of the discrete operator; this is validation layer A only.",
+  "observables": [
+    {"name": "forward_fields_and_signals", "unit": "reduced field", "definition": "E, H, CPML psi and monitor signals of one path against another after N steps"},
+    {"name": "material_vjp", "unit": "d objective / d epsilon", "definition": "adjoint or backward gradients with respect to epsilon, density, tensor table or waveform of one path against another"},
+    {"name": "adjoint_states", "unit": "reduced adjoint field", "definition": "transposed E, H and psi bars of the fused adjoint against the torch transpose"},
+    {"name": "relative_l2", "unit": "dimensionless", "definition": "per-group relative L2 of outputs and VJPs in the all-modes driver and the reversible tests"}
+  ],
+  "acceptance": {
+    "program_thresholds": {"float64": {"rtol": 1e-7, "atol": 1e-9}, "float32": {"rtol": 1e-4, "atol": 1e-6}},
+    "within_program_thresholds": {
+      "tests/test_solver.py": {"float32": {"rtol": 2e-6, "atol": 2e-6}, "float64": {"rtol": 1e-12, "atol": 1e-12}},
+      "tests/test_cuda_kernels.py": {"float32": 3e-6, "float64": 2e-14, "flux_plane_float64": 1e-11, "subnormal": "exact"},
+      "tests/test_cuda_adjoint.py": {"float32": 2e-6, "float64": 2e-13},
+      "tests/test_differentiable.py": {"signals": {"rtol": 1e-11, "atol": 1e-13}, "gradient": {"rtol": 2e-10, "atol": 1e-12}},
+      "tests/test_spacetime.py": {"float32": {"rtol": 2e-5, "atol": 2e-6}, "float64": {"rtol": 2e-10, "atol": 2e-12}},
+      "tests/test_pec_boundaries.py": {"signals": {"rtol": 2e-5, "atol": 2e-6}, "gradient": {"rtol": 4e-5, "atol": 3e-6}},
+      "tests/test_tensor_native_cuda.py signals": {"rtol": 8e-5, "atol": 8e-7},
+      "tests/test_streamed_density.py response": {"rtol": 1e-4, "atol": 4e-6}
+    },
+    "looser_than_program_thresholds": {
+      "tests/test_tensor_native_cuda.py table VJP float32": {"rtol": 3e-4, "atol": 2e-7},
+      "tests/test_endpoint_native_cpml_cuda.py VJPs float32": {"rtol": 2e-4, "atol": 1e-6},
+      "tests/test_streamed_density.py gradient float32": {"rtol": 3e-4, "atol": 7e-6},
+      "tests/test_cpu_gpu_adjoint_benchmark.py relative L2": 2e-4,
+      "tests/test_reversible.py and tests/test_reversible_cuda.py relative L2": 2e-4,
+      "note": "float32 gradient budgets of 2e-4 to 3e-4 relative were declared in the repository before this case for accumulated 12 to 512 step backward passes; they exceed the program's float32 rtol 1e-4 and are reported as differences, not loosened or tightened here; the float32 atol values in absolute reduced units are 2e-7 to 7e-6 against the program's 1e-6"
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 and fp64; each test's own assertions are the recorded criteria"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager",
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states",
+      "tests/test_cuda_kernels.py::test_complete_fused_graph_matches_reference_and_eager",
+      "tests/test_cuda_kernels.py::test_fused_preserves_subnormal_fields",
+      "tests/test_cuda_kernels.py::test_fused_frequency_plane_matches_cpu_flux",
+      "tests/test_cuda_adjoint.py::test_random_physical_and_adjoint_state_transpose",
+      "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd",
+      "tests/test_tensor_native_cuda.py::test_native_tensor_cuda_periodic_bloch_cpml_and_material_table_vjp",
+      "tests/test_endpoint_native_cpml_cuda.py::test_native_cpml_cuda_results_npz_material_and_waveform_vjp",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident",
+      "tests/test_streamed_density.py::test_async_cuda_periodic_density_response_and_gradient_match_dense_cpu",
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint",
+      "tests/test_cpu_gpu_adjoint_benchmark.py::test_actual_cpu_resident_cuda_and_async_dram_driver",
+      "tests/test_reversible.py::test_reversible_full_gradient_retained_seeds_and_source_derivative",
+      "tests/test_reversible_cuda.py::test_native_reversible_cuda_gradient_memory_and_owned_states"
+    ],
+    "layers": {
+      "tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "CPU NumPy against CUDA torch forward, graph against eager"},
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "CUDA torch YeeGrid against fused CUDA forward with CPML states"},
+      "tests/test_cuda_kernels.py::test_complete_fused_graph_matches_reference_and_eager": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "torch kernel against fused eager and graph, dielectric and Lorentz"},
+      "tests/test_cuda_kernels.py::test_fused_preserves_subnormal_fields": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "torch against fused, exact equality on subnormal fields"},
+      "tests/test_cuda_kernels.py::test_fused_frequency_plane_matches_cpu_flux": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "CPU float64 Simulation against fused CUDA frequency plane and flux"},
+      "tests/test_cuda_adjoint.py::test_random_physical_and_adjoint_state_transpose": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "fused CUDA adjoint step against the torch transpose"},
+      "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "explicit adjoint against full autograd, cpu and cuda, float64"},
+      "tests/test_tensor_native_cuda.py::test_native_tensor_cuda_periodic_bloch_cpml_and_material_table_vjp": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "CPU against CUDA tensor forward and VJP"},
+      "tests/test_endpoint_native_cpml_cuda.py::test_native_cpml_cuda_results_npz_material_and_waveform_vjp": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "CPU against CUDA endpoint CPML forward and VJPs"},
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "streamed block operator against the resident reference step"},
+      "tests/test_streamed_density.py::test_async_cuda_periodic_density_response_and_gradient_match_dense_cpu": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "CPU dense resident against CUDA async streamed"},
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "reference against resident and streamed with PEC, real and complex"},
+      "tests/test_cpu_gpu_adjoint_benchmark.py::test_actual_cpu_resident_cuda_and_async_dram_driver": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "cpu torch, cuda fused resident and cuda streamed modes against cpu_t1"},
+      "tests/test_reversible.py::test_reversible_full_gradient_retained_seeds_and_source_derivative": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "reversible backward against stored backward, random cotangents"},
+      "tests/test_reversible_cuda.py::test_native_reversible_cuda_gradient_memory_and_owned_states": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "fused CUDA reversible against stored"}
+    },
+    "not_yet_covered": [
+      "one fixture compared across all four of CPU torch, CUDA torch, fused CUDA and streamed at once (the driver compares three; the CUDA torch kernel is compared separately)",
+      "float32 gradient agreement at the program's rtol 1e-4 on the fixtures whose recorded budgets are 2e-4 to 3e-4"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float32 forward 2e-6 to 3e-6 relative after 23 to 180 steps; float32 VJP 2e-5 to 3e-4 relative after 12 to 512 backward steps; float64 1e-13 to 2e-10",
+    "time_window": "12 to 1600 steps per fixture; not a physics window, since both paths integrate the same number of steps",
+    "pml": "part of the compared operator; CPML psi states are compared directly in the kernel and adjoint tests"
+  },
+  "notes": "Layer A only by definition of the task. No test was added; the tests listed are the repository's existing device and execution-path comparisons on small fixtures, chosen so that every pair (CPU-CUDA forward, CPU-CUDA VJP, torch-fused, resident-streamed, stored-reversible) is covered in both precisions where the fixture supports it. tests/test_reversible_cpml_kernels.py is excluded because its CUDA instance is gated by TORCHFDTD_RUN_CPML_KERNEL_CUDA_TEST and would skip."
+}

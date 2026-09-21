@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-17_oracle_budget",
+  "task": "G3-17",
+  "title": "Oracle independence, precision floor, time-window and PML error budgets of every G3 fixture",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "oracle_class": ["stored_record"],
+  "fixture": {
+    "document": "docs/ORACLE_BUDGET.md: one row per fixture of every G3 case file present under docs/validation/cases, giving the oracle class, its independence from the code under test, the precision floor, the time window and the PML budget as recorded, plus the open residuals per task",
+    "case_files": "docs/validation/cases/G3-*.json with the fields oracle_class (list) and tests.layers (one entry per tests.existing id with layer, oracle_class and oracle)",
+    "classes": "analytic_continuum, analytic_discrete, independent_solver, physical_invariant, convergence_study (layer B); shared_discrete_operator, finite_difference_same_discretisation, independent_implementation_same_scheme (layer A); stored_record (either)"
+  },
+  "seed": "not applicable",
+  "precision": "not applicable",
+  "backend": "cpu (file checks only)",
+  "reference_method": "Consistency of the documents of record with each other: every G3 case names allowed oracle classes, every listed test carries a layer consistent with its class and exists in its source file, the tasks G3-06, G3-09, G3-10, G3-11, G3-12 and G3-16 keep at least one layer-B entry, G3-14 and G3-15 are layer A only, and docs/ORACLE_BUDGET.md names every case id and every class.",
+  "observables": [
+    {"name": "case_files_consistent", "unit": "boolean", "definition": "tests/test_oracle_budget.py passes on every docs/validation/cases/G3-*.json present"},
+    {"name": "document_coverage", "unit": "boolean", "definition": "every G3 case_id and every oracle class appears in docs/ORACLE_BUDGET.md"}
+  ],
+  "acceptance": {
+    "all_checks": "pass/fail assertions of tests/test_oracle_budget.py",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md section 1 rule 8 (oracle classes must be distinguished) and section 5 (fixture-specific error budgets are declared before the run and differences from the common criteria are reported)"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_oracle_budget.py::test_the_recorded_g3_cases_are_present",
+      "tests/test_oracle_budget.py::test_every_g3_case_names_allowed_oracle_classes_and_layers",
+      "tests/test_oracle_budget.py::test_every_listed_test_exists_in_its_source_file",
+      "tests/test_oracle_budget.py::test_oracle_budget_document_covers_every_g3_case_and_class"
+    ],
+    "layers": {
+      "tests/test_oracle_budget.py::test_the_recorded_g3_cases_are_present": {"layer": "A", "oracle_class": "stored_record", "oracle": "the case files of the tasks recorded in this branch exist"},
+      "tests/test_oracle_budget.py::test_every_g3_case_names_allowed_oracle_classes_and_layers": {"layer": "A", "oracle_class": "stored_record", "oracle": "case-file schema and layer consistency"},
+      "tests/test_oracle_budget.py::test_every_listed_test_exists_in_its_source_file": {"layer": "A", "oracle_class": "stored_record", "oracle": "listed test ids resolve to functions in the tree"},
+      "tests/test_oracle_budget.py::test_oracle_budget_document_covers_every_g3_case_and_class": {"layer": "A", "oracle_class": "stored_record", "oracle": "document coverage of case ids and classes"}
+    },
+    "not_yet_covered": [
+      "rows for G3-01 to G3-05, G3-07, G3-08 and G3-13 in docs/ORACLE_BUDGET.md; their case files are written on other branches and the test enforces the class naming on them once merged"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "not applicable",
+    "time_window": "not applicable",
+    "pml": "not applicable"
+  },
+  "notes": "This is a bookkeeping task; its evidence is the consistency test, not a physics measurement. The document records the budgets and open residuals found while writing the G3-06 to G3-16 cases on this branch, including the unexplained -0.69 percent Y-branch flux closure, the 2 percent fiber neff budget, the float32 VJP budgets of 2e-4 to 3e-4 and the tensor slab's missing reflection channel."
+}

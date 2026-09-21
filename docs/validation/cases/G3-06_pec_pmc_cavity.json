@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-06_pec_pmc_cavity",
+  "task": "G3-06",
+  "title": "PEC/PMC cavity eigenfrequency, symmetry-reduced versus full domain, and gradient mapping",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "oracle_class": ["analytic_discrete", "independent_implementation_same_scheme", "shared_discrete_operator", "finite_difference_same_discretisation"],
+  "fixture": {
+    "cavity_resonance": "tests/test_cavity_resonance.py: closed PEC cube of 8 cells at 0.1 um (0.8 um side), uniform permittivity n^2 for n in {1.0, 1.5}, float32 Yee path (DifferentiableSimulation, torch kernel, CPU), 4000 steps at dt = 0.99/sqrt(3)*0.1 um/c = 1.9066e-16 s (763 fs, about 200 TM110 periods), Ez point source at the central Ez node with a 2-cycle Gaussian pulse centred on the continuum TM110 wavelength, two Ez point monitors at Yee indices (3,2,3) and (5,3,1); the spectrum is the time-integral DFT of the monitor signal with the first 600 steps (source interval, past 8 sigma of the pulse for both indices) zeroed, searched on a 601-point grid over 0.85 to 1.15 of the continuum frequency, refined on a 401-point grid over two coarse steps and by parabolic interpolation",
+    "discrete_eigenmode_marching": "tests/test_pec_boundaries.py (16^3 cells, 0.1 um, PEC or antisymmetric on one axis, periodic on the others, float32 NumPy YeeGrid, courant 0.99/sqrt(3), 35 steps, exact standing-wave initial condition q = pi/16); tests/test_pmc_general.py (12x6x6 cells with PMC/PEC/PMC faces, float32, 35 reference steps); tests/test_pmc_reference.py (6^3 nodes, dimensionless dt 0.3, five PEC/PMC parity cases, 24 steps)",
+    "symmetry_reduction": "tests/test_pmc_general.py and tests/test_pmc_dispersive.py mirrored pairs: half domains 12x6x6 or 6x12x6 cells with PMC on the mirrored upper faces and a CPML axis that is not mirrored, full domains 12x12x12 cells with PEC on both ends, image sources with 180 degree phase for odd images, random epsilon 1.5+U(0,1) seed 7, two Lorentz poles (omega0 2e15 and 3e15 rad/s, gamma 1e14 and 3e14 rad/s) in the dispersive twin, 16 steps, float32, CPU; tests/test_pec_boundaries.py reduced 16 cells versus doubled 32-cell periodic domain",
+    "independent_endpoint_solver": "tests/test_pmc_general.py cavity_scene: 8x7x6 cells with PEC/PMC faces, glass block n = 1.7, Ez continuous and Ey Gaussian sources at 0.5 um, six point monitors including upper-face and edge samples, 40 steps, float32, CPU and CUDA",
+    "boundaries": "PEC and PMC at mesh endpoints with stored upper PMC face and edge arrays; no PML in the eigenmode and resonance fixtures; CPML on the non-mirrored axis of the symmetry fixtures",
+    "pml": "none in the cavity fixtures; 3 to 4 CPML layers on the non-mirrored axis of the mirrored pairs"
+  },
+  "seed": {"mirrored_epsilon": 7, "gradient_direction": 11, "gradient_epsilon": 3, "cavity_resonance": "deterministic, no random input"},
+  "precision": ["float32", "float64 for the adjoint Taylor checks"],
+  "backend": ["cpu", "cuda for the endpoint-solver, streamed and tensor-batch comparisons"],
+  "reference_method": "Discrete oracle: closed-form Yee dispersion of the cavity eigenmode, omega dt = 2 asin((S/n) sqrt(sum_i sin^2(q_i/2))) with S = c dt/h and q_i = m_i pi/N_i, derived independently of the update code. Continuum oracle: omega = (c/n) pi sqrt(sum_i (m_i/L_i)^2). Symmetry oracle: the full mirrored domain solved by full Torch autograd through the same discretisation, folded onto the half domain. Independent implementation: the sparse-incidence exact-endpoint PEC/PMC engine of Simulation.run against the stored-face Yee path.",
+  "observables": [
+    {"name": "tm110_resonance_relative_error_discrete", "unit": "dimensionless", "definition": "|f_peak/f_discrete - 1| for the spectrum peak of each monitor (tests/test_cavity_resonance.py)"},
+    {"name": "tm110_resonance_relative_error_continuum", "unit": "dimensionless", "definition": "|f_peak/f_continuum - 1|; the difference from the discrete error is the analytic numerical dispersion of the 8-cell cube, 0.225 percent for n = 1 and 0.457 percent for n = 1.5"},
+    {"name": "eigenmode_phase_advance", "unit": "reduced field", "definition": "E after N steps against E0 cos(N omega_discrete dt) at every node including stored PMC faces"},
+    {"name": "half_versus_full_signals", "unit": "reduced field", "definition": "monitor signals of the PMC half domain against the PEC full domain"},
+    {"name": "folded_gradient", "unit": "d objective / d epsilon", "definition": "adjoint gradient of the half domain against the full-domain autograd gradient folded over the images; wall rows nonzero, inert padding rows exactly zero"},
+    {"name": "endpoint_solver_signals", "unit": "reduced field", "definition": "stored-face Yee signals against the exact-endpoint engine"}
+  ],
+  "acceptance": {
+    "cavity_resonance": {"discrete_relative_error_max": 0.001, "continuum_relative_error_max": 0.01, "discrimination": "the measured peak must lie closer to the discrete than to the continuum eigenfrequency", "source_of_limits": "continuum: completion_gates.json cavity_resonant_frequency_relative_error; discrete: estimator floor declared from the DFT grid spacing 5e-6 f and the leakage of the next excited mode at 1.73 f and of the negative-frequency image, both below 1e-4"},
+    "eigenmode_phase_advance": {"float32": {"atol": 3e-6, "rtol": 3e-6, "where": "tests/test_pec_boundaries.py"}, "pmc": {"atol": 4e-6, "rtol": 4e-6, "where": "tests/test_pmc_general.py"}, "pmc_reference": {"atol": 2e-6, "rtol": 3e-5, "where": "tests/test_pmc_reference.py"}, "note": "tighter than the program's float32 discrete limit rtol 1e-4, atol 1e-6 on the rtol side; the absolute floor 2e-6 to 4e-6 is the float32 round-off after 24 to 35 steps"},
+    "symmetry_reduction": {"signals": {"atol": 4e-6, "rtol": 4e-5}, "folded_gradient": {"atol": "2e-6 times max |expected|", "rtol": 4e-5}, "reduced_versus_doubled_fields": {"atol": 4e-6, "rtol": 4e-6}, "note": "recorded budgets of the repository; the rtol 4e-5 is within the program's float32 rtol 1e-4"},
+    "independent_endpoint_solver": {"rtol": 3e-5, "atol": 2e-6},
+    "adjoint_taylor_float64": {"autograd": {"atol": 1e-12, "rtol": 1e-9}, "central_difference_sweep": "h in (4e-3, 2e-3, 1e-3): last error below 1e-6 |directional derivative| and errors[0] > 3 errors[1] > 9 errors[2]"},
+    "source_of_limits": "completion_gates.json proposed_thresholds cavity_resonant_frequency_relative_error 0.01 and discrete_dimensionless_fp32 / fp64; the tighter recorded assertions are not loosened by this case"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_cavity_resonance.py::test_pec_cavity_tm110_resonance_matches_discrete_then_continuum_eigenfrequency",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction",
+      "tests/test_pmc_general.py::test_pmc_cavity_eigenmode_follows_discrete_dispersion",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain",
+      "tests/test_pmc_general.py::test_symmetric_half_domain_matches_mirrored_full_domain",
+      "tests/test_pmc_dispersive.py::test_dispersive_half_domain_matches_mirrored_full_domain",
+      "tests/test_pmc_general.py::test_yee_faces_match_independent_exact_endpoint_solver",
+      "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64",
+      "tests/test_pmc_general.py::test_cuda_adjoint_matches_autograd_and_central_differences"
+    ],
+    "layers": {
+      "tests/test_cavity_resonance.py::test_pec_cavity_tm110_resonance_matches_discrete_then_continuum_eigenfrequency": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "closed-form discrete TM110 eigenfrequency as the precise oracle and the continuum eigenfrequency (analytic_continuum) against the 1 percent limit; user path with source, monitor and spectrum"},
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "closed-form Yee dispersion of the seeded standing wave; the doubled-domain half is shared_discrete_operator"},
+      "tests/test_pmc_general.py::test_pmc_cavity_eigenmode_follows_discrete_dispersion": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "closed-form Yee dispersion with PMC stored faces"},
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "three-dimensional closed-form Yee dispersion for five PEC/PMC parity cases; the doubled Bloch domain half is shared_discrete_operator"},
+      "tests/test_pmc_general.py::test_symmetric_half_domain_matches_mirrored_full_domain": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "full mirrored domain by full autograd of the same discretisation, gradient folded over images"},
+      "tests/test_pmc_dispersive.py::test_dispersive_half_domain_matches_mirrored_full_domain": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "full mirrored domain with Lorentz poles by full autograd of the same discretisation"},
+      "tests/test_pmc_general.py::test_yee_faces_match_independent_exact_endpoint_solver": {"layer": "A", "oracle_class": "independent_implementation_same_scheme", "oracle": "sparse-incidence exact-endpoint PEC/PMC engine, separately coded, same Yee scheme"},
+      "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "full autograd and a three-step central-difference sweep of the same discretisation"},
+      "tests/test_pmc_general.py::test_cuda_adjoint_matches_autograd_and_central_differences": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "full autograd and one central-difference step on CUDA, float32 and float64"}
+    },
+    "not_yet_covered": [
+      "cavity eigenfrequency with PMC faces measured from a spectrum (the PMC discrete-dispersion evidence is the seeded eigenmode only)",
+      "gradient mapping of a symmetry-reduced domain against a continuum or independent-solver derivative (the folded gradient is checked against the full domain of the same discretisation only)",
+      "cavity Q measurement (not publicly supported; no criterion declared)"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float32 round-off of 2e-6 to 4e-6 in reduced fields after 24 to 40 steps sets the absolute tolerances of the eigenmode and endpoint comparisons; the resonance estimator floor is 1e-3 relative by declaration and about 1e-5 by construction",
+    "time_window": "eigenmode tests: 24 to 35 steps (phase advance below pi); resonance test: 4000 steps, 763 fs, source interval of 600 steps excluded from the DFT; no time-window sweep was run for the resonance test",
+    "pml": "not present in the cavity fixtures; CPML depth of the mirrored pairs is 3 to 4 layers on the non-mirrored axis and is part of the compared operator, not an error source"
+  },
+  "notes": "tests/test_cavity_resonance.py is added with this case; the pilot run at this commit measured discrete relative errors of 3.0e-6 and 5.0e-6 (n = 1) and 4.8e-6 and 7.0e-6 (n = 1.5) with continuum errors of 0.2245 and 0.4569 percent, equal to the analytic numerical dispersion. The limits above were written before that pilot from the estimator analysis and were not changed after it. The discrete-dispersion tests verify that the implemented operator is the intended Yee operator; only the resonance test and the 3 percent continuum bound of tests/test_anisotropy_walls.py (recorded under G3-12) close the loop to the continuum."
+}
