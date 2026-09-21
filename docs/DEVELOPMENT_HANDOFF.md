@@ -944,7 +944,10 @@ zero and its allowance was never exercised).
 **Evidence paths and hashes.** `docs/validation/stability_sweep_3060.json`
 (run at 8167030 with the working files dirty, 1757 s wall),
 `docs/validation/adjoint_leak_soak_3060.json` (run at a248548, 738 s wall);
-both carry the SHA-256 of the driver and the solver modules they exercise.
+both carry the SHA-256 of the driver and the solver modules they exercise;
+the recorded hash of `torchfdtd/solver.py` is that of the LF-normalized
+working copy the runs used (its mixed CRLF/LF endings were restored, content
+unchanged, in the commit after the records).
 
 **Remaining defects, risks, external blockers.**
 - The documented `ade` divergence is not reproduced within the sweep's bounded fixtures; the warning is the only behavioural change. Reproducing it needs the larger domain of the BOUNDARIES.md paragraph on a GPU that is not shared.
