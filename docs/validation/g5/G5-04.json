@@ -1,0 +1,63 @@
+{
+  "task": "G5-04",
+  "case": "docs/validation/cases/G5-04.json",
+  "test_module": "tests/test_design_slab_memory_g5.py",
+  "environment": {
+    "python": "3.10.2",
+    "numpy": "2.2.6",
+    "torch": "2.10.0+cu126",
+    "cuda_runtime": "12.6",
+    "cuda_available": true,
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "commit": "e9e945856aa268b6a37231abd75b8d00fbfad569",
+    "dirty_paths": 1,
+    "recorded_at": "2026-09-21T20:06:55+00:00"
+  },
+  "entries": {
+    "geometry": {
+      "path": "geometry",
+      "shape": [
+        800,
+        32,
+        32
+      ],
+      "cells": 819200,
+      "full_epsilon_bytes": 9830400,
+      "gpu_budget_bytes": 9600000,
+      "gpu_reservation_bytes": 9437300,
+      "peak_torch_allocated_delta_bytes": 3825664,
+      "peak_over_full_epsilon": 0.38916666666666666,
+      "max_host_allocation_bytes": 801468,
+      "full_shape_host_allocations": 0,
+      "design_parameters": 21,
+      "gradient_max_abs": 0.3403807580471039,
+      "forward_seconds": 12.579892800189555,
+      "backward_seconds": 55.043436200357974,
+      "max_extended_tile_cells": 18432
+    },
+    "density": {
+      "path": "density",
+      "shape": [
+        800,
+        32,
+        32
+      ],
+      "cells": 819200,
+      "full_epsilon_bytes": 9830400,
+      "gpu_budget_bytes": 9600000,
+      "gpu_reservation_bytes": 9437300,
+      "peak_torch_allocated_delta_bytes": 3208192,
+      "peak_over_full_epsilon": 0.32635416666666667,
+      "max_host_allocation_bytes": 728424,
+      "full_shape_host_allocations": 0,
+      "design_parameters": 128,
+      "gradient_max_abs": 2.379479169845581,
+      "forward_seconds": 6.199053700082004,
+      "backward_seconds": 16.531717100180686,
+      "max_extended_tile_cells": 18432
+    }
+  }
+}

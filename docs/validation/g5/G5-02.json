@@ -1,0 +1,584 @@
+{
+  "task": "G5-02",
+  "case": "docs/validation/cases/G5-02.json",
+  "test_module": "tests/test_memory_accounting_g5.py",
+  "environment": {
+    "python": "3.10.2",
+    "numpy": "2.2.6",
+    "torch": "2.10.0+cu126",
+    "cuda_runtime": "12.6",
+    "cuda_available": true,
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "commit": "e9e945856aa268b6a37231abd75b8d00fbfad569",
+    "dirty_paths": 1,
+    "recorded_at": "2026-09-21T20:04:45+00:00"
+  },
+  "entries": {
+    "host_sync/forward": {
+      "path": "host_sync",
+      "phase": "forward",
+      "state_bytes": 229376,
+      "peak_torch_allocated_bytes": {
+        "bytes": 247808,
+        "domain": "device",
+        "at_start_bytes": 0,
+        "delta_bytes": 247808,
+        "exact": true,
+        "prior_process_peak_bytes": 0
+      },
+      "peak_torch_reserved_bytes": {
+        "bytes": 2097152,
+        "domain": "device",
+        "at_start_bytes": 0,
+        "delta_bytes": 2097152,
+        "exact": true,
+        "prior_process_peak_bytes": 0
+      },
+      "cuda_process_memory_bytes": {
+        "bytes": 18874368,
+        "domain": "device",
+        "device_free_at_start_bytes": 11791237120,
+        "device_min_free_bytes": 11772362752,
+        "nvidia_smi_process_used_bytes": null,
+        "nvidia_smi_instrument": "nvidia-smi --query-compute-apps reports N/A or is unavailable for this process"
+      },
+      "peak_process_rss_bytes": {
+        "bytes": 939139072,
+        "domain": "host",
+        "at_start_bytes": 732495872,
+        "delta_bytes": 206643200,
+        "os_lifetime_peak_bytes": 939139072
+      },
+      "peak_process_private_bytes": {
+        "bytes": 2652561408,
+        "domain": "host",
+        "at_start_bytes": 2401947648,
+        "delta_bytes": 250613760
+      },
+      "peak_process_committed_bytes": {
+        "bytes": 2652561408,
+        "domain": "host",
+        "at_start_bytes": 2401947648,
+        "delta_bytes": 250613760,
+        "os_lifetime_peak_bytes": 2652561408
+      },
+      "host_bank_bytes": {
+        "bytes": 458752,
+        "domain": "host",
+        "created_bytes": 2293760,
+        "banks_created": 10,
+        "live_bytes_at_end": 229376
+      },
+      "os_file_cache_bytes": {
+        "bytes": 208896,
+        "domain": "system",
+        "at_start_bytes": 6111694848,
+        "at_end_bytes": 6111903744,
+        "peak_delta_bytes": 208896
+      },
+      "scratch_disk_written_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "process_io_delta_bytes": 0,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_read_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "process_io_delta_bytes": 3863272,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_peak_file_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "created_banks": 0
+      },
+      "scratch_disk_bandwidth_bytes_per_second": {
+        "written": 0.0,
+        "read": 0.0,
+        "seconds": 1.1602695998735726,
+        "domain": "disk"
+      },
+      "sampler": {
+        "interval_seconds": 0.02,
+        "samples": 39
+      },
+      "seconds": 1.1602695998735726
+    },
+    "host_sync/backward": {
+      "path": "host_sync",
+      "phase": "backward",
+      "state_bytes": 229376,
+      "peak_torch_allocated_bytes": {
+        "bytes": 728064,
+        "domain": "device",
+        "at_start_bytes": 0,
+        "delta_bytes": 728064,
+        "exact": true,
+        "prior_process_peak_bytes": 247808
+      },
+      "peak_torch_reserved_bytes": {
+        "bytes": 2097152,
+        "domain": "device",
+        "at_start_bytes": 2097152,
+        "delta_bytes": 0,
+        "exact": true,
+        "prior_process_peak_bytes": 2097152
+      },
+      "cuda_process_memory_bytes": {
+        "bytes": 0,
+        "domain": "device",
+        "device_free_at_start_bytes": 11772362752,
+        "device_min_free_bytes": 11772362752,
+        "nvidia_smi_process_used_bytes": null,
+        "nvidia_smi_instrument": "nvidia-smi --query-compute-apps reports N/A or is unavailable for this process"
+      },
+      "peak_process_rss_bytes": {
+        "bytes": 955568128,
+        "domain": "host",
+        "at_start_bytes": 939732992,
+        "delta_bytes": 15835136,
+        "os_lifetime_peak_bytes": 955576320
+      },
+      "peak_process_private_bytes": {
+        "bytes": 2636136448,
+        "domain": "host",
+        "at_start_bytes": 2619465728,
+        "delta_bytes": 16670720
+      },
+      "peak_process_committed_bytes": {
+        "bytes": 2636136448,
+        "domain": "host",
+        "at_start_bytes": 2619465728,
+        "delta_bytes": 16670720,
+        "os_lifetime_peak_bytes": 2652561408
+      },
+      "host_bank_bytes": {
+        "bytes": 1146880,
+        "domain": "host",
+        "created_bytes": 5734400,
+        "banks_created": 25,
+        "live_bytes_at_end": 229376
+      },
+      "os_file_cache_bytes": {
+        "bytes": 12288,
+        "domain": "system",
+        "at_start_bytes": 6111928320,
+        "at_end_bytes": 6111940608,
+        "peak_delta_bytes": 438272
+      },
+      "scratch_disk_written_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "process_io_delta_bytes": 0,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_read_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "process_io_delta_bytes": 1181579,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_peak_file_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "created_banks": 0
+      },
+      "scratch_disk_bandwidth_bytes_per_second": {
+        "written": 0.0,
+        "read": 0.0,
+        "seconds": 1.9086191998794675,
+        "domain": "disk"
+      },
+      "sampler": {
+        "interval_seconds": 0.02,
+        "samples": 64
+      },
+      "seconds": 1.9086191998794675
+    },
+    "disk_sync/forward": {
+      "path": "disk_sync",
+      "phase": "forward",
+      "state_bytes": 229376,
+      "peak_torch_allocated_bytes": {
+        "bytes": 247808,
+        "domain": "device",
+        "at_start_bytes": 0,
+        "delta_bytes": 247808,
+        "exact": true,
+        "prior_process_peak_bytes": 0
+      },
+      "peak_torch_reserved_bytes": {
+        "bytes": 2097152,
+        "domain": "device",
+        "at_start_bytes": 2097152,
+        "delta_bytes": 0,
+        "exact": true,
+        "prior_process_peak_bytes": 2097152
+      },
+      "cuda_process_memory_bytes": {
+        "bytes": 0,
+        "domain": "device",
+        "device_free_at_start_bytes": 11772362752,
+        "device_min_free_bytes": 11772362752,
+        "nvidia_smi_process_used_bytes": null,
+        "nvidia_smi_instrument": "nvidia-smi --query-compute-apps reports N/A or is unavailable for this process"
+      },
+      "peak_process_rss_bytes": {
+        "bytes": 955002880,
+        "domain": "host",
+        "at_start_bytes": 954896384,
+        "delta_bytes": 106496,
+        "os_lifetime_peak_bytes": 955576320
+      },
+      "peak_process_private_bytes": {
+        "bytes": 2635546624,
+        "domain": "host",
+        "at_start_bytes": 2635046912,
+        "delta_bytes": 499712
+      },
+      "peak_process_committed_bytes": {
+        "bytes": 2635546624,
+        "domain": "host",
+        "at_start_bytes": 2635046912,
+        "delta_bytes": 499712,
+        "os_lifetime_peak_bytes": 2652561408
+      },
+      "host_bank_bytes": {
+        "bytes": 0,
+        "domain": "host",
+        "created_bytes": 0,
+        "banks_created": 0,
+        "live_bytes_at_end": 0
+      },
+      "os_file_cache_bytes": {
+        "bytes": 385024,
+        "domain": "system",
+        "at_start_bytes": 6112165888,
+        "at_end_bytes": 6112550912,
+        "peak_delta_bytes": 856064
+      },
+      "scratch_disk_written_bytes": {
+        "bytes": 2293760,
+        "domain": "disk",
+        "process_io_delta_bytes": 4587520,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_read_bytes": {
+        "bytes": 3981312,
+        "domain": "disk",
+        "process_io_delta_bytes": 3981312,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_peak_file_bytes": {
+        "bytes": 458752,
+        "domain": "disk",
+        "created_banks": 10
+      },
+      "scratch_disk_bandwidth_bytes_per_second": {
+        "written": 3891340.5029568085,
+        "read": 6754255.301560746,
+        "seconds": 0.5894524003379047,
+        "domain": "disk"
+      },
+      "sampler": {
+        "interval_seconds": 0.02,
+        "samples": 20
+      },
+      "seconds": 0.5894524003379047
+    },
+    "disk_sync/backward": {
+      "path": "disk_sync",
+      "phase": "backward",
+      "state_bytes": 229376,
+      "peak_torch_allocated_bytes": {
+        "bytes": 728064,
+        "domain": "device",
+        "at_start_bytes": 0,
+        "delta_bytes": 728064,
+        "exact": true,
+        "prior_process_peak_bytes": 247808
+      },
+      "peak_torch_reserved_bytes": {
+        "bytes": 2097152,
+        "domain": "device",
+        "at_start_bytes": 2097152,
+        "delta_bytes": 0,
+        "exact": true,
+        "prior_process_peak_bytes": 2097152
+      },
+      "cuda_process_memory_bytes": {
+        "bytes": 0,
+        "domain": "device",
+        "device_free_at_start_bytes": 11772362752,
+        "device_min_free_bytes": 11772362752,
+        "nvidia_smi_process_used_bytes": null,
+        "nvidia_smi_instrument": "nvidia-smi --query-compute-apps reports N/A or is unavailable for this process"
+      },
+      "peak_process_rss_bytes": {
+        "bytes": 955236352,
+        "domain": "host",
+        "at_start_bytes": 954695680,
+        "delta_bytes": 540672,
+        "os_lifetime_peak_bytes": 955576320
+      },
+      "peak_process_private_bytes": {
+        "bytes": 2636402688,
+        "domain": "host",
+        "at_start_bytes": 2635505664,
+        "delta_bytes": 897024
+      },
+      "peak_process_committed_bytes": {
+        "bytes": 2636402688,
+        "domain": "host",
+        "at_start_bytes": 2635505664,
+        "delta_bytes": 897024,
+        "os_lifetime_peak_bytes": 2652561408
+      },
+      "host_bank_bytes": {
+        "bytes": 0,
+        "domain": "host",
+        "created_bytes": 0,
+        "banks_created": 0,
+        "live_bytes_at_end": 0
+      },
+      "os_file_cache_bytes": {
+        "bytes": -20480,
+        "domain": "system",
+        "at_start_bytes": 6112550912,
+        "at_end_bytes": 6112530432,
+        "peak_delta_bytes": 1183744
+      },
+      "scratch_disk_written_bytes": {
+        "bytes": 7864320,
+        "domain": "disk",
+        "process_io_delta_bytes": 13598720,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_read_bytes": {
+        "bytes": 13926400,
+        "domain": "disk",
+        "process_io_delta_bytes": 13926400,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_peak_file_bytes": {
+        "bytes": 1146880,
+        "domain": "disk",
+        "created_banks": 25
+      },
+      "scratch_disk_bandwidth_bytes_per_second": {
+        "written": 4703787.674177872,
+        "read": 8329624.006356648,
+        "seconds": 1.6719122002832592,
+        "domain": "disk"
+      },
+      "sampler": {
+        "interval_seconds": 0.02,
+        "samples": 56
+      },
+      "seconds": 1.6719122002832592
+    },
+    "host_async/forward": {
+      "path": "host_async",
+      "phase": "forward",
+      "state_bytes": 229376,
+      "peak_torch_allocated_bytes": {
+        "bytes": 492032,
+        "domain": "device",
+        "at_start_bytes": 0,
+        "delta_bytes": 492032,
+        "exact": true,
+        "prior_process_peak_bytes": 0
+      },
+      "peak_torch_reserved_bytes": {
+        "bytes": 2097152,
+        "domain": "device",
+        "at_start_bytes": 2097152,
+        "delta_bytes": 0,
+        "exact": true,
+        "prior_process_peak_bytes": 2097152
+      },
+      "cuda_process_memory_bytes": {
+        "bytes": 12582912,
+        "domain": "device",
+        "device_free_at_start_bytes": 11772362752,
+        "device_min_free_bytes": 11759779840,
+        "nvidia_smi_process_used_bytes": null,
+        "nvidia_smi_instrument": "nvidia-smi --query-compute-apps reports N/A or is unavailable for this process"
+      },
+      "peak_process_rss_bytes": {
+        "bytes": 957771776,
+        "domain": "host",
+        "at_start_bytes": 955224064,
+        "delta_bytes": 2547712,
+        "os_lifetime_peak_bytes": 957771776
+      },
+      "peak_process_private_bytes": {
+        "bytes": 2651897856,
+        "domain": "host",
+        "at_start_bytes": 2636361728,
+        "delta_bytes": 15536128
+      },
+      "peak_process_committed_bytes": {
+        "bytes": 2651897856,
+        "domain": "host",
+        "at_start_bytes": 2636361728,
+        "delta_bytes": 15536128,
+        "os_lifetime_peak_bytes": 2652561408
+      },
+      "host_bank_bytes": {
+        "bytes": 458752,
+        "domain": "host",
+        "created_bytes": 2293760,
+        "banks_created": 10,
+        "live_bytes_at_end": 229376
+      },
+      "os_file_cache_bytes": {
+        "bytes": 4096,
+        "domain": "system",
+        "at_start_bytes": 6112542720,
+        "at_end_bytes": 6112546816,
+        "peak_delta_bytes": 434176
+      },
+      "scratch_disk_written_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "process_io_delta_bytes": 0,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_read_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "process_io_delta_bytes": 0,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_peak_file_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "created_banks": 0
+      },
+      "scratch_disk_bandwidth_bytes_per_second": {
+        "written": 0.0,
+        "read": 0.0,
+        "seconds": 0.4202250000089407,
+        "domain": "disk"
+      },
+      "sampler": {
+        "interval_seconds": 0.02,
+        "samples": 15
+      },
+      "seconds": 0.4202250000089407
+    },
+    "host_async/backward": {
+      "path": "host_async",
+      "phase": "backward",
+      "state_bytes": 229376,
+      "peak_torch_allocated_bytes": {
+        "bytes": 1439232,
+        "domain": "device",
+        "at_start_bytes": 0,
+        "delta_bytes": 1439232,
+        "exact": true,
+        "prior_process_peak_bytes": 492032
+      },
+      "peak_torch_reserved_bytes": {
+        "bytes": 2097152,
+        "domain": "device",
+        "at_start_bytes": 2097152,
+        "delta_bytes": 0,
+        "exact": true,
+        "prior_process_peak_bytes": 2097152
+      },
+      "cuda_process_memory_bytes": {
+        "bytes": 0,
+        "domain": "device",
+        "device_free_at_start_bytes": 11759779840,
+        "device_min_free_bytes": 11759779840,
+        "nvidia_smi_process_used_bytes": null,
+        "nvidia_smi_instrument": "nvidia-smi --query-compute-apps reports N/A or is unavailable for this process"
+      },
+      "peak_process_rss_bytes": {
+        "bytes": 958087168,
+        "domain": "host",
+        "at_start_bytes": 956964864,
+        "delta_bytes": 1122304,
+        "os_lifetime_peak_bytes": 958091264
+      },
+      "peak_process_private_bytes": {
+        "bytes": 2650779648,
+        "domain": "host",
+        "at_start_bytes": 2649690112,
+        "delta_bytes": 1089536
+      },
+      "peak_process_committed_bytes": {
+        "bytes": 2650779648,
+        "domain": "host",
+        "at_start_bytes": 2649690112,
+        "delta_bytes": 1089536,
+        "os_lifetime_peak_bytes": 2652561408
+      },
+      "host_bank_bytes": {
+        "bytes": 1146880,
+        "domain": "host",
+        "created_bytes": 5734400,
+        "banks_created": 25,
+        "live_bytes_at_end": 229376
+      },
+      "os_file_cache_bytes": {
+        "bytes": -1302528,
+        "domain": "system",
+        "at_start_bytes": 6112546816,
+        "at_end_bytes": 6111244288,
+        "peak_delta_bytes": 4096
+      },
+      "scratch_disk_written_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "process_io_delta_bytes": 0,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_read_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "process_io_delta_bytes": 0,
+        "process_io_instrument": "kernel32.GetProcessIoCounters: ReadTransferCount, WriteTransferCount (all handles, not only scratch files)"
+      },
+      "scratch_disk_peak_file_bytes": {
+        "bytes": 0,
+        "domain": "disk",
+        "created_banks": 0
+      },
+      "scratch_disk_bandwidth_bytes_per_second": {
+        "written": 0.0,
+        "read": 0.0,
+        "seconds": 1.5107241999357939,
+        "domain": "disk"
+      },
+      "sampler": {
+        "interval_seconds": 0.02,
+        "samples": 49
+      },
+      "seconds": 1.5107241999357939
+    },
+    "disk_sync/bank_files": {
+      "state_bytes": 229376,
+      "forward": {
+        "created_banks": 10,
+        "created_file_bytes": 2293760,
+        "written_bytes": 2293760,
+        "read_bytes": 3981312,
+        "peak_file_bytes": 458752
+      },
+      "backward": {
+        "created_banks": 25,
+        "created_file_bytes": 5734400,
+        "written_bytes": 7864320,
+        "read_bytes": 13926400,
+        "peak_file_bytes": 1146880
+      }
+    }
+  }
+}
