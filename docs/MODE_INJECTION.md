@@ -58,8 +58,9 @@ mode profile. Mode eigenvalues, mode shapes and source-current profiles do not
 have material derivatives.
 
 Graded meshes, complex/Bloch transverse modes, dispersive/PML transverse modes,
-TFSF and arbitrary time signals are rejected. Streamed execution is not yet
-supported by this source wrapper. The underlying plane quadrature must be a
+TFSF and arbitrary time signals are rejected. `StreamedAdjointOptions` runs
+the same fixed sheets through X slabs; see [N-port aperture
+networks](OPEN_MODE_PORTS.md). The underlying plane quadrature must be a
 complete uniform midpoint tensor product with positive uniform SI area weights.
 Detectors must lie on longitudinal electric-node planes. General offset planes
 and cropped/nonuniform quadrature are not accepted for modal extraction.

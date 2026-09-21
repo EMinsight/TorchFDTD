@@ -128,9 +128,101 @@ and separately increasing PML thickness from 0.8 to 1 micrometre changed beta
 by at most 2.10e-7 relatively. Both cases passed the predeclared 1e-4 beta-shift
 and collar-tail gates. This checks finite-box sensitivity at one mesh.
 
-Current exclusions are general multi-branch routing, leaky/resonant channel
-normalization, eigenmode differentiation, anisotropic or dispersive mode
-profiles, nonuniform grids and spatially streamed modal injection. A restricted
-[native CAD and browser workflow](MODE_NETWORK_WORKFLOW.md) now exposes the same
-fixed opposing ports, complex S and interior material derivatives. FDTDX feature
+## N-port aperture networks
+
+`ModePort` and `ModeBranchNetwork` in `torchfdtd.mode_branches` place any
+number of fixed-mode ports on any of the six cardinal faces. Each port has its
+own transverse aperture, which may be a sub-rectangle of the cell, its own
+straight calibration guide through `port_permittivities`, and its own selected
+mode indices. The result is the complex S matrix over every channel pair in
+the existing normalization: outgoing amplitude at the row phase plane divided
+by the matched incident amplitude at the column phase plane, with the
+same-port matched-guide outgoing baseline subtracted. The report carries
+`column_power` and `power_defect`, summed over the selected guided channels
+only; radiation and omitted modes are not included, so a defect is reported,
+never corrected.
+
+```python
+import numpy as np
+from torchfdtd import AdjointOptions, ModePort, ModeBranchNetwork
+
+ports = (ModePort('in', 'x', +1, (-1., 0., 0.), (0., 1.2, .5), .4),
+         ModePort('up', 'x', -1, (1., .7, 0.), (0., 1.2, .5), .4),
+         ModePort('down', 'x', -1, (1., -.7, 0.), (0., 1.2, .5), .4))
+sections = {'in': lambda y, z: np.where(abs(y) < .2, 12., 2.1),
+            'up': lambda y, z: np.where(abs(y-.7) < .2, 12., 2.1),
+            'down': lambda y, z: np.where(abs(y+.7) < .2, 12., 2.1)}
+network = ModeBranchNetwork(project, ports, options=AdjointOptions(checkpoints=4),
+                            port_permittivities=sections)
+result = network(epsilon)          # result.s is 3 by 3, result.report['column_power']
+```
+
+Port apertures are periodic-supercell eigenmodes solved on the aperture
+rectangle by `prepare_aperture_modal_launch`. Unless the rectangle is the
+complete periodic cell on an axis, the outermost cell ring must hold at most
+`confinement_tolerance` (default 1e-3) of the squared six-component amplitude;
+the fraction is reported per port. Aperture edges lie on Yee cell boundaries
+and, on a CPML axis, inside the physical region. Injection, the fixed-material
+check and the detector quadrature cover only the rectangle. Material beside
+the aperture is free. Each port's exterior footprint, its aperture times the
+cells from one cell inside the phase plane outward through the source and
+CPML, must equal that port's calibration guide and carries zero derivative.
+Footprints may not overlap. Phase planes lie on longitudinal E nodes and
+sources a whole number of at least two cells outside them. `ModePort` accepts
+the x, y and z normals with either sign. Mode profiles, eigenvalues, source
+packets and calibration stay fixed reference quantities, as in FDTDX.
+
+`branch_network_from_ports` builds the same network from in-plane port
+markers such as `GDSImport.ports`, taking `normal_convention`,
+`wavelength_um`, `source_offset_um`, `mode_indices`, `options` and either
+core/cladding rectangle epsilons or explicit `permittivity` or
+`port_permittivities` sections, the keywords of the two-port GDS helper;
+marker selection is the caller's list.
+Marker normals must be cardinal x or y; use `ModePort` directly for z faces.
+Marker geometry is not rasterized.
+
+`ModeInjectedPlaneSimulation` now admits `StreamedAdjointOptions`. Each X slab
+injects only its rows of the fixed sheets and accumulates only its own plane
+observers, through the existing tile transposes; the same holds for
+`ModeBranchNetwork`. The `reference` method runs the identical fixed sheets
+through full Torch autograd on small resident problems, at most two million
+cell-steps, as the oracle for the checkpointed adjoint.
+
+### Recorded checks
+
+`tests/test_mode_branches.py`, `tests/test_mode_streamed_injection.py` and
+`tests/test_mode_adjoint_oracle.py` record these on the RTX 3060 and CPU with
+0.1 micrometre meshes, two-cycle pulses and cores of epsilon 12 in 2.1. They
+are discrete consistency checks at one mesh, not convergence claims.
+
+On a straight guide, a 1.2 micrometre aperture port and a mixed aperture pair
+differed from the full-cell `ModeNetwork` by at most 1.6e-5 and 1.0e-5 in
+complex S, with straight propagation phase error 2.8e-4 and column powers
+1.000002 and 0.99981. A staircase symmetric Y branch with 800 steps gave
+column powers 0.816, 0.549 and 0.549, reciprocity error 2.0e-3, arm asymmetry
+1.2e-4, and a derivative of a mixed complex S objective of 0.189753 against a
+central difference of 0.189749, relative error 2.2e-5. A four-port crossing on
+the x and y normals gave column powers 0.760, reciprocity error 2.4e-4, a
+four-fold rotation gap of 1.2e-7 and a mirror gap of 2.6e-3. Ports on the z
+faces reproduced the x-normal scene under cyclic relabelling to 4.1e-8 in S
+with identical derivatives. The power lost by the crude junctions goes to
+radiation outside the selected basis.
+
+Streamed versus resident execution agreed to 1.3e-7 in normalized plane
+fields, to 1.5e-6 (CPU, x normal) and 1.1e-5 (CUDA, y normal) relative in
+material derivatives, and to 8.2e-8 in network S with 2.3e-7 relative
+derivative agreement. The checkpointed adjoint matched full Torch autograd to
+1.3e-15 (CPU) and 5.4e-15 (CUDA) relative in FP64, Taylor residuals 1.56e-8,
+3.90e-9 and 9.76e-10 for steps 2e-3, 1e-3 and 5e-4, and the central difference
+agreed to 8.3e-9 relative. A network-level |S21|^2 objective had residuals
+2.65e-8, 6.62e-9 and 1.65e-9 with central difference agreement 1.7e-8 relative.
+
+Current exclusions are open-boundary (transverse CPML) modes on sub-cell
+apertures, since aperture modes are periodic supercells and `OpenPortOptions`
+remains a two-port `ModeNetwork` feature, oblique or non-cardinal port normals,
+leaky/resonant channel normalization, eigenmode and source-parameter
+differentiation, anisotropic or dispersive mode profiles, nonuniform grids,
+and z-normal GDS markers. A restricted
+[native CAD and browser workflow](MODE_NETWORK_WORKFLOW.md) exposes the fixed
+opposing two ports, complex S and interior material derivatives. FDTDX feature
 parity remains a separate checklist with these restrictions explicit.

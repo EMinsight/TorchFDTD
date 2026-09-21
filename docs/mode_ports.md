@@ -4,8 +4,10 @@
 2D transverse Yee mesh. This is a CPU sparse eigensolver with periodic transverse
 boundaries. It supplies propagation constants, six-component fields, signed
 power normalization, component-aware interpolation and a differentiable fixed-mode
-plane objective. It is not yet a mode source, an open-boundary/PML port, or a
-validated time-domain port coupling implementation.
+plane objective. The time-domain layers built on it are documented
+separately: [fixed modal injection](MODE_INJECTION.md), [opposing two-port
+networks](MODE_NETWORK.md), [open transverse CPML ports and N-port aperture
+networks](OPEN_MODE_PORTS.md) and the [GDS adapter](GDS_MODE_PORTS.md).
 
 ```python
 import numpy as np
@@ -171,11 +173,15 @@ error 3.46e-4 at step 0.001. Separate analytic amplitude tests check both sample
 and reference gradients. These are synthetic overlap tests, not measured FDTD
 reflection or source cross-polarization results.
 
-A production mode port still requires bounded source-current construction,
-longitudinal and temporal Yee phase/dispersion matching, incident calibration,
-mode-launched homogeneous and slab propagation tests, and an actual FDTD
-reflection/transmission and objective-gradient validation. Open/PML transverse
-modes and eigenmode derivatives require additional implementations and evidence.
+Bounded source-current construction, longitudinal and temporal Yee
+phase/dispersion matching, incident calibration, mode-launched propagation
+tests and FDTD reflection/transmission and objective-gradient validation live
+in the injection and network layers listed above. `prepare_aperture_modal_launch`
+applies this periodic solver to a transverse sub-rectangle of the cell, with
+the mesh origin at the rectangle corner, and gates the result on the squared
+amplitude in the outermost cell ring. Open/PML transverse modes are a separate
+solver in `open_mode_ports`. Eigenmode derivatives with respect to
+permittivity remain unimplemented in every layer.
 
 The numerical record retains the exact source hashes measured before a
 line-ending cleanup. No numerical run was repeated for that cleanup.
