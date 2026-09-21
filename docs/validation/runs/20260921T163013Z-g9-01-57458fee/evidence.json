@@ -1,0 +1,288 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T163013Z-g9-01-57458fee",
+  "task": "G9-01",
+  "stage": "G9",
+  "task_title": "local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_server_security.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-01.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T01:27:48.013854+09:00",
+  "recorded_at": "2026-09-21T16:30:13+00:00",
+  "source_commit": "e132fdd4155b21972ccbe05d29b0489853e1af8b",
+  "source_tree_sha256": "aedc079f4a4dc1bb2f5b0171b88479b2ec5306f63a5f6a16c98d8e82b78e83fe",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_server_security.py": "5cf92a4168503feefa643f60a828a939e24297ff46d28a780b1d6ce60205b7d0"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G9-01.json",
+  "fixture_sha256": "b6f948eafaa4af197405878f5eb0221671b84b523fc4da28cf968dda553cc2f7",
+  "acceptance_criteria_path": "docs/validation/cases/G9-01.json",
+  "acceptance_criteria_sha256": "b6f948eafaa4af197405878f5eb0221671b84b523fc4da28cf968dda553cc2f7",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable: every request and file is fixed in tests/test_server_security.py",
+  "precision": "not applicable: no floating-point observable",
+  "backend": "cpu; no simulation is run and no CUDA context is created by the case",
+  "physics_configuration": {
+    "server": "torchfdtd.server.create_app(<tmp>/results) driven in-process by fastapi.testclient.TestClient with raise_server_exceptions=False; the CLI entry torchfdtd.cli.main with uvicorn.run replaced by a recorder",
+    "loopback_bind": {
+      "default": "torchfdtd serve --port 8123 must call uvicorn.run with host 127.0.0.1",
+      "accepted_hosts": [
+        "127.0.0.1",
+        "localhost"
+      ],
+      "refused_hosts": [
+        "0.0.0.0",
+        "192.168.0.5",
+        "::",
+        "fdtd.example",
+        "10.0.0.1",
+        "::1"
+      ]
+    },
+    "host_headers": {
+      "accepted": [
+        "localhost:8765",
+        "127.0.0.1:8765",
+        "localhost",
+        "127.0.0.1"
+      ],
+      "rejected": [
+        "0.0.0.0",
+        "192.168.0.5",
+        "::",
+        "fdtd.example",
+        "10.0.0.1",
+        "evil.example:8765",
+        "127.0.0.1.evil.example",
+        "[::1]:8765"
+      ]
+    },
+    "origins": {
+      "rejected": [
+        "https://evil.example",
+        "http://testserver.evil.example",
+        "http://localhost:8765",
+        "null"
+      ],
+      "routes": [
+        "/api/validate",
+        "/api/jobs",
+        "/api/mesh/preview",
+        "/api/mesh/freeze",
+        "/api/python",
+        "/api/materials/data",
+        "/api/design/config",
+        "/api/design/jobs",
+        "/api/mode-networks/validate",
+        "/api/mode-network-jobs",
+        "/api/gds/inspect",
+        "/api/fsp/native-import",
+        "/api/jobs/none/cancel"
+      ],
+      "accepted": "http://testserver on /api/validate and a request without Origin"
+    },
+    "path_policy": {
+      "route_keys": [
+        "../pyproject.toml",
+        "..%2F..%2Fpyproject.toml",
+        "..%5C..%5Cpyproject.toml",
+        "C:%5CWindows%5Cwin.ini",
+        "%5C%5Cserver%5Cshare%5Cwin.ini",
+        "%2Fetc%2Fpasswd"
+      ],
+      "key_routes": [
+        "/api/jobs/{key}",
+        "/api/jobs/{key}/download",
+        "/api/jobs/{key}/fields",
+        "/api/jobs/{key}/monitors.csv",
+        "/api/fsp/{key}",
+        "/api/fsp/{key}/download",
+        "/api/fsp/{key}/archive",
+        "/api/fsp/{key}/conversion",
+        "/api/design/jobs/{key}/download",
+        "/api/mode-network-jobs/{key}/download",
+        "/api/examples/{key}",
+        "POST /api/gds/{key}/convert"
+      ],
+      "static_paths": [
+        "/../pyproject.toml",
+        "/%2e%2e/pyproject.toml",
+        "/assets/../../pyproject.toml",
+        "/..%5Cpyproject.toml",
+        "/C:/Windows/win.ini",
+        "/C:%5CWindows%5Cwin.ini",
+        "/assets/C:/Windows/win.ini",
+        "/%5C%5Cserver%5Cshare%5Cwin.ini",
+        "//server/share/win.ini",
+        "/index.html::$DATA",
+        "/../../.git/config",
+        "/assets/..%2F..%2FLICENSE"
+      ],
+      "upload_names": [
+        "../../escape.fsp",
+        "..\\..\\escape.fsp",
+        "C:\\Windows\\escape.fsp",
+        "\\\\server\\share\\escape.fsp",
+        "/etc/escape.fsp",
+        "%2e%2e%2Fescape.fsp",
+        "..%5Cescape.fsp",
+        "../../escape.gds"
+      ]
+    },
+    "body_limits": {
+      "MAX_REQUEST_BYTES_patched": 64,
+      "gds_MAX_UPLOAD_BYTES_patched": 20,
+      "fsp_MAX_FSP_BYTES_patched": 16,
+      "declared_over_limit": "JSON body of about 92 bytes with Content-Length",
+      "chunked": "two-chunk body without Content-Length",
+      "malformed_content_length": [
+        "abc",
+        "1e9",
+        "-1",
+        "0x10",
+        ""
+      ]
+    },
+    "json_bodies": [
+      "binary bytes",
+      "top-level array",
+      "trailing data",
+      "empty body",
+      "top-level string",
+      "100000-deep array nesting",
+      "NaN literal",
+      "Infinity literal",
+      "1e999",
+      "string where an integer is required",
+      "unknown key __class__",
+      "mesh 1e-9 um on the demo region",
+      "negative steps",
+      "unknown boundary kind"
+    ],
+    "project_as_code": "demo project whose name, material name and structure name carry Python and shell syntax; saved, reloaded and rendered through /api/python",
+    "npz_inputs": [
+      "archive with object-dtype entries",
+      "archive declaring frames of shape (2**40,) and fields of shape (2**30, 4, 6) in under 8 KiB",
+      "archive truncated to 200 bytes"
+    ],
+    "gds_inputs": [
+      "rectangle layout truncated to half",
+      "layout minus two bytes",
+      "layout plus a record after ENDLIB",
+      "64 zero bytes",
+      "header plus 0xff bytes",
+      "AREF 4000 x 4000 of a one-rectangle cell converted through /api/gds/{key}/convert"
+    ]
+  },
+  "reference_method": "expected HTTP status codes and file-system state stated in docs/SECURITY.md; static source scan of torchfdtd/*.py for np.load(... allow_pickle=False), pickle.load, torch.load, eval, exec, os.system, subprocess and __import__",
+  "observables": [
+    {
+      "name": "bind_host",
+      "unit": "string",
+      "definition": "host keyword passed to uvicorn.run by torchfdtd serve"
+    },
+    {
+      "name": "status_code",
+      "unit": "HTTP status",
+      "definition": "response status of each fixture request"
+    },
+    {
+      "name": "stored_paths",
+      "unit": "path",
+      "definition": "every file under the temporary results directory after the upload requests"
+    },
+    {
+      "name": "generated_script_ast",
+      "unit": "AST node kinds",
+      "definition": "statement kinds, called names and string constants of the /api/python output"
+    },
+    {
+      "name": "loader_exception",
+      "unit": "exception class",
+      "definition": "exception raised by Result.load, load_native_radiation_plane and load_native_radiation_box on each hostile archive"
+    }
+  ],
+  "acceptance_limits": {
+    "bind": "uvicorn.run receives host 127.0.0.1 by default and localhost when asked; every refused host exits the CLI with code 2 before uvicorn.run",
+    "host_header": "accepted hosts answer 200 on /api/capabilities; rejected hosts answer 400 with no capability payload",
+    "origin": "every listed origin answers 403 on every listed route and the job table stays empty; the server's own origin and a missing Origin answer 200 on /api/validate",
+    "paths": "every route key answers 404 or 405 without repository file content; the CSS asset answers 200; every static escape answers 404 without repository content; every accepted upload is stored under <results>/fsp/<32 hex>/ or <results>/gds/<32 hex>.gds and no file named escape* exists anywhere under the temporary directory",
+    "body_limits": "declared over-limit bodies answer 413 on JSON, GDS and FSP routes; a chunked body answers 411; every malformed Content-Length answers 400; a body under the limit is served",
+    "json": "every hostile body answers a 4xx status with a JSON detail; NaN, Infinity and 1e999 answer 422 mentioning finite; /api/capabilities and a valid project answer 200 afterwards",
+    "code": "the reloaded project keeps the hostile strings as data; a JSON key __reduce__ is refused; the generated script parses to ImportFrom, Assign, Assign, Expr, Expr calling only model_validate, Simulation, run, save and print with the hostile strings as string constants; the listed server modules contain no eval, exec, compile, os.system, subprocess, __import__ or importlib",
+    "npz": "every np.load call in the package passes allow_pickle=False and no module uses allow_pickle=True, pickle.load, torch.load, joblib.load or numpy.load; object archives raise ValueError mentioning allow_pickle; the declared-huge archive raises MemoryError or ValueError from Result.load and ValueError from the box loader within 5 s; the truncated archive raises BadZipFile, ValueError, OSError or EOFError",
+    "gds": "every hostile layout answers 422 on /api/gds/inspect; the 16-million-instance array is accepted by inspect and refused by convert at 422 mentioning admission limits within 30 s",
+    "source_of_limits": "docs/SECURITY.md; MAX_REQUEST_BYTES 32000000, gds_service.MAX_UPLOAD_BYTES 32000000, fsp.MAX_FSP_BYTES 134217728, GDSLimits defaults"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 10,
+    "passed": [
+      "tests/test_server_security.py::test_serve_binds_loopback_by_default_and_refuses_other_hosts",
+      "tests/test_server_security.py::test_foreign_host_headers_are_rejected",
+      "tests/test_server_security.py::test_foreign_origins_are_rejected_on_state_changing_routes",
+      "tests/test_server_security.py::test_path_parameters_and_static_paths_stay_inside_their_directories",
+      "tests/test_server_security.py::test_upload_filename_headers_cannot_choose_the_stored_path",
+      "tests/test_server_security.py::test_gds_upload_names_are_display_only_and_hostile_layouts_are_rejected",
+      "tests/test_server_security.py::test_request_size_limits_apply_to_declared_and_chunked_bodies",
+      "tests/test_server_security.py::test_malformed_json_bodies_get_a_client_error_not_a_server_error",
+      "tests/test_server_security.py::test_project_files_are_data_not_code",
+      "tests/test_server_security.py::test_npz_readers_never_unpickle_and_fail_closed_on_hostile_archives"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 33.754,
+    "suite_timestamp": "2026-09-22T01:27:48.013854+09:00"
+  },
+  "required_tests": [
+    "tests/test_server_security.py"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T163013Z-g9-01-57458fee/junit.xml",
+      "sha256": "0bbc72a9f7759d96ad29d337006985cbd0a906298e0a02b1404ab2a941011e99",
+      "bytes": 1553,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G9-01.xml"
+    }
+  ],
+  "applicable_scope": "G9-01 local server security: the FastAPI app driven in-process on the CPU-only case of docs/validation/cases/G9-01.json (loopback bind, Host and Origin checks, path policy, body limits, hostile JSON, NPZ and GDS inputs); not a probe of a live uvicorn process over TCP and not the optional vendor bridge routes",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
