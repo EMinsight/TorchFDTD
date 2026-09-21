@@ -39,7 +39,10 @@ import pytest
 # starts with one of them would run under the leaked defaults. Importing torchfdtd
 # here, before any test module is collected, fixes the session defaults.
 import torchfdtd  # noqa: E402,F401  (must precede any test module import of fdtd)
-import record_output
+try:
+    import record_output
+except ImportError:  # this conftest is also copied into throwaway test directories by pytester-based tests
+    record_output = None
 
 pytest_plugins = ['pytester']
 
@@ -56,7 +59,8 @@ def pytest_addoption(parser):
 @pytest.fixture(scope='session', autouse=True)
 def record_scratch(tmp_path_factory):
     """Records written by the test modules land here unless TORCHFDTD_WRITE_RECORDS=1 (tests/record_output.py)."""
-    record_output.SCRATCH = tmp_path_factory.mktemp('records')
+    if record_output is not None:
+        record_output.SCRATCH = tmp_path_factory.mktemp('records')
 
 
 def pytest_configure(config):
