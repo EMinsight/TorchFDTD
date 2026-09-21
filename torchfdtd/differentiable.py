@@ -17,7 +17,8 @@ import time
 import numpy as np
 import torch
 
-from .boundaries import BoundaryDescription, CURL_TERMS, _slice
+from .boundaries import (BoundaryDescription, CURL_TERMS, _slice, extended_shape, face_index,
+                         is_nodal, material_shape)
 from .models import Project
 from .solver import field_axes, index_at
 
@@ -100,7 +101,6 @@ class _System:
         self.project=project
         self.region=r=project.region
         self.epsilon=epsilon
-        self.eps4=epsilon[...,None] if epsilon.ndim==3 else epsilon
         self.device,self.dtype=epsilon.device,epsilon.dtype
         self.field_dtype=(torch.complex128 if self.dtype==torch.float64 else torch.complex64) if r.complex_fields else self.dtype
         if prepare_kernels and self.device.type=='cuda' and not r.complex_fields:
@@ -112,13 +112,22 @@ class _System:
         # Preparing coefficients must not allocate another full-volume E/H
         # field or touch fdtd's process-global backend.
         template=BoundaryDescription(r)
+        # PMC/symmetric walls: lower walls mirror inside the volume arrays,
+        # upper walls keep their tangential E, normal H and E edges in stored
+        # blocks. Epsilon then carries one extra sampled row per upper wall.
+        self.pmc=bool(template.pmc_lower or template.pmc_upper)
+        if self.pmc and type(self) is not _System:
+            raise ValueError(f'PMC/symmetric faces are not implemented by {type(self).__name__}; only the plain Yee system carries the stored face topology.')
+        if tuple(epsilon.shape[:3])!=material_shape(r) or epsilon.ndim not in (3,4) or (epsilon.ndim==4 and epsilon.shape[3]!=3):
+            raise ValueError(f'epsilon shape must be {material_shape(r)} or {material_shape(r,True)}, including stored upper PMC rows.')
+        volume=self._volume(epsilon)
+        self.eps4=volume[...,None] if epsilon.ndim==3 else volume
         g=self.grid=_Grid()
         def initial(shape):
             if not prepare_updates:return torch.zeros((),device=self.device,dtype=self.field_dtype).expand(shape)
             return torch.zeros(shape,device=self.device,dtype=self.field_dtype)
         g.E=initial((*r.shape,3))
         g.H=initial(g.E.shape)
-        g.inverse_permittivity=(1/self.eps4.detach()).expand_as(g.E).contiguous() if prepare_updates and prepare_permittivity else None
         g.inverse_permeability=torch.ones(1,device=self.device,dtype=self.dtype)
         g.is_torch=True
         g.courant_number=r.rectangular_courant
@@ -126,6 +135,14 @@ class _System:
         g.material_states=[]
         g.wrap=template.wrap.copy()
         g.pec_upper=template.pec_upper.copy()
+        g.pmc_lower=template.pmc_lower.copy()
+        g.pmc_upper=template.pmc_upper.copy()
+        g.pmc_blocks=template.pmc_blocks
+        g.faces={family:[initial(shape) for _,_,shape in blocks] for family,blocks in g.pmc_blocks.items()}
+        self.face_slices=[tuple(slice(n,n+1) if a in upper else slice(0,n) for a,n in enumerate(r.shape))
+                          for _,upper,_ in g.pmc_blocks['E']]
+        if prepare_updates and prepare_permittivity:self.configure_material()
+        else:g.inverse_permittivity=None;g.face_inverse_permittivity=[]
         g.metric={key:(self.tensor(value),edge) for key,(value,edge) in template.metric.items()}
         g.cpml={}
         self.segments=[]
@@ -140,13 +157,20 @@ class _System:
                 self.segments.append(item)
                 g.cpml[key].append(item)
         self.sources={'E':[],'H':[]}
+        self.face_sources={'E':[],'H':[]}
         from .injection import source_terms,validate_oneway_materials
         if any(s.enabled and s.injection=='oneway' for s in project.sources):
             validate_oneway_materials(project,epsilon.detach().cpu().numpy(),np.broadcast_to(np.array(-1,dtype=np.int32),r.shape))
         for source in project.sources:
             for component,loc,waveform,profile in source_terms(project,source):
-                self.sources[component[0]].append((loc,'xyz'.index(component[1].lower()),
-                                                  self.tensor(waveform),None if profile is None else self.tensor(profile)))
+                family=component[0];comp='xyz'.index(component[1].lower())
+                if self.pmc and any((sl.stop if isinstance(sl,slice) else sl+1)>n for sl,n in zip(loc,r.shape)):
+                    if not all(isinstance(sl,int) for sl in loc):
+                        raise ValueError(f'{source.name}: only point sources may address a stored upper PMC/symmetric face; plane sources must end below the wall.')
+                    block,index=face_index(g.pmc_blocks,r.shape,family,comp,loc)
+                    self.face_sources[family].append((block,loc,index,self.tensor(waveform)))
+                    continue
+                self.sources[family].append((loc,comp,self.tensor(waveform),None if profile is None else self.tensor(profile)))
         self.monitors=[(m.component,index_at(m.center,r,m.component),'xyz'.index(m.component[1].lower()))
                        for m in project.monitors if m.enabled]
         if observation_monitors is not None:self.monitors=list(observation_monitors)
@@ -159,38 +183,122 @@ class _System:
             from .cuda_complex import FusedComplexYeeCUDA
             self.kernel=FusedComplexYeeCUDA(g)
 
+    def _volume(self,epsilon):
+        """Cell-indexed material rows, excluding stored upper PMC rows."""
+        if not self.pmc:return epsilon
+        n=self.region.shape
+        return epsilon[:n[0],:n[1],:n[2]]
+
+    def face_epsilon(self,epsilon,position):
+        """Sampled epsilon at every node of one stored upper E face or edge."""
+        component=self.grid.pmc_blocks['E'][position][0]
+        sl=self.face_slices[position]
+        return epsilon[sl+(component,)] if epsilon.ndim==4 else epsilon[sl]
+
+    def configure_material(self,workspace=None):
+        g=self.grid
+        volume=self._volume(self.epsilon.detach());eps4=volume[...,None] if volume.ndim==3 else volume
+        if workspace is None:g.inverse_permittivity=(1/eps4).expand_as(g.E).contiguous()
+        else:
+            g.inverse_permittivity=workspace.array('inverse',g.E.shape,self.dtype)
+            g.inverse_permittivity.copy_(eps4.expand_as(g.E)).reciprocal_()
+        faces=[]
+        for position,(_,_,shape) in enumerate(g.pmc_blocks['E']):
+            value=self.face_epsilon(self.epsilon.detach(),position)
+            if workspace is None:faces.append((1/value).contiguous())
+            else:faces.append(workspace.array(f'inverse_face:{position}',shape,self.dtype).copy_(value).reciprocal_())
+        g.face_inverse_permittivity=faces
+
     def prepare_observations(self):
         self.observation_maps=[]
-        # Region.shape derives mesh counts. Reuse them across dense planes.
-        _,ny,nz=self.region.shape
+        self.face_observation_maps=[]
+        shape=self.region.shape
+        groups={}
         for family in ('E','H'):
             positions=[];indices=[]
             for position,(name,loc,component) in enumerate(self.monitors):
-                if name[0]==family:
-                    positions.append(position)
-                    indices.append(((loc[0]*ny+loc[1])*nz+loc[2])*3+component)
+                if name[0]!=family:continue
+                block,index=face_index(self.grid.pmc_blocks,shape,family,component,loc)
+                if block is None:
+                    positions.append(position);indices.append(index)
+                else:
+                    offset=2+len(self.segments)+(block if family=='E' else len(self.grid.pmc_blocks['E'])+block)
+                    groups.setdefault(offset,([],[]))
+                    groups[offset][0].append(position);groups[offset][1].append(index)
             self.observation_maps.append((torch.tensor(positions,device=self.device,dtype=torch.long),
                                           torch.tensor(indices,device=self.device,dtype=torch.long)))
+        for offset,(positions,indices) in sorted(groups.items()):
+            self.face_observation_maps.append((offset,torch.tensor(positions,device=self.device,dtype=torch.long),
+                                               torch.tensor(indices,device=self.device,dtype=torch.long)))
 
     def tensor(self,value):
         is_complex=value.is_complex() if isinstance(value,torch.Tensor) else np.iscomplexobj(value)
         dtype=(torch.complex128 if self.dtype==torch.float64 else torch.complex64) if is_complex else self.dtype
         return torch.as_tensor(value,device=self.device,dtype=dtype)
 
-    def state(self):return (self.grid.E,self.grid.H,*(seg['psi'] for seg in self.segments))
+    def state(self):
+        return (self.grid.E,self.grid.H,*(seg['psi'] for seg in self.segments),*self.grid.faces['E'],*self.grid.faces['H'])
+
+    def split_state(self,state):
+        """(psi states, E face blocks, H face blocks) of a complete state tuple."""
+        k=2+len(self.segments);ne=len(self.grid.pmc_blocks['E'])
+        return tuple(state[2:k]),tuple(state[k:k+ne]),tuple(state[k+ne:])
 
     def zero(self):
         for value in self.state():value.zero_()
         self.current_step=0
 
+    def _extended(self,field,faces,family,shape):
+        """One array per component including its stored upper PMC nodes.
+
+        Concatenation is the exact adjoint of the restriction below, so the
+        face topology transposes without any separate incidence tables.
+        """
+        parts=[field[...,c] for c in range(3)]
+        if not self.grid.pmc_upper:return parts
+        blocks=self.grid.pmc_blocks[family]
+        for c in range(3):
+            stored={upper:faces[i] for i,(comp,upper,_) in enumerate(blocks) if comp==c}
+            if not stored:continue
+            axes=sorted({a for upper in stored for a in upper})
+            if len(axes)==1:
+                a=axes[0];parts[c]=torch.cat((parts[c],stored[(a,)]),dim=a)
+            else:
+                a,b=axes
+                parts[c]=torch.cat((torch.cat((parts[c],stored[(b,)]),dim=b),
+                                    torch.cat((stored[(a,)],stored[(a,b)]),dim=b)),dim=a)
+        return parts
+
+    def _restricted(self,parts,family,shape):
+        volume=torch.stack([p[:shape[0],:shape[1],:shape[2]] for p in parts],dim=-1)
+        faces=[parts[comp][tuple(slice(n,n+1) if a in upper else slice(0,n) for a,n in enumerate(shape))]
+               for comp,upper,_ in self.grid.pmc_blocks[family]]
+        return volume,tuple(faces)
+
+    def _outputs(self,like,family,shape):
+        if not self.grid.pmc_upper:
+            result=torch.zeros_like(like)
+            return result,[result[...,c] for c in range(3)]
+        return None,[torch.zeros(extended_shape(shape,self.grid.pmc_upper,family,c),device=like.device,dtype=like.dtype)
+                     for c in range(3)]
+
     def curl(self,field,psis,forward):
-        g=self.grid
-        result=torch.zeros_like(field)
+        if self.pmc:raise ValueError('PMC/symmetric faces require the face-aware curl; this caller does not implement stored upper faces.')
+        result,_,updated=self.curl_faces(field,(),psis,forward)
+        return result,updated
+
+    def curl_faces(self,field,faces,psis,forward):
+        """Yee curl on volume arrays plus stored PMC faces, with CPML memories."""
+        g=self.grid;shape=tuple(field.shape[:3])
+        source,target=('E','H') if forward else ('H','E')
+        inputs=self._extended(field,faces,source,shape)
+        result,outputs=self._outputs(field,target,shape)
         updated=list(psis)
         for axis,component,out,sign in CURL_TERMS:
-            if field.shape[axis]==1:continue
-            low,high=_slice(axis,slice(None,-1),component),_slice(axis,slice(1,None),component)
-            derivative=field[high]-field[low]
+            n=shape[axis]
+            if n==1:continue
+            src=inputs[component];dst=outputs[out]
+            derivative=src[_slice(axis,slice(1,n))]-src[_slice(axis,slice(0,n-1))]
             metric=g.metric.get((forward,axis))
             if metric:derivative=derivative*metric[0]
             for i in self.keys[forward,axis,component]:
@@ -200,28 +308,41 @@ class _System:
                 updated[i]=psi
                 derivative=derivative.clone()
                 derivative[sl]=data*seg['inv_k']+psi
-            target=_slice(axis,slice(None,-1) if forward else slice(1,None),out)
-            result[target]=result[target]+sign*derivative
+            dst[_slice(axis,slice(0,n-1) if forward else slice(1,n))]+=sign*derivative
             if axis in g.wrap:
                 phase=g.wrap[axis]
-                first,last=field[_slice(axis,0,component)],field[_slice(axis,-1,component)]
+                first,last=src[_slice(axis,0)],src[_slice(axis,n-1)]
                 edge=phase*first-last if forward else first-last/phase
                 if metric:edge=edge*metric[1]
-                dest=_slice(axis,-1 if forward else 0,out)
-                result[dest]=result[dest]+sign*edge
+                dst[_slice(axis,n-1 if forward else 0)]+=sign*edge
+            elif forward and axis in g.pmc_upper:
+                dst[_slice(axis,n-1)]+=sign*g.pmc_upper[axis]*(src[_slice(axis,n)]-src[_slice(axis,n-1)])
             elif forward and axis in g.pec_upper:
-                dest=_slice(axis,-1,out)
-                result[dest]=result[dest]-sign*g.pec_upper[axis]*field[_slice(axis,-1,component)]
-        return result,tuple(updated)
+                dst[_slice(axis,n-1)]-=sign*g.pec_upper[axis]*src[_slice(axis,n-1)]
+            elif not forward:
+                # Mirrored half cells: the wall derivative is +-2 H_wall / dx_wall.
+                if axis in g.pmc_lower:dst[_slice(axis,0)]+=sign*2*g.pmc_lower[axis]*src[_slice(axis,0)]
+                if axis in g.pmc_upper:dst[_slice(axis,n)]-=sign*2*g.pmc_upper[axis]*src[_slice(axis,n-1)]
+        if result is None:result,faces_out=self._restricted(outputs,target,shape)
+        else:faces_out=()
+        return result,faces_out,tuple(updated)
 
     def curl_transpose(self,bar,psi_bar,forward):
-        g=self.grid
-        result=torch.zeros_like(bar)
+        if self.pmc:raise ValueError('PMC/symmetric faces require the face-aware curl transpose; this caller does not implement stored upper faces.')
+        result,_,previous=self.curl_faces_transpose(bar,(),psi_bar,forward)
+        return result,previous
+
+    def curl_faces_transpose(self,bar,faces_bar,psi_bar,forward):
+        g=self.grid;shape=tuple(bar.shape[:3])
+        source,target=('E','H') if forward else ('H','E')
+        outputs=self._extended(bar,faces_bar,target,shape)
+        result,inputs=self._outputs(bar,source,shape)
         previous=list(psi_bar)
         for axis,component,out,sign in CURL_TERMS:
-            if bar.shape[axis]==1:continue
-            target=_slice(axis,slice(None,-1) if forward else slice(1,None),out)
-            derivative=sign*bar[target]
+            n=shape[axis]
+            if n==1:continue
+            dst=outputs[out];src=inputs[component]
+            derivative=sign*dst[_slice(axis,slice(0,n-1) if forward else slice(1,n))]
             for i in self.keys[forward,axis,component]:
                 seg=self.segments[i];sl=seg['slice']
                 value=derivative[sl]
@@ -231,20 +352,26 @@ class _System:
                 derivative[sl]=value*seg['inv_k']+seg['c']*memory_bar
             metric=g.metric.get((forward,axis))
             if metric:derivative=derivative*metric[0]
-            low,high=_slice(axis,slice(None,-1),component),_slice(axis,slice(1,None),component)
-            result[high]=result[high]+derivative
-            result[low]=result[low]-derivative
+            src[_slice(axis,slice(1,n))]+=derivative
+            src[_slice(axis,slice(0,n-1))]-=derivative
             if axis in g.wrap:
-                edge=sign*bar[_slice(axis,-1 if forward else 0,out)]
+                edge=sign*dst[_slice(axis,n-1 if forward else 0)]
                 if metric:edge=edge*metric[1]
-                first,last=_slice(axis,0,component),_slice(axis,-1,component)
                 phase=g.wrap[axis]
-                result[first]=result[first]+(np.conj(phase)*edge if forward else edge)
-                result[last]=result[last]-(edge if forward else np.conj(1/phase)*edge)
+                src[_slice(axis,0)]+=np.conj(phase)*edge if forward else edge
+                src[_slice(axis,n-1)]-=edge if forward else np.conj(1/phase)*edge
+            elif forward and axis in g.pmc_upper:
+                edge=sign*g.pmc_upper[axis]*dst[_slice(axis,n-1)]
+                src[_slice(axis,n)]+=edge
+                src[_slice(axis,n-1)]-=edge
             elif forward and axis in g.pec_upper:
-                dest=_slice(axis,-1,component)
-                result[dest]=result[dest]-sign*g.pec_upper[axis]*bar[_slice(axis,-1,out)]
-        return result,tuple(previous)
+                src[_slice(axis,n-1)]-=sign*g.pec_upper[axis]*dst[_slice(axis,n-1)]
+            elif not forward:
+                if axis in g.pmc_lower:src[_slice(axis,0)]+=sign*2*g.pmc_lower[axis]*dst[_slice(axis,0)]
+                if axis in g.pmc_upper:src[_slice(axis,n-1)]-=sign*2*g.pmc_upper[axis]*dst[_slice(axis,n)]
+        if result is None:result,faces_out=self._restricted(inputs,source,shape)
+        else:faces_out=()
+        return result,faces_out,tuple(previous)
 
     def inject(self,value,family,step,*,functional=False):
         if functional and self.sources[family]:value=value.clone()
@@ -253,22 +380,33 @@ class _System:
             value[loc+(component,)]=value[loc+(component,)]+amplitude
         return value
 
+    def inject_faces(self,faces,family,step,*,functional=False):
+        faces=list(faces)
+        for block,_,index,wave in self.face_sources[family]:
+            if functional:faces[block]=faces[block].clone()
+            faces[block].reshape(-1)[index]+=wave[step]
+        return tuple(faces)
+
     def reference_step(self,state,step,epsilon):
-        e,h,*psis=state
-        ce,psis=self.curl(h,psis,False)
-        eps=epsilon[...,None] if epsilon.ndim==3 else epsilon
-        e=self.inject(e+self.grid.courant_number/eps*ce,'E',step,functional=True)
-        ch,psis=self.curl(e,psis,True)
-        h=self.inject(h-self.grid.courant_number*ch,'H',step,functional=True)
-        return (e,h,*psis)
+        e,h=state[:2];psis,fe,fh=self.split_state(state)
+        ce,cf,psis=self.curl_faces(h,fh,psis,False)
+        volume=self._volume(epsilon)
+        eps=volume[...,None] if epsilon.ndim==3 else volume
+        courant=self.grid.courant_number
+        e=self.inject(e+courant/eps*ce,'E',step,functional=True)
+        fe=self.inject_faces([f+courant/self.face_epsilon(epsilon,i)*v for i,(f,v) in enumerate(zip(fe,cf))],'E',step,functional=True)
+        ch,cf,psis=self.curl_faces(e,fe,psis,True)
+        h=self.inject(h-courant*ch,'H',step,functional=True)
+        fh=self.inject_faces([f-courant*v for f,v in zip(fh,cf)],'H',step,functional=True)
+        return (e,h,*psis,*fe,*fh)
 
     def advance(self,start,end):
         if self.grid.inverse_permittivity is None:
             raise RuntimeError('Storage-only initial states cannot be advanced in place. Use a tile operator.')
         for step in range(start,end):
             if self.kernel is not None:
-                self.kernel.update_E();self.inject(self.grid.E,'E',step)
-                self.kernel.update_H();self.inject(self.grid.H,'H',step)
+                self.kernel.update_E();self.inject(self.grid.E,'E',step);self.inject_faces(self.grid.faces['E'],'E',step)
+                self.kernel.update_H();self.inject(self.grid.H,'H',step);self.inject_faces(self.grid.faces['H'],'H',step)
             else:
                 new=self.reference_step(self.state(),step,self.epsilon)
                 for target,value in zip(self.state(),new):target.copy_(value)
@@ -278,22 +416,41 @@ class _System:
         result=state[0].new_empty(len(self.monitors))
         for field,(positions,indices) in zip(state[:2],self.observation_maps):
             if indices.numel():result.index_copy_(0,positions,field.reshape(-1).index_select(0,indices))
+        for offset,positions,indices in self.face_observation_maps:
+            result.index_copy_(0,positions,state[offset].reshape(-1).index_select(0,indices))
         return result
 
     def transpose_step(self,state,adjoint,signal_bar):
-        e_bar,h_bar,*psi_bar=adjoint
+        e_bar,h_bar=adjoint[:2];psi_bar,fe_bar,fh_bar=self.split_state(adjoint)
         # Every point sample is taken after both source injections of this step.
         # Multiple monitors may coincide, so their adjoints must accumulate.
         for target,(positions,indices) in zip((e_bar,h_bar),self.observation_maps):
             if indices.numel():target.reshape(-1).index_add_(0,indices,signal_bar.index_select(0,positions))
-        contribution,psi_bar=self.curl_transpose(-self.grid.courant_number*h_bar,psi_bar,True)
+        for offset,positions,indices in self.face_observation_maps:
+            adjoint[offset].reshape(-1).index_add_(0,indices,signal_bar.index_select(0,positions))
+        courant=self.grid.courant_number
+        contribution,faces,psi_bar=self.curl_faces_transpose(-courant*h_bar,[-courant*f for f in fh_bar],psi_bar,True)
         e_bar=e_bar+contribution
-        curl_e,_=self.curl(state[1],state[2:],False)
-        full=-self.grid.courant_number*(e_bar.conj()*curl_e).real/self.eps4.square()
-        gradient=full.sum_to_size(self.eps4.shape)
-        if self.epsilon.ndim==3:gradient=gradient[...,0]
-        contribution,psi_bar=self.curl_transpose(self.grid.courant_number/self.eps4*e_bar,psi_bar,False)
-        return (e_bar,h_bar+contribution,*psi_bar),gradient
+        fe_bar=[f+v for f,v in zip(fe_bar,faces)]
+        _,_,fh_state=self.split_state(state)
+        curl_e,curl_faces,_=self.curl_faces(state[1],fh_state,state[2:2+len(self.segments)],False)
+        full=-courant*(e_bar.conj()*curl_e).real/self.eps4.square()
+        volume=full.sum_to_size(self.eps4.shape)
+        if self.epsilon.ndim==3:volume=volume[...,0]
+        if self.pmc:
+            gradient=torch.zeros(self.epsilon.shape,device=self.device,dtype=self.dtype)
+            n=self.region.shape
+            gradient[:n[0],:n[1],:n[2]]=volume
+            for position,(component,_,_) in enumerate(self.grid.pmc_blocks['E']):
+                part=-courant*(fe_bar[position].conj()*curl_faces[position]).real/self.face_epsilon(self.epsilon,position).square()
+                sl=self.face_slices[position]
+                if self.epsilon.ndim==4:gradient[sl+(component,)]+=part
+                else:gradient[sl]+=part
+        else:gradient=volume
+        scaled=[courant/self.face_epsilon(self.epsilon,position)*f for position,f in enumerate(fe_bar)]
+        contribution,faces,psi_bar=self.curl_faces_transpose(courant/self.eps4*e_bar,scaled,psi_bar,False)
+        fh_bar=[f+v for f,v in zip(fh_bar,faces)]
+        return (e_bar,h_bar+contribution,*psi_bar,*fe_bar,*fh_bar),gradient
 
 
 class _Checkpoints:
@@ -461,7 +618,9 @@ class _FDTD(torch.autograd.Function):
         started=time.perf_counter()
         gradient=torch.zeros(epsilon.shape,device=epsilon.device,dtype=epsilon.dtype)
         fused=None
-        if epsilon.is_cuda and options.backward_kernel!='torch' and (not system.region.complex_fields or options.backward_kernel=='fused'):
+        if system.pmc and options.backward_kernel=='fused':
+            raise ValueError('The fused CUDA backward kernel does not implement PMC/symmetric faces. Use backward_kernel="auto" or "torch".')
+        if epsilon.is_cuda and not system.pmc and options.backward_kernel!='torch' and (not system.region.complex_fields or options.backward_kernel=='fused'):
             if system.region.complex_fields:
                 from .cuda_complex_adjoint import FusedComplexAdjointCUDA as Kernel
             else:
@@ -576,8 +735,13 @@ class DifferentiableSimulation(torch.nn.Module):
             raise ValueError('The fused backward requires a CUDA tensor.')
         if epsilon.device.type!='cuda' and self.options.checkpoint_transfers=='async':
             raise ValueError('Asynchronous checkpoints require a CUDA tensor.')
-        if tuple(epsilon.shape) not in (r.shape,r.shape+(3,)):
-            raise ValueError('epsilon shape must match the scene grid, optionally with three Yee components.')
+        from .endpoint_native import uses_endpoint
+        pmc=uses_endpoint(r)
+        if pmc and self.options.backward_kernel=='fused':
+            raise ValueError('The fused CUDA backward kernel does not implement PMC/symmetric faces. Use backward_kernel="auto" or "torch".')
+        if tuple(epsilon.shape) not in (material_shape(r),material_shape(r,True)):
+            raise ValueError('epsilon shape must match the scene grid plus one stored row on every upper PMC/symmetric axis, optionally with three Yee components.'
+                             if pmc else 'epsilon shape must match the scene grid, optionally with three Yee components.')
         if not bool(torch.isfinite(epsilon).all()) or bool((epsilon<1).any()):
             raise ValueError('This conservative CFL contract requires finite epsilon >= 1.')
         if (epsilon.dtype==torch.float64)!=(r.precision=='float64'):
@@ -590,7 +754,8 @@ class DifferentiableSimulation(torch.nn.Module):
         report=dict(experimental=True,adjoint='discrete Yee/CPML',higher_order=False,
                     spatial_streaming=False,full_time_autograd=False,steps=r.steps,
                     forward_backend='fused CUDA' if epsilon.is_cuda and (not r.complex_fields or r.cuda_kernel=='fused') else 'torch CUDA' if epsilon.is_cuda else 'torch CPU',
-                    backward_backend='fused CUDA complex transpose' if epsilon.is_cuda and r.complex_fields and self.options.backward_kernel=='fused' else 'fused CUDA transpose' if epsilon.is_cuda and not r.complex_fields and self.options.backward_kernel!='torch' else 'torch explicit transpose',
+                    backward_backend='fused CUDA complex transpose' if epsilon.is_cuda and r.complex_fields and self.options.backward_kernel=='fused' else 'fused CUDA transpose' if epsilon.is_cuda and not r.complex_fields and not pmc and self.options.backward_kernel!='torch' else 'torch explicit transpose',
+                    pmc_faces=pmc,
                     checkpoint_transfers=self.options.checkpoint_transfers,**reservation)
         # A later wavelength/ray configuration must not alter an earlier graph's replay.
         factory=system_factory or _System
@@ -637,5 +802,13 @@ def smooth_sphere_epsilon(region,radius,*,center=None,inside=4.,outside=1.,width
         distance=torch.sqrt(square+torch.finfo(radius.dtype).tiny)
         fraction=torch.sigmoid((radius-distance)/width)
         return outside+(inside-outside)*fraction
-    if yee:return torch.stack([at(field_axes(region,c)) for c in ('Ex','Ey','Ez')],dim=-1)
-    return at([(a[:-1]+a[1:])/2 if len(a)>2 else np.array([0.]) for a in region.mesh_nodes])
+    target=material_shape(region)
+    if yee:
+        def padded(value):
+            # Half-cell axes have no upper PMC sample; replicate an inert edge row.
+            for axis,(n,t) in enumerate(zip(value.shape,target)):
+                if t>n:value=torch.cat((value,value.narrow(axis,n-1,1)),dim=axis)
+            return value
+        return torch.stack([padded(at(field_axes(region,c))) for c in ('Ex','Ey','Ez')],dim=-1)
+    return at([np.r_[(a[:-1]+a[1:])/2,a[-1:]] if t>len(a)-1 else (a[:-1]+a[1:])/2 if len(a)>2 else np.array([0.])
+               for a,t in zip(region.mesh_nodes,target)])

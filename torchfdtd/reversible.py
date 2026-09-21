@@ -203,6 +203,8 @@ class ReversibleSimulation(torch.nn.Module):
         self.options = options or ReversibleOptions()
         if not isinstance(self.options, ReversibleOptions):
             raise ValueError('ReversibleSimulation requires ReversibleOptions.')
+        from .boundaries import reject_pmc_faces
+        reject_pmc_faces(self.project.region, 'ReversibleSimulation')
         _validate_project(self.project)
 
     def plan(self, *, device='cpu'):

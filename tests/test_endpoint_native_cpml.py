@@ -40,13 +40,14 @@ def test_native_cpml_matches_adapter_fields_trace_and_profile():
 
 @pytest.mark.parametrize('field,value', [('alpha',1e-8),('kappa',2),('polynomial',2),('alpha_polynomial',1),('layers',4),('sigma_scale',.4),('kind','periodic')])
 def test_native_cpml_rejects_untranslated_profile_parameters(field,value):
+    # Per-face profiles are admitted by the Yee paths; the endpoint forward dispatch rejects them at run time.
     payload=scene().model_dump();payload['region']['boundaries']['x_min'][field]=value
-    with pytest.raises(ValueError):Project.model_validate(payload)
+    with pytest.raises(ValueError):Simulation(Project.model_validate(payload)).run()
 
 
 def test_native_cpml_rejects_inside_source_and_checks_auxiliary(monkeypatch):
     payload=scene().model_dump();payload['sources'][0]['center']=(-.7,0,0)
-    with pytest.raises(ValueError,match='CPML'):Project.model_validate(payload)
+    with pytest.raises(ValueError,match='PML'):Simulation(Project.model_validate(payload)).run()
     from torchfdtd.pmc_cpml import EndpointCPMLSimulation, CPMLState
     step=EndpointCPMLSimulation._step
     def broken(self,*args):

@@ -37,8 +37,11 @@ def field_axes(region, component):
     """Physical Yee locations: E along its own edge, H on its dual face."""
     axis = 'xyz'.index(component[1].lower())
     offsets = [(.5 if i == axis else 0.) if component[0] == 'E' else (0. if i == axis else .5) for i in range(3)]
+    # Nodal axes ending on a PMC/symmetric wall keep that stored upper node.
+    from .boundaries import pmc_faces
+    upper = pmc_faces(region)[1]
     return [np.array([0.]) if region.dimension == '2d' and i == 2 else
-            (nodes[:-1]+nodes[1:])/2 if offsets[i] else nodes[:-1]
+            (nodes[:-1]+nodes[1:])/2 if offsets[i] else (nodes if i in upper else nodes[:-1])
             for i,nodes in enumerate(region.mesh_nodes)]
 
 
@@ -52,11 +55,21 @@ def voxelize(p: Project, *, with_ownership=False, interface_plan=None):
         return (plan.epsilon,plan.counts,plan.ownership) if with_ownership else (plan.epsilon,plan.counts)
     if p.region.material_sampling == 'yee':
         parts = [_voxelize_at(p, field_axes(p.region, component), with_ownership) for component in ('Ex','Ey','Ez')]
-        eps = np.stack([part[0] for part in parts], axis=-1)
+        # Every component shares one extended array. Half-cell axes have no
+        # upper PMC sample, so their padding row is inert edge replication.
+        from .boundaries import material_shape
+        target = material_shape(p.region)
+        def padded(array):
+            width = [(0, t-n) for n, t in zip(array.shape, target)]
+            return np.pad(array, width, mode='edge') if any(w for _, w in width) else array
+        eps = np.stack([padded(part[0]) for part in parts], axis=-1)
         counts = {key:max(part[1].get(key,0) for part in parts) for key in parts[0][1]}
-        return (eps,counts,np.stack([part[2] for part in parts],axis=-1)) if with_ownership else (eps,counts)
+        return (eps,counts,np.stack([padded(part[2]) for part in parts],axis=-1)) if with_ownership else (eps,counts)
     r = p.region
-    axes = [(np.arange(n) + .5) * r.mesh - s / 2 for n, s in zip(r.shape, r.actual_size)]
+    from .boundaries import pmc_faces
+    upper = pmc_faces(r)[1]
+    axes = [np.r_[(np.arange(n) + .5) * r.mesh - s / 2, [s / 2]] if i in upper else (np.arange(n) + .5) * r.mesh - s / 2
+            for i, (n, s) in enumerate(zip(r.shape, r.actual_size))]
     if r.dimension == '2d':
         axes[2] = np.array([0.])
     return _voxelize_at(p, axes, with_ownership)
@@ -65,10 +78,11 @@ def voxelize(p: Project, *, with_ownership=False, interface_plan=None):
 def _voxelize_at(p, axes, with_ownership):
     from .geometry import contains,object_bounds
     r = p.region
-    eps = np.full(r.shape, r.background_index**2, dtype=np.float64 if r.precision == 'float64' else np.float32)
+    shape = tuple(len(axis) for axis in axes)
+    eps = np.full(shape, r.background_index**2, dtype=np.float64 if r.precision == 'float64' else np.float32)
     active = {obj.material for obj in p.structures if obj.enabled}
     materials = {m.name: (i, m.instantaneous_epsilon) for i, m in enumerate(p.materials) if m.name in active}
-    ownership = np.full(r.shape, -1, dtype=np.int32) if with_ownership else None
+    ownership = np.full(shape, -1, dtype=np.int32) if with_ownership else None
     counts = {}
     # Lower mesh order wins. At equal order, the later tree object wins.
     for obj in sorted(p.structures, key=lambda s: -s.mesh_order):
@@ -148,16 +162,20 @@ def source_profile(src, loc, region):
     return np.exp(1j*phase)
 
 
-def estimate(p: Project):
+def estimate(p: Project, *, endpoint_dispatch=True):
+    """Native resident estimate. PMC projects describe the endpoint dispatch unless
+    endpoint_dispatch is False, which describes the volume-plus-face Yee grid."""
     from .tensor_project import uses_tensor
     if uses_tensor(p):
         from .tensor_native import estimate_tensor
         return estimate_tensor(p)
     from .endpoint_native import uses_endpoint, estimate_endpoint
-    if uses_endpoint(p.region):return estimate_endpoint(p)
+    if endpoint_dispatch and uses_endpoint(p.region):return estimate_endpoint(p)
     configure_auto_mesh(p)
     r = p.region
     n = math.prod(r.shape)
+    from .boundaries import material_shape
+    stored = math.prod(material_shape(r))
     dt = r.time_step
     active_materials = [m for m in p.materials if any(s.enabled and s.material == m.name for s in p.structures)]
     warnings = list(p.import_provenance.differences) if p.import_provenance else []
@@ -236,7 +254,7 @@ def estimate(p: Project):
         auxiliary_bytes+=surface*(16+real_bytes)+(10*box['incident_line_cells']+r.steps)*real_bytes
     if boxes:warnings.append('TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
-            'estimated_memory_mb': round((n * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
+            'estimated_memory_mb': round((stored * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes}
 
 

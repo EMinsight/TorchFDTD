@@ -308,6 +308,8 @@ class RecomputedAdjointBatch(torch.nn.Module):
             raise ValueError('Provide at least one AdjointCase.')
         self.options=options or AdjointBatchOptions()
         if not isinstance(self.options,AdjointBatchOptions):raise ValueError('Use AdjointBatchOptions.')
+        from .boundaries import reject_pmc_faces
+        for case in specs:reject_pmc_faces(case.project.region,'RecomputedAdjointBatch')
         self._cases=tuple(_PreparedCase(case) for case in specs)
 
     def _plan(self,parameters):

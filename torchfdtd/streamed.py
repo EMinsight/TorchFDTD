@@ -7,7 +7,7 @@ import time
 
 import torch
 
-from .boundaries import BoundaryDescription
+from .boundaries import BoundaryDescription, material_shape
 from .differentiable import DifferentiableResult, DifferentiableSimulation, _System, _split
 from .spacetime import SlabBlockOperator
 from .memory_profile import host_memory
@@ -81,15 +81,19 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     n = math.prod(region.shape)
     boundary = BoundaryDescription(region)
     cpml = sum(math.prod(s['shape']) for segments in boundary.cpml.values() for s in segments)
+    # Stored upper PMC faces/edges count their exact elements, not a padded volume.
+    faces = sum(math.prod(shape) for blocks in boundary.pmc_blocks.values() for _, _, shape in blocks)
+    pmc = bool(boundary.pmc_lower or boundary.pmc_upper)
     material_item = epsilon.element_size()
     # Fields, CPML memories and source/observation histories are complex for
     # Bloch propagation even though epsilon and its gradient remain real.
     item = material_item*(2 if region.complex_fields else 1)
-    state = (6*n+cpml+6*pole_count*n)*item
+    state = (6*n+cpml+faces+6*pole_count*n)*item
     depth = min(options.temporal_depth, region.steps)
     width = min(options.slab_width, region.shape[0])+2*depth
     if 0 not in boundary.wrap:width = min(width, region.shape[0])
-    tile_cells = width*region.shape[1]*region.shape[2]
+    stored = material_shape(region)
+    tile_cells = (width+stored[0]-region.shape[0])*stored[1]*stored[2]
     if (6 if region.complex_fields else 3)*tile_cells >= 2**31:
         raise ValueError('A CUDA tile exceeds the supported integer index range.')
     monitors = sum(m.enabled for m in project.monitors) if spectral is None else len(spectral.components)
@@ -108,7 +112,8 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     # bound for both CPU and native CUDA execution until large runs calibrate it.
     tile_workspace = (128+144*pole_count+(18+6*pole_count)*local_slots)*tile_cells*item
     buffers = options.tile_buffers if options.tile_transfers == 'async' else 1
-    initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values())+(2 if pole_count else 0))*item
+    initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values())
+                       +sum(len(blocks) for blocks in boundary.pmc_blocks.values())+(2 if pole_count else 0))*item
     # The immutable all-zero host initial bank is represented by scalar views.
     # At most C saved block states, one current adjoint and two evolving
     # primal banks coexist during replay. Transpose instead holds a primal,
@@ -129,7 +134,7 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     # caller's input. Reserve four there: input, gradient, contribution and one
     # margin for accumulation temporaries. Every other path keeps eight. The
     # metadata estimate passes a meta tensor and must select the same figure.
-    measured_scope = (pole_count == 0 and parameter_shapes is None and spectral is None
+    measured_scope = (pole_count == 0 and parameter_shapes is None and spectral is None and not pmc
                       and epsilon.device.type in ('cpu', 'meta') and epsilon.is_contiguous()
                       and epsilon.ndim == 3 and not epsilon.is_complex() and not region.complex_fields
                       and torch.device(options.device).type == 'cuda' and options.state_storage == 'disk'
@@ -209,8 +214,7 @@ def estimate_streamed_memory(project, options=None, *, diagonal=False, frequency
     """
     if not isinstance(diagonal,bool):raise ValueError('diagonal must be boolean.')
     options=options or StreamedAdjointOptions()
-    shape=project.region.shape+((3,) if diagonal else ())
-    epsilon=torch.empty(shape,dtype=getattr(torch,project.region.precision),device='meta')
+    epsilon=torch.empty(material_shape(project.region,diagonal),dtype=getattr(torch,project.region.precision),device='meta')
     if window is not None and frequency_hz is None:
         raise ValueError('A spectral window requires frequency_hz.')
     spectral=None
@@ -426,8 +430,8 @@ class StreamedSimulation(DifferentiableSimulation):
             raise ValueError('Streamed epsilon must be a CPU tensor to avoid full-volume VRAM allocation.')
         if epsilon.dtype not in (torch.float32, torch.float64) or (epsilon.dtype == torch.float64) != (region.precision == 'float64'):
             raise ValueError('Epsilon dtype must match the real project precision.')
-        if tuple(epsilon.shape) not in (region.shape, region.shape+(3,)):
-            raise ValueError('Epsilon shape must match the project grid.')
+        if tuple(epsilon.shape) not in (material_shape(region), material_shape(region, True)):
+            raise ValueError('Epsilon shape must match the project grid plus one stored row on every upper PMC/symmetric axis.')
         options = self.streaming_options
         reservation = _reservation(self.project, epsilon, options, spectral)
         if not bool(torch.isfinite(epsilon).all()) or bool((epsilon < 1).any()):

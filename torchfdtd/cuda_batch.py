@@ -12,6 +12,7 @@ from types import SimpleNamespace
 import numpy as np
 import torch
 
+from .boundaries import face_index
 from .cuda_kernels import FusedYeeCUDA, _compile
 from .solver import index_at
 
@@ -53,7 +54,8 @@ class FusedBatchYeeCUDA:
     def update(self,forward):
         kernel,table,_=self.launches[forward]
         with self.cp.cuda.Device(self.device),self._stream():
-            kernel(((math.prod(self.grids[0].region.shape)+255)//256,len(self.grids)),(256,),(table,))
+            # Volume cells plus the stored upper PMC face/edge entries, identical across the cohort.
+            kernel(((FusedYeeCUDA.launch_count(self.grids[0],forward)+255)//256,len(self.grids)),(256,),(table,))
 
     def update_E(self):
         prepared=[[(state,*state.prepare(g.E)) for state in g.material_states] for g in self.grids]
@@ -75,28 +77,44 @@ class FusedBatchIO:
         injections={'E':[],'H':[]};profiles={'E':[],'H':[]};monitors=[];occupied=set()
         for case,(g,p,trace) in enumerate(zip(grids,projects,traces)):
             r=p.region;nx,ny,nz=r.shape
+            blocks=getattr(g,'pmc_blocks',None) or {'E':(),'H':()}
+            def sample(family,component,loc,name):
+                """(array, flat index) of one Yee sample: the volume or a stored upper PMC block."""
+                if all(i<n for i,n in zip(loc,r.shape)):
+                    return (g.E if family=='E' else g.H),((loc[0]*ny+loc[1])*nz+loc[2])*3+component
+                block,index=face_index(blocks,r.shape,family,component,loc)
+                return g.faces[family][block],index
             from .injection import source_terms
             for raw in p.sources:
                 for field,loc,waveform,profile in source_terms(p,raw):
-                    family=field[0];target=g.E if family=='E' else g.H
+                    family=field[0]
                     component='xyz'.index(field[1].lower())
+                    values=torch.as_tensor(waveform,device=device,dtype=dtype)
+                    self.owners.append(values)
+                    if any((part.stop if isinstance(part,slice) else part+1)>n for part,n in zip(loc,r.shape)):
+                        if not all(isinstance(part,int) for part in loc):
+                            raise ValueError(f'{raw.name}: only point sources may address a stored upper PMC/symmetric face; plane sources must end below the wall.')
+                        target,index=sample(family,component,loc,raw.name)
+                        key=case,family,target.data_ptr(),int(index)
+                        if key in occupied:
+                            raise ValueError('Tensor batch currently requires non-overlapping source supports per field component. Use BatchRunner for overlapping sources.')
+                        occupied.add(key)
+                        injections[family].append((target.data_ptr(),int(index),values.data_ptr()));profiles[family].append(1. if profile is None else float(profile))
+                        continue
+                    target=g.E if family=='E' else g.H
                     coords=[np.atleast_1d(np.arange(n)[part]) for n,part in zip(r.shape,loc)]
                     ix,iy,iz=np.ix_(*coords)
                     indices=(((ix*ny+iy)*nz+iz)*3+component).reshape(-1)
                     profile=np.ones(len(indices)) if profile is None else np.broadcast_to(profile,tuple(len(c) for c in coords)).reshape(-1)
-                    values=torch.as_tensor(waveform,device=device,dtype=dtype)
-                    self.owners.append(values)
                     for index,weight in zip(indices,profile):
-                        key=case,family,int(index)
+                        key=case,family,target.data_ptr(),int(index)
                         if key in occupied:
                             raise ValueError('Tensor batch currently requires non-overlapping source supports per field component. Use BatchRunner for overlapping sources.')
                         occupied.add(key)
                         injections[family].append((target.data_ptr(),int(index),values.data_ptr()));profiles[family].append(float(weight))
             for j,m in enumerate([m for m in p.monitors if m.enabled and m.kind=='point']):
-                x,y,z=index_at(m.center,r,m.component)
-                field=g.E if m.component[0]=='E' else g.H
-                monitors.append((field.data_ptr(),((x*ny+y)*nz+z)*3+'xyz'.index(m.component[1].lower()),
-                                 trace.data_ptr(),j,trace.shape[1]))
+                field,index=sample(m.component[0],'xyz'.index(m.component[1].lower()),index_at(m.center,r,m.component),m.name)
+                monitors.append((field.data_ptr(),int(index),trace.data_ptr(),j,trace.shape[1]))
         self.n_injections={family:len(tasks) for family,tasks in injections.items()};self.n_monitors=len(monitors)
         inject={family:torch.tensor(tasks,device=device,dtype=torch.int64) for family,tasks in injections.items()}
         profile={family:torch.tensor(values,device=device,dtype=dtype) for family,values in profiles.items()}

@@ -90,8 +90,9 @@ def _spectral_library_reservation(device):
 
 def _workspace(project,options,device,boundary,segments,n,cpml,item,real_item,poles,state,monitors):
     region=project.region
+    pmc=bool(boundary.pmc_lower or boundary.pmc_upper)
     native_forward=device.type=='cuda' and (region.cuda_kernel=='fused' or (not poles and not region.complex_fields))
-    native_backward=device.type=='cuda' and (options.backward_kernel=='fused' or
+    native_backward=device.type=='cuda' and not pmc and (options.backward_kernel=='fused' or
         (not poles and not region.complex_fields and options.backward_kernel=='auto'))
     fused=native_forward and native_backward
     if fused:
@@ -139,9 +140,12 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     boundary=BoundaryDescription(region)
     segments=[s for group in boundary.cpml.values() for s in group]
     cpml=sum(math.prod(s['shape']) for s in segments)
-    state=(6*n+cpml+6*pole_count*n)*item
+    # Stored upper PMC faces/edges are exact element counts, not a padded volume.
+    faces=sum(math.prod(shape) for blocks in boundary.pmc_blocks.values() for _,_,shape in blocks)
+    state=(6*n+cpml+faces+6*pole_count*n)*item
+    from .boundaries import material_shape
     workspace_model,workspace_parts=_workspace(project,options,device,boundary,segments,
-        n,cpml,item,real_item,pole_count,state,monitor_count)
+        math.prod(material_shape(region)),cpml,item,real_item,pole_count,state,monitor_count)
     workspace=sum(workspace_parts.values())
     # Packing and its normalization graph precede field creation. Budget those
     # carriers before torch.cat, rather than testing only the packed output.
@@ -169,7 +173,7 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     asynchronous=options.checkpoint_transfers=='async' and (host_slots or disk_slots)
     staging_slots=options.staging_slots if asynchronous else 0
     host_checkpoint=state*(host_slots+staging_slots+(1 if disk_slots else 0))
-    array_count=2+len(segments)+(2 if pole_count else 0)
+    array_count=2+len(segments)+sum(len(blocks) for blocks in boundary.pmc_blocks.values())+(2 if pole_count else 0)
     disk_checkpoint=(state+4096+512*array_count)*disk_slots
     device_checkpoint=device_slots*state
     device_staging=staging_slots*state

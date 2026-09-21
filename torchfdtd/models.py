@@ -273,8 +273,8 @@ class Region(Model):
         if (self.mesh_type!='uniform' or self.mesh_steps is not None) and self.material_sampling=='cell':
             raise ValueError('Graded, explicit and axis-specific meshes require Yee material sampling.')
         if self.interface_method=='subpixel' and any(
-                face.kind in ('pec','antisymmetric') for axis in range(3) for face in self.boundaries.pair(axis)):
-            raise ValueError('PEC/antisymmetric boundaries currently require staircase interfaces.')
+                face.kind in ('pec','antisymmetric','pmc','symmetric') for axis in range(3) for face in self.boundaries.pair(axis)):
+            raise ValueError('PEC/antisymmetric and PMC/symmetric boundaries currently require staircase interfaces.')
         if self.interface_method=='subpixel':
             if self.material_sampling!='yee':raise ValueError('Subpixel interfaces require Yee material sampling.')
             if any(any(not math.isclose(b-a,nodes[1]-nodes[0],rel_tol=1e-10,abs_tol=0) for a,b in zip(nodes,nodes[1:])) for nodes in self.mesh_nodes):
@@ -575,9 +575,9 @@ class Project(Model):
         from .mesh import configure_auto_mesh
         configure_auto_mesh(self)
         r.valid_grid()
-        from .endpoint_native import uses_endpoint, validate_endpoint_project
+        from .endpoint_native import uses_endpoint, validate_pmc_project
         endpoint = uses_endpoint(r)
-        if endpoint:validate_endpoint_project(self)
+        if endpoint:validate_pmc_project(self)
         if r.interface_method=='subpixel':
             active={s.material for s in self.structures if s.enabled}
             if any(m.oscillators and m.name in active for m in self.materials):
@@ -592,7 +592,7 @@ class Project(Model):
             elif resolved.enabled and resolved.injection == 'oneway':
                 from .injection import oneway_plan
                 oneway_plan(resolved, r)
-            if not endpoint and resolved.enabled and resolved.injection != 'oneway' and any(r.boundaries.pair(a)[0].kind in ('pec','antisymmetric') for a in range(3)):
+            if resolved.enabled and resolved.injection != 'oneway' and any(r.boundaries.pair(a)[0].kind in ('pec','antisymmetric') for a in range(3)):
                 from .solver import source_slice
                 for field, weight in resolved.polarization_components:
                     scalar=resolved.model_copy(update={'component':field, 'theta':None})

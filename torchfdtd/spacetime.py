@@ -10,6 +10,7 @@ from types import SimpleNamespace
 
 import torch
 
+from .boundaries import face_index
 from .differentiable import _Grid, _System, _split
 from .tensor_packet import pack_tensors
 
@@ -151,18 +152,16 @@ class SlabBlockOperator:
             local.kernel = kernel_type(local.grid, direct_views=self.direct_views, bindings_cache=self.workspace)
 
     def _prepare_permittivity(self, local):
-        grid = local.grid
-        if self.workspace is None:
-            grid.inverse_permittivity = (1/local.eps4).expand_as(grid.E).contiguous()
-        else:
-            grid.inverse_permittivity = self.workspace.array('inverse', grid.E.shape, local.dtype)
-            grid.inverse_permittivity.copy_(local.eps4.expand_as(grid.E)).reciprocal_()
+        # Volume inverse permittivity plus one bank per stored upper PMC E face/edge.
+        local.configure_material(self.workspace)
 
     def _local_material(self, local):
         return local.epsilon
 
     def _backward(self, local, gradient, samples):
-        if self.device.type != 'cuda':return None
+        # The fused CUDA transposes do not implement stored PMC faces; those
+        # tiles use the explicit Torch transpose on the device instead.
+        if self.device.type != 'cuda' or local.pmc:return None
         from .cuda_adjoint import FusedAdjointCUDA
         from .cuda_complex_adjoint import FusedComplexAdjointCUDA
         backward_type = FusedComplexAdjointCUDA if local.grid.E.is_complex() else FusedAdjointCUDA
@@ -184,13 +183,23 @@ class SlabBlockOperator:
         local.field_dtype = host.field_dtype
         phase = self._halo_phase(descriptor)
         begin, end = lo-core.start, lo-core.start+len(indices)
-        contiguous = begin >= 0 and end <= host.region.shape[0]
+        n_x = host.region.shape[0]
+        contiguous = begin >= 0 and end <= n_x
+        first, last = int(indices[0]) == 0, int(indices[-1]) == n_x-1
+        # A tile reaching the last row carries the stored x-upper PMC row as
+        # halo input: its faces, edges, epsilon row and the transverse CPML
+        # rows on that plane. Only the tile whose core ends there commits it.
+        extra = last and 0 in host.grid.pmc_upper
+        owns_extra = extra and hi == n_x
+        rows_take = torch.cat((indices, torch.tensor([n_x], dtype=torch.int64))) if extra else indices
         def rows(value):
             # The final packet owns a copy. Until then, a primary-domain slice
             # can remain a read-only view instead of a redundant gather buffer.
+            if value.shape[0] == n_x+1 and extra:
+                return value[begin:end+1] if contiguous else value.index_select(0, rows_take)
             return value[begin:end] if contiguous else value.index_select(0, indices)
+        local.pmc = host.pmc
         local.epsilon = rows(epsilon)
-        local.eps4 = local.epsilon[..., None] if epsilon.ndim == 3 else local.epsilon
         local.region = SimpleNamespace(shape=(len(indices), *host.region.shape[1:]))
         local.current_step = 0
         grid = local.grid = _Grid()
@@ -201,8 +210,20 @@ class SlabBlockOperator:
         grid.is_torch = True
         grid.material_states = []
         grid.wrap = {axis: value for axis, value in host.grid.wrap.items() if axis != 0}
-        grid.pec_upper = {axis: value for axis, value in host.grid.pec_upper.items()
-                          if axis != 0 or int(indices[-1]) == host.region.shape[0]-1}
+        grid.pec_upper = {axis: value for axis, value in host.grid.pec_upper.items() if axis != 0 or last}
+        grid.pmc_lower = {axis: value for axis, value in host.grid.pmc_lower.items() if axis != 0 or first}
+        grid.pmc_upper = {axis: value for axis, value in host.grid.pmc_upper.items() if axis != 0 or last}
+        grid.pmc_blocks = {}
+        for family, blocks in host.grid.pmc_blocks.items():
+            kept = []
+            for comp, upper, shape in blocks:
+                if 0 in upper and not last:continue
+                kept.append((comp, upper, (1 if 0 in upper else len(indices), *shape[1:])))
+            grid.pmc_blocks[family] = tuple(kept)
+        local.face_slices = [tuple(slice(n, n+1) if a in upper else slice(0, n) for a, n in enumerate(local.region.shape))
+                             for _, upper, _ in grid.pmc_blocks['E']]
+        volume = local._volume(local.epsilon)
+        local.eps4 = volume[..., None] if epsilon.ndim == 3 else volume
         grid.metric = {}
         for (forward, axis), (values, edge) in host.grid.metric.items():
             if axis == 0:
@@ -226,18 +247,22 @@ class SlabBlockOperator:
                     # X CPML cannot coexist with periodic X in the admitted contract.
                     if selected.numel() > 1 and not bool((selected[1:]-selected[:-1] == 1).all()):
                         raise ValueError('Noncontiguous X CPML segment.')
-                    first, last = int(selected[0]), int(selected[-1])+1
+                    row_lo, row_hi = int(selected[0]), int(selected[-1])+1
                     take = indices[selected] - a
                     target = indices[selected] + (0 if forward else 1)
                     owned = torch.nonzero((target >= lo) & (target < hi)).flatten()
                     destination = take[owned]
-                    sl = (slice(first, last), slice(None), slice(None))
+                    sl = (slice(row_lo, row_hi), slice(None), slice(None))
                     coefficients = {name: segment[name].index_select(0, take)
                                     for name in ('b', 'c', 'inv_k')}
                 else:
-                    take = indices
+                    # Transverse CPML rows on the x-upper PMC plane travel with
+                    # the last tile, like the stored face arrays themselves.
+                    extended = state[global_id+2].shape[0] == n_x+1 and extra
+                    take = rows_take if extended else indices
                     owned = torch.arange(core.start, core.stop)
-                    destination = indices[owned]
+                    if extended and owns_extra:owned = torch.cat((owned, torch.tensor([len(indices)], dtype=torch.int64)))
+                    destination = take[owned]
                     sl = segment['slice']
                     coefficients = {name: segment[name] for name in ('b', 'c', 'inv_k')}
                 item = dict(slice=sl, psi=rows(state[global_id+2]) if axis != 0 else state[global_id+2].index_select(0, take),
@@ -247,7 +272,37 @@ class SlabBlockOperator:
                 local.segments.append(item)
                 grid.cpml[key].append(item)
                 mapping.append((global_id+2, take, owned, destination))
+        grid.faces = {'E': [], 'H': []}
+        offset = 2+len(host.segments)
+        for family in ('E', 'H'):
+            for position, (comp, upper, shape) in enumerate(host.grid.pmc_blocks[family]):
+                global_id = offset+(position if family == 'E' else len(host.grid.pmc_blocks['E'])+position)
+                if 0 in upper:
+                    if not last:continue
+                    take = torch.zeros(1, dtype=torch.int64)
+                    owned = destination = take if owns_extra else take[:0]
+                    value = state[global_id].index_select(0, take)
+                else:
+                    take = indices
+                    owned = torch.arange(core.start, core.stop)
+                    destination = indices[owned]
+                    value = rows(state[global_id])
+                grid.faces[family].append(value)
+                mapping.append((global_id, take, owned, destination))
         local.sources = {'E': [], 'H': []}
+        local.face_sources = {'E': [], 'H': []}
+        for family, terms in host.face_sources.items():
+            for block, loc, _, wave in terms:
+                comp, upper, _ = host.grid.pmc_blocks[family][block]
+                if 0 in upper:
+                    if not last:continue
+                    position = len(indices)
+                else:
+                    found = torch.nonzero(indices == loc[0]).flatten()
+                    if not found.numel():continue
+                    position = int(found[0])
+                local_block, index = face_index(grid.pmc_blocks, local.region.shape, family, comp, (position, *loc[1:]))
+                local.face_sources[family].append((local_block, (position, *loc[1:]), index, wave[start:start+depth]))
         for family, terms in host.sources.items():
             for loc, component, wave, profile in terms:
                 if isinstance(loc[0], int):
@@ -273,10 +328,10 @@ class SlabBlockOperator:
                     local.sources[family].append(((selection, *loc[1:]), component, image_wave, value))
         local.monitors, observer_ids = [], []
         for m, (name, loc, component) in enumerate(host.monitors):
-            if lo <= loc[0] < hi:
+            if lo <= loc[0] < hi or (loc[0] == n_x and owns_extra):
                 local.monitors.append((name, (loc[0]-lo+core.start, *loc[1:]), component))
                 observer_ids.append(m)
-        extra = self._extra_payload(local, material, state, rows, phase, mapping, descriptor)
+        payload = self._extra_payload(local, material, state, rows, phase, mapping, descriptor)
         # Pack small CPML/metric/source arrays with the fields to avoid one
         # blocking PCIe transaction for every individual boundary coefficient.
         tensors = [local.epsilon, grid.E, grid.H, grid.inverse_permeability]
@@ -287,7 +342,10 @@ class SlabBlockOperator:
             for _, _, wave, profile in terms:
                 tensors.append(wave)
                 if profile is not None:tensors.append(profile)
-        tensors.extend(extra)
+        for family in ('E', 'H'):
+            tensors.extend(grid.faces[family])
+            tensors.extend(wave for _, _, _, wave in local.face_sources[family])
+        tensors.extend(payload)
         if self.workspace is not None:
             packed,layout = self.workspace.copy_packet('payload', tensors)
         else:
@@ -295,7 +353,8 @@ class SlabBlockOperator:
             packed = packed.to(self.device)
         views = iter(layout.unpack(packed))
         local.epsilon, grid.E, grid.H, grid.inverse_permeability = [next(views) for _ in range(4)]
-        local.eps4 = local.epsilon[..., None] if epsilon.ndim == 3 else local.epsilon
+        volume = local._volume(local.epsilon)
+        local.eps4 = volume[..., None] if epsilon.ndim == 3 else volume
         self._prepare_permittivity(local)
         grid.metric = {key:(next(views), edge) for key, (_, edge) in grid.metric.items()}
         for segment in local.segments:
@@ -303,8 +362,12 @@ class SlabBlockOperator:
         for family, terms in local.sources.items():
             local.sources[family] = [(loc, component, next(views), next(views) if profile is not None else None)
                                      for loc, component, _, profile in terms]
+        for family in ('E', 'H'):
+            grid.faces[family] = [next(views) for _ in grid.faces[family]]
+            local.face_sources[family] = [(block, loc, index, next(views)) for block, loc, index, _ in local.face_sources[family]]
         self._restore_payload(local, views)
         local.kernel = None
+        local.gradient_rows = rows_take
         local.prepare_observations()
         self._prepare_kernel(local)
         return local, mapping, observer_ids
@@ -390,7 +453,7 @@ class SlabBlockOperator:
                 adjoint = tuple(torch.zeros_like(s) for s in local.state())
                 for target, value in zip(adjoint[:2], endpoint_bar[:2]):target[core].copy_(value[lo:hi])
                 for target, (global_id, _, owned, destination) in zip(adjoint[2:], mapping):
-                    target.index_copy_(0, owned, endpoint_bar[global_id].index_select(0, destination))
+                    target.index_copy_(0, owned.to(target.device), endpoint_bar[global_id].index_select(0, destination).to(target.device))
             def restore(saved, begin, end):
                 for target, value in zip(local.state(), saved):target.copy_(value)
                 local.advance(begin, end)
@@ -425,10 +488,10 @@ class SlabBlockOperator:
             if backward is not None:
                 if hasattr(backward, 'finalize'):backward.finalize({})
                 adjoint = self._adjoint_state(backward)
-            return self._return((*adjoint, local_gradient)), (indices, mapping, self._halo_phase(descriptor))
+            return self._return((*adjoint, local_gradient)), (indices, mapping, self._halo_phase(descriptor), local.gradient_rows)
 
         def commit(returned, metadata):
-            indices, mapping, phase = metadata
+            indices, mapping, phase, gradient_rows = metadata
             conjugate = None if phase is None else phase.conj()
             for target, value in zip(initial_bar[:2], returned[:2]):
                 target.index_add_(0, indices, self._phase_value(value, conjugate))
@@ -436,6 +499,6 @@ class SlabBlockOperator:
                 # Periodic X excludes X CPML, so every remaining psi slab
                 # shares the field's X winding and Hermitian extension.
                 initial_bar[global_id].index_add_(0, take, self._phase_value(value, conjugate))
-            self._accumulate_gradient(gradient, returned[-1], indices)
+            self._accumulate_gradient(gradient, returned[-1], gradient_rows)
         self._pipeline(depth, prepare, commit)
         return initial_bar, gradient

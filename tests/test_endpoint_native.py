@@ -71,21 +71,25 @@ def test_cli_and_api_jobs_follow_native_dispatch(tmp_path,monkeypatch,capsys):
     lambda p:p['monitors'][0].update(kind='field'),
     lambda p:p['monitors'][0].update(time_downsample=2),
 ])
-def test_unsupported_native_pmc_contracts_fail_schema(change):
+def test_unsupported_native_pmc_contracts_are_rejected_before_dispatch(change):
+    # The schema admits what the Yee adjoint, streamed and batch paths implement;
+    # the bounded exact-endpoint forward dispatch still rejects at run time.
     payload=scene().model_dump();change(payload)
-    with pytest.raises(ValueError):Project.model_validate(payload)
+    with pytest.raises(ValueError):Simulation(Project.model_validate(payload)).run()
 
 
-def test_ade_and_other_yee_paths_reject_pmc_early():
+def test_ade_rejected_and_plain_grid_curl_rejects_pmc():
     from torchfdtd.boundaries import BoundaryDescription,YeeGrid
     from torchfdtd.differentiable import DifferentiableSimulation
     project=scene();payload=project.model_dump()
     payload['materials']=[Material(name='metal',model='drude').model_dump()]
     payload['structures']=[Structure(material='metal').model_dump()]
     with pytest.raises(ValueError,match='ADE'):Project.model_validate(payload)
-    for factory in (BoundaryDescription,YeeGrid):
-        with pytest.raises(ValueError,match='endpoint'):factory(project.region)
-    with pytest.raises(ValueError,match='endpoint'):
+    description=BoundaryDescription(project.region)
+    assert description.pmc_upper and description.pmc_blocks['E']
+    grid=YeeGrid(project.region)
+    with pytest.raises(ValueError,match='not implemented by the Torch/NumPy grid curl'):grid.curl(grid.H,False)
+    with pytest.raises(ValueError,match='stored row'):
         DifferentiableSimulation(project)(torch.ones(project.region.shape))
 
 

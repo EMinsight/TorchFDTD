@@ -326,6 +326,8 @@ class ReversibleCPMLSimulation(torch.nn.Module):
         self.options = options or ReversibleCPMLOptions()
         if not isinstance(self.options, ReversibleCPMLOptions):
             raise ValueError('ReversibleCPMLSimulation requires ReversibleCPMLOptions.')
+        from .boundaries import reject_pmc_faces
+        reject_pmc_faces(self.project.region, 'ReversibleCPMLSimulation')
         _validate_project(self.project, self.options)
 
     def _snapshot(self):

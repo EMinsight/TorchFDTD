@@ -36,12 +36,51 @@ def endpoint_cpml_options(region):
     return dict(pml_cells=layers,background_epsilon=background,reflection=reflection)
 
 
-def validate_endpoint_project(project):
-    """Metadata-only admission shared by Project parsing and native dispatch."""
+def _nearest_samples(project,item):
+    """Nearest Yee index of every polarization term, including stored upper PMC nodes."""
+    r=project.region
+    terms=project.resolved_source(item).polarization_components if item in project.sources else ((item.component,1.),)
+    for field,_ in terms:
+        component='xyz'.index(field[1].lower());indices=[]
+        for a,nodes in enumerate(r.mesh_nodes):
+            nodal=(component!=a) if field[0]=='E' else (component==a)
+            coords=nodes if nodal else (nodes[:-1]+nodes[1:])/2
+            indices.append(int(np.argmin(abs(coords-item.center[a]))))
+        yield field,component,tuple(indices)
+
+
+def validate_pmc_project(project):
+    """Schema-level admission shared by every numerical path with PMC/symmetric faces.
+
+    Execution paths add their own contracts: the native forward dispatch below,
+    the resident/streamed adjoints and the tensor batch each reject what they
+    do not implement instead of relabelling a wall.
+    """
     r=project.region
     if not uses_endpoint(r):return
     if any(f.kind not in ('pec','antisymmetric','pmc','symmetric','pml') for a in range(3) for f in r.boundaries.pair(a)):
-        raise ValueError('PMC native dispatch supports PEC/PMC/PML faces; periodic or Bloch mixing is unsupported.')
+        raise ValueError('PMC/symmetric faces combine with PEC/PMC/PML faces only; periodic or Bloch mixing is unsupported.')
+    if r.interface_method!='staircase':
+        raise ValueError('PMC/symmetric faces currently require staircase interfaces.')
+    active={obj.material for obj in project.structures if obj.enabled}
+    if any(m.oscillators for m in project.materials if m.name in active):
+        raise ValueError('PMC/symmetric faces do not support ADE/dispersive materials: no path stores face material states yet.')
+    for item in [*project.sources,*project.monitors]:
+        if not item.enabled or getattr(item,'kind','point')!='point':continue
+        for field,component,indices in _nearest_samples(project,item):
+            for a,nodes in enumerate(r.mesh_nodes):
+                if r.dimension=='2d' and a==2:continue
+                nodal=(component!=a) if field[0]=='E' else (component==a)
+                if nodal and ((indices[a]==0 and r.boundaries.pair(a)[0].kind in ('pec','antisymmetric')) or
+                              (indices[a]==len(nodes)-1 and r.boundaries.pair(a)[1].kind in ('pec','antisymmetric'))):
+                    raise ValueError(f'{item.name}: nearest {field} sample is constrained by a PEC wall.')
+
+
+def validate_endpoint_project(project):
+    """Bounded contract of the native forward endpoint dispatch, checked at dispatch time."""
+    r=project.region
+    if not uses_endpoint(r):return
+    validate_pmc_project(project)
     if r.dimension!='3d' or r.precision!='float32' or r.complex_fields or r.mesh_type not in ('uniform','explicit'):
         raise ValueError('PMC native dispatch requires fixed uniform/explicit real FP32 3D meshes.')
     if r.memory_mode!='resident' or r.run_control.auto_shutoff:
@@ -61,20 +100,15 @@ def validate_endpoint_project(project):
     cpml=endpoint_cpml_options(r)
     seen=set()
     for item in [*project.sources,*project.monitors]:
-        terms=project.resolved_source(item).polarization_components if item in project.sources else ((item.component,1.),)
-        for field,_ in terms:
-            component='xyz'.index(field[1].lower());indices=[]
+        for field,component,indices in _nearest_samples(project,item):
             for a,nodes in enumerate(r.mesh_nodes):
                 nodal=(component!=a) if field[0]=='E' else (component==a)
                 coords=nodes if nodal else (nodes[:-1]+nodes[1:])/2
-                index=int(np.argmin(abs(coords-item.center[a])));indices.append(index)
+                index=indices[a]
                 if cpml is not None and (coords[index]<nodes[r.pml_layers(a,0)]-1e-12 or coords[index]>nodes[len(nodes)-1-r.pml_layers(a,1)]+1e-12):
                     raise ValueError(f'{item.name}: nearest {field} sample lies inside a CPML layer.')
-                if nodal and ((index==0 and r.boundaries.pair(a)[0].kind in ('pec','antisymmetric')) or
-                              (index==len(nodes)-1 and r.boundaries.pair(a)[1].kind in ('pec','antisymmetric'))):
-                    raise ValueError(f'{item.name}: nearest {field} sample is constrained by a PEC wall.')
             if item in project.sources:
-                key=(field,tuple(indices))
+                key=(field,indices)
                 if key in seen:raise ValueError('PMC source terms must map to unique electric DOFs.')
                 seen.add(key)
 
@@ -82,6 +116,7 @@ def validate_endpoint_project(project):
 def estimate_endpoint(project):
     from .pmc_cuda import CompactEndpointTopology
     from .mesh import mesh_summary
+    validate_endpoint_project(project)
     r=project.region
     faces=tuple(tuple('pmc' if f.kind in ('pmc','symmetric') else 'pec' for f in r.boundaries.pair(a)) for a in range(3))
     topology=CompactEndpointTopology(r.mesh_nodes,faces)

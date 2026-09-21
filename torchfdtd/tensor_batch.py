@@ -19,7 +19,7 @@ import numpy as np
 import torch
 
 from .batch import BatchCase, BatchItem, BatchReport
-from .boundaries import YeeGrid
+from .boundaries import YeeGrid, pmc_faces
 from .materials import configure_materials
 from .models import Project
 from .solver import ENGINE_LOCK, Result, estimate, voxelize, index_at, field_axes
@@ -78,6 +78,7 @@ def run_tensor_batch(cases, *, objective=None, output_dir=None, keep_results=Tru
         if p.region.backend=='cpu':raise ValueError('Tensor batch cannot execute a CPU project. Set backend="cuda" or "auto" explicitly.')
         if p.region.complex_fields:raise ValueError('Tensor batch currently requires real fields. Use BatchRunner for complex Bloch fields.')
         if p.region.run_control.auto_shutoff:raise ValueError('Tensor batch requires fixed-duration runs. Set auto_shutoff=False or use BatchRunner.')
+        _validate_pmc_case(p)
     with ENGINE_LOCK,torch.cuda.device(device):
         old_dtype=torch.get_default_dtype()
         try:
@@ -106,10 +107,23 @@ def run_tensor_batch(cases, *, objective=None, output_dir=None, keep_results=Tru
             torch.set_default_dtype(old_dtype)
 
 
+def _validate_pmc_case(p):
+    """PMC/symmetric cohorts carry the stored upper faces; everything else stays explicit."""
+    if pmc_faces(p.region)==((),()):return
+    active={s.material for s in p.structures if s.enabled}
+    if any(m.oscillators for m in p.materials if m.name in active):
+        raise ValueError('Tensor batch does not implement ADE material states on stored PMC/symmetric faces.')
+    if any(s.enabled and (s.kind=='tfsf' or s.injection=='oneway') for s in p.sources):
+        raise ValueError('Tensor batch does not implement TFSF or one-way sources with PMC/symmetric faces.')
+    if any(m.enabled and m.kind!='point' for m in p.monitors):
+        raise ValueError('Tensor batch does not implement field monitors with PMC/symmetric faces; use point monitors.')
+
+
 def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_graph,cancel,progress,cuda_graph_steps):
     from .cuda_batch import FusedBatchYeeCUDA,FusedBatchIO
     started=time.perf_counter();wall_started=time.time()
-    stats=[estimate(p) for p in projects]
+    # The estimate describes this volume-plus-face Yee grid, not the endpoint dispatch.
+    stats=[estimate(p,endpoint_dispatch=False) for p in projects]
     first=projects[0].region
     baseline=_topology(first)
     if any(_topology(p.region)!=baseline for p in projects):
@@ -133,7 +147,14 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
             if obj.enabled and counts.get(obj.id)==0:
                 message='no Yee component centers intersect this object; subpixel integration may still include it. Check quadrature and mesh convergence.' if interface_plan is not None else 'no cells intersect this object. Refine mesh or reposition it.'
                 s['warnings'].append(f'{obj.name}: {message}')
-        g.inverse_permittivity[:]=torch.as_tensor(1/(eps if eps.ndim==4 else eps[...,None]),device=g.E.device,dtype=dtype)
+        shape=p.region.shape
+        volume=eps[:shape[0],:shape[1],:shape[2]]
+        g.inverse_permittivity[:]=torch.as_tensor(1/(volume if volume.ndim==4 else volume[...,None]),device=g.E.device,dtype=dtype)
+        for k,(component,upper,_) in enumerate(g.pmc_blocks['E']):
+            # Sampled epsilon at every node of one stored upper E face or edge.
+            sl=tuple(slice(n,n+1) if a in upper else slice(0,n) for a,n in enumerate(shape))
+            face=eps[sl+(component,)] if eps.ndim==4 else eps[sl]
+            g.face_inverse_permittivity[k][:]=torch.as_tensor(1/face,device=g.E.device,dtype=dtype)
         configure_materials(g,p,ownership)
         configure_interfaces(g,interface_plan)
         from .tfsf import prepare_tfsf
@@ -157,7 +178,7 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
         frequency_updates.update(counter)
         io.record()
     states=[counter,*traces]
-    for g in grids:states.extend((g.E,g.H,*g.memory_states))
+    for g in grids:states.extend((g.E,g.H,*g.memory_states,*g.faces['E'],*g.faces['H']))
     graph=None
     if cuda_graph:
         graph=CudaStepGraphs(step,states,first.steps,cuda_graph_steps)
@@ -256,8 +277,17 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
             signature=hashlib.sha256(json.dumps(config,sort_keys=True).encode()).hexdigest()
             for m in frequency:m['run_signature']=signature
         eps=epsilon[i][...,component] if epsilon[i].ndim==4 else epsilon[i]
+        eps=eps[:r.shape[0],:r.shape[1],:r.shape[2]]
+        endpoint=None
+        if g.pmc_blocks['E'] or g.pmc_blocks['H']:
+            # Base E/H and plots crop the stored upper faces/edges; the NPZ keeps them.
+            endpoint={family+'_upper':np.concatenate([v.detach().cpu().numpy().reshape(-1) for v in g.faces[family]] or [np.zeros(0,dtype=e.dtype)])
+                      for family in ('E','H')}
+            s.update(endpoint_blocks={family:[dict(component=c,upper_axes=list(u),shape=list(shape)) for c,u,shape in g.pmc_blocks[family]] for family in ('E','H')},
+                     endpoint_view='E/H base volume and plot crop upper faces/edges; NPZ endpoint_E_upper/endpoint_H_upper retain every stored PMC/symmetric DOF in endpoint_blocks order',
+                     diagnostics_scope='volume E/H arrays; stored upper faces/edges are excluded from the state-norm heuristic')
         result=Result(p,s,np.array(frames[i]),np.array(frame_steps[i]),plane(eps,i),
-                      trace[:completed].cpu().numpy().copy(),np.arange(1,completed+1)*g.time_step,e,h,frequency)
+                      trace[:completed].cpu().numpy().copy(),np.arange(1,completed+1)*g.time_step,e,h,frequency,endpoint_fields=endpoint)
         item=BatchItem(case.id,'cancelled' if cancelled else 'completed',case.parameters,summary=s,
                        pid=os.getpid(),device=str(g.E.device),started=wall_started)
         if root:

@@ -14,7 +14,7 @@ from functools import lru_cache
 
 import torch
 
-from .boundaries import CURL_TERMS
+from .boundaries import CURL_TERMS, extended_shape
 
 
 def _direct_cuda_view(cupy, tensor):
@@ -102,6 +102,13 @@ class FusedYeeCUDA:
     def _stream(self):
         return self.cp.cuda.ExternalStream(torch.cuda.current_stream(self.device).cuda_stream, device_id=self.device)
 
+    @staticmethod
+    def launch_count(grid, forward):
+        """Volume cells plus the stored upper PMC faces/edges updated by this launch."""
+        blocks = getattr(grid, 'pmc_blocks', None)
+        faces = sum(math.prod(shape) for _, _, shape in blocks['H' if forward else 'E']) if blocks else 0
+        return math.prod(grid.E.shape[:3])+faces
+
     def _source(self, forward):
         g = self.grid
         shape = tuple(g.E.shape[:3])
@@ -124,6 +131,19 @@ class FusedYeeCUDA:
         if subpixel:argument('curl_buffer',g.subpixel.curl_buffer,True)
         inverse = g.inverse_permeability if forward else g.inverse_permittivity
         argument('inverse', inverse)
+        # PMC/symmetric walls: lower walls mirror inside the volume, upper walls
+        # keep stored face/edge blocks that receive their own threads below.
+        pmc_lower = getattr(g, 'pmc_lower', {})
+        pmc_upper = getattr(g, 'pmc_upper', {})
+        upper_axes = tuple(pmc_upper)
+        blocks = getattr(g, 'pmc_blocks', None) if (pmc_lower or pmc_upper) else None
+        family_in, family_out = ('E', 'H') if forward else ('H', 'E')
+        faces_in = faces_out = ()
+        if blocks:
+            faces_in = tuple(argument(f'fin{k}', value) for k, value in enumerate(g.faces[family_in]))
+            faces_out = tuple(argument(f'fout{k}', value, True) for k, value in enumerate(g.faces[family_out]))
+            if not forward:
+                for k, value in enumerate(g.face_inverse_permittivity):argument(f'finv{k}', value)
         count = math.prod(shape)
         lines = [f'const int i = blockIdx.x * blockDim.x + threadIdx.x;',
                  f'if (i >= {count}) return;',
@@ -131,6 +151,7 @@ class FusedYeeCUDA:
                  f'const int y = (i / {strides[1]}) % {shape[1]};',
                  f'const int z = i % {shape[2]};',
                  f'{real} c0=0, c1=0, c2=0;']
+        metrics, segments = {}, {}
         for term, (axis, comp, out, sign) in enumerate(CURL_TERMS):
             n, stride = shape[axis], strides[axis]
             if n == 1:
@@ -144,16 +165,22 @@ class FusedYeeCUDA:
             metric = g.metric.get((forward, axis))
             if metric:
                 name = argument(f'metric{term}', metric[0])
+                metrics[term] = name
                 lines.append(f'd *= {name}[{coord}{"" if forward else "-1"}];')
             active_start = 0 if forward else 1
+            # Auxiliary rows follow the derivative target, including its stored
+            # upper PMC nodes on transverse axes. Without PMC this is the grid.
+            target_shape = extended_shape(shape, upper_axes, family_out, out)
+            segments[term] = []
             for si, seg in enumerate(g.cpml.get((forward, axis, comp), [])):
                 lo = seg['slice'][axis].start + active_start
                 hi = seg['slice'][axis].stop + active_start
                 psi = argument(f'psi{term}_{si}', seg['psi'], True)
                 b, c, inv_k = [argument(f'{key}{term}_{si}', seg[key]) for key in ('b', 'c', 'inv_k')]
+                segments[term].append((lo, hi, psi, b, c, inv_k))
                 coords = ['x', 'y', 'z']
                 coords[axis] = f'({coord}-{lo})'
-                slab = list(shape)
+                slab = list(target_shape)
                 slab[axis] = hi-lo
                 index = f'({coords[0]}*{slab[1]}+{coords[1]})*{slab[2]}+{coords[2]}'
                 lines.extend([f'if ({coord} >= {lo} && {coord} < {hi}) {{',
@@ -170,15 +197,94 @@ class FusedYeeCUDA:
                 if metric:
                     lines.append(f'd *= ({real})({metric[1]:.17g});')
                 lines.append('}')
+            elif forward and axis in pmc_upper:
+                # The last magnetic half cell differences the stored wall E.
+                k, (_, _, face_shape) = next((k, block) for k, block in enumerate(blocks['E'])
+                                             if block[0] == comp and block[1] == (axis,))
+                coords = ['x', 'y', 'z']
+                coords[axis] = '0'
+                index = f'({coords[0]}*{face_shape[1]}+{coords[1]})*{face_shape[2]}+{coords[2]}'
+                lines.extend(['else {', f'd = ({real})({pmc_upper[axis]:.17g})*(fin{k}[{index}] - src[3*i+{comp}]);', '}'])
             elif forward and axis in getattr(g,'pec_upper',{}):
                 factor=g.pec_upper[axis]
                 lines.extend(['else {',f'd = -({real})({factor:.17g})*src[3*i+{comp}];','}'])
+            elif not forward and axis in pmc_lower:
+                lines.extend(['else {', f'd = 2*({real})({pmc_lower[axis]:.17g})*src[3*i+{comp}];', '}'])
             lines.extend([f'c{out} += {"-" if sign < 0 else ""}d;', '}'])
         finish=getattr(self,'_update_statements',None)
         # Tensor cohorts build templates from a minimal grid-only proxy.
         lines.extend(FusedYeeCUDA._update_statements(self,forward,inverse,argument,real,subpixel=subpixel)
                      if finish is None else finish(forward,inverse,argument,real,subpixel=subpixel))
+        if blocks:
+            lines[1:2] = FusedYeeCUDA._face_threads(self, forward, shape, real, blocks, faces_in, faces_out, metrics,
+                                                    segments, pmc_lower, pmc_upper, getattr(g, 'pec_upper', {}), count)
         return ('extern "C" __global__ void yee_update(' + ', '.join(parameters) + ') {\n' + '\n'.join(lines) + '\n}'), tensors
+
+    def _face_threads(self, forward, shape, real, blocks, faces_in, faces_out, metrics, segments,
+                      pmc_lower, pmc_upper, pec_upper, count):
+        """Threads past the volume update one stored upper PMC face or edge entry each.
+
+        Every neighbour read resolves an extended Yee index to the volume, a
+        stored block, or the omitted upper PEC zero. Wall derivatives use the
+        mirrored half cell, +-2 H_wall / dx_wall, exactly as the Torch curl.
+        """
+        g = self.grid
+        family_in, family_out = ('E', 'H') if forward else ('H', 'E')
+        upper_axes = tuple(pmc_upper)
+        courant = f'(({real})({g.courant_number:.17g}))'
+        lines = [f'if (i >= {count}) {{', f'auto read_in=[&](int c,int px,int py,int pz)->{real}{{',
+                 f'if(px<{shape[0]}&&py<{shape[1]}&&pz<{shape[2]})return src[3*((px*{shape[1]}+py)*{shape[2]}+pz)+c];',
+                 f'const int m=(px=={shape[0]}?1:0)|(py=={shape[1]}?2:0)|(pz=={shape[2]}?4:0);']
+        for name, (comp, upper, block_shape) in zip(faces_in, blocks[family_in]):
+            q = ['0' if a in upper else v for a, v in enumerate(('px', 'py', 'pz'))]
+            lines.append(f'if(c=={comp}&&m=={sum(1<<a for a in upper)})return {name}[(({q[0]})*{block_shape[1]}+({q[1]}))*{block_shape[2]}+({q[2]})];')
+        lines.append(f'return ({real})0;}};')
+        offset = count
+        for k, (name, (comp, upper, block_shape)) in enumerate(zip(faces_out, blocks[family_out])):
+            size = math.prod(block_shape)
+            lines.append(f'if (i < {offset+size}) {{ const int j = i-{offset};')
+            decode = [f'j/{block_shape[1]*block_shape[2]}', f'(j/{block_shape[2]})%{block_shape[1]}', f'j%{block_shape[2]}']
+            for a, v in enumerate('xyz'):
+                lines.append(f'const int f{v} = {shape[a] if a in upper else decode[a]};')
+            lines.append(f'{real} total=0;')
+            for term, (axis, ic, out, sign) in enumerate(CURL_TERMS):
+                n = shape[axis]
+                if out != comp or n == 1:
+                    continue
+                coord = f'f{"xyz"[axis]}'
+                def at(delta):
+                    q = [f'f{v}' for v in 'xyz']
+                    if delta:q[axis] = f'({coord}{delta:+d})'
+                    return ','.join(q)
+                target_shape = extended_shape(shape, upper_axes, family_out, out)
+                lines.extend(['{', f'{real} d=0;'])
+                if not forward and axis in upper:
+                    lines.append(f'd = -2*({real})({pmc_upper[axis]:.17g})*read_in({ic},{at(-1)});')
+                else:
+                    if forward:lines.append(f'if ({coord} < {n-1}) {{ d = read_in({ic},{at(1)}) - read_in({ic},{at(0)});')
+                    else:lines.append(f'if ({coord} > 0) {{ d = read_in({ic},{at(0)}) - read_in({ic},{at(-1)});')
+                    if term in metrics:lines.append(f'd *= {metrics[term]}[{coord}{"" if forward else "-1"}];')
+                    for lo, hi, psi, b, c, inv_k in segments[term]:
+                        coords = [f'f{v}' for v in 'xyz']
+                        coords[axis] = f'({coord}-{lo})'
+                        slab = list(target_shape)
+                        slab[axis] = hi-lo
+                        index = f'(({coords[0]})*{slab[1]}+({coords[1]}))*{slab[2]}+({coords[2]})'
+                        lines.extend([f'if ({coord} >= {lo} && {coord} < {hi}) {{', f'const int p = {index};', f'const int q = {coord}-{lo};',
+                                      f'{real} memory = {psi}[p]*{b}[q] + {c}[q]*d;', f'{psi}[p] = memory;', f'd = d*{inv_k}[q] + memory;', '}'])
+                    lines.append('}')
+                    if forward and (axis in pmc_upper or axis in pec_upper):
+                        factor = pmc_upper.get(axis, pec_upper.get(axis))
+                        lines.append(f'else {{ d = ({real})({factor:.17g})*(read_in({ic},{at(1)}) - read_in({ic},{at(0)})); }}')
+                    elif not forward and axis in pmc_lower:
+                        lines.append(f'else {{ d = 2*({real})({pmc_lower[axis]:.17g})*read_in({ic},{at(0)}); }}')
+                lines.extend([f'total {"-=" if sign < 0 else "+="} d;', '}'])
+            if forward:lines.append(f'{name}[j] -= {courant}*total;')
+            else:lines.append(f'{name}[j] += {courant}*finv{k}[j]*total;')
+            lines.append('return; }')
+            offset += size
+        lines.extend(['return;', '}'])
+        return lines
 
     def _update_statements(self,forward,inverse,argument,real,*,subpixel=False):
         g=self.grid
@@ -193,7 +299,7 @@ class FusedYeeCUDA:
     def update(self, forward):
         kernel, arrays, _ = self.launches[forward]
         with self.cp.cuda.Device(self.device), self._stream():
-            kernel(((math.prod(self.grid.E.shape[:3])+255)//256,), (256,), arrays)
+            kernel(((self.launch_count(self.grid, forward)+255)//256,), (256,), arrays)
 
     def update_E(self):
         g = self.grid

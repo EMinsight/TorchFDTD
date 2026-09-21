@@ -7,6 +7,7 @@ D/kappa + psi and psi <- b*psi + c*D to each transverse derivative.
 from __future__ import annotations
 
 import cmath
+from itertools import combinations
 import math
 
 import fdtd
@@ -28,11 +29,77 @@ def _slice(axis, value, component=None):
     return tuple(parts)
 
 
+def is_nodal(family, component, axis):
+    """E_c has integer nodes on its two transverse axes, H_c on its own axis."""
+    return component != axis if family == 'E' else component == axis
+
+
+def reject_pmc_faces(region, path):
+    """Explicit refusal for numerical paths without the stored-face topology."""
+    if any(f.kind in ('pmc', 'symmetric') for a in range(3) for f in region.boundaries.pair(a)):
+        raise ValueError(f'PMC/symmetric faces are not implemented by {path}. '
+                         'Use DifferentiableSimulation, StreamedSimulation, run_tensor_batch or the endpoint Simulation dispatch.')
+
+
+def pmc_faces(region):
+    """Active axes with a PMC/symmetric wall at the lower and upper mesh endpoints."""
+    active = 2 if region.dimension == '2d' else 3
+    def walls(side):
+        return tuple(a for a in range(active) if region.shape[a] > 1
+                     and region.boundaries.pair(a)[side].kind in ('pmc', 'symmetric'))
+    return walls(0), walls(1)
+
+
+def pmc_blocks(shape, upper):
+    """Disjoint stored upper PMC faces and E edges, in the packed endpoint order.
+
+    Each entry is (component, upper axes, block shape). A block has one entry on
+    each of its upper axes and the full cell count elsewhere, so faces exclude
+    the separately stored edges. Upper PEC nodes stay omitted zeros.
+    """
+    blocks = {}
+    for family in ('E', 'H'):
+        entries = []
+        for comp in range(3):
+            axes = [a for a in upper if is_nodal(family, comp, a)]
+            for length in range(1, len(axes)+1):
+                for selected in combinations(axes, length):
+                    entries.append((comp, selected, tuple(1 if a in selected else n for a, n in enumerate(shape))))
+        blocks[family] = tuple(entries)
+    return blocks
+
+
+def extended_shape(shape, upper, family=None, component=None):
+    """Cell counts plus one stored node on every upper PMC axis of a component."""
+    return tuple(n+(1 if a in upper and (family is None or is_nodal(family, component, a)) else 0)
+                 for a, n in enumerate(shape))
+
+
+def material_shape(region, diagonal=False):
+    """Sampled epsilon shape: the grid plus every stored upper PMC node row."""
+    shape = extended_shape(region.shape, pmc_faces(region)[1])
+    return shape+((3,) if diagonal else ())
+
+
+def face_index(blocks, shape, family, component, loc):
+    """Resolve an extended Yee index to (stored block position or None, flat index)."""
+    upper = tuple(a for a in range(3) if loc[a] == shape[a])
+    if not upper:
+        return None, ((loc[0]*shape[1]+loc[1])*shape[2]+loc[2])*3+component
+    for position, (comp, selected, block_shape) in enumerate(blocks[family]):
+        if comp == component and selected == upper:
+            local = tuple(0 if a in upper else i for a, i in enumerate(loc))
+            return position, int(np.ravel_multi_index(local, block_shape))
+    raise ValueError('The requested Yee sample is not a stored PMC/symmetric upper face or edge.')
+
+
 class YeeGrid(fdtd.Grid):
-    """Extend the open-source fdtd grid with complex fields and native CPML."""
+    """Extend the open-source fdtd grid with complex fields and native CPML.
+
+    PMC/symmetric faces allocate the stored upper face/edge arrays. Only the
+    fused CUDA kernel updates them; the Torch/NumPy curl below rejects them.
+    """
     def __init__(self, region):
-        if any(f.kind in ('pmc','symmetric') for a in range(3) for f in region.boundaries.pair(a)):
-            raise ValueError('PMC/symmetric requires the dedicated endpoint Simulation path; this Yee/adjoint/batch/streamed path is unsupported.')
         region.require_resident()
         super().__init__(shape=region.shape, grid_spacing=region.reference_step * 1e-6,
                          courant_number=region.courant_factor/math.sqrt(2 if region.dimension == '2d' else 3))
@@ -50,6 +117,8 @@ class YeeGrid(fdtd.Grid):
                 kind = np.complex128 if region.precision == 'float64' else np.complex64
                 self.E, self.H = self.E.astype(kind), self.H.astype(kind)
         self._prepare_boundaries(region)
+        self.faces = {family: [self._zeros(shape) for _, _, shape in blocks] for family, blocks in self.pmc_blocks.items()}
+        self.face_inverse_permittivity = [self._zeros(shape)+1 for _, _, shape in self.pmc_blocks['E']]
 
     def _prepare_boundaries(self,region):
         self.wrap = {}
@@ -60,6 +129,14 @@ class YeeGrid(fdtd.Grid):
             for axis, nodes in enumerate(region.mesh_nodes)
             if region.shape[axis] > 1 and region.boundaries.pair(axis)[1].kind in ('pec', 'antisymmetric')
         }
+        # PMC planes are also exact mesh endpoints. The mirrored outer half
+        # cell equals the wall cell, so the wall derivative is +-2 H / dx_wall.
+        # Upper walls keep their tangential E and normal H in stored blocks.
+        lower, upper = pmc_faces(region)
+        nodes = region.mesh_nodes
+        self.pmc_lower = {axis: float(region.reference_step/(nodes[axis][1]-nodes[axis][0])) for axis in lower}
+        self.pmc_upper = {axis: float(region.reference_step/(nodes[axis][-1]-nodes[axis][-2])) for axis in upper}
+        self.pmc_blocks = pmc_blocks(region.shape, upper)
         self.metric = {}
         if region.mesh_type != 'uniform' or region.mesh_steps is not None:
             for axis, nodes in enumerate(region.mesh_nodes):
@@ -78,10 +155,13 @@ class YeeGrid(fdtd.Grid):
         self.material_states = []
         self.incident_states = []
         for forward in (False, True):
-            for axis, component, _, _ in CURL_TERMS:
+            for axis, component, output, _ in CURL_TERMS:
                 n = region.shape[axis]
                 if n == 1:
                     continue
+                # Auxiliary rows follow the derivative target, including its
+                # stored upper PMC nodes on the transverse axes.
+                target_shape = extended_shape(region.shape, upper, 'H' if forward else 'E', output)
                 segments = []
                 for side, face in enumerate(region.boundaries.pair(axis)):
                     if face.kind != 'pml':
@@ -111,7 +191,7 @@ class YeeGrid(fdtd.Grid):
                     coupling = np.divide((decay-1)*sigma, denominator, out=np.zeros_like(sigma), where=denominator != 0)
                     coeff_shape = [1, 1, 1]
                     coeff_shape[axis] = hi-lo
-                    shape = list(region.shape)
+                    shape = list(target_shape)
                     shape[axis] = hi-lo
                     psi = self._zeros(tuple(shape))
                     self.memory_states.append(psi)
@@ -129,6 +209,8 @@ class YeeGrid(fdtd.Grid):
         return torch.as_tensor(array, device=self.E.device, dtype=self.E.real.dtype) if self.is_torch else array.astype(self.E.real.dtype)
 
     def curl(self, field, forward):
+        if self.pmc_lower or self.pmc_upper:
+            raise ValueError('PMC/symmetric faces are not implemented by the Torch/NumPy grid curl. Use the fused CUDA kernel, DifferentiableSimulation, StreamedSimulation or the endpoint Simulation dispatch.')
         result = self._zeros(field.shape)
         for axis, component, output, sign in CURL_TERMS:
             if field.shape[axis] == 1:
@@ -174,8 +256,6 @@ class YeeGrid(fdtd.Grid):
 class BoundaryDescription:
     """Boundary coefficients and state shapes without allocating volume fields."""
     def __init__(self,region):
-        if any(f.kind in ('pmc','symmetric') for a in range(3) for f in region.boundaries.pair(a)):
-            raise ValueError('PMC/symmetric requires the dedicated endpoint Simulation path; this Yee/adjoint/batch/streamed path is unsupported.')
         self.courant_number=region.rectangular_courant
         YeeGrid._prepare_boundaries(self,region)
 

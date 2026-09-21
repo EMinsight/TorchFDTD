@@ -164,6 +164,8 @@ class StreamedDispersiveSimulation(StreamedSimulation):
 
     def __init__(self, project, options=None):
         super().__init__(project, options)
+        from .boundaries import reject_pmc_faces
+        reject_pmc_faces(self.project.region, 'StreamedDispersiveSimulation')
         if self.streaming_options.cuda_binding != 'direct':
             raise ValueError('Streamed ADE kernels currently require cuda_binding="direct".')
         if any(s.enabled and s.injection != 'soft' for s in self.project.sources):

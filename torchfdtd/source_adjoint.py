@@ -83,6 +83,8 @@ class SourceWaveformSimulation(DifferentiableSimulation):
         if options is not None and not isinstance(options,AdjointOptions):
             raise ValueError('Source waveform derivatives require resident AdjointOptions.')
         super().__init__(project,options)
+        from .boundaries import reject_pmc_faces
+        reject_pmc_faces(self.project.region,'SourceWaveformSimulation')
         layout=[]
         for raw in self.project.sources:
             source=self.project.resolved_source(raw)

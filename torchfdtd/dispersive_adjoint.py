@@ -162,6 +162,8 @@ class DispersiveSimulation(DifferentiableSimulation):
         # Keep the Torch fallback as auto until application-scale performance
         # comparisons establish when native ADE kernels are beneficial.
         super().__init__(project, replace(options, backward_kernel='torch') if options.backward_kernel=='auto' else options)
+        from .boundaries import reject_pmc_faces
+        reject_pmc_faces(self.project.region, 'DispersiveSimulation')
         if any(s.enabled and s.injection != 'soft' for s in self.project.sources):
             raise ValueError('Dispersive differentiation currently requires soft source injection.')
 

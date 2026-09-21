@@ -213,6 +213,11 @@ class StreamedGeometrySimulation(StreamedSimulation):
     """
     _execution_type = _GeometryExecution
 
+    def __init__(self, project, options=None):
+        super().__init__(project, options)
+        from .boundaries import reject_pmc_faces
+        reject_pmc_faces(self.project.region, 'StreamedGeometrySimulation')
+
     def spectrum(self, geometry, frequency_hz, *, window=None, block_size=32):
         from .adjoint_spectrum import SpectralObservation
         self._validate_geometry(geometry)
