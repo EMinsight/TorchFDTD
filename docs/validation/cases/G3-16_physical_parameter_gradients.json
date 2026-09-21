@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-16_physical_parameter_gradients",
+  "task": "G3-16",
+  "title": "Physical shape and material parameter gradients: slab thickness and permittivity against the Airy derivative, polygon vertices under mesh refinement",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "oracle_class": ["analytic_continuum", "convergence_study", "stored_record", "finite_difference_same_discretisation", "shared_discrete_operator"],
+  "fixture": {
+    "planar_slab": "tests/test_gradient_mesh_slab.py via benchmarks/gradient_mesh.py: 2D domain 8 x 0.24 um, y periodic, slab thickness 0.23 um at x = 0.013 um with permittivity 2.25 in air, wavelength 1.55 um, one-cycle plane pulse at x = -1.5 um, transmitted and reflected normalized-flux planes at x = +-0.8 um, physical time 90 fs (time_step_override so that steps times dt is exact), CPML 0.4 um, float32 CUDA, DifferentiableSolid.box through smooth_geometry_epsilon of width w, 8 checkpoints; joint refinement (mesh, width) = (0.04, 0.16), (0.02, 0.12), (0.01, 0.08) um then the regularization followup (0.01, 0.06) um with actual improvement steps of 0.001 um and 0.01 in epsilon; fixed-width controls (0.04, 0.12) and (0.01, 0.12) um; duration control 120 fs and PML control 0.5 um at (0.01, 0.06) um",
+    "polygon_grating": "tests/test_shape_gradients.py record docs/validation/shape_gradient_polygon_3060.json: pentagon of five off-grid vertices with epsilon 4 in a 4 x 0.6 um y-periodic domain, 60 fs, CPML 0.24 um, normalized transmitted flux at 1.55 um, checkpointed adjoint at (mesh, width) = (0.04, 0.08), (0.02, 0.08), (0.01, 0.08) and (0.02, 0.04), (0.01, 0.04) um in float32, float64 precision control, 90 fs duration control, 0.30 um PML control; reference central differences at mesh 0.005 um in float64 with steps 0.002 and 0.001 um for widths 0.08 and 0.04 um; sharp-interface forward runs (width 1e-9) at 0.01 and 0.005 um",
+    "geometry_maps": "tests/test_differentiable_geometry.py: box centre, rotation and epsilon, cylinder radius and height, background epsilon through the fill VJP (float64, no FDTD) and an FP32 geometry-to-FDTD adjoint and streamed chain on 18 steps",
+    "pml": "0.4 um in the slab study with a 0.5 um control; 0.24 um in the polygon record with a 0.30 um control"
+  },
+  "seed": "deterministic",
+  "precision": ["float32 CUDA for the slab and polygon adjoints", "float64 for the polygon reference differences and the geometry map checks"],
+  "backend": ["cuda for the slab study", "cpu for the record contract and geometry maps", "cpu and cuda for the FP32 chain"],
+  "reference_method": "Closed-form Airy transmission T(d, epsilon) of an air/slab/air stack and its analytic derivatives dT/dd and dT/depsilon, checked against an independent complex-amplitude transfer formula by central differences (tests/test_gradient_mesh.py); for the polygon, central differences of the same regularised fill at a four times finer mesh (mesh convergence of the regularised derivative, not a sharp-interface shape derivative, as docs/SHAPE_GRADIENTS.md states).",
+  "observables": [
+    {"name": "transmission_absolute_error", "unit": "dimensionless", "definition": "|T - T_airy| per case"},
+    {"name": "thickness_derivative_relative_error", "unit": "dimensionless", "definition": "|dT/dd - analytic| / |analytic| with the derivative per um"},
+    {"name": "epsilon_derivative_relative_error", "unit": "dimensionless", "definition": "|dT/depsilon - analytic| / |analytic|"},
+    {"name": "conservation_error", "unit": "dimensionless", "definition": "|T + R - 1| with R from the incident-subtracted reflected plane"},
+    {"name": "improvement", "unit": "dimensionless", "definition": "predicted, actual and analytic change of T for a gradient step of 0.001 um in thickness and 0.01 in epsilon"},
+    {"name": "control_changes", "unit": "dimensionless", "definition": "changes of T, dT/dd, dT/depsilon when the duration goes 90 to 120 fs or the PML 0.4 to 0.5 um"},
+    {"name": "polygon_gradient_relative_l2", "unit": "dimensionless", "definition": "relative L2 of the ten vertex derivatives against the fine-mesh float64 central differences"}
+  ],
+  "acceptance": {
+    "slab": {"followup_gradient_relative_error_max": 0.03, "fine_transmission_absolute_error_max": 0.005, "conservation_max": 5e-4, "joint_errors_strictly_decrease": true, "followup_below_finest_joint": true, "improvement_positive": true, "fixed_width_discretization_converges": true, "control_change_max": 1e-5, "where": "benchmarks/gradient_mesh.py summarize, declared with docs/gradient_mesh.md"},
+    "polygon": {"fine_relative_l2_max": 0.03, "reference_step_halving_max": 0.005, "conservation_max": 5e-4, "control_transmission_max": 1e-4, "control_gradient_relative_max": 2e-3, "where": "docs/validation/shape_gradient_polygon_3060.json tolerances, checked by tests/test_shape_gradients.py"},
+    "airy_oracle_self_check": {"rtol": 2e-7, "atol": 2e-9},
+    "geometry_maps": {"fill_vjp": {"rtol": 2e-6, "atol": 1e-7}, "fp32_chain": {"rtol": 3e-4}, "streamed": {"rtol": 4e-4}},
+    "source_of_limits": "completion_gates.json proposed_thresholds physical_parameter_gradient_relative_error_nonzero 0.03 for the slab followup and the polygon fine mesh; the slab's first 0.08 um width missed 3 percent (2.80 and 3.19 percent) and the 0.06 um followup is the declared fixture, kept in the record as the initial_validation note"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_gradient_mesh_slab.py::test_slab_thickness_and_epsilon_derivatives_refine_toward_airy_with_controls",
+      "tests/test_gradient_mesh.py::test_airy_derivatives_against_complex_amplitude_transfer_formula",
+      "tests/test_gradient_mesh.py::test_refinement_preserves_physical_domain_time_source_and_absorber",
+      "tests/test_shape_gradients.py::test_shape_gradient_convergence_record_and_refinement_contract",
+      "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint",
+      "tests/test_differentiable_geometry.py::test_geometry_vjp_directional_derivative_all_parameters_and_noncontiguous_seed",
+      "tests/test_differentiable_geometry.py::test_fp32_geometry_to_fdtd_adjoint_and_streamed_chain"
+    ],
+    "layers": {
+      "tests/test_gradient_mesh_slab.py::test_slab_thickness_and_epsilon_derivatives_refine_toward_airy_with_controls": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "Airy transmission and its thickness and permittivity derivatives; joint mesh/width refinement with duration and PML controls"},
+      "tests/test_gradient_mesh.py::test_airy_derivatives_against_complex_amplitude_transfer_formula": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "oracle self-check against an independent complex-amplitude transfer formula"},
+      "tests/test_gradient_mesh.py::test_refinement_preserves_physical_domain_time_source_and_absorber": {"layer": "B", "oracle_class": "convergence_study", "oracle": "fixture invariants of the refinement (size, time, PML, source)"},
+      "tests/test_shape_gradients.py::test_shape_gradient_convergence_record_and_refinement_contract": {"layer": "B", "oracle_class": "stored_record", "oracle": "stored polygon record: regularised vertex derivatives under mesh refinement against fine-mesh central differences (convergence_study of the regularised derivative)"},
+      "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "central differences of the same discretisation"},
+      "tests/test_differentiable_geometry.py::test_geometry_vjp_directional_derivative_all_parameters_and_noncontiguous_seed": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "fill VJP against central differences"},
+      "tests/test_differentiable_geometry.py::test_fp32_geometry_to_fdtd_adjoint_and_streamed_chain": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "checkpointed and streamed FP32 chain against full autograd"}
+    },
+    "not_yet_covered": [
+      "sharp-interface (staircase) shape derivative convergence: the polygon reference is the regularised fill at a finer mesh and the sharp forward runs carry no gradient",
+      "regeneration of the polygon record under pytest (the record is checked, not recomputed; python -m benchmarks.shape_gradient_polygon regenerates it on CUDA)",
+      "curved interfaces, rotated boxes and cylinder radii against an analytic derivative (checked against finite differences of the same discretisation only)",
+      "near-zero derivatives judged on a characteristic absolute scale (both slab derivatives are of order 0.2 to 0.3 and judged relatively)",
+      "asymptotic convergence order of the slab derivatives (docs/gradient_mesh.md: no order established)"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float32 adjoint; the polygon float64 control changed the gradient by 6.6e-7 relative and T by 4.4e-7, so float32 round-off is far below the 3 percent budget; the slab conservation error is 1.8e-5",
+    "time_window": "slab 90 fs with a 120 fs control (changes at most 1.8e-7); polygon 60 fs with a 90 fs control (gradient change 5.8e-6 relative)",
+    "pml": "slab 0.4 um with a 0.5 um control (changes at most 1.2e-7); polygon 0.24 um with a 0.30 um control (1.8e-6 relative)",
+    "mesh_and_regularisation": "slab joint refinement 12.1, 6.8, 2.8 percent (thickness) and 12.0, 7.0, 3.2 percent (epsilon) then 1.63 and 1.78 percent at width 0.06 um; polygon 11.6, 1.78, 0.51 percent at width 0.08 um and 5.4, 0.99 percent at 0.04 um"
+  },
+  "notes": "tests/test_gradient_mesh_slab.py is added with this case as a thin wrapper of benchmarks/gradient_mesh.py whose checks were declared with docs/gradient_mesh.md and the stored record; the pilot at this commit reproduced 1.633 and 1.783 percent at the followup (T error 0.00229, conservation 1.8e-5, controls below 1.8e-7) in 95 s on the shared RTX 3060. The polygon record is checked by the existing contract test and not recomputed here."
+}

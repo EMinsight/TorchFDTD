@@ -1,0 +1,235 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T165032Z-g3-15-12732135",
+  "task": "G3-15",
+  "stage": "G3",
+  "task_title": "full-autograd·directional VJP·FD sweep·Taylor 검사",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_differentiable.py::test_directional_taylor_and_geometry_chain tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64 tests/test_pmc_dispersive.py::test_dispersive_adjoint_taylor_check_float64 tests/test_dispersive_adjoint.py::test_geometry_to_ade_taylor_and_online_spectrum tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions tests/test_dispersive_adjoint.py::test_plane_flux_material_gradient_and_zero_pole_limit tests/test_cuda_dispersive_adjoint.py::test_spectral_replay_mixed_tiers_and_geometry_taylor tests/test_cuda_dispersive_adjoint.py::test_fused_plane_flux_zero_pole_and_material_finite_difference tests/test_mode_adjoint_oracle.py::test_checkpointed_modal_adjoint_matches_full_autograd_taylor_and_central_difference tests/test_density_layer.py::test_density_gradient tests/test_density_layer.py::test_fdtd_density_directional_gradient tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences tests/test_cr_directional_check.py::test_direction_sweep_detects_incorrect_gradient_and_taylor_order --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-15.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T01:47:07.459981+09:00",
+  "recorded_at": "2026-09-21T16:50:32+00:00",
+  "source_commit": "5c0172da60d27ad0e5aa6906910ae256e53de1f6",
+  "source_tree_sha256": "12f35e8aa98fe823d8fe6bff872ad36b387aea885f11f2b747788a3195d7d8ff",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_differentiable.py": "1339a6ecc9852e7f3a8d63e8ceb9c12e3b922048249ac05faa810b4578975983",
+    "tests/test_pmc_general.py": "b4833e6477d2534ff2d97e6033f120e58acf9e851fb1675ba9930098d98657d4",
+    "tests/test_pmc_dispersive.py": "7bd298af186ef45a10be5ab3dc9b6b6e4ac82f52bc7fd84db699c05c41bfde75",
+    "tests/test_dispersive_adjoint.py": "5480420a5eaa62c29d06a54cd7f5a69a1f801793a89f62d532c0c57e7566c462",
+    "tests/test_cuda_dispersive_adjoint.py": "e5a33f0d1dd42e669a39a05575d5ad66ee7aef3b94f7228de375a946785900b5",
+    "tests/test_mode_adjoint_oracle.py": "e0c2dc833186d4333d144f2ba7cc87cbd22f8e9a6e4b291624b609e86f1cf73d",
+    "tests/test_density_layer.py": "5c15a575b80d51c9e952d892f7e4620e8d4f1ba4f636bf0dde7da29b8546554b",
+    "tests/test_shape_gradients.py": "9d95431aaa5e995681071d59ee8b13dd047ca6915180303b88c76cf16a649ca3",
+    "tests/test_source_parameters.py": "92b010c9be95ab53aafdcaa3e8cb757e40c8865086eb3e2adba6bbc24074cc8f",
+    "tests/test_cr_directional_check.py": "3a45bb90bc1379818ff47d983cc6eb51d3726374c4e4626cebc6104deebf06f0"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G3-15_gradient_checks.json",
+  "fixture_sha256": "5c5c2e8ed996dd488565aec95715ff6327bf769f9e13bf582feb72617a84806e",
+  "acceptance_criteria_path": "docs/validation/cases/G3-15_gradient_checks.json",
+  "acceptance_criteria_sha256": "5c5c2e8ed996dd488565aec95715ff6327bf769f9e13bf582feb72617a84806e",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": {
+    "epsilon": [
+      82,
+      3
+    ],
+    "directions": [
+      11,
+      3,
+      5,
+      1729
+    ],
+    "note": "at most two random cotangent seeds per test; no test repeats the same check over several fixture seeds"
+  },
+  "precision": [
+    "float64 for every central-difference and Taylor check",
+    "float32 for the CUDA adjoint comparisons with precision-dependent steps"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "epsilon_and_shape": "tests/test_differentiable.py: 16x15x1 cells, 0.1 um, 3 CPML cells, float64 CPU, 35 steps, objective mean of signal squares, sphere radius and centre through smooth_sphere_epsilon; Taylor remainder at h = 1e-3, 5e-4, 2.5e-4 along the fixed direction (0.4, -0.3, 0); central difference h = 1e-5 on the radius; explicit adjoint against full autograd on cpu and cuda (seed 82), central difference h = 1e-5 on a scalar epsilon design with nonuniform mesh and one-way plane sources",
+    "epsilon_pmc": "tests/test_pmc_general.py gradient_scene: 10x6x6 cells with PML/PMC/PEC faces, 14 steps, float64, random epsilon seed 3 and random direction seed 11; central-difference step sweep h = 4e-3, 2e-3, 1e-3",
+    "ade_coefficients": "tests/test_pmc_dispersive.py: epsilon_inf, spatial strength, omega0 and gamma with directions scaled by each parameter's mean magnitude (seed 11), sweep h = 4e-2, 2e-2, 1e-2; tests/test_dispersive_adjoint.py: order-one leaves times scales (1, 1e30, 1e15, 1e15), central difference h = 1e-4 along (0.2, -0.3, 0.4, 0.1) in float64 on cpu and cuda; geometry-to-ADE sigmoid density Taylor remainder at h = 2e-3, 1e-3, 5e-4; tests/test_cuda_dispersive_adjoint.py: CUDA float64 density shift, strength and gamma Taylor at h = 4e-3, 2e-3, 1e-3 with torch and fused backward",
+    "modal_objective": "tests/test_mode_adjoint_oracle.py: modal S objective, float64, 600 steps, cpu and cuda, direction seed 3, h = 2e-3, 1e-3, 5e-4",
+    "density": "tests/test_density_layer.py: density 4x3 through the density-to-epsilon map (torch.autograd.gradcheck) and an FDTD directional derivative with central difference h = 1e-5",
+    "shape_parameters": "tests/test_shape_gradients.py: 19 polygon parameters through the fill VJP (no FDTD), random direction seeds 3 and 5, central difference h = 1e-5, Taylor at h = 1e-3 and 2.5e-4; vertex and control-point gradients through the checkpointed adjoint, float64 CPU, 18 steps, central difference h = 1e-5",
+    "source_waveform": "tests/test_source_parameters.py: scalar waveform parameters of gaussian_waveform against independent finite differences, float32 step 2e-3 and float64 step 1e-5 (no FDTD)",
+    "directional_driver": "tests/test_cr_directional_check.py: benchmarks/cr_spectral_objective.py check_density_direction on a synthetic objective with Rademacher direction seed 1729 and steps 2e-3, 1e-3, 5e-4",
+    "pml": "3 to 4 CPML layers in the FDTD fixtures; part of the differentiated operator"
+  },
+  "reference_method": "Full Torch autograd through every time step (small-problem oracle), central differences of the same discretisation at one or several steps, first-order Taylor remainder ratios under step halving, and random directional VJP seeds; all of validation layer A by construction. Nondimensionalisation: leaves are order one and scaled by characteristic magnitudes (1e30, 1e15 rad/s), fields divided by dt or steps times dt, gradients rescaled by (1, dt^-2, dt^-1, dt^-1) and finite-difference directions scaled to the parameter magnitude.",
+  "observables": [
+    {
+      "name": "adjoint_versus_autograd",
+      "unit": "d objective / d parameter",
+      "definition": "explicit adjoint gradient against the full-time autograd gradient"
+    },
+    {
+      "name": "central_difference_error",
+      "unit": "dimensionless",
+      "definition": "|central difference - directional derivative| / |directional derivative| at each step of the sweep"
+    },
+    {
+      "name": "taylor_remainder_ratio",
+      "unit": "dimensionless",
+      "definition": "R(h)/R(h/2) with R(h) = |f(x + h d) - f(x) - h g.d|"
+    },
+    {
+      "name": "directional_vjp",
+      "unit": "d objective / d parameter",
+      "definition": "VJP along random cotangents against the reference path"
+    }
+  ],
+  "acceptance_limits": {
+    "adjoint_versus_autograd_float64": {
+      "rtol": "1e-9 to 2e-10",
+      "atol": "1e-12 to 1e-16"
+    },
+    "central_difference": {
+      "single_step": {
+        "rtol": "1e-6 to 2e-6",
+        "atol": "1e-9 to 1e-12"
+      },
+      "sweep_pmc": "errors[-1] < 1e-6 |d| and errors[0] > 3 errors[1] > 9 errors[2] (second order until round-off)",
+      "sweep_pmc_dispersive": "errors[-1] < 1e-5 |d| with the same ratio chain"
+    },
+    "taylor_remainder": {
+      "second_order_asserted": "ratio > 3.8 (tests/test_differentiable.py), 3.8 < ratio < 4.2 (tests/test_dispersive_adjoint.py), 3.7 < ratio < 4.3 (tests/test_cuda_dispersive_adjoint.py), 3.9 < ratio < 4.1 (directional driver)",
+      "superlinear_only": "ratio < 0.3 per halving (modal, branch, tensor rotation), R(h/4) < R(h)/8 (polygon)"
+    },
+    "density_gradcheck": "torch.autograd.gradcheck float64 on the density map; FDTD directional derivative rtol 2e-6, atol 1e-9",
+    "waveform": {
+      "float32": {
+        "rtol": 0.003,
+        "atol": 0.0003,
+        "step": 0.002
+      },
+      "float64": {
+        "rtol": 2e-07,
+        "atol": 2e-08,
+        "step": 1e-05
+      }
+    },
+    "shape": {
+      "fill_vjp_rel": 0.0002,
+      "adjoint_chain_rel": 0.0002,
+      "cuda_float32_versus_autograd": {
+        "rtol": 0.0003
+      }
+    },
+    "source_of_limits": "repository-recorded budgets; the program's float64 discrete limit rtol 1e-7 is met by the adjoint-versus-autograd checks (1e-9 and tighter) and by the single-step central differences (1e-6 to 2e-6 relative, which is the finite-difference truncation floor, not a solver discrepancy)"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 34,
+    "passed": [
+      "tests/test_differentiable.py::test_directional_taylor_and_geometry_chain",
+      "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients[nonuniform-cpu]",
+      "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients[nonuniform-cuda]",
+      "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients[oneway_forward-cpu]",
+      "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients[oneway_forward-cuda]",
+      "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients[oneway_backward-cpu]",
+      "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients[oneway_backward-cuda]",
+      "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64",
+      "tests/test_pmc_dispersive.py::test_dispersive_adjoint_taylor_check_float64",
+      "tests/test_dispersive_adjoint.py::test_geometry_to_ade_taylor_and_online_spectrum",
+      "tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions[cpu-dtype0]",
+      "tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions[cpu-dtype1]",
+      "tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions[cuda-dtype0]",
+      "tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions[cuda-dtype1]",
+      "tests/test_dispersive_adjoint.py::test_plane_flux_material_gradient_and_zero_pole_limit[cpu]",
+      "tests/test_dispersive_adjoint.py::test_plane_flux_material_gradient_and_zero_pole_limit[cuda]",
+      "tests/test_cuda_dispersive_adjoint.py::test_spectral_replay_mixed_tiers_and_geometry_taylor[torch]",
+      "tests/test_cuda_dispersive_adjoint.py::test_spectral_replay_mixed_tiers_and_geometry_taylor[fused]",
+      "tests/test_cuda_dispersive_adjoint.py::test_fused_plane_flux_zero_pole_and_material_finite_difference[torch]",
+      "tests/test_cuda_dispersive_adjoint.py::test_fused_plane_flux_zero_pole_and_material_finite_difference[fused]",
+      "tests/test_mode_adjoint_oracle.py::test_checkpointed_modal_adjoint_matches_full_autograd_taylor_and_central_difference[cpu]",
+      "tests/test_mode_adjoint_oracle.py::test_checkpointed_modal_adjoint_matches_full_autograd_taylor_and_central_difference[cuda]",
+      "tests/test_density_layer.py::test_density_gradient[cpu]",
+      "tests/test_density_layer.py::test_density_gradient[cuda]",
+      "tests/test_density_layer.py::test_fdtd_density_directional_gradient",
+      "tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference[cpu]",
+      "tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference[cuda]",
+      "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint[cpu]",
+      "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint[cuda]",
+      "tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences[dtype0-False]",
+      "tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences[dtype0-True]",
+      "tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences[dtype1-False]",
+      "tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences[dtype1-True]",
+      "tests/test_cr_directional_check.py::test_direction_sweep_detects_incorrect_gradient_and_taylor_order"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 55.044,
+    "suite_timestamp": "2026-09-22T01:47:07.459981+09:00"
+  },
+  "required_tests": [
+    "tests/test_differentiable.py::test_directional_taylor_and_geometry_chain",
+    "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients",
+    "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64",
+    "tests/test_pmc_dispersive.py::test_dispersive_adjoint_taylor_check_float64",
+    "tests/test_dispersive_adjoint.py::test_geometry_to_ade_taylor_and_online_spectrum",
+    "tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions",
+    "tests/test_dispersive_adjoint.py::test_plane_flux_material_gradient_and_zero_pole_limit",
+    "tests/test_cuda_dispersive_adjoint.py::test_spectral_replay_mixed_tiers_and_geometry_taylor",
+    "tests/test_cuda_dispersive_adjoint.py::test_fused_plane_flux_zero_pole_and_material_finite_difference",
+    "tests/test_mode_adjoint_oracle.py::test_checkpointed_modal_adjoint_matches_full_autograd_taylor_and_central_difference",
+    "tests/test_density_layer.py::test_density_gradient",
+    "tests/test_density_layer.py::test_fdtd_density_directional_gradient",
+    "tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference",
+    "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint",
+    "tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences",
+    "tests/test_cr_directional_check.py::test_direction_sweep_detects_incorrect_gradient_and_taylor_order"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T165032Z-g3-15-12732135/junit.xml",
+      "sha256": "883dcc0644c5df50658ff53b3c0c1c5a10d4e1d560cae1c0907f06dbb9c0f1e2",
+      "bytes": 4870,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G3-15.xml"
+    }
+  ],
+  "applicable_scope": "Layer A only: full autograd oracles, explicit adjoints, central-difference sweeps, Taylor remainders and directional VJPs over epsilon, ADE coefficients, density and shape, float64 with float32 CUDA comparisons, CPU and CUDA, on local Windows 11, i7-12700, RTX 3060 12 GB shared with other sessions. Waveform parameters are checked outside FDTD only.",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

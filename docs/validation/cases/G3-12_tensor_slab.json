@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-12_tensor_slab",
+  "task": "G3-12",
+  "title": "Tensor dielectrics: eigenpolarization dispersion, birefringent slab transmission and tensor gradients",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "oracle_class": ["analytic_continuum", "analytic_discrete", "shared_discrete_operator", "finite_difference_same_discretisation"],
+  "fixture": {
+    "birefringent_slab": "tests/test_tensor_slab_acceptance.py via benchmarks/tensor_cpml_birefringent_slab.py: exterior principal indices 1.2 and 1.4 with normal permittivity 2.25 filling the domain and both z CPML faces, slab principal indices 1.5 and 2.0 with normal permittivity 4.5, both rotated 25 degrees about z, thickness 0.6 um, wavelength 1.55 um, domain 0.5 x 0.5 x 6 um, transverse mesh 0.1 um, normal meshes 0.05 and 0.025 um (5x5x120 and 5x5x240 cells), CPML 1 um (20 and 40 layers), source z = -1.2 um, probe z = +1.2 um, Gaussian 6 fs FWHM offset 18 fs, 80 fs (594 and 1028 steps), float32 CUDA, TensorDielectricSimulation with cpml_material tensor and 8 checkpoints; per-channel normalisation to the slab-free run",
+    "bulk_eigenpolarization": "tests/test_anisotropy_walls.py: PEC x walls, periodic y and z, 12^3 cells of 0.1 um, SPD tensor with eigenvalues (1.9, 2.6, 4.1) rotated 0.55 rad about x coupling Ey and Ez, modes (m = 2, polarization 0) and (m = 3, polarization 1), 400 steps float64; tests/test_anisotropy.py: Bloch box 6x5x5 cells with steps (0.1, 0.2, 0.25) um, fixed full SPD tensor, float64, one-step Fourier symbol, 256-step energy conservation, continuum refinement h = 0.4, 0.2, 0.1",
+    "tensor_gradients": "tests/test_anisotropy.py six symmetric tensor components (float64, central difference step 2e-5); tests/test_anisotropy_walls.py rotation angle theta = 0.4 rad of spd((3.3, 1.5, 2.4)) through x CPML (float64, central difference 1e-4 and Taylor); tests/test_anisotropy_dispersive.py pole-strength rotation 0.6 rad; the slab index VJP d|t_1|^2/dn_1 at the coarse mesh against the transfer-matrix central difference",
+    "cpml_stability": "tests/test_anisotropy_walls.py dense one-step spectral radius against the Becache-Fauqueux-Joly face criterion on a 5x11x5 Bloch box",
+    "pml": "1 um CPML filled with the exterior tensor in the slab study; 3 layers in the small tensor-CPML checks"
+  },
+  "seed": "deterministic",
+  "precision": ["float32 CUDA for the slab study and the CPU-CUDA parity tests", "float64 for the eigenpolarization, symbol, transpose and gradient checks"],
+  "backend": ["cuda for the slab study", "cpu for the float64 checks", "cpu and cuda for the parity tests"],
+  "reference_method": "Per-eigenpolarization scalar transfer-matrix transmission t_j = exp(i k0 n0j d) / (cos(k0 nj d) + i/2 (nj/n0j + n0j/nj) sin(k0 nj d)) at normal incidence with shared principal axes (analytic continuum) and its central-difference derivative in n_1; closed-form discrete standing-wave frequency omega dt = 2 asin(S sqrt(lambda) sin(k/2)) with eigenpolarizations from eigh(inv(eps)[1:, 1:]) and its continuum limit; the independently derived Fourier symbol K_ab cos(q_a/2) cos(q_b/2) of the tensor operator; dense one-step matrices and full autograd of the same discretisation for transposes and gradients.",
+  "observables": [
+    {"name": "channel_vector_relative_error", "unit": "dimensionless", "definition": "relative L2 of the two complex channel transmissions against the transfer matrix at 0.05 and 0.025 um"},
+    {"name": "channel_power_absolute_error", "unit": "dimensionless", "definition": "|t_j|^2 against the transfer-matrix power at the fine mesh"},
+    {"name": "index_vjp_relative_error", "unit": "dimensionless", "definition": "d|t_1|^2/dn_1 from the checkpointed adjoint at 0.05 um against the transfer-matrix central difference"},
+    {"name": "standing_wave_fields", "unit": "reduced field", "definition": "E and staggered H after 400 steps against the closed-form discrete eigenpolarization standing wave"},
+    {"name": "continuum_frequency_ratio", "unit": "dimensionless", "definition": "|omega_discrete / omega_continuum - 1| for the coupled tensor standing wave"},
+    {"name": "symbol_and_refinement", "unit": "dimensionless", "definition": "operator against the Fourier symbol; discrete-to-continuum eigenfrequency errors at h = 0.4, 0.2, 0.1"},
+    {"name": "tensor_component_and_rotation_gradients", "unit": "d objective / d parameter", "definition": "adjoint directional derivatives against central differences and Taylor remainders"}
+  ],
+  "acceptance": {
+    "slab": {"coarse_channel_vector_relative_error_max": 0.05, "fine_channel_vector_relative_error_max": 0.03, "fine_to_coarse_error_ratio_max": 0.8, "fine_channel_power_absolute_error_max": 0.03, "tail_rms_to_peak_max": 1e-3, "index_vjp_relative_error_max": 0.15, "where": "benchmarks/tensor_cpml_birefringent_slab.py CRITERIA, declared with docs/TENSOR_CPML_SLAB_ACCEPTANCE.md", "difference_from_common_criterion": "the program asks 0.01 absolute on R and T and 3 percent on physical gradients; the slab study declares 0.03 on the transmitted channel power, measures transmission only (no reflection, no channel balance) and 15 percent on the coarse-mesh index VJP; docs record 0.0002 and 0.0014 power error and 6.89 percent VJP error"},
+    "standing_wave": {"rtol": 1e-9, "atol": 1e-11, "continuum_ratio_max": 0.03},
+    "symbol": {"rtol": 2e-12, "atol": 2e-12, "energy_conservation": 2e-12, "refinement_ratio_max": 0.27},
+    "tensor_component_gradients": {"rtol": 2e-5, "atol": 1e-10, "step": 2e-5},
+    "rotation_gradient": {"rtol": 1e-6, "atol": 1e-12, "step": 1e-4, "taylor_ratio_max": 0.3},
+    "cuda_parity_float32": {"signals": {"rtol": 5e-5, "atol": 3e-7}, "gradient": {"rtol": 5e-4, "atol": 3e-7}, "difference_from_common_criterion": "gradient rtol 5e-4 exceeds the program's float32 rtol 1e-4"},
+    "spectral_radius": {"admitted_max": "1 + 1e-9", "rejected_min": "1 + 1e-3"},
+    "source_of_limits": "repository-recorded budgets; the program's slab_R_T_absolute_error 0.01 is not met by any tensor fixture because reflection is not measured"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_tensor_slab_acceptance.py::test_transfer_matrix_oracle_limits",
+      "tests/test_tensor_slab_acceptance.py::test_birefringent_slab_channels_refine_toward_transfer_matrix_and_index_vjp",
+      "tests/test_anisotropy_walls.py::test_pec_cavity_exact_discrete_standing_wave_with_transverse_coupling",
+      "tests/test_anisotropy.py::test_rotated_tensor_independent_fourier_symbol_and_continuum_refinement",
+      "tests/test_anisotropy.py::test_tensor_adjoint_all_six_components_on_actual_field_objective",
+      "tests/test_anisotropy_walls.py::test_tensor_cpml_rotation_taylor_and_central_difference_and_isotropic_parity",
+      "tests/test_anisotropy_walls.py::test_tensor_into_cpml_checkpoint_vjp_matches_full_autograd",
+      "tests/test_anisotropy_walls.py::test_cpml_face_criterion_matches_dense_one_step_spectral_radius",
+      "tests/test_anisotropy_cpml.py::test_rotated_interior_pulse_checkpoint_vjp_matches_full_autograd",
+      "tests/test_anisotropy_dispersive.py::test_strength_rotation_taylor_and_central_difference",
+      "tests/test_anisotropy.py::test_cuda_tensor_runtime_and_checkpoint_gradient_match_cpu",
+      "tests/test_anisotropy_walls.py::test_cuda_walls_and_tensor_cpml_match_cpu_and_reservation"
+    ],
+    "layers": {
+      "tests/test_tensor_slab_acceptance.py::test_transfer_matrix_oracle_limits": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "oracle self-check: index-matched channels transmit one, weak contrast gives negative phase"},
+      "tests/test_tensor_slab_acceptance.py::test_birefringent_slab_channels_refine_toward_transfer_matrix_and_index_vjp": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "scalar-channel transfer matrix transmission and its n_1 derivative, two meshes"},
+      "tests/test_anisotropy_walls.py::test_pec_cavity_exact_discrete_standing_wave_with_transverse_coupling": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "closed-form discrete eigenpolarization standing wave with a 3 percent continuum bound"},
+      "tests/test_anisotropy.py::test_rotated_tensor_independent_fourier_symbol_and_continuum_refinement": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "independently derived Fourier symbol; continuum refinement ratio below 0.27"},
+      "tests/test_anisotropy.py::test_tensor_adjoint_all_six_components_on_actual_field_objective": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "central differences on six symmetric tensor directions"},
+      "tests/test_anisotropy_walls.py::test_tensor_cpml_rotation_taylor_and_central_difference_and_isotropic_parity": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "central difference and Taylor remainder in the rotation angle; isotropic parity with the scalar path"},
+      "tests/test_anisotropy_walls.py::test_tensor_into_cpml_checkpoint_vjp_matches_full_autograd": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "checkpointed adjoint against full autograd"},
+      "tests/test_anisotropy_walls.py::test_cpml_face_criterion_matches_dense_one_step_spectral_radius": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "Becache-Fauqueux-Joly continuum criterion against the dense discrete spectral radius"},
+      "tests/test_anisotropy_cpml.py::test_rotated_interior_pulse_checkpoint_vjp_matches_full_autograd": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "checkpointed adjoint against full autograd, float64"},
+      "tests/test_anisotropy_dispersive.py::test_strength_rotation_taylor_and_central_difference": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "central difference and Taylor remainder of the pole-strength rotation"},
+      "tests/test_anisotropy.py::test_cuda_tensor_runtime_and_checkpoint_gradient_match_cpu": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "CUDA against CPU, float32"},
+      "tests/test_anisotropy_walls.py::test_cuda_walls_and_tensor_cpml_match_cpu_and_reservation": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "CUDA against CPU with walls and tensor CPML, float32"}
+    },
+    "not_yet_covered": [
+      "reflection and channel balance R + T of the birefringent slab (transmission only is measured)",
+      "oblique incidence, principal axes not shared between slab and exterior, and a 4x4 (Berreman) transfer-matrix oracle",
+      "tensor gradient against a continuum derivative other than the coarse-mesh n_1 VJP (15 percent budget); the rotation-angle gradient is checked against finite differences of the same discretisation only",
+      "asymptotic convergence order of the slab (two meshes only)"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float32 slab study: tail RMS to peak below 1e-3 bounds the finite-duration contamination, recorded 9.1e-8; float64 checks at 1e-9 to 1e-12",
+    "time_window": "80 fs fixed across the two slab meshes (594 and 1028 steps); tail decay bounds the truncation; no window sweep",
+    "pml": "1 um tensor-filled CPML fixed; docs/TENSOR_CPML_SLAB_ACCEPTANCE.md records no isolated CPML reflection measurement",
+    "mesh": "channel-vector error 1.372 percent at 0.05 um and 0.330 percent at 0.025 um (ratio 0.24)"
+  },
+  "notes": "tests/test_tensor_slab_acceptance.py is added with this case as a thin wrapper of the benchmark whose CRITERIA were declared with docs/TENSOR_CPML_SLAB_ACCEPTANCE.md; the pilot at this commit reproduced 1.3721 and 0.3302 percent, channel powers 0.9880 and 0.8839 against 0.9882 and 0.8852, and an index VJP of -0.18468 against -0.17277 (6.89 percent), in 106 s on the shared RTX 3060."
+}

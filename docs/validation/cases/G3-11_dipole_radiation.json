@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-11_dipole_radiation",
+  "task": "G3-11",
+  "title": "Dipole radiation: near-to-far and near-zone projection against analytic Hertzian fields, native far-field pattern convergence",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "oracle_class": ["analytic_continuum", "convergence_study", "physical_invariant", "shared_discrete_operator", "finite_difference_same_discretisation"],
+  "fixture": {
+    "analytic_faces": "tests/test_radiation.py: six midpoint-quadrature planes on the box (-0.65, 0.65) x (-0.7, 0.7) x (-0.6, 0.6) um carrying the complete analytic Hertzian dipole E and H (1/r, 1/r^2, 1/r^3 terms) for dipole moment (0.3+0.1i, -0.2i, 1) offset (0.12, -0.08, 0.05) um from the box centre, wavelength 1.55 um, exterior index 1.3 (and lossy 1.3+0.05i with mu 1 or 1.1+0.02i), samples per face axis 14, 28, 56, float64 CPU; far field at five directions +-x, y, z and (1,2,3)/|.| and at r = 0.5 m; near zone at five points 0.55 to 1.35 um outside the box and on spheres of radius 200 and 2000 um",
+    "native_dipole": "tests/test_radiation_dipole_pattern.py via benchmarks/radiation_dipole.py: vacuum 2.4^3 um box, Ez point source at the origin, wavelength 1.1 um, 2-cycle Gaussian, meshes 0.1, 0.075, 0.05 um (24^3, 32^3, 48^3 cells, 262, 350, 525 steps), physical time 50 fs and PML 0.3 um fixed, near-to-far box +-0.6 um with 32x32 quadrature per face, 39 directions (13 theta values at phi = 0, pi/4, pi/2), float32 CUDA, least-squares scale against 1 - dz^2",
+    "native_vjp": "tests/test_radiation.py: tests/test_differentiable.py project 3d with 35 steps, 1.6 x 1.5 x 1.4 um, mesh 0.1 um, 3 PML cells, float64 CPU, six FieldMonitor planes at +-0.3 um with 5x5 quadrature, far intensity and near-zone Poynting objectives",
+    "pml": "0.3 um fixed in the native pattern study; 3 cells in the native VJP fixture; none for the analytic faces"
+  },
+  "seed": "deterministic",
+  "precision": ["float64 for the analytic projection checks", "float32 for the native pattern study and the FP32 projection checks"],
+  "backend": ["cpu", "cuda for the native pattern study and tests/test_radiation.py::test_nearzone_cuda_matches_cpu"],
+  "reference_method": "Closed-form Hertzian dipole fields and far-field complex amplitude (2 pi/lambda)^2 p_transverse exp(-i k d.shift), including phase; Poynting theorem between the closed near-surface flux and the sphere-integrated far power; the far-field limit of the near-zone projection; the analytic sin^2 theta pattern of a z dipole for the native time-domain run with mesh refinement at fixed physical box, PML and time.",
+  "observables": [
+    {"name": "far_amplitude_relative_l2", "unit": "dimensionless", "definition": "relative L2 of the complex far-field amplitude against the analytic amplitude with translation phase, over five directions, at 14, 28, 56 samples per face axis"},
+    {"name": "nearzone_fields_relative_l2", "unit": "dimensionless", "definition": "relative L2 of all six projected near-zone components against the analytic dipole at five points"},
+    {"name": "near_flux_versus_far_power", "unit": "dimensionless", "definition": "closed-surface Poynting flux against the 12x24 Gauss-Legendre sphere integral of the far intensity"},
+    {"name": "nearzone_to_farfield_limit", "unit": "dimensionless", "definition": "near-zone versus far-field model difference at radii 200 and 2000 um"},
+    {"name": "native_pattern_relative_l2", "unit": "dimensionless", "definition": "relative L2 of the scale-fitted native far intensity against 1 - dz^2 at three meshes"},
+    {"name": "native_objective_vjp", "unit": "d objective / d epsilon", "definition": "autograd derivative of far and near-zone objectives against central differences"}
+  ],
+  "acceptance": {
+    "far_amplitude": {"halving_ratio_min": 3.8, "final_relative_l2_max": 2e-4, "transversality_max": 1e-19},
+    "nearzone": {"halving_ratio_min": 3.5, "final_relative_l2_max": 5e-4, "fp32_relative_l2_max": 2e-3, "poynting_rtol": 2e-3},
+    "near_flux_versus_far_power": {"rtol": 5e-4, "atol": 1e-25},
+    "nearzone_to_farfield_limit": {"radius_ratio_min": 8, "final_max": 4e-4, "versus_analytic_max": 1e-3},
+    "native_pattern": {"monotone_decrease": true, "final_relative_l2_max": 0.01, "fixed": "physical time 50 fs within one time step, PML 0.3 um"},
+    "native_objective_vjp": {"rtol": 2e-6, "atol": 1e-10, "step": 1e-4},
+    "source_of_limits": "repository-recorded budgets; the program declares no numeric dipole limit beyond convergence and pattern agreement, and the phase limit 0.02 rad applies to the complex far amplitude whose relative error 2e-4 bounds the phase error by 2e-4 rad on the declared five directions"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_radiation.py::test_closed_surface_dipole_complex_amplitude_converges_and_translation_phase",
+      "tests/test_radiation.py::test_closed_surface_near_flux_matches_sphere_integrated_far_power",
+      "tests/test_radiation.py::test_nearzone_dipole_fields_converge_with_radial_component",
+      "tests/test_radiation.py::test_nearzone_converges_to_farfield_model_at_large_radius",
+      "tests/test_radiation.py::test_lossy_exterior_dipole_near_and_far_fields",
+      "tests/test_radiation.py::test_open_surface_converges_for_directional_emitter_and_not_for_dipole",
+      "tests/test_radiation.py::test_nearzone_cuda_matches_cpu",
+      "tests/test_radiation.py::test_native_fdtd_far_and_nearzone_objective_material_vjp_matches_difference",
+      "tests/test_radiation.py::test_rayleigh_orders_bloch_direction_complex_phase_and_power_sum",
+      "tests/test_radiation_box.py::test_analytic_dipole_owned_adapter_and_direct_transform",
+      "tests/test_radiation_dipole_pattern.py::test_native_dipole_pattern_error_decreases_with_mesh_and_ends_below_one_percent"
+    ],
+    "layers": {
+      "tests/test_radiation.py::test_closed_surface_dipole_complex_amplitude_converges_and_translation_phase": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "analytic complex far amplitude with translation phase; quadrature convergence"},
+      "tests/test_radiation.py::test_closed_surface_near_flux_matches_sphere_integrated_far_power": {"layer": "B", "oracle_class": "physical_invariant", "oracle": "Poynting theorem between near flux and far power"},
+      "tests/test_radiation.py::test_nearzone_dipole_fields_converge_with_radial_component": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "analytic six-component near-zone fields; quadrature convergence"},
+      "tests/test_radiation.py::test_nearzone_converges_to_farfield_model_at_large_radius": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "far-field limit and analytic fields at 200 and 2000 um"},
+      "tests/test_radiation.py::test_lossy_exterior_dipole_near_and_far_fields": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "analytic fields in a lossy exterior with complex mu"},
+      "tests/test_radiation.py::test_open_surface_converges_for_directional_emitter_and_not_for_dipole": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "closed box of the same projection as reference for the open-surface approximation"},
+      "tests/test_radiation.py::test_nearzone_cuda_matches_cpu": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "CUDA against CPU projection, float32"},
+      "tests/test_radiation.py::test_native_fdtd_far_and_nearzone_objective_material_vjp_matches_difference": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "central difference of the same native run"},
+      "tests/test_radiation.py::test_rayleigh_orders_bloch_direction_complex_phase_and_power_sum": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "analytic Rayleigh plane-wave orders"},
+      "tests/test_radiation_box.py::test_analytic_dipole_owned_adapter_and_direct_transform": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "stored-box adapter against the analytic far amplitude within 1 percent at 12 samples; bitwise against the direct transform"},
+      "tests/test_radiation_dipole_pattern.py::test_native_dipole_pattern_error_decreases_with_mesh_and_ends_below_one_percent": {"layer": "B", "oracle_class": "convergence_study", "oracle": "analytic sin^2 theta pattern of the native time-domain dipole under mesh refinement at fixed box, PML and time"}
+    },
+    "not_yet_covered": [
+      "surface-position dependence: no test moves the near-to-far box and bounds the change of the far field (the stored-box adapter rejects a shifted face; phase_origin is the only varied position)",
+      "phase of the native time-domain far field against the analytic value (the native study compares the scale-fitted magnitude pattern only)",
+      "convergence order of the native far field in dt and PML depth (the study holds them fixed and sweeps the mesh only)"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float64 projection floors 1e-12 to 1e-15 in the identity checks; float32 projection 2e-3 relative at 28 samples per face axis; float32 native pattern floor not separated from the mesh error",
+    "time_window": "native pattern study: 50 fs fixed within one time step across meshes; native VJP: 35 steps",
+    "pml": "native pattern study: 0.3 um fixed across meshes; no PML sweep for the far field",
+    "quadrature": "the analytic-face tests converge in the midpoint sample count with observed halving ratios above 3.5 (order about 2); the native study converges in mesh with recorded errors 1.03, 0.54, 0.23 percent"
+  },
+  "notes": "tests/test_radiation_dipole_pattern.py is added with this case as a thin wrapper of benchmarks/radiation_dipole.py whose criteria (monotone decrease, final error below 1 percent) were declared with the record docs/validation/radiation_dipole_3060.json; its pilot at this commit reproduced 1.031, 0.541 and 0.230 percent. The far-field phase is checked on analytic input only."
+}

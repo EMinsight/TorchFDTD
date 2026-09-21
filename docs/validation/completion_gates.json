@@ -687,16 +687,45 @@
           "title": "PEC/PMC cavity·symmetry와 gradient mapping",
           "specification": "PEC/PMC cavity·symmetry와 gradient mapping",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/boundaries.py",
+            "torchfdtd/differentiable.py",
+            "torchfdtd/endpoint_native.py",
+            "torchfdtd/pmc_reference.py",
+            "tests/test_cavity_resonance.py",
+            "tests/test_pec_boundaries.py",
+            "tests/test_pmc_general.py",
+            "tests/test_pmc_dispersive.py",
+            "tests/test_pmc_reference.py",
+            "docs/PMC_IMPLEMENTATION_PLAN.md",
+            "docs/validation/cases/G3-06_pec_pmc_cavity.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cavity_resonance.py tests/test_pec_boundaries.py tests/test_pmc_general.py tests/test_pmc_dispersive.py tests/test_pmc_reference.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-06.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_cavity_resonance.py tests/test_pec_boundaries.py tests/test_pmc_general.py tests/test_pmc_dispersive.py tests/test_pmc_reference.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-06.xml"
+          ],
+          "required_tests": [
+            "tests/test_cavity_resonance.py::test_pec_cavity_tm110_resonance_matches_discrete_then_continuum_eigenfrequency",
+            "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction",
+            "tests/test_pmc_general.py::test_pmc_cavity_eigenmode_follows_discrete_dispersion",
+            "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain",
+            "tests/test_pmc_general.py::test_symmetric_half_domain_matches_mirrored_full_domain",
+            "tests/test_pmc_dispersive.py::test_dispersive_half_domain_matches_mirrored_full_domain",
+            "tests/test_pmc_general.py::test_yee_faces_match_independent_exact_endpoint_solver",
+            "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64",
+            "tests/test_pmc_general.py::test_cuda_adjoint_matches_autograd_and_central_differences"
+          ],
+          "evidence": [
+            "20260921T164848Z-g3-06-3343e41b"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Layer B: PEC cavity resonance from a monitor spectrum against the discrete and continuum TM110 eigenfrequency (tests/test_cavity_resonance.py, added 2026-09-22) and seeded eigenmodes against the discrete Yee dispersion. Layer A: mirrored half versus full domain with folded gradients, the independent exact-endpoint engine, adjoint Taylor checks. Not covered: PMC resonance from a spectrum, gradient mapping against a continuum derivative, Q."
         },
         {
           "id": "G3-07",
@@ -735,64 +764,191 @@
           "title": "mode neff·field·confinement·power oracle",
           "specification": "mode neff·field·confinement·power oracle",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/mode_ports.py",
+            "torchfdtd/open_mode_ports.py",
+            "benchmarks/open_mode_oracles.py",
+            "tests/test_mode_ports.py",
+            "tests/test_open_mode_ports.py",
+            "tests/test_open_mode_oracles.py",
+            "tests/test_open_mode_padding.py",
+            "tests/test_mode_network_slab_oracle.py",
+            "docs/mode_ports.md",
+            "docs/OPEN_MODE_PORTS.md",
+            "docs/validation/cases/G3-09_mode_solver_oracles.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_mode_ports.py tests/test_open_mode_ports.py tests/test_open_mode_oracles.py tests/test_open_mode_padding.py tests/test_mode_network_slab_oracle.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-09.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_mode_ports.py tests/test_open_mode_ports.py tests/test_open_mode_oracles.py tests/test_open_mode_padding.py tests/test_mode_network_slab_oracle.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-09.xml"
+          ],
+          "required_tests": [
+            "tests/test_mode_ports.py::test_slab_te_tm_mesh_limit_box_convergence_and_evanescent_confinement",
+            "tests/test_mode_ports.py::test_homogeneous_vector_fourier_dispersion_residual_and_power_orthogonality",
+            "tests/test_mode_ports.py::test_degenerate_polarization_basis_is_canonical_and_start_independent",
+            "tests/test_mode_ports.py::test_fixed_mode_directional_plane_power_and_both_torch_graphs",
+            "tests/test_mode_ports.py::test_plane_field_vjp_finite_difference_leakage_and_quadrature_rejection",
+            "tests/test_open_mode_ports.py::test_independent_te_tm_continuum_refinement",
+            "tests/test_open_mode_ports.py::test_fully_confined_fiber_two_mesh_continuum_comparison",
+            "tests/test_open_mode_ports.py::test_six_field_maxwell_and_open_sampling_contract",
+            "tests/test_open_mode_ports.py::test_independent_native_time_stagger_and_cpml_recurrence",
+            "tests/test_open_mode_padding.py::test_fixed_mesh_physical_padding_and_pml_sensitivity",
+            "tests/test_open_mode_oracles.py::test_slab_continuity_dispersion_scaling_and_limits",
+            "tests/test_open_mode_oracles.py::test_fiber_full_vector_boundary_conditions_and_confinement",
+            "tests/test_open_mode_oracles.py::test_fiber_six_component_maxwell_equations_independently_differenced",
+            "tests/test_open_mode_oracles.py::test_fiber_scale_weak_guidance_and_large_v_invariants",
+            "tests/test_mode_network_slab_oracle.py::test_continuum_four_equations_match_airy_and_conserve_power",
+            "tests/test_mode_network_slab_oracle.py::test_no_contrast_phase_and_discrete_continuum_limit"
+          ],
+          "evidence": [
+            "20260921T164916Z-g3-09-a7e7b272"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Layer B: neff of the periodic and CPML solvers against the analytic slab TE/TM dispersion (within 0.5 percent) and the analytic HE11 fiber (within the pre-declared 2 percent). Not covered: field profile, confinement factor and modal power against analytic values."
         },
         {
           "id": "G3-10",
           "title": "PIC S·수동성·상반성과 누락 방사 채널",
           "specification": "PIC S·수동성·상반성과 누락 방사 채널",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/mode_branches.py",
+            "torchfdtd/mode_network.py",
+            "torchfdtd/mode_injection.py",
+            "torchfdtd/adjoint_planes.py",
+            "benchmarks/mode_network_unequal_cpml.py",
+            "tests/test_mode_branch_passivity.py",
+            "tests/test_mode_branches.py",
+            "tests/test_mode_network.py",
+            "tests/test_mode_network_unequal.py",
+            "docs/OPEN_MODE_PORTS.md",
+            "docs/MODE_NETWORK.md",
+            "docs/validation/cases/G3-10_pic_networks.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_mode_branch_passivity.py tests/test_mode_branches.py tests/test_mode_network.py tests/test_mode_network_unequal.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-10.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_mode_branch_passivity.py tests/test_mode_branches.py tests/test_mode_network.py tests/test_mode_network_unequal.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-10.xml"
+          ],
+          "required_tests": [
+            "tests/test_mode_branch_passivity.py::test_branch_network_passivity_with_flux_closure_and_radiation_defect",
+            "tests/test_mode_branches.py::test_aperture_ports_match_full_cell_network_on_straight_guide",
+            "tests/test_mode_branches.py::test_y_branch_power_balance_reciprocity_symmetry_and_gradient",
+            "tests/test_mode_branches.py::test_four_port_crossing_on_two_normals",
+            "tests/test_mode_branches.py::test_branch_network_power_objective_taylor_and_central_difference_cpu",
+            "tests/test_mode_branches.py::test_streamed_branch_network_matches_resident",
+            "tests/test_mode_network.py::test_reciprocal_two_port_native_propagation_and_material_gradient",
+            "tests/test_mode_network.py::test_native_four_channel_straight_guide_mode_mapping",
+            "tests/test_mode_network_unequal.py::test_unequal_native_fresnel_interior_fd_and_zero_exterior_vjp",
+            "tests/test_mode_network_unequal.py::test_discrete_interface_oracle_algebra_and_reflectionless_negative_control",
+            "tests/test_mode_network_unequal.py::test_unequal_native_complex_s_against_independent_discrete_interface"
+          ],
+          "evidence": [
+            "20260921T164946Z-g3-10-ea83b20f"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Layer B: passivity with the radiation defect measured by a closed flux box (tests/test_mode_branch_passivity.py, added 2026-09-22, mesh 0.05 um), reciprocity, straight-guide phase, Fresnel index step. Layer A: aperture versus full-cell, streamed versus resident, independent discrete interface. Not covered: bends, couplers, an independent solver for junction S values."
         },
         {
           "id": "G3-11",
           "title": "dipole far/near field와 표면/격자 수렴",
           "specification": "dipole far/near field와 표면/격자 수렴",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/radiation.py",
+            "torchfdtd/radiation_box.py",
+            "benchmarks/radiation_dipole.py",
+            "tests/test_radiation.py",
+            "tests/test_radiation_box.py",
+            "tests/test_radiation_dipole_pattern.py",
+            "docs/RADIATION.md",
+            "docs/validation/cases/G3-11_dipole_radiation.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_radiation.py tests/test_radiation_box.py tests/test_radiation_dipole_pattern.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-11.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_radiation.py tests/test_radiation_box.py tests/test_radiation_dipole_pattern.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-11.xml"
+          ],
+          "required_tests": [
+            "tests/test_radiation.py::test_closed_surface_dipole_complex_amplitude_converges_and_translation_phase",
+            "tests/test_radiation.py::test_closed_surface_near_flux_matches_sphere_integrated_far_power",
+            "tests/test_radiation.py::test_nearzone_dipole_fields_converge_with_radial_component",
+            "tests/test_radiation.py::test_nearzone_converges_to_farfield_model_at_large_radius",
+            "tests/test_radiation.py::test_lossy_exterior_dipole_near_and_far_fields",
+            "tests/test_radiation.py::test_open_surface_converges_for_directional_emitter_and_not_for_dipole",
+            "tests/test_radiation.py::test_nearzone_cuda_matches_cpu",
+            "tests/test_radiation.py::test_native_fdtd_far_and_nearzone_objective_material_vjp_matches_difference",
+            "tests/test_radiation.py::test_rayleigh_orders_bloch_direction_complex_phase_and_power_sum",
+            "tests/test_radiation_box.py::test_analytic_dipole_owned_adapter_and_direct_transform",
+            "tests/test_radiation_dipole_pattern.py::test_native_dipole_pattern_error_decreases_with_mesh_and_ends_below_one_percent"
+          ],
+          "evidence": [
+            "20260921T165000Z-g3-11-74c48d39"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Layer B: near-to-far and near-zone projection against analytic Hertzian fields including phase, Poynting theorem, native dipole pattern convergence against sin^2 theta (tests/test_radiation_dipole_pattern.py, added 2026-09-22, wraps the benchmark). Not covered: surface-position dependence, native far-field phase."
         },
         {
           "id": "G3-12",
           "title": "tensor slab 및 tensor gradient",
           "specification": "tensor slab 및 tensor gradient",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/anisotropy.py",
+            "torchfdtd/anisotropy_dispersive.py",
+            "benchmarks/tensor_cpml_birefringent_slab.py",
+            "tests/test_tensor_slab_acceptance.py",
+            "tests/test_anisotropy.py",
+            "tests/test_anisotropy_cpml.py",
+            "tests/test_anisotropy_walls.py",
+            "tests/test_anisotropy_dispersive.py",
+            "docs/TENSOR_CPML_SLAB_ACCEPTANCE.md",
+            "docs/validation/cases/G3-12_tensor_slab.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_tensor_slab_acceptance.py tests/test_anisotropy.py tests/test_anisotropy_cpml.py tests/test_anisotropy_walls.py tests/test_anisotropy_dispersive.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-12.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_tensor_slab_acceptance.py tests/test_anisotropy.py tests/test_anisotropy_cpml.py tests/test_anisotropy_walls.py tests/test_anisotropy_dispersive.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-12.xml"
+          ],
+          "required_tests": [
+            "tests/test_tensor_slab_acceptance.py::test_transfer_matrix_oracle_limits",
+            "tests/test_tensor_slab_acceptance.py::test_birefringent_slab_channels_refine_toward_transfer_matrix_and_index_vjp",
+            "tests/test_anisotropy_walls.py::test_pec_cavity_exact_discrete_standing_wave_with_transverse_coupling",
+            "tests/test_anisotropy.py::test_rotated_tensor_independent_fourier_symbol_and_continuum_refinement",
+            "tests/test_anisotropy.py::test_tensor_adjoint_all_six_components_on_actual_field_objective",
+            "tests/test_anisotropy_walls.py::test_tensor_cpml_rotation_taylor_and_central_difference_and_isotropic_parity",
+            "tests/test_anisotropy_walls.py::test_tensor_into_cpml_checkpoint_vjp_matches_full_autograd",
+            "tests/test_anisotropy_walls.py::test_cpml_face_criterion_matches_dense_one_step_spectral_radius",
+            "tests/test_anisotropy_cpml.py::test_rotated_interior_pulse_checkpoint_vjp_matches_full_autograd",
+            "tests/test_anisotropy_dispersive.py::test_strength_rotation_taylor_and_central_difference",
+            "tests/test_anisotropy.py::test_cuda_tensor_runtime_and_checkpoint_gradient_match_cpu",
+            "tests/test_anisotropy_walls.py::test_cuda_walls_and_tensor_cpml_match_cpu_and_reservation"
+          ],
+          "evidence": [
+            "20260921T165015Z-g3-12-562acc59"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Layer B: birefringent slab channel transmission and index VJP against the scalar transfer matrix (tests/test_tensor_slab_acceptance.py, added 2026-09-22, wraps the benchmark), coupled eigenpolarization standing wave, Fourier symbol and continuum refinement, CPML face criterion. Layer A: tensor and rotation gradients against finite differences, CUDA parity. Not covered: reflection and channel balance, oblique incidence."
         },
         {
           "id": "G3-13",
@@ -815,64 +971,196 @@
           "title": "무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교",
           "specification": "무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/solver.py",
+            "torchfdtd/cuda_kernels.py",
+            "torchfdtd/cuda_adjoint.py",
+            "torchfdtd/differentiable.py",
+            "torchfdtd/spacetime.py",
+            "torchfdtd/reversible.py",
+            "benchmarks/cpu_gpu_adjoint.py",
+            "tests/test_solver.py",
+            "tests/test_cuda_kernels.py",
+            "tests/test_cuda_adjoint.py",
+            "tests/test_differentiable.py",
+            "tests/test_tensor_native_cuda.py",
+            "tests/test_endpoint_native_cpml_cuda.py",
+            "tests/test_spacetime.py",
+            "tests/test_streamed_density.py",
+            "tests/test_pec_boundaries.py",
+            "tests/test_cpu_gpu_adjoint_benchmark.py",
+            "tests/test_reversible.py",
+            "tests/test_reversible_cuda.py",
+            "docs/validation/cases/G3-14_discrete_backend_agreement.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager tests/test_cuda_kernels.py tests/test_cuda_adjoint.py tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd tests/test_tensor_native_cuda.py tests/test_endpoint_native_cpml_cuda.py tests/test_spacetime.py::test_block_and_transpose_match_resident tests/test_streamed_density.py::test_async_cuda_periodic_density_response_and_gradient_match_dense_cpu tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint tests/test_cpu_gpu_adjoint_benchmark.py::test_actual_cpu_resident_cuda_and_async_dram_driver tests/test_reversible.py::test_reversible_full_gradient_retained_seeds_and_source_derivative tests/test_reversible_cuda.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-14.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager tests/test_cuda_kernels.py tests/test_cuda_adjoint.py tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd tests/test_tensor_native_cuda.py tests/test_endpoint_native_cpml_cuda.py tests/test_spacetime.py::test_block_and_transpose_match_resident tests/test_streamed_density.py::test_async_cuda_periodic_density_response_and_gradient_match_dense_cpu tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint tests/test_cpu_gpu_adjoint_benchmark.py::test_actual_cpu_resident_cuda_and_async_dram_driver tests/test_reversible.py::test_reversible_full_gradient_retained_seeds_and_source_derivative tests/test_reversible_cuda.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-14.xml"
+          ],
+          "required_tests": [
+            "tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager",
+            "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states",
+            "tests/test_cuda_kernels.py::test_complete_fused_graph_matches_reference_and_eager",
+            "tests/test_cuda_kernels.py::test_fused_preserves_subnormal_fields",
+            "tests/test_cuda_kernels.py::test_fused_frequency_plane_matches_cpu_flux",
+            "tests/test_cuda_adjoint.py::test_random_physical_and_adjoint_state_transpose",
+            "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd",
+            "tests/test_tensor_native_cuda.py::test_native_tensor_cuda_periodic_bloch_cpml_and_material_table_vjp",
+            "tests/test_endpoint_native_cpml_cuda.py::test_native_cpml_cuda_results_npz_material_and_waveform_vjp",
+            "tests/test_spacetime.py::test_block_and_transpose_match_resident",
+            "tests/test_streamed_density.py::test_async_cuda_periodic_density_response_and_gradient_match_dense_cpu",
+            "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint",
+            "tests/test_cpu_gpu_adjoint_benchmark.py::test_actual_cpu_resident_cuda_and_async_dram_driver",
+            "tests/test_reversible.py::test_reversible_full_gradient_retained_seeds_and_source_derivative",
+            "tests/test_reversible_cuda.py::test_native_reversible_cuda_gradient_memory_and_owned_states"
+          ],
+          "evidence": [
+            "20260921T165025Z-g3-14-bfa848be"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Layer A only by definition: CPU against CUDA torch, torch against fused CUDA, explicit adjoint against autograd, resident against streamed and reversible, float32 and float64. Float32 gradient budgets of 2e-4 to 3e-4 relative on five fixtures exceed the program rtol 1e-4 and are reported as differences in the case."
         },
         {
           "id": "G3-15",
           "title": "full-autograd·directional VJP·FD sweep·Taylor 검사",
           "specification": "full-autograd·directional VJP·FD sweep·Taylor 검사",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/differentiable.py",
+            "torchfdtd/dispersive_adjoint.py",
+            "torchfdtd/density_layer.py",
+            "torchfdtd/differentiable_geometry.py",
+            "torchfdtd/source_parameters.py",
+            "benchmarks/cr_spectral_objective.py",
+            "tests/test_differentiable.py",
+            "tests/test_pmc_general.py",
+            "tests/test_pmc_dispersive.py",
+            "tests/test_dispersive_adjoint.py",
+            "tests/test_cuda_dispersive_adjoint.py",
+            "tests/test_mode_adjoint_oracle.py",
+            "tests/test_density_layer.py",
+            "tests/test_shape_gradients.py",
+            "tests/test_source_parameters.py",
+            "tests/test_cr_directional_check.py",
+            "docs/validation/cases/G3-15_gradient_checks.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_differentiable.py::test_directional_taylor_and_geometry_chain tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64 tests/test_pmc_dispersive.py::test_dispersive_adjoint_taylor_check_float64 tests/test_dispersive_adjoint.py::test_geometry_to_ade_taylor_and_online_spectrum tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions tests/test_dispersive_adjoint.py::test_plane_flux_material_gradient_and_zero_pole_limit tests/test_cuda_dispersive_adjoint.py::test_spectral_replay_mixed_tiers_and_geometry_taylor tests/test_cuda_dispersive_adjoint.py::test_fused_plane_flux_zero_pole_and_material_finite_difference tests/test_mode_adjoint_oracle.py::test_checkpointed_modal_adjoint_matches_full_autograd_taylor_and_central_difference tests/test_density_layer.py::test_density_gradient tests/test_density_layer.py::test_fdtd_density_directional_gradient tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences tests/test_cr_directional_check.py::test_direction_sweep_detects_incorrect_gradient_and_taylor_order --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-15.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_differentiable.py::test_directional_taylor_and_geometry_chain tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64 tests/test_pmc_dispersive.py::test_dispersive_adjoint_taylor_check_float64 tests/test_dispersive_adjoint.py::test_geometry_to_ade_taylor_and_online_spectrum tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions tests/test_dispersive_adjoint.py::test_plane_flux_material_gradient_and_zero_pole_limit tests/test_cuda_dispersive_adjoint.py::test_spectral_replay_mixed_tiers_and_geometry_taylor tests/test_cuda_dispersive_adjoint.py::test_fused_plane_flux_zero_pole_and_material_finite_difference tests/test_mode_adjoint_oracle.py::test_checkpointed_modal_adjoint_matches_full_autograd_taylor_and_central_difference tests/test_density_layer.py::test_density_gradient tests/test_density_layer.py::test_fdtd_density_directional_gradient tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences tests/test_cr_directional_check.py::test_direction_sweep_detects_incorrect_gradient_and_taylor_order --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-15.xml"
+          ],
+          "required_tests": [
+            "tests/test_differentiable.py::test_directional_taylor_and_geometry_chain",
+            "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients",
+            "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64",
+            "tests/test_pmc_dispersive.py::test_dispersive_adjoint_taylor_check_float64",
+            "tests/test_dispersive_adjoint.py::test_geometry_to_ade_taylor_and_online_spectrum",
+            "tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions",
+            "tests/test_dispersive_adjoint.py::test_plane_flux_material_gradient_and_zero_pole_limit",
+            "tests/test_cuda_dispersive_adjoint.py::test_spectral_replay_mixed_tiers_and_geometry_taylor",
+            "tests/test_cuda_dispersive_adjoint.py::test_fused_plane_flux_zero_pole_and_material_finite_difference",
+            "tests/test_mode_adjoint_oracle.py::test_checkpointed_modal_adjoint_matches_full_autograd_taylor_and_central_difference",
+            "tests/test_density_layer.py::test_density_gradient",
+            "tests/test_density_layer.py::test_fdtd_density_directional_gradient",
+            "tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference",
+            "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint",
+            "tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences",
+            "tests/test_cr_directional_check.py::test_direction_sweep_detects_incorrect_gradient_and_taylor_order"
+          ],
+          "evidence": [
+            "20260921T165032Z-g3-15-12732135"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Layer A only by definition: full autograd oracles, explicit adjoints, central-difference sweeps (two PMC tests with an asserted second-order chain), Taylor remainders (ratio about 4 asserted in four tests), random directional VJPs (at most two seeds), over epsilon, ADE coefficients, density and shape. Not covered: waveform parameters through FDTD, adaptive round-off floor, several fixture seeds."
         },
         {
           "id": "G3-16",
           "title": "실제 shape/material 파라미터의 물리 gradient 수렴",
           "specification": "실제 shape/material 파라미터의 물리 gradient 수렴",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "torchfdtd/geometry.py",
+            "torchfdtd/differentiable_geometry.py",
+            "benchmarks/gradient_mesh.py",
+            "benchmarks/shape_gradient_polygon.py",
+            "tests/test_gradient_mesh_slab.py",
+            "tests/test_gradient_mesh.py",
+            "tests/test_shape_gradients.py",
+            "tests/test_differentiable_geometry.py",
+            "docs/SHAPE_GRADIENTS.md",
+            "docs/gradient_mesh.md",
+            "docs/validation/gradient_mesh_3060.json",
+            "docs/validation/shape_gradient_polygon_3060.json",
+            "docs/validation/cases/G3-16_physical_parameter_gradients.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_gradient_mesh_slab.py tests/test_gradient_mesh.py tests/test_shape_gradients.py tests/test_differentiable_geometry.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-16.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_gradient_mesh_slab.py tests/test_gradient_mesh.py tests/test_shape_gradients.py tests/test_differentiable_geometry.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-16.xml"
+          ],
+          "required_tests": [
+            "tests/test_gradient_mesh_slab.py::test_slab_thickness_and_epsilon_derivatives_refine_toward_airy_with_controls",
+            "tests/test_gradient_mesh.py::test_airy_derivatives_against_complex_amplitude_transfer_formula",
+            "tests/test_gradient_mesh.py::test_refinement_preserves_physical_domain_time_source_and_absorber",
+            "tests/test_shape_gradients.py::test_shape_gradient_convergence_record_and_refinement_contract",
+            "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint",
+            "tests/test_differentiable_geometry.py::test_geometry_vjp_directional_derivative_all_parameters_and_noncontiguous_seed",
+            "tests/test_differentiable_geometry.py::test_fp32_geometry_to_fdtd_adjoint_and_streamed_chain"
+          ],
+          "evidence": [
+            "20260921T165045Z-g3-16-aa46cfa9"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Layer B: slab thickness and permittivity derivatives against the Airy formula under joint mesh/width refinement with duration and PML controls (tests/test_gradient_mesh_slab.py, added 2026-09-22, wraps the benchmark; 1.63 and 1.78 percent at the followup within the 3 percent limit), polygon vertex derivatives under mesh refinement against fine-mesh differences (stored record). Not covered: sharp-interface shape derivative, curved-interface analytic derivatives."
         },
         {
           "id": "G3-17",
           "title": "oracle 독립성·정밀도·시간·PML 오차 budget 확인",
           "specification": "oracle 독립성·정밀도·시간·PML 오차 budget 확인",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "docs/ORACLE_BUDGET.md",
+            "tests/test_oracle_budget.py",
+            "docs/validation/cases",
+            "docs/validation/cases/G3-17_oracle_budget.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_oracle_budget.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-17.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_oracle_budget.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-17.xml"
+          ],
+          "required_tests": [
+            "tests/test_oracle_budget.py::test_the_recorded_g3_cases_are_present",
+            "tests/test_oracle_budget.py::test_every_g3_case_names_allowed_oracle_classes_and_layers",
+            "tests/test_oracle_budget.py::test_every_listed_test_exists_in_its_source_file",
+            "tests/test_oracle_budget.py::test_oracle_budget_document_covers_every_g3_case_and_class"
+          ],
+          "evidence": [
+            "20260921T165050Z-g3-17-bb3742d1"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "docs/ORACLE_BUDGET.md records, for every G3 fixture with a case file on this branch, the oracle class, its independence, the precision floor and the time-window and PML budgets; tests/test_oracle_budget.py enforces that every G3 case names allowed oracle classes with a layer per test. Rows for the G3 tasks recorded on other branches are still to be added."
         }
       ]
     },

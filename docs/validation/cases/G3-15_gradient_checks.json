@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-15_gradient_checks",
+  "task": "G3-15",
+  "title": "Full-autograd oracle, explicit adjoint, central-difference step sweep, Taylor remainder and directional VJP checks",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "oracle_class": ["shared_discrete_operator", "finite_difference_same_discretisation"],
+  "fixture": {
+    "epsilon_and_shape": "tests/test_differentiable.py: 16x15x1 cells, 0.1 um, 3 CPML cells, float64 CPU, 35 steps, objective mean of signal squares, sphere radius and centre through smooth_sphere_epsilon; Taylor remainder at h = 1e-3, 5e-4, 2.5e-4 along the fixed direction (0.4, -0.3, 0); central difference h = 1e-5 on the radius; explicit adjoint against full autograd on cpu and cuda (seed 82), central difference h = 1e-5 on a scalar epsilon design with nonuniform mesh and one-way plane sources",
+    "epsilon_pmc": "tests/test_pmc_general.py gradient_scene: 10x6x6 cells with PML/PMC/PEC faces, 14 steps, float64, random epsilon seed 3 and random direction seed 11; central-difference step sweep h = 4e-3, 2e-3, 1e-3",
+    "ade_coefficients": "tests/test_pmc_dispersive.py: epsilon_inf, spatial strength, omega0 and gamma with directions scaled by each parameter's mean magnitude (seed 11), sweep h = 4e-2, 2e-2, 1e-2; tests/test_dispersive_adjoint.py: order-one leaves times scales (1, 1e30, 1e15, 1e15), central difference h = 1e-4 along (0.2, -0.3, 0.4, 0.1) in float64 on cpu and cuda; geometry-to-ADE sigmoid density Taylor remainder at h = 2e-3, 1e-3, 5e-4; tests/test_cuda_dispersive_adjoint.py: CUDA float64 density shift, strength and gamma Taylor at h = 4e-3, 2e-3, 1e-3 with torch and fused backward",
+    "modal_objective": "tests/test_mode_adjoint_oracle.py: modal S objective, float64, 600 steps, cpu and cuda, direction seed 3, h = 2e-3, 1e-3, 5e-4",
+    "density": "tests/test_density_layer.py: density 4x3 through the density-to-epsilon map (torch.autograd.gradcheck) and an FDTD directional derivative with central difference h = 1e-5",
+    "shape_parameters": "tests/test_shape_gradients.py: 19 polygon parameters through the fill VJP (no FDTD), random direction seeds 3 and 5, central difference h = 1e-5, Taylor at h = 1e-3 and 2.5e-4; vertex and control-point gradients through the checkpointed adjoint, float64 CPU, 18 steps, central difference h = 1e-5",
+    "source_waveform": "tests/test_source_parameters.py: scalar waveform parameters of gaussian_waveform against independent finite differences, float32 step 2e-3 and float64 step 1e-5 (no FDTD)",
+    "directional_driver": "tests/test_cr_directional_check.py: benchmarks/cr_spectral_objective.py check_density_direction on a synthetic objective with Rademacher direction seed 1729 and steps 2e-3, 1e-3, 5e-4",
+    "pml": "3 to 4 CPML layers in the FDTD fixtures; part of the differentiated operator"
+  },
+  "seed": {"epsilon": [82, 3], "directions": [11, 3, 5, 1729], "note": "at most two random cotangent seeds per test; no test repeats the same check over several fixture seeds"},
+  "precision": ["float64 for every central-difference and Taylor check", "float32 for the CUDA adjoint comparisons with precision-dependent steps"],
+  "backend": ["cpu", "cuda"],
+  "reference_method": "Full Torch autograd through every time step (small-problem oracle), central differences of the same discretisation at one or several steps, first-order Taylor remainder ratios under step halving, and random directional VJP seeds; all of validation layer A by construction. Nondimensionalisation: leaves are order one and scaled by characteristic magnitudes (1e30, 1e15 rad/s), fields divided by dt or steps times dt, gradients rescaled by (1, dt^-2, dt^-1, dt^-1) and finite-difference directions scaled to the parameter magnitude.",
+  "observables": [
+    {"name": "adjoint_versus_autograd", "unit": "d objective / d parameter", "definition": "explicit adjoint gradient against the full-time autograd gradient"},
+    {"name": "central_difference_error", "unit": "dimensionless", "definition": "|central difference - directional derivative| / |directional derivative| at each step of the sweep"},
+    {"name": "taylor_remainder_ratio", "unit": "dimensionless", "definition": "R(h)/R(h/2) with R(h) = |f(x + h d) - f(x) - h g.d|"},
+    {"name": "directional_vjp", "unit": "d objective / d parameter", "definition": "VJP along random cotangents against the reference path"}
+  ],
+  "acceptance": {
+    "adjoint_versus_autograd_float64": {"rtol": "1e-9 to 2e-10", "atol": "1e-12 to 1e-16"},
+    "central_difference": {"single_step": {"rtol": "1e-6 to 2e-6", "atol": "1e-9 to 1e-12"}, "sweep_pmc": "errors[-1] < 1e-6 |d| and errors[0] > 3 errors[1] > 9 errors[2] (second order until round-off)", "sweep_pmc_dispersive": "errors[-1] < 1e-5 |d| with the same ratio chain"},
+    "taylor_remainder": {"second_order_asserted": "ratio > 3.8 (tests/test_differentiable.py), 3.8 < ratio < 4.2 (tests/test_dispersive_adjoint.py), 3.7 < ratio < 4.3 (tests/test_cuda_dispersive_adjoint.py), 3.9 < ratio < 4.1 (directional driver)", "superlinear_only": "ratio < 0.3 per halving (modal, branch, tensor rotation), R(h/4) < R(h)/8 (polygon)"},
+    "density_gradcheck": "torch.autograd.gradcheck float64 on the density map; FDTD directional derivative rtol 2e-6, atol 1e-9",
+    "waveform": {"float32": {"rtol": 3e-3, "atol": 3e-4, "step": 2e-3}, "float64": {"rtol": 2e-7, "atol": 2e-8, "step": 1e-5}},
+    "shape": {"fill_vjp_rel": 2e-4, "adjoint_chain_rel": 2e-4, "cuda_float32_versus_autograd": {"rtol": 3e-4}},
+    "source_of_limits": "repository-recorded budgets; the program's float64 discrete limit rtol 1e-7 is met by the adjoint-versus-autograd checks (1e-9 and tighter) and by the single-step central differences (1e-6 to 2e-6 relative, which is the finite-difference truncation floor, not a solver discrepancy)"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_differentiable.py::test_directional_taylor_and_geometry_chain",
+      "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients",
+      "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64",
+      "tests/test_pmc_dispersive.py::test_dispersive_adjoint_taylor_check_float64",
+      "tests/test_dispersive_adjoint.py::test_geometry_to_ade_taylor_and_online_spectrum",
+      "tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions",
+      "tests/test_dispersive_adjoint.py::test_plane_flux_material_gradient_and_zero_pole_limit",
+      "tests/test_cuda_dispersive_adjoint.py::test_spectral_replay_mixed_tiers_and_geometry_taylor",
+      "tests/test_cuda_dispersive_adjoint.py::test_fused_plane_flux_zero_pole_and_material_finite_difference",
+      "tests/test_mode_adjoint_oracle.py::test_checkpointed_modal_adjoint_matches_full_autograd_taylor_and_central_difference",
+      "tests/test_density_layer.py::test_density_gradient",
+      "tests/test_density_layer.py::test_fdtd_density_directional_gradient",
+      "tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference",
+      "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint",
+      "tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences",
+      "tests/test_cr_directional_check.py::test_direction_sweep_detects_incorrect_gradient_and_taylor_order"
+    ],
+    "layers": {
+      "tests/test_differentiable.py::test_directional_taylor_and_geometry_chain": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "Taylor remainder ratio > 3.8 and central difference on the sphere radius"},
+      "tests/test_differentiable.py::test_mesh_metrics_and_fixed_plane_source_gradients": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "explicit adjoint against full autograd on cpu and cuda; central difference on the scalar design"},
+      "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "three-step central-difference sweep with second-order ratio chain"},
+      "tests/test_pmc_dispersive.py::test_dispersive_adjoint_taylor_check_float64": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "three-step sweep over ADE coefficients with magnitude-scaled directions"},
+      "tests/test_dispersive_adjoint.py::test_geometry_to_ade_taylor_and_online_spectrum": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "Taylor remainder 3.8 < ratio < 4.2 through a sigmoid density to epsilon and ADE strength"},
+      "tests/test_dispersive_adjoint.py::test_cpu_cuda_precision_and_parameter_directions": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "float64 central difference along a four-parameter direction with characteristic scales"},
+      "tests/test_dispersive_adjoint.py::test_plane_flux_material_gradient_and_zero_pole_limit": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "central difference of a plane-flux objective with respect to pole strength"},
+      "tests/test_cuda_dispersive_adjoint.py::test_spectral_replay_mixed_tiers_and_geometry_taylor": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "CUDA float64 Taylor remainder 3.7 < ratio < 4.3 with torch and fused backward"},
+      "tests/test_cuda_dispersive_adjoint.py::test_fused_plane_flux_zero_pole_and_material_finite_difference": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "central difference of the fused plane-flux material gradient"},
+      "tests/test_mode_adjoint_oracle.py::test_checkpointed_modal_adjoint_matches_full_autograd_taylor_and_central_difference": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "full autograd within 1e-9, Taylor ratio < 0.3, central difference within 1e-6"},
+      "tests/test_density_layer.py::test_density_gradient": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "torch.autograd.gradcheck on the density map"},
+      "tests/test_density_layer.py::test_fdtd_density_directional_gradient": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "FDTD directional derivative against central difference"},
+      "tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "polygon fill VJP against central difference and Taylor remainder"},
+      "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "vertex and control gradients through the adjoint against central differences; CUDA float32 against full autograd"},
+      "tests/test_source_parameters.py::test_scalar_parameter_vjps_against_independent_finite_differences": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "waveform parameter VJPs against finite differences (no FDTD)"},
+      "tests/test_cr_directional_check.py::test_direction_sweep_detects_incorrect_gradient_and_taylor_order": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "the directional-check driver detects a sign-flipped gradient and asserts second order on a synthetic objective"}
+    },
+    "not_yet_covered": [
+      "central-difference step sweep or Taylor remainder on a source-waveform parameter through an FDTD run (waveform checks are on the envelope function only)",
+      "an adaptive round-off floor: every sweep uses pre-chosen steps with a comment or a precision-dependent step, none detects where round-off takes over",
+      "the same gradient check repeated over several fixture seeds (material or state); only the cotangent or direction is randomised",
+      "complex conjugation, duplicate-monitor accumulation, retained backward, multi-objective and replay/version checks are recorded under other tasks (G1, G5), not here"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float64 central differences reach 1e-6 to 2e-6 relative at h = 1e-5 (truncation and round-off of the difference quotient), the adjoint-versus-autograd floor is 1e-9 to 1e-12; float32 comparisons use larger steps (2e-2, 1e-2, 2e-3) and 2e-2 to 3e-2 relative budgets",
+    "time_window": "14 to 600 steps per fixture; the same steps on both sides of every comparison",
+    "pml": "3 to 4 CPML layers; part of the differentiated operator"
+  },
+  "notes": "Layer A only by definition of the task. No test was added. The step sweeps with an asserted second-order trend are the two PMC tests; the other central-difference checks use one step. Nondimensionalisation is present in the dispersive fixtures (parameter scales) and in the plane fixtures (dt scaling of fields and gradients), but no test rescales the finite-difference step itself by a characteristic scale."
+}

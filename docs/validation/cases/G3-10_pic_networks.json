@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-10_pic_networks",
+  "task": "G3-10",
+  "title": "PIC mode-port networks: straight guide, discontinuity, Y branch and crossing S, reciprocity, passivity with the radiation defect measured",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "oracle_class": ["physical_invariant", "analytic_discrete", "analytic_continuum", "independent_implementation_same_scheme", "shared_discrete_operator", "finite_difference_same_discretisation"],
+  "fixture": {
+    "materials": "core permittivity 12, cladding 2.1, guide width 0.4 um, wavelength 1.55 um, 0.5 um z-periodic slab, float32",
+    "straight_guide": "tests/test_mode_branches.py: 4.8 x 2.4 x 0.5 um, mesh 0.1 um, x CPML 8 layers, y and z periodic, 600 steps, aperture ports (0, 1.2, 0.5) um at x = -1 and +1 um with source offset 0.4 um; tests/test_mode_network.py: 8 x 1 x 1 um, mesh 0.2 um, 40x5x5 cells, 600 steps, full-cell two-port network",
+    "y_branch_and_crossing_at_0p1um": "tests/test_mode_branches.py: 4.8 x 4.8 x 0.5 um, mesh 0.1 um, 48x48x5 cells, x and y CPML 8 layers (0.8 um), 800 steps (152 fs), Y branch with arms moving from y = 0 at x = -0.4 um to y = +-0.7 um at x = 0.6 um and three ports (in at x = -1, up and down at x = +1, y = +-0.7 um); crossing of two 0.4 um guides with four ports at x = +-1 and y = +-1 um; 2-cycle Gaussian plane launch; device cuda when available else cpu",
+    "y_branch_and_crossing_at_0p05um": "tests/test_mode_branch_passivity.py: the same physical geometry, ports and launch at mesh 0.05 um (96x96x10 cells), CPML 16 layers (0.8 um), 2400 steps (229 fs, dt = 9.533e-17 s); a closed box of four full-extent FieldMonitor planes through the x = +-1 um port planes and y = +-1.4 um (Y branch) or y = +-1 um (crossing), fed by prepare_aperture_modal_launch and ModeInjectedPlaneSimulation with the network's own input-port launch; the incident power is the west-plane flux of the straight calibration guide with the same launch",
+    "discontinuity": "tests/test_mode_network_unequal.py: two-port network with exterior permittivities 1.0 and 1.44 (index step 1.0 to 1.2), 40x5x5 cells of 0.2 um, 600 steps, CPU; benchmarks/mode_network_unequal_cpml.py 12 um guide with 15-cell CPML against a scalar discrete Yee interface oracle",
+    "pml": "0.8 um CPML on the open axes of the branch fixtures; 15 cells in the unequal-port benchmark"
+  },
+  "seed": {"taylor_direction": 5, "others": "deterministic"},
+  "precision": ["float32", "float64 for the Taylor and central-difference checks"],
+  "backend": ["cuda for tests/test_mode_branches.py, tests/test_mode_network.py and tests/test_mode_branch_passivity.py when CUDA and CuPy are present, else cpu", "cpu for tests/test_mode_network_unequal.py"],
+  "reference_method": "Physical invariants of a lossless reciprocal structure: reciprocity S_ij = S_ji after unit reduced-power normalisation of every channel at the port phase planes, passivity sum_j |S_ji|^2 <= 1, and the complete channel balance of the Poynting flux through a closed box (incident = reflected + transmitted + side radiation) measured without the modal projection. Straight-guide phase against exp(2 i beta L) from the mode solver's beta (analytic_discrete). Discontinuity |S|^2 against continuum Fresnel R and T and the complex S against an independently coded scalar discrete Yee interface. S^H S = I is never asserted for an open network.",
+  "observables": [
+    {"name": "column_power", "unit": "dimensionless", "definition": "sum over selected guided channels of |S_ji|^2 for each incident channel i (report column_power); the defect 1 - column_power is the power missing from the guided channels"},
+    {"name": "reciprocity", "unit": "dimensionless", "definition": "max |S - S^T|"},
+    {"name": "flux_closure", "unit": "dimensionless", "definition": "sum of the outward Poynting flux fractions through the four box faces (west inward incident counted negative); zero for a closed box when all power has left"},
+    {"name": "guided_versus_total", "unit": "dimensionless", "definition": "|S_00|^2 against the total reflected fraction 1 + west/incident; sum of arm |S_j0|^2 against the total flux fraction through the arm-carrying faces"},
+    {"name": "measured_nonguided", "unit": "dimensionless", "definition": "(reflected_total - |S_00|^2) + (transmitted_total - guided transmission) + side radiation; equals the defect minus the closure error identically"},
+    {"name": "straight_phase", "unit": "dimensionless", "definition": "|S_10 - exp(2 i beta L)|"},
+    {"name": "fresnel_powers", "unit": "dimensionless", "definition": "|S_ii|^2 against R = 1/121 and |S_21|^2 against T = 120/121 for the index step 1.0 to 1.2"}
+  ],
+  "acceptance": {
+    "passivity": {"column_power_max": 1.002, "where": "tests/test_mode_branches.py and tests/test_mode_branch_passivity.py"},
+    "reciprocity_max": {"y_branch": 5e-3, "crossing": 1e-3, "straight_full_cell": 2e-3, "perturbed_full_cell": 3e-3, "unequal_ports": 0.012},
+    "flux_closure_abs_max": {"value": 0.01, "where": "tests/test_mode_branch_passivity.py at mesh 0.05 um", "source": "completion_gates.json lossless_complete_channel_balance_absolute_error"},
+    "guided_excess_max": 0.01,
+    "calibration_guide": {"east_over_incident_abs_error_max": 0.01, "side_fraction_max": 0.01},
+    "straight_guide_column_power_abs_error_max": {"aperture": 1e-3, "full_cell_perturbed": 0.015},
+    "straight_phase_abs_max": {"aperture": 1e-3, "full_cell": 2e-3},
+    "fresnel": {"reflection_atol": 0.012, "transmission_atol": 0.025},
+    "independent_discrete_interface_complex_s_abs_max": 0.004,
+    "material_vjp": {"y_branch": {"rtol": 1e-3, "atol": 1e-5, "step": 0.01}, "cpu_float64_taylor": "remainder ratio below 0.3 per halving and central difference within 1e-6 relative"},
+    "source_of_limits": "completion_gates.json proposed_thresholds lossless_complete_channel_balance_absolute_error 0.01 for the flux closure; the other values are the repository's recorded budgets, all reported here as differences from the program's common criteria where looser"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_mode_branch_passivity.py::test_branch_network_passivity_with_flux_closure_and_radiation_defect",
+      "tests/test_mode_branches.py::test_aperture_ports_match_full_cell_network_on_straight_guide",
+      "tests/test_mode_branches.py::test_y_branch_power_balance_reciprocity_symmetry_and_gradient",
+      "tests/test_mode_branches.py::test_four_port_crossing_on_two_normals",
+      "tests/test_mode_branches.py::test_branch_network_power_objective_taylor_and_central_difference_cpu",
+      "tests/test_mode_branches.py::test_streamed_branch_network_matches_resident",
+      "tests/test_mode_network.py::test_reciprocal_two_port_native_propagation_and_material_gradient",
+      "tests/test_mode_network.py::test_native_four_channel_straight_guide_mode_mapping",
+      "tests/test_mode_network_unequal.py::test_unequal_native_fresnel_interior_fd_and_zero_exterior_vjp",
+      "tests/test_mode_network_unequal.py::test_discrete_interface_oracle_algebra_and_reflectionless_negative_control",
+      "tests/test_mode_network_unequal.py::test_unequal_native_complex_s_against_independent_discrete_interface"
+    ],
+    "layers": {
+      "tests/test_mode_branch_passivity.py::test_branch_network_passivity_with_flux_closure_and_radiation_defect": {"layer": "B", "oracle_class": "physical_invariant", "oracle": "passivity and complete Poynting flux balance through a closed box, radiation measured without the modal projection"},
+      "tests/test_mode_branches.py::test_aperture_ports_match_full_cell_network_on_straight_guide": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "aperture versus full-cell network of the same solver; phase against the same eigensolver's beta; closed-guide column power within 1e-3"},
+      "tests/test_mode_branches.py::test_y_branch_power_balance_reciprocity_symmetry_and_gradient": {"layer": "B", "oracle_class": "physical_invariant", "oracle": "passivity bound, reciprocity and arm symmetry; the material VJP part is finite_difference_same_discretisation"},
+      "tests/test_mode_branches.py::test_four_port_crossing_on_two_normals": {"layer": "B", "oracle_class": "physical_invariant", "oracle": "passivity bound, reciprocity, four-fold rotation and mirror symmetry"},
+      "tests/test_mode_branches.py::test_branch_network_power_objective_taylor_and_central_difference_cpu": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "Taylor remainder and central differences of the same discretisation, float64"},
+      "tests/test_mode_branches.py::test_streamed_branch_network_matches_resident": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "streamed versus resident execution of the same network"},
+      "tests/test_mode_network.py::test_reciprocal_two_port_native_propagation_and_material_gradient": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "straight-guide phase exp(2 i beta L) from the discrete mode solver, reciprocity; the VJP part is finite_difference_same_discretisation"},
+      "tests/test_mode_network.py::test_native_four_channel_straight_guide_mode_mapping": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "diagonal-block exp(2 i beta_m L) mode mapping of four channels"},
+      "tests/test_mode_network_unequal.py::test_unequal_native_fresnel_interior_fd_and_zero_exterior_vjp": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "continuum Fresnel R and T of the index step; the VJP part is finite_difference_same_discretisation"},
+      "tests/test_mode_network_unequal.py::test_discrete_interface_oracle_algebra_and_reflectionless_negative_control": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "unitarity and symmetry of the scalar discrete interface oracle itself, with a negative control"},
+      "tests/test_mode_network_unequal.py::test_unequal_native_complex_s_against_independent_discrete_interface": {"layer": "A", "oracle_class": "independent_implementation_same_scheme", "oracle": "separately coded scalar Yee interface, complex S within 0.004"}
+    },
+    "not_yet_covered": [
+      "bend and directional coupler S parameters",
+      "mode tracking across a taper with a degenerate or crossing mode pair",
+      "an independent solver (mode-matching, eigenmode expansion or another FDTD) for the Y-branch and crossing S values themselves; the present oracles are physical invariants and the straight-guide and interface limits",
+      "flux closure at the 0.1 um network mesh: the quadrature error alone is 2 percent of the incident power on the crossing (O(h^2), 0.34 percent at 0.05 um), so the 1 percent balance limit is declared at 0.05 um only"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float32 S entries; reciprocity floors of 5.6e-5 (crossing) to 2.2e-3 (Y branch) at 0.05 um; the staircase Y-branch taper is the dominant asymmetry, not round-off",
+    "time_window": "0.05 um fixture: 2400 steps (229 fs); the pilot sweep at this commit gave identical closure to five digits at 3200 steps (305 fs); at 0.1 um and 800 steps (152 fs) the Y-branch closure was -2.12 percent falling to -0.64 percent at 1200 steps, so 800 steps is truncation-limited and is kept only for the S-matrix tests",
+    "pml": "0.8 um CPML fixed; the pilot at 0.1 um with 16 and 24 layers (1.6 and 2.4 um) changed the Y-branch closure by less than 0.15 percentage points, so PML reflection is not the residual",
+    "mesh": "crossing closure -1.97 percent at 0.1 um and -0.34 percent at 0.05 um (O(h^2) flux quadrature); Y-branch closure -0.64 percent at 0.1 um and -0.69 percent at 0.05 um, mesh-, window- and PML-independent and not identified; it lies inside the 1 percent limit and is recorded as an open residual"
+  },
+  "notes": "tests/test_mode_branch_passivity.py is added with this case. Its first draft at mesh 0.1 um and 800 steps with a 2 percent closure budget failed on the Y branch by truncation (-2.12 percent); the sweeps of window, PML depth and mesh listed under error_budget were run before the fixture was fixed at 0.05 um and 2400 steps and judged against the program's 1 percent balance limit. Pilot values at this commit: Y branch column power 0.7234, defect 0.2766, measured nonguided 0.2697, closure -0.688 percent, side radiation 3.53 percent, reciprocity 2.2e-3; crossing column power 0.8054, defect 0.1946, measured nonguided 0.1911, closure -0.344 percent, reciprocity 5.6e-5. The 0.1 um network tests keep their recorded values (Y branch 0.816, 0.549, 0.549; crossing 0.760)."
+}

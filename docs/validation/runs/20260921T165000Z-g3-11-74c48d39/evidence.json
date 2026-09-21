@@ -1,0 +1,232 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T165000Z-g3-11-74c48d39",
+  "task": "G3-11",
+  "stage": "G3",
+  "task_title": "dipole far/near field와 표면/격자 수렴",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_radiation.py tests/test_radiation_box.py tests/test_radiation_dipole_pattern.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-11.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T01:28:06.341671+09:00",
+  "recorded_at": "2026-09-21T16:50:00+00:00",
+  "source_commit": "5c0172da60d27ad0e5aa6906910ae256e53de1f6",
+  "source_tree_sha256": "52cfb4e6fc264e923d14296dbb43fbcf8bf73131b220496cb870b2b6a00c7163",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_radiation.py": "777a57f705ca2e536c45296e2db9b1aef88d1a3bb91e06c09e319b4d6c992ff2",
+    "tests/test_radiation_box.py": "f19e591f582ff05809d905a9d72562b1a74a2e45eb73dbff0d004e5b66165cd2",
+    "tests/test_radiation_dipole_pattern.py": "b5a7291ec0f552ee406881416b4d61916f5f01befae9fd673799475db811cd93"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G3-11_dipole_radiation.json",
+  "fixture_sha256": "7add6d803eb1f570a899f3df78f3714ed81f29aaac1180c8cfc49884908e36fd",
+  "acceptance_criteria_path": "docs/validation/cases/G3-11_dipole_radiation.json",
+  "acceptance_criteria_sha256": "7add6d803eb1f570a899f3df78f3714ed81f29aaac1180c8cfc49884908e36fd",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "deterministic",
+  "precision": [
+    "float64 for the analytic projection checks",
+    "float32 for the native pattern study and the FP32 projection checks"
+  ],
+  "backend": [
+    "cpu",
+    "cuda for the native pattern study and tests/test_radiation.py::test_nearzone_cuda_matches_cpu"
+  ],
+  "physics_configuration": {
+    "analytic_faces": "tests/test_radiation.py: six midpoint-quadrature planes on the box (-0.65, 0.65) x (-0.7, 0.7) x (-0.6, 0.6) um carrying the complete analytic Hertzian dipole E and H (1/r, 1/r^2, 1/r^3 terms) for dipole moment (0.3+0.1i, -0.2i, 1) offset (0.12, -0.08, 0.05) um from the box centre, wavelength 1.55 um, exterior index 1.3 (and lossy 1.3+0.05i with mu 1 or 1.1+0.02i), samples per face axis 14, 28, 56, float64 CPU; far field at five directions +-x, y, z and (1,2,3)/|.| and at r = 0.5 m; near zone at five points 0.55 to 1.35 um outside the box and on spheres of radius 200 and 2000 um",
+    "native_dipole": "tests/test_radiation_dipole_pattern.py via benchmarks/radiation_dipole.py: vacuum 2.4^3 um box, Ez point source at the origin, wavelength 1.1 um, 2-cycle Gaussian, meshes 0.1, 0.075, 0.05 um (24^3, 32^3, 48^3 cells, 262, 350, 525 steps), physical time 50 fs and PML 0.3 um fixed, near-to-far box +-0.6 um with 32x32 quadrature per face, 39 directions (13 theta values at phi = 0, pi/4, pi/2), float32 CUDA, least-squares scale against 1 - dz^2",
+    "native_vjp": "tests/test_radiation.py: tests/test_differentiable.py project 3d with 35 steps, 1.6 x 1.5 x 1.4 um, mesh 0.1 um, 3 PML cells, float64 CPU, six FieldMonitor planes at +-0.3 um with 5x5 quadrature, far intensity and near-zone Poynting objectives",
+    "pml": "0.3 um fixed in the native pattern study; 3 cells in the native VJP fixture; none for the analytic faces"
+  },
+  "reference_method": "Closed-form Hertzian dipole fields and far-field complex amplitude (2 pi/lambda)^2 p_transverse exp(-i k d.shift), including phase; Poynting theorem between the closed near-surface flux and the sphere-integrated far power; the far-field limit of the near-zone projection; the analytic sin^2 theta pattern of a z dipole for the native time-domain run with mesh refinement at fixed physical box, PML and time.",
+  "observables": [
+    {
+      "name": "far_amplitude_relative_l2",
+      "unit": "dimensionless",
+      "definition": "relative L2 of the complex far-field amplitude against the analytic amplitude with translation phase, over five directions, at 14, 28, 56 samples per face axis"
+    },
+    {
+      "name": "nearzone_fields_relative_l2",
+      "unit": "dimensionless",
+      "definition": "relative L2 of all six projected near-zone components against the analytic dipole at five points"
+    },
+    {
+      "name": "near_flux_versus_far_power",
+      "unit": "dimensionless",
+      "definition": "closed-surface Poynting flux against the 12x24 Gauss-Legendre sphere integral of the far intensity"
+    },
+    {
+      "name": "nearzone_to_farfield_limit",
+      "unit": "dimensionless",
+      "definition": "near-zone versus far-field model difference at radii 200 and 2000 um"
+    },
+    {
+      "name": "native_pattern_relative_l2",
+      "unit": "dimensionless",
+      "definition": "relative L2 of the scale-fitted native far intensity against 1 - dz^2 at three meshes"
+    },
+    {
+      "name": "native_objective_vjp",
+      "unit": "d objective / d epsilon",
+      "definition": "autograd derivative of far and near-zone objectives against central differences"
+    }
+  ],
+  "acceptance_limits": {
+    "far_amplitude": {
+      "halving_ratio_min": 3.8,
+      "final_relative_l2_max": 0.0002,
+      "transversality_max": 1e-19
+    },
+    "nearzone": {
+      "halving_ratio_min": 3.5,
+      "final_relative_l2_max": 0.0005,
+      "fp32_relative_l2_max": 0.002,
+      "poynting_rtol": 0.002
+    },
+    "near_flux_versus_far_power": {
+      "rtol": 0.0005,
+      "atol": 1e-25
+    },
+    "nearzone_to_farfield_limit": {
+      "radius_ratio_min": 8,
+      "final_max": 0.0004,
+      "versus_analytic_max": 0.001
+    },
+    "native_pattern": {
+      "monotone_decrease": true,
+      "final_relative_l2_max": 0.01,
+      "fixed": "physical time 50 fs within one time step, PML 0.3 um"
+    },
+    "native_objective_vjp": {
+      "rtol": 2e-06,
+      "atol": 1e-10,
+      "step": 0.0001
+    },
+    "source_of_limits": "repository-recorded budgets; the program declares no numeric dipole limit beyond convergence and pattern agreement, and the phase limit 0.02 rad applies to the complex far amplitude whose relative error 2e-4 bounds the phase error by 2e-4 rad on the declared five directions"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 56,
+    "passed": [
+      "tests/test_radiation.py::test_rayleigh_orders_bloch_direction_complex_phase_and_power_sum[x]",
+      "tests/test_radiation.py::test_rayleigh_orders_bloch_direction_complex_phase_and_power_sum[y]",
+      "tests/test_radiation.py::test_rayleigh_orders_bloch_direction_complex_phase_and_power_sum[z]",
+      "tests/test_radiation.py::test_evanescent_amplitudes_zero_power_and_cutoff_rejection",
+      "tests/test_radiation.py::test_fp32_efficiency_preserves_sample_and_reference_gradients_at_si_scales",
+      "tests/test_radiation.py::test_fp32_grazing_cutoff_roundoff_is_rejected_for_multiple_indices",
+      "tests/test_radiation.py::test_closed_surface_dipole_complex_amplitude_converges_and_translation_phase",
+      "tests/test_radiation.py::test_closed_surface_near_flux_matches_sphere_integrated_far_power",
+      "tests/test_radiation.py::test_fp32_farfield_both_graphs_and_phase_origin",
+      "tests/test_radiation.py::test_invalid_surface_quadrature_and_conventions_fail_explicitly",
+      "tests/test_radiation.py::test_fp32_farfield_macroscopic_radius_preserves_coherent_phase",
+      "tests/test_radiation.py::test_complex_radiation_geometry_is_rejected_without_silent_real_cast",
+      "tests/test_radiation.py::test_nearzone_dipole_fields_converge_with_radial_component",
+      "tests/test_radiation.py::test_nearzone_cuda_matches_cpu",
+      "tests/test_radiation.py::test_nearzone_converges_to_farfield_model_at_large_radius",
+      "tests/test_radiation.py::test_observation_grids_and_cartesian_far_field_are_consistent",
+      "tests/test_radiation.py::test_nearzone_and_observation_inputs_are_rejected_explicitly",
+      "tests/test_radiation.py::test_lossy_exterior_dipole_near_and_far_fields[(1.3+0.05j)-1.0]",
+      "tests/test_radiation.py::test_lossy_exterior_dipole_near_and_far_fields[(1.3+0.05j)-(1.1+0.02j)]",
+      "tests/test_radiation.py::test_per_frequency_exterior_equals_single_frequency_calls[dtype0]",
+      "tests/test_radiation.py::test_per_frequency_exterior_equals_single_frequency_calls[dtype1]",
+      "tests/test_radiation.py::test_kspace_directions_match_spherical_directions",
+      "tests/test_radiation.py::test_growing_or_per_frequency_exterior_is_rejected",
+      "tests/test_radiation.py::test_open_surface_converges_for_directional_emitter_and_not_for_dipole",
+      "tests/test_radiation.py::test_nearzone_objective_preserves_field_graph[dtype0]",
+      "tests/test_radiation.py::test_nearzone_objective_preserves_field_graph[dtype1]",
+      "tests/test_radiation.py::test_native_fdtd_far_and_nearzone_objective_material_vjp_matches_difference",
+      "tests/test_radiation_box.py::test_analytic_dipole_owned_adapter_and_direct_transform[dtype0]",
+      "tests/test_radiation_box.py::test_analytic_dipole_owned_adapter_and_direct_transform[dtype1]",
+      "tests/test_radiation_box.py::test_coherent_matched_incident_subtraction_on_every_face",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[duplicate-distinct]",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[cancelled-Cancelled]",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[periodic-isolated]",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[face_position-closed box]",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[partial-rectangle]",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[apodization-unapodized]",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[object-contrast-object]",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[source-source support]",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[index-background]",
+      "tests/test_radiation_box.py::test_geometry_metadata_and_completion_rejections[oneway-periodic transverse]",
+      "tests/test_radiation_box.py::test_tfsf_box_provenance_admission[0.6-False-tfsf scattered-field region]",
+      "tests/test_radiation_box.py::test_tfsf_box_provenance_admission[0.6-True-matched reference]",
+      "tests/test_radiation_box.py::test_tfsf_box_provenance_admission[2.0-True-matched reference]",
+      "tests/test_radiation_box.py::test_tfsf_box_provenance_admission[2.0-False-matched reference for incident]",
+      "tests/test_radiation_box.py::test_tfsf_box_provenance_admission[1.0-True-cross or approach]",
+      "tests/test_radiation_box.py::test_stored_nearzone_matches_direct_transform_and_is_budgeted",
+      "tests/test_radiation_box.py::test_open_surface_stored_faces_are_flagged_and_match_direct_transform",
+      "tests/test_radiation_box.py::test_preparation_and_projection_budget_precede_copies",
+      "tests/test_radiation_box.py::test_raw_fp32_frequency_and_native_plane_shape_mismatch_rejected",
+      "tests/test_radiation_box.py::test_upper_node_interpolation_cannot_touch_pml_indices",
+      "tests/test_radiation_box.py::test_matched_external_source_and_nonhomogeneous_reference_contract",
+      "tests/test_radiation_box.py::test_explicit_wrong_dft_and_trainable_projection_metadata_rejected",
+      "tests/test_radiation_box.py::test_long_axis_workspace_rejects_before_project_or_mesh_allocation",
+      "tests/test_radiation_box.py::test_reference_raw_quadrature_difference_cannot_hide_in_fp32_cast[points_um]",
+      "tests/test_radiation_box.py::test_reference_raw_quadrature_difference_cannot_hide_in_fp32_cast[weights]",
+      "tests/test_radiation_dipole_pattern.py::test_native_dipole_pattern_error_decreases_with_mesh_and_ends_below_one_percent"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 223.097,
+    "suite_timestamp": "2026-09-22T01:28:06.341671+09:00"
+  },
+  "required_tests": [
+    "tests/test_radiation.py::test_closed_surface_dipole_complex_amplitude_converges_and_translation_phase",
+    "tests/test_radiation.py::test_closed_surface_near_flux_matches_sphere_integrated_far_power",
+    "tests/test_radiation.py::test_nearzone_dipole_fields_converge_with_radial_component",
+    "tests/test_radiation.py::test_nearzone_converges_to_farfield_model_at_large_radius",
+    "tests/test_radiation.py::test_lossy_exterior_dipole_near_and_far_fields",
+    "tests/test_radiation.py::test_open_surface_converges_for_directional_emitter_and_not_for_dipole",
+    "tests/test_radiation.py::test_nearzone_cuda_matches_cpu",
+    "tests/test_radiation.py::test_native_fdtd_far_and_nearzone_objective_material_vjp_matches_difference",
+    "tests/test_radiation.py::test_rayleigh_orders_bloch_direction_complex_phase_and_power_sum",
+    "tests/test_radiation_box.py::test_analytic_dipole_owned_adapter_and_direct_transform",
+    "tests/test_radiation_dipole_pattern.py::test_native_dipole_pattern_error_decreases_with_mesh_and_ends_below_one_percent"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T165000Z-g3-11-74c48d39/junit.xml",
+      "sha256": "91e98473ca8c451681cc0645cc4ad533df6f3ef167682cb0ca0f4776f4077521",
+      "bytes": 7689,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G3-11.xml"
+    }
+  ],
+  "applicable_scope": "Layer B (analytic Hertzian near-zone and far fields with phase on analytic faces, Poynting theorem, native dipole pattern mesh convergence against sin^2 theta on CUDA float32) and layer A (CUDA versus CPU projection, native objective VJP), on local Windows 11, i7-12700, RTX 3060 12 GB shared with other sessions. No surface-position sweep; native far-field magnitude only.",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

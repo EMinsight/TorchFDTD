@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-09_mode_solver_oracles",
+  "task": "G3-09",
+  "title": "Mode solver effective index, field, confinement and power against analytic slab and fiber oracles",
+  "declared": "2026-09-22",
+  "declared_at_commit": "2b64f9133af661555779e9a4ef9d351cca8de67a",
+  "declared_before_run": true,
+  "oracle_class": ["analytic_continuum", "analytic_discrete", "convergence_study", "shared_discrete_operator", "finite_difference_same_discretisation"],
+  "fixture": {
+    "periodic_slab": "tests/test_mode_ports.py: symmetric slab, core index 2 (epsilon 4), cladding 1.5 (epsilon 2.25), thickness 0.5 um, wavelength 1.55 um, interface samples at epsilon 3.125, transverse grid h in {0.1, 0.05, 0.025} um over a 4 um box (and boxes 2, 4, 6 um at h = 0.05 um), 4 cells of 0.05 um along the invariant axis, periodic full-vector solver solve_waveguide_modes with normal z, two modes (TE0, TM0), CPU",
+    "homogeneous_check": "tests/test_mode_ports.py: uniform epsilon 2.25, 20x16 cells of 0.1 um, wavelength 1.55 um, six modes",
+    "open_slab": "tests/test_open_mode_ports.py: CPML mode solver, region 6.4 x 0.5 x 1.6 um, mesh (h, 0.1, h) um for h in {0.1, 0.05, 0.025}, x CPML of 0.8 um physical depth (round(0.8/h) layers), y periodic, z 3 PML layers, core index 1.8 for |x| < 0.4 um in cladding 1.4, wavelength 1.55 um, cladding_epsilon 1.96, two modes, float32, CPU",
+    "open_fiber": "tests/test_open_mode_ports.py: step-index fiber core index 2.2 in cladding 1.0, radius 0.4 um, wavelength 1.55 um, region 4 x 4 x 1.6 um, h in {0.1, 0.08} um, x and y CPML of 0.8 um, z 3 PML layers, float32, CPU; tests/test_open_mode_padding.py repeats h = 0.1 um with boxes (4.8, 0.8) and (4.8, 1.0) um against a stored baseline beta",
+    "oracles": "benchmarks/open_mode_oracles.py solve_slab (TE and TM even-mode dispersion, root by brentq, fields from continuity) and solve_fiber_he11 (full-vector HE11 characteristic equation); tests/test_open_mode_oracles.py checks the oracles themselves (root residual, interface continuity, Maxwell curl residual by central differences, scale invariance, thin/thick and weak-guidance limits)",
+    "pml": "0.8 um CPML on the open axes; the padding test records the box and PML sensitivity of beta"
+  },
+  "seed": {"degenerate_basis_rotation": "random unitary rotation in tests/test_mode_ports.py::test_degenerate_polarization_basis_is_canonical_and_start_independent", "others": "deterministic"},
+  "precision": ["float64 for the periodic solver", "float32 for the open solver", "float64 for the oracles"],
+  "backend": ["cpu"],
+  "reference_method": "Analytic continuum slab TE/TM dispersion relation solved by root finding (periodic and open solvers) and the analytic full-vector HE11 fiber characteristic equation (open solver); the homogeneous case uses the closed-form discrete periodic Yee dispersion sqrt(epsilon - (2/h sin(pi/N)/k)^2); power normalisation and Gram orthogonality are self-consistency of the same discrete quadrature.",
+  "observables": [
+    {"name": "slab_neff_absolute_error", "unit": "dimensionless", "definition": "|neff - neff_analytic| for TE0 and TM0 of the periodic solver at h = 0.025 um; errors strictly decreasing over h"},
+    {"name": "open_slab_beta_relative_error", "unit": "dimensionless", "definition": "|Re beta / beta_analytic - 1| of the CPML solver at h in {0.1, 0.05, 0.025} um, corrections shrinking"},
+    {"name": "fiber_beta_relative_error", "unit": "dimensionless", "definition": "|Re beta / beta_HE11 - 1| of the CPML solver at h = 0.1 and 0.08 um"},
+    {"name": "homogeneous_neff", "unit": "dimensionless", "definition": "six modes against the discrete periodic dispersion"},
+    {"name": "modal_power", "unit": "reduced power", "definition": "mode.power() = 1 and backward().power() = -1; Gram matrix identity"},
+    {"name": "leakage", "unit": "dimensionless", "definition": "edge energy fraction of the outer three cells (periodic) and collar_energy_fraction (open)"},
+    {"name": "box_pml_sensitivity", "unit": "dimensionless", "definition": "relative shift of beta with box size and PML depth (padding test)"}
+  ],
+  "acceptance": {
+    "slab_neff_absolute_error_max": {"value": 5e-4, "where": "tests/test_mode_ports.py; relative 3e-4 at neff about 1.7, tighter than the program's 0.005"},
+    "open_slab_beta_relative_error_max": {"value": 0.005, "where": "tests/test_open_mode_ports.py; equals the program's analytic_mode_neff_relative_error"},
+    "fiber_beta_relative_error_max": {"value": 0.02, "where": "tests/test_open_mode_ports.py", "difference_from_common_criterion": "looser than the program's 0.005: the fiber is resolved by 8 to 10 cells across its 0.8 um diameter with a staircase circle; docs/OPEN_MODE_PORTS.md records 0.551 and 0.330 percent at h = 0.1 and 0.08 um"},
+    "homogeneous_neff": {"rtol": 2e-5, "atol": 2e-5},
+    "modal_power": {"power_rel": 1e-6, "gram": {"rtol": 2e-4, "atol": 2e-4}},
+    "leakage": {"periodic_edge_energy_fraction_max": 1e-7, "open_collar_energy_fraction_max": 1e-4},
+    "box_pml_sensitivity_max": 1e-4,
+    "maxwell_residual_max": {"periodic": 2e-5, "open": 2e-4},
+    "source_of_limits": "completion_gates.json proposed_thresholds analytic_mode_neff_relative_error 0.005; the fiber budget is the repository's pre-declared fixture-specific limit and is reported as a difference"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_mode_ports.py::test_slab_te_tm_mesh_limit_box_convergence_and_evanescent_confinement",
+      "tests/test_mode_ports.py::test_homogeneous_vector_fourier_dispersion_residual_and_power_orthogonality",
+      "tests/test_mode_ports.py::test_degenerate_polarization_basis_is_canonical_and_start_independent",
+      "tests/test_mode_ports.py::test_fixed_mode_directional_plane_power_and_both_torch_graphs",
+      "tests/test_mode_ports.py::test_plane_field_vjp_finite_difference_leakage_and_quadrature_rejection",
+      "tests/test_open_mode_ports.py::test_independent_te_tm_continuum_refinement",
+      "tests/test_open_mode_ports.py::test_fully_confined_fiber_two_mesh_continuum_comparison",
+      "tests/test_open_mode_ports.py::test_six_field_maxwell_and_open_sampling_contract",
+      "tests/test_open_mode_ports.py::test_independent_native_time_stagger_and_cpml_recurrence",
+      "tests/test_open_mode_padding.py::test_fixed_mesh_physical_padding_and_pml_sensitivity",
+      "tests/test_open_mode_oracles.py::test_slab_continuity_dispersion_scaling_and_limits",
+      "tests/test_open_mode_oracles.py::test_fiber_full_vector_boundary_conditions_and_confinement",
+      "tests/test_open_mode_oracles.py::test_fiber_six_component_maxwell_equations_independently_differenced",
+      "tests/test_open_mode_oracles.py::test_fiber_scale_weak_guidance_and_large_v_invariants",
+      "tests/test_mode_network_slab_oracle.py::test_continuum_four_equations_match_airy_and_conserve_power",
+      "tests/test_mode_network_slab_oracle.py::test_no_contrast_phase_and_discrete_continuum_limit"
+    ],
+    "layers": {
+      "tests/test_mode_ports.py::test_slab_te_tm_mesh_limit_box_convergence_and_evanescent_confinement": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "analytic slab TE0/TM0 dispersion; mesh and box refinement"},
+      "tests/test_mode_ports.py::test_homogeneous_vector_fourier_dispersion_residual_and_power_orthogonality": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "closed-form discrete periodic dispersion; power and Gram are self-consistency"},
+      "tests/test_mode_ports.py::test_degenerate_polarization_basis_is_canonical_and_start_independent": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "degenerate subspace under a random unitary rotation of the ARPACK pair"},
+      "tests/test_mode_ports.py::test_fixed_mode_directional_plane_power_and_both_torch_graphs": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "analytic overlap identity on synthetic plane fields"},
+      "tests/test_mode_ports.py::test_plane_field_vjp_finite_difference_leakage_and_quadrature_rejection": {"layer": "A", "oracle_class": "finite_difference_same_discretisation", "oracle": "central difference h = 1e-3 on the plane-field VJP"},
+      "tests/test_open_mode_ports.py::test_independent_te_tm_continuum_refinement": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "solve_slab TE/TM beta; three-mesh refinement"},
+      "tests/test_open_mode_ports.py::test_fully_confined_fiber_two_mesh_continuum_comparison": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "solve_fiber_he11 beta; two meshes"},
+      "tests/test_open_mode_ports.py::test_six_field_maxwell_and_open_sampling_contract": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "six-curl residual with the solver's own sparse operators; power normalisation"},
+      "tests/test_open_mode_ports.py::test_independent_native_time_stagger_and_cpml_recurrence": {"layer": "A", "oracle_class": "shared_discrete_operator", "oracle": "re-implemented leapfrog and CPML recurrence on the mode fields, same discrete recurrence"},
+      "tests/test_open_mode_padding.py::test_fixed_mesh_physical_padding_and_pml_sensitivity": {"layer": "B", "oracle_class": "convergence_study", "oracle": "box and PML sensitivity of beta against a stored baseline"},
+      "tests/test_open_mode_oracles.py::test_slab_continuity_dispersion_scaling_and_limits": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "oracle self-check: residual, continuity, scaling, thin/thick limits"},
+      "tests/test_open_mode_oracles.py::test_fiber_full_vector_boundary_conditions_and_confinement": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "oracle self-check: HE11 boundary conditions and tail power"},
+      "tests/test_open_mode_oracles.py::test_fiber_six_component_maxwell_equations_independently_differenced": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "oracle self-check: curl equations by central differences"},
+      "tests/test_open_mode_oracles.py::test_fiber_scale_weak_guidance_and_large_v_invariants": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "oracle self-check: LP01 limit and large-V invariants"},
+      "tests/test_mode_network_slab_oracle.py::test_continuum_four_equations_match_airy_and_conserve_power": {"layer": "B", "oracle_class": "analytic_continuum", "oracle": "scalar slab S against closed-form Airy r and t"},
+      "tests/test_mode_network_slab_oracle.py::test_no_contrast_phase_and_discrete_continuum_limit": {"layer": "B", "oracle_class": "analytic_discrete", "oracle": "discrete scalar slab oracle against the continuum limit"}
+    },
+    "not_yet_covered": [
+      "mode field profile of the discrete solver against the analytic slab or fiber profile (only component-dominance ratios and oracle-internal continuity are checked)",
+      "confinement factor of the discrete mode against the analytic value (only leakage bounds are asserted)",
+      "modal power normalisation against an independent quadrature (power() = 1 is self-consistency of the same discrete quadrature)",
+      "an independent numerical mode solver as a second oracle"
+    ]
+  },
+  "error_budget": {
+    "precision_floor": "float64 periodic solver: eigenpair and Maxwell residuals below 1e-4 to 2e-5; float32 open solver: Maxwell residual below 2e-4 and collar energy below 1e-4",
+    "time_window": "not applicable (frequency-domain eigenproblem)",
+    "pml": "open solver: 0.8 um CPML fixed across meshes; PML and box sensitivity of beta bounded at 1e-4 by the padding test; the fiber budget of 2 percent absorbs the staircase circle at 8 to 10 cells per diameter"
+  },
+  "notes": "All fixtures run on CPU only; the program's neff limit of 0.5 percent is met by the periodic slab (absolute error below 5e-4) and the open slab (relative beta error below 0.5 percent), while the open fiber keeps its pre-declared 2 percent budget. docs/OPEN_MODE_PORTS.md records finest open-slab errors of 0.150 percent (TE) and 0.0119 percent (TM). No test was added by this case."
+}
