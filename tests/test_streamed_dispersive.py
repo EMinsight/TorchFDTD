@@ -7,7 +7,7 @@ import torch
 from torchfdtd import (BoundaryFace, DispersiveSimulation, DispersivePlaneSimulation, Region,
                          StreamedDispersiveSimulation, StreamedAdjointOptions)
 from torchfdtd.streamed_dispersive import (_SlabDispersiveSystem, DispersiveSlabBlockOperator,
-                                             _DispersiveExecution, _pole_state, _slab_state)
+                                             _DispersiveExecution)
 from torchfdtd.dispersive_adjoint import _DispersiveSystem
 from test_dispersive_adjoint import project
 
@@ -57,17 +57,17 @@ def test_complete_block_jacobian(layout, bloch, depth, device):
     actual, signals = operator.forward(parameters, state, 1, depth)
     bars, gradient = operator.transpose(parameters, state, 1, depth, endpoint, weights)
     differentiable = parameters.clone().requires_grad_()
-    initial = tuple(s.clone().requires_grad_() for s in _pole_state(state))
+    initial = tuple(s.clone().requires_grad_() for s in host._pole_state(state))
     current, observed = initial, []
     for j in range(depth):
         current = oracle.reference_step(current, j+1, differentiable)
         observed.append(oracle.observe(current))
     observed = torch.stack(observed)
     objective = (observed.conj()*weights).real.sum()
-    objective += sum((s.conj()*b).real.sum() for s,b in zip(current, _pole_state(endpoint)))
+    objective += sum((s.conj()*b).real.sum() for s,b in zip(current, host._pole_state(endpoint)))
     expected = torch.autograd.grad(objective, (*initial, differentiable))
-    for a,b in zip(actual, _slab_state(current)):torch.testing.assert_close(a,b,rtol=2e-10,atol=2e-12)
-    for a,b in zip(bars, _slab_state(expected[:-1])):torch.testing.assert_close(a,b,rtol=2e-9,atol=2e-11)
+    for a,b in zip(actual, host._slab_state(current)):torch.testing.assert_close(a,b,rtol=2e-10,atol=2e-12)
+    for a,b in zip(bars, host._slab_state(expected[:-1])):torch.testing.assert_close(a,b,rtol=2e-9,atol=2e-11)
     torch.testing.assert_close(signals, observed, rtol=2e-10,atol=2e-12)
     torch.testing.assert_close(gradient, expected[-1], rtol=2e-9,atol=2e-11)
     for a,b in zip(state, original):torch.testing.assert_close(a,b,rtol=0,atol=0)

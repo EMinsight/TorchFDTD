@@ -110,9 +110,6 @@ def run_tensor_batch(cases, *, objective=None, output_dir=None, keep_results=Tru
 def _validate_pmc_case(p):
     """PMC/symmetric cohorts carry the stored upper faces; everything else stays explicit."""
     if pmc_faces(p.region)==((),()):return
-    active={s.material for s in p.structures if s.enabled}
-    if any(m.oscillators for m in p.materials if m.name in active):
-        raise ValueError('Tensor batch does not implement ADE material states on stored PMC/symmetric faces.')
     if any(s.enabled and (s.kind=='tfsf' or s.injection=='oneway') for s in p.sources):
         raise ValueError('Tensor batch does not implement TFSF or one-way sources with PMC/symmetric faces.')
     if any(m.enabled and m.kind!='point' for m in p.monitors):
@@ -141,24 +138,32 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
         interface_plan=prepare_interfaces(p)
         if interface_plan is not None:s['subpixel']=interface_plan.metadata
         eps,counts,ownership=voxelize(p,with_ownership=True,interface_plan=interface_plan)
+        shape=p.region.shape
+        # Stored upper PMC rows are cropped for the volume banks and sliced per face below.
+        volume_ownership=ownership[:shape[0],:shape[1],:shape[2]]
         from .injection import validate_oneway_materials
-        validate_oneway_materials(p,eps,ownership)
+        validate_oneway_materials(p,eps,volume_ownership)
         for obj in p.structures:
             if obj.enabled and counts.get(obj.id)==0:
                 message='no Yee component centers intersect this object; subpixel integration may still include it. Check quadrature and mesh convergence.' if interface_plan is not None else 'no cells intersect this object. Refine mesh or reposition it.'
                 s['warnings'].append(f'{obj.name}: {message}')
-        shape=p.region.shape
         volume=eps[:shape[0],:shape[1],:shape[2]]
         g.inverse_permittivity[:]=torch.as_tensor(1/(volume if volume.ndim==4 else volume[...,None]),device=g.E.device,dtype=dtype)
+        g.face_material_states=[]
         for k,(component,upper,_) in enumerate(g.pmc_blocks['E']):
-            # Sampled epsilon at every node of one stored upper E face or edge.
+            # Sampled epsilon at every node of one stored upper E face or edge,
+            # and one ADE bank per dispersive material owning nodes on it.
             sl=tuple(slice(n,n+1) if a in upper else slice(0,n) for a,n in enumerate(shape))
             face=eps[sl+(component,)] if eps.ndim==4 else eps[sl]
             g.face_inverse_permittivity[k][:]=torch.as_tensor(1/face,device=g.E.device,dtype=dtype)
-        configure_materials(g,p,ownership)
+            owners=ownership[sl+(component,)] if ownership.ndim==4 else ownership[sl]
+            from .materials import MaterialADE
+            g.face_material_states.extend((k,MaterialADE(g,m,np.flatnonzero(owners.reshape(-1)==i),True))
+                                          for i,m in enumerate(p.materials) if m.oscillators and np.any(owners==i))
+        configure_materials(g,p,volume_ownership)
         configure_interfaces(g,interface_plan)
         from .tfsf import prepare_tfsf
-        prepare_tfsf(g,p,eps,ownership)
+        prepare_tfsf(g,p,eps,volume_ownership)
         grids.append(g);epsilon.append(eps)
         monitors=[m for m in p.monitors if m.enabled and m.kind=='point']
         traces.append(torch.zeros((p.region.steps,len(monitors)),device=g.E.device,dtype=dtype))
@@ -265,8 +270,8 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
                  seconds=seconds,setup_seconds=setup_seconds,mcells_per_second=math.prod(r.shape)*completed/max(seconds,1e-9)/1e6,
                  field_peak=float(np.max(abs(e))),slice_index=index,
                  slice_position=float(field_axes(r,r.field)[axis][index]) if r.material_sampling=='yee' else (0 if r.dimension=='2d' else (index+.5)*r.mesh-r.actual_size[axis]/2),
-                 complex_fields=False,complex_display=r.complex_display,material_update='trapezoidal ADE' if g.material_states else 'nondispersive',
-                 dispersive_samples=sum(state.P.numel() for state in g.material_states),material_sampling=r.material_sampling,
+                 complex_fields=False,complex_display=r.complex_display,material_update='trapezoidal ADE' if g.material_states or g.face_material_states else 'nondispersive',
+                 dispersive_samples=sum(state.P.numel() for state in g.material_states)+sum(state.P.numel() for _,state in g.face_material_states),material_sampling=r.material_sampling,
                  epsilon_definition=s['subpixel']['epsilon_image'] if 'subpixel' in s else 'instantaneous relative permittivity (epsilon-infinity for dispersive cells)',
                  boundaries=r.boundaries.model_dump(),bloch_phase=r.bloch_phase,
                  units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad',engine='TorchFDTD batched Yee/CPML CUDA')

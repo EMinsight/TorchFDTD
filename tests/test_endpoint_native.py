@@ -78,13 +78,14 @@ def test_unsupported_native_pmc_contracts_are_rejected_before_dispatch(change):
     with pytest.raises(ValueError):Simulation(Project.model_validate(payload)).run()
 
 
-def test_ade_rejected_and_plain_grid_curl_rejects_pmc():
+def test_endpoint_dispatch_rejects_ade_and_plain_grid_curl_rejects_pmc():
     from torchfdtd.boundaries import BoundaryDescription,YeeGrid
     from torchfdtd.differentiable import DifferentiableSimulation
     project=scene();payload=project.model_dump()
     payload['materials']=[Material(name='metal',model='drude').model_dump()]
     payload['structures']=[Structure(material='metal').model_dump()]
-    with pytest.raises(ValueError,match='ADE'):Project.model_validate(payload)
+    # ADE next to PMC runs through the Yee adjoint/streamed/batch paths; the endpoint forward has no ADE.
+    with pytest.raises(ValueError,match='ADE'):Simulation(Project.model_validate(payload)).run()
     description=BoundaryDescription(project.region)
     assert description.pmc_upper and description.pmc_blocks['E']
     grid=YeeGrid(project.region)

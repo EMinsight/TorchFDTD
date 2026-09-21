@@ -58,11 +58,14 @@ class FusedBatchYeeCUDA:
             kernel(((FusedYeeCUDA.launch_count(self.grids[0],forward)+255)//256,len(self.grids)),(256,),(table,))
 
     def update_E(self):
-        prepared=[[(state,*state.prepare(g.E)) for state in g.material_states] for g in self.grids]
+        # Volume ADE banks act on E; stored upper PMC face banks act on their face array.
+        targets=[[(state,g.E) for state in g.material_states]
+                 +[(state,g.faces['E'][k]) for k,state in getattr(g,'face_material_states',())] for g in self.grids]
+        prepared=[[(state,field,*state.prepare(field)) for state,field in pairs] for pairs in targets]
         self.update(False)
         if self.interface_update is not None:self.interface_update.update()
-        for g,states in zip(self.grids,prepared):
-            for state,old,response in states:state.correct(g.E,old,response)
+        for states in prepared:
+            for state,field,old,response in states:state.correct(field,old,response)
 
     def update_H(self):self.update(True)
 

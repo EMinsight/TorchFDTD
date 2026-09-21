@@ -16,24 +16,27 @@ from .tensor_packet import pack_tensors
 from .streamed import StreamedSimulation, StreamedAdjointOptions, _Streamed, _StreamedExecution, _reservation
 
 
-def _pole_state(state):
-    return (*state[:-2], state[-2].movedim(0, 1), state[-1].movedim(0, 1))
-
-
-def _slab_state(state):
-    return (*state[:-2], state[-2].movedim(1, 0), state[-1].movedim(1, 0))
-
-
 class _SlabDispersiveSystem(_DispersiveSystem):
+    _pmc_faces=True
+
+    def _pole_state(self, state):
+        """Pole-first P/Q and stored-face banks from the x-first slab layout."""
+        base = self.base_count
+        return (*state[:base], *(value.movedim(0, 1) for value in state[base:]))
+
+    def _slab_state(self, state):
+        base = self.base_count
+        return (*state[:base], *(value.movedim(1, 0) for value in state[base:]))
+
     def state(self):
-        return _slab_state(super().state())
+        return self._slab_state(super().state())
 
     def reference_step(self, state, step, parameters):
-        return _slab_state(super().reference_step(_pole_state(state), step, parameters))
+        return self._slab_state(super().reference_step(self._pole_state(state), step, parameters))
 
     def transpose_step(self, state, adjoint, signal_bar):
-        bars, gradient = super().transpose_step(_pole_state(state), _pole_state(adjoint), signal_bar)
-        return _slab_state(bars), gradient
+        bars, gradient = super().transpose_step(self._pole_state(state), self._pole_state(adjoint), signal_bar)
+        return self._slab_state(bars), gradient
 
 
 def _tile_layout(layout, width):
@@ -55,12 +58,13 @@ class DispersiveSlabBlockOperator(SlabBlockOperator):
         return self.host.layout.originals(material)[0]
 
     def _extra_payload(self, local, material, state, rows, phase, mapping, descriptor):
-        _, _, indices, core = descriptor
+        _, hi, indices, core = descriptor
         values = self.host.layout.originals(material)
         parameters = [local.epsilon]
         for value in values[1:]:
             parameters.append(value if value.ndim <= 1 else rows(value.movedim(1, 0)).movedim(0, 1))
-        local.layout = _tile_layout(self.host.layout, len(indices))
+        # The last tile of an x-upper PMC axis also carries that stored material row.
+        local.layout = _tile_layout(self.host.layout, local.epsilon.shape[0])
         local.pole_count = local.layout.pole_count
         if self.workspace is not None:
             target = self.workspace.host_array('ade_material',
@@ -69,19 +73,45 @@ class DispersiveSlabBlockOperator(SlabBlockOperator):
         else:
             packed, _ = pack_tensors(parameters)
         owned = torch.arange(core.start, core.stop)
-        for index in (len(state)-2, len(state)-1):
+        base = self.host.base_count
+        for index in (base, base+1):
             mapping.append((index, indices, owned, indices[owned]))
         # P/Q receive field phase. Shared or spatial material coefficients do not.
-        p, q = (self._phase_value(rows(s), phase).movedim(0, 1) for s in state[-2:])
-        return packed, p, q
+        banks = [self._phase_value(rows(s), phase).movedim(0, 1) for s in state[base:base+2]]
+        # Stored-face banks follow the face arrays: y/z faces through the halos,
+        # x-upper faces read by any tile reaching the last row, owned by the last core.
+        n_x = self.host.region.shape[0]
+        last = int(indices[-1]) == n_x-1
+        owns_extra = last and hi == n_x and 0 in self.host.grid.pmc_upper
+        blocks = self.host.grid.pmc_blocks['E']
+        for family_offset in (0, len(blocks)):
+            for position, (_, upper, _) in enumerate(blocks):
+                index = base+2+family_offset+position
+                if 0 in upper:
+                    if not last:continue
+                    take = torch.zeros(1, dtype=torch.int64)
+                    destination = take if owns_extra else take[:0]
+                    value = state[index].index_select(0, take)
+                    mapping.append((index, take, destination, destination))
+                else:
+                    value = rows(state[index])
+                    mapping.append((index, indices, owned, indices[owned]))
+                banks.append(self._phase_value(value, phase).movedim(0, 1))
+        return (packed, *banks)
 
     def _restore_payload(self, local, views):
         local.parameters, local.P, local.Q = [next(views) for _ in range(3)]
+        count = len(local.grid.pmc_blocks['E'])
+        local.face_P = [next(views) for _ in range(count)]
+        local.face_Q = [next(views) for _ in range(count)]
         local.epsilon = local.layout.originals(local.parameters)[0]
-        local.eps4 = local.epsilon[..., None] if local.epsilon.ndim == 3 else local.epsilon
+        volume = local._volume(local.epsilon)
+        local.eps4 = volume[..., None] if volume.ndim == 3 else volume
 
     def _prepare_kernel(self, local):
-        if self.device.type == 'cuda':
+        # The fused ADE tile kernels do not implement stored PMC faces; those
+        # tiles advance with the Torch reference step on the device.
+        if self.device.type == 'cuda' and not local.pmc:
             from .cuda_dispersive_adjoint import fused_ade_forward
             local.kernel = fused_ade_forward(local, buffers=self.workspace)
 
@@ -94,7 +124,7 @@ class DispersiveSlabBlockOperator(SlabBlockOperator):
         return local.parameters
 
     def _backward(self, local, gradient, samples):
-        if self.device.type != 'cuda':return None
+        if self.device.type != 'cuda' or local.pmc:return None
         from .cuda_dispersive_adjoint import FusedDispersiveAdjointCUDA
         return FusedDispersiveAdjointCUDA(local, gradient, samples, buffers=self.workspace)
 
@@ -164,8 +194,6 @@ class StreamedDispersiveSimulation(StreamedSimulation):
 
     def __init__(self, project, options=None):
         super().__init__(project, options)
-        from .boundaries import reject_pmc_faces
-        reject_pmc_faces(self.project.region, 'StreamedDispersiveSimulation')
         if self.streaming_options.cuda_binding != 'direct':
             raise ValueError('Streamed ADE kernels currently require cuda_binding="direct".')
         if any(s.enabled and s.injection != 'soft' for s in self.project.sources):
@@ -180,6 +208,10 @@ class StreamedDispersiveSimulation(StreamedSimulation):
         parameters, layout = DispersiveSimulation._pack(self, epsilon, strength, omega0, gamma,
                                                         streamed=True, admission=admit)
         region = self.project.region
+        from .boundaries import BoundaryDescription
+        faces = sum(math.prod(shape) for _, _, shape in BoundaryDescription(region).pmc_blocks['E'])
+        cuda = torch.device(options.device).type == 'cuda'
+        pmc = faces > 0
         report = dict(experimental=True, spatial_streaming=True, full_time_autograd=False,
             complex_fields=region.complex_fields, higher_order=False,
             slab_width=options.slab_width, temporal_depth=options.temporal_depth,
@@ -190,10 +222,11 @@ class StreamedDispersiveSimulation(StreamedSimulation):
             reuse_tile_buffers=options.reuse_tile_buffers, policy='manual', precision=str(epsilon.dtype),
             adjoint='space-time tiled Yee/CPML/trapezoidal ADE', oscillator_count=layout.pole_count,
             material_parameter_bytes=parameters.numel()*parameters.element_size(),
-            material_state_bytes=6*layout.pole_count*math.prod(region.shape)*epsilon.element_size()*(2 if region.complex_fields else 1),
+            material_state_bytes=(6*math.prod(region.shape)+2*faces)*layout.pole_count*epsilon.element_size()*(2 if region.complex_fields else 1),
             material_parameter_layout='compact original shapes with halo reduction and shared-parameter sums',
-            forward_backend='fused CUDA ADE' if torch.device(options.device).type == 'cuda' else 'torch CPU',
-            backward_backend='fused CUDA ADE transpose' if torch.device(options.device).type == 'cuda' else 'torch explicit ADE transpose',
+            forward_backend='fused CUDA ADE' if cuda and not pmc else 'torch CUDA' if cuda else 'torch CPU',
+            backward_backend='fused CUDA ADE transpose' if cuda and not pmc else 'torch explicit ADE transpose',
+            pmc_faces=pmc,
             observation_storage='time_history' if spectral is None else 'online_spectrum', **reservation)
         if spectral is not None:report.update(spectral.reservation(min(options.temporal_depth, region.steps)))
         signals = _Streamed.apply(parameters, self.project, options, report, spectral, _DispersiveExecution(layout))

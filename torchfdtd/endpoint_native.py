@@ -62,9 +62,6 @@ def validate_pmc_project(project):
         raise ValueError('PMC/symmetric faces combine with PEC/PMC/PML faces only; periodic or Bloch mixing is unsupported.')
     if r.interface_method!='staircase':
         raise ValueError('PMC/symmetric faces currently require staircase interfaces.')
-    active={obj.material for obj in project.structures if obj.enabled}
-    if any(m.oscillators for m in project.materials if m.name in active):
-        raise ValueError('PMC/symmetric faces do not support ADE/dispersive materials: no path stores face material states yet.')
     for item in [*project.sources,*project.monitors]:
         if not item.enabled or getattr(item,'kind','point')!='point':continue
         for field,component,indices in _nearest_samples(project,item):

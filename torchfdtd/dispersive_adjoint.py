@@ -42,18 +42,25 @@ class _ParameterLayout:
 
 
 class _DispersiveSystem(_System):
+    _pmc_faces=True
+
     def __init__(self, project, epsilon, parameters, layout, *, fused_forward=False, fused_backward=False, **kwargs):
         super().__init__(project, epsilon, prepare_kernels=False, prepare_permittivity=False, **kwargs)
         self.parameters = parameters.detach()
         self.layout = layout
         self.pole_count = layout.pole_count
         shape = (self.pole_count, *self.grid.E.shape)
-        if kwargs.get('prepare_updates', True):
-            self.P = torch.zeros(shape, dtype=self.field_dtype, device=self.device)
-            self.Q = torch.zeros_like(self.P)
-        else:
-            self.P = torch.zeros((), dtype=self.field_dtype, device=self.device).expand(shape)
-            self.Q = torch.zeros((), dtype=self.field_dtype, device=self.device).expand(shape)
+        def bank(shape):
+            if kwargs.get('prepare_updates', True):
+                return torch.zeros(shape, dtype=self.field_dtype, device=self.device)
+            return torch.zeros((), dtype=self.field_dtype, device=self.device).expand(shape)
+        self.P = bank(shape)
+        self.Q = bank(shape)
+        # Polarization banks on every stored upper PMC E face/edge node, after P/Q.
+        self.face_P = [bank((self.pole_count, *block)) for _, _, block in self.grid.pmc_blocks['E']]
+        self.face_Q = [bank((self.pole_count, *block)) for _, _, block in self.grid.pmc_blocks['E']]
+        if (fused_forward or fused_backward) and self.pmc:
+            raise ValueError('The fused CUDA ADE kernels do not implement stored PMC/symmetric faces. Use cuda_kernel="torch" and backward_kernel="torch".')
         if fused_forward or fused_backward:
             # The ADE kernel replaces the dielectric final update. Its shared
             # curl generator only needs a scalar placeholder, not 3*N inverses.
@@ -67,7 +74,17 @@ class _DispersiveSystem(_System):
         return FusedDispersiveAdjointCUDA(self,gradient,signal_bar)
 
     def state(self):
-        return (*super().state(), self.P, self.Q)
+        return (*super().state(), self.P, self.Q, *self.face_P, *self.face_Q)
+
+    @property
+    def base_count(self):
+        """Length of the dielectric state prefix (E, H, psi, E faces, H faces)."""
+        return 2+len(self.segments)+sum(len(blocks) for blocks in self.grid.pmc_blocks.values())
+
+    def split_poles(self, state):
+        """(P, Q, face P blocks, face Q blocks) of a complete state tuple."""
+        base = self.base_count;count = len(self.grid.pmc_blocks['E'])
+        return state[base], state[base+1], tuple(state[base+2:base+2+count]), tuple(state[base+2+count:base+2+2*count])
 
     def coefficients(self, parameters):
         eps, strength, frequency2, damping = self.layout.views(parameters)
@@ -76,23 +93,55 @@ class _DispersiveSystem(_System):
         k = strength/(4*d)
         return eps, a, d, k
 
-    def electric_step(self, state, parameters):
-        e, h = state[:2]
-        p, q = state[-2:]
-        curl, psis = self.curl(h, state[2:-2], False)
-        eps, a, d, k = self.coefficients(parameters)
+    def volume_coefficients(self, coefficients):
+        """Coefficient views restricted to the cell rows; stored PMC rows are cut off."""
+        if not self.pmc:return coefficients
+        n = self.region.shape
+        return tuple(value[..., :n[0], :n[1], :n[2], :] for value in coefficients)
+
+    def face_coefficients(self, coefficients, position):
+        """Coefficients at every node of one stored upper E face or edge, without a component axis."""
+        component = self.grid.pmc_blocks['E'][position][0]
+        sl = self.face_slices[position]
+        def take(value):
+            index = [slice(None)]*value.ndim
+            for axis in range(3):
+                if value.shape[axis-4] > 1:index[axis-4] = sl[axis]
+            index[-1] = component if value.shape[-1] == 3 else 0
+            return value[tuple(index)]
+        return tuple(take(value) for value in coefficients)
+
+    def _ade(self, e, curl, p, q, coefficients):
+        """Coupled trapezoidal update of one E array with its pole banks."""
+        eps, a, d, k = coefficients
         response = (q-a*p)/d
         k_sum = k.sum(0)
         new = ((eps-k_sum)*e + self.grid.courant_number*curl - response.sum(0))/(eps+k_sum)
         delta = response + k*(new+e)
-        return new, p+delta, -q+2*delta, psis, response
+        return new, p+delta, -q+2*delta, response
+
+    def electric_step(self, state, parameters):
+        """Volume (new E, P, Q, psis, response) plus the same tuple for every stored E face."""
+        e, h = state[:2]
+        psis, fe, fh = self.split_state(state[:self.base_count])
+        p, q, face_p, face_q = self.split_poles(state)
+        curl, curl_faces, psis = self.curl_faces(h, fh, psis, False)
+        coefficients = self.coefficients(parameters)
+        new, p, q, response = self._ade(e, curl, p, q, self.volume_coefficients(coefficients))
+        faces = [self._ade(fe[i], curl_faces[i], face_p[i], face_q[i], self.face_coefficients(coefficients, i))
+                 for i in range(len(fe))]
+        return new, p, q, psis, response, faces
 
     def reference_step(self, state, step, parameters):
-        e, p, q, psis, _ = self.electric_step(state, parameters)
+        e, p, q, psis, _, faces = self.electric_step(state, parameters)
         e = self.inject(e, 'E', step, functional=True)
-        curl, psis = self.curl(e, psis, True)
-        h = self.inject(state[1]-self.grid.courant_number*curl, 'H', step, functional=True)
-        return (e, h, *psis, p, q)
+        fe = self.inject_faces([face[0] for face in faces], 'E', step, functional=True)
+        curl, curl_faces, psis = self.curl_faces(e, fe, psis, True)
+        courant = self.grid.courant_number
+        h = self.inject(state[1]-courant*curl, 'H', step, functional=True)
+        _, _, fh = self.split_state(state[:self.base_count])
+        fh = self.inject_faces([f-courant*v for f, v in zip(fh, curl_faces)], 'H', step, functional=True)
+        return (e, h, *psis, *fe, *fh, p, q, *(face[1] for face in faces), *(face[2] for face in faces))
 
     def advance(self, start, end):
         for step in range(start, end):
@@ -105,19 +154,9 @@ class _DispersiveSystem(_System):
                     target.copy_(value)
         self.current_step = end
 
-    def transpose_step(self, state, adjoint, signal_bar):
-        e_bar, h_bar = adjoint[:2]
-        p_bar, q_bar = adjoint[-2:]
-        psi_bar = adjoint[2:-2]
-        for target, (positions, indices) in zip((e_bar, h_bar), self.observation_maps):
-            if indices.numel():
-                target.reshape(-1).index_add_(0, indices, signal_bar.index_select(0, positions))
-        contribution, psi_bar = self.curl_transpose(-self.grid.courant_number*h_bar, psi_bar, True)
-        e_bar = e_bar + contribution
-        old = state[0]
-        p = state[-2]
-        new, _, _, _, response = self.electric_step(state, self.parameters)
-        eps, a, d, k = self.coefficients(self.parameters)
+    def _ade_transpose(self, e_bar, p_bar, q_bar, old, p, new, response, coefficients):
+        """Transpose of _ade for one array: state cotangents and parameter cotangents."""
+        eps, a, d, k = coefficients
         # Source injection follows ADE correction and does not enter P or Q.
         delta_bar = p_bar + 2*q_bar
         common = (k*delta_bar).sum(0)
@@ -136,9 +175,52 @@ class _DispersiveSystem(_System):
         strength_bar = k_bar/(4*d)
         frequency2_bar = .5*a_bar + .25*d_bar
         damping_bar = .5*d_bar
-        contribution, psi_bar = self.curl_transpose(self.grid.courant_number*numerator_bar, psi_bar, False)
-        gradient = self.layout.transpose((eps_bar, strength_bar, frequency2_bar, damping_bar))
-        return (old_bar, h_bar+contribution, *psi_bar, previous_p_bar, previous_q_bar), gradient
+        return old_bar, numerator_bar, previous_p_bar, previous_q_bar, (eps_bar, strength_bar, frequency2_bar, damping_bar)
+
+    def _parameter_bars(self, volume, faces):
+        """Assemble cotangents over the stored material rows before the layout reduction."""
+        if not self.pmc:return volume
+        n = self.region.shape
+        full = []
+        for index, value in enumerate(volume):
+            shape = (*self.epsilon.shape[:3], 3) if index == 0 else (self.pole_count, *self.epsilon.shape[:3], 3)
+            target = torch.zeros(shape, dtype=value.dtype, device=value.device)
+            target[..., :n[0], :n[1], :n[2], :] = value
+            for position, (component, _, _) in enumerate(self.grid.pmc_blocks['E']):
+                sl = self.face_slices[position]
+                target[(..., *sl, component)] += faces[position][index]
+            full.append(target)
+        return tuple(full)
+
+    def transpose_step(self, state, adjoint, signal_bar):
+        base = self.base_count
+        e_bar, h_bar = adjoint[:2]
+        psi_bar, fe_bar, fh_bar = self.split_state(adjoint[:base])
+        p_bar, q_bar, face_p_bar, face_q_bar = self.split_poles(adjoint)
+        for target, (positions, indices) in zip((e_bar, h_bar), self.observation_maps):
+            if indices.numel():
+                target.reshape(-1).index_add_(0, indices, signal_bar.index_select(0, positions))
+        for offset, positions, indices in self.face_observation_maps:
+            adjoint[offset].reshape(-1).index_add_(0, indices, signal_bar.index_select(0, positions))
+        courant = self.grid.courant_number
+        contribution, faces, psi_bar = self.curl_faces_transpose(-courant*h_bar, [-courant*f for f in fh_bar], psi_bar, True)
+        e_bar = e_bar + contribution
+        fe_bar = [f+v for f, v in zip(fe_bar, faces)]
+        old = state[0]
+        _, fe_old, _ = self.split_state(state[:base])
+        p, _, face_p, _ = self.split_poles(state)
+        new, _, _, _, response, new_faces = self.electric_step(state, self.parameters)
+        coefficients = self.coefficients(self.parameters)
+        old_bar, numerator_bar, previous_p_bar, previous_q_bar, bars = self._ade_transpose(
+            e_bar, p_bar, q_bar, old, p, new, response, self.volume_coefficients(coefficients))
+        face_results = [self._ade_transpose(fe_bar[i], face_p_bar[i], face_q_bar[i], fe_old[i], face_p[i], new_faces[i][0],
+                                            new_faces[i][3], self.face_coefficients(coefficients, i))
+                        for i in range(len(fe_bar))]
+        contribution, faces, psi_bar = self.curl_faces_transpose(courant*numerator_bar, [courant*r[1] for r in face_results], psi_bar, False)
+        fh_bar = [f+v for f, v in zip(fh_bar, faces)]
+        gradient = self.layout.transpose(self._parameter_bars(bars, [r[4] for r in face_results]))
+        return (old_bar, h_bar+contribution, *psi_bar, *(r[0] for r in face_results), *fh_bar,
+                previous_p_bar, previous_q_bar, *(r[2] for r in face_results), *(r[3] for r in face_results)), gradient
 
 
 class DispersiveSimulation(DifferentiableSimulation):
@@ -162,8 +244,9 @@ class DispersiveSimulation(DifferentiableSimulation):
         # Keep the Torch fallback as auto until application-scale performance
         # comparisons establish when native ADE kernels are beneficial.
         super().__init__(project, replace(options, backward_kernel='torch') if options.backward_kernel=='auto' else options)
-        from .boundaries import reject_pmc_faces
-        reject_pmc_faces(self.project.region, 'DispersiveSimulation')
+        from .endpoint_native import uses_endpoint
+        if uses_endpoint(self.project.region) and (self.project.region.cuda_kernel == 'fused' or self.options.backward_kernel == 'fused'):
+            raise ValueError('The fused CUDA ADE kernels do not implement stored PMC/symmetric faces. Use cuda_kernel="torch" and backward_kernel="torch".')
         if any(s.enabled and s.injection != 'soft' for s in self.project.sources):
             raise ValueError('Dispersive differentiation currently requires soft source injection.')
 
@@ -176,8 +259,10 @@ class DispersiveSimulation(DifferentiableSimulation):
             raise ValueError('Streamed epsilon_inf must be a CPU tensor.')
         if not isinstance(epsilon, torch.Tensor) or epsilon.dtype not in (torch.float32, torch.float64):
             raise ValueError('epsilon_inf must be a real FP32/FP64 tensor.')
-        if tuple(epsilon.shape) not in (r.shape, r.shape+(3,)):
-            raise ValueError('epsilon_inf shape must match the grid, optionally with three components.')
+        from .boundaries import material_shape
+        grid = material_shape(r)
+        if tuple(epsilon.shape) not in (grid, grid+(3,)):
+            raise ValueError('epsilon_inf shape must match the grid plus one stored row on every upper PMC/symmetric axis, optionally with three components.')
         if epsilon.device.type not in ('cpu', 'cuda') or (epsilon.dtype == torch.float64) != (r.precision == 'float64'):
             raise ValueError('epsilon_inf device and precision must match the resident CPU/CUDA contract.')
         if not bool(torch.isfinite(epsilon).all()) or bool((epsilon < 1).any()):
@@ -197,8 +282,8 @@ class DispersiveSimulation(DifferentiableSimulation):
         if reference and math.prod(r.shape)*r.steps*(1+count)>2_000_000:
             raise ValueError('Full-autograd ADE oracle is restricted to two million pole-cell-steps.')
         for value in (strength, omega0, gamma):
-            if value.shape not in ((), (count,), (count, *r.shape), (count, *r.shape, 3)):
-                raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3).')
+            if value.shape not in ((), (count,), (count, *grid), (count, *grid, 3)):
+                raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3), with stored upper PMC rows included.')
         layout = _ParameterLayout(tuple(tuple(value.shape) for value in (epsilon, strength, omega0, gamma)), count)
         return (epsilon, strength, omega0, gamma), layout
 
@@ -228,7 +313,9 @@ class DispersiveSimulation(DifferentiableSimulation):
                 pole_count=layout.pole_count,parameter_elements=sum(math.prod(s) for s in layout.shapes))
         parameters, layout = self._pack(epsilon, strength, omega0, gamma,admission=admit)
         count = layout.pole_count
+        from .boundaries import BoundaryDescription
         n = math.prod(self.project.region.shape)
+        faces = sum(math.prod(shape) for _, _, shape in BoundaryDescription(self.project.region).pmc_blocks['E'])
         real_item = epsilon.element_size()
         field_item = real_item*(2 if self.project.region.complex_fields else 1)
         fused_forward = epsilon.is_cuda and self.project.region.cuda_kernel == 'fused'
@@ -241,7 +328,7 @@ class DispersiveSimulation(DifferentiableSimulation):
         result.report.update(adjoint='discrete Yee/CPML/trapezoidal ADE',
             forward_backend='fused CUDA ADE' if fused_forward else 'torch CUDA' if epsilon.is_cuda else 'torch CPU',
             backward_backend='fused CUDA ADE transpose' if fused_backward else 'torch explicit ADE transpose', oscillator_count=count,
-            material_state_bytes=6*count*n*field_item,
+            material_state_bytes=(6*n+2*faces)*count*field_item,
             material_parameter_bytes=parameters.numel()*real_item,
             material_parameter_layout='compact original shapes with broadcast transpose reductions',
             material_parameters='epsilon_inf, strength [(rad/s)^2], omega0 [rad/s], gamma [rad/s]')

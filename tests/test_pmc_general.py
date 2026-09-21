@@ -478,9 +478,6 @@ def test_rejected_combinations_raise_explicitly():
     with pytest.raises(ValueError, match='periodic or Bloch mixing'):Project.model_validate(payload)
     payload = p.model_dump();payload['region']['interface_method'] = 'subpixel'
     with pytest.raises(ValueError, match='staircase'):Project.model_validate(payload)
-    payload = p.model_dump()
-    payload['materials'] = [Material(name='metal', model='drude').model_dump()];payload['structures'] = [Structure(material='metal').model_dump()]
-    with pytest.raises(ValueError, match='ADE'):Project.model_validate(payload)
 
     class _Special(_System):pass
     with pytest.raises(ValueError, match='not implemented by _Special'):_Special(p, eps)
@@ -490,8 +487,9 @@ def test_rejected_combinations_raise_explicitly():
     from torchfdtd.source_adjoint import SourceWaveformSimulation
     from torchfdtd.streamed_geometry import StreamedGeometrySimulation
     from torchfdtd.adjoint_batch import RecomputedAdjointBatch, AdjointCase
-    for factory in (ReversibleSimulation, DispersiveSimulation, DifferentiablePlaneSimulation, SourceWaveformSimulation, StreamedGeometrySimulation):
+    for factory in (ReversibleSimulation, DifferentiablePlaneSimulation, SourceWaveformSimulation, StreamedGeometrySimulation):
         with pytest.raises(ValueError, match='PMC/symmetric faces are not implemented by'):factory(p)
+    assert DispersiveSimulation(p).project.region.boundaries.x_max.kind == 'pmc'   # face ADE banks: tests/test_pmc_dispersive.py
     from torchfdtd.execution_tuning import AdjointExecutionPolicy
     with pytest.raises(ValueError, match='PMC/symmetric faces are not implemented by'):
         RecomputedAdjointBatch([AdjointCase(p, AdjointExecutionPolicy(resident=AdjointOptions(), device='cpu'))])

@@ -83,12 +83,13 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     cpml = sum(math.prod(s['shape']) for segments in boundary.cpml.values() for s in segments)
     # Stored upper PMC faces/edges count their exact elements, not a padded volume.
     faces = sum(math.prod(shape) for blocks in boundary.pmc_blocks.values() for _, _, shape in blocks)
+    electric_faces = sum(math.prod(shape) for _, _, shape in boundary.pmc_blocks['E'])
     pmc = bool(boundary.pmc_lower or boundary.pmc_upper)
     material_item = epsilon.element_size()
     # Fields, CPML memories and source/observation histories are complex for
     # Bloch propagation even though epsilon and its gradient remain real.
     item = material_item*(2 if region.complex_fields else 1)
-    state = (6*n+cpml+faces+6*pole_count*n)*item
+    state = (6*n+cpml+faces+6*pole_count*n+2*pole_count*electric_faces)*item
     depth = min(options.temporal_depth, region.steps)
     width = min(options.slab_width, region.shape[0])+2*depth
     if 0 not in boundary.wrap:width = min(width, region.shape[0])
@@ -113,7 +114,8 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     tile_workspace = (128+144*pole_count+(18+6*pole_count)*local_slots)*tile_cells*item
     buffers = options.tile_buffers if options.tile_transfers == 'async' else 1
     initial_storage = (2+sum(len(segments) for segments in boundary.cpml.values())
-                       +sum(len(blocks) for blocks in boundary.pmc_blocks.values())+(2 if pole_count else 0))*item
+                       +sum(len(blocks) for blocks in boundary.pmc_blocks.values())
+                       +((2+2*len(boundary.pmc_blocks['E'])) if pole_count else 0))*item
     # The immutable all-zero host initial bank is represented by scalar views.
     # At most C saved block states, one current adjoint and two evolving
     # primal banks coexist during replay. Transpose instead holds a primal,

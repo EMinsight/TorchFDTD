@@ -96,6 +96,9 @@ class _Grid:
 
 
 class _System:
+    # Declared on each class that implements the stored PMC face topology; not inherited.
+    _pmc_faces=True
+
     def __init__(self, project, epsilon, *, prepare_updates=True, observation_monitors=None,
                  prepare_kernels=True, prepare_permittivity=True):
         self.project=project
@@ -116,8 +119,8 @@ class _System:
         # upper walls keep their tangential E, normal H and E edges in stored
         # blocks. Epsilon then carries one extra sampled row per upper wall.
         self.pmc=bool(template.pmc_lower or template.pmc_upper)
-        if self.pmc and type(self) is not _System:
-            raise ValueError(f'PMC/symmetric faces are not implemented by {type(self).__name__}; only the plain Yee system carries the stored face topology.')
+        if self.pmc and not type(self).__dict__.get('_pmc_faces',False):
+            raise ValueError(f'PMC/symmetric faces are not implemented by {type(self).__name__}; only the plain and dispersive Yee systems carry the stored face topology.')
         if tuple(epsilon.shape[:3])!=material_shape(r) or epsilon.ndim not in (3,4) or (epsilon.ndim==4 and epsilon.shape[3]!=3):
             raise ValueError(f'epsilon shape must be {material_shape(r)} or {material_shape(r,True)}, including stored upper PMC rows.')
         volume=self._volume(epsilon)

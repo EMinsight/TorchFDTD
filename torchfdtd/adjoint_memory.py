@@ -31,8 +31,9 @@ def _cuda_index_contract(region,monitor_count,observation_steps):
 
 
 def _material_shapes(region, parameter_shapes):
+    from .boundaries import material_shape
     shapes=tuple(tuple(s) for s in parameter_shapes)
-    grid=region.shape
+    grid=material_shape(region)
     if len(shapes)!=4 or shapes[0] not in (grid,grid+(3,)):
         raise ValueError('Provide four material shapes starting with the epsilon_inf grid shape.')
     if not shapes[1] or isinstance(shapes[1][0],bool) or not isinstance(shapes[1][0],int) or not 1<=shapes[1][0]<=64:
@@ -142,7 +143,8 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     cpml=sum(math.prod(s['shape']) for s in segments)
     # Stored upper PMC faces/edges are exact element counts, not a padded volume.
     faces=sum(math.prod(shape) for blocks in boundary.pmc_blocks.values() for _,_,shape in blocks)
-    state=(6*n+cpml+faces+6*pole_count*n)*item
+    electric_faces=sum(math.prod(shape) for _,_,shape in boundary.pmc_blocks['E'])
+    state=(6*n+cpml+faces+6*pole_count*n+2*pole_count*electric_faces)*item
     from .boundaries import material_shape
     workspace_model,workspace_parts=_workspace(project,options,device,boundary,segments,
         math.prod(material_shape(region)),cpml,item,real_item,pole_count,state,monitor_count)
@@ -173,7 +175,7 @@ def _resident_reservation(project, options, device, spectral=None, *, pole_count
     asynchronous=options.checkpoint_transfers=='async' and (host_slots or disk_slots)
     staging_slots=options.staging_slots if asynchronous else 0
     host_checkpoint=state*(host_slots+staging_slots+(1 if disk_slots else 0))
-    array_count=2+len(segments)+sum(len(blocks) for blocks in boundary.pmc_blocks.values())+(2 if pole_count else 0)
+    array_count=2+len(segments)+sum(len(blocks) for blocks in boundary.pmc_blocks.values())+((2+2*len(boundary.pmc_blocks['E'])) if pole_count else 0)
     disk_checkpoint=(state+4096+512*array_count)*disk_slots
     device_checkpoint=device_slots*state
     device_staging=staging_slots*state
