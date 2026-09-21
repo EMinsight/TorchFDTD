@@ -135,7 +135,9 @@
           ],
           "planned_test_commands": [],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_completion_program_documents.py::test_plan_points_to_the_program_and_handoff_has_the_required_sections"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null,
@@ -154,7 +156,9 @@
           ],
           "planned_test_commands": [],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_completion_program_documents.py::test_release_scope_separates_profiles_and_blocks_hpc_without_two_devices"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -177,7 +181,10 @@
           ],
           "planned_test_commands": [],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_completion_program_documents.py::test_program_text_matches_the_recorded_specification_hash",
+            "tests/test_completion_program_documents.py::test_gate_file_lists_every_stage_with_dependencies_and_profiles"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -244,19 +251,21 @@
           "title": "자동 graded mesh와 미분 평면 모델의 격자 불일치.",
           "specification": "자동 graded mesh와 미분 평면 모델의 격자 불일치.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
             "torchfdtd/adjoint_planes.py",
-            "torchfdtd/plane_execution.py",
             "torchfdtd/mesh.py",
             "tests/test_adjoint_planes.py",
-            "tests/test_plane_execution.py"
+            "tests/test_plane_mesh_combinations.py"
           ],
           "planned_test_commands": [],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_adjoint_planes.py::test_internal_solver_keeps_the_auto_refined_plane_mesh",
+            "tests/test_plane_mesh_combinations.py"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -266,17 +275,20 @@
           "title": "reference signature의 실제 격자 누락.",
           "specification": "reference signature의 실제 격자 누락.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
             "torchfdtd/adjoint_planes.py",
-            "torchfdtd/reference_cache.py",
-            "tests/test_reference_cache.py"
+            "torchfdtd/source_adjoint.py",
+            "tests/test_adjoint_planes.py"
           ],
           "planned_test_commands": [],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_adjoint_planes.py::test_plane_signature_tracks_realized_mesh_not_placement_or_structure",
+            "tests/test_adjoint_planes.py::test_reference_fingerprint_ignores_ids_names_and_display_options"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null
@@ -300,9 +312,7 @@
           ],
           "actual_test_commands": [],
           "required_tests": [
-            "tests/test_detector_allocation.py::test_fp32_dft_scale_ratio_and_gradient",
-            "tests/test_detector_allocation.py::test_dft_scale_field_and_total_transmission_gradcheck",
-            "tests/test_detector_allocation.py::test_scaled_ratio_matches_unscaled_formula_on_unit_fields"
+            "tests/test_detector_allocation.py"
           ],
           "evidence": [],
           "blocker": null,
@@ -360,11 +370,14 @@
             "README.md",
             "docs/MEASUREMENTS.md",
             "docs/BEYOND_VRAM_FP32.md",
-            "docs/BEYOND_VRAM_RESTART.md"
+            "docs/validation/beyond_vram_restart_5880.json",
+            "tests/test_readme_measurements.py"
           ],
           "planned_test_commands": [],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_readme_measurements.py"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": null,
