@@ -1,0 +1,134 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T170718Z-g8-07-b934b710",
+  "task": "G8-07",
+  "stage": "G8",
+  "task_title": "README의 모든 기본 예제를 installed wheel에서 실행한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_clean_install.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-07.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T02:07:12.282532+09:00",
+  "recorded_at": "2026-09-21T17:07:18+00:00",
+  "source_commit": "656c5075eabd4d1cb11aec250a10c9e1ce87b2e6",
+  "source_tree_sha256": "1c4b9dd2f2062b57a371dbec17234ae3f065f348b26cd955097dfaf8b21f106f",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": "0cc7b719bc14df32d16cf831b555686846e91732b59621ee7dfca08057316526",
+  "package_path": "D:/TorchFDTD/.local/dist/b768cc74102e/torchfdtd-0.14.0.dev0-py3-none-any.whl",
+  "test_source_sha256": {
+    "tests/test_clean_install.py": "34107a1ded8667dadc401d06bc4814dd46e9ce057ca6574d8c1152868f218ee7"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G8-07_readme_examples_installed_wheel.json",
+  "fixture_sha256": "fc404f76c90630f57a714d68b52d6e4349415566e7ee55ebab11953b5f8f49cd",
+  "acceptance_criteria_path": "docs/validation/cases/G8-07_readme_examples_installed_wheel.json",
+  "acceptance_criteria_sha256": "fc404f76c90630f57a714d68b52d6e4349415566e7ee55ebab11953b5f8f49cd",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "marker_rule": "a fenced ```python block is runnable in the CPU environment unless the nearest non-blank line above it is <!-- readme-example: cuda --> (runs in the CUDA environment) or <!-- readme-example: skip: reason --> (never runs, reason recorded); blocks in other languages are listed, not executed",
+    "runner": "scripts/run_readme_examples.py, called by scripts/clean_install_check.py after both environments exist; blocks run in README order in one working directory <local-root>/tmp/clean_install/work/readme, each in a fresh interpreter process with PYTHONPATH removed and TMP/TEMP under that directory",
+    "blocks_on_declaration": [
+      "powershell: wheel install (not executed)",
+      "powershell: checkout development install (not executed)",
+      "python, cuda: the 3D waveguide, 8 x 6 x 2 um at 0.05 um, 1000 steps, backend cuda, cuda_kernel fused; project.save('project.json'), Simulation.run, result.save('results/run.npz')",
+      "python, cpu: the 2D default waveguide, backend auto, Simulation.run, result.save('results/first.npz'), Result.load and print of summary['backend']",
+      "powershell: verification commands (not executed)"
+    ],
+    "interpreter_check": "each interpreter must import torchfdtd from its own sys.prefix and not from the checkout before any block runs",
+    "platforms": "Windows 11 on this host; Linux NOT_RUN (the same command runs unchanged in WSL: python scripts/clean_install_check.py --local-root <dir> --find-links <wheels> --skip-cuda)"
+  },
+  "reference_method": "the exit code of each block's process; the block text itself is the reference and is hashed into the record so that a changed block invalidates it",
+  "observables": [
+    {
+      "name": "block_status",
+      "unit": "passed|failed|skipped|not_executed",
+      "definition": "per block with its mode, line, SHA-256, interpreter, exit code, duration and output tails"
+    },
+    {
+      "name": "runnable_blocks_sha256",
+      "unit": "hex",
+      "definition": "digest over the code of every cpu and cuda block in README order"
+    },
+    {
+      "name": "interpreter_location",
+      "unit": "path",
+      "definition": "torchfdtd.__file__ and sys.prefix of each interpreter"
+    }
+  ],
+  "acceptance_limits": {
+    "blocks": "every cpu block exits 0 in the CPU environment and every cuda block exits 0 in the CUDA environment; at least one block saves a result and one loads it back; skipped blocks carry a reason",
+    "record": "readme_examples.all_runnable_passed true in the newest docs/validation/clean_install record and readme.runnable_blocks_sha256 equal to the digest of the current README",
+    "isolation": "every interpreter's torchfdtd.__file__ lies inside its sys.prefix and outside the checkout",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-07 (install, first computation, save, load on every advertised platform, from a changed working directory); pass/fail only"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 6,
+    "passed": [
+      "tests/test_clean_install.py::test_record_is_complete_and_every_step_passed",
+      "tests/test_clean_install.py::test_wheel_in_the_record_carries_the_committed_browser_assets",
+      "tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel",
+      "tests/test_clean_install.py::test_every_runnable_readme_block_passed_on_the_installed_wheel",
+      "tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment",
+      "tests/test_clean_install.py::test_readme_block_parser_reads_markers_and_languages"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 2.931,
+    "suite_timestamp": "2026-09-22T02:07:12.282532+09:00"
+  },
+  "required_tests": [
+    "tests/test_clean_install.py::test_every_runnable_readme_block_passed_on_the_installed_wheel",
+    "tests/test_clean_install.py::test_readme_block_parser_reads_markers_and_languages"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T170718Z-g8-07-b934b710/junit.xml",
+      "sha256": "7afe912cbb40551284dfa569c5472be1ca9d39685556bf44d6428b3a50de9a9b",
+      "bytes": 1005,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G8-07.xml"
+    }
+  ],
+  "applicable_scope": "G8-07 Windows 11 only: the cuda README block ran in the clean CUDA venv on the RTX 3060 and the cpu block in the clean CPU-only venv, both from a working directory outside the checkout, per the newest docs/validation/clean_install record. Linux column NOT_RUN: run D:/TorchFDTD/.venv/Scripts/python.exe scripts/clean_install_check.py --local-root <linux dir> --skip-cuda in WSL and record again. macOS not run.",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

@@ -1,0 +1,155 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T170637Z-g8-05-29a464aa",
+  "task": "G8-05",
+  "stage": "G8",
+  "task_title": "최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_clean_install.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G8-05.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T02:06:36.217299+09:00",
+  "recorded_at": "2026-09-21T17:06:37+00:00",
+  "source_commit": "656c5075eabd4d1cb11aec250a10c9e1ce87b2e6",
+  "source_tree_sha256": "9c053ad11c8afa7f1c80b14b3418405ae8ed47f5858a068cd756a8e42b7acc47",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": "0cc7b719bc14df32d16cf831b555686846e91732b59621ee7dfca08057316526",
+  "package_path": "D:/TorchFDTD/.local/dist/b768cc74102e/torchfdtd-0.14.0.dev0-py3-none-any.whl",
+  "test_source_sha256": {
+    "tests/test_clean_install.py": "34107a1ded8667dadc401d06bc4814dd46e9ce057ca6574d8c1152868f218ee7"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G8-05_wheel_clean_install.json",
+  "fixture_sha256": "3d2c6fc2e3e1e50d0d2cbb2a2398b2bf0dfcf95d85181911346b47c5c0b10a4c",
+  "acceptance_criteria_path": "docs/validation/cases/G8-05_wheel_clean_install.json",
+  "acceptance_criteria_sha256": "3d2c6fc2e3e1e50d0d2cbb2a2398b2bf0dfcf95d85181911346b47c5c0b10a4c",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "script": "scripts/clean_install_check.py, run from the checkout root on a clean tree; every venv, wheel, scratch file and the pip cache under --local-root (D:/TorchFDTD/.local on this host)",
+    "wheel": "python -m build --wheel from a fresh staging copy of torchfdtd/, pyproject.toml, README.md, LICENSE and THIRD_PARTY_NOTICES.txt into <local-root>/dist/<commit>",
+    "cpu_environment": "python -m venv (no system site-packages) from the base interpreter of D:/TorchFDTD/.venv; pip install torch --index-url https://download.pytorch.org/whl/cpu with --find-links to the local wheel cache; pip install <wheel>; the venv's bundled pip, not upgraded",
+    "cuda_environment": "python -m venv as above; pip install torch==2.10.0+cu126 from the local wheel cache (cu126 index as fallback); pip install '<wheel>[cuda-kernels]'",
+    "working_directory": "<local-root>/tmp/clean_install/work/<env>, outside the checkout; PYTHONPATH removed from the environment",
+    "cpu_probe": "import torchfdtd (file inside sys.prefix, outside the checkout); 2D region 2 x 2 um, mesh 0.1 um, 3 PML cells, 80 steps, one Ez point source (wavelength 1 um, 1 cycle), one point monitor at x 0.4 um; Result.save then Result.load",
+    "server": "python -m torchfdtd.cli serve --port <free loopback port>; GET /, every /assets/ file the index references, /api/health, /api/capabilities; then terminate",
+    "cuda_probe": "the same 2D region with backend cuda, cuda_kernel fused, cuda_monitor_kernel fused, 20 steps",
+    "doctor": "torchfdtd doctor --json in both environments",
+    "host": "Windows 11, RTX 3060 12 GB, driver 591.86, base Python 3.10.2"
+  },
+  "reference_method": "git HEAD blobs of torchfdtd/web for the packaged assets; the working tree for the wheel payload; the fresh venv's own sys.prefix for the import location; finite nonzero fields and an equal save/load cycle for the runs; HTTP status codes for the server",
+  "observables": [
+    {
+      "name": "wheel_sha256",
+      "unit": "hex",
+      "definition": "SHA-256 of the built wheel file"
+    },
+    {
+      "name": "wheel_payload_equals_tree",
+      "unit": "boolean",
+      "definition": "the torchfdtd/ entries of the wheel are exactly the package files of the tree and byte-identical"
+    },
+    {
+      "name": "web_assets_match_committed",
+      "unit": "boolean",
+      "definition": "every torchfdtd/web entry of the wheel is byte-identical to git HEAD"
+    },
+    {
+      "name": "frontend_assets_current",
+      "unit": "boolean",
+      "definition": "no commit touching frontend/, vite.config.js, package.json or package-lock.json after the last commit touching torchfdtd/web"
+    },
+    {
+      "name": "step_status",
+      "unit": "passed|failed|skipped",
+      "definition": "one entry per step of scripts/clean_install_check.py with its duration"
+    },
+    {
+      "name": "package_list",
+      "unit": "pip freeze lines",
+      "definition": "every package in each environment"
+    },
+    {
+      "name": "server_routes",
+      "unit": "HTTP status",
+      "definition": "status of /, each referenced asset, /api/health and /api/capabilities"
+    }
+  ],
+  "acceptance_limits": {
+    "wheel": "one wheel built; payload equals the tree; torchfdtd/web/index.html and at least one torchfdtd/web/assets/ file present; web_assets_match_committed true; frontend_assets_current true",
+    "cpu_environment": "every step passed: venv, torch install, wheel install with the bundled pip, package list, import outside the checkout, 2D run with finite nonzero fields and signals, NPZ save then load with equal electric field and summary steps 80 and backend cpu, server 200 on / with /assets/ links, 200 on every asset, 200 on /api/health with a version, 200 on /api/capabilities, doctor exit 0 with backend cpu",
+    "cuda_environment": "every step passed: venv, CUDA torch install, wheel install with the cuda-kernels extra (cupy-cuda12x in the package list), fused 2D run with summary backend cuda and cuda_kernel fused, doctor exit 0 with fused_kernels ok and backend cuda/fused",
+    "record": "written to docs/validation/clean_install/<time>-<commit>.json with dirty_paths empty; all_passed true; tests/test_clean_install.py reads the newest record and checks it against the current packaging inputs, the committed assets and, when the file is on this host, the wheel hash",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-05 and the G8 pass rule (no manual path edits, no source edits, no frontend build for a clean-install user); pass/fail only, no numeric threshold"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 6,
+    "passed": [
+      "tests/test_clean_install.py::test_record_is_complete_and_every_step_passed",
+      "tests/test_clean_install.py::test_wheel_in_the_record_carries_the_committed_browser_assets",
+      "tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel",
+      "tests/test_clean_install.py::test_every_runnable_readme_block_passed_on_the_installed_wheel",
+      "tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment",
+      "tests/test_clean_install.py::test_readme_block_parser_reads_markers_and_languages"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 0.327,
+    "suite_timestamp": "2026-09-22T02:06:36.217299+09:00"
+  },
+  "required_tests": [
+    "tests/test_clean_install.py::test_record_is_complete_and_every_step_passed",
+    "tests/test_clean_install.py::test_wheel_in_the_record_carries_the_committed_browser_assets",
+    "tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T170637Z-g8-05-29a464aa/junit.xml",
+      "sha256": "8902feae737104d84a3711a2171c84412a8f91654f98ac84b5516b9309b6fba2",
+      "bytes": 1005,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G8-05.xml"
+    }
+  ],
+  "applicable_scope": "G8-05 on Windows 11 only: the newest docs/validation/clean_install record (wheel built from b768cc7, clean CPU-only venv with torch 2.14.0+cpu and clean CUDA venv with torch 2.10.0+cu126 and cupy-cuda12x 13.6.0 on the RTX 3060) is complete and matches the committed browser assets and packaging inputs. Linux and macOS not run.",
+  "note": "The record was written by scripts/clean_install_check.py at b768cc7 on a clean tree; the wheel hashed here is the one it installed.",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
