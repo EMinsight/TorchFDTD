@@ -1,0 +1,169 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T164503Z-g4-05-300f0a95",
+  "task": "G4-05",
+  "stage": "G4",
+  "task_title": "CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_suite_policy.py tests/test_release_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-05.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T01:43:24.346343+09:00",
+  "recorded_at": "2026-09-21T16:45:03+00:00",
+  "source_commit": "e66e499d9db74b952734b36339c87e6c59cc10e9",
+  "source_tree_sha256": "09d79ca64299ea81565d5e8a69bd27b6ee3478abaa7c3998fdd7869dacca23a1",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_suite_policy.py": "6e60cfd9f417a97679cd7aa5c08952851b7dfa6a94991ed9b2525a0d4d2eb0f4",
+    "tests/test_release_gates.py": "8ea3714249732dddb45684412b35debd867dbc515bbc338fe636203852a518f9"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G4-05_suite_separation.json",
+  "fixture_sha256": "df967f817731aabcc43b6a3d55b9277911ee95ab5c91f1210afdb3ab2e55baa1",
+  "acceptance_criteria_path": "docs/validation/cases/G4-05_suite_separation.json",
+  "acceptance_criteria_sha256": "df967f817731aabcc43b6a3d55b9277911ee95ab5c91f1210afdb3ab2e55baa1",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": null,
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "suites": {
+      "cpu-pr": "-m 'not cuda and not long', CUDA_VISIBLE_DEVICES=-1, GitHub Actions",
+      "gpu-nightly": "-m 'not long' --gpu-required on a lab GPU host, trusted commits",
+      "release-full": "--gpu-required with TORCHFDTD_RUN_CUDA_BOOTSTRAP_TEST=1 and TORCHFDTD_RUN_CPML_KERNEL_CUDA_TEST=1 on an idle lab GPU host"
+    },
+    "runner": "scripts/run_suite.py",
+    "markers": "pyproject.toml [tool.pytest.ini_options] markers and tests/conftest.py (collection rules, --gpu-required, optional prefix)",
+    "recorder": "scripts/record_gate_evidence.py classifies skips via release_audit.gpu_required_skips; scripts/check_release_gates.py rejects evidence with such skips",
+    "synthetic_policy_tests": "tests/test_suite_policy.py runs tests/conftest.py on a synthetic module under pytester with CUDA hidden",
+    "marker_validation_on_2026_09_22": "pytest -m cuda with CUDA_VISIBLE_DEVICES=-1: 603 skipped, 0 passed, 0 failed (no CPU test carries the cuda marker); the cpu-pr suite with CUDA hidden is run separately and its skip reasons are recorded in the handoff"
+  },
+  "reference_method": "behavioural specification: injected JUnit reports and synthetic test modules with known outcomes",
+  "observables": [
+    {
+      "name": "marker_selection",
+      "unit": "set",
+      "definition": "which synthetic tests carry the cuda marker"
+    },
+    {
+      "name": "gpu_required_outcomes",
+      "unit": "counts",
+      "definition": "passed/skipped/failed/error counts and JUnit messages under --gpu-required with CUDA hidden"
+    },
+    {
+      "name": "recorder_state",
+      "unit": "string",
+      "definition": "verification_state assigned to a run whose JUnit contains a CUDA skip"
+    },
+    {
+      "name": "judge_exit",
+      "unit": "integer",
+      "definition": "exit status of check_release_gates on such evidence"
+    }
+  ],
+  "acceptance_limits": {
+    "markers": "explicit cuda marker, CUDA skipif reason, CUDA parameter with a gate idiom and an unconditional gate call are marked; conditional gates, CPU parameters and gate-free CUDA parameters are not",
+    "gpu_required": "a CUDA-reason skip or any skip of a cuda-marked test becomes a failure (or a setup error for skipif); optional tests keep skipping with the 'optional platform check: ' prefix; without the flag every skip stays a skip",
+    "recorder": "a CUDA-reason skip in a recorded run assigns FAILED even when required_tests does not list the test; an optional-prefixed skip does not; the judge exits 1 on such evidence and classifies evidence recorded before the field existed",
+    "workflow": "the CI job launches scripts/run_suite.py cpu-pr",
+    "gpu_suites": "refuse to start without a CUDA device (exit 2)",
+    "source_of_limits": "fixture-specific behavioural rules; no numerical threshold applies"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 31,
+    "passed": [
+      "tests/test_suite_policy.py::test_cuda_marker_rules",
+      "tests/test_suite_policy.py::test_gpu_required_turns_cuda_skips_into_failures",
+      "tests/test_suite_policy.py::test_without_gpu_required_cuda_skips_stay_skips",
+      "tests/test_suite_policy.py::test_cpu_pr_suite_hides_cuda_and_deselects_cuda_and_long_tests",
+      "tests/test_suite_policy.py::test_gpu_nightly_suite_requires_the_gpu_and_excludes_long_tests",
+      "tests/test_suite_policy.py::test_release_full_suite_enables_opt_in_tests",
+      "tests/test_suite_policy.py::test_gpu_suites_refuse_to_run_without_a_cuda_device",
+      "tests/test_suite_policy.py::test_markers_are_declared_in_pyproject",
+      "tests/test_release_gates.py::test_passing_junit_records_verified_evidence_with_every_required_field",
+      "tests/test_release_gates.py::test_injected_failure_marks_failed_and_judge_rejects",
+      "tests/test_release_gates.py::test_injected_error_marks_failed",
+      "tests/test_release_gates.py::test_skipped_required_test_stays_not_run_and_judge_exits_nonzero",
+      "tests/test_release_gates.py::test_skipped_unrequired_test_still_verifies_but_required_absence_does_not",
+      "tests/test_release_gates.py::test_gpu_required_skip_of_an_unlisted_test_is_a_failure",
+      "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not[could not import 'cupy': No module named cupy]",
+      "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not[Requires installed GPU]",
+      "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not[CUDA GPU not available]",
+      "tests/test_release_gates.py::test_judge_classifies_gpu_skips_in_evidence_recorded_without_the_field",
+      "tests/test_release_gates.py::test_nonzero_exit_code_without_failures_does_not_verify",
+      "tests/test_release_gates.py::test_parametrized_required_test_matches_instances",
+      "tests/test_release_gates.py::test_modified_test_file_after_recording_is_a_hash_mismatch",
+      "tests/test_release_gates.py::test_evidence_from_a_commit_that_is_not_an_ancestor_is_stale",
+      "tests/test_release_gates.py::test_missing_evidence_file_is_reported",
+      "tests/test_release_gates.py::test_hand_marked_verified_without_evidence_is_rejected",
+      "tests/test_release_gates.py::test_hand_marked_verified_over_failed_evidence_is_rejected",
+      "tests/test_release_gates.py::test_profile_judgement_needs_every_required_task_and_reports_blockers",
+      "tests/test_release_gates.py::test_failed_task_outside_the_profile_blocks_release",
+      "tests/test_release_gates.py::test_dirty_tree_is_recorded_in_the_manifest",
+      "tests/test_release_gates.py::test_fixture_and_criteria_hashes_are_recorded_and_checked",
+      "tests/test_release_gates.py::test_unknown_task_is_refused",
+      "tests/test_release_gates.py::test_repository_gate_file_is_adopted_and_not_yet_releasable"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 89.667,
+    "suite_timestamp": "2026-09-22T01:43:24.346343+09:00"
+  },
+  "required_tests": [
+    "tests/test_suite_policy.py",
+    "tests/test_release_gates.py::test_gpu_required_skip_of_an_unlisted_test_is_a_failure",
+    "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not",
+    "tests/test_release_gates.py::test_judge_classifies_gpu_skips_in_evidence_recorded_without_the_field"
+  ],
+  "skipped_required_tests": [],
+  "gpu_required_skips": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T164503Z-g4-05-300f0a95/junit.xml",
+      "sha256": "db4d98839cc55e8849680f00234c1d68f55991ecad1bb4c0a91a531b2417f3ea",
+      "bytes": 4174,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/g4-05.xml"
+    }
+  ],
+  "applicable_scope": "G4-05 on the local host (CPU and RTX 3060): marker rules, --gpu-required outcomes and the suite runner on synthetic tests under pytester, plus the recorder and judge failure injections; the marker inventory run (pytest -m cuda with CUDA hidden: 603 skipped, 0 passed) and the cpu-pr run with CUDA hidden are recorded in DEVELOPMENT_HANDOFF.md, not here; no gpu-nightly run recorded on the RTX 5880 Ada",
+  "note": null,
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
