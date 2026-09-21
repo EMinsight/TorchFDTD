@@ -142,6 +142,12 @@ def test_prepare_replaces_the_interpreter_and_the_junit_path_and_keeps_the_prefi
 
 def test_selection_skips_tasks_without_evidence_and_cuda_runs_on_a_host_without_a_device(repo):
     runs = repo / 'docs' / 'validation' / 'runs'
+    # The fixture's G1-03 run stands for a CPU-only recording whatever host recorded it.
+    for run_id in task_of(repo, 'G1-03')['evidence']:
+        evidence_path = runs / run_id / 'evidence.json'
+        evidence = json.loads(evidence_path.read_text(encoding='utf-8'))
+        evidence['environment']['torch_cuda_available'] = False
+        evidence_path.write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
     rows = {row[1]['id']: row[4] for row in rerecord.select(gates_of(repo), repo, runs, cuda=False)}
     assert rows['G0-01'] == 'no evidence run to replay'
     assert rows['G1-03'] is None
