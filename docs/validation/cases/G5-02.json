@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-02_memory_accounting",
+  "task": "G5-02",
+  "title": "One streamed run reports peak Torch allocated and reserved bytes, the device memory of the process, working set, private and committed bytes, the OS file cache change and the scratch disk bytes as separate instrumented fields that are never summed",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "tests/test_memory_accounting_g5.py with the scatterer of tests/g5_support.py (24 x 16 x 16 cells, 40 steps, two point probes, full time history)",
+    "runs": "StreamedSimulation forward and backward with host_sync, disk_sync and host_async CUDA tiles (slab_width 6, temporal_depth 4, checkpoints 2), one CPU-tile run with host banks, and two MemoryMeter phases around explicit CUDA allocations",
+    "instrument_module": "torchfdtd/memory_accounting.py: MemoryMeter around each phase of torchfdtd/streamed.py::_Streamed (report['forward_memory'], report['backward_memory'])",
+    "fields": {
+      "peak_torch_allocated_bytes": "torch.cuda.max_memory_allocated (exact when the phase set a new process peak or began at it, otherwise the sampled torch.cuda.memory_allocated lower bound, flagged exact=false); at_start_bytes, delta_bytes, prior_process_peak_bytes",
+      "peak_torch_reserved_bytes": "torch.cuda.max_memory_reserved with the same exactness rule",
+      "cuda_process_memory_bytes": "torch.cuda.mem_get_info free-memory decrease during the phase, device-wide, sampled every 20 ms and at the end; nvidia-smi --query-compute-apps used_memory for this pid when the driver exposes it (N/A under WDDM on Windows, reported as null with the reason)",
+      "peak_process_rss_bytes": "working set from psapi.GetProcessMemoryInfo (Windows) or /proc/self/status VmRSS (Linux), sampled every 20 ms and at the phase boundaries, with the OS lifetime peak",
+      "peak_process_private_bytes": "PrivateUsage (Windows) or RssAnon (Linux)",
+      "peak_process_committed_bytes": "PagefileUsage commit charge (Windows) or VmSize (Linux, labelled virtual size)",
+      "os_file_cache_bytes": "psapi.GetPerformanceInfo SystemCache times PageSize (Windows) or /proc/meminfo Cached (Linux): change over the phase, system-wide",
+      "scratch_disk_written_bytes, scratch_disk_read_bytes": "StateStore logical byte counters of the scratch bank files plus the process I/O counter deltas (GetProcessIoCounters or /proc/self/io)",
+      "scratch_disk_bandwidth_bytes_per_second": "logical scratch bytes divided by the phase wall time",
+      "scratch_disk_peak_file_bytes": "peak sum of live scratch bank file sizes; every bank file is truncated to its size and the size is read back with os.fstat",
+      "host_bank_bytes": "SlabBlockOperator bank ledger: peak and created bytes of live host field banks released through weak references"
+    },
+    "caveats_written_into_every_record": "each field carries instrument, caveat and domain (device, host, system, disk); total_memory_bytes is null with a note that the fields overlap; the SCOPE text states which fields contain which"
+  },
+  "seed": null,
+  "precision": ["float32"],
+  "backend": ["cuda", "cpu"],
+  "reference_method": "internal consistency of the instruments: the Torch allocator's own counters, the OS process counters and the StateStore file sizes read back with os.fstat; no physics oracle is involved",
+  "observables": [
+    {"name": "peak_torch_allocated_bytes", "unit": "bytes", "definition": "as above, per phase"},
+    {"name": "peak_torch_reserved_bytes", "unit": "bytes", "definition": "as above, per phase"},
+    {"name": "cuda_process_memory_bytes", "unit": "bytes", "definition": "device-wide free-memory decrease, per phase"},
+    {"name": "peak_process_rss_bytes", "unit": "bytes", "definition": "working set, per phase"},
+    {"name": "scratch_disk_written_bytes", "unit": "bytes", "definition": "logical bank writes, per phase"},
+    {"name": "scratch_disk_peak_file_bytes", "unit": "bytes", "definition": "peak live bank file bytes, per phase"},
+    {"name": "host_bank_bytes", "unit": "bytes", "definition": "peak live host bank bytes, per phase"}
+  ],
+  "acceptance": {
+    "presence": "every field listed above is present in both phase records with domain, instrument and caveat; total_memory_bytes is null; the record is JSON-serializable",
+    "ordering": "0 < peak_torch_allocated_bytes <= peak_torch_reserved_bytes and allocated at_start <= reserved at_start in every CUDA phase; the delta of the allocated peak is positive; the allocator peaks are exact when the test resets the peak counters first",
+    "domains": "peak_process_rss_bytes has domain host, its caveat says it is not device memory, its instrument does not name torch.cuda, and its value differs from the Torch allocated peak; CPU-tile runs report the three device fields as null with a not-applicable instrument and still report the host fields",
+    "disk": "for the disk-bank run, in each phase created_file_bytes == created_banks * state_bytes, scratch_disk_written_bytes and scratch_disk_read_bytes equal the StateStore counters, scratch_disk_peak_file_bytes is an integer multiple of state_bytes between 1 and state_bank_capacity, host_bank_bytes is zero, the effective rates equal bytes / seconds; in the forward phase written bytes equal created_file_bytes exactly (every owned row of every bank committed once) and in the backward phase written bytes are at least created_file_bytes",
+    "host_banks": "for host-bank runs host_bank_bytes is a positive multiple of state_bytes and the scratch bytes are zero",
+    "source_of_limits": "G5-02 specification: the quantities are separated and never summed; equalities are exact byte counts and no numeric tolerance applies"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_memory_accounting_g5.py::test_streamed_report_exposes_instrumented_memory_fields",
+      "tests/test_memory_accounting_g5.py::test_disk_bytes_match_the_bank_file_sizes",
+      "tests/test_memory_accounting_g5.py::test_cpu_tiles_report_host_fields_and_no_device_fields",
+      "tests/test_memory_accounting_g5.py::test_operating_system_instruments_return_integers",
+      "tests/test_memory_accounting_g5.py::test_allocator_peak_is_exact_only_when_the_phase_sets_a_new_process_peak"
+    ],
+    "not_yet_covered": [
+      "PSS on Linux (only RSS, RssAnon and VmSize are read from /proc; the recorded run is on Windows)",
+      "nvidia-smi per-process memory on a TCC or Linux driver (reported as null under WDDM with the reason)",
+      "the streamed execution mode of torchfdtd/execution_modes.py, which runs its own forward loop and is not metered"
+    ]
+  },
+  "notes": "Declared before the recorded run on branch g5-memory from main 73203d2. The record is docs/validation/g5/G5-02.json."
+}

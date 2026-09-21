@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-03_admission_versus_measured_peak",
+  "task": "G5-03",
+  "title": "The streamed byte admission bounds the measured peaks on a three-rung ladder, and the in-process registry admits only one of two runs that together exceed a tier budget",
+  "declared": "2026-09-22",
+  "declared_at_commit": "73203d2",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "tests/test_admission_peak_g5.py",
+    "ladder": [
+      {"shape": [64, 32, 32], "cells": 65536},
+      {"shape": [128, 48, 48], "cells": 294912},
+      {"shape": [256, 64, 64], "cells": 1048576}
+    ],
+    "region": "3D, uniform mesh 0.05 um, 4 CPML cells on every face, Yee sampling, FP32, 12 steps, memory_mode streamed",
+    "structure": "smooth sphere of radius 0.3 um (width 0.08 um), permittivity 4 in air, scalar epsilon",
+    "source_and_monitors": "Ez point source at (-0.3, 0, 0) um, standard Gaussian pulse (0.8 um, FWHM 0.5 fs, centre 0.5 fs, amplitude 100); point probes Ez (0.3, 0, 0) and Hy (0.2, 0.1, 0); full time history; objective sum of squared signals",
+    "policy": "StreamedAdjointOptions(device=cuda, slab_width=8, temporal_depth=4, checkpoints=1, tile_transfers=sync) with state_storage host and disk (private scratch directory, disk_budget_bytes 4 GiB), gpu_budget_bytes 2 GiB, host_budget_bytes 16 GiB; one small warm-up run precedes the ladder so the CUDA kernels are loaded",
+    "instruments": "report['forward_memory'] and report['backward_memory'] of torchfdtd/memory_accounting.py: peak_torch_allocated_bytes.delta_bytes (exact allocator peak after torch.cuda.reset_peak_memory_stats before each rung), host_bank_bytes.bytes (SlabBlockOperator bank ledger), scratch_disk_peak_file_bytes.bytes (StateStore), peak_process_rss_bytes.delta_bytes (working set, informational)",
+    "registry": "torchfdtd/reservation_registry.py: ReservationRegistry.acquire under one threading.Lock; StreamedSimulation forward and backward phases hold a lease on the host, gpu and disk tiers for the duration of the phase; the concurrency tests run the scatterer of tests/g5_support.py on CPU tiles with host and disk banks and a budget of 1.5 times one reservation"
+  },
+  "seed": null,
+  "precision": ["float32"],
+  "backend": ["cuda", "cpu"],
+  "reference_method": "the planner's own reservation (torchfdtd/streamed.py::_reservation) compared with the measured peaks of the same run; a bound check, not a physics oracle. The registry is checked by construction: two threads released together by a barrier, and a run blocked inside its first tile while a second run is admitted against the same budget",
+  "observables": [
+    {"name": "gpu_ratio", "unit": "dimensionless", "definition": "gpu_reservation_bytes / max over phases of peak_torch_allocated_bytes.delta_bytes"},
+    {"name": "bank_ratio", "unit": "dimensionless", "definition": "host_reservation_bytes / peak host_bank_bytes for host banks; disk_reservation_bytes / peak scratch_disk_peak_file_bytes for disk banks"},
+    {"name": "gpu_margin_bytes", "unit": "bytes", "definition": "gpu_reservation_bytes minus the measured peak Torch allocated delta"},
+    {"name": "bank_margin_bytes", "unit": "bytes", "definition": "the tier reservation minus the measured peak bank bytes"},
+    {"name": "rss_ratio_informational", "unit": "dimensionless", "definition": "host_reservation_bytes / working-set delta of the phase; recorded, not a criterion: the working set also holds pinned staging, Torch host tensors of the caller, allocator arenas and runtime pages that the reservation does not model"}
+  ],
+  "acceptance": {
+    "minimum_ratio": 1.0,
+    "rule": "on every rung and for both bank tiers, gpu_ratio >= minimum_ratio and bank_ratio >= minimum_ratio, with the allocator peak flagged exact; the measured peak Torch allocated delta never exceeds the measured peak Torch reserved bytes",
+    "registry": "of two simultaneous requests of 600 bytes against a 1000-byte budget exactly one is admitted and the other raises ValueError starting with 'Concurrent streamed reservation refused'; a request that overflows one tier registers nothing on any tier; a second StreamedSimulation run against a budget of 1.5 reservations is refused with that message while the first run is inside its forward phase, and is admitted after the first run finishes; a failed phase releases its lease",
+    "scope_statement": "the registry guarantee is per Python process and is admission, not a quota: it does not see other processes, does not limit later allocations of an admitted run and does not replace the live free-memory checks",
+    "source_of_limits": "G5-03 specification: the byte admission is matched against the actual peak (ratio at least one) and concurrent admission is atomic; the margin is recorded rather than bounded above because the reservation is a documented conservative bound (docs/STREAMED_FDTD.md)"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_admission_peak_g5.py::test_reservation_bounds_measured_peaks_on_every_rung",
+      "tests/test_admission_peak_g5.py::test_registry_admits_only_one_of_two_simultaneous_requests",
+      "tests/test_admission_peak_g5.py::test_registry_requests_are_all_or_nothing_across_tiers",
+      "tests/test_admission_peak_g5.py::test_streamed_requests_name_every_tier_of_the_options",
+      "tests/test_admission_peak_g5.py::test_second_concurrent_run_is_refused_and_the_lease_is_released",
+      "tests/test_admission_peak_g5.py::test_failed_phase_releases_its_lease"
+    ],
+    "not_yet_covered": [
+      "a machine-wide (cross-process) reservation: the registry is per process by design and the scope is stated in the record",
+      "asynchronous tiles and ADE, geometry or density paths on the ladder (the ladder measures the dense scalar path)"
+    ]
+  },
+  "notes": "Declared before the recorded run on branch g5-memory from main 73203d2. A prototype of the ladder at this commit measured gpu ratios of 2.8 to 3.0, host bank ratios of 2.1 to 3.0 and disk ratios of 1.33; the working-set delta of the very first CUDA run in a process includes the kernel modules, which is why the ladder is preceded by a warm-up run and the RSS ratio is informational. The record is docs/validation/g5/G5-03.json."
+}

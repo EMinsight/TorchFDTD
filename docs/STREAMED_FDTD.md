@@ -413,6 +413,58 @@ replay overhead. A reduction in device storage is not itself a speedup. The
 [runtime validation report](validation/TILE_RUNTIME_REPORT.md) records both
 improvements and the prefix selector's longer-duration prediction errors.
 
+## Memory accounting, the reservation registry and optimizer state
+
+Every forward and backward phase of `StreamedSimulation` (and of the
+dispersive, geometry, density and tensor streamed models, which share the
+`_Streamed` operation) is metered by `torchfdtd/memory_accounting.py`. The
+result is `report["forward_memory"]` and `report["backward_memory"]`, one
+record per phase with one field per instrument:
+
+| Field | Instrument | Domain |
+|---|---|---|
+| `peak_torch_allocated_bytes` | `torch.cuda.max_memory_allocated`, exact when the phase set a new process peak or began at it, otherwise the sampled `memory_allocated` lower bound (`exact` is false and the instrument text says so; call `torch.cuda.reset_peak_memory_stats` before the run for an exact value) | device |
+| `peak_torch_reserved_bytes` | `torch.cuda.max_memory_reserved`, same rule | device |
+| `cuda_process_memory_bytes` | `torch.cuda.mem_get_info` free-memory decrease during the phase, device-wide; `nvidia_smi_process_used_bytes` when the driver reports per-process memory (it does not under WDDM on Windows) | device |
+| `peak_process_rss_bytes` | working set (`GetProcessMemoryInfo` or `/proc/self/status`), sampled every 20 ms, with the OS lifetime peak | host |
+| `peak_process_private_bytes`, `peak_process_committed_bytes` | private bytes and commit charge (Windows) or `RssAnon` and `VmSize` (Linux) | host |
+| `os_file_cache_bytes` | system cache change over the phase (`GetPerformanceInfo` or `/proc/meminfo`) | system |
+| `scratch_disk_written_bytes`, `scratch_disk_read_bytes`, `scratch_disk_peak_file_bytes`, `scratch_disk_bandwidth_bytes_per_second` | `StateStore` logical counters and bank file sizes read back with `os.fstat`, plus the process I/O counters; the rate is bytes over the phase wall time | disk |
+| `host_bank_bytes` | the `SlabBlockOperator` bank ledger of live host field banks | host |
+
+Each field carries its `instrument`, `caveat` and `domain`; the record's
+`total_memory_bytes` is `None` because the fields overlap (Torch allocated is a
+subset of reserved, both of the process device memory; pinned staging appears
+in the working set and the commit charge; the file cache is system-wide) and
+must not be added. The sampled quantities can miss a transient between two
+samples. The three-rung ladder of `tests/test_admission_peak_g5.py` compares
+the reservation with these measurements and records the margins
+(`docs/validation/g5/G5-03.json`); the reservation bounded the exact peak
+Torch allocated delta by a factor of 2.8 to 3.0 and the peak bank bytes by 2.1
+to 3.0 (host) and 1.33 (disk) on the RTX 3060.
+
+`torchfdtd/reservation_registry.py` keeps the live reservations of every
+streamed phase in this process. A phase acquires its host, device and scratch
+volume bytes under one lock before it starts and releases them when it ends,
+so two runs in one process that would together exceed the budget declared by
+the second run cannot both be admitted; the second raises
+`Concurrent streamed reservation refused: ...`. The scope is one Python
+process (threads), and it is admission, not a quota: other processes are not
+seen, an admitted run is not limited afterwards, and the live free-memory
+checks of `_reservation` still apply.
+
+`StreamedAdjointOptions(optimizer_moments=2)` charges two parameter-sized
+optimizer state tensors (Adam's `exp_avg` and `exp_avg_sq`) to the host
+reservation of the dense, dispersive, geometry and density paths, next to the
+design tensor itself (`design_tensor_bytes`). The reservation grows by exactly
+`optimizer_moments * design_tensor_bytes`; `estimate_streamed_memory`,
+`plan_streamed_work` and the run report carry the same fields. The geometry
+and density paths keep the material and its VJP in slabs: on an 800 x 32 x 32
+grid whose full diagonal epsilon (9.83 MB) exceeds the declared 9.6 MB GPU
+budget, the exact peak Torch allocated delta was 3.83 MB (geometry) and 3.21 MB
+(density) with no host allocation of the full material shape
+(`docs/validation/g5/G5-04.json`).
+
 ## Lossless mixed-dtype transport preparation
 
 Internal tile input and output packets now preserve each tensor's dtype and
