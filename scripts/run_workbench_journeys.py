@@ -155,7 +155,9 @@ def main(argv=None):
     playwright_package = ROOT / 'node_modules' / '@playwright' / 'test' / 'package.json'
     record = dict(
         kind='workbench_journey_record', schema_version=1, timestamp=stamp, commit=commit,
-        dirty_paths=None if status is None else [line[3:] for line in status.splitlines() if line[3:] not in own],
+        # An untracked record directory shows as one entry ending in '/', so a prefix match covers it.
+        dirty_paths=None if status is None else [line[3:] for line in status.splitlines()
+                                                 if not any(o == line[3:] or o.startswith(line[3:]) for o in own)],
         server_url=url, server_started_here=server is not None, server_health=health,
         environment=dict(platform=platform.platform(), python=sys.version.split()[0], node=command_output('node', '--version'),
                          playwright=json.loads(playwright_package.read_text(encoding='utf-8')).get('version') if playwright_package.is_file() else None,
