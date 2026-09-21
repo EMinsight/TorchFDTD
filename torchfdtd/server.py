@@ -47,7 +47,10 @@ class WorkbenchFiles(StaticFiles):
 
 def create_app(result_dir=None):
     app = FastAPI(title='TorchFDTD', version='0.14.0.dev0')
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', 'testserver'])
+    # The Host allowlist is the loopback names only. TORCHFDTD_ALLOWED_HOSTS adds names, comma-separated;
+    # tests/conftest.py sets it to testserver, the TestClient default, which no deployment allows.
+    extra = [h.strip() for h in os.environ.get('TORCHFDTD_ALLOWED_HOSTS', '').split(',') if h.strip()]
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', *extra])
     app.add_middleware(GZipMiddleware, minimum_size=4096, compresslevel=1)
     root = Path(result_dir or os.environ.get('TORCHFDTD_RESULTS') or os.environ.get('PHOTONWEAVE_RESULTS', 'results')).resolve()
     root.mkdir(parents=True, exist_ok=True)

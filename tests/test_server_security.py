@@ -75,6 +75,31 @@ def test_foreign_host_headers_are_rejected(client):
         assert 'features' not in response.text
 
 
+def test_the_test_host_is_allowed_only_through_the_environment(tmp_path, monkeypatch):
+    """Without TORCHFDTD_ALLOWED_HOSTS the allowlist is loopback only: the TestClient default host, testserver, answers 400."""
+    monkeypatch.delenv('TORCHFDTD_ALLOWED_HOSTS', raising=False)
+    application = server.create_app(tmp_path / 'default')
+    try:
+        with TestClient(application, raise_server_exceptions=False) as c:
+            assert c.get('/api/capabilities').status_code == 400
+            assert c.get('/api/capabilities', headers={'Host': 'testserver'}).status_code == 400
+            for host in ['localhost', '127.0.0.1', 'localhost:8765']:
+                assert c.get('/api/capabilities', headers={'Host': host}).status_code == 200, host
+    finally:
+        application.state.pool.shutdown()
+        application.state.fsp_pool.shutdown()
+    monkeypatch.setenv('TORCHFDTD_ALLOWED_HOSTS', 'testserver')
+    application = server.create_app(tmp_path / 'tests')
+    try:
+        with TestClient(application, raise_server_exceptions=False) as c:
+            assert c.get('/api/capabilities').status_code == 200
+            for host in FOREIGN_HOSTS:
+                assert c.get('/api/capabilities', headers={'Host': host}).status_code == 400, host
+    finally:
+        application.state.pool.shutdown()
+        application.state.fsp_pool.shutdown()
+
+
 def test_foreign_origins_are_rejected_on_state_changing_routes(app, client):
     project = demo_project().model_dump()
     routes = ['/api/validate', '/api/jobs', '/api/mesh/preview', '/api/mesh/freeze', '/api/python',
