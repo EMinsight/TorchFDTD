@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "STABILITY_SWEEP",
+  "task": "stability sweep",
+  "title": "20,000-step field-energy stability of small fixtures after the source has ended, across boundaries, media, meshes, sources and execution paths",
+  "declared": "2026-09-22",
+  "declared_at_commit": "6eb7996",
+  "declared_before_run": true,
+  "driver": "benchmarks/stability_sweep.py",
+  "record": "docs/validation/stability_sweep_3060.json",
+  "fixture": {
+    "two_d": "6.0 x 4.0 um, mesh 0.05 um (120 x 80 cells), 10 CPML layers, courant_factor 0.99, float64 on CPU unless the row states otherwise; the Bloch row uses 6.0 x 2.0 um (120 x 40)",
+    "three_d": "3.2 um cube, mesh 0.1 um (32 x 32 x 32 cells), 6 CPML layers, courant_factor 0.99, float64 on CPU except the paths whose contract is FP32 (tensor media, PMC endpoint, reversible, tensor batch)",
+    "steps": 20000,
+    "sample_interval_steps": 250,
+    "source": "three-cycle Gaussian at 1.55 um (power FWHM 25.83 fs, offset 75 fs, C1 endpoint taper), soft point Ez unless the row states a sheet, one-way plane or TFSF box",
+    "slab_crossing_the_lateral_pml": "a rectangle finite along x (0.8 um in 2D, 0.8 um in 3D) whose y (and z) span exceeds the region, so it fills the y (and z) CPML layers to the outer boundary; the x PML stays vacuum",
+    "media": {
+      "n35": "index 3.5 dielectric",
+      "drude_dielectric": "Drude epsilon_inf 4, omega_p 1e15 rad/s, gamma 1e14 rad/s (Re epsilon 3.3 at 1.55 um, negative below 5e14 rad/s inside the grid band)",
+      "lorentz_two_pole": "epsilon_inf 2.25 with poles (1.9e15 rad/s, 0.5*1.9e15^2, 2e14 rad/s) and (7.5e14 rad/s, 0.3*7.5e14^2, 1e14 rad/s)",
+      "drude_metal": "Drude epsilon_inf 1, omega_p 2e15 rad/s, gamma 1e14 rad/s (Re epsilon -1.7 at 1.55 um)",
+      "tensor_admitted": "diag(4, 2, 2): the y and z face normals are principal axes with the extreme eigenvalue 2",
+      "tensor_rejected": "diag(2, 3, 4): the y face normal carries the intermediate eigenvalue 3 (Becache-Fauqueux-Joly criterion violated)"
+    },
+    "execution_paths": [
+      "torchfdtd.Simulation (resident Yee/CPML, CPU float64; the tensor-media rows run the node-tensor D-field system of TensorDielectricSimulation with cpml_material='tensor', FP32; PMC rows run the exact-endpoint dispatch, FP32)",
+      "torchfdtd.Simulation on CUDA float32 with cuda_kernel='fused' for the dispersive-in-PML rows and their nondispersive controls",
+      "the reversible adjoint's forward pass (_System advance loop of ReversibleSimulation, all-periodic 3D FP32)",
+      "the streamed forward (SlabBlockOperator block loop of StreamedSimulation on CPU host banks)",
+      "run_tensor_batch (fused CUDA batch, one case)"
+    ]
+  },
+  "observables": [
+    {
+      "name": "state_norm",
+      "definition": "the run-control diagnostic of the path: volume-weighted sum of epsilon|E|^2 + |H|^2 over the whole grid plus the passive oscillator energy of every ADE state and the one-way incident lines (StateDiagnostics.measure); the packed-state |E|^2+|H|^2 (+CPML memory) for the tensor and endpoint dispatches; sum |E|^2 + |H|^2 + |psi|^2 for the manual reversible/streamed/tensor loops"
+    },
+    {
+      "name": "interior_energy",
+      "definition": "volume-weighted sum of epsilon|E|^2 + |H|^2 over the cells outside every PML layer (materials.pml_cell_mask), E and H only; unweighted |E|^2 + |H|^2 on the interior for the tensor-media rows; null where the path exposes no grid (tensor and endpoint dispatches)"
+    },
+    {
+      "name": "field_peak",
+      "definition": "max |E| and |H| over the grid at each sample"
+    },
+    {
+      "name": "divergence_check_fired",
+      "definition": "true when the run raised FloatingPointError from run_control (post-source growth above growth_limit 1e6, non-finite state) or from the solver's non-finite field checks"
+    }
+  ],
+  "windows": {
+    "post_source": "samples whose time step*dt is at least source_end_time(project) (run_control.source_end_time, including one-way and TFSF flight)",
+    "reference_window": "the first quarter of the post-source samples, at least one sample",
+    "post_source_peak": "max energy over the reference window, floored at 1e-12 times the overall peak so FP64 round-off is never read as growth"
+  },
+  "acceptance": {
+    "growth_ratio_max": 1.5,
+    "growth_ratio": "max energy over the samples after the reference window divided by post_source_peak; applies to state_norm and to interior_energy where recorded",
+    "last_over_peak_max_open": 1.0,
+    "last_over_peak_max_closed": 1.001,
+    "last_over_peak": "energy at the last sample divided by post_source_peak; open rows (at least one absorbing face, every medium passive) must satisfy the open limit; closed lossless cavities (all faces PEC/PMC/periodic) conserve energy and must stay within the FP32 round-off allowance above",
+    "divergence_check_fired": false,
+    "rejected_rows": "a row declared expect='rejected' passes only if the path refuses it with the admission error naming the criterion; its growth is not measured",
+    "verdict": "every criterion of a row must hold for the row to pass; any failing row is a finding that must be fixed with a regression test or documented as a known instability with its numbers"
+  },
+  "notes": "The state norm is the same quantity the production divergence check reads, so a diverging row is seen both by the criteria and by the flag. Interior energy excludes the PML: a PML-only instability reaches it only after leaking inward, which is why both measures are judged. Shakedown runs with fewer steps may change fixture placements before the recorded run; they do not change the limits above."
+}
