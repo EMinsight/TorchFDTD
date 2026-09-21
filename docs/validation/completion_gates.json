@@ -591,7 +591,7 @@
           "specification": "dielectric cylinder/sphere Mie 산란",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "tests/test_physics_g3_b.py",
@@ -605,7 +605,9 @@
           "planned_test_commands": [
             "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_04 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-04.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_04 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-04.xml"
+          ],
           "required_tests": [
             "tests/test_physics_g3_b.py::test_g3_04_reference_series_limits",
             "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering",
@@ -614,7 +616,9 @@
             "tests/test_physics_g3_b.py::test_g3_04_sphere_scattering",
             "tests/test_physics_g3_b.py::test_g3_04_sphere_cuda_layer_a"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T181942Z-g3-04-b95d2106"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-04_mie_cylinder_sphere.json. The record docs/validation/g3/G3-04.json is written by the full run."
@@ -625,7 +629,7 @@
           "specification": "금속/분산 곡면 산란·흡수 수렴",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "FAILED",
           "owner": null,
           "code_paths": [
             "tests/test_physics_g3_b.py",
@@ -638,12 +642,16 @@
           "planned_test_commands": [
             "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05.xml"
+          ],
           "required_tests": [
             "tests/test_physics_g3_b.py::test_g3_05_drude_sphere",
             "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T181951Z-g3-05-8fafa59e"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-05_drude_sphere.json. The record docs/validation/g3/G3-05.json is written by the full run."
@@ -686,7 +694,7 @@
           "specification": "Bloch grating·회절과 독립 RCWA",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "FAILED",
           "owner": null,
           "code_paths": [
             "tests/test_physics_g3_b.py",
@@ -702,7 +710,9 @@
           "planned_test_commands": [
             "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_08 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-08.xml"
+          ],
           "required_tests": [
             "tests/test_physics_g3_b.py::test_g3_08_torcwa_reference_is_converged",
             "tests/test_physics_g3_b.py::test_g3_08_empty_cell",
@@ -710,7 +720,9 @@
             "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a",
             "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T181948Z-g3-08-6ccad85a"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-08_bloch_grating_rcwa.json. The record docs/validation/g3/G3-08.json is written by the full run."
@@ -785,7 +797,7 @@
           "specification": "곡면 grid offset/mesh/smoothing 폭 물리 수렴",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "tests/test_physics_g3_b.py",
@@ -798,13 +810,17 @@
           "planned_test_commands": [
             "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_13 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-13.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_13 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-13.xml"
+          ],
           "required_tests": [
             "tests/test_physics_g3_b.py::test_g3_13_mesh_and_interface_convergence",
             "tests/test_physics_g3_b.py::test_g3_13_subcell_shift",
             "tests/test_physics_g3_b.py::test_g3_13_smoothing_width_sweep"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260921T181945Z-g3-13-ecfade50"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-13_curved_interface_convergence.json. The record docs/validation/g3/G3-13.json is written by the full run."
