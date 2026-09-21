@@ -26,7 +26,7 @@
   },
   "physical_vram_exceeded": true,
   "driver_smoke": false,
-  "scratch_directory": "C:\\Users\\admin\\photonweave\\.local\\beyond-vram-state",
+  "scratch_directory": "<redacted workstation home>\\photonweave\\.local\\beyond-vram-state",
   "initial_disk_free_bytes": 455133671424,
   "initial_available_ram_bytes": 113124040704,
   "disk_headroom_bytes": 107374182400,

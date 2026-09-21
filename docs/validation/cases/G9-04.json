@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G9-04",
+  "task": "G9-04",
+  "title": "Compatibility policy: public API surface, deprecation rule, persisted format versions, changelog, bug template and numerical severity scale",
+  "declared": "2026-09-22",
+  "declared_at_commit": "356a923",
+  "declared_before_run": true,
+  "fixture": {
+    "documents": ["docs/COMPATIBILITY.md", "docs/CHANGELOG.md", ".github/ISSUE_TEMPLATE/bug_report.md"],
+    "public_api": "torchfdtd.__all__ as imported from the worktree",
+    "format_constants": {
+      "Project JSON": "Project.model_fields['schema_version'] default and Literal argument",
+      "Streamed restart journal": "torchfdtd.streamed_restart.MARKER and the keys of journal_contract(demo_project(), ones(2,2,2), StreamedAdjointOptions(), (0,))",
+      "Mode-network configuration": "ModeNetworkConfig.model_fields['version'] default",
+      "Result NPZ": "member names of Result.save after a 20-step CPU run of the 2D demo project"
+    },
+    "version_strings": ["pyproject.toml [project].version", "the two occurrences in torchfdtd/server.py", "the Version of record line of COMPATIBILITY.md", "the first heading of CHANGELOG.md"],
+    "changelog_commits": "every 7-hex hash cited in CHANGELOG.md against git log --format=%h of the worktree"
+  },
+  "seed": "not applicable",
+  "precision": "not applicable: the CPU demo run only produces member names",
+  "backend": "cpu",
+  "reference_method": "the code constants and the git history are the reference; the documents must agree with them",
+  "observables": [
+    {"name": "documented_minus_exported", "unit": "set", "definition": "names in the API table that torchfdtd.__all__ does not export"},
+    {"name": "exported_minus_documented", "unit": "set", "definition": "names in torchfdtd.__all__ missing from the API table"},
+    {"name": "format_constants", "unit": "string", "definition": "value column of each row of the persisted-formats table"},
+    {"name": "result_members", "unit": "set", "definition": "members of the saved NPZ not explained by the documented names and patterns"},
+    {"name": "unknown_commits", "unit": "set", "definition": "changelog hashes absent from git log"}
+  ],
+  "acceptance": {
+    "api": "both set differences are empty and the stated count equals len(__all__)",
+    "formats": "Project JSON schema_version 1 as Literal[1]; journal marker torchfdtd-streamed-restart with every contract key named; mode-network version 1; every NPZ member is a documented fixed name or matches a documented pattern",
+    "versions": "one version string across pyproject, the two server occurrences, the document and the changelog heading",
+    "changelog": "a Security and a Results change section exist; more than 50 distinct commits are cited and every one exists",
+    "template_and_severity": "the severity table has exactly S0, S1, S2, S3; the result-impact and rollback section exists; the template has the platform report, minimal reproduction, expected/observed and proposed severity sections and names torchfdtd hardware and /api/health",
+    "source_of_limits": "G9-04 in docs/COMPLETION_PROGRAM_KO.md section 11"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_compatibility_policy.py::test_every_public_name_is_documented_and_no_stale_name_remains",
+      "tests/test_compatibility_policy.py::test_format_version_constants_match_the_code",
+      "tests/test_compatibility_policy.py::test_version_strings_agree_across_pyproject_server_and_document",
+      "tests/test_compatibility_policy.py::test_changelog_cites_real_commits_and_carries_the_result_impact_section",
+      "tests/test_compatibility_policy.py::test_severity_scale_and_bug_template_ask_for_platform_report_and_minimal_repro"
+    ],
+    "not_yet_covered": [
+      "a DeprecationWarning path (no public name is deprecated at this version, so the rule has no instance to test)",
+      "reading a Project JSON of a later schema version (only version 1 exists)",
+      "the support matrix minimum and maximum versions, which G8-06 fixes by installation tests"
+    ]
+  },
+  "notes": "Declared at 356a923 before the run. The changelog is seeded from the whole history because no tag exists; evidence-only commits are left out by design."
+}

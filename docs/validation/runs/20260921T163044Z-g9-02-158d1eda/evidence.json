@@ -1,0 +1,180 @@
+{
+  "recorder_version": 1,
+  "run_id": "20260921T163044Z-g9-02-158d1eda",
+  "task": "G9-02",
+  "stage": "G9",
+  "task_title": "코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-02.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T01:28:26.034966+09:00",
+  "recorded_at": "2026-09-21T16:30:44+00:00",
+  "source_commit": "e132fdd4155b21972ccbe05d29b0489853e1af8b",
+  "source_tree_sha256": "842fbc3ab5e9cedfb9cbe6b02876bdb9e19b8d2bb9dcc8eb4cdce8adf7c76fde",
+  "dirty_source_manifest": [],
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "test_source_sha256": {
+    "tests/test_provenance_inventory.py": "56aeaf602749903072eb4f52eb538099acff31d59b25e6cf0ed80b72c3f4881d"
+  },
+  "unresolved_test_classnames": [],
+  "fixture_path": "docs/validation/cases/G9-02.json",
+  "fixture_sha256": "bb85e8320c1a91d4bee88533798bbb5a6b42a6ed2caa03482b7d0a21cb7d71a1",
+  "acceptance_criteria_path": "docs/validation/cases/G9-02.json",
+  "acceptance_criteria_sha256": "bb85e8320c1a91d4bee88533798bbb5a6b42a6ed2caa03482b7d0a21cb7d71a1",
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable: the inputs are the tracked tree and the installed metadata",
+  "precision": "not applicable",
+  "backend": "cpu; no simulation and no CUDA context",
+  "physics_configuration": {
+    "generator": "scripts/provenance_inventory.py run with the development interpreter; --check compares its stable sections (project, components, assets, open_items, history_note) with the committed docs/validation/sbom.json and regenerates docs/THIRD_PARTY_NOTICES.md from the committed SBOM",
+    "pip_closure": "every distribution reachable from [project].dependencies and every optional-dependencies group of pyproject.toml through Requires-Dist with environment markers evaluated for this interpreter",
+    "non_pip_assets": "the hand-maintained ASSETS table of the generator: frontend bundle libraries with versions from package-lock.json, fonts, material tables, own artwork, manuscript, validation records, reference outputs of other solvers, application records, examples and fixtures, and the three vendor-derived items",
+    "scan_inputs": "every tracked path from git ls-files except binaries and the four files that spell the patterns; positions only, never the matched text",
+    "scan_patterns": [
+      "private_windows_user_path",
+      "hangul_user_path",
+      "address_100_x_x_x",
+      "password_literal",
+      "ssh_password_environment",
+      "credential_token",
+      "private_key_block",
+      "ssh_public_key"
+    ],
+    "pattern_samples": "fourteen positive and nine benign strings in tests/test_provenance_inventory.py, assembled at run time with synthetic addresses and parametrized under short labels so that no sample reaches a test id or a JUnit report",
+    "history_query": "git log --pickaxe-regex -S'C:[/\\\\]+Users[/\\\\]+admin' HEAD, keeping the commits whose tree still contains the pattern",
+    "dependency_check": "python -m pip check in the same interpreter",
+    "vulnerability_audit": "pip-audit -r <pinned closure> --no-deps, recorded in the SBOM when run with --audit and carried forward otherwise"
+  },
+  "reference_method": "pyproject.toml as the list of declared dependencies; package-lock.json as the frontend version reference; docs/RELEASE_REVIEW.md as the list of unresolved distribution items; the pattern samples as the scan oracle",
+  "observables": [
+    {
+      "name": "check_exit_code",
+      "unit": "integer",
+      "definition": "exit code of provenance_inventory.py --check"
+    },
+    {
+      "name": "findings",
+      "unit": "count",
+      "definition": "scan findings on the tracked tree"
+    },
+    {
+      "name": "components",
+      "unit": "count",
+      "definition": "distributions in the closure and how many are installed with a licence label and a source URL"
+    },
+    {
+      "name": "open_items",
+      "unit": "list",
+      "definition": "items with BLOCKED_EXTERNAL semantics in the SBOM and the notices"
+    },
+    {
+      "name": "history_commits",
+      "unit": "list",
+      "definition": "commits on HEAD whose tree contains the historic workstation path"
+    },
+    {
+      "name": "pip_check",
+      "unit": "exit code",
+      "definition": "pip check result"
+    },
+    {
+      "name": "audit_status",
+      "unit": "string",
+      "definition": "pip-audit status recorded in the SBOM: CLEAN, FINDINGS, NOT_RUN or BLOCKED_EXTERNAL"
+    }
+  ],
+  "acceptance_limits": {
+    "check": "--check exits 0 with no finding and no problem on the committed tree, and pip check exits 0",
+    "coverage": "every declared dependency of pyproject.toml appears in the SBOM installed with a version and a source URL, and with a licence label or an open item; every asset in the table has a status among cleared, own and open; three.js and lucide versions match package-lock.json",
+    "open_items": "the installed-API property catalogue, the FSP layout support and the aggregate commercial timing table are open items with state BLOCKED_EXTERNAL and appear in the notices document; nothing with an unclear licence is omitted",
+    "scan": "each positive sample matches its pattern and no benign sample matches any pattern; the generated SBOM and notices match no pattern and contain no venv, site-packages or Hangul account path",
+    "history": "the commits that carry the historic workstation path are listed in the notices as a known history note and are not counted as findings",
+    "audit": "the pip-audit result is recorded as a statement about the development interpreter with fix versions; advisories do not fail --check, which is the G9-06 release-environment concern",
+    "source_of_limits": "the brief of G9-02 in docs/COMPLETION_PROGRAM_KO.md section 11 and docs/RELEASE_REVIEW.md"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 27,
+    "passed": [
+      "tests/test_provenance_inventory.py::test_inventory_check_passes_on_the_tracked_tree",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[address_ssh]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[address_url]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[admin_forward_slash]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[admin_json_escaped]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[aws_key_id]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[github_token]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[hangul_drive_path]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[hangul_user_path]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[passwd_double_quoted]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[password_single_quoted]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[private_key_block]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[ssh_password_environment]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[ssh_public_key]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[tailscale_key]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[administrator]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[environment_read]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[four_part_version]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[powershell_prompt]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[project_scratch]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[prose_key_type]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[prose_password]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[public_user]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[version_number]",
+      "tests/test_provenance_inventory.py::test_sbom_covers_every_declared_dependency_with_licence_and_source",
+      "tests/test_provenance_inventory.py::test_notices_document_matches_the_sbom_and_names_the_open_items",
+      "tests/test_provenance_inventory.py::test_generated_outputs_carry_no_private_path_or_credential"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "failure_messages": {},
+    "suite_time_seconds": 21.047,
+    "suite_timestamp": "2026-09-22T01:28:26.034966+09:00"
+  },
+  "required_tests": [
+    "tests/test_provenance_inventory.py"
+  ],
+  "skipped_required_tests": [],
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260921T163044Z-g9-02-158d1eda/junit.xml",
+      "sha256": "ff7209592a1d405a1567d6d9d3b7840c9bc03a2f255ff1bdeaf233e35300914a",
+      "bytes": 3889,
+      "original_path": "D:/TorchFDTD/.local/tmp/junit/G9-02.xml"
+    }
+  ],
+  "applicable_scope": "G9-02 provenance inventory of the tracked tree and of the development interpreter's dependency closure per docs/validation/cases/G9-02.json; the three vendor-derived items are open BLOCKED_EXTERNAL items for G9-03, and the advisories describe the development interpreter, not a release environment (G9-06)",
+  "note": "pip-audit 2.10.1 was installed into D:/TorchFDTD/.venv for this task and run once with --audit on 2026-09-22: 7 of the 51 closure distributions carry advisories in the development interpreter (anyio, click, fonttools, idna, pillow, starlette, tqdm; fixes listed in docs/THIRD_PARTY_NOTICES.md), torch 2.10.0+cu126 could not be audited on PyPI; pip check found no broken requirement",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

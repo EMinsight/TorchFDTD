@@ -11,6 +11,11 @@ def main():
     sub = parser.add_subparsers(dest='command', required=True)
     serve = sub.add_parser('serve', help='Open the local web workbench')
     serve.add_argument('--port', type=int, default=8765)
+    # Loopback only. The workbench has no authentication, so a LAN or 0.0.0.0
+    # bind is refused here rather than warned about; see docs/SECURITY.md. IPv6
+    # loopback is not offered: the host check rejects a bracketed Host header.
+    serve.add_argument('--host', default='127.0.0.1', choices=['127.0.0.1', 'localhost'],
+                       help='loopback address to bind (default 127.0.0.1); remote exposure needs a separate authenticated deployment')
     run = sub.add_parser('run', help='Run a saved JSON project')
     run.add_argument('project')
     run.add_argument('--output', default='results/simulation.npz')
@@ -62,7 +67,7 @@ def main():
     if args.command == 'serve':
         import uvicorn
         from .server import create_app
-        uvicorn.run(create_app(), host='127.0.0.1', port=args.port)
+        uvicorn.run(create_app(), host=args.host, port=args.port)
     elif args.command == 'run':
         result = Simulation(Project.load(args.project)).run()
         result.save(args.output)

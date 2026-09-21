@@ -1473,16 +1473,30 @@
           "title": "local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다",
           "specification": "local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다. 외부 노출/remote execution은 별도 인증·권한 계약 없이 허용하지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
-            "torchfdtd/server.py"
+            "torchfdtd/server.py",
+            "torchfdtd/cli.py",
+            "torchfdtd/gds_service.py",
+            "torchfdtd/fsp_service.py",
+            "docs/SECURITY.md",
+            "tests/test_server_security.py",
+            "docs/validation/cases/G9-01.json"
           ],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_server_security.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-01.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_server_security.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-01.xml"
+          ],
+          "required_tests": [
+            "tests/test_server_security.py"
+          ],
+          "evidence": [
+            "20260921T163013Z-g9-01-57458fee"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -1491,17 +1505,32 @@
           "title": "코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다",
           "specification": "코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다. proprietary runtime, vendor material database, 무단 benchmark 원시값, credentials/private paths를 배포물에서 점검한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
+            "scripts/provenance_inventory.py",
+            "docs/THIRD_PARTY_NOTICES.md",
+            "docs/validation/sbom.json",
+            "THIRD_PARTY_NOTICES.txt",
             "scripts/release_audit.py",
-            "scripts/verify_staged_release.py"
+            "scripts/verify_staged_release.py",
+            "tests/test_provenance_inventory.py",
+            "docs/validation/cases/G9-02.json"
           ],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe scripts/provenance_inventory.py --check",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-02.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-02.xml"
+          ],
+          "required_tests": [
+            "tests/test_provenance_inventory.py"
+          ],
+          "evidence": [
+            "20260921T163044Z-g9-02-158d1eda"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },
@@ -1528,14 +1557,32 @@
           "title": "API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다.",
           "specification": "API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "docs/COMPATIBILITY.md",
+            "docs/CHANGELOG.md",
+            ".github/ISSUE_TEMPLATE/bug_report.md",
+            "torchfdtd/__init__.py",
+            "torchfdtd/models.py",
+            "torchfdtd/streamed_restart.py",
+            "torchfdtd/mode_network_project.py",
+            "tests/test_compatibility_policy.py",
+            "docs/validation/cases/G9-04.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_compatibility_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-04.xml"
+          ],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_compatibility_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-04.xml"
+          ],
+          "required_tests": [
+            "tests/test_compatibility_policy.py"
+          ],
+          "evidence": [
+            "20260921T163104Z-g9-04-f2b9d65e"
+          ],
           "blocker": null,
           "scope_change_approval": null
         },

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G9-02",
+  "task": "G9-02",
+  "title": "Provenance and licence inventory: SBOM, third-party notices, private-data scan, dependency and vulnerability checks",
+  "declared": "2026-09-22",
+  "declared_at_commit": "4c5a871",
+  "declared_before_run": true,
+  "fixture": {
+    "generator": "scripts/provenance_inventory.py run with the development interpreter; --check compares its stable sections (project, components, assets, open_items, history_note) with the committed docs/validation/sbom.json and regenerates docs/THIRD_PARTY_NOTICES.md from the committed SBOM",
+    "pip_closure": "every distribution reachable from [project].dependencies and every optional-dependencies group of pyproject.toml through Requires-Dist with environment markers evaluated for this interpreter",
+    "non_pip_assets": "the hand-maintained ASSETS table of the generator: frontend bundle libraries with versions from package-lock.json, fonts, material tables, own artwork, manuscript, validation records, reference outputs of other solvers, application records, examples and fixtures, and the three vendor-derived items",
+    "scan_inputs": "every tracked path from git ls-files except binaries and the four files that spell the patterns; positions only, never the matched text",
+    "scan_patterns": ["private_windows_user_path", "hangul_user_path", "address_100_x_x_x", "password_literal", "ssh_password_environment", "credential_token", "private_key_block", "ssh_public_key"],
+    "pattern_samples": "fourteen positive and nine benign strings in tests/test_provenance_inventory.py, assembled at run time with synthetic addresses and parametrized under short labels so that no sample reaches a test id or a JUnit report",
+    "history_query": "git log --pickaxe-regex -S'C:[/\\\\]+Users[/\\\\]+admin' HEAD, keeping the commits whose tree still contains the pattern",
+    "dependency_check": "python -m pip check in the same interpreter",
+    "vulnerability_audit": "pip-audit -r <pinned closure> --no-deps, recorded in the SBOM when run with --audit and carried forward otherwise"
+  },
+  "seed": "not applicable: the inputs are the tracked tree and the installed metadata",
+  "precision": "not applicable",
+  "backend": "cpu; no simulation and no CUDA context",
+  "reference_method": "pyproject.toml as the list of declared dependencies; package-lock.json as the frontend version reference; docs/RELEASE_REVIEW.md as the list of unresolved distribution items; the pattern samples as the scan oracle",
+  "observables": [
+    {"name": "check_exit_code", "unit": "integer", "definition": "exit code of provenance_inventory.py --check"},
+    {"name": "findings", "unit": "count", "definition": "scan findings on the tracked tree"},
+    {"name": "components", "unit": "count", "definition": "distributions in the closure and how many are installed with a licence label and a source URL"},
+    {"name": "open_items", "unit": "list", "definition": "items with BLOCKED_EXTERNAL semantics in the SBOM and the notices"},
+    {"name": "history_commits", "unit": "list", "definition": "commits on HEAD whose tree contains the historic workstation path"},
+    {"name": "pip_check", "unit": "exit code", "definition": "pip check result"},
+    {"name": "audit_status", "unit": "string", "definition": "pip-audit status recorded in the SBOM: CLEAN, FINDINGS, NOT_RUN or BLOCKED_EXTERNAL"}
+  ],
+  "acceptance": {
+    "check": "--check exits 0 with no finding and no problem on the committed tree, and pip check exits 0",
+    "coverage": "every declared dependency of pyproject.toml appears in the SBOM installed with a version and a source URL, and with a licence label or an open item; every asset in the table has a status among cleared, own and open; three.js and lucide versions match package-lock.json",
+    "open_items": "the installed-API property catalogue, the FSP layout support and the aggregate commercial timing table are open items with state BLOCKED_EXTERNAL and appear in the notices document; nothing with an unclear licence is omitted",
+    "scan": "each positive sample matches its pattern and no benign sample matches any pattern; the generated SBOM and notices match no pattern and contain no venv, site-packages or Hangul account path",
+    "history": "the commits that carry the historic workstation path are listed in the notices as a known history note and are not counted as findings",
+    "audit": "the pip-audit result is recorded as a statement about the development interpreter with fix versions; advisories do not fail --check, which is the G9-06 release-environment concern",
+    "source_of_limits": "the brief of G9-02 in docs/COMPLETION_PROGRAM_KO.md section 11 and docs/RELEASE_REVIEW.md"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_provenance_inventory.py::test_inventory_check_passes_on_the_tracked_tree",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text",
+      "tests/test_provenance_inventory.py::test_sbom_covers_every_declared_dependency_with_licence_and_source",
+      "tests/test_provenance_inventory.py::test_notices_document_matches_the_sbom_and_names_the_open_items",
+      "tests/test_provenance_inventory.py::test_generated_outputs_carry_no_private_path_or_credential"
+    ],
+    "not_yet_covered": [
+      "a transitive SBOM of the wheel as installed in a clean environment (the inventory reads the development interpreter)",
+      "the scan of the git history itself beyond the pickaxe of the one historic path pattern"
+    ]
+  },
+  "notes": "Declared at 4c5a871 before the first inventory run. The run that recorded this case also redacted the workstation account path from three beyond-VRAM records; the redaction is recorded in the notices history note."
+}

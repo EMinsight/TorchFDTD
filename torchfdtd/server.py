@@ -10,6 +10,8 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Request, Query
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
@@ -20,6 +22,26 @@ from .solver import Simulation, estimate, hardware
 from .execution_modes import execution_resources, resolve_execution, run_streamed_job, run_tiled_job, scratch_directory
 from .material_fit import OpticalDataRequest, MaterialFitRequest, fit_material, material_fit_report
 from .optical_data import OpticalData
+
+# Bytes accepted in one request body on every route except the FSP uploads,
+# which stream under fsp.MAX_FSP_BYTES. Module level so tests can lower it.
+MAX_REQUEST_BYTES = 32_000_000
+
+
+def _finite(value):
+    # A NaN or Infinity literal in a request body is rejected by the models, but
+    # the rejected input must not resurface in the 422 body, which is strict JSON.
+    return value if value == value and value not in (float('inf'), float('-inf')) else repr(value)
+
+
+class WorkbenchFiles(StaticFiles):
+    def lookup_path(self, path):
+        # On Windows os.path.join lets a drive letter or a UNC prefix replace the
+        # web directory, so realpath would probe a drive root or a network share
+        # before the containment check. Only plain relative names reach the lookup.
+        if os.path.isabs(path) or os.path.splitdrive(path)[0] or path.startswith(('\\\\', '//')) or ':' in path:
+            return '', None
+        return super().lookup_path(path)
 
 
 def create_app(result_dir=None):
@@ -37,12 +59,24 @@ def create_app(result_dir=None):
         if origin and origin != str(request.base_url).rstrip('/'):
             return JSONResponse({'detail': 'Cross-origin requests are not allowed.'}, status_code=403)
         from .fsp import MAX_FSP_BYTES
-        limit = MAX_FSP_BYTES if request.url.path in ('/api/fsp/import', '/api/fsp/native-import') else 32_000_000
-        if int(request.headers.get('content-length', 0)) > limit:
+        limit = MAX_FSP_BYTES if request.url.path in ('/api/fsp/import', '/api/fsp/native-import') else MAX_REQUEST_BYTES
+        declared = request.headers.get('content-length')
+        if declared is None:
+            # A chunked body has no declared size, so the limit below could not
+            # be applied before the route reads the whole body into memory.
+            if 'chunked' in request.headers.get('transfer-encoding', '').lower():
+                return JSONResponse({'detail': 'Request bodies must declare Content-Length.'}, status_code=411)
+        elif not declared.isdigit():
+            return JSONResponse({'detail': 'Malformed Content-Length header.'}, status_code=400)
+        elif int(declared) > limit:
             return JSONResponse({'detail': 'Request payload exceeds the upload limit.'}, status_code=413)
         response = await call_next(request)
         response.headers['X-Content-Type-Options'] = 'nosniff'
         return response
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_error(request: Request, exc: RequestValidationError):
+        return JSONResponse({'detail': jsonable_encoder(exc.errors(), custom_encoder={float: _finite})}, status_code=422)
 
     @app.get('/api/health')
     def health():
@@ -314,7 +348,7 @@ def create_app(result_dir=None):
     attach_gds_routes(app, root)
     static = Path(__file__).parent/'web'
     if static.exists():
-        app.mount('/', StaticFiles(directory=static, html=True), name='workbench')
+        app.mount('/', WorkbenchFiles(directory=static, html=True), name='workbench')
     app.state.jobs = jobs
     app.state.pool = pool
     return app
