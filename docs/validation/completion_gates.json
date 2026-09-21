@@ -582,7 +582,7 @@
           "specification": "유전체 slab normal/oblique TE/TM과 TMM",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "FAILED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "torchfdtd/boundaries.py",
@@ -610,7 +610,8 @@
             "tests/test_physics_g3_a.py::TestG302::test_layer_a_cuda_fp32"
           ],
           "evidence": [
-            "20260921T164814Z-g3-02-1e349534"
+            "20260921T164814Z-g3-02-1e349534",
+            "20260921T170604Z-g3-02-ef141f60"
           ],
           "blocker": null,
           "scope_change_approval": null,
