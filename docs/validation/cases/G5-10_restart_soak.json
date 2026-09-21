@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-10_restart_soak",
+  "task": "G5-10",
+  "title": "Soak: 1e5 journaled steps, repeated runs and 100 optimizer updates without sustained memory growth or late-time energy growth",
+  "declared": "2026-09-22",
+  "declared_at_commit": "dfdd44d279789ae312b53f9caeadfd2ccf92015a",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "benchmarks/restart_soak.py",
+    "scene": "2D 16 x 15 cells (1.6 x 1.5 um, mesh 0.1 um), three-cell PML on every wall, one Gaussian point source (wavelength 1.1 um, 20 fs FWHM, 50 fs centre) at (-0.2, 0, 0), three point monitors, float32, epsilon 1.7, CPU tiles, slab width 16 (one tile), four torch threads",
+    "long_forward": "100000 steps in blocks of 100 with a journal record every 10 blocks (100 records); RSS, torch allocated, torch reserved and journal bytes sampled at every record; sum eps E^2 + sum H^2 and the peak field after every block, judged by torchfdtd.run_control.DecayDecision with the growth limit below after source_end_time",
+    "repeated_runs": "8 forward-plus-backward runs of 600 steps (blocks of 20, checkpoints 4, a record every 2 blocks) in one process, each with its own journal removed afterwards; counters sampled after each run",
+    "optimization": "100 projected Adam updates (lr 0.02) of a 16 x 15 density (truncate filter 0.15 um, beta 1 doubled every 25 updates up to 16, eta 0.5) through the streamed adjoint, 120 steps per solve (blocks of 20, a record every 3 blocks), a journal per iteration and a DesignCheckpoint per update; counters sampled after each update",
+    "growth_metric": "least-squares slope of each counter over the samples at or after the warm-up, in bytes per 1000 steps, per run or per update; no sample is required to decrease"
+  },
+  "seed": 3,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "reference_method": "self-referential soak: the counters of the same process over time, the state norm relative to its post-source peak, and the journal size against the planner's reservation; no external oracle",
+  "observables": [
+    {
+      "name": "rss_growth",
+      "unit": "bytes per 1000 steps, per run, per update",
+      "definition": "slope of psutil.Process().memory_info().rss after warm-up"
+    },
+    {
+      "name": "torch_growth",
+      "unit": "bytes per unit",
+      "definition": "slope of torch.cuda.memory_allocated and memory_reserved after warm-up (zero on CPU)"
+    },
+    {
+      "name": "journal_bytes",
+      "unit": "bytes",
+      "definition": "largest size of the journal directory at a record against restart_reservation_bytes"
+    },
+    {
+      "name": "relative_norm",
+      "unit": "dimensionless",
+      "definition": "state norm divided by the peak frozen at the first block boundary after the source ends"
+    }
+  ],
+  "acceptance": {
+    "long_forward": {
+      "min_steps": 100000,
+      "warmup_steps": 5000,
+      "max_rss_growth_mb_per_1000_steps": 1.0,
+      "energy_growth_limit": 1.5,
+      "max_relative_norm_last_half": 1e-06
+    },
+    "repeated_runs": {
+      "min_runs": 8,
+      "warmup_runs": 2,
+      "max_rss_growth_mb_per_run": 1.0
+    },
+    "optimization": {
+      "min_updates": 100,
+      "warmup_updates": 5,
+      "max_rss_growth_mb_per_update": 0.25
+    },
+    "max_torch_growth_bytes_per_unit": 0,
+    "other": "journal bytes never exceed the reservation; every state norm and signal is finite; the eight repeated runs return bitwise identical gradients; every optimization objective and gradient norm is finite",
+    "source_of_limits": "fixture-specific budgets declared from a 5000-step, 8-run, 30-update pilot on the same fixture and machine (RSS slopes 0.02 MB per 1000 steps, 0.36 MB per run with one 2.5 MB jump at the third run, 0.0006 MB per update; relative norm 2e-11 one block after the source ends and 3e-14 at step 5000): the RSS bounds are the brief's 1 MB per 1000 steps and margins of about three times and four hundred times the pilot slopes; the energy growth limit 1.5 bounds any excursion above the post-source peak without demanding monotone decay, and the last-half ceiling 1e-6 sits eight orders above the pilot's decayed level so that only an exponential late-time instability reaches it"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_restart_soak_record.py"
+    ],
+    "not_yet_covered": [
+      "CUDA tiles and file-backed banks in the soak",
+      "multi-hour wall time and larger domains",
+      "an approved long soak beyond about 25 minutes of CPU"
+    ]
+  },
+  "applicability": "One light 2D fixture on the RTX 3060 workstation's CPU; the numbers are memory-growth and discrete-stability observations of this fixture, not throughput or physics accuracy.",
+  "notes": "Declared on branch g5-restart before the recorded run; the pilot records are not part of the evidence."
+}

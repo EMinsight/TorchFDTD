@@ -1610,73 +1610,136 @@
           "title": "forward 중단, backward 중단, process kill, simulated ENOSPC/OOM, read/write fault, truncate/checksum 오류, CUDA transfer failure, cancellation을 주입한다",
           "specification": "forward 중단, backward 중단, process kill, simulated ENOSPC/OOM, read/write fault, truncate/checksum 오류, CUDA transfer failure, cancellation을 주입한다. 마지막 valid checkpoint는 보존하며, 손상된 최신 기록은 거절하거나 명시적으로 이전 valid 기록으로 복구한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
             "torchfdtd/streamed_restart.py",
-            "tests/test_streamed_restart.py"
+            "torchfdtd/streamed.py",
+            "tests/test_restart_faults.py",
+            "docs/STREAMED_RESTART.md",
+            "docs/validation/cases/G5-07_restart_fault_injection.json"
           ],
-          "planned_test_commands": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_restart_faults.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-07.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_restart_faults.py::test_forward_interruption",
+            "tests/test_restart_faults.py::test_backward_interruption",
+            "tests/test_restart_faults.py::test_process_kill",
+            "tests/test_restart_faults.py::test_enospc_while_writing_a_record",
+            "tests/test_restart_faults.py::test_device_out_of_memory_inside_a_slab_update",
+            "tests/test_restart_faults.py::test_cuda_transfer_failure",
+            "tests/test_restart_faults.py::test_bank_fault",
+            "tests/test_restart_faults.py::test_damaged_newest_forward_record_rolls_back_to_the_previous",
+            "tests/test_restart_faults.py::test_damaged_newest_backward_record_rolls_back",
+            "tests/test_restart_faults.py::test_damaged_meta_and_missing_checksum_are_named",
+            "tests/test_restart_faults.py::test_cancellation_records_the_boundary",
+            "tests/test_restart_faults.py::test_cancel_event_is_validated_and_without_a_journal_nothing_is_kept"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "One injected fault per test (interruptions, child-process kill, ENOSPC, device OOM, CUDA transfer, bank read/write, truncated array, corrupted and removed checksum, unreadable meta.json, cancel event). The journal keeps one fallback record per kind and rolls a damaged newest record back to it with the reason named in report[restart_rollbacks]; status.json carries failed or cancelled; scratch files and torch.cuda.memory_allocated return to the baseline. Not covered: faults inside the ADE, tensor, geometry and modal streamed paths, real ENOSPC, asynchronous tiles."
         },
         {
           "id": "G5-08",
           "title": "checkpoint에 solver와 필요한 auxiliary states, optimizer state, scheduler/projection state, RNG, effective source, configuration fingerprint를 보존한다",
           "specification": "checkpoint에 solver와 필요한 auxiliary states, optimizer state, scheduler/projection state, RNG, effective source, configuration fingerprint를 보존한다. solver restart와 optimizer restart를 따로 시험한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
             "torchfdtd/streamed_restart.py",
-            "tests/test_streamed_restart.py"
+            "torchfdtd/design_checkpoint.py",
+            "torchfdtd/identity.py",
+            "tests/test_checkpoint_completeness.py",
+            "docs/STREAMED_RESTART.md",
+            "docs/validation/cases/G5-08_checkpoint_completeness.json"
           ],
-          "planned_test_commands": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_checkpoint_completeness.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-08.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_checkpoint_completeness.py::test_solver_journal_carries_every_auxiliary_state_and_resumes",
+            "tests/test_checkpoint_completeness.py::test_optimizer_restart_reproduces_the_uninterrupted_history_bitwise",
+            "tests/test_checkpoint_completeness.py::test_checkpoint_round_trip_restores_each_named_state",
+            "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name",
+            "tests/test_checkpoint_completeness.py::test_checkpoint_refuses_another_configuration_waveform_or_damage"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "Solver journal records carry E, H, every CPML psi segment, the stored PMC face banks and the ADE P and Q banks (checked against the host state tuple for three scenes, restored bitwise, forward and backward resume bitwise). DesignCheckpoint (new) carries iteration, parameters, optimizer (Adam moments and step), projection (beta continuation, eta, filter configuration), rng (torch CPU/CUDA, NumPy, Python), the effective source waveform and the restart_key fingerprint; a four-iteration optimization interrupted in its third backward resumes to the uninterrupted history bitwise on CPU; a checkpoint missing any state is refused by name. The solver journal contract stays journal_contract as recorded for G1-04."
         },
         {
           "id": "G5-09",
           "title": "journal은 run별 소유권과 동시 writer 잠금을 갖는다",
           "specification": "journal은 run별 소유권과 동시 writer 잠금을 갖는다. 파일 checksum·dtype·shape·array count·bytes를 검사한다. 완료·취소·실패 상태와 부분 결과를 구분한다. directory fsync 등으로 process-kill consistency와 실제 power-loss durability의 보장 수준을 분리한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
             "torchfdtd/streamed_restart.py",
-            "tests/test_streamed_restart.py"
+            "torchfdtd/streamed.py",
+            "tests/test_journal_ownership.py",
+            "docs/STREAMED_RESTART.md",
+            "docs/validation/cases/G5-09_journal_ownership_durability.json"
           ],
-          "planned_test_commands": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_journal_ownership.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-09.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_journal_ownership.py::test_second_writer_is_refused_while_the_owner_lives_and_admitted_after_it_dies",
+            "tests/test_journal_ownership.py::test_stale_lock_of_a_dead_process_is_taken_over",
+            "tests/test_journal_ownership.py::test_locks_that_cannot_be_judged_are_refused_by_name",
+            "tests/test_journal_ownership.py::test_ownership_is_taken_again_after_a_terminal_state",
+            "tests/test_journal_ownership.py::test_every_record_file_is_checked",
+            "tests/test_journal_ownership.py::test_written_descriptions_carry_checksum_dtype_shape_count_and_bytes",
+            "tests/test_journal_ownership.py::test_terminal_states_are_distinct_and_partial_results_stay_readable",
+            "tests/test_journal_ownership.py::test_rename_into_place_uses_the_platform_durability_primitive",
+            "tests/test_journal_ownership.py::test_durability_levels_are_stated_separately"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "owner.json lock with run id, pid and host (O_EXCL; live owner refused by name, dead owner taken over as partial, other host or unreadable lock refused, pid reuse documented as a limitation); per-file checksum, dtype, shape, array count and byte count; status.json with running, completed, cancelled, failed and partial and inspect_journal for partial results; rename-into-place with directory fsync on POSIX and MoveFileExW MOVEFILE_WRITE_THROUGH on Windows; power-loss durability stated as a separate, unexercised level. The POSIX fsync branch is exercised on the Linux CI host only."
         },
         {
           "id": "G5-10",
           "title": "경량 fixture에서 1e5 steps, 반복 실행, 최소 100 optimizer updates 및 승인된 장시간 soak를 수행한다",
           "specification": "경량 fixture에서 1e5 steps, 반복 실행, 최소 100 optimizer updates 및 승인된 장시간 soak를 수행한다. warm-up/cache 상한 이후 반복당 메모리 증가가 지속되는지 검사한다. 모든 step에서 에너지 감소를 강요하지 않고 해당 이산계의 안정성/에너지 기준을 사용한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "benchmarks/restart_soak.py",
+            "tests/test_restart_soak_record.py",
+            "docs/RESTART_SOAK.md",
+            "docs/validation/g5/G5-10_soak_3060.json",
+            "docs/validation/cases/G5-10_restart_soak.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_restart_soak_record.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-10.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_restart_soak_record.py::test_record_was_produced_under_the_declared_criteria",
+            "tests/test_restart_soak_record.py::test_long_forward_meets_the_declared_bounds",
+            "tests/test_restart_soak_record.py::test_repeated_runs_meet_the_declared_bounds",
+            "tests/test_restart_soak_record.py::test_optimization_meets_the_declared_bounds",
+            "tests/test_restart_soak_record.py::test_recorded_verdicts_match_a_fresh_judgement_and_the_document"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "implementation_note": "benchmarks/restart_soak.py: 1e5 journaled forward steps of a light 2D fixture with RSS, torch allocated/reserved and journal bytes sampled at every record and the state norm judged by run_control.DecayDecision after the source ends; eight repeated forward-plus-backward runs; 100 projected Adam updates through the streamed adjoint with a journal per iteration and a design checkpoint per update. Growth is the least-squares slope after the declared warm-up against the case bounds; the record is docs/validation/g5/G5-10_soak_3060.json rendered to docs/RESTART_SOAK.md and judged by the test without a long run. CPU by design; about 22 minutes."
         }
       ]
     },

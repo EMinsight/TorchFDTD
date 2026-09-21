@@ -323,13 +323,22 @@ def _journal(project, epsilon, options, spectral, starts):
                           options.restart_every_blocks)
 
 
+class StreamCancelled(InterruptedError):
+    """A streamed pass stopped at a block boundary because its cancel event was set."""
+
+
+def _cancelled(cancel):
+    return cancel is not None and cancel.is_set()
+
+
 class _Streamed(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, epsilon, project, options, report, spectral, execution):
+    def forward(ctx, epsilon, project, options, report, spectral, execution, cancel=None):
         ctx.save_for_backward(epsilon)
         ctx.project, ctx.options, ctx.report = project.model_copy(deep=True), options, report
         ctx.spectral = spectral
         ctx.execution = execution
+        ctx.cancel = cancel
         started = time.perf_counter()
         host = execution.host(project, epsilon, spectral)
         report['host_initial_state_storage_bytes'] = sum(s.untyped_storage().nbytes() for s in host.state())
@@ -337,34 +346,55 @@ class _Streamed(torch.autograd.Function):
         starts = list(range(0, project.region.steps, options.temporal_depth))+[project.region.steps]
         journal = _journal(project, epsilon, options, spectral, starts)
         ctx.journal = journal
-        with _backing(options,report,'forward') as store:
-            operator = execution.operator(host, options, store)
-            state = host.state()
-            signals = torch.empty((project.region.steps, len(host.monitors)), dtype=host.field_dtype,
-                                  device='cpu') if spectral is None else spectral.zeros()
-            first = 0
-            resumed = journal.load_forward(operator.new_state, signals) if journal is not None else None
-            if resumed is not None:
-                completed, saved_state, signals = resumed
-                if completed is None:
-                    first = len(starts)-1
-                    report['forward_resumed_from_block'] = 'complete'
-                else:
-                    first, state = completed, saved_state
-                    report['forward_resumed_from_block'] = completed
-            for index in range(first, len(starts)-1):
-                start = starts[index]
-                depth = starts[index+1]-start
-                state, values = operator.forward(epsilon, state, start, depth)
-                if spectral is None:signals[start:start+depth].copy_(values)
-                else:spectral.accumulate(signals, values, start)
-                if journal is not None and journal.forward_due(index+1, len(starts)-1):
-                    journal.record_forward(index+1, state, signals)
-            if journal is not None and first < len(starts)-1:
-                journal.record_signals(signals)
-            if operator.workspace is not None:
-                report['forward_workspace'] = operator.workspace_report()
-            if journal is not None:report.update(journal.report())
+        total = len(starts)-1
+        index = 0
+        try:
+            with _backing(options,report,'forward') as store:
+                operator = execution.operator(host, options, store)
+                state = host.state()
+                signals = torch.empty((project.region.steps, len(host.monitors)), dtype=host.field_dtype,
+                                      device='cpu') if spectral is None else spectral.zeros()
+                first = 0
+                resumed = journal.load_forward(operator.new_state, signals) if journal is not None else None
+                if resumed is not None:
+                    completed, saved_state, signals = resumed
+                    if completed is None:
+                        first = total
+                        report['forward_resumed_from_block'] = 'complete'
+                    else:
+                        first, state = completed, saved_state
+                        report['forward_resumed_from_block'] = completed
+                recorded = first
+                for index in range(first, total):
+                    if _cancelled(cancel):
+                        # Stop at the block boundary. The journal keeps the state
+                        # reached here unless it already holds this block.
+                        if journal is not None:
+                            if index > recorded and index > 0:
+                                journal.record_forward(index, state, signals)
+                            journal.cancel('forward', index)
+                            report.update(journal.report())
+                        raise StreamCancelled(f'Streamed forward cancelled at block {index} of {total}.')
+                    start = starts[index]
+                    depth = starts[index+1]-start
+                    state, values = operator.forward(epsilon, state, start, depth)
+                    if spectral is None:signals[start:start+depth].copy_(values)
+                    else:spectral.accumulate(signals, values, start)
+                    if journal is not None and journal.forward_due(index+1, total):
+                        journal.record_forward(index+1, state, signals)
+                        recorded = index+1
+                if journal is not None and first < total:
+                    journal.record_signals(signals)
+                if operator.workspace is not None:
+                    report['forward_workspace'] = operator.workspace_report()
+                if journal is not None:report.update(journal.report())
+        except StreamCancelled:
+            raise
+        except BaseException as exc:
+            if journal is not None:
+                journal.fail('forward', exc, block=index)
+                report.update(journal.report())
+            raise
         report['forward_seconds'] = time.perf_counter()-started
         # No physical time history is retained by the autograd context.
         return signals
@@ -374,49 +404,68 @@ class _Streamed(torch.autograd.Function):
         if torch.is_grad_enabled():raise RuntimeError('Higher-order streamed derivatives are not implemented.')
         epsilon, = ctx.saved_tensors
         options, project, report = ctx.options, ctx.project, ctx.report
+        cancel = getattr(ctx, 'cancel', None)
         ctx.execution.reservation(project, epsilon, options, ctx.spectral)
         started = time.perf_counter()
         host = ctx.execution.host(project, epsilon, ctx.spectral)
+        journal = getattr(ctx, 'journal', None)
         with _backing(options,report,'backward') as store:
             operator = ctx.execution.operator(host, options, store)
             steps = project.region.steps
             starts = list(range(0, steps, options.temporal_depth))+[steps]
-            journal = getattr(ctx, 'journal', None)
+            total = len(starts)-1
             signal_bar_sha256 = None
             resumed = None
             if journal is not None:
                 from .streamed_restart import sha256_tensor
                 signal_bar_sha256 = sha256_tensor(signal_bar.detach().contiguous())
+                # A journal written for another objective is refused here, before
+                # any work; that refusal is not a failure of this run.
                 resumed = journal.load_backward(signal_bar_sha256, operator.new_state, epsilon)
             if resumed is not None:
                 limit, adjoint, gradient = resumed
                 report['backward_resumed_from_block'] = limit
             else:
-                limit = len(starts)-1
+                limit = total
                 gradient = torch.zeros_like(epsilon)
                 adjoint = host.state()
             live = 0
+            recorded = limit
             report.update(peak_block_checkpoints=0, replayed_blocks=0)
+
+            def stop(position):
+                # Cancellation at a transpose boundary: the adjoint and partial
+                # gradient reached here are recorded unless the journal already
+                # holds this position, then the journal is marked cancelled.
+                if journal is not None:
+                    if position < recorded and position < total:
+                        journal.record_backward(position, adjoint, gradient, signal_bar_sha256)
+                    journal.cancel('backward', position)
+                    report.update(journal.report())
+                raise StreamCancelled(f'Streamed backward cancelled at block {position} of {total}.')
 
             def replay(state, begin, end):
                 for block in range(begin, end):
+                    if _cancelled(cancel):stop(recorded)
                     state, _ = operator.forward(epsilon, state, starts[block], starts[block+1]-starts[block])
                     report['replayed_blocks'] += 1
                 return state
 
             def reverse(begin, end, restart, slots):
-                nonlocal adjoint, live
+                nonlocal adjoint, live, recorded
                 while end > begin:
                     if end-begin == 1 or slots == 0:
                         for block in reversed(range(begin, end)):
+                            if _cancelled(cancel):stop(block+1)
                             state = replay(restart, begin, block)
-                            start, stop = starts[block], starts[block+1]
-                            adjoint, contribution = operator.transpose(epsilon, state, start, stop-start,
-                                                                       adjoint, signal_bar[start:stop] if ctx.spectral is None else ctx.spectral.transpose(signal_bar,start,stop))
+                            start, stop_step = starts[block], starts[block+1]
+                            adjoint, contribution = operator.transpose(epsilon, state, start, stop_step-start,
+                                                                       adjoint, signal_bar[start:stop_step] if ctx.spectral is None else ctx.spectral.transpose(signal_bar,start,stop_step))
                             gradient.add_(contribution)
                             del state, contribution
-                            if journal is not None and journal.backward_due(block, len(starts)-1):
+                            if journal is not None and journal.backward_due(block, total):
                                 journal.record_backward(block, adjoint, gradient, signal_bar_sha256)
+                                recorded = block
                         return
                     middle = begin+_split(end-begin, slots)
                     saved = replay(restart, begin, middle)
@@ -429,6 +478,13 @@ class _Streamed(torch.autograd.Function):
                     end = middle
 
             try:reverse(0, limit, host.state(), options.checkpoints)
+            except StreamCancelled:
+                raise
+            except BaseException as exc:
+                if journal is not None:
+                    journal.fail('backward', exc, block=recorded)
+                    report.update(journal.report())
+                raise
             finally:reverse=None  # Release recursive replay captures without cyclic GC.
             if journal is not None:
                 journal.complete()
@@ -436,7 +492,7 @@ class _Streamed(torch.autograd.Function):
             if operator.workspace is not None:
                 report['backward_workspace'] = operator.workspace_report()
         report['backward_seconds'] = time.perf_counter()-started
-        return gradient, None, None, None, None, None
+        return gradient, None, None, None, None, None, None
 
 
 class StreamedSimulation(DifferentiableSimulation):
@@ -447,9 +503,15 @@ class StreamedSimulation(DifferentiableSimulation):
     A manual policy or a policy from tune_streamed is explicit, and conservative
     admission does not itself establish a throughput advantage.
     """
-    def __init__(self, project, options=None):
+    def __init__(self, project, options=None, *, cancel=None):
         super().__init__(project)
         self.streaming_options = options or StreamedAdjointOptions()
+        if cancel is not None and not callable(getattr(cancel, 'is_set', None)):
+            raise ValueError('cancel must be an event with an is_set() method, such as threading.Event.')
+        # Checked at block boundaries of the forward pass and at transpose and
+        # replay boundaries of the backward pass; a set event raises
+        # StreamCancelled after the journal, if any, has recorded the boundary.
+        self.cancel = cancel
 
     def spectrum(self, epsilon, frequency_hz, *, window=None, block_size=32):
         """Accumulate a fixed-frequency DFT without retaining time signals."""
@@ -489,7 +551,8 @@ class StreamedSimulation(DifferentiableSimulation):
                       policy='manual', precision=str(epsilon.dtype), **reservation)
         report['observation_storage'] = 'time_history' if spectral is None else 'online_spectrum'
         if spectral is not None:report.update(spectral.reservation(min(options.temporal_depth,region.steps)))
-        signals = _Streamed.apply(epsilon, self.project, options, report, spectral, execution or _StreamedExecution())
+        signals = _Streamed.apply(epsilon, self.project, options, report, spectral, execution or _StreamedExecution(),
+                                  getattr(self, 'cancel', None))
         if spectral is not None:return spectral.result(signals,report)
         return DifferentiableResult(signals, region.time_step,
                                     tuple(m.component for m in self.project.monitors if m.enabled), report)

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-08_checkpoint_completeness",
+  "task": "G5-08",
+  "title": "Checkpoint completeness: the solver journal carries every auxiliary state and the design checkpoint carries the optimizer, projection, generator, waveform and fingerprint states",
+  "declared": "2026-09-22",
+  "declared_at_commit": "dfdd44d279789ae312b53f9caeadfd2ccf92015a",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "tests/test_checkpoint_completeness.py",
+    "solver_scenes": [
+      "cpml: tests/test_differentiable.py::project(steps=13), 2D 16 x 15, CPML on every wall, float64, epsilon 1.7 (E, H and 16 psi segments)",
+      "faces: tests/test_pmc_general.py::scene with walls (pml, pmc), (pmc, pml), (pec, pmc), 10 x 10 x 6 cells, float64, voxelized diagonal epsilon (E, H, psi segments, stored E and H face banks)",
+      "ade: the cpml scene through StreamedDispersiveSimulation with two poles (E, H, psi segments, P and Q banks in the x-first slab layout)"
+    ],
+    "policy": "slab width 4 (3 for faces), temporal depth 3, checkpoints 1, local checkpoints 1, host banks, CPU tiles, restart_every_blocks 1",
+    "optimization": "DensityParameterization 16 x 15, density mode, truncate filter radius 0.15 um, beta 1 advanced to 2 at the third iteration, eta 0.5, float64; Adam lr 0.05; objective sum over monitors of a torch.rand weight times the squared signals; four iterations with a journal per iteration and a design checkpoint per update; the interrupted run raises after the twelfth transpose (third iteration, two transposes done)"
+  },
+  "seed": 7,
+  "precision": [
+    "float64"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "reference_method": "behavioural: the host state tuple built independently by _StreamedExecution.host and advanced two blocks by the slab operator; the uninterrupted optimization run in the same process with the same seed",
+  "observables": [
+    {
+      "name": "record_arrays",
+      "unit": "count, shape, dtype, bytes, sha256",
+      "definition": "the array descriptions of the forward record after two blocks against the host state tuple"
+    },
+    {
+      "name": "restored_state",
+      "unit": "dimensionless",
+      "definition": "difference between the arrays loaded from the record and the state reached by advancing the host state two blocks"
+    },
+    {
+      "name": "history_agreement",
+      "unit": "dimensionless",
+      "definition": "difference of objective, gradient norm, beta, random weight, final design and Adam moments between the resumed and the uninterrupted optimization"
+    },
+    {
+      "name": "refusal",
+      "unit": "string",
+      "definition": "the state named by the ValueError of a checkpoint lacking it"
+    }
+  ],
+  "acceptance": {
+    "solver_states": "the forward record holds exactly len(host.state())+1 arrays: E, H, one psi per CPML segment, every stored E and H face bank, and for ADE the P and Q banks, each with the state's shape, dtype and byte count and a 64-character SHA-256; loading the record reproduces the two-block state bitwise; the forward resume and the backward resume reproduce the uninterrupted signals and gradients bitwise (rtol 0, atol 0)",
+    "optimizer_states": "the resumed optimization reproduces the uninterrupted history bitwise on CPU: objectives, gradient norms, beta, the torch.rand weights, the final design and the Adam exp_avg, exp_avg_sq and step",
+    "named_states": "DesignCheckpoint carries iteration, parameters, optimizer, projection, rng, waveform, fingerprint and history; a checkpoint lacking any one of them is refused with that name; a checkpoint written for another plan or other options (restart_key differs), another effective waveform, a damaged file (checksum or byte count) or another filter configuration is refused with the cause named",
+    "source_of_limits": "bitwise equality on CPU (stricter than proposed_thresholds discrete_dimensionless_fp32); counts are exact"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_checkpoint_completeness.py"
+    ],
+    "not_yet_covered": [
+      "CUDA generator states are saved when CUDA is available but the optimization test runs on CPU",
+      "ADE face banks (a dispersive scene with stored PMC faces)",
+      "the solver journal's own contract remains journal_contract (project hash, epsilon hash, options, runtime sources, torch), as recorded for G1-04; restart_key is the fingerprint of the design checkpoint"
+    ]
+  },
+  "applicability": "Streamed restart journals and DesignCheckpoint on one workstation, CPU; the optimization loop of the test is the reference pattern (a journal per iteration, a checkpoint per update).",
+  "notes": "Declared on branch g5-restart after torchfdtd/design_checkpoint.py was added; no fixture-specific budget."
+}
