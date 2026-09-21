@@ -72,7 +72,8 @@ def test_optimization_meets_the_declared_bounds(case, record):
     growth = opt['memory_growth']['rss_bytes']
     assert growth['samples_after_warmup'] == opt['updates']-limits['warmup_updates']+1
     assert growth['slope_bytes_per_unit'] <= limits['max_rss_growth_mb_per_update']*1024**2
-    assert opt['objectives_finite'] and opt['final_beta'] == 16.
+    # beta doubles at updates 25, 50 and 75 (the cap of 16 is not reached within 100 updates).
+    assert opt['objectives_finite'] and opt['final_beta'] == 8.
 
 
 def test_recorded_verdicts_match_a_fresh_judgement_and_the_document(case, record, tmp_path):
