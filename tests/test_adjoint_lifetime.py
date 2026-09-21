@@ -6,7 +6,7 @@ from torchfdtd import DifferentiableSimulation,AdjointOptions
 from test_bloch_adjoint import scene
 
 
-@pytest.mark.parametrize('backend',['cpu','torch','fused'])
+@pytest.mark.parametrize('backend',['cpu',pytest.param('torch',marks=pytest.mark.cuda),pytest.param('fused',marks=pytest.mark.cuda)])
 @pytest.mark.parametrize('complex_fields',[False,True])
 def test_completed_adjoint_does_not_retain_system_until_gc(backend,complex_fields):
     device='cpu' if backend=='cpu' else 'cuda'

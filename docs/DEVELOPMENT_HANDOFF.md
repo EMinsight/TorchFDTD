@@ -149,9 +149,12 @@ gave 603 skipped, 0 passed, 0 failed in 16.53 s (no CPU test carries the
 (CUDA hidden by the runner) gave 1779 passed, 9 skipped, 603 deselected in
 3263.89 s on the loaded host. The nine skips: three Gloo transport cases and
 the Lumerical round trip (all `optional platform check:`), and five CUDA
-skips the collection rules miss (tests/test_adjoint_lifetime.py:13, four
-instances, and tests/test_shape_gradients.py:29, one instance), which skip in
-cpu-pr and would fail under --gpu-required on a host without a GPU.
+skips the collection rules missed (tests/test_adjoint_lifetime.py:13, four
+instances, and tests/test_shape_gradients.py:29, one instance: their CUDA
+parameters are named `torch`/`fused` or gated through a helper). Those
+parameters now carry an explicit `cuda` marker (commit after 4a14c4b); with
+it the two files give 12 passed and 8 deselected in cpu-pr mode and 20 passed
+on the GPU.
 
 **Measurements and pre-declared limits.** Every comparison is on quantities
 divided by the reference maximum, at the program's layer-A limits declared in
