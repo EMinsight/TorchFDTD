@@ -1,0 +1,89 @@
+{
+  "name": "adjoint",
+  "description": "Full scalar-per-cell epsilon gradient of a two-probe loss in a periodic dielectric box (docs/FDTDX_MATCHED_FULL_GRADIENT.md fixture at 128 steps).",
+  "dimension": "3d",
+  "size_um": [
+    6.4,
+    6.4,
+    6.4
+  ],
+  "mesh_um": 0.1,
+  "shape": [
+    64,
+    64,
+    64
+  ],
+  "courant_factor": 0.9,
+  "courant_number": 0.5196152422706632,
+  "dt_s": 1.7332498813918235e-16,
+  "steps": 128,
+  "boundaries": "all six periodic, zero Bloch phase",
+  "slab": {
+    "epsilon": 2.25,
+    "z_cell_range": [
+      32,
+      40
+    ]
+  },
+  "source": {
+    "component": "Ex",
+    "index": [
+      32,
+      32,
+      12
+    ],
+    "waveform": {
+      "type": "gaussian_standard",
+      "wavelength_um": 1.55,
+      "pulse_length_s": 5e-15,
+      "pulse_offset_s": 8e-15,
+      "amplitude": 1.0
+    },
+    "note": "Additive Ex kick at one vacuum cell after the E update; kick[n]=waveform((n+1)*dt). FDTDX injects -C*inv_eps*profile[n] at time n*dt, so profile=-kick/C at the fixed inv_eps=1 source cell."
+  },
+  "probes": [
+    {
+      "component": "Ex",
+      "index": [
+        32,
+        32,
+        24
+      ]
+    },
+    {
+      "component": "Ex",
+      "index": [
+        32,
+        32,
+        48
+      ]
+    }
+  ],
+  "loss": "mean(probe0**2) + 0.3*mean(probe1**2) over all steps",
+  "design_variables": "all 64^3 cells except the source cell (gradient reported on the full array; source-cell entry is zero by construction in TorchFDTD and in FDTDX)",
+  "torchfdtd": {
+    "mode": "checkpointed",
+    "checkpoints": 2,
+    "storage": "device"
+  },
+  "fdtdx": {
+    "modes": [
+      {
+        "method": "checkpointed",
+        "num_checkpoints": 2
+      },
+      {
+        "method": "reversible",
+        "recorder": "Recorder(modules=[])",
+        "num_checkpoints_reversible": 0
+      }
+    ]
+  },
+  "meep": "Meep is excluded: its adjoint is a frequency-domain method with different semantics.",
+  "precision": {
+    "torchfdtd": "float32",
+    "fdtdx": "float32"
+  },
+  "repetitions": 3,
+  "warmup": 1
+}

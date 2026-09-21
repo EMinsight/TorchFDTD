@@ -1,0 +1,2574 @@
+{
+  "schema": "torchfdtd-cross-solver-combined-v1",
+  "date": "2026-09-22",
+  "worktree_head_at_run": "f6aacf359e52278db73ed8526cda94d717e20ca7",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3060 12 GB (WSL2, driver from Windows)",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "note": "Linux side: WSL2 Ubuntu 22.04 distribution torchfdtd-bench on D: (imported because the LangtangSim VHD on the full C: drive could not grow). GPU shared with the Windows desktop compositor; every timing block waited for the idle criterion recorded in gpu_idle."
+  },
+  "environments": {
+    "torchfdtd": {
+      "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+      "python": "3.12.14",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+      "logical_cpus": 20,
+      "wsl_distribution": "torchfdtd-bench",
+      "gpu": {
+        "name": "NVIDIA GeForce RTX 3060",
+        "driver_version": "591.86",
+        "memory.total": "12288",
+        "memory.used": "2511",
+        "utilization.gpu": "0"
+      },
+      "packages": {
+        "torchfdtd": "0.14.0.dev0",
+        "torch": "2.11.0+cu128",
+        "cupy-cuda12x": "14.2.0",
+        "fdtd": "0.2.2",
+        "numpy": "2.4.6",
+        "scipy": "1.18.1"
+      },
+      "torch_hardware": {
+        "cuda": true,
+        "gpu": "NVIDIA GeForce RTX 3060",
+        "gpu_memory_gb": 12.0,
+        "torch": "2.11.0+cu128",
+        "engine": "TorchFDTD Yee/CPML on fdtd grid",
+        "cpu_threads": 10
+      },
+      "torch_cuda": "12.8"
+    },
+    "fdtdx": {
+      "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+      "python": "3.12.14",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+      "logical_cpus": 20,
+      "wsl_distribution": "torchfdtd-bench",
+      "gpu": {
+        "name": "NVIDIA GeForce RTX 3060",
+        "driver_version": "591.86",
+        "memory.total": "12288",
+        "memory.used": "2495",
+        "utilization.gpu": "0"
+      },
+      "packages": {
+        "fdtdx": "0.6.2",
+        "jax": "0.11.2",
+        "jaxlib": "0.11.2",
+        "jax-cuda12-plugin": "0.11.2",
+        "jax-cuda12-pjrt": "0.11.2",
+        "equinox": "0.13.8",
+        "optax": "0.2.8",
+        "numpy": "2.4.6",
+        "scipy": "1.18.1"
+      },
+      "jax_devices": [
+        "cuda:0"
+      ],
+      "jax_x64": false,
+      "xla_preallocate": "false"
+    },
+    "meep": {
+      "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+      "python": "3.13.15",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+      "logical_cpus": 20,
+      "wsl_distribution": "torchfdtd-bench",
+      "gpu": {
+        "name": "NVIDIA GeForce RTX 3060",
+        "driver_version": "591.86",
+        "memory.total": "12288",
+        "memory.used": "2443",
+        "utilization.gpu": "1"
+      },
+      "packages": {
+        "meep": null,
+        "numpy": "2.5.3",
+        "scipy": "1.18.1",
+        "mpich": null,
+        "mpi4py": "4.1.2"
+      },
+      "meep_version": "1.34.0",
+      "conda_packages": {
+        "mpich": "4.3.2 h23078de_105",
+        "numpy": "2.5.3 py313hb5f73ae_0",
+        "pymeep": "1.34.0 mpi_mpich_py313h5c06767_1",
+        "python": "3.13.15 hf47f18c_103_cp313",
+        "scipy": "1.18.1 py313he2a5f1a_0"
+      },
+      "mpich_version": "4.3.2 h23078de_105",
+      "meep_mpi": true,
+      "mpi_processes": 12,
+      "omp_num_threads": "1",
+      "precision": "float64 (Meep build)"
+    }
+  },
+  "fixtures": {
+    "slab": {
+      "name": "slab",
+      "description": "Lossless dielectric slab at normal incidence in a periodic 2D cell (TMz: Ez, Hx, Hy). Solvers without a 2D mode use a 3D grid with one periodic cell along z.",
+      "dimension": "2d",
+      "size_um": [
+        8.0,
+        0.5,
+        1.0
+      ],
+      "mesh_um": 0.025,
+      "shape": [
+        320,
+        20,
+        1
+      ],
+      "courant_number": 0.700035713374682,
+      "dt_s": 5.837669483455467e-17,
+      "steps": 1600,
+      "pml_cells": 16,
+      "boundaries": {
+        "x": "pml",
+        "y": "periodic"
+      },
+      "background_index": 1.0,
+      "slab": {
+        "index": 1.5,
+        "thickness_um": 0.2,
+        "center_x_um": 0.0125,
+        "note": "Ez nodes at x=-4+k*0.025 um; the slab covers the eight Ez nodes x=-0.075..0.100 um (indices 157..164), i.e. exactly 0.2 um of staircased material.",
+        "ez_cell_indices": [
+          157,
+          165
+        ]
+      },
+      "source": {
+        "kind": "soft_sheet",
+        "component": "Ez",
+        "x_um": -1.5,
+        "x_index": 100,
+        "waveform": {
+          "type": "gaussian_cycles",
+          "wavelength_um": 1.55,
+          "pulse_cycles": 1.0,
+          "amplitude": 1.0
+        },
+        "note": "Additive (soft) Ez sheet over the whole periodic y span at one x node, applied after the E update of every step with the sample at t=(n+1)*dt."
+      },
+      "monitors": {
+        "reflection_x_um": -0.8,
+        "reflection_x_index": 128,
+        "transmission_x_um": 0.8,
+        "transmission_x_index": 192
+      },
+      "spectrum": {
+        "sampling": "frequency",
+        "wavelength_start_um": 1.3,
+        "wavelength_stop_um": 1.8,
+        "points": 31,
+        "note": "31 samples equally spaced in frequency between c/1.8um and c/1.3um."
+      },
+      "reference": {
+        "kind": "fresnel_slab",
+        "formula": "T=[1+((n^2-1)/(2n))^2 sin^2(2 pi n d/lambda)]^-1, R=1-T"
+      },
+      "precision": {
+        "torchfdtd": "float32",
+        "fdtdx": "float32",
+        "meep": "float64 (build fixed)"
+      }
+    },
+    "sphere": {
+      "name": "sphere",
+      "description": "Dielectric sphere scattering cross-section from a closed TFSF box (TorchFDTD, FDTDX) or a Meep native plane-wave-plus-flux-box setup.",
+      "dimension": "3d",
+      "size_um": [
+        3.2,
+        3.2,
+        3.2
+      ],
+      "mesh_um": 0.05,
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "courant_number": 0.5715767664977295,
+      "dt_s": 9.532874347655028e-17,
+      "duration_fs": 240.0,
+      "steps": 2518,
+      "pml_cells": 8,
+      "boundaries": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "background_index": 1.0,
+      "sphere": {
+        "index": 2.0,
+        "radius_um": 0.6,
+        "center_um": [
+          0,
+          0,
+          0
+        ]
+      },
+      "tfsf_box": {
+        "size_um": 1.6,
+        "lower_node_index": 16,
+        "upper_node_index": 48,
+        "normal": "x",
+        "direction": "+",
+        "component": "Ez"
+      },
+      "flux_box": {
+        "size_um": 2.2,
+        "plane_positions_um": 1.1,
+        "plane_node_indices": [
+          10,
+          54
+        ]
+      },
+      "incident_plane": {
+        "x_um": 0.0,
+        "x_index": 32,
+        "size_um": 0.4
+      },
+      "source": {
+        "waveform": {
+          "type": "gaussian_standard",
+          "wavelength_um": 1.55,
+          "pulse_length_s": 8e-15,
+          "pulse_offset_s": 3e-14,
+          "amplitude": 1.0
+        }
+      },
+      "spectrum": {
+        "sampling": "wavelength",
+        "wavelength_start_um": 1.3,
+        "wavelength_stop_um": 1.8,
+        "points": 9,
+        "note": "9 samples equally spaced in wavelength."
+      },
+      "reference": {
+        "kind": "mie_series",
+        "note": "Bohren-Huffman a_n/b_n with SciPy spherical Bessel functions, as in examples/tfsf_sphere.py."
+      },
+      "precision": {
+        "torchfdtd": "float32",
+        "fdtdx": "float32",
+        "meep": "float64 (build fixed)"
+      },
+      "fdtdx_plane_source": {
+        "kind": "UniformPlaneSource one-way plane (no closed TFSF box in fdtdx 0.6.2)",
+        "x_index": 8,
+        "x_um": -1.2,
+        "note": "Spans the full y,z domain including the PML; the flux box faces lie in the total-field region, so the empty-domain phasors are subtracted before the scattered flux is integrated."
+      },
+      "meep_plane_source": {
+        "kind": "planewave current sheet spanning the full cell (Meep Mie tutorial setup, no TFSF box)",
+        "x_um": -1.2,
+        "note": "Ez current sheet at the PML interface spanning the full cell including the PML; scattered flux = total-run flux minus empty-run DFT fields (load_minus_flux_data)."
+      }
+    },
+    "throughput": {
+      "name": "throughput",
+      "description": "Forward throughput on the benchmarks/open_source.py vacuum and sphere scenes: 4.8 um cube, 800 steps, point Ez source and point Ez monitor.",
+      "dimension": "3d",
+      "size_um": [
+        4.8,
+        4.8,
+        4.8
+      ],
+      "source": {
+        "kind": "point",
+        "component": "Ez",
+        "center_um": [
+          -1.2,
+          0,
+          0
+        ],
+        "waveform": {
+          "type": "gaussian_cycles",
+          "wavelength_um": 1.55,
+          "pulse_cycles": 2.0,
+          "amplitude": 1.0
+        }
+      },
+      "monitor": {
+        "kind": "point",
+        "component": "Ez",
+        "center_um": [
+          1.2,
+          0,
+          0
+        ]
+      },
+      "boundaries": {
+        "x": "pml",
+        "y": "pml",
+        "z": "pml"
+      },
+      "material_sampling": "yee (per-component staircase); Meep eps_averaging disabled",
+      "cases": [
+        {
+          "name": "vacuum-64",
+          "kind": "vacuum",
+          "n": 64,
+          "shape": [
+            64,
+            64,
+            64
+          ],
+          "mesh_um": 0.075,
+          "pml_cells": 8,
+          "courant_number": 0.5715767664977295,
+          "dt_s": 1.4299311521482543e-16,
+          "steps": 800,
+          "structures": [],
+          "source_index": [
+            16,
+            32,
+            31
+          ],
+          "monitor_index": [
+            48,
+            32,
+            31
+          ]
+        },
+        {
+          "name": "sphere-64",
+          "kind": "sphere",
+          "n": 64,
+          "shape": [
+            64,
+            64,
+            64
+          ],
+          "mesh_um": 0.075,
+          "pml_cells": 8,
+          "courant_number": 0.5715767664977295,
+          "dt_s": 1.4299311521482543e-16,
+          "steps": 800,
+          "structures": [
+            {
+              "kind": "sphere",
+              "radius_um": 0.5,
+              "index": 1.5,
+              "center_um": [
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "source_index": [
+            16,
+            32,
+            31
+          ],
+          "monitor_index": [
+            48,
+            32,
+            31
+          ]
+        },
+        {
+          "name": "vacuum-96",
+          "kind": "vacuum",
+          "n": 96,
+          "shape": [
+            96,
+            96,
+            96
+          ],
+          "mesh_um": 0.049999999999999996,
+          "pml_cells": 8,
+          "courant_number": 0.5715767664977295,
+          "dt_s": 9.532874347655027e-17,
+          "steps": 800,
+          "structures": [],
+          "source_index": [
+            24,
+            48,
+            48
+          ],
+          "monitor_index": [
+            72,
+            48,
+            48
+          ]
+        },
+        {
+          "name": "sphere-96",
+          "kind": "sphere",
+          "n": 96,
+          "shape": [
+            96,
+            96,
+            96
+          ],
+          "mesh_um": 0.049999999999999996,
+          "pml_cells": 8,
+          "courant_number": 0.5715767664977295,
+          "dt_s": 9.532874347655027e-17,
+          "steps": 800,
+          "structures": [
+            {
+              "kind": "sphere",
+              "radius_um": 0.5,
+              "index": 1.5,
+              "center_um": [
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "source_index": [
+            24,
+            48,
+            48
+          ],
+          "monitor_index": [
+            72,
+            48,
+            48
+          ]
+        }
+      ],
+      "repetitions": 3,
+      "warmup": 1,
+      "precision": {
+        "torchfdtd": "float32",
+        "fdtdx": "float32",
+        "meep": "float64 (build fixed)"
+      },
+      "index_note": "Ez Yee node indices (x,y integer nodes, z half node) as resolved by torchfdtd.solver.index_at for yee sampling; z=0 lies exactly between two half nodes and the resolved index is recorded here so that every solver uses the same cell."
+    },
+    "adjoint": {
+      "name": "adjoint",
+      "description": "Full scalar-per-cell epsilon gradient of a two-probe loss in a periodic dielectric box (docs/FDTDX_MATCHED_FULL_GRADIENT.md fixture at 128 steps).",
+      "dimension": "3d",
+      "size_um": [
+        6.4,
+        6.4,
+        6.4
+      ],
+      "mesh_um": 0.1,
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "courant_factor": 0.9,
+      "courant_number": 0.5196152422706632,
+      "dt_s": 1.7332498813918235e-16,
+      "steps": 128,
+      "boundaries": "all six periodic, zero Bloch phase",
+      "slab": {
+        "epsilon": 2.25,
+        "z_cell_range": [
+          32,
+          40
+        ]
+      },
+      "source": {
+        "component": "Ex",
+        "index": [
+          32,
+          32,
+          12
+        ],
+        "waveform": {
+          "type": "gaussian_standard",
+          "wavelength_um": 1.55,
+          "pulse_length_s": 5e-15,
+          "pulse_offset_s": 8e-15,
+          "amplitude": 1.0
+        },
+        "note": "Additive Ex kick at one vacuum cell after the E update; kick[n]=waveform((n+1)*dt). FDTDX injects -C*inv_eps*profile[n] at time n*dt, so profile=-kick/C at the fixed inv_eps=1 source cell."
+      },
+      "probes": [
+        {
+          "component": "Ex",
+          "index": [
+            32,
+            32,
+            24
+          ]
+        },
+        {
+          "component": "Ex",
+          "index": [
+            32,
+            32,
+            48
+          ]
+        }
+      ],
+      "loss": "mean(probe0**2) + 0.3*mean(probe1**2) over all steps",
+      "design_variables": "all 64^3 cells except the source cell (gradient reported on the full array; source-cell entry is zero by construction in TorchFDTD and in FDTDX)",
+      "torchfdtd": {
+        "mode": "checkpointed",
+        "checkpoints": 2,
+        "storage": "device"
+      },
+      "fdtdx": {
+        "modes": [
+          {
+            "method": "checkpointed",
+            "num_checkpoints": 2
+          },
+          {
+            "method": "reversible",
+            "recorder": "Recorder(modules=[])",
+            "num_checkpoints_reversible": 0
+          }
+        ]
+      },
+      "meep": "Meep is excluded: its adjoint is a frequency-domain method with different semantics.",
+      "precision": {
+        "torchfdtd": "float32",
+        "fdtdx": "float32"
+      },
+      "repetitions": 3,
+      "warmup": 1
+    }
+  },
+  "fixture_sha256": {
+    "slab": "cee8b0071b343906aa4c0cac318ee6bbfdec459d5f272cee4b479b1eaefc7547",
+    "sphere": "44af18789e485e661e15487e855733011910adbc61fafd8f359a1be00434f7e4",
+    "throughput": "2c8a687efbada9c7ca7b7d4419161b9c7866840fb0847004edaa8687605511db",
+    "adjoint": "aa0843678bc5e31cdd03236e765165827a1330e75fdd9d2e9388721b79654d95"
+  },
+  "driver_sha256": {
+    "common.py": "25dfbc48970f46f6fba4d19439a2d925ef381c982ab543452e719188cc9ab716",
+    "torchfdtd_driver.py": "78d12115209a5d9422b4362d27c3b3da2324dcd454921361229d68f4c82f5fb6",
+    "fdtdx_driver.py": "0151c5df68905651fedad6c37c7fd38fd8537fafbdb00ae02e066e9395b7196c",
+    "meep_driver.py": "860264cb7ec94fedcda05c02ff8dfa1cdac688af275f6329c2926fc41a6d0d42",
+    "combine.py": "0b428ff8f089eab32da334acd09b0c4702e41748894ee1c1870a41a8619c1e01",
+    "report.py": "3494762036c4a4bb786304df704e36b8e06c57eef6ed728a55b7014ab274f09c"
+  },
+  "records": {
+    "fdtdx_adjoint_checkpointed.json": "662c18ecd0265c3fbf298730f26458e5493eb3ec1d91fb1773fa089bf1477279",
+    "fdtdx_adjoint_checkpointed16.json": "004ae6c675f281dbfcdb2f842d27e2af925980e6246683433007ee5848e4fbf9",
+    "fdtdx_adjoint_reversible.json": "ae33bd4c29b1ef8eb7d34211599d210e1c71fee19ef7226266c5c05fe69989bd",
+    "fdtdx_slab.json": "e59aa4a9b578954f9ef6fc0313249363cc37c6e697a8526b2e419c238ec99ae4",
+    "fdtdx_sphere.json": "045ee8f8915cfdc29dbc3ed79f5fd1112b5a93460d5ebf96daf2cdba49626754",
+    "fdtdx_throughput.json": "51c444c5e941b6d07ae16202747b3e8727293d35c7bf22dc861880f66d74aa66",
+    "meep_slab.json": "b2ec98be2a31b65650040991b0955f6614ae6d080025585196cf3c3f9be1e1a7",
+    "meep_sphere.json": "8b06f58cec21db3c643edba1474d2dcf68e1046f8af7160f9e8eecf09ec76fc6",
+    "meep_throughput_ranks12.json": "3a7423bc816ec0381f5b3455784ab396d52a9851d655afa228424fd60a771dfd",
+    "meep_throughput_ranks16.json": "39e80e0e1af9aae428788da68b6e809f2f928127d4e0b668b2491b58e65603b0",
+    "meep_throughput_ranks4.json": "503872b5121618590548b0c4648a943c4f37a022460660c7b444b2af26986d5b",
+    "meep_throughput_ranks8.json": "33773d5723c848c20764b49830fdc2b49048b47f4201f9636d6b57572e378af7",
+    "torchfdtd_adjoint.json": "93fb52c4ff63c5ba017d6cf2b74f2382daba19c64c1bc6ed8bcde405275b3098",
+    "torchfdtd_slab.json": "bb4a7ddb308ff9895ff112683e92677186f8ed4c01263782eb549b2a8f94caff",
+    "torchfdtd_sphere.json": "4aa0f5da3bada9b9254db0061bb182032e4bdda74557e39c63b3dc23d05662ae",
+    "torchfdtd_throughput.json": "83b9d53c9914917857bb3c449ff121a63b050746fb0835363ba97279c1563b28"
+  },
+  "slab": {
+    "solvers": {
+      "torchfdtd": {
+        "max_T_absolute_error": 0.001533341504959651,
+        "max_R_absolute_error": 0.0015351270638395142,
+        "max_energy_residual": 5.3562220811986805e-06,
+        "wavelength_um": [
+          1.7999999999999998,
+          1.7772151898734179,
+          1.755,
+          1.7333333333333332,
+          1.7121951219512195,
+          1.691566265060241,
+          1.6714285714285713,
+          1.651764705882353,
+          1.6325581395348836,
+          1.6137931034482758,
+          1.5954545454545457,
+          1.5775280898876405,
+          1.56,
+          1.542857142857143,
+          1.526086956521739,
+          1.5096774193548388,
+          1.4936170212765958,
+          1.4778947368421052,
+          1.4625,
+          1.447422680412371,
+          1.4326530612244897,
+          1.4181818181818182,
+          1.404,
+          1.3900990099009902,
+          1.3764705882352941,
+          1.3631067961165046,
+          1.35,
+          1.3371428571428572,
+          1.3245283018867926,
+          1.3121495327102803,
+          1.3
+        ],
+        "T": [
+          0.8840879859603203,
+          0.882496414779759,
+          0.8809349370881017,
+          0.8794069362805628,
+          0.8779141358486564,
+          0.876448456165449,
+          0.875020737350039,
+          0.8736282068573373,
+          0.8722694770630717,
+          0.8709462211887262,
+          0.8696592942310464,
+          0.8684095710567777,
+          0.8671981696202974,
+          0.8660250833872054,
+          0.8648912052670862,
+          0.8637919901862869,
+          0.8627347678944874,
+          0.861719497825699,
+          0.8607434460553904,
+          0.8598089058367969,
+          0.8589149701978244,
+          0.8580644741765144,
+          0.8572554566556553,
+          0.8564901975469137,
+          0.8557690683649201,
+          0.8550924722245122,
+          0.8544582263618532,
+          0.8538708817902726,
+          0.8533247608932955,
+          0.8528244593358091,
+          0.8523729428672541
+        ],
+        "R": [
+          0.11591167354329616,
+          0.11750141313564365,
+          0.119061659942519,
+          0.12058958402027202,
+          0.12208370606239764,
+          0.12354679090456304,
+          0.12497564860974761,
+          0.1263700611184989,
+          0.12772921377755928,
+          0.12905364249278636,
+          0.13034161837978792,
+          0.13159043497667924,
+          0.13280355663304436,
+          0.13397916737323812,
+          0.13511415095499496,
+          0.1362091018565164,
+          0.13726705106172402,
+          0.13828219277878379,
+          0.1392571865328579,
+          0.14019067713881786,
+          0.14108324998231722,
+          0.14193420895945777,
+          0.1427407247880048,
+          0.14350465702513635,
+          0.14422628053219322,
+          0.14490313384191778,
+          0.14553722178111012,
+          0.14612668505732526,
+          0.14667228239927074,
+          0.1471724290558444,
+          0.1476288426916258
+        ],
+        "analytic_T": [
+          0.8847926267281104,
+          0.883227590334301,
+          0.8816935274634387,
+          0.8801912446893425,
+          0.8787215221823578,
+          0.8772851139536247,
+          0.8758827481143231,
+          0.874515127147977,
+          0.8731829281939665,
+          0.87188680334045,
+          0.8706273799249665,
+          0.8694052608410452,
+          0.8682210248492197,
+          0.8670752268909024,
+          0.8659683984036407,
+          0.8649010476363433,
+          0.8638736599631226,
+          0.8628866981944694,
+          0.8619406028845328,
+          0.8610357926333447,
+          0.8601726643828838,
+          0.8593515937059413,
+          0.8585729350868024,
+          0.8578370221928194,
+          0.8571441681360087,
+          0.8564946657238572,
+          0.8558887876985819,
+          0.8553267869641339,
+          0.8548088968002969,
+          0.8543353310632742,
+          0.8539062843722137
+        ],
+        "method": "Soft Ez sheet, air reference run, plane monitors with trilinear Yee interpolation and half-step H phase, T=flux/flux_air, R=-(flux of sample-minus-air fields)/flux_air.",
+        "pml": {
+          "formulation": "stretched-coordinate CPML, cubic sigma profile sigma=40*rho^3/(L+1) in Courant units, kappa=1, alpha=1e-8",
+          "layers": 16
+        },
+        "precision": "float32"
+      },
+      "fdtdx": {
+        "max_T_absolute_error": 0.0015383635681562868,
+        "max_R_absolute_error": 0.0015344127540599106,
+        "max_energy_residual": 6.3584887450840455e-06,
+        "wavelength_um": [
+          1.7999999999999998,
+          1.7772151898734179,
+          1.755,
+          1.7333333333333332,
+          1.7121951219512195,
+          1.691566265060241,
+          1.6714285714285713,
+          1.651764705882353,
+          1.6325581395348836,
+          1.6137931034482758,
+          1.5954545454545457,
+          1.5775280898876405,
+          1.56,
+          1.542857142857143,
+          1.526086956521739,
+          1.5096774193548388,
+          1.4936170212765958,
+          1.4778947368421052,
+          1.4625,
+          1.447422680412371,
+          1.4326530612244897,
+          1.4181818181818182,
+          1.404,
+          1.3900990099009902,
+          1.3764705882352941,
+          1.3631067961165046,
+          1.35,
+          1.3371428571428572,
+          1.3245283018867926,
+          1.3121495327102803,
+          1.3
+        ],
+        "T": [
+          0.8840911890803549,
+          0.8825004307861752,
+          0.8809403512609285,
+          0.8794120067402292,
+          0.877915295652182,
+          0.8764511638811769,
+          0.8750225794866907,
+          0.8736270116752104,
+          0.8722678199764515,
+          0.8709454130977344,
+          0.8696580543651984,
+          0.8684081884313403,
+          0.8671934941826852,
+          0.8660219777209623,
+          0.8648852941775179,
+          0.8637910966005726,
+          0.8627333267787822,
+          0.861719198463226,
+          0.8607416513651653,
+          0.8598095829613606,
+          0.8589177827816363,
+          0.8580687455065272,
+          0.8572595155890957,
+          0.85649599103948,
+          0.8557740139249342,
+          0.8550951728999927,
+          0.854461774588539,
+          0.8538716304777904,
+          0.8533272063699191,
+          0.8528234959037158,
+          0.8523679208040574
+        ],
+        "R": [
+          0.1159125857348368,
+          0.11750230904540886,
+          0.11906145740891999,
+          0.12058933403835592,
+          0.12208470266376191,
+          0.1235466257113385,
+          0.12497539135292166,
+          0.1263699293034383,
+          0.12772918177413004,
+          0.12905327759921764,
+          0.130341096562251,
+          0.1315909331913122,
+          0.13280346841237398,
+          0.13397861879766196,
+          0.13511422548744292,
+          0.13620941678499832,
+          0.13726787015966085,
+          0.13828402223003736,
+          0.13925752126741664,
+          0.14019157807720772,
+          0.14108415262443683,
+          0.1419348838001638,
+          0.14274101956348992,
+          0.143505139208005,
+          0.14422690413835784,
+          0.14490274103057152,
+          0.14553635829330344,
+          0.14612634508370467,
+          0.14667012913936778,
+          0.14717014560753916,
+          0.1476281283818462
+        ],
+        "analytic_T": [
+          0.8847926267281104,
+          0.883227590334301,
+          0.8816935274634387,
+          0.8801912446893425,
+          0.8787215221823578,
+          0.8772851139536247,
+          0.8758827481143231,
+          0.874515127147977,
+          0.8731829281939665,
+          0.87188680334045,
+          0.8706273799249665,
+          0.8694052608410452,
+          0.8682210248492197,
+          0.8670752268909024,
+          0.8659683984036407,
+          0.8649010476363433,
+          0.8638736599631226,
+          0.8628866981944694,
+          0.8619406028845328,
+          0.8610357926333447,
+          0.8601726643828838,
+          0.8593515937059413,
+          0.8585729350868024,
+          0.8578370221928194,
+          0.8571441681360087,
+          0.8564946657238572,
+          0.8558887876985819,
+          0.8553267869641339,
+          0.8548088968002969,
+          0.8543353310632742,
+          0.8539062843722137
+        ],
+        "method": "3D grid (320,20,1) with periodic y and z, soft Ez sheet through PointDipoleSource over the sheet slice with a sampled profile (-kick/C), PhasorDetector planes with exact_interpolation (E/H co-located at the Ez node, H time-centred by (H_prev+H)/2), pulse scaling; T=flux/flux_air, R=-(flux of sample-minus-air phasors)/flux_air.",
+        "pml": {
+          "formulation": "FDTDX CPML, cubic sigma with sigma_end matched to TorchFDTD maximum 40/(L+1) Courant units, kappa=1, alpha matched to 1e-8 Courant units; FDTDX grades on d/L with E and H half-cell offsets",
+          "layers": 16,
+          "sigma_end_S_per_m": 249827.64512358326
+        },
+        "precision": "float32"
+      },
+      "meep": {
+        "max_T_absolute_error": 0.0015491282422059882,
+        "max_R_absolute_error": 0.0015344899836775006,
+        "max_energy_residual": 1.4922757217705751e-05,
+        "wavelength_um": [
+          1.7999999999999998,
+          1.7772151898734179,
+          1.755,
+          1.7333333333333332,
+          1.7121951219512195,
+          1.6915662650602408,
+          1.6714285714285715,
+          1.6517647058823532,
+          1.6325581395348836,
+          1.6137931034482758,
+          1.5954545454545455,
+          1.5775280898876405,
+          1.56,
+          1.542857142857143,
+          1.526086956521739,
+          1.5096774193548388,
+          1.493617021276596,
+          1.4778947368421052,
+          1.4625,
+          1.447422680412371,
+          1.4326530612244899,
+          1.4181818181818182,
+          1.404,
+          1.39009900990099,
+          1.3764705882352941,
+          1.3631067961165049,
+          1.35,
+          1.3371428571428572,
+          1.3245283018867924,
+          1.3121495327102803,
+          1.3
+        ],
+        "T": [
+          0.8840998933511899,
+          0.8825079025920615,
+          0.8809456135949064,
+          0.8794140886285059,
+          0.8779144477134407,
+          0.8764478360442657,
+          0.8750153847997577,
+          0.8736181694626431,
+          0.8722571701732591,
+          0.8709332385759893,
+          0.8696470750602929,
+          0.8683992192763555,
+          0.8671900554106998,
+          0.8660198320899073,
+          0.8648886951334122,
+          0.863796729900076,
+          0.8627440088438428,
+          0.8617306392363475,
+          0.8607568058951596,
+          0.8598228041824818,
+          0.8589290594719907,
+          0.8580761306401093,
+          0.8572646968040039,
+          0.8564955283431896,
+          0.8557694450122973,
+          0.8550872654681927,
+          0.8544497535981037,
+          0.8538575674993641,
+          0.853311216761088,
+          0.8528110328612333,
+          0.8523571561300077
+        ],
+        "R": [
+          0.11591063793922596,
+          0.117502295667649,
+          0.11906316592328042,
+          0.12059230052308485,
+          0.1220888011027685,
+          0.12355183132652728,
+          0.12498062568263109,
+          0.1263744936992705,
+          0.1277328188711812,
+          0.12905505214858137,
+          0.130340700443918,
+          0.1315893111875442,
+          0.13280045444125596,
+          0.13397370440082204,
+          0.13510862224723627,
+          0.13620474222588028,
+          0.13726156254915348,
+          0.138278542256508,
+          0.13925510456721826,
+          0.14019064658079927,
+          0.14108455448511015,
+          0.14193622279834203,
+          0.14274507567434883,
+          0.14351058800694153,
+          0.1442323040209254,
+          0.14490985124786845,
+          0.1455429482305839,
+          0.146131404931569,
+          0.1466751155677482,
+          0.14717404438154907,
+          0.14762820561146378
+        ],
+        "analytic_T": [
+          0.8847926267281104,
+          0.883227590334301,
+          0.8816935274634387,
+          0.8801912446893425,
+          0.8787215221823578,
+          0.8772851139536247,
+          0.8758827481143231,
+          0.874515127147977,
+          0.8731829281939665,
+          0.87188680334045,
+          0.8706273799249665,
+          0.8694052608410452,
+          0.8682210248492197,
+          0.8670752268909024,
+          0.8659683984036407,
+          0.8649010476363433,
+          0.8638736599631226,
+          0.8628866981944694,
+          0.8619406028845328,
+          0.8610357926333447,
+          0.8601726643828838,
+          0.8593515937059413,
+          0.8585729350868024,
+          0.8578370221928194,
+          0.8571441681360087,
+          0.8564946657238572,
+          0.8558887876985819,
+          0.8553267869641339,
+          0.8548088968002969,
+          0.8543353310632742,
+          0.8539062843722137
+        ],
+        "method": "2D TMz cell (Ez, Hx, Hy), y periodic through k_point=0, PML of the same thickness on x (Meep stretched-coordinate PML, quadratic default profile), Ez CustomSource current sheet with the shared waveform, eps_averaging=False, DFT flux monitors; air reference run, load_minus_flux_data on the reflection monitor: T=flux/flux_air, R=-flux_scattered/flux_air.",
+        "pml": {
+          "formulation": "Meep PML (stretched-coordinate, quadratic profile by default, R_asymptotic=1e-15), same thickness 0.4 um",
+          "thickness_um": 0.4
+        },
+        "precision": "float64"
+      }
+    },
+    "pairwise": {
+      "torchfdtd_vs_fdtdx": {
+        "T_max_abs": 5.911089568266803e-06,
+        "R_max_abs": 2.28344830524585e-06
+      },
+      "torchfdtd_vs_meep": {
+        "T_max_abs": 1.5786737246337168e-05,
+        "R_max_abs": 6.717405950679156e-06
+      },
+      "fdtdx_vs_meep": {
+        "T_max_abs": 1.5989608831090685e-05,
+        "R_max_abs": 7.110217296935062e-06
+      }
+    }
+  },
+  "sphere": {
+    "solvers": {
+      "torchfdtd": {
+        "max_relative_error": 0.01351762113037358,
+        "relative_error": [
+          0.01351762113037358,
+          0.011794658441245165,
+          -0.00299038880502156,
+          -0.007713871895365099,
+          -0.0034127616562178442,
+          0.001739243323836126,
+          0.005882402552648047,
+          0.007866057956111838,
+          0.005211875001944533
+        ],
+        "wavelength_um": [
+          1.3,
+          1.3625,
+          1.4249999999999998,
+          1.4875,
+          1.55,
+          1.6125,
+          1.675,
+          1.7375,
+          1.7999999999999998
+        ],
+        "scattering_cross_section_um2": [
+          3.905363567076911,
+          5.031971209615128,
+          4.890194921849735,
+          4.222157877910653,
+          4.490046790524988,
+          4.990812644335833,
+          5.627784877128032,
+          6.308964336175096,
+          6.511056946654233
+        ],
+        "mie_cross_section_um2": [
+          3.8532764361030734,
+          4.973312685172012,
+          4.90486236736327,
+          4.254980250480165,
+          4.505422724444023,
+          4.982147477597055,
+          5.594873578508073,
+          6.259724976718905,
+          6.477298078717622
+        ],
+        "max_empty_box_cross_section_um2": 1.1022556506313123e-14,
+        "method": "Closed TFSF box (live 1D Yee incident line, 96 auxiliary CPML cells), six scattered-field plane monitors at +-1.1 um, matched empty-box reference subtracted field-wise, incident intensity from the empty-box centre plane.",
+        "pml": {
+          "formulation": "stretched-coordinate CPML, cubic sigma profile, kappa=1, alpha=1e-8",
+          "layers": 8
+        },
+        "precision": "float32",
+        "steps": 2518
+      },
+      "fdtdx": {
+        "max_relative_error": 0.011503744530189763,
+        "relative_error": [
+          0.011503744530189763,
+          0.009800180178680007,
+          -0.004417198946010892,
+          -0.010720897409078445,
+          -0.007705268871991633,
+          -0.0036712950797496147,
+          -0.00035603748403068014,
+          0.0012256060879873854,
+          -0.0015841235540324794
+        ],
+        "wavelength_um": [
+          1.3,
+          1.3625,
+          1.4249999999999998,
+          1.4875,
+          1.55,
+          1.6125,
+          1.675,
+          1.7375,
+          1.7999999999999998
+        ],
+        "scattering_cross_section_um2": [
+          3.897603543828203,
+          5.0220520455716136,
+          4.883196614483825,
+          4.209363043737112,
+          4.470707230970201,
+          4.963856544075965,
+          5.5928815937957115,
+          6.267396933759499,
+          6.467037238264636
+        ],
+        "mie_cross_section_um2": [
+          3.8532764361030734,
+          4.973312685172012,
+          4.90486236736327,
+          4.254980250480165,
+          4.505422724444023,
+          4.982147477597055,
+          5.594873578508073,
+          6.259724976718905,
+          6.477298078717622
+        ],
+        "max_empty_box_cross_section_um2": 9.678950066302663,
+        "method": "No closed TFSF box in fdtdx 0.6.2: native one-way UniformPlaneSource (single-plane TFSF) spanning the full transverse domain including the PML, at the first interior x cell; total field downstream. Six PhasorDetector planes at +-1.1 um with exact_interpolation, empty-domain reference subtracted phasor-wise (removes the incident field), incident intensity from the empty-domain centre plane; shared per-component staircase permittivity array.",
+        "pml": {
+          "formulation": "FDTDX CPML, cubic sigma with sigma_end matched to TorchFDTD maximum, kappa=1, alpha matched",
+          "layers": 8,
+          "sigma_end_S_per_m": 235948.33150560645
+        },
+        "precision": "float32",
+        "steps": 2518
+      },
+      "meep": {
+        "max_relative_error": 0.011489719577558288,
+        "relative_error": [
+          0.011489719577558288,
+          0.009478549378452827,
+          -0.0047847865956519575,
+          -0.008853760212389594,
+          -0.004429168716405751,
+          0.00073061081364445,
+          0.004851236543151671,
+          0.006827479174973394,
+          0.004298288108476989
+        ],
+        "wavelength_um": [
+          1.3,
+          1.3625,
+          1.4249999999999998,
+          1.4874999999999998,
+          1.55,
+          1.6125,
+          1.675,
+          1.7375,
+          1.7999999999999998
+        ],
+        "scattering_cross_section_um2": [
+          3.8975495018087107,
+          5.020452475032902,
+          4.881393647654392,
+          4.2173076756339585,
+          4.485467447058732,
+          4.9857874884193585,
+          5.622015633666446,
+          6.3024631186385145,
+          6.505139372024434
+        ],
+        "mie_cross_section_um2": [
+          3.8532764361030734,
+          4.973312685172012,
+          4.90486236736327,
+          4.2549802504801635,
+          4.505422724444023,
+          4.982147477597055,
+          5.594873578508073,
+          6.259724976718905,
+          6.477298078717622
+        ],
+        "max_empty_box_cross_section_um2": 9.692018457935577,
+        "method": "No TFSF box: Meep Mie-tutorial setup. Ez current sheet spanning the full cell (including the PML, hence is_integrated=True) at x=-1.2 um with the shared waveform as the integrated current, six DFT flux planes at +-1.1 um, empty-cell run subtracted with load_minus_flux_data, incident intensity from the empty-cell centre plane (0.4 x 0.4 um). Sphere geometry rasterised by Meep at each Yee component position with eps_averaging=False.",
+        "pml": {
+          "formulation": "Meep PML (stretched-coordinate, quadratic profile by default, R_asymptotic=1e-15), same thickness 0.4 um",
+          "thickness_um": 0.4
+        },
+        "precision": "float64",
+        "steps": 2518
+      }
+    },
+    "pairwise": {
+      "torchfdtd_vs_fdtdx": {
+        "max_relative": 0.006806781338622558
+      },
+      "torchfdtd_vs_meep": {
+        "max_relative": 0.002294361840792236
+      },
+      "fdtdx_vs_meep": {
+        "max_relative": 0.0058572355764824335
+      }
+    }
+  },
+  "throughput": {
+    "source_records": {
+      "torchfdtd": "torchfdtd_throughput.json",
+      "fdtdx": "fdtdx_throughput.json",
+      "meep": "meep_throughput_ranks12.json"
+    },
+    "cases": {
+      "vacuum-64": {
+        "shape": [
+          64,
+          64,
+          64
+        ],
+        "cells": 262144,
+        "steps": 800,
+        "solvers": {
+          "torchfdtd": {
+            "median_wall_seconds": 0.11691452299965022,
+            "median_loop_seconds": 0.09543776900000012,
+            "median_setup_seconds": 0.016553561999899102,
+            "cell_steps_per_second_full": 1793748070.1232252,
+            "cell_steps_per_second_stepping": 2197402581.7808013,
+            "wall_samples": [
+              0.11631097600002249,
+              0.11895977999984098,
+              0.11691452299965022
+            ],
+            "loop_samples": [
+              0.0943162339999617,
+              0.09779111099987858,
+              0.09543776900000012
+            ],
+            "peak_allocated_bytes": 18714624,
+            "gpu_idle": {
+              "checked": true,
+              "limit_mb": 3320.0,
+              "memory_used_mb": 2511.0,
+              "utilization": 1.0,
+              "waited_seconds": 10.072135210037231,
+              "samples": [
+                {
+                  "memory_used_mb": 2511.0,
+                  "utilization": 0.0,
+                  "t": 0.019450664520263672
+                },
+                {
+                  "memory_used_mb": 2511.0,
+                  "utilization": 1.0,
+                  "t": 5.04790186882019
+                },
+                {
+                  "memory_used_mb": 2511.0,
+                  "utilization": 1.0,
+                  "t": 10.072129487991333
+                }
+              ]
+            },
+            "spread": 1.02277346550525,
+            "accepted_attempt": 0
+          },
+          "fdtdx": {
+            "median_wall_seconds": 0.8488714509999227,
+            "median_loop_seconds": 0.4170567010000923,
+            "median_setup_seconds": 0.4252501019996089,
+            "cell_steps_per_second_full": 247051776.51217663,
+            "cell_steps_per_second_stepping": 502845774.9200716,
+            "wall_samples": [
+              0.8168728720002036,
+              0.8488714509999227,
+              0.8497324539998772
+            ],
+            "loop_samples": [
+              0.4170567010000923,
+              0.4143150280001464,
+              0.41738072499992995
+            ],
+            "peak_bytes_in_use": 93305856,
+            "compile_seconds": 0.6955826909997995,
+            "gpu_idle": {
+              "checked": true,
+              "limit_mb": 3202.0,
+              "memory_used_mb": 2495.0,
+              "utilization": 3.0,
+              "waited_seconds": 10.083807468414307,
+              "samples": [
+                {
+                  "memory_used_mb": 2495.0,
+                  "utilization": 0.0,
+                  "t": 0.025714397430419922
+                },
+                {
+                  "memory_used_mb": 2495.0,
+                  "utilization": 1.0,
+                  "t": 5.056801795959473
+                },
+                {
+                  "memory_used_mb": 2495.0,
+                  "utilization": 3.0,
+                  "t": 10.083803653717041
+                }
+              ]
+            },
+            "spread": 1.0402260659228568,
+            "accepted_attempt": 0
+          },
+          "meep": {
+            "median_wall_seconds": 4.394813979999981,
+            "median_loop_seconds": 4.323488623999765,
+            "median_setup_seconds": 0.013680731000022206,
+            "cell_steps_per_second_full": 47778437.257087484,
+            "cell_steps_per_second_stepping": 48566646.58128436,
+            "wall_samples": [
+              4.449958210999739,
+              4.394813979999981,
+              4.290395630999683
+            ],
+            "loop_samples": [
+              4.366267260999848,
+              4.323488623999765,
+              4.216152575999786
+            ],
+            "steps_run": 801,
+            "load_average_before": [
+              7.662109375,
+              6.0654296875,
+              3.31689453125
+            ],
+            "load_average_after": [
+              8.89404296875,
+              6.45068359375,
+              3.50244140625
+            ],
+            "mpi_processes": 12
+          }
+        }
+      },
+      "sphere-64": {
+        "shape": [
+          64,
+          64,
+          64
+        ],
+        "cells": 262144,
+        "steps": 800,
+        "solvers": {
+          "torchfdtd": {
+            "median_wall_seconds": 0.11415576400031568,
+            "median_loop_seconds": 0.09447405800028719,
+            "median_setup_seconds": 0.016059721000146965,
+            "cell_steps_per_second_full": 1837096898.5799093,
+            "cell_steps_per_second_stepping": 2219817846.708379,
+            "wall_samples": [
+              0.11614299500024572,
+              0.11415576400031568,
+              0.11400541100010742
+            ],
+            "loop_samples": [
+              0.09542802700025277,
+              0.09400293599992438,
+              0.09447405800028719
+            ],
+            "peak_allocated_bytes": 18714624,
+            "gpu_idle": {
+              "checked": true,
+              "limit_mb": 3320.0,
+              "memory_used_mb": 2549.0,
+              "utilization": 1.0,
+              "waited_seconds": 15.122962951660156,
+              "samples": [
+                {
+                  "memory_used_mb": 2549.0,
+                  "utilization": 1.0,
+                  "t": 5.062422752380371
+                },
+                {
+                  "memory_used_mb": 2549.0,
+                  "utilization": 4.0,
+                  "t": 10.091658353805542
+                },
+                {
+                  "memory_used_mb": 2549.0,
+                  "utilization": 1.0,
+                  "t": 15.122958898544312
+                }
+              ]
+            },
+            "spread": 1.0187498468834633,
+            "accepted_attempt": 0
+          },
+          "fdtdx": {
+            "median_wall_seconds": 0.7804487379999046,
+            "median_loop_seconds": 0.41788703300017005,
+            "median_setup_seconds": 0.35825988799979314,
+            "cell_steps_per_second_full": 268711050.1804997,
+            "cell_steps_per_second_stepping": 501846631.83821416,
+            "wall_samples": [
+              0.7804487379999046,
+              0.7864027690002331,
+              0.7604205640000146
+            ],
+            "loop_samples": [
+              0.4181630950001818,
+              0.41517614599979424,
+              0.41788703300017005
+            ],
+            "peak_bytes_in_use": 93309184,
+            "compile_seconds": 0.6339982170002258,
+            "gpu_idle": {
+              "checked": true,
+              "limit_mb": 3202.0,
+              "memory_used_mb": 2629.0,
+              "utilization": 3.0,
+              "waited_seconds": 25.17331337928772,
+              "samples": [
+                {
+                  "memory_used_mb": 2629.0,
+                  "utilization": 4.0,
+                  "t": 15.113444805145264
+                },
+                {
+                  "memory_used_mb": 2629.0,
+                  "utilization": 1.0,
+                  "t": 20.140206575393677
+                },
+                {
+                  "memory_used_mb": 2629.0,
+                  "utilization": 3.0,
+                  "t": 25.17331027984619
+                }
+              ]
+            },
+            "spread": 1.03416820405743,
+            "accepted_attempt": 0
+          },
+          "meep": {
+            "median_wall_seconds": 4.373208375000104,
+            "median_loop_seconds": 4.297810972000207,
+            "median_setup_seconds": 0.013357328999973106,
+            "cell_steps_per_second_full": 48014484.10287447,
+            "cell_steps_per_second_stepping": 48856812.30933157,
+            "wall_samples": [
+              4.373208375000104,
+              4.334719463000056,
+              4.436724312000024
+            ],
+            "loop_samples": [
+              4.297810972000207,
+              4.259525105000193,
+              4.364132486000017
+            ],
+            "steps_run": 801,
+            "load_average_before": [
+              8.89404296875,
+              6.45068359375,
+              3.50244140625
+            ],
+            "load_average_after": [
+              9.58251953125,
+              6.72314453125,
+              3.63916015625
+            ],
+            "mpi_processes": 12
+          }
+        }
+      },
+      "vacuum-96": {
+        "shape": [
+          96,
+          96,
+          96
+        ],
+        "cells": 884736,
+        "steps": 800,
+        "solvers": {
+          "torchfdtd": {
+            "median_wall_seconds": 0.30189708900024925,
+            "median_loop_seconds": 0.2651458069999535,
+            "median_setup_seconds": 0.026224958999591763,
+            "cell_steps_per_second_full": 2344470436.4122424,
+            "cell_steps_per_second_stepping": 2669432370.0925965,
+            "wall_samples": [
+              0.30189708900024925,
+              0.30627546200003053,
+              0.29195831700008057
+            ],
+            "loop_samples": [
+              0.2670384800003376,
+              0.2651458069999535,
+              0.260316069000055
+            ],
+            "peak_allocated_bytes": 59756544,
+            "gpu_idle": {
+              "checked": true,
+              "limit_mb": 3320.0,
+              "memory_used_mb": 2549.0,
+              "utilization": 1.0,
+              "waited_seconds": 15.124858856201172,
+              "samples": [
+                {
+                  "memory_used_mb": 2549.0,
+                  "utilization": 4.0,
+                  "t": 5.064686298370361
+                },
+                {
+                  "memory_used_mb": 2549.0,
+                  "utilization": 1.0,
+                  "t": 10.098562717437744
+                },
+                {
+                  "memory_used_mb": 2549.0,
+                  "utilization": 1.0,
+                  "t": 15.12485647201538
+                }
+              ]
+            },
+            "spread": 1.0490383187129622,
+            "accepted_attempt": 0
+          },
+          "fdtdx": {
+            "median_wall_seconds": 2.0217955190000794,
+            "median_loop_seconds": 1.5094217000000754,
+            "median_setup_seconds": 0.49684293299969795,
+            "cell_steps_per_second_full": 350079319.76723915,
+            "cell_steps_per_second_stepping": 468913889.3391851,
+            "wall_samples": [
+              1.9899707239997042,
+              2.022026896999705,
+              2.0217955190000794
+            ],
+            "loop_samples": [
+              1.5111980829997265,
+              1.5094217000000754,
+              1.508679556000061
+            ],
+            "peak_bytes_in_use": 301880576,
+            "compile_seconds": 0.6268036870001197,
+            "gpu_idle": {
+              "checked": true,
+              "limit_mb": 3202.0,
+              "memory_used_mb": 2629.0,
+              "utilization": 3.0,
+              "waited_seconds": 15.104796171188354,
+              "samples": [
+                {
+                  "memory_used_mb": 2629.0,
+                  "utilization": 1.0,
+                  "t": 5.046487331390381
+                },
+                {
+                  "memory_used_mb": 2629.0,
+                  "utilization": 4.0,
+                  "t": 10.0756995677948
+                },
+                {
+                  "memory_used_mb": 2629.0,
+                  "utilization": 3.0,
+                  "t": 15.1047945022583
+                }
+              ]
+            },
+            "spread": 1.0161088666347664,
+            "accepted_attempt": 0
+          },
+          "meep": {
+            "median_wall_seconds": 13.241516133000005,
+            "median_loop_seconds": 13.005108511999879,
+            "median_setup_seconds": 0.04015596999988702,
+            "cell_steps_per_second_full": 53452247.68001268,
+            "cell_steps_per_second_stepping": 54423905.75572051,
+            "wall_samples": [
+              13.241516133000005,
+              13.202859320999778,
+              13.34177721900005
+            ],
+            "loop_samples": [
+              13.005108511999879,
+              12.965746398000192,
+              13.095316507999996
+            ],
+            "steps_run": 800,
+            "load_average_before": [
+              9.58251953125,
+              6.72314453125,
+              3.63916015625
+            ],
+            "load_average_after": [
+              11.03662109375,
+              7.61279296875,
+              4.123046875
+            ],
+            "mpi_processes": 12
+          }
+        }
+      },
+      "sphere-96": {
+        "shape": [
+          96,
+          96,
+          96
+        ],
+        "cells": 884736,
+        "steps": 800,
+        "solvers": {
+          "torchfdtd": {
+            "median_wall_seconds": 0.31018013899984,
+            "median_loop_seconds": 0.26959627499991257,
+            "median_setup_seconds": 0.029079321000153868,
+            "cell_steps_per_second_full": 2281863701.1454983,
+            "cell_steps_per_second_stepping": 2625365650.9172077,
+            "wall_samples": [
+              0.30618085999958566,
+              0.31018013899984,
+              0.31152262199975667
+            ],
+            "loop_samples": [
+              0.26959627499991257,
+              0.2699379730001965,
+              0.2675369469998259
+            ],
+            "peak_allocated_bytes": 59756544,
+            "gpu_idle": {
+              "checked": true,
+              "limit_mb": 3320.0,
+              "memory_used_mb": 2581.0,
+              "utilization": 3.0,
+              "waited_seconds": 15.108745813369751,
+              "samples": [
+                {
+                  "memory_used_mb": 2581.0,
+                  "utilization": 1.0,
+                  "t": 5.051720380783081
+                },
+                {
+                  "memory_used_mb": 2581.0,
+                  "utilization": 1.0,
+                  "t": 10.077704906463623
+                },
+                {
+                  "memory_used_mb": 2581.0,
+                  "utilization": 3.0,
+                  "t": 15.108742237091064
+                }
+              ]
+            },
+            "spread": 1.017446426926158,
+            "accepted_attempt": 0
+          },
+          "fdtdx": {
+            "median_wall_seconds": 1.9982002819997433,
+            "median_loop_seconds": 1.5074166360000163,
+            "median_setup_seconds": 0.4815620719996332,
+            "cell_steps_per_second_full": 354213141.8836878,
+            "cell_steps_per_second_stepping": 469537606.9871053,
+            "wall_samples": [
+              2.000161380999998,
+              1.9982002819997433,
+              1.9953482859996257
+            ],
+            "loop_samples": [
+              1.5105854540001928,
+              1.5071732559999873,
+              1.5074166360000163
+            ],
+            "peak_bytes_in_use": 301883904,
+            "compile_seconds": 0.5960631079997256,
+            "gpu_idle": {
+              "checked": true,
+              "limit_mb": 3202.0,
+              "memory_used_mb": 3013.0,
+              "utilization": 4.0,
+              "waited_seconds": 15.108076333999634,
+              "samples": [
+                {
+                  "memory_used_mb": 3013.0,
+                  "utilization": 5.0,
+                  "t": 5.051386594772339
+                },
+                {
+                  "memory_used_mb": 3013.0,
+                  "utilization": 1.0,
+                  "t": 10.081626176834106
+                },
+                {
+                  "memory_used_mb": 3013.0,
+                  "utilization": 4.0,
+                  "t": 15.10807490348816
+                }
+              ]
+            },
+            "spread": 1.0024121578343708,
+            "accepted_attempt": 0
+          },
+          "meep": {
+            "median_wall_seconds": 13.602401749999899,
+            "median_loop_seconds": 13.356407920000038,
+            "median_setup_seconds": 0.03986134000024322,
+            "cell_steps_per_second_full": 52034104.932976656,
+            "cell_steps_per_second_stepping": 52992451.58124805,
+            "wall_samples": [
+              13.365134797000337,
+              13.602401749999899,
+              13.622840526000346
+            ],
+            "loop_samples": [
+              13.129167489000338,
+              13.356407920000038,
+              13.372135478000018
+            ],
+            "steps_run": 800,
+            "load_average_before": [
+              11.03662109375,
+              7.61279296875,
+              4.123046875
+            ],
+            "load_average_after": [
+              11.61669921875,
+              8.353515625,
+              4.57861328125
+            ],
+            "mpi_processes": 12
+          }
+        }
+      }
+    },
+    "methods": {
+      "torchfdtd": "benchmarks.open_source.scene projects, fused CUDA kernels, CUDA graph capture, float32. Full solve = Simulation(project).run() wall time including voxelization, grid and graph construction and the final host copy of E, H and the point trace. Stepping = summary[\"seconds\"] (captured loop only). One warm-up solve per case, then the listed repetitions.",
+      "fdtdx": "run_fdtd inside jax.jit (donated arrays), float32, GPU. Full solve = place_objects + apply_params + shared permittivity upload + jitted run + host copy of E, H and the probe trace, after one warm-up that includes XLA compilation (recorded separately). Stepping = jitted call alone with block_until_ready.",
+      "meep": "mp.Simulation with the shared point Ez CustomSource, sphere geometry rasterised by Meep (eps_averaging=False), same PML thickness (Meep PML formulation), all MPI ranks on the CPU. Full solve = init_sim + run(until=steps*dt) with a per-step get_field_point probe + get_array of all six field components. Stepping = run() alone. One warm-up solve per case, then the listed repetitions. Wall time measured on the master rank after MPI barriers."
+    }
+  },
+  "throughput_traces": {
+    "vacuum-64": {
+      "lengths": {
+        "torchfdtd": 800,
+        "fdtdx": 800,
+        "meep": 802
+      },
+      "pairwise": {
+        "torchfdtd_vs_fdtdx": {
+          "samples": 800,
+          "raw_relative_l2": 6.354542475357242e-05,
+          "amplitude_ratio": 1.0000105417298526,
+          "fitted_relative_l2": 6.266426531643004e-05,
+          "best_shift": {
+            "shift_samples": 0,
+            "amplitude_ratio": 1.0000105417298526,
+            "fitted_relative_l2": 6.266426531643004e-05
+          }
+        },
+        "torchfdtd_vs_meep": {
+          "samples": 800,
+          "raw_relative_l2": 1.009509704948603,
+          "amplitude_ratio": -0.009506410826232133,
+          "fitted_relative_l2": 0.2712833740315877,
+          "best_shift": {
+            "shift_samples": -2,
+            "amplitude_ratio": -0.009814128223067778,
+            "fitted_relative_l2": 0.08559211661800532
+          }
+        },
+        "fdtdx_vs_meep": {
+          "samples": 800,
+          "raw_relative_l2": 1.00950964867621,
+          "amplitude_ratio": -0.009506355041668607,
+          "fitted_relative_l2": 0.2712648702723286,
+          "best_shift": {
+            "shift_samples": -2,
+            "amplitude_ratio": -0.009814010220591763,
+            "fitted_relative_l2": 0.08560953483216337
+          }
+        }
+      },
+      "artifacts": {
+        "torchfdtd": {
+          "artifact": "torchfdtd_throughput_vacuum-64_trace.npy",
+          "sha256": "04a47f590c9ecb1ee2cf5b60cf500ffa2b97e8ea260be2c7006e42c80d7e8cbf",
+          "matches_record": true
+        },
+        "fdtdx": {
+          "artifact": "fdtdx_throughput_vacuum-64_trace.npy",
+          "sha256": "9969b692604488eebb20ff4ba4a1737b78d0b7e23bd00c53302eb39608c00f11",
+          "matches_record": true
+        },
+        "meep": {
+          "artifact": "meep_throughput_vacuum-64_trace.npy",
+          "sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "matches_record": true
+        }
+      },
+      "half_step_carrier_phase": 0.08688684051251011
+    },
+    "sphere-64": {
+      "lengths": {
+        "torchfdtd": 800,
+        "fdtdx": 800,
+        "meep": 802
+      },
+      "pairwise": {
+        "torchfdtd_vs_fdtdx": {
+          "samples": 800,
+          "raw_relative_l2": 5.791368143791851e-05,
+          "amplitude_ratio": 1.0000279499702132,
+          "fitted_relative_l2": 5.0721295821295795e-05,
+          "best_shift": {
+            "shift_samples": 0,
+            "amplitude_ratio": 1.0000279499702132,
+            "fitted_relative_l2": 5.0721295821295795e-05
+          }
+        },
+        "torchfdtd_vs_meep": {
+          "samples": 800,
+          "raw_relative_l2": 1.009495208953569,
+          "amplitude_ratio": -0.00949190203010264,
+          "fitted_relative_l2": 0.27222349042145144,
+          "best_shift": {
+            "shift_samples": -2,
+            "amplitude_ratio": -0.009801069258298321,
+            "fitted_relative_l2": 0.08608557097574497
+          }
+        },
+        "fdtdx_vs_meep": {
+          "samples": 800,
+          "raw_relative_l2": 1.0094950331678232,
+          "amplitude_ratio": -0.009491727280059153,
+          "fitted_relative_l2": 0.27218584539840884,
+          "best_shift": {
+            "shift_samples": -2,
+            "amplitude_ratio": -0.009800765863604807,
+            "fitted_relative_l2": 0.08612072828434421
+          }
+        }
+      },
+      "artifacts": {
+        "torchfdtd": {
+          "artifact": "torchfdtd_throughput_sphere-64_trace.npy",
+          "sha256": "6f719862c389ece8fdc3e3d2658389ca16df9fb9aa27b515a264d8a69f3788b7",
+          "matches_record": true
+        },
+        "fdtdx": {
+          "artifact": "fdtdx_throughput_sphere-64_trace.npy",
+          "sha256": "a3c9d4997e4a9f2656f156222270c6b0cc0d7b368f82e411c2ccd69eff6162d9",
+          "matches_record": true
+        },
+        "meep": {
+          "artifact": "meep_throughput_sphere-64_trace.npy",
+          "sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "matches_record": true
+        }
+      },
+      "half_step_carrier_phase": 0.08688684051251011
+    },
+    "vacuum-96": {
+      "lengths": {
+        "torchfdtd": 800,
+        "fdtdx": 800,
+        "meep": 801
+      },
+      "pairwise": {
+        "torchfdtd_vs_fdtdx": {
+          "samples": 800,
+          "raw_relative_l2": 4.07394274121425e-05,
+          "amplitude_ratio": 1.0000193556327712,
+          "fitted_relative_l2": 3.584704563863686e-05,
+          "best_shift": {
+            "shift_samples": 0,
+            "amplitude_ratio": 1.0000193556327712,
+            "fitted_relative_l2": 3.584704563863686e-05
+          }
+        },
+        "torchfdtd_vs_meep": {
+          "samples": 800,
+          "raw_relative_l2": 1.004307741997119,
+          "amplitude_ratio": -0.004307449718826691,
+          "fitted_relative_l2": 0.17787971936620053,
+          "best_shift": {
+            "shift_samples": -2,
+            "amplitude_ratio": -0.0043678345032279655,
+            "fitted_relative_l2": 0.05755563836924649
+          }
+        },
+        "fdtdx_vs_meep": {
+          "samples": 800,
+          "raw_relative_l2": 1.0043076375603068,
+          "amplitude_ratio": -0.004307345202624548,
+          "fitted_relative_l2": 0.1779081834637409,
+          "best_shift": {
+            "shift_samples": -2,
+            "amplitude_ratio": -0.004367756860003593,
+            "fitted_relative_l2": 0.057528102716805654
+          }
+        }
+      },
+      "artifacts": {
+        "torchfdtd": {
+          "artifact": "torchfdtd_throughput_vacuum-96_trace.npy",
+          "sha256": "24f21e3393e8bb96ef5777802bbd10cd1a4a8c6f8342dea829a360d06ee3147c",
+          "matches_record": true
+        },
+        "fdtdx": {
+          "artifact": "fdtdx_throughput_vacuum-96_trace.npy",
+          "sha256": "9171e45af6e8847c2a4d97b826503974c63569024230def9557df2650dd4e7c4",
+          "matches_record": true
+        },
+        "meep": {
+          "artifact": "meep_throughput_vacuum-96_trace.npy",
+          "sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "matches_record": true
+        }
+      },
+      "half_step_carrier_phase": 0.057924560341673405
+    },
+    "sphere-96": {
+      "lengths": {
+        "torchfdtd": 800,
+        "fdtdx": 800,
+        "meep": 801
+      },
+      "pairwise": {
+        "torchfdtd_vs_fdtdx": {
+          "samples": 800,
+          "raw_relative_l2": 5.8136137915086985e-05,
+          "amplitude_ratio": 1.0000441154600443,
+          "fitted_relative_l2": 3.786172518564454e-05,
+          "best_shift": {
+            "shift_samples": 0,
+            "amplitude_ratio": 1.0000441154600443,
+            "fitted_relative_l2": 3.786172518564454e-05
+          }
+        },
+        "torchfdtd_vs_meep": {
+          "samples": 800,
+          "raw_relative_l2": 1.0043048569985094,
+          "amplitude_ratio": -0.0043045632425216425,
+          "fitted_relative_l2": 0.17844813713135937,
+          "best_shift": {
+            "shift_samples": -2,
+            "amplitude_ratio": -0.004365189109752765,
+            "fitted_relative_l2": 0.05789935532547582
+          }
+        },
+        "fdtdx_vs_meep": {
+          "samples": 800,
+          "raw_relative_l2": 1.004304645002967,
+          "amplitude_ratio": -0.004304351177806031,
+          "fitted_relative_l2": 0.17847792011959332,
+          "best_shift": {
+            "shift_samples": -2,
+            "amplitude_ratio": -0.004365003839456651,
+            "fitted_relative_l2": 0.05787052748846297
+          }
+        }
+      },
+      "artifacts": {
+        "torchfdtd": {
+          "artifact": "torchfdtd_throughput_sphere-96_trace.npy",
+          "sha256": "fe6460ef52f25f684f72e674fa3b1fff049b09aa64cc04357056a60103cf89ea",
+          "matches_record": true
+        },
+        "fdtdx": {
+          "artifact": "fdtdx_throughput_sphere-96_trace.npy",
+          "sha256": "0769158edc215bf425d6a5b0a518d3e06e166f1712b85eb40ab7443599a4126b",
+          "matches_record": true
+        },
+        "meep": {
+          "artifact": "meep_throughput_sphere-96_trace.npy",
+          "sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "matches_record": true
+        }
+      },
+      "half_step_carrier_phase": 0.057924560341673405
+    }
+  },
+  "meep_rank_sweep": [
+    {
+      "ranks": 4,
+      "record": "meep_throughput_ranks4.json",
+      "cases": {
+        "vacuum-64": {
+          "median_loop_seconds": 3.4349171669996394,
+          "cell_steps_per_second_stepping": 61130249.665791154,
+          "loop_samples": [
+            3.3994598049998785,
+            3.479102434000197,
+            3.4349171669996394
+          ],
+          "load_average_before": [
+            11.20458984375,
+            5.482421875,
+            2.40087890625
+          ]
+        },
+        "sphere-64": {
+          "median_loop_seconds": 3.488362976999724,
+          "cell_steps_per_second_stepping": 60193662.58169544,
+          "loop_samples": [
+            3.501438656999653,
+            3.474099618999844,
+            3.488362976999724
+          ],
+          "load_average_before": [
+            9.6083984375,
+            5.4091796875,
+            2.42724609375
+          ]
+        },
+        "vacuum-96": {
+          "median_loop_seconds": 10.790829335000126,
+          "cell_steps_per_second_stepping": 65591696.2475055,
+          "loop_samples": [
+            10.73071264300006,
+            10.790829335000126,
+            11.299171246000242
+          ],
+          "load_average_before": [
+            8.365234375,
+            5.33935546875,
+            2.45361328125
+          ]
+        },
+        "sphere-96": {
+          "median_loop_seconds": 11.078546978999839,
+          "cell_steps_per_second_stepping": 63888233.83984048,
+          "loop_samples": [
+            11.320706369000163,
+            11.078546978999839,
+            11.074565768999946
+          ],
+          "load_average_before": [
+            6.05859375,
+            5.14990234375,
+            2.52880859375
+          ]
+        }
+      }
+    },
+    {
+      "ranks": 8,
+      "record": "meep_throughput_ranks8.json",
+      "cases": {
+        "vacuum-64": {
+          "median_loop_seconds": 3.5495779660000153,
+          "cell_steps_per_second_stepping": 59155580.187641695,
+          "loop_samples": [
+            3.5495779660000153,
+            3.5110714180000286,
+            3.5731388189997233
+          ],
+          "load_average_before": [
+            5.0185546875,
+            5.001953125,
+            2.60595703125
+          ]
+        },
+        "sphere-64": {
+          "median_loop_seconds": 3.661982276999879,
+          "cell_steps_per_second_stepping": 57339803.449848026,
+          "loop_samples": [
+            3.7186224490001223,
+            3.661982276999879,
+            3.6401576839998597
+          ],
+          "load_average_before": [
+            5.67919921875,
+            5.1494140625,
+            2.693359375
+          ]
+        },
+        "vacuum-96": {
+          "median_loop_seconds": 11.631902361999892,
+          "cell_steps_per_second_stepping": 60848928.91744569,
+          "loop_samples": [
+            11.64570356899958,
+            11.631902361999892,
+            11.574863969000035
+          ],
+          "load_average_before": [
+            6.19384765625,
+            5.28955078125,
+            2.779296875
+          ]
+        },
+        "sphere-96": {
+          "median_loop_seconds": 12.197918915999708,
+          "cell_steps_per_second_stepping": 58025373.4160842,
+          "loop_samples": [
+            11.999659773000076,
+            12.197918915999708,
+            12.458038986999782
+          ],
+          "load_average_before": [
+            7.21728515625,
+            5.7099609375,
+            3.05517578125
+          ]
+        }
+      }
+    },
+    {
+      "ranks": 12,
+      "record": "meep_throughput_ranks12.json",
+      "cases": {
+        "vacuum-64": {
+          "median_loop_seconds": 4.323488623999765,
+          "cell_steps_per_second_stepping": 48566646.58128436,
+          "loop_samples": [
+            4.366267260999848,
+            4.323488623999765,
+            4.216152575999786
+          ],
+          "load_average_before": [
+            7.662109375,
+            6.0654296875,
+            3.31689453125
+          ]
+        },
+        "sphere-64": {
+          "median_loop_seconds": 4.297810972000207,
+          "cell_steps_per_second_stepping": 48856812.30933157,
+          "loop_samples": [
+            4.297810972000207,
+            4.259525105000193,
+            4.364132486000017
+          ],
+          "load_average_before": [
+            8.89404296875,
+            6.45068359375,
+            3.50244140625
+          ]
+        },
+        "vacuum-96": {
+          "median_loop_seconds": 13.005108511999879,
+          "cell_steps_per_second_stepping": 54423905.75572051,
+          "loop_samples": [
+            13.005108511999879,
+            12.965746398000192,
+            13.095316507999996
+          ],
+          "load_average_before": [
+            9.58251953125,
+            6.72314453125,
+            3.63916015625
+          ]
+        },
+        "sphere-96": {
+          "median_loop_seconds": 13.356407920000038,
+          "cell_steps_per_second_stepping": 52992451.58124805,
+          "loop_samples": [
+            13.129167489000338,
+            13.356407920000038,
+            13.372135478000018
+          ],
+          "load_average_before": [
+            11.03662109375,
+            7.61279296875,
+            4.123046875
+          ]
+        }
+      }
+    },
+    {
+      "ranks": 16,
+      "record": "meep_throughput_ranks16.json",
+      "cases": {
+        "vacuum-64": {
+          "median_loop_seconds": 5.069961115999831,
+          "cell_steps_per_second_stepping": 41415967.34092329,
+          "loop_samples": [
+            4.845695699999851,
+            5.069961115999831,
+            5.1170656709996365
+          ],
+          "load_average_before": [
+            11.61669921875,
+            8.353515625,
+            4.57861328125
+          ]
+        },
+        "sphere-64": {
+          "median_loop_seconds": 4.8946992709998085,
+          "cell_steps_per_second_stepping": 42898926.44560966,
+          "loop_samples": [
+            4.8946992709998085,
+            4.873040704000232,
+            4.92237162299989
+          ],
+          "load_average_before": [
+            12.86181640625,
+            8.849609375,
+            4.82275390625
+          ]
+        },
+        "vacuum-96": {
+          "median_loop_seconds": 14.256468058999872,
+          "cell_steps_per_second_stepping": 49646854.82202478,
+          "loop_samples": [
+            14.256468058999872,
+            14.710708269000406,
+            13.783486385000288
+          ],
+          "load_average_before": [
+            13.75341796875,
+            9.314453125,
+            5.0615234375
+          ]
+        },
+        "sphere-96": {
+          "median_loop_seconds": 14.113584114999867,
+          "cell_steps_per_second_stepping": 50149472.6097083,
+          "loop_samples": [
+            14.113584114999867,
+            14.036934821000159,
+            14.244945383999948
+          ],
+          "load_average_before": [
+            15.17626953125,
+            10.5341796875,
+            5.7490234375
+          ]
+        }
+      }
+    }
+  ],
+  "adjoint": {
+    "solvers": {
+      "torchfdtd_checkpointed": {
+        "method": "DifferentiableSimulation, discrete adjoint of the fused CUDA Yee step, device checkpoints (binomial replay), loss.backward() on the full scalar-per-cell epsilon tensor. Time to gradient = wall time of tensor upload, forward, backward and synchronize after one warm-up call.",
+        "options": {
+          "checkpoints": 2,
+          "storage": "device",
+          "forward_backend": "fused CUDA",
+          "backward_backend": "fused CUDA transpose"
+        },
+        "median_wall_seconds": 0.10225064199994449,
+        "wall_samples": [
+          0.10225064199994449,
+          0.10483429799978694,
+          0.10110531899999842
+        ],
+        "loss": 3.318336212032591e-06,
+        "gradient": {
+          "sha256": "055df694fa0b8a7158bd00b068627624cb36795f47563e0ba910460bde264afe",
+          "shape": [
+            64,
+            64,
+            64
+          ],
+          "dtype": "float32",
+          "l2_norm": 5.507867438979702e-06,
+          "max_abs": 4.689182333095232e-06,
+          "source_cell_value": 4.689182333095232e-06,
+          "nonzero": 240622,
+          "finite": true,
+          "replayed_steps": 765
+        },
+        "probe_history": {
+          "sha256": "92ffc4a194166f39e5ccc50bb3f62bd51c45411048a99784fbc9e91ff81a4bb4",
+          "shape": [
+            128,
+            2
+          ],
+          "max_abs": 0.004887075163424015,
+          "first_nonzero_step": 12
+        },
+        "gpu_idle": {
+          "checked": true,
+          "limit_mb": 3320.0,
+          "memory_used_mb": 2513.0,
+          "utilization": 1.0,
+          "waited_seconds": 10.080476999282837,
+          "samples": [
+            {
+              "memory_used_mb": 2511.0,
+              "utilization": 0.0,
+              "t": 0.022829532623291016
+            },
+            {
+              "memory_used_mb": 2513.0,
+              "utilization": 0.0,
+              "t": 5.0506086349487305
+            },
+            {
+              "memory_used_mb": 2513.0,
+              "utilization": 1.0,
+              "t": 10.080472469329834
+            }
+          ]
+        },
+        "shared": {
+          "epsilon_sha256": "f26d2a20bde91d04606a0f8177358053b43000255f4b5ee0555d13f4bf04558c",
+          "kick_sha256": "4d7a52c6ddde78a865a843f590cae4f399a8a996115e811076b54308189ee185",
+          "loss_weights": [
+            1.0,
+            0.3
+          ]
+        },
+        "peak_allocated_bytes": 41952768,
+        "median_forward_seconds": 0.016435636000096565,
+        "median_backward_seconds": 0.08095452399993519,
+        "spread": 1.0368821248641586,
+        "accepted_attempt": 0
+      },
+      "fdtdx_checkpointed": {
+        "method": "jax.value_and_grad of the two-probe loss with respect to the scalar-per-cell epsilon array (inv_permittivities=1/eps), run_fdtd with GradientConfig(method='checkpointed'); the whole forward+backward is one jitted executable compiled once (compile time recorded separately). Time to gradient = host upload of epsilon + executable + block_until_ready.",
+        "options": {
+          "method": "checkpointed",
+          "num_checkpoints": 2,
+          "recorder": null
+        },
+        "median_wall_seconds": 5.268022355000085,
+        "wall_samples": [
+          5.2960645220000515,
+          5.268022355000085,
+          5.251360392999686
+        ],
+        "loss": 3.318336212032591e-06,
+        "gradient": {
+          "sha256": "47db1ed2421f8bfc37deca373f7441dd58445c2b98f7c1d3a9a22daa41d5cbde",
+          "shape": [
+            64,
+            64,
+            64
+          ],
+          "dtype": "float32",
+          "l2_norm": 5.5078674773946436e-06,
+          "max_abs": 4.689182333095232e-06,
+          "source_cell_value": 4.689182333095232e-06,
+          "nonzero": 240622,
+          "finite": true
+        },
+        "probe_history": {
+          "sha256": "51ef5915708b05d4baf1ad5c59d68ef18cb5b69b45d2dbb49c8ff3e35b34de15",
+          "shape": [
+            128,
+            2
+          ],
+          "max_abs": 0.00488707609474659,
+          "first_nonzero_step": 12
+        },
+        "gpu_idle": {
+          "checked": true,
+          "limit_mb": 3202.0,
+          "memory_used_mb": 2565.0,
+          "utilization": 3.0,
+          "waited_seconds": 10.074473142623901,
+          "samples": [
+            {
+              "memory_used_mb": 2565.0,
+              "utilization": 1.0,
+              "t": 0.022259235382080078
+            },
+            {
+              "memory_used_mb": 2565.0,
+              "utilization": 1.0,
+              "t": 5.050846099853516
+            },
+            {
+              "memory_used_mb": 2565.0,
+              "utilization": 3.0,
+              "t": 10.074470520019531
+            }
+          ]
+        },
+        "shared": {
+          "epsilon_sha256": "f26d2a20bde91d04606a0f8177358053b43000255f4b5ee0555d13f4bf04558c",
+          "kick_sha256": "4d7a52c6ddde78a865a843f590cae4f399a8a996115e811076b54308189ee185",
+          "loss_weights": [
+            1.0,
+            0.3
+          ]
+        },
+        "peak_bytes_in_use": 317717760,
+        "compile_seconds": 1.6677970759997152,
+        "spread": 1.0085128663155472,
+        "accepted_attempt": 0
+      },
+      "fdtdx_reversible": {
+        "method": "jax.value_and_grad of the two-probe loss with respect to the scalar-per-cell epsilon array (inv_permittivities=1/eps), run_fdtd with GradientConfig(method='reversible'); the whole forward+backward is one jitted executable compiled once (compile time recorded separately). Time to gradient = host upload of epsilon + executable + block_until_ready.",
+        "options": {
+          "method": "reversible",
+          "num_checkpoints": null,
+          "recorder": "Recorder(modules=[])"
+        },
+        "median_wall_seconds": 0.20900233400016077,
+        "wall_samples": [
+          0.20900233400016077,
+          0.2078167179997763,
+          0.2102565959999083
+        ],
+        "loss": 3.318336212032591e-06,
+        "gradient": {
+          "sha256": "dec4d2d5c464d180424a3ca2f6a443937b1b226a5d31817d25402e3402511e12",
+          "shape": [
+            64,
+            64,
+            64
+          ],
+          "dtype": "float32",
+          "l2_norm": 5.507867792128228e-06,
+          "max_abs": 4.689182787842583e-06,
+          "source_cell_value": 4.689182787842583e-06,
+          "nonzero": 262144,
+          "finite": true
+        },
+        "probe_history": {
+          "sha256": "51ef5915708b05d4baf1ad5c59d68ef18cb5b69b45d2dbb49c8ff3e35b34de15",
+          "shape": [
+            128,
+            2
+          ],
+          "max_abs": 0.00488707609474659,
+          "first_nonzero_step": 12
+        },
+        "gpu_idle": {
+          "checked": true,
+          "limit_mb": 3202.0,
+          "memory_used_mb": 2565.0,
+          "utilization": 4.0,
+          "waited_seconds": 10.092788934707642,
+          "samples": [
+            {
+              "memory_used_mb": 2565.0,
+              "utilization": 4.0,
+              "t": 0.026177167892456055
+            },
+            {
+              "memory_used_mb": 2565.0,
+              "utilization": 1.0,
+              "t": 5.059318780899048
+            },
+            {
+              "memory_used_mb": 2565.0,
+              "utilization": 4.0,
+              "t": 10.092785120010376
+            }
+          ]
+        },
+        "shared": {
+          "epsilon_sha256": "f26d2a20bde91d04606a0f8177358053b43000255f4b5ee0555d13f4bf04558c",
+          "kick_sha256": "4d7a52c6ddde78a865a843f590cae4f399a8a996115e811076b54308189ee185",
+          "loss_weights": [
+            1.0,
+            0.3
+          ]
+        },
+        "peak_bytes_in_use": 116391168,
+        "compile_seconds": 0.47825783400003274,
+        "spread": 1.0117405280172629,
+        "accepted_attempt": 0
+      },
+      "fdtdx_checkpointed16": {
+        "method": "jax.value_and_grad of the two-probe loss with respect to the scalar-per-cell epsilon array (inv_permittivities=1/eps), run_fdtd with GradientConfig(method='checkpointed'); the whole forward+backward is one jitted executable compiled once (compile time recorded separately). Time to gradient = host upload of epsilon + executable + block_until_ready.",
+        "options": {
+          "method": "checkpointed",
+          "num_checkpoints": 16,
+          "recorder": null
+        },
+        "median_wall_seconds": 0.674615041999914,
+        "wall_samples": [
+          0.681129239999791,
+          0.674615041999914,
+          0.6706054300002506
+        ],
+        "loss": 3.318336212032591e-06,
+        "gradient": {
+          "sha256": "47db1ed2421f8bfc37deca373f7441dd58445c2b98f7c1d3a9a22daa41d5cbde",
+          "shape": [
+            64,
+            64,
+            64
+          ],
+          "dtype": "float32",
+          "l2_norm": 5.5078674773946436e-06,
+          "max_abs": 4.689182333095232e-06,
+          "source_cell_value": 4.689182333095232e-06,
+          "nonzero": 240622,
+          "finite": true
+        },
+        "probe_history": {
+          "sha256": "51ef5915708b05d4baf1ad5c59d68ef18cb5b69b45d2dbb49c8ff3e35b34de15",
+          "shape": [
+            128,
+            2
+          ],
+          "max_abs": 0.00488707609474659,
+          "first_nonzero_step": 12
+        },
+        "gpu_idle": {
+          "checked": true,
+          "limit_mb": 3230.0,
+          "memory_used_mb": 2616.0,
+          "utilization": 3.0,
+          "waited_seconds": 10.08112359046936,
+          "samples": [
+            {
+              "memory_used_mb": 2616.0,
+              "utilization": 4.0,
+              "t": 0.028304100036621094
+            },
+            {
+              "memory_used_mb": 2616.0,
+              "utilization": 2.0,
+              "t": 5.056489706039429
+            },
+            {
+              "memory_used_mb": 2616.0,
+              "utilization": 3.0,
+              "t": 10.081120729446411
+            }
+          ]
+        },
+        "shared": {
+          "epsilon_sha256": "f26d2a20bde91d04606a0f8177358053b43000255f4b5ee0555d13f4bf04558c",
+          "kick_sha256": "4d7a52c6ddde78a865a843f590cae4f399a8a996115e811076b54308189ee185",
+          "loss_weights": [
+            1.0,
+            0.3
+          ]
+        },
+        "peak_bytes_in_use": 1231060736,
+        "compile_seconds": 1.681939955999951,
+        "spread": 1.0156929984887484,
+        "accepted_attempt": 0
+      }
+    },
+    "pairwise": {
+      "torchfdtd_checkpointed_vs_fdtdx_checkpointed": {
+        "gradient_relative_l2": 7.055018567715159e-08,
+        "gradient_max_abs_difference": 2.2737367544323206e-13,
+        "gradient_reference_max_abs": 4.689182333095232e-06,
+        "probe_history_relative_l2": 8.482756070278749e-07,
+        "probe_history_max_abs_difference": 7.392372936010361e-09,
+        "loss_relative_difference": 0.0
+      },
+      "torchfdtd_checkpointed_vs_fdtdx_reversible": {
+        "gradient_relative_l2": 1.0322482796113474e-07,
+        "gradient_max_abs_difference": 4.547473508864641e-13,
+        "gradient_reference_max_abs": 4.689182787842583e-06,
+        "probe_history_relative_l2": 8.482756070278749e-07,
+        "probe_history_max_abs_difference": 7.392372936010361e-09,
+        "loss_relative_difference": 0.0
+      },
+      "torchfdtd_checkpointed_vs_fdtdx_checkpointed16": {
+        "gradient_relative_l2": 7.055018567715159e-08,
+        "gradient_max_abs_difference": 2.2737367544323206e-13,
+        "gradient_reference_max_abs": 4.689182333095232e-06,
+        "probe_history_relative_l2": 8.482756070278749e-07,
+        "probe_history_max_abs_difference": 7.392372936010361e-09,
+        "loss_relative_difference": 0.0
+      },
+      "fdtdx_checkpointed_vs_fdtdx_reversible": {
+        "gradient_relative_l2": 1.0715051107413925e-07,
+        "gradient_max_abs_difference": 4.547473508864641e-13,
+        "gradient_reference_max_abs": 4.689182787842583e-06,
+        "probe_history_relative_l2": 0.0,
+        "probe_history_max_abs_difference": 0.0,
+        "loss_relative_difference": 0.0
+      },
+      "fdtdx_checkpointed_vs_fdtdx_checkpointed16": {
+        "gradient_relative_l2": 0.0,
+        "gradient_max_abs_difference": 0.0,
+        "gradient_reference_max_abs": 4.689182333095232e-06,
+        "probe_history_relative_l2": 0.0,
+        "probe_history_max_abs_difference": 0.0,
+        "loss_relative_difference": 0.0
+      },
+      "fdtdx_reversible_vs_fdtdx_checkpointed16": {
+        "gradient_relative_l2": 1.0715051719699253e-07,
+        "gradient_max_abs_difference": 4.547473508864641e-13,
+        "gradient_reference_max_abs": 4.689182333095232e-06,
+        "probe_history_relative_l2": 0.0,
+        "probe_history_max_abs_difference": 0.0,
+        "loss_relative_difference": 0.0
+      }
+    },
+    "meep": "excluded: Meep implements a frequency-domain adjoint with different semantics"
+  }
+}

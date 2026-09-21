@@ -1,0 +1,176 @@
+{
+  "name": "throughput",
+  "description": "Forward throughput on the benchmarks/open_source.py vacuum and sphere scenes: 4.8 um cube, 800 steps, point Ez source and point Ez monitor.",
+  "dimension": "3d",
+  "size_um": [
+    4.8,
+    4.8,
+    4.8
+  ],
+  "source": {
+    "kind": "point",
+    "component": "Ez",
+    "center_um": [
+      -1.2,
+      0,
+      0
+    ],
+    "waveform": {
+      "type": "gaussian_cycles",
+      "wavelength_um": 1.55,
+      "pulse_cycles": 2.0,
+      "amplitude": 1.0
+    }
+  },
+  "monitor": {
+    "kind": "point",
+    "component": "Ez",
+    "center_um": [
+      1.2,
+      0,
+      0
+    ]
+  },
+  "boundaries": {
+    "x": "pml",
+    "y": "pml",
+    "z": "pml"
+  },
+  "material_sampling": "yee (per-component staircase); Meep eps_averaging disabled",
+  "cases": [
+    {
+      "name": "vacuum-64",
+      "kind": "vacuum",
+      "n": 64,
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "courant_number": 0.5715767664977295,
+      "dt_s": 1.4299311521482543e-16,
+      "steps": 800,
+      "structures": [],
+      "source_index": [
+        16,
+        32,
+        31
+      ],
+      "monitor_index": [
+        48,
+        32,
+        31
+      ]
+    },
+    {
+      "name": "sphere-64",
+      "kind": "sphere",
+      "n": 64,
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "courant_number": 0.5715767664977295,
+      "dt_s": 1.4299311521482543e-16,
+      "steps": 800,
+      "structures": [
+        {
+          "kind": "sphere",
+          "radius_um": 0.5,
+          "index": 1.5,
+          "center_um": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "source_index": [
+        16,
+        32,
+        31
+      ],
+      "monitor_index": [
+        48,
+        32,
+        31
+      ]
+    },
+    {
+      "name": "vacuum-96",
+      "kind": "vacuum",
+      "n": 96,
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "courant_number": 0.5715767664977295,
+      "dt_s": 9.532874347655027e-17,
+      "steps": 800,
+      "structures": [],
+      "source_index": [
+        24,
+        48,
+        48
+      ],
+      "monitor_index": [
+        72,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "sphere-96",
+      "kind": "sphere",
+      "n": 96,
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "courant_number": 0.5715767664977295,
+      "dt_s": 9.532874347655027e-17,
+      "steps": 800,
+      "structures": [
+        {
+          "kind": "sphere",
+          "radius_um": 0.5,
+          "index": 1.5,
+          "center_um": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "source_index": [
+        24,
+        48,
+        48
+      ],
+      "monitor_index": [
+        72,
+        48,
+        48
+      ]
+    }
+  ],
+  "repetitions": 3,
+  "warmup": 1,
+  "precision": {
+    "torchfdtd": "float32",
+    "fdtdx": "float32",
+    "meep": "float64 (build fixed)"
+  },
+  "index_note": "Ez Yee node indices (x,y integer nodes, z half node) as resolved by torchfdtd.solver.index_at for yee sampling; z=0 lies exactly between two half nodes and the resolved index is recorded here so that every solver uses the same cell."
+}

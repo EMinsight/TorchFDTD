@@ -1,0 +1,194 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "fdtdx",
+  "fixture": "adjoint_reversible",
+  "fixture_sha256": "aa0843678bc5e31cdd03236e765165827a1330e75fdd9d2e9388721b79654d95",
+  "date": "2026-09-21",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.12.14",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2631",
+      "utilization.gpu": "88"
+    },
+    "packages": {
+      "fdtdx": "0.6.2",
+      "jax": "0.11.2",
+      "jaxlib": "0.11.2",
+      "jax-cuda12-plugin": "0.11.2",
+      "jax-cuda12-pjrt": "0.11.2",
+      "equinox": "0.13.8",
+      "optax": "0.2.8",
+      "numpy": "2.4.6",
+      "scipy": "1.18.1"
+    },
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_x64": false,
+    "xla_preallocate": "false"
+  },
+  "driver_sha256": {
+    "fdtdx_driver.py": "0151c5df68905651fedad6c37c7fd38fd8537fafbdb00ae02e066e9395b7196c",
+    "common.py": "21bd4de1e20e137891f3feeb8af76d9825fca9cc9967b3cea736f80d46f7509e"
+  },
+  "method": "jax.value_and_grad of the two-probe loss with respect to the scalar-per-cell epsilon array (inv_permittivities=1/eps), run_fdtd with GradientConfig(method='reversible'); the whole forward+backward is one jitted executable compiled once (compile time recorded separately). Time to gradient = host upload of epsilon + executable + block_until_ready.",
+  "grid": {
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "mesh_um": 0.1,
+    "dt_s": 1.7332498813918235e-16,
+    "steps": 128,
+    "courant_number": 0.5196152422706632,
+    "precision": "float32"
+  },
+  "options": {
+    "method": "reversible",
+    "num_checkpoints": null,
+    "recorder": "Recorder(modules=[])"
+  },
+  "shared": {
+    "epsilon_sha256": "f26d2a20bde91d04606a0f8177358053b43000255f4b5ee0555d13f4bf04558c",
+    "kick_sha256": "4d7a52c6ddde78a865a843f590cae4f399a8a996115e811076b54308189ee185",
+    "loss_weights": [
+      1.0,
+      0.3
+    ]
+  },
+  "gpu_idle": {
+    "checked": true,
+    "limit_mb": 3202.0,
+    "memory_used_mb": 2565.0,
+    "utilization": 4.0,
+    "waited_seconds": 10.092788934707642,
+    "samples": [
+      {
+        "memory_used_mb": 2565.0,
+        "utilization": 4.0,
+        "t": 0.026177167892456055
+      },
+      {
+        "memory_used_mb": 2565.0,
+        "utilization": 1.0,
+        "t": 5.059318780899048
+      },
+      {
+        "memory_used_mb": 2565.0,
+        "utilization": 4.0,
+        "t": 10.092785120010376
+      }
+    ]
+  },
+  "compile_seconds": 0.47825783400003274,
+  "runs": [
+    {
+      "wall_seconds": 0.20900233400016077,
+      "peak_bytes_in_use": 116391168,
+      "loss": 3.318336212032591e-06
+    },
+    {
+      "wall_seconds": 0.2078167179997763,
+      "peak_bytes_in_use": 116391168,
+      "loss": 3.318336212032591e-06
+    },
+    {
+      "wall_seconds": 0.2102565959999083,
+      "peak_bytes_in_use": 116391168,
+      "loss": 3.318336212032591e-06
+    }
+  ],
+  "timing_attempts": [
+    {
+      "attempt": 0,
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3202.0,
+        "memory_used_mb": 2565.0,
+        "utilization": 4.0,
+        "waited_seconds": 10.092788934707642,
+        "samples": [
+          {
+            "memory_used_mb": 2565.0,
+            "utilization": 4.0,
+            "t": 0.026177167892456055
+          },
+          {
+            "memory_used_mb": 2565.0,
+            "utilization": 1.0,
+            "t": 5.059318780899048
+          },
+          {
+            "memory_used_mb": 2565.0,
+            "utilization": 4.0,
+            "t": 10.092785120010376
+          }
+        ]
+      },
+      "runs": [
+        {
+          "wall_seconds": 0.20900233400016077,
+          "peak_bytes_in_use": 116391168,
+          "loss": 3.318336212032591e-06
+        },
+        {
+          "wall_seconds": 0.2078167179997763,
+          "peak_bytes_in_use": 116391168,
+          "loss": 3.318336212032591e-06
+        },
+        {
+          "wall_seconds": 0.2102565959999083,
+          "peak_bytes_in_use": 116391168,
+          "loss": 3.318336212032591e-06
+        }
+      ],
+      "spread": 1.0117405280172629,
+      "accepted": true
+    }
+  ],
+  "spread": 1.0117405280172629,
+  "accepted_attempt": 0,
+  "median_wall_seconds": 0.20900233400016077,
+  "peak_bytes_in_use": 116391168,
+  "loss": 3.318336212032591e-06,
+  "gradient": {
+    "sha256": "dec4d2d5c464d180424a3ca2f6a443937b1b226a5d31817d25402e3402511e12",
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "dtype": "float32",
+    "l2_norm": 5.507867792128228e-06,
+    "max_abs": 4.689182787842583e-06,
+    "source_cell_value": 4.689182787842583e-06,
+    "nonzero": 262144,
+    "finite": true
+  },
+  "probe_history": {
+    "sha256": "51ef5915708b05d4baf1ad5c59d68ef18cb5b69b45d2dbb49c8ff3e35b34de15",
+    "shape": [
+      128,
+      2
+    ],
+    "max_abs": 0.00488707609474659,
+    "first_nonzero_step": 12
+  },
+  "artifacts": {
+    "gradient": "/root/torchfdtd-bench/artifacts/fdtdx_reversible_adjoint_gradient.npy",
+    "signals": "/root/torchfdtd-bench/artifacts/fdtdx_reversible_adjoint_signals.npy"
+  },
+  "gpu_context": {
+    "before_mb": 2495.0,
+    "after_mb": 2497.0,
+    "own_mb": 2.0
+  }
+}

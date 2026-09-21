@@ -1,0 +1,649 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "fdtdx",
+  "fixture": "throughput",
+  "fixture_sha256": "2c8a687efbada9c7ca7b7d4419161b9c7866840fb0847004edaa8687605511db",
+  "date": "2026-09-21",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.12.14",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2495",
+      "utilization.gpu": "0"
+    },
+    "packages": {
+      "fdtdx": "0.6.2",
+      "jax": "0.11.2",
+      "jaxlib": "0.11.2",
+      "jax-cuda12-plugin": "0.11.2",
+      "jax-cuda12-pjrt": "0.11.2",
+      "equinox": "0.13.8",
+      "optax": "0.2.8",
+      "numpy": "2.4.6",
+      "scipy": "1.18.1"
+    },
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_x64": false,
+    "xla_preallocate": "false"
+  },
+  "driver_sha256": {
+    "fdtdx_driver.py": "0151c5df68905651fedad6c37c7fd38fd8537fafbdb00ae02e066e9395b7196c",
+    "common.py": "21bd4de1e20e137891f3feeb8af76d9825fca9cc9967b3cea736f80d46f7509e"
+  },
+  "method": "run_fdtd inside jax.jit (donated arrays), float32, GPU. Full solve = place_objects + apply_params + shared permittivity upload + jitted run + host copy of E, H and the probe trace, after one warm-up that includes XLA compilation (recorded separately). Stepping = jitted call alone with block_until_ready.",
+  "cases": [
+    {
+      "name": "vacuum-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "compile_seconds": 0.6955826909997995,
+      "runs": [
+        {
+          "wall_seconds": 0.8168728720002036,
+          "setup_seconds": 0.39112022200015417,
+          "loop_seconds": 0.4170567010000923,
+          "transfer_seconds": 0.008693238000432757,
+          "peak_bytes_in_use": 93305856,
+          "field_peak": 0.0005851444439031184,
+          "magnetic_peak": 2.2171708735641005e-07,
+          "trace_sha256": "6b6095dcca8ce1af675f2d5dc6576bd3fb737ddf6c729858276d0f6d78cf0b6c",
+          "finite": true
+        },
+        {
+          "wall_seconds": 0.8488714509999227,
+          "setup_seconds": 0.4291672880003716,
+          "loop_seconds": 0.4143150280001464,
+          "transfer_seconds": 0.005385943999954179,
+          "peak_bytes_in_use": 93305856,
+          "field_peak": 0.0005851444439031184,
+          "magnetic_peak": 2.2171708735641005e-07,
+          "trace_sha256": "6b6095dcca8ce1af675f2d5dc6576bd3fb737ddf6c729858276d0f6d78cf0b6c",
+          "finite": true
+        },
+        {
+          "wall_seconds": 0.8497324539998772,
+          "setup_seconds": 0.4252501019996089,
+          "loop_seconds": 0.41738072499992995,
+          "transfer_seconds": 0.007098345000031259,
+          "peak_bytes_in_use": 93305856,
+          "field_peak": 0.0005851444439031184,
+          "magnetic_peak": 2.2171708735641005e-07,
+          "trace_sha256": "6b6095dcca8ce1af675f2d5dc6576bd3fb737ddf6c729858276d0f6d78cf0b6c",
+          "finite": true
+        }
+      ],
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3202.0,
+        "memory_used_mb": 2495.0,
+        "utilization": 3.0,
+        "waited_seconds": 10.083807468414307,
+        "samples": [
+          {
+            "memory_used_mb": 2495.0,
+            "utilization": 0.0,
+            "t": 0.025714397430419922
+          },
+          {
+            "memory_used_mb": 2495.0,
+            "utilization": 1.0,
+            "t": 5.056801795959473
+          },
+          {
+            "memory_used_mb": 2495.0,
+            "utilization": 3.0,
+            "t": 10.083803653717041
+          }
+        ]
+      },
+      "spread": 1.0402260659228568,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "gpu_idle": {
+            "checked": true,
+            "limit_mb": 3202.0,
+            "memory_used_mb": 2495.0,
+            "utilization": 3.0,
+            "waited_seconds": 10.083807468414307,
+            "samples": [
+              {
+                "memory_used_mb": 2495.0,
+                "utilization": 0.0,
+                "t": 0.025714397430419922
+              },
+              {
+                "memory_used_mb": 2495.0,
+                "utilization": 1.0,
+                "t": 5.056801795959473
+              },
+              {
+                "memory_used_mb": 2495.0,
+                "utilization": 3.0,
+                "t": 10.083803653717041
+              }
+            ]
+          },
+          "runs": [
+            {
+              "wall_seconds": 0.8168728720002036,
+              "setup_seconds": 0.39112022200015417,
+              "loop_seconds": 0.4170567010000923,
+              "transfer_seconds": 0.008693238000432757,
+              "peak_bytes_in_use": 93305856,
+              "field_peak": 0.0005851444439031184,
+              "magnetic_peak": 2.2171708735641005e-07,
+              "trace_sha256": "6b6095dcca8ce1af675f2d5dc6576bd3fb737ddf6c729858276d0f6d78cf0b6c",
+              "finite": true
+            },
+            {
+              "wall_seconds": 0.8488714509999227,
+              "setup_seconds": 0.4291672880003716,
+              "loop_seconds": 0.4143150280001464,
+              "transfer_seconds": 0.005385943999954179,
+              "peak_bytes_in_use": 93305856,
+              "field_peak": 0.0005851444439031184,
+              "magnetic_peak": 2.2171708735641005e-07,
+              "trace_sha256": "6b6095dcca8ce1af675f2d5dc6576bd3fb737ddf6c729858276d0f6d78cf0b6c",
+              "finite": true
+            },
+            {
+              "wall_seconds": 0.8497324539998772,
+              "setup_seconds": 0.4252501019996089,
+              "loop_seconds": 0.41738072499992995,
+              "transfer_seconds": 0.007098345000031259,
+              "peak_bytes_in_use": 93305856,
+              "field_peak": 0.0005851444439031184,
+              "magnetic_peak": 2.2171708735641005e-07,
+              "trace_sha256": "6b6095dcca8ce1af675f2d5dc6576bd3fb737ddf6c729858276d0f6d78cf0b6c",
+              "finite": true
+            }
+          ],
+          "spread": 1.0402260659228568,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/fdtdx_throughput_vacuum-64_trace.npy",
+      "median_wall_seconds": 0.8488714509999227,
+      "median_loop_seconds": 0.4170567010000923,
+      "median_setup_seconds": 0.4252501019996089,
+      "cell_steps_per_second_full": 247051776.51217663,
+      "cell_steps_per_second_stepping": 502845774.9200716,
+      "peak_bytes_in_use": 93305856,
+      "shared_epsilon_sha256": "c92c83257ebee207e2ca7d495cd12254513713c8b8489bd5a219d14b03d81549"
+    },
+    {
+      "name": "sphere-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "compile_seconds": 0.6339982170002258,
+      "runs": [
+        {
+          "wall_seconds": 0.7804487379999046,
+          "setup_seconds": 0.35825988799979314,
+          "loop_seconds": 0.4181630950001818,
+          "transfer_seconds": 0.00402325999993991,
+          "peak_bytes_in_use": 93309184,
+          "field_peak": 0.0005851774476468563,
+          "magnetic_peak": 2.592444729998533e-07,
+          "trace_sha256": "69097e9526500e6798bbb80052a00a65f367cc776867d986d4f3a47ea42541dc",
+          "finite": true
+        },
+        {
+          "wall_seconds": 0.7864027690002331,
+          "setup_seconds": 0.36664165299998785,
+          "loop_seconds": 0.41517614599979424,
+          "transfer_seconds": 0.004582379000112269,
+          "peak_bytes_in_use": 93309184,
+          "field_peak": 0.0005851774476468563,
+          "magnetic_peak": 2.592444729998533e-07,
+          "trace_sha256": "69097e9526500e6798bbb80052a00a65f367cc776867d986d4f3a47ea42541dc",
+          "finite": true
+        },
+        {
+          "wall_seconds": 0.7604205640000146,
+          "setup_seconds": 0.3377622739999424,
+          "loop_seconds": 0.41788703300017005,
+          "transfer_seconds": 0.0047686550001344585,
+          "peak_bytes_in_use": 93309184,
+          "field_peak": 0.0005851774476468563,
+          "magnetic_peak": 2.592444729998533e-07,
+          "trace_sha256": "69097e9526500e6798bbb80052a00a65f367cc776867d986d4f3a47ea42541dc",
+          "finite": true
+        }
+      ],
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3202.0,
+        "memory_used_mb": 2629.0,
+        "utilization": 3.0,
+        "waited_seconds": 25.17331337928772,
+        "samples": [
+          {
+            "memory_used_mb": 2629.0,
+            "utilization": 4.0,
+            "t": 15.113444805145264
+          },
+          {
+            "memory_used_mb": 2629.0,
+            "utilization": 1.0,
+            "t": 20.140206575393677
+          },
+          {
+            "memory_used_mb": 2629.0,
+            "utilization": 3.0,
+            "t": 25.17331027984619
+          }
+        ]
+      },
+      "spread": 1.03416820405743,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "gpu_idle": {
+            "checked": true,
+            "limit_mb": 3202.0,
+            "memory_used_mb": 2629.0,
+            "utilization": 3.0,
+            "waited_seconds": 25.17331337928772,
+            "samples": [
+              {
+                "memory_used_mb": 2629.0,
+                "utilization": 4.0,
+                "t": 15.113444805145264
+              },
+              {
+                "memory_used_mb": 2629.0,
+                "utilization": 1.0,
+                "t": 20.140206575393677
+              },
+              {
+                "memory_used_mb": 2629.0,
+                "utilization": 3.0,
+                "t": 25.17331027984619
+              }
+            ]
+          },
+          "runs": [
+            {
+              "wall_seconds": 0.7804487379999046,
+              "setup_seconds": 0.35825988799979314,
+              "loop_seconds": 0.4181630950001818,
+              "transfer_seconds": 0.00402325999993991,
+              "peak_bytes_in_use": 93309184,
+              "field_peak": 0.0005851774476468563,
+              "magnetic_peak": 2.592444729998533e-07,
+              "trace_sha256": "69097e9526500e6798bbb80052a00a65f367cc776867d986d4f3a47ea42541dc",
+              "finite": true
+            },
+            {
+              "wall_seconds": 0.7864027690002331,
+              "setup_seconds": 0.36664165299998785,
+              "loop_seconds": 0.41517614599979424,
+              "transfer_seconds": 0.004582379000112269,
+              "peak_bytes_in_use": 93309184,
+              "field_peak": 0.0005851774476468563,
+              "magnetic_peak": 2.592444729998533e-07,
+              "trace_sha256": "69097e9526500e6798bbb80052a00a65f367cc776867d986d4f3a47ea42541dc",
+              "finite": true
+            },
+            {
+              "wall_seconds": 0.7604205640000146,
+              "setup_seconds": 0.3377622739999424,
+              "loop_seconds": 0.41788703300017005,
+              "transfer_seconds": 0.0047686550001344585,
+              "peak_bytes_in_use": 93309184,
+              "field_peak": 0.0005851774476468563,
+              "magnetic_peak": 2.592444729998533e-07,
+              "trace_sha256": "69097e9526500e6798bbb80052a00a65f367cc776867d986d4f3a47ea42541dc",
+              "finite": true
+            }
+          ],
+          "spread": 1.03416820405743,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/fdtdx_throughput_sphere-64_trace.npy",
+      "median_wall_seconds": 0.7804487379999046,
+      "median_loop_seconds": 0.41788703300017005,
+      "median_setup_seconds": 0.35825988799979314,
+      "cell_steps_per_second_full": 268711050.1804997,
+      "cell_steps_per_second_stepping": 501846631.83821416,
+      "peak_bytes_in_use": 93309184,
+      "shared_epsilon_sha256": "0461ac26ac0f35769e3b3d71616e2f8bb0e778e071a39c0434fe949199c425c7"
+    },
+    {
+      "name": "vacuum-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "compile_seconds": 0.6268036870001197,
+      "runs": [
+        {
+          "wall_seconds": 1.9899707239997042,
+          "setup_seconds": 0.46747431899984804,
+          "loop_seconds": 1.5111980829997265,
+          "transfer_seconds": 0.011295756999970763,
+          "peak_bytes_in_use": 301880576,
+          "field_peak": 0.002816015388816595,
+          "magnetic_peak": 0.0009522470645606518,
+          "trace_sha256": "52bcb72cd0e2ff079e54f81ba57c05f8eb7e18fd6506d1a4cbac66b795fab4f9",
+          "finite": true
+        },
+        {
+          "wall_seconds": 2.022026896999705,
+          "setup_seconds": 0.49684293299969795,
+          "loop_seconds": 1.5094217000000754,
+          "transfer_seconds": 0.015758334000111063,
+          "peak_bytes_in_use": 301880576,
+          "field_peak": 0.002816015388816595,
+          "magnetic_peak": 0.0009522470645606518,
+          "trace_sha256": "52bcb72cd0e2ff079e54f81ba57c05f8eb7e18fd6506d1a4cbac66b795fab4f9",
+          "finite": true
+        },
+        {
+          "wall_seconds": 2.0217955190000794,
+          "setup_seconds": 0.4984663569998702,
+          "loop_seconds": 1.508679556000061,
+          "transfer_seconds": 0.014644543000031263,
+          "peak_bytes_in_use": 301880576,
+          "field_peak": 0.002816015388816595,
+          "magnetic_peak": 0.0009522470645606518,
+          "trace_sha256": "52bcb72cd0e2ff079e54f81ba57c05f8eb7e18fd6506d1a4cbac66b795fab4f9",
+          "finite": true
+        }
+      ],
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3202.0,
+        "memory_used_mb": 2629.0,
+        "utilization": 3.0,
+        "waited_seconds": 15.104796171188354,
+        "samples": [
+          {
+            "memory_used_mb": 2629.0,
+            "utilization": 1.0,
+            "t": 5.046487331390381
+          },
+          {
+            "memory_used_mb": 2629.0,
+            "utilization": 4.0,
+            "t": 10.0756995677948
+          },
+          {
+            "memory_used_mb": 2629.0,
+            "utilization": 3.0,
+            "t": 15.1047945022583
+          }
+        ]
+      },
+      "spread": 1.0161088666347664,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "gpu_idle": {
+            "checked": true,
+            "limit_mb": 3202.0,
+            "memory_used_mb": 2629.0,
+            "utilization": 3.0,
+            "waited_seconds": 15.104796171188354,
+            "samples": [
+              {
+                "memory_used_mb": 2629.0,
+                "utilization": 1.0,
+                "t": 5.046487331390381
+              },
+              {
+                "memory_used_mb": 2629.0,
+                "utilization": 4.0,
+                "t": 10.0756995677948
+              },
+              {
+                "memory_used_mb": 2629.0,
+                "utilization": 3.0,
+                "t": 15.1047945022583
+              }
+            ]
+          },
+          "runs": [
+            {
+              "wall_seconds": 1.9899707239997042,
+              "setup_seconds": 0.46747431899984804,
+              "loop_seconds": 1.5111980829997265,
+              "transfer_seconds": 0.011295756999970763,
+              "peak_bytes_in_use": 301880576,
+              "field_peak": 0.002816015388816595,
+              "magnetic_peak": 0.0009522470645606518,
+              "trace_sha256": "52bcb72cd0e2ff079e54f81ba57c05f8eb7e18fd6506d1a4cbac66b795fab4f9",
+              "finite": true
+            },
+            {
+              "wall_seconds": 2.022026896999705,
+              "setup_seconds": 0.49684293299969795,
+              "loop_seconds": 1.5094217000000754,
+              "transfer_seconds": 0.015758334000111063,
+              "peak_bytes_in_use": 301880576,
+              "field_peak": 0.002816015388816595,
+              "magnetic_peak": 0.0009522470645606518,
+              "trace_sha256": "52bcb72cd0e2ff079e54f81ba57c05f8eb7e18fd6506d1a4cbac66b795fab4f9",
+              "finite": true
+            },
+            {
+              "wall_seconds": 2.0217955190000794,
+              "setup_seconds": 0.4984663569998702,
+              "loop_seconds": 1.508679556000061,
+              "transfer_seconds": 0.014644543000031263,
+              "peak_bytes_in_use": 301880576,
+              "field_peak": 0.002816015388816595,
+              "magnetic_peak": 0.0009522470645606518,
+              "trace_sha256": "52bcb72cd0e2ff079e54f81ba57c05f8eb7e18fd6506d1a4cbac66b795fab4f9",
+              "finite": true
+            }
+          ],
+          "spread": 1.0161088666347664,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/fdtdx_throughput_vacuum-96_trace.npy",
+      "median_wall_seconds": 2.0217955190000794,
+      "median_loop_seconds": 1.5094217000000754,
+      "median_setup_seconds": 0.49684293299969795,
+      "cell_steps_per_second_full": 350079319.76723915,
+      "cell_steps_per_second_stepping": 468913889.3391851,
+      "peak_bytes_in_use": 301880576,
+      "shared_epsilon_sha256": "f9068ffb5c64ed0480f4dec655e82d759f8eaf0b806a0223f6e603d6a5efdaae"
+    },
+    {
+      "name": "sphere-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "compile_seconds": 0.5960631079997256,
+      "runs": [
+        {
+          "wall_seconds": 2.000161380999998,
+          "setup_seconds": 0.48106042000017624,
+          "loop_seconds": 1.5105854540001928,
+          "transfer_seconds": 0.008512320000136242,
+          "peak_bytes_in_use": 301883904,
+          "field_peak": 0.0027975351549685,
+          "magnetic_peak": 0.000969829794485122,
+          "trace_sha256": "d2e23acdaa7609ece5b0683692da8ae41f53e1c7d4338ee4e8d0a4b25d20619e",
+          "finite": true
+        },
+        {
+          "wall_seconds": 1.9982002819997433,
+          "setup_seconds": 0.4828532510000514,
+          "loop_seconds": 1.5071732559999873,
+          "transfer_seconds": 0.008170465999683074,
+          "peak_bytes_in_use": 301883904,
+          "field_peak": 0.0027975351549685,
+          "magnetic_peak": 0.000969829794485122,
+          "trace_sha256": "d2e23acdaa7609ece5b0683692da8ae41f53e1c7d4338ee4e8d0a4b25d20619e",
+          "finite": true
+        },
+        {
+          "wall_seconds": 1.9953482859996257,
+          "setup_seconds": 0.4815620719996332,
+          "loop_seconds": 1.5074166360000163,
+          "transfer_seconds": 0.0063673140002720174,
+          "peak_bytes_in_use": 301883904,
+          "field_peak": 0.0027975351549685,
+          "magnetic_peak": 0.000969829794485122,
+          "trace_sha256": "d2e23acdaa7609ece5b0683692da8ae41f53e1c7d4338ee4e8d0a4b25d20619e",
+          "finite": true
+        }
+      ],
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3202.0,
+        "memory_used_mb": 3013.0,
+        "utilization": 4.0,
+        "waited_seconds": 15.108076333999634,
+        "samples": [
+          {
+            "memory_used_mb": 3013.0,
+            "utilization": 5.0,
+            "t": 5.051386594772339
+          },
+          {
+            "memory_used_mb": 3013.0,
+            "utilization": 1.0,
+            "t": 10.081626176834106
+          },
+          {
+            "memory_used_mb": 3013.0,
+            "utilization": 4.0,
+            "t": 15.10807490348816
+          }
+        ]
+      },
+      "spread": 1.0024121578343708,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "gpu_idle": {
+            "checked": true,
+            "limit_mb": 3202.0,
+            "memory_used_mb": 3013.0,
+            "utilization": 4.0,
+            "waited_seconds": 15.108076333999634,
+            "samples": [
+              {
+                "memory_used_mb": 3013.0,
+                "utilization": 5.0,
+                "t": 5.051386594772339
+              },
+              {
+                "memory_used_mb": 3013.0,
+                "utilization": 1.0,
+                "t": 10.081626176834106
+              },
+              {
+                "memory_used_mb": 3013.0,
+                "utilization": 4.0,
+                "t": 15.10807490348816
+              }
+            ]
+          },
+          "runs": [
+            {
+              "wall_seconds": 2.000161380999998,
+              "setup_seconds": 0.48106042000017624,
+              "loop_seconds": 1.5105854540001928,
+              "transfer_seconds": 0.008512320000136242,
+              "peak_bytes_in_use": 301883904,
+              "field_peak": 0.0027975351549685,
+              "magnetic_peak": 0.000969829794485122,
+              "trace_sha256": "d2e23acdaa7609ece5b0683692da8ae41f53e1c7d4338ee4e8d0a4b25d20619e",
+              "finite": true
+            },
+            {
+              "wall_seconds": 1.9982002819997433,
+              "setup_seconds": 0.4828532510000514,
+              "loop_seconds": 1.5071732559999873,
+              "transfer_seconds": 0.008170465999683074,
+              "peak_bytes_in_use": 301883904,
+              "field_peak": 0.0027975351549685,
+              "magnetic_peak": 0.000969829794485122,
+              "trace_sha256": "d2e23acdaa7609ece5b0683692da8ae41f53e1c7d4338ee4e8d0a4b25d20619e",
+              "finite": true
+            },
+            {
+              "wall_seconds": 1.9953482859996257,
+              "setup_seconds": 0.4815620719996332,
+              "loop_seconds": 1.5074166360000163,
+              "transfer_seconds": 0.0063673140002720174,
+              "peak_bytes_in_use": 301883904,
+              "field_peak": 0.0027975351549685,
+              "magnetic_peak": 0.000969829794485122,
+              "trace_sha256": "d2e23acdaa7609ece5b0683692da8ae41f53e1c7d4338ee4e8d0a4b25d20619e",
+              "finite": true
+            }
+          ],
+          "spread": 1.0024121578343708,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/fdtdx_throughput_sphere-96_trace.npy",
+      "median_wall_seconds": 1.9982002819997433,
+      "median_loop_seconds": 1.5074166360000163,
+      "median_setup_seconds": 0.4815620719996332,
+      "cell_steps_per_second_full": 354213141.8836878,
+      "cell_steps_per_second_stepping": 469537606.9871053,
+      "peak_bytes_in_use": 301883904,
+      "shared_epsilon_sha256": "4e15c37dd6ea1bee416228e71b825718a01240f794e7bf08a5a12e45a5fb3abf"
+    }
+  ],
+  "gpu_context": {
+    "before_mb": 2493.0,
+    "after_mb": 2495.0,
+    "own_mb": 2.0
+  }
+}

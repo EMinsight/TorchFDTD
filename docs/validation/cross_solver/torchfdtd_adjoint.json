@@ -1,0 +1,215 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "torchfdtd",
+  "fixture": "adjoint",
+  "fixture_sha256": "aa0843678bc5e31cdd03236e765165827a1330e75fdd9d2e9388721b79654d95",
+  "date": "2026-09-21",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.12.14",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2557",
+      "utilization.gpu": "58"
+    },
+    "packages": {
+      "torchfdtd": "0.14.0.dev0",
+      "torch": "2.11.0+cu128",
+      "cupy-cuda12x": "14.2.0",
+      "fdtd": "0.2.2",
+      "numpy": "2.4.6",
+      "scipy": "1.18.1"
+    },
+    "torch_hardware": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "gpu_memory_gb": 12.0,
+      "torch": "2.11.0+cu128",
+      "engine": "TorchFDTD Yee/CPML on fdtd grid",
+      "cpu_threads": 10
+    },
+    "torch_cuda": "12.8"
+  },
+  "driver_sha256": {
+    "torchfdtd_driver.py": "78d12115209a5d9422b4362d27c3b3da2324dcd454921361229d68f4c82f5fb6",
+    "common.py": "21bd4de1e20e137891f3feeb8af76d9825fca9cc9967b3cea736f80d46f7509e"
+  },
+  "method": "DifferentiableSimulation, discrete adjoint of the fused CUDA Yee step, device checkpoints (binomial replay), loss.backward() on the full scalar-per-cell epsilon tensor. Time to gradient = wall time of tensor upload, forward, backward and synchronize after one warm-up call.",
+  "grid": {
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "mesh_um": 0.1,
+    "dt_s": 1.7332498813918235e-16,
+    "steps": 128,
+    "courant_number": 0.5196152422706632,
+    "precision": "float32"
+  },
+  "options": {
+    "checkpoints": 2,
+    "storage": "device",
+    "forward_backend": "fused CUDA",
+    "backward_backend": "fused CUDA transpose"
+  },
+  "shared": {
+    "epsilon_sha256": "f26d2a20bde91d04606a0f8177358053b43000255f4b5ee0555d13f4bf04558c",
+    "kick_sha256": "4d7a52c6ddde78a865a843f590cae4f399a8a996115e811076b54308189ee185",
+    "loss_weights": [
+      1.0,
+      0.3
+    ]
+  },
+  "gpu_idle": {
+    "checked": true,
+    "limit_mb": 3320.0,
+    "memory_used_mb": 2513.0,
+    "utilization": 1.0,
+    "waited_seconds": 10.080476999282837,
+    "samples": [
+      {
+        "memory_used_mb": 2511.0,
+        "utilization": 0.0,
+        "t": 0.022829532623291016
+      },
+      {
+        "memory_used_mb": 2513.0,
+        "utilization": 0.0,
+        "t": 5.0506086349487305
+      },
+      {
+        "memory_used_mb": 2513.0,
+        "utilization": 1.0,
+        "t": 10.080472469329834
+      }
+    ]
+  },
+  "runs": [
+    {
+      "wall_seconds": 0.10225064199994449,
+      "forward_seconds": 0.016435636000096565,
+      "backward_seconds": 0.08095452399993519,
+      "replayed_steps": 765,
+      "peak_allocated_bytes": 41952768,
+      "loss": 3.318336212032591e-06
+    },
+    {
+      "wall_seconds": 0.10483429799978694,
+      "forward_seconds": 0.019093899000381498,
+      "backward_seconds": 0.08121050699992338,
+      "replayed_steps": 765,
+      "peak_allocated_bytes": 41952768,
+      "loss": 3.318336212032591e-06
+    },
+    {
+      "wall_seconds": 0.10110531899999842,
+      "forward_seconds": 0.016240537999692606,
+      "backward_seconds": 0.08055028800026776,
+      "replayed_steps": 765,
+      "peak_allocated_bytes": 41952768,
+      "loss": 3.318336212032591e-06
+    }
+  ],
+  "timing_attempts": [
+    {
+      "attempt": 0,
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3320.0,
+        "memory_used_mb": 2513.0,
+        "utilization": 1.0,
+        "waited_seconds": 10.080476999282837,
+        "samples": [
+          {
+            "memory_used_mb": 2511.0,
+            "utilization": 0.0,
+            "t": 0.022829532623291016
+          },
+          {
+            "memory_used_mb": 2513.0,
+            "utilization": 0.0,
+            "t": 5.0506086349487305
+          },
+          {
+            "memory_used_mb": 2513.0,
+            "utilization": 1.0,
+            "t": 10.080472469329834
+          }
+        ]
+      },
+      "runs": [
+        {
+          "wall_seconds": 0.10225064199994449,
+          "forward_seconds": 0.016435636000096565,
+          "backward_seconds": 0.08095452399993519,
+          "replayed_steps": 765,
+          "peak_allocated_bytes": 41952768,
+          "loss": 3.318336212032591e-06
+        },
+        {
+          "wall_seconds": 0.10483429799978694,
+          "forward_seconds": 0.019093899000381498,
+          "backward_seconds": 0.08121050699992338,
+          "replayed_steps": 765,
+          "peak_allocated_bytes": 41952768,
+          "loss": 3.318336212032591e-06
+        },
+        {
+          "wall_seconds": 0.10110531899999842,
+          "forward_seconds": 0.016240537999692606,
+          "backward_seconds": 0.08055028800026776,
+          "replayed_steps": 765,
+          "peak_allocated_bytes": 41952768,
+          "loss": 3.318336212032591e-06
+        }
+      ],
+      "spread": 1.0368821248641586,
+      "accepted": true
+    }
+  ],
+  "spread": 1.0368821248641586,
+  "accepted_attempt": 0,
+  "median_wall_seconds": 0.10225064199994449,
+  "median_forward_seconds": 0.016435636000096565,
+  "median_backward_seconds": 0.08095452399993519,
+  "peak_allocated_bytes": 41952768,
+  "loss": 3.318336212032591e-06,
+  "gradient": {
+    "sha256": "055df694fa0b8a7158bd00b068627624cb36795f47563e0ba910460bde264afe",
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "dtype": "float32",
+    "l2_norm": 5.507867438979702e-06,
+    "max_abs": 4.689182333095232e-06,
+    "source_cell_value": 4.689182333095232e-06,
+    "nonzero": 240622,
+    "finite": true
+  },
+  "probe_history": {
+    "sha256": "92ffc4a194166f39e5ccc50bb3f62bd51c45411048a99784fbc9e91ff81a4bb4",
+    "shape": [
+      128,
+      2
+    ],
+    "max_abs": 0.004887075163424015,
+    "first_nonzero_step": 12
+  },
+  "artifacts": {
+    "gradient": "/root/torchfdtd-bench/artifacts/torchfdtd_adjoint_gradient.npy",
+    "signals": "/root/torchfdtd-bench/artifacts/torchfdtd_adjoint_signals.npy"
+  },
+  "gpu_context": {
+    "before_mb": 2391.0,
+    "after_mb": 2511.0,
+    "own_mb": 120.0
+  }
+}

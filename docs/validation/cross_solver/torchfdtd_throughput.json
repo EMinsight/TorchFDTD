@@ -1,0 +1,594 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "torchfdtd",
+  "fixture": "throughput",
+  "fixture_sha256": "2c8a687efbada9c7ca7b7d4419161b9c7866840fb0847004edaa8687605511db",
+  "date": "2026-09-21",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.12.14",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2511",
+      "utilization.gpu": "0"
+    },
+    "packages": {
+      "torchfdtd": "0.14.0.dev0",
+      "torch": "2.11.0+cu128",
+      "cupy-cuda12x": "14.2.0",
+      "fdtd": "0.2.2",
+      "numpy": "2.4.6",
+      "scipy": "1.18.1"
+    },
+    "torch_hardware": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "gpu_memory_gb": 12.0,
+      "torch": "2.11.0+cu128",
+      "engine": "TorchFDTD Yee/CPML on fdtd grid",
+      "cpu_threads": 10
+    },
+    "torch_cuda": "12.8"
+  },
+  "driver_sha256": {
+    "torchfdtd_driver.py": "78d12115209a5d9422b4362d27c3b3da2324dcd454921361229d68f4c82f5fb6",
+    "common.py": "21bd4de1e20e137891f3feeb8af76d9825fca9cc9967b3cea736f80d46f7509e"
+  },
+  "method": "benchmarks.open_source.scene projects, fused CUDA kernels, CUDA graph capture, float32. Full solve = Simulation(project).run() wall time including voxelization, grid and graph construction and the final host copy of E, H and the point trace. Stepping = summary[\"seconds\"] (captured loop only). One warm-up solve per case, then the listed repetitions.",
+  "cases": [
+    {
+      "name": "vacuum-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "runs": [
+        {
+          "wall_seconds": 0.11631097600002249,
+          "setup_seconds": 0.016553561999899102,
+          "loop_seconds": 0.0943162339999617,
+          "peak_allocated_bytes": 18714624,
+          "field_peak": 0.0005846074200235307,
+          "trace_sha256": "892451ebb231c96557a589d07d31fdaf49bca866dfcb2a0c827f75266118089c",
+          "cuda_graph": true
+        },
+        {
+          "wall_seconds": 0.11895977999984098,
+          "setup_seconds": 0.015785085000061372,
+          "loop_seconds": 0.09779111099987858,
+          "peak_allocated_bytes": 18714624,
+          "field_peak": 0.0005846074200235307,
+          "trace_sha256": "892451ebb231c96557a589d07d31fdaf49bca866dfcb2a0c827f75266118089c",
+          "cuda_graph": true
+        },
+        {
+          "wall_seconds": 0.11691452299965022,
+          "setup_seconds": 0.01678277099972547,
+          "loop_seconds": 0.09543776900000012,
+          "peak_allocated_bytes": 18714624,
+          "field_peak": 0.0005846074200235307,
+          "trace_sha256": "892451ebb231c96557a589d07d31fdaf49bca866dfcb2a0c827f75266118089c",
+          "cuda_graph": true
+        }
+      ],
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3320.0,
+        "memory_used_mb": 2511.0,
+        "utilization": 1.0,
+        "waited_seconds": 10.072135210037231,
+        "samples": [
+          {
+            "memory_used_mb": 2511.0,
+            "utilization": 0.0,
+            "t": 0.019450664520263672
+          },
+          {
+            "memory_used_mb": 2511.0,
+            "utilization": 1.0,
+            "t": 5.04790186882019
+          },
+          {
+            "memory_used_mb": 2511.0,
+            "utilization": 1.0,
+            "t": 10.072129487991333
+          }
+        ]
+      },
+      "spread": 1.02277346550525,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "gpu_idle": {
+            "checked": true,
+            "limit_mb": 3320.0,
+            "memory_used_mb": 2511.0,
+            "utilization": 1.0,
+            "waited_seconds": 10.072135210037231,
+            "samples": [
+              {
+                "memory_used_mb": 2511.0,
+                "utilization": 0.0,
+                "t": 0.019450664520263672
+              },
+              {
+                "memory_used_mb": 2511.0,
+                "utilization": 1.0,
+                "t": 5.04790186882019
+              },
+              {
+                "memory_used_mb": 2511.0,
+                "utilization": 1.0,
+                "t": 10.072129487991333
+              }
+            ]
+          },
+          "runs": [
+            {
+              "wall_seconds": 0.11631097600002249,
+              "setup_seconds": 0.016553561999899102,
+              "loop_seconds": 0.0943162339999617,
+              "peak_allocated_bytes": 18714624,
+              "field_peak": 0.0005846074200235307,
+              "trace_sha256": "892451ebb231c96557a589d07d31fdaf49bca866dfcb2a0c827f75266118089c",
+              "cuda_graph": true
+            },
+            {
+              "wall_seconds": 0.11895977999984098,
+              "setup_seconds": 0.015785085000061372,
+              "loop_seconds": 0.09779111099987858,
+              "peak_allocated_bytes": 18714624,
+              "field_peak": 0.0005846074200235307,
+              "trace_sha256": "892451ebb231c96557a589d07d31fdaf49bca866dfcb2a0c827f75266118089c",
+              "cuda_graph": true
+            },
+            {
+              "wall_seconds": 0.11691452299965022,
+              "setup_seconds": 0.01678277099972547,
+              "loop_seconds": 0.09543776900000012,
+              "peak_allocated_bytes": 18714624,
+              "field_peak": 0.0005846074200235307,
+              "trace_sha256": "892451ebb231c96557a589d07d31fdaf49bca866dfcb2a0c827f75266118089c",
+              "cuda_graph": true
+            }
+          ],
+          "spread": 1.02277346550525,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/torchfdtd_throughput_vacuum-64_trace.npy",
+      "median_wall_seconds": 0.11691452299965022,
+      "median_loop_seconds": 0.09543776900000012,
+      "median_setup_seconds": 0.016553561999899102,
+      "cell_steps_per_second_full": 1793748070.1232252,
+      "cell_steps_per_second_stepping": 2197402581.7808013,
+      "peak_allocated_bytes": 18714624
+    },
+    {
+      "name": "sphere-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "runs": [
+        {
+          "wall_seconds": 0.11614299500024572,
+          "setup_seconds": 0.016169537999758177,
+          "loop_seconds": 0.09542802700025277,
+          "peak_allocated_bytes": 18714624,
+          "field_peak": 0.0005846780841238797,
+          "trace_sha256": "7fcad1604c7462f2accb7ddedc5cf294826a8aeba568e38761d93492df9c7c1e",
+          "cuda_graph": true
+        },
+        {
+          "wall_seconds": 0.11415576400031568,
+          "setup_seconds": 0.016059721000146965,
+          "loop_seconds": 0.09400293599992438,
+          "peak_allocated_bytes": 18714624,
+          "field_peak": 0.0005846780841238797,
+          "trace_sha256": "7fcad1604c7462f2accb7ddedc5cf294826a8aeba568e38761d93492df9c7c1e",
+          "cuda_graph": true
+        },
+        {
+          "wall_seconds": 0.11400541100010742,
+          "setup_seconds": 0.015530233999925258,
+          "loop_seconds": 0.09447405800028719,
+          "peak_allocated_bytes": 18714624,
+          "field_peak": 0.0005846780841238797,
+          "trace_sha256": "7fcad1604c7462f2accb7ddedc5cf294826a8aeba568e38761d93492df9c7c1e",
+          "cuda_graph": true
+        }
+      ],
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3320.0,
+        "memory_used_mb": 2549.0,
+        "utilization": 1.0,
+        "waited_seconds": 15.122962951660156,
+        "samples": [
+          {
+            "memory_used_mb": 2549.0,
+            "utilization": 1.0,
+            "t": 5.062422752380371
+          },
+          {
+            "memory_used_mb": 2549.0,
+            "utilization": 4.0,
+            "t": 10.091658353805542
+          },
+          {
+            "memory_used_mb": 2549.0,
+            "utilization": 1.0,
+            "t": 15.122958898544312
+          }
+        ]
+      },
+      "spread": 1.0187498468834633,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "gpu_idle": {
+            "checked": true,
+            "limit_mb": 3320.0,
+            "memory_used_mb": 2549.0,
+            "utilization": 1.0,
+            "waited_seconds": 15.122962951660156,
+            "samples": [
+              {
+                "memory_used_mb": 2549.0,
+                "utilization": 1.0,
+                "t": 5.062422752380371
+              },
+              {
+                "memory_used_mb": 2549.0,
+                "utilization": 4.0,
+                "t": 10.091658353805542
+              },
+              {
+                "memory_used_mb": 2549.0,
+                "utilization": 1.0,
+                "t": 15.122958898544312
+              }
+            ]
+          },
+          "runs": [
+            {
+              "wall_seconds": 0.11614299500024572,
+              "setup_seconds": 0.016169537999758177,
+              "loop_seconds": 0.09542802700025277,
+              "peak_allocated_bytes": 18714624,
+              "field_peak": 0.0005846780841238797,
+              "trace_sha256": "7fcad1604c7462f2accb7ddedc5cf294826a8aeba568e38761d93492df9c7c1e",
+              "cuda_graph": true
+            },
+            {
+              "wall_seconds": 0.11415576400031568,
+              "setup_seconds": 0.016059721000146965,
+              "loop_seconds": 0.09400293599992438,
+              "peak_allocated_bytes": 18714624,
+              "field_peak": 0.0005846780841238797,
+              "trace_sha256": "7fcad1604c7462f2accb7ddedc5cf294826a8aeba568e38761d93492df9c7c1e",
+              "cuda_graph": true
+            },
+            {
+              "wall_seconds": 0.11400541100010742,
+              "setup_seconds": 0.015530233999925258,
+              "loop_seconds": 0.09447405800028719,
+              "peak_allocated_bytes": 18714624,
+              "field_peak": 0.0005846780841238797,
+              "trace_sha256": "7fcad1604c7462f2accb7ddedc5cf294826a8aeba568e38761d93492df9c7c1e",
+              "cuda_graph": true
+            }
+          ],
+          "spread": 1.0187498468834633,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/torchfdtd_throughput_sphere-64_trace.npy",
+      "median_wall_seconds": 0.11415576400031568,
+      "median_loop_seconds": 0.09447405800028719,
+      "median_setup_seconds": 0.016059721000146965,
+      "cell_steps_per_second_full": 1837096898.5799093,
+      "cell_steps_per_second_stepping": 2219817846.708379,
+      "peak_allocated_bytes": 18714624
+    },
+    {
+      "name": "vacuum-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "runs": [
+        {
+          "wall_seconds": 0.30189708900024925,
+          "setup_seconds": 0.026224958999591763,
+          "loop_seconds": 0.2670384800003376,
+          "peak_allocated_bytes": 59756544,
+          "field_peak": 0.0028160426300019026,
+          "trace_sha256": "be0468cdb4f59c6ced4ea42cf8f8de60fa2e3fc55a6838503a982ba2f86a6e88",
+          "cuda_graph": true
+        },
+        {
+          "wall_seconds": 0.30627546200003053,
+          "setup_seconds": 0.029299056000127166,
+          "loop_seconds": 0.2651458069999535,
+          "peak_allocated_bytes": 59756544,
+          "field_peak": 0.0028160426300019026,
+          "trace_sha256": "be0468cdb4f59c6ced4ea42cf8f8de60fa2e3fc55a6838503a982ba2f86a6e88",
+          "cuda_graph": true
+        },
+        {
+          "wall_seconds": 0.29195831700008057,
+          "setup_seconds": 0.0228390360002777,
+          "loop_seconds": 0.260316069000055,
+          "peak_allocated_bytes": 59756544,
+          "field_peak": 0.0028160426300019026,
+          "trace_sha256": "be0468cdb4f59c6ced4ea42cf8f8de60fa2e3fc55a6838503a982ba2f86a6e88",
+          "cuda_graph": true
+        }
+      ],
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3320.0,
+        "memory_used_mb": 2549.0,
+        "utilization": 1.0,
+        "waited_seconds": 15.124858856201172,
+        "samples": [
+          {
+            "memory_used_mb": 2549.0,
+            "utilization": 4.0,
+            "t": 5.064686298370361
+          },
+          {
+            "memory_used_mb": 2549.0,
+            "utilization": 1.0,
+            "t": 10.098562717437744
+          },
+          {
+            "memory_used_mb": 2549.0,
+            "utilization": 1.0,
+            "t": 15.12485647201538
+          }
+        ]
+      },
+      "spread": 1.0490383187129622,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "gpu_idle": {
+            "checked": true,
+            "limit_mb": 3320.0,
+            "memory_used_mb": 2549.0,
+            "utilization": 1.0,
+            "waited_seconds": 15.124858856201172,
+            "samples": [
+              {
+                "memory_used_mb": 2549.0,
+                "utilization": 4.0,
+                "t": 5.064686298370361
+              },
+              {
+                "memory_used_mb": 2549.0,
+                "utilization": 1.0,
+                "t": 10.098562717437744
+              },
+              {
+                "memory_used_mb": 2549.0,
+                "utilization": 1.0,
+                "t": 15.12485647201538
+              }
+            ]
+          },
+          "runs": [
+            {
+              "wall_seconds": 0.30189708900024925,
+              "setup_seconds": 0.026224958999591763,
+              "loop_seconds": 0.2670384800003376,
+              "peak_allocated_bytes": 59756544,
+              "field_peak": 0.0028160426300019026,
+              "trace_sha256": "be0468cdb4f59c6ced4ea42cf8f8de60fa2e3fc55a6838503a982ba2f86a6e88",
+              "cuda_graph": true
+            },
+            {
+              "wall_seconds": 0.30627546200003053,
+              "setup_seconds": 0.029299056000127166,
+              "loop_seconds": 0.2651458069999535,
+              "peak_allocated_bytes": 59756544,
+              "field_peak": 0.0028160426300019026,
+              "trace_sha256": "be0468cdb4f59c6ced4ea42cf8f8de60fa2e3fc55a6838503a982ba2f86a6e88",
+              "cuda_graph": true
+            },
+            {
+              "wall_seconds": 0.29195831700008057,
+              "setup_seconds": 0.0228390360002777,
+              "loop_seconds": 0.260316069000055,
+              "peak_allocated_bytes": 59756544,
+              "field_peak": 0.0028160426300019026,
+              "trace_sha256": "be0468cdb4f59c6ced4ea42cf8f8de60fa2e3fc55a6838503a982ba2f86a6e88",
+              "cuda_graph": true
+            }
+          ],
+          "spread": 1.0490383187129622,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/torchfdtd_throughput_vacuum-96_trace.npy",
+      "median_wall_seconds": 0.30189708900024925,
+      "median_loop_seconds": 0.2651458069999535,
+      "median_setup_seconds": 0.026224958999591763,
+      "cell_steps_per_second_full": 2344470436.4122424,
+      "cell_steps_per_second_stepping": 2669432370.0925965,
+      "peak_allocated_bytes": 59756544
+    },
+    {
+      "name": "sphere-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "runs": [
+        {
+          "wall_seconds": 0.30618085999958566,
+          "setup_seconds": 0.025418720000288886,
+          "loop_seconds": 0.26959627499991257,
+          "peak_allocated_bytes": 59756544,
+          "field_peak": 0.0027973277028650045,
+          "trace_sha256": "add756f64f61797d2f2359fd1829b2ae38ebc41e2b84cd714a11b5a851e60bc0",
+          "cuda_graph": true
+        },
+        {
+          "wall_seconds": 0.31018013899984,
+          "setup_seconds": 0.029079321000153868,
+          "loop_seconds": 0.2699379730001965,
+          "peak_allocated_bytes": 59756544,
+          "field_peak": 0.0027973277028650045,
+          "trace_sha256": "add756f64f61797d2f2359fd1829b2ae38ebc41e2b84cd714a11b5a851e60bc0",
+          "cuda_graph": true
+        },
+        {
+          "wall_seconds": 0.31152262199975667,
+          "setup_seconds": 0.03321499699995911,
+          "loop_seconds": 0.2675369469998259,
+          "peak_allocated_bytes": 59756544,
+          "field_peak": 0.0027973277028650045,
+          "trace_sha256": "add756f64f61797d2f2359fd1829b2ae38ebc41e2b84cd714a11b5a851e60bc0",
+          "cuda_graph": true
+        }
+      ],
+      "gpu_idle": {
+        "checked": true,
+        "limit_mb": 3320.0,
+        "memory_used_mb": 2581.0,
+        "utilization": 3.0,
+        "waited_seconds": 15.108745813369751,
+        "samples": [
+          {
+            "memory_used_mb": 2581.0,
+            "utilization": 1.0,
+            "t": 5.051720380783081
+          },
+          {
+            "memory_used_mb": 2581.0,
+            "utilization": 1.0,
+            "t": 10.077704906463623
+          },
+          {
+            "memory_used_mb": 2581.0,
+            "utilization": 3.0,
+            "t": 15.108742237091064
+          }
+        ]
+      },
+      "spread": 1.017446426926158,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "gpu_idle": {
+            "checked": true,
+            "limit_mb": 3320.0,
+            "memory_used_mb": 2581.0,
+            "utilization": 3.0,
+            "waited_seconds": 15.108745813369751,
+            "samples": [
+              {
+                "memory_used_mb": 2581.0,
+                "utilization": 1.0,
+                "t": 5.051720380783081
+              },
+              {
+                "memory_used_mb": 2581.0,
+                "utilization": 1.0,
+                "t": 10.077704906463623
+              },
+              {
+                "memory_used_mb": 2581.0,
+                "utilization": 3.0,
+                "t": 15.108742237091064
+              }
+            ]
+          },
+          "runs": [
+            {
+              "wall_seconds": 0.30618085999958566,
+              "setup_seconds": 0.025418720000288886,
+              "loop_seconds": 0.26959627499991257,
+              "peak_allocated_bytes": 59756544,
+              "field_peak": 0.0027973277028650045,
+              "trace_sha256": "add756f64f61797d2f2359fd1829b2ae38ebc41e2b84cd714a11b5a851e60bc0",
+              "cuda_graph": true
+            },
+            {
+              "wall_seconds": 0.31018013899984,
+              "setup_seconds": 0.029079321000153868,
+              "loop_seconds": 0.2699379730001965,
+              "peak_allocated_bytes": 59756544,
+              "field_peak": 0.0027973277028650045,
+              "trace_sha256": "add756f64f61797d2f2359fd1829b2ae38ebc41e2b84cd714a11b5a851e60bc0",
+              "cuda_graph": true
+            },
+            {
+              "wall_seconds": 0.31152262199975667,
+              "setup_seconds": 0.03321499699995911,
+              "loop_seconds": 0.2675369469998259,
+              "peak_allocated_bytes": 59756544,
+              "field_peak": 0.0027973277028650045,
+              "trace_sha256": "add756f64f61797d2f2359fd1829b2ae38ebc41e2b84cd714a11b5a851e60bc0",
+              "cuda_graph": true
+            }
+          ],
+          "spread": 1.017446426926158,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts/torchfdtd_throughput_sphere-96_trace.npy",
+      "median_wall_seconds": 0.31018013899984,
+      "median_loop_seconds": 0.26959627499991257,
+      "median_setup_seconds": 0.029079321000153868,
+      "cell_steps_per_second_full": 2281863701.1454983,
+      "cell_steps_per_second_stepping": 2625365650.9172077,
+      "peak_allocated_bytes": 59756544
+    }
+  ],
+  "gpu_context": {
+    "before_mb": 2391.0,
+    "after_mb": 2511.0,
+    "own_mb": 120.0
+  }
+}

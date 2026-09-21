@@ -1,0 +1,93 @@
+{
+  "name": "sphere",
+  "description": "Dielectric sphere scattering cross-section from a closed TFSF box (TorchFDTD, FDTDX) or a Meep native plane-wave-plus-flux-box setup.",
+  "dimension": "3d",
+  "size_um": [
+    3.2,
+    3.2,
+    3.2
+  ],
+  "mesh_um": 0.05,
+  "shape": [
+    64,
+    64,
+    64
+  ],
+  "courant_number": 0.5715767664977295,
+  "dt_s": 9.532874347655028e-17,
+  "duration_fs": 240.0,
+  "steps": 2518,
+  "pml_cells": 8,
+  "boundaries": {
+    "x": "pml",
+    "y": "pml",
+    "z": "pml"
+  },
+  "background_index": 1.0,
+  "sphere": {
+    "index": 2.0,
+    "radius_um": 0.6,
+    "center_um": [
+      0,
+      0,
+      0
+    ]
+  },
+  "tfsf_box": {
+    "size_um": 1.6,
+    "lower_node_index": 16,
+    "upper_node_index": 48,
+    "normal": "x",
+    "direction": "+",
+    "component": "Ez"
+  },
+  "flux_box": {
+    "size_um": 2.2,
+    "plane_positions_um": 1.1,
+    "plane_node_indices": [
+      10,
+      54
+    ]
+  },
+  "incident_plane": {
+    "x_um": 0.0,
+    "x_index": 32,
+    "size_um": 0.4
+  },
+  "source": {
+    "waveform": {
+      "type": "gaussian_standard",
+      "wavelength_um": 1.55,
+      "pulse_length_s": 8e-15,
+      "pulse_offset_s": 3e-14,
+      "amplitude": 1.0
+    }
+  },
+  "spectrum": {
+    "sampling": "wavelength",
+    "wavelength_start_um": 1.3,
+    "wavelength_stop_um": 1.8,
+    "points": 9,
+    "note": "9 samples equally spaced in wavelength."
+  },
+  "reference": {
+    "kind": "mie_series",
+    "note": "Bohren-Huffman a_n/b_n with SciPy spherical Bessel functions, as in examples/tfsf_sphere.py."
+  },
+  "precision": {
+    "torchfdtd": "float32",
+    "fdtdx": "float32",
+    "meep": "float64 (build fixed)"
+  },
+  "fdtdx_plane_source": {
+    "kind": "UniformPlaneSource one-way plane (no closed TFSF box in fdtdx 0.6.2)",
+    "x_index": 8,
+    "x_um": -1.2,
+    "note": "Spans the full y,z domain including the PML; the flux box faces lie in the total-field region, so the empty-domain phasors are subtracted before the scattered flux is integrated."
+  },
+  "meep_plane_source": {
+    "kind": "planewave current sheet spanning the full cell (Meep Mie tutorial setup, no TFSF box)",
+    "x_um": -1.2,
+    "note": "Ez current sheet at the PML interface spanning the full cell including the PML; scattered flux = total-run flux minus empty-run DFT fields (load_minus_flux_data)."
+  }
+}
