@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 32 | 45 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 32 | 51 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 35 | 42 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 35 | 48 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -37,20 +37,20 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G1-01 | 자동 graded mesh와 미분 평면 모델의 격자 불일치. | IMPLEMENTED | VERIFIED | `20260921T140954Z-g1-01-202f68c3` | `1be01cca38dd` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G1-02 | reference signature의 실제 격자 누락. | IMPLEMENTED | VERIFIED | `20260921T140958Z-g1-02-2afa31eb` | `1be01cca38dd` | PASS | run predates its commit: the tests started at 2026-09-21T23:07:46.449202+09:00 before commit 1be01cca38dd was made |
 | G1-03 | quadrant_intensity_allocation의 FP32 불안정. | IMPLEMENTED | VERIFIED | `20260921T140949Z-g1-03-72ef3ff6` | `1be01cca38dd` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260921T184733Z-g1-04-e39845b1` | `dfdd44d27978` | PASS | evidence matches the current checkout |
-| G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260921T184737Z-g1-05-c820d464` | `dfdd44d27978` | PASS | evidence matches the current checkout |
-| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260921T212526Z-g1-06-c5adc0f5` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260921T184733Z-g1-04-e39845b1` | `dfdd44d27978` | FAIL | STALE: test source changed since the run: tests/test_streamed_restart.py |
+| G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260921T184737Z-g1-05-c820d464` | `dfdd44d27978` | FAIL | STALE: test source changed since the run: tests/test_streamed_restart.py |
+| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260921T212526Z-g1-06-c5adc0f5` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: README.md |
 
 ### G2 물리·격자·실행 계약 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G2-01 | 기존 구조를 활용하여 immutable resolved/compiled simulation plan을 만든다 | IMPLEMENTED | VERIFIED | `20260921T164040Z-g2-01-2739bbf9` | `7847737ba636` | PASS | evidence matches the current checkout |
-| G2-02 | forward/adjoint/streamed/tensor batch/GUI가 서로 다른 규칙으로 물리 입력을 다시 해석하지 않도록 한다 | IMPLEMENTED | VERIFIED | `20260921T164046Z-g2-02-fc7ab609` | `7847737ba636` | PASS | evidence matches the current checkout |
-| G2-03 | capability registry를 만들고 dimensions × mesh × materials × boundaries × sources × monitors × forward/backward × resident/streamed × precision/backend의 유효 조합을 명시한다 | IMPLEMENTED | VERIFIED | `20260921T171604Z-g2-03-53e2e466` | `bca0a7b29e6a` | PASS | evidence matches the current checkout |
-| G2-04 | 전수 조합 대신 위험 기반 pairwise 검사와 고위험 3~4개 기능 조합을 설계한다 | IMPLEMENTED | VERIFIED | `20260921T171624Z-g2-04-481b2694` | `bca0a7b29e6a` | PASS | evidence matches the current checkout |
+| G2-01 | 기존 구조를 활용하여 immutable resolved/compiled simulation plan을 만든다 | IMPLEMENTED | VERIFIED | `20260921T164040Z-g2-01-2739bbf9` | `7847737ba636` | FAIL | STALE: test source changed since the run: tests/test_plan.py |
+| G2-02 | forward/adjoint/streamed/tensor batch/GUI가 서로 다른 규칙으로 물리 입력을 다시 해석하지 않도록 한다 | IMPLEMENTED | VERIFIED | `20260921T164046Z-g2-02-fc7ab609` | `7847737ba636` | FAIL | STALE: test source changed since the run: tests/test_plan.py |
+| G2-03 | capability registry를 만들고 dimensions × mesh × materials × boundaries × sources × monitors × forward/backward × resident/streamed × precision/backend의 유효 조합을 명시한다 | IMPLEMENTED | VERIFIED | `20260921T171604Z-g2-03-53e2e466` | `bca0a7b29e6a` | FAIL | STALE: test source changed since the run: tests/test_capability_pairs.py |
+| G2-04 | 전수 조합 대신 위험 기반 pairwise 검사와 고위험 3~4개 기능 조합을 설계한다 | IMPLEMENTED | VERIFIED | `20260921T171624Z-g2-04-481b2694` | `bca0a7b29e6a` | FAIL | STALE: test source changed since the run: tests/test_capability_pairs.py |
 | G2-05 | "+/- DFT", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다. | IMPLEMENTED | VERIFIED | `20260921T212539Z-g2-05-d33352b2` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
-| G2-06 | cache/reference/restart마다 필요한 동일성 조건을 분리한다 | IMPLEMENTED | VERIFIED | `20260921T164116Z-g2-06-c78e74ff` | `7847737ba636` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/IDENTITY_CONDITIONS.md |
+| G2-06 | cache/reference/restart마다 필요한 동일성 조건을 분리한다 | IMPLEMENTED | VERIFIED | `20260921T164116Z-g2-06-c78e74ff` | `7847737ba636` | FAIL | STALE: test source changed since the run: tests/test_identity.py |
 
 ### G3 독립 물리·gradient 검증 (WORKSTATION, P0)
 
@@ -72,7 +72,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G3-14 | 무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교 | IMPLEMENTED | VERIFIED | `20260921T185333Z-g3-14-1bd80f8e` | `5218de5b6b52` | PASS | scope change pending approval (9 declaration(s), scope_change_approval is null): docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_solver.py/float32/atol = 2e-06 is looser than the loosest program atol 1e-06; and 8 more |
 | G3-15 | full-autograd·directional VJP·FD sweep·Taylor 검사 | IMPLEMENTED | VERIFIED | `20260921T190441Z-g3-15-ca5f7da9` | `d6fb1f86dbc1` | PASS | scope change pending approval (3 declaration(s), scope_change_approval is null): docs/validation/cases/G3-15_gradient_checks.json acceptance/waveform/float32/rtol = 0.003 is looser than the loosest program rtol 0.0001; and 2 more |
 | G3-16 | 실제 shape/material 파라미터의 물리 gradient 수렴 | IMPLEMENTED | VERIFIED | `20260921T190545Z-g3-16-7cf64e2d` | `d6fb1f86dbc1` | FAIL | STALE: the task watches data files but the evidence predates the watch list: benchmarks/gradient_mesh.py, benchmarks/shape_gradient_polygon.py, docs/validation/shape_gradient_polygon_3060.json |
-| G3-17 | oracle 독립성·정밀도·시간·PML 오차 budget 확인 | IMPLEMENTED | FAILED | `20260921T212540Z-g3-17-2222cfe9` | `32af0e2bffa2` | FAIL | verification_state is FAILED |
+| G3-17 | oracle 독립성·정밀도·시간·PML 오차 budget 확인 | IMPLEMENTED | VERIFIED | `20260921T210000Z-g3-17-dc84d85f` | `e13fe664c7a7` | FAIL | STALE: the task watches data files but the evidence predates the watch list: docs/validation/cases/G3-*.json, docs/validation/cases/*.oracles.json, docs/ORACLE_BUDGET.md |
 
 ### G4 CUDA·CI·환경 검증 (WORKSTATION, P0)
 
@@ -82,36 +82,36 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G4-02 | torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다. | IMPLEMENTED | VERIFIED | `20260921T163724Z-g4-02-b5c11b4f` | `a73f47920e9c` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-03 | noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다 | IMPLEMENTED | VERIFIED | `20260921T163744Z-g4-03-5f80ac67` | `a73f47920e9c` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-04 | 최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다 | IMPLEMENTED | VERIFIED | `20260921T163757Z-g4-04-7e1cdb0f` | `a73f47920e9c` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260921T212749Z-g4-05-d9c1df76` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260921T212749Z-g4-05-d9c1df76` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: tests/conftest.py |
 | G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260921T212752Z-g4-06-c6698b17` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 
 ### G5 메모리·재시작·장기 안정성 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G5-01 | resident/host/disk/async 경로를 같은 물리 문제·관측자·목적함수에서 비교한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G5-02 | peak Torch allocated/reserved, CUDA 전체 process memory(가용한 계측 사용), RSS/PSS 또는 플랫폼 동등량, committed memory, OS cache, 디스크 사용량·총 읽기/쓰기·실효 대역폭을 구분한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G5-03 | planner의 byte admission과 실제 peak를 맞추고 원자적 동시 reservation 또는 동등 admission으로 여러 작업이 각각 free memory를 보고 동시에 초과하는 문제를 다룬다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G5-04 | 전체 3D epsilon/VJP를 만들지 않는 geometry/density slab 생성·gradient 축약 경로를 공개 합성 구조로 시험한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G5-05 | meaningful beyond-VRAM 사례 하나를 추가한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G5-06 | 위 대규모 사례는 승인된 실행/디스크 쓰기 예산 안에서 수행한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G5-07 | forward 중단, backward 중단, process kill, simulated ENOSPC/OOM, read/write fault, truncate/checksum 오류, CUDA transfer failure, cancellation을 주입한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G5-08 | checkpoint에 solver와 필요한 auxiliary states, optimizer state, scheduler/projection state, RNG, effective source, configuration fingerprint를 보존한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G5-09 | journal은 run별 소유권과 동시 writer 잠금을 갖는다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G5-10 | 경량 fixture에서 1e5 steps, 반복 실행, 최소 100 optimizer updates 및 승인된 장시간 soak를 수행한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
+| G5-01 | resident/host/disk/async 경로를 같은 물리 문제·관측자·목적함수에서 비교한다 | IMPLEMENTED | VERIFIED | `20260921T200923Z-g5-01-d42add9e` | `ed67736f91ca` | PASS | run predates its commit: the tests started at 2026-09-22T05:00:06.173976+09:00 before commit ed67736f91ca was made |
+| G5-02 | peak Torch allocated/reserved, CUDA 전체 process memory(가용한 계측 사용), RSS/PSS 또는 플랫폼 동등량, committed memory, OS cache, 디스크 사용량·총 읽기/쓰기·실효 대역폭을 구분한다 | IMPLEMENTED | VERIFIED | `20260921T200934Z-g5-02-e1aa0e9d` | `ed67736f91ca` | PASS | run predates its commit: the tests started at 2026-09-22T05:04:29.794969+09:00 before commit ed67736f91ca was made |
+| G5-03 | planner의 byte admission과 실제 peak를 맞추고 원자적 동시 reservation 또는 동등 admission으로 여러 작업이 각각 free memory를 보고 동시에 초과하는 문제를 다룬다 | IMPLEMENTED | VERIFIED | `20260921T200952Z-g5-03-8f43e40b` | `ed67736f91ca` | PASS | run predates its commit: the tests started at 2026-09-22T05:04:57.853722+09:00 before commit ed67736f91ca was made |
+| G5-04 | 전체 3D epsilon/VJP를 만들지 않는 geometry/density slab 생성·gradient 축약 경로를 공개 합성 구조로 시험한다 | IMPLEMENTED | VERIFIED | `20260921T201010Z-g5-04-c3e8d3fe` | `ed67736f91ca` | PASS | run predates its commit: the tests started at 2026-09-22T05:05:38.632650+09:00 before commit ed67736f91ca was made |
+| G5-05 | meaningful beyond-VRAM 사례 하나를 추가한다 | IN_PROGRESS | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
+| G5-06 | 위 대규모 사례는 승인된 실행/디스크 쓰기 예산 안에서 수행한다 | IN_PROGRESS | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
+| G5-07 | forward 중단, backward 중단, process kill, simulated ENOSPC/OOM, read/write fault, truncate/checksum 오류, CUDA transfer failure, cancellation을 주입한다 | IMPLEMENTED | VERIFIED | `20260921T204924Z-g5-07-b25fc657` | `5dfa656c5fff` | PASS | evidence matches the current checkout |
+| G5-08 | checkpoint에 solver와 필요한 auxiliary states, optimizer state, scheduler/projection state, RNG, effective source, configuration fingerprint를 보존한다 | IMPLEMENTED | VERIFIED | `20260921T203532Z-g5-08-bbf1867e` | `b61ad034a0ec` | PASS | evidence matches the current checkout |
+| G5-09 | journal은 run별 소유권과 동시 writer 잠금을 갖는다 | IMPLEMENTED | VERIFIED | `20260921T203815Z-g5-09-939acc1a` | `b61ad034a0ec` | PASS | evidence matches the current checkout |
+| G5-10 | 경량 fixture에서 1e5 steps, 반복 실행, 최소 100 optimizer updates 및 승인된 장시간 soak를 수행한다 | IMPLEMENTED | VERIFIED | `20260921T203823Z-g5-10-0fade0c0` | `b61ad034a0ec` | PASS | evidence matches the current checkout |
 
 ### G6 사용자 물리·역설계 API (WORKSTATION, P1)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G6-01 | 재료 CSV/nk/epsilon import, passive fitting, 원자료 출처·사용권·해시, fit band, 시간 이산화에 따른 n/k 오차, extrapolation 경고를 하나의 workflow로 묶는다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G6-02 | source의 실제 공간 분포·위상·편광·시간 파형·유효 bandwidth를 preview한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G6-03 | reference를 포함한 R/T/A, 복소 S, phase/group delay, mode decomposition, diffraction, far-field/near-zone을 기존 결과와 통합한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G6-04 | 포트별 mode tracking, normalization, reference plane, forward/backward separation과 퇴화/약한 모드 진단을 제공한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G6-05 | 기존 design/periodic/mode-network API를 재사용해 objective→parameterization→optimizer→history→resume→final evaluation의 최소 고수준 인터페이스를 통합한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G6-06 | density filter, projection, beta continuation, symmetry, mask, min linewidth/gap, fabrication perturbation, binary export를 실제 검사와 연결한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G6-07 | export된 binary/GDS 구조를 다시 import하여 독립 finer forward로 평가한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G6-08 | low-intensity/near-zero reference/frequency cutoff/evanescent/backflow에서 NaN·음의 국소 flux·invalid phase를 임의 clipping으로 숨기지 않는다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
+| G6-01 | 재료 CSV/nk/epsilon import, passive fitting, 원자료 출처·사용권·해시, fit band, 시간 이산화에 따른 n/k 오차, extrapolation 경고를 하나의 workflow로 묶는다 | IMPLEMENTED | VERIFIED | `20260921T195534Z-g6-01-bdd21c2c` | `da70a70484c2` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
+| G6-02 | source의 실제 공간 분포·위상·편광·시간 파형·유효 bandwidth를 preview한다 | IMPLEMENTED | VERIFIED | `20260921T195548Z-g6-02-9b5a95d6` | `da70a70484c2` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
+| G6-03 | reference를 포함한 R/T/A, 복소 S, phase/group delay, mode decomposition, diffraction, far-field/near-zone을 기존 결과와 통합한다 | IMPLEMENTED | VERIFIED | `20260921T195559Z-g6-03-b314c028` | `da70a70484c2` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
+| G6-04 | 포트별 mode tracking, normalization, reference plane, forward/backward separation과 퇴화/약한 모드 진단을 제공한다 | IMPLEMENTED | VERIFIED | `20260921T195524Z-g6-04-cd77e84a` | `68d797bbb060` | PASS | scope change pending approval (2 declaration(s), scope_change_approval is null): docs/validation/cases/G6-04.json acceptance/tracked_neff_error_max/difference_from_common_criterion states a limit looser than the program threshold; and 1 more |
+| G6-05 | 기존 design/periodic/mode-network API를 재사용해 objective→parameterization→optimizer→history→resume→final evaluation의 최소 고수준 인터페이스를 통합한다 | IMPLEMENTED | VERIFIED | `20260921T195542Z-g6-05-9f485769` | `68d797bbb060` | PASS | evidence matches the current checkout |
+| G6-06 | density filter, projection, beta continuation, symmetry, mask, min linewidth/gap, fabrication perturbation, binary export를 실제 검사와 연결한다 | IMPLEMENTED | VERIFIED | `20260921T195559Z-g6-06-e9e7f257` | `68d797bbb060` | PASS | evidence matches the current checkout |
+| G6-07 | export된 binary/GDS 구조를 다시 import하여 독립 finer forward로 평가한다 | IMPLEMENTED | VERIFIED | `20260921T202810Z-g6-07-e5631996` | `cbe9d4d9fc6a` | PASS | run predates its commit: the tests started at 2026-09-22T04:56:18.896576+09:00 before commit cbe9d4d9fc6a was made |
+| G6-08 | low-intensity/near-zero reference/frequency cutoff/evanescent/backflow에서 NaN·음의 국소 flux·invalid phase를 임의 clipping으로 숨기지 않는다 | IMPLEMENTED | VERIFIED | `20260921T195609Z-g6-08-374a45a0` | `da70a70484c2` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 
 ### G7 대표 응용·동일 정확도 비용 (WORKSTATION, P1)
 
@@ -127,22 +127,22 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G8-01 | 기존 Project JSON/NPZ compatibility와 schema migration을 시험한다 | IMPLEMENTED | VERIFIED | `20260921T212803Z-g8-01-21814658` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
-| G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260921T192908Z-g8-02-76c35baa` | `579c27df75e5` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
+| G8-01 | 기존 Project JSON/NPZ compatibility와 schema migration을 시험한다 | IMPLEMENTED | VERIFIED | `20260921T212803Z-g8-01-21814658` | `32af0e2bffa2` | FAIL | STALE: a file matching a watched pattern did not exist at recording: tests/fixtures/materials/sio2_sellmeier_malitson1965.csv |
+| G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260921T192908Z-g8-02-76c35baa` | `579c27df75e5` | FAIL | STALE: test source changed since the run: tests/test_result_store.py |
 | G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260921T192925Z-g8-03-25de93db` | `579c27df75e5` | FAIL | STALE: the task watches data files but the evidence predates the watch list: torchfdtd/web/**, docs/validation/workbench/*.json |
 | G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260921T192929Z-g8-04-705af196` | `579c27df75e5` | FAIL | STALE: the task watches data files but the evidence predates the watch list: torchfdtd/web/**, docs/validation/workbench/*.json |
-| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | FAILED | `20260921T212804Z-g8-05-bbac99d9` | `32af0e2bffa2` | FAIL | verification_state is FAILED |
-| G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260921T170706Z-g8-06-7b7e68da` | `656c5075eabd` | FAIL | STALE: the task watches data files but the evidence predates the watch list: pyproject.toml, torchfdtd/web/**, scripts/clean_install_check.py, scripts/run_readme_examples.py, README.md, docs/validation/clean_install/*.json |
-| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | FAILED | `20260921T212806Z-g8-07-0ede6bb6` | `32af0e2bffa2` | FAIL | verification_state is FAILED |
+| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260921T170637Z-g8-05-29a464aa` | `656c5075eabd` | FAIL | STALE: test source changed since the run: tests/test_clean_install.py |
+| G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260921T170706Z-g8-06-7b7e68da` | `656c5075eabd` | FAIL | STALE: test source changed since the run: tests/test_doctor.py |
+| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260921T170718Z-g8-07-b934b710` | `656c5075eabd` | FAIL | STALE: test source changed since the run: tests/test_clean_install.py |
 
 ### G9 보안·운영·출고 판정 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260921T163013Z-g9-01-57458fee` | `e132fdd4155b` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260921T212820Z-g9-02-ae84c532` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260921T163013Z-g9-01-57458fee` | `e132fdd4155b` | FAIL | STALE: test source changed since the run: tests/test_server_security.py |
+| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260921T212820Z-g9-02-ae84c532` | `32af0e2bffa2` | FAIL | STALE: test source changed since the run: tests/test_provenance_inventory.py |
 | G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260921T212831Z-g9-04-f826cb57` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260921T212831Z-g9-04-f826cb57` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | VERIFIED | `20260921T213007Z-g9-07-31e7a456` | `15122d2aae0e` | PASS | evidence matches the current checkout |
@@ -169,7 +169,7 @@ Every record written by `scripts/platform_report.py` under `docs/validation/plat
 
 | Platform id | G4 evidence runs recorded on this platform | Other tasks whose newest run was recorded here |
 | --- | --- | --- |
-| rtx3060-win11-lab | G4-01 `20260921T163708Z-g4-01-53b82748` (GPU name); G4-02 `20260921T163724Z-g4-02-b5c11b4f` (GPU name); G4-03 `20260921T163744Z-g4-03-5f80ac67` (GPU name); G4-04 `20260921T163757Z-g4-04-7e1cdb0f` (GPU name); G4-05 `20260921T212749Z-g4-05-d9c1df76` (platform_id); G4-06 `20260921T212752Z-g4-06-c6698b17` (platform_id) | 45 |
+| rtx3060-win11-lab | G4-01 `20260921T163708Z-g4-01-53b82748` (GPU name); G4-02 `20260921T163724Z-g4-02-b5c11b4f` (GPU name); G4-03 `20260921T163744Z-g4-03-5f80ac67` (GPU name); G4-04 `20260921T163757Z-g4-04-7e1cdb0f` (GPU name); G4-05 `20260921T212749Z-g4-05-d9c1df76` (platform_id); G4-06 `20260921T212752Z-g4-06-c6698b17` (platform_id) | 61 |
 | rtx5880-ada-win11-remote | none | 0 |
 
 Newest runs that match no platform record: none.
@@ -235,7 +235,7 @@ One line per G3 task. Where `docs/validation/g3/<task>.json` exists, the criteri
 | G3-14 | Small discrete problems: CPU torch, CUDA torch, fused CUDA, streamed and reversible forward and VJP agreement | none (the test assertions are the record) | the pass/fail assertions of the required tests | 75 passed, 0 failed, 0 skipped in `20260921T185333Z-g3-14-1bd80f8e` | VERIFIED |
 | G3-15 | Full-autograd oracle, explicit adjoint, central-difference step sweep, Taylor remainder and directional VJP checks | none (the test assertions are the record) | the pass/fail assertions of the required tests | 34 passed, 0 failed, 0 skipped in `20260921T190441Z-g3-15-ca5f7da9` | VERIFIED |
 | G3-16 | Physical shape and material parameter gradients: slab thickness and permittivity against the Airy derivative, polygon vertices under mesh refinement | none (the test assertions are the record) | the pass/fail assertions of the required tests | 19 passed, 0 failed, 0 skipped in `20260921T190545Z-g3-16-7cf64e2d` | VERIFIED |
-| G3-17 | Oracle independence, precision floor, time-window and PML error budgets of every G3 fixture | none (the test assertions are the record) | the pass/fail assertions of the required tests | 1 passed, 3 failed, 0 skipped in `20260921T212540Z-g3-17-2222cfe9`; KeyError: 'oracle_class'; AssertionError: ('G3-01_uniform_propagation.json', 'tests/test_physics_g3_a.py::TestG301::test_eigenmode_matches_yee_relation'); AssertionError: G3-01_uniform_propagation | FAILED |
+| G3-17 | Oracle independence, precision floor, time-window and PML error budgets of every G3 fixture | none (the test assertions are the record) | the pass/fail assertions of the required tests | 4 passed, 0 failed, 0 skipped in `20260921T210000Z-g3-17-dc84d85f` | VERIFIED |
 
 ## Cross-solver and Meep comparison headlines
 
@@ -292,7 +292,7 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | G2-06 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G3-01 | run predates its commit: the tests started at 2026-09-22T02:08:12.938239+09:00 before commit ce5f049d4375 was made |
 | G3-02 | run predates its commit: the tests started at 2026-09-22T01:55:21.819372+09:00 before commit 88c577519350 was made |
-| G3-02 | scope change pending approval (1 declaration(s), scope_change_approval is null): docs/validation/cases/G3-02r2_slab_tmm_40_cells.json declares supersedes (a revised case) |
+| G3-02 | scope change pending approval (2 declaration(s), scope_change_approval is null): docs/validation/cases/G3-02_dielectric_slab_tmm.oracles.json declares superseded_by (a revised case); and 1 more |
 | G3-03 | run predates its commit: the tests started at 2026-09-22T02:17:18.577354+09:00 before commit ce5f049d4375 was made |
 | G3-04 | run predates its commit: the tests started at 2026-09-22T01:48:13.169199+09:00 before commit 487de42640e4 was made |
 | G3-06 | scope change pending approval (6 declaration(s), scope_change_approval is null): docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/eigenmode_phase_advance/float32/atol = 3e-06 is looser than the loosest program atol 1e-06; and 5 more |
@@ -311,6 +311,16 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | G4-02 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-03 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-04 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
+| G5-01 | run predates its commit: the tests started at 2026-09-22T05:00:06.173976+09:00 before commit ed67736f91ca was made |
+| G5-02 | run predates its commit: the tests started at 2026-09-22T05:04:29.794969+09:00 before commit ed67736f91ca was made |
+| G5-03 | run predates its commit: the tests started at 2026-09-22T05:04:57.853722+09:00 before commit ed67736f91ca was made |
+| G5-04 | run predates its commit: the tests started at 2026-09-22T05:05:38.632650+09:00 before commit ed67736f91ca was made |
+| G6-01 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
+| G6-02 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
+| G6-03 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
+| G6-04 | scope change pending approval (2 declaration(s), scope_change_approval is null): docs/validation/cases/G6-04.json acceptance/tracked_neff_error_max/difference_from_common_criterion states a limit looser than the program threshold; and 1 more |
+| G6-07 | run predates its commit: the tests started at 2026-09-22T04:56:18.896576+09:00 before commit cbe9d4d9fc6a was made |
+| G6-08 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G8-02 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G8-04 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G8-06 | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
@@ -322,7 +332,7 @@ Tasks whose case files declare a scope change (a revised case, or a limit looser
 
 | Task | Declared change |
 | --- | --- |
-| G3-02 | docs/validation/cases/G3-02r2_slab_tmm_40_cells.json declares supersedes (a revised case) |
+| G3-02 | docs/validation/cases/G3-02_dielectric_slab_tmm.oracles.json declares superseded_by (a revised case); docs/validation/cases/G3-02r2_slab_tmm_40_cells.json declares supersedes (a revised case) |
 | G3-05 | docs/validation/cases/G3-05_drude_sphere.json acceptance/justification declares a program threshold not applicable |
 | G3-06 | docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/eigenmode_phase_advance/float32/atol = 3e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/eigenmode_phase_advance/pmc/atol = 4e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/eigenmode_phase_advance/pmc_reference/atol = 2e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/symmetry_reduction/signals/atol = 4e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/symmetry_reduction/reduced_versus_doubled_fields/atol = 4e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/independent_endpoint_solver/atol = 2e-06 is looser than the loosest program atol 1e-06 |
 | G3-08 | docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json declares revision_of (a revised case) |
@@ -333,6 +343,7 @@ Tasks whose case files declare a scope change (a revised case, or a limit looser
 | G3-14 | docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_solver.py/float32/atol = 2e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_spacetime.py/float32/atol = 2e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_pec_boundaries.py/signals/atol = 2e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_pec_boundaries.py/gradient/atol = 3e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_streamed_density.py response/atol = 4e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/looser_than_program_thresholds/tests/test_tensor_native_cuda.py table VJP float32/rtol = 0.0003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/looser_than_program_thresholds/tests/test_endpoint_native_cpml_cuda.py VJPs float32/rtol = 0.0002 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/looser_than_program_thresholds/tests/test_streamed_density.py gradient float32/rtol = 0.0003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/looser_than_program_thresholds/tests/test_streamed_density.py gradient float32/atol = 7e-06 is looser than the loosest program atol 1e-06 |
 | G3-15 | docs/validation/cases/G3-15_gradient_checks.json acceptance/waveform/float32/rtol = 0.003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-15_gradient_checks.json acceptance/waveform/float32/atol = 0.0003 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-15_gradient_checks.json acceptance/shape/cuda_float32_versus_autograd/rtol = 0.0003 is looser than the loosest program rtol 0.0001 |
 | G3-16 | docs/validation/cases/G3-16_physical_parameter_gradients.json acceptance/geometry_maps/fp32_chain/rtol = 0.0003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-16_physical_parameter_gradients.json acceptance/geometry_maps/streamed/rtol = 0.0004 is looser than the loosest program rtol 0.0001 |
+| G6-04 | docs/validation/cases/G6-04.json acceptance/tracked_neff_error_max/difference_from_common_criterion states a limit looser than the program threshold; docs/validation/cases/G6-04.json acceptance/separated_amplitudes/atol = 1e-05 is looser than the loosest program atol 1e-06 |
 
 ## Consistency
 
@@ -350,7 +361,7 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 | README "Compared with Meep" block | ok | equals the renderer output for the committed records |
 | MEEP_COMPARISON.md | ok | equals the renderer output for the committed records |
 | third-party notices and SBOM | ok | 52 components, 3 open items, 0 scan findings, pip check exit 0 |
-| RELEASE_SCOPE.md support claims | ok | 24 verification cells and the stage-status block rendered from the gate file |
+| RELEASE_SCOPE.md support claims | ok | 22 verification cells and the stage-status block rendered from the gate file |
 | attestation wording | ok | no line uses the words that tests/test_validation_report.py forbids |
 
 12 checks, 0 mismatch(es).
