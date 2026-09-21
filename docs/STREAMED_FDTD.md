@@ -337,7 +337,10 @@ continues from a new process: a completed forward returns its recorded signals,
 and a recorded backward restores the adjoint and partial gradient and replays
 only the remaining blocks from the all-zero initial state. A strict contract
 rejects journals written for other inputs, options, runtimes or objectives,
-hashing every Python file of the package as the runtime. The journal
+hashing every Python file of the package as the runtime; every record array
+is checksummed, one earlier record per kind is kept as the rollback target,
+one process owns a journal at a time and `cancel=event` stops a run at a
+block boundary after recording it. The journal
 reservation charges `max(2(B+S), S+2(B+G))` on its volume for state bytes B,
 signal-history bytes S and parameter-gradient bytes G, plus bounded JSON
 metadata, and adds the bank reservation when the two directories resolve to

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-09_journal_ownership_durability",
+  "task": "G5-09",
+  "title": "Journal ownership, per-file integrity, distinct terminal states and the separation of process-kill consistency from power-loss durability",
+  "declared": "2026-09-22",
+  "declared_at_commit": "dfdd44d279789ae312b53f9caeadfd2ccf92015a",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "tests/test_journal_ownership.py",
+    "scene": "tests/test_differentiable.py::project(steps=13), 2D 16 x 15, float64, epsilon 1.7, host banks, CPU tiles, slab width 4, temporal depth 3, restart_every_blocks 1",
+    "ownership": "owner.json with marker, run id, pid, host and start time, created O_EXCL; a holder child process; a dead pid from an exited child; locks from another host, unreadable and foreign",
+    "integrity": "the forward record after three blocks with one tampered description or file per instance: unknown dtype, wrong byte count, wrong shape, missing description, missing file, wrong checksum, description without a file name, wrong kind, wrong marker, empty array list",
+    "terminal_states": "one journal each: completed (full run), cancelled (cancel event during the second block), failed (transpose interrupted), partial (running status with a dead owner pid)",
+    "durability": "_move_file_ex recorded on Windows; os.open and os.fsync recorded on POSIX"
+  },
+  "seed": null,
+  "precision": [
+    "float64"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "reference_method": "behavioural: exceptions and their messages, inspect_journal views, files on disk, and the rollback entries of a resumed run",
+  "observables": [
+    {
+      "name": "ownership_decision",
+      "unit": "string",
+      "definition": "the refusal message or the previous_state reported when a journal with an existing owner.json is opened"
+    },
+    {
+      "name": "integrity_reason",
+      "unit": "string",
+      "definition": "the RestartRecordDamaged reason naming the file and the failed check, as reported by _validate_record, _read_array, inspect_journal and the rollback entry"
+    },
+    {
+      "name": "terminal_state",
+      "unit": "string",
+      "definition": "state read by inspect_journal for each journal"
+    },
+    {
+      "name": "durability_calls",
+      "unit": "flags or fds",
+      "definition": "MoveFileExW flags per replaced file and directory on Windows; directory fsync calls on POSIX"
+    }
+  ],
+  "acceptance": {
+    "ownership": "a second writer is refused while the owner process lives (message names the run id and pid); a stale lock of a dead process on this host is taken over and previous_state is partial; locks from another host, unreadable locks and foreign markers are refused with the cause named and nothing is changed; after a terminal state the same run re-owns its journal on the next publish",
+    "integrity": "each of the ten tampered instances is named with its file and check; the cheap checks (dtype, bytes, shape, missing file, description fields, kind, empty list) are reported by inspect_journal without reading the arrays, the array count and the checksum at load; every instance rolls back to the previous record and the resumed run completes; every written description carries file, shape, dtype, bytes equal to the file size and the SHA-256 of the file",
+    "terminal_states": "completed, cancelled, failed and partial are four distinct states; a cancelled journal's records are valid and loadable by a reader that does not own the journal; a failed journal names the exception",
+    "durability": "on Windows every JSON replacement uses MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH and every record directory rename MOVEFILE_WRITE_THROUGH; on POSIX every rename is followed by an fsync of the journal directory; docs/STREAMED_RESTART.md states process-kill consistency (exercised) and power-loss durability (not exercised) as separate levels",
+    "source_of_limits": "exact string, count and flag comparisons; no tolerance"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_journal_ownership.py"
+    ],
+    "not_yet_covered": [
+      "the POSIX fsync branch runs on the Linux CI host only",
+      "pid reuse (a recycled pid of an unrelated process is reported as alive; documented limitation)",
+      "power-loss durability (not exercised on any host)"
+    ]
+  },
+  "applicability": "Durable restart journals on local volumes of one host; network shares, cross-host locking and the drive's own write cache are outside the exercised scope.",
+  "notes": "Declared on branch g5-restart together with the ownership, status and checksum changes to torchfdtd/streamed_restart.py; no fixture-specific budget."
+}

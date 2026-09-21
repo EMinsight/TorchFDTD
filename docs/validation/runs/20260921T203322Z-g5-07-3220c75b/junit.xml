@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="25" time="322.654" timestamp="2026-09-22T05:27:44.742757+09:00" hostname="DESKTOP-N5DFT8J"><testcase classname="tests.test_restart_faults" name="test_forward_interruption[host]" time="12.808" /><testcase classname="tests.test_restart_faults" name="test_forward_interruption[disk]" time="11.880" /><testcase classname="tests.test_restart_faults" name="test_backward_interruption[cpu-host]" time="13.617" /><testcase classname="tests.test_restart_faults" name="test_backward_interruption[cuda-disk]" time="13.695" /><testcase classname="tests.test_restart_faults" name="test_process_kill[forward]" time="6.864"><failure message="AssertionError: Traceback (most recent call last):&#13;&#10;    File &quot;&lt;string&gt;&quot;, line 16, in &lt;module&gt;&#13;&#10;  NameError: name 'StreamedAdjointOptions' is not defined&#13;&#10;  &#10;assert 1 is None&#10; +  where 1 = poll()&#10; +    where poll = &lt;Popen: returncode: 1 args: ['D:\\TorchFDTD\\.venv\\Scripts\\python.exe', '-...&gt;.poll">tmp_path = WindowsPath('D:/TorchFDTD/.local/tmp/pytest-of-연구실/pytest-302/test_process_kill_forward_0')
+phase = 'forward'
+
+    @pytest.mark.parametrize('phase', ['forward', 'transpose'])
+    def test_process_kill(tmp_path, phase):
+        p, eps, signals, gradient, settings, scratch = setup(tmp_path, 'disk')
+        source = str(Path(torchfdtd.__file__).resolve().parents[1])
+        tests = str(Path(__file__).resolve().parent)
+        journal = tmp_path / 'journal'
+        kind = 'forward' if phase == 'forward' else 'backward'
+        child = subprocess.Popen([sys.executable, '-c', CHILD, source, tests, str(scratch), str(journal), phase],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        deadline = time.time() + 120
+        seen = None
+        while time.time() &lt; deadline and child.poll() is None:
+            latest = journal / f'latest-{kind}.json'
+            if latest.exists():
+                try:
+                    seen = json.loads(latest.read_text())
+                except (json.JSONDecodeError, OSError):
+                    seen = None
+                if seen and seen['kind'] == kind and (seen['block'] &gt;= 2 if kind == 'forward' else seen['block'] &lt;= 3):
+                    break
+            time.sleep(0.05)
+&gt;       assert child.poll() is None, child.stderr.read().decode('utf8', 'replace')[-2000:]
+E       AssertionError: Traceback (most recent call last):
+E           File "&lt;string&gt;", line 16, in &lt;module&gt;
+E         NameError: name 'StreamedAdjointOptions' is not defined
+E         
+E       assert 1 is None
+E        +  where 1 = poll()
+E        +    where poll = &lt;Popen: returncode: 1 args: ['D:\\TorchFDTD\\.venv\\Scripts\\python.exe', '-...&gt;.poll
+
+tests\test_restart_faults.py:187: AssertionError</failure></testcase><testcase classname="tests.test_restart_faults" name="test_process_kill[transpose]" time="3.774"><failure message="AssertionError: Traceback (most recent call last):&#13;&#10;    File &quot;&lt;string&gt;&quot;, line 16, in &lt;module&gt;&#13;&#10;  NameError: name 'StreamedAdjointOptions' is not defined&#13;&#10;  &#10;assert 1 is None&#10; +  where 1 = poll()&#10; +    where poll = &lt;Popen: returncode: 1 args: ['D:\\TorchFDTD\\.venv\\Scripts\\python.exe', '-...&gt;.poll">tmp_path = WindowsPath('D:/TorchFDTD/.local/tmp/pytest-of-연구실/pytest-302/test_process_kill_transpose_0')
+phase = 'transpose'
+
+    @pytest.mark.parametrize('phase', ['forward', 'transpose'])
+    def test_process_kill(tmp_path, phase):
+        p, eps, signals, gradient, settings, scratch = setup(tmp_path, 'disk')
+        source = str(Path(torchfdtd.__file__).resolve().parents[1])
+        tests = str(Path(__file__).resolve().parent)
+        journal = tmp_path / 'journal'
+        kind = 'forward' if phase == 'forward' else 'backward'
+        child = subprocess.Popen([sys.executable, '-c', CHILD, source, tests, str(scratch), str(journal), phase],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        deadline = time.time() + 120
+        seen = None
+        while time.time() &lt; deadline and child.poll() is None:
+            latest = journal / f'latest-{kind}.json'
+            if latest.exists():
+                try:
+                    seen = json.loads(latest.read_text())
+                except (json.JSONDecodeError, OSError):
+                    seen = None
+                if seen and seen['kind'] == kind and (seen['block'] &gt;= 2 if kind == 'forward' else seen['block'] &lt;= 3):
+                    break
+            time.sleep(0.05)
+&gt;       assert child.poll() is None, child.stderr.read().decode('utf8', 'replace')[-2000:]
+E       AssertionError: Traceback (most recent call last):
+E           File "&lt;string&gt;", line 16, in &lt;module&gt;
+E         NameError: name 'StreamedAdjointOptions' is not defined
+E         
+E       assert 1 is None
+E        +  where 1 = poll()
+E        +    where poll = &lt;Popen: returncode: 1 args: ['D:\\TorchFDTD\\.venv\\Scripts\\python.exe', '-...&gt;.poll
+
+tests\test_restart_faults.py:187: AssertionError</failure></testcase><testcase classname="tests.test_restart_faults" name="test_enospc_while_writing_a_record[forward-state-0.bin-2]" time="18.320" /><testcase classname="tests.test_restart_faults" name="test_enospc_while_writing_a_record[forward-meta.json.tmp-2]" time="18.803" /><testcase classname="tests.test_restart_faults" name="test_enospc_while_writing_a_record[forward-latest-forward.json.tmp-2]" time="18.744" /><testcase classname="tests.test_restart_faults" name="test_enospc_while_writing_a_record[backward-gradient.bin-2]" time="18.721" /><testcase classname="tests.test_restart_faults" name="test_device_out_of_memory_inside_a_slab_update" time="11.141" /><testcase classname="tests.test_restart_faults" name="test_cuda_transfer_failure[h2d-_copy_into]" time="11.961" /><testcase classname="tests.test_restart_faults" name="test_cuda_transfer_failure[d2h-to_host]" time="11.833" /><testcase classname="tests.test_restart_faults" name="test_bank_fault[read-index_select]" time="11.949" /><testcase classname="tests.test_restart_faults" name="test_bank_fault[write-index_copy_]" time="11.613" /><testcase classname="tests.test_restart_faults" name="test_damaged_newest_forward_record_rolls_back_to_the_previous[truncate-state-0.bin]" time="11.961" /><testcase classname="tests.test_restart_faults" name="test_damaged_newest_forward_record_rolls_back_to_the_previous[checksum-signals.bin]" time="12.012" /><testcase classname="tests.test_restart_faults" name="test_damaged_newest_backward_record_rolls_back[2-checksum-adjoint-1.bin-backward-4]" time="12.495" /><testcase classname="tests.test_restart_faults" name="test_damaged_newest_backward_record_rolls_back[2-truncate-gradient.bin-backward-4]" time="11.944" /><testcase classname="tests.test_restart_faults" name="test_damaged_newest_backward_record_rolls_back[1-checksum-gradient.bin-None]" time="11.992" /><testcase classname="tests.test_restart_faults" name="test_damaged_meta_and_missing_checksum_are_named" time="30.741" /><testcase classname="tests.test_restart_faults" name="test_cancellation_records_the_boundary[forward-1]" time="13.263" /><testcase classname="tests.test_restart_faults" name="test_cancellation_records_the_boundary[forward-2]" time="8.326" /><testcase classname="tests.test_restart_faults" name="test_cancellation_records_the_boundary[transpose-1]" time="11.351" /><testcase classname="tests.test_restart_faults" name="test_cancel_event_is_validated_and_without_a_journal_nothing_is_kept" time="0.007" /></testsuite></testsuites>

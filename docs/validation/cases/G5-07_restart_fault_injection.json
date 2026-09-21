@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G5-07_restart_fault_injection",
+  "task": "G5-07",
+  "title": "Fault injection: every injected fault leaves the last valid record, a damaged newest record is rolled back by name, and the resume reproduces the uninterrupted run",
+  "declared": "2026-09-22",
+  "declared_at_commit": "dfdd44d279789ae312b53f9caeadfd2ccf92015a",
+  "declared_before_run": true,
+  "fixture": {
+    "module": "tests/test_restart_faults.py",
+    "scene": "tests/test_differentiable.py::project(steps=13): 2D 16 x 15 cells, mesh 0.1 um, three-cell PML with a four-layer CPML on x_min, one continuous point source, three point monitors, float64, epsilon 1.7",
+    "policy": "slab width 4, temporal depth 3 (five blocks, the last partial), checkpoints 1, local checkpoints 1, restart_every_blocks 1 (2 in one cancellation instance), host or file-backed banks, CPU or CUDA tiles",
+    "faults": [
+      "forward interruption after two blocks (host and disk banks)",
+      "backward interruption after two transposes (CPU host, CUDA disk)",
+      "process kill of a child process during forward and during backward (subprocess, disk banks)",
+      "ENOSPC raised by the write of state-0.bin, meta.json, latest-forward.json of the second forward record and gradient.bin of the second backward record",
+      "torch.cuda.OutOfMemoryError raised inside the 25th slab update (first update of the third block, CUDA)",
+      "EIO raised by the next file-bank read (index_select) and write (index_copy_) once the journal holds backward-3",
+      "state-0.bin truncated to half and one byte of signals.bin flipped in the newest forward record; adjoint-1.bin flipped, gradient.bin truncated in the newest backward record with a fallback, gradient.bin flipped in a first backward record without a fallback; a checksum removed from meta.json; meta.json unreadable with a truncated fallback",
+      "RuntimeError raised by the next host-to-device (_copy_into) and device-to-host (to_host) tile transfer once the journal holds backward-3 (CUDA)",
+      "cancel event set during the third forward block (every 1 and every 2) and during the third transpose"
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "behavioural: the same scene run uninterrupted without a journal in the same process; after the fault, the pointer names the last record published before it, the journal's status names the fault, and a second run resumes from that record",
+  "observables": [
+    {
+      "name": "surviving_record",
+      "unit": "block index",
+      "definition": "block named by latest-<kind>.json after the fault, and the fallback it names"
+    },
+    {
+      "name": "rollback",
+      "unit": "record name, reason, fallback",
+      "definition": "entries of report['restart_rollbacks'] for a damaged newest record"
+    },
+    {
+      "name": "terminal_state",
+      "unit": "string",
+      "definition": "status.json state after the fault (failed or cancelled) and after the resume (completed), with the failure reason text"
+    },
+    {
+      "name": "resume_agreement",
+      "unit": "dimensionless",
+      "definition": "difference between the resumed and the uninterrupted signals and gradient"
+    },
+    {
+      "name": "leaks",
+      "unit": "files, bytes",
+      "definition": "entries under the scratch directory and torch.cuda.memory_allocated after the faulty run and after the resume, against the values before the faulty run"
+    }
+  ],
+  "acceptance": {
+    "last_valid_record": "after every fault the pointer of the interrupted kind names a record published before the fault and that record passes the integrity checks; for a fault while writing record N, the pointer names N-1 (block 1 for the forward faults, block 4 for the backward faults)",
+    "damaged_newest_record": "a truncated, corrupted or checksum-less newest record is rolled back to its fallback (the previous record of that kind) or, without one, to the empty journal of that kind; report['restart_rollbacks'] names the record, the reason (file and check) and the fallback",
+    "terminal_state": "an exception leaves status.json as failed with the exception type and message; a cancel event leaves it cancelled with the phase and block; the resume ends with completed",
+    "resume": "the resumed signals and gradient agree with the uninterrupted run within rtol 1e-4, atol 1e-6 on CPU and CUDA (proposed_thresholds discrete_dimensionless_fp32), and bitwise on CPU",
+    "no_leaks": "the scratch directory is empty after the faulty run and after the resume (the killed process's own bank excepted and removed by the test), and torch.cuda.memory_allocated returns to the value measured before the faulty run",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32; file and byte counts are exact"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_restart_faults.py"
+    ],
+    "not_yet_covered": [
+      "faults inside the dispersive (ADE), tensor, geometry and modal streamed paths",
+      "a real out-of-space volume (ENOSPC is raised by a monkeypatched write)",
+      "faults during asynchronous tile transfers"
+    ]
+  },
+  "applicability": "Streamed X-slab runs with a durable journal on one workstation; the injected faults are raised by monkeypatched methods or a killed child process, not by real hardware faults.",
+  "notes": "Declared after the journal gained checksummed records, one fallback record per kind, ownership and terminal states on branch g5-restart; the limits are the program's fp32 pair and exact counts, no fixture-specific budget."
+}

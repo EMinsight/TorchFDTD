@@ -1066,6 +1066,154 @@ count correction), ed67736 (records), fe738b0 (runs and gate states).
 ```
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --task G5-01
 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_memory_accounting_g5.py
+### 2026-09-22 G5-07, G5-08, G5-09, G5-10 (fault injection, checkpoint completeness, journal ownership and durability, soak), branch g5-restart from dfdd44d
+
+**Problem or goal.** Make the streamed restart journal survive injected
+faults with the last valid record intact and a damaged newest record rolled
+back by name; verify that a checkpoint carries every solver, optimizer,
+projection, generator, waveform and fingerprint state; give a journal per-run
+ownership, per-file integrity checks and distinct terminal states with the
+process-kill and power-loss durability levels separated; and soak the engine
+with the journal enabled for 1e5 steps, repeated runs and 100 optimizer
+updates.
+
+**State found.** HEAD dfdd44d on branch g5-restart, clean tree. The journal
+had per-record pointers and a contract but no checksums, no fallback record,
+no lock, no terminal state, no cancellation and no optimizer checkpoint; the
+four G5 task rows were NOT_ASSESSED with empty `required_tests`.
+
+**Changed files (why).**
+- `torchfdtd/streamed_restart.py`: array descriptions carry `file`, `bytes`
+  and `sha256`; `_read_array` verifies byte count, dtype, shape and checksum
+  and raises `RestartRecordDamaged` naming the file and check; one fallback
+  record per kind (`previous` in the pointer, dropped before the next write
+  so at most two records of a kind coexist within the unchanged reservation;
+  the forward fallback goes before the first backward record); `_latest` and
+  `_load` roll a damaged record back and append to `rollbacks`; `owner.json`
+  lock (O_EXCL, run id, pid, host; live owner refused, dead owner taken over,
+  other host, unreadable or foreign lock refused; `_pid_alive` via
+  OpenProcess/GetExitCodeProcess or kill(0)); `status.json` with running,
+  completed, cancelled, failed, partial; `cancel`, `fail`, `close`; `_durable_replace`
+  (MoveFileExW MOVEFILE_WRITE_THROUGH on Windows, os.replace plus directory
+  fsync elsewhere); `inspect_journal` for partial results.
+- `torchfdtd/streamed.py`: `StreamedSimulation(..., cancel=event)`,
+  `StreamCancelled`; `_Streamed.forward` and `backward` check the event at
+  block, transpose and replay boundaries, record the boundary if the journal
+  lacks it, mark the journal cancelled or failed (best effort, refusals
+  excluded) and report `restart_state`, `restart_previous_state`,
+  `restart_rollbacks`, `restart_run_id`.
+- `torchfdtd/design_checkpoint.py` (new): `DesignCheckpoint` with
+  `REQUIRED_STATES` (iteration, parameters, optimizer, projection, rng,
+  waveform, fingerprint, history), checksummed `checkpoint.pt` beside
+  `checkpoint.json`, refusal by name, fingerprint `restart_key(plan, options)`.
+- `tests/test_restart_faults.py` (26), `tests/test_checkpoint_completeness.py`
+  (14), `tests/test_journal_ownership.py` (20), `tests/test_restart_soak_record.py` (5).
+- `benchmarks/restart_soak.py`, `docs/validation/g5/G5-10_soak_3060.json`,
+  `docs/RESTART_SOAK.md` (rendered).
+- `docs/validation/cases/G5-07_restart_fault_injection.json`,
+  `G5-08_checkpoint_completeness.json`, `G5-09_journal_ownership_durability.json`,
+  `G5-10_restart_soak.json`: pre-declared criteria; the soak budgets come from
+  a 5000-step, 8-run, 30-update pilot on the same fixture, stated in the case.
+- `docs/STREAMED_RESTART.md` (integrity, rollback, ownership, terminal states,
+  cancellation, durability levels, design checkpoints, verified scope),
+  `docs/STREAMED_FDTD.md`, `docs/RELEASE_SCOPE.md`, `docs/CHANGELOG.md`,
+  `docs/validation/completion_gates.json` (metadata, then evidence by the recorder).
+
+**Defects found and fixed.** No defect of the previous journal was found by
+the injected faults beyond what the brief required to add: without
+checksums a flipped byte in a record was loaded silently (now rolled back),
+the previous record was removed as soon as the next was published (now kept
+as the fallback), two processes could write one journal (now refused), a
+killed or failed run left no terminal state (now partial or failed), and the
+venv launcher on Windows makes `Popen.pid` differ from the interpreter's pid
+(the kill test compares liveness, not pids). `_publish` re-takes ownership
+after a terminal state so that a second backward on the same result still
+publishes.
+
+**Commands run (device: local Windows 11, i7-12700, RTX 3060 12 GB shared with about ten other agents, Python 3.10, torch 2.10.0+cu126; TMP and TEMP set to D:/TorchFDTD/.local/tmp; test files one at a time).**
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.restart_soak --output docs/validation/g5/G5-10_soak_3060.json --scratch D:/TorchFDTD/.local/tmp/g5-restart/soak
+D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.restart_soak --render docs/validation/g5/G5-10_soak_3060.json --markdown docs/RESTART_SOAK.md
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_restart_faults.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-07.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_checkpoint_completeness.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-08.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_journal_ownership.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-09.xml
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_restart_soak_record.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G5-10.xml
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G5-0N --command "<the line above>" --junit D:/TorchFDTD/.local/tmp/junit/G5-0N.xml --exit-code 0 --fixture docs/validation/cases/<case>.json --scope "<scope>"
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_streamed_restart.py   (regression, 29 passed)
+```
+
+**Measurements and pre-declared limits.**
+- G5-07 (rtol 1e-4, atol 1e-6 declared; CPU bitwise): every injected fault
+  left the previous record pointed at (block 1 for forward faults, block 4
+  for backward faults, block 2 or 3 for the boundary faults), every damaged
+  newest record was rolled back with its file and check named, `status.json`
+  read `failed` or `cancelled` and then `completed`, scratch directories were
+  empty and `torch.cuda.memory_allocated` returned to its baseline; 25 tests
+  in 604.6 s on the loaded machine (322.7 s and 276 s in earlier runs).
+- G5-08 (bitwise): record arrays E, H, 16 psi (cpml), E, H, psi and the
+  stored face banks (faces), E, H, psi, P, Q (ade) restored bitwise; the
+  optimization interrupted after the twelfth transpose resumed from
+  checkpoint iteration 2 and journal backward-3 and reproduced four
+  objectives, gradient norms, betas (1, 1, 2, 2), random weights, the final
+  design and the Adam moments bitwise; 14 tests in 122.8 s.
+- G5-09 (exact): live owner refused by run id and pid, dead owner taken over
+  as `partial`, other-host, unreadable and foreign locks refused; ten
+  tampered instances named (dtype, bytes, shape, count, missing file,
+  checksum, description fields, kind, marker, empty list) and rolled back;
+  completed, cancelled, failed and partial distinct; MoveFileExW flags
+  REPLACE_EXISTING|WRITE_THROUGH for files and WRITE_THROUGH for the record
+  directory; 20 tests in 155.2 s.
+- G5-10 (case bounds 1 MB per 1000 steps, 1 MB per run, 0.25 MB per update
+  after warm-ups of 5000 steps, 2 runs, 5 updates; energy growth limit 1.5;
+  last-half ceiling 1e-6): RSS slopes 0.046 MB per 1000 steps (606.5 to
+  609.6 MB over 96 samples), 0.009 MB per run (609.93 to 609.97 MB over 7
+  samples), 0.003 MB per update (660.38 to 660.57 MB over 96 samples); torch
+  counters zero; journal peak 2,446,949 of 2,508,800 reserved bytes; source
+  end at step 475, post-source peak 10.328, largest later relative norm
+  1.97e-11, last-half maximum 3.16e-14; eight gradients bitwise identical;
+  100 objectives finite, final beta 8; wall 259 s, 439 s and 397 s (journal
+  writes 149.5 s of the long forward). Pass on every criterion.
+
+**Passed / failed / skipped / not run.**
+Passed: tests/test_restart_faults.py 25 (second recorded run),
+tests/test_checkpoint_completeness.py 14, tests/test_journal_ownership.py 20,
+tests/test_restart_soak_record.py 5, and the unchanged
+tests/test_streamed_restart.py 29 as regression (CPU 23 in 253.4 s, CUDA and
+killed-process 6 in 105.4 s). Failed: the first recorded G5-07 run
+(20260921T203322Z-g5-07-3220c75b, 23 passed, 2 failed) because the
+killed-child script had lost its `StreamedAdjointOptions` import in an
+import cleanup; fixed in 5dfa656 and re-recorded. Skipped: none (CUDA and
+CuPy present). Not run: the full Python suite; tests/test_oracle_budget.py
+fails 3 tests on the base commit already (see below).
+
+**Evidence paths and hashes.**
+- G5-07: `docs/validation/runs/20260921T203322Z-g5-07-3220c75b/evidence.json` (b61ad03, FAILED, evidence SHA-256 prefix 618d89142b870742) and `docs/validation/runs/20260921T204924Z-g5-07-b25fc657/evidence.json` (5dfa656, VERIFIED, 7b39da8d3ba8cb98); case `G5-07_restart_fault_injection.json` 243aa498ff2527ab.
+- G5-08: `docs/validation/runs/20260921T203532Z-g5-08-bbf1867e/evidence.json` (b61ad03, VERIFIED, 64fbbee3ad6de15f); case 7563f7195635ae3c.
+- G5-09: `docs/validation/runs/20260921T203815Z-g5-09-939acc1a/evidence.json` (b61ad03, VERIFIED, 11bb27f24178a619); case b4b53cb3ee51004b.
+- G5-10: `docs/validation/runs/20260921T203823Z-g5-10-0fade0c0/evidence.json` (b61ad03, VERIFIED, e5693471cf61339f); case abe0fd65b409daed; artifacts `docs/validation/g5/G5-10_soak_3060.json` (produced at 767bc8f, clean tree), `G5-10_observed.json`, `docs/RESTART_SOAK.md`.
+- `scripts/check_release_gates.py --task G5-0N` passes all four ("evidence matches the current checkout").
+
+**Remaining defects, risks, external blockers.**
+- `tests/test_oracle_budget.py` fails three tests on the base commit dfdd44d
+  already (G3 case bookkeeping of the merged G3 branches); untouched here.
+- The dispersive, tensor, geometry and modal streamed classes do not take the
+  cancel event; faults inside those paths and asynchronous tiles are not
+  injected (`not_yet_covered` of G5-07).
+- Pid reuse makes a stale lock look alive; cross-host locks are refused; both
+  are documented limitations. Power-loss durability is stated, not exercised.
+- The journal's own contract stays `journal_contract`; `restart_key` is the
+  fingerprint of the design checkpoint (G5-08 case, not_yet_covered).
+- Journal writes cost about one fsync per array file (about 50 ms each on
+  this volume, 1.2 s per 19-array record of the test fixture); the soak's
+  wall time is dominated by it.
+
+**Next first command and task id.** G5-01 to G5-06 remain; for the restart
+work, extend the cancel event to the dispersive, tensor, geometry and modal
+streamed classes and inject faults there:
+
+```
+D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_restart_faults.py tests/test_journal_ownership.py
 ```
 ---
 
