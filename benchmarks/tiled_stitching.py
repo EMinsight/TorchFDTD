@@ -327,7 +327,7 @@ def main():
     path = Path(args.output)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(record, indent=1, allow_nan=False, default=lambda v: v.tolist() if hasattr(v, 'tolist') else str(v)) + '\n',
-                    encoding='utf-8')
+                    encoding='utf-8', newline='\n')
     print('wrote', path, f'{record["total_seconds"]:.0f}s')
 
 
