@@ -216,7 +216,8 @@ def history_note():
     commits = []
     for line in listing.splitlines():
         commit, date, subject = line.split('\t', 2)
-        present = subprocess.run(['git', 'grep', '-q', '-I', '-E', HISTORY_PATTERN, commit, '--', '.'], cwd=ROOT, capture_output=True).returncode == 0
+        pathspec = ['.'] + [':!' + path for path in SCAN_EXCLUDED]
+        present = subprocess.run(['git', 'grep', '-q', '-I', '-E', HISTORY_PATTERN, commit, '--', *pathspec], cwd=ROOT, capture_output=True).returncode == 0
         if present:
             commits.append(dict(commit=commit[:12], date=date, subject=subject))
     return dict(pattern=HISTORY_PATTERN, commits=commits,

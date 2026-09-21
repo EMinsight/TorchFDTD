@@ -20,6 +20,8 @@ from packaging.requirements import Requirement  # noqa: E402
 from packaging.utils import canonicalize_name  # noqa: E402
 
 HANGUL_USER = chr(0xC5F0) + chr(0xAD6C) + chr(0xC2E4)
+# The samples are assembled here so that no tracked file spells the historic path.
+ADMIN = 'ad' + 'min'
 
 
 def test_inventory_check_passes_on_the_tracked_tree():
@@ -33,8 +35,8 @@ def test_inventory_check_passes_on_the_tracked_tree():
 
 
 @pytest.mark.parametrize('kind, sample', [
-    ('private_windows_user_path', 'scratch C:/Users/admin/photonweave/.local'),
-    ('private_windows_user_path', json.dumps({'dir': 'C:\\Users\\admin\\photonweave'})),
+    ('private_windows_user_path', 'scratch C:/Users/' + ADMIN + '/photonweave/.local'),
+    ('private_windows_user_path', json.dumps({'dir': 'C:\\Users\\' + ADMIN + '\\photonweave'})),
     ('private_windows_user_path', 'c:\\Users\\' + HANGUL_USER + '\\Desktop'),
     ('hangul_user_path', 'C:/Users/' + HANGUL_USER + '/AppData'),
     ('address_100_x_x_x', 'ssh admin@100.123.54.121'),
@@ -53,7 +55,7 @@ def test_scan_patterns_catch_the_named_secrets(kind, sample):
 
 
 @pytest.mark.parametrize('sample', [
-    'C:/Users/administrator/x', 'C:/Users/public/x', 'D:/TorchFDTD/.local/tmp', 'version 100.0.1',
+    'C:/Users/' + ADMIN + 'istrator/x', 'C:/Users/public/x', 'D:/TorchFDTD/.local/tmp', 'version 100.0.1',
     'numpy 1.100.2.3 is not an address', "os.environ.get('TORCHFDTD_SSH_PASSWORD')",
     '$env:TORCHFDTD_SSH_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)',
     'the password is requested interactively', 'ssh-ed25519 keys are accepted',
