@@ -22,7 +22,11 @@ All 125 wheel/installed package files match source bytes. The wheel SHA-256 is
 `adc96e49683fc7256af0ae06322a334393454579bcb90f6d8e3458238b750e69`.
 See [usage and limits](FARFIELD_WORKFLOW.md) and the
 [machine-readable record](validation/native_farfield_workflow.json).
-Full CI for this stored closed-box integration is pending.
+Linux CI [35556166662](https://github.com/hyoseokp/TorchFDTD/actions/runs/35556166662)
+at `9ec5173` passed with 1,486 Python passes and 448 skips,
+42 browser passes and 8 skips. Frontend and wheel builds passed.
+The JUnit SHA-256 is `dd05d2b4d30d63402b13532265e858d48b013cbd9020fcc1ab7789158883046d`.
+The completed CI evidence was collected without another numerical sweep.
 General substrate/lattice radiation and complete FDTDX parity remain unfinished.
 Public release remains NOT_CLEARED_FOR_PUBLICATION.
 

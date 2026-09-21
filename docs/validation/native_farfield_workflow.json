@@ -1,5 +1,5 @@
 {
-  "status": "focused_cpu_browser_and_installed_wheel_passed_full_ci_pending",
+  "status": "focused_cpu_browser_installed_wheel_and_full_ci_passed",
   "npz_http_complex_amplitude_relative_l2": 0.0,
   "predeclared_limit": 2e-12,
   "fdtd_precision": "float32",
@@ -86,5 +86,25 @@
     "packaged_sha256": "2323d4eb533b718b8d35b0611e66e33dbb28b80716a8115876d50ee0a3152784",
     "only_crlf_to_lf": true,
     "json_equal": true
+  },
+  "completed_ci": {
+    "run_id": 35556166662,
+    "commit": "9ec5173de19446ca1fbadb0b94b27137c32b2d82",
+    "url": "https://github.com/hyoseokp/TorchFDTD/actions/runs/35556166662",
+    "conclusion": "success",
+    "python": {
+      "tests": 1934,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 448,
+      "passed": 1486,
+      "junit_sha256": "dd05d2b4d30d63402b13532265e858d48b013cbd9020fcc1ab7789158883046d"
+    },
+    "browser": {
+      "passed": 42,
+      "skipped": 8
+    },
+    "frontend_build": "success",
+    "wheel_build": "success"
   }
 }
