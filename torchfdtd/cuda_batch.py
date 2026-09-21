@@ -94,7 +94,7 @@ class FusedBatchIO:
                     component='xyz'.index(field[1].lower())
                     values=torch.as_tensor(waveform,device=device,dtype=dtype)
                     self.owners.append(values)
-                    if any((part.stop if isinstance(part,slice) else part+1)>n for part,n in zip(loc,r.shape)):
+                    if any(((n if part.stop is None else part.stop) if isinstance(part,slice) else part+1)>n for part,n in zip(loc,r.shape)):
                         if not all(isinstance(part,int) for part in loc):
                             raise ValueError(f'{raw.name}: only point sources may address a stored upper PMC/symmetric face; plane sources must end below the wall.')
                         target,index=sample(family,component,loc,raw.name)
