@@ -1,6 +1,6 @@
 # Exact-endpoint PMC implementation plan
 
-Status: the stored upper face/edge topology is implemented in the general Yee operators. `DifferentiableSimulation` (CPU and CUDA, Torch explicit transpose), `StreamedSimulation` (CPU and CUDA tiles, host or disk banks, restart journal) and `run_tensor_batch` admit PMC/symmetric faces next to PEC and per-face CPML, with the material and admission contract in the final section of this document. Native `Simulation(project).run()` keeps the bounded exact-endpoint forward dispatch described below, checked at run time rather than at schema validation. The fused CUDA backward kernels, ADE materials, plane/reversible/geometry/source-waveform/adjoint-batch paths, subpixel interfaces and periodic/Bloch mixing still reject PMC explicitly. This plan contains no vendor execution or equivalence claims.
+Status: the stored upper face/edge topology is implemented in the general Yee operators. `DifferentiableSimulation` and `DispersiveSimulation` (CPU and CUDA, Torch explicit transpose), `StreamedSimulation` and `StreamedDispersiveSimulation` (CPU and CUDA tiles, host or disk banks, restart journal) and `run_tensor_batch` admit PMC/symmetric faces next to PEC and per-face CPML, with nondispersive or coupled trapezoidal ADE media, under the material and admission contract in the final section of this document. Native `Simulation(project).run()` keeps the bounded exact-endpoint forward dispatch described below, checked at run time rather than at schema validation. The fused CUDA backward and ADE kernels, plane/reversible/geometry/source-waveform/adjoint-batch paths, subpixel interfaces and periodic/Bloch mixing still reject PMC explicitly. This plan contains no vendor execution or equivalence claims.
 
 The existing mesh has N cell intervals with endpoints x_0 and x_N. E_a occupies half nodes along a and integer nodes along transverse axes. H_a occupies integer nodes along a and half nodes along transverse axes. Existing arrays omit every upper integer node. PMC has even tangential E and normal H, and odd normal E and tangential H. Replacing the missing E_t(N) with E_t(N-1) freezes the last H sample and shifts the wall to x_(N-1/2). That shortcut is prohibited.
 
@@ -526,17 +526,32 @@ dx_wall`, and the last magnetic half cell differences the stored wall E.
   `endpoint_E_upper`/`endpoint_H_upper` in `summary.endpoint_blocks` order.
   Base E/H volumes and plots crop the faces; the state-norm diagnostic covers
   the volume arrays only.
+- ADE media: every stored upper E face/edge block owns P/Q banks
+  `(poles, *block)` after the volume P/Q in the state tuple
+  `(E, H, psi..., E faces..., H faces..., P, Q, face P..., face Q...)`.
+  `DispersiveSimulation` and `StreamedDispersiveSimulation` take `epsilon_inf`
+  and spatial `strength`/`omega0`/`gamma` with `material_shape` rows; the
+  coupled trapezoidal update and its transpose run per array with the same
+  coefficients as the interior, and parameter cotangents are assembled on the
+  stored rows before the layout reduction. Tensor-batch cohorts give each
+  dispersive material one `MaterialADE` bank per face block it owns, corrected
+  after the fused electric launch like the volume banks. CUDA uses the Torch
+  reference step and explicit transpose on the device; the fused ADE kernels
+  (`cuda_kernel='fused'`, `backward_kernel='fused'`, fused tiles) are rejected
+  with PMC faces.
 
 ### Supported combinations
 
 | Path | PMC/symmetric with PEC and per-face CPML | Sources/monitors on faces and edges | Still rejected explicitly |
 | --- | --- | --- | --- |
-| `DifferentiableSimulation` CPU, FP32/FP64 | yes | point sources and monitors | ADE, subpixel, periodic/Bloch mixing, plane sources reaching a wall, complex fields |
+| `DifferentiableSimulation` CPU, FP32/FP64 | yes | point sources and monitors | subpixel, periodic/Bloch mixing, plane sources reaching a wall, complex fields |
 | `DifferentiableSimulation` CUDA | fused forward, Torch transpose | point sources and monitors | `backward_kernel='fused'`, as above |
+| `DispersiveSimulation` CPU/CUDA, FP32/FP64 | yes, face P/Q banks, shared or spatial poles | point sources and monitors | `cuda_kernel='fused'`, `backward_kernel='fused'`, as above |
 | `StreamedSimulation` CPU/CUDA, host/disk banks, restart journal | yes | point sources and monitors | as above; `estimate_streamed_work` and `plan_streamed_work` do not model faces |
-| `run_tensor_batch` | yes, with CUDA graphs | point sources and monitors | ADE, TFSF and one-way sources, field monitors |
-| `Simulation.run()` exact-endpoint forward | closed PEC/PMC, or the restricted equal-profile CPML | point electric sources, point monitors | every other combination, checked at run time |
-| Plane, reversible, reversible-CPML, dispersive, streamed-dispersive, geometry, density, source-waveform, mode-injected, adjoint-batch simulations, `TensorDielectricSimulation`, `_System` subclasses, `YeeGrid.curl` | no | - | any PMC/symmetric face |
+| `StreamedDispersiveSimulation` CPU/CUDA, host/disk banks, restart journal | yes, face P/Q banks through halos and the last tile | point sources and monitors | fused ADE tile kernels (Torch tiles are used), as above |
+| `run_tensor_batch` | yes, with CUDA graphs and face `MaterialADE` banks | point sources and monitors | TFSF and one-way sources, field monitors |
+| `Simulation.run()` exact-endpoint forward | closed PEC/PMC, or the restricted equal-profile CPML, nondispersive | point electric sources, point monitors | every other combination, checked at run time |
+| Plane, reversible, reversible-CPML, dispersive-plane, geometry, density, source-waveform, mode-injected, adjoint-batch simulations, `TensorDielectricSimulation`, other `_System` subclasses, `YeeGrid.curl` | no | - | any PMC/symmetric face |
 
 ### Evidence
 
@@ -572,12 +587,35 @@ dx_wall`, and the last magnetic half cell differences the stored wall E.
   three-layer `sigma_scale=.1` profile. These are normal-incidence pulse
   measurements on a 5x5 cell PMC duct, not a broadband or oblique study.
 
+`tests/test_pmc_dispersive.py`, 15 checks on the same GPU, records for two
+Lorentz poles with spatial strength on the stored rows:
+
+- The same two mirrored full PEC domains with dispersive media: signals
+  bitwise equal, folded `epsilon_inf` and strength gradients within `4.7e-10`
+  of `2.7e-3` and `1.7e-41` of `1.1e-34`, shared `omega0`/`gamma` gradients
+  within `2e-25` of `1e-18`, wall rows nonzero and padding rows exactly zero.
+- FP64 CPU: adjoint minus autograd at most `2.7e-16` relative for all four
+  parameters; central differences of the joint directional derivative
+  `6.6e-7` converge at second order, errors `3.2e-11`, `8e-12`, `2e-12`.
+- CUDA FP32 adjoint within `2.5e-7` relative of autograd for all four
+  parameters, shared and spatial poles; CUDA FP64 within `1e-9`.
+- Host and disk checkpoint tiers restore the face P/Q banks;
+  `restart_bytes` and `material_state_bytes` equal the exact state sums.
+- Streamed CPU and CUDA, host and disk banks, restart journal: signals
+  bitwise equal to the resident reference, all gradients within `2.4e-7`
+  relative, `state_bytes` (32,448 for the 10x6x6 case with two poles) equal
+  to the exact host state sum and to `estimate_streamed_dispersive_memory`.
+- A tensor-batch cohort with a two-pole block reaching the x-upper face
+  matches `DispersiveSimulation` with masked spatial strength within `3e-6`
+  relative, and its `dispersive_samples` count the face nodes.
+
 ### Remaining limitations
 
-- No face ADE state banks: dispersive materials are rejected with PMC faces
-  at schema validation.
-- The fused CUDA adjoint kernels, the complex Bloch kernels and the ordinary
-  CPU/NumPy `YeeGrid` forward do not implement the stored faces.
+- The fused CUDA adjoint and ADE kernels, the complex Bloch kernels and the
+  ordinary CPU/NumPy `YeeGrid` forward do not implement the stored faces;
+  PMC ADE runs on CUDA through the Torch reference step and transpose.
+- `DispersivePlaneSimulation` and the exact-endpoint forward have no ADE
+  face path; `Simulation.run()` rejects dispersive materials with PMC.
 - Native `Simulation.run()` keeps the exact-endpoint contract; per-face CPML
   profiles with PMC run through `run_tensor_batch` or the adjoint APIs.
 - Streamed work planning and the browser have no face model.

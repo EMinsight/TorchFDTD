@@ -82,6 +82,8 @@ PMC/symmetric faces carry their stored upper face and edge arrays through the
 same banks, checkpoints and restart journal; only the tile whose core ends at
 the last row owns the X-upper faces, and `tests/test_pmc_general.py` compares
 CPU and CUDA tiles with host and disk banks against the resident adjoint.
+`StreamedDispersiveSimulation` adds face P/Q banks to the same tiles with the
+Torch ADE step on CUDA (`tests/test_pmc_dispersive.py`).
 The packet/workspace/complex-CUDA suites passed 50 checks on RTX 3060. Their
 runtime is not used as a benchmark because a separate CR validation was active.
 
