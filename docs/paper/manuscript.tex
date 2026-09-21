@@ -256,7 +256,7 @@ Gradient relative $L_2$ error & & $9.08\times10^{-8}$ \\
 
 \section{Discussion}
 
-We demonstrate a time-domain solver in which the same fused CUDA kernels serve the forward run, its transposed sweep and a streamed execution whose field state may exceed the processor by more than an order of magnitude, with a device footprint of 2 to 3 GB for a 54 GB problem. The measured reservations and the journal turn a large adjoint from a single fragile allocation into a sequence of block records that can be planned, budgeted and resumed.
+We demonstrate a time-domain solver in which the same fused CUDA kernels serve the forward run, its transposed sweep and a streamed execution whose field state exceeds the memory of the processor, with a device footprint of 2 to 3 GB for a 54 GB problem. The measured reservations and the journal turn a large adjoint from a single fragile allocation into a sequence of block records that can be planned, budgeted and resumed.
 
 The design of the differentiation layer separates it from frameworks that differentiate their own operations. TORCWA and FDTDX obtain gradients from the framework at the cost of keeping every differentiated operation inside it \citep{kim2023,mahlau2024}, whereas TorchFDTD pays that cost once, in the transposes of a small set of kernels, and is then free to fuse, tile and offload. The price is coverage: a new physical update needs its transpose before it becomes differentiable, and the eigenmode solver and the source positions are held fixed here as they are in the frameworks above. Single-domain multi-GPU execution is implemented on CPU ranks and awaits a validation on two devices.
 
