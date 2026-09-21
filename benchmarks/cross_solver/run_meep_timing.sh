@@ -2,7 +2,7 @@
 # Meep timing fixtures only (primary 12-rank throughput, then the rank sweep), followed by combine and report.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
-ROOT=/root/torchfdtd-bench
+ROOT=${TORCHFDTD_BENCH_ROOT:-$HOME/torchfdtd-bench}
 {
   bash "$HERE/run_meep.sh" 12 --fixture throughput
   bash "$HERE/meep_rank_sweep.sh"

@@ -2,8 +2,8 @@
 # Run the Meep driver inside the micromamba "meep" environment from the repository root.
 # Usage: run_meep.sh <ranks> [args...]   (ranks=1 runs without mpirun)
 set -eu
-ROOT=/root/torchfdtd-bench
-WORKTREE=/mnt/d/TorchFDTD/.local/worktrees/cross-solver
+ROOT=${TORCHFDTD_BENCH_ROOT:-$HOME/torchfdtd-bench}
+WORKTREE=$(cd "$(dirname "$0")/../.." && pwd)
 export MAMBA_ROOT_PREFIX=$ROOT/micromamba
 export OMP_NUM_THREADS=1
 export PYTHONUNBUFFERED=1

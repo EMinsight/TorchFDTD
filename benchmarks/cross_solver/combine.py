@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -238,7 +239,7 @@ def adjoint_block(torch_rec, fdtdx_ckpt, fdtdx_rev, fdtdx_ckpt16, artifacts):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--artifacts', default='/root/torchfdtd-bench/artifacts')
+    parser.add_argument('--artifacts', default=os.path.join(os.environ.get('TORCHFDTD_BENCH_ROOT', os.path.expanduser('~/torchfdtd-bench')), 'artifacts'))
     args = parser.parse_args()
     fixtures = {name: common.load_fixture(name) for name in ('slab', 'sphere', 'throughput', 'adjoint')}
     slab = {s: load(f'{s}_slab') for s in ('torchfdtd', 'fdtdx', 'meep')}

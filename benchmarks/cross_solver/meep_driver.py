@@ -24,6 +24,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import common  # noqa: E402
 
+BENCH_ROOT = Path(os.environ.get('TORCHFDTD_BENCH_ROOT', os.path.expanduser('~/torchfdtd-bench')))
+
 PACKAGES = ('meep', 'numpy', 'scipy', 'mpich', 'mpi4py')
 SOLVER = 'meep'
 RECORD_SUFFIX = ['']
@@ -37,9 +39,10 @@ def log(*args):
         print(*args, flush=True)
 
 
-def conda_versions(names, listing=Path('/root/torchfdtd-bench/meep-list.txt')):
+def conda_versions(names, listing=None):
     """Versions of conda-forge packages (mpich, pymeep, ...) from the micromamba listing written by setup_env.sh."""
     out = {}
+    listing = BENCH_ROOT / 'meep-list.txt' if listing is None else listing
     try:
         for line in listing.read_text(encoding='utf-8').splitlines():
             parts = line.split()
@@ -244,7 +247,7 @@ def throughput_simulation(spec, case):
     return sim, duration
 
 
-TOKEN_DIR = Path('/root/torchfdtd-bench/tmp') / f'sync_{os.getppid()}'
+TOKEN_DIR = BENCH_ROOT / 'tmp' / f'sync_{os.getppid()}'
 
 
 def master_broadcast(tag, value=None):
@@ -386,7 +389,7 @@ def main():
     parser.add_argument('--repeats', type=int, default=3)
     parser.add_argument('--record-suffix', default='', help='Suffix for the record name (used by the MPI rank sweep).')
     parser.add_argument('--no-probe', action='store_true', help='Throughput without the per-step get_field_point probe.')
-    parser.add_argument('--artifacts', default='/root/torchfdtd-bench/artifacts')
+    parser.add_argument('--artifacts', default=os.path.join(os.environ.get('TORCHFDTD_BENCH_ROOT', os.path.expanduser('~/torchfdtd-bench')), 'artifacts'))
     parser.add_argument('--cpu-idle-limit', type=float, default=50.0, help='Host CPU load (percent) that must not be exceeded before a timing block.')
     args = parser.parse_args()
     spec = common.load_fixture(args.fixture)

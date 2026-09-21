@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Build the isolated comparison environments under /root/torchfdtd-bench.
+# Build the isolated comparison environments under $TORCHFDTD_BENCH_ROOT (default ~/torchfdtd-bench).
 # GPU venv: Python 3.12 (from micromamba), torch cu128, cupy, jax[cuda12], fdtdx, torchfdtd.
 # CPU env: micromamba environment "meep" with conda-forge pymeep (MPI build preferred).
 set -euo pipefail
-ROOT=/root/torchfdtd-bench
-WORKTREE=/mnt/d/TorchFDTD/.local/worktrees/cross-solver
+ROOT=${TORCHFDTD_BENCH_ROOT:-$HOME/torchfdtd-bench}
+WORKTREE=$(cd "$(dirname "$0")/../.." && pwd)
 export PIP_CACHE_DIR=$ROOT/pip-cache
 export MAMBA_ROOT_PREFIX=$ROOT/micromamba
 export TMPDIR=$ROOT/tmp

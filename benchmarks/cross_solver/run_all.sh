@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Run every fixture for every solver in sequence, then combine the records and write the document.
-# Usage (from Windows): wsl.exe -d torchfdtd-bench -- bash /mnt/d/TorchFDTD/.local/worktrees/cross-solver/benchmarks/cross_solver/run_all.sh
+# Usage (from Windows, with the repository on D:): wsl.exe -d torchfdtd-bench -- bash /mnt/d/TorchFDTD/benchmarks/cross_solver/run_all.sh
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
-ROOT=/root/torchfdtd-bench
+ROOT=${TORCHFDTD_BENCH_ROOT:-$HOME/torchfdtd-bench}
 IDLE=${IDLE_LIMIT_MB:-3200}
 LOG=$ROOT/logs/run_all_$(date +%Y%m%d_%H%M%S).log
 mkdir -p "$ROOT/logs"

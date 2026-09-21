@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import gc
 import json
+import os
 import math
 import sys
 import time
@@ -329,7 +330,7 @@ def main():
     parser.add_argument('--sizes', nargs='+', type=int, default=[64, 96])
     parser.add_argument('--repeats', type=int, default=3)
     parser.add_argument('--idle-limit-mb', type=float, default=1500)
-    parser.add_argument('--artifacts', default='/root/torchfdtd-bench/artifacts')
+    parser.add_argument('--artifacts', default=os.path.join(os.environ.get('TORCHFDTD_BENCH_ROOT', os.path.expanduser('~/torchfdtd-bench')), 'artifacts'))
     args = parser.parse_args()
     spec = common.load_fixture(args.fixture)
     torch.backends.cudnn.benchmark = False

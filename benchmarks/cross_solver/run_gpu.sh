@@ -2,8 +2,8 @@
 # Run one GPU-side driver inside the comparison venv from the repository root.
 # Usage: run_gpu.sh <driver.py> [args...]
 set -eu
-ROOT=/root/torchfdtd-bench
-WORKTREE=/mnt/d/TorchFDTD/.local/worktrees/cross-solver
+ROOT=${TORCHFDTD_BENCH_ROOT:-$HOME/torchfdtd-bench}
+WORKTREE=$(cd "$(dirname "$0")/../.." && pwd)
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export JAX_PLATFORMS=cuda
 export CUPY_CACHE_DIR=$ROOT/cupy-cache

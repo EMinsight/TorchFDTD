@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Verify the two comparison environments and print every relevant version.
 set -eu
-ROOT=/root/torchfdtd-bench
+ROOT=${TORCHFDTD_BENCH_ROOT:-$HOME/torchfdtd-bench}
 export MAMBA_ROOT_PREFIX=$ROOT/micromamba
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 "$ROOT/venv/bin/python" - <<'PY'
