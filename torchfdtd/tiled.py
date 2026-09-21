@@ -29,7 +29,6 @@ from .geometry import object_bounds
 from .models import FieldMonitor, Project, Source, Structure
 from .radiation import project_farfield
 
-C0 = 299792458.0
 
 
 def suggest_overlap(distance_um, max_angle_deg, wavelength_um, *, absorber_um=None):
@@ -545,40 +544,23 @@ def run_tiled(project, plan, *, backend, options=None, executor='sequential', bl
 def propagate_plane(stitched, distance_um, index, *, pad=2):
     """Angular-spectrum propagation of every component to a parallel plane.
 
-    Each Cartesian component of E and H satisfies the scalar Helmholtz equation
-    in the homogeneous medium of index ``index``, so the plane is zero padded
-    ``pad`` times its size, transformed with ``fft2``, multiplied by
-    ``exp(i k_n d)`` with ``k_n = sqrt(k^2 - ku^2 - kv^2)`` (imaginary for
-    evanescent waves, which decay) and cropped back to the grid. ``distance_um``
-    is measured away from the device along the plane's propagation direction and
-    must be nonnegative; the plane holds only outgoing waves. Rays leaving the
-    padded window wrap around, so choose ``pad`` with
+    One inverse FFT of ``angular_spectrum.propagate_volume`` at one distance:
+    each Cartesian component of E and H satisfies the scalar Helmholtz
+    equation in the homogeneous medium of index ``index``, so the plane is
+    zero padded ``pad`` times its size, transformed, multiplied by
+    ``exp(i k_n d)`` and cropped back. ``distance_um`` is measured away from
+    the device along the plane's propagation direction and must be
+    nonnegative; the plane holds only outgoing waves. Rays leaving the padded
+    window wrap around, so choose ``pad`` with
     ``(pad - 1) * span / 2 >= distance * tan(max angle)``.
     """
+    from .angular_spectrum import propagate_volume
     if isinstance(distance_um, bool) or not isinstance(distance_um, (int, float)) or not math.isfinite(distance_um) or distance_um < 0:
         raise ValueError('distance_um must be a finite nonnegative distance away from the device.')
-    if isinstance(index, bool) or not isinstance(index, (int, float)) or not math.isfinite(index) or index <= 0:
-        raise ValueError('index must be a positive real refractive index.')
-    if isinstance(pad, bool) or not isinstance(pad, int) or pad < 1:
-        raise ValueError('pad must be an integer of at least one.')
-    fields = stitched.fields
-    count, nu, nv, _ = fields.shape
-    hu, hv = stitched.spacing_um
-    pu, pv = pad * nu, (pad * nv if nv > 1 else 1)
-    ou, ov = (pu - nu) // 2, (pv - nv) // 2
-    padded = torch.nn.functional.pad(fields, (0, 0, ov, pv - nv - ov, ou, pu - nu - ou))
-    ku = 2 * math.pi * torch.fft.fftfreq(pu, hu, dtype=torch.float64, device=fields.device)
-    kv = 2 * math.pi * torch.fft.fftfreq(pv, hv, dtype=torch.float64, device=fields.device)
-    k = 2 * math.pi * index * stitched.frequency_hz.to(device=fields.device, dtype=torch.float64) / C0 * 1e-6
-    argument = k[:, None, None].square() - (ku[:, None].square() + kv[None, :].square())[None]
-    kn = torch.where(argument >= 0, torch.sqrt(argument.clamp(min=0)).to(torch.complex128),
-                     1j * torch.sqrt((-argument).clamp(min=0)).to(torch.complex128))
-    transfer = torch.exp(1j * kn * distance_um).to(fields.dtype)
-    spectrum = torch.fft.fft2(padded, dim=(1, 2))
-    propagated = torch.fft.ifft2(spectrum * transfer[..., None], dim=(1, 2))[:, ou:ou + nu, ov:ov + nv]
+    volume = propagate_volume(stitched, [float(distance_um)], index=index, components=stitched.components, pad=pad, chunk=1)
     report = dict(stitched.report, propagation=dict(distance_um=distance_um, index=index, pad=pad,
                   method='angular spectrum per Cartesian component, zero padded'))
-    return replace(stitched, fields=propagated, offset_um=stitched.offset_um + stitched.direction * distance_um, report=report,
+    return replace(stitched, fields=volume.fields[:, 0], offset_um=stitched.offset_um + stitched.direction * distance_um, report=report,
                    tile_planes=None)
 
 

@@ -171,3 +171,8 @@ from .tiled import (TilePlan, TileSpec, StitchedPlane, plan_tiles, run_tiled, st
                     farfield_from_stitched, suggest_overlap, TiledPlaneSimulation)
 __all__ += ["TilePlan", "TileSpec", "StitchedPlane", "plan_tiles", "run_tiled", "stitch_planes", "propagate_plane",
             "farfield_from_stitched", "suggest_overlap", "TiledPlaneSimulation"]
+
+from .angular_spectrum import (PlaneSpectrum, SectionResult, VolumeResult, PointsResult, plane_spectrum, propagate_section,
+                               propagate_volume, propagate_points, volume_bytes)
+__all__ += ["PlaneSpectrum", "SectionResult", "VolumeResult", "PointsResult", "plane_spectrum", "propagate_section",
+            "propagate_volume", "propagate_points", "volume_bytes"]
