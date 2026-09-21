@@ -1,0 +1,464 @@
+{
+ "example": "coupler",
+ "seed": 1,
+ "iterations": 16,
+ "declared": {
+  "length_um": 6.4,
+  "period_um": 2.4,
+  "slab_um": 1.0,
+  "core_epsilon": 4.0,
+  "cladding_epsilon": 2.25,
+  "guide_width_um": 0.6,
+  "guide_offset_um": 0.3,
+  "wavelength_um": 1.55,
+  "holdout_um": 1.5,
+  "port_um": 1.0,
+  "source_um": 1.8,
+  "box_um": [
+   -0.6,
+   0.6,
+   -1.0,
+   1.0
+  ],
+  "pixels": [
+   6,
+   10
+  ],
+  "pixel_um": 0.2,
+  "coarse_mesh_um": 0.2,
+  "coarse_steps": 500,
+  "fine_mesh_um": 0.1,
+  "fine_steps": 1000,
+  "filter_radius_um": 0.4,
+  "symmetry": "rotate180",
+  "learning_rate": 0.1,
+  "beta_initial": 4.0,
+  "continuation": "x2 every 4 steps to 64",
+  "objective": "modal transmission |S21|^2 at 1.55 um, maximized",
+  "holdout": "|S21|^2 at 1.50 um of the final GDS design, never optimized"
+ },
+ "history": [
+  {
+   "iteration": 1,
+   "objective": -0.3624507188796997,
+   "metrics": {
+    "transmission": 0.3624507188796997,
+    "reflection": 0.0011906216386705637,
+    "reverse_transmission": 0.3622216582298279
+   },
+   "gradient_norm": 0.036299508064985275,
+   "beta": 4.0,
+   "beta_next": 4.0,
+   "elapsed_s": 15.762760799843818
+  },
+  {
+   "iteration": 2,
+   "objective": -0.38514456152915955,
+   "metrics": {
+    "transmission": 0.38514456152915955,
+    "reflection": 0.0010407364461570978,
+    "reverse_transmission": 0.3849722146987915
+   },
+   "gradient_norm": 0.03665241599082947,
+   "beta": 4.0,
+   "beta_next": 4.0,
+   "elapsed_s": 15.285816899966449
+  },
+  {
+   "iteration": 3,
+   "objective": -0.4083617627620697,
+   "metrics": {
+    "transmission": 0.4083617627620697,
+    "reflection": 0.0009317146032117307,
+    "reverse_transmission": 0.40826570987701416
+   },
+   "gradient_norm": 0.03742818161845207,
+   "beta": 4.0,
+   "beta_next": 4.0,
+   "elapsed_s": 15.939350900240242
+  },
+  {
+   "iteration": 4,
+   "objective": -0.4317602217197418,
+   "metrics": {
+    "transmission": 0.4317602217197418,
+    "reflection": 0.0008531661587767303,
+    "reverse_transmission": 0.43172967433929443
+   },
+   "gradient_norm": 0.037175439298152924,
+   "beta": 4.0,
+   "beta_next": 8.0,
+   "elapsed_s": 15.083562800195068
+  },
+  {
+   "iteration": 5,
+   "objective": -0.5163688659667969,
+   "metrics": {
+    "transmission": 0.5163688659667969,
+    "reflection": 0.0005482787382788956,
+    "reverse_transmission": 0.5161197185516357
+   },
+   "gradient_norm": 0.05824897438287735,
+   "beta": 8.0,
+   "beta_next": 8.0,
+   "elapsed_s": 17.136162200011313
+  },
+  {
+   "iteration": 6,
+   "objective": -0.5445442199707031,
+   "metrics": {
+    "transmission": 0.5445442199707031,
+    "reflection": 0.00021254789317026734,
+    "reverse_transmission": 0.5442831516265869
+   },
+   "gradient_norm": 0.05446366220712662,
+   "beta": 8.0,
+   "beta_next": 8.0,
+   "elapsed_s": 16.151360400021076
+  },
+  {
+   "iteration": 7,
+   "objective": -0.5720199346542358,
+   "metrics": {
+    "transmission": 0.5720199346542358,
+    "reflection": 5.9358280850574374e-05,
+    "reverse_transmission": 0.5718239545822144
+   },
+   "gradient_norm": 0.04832620546221733,
+   "beta": 8.0,
+   "beta_next": 8.0,
+   "elapsed_s": 15.517049700021744
+  },
+  {
+   "iteration": 8,
+   "objective": -0.5960692167282104,
+   "metrics": {
+    "transmission": 0.5960692167282104,
+    "reflection": 0.00013185279385652393,
+    "reverse_transmission": 0.5960228443145752
+   },
+   "gradient_norm": 0.03815843164920807,
+   "beta": 8.0,
+   "beta_next": 16.0,
+   "elapsed_s": 15.533423600252718
+  },
+  {
+   "iteration": 9,
+   "objective": -0.6517792344093323,
+   "metrics": {
+    "transmission": 0.6517792344093323,
+    "reflection": 0.0010087884729728103,
+    "reverse_transmission": 0.6517754793167114
+   },
+   "gradient_norm": 0.0537327416241169,
+   "beta": 16.0,
+   "beta_next": 16.0,
+   "elapsed_s": 14.842762500047684
+  },
+  {
+   "iteration": 10,
+   "objective": -0.666797935962677,
+   "metrics": {
+    "transmission": 0.666797935962677,
+    "reflection": 0.001995907863602042,
+    "reverse_transmission": 0.6670723557472229
+   },
+   "gradient_norm": 0.031060488894581795,
+   "beta": 16.0,
+   "beta_next": 16.0,
+   "elapsed_s": 15.315270700026304
+  },
+  {
+   "iteration": 11,
+   "objective": -0.6741815209388733,
+   "metrics": {
+    "transmission": 0.6741815209388733,
+    "reflection": 0.0034948813263326883,
+    "reverse_transmission": 0.6746077537536621
+   },
+   "gradient_norm": 0.021410733461380005,
+   "beta": 16.0,
+   "beta_next": 16.0,
+   "elapsed_s": 15.397110499907285
+  },
+  {
+   "iteration": 12,
+   "objective": -0.679193377494812,
+   "metrics": {
+    "transmission": 0.679193377494812,
+    "reflection": 0.00491764722391963,
+    "reverse_transmission": 0.6796624064445496
+   },
+   "gradient_norm": 0.017983976751565933,
+   "beta": 16.0,
+   "beta_next": 32.0,
+   "elapsed_s": 16.096613199915737
+  },
+  {
+   "iteration": 13,
+   "objective": -0.6891981959342957,
+   "metrics": {
+    "transmission": 0.6891981959342957,
+    "reflection": 0.008905175141990185,
+    "reverse_transmission": 0.6893772482872009
+   },
+   "gradient_norm": 0.013845493085682392,
+   "beta": 32.0,
+   "beta_next": 32.0,
+   "elapsed_s": 16.188007300253958
+  },
+  {
+   "iteration": 14,
+   "objective": -0.690416157245636,
+   "metrics": {
+    "transmission": 0.690416157245636,
+    "reflection": 0.009961850009858608,
+    "reverse_transmission": 0.6905724406242371
+   },
+   "gradient_norm": 0.018222181126475334,
+   "beta": 32.0,
+   "beta_next": 32.0,
+   "elapsed_s": 15.556780999992043
+  },
+  {
+   "iteration": 15,
+   "objective": -0.6930238604545593,
+   "metrics": {
+    "transmission": 0.6930238604545593,
+    "reflection": 0.010504266247153282,
+    "reverse_transmission": 0.693183958530426
+   },
+   "gradient_norm": 0.023816678673028946,
+   "beta": 32.0,
+   "beta_next": 32.0,
+   "elapsed_s": 15.968918399885297
+  },
+  {
+   "iteration": 16,
+   "objective": -0.6979910135269165,
+   "metrics": {
+    "transmission": 0.6979910135269165,
+    "reflection": 0.010728838853538036,
+    "reverse_transmission": 0.6981925368309021
+   },
+   "gradient_norm": 0.031945742666721344,
+   "beta": 32.0,
+   "beta_next": 64.0,
+   "elapsed_s": 15.003385999705642
+  }
+ ],
+ "fabrication": {
+  "feature_sizes": {
+   "min_linewidth_um": 0.2,
+   "min_gap_um": 0.2,
+   "linewidth_pixels": 1,
+   "gap_pixels": 1,
+   "spacing_um": 0.2,
+   "maximum_side_pixels": 10,
+   "saturated": [],
+   "solid_fraction": 0.5,
+   "definition": "largest digital-square side whose morphological opening leaves the solid (linewidth) or the void (gap) unchanged"
+  },
+  "declared": {
+   "min_linewidth_um": 0.4,
+   "min_gap_um": 0.4,
+   "perturbation_um": 0.2,
+   "boundary": "extend"
+  },
+  "violations": [
+   "min_linewidth",
+   "min_gap"
+  ],
+  "satisfies_declared_constraints": false,
+  "filter_radius_um": 0.4,
+  "perturbation": {
+   "realized_um": 0.2,
+   "nominal": {
+    "objective": -0.6932952404022217,
+    "metrics": {
+     "transmission": 0.6932952404022217,
+     "reflection": 0.010286161676049232,
+     "reverse_transmission": 0.6932596564292908
+    }
+   },
+   "eroded": {
+    "objective": -0.4072727560997009,
+    "metrics": {
+     "transmission": 0.4072727560997009,
+     "reflection": 0.01667771115899086,
+     "reverse_transmission": 0.4067590832710266
+    },
+    "objective_change": 0.28602248430252075,
+    "solid_fraction": 0.1
+   },
+   "dilated": {
+    "objective": -0.5953676104545593,
+    "metrics": {
+     "transmission": 0.5953676104545593,
+     "reflection": 0.030830448493361473,
+     "reverse_transmission": 0.5961624979972839
+    },
+    "objective_change": 0.09792762994766235,
+    "solid_fraction": 0.8
+   }
+  }
+ },
+ "binary": [
+  [
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   0,
+   0,
+   0,
+   0
+  ],
+  [
+   1,
+   1,
+   0,
+   1,
+   1,
+   1,
+   0,
+   0,
+   0,
+   0
+  ],
+  [
+   1,
+   0,
+   0,
+   1,
+   1,
+   1,
+   0,
+   0,
+   0,
+   0
+  ],
+  [
+   0,
+   0,
+   0,
+   0,
+   1,
+   1,
+   1,
+   0,
+   0,
+   1
+  ],
+  [
+   0,
+   0,
+   0,
+   0,
+   1,
+   1,
+   1,
+   0,
+   1,
+   1
+  ],
+  [
+   0,
+   0,
+   0,
+   0,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1
+  ]
+ ],
+ "export": {
+  "gds": "docs\\validation\\g6\\export\\coupler\\seed1\\coupler-seed1.gds",
+  "structures": "docs\\validation\\g6\\export\\coupler\\seed1\\coupler-seed1-structures.json",
+  "structure_count": 9
+ },
+ "final_evaluation": {
+  "coarse_objective": -0.7003046274185181,
+  "stages": {
+   "coarse_smooth": {
+    "transmission": 0.7003046274185181,
+    "reflection": 0.012288141995668411,
+    "reverse_transmission": 0.7003589272499084
+   },
+   "fine_smooth": {
+    "transmission": 0.6131999492645264,
+    "reflection": 0.011398687958717346,
+    "reverse_transmission": 0.6132009029388428
+   },
+   "fine_binary": {
+    "transmission": 0.6100113987922668,
+    "reflection": 0.013171081431210041,
+    "reverse_transmission": 0.6100125908851624
+   },
+   "fine_structures": {
+    "transmission": 0.6136260032653809,
+    "reflection": 0.030115623027086258,
+    "reverse_transmission": 0.6152395009994507
+   },
+   "fine_gds": {
+    "transmission": 0.6136260032653809,
+    "reflection": 0.030115623027086258,
+    "reverse_transmission": 0.6152395009994507
+   }
+  },
+  "differences": {
+   "mesh_refinement": {
+    "transmission": -0.0871046781539917,
+    "reflection": -0.0008894540369510651,
+    "reverse_transmission": -0.08715802431106567
+   },
+   "thresholding": {
+    "transmission": -0.0031885504722595215,
+    "reflection": 0.0017723934724926949,
+    "reverse_transmission": -0.00318831205368042
+   },
+   "smoothing": {
+    "transmission": 0.0036146044731140137,
+    "reflection": 0.016944541595876217,
+    "reverse_transmission": 0.00522691011428833
+   },
+   "gds": {
+    "transmission": 0.0,
+    "reflection": 0.0,
+    "reverse_transmission": 0.0
+   },
+   "total": {
+    "transmission": -0.08667862415313721,
+    "reflection": 0.017827481031417847,
+    "reverse_transmission": -0.08511942625045776
+   }
+  },
+  "holdout": {
+   "holdout_transmission": 0.5782968997955322,
+   "holdout_reflection": 0.04807910695672035,
+   "holdout_reverse_transmission": 0.5801025629043579
+  },
+  "binary_solid_fraction": 0.5,
+  "export": {
+   "structure_count": 9,
+   "reimported_structure_count": 9,
+   "gds_structure_count": 9,
+   "gds_sha256": "4df8bc2608c45299740b3a26721a45819b73eefaff52c7be239d096775c9c51f",
+   "gds_maximum_rounding_um": 0.0005,
+   "gds_native_vertex_count": 36
+  },
+  "conventions": {
+   "difference": "after minus before; a negative difference of a maximized metric is a loss",
+   "fine_density": "the evaluator transfers the same pixel density at its own mesh",
+   "fine_structures": "inclusive staircase voxelization of the exported rectangles",
+   "fine_gds": "polygons read back by import_gds from the exported file"
+  }
+ },
+ "wall_time_s": 320.7713350998238,
+ "device": "cpu"
+}

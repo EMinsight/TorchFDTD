@@ -1,0 +1,215 @@
+{
+ "metagrating": {
+  "thresholds": {
+   "final_objective_min": 0.35,
+   "holdout_min": 0.15,
+   "iterations": 24
+  },
+  "starts": [
+   {
+    "seed": 1,
+    "iterations": 24,
+    "final_objective": 0.49845367670059204,
+    "holdout": 0.5916554927825928,
+    "coarse_last_objective": 0.5530598759651184,
+    "differences": {
+     "mesh_refinement": 0.011639237403869629,
+     "thresholding": 0.0026064515113830566,
+     "smoothing": -0.07106035947799683,
+     "gds": 0.0,
+     "total": -0.05681467056274414
+    },
+    "feature_sizes": {
+     "min_linewidth_um": 0.2,
+     "min_gap_um": 0.1,
+     "linewidth_pixels": 4,
+     "gap_pixels": 2,
+     "spacing_um": 0.05,
+     "maximum_side_pixels": 30,
+     "saturated": [],
+     "solid_fraction": 0.5666666666666667,
+     "definition": "largest digital-square side whose morphological opening leaves the solid (linewidth) or the void (gap) unchanged"
+    },
+    "violations": [],
+    "perturbation_objective_change": {
+     "eroded": 0.26529115438461304,
+     "dilated": 0.16064026951789856
+    },
+    "wall_time_s": 303.11533930012956
+   },
+   {
+    "seed": 2,
+    "iterations": 24,
+    "final_objective": 0.518540620803833,
+    "holdout": 0.27646946907043457,
+    "coarse_last_objective": 0.5836865901947021,
+    "differences": {
+     "mesh_refinement": -0.014079511165618896,
+     "thresholding": -0.03048175573348999,
+     "smoothing": -0.03238558769226074,
+     "gds": 0.0,
+     "total": -0.07694685459136963
+    },
+    "feature_sizes": {
+     "min_linewidth_um": 0.1,
+     "min_gap_um": 0.1,
+     "linewidth_pixels": 2,
+     "gap_pixels": 2,
+     "spacing_um": 0.05,
+     "maximum_side_pixels": 30,
+     "saturated": [],
+     "solid_fraction": 0.5,
+     "definition": "largest digital-square side whose morphological opening leaves the solid (linewidth) or the void (gap) unchanged"
+    },
+    "violations": [],
+    "perturbation_objective_change": {
+     "eroded": 0.21699726581573486,
+     "dilated": 0.12885242700576782
+    },
+    "wall_time_s": 283.4588591000065
+   },
+   {
+    "seed": 3,
+    "iterations": 24,
+    "final_objective": 0.46835407614707947,
+    "holdout": 0.4731254279613495,
+    "coarse_last_objective": 0.4553987383842468,
+    "differences": {
+     "mesh_refinement": -0.031014084815979004,
+     "thresholding": -0.003977745771408081,
+     "smoothing": 0.047972649335861206,
+     "gds": 0.0,
+     "total": 0.012980818748474121
+    },
+    "feature_sizes": {
+     "min_linewidth_um": 0.8500000000000001,
+     "min_gap_um": 0.65,
+     "linewidth_pixels": 17,
+     "gap_pixels": 13,
+     "spacing_um": 0.05,
+     "maximum_side_pixels": 30,
+     "saturated": [],
+     "solid_fraction": 0.5666666666666667,
+     "definition": "largest digital-square side whose morphological opening leaves the solid (linewidth) or the void (gap) unchanged"
+    },
+    "violations": [],
+    "perturbation_objective_change": {
+     "eroded": 0.2065170854330063,
+     "dilated": 0.016532301902770996
+    },
+    "wall_time_s": 290.4745926996693
+   }
+  ],
+  "all_starts_pass": true
+ },
+ "coupler": {
+  "thresholds": {
+   "final_objective_min": 0.5,
+   "holdout_min": 0.45,
+   "iterations": 16
+  },
+  "starts": [
+   {
+    "seed": 1,
+    "iterations": 16,
+    "final_objective": 0.6136260032653809,
+    "holdout": 0.5782968997955322,
+    "coarse_last_objective": 0.6979910135269165,
+    "differences": {
+     "mesh_refinement": -0.0871046781539917,
+     "thresholding": -0.0031885504722595215,
+     "smoothing": 0.0036146044731140137,
+     "gds": 0.0,
+     "total": -0.08667862415313721
+    },
+    "feature_sizes": {
+     "min_linewidth_um": 0.2,
+     "min_gap_um": 0.2,
+     "linewidth_pixels": 1,
+     "gap_pixels": 1,
+     "spacing_um": 0.2,
+     "maximum_side_pixels": 10,
+     "saturated": [],
+     "solid_fraction": 0.5,
+     "definition": "largest digital-square side whose morphological opening leaves the solid (linewidth) or the void (gap) unchanged"
+    },
+    "violations": [
+     "min_linewidth",
+     "min_gap"
+    ],
+    "perturbation_objective_change": {
+     "eroded": 0.28602248430252075,
+     "dilated": 0.09792762994766235
+    },
+    "wall_time_s": 320.7713350998238
+   },
+   {
+    "seed": 2,
+    "iterations": 16,
+    "final_objective": 0.5760034918785095,
+    "holdout": 0.5562245845794678,
+    "coarse_last_objective": 0.7223175764083862,
+    "differences": {
+     "mesh_refinement": -0.10561645030975342,
+     "thresholding": 0.001767575740814209,
+     "smoothing": -0.048389554023742676,
+     "gds": 0.0,
+     "total": -0.15223842859268188
+    },
+    "feature_sizes": {
+     "min_linewidth_um": 0.2,
+     "min_gap_um": 0.4,
+     "linewidth_pixels": 1,
+     "gap_pixels": 2,
+     "spacing_um": 0.2,
+     "maximum_side_pixels": 10,
+     "saturated": [],
+     "solid_fraction": 0.5666666666666667,
+     "definition": "largest digital-square side whose morphological opening leaves the solid (linewidth) or the void (gap) unchanged"
+    },
+    "violations": [
+     "min_linewidth"
+    ],
+    "perturbation_objective_change": {
+     "eroded": 0.2636708617210388,
+     "dilated": 0.20936626195907593
+    },
+    "wall_time_s": 356.0699521000497
+   },
+   {
+    "seed": 3,
+    "iterations": 16,
+    "final_objective": 0.5760034918785095,
+    "holdout": 0.5562245845794678,
+    "coarse_last_objective": 0.7251885533332825,
+    "differences": {
+     "mesh_refinement": -0.1147834062576294,
+     "thresholding": 0.007718265056610107,
+     "smoothing": -0.048389554023742676,
+     "gds": 0.0,
+     "total": -0.15545469522476196
+    },
+    "feature_sizes": {
+     "min_linewidth_um": 0.2,
+     "min_gap_um": 0.4,
+     "linewidth_pixels": 1,
+     "gap_pixels": 2,
+     "spacing_um": 0.2,
+     "maximum_side_pixels": 10,
+     "saturated": [],
+     "solid_fraction": 0.5666666666666667,
+     "definition": "largest digital-square side whose morphological opening leaves the solid (linewidth) or the void (gap) unchanged"
+    },
+    "violations": [
+     "min_linewidth"
+    ],
+    "perturbation_objective_change": {
+     "eroded": 0.2636708617210388,
+     "dilated": 0.20936626195907593
+    },
+    "wall_time_s": 301.81564110005274
+   }
+  ],
+  "all_starts_pass": true
+ }
+}

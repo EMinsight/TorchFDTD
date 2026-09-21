@@ -1,0 +1,366 @@
+[
+ {
+  "id": "coupler-seed2-0000",
+  "name": "coupler-seed2 0",
+  "center": [
+   -0.39999999999999997,
+   -0.6,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.40000000199999997,
+   0.40000000200000013,
+   1.0
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "core",
+  "mesh_order": 2
+ },
+ {
+  "id": "coupler-seed2-0001",
+  "name": "coupler-seed2 1",
+  "center": [
+   -0.29999999999999993,
+   -0.9000000000000001,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.600000002,
+   0.200000002,
+   1.0
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "core",
+  "mesh_order": 2
+ },
+ {
+  "id": "coupler-seed2-0002",
+  "name": "coupler-seed2 2",
+  "center": [
+   -0.19999999999999996,
+   -0.29999999999999993,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.800000002,
+   0.20000000199999998,
+   1.0
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "core",
+  "mesh_order": 2
+ },
+ {
+  "id": "coupler-seed2-0003",
+  "name": "coupler-seed2 3",
+  "center": [
+   1.1102230246251565e-16,
+   1.1102230246251565e-16,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   1.2000000020000001,
+   0.40000000200000013,
+   1.0
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "core",
+  "mesh_order": 2
+ },
+ {
+  "id": "coupler-seed2-0004",
+  "name": "coupler-seed2 4",
+  "center": [
+   0.20000000000000012,
+   0.30000000000000016,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.8000000020000001,
+   0.20000000199999998,
+   1.0
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "core",
+  "mesh_order": 2
+ },
+ {
+  "id": "coupler-seed2-0005",
+  "name": "coupler-seed2 5",
+  "center": [
+   0.30000000000000016,
+   0.9000000000000001,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.600000002,
+   0.200000002,
+   1.0
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "core",
+  "mesh_order": 2
+ },
+ {
+  "id": "coupler-seed2-0006",
+  "name": "coupler-seed2 6",
+  "center": [
+   0.40000000000000013,
+   0.6000000000000001,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.4000000020000001,
+   0.4000000019999999,
+   1.0
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "core",
+  "mesh_order": 2
+ }
+]

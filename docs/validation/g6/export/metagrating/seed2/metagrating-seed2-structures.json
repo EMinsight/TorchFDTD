@@ -1,0 +1,158 @@
+[
+ {
+  "id": "metagrating-seed2-0000",
+  "name": "metagrating-seed2 0",
+  "center": [
+   -0.375,
+   0.0,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.15000000200000002,
+   0.250000002,
+   0.5
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "tio2-like",
+  "mesh_order": 2
+ },
+ {
+  "id": "metagrating-seed2-0001",
+  "name": "metagrating-seed2 1",
+  "center": [
+   -0.09999999999999992,
+   0.0,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.10000000199999998,
+   0.250000002,
+   0.5
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "tio2-like",
+  "mesh_order": 2
+ },
+ {
+  "id": "metagrating-seed2-0002",
+  "name": "metagrating-seed2 2",
+  "center": [
+   0.30000000000000004,
+   0.0,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.5000000019999999,
+   0.250000002,
+   0.5
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "tio2-like",
+  "mesh_order": 2
+ }
+]

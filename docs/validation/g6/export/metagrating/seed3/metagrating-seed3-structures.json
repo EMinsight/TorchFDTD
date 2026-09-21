@@ -1,0 +1,106 @@
+[
+ {
+  "id": "metagrating-seed3-0000",
+  "name": "metagrating-seed3 0",
+  "center": [
+   -0.5499999999999999,
+   0.0,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.400000002,
+   0.250000002,
+   0.5
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "tio2-like",
+  "mesh_order": 2
+ },
+ {
+  "id": "metagrating-seed3-0001",
+  "name": "metagrating-seed3 1",
+  "center": [
+   0.525,
+   0.0,
+   0.0
+  ],
+  "enabled": true,
+  "kind": "rectangle",
+  "size": [
+   0.45000000199999995,
+   0.250000002,
+   0.5
+  ],
+  "radius": 0.5,
+  "inner_radius": 0.3,
+  "rotation": 0.0,
+  "rotation_axes": [
+   "z",
+   "x",
+   "y"
+  ],
+  "rotation_angles": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "make_ellipsoid": false,
+  "radius_2": 0.5,
+  "radius_3": 0.5,
+  "inner_radius_2": 0.3,
+  "theta_start": 0.0,
+  "theta_stop": 360.0,
+  "vertices": [
+   [
+    -0.5,
+    -0.5
+   ],
+   [
+    0.5,
+    -0.5
+   ],
+   [
+    0.0,
+    0.5
+   ]
+  ],
+  "holes": [],
+  "material": "tio2-like",
+  "mesh_order": 2
+ }
+]

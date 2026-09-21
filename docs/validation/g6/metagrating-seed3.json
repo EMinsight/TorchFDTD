@@ -1,0 +1,544 @@
+{
+ "example": "metagrating",
+ "seed": 3,
+ "iterations": 24,
+ "declared": {
+  "period_um": 1.5,
+  "slab_um": 0.25,
+  "height_um": 0.5,
+  "wavelength_um": 1.0,
+  "holdout_um": 0.95,
+  "design_epsilon": 4.0,
+  "pixels": 30,
+  "pixel_um": 0.05,
+  "coarse_mesh_um": 0.05,
+  "coarse_steps": 800,
+  "fine_mesh_um": 0.025,
+  "fine_steps": 1600,
+  "filter_radius_um": 0.125,
+  "learning_rate": 0.1,
+  "beta_initial": 4.0,
+  "continuation": "x2 every 4 steps to 64",
+  "objective": "+1 transmitted order efficiency at 1.0 um, maximized",
+  "holdout": "+1 transmitted order efficiency at 0.95 um, recorded and never optimized"
+ },
+ "history": [
+  {
+   "iteration": 1,
+   "objective": -0.002207624725997448,
+   "metrics": {
+    "efficiency": 0.002207624725997448,
+    "holdout_efficiency": 0.0019023572094738483,
+    "zero_order": 0.8457708954811096,
+    "minus_one": 0.0020514768548309803
+   },
+   "gradient_norm": 0.01753832772374153,
+   "beta": 4.0,
+   "beta_next": 4.0,
+   "elapsed_s": 11.496095899958163
+  },
+  {
+   "iteration": 2,
+   "objective": -0.019278457388281822,
+   "metrics": {
+    "efficiency": 0.019278457388281822,
+    "holdout_efficiency": 0.016444789245724678,
+    "zero_order": 0.8163989782333374,
+    "minus_one": 0.01696217618882656
+   },
+   "gradient_norm": 0.05289241671562195,
+   "beta": 4.0,
+   "beta_next": 4.0,
+   "elapsed_s": 10.83419209998101
+  },
+  {
+   "iteration": 3,
+   "objective": -0.049633774906396866,
+   "metrics": {
+    "efficiency": 0.049633774906396866,
+    "holdout_efficiency": 0.04109572246670723,
+    "zero_order": 0.7650708556175232,
+    "minus_one": 0.041447024792432785
+   },
+   "gradient_norm": 0.08367173373699188,
+   "beta": 4.0,
+   "beta_next": 4.0,
+   "elapsed_s": 11.310500599909574
+  },
+  {
+   "iteration": 4,
+   "objective": -0.0928424596786499,
+   "metrics": {
+    "efficiency": 0.0928424596786499,
+    "holdout_efficiency": 0.07508668303489685,
+    "zero_order": 0.6949060559272766,
+    "minus_one": 0.07335995882749557
+   },
+   "gradient_norm": 0.10625316202640533,
+   "beta": 4.0,
+   "beta_next": 8.0,
+   "elapsed_s": 10.241182699799538
+  },
+  {
+   "iteration": 5,
+   "objective": -0.3215514123439789,
+   "metrics": {
+    "efficiency": 0.3215514123439789,
+    "holdout_efficiency": 0.29043859243392944,
+    "zero_order": 0.3038727641105652,
+    "minus_one": 0.2196742743253708
+   },
+   "gradient_norm": 0.2543450593948364,
+   "beta": 8.0,
+   "beta_next": 8.0,
+   "elapsed_s": 10.08874770021066
+  },
+  {
+   "iteration": 6,
+   "objective": -0.36496642231941223,
+   "metrics": {
+    "efficiency": 0.36496642231941223,
+    "holdout_efficiency": 0.33954253792762756,
+    "zero_order": 0.25580260157585144,
+    "minus_one": 0.3035522699356079
+   },
+   "gradient_norm": 0.15747423470020294,
+   "beta": 8.0,
+   "beta_next": 8.0,
+   "elapsed_s": 10.776305600069463
+  },
+  {
+   "iteration": 7,
+   "objective": -0.3913286030292511,
+   "metrics": {
+    "efficiency": 0.3913286030292511,
+    "holdout_efficiency": 0.3770391643047333,
+    "zero_order": 0.21132275462150574,
+    "minus_one": 0.3379242420196533
+   },
+   "gradient_norm": 0.162933811545372,
+   "beta": 8.0,
+   "beta_next": 8.0,
+   "elapsed_s": 10.467978699598461
+  },
+  {
+   "iteration": 8,
+   "objective": -0.4190165102481842,
+   "metrics": {
+    "efficiency": 0.4190165102481842,
+    "holdout_efficiency": 0.4037848711013794,
+    "zero_order": 0.16679051518440247,
+    "minus_one": 0.34909555315971375
+   },
+   "gradient_norm": 0.08282535523176193,
+   "beta": 8.0,
+   "beta_next": 16.0,
+   "elapsed_s": 10.907447900157422
+  },
+  {
+   "iteration": 9,
+   "objective": -0.4408341348171234,
+   "metrics": {
+    "efficiency": 0.4408341348171234,
+    "holdout_efficiency": 0.44604212045669556,
+    "zero_order": 0.05213949829339981,
+    "minus_one": 0.418392539024353
+   },
+   "gradient_norm": 0.24156098067760468,
+   "beta": 16.0,
+   "beta_next": 16.0,
+   "elapsed_s": 11.123772900085896
+  },
+  {
+   "iteration": 10,
+   "objective": -0.451272577047348,
+   "metrics": {
+    "efficiency": 0.451272577047348,
+    "holdout_efficiency": 0.452471524477005,
+    "zero_order": 0.04678205028176308,
+    "minus_one": 0.43278008699417114
+   },
+   "gradient_norm": 0.1545180082321167,
+   "beta": 16.0,
+   "beta_next": 16.0,
+   "elapsed_s": 10.756964299827814
+  },
+  {
+   "iteration": 11,
+   "objective": -0.46021705865859985,
+   "metrics": {
+    "efficiency": 0.46021705865859985,
+    "holdout_efficiency": 0.4607549011707306,
+    "zero_order": 0.04478439316153526,
+    "minus_one": 0.4459172189235687
+   },
+   "gradient_norm": 0.034560784697532654,
+   "beta": 16.0,
+   "beta_next": 16.0,
+   "elapsed_s": 10.375676900148392
+  },
+  {
+   "iteration": 12,
+   "objective": -0.4598936438560486,
+   "metrics": {
+    "efficiency": 0.4598936438560486,
+    "holdout_efficiency": 0.46624481678009033,
+    "zero_order": 0.047711506485939026,
+    "minus_one": 0.4492676258087158
+   },
+   "gradient_norm": 0.05267728120088577,
+   "beta": 16.0,
+   "beta_next": 32.0,
+   "elapsed_s": 10.196163800079376
+  },
+  {
+   "iteration": 13,
+   "objective": -0.4569355845451355,
+   "metrics": {
+    "efficiency": 0.4569355845451355,
+    "holdout_efficiency": 0.46707969903945923,
+    "zero_order": 0.03903738409280777,
+    "minus_one": 0.4633539617061615
+   },
+   "gradient_norm": 0.05865291878581047,
+   "beta": 32.0,
+   "beta_next": 32.0,
+   "elapsed_s": 10.620015399996191
+  },
+  {
+   "iteration": 14,
+   "objective": -0.45481356978416443,
+   "metrics": {
+    "efficiency": 0.45481356978416443,
+    "holdout_efficiency": 0.46801459789276123,
+    "zero_order": 0.041021090000867844,
+    "minus_one": 0.46055498719215393
+   },
+   "gradient_norm": 0.06291893124580383,
+   "beta": 32.0,
+   "beta_next": 32.0,
+   "elapsed_s": 11.016385099850595
+  },
+  {
+   "iteration": 15,
+   "objective": -0.45424190163612366,
+   "metrics": {
+    "efficiency": 0.45424190163612366,
+    "holdout_efficiency": 0.46830347180366516,
+    "zero_order": 0.04159704968333244,
+    "minus_one": 0.459561824798584
+   },
+   "gradient_norm": 0.06172171235084534,
+   "beta": 32.0,
+   "beta_next": 32.0,
+   "elapsed_s": 10.757684799842536
+  },
+  {
+   "iteration": 16,
+   "objective": -0.4549599587917328,
+   "metrics": {
+    "efficiency": 0.4549599587917328,
+    "holdout_efficiency": 0.4682769477367401,
+    "zero_order": 0.04105424880981445,
+    "minus_one": 0.4602167308330536
+   },
+   "gradient_norm": 0.06034267321228981,
+   "beta": 32.0,
+   "beta_next": 64.0,
+   "elapsed_s": 11.170516500249505
+  },
+  {
+   "iteration": 17,
+   "objective": -0.4530513882637024,
+   "metrics": {
+    "efficiency": 0.4530513882637024,
+    "holdout_efficiency": 0.4674476981163025,
+    "zero_order": 0.04018060490489006,
+    "minus_one": 0.4619077742099762
+   },
+   "gradient_norm": 0.09592308104038239,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 11.378960399888456
+  },
+  {
+   "iteration": 18,
+   "objective": -0.4579969048500061,
+   "metrics": {
+    "efficiency": 0.4579969048500061,
+    "holdout_efficiency": 0.46374639868736267,
+    "zero_order": 0.035308849066495895,
+    "minus_one": 0.4695029854774475
+   },
+   "gradient_norm": 0.08728562295436859,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 11.056435400154442
+  },
+  {
+   "iteration": 19,
+   "objective": -0.46014076471328735,
+   "metrics": {
+    "efficiency": 0.46014076471328735,
+    "holdout_efficiency": 0.4568473696708679,
+    "zero_order": 0.03080364130437374,
+    "minus_one": 0.471174418926239
+   },
+   "gradient_norm": 0.0228872150182724,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.716351500246674
+  },
+  {
+   "iteration": 20,
+   "objective": -0.45796072483062744,
+   "metrics": {
+    "efficiency": 0.45796072483062744,
+    "holdout_efficiency": 0.4544508457183838,
+    "zero_order": 0.03038555569946766,
+    "minus_one": 0.46565935015678406
+   },
+   "gradient_norm": 0.044784437865018845,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.403302400372922
+  },
+  {
+   "iteration": 21,
+   "objective": -0.4565264582633972,
+   "metrics": {
+    "efficiency": 0.4565264582633972,
+    "holdout_efficiency": 0.45448538661003113,
+    "zero_order": 0.030763326212763786,
+    "minus_one": 0.46173903346061707
+   },
+   "gradient_norm": 0.032820191234350204,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.408985800109804
+  },
+  {
+   "iteration": 22,
+   "objective": -0.45585164427757263,
+   "metrics": {
+    "efficiency": 0.45585164427757263,
+    "holdout_efficiency": 0.45479926466941833,
+    "zero_order": 0.031039342284202576,
+    "minus_one": 0.459657222032547
+   },
+   "gradient_norm": 0.024075547233223915,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.659934700001031
+  },
+  {
+   "iteration": 23,
+   "objective": -0.45553478598594666,
+   "metrics": {
+    "efficiency": 0.45553478598594666,
+    "holdout_efficiency": 0.4550391137599945,
+    "zero_order": 0.031198114156723022,
+    "minus_one": 0.45856213569641113
+   },
+   "gradient_norm": 0.019326670095324516,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.32151270005852
+  },
+  {
+   "iteration": 24,
+   "objective": -0.4553987383842468,
+   "metrics": {
+    "efficiency": 0.4553987383842468,
+    "holdout_efficiency": 0.45518940687179565,
+    "zero_order": 0.03128230944275856,
+    "minus_one": 0.4579993486404419
+   },
+   "gradient_norm": 0.016984345391392708,
+   "beta": 64.0,
+   "beta_next": 64.0,
+   "elapsed_s": 10.717749900184572
+  }
+ ],
+ "fabrication": {
+  "feature_sizes": {
+   "min_linewidth_um": 0.8500000000000001,
+   "min_gap_um": 0.65,
+   "linewidth_pixels": 17,
+   "gap_pixels": 13,
+   "spacing_um": 0.05,
+   "maximum_side_pixels": 30,
+   "saturated": [],
+   "solid_fraction": 0.5666666666666667,
+   "definition": "largest digital-square side whose morphological opening leaves the solid (linewidth) or the void (gap) unchanged"
+  },
+  "declared": {
+   "min_linewidth_um": 0.1,
+   "min_gap_um": 0.1,
+   "perturbation_um": 0.05,
+   "boundary": [
+    "periodic",
+    "extend"
+   ]
+  },
+  "violations": [],
+  "satisfies_declared_constraints": true,
+  "filter_radius_um": 0.125,
+  "perturbation": {
+   "realized_um": 0.05,
+   "nominal": {
+    "objective": -0.4542146623134613,
+    "metrics": {
+     "efficiency": 0.4542146623134613,
+     "holdout_efficiency": 0.4562293589115143,
+     "zero_order": 0.03190517798066139,
+     "minus_one": 0.45421481132507324
+    }
+   },
+   "eroded": {
+    "objective": -0.24769757688045502,
+    "metrics": {
+     "efficiency": 0.24769757688045502,
+     "holdout_efficiency": 0.4044730067253113,
+     "zero_order": 0.19973298907279968,
+     "minus_one": 0.24769747257232666
+    },
+    "objective_change": 0.2065170854330063,
+    "solid_fraction": 0.5
+   },
+   "dilated": {
+    "objective": -0.4376823604106903,
+    "metrics": {
+     "efficiency": 0.4376823604106903,
+     "holdout_efficiency": 0.4349706470966339,
+     "zero_order": 0.07107290625572205,
+     "minus_one": 0.43768277764320374
+    },
+    "objective_change": 0.016532301902770996,
+    "solid_fraction": 0.6333333333333333
+   }
+  }
+ },
+ "binary": [
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "export": {
+  "gds": "docs\\validation\\g6\\export\\metagrating\\seed3\\metagrating-seed3.gds",
+  "structures": "docs\\validation\\g6\\export\\metagrating\\seed3\\metagrating-seed3-structures.json",
+  "structure_count": 2
+ },
+ "final_evaluation": {
+  "coarse_objective": -0.45537325739860535,
+  "stages": {
+   "coarse_smooth": {
+    "efficiency": 0.45537325739860535,
+    "holdout_efficiency": 0.45527154207229614,
+    "zero_order": 0.03131760656833649,
+    "minus_one": 0.4577629864215851
+   },
+   "fine_smooth": {
+    "efficiency": 0.42435917258262634,
+    "holdout_efficiency": 0.4478117525577545,
+    "zero_order": 0.04455031454563141,
+    "minus_one": 0.4262232184410095
+   },
+   "fine_binary": {
+    "efficiency": 0.42038142681121826,
+    "holdout_efficiency": 0.4496942460536957,
+    "zero_order": 0.04631274938583374,
+    "minus_one": 0.4203816056251526
+   },
+   "fine_structures": {
+    "efficiency": 0.46835407614707947,
+    "holdout_efficiency": 0.4731254279613495,
+    "zero_order": 0.025739887729287148,
+    "minus_one": 0.46835407614707947
+   },
+   "fine_gds": {
+    "efficiency": 0.46835407614707947,
+    "holdout_efficiency": 0.4731254279613495,
+    "zero_order": 0.025739887729287148,
+    "minus_one": 0.46835407614707947
+   }
+  },
+  "differences": {
+   "mesh_refinement": {
+    "efficiency": -0.031014084815979004,
+    "holdout_efficiency": -0.007459789514541626,
+    "zero_order": 0.013232707977294922,
+    "minus_one": -0.03153976798057556
+   },
+   "thresholding": {
+    "efficiency": -0.003977745771408081,
+    "holdout_efficiency": 0.0018824934959411621,
+    "zero_order": 0.0017624348402023315,
+    "minus_one": -0.005841612815856934
+   },
+   "smoothing": {
+    "efficiency": 0.047972649335861206,
+    "holdout_efficiency": 0.02343118190765381,
+    "zero_order": -0.020572861656546593,
+    "minus_one": 0.04797247052192688
+   },
+   "gds": {
+    "efficiency": 0.0,
+    "holdout_efficiency": 0.0,
+    "zero_order": 0.0,
+    "minus_one": 0.0
+   },
+   "total": {
+    "efficiency": 0.012980818748474121,
+    "holdout_efficiency": 0.017853885889053345,
+    "zero_order": -0.005577718839049339,
+    "minus_one": 0.010591089725494385
+   }
+  },
+  "holdout": null,
+  "binary_solid_fraction": 0.5666666626930237,
+  "export": {
+   "structure_count": 2,
+   "reimported_structure_count": 2,
+   "gds_structure_count": 2,
+   "gds_sha256": "819029fb46d7c892e49b0a7c2bb1b910b90c35321657bdb76b630c470476f1e4",
+   "gds_maximum_rounding_um": 0.0005,
+   "gds_native_vertex_count": 8
+  },
+  "conventions": {
+   "difference": "after minus before; a negative difference of a maximized metric is a loss",
+   "fine_density": "the evaluator transfers the same pixel density at its own mesh",
+   "fine_structures": "inclusive staircase voxelization of the exported rectangles",
+   "fine_gds": "polygons read back by import_gds from the exported file"
+  }
+ },
+ "wall_time_s": 290.4745926996693,
+ "device": "cpu"
+}
