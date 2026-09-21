@@ -75,8 +75,17 @@ FP32 matrices, eigenvectors and output fields are the default. SciPy ARPACK uses
 shift-invert near `target_neff`, or just above the maximum material index by
 default. The solve requests extra candidate eigenvectors to handle repeated
 polarization eigenvalues, then selects the requested modes nearest the shift.
-Degenerate modes are orthogonalized using their Hermitian power pairing. The
-requested subset is not a proof of complete mode enumeration for every guide.
+Degenerate modes are orthogonalized using their Hermitian power pairing and
+then rotated onto a canonical basis: within one equal-beta cluster the modes
+diagonalize the overlap of their Eu components, ordered by descending Eu power,
+so a uniform or square section returns the u-polarized mode first and the
+v-polarized mode second on every machine. ARPACK alone returns an arbitrary
+basis of such a cluster, and that basis differs between BLAS builds and CPUs:
+before this rule the two ports of a uniform interface network received
+orthogonal polarizations on one workstation and reported no transmission. A
+cluster whose Eu overlaps are themselves equal keeps its orthogonalized
+basis. The requested subset is not a proof of complete mode enumeration for
+every guide.
 `precision='float64'` is available for targeted numerical diagnostics. No FP64
 solve was required for the recorded validation. Sparse LU fill-in can consume
 substantial CPU memory. This solver does not inherit the streamed FDTD memory

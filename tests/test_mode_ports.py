@@ -197,3 +197,44 @@ def test_plane_field_vjp_finite_difference_leakage_and_quadrature_rejection():
     altered=replace(reference,weights=weights)
     with pytest.raises(ValueError,match='quadrature'):
         normalized_mode_power(altered,altered,modes[0])
+
+
+def test_degenerate_polarization_basis_is_canonical_and_start_independent(monkeypatch):
+    """A uniform section has a doubly degenerate fundamental pair. Its returned
+    basis must not depend on the ARPACK Krylov sequence, which differs between
+    BLAS builds and CPUs: the two ports of an interface network on another
+    workstation received orthogonal polarizations and lost all transmission."""
+    import torchfdtd.mode_ports as module
+    def polarization(mode):
+        power=np.abs(mode.fields[...,:3].astype(np.complex128))**2
+        return power.sum(axis=(0,1))/power.sum()
+    reference={}
+    for eps in (1.,1.44):
+        modes=solve_waveguide_modes(eps,shape=(5,5),spacing_um=(.2,.2),wavelength_um=1.55,normal='x',num_modes=2)
+        assert math.isclose(modes[0].beta_per_um,modes[1].beta_per_um,rel_tol=1e-6)
+        np.testing.assert_allclose(polarization(modes[0]),[0.,1.,0.],atol=1e-6)
+        np.testing.assert_allclose(polarization(modes[1]),[0.,0.,1.],atol=1e-6)
+        reference[eps]=modes
+    assert abs(mode_power_overlap(reference[1.][0],reference[1.44][0]))>.999
+    assert abs(mode_power_overlap(reference[1.][0],reference[1.44][1]))<1e-6
+    # Rotate the degenerate ARPACK pair by a random unitary before selection,
+    # imitating a different Krylov sequence, and require the same modes.
+    original=module.eigs
+    rng=np.random.default_rng(7)
+    def rotated_eigs(*args,**kwargs):
+        values,vectors=original(*args,**kwargs)
+        vectors=vectors.copy()
+        order=np.argsort(np.abs(values-values[0]))
+        pair=order[:2]
+        if abs(values[pair[0]]-values[pair[1]])<1e-4*abs(values[pair[0]]):
+            theta,phi=rng.uniform(0,2*np.pi,2)
+            unitary=np.array([[np.cos(theta),-np.sin(theta)*np.exp(1j*phi)],
+                              [np.sin(theta)*np.exp(-1j*phi),np.cos(theta)]])
+            vectors[:,pair]=vectors[:,pair]@unitary
+        return values,vectors
+    monkeypatch.setattr(module,'eigs',rotated_eigs)
+    for eps,modes in reference.items():
+        again=solve_waveguide_modes(eps,shape=(5,5),spacing_um=(.2,.2),wavelength_um=1.55,normal='x',num_modes=2)
+        for first,second in zip(modes,again):
+            assert math.isclose(first.beta_per_um,second.beta_per_um,rel_tol=1e-6)
+            np.testing.assert_allclose(second.fields,first.fields,rtol=2e-4,atol=2e-4*np.abs(first.fields).max())

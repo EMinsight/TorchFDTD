@@ -23,6 +23,47 @@ def _difference(n, spacing, dtype):
     return plus, -plus.T
 
 
+def _canonical_degenerate_basis(pairs, n, area, tol):
+    """Rotate each cluster of equal-beta modes onto a platform-independent basis.
+
+    ARPACK returns an arbitrary basis of a degenerate eigenspace, and which
+    basis it returns depends on the BLAS build and the CPU. Within one cluster
+    the power-orthonormal vectors are rotated so that they diagonalize the
+    Hermitian overlap of their Eu components, ordered by descending Eu power.
+    A uniform or square section therefore yields the u-polarized mode first and
+    the v-polarized mode second on every machine. Nondegenerate modes are
+    returned unchanged. A cluster whose Eu overlaps are themselves degenerate
+    keeps its orthogonalized basis.
+    """
+    result = list(pairs)
+    start = 0
+    while start < len(result):
+        end = start+1
+        while end < len(result) and abs(result[end][0]-result[start][0])<max(10*tol,1e-8)*max(result[end][0],result[start][0]):
+            end += 1
+        if end-start > 1:
+            cluster = [vector for _,vector in result[start:end]]
+            eu = np.stack([vector[:n] for vector in cluster],axis=1)
+            overlap = eu.conj().T@eu
+            values,rotation = np.linalg.eigh(.5*(overlap+overlap.conj().T))
+            spread = float(values.max()-values.min())
+            if spread > max(100*tol,1e-4)*float(np.abs(values).max()):
+                rotated = []
+                for column in rotation[:,::-1].T:
+                    vector = sum(coefficient*member for coefficient,member in zip(column,cluster))
+                    power = float(_power_pair(vector,vector,area).real)
+                    if not np.isfinite(power) or power<=0:
+                        raise ValueError('Degenerate mode rotation produced a mode without positive power.')
+                    vector /= math.sqrt(power)
+                    pivot = vector[:2*n][np.argmax(np.abs(vector[:2*n]))]
+                    vector *= np.exp(-1j*np.angle(pivot))
+                    rotated.append(vector)
+                for offset,vector in enumerate(rotated):
+                    result[start+offset] = (result[start+offset][0],vector)
+        start = end
+    return result
+
+
 def _power_pair(a, b, area):
     """Hermitian, discrete, signed power pairing for [Eu,Ev,Hu,Hv]."""
     n = a.size//4
@@ -208,8 +249,10 @@ def solve_waveguide_modes(permittivity, *, shape, spacing_um, wavelength_um,
         electric,magnetic = transverse[:2*n],transverse[2*n:]
         pivot = electric[np.argmax(np.abs(electric))]
         transverse *= np.exp(-1j*np.angle(pivot))
-        electric,magnetic = transverse[:2*n],transverse[2*n:]
         previous.append((beta,transverse.copy()))
+    previous = _canonical_degenerate_basis(previous,n,area,tol)
+    for beta,transverse in previous:
+        electric,magnetic = transverse[:2*n],transverse[2*n:]
         elu,elv = electric[:n],electric[n:]
         hlu,hlv = magnetic[:n],magnetic[n:]
         elw = 1j*(inverse_ew@(um@hlv-vm@hlu))/k
