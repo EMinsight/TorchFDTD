@@ -79,8 +79,12 @@ An opt-in [reversible adjoint](docs/REVERSIBLE_ADJOINT.md) now reconstructs
 lossless periodic FP32 fields from one terminal state without checkpoint
 replay. The Python API includes memory admission, retained-backward
 ownership and drift rejection. CPU and native CUDA full-gradient checks
-pass through 512 steps. CPML reconstruction, broad long-time acceptance
-and competitive throughput remain separate work.
+pass through 512 steps. A separate [recorded-interface CPML API](docs/REVERSIBLE_CPML.md)
+now supports an interior scalar design with fixed absorbing exterior material.
+Four tangential planes per timestep replace full-volume replay. CPU checks
+extend through 2,048 steps, and native CUDA gradients agree with checkpointed
+execution for both device and synchronous CPU trace storage. General physical
+combinations, broad long-time acceptance and competitive throughput remain open.
 
 Experimental [resident/streamed adjoint selection](docs/EXECUTION_SELECTION.md)
 now compares full-grid and tiled execution with one CPU design-tensor API.

@@ -1122,6 +1122,55 @@ original fields and terminal pairs are released after their graphs.
 These restricted checks do not establish arbitrary-duration accuracy,
 beyond-VRAM capacity or a competitive throughput ranking.
 
+\subsection{Recorded interfaces with a fixed absorbing exterior}
+
+The separate \code{ReversibleCPMLSimulation} API extends interior
+reconstruction to uniform real FP32 scalar nondispersive grids with periodic
+$x/y$ boundaries and CPML on both $z$ faces. Actual staggered CPML target
+rows determine an inclusive reconstruction interval $[a,b]$, separated from
+the absorbing rows by a fixed collar. The caller supplies both a design
+permittivity map and an explicit fixed exterior map. The effective material
+is a copy of the exterior map with only $[a,b]$ replaced by the design map.
+Its differentiable slice assignment therefore gives exactly zero design
+cotangents outside that interval. It does not expose an unrestricted
+exterior material VJP. Fixed impressed electric point increments lie inside
+the reconstruction interval, while point E/H observations may also sample
+the fixed non-PML collar.
+
+Each forward timestep records four tangential planes between the electric
+and magnetic updates. These are the new Ex/Ey at $z=b+1$ and the old Hx/Hy
+at $z=a-1$. Reverse reconstruction restores these halos and updates only
+interior H and E in inverse order. The full field and CPML auxiliary
+transpose still propagates through the original domain, including the
+absorbing exterior. No primal CPML auxiliary state is inverted, and the
+interior material VJP reads only reconstructed lossless stencils. Recording
+interfaces for reversible differentiation is established practice,
+including in FDTDX \citep{fdtdx-source}, rather than a new algorithm claimed
+here.
+
+For $A=N_xN_y$ transverse cells, the four-plane FP32 archive requires
+$16TA$ bytes and the owned interior terminal E/H pair requires
+$24A(b-a+1)$ bytes. Total state storage is $O(N+TA)$, in addition to source
+and point histories. The public API supports device or CPU trace storage
+with synchronous transfers. These routes do not establish asynchronous
+copy overlap or SSD-backed recording. Material assembly, live and adjoint
+fields, auxiliary buffers, traces, terminal storage and reduction scratch
+are included in the admission plan. Reconstruction residuals remain
+reported drift diagnostics, not general gradient-error bounds.
+
+Eleven public CPU tests pass, including absorbing trajectories through
+2048 timesteps. Two public CUDA cases use a $6\times7\times20$ grid and
+96 steps with two coincident electric sources, duplicate observations and
+E/H monitors, including an electric observation in the fixed collar. Histories are bitwise equal to
+checkpointed execution. The full admitted material-gradient relative
+$L_2$ error is $5.34\times10^{-7}$ and a distinct retained backward seed
+gives $3.64\times10^{-7}$. The initial reconstruction relative $L_2$
+residual is $8.67\times10^{-7}$. These checks validate the restricted
+public reconstruction and derivative contract. Test execution durations
+are not throughput benchmarks, and physical reflection convergence,
+beyond-VRAM transport and broader material or boundary scopes remain
+separate validation tasks.
+
 \section{Limitations and development priorities}
 
 The native scope must be assessed by tested physical capabilities, supported parameter ranges and convergence evidence. Counting configuration properties cannot establish a product-completion percentage. In particular, a shared UI and Python schema does not establish that every requested observable or source type is physically implemented.

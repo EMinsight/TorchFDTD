@@ -134,3 +134,6 @@ __all__ += ["EndpointCPMLSimulation", "native_radiation_plane", "load_native_rad
 
 from .reversible import ReversibleOptions, ReversibleSimulation
 __all__ += ["ReversibleOptions", "ReversibleSimulation"]
+
+from .reversible_cpml import ReversibleCPMLOptions, ReversibleCPMLSimulation
+__all__ += ["ReversibleCPMLOptions", "ReversibleCPMLSimulation"]

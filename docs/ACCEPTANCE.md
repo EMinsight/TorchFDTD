@@ -1,5 +1,23 @@
 # Current acceptance record
 
+## Recorded-interface CPML integration, 21 September 2026
+
+The separate [CPML reversible API](REVERSIBLE_CPML.md) admits a scalar interior
+design surrounded by fixed material and z CPML. It records four tangential
+planes per timestep and retains the full field/CPML transpose. Absorbing
+primal auxiliary states are never inverted. Source-cell material derivatives
+remain active inside the design interval.
+
+Eleven targeted CPU tests passed, including a 2,048-step checkpoint comparison,
+collar observations, retained seeds, source-cell finite differences and owned
+snapshots. Two native CUDA cases passed with device and synchronous CPU trace
+storage. Their full admitted gradient relative L2 error is 5.34e-7 and both
+histories match their checkpoint reference exactly. Eleven metadata-only
+admission cases also passed. The [source-fingerprinted record](validation/reversible_cpml_workflow.json)
+keeps scope, corrections and conservative memory allowances. This is not a
+general CPML physical-convergence, large-capacity or throughput result.
+Full integration CI is recorded separately after delivery.
+
 ## 21 September 2026 integration
 
 The integration following `3bc7898` adds ordinary native Project/CLI/browser

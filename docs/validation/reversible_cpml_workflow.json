@@ -1,0 +1,79 @@
+{
+  "status": "targeted_integration_passed",
+  "scope": "Public ReversibleCPMLSimulation, real FP32 scalar periodic x/y and z CPML, explicit fixed exterior material, point observations and fixed soft electric point sources.",
+  "physical_scope": "Discrete implementation and memory admission checks, not a general absorption/mesh-convergence or throughput result.",
+  "gradient_scope": "Only epsilon inside the descriptor-derived reconstruction interval affects the forward. All exterior material comes from a non-gradient fixed_epsilon input.",
+  "source_material_gradient": "Interior source-cell epsilon is not frozen; source-cell finite differences passed.",
+  "history_storage": "Four real FP32 transverse planes per step. Device or synchronous CPU archive, no asynchronous trace or disk claim.",
+  "cpu": {
+    "passed": 11,
+    "seconds": 34.85,
+    "maximum_steps": 2048,
+    "checks": [
+      "checkpoint history equality",
+      "complete admitted material gradient relative L2 < 1e-4",
+      "two retained noncontiguous seeds",
+      "fixed collar-only objective",
+      "source-cell finite difference < 2%",
+      "snapshot and owner release",
+      "trace version guard",
+      "drift/concurrency/higher-order rejection",
+      "budget/scope rejection before fields"
+    ]
+  },
+  "cuda": {
+    "passed": 2,
+    "seconds": 5.46,
+    "shape": [
+      6,
+      7,
+      20
+    ],
+    "steps": 96,
+    "cases": [
+      {
+        "trace_storage": "device",
+        "history_bitwise_equal": true,
+        "gradient_relative_l2": 5.336470133381165e-07,
+        "retained_seed_relative_l2": 3.635509815713815e-07,
+        "initial_relative_l2": 8.669968979016907e-07,
+        "torch_peak_increment_bytes": 203776,
+        "conservative_solver_reservation_bytes": 8652458,
+        "owners_released": true
+      },
+      {
+        "trace_storage": "cpu",
+        "history_bitwise_equal": true,
+        "gradient_relative_l2": 5.336470133381165e-07,
+        "retained_seed_relative_l2": 3.635509815713815e-07,
+        "initial_relative_l2": 8.669968979016907e-07,
+        "torch_peak_increment_bytes": 140288,
+        "conservative_solver_reservation_bytes": 8586132,
+        "owners_released": true
+      }
+    ],
+    "memory_scope": "Torch allocated increment for this tiny fixture only, excluding caller inputs, CUDA context and external allocations. Not a large-capacity measurement."
+  },
+  "metadata_admission": {
+    "passed": 11,
+    "field_allocations": 0,
+    "checks": "CPU/CUDA x trace placement, complete explicit budgets, current host capacity, diagnostic/material/transfer allowances and asymmetric CPML budgeted Project."
+  },
+  "corrections": [
+    "Initial public CPU test fixture omitted material_sampling=yee and was rejected before computation. The fixture was corrected without changing numerical criteria.",
+    "Interior CUDA address arithmetic uses 64-bit indices. Public CUDA checks ran after this change."
+  ],
+  "novelty": "Boundary recording and reversible differentiation are established approaches. This integration does not establish a new algorithm or overall FDTDX parity.",
+  "source_sha256": {
+    "torchfdtd/reversible_cpml.py": "946e5a77a138406839541a1c8b6a4f1bc12a797b922eba42c55729c3a8b94e92",
+    "torchfdtd/reversible_cpml_kernels.py": "d8426e67587655b98bf9ff6e521a3fc597547b27714aea395d42f9e80dff62c4",
+    "torchfdtd/reversible_cpml_memory.py": "3877396a36f703f16a993d9e33e0aecf9225e53a6b4c3f27a6b9f4bcb42ecde4",
+    "torchfdtd/differentiable.py": "4b20a33eeaa0e2d27d2499db3435ee623cc246bdd3569245f7156597840385e3",
+    "torchfdtd/cuda_adjoint.py": "0be7744c399e4aed97b8f00f15d7a4649a28f842097ad2309bf262feb6a8ff5d",
+    "torchfdtd/cuda_kernels.py": "634e16f3979ef9c8aff925b8b30b3bad4433f969118dbe4f39ad7aa9ae6db1b9",
+    "tests/test_reversible_cpml.py": "f9e2710c68b786e8cd61f01a00137c270971274cd51177d89c412418bbf24ef9",
+    "tests/test_reversible_cpml_cuda.py": "20289462268e7df6503273250d01d66df077d0d90de0c7845c33a1688df5d570",
+    "tests/test_reversible_cpml_memory.py": "d7056535f3c204a039f762489a6da799437978d02b2923421b7f7d6216d6857c",
+    "tests/test_reversible_cpml_kernels.py": "5ed1389291b6a4c4fc27edc91eae12b84cdbcbe7c1bee42feae3b5ae9af56e3e"
+  }
+}
