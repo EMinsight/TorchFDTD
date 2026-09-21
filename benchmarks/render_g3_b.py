@@ -179,7 +179,7 @@ def render_g3_08(record):
                   and r['duration_fs'] == case['fixture']['duration_fs']] if rerun else []
         out += ['', f'**Revision 2 (case `{r2["case_id"]}`, records under `docs/validation/g3/r2`, generated {r2["generated"]}).** '
                 'Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record.'
-                + (f'The re-run of the {len(judged)} judged physics rows gives a largest efficiency error of {max(r["max_efficiency_error"] for r in judged):.4f}, '
+                + (f' The re-run of the {len(judged)} judged physics rows gives a largest efficiency error of {max(r["max_efficiency_error"] for r in judged):.4f}, '
                    f'a largest dominant phase error of {max(r["max_dominant_phase_error_rad"] for r in judged):.4f} rad and sums of T and R within '
                    f'{max(abs(r["efficiency_sum"]-1) for r in judged):.4f} of one, all within the unchanged limits.' if judged else ''),
                 '', '| Pol | Angle | Wavelength (um) | Max relative difference | Largest excess over rtol abs(cpu) + atol | Result |', '|---|---:|---:|---:|---:|---|']
