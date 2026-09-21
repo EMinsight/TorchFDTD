@@ -40,6 +40,58 @@ def test_field_and_total_transmission_gradcheck():
     assert torch.autograd.gradcheck(lambda e,t:quadrant_intensity_allocation(plane(e),t),(fields,t))
 
 
+def dft_scale_plane(amplitude,a,dtype,device):
+    """One sample per quadrant, E_x = amplitude*[a,1,1,1], areas of 1e-14 m^2."""
+    real=torch.empty(0,dtype=dtype).real.dtype
+    points=torch.tensor([[-1.,-1.,0.],[1.,-1.,0.],[-1.,1.,0.],[1.,1.,0.]],dtype=real,device=device)
+    fields=torch.zeros(1,4,6,dtype=dtype,device=device)
+    fields[0,:,0]=amplitude*torch.cat((a[None],torch.ones(3,dtype=real,device=device))).to(dtype)
+    return SimpleNamespace(fields=fields,points_um=points,weights=torch.full((4,),1e-14,dtype=real,device=device),
+                           normal='z',components=('Ex','Ey','Ez','Hx','Hy','Hz'))
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+@pytest.mark.parametrize('amplitude',[1.,1e-14,1e-16])
+def test_fp32_dft_scale_ratio_and_gradient(device,amplitude):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    # Time-integrated DFT fields (~1e-14) times m^2 areas (~1e-14) fall below the
+    # float32 normal range. The unscaled ratio returned a NaN gradient at 1e-14
+    # and raised on a zero total at 1e-16. Analytic first quadrant: a^2/(a^2+3).
+    a=torch.tensor(1.5,dtype=torch.float32,device=device,requires_grad=True)
+    output=quadrant_intensity_allocation(dft_scale_plane(amplitude,a,torch.complex64,device),
+                                         torch.ones(1,dtype=torch.float32,device=device))
+    gradient,=torch.autograd.grad(output[0,0],a)
+    assert abs(output[0,0].item()-1.5**2/(1.5**2+3))<1e-6
+    assert abs(gradient.item()-6*1.5/(1.5**2+3)**2)<1e-5
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_dft_scale_field_and_total_transmission_gradcheck(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    unit=plane().fields.to(device).requires_grad_();t=torch.tensor([.6,.8],dtype=torch.float64,device=device,requires_grad=True)
+    def response(e,t):
+        # Unit-scale inputs keep gradcheck's perturbation meaningful at 1e-14 fields.
+        p=plane(e*1e-14);p.points_um=p.points_um.to(device);p.weights=torch.full((16,),1e-14,dtype=torch.float64,device=device)
+        return quadrant_intensity_allocation(p,t)
+    assert torch.autograd.gradcheck(response,(unit,t))
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_scaled_ratio_matches_unscaled_formula_on_unit_fields(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    fields=plane().fields.to(device).requires_grad_();t=torch.tensor([.7,1.1],dtype=torch.float64,device=device,requires_grad=True)
+    p=plane(fields);p.points_um=p.points_um.to(device);p.weights=p.weights.to(device)
+    actual=quadrant_intensity_allocation(p,t)
+    low_x=p.points_um[:,0]<0;low_y=p.points_um[:,1]<0
+    masks=torch.stack((low_x&low_y,~low_x&low_y,low_x&~low_y,~low_x&~low_y)).to(torch.float64)
+    integrals=(fields[...,:3].abs().square().sum(-1)*p.weights)@masks.T
+    expected=integrals/integrals.sum(-1,keepdim=True)*t[:,None]
+    torch.testing.assert_close(actual,expected,rtol=1e-7,atol=1e-7)
+    seed=torch.arange(1.,9.,dtype=torch.float64,device=device).reshape(2,4)
+    torch.testing.assert_close(torch.autograd.grad((actual*seed).sum(),(fields,t)),
+                               torch.autograd.grad((expected*seed).sum(),(fields,t)),rtol=1e-7,atol=1e-7)
+
+
 @pytest.mark.parametrize('kind',['zero','negative_t','weights','missing_quadrant','normal','nan'])
 def test_invalid_contract(kind):
     p=plane();t=torch.ones(2,dtype=torch.float64)

@@ -36,10 +36,13 @@ an under-resolved mesh. Counts currently apply to the Python differentiable
 plane API, not the UI/native forward monitor configuration.
 
 Coordinates, weights and split locations are fixed. Both electric fields and
-the supplied total transmission differentiate. The function rejects missing
-quadrants, zero/nonfinite integrated intensity and negative transmission without
-clipping. Transmission above one is not silently clipped. The four entries sum
-to the supplied transmission. They are not collected electrons or absorption.
+the supplied total transmission differentiate. The ratio is formed from fields
+and weights divided by detached per-frequency scales, so single-precision DFT
+magnitudes and square-metre areas differentiate without underflow. The function
+rejects missing quadrants, zero/nonfinite integrated intensity and negative
+transmission without clipping. Transmission above one is not silently clipped.
+The four entries sum to the supplied transmission. They are not collected
+electrons or absorption.
 For an incoherent pupil, compute and rescale each ray/polarization separately,
 then average responses with the specified weights. Averaging fields or
 rescaling an averaged intensity would change the model.

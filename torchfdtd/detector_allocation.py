@@ -37,8 +37,15 @@ def quadrant_intensity_allocation(plane, total_transmission, *, split_um=(0.,0.)
     low_x=points[:,0]<split[0];low_y=points[:,1]<split[1]
     masks=torch.stack((low_x&low_y,~low_x&low_y,low_x&~low_y,~low_x&~low_y))
     if not bool(masks.any(dim=1).all()):raise ValueError('Every quadrant must contain samples.')
-    intensity=fields[...,:3].abs().square().sum(-1)
-    integrals=(intensity*weights)@masks.to(dtype).T
+    # Scale fields and areas before squaring, as normalized_flux does. SI-scale
+    # spectral fields times m^2 areas fall below the float32 normal range, which
+    # loses the forward ratio and overflows its backward seed. Both detached
+    # scales cancel from the ratio and leave its derivatives unchanged.
+    field_scale=fields[...,:3].detach().abs().amax(dim=(1,2),keepdim=True)
+    if bool((field_scale<=0).any()):
+        raise ValueError('Integrated electric intensity must be finite and positive.')
+    intensity=(fields[...,:3]/field_scale).abs().square().sum(-1)
+    integrals=(intensity*(weights/weights.detach().amax()))@masks.to(dtype).T
     total=integrals.sum(-1,keepdim=True)
     if not bool(torch.isfinite(total).all()) or bool((total<=0).any()):
         raise ValueError('Integrated electric intensity must be finite and positive.')
