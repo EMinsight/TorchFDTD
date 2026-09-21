@@ -170,7 +170,11 @@ CPML, must equal that port's calibration guide and carries zero derivative.
 Footprints may not overlap. Phase planes lie on longitudinal E nodes and
 sources a whole number of at least two cells outside them. `ModePort` accepts
 the x, y and z normals with either sign. Mode profiles, eigenvalues, source
-packets and calibration stay fixed reference quantities, as in FDTDX.
+packets and calibration stay fixed reference quantities, as in FDTDX. A
+polarization-degenerate section, for example a homogeneous one, leaves the
+selected member of the degenerate pair to eigensolver rounding, so ports with
+different sections need polarization-nondegenerate guides for their bases to
+correspond across platforms.
 
 `branch_network_from_ports` builds the same network from in-plane port
 markers such as `GDSImport.ports`, taking `normal_convention`,
