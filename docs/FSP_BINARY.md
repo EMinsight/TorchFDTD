@@ -12,7 +12,8 @@ The implementation was derived from controlled, user-authored FSP data files and
 - Embedded material dictionaries. Decoding data does not fit or execute the material in the native solver.
 - Generic property dictionaries and object trees. Duplicate siblings remain distinct by record offset. Class UUIDs identify classes, not unique instances.
 - Legacy revisions: rectangle 6/32, sphere 8/25, circle 4/25, ring 5/26, polygon 11/22, structure group 13/18. Selected geometry values and enabled flags are decoded. Controlled scalar forms of three rotation axes/angles, material mesh-order override/priority and sphere/cylinder ellipsoid flags/radii are decoded. Unknown expression forms are explicitly marked as not decoded. Other drawing fields are retained in the original bytes.
-- The observed empty table of contents and project footer. Nonempty tables of contents, result/dataset records and unfamiliar revisions are explicitly rejected. The tested result-bearing sphere file is not accepted.
+- Structure group setup scripts, their user-property lists and the headerless primitive records a script generated are decoded. Generated records appear as the group's children, flagged `script_generated`; nested generated groups are rejected explicitly.
+- The observed empty table of contents and project footer. Parameter sweep/optimization records after the footer are counted and retained verbatim, never decoded. Nonempty tables of contents, result/dataset records and unfamiliar revisions are explicitly rejected. The tested result-bearing sphere file is not accepted.
 
 Saving without edits preserves every original byte. Existing destinations cannot be overwritten. Successful decoding does not establish physical or script compatibility.
 

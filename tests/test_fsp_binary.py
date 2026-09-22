@@ -26,6 +26,20 @@ def mapping(items):
     return output
 def node(uid,items,children=()):
     return u(1001)+u(38)+uid.encode()+mapping(items)+u(0)+u(len(children))+b''.join(children)
+def legacy_circle(name='circle',enabled=1,index=1.5):
+    # Headerless circle 4/25 body: also what a group script leaves behind.
+    body=u(4)+u(25)+struct.pack('<i6d',-1,index,.1e-6,0.,0.,-.1e-6,.1e-6)
+    body+=string(f'{index:g}')+bytes(8)+string(name)
+    tail=bytearray(158);tail[-9:-5]=u(enabled)
+    return body+tail+mapping({'materialuuid':(0,'{00000000-0000-0000-0000-000000000000}'),'use_relative_coordinates':(2,1)})
+def scripted_group(name,script,properties,generated,enabled=1):
+    body=u(13)+u(18)+bytes(97)+b'\0'+struct.pack('<i',-1)+b'\1'+struct.pack('<d',1.)
+    body+=b'\x02'+string('1')+b'\0'+bytes(8)+b'\0\x02'+string(name)+(b'\1'+struct.pack('<d',0.))*3
+    body+=bytes(4)+b'\x02'+string(script)+b'\0'+u(len(properties))
+    for key,code,value in properties:body+=b'\x02'+string(key)+b'\0'+u(code)+b'\x02'+string(value)
+    tail=bytearray(15);tail[6:10]=u(enabled)
+    body+=tail+mapping({'use_relative_coordinates':(2,1)})+u(len(generated))+b''.join(generated)+u(0)
+    return u(1000)+u(38)+b'{b1c063bf-9b6d-49e1-b1dc-2c5cddef5d3c}'+body
 
 
 def fixture():
@@ -94,3 +108,24 @@ def test_legacy_enabled_flag_is_independent_of_expression_metadata():
         root=node('{ba475c44-6315-46ba-866f-0d85a97d5267}',{'name':(0,'::model')},[legacy])
         blob=raw[:base.root.start]+root+raw[base.root.end:]
         assert FspDocument(blob).nodes()[1].legacy['enabled'] is bool(enabled)
+
+
+def test_scripted_structure_groups_and_sweep_stores_parse_and_roundtrip():
+    raw,_=fixture();base=FspDocument(raw)
+    circles=[legacy_circle(enabled=i%2) for i in range(3)]
+    group=scripted_group('array','deleteall;\naddcircle;\n',[('index',0,'1.5'),('nx',0,'3')],circles)
+    plain=scripted_group('empty','',[],[])  # the previously observed fixed 30-byte tail
+    root=node('{ba475c44-6315-46ba-866f-0d85a97d5267}',{'name':(0,'::model')},[group,plain])
+    sweep=b'opaque sweep store bytes'
+    blob=raw[:base.root.start]+root+raw[base.root.end:-12]+u(0)+u(0)+u(1)+sweep
+    doc=FspDocument(blob);array,empty=doc.root.children
+    assert array.legacy['script']=='deleteall;\naddcircle;\n' and array.legacy['user_properties']==[('index',0,'1.5'),('nx',0,'3')]
+    assert [c.name for c in array.children]==['circle']*3 and [c.legacy['enabled'] for c in array.children]==[False,True,False]
+    assert all(c.legacy['script_generated'] and c.uid=='{921e6d99-3bcb-4063-b513-216a3bb757d9}' and not c.children for c in array.children)
+    assert empty.legacy['script']=='' and empty.legacy['user_properties']==[] and empty.children==[] and empty.legacy['enabled']
+    assert doc.sweep_records==1 and doc.trailing==sweep and len(doc.nodes())==6
+    json.dumps(doc.inspect(),allow_nan=False)
+    assert doc.data==blob
+    with pytest.raises(FspFormatError):FspDocument(raw[:-12]+u(0)+u(0)+u(0)+b'x')
+    with pytest.raises(FspFormatError):FspDocument(raw[:-12]+u(0)+u(0)+u(2))
+    with pytest.raises(FspFormatError):FspDocument(raw[:-12]+u(1)+u(0)+u(0))

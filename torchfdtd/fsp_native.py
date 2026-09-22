@@ -88,19 +88,28 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
         report.issue(document.root, 'fdtd_region', 'Exactly one top-level FDTD region is required.')
         return report
     domain = fdtds[0]
+    if document.root.uid != ROOT:
+        report.issue(document.root, 'model_mapping', 'Unrecognized model root class.')
+        return report
+    # Model-level scripts and transforms are listed, not fatal, so that every
+    # unsupported object below still reaches the report.
     try:
-        if document.root.uid != ROOT:raise Unsupported('Unrecognized model root class.')
         for key in ('setupscript', 'analysisscript'):
-            require(document.root, key, '')
+            if value(document.root, key) != '':
+                report.issue(document.root, 'model_script', f'The model {key} is not mapped yet; native scenes do not run scripts.')
         require(document.root, 'enabled', 1)
         require(document.root, 'constructionflag', 0)
         for key in 'xyz':
             require(document.root, key, 0)
+    except (Unsupported, ValueError) as exc:
+        report.issue(document.root, 'model_mapping', str(exc))
+    try:
         region, origin = convert_region(domain, backend, report)
         report.origin_m = tuple(origin)
     except (Unsupported, ValueError) as exc:
         report.issue(domain, 'region_mapping', str(exc))
-        return report
+        report.issue(domain, 'region_mapping', 'Structures, sources and monitors were not checked because the FDTD region could not be mapped.', 'warning')
+        region = origin = None
 
     try:
         global_source = source_settings(domain, global_=True)
@@ -131,8 +140,12 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
                 report.issue(node, 'simulation_state', 'Saved simulation state is not a layout-only record.')
             continue
         try:
+            if node.legacy.get('kind') == 13:
+                raise Unsupported(f'Structure group with a setup script and {len(node.children)} script-generated objects is not mapped yet.')
             if node.children:
                 raise Unsupported('Hierarchical/group transforms and scripts are not mapped yet.')
+            if region is None and (node.legacy.get('kind') in (4, 5, 6, 8, 11) or node.uid in (*SOURCE_CLASSES, TIME, DFT)):
+                continue
             if node.legacy.get('kind') in (4, 5, 6, 8, 11):
                 shape, material = convert_structure(node, origin, region, document.materials)
                 structures.append(shape)
@@ -156,7 +169,7 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
             report.mappings.append(dict(record_offset=node.start, object_id=node.name, native_ids=mapped))
         except (Unsupported, ValueError) as exc:
             report.issue(node, 'object_mapping', str(exc))
-    if not materials:
+    if not materials and region is not None:
         materials = [Material(name='Background', index=region.background_index)]
     if not any(i['severity'] == 'error' for i in report.issues):
         try:
@@ -214,7 +227,7 @@ def convert_region(node, backend, report):
         a = 'xyz'[axis]
         kinds = [number(node, f'BCType{2*axis+s}') for s in (0, 1)]
         if any(k not in (0, 1) for k in kinds) or (1 in kinds and kinds != [1, 1]):
-            raise Unsupported(f'{a}: only verified PML and paired Periodic FSP boundary codes are mapped yet.')
+            raise Unsupported(f'{a}: boundary codes {kinds} are not mapped yet; only verified PML (0) and paired Periodic (1) FSP boundary codes are.')
         grid = vector(node, a+'Grid')
         if len(grid) < 6 or np.any(np.diff(grid) <= 0):
             raise Unsupported(f'{a}: saved grid must contain strictly increasing nodes.')
