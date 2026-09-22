@@ -20,6 +20,26 @@ def items(data):
             for k, v in data.items()}
 
 
+def dipole_settings(name='::model::source', **overrides):
+    source = dict(name=name, enabled=1, sourceType=0, useGlobalSource=0,
+                  sourcePreference=0, frequencyEnvelopeType=0, optimizeForShortPulse=0, mEliminateDC=0, eliminateDiscontinuities=0,
+                  theta=0., angle=0., frequency=299792458/1.55e-6, amplitude0=1.,
+                  pulseLength=2e-15, offset=4e-15, phase=23., xcoord=-.5e-6, ycoord=0., zcoord=0.)
+    return {**source, **overrides}
+
+
+def time_monitor_settings(name='::model::monitor', **overrides):
+    monitor = dict(name=name, enabled=1, monitorShape=0, spatialAveraging=1,
+                   recordInPML=0, simulationType=0, outputPower=0, startTime=0., stopMethod=0, downsampleT=1,
+                   outputP=np.zeros(3), outputE=np.array([0, 0, 1, 0, 0, 0]), left=.5e-6, bottom=0., z1=0.)
+    return {**monitor, **overrides}
+
+
+def analysis_group(name, members, enabled=1, setupscript='adddipole;'):
+    return node(ROOT, items(dict(name=name, enabled=enabled, x=.2e-6, y=0., z=0., use_relative_coordinates=1,
+                                 setupscript=setupscript, analysisscript='', constructionflag=1)), members)
+
+
 def fixture(source_overrides=None, region_overrides=None, *, source_class=DIPOLE,
             monitor_class=TIME, monitor_overrides=None, root_overrides=None, extra=()):
     dx = .1e-6; dt = .8*dx/299792458/math.sqrt(3)
@@ -31,16 +51,9 @@ def fixture(source_overrides=None, region_overrides=None, *, source_class=DIPOLE
                   courantFactor=.8, dt=dt, MaxSimTime=20*dt, useAutoShutoffMin=0, useAutoShutoffMax=1)
     region.update({f'BCType{i}':0 for i in range(6)})
     region.update({a+'Grid':np.linspace(-2.4e-6, 2.4e-6, 49) for a in 'xyz'})
-    source = dict(name='::model::source', enabled=1, sourceType=0, useGlobalSource=0,
-                  sourcePreference=0, frequencyEnvelopeType=0, optimizeForShortPulse=0, mEliminateDC=0, eliminateDiscontinuities=0,
-                  theta=0., angle=0., frequency=299792458/1.55e-6, amplitude0=1.,
-                  pulseLength=2e-15, offset=4e-15, phase=23., xcoord=-.5e-6, ycoord=0., zcoord=0.)
-    source.update(source_overrides or {})
+    source = dipole_settings(**(source_overrides or {}))
     region.update(region_overrides or {})
-    monitor = dict(name='::model::monitor', enabled=1, monitorShape=0, spatialAveraging=1,
-                   recordInPML=0, simulationType=0, outputPower=0, startTime=0., stopMethod=0, downsampleT=1,
-                   outputP=np.zeros(3), outputE=np.array([0, 0, 1, 0, 0, 0]), left=.5e-6, bottom=0., z1=0.)
-    monitor.update(monitor_overrides or {})
+    monitor = time_monitor_settings(**(monitor_overrides or {}))
     # Controlled legacy sphere with real scalar transforms and material order.
     tail = bytearray(167)
     tail[:23] = b'\0'+u(0)+b'\1'+struct.pack('<d', .3e-6)+b'\1'+struct.pack('<d', .3e-6)
@@ -270,5 +283,65 @@ def test_scripted_group_geometry_sampled_material_and_skipped_objects_convert_to
                 if edited['status'] in ('ready', 'failed'):break
                 time.sleep(.01)
             assert edited['status'] == 'failed' and 'Script-generated group objects are not written back' in edited['error']
+    finally:
+        app.state.pool.shutdown(); app.state.fsp_pool.shutdown()
+
+
+def test_enabled_analysis_group_members_import_with_global_coordinates_and_caps(tmp_path, monkeypatch):
+    from torchfdtd import fsp
+    monkeypatch.setattr(fsp, 'load_api', lambda: pytest.fail('Independent conversion loaded Lumerical'))
+    cloud = analysis_group('::model::cloud', [
+        node(DIPOLE, items(dipole_settings('::model::cloud::s1', xcoord=.3e-6, ycoord=-.2e-6, theta=40., angle=30., phase=5.))),
+        node(TIME, items(time_monitor_settings('::model::cloud::m1', left=.4e-6, bottom=.1e-6, spatialAveraging=0))),
+        node(TIME, items(time_monitor_settings('::model::cloud::m2', left=-.4e-6, enabled=0, monitorShape=6)))])
+    off = analysis_group('::model::off', [node(TIME, items(time_monitor_settings('::model::off::t1')))], enabled=0)
+    raw = bloch_fixture(units=0, kx=0., ky=.5, extra=[cloud, off])
+    report = convert_fsp(FspDocument(raw), 'Cloud', 'cpu')
+    assert report.project is not None, report.issues
+    p = report.project
+    assert [s.name for s in p.sources] == ['source', 's1'] and [m.name for m in p.monitors] == ['monitor', 'm1']
+    # Members keep their stored global coordinates: the group offset (0.2 um) is not added.
+    assert p.sources[1].center == pytest.approx((.3, -.2, 0)) and p.sources[1].theta == 40 and p.sources[1].phi == 30 and p.sources[1].phase == 5
+    assert p.monitors[1].center == pytest.approx((.4, .1, 0)) and p.monitors[1].component == 'Ez'
+    issues = {(i['severity'], i['code'], i['object_id']) for i in report.issues}
+    assert ('info', 'group_script', '::model::cloud') in issues
+    assert ('warning', 'point_interpolation', '::model::cloud::m1') in issues
+    assert ('warning', 'object_mapping', '::model::cloud::m2') in issues and ('warning', 'object_mapping', '::model::off') in issues
+    assert not any(i['severity'] == 'error' for i in report.issues)
+    row = next(m for m in report.mappings if m['object_id'] == '::model::cloud')
+    assert row['script_generated'] and row['native_ids'] == [p.sources[1].id, p.monitors[1].id]
+    result = Simulation(p).run()
+    assert np.isfinite(result.electric).all() and np.max(abs(result.electric)) > 0
+    big = analysis_group('::model::big', [node(TIME, items(time_monitor_settings(f'::model::big::t{i}', left=i*.1e-6, outputE=np.ones(6))))
+                                          for i in range(6)])
+    report = convert_fsp(FspDocument(bloch_fixture(extra=[big])), 'Big', 'cpu')
+    assert report.project is None
+    cap = next(i for i in report.issues if i['object_id'] == '::model::big' and i['severity'] == 'error')
+    assert '36 native monitors' in cap['message'] and '1 already imported' in cap['message']
+    monkeypatch.setattr(fsp, 'availability', lambda: {'installed': False, 'reason': 'Not installed'})
+    app = create_app(tmp_path)
+    try:
+        with TestClient(app) as client:
+            response = client.post('/api/fsp/native-import', content=raw, headers={'x-filename': 'cloud.fsp'})
+            key = response.json()['id']
+            deadline = time.monotonic()+20
+            while time.monotonic() < deadline:
+                job = client.get('/api/fsp/'+key).json()
+                if job['status'] in ('ready', 'failed'):break
+                time.sleep(.01)
+            assert job['status'] == 'ready' and job['conversion']['native_execution_allowed'], job
+            assert client.post('/api/validate', json=job['conversion']['project']).status_code == 200
+            outcomes = {}
+            for route in ('native-export', 'native-scene-export'):
+                export = client.post(f'/api/fsp/{key}/{route}', json=job['conversion']['project'])
+                assert export.status_code == 202
+                deadline = time.monotonic()+20
+                while time.monotonic() < deadline:
+                    edited = client.get('/api/fsp/'+export.json()['id']).json()
+                    if edited['status'] in ('ready', 'failed'):break
+                    time.sleep(.01)
+                outcomes[route] = edited
+            assert outcomes['native-export']['status'] == 'ready', outcomes['native-export']
+            assert outcomes['native-scene-export']['status'] == 'failed' and 'Analysis-group members' in outcomes['native-scene-export']['error']
     finally:
         app.state.pool.shutdown(); app.state.fsp_pool.shutdown()

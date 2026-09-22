@@ -128,7 +128,10 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
                             n.properties['useGlobalSource'].value != 0 for n in document.root.children)
         report.issue(domain, 'global_source_mapping', ('Referenced' if active_global else 'Unused')+
                      ' global source settings could not be imported: '+str(exc), 'error' if active_global else 'warning')
-    report.fit_band_um = fit_band(domain, global_source)
+    candidates = [n for n in document.root.children if n.uid in SOURCE_CLASSES]
+    candidates += [c for n in document.root.children if n.uid == ROOT and n.children and n.properties.get('enabled') is not None
+                   and n.properties['enabled'].value != 0 for c in n.children if c.uid in SOURCE_CLASSES]
+    report.fit_band_um = fit_band(domain, global_source, candidates)
     materials, structures, sources, monitors = [], [], [], []
     global_monitor=None
     referenced_global=any(n.uid==DFT and n.properties.get('useGlobalDFT') is not None and
@@ -149,8 +152,14 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
                 report.issue(node, 'simulation_state', 'Saved simulation state is not a layout-only record.')
             continue
         try:
+            if node.uid == ROOT and node.children:
+                if region is None:continue
+                new_sources, new_monitors = convert_analysis_group(node, origin, region, report, global_source, global_monitor, len(sources), len(monitors))
+                sources += new_sources;monitors += new_monitors
+                report.mappings.append(dict(record_offset=node.start, object_id=node.name, native_ids=[s.id for s in new_sources]+[m.id for m in new_monitors], script_generated=True))
+                continue
             if node.legacy.get('kind') != 13 and node.children:
-                raise Skipped(f'Group with {len(node.children)} members is not imported: hierarchical/analysis group transforms and scripts are not mapped yet.')
+                raise Skipped(f'Group with {len(node.children)} members is not imported: hierarchical group transforms are not mapped yet.')
             if region is None and (node.legacy.get('kind') in (4, 5, 6, 8, 11, 13) or node.uid in (*SOURCE_CLASSES, TIME, DFT)):
                 continue
             if node.legacy.get('kind') in (4, 5, 6, 8, 11, 13):
@@ -166,7 +175,7 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
                         warned.add(('curve', material.name))
                         report.issue(node, 'drude_curve_accuracy', 'Experimental curved Drude geometry: quantitative curved-interface accuracy is not established. Refine space/time and compare material sampling choices.', 'warning')
             elif node.uid == DIPOLE:
-                source = convert_source(node, origin, report, global_source)
+                source = convert_source(node, origin, report, global_source, region)
                 sources.append(source); mapped = [source.id]
             elif node.uid in (PLANE, TFSF):
                 source = convert_paired_source(node, origin, region, report, global_source)
@@ -176,17 +185,15 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
                 monitors.extend(outputs); mapped = [m.id for m in outputs]
             else:
                 raise Skipped(f'Object class {node.uid} is not imported: it has no native scene mapping yet.')
-            report.mappings.append(dict(record_offset=node.start, object_id=node.name, native_ids=mapped))
+            report.mappings.append(dict(record_offset=node.start, object_id=node.name, native_ids=mapped, **({'script_generated': True} if node.legacy.get('kind') == 13 else {})))
         except (Unsupported, ValueError) as exc:
-            disabled = node.uid in (*SOURCE_CLASSES, TIME, DFT) and node.properties.get('enabled') is not None and node.properties['enabled'].value == 0
-            report.issue(node, 'object_mapping', ('Disabled object is not imported: ' if disabled and not isinstance(exc, Skipped) else '')+str(exc),
-                         'warning' if disabled or isinstance(exc, Skipped) else 'error')
+            mapping_issue(report, node, exc)
     if not materials and region is not None:
         materials = [Material(name='Background', index=region.background_index)]
     ranged = any(s.enabled and (global_source if s.use_global_source and global_source else s).time_definition in ('wavelength', 'frequency') for s in sources)
-    if not ranged and report.fit_band_um is not None:
-        # Source limits resolve against imported sources only; keep the global source range explicitly.
-        low, high = report.fit_band_um
+    if not ranged and global_source is not None and global_source.time_definition in ('wavelength', 'frequency'):
+        # Source limits resolve against imported sources only; keep the declared global source range explicitly.
+        low, high = global_source.wavelength_start, global_source.wavelength_stop
         def explicit(spec):
             return spec.model_copy(update=dict(use_source_limits=False, wavelength_start=low, wavelength_stop=high)) if spec.use_source_limits and spec.sampling != 'custom' else spec
         limited = [m for m in monitors if (global_monitor if m.use_global_monitor and global_monitor else m.spectrum).use_source_limits]
@@ -328,21 +335,72 @@ def bloch_phase(node, axis, period_m, report):
     return phase
 
 
-def fit_band(domain, global_source):
-    """Wavelength band (um) for sampled-material fits: the global source range, else its saved limits."""
-    if global_source is not None:
-        p = pulse_parameters(global_source)
-        if global_source.time_definition in ('wavelength', 'frequency'):
-            return (global_source.wavelength_start, global_source.wavelength_stop)
-        width = p.frequency_span_hz/2 if p.chirped else 1/(math.pi*p.sigma_s)
-        low, high = max(p.frequency_hz-width, p.frequency_hz*.1), p.frequency_hz+width
-        return (C0/high*1e6, C0/low*1e6)
+def mapping_issue(report, node, exc):
+    """A skipped object or a disabled instrument is a warning; unsupported physics on an enabled object is an error."""
+    disabled = node.uid in (*SOURCE_CLASSES, TIME, DFT) and node.properties.get('enabled') is not None and node.properties['enabled'].value == 0
+    report.issue(node, 'object_mapping', ('Disabled object is not imported: ' if disabled and not isinstance(exc, Skipped) else '')+str(exc),
+                 'warning' if disabled or isinstance(exc, Skipped) else 'error')
+
+
+def convert_analysis_group(node, origin, region, report, global_source, global_monitor, source_count, monitor_count):
+    """Import the enabled members of an analysis group as ordinary sources and monitors; its scripts are informational.
+
+    Member records already hold global coordinates: a member the script placed at relative z = 0
+    is stored at the group z, so no group translation is added.
+    """
+    if not flag(node, 'enabled'):raise Skipped(f'Disabled analysis group with {len(node.children)} members is not imported.')
+    for key in ('setupscript', 'analysisscript'):
+        if node.properties.get(key) is not None and node.properties[key].value != '':
+            report.issue(node, 'group_script', f'The analysis group {key} is not executed; its {len(node.children)} saved members are imported.', 'info')
+    sources, monitors = [], []
+    for child in node.children:
+        try:
+            if child.children:raise Skipped('Nested group is not imported.')
+            if child.uid == DIPOLE:sources.append(convert_source(child, origin, report, global_source, region))
+            elif child.uid in (PLANE, TFSF):sources.append(convert_paired_source(child, origin, region, report, global_source))
+            elif child.uid in (TIME, DFT):monitors.extend(convert_monitor(child, origin, report, region, global_monitor))
+            else:raise Skipped(f'Object class {child.uid} is not imported: it has no native scene mapping yet.')
+        except (Unsupported, ValueError) as exc:
+            mapping_issue(report, child, exc)
+    for kind, added, existing in (('sources', len(sources), source_count), ('monitors', len(monitors), monitor_count)):
+        if added+existing > 32:
+            raise Unsupported(f'Its members expand to {added} native {kind} ({existing} already imported), above the native limit of 32 {kind}. Disable the group or reduce it in Lumerical.')
+    return sources, monitors
+
+
+def source_band(settings):
+    p = pulse_parameters(settings)
+    if settings.time_definition in ('wavelength', 'frequency'):
+        return (settings.wavelength_start, settings.wavelength_stop)
+    width = p.frequency_span_hz/2 if p.chirped else 1/(math.pi*p.sigma_s)
+    low, high = max(p.frequency_hz-width, p.frequency_hz*.1), p.frequency_hz+width
+    return (C0/high*1e6, C0/low*1e6)
+
+
+def fit_band(domain, global_source, source_nodes=()):
+    """Wavelength band (um) for sampled-material fits: the union of the global source range and every enabled
+    local source range, else the saved global limits."""
+    bands = [source_band(global_source)] if global_source is not None else []
+    for source in source_nodes:
+        try:
+            if not number(source, 'enabled') or number(source, 'useGlobalSource'):continue
+            bands.append(source_band(source_settings(source)))
+        except (Unsupported, ValueError):
+            continue
+    if bands:return (min(b[0] for b in bands), max(b[1] for b in bands))
     keys = ('BBFrequencyStart', 'BBFrequencyStop')
     if all(k in domain.properties for k in keys):
         low, high = (domain.properties[k].value for k in keys)
         if isinstance(low, (int, float)) and isinstance(high, (int, float)) and 0 < low < high:
             return (C0/high*1e6, C0/low*1e6)
     return None
+
+
+def plane_center(position_m, origin, region=None):
+    """Native centre in um; a 2D scene ignores z, so point objects sit exactly on the plane."""
+    center = (np.asarray(position_m, dtype=float)-origin)*1e6
+    if region is not None and region.dimension == '2d':center[2] = 0.
+    return tuple(center)
 
 
 def identity(node):
@@ -569,7 +627,7 @@ def source_temporal(node, global_source=None):
     return local,bool(use_global),effective
 
 
-def convert_source(node, origin, report, global_source=None):
+def convert_source(node, origin, report, global_source=None, region=None):
     require(node, 'sourceType', 0)  # electric dipole
     local,use_global,effective=source_temporal(node,global_source)
     theta, phi = math.radians(number(node, 'theta')), math.radians(number(node, 'angle'))
@@ -577,7 +635,7 @@ def convert_source(node, origin, report, global_source=None):
     component = int(np.argmax(abs(direction)))
     axial = number(node,'theta') in (0,180) or (number(node,'theta')==90 and number(node,'angle')%360 in (0,90,180,270))
     result = Source(**identity(node), **local.model_dump(), use_global_source=bool(use_global), enabled=bool(number(node, 'enabled')),
-                    center=tuple((np.array([number(node, a+'coord') for a in 'xyz'])-origin)*1e6),
+                    center=plane_center(np.array([number(node, a+'coord') for a in 'xyz']), origin, region),
                     component='E'+'xyz'[component], amplitude=number(node, 'amplitude0'),
                     theta=None if axial else number(node,'theta'),phi=number(node,'angle'),
                     phase=number(node, 'phase')+(180 if axial and direction[component] < 0 else 0))
@@ -701,7 +759,7 @@ def convert_monitor(node, origin, report, region=None, global_monitor=None):
     interpolation=number(node,'spatialAveraging')
     if interpolation not in (0,1):raise Unsupported('Uncollocated monitor components are not mapped. Select nearest mesh cell or specified position interpolation.')
     if node.uid == TIME:
-        require(node,'monitorShape',0);require(node,'spatialAveraging',1);require(node,'outputPower',0)
+        require(node,'monitorShape',0);require(node,'outputPower',0)
         require(node, 'startTime', 0); require(node, 'stopMethod', 0); require(node, 'downsampleT', 1)
         if np.any(vector(node, 'outputP', 3)):raise Unsupported('Poynting vector recording is not implemented yet.')
         outputs = vector(node, 'outputE', 6)
@@ -750,10 +808,12 @@ def convert_monitor(node, origin, report, region=None, global_monitor=None):
             return [result]
         if shape!=0:raise Unsupported('This spatial DFT shape has no native mapping yet.')
         if record_power or poynting:raise Unsupported('Point-monitor power/Poynting outputs are not mapped to scalar time traces.')
-        if interpolation!=1:raise Unsupported('Point traces require nearest-cell interpolation.')
         report.issue(node, 'dft_normalization', 'Native point DFT is an unnormalized field integral. Selected E/H traces are sampled at their native Yee locations. Saved temporal stride is used for the postprocessed DFT, while full time traces are retained. Vendor normalization and sample phase are not reproduced.', 'warning')
+    if interpolation==0:
+        report.issue(node,'point_interpolation','Specified-position interpolation is not reproduced: the native point trace samples the nearest Yee cell, up to half a cell from the saved position.','warning')
     if any(v not in (0, 1) for v in outputs):raise Unsupported('Unrecognized monitor component switches.')
     center = np.array([number(node, 'left'), number(node, 'bottom'), number(node, 'z1')])
+    if region is not None and region.dimension == '2d':center[2] = origin[2]  # 2D ignores z; the plane is the origin
     selected = [c for c, on in zip(('Ex', 'Ey', 'Ez', 'Hx', 'Hy', 'Hz'), outputs) if on]
     if not selected:raise Unsupported('Monitor has no enabled field components.')
     base = identity(node)
