@@ -5,6 +5,8 @@ test('create a closed TFSF box, preview incidence and verify empty exterior on G
  p.structures=[];p.sources=[];p.region.size=[3.2,3.2,1];p.region.mesh=.1;p.region.pml_cells=4;p.region.steps=300;
  p.region.backend=process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu';p.region.cuda_kernel=process.env.TORCHFDTD_TEST_CUDA?'fused':'torch';
  p.region.material_sampling='yee';p.region.precision='float64';
+ // The example's one-way sheet left periodic y faces; a TFSF box needs PML on every active face.
+ p.region.boundaries.y_min.kind='pml';p.region.boundaries.y_max.kind='pml';
  p.monitors[0].center=[0,0,0];p.monitors[1].center=[1.1,1.1,0];
  await page.addInitScript(p=>localStorage.setItem('torchfdtd.project.v1',JSON.stringify(p)),p);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));

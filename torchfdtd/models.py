@@ -763,24 +763,31 @@ def demo_project(name='waveguide'):
     if name == 'pmc':
         return Project(name='Closed PMC cavity | exact endpoints',
             region=Region(dimension='3d',size=(3.2,3.2,3.2),mesh=.2,steps=160,pml_cells=3,
-                backend='cpu',material_sampling='yee',snapshot_interval=8,
+                backend='cpu',material_sampling='yee',snapshot_interval=3,
                 boundaries={a+'_'+side:BoundaryFace(kind='pmc') for a in 'xyz' for side in ('min','max')}),
             sources=[Source(id='source',name='electric pulse',component='Ez',center=(0,0,0),pulse_cycles=1)],
             monitors=[Monitor(id='electric',name='electric probe',component='Ez',center=(.4,0,0)),
                       Monitor(id='magnetic',name='magnetic probe',component='Hy',center=(.4,0,0))])
 
-    p = Project(name='SiN waveguide | 2D TMz',
+    # The Project schema has no eigenmode source, so the waveguide is excited by a
+    # soft sheet spanning its cross-section: a bidirectional launch of the guided
+    # wave, drawn with a double arrow. Stored frames must resolve the carrier: at
+    # 1.55 um and 0.05 um mesh one period is 44 steps.
+    p = Project(name='SiN waveguide | 2D TMz', region=Region(snapshot_interval=5),
                 structures=[Structure(id='waveguide', name='waveguide', size=(8, 0.65, 0.4))],
-                sources=[Source(id='source', center=(-2.5, 0, 0))],
+                sources=[Source(id='source', kind='plane', center=(-2.5, 0, 0), size=(0, 1.0, 0))],
                 monitors=[Monitor(id='input', name='input', center=(-1.8, 0, 0)),
                           Monitor(id='output', name='output', center=(2, 0, 0))])
     if name == 'scatterer':
+        # A one-way sheet toward +x over the whole transverse cell (periodic in y),
+        # so nothing radiates into the left PML.
         p.name = 'Dielectric cylinder | 2D TMz'
+        p.region = Region(boundaries=Boundaries(y_min=BoundaryFace(kind='periodic'), y_max=BoundaryFace(kind='periodic')), snapshot_interval=5)
         p.structures = [Structure(id='cylinder', name='cylinder', kind='circle', radius=0.65)]
-        p.sources = [Source(id='source', kind='plane', center=(-2.5, 0, 0), size=(0, 4, 0))]
+        p.sources = [Source(id='source', kind='plane', injection='oneway', normal='x', direction='+', center=(-2.5, 0, 0), size=(0, 6, 0))]
     elif name == '3d':
         p.name = 'Dielectric sphere | 3D'
-        p.region = Region(dimension='3d', size=(4, 4, 4), mesh=0.1, steps=300, pml_cells=6)
+        p.region = Region(dimension='3d', size=(4, 4, 4), mesh=0.1, steps=300, pml_cells=6, snapshot_interval=5)
         p.structures = [Structure(id='sphere', name='sphere', kind='sphere', radius=0.6)]
         p.sources = [Source(id='source', center=(-1, 0, 0))]
         p.monitors = [Monitor(id='output', name='output', center=(1, 0, 0))]

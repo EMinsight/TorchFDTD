@@ -103,6 +103,12 @@ export class Views {
         if((name==='xy'&&['circle','ring'].includes(o.kind))||o.kind==='sphere'){ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2);if(o.kind==='ring'){ctx.ellipse(0,0,o.inner_radius*m.scale,o.inner_radius*m.scale,0,0,Math.PI*2,true);}}
         else ctx.rect(-w/2,-h/2,w,h);
         ctx.fill('evenodd');ctx.stroke();
+        if(o.category==='source'&&o.kind==='plane'){
+          // Propagation arrows along the sheet normal: one for a one-way plane, both ways for a soft sheet.
+          const zero=o.size.findIndex((v,i)=>v===0&&(p.region.dimension==='3d'||i<2)),normal=o.injection==='oneway'?(o.normal||'x'):(zero>=0?'xyz'[zero]:o.normal||'x'),a='xyz'.indexOf(normal);
+          if(axes.includes(a)){const horizontal=axes[0]===a,signs=o.injection==='oneway'?[o.direction==='-'?-1:1]:[1,-1];ctx.lineWidth=1.5;ctx.fillStyle=ctx.strokeStyle;
+            for(const sign of signs){const dx=horizontal?sign:0,dy=horizontal?0:-sign,L=16;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(dx*L,dy*L);ctx.stroke();ctx.beginPath();ctx.moveTo(dx*L,dy*L);ctx.lineTo(dx*(L-6)+dy*4,dy*(L-6)-dx*4);ctx.lineTo(dx*(L-6)-dy*4,dy*(L-6)+dx*4);ctx.closePath();ctx.fill();}}
+        }
       }
       if(selected&&o.category!=='structure'){ctx.fillStyle='#187be7';ctx.font='11px Inter,Segoe UI,sans-serif';ctx.fillText(o.name,0,-h/2-9);}
       ctx.restore();
