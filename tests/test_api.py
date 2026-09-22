@@ -49,3 +49,27 @@ def test_health_reports_cpu_when_cuda_is_available_without_a_visible_device(tmp_
         assert response.status_code==200
         assert response.json()['cuda'] is False and response.json()['gpu'] is None
     app.state.pool.shutdown()
+
+
+def test_validate_reports_stored_frames_per_optical_period(tmp_path):
+    import pytest
+    from torchfdtd.solver import snapshot_frames
+    app=create_app(tmp_path)
+    with TestClient(app) as client:
+        for name in ('waveguide','scatterer','3d','pmc'):
+            p=demo_project(name)
+            snapshot=client.post('/api/validate',json=p.model_dump()).json()['snapshot']
+            assert snapshot==snapshot_frames(p) and snapshot['frames_per_period']>=4 and not snapshot['aliased'], (name, snapshot)
+        p=demo_project()
+        snapshot=client.post('/api/validate',json=p.model_dump()).json()['snapshot']
+        # 1.55 um at a 0.05 um mesh: one period is 44.3 steps; the solver keeps at most 100 frames, so 1000 steps store one every 10.
+        assert snapshot['period_steps']==pytest.approx(44.3,abs=.1) and snapshot['effective_interval']==10 and snapshot['frames']==100
+        assert snapshot['frames_per_period']==pytest.approx(4.43,abs=.01)
+        p.region.snapshot_interval=40
+        summary=client.post('/api/validate',json=p.model_dump()).json()
+        assert summary['snapshot']['aliased'] and summary['snapshot']['frames_per_period']==pytest.approx(1.107,abs=.01)
+        assert any('alias the carrier' in w and 'backward motion' in w for w in summary['warnings'])
+        p.sources=[]
+        summary=client.post('/api/validate',json=p.model_dump()).json()
+        assert summary['snapshot']['frames_per_period'] is None and not summary['snapshot']['aliased']
+    app.state.pool.shutdown()

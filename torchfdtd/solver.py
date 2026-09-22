@@ -256,14 +256,40 @@ def estimate(p: Project, *, endpoint_dispatch=True):
         real_bytes=8 if r.precision=='float64' else 4
         auxiliary_bytes+=surface*(16+real_bytes)+(10*box['incident_line_cells']+r.steps)*real_bytes
     if boxes:warnings.append('TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.')
+    snapshot = snapshot_frames(p)
+    if snapshot['aliased']:
+        warnings.append(f'Stored frames alias the carrier: {snapshot["frames_per_period"]:.1f} frames per optical period '
+                        f'(period {snapshot["period_steps"]:.1f} steps, one frame every {snapshot["effective_interval"]} steps). '
+                        f'The playback will look like backward motion; store a frame at least every {snapshot["period_steps"]/SNAPSHOT_FRAMES_PER_PERIOD:.0f} steps.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
             'estimated_memory_mb': round((stored * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
-            'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes}
+            'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes, 'snapshot': snapshot}
 
 
 def pulse_envelope_parameters(source):
     p = pulse_parameters(source)
     return p.sigma_s, p.offset_s
+
+
+SNAPSHOT_FRAMES_PER_PERIOD = 4
+
+
+def snapshot_frames(p: Project):
+    """Stored frames per optical period of the shortest enabled source wavelength.
+
+    The solver stores a frame every max(snapshot_interval, ceil(steps/100))
+    steps, so at most 100 frames. Below four frames per period the stored
+    frames alias the carrier and the playback looks like backward motion."""
+    r = p.region
+    interval = max(r.snapshot_interval, math.ceil(r.steps/100))
+    wavelengths = [s.wavelength_start if s.time_definition in ('wavelength', 'frequency') else s.wavelength
+                   for s in (p.resolved_source(x) for x in p.sources) if s.enabled]
+    shortest = min(wavelengths) if wavelengths else None
+    period = shortest*1e-6/C0/r.time_step if shortest else None
+    per_period = period/interval if period else None
+    return dict(interval=r.snapshot_interval, effective_interval=interval, frames=r.steps//interval,
+                shortest_wavelength_um=shortest, period_steps=period, frames_per_period=per_period,
+                aliased=bool(per_period is not None and per_period < SNAPSHOT_FRAMES_PER_PERIOD))
 
 
 def run_signature(p: Project, steps):
