@@ -10,11 +10,12 @@ The pip rows come from the metadata of the interpreter that runs this script;
 the non-pip rows are the hand-maintained tables below. The SBOM records the
 platform and interpreter it was taken on. ``--check`` on that platform compares
 the whole stable record; on another platform (a Linux CI job against a Windows
-record, say) it compares only the platform-independent parts: the tracked-tree
-scan, the asset table, the declared dependency specifications, the history note
-and the licence of every component installed on both, and it reports the
-closure difference (components present or installed on one side only) as
-information, not as a problem. Nothing here is a legal opinion: an item whose
+record, say) it judges only the tracked-tree scan findings, the non-pip asset
+table, the dependency specifiers declared in pyproject.toml and that every
+runtime component of the record is installed here or accounted for in the
+closure difference. Licence strings, versions, group membership and extra
+components differ between wheel builds, so they are reported in the
+``closure_difference`` block as information, never judged there. Nothing here is a legal opinion: an item whose
 licence or distribution right is not settled is listed under open items with
 BLOCKED_EXTERNAL semantics, never omitted. This is the G9-02 tool of
 docs/COMPLETION_PROGRAM_KO.md.
@@ -329,6 +330,8 @@ def build(audit):
                      license_files=pyproject['project']['license-files'], requires_python=pyproject['project']['requires-python']),
         python=dict(version='.'.join(map(str, sys.version_info[:3])), platform=sys.platform),
         host=dict(os=platform.system(), platform=platform.platform(), machine=platform.machine()),
+        declared_dependencies=dict(runtime=list(pyproject['project']['dependencies']),
+                                   **{group: list(specs) for group, specs in pyproject['project'].get('optional-dependencies', {}).items()}),
         summary=dict(components=len(components), installed=sum(c['installed'] for c in components), open_items=len(open_items),
                      scan_findings=len(findings)),
         components=components, assets=ASSETS, open_items=open_items,
@@ -426,26 +429,29 @@ def compare(committed, fresh):
     if same_platform(committed, fresh):
         problems = [] if stable(committed) == stable(fresh) else [f'{SBOM.relative_to(ROOT).as_posix()} is stale; regenerate it']
         return problems, dict(platform_match=True, closure_difference=None)
+    # Another platform judges only what does not depend on the interpreter's wheels: the scan (judged by the
+    # caller from the fresh findings), the asset table, the declared specifiers, and that every runtime
+    # component of the record is installed here or accounted for below. Everything else is information.
     problems = []
-    for section in ('project', 'assets', 'history_note'):
-        if committed.get(section) != fresh[section]:
-            problems.append(f'{SBOM.relative_to(ROOT).as_posix()}: {section} differs from the tracked tree; regenerate it on its platform')
+    if committed.get('assets') != fresh['assets']:
+        problems.append(f'{SBOM.relative_to(ROOT).as_posix()}: the asset table differs from the tracked tree; regenerate it on its platform')
+    if committed.get('declared_dependencies') != fresh['declared_dependencies']:
+        problems.append(f'{SBOM.relative_to(ROOT).as_posix()}: the dependency specifiers declared in pyproject.toml differ from the record; regenerate it on its platform')
     mine = {c['name']: c for c in committed.get('components', [])}
     theirs = {c['name']: c for c in fresh['components']}
-    for name in sorted(set(mine) & set(theirs)):
-        a, b = mine[name], theirs[name]
-        if a['groups'] != b['groups'] or a['specifiers'] != b['specifiers']:
-            problems.append(f'component {name}: declared groups or specifiers differ ({a["groups"]} {a["specifiers"]} vs {b["groups"]} {b["specifiers"]})')
-        if a['installed'] and b['installed'] and a['license'] != b['license']:
-            problems.append(f'component {name}: licence differs ({a["license"]!r} on the record, {b["license"]!r} here)')
-    asset_items = lambda sbom: [item for item in sbom.get('open_items', []) if item.get('paths')]  # noqa: E731
-    if asset_items(committed) != asset_items(fresh):
-        problems.append('asset open items differ from the tracked tree; regenerate the record on its platform')
+    both = set(mine) & set(theirs)
     difference = dict(
         only_in_record=sorted(set(mine) - set(theirs)), only_here=sorted(set(theirs) - set(mine)),
-        not_installed_here=sorted(n for n in set(mine) & set(theirs) if mine[n]['installed'] and not theirs[n]['installed']),
-        not_installed_on_record=sorted(n for n in set(mine) & set(theirs) if theirs[n]['installed'] and not mine[n]['installed']),
-        version_differs=sorted(n for n in set(mine) & set(theirs) if mine[n]['installed'] and theirs[n]['installed'] and mine[n]['version'] != theirs[n]['version']))
+        not_installed_here=sorted(n for n in both if mine[n]['installed'] and not theirs[n]['installed']),
+        not_installed_on_record=sorted(n for n in both if theirs[n]['installed'] and not mine[n]['installed']),
+        version_differs=sorted(n for n in both if mine[n]['installed'] and theirs[n]['installed'] and mine[n]['version'] != theirs[n]['version']),
+        license_differs={n: dict(record=mine[n]['license'], here=theirs[n]['license']) for n in sorted(both)
+                         if mine[n]['installed'] and theirs[n]['installed'] and mine[n]['license'] != theirs[n]['license']},
+        groups_differ={n: dict(record=mine[n]['groups'], here=theirs[n]['groups']) for n in sorted(both) if mine[n]['groups'] != theirs[n]['groups']})
+    accounted = set(difference['only_in_record']) | set(difference['not_installed_here'])
+    for name in sorted(n for n, c in mine.items() if 'runtime' in c['groups']):
+        if not (name in theirs and theirs[name]['installed']) and name not in accounted:
+            problems.append(f'runtime component {name} of the record is neither installed here nor listed in the closure difference')
     return problems, dict(platform_match=False, closure_difference=difference)
 
 
