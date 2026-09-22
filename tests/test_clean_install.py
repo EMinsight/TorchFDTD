@@ -10,7 +10,7 @@ import hashlib
 import json
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 import pytest
 
@@ -92,9 +92,11 @@ def test_every_runnable_readme_block_passed_on_the_installed_wheel():
     assert set(recorded) == set(runnable)
     for key, block in recorded.items():
         assert block['status'] == 'passed' and block['exit_code'] == 0, (key, block.get('stderr_tail'))
+    # The record's paths belong to the recording host; parse them with that host's path class, not this host's.
+    record_path = PureWindowsPath if record['host']['os'].startswith('Windows') else PurePosixPath
     for name, interpreter in outcome['interpreters'].items():
-        assert Path(interpreter['file']).is_relative_to(Path(interpreter['prefix'])), name
-        assert not Path(interpreter['file']).is_relative_to(ROOT), f'{name} imported torchfdtd from the checkout'
+        assert record_path(interpreter['file']).is_relative_to(record_path(interpreter['prefix'])), name
+        assert not record_path(interpreter['file']).is_relative_to(record_path(record['checkout'])), f'{name} imported torchfdtd from the checkout'
 
 
 def test_doctor_reports_are_consistent_with_each_environment():

@@ -234,7 +234,7 @@ def version_strings(root):
 
 def clean_install_record(root):
     records = []
-    for path in sorted((root / CLEAN_INSTALL).glob('*.json')):
+    for path in sorted((root / CLEAN_INSTALL).glob('*.json'), key=lambda p: p.name):
         record = load_json(path)
         if record.get('kind') == 'clean_install_record':
             records.append((path, record))
@@ -323,7 +323,7 @@ def section_platforms(root, gates, runs_dir):
              'listed, as in [PLATFORM_MATRIX.md](PLATFORM_MATRIX.md). The evidence rows name, per platform, the newest G4 evidence run of '
              'each task that was recorded there (by the `platform_id` the recorder writes with `--platform`, or, for older evidence, by the '
              'GPU names of the run equalling those of exactly one record) and count the other tasks whose newest run was recorded there.', '']
-    records = [load_json(path) for path in sorted((root / PLATFORMS).glob('*.json'))]
+    records = [load_json(path) for path in sorted((root / PLATFORMS).glob('*.json'), key=lambda p: p.name)]
     rows = []
     for record in records:
         gpus = '; '.join(f"{gpu['name']} (cc {gpu['compute_capability']}, {gpu['total_memory_bytes'] // 2**20} MiB)" for gpu in record['gpus']) or 'no CUDA device'
@@ -394,7 +394,7 @@ def g3_record(root, name):
 
 
 def case_of(root, task_id):
-    matches = sorted((root / CASES).glob(f'{task_id}_*.json')) or sorted((root / CASES).glob(f'{task_id}.json'))
+    matches = sorted((root / CASES).glob(f'{task_id}_*.json'), key=lambda p: p.name) or sorted((root / CASES).glob(f'{task_id}.json'), key=lambda p: p.name)
     return load_json(matches[0]) if matches else None
 
 
@@ -640,20 +640,32 @@ def readme_checks(root):
 
 
 def provenance_check(root):
-    """(ok, detail) of scripts/provenance_inventory.py --check: stale notices or SBOM, scan findings, broken requirements."""
+    """(ok, detail): the committed SBOM's own summary plus the verdict of scripts/provenance_inventory.py --check.
+
+    The detail is rendered from the committed record, never from the local closure, so the line is the same on every
+    platform that passes the check; the scanned-file count stays out because every evidence commit changes it.
+    """
+    sbom = load_json(root / 'docs' / 'validation' / 'sbom.json')
+    summary = sbom.get('summary') or dict(components=len(sbom['components']), installed=sum(c['installed'] for c in sbom['components']),
+                                          open_items=len(sbom['open_items']), scan_findings=len(sbom['scan']['findings']))
+    recorded = f"{sbom['python']['platform']}, Python {sbom['python']['version']}" + (f", {sbom['host']['platform']}" if sbom.get('host') else '')
+    detail = (f"committed SBOM taken on {recorded}: {summary['components']} components ({summary['installed']} installed there), "
+              f"{summary['open_items']} open items, {summary['scan_findings']} scan findings")
     completed = subprocess.run([sys.executable, str(root / 'scripts' / 'provenance_inventory.py'), '--check'], cwd=str(root),
                                capture_output=True, text=True, encoding='utf-8', errors='replace')
-    text = completed.stdout
-    try:
-        summary = json.loads(text[text.rindex('{'):] if '{' in text else text)
-    except ValueError:
-        return False, f'provenance_inventory.py --check exit {completed.returncode} without a summary: {cell(text[-200:])}'
-    # The scanned-file count changes with every commit that adds a tracked file (each evidence run does), so it stays out of the report.
-    detail = (f"{summary['components']} components, {summary['open_items']} open items, {len(summary['findings'])} scan findings, "
-              f"pip check exit {summary['pip_check']}")
-    if summary['problems'] or completed.returncode != 0:
-        return False, detail + '; problems: ' + '; '.join(summary['problems'] or [f'exit {completed.returncode}'])
-    return True, detail
+    verdict = None
+    for line_number, line in reversed(list(enumerate(completed.stdout.splitlines()))):
+        if line.strip() == '{':  # the summary object starts on its own line; nested objects never do at column 0
+            try:
+                verdict = json.loads('\n'.join(completed.stdout.splitlines()[line_number:]))
+                break
+            except ValueError:
+                continue
+    if verdict is None:
+        return False, detail + f'; check: provenance_inventory.py --check exit {completed.returncode} without a summary: {cell(completed.stdout[-200:])}'
+    if verdict['problems'] or completed.returncode != 0:
+        return False, detail + '; check: problems: ' + '; '.join(verdict['problems'] or [f'exit {completed.returncode}'])
+    return True, detail + '; check: passed against the tracked tree'
 
 
 def consistency_checks(root, versions, wheel_name, scope_ok, scope_cells):

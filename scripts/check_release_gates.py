@@ -108,7 +108,7 @@ def scope_change_reasons(root, gates, task):
                 if isinstance(value.get(key), (int, float)):
                     loosest[key] = max(loosest.get(key, 0), value[key])
     reasons = []
-    for path in sorted((root / 'docs' / 'validation' / 'cases').glob(f"{task['id']}*.json")):
+    for path in sorted((root / 'docs' / 'validation' / 'cases').glob(f"{task['id']}*.json"), key=lambda p: p.name):
         try:
             case = json.loads(path.read_text(encoding='utf-8'))
         except (OSError, ValueError):

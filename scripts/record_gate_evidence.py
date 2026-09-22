@@ -189,11 +189,11 @@ def optional_skip(reason):
 
 
 def parse_timestamp(text):
-    """An ISO 8601 timestamp as an aware datetime; a naive one is taken as local time."""
+    """An ISO 8601 timestamp as an aware datetime; a naive one is taken as UTC so that no judgement depends on the host's zone."""
     if not text:
         return None
     value = datetime.datetime.fromisoformat(text.replace('Z', '+00:00'))
-    return value if value.tzinfo else value.astimezone()
+    return value if value.tzinfo else value.replace(tzinfo=datetime.timezone.utc)
 
 
 def commit_time(root, commit):

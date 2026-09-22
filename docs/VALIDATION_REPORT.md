@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 32 | 45 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 32 | 51 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 28 | 49 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 28 | 55 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -27,8 +27,8 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G0-01 | 실제 HEAD/dirty tree/기존 계획/자원·권한 확인 | IMPLEMENTED | VERIFIED | `20260921T212112Z-g0-01-78c4f2c1` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 | G0-02 | RELEASE_SCOPE와 기능·검증 상태 분리 | IMPLEMENTED | VERIFIED | `20260921T212114Z-g0-02-a4700f5a` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
 | G0-03 | 기존 완료 계획·gate·fixture·raw evidence 단일 추적 | IMPLEMENTED | VERIFIED | `20260921T212115Z-g0-03-9d45ae2d` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
-| G0-04 | 필수 누락/실패/skip/source 불일치에서 출고 실패 판정기 | IMPLEMENTED | VERIFIED | `20260921T212305Z-g0-04-4a232a3c` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
-| G0-05 | 판정기 자체 failure injection과 세션 인계 구조 | IMPLEMENTED | VERIFIED | `20260921T212525Z-g0-05-d0b1a9fe` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G0-04 | 필수 누락/실패/skip/source 불일치에서 출고 실패 판정기 | IMPLEMENTED | VERIFIED | `20260921T212305Z-g0-04-4a232a3c` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: scripts/check_release_gates.py |
+| G0-05 | 판정기 자체 failure injection과 세션 인계 구조 | IMPLEMENTED | VERIFIED | `20260921T212525Z-g0-05-d0b1a9fe` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: scripts/check_release_gates.py |
 
 ### G1 과거 리뷰 회귀 및 수정 (WORKSTATION, P0)
 
@@ -82,8 +82,8 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G4-02 | torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다. | IMPLEMENTED | VERIFIED | `20260921T163724Z-g4-02-b5c11b4f` | `a73f47920e9c` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-03 | noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다 | IMPLEMENTED | VERIFIED | `20260921T163744Z-g4-03-5f80ac67` | `a73f47920e9c` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
 | G4-04 | 최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다 | IMPLEMENTED | VERIFIED | `20260921T163757Z-g4-04-7e1cdb0f` | `a73f47920e9c` | PASS | file-level required tests were not enumerated at recording time (evidence predates that rule); a partial run cannot be excluded |
-| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260921T212749Z-g4-05-d9c1df76` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: tests/conftest.py |
-| G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260921T212752Z-g4-06-c6698b17` | `32af0e2bffa2` | PASS | evidence matches the current checkout |
+| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260921T212749Z-g4-05-d9c1df76` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: scripts/check_release_gates.py |
+| G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260921T212752Z-g4-06-c6698b17` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: .github/workflows/test.yml |
 
 ### G5 메모리·재시작·장기 안정성 (WORKSTATION, P0)
 
@@ -145,7 +145,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260921T212831Z-g9-04-f826cb57` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | VERIFIED | `20260921T213007Z-g9-07-31e7a456` | `15122d2aae0e` | PASS | evidence matches the current checkout |
+| G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | VERIFIED | `20260921T213007Z-g9-07-31e7a456` | `15122d2aae0e` | FAIL | STALE: test source changed since the run: tests/test_validation_report.py |
 
 ### H1 실제 단일 문제 multi-GPU (HPC, P1)
 
@@ -360,7 +360,7 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 | README row check `test_readme_restart_row_matches_the_restart_record` | ok | reproduced from its record |
 | README "Compared with Meep" block | ok | equals the renderer output for the committed records |
 | MEEP_COMPARISON.md | ok | equals the renderer output for the committed records |
-| third-party notices and SBOM | ok | 52 components, 3 open items, 0 scan findings, pip check exit 0 |
+| third-party notices and SBOM | ok | committed SBOM taken on win32, Python 3.10.2, Windows-10-10.0.26200-SP0: 52 components (52 installed there), 3 open items, 0 scan findings; check: passed against the tracked tree |
 | RELEASE_SCOPE.md support claims | ok | 22 verification cells and the stage-status block rendered from the gate file |
 | attestation wording | ok | no line uses the words that tests/test_validation_report.py forbids |
 
