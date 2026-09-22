@@ -18,9 +18,6 @@ with tempfile.TemporaryDirectory(prefix='.gds-ui-',dir='.') as d:
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text());});page.on('download',d=>downloads.push(d));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
  await expect(page.locator('#connection')).not.toContainText('Connecting');
- // The example's one-way sheet needs periodic y faces; the journey sets PEC walls later, so make it a soft sheet inside the interior.
- await page.locator('[data-select="source"]').click();await page.getByLabel('injection',{exact:true}).selectOption('soft');
- await page.getByLabel('y span',{exact:true}).fill('2');await page.getByLabel('y span',{exact:true}).press('Tab');
 
  // 1. CAD/GDS import replacing the example geometry, with an explicit Z stack and material per layer.
  await page.locator('[data-action="gds"]').click();await page.locator('#gds-input').setInputFiles(file);

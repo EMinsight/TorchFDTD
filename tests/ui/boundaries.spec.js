@@ -3,10 +3,6 @@ import { test, expect } from '@playwright/test';
 test('configure paired Bloch faces and custom PML, run complex fields',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
- // The example sheet is one-way and needs periodic transverse faces; a soft sheet accepts the Bloch phase.
- await page.locator('[data-select="source"]').click();await page.getByLabel('injection',{exact:true}).selectOption('soft');
- await page.getByLabel('y span',{exact:true}).fill('4');await page.getByLabel('y span',{exact:true}).press('Tab');
- await page.locator('[data-select="fdtd"]').click();
  await page.getByLabel('y min bc',{exact:true}).selectOption('bloch');
  await expect(page.getByLabel('y max bc',{exact:true})).toHaveValue('bloch');
  await page.getByLabel('Bloch phase y',{exact:true}).fill('0.4');
