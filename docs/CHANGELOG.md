@@ -149,6 +149,7 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Fixed
 
+- The propagated beyond-VRAM driver runs its finite-difference forwards in child processes, because the parent keeps its heap high-water mark after the backward and the operating system counts it as used memory, which failed the in-process forwards' host admission on a tight host (`--fd-in-process` keeps the old behaviour) (this commit).
 - The streamed backward counts the forward's retained host banks of the same run as available when it admits its reservation, so a run whose forward was admitted no longer fails at the backward on a host where those banks left less free memory than the reservation (this commit).
 - `DesignCheckpoint.load` and `DesignProblem.load` read their files with `torch.load(..., weights_only=True)` instead of an unrestricted unpickle: the checkpoint stores the NumPy generator key as a tensor so both files hold tensors and plain containers only, and a file that carries any other pickled object is refused with `ValueError` before anything in it runs; a `checkpoint.pt` written before this change carries a NumPy array in its generator state and is refused the same way (remove it to start the loop over), while earlier `DesignProblem` state files load unchanged (this commit).
 - `Region.pml_dispersion` enters the plan's `exterior` section, so the frozen and ADE absorber updates no longer share a plan hash, reference, cache or restart key (this commit).

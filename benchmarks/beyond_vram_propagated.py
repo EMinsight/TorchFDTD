@@ -387,6 +387,58 @@ def directional(gradient, delta_mask, layers):
     return float(gradient[:, :, k_lo:k_hi][inside].double().sum())
 
 
+def fd_forward_in_child(args, mode, sign, artifacts):
+    """Run one perturbed forward in a fresh interpreter and return its objective and run entry."""
+    import subprocess
+    import sys
+    result_path = Path(artifacts)/f'{mode}_fd_{"plus" if sign > 0 else "minus"}.json'
+    if result_path.exists():
+        result_path.unlink()
+    skip = {'--output', '--artifacts', '--fd-worker', '--fd-result', '--mode'}
+    forwarded, argv, index = [], list(sys.argv[1:]), 0
+    while index < len(argv):
+        item = argv[index]
+        key = item.split('=', 1)[0]
+        if key in skip:
+            index += 1 if '=' in item else 2
+            continue
+        if item in ('--plan', '--rehearsal', '--fd-in-process'):
+            index += 1
+            continue
+        forwarded.append(item)
+        index += 1
+    command = [sys.executable, '-m', 'benchmarks.beyond_vram_propagated', *forwarded, '--mode', mode, '--fd-worker', str(sign),
+               '--fd-result', str(result_path), '--output', str(Path(artifacts)/f'{mode}_fd_{"plus" if sign > 0 else "minus"}_record.json'),
+               '--artifacts', str(Path(artifacts)/'fd_worker')]
+    completed = subprocess.run(command, cwd=str(Path(__file__).resolve().parents[1]))
+    if completed.returncode or not result_path.exists():
+        raise RuntimeError(f'finite-difference child process failed with exit {completed.returncode}: {" ".join(command)}')
+    payload = json.loads(result_path.read_text(encoding='utf-8'))
+    return float(payload['objective']), payload['run']
+
+
+def fd_worker(args, spec, mode, record, artifacts):
+    """Child-process body: one perturbed forward, written as JSON for the parent."""
+    project = spec['project']
+    project.region.memory_mode = 'streamed' if mode == 'streamed' else 'resident'
+    project = spec['project'] = type(project).model_validate(project.model_dump())
+    device = 'cuda' if mode == 'resident' else 'cpu'
+    options = streamed_options(args, project) if mode == 'streamed' else resident_options(args)
+    model = energy_plane_model(project, options)
+    epsilon, _ = rasterize(spec)
+    fd_mask = pillar_mask(spec, args.fd_radius_um)
+    k_lo, k_hi = spec['pillar_layers']
+    delta = torch.zeros_like(epsilon)
+    delta[:, :, k_lo:k_hi] = torch.from_numpy(fd_mask)[:, :, None].to(epsilon.dtype)
+    sign = int(args.fd_worker)
+    label = f'{mode}_fd_{"plus" if sign > 0 else "minus"}'
+    with torch.no_grad():
+        perturbed = (epsilon+sign*args.fd_step*delta).to(device)
+        _, J_side, _, _, entry = run_forward(model, perturbed, spec, label, record, args, mode)
+    Path(args.fd_result).write_text(json.dumps(dict(sign=sign, objective=float(J_side), run=entry), indent=1, allow_nan=False)+'\n', encoding='utf-8', newline='\n')
+    print(json.dumps(dict(mode=mode, stage=label, objective=float(J_side))), flush=True)
+
+
 def execute(args, spec, mode, record, artifacts):
     """Forward, VJP and the optional finite-difference check in one execution mode."""
     project = spec['project']
@@ -439,15 +491,21 @@ def execute(args, spec, mode, record, artifacts):
         delta[:, :, k_lo:k_hi] = torch.from_numpy(fd_mask)[:, :, None].to(epsilon.dtype)
         h = args.fd_step
         values = {}
-        with torch.no_grad():
-            for sign in ((1,) if args.fd_check == 'forward' else (1, -1)):
-                perturbed = (epsilon+sign*h*delta).to(device)
-                _, J_side, _, _, side = run_forward(model, perturbed, spec, f'{mode}_fd_{"plus" if sign > 0 else "minus"}', record, args, mode)
-                values[sign] = float(J_side)
-                del perturbed
-                gc.collect()
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
+        for sign in ((1,) if args.fd_check == 'forward' else (1, -1)):
+            label = f'{mode}_fd_{"plus" if sign > 0 else "minus"}'
+            if args.fd_in_process:
+                with torch.no_grad():
+                    perturbed = (epsilon+sign*h*delta).to(device)
+                    _, J_side, _, _, side = run_forward(model, perturbed, spec, label, record, args, mode)
+                    values[sign] = float(J_side)
+                    del perturbed
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+            else:
+                # A child process: the parent's heap keeps its high-water mark after the backward and the
+                # operating system counts it as used, which would fail the child's own host admission.
+                values[sign], record['runs'][label] = fd_forward_in_child(args, mode, sign, artifacts)
         base = forward['objective']
         if args.fd_check == 'forward':
             fd = (values[1]-base)/h
@@ -486,6 +544,9 @@ def main(argv=None):
     parser.add_argument('--disk-gib', type=float, default=250.)
     parser.add_argument('--disk-reserve-gib', type=float, default=50.)
     parser.add_argument('--fd-check', choices=['none', 'forward', 'central'], default='central')
+    parser.add_argument('--fd-in-process', action='store_true', help='run the finite-difference forwards in this process instead of child processes')
+    parser.add_argument('--fd-worker', type=int, default=None, help=argparse.SUPPRESS)
+    parser.add_argument('--fd-result', default=None, help=argparse.SUPPRESS)
     parser.add_argument('--fd-step', type=float, default=.05, help='Epsilon perturbation of the finite-difference direction')
     parser.add_argument('--fd-radius-um', type=float, default=10., help='Pillars within this distance of the axis form the direction')
     parser.add_argument('--output', required=True)
@@ -552,6 +613,12 @@ def main(argv=None):
         return record
     artifacts = Path(args.artifacts) if args.artifacts else output.parent/(output.stem+'_artifacts')
     artifacts.mkdir(parents=True, exist_ok=True)
+    if args.fd_worker is not None:
+        record['executions'] = {}
+        record['artifacts_directory'] = None
+        fd_worker(args, spec, args.mode, record, artifacts)
+        save()
+        return record
     record['executions'] = {}
     record['artifacts_directory'] = str(artifacts)
     started = time.perf_counter()
@@ -572,7 +639,7 @@ def main(argv=None):
                                                  /np.linalg.norm(np.load(artifacts/'resident_energy_history.npy'))))
         record['stage'] = 'complete'
         record['elapsed_seconds'] = time.perf_counter()-started
-        record['artifact_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(artifacts.iterdir())}
+        record['artifact_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(artifacts.iterdir()) if p.is_file()}
         save()
         print(json.dumps(dict(stage='complete', elapsed_seconds=record['elapsed_seconds'], comparison=record.get('comparison'))), flush=True)
     except BaseException as exc:
