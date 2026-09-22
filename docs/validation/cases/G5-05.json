@@ -40,17 +40,17 @@
     },
     "judged_run_rtx3060": {
       "machine": "rtx3060-win11-lab: NVIDIA GeForce RTX 3060, 12,884,377,600 bytes of VRAM, 85.6 GB of RAM, Windows 11, shared with other agents",
-      "footprint_um": 64.0,
-      "lateral_size_um": 66.0,
+      "footprint_um": 44.0,
+      "lateral_size_um": 46.0,
       "grid": [
-        1320,
-        1320,
+        920,
+        920,
         64
       ],
-      "cells": 111513600,
-      "pillars": 4096,
-      "observers": 1228800,
-      "plane": "160 x 160 samples of 0.4 um",
+      "cells": 54169600,
+      "pillars": 1936,
+      "observers": 72600,
+      "plane": "110 x 110 samples of 0.4 um",
       "fd_pillars": 316,
       "execution": {
         "mode": "streamed, DifferentiablePlaneSimulation over StreamedSimulation, fused CUDA tiles, synchronous transfers",
@@ -67,20 +67,26 @@
       },
       "planner": {
         "source": "python -m benchmarks.beyond_vram_propagated --preset workstation-3060 --plan --assume rtx3060 --output <plan.json> (metadata only; 70 GiB of RAM and 11.5 GB of VRAM assumed free at launch)",
-        "eh_bytes": 2676326400,
+        "eh_bytes": 1300070400,
         "state_bytes_with_cpml": 3257379840,
         "state_bank_capacity": 9,
-        "host_reservation_bytes": 41087352640,
-        "gpu_reservation_bytes": 6531318024,
-        "dense_parameter_reservation_bytes": 3568435200,
+        "host_reservation_bytes": 21365522240,
+        "gpu_reservation_bytes": 4503618824,
+        "dense_parameter_reservation_bytes": 1733427200,
         "max_extended_tile_cells": 10813440,
         "blocks": 58,
-        "tiles": 21,
+        "tiles": 15,
         "global_replayed_blocks": 135,
         "forward_cell_steps": 402462720000,
         "global_replay_cell_steps": 948879360000,
         "local_replay_cell_steps": 1832624640000,
-        "total_cell_steps": 3586429440000
+        "total_cell_steps": 1738220032000,
+        "state_bytes": 1593175040,
+        "replayed_blocks": 135,
+        "fitted_estimate_seconds": 2606,
+        "live_adjoint_state_bytes": 16072002560,
+        "physical_vram_bytes": 12884377600,
+        "live_adjoint_state_over_vram": 1.247
       },
       "physical_vram": {
         "machine": "NVIDIA GeForce RTX 3060, 12,884,377,600 bytes",
@@ -140,6 +146,61 @@
       },
       "wall_time_model": "benchmarks.beyond_vram_propagated.TIME_MODELS[\"rtx5880\"], fitted on compact-host-large-5880.json and compact-host-capacity-5880.json: forward 493 s, backward 4023 s, two finite-difference forwards 985 s, total 5501 s (1.53 h); the fit scatters by about 30 percent on those records",
       "status": "optional larger run; not required for G5-05 after the owner decided that the local RTX 3060 verification is sufficient"
+    },
+    "optional_run_rtx3060_64um": {
+      "machine": "rtx3060-win11-lab: NVIDIA GeForce RTX 3060, 12,884,377,600 bytes of VRAM, 85.6 GB of RAM, Windows 11, shared with other agents",
+      "footprint_um": 64.0,
+      "lateral_size_um": 66.0,
+      "grid": [
+        1320,
+        1320,
+        64
+      ],
+      "cells": 111513600,
+      "pillars": 4096,
+      "observers": 1228800,
+      "plane": "160 x 160 samples of 0.4 um",
+      "fd_pillars": 316,
+      "execution": {
+        "mode": "streamed, DifferentiablePlaneSimulation over StreamedSimulation, fused CUDA tiles, synchronous transfers",
+        "preset": "workstation-3060",
+        "slab_width": 64,
+        "temporal_depth": 32,
+        "checkpoints": 6,
+        "local_checkpoints": 1,
+        "state_storage": "host",
+        "restart_journal": "none: the streamed spectral path rejects a restart journal (torchfdtd.streamed._journal); a crash means rerunning",
+        "host_budget_gib": 56,
+        "gpu_budget_gib": 8,
+        "finite_difference": "central, two extra streamed forwards"
+      },
+      "planner": {
+        "source": "python -m benchmarks.beyond_vram_propagated --preset workstation-3060 --plan --assume rtx3060 --output <plan.json> (metadata only; 70 GiB of RAM and 11.5 GB of VRAM assumed free at launch)",
+        "eh_bytes": 2676326400,
+        "state_bytes_with_cpml": 3257379840,
+        "state_bank_capacity": 9,
+        "host_reservation_bytes": 41087352640,
+        "gpu_reservation_bytes": 6531318024,
+        "dense_parameter_reservation_bytes": 3568435200,
+        "max_extended_tile_cells": 10813440,
+        "blocks": 58,
+        "tiles": 21,
+        "global_replayed_blocks": 135,
+        "forward_cell_steps": 402462720000,
+        "global_replay_cell_steps": 948879360000,
+        "local_replay_cell_steps": 1832624640000,
+        "total_cell_steps": 3586429440000
+      },
+      "physical_vram": {
+        "machine": "NVIDIA GeForce RTX 3060, 12,884,377,600 bytes",
+        "eh_over_vram": 0.208,
+        "live_adjoint_state_bytes": "9 state banks x 3.26 GB plus the dense parameter reservation 3.57 GB = 32.9 GB, 2.55 times the 12.9 GB of physical VRAM",
+        "resident_alternative": "a resident adjoint holds one primal and one adjoint E/H state, epsilon, its inverse and the gradient (60 bytes per cell, 6.7 GB) plus 3.26 GB per checkpoint; with the six checkpoints of this schedule it would need 26.2 GB; the public resident path also refuses scenes above eight million cells",
+        "statement": "The E/H state of one bank (2.68 GB) does not exceed physical VRAM; the live state of the adjoint at the declared checkpoint schedule exceeds it 2.55 times. The case meets the program requirement in the working-set sense, which the record states plainly."
+      },
+      "wall_time_model": "benchmarks.beyond_vram_propagated.TIME_MODELS[\"rtx3060\"], the RTX 5880 model with the payload and compute rates refitted on the two RTX 3060 streamed rehearsals of this case (four timings within 16 percent, shared GPU): forward 476 s, backward 3923 s, two finite-difference forwards 952 s, total 5351 s (1.49 h)",
+      "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --preset workstation-3060 --mode streamed --output D:/TorchFDTD/.local/runs/g5-05/G5-05_3060.json --artifacts D:/TorchFDTD/.local/runs/g5-05/artifacts",
+      "note": "The 64 um instance first declared for this host; it needs 52 GB of available RAM and was not the judged run."
     }
   },
   "seed": null,
@@ -192,12 +253,18 @@
     "fixture_of_record": {
       "rtx3060": {
         "grid": [
-          1320,
-          1320,
+          920,
+          920,
           64
         ],
         "steps": 1836,
-        "minimum_eh_bytes": 2676326400
+        "minimum_eh_bytes": 1300070400,
+        "footprint_um": 44.0,
+        "host_reservation_bytes": 21365522240,
+        "gpu_reservation_bytes": 4503618824,
+        "state_bank_capacity": 9,
+        "state_bytes": 1593175040,
+        "dense_parameter_reservation_bytes": 1733427200
       },
       "rtx5880": {
         "grid": [
@@ -216,6 +283,15 @@
         ],
         "steps": 1836,
         "minimum_eh_bytes": 157286400
+      },
+      "rtx3060_64um": {
+        "grid": [
+          1320,
+          1320,
+          64
+        ],
+        "steps": 1836,
+        "minimum_eh_bytes": 2676326400
       }
     },
     "propagation": {
@@ -246,6 +322,10 @@
         "rehearsal": {
           "kind": "central",
           "relative_error_max": 0.03
+        },
+        "rtx3060_64um": {
+          "kind": "central",
+          "relative_error_max": 0.05
         }
       },
       "justification": "The step changes the pillar index by 0.6 percent over 316 pillars (7.7 percent of the 64 um array judged on the RTX 3060, 2.2 percent of the optional 120 um array) and over all 196 pillars in the rehearsal. Both contexts use the central difference: the 14 um rehearsal gave a central relative error of 9.1e-3 at a 26 percent response, while the supplementary 24 um streamed run showed that the one-sided difference at this step carries a 14.7 percent truncation error at a 1.9 percent response (the pillar transmission is strongly nonlinear in epsilon near its resonances), so the one-sided form first declared for the workstation was replaced by the central form before the judged run at the cost of one more forward. The judged and the optional runs keep the 5 percent originally declared for the workstation run and the rehearsal the program's 3 percent physical-parameter threshold. A response below 2e-4 of the objective would sit near the FP32 floor of a 1836-step spectrum and is declared inconclusive (FAIL)."
@@ -268,5 +348,6 @@
       "an E/H state that exceeds physical VRAM by itself: on the RTX 3060 that needs at least 0.54 billion cells whose host banks alone exceed the machine, on the RTX 5880 at least 2.1 billion cells at about six times the three-hour budget"
     ]
   },
-  "notes": "Applicability: the judged run is the 64 um instance on rtx3060-win11-lab (context rtx3060); the rehearsal verifies the driver, the criteria machinery, the resident/streamed agreement and the central finite difference at 1/17 of its cells on the same GPU; the 120 um RTX 5880 instance (context rtx5880) is optional. G5-05 stays NOT_RUN until the RTX 3060 record is judged. History: the case was first declared for the RTX 5880 at 120 um (commit following 73203d2; the 1.2 to 1.6 billion cell target of the brief was reduced to 381 million cells because host banks of five states plus eight dense parameter copies exceed the 103 GB admissible there above about 0.45 billion cells and the fitted wall-time model gave 1.39 h against the 3 h budget); before any judged run the workstation finite difference was changed from one-sided to central (commit after 3b0deb0) on the evidence of the supplementary 24 um streamed rehearsal (one-sided relative error 0.147 at a 0.019 response), and then, on the owner's decision that local verification is sufficient, the judged instance was re-scoped to the RTX 3060 at 64 um with six global checkpoints so that the live adjoint state (32.9 GB) exceeds its 12.9 GB of VRAM by a clear margin while the host reservation (41.1 GB) stays under 60 GB of the 85.6 GB of RAM; physics, criteria and limits are unchanged. Exploratory probes before the first declaration: resident 12 um at 2600 steps and streamed 20 um at 2518 steps for the energy decay, and an 8 um, 300-step run of the driver in both modes (finite-difference relative error 5e-4 at a 2.9 percent response, resident/streamed gradient relative L2 3.9e-7)."
+  "notes": "Applicability: the judged run is the 64 um instance on rtx3060-win11-lab (context rtx3060); the rehearsal verifies the driver, the criteria machinery, the resident/streamed agreement and the central finite difference at 1/17 of its cells on the same GPU; the 120 um RTX 5880 instance (context rtx5880) is optional. G5-05 stays NOT_RUN until the RTX 3060 record is judged. History: the case was first declared for the RTX 5880 at 120 um (commit following 73203d2; the 1.2 to 1.6 billion cell target of the brief was reduced to 381 million cells because host banks of five states plus eight dense parameter copies exceed the 103 GB admissible there above about 0.45 billion cells and the fitted wall-time model gave 1.39 h against the 3 h budget); before any judged run the workstation finite difference was changed from one-sided to central (commit after 3b0deb0) on the evidence of the supplementary 24 um streamed rehearsal (one-sided relative error 0.147 at a 0.019 response), and then, on the owner's decision that local verification is sufficient, the judged instance was re-scoped to the RTX 3060 at 64 um with six global checkpoints so that the live adjoint state (32.9 GB) exceeds its 12.9 GB of VRAM by a clear margin while the host reservation (41.1 GB) stays under 60 GB of the 85.6 GB of RAM; physics, criteria and limits are unchanged. Exploratory probes before the first declaration: resident 12 um at 2600 steps and streamed 20 um at 2518 steps for the energy decay, and an 8 um, 300-step run of the driver in both modes (finite-difference relative error 5e-4 at a 2.9 percent response, resident/streamed gradient relative L2 3.9e-7). Re-declared before the judged run on 2026-09-22: the 64 um instance needs a 41.1 GB host reservation but this workstation had only 30.8 GB of available RAM at run time (other users' processes), so the judged RTX 3060 instance is the 44 um member of the same family: grid 920 x 920 x 64 = 54,169,600 cells, E/H 1.30 GB, streamed state 1.59 GB, 9 host banks, dense parameter reservation 1.73 GB, host reservation 21.4 GB, GPU reservation 4.5 GB, fitted estimate 0.72 h. Its live adjoint state (9 x 1.59 GB banks plus 1.73 GB parameters, 16.1 GB) exceeds the 12.88 GB physical VRAM by 1.25 times, against 2.55 times for the 64 um instance, which stays declared as the larger optional run (context rtx3060_64um) for a host with 52 GB available.",
+  "declared_at_commit_44um": "b7bdec0991f3130c621e133df305416e53282de3"
 }

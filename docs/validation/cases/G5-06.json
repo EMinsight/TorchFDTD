@@ -64,7 +64,8 @@
     "budget": {
       "rtx3060": {
         "wall_seconds_max": 14400,
-        "disk_write_bytes_max": 2000000000000
+        "disk_write_bytes_max": 2000000000000,
+        "fitted_estimate_seconds": 2606
       },
       "rtx5880": {
         "wall_seconds_max": 10800,
@@ -74,7 +75,11 @@
         "wall_seconds_max": 3600,
         "disk_write_bytes_max": 100000000000
       },
-      "justification": "Two terabytes of writes and, for the RTX 5880, three hours were set by the program owner; the RTX 3060 wall budget of four hours is declared here at about 2.7 times the fitted estimate of 1.49 h because the GPU is shared. Host banks write nothing. The rehearsal limits are generous bounds for a shared RTX 3060. The disk figure is machine-wide and includes other processes."
+      "justification": "Two terabytes of writes and, for the RTX 5880, three hours were set by the program owner; the RTX 3060 wall budget of four hours is declared here at about 2.7 times the fitted estimate of 1.49 h because the GPU is shared. Host banks write nothing. The rehearsal limits are generous bounds for a shared RTX 3060. The disk figure is machine-wide and includes other processes.",
+      "rtx3060_64um": {
+        "wall_seconds_max": 14400,
+        "disk_write_bytes_max": 2000000000000
+      }
     },
     "vram": {
       "rtx3060": {
@@ -84,7 +89,11 @@
         "physical_vram_bytes_min": 51000000000
       },
       "live_state_must_exceed_vram": "state_bank_capacity x state_bytes plus dense_parameter_reservation_bytes of the streamed reservation must exceed the recorded physical VRAM",
-      "eh_over_vram": "reported and not judged: expected 0.21 on the RTX 3060 and 0.18 on the RTX 5880; see the statement in G5-05"
+      "eh_over_vram": "reported and not judged: expected 0.21 on the RTX 3060 and 0.18 on the RTX 5880; see the statement in G5-05",
+      "rtx3060_64um": {
+        "physical_vram_bytes_min": 12500000000
+      },
+      "expected_live_state_over_vram_rtx3060": 1.25
     },
     "vjp": {
       "definition": "the dense epsilon gradient of the streamed backward must be finite with at least one nonzero entry, its design-slab norm positive, and its directional derivative must pass the finite-difference criteria of G5-05",
@@ -116,5 +125,6 @@
       "a physical-disk write measurement of the artifacts (the psutil counters are machine-wide and include other processes)"
     ]
   },
-  "notes": "Applicability: the rehearsal record exercises every criterion of this case in the rehearsal context on the local RTX 3060; the judged criteria (four-hour wall, two-terabyte writes, live state above the RTX 3060 physical VRAM) can only be judged on the RTX 3060 record of the 64 um instance, so G5-06 stays NOT_RUN until then; the RTX 5880 entries describe the optional larger run. The case was added in the commit following 73203d2 together with G5-05, its budget basis updated with G5-05's central-difference revision, and re-scoped to the RTX 3060 judged run on the owner's decision before any judged run."
+  "notes": "Applicability: the rehearsal record exercises every criterion of this case in the rehearsal context on the local RTX 3060; the judged criteria (four-hour wall, two-terabyte writes, live state above the RTX 3060 physical VRAM) can only be judged on the RTX 3060 record of the 64 um instance, so G5-06 stays NOT_RUN until then; the RTX 5880 entries describe the optional larger run. The case was added in the commit following 73203d2 together with G5-05, its budget basis updated with G5-05's central-difference revision, and re-scoped to the RTX 3060 judged run on the owner's decision before any judged run. Re-declared before the judged run on 2026-09-22: the 64 um instance needs a 41.1 GB host reservation but this workstation had only 30.8 GB of available RAM at run time (other users' processes), so the judged RTX 3060 instance is the 44 um member of the same family: grid 920 x 920 x 64 = 54,169,600 cells, E/H 1.30 GB, streamed state 1.59 GB, 9 host banks, dense parameter reservation 1.73 GB, host reservation 21.4 GB, GPU reservation 4.5 GB, fitted estimate 0.72 h. Its live adjoint state (9 x 1.59 GB banks plus 1.73 GB parameters, 16.1 GB) exceeds the 12.88 GB physical VRAM by 1.25 times, against 2.55 times for the 64 um instance, which stays declared as the larger optional run (context rtx3060_64um) for a host with 52 GB available.",
+  "declared_at_commit_44um": "b7bdec0991f3130c621e133df305416e53282de3"
 }
