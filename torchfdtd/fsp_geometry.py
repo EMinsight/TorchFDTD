@@ -131,6 +131,10 @@ def _write_fsp(document,project,*,settings):
         raise ValueError('Adding, deleting or reordering FSP objects is not mapped by the geometry writer yet.')
     materials={m.name:m for m in project.materials};base_materials={m.name:m for m in base.materials}
     nodes={identity(n)['id']:n for n in document.root.children if n.legacy}
+    # Objects a group script generated are imported for execution only; they are never written back.
+    generated={identity(c)['id']:c for n in document.root.children if n.legacy.get('kind')==13 for c in n.children}
+    if any(sid in generated and (topology_changed or project.structures[i]!=originals.get(sid)) for i,sid in enumerate(structure_ids)):
+        raise ValueError('Script-generated group objects are not written back to FSP. Keep them unchanged and edit the group script in Lumerical, or remove them from the export.')
     patches=list(settings_patches) if settings else [];edits=[];reparameterized=[]
     new_records=dict(instruments['new_records']) if instruments else {};new_primitives=[]
     for shape in project.structures:
@@ -141,6 +145,7 @@ def _write_fsp(document,project,*,settings):
             native_only.append(shape.id+'.material label/color and inactive primitive controls')
             if shape.rotation!=0:reparameterized.append(shape.id)
             continue
+        if shape.id in generated:continue
         previous=originals[shape.id];node=nodes[shape.id]
         if shape.kind!=previous.kind:raise ValueError('Changing the FSP primitive type is not mapped yet.')
         changes={k for k in type(shape).model_fields if getattr(shape,k)!=getattr(previous,k)}

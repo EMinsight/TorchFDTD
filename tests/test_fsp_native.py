@@ -80,7 +80,7 @@ def test_conversion_retains_geometry_timestep_pulse_and_fingerprint(monkeypatch)
 @pytest.mark.parametrize('class_id,key,bad', [(DIPOLE,'frequencyEnvelopeType',3),
     (DIPOLE,'sourceType',1), (DIPOLE,'useGlobalSource',1), (FDTD,'meshRefineDesired',0),
     (FDTD,'mMaterialId','a dispersive material'), (FDTD,'dt',1e-12),
-    (TIME,'outputPower',1), (TIME,'monitorShape',6), (ROOT,'setupscript','deleteall;')])
+    (TIME,'outputPower',1), (TIME,'monitorShape',6), (FDTD,'BCType0',5)])
 def test_unsupported_physics_never_produces_a_runnable_partial_scene(class_id, key, bad):
     doc = FspDocument(fixture())
     target = next(n for n in doc.nodes() if n.uid == class_id)
@@ -158,25 +158,84 @@ def test_native_upload_download_and_run_without_vendor_runtime(tmp_path, monkeyp
         app.state.pool.shutdown(); app.state.fsp_pool.shutdown()
 
 
-def test_scripts_boundaries_and_scripted_groups_are_listed_together_not_fatal(tmp_path, monkeypatch):
+def sampled_material(uid, name='Synthetic glass', wavelengths_um=np.geomspace(.4, 20, 80)):
+    """A type-7 record: embedded frequency/permittivity samples of a lossy dielectric."""
+    frequency = 299792458/(wavelengths_um*1e-6);omega = 2*np.pi*frequency
+    w0 = 2*np.pi*299792458/.25e-6  # one ultraviolet Lorentz resonance: Sellmeier-like dispersion with small loss
+    epsilon = 2.25+.6*w0**2/(w0**2-omega**2-1j*.05*w0*omega)
+    return mapping(items(dict(name=name, materialuuid=uid, type=7, anisotropy=0, priority=3, maxpoles=4, red=.1, green=.6, blue=.9,
+                              frequency=frequency.reshape(-1, 1), permittivity=epsilon.reshape(-1, 1))))
+
+
+def bloch_fixture(units=1, kx=0., ky=.5, based_on_source=0, extra=(), sampled=None, **overrides):
+    """3D fixture with paired Bloch faces on x and y, ghost planes included, PML on z."""
+    grid = np.linspace(-2.1e-6, 2.1e-6, 43)  # 41 interior nodes = the 4 um cell plus one ghost plane per side
+    region = dict(BCType0=5, BCType1=5, BCType2=5, BCType3=5, PMLLayersV7p0=np.array([0, 0, 0, 0, 4, 4]).reshape(6, 1),
+                  xGrid=grid, yGrid=grid, blochUnits=units, blochBasedOnSource=based_on_source, kx=kx, ky=ky, kz=0.,
+                  frequencyEnvelopeType=0, sourcePreference=0, globalFrequency=299792458/1.55e-6, globalEliminateDC=0,
+                  pulseLength=2e-15, offset=4e-15, optimizeForShortPulse=0, eliminateDiscontinuities=0)
+    region.update(overrides.pop('region_overrides', None) or {})
+    raw = fixture(region_overrides=region, extra=extra, **overrides)
+    if sampled is not None:
+        marker = b'Lumerical material data file version 2.0\0'+u(0)
+        raw = raw.replace(marker, marker[:-4]+u(1)+sampled, 1)
+    return raw
+
+
+def test_bloch_boundaries_map_the_saved_wavevector_in_both_unit_systems(monkeypatch):
     from torchfdtd import fsp
     monkeypatch.setattr(fsp, 'load_api', lambda: pytest.fail('Independent conversion loaded Lumerical'))
-    group = scripted_group('array', 'addcircle;', [('nx', 0, '2')], [legacy_circle(), legacy_circle()])
-    raw = fixture(region_overrides={'BCType0': 5, 'BCType1': 5}, root_overrides={'setupscript': 'set("x",0);'}, extra=[group])
-    report = convert_fsp(FspDocument(raw), 'Scripted', 'cpu')
-    assert report.project is None
-    errors = {(i['code'], i['object_id']): i['message'] for i in report.issues if i['severity'] == 'error'}
-    assert 'setupscript' in errors['model_script', '::model'] and 'set("x"' not in errors['model_script', '::model']
-    assert '[5, 5]' in errors['region_mapping', '::model::FDTD']
-    assert '2 script-generated objects' in errors['object_mapping', 'array']
-    assert not any(i['object_id'] in ('sphere', '::model::source', '::model::monitor') for i in report.issues)
-    assert any(i['severity'] == 'warning' and 'were not checked' in i['message'] for i in report.issues)
-    import json; json.dumps(report.as_dict(), allow_nan=False)
-    # With a mappable region the other objects are mapped and only the group is listed.
-    report = convert_fsp(FspDocument(fixture(extra=[group])), 'Scripted', 'cpu')
-    assert report.project is None
-    assert [(i['code'], i['object_id']) for i in report.issues if i['severity'] == 'error'] == [('object_mapping', 'array')]
-    assert {m['object_id'] for m in report.mappings} == {'sphere', '::model::source', '::model::monitor'}
+    report = convert_fsp(FspDocument(bloch_fixture(units=0, kx=.25, ky=.5)), 'Bloch', 'cpu')
+    assert report.project is not None, report.issues
+    p = first = report.project
+    assert [f.kind for a in range(3) for f in p.region.boundaries.pair(a)] == ['bloch']*4+['pml']*2
+    assert p.region.bloch_phase == pytest.approx((2*math.pi*.25, math.pi, 0))
+    assert p.region.shape == (40, 40, 48) and p.region.size[:2] == pytest.approx((4, 4))
+    assert sum(i['code'] == 'bloch_phase' and i['severity'] == 'info' and 'exp(+i*phase)' in i['message'] for i in report.issues) == 2
+    p = convert_fsp(FspDocument(bloch_fixture(units=1, kx=0., ky=2.5e5)), 'Bloch', 'cpu').project
+    assert p is not None and p.region.bloch_phase == pytest.approx((0, 2.5e5*4e-6, 0))
+    report = convert_fsp(FspDocument(bloch_fixture(units=0, kx=.25, ky=.5, based_on_source=1)), 'Bloch', 'cpu')
+    assert report.project is not None and report.project.region.bloch_phase == (0, 0, 0)
+    assert sum(i['code'] == 'bloch_source_angle' and i['severity'] == 'warning' for i in report.issues) == 2
+    report = convert_fsp(FspDocument(bloch_fixture(units=0, region_overrides={'BCType1': 1})), 'Bloch', 'cpu')
+    assert report.project is None and any('[5, 1]' in i['message'] for i in report.issues)
+    result = Simulation(first).run()
+    assert np.iscomplexobj(result.electric) and np.isfinite(result.electric).all() and np.max(abs(result.electric)) > 0
+
+
+def test_scripted_group_geometry_sampled_material_and_skipped_objects_convert_to_a_runnable_project(tmp_path, monkeypatch):
+    from torchfdtd import fsp
+    monkeypatch.setattr(fsp, 'load_api', lambda: pytest.fail('Independent conversion loaded Lumerical'))
+    uid = '{11111111-2222-3333-4444-555555555555}'
+    inside = legacy_circle(x=.5e-6, y=-.4e-6, index=1.71)
+    outside = legacy_circle(x=3e-6, y=0., index=1.71)  # entirely beyond the 4 um cell after the group shift
+    glass = legacy_circle(x=-.6e-6, y=.6e-6, material=uid, radius=.2e-6)
+    group = scripted_group('array', 'addcircle;', [('nx', 0, '2')], [inside, outside, glass], x=.1e-6, y=0., z=.3e-6)
+    raw = bloch_fixture(units=0, kx=0., ky=.5, extra=[group], sampled=sampled_material(uid),
+                        root_overrides={'setupscript': 'set("x",0);'}, monitor_overrides={'enabled': 0, 'monitorShape': 6})
+    doc = FspDocument(raw)
+    report = convert_fsp(doc, 'Scripted', 'cpu')
+    assert report.project is not None, report.issues
+    p = report.project
+    by_name = {s.name: s for s in p.structures}
+    assert sorted(by_name) == ['array circle 1', 'array circle 3', 'sphere']
+    assert by_name['array circle 1'].center == pytest.approx((.6, -.4, .3)) and by_name['array circle 1'].material == 'FSP n=1.71'
+    assert by_name['array circle 3'].radius == pytest.approx(.2) and by_name['array circle 3'].mesh_order == 3
+    glass_material = next(m for m in p.materials if m.name == by_name['array circle 3'].material)
+    assert glass_material.model == 'multipole' and glass_material.poles and glass_material.provenance.source.startswith('FSP embedded sampled data')
+    assert glass_material.color == '#1a99e6'
+    codes = {(i['severity'], i['code']) for i in report.issues}
+    assert ('warning', 'model_script') in codes and ('info', 'group_script') in codes and ('error', 'object_mapping') not in codes
+    assert any(i['code'] == 'group_script' and '3 saved generated objects' in i['message'] and '1 lying entirely outside' in i['message'] for i in report.issues)
+    fit = next(i for i in report.issues if i['code'] == 'material_fit')
+    assert fit['severity'] == 'warning' and 'normalized RMS' in fit['message'] and 'Synthetic glass' in fit['message']
+    assert any(i['code'] == 'object_mapping' and i['severity'] == 'warning' and i['message'].startswith('Disabled object is not imported') for i in report.issues)
+    assert p.monitors == [] and len(p.sources) == 1
+    assert {m['object_id'] for m in report.mappings} == {'array', 'sphere', '::model::source'}
+    assert next(m for m in report.mappings if m['object_id'] == 'array')['native_ids'] == [by_name['array circle 1'].id, by_name['array circle 3'].id]
+    rotated = scripted_group('twist', '', [], [inside], axes=(2, -1, -1), angles=(90., 0., 0.))
+    report = convert_fsp(FspDocument(bloch_fixture(extra=[rotated])), 'Rotated', 'cpu')
+    assert report.project is None and any('Rotated structure groups' in i['message'] for i in report.issues)
     monkeypatch.setattr(fsp, 'availability', lambda: {'installed': False, 'reason': 'Not installed'})
     app = create_app(tmp_path)
     try:
@@ -184,15 +243,32 @@ def test_scripts_boundaries_and_scripted_groups_are_listed_together_not_fatal(tm
             response = client.post('/api/fsp/native-import', content=raw, headers={'x-filename': 'moir%C3%A9%20cavity%20-%2090%20twist.fsp'})
             assert response.status_code == 202
             key = response.json()['id']
-            deadline = time.monotonic()+5
+            deadline = time.monotonic()+20
             while time.monotonic() < deadline:
                 job = client.get('/api/fsp/'+key).json()
                 if job['status'] in ('ready', 'failed'):break
                 time.sleep(.01)
             assert job['status'] == 'ready', job
-            assert job['filename'] == 'moiré cavity - 90 twist.fsp'
-            assert job['conversion']['project'] is None and not job['conversion']['native_execution_allowed']
-            assert ('object_mapping', 'array') in [(i['code'], i['object_id']) for i in job['conversion']['issues']]
-            assert client.get('/api/fsp/'+key+'/download').content == raw
+            assert job['filename'] == 'moiré cavity - 90 twist.fsp' and job['conversion']['native_execution_allowed']
+            validated = client.post('/api/validate', json=job['conversion']['project'])
+            assert validated.status_code == 200, validated.text
+            assert validated.json()['cells'] == 40*40*48
+            # Generated objects execute natively but are never written back.
+            export = client.post('/api/fsp/'+key+'/native-export', json=job['conversion']['project'])
+            assert export.status_code == 202
+            deadline = time.monotonic()+20
+            while time.monotonic() < deadline:
+                edited = client.get('/api/fsp/'+export.json()['id']).json()
+                if edited['status'] in ('ready', 'failed'):break
+                time.sleep(.01)
+            assert edited['status'] == 'ready', edited
+            moved = dict(job['conversion']['project']);moved['structures'] = [dict(s, center=(s['center'][0]+.1, s['center'][1], s['center'][2])) if s['name'] == 'array circle 1' else s for s in moved['structures']]
+            export = client.post('/api/fsp/'+key+'/native-export', json=moved)
+            deadline = time.monotonic()+20
+            while time.monotonic() < deadline:
+                edited = client.get('/api/fsp/'+export.json()['id']).json()
+                if edited['status'] in ('ready', 'failed'):break
+                time.sleep(.01)
+            assert edited['status'] == 'failed' and 'Script-generated group objects are not written back' in edited['error']
     finally:
         app.state.pool.shutdown(); app.state.fsp_pool.shutdown()

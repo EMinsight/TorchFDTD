@@ -26,7 +26,7 @@ project = Project(region=Region(
 - The phase is fixed across the source spectrum, so this is not broadband fixed-angle/BFAST injection. Diffraction orders can differ by integer multiples of 2π/L.
 - The invariant z dimension has no boundary in 2D. Its configuration remains at defaults.
 
-The sign convention follows the documented [Lumerical Bloch phase relationship](https://optics.ansys.com/hc/en-us/articles/360034382714-Bloch-boundary-conditions-in-FDTD-and-MODE). FSP wavevector and mesh mapping are not yet validated for native import.
+The sign convention follows the documented [Lumerical Bloch phase relationship](https://optics.ansys.com/hc/en-us/articles/360034382714-Bloch-boundary-conditions-in-FDTD-and-MODE). The FSP wavevector mapping (bandstructure or SI units, source-angle fallback) is described in [FSP_NATIVE.md](FSP_NATIVE.md); equivalence against vendor Bloch fields is not measured.
 
 ## PEC and anti-symmetric walls
 

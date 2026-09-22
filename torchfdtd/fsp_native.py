@@ -25,10 +25,16 @@ SOURCE_CLASSES = (DIPOLE, PLANE, TFSF)
 TIME = '{3cbd368f-83d1-45a9-8b2b-154d82400a51}'
 DFT = '{15879b8f-3efb-45dd-a50f-acd1106124bc}'
 STATE = '{5126557e-473e-4885-8285-4461cc51f71a}'
+# BCType values observed in saved layouts (docs/FSP_BINARY.md); Metal and symmetry codes are unverified.
+BOUNDARY_CODES = {0: 'pml', 1: 'periodic', 5: 'bloch'}
 
 
 class Unsupported(ValueError):
     pass
+
+
+class Skipped(Unsupported):
+    """An object left out of the native scene without blocking it: listed as a warning."""
 
 
 def value(node: Node, key):
@@ -68,6 +74,8 @@ class Conversion:
     issues: list[dict] = field(default_factory=list)
     mappings: list[dict] = field(default_factory=list)
     origin_m: tuple = (0, 0, 0)
+    fit_band_um: tuple | None = None
+    fits: dict = field(default_factory=dict)
 
     def issue(self, node, code, message, severity='error'):
         self.issues.append(dict(severity=severity, code=code, object_id=node.name,
@@ -96,7 +104,7 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
     try:
         for key in ('setupscript', 'analysisscript'):
             if value(document.root, key) != '':
-                report.issue(document.root, 'model_script', f'The model {key} is not mapped yet; native scenes do not run scripts.')
+                report.issue(document.root, 'model_script', f'The model {key} is not executed; the saved layout it last produced is imported.', 'warning')
         require(document.root, 'enabled', 1)
         require(document.root, 'constructionflag', 0)
         for key in 'xyz':
@@ -120,6 +128,7 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
                             n.properties['useGlobalSource'].value != 0 for n in document.root.children)
         report.issue(domain, 'global_source_mapping', ('Referenced' if active_global else 'Unused')+
                      ' global source settings could not be imported: '+str(exc), 'error' if active_global else 'warning')
+    report.fit_band_um = fit_band(domain, global_source)
     materials, structures, sources, monitors = [], [], [], []
     global_monitor=None
     referenced_global=any(n.uid==DFT and n.properties.get('useGlobalDFT') is not None and
@@ -140,21 +149,22 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
                 report.issue(node, 'simulation_state', 'Saved simulation state is not a layout-only record.')
             continue
         try:
-            if node.legacy.get('kind') == 13:
-                raise Unsupported(f'Structure group with a setup script and {len(node.children)} script-generated objects is not mapped yet.')
-            if node.children:
-                raise Unsupported('Hierarchical/group transforms and scripts are not mapped yet.')
-            if region is None and (node.legacy.get('kind') in (4, 5, 6, 8, 11) or node.uid in (*SOURCE_CLASSES, TIME, DFT)):
+            if node.legacy.get('kind') != 13 and node.children:
+                raise Skipped(f'Group with {len(node.children)} members is not imported: hierarchical/analysis group transforms and scripts are not mapped yet.')
+            if region is None and (node.legacy.get('kind') in (4, 5, 6, 8, 11, 13) or node.uid in (*SOURCE_CLASSES, TIME, DFT)):
                 continue
-            if node.legacy.get('kind') in (4, 5, 6, 8, 11):
-                shape, material = convert_structure(node, origin, region, document.materials)
-                structures.append(shape)
-                if not any(m.name == material.name for m in materials): materials.append(material)
-                if material.oscillator:
-                    report.issue(node, 'material_ade', 'Passive isotropic '+material.model+' coefficients are mapped in rad/s. Native trapezoidal ADE and Yee sampling may differ from Lumerical; compare convergence.', 'warning')
-                if material.model == 'drude' and shape.kind != 'rectangle':
-                    report.issue(node, 'drude_curve_accuracy', 'Experimental curved Drude geometry: quantitative curved-interface accuracy is not established. Refine space/time and compare material sampling choices.', 'warning')
-                mapped = [shape.id]
+            if node.legacy.get('kind') in (4, 5, 6, 8, 11, 13):
+                converted = convert_group(node, origin, region, document.materials, report) if node.legacy['kind'] == 13 else [convert_structure(node, origin, region, document.materials, report)]
+                mapped = [];warned = set()  # one material notice per record, not one per generated object
+                for shape, material in converted:
+                    structures.append(shape); mapped.append(shape.id)
+                    if not any(m.name == material.name for m in materials): materials.append(material)
+                    if material.oscillator and ('ade', material.name) not in warned:
+                        warned.add(('ade', material.name))
+                        report.issue(node, 'material_ade', 'Passive isotropic '+material.model+' coefficients are mapped in rad/s. Native trapezoidal ADE and Yee sampling may differ from Lumerical; compare convergence.', 'warning')
+                    if material.model == 'drude' and shape.kind != 'rectangle' and ('curve', material.name) not in warned:
+                        warned.add(('curve', material.name))
+                        report.issue(node, 'drude_curve_accuracy', 'Experimental curved Drude geometry: quantitative curved-interface accuracy is not established. Refine space/time and compare material sampling choices.', 'warning')
             elif node.uid == DIPOLE:
                 source = convert_source(node, origin, report, global_source)
                 sources.append(source); mapped = [source.id]
@@ -165,12 +175,25 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
                 outputs = convert_monitor(node, origin, report, region, global_monitor)
                 monitors.extend(outputs); mapped = [m.id for m in outputs]
             else:
-                raise Unsupported(f'Object class {node.uid} has no native scene mapping yet.')
+                raise Skipped(f'Object class {node.uid} is not imported: it has no native scene mapping yet.')
             report.mappings.append(dict(record_offset=node.start, object_id=node.name, native_ids=mapped))
         except (Unsupported, ValueError) as exc:
-            report.issue(node, 'object_mapping', str(exc))
+            disabled = node.uid in (*SOURCE_CLASSES, TIME, DFT) and node.properties.get('enabled') is not None and node.properties['enabled'].value == 0
+            report.issue(node, 'object_mapping', ('Disabled object is not imported: ' if disabled and not isinstance(exc, Skipped) else '')+str(exc),
+                         'warning' if disabled or isinstance(exc, Skipped) else 'error')
     if not materials and region is not None:
         materials = [Material(name='Background', index=region.background_index)]
+    ranged = any(s.enabled and (global_source if s.use_global_source and global_source else s).time_definition in ('wavelength', 'frequency') for s in sources)
+    if not ranged and report.fit_band_um is not None:
+        # Source limits resolve against imported sources only; keep the global source range explicitly.
+        low, high = report.fit_band_um
+        def explicit(spec):
+            return spec.model_copy(update=dict(use_source_limits=False, wavelength_start=low, wavelength_stop=high)) if spec.use_source_limits and spec.sampling != 'custom' else spec
+        limited = [m for m in monitors if (global_monitor if m.use_global_monitor and global_monitor else m.spectrum).use_source_limits]
+        if limited:
+            if global_monitor is not None:global_monitor = explicit(global_monitor)
+            monitors = [m.model_copy(update=dict(spectrum=explicit(m.spectrum))) for m in monitors]
+            report.issue(domain, 'monitor_source_limits', f'No enabled ranged source was imported, so the source limits of {len(limited)} monitor(s) were replaced by the explicit global source range {low:.4g}-{high:.4g} um.', 'warning')
     if not any(i['severity'] == 'error' for i in report.issues):
         try:
             candidate = Project(name=name[:120], region=region, materials=materials,
@@ -223,19 +246,21 @@ def convert_region(node, backend, report):
     fields, shape, origin, nodes = {}, [], [], []
     cad_centres = [number(node, 'GUIx'), number(node, 'GUIy'), (number(node, 'GUIz1')+number(node, 'GUIz2'))/2]
     cad_spans = [number(node, 'GUIwidth'), number(node, 'GUIheight'), number(node, 'GUIz2')-number(node, 'GUIz1')]
+    phases = [0., 0., 0.]
     for axis in range(active):
         a = 'xyz'[axis]
         kinds = [number(node, f'BCType{2*axis+s}') for s in (0, 1)]
-        if any(k not in (0, 1) for k in kinds) or (1 in kinds and kinds != [1, 1]):
-            raise Unsupported(f'{a}: boundary codes {kinds} are not mapped yet; only verified PML (0) and paired Periodic (1) FSP boundary codes are.')
+        if any(k not in BOUNDARY_CODES for k in kinds) or kinds[0] != kinds[1]:
+            raise Unsupported(f'{a}: boundary codes {kinds} are not mapped yet; only verified PML (0), paired Periodic (1) and paired Bloch (5) FSP boundary codes are.')
+        cyclic = BOUNDARY_CODES[kinds[0]] != 'pml'
         grid = vector(node, a+'Grid')
         if len(grid) < 6 or np.any(np.diff(grid) <= 0):
             raise Unsupported(f'{a}: saved grid must contain strictly increasing nodes.')
         dx = float(np.min(np.diff(grid)))
         if mode == 2 and not np.allclose(np.diff(grid), spacing[axis], rtol=1e-8, atol=spacing[axis]*1e-8):
             raise Unsupported(f'{a}: saved grid is not uniformly spaced at the requested mesh.')
-        if kinds == [1, 1]:
-            # Saved periodic layouts include one boundary plane on each side.
+        if cyclic:
+            # Saved periodic/Bloch layouts include one boundary plane on each side.
             widths = np.diff(grid)
             if not np.allclose(widths[[0,-1]], widths[[-2,1]], rtol=1e-8, atol=dx*1e-8):
                 raise Unsupported(f'{a}: periodic ghost intervals do not match the opposite boundary.')
@@ -243,10 +268,12 @@ def convert_region(node, backend, report):
         for side in (0, 1):
             count = int(layers[2*axis+side])
             if count != layers[2*axis+side]:raise Unsupported('Nonintegral PML layer count.')
-            if kinds[side] == 0 and not 3 <= count < len(grid)-1:raise Unsupported('Invalid PML layer count.')
-            fields[f'{a}_{("min", "max")[side]}'] = BoundaryFace(kind='periodic') if kinds[side] == 1 else BoundaryFace(layers=count)
-        low = grid[int(layers[2*axis]) if kinds[0] == 0 else 0]
-        high = grid[-1-int(layers[2*axis+1]) if kinds[1] == 0 else -1]
+            if not cyclic and not 3 <= count < len(grid)-1:raise Unsupported('Invalid PML layer count.')
+            fields[f'{a}_{("min", "max")[side]}'] = BoundaryFace(kind=BOUNDARY_CODES[kinds[side]]) if cyclic else BoundaryFace(layers=count)
+        if BOUNDARY_CODES[kinds[0]] == 'bloch':
+            phases[axis] = bloch_phase(node, axis, float(grid[-1]-grid[0]), report)
+        low = grid[0 if cyclic else int(layers[2*axis])]
+        high = grid[-1 if cyclic else -1-int(layers[2*axis+1])]
         desired = (cad_centres[axis]-cad_spans[axis]/2, cad_centres[axis]+cad_spans[axis]/2)
         if not np.allclose((low, high), desired, rtol=0, atol=dx*1e-6):
             raise Unsupported(f'{a}: stored mesh bounds do not exactly align with current CAD/PML settings. Regenerate the mesh in Lumerical before import.')
@@ -265,7 +292,7 @@ def convert_region(node, backend, report):
         raise Unsupported('Stored timestep does not match the requested uniform mesh/CFL settings.')
     steps = integral_ceil(number(node, 'MaxSimTime')/dt)
     common = dict(dimension='2d' if active == 2 else '3d', courant_factor=cfl, steps=steps,
-                  boundaries=Boundaries(**fields), background_index=background, backend=backend)
+                  boundaries=Boundaries(**fields), bloch_phase=tuple(phases), background_index=background, backend=backend)
     if legacy:
         region = Region(mesh=dx*1e6,size=tuple(n*dx*1e6 for n in shape),**common)
     else:
@@ -286,16 +313,50 @@ def convert_region(node, backend, report):
     return region, np.asarray(origin)
 
 
+def bloch_phase(node, axis, period_m, report):
+    """Phase per period from the saved wavevector, F(r+L) = exp(+i phi) F(r) (docs/BOUNDARIES.md)."""
+    a = 'xyz'[axis]
+    based, units = number(node, 'blochBasedOnSource'), number(node, 'blochUnits')
+    if based not in (0, 1) or units not in (0, 1):raise Unsupported('Unrecognized Bloch wavevector settings.')
+    if based:
+        report.issue(node, 'bloch_source_angle', f'{a}: the Bloch wavevector follows the source angle. Only normal-incidence paired sources are mapped, so the native phase is zero (Periodic-equivalent). Store an explicit wavevector for oblique Bloch runs.', 'warning')
+        return 0.
+    k = number(node, 'k'+a)
+    # blochUnits 0 stores k*span/(2*pi) (bandstructure units), 1 stores rad/m (SI); both observed in saved files.
+    phase = 2*math.pi*k if units == 0 else k*period_m
+    report.issue(node, 'bloch_phase', f'{a}: Bloch phase {phase:.6g} rad per period from the saved wavevector in '+('bandstructure (2*pi/span)' if units == 0 else 'SI (rad/m)')+' units. Native fields obey F(r+L) = exp(+i*phase)*F(r), the documented Lumerical relationship; the sign is not measured against vendor fields.', 'info')
+    return phase
+
+
+def fit_band(domain, global_source):
+    """Wavelength band (um) for sampled-material fits: the global source range, else its saved limits."""
+    if global_source is not None:
+        p = pulse_parameters(global_source)
+        if global_source.time_definition in ('wavelength', 'frequency'):
+            return (global_source.wavelength_start, global_source.wavelength_stop)
+        width = p.frequency_span_hz/2 if p.chirped else 1/(math.pi*p.sigma_s)
+        low, high = max(p.frequency_hz-width, p.frequency_hz*.1), p.frequency_hz+width
+        return (C0/high*1e6, C0/low*1e6)
+    keys = ('BBFrequencyStart', 'BBFrequencyStop')
+    if all(k in domain.properties for k in keys):
+        low, high = (domain.properties[k].value for k in keys)
+        if isinstance(low, (int, float)) and isinstance(high, (int, float)) and 0 < low < high:
+            return (C0/high*1e6, C0/low*1e6)
+    return None
+
+
 def identity(node):
     return dict(id=f'fsp-{node.start}', name=node.name.rsplit('::', 1)[-1][:100])
 
 
-def convert_material(records, uid):
+def convert_material(records, uid, report=None, node=None):
     matches = [record for record in records if record.get('materialuuid') and record['materialuuid'].value == uid]
     if len(matches) != 1:
         raise Unsupported('Material UUID must resolve to exactly one material record.')
     record = Node(uid, 0, matches[0])
     require(record, 'anisotropy', 0)
+    if number(record, 'type') == 7:
+        return fit_sampled_material(record, uid, report, node), number(record, 'priority')
     def isotropic(key):
         matrix = np.asarray(value(record, key))
         if matrix.shape != (3,3) or not np.isfinite(matrix).all() or not np.array_equal(matrix, np.eye(3)*matrix[0,0]):
@@ -316,11 +377,47 @@ def convert_material(records, uid):
     elif kind == 4:
         data.update(model='lorentz', epsilon_inf=epsilon, resonance_rad_s=isotropic('omegalorentz'), linewidth_rad_s=isotropic('deltalorentz'), delta_epsilon=isotropic('epsilonlorentz'))
     else:
-        raise Unsupported(f'Material type {kind} is not supported. Only isotropic Dielectric, Plasma and Lorentz records are mapped.')
+        raise Unsupported(f'Material type {kind} is not supported. Only isotropic Dielectric, Plasma, Lorentz and Sampled data records are mapped.')
     return Material(**data), number(record, 'priority')
 
 
-def convert_structure(node, origin, region, material_records=()):
+def fit_sampled_material(record, uid, report, node):
+    """Fit the embedded sampled permittivity over the source band with the package fitter, once per material."""
+    from .material_fit import import_material_table
+    if report is None or report.fit_band_um is None:
+        raise Unsupported('Sampled-data materials need a source wavelength band for their passive fit.')
+    label = str(value(record, 'name'))[:50]+' ['+uid.strip('{}')+']'
+    if label in report.fits:return report.fits[label]
+    frequency = vector(record, 'frequency');epsilon = np.asarray(value(record, 'permittivity')).reshape(-1)
+    if len(frequency) != len(epsilon) or len(frequency) < 3 or np.any(frequency <= 0) or not np.isfinite(epsilon).all():
+        raise Unsupported('Sampled material data must hold matching positive frequencies and finite permittivities.')
+    low, high = report.fit_band_um
+    order = np.argsort(frequency)[::-1];wavelength = C0/frequency[order]*1e6;epsilon = epsilon[order]
+    # Fit from the last sample at or below the band start to the first at or above its end, so the
+    # fitted band covers the source band whenever the samples do.
+    below = np.flatnonzero(wavelength <= low);above = np.flatnonzero(wavelength >= high)
+    start = below[-1] if len(below) else 0;stop = above[0] if len(above) else len(wavelength)-1
+    wavelength, epsilon = wavelength[start:stop+1], epsilon[start:stop+1]
+    if len(wavelength) < 3:raise Unsupported('Sampled material data does not cover the source wavelength band with at least three samples.')
+    if np.any(epsilon.imag < 0):raise Unsupported('Sampled material data has gain (negative imaginary permittivity) inside the source band.')
+    table = 'wavelength_um epsilon_real epsilon_imag\n'+'\n'.join(f'{w:.12g} {e.real:.12g} {e.imag:.12g}' for w, e in zip(wavelength, epsilon))
+    poles = number(record, 'maxpoles') if 'maxpoles' in record.properties else 6
+    fit = import_material_table(text=table, kind='epsilon', unit='um', source='FSP embedded sampled data: '+str(value(record, 'name')),
+                                name=label, options=dict(max_poles=int(min(max(poles, 1), 16))), file_name=label+'.txt',
+                                simulation_band_um=(low, high))
+    material = fit.material
+    if all(key in record.properties for key in ('red', 'green', 'blue')):
+        rgb = [number(record, key) for key in ('red', 'green', 'blue')]
+        if all(0 <= v <= 1 for v in rgb):material = material.model_copy(update=dict(color='#'+''.join(f'{round(v*255):02x}' for v in rgb)))
+    report.fits[label] = material
+    quality = fit.report[fit.report['target']]
+    report.issue(node, 'material_fit', f'{label}: sampled permittivity fitted over {low:.4g}-{high:.4g} um with {fit.report["pole_count"]} poles, normalized RMS {quality["normalized_rms"]:.3e}'+('' if fit.converged else f' (above the {fit.report["tolerance"]:g} tolerance)')+'. Lumerical fit coefficients are not reused.', 'warning')
+    for message in fit.warnings:
+        report.issue(node, 'material_fit', message, 'warning')
+    return material
+
+
+def convert_structure(node, origin, region, material_records=(), report=None, translation=(0, 0, 0), label=None):
     p, g = node.properties, node.legacy
     if not g.get('transform_metadata_decoded'):
         raise Unsupported('Legacy geometry transformations/expressions are not fully decoded.')
@@ -333,9 +430,9 @@ def convert_structure(node, origin, region, material_records=()):
             raise Unsupported('Spatially varying or tensor index expressions are not supported.')
         if not math.isclose(index, g['index'], rel_tol=1e-12):
             raise Unsupported('Stored index and index expression disagree.')
-        material = Material(name=f'FSP n={index:g} [{node.start}]', index=index)
+        material = Material(name=f'FSP n={index:g}', index=index)  # shared by every object with this index
     else:
-        material, priority = convert_material(material_records, value(node, 'materialuuid'))
+        material, priority = convert_material(material_records, value(node, 'materialuuid'), report, node)
         if not g['override_mesh_order']: mesh_order = priority
     if 'mIsEllipse' in p and number(node,'mIsEllipse') not in (0,1):
         raise Unsupported('Ring ellipse switch must be zero or one.')
@@ -368,7 +465,9 @@ def convert_structure(node, origin, region, material_records=()):
             raise Unsupported('Ellipsoid radii are not completely decoded.')
         else:extra.update(make_ellipsoid=True,radius_2=g['radius 2']*1e6,
                           radius_3=g['radius 3']*1e6 if kind=='sphere' else radius)
-    shape = Structure(**identity(node), kind=kind, enabled=g['enabled'], center=tuple((np.asarray(center)-origin)*1e6),
+    ident = identity(node)
+    if label is not None:ident['name'] = label[:100]
+    shape = Structure(**ident, kind=kind, enabled=g['enabled'], center=tuple((np.asarray(center)+np.asarray(translation, dtype=float)-origin)*1e6),
                       size=tuple(size), radius=radius, inner_radius=inner,
                       rotation_axes=tuple(g['rotation_axes']),rotation_angles=tuple(g['rotation_angles']),
                       material=material.name, mesh_order=mesh_order,**extra)
@@ -381,6 +480,29 @@ def convert_structure(node, origin, region, material_records=()):
             if (region.pml_layers(a, 0) and bound_center[a]-bounds[a]/2 < low) or (region.pml_layers(a, 1) and bound_center[a]+bounds[a]/2 > high):
                 raise Unsupported('Structure intersects PML. Automatic structure extension through PML is not mapped yet.')
     return shape, material
+
+
+def convert_group(node, origin, region, material_records, report):
+    """Import the primitives a structure group script generated, translated by the group, without running the script."""
+    from .geometry import object_bounds
+    g = node.legacy
+    if not g.get('transform_metadata_decoded'):raise Unsupported('Structure group transformations are not fully decoded.')
+    if any(angle != 0 for angle in g['rotation_angles']):raise Unsupported('Rotated structure groups are not mapped yet.')
+    if not all(c.legacy.get('script_generated') for c in node.children):raise Unsupported('Hierarchical group members are not mapped yet.')
+    shift = np.array([g['x'], g['y'], g['z']])
+    results = [];outside = 0
+    for index, child in enumerate(node.children):
+        relative = number(child, 'use_relative_coordinates')
+        if relative not in (0, 1):raise Unsupported('Unrecognized group coordinate mode.')
+        shape, material = convert_structure(child, origin, region, material_records, report, shift if relative else (0, 0, 0),
+                                            f'{identity(node)["name"]} {identity(child)["name"]} {index+1}')
+        center, bounds = object_bounds(shape)
+        if any(center[a]-bounds[a]/2 >= region.actual_size[a]/2 or center[a]+bounds[a]/2 <= -region.actual_size[a]/2
+               for a in range(2 if region.dimension == '2d' else 3)):
+            outside += 1;continue
+        results.append((shape, material))
+    report.issue(node, 'group_script', f'The structure group setup script is not executed. Its {len(node.children)} saved generated objects were imported as ordinary structures; {outside} lying entirely outside the region were omitted.', 'info')
+    return results
 
 
 def source_settings(node, global_=False, local_override=False):
@@ -574,6 +696,8 @@ def convert_monitor(node, origin, report, region=None, global_monitor=None):
     require(node, 'recordInPML', 0)
     require(node, 'simulationType', 0)
     shape=number(node,'monitorShape')
+    if node.uid==DFT and region is not None and region.dimension=='2d' and shape==6:
+        raise Skipped('Frequency monitor is not imported: a z-normal plane in 2D has no native DFT mapping. Native 2D field profiles come from snapshots.')
     interpolation=number(node,'spatialAveraging')
     if interpolation not in (0,1):raise Unsupported('Uncollocated monitor components are not mapped. Select nearest mesh cell or specified position interpolation.')
     if node.uid == TIME:
