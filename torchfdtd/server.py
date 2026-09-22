@@ -47,7 +47,7 @@ class WorkbenchFiles(StaticFiles):
 
 
 def create_app(result_dir=None):
-    app = FastAPI(title='TorchFDTD', version='0.14.0.dev0')
+    app = FastAPI(title='TorchFDTD', version='0.15.0')
     # The Host allowlist is the loopback names only. TORCHFDTD_ALLOWED_HOSTS adds names, comma-separated;
     # tests/conftest.py sets it to testserver, the TestClient default, which no deployment allows.
     extra = [h.strip() for h in os.environ.get('TORCHFDTD_ALLOWED_HOSTS', '').split(',') if h.strip()]
@@ -85,7 +85,7 @@ def create_app(result_dir=None):
 
     @app.get('/api/health')
     def health():
-        return {**hardware(), **execution_resources(), 'hostname': socket.gethostname(), 'version': '0.14.0.dev0'}
+        return {**hardware(), **execution_resources(), 'hostname': socket.gethostname(), 'version': '0.15.0'}
 
     @app.get('/api/capabilities')
     def capabilities():

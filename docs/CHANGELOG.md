@@ -7,7 +7,7 @@ the first section covers the whole history since the first commit (2026-09-20).
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
-## 0.14.0.dev0 (unreleased, 2026-09-20 to 2026-09-22)
+## 0.15.0 (2026-09-23)
 
 ### Security
 
