@@ -76,8 +76,52 @@ def test_inventory_check_passes_on_the_tracked_tree():
     summary = json.loads(result.stdout[result.stdout.index('{'):])
     assert result.returncode == 0, (summary, result.stderr[-800:])
     assert summary['findings'] == [] and summary['problems'] == []
-    assert summary['components'] == summary['installed'] > 20
-    assert summary['pip_check'] == 0
+    assert summary['components'] > 20 and summary['pip_check'] == 0
+    assert summary['recorded_on']['python']['platform'] and summary['recorded_on']['host']['os']
+    if summary['platform_match']:
+        assert summary['components'] == summary['installed'] and summary['closure_difference'] is None
+    else:  # another platform compares the portable parts and reports the closure difference as information
+        assert set(summary['closure_difference']) == {'only_in_record', 'only_here', 'not_installed_here', 'not_installed_on_record', 'version_differs'}
+
+
+def test_committed_sbom_records_its_platform_and_summary():
+    sbom = json.loads((ROOT / 'docs' / 'validation' / 'sbom.json').read_text(encoding='utf-8'))
+    assert sbom['python']['platform'] and sbom['host']['os'] and sbom['host']['platform']
+    assert sbom['summary'] == dict(components=len(sbom['components']), installed=sum(c['installed'] for c in sbom['components']),
+                                   open_items=len(sbom['open_items']), scan_findings=len(sbom['scan']['findings']))
+
+
+def test_check_on_another_platform_compares_only_the_portable_parts():
+    import copy
+    committed = json.loads((ROOT / 'docs' / 'validation' / 'sbom.json').read_text(encoding='utf-8'))
+    fresh = copy.deepcopy(committed)
+    fresh['python'] = dict(version='3.11.9', platform='linux' if committed['python']['platform'] != 'linux' else 'win32')
+    fresh['host'] = dict(os='Linux', platform='Linux-6.8.0-x86_64', machine='x86_64')
+    installed = [c for c in fresh['components'] if c['installed']]
+    dropped = installed[0]
+    dropped.update(installed=False, version=None, license=None)  # not installed here, for example cupy on a CPU-only host
+    installed[1]['version'] = installed[1]['version'] + '.post1'
+    fresh['components'].append(dict(name='linux-only-dep', groups=['runtime'], required_by=[], specifiers=[], version='1.0', installed=True,
+                                    license='MIT', license_classifiers=[], license_files=[], source_url=None))
+    fresh['open_items'] = [item for item in fresh['open_items'] if item.get('paths')] + [dict(name=f"pip: {dropped['name']} (not installed)", paths=[], state='BLOCKED_EXTERNAL', why='x', decision='y')]
+    problems, information = inventory.compare(committed, fresh)
+    assert problems == [], problems
+    assert information['platform_match'] is False
+    assert information['closure_difference']['only_here'] == ['linux-only-dep']
+    assert information['closure_difference']['not_installed_here'] == [dropped['name']]
+    assert information['closure_difference']['version_differs'] == [installed[1]['name']]
+    # A licence that differs on a component installed on both sides, a changed asset or a changed spec is a problem anywhere.
+    installed[2]['license'] = 'Proprietary'
+    problems, _ = inventory.compare(committed, fresh)
+    assert any('licence differs' in problem for problem in problems)
+    fresh['assets'] = []
+    problems, _ = inventory.compare(committed, fresh)
+    assert any('assets differs' in problem for problem in problems)
+    # On the recording platform the whole stable record must match.
+    same = copy.deepcopy(committed)
+    assert inventory.compare(committed, same) == ([], dict(platform_match=True, closure_difference=None))
+    same['components'][0]['version'] = '0.0.0'
+    assert inventory.compare(committed, same)[0] == ['docs/validation/sbom.json is stale; regenerate it']
 
 
 @pytest.mark.parametrize('label', sorted(POSITIVE))

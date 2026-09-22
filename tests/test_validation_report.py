@@ -1,8 +1,10 @@
 """docs/VALIDATION_REPORT.md is the renderer's output for the committed records, and it says what it must and must not say (G9-07)."""
+import datetime
 import importlib.util
 import json
+import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pytest
 
@@ -148,3 +150,79 @@ def test_scope_cells_are_regenerated_only_where_they_state_a_gate_result():
     assert lines[8] == '| x | NOT_RUN (G4-01) | y |'
     assert 'old' not in text and '| G4 | cuda | WORKSTATION | 4 | 2 | 0 | 1 | 1 | 2 pass, 2 fail |' in text
     assert again == text
+
+
+def _git(root, *args):
+    return subprocess.run(['git', '-c', 'user.name=gate', '-c', 'user.email=gate@example.invalid', '-c', 'core.autocrlf=false',
+                           '-c', 'commit.gpgsign=false', *args], cwd=root, capture_output=True, text=True, check=True).stdout.strip()
+
+
+def _fake_repository(root):
+    """A committed miniature repository: one whole-file task with a watched data glob, a case file and a platform record."""
+    real = json.loads((ROOT / 'docs' / 'validation' / 'completion_gates.json').read_text(encoding='utf-8'))
+    (root / 'tests').mkdir(parents=True)
+    (root / 'tests' / 'test_alpha.py').write_text('def test_one():\n    assert True\n\n\ndef test_two():\n    assert True\n', encoding='utf-8')
+    (root / 'data').mkdir()
+    (root / 'data' / 'a.json').write_text('{"a": 1}\n', encoding='utf-8')
+    cases = root / 'docs' / 'validation' / 'cases'
+    cases.mkdir(parents=True)
+    (cases / 'G1-03_demo.json').write_text(json.dumps(dict(task='G1-03', title='demo case', seed=1, acceptance=dict(rtol=1e-4))) + '\n', encoding='utf-8')
+    platforms = root / 'docs' / 'validation' / 'platforms'
+    platforms.mkdir()
+    (platforms / 'lab.json').write_text(json.dumps(dict(platform_id='lab', recorded_at='2026-09-22T00:00:00+00:00', os='Linux-6.8', python='3.11.9',
+                                                        torch='2.10.0', cupy=None, cuda_runtime=None, driver=None, gpus=[])) + '\n', encoding='utf-8')
+    (root / 'docs' / 'validation' / 'runs').mkdir()
+    (root / '.gitignore').write_text('.local/\n__pycache__/\n', encoding='utf-8')
+    (root / 'pyproject.toml').write_text('[tool.pytest.ini_options]\ntestpaths = ["tests"]\n', encoding='utf-8')
+    task = dict(id='G1-03', title='demo task', specification='demo', required_by_current_plan=True, implementation_state='IMPLEMENTED',
+                verification_state='NOT_RUN', owner=None, code_paths=['tests/test_alpha.py'], planned_test_commands=[], actual_test_commands=[],
+                required_tests=['tests/test_alpha.py::test_one'], evidence=[], blocker=None, scope_change_approval=None, watch_paths=['data/*.json'])
+    gates = {key: real[key] for key in ('schema_version', 'kind', 'implementation_states', 'verification_states', 'required_evidence_fields',
+                                        'release_rule', 'proposed_thresholds')}
+    gates.update(adopted_commit=None, task_count=1, profiles={'WORKSTATION': {'required_stages': ['G1'], 'scope_status': 'TEST'}},
+                 stages=[dict(id='G1', title='demo stage', depends_on_stages=[], profile='WORKSTATION', priority='P0', tasks=[task])])
+    (root / 'docs' / 'validation' / 'completion_gates.json').write_text(json.dumps(gates, indent=2) + '\n', encoding='utf-8')
+    _git(root, 'init', '-q')
+    _git(root, 'add', '.')
+    _git(root, 'commit', '-q', '-m', 'baseline')
+    junit = root.parent / 'run.xml'
+    junit.write_text('<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" tests="2" failures="0" errors="0" skipped="0" '
+                     f'time="0.01" timestamp="{datetime.datetime.now().astimezone().isoformat()}">'
+                     '<testcase classname="tests.test_alpha" name="test_one" time="0.001"></testcase>'
+                     '<testcase classname="tests.test_alpha" name="test_two" time="0.001"></testcase></testsuite></testsuites>', encoding='utf-8')
+    assert builder.recorder.main(['--root', str(root), '--task', 'G1-03', '--command', 'pytest tests/test_alpha.py', '--junit', str(junit),
+                                  '--exit-code', '0', '--fixture', str(cases / 'G1-03_demo.json'), '--platform', 'lab']) == 0
+
+
+def _gate_sections(root):
+    gates = builder.load_json(root / builder.GATE_FILE)
+    runs = root / builder.RUNS_DIR
+    verdicts = builder.judge_all(root, gates, runs)
+    lines = builder.section_gates(root, gates, runs, verdicts) + builder.stage_status_block(gates, verdicts)
+    lines += builder.section_platforms(root, gates, runs) + builder.section_warnings(gates, verdicts) + builder.section_pending_approvals(root, gates)
+    lines += builder.render_scope('## Stage status\n\n' + builder.STAGE_BEGIN + '\n' + builder.STAGE_END + '\n', gates, verdicts)[0].split('\n')
+    return '\n'.join(lines)
+
+
+def test_gate_sections_render_identically_for_windows_and_posix_root_spellings(tmp_path):
+    """The rendered sections carry POSIX paths only and do not depend on how the root is spelled or on the host's path flavour."""
+    root = tmp_path / 'repo'
+    _fake_repository(root)
+    native = Path(str(root))
+    posix = Path(root.as_posix())  # forward slashes on every platform; on POSIX hosts the same object as native
+    first, second = _gate_sections(native), _gate_sections(posix)
+    assert first == second
+    assert '\\' not in first, first
+    assert '| G1-03 | demo task | IMPLEMENTED | VERIFIED |' in first and '| PASS |' in first
+    assert '| lab |' in first and '| G1 | demo stage | WORKSTATION | 1 | 1 | 0 | 0 | 0 | 1 pass, 0 fail |' in first
+    run_dir = next((root / 'docs' / 'validation' / 'runs').iterdir())
+    evidence = json.loads((run_dir / 'evidence.json').read_text(encoding='utf-8'))
+    for value in [evidence['fixture_path'], *evidence['watch_sha256'], *evidence['test_source_sha256'], evidence['gate_file']]:
+        assert value == PurePosixPath(value).as_posix() and not value.startswith('/') and ':' not in value, value
+    assert list(evidence['watch_sha256']) == ['data/a.json']
+    # A watched file changed under either spelling is the same STALE judgement.
+    (root / 'data' / 'a.json').write_text('{"a": 2}\n', encoding='utf-8')
+    for spelling in (native, posix):
+        gates = builder.load_json(spelling / builder.GATE_FILE)
+        label, reason, _ = builder.judge_all(spelling, gates, spelling / builder.RUNS_DIR)['G1-03']
+        assert label == 'FAIL' and reason == 'STALE: watched file changed since the run: data/a.json'

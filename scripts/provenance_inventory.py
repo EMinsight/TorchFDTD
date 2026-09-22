@@ -7,14 +7,22 @@ assets, open licence questions, a private-data scan and a dependency check.
     python scripts/provenance_inventory.py --audit    also run pip-audit on the runtime closure and record the result
 
 The pip rows come from the metadata of the interpreter that runs this script;
-the non-pip rows are the hand-maintained tables below. Nothing here is a legal
-opinion: an item whose licence or distribution right is not settled is listed
-under open items with BLOCKED_EXTERNAL semantics, never omitted. This is the
-G9-02 tool of docs/COMPLETION_PROGRAM_KO.md.
+the non-pip rows are the hand-maintained tables below. The SBOM records the
+platform and interpreter it was taken on. ``--check`` on that platform compares
+the whole stable record; on another platform (a Linux CI job against a Windows
+record, say) it compares only the platform-independent parts: the tracked-tree
+scan, the asset table, the declared dependency specifications, the history note
+and the licence of every component installed on both, and it reports the
+closure difference (components present or installed on one side only) as
+information, not as a problem. Nothing here is a legal opinion: an item whose
+licence or distribution right is not settled is listed under open items with
+BLOCKED_EXTERNAL semantics, never omitted. This is the G9-02 tool of
+docs/COMPLETION_PROGRAM_KO.md.
 """
 import argparse
 import datetime
 import json
+import platform
 import re
 import subprocess
 import sys
@@ -320,6 +328,9 @@ def build(audit):
         project=dict(name=pyproject['project']['name'], version=pyproject['project']['version'], license=pyproject['project']['license'],
                      license_files=pyproject['project']['license-files'], requires_python=pyproject['project']['requires-python']),
         python=dict(version='.'.join(map(str, sys.version_info[:3])), platform=sys.platform),
+        host=dict(os=platform.system(), platform=platform.platform(), machine=platform.machine()),
+        summary=dict(components=len(components), installed=sum(c['installed'] for c in components), open_items=len(open_items),
+                     scan_findings=len(findings)),
         components=components, assets=ASSETS, open_items=open_items,
         scan=dict(patterns=sorted(SCAN_PATTERNS), excluded=SCAN_EXCLUDED, files_scanned=scanned, tracked_files=len(paths), findings=findings),
         history_note=history_note(), dependency_check=pip_check(), vulnerability_audit=vulnerability_audit)
@@ -338,7 +349,8 @@ def markdown(sbom):
              'This inventory records what is known; it is not a legal opinion, and every item whose',
              'right to distribute is unsettled is listed under open items rather than left out.', '',
              f"Project: {sbom['project']['name']} {sbom['project']['version']}, licence {sbom['project']['license']}; "
-             f"inventoried with Python {sbom['python']['version']} on {sbom['python']['platform']}.", '',
+             f"inventoried with Python {sbom['python']['version']} on {sbom['python']['platform']}"
+             + (f" ({sbom['host']['platform']})" if sbom.get('host') else '') + '.', '',
              '## Python dependencies', '',
              'Every distribution reachable from the declared dependencies of `pyproject.toml`, resolved in the',
              'development interpreter. Group `runtime` is the base install; the other groups are extras.', '',
@@ -397,6 +409,46 @@ def stable(sbom):
     return {key: sbom[key] for key in STABLE_SECTIONS}
 
 
+def same_platform(committed, fresh):
+    """The committed record was taken on this interpreter's platform and Python minor version."""
+    return (committed.get('python', {}).get('platform') == fresh['python']['platform']
+            and committed.get('python', {}).get('version', '').rsplit('.', 1)[0] == fresh['python']['version'].rsplit('.', 1)[0])
+
+
+def compare(committed, fresh):
+    """(problems, information) of the committed SBOM against a fresh build.
+
+    On the recording platform every stable section must match. On another platform only the
+    platform-independent parts are compared, and the closure difference is information.
+    """
+    if committed is None:
+        return [f'{SBOM.relative_to(ROOT).as_posix()} is missing; generate it'], dict(platform_match=False, closure_difference=None)
+    if same_platform(committed, fresh):
+        problems = [] if stable(committed) == stable(fresh) else [f'{SBOM.relative_to(ROOT).as_posix()} is stale; regenerate it']
+        return problems, dict(platform_match=True, closure_difference=None)
+    problems = []
+    for section in ('project', 'assets', 'history_note'):
+        if committed.get(section) != fresh[section]:
+            problems.append(f'{SBOM.relative_to(ROOT).as_posix()}: {section} differs from the tracked tree; regenerate it on its platform')
+    mine = {c['name']: c for c in committed.get('components', [])}
+    theirs = {c['name']: c for c in fresh['components']}
+    for name in sorted(set(mine) & set(theirs)):
+        a, b = mine[name], theirs[name]
+        if a['groups'] != b['groups'] or a['specifiers'] != b['specifiers']:
+            problems.append(f'component {name}: declared groups or specifiers differ ({a["groups"]} {a["specifiers"]} vs {b["groups"]} {b["specifiers"]})')
+        if a['installed'] and b['installed'] and a['license'] != b['license']:
+            problems.append(f'component {name}: licence differs ({a["license"]!r} on the record, {b["license"]!r} here)')
+    asset_items = lambda sbom: [item for item in sbom.get('open_items', []) if item.get('paths')]  # noqa: E731
+    if asset_items(committed) != asset_items(fresh):
+        problems.append('asset open items differ from the tracked tree; regenerate the record on its platform')
+    difference = dict(
+        only_in_record=sorted(set(mine) - set(theirs)), only_here=sorted(set(theirs) - set(mine)),
+        not_installed_here=sorted(n for n in set(mine) & set(theirs) if mine[n]['installed'] and not theirs[n]['installed']),
+        not_installed_on_record=sorted(n for n in set(mine) & set(theirs) if theirs[n]['installed'] and not mine[n]['installed']),
+        version_differs=sorted(n for n in set(mine) & set(theirs) if mine[n]['installed'] and theirs[n]['installed'] and mine[n]['version'] != theirs[n]['version']))
+    return problems, dict(platform_match=False, closure_difference=difference)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument('--check', action='store_true', help='compare with the committed outputs instead of writing them')
@@ -410,12 +462,14 @@ def main():
         problems.append('pip check reports broken requirements')
     # Advisories against the development interpreter are recorded, not gated
     # here: the release environment of G9-06 resolves the pinned versions.
+    information = dict(platform_match=True, closure_difference=None)
     if args.check:
         committed = json.loads(SBOM.read_text(encoding='utf-8')) if SBOM.exists() else None
-        if committed is None or stable(committed) != stable(sbom):
-            problems.append(f'{SBOM.relative_to(ROOT).as_posix()} is stale; regenerate it')
-        elif not NOTICES.exists() or NOTICES.read_text(encoding='utf-8') != markdown(committed):
+        compared, information = compare(committed, sbom)
+        problems += compared
+        if committed is not None and not compared and (not NOTICES.exists() or NOTICES.read_text(encoding='utf-8') != markdown(committed)):
             problems.append(f'{NOTICES.relative_to(ROOT).as_posix()} is stale; regenerate it')
+        information['recorded_on'] = None if committed is None else dict(python=committed.get('python'), host=committed.get('host'))
     else:
         SBOM.write_text(json.dumps(sbom, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
         NOTICES.write_text(markdown(sbom), encoding='utf-8', newline='\n')
@@ -424,7 +478,7 @@ def main():
                           open_items=len(sbom['open_items']), files_scanned=sbom['scan']['files_scanned'],
                           findings=sbom['scan']['findings'], history_commits=len(sbom['history_note']['commits']),
                           pip_check=sbom['dependency_check']['exit_code'], audit=sbom['vulnerability_audit'].get('status'),
-                          problems=problems), ensure_ascii=False, indent=2))
+                          problems=problems, **information), ensure_ascii=False, indent=2))
     return 1 if problems else 0
 
 

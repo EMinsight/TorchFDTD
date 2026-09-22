@@ -1,0 +1,274 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260922T051942Z-g9-02-9b6000ae",
+  "task": "G9-02",
+  "stage": "G9",
+  "task_title": "코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다",
+  "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/worktrees/ci-portability/.local/tmp/junit/rerecord/G9-02.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-22T14:19:14.435846+09:00",
+  "recorded_at": "2026-09-22T05:19:42+00:00",
+  "source_commit": "6eb168b3f601a0e7b5a22937a8877fa4b0e5beb0",
+  "source_commit_time": "2026-09-22T14:18:55+09:00",
+  "source_tree_sha256": "22a14d024ffeeaa45cee645092b882f9eda4fb612e1490729f7ba3a0750c19d3",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": null,
+  "package_path": null,
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_provenance_inventory.py": "f2279ad71f59be7a3819255aa2686eb6f01277d05bb3aae5ee8e3be7e72766ba"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "docs/validation/sbom.json",
+    "docs/THIRD_PARTY_NOTICES.md",
+    "pyproject.toml",
+    "THIRD_PARTY_NOTICES.txt",
+    "package-lock.json"
+  ],
+  "watch_sha256": {
+    "THIRD_PARTY_NOTICES.txt": "cbafc1d813576ae9fbbd5cb3174d002b6a994e7a4ebdd4f771d081c451e0e933",
+    "docs/THIRD_PARTY_NOTICES.md": "410c8c7d4573ffcebee3de988b79e49718e2204f00950e23802e0fcf942f18c3",
+    "docs/validation/sbom.json": "81d882a4a20bf1b122fde6433669f67b7e4b94a988e856827d5923ed2821bb8f",
+    "package-lock.json": "cf84c179a82c08abc2b44e43851d401303e1da99b99db26912a762514ee92da8",
+    "pyproject.toml": "83f0092e656db5da3c212bcb182829939b4866f7a5cef5f9ce9963bed361baf6"
+  },
+  "fixture_path": "docs/validation/cases/G9-02.json",
+  "fixture_sha256": "bb85e8320c1a91d4bee88533798bbb5a6b42a6ed2caa03482b7d0a21cb7d71a1",
+  "acceptance_criteria_path": "docs/validation/cases/G9-02.json",
+  "acceptance_criteria_sha256": "bb85e8320c1a91d4bee88533798bbb5a6b42a6ed2caa03482b7d0a21cb7d71a1",
+  "case_first_commit": "5f80df33b1f1c5079b199a9816a061aaf1fe1331",
+  "case_first_commit_time": "2026-09-22T01:06:43+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.venv\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": false,
+    "cuda_driver": "591.86",
+    "fdtd_location": "<user home>\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\TorchFDTD\\.local\\worktrees\\ci-portability\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable: the inputs are the tracked tree and the installed metadata",
+  "precision": "not applicable",
+  "backend": "cpu; no simulation and no CUDA context",
+  "physics_configuration": {
+    "generator": "scripts/provenance_inventory.py run with the development interpreter; --check compares its stable sections (project, components, assets, open_items, history_note) with the committed docs/validation/sbom.json and regenerates docs/THIRD_PARTY_NOTICES.md from the committed SBOM",
+    "pip_closure": "every distribution reachable from [project].dependencies and every optional-dependencies group of pyproject.toml through Requires-Dist with environment markers evaluated for this interpreter",
+    "non_pip_assets": "the hand-maintained ASSETS table of the generator: frontend bundle libraries with versions from package-lock.json, fonts, material tables, own artwork, manuscript, validation records, reference outputs of other solvers, application records, examples and fixtures, and the three vendor-derived items",
+    "scan_inputs": "every tracked path from git ls-files except binaries and the four files that spell the patterns; positions only, never the matched text",
+    "scan_patterns": [
+      "private_windows_user_path",
+      "hangul_user_path",
+      "address_100_x_x_x",
+      "password_literal",
+      "ssh_password_environment",
+      "credential_token",
+      "private_key_block",
+      "ssh_public_key"
+    ],
+    "pattern_samples": "fourteen positive and nine benign strings in tests/test_provenance_inventory.py, assembled at run time with synthetic addresses and parametrized under short labels so that no sample reaches a test id or a JUnit report",
+    "history_query": "git log --pickaxe-regex -S'C:[/\\\\]+Users[/\\\\]+admin' HEAD, keeping the commits whose tree still contains the pattern",
+    "dependency_check": "python -m pip check in the same interpreter",
+    "vulnerability_audit": "pip-audit -r <pinned closure> --no-deps, recorded in the SBOM when run with --audit and carried forward otherwise"
+  },
+  "reference_method": "pyproject.toml as the list of declared dependencies; package-lock.json as the frontend version reference; docs/RELEASE_REVIEW.md as the list of unresolved distribution items; the pattern samples as the scan oracle",
+  "observables": [
+    {
+      "name": "check_exit_code",
+      "unit": "integer",
+      "definition": "exit code of provenance_inventory.py --check"
+    },
+    {
+      "name": "findings",
+      "unit": "count",
+      "definition": "scan findings on the tracked tree"
+    },
+    {
+      "name": "components",
+      "unit": "count",
+      "definition": "distributions in the closure and how many are installed with a licence label and a source URL"
+    },
+    {
+      "name": "open_items",
+      "unit": "list",
+      "definition": "items with BLOCKED_EXTERNAL semantics in the SBOM and the notices"
+    },
+    {
+      "name": "history_commits",
+      "unit": "list",
+      "definition": "commits on HEAD whose tree contains the historic workstation path"
+    },
+    {
+      "name": "pip_check",
+      "unit": "exit code",
+      "definition": "pip check result"
+    },
+    {
+      "name": "audit_status",
+      "unit": "string",
+      "definition": "pip-audit status recorded in the SBOM: CLEAN, FINDINGS, NOT_RUN or BLOCKED_EXTERNAL"
+    }
+  ],
+  "acceptance_limits": {
+    "check": "--check exits 0 with no finding and no problem on the committed tree, and pip check exits 0",
+    "coverage": "every declared dependency of pyproject.toml appears in the SBOM installed with a version and a source URL, and with a licence label or an open item; every asset in the table has a status among cleared, own and open; three.js and lucide versions match package-lock.json",
+    "open_items": "the installed-API property catalogue, the FSP layout support and the aggregate commercial timing table are open items with state BLOCKED_EXTERNAL and appear in the notices document; nothing with an unclear licence is omitted",
+    "scan": "each positive sample matches its pattern and no benign sample matches any pattern; the generated SBOM and notices match no pattern and contain no venv, site-packages or Hangul account path",
+    "history": "the commits that carry the historic workstation path are listed in the notices as a known history note and are not counted as findings",
+    "audit": "the pip-audit result is recorded as a statement about the development interpreter with fix versions; advisories do not fail --check, which is the G9-06 release-environment concern",
+    "source_of_limits": "the brief of G9-02 in docs/COMPLETION_PROGRAM_KO.md section 11 and docs/RELEASE_REVIEW.md"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 43,
+    "passed": [
+      "tests/test_provenance_inventory.py::test_inventory_check_passes_on_the_tracked_tree",
+      "tests/test_provenance_inventory.py::test_committed_sbom_records_its_platform_and_summary",
+      "tests/test_provenance_inventory.py::test_check_on_another_platform_compares_only_the_portable_parts",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[address_ssh]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[address_url]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[admin_forward_slash]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[admin_json_escaped]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[aws_key_id]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[driveless_backslash]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[driveless_json_escaped]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[github_token]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[hangul_drive_path]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[hangul_user_path]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[macos_home]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[passwd_double_quoted]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[password_single_quoted]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[private_key_block]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[ssh_password_environment]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[ssh_public_key]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[tailscale_key]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[unc_admin_share]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[unc_json_escaped]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[administrator]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[environment_read]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[four_part_version]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[percent_progress]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[powershell_prompt]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[program_files_users]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[project_scratch]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[prose_key_type]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[prose_password]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[public_user]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[users_word]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[version_number]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[web_admin_route]",
+      "tests/test_provenance_inventory.py::test_scan_decodes_json_and_percent_escapes_before_matching[json_escaped_hangul]",
+      "tests/test_provenance_inventory.py::test_scan_decodes_json_and_percent_escapes_before_matching[json_escaped_hangul_driveless]",
+      "tests/test_provenance_inventory.py::test_scan_decodes_json_and_percent_escapes_before_matching[percent_encoded_hangul]",
+      "tests/test_provenance_inventory.py::test_scan_decodes_json_and_percent_escapes_before_matching[percent_encoded_macos]",
+      "tests/test_provenance_inventory.py::test_scan_reports_each_position_once_and_keeps_line_numbers",
+      "tests/test_provenance_inventory.py::test_sbom_covers_every_declared_dependency_with_licence_and_source",
+      "tests/test_provenance_inventory.py::test_notices_document_matches_the_sbom_and_names_the_open_items",
+      "tests/test_provenance_inventory.py::test_generated_outputs_carry_no_private_path_or_credential"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 16.28,
+    "suite_timestamp": "2026-09-22T14:19:14.435846+09:00"
+  },
+  "required_tests": [
+    "tests/test_provenance_inventory.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_provenance_inventory.py": [
+      "tests/test_provenance_inventory.py::test_inventory_check_passes_on_the_tracked_tree",
+      "tests/test_provenance_inventory.py::test_committed_sbom_records_its_platform_and_summary",
+      "tests/test_provenance_inventory.py::test_check_on_another_platform_compares_only_the_portable_parts",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[address_ssh]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[address_url]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[admin_forward_slash]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[admin_json_escaped]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[aws_key_id]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[driveless_backslash]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[driveless_json_escaped]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[github_token]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[hangul_drive_path]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[hangul_user_path]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[macos_home]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[passwd_double_quoted]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[password_single_quoted]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[private_key_block]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[ssh_password_environment]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[ssh_public_key]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[tailscale_key]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[unc_admin_share]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_catch_the_named_secrets[unc_json_escaped]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[administrator]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[environment_read]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[four_part_version]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[percent_progress]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[powershell_prompt]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[program_files_users]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[project_scratch]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[prose_key_type]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[prose_password]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[public_user]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[users_word]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[version_number]",
+      "tests/test_provenance_inventory.py::test_scan_patterns_ignore_benign_text[web_admin_route]",
+      "tests/test_provenance_inventory.py::test_scan_decodes_json_and_percent_escapes_before_matching[json_escaped_hangul]",
+      "tests/test_provenance_inventory.py::test_scan_decodes_json_and_percent_escapes_before_matching[json_escaped_hangul_driveless]",
+      "tests/test_provenance_inventory.py::test_scan_decodes_json_and_percent_escapes_before_matching[percent_encoded_hangul]",
+      "tests/test_provenance_inventory.py::test_scan_decodes_json_and_percent_escapes_before_matching[percent_encoded_macos]",
+      "tests/test_provenance_inventory.py::test_scan_reports_each_position_once_and_keeps_line_numbers",
+      "tests/test_provenance_inventory.py::test_sbom_covers_every_declared_dependency_with_licence_and_source",
+      "tests/test_provenance_inventory.py::test_notices_document_matches_the_sbom_and_names_the_open_items",
+      "tests/test_provenance_inventory.py::test_generated_outputs_carry_no_private_path_or_credential"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G9-02.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260922T051942Z-g9-02-9b6000ae/junit.xml",
+      "sha256": "956379264ef2a3918e2f59a776090f69b6fc072a883ed1871864b7c3a1ebbdc2",
+      "bytes": 6144,
+      "original_path": ".local/tmp/junit/rerecord/G9-02.xml"
+    }
+  ],
+  "applicable_scope": "G9-02 provenance inventory of the tracked tree and of the development interpreter's dependency closure per docs/validation/cases/G9-02.json; the three vendor-derived items are open BLOCKED_EXTERNAL items for G9-03, and the advisories describe the development interpreter, not a release environment (G9-06) re-recorded on 6eb168b3f601 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260921T212820Z-g9-02-ae84c532",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement",
+    "package_or_wheel_sha256": "no distribution file was supplied; the evidence applies to the source tree at source_commit"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

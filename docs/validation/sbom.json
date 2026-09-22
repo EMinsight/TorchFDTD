@@ -16,6 +16,17 @@
     "version": "3.10.2",
     "platform": "win32"
   },
+  "host": {
+    "os": "Windows",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64"
+  },
+  "summary": {
+    "components": 52,
+    "installed": 52,
+    "open_items": 3,
+    "scan_findings": 0
+  },
   "components": [
     {
       "name": "annotated-doc",
@@ -1389,8 +1400,8 @@
       "docs/validation/sbom.json",
       "tests/test_provenance_inventory.py"
     ],
-    "files_scanned": 1504,
-    "tracked_files": 1529,
+    "files_scanned": 1520,
+    "tracked_files": 1545,
     "findings": []
   },
   "history_note": {
