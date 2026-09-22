@@ -427,6 +427,24 @@ def relative(root, path):
         return path.as_posix()
 
 
+def written_records(command, root):
+    """Record files the command itself writes, named by a TORCHFDTD_*_RECORD environment prefix."""
+    written = set()
+    for match in re.finditer(r"\$env:TORCHFDTD_[A-Z0-9_]*RECORD\s*=\s*'([^']+)'|TORCHFDTD_[A-Z0-9_]*RECORD=([^\s;]+)", command):
+        value = match.group(1) or match.group(2)
+        target = Path(value)
+        if not target.is_absolute():
+            target = root/value
+        try:
+            base = relative(root, target)
+        except ValueError:
+            continue
+        written.add(base)
+        if target.is_dir():
+            written.update(relative(root, item) for item in target.rglob('*') if item.is_file())
+    return written
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--task', required=True, help='gate task id, for example G1-03')
@@ -482,6 +500,11 @@ def main(argv=None):
     guarded = [entry.split('::')[0] for entry in task.get('required_tests') or []] + list(task.get('code_paths') or [])
     guarded += [relative(root, args.fixture)] if args.fixture else []
     guarded += [relative(root, args.criteria)] if args.criteria else []
+    # A command that writes its own measurement record (TORCHFDTD_*_RECORD) leaves that file
+    # modified by construction; it is an output of this run, like the gate file and the runs
+    # directory, so it is not evidence of an untracked source change. It is hashed below.
+    written = written_records(args.command, root)
+    guarded = [item for item in guarded if item not in written]
     # git status collapses an untracked directory to one row ending in '/', so a guarded file inside it matches that row.
     dirty_guarded = sorted({row['path'] for row in manifest
                             if any(row['path'] == item or row['path'].startswith(item.rstrip('/') + '/')
