@@ -75,12 +75,14 @@ def test_evanescent_band_edge_is_named_not_clipped():
 
 def test_normal_sheet_point_oneway_and_tfsf_spatial_records():
     p = demo_project('scatterer')
+    p.sources = [Source(id='source', kind='plane', center=(-2.5, 0, 0), size=(0, 4, 0))]  # the demo itself now carries a one-way sheet
+    p = Project.model_validate(p.model_dump())
     out = preview_source(p, p.sources[0].id)
     assert out['incidence']['kind'] == 'normal' and out['incidence']['k_parallel_rad_per_um'] == {}
     term, = out['spatial']
     assert term['kind'] == 'soft sheet' and term['phase_rad_by_axis'] == {} and 'no spatial phase' in term['profile']
     assert term['cells'][0][1]-term['cells'][0][0] == 1 and len(term['positions_um']['y']) == term['cells'][1][1]-term['cells'][1][0]
-    p = demo_project()
+    p = demo_project('3d')
     out = preview_source(p, p.sources[0].id)
     assert out['incidence']['kind'] == 'not applicable' and out['spatial'][0]['kind'] == 'point'
     assert [b-a for a, b in out['spatial'][0]['cells']] == [1, 1, 1]

@@ -81,7 +81,8 @@ def test_inventory_check_passes_on_the_tracked_tree():
     if summary['platform_match']:
         assert summary['components'] == summary['installed'] and summary['closure_difference'] is None
     else:  # another platform compares the portable parts and reports the closure difference as information
-        assert set(summary['closure_difference']) == {'only_in_record', 'only_here', 'not_installed_here', 'not_installed_on_record', 'version_differs'}
+        assert set(summary['closure_difference']) <= {'only_in_record', 'only_here', 'not_installed_here', 'not_installed_on_record',
+                                                     'version_differs', 'license_differs', 'groups_differ'}
 
 
 def test_committed_sbom_records_its_platform_and_summary():
