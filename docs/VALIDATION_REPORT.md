@@ -176,9 +176,9 @@ Newest runs that match no platform record: none.
 
 ## Clean-install record
 
-Newest record `20260921T222259Z-4120a653.json` (kind `clean_install_record`), taken at commit `4120a6530685` on 2026-09-21T22:22:59+00:00 with 0 dirty packaging paths; all steps passed: yes.
+Newest record `20260922T062008Z-4f5b1f2a.json` (kind `clean_install_record`), taken at commit `4f5b1f2a5654` on 2026-09-22T06:20:08+00:00 with 0 dirty packaging paths; all steps passed: yes.
 
-Wheel `torchfdtd-0.14.0.dev0-py3-none-any.whl`, SHA-256 `8c7df04a88a73fda38b50475fc106c13cdc92bfe19e43b87feeebfe66e721332`, 960,864 bytes, 159 entries, 152 package files; browser assets match the committed ones: yes; frontend assets current: yes.
+Wheel `torchfdtd-0.14.0.dev0-py3-none-any.whl`, SHA-256 `ecd483d06a099729f66a011793a3ce7a3be1bd3716542e0154eb0b4a6ee91ee1`, 962,891 bytes, 159 entries, 152 package files; browser assets match the committed ones: yes; frontend assets current: yes.
 
 | Environment | Python | torch | cupy-cuda12x | numpy | torchfdtd | Packages |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -187,21 +187,21 @@ Wheel `torchfdtd-0.14.0.dev0-py3-none-any.whl`, SHA-256 `8c7df04a88a73fda38b5047
 
 | Step | Status | Seconds |
 | --- | --- | --- |
-| build_wheel | passed | 12.52 |
-| cpu_venv_create | passed | 7.48 |
-| cpu_pip_install_torch | passed | 84.12 |
-| cpu_pip_install_wheel | passed | 53.9 |
-| cpu_package_list | passed | 1.04 |
-| cpu_import_run_save_load | passed | 10.82 |
-| cpu_server_index_assets_api | passed | 3.42 |
-| cpu_doctor | passed | 3.38 |
-| cuda_venv_create | passed | 7.05 |
-| cuda_pip_install_torch | passed | 241.96 |
-| cuda_pip_install_wheel_extras | passed | 60.25 |
-| cuda_package_list | passed | 0.92 |
-| cuda_fused_forward_run | passed | 17.25 |
-| cuda_doctor | passed | 4.47 |
-| readme_examples | passed | 15.76 |
+| build_wheel | passed | 18.05 |
+| cpu_venv_create | passed | 13.93 |
+| cpu_pip_install_torch | passed | 119.08 |
+| cpu_pip_install_wheel | passed | 64.11 |
+| cpu_package_list | passed | 1.3 |
+| cpu_import_run_save_load | passed | 10.39 |
+| cpu_server_index_assets_api | passed | 3.48 |
+| cpu_doctor | passed | 6.76 |
+| cuda_venv_create | passed | 14.5 |
+| cuda_pip_install_torch | passed | 197.5 |
+| cuda_pip_install_wheel_extras | passed | 66.96 |
+| cuda_package_list | passed | 3.25 |
+| cuda_fused_forward_run | passed | 17.71 |
+| cuda_doctor | passed | 5.31 |
+| readme_examples | passed | 16.97 |
 
 ## Suite policy
 
