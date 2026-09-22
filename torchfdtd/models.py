@@ -611,9 +611,9 @@ class Project(Model):
     region: Region = Field(default_factory=Region)
     materials: list[Material] = Field(default_factory=default_materials, min_length=1, max_length=100)
     structures: list[Structure] = Field(default_factory=list, max_length=1000)
-    sources: list[Source] = Field(default_factory=list, max_length=32)
+    sources: list[Source] = Field(default_factory=list, max_length=512)
     global_source: SourceTimeSettings | None = Field(default_factory=SourceTimeSettings)
-    monitors: list[Monitor | FieldMonitor] = Field(default_factory=list, max_length=32)
+    monitors: list[Monitor | FieldMonitor] = Field(default_factory=list, max_length=512)  # trace storage is admitted by the resident estimate
     global_monitor: SpectrumSettings = Field(default_factory=lambda:SpectrumSettings(sampling='frequency',apodization='none'))
     import_provenance: ImportProvenance | None = None
     # Edit counter and content hash of the saved file (G8-04). The workbench

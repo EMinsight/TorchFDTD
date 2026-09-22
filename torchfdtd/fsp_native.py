@@ -75,6 +75,7 @@ class Conversion:
     mappings: list[dict] = field(default_factory=list)
     origin_m: tuple = (0, 0, 0)
     fit_band_um: tuple | None = None
+    fit_band_source: str = ''
     fits: dict = field(default_factory=dict)
 
     def issue(self, node, code, message, severity='error'):
@@ -131,7 +132,9 @@ def convert_fsp(document: FspDocument, name='Imported FSP', backend='auto') -> C
     candidates = [n for n in document.root.children if n.uid in SOURCE_CLASSES]
     candidates += [c for n in document.root.children if n.uid == ROOT and n.children and n.properties.get('enabled') is not None
                    and n.properties['enabled'].value != 0 for c in n.children if c.uid in SOURCE_CLASSES]
-    report.fit_band_um = fit_band(domain, global_source, candidates)
+    report.fit_band_um, report.fit_band_source = fit_band(domain, global_source, candidates)
+    if any(domain.properties.get(k) is not None and domain.properties[k].value for k in ('setSimulationBandwidth', 'overrideSimBandwidth')):
+        report.issue(domain, 'simulation_bandwidth', 'The FSP overrides its simulation bandwidth; that override is not mapped, material fits use the global source limits.', 'warning')
     materials, structures, sources, monitors = [], [], [], []
     global_monitor=None
     referenced_global=any(n.uid==DFT and n.properties.get('useGlobalDFT') is not None and
@@ -363,8 +366,9 @@ def convert_analysis_group(node, origin, region, report, global_source, global_m
         except (Unsupported, ValueError) as exc:
             mapping_issue(report, child, exc)
     for kind, added, existing in (('sources', len(sources), source_count), ('monitors', len(monitors), monitor_count)):
-        if added+existing > 32:
-            raise Unsupported(f'Its members expand to {added} native {kind} ({existing} already imported), above the native limit of 32 {kind}. Disable the group or reduce it in Lumerical.')
+        limit = next(m.max_length for m in Project.model_fields[kind].metadata if hasattr(m, 'max_length'))
+        if added+existing > limit:
+            raise Unsupported(f'Its members expand to {added} native {kind} ({existing} already imported), above the native limit of {limit} {kind}. Disable the group or reduce it in Lumerical.')
     return sources, monitors
 
 
@@ -378,8 +382,14 @@ def source_band(settings):
 
 
 def fit_band(domain, global_source, source_nodes=()):
-    """Wavelength band (um) for sampled-material fits: the union of the global source range and every enabled
-    local source range, else the saved global limits."""
+    """Wavelength band (um) and its origin for sampled-material fits: the stored global source limits that
+    Lumerical applies to every source when the global source is range-defined, else the union of the
+    enabled source ranges."""
+    keys = ('BBFrequencyStart', 'BBFrequencyStop')
+    if all(k in domain.properties for k in keys) and domain.properties.get('sourcePreference') is not None and domain.properties['sourcePreference'].value in (1, 2):
+        low, high = (domain.properties[k].value for k in keys)
+        if isinstance(low, (int, float)) and isinstance(high, (int, float)) and 0 < low < high:
+            return (C0/high*1e6, C0/low*1e6), 'FSP global source limits'
     bands = [source_band(global_source)] if global_source is not None else []
     for source in source_nodes:
         try:
@@ -387,13 +397,8 @@ def fit_band(domain, global_source, source_nodes=()):
             bands.append(source_band(source_settings(source)))
         except (Unsupported, ValueError):
             continue
-    if bands:return (min(b[0] for b in bands), max(b[1] for b in bands))
-    keys = ('BBFrequencyStart', 'BBFrequencyStop')
-    if all(k in domain.properties for k in keys):
-        low, high = (domain.properties[k].value for k in keys)
-        if isinstance(low, (int, float)) and isinstance(high, (int, float)) and 0 < low < high:
-            return (C0/high*1e6, C0/low*1e6)
-    return None
+    if bands:return (min(b[0] for b in bands), max(b[1] for b in bands)), 'union of the enabled source ranges'
+    return None, ''
 
 
 def plane_center(position_m, origin, region=None):
@@ -469,7 +474,7 @@ def fit_sampled_material(record, uid, report, node):
         if all(0 <= v <= 1 for v in rgb):material = material.model_copy(update=dict(color='#'+''.join(f'{round(v*255):02x}' for v in rgb)))
     report.fits[label] = material
     quality = fit.report[fit.report['target']]
-    report.issue(node, 'material_fit', f'{label}: sampled permittivity fitted over {low:.4g}-{high:.4g} um with {fit.report["pole_count"]} poles, normalized RMS {quality["normalized_rms"]:.3e}'+('' if fit.converged else f' (above the {fit.report["tolerance"]:g} tolerance)')+'. Lumerical fit coefficients are not reused.', 'warning')
+    report.issue(node, 'material_fit', f'{label}: sampled permittivity fitted over {low:.4g}-{high:.4g} um ({report.fit_band_source}) with {fit.report["pole_count"]} poles, normalized RMS {quality["normalized_rms"]:.3e}'+('' if fit.converged else f' (above the {fit.report["tolerance"]:g} tolerance)')+'. Lumerical fit coefficients are not reused.', 'warning')
     for message in fit.warnings:
         report.issue(node, 'material_fit', message, 'warning')
     return material

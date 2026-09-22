@@ -242,6 +242,12 @@ def test_scripted_group_geometry_sampled_material_and_skipped_objects_convert_to
     assert any(i['code'] == 'group_script' and '3 saved generated objects' in i['message'] and '1 lying entirely outside' in i['message'] for i in report.issues)
     fit = next(i for i in report.issues if i['code'] == 'material_fit')
     assert fit['severity'] == 'warning' and 'normalized RMS' in fit['message'] and 'Synthetic glass' in fit['message']
+    assert '(union of the enabled source ranges)' in fit['message']  # a standard global pulse stores no limits
+    limited = convert_fsp(FspDocument(bloch_fixture(units=0, extra=[group], sampled=sampled_material(uid),
+                                                    region_overrides=dict(sourcePreference=2, BBFrequencyStart=299792458/1.8e-6, BBFrequencyStop=299792458/1.2e-6))), 'Limits', 'cpu')
+    fit = next(i for i in limited.issues if i['code'] == 'material_fit')
+    assert 'fitted over 1.2-1.8 um (FSP global source limits)' in fit['message'], fit['message']
+    assert next(m for m in limited.project.materials if 'Synthetic glass' in m.name).fit_band_um[0] <= 1.2
     assert any(i['code'] == 'object_mapping' and i['severity'] == 'warning' and i['message'].startswith('Disabled object is not imported') for i in report.issues)
     assert p.monitors == [] and len(p.sources) == 1
     assert {m['object_id'] for m in report.mappings} == {'array', 'sphere', '::model::source'}
@@ -312,12 +318,12 @@ def test_enabled_analysis_group_members_import_with_global_coordinates_and_caps(
     assert row['script_generated'] and row['native_ids'] == [p.sources[1].id, p.monitors[1].id]
     result = Simulation(p).run()
     assert np.isfinite(result.electric).all() and np.max(abs(result.electric)) > 0
-    big = analysis_group('::model::big', [node(TIME, items(time_monitor_settings(f'::model::big::t{i}', left=i*.1e-6, outputE=np.ones(6))))
-                                          for i in range(6)])
+    big = analysis_group('::model::big', [node(TIME, items(time_monitor_settings(f'::model::big::t{i}', left=(i % 30)*.1e-6, bottom=(i // 30)*.1e-6, outputE=np.ones(6))))
+                                          for i in range(86)])  # 516 traces, above the 512-trace product limit
     report = convert_fsp(FspDocument(bloch_fixture(extra=[big])), 'Big', 'cpu')
     assert report.project is None
     cap = next(i for i in report.issues if i['object_id'] == '::model::big' and i['severity'] == 'error')
-    assert '36 native monitors' in cap['message'] and '1 already imported' in cap['message']
+    assert '516 native monitors' in cap['message'] and '1 already imported' in cap['message'] and 'limit of 512' in cap['message']
     monkeypatch.setattr(fsp, 'availability', lambda: {'installed': False, 'reason': 'Not installed'})
     app = create_app(tmp_path)
     try:

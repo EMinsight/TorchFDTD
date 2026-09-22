@@ -414,3 +414,31 @@ def test_tiled_mode_reports_the_planner_rejection(tmp_path):
         assert response.status_code == 422 and 'Tiling rejected the scene' in response.json()['detail']
         assert client.get('/api/jobs').json() == []
     app.state.pool.shutdown()
+
+
+def test_point_traces_and_spectra_enter_the_resident_estimate_and_can_be_refused(tmp_path):
+    from pydantic import ValidationError
+    steps = 4000
+    one = scene(steps=steps).model_copy(update=dict(monitors=[Monitor(id='m0', center=(.3, .1, 0), component='Ez')]))
+    many = one.model_copy(update=dict(monitors=[Monitor(id=f'm{i}', center=(.3, .1, 0), component='Ez') for i in range(400)]))
+    per_trace = steps*4+(steps//2+1)*16  # float32 samples plus the complex128 FFT spectrum
+    assert estimate(one)['point_trace_estimated_bytes'] == per_trace
+    assert estimate(many)['point_trace_estimated_bytes'] == 400*per_trace
+    assert estimate(many)['estimated_memory_mb']-estimate(one)['estimated_memory_mb'] == pytest.approx(399*per_trace/2**20, abs=.1)
+    from torchfdtd import Boundaries, BoundaryFace
+    bloch = one.model_copy(update=dict(region=one.region.model_copy(update=dict(
+        boundaries=Boundaries(y_min=BoundaryFace(kind='bloch'), y_max=BoundaryFace(kind='bloch')), bloch_phase=(0, .3, 0)))))
+    assert estimate(bloch)['point_trace_estimated_bytes'] == steps*8+(steps//2+1)*16
+    dft = one.model_copy(update=dict(monitors=[Monitor(id='m0', center=(.3, .1, 0), component='Ez', time_downsample=2,
+                                                       spectrum=dict(sampling='frequency', wavelength_start=.9, wavelength_stop=1.2, frequency_points=7, apodization='none'))]))
+    assert estimate(dft)['point_trace_estimated_bytes'] == steps*4+7*16
+    available = int((int(estimate(one)['estimated_memory_mb']*2**20)+200*per_trace)/.8)
+    fits = resolve_execution(one, health=dict(CPU_RECORD, host_available_bytes=available), scratch=tmp_path/'scratch', summary=estimate(one))
+    refused = resolve_execution(many, health=dict(CPU_RECORD, host_available_bytes=available), scratch=tmp_path/'scratch', summary=estimate(many))
+    assert fits['resident']['fits'] and fits['mode'] == 'resident'
+    assert not refused['resident']['fits'] and 'exceeds 80%' in refused['resident']['reason'] and refused['mode'] != 'resident'
+    assert len(one.model_copy(update=dict(monitors=[Monitor(id=f'm{i}', center=(.3, .1, 0), component='Ez') for i in range(512)])).monitors) == 512
+    with pytest.raises(ValidationError):
+        Project.model_validate(dict(one.model_dump(), monitors=[Monitor(id=f'm{i}', center=(.3, .1, 0), component='Ez').model_dump() for i in range(513)]))
+    with pytest.raises(ValidationError):
+        Project.model_validate(dict(one.model_dump(), sources=[Source(id=f's{i}', center=(-.3, 0, 0), component='Ez', wavelength=1., pulse_cycles=2).model_dump() for i in range(513)]))

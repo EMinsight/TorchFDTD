@@ -19,7 +19,7 @@ from .boundaries import YeeGrid
 from .materials import configure_materials, permittivity
 from .spectra import point_spectrum, apodization_window
 from .mesh import configure_auto_mesh, mesh_summary
-from .field_monitors import FrequencyPlane,FrequencyUpdates,monitor_memory
+from .field_monitors import FrequencyPlane,FrequencyUpdates,monitor_memory,point_trace_memory
 
 C0 = 299792458.0
 # fdtd changes a process-global backend and torch default dtype.
@@ -263,7 +263,8 @@ def estimate(p: Project, *, endpoint_dispatch=True):
                         f'The playback will look like backward motion; store a frame at least every {snapshot["period_steps"]/SNAPSHOT_FRAMES_PER_PERIOD:.0f} steps.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
             'estimated_memory_mb': round((stored * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
-            'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes, 'snapshot': snapshot}
+            'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes,
+            'point_trace_estimated_bytes': point_trace_memory(p), 'snapshot': snapshot}
 
 
 def pulse_envelope_parameters(source):
