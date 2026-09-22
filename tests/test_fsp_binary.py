@@ -26,15 +26,23 @@ def mapping(items):
     return output
 def node(uid,items,children=()):
     return u(1001)+u(38)+uid.encode()+mapping(items)+u(0)+u(len(children))+b''.join(children)
-def legacy_circle(name='circle',enabled=1,index=1.5):
+def transform_block(axes=(-1,-1,-1),angles=(0.,0.,0.),order=2):
+    # Three tagged axis codes, a 3x1 angle matrix, then the database/mesh order pair (rotation 3 first).
+    block=b''.join(b'\0'+struct.pack('<i',a) for a in axes[::-1])
+    block+=u(3)+b'\0'+u(3)+u(2)+u(3)+u(1)+u(1)+u(1)+struct.pack('<3d',*angles[::-1])
+    return block,b'\0'+u(1)+b'\0'+u(order)
+def legacy_circle(name='circle',enabled=1,index=1.5,x=0.,y=0.,radius=.1e-6,material='{00000000-0000-0000-0000-000000000000}',relative=1):
     # Headerless circle 4/25 body: also what a group script leaves behind.
-    body=u(4)+u(25)+struct.pack('<i6d',-1,index,.1e-6,0.,0.,-.1e-6,.1e-6)
+    body=u(4)+u(25)+struct.pack('<i6d',-1,index,radius,x,y,-.1e-6,.1e-6)
     body+=string(f'{index:g}')+bytes(8)+string(name)
     tail=bytearray(158);tail[-9:-5]=u(enabled)
-    return body+tail+mapping({'materialuuid':(0,'{00000000-0000-0000-0000-000000000000}'),'use_relative_coordinates':(2,1)})
-def scripted_group(name,script,properties,generated,enabled=1):
-    body=u(13)+u(18)+bytes(97)+b'\0'+struct.pack('<i',-1)+b'\1'+struct.pack('<d',1.)
-    body+=b'\x02'+string('1')+b'\0'+bytes(8)+b'\0\x02'+string(name)+(b'\1'+struct.pack('<d',0.))*3
+    rotation,order=transform_block();tail[:5]=b'\0'+u(0);tail[5:14]=b'\1'+struct.pack('<d',radius)
+    tail[14:14+len(rotation)]=rotation;tail[-57:-47]=order
+    return body+tail+mapping({'materialuuid':(0,material),'use_relative_coordinates':(2,relative),'gridAttributeName':(0,'')})
+def scripted_group(name,script,properties,generated,enabled=1,axes=(-1,-1,-1),angles=(0.,0.,0.),x=0.,y=0.,z=0.):
+    rotation,_=transform_block(axes,angles);drawing=rotation+bytes(97-len(rotation))
+    body=u(13)+u(18)+drawing+b'\0'+struct.pack('<i',-1)+b'\1'+struct.pack('<d',1.)
+    body+=b'\x02'+string('1')+b'\0'+bytes(8)+b'\0\x02'+string(name)+b''.join(b'\1'+struct.pack('<d',v) for v in (x,y,z))
     body+=bytes(4)+b'\x02'+string(script)+b'\0'+u(len(properties))
     for key,code,value in properties:body+=b'\x02'+string(key)+b'\0'+u(code)+b'\x02'+string(value)
     tail=bytearray(15);tail[6:10]=u(enabled)
@@ -124,6 +132,11 @@ def test_scripted_structure_groups_and_sweep_stores_parse_and_roundtrip():
     assert all(c.legacy['script_generated'] and c.uid=='{921e6d99-3bcb-4063-b513-216a3bb757d9}' and not c.children for c in array.children)
     assert empty.legacy['script']=='' and empty.legacy['user_properties']==[] and empty.children==[] and empty.legacy['enabled']
     assert doc.sweep_records==1 and doc.trailing==sweep and len(doc.nodes())==6
+    assert array.legacy['transform_metadata_decoded'] and array.legacy['rotation_axes']==['none']*3 and array.legacy['rotation_angles']==[0.,0.,0.]
+    assert all(c.legacy['transform_metadata_decoded'] and c.legacy['mesh_order']==2 for c in array.children)
+    twisted=FspDocument(raw[:base.root.start]+node('{ba475c44-6315-46ba-866f-0d85a97d5267}',{'name':(0,'::model')},
+                        [scripted_group('twist','',[],[],axes=(2,-1,-1),angles=(90.,0.,0.),z=.2e-6)])+raw[base.root.end:]).root.children[0]
+    assert twisted.legacy['rotation_axes']==['z','none','none'] and twisted.legacy['rotation_angles']==[90.,0.,0.] and twisted.legacy['z']==.2e-6
     json.dumps(doc.inspect(),allow_nan=False)
     assert doc.data==blob
     with pytest.raises(FspFormatError):FspDocument(raw[:-12]+u(0)+u(0)+u(0)+b'x')

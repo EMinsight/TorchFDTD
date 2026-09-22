@@ -51,6 +51,8 @@ The limited familiar facade supports `adddft()` for a **point** DFT, `minimum wa
 
 Spectral processing uses bounded-memory CPU chunks after the CPU/CUDA field solver completes. It does not add DFT operations to the CUDA time-stepping graph. `summary.seconds` remains solver-loop time and must not be presented as spectral-processing or end-to-end time.
 
+A project holds at most 512 sources and 512 monitors; these are product limits, not solver ones. Point traces are resident for the whole run at `steps x traces x field bytes` (4 bytes per real float32 sample, 8 for the complex samples of a Bloch run, twice that in float64) plus their post-processed complex spectra (16 bytes per FFT bin or requested DFT frequency). `/api/validate` reports that total as `point_trace_estimated_bytes`, includes it in `estimated_memory_mb`, and the resident admission refuses a scene whose estimate exceeds the device or host budget.
+
 There is no source normalization, power/flux integration, distributed DFT monitor, spectral averaging, Chebyshev/custom sample table, or global monitor inheritance yet. The licensed FSP inspector remains separate. The independent [native importer](FSP_NATIVE.md) maps a subset of point monitor settings, with additional FSP-specific restrictions.
 
 Plane E/H monitors, global/custom sampling and reference-normalized flux are described in the [Python guide](PYTHON_BATCH.md). Current validation uses analytic transforms, the native lossless-slab solution and CPU/CUDA parity only.

@@ -66,8 +66,19 @@ def interpolation_map(region,component,points):
     return np.array(indices),np.array(weights)
 
 
-def monitor_memory(project):
+def point_trace_memory(project):
+    """Resident point traces (steps x traces x field dtype) plus their post-processed complex spectra."""
+    r=project.region;real=8 if r.precision=='float64' else 4;field=real*(2 if r.complex_fields else 1)
     size=0
+    for raw in project.monitors:
+        if not raw.enabled or raw.kind!='point':continue
+        m=project.resolved_monitor(raw);samples=len(range(0,r.steps,m.time_downsample))
+        size+=r.steps*field+16*(len(frequency_samples(m.spectrum)) if m.spectrum.sampling!='fft' else samples//2+1)
+    return size
+
+
+def monitor_memory(project):
+    size=point_trace_memory(project)
     for raw in project.monitors:
         if not raw.enabled or raw.kind!='field':continue
         m=project.resolved_monitor(raw);n=len(plane_plan(project.region,m)['weights']);nf=len(frequency_samples(m.spectrum))

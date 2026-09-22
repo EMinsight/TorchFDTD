@@ -183,6 +183,24 @@ class Reader:
             pass
         return result
 
+    def group_metadata(self, raw):
+        """Rotation axes/angles lead the group drawing block; the rest stays opaque."""
+        r = Reader(raw)
+        result = {'transform_metadata_decoded': False}
+        try:
+            axes = []
+            for _ in range(3):
+                if r.take(1) != b'\0':return result
+                code = r.i32()
+                if code not in (-1, 0, 1, 2):return result
+                axes.append({-1:'none', 0:'x', 1:'y', 2:'z'}[code])
+            angles = r.legacy_matrix().reshape(-1)
+            if len(angles) != 3 or not np.isfinite(angles).all():return result
+            result.update(rotation_axes=axes[::-1], rotation_angles=angles[::-1].tolist(), transform_metadata_decoded=True)
+        except FspFormatError:
+            pass
+        return result
+
     def legacy_geometry(self):
         kind=self.u32();version=self.u32()
         fields={}
@@ -204,7 +222,7 @@ class Reader:
                 fields['vertices_global']=(start,self.pos,'matrix')
                 geometry['z min']=scalar('z min',True);geometry['z max']=scalar('z max',True)
             else:
-                self.take(97)  # observed legacy drawing fields, preserved verbatim
+                geometry.update(self.group_metadata(self.take(97)))  # remaining drawing fields preserved verbatim
                 if self.take(1)!=b'\0':self.fail('Unsupported group material expression')
                 old_material=self.i32();index=scalar('index',True)
             if self.take(1)!=b'\x02':self.fail('Unsupported legacy index expression')

@@ -83,7 +83,7 @@ def rewrite_scene(document, patches, requested, new_records, originals):
     """
     root=document.root;start=root.child_count_offset+4
     def family(node):
-        if node.legacy:return 'structures'
+        if node.legacy:return None if node.legacy.get('kind')==13 else 'structures'  # groups keep their place
         if node.uid in SOURCE_CLASSES:return 'sources'
         if node.uid in (TIME,DFT):return 'monitors'
         return None

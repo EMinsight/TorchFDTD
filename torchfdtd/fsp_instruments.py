@@ -88,7 +88,11 @@ def plan_instruments(plan,document,base,project,conversion,native_only):
     from .fsp_settings import _source,_monitor
     origin=np.asarray(conversion.origin_m)
     by_offset={n.start:n for n in document.root.children}
-    mapped={key:(by_offset[row['record_offset']],row['native_ids']) for row in conversion.mappings for key in row['native_ids']}
+    # Analysis-group members are imported for execution only; their records sit inside the group.
+    members={key for row in conversion.mappings if row.get('script_generated') for key in row['native_ids']}
+    if members&({s.id for s in project.sources}|{m.id for m in project.monitors}):
+        raise ValueError('Analysis-group members imported from the FSP are not written back. Remove them from the scene or edit the group in Lumerical; the geometry export keeps them unchanged.')
+    mapped={key:(by_offset[row['record_offset']],row['native_ids']) for row in conversion.mappings for key in row['native_ids'] if not row.get('script_generated')}
     old_sources={s.id:s for s in base.sources};old_monitors={m.id:m for m in base.monitors}
     nodes={};new_records={};source_keys=[];monitor_keys=[];monitor_groups=[];splits=[]
     source_changed=[s.id for s in base.sources]!=[s.id for s in project.sources]
