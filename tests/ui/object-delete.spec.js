@@ -46,7 +46,7 @@ test('delete a structure from its panel, undo it, delete from the row button, de
  expect((await saved(page)).structures.some(s=>s.name===name)).toBe(false);
  // A source and a monitor go the same way, from the panel and from the row.
  await page.locator('[data-select="source"]').click();
- await expect(page.locator('#property-type')).toHaveText('point');
+ await expect(page.locator('#property-type')).toHaveText('plane');
  await page.locator('#properties .object-actions').getByRole('button',{name:'Delete source',exact:true}).click();
  await expect(page.locator('[data-select="source"]')).toHaveCount(0);
  expect((await saved(page)).sources.length).toBe(0);

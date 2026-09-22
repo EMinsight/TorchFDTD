@@ -769,15 +769,20 @@ def demo_project(name='waveguide'):
             monitors=[Monitor(id='electric',name='electric probe',component='Ez',center=(.4,0,0)),
                       Monitor(id='magnetic',name='magnetic probe',component='Hy',center=(.4,0,0))])
 
-    p = Project(name='SiN waveguide | 2D TMz',
-                structures=[Structure(id='waveguide', name='waveguide', size=(8, 0.65, 0.4))],
-                sources=[Source(id='source', center=(-2.5, 0, 0))],
+    # Both 2D demos launch a one-way sheet toward +x, so nothing radiates into the
+    # left PML. The one-way contract needs the whole transverse cell (periodic in
+    # y) and a homogeneous injection neighbourhood, so the waveguide starts at
+    # x = -2 and is excited end-fire by the plane wave.
+    periodic = Boundaries(y_min=BoundaryFace(kind='periodic'), y_max=BoundaryFace(kind='periodic'))
+    p = Project(name='SiN waveguide | 2D TMz', region=Region(boundaries=periodic),
+                structures=[Structure(id='waveguide', name='waveguide', center=(1, 0, 0), size=(6, 0.65, 0.4))],
+                sources=[Source(id='source', kind='plane', injection='oneway', normal='x', direction='+', center=(-2.5, 0, 0), size=(0, 6, 0))],
                 monitors=[Monitor(id='input', name='input', center=(-1.8, 0, 0)),
                           Monitor(id='output', name='output', center=(2, 0, 0))])
     if name == 'scatterer':
         p.name = 'Dielectric cylinder | 2D TMz'
         p.structures = [Structure(id='cylinder', name='cylinder', kind='circle', radius=0.65)]
-        p.sources = [Source(id='source', kind='plane', center=(-2.5, 0, 0), size=(0, 4, 0))]
+        p.sources = [Source(id='source', kind='plane', injection='oneway', normal='x', direction='+', center=(-2.5, 0, 0), size=(0, 6, 0))]
     elif name == '3d':
         p.name = 'Dielectric sphere | 3D'
         p.region = Region(dimension='3d', size=(4, 4, 4), mesh=0.1, steps=300, pml_cells=6)

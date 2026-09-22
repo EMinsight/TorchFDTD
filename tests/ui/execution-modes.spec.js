@@ -124,9 +124,11 @@ test('tiled mode shows its panel, the suggested overlap and the mismatch indicat
  await page.locator('[data-add="field"]').click();
  await page.locator('[data-path="center.0"]').fill('2');await page.locator('[data-path="center.0"]').press('Tab');
  await page.locator('[data-select]').filter({hasText:'source'}).click();
+ await page.getByLabel('injection',{exact:true}).selectOption('soft');
  await page.locator('[data-path="size.1"]').fill('6');await page.locator('[data-path="size.1"]').press('Tab');
  await page.locator('[data-path="extend_through_pml"]').check();
  await page.locator('[data-action="region"]').first().click();
+ await page.getByLabel('y min bc',{exact:true}).selectOption('pml');await page.getByLabel('y max bc',{exact:true}).selectOption('pml');
  const gpu=page.getByLabel('GPU',{exact:true});
  if(await gpu.isEnabled())await gpu.uncheck();
  await expect(page.getByLabel('resource',{exact:true})).toHaveValue('cpu');

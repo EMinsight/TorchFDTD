@@ -4,7 +4,7 @@ test('configure full-cell one-way injection, inspect paired currents and run bac
  const p=await (await page.request.get('/api/examples/scatterer')).json();
  p.structures=[];p.region.size=[12,4,1];p.region.mesh=.05;p.region.steps=300;p.region.pml_cells=20;
  p.region.precision='float64';p.region.material_sampling='yee';p.region.backend=process.env.TORCHFDTD_TEST_CUDA?'cuda':'cpu';
- p.sources[0].center=[0,0,0];p.sources[0].size=[0,2,0];p.sources[0].pulse_cycles=1;
+ p.sources[0].center=[0,0,0];p.sources[0].size=[0,2,0];p.sources[0].pulse_cycles=1;p.sources[0].injection='soft';
  p.monitors[0].center=[-1,0,0];p.monitors[1].center=[1,0,0];
  await page.addInitScript(p=>localStorage.setItem('torchfdtd.project.v1',JSON.stringify(p)),p);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));

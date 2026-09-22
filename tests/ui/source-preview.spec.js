@@ -8,7 +8,7 @@ test('Bloch sheet preview states fixed k_parallel and refuses a fixed-angle defi
  p.structures=[];p.region.size=[8,1.2,1];p.region.mesh=.05;p.region.steps=800;p.region.pml_cells=10;p.region.backend='cpu';
  p.region.boundaries.y_min.kind='bloch';p.region.boundaries.y_max.kind='bloch';
  p.region.bloch_phase=[0,2*Math.PI/1.55*Math.sin(20*Math.PI/180)*1.2,0];
- p.sources[0].center=[-2.5,0,0];p.sources[0].size=[0,1.2,0];p.sources[0].pulse_cycles=3;
+ p.sources[0].center=[-2.5,0,0];p.sources[0].size=[0,1.2,0];p.sources[0].pulse_cycles=3;p.sources[0].injection='soft';
  // The init script runs on every load; the second part of the test rewrites the stored project itself.
  await page.addInitScript(p=>{if(!localStorage.getItem('torchfdtd.spec.seeded')){localStorage.setItem('torchfdtd.project.v1',JSON.stringify(p));localStorage.setItem('torchfdtd.spec.seeded','1');}},p);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
