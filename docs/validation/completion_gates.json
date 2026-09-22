@@ -2865,7 +2865,8 @@
           "actual_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-02.xml",
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/worktrees/g9-report/.local/tmp/junit/rerecord/G9-02.xml",
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/worktrees/ci-portability/.local/tmp/junit/rerecord/G9-02.xml"
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/worktrees/ci-portability/.local/tmp/junit/rerecord/G9-02.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_provenance_inventory.py --junitxml=D:/TorchFDTD/.local/worktrees/ci-sbom/.local/tmp/junit/rerecord/G9-02.xml"
           ],
           "required_tests": [
             "tests/test_provenance_inventory.py"
@@ -2873,7 +2874,8 @@
           "evidence": [
             "20260921T163044Z-g9-02-158d1eda",
             "20260921T212820Z-g9-02-ae84c532",
-            "20260922T051942Z-g9-02-9b6000ae"
+            "20260922T051942Z-g9-02-9b6000ae",
+            "20260922T064526Z-g9-02-3d2ecc54"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3027,7 +3029,8 @@
             "20260921T201139Z-g9-07-856d0eb3",
             "20260921T202555Z-g9-07-f8fe342e",
             "20260921T213007Z-g9-07-31e7a456",
-            "20260922T052219Z-g9-07-512b7fdc"
+            "20260922T052219Z-g9-07-512b7fdc",
+            "20260922T064740Z-g9-07-e3635ece"
           ],
           "blocker": null,
           "scope_change_approval": null,

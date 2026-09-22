@@ -663,6 +663,10 @@ def provenance_check(root):
                 continue
     if verdict is None:
         return False, detail + f'; check: provenance_inventory.py --check exit {completed.returncode} without a summary: {cell(completed.stdout[-200:])}'
+    if verdict.get('closure_difference'):
+        # Printed for the person running the build; it depends on this host's wheels, so it never enters the report text.
+        print('provenance check on another platform than the record; closure difference (information, not judged): '
+              + json.dumps(verdict['closure_difference'], ensure_ascii=False))
     if verdict['problems'] or completed.returncode != 0:
         return False, detail + '; check: problems: ' + '; '.join(verdict['problems'] or [f'exit {completed.returncode}'])
     return True, detail + '; check: passed against the tracked tree'

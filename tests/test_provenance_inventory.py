@@ -87,6 +87,9 @@ def test_inventory_check_passes_on_the_tracked_tree():
 def test_committed_sbom_records_its_platform_and_summary():
     sbom = json.loads((ROOT / 'docs' / 'validation' / 'sbom.json').read_text(encoding='utf-8'))
     assert sbom['python']['platform'] and sbom['host']['os'] and sbom['host']['platform']
+    pyproject = tomllib.loads((ROOT / 'pyproject.toml').read_text(encoding='utf-8'))
+    assert sbom['declared_dependencies']['runtime'] == pyproject['project']['dependencies']
+    assert sbom['declared_dependencies']['dev'] == pyproject['project']['optional-dependencies']['dev']
     assert sbom['summary'] == dict(components=len(sbom['components']), installed=sum(c['installed'] for c in sbom['components']),
                                    open_items=len(sbom['open_items']), scan_findings=len(sbom['scan']['findings']))
 
@@ -101,22 +104,29 @@ def test_check_on_another_platform_compares_only_the_portable_parts():
     dropped = installed[0]
     dropped.update(installed=False, version=None, license=None)  # not installed here, for example cupy on a CPU-only host
     installed[1]['version'] = installed[1]['version'] + '.post1'
+    installed[2]['license'] = 'MIT License' if installed[2]['license'] != 'MIT License' else 'MIT'  # wheel metadata spells licences differently
+    installed[3]['groups'] = installed[3]['groups'] + ['benchmark']  # a transitive dependency reached through another group here
     fresh['components'].append(dict(name='linux-only-dep', groups=['runtime'], required_by=[], specifiers=[], version='1.0', installed=True,
                                     license='MIT', license_classifiers=[], license_files=[], source_url=None))
+    fresh['components'] = [c for c in fresh['components'] if c['name'] != installed[4]['name']]  # absent from this closure entirely
     fresh['open_items'] = [item for item in fresh['open_items'] if item.get('paths')] + [dict(name=f"pip: {dropped['name']} (not installed)", paths=[], state='BLOCKED_EXTERNAL', why='x', decision='y')]
+    fresh['history_note'] = dict(pattern='x', commits=[], note='a shallow clone sees another history')
     problems, information = inventory.compare(committed, fresh)
     assert problems == [], problems
     assert information['platform_match'] is False
-    assert information['closure_difference']['only_here'] == ['linux-only-dep']
-    assert information['closure_difference']['not_installed_here'] == [dropped['name']]
-    assert information['closure_difference']['version_differs'] == [installed[1]['name']]
-    # A licence that differs on a component installed on both sides, a changed asset or a changed spec is a problem anywhere.
-    installed[2]['license'] = 'Proprietary'
+    difference = information['closure_difference']
+    assert difference['only_here'] == ['linux-only-dep'] and difference['only_in_record'] == [installed[4]['name']]
+    assert difference['not_installed_here'] == [dropped['name']] and difference['version_differs'] == [installed[1]['name']]
+    assert difference['license_differs'] == {installed[2]['name']: dict(record=committed['components'][[c['name'] for c in committed['components']].index(installed[2]['name'])]['license'], here=installed[2]['license'])}
+    assert list(difference['groups_differ']) == [installed[3]['name']]
+    # Only the asset table and the declared specifiers are judged on another platform.
+    fresh['declared_dependencies']['runtime'] = fresh['declared_dependencies']['runtime'] + ['extra-dep>=1']
     problems, _ = inventory.compare(committed, fresh)
-    assert any('licence differs' in problem for problem in problems)
+    assert problems == ['docs/validation/sbom.json: the dependency specifiers declared in pyproject.toml differ from the record; regenerate it on its platform']
+    fresh['declared_dependencies'] = committed['declared_dependencies']
     fresh['assets'] = []
     problems, _ = inventory.compare(committed, fresh)
-    assert any('assets differs' in problem for problem in problems)
+    assert problems == ['docs/validation/sbom.json: the asset table differs from the tracked tree; regenerate it on its platform']
     # On the recording platform the whole stable record must match.
     same = copy.deepcopy(committed)
     assert inventory.compare(committed, same) == ([], dict(platform_match=True, closure_difference=None))

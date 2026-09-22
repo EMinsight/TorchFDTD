@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.14.0.dev0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260922T052219Z-g9-07-512b7fdc` recorded 2026-09-22T05:22:19+00:00 at commit `5881dfaf3976`.
+Package version `0.14.0.dev0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260922T064740Z-g9-07-e3635ece` recorded 2026-09-22T06:47:40+00:00 at commit `e14c30c7a185`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -140,12 +140,12 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260921T163013Z-g9-01-57458fee` | `e132fdd4155b` | FAIL | STALE: test source changed since the run: tests/test_server_security.py |
-| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260922T051942Z-g9-02-9b6000ae` | `6eb168b3f601` | PASS | evidence matches the current checkout |
+| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260922T064526Z-g9-02-3d2ecc54` | `1b46bc4d5172` | PASS | evidence matches the current checkout |
 | G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260921T212831Z-g9-04-f826cb57` | `32af0e2bffa2` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | VERIFIED | `20260922T052219Z-g9-07-512b7fdc` | `5881dfaf3976` | PASS | evidence matches the current checkout |
+| G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | VERIFIED | `20260922T064740Z-g9-07-e3635ece` | `e14c30c7a185` | PASS | evidence matches the current checkout |
 
 ### H1 실제 단일 문제 multi-GPU (HPC, P1)
 
