@@ -247,6 +247,33 @@ def test_streamed_small_scene_preserves_gradient_and_budget_precedes_state(monke
     with pytest.raises(ValueError,match='host budget'):rejected(epsilon)
 
 
+def test_backward_admission_counts_the_forward_banks_this_run_already_holds(monkeypatch):
+    """The OS reports the forward's retained host banks as used memory; the backward's own admission must not fail on them."""
+    import torchfdtd.streamed as streamed
+    p = project(steps=10)
+    p.region.memory_mode = 'streamed'
+    epsilon = torch.full(p.region.shape,1.7,dtype=torch.float64,requires_grad=True)
+    options = StreamedAdjointOptions(device='cpu',slab_width=4,temporal_depth=2)
+    required = streamed._reservation(p,epsilon,options)['host_reservation_bytes']
+    # Available memory a hair below the requirement: the forward is refused outright...
+    monkeypatch.setattr(streamed,'host_memory',lambda: {'total_bytes':2*required,'available_bytes':int(required/.8)-1})
+    with pytest.raises(ValueError,match='host budget'):
+        StreamedSimulation(p,options)(epsilon)
+    # ...but the same shortfall at backward time, caused by this run's own retained banks, is admitted.
+    with streamed.held_host_bytes(required):
+        streamed._reservation(p,epsilon,options)
+    with streamed.held_host_bytes(0):
+        with pytest.raises(ValueError,match='host budget'):
+            streamed._reservation(p,epsilon,options)
+    # End to end: the forward passes with room, the backward is admitted although the OS now reports the banks as used.
+    monkeypatch.setattr(streamed,'host_memory',lambda: {'total_bytes':4*required,'available_bytes':4*required})
+    result = StreamedSimulation(p,options)(epsilon)
+    retained = result.report['forward_bank_ledger']['live_bytes']+result.report['host_initial_state_storage_bytes']
+    monkeypatch.setattr(streamed,'host_memory',lambda: {'total_bytes':4*required,'available_bytes':int(required/.8)-retained})
+    gradient, = torch.autograd.grad(result.signals.square().sum(),epsilon)
+    assert torch.isfinite(gradient).all()
+
+
 def test_resident_guard_rechecks_mutated_shape():
     region = Region()
     region.dimension = '3d'

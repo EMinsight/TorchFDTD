@@ -1,6 +1,7 @@
 """Experimental host/file-backed differentiable FDTD with bounded CUDA slabs."""
 from dataclasses import dataclass, replace
 from contextlib import contextmanager
+import contextvars
 from pathlib import Path
 import math
 import os
@@ -103,6 +104,22 @@ def _volume(directory):
     return os.stat(path).st_dev
 
 
+# Host bytes this process already holds for the run being admitted (the forward's
+# retained field banks when the backward is admitted). The operating system
+# reports them as unavailable, so they are added back before the budget check.
+_HELD_HOST_BYTES = contextvars.ContextVar('torchfdtd_streamed_held_host_bytes', default=0)
+
+
+@contextmanager
+def held_host_bytes(count):
+    """Admit the next reservation with `count` bytes of this run's own host banks counted as available."""
+    token = _HELD_HOST_BYTES.set(int(count))
+    try:
+        yield
+    finally:
+        _HELD_HOST_BYTES.reset(token)
+
+
 def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, parameter_shapes=None):
     region = project.region
     n = math.prod(region.shape)
@@ -186,6 +203,8 @@ def _reservation(project, epsilon, options, spectral=None, *, pole_count=0, para
     gpu+=buffers*(16*monitors+observer_layout) if cuda else 0
     host+=buffers*(observer_preparation+observer_layout)
     available = host_memory()['available_bytes']
+    if available is not None:
+        available += _HELD_HOST_BYTES.get()
     host_limit = min(options.host_budget_bytes, int(available*.8)) if available is not None else options.host_budget_bytes
     if host > host_limit:
         raise ValueError(f'Streamed state and checkpoint reservation exceed the host budget: required={host} bytes, admissible={host_limit} bytes.')
@@ -426,7 +445,10 @@ class _Streamed(torch.autograd.Function):
         if torch.is_grad_enabled():raise RuntimeError('Higher-order streamed derivatives are not implemented.')
         epsilon, = ctx.saved_tensors
         options, project, report = ctx.options, ctx.project, ctx.report
-        reservation = ctx.execution.reservation(project, epsilon, options, ctx.spectral)
+        # The forward's retained host banks belong to this run; the OS counts them as used.
+        retained = (report.get('forward_bank_ledger') or {}).get('live_bytes', 0) + report.get('host_initial_state_storage_bytes', 0)
+        with held_host_bytes(retained):
+            reservation = ctx.execution.reservation(project, epsilon, options, ctx.spectral)
         started = time.perf_counter()
         with streamed_lease(options, reservation), MemoryMeter(options.device) as meter:
             gradient = _backward(ctx, signal_bar, epsilon, project, options, report)
