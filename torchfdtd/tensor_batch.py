@@ -70,8 +70,7 @@ def run_tensor_batch(cases, *, objective=None, output_dir=None, keep_results=Tru
     if root and ((root/'tensor-batch.json').exists() or any((root/(c.id+'.npz')).exists() for c in cases)):
         raise FileExistsError('Tensor batch output exists. Use a new directory. Resume is supported by BatchRunner.')
     if not 0<memory_fraction<=.9:raise ValueError('memory_fraction must be positive and at most .9.')
-    if not torch.cuda.is_available():raise RuntimeError('Tensor batch requires CUDA.')
-    if not isinstance(device,int) or not 0<=device<torch.cuda.device_count():raise ValueError('Invalid CUDA device.')
+    # Input admission first, so a host without CUDA reports the same project refusals as a CUDA host.
     projects=[Project.model_validate(c.project.model_dump()) for c in cases]
     from .tensor_project import uses_tensor
     for p in projects:
@@ -81,6 +80,8 @@ def run_tensor_batch(cases, *, objective=None, output_dir=None, keep_results=Tru
         if p.region.complex_fields:raise ValueError('Tensor batch currently requires real fields. Use BatchRunner for complex Bloch fields.')
         if p.region.run_control.auto_shutoff:raise ValueError('Tensor batch requires fixed-duration runs. Set auto_shutoff=False or use BatchRunner.')
         _validate_pmc_case(p)
+    if not torch.cuda.is_available():raise RuntimeError('Tensor batch requires CUDA.')
+    if not isinstance(device,int) or not 0<=device<torch.cuda.device_count():raise ValueError('Invalid CUDA device.')
     with ENGINE_LOCK,torch.cuda.device(device):
         old_dtype=torch.get_default_dtype()
         try:
