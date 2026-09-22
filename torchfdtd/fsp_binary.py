@@ -19,6 +19,14 @@ class FspFormatError(ValueError):
     pass
 
 
+LEGACY_CLASSES={'{75954e61-0067-4a0e-8d16-1ee8d371e892}':6,
+                '{23046316-141b-4111-aa2f-9e18de790b6c}':8,
+                '{921e6d99-3bcb-4063-b513-216a3bb757d9}':4,
+                '{b4a87699-109a-4252-b2c4-06be606f82f3}':5,
+                '{49651cff-e643-43b3-b70d-0b6846faa79c}':11,
+                '{b1c063bf-9b6d-49e1-b1dc-2c5cddef5d3c}':13}
+
+
 @dataclass
 class Value:
     value: object
@@ -210,7 +218,23 @@ class Reader:
                 geometry.update(self.shape_metadata(self.data[start:self.pos],kind,fields,start))
             else:
                 for key in ('x','y','z'):geometry[key]=self.tagged_legacy_double()
-                enabled,_=tail(30)
+                # Setup script and user properties precede the enabled block.
+                # An empty script and no properties is the fixed 30-byte tail.
+                self.take(4)
+                if self.take(1)!=b'\x02':self.fail('Unsupported group script expression')
+                geometry['script']=text('script')
+                if self.take(1)!=b'\0':self.fail('Unsupported group property list')
+                count=self.u32()
+                if count>10000:self.fail('Excessive group property count')
+                geometry['user_properties']=[]
+                for _ in range(count):
+                    if self.take(1)!=b'\x02':self.fail('Unsupported group property name')
+                    key=self.string()
+                    if self.take(1)!=b'\0':self.fail('Unsupported group property type')
+                    code=self.u32()
+                    if self.take(1)!=b'\x02':self.fail('Unsupported group property value')
+                    geometry['user_properties'].append((key,code,self.string()))
+                enabled,_=tail(15)
             map_start=self.pos;properties=self.mapping()
             fields['__properties__']=(map_start,self.pos,'mapping')
             if 'use_relative_coordinates' not in properties:self.fail('Unexpected legacy extension')
@@ -250,22 +274,27 @@ class Reader:
             map_start=self.pos;properties=self.mapping()
             legacy_fields['__properties__']=(map_start,self.pos,'mapping')
         else:
-            legacy_classes={'{75954e61-0067-4a0e-8d16-1ee8d371e892}':6,
-                            '{23046316-141b-4111-aa2f-9e18de790b6c}':8,
-                            '{921e6d99-3bcb-4063-b513-216a3bb757d9}':4,
-                            '{b4a87699-109a-4252-b2c4-06be606f82f3}':5,
-                            '{49651cff-e643-43b3-b70d-0b6846faa79c}':11,
-                            '{b1c063bf-9b6d-49e1-b1dc-2c5cddef5d3c}':13}
-            if uid not in legacy_classes:self.fail('Unsupported legacy object class')
+            if uid not in LEGACY_CLASSES:self.fail('Unsupported legacy object class')
             properties,legacy,legacy_fields=self.legacy_geometry()
-            if legacy['kind']!=legacy_classes[uid]:self.fail('Legacy class and geometry type disagree')
-        if tag==1001 or legacy.get('kind')==13:
+            if legacy['kind']!=LEGACY_CLASSES[uid]:self.fail('Legacy class and geometry type disagree')
+        children=[]
+        if legacy.get('kind')==13:
+            # Script-generated primitives follow the group headerless, kind first.
+            count=self.u32()
+            if count>100000:self.fail('Excessive generated object count')
+            classes={kind:cls for cls,kind in LEGACY_CLASSES.items()}
+            for _ in range(count):
+                record=self.pos;p,g,f=self.legacy_geometry()
+                if g['kind']==13:self.fail('Nested script-generated groups are not decoded yet')
+                g['script_generated']=True
+                children.append(Node(classes[g['kind']],record,p,[],g,self.pos,f))
+        elif tag==1001:
             extra=self.u32()
             if extra!=0:self.fail('Result/dataset records are not decoded yet')
         child_count_offset=self.pos
         count=self.u32()
         if count>10000:self.fail('Excessive object count')
-        children=[self.node(depth+1) for _ in range(count)]
+        children+=[self.node(depth+1) for _ in range(count)]
         return Node(uid,start,properties,children,legacy,self.pos,legacy_fields,child_count_offset)
 
 
@@ -289,8 +318,12 @@ class FspDocument:
         self.footer_start=r.pos
         # Footer decoding is separate from the simulation object tree.
         self.footer=r.mapping()
+        # Two zero words and a sweep/optimization record count end the file.
+        # Those records are retained verbatim, never decoded.
+        if r.u32()!=0 or r.u32()!=0:r.fail('Unsupported footer records')
+        self.sweep_records=r.u32()
         self.trailing=r.take(len(self.data)-r.pos)
-        if self.trailing!=bytes(12):r.fail('Unsupported footer records')
+        if bool(self.sweep_records)!=bool(self.trailing):r.fail('Unsupported footer records')
 
     @classmethod
     def load(cls,path):

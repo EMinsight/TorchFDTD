@@ -55,6 +55,8 @@ The simulation origin is translated to the centre of the total computational ext
 
 Automatic pulse parameters and standard/chirped selection must agree with the saved settings. Eliminate-DC processing, FSP magnetic dipole type mapping, oblique/finite-aperture and mode sources, sampled-data material fitting, anisotropy, conformal meshes, group scripts/transforms, automatic structure extension through PML, volume/time-distributed monitors and result-bearing files require further implementation. Saved rectilinear nodes do not reproduce the original mesh generator. Editing geometry leaves these nodes unchanged. TFSF import additionally requires constant spacing along each axis throughout its injection support. See [rectilinear controls and tests](RECTILINEAR_MESH.md).
 
+Unsupported content is listed, not thrown. A model setup/analysis script (`model_script`), an unmappable region such as a boundary code other than PML or paired Periodic (`region_mapping`, with the stored codes), scripted structure groups with their generated object count, analysis groups and unknown classes (`object_mapping`) each add an error issue and conversion continues to the next object, so one report names everything that blocks native execution. When the region itself cannot be mapped, structures, sources and monitors are not checked and a warning says so.
+
 ## Independent geometry writeback
 
 ```python

@@ -12,7 +12,7 @@ from torchfdtd.fsp_native import DIPOLE, FDTD, ROOT, TIME, ZERO_UUID, convert_fs
 from torchfdtd.models import Project, Region, Source
 from torchfdtd.server import create_app
 from torchfdtd.solver import Simulation, source_time_signal
-from test_fsp_binary import mapping, node, string, u
+from test_fsp_binary import legacy_circle, mapping, node, scripted_group, string, u
 
 
 def items(data):
@@ -21,7 +21,7 @@ def items(data):
 
 
 def fixture(source_overrides=None, region_overrides=None, *, source_class=DIPOLE,
-            monitor_class=TIME, monitor_overrides=None):
+            monitor_class=TIME, monitor_overrides=None, root_overrides=None, extra=()):
     dx = .1e-6; dt = .8*dx/299792458/math.sqrt(3)
     region = dict(name='::model::FDTD', enabled=1, customGrid=2, meshRefineDesired=5,
                   fullSymmetry=0, forceComplex=0, splitFieldFDTD=0, checkpointDuringSimulation=0,
@@ -50,9 +50,9 @@ def fixture(source_overrides=None, region_overrides=None, *, source_class=DIPOLE
     body = u(8)+u(25)+struct.pack('<i5d', -1, 2., .3e-6, 0., 0., 0.)+string('2')+bytes(8)+string('sphere')
     body += tail+mapping(items(dict(materialuuid=ZERO_UUID, use_relative_coordinates=1, gridAttributeName='')))+u(0)
     sphere = u(1000)+u(38)+b'{23046316-141b-4111-aa2f-9e18de790b6c}'+body
-    root = node(ROOT, items(dict(name='::model', setupscript='', analysisscript='', enabled=1,
-                                constructionflag=0, x=0., y=0., z=0.)),
-                [node(FDTD, items(region)), sphere, node(source_class, items(source)), node(monitor_class, items(monitor))])
+    root = node(ROOT, items({**dict(name='::model', setupscript='', analysisscript='', enabled=1,
+                                    constructionflag=0, x=0., y=0., z=0.), **(root_overrides or {})}),
+                [node(FDTD, items(region)), sphere, node(source_class, items(source)), node(monitor_class, items(monitor)), *extra])
     return (b'LUMERICAL file version 1.1\0'+struct.pack('<5I', 3, 10, 4, 8, 1)+bytes(24)
             +b'table of contents\0end table of contents\0Lumerical material data file version 2.0\0'
             +u(0)+root+u(0)+bytes(12))
@@ -154,5 +154,45 @@ def test_native_upload_download_and_run_without_vendor_runtime(tmp_path, monkeyp
             assert client.get('/api/fsp/'+key+'/conversion').json()['requires_lumerical'] is False
             assert client.get('/api/fsp/'+key+'/archive').status_code == 409
             assert client.post('/api/validate', json=job['conversion']['project']).status_code == 200
+    finally:
+        app.state.pool.shutdown(); app.state.fsp_pool.shutdown()
+
+
+def test_scripts_boundaries_and_scripted_groups_are_listed_together_not_fatal(tmp_path, monkeypatch):
+    from torchfdtd import fsp
+    monkeypatch.setattr(fsp, 'load_api', lambda: pytest.fail('Independent conversion loaded Lumerical'))
+    group = scripted_group('array', 'addcircle;', [('nx', 0, '2')], [legacy_circle(), legacy_circle()])
+    raw = fixture(region_overrides={'BCType0': 5, 'BCType1': 5}, root_overrides={'setupscript': 'set("x",0);'}, extra=[group])
+    report = convert_fsp(FspDocument(raw), 'Scripted', 'cpu')
+    assert report.project is None
+    errors = {(i['code'], i['object_id']): i['message'] for i in report.issues if i['severity'] == 'error'}
+    assert 'setupscript' in errors['model_script', '::model'] and 'set("x"' not in errors['model_script', '::model']
+    assert '[5, 5]' in errors['region_mapping', '::model::FDTD']
+    assert '2 script-generated objects' in errors['object_mapping', 'array']
+    assert not any(i['object_id'] in ('sphere', '::model::source', '::model::monitor') for i in report.issues)
+    assert any(i['severity'] == 'warning' and 'were not checked' in i['message'] for i in report.issues)
+    import json; json.dumps(report.as_dict(), allow_nan=False)
+    # With a mappable region the other objects are mapped and only the group is listed.
+    report = convert_fsp(FspDocument(fixture(extra=[group])), 'Scripted', 'cpu')
+    assert report.project is None
+    assert [(i['code'], i['object_id']) for i in report.issues if i['severity'] == 'error'] == [('object_mapping', 'array')]
+    assert {m['object_id'] for m in report.mappings} == {'sphere', '::model::source', '::model::monitor'}
+    monkeypatch.setattr(fsp, 'availability', lambda: {'installed': False, 'reason': 'Not installed'})
+    app = create_app(tmp_path)
+    try:
+        with TestClient(app) as client:
+            response = client.post('/api/fsp/native-import', content=raw, headers={'x-filename': 'moir%C3%A9%20cavity%20-%2090%20twist.fsp'})
+            assert response.status_code == 202
+            key = response.json()['id']
+            deadline = time.monotonic()+5
+            while time.monotonic() < deadline:
+                job = client.get('/api/fsp/'+key).json()
+                if job['status'] in ('ready', 'failed'):break
+                time.sleep(.01)
+            assert job['status'] == 'ready', job
+            assert job['filename'] == 'moiré cavity - 90 twist.fsp'
+            assert job['conversion']['project'] is None and not job['conversion']['native_execution_allowed']
+            assert ('object_mapping', 'array') in [(i['code'], i['object_id']) for i in job['conversion']['issues']]
+            assert client.get('/api/fsp/'+key+'/download').content == raw
     finally:
         app.state.pool.shutdown(); app.state.fsp_pool.shutdown()
