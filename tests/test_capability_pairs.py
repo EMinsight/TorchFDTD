@@ -464,8 +464,9 @@ def error_text(exc):
 def innermost_frame(exc):
     for frame in reversed(traceback.extract_tb(exc.__traceback__)):
         path = frame.filename.replace('\\', '/')
-        if '/torchfdtd/' in path and 'site-packages' not in path and not path.endswith('capabilities.py'):
-            return 'torchfdtd/'+path.split('/torchfdtd/', 1)[1], frame.name
+        # The package may run from the checkout or from an installed wheel; both spell the module the same way.
+        if '/torchfdtd/' in path and not path.endswith('capabilities.py'):
+            return 'torchfdtd/'+path.rsplit('/torchfdtd/', 1)[1], frame.name
     return None, None
 
 

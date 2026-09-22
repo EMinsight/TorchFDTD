@@ -14,6 +14,12 @@ TORCWA (Kim and Lee, Comput. Phys. Commun. 282, 108552, 2023) run in a separate
 interpreter by benchmarks/g3_torcwa_grating.py into
 docs/validation/g3/G3-08_torcwa_reference.json.
 """
+import sys
+from pathlib import Path
+
+# benchmarks/ and examples/ ship with the repository, not with the wheel, so a run against an
+# installed package still reads them from the checkout that holds this test.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import json
 import math
 import os
