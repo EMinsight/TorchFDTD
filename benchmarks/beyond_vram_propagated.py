@@ -457,6 +457,28 @@ def execute(args, spec, mode, record, artifacts):
     record['executions'][mode] = entry
     if mode == 'streamed':
         entry['reservation'] = plane_reservation(model, spec, options)
+    values = {}
+    if args.fd_check != 'none':
+        # The perturbed forwards run first, while this process is still small: after the backward the
+        # process keeps its heap high-water mark, which the operating system counts as used memory and
+        # which would fail the host admission of any later forward, in this process or in a child.
+        delta = torch.zeros_like(epsilon)
+        delta[:, :, k_lo:k_hi] = torch.from_numpy(fd_mask)[:, :, None].to(epsilon.dtype)
+        for sign in ((1,) if args.fd_check == 'forward' else (1, -1)):
+            label = f'{mode}_fd_{"plus" if sign > 0 else "minus"}'
+            if args.fd_in_process:
+                with torch.no_grad():
+                    perturbed = (epsilon+sign*args.fd_step*delta).to(device)
+                    _, J_side, _, _, side = run_forward(model, perturbed, spec, label, record, args, mode)
+                    values[sign] = float(J_side)
+                    del perturbed
+                    gc.collect()
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+            else:
+                values[sign], record.setdefault('runs', {})[label] = fd_forward_in_child(args, mode, sign, artifacts)
+        del delta
+        gc.collect()
     design = epsilon.to(device).requires_grad_(True)
     plane, J, scaled, history, forward = run_forward(model, design, spec, mode+'_forward', record, args, mode)
     np.save(artifacts/f'{mode}_energy_history.npy', history)
@@ -487,25 +509,7 @@ def execute(args, spec, mode, record, artifacts):
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     if args.fd_check != 'none':
-        delta = torch.zeros_like(epsilon)
-        delta[:, :, k_lo:k_hi] = torch.from_numpy(fd_mask)[:, :, None].to(epsilon.dtype)
         h = args.fd_step
-        values = {}
-        for sign in ((1,) if args.fd_check == 'forward' else (1, -1)):
-            label = f'{mode}_fd_{"plus" if sign > 0 else "minus"}'
-            if args.fd_in_process:
-                with torch.no_grad():
-                    perturbed = (epsilon+sign*h*delta).to(device)
-                    _, J_side, _, _, side = run_forward(model, perturbed, spec, label, record, args, mode)
-                    values[sign] = float(J_side)
-                    del perturbed
-                    gc.collect()
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-            else:
-                # A child process: the parent's heap keeps its high-water mark after the backward and the
-                # operating system counts it as used, which would fail the child's own host admission.
-                values[sign], record['runs'][label] = fd_forward_in_child(args, mode, sign, artifacts)
         base = forward['objective']
         if args.fd_check == 'forward':
             fd = (values[1]-base)/h
