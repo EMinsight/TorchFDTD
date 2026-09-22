@@ -8,7 +8,7 @@ Licence texts of the bundled frontend libraries and of the grid dependency are i
 This inventory records what is known; it is not a legal opinion, and every item whose
 right to distribute is unsettled is listed under open items rather than left out.
 
-Project: torchfdtd 0.14.0.dev0, licence MIT; inventoried with Python 3.10.2 on win32 (Windows-10-10.0.26200-SP0).
+Project: torchfdtd 0.15.0, licence MIT; inventoried with Python 3.10.2 on win32 (Windows-10-10.0.26200-SP0).
 
 ## Python dependencies
 
@@ -101,7 +101,7 @@ These need a decision that this program cannot make. They stay listed until
 
 ## Credential and private-path scan
 
-1540 text files of 1565 tracked paths were scanned for: `address_100_x_x_x`, `credential_token`, `hangul_user_path`, `password_literal`, `private_driveless_user_path`, `private_key_block`, `private_macos_user_path`, `private_unc_user_path`, `private_windows_user_path`, `ssh_password_environment`, `ssh_public_key`.
+1541 text files of 1566 tracked paths were scanned for: `address_100_x_x_x`, `credential_token`, `hangul_user_path`, `password_literal`, `private_driveless_user_path`, `private_key_block`, `private_macos_user_path`, `private_unc_user_path`, `private_windows_user_path`, `ssh_password_environment`, `ssh_public_key`.
 Excluded because they name the patterns themselves: `scripts/provenance_inventory.py`, `docs/THIRD_PARTY_NOTICES.md`, `docs/validation/sbom.json`, `tests/test_provenance_inventory.py`.
 
 No finding in the tracked tree.
