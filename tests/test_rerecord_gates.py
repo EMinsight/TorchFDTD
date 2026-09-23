@@ -140,6 +140,29 @@ def test_prepare_replaces_the_interpreter_and_the_junit_path_and_keeps_the_prefi
         rerecord.prepare('make check', tmp_path, Path('/venv/python.exe'), tmp_path / 'new.xml', absolute_paths=True)
 
 
+@pytest.mark.parametrize('absolute_paths', [True, False])
+def test_prepare_moves_paths_of_the_recording_checkout_into_the_replaying_one(tmp_path, absolute_paths):
+    """A command recorded with absolute paths in one checkout, replayed from another (a worktree of the candidate),
+    must run that checkout's tests and write its records there, not into the recording checkout."""
+    old, new = tmp_path / 'old', tmp_path / 'new'
+    for checkout in (old, new):
+        (checkout / 'docs' / 'validation').mkdir(parents=True)
+        (checkout / 'docs' / 'validation' / 'completion_gates.json').write_text('{}', encoding='utf-8')
+        (checkout / 'tests').mkdir()
+        (checkout / 'tests' / 'test_a.py').write_text('', encoding='utf-8')
+    elsewhere = Path(tmp_path.anchor) / 'no-checkout-here' / 'x.txt'   # tmp_path itself may lie inside a checkout
+    command = (f"$env:TORCHFDTD_G3_RECORD='{(old / 'docs/validation/g3').as_posix()}'; {(old / '.venv/python.exe').as_posix()} "
+               f"-m pytest -q {(old / 'tests/test_a.py').as_posix()}::test_x {elsewhere.as_posix()} "
+               f"--junitxml={(old / 'old.xml').as_posix()}")
+    env, argv = rerecord.prepare(command, new, Path('/venv/python.exe'), new / 'new.xml', absolute_paths=absolute_paths)
+    assert env == {'TORCHFDTD_G3_RECORD': (new / 'docs/validation/g3').as_posix()}
+    assert f"{(new / 'tests/test_a.py').as_posix()}::test_x" in argv
+    assert elsewhere.as_posix() in argv   # outside any checkout: unchanged
+    assert not any(old.as_posix() in token for token in [*argv, *env.values()])
+    env, argv = rerecord.prepare(command, old, Path('/venv/python.exe'), old / 'new.xml', absolute_paths=absolute_paths)
+    assert f"{(old / 'tests/test_a.py').as_posix()}::test_x" in argv and env['TORCHFDTD_G3_RECORD'] == (old / 'docs/validation/g3').as_posix()
+
+
 def test_selection_skips_tasks_without_evidence_and_cuda_runs_on_a_host_without_a_device(repo):
     runs = repo / 'docs' / 'validation' / 'runs'
     # The fixture's G1-03 run stands for a CPU-only recording whatever host recorded it.
