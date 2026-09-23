@@ -3118,7 +3118,7 @@
           "specification": "최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다. 이전 커밋의 통과와 이후 부분검사를 합쳐 현재 전체 통과라고 쓰지 않는다. 긴 검사 증거의 재사용은 동일 관련 hash와 명시한 정책이 있을 때만 허용한다.",
           "required_by_current_plan": true,
           "implementation_state": "IN_PROGRESS",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "scripts/rerecord_gates.py",
@@ -3134,11 +3134,15 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_rerecord_gates.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-06.xml",
             "the release-candidate run of docs/RELEASE_PROCEDURE.md (regenerate the notices and SBOM, build the wheel, clean_install_check, rerecord_gates --all --wheel --platform, run_suite release-full --gpu-required on both hosts recorded with --platform, build_validation_report, check_release_gates)"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-b2f060510b0c.xml"
+          ],
           "required_tests": [
             "tests/test_rerecord_gates.py"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260923T074741Z-g9-06-47bc6631"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "implementation_note": "The tooling exists and is tested (scripts/rerecord_gates.py re-records every replayable gate on one commit and, with --wheel, with the installed wheel); the task itself is the maintainer's release-candidate run of docs/RELEASE_PROCEDURE.md on the exact RC tree and wheel, which has not been performed. Its verification stays NOT_RUN until that run is recorded.",
