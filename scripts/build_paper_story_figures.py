@@ -337,7 +337,8 @@ def architecture():
     cx0 = ox + current[1] * sw
     cy1 = oy + (current[0] + 1) * bh
     dim((cx0, cy1 + 1.1), (cx0 + sw, cy1 + 1.1), '$W$', offset=-2.3)
-    ax.annotate('halo $K$', (cx0 - halo / 2, oy + current[0] * bh + 0.3), (cx0 - 9, cy1 + 4.2),
+    t = 0.45   # the leader ends inside the left halo wedge at this fraction of the block height
+    ax.annotate('halo $K$', (cx0 - halo * (1 - t) / 2, oy + (current[0] + t) * bh), (cx0 - 9, cy1 + 4.2),
                 fontsize=5.8, color=TEAL, ha='center',
                 arrowprops=dict(arrowstyle='-', color=TEAL, lw=0.5, shrinkA=0, shrinkB=0))
     # memory tiers
@@ -380,7 +381,7 @@ def architecture():
     text(gx + core, ytop + rh + 2.6, 'artificial cut', size=5.8, color=ORANGE)
     text(148.5, ytop + rh / 2, 'grey: own PML', size=5.6, color=MUTED, ha='left')
     text(148.5, ytop - rh - gap + rh / 2, 'hatched: overlap', size=5.6, color=MUTED, ha='left')
-    text(130, 2.2, 'Each tile is solved on its own, so coupling across the cut\nis lost. The error against the full domain is measured in Fig. 4.',
+    text(130, 2.2, 'Each tile is solved on its own, so coupling across the cut\nis lost, and its error is measured against the full domain.',
          size=6.0, color=MUTED)
     save(fig, 'execution-overview')
 
