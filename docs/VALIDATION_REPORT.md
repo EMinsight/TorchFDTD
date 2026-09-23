@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 69 | 8 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 69 | 14 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 9 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 15 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -142,10 +142,10 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260923T050949Z-g9-01-266acf6c` | `9ba879241b39` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 9ba879241b39 alone |
 | G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260923T051021Z-g9-02-52c4b660` | `9ba879241b39` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 9ba879241b39 alone |
 | G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260923T052154Z-g9-04-b221e298` | `f0a04477f5de` | PASS | evidence matches the current checkout |
+| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260923T052154Z-g9-04-b221e298` | `f0a04477f5de` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260923T074741Z-g9-06-47bc6631` | `b2f060510b0c` | PASS | evidence matches the current checkout |
-| G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | VERIFIED | `20260922T064740Z-g9-07-e3635ece` | `e14c30c7a185` | PASS | evidence matches the current checkout |
+| G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | SELF | none | none | self | this report's own gate, recorded after the render; judge it with scripts/check_release_gates.py |
 
 ### H1 실제 단일 문제 multi-GPU (HPC, P1)
 
@@ -169,7 +169,7 @@ Every record written by `scripts/platform_report.py` under `docs/validation/plat
 
 | Platform id | G4 evidence runs recorded on this platform | Other tasks whose newest run was recorded here |
 | --- | --- | --- |
-| rtx3060-win11-lab | G4-01 `20260923T042153Z-g4-01-f0212da8` (platform_id); G4-02 `20260923T042229Z-g4-02-5acbf56f` (platform_id); G4-03 `20260923T042254Z-g4-03-3e636cc3` (platform_id); G4-04 `20260923T042326Z-g4-04-5d1fc9c6` (platform_id); G4-05 `20260923T042658Z-g4-05-f04e7ecb` (platform_id); G4-06 `20260923T042713Z-g4-06-61d814f9` (platform_id) | 64 |
+| rtx3060-win11-lab | G4-01 `20260923T042153Z-g4-01-f0212da8` (platform_id); G4-02 `20260923T042229Z-g4-02-5acbf56f` (platform_id); G4-03 `20260923T042254Z-g4-03-3e636cc3` (platform_id); G4-04 `20260923T042326Z-g4-04-5d1fc9c6` (platform_id); G4-05 `20260923T042658Z-g4-05-f04e7ecb` (platform_id); G4-06 `20260923T042713Z-g4-06-61d814f9` (platform_id) | 63 |
 | rtx5880-ada-win11-remote | none | 0 |
 
 Newest runs that match no platform record: none.
