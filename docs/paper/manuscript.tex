@@ -28,7 +28,9 @@
 \usepackage[numbers,sort&compress]{natbib}
 \PassOptionsToPackage{obeyspaces}{url}
 \usepackage{xurl}
-\usepackage[hidelinks]{hyperref}
+\usepackage{hyperref}
+\definecolor{citelink}{RGB}{0,90,160}
+\hypersetup{colorlinks=true, citecolor=citelink, linkcolor=black, urlcolor=black, filecolor=black}
 \urlstyle{same}
 \hypersetup{
   pdftitle={TorchFDTD: GPU-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design},

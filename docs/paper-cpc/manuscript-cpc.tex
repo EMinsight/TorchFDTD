@@ -16,7 +16,11 @@
 \usepackage{listings}
 \PassOptionsToPackage{obeyspaces}{url}
 \usepackage{xurl}
-\usepackage[hidelinks]{hyperref}
+\usepackage{hyperref}
+\definecolor{citelink}{RGB}{0,90,160}
+\hypersetup{colorlinks=true}
+% elsarticle sets every link colour to blue at \begin{document}, so the colours are set after its hook
+\AtBeginDocument{\hypersetup{citecolor=citelink, linkcolor=black, urlcolor=black, filecolor=black}}
 \urlstyle{same}
 \usepackage{lineno}
 \biboptions{sort&compress}

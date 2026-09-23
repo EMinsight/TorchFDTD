@@ -13,7 +13,9 @@
 \PassOptionsToPackage{obeyspaces}{url}
 \usepackage{xurl}
 \usepackage[numbers,sort&compress]{natbib}
-\usepackage[hidelinks]{hyperref}
+\usepackage{hyperref}
+\definecolor{citelink}{RGB}{0,90,160}
+\hypersetup{colorlinks=true, citecolor=citelink, linkcolor=black, urlcolor=black, filecolor=black}
 \usepackage[font=small,labelfont=bf]{caption}
 \newcommand{\micron}{\ensuremath{\mu\mathrm{m}}}
 \renewcommand{\thesection}{S\arabic{section}}
