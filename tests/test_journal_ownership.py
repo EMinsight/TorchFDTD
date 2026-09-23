@@ -332,7 +332,7 @@ def test_rename_into_place_uses_the_platform_durability_primitive(tmp_path, monk
 
 
 def test_durability_levels_are_stated_separately(tmp_path):
-    text = (Path(torchfdtd.__file__).resolve().parents[1] / 'docs' / 'STREAMED_RESTART.md').read_text(encoding='utf-8')
+    text = (Path(__file__).resolve().parents[1] / 'docs' / 'STREAMED_RESTART.md').read_text(encoding='utf-8')
     section = text[text.index('## Durability levels'):]
     assert 'process-kill consistency' in section and 'power-loss durability' in section
     assert 'not exercised' in section and 'MOVEFILE_WRITE_THROUGH' in section and 'fsync' in section

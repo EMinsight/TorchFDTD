@@ -39,6 +39,14 @@ import pytest
 # starts with one of them would run under the leaked defaults. Importing torchfdtd
 # here, before any test module is collected, fixes the session defaults.
 import torchfdtd  # noqa: E402,F401  (must precede any test module import of fdtd)
+import sys as _sys
+from pathlib import Path as _Path
+# benchmarks/, examples/ and the tests package ship with the repository, not with the wheel. Appending the
+# repository root after torchfdtd is imported keeps the installed package in charge while a run against the
+# wheel still finds those repository-only modules.
+_ROOT = str(_Path(__file__).resolve().parents[1])
+if _ROOT not in _sys.path:
+    _sys.path.append(_ROOT)
 try:
     import record_output
 except ImportError:  # this conftest is also copied into throwaway test directories by pytester-based tests

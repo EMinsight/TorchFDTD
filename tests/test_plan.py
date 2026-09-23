@@ -4,7 +4,8 @@ from pathlib import Path
 
 # benchmarks/ and examples/ ship with the repository, not with the wheel, so a run against an
 # installed package still reads them from the checkout that holds this test.
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+if str(Path(__file__).resolve().parents[1]) not in sys.path:
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
 import json
 
 import numpy as np

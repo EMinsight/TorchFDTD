@@ -22,7 +22,9 @@ docs/COMPLETION_PROGRAM_KO.md.
 """
 import argparse
 import datetime
+import hashlib
 import json
+import os
 import platform
 import re
 import subprocess
@@ -328,7 +330,8 @@ def build(audit):
         schema_version=1, kind='sbom', generator='scripts/provenance_inventory.py',
         project=dict(name=pyproject['project']['name'], version=pyproject['project']['version'], license=pyproject['project']['license'],
                      license_files=pyproject['project']['license-files'], requires_python=pyproject['project']['requires-python']),
-        python=dict(version='.'.join(map(str, sys.version_info[:3])), platform=sys.platform),
+        python=dict(version='.'.join(map(str, sys.version_info[:3])), platform=sys.platform,
+                    environment_sha256=hashlib.sha256(os.path.realpath(sys.prefix).encode('utf-8')).hexdigest()[:16]),
         host=dict(os=platform.system(), platform=platform.platform(), machine=platform.machine()),
         declared_dependencies=dict(runtime=list(pyproject['project']['dependencies']),
                                    **{group: list(specs) for group, specs in pyproject['project'].get('optional-dependencies', {}).items()}),
@@ -415,7 +418,8 @@ def stable(sbom):
 def same_platform(committed, fresh):
     """The committed record was taken on this interpreter's platform and Python minor version."""
     return (committed.get('python', {}).get('platform') == fresh['python']['platform']
-            and committed.get('python', {}).get('version', '').rsplit('.', 1)[0] == fresh['python']['version'].rsplit('.', 1)[0])
+            and committed.get('python', {}).get('version', '').rsplit('.', 1)[0] == fresh['python']['version'].rsplit('.', 1)[0]
+            and committed.get('python', {}).get('environment_sha256') == fresh['python'].get('environment_sha256'))
 
 
 def compare(committed, fresh):
