@@ -93,12 +93,22 @@ def all_tasks(gates):
     return [(stage, task) for stage in gates['stages'] for task in stage['tasks']]
 
 
+# The task whose evidence is this report: it is recorded after the report is rendered, so the report shows it without
+# its own run and judgement (otherwise recording it would change the report it just checked).
+SELF_TASK = 'G9-07'
+SELF_REASON = 'this report\'s own gate, recorded after the render; judge it with scripts/check_release_gates.py'
+
+
 def display_state(task):
+    if task['id'] == SELF_TASK:
+        return 'SELF'
     return 'BLOCKED_EXTERNAL' if task.get('blocker') else task.get('verification_state')
 
 
 def judgement(root, gates, task, runs_dir):
     """(label, reason, warnings) with the rules of check_release_gates.judge_task, stale evidence never accepted."""
+    if task['id'] == SELF_TASK:
+        return 'self', SELF_REASON, []
     if task.get('required_by_current_plan') is False:
         return 'optional', 'not required by the current plan', []
     failures, stale, warnings = judge.judge_task(root, gates, task, runs_dir)
@@ -110,7 +120,7 @@ def judgement(root, gates, task, runs_dir):
 
 
 def newest_run(root, task, runs_dir):
-    ids = task.get('evidence') or []
+    ids = [] if task['id'] == SELF_TASK else task.get('evidence') or []
     if not ids:
         return None, None
     path = runs_dir / ids[-1] / 'evidence.json'
@@ -124,7 +134,7 @@ def judge_all(root, gates, runs_dir):
 
 def profile_summary(gates, verdicts, profile_id):
     profile = gates['profiles'][profile_id]
-    counts = dict(PASS=0, FAIL=0, optional=0)
+    counts = dict(PASS=0, FAIL=0, optional=0, self=0)
     for stage, task in all_tasks(gates):
         if stage['id'] in profile['required_stages']:
             counts[verdicts[task['id']][0]] += 1
@@ -171,7 +181,7 @@ def stage_status_block(gates, verdicts):
     rows = []
     for stage in gates['stages']:
         counts = {state: 0 for state in STATES}
-        labels = dict(PASS=0, FAIL=0, optional=0)
+        labels = dict(PASS=0, FAIL=0, optional=0, self=0)
         for task in stage['tasks']:
             counts[display_state(task)] = counts.get(display_state(task), 0) + 1
             labels[verdicts[task['id']][0]] += 1
@@ -184,7 +194,8 @@ def stage_status_block(gates, verdicts):
         counts = summary['counts']
         judged = counts['PASS'] + counts['FAIL'] + counts['optional']
         line = (f"- {profile_id} (stages {', '.join(summary['stages'])}): {counts['PASS']} of {judged} required tasks pass the judge, "
-                f"{counts['FAIL']} fail; {summary['verdict']}.")
+                f"{counts['FAIL']} fail" + (f", and {SELF_TASK} (this report) is judged after the render" if counts['self'] else '')
+                + f"; {summary['verdict']}.")
         if summary['failed_elsewhere']:
             line = line[:-1] + f" FAILED tasks outside the profile count against it: {', '.join(summary['failed_elsewhere'])}."
         lines.append(line)

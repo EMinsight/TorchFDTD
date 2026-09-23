@@ -149,6 +149,7 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ### Fixed
 
+- The validation report no longer depends on its own gate (G9-07): that task is shown without its run and judgement and is judged after the render, so recording it leaves the committed report consistent (this commit).
 - Restore the metagrating resume test that an earlier edit had folded into the pickled-state refusal test; the release-candidate judge found it absent from the required tests (this commit).
 - The test suite runs against an installed wheel as well as the checkout: the repository-only packages are appended to the path after the installed package is imported, and the SBOM check treats another interpreter environment on the same platform with the portable comparison (this commit).
 - The evidence recorder no longer refuses a run whose own command writes a measurement record (a `TORCHFDTD_*_RECORD` prefix); those files are outputs of the run, are excluded from the dirty guard and are hashed with the evidence (this commit).
