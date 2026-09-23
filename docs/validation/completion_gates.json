@@ -2403,7 +2403,7 @@
           "specification": "기존 design/periodic/mode-network API를 재사용해 objective→parameterization→optimizer→history→resume→final evaluation의 최소 고수준 인터페이스를 통합한다. 존재하지 않는 class 이름을 문서에 먼저 확정하지 않는다.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "torchfdtd/design_problem.py",
@@ -2430,7 +2430,8 @@
           ],
           "evidence": [
             "20260921T195542Z-g6-05-9f485769",
-            "20260923T044411Z-g6-05-70abffd8"
+            "20260923T044411Z-g6-05-70abffd8",
+            "20260923T052003Z-g6-05-a93e7a97"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2464,7 +2465,8 @@
           ],
           "evidence": [
             "20260921T195559Z-g6-06-e9e7f257",
-            "20260923T044544Z-g6-06-24f1f247"
+            "20260923T044544Z-g6-06-24f1f247",
+            "20260923T052141Z-g6-06-5bb897b9"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3080,7 +3082,8 @@
           "evidence": [
             "20260921T163104Z-g9-04-f2b9d65e",
             "20260921T212831Z-g9-04-f826cb57",
-            "20260923T051039Z-g9-04-6a6a448a"
+            "20260923T051039Z-g9-04-6a6a448a",
+            "20260923T052154Z-g9-04-b221e298"
           ],
           "blocker": null,
           "scope_change_approval": null,
