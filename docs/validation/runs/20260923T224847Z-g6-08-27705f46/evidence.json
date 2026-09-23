@@ -1,0 +1,221 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T224847Z-g6-08-27705f46",
+  "task": "G6-08",
+  "stage": "G6",
+  "task_title": "low-intensity/near-zero reference/frequency cutoff/evanescent/backflow에서 NaN·음의 국소 flux·invalid phase를 임의 clipping으로 숨기지 않는다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_numerical_guards.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G6-08.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-24T07:48:42.515064+09:00",
+  "recorded_at": "2026-09-23T22:48:47+00:00",
+  "source_commit": "9d2eb55a1955f2719df50fecf5127a656d0bccf9",
+  "source_commit_time": "2026-09-24T07:01:33+09:00",
+  "source_tree_sha256": "4dd5fe3f1b9a2f775050e30db1cdb3a1091565470f794d47ef9e7cb65fe36b76",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g6/coupler-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0192584db7370f2b5af40e0a8a8260f68ad64404e4251d102282c5f71eaf67da",
+      "head_sha256": "4c6b24323f9efec162d28bce8a8edc4d6bfad1d0a939a55fb8573eb2af616f24"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "900eb8f94b1876d5d2c26ec7378f108363c39c053f9ff856a0d635dd5d69fbce",
+      "head_sha256": "0b5fe584b2de1a3e5af9ab728b01a3e2bcc90c42c576b13f45aacbe3ba6ac096"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "7bb926b640d58241a5ee37d2c33cfd47e127f83b559c197f39dbb744d2e10124",
+      "head_sha256": "5439b2cbc6635e9b563d38e4b26fef52644431af30292fc6c97514fb56038bd6"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "cf012b1a9405d277b18d9372137d0a995ed642502ac08c85ad9448327ed70f03",
+      "head_sha256": "e2af3741fd5f628fcb7b28ed0c1b2097f6bea6dec0f8200e97668eb3e2db0b14"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "549550b657900def2aeafbef8776efe4f8f52c083a7478bf5fdea425383cdbd4",
+      "head_sha256": "02839208050a4909f70a8f8e9cc12cca7805522f1be34ab0f25d45319d0e23b7"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1e2183c13c8649f4e31acf3b5438c711a84a86c664678cf20b62eb6c4e45b208",
+      "head_sha256": "6e3baf1903876549b1830c8f8684c39af379d43f2c7a3283cc75c95c57f91ed0"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "675c55e0188f51d41cd58df189eea7a82f1dd798e4e60ac888f12da372e9011e",
+  "package_path": "D:/torchfdtd-clean/dist/afda8955fa1c/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_numerical_guards.py": "fb0cb14c736f00da32928f466eda759043e649afff30397d0d5321c218b0bd68"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G6-08_numerical_guards.json",
+  "fixture_sha256": "a07c63a09e91da5e23f55212d83faebdd0e3bec6fe2ced3cc9d6f863449f6971",
+  "acceptance_criteria_path": "docs/validation/cases/G6-08_numerical_guards.json",
+  "acceptance_criteria_sha256": "a07c63a09e91da5e23f55212d83faebdd0e3bec6fe2ced3cc9d6f863449f6971",
+  "case_first_commit": "da70a70484c2d5f2481710576c594c06226f3a39",
+  "case_first_commit_time": "2026-09-22T04:52:42+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable",
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": "cpu",
+  "physics_configuration": {
+    "table": "docs/NUMERICAL_GUARDS.md: every path, its guard, its declared threshold and its test",
+    "paths": [
+      "torchfdtd.results.guarded_ratio",
+      "torchfdtd.field_monitors.normalize_flux",
+      "torchfdtd.results.reflection_transmission",
+      "torchfdtd.results.s_parameters (phase, group delay)",
+      "torchfdtd.mode_injection.modal_s_parameters",
+      "torchfdtd.results.mode_decomposition",
+      "torchfdtd.radiation.diffraction_orders and diffraction_efficiency",
+      "torchfdtd.results.diffraction_record",
+      "torchfdtd.radiation.normalized_farfield_intensity",
+      "torchfdtd.results.farfield_record",
+      "torchfdtd.detector_allocation.quadrant_intensity_allocation"
+    ],
+    "injections": "zero reference, reference at 5e-3 of the peak, reference against its dominant direction, negative numerator with a declared direction, NaN; synthetic monitor records with a zero reference and a reversed transmission flux; S at 1e-20, a phase step of 3.14 rad between neighbours, two frequencies; a Rayleigh order at grazing cutoff (order 1 at lambda 2 um, period 2 um) and an evanescent order 2; a two-frequency reference weak at one frequency for diffraction and far field; a 12-step modal run whose far plane carries no signal; a zero-intensity allocation plane",
+    "thresholds": {
+      "REFERENCE_FRACTION": 0.01,
+      "rounding_floor": "32 * eps(dtype) of the largest magnitude",
+      "phase_magnitude_floor": "rounding floor of the S dtype times max |S|",
+      "resolved_phase_step_rad": 1.5707963267948966,
+      "group_delay_minimum_frequencies": 3,
+      "cutoff_tolerance": 1e-05
+    }
+  },
+  "reference_method": "each injected situation has a known correct outcome (NaN with a named reason, or a ValueError with a named message); the valid entries of the same arrays are compared with the unguarded quotient to show that nothing else changed",
+  "observables": [
+    {
+      "name": "reason",
+      "unit": "text",
+      "definition": "record.reasons[name][index] or the ValueError message for every injected situation"
+    },
+    {
+      "name": "valid_mask",
+      "unit": "boolean",
+      "definition": "record.valid[name] per entry"
+    },
+    {
+      "name": "untouched_ratio",
+      "unit": "dimensionless",
+      "definition": "the ratio at valid entries equals numerator / |reference| exactly"
+    }
+  ],
+  "acceptance_limits": {
+    "reasons": "every injected situation yields the reason listed in docs/NUMERICAL_GUARDS.md for its path; no injected situation yields a finite clipped number or an absolute value",
+    "no_epsilon": "no denominator is offset: a zero reference is refused or flagged, never divided",
+    "precision": "a float32 reference at 1e-8 of its peak is flagged by the rounding floor while a float64 one at 1e-6 with a 1e-9 fraction is not",
+    "source_of_limits": "G6-08 specification; thresholds declared in the fixture above and in docs/NUMERICAL_GUARDS.md before the run"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 9,
+    "passed": [
+      "tests/test_numerical_guards.py::test_guarded_ratio_names_every_refusal_and_never_clips",
+      "tests/test_numerical_guards.py::test_normalize_flux_reports_the_reason_of_every_nan",
+      "tests/test_numerical_guards.py::test_reflection_transmission_zero_reference_and_backflow_injections",
+      "tests/test_numerical_guards.py::test_s_parameter_phase_floor_aliasing_and_frequency_count",
+      "tests/test_numerical_guards.py::test_diffraction_order_at_cutoff_is_refused_and_evanescent_orders_are_flagged",
+      "tests/test_numerical_guards.py::test_farfield_weak_reference_frequency_is_flagged_and_zero_reference_refused",
+      "tests/test_numerical_guards.py::test_mode_decomposition_of_a_plane_without_signal_and_the_modal_reference_refusal",
+      "tests/test_numerical_guards.py::test_allocation_ratio_refuses_zero_intensity_instead_of_dividing",
+      "tests/test_numerical_guards.py::test_differentiable_efficiencies_refuse_a_weak_reference_band"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 0.297,
+    "suite_timestamp": "2026-09-24T07:48:42.515064+09:00"
+  },
+  "required_tests": [
+    "tests/test_numerical_guards.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_numerical_guards.py": [
+      "tests/test_numerical_guards.py::test_guarded_ratio_names_every_refusal_and_never_clips",
+      "tests/test_numerical_guards.py::test_normalize_flux_reports_the_reason_of_every_nan",
+      "tests/test_numerical_guards.py::test_reflection_transmission_zero_reference_and_backflow_injections",
+      "tests/test_numerical_guards.py::test_s_parameter_phase_floor_aliasing_and_frequency_count",
+      "tests/test_numerical_guards.py::test_diffraction_order_at_cutoff_is_refused_and_evanescent_orders_are_flagged",
+      "tests/test_numerical_guards.py::test_farfield_weak_reference_frequency_is_flagged_and_zero_reference_refused",
+      "tests/test_numerical_guards.py::test_mode_decomposition_of_a_plane_without_signal_and_the_modal_reference_refusal",
+      "tests/test_numerical_guards.py::test_allocation_ratio_refuses_zero_intensity_instead_of_dividing",
+      "tests/test_numerical_guards.py::test_differentiable_efficiencies_refuse_a_weak_reference_band"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G6-08.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T224847Z-g6-08-27705f46/junit.xml",
+      "sha256": "c1f8af241eeaffd88039aa0b973d91a66753f3efa0bda1cda29c82e4ca8a0a10",
+      "bytes": 1496,
+      "original_path": ".local/tmp/junit/rerecord/G6-08.xml"
+    }
+  ],
+  "applicable_scope": "CPU numpy and torch injections in float32 and float64; a 12-step float32 modal run; the differentiable paths' whole-call refusals re-recorded on 9d2eb55a1955 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T150754Z-g6-08-7959b749",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

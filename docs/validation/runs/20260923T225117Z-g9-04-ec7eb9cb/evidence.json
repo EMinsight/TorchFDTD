@@ -1,0 +1,232 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T225117Z-g9-04-ec7eb9cb",
+  "task": "G9-04",
+  "stage": "G9",
+  "task_title": "API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다.",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_compatibility_policy.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-04.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-24T07:51:12.500518+09:00",
+  "recorded_at": "2026-09-23T22:51:17+00:00",
+  "source_commit": "9d2eb55a1955f2719df50fecf5127a656d0bccf9",
+  "source_commit_time": "2026-09-24T07:01:33+09:00",
+  "source_tree_sha256": "4dd749cb8d9450acb74e5c6d20440bcb74e23bc25bab19560f7b65dc2778d4dd",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g6/coupler-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0192584db7370f2b5af40e0a8a8260f68ad64404e4251d102282c5f71eaf67da",
+      "head_sha256": "4c6b24323f9efec162d28bce8a8edc4d6bfad1d0a939a55fb8573eb2af616f24"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "900eb8f94b1876d5d2c26ec7378f108363c39c053f9ff856a0d635dd5d69fbce",
+      "head_sha256": "0b5fe584b2de1a3e5af9ab728b01a3e2bcc90c42c576b13f45aacbe3ba6ac096"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "7bb926b640d58241a5ee37d2c33cfd47e127f83b559c197f39dbb744d2e10124",
+      "head_sha256": "5439b2cbc6635e9b563d38e4b26fef52644431af30292fc6c97514fb56038bd6"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "cf012b1a9405d277b18d9372137d0a995ed642502ac08c85ad9448327ed70f03",
+      "head_sha256": "e2af3741fd5f628fcb7b28ed0c1b2097f6bea6dec0f8200e97668eb3e2db0b14"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "549550b657900def2aeafbef8776efe4f8f52c083a7478bf5fdea425383cdbd4",
+      "head_sha256": "02839208050a4909f70a8f8e9cc12cca7805522f1be34ab0f25d45319d0e23b7"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1e2183c13c8649f4e31acf3b5438c711a84a86c664678cf20b62eb6c4e45b208",
+      "head_sha256": "6e3baf1903876549b1830c8f8684c39af379d43f2c7a3283cc75c95c57f91ed0"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "675c55e0188f51d41cd58df189eea7a82f1dd798e4e60ac888f12da372e9011e",
+  "package_path": "D:/torchfdtd-clean/dist/afda8955fa1c/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_compatibility_policy.py": "4a159ead51766cf6c52b89dcf8e005c264ad2d3955e8fe0044fc96e8a482b92a"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "docs/COMPATIBILITY.md",
+    "docs/CHANGELOG.md",
+    ".github/ISSUE_TEMPLATE/bug_report.md",
+    "pyproject.toml",
+    "torchfdtd/server.py",
+    "torchfdtd/__init__.py"
+  ],
+  "watch_sha256": {
+    ".github/ISSUE_TEMPLATE/bug_report.md": "80d6d7db3e09684fa7a4d27751b40728c3766daa83d6579bae3869cbdc3e4814",
+    "docs/CHANGELOG.md": "2966bc2b9fde7647a182288530d533f57371a4ef009a90f86a1df78a3f0c52d8",
+    "docs/COMPATIBILITY.md": "7c3fde122e6c57a1b7fe319f83f6fae6159db3301a61bde0605397c0154575d4",
+    "pyproject.toml": "0fbf45ba804d911d94a79a908073bdf4d960ee4807821f7fde37681c985d6837",
+    "torchfdtd/__init__.py": "cdc329d55eb137ae5ca8c76a6119ff14560a615f2cb388daf9e732e40f951ed3",
+    "torchfdtd/server.py": "e5307c88231b932c03a23b7ef17185b25c27df6b492695caff4aaf048eacb4b9"
+  },
+  "fixture_path": "docs/validation/cases/G9-04.json",
+  "fixture_sha256": "03298170e4e41702f41ca03407b8ee42d62b565a6f8f65234798209f4ceb3206",
+  "acceptance_criteria_path": "docs/validation/cases/G9-04.json",
+  "acceptance_criteria_sha256": "03298170e4e41702f41ca03407b8ee42d62b565a6f8f65234798209f4ceb3206",
+  "case_first_commit": "94be937224387ff4cb1bcf20034f53d31d671ceb",
+  "case_first_commit_time": "2026-09-22T01:19:33+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable",
+  "precision": "not applicable: the CPU demo run only produces member names",
+  "backend": "cpu",
+  "physics_configuration": {
+    "documents": [
+      "docs/COMPATIBILITY.md",
+      "docs/CHANGELOG.md",
+      ".github/ISSUE_TEMPLATE/bug_report.md"
+    ],
+    "public_api": "torchfdtd.__all__ as imported from the worktree",
+    "format_constants": {
+      "Project JSON": "Project.model_fields['schema_version'] default and Literal argument",
+      "Streamed restart journal": "torchfdtd.streamed_restart.MARKER and the keys of journal_contract(demo_project(), ones(2,2,2), StreamedAdjointOptions(), (0,))",
+      "Mode-network configuration": "ModeNetworkConfig.model_fields['version'] default",
+      "Result NPZ": "member names of Result.save after a 20-step CPU run of the 2D demo project"
+    },
+    "version_strings": [
+      "pyproject.toml [project].version",
+      "the two occurrences in torchfdtd/server.py",
+      "the Version of record line of COMPATIBILITY.md",
+      "the first heading of CHANGELOG.md"
+    ],
+    "changelog_commits": "every 7-hex hash cited in CHANGELOG.md against git log --format=%h of the worktree"
+  },
+  "reference_method": "the code constants and the git history are the reference; the documents must agree with them",
+  "observables": [
+    {
+      "name": "documented_minus_exported",
+      "unit": "set",
+      "definition": "names in the API table that torchfdtd.__all__ does not export"
+    },
+    {
+      "name": "exported_minus_documented",
+      "unit": "set",
+      "definition": "names in torchfdtd.__all__ missing from the API table"
+    },
+    {
+      "name": "format_constants",
+      "unit": "string",
+      "definition": "value column of each row of the persisted-formats table"
+    },
+    {
+      "name": "result_members",
+      "unit": "set",
+      "definition": "members of the saved NPZ not explained by the documented names and patterns"
+    },
+    {
+      "name": "unknown_commits",
+      "unit": "set",
+      "definition": "changelog hashes absent from git log"
+    }
+  ],
+  "acceptance_limits": {
+    "api": "both set differences are empty and the stated count equals len(__all__)",
+    "formats": "Project JSON schema_version 1 as Literal[1]; journal marker torchfdtd-streamed-restart with every contract key named; mode-network version 1; every NPZ member is a documented fixed name or matches a documented pattern",
+    "versions": "one version string across pyproject, the two server occurrences, the document and the changelog heading",
+    "changelog": "a Security and a Results change section exist; more than 50 distinct commits are cited and every one exists",
+    "template_and_severity": "the severity table has exactly S0, S1, S2, S3; the result-impact and rollback section exists; the template has the platform report, minimal reproduction, expected/observed and proposed severity sections and names torchfdtd hardware and /api/health",
+    "source_of_limits": "G9-04 in docs/COMPLETION_PROGRAM_KO.md section 11"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 5,
+    "passed": [
+      "tests/test_compatibility_policy.py::test_every_public_name_is_documented_and_no_stale_name_remains",
+      "tests/test_compatibility_policy.py::test_format_version_constants_match_the_code",
+      "tests/test_compatibility_policy.py::test_version_strings_agree_across_pyproject_server_and_document",
+      "tests/test_compatibility_policy.py::test_changelog_cites_real_commits_and_carries_the_result_impact_section",
+      "tests/test_compatibility_policy.py::test_severity_scale_and_bug_template_ask_for_platform_report_and_minimal_repro"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 0.243,
+    "suite_timestamp": "2026-09-24T07:51:12.500518+09:00"
+  },
+  "required_tests": [
+    "tests/test_compatibility_policy.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_compatibility_policy.py": [
+      "tests/test_compatibility_policy.py::test_every_public_name_is_documented_and_no_stale_name_remains",
+      "tests/test_compatibility_policy.py::test_format_version_constants_match_the_code",
+      "tests/test_compatibility_policy.py::test_version_strings_agree_across_pyproject_server_and_document",
+      "tests/test_compatibility_policy.py::test_changelog_cites_real_commits_and_carries_the_result_impact_section",
+      "tests/test_compatibility_policy.py::test_severity_scale_and_bug_template_ask_for_platform_report_and_minimal_repro"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G9-04.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T225117Z-g9-04-ec7eb9cb/junit.xml",
+      "sha256": "f6dd1896fdcc2f671aa471deec00592034e8b09d8dc0b870bdc039147ab0f2dc",
+      "bytes": 954,
+      "original_path": ".local/tmp/junit/rerecord/G9-04.xml"
+    }
+  ],
+  "applicable_scope": "G9-04 compatibility policy documents checked against torchfdtd.__all__, the format constants, the version strings and the git history per docs/validation/cases/G9-04.json; the support matrix minimum and maximum versions remain for G8-06 and no deprecation instance exists yet re-recorded on 9d2eb55a1955 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T151152Z-g9-04-a75f3c5b",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

@@ -1,0 +1,198 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T222407Z-g6-01-114c1af7",
+  "task": "G6-01",
+  "stage": "G6",
+  "task_title": "재료 CSV/nk/epsilon import, passive fitting, 원자료 출처·사용권·해시, fit band, 시간 이산화에 따른 n/k 오차, extrapolation 경고를 하나의 workflow로 묶는다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_material_workflow.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G6-01.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-24T07:24:00.276575+09:00",
+  "recorded_at": "2026-09-23T22:24:07+00:00",
+  "source_commit": "9d2eb55a1955f2719df50fecf5127a656d0bccf9",
+  "source_commit_time": "2026-09-24T07:01:33+09:00",
+  "source_tree_sha256": "f4bf6bf23555ffb360223995dede8bdb4b22a9fe527906150db94961bf6b4f76",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "675c55e0188f51d41cd58df189eea7a82f1dd798e4e60ac888f12da372e9011e",
+  "package_path": "D:/torchfdtd-clean/dist/afda8955fa1c/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_material_workflow.py": "973d201703be23a90fba5ad9fb35be1494024c9cf787c6c61f967bce8eff2fcb"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G6-01_material_import_workflow.json",
+  "fixture_sha256": "1b3eb4cb10427e42f3d3d8cd59b9f554eb54ab7733c1b373eb8313e740cc7557",
+  "acceptance_criteria_path": "docs/validation/cases/G6-01_material_import_workflow.json",
+  "acceptance_criteria_sha256": "1b3eb4cb10427e42f3d3d8cd59b9f554eb54ab7733c1b373eb8313e740cc7557",
+  "case_first_commit": "da70a70484c2d5f2481710576c594c06226f3a39",
+  "case_first_commit_time": "2026-09-22T04:52:42+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": 0,
+  "precision": "float64 (numpy fitter)",
+  "backend": "cpu",
+  "physics_configuration": {
+    "function": "torchfdtd.material_fit.import_material_table (fit_material, discretization_report, fit_band_extrapolation, MaterialProvenance)",
+    "public_table": "tests/fixtures/materials/sio2_sellmeier_malitson1965.csv: 81 wavelengths from 0.4 to 2.0 um of n from the Sellmeier equation of Malitson, J. Opt. Soc. Am. 55, 1205 (1965) stated in the file header, k = 0",
+    "synthetic_table": "authored two-pole Lorentz permittivity (epsilon_inf 2.3; poles (1.7e15 rad/s, 4e30 rad^2/s^2, 2e14 rad/s) and (3e15, 2e30, 5e14)) at 61 wavelengths from 0.8 to 2.0 um, written as wavelength_nm or wavelength_um, epsilon_real, epsilon_imag text",
+    "fit_options": "max_poles 3, tolerance 1e-4 (SiO2); max_poles 2 or 3, tolerance 1e-6 or 1e-4, include_drude False (Lorentz); ADE-target fit at dt 4e-17 s on 0.9 to 1.9 um for the persistence test",
+    "discretization": "dt 5e-17 s and 2.5e-17 s over 0.4 to 2.0 um, 201 samples",
+    "simulation_bands_um": [
+      [
+        0.5,
+        1.6
+      ],
+      [
+        0.3,
+        1.0
+      ],
+      [
+        2.5,
+        2.5
+      ],
+      [
+        0.35,
+        0.8
+      ]
+    ],
+    "server_routes": [
+      "/api/materials/data",
+      "/api/materials/provenance",
+      "/api/materials/fit",
+      "/api/materials/preview",
+      "/api/validate"
+    ],
+    "workbench": "tests/ui/material-provenance.spec.js: import the SiO2 table with source and licence, fit, use, read the provenance and band panel, move the source to 2.5 um, save the project"
+  },
+  "reference_method": "the Sellmeier formula itself at held-out wavelengths; hashlib.sha256 of the raw bytes; an independent evaluation of the fitted poles with omega -> (2/dt) tan(omega dt/2) for the discretization error; the second-order scaling of that error with dt",
+  "observables": [
+    {
+      "name": "raw_sha256",
+      "unit": "hex",
+      "definition": "MaterialProvenance.raw_sha256 against hashlib.sha256 of the file bytes or the submitted text"
+    },
+    {
+      "name": "fit_normalized_rms",
+      "unit": "dimensionless",
+      "definition": "report['analytic']['normalized_rms'] over the fitted band"
+    },
+    {
+      "name": "held_out_n_error",
+      "unit": "dimensionless",
+      "definition": "max |Re sqrt(eps_fit) - n_Sellmeier| at 97 wavelengths not in the table"
+    },
+    {
+      "name": "discretization_n_error",
+      "unit": "dimensionless",
+      "definition": "discretization_report max_abs_n_error at dt and at dt/2, and their ratio"
+    },
+    {
+      "name": "extrapolation_warning",
+      "unit": "text",
+      "definition": "MaterialBandWarning message and its presence in estimate(project)['warnings'] and /api/validate"
+    },
+    {
+      "name": "persisted_fields",
+      "unit": "equality",
+      "definition": "provenance, fit_band_um, fit_dt_s, samples and poles after Project.save/load"
+    }
+  ],
+  "acceptance_limits": {
+    "provenance": "raw_sha256 equals the SHA-256 of the raw bytes; source, licence, file name, columns, unit and date are kept on the Material and in the project JSON",
+    "fit": "SiO2 converges within 3 poles at tolerance 1e-4; held-out n error below 2e-4 and |k| below 1e-6; the Lorentz table converges within 2 poles at 1e-6 with permittivity error below 1e-5",
+    "discretization": "max_abs_n_error equals the independent bilinear evaluation to 1e-12 relative; error ratio dt over dt/2 between 3.8 and 4.2; k error below 1e-8 for the lossless table",
+    "extrapolation": "a band inside the fitted band gives no warning; a band outside raises MaterialBandWarning naming both bands and the material, and the same text is in the estimate and validation warnings",
+    "failure_is_explicit": "an unconverged fit is returned with converged False and require_tolerance raises",
+    "source_of_limits": "G6-01 specification; the fit tolerance and error limits are fixture-specific budgets declared here before the run"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 8,
+    "passed": [
+      "tests/test_material_workflow.py::test_fixture_table_is_the_stated_sellmeier_formula",
+      "tests/test_material_workflow.py::test_public_sio2_table_records_provenance_and_fits_within_the_band",
+      "tests/test_material_workflow.py::test_discretization_error_is_the_bilinear_ade_response_and_second_order_in_dt",
+      "tests/test_material_workflow.py::test_extrapolation_warning_is_raised_kept_and_shared_with_the_estimate",
+      "tests/test_material_workflow.py::test_synthetic_epsilon_text_table_hashes_the_text_and_fits",
+      "tests/test_material_workflow.py::test_project_json_keeps_provenance_fit_band_and_timestep",
+      "tests/test_material_workflow.py::test_server_routes_surface_provenance_discretization_and_extrapolation",
+      "tests/test_material_workflow.py::test_fit_material_accepts_and_keeps_provenance_without_changing_the_fit"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 1.442,
+    "suite_timestamp": "2026-09-24T07:24:00.276575+09:00"
+  },
+  "required_tests": [
+    "tests/test_material_workflow.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_material_workflow.py": [
+      "tests/test_material_workflow.py::test_fixture_table_is_the_stated_sellmeier_formula",
+      "tests/test_material_workflow.py::test_public_sio2_table_records_provenance_and_fits_within_the_band",
+      "tests/test_material_workflow.py::test_discretization_error_is_the_bilinear_ade_response_and_second_order_in_dt",
+      "tests/test_material_workflow.py::test_extrapolation_warning_is_raised_kept_and_shared_with_the_estimate",
+      "tests/test_material_workflow.py::test_synthetic_epsilon_text_table_hashes_the_text_and_fits",
+      "tests/test_material_workflow.py::test_project_json_keeps_provenance_fit_band_and_timestep",
+      "tests/test_material_workflow.py::test_server_routes_surface_provenance_discretization_and_extrapolation",
+      "tests/test_material_workflow.py::test_fit_material_accepts_and_keeps_provenance_without_changing_the_fit"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G6-01.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T222407Z-g6-01-114c1af7/junit.xml",
+      "sha256": "5d30580d7ab4c608033488cdd7182a98da768587a87e7d1d746424fd55817eb6",
+      "bytes": 1361,
+      "original_path": ".local/tmp/junit/rerecord/G6-01.xml"
+    }
+  ],
+  "applicable_scope": "CPU numpy fitter, float64; FastAPI TestClient routes; the Playwright spec tests/ui/material-provenance.spec.js ran against the bundle built from this commit on port 8772 and its JUnit report is the attached artifact (1 test, 0 failures) re-recorded on 9d2eb55a1955 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T144110Z-g6-01-899faccb",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
