@@ -163,10 +163,11 @@ def cross_solver_assets(record: dict) -> None:
 def build_assets() -> None:
     (PAPER / 'figures').mkdir(parents=True, exist_ok=True)
     (PAPER / 'tables').mkdir(parents=True, exist_ok=True)
-    names = ('flux', 'batch', 'cuda-kernels', 'open-source-flaport', 'tensor-batch', 'cohorts', 'vector-sources', 'oneway-sources', 'oneway-slab', 'ensembles', 'design-throughput', 'ensemble-before', 'tfsf-sources', 'tfsf-sphere', 'tfsf-sphere-finer', 'tfsf-sphere-long', 'spectral-ensembles', 'graph-ensembles', 'selective-monitors', 'rectilinear-ensembles', 'geometry-ensembles', 'grouped-ensembles', 'cross_solver_3060')
+    names = ('flux', 'batch', 'cuda-kernels', 'open-source-flaport', 'tensor-batch', 'cohorts', 'vector-sources', 'oneway-sources', 'oneway-slab', 'ensembles', 'design-throughput', 'ensemble-before', 'tfsf-sources', 'tfsf-sphere', 'tfsf-sphere-finer', 'tfsf-sphere-long', 'spectral-ensembles', 'graph-ensembles', 'selective-monitors', 'rectilinear-ensembles', 'geometry-ensembles', 'grouped-ensembles', 'cross_solver_3060', 'flux-slab-project')
     # The manuscript reports its timings on the A100. The RTX 5880 originals stay in docs/validation,
     # and a caption always names the GPU of the record it was built from.
     files = {name: name for name in names}
+    files['flux-slab-project'] = 'paper_review/flux-slab-project'   # geometry of the slab of Fig. 2
     for name in ('batch', 'open-source-flaport', 'tensor-batch', 'ensembles', 'tfsf-sphere', 'tfsf-sphere-finer', 'tfsf-sphere-long'):
         if (DATA / f'{name}-a100.json').exists():
             files[name] = f'{name}-a100'
@@ -179,7 +180,12 @@ def build_assets() -> None:
     wl = np.asarray(flux['wavelength_um'])
     order = np.argsort(wl)
     exact_t = np.asarray(flux['analytic_T'])
-    fig, axes = plt.subplots(1, 2, figsize=(style.WIDTH, 2.3))
+    fig = plt.figure(figsize=(style.WIDTH, 3.5))
+    grid = fig.add_gridspec(2, 2, height_ratios=[0.45, 1])
+    geometry = fig.add_subplot(grid[0, :])
+    style.flux_slab_geometry(geometry, data['flux-slab-project'])
+    style.panel(geometry, 'a', 'Geometry')
+    axes = [fig.add_subplot(grid[1, 0]), fig.add_subplot(grid[1, 1])]
     for key, exact, color, marker in [('T', exact_t, style.BLUE, 'o'), ('R', 1-exact_t, style.ORANGE, 's')]:
         values = np.asarray(flux[key])
         # small hollow markers under the analytic line, so both stay visible
@@ -206,15 +212,18 @@ def build_assets() -> None:
     axes[1].set_ylim(3e-8, 3e-2)
     axes[0].legend(loc='center right', bbox_to_anchor=(1.0, 0.52), handlelength=1.5)
     axes[1].legend(loc='center right', bbox_to_anchor=(1.0, 0.52))
-    style.panel(axes[0], 'a', 'Slab transmission and reflection, 31 samples')
-    style.panel(axes[1], 'b', 'Error against the analytic spectra and energy residual')
-    fig.tight_layout(w_pad=2.2)
+    style.panel(axes[0], 'b', 'Slab transmission and reflection, 31 samples')
+    style.panel(axes[1], 'c', 'Error against the analytic spectra and energy residual')
+    fig.tight_layout(w_pad=2.2, h_pad=1.0)
     fig.savefig(PAPER / 'figures/flux-validation.pdf', metadata=metadata, bbox_inches='tight', pad_inches=0.04)
     plt.close(fig)
 
     sphere = data['tfsf-sphere']['cases'] + data['tfsf-sphere-finer']['cases']
     sphere.sort(key=lambda c: -c['project']['region']['mesh'])   # coarse to fine
-    fig, axes = plt.subplots(1, 2, figsize=(style.WIDTH, 2.35))
+    fig, panels = plt.subplots(1, 3, figsize=(style.WIDTH, 2.35), gridspec_kw={'width_ratios': [0.8, 1, 1]})
+    style.sphere_geometry(panels[0], sphere[0]['project'])
+    style.panel(panels[0], 'a', 'Geometry, z = 0')
+    axes = panels[1:]
     markers = ['o', 's', 'D', '^']
     for case, color, marker in zip(sphere, style.BLUES, markers):
         wl=np.asarray(case['wavelength_um']);order=np.argsort(wl)
@@ -227,9 +236,10 @@ def build_assets() -> None:
     axes[0].set(xlabel='Wavelength (µm)',ylabel='Scattering cross section (µm$^2$)', xlim=(1.28, 1.82))
     axes[1].set(xlabel='Wavelength (µm)',ylabel='Relative error',yscale='log', xlim=(1.28, 1.82), ylim=(1e-4, 3e-1))
     axes[0].legend(loc='upper right', handlelength=2.0)
-    style.panel(axes[0], 'a', 'TFSF sphere cross section by mesh step')
-    style.panel(axes[1], 'b', 'Relative error against the Mie series')
-    fig.tight_layout(w_pad=2.2)
+    style.panel(axes[0], 'b', 'Cross section by mesh step')
+    style.panel(axes[1], 'c', 'Relative error against the Mie series')
+    fig.tight_layout(w_pad=1.6)
+    style.align_square_title(fig, panels[0], panels[1], 'a', 'Geometry, z = 0')
     fig.savefig(PAPER/'figures/tfsf-sphere.pdf',metadata=metadata, bbox_inches='tight', pad_inches=0.04)
     plt.close(fig)
     sphere += data['tfsf-sphere-long']['cases']

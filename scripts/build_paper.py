@@ -47,7 +47,9 @@ def build_arxiv_bundle(files: list[Path], bbl: Path) -> Path:
                 archive.write(path, path.relative_to(PAPER).as_posix())
         archive.write(bbl, 'manuscript.bbl')
         for name in sorted(records):
-            archive.write(ROOT / 'docs/validation' / name, f'anc/{name}')
+            # geometry files of examples keep their repository path, other records live in docs/validation
+            source = ROOT / name if name.startswith('examples/') else ROOT / 'docs/validation' / name
+            archive.write(source, f'anc/{name}')
         archive.write(ROOT / 'scripts/build_paper_story_figures.py', 'anc/build_paper_story_figures.py')
         archive.write(ROOT / 'scripts/build_paper_assets.py', 'anc/build_paper_assets.py')
         for name in ('torchfdtd_router.py', 'torcwa_reference.py', 'README.md'):

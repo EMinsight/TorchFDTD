@@ -23,7 +23,8 @@
     "docs/validation/rectilinear-ensembles.json": "710c1c227433856b2eef184471fefac739c32a45c83ef8e5d1a5cf56e540a3cd",
     "docs/validation/geometry-ensembles.json": "9c392bf2457f4a9d84610e0d1664fda3f0e67e929fe90296c02d5783d6d53cb8",
     "docs/validation/grouped-ensembles.json": "b9c311df4248abe768c08a0e809c7ead88411edabe1aef4882bb48872f3bbf1c",
-    "docs/validation/cross_solver_3060.json": "58da9d9e9a73554a30864756df6d671414effff17c4a6613db43eed4bcf388e9"
+    "docs/validation/cross_solver_3060.json": "58da9d9e9a73554a30864756df6d671414effff17c4a6613db43eed4bcf388e9",
+    "docs/validation/paper_review/flux-slab-project.json": "704925f825aa9964b52f895f3c40eaa69513bc19ae2d1d80dc649044ed4b9a6e"
   },
   "generator": "scripts/build_paper_assets.py"
 }

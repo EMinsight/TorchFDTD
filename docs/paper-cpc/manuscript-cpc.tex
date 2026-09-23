@@ -249,7 +249,7 @@ at 31 wavelengths between 1.3 and 1.8~\micron{}. The plane-monitor spectra reach
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=\linewidth]{figures/flux-validation.pdf}
-\caption{Plane-monitor spectra of the lossless slab. (a) Transmission and reflection of the 31 recorded samples, with Eq.~\eqref{eq:slab} as the solid line. (b) Absolute errors of both spectra and the energy residual $|R+T-1|$ on a logarithmic axis.}
+\caption{Plane-monitor spectra of the lossless slab. (a) The two-dimensional cell, periodic along $y$, with the slab, the source plane, the reflection (R) and transmission (T) monitors and the absorbing layers, to scale along $x$. (b) Transmission and reflection of the 31 recorded samples, with Eq.~\eqref{eq:slab} as the solid line. (c) Absolute errors of both spectra and the energy residual $|R+T-1|$ on a logarithmic axis.}
 \label{fig:flux-validation}
 \end{figure}
 
@@ -260,7 +260,7 @@ A closed total-field/scattered-field box around a dielectric sphere yields the s
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=\linewidth]{figures/tfsf-sphere.pdf}
-\caption{Scattering cross-section of the dielectric sphere from the closed total-field/scattered-field box at four mesh steps. (a) Recorded cross-sections with the Mie series as reference. (b) Relative error against the Mie series at the nine recorded wavelengths.}
+\caption{Scattering cross-section of the dielectric sphere from the closed total-field/scattered-field box at four mesh steps. (a) Section $z=0$ of the scene: the sphere inside the total-field region (orange), the closed scattered-field flux surface (teal) and the absorbing layer (grey), with the incident direction and polarization. (b) Recorded cross-sections with the Mie series as reference. (c) Relative error against the Mie series at the nine recorded wavelengths.}
 \label{fig:tfsf-sphere}
 \end{figure}
 
@@ -269,7 +269,7 @@ Dispersive and lossy media are checked on a Drude slab of thickness 0.1~\micron{
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=\linewidth]{figures/dispersive-slabs.pdf}
-\caption{Dispersive slabs at normal incidence. (a) Drude slab of thickness 0.1~\micron{} and (b) two-pole Lorentz slab of thickness 0.5~\micron{}, with reflection, transmission and absorption from TorchFDTD at a 10~nm mesh (markers) and from the transfer-matrix solution (lines). (c) Largest absolute error of $R$, $T$ and $A$ over the band at two mesh steps, with a second-order guide.}
+\caption{Dispersive slabs at normal incidence. (a) The two slabs in their periodic cells, to scale along $x$, with the source plane, the reflection (R) and transmission (T) points and the absorbing layers. (b) Drude slab of thickness 0.1~\micron{} and (c) two-pole Lorentz slab of thickness 0.5~\micron{}, with reflection, transmission and absorption from TorchFDTD at a 10~nm mesh (markers) and from the transfer-matrix solution (lines). (d) Largest absolute error of $R$, $T$ and $A$ over the band at two mesh steps, with a second-order guide.}
 \label{fig:dispersive}
 \end{figure}
 
@@ -333,7 +333,7 @@ Focusing is compared on a three-dimensional lens of 112 silicon pillars with a 6
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=\linewidth]{figures/metalens-meep.pdf}
-\caption{A three-dimensional pillar lens computed by TorchFDTD and by Meep on one grid. (a,b) Intensity at 1.55~\micron{} over the axial $xz$ section, normalized by the Meep peak. (c) On-axis intensity from both solvers.}
+\caption{A three-dimensional pillar lens computed by TorchFDTD and by Meep on one grid. (a) Top view of the 112 silicon pillars, 0.6~\micron{} tall, in the 8~\micron{} cell, with the 6~\micron{} aperture (dashed), the absorbing border (grey) and the $xz$ section of (b,c) (dotted). (b,c) Intensity at 1.55~\micron{} over the axial $xz$ section, normalized by the Meep peak, with $z$ measured above the output plane. (d) On-axis intensity from both solvers.}
 \label{fig:metalens-meep}
 \end{figure}
 

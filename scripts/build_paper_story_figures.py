@@ -54,10 +54,17 @@ def apply_style():
     })
 
 
-def panel(ax, letter, title=''):
-    """Bold panel letter and a short title, left aligned above the axes."""
+def panel(ax, letter, title='', y=None):
+    """Bold panel letter and a short title, left aligned above the axes. y (axes fraction) fixes its height."""
     ax.set_title(r'$\mathbf{' + letter + '}$' + ('   ' + title if title else ''),
-                 loc='left', fontsize=8, pad=7, color=INK)
+                 loc='left', fontsize=8, pad=7, color=INK, **({} if y is None else {'y': y}))
+
+
+def align_square_title(fig, square, neighbour, letter, title):
+    """Put the title of an equal-aspect panel on the line of the titles of its taller neighbours."""
+    fig.canvas.draw()
+    lower, upper = square.get_position(), neighbour.get_position()
+    panel(square, letter, title, y=(upper.y1 - lower.y0) / lower.height)
 
 
 def sci_tex(value, digits=1):
@@ -85,6 +92,131 @@ def save(fig, name, png=True):
         fig.savefig(OUT / (name + '.png'), dpi=220, bbox_inches='tight', pad_inches=0.04)
     plt.close(fig)
 
+
+# ----------------------------------------------------------------------------
+# Geometry panels: what each validation simulated, drawn from its record
+# ----------------------------------------------------------------------------
+
+PALE = {'blue': '#dbe7f5', 'teal': '#dff2ef', 'orange': '#fbeee2', 'grey': '#e6e9ec'}
+EXAMPLES = ROOT if DATA == ROOT / 'docs/validation' else DATA
+
+
+def read_repo(name):
+    """A record kept outside docs/validation, such as the geometry file of an example."""
+    p = EXAMPLES / name
+    INPUTS[name] = hashlib.sha256(p.read_bytes()).hexdigest()
+    return json.loads(p.read_text(encoding='utf-8'))
+
+
+def slab_lane(ax, y0, height, x_range, pml, slab, label, source_x, monitors, fill=None):
+    """One periodic lane of a normal-incidence slab cell: absorbers, slab, source and monitors, to scale along x."""
+    x0, x1 = x_range
+    ax.add_patch(Rectangle((x0, y0), x1 - x0, height, facecolor='white', edgecolor=LINE, lw=0.5))
+    for start in (x0, x1 - pml):
+        ax.add_patch(Rectangle((start, y0), pml, height, facecolor=PALE['grey'], edgecolor='none'))
+    lo, hi = slab
+    ax.add_patch(Rectangle((lo, y0), hi - lo, height, facecolor=fill or BLUE, edgecolor='none', alpha=0.85))
+    ax.text((lo + hi) / 2, y0 + height + 0.04, label, ha='center', va='bottom', fontsize=6.0, color=INK)
+    ax.plot([source_x] * 2, [y0 + 0.06 * height, y0 + 0.94 * height], color=ORANGE, lw=1.3, solid_capstyle='butt')
+    ax.annotate('', (source_x + 0.55, y0 + height / 2), (source_x + 0.05, y0 + height / 2),
+                arrowprops=dict(arrowstyle='-|>', color=ORANGE, lw=0.8, mutation_scale=6))
+    for name, x in monitors:
+        ax.plot([x] * 2, [y0, y0 + height], color=TEAL, lw=0.9, ls=(0, (2.5, 1.5)))
+        ax.text(x, y0 - 0.05, name, ha='center', va='top', fontsize=5.8, color=TEAL)
+    for y in (y0, y0 + height):
+        ax.plot([x0 + pml, x1 - pml], [y, y], color=MUTED, lw=0.6, ls=(0, (1, 1.5)))
+
+
+def slab_frame(ax, x_range, y_top, note):
+    x0, x1 = x_range
+    ax.set_xlim(x0 - 0.05 * (x1 - x0), x1 + 0.05 * (x1 - x0))
+    ax.set_ylim(-0.35, y_top)
+    ax.set_yticks([])
+    for side in ('left', 'right', 'top'):
+        ax.spines[side].set_visible(False)
+    ax.set_xlabel('x (µm)')
+    ax.text(x1, y_top - 0.02, note, ha='right', va='top', fontsize=5.8, color=MUTED)
+
+
+def flux_slab_geometry(ax, record):
+    """Geometry panel of the analytic slab of examples/flux_slab.py."""
+    project = record['project']
+    region = project['region']
+    size_x = region['size'][0]
+    pml = region['pml_cells'] * region['mesh']
+    structure = project['structures'][0]
+    index = {m['name']: m['index'] for m in project['materials']}[structure['material']]
+    centre, thickness = structure['center'][0], structure['size'][0]
+    source_x = project['sources'][0]['center'][0]
+    monitors = [('R' if m['name'] == 'reflection' else 'T', m['center'][0]) for m in project['monitors']]
+    slab_lane(ax, 0.0, 0.5, (-size_x / 2, size_x / 2), pml, (centre - thickness / 2, centre + thickness / 2),
+              f'slab, n = {index:g}, {thickness:g} µm', source_x, monitors)
+    ax.text(-size_x / 2 + pml / 2, 0.25, 'PML', rotation=90, ha='center', va='center', fontsize=5.6, color=MUTED)
+    ax.text(source_x, -0.05, 'source', ha='center', va='top', fontsize=5.8, color=ORANGE)
+    slab_frame(ax, (-size_x / 2, size_x / 2), 1.05,
+               f"{region['size'][1]:g} µm period along y (dotted), mesh {region['mesh']:g} µm, "
+               f"{region['pml_cells']} absorbing cells per end")
+
+
+def dispersive_slab_geometry(ax, case, rec):
+    """Geometry panel of the Drude and two-pole Lorentz slabs of the G3-03 fixture."""
+    fixture = case['fixture']
+    x_range = fixture['domain_um']['x']
+    pml = fixture['mesh_sweep'][0]['pml_thickness_um']
+    centre = float(fixture['slab_faces'].split('x = ')[1].split(' um')[0])
+    source_x = fixture['source']['x_um']
+    mon = fixture['monitors']
+    monitors = [('R', mon['reflection_x_um']), ('T', mon['transmission_x_um'])]
+    lanes = [('drude', 'Drude slab', BLUE), ('lorentz', 'two-pole Lorentz slab', BLUE)]
+    for k, (material, name, color) in enumerate(lanes):
+        thickness = rec[f'analytic {material} TE h10']['thickness_um']
+        y0 = 1.05 - 0.75 * k
+        slab_lane(ax, y0, 0.36, x_range, pml, (centre - thickness / 2, centre + thickness / 2),
+                  f'{name}, {thickness:g} µm', source_x, monitors, fill=color)
+        if k == 0:
+            ax.text(source_x, y0 - 0.05, 'source', ha='center', va='top', fontsize=5.8, color=ORANGE)
+    slab_frame(ax, x_range, 1.75, f"periodic along y (dotted), PML {pml:g} µm per end")
+
+
+def sphere_geometry(ax, project):
+    """Cross-section z = 0 of the closed total-field/scattered-field sphere scene."""
+    region = project['region']
+    half = region['size'][0] / 2
+    pml = region['pml_cells'] * region['mesh']
+    sphere = project['structures'][0]
+    index = {m['name']: m['index'] for m in project['materials']}[sphere['material']]
+    source = project['sources'][0]
+    box = source['size'][0] / 2
+    flux = max(abs(m['center'][0]) for m in project['monitors'])
+    r = sphere['radius']
+    ax.add_patch(Rectangle((-half, -half), 2 * half, 2 * half, facecolor=PALE['grey'], edgecolor=LINE, lw=0.5))
+    ax.add_patch(Rectangle((-half + pml, -half + pml), 2 * (half - pml), 2 * (half - pml), facecolor='white', edgecolor='none'))
+    ax.add_patch(Rectangle((-box, -box), 2 * box, 2 * box, facecolor=PALE['orange'], edgecolor=ORANGE, lw=0.9,
+                           ls=(0, (3, 2))))
+    ax.add_patch(Rectangle((-flux, -flux), 2 * flux, 2 * flux, facecolor='none', edgecolor=TEAL, lw=0.9))
+    ax.add_patch(plt.Circle((0, 0), r, facecolor=BLUE, edgecolor='none', alpha=0.9))
+    ax.text(0, -r - 0.06, f'n = {index:g}\nr = {r:g} µm', ha='center', va='top', fontsize=5.6, color=INK, linespacing=1.2)
+    ax.annotate('', (-box + 0.45, box - 0.36), (-box + 0.08, box - 0.36),
+                arrowprops=dict(arrowstyle='-|>', color=ORANGE, lw=0.9, mutation_scale=7))
+    ax.text(-box + 0.08, box - 0.06, f"+{source['normal']}, {source['component']}", fontsize=5.6, color=ORANGE,
+            ha='left', va='top')
+    ax.text(box - 0.06, box - 0.06, 'total\nfield', ha='right', va='top', fontsize=5.6, color=ORANGE, linespacing=1.1)
+    ax.text(0, (box + flux) / 2, 'flux surface', ha='center', va='center', fontsize=5.4, color=TEAL)
+    ax.text(half - pml / 2, 0, 'PML', rotation=90, ha='center', va='center', fontsize=5.6, color=MUTED)
+    ax.set(xlim=(-half, half), ylim=(-half, half), aspect='equal', xlabel='x (µm)', ylabel='y (µm)')
+
+
+def metalens_topview(ax, geometry):
+    """Top view of the pillar lens compared with Meep, from its geometry file."""
+    cell = geometry['cell_um'][0] / 2
+    pml = geometry['pml_um']
+    ax.add_patch(Rectangle((-cell, -cell), 2 * cell, 2 * cell, facecolor=PALE['grey'], edgecolor=LINE, lw=0.5))
+    ax.add_patch(Rectangle((-cell + pml, -cell + pml), 2 * (cell - pml), 2 * (cell - pml), facecolor='white', edgecolor='none'))
+    for p in geometry['pillars']:
+        ax.add_patch(plt.Circle((p['x_um'], p['y_um']), p['radius_um'], facecolor=BLUE, edgecolor='none'))
+    ax.add_patch(plt.Circle((0, 0), geometry['aperture_um'] / 2, facecolor='none', edgecolor=GREY, lw=0.7, ls=(0, (3, 2))))
+    ax.plot([-cell + pml, cell - pml], [0, 0], color=ORANGE, lw=0.8, ls=(0, (1, 1.2)))
+    ax.set(xlim=(-cell, cell), ylim=(-cell, cell), aspect='equal', xlabel='x (µm)', ylabel='y (µm)')
 
 # ----------------------------------------------------------------------------
 # Figure 1: execution and differentiation schematic
@@ -461,9 +593,15 @@ def application():
 def dispersive_slabs():
     """Drude and two-pole Lorentz slabs against the transfer-matrix reference with the same permittivity."""
     rec = read('g3/G3-03.json')['entries']
-    fig, axes = plt.subplots(1, 3, figsize=(WIDTH, 2.25), gridspec_kw={'width_ratios': [1, 1, 0.9]})
-    for ax, material, letter, title in ((axes[0], 'drude', 'a', 'Drude slab, 0.1 µm'),
-                                        (axes[1], 'lorentz', 'b', 'Two-pole Lorentz slab, 0.5 µm')):
+    case = read('cases/G3-03_dispersive_slab_fit_ade.json')
+    fig = plt.figure(figsize=(WIDTH, 3.6))
+    grid = fig.add_gridspec(2, 3, height_ratios=[0.62, 1], width_ratios=[1, 1, 0.9])
+    geo = fig.add_subplot(grid[0, :])
+    dispersive_slab_geometry(geo, case, rec)
+    panel(geo, 'a', 'Geometry at normal incidence')
+    axes = [fig.add_subplot(grid[1, i]) for i in range(3)]
+    for ax, material, letter, title in ((axes[0], 'drude', 'b', 'Drude slab, 0.1 µm'),
+                                        (axes[1], 'lorentz', 'c', 'Two-pole Lorentz slab, 0.5 µm')):
         e = rec[f'analytic {material} TE h10']
         wl = np.asarray(e['wavelength_um'])
         order = np.argsort(wl)
@@ -490,39 +628,44 @@ def dispersive_slabs():
     ax.set_xticks([10, 20], ['10', '20'])
     ax.minorticks_off()
     ax.legend(loc='lower right')
-    panel(ax, 'c', 'Mesh convergence')
-    fig.tight_layout(w_pad=1.6)
+    panel(ax, 'd', 'Mesh convergence')
+    fig.tight_layout(w_pad=1.6, h_pad=1.2)
     save(fig, 'dispersive-slabs')
 
 
 def metalens_meep():
-    """Focal xz intensity of the 3D pillar lens from TorchFDTD and Meep on the same grid."""
-    t = read('meep_comparison/metalens_3d_torchfdtd.json')['observables']['xz']
-    m = read('meep_comparison/metalens_3d_meep.json')['observables']['xz']
+    """Top view of the 3D pillar lens and its focal xz intensity from TorchFDTD and Meep on the same grid."""
+    tr = read('meep_comparison/metalens_3d_torchfdtd.json')
+    mr = read('meep_comparison/metalens_3d_meep.json')
+    name = 'examples/meep_comparison/metalens/geometry_3d.json'
+    geometry = read_repo(name)
+    assert INPUTS[name] == tr['geometry_sha256'] == mr['geometry_sha256'], 'the drawn geometry must be the simulated one'
+    t, m = tr['observables']['xz'], mr['observables']['xz']
     x = np.asarray(t['transverse_um'])
     z = np.asarray(t['z_um'])
     a = np.asarray(t['intensity'], dtype=float)
     b = np.asarray(m['intensity'], dtype=float)
     peak = b.max()
-    fig, axes = plt.subplots(1, 3, figsize=(WIDTH, 2.25), gridspec_kw={'width_ratios': [1, 1, 1.05]})
+    fig, axes = plt.subplots(1, 4, figsize=(WIDTH, 2.25), gridspec_kw={'width_ratios': [1.3, 0.92, 1.0, 1.12]})
+    metalens_topview(axes[0], geometry)
+    panel(axes[0], 'a', 'Top view')
     extent = (z[0], z[-1], x[0], x[-1])
-    for ax, data, letter, title in ((axes[0], a, 'a', 'TorchFDTD'), (axes[1], b, 'b', 'Meep')):
+    for ax, data, letter, title in ((axes[1], a, 'b', 'TorchFDTD'), (axes[2], b, 'c', 'Meep')):
         im = ax.imshow(data / peak, origin='lower', extent=extent, aspect='auto', cmap='magma', vmin=0, vmax=1)
-        ax.set(xlabel='z above output plane (µm)', ylabel='x (µm)')
-        panel(ax, letter, f'{title}, |E|$^2$ at 1.55 µm')
-    cbar = fig.colorbar(im, ax=axes[1], fraction=0.05, pad=0.03)
-    cbar.set_label('Intensity / Meep peak', fontsize=6.5)
+        ax.set(xlabel='z (µm)', ylabel='x (µm)')
+        panel(ax, letter, f'{title}, |E|$^2$')
+    cbar = fig.colorbar(im, ax=axes[2], fraction=0.06, pad=0.03)
+    cbar.set_label('Intensity / Meep peak', fontsize=6.3)
     cbar.ax.tick_params(labelsize=6)
-    ax = axes[2]
+    ax = axes[3]
     centre = int(np.argmin(np.abs(x)))
     ax.plot(z, a[centre] / peak, color=BLUE, lw=1.3, label='TorchFDTD')
     ax.plot(z, b[centre] / peak, ls='none', marker='o', ms=2.4, mfc='white', mew=0.7, color=ORANGE, markevery=3, label='Meep')
-    diff = np.linalg.norm(a - b) / np.linalg.norm(b)
-    ax.text(0.04, 0.95, f'section relative\n$L_2$ difference\n{sci_tex(diff)}', transform=ax.transAxes, ha='left', va='top', fontsize=6.0, color=MUTED, linespacing=1.3)
-    ax.set(xlabel='z above output plane (µm)', ylabel='On-axis intensity / Meep peak', ylim=(0, 1.1))
-    ax.legend(loc='center right')
-    panel(ax, 'c', 'On-axis intensity')
-    fig.tight_layout(w_pad=1.2)
+    ax.set(xlabel='z (µm)', ylabel='On-axis intensity / Meep peak', ylim=(0, 1.1))
+    ax.legend(loc='lower right', fontsize=5.8, handlelength=1.0, handletextpad=0.3)
+    panel(ax, 'd', 'On-axis intensity')
+    fig.tight_layout(w_pad=0.8)
+    align_square_title(fig, axes[0], axes[1], 'a', 'Top view')
     save(fig, 'metalens-meep')
 
 
