@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.15.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260923T074741Z-g9-06-47bc6631` recorded 2026-09-23T07:47:41+00:00 at commit `b2f060510b0c`.
+Package version `0.15.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260923T080205Z-g9-04-03b0495b` recorded 2026-09-23T08:02:05+00:00 at commit `b9f0341a4d46`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 9 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 15 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 68 | 8 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 68 | 14 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -142,7 +142,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260923T050949Z-g9-01-266acf6c` | `9ba879241b39` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 9ba879241b39 alone |
 | G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260923T051021Z-g9-02-52c4b660` | `9ba879241b39` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 9ba879241b39 alone |
 | G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260923T052154Z-g9-04-b221e298` | `f0a04477f5de` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
+| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260923T080205Z-g9-04-03b0495b` | `b9f0341a4d46` | PASS | evidence matches the current checkout |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260923T074741Z-g9-06-47bc6631` | `b2f060510b0c` | PASS | evidence matches the current checkout |
 | G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | SELF | none | none | self | this report's own gate, recorded after the render; judge it with scripts/check_release_gates.py |
