@@ -639,8 +639,8 @@ def grid_scaling():
     ax.axhline(device, color=GREY, lw=0.7, ls=(0, (3, 2)))
     ax.text(560, device * 1.15, f'device {device:.0f} GB', fontsize=5.8, color=GREY, va='bottom', ha='right')
     xaxis(ax)
-    ax.set(yscale='log', ylabel='Peak device allocation (GB)', ylim=(1e-2, 1e3))
-    ax.legend(loc='upper left', ncol=2, fontsize=5.6, columnspacing=0.8, handlelength=1.4)
+    ax.set(yscale='log', ylabel='Peak device allocation (GB)', ylim=(3e-3, 1e3))
+    ax.legend(loc='upper left', fontsize=5.8, handlelength=1.4)
     panel(ax, 'b', 'Device memory')
 
     ax = axes[2]
