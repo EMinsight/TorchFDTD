@@ -1,29 +1,42 @@
 % Canonical manuscript source. Edit this file directly.
 % Writing rules: no em dashes, no semicolons, no self-assessment adjectives.
 \documentclass[11pt,a4paper]{article}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{newtxtext,newtxmath}
+\usepackage{fontspec}
+% Latin Modern, the Computer Modern family of a default LaTeX article, as in the related manuscripts.
+\setmainfont{lmroman10-regular.otf}[BoldFont=lmroman10-bold.otf,ItalicFont=lmroman10-italic.otf,BoldItalicFont=lmroman10-bolditalic.otf]
+\setsansfont{lmsans10-regular.otf}[BoldFont=lmsans10-bold.otf]
+\setmonofont{lmmono10-regular.otf}[BoldFont=lmmonolt10-bold.otf,ItalicFont=lmmono10-italic.otf]
 \usepackage[margin=25mm]{geometry}
 \usepackage{microtype}
 \usepackage{amsmath}
+\usepackage{unicode-math}
+\setmathfont{latinmodern-math.otf}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{listings}
 \usepackage[font=small,labelfont=bf]{caption}
 \usepackage[numbers,sort&compress]{natbib}
 \PassOptionsToPackage{obeyspaces}{url}
 \usepackage{xurl}
 \usepackage[hidelinks]{hyperref}
+\urlstyle{same}
 \hypersetup{
-  pdftitle={TorchFDTD: GPU finite-difference time-domain simulation with discrete adjoints and tiered-memory execution for photonic design},
+  pdftitle={TorchFDTD: GPU-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design},
   pdfauthor={Hyoseok Park},
   pdfsubject={Computational photonics software}
 }
+\definecolor{codekw}{RGB}{36,49,59}
+\definecolor{codecomment}{RGB}{107,116,128}
+\lstset{language=Python, basicstyle=\small\ttfamily, keywordstyle=\bfseries\color{codekw},
+  commentstyle=\itshape\color{codecomment}, stringstyle=\color{codekw}, columns=fullflexible,
+  keepspaces=true, breaklines=true, showstringspaces=false, xleftmargin=1.2em,
+  aboveskip=6pt, belowskip=6pt, captionpos=b, frame=none}
 \newcommand{\code}[1]{{\small\nolinkurl{#1}}}
 \newcommand{\micron}{\ensuremath{\mu\mathrm{m}}}
 \setlength{\parskip}{3pt}
 \setlength{\emergencystretch}{1.5em}
-\setlength{\bibsep}{5pt}
+\setlength{\bibsep}{3pt}
 \raggedbottom
 \clubpenalty=10000
 \widowpenalty=10000
@@ -35,33 +48,54 @@
 \input{tables/validation-values}
 \input{tables/cross-solver-values}
 
-\title{\Large\bfseries TorchFDTD: GPU finite-difference time-domain simulation with discrete adjoints and tiered-memory execution for photonic design}
+\title{\Large\bfseries TorchFDTD: GPU-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design}
 \author{Hyoseok Park\\[2pt]\small Department of Physics, Chungnam National University, Daejeon, Republic of Korea}
-\date{\small 21 September 2026}
+\date{\small 23 September 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Gradient-based photonic design needs a time-domain solver that is fast on one graphics processor, differentiable with respect to the design, and able to run problems whose field state exceeds the memory of that processor. We present TorchFDTD, an open-source finite-difference time-domain (FDTD) package that couples a native CUDA Yee engine to PyTorch. The engine advances the six field components with fused kernels captured in CUDA Graphs and supports convolutional perfectly matched layers with independent per-face profiles, periodic and Bloch boundaries, perfect electric and magnetic conductor faces, multipole Drude and Lorentz dispersion, anisotropic permittivity tensors admitted inside the absorbing layers under a geometric stability criterion, graded rectilinear meshes, subpixel interfaces, and total-field/scattered-field, one-way and guided-mode sources. First-order gradients follow from an explicit transpose of every discrete update combined with binomial checkpoint replay, and they cover material, density, polygon and spline shape, and source-waveform parameters together with objectives on point signals, plane spectra, multiport scattering parameters and projected far fields. A streamed execution mode partitions the domain into slabs, keeps only the active slabs on the GPU, banks the remaining state in host memory or on solid-state storage under measured reservations, and writes a durable journal from which an interrupted run resumes. On an RTX 5880 the fused engine solves eight forward fixtures 9.6 to 17.1 times faster than a CUDA-graph adaptation of an existing PyTorch FDTD package, and a $256^3$ adjoint runs 179 times faster than the same Torch model on twelve CPU threads. On one RTX 3060, forward solves run \CrossFdtdxFullMin{} to \CrossFdtdxFullMax{} times faster than FDTDX and \CrossMeepFullMin{} to \CrossMeepFullMax{} times faster than twelve-rank Meep. A 2.26 billion cell single-precision adjoint whose 54 GB of field state exceeds the 51.5 GB of the processor completes with a 3.0 GB peak device allocation, and a process killed after its first backward record resumes from the journal with a gradient within $9\times10^{-8}$ of the uninterrupted oracle. Analytic slab spectra, Mie scattering, dipole radiation, waveguide scattering parameters and finite-difference gradient checks bound the numerical error of each path.
+Gradient-based photonic design needs full-wave derivatives with respect to millions of parameters, but on a single GPU workstation the time-domain adjoint is limited by device memory and by the incompatibility of fused update kernels with automatic differentiation. Here, we present TorchFDTD, an open-source finite-difference time-domain (FDTD) package that addresses both limits. The Yee update, the convolutional perfectly matched layer and the auxiliary differential equations of dispersive media execute as fused CUDA kernels captured in a CUDA graph, and every kernel is paired with a hand-written transpose, so material and geometry derivatives are obtained by a discrete adjoint that PyTorch chains with differentiable objectives built from the supported observations. The forward states required by the adjoint are supplied by checkpoint replay or, for lossless periodic problems, by time reversal. A streamed mode advances causal slabs of the domain one block at a time and keeps the global state and the checkpoints in host memory, which lowers the device allocation while preserving the resident discretization. Guided-mode ports, near-to-far projection, GDSII import and a browser workbench complete the design workflow. We validate the package against analytic solutions, against Meep, FDTDX and a rigorous coupled-wave solver, and against automatic differentiation and finite differences. On an RTX 5880 the fused path completes full forward solves of eight test scenes 9.6 to 17.1 times faster than the PyTorch FDTD package it extends, and host streaming lowers the peak device allocation of a $256^3$ adjoint by 56\% at a 4.1 to 4.8 fold cost in time. A 54-million-cell pillar-array lens coupled to an angular-spectrum objective yields an adjoint derivative within 0.78\% of a central difference on an RTX 3060. The time-domain adjoint of a device with tens of millions of cells thus becomes available on a single workstation GPU.
 \end{abstract}
+
+\noindent\textbf{Keywords:} finite-difference time-domain, adjoint method, inverse design, GPU computing, PyTorch, metasurfaces, nanophotonics
+
+\section*{Program summary}
+\noindent\textit{Program title:} TorchFDTD\\
+\textit{Developer's repository link:} \url{https://github.com/hyoseokp/TorchFDTD}\\
+\textit{Licensing provisions:} MIT\\
+\textit{Programming language:} Python 3.10 or later, with CUDA C++ kernels compiled at run time through CuPy and a JavaScript browser workbench\\
+\textit{Supplementary material:} the validation records behind every figure and generated table, the two scripts that typeset them from those records, and SHA-256 provenance manifests\\
+\textit{Nature of problem:} Gradient-based design of nanophotonic devices requires a full-wave Maxwell solver that returns broadband observables and their derivatives with respect to millions of material or geometry parameters. On a single workstation the time-domain adjoint is limited by GPU memory, because the backward sweep needs the forward field history and the working field state must fit the device. A second limit is the incompatibility between fused CUDA update kernels and framework automatic differentiation.\\
+\textit{Solution method:} The Yee scheme with convolutional perfectly matched layers, auxiliary-differential-equation dispersion and anisotropic tensors runs as two fused CUDA kernels per step inside a CUDA graph. Each kernel has a hand-written transpose, and the discrete adjoint is exposed to PyTorch as a custom autograd function so that geometry parameterizations, objectives built from the supported observations and optimizers are ordinary Torch code. Forward states for the transposed sweep come from binomial checkpoint replay or time reversal. A host-streamed mode partitions the domain into causal slabs with halos, advances one slab for $K$ steps on the device and keeps the global state and checkpoints in host memory. Guided-mode sources and monitors, total-field/scattered-field boxes, near-to-far projection, angular-spectrum propagation, GDSII import and process-level or tensor batches are provided.\\
+\textit{Additional comments including restrictions and unusual features:} Fused kernels require an NVIDIA GPU with CuPy, and a CPU path executes the same discrete operators for reference. Host streaming keeps full-domain state banks in host memory, so host capacity and device--host bandwidth bound the usable problem size and speed. Independent lateral tiling is an approximation that changes the boundary-value problem and is reported with its error against a full-domain solution. Multi-GPU execution of one domain is not part of this release.
 
 \section{Introduction}
 
-The finite-difference time-domain (FDTD) method advances Maxwell's equations on a staggered grid and returns broadband observables from one run \citep{yee1966,taflove2005}. Absorbing layers \citep{berenger1994,roden2000}, auxiliary differential equations for dispersive media \citep{okoniewski1997} and subpixel material averaging \citep{farjadpour2006} made the method the standard forward solver of nanophotonics, and mature packages such as Meep \citep{oskooi2010} and commercial tools \citep{lumerical,tidy3d} expose it through scripting interfaces. Inverse design shifted the requirement from a forward solver to a differentiable one: adjoint sensitivities turn a single extra simulation into a gradient over millions of design variables \citep{jensen2011,piggott2015,molesky2018,hughes2018,hammond2022}. The Fourier modal solver TORCWA showed how a PyTorch implementation makes such gradients available to ordinary optimizers on a graphics processor \citep{kim2023}, and FDTDX brought reverse-mode differentiation and multi-GPU sharding to time-domain simulation in JAX \citep{mahlau2024}.
+The finite-difference time-domain (FDTD) method advances Maxwell's equations on a staggered grid and returns broadband observables from a single run \citep{yee1966,taflove2005}. Absorbing layers \citep{berenger1994,roden2000}, auxiliary differential equations for dispersive media \citep{okoniewski1997} and subpixel material averaging \citep{farjadpour2006} made it the standard full-wave solver of nanophotonics, and packages such as Meep \citep{oskooi2010} and commercial tools \citep{lumerical,tidy3d} expose it through scripting interfaces. Inverse design changed what is asked of the solver. Adjoint sensitivities turn one additional simulation into the gradient of an objective with respect to millions of design variables \citep{georgieva2002,jensen2011,elesin2012,piggott2015,molesky2018,hughes2018,christiansen2021}, and design frameworks built on frequency-domain solvers \citep{su2020,minkov2020} or on hybrid time and frequency-domain evaluation \citep{hammond2022} made that gradient central to nanophotonic design. The practical question became how to obtain it quickly on the hardware that a design group owns. Automatic differentiation of a Maxwell solver written in a machine-learning framework answers part of that question \citep{hughes2019}. The Fourier modal solver TORCWA showed that a PyTorch implementation makes rigorous coupled-wave gradients available to ordinary optimizers on a graphics processor \citep{kim2023}. GPU time-domain solvers such as fdtd-z moved the Yee update itself onto the device \citep{fdtdz}, and FDTDX brought reverse-mode differentiation and multi-GPU sharding to time-domain simulation in JAX \citep{mahlau2024}.
 
-Two costs remain with the time-domain adjoint. The first is memory. The backward pass of an FDTD run needs the forward field history, and a time-reversible reconstruction or a checkpointing schedule trades that history against recomputation \citep{griewank2000,mahlau2024}. Either way the peak state of a three-dimensional problem, six field components plus absorber and material memories over every cell, must fit the processor, so the largest design problem is fixed by the size of one graphics card. The second cost is the granularity of the differentiation itself. A solver written entirely in an automatic-differentiation framework differentiates every operation it executes, so a fused hand-written CUDA kernel that removes the memory traffic of the framework also removes its gradient unless the transpose of that kernel is written by hand.
+Two costs remain for the time-domain adjoint on a single workstation. The first is memory. The backward sweep needs the forward field history, and time-reversible reconstruction or checkpoint replay trades retained history against recomputation \citep{griewank2000,mahlau2024,mahlau2026}. However, even with that history under control, a resident implementation must hold the complete working state on the device. For a $10^9$-cell grid in single precision the six field components alone occupy 24~GB, and the adjoint sweep adds a cotangent state of equal size and at least one checkpoint, so the working state exceeds 70~GB before the material arrays and absorber memories are counted. That is more than the 12 and 48~GB of the two GPUs used in this work. The second cost is the interaction between differentiation and kernel fusion. Framework automatic differentiation records every array operation, so the fused update kernels that give an FDTD code its speed cannot participate in the graph unless they are supplied with their own derivative rules.
 
-TorchFDTD addresses both costs with one engine. The Yee, absorber and dispersion updates are fused CUDA kernels whose transposes are written explicitly, so the adjoint has the same kernel-level efficiency as the forward pass while remaining a first-class PyTorch operation. The field state is partitioned into slabs along one axis, and a streamed execution mode keeps only the slabs under update on the device, banks the rest in host memory or on solid-state storage, and replays checkpoints at the block level. The reservations of that hierarchy are measured rather than assumed: the number of simultaneously live file banks is bounded by the checkpoint count plus three, and the host-side tensors of the dense material gradient are counted from a recorded allocation ledger. A journal of block-boundary records makes a multi-hour adjoint resumable after a process failure. Around the engine sit a serializable scene model shared by a browser workbench and a Python interface, ensembles that execute independent structures in one CUDA launch, guided-mode ports with multiport scattering parameters, near-to-far field projection, GDSII import and export, and an independent reader and writer for a documented subset of a commercial project format.
+Here, we address both costs in TorchFDTD. Its Yee, absorber and dispersion updates run as fused CUDA kernels captured in a CUDA graph. Instead of letting the framework record these updates, we give each kernel its own derivative rule, a hand-written transpose. The discrete adjoint is therefore exposed to PyTorch as a custom autograd function and chains with Torch geometry parameterizations, optimizers and differentiable objectives built from the supported observations. We partition the field state into causal slabs, strips of the domain padded by halos as wide as the number of steps advanced per block. A streamed mode advances one slab at a time on the device while the global state and the checkpoints reside in host memory (Fig.~\ref{fig:overview}). The device allocation then follows the width of one slab rather than the length of the domain along the partitioned axis, although it still grows with the transverse cross-section. The discrete problem is unchanged. Guided-mode ports, total-field/scattered-field boxes, near-to-far projection, angular-spectrum propagation to remote observation planes, GDSII import and a browser workbench connect the solver to a complete design workflow. The grid and backend foundation come from the MIT-licensed \code{flaport/fdtd} package \citep{fdtd}, and PyTorch supplies device arrays, graph capture and the optimizer interface \citep{paszke2019}.
 
-This paper describes the discrete formulation (Section~\ref{sec:formulation}), the execution and differentiation machinery (Sections~\ref{sec:execution} and~\ref{sec:adjoint}), the tiered-memory mode (Section~\ref{sec:streaming}), the workbench (Section~\ref{sec:workbench}), and the validation and performance records (Sections~\ref{sec:validation} and~\ref{sec:performance}). Every number quoted below is taken from a JSON record in the repository, which also stores the source hashes of the code that produced it \citep{torchfdtd}. The grid and backend foundation come from the MIT-licensed \code{flaport/fdtd} package \citep{fdtd}, and PyTorch supplies device arrays, graph capture and the optimizer interface \citep{paszke2019}.
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/execution-overview.pdf}
+\caption{Execution and differentiation in TorchFDTD. (a) The forward map from design parameters to an objective evaluated after angular-spectrum propagation, and its transposed chain. Every forward kernel has a hand-written transpose, and the transposed sweep obtains forward states from checkpoint replay. (b) Host-streamed execution sweeps causal slabs of $W$ cells with halos of $K$ cells over blocks of $K$ steps. One slab block resides on the GPU while the state banks of all slabs and the block checkpoints stay in host DRAM. (c) Independent lateral tiles solve overlapping subdomains with their own absorbers and assemble the core fields on the output plane. Coupling across the artificial cut is lost, and the resulting error is measured against a full-domain solution.}
+\label{fig:overview}
+\end{figure}
 
-\section{Discrete formulation}
+On the tested scenes the fused path completes full forward solves 9.6 to 17.1 times faster than the package it extends, and host streaming lowers the peak device allocation of a $256^3$ adjoint by 56\% at a 4.1 to 4.8 fold cost in time.
+
+This paper describes the numerical method (Section~\ref{sec:formulation}), the discrete adjoint (Section~\ref{sec:adjoint}), the execution modes (Section~\ref{sec:execution}) and the software structure with usage examples (Section~\ref{sec:software}). Section~\ref{sec:validation} validates the package against analytic solutions, independent solvers and finite differences, and Section~\ref{sec:performance} reports throughput, the memory--time trade-off of host streaming and a propagated optical objective on a workstation.
+
+\section{Numerical method}
 \label{sec:formulation}
 
 \subsection{Yee update and time step}
 
-The six components occupy the standard staggered positions \citep{yee1966}. In a nonmagnetic medium the reduced update reads
+The six field components occupy the standard staggered positions \citep{yee1966}. In a nonmagnetic medium the reduced update reads
 \begin{equation}
 E^{n+1}=E^{n}+S\,\epsilon^{-1}\,\mathcal{C}^{-}\!\left(H^{n+1/2}\right)+s^{n+1},\qquad
 H^{n+3/2}=H^{n+1/2}-S\,\mathcal{C}^{+}\!\left(E^{n+1}\right)+m^{n+3/2},
@@ -72,107 +106,165 @@ where $S=c\Delta t/h$ with $h$ the smallest mesh step, $\mathcal{C}^{\pm}$ are t
 \Delta t\leq\frac{\eta}{c\sqrt{\sum_{a=1}^{d}h_a^{-2}}},\qquad 0<\eta\leq0.99,
 \label{eq:cfl}
 \end{equation}
-which reduces to $\eta h/(c\sqrt{d})$ on a uniform mesh. A graded rectilinear mesh keeps this conservative fine-grid step, so coarsening the background reduces the cell count at fixed physical duration without local time stepping. The two-dimensional solver suppresses the $z$ derivatives while keeping all six components, and Bloch problems carry complex fields.
+which reduces to $\eta h/(c\sqrt{d})$ on a uniform mesh. A graded rectilinear mesh keeps this fine-grid step, so coarsening the background reduces the cell count at a fixed physical duration without local time stepping. The two-dimensional solver suppresses the $z$ derivatives while keeping all six components, and Bloch problems carry complex fields.
 
 \subsection{Boundaries}
 
-Convolutional perfectly matched layers \citep{roden2000} store one memory variable per transverse derivative inside each absorbing face. The stretching coefficients $\kappa$, $\sigma$ and $\alpha$ follow polynomial profiles that are configured per face, so opposite faces and neighbouring faces of different type may carry different depths and gradings. Periodic and Bloch pairs wrap the difference operators without a duplicated end plane, and a Bloch phase enters through the wrapped stencil. Perfect electric conductor faces and electric antisymmetry planes hold the tangential electric field at zero on the boundary node. Perfect magnetic conductor and magnetic symmetry faces require the dual: the upper boundary node of each electric component tangential to the face is a stored degree of freedom, and the package carries those face arrays through the resident, streamed and batched paths, through their checkpoints and journals, and through the absorber memories of neighbouring faces. Because any face type may adjoin any other, the reflection of an absorbing face next to a magnetic wall is measured rather than inferred (Section~\ref{sec:validation}).
+Convolutional perfectly matched layers \citep{roden2000} store one memory variable per transverse derivative inside each absorbing face. The stretching coefficients $\kappa$, $\sigma$ and $\alpha$ follow polynomial profiles configured per face, so opposite faces and neighboring faces of different type may carry different depths and gradings. Periodic and Bloch pairs wrap the difference operators without a duplicated end plane, and the Bloch phase enters through the wrapped stencil. Perfect electric conductor faces and electric antisymmetry planes hold the tangential electric field at zero on the boundary node. Perfect magnetic conductor and magnetic symmetry faces need the dual arrangement, in which the upper boundary node of each tangential electric component becomes a stored degree of freedom. The package carries those face arrays through the resident, streamed and batched paths, through their checkpoints, and through the absorber memories of neighboring faces. Any face type may adjoin any other, so Section~\ref{sec:validation} measures the reflection of an absorbing face next to a magnetic wall.
 
-\subsection{Materials}
+\subsection{Materials and geometry}
 
-A nondispersive cell carries a real permittivity at each Yee electric position. Dispersive materials add up to sixteen Drude or Lorentz poles integrated with the trapezoidal auxiliary differential equation of \citet{okoniewski1997}, and measured refractive-index tables are fitted to a passive multipole model whose error and band are reported before the fit is accepted. Anisotropic media use a symmetric positive-definite permittivity tensor sampled at grid nodes and applied to the curl through a node assembly $S=D^{-1/2}\bigl(\tfrac18\sum R^{\dagger}\epsilon^{-1}R\bigr)D^{-1/2}$, whose eigenvalues stay at or above one so that the vacuum time step of Eq.~\eqref{eq:cfl} remains admissible. Inside an absorbing layer the stretched-coordinate formulation is unstable for tensors whose principal axes are rotated relative to the face normal or whose normal eigenvalue is the intermediate one, a consequence of the backward-wave criterion of \citet{becache2003}. TorchFDTD therefore admits a tensor inside a face only when the face normal is a principal axis with a non-intermediate eigenvalue, a rule checked node by node. Dense one-step spectral radii on small Bloch grids equal 1.000000000 for admitted tensors and 1.0049 to 1.0089 for rejected ones, and a 4000-step sweep over fifteen admitted cases with contrasts up to sixteen shows no growth while the rejected cases grow by factors of $7.9\times10^{3}$ and $7.6\times10^{12}$. Tensor dispersion couples a symmetric positive semidefinite strength tensor to each pole, and poles inside an absorbing face require an axis-aligned $\epsilon_\infty$ with strengths proportional to it.
+A nondispersive cell carries a real permittivity at each Yee electric position. Dispersive materials add up to sixteen Drude or Lorentz poles integrated with the trapezoidal auxiliary differential equation of \citet{okoniewski1997}, and measured refractive-index tables are fitted to a passive multipole model whose error and band are reported before the fit is accepted. Anisotropic media \citep{oskooi2009} use a symmetric positive-definite permittivity tensor sampled at grid nodes and applied to the curl through the node assembly $S=D^{-1/2}\bigl(\tfrac18\sum R^{\dagger}\epsilon^{-1}R\bigr)D^{-1/2}$, with the tensor restricted to eigenvalues at or above one so that the vacuum time step of Eq.~\eqref{eq:cfl} remains admissible. Inside an absorbing layer the stretched-coordinate formulation is unstable for tensors whose principal axes are rotated relative to the face normal or whose normal eigenvalue is the intermediate one, a consequence of the backward-wave criterion of \citet{becache2003} that also constrains the corrected unsplit layers of \citet{oskooi2011}. TorchFDTD therefore admits a tensor inside a face only when the face normal is a principal axis with a non-intermediate eigenvalue, a rule checked node by node. Dense one-step spectral radii on small Bloch grids equal one to nine decimal places for admitted tensors and lie between 1.0049 and 1.0089 for rejected ones, and a 4000-step sweep over fifteen admitted cases with contrasts up to sixteen shows no growth. The rejected cases grow by factors of $7.9\times10^{3}$ and $7.6\times10^{12}$ over that sweep.
 
-Geometry enters through analytic solids (boxes, cylinders, spheres, ellipsoids, rings and extruded polygons with holes) placed by an ordered rotation and a pivot, with a lower mesh order winning overlaps. Membership is evaluated only inside a conservative axis-aligned support, and an optional dielectric subpixel operator averages the permittivity across interfaces \citep{farjadpour2006}. GDSII layouts map layer and datatype pairs to extrusion intervals and materials, apply Boolean etch layers, staircase a sidewall angle on the native $z$ nodes, and keep polygon holes with even-odd filling \citep{gdstk}.
+Geometry enters through analytic solids (boxes, cylinders, spheres, ellipsoids, rings and extruded polygons with holes) placed by an ordered rotation and a pivot, with a lower mesh order winning overlaps. Membership is evaluated only inside a conservative axis-aligned support, and an optional dielectric subpixel operator averages the permittivity across interfaces \citep{farjadpour2006}. GDSII layouts map layer and datatype pairs to extrusion intervals and materials, apply Boolean etch layers, staircase a sidewall angle on the native $z$ nodes and keep polygon holes with even-odd filling \citep{gdstk}.
 
 \subsection{Sources, monitors and projections}
 
-Point and sheet sources inject Gaussian, ramped continuous or sampled waveforms with Cartesian or angular polarization. A one-way plane covering a periodic transverse cell injects a normally incident wave without a backward component, and a closed total-field/scattered-field box surrounds an isolated scatterer with an incident field that is corrected on its faces. Guided-mode sources solve the full-vector finite-difference eigenproblem of the port cross-section \citep{zhu2002} at the temporal wavenumber $\tilde k_0=2\sin(\omega\Delta t/2)/(c\Delta t)$, convert the eigenvalue to the longitudinal Yee propagation constant $\beta=2\arcsin(\tilde\beta\,\Delta w/2)/\Delta w$, and inject electric and magnetic Huygens sheets at their staggered positions and times. The eigensolver returns a canonical basis for degenerate polarization pairs by diagonalizing the overlap of their transverse components, so a port's mode index has the same meaning on every machine.
+Point and sheet sources inject Gaussian, ramped continuous or sampled waveforms with Cartesian or angular polarization. A one-way plane covering a periodic transverse cell injects a normally incident wave without a backward component, and a closed total-field/scattered-field box \citep{schneider2010} surrounds an isolated scatterer with an incident field that is corrected on its faces. Guided-mode sources solve the full-vector finite-difference eigenproblem of the port cross-section \citep{zhu2002} at the temporal wavenumber $\tilde k_0=2\sin(\omega\Delta t/2)/(c\Delta t)$, convert the eigenvalue to the longitudinal Yee propagation constant $\beta=2\arcsin(\tilde\beta\,\Delta w/2)/\Delta w$, and inject electric and magnetic Huygens sheets at their staggered positions and times. The eigensolver returns a canonical basis for degenerate polarization pairs by diagonalizing the overlap of their transverse components, so a port's mode index is stable across machines.
 
-Point monitors record one component per step. Plane monitors accumulate six-component complex spectra with the Yee interpolation and the magnetic half-step phase applied before the signed Poynting flux is formed, and flux ratios are taken against a matching reference run. A closed six-face box of stored spectra feeds a near-to-far transform of the equivalent surface currents in the asymptotic form and in a finite-distance form built on the free-space dyadic Green function, with angular, spherical, Cartesian and direction-cosine observation sets, a complex passive exterior index that may vary per frequency, and an open-surface variant that projects from one to five faces with an edge window. Periodic cells return Bloch diffraction orders separated into forward and backward propagating branches.
-
-\section{Execution}
-\label{sec:execution}
-
-One simulation on the device runs as a sequence of fused kernels: one kernel updates all electric components together with the absorber memories of every face, and one kernel updates the magnetic components. The kernels are captured once into a CUDA Graph together with source injection and monitor accumulation, so a run of $N$ steps replays $N$ graph launches without Python in the loop \citep{paszke2019}. The CPU path executes the same discrete operators with NumPy and Torch tensors and serves as the reference for every device test.
-
-Design workflows evaluate many structures, so the package provides two levels of concurrency. A process-level batch runner executes independent projects in separate processes on one or more devices with checksum-validated resumption, per-case error capture and a memory estimate that limits the number of resident cases. A tensor batch instead places $B$ compatible structures along a leading batch axis of the field arrays and updates all of them in one launch, which amortizes kernel launch and graph overhead for small grids. Structures with different meshes or durations are grouped into cohorts of identical shape and executed cohort by cohort, and the results are returned in the input order. A seeded differential-evolution optimizer \citep{storn1997} drives either level through a user-defined objective for gradient-free design.
+Point monitors record one component per step. Plane monitors accumulate six-component complex spectra with the Yee interpolation and the magnetic half-step phase applied before the signed Poynting flux is formed, and flux ratios are taken against a matching reference run. A closed six-face box of stored spectra feeds a near-to-far transform of the equivalent surface currents \citep{luebbers1991} in the asymptotic form and in a finite-distance form built on the free-space dyadic Green function. The transform accepts angular, spherical, Cartesian and direction-cosine observation sets and a complex passive exterior index that may vary per frequency, and an open-surface variant projects from one to five faces with an edge window. Periodic cells return Bloch diffraction orders separated into forward and backward propagating branches.
 
 \section{Discrete adjoint}
 \label{sec:adjoint}
 
 \subsection{Transposed updates}
 
-Let $u^{n}$ collect the field, absorber and polarization state after step $n$ and let the forward step be $u^{n+1}=F_n(u^{n},p)$ with parameters $p$. For an objective $J(u^{N},\ldots)$ the reverse recursion
+Let $u^{n}$ collect the field, absorber and polarization state after step $n$, and let the forward step be $u^{n+1}=F_n(u^{n},p)$ with parameters $p$. For an objective $J(u^{N},\ldots)$ the reverse recursion
 \begin{equation}
 \bar u^{n}=\left(\frac{\partial F_n}{\partial u}\right)^{\!\mathsf T}\bar u^{n+1}+\frac{\partial J}{\partial u^{n}},\qquad
 \bar p=\sum_n\left(\frac{\partial F_n}{\partial p}\right)^{\!\mathsf T}\bar u^{n+1},
 \label{eq:adjoint}
 \end{equation}
-returns the gradient of $J$ with respect to every parameter after one backward sweep. Each transpose is a hand-written kernel that mirrors its forward kernel. The Yee curls transpose to the opposite-direction differences with the same metric, the absorber recursion transposes to $\bar\psi_{\mathrm{mem}}=\bar\psi+\bar y$, $\bar D=\kappa^{-1}\bar y+c\,\bar\psi_{\mathrm{mem}}$ and $\bar\psi_{\mathrm{old}}=b\,\bar\psi_{\mathrm{mem}}$ for the memory variable $\psi$ with coefficients $b$ and $c$, and the trapezoidal dispersion update transposes to the same two-by-two system applied to the cotangents. The material cotangent $\bar\epsilon^{-1}$ accumulates the product of the electric cotangent with the curl at every step, and a chain of differentiable material producers maps it onto design variables: a scalar or tensor permittivity per cell, a density field passed through a physical-radius filter, symmetry averaging and a smooth projection, an analytic solid whose occupancy is a smooth signed-distance step of fixed physical width, a polygon or spline outline whose vertices or control points move that distance, or a source waveform. Objectives may combine point signals, plane spectra, the amplitudes of guided modes at any number of ports, and the far or near-zone fields of a projected box, since each observation is linear in the stored fields and carries its own transpose.
+returns the gradient of $J$ with respect to every parameter after one backward sweep. Each transpose is a hand-written kernel that mirrors its forward kernel. The Yee curls transpose to the opposite-direction differences with the same metric. The absorber recursion transposes to $\bar\psi_{\mathrm{mem}}=\bar\psi+\bar y$, $\bar D=\kappa^{-1}\bar y+c\,\bar\psi_{\mathrm{mem}}$ and $\bar\psi_{\mathrm{old}}=b\,\bar\psi_{\mathrm{mem}}$ for the memory variable $\psi$ with coefficients $b$ and $c$, and the trapezoidal dispersion update transposes to the same two-by-two system applied to the cotangents. The material cotangent $\bar\epsilon^{-1}$ accumulates the product of the electric cotangent with the curl at every step.
+
+A chain of differentiable material producers maps that cotangent onto design variables. The variables may be a scalar or tensor permittivity per cell, a density field passed through a physical-radius filter, symmetry averaging and a smooth projection \citep{lazarov2011,wang2011}, an analytic solid whose occupancy is a smooth signed-distance step of fixed physical width, a polygon or spline outline whose vertices or control points move that step, or a source waveform. Objectives may combine point signals, plane spectra, the amplitudes of guided modes at any number of ports and the far or near-zone fields of a projected box, since each observation is linear in the stored fields and carries its own transpose. Because the transposed sweep is wrapped as a Torch autograd function, everything upstream of the permittivity and downstream of the observations remains ordinary differentiable Torch code.
 
 \subsection{Checkpoint replay and reversibility}
 
-Storing $u^{n}$ for all $n$ is impossible for three-dimensional problems, so the backward sweep replays the forward pass between checkpoints. With $C$ checkpoints and $N$ steps the binomial schedule of \citet{griewank2000} minimizes the number of recomputed steps, and the package places the checkpoints on device, host or file storage in an explicit tier order. A retained backward pass keeps the adjoint state between transposes so that several objectives can be differentiated from one forward run. For lossless nondispersive periodic problems an opt-in reversible mode reconstructs the forward fields by stepping Eq.~\eqref{eq:yee} backward, in the spirit of \citet{mahlau2024}, and the absorbing-face variant records the fields at the interface between interior and absorber so that the interior reconstruction stays lossless while the absorber is replayed. Which mode is admissible is decided by the material and boundary content of the project rather than by the user.
+Retaining $u^{n}$ for every time step scales with both volume and duration, so the backward sweep instead replays the forward pass between checkpoints. With $C$ checkpoints and $N$ steps the binomial schedule of \citet{griewank2000} minimizes the number of recomputed steps, and the checkpoints are placed in GPU or host memory according to the execution policy. A retained backward pass keeps the adjoint state between transposes, so several objectives can be differentiated from one forward run. For lossless nondispersive periodic problems an opt-in reversible mode reconstructs the forward fields by stepping Eq.~\eqref{eq:yee} backward, in the spirit of \citet{mahlau2024}, and the absorbing-face variant records the fields at the interface between interior and absorber so that the interior reconstruction stays lossless while the absorber is replayed. Which mode is admissible follows from the material and boundary content of the project rather than from a user setting.
 
-\section{Tiered-memory execution}
+\section{Execution on a workstation}
+\label{sec:execution}
+
+\subsection{Fused kernels and batches}
+
+One simulation on the device runs as a sequence of fused kernels compiled through CuPy \citep{okuta2017}: one kernel updates all electric components together with the absorber memories of every face, and one kernel updates the magnetic components. The kernels are captured once into a CUDA graph together with source injection and monitor accumulation, so a run of $N$ steps replays $N$ graph launches without Python in the loop \citep{paszke2019}. The CPU path executes the same discrete operators with NumPy and Torch tensors and serves as the reference for every device test.
+
+A design loop evaluates many structures, so the package runs them either as separate processes or as one tensor batch. A process-level batch runner executes independent projects in separate processes on one or more devices with checksum-validated resumption, per-case error capture and a memory estimate that limits the number of resident cases. A tensor batch instead places $B$ compatible structures along a leading batch axis of the field arrays and updates all of them in one launch. For small grids, this single launch amortizes the kernel-launch and graph overhead. Because structures with different meshes or durations cannot share an axis, they are grouped into cohorts of identical shape and executed cohort by cohort. The results return in the input order. A seeded differential-evolution optimizer \citep{storn1997} drives either level through a user-defined objective for gradient-free design.
+
+\subsection{Host-streamed slabs}
 \label{sec:streaming}
 
-\subsection{Slabs, halos and banks}
+The streamed mode partitions the domain along $x$ into slabs of $W$ cells and advances each slab for $K$ steps before moving to the next, so a block of $K$ steps needs a halo of $K$ cells on either side of the slab (Fig.~\ref{fig:overview}b). Only the slab under update, its halos and its checkpoint reside on the device. The remaining field state lives in banks, contiguous buffers in host DRAM that are read into and written from the device slab by slab. The transposed sweep runs this tiling in reverse, and both sweeps see the same number of field updates plus the halo overhead $2K/W$ per block. Absorber memories, dispersion states and the stored magnetic-wall faces travel with their slabs, and the slab whose core ends at the upper boundary owns the face arrays. Because the halos carry the complete state that the Yee stencil needs at every block, the streamed sweep reproduces the resident discrete problem up to floating-point ordering.
 
-The streamed mode partitions the domain along $x$ into slabs of $W$ cells and advances each slab for $K$ steps before moving to the next, so a block of $K$ steps needs a halo of $K$ cells on either side of the slab. Only the slab under update, its halos and its checkpoint reside on the device. The remaining field state lives in banks, contiguous buffers in host memory or in files on solid-state storage, that are read into and written from the device tile by tile. The transposed sweep runs the same tiling in reverse, and both sweeps see the same number of field updates plus the halo overhead $2K/W$ per block. Absorber memories, dispersion states and the stored magnetic-wall faces travel with their slabs, and the tile whose core ends at the upper boundary owns the face arrays.
+A policy is admitted only after accounting for the active device workspace, the global state banks, the checkpoints, the material tensors and the observation buffers. Slab width $W$ and temporal depth $K$ control the active field extent $W+2K$, while the checkpoint count controls retained history and replay work. For a domain of $N_x\times N_y\times N_z$ cells partitioned along $x$, the device workspace therefore scales with $(W+2K)N_yN_z$ rather than with $N_xN_yN_z$, so it still grows with the transverse cross-section. The host allocation scales with the full volume plus the retained checkpoints, and host capacity and device--host bandwidth bound the usable policies.
 
-The memory a run may consume is reserved before any field array is allocated. The reservation counts the file banks that can be alive at once, the host tensors of the material gradient and the device tiles. Both counts are measured. Weak references to every bank, taken with cyclic garbage collection disabled over sixty-eight nondispersive and dispersive layouts, never exceed two banks in the forward sweep and $C+3$ banks in the backward sweep, and the bound is reached, so the disk reservation charges $C+3$ states instead of the $C+5$ it charged before the measurement. An allocation ledger over two recorded runs finds no full-size host tensor in the forward sweep and exactly two in the backward sweep, so a contiguous scalar-permittivity problem reserves four copies of the parameter array rather than eight. Injected allocation, read, write, transfer and reduction failures leave no scratch file behind while their tracebacks are alive. A metadata planner evaluates candidate $(W,K,C)$ policies from the replay work and the logical file traffic they imply before anything is allocated, and can select a policy by an explicit work metric.
+\subsection{Lateral tiling and exterior propagation}
+\label{sec:hybrid}
 
-\subsection{Durable restart}
+A separate interface partitions a planar device into independently solved, overlapping lateral tiles, each with its own absorber and output plane, and assembles their core fields on the global plane (Fig.~\ref{fig:overview}c). In contrast to the causal slabs above, this is an overlapping-domain approximation of the kind used for large-area metasurfaces \citep{pestourie2018,lin2019}, and it changes the boundary-value problem. A neighboring-tile mismatch is reported as a diagnostic, and Section~\ref{sec:hybrid-validation} measures the error against a full-domain solution.
 
-A multi-hour adjoint on a shared workstation should survive the loss of its process. The streamed mode therefore writes a journal at block boundaries: the forward state and partial signals after each forward block, the completed forward signals, and the adjoint state with the partial material gradient after each backward block. A record is written to a temporary directory, synchronized to storage, renamed into place and published through a per-phase pointer file, and the previous record of the same phase is removed afterwards. The journal carries a contract with the hash of the scene, the permittivity, the options and the runtime source files, so a resume with a changed input or a changed solver is refused with the differing keys named. A resumed backward sweep replays only the blocks below the recorded one from the all-zero initial state, so no restart bank has to survive the failure. The design follows the block-granular offloading of large-model inference systems \citep{sheng2023,kwon2023}, with the causal halo of the wave equation replacing their token dependency.
+In a homogeneous, lossless and source-free exterior containing outgoing waves, a recorded plane field is propagated with the angular spectrum \citep{goodman2005},
+\begin{equation}
+u(x,y,z_0+d)=\mathcal{F}^{-1}_{xy}
+ \left[\mathcal{F}_{xy}\{u(x,y,z_0)\}
+ \exp\!\left(\mathrm{i}d\sqrt{k^2-k_x^2-k_y^2}\right)\right],
+\qquad d\geq0,
+\label{eq:asm}
+\end{equation}
+where the square-root branch makes evanescent components decay. The implementation propagates the sampled electric and magnetic components rather than a scalar transmission coefficient, and zero padding limits the periodic wraparound of the discrete transform \citep{matsushima2009}. The interface returns selected planes, axial sections or points without storing an exterior volume. For a tiled plane $u=\sum_j R_j u_j(p)$ with fixed assembly maps $R_j$, the reverse operation applies $R_j^{\mathsf T}$ to the global plane cotangent before the local FDTD adjoint, and the propagation of Eq.~\eqref{eq:asm} has a differentiable transpose, so an exterior intensity objective differentiates to the material parameters.
 
-\section{Workbench and interoperability}
-\label{sec:workbench}
+\section{Software structure and usage}
+\label{sec:software}
 
-A validated \code{Project} model with a region, materials, structures, sources and monitors is the single description of a scene. Its JSON form is edited in a browser workbench with an objects tree, three orthogonal and one perspective CAD view, a material database, layout and analysis modes, a field viewer and monitor traces, and the same JSON is loaded by the Python interface, stored with every result and exported as a runnable script. The browser talks to a local FastAPI server that queues jobs and streams their state, and a remote GPU is reached through an SSH tunnel rather than by exposing the server.
+TorchFDTD is a Python package of about 36\,000 lines with a serializable scene model, a solver core, an adjoint layer and a browser workbench. A \code{Project} holds the region, materials, structures, sources, monitors and execution policy, and it round-trips through JSON so that the workbench, the command line and scripts operate on one description. The solver core contains the fused CUDA kernels and their transposes, the streamed executor, the batch runners and the CPU reference path. The adjoint layer wraps the transposed sweep as Torch autograd functions and provides the material producers, mode-port and projection objectives, memory estimation and checkpoint tiers. The workbench is a FastAPI service with a JavaScript client for scene editing, execution, field inspection and GDSII import. Optional extras add CuPy for the fused kernels, gdstk for layouts and h5py for HDF5 output, and the repository carries 1551 tests that exercise the CPU path everywhere and the CUDA path where a device is present.
 
-GDSII files are imported through the layer stack described in Section~\ref{sec:formulation} and exported from native polygons and rectangles. Port markers in a layout become a runnable two-port or multiport mode network in one call. An independent reader decodes the documented layout records of a commercial project format into the native model and an independent writer splices edited geometry, sources, monitors and region settings back into the original byte stream, reparsing the result before it is returned. These readers and writers cover the documented subset and reject unsupported records.
+Listing~\ref{lst:forward} runs a three-dimensional waveguide with a fused CUDA solve and saves the result. Lengths are in micrometers.
+\begin{lstlisting}[float=tbp,caption={A forward simulation with the fused CUDA path.},label={lst:forward}]
+from torchfdtd import (Project, Region, Structure, Source, Monitor,
+                       Simulation)
+
+project = Project(
+    name="My waveguide",
+    region=Region(dimension="3d", size=(8, 6, 2), mesh=0.05, steps=1000,
+                  backend="cuda", cuda_kernel="fused"),
+    structures=[Structure(name="core", size=(8, 0.65, 0.4))],
+    sources=[Source(center=(-2.5, 0, 0), wavelength=1.55)],
+    monitors=[Monitor(name="output", center=(2, 0, 0))],
+)
+project.save("project.json")          # opens in the browser workbench
+result = Simulation(project).run()
+result.save("results/run.npz")
+\end{lstlisting}
+
+Listing~\ref{lst:adjoint} differentiates a point-signal objective with respect to the radius of a smooth sphere. The permittivity is built by a differentiable producer from a Torch parameter, the differentiable simulation replays four host checkpoints during the transposed sweep, and a standard optimizer consumes the gradient. Replacing \code{AdjointOptions} by a streamed policy with a slab width and temporal depth switches this model to host-streamed execution.
+\begin{lstlisting}[float=tbp,caption={A differentiable simulation with checkpoint replay.},label={lst:adjoint}]
+import torch
+from torchfdtd import (Project, Region, Source, Monitor, AdjointOptions,
+                       DifferentiableSimulation, smooth_sphere_epsilon)
+
+project = Project(
+    region=Region(size=(1.6, 1.5, 1.4), mesh=0.1, pml_cells=3, steps=40,
+                  precision="float64"),
+    sources=[Source(center=(-0.2, 0, 0), pulse="continuous",
+                    wavelength=1.1)],
+    monitors=[Monitor(center=(0.1, 0, 0))],
+)
+radius = torch.nn.Parameter(
+    torch.tensor(0.25, device="cuda", dtype=torch.float64))
+model = DifferentiableSimulation(
+    project, AdjointOptions(checkpoints=4, storage="host",
+                            host_budget_bytes=128 * 1024**2))
+optimizer = torch.optim.Adam([radius], lr=0.003)
+optimizer.zero_grad()
+epsilon = smooth_sphere_epsilon(project.region, radius, inside=3.0, width=0.09)
+result = model(epsilon)
+loss = result.signals[:, 0].square().mean()
+loss.backward()
+optimizer.step()
+\end{lstlisting}
+
+Each measurement in this paper is a JSON record under \code{docs/validation} with the hardware, execution settings and source hashes of its run. The figures and tables are typeset from these records by scripts that run no solver, and a provenance manifest lists the hash of every record they read.
 
 \section{Validation}
 \label{sec:validation}
 
-\subsection{Analytic and reference problems}
+\subsection{Analytic references}
 
 A lossless slab of index 1.5 and thickness 0.2~\micron{} in air, excited by a broadband sheet in a periodic two-dimensional cell with a 0.025~\micron{} mesh and 16 absorbing cells at each end, is compared with the normal-incidence transmission
 \begin{equation}
 T(\lambda)=\left[1+\left(\frac{n^{2}-1}{2n}\right)^{2}\sin^{2}\!\left(\frac{2\pi nd}{\lambda}\right)\right]^{-1},\qquad R=1-T,
 \label{eq:slab}
 \end{equation}
-at 31 wavelengths between 1.3 and 1.8~\micron{}. The plane-monitor spectra reach maximum absolute errors of \SlabTError{} in transmission and \SlabRError{} in reflection, and the residual of $R+T-1$ stays below $\SlabEnergyError$ (Fig.~\ref{fig:flux-validation}).
+at 31 wavelengths between 1.3 and 1.8~\micron{}. The plane-monitor spectra reach maximum absolute errors of \SlabTError{} in transmission and \SlabRError{} in reflection, and the residual $R+T-1$ stays below $\SlabEnergyError$ (Fig.~\ref{fig:flux-validation}). The transmission and reflection errors are equal and opposite and three orders of magnitude above the energy residual, so the remaining error lies in the discrete response of the slab rather than in the flux monitors.
 
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=\linewidth]{figures/flux-validation.pdf}
-\caption{Plane-monitor spectra of the lossless slab against Eq.~\eqref{eq:slab}. Absolute errors of the 31 recorded samples are plotted on the logarithmic right axis.}
+\caption{Plane-monitor spectra of the lossless slab. (a) Transmission and reflection of the 31 recorded samples, with Eq.~\eqref{eq:slab} as the solid line. (b) Absolute errors of both spectra and the energy residual $|R+T-1|$ on a logarithmic axis.}
 \label{fig:flux-validation}
 \end{figure}
 
-A closed total-field/scattered-field box around a dielectric sphere yields the scattering cross-section over nine wavelengths, which is compared with the Mie series \citep{bohren1983}. The error over a mesh sequence is not monotonic: it falls from 8.9\% at a 0.1~\micron{} mesh to 0.31\% at 0.05~\micron{}, rises to 1.05\% at 0.025~\micron{} and falls again to 0.55\% at 0.02~\micron{}, while doubling the physical duration leaves the 0.025~\micron{} value unchanged (Table~\ref{tab:tfsf-sphere}, Fig.~\ref{fig:tfsf-sphere}). The staircased sphere surface, not the box or the duration, sets this error.
+A closed total-field/scattered-field box around a dielectric sphere yields the scattering cross-section over nine wavelengths, which is compared with the Mie series \citep{bohren1983}. The error is set by the staircased sphere surface rather than by the box or the duration, and it is not monotonic in the mesh. It falls from 8.9\% at a 0.1~\micron{} mesh to 0.31\% at 0.05~\micron{}, rises to 1.05\% at 0.025~\micron{} and falls again to 0.55\% at 0.02~\micron{}, while doubling the physical duration leaves the 0.025~\micron{} value unchanged (Table~\ref{tab:tfsf-sphere}, Fig.~\ref{fig:tfsf-sphere}). Cross-sections of this sphere are therefore accurate to about one percent from a 0.05~\micron{} mesh onward, where the staircase rather than the resolution limits the error.
 
 \input{tables/tfsf-sphere}
 
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=\linewidth]{figures/tfsf-sphere.pdf}
-\caption{Scattering cross-section of the dielectric sphere from the closed total-field/scattered-field box at four mesh steps, with the Mie series as reference.}
+\caption{Scattering cross-section of the dielectric sphere from the closed total-field/scattered-field box at four mesh steps. (a) Recorded cross-sections with the Mie series as reference. (b) Relative error against the Mie series at the nine recorded wavelengths.}
 \label{fig:tfsf-sphere}
 \end{figure}
 
-Radiation projections are checked against the closed-form fields of an electric dipole. With 14, 28 and 56 samples per face axis the finite-distance projection reaches relative errors of $4.6\times10^{-3}$, $1.1\times10^{-3}$ and $2.8\times10^{-4}$ at five points between 0.55 and 1.35~\micron{} outside the box, a second-order sequence, and the asymptotic and finite-distance models agree to $1.9\times10^{-4}$ at a radius of 2000~\micron{}. A lossy exterior with index $1.3+0.05\mathrm{i}$ reproduces the analytic near and far fields with the same convergence. For an open surface the single-face projection of a Gaussian-apodized directional emitter converges to the closed-box result as the field on the omitted faces decays, from $9.6\times10^{-2}$ to $3.8\times10^{-3}$ as the beam waist grows from 0.4 to 0.8 wavelengths, whereas an isotropic dipole stays at 0.79 under refinement.
+Radiation projections are checked against the closed-form fields of an electric dipole. With 14, 28 and 56 samples per face axis the finite-distance projection reaches relative errors of $4.6\times10^{-3}$, $1.1\times10^{-3}$ and $2.8\times10^{-4}$ at five points between 0.55 and 1.35~\micron{} outside the box, a second-order sequence. The asymptotic and finite-distance models agree to $1.9\times10^{-4}$ at a radius of 2000~\micron{}. A lossy exterior with index $1.3+0.05\mathrm{i}$ reproduces the analytic near and far fields with the same convergence. For an open surface the single-face projection of a Gaussian-apodized directional emitter converges to the closed-box result as the field on the omitted faces decays, from $9.6\times10^{-2}$ to $3.8\times10^{-3}$ as the beam waist grows from 0.4 to 0.8 wavelengths, whereas an isotropic dipole stays at 0.79 under refinement. The closed-box projection is therefore accurate from just outside the box to the far field, while an open surface suits directional emitters whose field on the omitted faces is small.
 
-Guided-mode ports are validated on a straight guide, an interface between guides of index 1.0 and 1.2 whose complex scattering parameters are compared with an independent discrete interface solution, a symmetric Y branch and a four-port crossing. A narrow-aperture port on a wide domain matches the full-cell network to $1.6\times10^{-5}$ in the scattering parameters, the Y branch obeys reciprocity to $2.0\times10^{-3}$ with a $1.2\times10^{-4}$ arm asymmetry, and the crossing obeys reciprocity to $2.4\times10^{-4}$ with a $1.2\times10^{-7}$ gap between its four-fold rotated columns. The power missing from the guided channels of the Y branch is radiated by the staircased junction and is reported as a defect rather than corrected.
+Guided-mode ports are validated on a straight guide, an interface between guides of index 1.0 and 1.2, a symmetric Y branch and a four-port crossing, and the complex scattering parameters of the interface are compared with an independent discrete interface solution. A narrow-aperture port on a wide domain matches the full-cell network to $1.6\times10^{-5}$ in the scattering parameters. The Y branch obeys reciprocity to $2.0\times10^{-3}$ with a $1.2\times10^{-4}$ arm asymmetry, and the crossing obeys reciprocity to $2.4\times10^{-4}$ with a $1.2\times10^{-7}$ gap between its four-fold rotated columns. The port model is therefore reciprocal and symmetric to $2\times10^{-3}$ or better, and the power missing from the guided channels of the Y branch is radiated by the staircased junction, a property of the discretized geometry.
 
-The anisotropic path is checked against a birefringent slab of principal indices 1.5 and 2.0 in a co-aligned exterior of indices 1.2 and 1.4 that fills both absorbing faces along the propagation axis. The two polarization channels reproduce the analytic transmission to 1.37\% and 0.33\%, and the derivative of the transmission with respect to the slab index agrees with the analytic derivative to 6.9\%. A magnetic wall next to an absorbing face reflects $1.7\times10^{-4}$ of the incident power with the default profile and $3.5\times10^{-4}$ with $\kappa=3$, $\alpha=0.05$ and a quadratic grading.
+The anisotropic path is checked against a birefringent slab of principal indices 1.5 and 2.0 in a co-aligned exterior of indices 1.2 and 1.4 that fills both absorbing faces along the propagation axis. The two polarization channels reproduce the analytic transmission to 1.37\% and 0.33\%, and the derivative of the transmission with respect to the slab index agrees with the analytic derivative to 6.9\%. A magnetic wall next to an absorbing face reflects $1.7\times10^{-4}$ of the incident power with the default profile and $3.5\times10^{-4}$ with $\kappa=3$, $\alpha=0.05$ and a quadratic grading. On this mesh anisotropic transmission is thus accurate to about one percent and its index derivative to about seven percent, and a magnetic symmetry plane can adjoin an absorber at a reflection cost below $4\times10^{-4}$ of the incident power.
 
 \subsection{Gradient checks}
 
-Every differentiable path is compared with full Torch automatic differentiation on a small grid and with central differences along a random direction, and the Taylor remainder of the directional derivative is required to fall quadratically. Table~\ref{tab:gradients} lists the recorded agreement. The material gradient of the $256^{3}$ problem of Section~\ref{sec:performance} agrees with the complete-history reference to a relative $L_2$ error of $2.4\times10^{-7}$ for the dielectric and $4.3\times10^{-7}$ for the two-pole material, both in single precision.
+We compare every differentiable path with full Torch automatic differentiation on a small grid and with central differences along a random direction, and we require the Taylor remainder of the directional derivative to fall quadratically. Table~\ref{tab:gradients} lists the agreement, and the double-precision autograd comparisons differ at the round-off level. The material gradient of the $256^{3}$ problem of Section~\ref{sec:performance} agrees with the complete-history reference to a relative $L_2$ error of $2.4\times10^{-7}$ for the dielectric and $4.3\times10^{-7}$ for the two-pole material, both in single precision. The transposed kernels therefore reproduce the derivative of the discrete forward model to round-off in double precision and to a few parts in $10^{7}$ in single precision, in resident and streamed execution alike.
 
 \begin{table}[tbp]
 \centering
@@ -180,17 +272,18 @@ Every differentiable path is compared with full Torch automatic differentiation 
 \renewcommand{\arraystretch}{1.15}
 \caption{Recorded gradient agreement of the discrete adjoint. Relative errors compare the transposed sweep with full Torch automatic differentiation unless a finite-difference (FD) reference is named. FP64 on CPU unless stated.}
 \label{tab:gradients}
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}llr@{}}
 \toprule
 Path & Reference & Relative error \\
 \midrule
-Polygon solid through the checkpointed adjoint & autograd, CUDA FP32 & $1.2\times10^{-7}$ \\
+Polygon solid, checkpointed adjoint & autograd, CUDA FP32 & $1.2\times10^{-7}$ \\
 Magnetic-wall faces with CPML & autograd & $2\times10^{-16}$ \\
 Dispersive faces, four pole parameters & autograd & $2.7\times10^{-16}$ \\
 Polygon vertices, voxel VJP & central FD, CPU and CUDA & $6.7\times10^{-8}$ \\
 Polygon vertices through the solver & central FD & $4.4\times10^{-9}$ to $5.5\times10^{-8}$ \\
 Spline control points & central FD & $1.8\times10^{-8}$ \\
-Modal $|S_{21}|^{2}$ objective, N-port & autograd, CPU and CUDA & $1.3\times10^{-15}$ to $5.4\times10^{-15}$ \\
+Modal $|S_{21}|^{2}$ objective, N ports & autograd, CPU and CUDA & $1.3\times10^{-15}$ to $5.4\times10^{-15}$ \\
 Far-field intensity objective & central FD & $3.4\times10^{-10}$ \\
 Near-zone Poynting objective & central FD & $2.7\times10^{-9}$ \\
 Streamed versus resident, tensor media & resident sweep & $1\times10^{-10}$ \\
@@ -199,24 +292,42 @@ Streamed versus resident, magnetic walls & resident sweep & $3\times10^{-7}$ \\
 \end{tabular}
 \end{table}
 
-The discrete adjoint of a shape parameter converges to the physical shape derivative only with the mesh. For a two-dimensional pentagon grating of permittivity 4 and period 0.6~\micron{} at normal incidence and 1.55~\micron{}, the vertex gradient at mesh steps of 0.04, 0.02 and 0.01~\micron{} differs from a central-difference reference at 0.005~\micron{} by 11.6\%, 1.8\% and 0.5\% for a 0.08~\micron{} smoothing width, and by 5.4\% and 1.0\% at the two coarser steps for a 0.04~\micron{} width. Halving the reference step moves the reference by less than 0.07\%.
+The discrete adjoint of a shape parameter converges to the physical shape derivative with the mesh. For a two-dimensional pentagon grating of permittivity 4 and period 0.6~\micron{} at normal incidence and 1.55~\micron{}, the vertex gradient at mesh steps of 0.04, 0.02 and 0.01~\micron{} differs from a central-difference reference at 0.005~\micron{} by 11.6\%, 1.8\% and 0.5\% for a 0.08~\micron{} smoothing width. For a 0.04~\micron{} width the two coarser steps give 5.4\% and 1.0\%. Halving the reference step moves the reference by less than 0.07\%. On this grating a mesh step of 0.02~\micron{} is therefore needed for the vertex gradient to approach the physical shape derivative within 2\%.
 
-\subsection{Test suite}
+\subsection{Comparison with Meep, FDTDX and a rigorous coupled-wave solver}
+\label{sec:cross-solver}
 
-The behaviour above is fixed by 2,141 tests that run on a Linux CPU continuous-integration host and on two CUDA workstations, and every device path is compared with its CPU counterpart. Recorded numerical fixtures carry the SHA-256 of the source files that produced them, so a change in a kernel that alters a recorded number is caught by the test that reads the record.
+To compare the package with independent implementations, we ran Meep 1.34 \citep{oskooi2010} on twelve MPI ranks of an i7-12700 and FDTDX 0.6.2 \citep{mahlau2024} on the RTX 3060 of the same workstation, each from its own driver. The fixtures are the slab above, a Mie sphere at a 0.05~\micron{} mesh, and the vacuum and sphere scenes of Table~\ref{tab:open-source} at $64^{3}$ and $96^{3}$ cells. The absorbing layers share only their thickness, since FDTDX grades its convolutional profile differently and Meep uses a stretched-coordinate layer. Only TorchFDTD closes a total-field/scattered-field box around the sphere, so the other two subtract an empty run from total-field planes. Meep runs in double precision and the GPU solvers in single precision. Between any two solvers the slab transmission differs by at most $\CrossSlabPairT$ and the sphere cross-sections by at most \CrossSpherePair\% (Table~\ref{tab:cross-solver-accuracy}). The three codes agree more closely with each other than with the analytic slab response, so the remaining slab error belongs to the shared Yee discretization rather than to any one implementation.
 
-\subsection{AI-assisted development}
+On that device the fused engine steps \CrossFdtdxStepMin{} to \CrossFdtdxStepMax{} times faster than FDTDX and completes a solve \CrossFdtdxFullMin{} to \CrossFdtdxFullMax{} times faster, and against the twelve Meep ranks, timed with other processes on the host, the full solve is \CrossMeepFullMin{} to \CrossMeepFullMax{} times faster (Table~\ref{tab:cross-solver-speed}). For a periodic dielectric slab at $64^{3}$ cells and 128 steps the checkpointed sweep returns the permittivity gradient \CrossAdjointCheckpointRatio{} times faster than the FDTDX checkpointed method with the same two checkpoints and \CrossAdjointReversibleRatio{} times faster than its reversible method, and the gradients agree to a relative $L_2$ difference of $\CrossGradientDiff$. The Meep adjoint, a frequency-domain method, was not part of this comparison. Against FDTDX the stepping ratio is smaller than the full-solve ratio, so part of the gain comes from setup and transfer rather than from the update kernels alone.
 
-During the development of TorchFDTD, OpenAI GPT-6 Astra and Anthropic Claude Fable 5.1 were used as AI-assisted programming tools to support code prototyping, implementation, refactoring, debugging, test generation, and documentation. The authors defined the numerical formulations, physical assumptions, validation criteria, benchmark protocols, and acceptance thresholds, and reviewed the resulting implementation and numerical results. Solver correctness was independently assessed using analytical reference solutions, numerical convergence studies, finite-difference and automatic-differentiation gradient checks, independently implemented reference calculations, and CPU--GPU parity tests. The authors take full responsibility for the software, methodology, and results reported in this work.
+\input{tables/cross-solver-accuracy}
+\input{tables/cross-solver-speed}
+
+We also cross-checked the density path against TORCWA \citep{kim2023} on a device from our related work, the single-layer silicon nitride color router of \citet{park2026colorrouter}, a $2\times2$~\micron{} periodic cell observed at normal incidence between 420 and 670~nm. On a 15.6~nm mesh the fraction of incident power reaching each of its four detector wells differs from the TORCWA reference by at most 3.0 percentage points, with a mean difference of 1.2 points. At a continuous density between the two materials, the adjoint derivative of a band-averaged routing objective agrees with central differences along two random directions to 1.3\% and 0.07\%.
+
+\subsection{Lateral tiling and exterior propagation}
+\label{sec:hybrid-validation}
+
+Because independent lateral tiles change the boundary-value problem, we measure their error against a full-domain reference. The tiling test uses a $140\times140\times60$ grid with 2059 time steps, split into four tiles with 3~\micron{} cores (Fig.~\ref{fig:hybrid-results}a,b). With the excitation sheet extended through the absorbers and hard core assembly, increasing the overlap from 0.25 to 2~\micron{} reduces the six-component near-field relative $L_2$ error from 12.0\% to 5.68\%, while the total number of simulated cells grows to 2.9 times the full grid. In a separate gradient check at 1.5~\micron{} overlap the focal objective differs by 0.138\% from the full-domain value, whereas the design-region gradient differs by 27.2\%. Consequently, agreement of the tiled derivative with a finite difference of its own forward model does not establish the accuracy of the full-device derivative, and we offer the tiled path for forward screening rather than final gradients.
+
+Exterior propagation has a different error mechanism. For a fixed silicon-pillar lens the full observation-domain calculation uses $180\times180\times202$ cells, while FDTD to the output plane uses $180\times180\times62$ cells followed by Eq.~\eqref{eq:asm}. The relative intensity error over the axial section is 1.78\% (Fig.~\ref{fig:hybrid-results}c). Both routes locate the sampled maximum at 2.775~\micron{} above the plane with transverse full widths at half maximum of 1.336 and 1.326~\micron{}. The long FDTD domain takes 60.5~s, the short domain 4.2~s and the FFT section 0.035~s on a shared RTX 3060, with 2412 and 2167 steps in the two FDTD runs (Fig.~\ref{fig:hybrid-results}d). The two tests separate the coupling error of independent tiles from the sampling error of replacing a homogeneous exterior by propagation.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/decomposition-propagation.pdf}
+\caption{Accuracy and computational extent of the two spatial reductions on an RTX 3060. (a) Full-domain reference errors for independent overlapping tiles with hard core assembly. (b) The summed cell count of all tiles relative to the full grid, including repeated overlap regions. (c) Relative intensity error at each axial position for angular-spectrum propagation compared with FDTD through the observation region. The dashed line marks the sampled FDTD focus. (d) The recorded FDTD and FFT wall times on a logarithmic axis. Panels (a,b) and (c,d) use different lens fixtures.}
+\label{fig:hybrid-results}
+\end{figure}
 
 \section{Performance}
 \label{sec:performance}
 
-All timings below were taken on one NVIDIA RTX 5880 Ada with 48 GiB (51.5 GB) of device memory in a Windows workstation with 137 GB of host memory, in single precision unless stated, as medians of three warmed repetitions that include construction, graph capture, stepping and the transfer of the final fields. Cold compilation and disk writes are excluded.
+Unless stated otherwise, the timings below were taken on one NVIDIA RTX 5880 Ada with 48~GiB (51.5~GB) of device memory and 137~GB of host memory in single precision. Each value is the median of three warmed repetitions that include construction, graph capture, stepping and final-field transfer and exclude cold compilation. The cross-solver comparison of Section~\ref{sec:cross-solver} and the propagated optical objective of Section~\ref{sec:application} use the RTX 3060 workstation.
 
-\subsection{Single simulations and ensembles}
+\subsection{Forward throughput and ensembles}
 
-The fused engine is compared with the PyTorch FDTD package it builds on, executed through the same CUDA Graph adapter so that both run without Python in the step loop \citep{fdtd}. Over eight fixtures at $64^{3}$ and $96^{3}$ cells and 800 steps the fused kernels are 15.8 to 17.1 times faster at $64^{3}$ and 9.6 to 12.1 times faster at $96^{3}$, with point-trace differences below 0.04\% that arise from the different absorber stencils (Table~\ref{tab:open-source}). Sixteen-case parameter sweeps run 31 to 44 times faster than the sequential upstream package at $32^{3}$ and 15 to 16 times faster at $64^{3}$ when the cases share one tensor batch, and four sphere cases at $64^{3}$ and 800 steps take 1.18 s with one CUDA worker against 47.0 s with one NumPy worker (Fig.~\ref{fig:batch-throughput}). The tensor batch itself is 2.4 times faster than sequential native execution for sixteen $32^{3}$ cases and slower than sequential execution for sixteen $64^{3}$ cases, so cohorts of four are selected at that size (Table~\ref{tab:tensor-batch}).
+To isolate the effect of kernel fusion, we compare the fused engine with the PyTorch FDTD package it builds on, executed through one CUDA graph adapter so that both run without Python in the step loop \citep{fdtd}. Over eight fixtures at $64^{3}$ and $96^{3}$ cells and 800 steps the fused path completes a full solve 15.8 to 17.1 times faster at $64^{3}$ and 9.6 to 12.1 times faster at $96^{3}$, with point-trace differences below 0.04\% that arise from the different absorber stencils (Table~\ref{tab:open-source}). Sixteen-case parameter sweeps run 31 to 44 times faster than the sequential upstream package at $32^{3}$ and 15 to 16 times faster at $64^{3}$ when the cases share one tensor batch. Four sphere cases at $64^{3}$ and 800 steps take 1.18~s with one CUDA worker against 47.0~s with one NumPy worker (Fig.~\ref{fig:batch-throughput}). The tensor batch itself is 2.4 times faster than sequential native execution for sixteen $32^{3}$ cases and slower than sequential execution for sixteen $64^{3}$ cases, so cohorts of four are selected at that size (Table~\ref{tab:tensor-batch}).
 
 \input{tables/open-source}
 \input{tables/tensor-batch}
@@ -224,70 +335,54 @@ The fused engine is compared with the PyTorch FDTD package it builds on, execute
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=\linewidth]{figures/batch-throughput.pdf}
-\caption{Wall time and throughput of four-structure ensembles. Bars are medians of three measured batches after warm-up and the left axis is logarithmic.}
+\caption{Wall time on a logarithmic axis (a) and throughput (b) of four-structure ensembles. Bars are medians of three measured batches after warm-up.}
 \label{fig:batch-throughput}
 \end{figure}
 
-\subsection{Other solvers on the same workstation}
-\label{sec:cross-solver}
+\subsection{Resident and host-streamed adjoints}
 
-Meep 1.34 \citep{oskooi2010} on twelve MPI ranks of an i7-12700 and FDTDX 0.6.2 \citep{mahlau2024} on the RTX 3060 of the same workstation were run, one driver per solver, on the slab of Section~\ref{sec:validation}, a Mie sphere at a 0.05~\micron{} mesh, and the vacuum and sphere scenes of Table~\ref{tab:open-source} at $64^{3}$ and $96^{3}$ cells. The absorbing layers share only their thickness, since FDTDX grades its convolutional profile differently and Meep uses a stretched-coordinate layer. Only TorchFDTD closes a total-field/scattered-field box around the sphere, so the other two subtract an empty run from total-field planes. Meep runs in double precision, the GPU solvers in single, and the Meep adjoint, a frequency-domain method, was not run. Between any two solvers the slab transmission differs by at most $\CrossSlabPairT$ and the sphere cross sections by at most \CrossSpherePair\% (Table~\ref{tab:cross-solver-accuracy}).
+The memory--time trade-off of host streaming is isolated on matched $256^3$ grids with 128 steps and two checkpoints (Fig.~\ref{fig:memory-cost}). Timings run from model construction to the transfer of material cotangents to the host. Specifically, the dielectric case takes 2.28~s resident on the GPU and 9.43~s with host-bank streaming, and the two-pole case takes 5.00~s and 23.90~s, while the corresponding device peaks decrease from 2.02 to 0.90~GB and from 5.51 to 2.41~GB. Streaming therefore lowers the device allocation by about 56\% at a factor of 4.1 to 4.8 in elapsed time for these policies, which places it as the mode for problems whose resident allocation would not fit rather than as an acceleration of a resident adjoint. For context, this Torch model on twelve CPU threads takes 407.7~s and 742.0~s, so the resident GPU is 179 and 149 times faster on these fixtures and host streaming retains factors of 43 and 31.
 
-On the same device the fused engine steps \CrossFdtdxStepMin{} to \CrossFdtdxStepMax{} times faster than FDTDX and completes a solve \CrossFdtdxFullMin{} to \CrossFdtdxFullMax{} times faster, and against the twelve Meep ranks, timed with other processes on the host, the full solve is \CrossMeepFullMin{} to \CrossMeepFullMax{} times faster (Table~\ref{tab:cross-solver-speed}). For a periodic dielectric slab at $64^{3}$ cells and 128 steps the checkpointed sweep returns the permittivity gradient \CrossAdjointCheckpointRatio{} times faster than the FDTDX checkpointed method with the same two checkpoints and \CrossAdjointReversibleRatio{} times faster than its reversible method, and the gradients agree to a relative $L_2$ difference of $\CrossGradientDiff$.
-
-\input{tables/cross-solver-accuracy}
-\input{tables/cross-solver-speed}
-
-\subsection{Adjoint}
-
-A $256^{3}$ problem with 128 steps and two checkpoints, timed from construction through the plane-flux objective and every material cotangent, takes 407.7 s for a dielectric and 742.0 s for a two-pole material on the same Torch model with twelve CPU threads, 2.28 s and 5.00 s resident on the device, and 9.44 s and 23.9 s in the streamed mode with host banks. The resident device adjoint is therefore 179 and 149 times faster than the CPU model, and the streamed mode retains 43 and 31 of those factors while holding only the active slabs on the device.
-
-\subsection{Beyond the device memory}
-
-Two runs exceed the 51.5 GB of the processor. The first advances a $1152\times1024\times2048$ real single-precision grid of 2.42 billion cells, whose electric and magnetic state occupies 58.0 GB and 58.3 GB with the absorber memories, for ten steps and a full spatial permittivity gradient with file banks on solid-state storage. The peak device allocation is 2.23 GB, the process peak resident memory is 31.9 GB, the run completes in 58.4 minutes, and the gradient over the causal cone of a point source agrees with a reference computed on the cone alone to a relative $L_2$ error of $9.1\times10^{-8}$ while no cell outside the cone receives a gradient.
-
-The second run tests the journal on a $1152\times1024\times1920$ grid of 2.26 billion cells with the same policy and one journal record per block (Table~\ref{tab:restart}). The first process exits deliberately after publishing its first backward record. A second process restores the completed forward signals in 7.7 s, resumes the backward sweep below the recorded block and finishes in 957 s with a peak device allocation of 3.03 GB, and its gradient matches the causal-cone reference to $9.08\times10^{-8}$. Whole-machine counters sampled every five seconds over both processes peak at 38.9 GB in use of 137 GB installed, with a mean disk write rate of 0.59 GB/s and 1.52 TB written in total, so the operating-system file cache stays below 0.3 GB because every bank is written and read once per block.
-
-\begin{table}[tbp]
+\begin{figure}[tbp]
 \centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\caption{Interrupted and resumed single-precision adjoint on the $1152\times1024\times1920$ grid with slab width 4, temporal depth 4, no interior checkpoints, file banks and one journal record per block.}
-\label{tab:restart}
-\begin{tabular}{@{}lrr@{}}
-\toprule
- & Killed process & Resumed process \\
-\midrule
-Forward sweep (s) & 559.1 & 7.7 (restored) \\
-Journal writes (s) & 96.6 & 64.8 \\
-Total elapsed (s) & 1137.4 & 957.5 \\
-Peak device allocation (GB) & & 3.03 \\
-Peak process resident memory (GB) & 28.5 & 30.0 \\
-Backward file traffic, read / written (GB) & & 546 / 437 \\
-Gradient relative $L_2$ error & & $9.08\times10^{-8}$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+\includegraphics[width=0.72\linewidth]{figures/memory-cost.pdf}
+\caption{Memory--time trade-off between GPU-resident and host-streamed adjoints on the RTX 5880. Matched $256^3$ grids use 128 steps and two checkpoints. (a) Median full-solve time. (b) Median peak Torch device allocation, which excludes the CUDA context and non-Torch allocations. Both quantities use three interleaved warmed repetitions. GB denotes $10^9$ bytes.}
+\label{fig:memory-cost}
+\end{figure}
 
-\section{Discussion}
+\subsection{A propagated optical objective on a workstation}
+\label{sec:application}
 
-We demonstrate a time-domain solver in which the same fused CUDA kernels serve the forward run, its transposed sweep and a streamed execution whose field state exceeds the memory of the processor, with a device footprint of 2 to 3 GB for a 54 GB problem. The measured reservations and the journal turn a large adjoint from a single fragile allocation into a sequence of block records that can be planned, budgeted and resumed.
+To exercise host streaming on a spatially extended optical objective, we evaluate a fixed array of 1936 dielectric pillars over a $44\times44$~\micron{} footprint. The pillars have relative permittivity 4, height 0.6~\micron{}, period 1~\micron{} and radii between 0.15 and 0.42~\micron{}, and a 0.05~\micron{} mesh gives $920\times920\times64$ cells. A plane-wave pulse is propagated for 1836 steps, or 175~fs, by which time the output-plane electric energy has decayed to $5.91\times10^{-4}$ of its recorded peak. The objective sums the on-axis intensity at 1.45, 1.55 and 1.65~\micron{} evaluated 150~\micron{} beyond the output plane with Eq.~\eqref{eq:asm}. The plane spectra are normalized by the sampled time interval, spatially downsampled by eight to $110\times110$ points and propagated with a padding factor of three, and the same sampling is used for the adjoint and the finite differences.
 
-The design of the differentiation layer separates it from frameworks that differentiate their own operations. TORCWA and FDTDX obtain gradients from the framework at the cost of keeping every differentiated operation inside it \citep{kim2023,mahlau2024}, whereas TorchFDTD pays that cost once, in the transposes of a small set of kernels, and is then free to fuse, tile and offload. On the RTX 3060 comparison of Section~\ref{sec:cross-solver} the same gradient arrived \CrossAdjointReversibleRatio{} times faster than with the reversible FDTDX method and \CrossAdjointCheckpointRatio{} times faster than with its two-checkpoint method. The price is coverage: a new physical update needs its transpose before it becomes differentiable, and the eigenmode solver and the source positions are held fixed here as they are in the frameworks above. Single-domain multi-GPU execution is implemented on CPU ranks and awaits a validation on two devices.
+On the RTX 3060, host-bank streaming with slab width 64, temporal depth 32, six global checkpoints and one local checkpoint completes the forward and reverse passes in 176.0~s and 1234.0~s (Fig.~\ref{fig:application}a). The peak device allocation during the reverse pass is 1.61~GB and the sampled process resident memory is 22.19~GB. Two further forward solves evaluate a central difference with a permittivity perturbation of 0.05 in the central pillar region. The adjoint and central-difference directional derivatives are 0.0382185 and 0.0379211, a relative difference of 0.78\% (Fig.~\ref{fig:application}b). The complete driver, including those checks, takes 29.58 minutes in a single run. The example connects propagation through the structured region, a remote optical objective and a dense material derivative without meshing the intervening exterior. Its 1.30~GB electric and magnetic state fits the device, so the example measures the streamed path at a reduced device footprint rather than beyond the device capacity.
 
-Several directions follow from the records. The tensor and magnetic-wall paths run their transposes as Torch operations rather than as fused kernels, so their device throughput is bounded by memory traffic that the fused isotropic kernels avoid. The staircase junction of the Y branch and the non-monotonic sphere errors point to the subpixel operator as the next accuracy step for curved and angled interfaces. Sustained throughput of the streamed mode over hours, rather than the ten-step capacity gates recorded here, will decide how far a single workstation can carry an inverse design whose state exceeds its device.
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/propagated-adjoint.pdf}
+\caption{Streamed evaluation of the fixed $44~\micron{}$ pillar-array objective on an RTX 3060. (a) Timeline of the recorded driver: the forward pass, the adjoint sweep, the two central-difference (FD) forward solves and the remaining setup and checks. (b) The objective at the unperturbed and the two perturbed permittivities of the central pillar region. The adjoint directional derivative and the central-difference secant are drawn as slopes through the unperturbed value. Both use the same sampled output plane and propagation model.}
+\label{fig:application}
+\end{figure}
 
 \section{Conclusion}
 
-TorchFDTD provides an FDTD engine whose forward kernels, transposes and storage tiers are designed together, so that inverse design on one graphics processor is limited by host memory and storage rather than by device memory. The package, its validation records and the source hashes of every measurement are available under the MIT licence \citep{torchfdtd}. Extending the fused transposes to tensor media and magnetic walls, measuring multi-device execution on real hardware, and running the streamed adjoint through a complete multi-hour optimization are the next steps toward design problems of ten billion cells on a single workstation.
+We have shown that the discrete adjoint of fused CUDA time stepping can be exposed to PyTorch and executed with its field state in host memory, so that a single workstation GPU returns material and geometry derivatives of full-wave photonic objectives. The transposed kernels of TorchFDTD give the gradient of differentiable Torch objectives built from the supported observations with respect to permittivity fields, densities, analytic solids, outlines and source waveforms, and its causal slab streaming bounds the device allocation by one slab and its halos while leaving the discrete problem unchanged. The package agrees with analytic solutions, Meep, FDTDX and a rigorous coupled-wave solver, and its adjoint matches automatic differentiation and finite differences. On the tested $64^3$ and $96^3$ scenes its full forward solves are 9.6 to 17.1 times faster than those of the package it extends on an RTX 5880 and \CrossFdtdxFullMin{} to \CrossFdtdxFullMax{} times faster than those of FDTDX on an RTX 3060. The software is available under the MIT license \citep{torchfdtd}.
 
-\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
+Most remaining questions are architectural. First, host streaming keeps dense material arrays, state banks and checkpoints in host memory, so sustained optimization of a device whose field state exceeds the GPU will be governed by host capacity and device--host bandwidth, and the multi-GPU execution of one domain is the next step. Second, the tiled forward path invites a coupled formulation that recovers the lateral coupling that independent tiles discard. On the numerical side, dispersive media that cross an absorbing face and conformal treatment of curved metallic surfaces remain open. Within these bounds, the time-domain adjoint of a photonic device with tens of millions of cells can be evaluated on the hardware that a design group owns.
 
-During the preparation of this work, the authors used generative AI tools to improve the language and readability of the manuscript. After using these tools, the authors reviewed and edited the content as needed and take full responsibility for the content of the publication.
+\section*{Declaration of competing interest}
 
-\section*{Data and code availability}
+The author declares no competing financial interests or personal relationships that could have influenced the work reported in this paper.
 
-The source code, the browser workbench, the test suite and every JSON record quoted in this paper are in the public repository \citep{torchfdtd}. Each record stores the SHA-256 of the source files that produced it and the hardware on which it was taken.
+\section*{Declaration of generative AI and AI-assisted technologies}
+
+\textit{Software development.} During the development of TorchFDTD the author used generative AI tools (OpenAI GPT-6 Astra and Anthropic Claude Fable 5.1) for assistance with implementation, test generation and benchmark scripting. The resulting code was checked by the automated test suite and by the numerical validation reported in this work.
+
+\textit{Manuscript preparation.} During the preparation of this manuscript the author used Anthropic Claude (Fable 5.1 and Opus 5.5) to improve the language, style and readability of the text. After using these tools the author reviewed and edited the content as needed and takes full responsibility for the content of the publication.
+
+\section*{Data availability}
+
+The source code, the test suite and the complete set of validation records are available in the public repository \citep{torchfdtd}. The ancillary files of this preprint contain the records behind every figure and generated table, the two scripts that regenerate those figures and tables from the records, and their SHA-256 provenance manifests. Table~\ref{tab:gradients} and the remaining in-text values are taken from records in the repository. The drivers of the color-router cross-check are in the ancillary files, and the device model they require is in the repository of Ref.~\citep{park2026colorrouter}.
 
 \bibliographystyle{unsrtnat}
 \bibliography{references}

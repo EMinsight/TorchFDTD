@@ -11,9 +11,15 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
+import build_paper_story_figures as style
+
 ROOT = Path(__file__).resolve().parents[1]
 PAPER = ROOT / 'docs/paper'
 DATA = ROOT / 'docs/validation'
+if not DATA.is_dir():
+    # arXiv ancillary layout: records and this script under anc/, figures/ and tables/ at the root
+    DATA = ROOT / 'anc'
+    PAPER = ROOT
 
 
 def write_table(name: str, caption: str, header: str, rows: list[str], columns: str = '@{}lrrrr@{}') -> None:
@@ -143,53 +149,63 @@ def build_assets() -> None:
     data = {name: json.loads(value) for name, value in raw.items()}
     flux, batch, cuda = (data[name] for name in ('flux', 'batch', 'cuda-kernels'))
 
-    plt.rcParams.update({
-        'font.family': 'DejaVu Sans', 'font.size': 10,
-        'axes.labelsize': 10, 'legend.fontsize': 8.5,
-        'axes.spines.top': False, 'axes.spines.right': False,
-        'axes.linewidth': 0.6, 'pdf.fonttype': 42,
-    })
-    metadata = {'Author': 'Hyoseok Park', 'CreationDate': None, 'ModDate': None}
+    style.apply_style()
+    metadata = style.METADATA
     wl = np.asarray(flux['wavelength_um'])
     order = np.argsort(wl)
     exact_t = np.asarray(flux['analytic_T'])
-    fig, axes = plt.subplots(1, 2, figsize=(7.5, 2.9), layout='constrained')
-    for key, exact, color in [('T', exact_t, '#1679aa'), ('R', 1-exact_t, '#d65c43')]:
+    fig, axes = plt.subplots(1, 2, figsize=(style.WIDTH, 2.3))
+    for key, exact, color, marker in [('T', exact_t, style.BLUE, 'o'), ('R', 1-exact_t, style.ORANGE, 's')]:
         values = np.asarray(flux[key])
-        axes[0].plot(wl[order], values[order], color=color, label=f'Native {key}', lw=1.8)
-        axes[0].plot(wl[order], exact[order], color='black', ls='--' if key=='T' else ':',
-                     lw=1, label=f'Analytic {key}')
-        axes[1].plot(wl[order], np.abs(values-exact)[order], color=color,
-                     label=f'|{key} - analytic|', lw=1.5, ls='-' if key=='T' else '--')
+        # small hollow markers under the analytic line, so both stay visible
+        axes[0].plot(wl[order], values[order], ls='none', marker=marker, color=color, ms=2.4,
+                     mfc='white', mew=0.8, zorder=2, label=f'TorchFDTD {key}')
+        axes[0].plot(wl[order], exact[order], color=style.INK, lw=0.8, zorder=3,
+                     label='analytic' if key == 'T' else None)
+        axes[0].annotate(key, (wl[order][-1], values[order][-1]), (7, 0), textcoords='offset points',
+                         va='center', fontsize=7.5, color=color, weight='bold')
+    # |T - analytic| and |R - analytic| coincide within the energy residual: draw one as a line, the other as markers
+    error_t = np.abs(np.asarray(flux['T']) - exact_t)
+    error_r = np.abs(np.asarray(flux['R']) - (1 - exact_t))
+    axes[1].plot(wl[order], error_t[order], color=style.BLUE, lw=1.4, zorder=2, label='|T $-$ analytic|')
+    axes[1].plot(wl[order], error_r[order], ls='none', marker='s', color=style.ORANGE, ms=2.2,
+                 mfc='white', mew=0.8, zorder=3, label='|R $-$ analytic|')
     residual = np.abs(np.asarray(flux['R']) + np.asarray(flux['T']) - 1)
-    axes[1].plot(wl[order], residual[order], color='#528257', label='|R + T - 1|', lw=1.5)
-    axes[0].set(xlabel=r'Wavelength ($\mu$m)', ylabel='Power ratio', ylim=(-0.04, 1.04))
-    axes[1].set(xlabel=r'Wavelength ($\mu$m)', ylabel='Absolute error', yscale='log')
-    for label, ax in zip(['(a)', '(b)'], axes):
-        ax.set_title(label, loc='left', fontsize=10, fontweight='bold')
-        ax.grid(alpha=0.18)
-    axes[0].legend(frameon=False, ncol=2)
-    axes[1].legend(frameon=False, loc='upper right', bbox_to_anchor=(1, 0.87))
-    fig.savefig(PAPER / 'figures/flux-validation.pdf', metadata=metadata)
+    axes[1].plot(wl[order], residual[order], color=style.TEAL, lw=1.1, marker='.', ms=3,
+                 label='|R + T $-$ 1|')
+    axes[1].annotate('equal within the\nenergy residual', (wl[order][15], error_t[order][15]), (0, 7),
+                     textcoords='offset points', ha='center', va='bottom', fontsize=6.2, color=style.MUTED)
+    axes[0].set(xlabel='Wavelength (µm)', ylabel='Power ratio', ylim=(0, 1.0), xlim=(1.28, 1.86))
+    axes[0].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    axes[1].set(xlabel='Wavelength (µm)', ylabel='Absolute error', yscale='log', xlim=(1.28, 1.82))
+    axes[1].set_ylim(3e-8, 3e-2)
+    axes[0].legend(loc='center right', bbox_to_anchor=(1.0, 0.52), handlelength=1.5)
+    axes[1].legend(loc='center right', bbox_to_anchor=(1.0, 0.52))
+    style.panel(axes[0], 'a', 'Slab transmission and reflection, 31 samples')
+    style.panel(axes[1], 'b', 'Error against the analytic spectra and energy residual')
+    fig.tight_layout(w_pad=2.2)
+    fig.savefig(PAPER / 'figures/flux-validation.pdf', metadata=metadata, bbox_inches='tight', pad_inches=0.04)
     plt.close(fig)
 
     sphere = data['tfsf-sphere']['cases'] + data['tfsf-sphere-finer']['cases']
-    fig, axes = plt.subplots(1, 2, figsize=(7.5, 3.0), layout='constrained')
-    for case, color in zip(sphere, ['#718da8', '#1679aa', '#d65c43', '#528257']):
+    sphere.sort(key=lambda c: -c['project']['region']['mesh'])   # coarse to fine
+    fig, axes = plt.subplots(1, 2, figsize=(style.WIDTH, 2.35))
+    markers = ['o', 's', 'D', '^']
+    for case, color, marker in zip(sphere, style.BLUES, markers):
         wl=np.asarray(case['wavelength_um']);order=np.argsort(wl)
         actual=np.asarray(case['scattering_cross_section_um2'])
         exact=np.asarray(case['mie_cross_section_um2'])
-        label=f"h = {case['project']['region']['mesh']:g} " + r'$\mu$m'
-        axes[0].plot(wl[order],actual[order],color=color,label=label,lw=1.3)
-        axes[1].plot(wl[order],abs(actual/exact-1)[order],color=color,label=label,lw=1.3)
-    axes[0].plot(wl[order],exact[order],'k--',label='Analytic Mie',lw=1)
-    axes[0].set(xlabel=r'Wavelength ($\mu$m)',ylabel=r'Scattering cross section ($\mu$m$^2$)')
-    axes[1].set(xlabel=r'Wavelength ($\mu$m)',ylabel='Absolute relative error',yscale='log')
-    for label,ax in zip(['(a)','(b)'],axes):
-        ax.set_title(label,loc='left',fontsize=10,fontweight='bold')
-        ax.grid(alpha=.18)
-    axes[0].legend(frameon=False,fontsize=7.8)
-    fig.savefig(PAPER/'figures/tfsf-sphere.pdf',metadata=metadata)
+        label=f"$h$ = {case['project']['region']['mesh']:g} µm"
+        axes[0].plot(wl[order],actual[order],color=color,label=label,lw=1.2,marker=marker,ms=3.2,mfc='white',mew=0.9)
+        axes[1].plot(wl[order],abs(actual/exact-1)[order],color=color,label=label,lw=1.2,marker=marker,ms=3.2,mfc='white',mew=0.9)
+    axes[0].plot(wl[order],exact[order],color=style.INK,ls=(0,(4,2)),label='Mie series',lw=1.0,zorder=0)
+    axes[0].set(xlabel='Wavelength (µm)',ylabel='Scattering cross section (µm$^2$)', xlim=(1.28, 1.82))
+    axes[1].set(xlabel='Wavelength (µm)',ylabel='Relative error',yscale='log', xlim=(1.28, 1.82), ylim=(1e-4, 3e-1))
+    axes[0].legend(loc='upper right', handlelength=2.0)
+    style.panel(axes[0], 'a', 'TFSF sphere cross section by mesh step')
+    style.panel(axes[1], 'b', 'Relative error against the Mie series')
+    fig.tight_layout(w_pad=2.2)
+    fig.savefig(PAPER/'figures/tfsf-sphere.pdf',metadata=metadata, bbox_inches='tight', pad_inches=0.04)
     plt.close(fig)
     sphere += data['tfsf-sphere-long']['cases']
     write_table('tfsf-sphere',
@@ -205,26 +221,30 @@ def build_assets() -> None:
 
     rows = batch['measurements']
     labels = [f"{r['backend'].upper()}\n{r['workers']} worker" + ('s' if r['workers']>1 else '') for r in rows]
-    colors = ['#718da8', '#1679aa', '#48a9b9', '#82c7c1']
-    fig, axes = plt.subplots(1, 2, figsize=(7.5, 2.9), layout='constrained')
-    for ax, key, ylabel, panel in zip(axes,
+    colors = [style.GREY if r['backend'] == 'cpu' else style.BLUE for r in rows]
+    fig, axes = plt.subplots(1, 2, figsize=(style.WIDTH, 2.2))
+    for ax, key, ylabel, letter, ttl in zip(axes,
             ['median_seconds', 'cases_per_second'],
-            ['Four-case wall time (s)', 'Cases per second'], ['(a)', '(b)']):
+            ['Four-case wall time (s)', 'Cases per second'], ['a', 'b'],
+            ['Wall time, logarithmic axis', 'Throughput']):
         values = [r[key] for r in rows]
-        ax.bar(labels, values, color=colors, width=0.65, zorder=2)
+        bars = ax.bar(labels, values, color=colors, width=0.62, linewidth=0)
         ax.set_ylabel(ylabel)
-        ax.set_title(panel, loc='left', fontsize=10, fontweight='bold')
-        ax.grid(axis='y', alpha=0.18, zorder=0)
-        ax.tick_params(axis='x', labelsize=9)
+        style.panel(ax, letter, ttl)
+        style.ygrid(ax)
+        ax.tick_params(axis='x', length=0)
         if key=='median_seconds':
-            ax.set(yscale='log', ylim=(0.7, 90))
-            for j, v in enumerate(values):
-                ax.text(j, v*1.13, f'{v:.3f}', ha='center', fontsize=8.5)
+            ax.set(yscale='log', ylim=(0.5, 200))
+            ax.bar_label(bars, labels=[f'{v:.2f}' for v in values], padding=2.5, fontsize=6.5)
+            ax.annotate(f"{rows[1]['speedup_vs_cpu_1']:.0f}$\\times$", (0.5, 7.5), ha='center', va='center',
+                        fontsize=6.6, color=style.MUTED)
+            ax.annotate('', (1, 1.55), (0, 38), arrowprops=dict(arrowstyle='-|>', color=style.LINE, lw=0.6,
+                        mutation_scale=6, connectionstyle='arc3,rad=-0.25'))
         else:
-            ax.set_ylim(0, 4.05)
-            for j, v in enumerate(values):
-                ax.text(j, v+0.08, f'{v:.3f}', ha='center', fontsize=8.5)
-    fig.savefig(PAPER / 'figures/batch-throughput.pdf', metadata=metadata)
+            ax.set_ylim(0, 4.3)
+            ax.bar_label(bars, labels=[f'{v:.2f}' for v in values], padding=2.5, fontsize=6.5)
+    fig.tight_layout(w_pad=2.2)
+    fig.savefig(PAPER / 'figures/batch-throughput.pdf', metadata=metadata, bbox_inches='tight', pad_inches=0.04)
     plt.close(fig)
 
     write_table('batch',

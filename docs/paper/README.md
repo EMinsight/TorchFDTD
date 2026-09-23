@@ -1,32 +1,38 @@
 # TorchFDTD manuscript
 
-`manuscript.tex` is the canonical editable manuscript. The author is **Hyoseok Park**.
-`references.bib` holds the bibliography. The source uses neither em dashes nor semicolons.
+`manuscript.tex` is the canonical editable source. Hyoseok Park is the sole
+author. The manuscript has no acknowledgments. Preserve its academic style
+and do not add em dashes or semicolons.
 
-The manuscript is a software paper in the form of a Computer Physics Communications
-article: introduction, discrete formulation, execution, discrete adjoint,
-tiered-memory execution, workbench, validation, performance, discussion and
-conclusion. Every number in it comes from a JSON record under `docs/validation`.
-The earlier technical draft that listed every development step is kept in
-`archive/` for reference and is not built.
+## Scientific scope
 
-## Compile this folder
+The manuscript is written as a Computer Physics Communications software
+paper: abstract, program summary, numerical method, discrete adjoint,
+execution modes, software structure with two usage listings, validation,
+performance and conclusion. It evaluates GPU-resident and host-DRAM-streamed
+discrete-adjoint execution with matched memory/time comparisons and a
+completed propagated optical-objective evaluation. No SSD tier, file-backed
+capacity test or durable-restart result is included. Independent lateral
+tiles are approximate, unlike causal slab streaming. The colour-router
+cross-check against TORCWA (docs/validation/color-router-rcwa-3060.json)
+cites the related arXiv preprint and reports summary numbers only, without
+the design pattern. Its drivers are in benchmarks/color_router_rcwa and run
+against the published mask and model of that preprint.
 
-Use a current TeX Live or MiKTeX installation with pdfLaTeX and BibTeX. From this folder:
+## Standalone compilation
+
+With TeX Live or MiKTeX, run in this directory:
 
 ```sh
-pdflatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
+xelatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
 bibtex manuscript
-pdflatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
-pdflatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
+xelatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
+xelatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
 ```
 
-Alternatively, run `latexmk -pdf -interaction=nonstopmode -halt-on-error manuscript.tex`.
-The checked-in figure PDFs and table files are sufficient. Python, CUDA and the simulator are not needed for this standalone compilation.
-
-## Overleaf
-
-Upload the contents of this folder, or import `torchfdtd-latex-source.zip` as a new project. Select `manuscript.tex` as the main document and pdfLaTeX as the compiler. The ZIP includes only the manuscript, bibliography, figure PDFs, table sources, this guide and an asset provenance record.
+The figure PDFs and table sources are sufficient for typesetting. CUDA
+and the simulator are not needed. Select manuscript.tex as the main
+document and XeLaTeX as the compiler in Overleaf.
 
 ## Repository build
 
@@ -36,12 +42,52 @@ From the repository root, with NumPy and Matplotlib available:
 python scripts/build_paper.py
 ```
 
-The build regenerates three vector figures and fifteen measurement tables from the recorded JSON measurements in `docs/validation`, compiles the TeX and resolves BibTeX citations. It writes the PDF to `docs/paper/torchfdtd-manuscript.pdf` and `output/pdf/torchfdtd-manuscript.pdf`, and a portable source bundle to `output/torchfdtd-latex-source.zip`. Intermediate files stay in `tmp/latex`. No simulation runs during this build. The geometry update adds analytic solid/rotation definitions, bounded host preparation and eight full-wall CUDA ensemble ablations with bitwise output gates. The rectilinear update adds the axis-dependent CFL, explicit node representation, a discrete energy identity, and an eight-workload matched-dt mesh ablation, separate from the cross-library timings.
+This regenerates the original measured assets and four added story figures,
+then compiles the manuscript. No simulation runs. Use `--keep-assets` to
+compile the existing figures and tables unchanged. Do not hand-edit generated
+tables or fabricate replacement measurement records.
 
-Use `--keep-assets` to compile the checked-in assets unchanged. Do not edit generated files in `tables` by hand. Update the recorded validation data only after completing the corresponding experiment, then regenerate the assets. `asset-provenance.json` records SHA-256 hashes of the input JSON files.
+Outputs are docs/paper/torchfdtd-manuscript.pdf,
+output/pdf/torchfdtd-manuscript.pdf, output/torchfdtd-latex-source.zip and
+output/torchfdtd-arxiv.zip. Temporary TeX files remain in tmp/latex.
 
-The interoperability follow-up describes recognized primitive import and existing-geometry and supported scene-settings writeback, including polygon pivots, ordered rotations, untouched-byte preservation and independent native roundtrip checks. These checks use author-generated records and native calculations. They do not establish commercial electromagnetic agreement or general file-format compatibility.
+## arXiv submission
 
-The build checks unresolved references, overfull boxes and the punctuation rule. A rendered page review is still required after layout changes. The manuscript's prose is never regenerated from Markdown.
+output/torchfdtd-arxiv.zip is the submission bundle: manuscript.tex,
+references.bib, the compiled manuscript.bbl (arXiv does not run BibTeX),
+the figure PDFs, the table sources, a 00README.XXX naming the top-level
+file, and an anc/ directory with the validation records behind every
+figure and table, the provenance manifests and the story-figure generator.
+The bundle compiles standalone with XeLaTeX and the Latin Modern fonts
+of TeX Live. Upload the ZIP as is and select XeLaTeX if arXiv asks.
 
-The mixed-topology follow-up derives exact grouping, memory-limited cohort partitioning and input-order result recovery. Four 16-case RTX 5880 workloads compare complete grouped execution with native and graph-adapted upstream sequences. Grouping overhead, increased allocation and modest gains remain visible.
+## Figure provenance
+
+`asset-provenance.json` covers the original tables and figures.
+`story-figure-provenance.json` records inputs and hashes for:
+
+- execution-overview.pdf, a method schematic
+- memory-cost.pdf, matched GPU-resident and host-DRAM-streamed adjoints (two panels)
+- decomposition-propagation.pdf, two independent validation fixtures
+- propagated-adjoint.pdf, a completed fixed-array optical derivative
+
+`scripts/build_paper_story_figures.py` generates those four figures.
+The script uses recorded data, not new FDTD runs or generated field images.
+Its copy in the curated arXiv archive also runs against the included records.
+
+## Checks before public release
+
+The build rejects unresolved references, overfull boxes and forbidden
+punctuation. Rendered pages must also be inspected. The author must approve
+the numerical claims, attribution and final text, choose the manuscript
+licence and inspect the submission server's PDF. Compilation is not
+scientific certification or a journal acceptance decision.
+
+Typography
+The manuscript is set in Latin Modern (the Computer Modern family of a
+default LaTeX article) for text and mathematics through fontspec and
+unicode-math, so XeLaTeX needs only the fonts shipped with TeX Live or
+MiKTeX. Figure labels use Arial, and the vector figure PDFs embed their
+font subsets, so no system font is needed to compile. Regenerating the
+figures does require an Arial installation.
+See https://info.arxiv.org/help/faq/texlive.html for engine/font requirements.

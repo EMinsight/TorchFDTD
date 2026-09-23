@@ -1,0 +1,11 @@
+{
+  "description": "Vector schematics and plots from completed records. No new simulation or interpolated field image.",
+  "inputs": {
+    "cpu-gpu-adjoint-256-dielectric-5880.json": "81c50fb6eb09d335f7f756f3deeb5c6cdb420995b71da480c4d03e4ce68f9abc",
+    "cpu-gpu-adjoint-256-ade-5880.json": "64ab4673c096e8762fedf67604c1b14a8ce1ec34083aa0b011ceb0a0b19f35bd",
+    "tiled-stitching-3d-3060.json": "527e7e6b165799f3936de2875f82376df117633d0d8dea18c3dec4550e8482f7",
+    "angular-spectrum-3060.json": "580e4816fd5deab9902413a9313b80e84f7062d4e27055175cfa9e501937a67a",
+    "beyond_vram_propagated_3060.json": "f670ee08f14a53621a9a07811168c0c6b4aa76fae7c9d6ef73822f5dd3cac670"
+  },
+  "generator_sha256": "a82118802d23b8e7616c5ed147b52c2698781374d8181b14285599b8cc82b357"
+}
