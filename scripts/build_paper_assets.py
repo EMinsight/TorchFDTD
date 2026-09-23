@@ -79,22 +79,29 @@ def ceil_sig(value: float, digits: int) -> float:
     return math.ceil(value * scale - 1e-9) / scale
 
 
+RANK_WORDS = {4: 'four', 8: 'eight', 12: 'twelve', 16: 'sixteen'}
+
+
+def fastest_meep(records: list[dict]) -> dict:
+    """The Meep throughput record of the workstation whose rank count solves every scene fastest."""
+    assert all('float64' in r['environment']['precision'] for r in records)
+    best = min(records, key=lambda r: sum(c['median_wall_seconds'] for c in r['cases']))
+    for case in best['cases']:
+        for key in ('median_wall_seconds', 'median_loop_seconds'):
+            assert all(case[key] <= other[key] for r in records for other in r['cases'] if other['name'] == case['name'])
+    return best
+
+
 def precision_assets(torch_: dict, records: list[dict]) -> None:
     """Double-precision forward solves of the sphere scenes: Meep on the workstation CPU at its fastest timed rank
     count against TorchFDTD on the A100. Writes the table and the macros of the text."""
     gpu = {(c['name'], c['precision']): c for c in torch_['cases']}
-    # records: every Meep throughput record timed on the workstation; each case takes its fastest one
-    assert all('float64' in r['environment']['precision'] for r in records)
+    meep = fastest_meep(records)
     ranks = sorted({r['environment']['mpi_processes'] for r in records})
-    best = {}
-    for r in records:
-        for case in r['cases']:
-            if case['name'].startswith('sphere') and (case['name'] not in best or case['median_wall_seconds'] < best[case['name']][0]['median_wall_seconds']):
-                best[case['name']] = (case, r['environment']['mpi_processes'])
-    (fastest,) = {n for _, n in best.values()}   # one rank count serves both grids
-    words = {4: 'four', 8: 'eight', 12: 'twelve', 16: 'sixteen'}
+    fastest, words = meep['environment']['mpi_processes'], RANK_WORDS
     rows, ratios64, ratios32, cost = [], [], [], []
-    for name, (case, _) in sorted(best.items(), key=lambda item: item[1][0]['cells']):
+    for case in sorted((c for c in meep['cases'] if c['name'].startswith('sphere')), key=lambda c: c['cells']):
+        name = case['name']
         t64, t32 = gpu[(name, 'float64')], gpu[(name, 'float32')]
         assert t64['cells'] == case['cells'] and t64['steps'] == case['steps']
         r64 = case['median_wall_seconds'] / t64['median_wall_seconds']
@@ -125,8 +132,9 @@ def precision_assets(torch_: dict, records: list[dict]) -> None:
     (PAPER / 'tables/precision-values.tex').write_text('\n'.join(values), encoding='utf-8')
 
 
-def cross_solver_assets(record: dict) -> None:
-    """Two tables and the text macros of the same-workstation Meep and FDTDX comparison."""
+def cross_solver_assets(record: dict, meep: dict) -> None:
+    """Two tables and the text macros of the same-workstation Meep and FDTDX comparison. The Meep throughput rows come
+    from meep, the record of the rank count that is fastest on the workstation CPU."""
     label = {'torchfdtd': 'TorchFDTD', 'fdtdx': 'FDTDX', 'meep': 'Meep'}
     method = {'torchfdtd': 'closed TFSF box, scattered-field planes',
               'fdtdx': 'one-way plane source, empty run subtracted',
@@ -140,8 +148,8 @@ def cross_solver_assets(record: dict) -> None:
     pair_sphere = max(v['max_relative'] for v in sphere['pairwise'].values())
     rows += [r'\midrule', r'\multicolumn{2}{@{}l}{Largest pairwise difference} & ' + f"${sci(pair_t, 2)}$ & ${sci(pair_r, 2)}$ & {100*pair_sphere:.2f} " + r'\\']
     write_table('cross-solver-accuracy',
-        'TorchFDTD, FDTDX 0.6.2 and Meep 1.34 on one workstation with an i7-12700, on which Meep ran with twelve MPI ranks, '
-        'and an RTX 3060 for the two GPU solvers. The slab columns are the maximum absolute errors of the transmission and '
+        'TorchFDTD, FDTDX 0.6.2 and Meep 1.34 on one workstation, with its i7-12700 CPU for Meep and its RTX 3060 for the '
+        'two GPU solvers. The slab columns are the maximum absolute errors of the transmission and '
         'reflection spectra against Eq.~\\eqref{eq:slab} over 31 wavelengths. The sphere column is the maximum relative '
         f"cross-section error of a sphere of index {sphere_fixture['sphere']['index']} and radius {sphere_fixture['sphere']['radius_um']}~\\micron{{}} "
         f"against the Mie series over nine wavelengths at a {sphere_fixture['mesh_um']}~\\micron{{}} mesh, with the source and "
@@ -151,12 +159,15 @@ def cross_solver_assets(record: dict) -> None:
         rows, columns='@{}llrrr@{}')
 
     cases = record['throughput']['cases']
+    meep_cases = {c['name']: c for c in meep['cases']}
+    assert meep_cases.keys() == cases.keys()
+    solver = lambda case_name, s: meep_cases[case_name] if s == 'meep' else cases[case_name]['solvers'][s]
     forward = []
     for case_name, case in cases.items():
         if not case_name.startswith('sphere'):
             continue
         for s in label:
-            r = case['solvers'][s]
+            r = solver(case_name, s)
             peak = r.get('peak_allocated_bytes', r.get('peak_bytes_in_use'))
             forward.append(f"${case['shape'][0]}^3$ & {label[s]} & {r['median_wall_seconds']:.3f} & {r['median_loop_seconds']:.3f} & "
                            f"${sci(r['cell_steps_per_second_stepping'], 2)}$ & {'CPU' if peak is None else f'{peak/2**20:.0f}'} " + r'\\')
@@ -176,19 +187,21 @@ def cross_solver_assets(record: dict) -> None:
         'The forward rows are the sphere scene at 800 steps as medians of three warmed solves, where the full solve includes '
         'setup and the final field transfer and the stepping column is the time-stepping loop alone. The adjoint rows are the '
         'permittivity gradient of a periodic dielectric slab at $64^{3}$ cells and 128 steps, and the last column is the '
-        r'relative $L_2$ difference of each gradient from the TorchFDTD gradient. Meep ran in double precision on twelve MPI '
-        'ranks, and its adjoint is excluded because it is a frequency-domain method. '
+        r'relative $L_2$ difference of each gradient from the TorchFDTD gradient. Meep ran in double precision on '
+        f"{RANK_WORDS[meep['environment']['mpi_processes']]} MPI ranks, its fastest setting on this CPU, and its adjoint is "
+        'excluded because it is a frequency-domain method. '
         'The GPU solvers ran in single precision.',
         [('@{}llrrrr@{}', r'Grid & Solver & \shortstack{Full solve\\(s)} & \shortstack{Stepping\\(s)} & \shortstack{Cell-steps/s\\stepping} & \shortstack{Peak device\\(MiB)}', forward),
          ('@{}lrrr@{}', r'Adjoint method & \shortstack{Time to\\gradient (s)} & \shortstack{Peak device\\(MiB)} & \shortstack{Gradient relative\\$L_2$ difference}', adjoint_rows)])
 
     torch_cases = {n: c['solvers']['torchfdtd'] for n, c in cases.items()}
-    ratio = {s: {k: [c['solvers'][s][k] / torch_cases[n][k] for n, c in cases.items()]
+    ratio = {s: {k: [solver(n, s)[k] / torch_cases[n][k] for n in cases]
                  for k in ('median_wall_seconds', 'median_loop_seconds')} for s in ('fdtdx', 'meep')}
     gradient_difference = max(adjoint['pairwise'][f'torchfdtd_checkpointed_vs_{k}']['gradient_relative_l2']
                               for k in ('fdtdx_checkpointed', 'fdtdx_reversible'))
     values = [
-        '% Generated from docs/validation/cross_solver_3060.json.',
+        '% Generated from docs/validation/cross_solver_3060.json and the fastest docs/validation/cross_solver/meep_throughput_ranks*.json.',
+        r'\newcommand{\CrossMeepRanks}{' + RANK_WORDS[meep['environment']['mpi_processes']] + '}',
         r'\newcommand{\CrossSlabPairT}{' + sci(ceil_sig(pair_t, 2), 1) + '}',
         r'\newcommand{\CrossSpherePair}{' + f'{ceil_sig(100*pair_sphere, 1):.1f}' + '}',
         r'\newcommand{\CrossFdtdxStepMin}{' + f"{min(ratio['fdtdx']['median_loop_seconds']):.1f}" + '}',
@@ -508,7 +521,7 @@ def build_assets() -> None:
         r'\newcommand{\SlabEnergyError}{' + mantissa + r'\times10^{' + str(int(exponent)) + '}}', '',
     ])
     (PAPER / 'tables/validation-values.tex').write_text(values, encoding='utf-8')
-    cross_solver_assets(data['cross_solver_3060'])
+    cross_solver_assets(data['cross_solver_3060'], fastest_meep([data[name] for name in MEEP_RANKS]))
     precision_assets(data['precision-a100'], [data[name] for name in MEEP_RANKS])
     provenance = {
         'description': 'Figures and tables derived from recorded native validation measurements. No solver is run by the paper build.',
