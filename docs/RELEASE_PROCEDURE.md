@@ -27,7 +27,10 @@ D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py    # the st
 Any change to code, tests, fixtures or documents after this point starts the
 procedure again from step 1. The only commits allowed during the procedure add
 files under `docs/validation/` (records, evidence runs, the gate file), the
-notices and SBOM of step 2 and the two rendered documents of step 6.
+notices and SBOM of step 2, `docs/PHYSICS_VALIDATION.md` re-rendered in step 4
+and the two rendered documents of step 6. A fix found during the procedure,
+even to a test alone, is committed and the procedure restarts here; re-recording
+only the tasks that watch the fixed file is not a release-candidate run.
 
 ## 2. Regenerate the third-party notices and the SBOM
 
@@ -48,12 +51,14 @@ The report of step 6 runs the same check and prints its result.
 ## 3. Build the wheel and check the clean install
 
 ```powershell
-D:/TorchFDTD/.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/TorchFDTD/.local `
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/torchfdtd-clean `
     --find-links D:/TorchFDTD/.local/wheels --cuda-torch "torch==2.10.0+cu126"
 ```
 
-This builds the wheel from a fresh staging copy of the package sources into
-`D:/TorchFDTD/.local/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl`,
+The local root lies outside the checkout, because the probes assert that the
+installed package does not resolve under it; the script refuses a root inside
+the checkout. This builds the wheel from a fresh staging copy of the package sources into
+`D:/torchfdtd-clean/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl`,
 verifies that its payload equals the tree byte for byte, installs it into fresh
 CPU and CUDA environments, runs the probes, the server, `torchfdtd doctor` and
 the README blocks, and writes `docs/validation/clean_install/<time>-<commit8>.json`.
@@ -73,12 +78,13 @@ git diff --stat <wheel source_commit> HEAD -- torchfdtd pyproject.toml README.md
 
 ```powershell
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all --exclude G9-07 --platform rtx3060-win11-lab `
-    --wheel D:/TorchFDTD/.local/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl `
-    --torch "torch==2.10.0+cu126" --find-links D:/TorchFDTD/.local/wheels
+    --wheel D:/torchfdtd-clean/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl `
+    --torch "torch==2.10.0+cu126" --find-links D:/TorchFDTD/.local/wheels --extras dev,cuda-kernels,gds,hdf5
 ```
 
 `rerecord_gates.py` refuses a dirty tree (the gate file and the runs directory
-excepted), installs the wheel with the `dev`, `cuda-kernels` and `gds` extras
+excepted), installs the wheel with the `dev`, `cuda-kernels`, `gds` and `hdf5`
+extras (without `hdf5` the result-store tests skip for want of `h5py`)
 into a fresh `D:/TorchFDTD/.local/venvs/rc`, checks that this interpreter imports
 `torchfdtd` from its own site-packages and not from the checkout, and then, for
 every task whose newest evidence exists, reruns the recorded command with that
@@ -119,15 +125,21 @@ On the RTX 3060 host, with the wheel interpreter of step 4 so that the suite
 sees the installed package's dependencies and the `--gpu-required` policy:
 
 ```powershell
-D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full `
+D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py `
     --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-<commit12>.xml
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G9-06 `
-    --command "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-<commit12>.xml" `
+    --command "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-<commit12>.xml" `
     --junit D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-<commit12>.xml --exit-code $LASTEXITCODE `
-    --dist D:/TorchFDTD/.local/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl `
+    --dist D:/torchfdtd-clean/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl `
     --interpreter D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe --platform rtx3060-win11-lab `
     --scope "G9-06: release-full suite with --gpu-required on rtx3060-win11-lab at commit <commit12> against wheel <sha256 head>"
 ```
+
+`tests/test_validation_report.py` is the G9-07 module: it compares the
+committed report with a fresh render of the gate file, and the report of this
+round is rendered in step 6 from the records of steps 4 and 5, so before step 6
+it cannot match. Step 6 runs it. Commit the gate file and the new run directory
+("Record the release-full suite on rtx3060-win11-lab at <commit12>").
 
 `run_suite.py` launches pytest from the checkout root, so this suite exercises
 the source tree of the candidate; its identity with the wheel is the byte
@@ -137,6 +149,11 @@ package as installed. The suite includes the opt-in `long` tests and sets
 a CUDA test that skips is a failure. Under `--gpu-required` the only permitted
 skips are `optional platform check:` ones (the two-GPU NCCL case, Gloo,
 licensed tools).
+
+For the 0.15.0 candidate the owner accepted the RTX 3060 run alone
+(2026-09-23), because the RTX 5880 Ada host was committed to other work; the
+G9-06 scope line of that candidate says so. The two-host run below remains the
+procedure for later candidates.
 
 On the RTX 5880 Ada host (platform record
 `docs/validation/platforms/rtx5880-ada-win11-remote.json`; rewrite it with
@@ -171,15 +188,25 @@ the file, do not rebuild it.
 ## 6. Render the report and judge
 
 ```powershell
-D:/TorchFDTD/.venv/Scripts/python.exe scripts/build_validation_report.py
-D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml
-D:/TorchFDTD/.venv/Scripts/python.exe scripts/record_gate_evidence.py --task G9-07 `
-    --command "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml" `
-    --junit D:/TorchFDTD/.local/tmp/junit/G9-07.xml --exit-code $LASTEXITCODE --fixture docs/validation/cases/G9-07.json
-D:/TorchFDTD/.venv/Scripts/python.exe scripts/build_validation_report.py     # the G9-07 row now carries its run; must print 0 mismatches
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/build_validation_report.py     # must print 0 mismatches
+git add docs/VALIDATION_REPORT.md docs/RELEASE_SCOPE.md
+git commit -m "Render the validation report of the release candidate at <commit12>"
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all --tasks G9-07 --platform rtx3060-win11-lab `
+    --wheel D:/torchfdtd-clean/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl `
+    --torch "torch==2.10.0+cu126" --find-links D:/TorchFDTD/.local/wheels --extras dev,cuda-kernels,gds,hdf5
+git add docs/validation
+git commit -m "Record the G9-07 report run at <commit12>"
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/build_validation_report.py --check     # the committed report still matches
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py
 D:/TorchFDTD/.venv/Scripts/python.exe scripts/check_release_gates.py --profile HPC
 ```
+
+The order is fixed by what each step reads. G9-07's tests compare the committed
+report with a fresh render, so the report is committed before G9-07 is
+recorded, and the recorder refuses the uncommitted documents otherwise. The
+report shows G9-07 as its own gate (`SELF`) without a run or a judgement, so
+recording G9-07 does not change the report it has just checked; the judge,
+not the report, gives G9-07's verdict.
 
 `build_validation_report.py` writes `docs/VALIDATION_REPORT.md` and the
 verification cells and stage-status block of `docs/RELEASE_SCOPE.md` from the
@@ -188,8 +215,6 @@ checks (version strings, README numbers, the notices and SBOM check of step 2,
 the scope cells); a MISMATCH is a finding to fix at its source, never in the
 report. The platform section lists, per platform record, the G4 evidence runs
 recorded there.
-Commit the two documents with the G9-07 evidence ("Render the validation
-report of the release candidate at <commit12>").
 
 The judge's exit status is the technical answer for the WORKSTATION profile:
 `RESULT: all judged tasks pass` with exit 0 means every required task is
