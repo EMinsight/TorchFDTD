@@ -3273,13 +3273,15 @@
             "the release-candidate run of docs/RELEASE_PROCEDURE.md (regenerate the notices and SBOM, build the wheel, clean_install_check, rerecord_gates --all --wheel --platform, run_suite release-full --gpu-required on both hosts recorded with --platform, build_validation_report, check_release_gates)"
           ],
           "actual_test_commands": [
-            "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-b2f060510b0c.xml"
+            "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-b2f060510b0c.xml",
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-47bd8ace3e69.xml"
           ],
           "required_tests": [
             "tests/test_rerecord_gates.py"
           ],
           "evidence": [
-            "20260923T074741Z-g9-06-47bc6631"
+            "20260923T074741Z-g9-06-47bc6631",
+            "20260923T162502Z-g9-06-c90ef9ab"
           ],
           "blocker": null,
           "scope_change_approval": null,
