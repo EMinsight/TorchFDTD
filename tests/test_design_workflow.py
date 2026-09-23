@@ -90,6 +90,9 @@ def test_state_file_with_a_pickled_object_is_refused_without_executing_it(tmp_pa
     assert not executed.exists()
     torch.load(hostile, weights_only=False)   # control: an unrestricted load runs the payload
     assert executed.is_dir()
+
+
+def test_metagrating_resume_reproduces_the_uninterrupted_history_bitwise(tmp_path):
     straight, _ = design_metagrating.build_problem(1, **FAST_METAGRATING)
     straight.run(4)
     checkpoint = tmp_path/'metagrating.pt'
