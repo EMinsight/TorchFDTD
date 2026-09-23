@@ -1,0 +1,276 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T140645Z-g3-09-1415252b",
+  "task": "G3-09",
+  "stage": "G3",
+  "task_title": "mode neff·field·confinement·power oracle",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_mode_ports.py D:/torchfdtd-rc-wt/tests/test_open_mode_ports.py D:/torchfdtd-rc-wt/tests/test_open_mode_oracles.py D:/torchfdtd-rc-wt/tests/test_open_mode_padding.py D:/torchfdtd-rc-wt/tests/test_mode_network_slab_oracle.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G3-09.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T23:06:36.959547+09:00",
+  "recorded_at": "2026-09-23T14:06:45+00:00",
+  "source_commit": "aa3f8c1506b5d178064bfef81a5c2909cd5cbf11",
+  "source_commit_time": "2026-09-23T20:37:16+09:00",
+  "source_tree_sha256": "615b247ed6a75fc41ab08331db7b472b7a8a3f2bef484c612d775810942e4a06",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ee7d4a044d0490859419351e84d67693458bc844d5ccd37f70c2f5ab8eee88a4",
+      "head_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1a7a05ff6fae3c928e29df55181ba608651c358e7c02d1b8d442416498db1b9d",
+      "head_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "175e2591f29c89a76a5a54b7773acb767e9731697f884a22166d23ef853f60e1",
+      "head_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "aacccd1a6f269711c47c89a595ba6eb7da85264c6d1a72652eca64c0797a399b",
+      "head_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "28a83fea97ff71ac6732ec0eeacfde58b816bc79ca2578f5b63a1254ed67a535",
+  "package_path": "D:/torchfdtd-clean/dist/86b61a543091/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_mode_ports.py": "e261079024424dd0189bc1993d2b6c016e49b877ab06af8c343806c940e687ed",
+    "tests/test_open_mode_ports.py": "0dde10935605e508cceec87d7f468a523500f23a051f2a6f0847893c73979336",
+    "tests/test_open_mode_oracles.py": "fd3ea63aad60e27b2ac92c0ceed432e04285f17bda4a2cf4e467ca6d1004f860",
+    "tests/test_open_mode_padding.py": "e21fc8f456f8b7dd5e0249f665d718402b006f7a3bd22da54f248b432079ab1e",
+    "tests/test_mode_network_slab_oracle.py": "030aa1dd8dc70f00c0c91a83d6cf8bf767e382418cbed585f5a9bad86c42e000"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G3-09_mode_solver_oracles.json",
+  "fixture_sha256": "b7aae212c15ec77d91df39e8264bb1ea98687fd6f28bcbfd5a17806931fccd0c",
+  "acceptance_criteria_path": "docs/validation/cases/G3-09_mode_solver_oracles.json",
+  "acceptance_criteria_sha256": "b7aae212c15ec77d91df39e8264bb1ea98687fd6f28bcbfd5a17806931fccd0c",
+  "case_first_commit": "5c0172da60d27ad0e5aa6906910ae256e53de1f6",
+  "case_first_commit_time": "2026-09-22T01:25:18+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": {
+    "degenerate_basis_rotation": "random unitary rotation in tests/test_mode_ports.py::test_degenerate_polarization_basis_is_canonical_and_start_independent",
+    "others": "deterministic"
+  },
+  "precision": [
+    "float64 for the periodic solver",
+    "float32 for the open solver",
+    "float64 for the oracles"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "physics_configuration": {
+    "periodic_slab": "tests/test_mode_ports.py: symmetric slab, core index 2 (epsilon 4), cladding 1.5 (epsilon 2.25), thickness 0.5 um, wavelength 1.55 um, interface samples at epsilon 3.125, transverse grid h in {0.1, 0.05, 0.025} um over a 4 um box (and boxes 2, 4, 6 um at h = 0.05 um), 4 cells of 0.05 um along the invariant axis, periodic full-vector solver solve_waveguide_modes with normal z, two modes (TE0, TM0), CPU",
+    "homogeneous_check": "tests/test_mode_ports.py: uniform epsilon 2.25, 20x16 cells of 0.1 um, wavelength 1.55 um, six modes",
+    "open_slab": "tests/test_open_mode_ports.py: CPML mode solver, region 6.4 x 0.5 x 1.6 um, mesh (h, 0.1, h) um for h in {0.1, 0.05, 0.025}, x CPML of 0.8 um physical depth (round(0.8/h) layers), y periodic, z 3 PML layers, core index 1.8 for |x| < 0.4 um in cladding 1.4, wavelength 1.55 um, cladding_epsilon 1.96, two modes, float32, CPU",
+    "open_fiber": "tests/test_open_mode_ports.py: step-index fiber core index 2.2 in cladding 1.0, radius 0.4 um, wavelength 1.55 um, region 4 x 4 x 1.6 um, h in {0.1, 0.08} um, x and y CPML of 0.8 um, z 3 PML layers, float32, CPU; tests/test_open_mode_padding.py repeats h = 0.1 um with boxes (4.8, 0.8) and (4.8, 1.0) um against a stored baseline beta",
+    "oracles": "benchmarks/open_mode_oracles.py solve_slab (TE and TM even-mode dispersion, root by brentq, fields from continuity) and solve_fiber_he11 (full-vector HE11 characteristic equation); tests/test_open_mode_oracles.py checks the oracles themselves (root residual, interface continuity, Maxwell curl residual by central differences, scale invariance, thin/thick and weak-guidance limits)",
+    "pml": "0.8 um CPML on the open axes; the padding test records the box and PML sensitivity of beta"
+  },
+  "reference_method": "Analytic continuum slab TE/TM dispersion relation solved by root finding (periodic and open solvers) and the analytic full-vector HE11 fiber characteristic equation (open solver); the homogeneous case uses the closed-form discrete periodic Yee dispersion sqrt(epsilon - (2/h sin(pi/N)/k)^2); power normalisation and Gram orthogonality are self-consistency of the same discrete quadrature.",
+  "observables": [
+    {
+      "name": "slab_neff_absolute_error",
+      "unit": "dimensionless",
+      "definition": "|neff - neff_analytic| for TE0 and TM0 of the periodic solver at h = 0.025 um; errors strictly decreasing over h"
+    },
+    {
+      "name": "open_slab_beta_relative_error",
+      "unit": "dimensionless",
+      "definition": "|Re beta / beta_analytic - 1| of the CPML solver at h in {0.1, 0.05, 0.025} um, corrections shrinking"
+    },
+    {
+      "name": "fiber_beta_relative_error",
+      "unit": "dimensionless",
+      "definition": "|Re beta / beta_HE11 - 1| of the CPML solver at h = 0.1 and 0.08 um"
+    },
+    {
+      "name": "homogeneous_neff",
+      "unit": "dimensionless",
+      "definition": "six modes against the discrete periodic dispersion"
+    },
+    {
+      "name": "modal_power",
+      "unit": "reduced power",
+      "definition": "mode.power() = 1 and backward().power() = -1; Gram matrix identity"
+    },
+    {
+      "name": "leakage",
+      "unit": "dimensionless",
+      "definition": "edge energy fraction of the outer three cells (periodic) and collar_energy_fraction (open)"
+    },
+    {
+      "name": "box_pml_sensitivity",
+      "unit": "dimensionless",
+      "definition": "relative shift of beta with box size and PML depth (padding test)"
+    }
+  ],
+  "acceptance_limits": {
+    "slab_neff_absolute_error_max": {
+      "value": 0.0005,
+      "where": "tests/test_mode_ports.py; relative 3e-4 at neff about 1.7, tighter than the program's 0.005"
+    },
+    "open_slab_beta_relative_error_max": {
+      "value": 0.005,
+      "where": "tests/test_open_mode_ports.py; equals the program's analytic_mode_neff_relative_error"
+    },
+    "fiber_beta_relative_error_max": {
+      "value": 0.02,
+      "where": "tests/test_open_mode_ports.py",
+      "difference_from_common_criterion": "looser than the program's 0.005: the fiber is resolved by 8 to 10 cells across its 0.8 um diameter with a staircase circle; docs/OPEN_MODE_PORTS.md records 0.551 and 0.330 percent at h = 0.1 and 0.08 um"
+    },
+    "homogeneous_neff": {
+      "rtol": 2e-05,
+      "atol": 2e-05
+    },
+    "modal_power": {
+      "power_rel": 1e-06,
+      "gram": {
+        "rtol": 0.0002,
+        "atol": 0.0002
+      }
+    },
+    "leakage": {
+      "periodic_edge_energy_fraction_max": 1e-07,
+      "open_collar_energy_fraction_max": 0.0001
+    },
+    "box_pml_sensitivity_max": 0.0001,
+    "maxwell_residual_max": {
+      "periodic": 2e-05,
+      "open": 0.0002
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds analytic_mode_neff_relative_error 0.005; the fiber budget is the repository's pre-declared fixture-specific limit and is reported as a difference"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 32,
+    "passed": [
+      "tests/test_mode_ports.py::test_homogeneous_vector_fourier_dispersion_residual_and_power_orthogonality",
+      "tests/test_mode_ports.py::test_component_coordinates_match_native_yee_field_axes[x]",
+      "tests/test_mode_ports.py::test_component_coordinates_match_native_yee_field_axes[y]",
+      "tests/test_mode_ports.py::test_component_coordinates_match_native_yee_field_axes[z]",
+      "tests/test_mode_ports.py::test_slab_te_tm_mesh_limit_box_convergence_and_evanescent_confinement",
+      "tests/test_mode_ports.py::test_nonseparable_dielectric_core_has_all_six_components_and_orthogonal_modes",
+      "tests/test_mode_ports.py::test_fixed_mode_directional_plane_power_and_both_torch_graphs",
+      "tests/test_mode_ports.py::test_invalid_material_and_mode_contracts",
+      "tests/test_mode_ports.py::test_yee_to_plane_interpolation_matches_native_maps_and_positive_time_dft",
+      "tests/test_mode_ports.py::test_plane_field_vjp_finite_difference_leakage_and_quadrature_rejection",
+      "tests/test_mode_ports.py::test_degenerate_polarization_basis_is_canonical_and_start_independent",
+      "tests/test_open_mode_ports.py::test_budget_before_material_sampling",
+      "tests/test_open_mode_ports.py::test_fixed_cladding_rejected_before_operator_assembly",
+      "tests/test_open_mode_ports.py::test_independent_te_tm_continuum_refinement",
+      "tests/test_open_mode_ports.py::test_six_field_maxwell_and_open_sampling_contract",
+      "tests/test_open_mode_ports.py::test_physical_rectangle_quadrature",
+      "tests/test_open_mode_ports.py::test_independent_native_time_stagger_and_cpml_recurrence",
+      "tests/test_open_mode_ports.py::test_reactive_flux_rejects_phase_corrupted_magnetic_profile",
+      "tests/test_open_mode_ports.py::test_fully_confined_fiber_two_mesh_continuum_comparison",
+      "tests/test_open_mode_ports.py::test_live_host_admission_precedes_material_and_sparse_allocations",
+      "tests/test_open_mode_oracles.py::test_slab_continuity_dispersion_scaling_and_limits[TE]",
+      "tests/test_open_mode_oracles.py::test_slab_continuity_dispersion_scaling_and_limits[TM]",
+      "tests/test_open_mode_oracles.py::test_fiber_full_vector_boundary_conditions_and_confinement",
+      "tests/test_open_mode_oracles.py::test_fiber_six_component_maxwell_equations_independently_differenced",
+      "tests/test_open_mode_oracles.py::test_fiber_scale_weak_guidance_and_large_v_invariants",
+      "tests/test_open_mode_oracles.py::test_invalid_or_unresolved_fiber_parameters_rejected[kwargs0]",
+      "tests/test_open_mode_oracles.py::test_invalid_or_unresolved_fiber_parameters_rejected[kwargs1]",
+      "tests/test_open_mode_oracles.py::test_invalid_or_unresolved_fiber_parameters_rejected[kwargs2]",
+      "tests/test_open_mode_oracles.py::test_invalid_or_unresolved_fiber_parameters_rejected[kwargs3]",
+      "tests/test_open_mode_padding.py::test_fixed_mesh_physical_padding_and_pml_sensitivity",
+      "tests/test_mode_network_slab_oracle.py::test_continuum_four_equations_match_airy_and_conserve_power",
+      "tests/test_mode_network_slab_oracle.py::test_no_contrast_phase_and_discrete_continuum_limit"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 6.104,
+    "suite_timestamp": "2026-09-23T23:06:36.959547+09:00"
+  },
+  "required_tests": [
+    "tests/test_mode_ports.py::test_slab_te_tm_mesh_limit_box_convergence_and_evanescent_confinement",
+    "tests/test_mode_ports.py::test_homogeneous_vector_fourier_dispersion_residual_and_power_orthogonality",
+    "tests/test_mode_ports.py::test_degenerate_polarization_basis_is_canonical_and_start_independent",
+    "tests/test_mode_ports.py::test_fixed_mode_directional_plane_power_and_both_torch_graphs",
+    "tests/test_mode_ports.py::test_plane_field_vjp_finite_difference_leakage_and_quadrature_rejection",
+    "tests/test_open_mode_ports.py::test_independent_te_tm_continuum_refinement",
+    "tests/test_open_mode_ports.py::test_fully_confined_fiber_two_mesh_continuum_comparison",
+    "tests/test_open_mode_ports.py::test_six_field_maxwell_and_open_sampling_contract",
+    "tests/test_open_mode_ports.py::test_independent_native_time_stagger_and_cpml_recurrence",
+    "tests/test_open_mode_padding.py::test_fixed_mesh_physical_padding_and_pml_sensitivity",
+    "tests/test_open_mode_oracles.py::test_slab_continuity_dispersion_scaling_and_limits",
+    "tests/test_open_mode_oracles.py::test_fiber_full_vector_boundary_conditions_and_confinement",
+    "tests/test_open_mode_oracles.py::test_fiber_six_component_maxwell_equations_independently_differenced",
+    "tests/test_open_mode_oracles.py::test_fiber_scale_weak_guidance_and_large_v_invariants",
+    "tests/test_mode_network_slab_oracle.py::test_continuum_four_equations_match_airy_and_conserve_power",
+    "tests/test_mode_network_slab_oracle.py::test_no_contrast_phase_and_discrete_continuum_limit"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-09.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T140645Z-g3-09-1415252b/junit.xml",
+      "sha256": "25aa94bb78dce5399ea519ef66d27acfe65ddaef1fe4d6522db0a4d153270f25",
+      "bytes": 7452,
+      "original_path": ".local/tmp/junit/rerecord/G3-09.xml"
+    }
+  ],
+  "applicable_scope": "Layer B (analytic slab TE/TM and HE11 fiber neff, oracle self-checks, box/PML sensitivity) and layer A (power, Gram, degenerate basis, VJP), CPU only, on local Windows 11, i7-12700, RTX 3060 12 GB shared with other sessions. neff only; field profile, confinement factor and power are not compared with analytic values. re-recorded on aa3f8c1506b5 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T040723Z-g3-09-ad9ce200",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

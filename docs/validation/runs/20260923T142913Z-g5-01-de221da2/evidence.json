@@ -1,0 +1,280 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T142913Z-g5-01-de221da2",
+  "task": "G5-01",
+  "stage": "G5",
+  "task_title": "resident/host/disk/async 경로를 같은 물리 문제·관측자·목적함수에서 비교한다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_memory_paths_g5.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G5-01.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T23:27:13.914157+09:00",
+  "recorded_at": "2026-09-23T14:29:13+00:00",
+  "source_commit": "aa3f8c1506b5d178064bfef81a5c2909cd5cbf11",
+  "source_commit_time": "2026-09-23T20:37:16+09:00",
+  "source_tree_sha256": "74bfa524f3bd0bdc7e1af3f75024b605638f6eea19d8575db5c8dc9e14041c15",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ee7d4a044d0490859419351e84d67693458bc844d5ccd37f70c2f5ab8eee88a4",
+      "head_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1a7a05ff6fae3c928e29df55181ba608651c358e7c02d1b8d442416498db1b9d",
+      "head_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "575c076ee9a82885893dd006b7e6367de1750e6e733a67d6f4e75a83bc7ec92d",
+      "head_sha256": "6fcf959589774bd73bab2ed679c21f12d016909cabd1b2d2095963adad33fe8e"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "175e2591f29c89a76a5a54b7773acb767e9731697f884a22166d23ef853f60e1",
+      "head_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "aacccd1a6f269711c47c89a595ba6eb7da85264c6d1a72652eca64c0797a399b",
+      "head_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "28a83fea97ff71ac6732ec0eeacfde58b816bc79ca2578f5b63a1254ed67a535",
+  "package_path": "D:/torchfdtd-clean/dist/86b61a543091/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_memory_paths_g5.py": "6c24fcd4d43a69a4f9e623fcd7524e618467c3f376041cc33b63b922919f2f53"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G5-01.json",
+  "fixture_sha256": "ce3e7edfc5c662d692d2717760b821234bdd1a3fae03b9edd90d15316128219d",
+  "acceptance_criteria_path": "docs/validation/cases/G5-01.json",
+  "acceptance_criteria_sha256": "ce3e7edfc5c662d692d2717760b821234bdd1a3fae03b9edd90d15316128219d",
+  "case_first_commit": "649ad7961803a98634a2ad6b08559ff6ea8a8dba",
+  "case_first_commit_time": "2026-09-22T04:54:52+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": 29,
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": [
+    "cuda"
+  ],
+  "physics_configuration": {
+    "module": "tests/g5_support.py (scene, sphere, streamed_options) and tests/test_memory_paths_g5.py",
+    "region": "3D, 2.4 x 1.6 x 1.6 um, uniform mesh 0.1 um (24 x 16 x 16 cells), 3 CPML cells on every face, Yee material sampling, staircase interfaces, 40 steps at the CFL time step (1.9066e-16 s)",
+    "structure": "smooth sphere of radius 0.3 um, sigmoid transition width 0.08 um, at the origin: permittivity 4 in air (scalar or diagonal Yee-sampled); Drude variant: epsilon_inf 2 inside, one Drude pole (omega0 = 0, gamma = 1e14 rad/s) of strength s_hat * 4e30 (rad/s)^2 with s_hat the sphere mask; stored-face variant: PMC y faces, symmetric z_min, PEC z_max with the scalar sphere and the stored upper rows; tensor variant: the admissible SPD node-tensor field of tests/test_anisotropy_walls.py (seed 29), FP32, point observations only",
+    "source": "Ez point source at (-0.7, 0, 0) um, standard Gaussian pulse, wavelength 0.8 um, power FWHM 1.5 fs, envelope centre 2 fs, amplitude 100",
+    "observations": {
+      "history": "two point probes Ez (0.7, 0, 0) and Hy (0.5, 0.2, 0) as the full time history, then DifferentiableResult.spectrum at 3e14 Hz",
+      "online": "the same two probes accumulated as an online DFT at 3e14 Hz (StreamedSimulation.spectrum, DifferentiableSimulation.spectrum)",
+      "plane": "one x-normal spectral plane at x = 0.7 um, 0.8 x 0.8 um, downsample 2, all six components at 3e14 Hz (DifferentiablePlaneSimulation, DispersivePlaneSimulation)"
+    },
+    "objective": "sum over frequencies, samples and components of |F / dt|^2 where F is the spectral field and dt the time step, so that the objective and its gradients are dimensionless per-step amplitudes",
+    "paths": {
+      "resident": "DifferentiableSimulation / DispersiveSimulation / TensorDielectricSimulation with AdjointOptions(checkpoints=2) on a CUDA epsilon: the reference",
+      "host_sync": "StreamedAdjointOptions(device=cuda, slab_width=6, temporal_depth=4, checkpoints=2, state_storage=host, tile_transfers=sync)",
+      "disk_sync": "the same with state_storage=disk, a private scratch directory and disk_budget_bytes 256 MiB",
+      "host_async": "the same as host_sync with tile_transfers=async and tile_buffers=2"
+    },
+    "instances": "precision {float32, float64} x material {scalar, diagonal, drude, pmc} x observation {history, online, plane} x path {host_sync, disk_sync, host_async}, minus pmc x plane (refused by the registry), plus float32 x tensor x online x the three paths: 69 streamed runs against 23 resident references",
+    "refusals": "planes_pmc, streamed_dispersive_oneway, streamed_dispersive_planes_oneway and mode_network_streamed from torchfdtd/capabilities.py, built by example_project and constructed with StreamedAdjointOptions"
+  },
+  "reference_method": "the resident CUDA discrete adjoint of the same scene (fused CUDA forward and transpose for real dielectric fields, Torch ADE and tensor transposes): a separate execution path over the same Yee discretization, not an analytic oracle; the agreement it establishes is that the streamed tiers reproduce the resident result",
+  "observables": [
+    {
+      "name": "max_abs_field_error",
+      "unit": "dimensionless (spectral amplitude per time step)",
+      "definition": "max |F_streamed - F_resident| / dt over frequencies, samples and components"
+    },
+    {
+      "name": "objective",
+      "unit": "dimensionless",
+      "definition": "sum |F / dt|^2 of the streamed run; objective_reference is the resident value"
+    },
+    {
+      "name": "max_abs_gradient_error",
+      "unit": "dimensionless per input unit",
+      "definition": "max |g_streamed - g_resident| for every differentiable input (epsilon, epsilon_inf and s_hat, or the node tensor)"
+    },
+    {
+      "name": "peak_block_checkpoints",
+      "unit": "count",
+      "definition": "report['peak_block_checkpoints'] of the streamed run"
+    }
+  ],
+  "acceptance_limits": {
+    "tolerances": {
+      "float32": {
+        "rtol": 0.0001,
+        "atol": 1e-06
+      },
+      "float64": {
+        "rtol": 1e-07,
+        "atol": 1e-09
+      }
+    },
+    "rule": "torch.testing.assert_close(streamed, resident, rtol, atol) on the spectral amplitude per time step, on the objective and on every gradient, for every instance; the reference amplitude must exceed 1e-3 and every reference gradient 1e-6 so that the comparison is not vacuous",
+    "refusals": "each listed combination raises ValueError whose message starts with the registry rule's expected message before torchfdtd.streamed._Streamed.apply is reached",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 (rtol 1e-4, atol 1e-6) and discrete_dimensionless_fp64 (rtol 1e-7, atol 1e-9): layer A, the same discretization on two execution paths"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 74,
+    "passed": [
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-scalar-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-diagonal-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-drude-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-pmc-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-scalar-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-diagonal-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-plane-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-plane-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-drude-plane-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-history-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-history-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-history-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float64-pmc-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-tensor-online-host_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-tensor-online-disk_sync]",
+      "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda[float32-tensor-online-host_async]",
+      "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule[planes_pmc-overrides0-<lambda>]",
+      "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule[streamed_dispersive_oneway-overrides1-<lambda>]",
+      "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule[streamed_dispersive_planes_oneway-overrides2-<lambda>]",
+      "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule[mode_network_streamed-overrides3-<lambda>]",
+      "tests/test_memory_paths_g5.py::test_admitted_combinations_name_the_streamed_lanes"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 115.226,
+    "suite_timestamp": "2026-09-23T23:27:13.914157+09:00"
+  },
+  "required_tests": [
+    "tests/test_memory_paths_g5.py::test_streamed_tier_matches_resident_cuda",
+    "tests/test_memory_paths_g5.py::test_unsupported_combinations_are_refused_by_the_registry_rule",
+    "tests/test_memory_paths_g5.py::test_admitted_combinations_name_the_streamed_lanes"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G5-01.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T142913Z-g5-01-de221da2/junit.xml",
+      "sha256": "282247e90f41bcea6863e222ad053383a3c34930bac71b618f9ac3dc53b5b68c",
+      "bytes": 11131,
+      "original_path": ".local/tmp/junit/rerecord/G5-01.xml"
+    }
+  ],
+  "applicable_scope": "Layer A on the RTX 3060 (CUDA 12.6, torch 2.10): resident CUDA adjoint versus streamed host, disk and asynchronous CUDA tiles, FP32 and FP64, scalar/diagonal/Drude ADE/stored-face materials with time-history, online-DFT and spectral-plane observations, and the FP32 node-tensor material with point observations; disk banks with asynchronous tiles and CPU tiles are not covered re-recorded on aa3f8c1506b5 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T042926Z-g5-01-62b6dd06",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

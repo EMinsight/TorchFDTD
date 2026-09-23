@@ -1,0 +1,198 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T120732Z-g2-05-ed21c58c",
+  "task": "G2-05",
+  "stage": "G2",
+  "task_title": "\"+/- DFT\", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다.",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_conventions.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G2-05.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T21:07:22.206942+09:00",
+  "recorded_at": "2026-09-23T12:07:32+00:00",
+  "source_commit": "aa3f8c1506b5d178064bfef81a5c2909cd5cbf11",
+  "source_commit_time": "2026-09-23T20:37:16+09:00",
+  "source_tree_sha256": "762d39f33526639d25349df614838dec12cdfcfd256c403f8c4df6ec377a5b29",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "28a83fea97ff71ac6732ec0eeacfde58b816bc79ca2578f5b63a1254ed67a535",
+  "package_path": "D:/torchfdtd-clean/dist/86b61a543091/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_conventions.py": "5889fc46b713da59aca38c229cb9ce500d97381b89e2146560842f2643054cac"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "docs/CONVENTIONS.md"
+  ],
+  "watch_sha256": {
+    "docs/CONVENTIONS.md": "94b5d7f12b8081b017d46af5019e45c81cd640d459f5dc1088942e5f97ccf176"
+  },
+  "fixture_path": "docs/validation/cases/G2-05_conventions.json",
+  "fixture_sha256": "2296f4af7f69ec8e50f8bfa6c55a6ab032a86f3fd2f061bed6ddd4d627089401",
+  "acceptance_criteria_path": "docs/validation/cases/G2-05_conventions.json",
+  "acceptance_criteria_sha256": "2296f4af7f69ec8e50f8bfa6c55a6ab032a86f3fd2f061bed6ddd4d627089401",
+  "case_first_commit": "7847737ba636127fd41f272ef2299b3f169e4068",
+  "case_first_commit_time": "2026-09-22T01:38:45+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "physics_configuration": {
+    "dft": "400 samples at dt = 1e-16 s, ten whole cycles (f0 = 2.5e14 Hz); complex exponentials and sin traces through direct_transform, point_spectrum (custom and fft) and DifferentiableResult.spectrum",
+    "planes": "tests/test_plan.py::scene field-monitor variant in float64 without structures, 11 steps, one custom frequency 2e14 Hz; native Simulation and DifferentiablePlaneSimulation against a full-state _System reference applying the documented sample times",
+    "bloch": "the same scene with Bloch y faces, phase 0.7, an Ez sheet; BoundaryDescription wrap, source_profile, interpolation_map at both seams, YeeGrid.curl forward and backward on exp(i k y) with k = (0.7 + 2 pi)/L",
+    "half_step": "the scene with 40 steps, an Ez and an Hy continuous point source, Ez and Hy point monitors",
+    "flux": "synthetic plane_result with E_y = 1, H_z = +/-1 on one 2e-12 m^2 point; a 2D y-periodic sheet run (3 x 0.6 um, 0.05 um, 800 steps, 8 PML cells, float64) with an Ez sheet at x = -1 um and x-normal monitors of width 0.3 and 0.6 um at x = 0.5 um windowed by a full Gaussian apodization (center 60 fs, width 20 fs), then the sheet at x = +1 um",
+    "units": "dt of the 2D scene; a 3D 1.6 um cube with a 1 x 0.8 um x-normal plane; Drude (wp 1.3e16, gamma 1e14, eps_inf 1.5) permittivity at 2e14 Hz; Lorentz ADE coefficient at the plan dt",
+    "exterior": "tests/test_radiation.py::dipole_faces with n = 1.3 + 0.05i, far field at 50 and 60 um"
+  },
+  "reference_method": "closed-form identities: geometric sums over whole cycles, the documented DFT and sample-time formulas evaluated by explicit stepping, Bloch difference formulas, the Poynting density formula, linear scaling of a y-uniform wave, eta_0 = 1 plane-wave impedance, the SI CFL formula, the Drude formula, the far-field (r1/r2) exp(-Im k (r2 - r1)) decay",
+  "observables": [
+    {
+      "name": "dft_sign_and_scale",
+      "unit": "reduced field * s",
+      "definition": "value at +f0 for exp(-2 pi i f0 t) and the phase of sin under the native, legacy FFT and differentiable transforms"
+    },
+    {
+      "name": "plane_dft_agreement",
+      "unit": "reduced field * s",
+      "definition": "native and differentiable plane fields versus the explicit-formula reference"
+    },
+    {
+      "name": "bloch_phase",
+      "unit": "dimensionless",
+      "definition": "wrap factor, sheet profile, seam interpolation weights and seam curl values"
+    },
+    {
+      "name": "sample_times",
+      "unit": "s",
+      "definition": "Result.times, H spectra time shift, source sample times"
+    },
+    {
+      "name": "flux_sign_and_scaling",
+      "unit": "reduced E*H * s^2 * m per invariant length",
+      "definition": "flux of the 0.3 and 0.6 um monitors, |Hy|/|Ez|, flux versus 0.5 sum |Ez|^2 width, flux of the reversed wave"
+    },
+    {
+      "name": "units",
+      "unit": "strings and SI values",
+      "definition": "dt formula, 3D weights in m^2, permittivity, ADE coefficient, unit strings"
+    },
+    {
+      "name": "exterior_decay",
+      "unit": "dimensionless",
+      "definition": "|E(r2)| / |E(r1)| of the far-field model"
+    }
+  ],
+  "acceptance_limits": {
+    "exact_identities": "1e-9 relative on whole-cycle DFT values and phases; 1e-12 relative on Bloch and permittivity formulas; exact equality on sample times and unit strings",
+    "plane_dft": {
+      "rtol": 1e-10,
+      "atol": "1e-14 of the peak"
+    },
+    "flux_scaling": {
+      "width_doubling_rtol": 1e-06,
+      "impedance_rtol": 0.02,
+      "sheet_power_rtol": 0.02,
+      "reversed_wave_rtol": 0.05
+    },
+    "exterior_decay": {
+      "rtol": 1e-06
+    },
+    "source_of_limits": "identities tighter than completion_gates.json discrete_dimensionless_fp64 (rtol 1e-7, atol 1e-9) where a formula is exact; the 2 % impedance and sheet-power budgets are fixture-specific Yee dispersion and windowing allowances declared before the run"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 9,
+    "passed": [
+      "tests/test_conventions.py::test_native_point_and_plane_dft_use_the_positive_sign_with_dt_normalization",
+      "tests/test_conventions.py::test_differentiable_point_spectrum_uses_the_negative_sign_and_the_half_step_for_h",
+      "tests/test_conventions.py::test_native_and_differentiable_planes_match_the_documented_dft_and_sample_times",
+      "tests/test_conventions.py::test_bloch_field_is_multiplied_by_exp_plus_i_phase_per_positive_period",
+      "tests/test_conventions.py::test_e_is_tagged_at_n_plus_one_dt_and_h_half_a_step_later",
+      "tests/test_conventions.py::test_flux_density_is_half_re_e_cross_h_conjugate_along_the_positive_normal",
+      "tests/test_conventions.py::test_two_dimensional_flux_is_signed_power_per_unit_length_with_unit_reduced_impedance",
+      "tests/test_conventions.py::test_reduced_units_and_si_calibration",
+      "tests/test_conventions.py::test_lossy_exterior_uses_exp_minus_i_omega_t_phasors_with_decaying_exp_ikr"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 0.554,
+    "suite_timestamp": "2026-09-23T21:07:22.206942+09:00"
+  },
+  "required_tests": [
+    "tests/test_conventions.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_conventions.py": [
+      "tests/test_conventions.py::test_native_point_and_plane_dft_use_the_positive_sign_with_dt_normalization",
+      "tests/test_conventions.py::test_differentiable_point_spectrum_uses_the_negative_sign_and_the_half_step_for_h",
+      "tests/test_conventions.py::test_native_and_differentiable_planes_match_the_documented_dft_and_sample_times",
+      "tests/test_conventions.py::test_bloch_field_is_multiplied_by_exp_plus_i_phase_per_positive_period",
+      "tests/test_conventions.py::test_e_is_tagged_at_n_plus_one_dt_and_h_half_a_step_later",
+      "tests/test_conventions.py::test_flux_density_is_half_re_e_cross_h_conjugate_along_the_positive_normal",
+      "tests/test_conventions.py::test_two_dimensional_flux_is_signed_power_per_unit_length_with_unit_reduced_impedance",
+      "tests/test_conventions.py::test_reduced_units_and_si_calibration",
+      "tests/test_conventions.py::test_lossy_exterior_uses_exp_minus_i_omega_t_phasors_with_decaying_exp_ikr"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G2-05.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T120732Z-g2-05-ed21c58c/junit.xml",
+      "sha256": "4da3fe8cb675a3fdb09e28058dd34f519f95cebdd9505b63b5ffea9bb455ef2b",
+      "bytes": 1495,
+      "original_path": ".local/tmp/junit/rerecord/G2-05.xml"
+    }
+  ],
+  "applicable_scope": "G2-05: one recorded run of tests/test_conventions.py at the listed commit on the local workstation CPU (float64). Each statement of docs/CONVENTIONS.md (DFT signs and normalization, Bloch phase sign, E/H sample times, flux sign along the positive normal, reduced units versus SI calibration, lossy exterior decay, 2D power per unit length) is computed on the declared tiny problems. Oblique flux on y/z-normal 3D monitors and the tiled plane conventions are not covered. re-recorded on aa3f8c1506b5 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T020954Z-g2-05-1e628e43",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

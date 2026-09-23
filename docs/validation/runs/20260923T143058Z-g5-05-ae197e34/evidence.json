@@ -1,0 +1,479 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T143058Z-g5-05-ae197e34",
+  "task": "G5-05",
+  "stage": "G5",
+  "task_title": "meaningful beyond-VRAM 사례 하나를 추가한다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_beyond_vram_propagated.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G5-05.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T23:30:54.217083+09:00",
+  "recorded_at": "2026-09-23T14:30:58+00:00",
+  "source_commit": "aa3f8c1506b5d178064bfef81a5c2909cd5cbf11",
+  "source_commit_time": "2026-09-23T20:37:16+09:00",
+  "source_tree_sha256": "284c849c4c780d9ce9c3d148418acb0ef1ea1ce8eacaf69b1e22a355c3d3daf4",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ee7d4a044d0490859419351e84d67693458bc844d5ccd37f70c2f5ab8eee88a4",
+      "head_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1a7a05ff6fae3c928e29df55181ba608651c358e7c02d1b8d442416498db1b9d",
+      "head_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "575c076ee9a82885893dd006b7e6367de1750e6e733a67d6f4e75a83bc7ec92d",
+      "head_sha256": "6fcf959589774bd73bab2ed679c21f12d016909cabd1b2d2095963adad33fe8e"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "175e2591f29c89a76a5a54b7773acb767e9731697f884a22166d23ef853f60e1",
+      "head_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "aacccd1a6f269711c47c89a595ba6eb7da85264c6d1a72652eca64c0797a399b",
+      "head_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "28a83fea97ff71ac6732ec0eeacfde58b816bc79ca2578f5b63a1254ed67a535",
+  "package_path": "D:/torchfdtd-clean/dist/86b61a543091/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_beyond_vram_propagated.py": "68b64db4ff6d7df99e64f6b895c5f6afdd20cfea662ca7d3936918ffc4813688"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G5-05.json",
+  "fixture_sha256": "4e0cb0ffcf2bab73cb19f8c68d610217dce6619db900972c4b913abf75d3bf13",
+  "acceptance_criteria_path": "docs/validation/cases/G5-05.json",
+  "acceptance_criteria_sha256": "4e0cb0ffcf2bab73cb19f8c68d610217dce6619db900972c4b913abf75d3bf13",
+  "case_first_commit": "6cdb3e458e713e4a706b1b1be38a7fcbc18c95c9",
+  "case_first_commit_time": "2026-09-22T04:29:02+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": "float32",
+  "backend": "cuda",
+  "physics_configuration": {
+    "driver": "benchmarks/beyond_vram_propagated.py",
+    "device": "Square array of cylindrical pillars (epsilon 4.0, silicon nitride at 1.55 um) on a 1.0 um period, 0.6 um tall, in air with no substrate. The radius of each pillar is the hyperbolic lens phase of a 150 um focal length at 1.55 um wrapped onto 0.15 to 0.42 um; the array is lens-like and its focusing efficiency is not claimed. The geometry is rasterized on cell centres into the epsilon tensor (no project structures).",
+    "mesh_um": 0.05,
+    "z_size_um": 3.2,
+    "pillar_layers": [
+      24,
+      36
+    ],
+    "pml_cells": 10,
+    "source": "soft Ex plane sheet at z = -0.8 um spanning the lateral CPML (extend_through_pml), Gaussian pulse of 15 fs power FWHM centred at 30 fs, carrier 1.55 um; the source envelope ends at 84.7 fs",
+    "monitor": "z-normal FieldMonitor at z = +0.6 um (0.4 um above the pillar tops) spanning the footprint, downsample 8 (0.4 um samples, sin(theta_max) = 1.55/0.8 covers every propagating angle), six components, DFT at 1.65, 1.55 and 1.45 um",
+    "time_step_fs": 0.09532874347655028,
+    "duration_fs": 175.02,
+    "steps": 1836,
+    "objective": "sum over the three wavelengths of |E|^2 on the axis 150 um beyond the monitor plane, evaluated by torchfdtd.angular_spectrum.propagate_points (pad 3) on the plane spectrum divided by dt x steps so that FP32 seeds stay of order one",
+    "design_variable": "dense cell-centred epsilon (float32, one value per cell); the design slab is the pillar layers 24 to 35",
+    "rehearsal": {
+      "footprint_um": 14.0,
+      "grid": [
+        320,
+        320,
+        64
+      ],
+      "cells": 6553600,
+      "pillars": 196,
+      "steps": 1836,
+      "modes": "resident (AdjointOptions checkpoints 8 on host) and streamed (slab width 32, temporal depth 16, checkpoints 2, local checkpoints 1, host banks, 6 GiB host and 1.5 GiB GPU budgets) on the local RTX 3060",
+      "command": "python -m benchmarks.beyond_vram_propagated --preset rehearsal --mode both --output docs/validation/g5/G5-05_rehearsal_3060.json",
+      "supplementary": "a 24 um streamed-only member (520 x 520 x 64, 17.3 million cells, 172,800 observers, W=32, K=16, C=4, L=1) with the one-sided difference, docs/validation/g5/G5-05_rehearsal_3060_streamed_24um.json; not judged by this case"
+    },
+    "judged_run_rtx3060": {
+      "machine": "rtx3060-win11-lab: NVIDIA GeForce RTX 3060, 12,884,377,600 bytes of VRAM, 85.6 GB of RAM, Windows 11, shared with other agents",
+      "footprint_um": 44.0,
+      "lateral_size_um": 46.0,
+      "grid": [
+        920,
+        920,
+        64
+      ],
+      "cells": 54169600,
+      "pillars": 1936,
+      "observers": 72600,
+      "plane": "110 x 110 samples of 0.4 um",
+      "fd_pillars": 316,
+      "execution": {
+        "mode": "streamed, DifferentiablePlaneSimulation over StreamedSimulation, fused CUDA tiles, synchronous transfers",
+        "preset": "workstation-3060",
+        "slab_width": 64,
+        "temporal_depth": 32,
+        "checkpoints": 6,
+        "local_checkpoints": 1,
+        "state_storage": "host",
+        "restart_journal": "none: the streamed spectral path rejects a restart journal (torchfdtd.streamed._journal); a crash means rerunning",
+        "host_budget_gib": 56,
+        "gpu_budget_gib": 8,
+        "finite_difference": "central, two extra streamed forwards"
+      },
+      "planner": {
+        "source": "python -m benchmarks.beyond_vram_propagated --preset workstation-3060 --plan --assume rtx3060 --output <plan.json> (metadata only; 70 GiB of RAM and 11.5 GB of VRAM assumed free at launch)",
+        "eh_bytes": 1300070400,
+        "state_bytes_with_cpml": 3257379840,
+        "state_bank_capacity": 9,
+        "host_reservation_bytes": 21365522240,
+        "gpu_reservation_bytes": 4503618824,
+        "dense_parameter_reservation_bytes": 1733427200,
+        "max_extended_tile_cells": 10813440,
+        "blocks": 58,
+        "tiles": 15,
+        "global_replayed_blocks": 135,
+        "forward_cell_steps": 402462720000,
+        "global_replay_cell_steps": 948879360000,
+        "local_replay_cell_steps": 1832624640000,
+        "total_cell_steps": 1738220032000,
+        "state_bytes": 1593175040,
+        "replayed_blocks": 135,
+        "fitted_estimate_seconds": 2606,
+        "live_adjoint_state_bytes": 16072002560,
+        "physical_vram_bytes": 12884377600,
+        "live_adjoint_state_over_vram": 1.247
+      },
+      "physical_vram": {
+        "machine": "NVIDIA GeForce RTX 3060, 12,884,377,600 bytes",
+        "eh_over_vram": 0.208,
+        "live_adjoint_state_bytes": "9 state banks x 3.26 GB plus the dense parameter reservation 3.57 GB = 32.9 GB, 2.55 times the 12.9 GB of physical VRAM",
+        "resident_alternative": "a resident adjoint holds one primal and one adjoint E/H state, epsilon, its inverse and the gradient (60 bytes per cell, 6.7 GB) plus 3.26 GB per checkpoint; with the six checkpoints of this schedule it would need 26.2 GB; the public resident path also refuses scenes above eight million cells",
+        "statement": "The E/H state of one bank (2.68 GB) does not exceed physical VRAM; the live state of the adjoint at the declared checkpoint schedule exceeds it 2.55 times. The case meets the program requirement in the working-set sense, which the record states plainly."
+      },
+      "wall_time_model": "benchmarks.beyond_vram_propagated.TIME_MODELS[\"rtx3060\"], the RTX 5880 model with the payload and compute rates refitted on the two RTX 3060 streamed rehearsals of this case (four timings within 16 percent, shared GPU): forward 476 s, backward 3923 s, two finite-difference forwards 952 s, total 5351 s (1.49 h)",
+      "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --preset workstation-3060 --mode streamed --output D:/TorchFDTD/.local/runs/g5-05/G5-05_3060.json --artifacts D:/TorchFDTD/.local/runs/g5-05/artifacts"
+    },
+    "optional_run_rtx5880": {
+      "footprint_um": 120.0,
+      "lateral_size_um": 122.0,
+      "grid": [
+        2440,
+        2440,
+        64
+      ],
+      "cells": 381030400,
+      "pillars": 14400,
+      "observers": 4320000,
+      "execution": {
+        "mode": "streamed, DifferentiablePlaneSimulation over StreamedSimulation, fused CUDA tiles, synchronous transfers",
+        "slab_width": 128,
+        "temporal_depth": 32,
+        "checkpoints": 2,
+        "local_checkpoints": 1,
+        "state_storage": "host",
+        "restart_journal": "none: the streamed spectral path rejects a restart journal (torchfdtd.streamed._journal), so the run is unjournaled and a crash means rerunning it; crash and resume are covered by docs/validation/beyond_vram_restart_5880.json",
+        "host_budget_gib": 100,
+        "gpu_budget_gib": 40
+      },
+      "planner": {
+        "source": "python -m benchmarks.beyond_vram_propagated --preset workstation-5880 --plan --assume rtx5880 (metadata only, resources of the workstation as recorded in beyond_vram_restart_5880.json)",
+        "eh_bytes": 9144729600,
+        "state_bytes_with_cpml": 11049569280,
+        "state_bank_capacity": 5,
+        "host_reservation_bytes": 91586260172,
+        "gpu_reservation_bytes": 18270228744,
+        "dense_parameter_reservation_bytes": 12192972800,
+        "max_extended_tile_cells": 29982720,
+        "blocks": 58,
+        "tiles": 20,
+        "global_replayed_blocks": 267,
+        "forward_cell_steps": 1039943147520,
+        "global_replay_cell_steps": 4845927137280,
+        "local_replay_cell_steps": 4734014760960,
+        "total_cell_steps": 11659828193280
+      },
+      "physical_vram": {
+        "machine": "NVIDIA RTX 5880 Ada Generation, 51,526,500,352 bytes",
+        "eh_over_vram": 0.177,
+        "live_adjoint_state_bytes": "5 state banks x 11.05 GB plus the dense parameter reservation 12.19 GB = 67.4 GB, above the 51.5 GB of physical VRAM",
+        "resident_alternative": "a resident adjoint holds one primal and one adjoint E/H state, epsilon, its inverse and the gradient (60 bytes per cell, 22.9 GB) plus 11.05 GB per checkpoint; with the two checkpoints of this schedule it would need 45 GB and 267 block replays, with three 56 GB; the public resident path also refuses scenes above eight million cells",
+        "statement": "The E/H state of one bank (9.1 GB) does not exceed physical VRAM; the live state of the adjoint at the declared checkpoint schedule does. This case therefore meets the program's requirement in the working-set sense only, which the record states plainly."
+      },
+      "wall_time_model": "benchmarks.beyond_vram_propagated.TIME_MODELS[\"rtx5880\"], fitted on compact-host-large-5880.json and compact-host-capacity-5880.json: forward 493 s, backward 4023 s, two finite-difference forwards 985 s, total 5501 s (1.53 h); the fit scatters by about 30 percent on those records",
+      "status": "optional larger run; not required for G5-05 after the owner decided that the local RTX 3060 verification is sufficient"
+    },
+    "optional_run_rtx3060_64um": {
+      "machine": "rtx3060-win11-lab: NVIDIA GeForce RTX 3060, 12,884,377,600 bytes of VRAM, 85.6 GB of RAM, Windows 11, shared with other agents",
+      "footprint_um": 64.0,
+      "lateral_size_um": 66.0,
+      "grid": [
+        1320,
+        1320,
+        64
+      ],
+      "cells": 111513600,
+      "pillars": 4096,
+      "observers": 1228800,
+      "plane": "160 x 160 samples of 0.4 um",
+      "fd_pillars": 316,
+      "execution": {
+        "mode": "streamed, DifferentiablePlaneSimulation over StreamedSimulation, fused CUDA tiles, synchronous transfers",
+        "preset": "workstation-3060",
+        "slab_width": 64,
+        "temporal_depth": 32,
+        "checkpoints": 6,
+        "local_checkpoints": 1,
+        "state_storage": "host",
+        "restart_journal": "none: the streamed spectral path rejects a restart journal (torchfdtd.streamed._journal); a crash means rerunning",
+        "host_budget_gib": 56,
+        "gpu_budget_gib": 8,
+        "finite_difference": "central, two extra streamed forwards"
+      },
+      "planner": {
+        "source": "python -m benchmarks.beyond_vram_propagated --preset workstation-3060 --plan --assume rtx3060 --output <plan.json> (metadata only; 70 GiB of RAM and 11.5 GB of VRAM assumed free at launch)",
+        "eh_bytes": 2676326400,
+        "state_bytes_with_cpml": 3257379840,
+        "state_bank_capacity": 9,
+        "host_reservation_bytes": 41087352640,
+        "gpu_reservation_bytes": 6531318024,
+        "dense_parameter_reservation_bytes": 3568435200,
+        "max_extended_tile_cells": 10813440,
+        "blocks": 58,
+        "tiles": 21,
+        "global_replayed_blocks": 135,
+        "forward_cell_steps": 402462720000,
+        "global_replay_cell_steps": 948879360000,
+        "local_replay_cell_steps": 1832624640000,
+        "total_cell_steps": 3586429440000
+      },
+      "physical_vram": {
+        "machine": "NVIDIA GeForce RTX 3060, 12,884,377,600 bytes",
+        "eh_over_vram": 0.208,
+        "live_adjoint_state_bytes": "9 state banks x 3.26 GB plus the dense parameter reservation 3.57 GB = 32.9 GB, 2.55 times the 12.9 GB of physical VRAM",
+        "resident_alternative": "a resident adjoint holds one primal and one adjoint E/H state, epsilon, its inverse and the gradient (60 bytes per cell, 6.7 GB) plus 3.26 GB per checkpoint; with the six checkpoints of this schedule it would need 26.2 GB; the public resident path also refuses scenes above eight million cells",
+        "statement": "The E/H state of one bank (2.68 GB) does not exceed physical VRAM; the live state of the adjoint at the declared checkpoint schedule exceeds it 2.55 times. The case meets the program requirement in the working-set sense, which the record states plainly."
+      },
+      "wall_time_model": "benchmarks.beyond_vram_propagated.TIME_MODELS[\"rtx3060\"], the RTX 5880 model with the payload and compute rates refitted on the two RTX 3060 streamed rehearsals of this case (four timings within 16 percent, shared GPU): forward 476 s, backward 3923 s, two finite-difference forwards 952 s, total 5351 s (1.49 h)",
+      "command": "D:/TorchFDTD/.venv/Scripts/python.exe -m benchmarks.beyond_vram_propagated --preset workstation-3060 --mode streamed --output D:/TorchFDTD/.local/runs/g5-05/G5-05_3060.json --artifacts D:/TorchFDTD/.local/runs/g5-05/artifacts",
+      "note": "The 64 um instance first declared for this host; it needs 52 GB of available RAM and was not the judged run."
+    }
+  },
+  "reference_method": "Directional central finite difference of the same objective along the pillar direction delta (indicator of the pillar cells whose centres lie within 10 um of the axis, over the design slab), two extra streamed forwards in the judged, the optional and the rehearsal runs; in the rehearsal the resident DifferentiablePlaneSimulation on the same grid, sources, monitor and objective is the second reference for the objective and the design-slab gradient.",
+  "observables": [
+    {
+      "name": "objective",
+      "unit": "reduced field^2 (time-normalized)",
+      "definition": "sum over the wavelengths of the on-axis focal intensity"
+    },
+    {
+      "name": "focal_intensity_per_frequency",
+      "unit": "reduced field^2",
+      "definition": "the three terms of the objective"
+    },
+    {
+      "name": "plane_electric_energy_per_frequency",
+      "unit": "reduced field^2 m^2",
+      "definition": "|E|^2 integrated over the plane quadrature at each wavelength"
+    },
+    {
+      "name": "energy_history",
+      "unit": "reduced field^2",
+      "definition": "per time step, the sum of squares of the electric Yee samples feeding the plane interpolation (artifact streamed_energy_history.npy)"
+    },
+    {
+      "name": "energy_peak_step, energy_rise_step, energy_decayed_fraction",
+      "unit": "step, step, dimensionless",
+      "definition": "argmax of the history, first step above 1e-3 of the peak, final value over the peak"
+    },
+    {
+      "name": "gradient_norm, design_slab_gradient_norm, gradient_nonzero",
+      "unit": "reduced, reduced, cells",
+      "definition": "L2 norms of the dense VJP and of its pillar-layer slab (artifact streamed_design_slab_gradient.npy), count of nonzero entries"
+    },
+    {
+      "name": "directional_derivative, finite_difference, relative_error, relative_response",
+      "unit": "reduced per epsilon unit",
+      "definition": "sum of the gradient over the direction cells, (J(eps + h delta) - J(eps)) / h or the central form, |fd - d| / |d|, |delta J| / J"
+    },
+    {
+      "name": "frequency_resolution_hz, source_amplitude_ratio",
+      "unit": "Hz, dimensionless",
+      "definition": "1 / duration; amplitude spectrum of the sampled source waveform at each wavelength over its peak"
+    }
+  ],
+  "acceptance_limits": {
+    "fixture_of_record": {
+      "rtx3060": {
+        "grid": [
+          920,
+          920,
+          64
+        ],
+        "steps": 1836,
+        "minimum_eh_bytes": 1300070400,
+        "footprint_um": 44.0,
+        "host_reservation_bytes": 21365522240,
+        "gpu_reservation_bytes": 4503618824,
+        "state_bank_capacity": 9,
+        "state_bytes": 1593175040,
+        "dense_parameter_reservation_bytes": 1733427200
+      },
+      "rtx5880": {
+        "grid": [
+          2440,
+          2440,
+          64
+        ],
+        "steps": 1836,
+        "minimum_eh_bytes": 9144729600
+      },
+      "rehearsal": {
+        "grid": [
+          320,
+          320,
+          64
+        ],
+        "steps": 1836,
+        "minimum_eh_bytes": 157286400
+      },
+      "rtx3060_64um": {
+        "grid": [
+          1320,
+          1320,
+          64
+        ],
+        "steps": 1836,
+        "minimum_eh_bytes": 2676326400
+      }
+    },
+    "propagation": {
+      "energy_rise_before_peak": true,
+      "energy_decayed_fraction_max": 0.001,
+      "justification": "Exploratory streamed forwards of 12 um and 20 um members of the same family reached 1.7e-4 and 2.1e-4 at 160 fs and about 1.5e-4 at 175 fs; the limit leaves a factor of about six for slower lateral leakage of the larger array. A tail of 1e-3 in energy is 3 percent in field amplitude, the truncation error accepted for the spectrum."
+    },
+    "spectrum": {
+      "frequency_resolution_max_fraction_of_separation": 0.5,
+      "source_amplitude_ratio_min": 0.5,
+      "justification": "1 / 175 fs = 5.71 THz against the 11.72 THz between 1.65 and 1.55 um (0.487); the source amplitude at the three wavelengths is 0.80, 0.99 and 0.75 of its peak."
+    },
+    "gradient": {
+      "finite": true,
+      "nonzero": true,
+      "finite_difference": {
+        "step": 0.05,
+        "radius_um": 10.0,
+        "relative_response_min": 0.0002,
+        "rtx3060": {
+          "kind": "central",
+          "relative_error_max": 0.05
+        },
+        "rtx5880": {
+          "kind": "central",
+          "relative_error_max": 0.05
+        },
+        "rehearsal": {
+          "kind": "central",
+          "relative_error_max": 0.03
+        },
+        "rtx3060_64um": {
+          "kind": "central",
+          "relative_error_max": 0.05
+        }
+      },
+      "justification": "The step changes the pillar index by 0.6 percent over 316 pillars (7.7 percent of the 64 um array judged on the RTX 3060, 2.2 percent of the optional 120 um array) and over all 196 pillars in the rehearsal. Both contexts use the central difference: the 14 um rehearsal gave a central relative error of 9.1e-3 at a 26 percent response, while the supplementary 24 um streamed run showed that the one-sided difference at this step carries a 14.7 percent truncation error at a 1.9 percent response (the pillar transmission is strongly nonlinear in epsilon near its resonances), so the one-sided form first declared for the workstation was replaced by the central form before the judged run at the cost of one more forward. The judged and the optional runs keep the 5 percent originally declared for the workstation run and the rehearsal the program's 3 percent physical-parameter threshold. A response below 2e-4 of the objective would sit near the FP32 floor of a 1836-step spectrum and is declared inconclusive (FAIL)."
+    },
+    "resident_agreement": {
+      "objective_relative_difference_max": 0.0001,
+      "design_slab_gradient_relative_l2_max": 0.0001,
+      "source_of_limits": "proposed_thresholds.discrete_dimensionless_fp32.rtol",
+      "applies_to": "rehearsal only; the judged and optional runs have no resident reference"
+    },
+    "source_of_limits": "fixture-specific budgets declared here; resident agreement from proposed_thresholds.discrete_dimensionless_fp32"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 8,
+    "passed": [
+      "tests/test_beyond_vram_propagated.py::test_cases_are_declared_before_the_run_and_match_the_fixture_generator",
+      "tests/test_beyond_vram_propagated.py::test_rehearsal_record_passes_every_rehearsal_criterion",
+      "tests/test_beyond_vram_propagated.py::test_judged_record_meets_g5_05",
+      "tests/test_beyond_vram_propagated.py::test_judged_record_meets_g5_06",
+      "tests/test_beyond_vram_propagated.py::test_rehearsal_record_is_complete_for_the_report_and_carries_no_machine_paths",
+      "tests/test_beyond_vram_propagated.py::test_report_renders_from_the_record_alone",
+      "tests/test_beyond_vram_propagated.py::test_time_model_reproduces_the_records_it_was_fitted_on",
+      "tests/test_beyond_vram_propagated.py::test_plan_against_the_recorded_workstation_needs_no_device"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 0.344,
+    "suite_timestamp": "2026-09-23T23:30:54.217083+09:00"
+  },
+  "required_tests": [
+    "tests/test_beyond_vram_propagated.py::test_cases_are_declared_before_the_run_and_match_the_fixture_generator",
+    "tests/test_beyond_vram_propagated.py::test_rehearsal_record_passes_every_rehearsal_criterion",
+    "tests/test_beyond_vram_propagated.py::test_judged_record_meets_g5_05"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G5-05.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T143058Z-g5-05-ae197e34/junit.xml",
+      "sha256": "ac5ee18b2dd9a28ce15fd9e1e1c043ce4cb7388f6d20338f8eb7cc63d6a3ca58",
+      "bytes": 1298,
+      "original_path": ".local/tmp/junit/rerecord/G5-05.xml"
+    }
+  ],
+  "applicable_scope": "G5-05: judged 44 um instance (920 x 920 x 64 cells, 1836 steps) of the propagated beyond-VRAM case on rtx3060-win11-lab with host banks; live adjoint state 16.1 GB against 12.88 GB of physical VRAM; whole-machine counters sampled during the run. re-recorded on aa3f8c1506b5 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T043111Z-g5-05-e3c7efa3",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

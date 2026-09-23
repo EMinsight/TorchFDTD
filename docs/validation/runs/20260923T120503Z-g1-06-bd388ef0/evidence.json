@@ -1,0 +1,143 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T120503Z-g1-06-bd388ef0",
+  "task": "G1-06",
+  "stage": "G1",
+  "task_title": "문서/실행 경로 일치.",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_readme_measurements.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G1-06.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T21:04:47.825678+09:00",
+  "recorded_at": "2026-09-23T12:05:03+00:00",
+  "source_commit": "aa3f8c1506b5d178064bfef81a5c2909cd5cbf11",
+  "source_commit_time": "2026-09-23T20:37:16+09:00",
+  "source_tree_sha256": "501388a5fd011a7acb7c402737769a706eaeb798cffd08c3b71e115297e12fc2",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "28a83fea97ff71ac6732ec0eeacfde58b816bc79ca2578f5b63a1254ed67a535",
+  "package_path": "D:/torchfdtd-clean/dist/86b61a543091/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_readme_measurements.py": "e4b5ac1985006c897df8a6b0a87e6d3d62fd0b4109d15782e0b63800b6e8341d"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "README.md",
+    "docs/BEYOND_VRAM_FP32.md",
+    "docs/validation/beyond_vram_restart_5880.json",
+    "docs/validation/cross_solver_3060.json"
+  ],
+  "watch_sha256": {
+    "README.md": "b654ffbe4e3e3c87dfca072346a98f8ea17bfc8d0f83feda3bbcf52da9f6f233",
+    "docs/BEYOND_VRAM_FP32.md": "f678976120b4b08f30bd7d89da249680fe536411924be8d0ae0607130005402b",
+    "docs/validation/beyond_vram_restart_5880.json": "3eca0789122f690afbb8f923a56db6729144a1f7c8222366eef81e4d84d2cb7f",
+    "docs/validation/cross_solver_3060.json": "58da9d9e9a73554a30864756df6d671414effff17c4a6613db43eed4bcf388e9"
+  },
+  "fixture_path": null,
+  "fixture_sha256": null,
+  "acceptance_criteria_path": null,
+  "acceptance_criteria_sha256": null,
+  "case_first_commit": null,
+  "case_first_commit_time": null,
+  "declared_before_run_verified": null,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": null,
+  "backend": null,
+  "physics_configuration": null,
+  "reference_method": null,
+  "observables": null,
+  "acceptance_limits": null,
+  "observed_metrics": null,
+  "test_results": {
+    "total": 6,
+    "passed": [
+      "tests/test_readme_measurements.py::test_readme_capacity_row_matches_the_fp32_record",
+      "tests/test_readme_measurements.py::test_readme_restart_row_matches_the_restart_record",
+      "tests/test_readme_measurements.py::test_readme_meep_row_matches_the_cross_solver_record",
+      "tests/test_readme_measurements.py::test_readme_fdtdx_row_matches_the_cross_solver_record",
+      "tests/test_readme_measurements.py::test_readme_fdtdx_adjoint_row_matches_the_cross_solver_record",
+      "tests/test_readme_measurements.py::test_quick_start_selects_the_measured_path_explicitly"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 0.075,
+    "suite_timestamp": "2026-09-23T21:04:47.825678+09:00"
+  },
+  "required_tests": [
+    "tests/test_readme_measurements.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_readme_measurements.py": [
+      "tests/test_readme_measurements.py::test_readme_capacity_row_matches_the_fp32_record",
+      "tests/test_readme_measurements.py::test_readme_restart_row_matches_the_restart_record",
+      "tests/test_readme_measurements.py::test_readme_meep_row_matches_the_cross_solver_record",
+      "tests/test_readme_measurements.py::test_readme_fdtdx_row_matches_the_cross_solver_record",
+      "tests/test_readme_measurements.py::test_readme_fdtdx_adjoint_row_matches_the_cross_solver_record",
+      "tests/test_readme_measurements.py::test_quick_start_selects_the_measured_path_explicitly"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G1-06.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T120503Z-g1-06-bd388ef0/junit.xml",
+      "sha256": "03f74c5bc09091a51d4489c1182b2d19a0cc66c7a32d6a0f4e6e6697770ac1a0",
+      "bytes": 1024,
+      "original_path": ".local/tmp/junit/rerecord/G1-06.xml"
+    }
+  ],
+  "applicable_scope": "Re-recorded on the merged main tree after a shared test module changed in a merged branch. re-recorded on aa3f8c1506b5 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T020747Z-g1-06-78a77a52",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "fixture_sha256": "no pre-declared fixture file was supplied; the test module fixes its own inputs",
+    "acceptance_criteria_sha256": "no acceptance-criteria file was supplied; the pass/fail assertions inside the test sources are the criteria",
+    "seed": "not declared: no case file supplied the \"seed\" entry for this run",
+    "precision": "not declared: no case file supplied the \"precision\" entry for this run",
+    "backend": "not declared: no case file supplied the \"backend\" entry for this run",
+    "physics_configuration": "not declared: no case file supplied the \"fixture\" entry for this run",
+    "reference_method": "not declared: no case file supplied the \"reference_method\" entry for this run",
+    "observables": "not declared: no case file supplied the \"observables\" entry for this run",
+    "acceptance_limits": "not declared: no case file supplied the \"acceptance\" entry for this run",
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

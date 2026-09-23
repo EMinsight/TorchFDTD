@@ -140,8 +140,8 @@
    "mie_peak_scattering_um": 0.3742792287665062,
    "peak_absorption_um": 0.4201933771478571,
    "mie_peak_absorption_um": 0.37390203660824456,
-   "wall_s": 3.1540050003677607,
-   "wall_reference_s": 3.1774665997363627
+   "wall_s": 3.1676686997525394,
+   "wall_reference_s": 3.1143655995838344
   },
   "r=0.02/h=0.01/cpu-float64": {
    "mesh_um": 0.01,
@@ -273,8 +273,8 @@
    "mie_peak_scattering_um": 0.3742792287665062,
    "peak_absorption_um": 0.3871112538047243,
    "mie_peak_absorption_um": 0.37390203660824456,
-   "wall_s": 37.67487360024825,
-   "wall_reference_s": 36.87169030029327
+   "wall_s": 40.08445520000532,
+   "wall_reference_s": 39.302327199839056
   },
   "r=0.02/h=0.005/cpu-float64": {
    "mesh_um": 0.005,
@@ -406,8 +406,8 @@
    "mie_peak_scattering_um": 0.3742792287665062,
    "peak_absorption_um": 0.375852747185064,
    "mie_peak_absorption_um": 0.37390203660824456,
-   "wall_s": 812.6891812998801,
-   "wall_reference_s": 803.0115662999451
+   "wall_s": 802.6018627001904,
+   "wall_reference_s": 840.5011330000125
   },
   "r=0.035/h=0.02/cpu-float64": {
    "mesh_um": 0.02,
@@ -539,8 +539,8 @@
    "mie_peak_scattering_um": 0.38839005056953546,
    "peak_absorption_um": 0.36511563416265597,
    "mie_peak_absorption_um": 0.3870817815764726,
-   "wall_s": 3.359398700296879,
-   "wall_reference_s": 3.1774665997363627
+   "wall_s": 3.116713300347328,
+   "wall_reference_s": 3.1143655995838344
   },
   "r=0.035/h=0.01/cpu-float64": {
    "mesh_um": 0.01,
@@ -672,8 +672,8 @@
    "mie_peak_scattering_um": 0.38839005056953546,
    "peak_absorption_um": 0.38613866457321744,
    "mie_peak_absorption_um": 0.3870817815764726,
-   "wall_s": 37.3727815002203,
-   "wall_reference_s": 36.87169030029327
+   "wall_s": 40.49928219988942,
+   "wall_reference_s": 39.302327199839056
   },
   "r=0.035/h=0.005/cpu-float64": {
    "mesh_um": 0.005,
@@ -805,8 +805,8 @@
    "mie_peak_scattering_um": 0.38839005056953546,
    "peak_absorption_um": 0.3887733175443935,
    "mie_peak_absorption_um": 0.3870817815764726,
-   "wall_s": 848.19666100014,
-   "wall_reference_s": 803.0115662999451
+   "wall_s": 811.720697700046,
+   "wall_reference_s": 840.5011330000125
   },
   "r=0.05/h=0.02/cpu-float64": {
    "mesh_um": 0.02,
@@ -938,8 +938,8 @@
    "mie_peak_scattering_um": 0.4102547621144342,
    "peak_absorption_um": 0.4457675869500057,
    "mie_peak_absorption_um": 0.36064432528209056,
-   "wall_s": 3.0692381002008915,
-   "wall_reference_s": 3.1774665997363627
+   "wall_s": 3.1427655001170933,
+   "wall_reference_s": 3.1143655995838344
   },
   "r=0.05/h=0.01/cpu-float64": {
    "mesh_um": 0.01,
@@ -1071,8 +1071,8 @@
    "mie_peak_scattering_um": 0.4102547621144342,
    "peak_absorption_um": 0.4044670997671049,
    "mie_peak_absorption_um": 0.36064432528209056,
-   "wall_s": 37.664708899799734,
-   "wall_reference_s": 36.87169030029327
+   "wall_s": 39.97653819993138,
+   "wall_reference_s": 39.302327199839056
   },
   "r=0.05/h=0.005/cpu-float64": {
    "mesh_um": 0.005,
@@ -1204,8 +1204,8 @@
    "mie_peak_scattering_um": 0.4102547621144342,
    "peak_absorption_um": 0.42196359438122233,
    "mie_peak_absorption_um": 0.36064432528209056,
-   "wall_s": 831.1790607003495,
-   "wall_reference_s": 803.0115662999451
+   "wall_s": 817.5484153996222,
+   "wall_reference_s": 840.5011330000125
   },
   "r=0.02/h=0.02/cuda-float32": {
    "mesh_um": 0.02,
@@ -1337,8 +1337,8 @@
    "mie_peak_scattering_um": 0.3742792287665062,
    "peak_absorption_um": 0.42019338341518975,
    "mie_peak_absorption_um": 0.37390203660824456,
-   "wall_s": 1.4279150003567338,
-   "wall_reference_s": 2.080157999880612,
+   "wall_s": 1.4196997000835836,
+   "wall_reference_s": 2.066035599913448,
    "layer_a_relative_difference": {
     "scattering_um2": [
      -2.6797197202332868e-06,
@@ -1496,8 +1496,8 @@
    "mie_peak_scattering_um": 0.38839005056953546,
    "peak_absorption_um": 0.3651144556395277,
    "mie_peak_absorption_um": 0.3870817815764726,
-   "wall_s": 1.445995599962771,
-   "wall_reference_s": 2.080157999880612,
+   "wall_s": 1.4325733999721706,
+   "wall_reference_s": 2.066035599913448,
    "layer_a_relative_difference": {
     "scattering_um2": [
      2.0469223938057723e-07,
@@ -1655,8 +1655,8 @@
    "mie_peak_scattering_um": 0.4102547621144342,
    "peak_absorption_um": 0.4457676642829707,
    "mie_peak_absorption_um": 0.36064432528209056,
-   "wall_s": 1.4343416998162866,
-   "wall_reference_s": 2.080157999880612,
+   "wall_s": 1.4296313999220729,
+   "wall_reference_s": 2.066035599913448,
    "layer_a_relative_difference": {
     "scattering_um2": [
      -6.753437216122649e-07,
@@ -1814,8 +1814,8 @@
    "mie_peak_scattering_um": 0.3742792287665062,
    "peak_absorption_um": 0.387111277245474,
    "mie_peak_absorption_um": 0.37390203660824456,
-   "wall_s": 3.0592752997763455,
-   "wall_reference_s": 3.06350849987939,
+   "wall_s": 3.0727920001372695,
+   "wall_reference_s": 3.027812300249934,
    "layer_a_relative_difference": {
     "scattering_um2": [
      -1.022138456319155e-06,
@@ -1973,8 +1973,8 @@
    "mie_peak_scattering_um": 0.38839005056953546,
    "peak_absorption_um": 0.386138666507741,
    "mie_peak_absorption_um": 0.3870817815764726,
-   "wall_s": 3.064039200078696,
-   "wall_reference_s": 3.06350849987939,
+   "wall_s": 3.2238966999575496,
+   "wall_reference_s": 3.027812300249934,
    "layer_a_relative_difference": {
     "scattering_um2": [
      -2.5326000219205724e-07,
@@ -2132,8 +2132,8 @@
    "mie_peak_scattering_um": 0.4102547621144342,
    "peak_absorption_um": 0.404467059142593,
    "mie_peak_absorption_um": 0.36064432528209056,
-   "wall_s": 3.06704520015046,
-   "wall_reference_s": 3.06350849987939,
+   "wall_s": 3.193580700084567,
+   "wall_reference_s": 3.027812300249934,
    "layer_a_relative_difference": {
     "scattering_um2": [
      -1.1232864605137394e-07,
@@ -2162,6 +2162,6 @@
    "layer_a_rtol": 0.0001
   }
  },
- "generated": "2026-09-23T03:32:12+00:00",
+ "generated": "2026-09-23T13:29:55+00:00",
  "full_mode": true
 }

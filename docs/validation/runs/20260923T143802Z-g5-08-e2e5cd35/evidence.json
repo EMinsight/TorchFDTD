@@ -1,0 +1,203 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T143802Z-g5-08-e2e5cd35",
+  "task": "G5-08",
+  "stage": "G5",
+  "task_title": "checkpoint에 solver와 필요한 auxiliary states, optimizer state, scheduler/projection state, RNG, effective source, configuration fingerprint를 보존한다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_checkpoint_completeness.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G5-08.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T23:36:03.198908+09:00",
+  "recorded_at": "2026-09-23T14:38:02+00:00",
+  "source_commit": "aa3f8c1506b5d178064bfef81a5c2909cd5cbf11",
+  "source_commit_time": "2026-09-23T20:37:16+09:00",
+  "source_tree_sha256": "38c1218a44e9472c24b862a33f2fcfd690a86087bf295772a48e991532e779d3",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ee7d4a044d0490859419351e84d67693458bc844d5ccd37f70c2f5ab8eee88a4",
+      "head_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1a7a05ff6fae3c928e29df55181ba608651c358e7c02d1b8d442416498db1b9d",
+      "head_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "575c076ee9a82885893dd006b7e6367de1750e6e733a67d6f4e75a83bc7ec92d",
+      "head_sha256": "6fcf959589774bd73bab2ed679c21f12d016909cabd1b2d2095963adad33fe8e"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "175e2591f29c89a76a5a54b7773acb767e9731697f884a22166d23ef853f60e1",
+      "head_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "aacccd1a6f269711c47c89a595ba6eb7da85264c6d1a72652eca64c0797a399b",
+      "head_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "28a83fea97ff71ac6732ec0eeacfde58b816bc79ca2578f5b63a1254ed67a535",
+  "package_path": "D:/torchfdtd-clean/dist/86b61a543091/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_checkpoint_completeness.py": "4bab13a5ee76d76da33d40aa23127182d19e046cb54dc9f71752b60a8df7cffa"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G5-08_checkpoint_completeness.json",
+  "fixture_sha256": "7563f7195635ae3c9f6c3a0e8171707edb93b35ccac408a21df470cf483be66f",
+  "acceptance_criteria_path": "docs/validation/cases/G5-08_checkpoint_completeness.json",
+  "acceptance_criteria_sha256": "7563f7195635ae3c9f6c3a0e8171707edb93b35ccac408a21df470cf483be66f",
+  "case_first_commit": "767bc8fa5a88c42a284ce14f2e86fd29002f88aa",
+  "case_first_commit_time": "2026-09-22T05:07:43+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": 7,
+  "precision": [
+    "float64"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "physics_configuration": {
+    "module": "tests/test_checkpoint_completeness.py",
+    "solver_scenes": [
+      "cpml: tests/test_differentiable.py::project(steps=13), 2D 16 x 15, CPML on every wall, float64, epsilon 1.7 (E, H and 16 psi segments)",
+      "faces: tests/test_pmc_general.py::scene with walls (pml, pmc), (pmc, pml), (pec, pmc), 10 x 10 x 6 cells, float64, voxelized diagonal epsilon (E, H, psi segments, stored E and H face banks)",
+      "ade: the cpml scene through StreamedDispersiveSimulation with two poles (E, H, psi segments, P and Q banks in the x-first slab layout)"
+    ],
+    "policy": "slab width 4 (3 for faces), temporal depth 3, checkpoints 1, local checkpoints 1, host banks, CPU tiles, restart_every_blocks 1",
+    "optimization": "DensityParameterization 16 x 15, density mode, truncate filter radius 0.15 um, beta 1 advanced to 2 at the third iteration, eta 0.5, float64; Adam lr 0.05; objective sum over monitors of a torch.rand weight times the squared signals; four iterations with a journal per iteration and a design checkpoint per update; the interrupted run raises after the twelfth transpose (third iteration, two transposes done)"
+  },
+  "reference_method": "behavioural: the host state tuple built independently by _StreamedExecution.host and advanced two blocks by the slab operator; the uninterrupted optimization run in the same process with the same seed",
+  "observables": [
+    {
+      "name": "record_arrays",
+      "unit": "count, shape, dtype, bytes, sha256",
+      "definition": "the array descriptions of the forward record after two blocks against the host state tuple"
+    },
+    {
+      "name": "restored_state",
+      "unit": "dimensionless",
+      "definition": "difference between the arrays loaded from the record and the state reached by advancing the host state two blocks"
+    },
+    {
+      "name": "history_agreement",
+      "unit": "dimensionless",
+      "definition": "difference of objective, gradient norm, beta, random weight, final design and Adam moments between the resumed and the uninterrupted optimization"
+    },
+    {
+      "name": "refusal",
+      "unit": "string",
+      "definition": "the state named by the ValueError of a checkpoint lacking it"
+    }
+  ],
+  "acceptance_limits": {
+    "solver_states": "the forward record holds exactly len(host.state())+1 arrays: E, H, one psi per CPML segment, every stored E and H face bank, and for ADE the P and Q banks, each with the state's shape, dtype and byte count and a 64-character SHA-256; loading the record reproduces the two-block state bitwise; the forward resume and the backward resume reproduce the uninterrupted signals and gradients bitwise (rtol 0, atol 0)",
+    "optimizer_states": "the resumed optimization reproduces the uninterrupted history bitwise on CPU: objectives, gradient norms, beta, the torch.rand weights, the final design and the Adam exp_avg, exp_avg_sq and step",
+    "named_states": "DesignCheckpoint carries iteration, parameters, optimizer, projection, rng, waveform, fingerprint and history; a checkpoint lacking any one of them is refused with that name; a checkpoint written for another plan or other options (restart_key differs), another effective waveform, a damaged file (checksum or byte count) or another filter configuration is refused with the cause named",
+    "source_of_limits": "bitwise equality on CPU (stricter than proposed_thresholds discrete_dimensionless_fp32); counts are exact"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 15,
+    "passed": [
+      "tests/test_checkpoint_completeness.py::test_solver_journal_carries_every_auxiliary_state_and_resumes[cpml]",
+      "tests/test_checkpoint_completeness.py::test_solver_journal_carries_every_auxiliary_state_and_resumes[faces]",
+      "tests/test_checkpoint_completeness.py::test_solver_journal_carries_every_auxiliary_state_and_resumes[ade]",
+      "tests/test_checkpoint_completeness.py::test_optimizer_restart_reproduces_the_uninterrupted_history_bitwise",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_round_trip_restores_each_named_state",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name[iteration]",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name[parameters]",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name[optimizer]",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name[projection]",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name[rng]",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name[waveform]",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name[fingerprint]",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name[history]",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_refuses_another_configuration_waveform_or_damage",
+      "tests/test_checkpoint_completeness.py::test_checkpoint_with_a_pickled_object_is_refused_without_executing_it"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 113.713,
+    "suite_timestamp": "2026-09-23T23:36:03.198908+09:00"
+  },
+  "required_tests": [
+    "tests/test_checkpoint_completeness.py::test_solver_journal_carries_every_auxiliary_state_and_resumes",
+    "tests/test_checkpoint_completeness.py::test_optimizer_restart_reproduces_the_uninterrupted_history_bitwise",
+    "tests/test_checkpoint_completeness.py::test_checkpoint_round_trip_restores_each_named_state",
+    "tests/test_checkpoint_completeness.py::test_checkpoint_missing_a_state_is_refused_by_name",
+    "tests/test_checkpoint_completeness.py::test_checkpoint_refuses_another_configuration_waveform_or_damage"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G5-08.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T143802Z-g5-08-e2e5cd35/junit.xml",
+      "sha256": "cbeae16b88c090c6248a6a37726912d2ad0d4f7acb7b0e5da2bc334597996e1c",
+      "bytes": 2393,
+      "original_path": ".local/tmp/junit/rerecord/G5-08.xml"
+    }
+  ],
+  "applicable_scope": "Streamed restart journal and DesignCheckpoint on CPU: CPML, stored PMC face and ADE scenes; CUDA generator states saved but the optimization runs on CPU re-recorded on aa3f8c1506b5 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T043828Z-g5-08-ac371944",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
