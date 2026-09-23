@@ -3083,7 +3083,8 @@
             "20260921T163104Z-g9-04-f2b9d65e",
             "20260921T212831Z-g9-04-f826cb57",
             "20260923T051039Z-g9-04-6a6a448a",
-            "20260923T052154Z-g9-04-b221e298"
+            "20260923T052154Z-g9-04-b221e298",
+            "20260923T080205Z-g9-04-03b0495b"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3157,7 +3158,7 @@
           "specification": "validation report를 기계 산출물에서 생성한다. 내부 검증 보고서를 제3자 인증서라고 부르지 않는다. 숫자·지원 표·README·API docs·wheel 버전을 일치시킨다.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "VERIFIED",
+          "verification_state": "FAILED",
           "owner": null,
           "code_paths": [
             "scripts/build_validation_report.py",
@@ -3183,7 +3184,8 @@
             "20260921T213007Z-g9-07-31e7a456",
             "20260922T052219Z-g9-07-512b7fdc",
             "20260922T064740Z-g9-07-e3635ece",
-            "20260923T075351Z-g9-07-d03dbea4"
+            "20260923T075351Z-g9-07-d03dbea4",
+            "20260923T080318Z-g9-07-72224fc0"
           ],
           "blocker": null,
           "scope_change_approval": null,

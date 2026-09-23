@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="10" time="59.404" timestamp="2026-09-23T17:02:13.571402+09:00" hostname="DESKTOP-N5DFT8J"><testcase classname="tests.test_validation_report" name="test_report_is_the_renderer_output_for_the_current_tree" time="25.252"><failure message="AssertionError: docs/VALIDATION_REPORT.md differs from a fresh render of the records; run scripts/build_validation_report.py on a clean tree&#10;assert b'# TorchFDTD...smatch(es).\n' == b'# TorchFDTD...smatch(es).\n'&#10;  &#10;  At index 989 diff: b'8' != b'7'&#10;  Use -v to get more diff">rendered = {'report': '# TorchFDTD internal validation report\n\nInternal validation report of the completion program ([COMPLETIO...ADME row check `test_readme_meep_row_matches_the_cross_solver_record`', True, 'reproduced from its record'), ...], ...}
+tmp_path = WindowsPath('D:/TorchFDTD/.local/tmp/pytest-of-연구실/pytest-669/test_report_is_the_renderer_ou0')
+
+    def test_report_is_the_renderer_output_for_the_current_tree(rendered, tmp_path):
+        fresh = tmp_path / 'VALIDATION_REPORT.md'
+        fresh.write_bytes(rendered['report'].encode('utf-8'))
+&gt;       assert fresh.read_bytes() == REPORT.read_bytes(), \
+            'docs/VALIDATION_REPORT.md differs from a fresh render of the records; run scripts/build_validation_report.py on a clean tree'
+E       AssertionError: docs/VALIDATION_REPORT.md differs from a fresh render of the records; run scripts/build_validation_report.py on a clean tree
+E       assert b'# TorchFDTD...smatch(es).\n' == b'# TorchFDTD...smatch(es).\n'
+E         
+E         At index 989 diff: b'8' != b'7'
+E         Use -v to get more diff
+
+..\..\..\..\tests\test_validation_report.py:36: AssertionError</failure></testcase><testcase classname="tests.test_validation_report" name="test_release_scope_cells_and_stage_block_match_the_gate_file" time="0.001"><failure message="AssertionError: docs/RELEASE_SCOPE.md verification cells or stage block drifted from the gate file; rerun the builder&#10;assert not True">rendered = {'report': '# TorchFDTD internal validation report\n\nInternal validation report of the completion program ([COMPLETIO...ADME row check `test_readme_meep_row_matches_the_cross_solver_record`', True, 'reproduced from its record'), ...], ...}
+
+    def test_release_scope_cells_and_stage_block_match_the_gate_file(rendered):
+        assert rendered['scope_cells'] &gt;= 20
+&gt;       assert not rendered['scope_changed'], 'docs/RELEASE_SCOPE.md verification cells or stage block drifted from the gate file; rerun the builder'
+E       AssertionError: docs/RELEASE_SCOPE.md verification cells or stage block drifted from the gate file; rerun the builder
+E       assert not True
+
+..\..\..\..\tests\test_validation_report.py:42: AssertionError</failure></testcase><testcase classname="tests.test_validation_report" name="test_report_title_and_forbidden_words" time="0.001" /><testcase classname="tests.test_validation_report" name="test_consistency_section_reports_no_mismatch" time="0.001"><failure message="AssertionError: [('RELEASE_SCOPE.md support claims', '22 verification cells and the stage-status block rendered from the gate file')]&#10;assert not [('RELEASE_SCOPE.md support claims', '22 verification cells and the stage-status block rendered from the gate file')]">rendered = {'report': '# TorchFDTD internal validation report\n\nInternal validation report of the completion program ([COMPLETIO...ADME row check `test_readme_meep_row_matches_the_cross_solver_record`', True, 'reproduced from its record'), ...], ...}
+
+    def test_consistency_section_reports_no_mismatch(rendered):
+        failing = [(name, detail) for name, ok, detail in rendered['checks'] if not ok]
+&gt;       assert not failing, failing
+E       AssertionError: [('RELEASE_SCOPE.md support claims', '22 verification cells and the stage-status block rendered from the gate file')]
+E       assert not [('RELEASE_SCOPE.md support claims', '22 verification cells and the stage-status block rendered from the gate file')]
+
+..\..\..\..\tests\test_validation_report.py:63: AssertionError</failure></testcase><testcase classname="tests.test_validation_report" name="test_platform_section_lists_every_record_with_its_g4_evidence" time="0.002" /><testcase classname="tests.test_validation_report" name="test_report_lists_every_gate_task_and_every_g3_task_once" time="0.002" /><testcase classname="tests.test_validation_report" name="test_report_lists_evidence_warnings_and_pending_approvals" time="11.993" /><testcase classname="tests.test_validation_report" name="test_check_mode_passes_on_the_committed_tree" time="19.261"><failure message="AssertionError: assert 1 == 0&#10; +  where 1 = &lt;function main at 0x00000210D1D6C5E0&gt;(['--check'])&#10; +    where &lt;function main at 0x00000210D1D6C5E0&gt; = builder.main">capsys = &lt;_pytest.capture.CaptureFixture object at 0x00000210D1CDD7E0&gt;
+
+    def test_check_mode_passes_on_the_committed_tree(capsys):
+&gt;       assert builder.main(['--check']) == 0
+E       AssertionError: assert 1 == 0
+E        +  where 1 = &lt;function main at 0x00000210D1D6C5E0&gt;(['--check'])
+E        +    where &lt;function main at 0x00000210D1D6C5E0&gt; = builder.main
+
+..\..\..\..\tests\test_validation_report.py:120: AssertionError</failure></testcase><testcase classname="tests.test_validation_report" name="test_scope_cells_are_regenerated_only_where_they_state_a_gate_result" time="0.001" /><testcase classname="tests.test_validation_report" name="test_gate_sections_render_identically_for_windows_and_posix_root_spellings" time="2.667" /></testsuite></testsuites>
