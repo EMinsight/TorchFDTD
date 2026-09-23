@@ -546,7 +546,7 @@ def application_timeline(ax, p):
     for side in ('left', 'top', 'right'):
         ax.spines[side].set_visible(False)
     ax.set_xlabel('Driver wall time (min)')
-    ax.text(0.3, 1.45, f"driver total {total / 60:.2f} min, single run on an RTX 3060, "
+    ax.text(0.3, 1.45, f"total {total / 60:.2f} min on an RTX 3060, "
             f"peak device allocation {streamed['backward']['peak_torch_allocated_bytes'] / 1e9:.2f} GB",
             fontsize=6.3, color=MUTED, va='center')
 

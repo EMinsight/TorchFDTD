@@ -90,7 +90,7 @@ Table~\ref{tab:si-microring} lists the four fitted resonances of the microring o
 \section{Independent lateral tiles}
 \label{si:tiling}
 
-Because independent lateral tiles change the boundary-value problem, we measure their error against a full-domain reference. The tiling test uses a $140\times140\times60$ grid with 2059 time steps, split into four tiles with 3~\micron{} cores (Fig.~\ref{fig:si-tiling}). With the excitation sheet extended through the absorbers and hard core assembly, increasing the overlap from 0.25 to 2~\micron{} reduces the six-component near-field relative $L_2$ error from 12.0\% to 5.68\%, while the total number of simulated cells grows to 2.9 times the full grid. At 1.5~\micron{} overlap the four tiles, solved one after another, take 4.05~s against 2.28~s for the full domain while the largest tile allocates 49~MiB of device memory against 81~MiB, and their adjoint takes 54.0~s against 20.3~s. In a separate gradient check at 1.5~\micron{} overlap the focal objective differs by 0.138\% from the full-domain value, whereas the design-region gradient differs by 27.2\%. Consequently, agreement of the tiled derivative with a finite difference of its own forward model does not establish the accuracy of the full-device derivative, and we offer the tiled path for forward screening rather than final gradients.
+Because independent lateral tiles change the boundary-value problem, we measure their error against a full-domain reference. The tiling test uses a $140\times140\times60$ grid with 2059 time steps, split into four tiles with 3~\micron{} cores (Fig.~\ref{fig:si-tiling}). With the excitation sheet extended through the absorbers and hard core assembly, increasing the overlap from 0.25 to 2~\micron{} reduces the six-component near-field relative $L_2$ error from 12.0\% to 5.68\%, while the total number of simulated cells grows to 2.9 times the full grid. At 1.5~\micron{} overlap the four tiles, solved one after another, take 4.05~s against 2.28~s for the full domain while the largest tile allocates 49~MiB of device memory against 81~MiB, and their adjoint takes 54.0~s against 20.3~s. In a separate gradient check at 1.5~\micron{} overlap the focal objective differs by 0.138\% from the full-domain value, whereas the design-region gradient differs by 27.2\%. The tiled path therefore serves forward screening, and final gradients use the full-domain adjoint.
 
 \begin{figure}[tbp]
 \centering
@@ -102,7 +102,7 @@ Because independent lateral tiles change the boundary-value problem, we measure 
 \section{Host dependence of the streaming cost}
 \label{si:host}
 
-The time factor of host streaming follows the host that moves the slabs rather than the GPU. Table~\ref{tab:si-host} compares the matched $256^3$ adjoints of Section~7.2 of the main text on the four-core A100 container, on an RTX 5880 Ada workstation with eight physical cores and, for the dielectric case, on the RTX 3060 workstation of Section~7.3. The ratio of streamed to resident time is 14.5 to 15.2 in the container, 4.1 to 4.8 on the RTX 5880 workstation and 3.1 on the RTX 3060 workstation, although the resident sweeps of both workstations are slower than those of the A100.
+The time factor of host streaming follows the host that moves the slabs rather than the GPU. Table~\ref{tab:si-host} compares the matched $256^3$ adjoints of Section~7.2 of the main text on the four-core A100 container, on an RTX 5880 Ada workstation with eight physical cores and, for the dielectric case, on the RTX 3060 workstation of Section~7.3. The ratio of streamed to resident time is 14.5 to 15.2 in the container, 4.1 to 4.8 on the RTX 5880 workstation and 3.1 on the RTX 3060 workstation.
 
 \input{tables/si-host}
 
@@ -117,7 +117,7 @@ Tables~\ref{tab:si-scaling-forward} and~\ref{tab:si-scaling-adjoint} list the me
 \section{Metagrating design runs}
 \label{si:metagrating}
 
-Each iteration of the design loop of Section~8.1 of the main text runs 800 steps on the 50~nm mesh, or 76~fs, and the reported efficiencies come from runs four times longer on the 25~nm mesh. Figure~\ref{fig:si-metagrating} shows this run-length check for the final layout. A run of the design length departs from energy balance by up to 0.08 near 0.96~\micron{}, the run four times longer closes the balance to $2.3\times10^{-4}$, and doubling its length again changes the efficiencies by less than 0.006. Near 0.98~\micron{} the weakly modulated initial layer supports narrow guided resonances that ring beyond the longer run. Above the final layer the power of the $+1$ Fourier component of $E_x$ exceeds that of the $-1$ component by 4.62, the ratio of the two converged efficiencies, which ties the field maps of Fig.~10 to the spectra. Table~\ref{tab:si-metagrating-seeds} lists the three seeds at the design-run lengths that the optimizer saw.
+Each iteration of the design loop of Section~8.1 of the main text runs 800 steps on the 50~nm mesh, or 76~fs, and the reported efficiencies come from runs four times longer on the 25~nm mesh. Figure~\ref{fig:si-metagrating} shows this run-length check for the final layout. A run of the design length departs from energy balance by up to 0.08 near 0.96~\micron{}, the run four times longer closes the balance to $2.3\times10^{-4}$, and doubling its length again changes the efficiencies by less than 0.006. Above the final layer the power of the $+1$ Fourier component of $E_x$ exceeds that of the $-1$ component by 4.62, the ratio of the two converged efficiencies, which ties the field maps of Fig.~10 to the spectra. Table~\ref{tab:si-metagrating-seeds} lists the three seeds at the design-run lengths that the optimizer saw.
 
 \begin{figure}[tbp]
 \centering
@@ -131,7 +131,7 @@ Each iteration of the design loop of Section~8.1 of the main text runs 800 steps
 \section{Pillar-array driver timeline}
 \label{si:pillar}
 
-Figure~\ref{fig:si-pillar} shows the single recorded run of the pillar-array example of Section~8.2 of the main text on the RTX 3060. The forward pass takes 176.0~s and the adjoint sweep 1234.0~s, and together with the two central-difference forward solves and the remaining setup and checks the driver takes 29.58 minutes.
+Figure~\ref{fig:si-pillar} shows the timeline of the pillar-array example of Section~8.2 of the main text on the RTX 3060, in which the forward pass takes 176.0~s and the adjoint sweep 1234.0~s.
 
 \begin{figure}[tbp]
 \centering
