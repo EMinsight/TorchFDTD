@@ -1,17 +1,23 @@
 # Drivers of the manuscript's review additions
 
-These scripts produced the records under `docs/validation/paper_review/` and
-`docs/validation/meep_comparison/microring_fields_torchfdtd.*`. They were run
-from working copies under `.local/paper_review/`, which is why the records name
-that path. The files here are byte-identical to those copies, and the SHA-256
-hashes stored in the records identify them.
+These scripts produced the records under `docs/validation/paper_review/`. They
+were run from working copies under `.local/paper_review/`, which is why the
+records name that path. The files here are byte-identical to those copies, and
+the SHA-256 hashes stored in the records identify them.
+
+`run_fields.py` writes `microring_fields_torchfdtd.{json,npz}` into
+`docs/validation/meep_comparison/`. The committed copies were moved to
+`docs/validation/paper_review/`, because
+`tests/test_readme_meep_comparison.py` takes every number of every JSON record
+in `meep_comparison/` as the allowed pool for the README numbers, and the field
+record would widen that pool. Move the two files the same way after a rerun.
 
 | Driver | Record | Hardware |
 |---|---|---|
 | `scaling/forward_sweep.py` | `scaling-forward-3060.json` | RTX 3060, resident fused forward, 64^3 to 192^3 |
 | `scaling/streamed_forward_sweep.py` | `scaling-forward-streamed-3060.json` | RTX 3060, host-streamed forward above eight million cells |
 | `scaling/adjoint_sweep.py` | `scaling-adjoint-3060-{n}.json`, `scaling-adjoint-3060-384-resident-plan.json` | RTX 3060, wraps `benchmarks/cpu_gpu_adjoint.py` |
-| `microring_fields/run_fields.py` | `meep_comparison/microring_fields_torchfdtd.{json,npz}` | RTX 3060 |
+| `microring_fields/run_fields.py` | `microring_fields_torchfdtd.{json,npz}` | RTX 3060 |
 | `metagrating/make_metagrating_showcase.py` | `metagrating_showcase.json`, `metagrating_fields.npz` | CPU, four threads |
 
 Commands, from the repository root:

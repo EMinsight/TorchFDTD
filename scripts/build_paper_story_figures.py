@@ -519,11 +519,11 @@ def microring_meep():
     tr = read('meep_comparison/microring_torchfdtd.json')
     me = read('meep_comparison/microring_meep.json')
     cmp_ = read('meep_comparison/microring_comparison.json')
-    fields_path = DATA / 'meep_comparison/microring_fields_torchfdtd.npz'
+    fields_path = DATA / 'paper_review/microring_fields_torchfdtd.npz'
     fig = plt.figure(figsize=(WIDTH, 4.5))
     grid = fig.add_gridspec(2, 2, height_ratios=[1.4, 1], hspace=0.42, wspace=0.3)
     if fields_path.exists():
-        INPUTS['meep_comparison/microring_fields_torchfdtd.npz'] = hashlib.sha256(fields_path.read_bytes()).hexdigest()
+        INPUTS['paper_review/microring_fields_torchfdtd.npz'] = hashlib.sha256(fields_path.read_bytes()).hexdigest()
         f = np.load(fields_path)
         # arrays are [iy, ix]; each map is divided by the source spectrum at its wavelength so both share one scale
         x, y, eps = f['x_um'], f['y_um'], f['epsilon']

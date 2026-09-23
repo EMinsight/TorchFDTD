@@ -12,7 +12,7 @@
     "meep_comparison/microring_torchfdtd.json": "8277323bf0c0902b8ab855adc1a28cd701150abbbfdb44aebc268c7063a2272f",
     "meep_comparison/microring_meep.json": "b8d8b8506acccd1f12a80a13b888e06383bcd38b5f7a27f6e96b48e90d9f20b8",
     "meep_comparison/microring_comparison.json": "fc9f484dd1a0ea86d1ed909048f6115669f60a6f3a57dd9b5a19aa44f3aedbdf",
-    "meep_comparison/microring_fields_torchfdtd.npz": "63794fb4e3250579a36689cabe24f56295ed9acee8d47a360235fea1ecccc050",
+    "paper_review/microring_fields_torchfdtd.npz": "63794fb4e3250579a36689cabe24f56295ed9acee8d47a360235fea1ecccc050",
     "paper_review/scaling-forward-3060.json": "8f0f8ce40e8ef1847fac3c2ad7dedec33a6b228fdfcbdbc3e0687f7a4a7e4c0e",
     "paper_review/scaling-forward-streamed-3060.json": "5376b2259afffc26153cbd9a5998a6282e4657d702a83e15a865152bf0c4e106",
     "paper_review/scaling-adjoint-3060-128.json": "7d2008852b2b8811bd1394aeed5d7c220290f39f5e8396701a967d07dc2951fb",
@@ -24,5 +24,5 @@
     "paper_review/metagrating_showcase.json": "ab2075285af990272e393a89d621da8962b0ac0b4982043f742c9be07378f677",
     "paper_review/metagrating_fields.npz": "c87ad8cd9977a1235e4871f0dbe7c992cbb9444c0be537e5595cc4183ef44a5d"
   },
-  "generator_sha256": "c14a50ba186c57ad6dc83df90555afdebcb388c7535e95789ff556912eaa41ff"
+  "generator_sha256": "84c2e930f3c7a0576264ddf4224f3113b0a34b6007fbc774ca3b8517040a2cad"
 }
