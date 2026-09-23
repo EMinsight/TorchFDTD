@@ -1,0 +1,856 @@
+{
+  "schema": "torchfdtd-cross-solver-v1",
+  "solver": "meep",
+  "fixture": "throughput",
+  "fixture_sha256": "2c8a687efbada9c7ca7b7d4419161b9c7866840fb0847004edaa8687605511db",
+  "date": "2026-09-24",
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "python": "3.13.15",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "wsl_distribution": "torchfdtd-bench",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "1959",
+      "utilization.gpu": "13"
+    },
+    "packages": {
+      "meep": null,
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "mpich": null,
+      "mpi4py": "4.1.2"
+    },
+    "meep_version": "1.34.0",
+    "conda_packages": {
+      "mpich": "4.3.2 h23078de_105",
+      "numpy": "2.5.3 py313hb5f73ae_0",
+      "pymeep": "1.34.0 mpi_mpich_py313h5c06767_1",
+      "python": "3.13.15 hf47f18c_103_cp313",
+      "scipy": "1.18.1 py313he2a5f1a_0"
+    },
+    "mpich_version": "4.3.2 h23078de_105",
+    "meep_mpi": true,
+    "mpi_processes": 12,
+    "omp_num_threads": "1",
+    "precision": "float64 (Meep build)"
+  },
+  "driver_sha256": {
+    "meep_driver.py": "3093374e890cba1e0702e30e55de4b7d93e554bf563b59a810958e4a349e648a",
+    "common.py": "25dfbc48970f46f6fba4d19439a2d925ef381c982ab543452e719188cc9ab716"
+  },
+  "method": "mp.Simulation with the shared point Ez CustomSource, sphere geometry rasterised by Meep (eps_averaging=False), same PML thickness (Meep PML formulation), all MPI ranks on the CPU. Full solve = init_sim + run(until=steps*dt) with a per-step get_field_point probe + get_array of all six field components. Stepping = run() alone. One warm-up solve per case, then the listed repetitions; a block starts after the Windows host CPU load fell below the recorded limit and is repeated while its wall times spread by more than the recorded factor. Host CPU load is sampled before and after every block. Wall time measured on the master rank after MPI barriers.",
+  "cases": [
+    {
+      "name": "vacuum-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "load_average_before": [
+        1.32568359375,
+        0.43994140625,
+        0.20751953125
+      ],
+      "runs": [
+        {
+          "wall_seconds": 5.754692742993939,
+          "setup_seconds": 0.01438179999240674,
+          "loop_seconds": 5.664314411013038,
+          "transfer_seconds": 0.07598778999818023,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458913706867724,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "finite": true
+        },
+        {
+          "wall_seconds": 5.891193490999285,
+          "setup_seconds": 0.014426221008761786,
+          "loop_seconds": 5.798351766003179,
+          "transfer_seconds": 0.07840414000384044,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458913706867724,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "finite": true
+        },
+        {
+          "wall_seconds": 5.757206241003587,
+          "setup_seconds": 0.0140084559971001,
+          "loop_seconds": 5.6670709579921095,
+          "transfer_seconds": 0.07611267299216706,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458913706867724,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+          "finite": true
+        }
+      ],
+      "cpu_idle": {
+        "checked": true,
+        "limit_percent": 50.0,
+        "host_cpu_percent": 13.0,
+        "waited_seconds": 7.7243781089782715,
+        "samples": [
+          {
+            "host_cpu_percent": 20.0,
+            "load_average": [
+              1.21923828125,
+              0.4326171875,
+              0.2060546875
+            ],
+            "t": 1.3696966171264648
+          },
+          {
+            "host_cpu_percent": 13.0,
+            "load_average": [
+              1.12158203125,
+              0.42529296875,
+              0.20458984375
+            ],
+            "t": 7.724374771118164
+          }
+        ]
+      },
+      "host_cpu_percent_before": 62.0,
+      "host_cpu_percent_after": 18.0,
+      "spread": 1.0237199020176238,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "cpu_idle": {
+            "checked": true,
+            "limit_percent": 50.0,
+            "host_cpu_percent": 13.0,
+            "waited_seconds": 7.7243781089782715,
+            "samples": [
+              {
+                "host_cpu_percent": 20.0,
+                "load_average": [
+                  1.21923828125,
+                  0.4326171875,
+                  0.2060546875
+                ],
+                "t": 1.3696966171264648
+              },
+              {
+                "host_cpu_percent": 13.0,
+                "load_average": [
+                  1.12158203125,
+                  0.42529296875,
+                  0.20458984375
+                ],
+                "t": 7.724374771118164
+              }
+            ]
+          },
+          "host_cpu_percent_before": 62.0,
+          "host_cpu_percent_after": 18.0,
+          "runs": [
+            {
+              "wall_seconds": 5.754692742993939,
+              "setup_seconds": 0.01438179999240674,
+              "loop_seconds": 5.664314411013038,
+              "transfer_seconds": 0.07598778999818023,
+              "steps_run": 801,
+              "probe_samples": 802,
+              "per_step_probe": true,
+              "field_peak": 0.007458913706867724,
+              "array_shape": [
+                64,
+                64,
+                64
+              ],
+              "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+              "finite": true
+            },
+            {
+              "wall_seconds": 5.891193490999285,
+              "setup_seconds": 0.014426221008761786,
+              "loop_seconds": 5.798351766003179,
+              "transfer_seconds": 0.07840414000384044,
+              "steps_run": 801,
+              "probe_samples": 802,
+              "per_step_probe": true,
+              "field_peak": 0.007458913706867724,
+              "array_shape": [
+                64,
+                64,
+                64
+              ],
+              "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+              "finite": true
+            },
+            {
+              "wall_seconds": 5.757206241003587,
+              "setup_seconds": 0.0140084559971001,
+              "loop_seconds": 5.6670709579921095,
+              "transfer_seconds": 0.07611267299216706,
+              "steps_run": 801,
+              "probe_samples": 802,
+              "per_step_probe": true,
+              "field_peak": 0.007458913706867724,
+              "array_shape": [
+                64,
+                64,
+                64
+              ],
+              "trace_sha256": "aaa2a7e6a0e67ee294e2d231bac95e6ead78cba56f6d43b5fc0a31372e1abfec",
+              "finite": true
+            }
+          ],
+          "spread": 1.0237199020176238,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts_quiet/meep_throughput_vacuum-64_trace.npy",
+      "median_wall_seconds": 5.757206241003587,
+      "median_loop_seconds": 5.6670709579921095,
+      "median_setup_seconds": 0.01438179999240674,
+      "steps_run": 801,
+      "cell_steps_per_second_full": 36472089.97039458,
+      "cell_steps_per_second_stepping": 37052181.90428248,
+      "load_average_after": [
+        4.83447265625,
+        1.35595703125,
+        0.51904296875
+      ]
+    },
+    {
+      "name": "sphere-64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "mesh_um": 0.075,
+      "pml_cells": 8,
+      "load_average_before": [
+        4.83447265625,
+        1.35595703125,
+        0.51904296875
+      ],
+      "runs": [
+        {
+          "wall_seconds": 5.7732172579999315,
+          "setup_seconds": 0.0150522569892928,
+          "loop_seconds": 5.681387111995718,
+          "transfer_seconds": 0.0767664809973212,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458705407853952,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "finite": true
+        },
+        {
+          "wall_seconds": 5.463470287999371,
+          "setup_seconds": 0.014757439988898113,
+          "loop_seconds": 5.37682427999971,
+          "transfer_seconds": 0.07187702700321097,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458705407853952,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "finite": true
+        },
+        {
+          "wall_seconds": 5.8137971550022485,
+          "setup_seconds": 0.015959240990923718,
+          "loop_seconds": 5.714477279994753,
+          "transfer_seconds": 0.08334653699421324,
+          "steps_run": 801,
+          "probe_samples": 802,
+          "per_step_probe": true,
+          "field_peak": 0.007458705407853952,
+          "array_shape": [
+            64,
+            64,
+            64
+          ],
+          "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+          "finite": true
+        }
+      ],
+      "cpu_idle": {
+        "checked": true,
+        "limit_percent": 50.0,
+        "host_cpu_percent": 12.0,
+        "waited_seconds": 7.69879937171936,
+        "samples": [
+          {
+            "host_cpu_percent": 31.0,
+            "load_average": [
+              4.447265625,
+              1.3330078125,
+              0.51611328125
+            ],
+            "t": 1.3637480735778809
+          },
+          {
+            "host_cpu_percent": 12.0,
+            "load_average": [
+              4.0908203125,
+              1.310546875,
+              0.51318359375
+            ],
+            "t": 7.698795557022095
+          }
+        ]
+      },
+      "host_cpu_percent_before": 71.0,
+      "host_cpu_percent_after": 22.0,
+      "spread": 1.0641216751507514,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "cpu_idle": {
+            "checked": true,
+            "limit_percent": 50.0,
+            "host_cpu_percent": 12.0,
+            "waited_seconds": 7.69879937171936,
+            "samples": [
+              {
+                "host_cpu_percent": 31.0,
+                "load_average": [
+                  4.447265625,
+                  1.3330078125,
+                  0.51611328125
+                ],
+                "t": 1.3637480735778809
+              },
+              {
+                "host_cpu_percent": 12.0,
+                "load_average": [
+                  4.0908203125,
+                  1.310546875,
+                  0.51318359375
+                ],
+                "t": 7.698795557022095
+              }
+            ]
+          },
+          "host_cpu_percent_before": 71.0,
+          "host_cpu_percent_after": 22.0,
+          "runs": [
+            {
+              "wall_seconds": 5.7732172579999315,
+              "setup_seconds": 0.0150522569892928,
+              "loop_seconds": 5.681387111995718,
+              "transfer_seconds": 0.0767664809973212,
+              "steps_run": 801,
+              "probe_samples": 802,
+              "per_step_probe": true,
+              "field_peak": 0.007458705407853952,
+              "array_shape": [
+                64,
+                64,
+                64
+              ],
+              "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+              "finite": true
+            },
+            {
+              "wall_seconds": 5.463470287999371,
+              "setup_seconds": 0.014757439988898113,
+              "loop_seconds": 5.37682427999971,
+              "transfer_seconds": 0.07187702700321097,
+              "steps_run": 801,
+              "probe_samples": 802,
+              "per_step_probe": true,
+              "field_peak": 0.007458705407853952,
+              "array_shape": [
+                64,
+                64,
+                64
+              ],
+              "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+              "finite": true
+            },
+            {
+              "wall_seconds": 5.8137971550022485,
+              "setup_seconds": 0.015959240990923718,
+              "loop_seconds": 5.714477279994753,
+              "transfer_seconds": 0.08334653699421324,
+              "steps_run": 801,
+              "probe_samples": 802,
+              "per_step_probe": true,
+              "field_peak": 0.007458705407853952,
+              "array_shape": [
+                64,
+                64,
+                64
+              ],
+              "trace_sha256": "b4284523837f01a6cabe31d647c9a0a865e57ccbafe2ceefca77d4198e85140f",
+              "finite": true
+            }
+          ],
+          "spread": 1.0641216751507514,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts_quiet/meep_throughput_sphere-64_trace.npy",
+      "median_wall_seconds": 5.7732172579999315,
+      "median_loop_seconds": 5.681387111995718,
+      "median_setup_seconds": 0.0150522569892928,
+      "steps_run": 801,
+      "cell_steps_per_second_full": 36370940.95307689,
+      "cell_steps_per_second_stepping": 36958816.54616571,
+      "load_average_after": [
+        6.79052734375,
+        2.169921875,
+        0.8193359375
+      ]
+    },
+    {
+      "name": "vacuum-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "load_average_before": [
+        6.79052734375,
+        2.169921875,
+        0.8193359375
+      ],
+      "runs": [
+        {
+          "wall_seconds": 19.05631202099903,
+          "setup_seconds": 0.03994008799782023,
+          "loop_seconds": 18.72831027499342,
+          "transfer_seconds": 0.28804767900146544,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.096346384202181,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "finite": true
+        },
+        {
+          "wall_seconds": 16.856280131003587,
+          "setup_seconds": 0.03946574599831365,
+          "loop_seconds": 16.493981189996703,
+          "transfer_seconds": 0.32282470699283294,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.096346384202181,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "finite": true
+        },
+        {
+          "wall_seconds": 17.81584894101252,
+          "setup_seconds": 0.04053573400597088,
+          "loop_seconds": 17.485630195005797,
+          "transfer_seconds": 0.2896689999906812,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.096346384202181,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+          "finite": true
+        }
+      ],
+      "cpu_idle": {
+        "checked": true,
+        "limit_percent": 50.0,
+        "host_cpu_percent": 19.0,
+        "waited_seconds": 8.98342752456665,
+        "samples": [
+          {
+            "host_cpu_percent": 29.0,
+            "load_average": [
+              6.24658203125,
+              2.1337890625,
+              0.814453125
+            ],
+            "t": 2.6238858699798584
+          },
+          {
+            "host_cpu_percent": 19.0,
+            "load_average": [
+              5.74609375,
+              2.09814453125,
+              0.81005859375
+            ],
+            "t": 8.983423948287964
+          }
+        ]
+      },
+      "host_cpu_percent_before": 60.0,
+      "host_cpu_percent_after": 28.0,
+      "spread": 1.1305170460443967,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "cpu_idle": {
+            "checked": true,
+            "limit_percent": 50.0,
+            "host_cpu_percent": 19.0,
+            "waited_seconds": 8.98342752456665,
+            "samples": [
+              {
+                "host_cpu_percent": 29.0,
+                "load_average": [
+                  6.24658203125,
+                  2.1337890625,
+                  0.814453125
+                ],
+                "t": 2.6238858699798584
+              },
+              {
+                "host_cpu_percent": 19.0,
+                "load_average": [
+                  5.74609375,
+                  2.09814453125,
+                  0.81005859375
+                ],
+                "t": 8.983423948287964
+              }
+            ]
+          },
+          "host_cpu_percent_before": 60.0,
+          "host_cpu_percent_after": 28.0,
+          "runs": [
+            {
+              "wall_seconds": 19.05631202099903,
+              "setup_seconds": 0.03994008799782023,
+              "loop_seconds": 18.72831027499342,
+              "transfer_seconds": 0.28804767900146544,
+              "steps_run": 800,
+              "probe_samples": 801,
+              "per_step_probe": true,
+              "field_peak": 0.096346384202181,
+              "array_shape": [
+                96,
+                96,
+                96
+              ],
+              "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+              "finite": true
+            },
+            {
+              "wall_seconds": 16.856280131003587,
+              "setup_seconds": 0.03946574599831365,
+              "loop_seconds": 16.493981189996703,
+              "transfer_seconds": 0.32282470699283294,
+              "steps_run": 800,
+              "probe_samples": 801,
+              "per_step_probe": true,
+              "field_peak": 0.096346384202181,
+              "array_shape": [
+                96,
+                96,
+                96
+              ],
+              "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+              "finite": true
+            },
+            {
+              "wall_seconds": 17.81584894101252,
+              "setup_seconds": 0.04053573400597088,
+              "loop_seconds": 17.485630195005797,
+              "transfer_seconds": 0.2896689999906812,
+              "steps_run": 800,
+              "probe_samples": 801,
+              "per_step_probe": true,
+              "field_peak": 0.096346384202181,
+              "array_shape": [
+                96,
+                96,
+                96
+              ],
+              "trace_sha256": "2c142ecfd546e8a4ae69f388e7be5fc58efeb91fe00ea8f7fb88f661034a5a73",
+              "finite": true
+            }
+          ],
+          "spread": 1.1305170460443967,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts_quiet/meep_throughput_vacuum-96_trace.npy",
+      "median_wall_seconds": 17.81584894101252,
+      "median_loop_seconds": 17.485630195005797,
+      "median_setup_seconds": 0.03994008799782023,
+      "steps_run": 800,
+      "cell_steps_per_second_full": 39728042.28097449,
+      "cell_steps_per_second_stepping": 40478312.311680764,
+      "load_average_after": [
+        10.18896484375,
+        4.287109375,
+        1.67724609375
+      ]
+    },
+    {
+      "name": "sphere-96",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "mesh_um": 0.049999999999999996,
+      "pml_cells": 8,
+      "load_average_before": [
+        10.18896484375,
+        4.287109375,
+        1.67724609375
+      ],
+      "runs": [
+        {
+          "wall_seconds": 18.475582044993644,
+          "setup_seconds": 0.04836015700129792,
+          "loop_seconds": 18.197476866000216,
+          "transfer_seconds": 0.2297354210022604,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.09207769540608897,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "finite": true
+        },
+        {
+          "wall_seconds": 16.528801448992454,
+          "setup_seconds": 0.04115573500166647,
+          "loop_seconds": 16.25380861099984,
+          "transfer_seconds": 0.2338252899935469,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.09207769540608897,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "finite": true
+        },
+        {
+          "wall_seconds": 17.057849693999742,
+          "setup_seconds": 0.04133026699128095,
+          "loop_seconds": 16.754796193999937,
+          "transfer_seconds": 0.2617138940113364,
+          "steps_run": 800,
+          "probe_samples": 801,
+          "per_step_probe": true,
+          "field_peak": 0.09207769540608897,
+          "array_shape": [
+            96,
+            96,
+            96
+          ],
+          "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+          "finite": true
+        }
+      ],
+      "cpu_idle": {
+        "checked": true,
+        "limit_percent": 50.0,
+        "host_cpu_percent": 3.0,
+        "waited_seconds": 11.158537149429321,
+        "samples": [
+          {
+            "host_cpu_percent": 1.0,
+            "load_average": [
+              9.373046875,
+              4.2158203125,
+              1.66796875
+            ],
+            "t": 3.891143321990967
+          },
+          {
+            "host_cpu_percent": 3.0,
+            "load_average": [
+              7.93115234375,
+              4.07666015625,
+              1.6494140625
+            ],
+            "t": 11.158535718917847
+          }
+        ]
+      },
+      "host_cpu_percent_before": 56.0,
+      "host_cpu_percent_after": 22.0,
+      "spread": 1.1177811108693463,
+      "accepted_attempt": 0,
+      "attempts": [
+        {
+          "attempt": 0,
+          "cpu_idle": {
+            "checked": true,
+            "limit_percent": 50.0,
+            "host_cpu_percent": 3.0,
+            "waited_seconds": 11.158537149429321,
+            "samples": [
+              {
+                "host_cpu_percent": 1.0,
+                "load_average": [
+                  9.373046875,
+                  4.2158203125,
+                  1.66796875
+                ],
+                "t": 3.891143321990967
+              },
+              {
+                "host_cpu_percent": 3.0,
+                "load_average": [
+                  7.93115234375,
+                  4.07666015625,
+                  1.6494140625
+                ],
+                "t": 11.158535718917847
+              }
+            ]
+          },
+          "host_cpu_percent_before": 56.0,
+          "host_cpu_percent_after": 22.0,
+          "runs": [
+            {
+              "wall_seconds": 18.475582044993644,
+              "setup_seconds": 0.04836015700129792,
+              "loop_seconds": 18.197476866000216,
+              "transfer_seconds": 0.2297354210022604,
+              "steps_run": 800,
+              "probe_samples": 801,
+              "per_step_probe": true,
+              "field_peak": 0.09207769540608897,
+              "array_shape": [
+                96,
+                96,
+                96
+              ],
+              "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+              "finite": true
+            },
+            {
+              "wall_seconds": 16.528801448992454,
+              "setup_seconds": 0.04115573500166647,
+              "loop_seconds": 16.25380861099984,
+              "transfer_seconds": 0.2338252899935469,
+              "steps_run": 800,
+              "probe_samples": 801,
+              "per_step_probe": true,
+              "field_peak": 0.09207769540608897,
+              "array_shape": [
+                96,
+                96,
+                96
+              ],
+              "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+              "finite": true
+            },
+            {
+              "wall_seconds": 17.057849693999742,
+              "setup_seconds": 0.04133026699128095,
+              "loop_seconds": 16.754796193999937,
+              "transfer_seconds": 0.2617138940113364,
+              "steps_run": 800,
+              "probe_samples": 801,
+              "per_step_probe": true,
+              "field_peak": 0.09207769540608897,
+              "array_shape": [
+                96,
+                96,
+                96
+              ],
+              "trace_sha256": "53f494e620e9620490f947a143a01e29410b823f005048f5cae9d9671ee40e79",
+              "finite": true
+            }
+          ],
+          "spread": 1.1177811108693463,
+          "accepted": true
+        }
+      ],
+      "max_spread": 1.25,
+      "trace_artifact": "/root/torchfdtd-bench/artifacts_quiet/meep_throughput_sphere-96_trace.npy",
+      "median_wall_seconds": 17.057849693999742,
+      "median_loop_seconds": 16.754796193999937,
+      "median_setup_seconds": 0.04133026699128095,
+      "steps_run": 800,
+      "cell_steps_per_second_full": 41493436.31800035,
+      "cell_steps_per_second_stepping": 42243951.63060631,
+      "load_average_after": [
+        9.97119140625,
+        5.7421875,
+        2.44287109375
+      ]
+    }
+  ]
+}

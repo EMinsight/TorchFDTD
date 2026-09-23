@@ -34,7 +34,8 @@ UM = 1e-6
 TIME_UNIT = UM / common.C0  # one Meep time unit in seconds (a = 1 um)
 
 
-def log(*args):
+def log(*args, **_):
+    # common.wait_for_idle_cpu passes flush=True, and this logger always flushes
     if mp.am_master():
         print(*args, flush=True)
 

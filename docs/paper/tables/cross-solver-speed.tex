@@ -3,7 +3,7 @@
 \centering
 \small
 \renewcommand{\arraystretch}{1.15}
-\caption{Forward throughput and time to gradient on the workstation of Table~\ref{tab:cross-solver-accuracy}. The forward rows are the sphere scene at 800 steps as medians of three warmed solves, where the full solve includes setup and the final field transfer and the stepping column is the time-stepping loop alone. The adjoint rows are the permittivity gradient of a periodic dielectric slab at $64^{3}$ cells and 128 steps, and the last column is the relative $L_2$ difference of each gradient from the TorchFDTD gradient. Meep ran in double precision on twelve MPI ranks with other processes present on the host, and its adjoint is excluded because it is a frequency-domain method. The GPU solvers ran in single precision.}
+\caption{Forward throughput and time to gradient on the workstation of Table~\ref{tab:cross-solver-accuracy}. The forward rows are the sphere scene at 800 steps as medians of three warmed solves, where the full solve includes setup and the final field transfer and the stepping column is the time-stepping loop alone. The adjoint rows are the permittivity gradient of a periodic dielectric slab at $64^{3}$ cells and 128 steps, and the last column is the relative $L_2$ difference of each gradient from the TorchFDTD gradient. Meep ran in double precision on twelve MPI ranks, and its adjoint is excluded because it is a frequency-domain method. The GPU solvers ran in single precision.}
 \label{tab:cross-solver-speed}
 \begin{tabular}{@{}llrrrr@{}}
 \toprule

@@ -24,7 +24,14 @@
     "docs/validation/geometry-ensembles.json": "9c392bf2457f4a9d84610e0d1664fda3f0e67e929fe90296c02d5783d6d53cb8",
     "docs/validation/grouped-ensembles.json": "b9c311df4248abe768c08a0e809c7ead88411edabe1aef4882bb48872f3bbf1c",
     "docs/validation/cross_solver_3060.json": "58da9d9e9a73554a30864756df6d671414effff17c4a6613db43eed4bcf388e9",
-    "docs/validation/paper_review/flux-slab-project.json": "704925f825aa9964b52f895f3c40eaa69513bc19ae2d1d80dc649044ed4b9a6e"
+    "docs/validation/paper_review/flux-slab-project.json": "704925f825aa9964b52f895f3c40eaa69513bc19ae2d1d80dc649044ed4b9a6e",
+    "docs/validation/paper_review/torchfdtd-precision-a100.json": "0838b75aff3b0b0a41ad15cd765db2acfc56c499f251239bd2eb38ee1ac2448e",
+    "docs/validation/cross_solver/meep_throughput_ranks4.json": "503872b5121618590548b0c4648a943c4f37a022460660c7b444b2af26986d5b",
+    "docs/validation/cross_solver/meep_throughput_ranks8.json": "33773d5723c848c20764b49830fdc2b49048b47f4201f9636d6b57572e378af7",
+    "docs/validation/cross_solver/meep_throughput_ranks12.json": "3a7423bc816ec0381f5b3455784ab396d52a9851d655afa228424fd60a771dfd",
+    "docs/validation/cross_solver/meep_throughput_ranks16.json": "39e80e0e1af9aae428788da68b6e809f2f928127d4e0b668b2491b58e65603b0",
+    "docs/validation/cross_solver/meep_throughput_ranks4_quiet.json": "2fb6b81f20156ae5c3d1e8da83a1cc71758d05293487c4b58f7d2754e95e6faa",
+    "docs/validation/cross_solver/meep_throughput_ranks12_quiet.json": "3f3e88da9a11367af77f734f4c463722431fb4bf26e54945219cfee1c6ded64b"
   },
   "generator": "scripts/build_paper_assets.py"
 }

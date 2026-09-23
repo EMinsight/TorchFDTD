@@ -79,6 +79,52 @@ def ceil_sig(value: float, digits: int) -> float:
     return math.ceil(value * scale - 1e-9) / scale
 
 
+def precision_assets(torch_: dict, records: list[dict]) -> None:
+    """Double-precision forward solves of the sphere scenes: Meep on the workstation CPU at its fastest timed rank
+    count against TorchFDTD on the A100. Writes the table and the macros of the text."""
+    gpu = {(c['name'], c['precision']): c for c in torch_['cases']}
+    # records: every Meep throughput record timed on the workstation; each case takes its fastest one
+    assert all('float64' in r['environment']['precision'] for r in records)
+    ranks = sorted({r['environment']['mpi_processes'] for r in records})
+    best = {}
+    for r in records:
+        for case in r['cases']:
+            if case['name'].startswith('sphere') and (case['name'] not in best or case['median_wall_seconds'] < best[case['name']][0]['median_wall_seconds']):
+                best[case['name']] = (case, r['environment']['mpi_processes'])
+    (fastest,) = {n for _, n in best.values()}   # one rank count serves both grids
+    words = {4: 'four', 8: 'eight', 12: 'twelve', 16: 'sixteen'}
+    rows, ratios64, ratios32, cost = [], [], [], []
+    for name, (case, _) in sorted(best.items(), key=lambda item: item[1][0]['cells']):
+        t64, t32 = gpu[(name, 'float64')], gpu[(name, 'float32')]
+        assert t64['cells'] == case['cells'] and t64['steps'] == case['steps']
+        r64 = case['median_wall_seconds'] / t64['median_wall_seconds']
+        r32 = case['median_wall_seconds'] / t32['median_wall_seconds']
+        ratios64.append(r64)
+        ratios32.append(r32)
+        cost.append(t64['median_wall_seconds'] / t32['median_wall_seconds'])
+        rows.append(f"${name.split('-')[1]}^{{3}}$ & {case['median_wall_seconds']:.2f} & {t64['median_wall_seconds']:.3f} & "
+                    f"{r64:.0f} & {t32['median_wall_seconds']:.3f} & {r32:.0f} " + r'\\')
+    write_table('cpu-gpu-precision',
+        'Full forward solves of the sphere scenes of Table~\\ref{tab:cross-solver-speed} at 800 steps. Meep runs in double '
+        f'precision on {words[fastest]} MPI ranks of the i7-12700 workstation CPU, the fastest of the '
+        f"{', '.join(str(n) for n in ranks[:-1])} and {ranks[-1]} ranks timed on it, and TorchFDTD on one A100 80GB PCIe in "
+        'double and in single precision. Each time is the median of three warmed solves, and each ratio divides the Meep '
+        'time by the TorchFDTD time in the column before it.',
+        r'Grid & \shortstack{Meep, CPU\\FP64 (s)} & \shortstack{TorchFDTD\\FP64 (s)} & Ratio & \shortstack{TorchFDTD\\FP32 (s)} & Ratio',
+        rows, columns='@{}lrrrrr@{}')
+    values = [
+        '% Generated from docs/validation/paper_review/torchfdtd-precision-a100.json and docs/validation/cross_solver/meep_throughput_ranks*.json.',
+        r'\newcommand{\PrecisionMeepRanks}{' + words[fastest] + '}',
+        r'\newcommand{\PrecisionRatioMin}{' + f'{min(ratios64):.0f}' + '}',
+        r'\newcommand{\PrecisionRatioMax}{' + f'{max(ratios64):.0f}' + '}',
+        r'\newcommand{\PrecisionSingleRatioMin}{' + f'{min(ratios32):.0f}' + '}',
+        r'\newcommand{\PrecisionSingleRatioMax}{' + f'{max(ratios32):.0f}' + '}',
+        r'\newcommand{\PrecisionDoubleCost}{' + f'{min(cost):.1f}' + '}', '',
+    ]
+    assert f'{min(cost):.1f}' == f'{max(cost):.1f}', 'the text quotes one double-precision cost for both grids'
+    (PAPER / 'tables/precision-values.tex').write_text('\n'.join(values), encoding='utf-8')
+
+
 def cross_solver_assets(record: dict) -> None:
     """Two tables and the text macros of the same-workstation Meep and FDTDX comparison."""
     label = {'torchfdtd': 'TorchFDTD', 'fdtdx': 'FDTDX', 'meep': 'Meep'}
@@ -131,7 +177,7 @@ def cross_solver_assets(record: dict) -> None:
         'setup and the final field transfer and the stepping column is the time-stepping loop alone. The adjoint rows are the '
         'permittivity gradient of a periodic dielectric slab at $64^{3}$ cells and 128 steps, and the last column is the '
         r'relative $L_2$ difference of each gradient from the TorchFDTD gradient. Meep ran in double precision on twelve MPI '
-        'ranks with other processes present on the host, and its adjoint is excluded because it is a frequency-domain method. '
+        'ranks, and its adjoint is excluded because it is a frequency-domain method. '
         'The GPU solvers ran in single precision.',
         [('@{}llrrrr@{}', r'Grid & Solver & \shortstack{Full solve\\(s)} & \shortstack{Stepping\\(s)} & \shortstack{Cell-steps/s\\stepping} & \shortstack{Peak device\\(MiB)}', forward),
          ('@{}lrrr@{}', r'Adjoint method & \shortstack{Time to\\gradient (s)} & \shortstack{Peak device\\(MiB)} & \shortstack{Gradient relative\\$L_2$ difference}', adjoint_rows)])
@@ -160,14 +206,20 @@ def cross_solver_assets(record: dict) -> None:
     (PAPER / 'tables/cross-solver-values.tex').write_text('\n'.join(values), encoding='utf-8')
 
 
+# Meep throughput records of the workstation, one per MPI rank count, with the reruns on an otherwise idle host
+MEEP_RANKS = ('ranks4', 'ranks8', 'ranks12', 'ranks16', 'ranks4_quiet', 'ranks12_quiet')
+
+
 def build_assets() -> None:
     (PAPER / 'figures').mkdir(parents=True, exist_ok=True)
     (PAPER / 'tables').mkdir(parents=True, exist_ok=True)
-    names = ('flux', 'batch', 'cuda-kernels', 'open-source-flaport', 'tensor-batch', 'cohorts', 'vector-sources', 'oneway-sources', 'oneway-slab', 'ensembles', 'design-throughput', 'ensemble-before', 'tfsf-sources', 'tfsf-sphere', 'tfsf-sphere-finer', 'tfsf-sphere-long', 'spectral-ensembles', 'graph-ensembles', 'selective-monitors', 'rectilinear-ensembles', 'geometry-ensembles', 'grouped-ensembles', 'cross_solver_3060', 'flux-slab-project')
+    names = ('flux', 'batch', 'cuda-kernels', 'open-source-flaport', 'tensor-batch', 'cohorts', 'vector-sources', 'oneway-sources', 'oneway-slab', 'ensembles', 'design-throughput', 'ensemble-before', 'tfsf-sources', 'tfsf-sphere', 'tfsf-sphere-finer', 'tfsf-sphere-long', 'spectral-ensembles', 'graph-ensembles', 'selective-monitors', 'rectilinear-ensembles', 'geometry-ensembles', 'grouped-ensembles', 'cross_solver_3060', 'flux-slab-project', 'precision-a100', *MEEP_RANKS)
     # The manuscript reports its timings on the A100. The RTX 5880 originals stay in docs/validation,
     # and a caption always names the GPU of the record it was built from.
     files = {name: name for name in names}
     files['flux-slab-project'] = 'paper_review/flux-slab-project'   # geometry of the slab of Fig. 2
+    files['precision-a100'] = 'paper_review/torchfdtd-precision-a100'
+    files.update({name: f'cross_solver/meep_throughput_{name}' for name in MEEP_RANKS})
     for name in ('batch', 'open-source-flaport', 'tensor-batch', 'ensembles', 'tfsf-sphere', 'tfsf-sphere-finer', 'tfsf-sphere-long'):
         if (DATA / f'{name}-a100.json').exists():
             files[name] = f'{name}-a100'
@@ -457,6 +509,7 @@ def build_assets() -> None:
     ])
     (PAPER / 'tables/validation-values.tex').write_text(values, encoding='utf-8')
     cross_solver_assets(data['cross_solver_3060'])
+    precision_assets(data['precision-a100'], [data[name] for name in MEEP_RANKS])
     provenance = {
         'description': 'Figures and tables derived from recorded native validation measurements. No solver is run by the paper build.',
         'inputs': {f'docs/validation/{files[name]}.json': hashlib.sha256(value).hexdigest()
