@@ -95,7 +95,7 @@ Here, we address both costs in TorchFDTD. Its Yee, absorber and dispersion updat
 \label{fig:overview}
 \end{figure}
 
-On an A100 the fused path completes full forward solves of the tested scenes 9.0 to 17.1 times faster than the package it extends, and host streaming lowers the peak device allocation of a $256^3$ adjoint by 56\% at a cost in time that is set by the host.
+On an A100 the fused path completes full forward solves of the tested scenes 9.0 to 17.1 times faster than the package it extends, and in double precision its solves of a dielectric sphere are \PrecisionRatioMin{} to \PrecisionRatioMax{} times faster than those of Meep on a workstation CPU. Host streaming lowers the peak device allocation of a $256^3$ adjoint by 56\% at a cost in time that is set by the host.
 
 This paper describes the numerical method (Section~\ref{sec:formulation}), the discrete adjoint (Section~\ref{sec:adjoint}), the execution modes (Section~\ref{sec:execution}) and the software structure with usage examples (Section~\ref{sec:software}). Section~\ref{sec:validation} validates the package against analytic solutions, independent solvers and finite differences, Section~\ref{sec:performance} reports throughput, its scaling with grid size and the memory--time trade-off of host streaming, and Section~\ref{sec:examples} presents a complete metagrating design and a propagated optical objective on a workstation. Appendices~\ref{app:validation} and~\ref{app:batch} collect further validation and batch measurements.
 
