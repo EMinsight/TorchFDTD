@@ -164,7 +164,7 @@ def architecture():
         ax.plot([xc, xc], [ry + rh, fy if xc != 63 else y0], color=TEAL, lw=0.6, ls=(0, (1.2, 1.6)))
     arrow((148.5, fy), (148.5, ry + rh), color=TEAL, lw=0.8)
     text(150.2, (fy + ry + rh) / 2, 'reverse\nsweep', size=5.6, color=TEAL, ha='left')
-    text(80, 52.2, 'Every forward kernel has a hand-written transpose. The reverse row is the '
+    text(80, 52.2, 'Every forward kernel has its own transpose kernel. The reverse row is the '
          'discrete adjoint of the row above it.', size=6.2, color=MUTED)
     ax.plot([2, 158], [48.6, 48.6], color=LINE, lw=0.6)
 
