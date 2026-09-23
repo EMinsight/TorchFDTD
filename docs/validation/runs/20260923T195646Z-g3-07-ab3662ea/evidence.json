@@ -1,0 +1,357 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T195646Z-g3-07-ab3662ea",
+  "task": "G3-07",
+  "stage": "G3",
+  "task_title": "PML normal/oblique 반사·장시간 안정성",
+  "command": "$env:TORCHFDTD_G3_FINE='1'; D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_physics_g3_a.py::TestG307 --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G3-07.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-24T04:55:34.456401+09:00",
+  "recorded_at": "2026-09-23T19:56:46+00:00",
+  "source_commit": "4635db7eab69597671476376d80254688fed9868",
+  "source_commit_time": "2026-09-24T02:47:23+09:00",
+  "source_tree_sha256": "088cda6610df49d1a93978561c26726d948a57f9953d9f668c22c2621f468143",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "f4a33ca7d37f18eeba49b9ac33f9c2577e4192f5e32b79a11d679453a062575f",
+      "head_sha256": "ee7d4a044d0490859419351e84d67693458bc844d5ccd37f70c2f5ab8eee88a4"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "8254f678d2bfe2da2940e772e60030b237b372f639336e595e4b0dde64900d28",
+      "head_sha256": "1a7a05ff6fae3c928e29df55181ba608651c358e7c02d1b8d442416498db1b9d"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "675c55e0188f51d41cd58df189eea7a82f1dd798e4e60ac888f12da372e9011e",
+  "package_path": "D:/torchfdtd-clean/dist/afda8955fa1c/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_physics_g3_a.py": "2050088c44171a6128850fb17e8bbd2a1be282da4788ac042c85e280fc33944c"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "docs/validation/cases/G3-07_*.json"
+  ],
+  "watch_sha256": {
+    "docs/validation/cases/G3-07_cpml_reflection_stability.json": "da30c508f259f54036af6a6f24efc7afc35ad48e3b70766c1201e6ae3028e218",
+    "docs/validation/cases/G3-07_cpml_reflection_stability.oracles.json": "abf31a84ecc971b8b8ed15b30aab1aef079927c2d41136c1142de11b2e97175d"
+  },
+  "fixture_path": "docs/validation/cases/G3-07_cpml_reflection_stability.json",
+  "fixture_sha256": "da30c508f259f54036af6a6f24efc7afc35ad48e3b70766c1201e6ae3028e218",
+  "acceptance_criteria_path": "docs/validation/cases/G3-07_cpml_reflection_stability.json",
+  "acceptance_criteria_sha256": "da30c508f259f54036af6a6f24efc7afc35ad48e3b70766c1201e6ae3028e218",
+  "case_first_commit": "637e653935152e28e2c90029d8d2626a33a6d93f",
+  "case_first_commit_time": "2026-09-22T01:47:36+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU oracle rows)",
+    "float32 (CUDA layer-A row)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "engine": "torchfdtd.Simulation, 2D TE (Ez), staircase Yee sampling, courant_factor 0.99, mesh 0.025 um (dt 5.837669e-17 s), precision float64 on CPU",
+    "pml_profile": "default BoundaryFace: layers 10 (0.25 um), sigma_scale 1, kappa 1, alpha 1e-8, polynomial 3, alpha_polynomial 0",
+    "short_domain": {
+      "x_um": [
+        -5.75,
+        5.75
+      ],
+      "source_x_um": 4.0,
+      "monitor_x_um": 5.0,
+      "x_max_pml_interior_edge_um": 5.5,
+      "distance_source_to_x_min_pml_um": 9.75
+    },
+    "long_reference_domain": {
+      "x_um": [
+        -20.25,
+        20.25
+      ],
+      "source_x_um": -10.5,
+      "monitor_x_um": -9.5,
+      "x_max_pml_interior_edge_um": 20.0,
+      "own_x_max_echo_at_monitor_fs": {
+        "vacuum": 200.2,
+        "dielectric": 400.3
+      },
+      "note": "same x_min distance, same mesh nodes, same source and monitor indices; its own x_max echo cannot reach the monitor within the run, so short - long is exactly the short domain's x_max CPML return and the x_min echo cancels"
+    },
+    "transverse": {
+      "normal_and_oblique": "0.3 um (12 cells), periodic or Bloch",
+      "interface": "2.0 um (80 cells), periodic"
+    },
+    "source": {
+      "kind": "plane",
+      "component": "Ez",
+      "spans_full_transverse_period": true,
+      "normal_and_interface": {
+        "pulse": "gaussian",
+        "time_definition": "standard",
+        "wavelength_um": 1.55,
+        "power_fwhm_s": 8.609020092789869e-15,
+        "sigma_s": 5.1702434755713565e-15,
+        "offset_s": 2.5e-14,
+        "eliminate_discontinuities": true,
+        "note": "one-cycle Gaussian at 193.4 THz with the C1 endpoint taper so the drive starts at exactly zero; amplitude 1; soft sheet (radiates both ways)"
+      },
+      "oblique": {
+        "pulse": "gaussian",
+        "time_definition": "standard",
+        "wavelength_um": 1.45,
+        "power_fwhm_s": 2.4160798324926404e-14,
+        "sigma_s": 1.4510038141119613e-14,
+        "offset_s": 7e-14,
+        "eliminate_discontinuities": true,
+        "note": "three-cycle Gaussian at 206.8 THz with the C1 endpoint taper, centred in the oblique band 1.3 to 1.6 um; the 60 deg design is grazing at 1.79 um where this pulse has 5e-4 of its peak amplitude"
+      }
+    },
+    "media": [
+      {
+        "name": "vacuum",
+        "background_index": 1.0
+      },
+      {
+        "name": "dielectric",
+        "background_index": 2.0
+      }
+    ],
+    "oblique": {
+      "angles_deg": [
+        30,
+        60
+      ],
+      "k_parallel_rad_per_um": [
+        2.0268339700579308,
+        3.510579414646873
+      ],
+      "bloch_phase_rad": [
+        0.6080501910173792,
+        1.0531738243940618
+      ],
+      "measurement_band_um": [
+        1.3,
+        1.6
+      ],
+      "angle_range_over_band_deg": {
+        "30": [
+          24.8,
+          31.1
+        ],
+        "60": [
+          46.6,
+          63.4
+        ]
+      },
+      "duration_fs": 150.0,
+      "steps": 2570,
+      "note": "fixed k_parallel; 1.8 um would be grazing (sin theta = 1.006) for the 60 deg design, so the oblique band stops at 1.6 um; R at exactly 1.55 um (the design angle) is recorded separately"
+    },
+    "interface": {
+      "description": "n=2 rectangle filling y from -0.9875 to 0.0125 um across the whole x range including both CPMLs; vacuum elsewhere; the interface enters the x CPML layers",
+      "monitors": {
+        "vacuum_side": [
+          5.0,
+          0.5
+        ],
+        "dielectric_side": [
+          5.0,
+          -0.5
+        ]
+      },
+      "duration_fs": 150.0
+    },
+    "duration_fs": 100.0,
+    "steps": 1713,
+    "frequencies": {
+      "wavelength_um": [
+        1.3,
+        1.8
+      ],
+      "points": 21,
+      "spacing": "uniform in frequency from c/1.8 um to c/1.3 um"
+    },
+    "depth_sweep": {
+      "layers": [
+        10,
+        20
+      ],
+      "medium": "vacuum, normal incidence",
+      "note": "separate sweep at fixed mesh and time; the criterion applies to the default 10 layers"
+    },
+    "time_sweep": {
+      "duration_fs": [
+        100.0,
+        200.0
+      ],
+      "medium": "vacuum, normal incidence, 10 layers",
+      "note": "separate sweep; the reflected pulse is fully recorded within 100 fs, so both durations should agree"
+    },
+    "stability": {
+      "steps": 20000,
+      "duration_fs": 1167.5,
+      "runs": [
+        "vacuum normal",
+        "n=2 normal",
+        "vacuum 60 deg Bloch"
+      ],
+      "energy": "state_norm of the run-control diagnostics every 100 steps: sum eps |E|^2 + |H|^2 over the volume including the CPML memory",
+      "note": "the 60 deg run uses the oblique pulse; its grazing components (about 5e-4 of the peak amplitude, beyond 1.79 um) are slow and are not absorbed like propagating waves, so that run is judged on non-growth only"
+    },
+    "layer_A": {
+      "description": "short vacuum normal fixture rerun on CUDA FP32 with the CUDA graph; raw trace / FP64 peak compared to CPU FP64"
+    }
+  },
+  "reference_method": "reflected/incident power ratio R(f) = |DFT(short - long)(f)|^2 / |DFT(long)(f)|^2 at the monitor, DFT written in the test; broadband energy ratio sum (short-long)^2 / sum long^2 over the whole trace; no analytic oracle is needed, the long domain is the reference",
+  "observables": [
+    {
+      "name": "R_max_on_band",
+      "unit": "power ratio",
+      "definition": "max over the declared band of R(f)"
+    },
+    {
+      "name": "R_at_design",
+      "unit": "power ratio",
+      "definition": "R at 1.55 um"
+    },
+    {
+      "name": "R_broadband",
+      "unit": "power ratio",
+      "definition": "time-domain energy ratio over the whole trace"
+    },
+    {
+      "name": "energy_last_over_peak",
+      "unit": "dimensionless",
+      "definition": "state_norm at the last diagnostic over the maximum state_norm of the run"
+    },
+    {
+      "name": "late_growth",
+      "unit": "dimensionless",
+      "definition": "max state_norm over the second half of the run divided by max(state_norm at the half-way diagnostic, 1e-12 x peak state_norm); the floor (1e-6 in field amplitude) keeps FP64 round-off noise, which the vacuum run reaches at about 1e-17 of its peak, from being read as growth"
+    },
+    {
+      "name": "layer_A_trace_error",
+      "unit": "dimensionless",
+      "definition": "CUDA FP32 trace / FP64 peak against CPU FP64 trace / FP64 peak"
+    }
+  ],
+  "acceptance_limits": {
+    "normal": {
+      "R_max_on_band": 1e-06,
+      "applies_to": "vacuum and n=2, 10 layers, band 1.3 to 1.8 um"
+    },
+    "oblique": {
+      "R_max_on_band": 0.0001,
+      "applies_to": "30 and 60 deg designs, band 1.3 to 1.6 um"
+    },
+    "interface": {
+      "R_max_on_band": 0.0001,
+      "applies_to": "both monitors, band 1.3 to 1.8 um",
+      "note": "this case's own budget: the declared-oblique limit, because the field at the interface reaches the layer at every angle"
+    },
+    "stability": {
+      "energy_last_over_peak_max": 1e-06,
+      "late_growth_max": 1.000001,
+      "applies_to": "energy_last_over_peak for the two normal-incidence runs; late_growth for all three runs (the 60 deg run reports energy_last_over_peak only)"
+    },
+    "sweeps": "reported only: 20 layers must not reflect more than 10 layers; 200 fs must agree with 100 fs to within 10 percent of R",
+    "layer_A": {
+      "rtol": 0.0001,
+      "atol": 1e-06
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds pml_normal_reflected_power_ratio and pml_declared_oblique_reflected_power_ratio; the interface and stability budgets are this case's own pre-declared limits"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 10,
+    "passed": [
+      "tests/test_physics_g3_a.py::TestG307::test_normal_reflection[1.0]",
+      "tests/test_physics_g3_a.py::TestG307::test_normal_reflection[2.0]",
+      "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection[30]",
+      "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection[60]",
+      "tests/test_physics_g3_a.py::TestG307::test_interface_reflection",
+      "tests/test_physics_g3_a.py::TestG307::test_depth_and_time_sweeps",
+      "tests/test_physics_g3_a.py::TestG307::test_long_time_stability[vacuum normal-kwargs0]",
+      "tests/test_physics_g3_a.py::TestG307::test_long_time_stability[n=2 normal-kwargs1]",
+      "tests/test_physics_g3_a.py::TestG307::test_long_time_stability[vacuum 60deg-kwargs2]",
+      "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 70.033,
+    "suite_timestamp": "2026-09-24T04:55:34.456401+09:00"
+  },
+  "required_tests": [
+    "tests/test_physics_g3_a.py::TestG307::test_normal_reflection",
+    "tests/test_physics_g3_a.py::TestG307::test_oblique_reflection",
+    "tests/test_physics_g3_a.py::TestG307::test_interface_reflection",
+    "tests/test_physics_g3_a.py::TestG307::test_depth_and_time_sweeps",
+    "tests/test_physics_g3_a.py::TestG307::test_long_time_stability",
+    "tests/test_physics_g3_a.py::TestG307::test_layer_a_cuda_fp32"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-07.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T195646Z-g3-07-ab3662ea/junit.xml",
+      "sha256": "87a4440bf787444ed2e56a9f188402d5c7203f3b9f83e6ed6ff1c4e7134d409a",
+      "bytes": 1352,
+      "original_path": ".local/tmp/junit/rerecord/G3-07.xml"
+    }
+  ],
+  "applicable_scope": "Re-recorded on the merged main tree after the shared module tests/test_physics_g3_a.py gained the G3-02 revision-2 tests; layers B (CPU FP64 against the analytic oracle) and A (CUDA FP32 against CPU FP64) on the RTX 3060 workstation under shared load. The records docs/validation/g3/<task>.json written by this run were committed before recording. re-recorded on 4635db7eab69 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T133246Z-g3-07-cbe45435",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

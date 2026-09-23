@@ -277,7 +277,7 @@ Environment: Python 3.10.2, numpy 2.2.6, torch 2.10.0+cu126 (CUDA runtime 12.6),
 
 ## G3-04 Mie scattering of a dielectric cylinder and sphere
 
-Case `G3-04_mie_cylinder_sphere`, record `docs/validation/g3/G3-04.json` generated 2026-09-23T12:32:03+00:00. Closed TFSF box, matched empty-box reference, cross section from the outward scattered power over the incident intensity, against the Mie series written in the test with SciPy Bessel functions. Limit: relative error at most 2.000% at the judged mesh; the coarser meshes are recorded and non-monotone sequences are allowed on staircased surfaces.
+Case `G3-04_mie_cylinder_sphere`, record `docs/validation/g3/G3-04.json` generated 2026-09-23T18:52:27+00:00. Closed TFSF box, matched empty-box reference, cross section from the outward scattered power over the incident intensity, against the Mie series written in the test with SciPy Bessel functions. Limit: relative error at most 2.000% at the judged mesh; the coarser meshes are recorded and non-monotone sequences are allowed on staircased surfaces.
 
 | Fixture | Polarization | h (um) | Grid | Steps | Execution | Max relative error | Judged |
 |---|---|---:|---|---:|---|---:|---|
@@ -316,7 +316,7 @@ Resonance of the 0.25 um, n = 3.5 cylinder (TE): peak position within 1.000% and
 | 0.025 | cpu float64 | 1.1214 | 1.1365 | -1.326% | 0.0778 | 0.0653 | 19.086% | recorded |
 ## G3-05 Drude sphere scattering and absorption
 
-Case `G3-05_drude_sphere`, record `docs/validation/g3/G3-05.json` generated 2026-09-23T13:29:55+00:00. Analytic Drude model epsilon_inf = 5.0, omega_p = 1.37e+16 rad/s, gamma = 1.5e+14 rad/s, radii [0.02, 0.035, 0.05] um, band 0.33 to 0.45 um, mesh sequence [0.02, 0.01, 0.005] um at a fixed 0.48 um domain. Scattering from the outer planes, absorption from the net inward total-field power of the inner planes, both against the complex-index Mie series. The per-radius budgets are the fixture-specific ones of the case (the 2 percent program threshold is declared not applicable); a failure is a recorded finding.
+Case `G3-05_drude_sphere`, record `docs/validation/g3/G3-05.json` generated 2026-09-23T19:53:50+00:00. Analytic Drude model epsilon_inf = 5.0, omega_p = 1.37e+16 rad/s, gamma = 1.5e+14 rad/s, radii [0.02, 0.035, 0.05] um, band 0.33 to 0.45 um, mesh sequence [0.02, 0.01, 0.005] um at a fixed 0.48 um domain. Scattering from the outer planes, absorption from the net inward total-field power of the inner planes, both against the complex-index Mie series. The per-radius budgets are the fixture-specific ones of the case (the 2 percent program threshold is declared not applicable); a failure is a recorded finding.
 
 | r (um) | h (um) | Cells/r | Execution | Max scattering error | Budget | Max absorption error | Budget | Peak sca (um) | Mie | Peak abs (um) | Mie | Inner/outer | Judged |
 |---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
@@ -459,7 +459,7 @@ Empty cell (no grating): forward zero-order transmission relative to the inciden
 | TM | 20 | cpu float64 | 0.99999732 | 3.0e-31 | 4.2e-08 | 1e-04 |
 | TM | 20 | cuda float32 | 0.99999341 | 1.3e-12 | 4.2e-08 | 1e-04 |
 
-**Revision 2 (case `G3-08r2_bloch_grating_rcwa_layer_a`, records under `docs/validation/g3/r2`, generated 2026-09-23T14:06:25+00:00).** Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record. The re-run of the 12 judged physics rows gives a largest efficiency error of 0.0031, a largest dominant phase error of 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits.
+**Revision 2 (case `G3-08r2_bloch_grating_rcwa_layer_a`, records under `docs/validation/g3/r2`, generated 2026-09-23T20:29:16+00:00).** Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record. The re-run of the 12 judged physics rows gives a largest efficiency error of 0.0031, a largest dominant phase error of 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits.
 
 | Pol | Angle | Wavelength (um) | Max relative difference | Largest excess over rtol abs(cpu) + atol | Result |
 |---|---:|---:|---:|---:|---|
