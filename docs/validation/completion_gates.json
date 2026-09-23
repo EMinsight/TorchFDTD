@@ -3171,7 +3171,8 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml"
           ],
           "actual_test_commands": [
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml"
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml",
+            "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G9-07.xml"
           ],
           "required_tests": [
             "tests/test_validation_report.py"
@@ -3181,7 +3182,8 @@
             "20260921T202555Z-g9-07-f8fe342e",
             "20260921T213007Z-g9-07-31e7a456",
             "20260922T052219Z-g9-07-512b7fdc",
-            "20260922T064740Z-g9-07-e3635ece"
+            "20260922T064740Z-g9-07-e3635ece",
+            "20260923T075351Z-g9-07-d03dbea4"
           ],
           "blocker": null,
           "scope_change_approval": null,
