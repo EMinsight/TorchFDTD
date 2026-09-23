@@ -376,12 +376,15 @@ def exterior_propagation():
 # Figure: propagated optical objective on the workstation
 # ----------------------------------------------------------------------------
 
-def application():
+def application_record():
     p = read('beyond_vram_propagated_3060.json')['record']
     assert p['stage'] == 'complete'
-    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.3), gridspec_kw={'width_ratios': [1.35, 1]})
+    return p
+
+
+def application_timeline(ax, p):
+    """Timeline of the recorded streamed driver (panel a of the arXiv figure, a separate figure in the CPC SI)."""
     streamed = p['executions']['streamed']
-    fd = streamed['fd']
     runs = p['runs']
     phases = [('Forward solve', runs['streamed_forward']['seconds'], BLUE),
               ('Adjoint sweep', streamed['backward']['seconds'], TEAL),
@@ -391,7 +394,6 @@ def application():
     other = total - sum(s for _, s, _ in phases)
     phases.append(('Setup and checks', other, '#dfe3e7'))
 
-    ax = axes[0]
     left, narrow = 0.0, 0
     for name, seconds, color in phases:
         minutes = seconds / 60
@@ -414,9 +416,11 @@ def application():
     ax.text(0.3, 1.45, f"driver total {total / 60:.2f} min, single run on an RTX 3060, "
             f"peak device allocation {streamed['backward']['peak_torch_allocated_bytes'] / 1e9:.2f} GB",
             fontsize=6.3, color=MUTED, va='center')
-    panel(ax, 'a', 'Streamed optical-objective evaluation')
 
-    ax = axes[1]
+
+def application_check(ax, p):
+    """Objective at three permittivities with the adjoint and central-difference slopes (panel b)."""
+    fd = p['executions']['streamed']['fd']
     delta = fd['step']
     xs = np.array([-delta, 0.0, delta])
     js = np.array([fd['objective_minus'], fd['objective'], fd['objective_plus']])
@@ -436,7 +440,15 @@ def application():
     ax.legend(loc='upper left', fontsize=6.2, handlelength=1.8)
     ax.text(0.97, 0.05, f"relative difference {100 * fd['relative_error']:.2f}%", transform=ax.transAxes,
             ha='right', va='bottom', fontsize=6.4, color=INK)
-    panel(ax, 'b', 'End-to-end derivative check')
+
+
+def application():
+    p = application_record()
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.3), gridspec_kw={'width_ratios': [1.35, 1]})
+    application_timeline(axes[0], p)
+    panel(axes[0], 'a', 'Streamed optical-objective evaluation')
+    application_check(axes[1], p)
+    panel(axes[1], 'b', 'End-to-end derivative check')
     fig.tight_layout(w_pad=2.0)
     save(fig, 'propagated-adjoint')
 
@@ -636,7 +648,7 @@ def grid_scaling():
         ax.plot([s[0] for s in series[mode]], [s[1] for s in series[mode]], marker=marker, color=color, label=name, **style)
     if refused.get('stage') == 'failed':
         n_refused = refused['configuration']['size']
-        ax.text(0.97, 0.04, f'{n_refused}$^3$: resident adjoint\nrefused by the planner', transform=ax.transAxes,
+        ax.text(0.97, 0.04, f'{n_refused}$^3$: only the streamed\nadjoint fits the budget', transform=ax.transAxes,
                 ha='right', va='bottom', fontsize=5.8, color=MUTED)
     xaxis(ax, ticks=(128, 256, 384), lo=100, hi=480)
     ax.set(yscale='log', ylabel='Time to gradient (s)')
