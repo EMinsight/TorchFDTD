@@ -1,0 +1,73 @@
+% Supplementary Material of the Computer Physics Communications submission of TorchFDTD.
+% Section, figure and table numbers carry the prefix S. The main text cites Sections S1 to S5 by these numbers,
+% and scripts/build_cpc.py checks the section order.
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\PassOptionsToPackage{obeyspaces}{url}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\usepackage[font=small,labelfont=bf]{caption}
+\newcommand{\micron}{\ensuremath{\mu\mathrm{m}}}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{1.5em}
+
+\title{\large\bfseries Supplementary Material for\\[4pt] TorchFDTD: GPU-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design}
+\author{Hyoseok Park\\[2pt]\small Department of Physics, Chungnam National University, Daejeon 34134, Republic of Korea}
+\date{}
+
+\begin{document}
+\maketitle
+
+This document collects the validation and batch measurements that support the main text. Sections S1 to S3 extend the validation of Section~6, Section~S4 gives the error of independent lateral tiles summarized in Section~6.4, and Section~S5 gives the batch measurements behind Section~7.1. Every value is taken from a validation record in the TorchFDTD repository.
+
+\section{Anisotropic media and magnetic walls}
+
+Dense one-step spectral radii on small Bloch grids equal one to nine decimal places for admitted tensors and lie between 1.0049 and 1.0089 for rejected ones, and a 4000-step sweep over fifteen admitted cases with contrasts up to sixteen shows no growth. The rejected cases grow by factors of $7.9\times10^{3}$ and $7.6\times10^{12}$ over that sweep. These values confirm the admission rule of Section~2.3 of the main text.
+
+The anisotropic path is checked against a birefringent slab of principal indices 1.5 and 2.0 in a co-aligned exterior of indices 1.2 and 1.4 that fills both absorbing faces along the propagation axis. The two polarization channels reproduce the analytic transmission to 1.37\% and 0.33\%, and the derivative of the transmission with respect to the slab index agrees with the analytic derivative to 6.9\%. A magnetic wall next to an absorbing face reflects $1.7\times10^{-4}$ of the incident power with the default profile and $3.5\times10^{-4}$ with $\kappa=3$, $\alpha=0.05$ and a quadratic grading. On this mesh anisotropic transmission is thus accurate to about one percent and its index derivative to about seven percent, and a magnetic symmetry plane can adjoin an absorber at a reflection cost below $4\times10^{-4}$ of the incident power.
+
+\section{Radiation projections}
+
+A lossy exterior with index $1.3+0.05\mathrm{i}$ reproduces the analytic near and far fields with the same convergence. For an open surface the single-face projection of a Gaussian-apodized directional emitter converges to the closed-box result as the field on the omitted faces decays, from $9.6\times10^{-2}$ to $3.8\times10^{-3}$ as the beam waist grows from 0.4 to 0.8 wavelengths, whereas an isotropic dipole stays at 0.79 under refinement. An open surface therefore suits directional emitters whose field on the omitted faces is small.
+
+\section{Guided-mode ports}
+
+Guided-mode ports are validated on a straight guide, an interface between guides of index 1.0 and 1.2, a symmetric Y branch and a four-port crossing, and the complex scattering parameters of the interface are compared with an independent discrete interface solution. A narrow-aperture port on a wide domain matches the full-cell network to $1.6\times10^{-5}$ in the scattering parameters. The Y branch obeys reciprocity to $2.0\times10^{-3}$ with a $1.2\times10^{-4}$ arm asymmetry, and the crossing obeys reciprocity to $2.4\times10^{-4}$ with a $1.2\times10^{-7}$ gap between its four-fold rotated columns. The port model is therefore reciprocal and symmetric to $2\times10^{-3}$ or better, and the power missing from the guided channels of the Y branch is radiated by the staircased junction, a property of the discretized geometry.
+
+\section{Independent lateral tiles}
+\label{si:tiling}
+
+Because independent lateral tiles change the boundary-value problem, we measure their error against a full-domain reference. The tiling test uses a $140\times140\times60$ grid with 2059 time steps, split into four tiles with 3~\micron{} cores (Fig.~\ref{fig:tiling}). With the excitation sheet extended through the absorbers and hard core assembly, increasing the overlap from 0.25 to 2~\micron{} reduces the six-component near-field relative $L_2$ error from 12.0\% to 5.68\%, while the total number of simulated cells grows to 2.9 times the full grid. In a separate gradient check at 1.5~\micron{} overlap the focal objective differs by 0.138\% from the full-domain value, whereas the design-region gradient differs by 27.2\%. Consequently, agreement of the tiled derivative with a finite difference of its own forward model does not establish the accuracy of the full-device derivative, and we offer the tiled path for forward screening rather than final gradients.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/tiling-overlap.pdf}
+\caption{Independent overlapping tiles on an RTX 3060, compared with the full-domain solution. (a) Relative $L_2$ errors of the six-component near field and the focal-plane intensity with hard core assembly. (b) The summed cell count of all tiles relative to the full grid, including repeated overlap regions, with the tile edge length in cells.}
+\label{fig:tiling}
+\end{figure}
+
+\section{Batch execution}
+\label{si:batch}
+
+Four sphere cases at $64^{3}$ and 800 steps take 1.75~s with one CUDA worker against 40.4~s with one NumPy worker on the container host (Fig.~\ref{fig:batch-throughput}). The tensor batch itself is up to 1.7 times faster than sequential native execution for $32^{3}$ cases and slower for every batch of $64^{3}$ cases, so the tuning keeps single-case cohorts at that size (Table~\ref{tab:tensor-batch}).
+
+\input{tables/tensor-batch}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/batch-throughput.pdf}
+\caption{Wall time on a logarithmic axis (a) and throughput (b) of four-structure ensembles on an A100. The CPU bar is one NumPy worker on the four-core host of that container. Bars are medians of three measured batches after warm-up.}
+\label{fig:batch-throughput}
+\end{figure}
+
+\end{document}
