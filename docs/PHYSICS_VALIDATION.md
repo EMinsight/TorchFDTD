@@ -477,21 +477,21 @@ Empty cell (no grating): forward zero-order transmission relative to the inciden
 | TM | 20 | 1.06 | 9.52e-05 | -1.0e-06 | pass |
 ## G3-13 Curved-interface convergence
 
-Case `G3-13_curved_interface_convergence`, record `docs/validation/g3/G3-13.json` generated 2026-09-23T14:18:09+00:00. The G3-04 cylinder (radius 0.3 um, n = 1.5) at h = [0.05, 0.025, 0.0125] um with the staircase and the subpixel interface, centre shifts of [0.0, 0.25, 0.5] h at h = 0.05 um, and the differentiable-solid transition width [1e-06, 0.125, 0.25, 0.5, 1.0, 2.0] h at h = 0.05 um. Pass/fail item: the subpixel error at h is below the staircase error at h; everything else is reported.
+Case `G3-13_curved_interface_convergence`, record `docs/validation/g3/G3-13.json` generated 2026-09-23T21:34:44+00:00. The G3-04 cylinder (radius 0.3 um, n = 1.5) at h = [0.05, 0.025, 0.0125] um with the staircase and the subpixel interface, centre shifts of [0.0, 0.25, 0.5] h at h = 0.05 um, and the differentiable-solid transition width [1e-06, 0.125, 0.25, 0.5, 1.0, 2.0] h at h = 0.05 um. Pass/fail item: the subpixel error at h is below the staircase error at h; everything else is reported.
 
 | Polarization | Interface | h (um) | Max relative error | Wall (s) |
 |---|---|---:|---:|---:|
-| TE | staircase | 0.0125 | 0.373% | 21.3 |
-| TE | staircase | 0.025 | 0.700% | 2.0 |
-| TE | staircase | 0.05 | 11.163% | 0.5 |
-| TE | subpixel | 0.0125 | 0.106% | 21.1 |
+| TE | staircase | 0.0125 | 0.373% | 23.2 |
+| TE | staircase | 0.025 | 0.700% | 2.6 |
+| TE | staircase | 0.05 | 11.163% | 0.6 |
+| TE | subpixel | 0.0125 | 0.106% | 23.5 |
 | TE | subpixel | 0.025 | 0.454% | 2.2 |
 | TE | subpixel | 0.05 | 1.974% | 0.6 |
-| TM | staircase | 0.0125 | 1.737% | 22.3 |
-| TM | staircase | 0.025 | 5.117% | 2.2 |
-| TM | staircase | 0.05 | 3.830% | 0.5 |
-| TM | subpixel | 0.0125 | 0.064% | 21.8 |
-| TM | subpixel | 0.025 | 0.253% | 2.1 |
+| TM | staircase | 0.0125 | 1.737% | 22.8 |
+| TM | staircase | 0.025 | 5.117% | 2.1 |
+| TM | staircase | 0.05 | 3.830% | 0.6 |
+| TM | subpixel | 0.0125 | 0.064% | 28.8 |
+| TM | subpixel | 0.025 | 0.253% | 2.3 |
 | TM | subpixel | 0.05 | 0.997% | 0.6 |
 
 | Polarization | Staircase order estimates | Subpixel order estimates | Subpixel(h) < staircase(h) | Subpixel(h) error < staircase(h/2) | Subpixel(h) wall < staircase(h/2) |
