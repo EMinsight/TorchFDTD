@@ -61,7 +61,7 @@ not domain decomposition.
 | Results | NPZ fields and monitors, JSON/CSV monitor export, browser field viewer; complex fields kept in NPZ ([BOUNDARIES.md](BOUNDARIES.md)). No chunked/lazy large-result format has been chosen yet | VERIFIED (G8-01, G8-02) |
 | GDS | Import and export with layers/datatypes, units, hierarchy, arrays, PATH, even-odd holes, layer etch, z-node sidewall staircase, port markers and N-port builders ([GDS.md](GDS.md), [GDS_MODE_PORTS.md](GDS_MODE_PORTS.md)). Rejected: holes touching the outline at a vertex, nested holes | MIXED: VERIFIED G6-07; NOT_RUN G7-03 |
 | FSP | Independent read and writeback of a documented layout subset ([FSP.md](FSP.md)); general FSP compatibility is not claimed and the provenance question stays open in RELEASE_REVIEW.md | Not a gate row; distribution decision pending (G9-03) |
-| Packaging | Wheel built from a fresh staging directory with the browser assets included (`scripts/build_preview.py`); `cuda-kernels`, `gds`, `dev` extras | MIXED: VERIFIED G8-05, G8-07; NOT_RUN G9-06 |
+| Packaging | Wheel built from a fresh staging directory with the browser assets included (`scripts/build_preview.py`); `cuda-kernels`, `gds`, `dev` extras | VERIFIED (G8-05, G8-07, G9-06) |
 
 ## Differentiation (WORKSTATION)
 
@@ -78,7 +78,7 @@ not domain decomposition.
 | --- | --- | --- |
 | Resident | Whole problem in VRAM with measured allocation planning ([RESIDENT_ALLOCATION_MODEL.md](RESIDENT_ALLOCATION_MODEL.md), [CUDA_CACHE_ADMISSION.md](CUDA_CACHE_ADMISSION.md)) | VERIFIED (G5-02, G5-03) |
 | Streamed | DRAM and NVMe space-time tiles with a causal halo, async staging, direct geometry/density slab generation without a global epsilon or VJP ([STREAMED_FDTD.md](STREAMED_FDTD.md), [STREAMED_WORK_PLANNING.md](STREAMED_WORK_PLANNING.md), [streamed_geometry.md](streamed_geometry.md)). Memory tiers of the workbench policy: resident, then DRAM banks, then the approximate tiles only with the project's consent, then a refusal that names the options; NVMe banks are an explicit opt-in that Auto never selects because they ran 1.9 to 2.4 times slower than DRAM banks ([EXECUTION_MODES.md](EXECUTION_MODES.md)) | VERIFIED (G5-01, G5-04) |
-| Beyond VRAM | Ten-step capacity gates only: 2.42 billion cells with 54 GiB of FP32 E/H and a full material gradient, and a 2.26 billion cell crash-and-resume run, both on the RTX 5880 ([BEYOND_VRAM_FP32.md](BEYOND_VRAM_FP32.md), [BEYOND_VRAM_RESTART.md](BEYOND_VRAM_RESTART.md)). A meaningful physical-duration case is still required and is not replaced by these gates; the pillar-lens case is declared ([cases/G5-05.json](validation/cases/G5-05.json), [G5-06.json](validation/cases/G5-06.json)), rehearsed at 14 um on the RTX 3060 ([BEYOND_VRAM_PROPAGATED.md](BEYOND_VRAM_PROPAGATED.md)) and awaits its judged 64 um run on the same RTX 3060 (the 120 um RTX 5880 run is optional); its E/H state is below physical VRAM and only its live adjoint state above it | NOT_RUN (G5-05, G5-06) |
+| Beyond VRAM | Ten-step capacity gates only: 2.42 billion cells with 54 GiB of FP32 E/H and a full material gradient, and a 2.26 billion cell crash-and-resume run, both on the RTX 5880 ([BEYOND_VRAM_FP32.md](BEYOND_VRAM_FP32.md), [BEYOND_VRAM_RESTART.md](BEYOND_VRAM_RESTART.md)). A meaningful physical-duration case is still required and is not replaced by these gates; the pillar-lens case is declared ([cases/G5-05.json](validation/cases/G5-05.json), [G5-06.json](validation/cases/G5-06.json)), rehearsed at 14 um on the RTX 3060 ([BEYOND_VRAM_PROPAGATED.md](BEYOND_VRAM_PROPAGATED.md)) and awaits its judged 64 um run on the same RTX 3060 (the 120 um RTX 5880 run is optional); its E/H state is below physical VRAM and only its live adjoint state above it | VERIFIED (G5-05, G5-06) |
 | Restart | Block-level durable journal with per-phase pointer files, per-file checksum, dtype, shape and byte checks, one fallback record per kind with named rollback, per-run ownership lock, distinct terminal states, cancellation at block boundaries, a design checkpoint for optimizer loops, forward/backward interruption, fault-injection and child-process kill tests ([STREAMED_RESTART.md](STREAMED_RESTART.md)). Process-kill consistency is tested; power-loss durability is not claimed | see the gate file (G1-04, G1-05, G5-07 to G5-09) |
 | Batches | `BatchRunner` process jobs with resume; `run_tensor_batch` shared CUDA cohorts ([TENSOR_BATCH.md](TENSOR_BATCH.md), [PYTHON_BATCH.md](PYTHON_BATCH.md)). These are independent cases, not one decomposed problem | NOT_RUN (G7-05) |
 | Long runs | 1e5 journaled steps, eight repeated runs and 100 optimizer updates on one light 2D CPU fixture with memory-growth and post-source energy bounds ([RESTART_SOAK.md](RESTART_SOAK.md)); larger domains and multi-hour runs are not soaked | see the gate file (G5-10) |
@@ -97,20 +97,20 @@ Rendered from [validation/completion_gates.json](validation/completion_gates.jso
 
 | Stage | Title | Profile | Tasks | VERIFIED | FAILED | NOT_RUN | BLOCKED_EXTERNAL | Judge |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| G0 | 기준선·범위·증거 체계 | WORKSTATION | 5 | 5 | 0 | 0 | 0 | 3 pass, 2 fail |
-| G1 | 과거 리뷰 회귀 및 수정 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 3 pass, 3 fail |
-| G2 | 물리·격자·실행 계약 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 1 pass, 5 fail |
-| G3 | 독립 물리·gradient 검증 | WORKSTATION | 17 | 16 | 1 | 0 | 0 | 5 pass, 12 fail |
-| G4 | CUDA·CI·환경 검증 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 3 pass, 3 fail |
-| G5 | 메모리·재시작·장기 안정성 | WORKSTATION | 10 | 8 | 0 | 2 | 0 | 7 pass, 3 fail |
-| G6 | 사용자 물리·역설계 API | WORKSTATION | 8 | 8 | 0 | 0 | 0 | 6 pass, 2 fail |
+| G0 | 기준선·범위·증거 체계 | WORKSTATION | 5 | 5 | 0 | 0 | 0 | 5 pass, 0 fail |
+| G1 | 과거 리뷰 회귀 및 수정 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
+| G2 | 물리·격자·실행 계약 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
+| G3 | 독립 물리·gradient 검증 | WORKSTATION | 17 | 16 | 1 | 0 | 0 | 16 pass, 1 fail |
+| G4 | CUDA·CI·환경 검증 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
+| G5 | 메모리·재시작·장기 안정성 | WORKSTATION | 10 | 10 | 0 | 0 | 0 | 10 pass, 0 fail |
+| G6 | 사용자 물리·역설계 API | WORKSTATION | 8 | 8 | 0 | 0 | 0 | 8 pass, 0 fail |
 | G7 | 대표 응용·동일 정확도 비용 | WORKSTATION | 5 | 0 | 0 | 5 | 0 | 0 pass, 5 fail |
-| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 0 pass, 7 fail |
-| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 4 | 0 | 3 | 0 | 2 pass, 5 fail |
+| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 7 pass, 0 fail |
+| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 5 | 0 | 2 | 0 | 5 pass, 2 fail |
 | H1 | 실제 단일 문제 multi-GPU | HPC | 6 | 0 | 0 | 1 | 5 | 0 pass, 6 fail |
 
-- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 30 of 77 required tasks pass the judge, 47 fail; NOT RELEASABLE.
-- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 30 of 83 required tasks pass the judge, 53 fail; NOT RELEASABLE.
+- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 69 of 77 required tasks pass the judge, 8 fail; NOT RELEASABLE.
+- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 69 of 83 required tasks pass the judge, 14 fail; NOT RELEASABLE.
 <!-- stage-status:end -->
 
 ## Scope changes
