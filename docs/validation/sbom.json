@@ -14,7 +14,8 @@
   },
   "python": {
     "version": "3.10.2",
-    "platform": "win32"
+    "platform": "win32",
+    "environment_sha256": "39c37ed8ffbfe535"
   },
   "host": {
     "os": "Windows",
@@ -1429,8 +1430,8 @@
       "docs/validation/sbom.json",
       "tests/test_provenance_inventory.py"
     ],
-    "files_scanned": 1541,
-    "tracked_files": 1566,
+    "files_scanned": 1542,
+    "tracked_files": 1567,
     "findings": []
   },
   "history_note": {
