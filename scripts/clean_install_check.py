@@ -13,9 +13,11 @@ so that a source tree on sys.path cannot mask a packaging defect.
                       one fused CUDA forward run, `torchfdtd doctor`, the README blocks marked cuda
 
 Everything the script creates (venvs, wheel, scratch, pip cache) lives under
---local-root. Example, from the checkout root:
+--local-root, which must lie outside the checkout: the probes assert that the
+installed package does not resolve under it. The default is a sibling of the
+checkout (D:/TorchFDTD-clean for D:/TorchFDTD). Example, from the checkout root:
 
-    python scripts/clean_install_check.py --local-root D:/TorchFDTD/.local ^
+    python scripts/clean_install_check.py --local-root D:/torchfdtd-clean ^
         --find-links D:/TorchFDTD/.local/wheels --cuda-torch "torch==2.10.0+cu126"
 
 tests/test_clean_install.py reads the newest record under docs/validation/clean_install.
@@ -44,6 +46,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from run_readme_examples import parse_blocks, run_blocks, runnable_blocks_sha256  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
+# Outside the checkout, so an environment created there cannot import the package from the source tree.
+DEFAULT_LOCAL_ROOT = ROOT.parent / f'{ROOT.name}-clean'
 RECORD_DIR = ROOT / 'docs' / 'validation' / 'clean_install'
 PAYLOAD_FILES = ('pyproject.toml', 'README.md', 'LICENSE', 'THIRD_PARTY_NOTICES.txt')
 # Inputs whose change makes an existing record stale; solver source changes do not.
@@ -144,6 +148,8 @@ class Check:
     def __init__(self, args):
         self.args = args
         self.local = Path(args.local_root).resolve()
+        if self.local.is_relative_to(ROOT.resolve()):
+            raise SystemExit(f'--local-root {self.local} is inside the checkout {ROOT}; the probes refuse a package installed there')
         self.scratch = self.local / 'tmp' / 'clean_install'
         self.scratch.mkdir(parents=True, exist_ok=True)
         self.steps = []
@@ -386,7 +392,8 @@ class Check:
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--local-root', default=str(ROOT / '.local'), help='directory for venvs, wheels, scratch and the pip cache')
+    parser.add_argument('--local-root', default=str(DEFAULT_LOCAL_ROOT),
+                        help='directory for venvs, wheels, scratch and the pip cache, outside the checkout')
     parser.add_argument('--python', default=sys.executable, help='interpreter that creates the virtual environments')
     parser.add_argument('--torch-cpu', default='torch', help='pip requirement for the CPU torch build')
     parser.add_argument('--torch-index', default='https://download.pytorch.org/whl/cpu', help='index for the CPU torch build')

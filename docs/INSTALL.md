@@ -144,11 +144,13 @@ doctor and every runnable README block, and writes the record that
 `tests/test_clean_install.py` reads:
 
 ```powershell
-.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/TorchFDTD/.local --find-links D:/TorchFDTD/.local/wheels --cuda-torch "torch==2.10.0+cu126"
+.venv/Scripts/python.exe scripts/clean_install_check.py --local-root D:/torchfdtd-clean --find-links D:/TorchFDTD/.local/wheels --cuda-torch "torch==2.10.0+cu126"
 ```
 
 `--local-root` holds the venvs, the wheel, the scratch directory and the pip
-cache; `--find-links` points at a directory of already downloaded torch and
+cache. It must lie outside the checkout, because the probes check that the
+installed package does not resolve under it; the default is a sibling of the
+checkout (`D:/TorchFDTD-clean`). `--find-links` points at a directory of already downloaded torch and
 CuPy wheels so that nothing large is downloaded again; `--skip-cuda` omits the
 CUDA environment (the record then fails the G8-05 tests). On Linux the same
 command runs unchanged with a Linux `--local-root`. Rerun the check whenever
