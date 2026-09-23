@@ -35,15 +35,15 @@ example remain on the RTX 3060.
 With TeX Live or MiKTeX, run in this directory:
 
 ```sh
-xelatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
+pdflatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
 bibtex manuscript
-xelatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
-xelatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
+pdflatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
+pdflatex -interaction=nonstopmode -halt-on-error -no-shell-escape manuscript.tex
 ```
 
 The figure PDFs and table sources are sufficient for typesetting. CUDA
 and the simulator are not needed. Select manuscript.tex as the main
-document and XeLaTeX as the compiler in Overleaf.
+document in Overleaf. pdfLaTeX, XeLaTeX and LuaLaTeX all compile it.
 
 ## Repository build
 
@@ -66,11 +66,11 @@ output/torchfdtd-arxiv.zip. Temporary TeX files remain in tmp/latex.
 
 output/torchfdtd-arxiv.zip is the submission bundle: manuscript.tex,
 references.bib, the compiled manuscript.bbl (arXiv does not run BibTeX),
-the figure PDFs, the table sources, a 00README.XXX naming the top-level
-file, and an anc/ directory with the validation records behind every
+the figure PDFs, the table sources and an anc/ directory with the validation records behind every
 figure and table, the provenance manifests and the story-figure generator.
-The bundle compiles standalone with XeLaTeX and the Latin Modern fonts
-of TeX Live. Upload the ZIP as is and select XeLaTeX if arXiv asks.
+The bundle compiles standalone with pdfLaTeX, the arXiv default, and the
+Latin Modern fonts of TeX Live. manuscript.tex is the only file with a
+documentclass, so arXiv detects it as the top-level file. Upload the ZIP as is.
 
 ## Figure provenance
 
@@ -104,9 +104,9 @@ scientific certification or a journal acceptance decision.
 
 Typography
 The manuscript is set in Latin Modern (the Computer Modern family of a
-default LaTeX article) for text and mathematics through fontspec and
-unicode-math, so XeLaTeX needs only the fonts shipped with TeX Live or
-MiKTeX. Figure labels use Arial, and the vector figure PDFs embed their
+default LaTeX article) for text and mathematics. pdfLaTeX uses the Type 1
+fonts of the lmodern package, and XeLaTeX or LuaLaTeX the OpenType fonts
+through fontspec and unicode-math, all shipped with TeX Live and MiKTeX. Figure labels use Arial, and the vector figure PDFs embed their
 font subsets, so no system font is needed to compile. Regenerating the
 figures does require an Arial installation.
 See https://info.arxiv.org/help/faq/texlive.html for engine/font requirements.

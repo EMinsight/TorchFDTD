@@ -46,7 +46,6 @@ def build_arxiv_bundle(files: list[Path], bbl: Path) -> Path:
             if path.suffix in {'.tex', '.bib', '.pdf'}:
                 archive.write(path, path.relative_to(PAPER).as_posix())
         archive.write(bbl, 'manuscript.bbl')
-        archive.writestr('00README.XXX', 'manuscript.tex toplevelfile\n')
         for name in sorted(records):
             archive.write(ROOT / 'docs/validation' / name, f'anc/{name}')
         archive.write(ROOT / 'scripts/build_paper_story_figures.py', 'anc/build_paper_story_figures.py')
@@ -74,9 +73,10 @@ def main() -> None:
     parser.add_argument('--keep-assets', action='store_true',
                         help='Use the checked-in figure and table assets without regenerating them.')
     args = parser.parse_args()
-    engines = {name: shutil.which(name) for name in ('xelatex', 'bibtex')}
+    # pdfLaTeX is the engine arXiv runs, so the checked PDF is the one arXiv will produce.
+    engines = {name: shutil.which(name) for name in ('pdflatex', 'bibtex')}
     if not all(engines.values()):
-        raise SystemExit('Install TeX Live or MiKTeX with xelatex and bibtex on PATH.')
+        raise SystemExit('Install TeX Live or MiKTeX with pdflatex and bibtex on PATH.')
     if not args.keep_assets:
         build_assets()
         build_story_figures()
@@ -107,7 +107,7 @@ def main() -> None:
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, destination)
     job = 'torchfdtd-manuscript'
-    latex = [engines['xelatex'], '-interaction=nonstopmode', '-halt-on-error',
+    latex = [engines['pdflatex'], '-interaction=nonstopmode', '-halt-on-error',
              '-file-line-error', '-no-shell-escape', f'-jobname={job}', 'manuscript.tex']
     run(latex, build, 'latex-pass-1')
     run([engines['bibtex'], job], build, 'bibtex-pass')

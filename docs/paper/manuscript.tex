@@ -1,16 +1,25 @@
 % Canonical manuscript source. Edit this file directly.
 % Writing rules: no em dashes, no semicolons, no self-assessment adjectives.
 \documentclass[11pt,a4paper]{article}
-\usepackage{fontspec}
 % Latin Modern, the Computer Modern family of a default LaTeX article, as in the related manuscripts.
-\setmainfont{lmroman10-regular.otf}[BoldFont=lmroman10-bold.otf,ItalicFont=lmroman10-italic.otf,BoldItalicFont=lmroman10-bolditalic.otf]
-\setsansfont{lmsans10-regular.otf}[BoldFont=lmsans10-bold.otf]
-\setmonofont{lmmono10-regular.otf}[BoldFont=lmmonolt10-bold.otf,ItalicFont=lmmono10-italic.otf]
+% pdfLaTeX (the arXiv default) uses the Type 1 fonts, XeLaTeX and LuaLaTeX the OpenType ones.
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage{lmodern}
+\else
+  \usepackage{fontspec}
+  \setmainfont{lmroman10-regular.otf}[BoldFont=lmroman10-bold.otf,ItalicFont=lmroman10-italic.otf,BoldItalicFont=lmroman10-bolditalic.otf]
+  \setsansfont{lmsans10-regular.otf}[BoldFont=lmsans10-bold.otf]
+  \setmonofont{lmmono10-regular.otf}[BoldFont=lmmonolt10-bold.otf,ItalicFont=lmmono10-italic.otf]
+\fi
 \usepackage[margin=25mm]{geometry}
 \usepackage{microtype}
 \usepackage{amsmath}
-\usepackage{unicode-math}
-\setmathfont{latinmodern-math.otf}
+\ifPDFTeX\else
+  \usepackage{unicode-math}
+  \setmathfont{latinmodern-math.otf}
+\fi
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{xcolor}
@@ -56,7 +65,7 @@
 \maketitle
 
 \begin{abstract}
-Gradient-based photonic design needs full-wave derivatives with respect to millions of parameters, but on a single GPU workstation the time-domain adjoint is limited by device memory and by the incompatibility of fused update kernels with automatic differentiation. Here, we present TorchFDTD, an open-source finite-difference time-domain (FDTD) package that addresses both limits. The Yee update, the convolutional perfectly matched layer and the auxiliary differential equations of dispersive media execute as fused CUDA kernels captured in a CUDA graph, and every kernel is paired with a hand-written transpose, so material and geometry derivatives are obtained by a discrete adjoint that PyTorch chains with differentiable objectives built from the supported observations. The forward states required by the adjoint are supplied by checkpoint replay or, for lossless periodic problems, by time reversal. A streamed mode advances causal slabs of the domain one block at a time and keeps the global state and the checkpoints in host memory, which lowers the device allocation while preserving the resident discretization. Guided-mode ports, near-to-far projection, GDSII import and a browser workbench complete the design workflow. We validate the package against analytic solutions, against Meep, FDTDX and a rigorous coupled-wave solver, and against automatic differentiation and finite differences. On an A100 the fused path completes full forward solves of eight test scenes 9.0 to 17.1 times faster than the PyTorch FDTD package it extends, and host streaming lowers the peak device allocation of a $256^3$ adjoint by 56\% at a cost in time that depends on the host, 14.5 to 15.2 fold in a four-core A100 container and 4.1 to 4.8 fold on an eight-core workstation. A 54-million-cell pillar-array lens coupled to an angular-spectrum objective yields an adjoint derivative within 0.78\% of a central difference on an RTX 3060. The time-domain adjoint of a device with tens of millions of cells thus becomes available on a single workstation GPU.
+Gradient-based photonic design needs full-wave derivatives with respect to millions of parameters, but on a single GPU workstation the time-domain adjoint is limited by device memory and by the incompatibility of fused update kernels with automatic differentiation. Here, we present TorchFDTD, an open-source finite-difference time-domain (FDTD) package that addresses both limits. The Yee update, the convolutional perfectly matched layer and the auxiliary differential equations of dispersive media execute as fused CUDA kernels captured in a CUDA graph, and every kernel is paired with a hand-written transpose, so material and geometry derivatives are obtained by a discrete adjoint that PyTorch chains with differentiable objectives built from the supported observations. The forward states required by the adjoint are supplied by checkpoint replay or, for lossless periodic problems, by time reversal. A streamed mode advances causal slabs of the domain one block at a time and keeps the global state and the checkpoints in host memory, which lowers the device allocation while preserving the resident discretization. We validate the package against analytic solutions, against Meep, FDTDX and a rigorous coupled-wave solver, and against automatic differentiation and finite differences. On an A100 the fused path completes full forward solves of eight test scenes 9.0 to 17.1 times faster than the PyTorch FDTD package it extends, and host streaming lowers the peak device allocation of a $256^3$ adjoint by 56\% at a host-dependent cost in time, 14.5 to 15.2 fold in a four-core A100 container and 4.1 to 4.8 fold on an eight-core workstation. A 54-million-cell pillar-array lens coupled to an angular-spectrum objective yields an adjoint derivative within 0.78\% of a central difference. The time-domain adjoint of a device with tens of millions of cells thus becomes available on a single workstation GPU.
 \end{abstract}
 
 \noindent\textbf{Keywords:} finite-difference time-domain, adjoint method, inverse design, GPU computing, PyTorch, metasurfaces, nanophotonics
