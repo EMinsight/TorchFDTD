@@ -1,0 +1,364 @@
+{
+  "hardware": {
+    "cuda": true,
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "gpu_memory_gb": 79.2,
+    "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+    "engine": "TorchFDTD Yee/CPML on fdtd grid",
+    "cpu_threads": 4
+  },
+  "platform": "Linux-5.15.0-170-generic-x86_64-with-glibc2.39",
+  "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+  "method": "Fused forward solves of the cross-solver throughput scenes in single and double precision on one GPU.\n\nThe scenes are benchmarks.open_source.scene (vacuum and dielectric sphere, 64^3 and 96^3 cells, 800 steps), the\nsame projects that benchmarks/cross_solver/torchfdtd_driver.py times against Meep and FDTDX. Only the precision of\nthe project changes. Full solve = Simulation(project).run() wall time, stepping = the captured loop alone. One\nwarm-up per case, then the listed repetitions. The double-precision point traces are saved for the comparison\nwith the double-precision Meep traces.\n\nUsage: python torchfdtd_precision.py --output OUT.json --traces DIR [--repeats 3]",
+  "repeats": 3,
+  "source_sha256": {
+    "benchmarks/paper_review/equal_precision/torchfdtd_precision.py": "900d3179441963bb7bd0d0f2325a1f68014cabcdbbd744e479b6d5d158c273e4",
+    "benchmarks/open_source.py": "5a1b34cc8ad18190533bbd35e6d9d944d7e38bee3c02373f06ae9e95e8b6a2cf"
+  },
+  "cases": [
+    {
+      "name": "sphere-64",
+      "precision": "float64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "runs": [
+        {
+          "wall_seconds": 0.07107491325587034,
+          "loop_seconds": 0.037098065949976444,
+          "setup_seconds": 0.019961168989539146,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 37392384,
+          "trace_sha256": "1cdf01ec5de97a2bd625138f402065de073567e1a3b4ef8d661a8e433baef583"
+        },
+        {
+          "wall_seconds": 0.07199790515005589,
+          "loop_seconds": 0.03705349192023277,
+          "setup_seconds": 0.021050491370260715,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 37392384,
+          "trace_sha256": "1cdf01ec5de97a2bd625138f402065de073567e1a3b4ef8d661a8e433baef583"
+        },
+        {
+          "wall_seconds": 0.0723898895084858,
+          "loop_seconds": 0.03708324767649174,
+          "setup_seconds": 0.021204713732004166,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 37392384,
+          "trace_sha256": "1cdf01ec5de97a2bd625138f402065de073567e1a3b4ef8d661a8e433baef583"
+        }
+      ],
+      "median_wall_seconds": 0.07199790515005589,
+      "median_loop_seconds": 0.03708324767649174,
+      "cell_steps_per_second_full": 2912795859.308932,
+      "cell_steps_per_second_stepping": 5655254411.089383,
+      "trace_file": "torchfdtd_float64_sphere-64_trace.npy"
+    },
+    {
+      "name": "sphere-96",
+      "precision": "float64",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "runs": [
+        {
+          "wall_seconds": 0.1867057429626584,
+          "loop_seconds": 0.11893246322870255,
+          "setup_seconds": 0.036363800056278706,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 119476224,
+          "trace_sha256": "7406852a4ef13e8aef07d51ea11fbf9b21eda64c8ca3019eba091f55e4a9db80"
+        },
+        {
+          "wall_seconds": 0.19349344540387392,
+          "loop_seconds": 0.11889284383505583,
+          "setup_seconds": 0.04361259751021862,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 119476224,
+          "trace_sha256": "7406852a4ef13e8aef07d51ea11fbf9b21eda64c8ca3019eba091f55e4a9db80"
+        },
+        {
+          "wall_seconds": 0.1898534120991826,
+          "loop_seconds": 0.11882841773331165,
+          "setup_seconds": 0.040201373398303986,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 119476224,
+          "trace_sha256": "7406852a4ef13e8aef07d51ea11fbf9b21eda64c8ca3019eba091f55e4a9db80"
+        }
+      ],
+      "median_wall_seconds": 0.1898534120991826,
+      "median_loop_seconds": 0.11889284383505583,
+      "cell_steps_per_second_full": 3728080481.5361404,
+      "cell_steps_per_second_stepping": 5953165700.888945,
+      "trace_file": "torchfdtd_float64_sphere-96_trace.npy"
+    },
+    {
+      "name": "vacuum-64",
+      "precision": "float64",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "runs": [
+        {
+          "wall_seconds": 0.06441131606698036,
+          "loop_seconds": 0.0370896328240633,
+          "setup_seconds": 0.016972768120467663,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 37392384,
+          "trace_sha256": "fec99703b2eff1b77ec6629e5b549b0244d77dec68c0e689dba5c9a243d150e4"
+        },
+        {
+          "wall_seconds": 0.0668738353997469,
+          "loop_seconds": 0.037111506797373295,
+          "setup_seconds": 0.016944294795393944,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 37392384,
+          "trace_sha256": "fec99703b2eff1b77ec6629e5b549b0244d77dec68c0e689dba5c9a243d150e4"
+        },
+        {
+          "wall_seconds": 0.066993972286582,
+          "loop_seconds": 0.03707421198487282,
+          "setup_seconds": 0.01905759610235691,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 37392384,
+          "trace_sha256": "fec99703b2eff1b77ec6629e5b549b0244d77dec68c0e689dba5c9a243d150e4"
+        }
+      ],
+      "median_wall_seconds": 0.0668738353997469,
+      "median_loop_seconds": 0.0370896328240633,
+      "cell_steps_per_second_full": 3135982836.1331544,
+      "cell_steps_per_second_stepping": 5654280833.536302,
+      "trace_file": "torchfdtd_float64_vacuum-64_trace.npy"
+    },
+    {
+      "name": "vacuum-96",
+      "precision": "float64",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "runs": [
+        {
+          "wall_seconds": 0.18916385620832443,
+          "loop_seconds": 0.11884067580103874,
+          "setup_seconds": 0.039488933980464935,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 119476224,
+          "trace_sha256": "38b9b935dbb16446b1d72bb14b54880e07fa6a06babe5c880e62bfc7c8b41c49"
+        },
+        {
+          "wall_seconds": 0.18931895308196545,
+          "loop_seconds": 0.11904350388795137,
+          "setup_seconds": 0.03938107658177614,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 119476224,
+          "trace_sha256": "38b9b935dbb16446b1d72bb14b54880e07fa6a06babe5c880e62bfc7c8b41c49"
+        },
+        {
+          "wall_seconds": 0.1894913399592042,
+          "loop_seconds": 0.11877881549298763,
+          "setup_seconds": 0.03961995244026184,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 119476224,
+          "trace_sha256": "38b9b935dbb16446b1d72bb14b54880e07fa6a06babe5c880e62bfc7c8b41c49"
+        }
+      ],
+      "median_wall_seconds": 0.18931895308196545,
+      "median_loop_seconds": 0.11884067580103874,
+      "cell_steps_per_second_full": 3738605081.412866,
+      "cell_steps_per_second_stepping": 5955778989.215522,
+      "trace_file": "torchfdtd_float64_vacuum-96_trace.npy"
+    },
+    {
+      "name": "sphere-64",
+      "precision": "float32",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "runs": [
+        {
+          "wall_seconds": 0.045742432586848736,
+          "loop_seconds": 0.021765577606856823,
+          "setup_seconds": 0.015624974854290485,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 18714624,
+          "trace_sha256": "6f719862c389ece8fdc3e3d2658389ca16df9fb9aa27b515a264d8a69f3788b7"
+        },
+        {
+          "wall_seconds": 0.04596790764480829,
+          "loop_seconds": 0.021771389059722424,
+          "setup_seconds": 0.015848977491259575,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 18714624,
+          "trace_sha256": "6f719862c389ece8fdc3e3d2658389ca16df9fb9aa27b515a264d8a69f3788b7"
+        },
+        {
+          "wall_seconds": 0.04578069690614939,
+          "loop_seconds": 0.021762668155133724,
+          "setup_seconds": 0.015598450787365437,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 18714624,
+          "trace_sha256": "6f719862c389ece8fdc3e3d2658389ca16df9fb9aa27b515a264d8a69f3788b7"
+        }
+      ],
+      "median_wall_seconds": 0.04578069690614939,
+      "median_loop_seconds": 0.021765577606856823,
+      "cell_steps_per_second_full": 4580865171.841246,
+      "cell_steps_per_second_stepping": 9635177333.12684,
+      "trace_file": "torchfdtd_float32_sphere-64_trace.npy"
+    },
+    {
+      "name": "sphere-96",
+      "precision": "float32",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "runs": [
+        {
+          "wall_seconds": 0.11558593902736902,
+          "loop_seconds": 0.06810449343174696,
+          "setup_seconds": 0.02969821449369192,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 59756544,
+          "trace_sha256": "fe6460ef52f25f684f72e674fa3b1fff049b09aa64cc04357056a60103cf89ea"
+        },
+        {
+          "wall_seconds": 0.11550341080874205,
+          "loop_seconds": 0.06811882276088,
+          "setup_seconds": 0.02975321002304554,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 59756544,
+          "trace_sha256": "fe6460ef52f25f684f72e674fa3b1fff049b09aa64cc04357056a60103cf89ea"
+        },
+        {
+          "wall_seconds": 0.11540146823972464,
+          "loop_seconds": 0.06814968679100275,
+          "setup_seconds": 0.029769416898489,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 59756544,
+          "trace_sha256": "fe6460ef52f25f684f72e674fa3b1fff049b09aa64cc04357056a60103cf89ea"
+        }
+      ],
+      "median_wall_seconds": 0.11550341080874205,
+      "median_loop_seconds": 0.06811882276088,
+      "cell_steps_per_second_full": 6127860597.7446165,
+      "cell_steps_per_second_stepping": 10390502526.512783,
+      "trace_file": "torchfdtd_float32_sphere-96_trace.npy"
+    },
+    {
+      "name": "vacuum-64",
+      "precision": "float32",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "steps": 800,
+      "dt_s": 1.4299311521482543e-16,
+      "runs": [
+        {
+          "wall_seconds": 0.04500361438840628,
+          "loop_seconds": 0.021771579049527645,
+          "setup_seconds": 0.01507288683205843,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 18714624,
+          "trace_sha256": "04a47f590c9ecb1ee2cf5b60cf500ffa2b97e8ea260be2c7006e42c80d7e8cbf"
+        },
+        {
+          "wall_seconds": 0.04540660697966814,
+          "loop_seconds": 0.021773681975901127,
+          "setup_seconds": 0.014993883669376373,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 18714624,
+          "trace_sha256": "04a47f590c9ecb1ee2cf5b60cf500ffa2b97e8ea260be2c7006e42c80d7e8cbf"
+        },
+        {
+          "wall_seconds": 0.04735385999083519,
+          "loop_seconds": 0.021865444257855415,
+          "setup_seconds": 0.015050381422042847,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 18714624,
+          "trace_sha256": "04a47f590c9ecb1ee2cf5b60cf500ffa2b97e8ea260be2c7006e42c80d7e8cbf"
+        }
+      ],
+      "median_wall_seconds": 0.04540660697966814,
+      "median_loop_seconds": 0.021773681975901127,
+      "cell_steps_per_second_full": 4618605395.772136,
+      "cell_steps_per_second_stepping": 9631591029.579218,
+      "trace_file": "torchfdtd_float32_vacuum-64_trace.npy"
+    },
+    {
+      "name": "vacuum-96",
+      "precision": "float32",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "steps": 800,
+      "dt_s": 9.532874347655027e-17,
+      "runs": [
+        {
+          "wall_seconds": 0.11484771501272917,
+          "loop_seconds": 0.06810544617474079,
+          "setup_seconds": 0.02920039091259241,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 59756544,
+          "trace_sha256": "24f21e3393e8bb96ef5777802bbd10cd1a4a8c6f8342dea829a360d06ee3147c"
+        },
+        {
+          "wall_seconds": 0.11482022888958454,
+          "loop_seconds": 0.06821633875370026,
+          "setup_seconds": 0.029189372435212135,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 59756544,
+          "trace_sha256": "24f21e3393e8bb96ef5777802bbd10cd1a4a8c6f8342dea829a360d06ee3147c"
+        },
+        {
+          "wall_seconds": 0.1149072926491499,
+          "loop_seconds": 0.06814342085272074,
+          "setup_seconds": 0.02917986363172531,
+          "cuda_graph": true,
+          "peak_allocated_bytes": 59756544,
+          "trace_sha256": "24f21e3393e8bb96ef5777802bbd10cd1a4a8c6f8342dea829a360d06ee3147c"
+        }
+      ],
+      "median_wall_seconds": 0.11484771501272917,
+      "median_loop_seconds": 0.06814342085272074,
+      "cell_steps_per_second_full": 6162846164.780484,
+      "cell_steps_per_second_stepping": 10386751811.737675,
+      "trace_file": "torchfdtd_float32_vacuum-96_trace.npy"
+    }
+  ]
+}
