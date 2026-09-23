@@ -3297,7 +3297,7 @@
           "specification": "validation report를 기계 산출물에서 생성한다. 내부 검증 보고서를 제3자 인증서라고 부르지 않는다. 숫자·지원 표·README·API docs·wheel 버전을 일치시킨다.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "VERIFIED",
+          "verification_state": "FAILED",
           "owner": null,
           "code_paths": [
             "scripts/build_validation_report.py",
@@ -3312,7 +3312,8 @@
           ],
           "actual_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml",
-            "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G9-07.xml"
+            "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G9-07.xml",
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_validation_report.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-07.xml"
           ],
           "required_tests": [
             "tests/test_validation_report.py"
@@ -3326,7 +3327,8 @@
             "20260923T075351Z-g9-07-d03dbea4",
             "20260923T080318Z-g9-07-72224fc0",
             "20260923T080858Z-g9-07-370efb51",
-            "20260923T090611Z-g9-07-43fac87d"
+            "20260923T090611Z-g9-07-43fac87d",
+            "20260923T163744Z-g9-07-f2ec5075"
           ],
           "blocker": null,
           "scope_change_approval": null,
