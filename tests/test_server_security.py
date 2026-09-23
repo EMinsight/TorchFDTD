@@ -69,7 +69,9 @@ def test_foreign_host_headers_are_rejected(client):
     # /api/capabilities is a file read, so the check never touches a GPU.
     for host in ['localhost:8765', '127.0.0.1:8765', 'localhost', '127.0.0.1']:
         assert client.get('/api/capabilities', headers={'Host': host}).status_code == 200, host
-    for host in FOREIGN_HOSTS + ['evil.example:8765', '127.0.0.1.evil.example', '[::1]:8765']:
+    # '[::1]' is loopback and on the allowlist; whether '[::1]:8765' matches depends on the Starlette version's IPv6
+    # host parsing (older releases split on the first colon), so it is not asserted either way here.
+    for host in FOREIGN_HOSTS + ['evil.example:8765', '127.0.0.1.evil.example']:
         response = client.get('/api/capabilities', headers={'Host': host})
         assert response.status_code == 400, (host, response.text)
         assert 'features' not in response.text
