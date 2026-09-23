@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="4" time="3477.074" timestamp="2026-09-23T11:34:15.293221+09:00" hostname="DESKTOP-N5DFT8J"><testcase classname="tests.test_physics_g3_b" name="test_g3_05_drude_sphere[0.02]" time="3457.658"><failure message="AssertionError: r=0.02 um at h=0.005 um: scattering 1.376 &gt; 0.5; absorption 6.733 &gt; 1.0&#10;assert not ['scattering 1.376 &gt; 0.5', 'absorption 6.733 &gt; 1.0']">radius = 0.02
+
+    @pytest.mark.parametrize('radius', CASES['G3-05']['fixture']['radii_um'])
+    def test_g3_05_drude_sphere(radius):
+        case = CASES['G3-05']
+        f = case['fixture']
+        meshes = f['mesh_sequence_um'] if FULL else f['mesh_sequence_um'][:1]
+        rows = []
+        for mesh in meshes:
+            row = drude_rows(mesh, 'cpu', 'float64')[radius]
+            rows.append(row)
+            record('G3-05', f'r={radius}/h={mesh}/cpu-float64', row)
+            assert row['inner_outer_scattering_max_difference_over_band_maximum'] &lt; CASES['G3-05']['acceptance']['self_consistency']['inner_outer_scattering_max_difference_over_band_maximum'], 'inner and outer scattered-power surfaces disagree'
+        full_only('judged mesh h/4 of the Drude fixture')
+        final = rows[-1]
+        limits = case['acceptance']['per_radius'][str(radius)]
+        failures = []
+        if final['max_scattering_relative_error'] &gt; limits['scattering_relative_error']:
+            failures.append(f'scattering {final["max_scattering_relative_error"]:.3f} &gt; {limits["scattering_relative_error"]}')
+        if final['max_absorption_relative_error'] &gt; limits['absorption_relative_error']:
+            failures.append(f'absorption {final["max_absorption_relative_error"]:.3f} &gt; {limits["absorption_relative_error"]}')
+&gt;       assert not failures, f'r={radius} um at h={final["mesh_um"]} um: '+'; '.join(failures)
+E       AssertionError: r=0.02 um at h=0.005 um: scattering 1.376 &gt; 0.5; absorption 6.733 &gt; 1.0
+E       assert not ['scattering 1.376 &gt; 0.5', 'absorption 6.733 &gt; 1.0']
+
+..\..\..\..\tests\test_physics_g3_b.py:608: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_b" name="test_g3_05_drude_sphere[0.035]" time="0.169"><failure message="AssertionError: r=0.035 um at h=0.005 um: scattering 0.458 &gt; 0.3; absorption 4.985 &gt; 0.6&#10;assert not ['scattering 0.458 &gt; 0.3', 'absorption 4.985 &gt; 0.6']">radius = 0.035
+
+    @pytest.mark.parametrize('radius', CASES['G3-05']['fixture']['radii_um'])
+    def test_g3_05_drude_sphere(radius):
+        case = CASES['G3-05']
+        f = case['fixture']
+        meshes = f['mesh_sequence_um'] if FULL else f['mesh_sequence_um'][:1]
+        rows = []
+        for mesh in meshes:
+            row = drude_rows(mesh, 'cpu', 'float64')[radius]
+            rows.append(row)
+            record('G3-05', f'r={radius}/h={mesh}/cpu-float64', row)
+            assert row['inner_outer_scattering_max_difference_over_band_maximum'] &lt; CASES['G3-05']['acceptance']['self_consistency']['inner_outer_scattering_max_difference_over_band_maximum'], 'inner and outer scattered-power surfaces disagree'
+        full_only('judged mesh h/4 of the Drude fixture')
+        final = rows[-1]
+        limits = case['acceptance']['per_radius'][str(radius)]
+        failures = []
+        if final['max_scattering_relative_error'] &gt; limits['scattering_relative_error']:
+            failures.append(f'scattering {final["max_scattering_relative_error"]:.3f} &gt; {limits["scattering_relative_error"]}')
+        if final['max_absorption_relative_error'] &gt; limits['absorption_relative_error']:
+            failures.append(f'absorption {final["max_absorption_relative_error"]:.3f} &gt; {limits["absorption_relative_error"]}')
+&gt;       assert not failures, f'r={radius} um at h={final["mesh_um"]} um: '+'; '.join(failures)
+E       AssertionError: r=0.035 um at h=0.005 um: scattering 0.458 &gt; 0.3; absorption 4.985 &gt; 0.6
+E       assert not ['scattering 0.458 &gt; 0.3', 'absorption 4.985 &gt; 0.6']
+
+..\..\..\..\tests\test_physics_g3_b.py:608: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_b" name="test_g3_05_drude_sphere[0.05]" time="0.167"><failure message="AssertionError: r=0.05 um at h=0.005 um: scattering 0.445 &gt; 0.2; absorption 3.446 &gt; 0.4&#10;assert not ['scattering 0.445 &gt; 0.2', 'absorption 3.446 &gt; 0.4']">radius = 0.05
+
+    @pytest.mark.parametrize('radius', CASES['G3-05']['fixture']['radii_um'])
+    def test_g3_05_drude_sphere(radius):
+        case = CASES['G3-05']
+        f = case['fixture']
+        meshes = f['mesh_sequence_um'] if FULL else f['mesh_sequence_um'][:1]
+        rows = []
+        for mesh in meshes:
+            row = drude_rows(mesh, 'cpu', 'float64')[radius]
+            rows.append(row)
+            record('G3-05', f'r={radius}/h={mesh}/cpu-float64', row)
+            assert row['inner_outer_scattering_max_difference_over_band_maximum'] &lt; CASES['G3-05']['acceptance']['self_consistency']['inner_outer_scattering_max_difference_over_band_maximum'], 'inner and outer scattered-power surfaces disagree'
+        full_only('judged mesh h/4 of the Drude fixture')
+        final = rows[-1]
+        limits = case['acceptance']['per_radius'][str(radius)]
+        failures = []
+        if final['max_scattering_relative_error'] &gt; limits['scattering_relative_error']:
+            failures.append(f'scattering {final["max_scattering_relative_error"]:.3f} &gt; {limits["scattering_relative_error"]}')
+        if final['max_absorption_relative_error'] &gt; limits['absorption_relative_error']:
+            failures.append(f'absorption {final["max_absorption_relative_error"]:.3f} &gt; {limits["absorption_relative_error"]}')
+&gt;       assert not failures, f'r={radius} um at h={final["mesh_um"]} um: '+'; '.join(failures)
+E       AssertionError: r=0.05 um at h=0.005 um: scattering 0.445 &gt; 0.2; absorption 3.446 &gt; 0.4
+E       assert not ['scattering 0.445 &gt; 0.2', 'absorption 3.446 &gt; 0.4']
+
+..\..\..\..\tests\test_physics_g3_b.py:608: AssertionError</failure></testcase><testcase classname="tests.test_physics_g3_b" name="test_g3_05_drude_cuda_layer_a" time="18.808" /></testsuite></testsuites>

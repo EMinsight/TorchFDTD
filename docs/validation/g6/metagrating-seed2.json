@@ -35,7 +35,7 @@
    "gradient_norm": 0.033857982605695724,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 10.154152399860322
+   "elapsed_s": 8.425734399817884
   },
   {
    "iteration": 2,
@@ -49,7 +49,7 @@
    "gradient_norm": 0.0443442165851593,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 10.141201300080866
+   "elapsed_s": 8.335292299743742
   },
   {
    "iteration": 3,
@@ -63,7 +63,7 @@
    "gradient_norm": 0.051872916519641876,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 11.090263599995524
+   "elapsed_s": 8.448599900119007
   },
   {
    "iteration": 4,
@@ -77,7 +77,7 @@
    "gradient_norm": 0.07357867807149887,
    "beta": 4.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.373720599804074
+   "elapsed_s": 8.413455399684608
   },
   {
    "iteration": 5,
@@ -91,7 +91,7 @@
    "gradient_norm": 0.17967037856578827,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 9.942344900220633
+   "elapsed_s": 8.574619099963456
   },
   {
    "iteration": 6,
@@ -105,7 +105,7 @@
    "gradient_norm": 0.17202603816986084,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 9.785397899802774
+   "elapsed_s": 8.183114500250667
   },
   {
    "iteration": 7,
@@ -119,7 +119,7 @@
    "gradient_norm": 0.14233292639255524,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.767288099974394
+   "elapsed_s": 8.19814100023359
   },
   {
    "iteration": 8,
@@ -133,7 +133,7 @@
    "gradient_norm": 0.1051180362701416,
    "beta": 8.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.205672100186348
+   "elapsed_s": 8.12334579974413
   },
   {
    "iteration": 9,
@@ -147,7 +147,7 @@
    "gradient_norm": 0.0787927433848381,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.417911500204355
+   "elapsed_s": 8.217620099894702
   },
   {
    "iteration": 10,
@@ -161,7 +161,7 @@
    "gradient_norm": 0.09334873408079147,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 11.286659899633378
+   "elapsed_s": 8.470719399861991
   },
   {
    "iteration": 11,
@@ -175,7 +175,7 @@
    "gradient_norm": 0.11591550707817078,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 11.040004500187933
+   "elapsed_s": 8.311517599970102
   },
   {
    "iteration": 12,
@@ -189,7 +189,7 @@
    "gradient_norm": 0.1711851805448532,
    "beta": 16.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.329377299640328
+   "elapsed_s": 8.666612499859184
   },
   {
    "iteration": 13,
@@ -203,7 +203,7 @@
    "gradient_norm": 0.15821732580661774,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.599068300332874
+   "elapsed_s": 8.714803299866617
   },
   {
    "iteration": 14,
@@ -217,7 +217,7 @@
    "gradient_norm": 0.13299855589866638,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 11.108625600114465
+   "elapsed_s": 8.529378000181168
   },
   {
    "iteration": 15,
@@ -231,7 +231,7 @@
    "gradient_norm": 0.2638220191001892,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.318084700033069
+   "elapsed_s": 8.611807500012219
   },
   {
    "iteration": 16,
@@ -245,7 +245,7 @@
    "gradient_norm": 0.31808850169181824,
    "beta": 32.0,
    "beta_next": 64.0,
-   "elapsed_s": 10.657183799892664
+   "elapsed_s": 8.290152099914849
   },
   {
    "iteration": 17,
@@ -259,7 +259,7 @@
    "gradient_norm": 0.42846018075942993,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 10.548484500031918
+   "elapsed_s": 8.612370199989527
   },
   {
    "iteration": 18,
@@ -273,7 +273,7 @@
    "gradient_norm": 0.6473395228385925,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 10.184401399921626
+   "elapsed_s": 8.395744899753481
   },
   {
    "iteration": 19,
@@ -287,7 +287,7 @@
    "gradient_norm": 0.5701737403869629,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 9.862422300036997
+   "elapsed_s": 8.437931600026786
   },
   {
    "iteration": 20,
@@ -301,7 +301,7 @@
    "gradient_norm": 0.19396325945854187,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 9.773437299765646
+   "elapsed_s": 8.247648099903017
   },
   {
    "iteration": 21,
@@ -315,7 +315,7 @@
    "gradient_norm": 0.6470588445663452,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 10.239682899788022
+   "elapsed_s": 8.396240000147372
   },
   {
    "iteration": 22,
@@ -329,7 +329,7 @@
    "gradient_norm": 0.24376972019672394,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 10.358831400051713
+   "elapsed_s": 8.303828400094062
   },
   {
    "iteration": 23,
@@ -343,7 +343,7 @@
    "gradient_norm": 0.505141019821167,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 9.7801911002025
+   "elapsed_s": 8.24909279961139
   },
   {
    "iteration": 24,
@@ -357,7 +357,7 @@
    "gradient_norm": 0.46554359793663025,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 9.958469099830836
+   "elapsed_s": 8.275181300006807
   }
  ],
  "fabrication": {
@@ -452,8 +452,8 @@
   0
  ],
  "export": {
-  "gds": "docs\\validation\\g6\\export\\metagrating\\seed2\\metagrating-seed2.gds",
-  "structures": "docs\\validation\\g6\\export\\metagrating\\seed2\\metagrating-seed2-structures.json",
+  "gds": "D:\\TorchFDTD\\docs\\validation\\g6\\export\\metagrating\\seed2\\metagrating-seed2.gds",
+  "structures": "D:\\TorchFDTD\\docs\\validation\\g6\\export\\metagrating\\seed2\\metagrating-seed2-structures.json",
   "structure_count": 3
  },
  "final_evaluation": {
@@ -539,6 +539,6 @@
    "fine_gds": "polygons read back by import_gds from the exported file"
   }
  },
- "wall_time_s": 283.4588591000065,
+ "wall_time_s": 225.26639040000737,
  "device": "cpu"
 }

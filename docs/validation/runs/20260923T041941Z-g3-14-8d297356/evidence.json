@@ -1,0 +1,382 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T041941Z-g3-14-8d297356",
+  "task": "G3-14",
+  "stage": "G3",
+  "task_title": "무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교",
+  "command": "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager D:/TorchFDTD/tests/test_cuda_kernels.py D:/TorchFDTD/tests/test_cuda_adjoint.py D:/TorchFDTD/tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd D:/TorchFDTD/tests/test_tensor_native_cuda.py D:/TorchFDTD/tests/test_endpoint_native_cpml_cuda.py D:/TorchFDTD/tests/test_spacetime.py::test_block_and_transpose_match_resident D:/TorchFDTD/tests/test_streamed_density.py::test_async_cuda_periodic_density_response_and_gradient_match_dense_cpu D:/TorchFDTD/tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint D:/TorchFDTD/tests/test_cpu_gpu_adjoint_benchmark.py::test_actual_cpu_resident_cuda_and_async_dram_driver D:/TorchFDTD/tests/test_reversible.py::test_reversible_full_gradient_retained_seeds_and_source_derivative D:/TorchFDTD/tests/test_reversible_cuda.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G3-14.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T13:18:40.574680+09:00",
+  "recorded_at": "2026-09-23T04:19:41+00:00",
+  "source_commit": "9ba879241b3979e91d1f81bc601d244ac0a788ee",
+  "source_commit_time": "2026-09-23T10:49:20+09:00",
+  "source_tree_sha256": "e533080f00f640ea452fa62d2056e0b276442cfed89430e6fca7ca7730f530a9",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824",
+      "head_sha256": "2396c2a9f5c858203686a0384b2dd0b207308d2d1250a0b6d5a9d74a032e5a41"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc",
+      "head_sha256": "34b3d7927bd9f9e481209d2189e6694e25cac4113234601a76ed3fb70a276075"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "6fcf959589774bd73bab2ed679c21f12d016909cabd1b2d2095963adad33fe8e",
+      "head_sha256": "805292c474b7a1fb5d97adac64c729c47eec607bcfd7766cdd1346c3dfc26601"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b",
+      "head_sha256": "f5dbc155c8178bf1dc3f157c4961968355e1eb480d92272685bcce12a7d9d9cd"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23",
+      "head_sha256": "45965cf265aa5a97677d8c6fbf21e326730cf64e4517be66af531122109d43ab"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "9382af263e93077a7cd49189798e54a8b669fd8b6a189e6cf759094147804824",
+  "package_path": "D:/torchfdtd-clean/dist/00a8d296bfa8/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_solver.py": "916bd0ab1cde0eb72ca9cb434b0a1926657ccf6f8da5223569757b57fbd012d9",
+    "tests/test_cuda_kernels.py": "b393867bc99f0868d1c441bba7bd3c34f617529f105bbd61a727f47a533dd613",
+    "tests/test_cuda_adjoint.py": "2142c899e641aa20cfadb6fd7bad645ae8545c4ee357c8f1add6ddbc29d7b2c4",
+    "tests/test_differentiable.py": "1339a6ecc9852e7f3a8d63e8ceb9c12e3b922048249ac05faa810b4578975983",
+    "tests/test_tensor_native_cuda.py": "4a8766c3a1f639ea59b75c5e98713f8ef463797fa3ae913e4010fd8c26b9323f",
+    "tests/test_endpoint_native_cpml_cuda.py": "9c7d9813f7ea054013a559a8bc8658eabe535832aa442d4e22b93f05420db40f",
+    "tests/test_spacetime.py": "9ff9bc4080760984047a6718e8849f6dd7efe274ca4ea4f614a43d76c63bb09a",
+    "tests/test_streamed_density.py": "abce608c36f40ea1aa6f55bba44e36c41ba9a08e904dc55a1771ecdeecff91be",
+    "tests/test_pec_boundaries.py": "bd63edd06c2ecf5b8f32a86f82168e2257d4b7561ff583caea7cc32eb59de53b",
+    "tests/test_cpu_gpu_adjoint_benchmark.py": "547be8da84aef2530c735db4a6572c41d4b28fe45ca7f069c7e3ddfbe98a7d8a",
+    "tests/test_reversible.py": "925c9aab9f028b11c386b4b8697f5a4a5ed91bf10c70263a0e4567e2d5da7e55",
+    "tests/test_reversible_cuda.py": "ebef85815c71e9705308cdbfe01582ba46cc821932187bbdd39e1674126d533d"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G3-14_discrete_backend_agreement.json",
+  "fixture_sha256": "a3b7ef176bdc841148044b72ecaabe1643acfcea0f5e8b7a16dd541bfabb5b53",
+  "acceptance_criteria_path": "docs/validation/cases/G3-14_discrete_backend_agreement.json",
+  "acceptance_criteria_sha256": "a3b7ef176bdc841148044b72ecaabe1643acfcea0f5e8b7a16dd541bfabb5b53",
+  "case_first_commit": "5c0172da60d27ad0e5aa6906910ae256e53de1f6",
+  "case_first_commit_time": "2026-09-22T01:25:18+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\TorchFDTD\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\TorchFDTD\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": {
+    "fused_kernels": 615,
+    "fused_adjoint": 82,
+    "explicit_adjoint": 82,
+    "streamed_block": 608,
+    "reversible_cotangents": [
+      37,
+      74
+    ],
+    "endpoint_and_tensor": "deterministic"
+  },
+  "precision": [
+    "float32",
+    "float64"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "native_forward": "tests/test_solver.py: 40x40x1 (2d) and 40x40x40 (3d) cells, 180 steps, float32 and float64, CPU NumPy backend against CUDA torch kernel with and without CUDA graphs",
+    "fused_kernels": "tests/test_cuda_kernels.py: random E, H, inverse epsilon and all CPML psi states (seed 615) on 32x28x1 or 32x28x24 cells with pml2d, pml3d, mixed and graded CPML layouts, 23 steps, float32 and float64, CUDA torch YeeGrid against FusedYeeCUDA; complete fused graph 40x30x1 cells, 180 steps, dielectric and Lorentz; subnormal fields; CPU float64 Simulation against fused CUDA frequency plane on 320x20x40 cells, 1600 steps",
+    "fused_adjoint": "tests/test_cuda_adjoint.py: random physical and adjoint states (seed 82) on the 16x15x14 project of tests/test_differentiable.py, 3 transposed steps, float32 and float64, FusedAdjointCUDA.step against _System.transpose_step",
+    "explicit_adjoint": "tests/test_differentiable.py: 16x15x1 and 16x15x14 cells, 24 steps, float64, seed 82 epsilon and weights, checkpoints 3, cpu and cuda, explicit adjoint against full autograd",
+    "tensor_native": "tests/test_tensor_native_cuda.py: 16x6x6 cells, 12 steps, float32, periodic, Bloch and CPML, CPU against CUDA forward and material-table VJP",
+    "endpoint_cpml": "tests/test_endpoint_native_cpml_cuda.py: 16x6x6 nodes, 20 steps, float32, CPU against CUDA forward, interior epsilon and waveform VJPs",
+    "streamed": "tests/test_spacetime.py: SlabBlockOperator forward and transpose on 16x15x14 cells with temporal depths 1, 3, 9 and local checkpoints, float32 and float64, cpu and cuda, against the host reference step by autograd (seed 608); tests/test_streamed_density.py: CPU dense resident reference against CUDA asynchronous streamed periodic density response and gradient, float32; tests/test_pec_boundaries.py: 2D 16x16 PEC scene, resident (fused on CUDA) and streamed against the reference, real and complex",
+    "all_modes_driver": "tests/test_cpu_gpu_adjoint_benchmark.py via benchmarks/cpu_gpu_adjoint.py: 16^3 cells, 19 steps, float32, x periodic, two plane monitors, modes cpu_t1, cpu_t2 (torch backward), cuda_resident (fused) and cuda_dram (streamed async), dielectric and dispersive, every mode's outputs and material VJPs against cpu_t1 by relative L2",
+    "reversible": "tests/test_reversible.py: 6^3 periodic cells, 80 and 512 steps, float32 CPU, reversible backward against the stored full gradient, two random cotangent seeds (generator 37) and a central difference; tests/test_reversible_cuda.py: fused CUDA reversible on 12^3 x 96 steps and 64^3 x 512 steps (generator 74)",
+    "pml": "CPML layers 3 to 4 in the differentiable fixtures; pml2d/pml3d/mixed/graded layouts in the kernel test; part of the compared operator"
+  },
+  "reference_method": "The same discrete problem executed through another path of the same Yee/CPML discretisation: NumPy or torch CPU against CUDA torch, torch against fused CUDA kernels, explicit transpose against torch autograd, resident against streamed or reversible execution. No path is independent of the discrete operator; this is validation layer A only.",
+  "observables": [
+    {
+      "name": "forward_fields_and_signals",
+      "unit": "reduced field",
+      "definition": "E, H, CPML psi and monitor signals of one path against another after N steps"
+    },
+    {
+      "name": "material_vjp",
+      "unit": "d objective / d epsilon",
+      "definition": "adjoint or backward gradients with respect to epsilon, density, tensor table or waveform of one path against another"
+    },
+    {
+      "name": "adjoint_states",
+      "unit": "reduced adjoint field",
+      "definition": "transposed E, H and psi bars of the fused adjoint against the torch transpose"
+    },
+    {
+      "name": "relative_l2",
+      "unit": "dimensionless",
+      "definition": "per-group relative L2 of outputs and VJPs in the all-modes driver and the reversible tests"
+    }
+  ],
+  "acceptance_limits": {
+    "program_thresholds": {
+      "float64": {
+        "rtol": 1e-07,
+        "atol": 1e-09
+      },
+      "float32": {
+        "rtol": 0.0001,
+        "atol": 1e-06
+      }
+    },
+    "within_program_thresholds": {
+      "tests/test_solver.py": {
+        "float32": {
+          "rtol": 2e-06,
+          "atol": 2e-06
+        },
+        "float64": {
+          "rtol": 1e-12,
+          "atol": 1e-12
+        }
+      },
+      "tests/test_cuda_kernels.py": {
+        "float32": 3e-06,
+        "float64": 2e-14,
+        "flux_plane_float64": 1e-11,
+        "subnormal": "exact"
+      },
+      "tests/test_cuda_adjoint.py": {
+        "float32": 2e-06,
+        "float64": 2e-13
+      },
+      "tests/test_differentiable.py": {
+        "signals": {
+          "rtol": 1e-11,
+          "atol": 1e-13
+        },
+        "gradient": {
+          "rtol": 2e-10,
+          "atol": 1e-12
+        }
+      },
+      "tests/test_spacetime.py": {
+        "float32": {
+          "rtol": 2e-05,
+          "atol": 2e-06
+        },
+        "float64": {
+          "rtol": 2e-10,
+          "atol": 2e-12
+        }
+      },
+      "tests/test_pec_boundaries.py": {
+        "signals": {
+          "rtol": 2e-05,
+          "atol": 2e-06
+        },
+        "gradient": {
+          "rtol": 4e-05,
+          "atol": 3e-06
+        }
+      },
+      "tests/test_tensor_native_cuda.py signals": {
+        "rtol": 8e-05,
+        "atol": 8e-07
+      },
+      "tests/test_streamed_density.py response": {
+        "rtol": 0.0001,
+        "atol": 4e-06
+      }
+    },
+    "looser_than_program_thresholds": {
+      "tests/test_tensor_native_cuda.py table VJP float32": {
+        "rtol": 0.0003,
+        "atol": 2e-07
+      },
+      "tests/test_endpoint_native_cpml_cuda.py VJPs float32": {
+        "rtol": 0.0002,
+        "atol": 1e-06
+      },
+      "tests/test_streamed_density.py gradient float32": {
+        "rtol": 0.0003,
+        "atol": 7e-06
+      },
+      "tests/test_cpu_gpu_adjoint_benchmark.py relative L2": 0.0002,
+      "tests/test_reversible.py and tests/test_reversible_cuda.py relative L2": 0.0002,
+      "note": "float32 gradient budgets of 2e-4 to 3e-4 relative were declared in the repository before this case for accumulated 12 to 512 step backward passes; they exceed the program's float32 rtol 1e-4 and are reported as differences, not loosened or tightened here; the float32 atol values in absolute reduced units are 2e-7 to 7e-6 against the program's 1e-6"
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 and fp64; each test's own assertions are the recorded criteria"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 75,
+    "passed": [
+      "tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager[float32-2d]",
+      "tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager[float32-3d]",
+      "tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager[float64-2d]",
+      "tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager[float64-3d]",
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states[pml2d-float32]",
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states[pml2d-float64]",
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states[pml3d-float32]",
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states[pml3d-float64]",
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states[mixed-float32]",
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states[mixed-float64]",
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states[graded-float32]",
+      "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states[graded-float64]",
+      "tests/test_cuda_kernels.py::test_complete_fused_graph_matches_reference_and_eager[dielectric]",
+      "tests/test_cuda_kernels.py::test_complete_fused_graph_matches_reference_and_eager[lorentz]",
+      "tests/test_cuda_kernels.py::test_fused_rejects_cpu_and_complex_fields",
+      "tests/test_cuda_kernels.py::test_fused_preserves_subnormal_fields",
+      "tests/test_cuda_kernels.py::test_fused_frequency_plane_matches_cpu_flux",
+      "tests/test_cuda_adjoint.py::test_random_physical_and_adjoint_state_transpose[False-False-float32]",
+      "tests/test_cuda_adjoint.py::test_random_physical_and_adjoint_state_transpose[False-False-float64]",
+      "tests/test_cuda_adjoint.py::test_random_physical_and_adjoint_state_transpose[True-True-float32]",
+      "tests/test_cuda_adjoint.py::test_random_physical_and_adjoint_state_transpose[True-True-float64]",
+      "tests/test_cuda_adjoint.py::test_fused_rejects_cpu_and_unknown_selection",
+      "tests/test_cuda_adjoint.py::test_dense_observer_code_is_bounded_and_duplicate_additions_are_ordered[float32]",
+      "tests/test_cuda_adjoint.py::test_dense_observer_code_is_bounded_and_duplicate_additions_are_ordered[float64]",
+      "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd[cpu-2d-False-False]",
+      "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd[cpu-2d-True-True]",
+      "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd[cpu-3d-False-True]",
+      "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd[cuda-2d-False-False]",
+      "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd[cuda-2d-True-True]",
+      "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd[cuda-3d-False-True]",
+      "tests/test_tensor_native_cuda.py::test_native_tensor_cuda_periodic_bloch_cpml_and_material_table_vjp",
+      "tests/test_endpoint_native_cpml_cuda.py::test_native_cpml_cuda_results_npz_material_and_waveform_vjp",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-1-False-float32-0-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-1-False-float32-0-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-1-False-float32-2-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-1-False-float32-2-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-1-False-float64-0-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-1-False-float64-0-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-1-False-float64-2-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-1-False-float64-2-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-3-True-float32-0-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-3-True-float32-0-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-3-True-float32-2-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-3-True-float32-2-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-3-True-float64-0-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-3-True-float64-0-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-3-True-float64-2-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[False-3-True-float64-2-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-3-True-float32-0-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-3-True-float32-0-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-3-True-float32-2-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-3-True-float32-2-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-3-True-float64-0-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-3-True-float64-0-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-3-True-float64-2-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-3-True-float64-2-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-9-False-float32-0-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-9-False-float32-0-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-9-False-float32-2-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-9-False-float32-2-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-9-False-float64-0-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-9-False-float64-0-cuda]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-9-False-float64-2-cpu]",
+      "tests/test_spacetime.py::test_block_and_transpose_match_resident[True-9-False-float64-2-cuda]",
+      "tests/test_streamed_density.py::test_async_cuda_periodic_density_response_and_gradient_match_dense_cpu",
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint[False-cpu]",
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint[False-cuda]",
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint[True-cpu]",
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint[True-cuda]",
+      "tests/test_cpu_gpu_adjoint_benchmark.py::test_actual_cpu_resident_cuda_and_async_dram_driver[False]",
+      "tests/test_cpu_gpu_adjoint_benchmark.py::test_actual_cpu_resident_cuda_and_async_dram_driver[True]",
+      "tests/test_reversible.py::test_reversible_full_gradient_retained_seeds_and_source_derivative[80]",
+      "tests/test_reversible.py::test_reversible_full_gradient_retained_seeds_and_source_derivative[512]",
+      "tests/test_reversible_cuda.py::test_native_reversible_cuda_gradient_memory_and_owned_states[12-96]",
+      "tests/test_reversible_cuda.py::test_native_reversible_cuda_gradient_memory_and_owned_states[64-512]"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 58.506,
+    "suite_timestamp": "2026-09-23T13:18:40.574680+09:00"
+  },
+  "required_tests": [
+    "tests/test_solver.py::test_cuda_matches_cpu_and_graph_matches_eager",
+    "tests/test_cuda_kernels.py::test_fused_random_fields_and_all_cpml_states",
+    "tests/test_cuda_kernels.py::test_complete_fused_graph_matches_reference_and_eager",
+    "tests/test_cuda_kernels.py::test_fused_preserves_subnormal_fields",
+    "tests/test_cuda_kernels.py::test_fused_frequency_plane_matches_cpu_flux",
+    "tests/test_cuda_adjoint.py::test_random_physical_and_adjoint_state_transpose",
+    "tests/test_differentiable.py::test_discrete_adjoint_matches_full_autograd",
+    "tests/test_tensor_native_cuda.py::test_native_tensor_cuda_periodic_bloch_cpml_and_material_table_vjp",
+    "tests/test_endpoint_native_cpml_cuda.py::test_native_cpml_cuda_results_npz_material_and_waveform_vjp",
+    "tests/test_spacetime.py::test_block_and_transpose_match_resident",
+    "tests/test_streamed_density.py::test_async_cuda_periodic_density_response_and_gradient_match_dense_cpu",
+    "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint",
+    "tests/test_cpu_gpu_adjoint_benchmark.py::test_actual_cpu_resident_cuda_and_async_dram_driver",
+    "tests/test_reversible.py::test_reversible_full_gradient_retained_seeds_and_source_derivative",
+    "tests/test_reversible_cuda.py::test_native_reversible_cuda_gradient_memory_and_owned_states"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-14.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T041941Z-g3-14-8d297356/junit.xml",
+      "sha256": "94e9cb68b850d6acf193ad5166e903aaa4ba61e470cb96d4cfb33b3fc6cf1145",
+      "bytes": 10108,
+      "original_path": ".local/tmp/junit/rerecord/G3-14.xml"
+    }
+  ],
+  "applicable_scope": "Re-recorded on the merged main tree after a shared test module changed in a merged branch. re-recorded on 9ba879241b39 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260921T185333Z-g3-14-1bd80f8e",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

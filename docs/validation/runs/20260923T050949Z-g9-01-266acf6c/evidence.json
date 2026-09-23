@@ -1,0 +1,400 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T050949Z-g9-01-266acf6c",
+  "task": "G9-01",
+  "stage": "G9",
+  "task_title": "local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다",
+  "command": "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_server_security.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G9-01.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T14:09:41.442966+09:00",
+  "recorded_at": "2026-09-23T05:09:49+00:00",
+  "source_commit": "9ba879241b3979e91d1f81bc601d244ac0a788ee",
+  "source_commit_time": "2026-09-23T10:49:20+09:00",
+  "source_tree_sha256": "f22bc959d29ff37bd31244b3508f6b7db6b744dc7c946a4d027888a32fa2f928",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824",
+      "head_sha256": "2396c2a9f5c858203686a0384b2dd0b207308d2d1250a0b6d5a9d74a032e5a41"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc",
+      "head_sha256": "34b3d7927bd9f9e481209d2189e6694e25cac4113234601a76ed3fb70a276075"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "6fcf959589774bd73bab2ed679c21f12d016909cabd1b2d2095963adad33fe8e",
+      "head_sha256": "805292c474b7a1fb5d97adac64c729c47eec607bcfd7766cdd1346c3dfc26601"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b",
+      "head_sha256": "f5dbc155c8178bf1dc3f157c4961968355e1eb480d92272685bcce12a7d9d9cd"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23",
+      "head_sha256": "45965cf265aa5a97677d8c6fbf21e326730cf64e4517be66af531122109d43ab"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "62979fbf21bd7da5477ad6cce732abcb549425cbeb5ab28806099488c54ea940",
+      "head_sha256": "eb65d64fdd2c9cb6712c7aeae393b53479159b5de7fefaf10eb8fe17ce1aac62"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "aa829a7f8c9ff4e7ce40032b1fec27dd37513abad39d04c3ec927eb58e751bc8",
+      "head_sha256": "b33679c46ffd84c19def4e41de74550f0c4201c276b7a64a01d4ac6abbb66405"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "fb5ca89bc9029a146b9440d764fe1db13c4e8c79f7e47d9b3d687b2f32ed4ede",
+      "head_sha256": "3089c400f46d2619243d6524f470afc5331941cded774ef1ed1ca81a5a93738a"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "81d583d77a0dbe860e846d51886a2f114e2e0681c2816096a9d822fa295ee841",
+      "head_sha256": "de59e4e2f707ad11aa7abb5b091a35e774d05d8eccdcac14ae4e1af79086f352"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "c68a1636641dc710734b9057a17a96cb42458289d23c4477b2a80db6459c155f",
+      "head_sha256": "d3bbc997e2fe12c8b709fd12d6a312445670a5ca455d8a75487ed98a95bf845b"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "c0c7b0be5a7af4970a64d92742f031b750ceb82898317b5308080af6bb26c37a",
+      "head_sha256": "a9035039d6d182be319be21ef21d5842931c93a7f05cbccc39afbcaa4bfd9a5f"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "9382af263e93077a7cd49189798e54a8b669fd8b6a189e6cf759094147804824",
+  "package_path": "D:/torchfdtd-clean/dist/00a8d296bfa8/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_server_security.py": "d01ea7eb96751a8685901bfe7782b8fec919df8a2622902f3f21e7c4eca3a318"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G9-01.json",
+  "fixture_sha256": "b6f948eafaa4af197405878f5eb0221671b84b523fc4da28cf968dda553cc2f7",
+  "acceptance_criteria_path": "docs/validation/cases/G9-01.json",
+  "acceptance_criteria_sha256": "b6f948eafaa4af197405878f5eb0221671b84b523fc4da28cf968dda553cc2f7",
+  "case_first_commit": "4c5a8712f971d95159d8c37df2b86ed55bf2eecc",
+  "case_first_commit_time": "2026-09-22T00:55:34+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\TorchFDTD\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\TorchFDTD\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable: every request and file is fixed in tests/test_server_security.py",
+  "precision": "not applicable: no floating-point observable",
+  "backend": "cpu; no simulation is run and no CUDA context is created by the case",
+  "physics_configuration": {
+    "server": "torchfdtd.server.create_app(<tmp>/results) driven in-process by fastapi.testclient.TestClient with raise_server_exceptions=False; the CLI entry torchfdtd.cli.main with uvicorn.run replaced by a recorder",
+    "loopback_bind": {
+      "default": "torchfdtd serve --port 8123 must call uvicorn.run with host 127.0.0.1",
+      "accepted_hosts": [
+        "127.0.0.1",
+        "localhost"
+      ],
+      "refused_hosts": [
+        "0.0.0.0",
+        "192.168.0.5",
+        "::",
+        "fdtd.example",
+        "10.0.0.1",
+        "::1"
+      ]
+    },
+    "host_headers": {
+      "accepted": [
+        "localhost:8765",
+        "127.0.0.1:8765",
+        "localhost",
+        "127.0.0.1"
+      ],
+      "rejected": [
+        "0.0.0.0",
+        "192.168.0.5",
+        "::",
+        "fdtd.example",
+        "10.0.0.1",
+        "evil.example:8765",
+        "127.0.0.1.evil.example",
+        "[::1]:8765"
+      ]
+    },
+    "origins": {
+      "rejected": [
+        "https://evil.example",
+        "http://testserver.evil.example",
+        "http://localhost:8765",
+        "null"
+      ],
+      "routes": [
+        "/api/validate",
+        "/api/jobs",
+        "/api/mesh/preview",
+        "/api/mesh/freeze",
+        "/api/python",
+        "/api/materials/data",
+        "/api/design/config",
+        "/api/design/jobs",
+        "/api/mode-networks/validate",
+        "/api/mode-network-jobs",
+        "/api/gds/inspect",
+        "/api/fsp/native-import",
+        "/api/jobs/none/cancel"
+      ],
+      "accepted": "http://testserver on /api/validate and a request without Origin"
+    },
+    "path_policy": {
+      "route_keys": [
+        "../pyproject.toml",
+        "..%2F..%2Fpyproject.toml",
+        "..%5C..%5Cpyproject.toml",
+        "C:%5CWindows%5Cwin.ini",
+        "%5C%5Cserver%5Cshare%5Cwin.ini",
+        "%2Fetc%2Fpasswd"
+      ],
+      "key_routes": [
+        "/api/jobs/{key}",
+        "/api/jobs/{key}/download",
+        "/api/jobs/{key}/fields",
+        "/api/jobs/{key}/monitors.csv",
+        "/api/fsp/{key}",
+        "/api/fsp/{key}/download",
+        "/api/fsp/{key}/archive",
+        "/api/fsp/{key}/conversion",
+        "/api/design/jobs/{key}/download",
+        "/api/mode-network-jobs/{key}/download",
+        "/api/examples/{key}",
+        "POST /api/gds/{key}/convert"
+      ],
+      "static_paths": [
+        "/../pyproject.toml",
+        "/%2e%2e/pyproject.toml",
+        "/assets/../../pyproject.toml",
+        "/..%5Cpyproject.toml",
+        "/C:/Windows/win.ini",
+        "/C:%5CWindows%5Cwin.ini",
+        "/assets/C:/Windows/win.ini",
+        "/%5C%5Cserver%5Cshare%5Cwin.ini",
+        "//server/share/win.ini",
+        "/index.html::$DATA",
+        "/../../.git/config",
+        "/assets/..%2F..%2FLICENSE"
+      ],
+      "upload_names": [
+        "../../escape.fsp",
+        "..\\..\\escape.fsp",
+        "C:\\Windows\\escape.fsp",
+        "\\\\server\\share\\escape.fsp",
+        "/etc/escape.fsp",
+        "%2e%2e%2Fescape.fsp",
+        "..%5Cescape.fsp",
+        "../../escape.gds"
+      ]
+    },
+    "body_limits": {
+      "MAX_REQUEST_BYTES_patched": 64,
+      "gds_MAX_UPLOAD_BYTES_patched": 20,
+      "fsp_MAX_FSP_BYTES_patched": 16,
+      "declared_over_limit": "JSON body of about 92 bytes with Content-Length",
+      "chunked": "two-chunk body without Content-Length",
+      "malformed_content_length": [
+        "abc",
+        "1e9",
+        "-1",
+        "0x10",
+        ""
+      ]
+    },
+    "json_bodies": [
+      "binary bytes",
+      "top-level array",
+      "trailing data",
+      "empty body",
+      "top-level string",
+      "100000-deep array nesting",
+      "NaN literal",
+      "Infinity literal",
+      "1e999",
+      "string where an integer is required",
+      "unknown key __class__",
+      "mesh 1e-9 um on the demo region",
+      "negative steps",
+      "unknown boundary kind"
+    ],
+    "project_as_code": "demo project whose name, material name and structure name carry Python and shell syntax; saved, reloaded and rendered through /api/python",
+    "npz_inputs": [
+      "archive with object-dtype entries",
+      "archive declaring frames of shape (2**40,) and fields of shape (2**30, 4, 6) in under 8 KiB",
+      "archive truncated to 200 bytes"
+    ],
+    "gds_inputs": [
+      "rectangle layout truncated to half",
+      "layout minus two bytes",
+      "layout plus a record after ENDLIB",
+      "64 zero bytes",
+      "header plus 0xff bytes",
+      "AREF 4000 x 4000 of a one-rectangle cell converted through /api/gds/{key}/convert"
+    ]
+  },
+  "reference_method": "expected HTTP status codes and file-system state stated in docs/SECURITY.md; static source scan of torchfdtd/*.py for np.load(... allow_pickle=False), pickle.load, torch.load, eval, exec, os.system, subprocess and __import__",
+  "observables": [
+    {
+      "name": "bind_host",
+      "unit": "string",
+      "definition": "host keyword passed to uvicorn.run by torchfdtd serve"
+    },
+    {
+      "name": "status_code",
+      "unit": "HTTP status",
+      "definition": "response status of each fixture request"
+    },
+    {
+      "name": "stored_paths",
+      "unit": "path",
+      "definition": "every file under the temporary results directory after the upload requests"
+    },
+    {
+      "name": "generated_script_ast",
+      "unit": "AST node kinds",
+      "definition": "statement kinds, called names and string constants of the /api/python output"
+    },
+    {
+      "name": "loader_exception",
+      "unit": "exception class",
+      "definition": "exception raised by Result.load, load_native_radiation_plane and load_native_radiation_box on each hostile archive"
+    }
+  ],
+  "acceptance_limits": {
+    "bind": "uvicorn.run receives host 127.0.0.1 by default and localhost when asked; every refused host exits the CLI with code 2 before uvicorn.run",
+    "host_header": "accepted hosts answer 200 on /api/capabilities; rejected hosts answer 400 with no capability payload",
+    "origin": "every listed origin answers 403 on every listed route and the job table stays empty; the server's own origin and a missing Origin answer 200 on /api/validate",
+    "paths": "every route key answers 404 or 405 without repository file content; the CSS asset answers 200; every static escape answers 404 without repository content; every accepted upload is stored under <results>/fsp/<32 hex>/ or <results>/gds/<32 hex>.gds and no file named escape* exists anywhere under the temporary directory",
+    "body_limits": "declared over-limit bodies answer 413 on JSON, GDS and FSP routes; a chunked body answers 411; every malformed Content-Length answers 400; a body under the limit is served",
+    "json": "every hostile body answers a 4xx status with a JSON detail; NaN, Infinity and 1e999 answer 422 mentioning finite; /api/capabilities and a valid project answer 200 afterwards",
+    "code": "the reloaded project keeps the hostile strings as data; a JSON key __reduce__ is refused; the generated script parses to ImportFrom, Assign, Assign, Expr, Expr calling only model_validate, Simulation, run, save and print with the hostile strings as string constants; the listed server modules contain no eval, exec, compile, os.system, subprocess, __import__ or importlib",
+    "npz": "every np.load call in the package passes allow_pickle=False and no module uses allow_pickle=True, pickle.load, torch.load, joblib.load or numpy.load; object archives raise ValueError mentioning allow_pickle; the declared-huge archive raises MemoryError or ValueError from Result.load and ValueError from the box loader within 5 s; the truncated archive raises BadZipFile, ValueError, OSError or EOFError",
+    "gds": "every hostile layout answers 422 on /api/gds/inspect; the 16-million-instance array is accepted by inspect and refused by convert at 422 mentioning admission limits within 30 s",
+    "source_of_limits": "docs/SECURITY.md; MAX_REQUEST_BYTES 32000000, gds_service.MAX_UPLOAD_BYTES 32000000, fsp.MAX_FSP_BYTES 134217728, GDSLimits defaults"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 11,
+    "passed": [
+      "tests/test_server_security.py::test_serve_binds_loopback_by_default_and_refuses_other_hosts",
+      "tests/test_server_security.py::test_foreign_host_headers_are_rejected",
+      "tests/test_server_security.py::test_the_test_host_is_allowed_only_through_the_environment",
+      "tests/test_server_security.py::test_foreign_origins_are_rejected_on_state_changing_routes",
+      "tests/test_server_security.py::test_path_parameters_and_static_paths_stay_inside_their_directories",
+      "tests/test_server_security.py::test_upload_filename_headers_cannot_choose_the_stored_path",
+      "tests/test_server_security.py::test_gds_upload_names_are_display_only_and_hostile_layouts_are_rejected",
+      "tests/test_server_security.py::test_request_size_limits_apply_to_declared_and_chunked_bodies",
+      "tests/test_server_security.py::test_malformed_json_bodies_get_a_client_error_not_a_server_error",
+      "tests/test_server_security.py::test_project_files_are_data_not_code",
+      "tests/test_server_security.py::test_npz_readers_never_unpickle_and_fail_closed_on_hostile_archives"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 2.654,
+    "suite_timestamp": "2026-09-23T14:09:41.442966+09:00"
+  },
+  "required_tests": [
+    "tests/test_server_security.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_server_security.py": [
+      "tests/test_server_security.py::test_serve_binds_loopback_by_default_and_refuses_other_hosts",
+      "tests/test_server_security.py::test_foreign_host_headers_are_rejected",
+      "tests/test_server_security.py::test_the_test_host_is_allowed_only_through_the_environment",
+      "tests/test_server_security.py::test_foreign_origins_are_rejected_on_state_changing_routes",
+      "tests/test_server_security.py::test_path_parameters_and_static_paths_stay_inside_their_directories",
+      "tests/test_server_security.py::test_upload_filename_headers_cannot_choose_the_stored_path",
+      "tests/test_server_security.py::test_gds_upload_names_are_display_only_and_hostile_layouts_are_rejected",
+      "tests/test_server_security.py::test_request_size_limits_apply_to_declared_and_chunked_bodies",
+      "tests/test_server_security.py::test_malformed_json_bodies_get_a_client_error_not_a_server_error",
+      "tests/test_server_security.py::test_project_files_are_data_not_code",
+      "tests/test_server_security.py::test_npz_readers_never_unpickle_and_fail_closed_on_hostile_archives"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G9-01.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T050949Z-g9-01-266acf6c/junit.xml",
+      "sha256": "fe39fb5321aec7ed515ddf690731f75e9263c13555046ad8d6c9face641fdef2",
+      "bytes": 1682,
+      "original_path": ".local/tmp/junit/rerecord/G9-01.xml"
+    }
+  ],
+  "applicable_scope": "G9-01 local server security: the FastAPI app driven in-process on the CPU-only case of docs/validation/cases/G9-01.json (loopback bind, Host and Origin checks, path policy, body limits, hostile JSON, NPZ and GDS inputs); not a probe of a live uvicorn process over TCP and not the optional vendor bridge routes re-recorded on 9ba879241b39 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260921T163013Z-g9-01-57458fee",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

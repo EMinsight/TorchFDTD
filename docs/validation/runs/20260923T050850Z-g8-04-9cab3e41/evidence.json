@@ -1,0 +1,282 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T050850Z-g8-04-9cab3e41",
+  "task": "G8-04",
+  "stage": "G8",
+  "task_title": "geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다",
+  "command": "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_project_versioning.py D:/TorchFDTD/tests/test_workbench_journeys.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G8-04.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T14:08:41.103683+09:00",
+  "recorded_at": "2026-09-23T05:08:50+00:00",
+  "source_commit": "9ba879241b3979e91d1f81bc601d244ac0a788ee",
+  "source_commit_time": "2026-09-23T10:49:20+09:00",
+  "source_tree_sha256": "953b2dc7f8918351680662b1219b006d43f34beaa255ee82442ec481f3f90599",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824",
+      "head_sha256": "2396c2a9f5c858203686a0384b2dd0b207308d2d1250a0b6d5a9d74a032e5a41"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc",
+      "head_sha256": "34b3d7927bd9f9e481209d2189e6694e25cac4113234601a76ed3fb70a276075"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "6fcf959589774bd73bab2ed679c21f12d016909cabd1b2d2095963adad33fe8e",
+      "head_sha256": "805292c474b7a1fb5d97adac64c729c47eec607bcfd7766cdd1346c3dfc26601"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b",
+      "head_sha256": "f5dbc155c8178bf1dc3f157c4961968355e1eb480d92272685bcce12a7d9d9cd"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23",
+      "head_sha256": "45965cf265aa5a97677d8c6fbf21e326730cf64e4517be66af531122109d43ab"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "62979fbf21bd7da5477ad6cce732abcb549425cbeb5ab28806099488c54ea940",
+      "head_sha256": "eb65d64fdd2c9cb6712c7aeae393b53479159b5de7fefaf10eb8fe17ce1aac62"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "aa829a7f8c9ff4e7ce40032b1fec27dd37513abad39d04c3ec927eb58e751bc8",
+      "head_sha256": "b33679c46ffd84c19def4e41de74550f0c4201c276b7a64a01d4ac6abbb66405"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "fb5ca89bc9029a146b9440d764fe1db13c4e8c79f7e47d9b3d687b2f32ed4ede",
+      "head_sha256": "3089c400f46d2619243d6524f470afc5331941cded774ef1ed1ca81a5a93738a"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "81d583d77a0dbe860e846d51886a2f114e2e0681c2816096a9d822fa295ee841",
+      "head_sha256": "de59e4e2f707ad11aa7abb5b091a35e774d05d8eccdcac14ae4e1af79086f352"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "c68a1636641dc710734b9057a17a96cb42458289d23c4477b2a80db6459c155f",
+      "head_sha256": "d3bbc997e2fe12c8b709fd12d6a312445670a5ca455d8a75487ed98a95bf845b"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "c0c7b0be5a7af4970a64d92742f031b750ceb82898317b5308080af6bb26c37a",
+      "head_sha256": "a9035039d6d182be319be21ef21d5842931c93a7f05cbccc39afbcaa4bfd9a5f"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "9382af263e93077a7cd49189798e54a8b669fd8b6a189e6cf759094147804824",
+  "package_path": "D:/torchfdtd-clean/dist/00a8d296bfa8/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_project_versioning.py": "19a8213cc1b294e8761c1c2021319a76e1bd64cc8f8ce54191b58067f7cc17ff",
+    "tests/test_workbench_journeys.py": "ba422d57e384815cb3f4bfd8e0555b9df84ddacd57795acbfcf2bbcdda05d125"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "torchfdtd/web/**",
+    "docs/validation/workbench/*.json"
+  ],
+  "watch_sha256": {
+    "docs/validation/workbench/20260921T192723Z-eb209464.json": "17fe5f7daae5a14d3a7dee1fb59e1e257721c3bfcfee487bf1725e340e715dfe",
+    "docs/validation/workbench/20260921T192723Z-eb209464.playwright.json": "889d861bd4b39a8d76e2ca56617d6137c6211c613797daab6c085b18474eed86",
+    "docs/validation/workbench/20260921T233814Z-1a2b928f.json": "1d7eec86f47d26322e49a52b5f0e76a65c55945d9b74572686445bf3edcc2330",
+    "docs/validation/workbench/20260921T233814Z-1a2b928f.playwright.json": "7d81ca28f4e8fa2e12624bcc8dd4717f76260fb6fd0e1902e4d4694b73fc37ad",
+    "docs/validation/workbench/20260922T061857Z-a7a580e4.json": "37f2d5e7d085068bd07c1f582449085072c57699e3d5afc6be625860e17a58d8",
+    "docs/validation/workbench/20260922T061857Z-a7a580e4.playwright.json": "2875dafe34c15d1bb912bb5e6b2223bb50e2667548347ffc234733a5bf250fad",
+    "torchfdtd/web/assets/index-BMhgsHC5.js": "96af944959d5befafb244ed0dd8f8cc160fc35e7994c417b4380df1c90f4582c",
+    "torchfdtd/web/assets/index-DErGp_7h.css": "aaefe25d640c4dc92a69ab20f49335885e1dc69c8325da46f6ed2c1507ac7ebc",
+    "torchfdtd/web/index.html": "0ebe59daddeef65b47eb4bfa226084f1e82d866e0019be531e17f991ba1823cb"
+  },
+  "fixture_path": "docs/validation/cases/G8-04_editing_integrity.json",
+  "fixture_sha256": "30ca1256afdab29d330e190881b45d95136e564ef34625500c438cd07fd462e3",
+  "acceptance_criteria_path": "docs/validation/cases/G8-04_editing_integrity.json",
+  "acceptance_criteria_sha256": "30ca1256afdab29d330e190881b45d95136e564ef34625500c438cd07fd462e3",
+  "case_first_commit": "794d1858273e978880530c2c661757c2c55fdbe1",
+  "case_first_commit_time": "2026-09-22T04:23:19+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\TorchFDTD\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\TorchFDTD\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "physics_configuration": {
+    "spec": "tests/ui/g8-editing.spec.js (six tests, each in a fresh browser context with empty storage) run by scripts/run_workbench_journeys.py against a CPU-only server; tests/test_project_versioning.py against FastAPI's TestClient",
+    "start": "the SiN waveguide 2D example of the workbench (structure waveguide 8 x 0.65 x 0.4 um, point source, monitors input and output, 1000 steps)",
+    "history": "y span edits 0.8 then 0.9; then 85 edits of the region's time steps 200 .. 284 followed by 80 undo clicks and one more",
+    "selection": "Ctrl+click on waveguide and source; Duplicate all; Ctrl+C; Ctrl+V; Delete all from the selection panel; Paste from the ribbon",
+    "autosave": "y span 0.8 and a duplicate, then page.reload(); then one more edit",
+    "versioning": "three edits (y span 0.8, x span 7, y span 0.75), Ctrl+S, the downloaded JSON posted to /api/validate unchanged and with steps + 1, then one undo",
+    "validation": "y span -1, '', 1e999, 0.8; region time steps 5; the autosaved project with steps 5 posted to /api/validate",
+    "stale": "CPU run of 300 steps; Layout; y span 0.8; open the field visualizer; undo; time steps 320; y span -3",
+    "api": "demo projects through Project.content_hash, stamped, content_matches, Project.save/load, /api/validate, /api/jobs, /api/gds/export"
+  },
+  "reference_method": "the browser's own storage (localStorage torchfdtd.project.v1) read by the spec, the server's /api/validate (plan_hash, revision, content_sha256, stored_content_sha256_matches) and /api/jobs/{id} (plan_hash, revision), and Python recomputation of the content hash in tests/test_project_versioning.py",
+  "observables": [
+    {
+      "name": "undo_redo",
+      "unit": "um",
+      "definition": "y span after undo, undo, redo, Ctrl+Y: 0.8, 0.65, 0.8, 0.9"
+    },
+    {
+      "name": "history_bound",
+      "unit": "steps",
+      "definition": "after 85 time-step edits, 80 undos restore the value of the fifth edit (204) and an 81st undo changes nothing"
+    },
+    {
+      "name": "multi_select",
+      "unit": "count",
+      "definition": "two tree rows selected, the panel reads '2 objects selected'; Duplicate all adds waveguide_copy and source_copy (object count 7); Ctrl+C then Ctrl+V adds waveguide_copy_copy and source_copy_copy (9), the pasted structure at x + 0.4 um with the original size and a new id; Delete all removes them (7); Paste from the ribbon restores 9"
+    },
+    {
+      "name": "autosave_recovery",
+      "unit": "text",
+      "definition": "localStorage holds the project with a 64-hex content_sha256 and revision >= 2; after reload the tree lists waveguide_copy, the log reads 'Recovered the autosaved project \"<name>\" at revision <n>' with no mismatch warning, the title shows rev <n>, y span reads 0.8 and the next edit is revision n + 1"
+    },
+    {
+      "name": "versioned_project",
+      "unit": "count",
+      "definition": "three edits raise revision by exactly 3; the saved JSON carries that revision, schema_version 1 and a 64-hex content_sha256; /api/validate reports stored_content_sha256_matches true for the file and false after steps + 1; the log names the revision and the first 12 hex digits of the hash; an undo raises the revision to start + 4"
+    },
+    {
+      "name": "field_validation",
+      "unit": "text",
+      "definition": "'y span must be at least 0.001 um.' for -1 with aria-invalid, a toast ending 'The previous value is kept.' and a log line; 'y span must be a finite number in um.' for '' and 1e999; the stored size stays 0.65 until 0.8 is accepted; 'time steps must be at least 10.' for 5 with the stored steps still 1000; /api/validate answers 422 for steps 5"
+    },
+    {
+      "name": "stale_marking",
+      "unit": "text",
+      "definition": "after the run the banner is hidden and the field label has no STALE; after Layout the results stay listed and the banner stays hidden; after y span 0.8 the validate plan_hash differs from the job's, the banner reads 'Stale results: the project changed since run revision <r>', the results tree and the field view carry the stale class and the field label starts with STALE; after undo the plan_hash equals the job's and the banner is hidden; after time steps 320 it is visible; after y span -3 (rejected) it stays visible with the field error shown"
+    },
+    {
+      "name": "content_hash_api",
+      "unit": "text",
+      "definition": "content_hash ignores revision and content_sha256, changes with steps; stamped() sets the hash; content_matches() is None, True, False as documented; revision -1 and a malformed hash are refused; Project.save/load keeps both fields; /api/jobs carries the plan_hash and revision of the submitted project, unchanged after completion; names, the revision and precision do not change the plan_hash, geometry and steps do"
+    }
+  ],
+  "acceptance_limits": {
+    "all_observables": "exact values as listed; every spec passes on its first attempt with zero page errors",
+    "history_bound": "80 snapshots (main.js remember())",
+    "stale_scope": "staleness follows plan_hash of torchfdtd.plan: geometry, mesh, materials, sources, monitors, boundaries and steps; placement (backend, kernels, execution mode, precision) is outside the hash by design and is printed in the run summary instead",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-04; the values are this case's declaration"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 10,
+    "passed": [
+      "tests/test_project_versioning.py::test_content_hash_ignores_the_version_fields_and_tracks_the_content",
+      "tests/test_project_versioning.py::test_project_file_round_trips_the_version_fields",
+      "tests/test_project_versioning.py::test_validate_reports_the_version_fields_a_tampered_hash_and_rejects_bad_values",
+      "tests/test_project_versioning.py::test_jobs_carry_the_plan_hash_of_the_submitted_project",
+      "tests/test_project_versioning.py::test_gds_export_route_returns_the_file_and_its_stack_sidecar",
+      "tests/test_workbench_journeys.py::test_record_is_complete_and_every_journey_passed",
+      "tests/test_workbench_journeys.py::test_journey_covers_every_step_and_records_its_wall_time",
+      "tests/test_workbench_journeys.py::test_editing_behaviours_are_each_verified",
+      "tests/test_workbench_journeys.py::test_record_matches_the_committed_specs_and_bundle",
+      "tests/test_workbench_journeys.py::test_record_commit_is_in_the_history_of_head"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 1.27,
+    "suite_timestamp": "2026-09-23T14:08:41.103683+09:00"
+  },
+  "required_tests": [
+    "tests/test_project_versioning.py",
+    "tests/test_workbench_journeys.py::test_editing_behaviours_are_each_verified",
+    "tests/test_workbench_journeys.py::test_record_is_complete_and_every_journey_passed",
+    "tests/test_workbench_journeys.py::test_record_matches_the_committed_specs_and_bundle"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_project_versioning.py": [
+      "tests/test_project_versioning.py::test_content_hash_ignores_the_version_fields_and_tracks_the_content",
+      "tests/test_project_versioning.py::test_project_file_round_trips_the_version_fields",
+      "tests/test_project_versioning.py::test_validate_reports_the_version_fields_a_tampered_hash_and_rejects_bad_values",
+      "tests/test_project_versioning.py::test_jobs_carry_the_plan_hash_of_the_submitted_project",
+      "tests/test_project_versioning.py::test_gds_export_route_returns_the_file_and_its_stack_sidecar"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G8-04.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T050850Z-g8-04-9cab3e41/junit.xml",
+      "sha256": "f3872bf6dcc4dcad3c2cb7a7ac0931cbe90e02d57603d1de063f4c1e6e676fe2",
+      "bytes": 1549,
+      "original_path": ".local/tmp/junit/rerecord/G8-04.xml"
+    }
+  ],
+  "applicable_scope": "Browser editing of the 2D waveguide example in Chromium headless through Playwright 1.63.0 on Windows 11 with CUDA hidden, and the FastAPI routes in-process; staleness follows the plan hash (placement excluded by design) re-recorded on 9ba879241b39 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260921T192929Z-g8-04-705af196",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

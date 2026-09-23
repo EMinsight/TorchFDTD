@@ -1,0 +1,257 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T033229Z-g3-05-c3f1ab53",
+  "task": "G3-05",
+  "stage": "G3",
+  "task_title": "금속/분산 곡면 산란·흡수 수렴",
+  "command": "$env:TORCHFDTD_G3_FULL='1'; $env:TORCHFDTD_G3_RECORD='D:/TorchFDTD/docs/validation/g3'; D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G3-05.xml",
+  "exit_code": 1,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T11:34:15.293221+09:00",
+  "recorded_at": "2026-09-23T03:32:29+00:00",
+  "source_commit": "9ba879241b3979e91d1f81bc601d244ac0a788ee",
+  "source_commit_time": "2026-09-23T10:49:20+09:00",
+  "source_tree_sha256": "29531772987e7da432eb930216a47ced9157034879a3bc34c49d8180fe43d248",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824",
+      "head_sha256": "2396c2a9f5c858203686a0384b2dd0b207308d2d1250a0b6d5a9d74a032e5a41"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc",
+      "head_sha256": "34b3d7927bd9f9e481209d2189e6694e25cac4113234601a76ed3fb70a276075"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "9382af263e93077a7cd49189798e54a8b669fd8b6a189e6cf759094147804824",
+  "package_path": "D:/torchfdtd-clean/dist/00a8d296bfa8/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_physics_g3_b.py": "8790681b54d6c2527b5ddb072ad3579bc0b0e0535ae592e388631e8433ced029"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "docs/validation/cases/G3-05_*.json",
+    "examples/tfsf_sphere.py"
+  ],
+  "watch_sha256": {
+    "docs/validation/cases/G3-05_drude_sphere.json": "c3f43172902e7f6f4747bc26a1bec2a58b2c948d864f068357fd756ab9981a26",
+    "docs/validation/cases/G3-05_drude_sphere.oracles.json": "24d27e84471f146a49d8b37216e2a07f53119fe68a42bceb2c2c92bf3459622f",
+    "examples/tfsf_sphere.py": "86dff20feeddf952fbc79d5c1e789695103345dee4b53d088ff8ca17e07e2ec9"
+  },
+  "fixture_path": "docs/validation/cases/G3-05_drude_sphere.json",
+  "fixture_sha256": "c3f43172902e7f6f4747bc26a1bec2a58b2c948d864f068357fd756ab9981a26",
+  "acceptance_criteria_path": "docs/validation/cases/G3-05_drude_sphere.json",
+  "acceptance_criteria_sha256": "c3f43172902e7f6f4747bc26a1bec2a58b2c948d864f068357fd756ab9981a26",
+  "case_first_commit": "84cc2bda318c6c7e377e1fb9beaba6de7a891d75",
+  "case_first_commit_time": "2026-09-22T01:47:52+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\TorchFDTD\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\TorchFDTD\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU reference)",
+    "float32 (CUDA, layer A)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "method": "Closed TFSF box; six inner monitor planes inside the box (total field) give the absorption as the net inward total-field power and, after matched-reference subtraction, the scattered power; six outer planes outside the box give the scattered power independently (the two scattered powers must agree). The Drude sphere is staircased at the Yee sampling positions and advanced with the native trapezoidal ADE. Physical domain, PML thickness, source, monitors and duration are fixed across the mesh sequence.",
+    "drude": {
+      "model": "epsilon(omega) = epsilon_inf - plasma_rad_s^2 / (omega^2 + i collision_rad_s omega), exp(-i omega t)",
+      "epsilon_inf": 5.0,
+      "plasma_rad_s": 1.37e+16,
+      "collision_rad_s": 150000000000000.0,
+      "description": "silver-like analytic model (plasma energy about 9 eV, damping about 0.1 eV, epsilon_inf 5); quasi-static dipole resonance where Re epsilon = -2, near 0.364 um; the model is analytic and identical in the solver and in the Mie series"
+    },
+    "radii_um": [
+      0.02,
+      0.035,
+      0.05
+    ],
+    "size_parameters_at_0.39um": [
+      0.32,
+      0.56,
+      0.81
+    ],
+    "domain_um": 0.48,
+    "pml_um": 0.08,
+    "tfsf_um": 0.24,
+    "inner_monitor_half_um": 0.09,
+    "outer_monitor_half_um": 0.15,
+    "band": [
+      0.33,
+      0.45,
+      9
+    ],
+    "pulse_wavelength_um": 0.39,
+    "pulse_length_s": 2e-15,
+    "pulse_offset_s": 8e-15,
+    "duration_fs": 48,
+    "duration_note": "the Drude relaxation time 1/collision_rad_s is 6.7 fs, so 48 fs leaves exp(-7.2) of the polarization energy",
+    "mesh_sequence_um": [
+      0.02,
+      0.01,
+      0.005
+    ],
+    "judged_mesh_um": 0.005,
+    "cells_per_radius_at_judged_mesh": [
+      4,
+      7,
+      10
+    ],
+    "grids": [
+      "24^3",
+      "48^3",
+      "96^3 (CPU FP64 only, above the CUDA cap of the recorded run)"
+    ],
+    "layer_a": "fused CUDA FP32 against CPU FP64 at 24^3 and 48^3 on the scattering and absorption observables",
+    "ade_diagnostic": "the record also stores the Mie result evaluated with the ADE-sampled permittivity at (2/dt) tan(omega dt/2), which separates the time-discretisation of the material from the grid error"
+  },
+  "reference_method": "Bohren-Huffman sphere series with the complex index sqrt(epsilon(omega)) of the same analytic Drude model, written in tests/test_physics_g3_b.py with SciPy spherical Bessel functions; checked against the real-index repository series and against the quasi-static absorption and scattering limits of a Drude sphere",
+  "observables": [
+    {
+      "name": "scattering_um2",
+      "unit": "um^2",
+      "definition": "outward scattered power through the outer planes divided by the incident intensity"
+    },
+    {
+      "name": "inner_scattering_um2",
+      "unit": "um^2",
+      "definition": "the same from the inner planes after subtracting the matched reference fields; its difference from the outer value over the band maximum is the self-consistency check"
+    },
+    {
+      "name": "absorption_um2",
+      "unit": "um^2",
+      "definition": "net inward total-field power through the inner planes divided by the incident intensity"
+    },
+    {
+      "name": "max_scattering_relative_error",
+      "unit": "dimensionless",
+      "definition": "max over the nine wavelengths of |scattering/Mie - 1|"
+    },
+    {
+      "name": "max_absorption_relative_error",
+      "unit": "dimensionless",
+      "definition": "max over the nine wavelengths of |absorption/Mie - 1|"
+    },
+    {
+      "name": "peak_scattering_um, peak_absorption_um",
+      "unit": "um",
+      "definition": "refined peak wavelengths of the measured and Mie curves (diagnostic, not judged)"
+    }
+  ],
+  "acceptance_limits": {
+    "judged_at": "h/4 = 0.005 um, CPU FP64",
+    "per_radius": {
+      "0.02": {
+        "scattering_relative_error": 0.5,
+        "absorption_relative_error": 1.0
+      },
+      "0.035": {
+        "scattering_relative_error": 0.3,
+        "absorption_relative_error": 0.6
+      },
+      "0.05": {
+        "scattering_relative_error": 0.2,
+        "absorption_relative_error": 0.4
+      }
+    },
+    "justification": "The 2 percent Mie threshold of the program is declared not applicable: a staircased metal sphere resolved by 4 to 10 cells per radius has an effective-radius uncertainty of about h/(2a) (12.5, 7 and 5 percent), the quasi-static scattering scales with a^6 and the absorption with a^3, and the plasmon peak shifts with the effective shape so that fixed-wavelength errors on the flanks are amplified by the peak steepness (Q about 10). The scattering budgets are roughly 6 h/(2a) rounded down to the values above; the absorption budgets are doubled because the absorption is the small difference of the inward and outward total-field powers and is the hard observable. These are loose engineering budgets, not a claim of accuracy; the expected outcome is FAIL at least for the smallest sphere, and a recorded failure with the numbers is the deliverable.",
+    "self_consistency": {
+      "inner_outer_scattering_max_difference_over_band_maximum": 0.02,
+      "definition": "max over the band of |inner - outer| scattered cross section divided by the band maximum of the outer value; a per-wavelength relative form was replaced before the recorded run because it is amplified where the coarse-mesh cross section is nearly zero"
+    },
+    "layer_a_cuda_fp32_vs_cpu_fp64": {
+      "rtol": 0.0001,
+      "atol": 0.0
+    },
+    "convergence_reporting": "the error at h, h/2 and h/4 is reported for every radius and observable; no order or monotonicity is required",
+    "source_of_limits": "fixture-specific budgets declared here; the program's 2 percent Mie threshold is recorded as not met by design of the fixture"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 4,
+    "passed": [
+      "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a"
+    ],
+    "failed": [
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.02]",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.035]",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.05]"
+    ],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.02]": "AssertionError: r=0.02 um at h=0.005 um: scattering 1.376 > 0.5; absorption 6.733 > 1.0\nassert not ['scattering 1.376 > 0.5', 'absorption 6.733 > 1.0']",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.035]": "AssertionError: r=0.035 um at h=0.005 um: scattering 0.458 > 0.3; absorption 4.985 > 0.6\nassert not ['scattering 0.458 > 0.3', 'absorption 4.985 > 0.6']",
+      "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.05]": "AssertionError: r=0.05 um at h=0.005 um: scattering 0.445 > 0.2; absorption 3.446 > 0.4\nassert not ['scattering 0.445 > 0.2', 'absorption 3.446 > 0.4']"
+    },
+    "suite_time_seconds": 3477.074,
+    "suite_timestamp": "2026-09-23T11:34:15.293221+09:00"
+  },
+  "required_tests": [
+    "tests/test_physics_g3_b.py::test_g3_05_drude_sphere",
+    "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-05.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T033229Z-g3-05-c3f1ab53/junit.xml",
+      "sha256": "ac03fd3818c9b8524d496389f5d94d6c6306649a533ffe190c7914ad778e42aa",
+      "bytes": 6369,
+      "original_path": ".local/tmp/junit/rerecord/G3-05.xml"
+    }
+  ],
+  "applicable_scope": "Layer B physics of a staircased Drude sphere with the trapezoidal ADE at three radii and three meshes on CPU FP64 against the complex-index Mie series, and layer A CUDA FP32 (fused kernel, RTX 3060) against CPU FP64 at 24^3 and 48^3; the fixture-specific budgets of the case, not the program's 2 percent threshold. re-recorded on 9ba879241b39 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260921T181951Z-g3-05-8fafa59e",
+  "verification_state_assigned": "FAILED",
+  "verification_reason": "3 failed and 0 errored test cases",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

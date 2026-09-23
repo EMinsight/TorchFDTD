@@ -1,0 +1,213 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T044224Z-g6-03-054a0040",
+  "task": "G6-03",
+  "stage": "G6",
+  "task_title": "reference를 포함한 R/T/A, 복소 S, phase/group delay, mode decomposition, diffraction, far-field/near-zone을 기존 결과와 통합한다",
+  "command": "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_results.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G6-03.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T13:41:49.953318+09:00",
+  "recorded_at": "2026-09-23T04:42:24+00:00",
+  "source_commit": "9ba879241b3979e91d1f81bc601d244ac0a788ee",
+  "source_commit_time": "2026-09-23T10:49:20+09:00",
+  "source_tree_sha256": "38af5ff91ce44b3e7cec1227ce48a45cfc35a41db4cd87aeac7541d1fded256a",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824",
+      "head_sha256": "2396c2a9f5c858203686a0384b2dd0b207308d2d1250a0b6d5a9d74a032e5a41"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc",
+      "head_sha256": "34b3d7927bd9f9e481209d2189e6694e25cac4113234601a76ed3fb70a276075"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "6fcf959589774bd73bab2ed679c21f12d016909cabd1b2d2095963adad33fe8e",
+      "head_sha256": "805292c474b7a1fb5d97adac64c729c47eec607bcfd7766cdd1346c3dfc26601"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b",
+      "head_sha256": "f5dbc155c8178bf1dc3f157c4961968355e1eb480d92272685bcce12a7d9d9cd"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23",
+      "head_sha256": "45965cf265aa5a97677d8c6fbf21e326730cf64e4517be66af531122109d43ab"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "9382af263e93077a7cd49189798e54a8b669fd8b6a189e6cf759094147804824",
+  "package_path": "D:/torchfdtd-clean/dist/00a8d296bfa8/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_results.py": "b2a88d0443785d21eb5f16c6ecce4847b1e4ea7726a3828de54bb1d55dac1db6"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G6-03_integrated_results.json",
+  "fixture_sha256": "bf1c59ee6080f676ae03c24131db5560194161d0d3653816332fe1a6d1fdfc96",
+  "acceptance_criteria_path": "docs/validation/cases/G6-03_integrated_results.json",
+  "acceptance_criteria_sha256": "bf1c59ee6080f676ae03c24131db5560194161d0d3653816332fe1a6d1fdfc96",
+  "case_first_commit": "da70a70484c2d5f2481710576c594c06226f3a39",
+  "case_first_commit_time": "2026-09-22T04:52:42+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\TorchFDTD\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\TorchFDTD\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\TorchFDTD\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable",
+  "precision": "float64 (slab, grating, dipole), float32 (mode-port fixtures)",
+  "backend": "cpu",
+  "physics_configuration": {
+    "module": "torchfdtd.results: ResultRecord, reflection_transmission, s_parameters, mode_decomposition, diffraction_record, farfield_record, nearzone_record",
+    "slab_flux": "tests/test_field_monitors.py::slab_project (2D, 8 x 0.5 um, mesh 0.025 um, 1600 steps, float64, periodic y, n = 1.5 slab 0.2 um thick, reflection monitor at x = -0.8 um, transmission at +0.8 um, 31 frequencies) plus two y-normal faces at y = +-0.2 um closing a box; the same monitor set for the sample, the empty reference and a lossy slab (Lorentz pole 1.2e15 rad/s, 4e29 rad^2/s^2, 8e14 rad/s, epsilon_inf 2.25)",
+    "straight_guide": "tests/test_mode_branches.py::straight_project at 600 steps, aperture ports at x = +-1 um, carriers 1.5, 1.55 and 1.6 um; the fundamental mode of the 2.4 x 0.5 um cell from solve_waveguide_modes",
+    "y_branch": "tests/test_mode_branches.py::branch_project, ybranch_ports, ybranch_sections, ybranch_epsilon at one carrier (1.55 um)",
+    "slab_guide": "benchmarks/mode_injection.py::make_case('slab', steps=600), modal launch and the far plane at 1.55 um",
+    "grating": "tests/test_physics_g3_b.py::grating_project(0.03 um, TE, 20 deg, 1.02 um, duration 150 fs) with and without the ridge: the G3-08 geometry at a coarse mesh for the interface, not the RCWA comparison",
+    "dipole": "tests/test_radiation.py::dipole_faces(10) analytic dipole in n = 1.3 on a closed box; a Rayleigh plane as the incident reference"
+  },
+  "reference_method": "Fabry-Perot transmission of the n = 1.5 slab; the balance 1 - R - T against the closed-box absorption of the lossy slab; the Yee longitudinal wavenumber (2/h) asin(beta h / 2) of the mode solver's beta for the group delay; the existing public functions (normalize_flux, modal_plane_amplitudes, diffraction_orders, project_farfield, project_nearzone) for the values the records wrap",
+  "observables": [
+    {
+      "name": "R_T_balance",
+      "unit": "dimensionless",
+      "definition": "record['R'], ['T'], ['balance'] of the lossless slab against the reference run"
+    },
+    {
+      "name": "A_vs_balance",
+      "unit": "dimensionless",
+      "definition": "record['A'] from the four box faces of the lossy slab against record['balance']"
+    },
+    {
+      "name": "group_delay_s",
+      "unit": "s",
+      "definition": "record['group_delay_s'][1, 1, 0] of the straight-guide S21 sweep"
+    },
+    {
+      "name": "forward_fraction",
+      "unit": "dimensionless",
+      "definition": "mode_decomposition forward_fraction on the far plane of the slab guide"
+    },
+    {
+      "name": "efficiency_sum",
+      "unit": "dimensionless",
+      "definition": "sum of the valid transmitted and reflected order efficiencies of the coarse grating"
+    },
+    {
+      "name": "units",
+      "unit": "string",
+      "definition": "record.units and record.calibration of every named value"
+    }
+  ],
+  "acceptance_limits": {
+    "slab": "T and R within 0.004 of the Fabry-Perot formula and its complement; |1 - R - T| below 0.004; A not measured with the reason; the lossy slab's A above 0.02 and within 0.01 of the balance",
+    "s_parameters": "the FDTD group delay is positive and within 3 percent of 2 um * d beta_yee / d omega, and between 1.2 and 1.35 times the continuum value at this mesh; the reflection channels have no phase (magnitude floor); the single-carrier Y branch has |S21| = |S31| within 1e-3 and no group delay with the three-frequency reason",
+    "modes": "forward fraction between 0.9 and 1.15; backward fraction below 0.02 or flagged weak",
+    "diffraction": "orders -1 and 0 propagating and valid at 1.02 um and 20 deg with period 1.2 um; orders -2, 1, 2 evanescent with NaN efficiency and the reason; transmitted plus reflected efficiencies within 0.05 of 1 at the coarse mesh; a synthetic order at cutoff refuses",
+    "radiation": "reduced intensity positive on 56 directions; the normalized intensity equals the reduced one over the reference flux magnitude to 1e-10; a zero reference refuses; the near-zone record carries the six fields and the Poynting vector in reduced units",
+    "units": "ratios are 'dimensionless' with calibration 'dimensionless ratio to the matched reference run'; fluxes carry the record's flux_units with calibration 'reduced'; group delay is 's'; positions 'um'",
+    "source_of_limits": "completion_gates.json proposed_thresholds slab_R_T_absolute_error (0.01, tightened to 0.004 by the existing slab test) and lossless_complete_channel_balance_absolute_error (0.01); the group-delay, fraction and coarse-grating budgets are fixture-specific and declared here before the run"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 9,
+    "passed": [
+      "tests/test_results.py::test_slab_reflection_transmission_against_the_reference_run",
+      "tests/test_results.py::test_wrong_incident_direction_and_reversed_flux_are_backflow_not_a_sign_fix",
+      "tests/test_results.py::test_absorption_is_measured_from_a_closed_box_and_agrees_with_the_balance",
+      "tests/test_results.py::test_straight_guide_group_delay_matches_the_mode_solver_dispersion",
+      "tests/test_results.py::test_y_branch_single_carrier_s_record",
+      "tests/test_results.py::test_slab_guide_mode_decomposition_on_the_far_plane",
+      "tests/test_results.py::test_grating_diffraction_record_flags_evanescent_orders_and_balances",
+      "tests/test_results.py::test_synthetic_orders_refuse_cutoff_and_name_evanescent_orders",
+      "tests/test_results.py::test_dipole_farfield_and_nearzone_records_name_reduced_units_and_the_reference_guard"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 26.165,
+    "suite_timestamp": "2026-09-23T13:41:49.953318+09:00"
+  },
+  "required_tests": [
+    "tests/test_results.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_results.py": [
+      "tests/test_results.py::test_slab_reflection_transmission_against_the_reference_run",
+      "tests/test_results.py::test_wrong_incident_direction_and_reversed_flux_are_backflow_not_a_sign_fix",
+      "tests/test_results.py::test_absorption_is_measured_from_a_closed_box_and_agrees_with_the_balance",
+      "tests/test_results.py::test_straight_guide_group_delay_matches_the_mode_solver_dispersion",
+      "tests/test_results.py::test_y_branch_single_carrier_s_record",
+      "tests/test_results.py::test_slab_guide_mode_decomposition_on_the_far_plane",
+      "tests/test_results.py::test_grating_diffraction_record_flags_evanescent_orders_and_balances",
+      "tests/test_results.py::test_synthetic_orders_refuse_cutoff_and_name_evanescent_orders",
+      "tests/test_results.py::test_dipole_farfield_and_nearzone_records_name_reduced_units_and_the_reference_guard"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G6-03.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T044224Z-g6-03-054a0040/junit.xml",
+      "sha256": "b68cac2b46425782a8525f1b71006a13fcb35615738d2788d049a5ebe0b7d3a7",
+      "bytes": 1403,
+      "original_path": ".local/tmp/junit/rerecord/G6-03.xml"
+    }
+  ],
+  "applicable_scope": "CPU only: 2D float64 slab and grating runs, float32 mode-port fixtures (straight guide, Y branch, slab guide), analytic dipole faces; no CUDA instance re-recorded on 9ba879241b39 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260921T195559Z-g6-03-b314c028",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
