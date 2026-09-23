@@ -3,22 +3,22 @@
 \centering
 \small
 \renewcommand{\arraystretch}{1.15}
-\caption{Native sphere ensembles on RTX 5880 with a real CUDA batch axis. Full wall times include setup, transfers and scalar objective evaluation. Final E/H arrays and point traces match independent native runs bitwise. Values below unity in the last column are slowdowns.}
+\caption{Native sphere ensembles on an A100 80GB PCIe with a real CUDA batch axis. Full wall times include setup, transfers and scalar objective evaluation. Final E/H arrays and point traces match independent native runs bitwise. Values below unity in the last column are slowdowns.}
 \label{tab:tensor-batch}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
 Grid, cases & \shortstack{Sequential\\(ms)} & \shortstack{Tensor cohort\\(ms)} & Cases/s & Speedup \\
 \midrule
-$32^3$, 1 & 23.22 & 20.38 & 49.06 & $1.14\times$ \\
-$32^3$, 2 & 46.00 & 31.39 & 63.71 & $1.47\times$ \\
-$32^3$, 4 & 106.81 & 63.67 & 62.83 & $1.68\times$ \\
-$32^3$, 8 & 181.89 & 88.24 & 90.66 & $2.06\times$ \\
-$32^3$, 16 & 341.29 & 142.46 & 112.31 & $2.40\times$ \\
-$64^3$, 1 & 39.08 & 40.49 & 24.70 & $0.97\times$ \\
-$64^3$, 2 & 86.40 & 78.29 & 25.55 & $1.10\times$ \\
-$64^3$, 4 & 167.68 & 153.87 & 26.00 & $1.09\times$ \\
-$64^3$, 8 & 307.35 & 357.10 & 22.40 & $0.86\times$ \\
-$64^3$, 16 & 669.53 & 852.94 & 18.76 & $0.78\times$ \\
+$32^3$, 1 & 32.71 & 29.88 & 33.46 & $1.09\times$ \\
+$32^3$, 2 & 65.28 & 46.04 & 43.44 & $1.42\times$ \\
+$32^3$, 4 & 126.19 & 79.77 & 50.14 & $1.58\times$ \\
+$32^3$, 8 & 251.59 & 145.73 & 54.90 & $1.73\times$ \\
+$32^3$, 16 & 507.21 & 302.42 & 52.91 & $1.68\times$ \\
+$64^3$, 1 & 45.52 & 52.94 & 18.89 & $0.86\times$ \\
+$64^3$, 2 & 90.95 & 113.53 & 17.62 & $0.80\times$ \\
+$64^3$, 4 & 179.82 & 230.35 & 17.36 & $0.78\times$ \\
+$64^3$, 8 & 361.38 & 444.69 & 17.99 & $0.81\times$ \\
+$64^3$, 16 & 719.11 & 874.50 & 18.30 & $0.82\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}

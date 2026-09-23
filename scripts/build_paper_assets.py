@@ -49,6 +49,25 @@ def write_stacked_table(name: str, caption: str, blocks: list[tuple[str, str, li
     (PAPER / 'tables' / f'{name}.tex').write_text('\n'.join(content), encoding='utf-8')
 
 
+def native_fused(case: dict) -> dict:
+    """Median of the native fused engine, named photonweave_fused in records made before the rename."""
+    medians = case['medians']
+    return medians['torchfdtd_fused'] if 'torchfdtd_fused' in medians else medians['photonweave_fused']
+
+
+def native_error(entry: dict) -> dict:
+    return entry['torchfdtd_relative_l2'] if 'torchfdtd_relative_l2' in entry else entry['photonweave_relative_l2']
+
+
+def gpu_label(record: dict) -> str:
+    name = record['hardware']['gpu'] if 'hardware' in record else record['cases'][0]['sample_summary']['gpu']
+    if 'A100' in name:
+        return 'an A100 80GB PCIe'
+    if '5880' in name:
+        return 'an RTX 5880 Ada'
+    return name
+
+
 def sci(value: float, digits: int) -> str:
     mantissa, exponent = f'{value:.{digits}e}'.split('e')
     return mantissa + r'\times10^{' + str(int(exponent)) + '}'
@@ -144,8 +163,14 @@ def cross_solver_assets(record: dict) -> None:
 def build_assets() -> None:
     (PAPER / 'figures').mkdir(parents=True, exist_ok=True)
     (PAPER / 'tables').mkdir(parents=True, exist_ok=True)
-    raw = {name: (DATA / f'{name}.json').read_bytes()
-           for name in ('flux', 'batch', 'cuda-kernels', 'open-source-flaport', 'tensor-batch', 'cohorts', 'vector-sources', 'oneway-sources', 'oneway-slab', 'ensembles', 'design-throughput', 'ensemble-before', 'tfsf-sources', 'tfsf-sphere', 'tfsf-sphere-finer', 'tfsf-sphere-long', 'spectral-ensembles', 'graph-ensembles', 'selective-monitors', 'rectilinear-ensembles', 'geometry-ensembles', 'grouped-ensembles', 'cross_solver_3060')}
+    names = ('flux', 'batch', 'cuda-kernels', 'open-source-flaport', 'tensor-batch', 'cohorts', 'vector-sources', 'oneway-sources', 'oneway-slab', 'ensembles', 'design-throughput', 'ensemble-before', 'tfsf-sources', 'tfsf-sphere', 'tfsf-sphere-finer', 'tfsf-sphere-long', 'spectral-ensembles', 'graph-ensembles', 'selective-monitors', 'rectilinear-ensembles', 'geometry-ensembles', 'grouped-ensembles', 'cross_solver_3060')
+    # The manuscript reports its timings on the A100. The RTX 5880 originals stay in docs/validation,
+    # and a caption always names the GPU of the record it was built from.
+    files = {name: name for name in names}
+    for name in ('batch', 'open-source-flaport', 'tensor-batch', 'ensembles', 'tfsf-sphere', 'tfsf-sphere-finer', 'tfsf-sphere-long'):
+        if (DATA / f'{name}-a100.json').exists():
+            files[name] = f'{name}-a100'
+    raw = {name: (DATA / f'{files[name]}.json').read_bytes() for name in names}
     data = {name: json.loads(value) for name, value in raw.items()}
     flux, batch, cuda = (data[name] for name in ('flux', 'batch', 'cuda-kernels'))
 
@@ -209,7 +234,7 @@ def build_assets() -> None:
     plt.close(fig)
     sphere += data['tfsf-sphere-long']['cases']
     write_table('tfsf-sphere',
-        'Closed-box TFSF sphere scattering on RTX 5880. The maximum relative cross-section '
+        f"Closed-box TFSF sphere scattering on {gpu_label(data['tfsf-sphere'])}. The maximum relative cross-section "
         'error is taken over nine wavelengths. Physical domain and PML thickness stay fixed. '
         'The final row doubles the physical duration. The error sequence is not monotonic.',
         r'$h$ ($\mu$m) & Grid & \shortstack{Time\\(fs)} & \shortstack{Max error\\(\%)} & \shortstack{Empty box\\($\mu$m$^2$)}',
@@ -265,20 +290,20 @@ def build_assets() -> None:
          f"${c['wall_speedup']:.2f}\\times$ " + r'\\' for c in cuda['cases']])
 
     write_table('open-source',
-        'Eight forward fixtures on RTX 5880. The external baseline is flaport/fdtd 0.2.2 '
+        f"Eight forward fixtures on {gpu_label(data['open-source-flaport'])}. The external baseline is flaport/fdtd 0.2.2 "
         'with an added CUDA Graph adapter. Values are medians of three warmed full solves. '
         'The last column is point-trace relative L2 difference in percent, not analytic error. '
         'The PML interface stencils differ and final fields are not identical.',
         r'Fixture, grid & \shortstack{Upstream graph\\(ms)} & \shortstack{Native fused\\(ms)} & Speedup & \shortstack{Trace L2\\(\%)}',
         [f"{c['name'].capitalize()}, ${c['shape'][0]}^3$ & "
          f"{1000*c['medians']['flaport_graph']['wall_seconds']:.2f} & "
-         f"{1000*c['medians']['photonweave_fused']['wall_seconds']:.2f} & "
-         f"${c['medians']['flaport_graph']['wall_seconds']/c['medians']['photonweave_fused']['wall_seconds']:.2f}\\times$ & "
-         f"{100*max(e['photonweave_relative_l2']['trace'] for e in c['errors']):.4f} " + r'\\'
+         f"{1000*native_fused(c)['wall_seconds']:.2f} & "
+         f"${c['medians']['flaport_graph']['wall_seconds']/native_fused(c)['wall_seconds']:.2f}\\times$ & "
+         f"{100*max(native_error(e)['trace'] for e in c['errors']):.4f} " + r'\\'
          for c in data['open-source-flaport']['cases']])
 
     write_table('tensor-batch',
-        'Native sphere ensembles on RTX 5880 with a real CUDA batch axis. Full wall times include '
+        f"Native sphere ensembles on {gpu_label(data['tensor-batch'])} with a real CUDA batch axis. Full wall times include "
         'setup, transfers and scalar objective evaluation. Final E/H arrays and point traces '
         'match independent native runs bitwise. Values below unity in the last column are slowdowns.',
         r'Grid, cases & \shortstack{Sequential\\(ms)} & \shortstack{Tensor cohort\\(ms)} & Cases/s & Speedup',
@@ -290,7 +315,7 @@ def build_assets() -> None:
          for c in data['tensor-batch']['cases']])
 
     write_table('ensembles',
-        'Sixteen-case ensembles on RTX 5880 after a separate cohort-selection experiment. '
+        f"Sixteen-case ensembles on {gpu_label(data['ensembles'])} after a separate cohort-selection experiment. "
         'The external baseline runs graph-adapted flaport/fdtd cases sequentially. '
         'Native execution shares CUDA launches. These are workflow throughput ratios, '
         'not single-solve or upstream fused-batch comparisons. Tuning cost is excluded here '
@@ -424,7 +449,7 @@ def build_assets() -> None:
     cross_solver_assets(data['cross_solver_3060'])
     provenance = {
         'description': 'Figures and tables derived from recorded native validation measurements. No solver is run by the paper build.',
-        'inputs': {f'docs/validation/{name}.json': hashlib.sha256(value).hexdigest()
+        'inputs': {f'docs/validation/{files[name]}.json': hashlib.sha256(value).hexdigest()
                    for name, value in raw.items()},
         'generator': 'scripts/build_paper_assets.py',
     }

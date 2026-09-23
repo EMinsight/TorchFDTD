@@ -252,7 +252,9 @@ def architecture():
 # ----------------------------------------------------------------------------
 
 def memory_cost():
-    datasets = [read('cpu-gpu-adjoint-256-' + n + '-5880.json') for n in ('dielectric', 'ade')]
+    # A100 records when present, otherwise the RTX 5880 originals
+    datasets = [read(f'cpu-gpu-adjoint-256-{n}-a100.json') if (DATA / f'cpu-gpu-adjoint-256-{n}-a100.json').exists()
+                else read(f'cpu-gpu-adjoint-256-{n}-5880.json') for n in ('dielectric', 'ade')]
     assert all(d['stage'] == 'complete' for d in datasets)
     fig, axes = plt.subplots(1, 2, figsize=(WIDTH * 0.72, 2.25))
     labels = ['Dielectric', 'Two-pole']

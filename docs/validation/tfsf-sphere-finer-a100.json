@@ -1,0 +1,2035 @@
+{
+  "method": "Closed scattered-field surface flux divided by homogeneous incident intensity, versus direct analytic Mie series. Matched empty-box reference, unchanged physical domain/PML/time.",
+  "cases": [
+    {
+      "wavelength_um": [
+        1.3,
+        1.3625,
+        1.4249999999999998,
+        1.4875,
+        1.55,
+        1.6125,
+        1.675,
+        1.7375,
+        1.7999999999999998
+      ],
+      "scattering_cross_section_um2": [
+        0.19385071385128394,
+        0.17002263930435413,
+        0.14984092872655605,
+        0.13233728530920127,
+        0.11698062237759563,
+        0.10345358568371789,
+        0.09153591508558774,
+        0.08105029152427845,
+        0.07183975785618528
+      ],
+      "mie_cross_section_um2": [
+        0.1931665776058582,
+        0.16926262751585175,
+        0.14908382969071546,
+        0.13162734316049982,
+        0.11633908546045314,
+        0.10288743285420893,
+        0.09104399445074206,
+        0.08062715915392742,
+        0.0714781769860109
+      ],
+      "max_relative_error": 0.005514371327601353,
+      "max_empty_box_cross_section_um2": 1.369720965655193e-14,
+      "project": {
+        "schema_version": 1,
+        "name": "TFSF dielectric sphere",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            3.2,
+            3.2,
+            3.2
+          ],
+          "mesh": 0.02,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24.0,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 3148,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0.0,
+            "divergence_check": true,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 20,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            }
+          },
+          "bloch_phase": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "background_index": 1.0,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20.0,
+            "overlap_um": 2.0,
+            "max_angle_deg": 45.0,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 10000,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0.0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "sphere",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "de1a959cbfb6",
+            "name": "object",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "sphere",
+            "size": [
+              1.0,
+              1.0,
+              0.5
+            ],
+            "radius": 0.3,
+            "inner_radius": 0.3,
+            "rotation": 0.0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0.0,
+            "theta_stop": 360.0,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0.0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "sphere",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 3.0,
+            "time_definition": "standard",
+            "pulse_length": 8e-15,
+            "pulse_offset": 3e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "34d0ef01904d",
+            "name": "source",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "tfsf",
+            "injection": "oneway",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              1.6,
+              1.6,
+              1.6
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0.0,
+            "amplitude": 1.0,
+            "phase": 0.0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3.0,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "x_min",
+            "name": "x_min",
+            "center": [
+              -1.1,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              2.2,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "x_max",
+            "name": "x_max",
+            "center": [
+              1.1,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              2.2,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "y_min",
+            "name": "y_min",
+            "center": [
+              0.0,
+              -1.1,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "y",
+            "size": [
+              2.2,
+              0.0,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "y_max",
+            "name": "y_max",
+            "center": [
+              0.0,
+              1.1,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "y",
+            "size": [
+              2.2,
+              0.0,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "z_min",
+            "name": "z_min",
+            "center": [
+              0.0,
+              0.0,
+              -1.1
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "z",
+            "size": [
+              2.2,
+              2.2,
+              0.0
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "z_max",
+            "name": "z_max",
+            "center": [
+              0.0,
+              0.0,
+              1.1
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "z",
+            "size": [
+              2.2,
+              2.2,
+              0.0
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "incident",
+            "name": "incident",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.4,
+              0.4
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "sample_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 4096000,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.019999999999999574,
+          0.019999999999999574,
+          0.019999999999999574
+        ],
+        "axis_max_step_um": [
+          0.020000000000000018,
+          0.020000000000000018,
+          0.020000000000000018
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000222,
+        "shape": [
+          160,
+          160,
+          160
+        ],
+        "actual_size_um": [
+          3.2,
+          3.2,
+          3.2
+        ],
+        "cells": 4096000,
+        "dt_fs": 0.03813149739062011,
+        "duration_fs": 120.03795378567212,
+        "estimated_memory_mb": 991.1,
+        "warnings": [
+          "TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.",
+          "Stored frames alias the carrier: 0.0 frames per optical period (period 135.6 steps, one frame every 10000 steps). The playback will look like backward motion; store a frame at least every 34 steps."
+        ],
+        "oneway_planes": [],
+        "tfsf_boxes": [
+          {
+            "source_id": "34d0ef01904d",
+            "normal": "x",
+            "direction": "+",
+            "lower_node_indices": [
+              40,
+              40,
+              40
+            ],
+            "upper_node_indices": [
+              120,
+              120,
+              120
+            ],
+            "lower_um": [
+              -0.8,
+              -0.8,
+              -0.8
+            ],
+            "upper_um": [
+              0.7999999999999998,
+              0.7999999999999998,
+              0.7999999999999998
+            ],
+            "incident_line_cells": 336,
+            "incident_pml_cells": 96,
+            "incident_drive_offset_cells": 8,
+            "total_field": "inside the staggered box",
+            "scattered_field": "outside the staggered box"
+          }
+        ],
+        "tfsf_auxiliary_estimated_bytes": 9473872,
+        "point_trace_estimated_bytes": 0,
+        "snapshot": {
+          "interval": 10000,
+          "effective_interval": 10000,
+          "frames": 0,
+          "shortest_wavelength_um": 1.55,
+          "period_steps": 135.58983594604848,
+          "frames_per_period": 0.013558983594604848,
+          "aliased": true
+        },
+        "plan_hash": "30664e8c242fb2e161849ee707042e239c1e51e33d967b4e018b936052aab266",
+        "backend": "cuda",
+        "precision": "float32",
+        "gpu": "NVIDIA A100 80GB PCIe",
+        "cuda_graph": true,
+        "cuda_graph_steps": 1,
+        "cuda_graph_replays": 3148,
+        "cuda_kernel": "fused",
+        "cuda_monitor_kernel": "torch",
+        "steps": 3148,
+        "requested_steps": 3148,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 1.9065748695310057e-15,
+            "state_norm": 3.354256015030847e-11,
+            "relative_norm": 1.0,
+            "field_peak": 7.1203709595124565e-09,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 3.813149739062011e-15,
+            "state_norm": 1.0613677801372149e-08,
+            "relative_norm": 1.0,
+            "field_peak": 1.4747135423931468e-07,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 5.719724608593017e-15,
+            "state_norm": 1.0928630073348322e-06,
+            "relative_norm": 1.0,
+            "field_peak": 1.381295760438661e-06,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 7.626299478124023e-15,
+            "state_norm": 2.7654104420450334e-05,
+            "relative_norm": 1.0,
+            "field_peak": 4.5620877244800795e-06,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 9.532874347655029e-15,
+            "state_norm": 0.0007007966687305763,
+            "relative_norm": 1.0,
+            "field_peak": 3.3187494409503415e-05,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 1.1439449217186033e-14,
+            "state_norm": 0.04876935509266388,
+            "relative_norm": 1.0,
+            "field_peak": 0.00030752946622669697,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 1.334602408671704e-14,
+            "state_norm": 1.0137307791122434,
+            "relative_norm": 1.0,
+            "field_peak": 0.0013339212164282799,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 1.5252598956248045e-14,
+            "state_norm": 7.455278686508263,
+            "relative_norm": 1.0,
+            "field_peak": 0.0023742923513054848,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 1.715917382577905e-14,
+            "state_norm": 105.79187266795498,
+            "relative_norm": 1.0,
+            "field_peak": 0.012484029866755009,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 1.9065748695310058e-14,
+            "state_norm": 1425.9996352966439,
+            "relative_norm": 1.0,
+            "field_peak": 0.05018843710422516,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 2.0972323564841062e-14,
+            "state_norm": 6948.464894310204,
+            "relative_norm": 1.0,
+            "field_peak": 0.10064912587404251,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 2.2878898434372066e-14,
+            "state_norm": 22793.81140780177,
+            "relative_norm": 1.0,
+            "field_peak": 0.16627252101898193,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 2.4785473303903074e-14,
+            "state_norm": 110385.16140856285,
+            "relative_norm": 1.0,
+            "field_peak": 0.3714694380760193,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 2.669204817343408e-14,
+            "state_norm": 326372.83847522,
+            "relative_norm": 1.0,
+            "field_peak": 0.646838903427124,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 2.859862304296508e-14,
+            "state_norm": 540856.7527266564,
+            "relative_norm": 1.0,
+            "field_peak": 0.8264042139053345,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 3.050519791249609e-14,
+            "state_norm": 841343.1144173727,
+            "relative_norm": 1.0,
+            "field_peak": 0.986797571182251,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 3.24117727820271e-14,
+            "state_norm": 1170764.994186962,
+            "relative_norm": 1.0,
+            "field_peak": 1.4827780723571777,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 3.43183476515581e-14,
+            "state_norm": 1196391.1159911482,
+            "relative_norm": 1.0,
+            "field_peak": 1.3367722034454346,
+            "source_finished": false
+          },
+          {
+            "step": 950,
+            "time_s": 3.622492252108911e-14,
+            "state_norm": 999472.0049652323,
+            "relative_norm": 0.8354057394827957,
+            "field_peak": 1.079298496246338,
+            "source_finished": false
+          },
+          {
+            "step": 1000,
+            "time_s": 3.8131497390620115e-14,
+            "state_norm": 713926.2729024943,
+            "relative_norm": 0.5967331781054253,
+            "field_peak": 1.005631923675537,
+            "source_finished": false
+          },
+          {
+            "step": 1050,
+            "time_s": 4.0038072260151116e-14,
+            "state_norm": 466815.3029028842,
+            "relative_norm": 0.3901861996995455,
+            "field_peak": 0.7274027466773987,
+            "source_finished": false
+          },
+          {
+            "step": 1100,
+            "time_s": 4.1944647129682124e-14,
+            "state_norm": 277653.83499518235,
+            "relative_norm": 0.23207614239525717,
+            "field_peak": 0.45169833302497864,
+            "source_finished": false
+          },
+          {
+            "step": 1150,
+            "time_s": 4.385122199921313e-14,
+            "state_norm": 129911.52484003952,
+            "relative_norm": 0.10858616643305191,
+            "field_peak": 0.21025413274765015,
+            "source_finished": false
+          },
+          {
+            "step": 1200,
+            "time_s": 4.575779686874413e-14,
+            "state_norm": 46788.172715401975,
+            "relative_norm": 0.0391077567277323,
+            "field_peak": 0.08367496728897095,
+            "source_finished": false
+          },
+          {
+            "step": 1250,
+            "time_s": 4.766437173827514e-14,
+            "state_norm": 15158.723774286962,
+            "relative_norm": 0.012670374739224591,
+            "field_peak": 0.05301705747842789,
+            "source_finished": false
+          },
+          {
+            "step": 1300,
+            "time_s": 4.957094660780615e-14,
+            "state_norm": 3792.1326208125847,
+            "relative_norm": 0.003169642912026306,
+            "field_peak": 0.016542773693799973,
+            "source_finished": false
+          },
+          {
+            "step": 1350,
+            "time_s": 5.1477521477337156e-14,
+            "state_norm": 607.837294515573,
+            "relative_norm": 0.0005080590171484275,
+            "field_peak": 0.00406061764806509,
+            "source_finished": false
+          },
+          {
+            "step": 1400,
+            "time_s": 5.338409634686816e-14,
+            "state_norm": 85.4644483053433,
+            "relative_norm": 7.143520807118366e-05,
+            "field_peak": 0.0015299753285944462,
+            "source_finished": false
+          },
+          {
+            "step": 1450,
+            "time_s": 5.5290671216399165e-14,
+            "state_norm": 10.211799433035896,
+            "relative_norm": 8.535502559776155e-06,
+            "field_peak": 0.0006659081554971635,
+            "source_finished": false
+          },
+          {
+            "step": 1500,
+            "time_s": 5.719724608593017e-14,
+            "state_norm": 0.694994450454796,
+            "relative_norm": 5.80909069923199e-07,
+            "field_peak": 0.00024455258972011507,
+            "source_finished": false
+          },
+          {
+            "step": 1550,
+            "time_s": 5.910382095546117e-14,
+            "state_norm": 0.03715826149923242,
+            "relative_norm": 3.1058623724774755e-08,
+            "field_peak": 6.208856939338148e-05,
+            "source_finished": false
+          },
+          {
+            "step": 1600,
+            "time_s": 6.101039582499218e-14,
+            "state_norm": 0.0020648017814227705,
+            "relative_norm": 1.7258585038156096e-09,
+            "field_peak": 1.2820024494430982e-05,
+            "source_finished": false
+          },
+          {
+            "step": 1650,
+            "time_s": 6.291697069452319e-14,
+            "state_norm": 6.549210601390402e-05,
+            "relative_norm": 5.474138443400861e-11,
+            "field_peak": 4.3561781239986885e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1700,
+            "time_s": 6.48235455640542e-14,
+            "state_norm": 1.4649616002848203e-06,
+            "relative_norm": 1.2244838503930007e-12,
+            "field_peak": 1.1652862212940818e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1750,
+            "time_s": 6.67301204335852e-14,
+            "state_norm": 1.0179705642825884e-07,
+            "relative_norm": 8.508677059502004e-14,
+            "field_peak": 7.755117508168041e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1800,
+            "time_s": 6.86366953031162e-14,
+            "state_norm": 6.808518654435555e-08,
+            "relative_norm": 5.690880317842422e-14,
+            "field_peak": 8.388359447053517e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1850,
+            "time_s": 7.054327017264721e-14,
+            "state_norm": 6.48144780599931e-08,
+            "relative_norm": 5.4174991099208935e-14,
+            "field_peak": 8.11285588042665e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1900,
+            "time_s": 7.244984504217821e-14,
+            "state_norm": 5.5271300244722677e-08,
+            "relative_norm": 4.619835395462065e-14,
+            "field_peak": 8.296285045616969e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1950,
+            "time_s": 7.435641991170922e-14,
+            "state_norm": 5.843651589978515e-08,
+            "relative_norm": 4.884399016234212e-14,
+            "field_peak": 8.822270274322364e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2000,
+            "time_s": 7.626299478124023e-14,
+            "state_norm": 5.830063883561444e-08,
+            "relative_norm": 4.873041771738281e-14,
+            "field_peak": 8.644591957818193e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2050,
+            "time_s": 7.816956965077124e-14,
+            "state_norm": 5.5310451281901676e-08,
+            "relative_norm": 4.6231078234043744e-14,
+            "field_peak": 8.845834145176923e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2100,
+            "time_s": 8.007614452030223e-14,
+            "state_norm": 5.670300342790175e-08,
+            "relative_norm": 4.73950388547697e-14,
+            "field_peak": 8.255077545982203e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2150,
+            "time_s": 8.198271938983324e-14,
+            "state_norm": 5.448661378042713e-08,
+            "relative_norm": 4.554247607839163e-14,
+            "field_peak": 8.21593573618884e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2200,
+            "time_s": 8.388929425936425e-14,
+            "state_norm": 5.088726522494685e-08,
+            "relative_norm": 4.2533971161085884e-14,
+            "field_peak": 8.460861522507912e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2250,
+            "time_s": 8.579586912889526e-14,
+            "state_norm": 5.1112525443288605e-08,
+            "relative_norm": 4.272225425290334e-14,
+            "field_peak": 7.698434387748421e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2300,
+            "time_s": 8.770244399842626e-14,
+            "state_norm": 5.119339566562519e-08,
+            "relative_norm": 4.27898493906937e-14,
+            "field_peak": 8.04535886800295e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2350,
+            "time_s": 8.960901886795727e-14,
+            "state_norm": 4.898974267396109e-08,
+            "relative_norm": 4.094793251066197e-14,
+            "field_peak": 8.198287559935125e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2400,
+            "time_s": 9.151559373748827e-14,
+            "state_norm": 4.866218663453543e-08,
+            "relative_norm": 4.0674145757277146e-14,
+            "field_peak": 8.463911171929794e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2450,
+            "time_s": 9.342216860701927e-14,
+            "state_norm": 4.912929196896326e-08,
+            "relative_norm": 4.1064574378974876e-14,
+            "field_peak": 8.496932082380226e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2500,
+            "time_s": 9.532874347655028e-14,
+            "state_norm": 4.663941161060453e-08,
+            "relative_norm": 3.898341519526095e-14,
+            "field_peak": 7.93326194070687e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2550,
+            "time_s": 9.723531834608129e-14,
+            "state_norm": 4.638493316699675e-08,
+            "relative_norm": 3.8770710135681034e-14,
+            "field_peak": 8.664662232149567e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2600,
+            "time_s": 9.91418932156123e-14,
+            "state_norm": 4.700801853357879e-08,
+            "relative_norm": 3.929151420907625e-14,
+            "field_peak": 8.77832178503013e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2650,
+            "time_s": 1.010484680851433e-13,
+            "state_norm": 4.4340125899217776e-08,
+            "relative_norm": 3.706156398736234e-14,
+            "field_peak": 8.107136295620876e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2700,
+            "time_s": 1.0295504295467431e-13,
+            "state_norm": 4.445819905215433e-08,
+            "relative_norm": 3.716025508541411e-14,
+            "field_peak": 8.248025551438332e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2750,
+            "time_s": 1.0486161782420531e-13,
+            "state_norm": 4.44821326829556e-08,
+            "relative_norm": 3.718025994041627e-14,
+            "field_peak": 7.882678119131015e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2800,
+            "time_s": 1.0676819269373631e-13,
+            "state_norm": 4.211490160093246e-08,
+            "relative_norm": 3.520161679405522e-14,
+            "field_peak": 7.795987357894774e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2850,
+            "time_s": 1.0867476756326732e-13,
+            "state_norm": 4.2821370946352684e-08,
+            "relative_norm": 3.57921171212287e-14,
+            "field_peak": 7.973888500600879e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2900,
+            "time_s": 1.1058134243279833e-13,
+            "state_norm": 4.2089038616166904e-08,
+            "relative_norm": 3.517999929420933e-14,
+            "field_peak": 7.431323183482164e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2950,
+            "time_s": 1.1248791730232934e-13,
+            "state_norm": 4.0587052874335454e-08,
+            "relative_norm": 3.392456892385997e-14,
+            "field_peak": 8.066213013080414e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3000,
+            "time_s": 1.1439449217186033e-13,
+            "state_norm": 4.192863616888502e-08,
+            "relative_norm": 3.504592737981786e-14,
+            "field_peak": 7.9798053320701e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3050,
+            "time_s": 1.1630106704139135e-13,
+            "state_norm": 4.0472226178064814e-08,
+            "relative_norm": 3.3828591367076197e-14,
+            "field_peak": 7.597116677970916e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3100,
+            "time_s": 1.1820764191092235e-13,
+            "state_norm": 3.9740447089875295e-08,
+            "relative_norm": 3.3216935965754304e-14,
+            "field_peak": 7.913409376669733e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3148,
+            "time_s": 1.200379537856721e-13,
+            "state_norm": 4.035565763365455e-08,
+            "relative_norm": 3.373115789164146e-14,
+            "field_peak": 7.486454478566884e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 4.142994883470237,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 6.50325797363674e-14,
+        "seconds": 4.164499744772911,
+        "setup_seconds": 0.602561429142952,
+        "mcells_per_second": 3096.22014413237,
+        "field_peak": 7.486454478566884e-07,
+        "slice_index": 79,
+        "slice_position": -0.010000000000000009,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "TorchFDTD Yee/CPML on fdtd grid"
+      },
+      "reference_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 4096000,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.019999999999999574,
+          0.019999999999999574,
+          0.019999999999999574
+        ],
+        "axis_max_step_um": [
+          0.020000000000000018,
+          0.020000000000000018,
+          0.020000000000000018
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000222,
+        "shape": [
+          160,
+          160,
+          160
+        ],
+        "actual_size_um": [
+          3.2,
+          3.2,
+          3.2
+        ],
+        "cells": 4096000,
+        "dt_fs": 0.03813149739062011,
+        "duration_fs": 120.03795378567212,
+        "estimated_memory_mb": 991.1,
+        "warnings": [
+          "TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.",
+          "Stored frames alias the carrier: 0.0 frames per optical period (period 135.6 steps, one frame every 10000 steps). The playback will look like backward motion; store a frame at least every 34 steps."
+        ],
+        "oneway_planes": [],
+        "tfsf_boxes": [
+          {
+            "source_id": "34d0ef01904d",
+            "normal": "x",
+            "direction": "+",
+            "lower_node_indices": [
+              40,
+              40,
+              40
+            ],
+            "upper_node_indices": [
+              120,
+              120,
+              120
+            ],
+            "lower_um": [
+              -0.8,
+              -0.8,
+              -0.8
+            ],
+            "upper_um": [
+              0.7999999999999998,
+              0.7999999999999998,
+              0.7999999999999998
+            ],
+            "incident_line_cells": 336,
+            "incident_pml_cells": 96,
+            "incident_drive_offset_cells": 8,
+            "total_field": "inside the staggered box",
+            "scattered_field": "outside the staggered box"
+          }
+        ],
+        "tfsf_auxiliary_estimated_bytes": 9473872,
+        "point_trace_estimated_bytes": 0,
+        "snapshot": {
+          "interval": 10000,
+          "effective_interval": 10000,
+          "frames": 0,
+          "shortest_wavelength_um": 1.55,
+          "period_steps": 135.58983594604848,
+          "frames_per_period": 0.013558983594604848,
+          "aliased": true
+        },
+        "plan_hash": "1ed71bad4aa3b1ef1df2920251c262c04e826512d77aa493e0755c56e2af0af8",
+        "backend": "cuda",
+        "precision": "float32",
+        "gpu": "NVIDIA A100 80GB PCIe",
+        "cuda_graph": true,
+        "cuda_graph_steps": 1,
+        "cuda_graph_replays": 3148,
+        "cuda_kernel": "fused",
+        "cuda_monitor_kernel": "torch",
+        "steps": 3148,
+        "requested_steps": 3148,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 1.9065748695310057e-15,
+            "state_norm": 3.354256015003716e-11,
+            "relative_norm": 1.0,
+            "field_peak": 7.1203709595124565e-09,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 3.813149739062011e-15,
+            "state_norm": 1.0613741528185913e-08,
+            "relative_norm": 1.0,
+            "field_peak": 1.474510895604908e-07,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 5.719724608593017e-15,
+            "state_norm": 1.0928674466827945e-06,
+            "relative_norm": 1.0,
+            "field_peak": 1.3808339645038359e-06,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 7.626299478124023e-15,
+            "state_norm": 2.765395646774919e-05,
+            "relative_norm": 1.0,
+            "field_peak": 4.562176400213502e-06,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 9.532874347655029e-15,
+            "state_norm": 0.0007007936796976292,
+            "relative_norm": 1.0,
+            "field_peak": 3.306813960080035e-05,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 1.1439449217186033e-14,
+            "state_norm": 0.048770086007901794,
+            "relative_norm": 1.0,
+            "field_peak": 0.0003069115919061005,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 1.334602408671704e-14,
+            "state_norm": 1.013748456015803,
+            "relative_norm": 1.0,
+            "field_peak": 0.0013325285399332643,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 1.5252598956248045e-14,
+            "state_norm": 7.455198625946761,
+            "relative_norm": 1.0,
+            "field_peak": 0.0022790541406720877,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 1.715917382577905e-14,
+            "state_norm": 105.79051719883347,
+            "relative_norm": 1.0,
+            "field_peak": 0.012380588799715042,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 1.9065748695310058e-14,
+            "state_norm": 1426.0379927722347,
+            "relative_norm": 1.0,
+            "field_peak": 0.049909137189388275,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 2.0972323564841062e-14,
+            "state_norm": 6948.6463314912735,
+            "relative_norm": 1.0,
+            "field_peak": 0.100412517786026,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 2.2878898434372066e-14,
+            "state_norm": 22790.08828491859,
+            "relative_norm": 1.0,
+            "field_peak": 0.15617577731609344,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 2.4785473303903074e-14,
+            "state_norm": 110332.79702742252,
+            "relative_norm": 1.0,
+            "field_peak": 0.3634258210659027,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 2.669204817343408e-14,
+            "state_norm": 326021.1470368453,
+            "relative_norm": 1.0,
+            "field_peak": 0.6365187168121338,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 2.859862304296508e-14,
+            "state_norm": 539720.7327089882,
+            "relative_norm": 1.0,
+            "field_peak": 0.6377930045127869,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 3.050519791249609e-14,
+            "state_norm": 838323.9977072612,
+            "relative_norm": 1.0,
+            "field_peak": 0.8449363708496094,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 3.24117727820271e-14,
+            "state_norm": 1159319.0239663678,
+            "relative_norm": 1.0,
+            "field_peak": 0.8452027440071106,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 3.43183476515581e-14,
+            "state_norm": 1172682.793939182,
+            "relative_norm": 1.0,
+            "field_peak": 0.845319390296936,
+            "source_finished": false
+          },
+          {
+            "step": 950,
+            "time_s": 3.622492252108911e-14,
+            "state_norm": 977906.6254093789,
+            "relative_norm": 0.8339054947028542,
+            "field_peak": 0.8451848030090332,
+            "source_finished": false
+          },
+          {
+            "step": 1000,
+            "time_s": 3.8131497390620115e-14,
+            "state_norm": 696729.6914395432,
+            "relative_norm": 0.5941331236720414,
+            "field_peak": 0.6379806399345398,
+            "source_finished": false
+          },
+          {
+            "step": 1050,
+            "time_s": 4.0038072260151116e-14,
+            "state_norm": 448355.09276526823,
+            "relative_norm": 0.38233279714046947,
+            "field_peak": 0.5578569173812866,
+            "source_finished": false
+          },
+          {
+            "step": 1100,
+            "time_s": 4.1944647129682124e-14,
+            "state_norm": 266342.95488983754,
+            "relative_norm": 0.22712276181281693,
+            "field_peak": 0.3636883795261383,
+            "source_finished": false
+          },
+          {
+            "step": 1150,
+            "time_s": 4.385122199921313e-14,
+            "state_norm": 126108.24346630057,
+            "relative_norm": 0.10753823976788118,
+            "field_peak": 0.15636159479618073,
+            "source_finished": false
+          },
+          {
+            "step": 1200,
+            "time_s": 4.575779686874413e-14,
+            "state_norm": 45534.161608532144,
+            "relative_norm": 0.038829052360849804,
+            "field_peak": 0.052735328674316406,
+            "source_finished": false
+          },
+          {
+            "step": 1250,
+            "time_s": 4.766437173827514e-14,
+            "state_norm": 14751.717696413994,
+            "relative_norm": 0.012579461191599141,
+            "field_peak": 0.04166727513074875,
+            "source_finished": false
+          },
+          {
+            "step": 1300,
+            "time_s": 4.957094660780615e-14,
+            "state_norm": 3704.37126663338,
+            "relative_norm": 0.0031588860054729316,
+            "field_peak": 0.012404014356434345,
+            "source_finished": false
+          },
+          {
+            "step": 1350,
+            "time_s": 5.1477521477337156e-14,
+            "state_norm": 593.1721157360969,
+            "relative_norm": 0.000505824864832851,
+            "field_peak": 0.00228589097969234,
+            "source_finished": false
+          },
+          {
+            "step": 1400,
+            "time_s": 5.338409634686816e-14,
+            "state_norm": 83.2629926221467,
+            "relative_norm": 7.100214401752781e-05,
+            "field_peak": 0.0007115310290828347,
+            "source_finished": false
+          },
+          {
+            "step": 1450,
+            "time_s": 5.5290671216399165e-14,
+            "state_norm": 9.965005079419228,
+            "relative_norm": 8.49761344749127e-06,
+            "field_peak": 0.00024469124036841094,
+            "source_finished": false
+          },
+          {
+            "step": 1500,
+            "time_s": 5.719724608593017e-14,
+            "state_norm": 0.6733402221057458,
+            "relative_norm": 5.741878584607824e-07,
+            "field_peak": 3.367548924870789e-05,
+            "source_finished": false
+          },
+          {
+            "step": 1550,
+            "time_s": 5.910382095546117e-14,
+            "state_norm": 0.0353721336509792,
+            "relative_norm": 3.016342853650983e-08,
+            "field_peak": 3.1053225484356517e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1600,
+            "time_s": 6.101039582499218e-14,
+            "state_norm": 0.0019473804937814104,
+            "relative_norm": 1.6606199936130434e-09,
+            "field_peak": 1.3592957657238003e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1650,
+            "time_s": 6.291697069452319e-14,
+            "state_norm": 5.9698023687907955e-05,
+            "relative_norm": 5.0907222308067755e-11,
+            "field_peak": 8.208144777199777e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1700,
+            "time_s": 6.48235455640542e-14,
+            "state_norm": 1.1719154801140974e-06,
+            "relative_norm": 9.993456765725137e-13,
+            "field_peak": 7.25246991351014e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1750,
+            "time_s": 6.67301204335852e-14,
+            "state_norm": 8.307121357181272e-08,
+            "relative_norm": 7.083860529134785e-14,
+            "field_peak": 6.935775331839977e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1800,
+            "time_s": 6.86366953031162e-14,
+            "state_norm": 6.55634971543758e-08,
+            "relative_norm": 5.5908978534715386e-14,
+            "field_peak": 8.670083957440511e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1850,
+            "time_s": 7.054327017264721e-14,
+            "state_norm": 6.364119971802867e-08,
+            "relative_norm": 5.426974800598058e-14,
+            "field_peak": 6.976949862291804e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1900,
+            "time_s": 7.244984504217821e-14,
+            "state_norm": 5.3658284474439566e-08,
+            "relative_norm": 4.5756861746214387e-14,
+            "field_peak": 6.824578804298653e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1950,
+            "time_s": 7.435641991170922e-14,
+            "state_norm": 5.6900699637724324e-08,
+            "relative_norm": 4.8521816753691807e-14,
+            "field_peak": 7.723694466221787e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2000,
+            "time_s": 7.626299478124023e-14,
+            "state_norm": 5.74125720646676e-08,
+            "relative_norm": 4.895831367305381e-14,
+            "field_peak": 6.806608325859997e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2050,
+            "time_s": 7.816956965077124e-14,
+            "state_norm": 5.4419745534966443e-08,
+            "relative_norm": 4.640619425493914e-14,
+            "field_peak": 7.464357167918934e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2100,
+            "time_s": 8.007614452030223e-14,
+            "state_norm": 5.605318822694129e-08,
+            "relative_norm": 4.7799105194211906e-14,
+            "field_peak": 7.082001047820086e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2150,
+            "time_s": 8.198271938983324e-14,
+            "state_norm": 5.365519227492371e-08,
+            "relative_norm": 4.5754224886927427e-14,
+            "field_peak": 8.469810950373358e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2200,
+            "time_s": 8.388929425936425e-14,
+            "state_norm": 4.902673796838324e-08,
+            "relative_norm": 4.180733120820896e-14,
+            "field_peak": 7.954820944178209e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2250,
+            "time_s": 8.579586912889526e-14,
+            "state_norm": 4.925041783420741e-08,
+            "relative_norm": 4.1998073211912106e-14,
+            "field_peak": 7.851507461964502e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2300,
+            "time_s": 8.770244399842626e-14,
+            "state_norm": 4.9817959471786645e-08,
+            "relative_norm": 4.248204180129747e-14,
+            "field_peak": 7.831105222066981e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2350,
+            "time_s": 8.960901886795727e-14,
+            "state_norm": 4.7036717699044815e-08,
+            "relative_norm": 4.011035033697633e-14,
+            "field_peak": 7.822098382348486e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2400,
+            "time_s": 9.151559373748827e-14,
+            "state_norm": 4.6762438269855545e-08,
+            "relative_norm": 3.9876459782252715e-14,
+            "field_peak": 8.221563803090248e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2450,
+            "time_s": 9.342216860701927e-14,
+            "state_norm": 4.7916122197553345e-08,
+            "relative_norm": 4.086025858416268e-14,
+            "field_peak": 7.299603907995333e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2500,
+            "time_s": 9.532874347655028e-14,
+            "state_norm": 4.4613710655146764e-08,
+            "relative_norm": 3.8044141933117274e-14,
+            "field_peak": 6.985345066823356e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2550,
+            "time_s": 9.723531834608129e-14,
+            "state_norm": 4.410070201326303e-08,
+            "relative_norm": 3.760667611155399e-14,
+            "field_peak": 7.800497883181379e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2600,
+            "time_s": 9.91418932156123e-14,
+            "state_norm": 4.578893721354415e-08,
+            "relative_norm": 3.9046311116865303e-14,
+            "field_peak": 7.485841706511565e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2650,
+            "time_s": 1.010484680851433e-13,
+            "state_norm": 4.261861770439106e-08,
+            "relative_norm": 3.634283535552697e-14,
+            "field_peak": 6.922485908944509e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2700,
+            "time_s": 1.0295504295467431e-13,
+            "state_norm": 4.246614103788434e-08,
+            "relative_norm": 3.6212811561117465e-14,
+            "field_peak": 7.249008717735705e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2750,
+            "time_s": 1.0486161782420531e-13,
+            "state_norm": 4.325716952762354e-08,
+            "relative_norm": 3.688735756266835e-14,
+            "field_peak": 7.590815584990196e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2800,
+            "time_s": 1.0676819269373631e-13,
+            "state_norm": 4.028237440166965e-08,
+            "relative_norm": 3.435061434333519e-14,
+            "field_peak": 6.949825888113992e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2850,
+            "time_s": 1.0867476756326732e-13,
+            "state_norm": 4.123205532710464e-08,
+            "relative_norm": 3.5160450498809845e-14,
+            "field_peak": 7.520504254898697e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2900,
+            "time_s": 1.1058134243279833e-13,
+            "state_norm": 4.097990102583642e-08,
+            "relative_norm": 3.494542704782086e-14,
+            "field_peak": 7.108899922059209e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2950,
+            "time_s": 1.1248791730232934e-13,
+            "state_norm": 3.8589372075669055e-08,
+            "relative_norm": 3.2906914192918896e-14,
+            "field_peak": 7.001704602771497e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3000,
+            "time_s": 1.1439449217186033e-13,
+            "state_norm": 4.0600374487666196e-08,
+            "relative_norm": 3.4621787492323195e-14,
+            "field_peak": 7.285697165571037e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3050,
+            "time_s": 1.1630106704139135e-13,
+            "state_norm": 3.953324470217236e-08,
+            "relative_norm": 3.3711797347495356e-14,
+            "field_peak": 7.047029271234351e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3100,
+            "time_s": 1.1820764191092235e-13,
+            "state_norm": 3.7979730058408745e-08,
+            "relative_norm": 3.238704469333116e-14,
+            "field_peak": 7.312983143492602e-07,
+            "source_finished": true
+          },
+          {
+            "step": 3148,
+            "time_s": 1.200379537856721e-13,
+            "state_norm": 3.9586036998202394e-08,
+            "relative_norm": 3.375681574147443e-14,
+            "field_peak": 6.826892331446288e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 4.14775482006371,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 6.50325797363674e-14,
+        "seconds": 4.1686391811817884,
+        "setup_seconds": 0.23548945132642984,
+        "mcells_per_second": 3093.145614090917,
+        "field_peak": 6.826892331446288e-07,
+        "slice_index": 79,
+        "slice_position": -0.010000000000000009,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "TorchFDTD Yee/CPML on fdtd grid"
+      }
+    }
+  ]
+}

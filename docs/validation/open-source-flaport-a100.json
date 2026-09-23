@@ -1,0 +1,3636 @@
+{
+  "hardware": {
+    "cuda": true,
+    "gpu": "NVIDIA A100 80GB PCIe",
+    "gpu_memory_gb": 79.2,
+    "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+    "engine": "TorchFDTD Yee/CPML on fdtd grid",
+    "cpu_threads": 4
+  },
+  "platform": "Linux-5.15.0-170-generic-x86_64-with-glibc2.39",
+  "packages": {
+    "fdtd": "0.2.2",
+    "numpy": "2.1.0",
+    "torch": "2.11.0a0+a6c236b9fd.nv26.3.46836102",
+    "cupy-cuda12x": "14.2.0 (cupy-cuda13x)"
+  },
+  "upstream_grid_sha256": "394560bcc257fe2784ee0b11c85f67f15fc1af18731bb348f26fffe3b24b1a13",
+  "upstream_boundary_sha256": "556f18c54da1b50a73283cda20c0133552279c0187bef4145d60a5ca11287907",
+  "method": "Identical native voxel grids, dt, sampled soft source, point trace and full final E/H. Six PML faces with matched cubic sigma/kappa/alpha profiles, with small high-side E interface stencil differences documented in the adapter. Fixed 800 steps by default. No auto termination or periodic state diagnostics. Each mode has one warmup and alternating measured order. The upstream graph adapter captures unmodified public field updates with common device-side source/trace operations. Full solve includes construction, graph preparation and field transfers. Python interpreter/context startup and first kernel compilation are excluded by warmup. Accuracy tolerance is 1% point-trace relative L2, declared before runs. Final-field relative errors are also recorded, with no field-wise equivalence claim.",
+  "cases": [
+    {
+      "name": "vacuum",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "vacuum-64",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.075,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20,
+            "overlap_um": 2,
+            "max_angle_deg": 45,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "f4c8ab599510",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "86a12b8b462e",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "runs": {
+        "flaport_eager": [
+          {
+            "setup_seconds": 0.009658852592110634,
+            "loop_seconds": 4.956745330244303,
+            "wall_seconds": 4.970491929911077,
+            "peak_allocated_bytes": 55057920
+          },
+          {
+            "setup_seconds": 0.008412126451730728,
+            "loop_seconds": 4.895897003822029,
+            "wall_seconds": 4.908796912059188,
+            "peak_allocated_bytes": 55057920
+          },
+          {
+            "setup_seconds": 0.009071639738976955,
+            "loop_seconds": 4.903826198540628,
+            "wall_seconds": 4.914795324206352,
+            "peak_allocated_bytes": 55057920
+          }
+        ],
+        "flaport_graph": [
+          {
+            "setup_seconds": 0.03803315479308367,
+            "loop_seconds": 0.7391271414235234,
+            "wall_seconds": 0.7812587143853307,
+            "peak_allocated_bytes": 55058944
+          },
+          {
+            "setup_seconds": 0.035655791871249676,
+            "loop_seconds": 0.7390957940369844,
+            "wall_seconds": 0.7774371867999434,
+            "peak_allocated_bytes": 55058944
+          },
+          {
+            "setup_seconds": 0.03659872617572546,
+            "loop_seconds": 0.7390543846413493,
+            "wall_seconds": 0.7783410716801882,
+            "peak_allocated_bytes": 55058944
+          }
+        ],
+        "torchfdtd_fused": [
+          {
+            "setup_seconds": 0.017548090778291225,
+            "loop_seconds": 0.021885890513658524,
+            "wall_seconds": 0.049824210815131664,
+            "peak_allocated_bytes": 18714624
+          },
+          {
+            "setup_seconds": 0.016214433126151562,
+            "loop_seconds": 0.021892997436225414,
+            "wall_seconds": 0.047485558316111565,
+            "peak_allocated_bytes": 18714624
+          },
+          {
+            "setup_seconds": 0.017170047387480736,
+            "loop_seconds": 0.021793055348098278,
+            "wall_seconds": 0.04741013888269663,
+            "peak_allocated_bytes": 18714624
+          }
+        ]
+      },
+      "errors": [
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0005762743395048782,
+            "H": 0.31454202774339,
+            "trace": 0.0001421211111299895
+          },
+          "max_absolute_difference": {
+            "E": 2.412707544863224e-07,
+            "H": 1.885818790015037e-07,
+            "trace": 1.8803984858095646e-07
+          },
+          "reference_final_peak": {
+            "E": 0.000584848690778017,
+            "H": 1.2258261961051176e-07,
+            "trace": 0.0013107917038723826
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0005762743395048782,
+            "H": 0.31454202774339,
+            "trace": 0.0001421211111299895
+          },
+          "max_absolute_difference": {
+            "E": 2.412707544863224e-07,
+            "H": 1.885818790015037e-07,
+            "trace": 1.8803984858095646e-07
+          },
+          "reference_final_peak": {
+            "E": 0.000584848690778017,
+            "H": 1.2258261961051176e-07,
+            "trace": 0.0013107917038723826
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0005762743395048782,
+            "H": 0.31454202774339,
+            "trace": 0.0001421211111299895
+          },
+          "max_absolute_difference": {
+            "E": 2.412707544863224e-07,
+            "H": 1.885818790015037e-07,
+            "trace": 1.8803984858095646e-07
+          },
+          "reference_final_peak": {
+            "E": 0.000584848690778017,
+            "H": 1.2258261961051176e-07,
+            "trace": 0.0013107917038723826
+          },
+          "trace_accuracy_pass": true
+        }
+      ],
+      "medians": {
+        "flaport_eager": {
+          "setup_seconds": 0.009071639738976955,
+          "loop_seconds": 4.903826198540628,
+          "wall_seconds": 4.914795324206352,
+          "peak_allocated_bytes": 55057920
+        },
+        "flaport_graph": {
+          "setup_seconds": 0.03659872617572546,
+          "loop_seconds": 0.7390957940369844,
+          "wall_seconds": 0.7783410716801882,
+          "peak_allocated_bytes": 55058944
+        },
+        "torchfdtd_fused": {
+          "setup_seconds": 0.017170047387480736,
+          "loop_seconds": 0.021885890513658524,
+          "wall_seconds": 0.047485558316111565,
+          "peak_allocated_bytes": 18714624
+        }
+      },
+      "accuracy_pass": true
+    },
+    {
+      "name": "sphere",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "sphere-64",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.075,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20,
+            "overlap_um": 2,
+            "max_angle_deg": 45,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "24f7a3329cb8",
+            "name": "object",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "enabled": true,
+            "kind": "sphere",
+            "size": [
+              1,
+              1,
+              0.5
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0,
+              0,
+              0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0,
+            "theta_stop": 360,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "dielectric",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "b74af6ba84d3",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "73421df416a4",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "runs": {
+        "flaport_eager": [
+          {
+            "setup_seconds": 0.009244957007467747,
+            "loop_seconds": 4.886695212684572,
+            "wall_seconds": 4.899361114017665,
+            "peak_allocated_bytes": 55057920
+          },
+          {
+            "setup_seconds": 0.008925209753215313,
+            "loop_seconds": 4.896747764199972,
+            "wall_seconds": 4.9072643127292395,
+            "peak_allocated_bytes": 55057920
+          },
+          {
+            "setup_seconds": 0.009033546783030033,
+            "loop_seconds": 4.881610786542296,
+            "wall_seconds": 4.894602086395025,
+            "peak_allocated_bytes": 55057920
+          }
+        ],
+        "flaport_graph": [
+          {
+            "setup_seconds": 0.03817602340131998,
+            "loop_seconds": 0.7391279535368085,
+            "wall_seconds": 0.7805769629776478,
+            "peak_allocated_bytes": 55058944
+          },
+          {
+            "setup_seconds": 0.0360950930044055,
+            "loop_seconds": 0.7390069309622049,
+            "wall_seconds": 0.776988179422915,
+            "peak_allocated_bytes": 55058944
+          },
+          {
+            "setup_seconds": 0.0378121817484498,
+            "loop_seconds": 0.7388365902006626,
+            "wall_seconds": 0.7794956248253584,
+            "peak_allocated_bytes": 55058944
+          }
+        ],
+        "torchfdtd_fused": [
+          {
+            "setup_seconds": 0.016400114633142948,
+            "loop_seconds": 0.021778211928904057,
+            "wall_seconds": 0.04663374461233616,
+            "peak_allocated_bytes": 18714624
+          },
+          {
+            "setup_seconds": 0.01605903171002865,
+            "loop_seconds": 0.021843137219548225,
+            "wall_seconds": 0.04609754588454962,
+            "peak_allocated_bytes": 18714624
+          },
+          {
+            "setup_seconds": 0.015872281976044178,
+            "loop_seconds": 0.021770808845758438,
+            "wall_seconds": 0.04687970411032438,
+            "peak_allocated_bytes": 18714624
+          }
+        ]
+      },
+      "errors": [
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.000979809124288869,
+            "H": 0.5204505779433214,
+            "trace": 0.00023258184292319952
+          },
+          "max_absolute_difference": {
+            "E": 4.810281097888947e-07,
+            "H": 4.3841566821356537e-07,
+            "trace": 5.622860044240952e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0005851591122336686,
+            "H": 2.3359326917216094e-07,
+            "trace": 0.0024538282305002213
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.000979809124288869,
+            "H": 0.5204505779433214,
+            "trace": 0.00023258184292319952
+          },
+          "max_absolute_difference": {
+            "E": 4.810281097888947e-07,
+            "H": 4.3841566821356537e-07,
+            "trace": 5.622860044240952e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0005851591122336686,
+            "H": 2.3359326917216094e-07,
+            "trace": 0.0024538282305002213
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.000979809124288869,
+            "H": 0.5204505779433214,
+            "trace": 0.00023258184292319952
+          },
+          "max_absolute_difference": {
+            "E": 4.810281097888947e-07,
+            "H": 4.3841566821356537e-07,
+            "trace": 5.622860044240952e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0005851591122336686,
+            "H": 2.3359326917216094e-07,
+            "trace": 0.0024538282305002213
+          },
+          "trace_accuracy_pass": true
+        }
+      ],
+      "medians": {
+        "flaport_eager": {
+          "setup_seconds": 0.009033546783030033,
+          "loop_seconds": 4.886695212684572,
+          "wall_seconds": 4.899361114017665,
+          "peak_allocated_bytes": 55057920
+        },
+        "flaport_graph": {
+          "setup_seconds": 0.0378121817484498,
+          "loop_seconds": 0.7390069309622049,
+          "wall_seconds": 0.7794956248253584,
+          "peak_allocated_bytes": 55058944
+        },
+        "torchfdtd_fused": {
+          "setup_seconds": 0.01605903171002865,
+          "loop_seconds": 0.021778211928904057,
+          "wall_seconds": 0.04663374461233616,
+          "peak_allocated_bytes": 18714624
+        }
+      },
+      "accuracy_pass": true
+    },
+    {
+      "name": "slab",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "slab-64",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.075,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20,
+            "overlap_um": 2,
+            "max_angle_deg": 45,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "cf90745e1306",
+            "name": "object",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "enabled": true,
+            "kind": "rectangle",
+            "size": [
+              0.3,
+              4.8,
+              4.8
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0,
+              0,
+              0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0,
+            "theta_stop": 360,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "dielectric",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "caee68b35021",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "1af0f42a4cb9",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "runs": {
+        "flaport_eager": [
+          {
+            "setup_seconds": 0.009050301276147366,
+            "loop_seconds": 4.90204035770148,
+            "wall_seconds": 4.914261390455067,
+            "peak_allocated_bytes": 55057920
+          },
+          {
+            "setup_seconds": 0.009032726287841797,
+            "loop_seconds": 4.888253707438707,
+            "wall_seconds": 4.899320344440639,
+            "peak_allocated_bytes": 55057920
+          },
+          {
+            "setup_seconds": 0.008979962207376957,
+            "loop_seconds": 4.888941803947091,
+            "wall_seconds": 4.900710798799992,
+            "peak_allocated_bytes": 55057920
+          }
+        ],
+        "flaport_graph": [
+          {
+            "setup_seconds": 0.03757775668054819,
+            "loop_seconds": 0.7390410136431456,
+            "wall_seconds": 0.7795472480356693,
+            "peak_allocated_bytes": 55058944
+          },
+          {
+            "setup_seconds": 0.03587950486689806,
+            "loop_seconds": 0.738995180465281,
+            "wall_seconds": 0.7775161201134324,
+            "peak_allocated_bytes": 55058944
+          },
+          {
+            "setup_seconds": 0.03623582795262337,
+            "loop_seconds": 0.7388526713475585,
+            "wall_seconds": 0.7769893566146493,
+            "peak_allocated_bytes": 55058944
+          }
+        ],
+        "torchfdtd_fused": [
+          {
+            "setup_seconds": 0.015420714393258095,
+            "loop_seconds": 0.02180312667042017,
+            "wall_seconds": 0.04554152861237526,
+            "peak_allocated_bytes": 18714624
+          },
+          {
+            "setup_seconds": 0.015234657563269138,
+            "loop_seconds": 0.02182229422032833,
+            "wall_seconds": 0.045420645736157894,
+            "peak_allocated_bytes": 18714624
+          },
+          {
+            "setup_seconds": 0.016678431071341038,
+            "loop_seconds": 0.0217656334862113,
+            "wall_seconds": 0.047097720205783844,
+            "peak_allocated_bytes": 18714624
+          }
+        ]
+      },
+      "errors": [
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0005180878680980842,
+            "H": 0.23110860428594443,
+            "trace": 0.0001970428234499926
+          },
+          "max_absolute_difference": {
+            "E": 1.8264108803123236e-07,
+            "H": 1.3409638199846086e-07,
+            "trace": 2.4800829123705626e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0005847446154803038,
+            "H": 7.469978413610079e-08,
+            "trace": 0.0013103085802868009
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0005180878680980842,
+            "H": 0.23110860428594443,
+            "trace": 0.0001970428234499926
+          },
+          "max_absolute_difference": {
+            "E": 1.8264108803123236e-07,
+            "H": 1.3409638199846086e-07,
+            "trace": 2.4800829123705626e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0005847446154803038,
+            "H": 7.469978413610079e-08,
+            "trace": 0.0013103085802868009
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0005180878680980842,
+            "H": 0.23110860428594443,
+            "trace": 0.0001970428234499926
+          },
+          "max_absolute_difference": {
+            "E": 1.8264108803123236e-07,
+            "H": 1.3409638199846086e-07,
+            "trace": 2.4800829123705626e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0005847446154803038,
+            "H": 7.469978413610079e-08,
+            "trace": 0.0013103085802868009
+          },
+          "trace_accuracy_pass": true
+        }
+      ],
+      "medians": {
+        "flaport_eager": {
+          "setup_seconds": 0.009032726287841797,
+          "loop_seconds": 4.888941803947091,
+          "wall_seconds": 4.900710798799992,
+          "peak_allocated_bytes": 55057920
+        },
+        "flaport_graph": {
+          "setup_seconds": 0.03623582795262337,
+          "loop_seconds": 0.738995180465281,
+          "wall_seconds": 0.7775161201134324,
+          "peak_allocated_bytes": 55058944
+        },
+        "torchfdtd_fused": {
+          "setup_seconds": 0.015420714393258095,
+          "loop_seconds": 0.02180312667042017,
+          "wall_seconds": 0.04554152861237526,
+          "peak_allocated_bytes": 18714624
+        }
+      },
+      "accuracy_pass": true
+    },
+    {
+      "name": "waveguide",
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "waveguide-64",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.075,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20,
+            "overlap_um": 2,
+            "max_angle_deg": 45,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "77337717ebc1",
+            "name": "object",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "enabled": true,
+            "kind": "rectangle",
+            "size": [
+              4.8,
+              0.6,
+              0.4
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0,
+              0,
+              0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0,
+            "theta_stop": 360,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "dielectric",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "72632880ad3b",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "f2f41a84e53a",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "runs": {
+        "flaport_eager": [
+          {
+            "setup_seconds": 0.00922552589327097,
+            "loop_seconds": 4.887088279239833,
+            "wall_seconds": 4.898029907606542,
+            "peak_allocated_bytes": 55057920
+          },
+          {
+            "setup_seconds": 0.008794480934739113,
+            "loop_seconds": 4.883880943991244,
+            "wall_seconds": 4.894213546067476,
+            "peak_allocated_bytes": 55057920
+          },
+          {
+            "setup_seconds": 0.008917557075619698,
+            "loop_seconds": 4.904524628072977,
+            "wall_seconds": 4.9149863282218575,
+            "peak_allocated_bytes": 55057920
+          }
+        ],
+        "flaport_graph": [
+          {
+            "setup_seconds": 0.03655227925628424,
+            "loop_seconds": 0.7391227753832936,
+            "wall_seconds": 0.7776401564478874,
+            "peak_allocated_bytes": 55058944
+          },
+          {
+            "setup_seconds": 0.036057814955711365,
+            "loop_seconds": 0.7390840323641896,
+            "wall_seconds": 0.7770135877653956,
+            "peak_allocated_bytes": 55058944
+          },
+          {
+            "setup_seconds": 0.0360881220549345,
+            "loop_seconds": 0.7391354022547603,
+            "wall_seconds": 0.7770950337871909,
+            "peak_allocated_bytes": 55058944
+          }
+        ],
+        "torchfdtd_fused": [
+          {
+            "setup_seconds": 0.01694527082145214,
+            "loop_seconds": 0.021840468980371952,
+            "wall_seconds": 0.04707291815429926,
+            "peak_allocated_bytes": 18714624
+          },
+          {
+            "setup_seconds": 0.01616387441754341,
+            "loop_seconds": 0.021788673475384712,
+            "wall_seconds": 0.04616375546902418,
+            "peak_allocated_bytes": 18714624
+          },
+          {
+            "setup_seconds": 0.015222697518765926,
+            "loop_seconds": 0.021862280555069447,
+            "wall_seconds": 0.04637168813496828,
+            "peak_allocated_bytes": 18714624
+          }
+        ]
+      },
+      "errors": [
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0006895609265479279,
+            "H": 0.040164884272018246,
+            "trace": 0.00037217007703162555
+          },
+          "max_absolute_difference": {
+            "E": 1.680018613114953e-07,
+            "H": 1.6308796091379918e-07,
+            "trace": 2.207700163125992e-06
+          },
+          "reference_final_peak": {
+            "E": 0.0005863960250280797,
+            "H": 1.2839279861509567e-06,
+            "trace": 0.005900838412344456
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0006895609265479279,
+            "H": 0.040164884272018246,
+            "trace": 0.00037217007703162555
+          },
+          "max_absolute_difference": {
+            "E": 1.680018613114953e-07,
+            "H": 1.6308796091379918e-07,
+            "trace": 2.207700163125992e-06
+          },
+          "reference_final_peak": {
+            "E": 0.0005863960250280797,
+            "H": 1.2839279861509567e-06,
+            "trace": 0.005900838412344456
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0006895609265479279,
+            "H": 0.040164884272018246,
+            "trace": 0.00037217007703162555
+          },
+          "max_absolute_difference": {
+            "E": 1.680018613114953e-07,
+            "H": 1.6308796091379918e-07,
+            "trace": 2.207700163125992e-06
+          },
+          "reference_final_peak": {
+            "E": 0.0005863960250280797,
+            "H": 1.2839279861509567e-06,
+            "trace": 0.005900838412344456
+          },
+          "trace_accuracy_pass": true
+        }
+      ],
+      "medians": {
+        "flaport_eager": {
+          "setup_seconds": 0.008917557075619698,
+          "loop_seconds": 4.887088279239833,
+          "wall_seconds": 4.898029907606542,
+          "peak_allocated_bytes": 55057920
+        },
+        "flaport_graph": {
+          "setup_seconds": 0.0360881220549345,
+          "loop_seconds": 0.7391227753832936,
+          "wall_seconds": 0.7770950337871909,
+          "peak_allocated_bytes": 55058944
+        },
+        "torchfdtd_fused": {
+          "setup_seconds": 0.01616387441754341,
+          "loop_seconds": 0.021840468980371952,
+          "wall_seconds": 0.04637168813496828,
+          "peak_allocated_bytes": 18714624
+        }
+      },
+      "accuracy_pass": true
+    },
+    {
+      "name": "vacuum",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "vacuum-96",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.049999999999999996,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20,
+            "overlap_um": 2,
+            "max_angle_deg": 45,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "368bad201592",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "d02789fac65b",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "runs": {
+        "flaport_eager": [
+          {
+            "setup_seconds": 0.018022197298705578,
+            "loop_seconds": 4.901107082143426,
+            "wall_seconds": 4.928330102935433,
+            "peak_allocated_bytes": 148643328
+          },
+          {
+            "setup_seconds": 0.016604069620370865,
+            "loop_seconds": 4.903919597156346,
+            "wall_seconds": 4.930563067086041,
+            "peak_allocated_bytes": 148643328
+          },
+          {
+            "setup_seconds": 0.01677150372415781,
+            "loop_seconds": 4.916486656293273,
+            "wall_seconds": 4.936491271480918,
+            "peak_allocated_bytes": 148643328
+          }
+        ],
+        "flaport_graph": [
+          {
+            "setup_seconds": 0.045852585695683956,
+            "loop_seconds": 0.9531088713556528,
+            "wall_seconds": 1.0025355322286487,
+            "peak_allocated_bytes": 148644352
+          },
+          {
+            "setup_seconds": 0.04588113073259592,
+            "loop_seconds": 0.9531287299469113,
+            "wall_seconds": 1.0049310205504298,
+            "peak_allocated_bytes": 148644352
+          },
+          {
+            "setup_seconds": 0.04540220461785793,
+            "loop_seconds": 0.9532596422359347,
+            "wall_seconds": 1.0022679213434458,
+            "peak_allocated_bytes": 148644352
+          }
+        ],
+        "torchfdtd_fused": [
+          {
+            "setup_seconds": 0.02779079508036375,
+            "loop_seconds": 0.0689489683136344,
+            "wall_seconds": 0.11658097244799137,
+            "peak_allocated_bytes": 59756544
+          },
+          {
+            "setup_seconds": 0.02471698634326458,
+            "loop_seconds": 0.06894541811197996,
+            "wall_seconds": 0.11114200856536627,
+            "peak_allocated_bytes": 59756544
+          },
+          {
+            "setup_seconds": 0.023821672424674034,
+            "loop_seconds": 0.06888503953814507,
+            "wall_seconds": 0.1101077739149332,
+            "peak_allocated_bytes": 59756544
+          }
+        ]
+      },
+      "errors": [
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0017081594868330577,
+            "H": 0.00180690753919599,
+            "trace": 0.00012008635173826134
+          },
+          "max_absolute_difference": {
+            "E": 8.833594620227814e-07,
+            "H": 2.8189970180392265e-07,
+            "trace": 7.066410034894943e-08
+          },
+          "reference_final_peak": {
+            "E": 0.00281515927053988,
+            "H": 0.0009522623149678111,
+            "trace": 0.0005842437967658043
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0017081594868330577,
+            "H": 0.00180690753919599,
+            "trace": 0.00012008635173826134
+          },
+          "max_absolute_difference": {
+            "E": 8.833594620227814e-07,
+            "H": 2.8189970180392265e-07,
+            "trace": 7.066410034894943e-08
+          },
+          "reference_final_peak": {
+            "E": 0.00281515927053988,
+            "H": 0.0009522623149678111,
+            "trace": 0.0005842437967658043
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.0017081594868330577,
+            "H": 0.00180690753919599,
+            "trace": 0.00012008635173826134
+          },
+          "max_absolute_difference": {
+            "E": 8.833594620227814e-07,
+            "H": 2.8189970180392265e-07,
+            "trace": 7.066410034894943e-08
+          },
+          "reference_final_peak": {
+            "E": 0.00281515927053988,
+            "H": 0.0009522623149678111,
+            "trace": 0.0005842437967658043
+          },
+          "trace_accuracy_pass": true
+        }
+      ],
+      "medians": {
+        "flaport_eager": {
+          "setup_seconds": 0.01677150372415781,
+          "loop_seconds": 4.903919597156346,
+          "wall_seconds": 4.930563067086041,
+          "peak_allocated_bytes": 148643328
+        },
+        "flaport_graph": {
+          "setup_seconds": 0.045852585695683956,
+          "loop_seconds": 0.9531287299469113,
+          "wall_seconds": 1.0025355322286487,
+          "peak_allocated_bytes": 148644352
+        },
+        "torchfdtd_fused": {
+          "setup_seconds": 0.02471698634326458,
+          "loop_seconds": 0.06894541811197996,
+          "wall_seconds": 0.11114200856536627,
+          "peak_allocated_bytes": 59756544
+        }
+      },
+      "accuracy_pass": true
+    },
+    {
+      "name": "sphere",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "sphere-96",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.049999999999999996,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20,
+            "overlap_um": 2,
+            "max_angle_deg": 45,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "66e199addbe8",
+            "name": "object",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "enabled": true,
+            "kind": "sphere",
+            "size": [
+              1,
+              1,
+              0.5
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0,
+              0,
+              0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0,
+            "theta_stop": 360,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "dielectric",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "5a8a8bd3ed44",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "4999f93f8ad0",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "runs": {
+        "flaport_eager": [
+          {
+            "setup_seconds": 0.01700709294527769,
+            "loop_seconds": 4.922718054614961,
+            "wall_seconds": 4.942951288074255,
+            "peak_allocated_bytes": 148643328
+          },
+          {
+            "setup_seconds": 0.017644177190959454,
+            "loop_seconds": 4.905404350720346,
+            "wall_seconds": 4.928658631630242,
+            "peak_allocated_bytes": 148643328
+          },
+          {
+            "setup_seconds": 0.018886643461883068,
+            "loop_seconds": 4.909886112436652,
+            "wall_seconds": 4.932072000578046,
+            "peak_allocated_bytes": 148643328
+          }
+        ],
+        "flaport_graph": [
+          {
+            "setup_seconds": 0.045866041444242,
+            "loop_seconds": 0.9531554635614157,
+            "wall_seconds": 1.002670232206583,
+            "peak_allocated_bytes": 148644352
+          },
+          {
+            "setup_seconds": 0.050155200995504856,
+            "loop_seconds": 0.95323396474123,
+            "wall_seconds": 1.007957600057125,
+            "peak_allocated_bytes": 148644352
+          },
+          {
+            "setup_seconds": 0.0472068851813674,
+            "loop_seconds": 0.9532110532745719,
+            "wall_seconds": 1.0044846292585135,
+            "peak_allocated_bytes": 148644352
+          }
+        ],
+        "torchfdtd_fused": [
+          {
+            "setup_seconds": 0.02477879263460636,
+            "loop_seconds": 0.068911824375391,
+            "wall_seconds": 0.10696806013584137,
+            "peak_allocated_bytes": 59756544
+          },
+          {
+            "setup_seconds": 0.02453786414116621,
+            "loop_seconds": 0.06889259535819292,
+            "wall_seconds": 0.10789219662547112,
+            "peak_allocated_bytes": 59756544
+          },
+          {
+            "setup_seconds": 0.024357417598366737,
+            "loop_seconds": 0.06894045416265726,
+            "wall_seconds": 0.10898479353636503,
+            "peak_allocated_bytes": 59756544
+          }
+        ]
+      },
+      "errors": [
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.001926617986339658,
+            "H": 0.0020065637811012235,
+            "trace": 0.00020766708076546759
+          },
+          "max_absolute_difference": {
+            "E": 7.594935595989227e-07,
+            "H": 2.7417263481765985e-07,
+            "trace": 2.2165477275848389e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0027980871964246035,
+            "H": 0.0009698359062895179,
+            "trace": 0.0010851394617930055
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.001926617986339658,
+            "H": 0.0020065637811012235,
+            "trace": 0.00020766708076546759
+          },
+          "max_absolute_difference": {
+            "E": 7.594935595989227e-07,
+            "H": 2.7417263481765985e-07,
+            "trace": 2.2165477275848389e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0027980871964246035,
+            "H": 0.0009698359062895179,
+            "trace": 0.0010851394617930055
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.001926617986339658,
+            "H": 0.0020065637811012235,
+            "trace": 0.00020766708076546759
+          },
+          "max_absolute_difference": {
+            "E": 7.594935595989227e-07,
+            "H": 2.7417263481765985e-07,
+            "trace": 2.2165477275848389e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0027980871964246035,
+            "H": 0.0009698359062895179,
+            "trace": 0.0010851394617930055
+          },
+          "trace_accuracy_pass": true
+        }
+      ],
+      "medians": {
+        "flaport_eager": {
+          "setup_seconds": 0.017644177190959454,
+          "loop_seconds": 4.909886112436652,
+          "wall_seconds": 4.932072000578046,
+          "peak_allocated_bytes": 148643328
+        },
+        "flaport_graph": {
+          "setup_seconds": 0.0472068851813674,
+          "loop_seconds": 0.9532110532745719,
+          "wall_seconds": 1.0044846292585135,
+          "peak_allocated_bytes": 148644352
+        },
+        "torchfdtd_fused": {
+          "setup_seconds": 0.02453786414116621,
+          "loop_seconds": 0.068911824375391,
+          "wall_seconds": 0.10789219662547112,
+          "peak_allocated_bytes": 59756544
+        }
+      },
+      "accuracy_pass": true
+    },
+    {
+      "name": "slab",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "slab-96",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.049999999999999996,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20,
+            "overlap_um": 2,
+            "max_angle_deg": 45,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "32a35ff056b0",
+            "name": "object",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "enabled": true,
+            "kind": "rectangle",
+            "size": [
+              0.3,
+              4.8,
+              4.8
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0,
+              0,
+              0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0,
+            "theta_stop": 360,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "dielectric",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "e7febc3d066b",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "1aa0b0e36a81",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "runs": {
+        "flaport_eager": [
+          {
+            "setup_seconds": 0.04231182858347893,
+            "loop_seconds": 4.903333273716271,
+            "wall_seconds": 4.94893822260201,
+            "peak_allocated_bytes": 148643328
+          },
+          {
+            "setup_seconds": 0.017093411646783352,
+            "loop_seconds": 4.888785692863166,
+            "wall_seconds": 4.9091173727065325,
+            "peak_allocated_bytes": 148643328
+          },
+          {
+            "setup_seconds": 0.017216547392308712,
+            "loop_seconds": 4.895543384365737,
+            "wall_seconds": 4.916069793514907,
+            "peak_allocated_bytes": 148643328
+          }
+        ],
+        "flaport_graph": [
+          {
+            "setup_seconds": 0.04598615225404501,
+            "loop_seconds": 0.9530480187386274,
+            "wall_seconds": 1.0025406144559383,
+            "peak_allocated_bytes": 148644352
+          },
+          {
+            "setup_seconds": 0.04593841265887022,
+            "loop_seconds": 0.9530646000057459,
+            "wall_seconds": 1.002733826637268,
+            "peak_allocated_bytes": 148644352
+          },
+          {
+            "setup_seconds": 0.04613177198916674,
+            "loop_seconds": 0.9530019629746675,
+            "wall_seconds": 1.003303118981421,
+            "peak_allocated_bytes": 148644352
+          }
+        ],
+        "torchfdtd_fused": [
+          {
+            "setup_seconds": 0.02467696461826563,
+            "loop_seconds": 0.0689368536695838,
+            "wall_seconds": 0.1070418106392026,
+            "peak_allocated_bytes": 59756544
+          },
+          {
+            "setup_seconds": 0.024750969372689724,
+            "loop_seconds": 0.06891455128788948,
+            "wall_seconds": 0.10721948835998774,
+            "peak_allocated_bytes": 59756544
+          },
+          {
+            "setup_seconds": 0.027548533864319324,
+            "loop_seconds": 0.06883726455271244,
+            "wall_seconds": 0.10964571870863438,
+            "peak_allocated_bytes": 59756544
+          }
+        ]
+      },
+      "errors": [
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.00164798775553723,
+            "H": 0.0016978646805012253,
+            "trace": 0.00017430837367315578
+          },
+          "max_absolute_difference": {
+            "E": 5.406327545642853e-07,
+            "H": 5.747424438595772e-07,
+            "trace": 9.685754776000977e-08
+          },
+          "reference_final_peak": {
+            "E": 0.0028207360301166773,
+            "H": 0.0009574512951076031,
+            "trace": 0.0005790492868982255
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.00164798775553723,
+            "H": 0.0016978646805012253,
+            "trace": 0.00017430837367315578
+          },
+          "max_absolute_difference": {
+            "E": 5.406327545642853e-07,
+            "H": 5.747424438595772e-07,
+            "trace": 9.685754776000977e-08
+          },
+          "reference_final_peak": {
+            "E": 0.0028207360301166773,
+            "H": 0.0009574512951076031,
+            "trace": 0.0005790492868982255
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.00164798775553723,
+            "H": 0.0016978646805012253,
+            "trace": 0.00017430837367315578
+          },
+          "max_absolute_difference": {
+            "E": 5.406327545642853e-07,
+            "H": 5.747424438595772e-07,
+            "trace": 9.685754776000977e-08
+          },
+          "reference_final_peak": {
+            "E": 0.0028207360301166773,
+            "H": 0.0009574512951076031,
+            "trace": 0.0005790492868982255
+          },
+          "trace_accuracy_pass": true
+        }
+      ],
+      "medians": {
+        "flaport_eager": {
+          "setup_seconds": 0.017216547392308712,
+          "loop_seconds": 4.895543384365737,
+          "wall_seconds": 4.916069793514907,
+          "peak_allocated_bytes": 148643328
+        },
+        "flaport_graph": {
+          "setup_seconds": 0.04598615225404501,
+          "loop_seconds": 0.9530480187386274,
+          "wall_seconds": 1.002733826637268,
+          "peak_allocated_bytes": 148644352
+        },
+        "torchfdtd_fused": {
+          "setup_seconds": 0.024750969372689724,
+          "loop_seconds": 0.06891455128788948,
+          "wall_seconds": 0.10721948835998774,
+          "peak_allocated_bytes": 59756544
+        }
+      },
+      "accuracy_pass": true
+    },
+    {
+      "name": "waveguide",
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "project": {
+        "schema_version": 1,
+        "name": "waveguide-96",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            4.8,
+            4.8,
+            4.8
+          ],
+          "mesh": 0.049999999999999996,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 800,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0,
+            "divergence_check": false,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1,
+              "kappa": 1,
+              "alpha": 1e-08,
+              "polynomial": 3,
+              "alpha_polynomial": 0
+            }
+          },
+          "bloch_phase": [
+            0,
+            0,
+            0
+          ],
+          "background_index": 1,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20,
+            "overlap_um": 2,
+            "max_angle_deg": 45,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 800,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "dielectric",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "a62cc78b1d9e",
+            "name": "object",
+            "center": [
+              0,
+              0,
+              0
+            ],
+            "enabled": true,
+            "kind": "rectangle",
+            "size": [
+              4.8,
+              0.6,
+              0.4
+            ],
+            "radius": 0.5,
+            "inner_radius": 0.3,
+            "rotation": 0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0,
+              0,
+              0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0,
+            "theta_stop": 360,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "dielectric",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 2.0,
+            "time_definition": "cycles",
+            "pulse_length": 2e-14,
+            "pulse_offset": 5e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "1fdd7e30e6da",
+            "name": "source",
+            "center": [
+              -1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "injection": "soft",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              0,
+              2,
+              0
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0,
+            "amplitude": 1,
+            "phase": 0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "e2c981b51357",
+            "name": "monitor",
+            "center": [
+              1.2,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "point",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "fft",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 101,
+              "apodization": "hann",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "runs": {
+        "flaport_eager": [
+          {
+            "setup_seconds": 0.01736683025956154,
+            "loop_seconds": 4.891828805208206,
+            "wall_seconds": 4.912770664319396,
+            "peak_allocated_bytes": 148643328
+          },
+          {
+            "setup_seconds": 0.030255750752985477,
+            "loop_seconds": 4.911193109117448,
+            "wall_seconds": 4.951590198092163,
+            "peak_allocated_bytes": 148643328
+          },
+          {
+            "setup_seconds": 0.017001713626086712,
+            "loop_seconds": 4.894016889855266,
+            "wall_seconds": 4.914211601018906,
+            "peak_allocated_bytes": 148643328
+          }
+        ],
+        "flaport_graph": [
+          {
+            "setup_seconds": 0.049357134848833084,
+            "loop_seconds": 0.9532558182254434,
+            "wall_seconds": 1.006147081963718,
+            "peak_allocated_bytes": 148644352
+          },
+          {
+            "setup_seconds": 0.046304830349981785,
+            "loop_seconds": 0.9532061452046037,
+            "wall_seconds": 1.007211315445602,
+            "peak_allocated_bytes": 148644352
+          },
+          {
+            "setup_seconds": 0.04631662368774414,
+            "loop_seconds": 0.9531283667311072,
+            "wall_seconds": 1.003020228818059,
+            "peak_allocated_bytes": 148644352
+          }
+        ],
+        "torchfdtd_fused": [
+          {
+            "setup_seconds": 0.025077286176383495,
+            "loop_seconds": 0.06892107613384724,
+            "wall_seconds": 0.10760197043418884,
+            "peak_allocated_bytes": 59756544
+          },
+          {
+            "setup_seconds": 0.02669195644557476,
+            "loop_seconds": 0.06898976769298315,
+            "wall_seconds": 0.10879169031977654,
+            "peak_allocated_bytes": 59756544
+          },
+          {
+            "setup_seconds": 0.026088145561516285,
+            "loop_seconds": 0.06896977499127388,
+            "wall_seconds": 0.11066990252584219,
+            "peak_allocated_bytes": 59756544
+          }
+        ]
+      },
+      "errors": [
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.002570814756182614,
+            "H": 0.002613690995903992,
+            "trace": 0.0003279015972284457
+          },
+          "max_absolute_difference": {
+            "E": 9.52028130996041e-07,
+            "H": 1.102107489714399e-06,
+            "trace": 7.870839908719063e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0029040134977549314,
+            "H": 0.0021681212820112705,
+            "trace": 0.002391705522313714
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.002570814756182614,
+            "H": 0.002613690995903992,
+            "trace": 0.0003279015972284457
+          },
+          "max_absolute_difference": {
+            "E": 9.52028130996041e-07,
+            "H": 1.102107489714399e-06,
+            "trace": 7.870839908719063e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0029040134977549314,
+            "H": 0.0021681212820112705,
+            "trace": 0.002391705522313714
+          },
+          "trace_accuracy_pass": true
+        },
+        {
+          "upstream_graph_relative_l2": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "torchfdtd_relative_l2": {
+            "E": 0.002570814756182614,
+            "H": 0.002613690995903992,
+            "trace": 0.0003279015972284457
+          },
+          "max_absolute_difference": {
+            "E": 9.52028130996041e-07,
+            "H": 1.102107489714399e-06,
+            "trace": 7.870839908719063e-07
+          },
+          "reference_final_peak": {
+            "E": 0.0029040134977549314,
+            "H": 0.0021681212820112705,
+            "trace": 0.002391705522313714
+          },
+          "trace_accuracy_pass": true
+        }
+      ],
+      "medians": {
+        "flaport_eager": {
+          "setup_seconds": 0.01736683025956154,
+          "loop_seconds": 4.894016889855266,
+          "wall_seconds": 4.914211601018906,
+          "peak_allocated_bytes": 148643328
+        },
+        "flaport_graph": {
+          "setup_seconds": 0.04631662368774414,
+          "loop_seconds": 0.9532061452046037,
+          "wall_seconds": 1.006147081963718,
+          "peak_allocated_bytes": 148644352
+        },
+        "torchfdtd_fused": {
+          "setup_seconds": 0.026088145561516285,
+          "loop_seconds": 0.06896977499127388,
+          "wall_seconds": 0.10879169031977654,
+          "peak_allocated_bytes": 59756544
+        }
+      },
+      "accuracy_pass": true
+    }
+  ]
+}

@@ -1,0 +1,4512 @@
+{
+  "method": "Closed scattered-field surface flux divided by homogeneous incident intensity, versus direct analytic Mie series. Matched empty-box reference, unchanged physical domain/PML/time.",
+  "cases": [
+    {
+      "wavelength_um": [
+        1.3,
+        1.3625,
+        1.4249999999999998,
+        1.4875,
+        1.55,
+        1.6125,
+        1.675,
+        1.7375,
+        1.7999999999999998
+      ],
+      "scattering_cross_section_um2": [
+        0.20987866874539793,
+        0.1842701034348208,
+        0.16234670107762086,
+        0.14326865318845391,
+        0.1265184947463599,
+        0.1117485330783874,
+        0.09870912850070725,
+        0.08720694273852356,
+        0.07708026791027238
+      ],
+      "mie_cross_section_um2": [
+        0.1931665776058582,
+        0.16926262751585175,
+        0.14908382969071546,
+        0.13162734316049982,
+        0.11633908546045314,
+        0.10288743285420893,
+        0.09104399445074206,
+        0.08062715915392742,
+        0.0714781769860109
+      ],
+      "max_relative_error": 0.08896250796897376,
+      "max_empty_box_cross_section_um2": 6.683070897149562e-15,
+      "project": {
+        "schema_version": 1,
+        "name": "TFSF dielectric sphere",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            3.2,
+            3.2,
+            3.2
+          ],
+          "mesh": 0.1,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24.0,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 630,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0.0,
+            "divergence_check": true,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 4,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            }
+          },
+          "bloch_phase": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "background_index": 1.0,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20.0,
+            "overlap_um": 2.0,
+            "max_angle_deg": 45.0,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 10000,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0.0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "sphere",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "a42b626a00e7",
+            "name": "object",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "sphere",
+            "size": [
+              1.0,
+              1.0,
+              0.5
+            ],
+            "radius": 0.3,
+            "inner_radius": 0.3,
+            "rotation": 0.0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0.0,
+            "theta_stop": 360.0,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0.0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "sphere",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 3.0,
+            "time_definition": "standard",
+            "pulse_length": 8e-15,
+            "pulse_offset": 3e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "e63079e440e1",
+            "name": "source",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "tfsf",
+            "injection": "oneway",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              1.6,
+              1.6,
+              1.6
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0.0,
+            "amplitude": 1.0,
+            "phase": 0.0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3.0,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "x_min",
+            "name": "x_min",
+            "center": [
+              -1.1,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              2.2,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "x_max",
+            "name": "x_max",
+            "center": [
+              1.1,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              2.2,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "y_min",
+            "name": "y_min",
+            "center": [
+              0.0,
+              -1.1,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "y",
+            "size": [
+              2.2,
+              0.0,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "y_max",
+            "name": "y_max",
+            "center": [
+              0.0,
+              1.1,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "y",
+            "size": [
+              2.2,
+              0.0,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "z_min",
+            "name": "z_min",
+            "center": [
+              0.0,
+              0.0,
+              -1.1
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "z",
+            "size": [
+              2.2,
+              2.2,
+              0.0
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "z_max",
+            "name": "z_max",
+            "center": [
+              0.0,
+              0.0,
+              1.1
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "z",
+            "size": [
+              2.2,
+              2.2,
+              0.0
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "incident",
+            "name": "incident",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.4,
+              0.4
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "sample_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 32768,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.09999999999999964,
+          0.09999999999999964,
+          0.09999999999999964
+        ],
+        "axis_max_step_um": [
+          0.10000000000000009,
+          0.10000000000000009,
+          0.10000000000000009
+        ],
+        "coarse_limit_um": 0.1,
+        "max_adjacent_ratio": 1.0000000000000044,
+        "shape": [
+          32,
+          32,
+          32
+        ],
+        "actual_size_um": [
+          3.2,
+          3.2,
+          3.2
+        ],
+        "cells": 32768,
+        "dt_fs": 0.19065748695310056,
+        "duration_fs": 120.11421678045336,
+        "estimated_memory_mb": 14.7,
+        "warnings": [
+          "source: only 10.3 cells per material wavelength on the least-resolved fine axis. Run a mesh convergence study (15+ recommended).",
+          "TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.",
+          "Stored frames alias the carrier: 0.0 frames per optical period (period 27.1 steps, one frame every 10000 steps). The playback will look like backward motion; store a frame at least every 7 steps."
+        ],
+        "oneway_planes": [],
+        "tfsf_boxes": [
+          {
+            "source_id": "e63079e440e1",
+            "normal": "x",
+            "direction": "+",
+            "lower_node_indices": [
+              8,
+              8,
+              8
+            ],
+            "upper_node_indices": [
+              24,
+              24,
+              24
+            ],
+            "lower_um": [
+              -0.8,
+              -0.8,
+              -0.8
+            ],
+            "upper_um": [
+              0.8000000000000003,
+              0.8000000000000003,
+              0.8000000000000003
+            ],
+            "incident_line_cells": 272,
+            "incident_pml_cells": 96,
+            "incident_drive_offset_cells": 8,
+            "total_field": "inside the staggered box",
+            "scattered_field": "outside the staggered box"
+          }
+        ],
+        "tfsf_auxiliary_estimated_bytes": 429560,
+        "point_trace_estimated_bytes": 0,
+        "snapshot": {
+          "interval": 10000,
+          "effective_interval": 10000,
+          "frames": 0,
+          "shortest_wavelength_um": 1.55,
+          "period_steps": 27.117967189209693,
+          "frames_per_period": 0.0027117967189209695,
+          "aliased": true
+        },
+        "plan_hash": "0af23d3d37bff94785e037f940049aa54655638f1a88cb6d932d664340e002d1",
+        "backend": "cuda",
+        "precision": "float32",
+        "gpu": "NVIDIA A100 80GB PCIe",
+        "cuda_graph": true,
+        "cuda_graph_steps": 1,
+        "cuda_graph_replays": 630,
+        "cuda_kernel": "fused",
+        "cuda_monitor_kernel": "torch",
+        "steps": 630,
+        "requested_steps": 630,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 9.532874347655029e-15,
+            "state_norm": 4.4684728244643165e-06,
+            "relative_norm": 1.0,
+            "field_peak": 2.520160023777862e-06,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 1.9065748695310058e-14,
+            "state_norm": 9.915348335435134,
+            "relative_norm": 1.0,
+            "field_peak": 0.01253652386367321,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 2.859862304296508e-14,
+            "state_norm": 4422.895668270245,
+            "relative_norm": 1.0,
+            "field_peak": 0.6316068172454834,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 3.8131497390620115e-14,
+            "state_norm": 12795.72531313788,
+            "relative_norm": 1.0,
+            "field_peak": 1.1096867322921753,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 4.766437173827514e-14,
+            "state_norm": 9287.856888770391,
+            "relative_norm": 0.725856226316001,
+            "field_peak": 0.10833503305912018,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 5.719724608593017e-14,
+            "state_norm": 5229.844876188257,
+            "relative_norm": 0.4087181264213735,
+            "field_peak": 0.0011050874600186944,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 6.67301204335852e-14,
+            "state_norm": 1133.48883041836,
+            "relative_norm": 0.08858339818021585,
+            "field_peak": 3.569195996533381e-06,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 7.626299478124023e-14,
+            "state_norm": 18.683118597451923,
+            "relative_norm": 0.001460106257381848,
+            "field_peak": 4.0641404552843596e-07,
+            "source_finished": true
+          },
+          {
+            "step": 450,
+            "time_s": 8.579586912889526e-14,
+            "state_norm": 0.006463105220650302,
+            "relative_norm": 5.050987781063395e-07,
+            "field_peak": 4.4010744204570074e-07,
+            "source_finished": true
+          },
+          {
+            "step": 500,
+            "time_s": 9.532874347655028e-14,
+            "state_norm": 2.290678960093893e-08,
+            "relative_norm": 1.790190789530283e-12,
+            "field_peak": 4.016147272523085e-07,
+            "source_finished": true
+          },
+          {
+            "step": 550,
+            "time_s": 1.0486161782420531e-13,
+            "state_norm": 5.001637593803169e-10,
+            "relative_norm": 3.908834764269118e-14,
+            "field_peak": 2.7615050157692167e-07,
+            "source_finished": true
+          },
+          {
+            "step": 600,
+            "time_s": 1.1439449217186033e-13,
+            "state_norm": 3.8236563458371075e-10,
+            "relative_norm": 2.9882294690330744e-14,
+            "field_peak": 2.781779073757207e-07,
+            "source_finished": true
+          },
+          {
+            "step": 630,
+            "time_s": 1.2011421678045337e-13,
+            "state_norm": 3.579829654789548e-10,
+            "relative_norm": 2.7976762295092367e-14,
+            "field_peak": 2.628104596169578e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 0.44918674416840076,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 6.716738994563558e-14,
+        "seconds": 0.45390900783240795,
+        "setup_seconds": 0.3489515921100974,
+        "mcells_per_second": 45.4801284922332,
+        "field_peak": 2.419598104097531e-07,
+        "slice_index": 15,
+        "slice_position": -0.050000000000000044,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "TorchFDTD Yee/CPML on fdtd grid"
+      },
+      "reference_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 32768,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.09999999999999964,
+          0.09999999999999964,
+          0.09999999999999964
+        ],
+        "axis_max_step_um": [
+          0.10000000000000009,
+          0.10000000000000009,
+          0.10000000000000009
+        ],
+        "coarse_limit_um": 0.1,
+        "max_adjacent_ratio": 1.0000000000000044,
+        "shape": [
+          32,
+          32,
+          32
+        ],
+        "actual_size_um": [
+          3.2,
+          3.2,
+          3.2
+        ],
+        "cells": 32768,
+        "dt_fs": 0.19065748695310056,
+        "duration_fs": 120.11421678045336,
+        "estimated_memory_mb": 14.7,
+        "warnings": [
+          "TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.",
+          "Stored frames alias the carrier: 0.0 frames per optical period (period 27.1 steps, one frame every 10000 steps). The playback will look like backward motion; store a frame at least every 7 steps."
+        ],
+        "oneway_planes": [],
+        "tfsf_boxes": [
+          {
+            "source_id": "e63079e440e1",
+            "normal": "x",
+            "direction": "+",
+            "lower_node_indices": [
+              8,
+              8,
+              8
+            ],
+            "upper_node_indices": [
+              24,
+              24,
+              24
+            ],
+            "lower_um": [
+              -0.8,
+              -0.8,
+              -0.8
+            ],
+            "upper_um": [
+              0.8000000000000003,
+              0.8000000000000003,
+              0.8000000000000003
+            ],
+            "incident_line_cells": 272,
+            "incident_pml_cells": 96,
+            "incident_drive_offset_cells": 8,
+            "total_field": "inside the staggered box",
+            "scattered_field": "outside the staggered box"
+          }
+        ],
+        "tfsf_auxiliary_estimated_bytes": 429560,
+        "point_trace_estimated_bytes": 0,
+        "snapshot": {
+          "interval": 10000,
+          "effective_interval": 10000,
+          "frames": 0,
+          "shortest_wavelength_um": 1.55,
+          "period_steps": 27.117967189209693,
+          "frames_per_period": 0.0027117967189209695,
+          "aliased": true
+        },
+        "plan_hash": "61693e3fb2f18a2ec8b7805864cb6bba8c865ff8a7fa99ad64dff30dbedf4696",
+        "backend": "cuda",
+        "precision": "float32",
+        "gpu": "NVIDIA A100 80GB PCIe",
+        "cuda_graph": true,
+        "cuda_graph_steps": 1,
+        "cuda_graph_replays": 630,
+        "cuda_kernel": "fused",
+        "cuda_monitor_kernel": "torch",
+        "steps": 630,
+        "requested_steps": 630,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 9.532874347655029e-15,
+            "state_norm": 4.468463979551112e-06,
+            "relative_norm": 1.0,
+            "field_peak": 2.5140043362625875e-06,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 1.9065748695310058e-14,
+            "state_norm": 9.915409170029243,
+            "relative_norm": 1.0,
+            "field_peak": 0.012427137233316898,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 2.859862304296508e-14,
+            "state_norm": 4422.466601821798,
+            "relative_norm": 1.0,
+            "field_peak": 0.6241329908370972,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 3.8131497390620115e-14,
+            "state_norm": 12631.213787199236,
+            "relative_norm": 1.0,
+            "field_peak": 0.862844705581665,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 4.766437173827514e-14,
+            "state_norm": 9273.207058686112,
+            "relative_norm": 0.7341501153344261,
+            "field_peak": 0.07946707308292389,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 5.719724608593017e-14,
+            "state_norm": 5229.841217339107,
+            "relative_norm": 0.4140410656843722,
+            "field_peak": 0.0003031588566955179,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 6.67301204335852e-14,
+            "state_norm": 1133.488830365227,
+            "relative_norm": 0.0897371265708392,
+            "field_peak": 4.210826318740146e-07,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 7.626299478124023e-14,
+            "state_norm": 18.683118597434976,
+            "relative_norm": 0.0014791229815434587,
+            "field_peak": 3.732355366992124e-07,
+            "source_finished": true
+          },
+          {
+            "step": 450,
+            "time_s": 8.579586912889526e-14,
+            "state_norm": 0.006463105208348336,
+            "relative_norm": 5.116772874906287e-07,
+            "field_peak": 3.988470496096852e-07,
+            "source_finished": true
+          },
+          {
+            "step": 500,
+            "time_s": 9.532874347655028e-14,
+            "state_norm": 2.290461844667255e-08,
+            "relative_norm": 1.813334714505792e-12,
+            "field_peak": 3.811081796811777e-07,
+            "source_finished": true
+          },
+          {
+            "step": 550,
+            "time_s": 1.0486161782420531e-13,
+            "state_norm": 4.919386081485207e-10,
+            "relative_norm": 3.8946265690401236e-14,
+            "field_peak": 3.333166205266025e-07,
+            "source_finished": true
+          },
+          {
+            "step": 600,
+            "time_s": 1.1439449217186033e-13,
+            "state_norm": 3.6261531337725445e-10,
+            "relative_norm": 2.870787554437066e-14,
+            "field_peak": 2.712471314225695e-07,
+            "source_finished": true
+          },
+          {
+            "step": 630,
+            "time_s": 1.2011421678045337e-13,
+            "state_norm": 3.3970186478704903e-10,
+            "relative_norm": 2.6893841756626012e-14,
+            "field_peak": 2.399870027147699e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 0.44912380166351795,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 6.716738994563558e-14,
+        "seconds": 0.45350701455026865,
+        "setup_seconds": 0.04878630582243204,
+        "mcells_per_second": 45.5204425459041,
+        "field_peak": 2.399870027147699e-07,
+        "slice_index": 15,
+        "slice_position": -0.050000000000000044,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "TorchFDTD Yee/CPML on fdtd grid"
+      }
+    },
+    {
+      "wavelength_um": [
+        1.3,
+        1.3625,
+        1.4249999999999998,
+        1.4875,
+        1.55,
+        1.6125,
+        1.675,
+        1.7375,
+        1.7999999999999998
+      ],
+      "scattering_cross_section_um2": [
+        0.19309782756320987,
+        0.169581167248452,
+        0.149498077525494,
+        0.13198429874977421,
+        0.11657388914831895,
+        0.10298480111910542,
+        0.09101377701637643,
+        0.08049006820189698,
+        0.07125760919859032
+      ],
+      "mie_cross_section_um2": [
+        0.1931665776058582,
+        0.16926262751585175,
+        0.14908382969071546,
+        0.13162734316049982,
+        0.11633908546045314,
+        0.10288743285420893,
+        0.09104399445074206,
+        0.08062715915392742,
+        0.0714781769860109
+      ],
+      "max_relative_error": 0.0030858060001131005,
+      "max_empty_box_cross_section_um2": 1.1097717795926313e-14,
+      "project": {
+        "schema_version": 1,
+        "name": "TFSF dielectric sphere",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            3.2,
+            3.2,
+            3.2
+          ],
+          "mesh": 0.05,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24.0,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 1259,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0.0,
+            "divergence_check": true,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 8,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            }
+          },
+          "bloch_phase": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "background_index": 1.0,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20.0,
+            "overlap_um": 2.0,
+            "max_angle_deg": 45.0,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 10000,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0.0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "sphere",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "56346c46a24e",
+            "name": "object",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "sphere",
+            "size": [
+              1.0,
+              1.0,
+              0.5
+            ],
+            "radius": 0.3,
+            "inner_radius": 0.3,
+            "rotation": 0.0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0.0,
+            "theta_stop": 360.0,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0.0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "sphere",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 3.0,
+            "time_definition": "standard",
+            "pulse_length": 8e-15,
+            "pulse_offset": 3e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "3bd1b0f6aaaf",
+            "name": "source",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "tfsf",
+            "injection": "oneway",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              1.6,
+              1.6,
+              1.6
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0.0,
+            "amplitude": 1.0,
+            "phase": 0.0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3.0,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "x_min",
+            "name": "x_min",
+            "center": [
+              -1.1,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              2.2,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "x_max",
+            "name": "x_max",
+            "center": [
+              1.1,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              2.2,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "y_min",
+            "name": "y_min",
+            "center": [
+              0.0,
+              -1.1,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "y",
+            "size": [
+              2.2,
+              0.0,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "y_max",
+            "name": "y_max",
+            "center": [
+              0.0,
+              1.1,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "y",
+            "size": [
+              2.2,
+              0.0,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "z_min",
+            "name": "z_min",
+            "center": [
+              0.0,
+              0.0,
+              -1.1
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "z",
+            "size": [
+              2.2,
+              2.2,
+              0.0
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "z_max",
+            "name": "z_max",
+            "center": [
+              0.0,
+              0.0,
+              1.1
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "z",
+            "size": [
+              2.2,
+              2.2,
+              0.0
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "incident",
+            "name": "incident",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.4,
+              0.4
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "sample_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 262144,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.04999999999999982,
+          0.04999999999999982,
+          0.04999999999999982
+        ],
+        "axis_max_step_um": [
+          0.050000000000000266,
+          0.050000000000000266,
+          0.050000000000000266
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000089,
+        "shape": [
+          64,
+          64,
+          64
+        ],
+        "actual_size_um": [
+          3.2,
+          3.2,
+          3.2
+        ],
+        "cells": 262144,
+        "dt_fs": 0.09532874347655028,
+        "duration_fs": 120.0188880369768,
+        "estimated_memory_mb": 83.7,
+        "warnings": [
+          "TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.",
+          "Stored frames alias the carrier: 0.0 frames per optical period (period 54.2 steps, one frame every 10000 steps). The playback will look like backward motion; store a frame at least every 14 steps."
+        ],
+        "oneway_planes": [],
+        "tfsf_boxes": [
+          {
+            "source_id": "3bd1b0f6aaaf",
+            "normal": "x",
+            "direction": "+",
+            "lower_node_indices": [
+              16,
+              16,
+              16
+            ],
+            "upper_node_indices": [
+              48,
+              48,
+              48
+            ],
+            "lower_um": [
+              -0.8,
+              -0.8,
+              -0.8
+            ],
+            "upper_um": [
+              0.8000000000000003,
+              0.8000000000000003,
+              0.8000000000000003
+            ],
+            "incident_line_cells": 288,
+            "incident_pml_cells": 96,
+            "incident_drive_offset_cells": 8,
+            "total_field": "inside the staggered box",
+            "scattered_field": "outside the staggered box"
+          }
+        ],
+        "tfsf_auxiliary_estimated_bytes": 1584716,
+        "point_trace_estimated_bytes": 0,
+        "snapshot": {
+          "interval": 10000,
+          "effective_interval": 10000,
+          "frames": 0,
+          "shortest_wavelength_um": 1.55,
+          "period_steps": 54.23593437841939,
+          "frames_per_period": 0.005423593437841939,
+          "aliased": true
+        },
+        "plan_hash": "5a798684aa1eca5dead03144669eed5e52fd853c018cf62b8628e72234b08d69",
+        "backend": "cuda",
+        "precision": "float32",
+        "gpu": "NVIDIA A100 80GB PCIe",
+        "cuda_graph": true,
+        "cuda_graph_steps": 1,
+        "cuda_graph_replays": 1259,
+        "cuda_kernel": "fused",
+        "cuda_monitor_kernel": "torch",
+        "steps": 1259,
+        "requested_steps": 1259,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 4.766437173827514e-15,
+            "state_norm": 3.0374990925002326e-09,
+            "relative_norm": 1.0,
+            "field_peak": 1.5459440305676253e-07,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 9.532874347655029e-15,
+            "state_norm": 3.7807398976460064e-05,
+            "relative_norm": 1.0,
+            "field_peak": 2.9863896997994743e-05,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 1.429931152148254e-14,
+            "state_norm": 0.16491819865360446,
+            "relative_norm": 1.0,
+            "field_peak": 0.0016460814513266087,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 1.9065748695310058e-14,
+            "state_norm": 77.75675948352679,
+            "relative_norm": 1.0,
+            "field_peak": 0.02595273032784462,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 2.383218586913757e-14,
+            "state_norm": 4059.929358230217,
+            "relative_norm": 1.0,
+            "field_peak": 0.17512372136116028,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 2.859862304296508e-14,
+            "state_norm": 36589.543489669035,
+            "relative_norm": 1.0,
+            "field_peak": 0.6738719344139099,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 3.33650602167926e-14,
+            "state_norm": 89396.36898979635,
+            "relative_norm": 1.0,
+            "field_peak": 1.3935465812683105,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 3.8131497390620115e-14,
+            "state_norm": 84433.71015304375,
+            "relative_norm": 0.9444870200788689,
+            "field_peak": 1.123014211654663,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 4.289793456444763e-14,
+            "state_norm": 52529.64349939457,
+            "relative_norm": 0.5876037706340207,
+            "field_peak": 0.4477378726005554,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 4.766437173827514e-14,
+            "state_norm": 26723.74842779159,
+            "relative_norm": 0.2989355018528977,
+            "field_peak": 0.06701838970184326,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 5.2430808912102653e-14,
+            "state_norm": 7316.470382881867,
+            "relative_norm": 0.08184303753675908,
+            "field_peak": 0.003839649725705385,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 5.719724608593017e-14,
+            "state_norm": 651.1497002348385,
+            "relative_norm": 0.007283849529830013,
+            "field_peak": 0.0003355658263899386,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 6.196368325975768e-14,
+            "state_norm": 14.660444053659562,
+            "relative_norm": 0.00016399373061038862,
+            "field_peak": 1.2500621778599452e-05,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 6.67301204335852e-14,
+            "state_norm": 0.07428072194775456,
+            "relative_norm": 8.30914306555705e-07,
+            "field_peak": 5.482136202772381e-07,
+            "source_finished": true
+          },
+          {
+            "step": 750,
+            "time_s": 7.149655760741272e-14,
+            "state_norm": 7.765018963326858e-05,
+            "relative_norm": 8.686056325412e-10,
+            "field_peak": 5.958395377092529e-07,
+            "source_finished": true
+          },
+          {
+            "step": 800,
+            "time_s": 7.626299478124023e-14,
+            "state_norm": 1.9669441506137782e-08,
+            "relative_norm": 2.2002506061944017e-13,
+            "field_peak": 5.385903136811976e-07,
+            "source_finished": true
+          },
+          {
+            "step": 850,
+            "time_s": 8.102943195506774e-14,
+            "state_norm": 3.1896338013576216e-09,
+            "relative_norm": 3.56796795820833e-14,
+            "field_peak": 4.7178488671306695e-07,
+            "source_finished": true
+          },
+          {
+            "step": 900,
+            "time_s": 8.579586912889526e-14,
+            "state_norm": 2.9267682096872293e-09,
+            "relative_norm": 3.273922915170401e-14,
+            "field_peak": 5.708402568416204e-07,
+            "source_finished": true
+          },
+          {
+            "step": 950,
+            "time_s": 9.056230630272277e-14,
+            "state_norm": 2.8057384715007086e-09,
+            "relative_norm": 3.138537396100455e-14,
+            "field_peak": 4.4972441060053825e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1000,
+            "time_s": 9.532874347655028e-14,
+            "state_norm": 2.5339995601026215e-09,
+            "relative_norm": 2.834566536356584e-14,
+            "field_peak": 5.088007242193271e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1050,
+            "time_s": 1.000951806503778e-13,
+            "state_norm": 2.2599750854525123e-09,
+            "relative_norm": 2.528039014325587e-14,
+            "field_peak": 5.583476649917429e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1100,
+            "time_s": 1.0486161782420531e-13,
+            "state_norm": 2.49271571988059e-09,
+            "relative_norm": 2.7883858685190077e-14,
+            "field_peak": 5.052533538218995e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1150,
+            "time_s": 1.0962805499803283e-13,
+            "state_norm": 2.2948483828423597e-09,
+            "relative_norm": 2.56704876134767e-14,
+            "field_peak": 4.97709947921976e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1200,
+            "time_s": 1.1439449217186033e-13,
+            "state_norm": 1.9131798981116937e-09,
+            "relative_norm": 2.1401091786290145e-14,
+            "field_peak": 5.623568881674146e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1250,
+            "time_s": 1.1916092934568786e-13,
+            "state_norm": 2.2163550515438256e-09,
+            "relative_norm": 2.4792450483048132e-14,
+            "field_peak": 5.120099331179517e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1259,
+            "time_s": 1.200188880369768e-13,
+            "state_norm": 1.9323814230009633e-09,
+            "relative_norm": 2.1615882667690053e-14,
+            "field_peak": 5.122826678416459e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 1.0618054261431098,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 6.583313356484297e-14,
+        "seconds": 1.070561076514423,
+        "setup_seconds": 0.09232999198138714,
+        "mcells_per_second": 308.2862839311846,
+        "field_peak": 5.122826678416459e-07,
+        "slice_index": 31,
+        "slice_position": -0.025000000000000022,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "TorchFDTD Yee/CPML on fdtd grid"
+      },
+      "reference_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 262144,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.04999999999999982,
+          0.04999999999999982,
+          0.04999999999999982
+        ],
+        "axis_max_step_um": [
+          0.050000000000000266,
+          0.050000000000000266,
+          0.050000000000000266
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000089,
+        "shape": [
+          64,
+          64,
+          64
+        ],
+        "actual_size_um": [
+          3.2,
+          3.2,
+          3.2
+        ],
+        "cells": 262144,
+        "dt_fs": 0.09532874347655028,
+        "duration_fs": 120.0188880369768,
+        "estimated_memory_mb": 83.7,
+        "warnings": [
+          "TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.",
+          "Stored frames alias the carrier: 0.0 frames per optical period (period 54.2 steps, one frame every 10000 steps). The playback will look like backward motion; store a frame at least every 14 steps."
+        ],
+        "oneway_planes": [],
+        "tfsf_boxes": [
+          {
+            "source_id": "3bd1b0f6aaaf",
+            "normal": "x",
+            "direction": "+",
+            "lower_node_indices": [
+              16,
+              16,
+              16
+            ],
+            "upper_node_indices": [
+              48,
+              48,
+              48
+            ],
+            "lower_um": [
+              -0.8,
+              -0.8,
+              -0.8
+            ],
+            "upper_um": [
+              0.8000000000000003,
+              0.8000000000000003,
+              0.8000000000000003
+            ],
+            "incident_line_cells": 288,
+            "incident_pml_cells": 96,
+            "incident_drive_offset_cells": 8,
+            "total_field": "inside the staggered box",
+            "scattered_field": "outside the staggered box"
+          }
+        ],
+        "tfsf_auxiliary_estimated_bytes": 1584716,
+        "point_trace_estimated_bytes": 0,
+        "snapshot": {
+          "interval": 10000,
+          "effective_interval": 10000,
+          "frames": 0,
+          "shortest_wavelength_um": 1.55,
+          "period_steps": 54.23593437841939,
+          "frames_per_period": 0.005423593437841939,
+          "aliased": true
+        },
+        "plan_hash": "309db0ba5fd6203eabf42e59e7a84f231f253167964afe7bb7b4f6819e00b792",
+        "backend": "cuda",
+        "precision": "float32",
+        "gpu": "NVIDIA A100 80GB PCIe",
+        "cuda_graph": true,
+        "cuda_graph_steps": 1,
+        "cuda_graph_replays": 1259,
+        "cuda_kernel": "fused",
+        "cuda_monitor_kernel": "torch",
+        "steps": 1259,
+        "requested_steps": 1259,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 4.766437173827514e-15,
+            "state_norm": 3.037512012196945e-09,
+            "relative_norm": 1.0,
+            "field_peak": 1.5452854995601228e-07,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 9.532874347655029e-15,
+            "state_norm": 3.780813910398705e-05,
+            "relative_norm": 1.0,
+            "field_peak": 2.9829549021087587e-05,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 1.429931152148254e-14,
+            "state_norm": 0.16492211895857595,
+            "relative_norm": 1.0,
+            "field_peak": 0.0016437685117125511,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 1.9065748695310058e-14,
+            "state_norm": 77.75745722838764,
+            "relative_norm": 1.0,
+            "field_peak": 0.025939755141735077,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 2.383218586913757e-14,
+            "state_norm": 4059.389586327398,
+            "relative_norm": 1.0,
+            "field_peak": 0.15659423172473907,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 2.859862304296508e-14,
+            "state_norm": 36547.56545775177,
+            "relative_norm": 1.0,
+            "field_peak": 0.6395643353462219,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 3.33650602167926e-14,
+            "state_norm": 88724.13442913232,
+            "relative_norm": 1.0,
+            "field_peak": 0.8491713404655457,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 3.8131497390620115e-14,
+            "state_norm": 82626.23145657139,
+            "relative_norm": 0.931271203581799,
+            "field_peak": 0.8119586110115051,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 4.289793456444763e-14,
+            "state_norm": 51840.89882168236,
+            "relative_norm": 0.5842930917865404,
+            "field_peak": 0.36675047874450684,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 4.766437173827514e-14,
+            "state_norm": 26676.77901730591,
+            "relative_norm": 0.3006710540367545,
+            "field_peak": 0.051338598132133484,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 5.2430808912102653e-14,
+            "state_norm": 7315.621976856251,
+            "relative_norm": 0.08245357392243195,
+            "field_peak": 0.00231920019723475,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 5.719724608593017e-14,
+            "state_norm": 651.1452240775094,
+            "relative_norm": 0.007338986491861539,
+            "field_peak": 3.408381962799467e-05,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 6.196368325975768e-14,
+            "state_norm": 14.660437496661379,
+            "relative_norm": 0.0001652361850694783,
+            "field_peak": 8.58559815242188e-07,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 6.67301204335852e-14,
+            "state_norm": 0.07428071802447248,
+            "relative_norm": 8.372098358852246e-07,
+            "field_peak": 5.110759957460687e-07,
+            "source_finished": true
+          },
+          {
+            "step": 750,
+            "time_s": 7.149655760741272e-14,
+            "state_norm": 7.765004928819372e-05,
+            "relative_norm": 8.751851994703432e-10,
+            "field_peak": 4.5864567255193833e-07,
+            "source_finished": true
+          },
+          {
+            "step": 800,
+            "time_s": 7.626299478124023e-14,
+            "state_norm": 1.9598499093503687e-08,
+            "relative_norm": 2.208925363950192e-13,
+            "field_peak": 5.096134714221989e-07,
+            "source_finished": true
+          },
+          {
+            "step": 850,
+            "time_s": 8.102943195506774e-14,
+            "state_norm": 3.123457946688386e-09,
+            "relative_norm": 3.520415236266095e-14,
+            "field_peak": 4.174497973963298e-07,
+            "source_finished": true
+          },
+          {
+            "step": 900,
+            "time_s": 8.579586912889526e-14,
+            "state_norm": 2.939271830745949e-09,
+            "relative_norm": 3.312821082626248e-14,
+            "field_peak": 5.171315820007294e-07,
+            "source_finished": true
+          },
+          {
+            "step": 950,
+            "time_s": 9.056230630272277e-14,
+            "state_norm": 2.855824338522714e-09,
+            "relative_norm": 3.218768328254338e-14,
+            "field_peak": 4.0859995920072834e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1000,
+            "time_s": 9.532874347655028e-14,
+            "state_norm": 2.574360245950962e-09,
+            "relative_norm": 2.9015332327724324e-14,
+            "field_peak": 4.555348311896523e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1050,
+            "time_s": 1.000951806503778e-13,
+            "state_norm": 2.271980137654043e-09,
+            "relative_norm": 2.560723925088014e-14,
+            "field_peak": 5.040392352384515e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1100,
+            "time_s": 1.0486161782420531e-13,
+            "state_norm": 2.5080086814383556e-09,
+            "relative_norm": 2.826749111248425e-14,
+            "field_peak": 3.951082305775344e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1150,
+            "time_s": 1.0962805499803283e-13,
+            "state_norm": 2.3417785567083224e-09,
+            "relative_norm": 2.639392958607896e-14,
+            "field_peak": 4.65025948415132e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1200,
+            "time_s": 1.1439449217186033e-13,
+            "state_norm": 1.8967244983114016e-09,
+            "relative_norm": 2.137777404665914e-14,
+            "field_peak": 4.783333338309603e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1250,
+            "time_s": 1.1916092934568786e-13,
+            "state_norm": 2.2171597242078626e-09,
+            "relative_norm": 2.4989364376147292e-14,
+            "field_peak": 4.6404406361943984e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1259,
+            "time_s": 1.200188880369768e-13,
+            "state_norm": 1.9339729914507408e-09,
+            "relative_norm": 2.179759773250294e-14,
+            "field_peak": 4.504961168549926e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 1.0519187599420547,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 6.583313356484297e-14,
+        "seconds": 1.0604545576497912,
+        "setup_seconds": 0.06404036562889814,
+        "mcells_per_second": 311.22436470209743,
+        "field_peak": 4.504961168549926e-07,
+        "slice_index": 31,
+        "slice_position": -0.025000000000000022,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "TorchFDTD Yee/CPML on fdtd grid"
+      }
+    },
+    {
+      "wavelength_um": [
+        1.3,
+        1.3625,
+        1.4249999999999998,
+        1.4875,
+        1.55,
+        1.6125,
+        1.675,
+        1.7375,
+        1.7999999999999998
+      ],
+      "scattering_cross_section_um2": [
+        0.194728598803952,
+        0.1708096045016287,
+        0.15054996106088583,
+        0.13297503730296917,
+        0.1175530506675125,
+        0.10396511089620006,
+        0.09199177111825595,
+        0.08145571825483157,
+        0.07219992734473418
+      ],
+      "mie_cross_section_um2": [
+        0.1931665776058582,
+        0.16926262751585175,
+        0.14908382969071546,
+        0.13162734316049982,
+        0.11633908546045314,
+        0.10288743285420893,
+        0.09104399445074206,
+        0.08062715915392742,
+        0.0714781769860109
+      ],
+      "max_relative_error": 0.010474340860639364,
+      "max_empty_box_cross_section_um2": 2.188998830603864e-15,
+      "project": {
+        "schema_version": 1,
+        "name": "TFSF dielectric sphere",
+        "region": {
+          "dimension": "3d",
+          "size": [
+            3.2,
+            3.2,
+            3.2
+          ],
+          "mesh": 0.025,
+          "mesh_steps": null,
+          "mesh_coordinates": null,
+          "material_sampling": "yee",
+          "interface_method": "staircase",
+          "subpixel_quadrature": 8,
+          "mesh_type": "uniform",
+          "mesh_max": 0.15,
+          "mesh_grading": 1.25,
+          "mesh_ppw": 24.0,
+          "mesh_auto_refine": true,
+          "mesh_refinements": [],
+          "courant_factor": 0.99,
+          "time_step_override": null,
+          "steps": 2518,
+          "run_control": {
+            "auto_shutoff": false,
+            "decay_threshold": 1e-06,
+            "check_interval": 50,
+            "consecutive_checks": 3,
+            "min_steps": 100,
+            "source_tail_amplitude": 1e-08,
+            "after_source_s": 0.0,
+            "divergence_check": true,
+            "growth_limit": 1000000.0,
+            "field_limit": null
+          },
+          "pml_cells": 16,
+          "pml_dispersion": "ade",
+          "boundaries": {
+            "x_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "x_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "y_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_min": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            },
+            "z_max": {
+              "kind": "pml",
+              "layers": null,
+              "sigma_scale": 1.0,
+              "kappa": 1.0,
+              "alpha": 1e-08,
+              "polynomial": 3.0,
+              "alpha_polynomial": 0.0
+            }
+          },
+          "bloch_phase": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "background_index": 1.0,
+          "backend": "cuda",
+          "memory_mode": "resident",
+          "execution_mode": "auto",
+          "tiling": {
+            "size_um": 20.0,
+            "overlap_um": 2.0,
+            "max_angle_deg": 45.0,
+            "propagation_um": null,
+            "allow_approximate": false
+          },
+          "cuda_kernel": "fused",
+          "cuda_monitor_kernel": "torch",
+          "precision": "float32",
+          "snapshot_interval": 10000,
+          "field": "Ez",
+          "slice_axis": "z",
+          "slice_position": 0.0,
+          "complex_display": "real"
+        },
+        "materials": [
+          {
+            "name": "sphere",
+            "index": 1.5,
+            "color": "#6ca8dd",
+            "model": "dielectric",
+            "epsilon_tensor": [
+              2.25,
+              2.25,
+              2.25,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "epsilon_inf": 1.0,
+            "plasma_rad_s": 2000000000000000.0,
+            "collision_rad_s": 100000000000000.0,
+            "resonance_rad_s": 2000000000000000.0,
+            "linewidth_rad_s": 100000000000000.0,
+            "delta_epsilon": 1.0,
+            "poles": [],
+            "samples": null,
+            "fit_band_um": null,
+            "fit_dt_s": null,
+            "provenance": null
+          }
+        ],
+        "structures": [
+          {
+            "id": "ead27510e544",
+            "name": "object",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "sphere",
+            "size": [
+              1.0,
+              1.0,
+              0.5
+            ],
+            "radius": 0.3,
+            "inner_radius": 0.3,
+            "rotation": 0.0,
+            "rotation_axes": [
+              "z",
+              "x",
+              "y"
+            ],
+            "rotation_angles": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "make_ellipsoid": false,
+            "radius_2": 0.5,
+            "radius_3": 0.5,
+            "inner_radius_2": 0.3,
+            "theta_start": 0.0,
+            "theta_stop": 360.0,
+            "vertices": [
+              [
+                -0.5,
+                -0.5
+              ],
+              [
+                0.5,
+                -0.5
+              ],
+              [
+                0.0,
+                0.5
+              ]
+            ],
+            "holes": [],
+            "material": "sphere",
+            "mesh_order": 2
+          }
+        ],
+        "sources": [
+          {
+            "wavelength": 1.55,
+            "pulse": "gaussian",
+            "pulse_cycles": 3.0,
+            "time_definition": "standard",
+            "pulse_length": 8e-15,
+            "pulse_offset": 3e-14,
+            "signal": null,
+            "wavelength_start": 1.3,
+            "wavelength_stop": 1.8,
+            "optimize_for_short_pulse": true,
+            "eliminate_discontinuities": false,
+            "chirp_bandwidth_hz": 100000000000000.0,
+            "id": "d244c17e8de2",
+            "name": "source",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "tfsf",
+            "injection": "oneway",
+            "normal": "x",
+            "direction": "+",
+            "incident_pml_cells": 96,
+            "size": [
+              1.6,
+              1.6,
+              1.6
+            ],
+            "component": "Ez",
+            "theta": null,
+            "phi": 0.0,
+            "amplitude": 1.0,
+            "phase": 0.0,
+            "use_global_source": false,
+            "extend_through_pml": false
+          }
+        ],
+        "global_source": {
+          "wavelength": 1.55,
+          "pulse": "gaussian",
+          "pulse_cycles": 3.0,
+          "time_definition": "cycles",
+          "pulse_length": 2e-14,
+          "pulse_offset": 5e-14,
+          "signal": null,
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "optimize_for_short_pulse": true,
+          "eliminate_discontinuities": false,
+          "chirp_bandwidth_hz": 100000000000000.0
+        },
+        "monitors": [
+          {
+            "id": "x_min",
+            "name": "x_min",
+            "center": [
+              -1.1,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              2.2,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "x_max",
+            "name": "x_max",
+            "center": [
+              1.1,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              2.2,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "y_min",
+            "name": "y_min",
+            "center": [
+              0.0,
+              -1.1,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "y",
+            "size": [
+              2.2,
+              0.0,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "y_max",
+            "name": "y_max",
+            "center": [
+              0.0,
+              1.1,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "y",
+            "size": [
+              2.2,
+              0.0,
+              2.2
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "z_min",
+            "name": "z_min",
+            "center": [
+              0.0,
+              0.0,
+              -1.1
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "z",
+            "size": [
+              2.2,
+              2.2,
+              0.0
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "z_max",
+            "name": "z_max",
+            "center": [
+              0.0,
+              0.0,
+              1.1
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "z",
+            "size": [
+              2.2,
+              2.2,
+              0.0
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          },
+          {
+            "id": "incident",
+            "name": "incident",
+            "center": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "enabled": true,
+            "kind": "field",
+            "component": "Ez",
+            "spectrum": {
+              "sampling": "wavelength",
+              "chebyshev_wavelength": false,
+              "chebyshev_nodes": "roots",
+              "use_source_limits": false,
+              "custom_frequencies_hz": [],
+              "wavelength_start": 1.3,
+              "wavelength_stop": 1.8,
+              "frequency_points": 9,
+              "apodization": "none",
+              "apodization_center": 2e-14,
+              "apodization_time_width": 1e-14
+            },
+            "use_global_monitor": false,
+            "inherit_apodization": true,
+            "time_downsample": 1,
+            "normal": "x",
+            "size": [
+              0.0,
+              0.4,
+              0.4
+            ],
+            "downsample": 1,
+            "downsample_xyz": null,
+            "record_fields": [
+              "Ex",
+              "Ey",
+              "Ez",
+              "Hx",
+              "Hy",
+              "Hz"
+            ],
+            "record_poynting": [
+              "x",
+              "y",
+              "z"
+            ],
+            "record_flux": true,
+            "dft_precision": "field",
+            "spatial_interpolation": "specified"
+          }
+        ],
+        "global_monitor": {
+          "sampling": "frequency",
+          "chebyshev_wavelength": false,
+          "chebyshev_nodes": "roots",
+          "use_source_limits": false,
+          "custom_frequencies_hz": [],
+          "wavelength_start": 1.3,
+          "wavelength_stop": 1.8,
+          "frequency_points": 101,
+          "apodization": "none",
+          "apodization_center": 2e-14,
+          "apodization_time_width": 1e-14
+        },
+        "import_provenance": null,
+        "revision": 0,
+        "content_sha256": null
+      },
+      "sample_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 2097152,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.02499999999999991,
+          0.02499999999999991,
+          0.02499999999999991
+        ],
+        "axis_max_step_um": [
+          0.025000000000000355,
+          0.025000000000000355,
+          0.025000000000000355
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000178,
+        "shape": [
+          128,
+          128,
+          128
+        ],
+        "actual_size_um": [
+          3.2,
+          3.2,
+          3.2
+        ],
+        "cells": 2097152,
+        "dt_fs": 0.04766437173827514,
+        "duration_fs": 120.0188880369768,
+        "estimated_memory_mb": 534.4,
+        "warnings": [
+          "TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.",
+          "Stored frames alias the carrier: 0.0 frames per optical period (period 108.5 steps, one frame every 10000 steps). The playback will look like backward motion; store a frame at least every 27 steps."
+        ],
+        "oneway_planes": [],
+        "tfsf_boxes": [
+          {
+            "source_id": "d244c17e8de2",
+            "normal": "x",
+            "direction": "+",
+            "lower_node_indices": [
+              32,
+              32,
+              32
+            ],
+            "upper_node_indices": [
+              96,
+              96,
+              96
+            ],
+            "lower_um": [
+              -0.8,
+              -0.8,
+              -0.8
+            ],
+            "upper_um": [
+              0.8000000000000003,
+              0.8000000000000003,
+              0.8000000000000003
+            ],
+            "incident_line_cells": 320,
+            "incident_pml_cells": 96,
+            "incident_drive_offset_cells": 8,
+            "total_field": "inside the staggered box",
+            "scattered_field": "outside the staggered box"
+          }
+        ],
+        "tfsf_auxiliary_estimated_bytes": 6106872,
+        "point_trace_estimated_bytes": 0,
+        "snapshot": {
+          "interval": 10000,
+          "effective_interval": 10000,
+          "frames": 0,
+          "shortest_wavelength_um": 1.55,
+          "period_steps": 108.47186875683877,
+          "frames_per_period": 0.010847186875683878,
+          "aliased": true
+        },
+        "plan_hash": "7488c71df55b780bcf8c756c5c9023f536da5cd71687bc356937397eeaa00ac8",
+        "backend": "cuda",
+        "precision": "float32",
+        "gpu": "NVIDIA A100 80GB PCIe",
+        "cuda_graph": true,
+        "cuda_graph_steps": 1,
+        "cuda_graph_replays": 2518,
+        "cuda_kernel": "fused",
+        "cuda_monitor_kernel": "torch",
+        "steps": 2518,
+        "requested_steps": 2518,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 2.383218586913757e-15,
+            "state_norm": 1.2548889881848213e-10,
+            "relative_norm": 1.0,
+            "field_peak": 7.180527283878746e-09,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 4.766437173827514e-15,
+            "state_norm": 2.1740629793305267e-08,
+            "relative_norm": 1.0,
+            "field_peak": 1.543083243404908e-07,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 7.14965576074127e-15,
+            "state_norm": 2.911792411894944e-06,
+            "relative_norm": 1.0,
+            "field_peak": 2.6076870653923834e-06,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 9.532874347655029e-15,
+            "state_norm": 0.0003536503586137457,
+            "relative_norm": 1.0,
+            "field_peak": 3.320155155961402e-05,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 1.1916092934568785e-14,
+            "state_norm": 0.030905753646188118,
+            "relative_norm": 1.0,
+            "field_peak": 0.00031787483021616936,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 1.429931152148254e-14,
+            "state_norm": 1.5797188736536163,
+            "relative_norm": 1.0,
+            "field_peak": 0.002289019525051117,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 1.66825301083963e-14,
+            "state_norm": 44.727090162222,
+            "relative_norm": 1.0,
+            "field_peak": 0.0122761819511652,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 1.9065748695310058e-14,
+            "state_norm": 704.9478383514238,
+            "relative_norm": 1.0,
+            "field_peak": 0.04813407361507416,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 2.1448967282223814e-14,
+            "state_norm": 6346.861350502284,
+            "relative_norm": 1.0,
+            "field_peak": 0.13882166147232056,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 2.383218586913757e-14,
+            "state_norm": 34155.985697887816,
+            "relative_norm": 1.0,
+            "field_peak": 0.29383179545402527,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 2.6215404456051327e-14,
+            "state_norm": 117852.61270884867,
+            "relative_norm": 1.0,
+            "field_peak": 0.4579960107803345,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 2.859862304296508e-14,
+            "state_norm": 282218.88434394007,
+            "relative_norm": 1.0,
+            "field_peak": 0.8049420118331909,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 3.098184162987884e-14,
+            "state_norm": 490473.90832719294,
+            "relative_norm": 1.0,
+            "field_peak": 1.069109559059143,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 3.33650602167926e-14,
+            "state_norm": 619227.0398639361,
+            "relative_norm": 1.0,
+            "field_peak": 1.1598299741744995,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 3.574827880370636e-14,
+            "state_norm": 575735.2789376533,
+            "relative_norm": 0.9297644351321619,
+            "field_peak": 1.3048745393753052,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 3.8131497390620115e-14,
+            "state_norm": 423647.26378492324,
+            "relative_norm": 0.6841549811487755,
+            "field_peak": 1.0890765190124512,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 4.051471597753387e-14,
+            "state_norm": 268891.42506072443,
+            "relative_norm": 0.4342372147053017,
+            "field_peak": 0.6789655685424805,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 4.289793456444763e-14,
+            "state_norm": 145972.16272507713,
+            "relative_norm": 0.23573286263008128,
+            "field_peak": 0.33102166652679443,
+            "source_finished": false
+          },
+          {
+            "step": 950,
+            "time_s": 4.5281153151361384e-14,
+            "state_norm": 61454.04127577439,
+            "relative_norm": 0.09924314882838094,
+            "field_peak": 0.1600843369960785,
+            "source_finished": false
+          },
+          {
+            "step": 1000,
+            "time_s": 4.766437173827514e-14,
+            "state_norm": 18370.991077922154,
+            "relative_norm": 0.02966761768342488,
+            "field_peak": 0.05745358765125275,
+            "source_finished": false
+          },
+          {
+            "step": 1050,
+            "time_s": 5.00475903251889e-14,
+            "state_norm": 3760.7174853133192,
+            "relative_norm": 0.006073244937978917,
+            "field_peak": 0.015396546572446823,
+            "source_finished": false
+          },
+          {
+            "step": 1100,
+            "time_s": 5.2430808912102653e-14,
+            "state_norm": 526.0126777653691,
+            "relative_norm": 0.0008494665831791692,
+            "field_peak": 0.0031025398056954145,
+            "source_finished": false
+          },
+          {
+            "step": 1150,
+            "time_s": 5.4814027499016416e-14,
+            "state_norm": 49.774205358380655,
+            "relative_norm": 8.038118840759542e-05,
+            "field_peak": 0.0009401993011124432,
+            "source_finished": false
+          },
+          {
+            "step": 1200,
+            "time_s": 5.719724608593017e-14,
+            "state_norm": 3.0646601990191558,
+            "relative_norm": 4.949170500843372e-06,
+            "field_peak": 0.00025919589097611606,
+            "source_finished": false
+          },
+          {
+            "step": 1250,
+            "time_s": 5.958046467284393e-14,
+            "state_norm": 0.11722537390980817,
+            "relative_norm": 1.8930919737543488e-07,
+            "field_peak": 5.557900294661522e-05,
+            "source_finished": false
+          },
+          {
+            "step": 1300,
+            "time_s": 6.196368325975768e-14,
+            "state_norm": 0.0027232489094074163,
+            "relative_norm": 4.3978197560717e-09,
+            "field_peak": 9.527895599603653e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1350,
+            "time_s": 6.434690184667144e-14,
+            "state_norm": 3.919129235679157e-05,
+            "relative_norm": 6.329066696668018e-11,
+            "field_peak": 1.557517293804267e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1400,
+            "time_s": 6.67301204335852e-14,
+            "state_norm": 3.9950674795366456e-07,
+            "relative_norm": 6.451700624078834e-13,
+            "field_peak": 7.570570232928731e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1450,
+            "time_s": 6.911333902049895e-14,
+            "state_norm": 3.1493517784781504e-08,
+            "relative_norm": 5.0859403348570873e-14,
+            "field_peak": 7.189175903477008e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1500,
+            "time_s": 7.149655760741272e-14,
+            "state_norm": 2.6255012541027935e-08,
+            "relative_norm": 4.239965448988952e-14,
+            "field_peak": 7.563628514617449e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1550,
+            "time_s": 7.387977619432647e-14,
+            "state_norm": 2.6278494238115497e-08,
+            "relative_norm": 4.243757547133232e-14,
+            "field_peak": 7.096260787875508e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1600,
+            "time_s": 7.626299478124023e-14,
+            "state_norm": 2.2917011444345e-08,
+            "relative_norm": 3.7009061247358637e-14,
+            "field_peak": 7.078314183672774e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1650,
+            "time_s": 7.864621336815398e-14,
+            "state_norm": 2.2068075716063605e-08,
+            "relative_norm": 3.5638100882856574e-14,
+            "field_peak": 7.591552844132821e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1700,
+            "time_s": 8.102943195506774e-14,
+            "state_norm": 2.4095722988568523e-08,
+            "relative_norm": 3.891258203754009e-14,
+            "field_peak": 7.185395816122764e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1750,
+            "time_s": 8.341265054198149e-14,
+            "state_norm": 2.1206937482889548e-08,
+            "relative_norm": 3.424743449115107e-14,
+            "field_peak": 7.445702294717194e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1800,
+            "time_s": 8.579586912889526e-14,
+            "state_norm": 2.051069907985864e-08,
+            "relative_norm": 3.3123067565598387e-14,
+            "field_peak": 7.454265755768574e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1850,
+            "time_s": 8.817908771580902e-14,
+            "state_norm": 2.1835913357765293e-08,
+            "relative_norm": 3.526317804623541e-14,
+            "field_peak": 7.058640676405048e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1900,
+            "time_s": 9.056230630272277e-14,
+            "state_norm": 2.0358699790521007e-08,
+            "relative_norm": 3.287760139640294e-14,
+            "field_peak": 7.069139087434451e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1950,
+            "time_s": 9.294552488963653e-14,
+            "state_norm": 2.064370359596503e-08,
+            "relative_norm": 3.333785876098225e-14,
+            "field_peak": 7.863063160584716e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2000,
+            "time_s": 9.532874347655028e-14,
+            "state_norm": 2.009940056875111e-08,
+            "relative_norm": 3.245885478962222e-14,
+            "field_peak": 6.979259410400118e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2050,
+            "time_s": 9.771196206346404e-14,
+            "state_norm": 1.9277435051912678e-08,
+            "relative_norm": 3.113144906615923e-14,
+            "field_peak": 7.302307949430542e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2100,
+            "time_s": 1.000951806503778e-13,
+            "state_norm": 2.0590487278383427e-08,
+            "relative_norm": 3.3251918848549976e-14,
+            "field_peak": 8.048679660532798e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2150,
+            "time_s": 1.0247839923729156e-13,
+            "state_norm": 1.8973700330213378e-08,
+            "relative_norm": 3.064094283476785e-14,
+            "field_peak": 7.160987252063933e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2200,
+            "time_s": 1.0486161782420531e-13,
+            "state_norm": 1.878834156055748e-08,
+            "relative_norm": 3.0341603888431416e-14,
+            "field_peak": 6.942000254639424e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2250,
+            "time_s": 1.0724483641111907e-13,
+            "state_norm": 2.0235508627706642e-08,
+            "relative_norm": 3.267865794774244e-14,
+            "field_peak": 8.355098657375493e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2300,
+            "time_s": 1.0962805499803283e-13,
+            "state_norm": 1.8144039950335493e-08,
+            "relative_norm": 2.9301110549568887e-14,
+            "field_peak": 6.939864078958635e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2350,
+            "time_s": 1.1201127358494658e-13,
+            "state_norm": 1.873737849352562e-08,
+            "relative_norm": 3.0259302787621833e-14,
+            "field_peak": 7.139559556890163e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2400,
+            "time_s": 1.1439449217186033e-13,
+            "state_norm": 1.9587917185992795e-08,
+            "relative_norm": 3.163285180552981e-14,
+            "field_peak": 8.191997835638176e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2450,
+            "time_s": 1.167777107587741e-13,
+            "state_norm": 1.765877666299835e-08,
+            "relative_norm": 2.8517450831731355e-14,
+            "field_peak": 6.949738917683135e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2500,
+            "time_s": 1.1916092934568786e-13,
+            "state_norm": 1.9011113155123765e-08,
+            "relative_norm": 3.0701361425206995e-14,
+            "field_peak": 6.959244842619228e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2518,
+            "time_s": 1.200188880369768e-13,
+            "state_norm": 1.880370234728454e-08,
+            "relative_norm": 3.036641027726488e-14,
+            "field_peak": 7.253602802848036e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 2.7906658053398132,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 6.516600537444666e-14,
+        "seconds": 2.807712772861123,
+        "setup_seconds": 0.2705720020458102,
+        "mcells_per_second": 1880.7581697963071,
+        "field_peak": 7.253602802848036e-07,
+        "slice_index": 63,
+        "slice_position": -0.012499999999999956,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "TorchFDTD Yee/CPML on fdtd grid"
+      },
+      "reference_summary": {
+        "mesh_type": "uniform",
+        "material_sampling": "yee",
+        "uniform_reference_cells": 2097152,
+        "cell_reduction_percent": 0.0,
+        "axis_min_step_um": [
+          0.02499999999999991,
+          0.02499999999999991,
+          0.02499999999999991
+        ],
+        "axis_max_step_um": [
+          0.025000000000000355,
+          0.025000000000000355,
+          0.025000000000000355
+        ],
+        "coarse_limit_um": 0.06458333333333334,
+        "max_adjacent_ratio": 1.0000000000000178,
+        "shape": [
+          128,
+          128,
+          128
+        ],
+        "actual_size_um": [
+          3.2,
+          3.2,
+          3.2
+        ],
+        "cells": 2097152,
+        "dt_fs": 0.04766437173827514,
+        "duration_fs": 120.0188880369768,
+        "estimated_memory_mb": 534.4,
+        "warnings": [
+          "TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.",
+          "Stored frames alias the carrier: 0.0 frames per optical period (period 108.5 steps, one frame every 10000 steps). The playback will look like backward motion; store a frame at least every 27 steps."
+        ],
+        "oneway_planes": [],
+        "tfsf_boxes": [
+          {
+            "source_id": "d244c17e8de2",
+            "normal": "x",
+            "direction": "+",
+            "lower_node_indices": [
+              32,
+              32,
+              32
+            ],
+            "upper_node_indices": [
+              96,
+              96,
+              96
+            ],
+            "lower_um": [
+              -0.8,
+              -0.8,
+              -0.8
+            ],
+            "upper_um": [
+              0.8000000000000003,
+              0.8000000000000003,
+              0.8000000000000003
+            ],
+            "incident_line_cells": 320,
+            "incident_pml_cells": 96,
+            "incident_drive_offset_cells": 8,
+            "total_field": "inside the staggered box",
+            "scattered_field": "outside the staggered box"
+          }
+        ],
+        "tfsf_auxiliary_estimated_bytes": 6106872,
+        "point_trace_estimated_bytes": 0,
+        "snapshot": {
+          "interval": 10000,
+          "effective_interval": 10000,
+          "frames": 0,
+          "shortest_wavelength_um": 1.55,
+          "period_steps": 108.47186875683877,
+          "frames_per_period": 0.010847186875683878,
+          "aliased": true
+        },
+        "plan_hash": "7b28df382970ac47466e24cb3cc360d1128a34bc899f1c766e25c83925e35c44",
+        "backend": "cuda",
+        "precision": "float32",
+        "gpu": "NVIDIA A100 80GB PCIe",
+        "cuda_graph": true,
+        "cuda_graph_steps": 1,
+        "cuda_graph_replays": 2518,
+        "cuda_kernel": "fused",
+        "cuda_monitor_kernel": "torch",
+        "steps": 2518,
+        "requested_steps": 2518,
+        "cancelled": false,
+        "termination_reason": "max_steps",
+        "auto_shutoff": false,
+        "diagnostics": [
+          {
+            "step": 50,
+            "time_s": 2.383218586913757e-15,
+            "state_norm": 1.2548885152752375e-10,
+            "relative_norm": 1.0,
+            "field_peak": 7.180527283878746e-09,
+            "source_finished": false
+          },
+          {
+            "step": 100,
+            "time_s": 4.766437173827514e-15,
+            "state_norm": 2.1740452257446956e-08,
+            "relative_norm": 1.0,
+            "field_peak": 1.53950395542779e-07,
+            "source_finished": false
+          },
+          {
+            "step": 150,
+            "time_s": 7.14965576074127e-15,
+            "state_norm": 2.9117719285781928e-06,
+            "relative_norm": 1.0,
+            "field_peak": 2.600589141366072e-06,
+            "source_finished": false
+          },
+          {
+            "step": 200,
+            "time_s": 9.532874347655029e-15,
+            "state_norm": 0.0003536508510424052,
+            "relative_norm": 1.0,
+            "field_peak": 3.308644227217883e-05,
+            "source_finished": false
+          },
+          {
+            "step": 250,
+            "time_s": 1.1916092934568785e-14,
+            "state_norm": 0.030906112629173095,
+            "relative_norm": 1.0,
+            "field_peak": 0.0003167042159475386,
+            "source_finished": false
+          },
+          {
+            "step": 300,
+            "time_s": 1.429931152148254e-14,
+            "state_norm": 1.579753783584573,
+            "relative_norm": 1.0,
+            "field_peak": 0.0022822022438049316,
+            "source_finished": false
+          },
+          {
+            "step": 350,
+            "time_s": 1.66825301083963e-14,
+            "state_norm": 44.72859133549527,
+            "relative_norm": 1.0,
+            "field_peak": 0.012226025573909283,
+            "source_finished": false
+          },
+          {
+            "step": 400,
+            "time_s": 1.9065748695310058e-14,
+            "state_norm": 704.9775141325368,
+            "relative_norm": 1.0,
+            "field_peak": 0.04790300875902176,
+            "source_finished": false
+          },
+          {
+            "step": 450,
+            "time_s": 2.1448967282223814e-14,
+            "state_norm": 6347.016667124735,
+            "relative_norm": 1.0,
+            "field_peak": 0.1380629688501358,
+            "source_finished": false
+          },
+          {
+            "step": 500,
+            "time_s": 2.383218586913757e-14,
+            "state_norm": 34152.45842687548,
+            "relative_norm": 1.0,
+            "field_peak": 0.2921871542930603,
+            "source_finished": false
+          },
+          {
+            "step": 550,
+            "time_s": 2.6215404456051327e-14,
+            "state_norm": 117786.69571718518,
+            "relative_norm": 1.0,
+            "field_peak": 0.4491890072822571,
+            "source_finished": false
+          },
+          {
+            "step": 600,
+            "time_s": 2.859862304296508e-14,
+            "state_norm": 281735.4197690891,
+            "relative_norm": 1.0,
+            "field_peak": 0.6377704739570618,
+            "source_finished": false
+          },
+          {
+            "step": 650,
+            "time_s": 3.098184162987884e-14,
+            "state_norm": 488519.2541246854,
+            "relative_norm": 1.0,
+            "field_peak": 0.8455612063407898,
+            "source_finished": false
+          },
+          {
+            "step": 700,
+            "time_s": 3.33650602167926e-14,
+            "state_norm": 614293.4515468488,
+            "relative_norm": 1.0,
+            "field_peak": 0.8451542258262634,
+            "source_finished": false
+          },
+          {
+            "step": 750,
+            "time_s": 3.574827880370636e-14,
+            "state_norm": 567425.7406183432,
+            "relative_norm": 0.9237046873762235,
+            "field_peak": 0.8457705974578857,
+            "source_finished": false
+          },
+          {
+            "step": 800,
+            "time_s": 3.8131497390620115e-14,
+            "state_norm": 414190.7930314903,
+            "relative_norm": 0.6742555890649964,
+            "field_peak": 0.6380934119224548,
+            "source_finished": false
+          },
+          {
+            "step": 850,
+            "time_s": 4.051471597753387e-14,
+            "state_norm": 261771.23136955616,
+            "relative_norm": 0.4261338464709196,
+            "field_peak": 0.39278924465179443,
+            "source_finished": false
+          },
+          {
+            "step": 900,
+            "time_s": 4.289793456444763e-14,
+            "state_norm": 142487.81854737143,
+            "relative_norm": 0.23195399232821656,
+            "field_peak": 0.2650189995765686,
+            "source_finished": false
+          },
+          {
+            "step": 950,
+            "time_s": 4.5281153151361384e-14,
+            "state_norm": 60342.65258342703,
+            "relative_norm": 0.09823098786333885,
+            "field_peak": 0.12846943736076355,
+            "source_finished": false
+          },
+          {
+            "step": 1000,
+            "time_s": 4.766437173827514e-14,
+            "state_norm": 18135.1207725196,
+            "relative_norm": 0.02952191778514594,
+            "field_peak": 0.04554265737533569,
+            "source_finished": false
+          },
+          {
+            "step": 1050,
+            "time_s": 5.00475903251889e-14,
+            "state_norm": 3726.484359042288,
+            "relative_norm": 0.006066293478562484,
+            "field_peak": 0.011879406869411469,
+            "source_finished": false
+          },
+          {
+            "step": 1100,
+            "time_s": 5.2430808912102653e-14,
+            "state_norm": 522.5296330467545,
+            "relative_norm": 0.0008506189211865692,
+            "field_peak": 0.0022759337443858385,
+            "source_finished": false
+          },
+          {
+            "step": 1150,
+            "time_s": 5.4814027499016416e-14,
+            "state_norm": 49.52049791831383,
+            "relative_norm": 8.061374867926161e-05,
+            "field_peak": 0.0003187551046721637,
+            "source_finished": false
+          },
+          {
+            "step": 1200,
+            "time_s": 5.719724608593017e-14,
+            "state_norm": 3.051120776377536,
+            "relative_norm": 4.966878238233741e-06,
+            "field_peak": 3.365310112712905e-05,
+            "source_finished": false
+          },
+          {
+            "step": 1250,
+            "time_s": 5.958046467284393e-14,
+            "state_norm": 0.11667954947221998,
+            "relative_norm": 1.8994106021871124e-07,
+            "field_peak": 3.0376836548384745e-06,
+            "source_finished": false
+          },
+          {
+            "step": 1300,
+            "time_s": 6.196368325975768e-14,
+            "state_norm": 0.0027059961596119972,
+            "relative_norm": 4.405054543228557e-09,
+            "field_peak": 6.731410735483223e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1350,
+            "time_s": 6.434690184667144e-14,
+            "state_norm": 3.87382054397832e-05,
+            "relative_norm": 6.306140060949169e-11,
+            "field_peak": 6.745343625880196e-07,
+            "source_finished": false
+          },
+          {
+            "step": 1400,
+            "time_s": 6.67301204335852e-14,
+            "state_norm": 3.876461877160564e-07,
+            "relative_norm": 6.31043985150626e-13,
+            "field_peak": 6.516852977256349e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1450,
+            "time_s": 6.911333902049895e-14,
+            "state_norm": 3.024052648799218e-08,
+            "relative_norm": 4.922814399509499e-14,
+            "field_peak": 7.615131494276284e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1500,
+            "time_s": 7.149655760741272e-14,
+            "state_norm": 2.5566738632148662e-08,
+            "relative_norm": 4.161974796861208e-14,
+            "field_peak": 6.178710236781626e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1550,
+            "time_s": 7.387977619432647e-14,
+            "state_norm": 2.5654422185406712e-08,
+            "relative_norm": 4.1762486838833234e-14,
+            "field_peak": 7.032235203041637e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1600,
+            "time_s": 7.626299478124023e-14,
+            "state_norm": 2.208153084382004e-08,
+            "relative_norm": 3.5946225355677596e-14,
+            "field_peak": 7.165115789575793e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1650,
+            "time_s": 7.864621336815398e-14,
+            "state_norm": 2.1495744230050827e-08,
+            "relative_norm": 3.4992631251273344e-14,
+            "field_peak": 5.959277586953249e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1700,
+            "time_s": 8.102943195506774e-14,
+            "state_norm": 2.3741249086192674e-08,
+            "relative_norm": 3.864805823081782e-14,
+            "field_peak": 7.521749694205937e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1750,
+            "time_s": 8.341265054198149e-14,
+            "state_norm": 2.0682097062060715e-08,
+            "relative_norm": 3.366810603300629e-14,
+            "field_peak": 6.084181336518668e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1800,
+            "time_s": 8.579586912889526e-14,
+            "state_norm": 1.9901723936351827e-08,
+            "relative_norm": 3.239774717805865e-14,
+            "field_peak": 6.660756071141805e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1850,
+            "time_s": 8.817908771580902e-14,
+            "state_norm": 2.1285324804750987e-08,
+            "relative_norm": 3.4650092315248576e-14,
+            "field_peak": 7.400439585580898e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1900,
+            "time_s": 9.056230630272277e-14,
+            "state_norm": 1.9976840978057075e-08,
+            "relative_norm": 3.252002919411481e-14,
+            "field_peak": 6.487562700385752e-07,
+            "source_finished": true
+          },
+          {
+            "step": 1950,
+            "time_s": 9.294552488963653e-14,
+            "state_norm": 1.9911735874306053e-08,
+            "relative_norm": 3.241404547641917e-14,
+            "field_peak": 6.377955514835776e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2000,
+            "time_s": 9.532874347655028e-14,
+            "state_norm": 1.9422743273757074e-08,
+            "relative_norm": 3.161802103676798e-14,
+            "field_peak": 7.096105605342018e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2050,
+            "time_s": 9.771196206346404e-14,
+            "state_norm": 1.8959455643131034e-08,
+            "relative_norm": 3.086384136993377e-14,
+            "field_peak": 6.586371910088928e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2100,
+            "time_s": 1.000951806503778e-13,
+            "state_norm": 1.9938763091498026e-08,
+            "relative_norm": 3.2458042717678894e-14,
+            "field_peak": 6.291290333138022e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2150,
+            "time_s": 1.0247839923729156e-13,
+            "state_norm": 1.829093833230838e-08,
+            "relative_norm": 2.9775571082924745e-14,
+            "field_peak": 7.250092721733381e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2200,
+            "time_s": 1.0486161782420531e-13,
+            "state_norm": 1.8360504180909994e-08,
+            "relative_norm": 2.9888816386820524e-14,
+            "field_peak": 6.78421145039465e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2250,
+            "time_s": 1.0724483641111907e-13,
+            "state_norm": 1.9732959248190658e-08,
+            "relative_norm": 3.2123017425142997e-14,
+            "field_peak": 6.229454356798669e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2300,
+            "time_s": 1.0962805499803283e-13,
+            "state_norm": 1.746480882731554e-08,
+            "relative_norm": 2.84307260371041e-14,
+            "field_peak": 6.826427920714195e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2350,
+            "time_s": 1.1201127358494658e-13,
+            "state_norm": 1.8121667833416275e-08,
+            "relative_norm": 2.9500017927562485e-14,
+            "field_peak": 7.352219313361275e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2400,
+            "time_s": 1.1439449217186033e-13,
+            "state_norm": 1.925557213447084e-08,
+            "relative_norm": 3.134588540050931e-14,
+            "field_peak": 6.27231770522485e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2450,
+            "time_s": 1.167777107587741e-13,
+            "state_norm": 1.7015034871134643e-08,
+            "relative_norm": 2.76985450980947e-14,
+            "field_peak": 7.119212455108936e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2500,
+            "time_s": 1.1916092934568786e-13,
+            "state_norm": 1.8340238527078812e-08,
+            "relative_norm": 2.985582620308969e-14,
+            "field_peak": 7.125478873604152e-07,
+            "source_finished": true
+          },
+          {
+            "step": 2518,
+            "time_s": 1.200188880369768e-13,
+            "state_norm": 1.811488394503996e-08,
+            "relative_norm": 2.948897452744283e-14,
+            "field_peak": 6.284455480454199e-07,
+            "source_finished": true
+          }
+        ],
+        "diagnostic_seconds": 2.783873725682497,
+        "diagnostic_backend": "fused_cuda",
+        "source_end_s": 6.516600537444666e-14,
+        "seconds": 2.800630225799978,
+        "setup_seconds": 0.1494865519925952,
+        "mcells_per_second": 1885.5144414831238,
+        "field_peak": 6.284455480454199e-07,
+        "slice_index": 63,
+        "slice_position": -0.012499999999999956,
+        "complex_fields": false,
+        "complex_display": "real",
+        "material_update": "nondispersive",
+        "dispersive_samples": 0,
+        "epsilon_definition": "instantaneous relative permittivity (epsilon-infinity for dispersive cells)",
+        "boundaries": {
+          "x_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "x_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "y_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_min": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          },
+          "z_max": {
+            "kind": "pml",
+            "layers": null,
+            "sigma_scale": 1.0,
+            "kappa": 1.0,
+            "alpha": 1e-08,
+            "polynomial": 3.0,
+            "alpha_polynomial": 0.0
+          }
+        },
+        "bloch_phase": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "units": "geometry: um; time: s; E/H: reduced fields; Bloch phase: rad",
+        "engine": "TorchFDTD Yee/CPML on fdtd grid"
+      }
+    }
+  ]
+}

@@ -3,20 +3,20 @@
 \centering
 \small
 \renewcommand{\arraystretch}{1.15}
-\caption{Eight forward fixtures on RTX 5880. The external baseline is flaport/fdtd 0.2.2 with an added CUDA Graph adapter. Values are medians of three warmed full solves. The last column is point-trace relative L2 difference in percent, not analytic error. The PML interface stencils differ and final fields are not identical.}
+\caption{Eight forward fixtures on an A100 80GB PCIe. The external baseline is flaport/fdtd 0.2.2 with an added CUDA Graph adapter. Values are medians of three warmed full solves. The last column is point-trace relative L2 difference in percent, not analytic error. The PML interface stencils differ and final fields are not identical.}
 \label{tab:open-source}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
 Fixture, grid & \shortstack{Upstream graph\\(ms)} & \shortstack{Native fused\\(ms)} & Speedup & \shortstack{Trace L2\\(\%)} \\
 \midrule
-Vacuum, $64^3$ & 649.23 & 38.06 & $17.06\times$ & 0.0142 \\
-Sphere, $64^3$ & 629.07 & 39.72 & $15.84\times$ & 0.0233 \\
-Slab, $64^3$ & 636.26 & 37.23 & $17.09\times$ & 0.0197 \\
-Waveguide, $64^3$ & 632.59 & 39.90 & $15.85\times$ & 0.0372 \\
-Vacuum, $96^3$ & 954.98 & 78.77 & $12.12\times$ & 0.0120 \\
-Sphere, $96^3$ & 848.58 & 88.05 & $9.64\times$ & 0.0208 \\
-Slab, $96^3$ & 836.66 & 80.37 & $10.41\times$ & 0.0174 \\
-Waveguide, $96^3$ & 848.07 & 80.00 & $10.60\times$ & 0.0328 \\
+Vacuum, $64^3$ & 778.34 & 47.49 & $16.39\times$ & 0.0142 \\
+Sphere, $64^3$ & 779.50 & 46.63 & $16.72\times$ & 0.0233 \\
+Slab, $64^3$ & 777.52 & 45.54 & $17.07\times$ & 0.0197 \\
+Waveguide, $64^3$ & 777.10 & 46.37 & $16.76\times$ & 0.0372 \\
+Vacuum, $96^3$ & 1002.54 & 111.14 & $9.02\times$ & 0.0120 \\
+Sphere, $96^3$ & 1004.48 & 107.89 & $9.31\times$ & 0.0208 \\
+Slab, $96^3$ & 1002.73 & 107.22 & $9.35\times$ & 0.0174 \\
+Waveguide, $96^3$ & 1006.15 & 108.79 & $9.25\times$ & 0.0328 \\
 \bottomrule
 \end{tabular}
 \end{table}

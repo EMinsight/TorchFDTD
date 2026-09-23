@@ -3,20 +3,20 @@
 \centering
 \small
 \renewcommand{\arraystretch}{1.15}
-\caption{Sixteen-case ensembles on RTX 5880 after a separate cohort-selection experiment. The external baseline runs graph-adapted flaport/fdtd cases sequentially. Native execution shares CUDA launches. These are workflow throughput ratios, not single-solve or upstream fused-batch comparisons. Tuning cost is excluded here and reported separately in the raw record and text.}
+\caption{Sixteen-case ensembles on an A100 80GB PCIe after a separate cohort-selection experiment. The external baseline runs graph-adapted flaport/fdtd cases sequentially. Native execution shares CUDA launches. These are workflow throughput ratios, not single-solve or upstream fused-batch comparisons. Tuning cost is excluded here and reported separately in the raw record and text.}
 \label{tab:ensembles}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
 Fixture, grid & Cohort & \shortstack{Upstream\\(s)} & \shortstack{Native batch\\(s)} & Speedup \\
 \midrule
-Vacuum, $32^3$ & 2 & 6.523 & 0.209 & $31.20\times$ \\
-Sphere, $32^3$ & 16 & 6.665 & 0.207 & $32.22\times$ \\
-Slab, $32^3$ & 16 & 6.977 & 0.204 & $34.12\times$ \\
-Waveguide, $32^3$ & 16 & 6.436 & 0.145 & $44.32\times$ \\
-Vacuum, $64^3$ & 4 & 7.911 & 0.519 & $15.24\times$ \\
-Sphere, $64^3$ & 4 & 8.290 & 0.545 & $15.22\times$ \\
-Slab, $64^3$ & 4 & 7.949 & 0.503 & $15.81\times$ \\
-Waveguide, $64^3$ & 4 & 8.058 & 0.562 & $14.33\times$ \\
+Vacuum, $32^3$ & 8 & 9.725 & 0.282 & $34.54\times$ \\
+Sphere, $32^3$ & 8 & 9.733 & 0.292 & $33.35\times$ \\
+Slab, $32^3$ & 8 & 9.731 & 0.293 & $33.23\times$ \\
+Waveguide, $32^3$ & 8 & 9.738 & 0.291 & $33.46\times$ \\
+Vacuum, $64^3$ & 1 & 12.427 & 0.866 & $14.36\times$ \\
+Sphere, $64^3$ & 1 & 12.406 & 0.846 & $14.66\times$ \\
+Slab, $64^3$ & 1 & 12.409 & 0.850 & $14.60\times$ \\
+Waveguide, $64^3$ & 1 & 12.414 & 0.846 & $14.68\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -19,6 +19,17 @@ cites the related arXiv preprint and reports summary numbers only, without
 the design pattern. Its drivers are in benchmarks/color_router_rcwa and run
 against the published mask and model of that preprint.
 
+## Timing platform
+
+The performance section reports an NVIDIA A100 80GB PCIe in a four-core
+container (records `docs/validation/*-a100.json`, produced by
+`benchmarks/a100_paper`). The build scripts read an `-a100` record when it
+exists and fall back to the original record otherwise, and every generated
+caption names the GPU of the record it was built from. The earlier RTX 5880
+records stay in place and are cited once, for the eight-core workstation
+cost of host streaming. The cross-solver comparison and the pillar-array
+example remain on the RTX 3060.
+
 ## Standalone compilation
 
 With TeX Live or MiKTeX, run in this directory:
