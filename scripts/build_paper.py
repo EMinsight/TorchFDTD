@@ -38,7 +38,8 @@ def build_arxiv_bundle(files: list[Path], bbl: Path) -> Path:
     for manifest in ('asset-provenance.json', 'story-figure-provenance.json'):
         inputs = json.loads((PAPER / manifest).read_text(encoding='utf-8'))['inputs']
         for name in inputs:
-            records.add(Path(name).name)
+            # keep sub-folders such as g3/ and meep_comparison/ so the scripts find their records under anc/
+            records.add(name.removeprefix('docs/validation/'))
     records.add('color-router-rcwa-3060.json')
     with ZipFile(output, 'w', ZIP_DEFLATED) as archive:
         for path in files:
@@ -56,11 +57,11 @@ def build_arxiv_bundle(files: list[Path], bbl: Path) -> Path:
             archive.write(PAPER / manifest, f'anc/{manifest}')
         archive.writestr('anc/README.txt',
             'Ancillary files of the TorchFDTD manuscript.\n\n'
-            'JSON records: the validation records behind every figure and generated table.\n'
+            'JSON and NPZ records: the validation records and saved field arrays behind every figure and generated table.\n'
             'asset-provenance.json, story-figure-provenance.json: SHA-256 hashes of the records each script read.\n'
             'From the unpacked directory,\n'
-            '    python anc/build_paper_assets.py          regenerates Figs. 2, 3 and 5 and every file in tables/\n'
-            '    python anc/build_paper_story_figures.py   regenerates Figs. 1, 4, 6 and 7\n'
+            '    python anc/build_paper_assets.py          regenerates the measured figures and every file in tables/\n'
+            '    python anc/build_paper_story_figures.py   regenerates the schematic, the field-map figures and the rest\n'
             'Both need NumPy and Matplotlib and read only these records. They run no solver.\n'
             'color_router_rcwa/: drivers of the colour-router cross-check (Section 6.3). They need TorchFDTD,\n'
             'TORCWA, a CUDA device and the published mask and model of arXiv:2608.13019, see its README.\n'

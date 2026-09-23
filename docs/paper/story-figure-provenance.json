@@ -3,9 +3,26 @@
   "inputs": {
     "cpu-gpu-adjoint-256-dielectric-a100.json": "d4230fef1bd546fa2a6e5f8d97ab979b5f085ea80592b903f92354d1e6d16b73",
     "cpu-gpu-adjoint-256-ade-a100.json": "c8c3deedc497caadbc919cdffdeaa247ffbeb6e684f67e154208e216ae47f89d",
-    "tiled-stitching-3d-3060.json": "527e7e6b165799f3936de2875f82376df117633d0d8dea18c3dec4550e8482f7",
     "angular-spectrum-3060.json": "580e4816fd5deab9902413a9313b80e84f7062d4e27055175cfa9e501937a67a",
-    "beyond_vram_propagated_3060.json": "f670ee08f14a53621a9a07811168c0c6b4aa76fae7c9d6ef73822f5dd3cac670"
+    "tiled-stitching-3d-3060.json": "527e7e6b165799f3936de2875f82376df117633d0d8dea18c3dec4550e8482f7",
+    "beyond_vram_propagated_3060.json": "f670ee08f14a53621a9a07811168c0c6b4aa76fae7c9d6ef73822f5dd3cac670",
+    "g3/G3-03.json": "6323f68bd2f7f867f4a62e1d893556ab598f3ed0f3758c00ea41e03eaa6a869e",
+    "meep_comparison/metalens_3d_torchfdtd.json": "13de726f93756f82d6eed8799f464c38bc370d15c8589cc653f0907d8caab41b",
+    "meep_comparison/metalens_3d_meep.json": "8e9b85619cd6be4f5d034ccca0650b256636349504cb3f187ddc241d7d6a6ce5",
+    "meep_comparison/microring_torchfdtd.json": "8277323bf0c0902b8ab855adc1a28cd701150abbbfdb44aebc268c7063a2272f",
+    "meep_comparison/microring_meep.json": "b8d8b8506acccd1f12a80a13b888e06383bcd38b5f7a27f6e96b48e90d9f20b8",
+    "meep_comparison/microring_comparison.json": "fc9f484dd1a0ea86d1ed909048f6115669f60a6f3a57dd9b5a19aa44f3aedbdf",
+    "meep_comparison/microring_fields_torchfdtd.npz": "63794fb4e3250579a36689cabe24f56295ed9acee8d47a360235fea1ecccc050",
+    "paper_review/scaling-forward-3060.json": "8f0f8ce40e8ef1847fac3c2ad7dedec33a6b228fdfcbdbc3e0687f7a4a7e4c0e",
+    "paper_review/scaling-forward-streamed-3060.json": "5376b2259afffc26153cbd9a5998a6282e4657d702a83e15a865152bf0c4e106",
+    "paper_review/scaling-adjoint-3060-128.json": "7d2008852b2b8811bd1394aeed5d7c220290f39f5e8396701a967d07dc2951fb",
+    "paper_review/scaling-adjoint-3060-192.json": "40ed684ea2011e4355a66947af0ad40a9959ac2133e53e1157a8695ebc59430a",
+    "paper_review/scaling-adjoint-3060-256.json": "38fa488a63f68712b20ac1a385972da791a6244458da5dd6d7ac103b598df5c5",
+    "paper_review/scaling-adjoint-3060-320.json": "e839cd5366b94df422a8ddd52cda6c5f42e7e88b5cb7c034e3c40debe2205015",
+    "paper_review/scaling-adjoint-3060-384.json": "ad977846ed2b531e258f8b544638a40e2ae4dd00247745275bd1cf9ceeb63b73",
+    "paper_review/scaling-adjoint-3060-384-resident-plan.json": "234429d66e4b39a076c2aa1b150540dfd81e234d691307a99b94a82d376f1b35",
+    "paper_review/metagrating_showcase.json": "ab2075285af990272e393a89d621da8962b0ac0b4982043f742c9be07378f677",
+    "paper_review/metagrating_fields.npz": "c87ad8cd9977a1235e4871f0dbe7c992cbb9444c0be537e5595cc4183ef44a5d"
   },
-  "generator_sha256": "36fc643e28a61978f34aaf2fae79284847aa7ad7236b9d9d926096ba9a5cb35b"
+  "generator_sha256": "c14a50ba186c57ad6dc83df90555afdebcb388c7535e95789ff556912eaa41ff"
 }

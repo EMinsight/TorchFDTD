@@ -1,0 +1,208 @@
+{
+  "hardware": {
+    "cuda": true,
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "gpu_memory_gb": 12.0,
+    "torch": "2.10.0+cu126",
+    "engine": "TorchFDTD Yee/CPML on fdtd grid",
+    "cpu_threads": 12
+  },
+  "platform": "Windows-10-10.0.26200-SP0",
+  "torch": "2.10.0+cu126",
+  "steps": 200,
+  "repeats": 3,
+  "method": "Fused forward throughput and device memory over grid sizes on one GPU.\n\nScene: the dielectric sphere of benchmarks/cuda_kernels.py (4.8 um cube, six CPML faces, float32,\nYee sampling, one point trace, one final snapshot) with the fused CUDA kernel and a CUDA graph.\nOne warm-up per size, then three measured full simulations. No solver comparison.\n",
+  "source_sha256": {
+    ".local/paper_review/scaling/forward_sweep.py": "7ca1904a4cc647eb3b64872c675c98aac367186e81fe214222ae9f119fa9169a",
+    "benchmarks/cuda_kernels.py": "0df63db07d1b5a48af07a67c5f80856ee1f5c6685c818b3661c388eb4d88d5a6"
+  },
+  "cases": [
+    {
+      "n": 64,
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "cells": 262144,
+      "runs": [
+        {
+          "wall_seconds": 0.06358350021764636,
+          "loop_seconds": 0.025809000246226788,
+          "setup_seconds": 0.02712599979713559,
+          "mcells_per_second": 2031.415378349069,
+          "peak_allocated_bytes": 18714624,
+          "peak_reserved_bytes": 29360128
+        },
+        {
+          "wall_seconds": 0.06114740017801523,
+          "loop_seconds": 0.025429800152778625,
+          "setup_seconds": 0.02668670006096363,
+          "mcells_per_second": 2061.70711861734,
+          "peak_allocated_bytes": 18714624,
+          "peak_reserved_bytes": 29360128
+        },
+        {
+          "wall_seconds": 0.0612781997770071,
+          "loop_seconds": 0.02585949981585145,
+          "setup_seconds": 0.026140599977225065,
+          "mcells_per_second": 2027.4483409714678,
+          "peak_allocated_bytes": 18714624,
+          "peak_reserved_bytes": 29360128
+        }
+      ],
+      "median": {
+        "wall_seconds": 0.0612781997770071,
+        "loop_seconds": 0.025809000246226788,
+        "setup_seconds": 0.02668670006096363,
+        "mcells_per_second": 2031.415378349069,
+        "peak_allocated_bytes": 18714624,
+        "peak_reserved_bytes": 29360128
+      },
+      "cell_steps_per_second_loop": 2031415378.3490689
+    },
+    {
+      "n": 96,
+      "shape": [
+        96,
+        96,
+        96
+      ],
+      "cells": 884736,
+      "runs": [
+        {
+          "wall_seconds": 0.15138019993901253,
+          "loop_seconds": 0.07597419992089272,
+          "setup_seconds": 0.04743009991943836,
+          "mcells_per_second": 2329.0432829071488,
+          "peak_allocated_bytes": 59756544,
+          "peak_reserved_bytes": 75497472
+        },
+        {
+          "wall_seconds": 0.14465150004252791,
+          "loop_seconds": 0.07205710001289845,
+          "setup_seconds": 0.049034399911761284,
+          "mcells_per_second": 2455.6525306781136,
+          "peak_allocated_bytes": 59756544,
+          "peak_reserved_bytes": 75497472
+        },
+        {
+          "wall_seconds": 0.13698519999161363,
+          "loop_seconds": 0.07351989997550845,
+          "setup_seconds": 0.044028600212186575,
+          "mcells_per_second": 2406.793263578243,
+          "peak_allocated_bytes": 59756544,
+          "peak_reserved_bytes": 75497472
+        }
+      ],
+      "median": {
+        "wall_seconds": 0.14465150004252791,
+        "loop_seconds": 0.07351989997550845,
+        "setup_seconds": 0.04743009991943836,
+        "mcells_per_second": 2406.793263578243,
+        "peak_allocated_bytes": 59756544,
+        "peak_reserved_bytes": 75497472
+      },
+      "cell_steps_per_second_loop": 2406793263.5782433
+    },
+    {
+      "n": 128,
+      "shape": [
+        128,
+        128,
+        128
+      ],
+      "cells": 2097152,
+      "runs": [
+        {
+          "wall_seconds": 0.29434810020029545,
+          "loop_seconds": 0.16136080026626587,
+          "setup_seconds": 0.0926096998155117,
+          "mcells_per_second": 2599.3326713048423,
+          "peak_allocated_bytes": 137662464,
+          "peak_reserved_bytes": 144703488
+        },
+        {
+          "wall_seconds": 0.29494719998911023,
+          "loop_seconds": 0.16426350036635995,
+          "setup_seconds": 0.09056650009006262,
+          "mcells_per_second": 2553.399867070509,
+          "peak_allocated_bytes": 137662464,
+          "peak_reserved_bytes": 144703488
+        },
+        {
+          "wall_seconds": 0.2833313997834921,
+          "loop_seconds": 0.16252390015870333,
+          "setup_seconds": 0.08288370026275516,
+          "mcells_per_second": 2580.7305854119268,
+          "peak_allocated_bytes": 137662464,
+          "peak_reserved_bytes": 144703488
+        }
+      ],
+      "median": {
+        "wall_seconds": 0.29434810020029545,
+        "loop_seconds": 0.16252390015870333,
+        "setup_seconds": 0.09056650009006262,
+        "mcells_per_second": 2580.7305854119268,
+        "peak_allocated_bytes": 137662464,
+        "peak_reserved_bytes": 144703488
+      },
+      "cell_steps_per_second_loop": 2580730585.4119267
+    },
+    {
+      "n": 192,
+      "shape": [
+        192,
+        192,
+        192
+      ],
+      "cells": 7077888,
+      "runs": [
+        {
+          "wall_seconds": 0.9613025998696685,
+          "loop_seconds": 0.573993599973619,
+          "setup_seconds": 0.26064160000532866,
+          "mcells_per_second": 2466.1905639105744,
+          "peak_allocated_bytes": 456495104,
+          "peak_reserved_bytes": 532676608
+        },
+        {
+          "wall_seconds": 0.9687518998980522,
+          "loop_seconds": 0.5824987003579736,
+          "setup_seconds": 0.2666175002232194,
+          "mcells_per_second": 2430.1815594267578,
+          "peak_allocated_bytes": 456495104,
+          "peak_reserved_bytes": 532676608
+        },
+        {
+          "wall_seconds": 0.947892100084573,
+          "loop_seconds": 0.5762813002802432,
+          "setup_seconds": 0.253840500023216,
+          "mcells_per_second": 2456.400371331866,
+          "peak_allocated_bytes": 456495104,
+          "peak_reserved_bytes": 532676608
+        }
+      ],
+      "median": {
+        "wall_seconds": 0.9613025998696685,
+        "loop_seconds": 0.5762813002802432,
+        "setup_seconds": 0.26064160000532866,
+        "mcells_per_second": 2456.400371331866,
+        "peak_allocated_bytes": 456495104,
+        "peak_reserved_bytes": 532676608
+      },
+      "cell_steps_per_second_loop": 2456400371.3318663
+    },
+    {
+      "n": 256,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "cells": 16777216,
+      "runs": [],
+      "error": "ValueError('Resident execution is limited to 8 million cells. Use memory_mode=\"streamed\" with StreamedSimulation.')"
+    }
+  ]
+}

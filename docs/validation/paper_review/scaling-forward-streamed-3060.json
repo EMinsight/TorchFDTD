@@ -1,0 +1,184 @@
+{
+  "hardware": {
+    "cuda": true,
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "gpu_memory_gb": 12.0,
+    "torch": "2.10.0+cu126",
+    "engine": "TorchFDTD Yee/CPML on fdtd grid",
+    "cpu_threads": 12
+  },
+  "platform": "Windows-10-10.0.26200-SP0",
+  "torch": "2.10.0+cu126",
+  "steps": 200,
+  "repeats": 3,
+  "method": "Host-streamed forward solves above the eight-million-cell resident limit on one GPU.\n\nScene: the periodic-x slab fixture of benchmarks/cpu_gpu_adjoint.py (0.1 um mesh, three CPML\ncells on the other faces, continuous source) with two point monitors in place of its plane\nmonitors, since the streamed forward model accepts point monitors only, float32, fused CUDA\nkernels, uniform epsilon 1.7 on the CPU.\nStreamedSimulation with host state banks is called without gradient tracking, which is the\nforward path the package offers above the resident limit. One warm-up per size, then three\nmeasured solves from model construction to the returned signals.\n",
+  "gpu_budget_gib": 10.0,
+  "host_budget_gib": 24.0,
+  "source_sha256": {
+    ".local/paper_review/scaling/streamed_forward_sweep.py": "a08f2165d284c9f7b1df6306336206cdf23c4c8741095d953af4409f65f542a9",
+    "benchmarks/cpu_gpu_adjoint.py": "7c556466630143590fb281a182a2657d0d67b45e0900a41a09a25e91a6e281aa"
+  },
+  "cases": [
+    {
+      "n": 256,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "cells": 16777216,
+      "slab_width": 32,
+      "temporal_depth": 8,
+      "runs": [
+        {
+          "wall_seconds": 5.102573600132018,
+          "peak_allocated_bytes": 360712704,
+          "peak_reserved_bytes": 362807296,
+          "sampled_peak_process_rss_bytes": 2539757568,
+          "sampled_rss_growth_bytes": 19374080,
+          "host_reservation_bytes": 5823797928,
+          "gpu_reservation_bytes": 3221225936
+        },
+        {
+          "wall_seconds": 5.09367570001632,
+          "peak_allocated_bytes": 360712704,
+          "peak_reserved_bytes": 362807296,
+          "sampled_peak_process_rss_bytes": 2539909120,
+          "sampled_rss_growth_bytes": 1769472,
+          "host_reservation_bytes": 5823797928,
+          "gpu_reservation_bytes": 3221225936
+        },
+        {
+          "wall_seconds": 4.878442799672484,
+          "peak_allocated_bytes": 360712704,
+          "peak_reserved_bytes": 362807296,
+          "sampled_peak_process_rss_bytes": 2540134400,
+          "sampled_rss_growth_bytes": 1773568,
+          "host_reservation_bytes": 5823797928,
+          "gpu_reservation_bytes": 3221225936
+        }
+      ],
+      "median": {
+        "wall_seconds": 5.09367570001632,
+        "peak_allocated_bytes": 360712704,
+        "sampled_peak_process_rss_bytes": 2539909120
+      },
+      "cell_steps_per_second_full": 658746924.1493425
+    },
+    {
+      "n": 320,
+      "shape": [
+        320,
+        320,
+        320
+      ],
+      "cells": 32768000,
+      "slab_width": 32,
+      "temporal_depth": 8,
+      "runs": [
+        {
+          "wall_seconds": 10.08975199982524,
+          "peak_allocated_bytes": 559549440,
+          "peak_reserved_bytes": 568328192,
+          "sampled_peak_process_rss_bytes": 5070159872,
+          "sampled_rss_growth_bytes": 949178368,
+          "host_reservation_bytes": 10095827624,
+          "gpu_reservation_bytes": 5033165264
+        },
+        {
+          "wall_seconds": 10.013890400063246,
+          "peak_allocated_bytes": 559549440,
+          "peak_reserved_bytes": 568328192,
+          "sampled_peak_process_rss_bytes": 5128564736,
+          "sampled_rss_growth_bytes": 62668800,
+          "host_reservation_bytes": 10095827624,
+          "gpu_reservation_bytes": 5033165264
+        },
+        {
+          "wall_seconds": 9.685905700083822,
+          "peak_allocated_bytes": 559549440,
+          "peak_reserved_bytes": 568328192,
+          "sampled_peak_process_rss_bytes": 5128585216,
+          "sampled_rss_growth_bytes": 25927680,
+          "host_reservation_bytes": 10095827624,
+          "gpu_reservation_bytes": 5033165264
+        }
+      ],
+      "median": {
+        "wall_seconds": 10.013890400063246,
+        "peak_allocated_bytes": 559549440,
+        "sampled_peak_process_rss_bytes": 5128564736
+      },
+      "cell_steps_per_second_full": 654450941.460135
+    },
+    {
+      "n": 384,
+      "shape": [
+        384,
+        384,
+        384
+      ],
+      "cells": 56623104,
+      "slab_width": 16,
+      "temporal_depth": 8,
+      "runs": [
+        {
+          "wall_seconds": 20.221714399755,
+          "peak_allocated_bytes": 496897024,
+          "peak_reserved_bytes": 501219328,
+          "sampled_peak_process_rss_bytes": 5772931072,
+          "sampled_rss_growth_bytes": 14520320,
+          "host_reservation_bytes": 13556521640,
+          "gpu_reservation_bytes": 4831838672
+        },
+        {
+          "wall_seconds": 20.43788139987737,
+          "peak_allocated_bytes": 496897024,
+          "peak_reserved_bytes": 501219328,
+          "sampled_peak_process_rss_bytes": 5772972032,
+          "sampled_rss_growth_bytes": 14471168,
+          "host_reservation_bytes": 13556521640,
+          "gpu_reservation_bytes": 4831838672
+        },
+        {
+          "wall_seconds": 20.336302899755538,
+          "peak_allocated_bytes": 496897024,
+          "peak_reserved_bytes": 501219328,
+          "sampled_peak_process_rss_bytes": 5772955648,
+          "sampled_rss_growth_bytes": 14413824,
+          "host_reservation_bytes": 13556521640,
+          "gpu_reservation_bytes": 4831838672
+        }
+      ],
+      "median": {
+        "wall_seconds": 20.336302899755538,
+        "peak_allocated_bytes": 496897024,
+        "sampled_peak_process_rss_bytes": 5772955648
+      },
+      "cell_steps_per_second_full": 556867236.6763446
+    },
+    {
+      "n": 448,
+      "shape": [
+        448,
+        448,
+        448
+      ],
+      "cells": 89915392,
+      "slab_width": 16,
+      "temporal_depth": 8,
+      "runs": [
+        {
+          "wall_seconds": 32.38538730004802,
+          "peak_allocated_bytes": 676531200,
+          "peak_reserved_bytes": 681574400,
+          "sampled_peak_process_rss_bytes": 7994875904,
+          "sampled_rss_growth_bytes": 20783104,
+          "host_reservation_bytes": 20404378280,
+          "gpu_reservation_bytes": 6576669136
+        }
+      ],
+      "error": "ValueError('Streamed state and checkpoint reservation exceed the host budget: required=20404378280 bytes, admissible=19445291417 bytes.')"
+    }
+  ]
+}

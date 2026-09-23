@@ -1,0 +1,272 @@
+{
+  "schema": "torchfdtd-microring-fields-v1",
+  "example": "microring",
+  "solver": "torchfdtd",
+  "date": "2026-09-24",
+  "purpose": "Ez DFT maps of the ring scene on and off resonance for a paper figure; data only, no figure.",
+  "data_file": "microring_fields_torchfdtd.npz",
+  "data_sha256": "63794fb4e3250579a36689cabe24f56295ed9acee8d47a360235fea1ecccc050",
+  "data_bytes": 5065399,
+  "arrays": {
+    "x_um": {
+      "shape": [
+        664
+      ],
+      "dtype": "float64"
+    },
+    "y_um": {
+      "shape": [
+        509
+      ],
+      "dtype": "float64"
+    },
+    "epsilon": {
+      "shape": [
+        509,
+        664
+      ],
+      "dtype": "float32"
+    },
+    "Ez_on": {
+      "shape": [
+        509,
+        664
+      ],
+      "dtype": "complex64"
+    },
+    "Ez_off": {
+      "shape": [
+        509,
+        664
+      ],
+      "dtype": "complex64"
+    },
+    "wavelength_on_um": {
+      "shape": [],
+      "dtype": "float64"
+    },
+    "wavelength_off_um": {
+      "shape": [],
+      "dtype": "float64"
+    },
+    "T_on": {
+      "shape": [],
+      "dtype": "float64"
+    },
+    "T_off": {
+      "shape": [],
+      "dtype": "float64"
+    },
+    "x_nodes_um": {
+      "shape": [
+        665
+      ],
+      "dtype": "float64"
+    },
+    "epsilon_nodes": {
+      "shape": [
+        509,
+        665
+      ],
+      "dtype": "float32"
+    },
+    "source_dft_on": {
+      "shape": [],
+      "dtype": "complex128"
+    },
+    "source_dft_off": {
+      "shape": [],
+      "dtype": "complex128"
+    }
+  },
+  "conventions": {
+    "indexing": "2D arrays are indexed [iy, ix]: row k is y_um[k], column i is x_um[i]; both coordinate arrays increase. imshow(abs(Ez_on)**2, origin=\"lower\", extent=[x_um[0]-dx/2, x_um[-1]+dx/2, y_um[0]-dx/2, y_um[-1]+dx/2]) draws it with +x to the right and +y up (source on the left, bus at the bottom, ring centre at the origin).",
+    "units": "x_um, y_um, x_nodes_um in um (ring centre at 0, 0); wavelengths in um; epsilon relative permittivity (n^2); Ez_on, Ez_off, source_dft_* in TorchFDTD reduced field units times seconds; T dimensionless.",
+    "sampling": "Ez_*[k, i] is the DFT of 0.5*(Ez[ix0, jy] + Ez[ix0 + 1, jy]) with ix0 = 43 + i, jy = 43 + k on the Yee Ez node lattice x = ix*0.024 - 9.0, y = jy*0.024 - 7.512 (um): exact node rows in y, the midpoint of two neighbouring nodes in x, so x_um lies half a cell (12 nm) to the right of the Ez nodes. The 0.5/0.5 weights and node indices were verified for every sample from the solver interpolation map.",
+    "epsilon": "epsilon = 0.5*(epsilon_nodes[:, :-1] + epsilon_nodes[:, 1:]), the mean of the two node permittivities that enter each field sample (values 2.085136, 8.0089, or their mean 5.047018 on the x-boundary samples); epsilon_nodes is the solver staircase at the Ez nodes x_nodes_um (665 columns) and y_um, the array the fixture hashes (sha256 of the full interior recorded below matches the committed record).",
+    "dft": "Ez(f) = sum_n Ez(t_n) exp(+2 pi i f t_n) dt, t_n = n dt, n = 1..steps, whole run, no apodization; source_dft_* is the same transform of the shared source pulse (amplitude 1), so Ez_*/source_dft_* is the response per unit source spectrum, which removes the pulse-spectrum difference between the two wavelengths.",
+    "wavelengths": "index 0 of the DFT = on resonance 1.564481 um (f = 1.916242e+14 Hz), index 1 = off resonance 1.55 um (f = 1.934145e+14 Hz)"
+  },
+  "crop": {
+    "reason": "TorchFDTD allows at most 512 monitors per project (2 fixture planes + 1 exact-wavelength out plane + 509 rows).",
+    "x": "full non-PML interior: samples between Ez nodes 43..707 (interior nodes [43, 708)), x_um -7.956 .. 7.956; includes the source column (x = -7.512) and both flux planes (x = +-6.0)",
+    "y": "Ez node rows [43, 552) of the interior rows [43, 584): y_um -6.480 .. 5.712; the 32 top interior rows (y 5.736 .. 6.480, cladding only) are omitted. Margins: 0.926 um below the bus bottom edge (y = -5.554), 0.712 um above the ring top (y = 5.0).",
+    "full_grid_cells": [
+      750,
+      626
+    ],
+    "pml_cells": 42
+  },
+  "monitors": {
+    "rows": {
+      "count": 509,
+      "kind": "FieldMonitor",
+      "normal": "y",
+      "spatial_interpolation": "nearest",
+      "record_fields": [
+        "Ez"
+      ],
+      "record_poynting": [],
+      "record_flux": false,
+      "dft_precision": "float64",
+      "spectrum": "custom, 2 frequencies, apodization none",
+      "x_span_um": [
+        -7.968,
+        7.968
+      ],
+      "note": "2D TorchFDTD rejects z-normal frequency monitors, so the map is assembled from one y-normal line monitor per Ez node row, all accumulated by the fused CUDA monitor kernel during the single run."
+    },
+    "out_exact": "x-normal flux plane identical to the fixture out plane (x = 6.0 um, 83 rows), sampled at the two field wavelengths",
+    "fixture_planes": "in and out planes exactly as built by build_project(g, True), 401 wavelengths 1.50..1.60 um"
+  },
+  "run": {
+    "steps": 89219,
+    "mesh_um": 0.024,
+    "dt_s": 5.604162704117249e-17,
+    "run_time_ps": 4.999977922986369,
+    "cells": [
+      750,
+      626,
+      1
+    ],
+    "pml_cells": 42,
+    "courant_number": 0.700035713374682,
+    "precision": "float32",
+    "cuda_kernel": "fused",
+    "cuda_monitor_kernel": "fused",
+    "cuda_graph": true,
+    "termination_reason": "max_steps",
+    "scene": "ring (build_project(g, True)) only",
+    "timing_s": {
+      "setup": 1.964817900210619,
+      "stepping": 146.92843540012836,
+      "full_solve": 149.38921059994027,
+      "script_wall": 150.19020080007613
+    },
+    "timing_note": "shared workstation GPU, another job may have been running; timing not a benchmark"
+  },
+  "grid_checks": {
+    "fixture_check_grid": {
+      "shared_waveform_sha256": "788a965dde05fef967b6428dab1b0e3a5fe0f77b080b9e4037b8a8e81a564a29",
+      "line_cells": [
+        [
+          62,
+          63
+        ],
+        [
+          62,
+          123
+        ]
+      ],
+      "end_cells": [
+        [
+          62,
+          61
+        ],
+        [
+          62,
+          123
+        ]
+      ],
+      "end_weight": 0.5
+    },
+    "staircase": {
+      "interior_cells": [
+        [
+          43,
+          708
+        ],
+        [
+          43,
+          584
+        ]
+      ],
+      "interior_ez_epsilon_sha256": "b937c9bfeae3e805e301d3ec3c79be65e2e5ce65f91fbbd5ac2897d2cb0ba837",
+      "interior_core_nodes": 39853,
+      "min_node_distance_to_circles_um": 4.480020070385393e-05
+    },
+    "staircase_hash_matches_record": true
+  },
+  "T_check": {
+    "normalisation": "T = out-plane flux of this ring run / out-plane flux of the committed straight-bus run (microring_torchfdtd.json flux_out_straight; cubic spline in frequency at the two field wavelengths). The straight-bus scene was not rerun.",
+    "flux_out_ring_max_relative_difference_vs_record": 0.0,
+    "flux_in_ring_max_relative_difference_vs_record": 0.0,
+    "T_grid_max_abs_difference_vs_record": 0.0,
+    "off": {
+      "wavelength_um": 1.55,
+      "T_this_run_exact_frequency": 1.0024521161776454,
+      "T_this_run_grid_sample": 1.0024521161776456,
+      "T_record_grid_sample": 1.0024521161776456,
+      "grid_index": 200,
+      "out_exact_vs_grid_flux_relative_difference": -3.3306690738754696e-16
+    },
+    "on": {
+      "wavelength_um": 1.564481,
+      "T_this_run_exact_frequency": 0.5310867888070667,
+      "T_record_cubic_spline_at_wavelength": 0.5310952965600624,
+      "T_record_neighbour_samples": {
+        "1564.250 nm": 0.5594718071981334,
+        "1564.500 nm": 0.5315987608416757
+      },
+      "T_this_run_neighbour_samples": {
+        "1564.250 nm": 0.5594718071981334,
+        "1564.500 nm": 0.5315987608416757
+      }
+    }
+  },
+  "intensity_summary": {
+    "definition": "|Ez|^2 of the saved maps; ring core: 4.5 <= r <= 5.0 um; bus core: |y + 5.304| <= 0.25 um; bus input section x in [-7.0, -3.0] um, bus output section x in [3.0, 7.5] um",
+    "on": {
+      "ring_core_peak": 6.93460063259784e-26,
+      "bus_input_peak": 1.1248661305574321e-26,
+      "bus_output_peak": 3.1269608412251804e-27,
+      "ring_to_bus_input_peak_ratio": 6.164823034685353,
+      "ring_to_bus_output_peak_ratio": 22.17680676129216,
+      "ring_to_bus_input_mean_ratio": 6.523036440126558,
+      "map_peak": 6.93460063259784e-26,
+      "map_peak_at_um": [
+        4.836,
+        -0.38400000000000034
+      ]
+    },
+    "off": {
+      "ring_core_peak": 8.953172024337496e-28,
+      "bus_input_peak": 6.3492222247965924e-27,
+      "bus_output_peak": 4.700487234118432e-27,
+      "ring_to_bus_input_peak_ratio": 0.14101210679587334,
+      "ring_to_bus_output_peak_ratio": 0.1904732760329823,
+      "ring_to_bus_input_mean_ratio": 0.0961604680768505,
+      "map_peak": 6.885574678829467e-27,
+      "map_peak_at_um": [
+        -7.9079999999999995,
+        -5.304
+      ]
+    }
+  },
+  "source_dft_abs_ratio_on_over_off": 0.9733194846130665,
+  "provenance": {
+    "git_commit": "7e38d04d2afb857eee49e332df9899a4db49591a",
+    "git_status_solver_and_fixture": "clean",
+    "geometry_sha256": "f7f2aaf2d0678e0dd1a21f525179549fc4723d27d51f713c8e3461ba6c6c2649",
+    "driver_sha256": "d1f1753486201eff37a1a60b7d04fe34a31218ad4240b5db8121c1b56941ae88",
+    "driver_path": ".local/paper_review/microring_fields/run_fields.py",
+    "fixture_script_sha256": "d24e96784d73a0cc9597fcfe76bfd9123ded53eb368b19aa1ddd945589e0cf04",
+    "record_sha256": "8277323bf0c0902b8ab855adc1a28cd701150abbbfdb44aebc268c7063a2272f",
+    "torchfdtd_file": "torchfdtd/__init__.py",
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "nvidia_smi": {
+      "name": "NVIDIA GeForce RTX 3060",
+      "driver_version": "591.86",
+      "memory.total": "12288",
+      "memory.used": "2567",
+      "utilization.gpu": "4"
+    },
+    "torch": "2.10.0+cu126",
+    "torch_cuda": "12.6",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "python": "3.10.2",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "interpreter": ".venv/Scripts/python.exe"
+  }
+}

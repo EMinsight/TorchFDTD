@@ -60,6 +60,12 @@ def panel(ax, letter, title=''):
                  loc='left', fontsize=8, pad=7, color=INK)
 
 
+def sci_tex(value, digits=1):
+    """Mathtext scientific notation such as 1.1 x 10^-4."""
+    mantissa, exponent = f'{value:.{digits}e}'.split('e')
+    return f'${mantissa}\\times10^{{{int(exponent)}}}$'
+
+
 def ygrid(ax):
     ax.grid(axis='y', color=LINE, lw=0.5, alpha=0.7)
     ax.set_axisbelow(True)
@@ -294,14 +300,14 @@ def memory_cost():
 # Figure: independent tiles and exterior propagation
 # ----------------------------------------------------------------------------
 
-def hybrid():
+def tiling_overlap():
+    """Appendix figure: error and cell overhead of independent overlapping tiles."""
     tiled = read('tiled-stitching-3d-3060.json')
-    asm = read('angular-spectrum-3060.json')['metalens_3d']
-    fig, axes = plt.subplots(2, 2, figsize=(WIDTH, 4.3))
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.3))
     rows = tiled['through_pml']
     x = np.array([r['overlap_um'] for r in rows])
 
-    ax = axes[0, 0]
+    ax = axes[0]
     for key, name, color, marker in [('near_error_hard', 'six-component near field', BLUE, 'o'),
                                      ('focal_intensity_error_hard', 'focal-plane intensity', TEAL, 's')]:
         y = np.array([100 * r[key] for r in rows])
@@ -311,21 +317,28 @@ def hybrid():
     ax.set_xticks([0.5, 1.0, 1.5, 2.0, 2.5])
     panel(ax, 'a', 'Independent-tile error')
 
-    ax = axes[0, 1]
+    ax = axes[1]
     ratio = np.array([r['total_tile_cells'] / tiled['reference']['cells'] for r in rows])
     ax.plot(x, ratio, marker='o', color=ORANGE, ms=4, mfc='white', mew=1.2)
     ax.axhline(1, color=GREY, ls=(0, (3, 2)), lw=0.8)
-    ax.text(0.08, 1.06, 'full grid', fontsize=6.4, color=GREY, va='bottom')
+    ax.text(2.7, 1.06, 'full grid', fontsize=6.4, color=GREY, va='bottom', ha='right')
     for xi, ri, r in zip(x, ratio, rows):
         ax.annotate(f"{r['tile_shapes'][0][0]}$^2$", (xi, ri), (0, 6), textcoords='offset points',
                     ha='center', fontsize=5.8, color=MUTED)
     ax.set(xlabel='Tile overlap (µm)', ylabel='Sum of tile cells / full-grid cells', ylim=(0.8, 4.0), xlim=(0, 2.75))
     ax.set_xticks([0.5, 1.0, 1.5, 2.0, 2.5])
-    ax.text(0.97, 0.06, f"four tiles of {tiled['tile_um']:g} µm cores, {tiled['reference']['shape'][0]}$^2\\times${tiled['reference']['shape'][2]} reference",
-            transform=ax.transAxes, ha='right', va='bottom', fontsize=6.2, color=MUTED)
+    ax.text(0.04, 0.96, f"four tiles with {tiled['tile_um']:g} µm cores\nfull grid {tiled['reference']['shape'][0]}$^2\\times${tiled['reference']['shape'][2]}",
+            transform=ax.transAxes, ha='left', va='top', fontsize=6.2, color=MUTED)
     panel(ax, 'b', 'Spatial overhead of tiling')
+    fig.tight_layout(w_pad=2.2)
+    save(fig, 'tiling-overlap')
 
-    ax = axes[1, 0]
+
+def exterior_propagation():
+    """Angular-spectrum propagation against FDTD through the observation region."""
+    asm = read('angular-spectrum-3060.json')['metalens_3d']
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH, 2.3))
+    ax = axes[0]
     z = np.asarray(asm['section']['z_um'])
     err = 100 * np.asarray(asm['section']['intensity_error_per_z'])
     ax.plot(z, err, color=BLUE, lw=1.3)
@@ -336,9 +349,9 @@ def hybrid():
     ax.axhline(mean, color=GREY, ls=(0, (1, 1.5)), lw=0.8)
     ax.text(0.05, mean + 0.15, f'section {mean:.2f}%', fontsize=6.3, color=GREY, va='bottom')
     ax.set(xlabel='Distance above output plane (µm)', ylabel='Intensity relative $L_2$ error (%)', ylim=(0, 7.5), xlim=(0, 7.6))
-    panel(ax, 'c', 'Exterior propagation accuracy')
+    panel(ax, 'a', 'Exterior propagation accuracy')
 
-    ax = axes[1, 1]
+    ax = axes[1]
     runs = asm['runs']
     names = [f"FDTD through focus\n{'×'.join(map(str, runs['through_focus']['shape']))}, {runs['through_focus']['steps']} steps",
              f"FDTD to output plane\n{'×'.join(map(str, runs['to_plane']['shape']))}, {runs['to_plane']['steps']} steps",
@@ -354,9 +367,9 @@ def hybrid():
     ax.set_xlabel('Recorded wall time (s)')
     ax.grid(axis='x', color=LINE, lw=0.5, alpha=0.7)
     ax.set_axisbelow(True)
-    panel(ax, 'd', 'Exterior propagation cost')
-    fig.tight_layout(w_pad=2.2, h_pad=2.4)
-    save(fig, 'decomposition-propagation')
+    panel(ax, 'b', 'Exterior propagation cost')
+    fig.tight_layout(w_pad=2.2)
+    save(fig, 'exterior-propagation')
 
 
 # ----------------------------------------------------------------------------
@@ -428,9 +441,297 @@ def application():
     save(fig, 'propagated-adjoint')
 
 
+
+# ----------------------------------------------------------------------------
+# Figures added for the review: dispersive slabs, Meep comparisons
+# ----------------------------------------------------------------------------
+
+def dispersive_slabs():
+    """Drude and two-pole Lorentz slabs against the transfer-matrix reference with the same permittivity."""
+    rec = read('g3/G3-03.json')['entries']
+    fig, axes = plt.subplots(1, 3, figsize=(WIDTH, 2.25), gridspec_kw={'width_ratios': [1, 1, 0.9]})
+    for ax, material, letter, title in ((axes[0], 'drude', 'a', 'Drude slab, 0.1 µm'),
+                                        (axes[1], 'lorentz', 'b', 'Two-pole Lorentz slab, 0.5 µm')):
+        e = rec[f'analytic {material} TE h10']
+        wl = np.asarray(e['wavelength_um'])
+        order = np.argsort(wl)
+        for key, color, marker in (('R', BLUE, 'o'), ('T', TEAL, 's'), ('A', ORANGE, '^')):
+            ref = np.asarray(e[f'{key}_ref'])[order]
+            got = np.asarray(e[f'{key}_fdtd'])[order]
+            ax.plot(wl[order], ref, color=INK, lw=0.8, zorder=3)
+            ax.plot(wl[order], got, ls='none', marker=marker, ms=3.0, mfc='white', mew=0.8, color=color, zorder=2, label=key)
+        ax.set(xlabel='Wavelength (µm)', ylim=(-0.03, 1.03), xlim=(1.28, 1.82))
+        ax.set_ylabel('Power fraction')
+        panel(ax, letter, title)
+    axes[0].legend(loc='center left', ncol=1, handletextpad=0.3)
+    axes[1].text(0.97, 0.52, 'lines: transfer matrix\nmarkers: TorchFDTD, 10 nm', transform=axes[1].transAxes,
+                 ha='right', va='center', fontsize=6.0, color=MUTED)
+    ax = axes[2]
+    for material, color, marker in (('drude', BLUE, 'o'), ('lorentz', ORANGE, 's')):
+        h = [20, 10]
+        err = [max(rec[f'analytic {material} TE h{m}'][f'{k}_abs_error'] for k in ('R', 'T', 'A')) for m in h]
+        ax.plot(h, err, marker=marker, color=color, ms=4, mfc='white', mew=1.1, label=material.capitalize())
+    ref = np.array([20, 10])
+    ax.plot(ref, 3e-3 * (ref / 20) ** 2, color=GREY, lw=0.8, ls=(0, (3, 2)))
+    ax.text(14, 3e-3 * (14 / 20) ** 2 * 1.6, 'slope 2', fontsize=6.0, color=GREY, rotation=28)
+    ax.set(xscale='log', yscale='log', xlabel='Mesh step (nm)', ylabel='Max. |error| of R, T, A', xlim=(8, 25), ylim=(1e-4, 1e-2))
+    ax.set_xticks([10, 20], ['10', '20'])
+    ax.minorticks_off()
+    ax.legend(loc='lower right')
+    panel(ax, 'c', 'Mesh convergence')
+    fig.tight_layout(w_pad=1.6)
+    save(fig, 'dispersive-slabs')
+
+
+def metalens_meep():
+    """Focal xz intensity of the 3D pillar lens from TorchFDTD and Meep on the same grid."""
+    t = read('meep_comparison/metalens_3d_torchfdtd.json')['observables']['xz']
+    m = read('meep_comparison/metalens_3d_meep.json')['observables']['xz']
+    x = np.asarray(t['transverse_um'])
+    z = np.asarray(t['z_um'])
+    a = np.asarray(t['intensity'], dtype=float)
+    b = np.asarray(m['intensity'], dtype=float)
+    peak = b.max()
+    fig, axes = plt.subplots(1, 3, figsize=(WIDTH, 2.25), gridspec_kw={'width_ratios': [1, 1, 1.05]})
+    extent = (z[0], z[-1], x[0], x[-1])
+    for ax, data, letter, title in ((axes[0], a, 'a', 'TorchFDTD'), (axes[1], b, 'b', 'Meep')):
+        im = ax.imshow(data / peak, origin='lower', extent=extent, aspect='auto', cmap='magma', vmin=0, vmax=1)
+        ax.set(xlabel='z above output plane (µm)', ylabel='x (µm)')
+        panel(ax, letter, f'{title}, |E|$^2$ at 1.55 µm')
+    cbar = fig.colorbar(im, ax=axes[1], fraction=0.05, pad=0.03)
+    cbar.set_label('Intensity / Meep peak', fontsize=6.5)
+    cbar.ax.tick_params(labelsize=6)
+    ax = axes[2]
+    centre = int(np.argmin(np.abs(x)))
+    ax.plot(z, a[centre] / peak, color=BLUE, lw=1.3, label='TorchFDTD')
+    ax.plot(z, b[centre] / peak, ls='none', marker='o', ms=2.4, mfc='white', mew=0.7, color=ORANGE, markevery=3, label='Meep')
+    diff = np.linalg.norm(a - b) / np.linalg.norm(b)
+    ax.text(0.04, 0.95, f'section relative\n$L_2$ difference\n{sci_tex(diff)}', transform=ax.transAxes, ha='left', va='top', fontsize=6.0, color=MUTED, linespacing=1.3)
+    ax.set(xlabel='z above output plane (µm)', ylabel='On-axis intensity / Meep peak', ylim=(0, 1.1))
+    ax.legend(loc='center right')
+    panel(ax, 'c', 'On-axis intensity')
+    fig.tight_layout(w_pad=1.2)
+    save(fig, 'metalens-meep')
+
+
+def microring_meep():
+    """Microring resonator: field on and off resonance, and the transmission of both solvers."""
+    tr = read('meep_comparison/microring_torchfdtd.json')
+    me = read('meep_comparison/microring_meep.json')
+    cmp_ = read('meep_comparison/microring_comparison.json')
+    fields_path = DATA / 'meep_comparison/microring_fields_torchfdtd.npz'
+    fig = plt.figure(figsize=(WIDTH, 4.5))
+    grid = fig.add_gridspec(2, 2, height_ratios=[1.4, 1], hspace=0.42, wspace=0.3)
+    if fields_path.exists():
+        INPUTS['meep_comparison/microring_fields_torchfdtd.npz'] = hashlib.sha256(fields_path.read_bytes()).hexdigest()
+        f = np.load(fields_path)
+        # arrays are [iy, ix]; each map is divided by the source spectrum at its wavelength so both share one scale
+        x, y, eps = f['x_um'], f['y_um'], f['epsilon']
+        amp = {key: np.abs(f[key] / f[src]) for key, src in (('Ez_on', 'source_dft_on'), ('Ez_off', 'source_dft_off'))}
+        vmax = float(amp['Ez_on'].max())
+        level = eps.min() + 0.45 * (eps.max() - eps.min())
+        axes_top = []
+        for col, key, wl_key, letter in ((0, 'Ez_on', 'wavelength_on_um', 'a'), (1, 'Ez_off', 'wavelength_off_um', 'b')):
+            ax = fig.add_subplot(grid[0, col])
+            im = ax.imshow(amp[key] / vmax, origin='lower', extent=(x[0], x[-1], y[0], y[-1]), cmap='magma', vmin=0, vmax=1, aspect='equal')
+            ax.contour(x, y, eps, levels=[level], colors='white', linewidths=0.35, alpha=0.6)
+            ax.set(xlabel='x (µm)', ylabel='y (µm)')
+            state = 'on resonance' if key == 'Ez_on' else 'off resonance'
+            panel(ax, letter, f'|E$_z$| {state}, {1e3 * float(f[wl_key]):.2f} nm')
+            axes_top.append(ax)
+    ax = fig.add_subplot(grid[1, 0])
+    wl = np.asarray(tr['wavelength_um']) * 1e3
+    order = np.argsort(wl)
+    ax.plot(wl[order], np.asarray(tr['T'])[order], color=BLUE, lw=1.1, label='TorchFDTD')
+    ax.plot(wl[order], np.asarray(me['T'])[order], ls=(0, (3, 2)), color=ORANGE, lw=1.0, label='Meep')
+    for r in cmp_['resonances']['torchfdtd']:
+        if isinstance(r, dict) and r.get('valid') and r.get('center_nm'):
+            ax.axvline(r['center_nm'], color=LINE, lw=0.6, zorder=0)
+    ax.axhline(1.0, color=GREY, lw=0.6, ls=(0, (1, 2)), zorder=0)
+    ax.set(xlabel='Wavelength (nm)', ylabel='Transmission', xlim=(1500, 1600))
+    ax.legend(loc='lower left', ncol=2)
+    panel(ax, 'c', 'Bus transmission, 89 219 steps')
+    ax = fig.add_subplot(grid[1, 1])
+    dT = np.abs(np.asarray(tr['T']) - np.asarray(me['T']))[order]
+    ax.plot(wl[order], dT, color=TEAL, lw=0.9)
+    ax.set(xlabel='Wavelength (nm)', ylabel='|T$_{TorchFDTD}$ $-$ T$_{Meep}$|', yscale='log', xlim=(1500, 1600), ylim=(1e-9, 1e-3))
+    q = cmp_['criteria']
+    ax.text(0.03, 0.95, f"resonance wavelengths within {sci_tex(q['resonance_wavelength_nm']['value'])} nm\nloaded Q within {sci_tex(q['q_relative']['value'])} (relative)",
+            transform=ax.transAxes, ha='left', va='top', fontsize=6.0, color=MUTED)
+    panel(ax, 'd', 'Solver difference')
+    fig.subplots_adjust(left=0.08, right=0.98, top=0.95, bottom=0.1)
+    if fields_path.exists():
+        # place the colorbar against the image of panel b once its equal-aspect box is known
+        axes_top[1].apply_aspect()
+        pos = axes_top[1].get_position()
+        cbar = fig.colorbar(im, cax=fig.add_axes([pos.x1 + 0.012, pos.y0, 0.011, pos.height]))
+        cbar.set_label('|E$_z$| / on-resonance maximum', fontsize=6.5)
+        cbar.ax.tick_params(labelsize=6)
+    save(fig, 'microring-meep')
+
+
+def grid_scaling():
+    """Forward and adjoint time and device memory against grid size on one RTX 3060."""
+    fwd = read('paper_review/scaling-forward-3060.json')
+    streamed_path = 'paper_review/scaling-forward-streamed-3060.json'
+    sfwd = read(streamed_path) if (DATA / streamed_path).exists() else {'cases': [], 'steps': fwd['steps']}
+    sizes = [128, 192, 256, 320, 384]
+    adj = {n: read(f'paper_review/scaling-adjoint-3060-{n}.json') for n in sizes
+           if (DATA / f'paper_review/scaling-adjoint-3060-{n}.json').exists()}
+    refused = read('paper_review/scaling-adjoint-3060-384-resident-plan.json')
+    res = [c for c in fwd['cases'] if 'median' in c]
+    stm = [c for c in sfwd['cases'] if 'median' in c]
+    fig, axes = plt.subplots(1, 3, figsize=(WIDTH, 2.45))
+    limit_n = 8e6 ** (1 / 3)   # edge of a cube at the eight-million-cell resident limit
+    style = dict(ms=4, mfc='white', mew=1.1)
+
+    def xaxis(ax, ticks=(64, 128, 256, 512), lo=56, hi=580):
+        ax.set_xscale('log', base=2)
+        ax.set_xlim(lo, hi)
+        ax.set_xticks(list(ticks), [f'{t}$^3$' for t in ticks])
+        ax.minorticks_off()
+        ax.set_xlabel('Grid')
+
+    ax = axes[0]
+    ax.plot([c['n'] for c in res], [c['cell_steps_per_second_loop'] / 1e9 for c in res],
+            marker='o', color=BLUE, label='Resident, stepping', **style)
+    ax.plot([c['n'] for c in res], [c['cells'] * fwd['steps'] / c['median']['wall_seconds'] / 1e9 for c in res],
+            marker='o', color=BLUE, ls=(0, (3, 2)), ms=3, mew=0, label='Resident, full solve')
+    if stm:
+        ax.plot([c['n'] for c in stm], [c['cell_steps_per_second_full'] / 1e9 for c in stm],
+                marker='D', color=PURPLE, ls=(0, (3, 2)), label='Streamed, full solve', **style)
+    ax.axvline(limit_n, color=GREY, lw=0.7, ls=(0, (1, 2)))
+    ax.text(limit_n * 0.94, 0.04, 'resident limit\n8 million cells', transform=ax.get_xaxis_transform(), ha='right',
+            va='bottom', fontsize=5.8, color=GREY)
+    xaxis(ax)
+    top = max(c['cell_steps_per_second_loop'] / 1e9 for c in res)
+    ax.set(ylabel='Rate (10$^9$ cell-steps/s)', ylim=(0, 1.45 * top))
+    ax.legend(loc='upper right', fontsize=5.8)
+    ygrid(ax)
+    panel(ax, 'a', f"Forward, {fwd['steps']} steps")
+
+    ax = axes[1]
+    ax.plot([c['n'] for c in res], [c['median']['peak_allocated_bytes'] / 1e9 for c in res], marker='o', color=BLUE,
+            label='Forward, resident', **style)
+    if stm:
+        ax.plot([c['n'] for c in stm], [c['median']['peak_allocated_bytes'] / 1e9 for c in stm], marker='D', color=PURPLE,
+                label='Forward, streamed', **style)
+    series = {}
+    for mode, color, marker, name in (('cuda_resident', ORANGE, 's', 'Adjoint, resident'),
+                                      ('cuda_dram', TEAL, '^', 'Adjoint, streamed')):
+        rows = sorted((k, d) for k, d in adj.items() if d.get('stage') == 'complete' and d['records'].get(mode))
+        series[mode] = [(k, d['median_seconds'][mode],
+                         statistics.median(r['peak_torch_cuda_allocated_bytes'] for r in d['records'][mode]) / 1e9) for k, d in rows]
+        ax.plot([s[0] for s in series[mode]], [s[2] for s in series[mode]], marker=marker, color=color, label=name, **style)
+    device = float(fwd['hardware'].get('gpu_memory_gb', 12.0))
+    ax.axhline(device, color=GREY, lw=0.7, ls=(0, (3, 2)))
+    ax.text(560, device * 1.15, f'device {device:.0f} GB', fontsize=5.8, color=GREY, va='bottom', ha='right')
+    xaxis(ax)
+    ax.set(yscale='log', ylabel='Peak device allocation (GB)', ylim=(1e-2, 1e3))
+    ax.legend(loc='upper left', ncol=2, fontsize=5.6, columnspacing=0.8, handlelength=1.4)
+    panel(ax, 'b', 'Device memory')
+
+    ax = axes[2]
+    for mode, color, marker, name in (('cuda_resident', ORANGE, 's', 'Resident'), ('cuda_dram', TEAL, '^', 'Host-streamed')):
+        ax.plot([s[0] for s in series[mode]], [s[1] for s in series[mode]], marker=marker, color=color, label=name, **style)
+    if refused.get('stage') == 'failed':
+        n_refused = refused['configuration']['size']
+        ax.text(0.97, 0.04, f'{n_refused}$^3$: resident adjoint\nrefused by the planner', transform=ax.transAxes,
+                ha='right', va='bottom', fontsize=5.8, color=MUTED)
+    xaxis(ax, ticks=(128, 256, 384), lo=100, hi=480)
+    ax.set(yscale='log', ylabel='Time to gradient (s)')
+    ax.legend(loc='upper left')
+    panel(ax, 'c', 'Adjoint, 128 steps')
+    fig.tight_layout(w_pad=1.2)
+    save(fig, 'grid-scaling')
+
+
+def metagrating_design(mesh='fine', duration='long_duration'):
+    """A complete small inverse design: densities, objective history, order spectra and fields."""
+    rec = read('paper_review/metagrating_showcase.json')
+    fields_path = DATA / 'paper_review/metagrating_fields.npz'
+    INPUTS['paper_review/metagrating_fields.npz'] = hashlib.sha256(fields_path.read_bytes()).hexdigest()
+    f = np.load(fields_path)
+    geo, seed = rec['geometry'], str(rec['chosen_seed'])
+    fig = plt.figure(figsize=(WIDTH, 4.7))
+    grid = fig.add_gridspec(2, 3, height_ratios=[1, 1.25], hspace=0.5, wspace=0.45, width_ratios=[0.9, 1, 1])
+
+    ax = fig.add_subplot(grid[0, 0])
+    edges = np.asarray(geo['pixel_edges_um'])
+    strips = np.vstack([rec['densities']['final_binary'], rec['densities']['initial']])
+    ax.imshow(strips, extent=(edges[0], edges[-1], -0.5, 1.5), origin='lower', cmap='Greys', vmin=0, vmax=1,
+              aspect='auto', interpolation='nearest')
+    ax.axhline(0.5, color='white', lw=2.0)
+    ax.set_yticks([0, 1], ['final\nbinary', f"initial\n$\\beta$ = {rec['densities']['initial_beta']:g}"])
+    ax.tick_params(axis='y', length=0)
+    ax.set_xlabel('Position in the period (µm)')
+    panel(ax, 'a', 'Design density')
+
+    ax = fig.add_subplot(grid[0, 1])
+    for s, hist in sorted(rec['histories'].items()):
+        it = [h['iteration'] for h in hist]
+        chosen = s == seed
+        ax.plot(it, [h['efficiency'] for h in hist], color=BLUE if chosen else GREY, lw=1.3 if chosen else 0.8,
+                alpha=1 if chosen else 0.6, label=f'seed {s}, 1.00 µm' if chosen else None, zorder=3 if chosen else 2)
+        if chosen:
+            ax.plot(it, [h['holdout_efficiency'] for h in hist], color=BLUE, lw=0.9, ls=(0, (3, 2)), label=f'seed {s}, 0.95 µm')
+            starts = [hist[0]['iteration'] - 0.5] + [h['iteration'] + 0.5 for h in hist if h['beta_next'] != h['beta']]
+            ends = starts[1:] + [hist[-1]['iteration'] + 0.5]
+            betas = [hist[0]['beta']] + [h['beta_next'] for h in hist if h['beta_next'] != h['beta']]
+            for a, b, beta in zip(starts, ends, betas):
+                if a > starts[0]:
+                    ax.axvline(a, color=LINE, lw=0.6, zorder=0)
+                label = f'$\\beta$ = {beta:g}' if a == starts[0] else f'{beta:g}'
+                ax.text(0.5 * (a + b), 0.705, label, ha='center', va='bottom', fontsize=5.8, color=MUTED)
+    ax.plot([], [], color=GREY, lw=0.8, alpha=0.6, label='other seeds')
+    ax.set(xlabel='Iteration', ylabel='+1 order efficiency', xlim=(0.5, 24.5), ylim=(0, 0.76))
+    ax.legend(loc='lower right', fontsize=6.0)
+    panel(ax, 'b', 'Objective history')
+
+    ax = fig.add_subplot(grid[0, 2])
+    spec = rec['spectra'][mesh][duration]
+    wl = np.asarray(rec['spectra']['wavelength_um'])
+    for key, color, name in (('T_plus1', BLUE, '+1'), ('T_zero', GREY, '0'), ('T_minus1', ORANGE, '$-$1')):
+        ax.plot(wl, spec['final_binary'][key], color=color, lw=1.2, label=name)
+        ax.plot(wl, spec['initial'][key], color=color, lw=0.8, ls=(0, (2, 2)))
+    ax.axvline(1.0, color=LINE, lw=0.6, zorder=0)
+    ax.set(xlabel='Wavelength (µm)', ylabel='Transmitted efficiency', ylim=(0, 1), xlim=(wl.min(), wl.max()))
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, 0.8), ncol=3, columnspacing=0.8, handlelength=1.2, fontsize=6.0,
+              title='solid final, dashed initial', title_fontsize=5.8)
+    panel(ax, 'c', 'Order spectra')
+
+    x, z = f['x_um'], f['z_um']
+    vmax = float(max(np.abs(f['Ex_real_initial']).max(), np.abs(f['Ex_real_final_binary']).max()))
+    bottom = grid[1, :].subgridspec(1, 2, wspace=0.12)
+    maps = []
+    for col, key, letter, title in ((0, 'initial', 'd', 'Initial design'), (1, 'final_binary', 'e', 'Final binary design')):
+        ax = fig.add_subplot(bottom[0, col])
+        im = ax.imshow(f[f'Ex_real_{key}'], origin='lower', extent=(x[0], x[-1], z[0], z[-1]), cmap='RdBu_r',
+                       vmin=-vmax, vmax=vmax, aspect='equal')
+        for zz in geo['layer_z_um']:
+            ax.axhline(zz, color=INK, lw=0.5, ls=(0, (2, 2)))
+        if key == 'final_binary':
+            ax.contour(x, z, f['eps_geometric_final_binary'], levels=[0.5 * (geo['background_epsilon'] + geo['design_epsilon'])],
+                       colors=INK, linewidths=0.6)
+        ax.set(xlabel='x (µm)', ylabel='z (µm)' if col == 0 else '')
+        if col:
+            ax.tick_params(labelleft=False)
+        panel(ax, letter, f'{title}, Re $E_x$ at 1.00 µm')
+        maps.append(ax)
+    fig.subplots_adjust(left=0.09, right=0.93, top=0.95, bottom=0.08)
+    maps[1].apply_aspect()
+    pos = maps[1].get_position()
+    cbar = fig.colorbar(im, cax=fig.add_axes([pos.x1 + 0.012, pos.y0, 0.011, pos.height]))
+    cbar.set_label('Re $E_x$ / incident amplitude', fontsize=6.5)
+    cbar.ax.tick_params(labelsize=6)
+    save(fig, 'metagrating-design')
+
+
 def build_story_figures():
     apply_style()
-    architecture(); memory_cost(); hybrid(); application()
+    architecture(); memory_cost(); exterior_propagation(); tiling_overlap(); application()
+    dispersive_slabs(); metalens_meep(); microring_meep()
+    grid_scaling(); metagrating_design()
     record = {'description': 'Vector schematics and plots from completed records. No new simulation or interpolated field image.',
               'inputs': INPUTS, 'generator_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     (OUT.parent / 'story-figure-provenance.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')

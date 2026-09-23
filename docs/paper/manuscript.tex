@@ -88,7 +88,7 @@ Here, we address both costs in TorchFDTD. Its Yee, absorber and dispersion updat
 
 On an A100 the fused path completes full forward solves of the tested scenes 9.0 to 17.1 times faster than the package it extends, and host streaming lowers the peak device allocation of a $256^3$ adjoint by 56\% at a cost in time that is set by the host.
 
-This paper describes the numerical method (Section~\ref{sec:formulation}), the discrete adjoint (Section~\ref{sec:adjoint}), the execution modes (Section~\ref{sec:execution}) and the software structure with usage examples (Section~\ref{sec:software}). Section~\ref{sec:validation} validates the package against analytic solutions, independent solvers and finite differences, and Section~\ref{sec:performance} reports throughput, the memory--time trade-off of host streaming and a propagated optical objective on a workstation.
+This paper describes the numerical method (Section~\ref{sec:formulation}), the discrete adjoint (Section~\ref{sec:adjoint}), the execution modes (Section~\ref{sec:execution}) and the software structure with usage examples (Section~\ref{sec:software}). Section~\ref{sec:validation} validates the package against analytic solutions, independent solvers and finite differences, Section~\ref{sec:performance} reports throughput, its scaling with grid size and the memory--time trade-off of host streaming, and Section~\ref{sec:examples} presents a complete metagrating design and a propagated optical objective on a workstation. Appendices~\ref{app:validation} and~\ref{app:batch} collect further validation and batch measurements.
 
 \section{Numerical method}
 \label{sec:formulation}
@@ -110,11 +110,11 @@ which reduces to $\eta h/(c\sqrt{d})$ on a uniform mesh. A graded rectilinear me
 
 \subsection{Boundaries}
 
-Convolutional perfectly matched layers \citep{roden2000} store one memory variable per transverse derivative inside each absorbing face. The stretching coefficients $\kappa$, $\sigma$ and $\alpha$ follow polynomial profiles configured per face, so opposite faces and neighboring faces of different type may carry different depths and gradings. Periodic and Bloch pairs wrap the difference operators without a duplicated end plane, and the Bloch phase enters through the wrapped stencil. Perfect electric conductor faces and electric antisymmetry planes hold the tangential electric field at zero on the boundary node. Perfect magnetic conductor and magnetic symmetry faces need the dual arrangement, in which the upper boundary node of each tangential electric component becomes a stored degree of freedom. The package carries those face arrays through the resident, streamed and batched paths, through their checkpoints, and through the absorber memories of neighboring faces. Any face type may adjoin any other, so Section~\ref{sec:validation} measures the reflection of an absorbing face next to a magnetic wall.
+Convolutional perfectly matched layers \citep{roden2000} store one memory variable per transverse derivative inside each absorbing face. The stretching coefficients $\kappa$, $\sigma$ and $\alpha$ follow polynomial profiles configured per face, so opposite faces and neighboring faces of different type may carry different depths and gradings. Periodic and Bloch pairs wrap the difference operators without a duplicated end plane, and the Bloch phase enters through the wrapped stencil. Perfect electric conductor faces and electric antisymmetry planes hold the tangential electric field at zero on the boundary node. Perfect magnetic conductor and magnetic symmetry faces need the dual arrangement, in which the upper boundary node of each tangential electric component becomes a stored degree of freedom. The package carries those face arrays through the resident, streamed and batched paths, through their checkpoints, and through the absorber memories of neighboring faces. Any face type may adjoin any other, so Appendix~\ref{app:validation} measures the reflection of an absorbing face next to a magnetic wall.
 
 \subsection{Materials and geometry}
 
-A nondispersive cell carries a real permittivity at each Yee electric position. Dispersive materials add up to sixteen Drude or Lorentz poles integrated with the trapezoidal auxiliary differential equation of \citet{okoniewski1997}, and measured refractive-index tables are fitted to a passive multipole model whose error and band are reported before the fit is accepted. Anisotropic media \citep{oskooi2009} use a symmetric positive-definite permittivity tensor sampled at grid nodes and applied to the curl through the node assembly $S=D^{-1/2}\bigl(\tfrac18\sum R^{\dagger}\epsilon^{-1}R\bigr)D^{-1/2}$, with the tensor restricted to eigenvalues at or above one so that the vacuum time step of Eq.~\eqref{eq:cfl} remains admissible. Inside an absorbing layer the stretched-coordinate formulation is unstable for tensors whose principal axes are rotated relative to the face normal or whose normal eigenvalue is the intermediate one, a consequence of the backward-wave criterion of \citet{becache2003} that also constrains the corrected unsplit layers of \citet{oskooi2011}. TorchFDTD therefore admits a tensor inside a face only when the face normal is a principal axis with a non-intermediate eigenvalue, a rule checked node by node. Dense one-step spectral radii on small Bloch grids equal one to nine decimal places for admitted tensors and lie between 1.0049 and 1.0089 for rejected ones, and a 4000-step sweep over fifteen admitted cases with contrasts up to sixteen shows no growth. The rejected cases grow by factors of $7.9\times10^{3}$ and $7.6\times10^{12}$ over that sweep.
+A nondispersive cell carries a real permittivity at each Yee electric position. Dispersive materials add up to sixteen Drude or Lorentz poles integrated with the trapezoidal auxiliary differential equation of \citet{okoniewski1997}, and measured refractive-index tables are fitted to a passive multipole model whose error and band are reported before the fit is accepted. Anisotropic media \citep{oskooi2009} use a symmetric positive-definite permittivity tensor sampled at grid nodes and applied to the curl through the node assembly $S=D^{-1/2}\bigl(\tfrac18\sum R^{\dagger}\epsilon^{-1}R\bigr)D^{-1/2}$, with the tensor restricted to eigenvalues at or above one so that the vacuum time step of Eq.~\eqref{eq:cfl} remains admissible. Inside an absorbing layer the stretched-coordinate formulation is unstable for tensors whose principal axes are rotated relative to the face normal or whose normal eigenvalue is the intermediate one, a consequence of the backward-wave criterion of \citet{becache2003} that also constrains the corrected unsplit layers of \citet{oskooi2011}. TorchFDTD therefore admits a tensor inside a face only when the face normal is a principal axis with a non-intermediate eigenvalue, a rule checked node by node. Appendix~\ref{app:validation} records the spectral radii and long-time behavior of admitted and rejected tensors.
 
 Geometry enters through analytic solids (boxes, cylinders, spheres, ellipsoids, rings and extruded polygons with holes) placed by an ordered rotation and a pivot, with a lower mesh order winning overlaps. Membership is evaluated only inside a conservative axis-aligned support, and an optional dielectric subpixel operator averages the permittivity across interfaces \citep{farjadpour2006}. GDSII layouts map layer and datatype pairs to extrusion intervals and materials, apply Boolean etch layers, staircase a sidewall angle on the native $z$ nodes and keep polygon holes with even-odd filling \citep{gdstk}.
 
@@ -159,7 +159,7 @@ The streamed mode partitions the domain along $x$ into slabs of $W$ cells and ad
 
 A policy is admitted only after accounting for the active device workspace, the global state banks, the checkpoints, the material tensors and the observation buffers. Slab width $W$ and temporal depth $K$ control the active field extent $W+2K$, while the checkpoint count controls retained history and replay work. For a domain of $N_x\times N_y\times N_z$ cells partitioned along $x$, the device workspace therefore scales with $(W+2K)N_yN_z$ rather than with $N_xN_yN_z$, so it still grows with the transverse cross-section. The host allocation scales with the full volume plus the retained checkpoints, and host capacity and device--host bandwidth bound the usable policies.
 
-\subsection{Lateral tiling and exterior propagation}
+\subsection{Exterior propagation and lateral tiling}
 \label{sec:hybrid}
 
 A separate interface partitions a planar device into independently solved, overlapping lateral tiles, each with its own absorber and output plane, and assembles their core fields on the global plane (Fig.~\ref{fig:overview}c). In contrast to the causal slabs above, this is an overlapping-domain approximation of the kind used for large-area metasurfaces \citep{pestourie2018,lin2019}, and it changes the boundary-value problem. A neighboring-tile mismatch is reported as a diagnostic, and Section~\ref{sec:hybrid-validation} measures the error against a full-domain solution.
@@ -245,7 +245,7 @@ at 31 wavelengths between 1.3 and 1.8~\micron{}. The plane-monitor spectra reach
 \label{fig:flux-validation}
 \end{figure}
 
-A closed total-field/scattered-field box around a dielectric sphere yields the scattering cross-section over nine wavelengths, which is compared with the Mie series \citep{bohren1983}. The error is set by the staircased sphere surface rather than by the box or the duration, and it is not monotonic in the mesh. It falls from 8.9\% at a 0.1~\micron{} mesh to 0.31\% at 0.05~\micron{}, rises to 1.05\% at 0.025~\micron{} and falls again to 0.55\% at 0.02~\micron{}, while doubling the physical duration leaves the 0.025~\micron{} value unchanged (Table~\ref{tab:tfsf-sphere}, Fig.~\ref{fig:tfsf-sphere}). Cross-sections of this sphere are therefore accurate to about one percent from a 0.05~\micron{} mesh onward, where the staircase rather than the resolution limits the error.
+A closed total-field/scattered-field box around a dielectric sphere yields the scattering cross-section over nine wavelengths, which is compared with the Mie series \citep{bohren1983}. The error is set by the staircased sphere surface rather than by the box or the duration, and it is not monotonic in the mesh. It falls from 8.9\% at a 0.1~\micron{} mesh to 0.31\% at 0.05~\micron{}, rises to 1.05\% at 0.025~\micron{} and falls again to 0.55\% at 0.02~\micron{}, while doubling the physical duration leaves the 0.025~\micron{} value unchanged (Table~\ref{tab:tfsf-sphere}, Fig.~\ref{fig:tfsf-sphere}). Cross-sections of this sphere are therefore accurate to about one percent from a 0.05~\micron{} mesh onward, where the staircase, not the resolution, limits the error.
 
 \input{tables/tfsf-sphere}
 
@@ -256,11 +256,18 @@ A closed total-field/scattered-field box around a dielectric sphere yields the s
 \label{fig:tfsf-sphere}
 \end{figure}
 
-Radiation projections are checked against the closed-form fields of an electric dipole. With 14, 28 and 56 samples per face axis the finite-distance projection reaches relative errors of $4.6\times10^{-3}$, $1.1\times10^{-3}$ and $2.8\times10^{-4}$ at five points between 0.55 and 1.35~\micron{} outside the box, a second-order sequence. The asymptotic and finite-distance models agree to $1.9\times10^{-4}$ at a radius of 2000~\micron{}. A lossy exterior with index $1.3+0.05\mathrm{i}$ reproduces the analytic near and far fields with the same convergence. For an open surface the single-face projection of a Gaussian-apodized directional emitter converges to the closed-box result as the field on the omitted faces decays, from $9.6\times10^{-2}$ to $3.8\times10^{-3}$ as the beam waist grows from 0.4 to 0.8 wavelengths, whereas an isotropic dipole stays at 0.79 under refinement. The closed-box projection is therefore accurate from just outside the box to the far field, while an open surface suits directional emitters whose field on the omitted faces is small.
+Dispersive and lossy media are checked on a Drude slab of thickness 0.1~\micron{} and a two-pole Lorentz slab of thickness 0.5~\micron{} at normal incidence, against the transfer-matrix reflection, transmission and absorption of the permittivity used in the solver (Fig.~\ref{fig:dispersive}). At a 20~nm mesh the largest errors in $R$, $T$ and $A$ over 21 wavelengths between 1.3 and 1.8~\micron{} are $1.1\times10^{-3}$ for the Drude slab and $2.7\times10^{-3}$ for the Lorentz slab, in both polarizations, and halving the mesh lowers them to $2.7\times10^{-4}$ and $6.7\times10^{-4}$, a factor of four. Passing the permittivity through the passive multipole fit of Section~\ref{sec:formulation} changes these quantities by less than $2.9\times10^{-9}$. The trapezoidal auxiliary differential equation reproduces lossy dispersive responses with second-order accuracy, and absorptions up to 0.24 are resolved to about $10^{-4}$ on the finer mesh.
 
-Guided-mode ports are validated on a straight guide, an interface between guides of index 1.0 and 1.2, a symmetric Y branch and a four-port crossing, and the complex scattering parameters of the interface are compared with an independent discrete interface solution. A narrow-aperture port on a wide domain matches the full-cell network to $1.6\times10^{-5}$ in the scattering parameters. The Y branch obeys reciprocity to $2.0\times10^{-3}$ with a $1.2\times10^{-4}$ arm asymmetry, and the crossing obeys reciprocity to $2.4\times10^{-4}$ with a $1.2\times10^{-7}$ gap between its four-fold rotated columns. The port model is therefore reciprocal and symmetric to $2\times10^{-3}$ or better, and the power missing from the guided channels of the Y branch is radiated by the staircased junction, a property of the discretized geometry.
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/dispersive-slabs.pdf}
+\caption{Dispersive slabs at normal incidence. (a) Drude slab of thickness 0.1~\micron{} and (b) two-pole Lorentz slab of thickness 0.5~\micron{}, with reflection, transmission and absorption from TorchFDTD at a 10~nm mesh (markers) and from the transfer-matrix solution (lines). (c) Largest absolute error of $R$, $T$ and $A$ over the band at two mesh steps, with a second-order guide.}
+\label{fig:dispersive}
+\end{figure}
 
-The anisotropic path is checked against a birefringent slab of principal indices 1.5 and 2.0 in a co-aligned exterior of indices 1.2 and 1.4 that fills both absorbing faces along the propagation axis. The two polarization channels reproduce the analytic transmission to 1.37\% and 0.33\%, and the derivative of the transmission with respect to the slab index agrees with the analytic derivative to 6.9\%. A magnetic wall next to an absorbing face reflects $1.7\times10^{-4}$ of the incident power with the default profile and $3.5\times10^{-4}$ with $\kappa=3$, $\alpha=0.05$ and a quadratic grading. On this mesh anisotropic transmission is thus accurate to about one percent and its index derivative to about seven percent, and a magnetic symmetry plane can adjoin an absorber at a reflection cost below $4\times10^{-4}$ of the incident power.
+Radiation projections are checked against the closed-form fields of an electric dipole. With 14, 28 and 56 samples per face axis the finite-distance projection reaches relative errors of $4.6\times10^{-3}$, $1.1\times10^{-3}$ and $2.8\times10^{-4}$ at five points between 0.55 and 1.35~\micron{} outside the box, a second-order sequence. The asymptotic and finite-distance models agree to $1.9\times10^{-4}$ at a radius of 2000~\micron{}. The closed-box projection is therefore accurate from just outside the box to the far field, and Appendix~\ref{app:validation} adds a lossy exterior and open surfaces.
+
+Guided-mode ports, anisotropic media and magnetic walls adjoining absorbers are validated in Appendix~\ref{app:validation}. The ports are reciprocal and symmetric to $2\times10^{-3}$ or better, birefringent transmission is accurate to about one percent, and a magnetic symmetry plane adjoins an absorber at a reflection cost below $4\times10^{-4}$ of the incident power.
 
 \subsection{Gradient checks}
 
@@ -304,44 +311,56 @@ On that device the fused engine steps \CrossFdtdxStepMin{} to \CrossFdtdxStepMax
 \input{tables/cross-solver-accuracy}
 \input{tables/cross-solver-speed}
 
-We also cross-checked the density path against TORCWA \citep{kim2023} on a device from our related work, the single-layer silicon nitride color router of \citet{park2026colorrouter}, a $2\times2$~\micron{} periodic cell observed at normal incidence between 420 and 670~nm. On a 15.6~nm mesh the fraction of incident power reaching each of its four detector wells differs from the TORCWA reference by at most 3.0 percentage points, with a mean difference of 1.2 points. At a continuous density between the two materials, the adjoint derivative of a band-averaged routing objective agrees with central differences along two random directions to 1.3\% and 0.07\%.
-
-\subsection{Lateral tiling and exterior propagation}
-\label{sec:hybrid-validation}
-
-Because independent lateral tiles change the boundary-value problem, we measure their error against a full-domain reference. The tiling test uses a $140\times140\times60$ grid with 2059 time steps, split into four tiles with 3~\micron{} cores (Fig.~\ref{fig:hybrid-results}a,b). With the excitation sheet extended through the absorbers and hard core assembly, increasing the overlap from 0.25 to 2~\micron{} reduces the six-component near-field relative $L_2$ error from 12.0\% to 5.68\%, while the total number of simulated cells grows to 2.9 times the full grid. In a separate gradient check at 1.5~\micron{} overlap the focal objective differs by 0.138\% from the full-domain value, whereas the design-region gradient differs by 27.2\%. Consequently, agreement of the tiled derivative with a finite difference of its own forward model does not establish the accuracy of the full-device derivative, and we offer the tiled path for forward screening rather than final gradients.
-
-Exterior propagation has a different error mechanism. For a fixed silicon-pillar lens the full observation-domain calculation uses $180\times180\times202$ cells, while FDTD to the output plane uses $180\times180\times62$ cells followed by Eq.~\eqref{eq:asm}. The relative intensity error over the axial section is 1.78\% (Fig.~\ref{fig:hybrid-results}c). Both routes locate the sampled maximum at 2.775~\micron{} above the plane with transverse full widths at half maximum of 1.336 and 1.326~\micron{}. The long FDTD domain takes 60.5~s, the short domain 4.2~s and the FFT section 0.035~s on a shared RTX 3060, with 2412 and 2167 steps in the two FDTD runs (Fig.~\ref{fig:hybrid-results}d). The two tests separate the coupling error of independent tiles from the sampling error of replacing a homogeneous exterior by propagation.
+A resonant device tests the accumulation of phase over a long run. We compared a two-dimensional microring of radius 5~\micron{} side-coupled to a straight bus across a 54~nm gap, in an effective-index model with a core index of 2.83 in silica (Fig.~\ref{fig:microring}). Both solvers ran one $750\times626$ grid of 24~nm cells for 89\,219 steps, or 5~ps, and their node permittivities are identical by hash. The transmission is the output flux of the ring run divided by the output flux of a straight-bus run of that solver, sampled at 401 wavelengths between 1.5 and 1.6~\micron{}. Across the four fitted resonances the solvers agree to $5.6\times10^{-5}$~nm in wavelength and to a relative $8.6\times10^{-6}$ in loaded quality factor, and their spectra differ by at most $2.4\times10^{-5}$. The window ends before the ring-down of the narrower resonances is complete, so both spectra ripple beside each resonance and reach $T=1.0515$ next to the narrowest line at 1592.7~nm, and the fitted quality factors of 1174 to 2811 describe the windowed spectra, not the resonator. Both solvers reproduce this truncation digit for digit, so the comparison tests their time stepping and flux accumulation over $9\times10^{4}$ steps.
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\linewidth]{figures/decomposition-propagation.pdf}
-\caption{Accuracy and computational extent of the two spatial reductions on an RTX 3060. (a) Full-domain reference errors for independent overlapping tiles with hard core assembly. (b) The summed cell count of all tiles relative to the full grid, including repeated overlap regions. (c) Relative intensity error at each axial position for angular-spectrum propagation compared with FDTD through the observation region. The dashed line marks the sampled FDTD focus. (d) The recorded FDTD and FFT wall times on a logarithmic axis. Panels (a,b) and (c,d) use different lens fixtures.}
-\label{fig:hybrid-results}
+\includegraphics[width=\linewidth]{figures/microring-meep.pdf}
+\caption{Microring resonator computed by TorchFDTD and by Meep on one grid. (a,b) $|E_z|$ from TorchFDTD at the 1564.48~nm resonance and at 1550~nm, each divided by the source spectrum at its wavelength and shown on the scale of the on-resonance maximum. White lines outline the ring and bus cores. (c) Bus transmission of both solvers, the output flux of the ring run divided by that of a straight-bus run. Vertical lines mark the fitted resonances and the dotted line marks $T=1$. (d) Absolute difference of the two spectra.}
+\label{fig:microring}
 \end{figure}
+
+Focusing is compared on a three-dimensional lens of 112 silicon pillars with a 6~\micron{} aperture, run by both solvers on one $160\times160\times134$ grid with a shared source, monitors and staircased permittivity. The focal positions agree to 2.7~nm, the focal widths to a relative $1.7\times10^{-5}$ and the focusing efficiencies, 0.6232, to $2.1\times10^{-6}$, while the intensity over the axial section through the focus differs by a relative $L_2$ norm of $1.0\times10^{-4}$ (Fig.~\ref{fig:metalens-meep}). The agreement extends from spectra and cross-sections to the full field distribution of a focusing device.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/metalens-meep.pdf}
+\caption{A three-dimensional pillar lens computed by TorchFDTD and by Meep on one grid. (a,b) Intensity at 1.55~\micron{} over the axial $xz$ section, normalized by the Meep peak. (c) On-axis intensity from both solvers.}
+\label{fig:metalens-meep}
+\end{figure}
+
+We also cross-checked the density path against TORCWA \citep{kim2023} on a device from our related work, the single-layer silicon nitride color router of \citet{park2026colorrouter}, a $2\times2$~\micron{} periodic cell observed at normal incidence between 420 and 670~nm. On a 15.6~nm mesh the fraction of incident power reaching each of its four detector wells differs from the TORCWA reference by at most 3.0 percentage points, with a mean difference of 1.2 points. At a continuous density between the two materials, the adjoint derivative of a band-averaged routing objective agrees with central differences along two random directions to 1.3\% and 0.07\%.
+
+\subsection{Exterior propagation and lateral tiling}
+\label{sec:hybrid-validation}
+
+Angular-spectrum propagation replaces a homogeneous exterior at the cost of its sampling error. For a fixed silicon-pillar lens the full observation-domain calculation uses $180\times180\times202$ cells, while FDTD to the output plane uses $180\times180\times62$ cells followed by Eq.~\eqref{eq:asm}. The relative intensity error over the axial section is 1.78\% (Fig.~\ref{fig:propagation}a). Both routes locate the sampled maximum at 2.775~\micron{} above the plane with transverse full widths at half maximum of 1.336 and 1.326~\micron{}. The long FDTD domain takes 60.5~s, the short domain 4.2~s and the FFT section 0.035~s on a shared RTX 3060, with 2412 and 2167 steps in the two FDTD runs (Fig.~\ref{fig:propagation}b). Replacing the homogeneous exterior by propagation therefore keeps the focal position and width while removing most of the exterior volume from the FDTD domain.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/exterior-propagation.pdf}
+\caption{Angular-spectrum propagation against FDTD through the observation region of a fixed silicon-pillar lens on an RTX 3060. (a) Relative intensity error at each axial position. The dashed line marks the sampled FDTD focus. (b) The recorded FDTD and FFT wall times on a logarithmic axis.}
+\label{fig:propagation}
+\end{figure}
+
+Independent lateral tiles change the boundary-value problem, so we measure their error against a full-domain reference on a $140\times140\times60$ grid split into four tiles with 3~\micron{} cores (Appendix~\ref{app:tiling}). Increasing the overlap from 0.25 to 2~\micron{} lowers the six-component near-field error from 12.0\% to 5.68\% at 2.9 times the full-grid cell count. At 1.5~\micron{} overlap the focal objective differs by 0.138\% from the full-domain value, whereas the design-region gradient differs by 27.2\%. Tiling is therefore suited to forward screening, and design gradients require the full-domain adjoint.
+
 
 \section{Performance}
 \label{sec:performance}
 
-Unless stated otherwise, the timings below were taken on one NVIDIA A100 80GB PCIe with CUDA 13.2 and PyTorch 2.11 in single precision, inside a shared-cluster container with four CPU cores. Each value is the median of three warmed repetitions that include construction, graph capture, stepping and final-field transfer and exclude cold compilation. The cross-solver comparison of Section~\ref{sec:cross-solver} and the propagated optical objective of Section~\ref{sec:application} use the RTX 3060 workstation.
+Unless stated otherwise, the timings below were taken on one NVIDIA A100 80GB PCIe with CUDA 13.2 and PyTorch 2.11 in single precision, inside a shared-cluster container with four CPU cores. Each value is the median of three warmed repetitions that include construction, graph capture, stepping and final-field transfer and exclude cold compilation. The cross-solver comparison of Section~\ref{sec:cross-solver} and the design examples of Section~\ref{sec:examples} use the RTX 3060 workstation and its CPU.
 
 \subsection{Forward throughput and ensembles}
 
-To isolate the effect of kernel fusion, we compare the fused engine with the PyTorch FDTD package it builds on, executed through one CUDA graph adapter so that both run without Python in the step loop \citep{fdtd}. Over eight fixtures at $64^{3}$ and $96^{3}$ cells and 800 steps the fused path completes a full solve 16.4 to 17.1 times faster at $64^{3}$ and 9.0 to 9.4 times faster at $96^{3}$, with point-trace differences below 0.04\% that arise from the different absorber stencils (Table~\ref{tab:open-source}). Sixteen-case parameter sweeps run 33 to 35 times faster than the sequential upstream package at $32^{3}$, where the tuned cohorts hold eight cases, and 14 to 15 times faster at $64^{3}$, where each case runs alone. Four sphere cases at $64^{3}$ and 800 steps take 1.75~s with one CUDA worker against 40.4~s with one NumPy worker on the container host (Fig.~\ref{fig:batch-throughput}). The tensor batch itself is up to 1.7 times faster than sequential native execution for $32^{3}$ cases and slower for every batch of $64^{3}$ cases, so the tuning keeps single-case cohorts at that size (Table~\ref{tab:tensor-batch}).
+To isolate the effect of kernel fusion, we compare the fused engine with the PyTorch FDTD package it builds on, executed through one CUDA graph adapter so that both run without Python in the step loop \citep{fdtd}. Over eight fixtures at $64^{3}$ and $96^{3}$ cells and 800 steps the fused path completes a full solve 16.4 to 17.1 times faster at $64^{3}$ and 9.0 to 9.4 times faster at $96^{3}$, with point-trace differences below 0.04\% that arise from the different absorber stencils (Table~\ref{tab:open-source}). Sixteen-case parameter sweeps run 33 to 35 times faster than the sequential upstream package at $32^{3}$, where the tuned cohorts hold eight cases, and 14 to 15 times faster at $64^{3}$, where each case runs alone. The tensor-batch and process-batch measurements behind these choices are given in Appendix~\ref{app:batch}.
 
 \input{tables/open-source}
-\input{tables/tensor-batch}
 
-\begin{figure}[tbp]
-\centering
-\includegraphics[width=\linewidth]{figures/batch-throughput.pdf}
-\caption{Wall time on a logarithmic axis (a) and throughput (b) of four-structure ensembles on an A100. The CPU bar is one NumPy worker on the four-core host of that container. Bars are medians of three measured batches after warm-up.}
-\label{fig:batch-throughput}
-\end{figure}
 
 \subsection{Resident and host-streamed adjoints}
 
-The memory--time trade-off of host streaming is isolated on matched $256^3$ grids with 128 steps and two checkpoints (Fig.~\ref{fig:memory-cost}). Timings run from model construction to the transfer of material cotangents to the host. Specifically, the dielectric case takes 1.27~s resident on the GPU and 18.45~s with host-bank streaming, and the two-pole case takes 3.26~s and 49.46~s, while the corresponding device peaks decrease from 2.02 to 0.90~GB and from 5.51 to 2.41~GB. Streaming therefore lowers the device allocation by about 56\% at a factor of 14.5 to 15.2 in elapsed time for these policies, which places it as the mode for problems whose resident allocation would not fit rather than as an acceleration of a resident adjoint. The factor depends on the host rather than on the GPU. On an RTX 5880 Ada workstation with eight physical cores the same policies take 2.28~s and 9.43~s for the dielectric and 5.00~s and 23.90~s for the two-pole material, a factor of 4.1 to 4.8, although its resident sweeps are slower than those of the A100.
+The memory--time trade-off of host streaming is isolated on matched $256^3$ grids with 128 steps and two checkpoints (Fig.~\ref{fig:memory-cost}). Timings run from model construction to the transfer of material cotangents to the host. Specifically, the dielectric case takes 1.27~s resident on the GPU and 18.45~s with host-bank streaming, and the two-pole case takes 3.26~s and 49.46~s, while the corresponding device peaks decrease from 2.02 to 0.90~GB and from 5.51 to 2.41~GB. Streaming lowers the device allocation by about 56\% at a factor of 14.5 to 15.2 in elapsed time for these policies, which places it as the mode for problems whose resident allocation would not fit rather than as an acceleration of a resident adjoint. The factor depends on the host rather than on the GPU. On an RTX 5880 Ada workstation with eight physical cores the same policies take 2.28~s and 9.43~s for the dielectric and 5.00~s and 23.90~s for the two-pole material, a factor of 4.1 to 4.8, although its resident sweeps are slower than those of the A100.
 
 \begin{figure}[tbp]
 \centering
@@ -350,7 +369,42 @@ The memory--time trade-off of host streaming is isolated on matched $256^3$ grid
 \label{fig:memory-cost}
 \end{figure}
 
-\subsection{A propagated optical objective on a workstation}
+\subsection{Scaling with grid size}
+\label{sec:scaling}
+
+The comparisons above use grids of at most $256^{3}$ cells, so the forward and adjoint workloads were repeated over grid size on the 12~GB RTX 3060 of the workstation (Fig.~\ref{fig:scaling}). The resident forward path accepts grids of up to eight million cells. For a dielectric sphere in a 4.8~\micron{} cube with absorbing faces and one point monitor, run for 200 steps, its stepping rate lies between 2.03 and 2.58$\times10^{9}$ cell-steps per second from $64^{3}$ to $192^{3}$ cells, and the complete solve including setup reaches 1.47$\times10^{9}$ at $192^{3}$. Above the limit the forward solve is streamed through host memory. With point monitors and a uniform permittivity it completes $256^{3}$ to $384^{3}$ grids at 0.56 to 0.66$\times10^{9}$ cell-steps per second with a peak device allocation of 0.50~GB at $384^{3}$. At $448^{3}$ its host reservation of 20.4~GB exceeds the admissible 80\% of the free host memory, and the solve is refused before it starts.
+
+The adjoint workload is the dielectric fixture of Fig.~\ref{fig:memory-cost}, a grid periodic along $x$ with a continuous source and two plane observations, run for 128 steps with two checkpoints and four host threads. From $128^{3}$ to $320^{3}$ cells the resident time to gradient grows from 0.78 to 13.15~s, a factor of 16.9 for 15.6 times the cells, and the host-streamed time from 3.64 to 35.15~s. The streaming factor thereby falls from 4.7 to 2.7, while the streamed device peak reaches at most 1.38~GB as the resident peak rises to 3.92~GB. At $384^{3}$ the planner refuses the resident adjoint because its reserved workspace and checkpoints exceed the 10~GiB device budget. The streamed adjoint, with a slab width of 16, completes in 75.1~s with a device peak of 1.27~GB and 11.1~GB of sampled host memory. Wherever both modes ran, the streamed gradients agree with the resident ones to a relative $L_2$ difference of $3.4\times10^{-7}$ or less. On this workstation the cost of streaming shrinks as the grid grows, and its device allocation follows the cross-section of the slab, not the volume of the grid.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/grid-scaling.pdf}
+\caption{Scaling with grid size on one RTX 3060 of 12~GB. (a) Forward rate in cell-steps per second over 200 steps: the stepping loop and the complete solve of the resident path up to its eight-million-cell limit (dotted line), and the complete host-streamed solve above it. (b) Median peak Torch device allocation of the forward and adjoint modes. (c) Median time to gradient of the dielectric adjoint fixture with 128 steps and two checkpoints. The resident curve ends at $320^{3}$ because the planner refuses the resident adjoint at $384^{3}$. Each point is the median of three warmed repetitions.}
+\label{fig:scaling}
+\end{figure}
+
+\section{Design examples}
+\label{sec:examples}
+
+Two examples close the loop from design parameters to a finished result. The first is a complete gradient-based design small enough to run on a CPU, and the second evaluates a remote optical objective of a large pillar array with host streaming.
+
+\subsection{A complete metagrating design}
+\label{sec:metagrating}
+
+The first example designs a transmissive metagrating that deflects normally incident light at 1.0~\micron{} into the $+1$ order (Fig.~\ref{fig:metagrating}). A single layer of permittivity 4 and thickness 0.5~\micron{} in air is divided into 30 pixels of 50~nm across a 1.5~\micron{} period, which sends the $+1$ order out at 41.8\textdegree{}, and the lines are invariant along $y$. The layer is illuminated by a plane wave with its electric field along the grating vector. Each pixel density passes through a sigmoid, a periodic conic filter of radius 0.125~\micron{} and a tanh projection whose sharpness $\beta$ doubles every four iterations from 4 to 64. Adam with a step of 0.1 maximizes the $+1$ transmitted efficiency at 1.0~\micron{} computed on a 50~nm mesh. The efficiency at 0.95~\micron{} is recorded but never optimized.
+
+From three random initial densities the $+1$ efficiency reaches 0.584, 0.553 and 0.455 after 24 iterations, and the best seed starts from 0.012. Its binarized layout satisfies the declared minimum linewidth and gap of 0.1~\micron{} and is written to a GDS layout. The complete workflow for one seed, including the final evaluation on a 25~nm mesh and the layout export, takes 225~s on four CPU threads.
+
+Each design iteration runs 800 steps, or 76~fs, to keep the loop short. For the final layout this window leaves the transmitted and reflected fractions short of energy balance by up to 0.08 near 0.96~\micron{}. A run four times longer closes the balance to $2.3\times10^{-4}$ and lowers the $+1$ efficiency at 1.0~\micron{} from 0.577 to 0.531 on the design mesh. On the 25~nm mesh the converged efficiencies are 0.522 in the $+1$ order, 0.260 in the zero order and 0.113 in the $-1$ order, with 0.104 reflected. Figure~\ref{fig:metagrating}d,e shows the fields of this converged evaluation. The initial layer transmits a nearly plane wave, whereas the final layer tilts the transmitted wavefronts toward $+x$, and above it the power of the $+1$ Fourier component of $E_x$ exceeds that of the $-1$ component by a factor of 4.62, the ratio of the two efficiencies. The short runs of the design loop overestimate the efficiency of this device by about 0.05, and the reported values rest on the longer evaluation.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/metagrating-design.pdf}
+\caption{A complete metagrating design. (a) Pixel density across the 1.5~\micron{} period for the initial design at $\beta=4$ and for the final binary layout, where black is permittivity 4. (b) The $+1$ efficiency at the design wavelength during optimization for the best seed and two others, with the unoptimized efficiency at 0.95~\micron{} and the projection sharpness $\beta$ of each stage. (c) Transmitted efficiencies of the three orders for the initial (dashed) and final (solid) designs from runs four times longer than the design runs on a 25~nm mesh. The initial spectra are not converged near 0.98~\micron{}, where the weakly modulated layer supports narrow guided resonances. (d,e) Real part of $E_x$ at 1.0~\micron{} over three periods, normalized by the incident amplitude. Dotted lines mark the layer and solid lines outline the final pixels.}
+\label{fig:metagrating}
+\end{figure}
+
+\subsection{A propagated optical objective of a pillar array}
 \label{sec:application}
 
 To exercise host streaming on a spatially extended optical objective, we evaluate a fixed array of 1936 dielectric pillars over a $44\times44$~\micron{} footprint. The pillars have relative permittivity 4, height 0.6~\micron{}, period 1~\micron{} and radii between 0.15 and 0.42~\micron{}, and a 0.05~\micron{} mesh gives $920\times920\times64$ cells. A plane-wave pulse is propagated for 1836 steps, or 175~fs, by which time the output-plane electric energy has decayed to $5.91\times10^{-4}$ of its recorded peak. The objective sums the on-axis intensity at 1.45, 1.55 and 1.65~\micron{} evaluated 150~\micron{} beyond the output plane with Eq.~\eqref{eq:asm}. The plane spectra are normalized by the sampled time interval, spatially downsampled by eight to $110\times110$ points and propagated with a padding factor of three, and the same sampling is used for the adjoint and the finite differences.
@@ -382,7 +436,52 @@ The author declares no competing financial interests or personal relationships t
 
 \section*{Data availability}
 
-The source code, the test suite and the complete set of validation records are available in the public repository \citep{torchfdtd}. The ancillary files of this preprint contain the records behind every figure and generated table, the two scripts that regenerate those figures and tables from the records, and their SHA-256 provenance manifests. Table~\ref{tab:gradients} and the remaining in-text values are taken from records in the repository. The A100 timing records were produced with the scripts in \code{benchmarks/a100_paper} of the repository. The drivers of the color-router cross-check are in the ancillary files, and the device model they require is in the repository of Ref.~\citep{park2026colorrouter}.
+The source code, the test suite and the complete set of validation records are available in the public repository \citep{torchfdtd}. The ancillary files of this preprint contain the records behind every figure and generated table, the two scripts that regenerate those figures and tables from the records, and their SHA-256 provenance manifests. Table~\ref{tab:gradients} and the remaining in-text values are taken from records in the repository. The A100 timing records were produced with the scripts in \code{benchmarks/a100_paper} of the repository, and the grid-size sweep, the microring field maps and the metagrating evaluation with those in \code{benchmarks/paper_review}. The drivers of the color-router cross-check are in the ancillary files, and the device model they require is in the repository of Ref.~\citep{park2026colorrouter}.
+
+
+\appendix
+\section{Additional validation}
+\label{app:validation}
+
+\subsection{Anisotropic media and magnetic walls}
+
+Dense one-step spectral radii on small Bloch grids equal one to nine decimal places for admitted tensors and lie between 1.0049 and 1.0089 for rejected ones, and a 4000-step sweep over fifteen admitted cases with contrasts up to sixteen shows no growth. The rejected cases grow by factors of $7.9\times10^{3}$ and $7.6\times10^{12}$ over that sweep. These values confirm the admission rule of Section~\ref{sec:formulation}.
+
+The anisotropic path is checked against a birefringent slab of principal indices 1.5 and 2.0 in a co-aligned exterior of indices 1.2 and 1.4 that fills both absorbing faces along the propagation axis. The two polarization channels reproduce the analytic transmission to 1.37\% and 0.33\%, and the derivative of the transmission with respect to the slab index agrees with the analytic derivative to 6.9\%. A magnetic wall next to an absorbing face reflects $1.7\times10^{-4}$ of the incident power with the default profile and $3.5\times10^{-4}$ with $\kappa=3$, $\alpha=0.05$ and a quadratic grading. On this mesh anisotropic transmission is thus accurate to about one percent and its index derivative to about seven percent, and a magnetic symmetry plane can adjoin an absorber at a reflection cost below $4\times10^{-4}$ of the incident power.
+
+\subsection{Radiation projections}
+
+A lossy exterior with index $1.3+0.05\mathrm{i}$ reproduces the analytic near and far fields with the same convergence. For an open surface the single-face projection of a Gaussian-apodized directional emitter converges to the closed-box result as the field on the omitted faces decays, from $9.6\times10^{-2}$ to $3.8\times10^{-3}$ as the beam waist grows from 0.4 to 0.8 wavelengths, whereas an isotropic dipole stays at 0.79 under refinement. An open surface therefore suits directional emitters whose field on the omitted faces is small.
+
+\subsection{Guided-mode ports}
+
+Guided-mode ports are validated on a straight guide, an interface between guides of index 1.0 and 1.2, a symmetric Y branch and a four-port crossing, and the complex scattering parameters of the interface are compared with an independent discrete interface solution. A narrow-aperture port on a wide domain matches the full-cell network to $1.6\times10^{-5}$ in the scattering parameters. The Y branch obeys reciprocity to $2.0\times10^{-3}$ with a $1.2\times10^{-4}$ arm asymmetry, and the crossing obeys reciprocity to $2.4\times10^{-4}$ with a $1.2\times10^{-7}$ gap between its four-fold rotated columns. The port model is therefore reciprocal and symmetric to $2\times10^{-3}$ or better, and the power missing from the guided channels of the Y branch is radiated by the staircased junction, a property of the discretized geometry.
+
+\subsection{Independent lateral tiles}
+\label{app:tiling}
+
+Because independent lateral tiles change the boundary-value problem, we measure their error against a full-domain reference. The tiling test uses a $140\times140\times60$ grid with 2059 time steps, split into four tiles with 3~\micron{} cores (Fig.~\ref{fig:tiling}). With the excitation sheet extended through the absorbers and hard core assembly, increasing the overlap from 0.25 to 2~\micron{} reduces the six-component near-field relative $L_2$ error from 12.0\% to 5.68\%, while the total number of simulated cells grows to 2.9 times the full grid. In a separate gradient check at 1.5~\micron{} overlap the focal objective differs by 0.138\% from the full-domain value, whereas the design-region gradient differs by 27.2\%. Consequently, agreement of the tiled derivative with a finite difference of its own forward model does not establish the accuracy of the full-device derivative, and we offer the tiled path for forward screening rather than final gradients.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/tiling-overlap.pdf}
+\caption{Independent overlapping tiles on an RTX 3060, compared with the full-domain solution. (a) Relative $L_2$ errors of the six-component near field and the focal-plane intensity with hard core assembly. (b) The summed cell count of all tiles relative to the full grid, including repeated overlap regions, with the tile edge length in cells.}
+\label{fig:tiling}
+\end{figure}
+
+\section{Batch execution}
+\label{app:batch}
+
+Four sphere cases at $64^{3}$ and 800 steps take 1.75~s with one CUDA worker against 40.4~s with one NumPy worker on the container host (Fig.~\ref{fig:batch-throughput}). The tensor batch itself is up to 1.7 times faster than sequential native execution for $32^{3}$ cases and slower for every batch of $64^{3}$ cases, so the tuning keeps single-case cohorts at that size (Table~\ref{tab:tensor-batch}).
+
+\input{tables/tensor-batch}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{figures/batch-throughput.pdf}
+\caption{Wall time on a logarithmic axis (a) and throughput (b) of four-structure ensembles on an A100. The CPU bar is one NumPy worker on the four-core host of that container. Bars are medians of three measured batches after warm-up.}
+\label{fig:batch-throughput}
+\end{figure}
 
 \bibliographystyle{unsrtnat}
 \bibliography{references}

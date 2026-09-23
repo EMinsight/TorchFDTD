@@ -79,11 +79,19 @@ of TeX Live. Upload the ZIP as is and select XeLaTeX if arXiv asks.
 
 - execution-overview.pdf, a method schematic
 - memory-cost.pdf, matched GPU-resident and host-DRAM-streamed adjoints (two panels)
-- decomposition-propagation.pdf, two independent validation fixtures
+- exterior-propagation.pdf, angular-spectrum propagation against a long FDTD domain
+- tiling-overlap.pdf, error and cell overhead of independent lateral tiles (appendix)
+- dispersive-slabs.pdf, Drude and Lorentz slabs against the transfer matrix
+- microring-meep.pdf, a microring against Meep with recorded field maps
+- metalens-meep.pdf, a three-dimensional pillar lens against Meep
+- grid-scaling.pdf, forward and adjoint time and memory against grid size
+- metagrating-design.pdf, a complete metagrating design with recorded field maps
 - propagated-adjoint.pdf, a completed fixed-array optical derivative
 
-`scripts/build_paper_story_figures.py` generates those four figures.
-The script uses recorded data, not new FDTD runs or generated field images.
+`scripts/build_paper_story_figures.py` generates these figures.
+The script runs no solver. It reads recorded JSON data and, for the field
+maps, NPZ arrays that the drivers under `.local/paper_review` and
+`examples/meep_comparison` saved beside their records.
 Its copy in the curated arXiv archive also runs against the included records.
 
 ## Checks before public release
