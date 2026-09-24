@@ -418,6 +418,7 @@ def run(*, spec, backend='cuda', iterations=None, learning_rate=None, starts=STA
     iterations = refinement['iterations'] if iterations is None else iterations
     learning_rate = refinement['learning_rate_um'] if learning_rate is None else learning_rate
     device = device_of(backend)
+    env = environment(device)   # the commit and tree state the run loaded, before any later edit
     started_all = time.perf_counter()
     library = library_widths()
     bounds = (min(library), max(library))
@@ -505,7 +506,7 @@ def run(*, spec, backend='cuda', iterations=None, learning_rate=None, starts=STA
         if output_dir is not None:
             write_json(Path(output_dir) / f'start-{start}.json', record)
     summary = judge(records, case, spec)
-    summary.update(schema=SCHEMA, case_id='G7-02', reduced=bool(spec.get('reduced')), date=time.strftime('%Y-%m-%d'), environment=environment(device),
+    summary.update(schema=SCHEMA, case_id='G7-02', reduced=bool(spec.get('reduced')), date=time.strftime('%Y-%m-%d'), environment=env,
                    design=dict(transition_um=spec['transition_um'], width_bounds_um=list(bounds), checkpoints=CHECKPOINTS, optimizer='torch.optim.Adam, default betas',
                                objective=f'|Ez|^2 at (x, y) = {focal_point(spec)[:2]} um, 1.55 um, relative to the bare-cell mean incident |Ez|^2 '
                                          f'({incident_intensity:.6g} reduced units) through DifferentiableSimulation.spectrum'),
@@ -557,6 +558,43 @@ def judge(records, case, spec):
     return dict(criteria=rows, all_pass=all(r['passed'] for r in rows), best_start=best['start'])
 
 
+def time_study(spec, output_dir, *, backend='cuda', factors=(1., 1.5, 2., 3.), log=print):
+    """Information, not a criterion: the recorded designs on the design grid against the physical run time.
+
+    Reads the records of a finished run in output_dir and evaluates every start's initial and final widths and the
+    staircase library design (the recorded comparison baseline) at multiples of the declared window, each with its
+    own bare cell. Writes time_convergence.json next to the records.
+    """
+    output_dir = Path(output_dir)
+    summary = json.loads((output_dir / 'summary.json').read_text(encoding='utf-8'))
+    records = [json.loads((output_dir / name).read_text(encoding='utf-8')) for name in summary['records']]
+    device = device_of(backend)
+    env = environment(device)
+    staircase = torch.as_tensor(voxelize(tm.build_2d(spec, with_lens=True, backend=backend))[0], device=device, dtype=torch.float32)
+    designs = {'library staircase': None}
+    for record in records:
+        designs[f"{record['start']} initial"] = record['initial_widths_um']
+        designs[f"{record['start']} final"] = record['final_widths_um']
+    started = time.perf_counter()
+    rows = []
+    for factor in factors:
+        variant = grid_variant(spec, time_factor=factor)
+        lines = LineModel(variant, backend=backend)
+        bare, _ = lines.bare()
+        for name, widths in designs.items():
+            planes, _ = lines.run(staircase) if widths is None else lines.lens(widths)
+            row = centre_row(line_observables(planes, bare, variant), variant)
+            rows.append(dict(design=name, time_factor=factor, steps=variant['steps'], run_time_fs=variant['run_time_fs'], **design_summary(row)))
+            log(f"  {name}, {factor} x time: efficiency {row['efficiency']:.5f}, focal peak {row['focal_plane_peak_intensity']:.4f}")
+    result = finite_or_none(dict(schema=SCHEMA, case_id='G7-02', reduced=bool(spec.get('reduced')), date=time.strftime('%Y-%m-%d'),
+                                 note='information only, after the judged run: the recorded widths (regularized fill) and the staircase library design '
+                                      'on the design grid for multiples of the declared window; no criterion is evaluated here',
+                                 environment=env, records=summary['records'], transition_um=spec['transition_um'], factors=list(factors),
+                                 rows=rows, wall_seconds=time.perf_counter() - started))
+    write_json(output_dir / 'time_convergence.json', result)
+    return result
+
+
 def finite_or_none(value):
     """Records hold JSON numbers only: a non-finite value (a profile that never crosses half maximum) is recorded as null and fails its criterion."""
     if isinstance(value, float) and not math.isfinite(value):
@@ -580,8 +618,12 @@ def main(argv=None):
     parser.add_argument('--iterations', type=int, default=None, help='Adam iterations (default: the declared 20)')
     parser.add_argument('--starts', nargs='*', choices=STARTS, default=list(STARTS))
     parser.add_argument('--output-dir', default=None)
+    parser.add_argument('--time-study', action='store_true',
+                        help='information only: evaluate the records in --output-dir at several run times (writes time_convergence.json)')
     args = parser.parse_args(argv)
     spec = reduced_spec() if args.reduced else declared_spec()
+    if args.time_study:
+        return time_study(spec, args.output_dir, backend=args.backend)
     summary, _ = run(spec=spec, backend=args.backend, iterations=args.iterations, starts=args.starts, output_dir=args.output_dir)
     print(json.dumps(dict(all_pass=summary['all_pass'], criteria=[{k: r.get(k) for k in ('id', 'value', 'limit', 'passed')} for r in summary['criteria']]), indent=1))
     return summary

@@ -143,7 +143,8 @@ def test_angular_spectrum_reproduces_a_direct_focal_line_on_a_small_lens():
 
 def test_reduced_workflow_reports_every_start_and_criterion(tmp_path):
     """The whole workflow on the reduced lens with one iteration: every start and every criterion is recorded (the values have no meaning)."""
-    summary, records = wf.run(spec=wf.reduced_spec(ridges=3, margin=1., run_time_fs=100.), backend='cpu', iterations=1, output_dir=tmp_path, log=lambda *_: None)
+    spec = wf.reduced_spec(ridges=3, margin=1., run_time_fs=100.)
+    summary, records = wf.run(spec=spec, backend='cpu', iterations=1, output_dir=tmp_path, log=lambda *_: None)
     assert sorted(p.name for p in tmp_path.iterdir()) == ['start-library.json', 'start-narrower.json', 'start-wider.json', 'summary.json']
     assert json.loads((tmp_path/'summary.json').read_text(encoding='utf-8')) == json.loads(json.dumps(summary))
     assert summary['reduced'] and [r['id'] for r in summary['criteria']] == ['a', 'b', 'c', 'd', 'e', 'f', 'scope']
@@ -158,6 +159,17 @@ def test_reduced_workflow_reports_every_start_and_criterion(tmp_path):
         assert 'full_width_line' in record['propagation']
         bounds = record['width_bounds_um']
         assert all(bounds[0] - 1e-7 <= w <= bounds[1] + 1e-7 for w in record['final_widths_um'])
+    # The information-only time study re-evaluates the recorded designs; at 1 and 1.5 times it repeats the recorded runs.
+    study = wf.time_study(spec, tmp_path, backend='cpu', factors=(1., 1.5), log=lambda *_: None)
+    assert study == json.loads((tmp_path/'time_convergence.json').read_text(encoding='utf-8')) and len(study['rows']) == 2 * 7
+    for record in records:
+        for factor, grid in ((1., 'design_grid'), (1.5, 'longer_time')):
+            row = next(r for r in study['rows'] if r['design'] == f"{record['start']} final" and r['time_factor'] == factor)
+            for key in ('efficiency', 'axis_peak_y_um', 'fwhm_um'):
+                recorded = record['final_design'][grid][key]
+                assert (row[key] is None) == (recorded is None), key
+                if recorded is not None:
+                    assert row[key] == pytest.approx(recorded, rel=1e-5, abs=1e-7), key
 
 
 def judged(summary, records):
