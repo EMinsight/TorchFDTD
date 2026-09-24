@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-24",
+  "declared_before_run": true,
+  "declaration": "docs/G7_WORKFLOWS.md",
+  "platform": "rtx3060-win11-lab",
+  "installation": "the release wheel in an environment outside the checkout",
+  "case_id": "G7-02",
+  "task": "G7-02",
+  "title": "Small finite metalens: full-aperture field, three deterministic starts refined by the shape VJP, mesh, time and propagation-model checks",
+  "fixture": {
+    "base": "examples/meep_comparison/metalens/geometry.json and design_2d.json",
+    "ridges": 33,
+    "pitch_um": 0.6,
+    "aperture_um": 20,
+    "height_um": 1.0,
+    "focal_length_um": 15,
+    "wavelength_um": 1.55,
+    "polarization": "E out of plane",
+    "mesh_um": 0.025,
+    "steps": 5200,
+    "starts": [
+      "library design of design_2d.json",
+      "every ridge one library step wider where allowed",
+      "one step narrower where allowed"
+    ],
+    "refinement": {
+      "parameters": "ridge widths through the shape VJP",
+      "objective": "focal-point intensity at 1.55 um",
+      "iterations": 20,
+      "optimizer": "Adam",
+      "learning_rate_um": 0.01
+    },
+    "validation": {
+      "fine_mesh_um": 0.0125,
+      "longer_time_factor": 1.5,
+      "propagation": "angular spectrum from the aperture line y = -7.9 um to the focal line y = 5.6 um and the axis"
+    }
+  },
+  "seed": "three deterministic starts",
+  "precision": "float32 on CUDA",
+  "backend": "cuda",
+  "reference_method": "the direct full-wave DFT lines; the angular-spectrum propagation is checked against them",
+  "baseline": {
+    "source": "docs/validation/meep_comparison/metalens_comparison.json",
+    "focusing_efficiency": 0.5571
+  },
+  "acceptance": {
+    "all_starts": "all three starts reported",
+    "performance": "best refined design focusing efficiency at least 0.5571",
+    "mesh": "0.0125 um changes the focusing efficiency by at most 0.02 and the axial peak by at most 0.1 um",
+    "time": "1.5 times the physical time changes the focusing efficiency by at most 0.005",
+    "propagation": "propagated and direct focal-line intensities within 5 percent relative L2",
+    "psf": "focal-line FWHM of the best design at most 1.25 lambda / (2 NA) = 1.76 um",
+    "scope": "a unit-cell phase library alone is never reported as a full-lens validation"
+  }
+}

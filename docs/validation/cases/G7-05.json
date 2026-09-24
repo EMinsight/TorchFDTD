@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-24",
+  "declared_before_run": true,
+  "declaration": "docs/G7_WORKFLOWS.md",
+  "platform": "rtx3060-win11-lab",
+  "installation": "the release wheel in an environment outside the checkout",
+  "case_id": "G7-05",
+  "task": "G7-05",
+  "title": "Cost of a design iteration: stage times, cold and warm, resident and streamed, batched and sequential, autotuning break-even",
+  "fixture": {
+    "workloads": [
+      "one G7-01 iteration (three wavelengths, TE)",
+      "one G7-03 iteration"
+    ],
+    "stages": [
+      "T_geometry",
+      "T_setup",
+      "T_forward",
+      "T_monitor",
+      "T_backward",
+      "T_transfer_io",
+      "T_optimizer"
+    ],
+    "synchronization": "each stage bounded by a CUDA synchronization; overlapping asynchronous work is not summed",
+    "cold": "first iteration of a fresh process",
+    "warm": "median of iterations 2 to 6",
+    "repeats": 5,
+    "comparisons": [
+      "resident against host-streamed (G7-01)",
+      "three wavelengths as one tensor batch against three sequential runs"
+    ],
+    "tuning": "policy autotuner cost and break-even iteration count"
+  },
+  "seed": "the G7-01 and G7-03 seed 1 starts",
+  "precision": "float32 on CUDA",
+  "backend": "cuda",
+  "reference_method": "the recorded medians become the regression baseline",
+  "acceptance": {
+    "stages": "every stage recorded with median and range for cold and warm iterations",
+    "comparisons": "streamed and batched comparisons recorded even where slower",
+    "regression": "a test flags a later run whose stage median exceeds 1.25 times the recorded baseline"
+  }
+}

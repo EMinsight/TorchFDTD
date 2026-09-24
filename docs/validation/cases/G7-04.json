@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-24",
+  "declared_before_run": true,
+  "declaration": "docs/G7_WORKFLOWS.md",
+  "platform": "rtx3060-win11-lab",
+  "installation": "the release wheel in an environment outside the checkout",
+  "case_id": "G7-04",
+  "task": "G7-04",
+  "title": "Independent solver at matched accuracy: TorchFDTD and Meep against a converged RCWA reference, accuracy-versus-cost curves",
+  "fixture": {
+    "base": "examples/meep_comparison/metagrating/geometry.json",
+    "polarization": "TE",
+    "incidence": "normal",
+    "reference": "TORCWA 101 Fourier orders, checked against 51 (at most 1e-4)",
+    "torchfdtd": {
+      "device": "RTX 3060, fused CUDA kernels",
+      "meshes_um": [
+        0.04,
+        0.02,
+        0.01,
+        0.005
+      ]
+    },
+    "meep": {
+      "version": "1.34",
+      "device": "i7-12700, 4 MPI ranks, torchfdtd-bench WSL distribution",
+      "resolutions_per_um": [
+        25,
+        50,
+        100,
+        200
+      ]
+    },
+    "observables": [
+      "T+1 at 1.55 um",
+      "band-mean T+1"
+    ],
+    "repeats": 3
+  },
+  "seed": "not applicable: fixed geometry",
+  "precision": "TorchFDTD float32 and float64; Meep double",
+  "backend": "cuda for TorchFDTD, cpu for Meep",
+  "reference_method": "converged TORCWA",
+  "acceptance": {
+    "records": "every point with median and range of three runs",
+    "curves": "accuracy-versus-cost curves of both solvers rendered from the record",
+    "matched_cost": "cost to reach errors 0.01, 0.005 and 0.002 by log-log interpolation for each solver",
+    "separation": "equal-cell-count and equal-error comparisons reported separately",
+    "hardware": "the record states CPU against GPU hardware and draws no algorithmic conclusion from it"
+  }
+}

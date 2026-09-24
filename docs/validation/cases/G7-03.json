@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-24",
+  "declared_before_run": true,
+  "declaration": "docs/G7_WORKFLOWS.md",
+  "platform": "rtx3060-win11-lab",
+  "installation": "the release wheel in an environment outside the checkout",
+  "case_id": "G7-03",
+  "task": "G7-03",
+  "title": "Passive PIC coupler: fabrication-aware density design from three seeds, 2 x 2 modal S with phase, passivity, reciprocity, gradient check, GDS round trip",
+  "fixture": {
+    "base": "examples/design_mode_coupler.py",
+    "core_eps": 4,
+    "cladding_eps": 2.25,
+    "guide_width_um": 0.6,
+    "offset_um": 0.6,
+    "design_box_pixels": [
+      6,
+      10
+    ],
+    "pixel_um": 0.2,
+    "symmetry": "rotate180",
+    "mesh_um": 0.05,
+    "check_mesh_um": 0.025,
+    "objective": "modal transmission port 1 to 2 at 1.55 um",
+    "holdout_wavelength_um": 1.5,
+    "fabrication": {
+      "min_linewidth_um": 0.4,
+      "min_gap_um": 0.4,
+      "erosion_dilation_um": 0.1
+    },
+    "evaluation": {
+      "wavelengths_um": [
+        1.5,
+        1.55,
+        1.6
+      ],
+      "quantities": "2 x 2 modal S matrix with phases",
+      "gds": "export, re-import, simulate"
+    }
+  },
+  "seed": "logits 0.5 * randn with seeds 1, 2, 3",
+  "precision": "float32 on CUDA",
+  "backend": "cuda",
+  "reference_method": "central finite differences for the gradient; the pre-export binary structure for the GDS round trip",
+  "baseline": {
+    "source": "docs/validation/g6/coupler-seed1.json",
+    "fine_gds_transmission": 0.6136
+  },
+  "acceptance": {
+    "all_seeds": "all three seeds reported",
+    "performance": "best seed transmission after the GDS round trip at least 0.6136 while meeting the declared linewidth and gap",
+    "passivity": "|S11|^2 + |S21|^2 and |S22|^2 + |S12|^2 at most 1.01 for every seed and wavelength",
+    "reciprocity": "|S21 - S12| at most 1e-3 in every case",
+    "gradient": "adjoint and central finite-difference derivatives within 2 percent at three pixels per seed",
+    "gds": "the GDS round trip changes the transmission by at most 0.005",
+    "mesh": "0.025 um changes the best seed transmission by at most 0.02"
+  }
+}
