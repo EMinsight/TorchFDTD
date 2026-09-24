@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use TorchFDTD in your research, please cite it using the metadata below."
+type: software
+title: "TorchFDTD"
+abstract: >-
+  GPU FDTD for photonics: a browser CAD workbench, a Python project API and
+  Torch-differentiable simulations on NVIDIA CUDA, with streamed execution of
+  forward and adjoint runs beyond the GPU memory.
+authors:
+  - family-names: Park
+    given-names: Hyoseok
+    affiliation: "Department of Physics, Chungnam National University, Daejeon, Republic of Korea"
+repository-code: "https://github.com/hyoseokp/TorchFDTD"
+license: MIT
+version: 0.15.0
+date-released: "2026-09-24"
+keywords:
+  - FDTD
+  - finite-difference time-domain
+  - adjoint method
+  - inverse design
+  - photonics
+  - PyTorch
+  - CUDA
+  - automatic differentiation
