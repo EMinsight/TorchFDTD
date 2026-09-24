@@ -3421,13 +3421,23 @@
           "implementation_state": "NOT_ASSESSED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
+          "code_paths": [
+            "docs/validation/cases/G9-05.json"
+          ],
           "planned_test_commands": [],
           "actual_test_commands": [],
           "required_tests": [],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-24",
+            "decision": "approved",
+            "scope": "G9-05: the independent-user test of the program is replaced by a self-review of the three G7 workflows from an independent installation",
+            "basis": "the owner was told that the program requires an independent user or installation and that an agent self-check does not replace another person's usability test, and decided to skip the independent user and have the self-review done instead",
+            "note": "the self-review is not evidence of usability by another person; the task stays NOT_RUN until the self-review is recorded"
+          },
+          "implementation_note": "Owner decision of 24 September 2026: the independent-user test is skipped and replaced by the maintainer's agent's self-review of the three G7 workflows from an independent installation (docs/validation/cases/G9-05.json). It runs after the G7 workflows are VERIFIED."
         },
         {
           "id": "G9-06",

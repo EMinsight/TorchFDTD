@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G9-05",
+  "task": "G9-05",
+  "title": "Self-review of the three representative workflows from an independent installation, replacing the independent-user test by owner decision",
+  "declared": "2026-09-24",
+  "declared_before_run": true,
+  "owner_decision": "24 September 2026: the independent-user test is skipped; the maintainer's agent runs the self-review below instead",
+  "fixture": {
+    "workflows": ["the G7 metagrating workflow", "the G7 small finite metalens workflow", "the G7 photonic-integrated-circuit workflow"],
+    "installation": "a fresh virtual environment outside the checkout with the release wheel installed by pip; no source tree on sys.path",
+    "instructions": "only README.md and the documents it links; no knowledge of the source code is used to work around a documentation gap",
+    "record": "docs/validation/g9-05-self-review.json: per workflow the commands followed, the outcome, the wall time and every issue found (documentation gap, error message, wrong default, missing step) with its resolution or an open-issue entry"
+  },
+  "seed": "the seeds of the G7 workflows",
+  "precision": "as documented for each G7 workflow",
+  "backend": "cuda on rtx3060-win11-lab, and the CPU path where a workflow documents one",
+  "reference_method": "the documented expected outputs of each G7 workflow",
+  "observables": [
+    {"name": "workflows_completed", "unit": "count", "definition": "G7 workflows that complete from the installed wheel by following the documentation alone"},
+    {"name": "issues_found", "unit": "list", "definition": "every issue met during the self-review, each with a fix commit or an open-issue entry"}
+  ],
+  "acceptance": {
+    "independent_user": "the program's independent-user test is declared not applicable by the owner's decision of 24 September 2026; this self-review replaces it and is not evidence of usability by another person",
+    "workflows": "workflows_completed is 3",
+    "issues": "every entry of issues_found has a fix commit or an open-issue entry; none is silently dropped",
+    "precondition": "the three G7 workflows are VERIFIED before the self-review runs",
+    "source_of_limits": "G9-05 in docs/COMPLETION_PROGRAM_KO.md, narrowed by the owner decision above"
+  }
+}
