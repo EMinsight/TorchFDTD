@@ -119,12 +119,13 @@ def band_wavelengths(g, settings):
     return np.linspace(s['wavelength_start_um'], s['wavelength_stop_um'], settings.band_points)
 
 
-def build_project(g, mesh_um, polarization, incidence, settings, *, monitors=('reflection', 'transmission')):
+def build_project(g, mesh_um, polarization, incidence, settings, *, monitors=('reflection', 'transmission'), kappa=1.):
     """The fixture scene without structures: the permittivity is supplied explicitly by layer_epsilon.
 
     A finer mesh keeps the physical cell, absorber thickness and duration of the fixture.
     TE drives Ez (E along the ridges), TM drives Hz (H along the ridges); the Bloch incidence sets
     the declared k_x on both periodic faces, and the plane source carries its phase exp(i k_x x).
+    kappa > 1 grades the CPML stretching of both y absorbers (diagnosis only; the fixture uses 1).
     """
     scale = g['mesh_um']/mesh_um
     lx, ly = g['cell_size_um']
@@ -134,7 +135,8 @@ def build_project(g, mesh_um, polarization, incidence, settings, *, monitors=('r
     region = Region(dimension='2d', size=(lx, ly, 1), mesh=mesh_um, steps=int(round(g['steps']*scale*settings.time_fraction)),
                     pml_cells=int(round(g['pml_cells']*scale)), courant_factor=.99, backend=settings.backend, precision='float32',
                     material_sampling='yee', cuda_kernel='fused' if cuda else 'torch', cuda_monitor_kernel='fused' if cuda else 'torch',
-                    boundaries=Boundaries(x_min=BoundaryFace(kind=kind), x_max=BoundaryFace(kind=kind)), bloch_phase=(phase, 0, 0))
+                    boundaries=Boundaries(x_min=BoundaryFace(kind=kind), x_max=BoundaryFace(kind=kind), y_min=BoundaryFace(kappa=kappa),
+                                          y_max=BoundaryFace(kappa=kappa)), bloch_phase=(phase, 0, 0))
     wave = g['source']['waveform']
     source = Source(id='source', name='source', kind='plane', component='Ez' if polarization == 'TE' else 'Hz', normal='y',
                     center=(0, g['source']['y_um'], 0), size=(lx, 0, 0), wavelength=wave['wavelength_um'],
@@ -278,13 +280,13 @@ def reference_diagnostics(reference, wavelength_um, g, kx0, polarization):
 
 class CaseEvaluator:
     """One evaluated case (mesh, polarization, incidence): its bare-substrate reference once, then any design."""
-    def __init__(self, g, settings, mesh_um, polarization, incidence):
+    def __init__(self, g, settings, mesh_um, polarization, incidence, *, kappa=1.):
         self.g, self.mesh_um, self.polarization, self.incidence = g, mesh_um, polarization, incidence
         self.kx0 = bloch_kx(g) if incidence == 'bloch' else 0.
         self.device = torch.device(settings.backend)
         self.wavelength = band_wavelengths(g, settings)
         self.frequency = C0/(self.wavelength*1e-6)
-        self.project = build_project(g, mesh_um, polarization, incidence, settings)
+        self.project = build_project(g, mesh_um, polarization, incidence, settings, kappa=kappa)
         self.model = DifferentiablePlaneSimulation(self.project, AdjointOptions(checkpoints=0))
         started = _clock(self.device)
         self.reference = self.planes(np.zeros(pixel_count(g)))
@@ -500,9 +502,13 @@ def environment(device):
             return subprocess.run(['git', *args], cwd=ROOT, capture_output=True, text=True, timeout=60, check=True).stdout.strip()
         except (OSError, subprocess.SubprocessError):
             return None
+    import importlib.metadata
     import torchfdtd
+    version = getattr(torchfdtd, '__version__', None)
     return dict(platform=platform.platform(), python=platform.python_version(), torch=torch.__version__, torch_cuda=torch.version.cuda,
-                numpy=np.__version__, torchfdtd=getattr(torchfdtd, '__version__', None), device=str(device),
+                numpy=np.__version__, torchfdtd=dict(file=torchfdtd.__file__, version=version or importlib.metadata.version('torchfdtd'),
+                                                     version_source='__version__' if version else 'distribution metadata'),
+                device=str(device),
                 device_name=torch.cuda.get_device_name(device) if device.type == 'cuda' else platform.processor(),
                 commit=git('rev-parse', 'HEAD'), tracked_changes=bool(git('status', '--porcelain', '--untracked-files=no')))
 
@@ -570,7 +576,7 @@ def run(settings, out, *, rcwa_python, checkpoint_dir=None, skip_rcwa=False):
     criteria = judge(records, case, settings)
     env = environment(device)
     for record in records:
-        record.update(schema='torchfdtd-g7-01-seed-v1', task='G7-01', settings=asdict(settings), provenance=provenance)
+        record.update(schema='torchfdtd-g7-01-seed-v1', task='G7-01', settings=asdict(settings), provenance=provenance, environment=env)
         write_json(Path(out)/f"seed{record['seed']}.json", record)
     summary = dict(
         schema='torchfdtd-g7-01-summary-v1', task='G7-01', date=time.strftime('%Y-%m-%d'), declaration='docs/G7_WORKFLOWS.md',
