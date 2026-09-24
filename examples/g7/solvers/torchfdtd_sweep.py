@@ -31,11 +31,17 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import common  # noqa: E402
 
+# The repository root goes to the END of sys.path, as in tests/conftest.py: an installed torchfdtd package
+# (the release wheel) is imported when one exists, otherwise the checkout that holds this script. It is
+# imported before torchfdtd_metagrating, which would put the checkout first.
+if str(common.ROOT) not in sys.path:
+    sys.path.append(str(common.ROOT))
+import torchfdtd  # noqa: E402
+from torchfdtd import Project  # noqa: E402
+
 spec = importlib.util.spec_from_file_location('torchfdtd_metagrating', common.METAGRATING / 'torchfdtd_metagrating.py')
 tm = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(tm)
-import torchfdtd  # noqa: E402  (imported from the checkout by torchfdtd_metagrating)
-from torchfdtd import Project  # noqa: E402
 
 REGION_PML_CAP = 50  # Region.pml_cells is capped at 50; BoundaryFace.layers carries thicker absorbers
 
@@ -48,6 +54,20 @@ def make_project(g, ridges=None, *, precision, series):
     for face in ('y_min', 'y_max'):
         region['boundaries'][face].update(kind='pml', layers=g['pml_cells'])
     return Project.model_validate(data)
+
+
+def package_state():
+    """Which torchfdtd ran: its file, version and whether it is this checkout or an installed package."""
+    path = Path(torchfdtd.__file__).resolve()
+    checkout = str(path).startswith(str(common.ROOT.resolve()))
+    pyproject = common.ROOT / 'pyproject.toml'
+    version = None
+    if checkout and pyproject.exists():
+        version = next((line.split('=', 1)[1].strip().strip('"') for line in pyproject.read_text(encoding='utf-8').splitlines()
+                        if line.startswith('version =')), None)
+    return dict(torchfdtd_file=str(path), torchfdtd_version=getattr(torchfdtd, '__version__', None) or version or tm.versions(('torchfdtd',))['torchfdtd'],
+                torchfdtd_import='checkout' if checkout else 'installed package',
+                installed_distribution_version=tm.versions(('torchfdtd',))['torchfdtd'])
 
 
 def git_state():
@@ -136,8 +156,7 @@ def run_point(base, mesh, series, precision, repeats, compare, gate):
                        'CPU jobs of other sessions may run concurrently; the Windows host CPU load is sampled before every run and recorded, '
                        'and with max_host_cpu_percent every run waits until the load is below it (at most max_wait_seconds)'),
         environment=dict(platform=platform.platform(), python=sys.version.split()[0], torch=torch.__version__, torch_cuda=torch.version.cuda,
-                         packages=tm.versions(('torchfdtd', 'torch', 'cupy-cuda12x', 'numpy')), torchfdtd_file=torchfdtd.__file__,
-                         git=git_state()))
+                         packages=tm.versions(('torch', 'cupy-cuda12x', 'numpy')), git=git_state(), **package_state()))
     return record
 
 
@@ -151,7 +170,6 @@ def main():
     parser.add_argument('--max-host-cpu-percent', type=float, default=None, help='wait before each run until the host load is at most this')
     parser.add_argument('--max-wait-seconds', type=float, default=600, help='longest wait for a quiet host before a run starts anyway')
     args = parser.parse_args()
-    tm.require_checkout_import()
     torch.backends.cudnn.benchmark = False
     base = common.load_geometry()
     compare = common.load_compare()

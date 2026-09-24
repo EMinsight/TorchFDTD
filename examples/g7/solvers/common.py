@@ -122,6 +122,7 @@ def derive_geometry(base, mesh_um, series):
     ties_after = edge_ties(g)
     if series == 'staircase':
         assert not any_tie(ties_after), ties_after
+    g['notes'] = derived_notes(g, series, shift)
     g['g7_04'] = dict(series=series, base_geometry_sha256=base['_sha256'], mesh_um=mesh_um, resolution_per_um=round(1 / mesh_um),
                       shift_um=[shift, shift], edges_on_nodes_before_shift=ties, edges_on_nodes=ties_after,
                       material_edges_um=material_edges(g), physical_time_s=steps * dt, dt_s=dt,
@@ -130,6 +131,27 @@ def derive_geometry(base, mesh_um, series):
     raw = json.dumps(g, sort_keys=True).encode('utf-8')
     g['_sha256'] = hashlib.sha256(raw).hexdigest()
     return g
+
+
+def derived_notes(g, series, shift):
+    h = g['mesh_um']
+    nx, ny = g['cells']
+    notes = [
+        f"Derived for G7-04 from examples/meep_comparison/metagrating/geometry.json at mesh {h:g} um: {nx} x {ny} cells (cell size / mesh), "
+        f"{g['pml_cells']} absorber cells on each y face ({ABSORBER_UM:g} um), {g['steps']} steps of the base Courant number "
+        f"{g['courant_number']:.6f} (the base physical time). Source and DFT lines keep their positions in um.",
+        "Ez nodes: TorchFDTD at -L/2 + i*h, Meep at integer multiples of h from the cell centre; the two sets coincide on an axis with an "
+        "even cell count and lie half a cell apart on an axis with an odd count."
+        + (f" Here the y axis has {ny} cells, so the two solvers sample the ridges and the substrate top on different rows." if ny % 2 else ''),
+        f"TorchFDTD: Region.pml_cells is capped at 50, so the absorber is set per face with BoundaryFace(kind='pml', layers={g['pml_cells']}) "
+        "on y_min and y_max (no package change); Meep: PML of pml_cells * mesh_um = 0.4 um in y.",
+    ]
+    if series == 'staircase':
+        notes.append(f"Staircase series: the structure moves by {shift:g} um in +x and +y because material edges would lie on Ez nodes at this mesh."
+                     if shift else 'Staircase series: no material edge lies on an Ez node at this mesh, no shift.')
+    else:
+        notes.append('Smoothed series: no shift; Meep subpixel averaging (eps_averaging=True), TorchFDTD experimental subpixel interfaces.')
+    return notes
 
 
 def order_amplitudes(monitor, orders=ORDERS):
