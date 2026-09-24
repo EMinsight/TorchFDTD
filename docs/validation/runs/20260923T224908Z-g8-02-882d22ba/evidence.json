@@ -1,0 +1,239 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T224908Z-g8-02-882d22ba",
+  "task": "G8-02",
+  "stage": "G8",
+  "task_title": "큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다",
+  "command": "$env:TORCHFDTD_G8_OBSERVED='D:/torchfdtd-rc-wt/.local/tmp/junit/G8-02_observed.json'; D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_result_store.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G8-02.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-24T07:49:02.148840+09:00",
+  "recorded_at": "2026-09-23T22:49:08+00:00",
+  "source_commit": "9d2eb55a1955f2719df50fecf5127a656d0bccf9",
+  "source_commit_time": "2026-09-24T07:01:33+09:00",
+  "source_tree_sha256": "5fd898c56c45675f527d2fd88a3df32e962191b95620dda1a95abe17632c5e8c",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g6/coupler-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0192584db7370f2b5af40e0a8a8260f68ad64404e4251d102282c5f71eaf67da",
+      "head_sha256": "4c6b24323f9efec162d28bce8a8edc4d6bfad1d0a939a55fb8573eb2af616f24"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "900eb8f94b1876d5d2c26ec7378f108363c39c053f9ff856a0d635dd5d69fbce",
+      "head_sha256": "0b5fe584b2de1a3e5af9ab728b01a3e2bcc90c42c576b13f45aacbe3ba6ac096"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "7bb926b640d58241a5ee37d2c33cfd47e127f83b559c197f39dbb744d2e10124",
+      "head_sha256": "5439b2cbc6635e9b563d38e4b26fef52644431af30292fc6c97514fb56038bd6"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "cf012b1a9405d277b18d9372137d0a995ed642502ac08c85ad9448327ed70f03",
+      "head_sha256": "e2af3741fd5f628fcb7b28ed0c1b2097f6bea6dec0f8200e97668eb3e2db0b14"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "549550b657900def2aeafbef8776efe4f8f52c083a7478bf5fdea425383cdbd4",
+      "head_sha256": "02839208050a4909f70a8f8e9cc12cca7805522f1be34ab0f25d45319d0e23b7"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1e2183c13c8649f4e31acf3b5438c711a84a86c664678cf20b62eb6c4e45b208",
+      "head_sha256": "6e3baf1903876549b1830c8f8684c39af379d43f2c7a3283cc75c95c57f91ed0"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "675c55e0188f51d41cd58df189eea7a82f1dd798e4e60ac888f12da372e9011e",
+  "package_path": "D:/torchfdtd-clean/dist/afda8955fa1c/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_result_store.py": "25f929c42e9a6a68b1d7667182c882db695100bc387e24f29cb03042f75cd08f"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G8-02_chunked_result_storage.json",
+  "fixture_sha256": "8f13fcaffa9c2247c13fafd5f2dfbfcae068af3f125bd9213c298a93f7a1bd50",
+  "acceptance_criteria_path": "docs/validation/cases/G8-02_chunked_result_storage.json",
+  "acceptance_criteria_sha256": "8f13fcaffa9c2247c13fafd5f2dfbfcae068af3f125bd9213c298a93f7a1bd50",
+  "case_first_commit": "794d1858273e978880530c2c661757c2c55fdbe1",
+  "case_first_commit_time": "2026-09-22T04:23:19+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": 7,
+  "precision": [
+    "float32 (runs)",
+    "complex128 (plane fields and spectra)"
+  ],
+  "backend": [
+    "cpu"
+  ],
+  "physics_configuration": {
+    "format_decision": "HDF5 through h5py (BSD-3-Clause, one binary wheel, native complex compound type, one file per result), declared as the optional extra torchfdtd[hdf5]; Zarr was not implemented because it would add zarr and numcodecs and spread a result over a directory tree. h5py 3.16.0 was present in the interpreter's user site-packages (installed for another package), not in the project venv.",
+    "round_trip_run": "tests/test_result_store.py::plane_project: 2D, 2.4 x 2 um at 0.1 um (24 x 20 x 1 cells), 3 PML cells, 60 steps, snapshot every 20 steps, one dielectric slab 0.4 x 2 um at x = 0.5 um, a point source at x = -0.6 um (wavelength 1 um, 1 cycle), a point Ez monitor at x = 0.2 um and an x-normal frequency plane at x = 0.8 um, 1 x 1 um, recording Ez and Hy, the x Poynting density and flux; CPU float32",
+    "endpoint_run": "demo_project('pmc'): closed PMC cavity, 3D 3.2 um cube at 0.2 um (16 x 16 x 16 cells), 160 steps, exact endpoints, so endpoint_fields E_upper and H_upper exist",
+    "synthetic_volume": "the E dataset of the round-trip file replaced by a chunked (512, 512, 512, 3) float32 dataset, 1,610,612,736 bytes nominal, chunks (1, 512, 512, 1), with one x plane (index 100, component Ez) written from a seeded standard normal (numpy default_rng(7)); every other chunk is unwritten and therefore not stored",
+    "reads_measured": "Result.open(path).field_slice('E', 'Ez', 'x', 100) (one stored chunk) and field_slice('E', 'Ez', 'y', 200) (a plane crossing all 512 x chunks, 511 of them unallocated)",
+    "layout": "torchfdtd/result_store.py layout 1: root attributes project, summary, units, field_monitors, monitor_spectra; datasets mesh/{x,y,z}_um, frames, frame_steps, epsilon, signals, times, E, H, monitors/<k>/{frequency_hz,spectrum}, field_monitors/<k>/<array>, endpoint/<name>"
+  },
+  "reference_method": "the in-memory Result of the same run: every array must be equal after Result.save(format='hdf5') and Result.open(path).load() or Result.load(path), with the same dtype and shape; chunk shapes are read back from the file with h5py; process memory is read with psutil.Process().memory_info() (rss and, on Windows, peak_wset) immediately before opening the file and immediately after the two plane reads, after gc.collect()",
+  "observables": [
+    {
+      "name": "array_round_trip",
+      "unit": "boolean",
+      "definition": "numpy array equality with dtype and shape equality for frames, frame_steps, epsilon, signals, times, E, H, every plane array (fields, poynting, points_um, weights, frequency_hz, flux) and endpoint fields; project model_dump equality; summary and plane metadata equality after a JSON round trip"
+    },
+    {
+      "name": "coordinate_and_unit_metadata",
+      "unit": "text",
+      "definition": "mesh/{x,y,z}_um equal Region.mesh_nodes with attribute units = 'um'; times carries units = 's'; the root units attribute equals summary['units']; field_units and flux_units of every plane are restored"
+    },
+    {
+      "name": "spectrum_recomputation",
+      "unit": "relative",
+      "definition": "Result.spectra recomputed from the restored signals against the original spectra"
+    },
+    {
+      "name": "lazy_slice_equality",
+      "unit": "boolean",
+      "definition": "frame(i), field_slice(field, component, axis, index), signal(k), monitor_spectrum(k), PlaneFile.fields(f, component) and PlaneFile.plane(f, component) equal the corresponding slices of the in-memory arrays"
+    },
+    {
+      "name": "chunk_shapes",
+      "unit": "cells",
+      "definition": "E and H chunks (1, ny, nz, 1); frames (1, a, b); plane fields (1, points, 1); signals (steps, 1)"
+    },
+    {
+      "name": "stored_file_bytes",
+      "unit": "bytes",
+      "definition": "size of the synthetic file on disk divided by the nominal volume bytes"
+    },
+    {
+      "name": "rss_growth_fraction",
+      "unit": "fraction of the nominal volume",
+      "definition": "(rss after the two plane reads - rss before opening) / 1,610,612,736"
+    },
+    {
+      "name": "peak_working_set_growth_fraction",
+      "unit": "fraction of the nominal volume",
+      "definition": "(peak_wset after - peak_wset before) / 1,610,612,736, Windows only"
+    }
+  ],
+  "acceptance_limits": {
+    "array_round_trip": "exact (assert_array_equal, dtype and shape equal)",
+    "coordinate_and_unit_metadata": "exact",
+    "spectrum_recomputation": {
+      "rtol": 1e-12,
+      "atol": 0
+    },
+    "lazy_slice_equality": "exact",
+    "chunk_shapes": "exactly as listed",
+    "stored_file_bytes": "< 0.01 of the nominal volume (16.1 MB)",
+    "rss_growth_fraction": "< 0.05 (80.5 MB of the 1.61 GB nominal volume); the read itself needs 1 MiB per plane plus the 1 MiB h5py chunk cache",
+    "peak_working_set_growth_fraction": "< 0.05, asserted only where peak_wset exists",
+    "npz_path": "Result.save(path) with a .npz suffix or format='npz' still writes the layout of COMPATIBILITY.md and Result.load reads it; format='npz' keeps numpy's rule of appending .npz to another suffix",
+    "refusals": "a file without the format attribute and a file with layout 2 raise ValueError naming the file and the layout",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-02 asks that a partial read not load the full volume; the 5% budget is this case's own declaration, fixed before the run, chosen as an order of magnitude above the expected 2 to 10 MB of chunk cache, output arrays and allocator noise"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 8,
+    "passed": [
+      "tests/test_result_store.py::test_format_is_selected_by_argument_then_suffix",
+      "tests/test_result_store.py::test_hdf5_round_trips_complex_planes_coordinates_and_units",
+      "tests/test_result_store.py::test_explicit_hdf5_format_and_npz_path_keep_working",
+      "tests/test_result_store.py::test_lazy_reads_match_the_full_arrays_and_use_the_documented_chunks",
+      "tests/test_result_store.py::test_foreign_and_newer_files_are_refused",
+      "tests/test_result_store.py::test_a_corrupted_metadata_attribute_does_not_leak_the_handle",
+      "tests/test_result_store.py::test_plane_slice_of_a_multi_gigabyte_shaped_volume_stays_within_the_declared_memory",
+      "tests/test_result_store.py::test_endpoint_fields_of_a_pmc_run_round_trip"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 1.623,
+    "suite_timestamp": "2026-09-24T07:49:02.148840+09:00"
+  },
+  "required_tests": [
+    "tests/test_result_store.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_result_store.py": [
+      "tests/test_result_store.py::test_format_is_selected_by_argument_then_suffix",
+      "tests/test_result_store.py::test_hdf5_round_trips_complex_planes_coordinates_and_units",
+      "tests/test_result_store.py::test_explicit_hdf5_format_and_npz_path_keep_working",
+      "tests/test_result_store.py::test_lazy_reads_match_the_full_arrays_and_use_the_documented_chunks",
+      "tests/test_result_store.py::test_foreign_and_newer_files_are_refused",
+      "tests/test_result_store.py::test_a_corrupted_metadata_attribute_does_not_leak_the_handle",
+      "tests/test_result_store.py::test_plane_slice_of_a_multi_gigabyte_shaped_volume_stays_within_the_declared_memory",
+      "tests/test_result_store.py::test_endpoint_fields_of_a_pmc_run_round_trip"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G8-02.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T224908Z-g8-02-882d22ba/junit.xml",
+      "sha256": "582239af48c68e9b60ce41c07969ceefd502764bbf47fecfde615af3c900a3d7",
+      "bytes": 1253,
+      "original_path": ".local/tmp/junit/rerecord/G8-02.xml"
+    }
+  ],
+  "applicable_scope": "HDF5 result files written by Result.save on the CPU resident solver (2D plane-monitor run and the 3D PMC endpoint run); lazy reads through Result.open; memory measured with psutil on Windows 11 with h5py 3.16.0 from the interpreter's user site-packages; NPZ, streamed, tensor and mode-network results are outside re-recorded on 9d2eb55a1955 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T150845Z-g8-02-c067cfaa",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

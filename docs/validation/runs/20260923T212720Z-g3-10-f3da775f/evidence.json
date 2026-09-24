@@ -1,0 +1,241 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T212720Z-g3-10-f3da775f",
+  "task": "G3-10",
+  "stage": "G3",
+  "task_title": "PIC S·수동성·상반성과 누락 방사 채널",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_mode_branch_passivity.py D:/torchfdtd-rc-wt/tests/test_mode_branches.py D:/torchfdtd-rc-wt/tests/test_mode_network.py D:/torchfdtd-rc-wt/tests/test_mode_network_unequal.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G3-10.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-24T06:23:18.864750+09:00",
+  "recorded_at": "2026-09-23T21:27:20+00:00",
+  "source_commit": "3e9300300d1528fc12ad813f032e3186aef5d029",
+  "source_commit_time": "2026-09-24T06:02:42+09:00",
+  "source_tree_sha256": "e3df606ce10f03fdde127ea79ff8fd53b391b379e4a5c01b04e68dcb40bb01ad",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "675c55e0188f51d41cd58df189eea7a82f1dd798e4e60ac888f12da372e9011e",
+  "package_path": "D:/torchfdtd-clean/dist/afda8955fa1c/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_mode_branch_passivity.py": "6545969b42a99c8eb5710c161f2841e74b92564670799c00f4190d84c36b07e0",
+    "tests/test_mode_branches.py": "837219284e46539f47ecddd99929f171ab5eb72eaf06e76c4dbe012f23e14fd6",
+    "tests/test_mode_network.py": "8d01ec1cc081a443608c9a755ecb021f6f5334084cab1419d3a591a63b017db0",
+    "tests/test_mode_network_unequal.py": "68f5091e6882f9abb74c798ed291f9f10166e394b721bdfdb57d5a998e4c9b68"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G3-10_pic_networks.json",
+  "fixture_sha256": "df2eda27e38f2269daf6c4066371131d3a3ad2cda63be3a8f03101321aff31ba",
+  "acceptance_criteria_path": "docs/validation/cases/G3-10_pic_networks.json",
+  "acceptance_criteria_sha256": "df2eda27e38f2269daf6c4066371131d3a3ad2cda63be3a8f03101321aff31ba",
+  "case_first_commit": "5c0172da60d27ad0e5aa6906910ae256e53de1f6",
+  "case_first_commit_time": "2026-09-22T01:25:18+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": {
+    "taylor_direction": 5,
+    "others": "deterministic"
+  },
+  "precision": [
+    "float32",
+    "float64 for the Taylor and central-difference checks"
+  ],
+  "backend": [
+    "cuda for tests/test_mode_branches.py, tests/test_mode_network.py and tests/test_mode_branch_passivity.py when CUDA and CuPy are present, else cpu",
+    "cpu for tests/test_mode_network_unequal.py"
+  ],
+  "physics_configuration": {
+    "materials": "core permittivity 12, cladding 2.1, guide width 0.4 um, wavelength 1.55 um, 0.5 um z-periodic slab, float32",
+    "straight_guide": "tests/test_mode_branches.py: 4.8 x 2.4 x 0.5 um, mesh 0.1 um, x CPML 8 layers, y and z periodic, 600 steps, aperture ports (0, 1.2, 0.5) um at x = -1 and +1 um with source offset 0.4 um; tests/test_mode_network.py: 8 x 1 x 1 um, mesh 0.2 um, 40x5x5 cells, 600 steps, full-cell two-port network",
+    "y_branch_and_crossing_at_0p1um": "tests/test_mode_branches.py: 4.8 x 4.8 x 0.5 um, mesh 0.1 um, 48x48x5 cells, x and y CPML 8 layers (0.8 um), 800 steps (152 fs), Y branch with arms moving from y = 0 at x = -0.4 um to y = +-0.7 um at x = 0.6 um and three ports (in at x = -1, up and down at x = +1, y = +-0.7 um); crossing of two 0.4 um guides with four ports at x = +-1 and y = +-1 um; 2-cycle Gaussian plane launch; device cuda when available else cpu",
+    "y_branch_and_crossing_at_0p05um": "tests/test_mode_branch_passivity.py: the same physical geometry, ports and launch at mesh 0.05 um (96x96x10 cells), CPML 16 layers (0.8 um), 2400 steps (229 fs, dt = 9.533e-17 s); a closed box of four full-extent FieldMonitor planes through the x = +-1 um port planes and y = +-1.4 um (Y branch) or y = +-1 um (crossing), fed by prepare_aperture_modal_launch and ModeInjectedPlaneSimulation with the network's own input-port launch; the incident power is the west-plane flux of the straight calibration guide with the same launch",
+    "discontinuity": "tests/test_mode_network_unequal.py: two-port network with exterior permittivities 1.0 and 1.44 (index step 1.0 to 1.2), 40x5x5 cells of 0.2 um, 600 steps, CPU; benchmarks/mode_network_unequal_cpml.py 12 um guide with 15-cell CPML against a scalar discrete Yee interface oracle",
+    "pml": "0.8 um CPML on the open axes of the branch fixtures; 15 cells in the unequal-port benchmark"
+  },
+  "reference_method": "Physical invariants of a lossless reciprocal structure: reciprocity S_ij = S_ji after unit reduced-power normalisation of every channel at the port phase planes, passivity sum_j |S_ji|^2 <= 1, and the complete channel balance of the Poynting flux through a closed box (incident = reflected + transmitted + side radiation) measured without the modal projection. Straight-guide phase against exp(2 i beta L) from the mode solver's beta (analytic_discrete). Discontinuity |S|^2 against continuum Fresnel R and T and the complex S against an independently coded scalar discrete Yee interface. S^H S = I is never asserted for an open network.",
+  "observables": [
+    {
+      "name": "column_power",
+      "unit": "dimensionless",
+      "definition": "sum over selected guided channels of |S_ji|^2 for each incident channel i (report column_power); the defect 1 - column_power is the power missing from the guided channels"
+    },
+    {
+      "name": "reciprocity",
+      "unit": "dimensionless",
+      "definition": "max |S - S^T|"
+    },
+    {
+      "name": "flux_closure",
+      "unit": "dimensionless",
+      "definition": "sum of the outward Poynting flux fractions through the four box faces (west inward incident counted negative); zero for a closed box when all power has left"
+    },
+    {
+      "name": "guided_versus_total",
+      "unit": "dimensionless",
+      "definition": "|S_00|^2 against the total reflected fraction 1 + west/incident; sum of arm |S_j0|^2 against the total flux fraction through the arm-carrying faces"
+    },
+    {
+      "name": "measured_nonguided",
+      "unit": "dimensionless",
+      "definition": "(reflected_total - |S_00|^2) + (transmitted_total - guided transmission) + side radiation; equals the defect minus the closure error identically"
+    },
+    {
+      "name": "straight_phase",
+      "unit": "dimensionless",
+      "definition": "|S_10 - exp(2 i beta L)|"
+    },
+    {
+      "name": "fresnel_powers",
+      "unit": "dimensionless",
+      "definition": "|S_ii|^2 against R = 1/121 and |S_21|^2 against T = 120/121 for the index step 1.0 to 1.2"
+    }
+  ],
+  "acceptance_limits": {
+    "passivity": {
+      "column_power_max": 1.002,
+      "where": "tests/test_mode_branches.py and tests/test_mode_branch_passivity.py"
+    },
+    "reciprocity_max": {
+      "y_branch": 0.005,
+      "crossing": 0.001,
+      "straight_full_cell": 0.002,
+      "perturbed_full_cell": 0.003,
+      "unequal_ports": 0.012
+    },
+    "flux_closure_abs_max": {
+      "value": 0.01,
+      "where": "tests/test_mode_branch_passivity.py at mesh 0.05 um",
+      "source": "completion_gates.json lossless_complete_channel_balance_absolute_error"
+    },
+    "guided_excess_max": 0.01,
+    "calibration_guide": {
+      "east_over_incident_abs_error_max": 0.01,
+      "side_fraction_max": 0.01
+    },
+    "straight_guide_column_power_abs_error_max": {
+      "aperture": 0.001,
+      "full_cell_perturbed": 0.015
+    },
+    "straight_phase_abs_max": {
+      "aperture": 0.001,
+      "full_cell": 0.002
+    },
+    "fresnel": {
+      "reflection_atol": 0.012,
+      "transmission_atol": 0.025
+    },
+    "independent_discrete_interface_complex_s_abs_max": 0.004,
+    "material_vjp": {
+      "y_branch": {
+        "rtol": 0.001,
+        "atol": 1e-05,
+        "step": 0.01
+      },
+      "cpu_float64_taylor": "remainder ratio below 0.3 per halving and central difference within 1e-6 relative"
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds lossless_complete_channel_balance_absolute_error 0.01 for the flux closure; the other values are the repository's recorded budgets, all reported here as differences from the program's common criteria where looser"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 23,
+    "passed": [
+      "tests/test_mode_branch_passivity.py::test_branch_network_passivity_with_flux_closure_and_radiation_defect[ybranch]",
+      "tests/test_mode_branch_passivity.py::test_branch_network_passivity_with_flux_closure_and_radiation_defect[crossing]",
+      "tests/test_mode_branches.py::test_port_and_network_contracts",
+      "tests/test_mode_branches.py::test_aperture_launch_terms_confinement_and_frozen_neighborhood",
+      "tests/test_mode_branches.py::test_aperture_ports_match_full_cell_network_on_straight_guide",
+      "tests/test_mode_branches.py::test_y_branch_power_balance_reciprocity_symmetry_and_gradient",
+      "tests/test_mode_branches.py::test_four_port_crossing_on_two_normals",
+      "tests/test_mode_branches.py::test_branch_network_from_gds_markers_matches_explicit_ports",
+      "tests/test_mode_branches.py::test_z_normal_ports_match_cyclic_relabelling_of_x_normal_ports",
+      "tests/test_mode_branches.py::test_branch_network_power_objective_taylor_and_central_difference_cpu",
+      "tests/test_mode_branches.py::test_streamed_branch_network_matches_resident",
+      "tests/test_mode_network.py::test_two_mode_directional_power_normalization_and_gram_rejection",
+      "tests/test_mode_network.py::test_network_contracts_and_early_packet_budget",
+      "tests/test_mode_network.py::test_reciprocal_two_port_native_propagation_and_material_gradient",
+      "tests/test_mode_network.py::test_fixed_port_snapshot_and_one_case_replay_after_network_mutation",
+      "tests/test_mode_network.py::test_native_four_channel_straight_guide_mode_mapping",
+      "tests/test_mode_network.py::test_reassigned_port_phase_plane_rejected_before_calibration[port]",
+      "tests/test_mode_network.py::test_reassigned_port_phase_plane_rejected_before_calibration[axis]",
+      "tests/test_mode_network_unequal.py::test_explicit_sections_contracts_and_fixed_profiles",
+      "tests/test_mode_network_unequal.py::test_unequal_native_fresnel_interior_fd_and_zero_exterior_vjp",
+      "tests/test_mode_network_unequal.py::test_calibration_guides_are_sequential_and_not_retained",
+      "tests/test_mode_network_unequal.py::test_discrete_interface_oracle_algebra_and_reflectionless_negative_control",
+      "tests/test_mode_network_unequal.py::test_unequal_native_complex_s_against_independent_discrete_interface"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 239.812,
+    "suite_timestamp": "2026-09-24T06:23:18.864750+09:00"
+  },
+  "required_tests": [
+    "tests/test_mode_branch_passivity.py::test_branch_network_passivity_with_flux_closure_and_radiation_defect",
+    "tests/test_mode_branches.py::test_aperture_ports_match_full_cell_network_on_straight_guide",
+    "tests/test_mode_branches.py::test_y_branch_power_balance_reciprocity_symmetry_and_gradient",
+    "tests/test_mode_branches.py::test_four_port_crossing_on_two_normals",
+    "tests/test_mode_branches.py::test_branch_network_power_objective_taylor_and_central_difference_cpu",
+    "tests/test_mode_branches.py::test_streamed_branch_network_matches_resident",
+    "tests/test_mode_network.py::test_reciprocal_two_port_native_propagation_and_material_gradient",
+    "tests/test_mode_network.py::test_native_four_channel_straight_guide_mode_mapping",
+    "tests/test_mode_network_unequal.py::test_unequal_native_fresnel_interior_fd_and_zero_exterior_vjp",
+    "tests/test_mode_network_unequal.py::test_discrete_interface_oracle_algebra_and_reflectionless_negative_control",
+    "tests/test_mode_network_unequal.py::test_unequal_native_complex_s_against_independent_discrete_interface"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-10.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T212720Z-g3-10-f3da775f/junit.xml",
+      "sha256": "0915223a2d701772cbf2add17e1e301f3d3b60a0b09112df8a23ab985c73a9f0",
+      "bytes": 3294,
+      "original_path": ".local/tmp/junit/rerecord/G3-10.xml"
+    }
+  ],
+  "applicable_scope": "Layer B (passivity with the radiation defect measured by a closed flux box at 0.05 um, reciprocity, straight-guide phase, Fresnel index step) and layer A (aperture versus full-cell, streamed versus resident, independent discrete interface), CUDA float32 for the branch and network tests, CPU for the unequal-port tests, on local Windows 11, i7-12700, RTX 3060 12 GB shared with other sessions. Y branch, crossing, straight guide and index step only; no bend or coupler. re-recorded on 3e9300300d15 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T141102Z-g3-10-3d8a3f19",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

@@ -106,8 +106,11 @@ def test_report_lists_evidence_warnings_and_pending_approvals(rendered):
     assert 'G3-02' in expected and 'G3-08' in expected  # the revised cases of the record
     warnings = report.split('## Evidence warnings', 1)[1].split('## Pending owner approvals', 1)[0]
     for _, task in builder.all_tasks(gates):
+        if task['id'] == builder.SELF_TASK:
+            continue  # the report's own gate is shown without a judgement; the judge reports its warnings
         for warning in rendered_warnings(task['id']):
             assert warning[:60] in warnings
+    assert f'| {builder.SELF_TASK} |' not in warnings
 
 
 def rendered_warnings(task_id):

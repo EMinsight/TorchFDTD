@@ -1,0 +1,263 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T185232Z-g3-04-ee03b515",
+  "task": "G3-04",
+  "stage": "G3",
+  "task_title": "dielectric cylinder/sphere Mie 산란",
+  "command": "$env:TORCHFDTD_G3_FULL='1'; $env:TORCHFDTD_G3_RECORD='D:/torchfdtd-rc-wt/docs/validation/g3'; D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_physics_g3_b.py -k g3_04 --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G3-04.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-24T03:34:29.799206+09:00",
+  "recorded_at": "2026-09-23T18:52:32+00:00",
+  "source_commit": "4635db7eab69597671476376d80254688fed9868",
+  "source_commit_time": "2026-09-24T02:47:23+09:00",
+  "source_tree_sha256": "9cf0c956bbfd873b23308881607b7f21f19367ef38bc3b1439e824f538eea9ae",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "f4a33ca7d37f18eeba49b9ac33f9c2577e4192f5e32b79a11d679453a062575f",
+      "head_sha256": "ee7d4a044d0490859419351e84d67693458bc844d5ccd37f70c2f5ab8eee88a4"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "675c55e0188f51d41cd58df189eea7a82f1dd798e4e60ac888f12da372e9011e",
+  "package_path": "D:/torchfdtd-clean/dist/afda8955fa1c/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_physics_g3_b.py": "8790681b54d6c2527b5ddb072ad3579bc0b0e0535ae592e388631e8433ced029"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "docs/validation/cases/G3-04_*.json",
+    "examples/tfsf_sphere.py"
+  ],
+  "watch_sha256": {
+    "docs/validation/cases/G3-04_mie_cylinder_sphere.json": "6ef8ee4abd6052ca67f92a81ec0d429ae6f6fc59819a9798fe36c0e51fc97851",
+    "docs/validation/cases/G3-04_mie_cylinder_sphere.oracles.json": "436a5a3c384a6c6896c7b89bd335c0ba459300851d57eee8e9ca4f002858e372",
+    "examples/tfsf_sphere.py": "86dff20feeddf952fbc79d5c1e789695103345dee4b53d088ff8ca17e07e2ec9"
+  },
+  "fixture_path": "docs/validation/cases/G3-04_mie_cylinder_sphere.json",
+  "fixture_sha256": "6ef8ee4abd6052ca67f92a81ec0d429ae6f6fc59819a9798fe36c0e51fc97851",
+  "acceptance_criteria_path": "docs/validation/cases/G3-04_mie_cylinder_sphere.json",
+  "acceptance_criteria_sha256": "6ef8ee4abd6052ca67f92a81ec0d429ae6f6fc59819a9798fe36c0e51fc97851",
+  "case_first_commit": "84cc2bda318c6c7e377e1fb9beaba6de7a891d75",
+  "case_first_commit_time": "2026-09-22T01:47:52+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU reference)",
+    "float32 (CUDA, layer A)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "method": "Closed TFSF box, six (3D) or four (2D) scattered-field monitor planes outside the box, matched empty-box reference run subtracted, incident intensity from a monitor inside the box of the empty run; cross section = outward scattered power / incident intensity. Yee material sampling, staircase interface, native CPML with the physical thickness below on every face.",
+    "cylinder": {
+      "dimension": "2d, propagation along +x, cylinder axis along the invariant z",
+      "domain_um": 3.2,
+      "pml_um": 0.4,
+      "tfsf_um": 1.6,
+      "monitor_half_um": 1.1,
+      "radius_um": 0.3,
+      "index": 1.5,
+      "polarizations": {
+        "TM": "Ez (E parallel to the axis)",
+        "TE": "Ey (H parallel to the axis)"
+      },
+      "band": [
+        1.3,
+        1.8,
+        9
+      ],
+      "pulse": "Gaussian, centre 1.55 um, power FWHM 8 fs, offset 30 fs",
+      "duration_fs": 120,
+      "mesh_sequence_um": [
+        0.05,
+        0.025,
+        0.0125
+      ],
+      "judged_mesh_um": 0.0125,
+      "cells_per_radius_at_judged_mesh": 24
+    },
+    "sphere": {
+      "dimension": "3d, propagation along +x, Ez polarization",
+      "domain_um": 2.4,
+      "pml_um": 0.4,
+      "tfsf_um": 1.0,
+      "monitor_half_um": 0.65,
+      "radius_um": 0.3,
+      "index": 1.5,
+      "band": [
+        1.3,
+        1.8,
+        9
+      ],
+      "pulse": "Gaussian, centre 1.55 um, power FWHM 8 fs, offset 30 fs",
+      "duration_fs": 120,
+      "mesh_sequence_um": [
+        0.1,
+        0.05,
+        0.025
+      ],
+      "judged_mesh_um": 0.05,
+      "grid_at_judged_mesh": "48^3 (the CUDA cap of the recorded run); 0.025 um is 96^3 and runs on the CPU in FP64 only"
+    },
+    "resonance": {
+      "dimension": "2d, TE (Ey), same domain, box, monitors and PML as the cylinder",
+      "radius_um": 0.25,
+      "index": 3.5,
+      "band": [
+        1.0,
+        1.3,
+        61
+      ],
+      "pulse_wavelength_um": 1.15,
+      "pulse_length_s": 5e-15,
+      "pulse_offset_s": 1.5e-14,
+      "duration_fs": 120,
+      "mesh_sequence_um": [
+        0.025,
+        0.0125
+      ],
+      "judged_mesh_um": 0.0125,
+      "resonance": "TE peak of the Mie scattering width near 1.136 um, full width at half maximum about 0.065 um (Q about 17); the sharper TM peak near 1.10 um is outside this band's pulse and not judged",
+      "peak_definition": "parabolic refinement through the three samples around the maximum of the sampled curve; FWHM by linear interpolation of the sampled curve at half of the refined peak height; the same procedure is applied to the Mie curve sampled at the same 61 wavelengths"
+    },
+    "layer_a": "the same discrete problem on fused CUDA FP32 (RTX 3060) and the CPU FP64 reference path at every mesh at or below 48^3 cells; the cross-section observable is compared"
+  },
+  "reference_method": "Infinite-cylinder Mie series (TM and TE coefficients from continuity of the axial field and of its normal derivative divided by mu or epsilon; C = (4/k) sum over all integer orders of |c_n|^2) and Bohren-Huffman sphere series, both written in tests/test_physics_g3_b.py with SciPy Bessel functions and checked against the optical theorem, the small-size limits and the repository's independent real-index sphere series in examples/tfsf_sphere.py. No solver routine enters the reference.",
+  "observables": [
+    {
+      "name": "scattering_width_um",
+      "unit": "um per unit length",
+      "definition": "2D outward scattered power per unit length through the four monitor lines divided by the incident intensity, nine wavelengths"
+    },
+    {
+      "name": "scattering_cross_section_um2",
+      "unit": "um^2",
+      "definition": "3D outward scattered power through the six monitor planes divided by the incident intensity, nine wavelengths"
+    },
+    {
+      "name": "max_relative_error",
+      "unit": "dimensionless",
+      "definition": "max over the nine wavelengths of |measured/Mie - 1|"
+    },
+    {
+      "name": "resonance_peak_um",
+      "unit": "um",
+      "definition": "refined peak wavelength of the TE scattering width of the 0.25 um, n = 3.5 cylinder"
+    },
+    {
+      "name": "resonance_fwhm_um",
+      "unit": "um",
+      "definition": "full width at half maximum of that peak"
+    },
+    {
+      "name": "layer_a_relative_difference",
+      "unit": "dimensionless",
+      "definition": "CUDA FP32 cross section divided by the CPU FP64 cross section minus one, per wavelength"
+    }
+  ],
+  "acceptance_limits": {
+    "integrated_cross_section_relative_error": 0.02,
+    "judged_at": "cylinder: h = 0.0125 um for TM and TE; sphere: h = 0.05 um; the coarser meshes of each sequence are recorded and not judged",
+    "monotonicity": "not required; staircased curved surfaces are allowed a non-monotone error sequence and the record keeps every mesh",
+    "resonance": {
+      "peak_position_relative_error": 0.01,
+      "fwhm_relative_error": 0.15,
+      "justification": "the staircase perturbs the effective radius by a fraction of the cell and the internal wavelength is resolved by about 26 cells at the judged mesh; both shift the resonance by a few tenths of a percent, so 1 percent on the position is a first engineering target; the width of a Q = 17 resonance is the difference of two flank positions and is given a proportionally looser 15 percent"
+    },
+    "layer_a_cuda_fp32_vs_cpu_fp64": {
+      "rtol": 0.0001,
+      "atol": 0.0,
+      "source": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 applied to the cross-section observable"
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds mie_integrated_cross_section_relative_error; the resonance and layer-A budgets are fixture-specific and stated above"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 8,
+    "passed": [
+      "tests/test_physics_g3_b.py::test_g3_04_reference_series_limits",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering[TM]",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering[TE]",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_cuda_layer_a[TM]",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_cuda_layer_a[TE]",
+      "tests/test_physics_g3_b.py::test_g3_04_cylinder_resonance",
+      "tests/test_physics_g3_b.py::test_g3_04_sphere_scattering",
+      "tests/test_physics_g3_b.py::test_g3_04_sphere_cuda_layer_a"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 1078.177,
+    "suite_timestamp": "2026-09-24T03:34:29.799206+09:00"
+  },
+  "required_tests": [
+    "tests/test_physics_g3_b.py::test_g3_04_reference_series_limits",
+    "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering",
+    "tests/test_physics_g3_b.py::test_g3_04_cylinder_cuda_layer_a",
+    "tests/test_physics_g3_b.py::test_g3_04_cylinder_resonance",
+    "tests/test_physics_g3_b.py::test_g3_04_sphere_scattering",
+    "tests/test_physics_g3_b.py::test_g3_04_sphere_cuda_layer_a"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-04.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T185232Z-g3-04-ee03b515/junit.xml",
+      "sha256": "a5524f1487fc5de6074c20cd5a411d421220adc0b89befa082bdc8e1908098ce",
+      "bytes": 1072,
+      "original_path": ".local/tmp/junit/rerecord/G3-04.xml"
+    }
+  ],
+  "applicable_scope": "Layer B physics of the 2D cylinder (TM, TE, resonance) and the 3D sphere against the Mie series on the CPU FP64 reference path, and layer A CUDA FP32 (fused kernel, RTX 3060) against CPU FP64 at every grid at or below 48^3 cells; staircase interface, closed TFSF box, native CPML. re-recorded on 4635db7eab69 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T123204Z-g3-04-05d2c627",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

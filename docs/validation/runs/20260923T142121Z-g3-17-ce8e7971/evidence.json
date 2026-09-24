@@ -1,0 +1,205 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T142121Z-g3-17-ce8e7971",
+  "task": "G3-17",
+  "stage": "G3",
+  "task_title": "oracle 독립성·정밀도·시간·PML 오차 budget 확인",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_oracle_budget.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G3-17.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-23T23:21:15.225996+09:00",
+  "recorded_at": "2026-09-23T14:21:21+00:00",
+  "source_commit": "aa3f8c1506b5d178064bfef81a5c2909cd5cbf11",
+  "source_commit_time": "2026-09-23T20:37:16+09:00",
+  "source_tree_sha256": "5812558bc9c1d09c4ef68e6f2e148dc1bd4e99f553c877a4f4cb74bd84715b86",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ee7d4a044d0490859419351e84d67693458bc844d5ccd37f70c2f5ab8eee88a4",
+      "head_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1a7a05ff6fae3c928e29df55181ba608651c358e7c02d1b8d442416498db1b9d",
+      "head_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "575c076ee9a82885893dd006b7e6367de1750e6e733a67d6f4e75a83bc7ec92d",
+      "head_sha256": "6fcf959589774bd73bab2ed679c21f12d016909cabd1b2d2095963adad33fe8e"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "175e2591f29c89a76a5a54b7773acb767e9731697f884a22166d23ef853f60e1",
+      "head_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "aacccd1a6f269711c47c89a595ba6eb7da85264c6d1a72652eca64c0797a399b",
+      "head_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "28a83fea97ff71ac6732ec0eeacfde58b816bc79ca2578f5b63a1254ed67a535",
+  "package_path": "D:/torchfdtd-clean/dist/86b61a543091/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_oracle_budget.py": "63094eb1ee9af2f38b502ca729ce7d54618e19f44c49533eb84184dca5d13d3e"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "docs/validation/cases/G3-*.json",
+    "docs/validation/cases/*.oracles.json",
+    "docs/ORACLE_BUDGET.md"
+  ],
+  "watch_sha256": {
+    "docs/ORACLE_BUDGET.md": "607b3c0c4285a73bc3e11212d73beb9c2107f2338eb2d8aefd2b3f70b0337934",
+    "docs/validation/cases/G3-01_uniform_propagation.json": "0c5f86bb0219cac769fa2ad5505cac0fd8a40b7ea273102a29830c5d3fcb44c0",
+    "docs/validation/cases/G3-01_uniform_propagation.oracles.json": "d52ca6307fd848dd6c1394698e9f3153c19b082be3eba57e64c58990af941063",
+    "docs/validation/cases/G3-02_dielectric_slab_tmm.json": "958a1aa9edb3503084101b2f8e261fc868c62934f3ea0d87448024bd084eef44",
+    "docs/validation/cases/G3-02_dielectric_slab_tmm.oracles.json": "86648e2b1423261a75af32d54e70bff1a0bbde99ea55f128681bffb5ff3f29c0",
+    "docs/validation/cases/G3-02r2_slab_tmm_40_cells.json": "b6ef99668856c0146f156b56300cea2dc45a02529fe0bed63edca03449b499e2",
+    "docs/validation/cases/G3-02r2_slab_tmm_40_cells.oracles.json": "77ddb4a19f1a84843f6af2874dc00b469fedba8d8b1cc7e6936bcc308b4bbf7f",
+    "docs/validation/cases/G3-03_dispersive_slab_fit_ade.json": "744dbecd3e8de1dc042164b828d0c1f66f27676fc2ec2c39ac006af9fd29180b",
+    "docs/validation/cases/G3-03_dispersive_slab_fit_ade.oracles.json": "201e9267ef07adaa3872e1e1b639dac21800b3afa99ac12f83758dac5323cce9",
+    "docs/validation/cases/G3-04_mie_cylinder_sphere.json": "6ef8ee4abd6052ca67f92a81ec0d429ae6f6fc59819a9798fe36c0e51fc97851",
+    "docs/validation/cases/G3-04_mie_cylinder_sphere.oracles.json": "436a5a3c384a6c6896c7b89bd335c0ba459300851d57eee8e9ca4f002858e372",
+    "docs/validation/cases/G3-05_drude_sphere.json": "c3f43172902e7f6f4747bc26a1bec2a58b2c948d864f068357fd756ab9981a26",
+    "docs/validation/cases/G3-05_drude_sphere.oracles.json": "24d27e84471f146a49d8b37216e2a07f53119fe68a42bceb2c2c92bf3459622f",
+    "docs/validation/cases/G3-06_pec_pmc_cavity.json": "1733a4f1c1fa27358e07080af73fe315239a197b1e1a47c6f9fd37fd13030f92",
+    "docs/validation/cases/G3-07_cpml_reflection_stability.json": "da30c508f259f54036af6a6f24efc7afc35ad48e3b70766c1201e6ae3028e218",
+    "docs/validation/cases/G3-07_cpml_reflection_stability.oracles.json": "abf31a84ecc971b8b8ed15b30aab1aef079927c2d41136c1142de11b2e97175d",
+    "docs/validation/cases/G3-08_bloch_grating_rcwa.json": "54ba1dadb928a7ce258f2053efc53d4edf9bc7e5266ef979864561dde7226b21",
+    "docs/validation/cases/G3-08_bloch_grating_rcwa.oracles.json": "e1e4eec3bc6db8e79d30c458b2f9071526c5aa2d8715bed94dac84afd742a6e9",
+    "docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json": "bc11b2501ed91e247ab6a9b1a2ee21d17543d83682c9d7e91ba2f1638def4f74",
+    "docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.oracles.json": "a83a3e6553232015b330536c37077e3cd7232406a86c79a7e4fbfd77e9572901",
+    "docs/validation/cases/G3-09_mode_solver_oracles.json": "b7aae212c15ec77d91df39e8264bb1ea98687fd6f28bcbfd5a17806931fccd0c",
+    "docs/validation/cases/G3-10_pic_networks.json": "df2eda27e38f2269daf6c4066371131d3a3ad2cda63be3a8f03101321aff31ba",
+    "docs/validation/cases/G3-11_dipole_radiation.json": "7add6d803eb1f570a899f3df78f3714ed81f29aaac1180c8cfc49884908e36fd",
+    "docs/validation/cases/G3-12_tensor_slab.json": "684c314d5cef283ad59a0ba183c9b1067a0a5d4dce51d6941ba36b6f658d9405",
+    "docs/validation/cases/G3-13_curved_interface_convergence.json": "9bb9127cacfbecca753ecbfdc84204eb3de4f20c3b99057d6b55f7b5b18af24e",
+    "docs/validation/cases/G3-13_curved_interface_convergence.oracles.json": "8a36383e1e44a3faa707a4a99e795ad1a68e75ad1445e156a0895275d0007219",
+    "docs/validation/cases/G3-14_discrete_backend_agreement.json": "a3b7ef176bdc841148044b72ecaabe1643acfcea0f5e8b7a16dd541bfabb5b53",
+    "docs/validation/cases/G3-15_gradient_checks.json": "5c5c2e8ed996dd488565aec95715ff6327bf769f9e13bf582feb72617a84806e",
+    "docs/validation/cases/G3-16_physical_parameter_gradients.json": "f8222fb55b672249ac8ad09fa630617b38b563db888b9a9297b6a497291cf884",
+    "docs/validation/cases/G3-17_oracle_budget.json": "17c79aef26d455caec581daa2c73bb3033be61f3b7a825a0de6fa688e84fc22b"
+  },
+  "fixture_path": "docs/validation/cases/G3-17_oracle_budget.json",
+  "fixture_sha256": "17c79aef26d455caec581daa2c73bb3033be61f3b7a825a0de6fa688e84fc22b",
+  "acceptance_criteria_path": "docs/validation/cases/G3-17_oracle_budget.json",
+  "acceptance_criteria_sha256": "17c79aef26d455caec581daa2c73bb3033be61f3b7a825a0de6fa688e84fc22b",
+  "case_first_commit": "5c0172da60d27ad0e5aa6906910ae256e53de1f6",
+  "case_first_commit_time": "2026-09-22T01:25:18+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "not applicable",
+  "precision": "not applicable",
+  "backend": "cpu (file checks only)",
+  "physics_configuration": {
+    "document": "docs/ORACLE_BUDGET.md: one row per fixture of every G3 case file present under docs/validation/cases, giving the oracle class, its independence from the code under test, the precision floor, the time window and the PML budget as recorded, plus the open residuals per task",
+    "case_files": "docs/validation/cases/G3-*.json with the fields oracle_class (list) and tests.layers (one entry per tests.existing id with layer, oracle_class and oracle)",
+    "classes": "analytic_continuum, analytic_discrete, independent_solver, physical_invariant, convergence_study (layer B); shared_discrete_operator, finite_difference_same_discretisation, independent_implementation_same_scheme (layer A); stored_record (either)"
+  },
+  "reference_method": "Consistency of the documents of record with each other: every G3 case names allowed oracle classes, every listed test carries a layer consistent with its class and exists in its source file, the tasks G3-06, G3-09, G3-10, G3-11, G3-12 and G3-16 keep at least one layer-B entry, G3-14 and G3-15 are layer A only, and docs/ORACLE_BUDGET.md names every case id and every class.",
+  "observables": [
+    {
+      "name": "case_files_consistent",
+      "unit": "boolean",
+      "definition": "tests/test_oracle_budget.py passes on every docs/validation/cases/G3-*.json present"
+    },
+    {
+      "name": "document_coverage",
+      "unit": "boolean",
+      "definition": "every G3 case_id and every oracle class appears in docs/ORACLE_BUDGET.md"
+    }
+  ],
+  "acceptance_limits": {
+    "all_checks": "pass/fail assertions of tests/test_oracle_budget.py",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md section 1 rule 8 (oracle classes must be distinguished) and section 5 (fixture-specific error budgets are declared before the run and differences from the common criteria are reported)"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 4,
+    "passed": [
+      "tests/test_oracle_budget.py::test_the_recorded_g3_cases_are_present",
+      "tests/test_oracle_budget.py::test_every_g3_case_names_allowed_oracle_classes_and_layers",
+      "tests/test_oracle_budget.py::test_every_listed_test_exists_in_its_source_file",
+      "tests/test_oracle_budget.py::test_oracle_budget_document_covers_every_g3_case_and_class"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 0.125,
+    "suite_timestamp": "2026-09-23T23:21:15.225996+09:00"
+  },
+  "required_tests": [
+    "tests/test_oracle_budget.py::test_the_recorded_g3_cases_are_present",
+    "tests/test_oracle_budget.py::test_every_g3_case_names_allowed_oracle_classes_and_layers",
+    "tests/test_oracle_budget.py::test_every_listed_test_exists_in_its_source_file",
+    "tests/test_oracle_budget.py::test_oracle_budget_document_covers_every_g3_case_and_class"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-17.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T142121Z-g3-17-ce8e7971/junit.xml",
+      "sha256": "de0b9e23abacf128b828864f4b6964b335a546734bd94aa3a8d4ac12e6428644",
+      "bytes": 733,
+      "original_path": ".local/tmp/junit/rerecord/G3-17.xml"
+    }
+  ],
+  "applicable_scope": "Re-recorded on the merged main tree after a shared test module changed in a merged branch. re-recorded on aa3f8c1506b5 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T042135Z-g3-17-3c8ac8b1",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

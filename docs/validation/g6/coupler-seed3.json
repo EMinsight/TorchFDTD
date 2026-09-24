@@ -49,7 +49,7 @@
    "gradient_norm": 0.042280130088329315,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 10.317484299652278
+   "elapsed_s": 10.075296999999864
   },
   {
    "iteration": 2,
@@ -62,7 +62,7 @@
    "gradient_norm": 0.0445367731153965,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 10.38725129980594
+   "elapsed_s": 10.039126399999986
   },
   {
    "iteration": 3,
@@ -75,7 +75,7 @@
    "gradient_norm": 0.04548090696334839,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 10.518788599874824
+   "elapsed_s": 10.018130800000108
   },
   {
    "iteration": 4,
@@ -88,7 +88,7 @@
    "gradient_norm": 0.044105906039476395,
    "beta": 4.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.5972176999785
+   "elapsed_s": 10.00679480000008
   },
   {
    "iteration": 5,
@@ -101,7 +101,7 @@
    "gradient_norm": 0.11695273965597153,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.356554699596018
+   "elapsed_s": 9.987379999999575
   },
   {
    "iteration": 6,
@@ -114,7 +114,7 @@
    "gradient_norm": 0.08134551346302032,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.996707600075752
+   "elapsed_s": 9.983100899999954
   },
   {
    "iteration": 7,
@@ -127,7 +127,7 @@
    "gradient_norm": 0.040853988379240036,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.757142300251871
+   "elapsed_s": 9.965687699999762
   },
   {
    "iteration": 8,
@@ -140,7 +140,7 @@
    "gradient_norm": 0.03182361274957657,
    "beta": 8.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.544887600000948
+   "elapsed_s": 10.001583599999776
   },
   {
    "iteration": 9,
@@ -153,7 +153,7 @@
    "gradient_norm": 0.052749376744031906,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.166220900136977
+   "elapsed_s": 9.972447600000123
   },
   {
    "iteration": 10,
@@ -166,7 +166,7 @@
    "gradient_norm": 0.03225744888186455,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.297255400102586
+   "elapsed_s": 9.974275999999918
   },
   {
    "iteration": 11,
@@ -179,7 +179,7 @@
    "gradient_norm": 0.025581715628504753,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.219378099776804
+   "elapsed_s": 9.983860499999992
   },
   {
    "iteration": 12,
@@ -192,7 +192,7 @@
    "gradient_norm": 0.022163188084959984,
    "beta": 16.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.149501599837095
+   "elapsed_s": 10.007384300000012
   },
   {
    "iteration": 13,
@@ -205,7 +205,7 @@
    "gradient_norm": 0.018874702975153923,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.099070499651134
+   "elapsed_s": 10.016810600000099
   },
   {
    "iteration": 14,
@@ -218,7 +218,7 @@
    "gradient_norm": 0.010400068014860153,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.259670599829406
+   "elapsed_s": 10.012895500000013
   },
   {
    "iteration": 15,
@@ -231,7 +231,7 @@
    "gradient_norm": 0.010066545568406582,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.200053399894387
+   "elapsed_s": 10.038682999999764
   },
   {
    "iteration": 16,
@@ -244,7 +244,7 @@
    "gradient_norm": 0.014450496062636375,
    "beta": 32.0,
    "beta_next": 64.0,
-   "elapsed_s": 10.110784399788827
+   "elapsed_s": 10.113865400000122
   }
  ],
  "fabrication": {
@@ -377,8 +377,8 @@
   ]
  ],
  "export": {
-  "gds": "D:\\TorchFDTD\\docs\\validation\\g6\\export\\coupler\\seed3\\coupler-seed3.gds",
-  "structures": "D:\\TorchFDTD\\docs\\validation\\g6\\export\\coupler\\seed3\\coupler-seed3-structures.json",
+  "gds": "D:\\torchfdtd-rc-wt\\docs\\validation\\g6\\export\\coupler\\seed3\\coupler-seed3.gds",
+  "structures": "D:\\torchfdtd-rc-wt\\docs\\validation\\g6\\export\\coupler\\seed3\\coupler-seed3-structures.json",
   "structure_count": 7
  },
  "final_evaluation": {
@@ -458,6 +458,6 @@
    "fine_gds": "polygons read back by import_gds from the exported file"
   }
  },
- "wall_time_s": 205.23601089976728,
+ "wall_time_s": 196.97044970000024,
  "device": "cpu"
 }

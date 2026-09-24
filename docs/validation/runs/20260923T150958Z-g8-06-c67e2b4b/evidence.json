@@ -1,0 +1,287 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260923T150958Z-g8-06-c67e2b4b",
+  "task": "G8-06",
+  "stage": "G8",
+  "task_title": "지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_doctor.py D:/torchfdtd-rc-wt/tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G8-06.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-24T00:09:36.985821+09:00",
+  "recorded_at": "2026-09-23T15:09:58+00:00",
+  "source_commit": "aa3f8c1506b5d178064bfef81a5c2909cd5cbf11",
+  "source_commit_time": "2026-09-23T20:37:16+09:00",
+  "source_tree_sha256": "467a856f5639af42a346149370274481a2a9b1e0bc1d1219bfaa79a5d7041d44",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "ee7d4a044d0490859419351e84d67693458bc844d5ccd37f70c2f5ab8eee88a4",
+      "head_sha256": "ed0b233ef3ac32f02706625f5179c5b27e028be73ce0096aee982ae5dd021824"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1a7a05ff6fae3c928e29df55181ba608651c358e7c02d1b8d442416498db1b9d",
+      "head_sha256": "736a12420b707b359a0f4356ecf704de315357959c0a6a7bacade5fa5c7d60cc"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "575c076ee9a82885893dd006b7e6367de1750e6e733a67d6f4e75a83bc7ec92d",
+      "head_sha256": "6fcf959589774bd73bab2ed679c21f12d016909cabd1b2d2095963adad33fe8e"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "175e2591f29c89a76a5a54b7773acb767e9731697f884a22166d23ef853f60e1",
+      "head_sha256": "01e9dce3dc3572118100f6168d764639908e63d2dcb967ce68347fc0b6e3c19b"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "aacccd1a6f269711c47c89a595ba6eb7da85264c6d1a72652eca64c0797a399b",
+      "head_sha256": "7a9702fa0f5d268414c56efa696ad1f88dd13928115f36ad51f8933096385d23"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "4c6b24323f9efec162d28bce8a8edc4d6bfad1d0a939a55fb8573eb2af616f24",
+      "head_sha256": "62979fbf21bd7da5477ad6cce732abcb549425cbeb5ab28806099488c54ea940"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0b5fe584b2de1a3e5af9ab728b01a3e2bcc90c42c576b13f45aacbe3ba6ac096",
+      "head_sha256": "aa829a7f8c9ff4e7ce40032b1fec27dd37513abad39d04c3ec927eb58e751bc8"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "5439b2cbc6635e9b563d38e4b26fef52644431af30292fc6c97514fb56038bd6",
+      "head_sha256": "fb5ca89bc9029a146b9440d764fe1db13c4e8c79f7e47d9b3d687b2f32ed4ede"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "e2af3741fd5f628fcb7b28ed0c1b2097f6bea6dec0f8200e97668eb3e2db0b14",
+      "head_sha256": "81d583d77a0dbe860e846d51886a2f114e2e0681c2816096a9d822fa295ee841"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "02839208050a4909f70a8f8e9cc12cca7805522f1be34ab0f25d45319d0e23b7",
+      "head_sha256": "c68a1636641dc710734b9057a17a96cb42458289d23c4477b2a80db6459c155f"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "6e3baf1903876549b1830c8f8684c39af379d43f2c7a3283cc75c95c57f91ed0",
+      "head_sha256": "c0c7b0be5a7af4970a64d92742f031b750ceb82898317b5308080af6bb26c37a"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "28a83fea97ff71ac6732ec0eeacfde58b816bc79ca2578f5b63a1254ed67a535",
+  "package_path": "D:/torchfdtd-clean/dist/86b61a543091/torchfdtd-0.15.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_doctor.py": "df1429f2837bca717a0af565c13b1c0b3fde7e60074d4cab3776c752c42f18c4",
+    "tests/test_clean_install.py": "562d9d97dffab9dc0c8ee5807cdef6c59d6218360b64e8f821dce7a7670f799b"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "pyproject.toml",
+    "torchfdtd/web/**",
+    "scripts/clean_install_check.py",
+    "scripts/run_readme_examples.py",
+    "README.md",
+    "docs/validation/clean_install/*.json"
+  ],
+  "watch_sha256": {
+    "README.md": "b654ffbe4e3e3c87dfca072346a98f8ea17bfc8d0f83feda3bbcf52da9f6f233",
+    "docs/validation/clean_install/20260921T165132Z-b768cc74.json": "db29946278b85297d14d4f22fbcf937909b974ee4341825d22f8e0c40c3b206c",
+    "docs/validation/clean_install/20260921T222259Z-4120a653.json": "5cd29277e5a2d762184284cb836aa42065e647130944cc4e136c1d0763207f1d",
+    "docs/validation/clean_install/20260922T062008Z-4f5b1f2a.json": "1a17e23b129194098908ec65ebcb6c3d48e4771be9de49b42fddb824b1aa60e2",
+    "docs/validation/clean_install/20260922T081202Z-4597459a.json": "d7f7456d5eb94d9b99769dbc02ea509dce5beab25e834549ca24e16eaa18b1c6",
+    "docs/validation/clean_install/20260922T104707Z-05fd4868.json": "d179044c49d44d0f883eb51a7a136197512cd4d0c438ad96f4a4f831674e4db7",
+    "docs/validation/clean_install/20260922T114415Z-fab4915e.json": "23d483713b18c951a9dce3f4b055a9d84dcb5251e49ee0ce02f5785b55d645a2",
+    "docs/validation/clean_install/20260922T202144Z-dcfbf1dc.json": "43fb5c5b79da6b16a95190fe52a34468b5c92e55facfe98f13183d6781e7b9de",
+    "docs/validation/clean_install/20260923T014045Z-00a8d296.json": "dbcb93664360cbf87ecda058f6f8631307d7be5c68bf2cdfc1e51c39b7331279",
+    "docs/validation/clean_install/20260923T093026Z-693f31ed.json": "86eec7756bc13d52037a0d2654d1706a2d8fba14cda816752e175a5d47feca55",
+    "docs/validation/clean_install/20260923T112904Z-86b61a54.json": "89244997407b31d4b34765f77b4736dc8ff1dddb91b31caff80f5b0f02c314c1",
+    "docs/validation/clean_install/version_trials_2026-09-22.json": "90afc67c7098c40484d3b8961c4be2a23b4ad66a7689282f5a2dac97404aa00d",
+    "pyproject.toml": "0fbf45ba804d911d94a79a908073bdf4d960ee4807821f7fde37681c985d6837",
+    "scripts/clean_install_check.py": "f7aabac12bc39ba54e2ceabbb73b41ec8728224be47605cc7f958b348b8be802",
+    "scripts/run_readme_examples.py": "d18d7d2c089e807ba43301b6d672f2eb1cccef5af308c08dd1148a87fa1c2316",
+    "torchfdtd/web/assets/index-BMhgsHC5.js": "96af944959d5befafb244ed0dd8f8cc160fc35e7994c417b4380df1c90f4582c",
+    "torchfdtd/web/assets/index-DErGp_7h.css": "aaefe25d640c4dc92a69ab20f49335885e1dc69c8325da46f6ed2c1507ac7ebc",
+    "torchfdtd/web/index.html": "0ebe59daddeef65b47eb4bfa226084f1e82d866e0019be531e17f991ba1823cb"
+  },
+  "fixture_path": "docs/validation/cases/G8-06_version_bounds_doctor.json",
+  "fixture_sha256": "56ab0fd82431ebc5fdf248ab2d5c670d023e49c69d677261d4dc342b2a1b0b76",
+  "acceptance_criteria_path": "docs/validation/cases/G8-06_version_bounds_doctor.json",
+  "acceptance_criteria_sha256": "56ab0fd82431ebc5fdf248ab2d5c670d023e49c69d677261d4dc342b2a1b0b76",
+  "case_first_commit": "1a1407eea28a670f722f0e509d30cff2a6a64126",
+  "case_first_commit_time": "2026-09-22T01:38:15+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "physics_configuration": {
+    "trials": "one fresh venv per trial from the base interpreter (Python 3.10.2) on D:/TorchFDTD/.local/venvs, the wheel of the current tree installed with pip --find-links D:/TorchFDTD/.local/wheels, then (a) the probe script D:/TorchFDTD/.local/tmp/g8/probe_trial.py from a directory outside the checkout: import torchfdtd from the venv prefix, a 2D CPU run (20 x 20 cells, 80 steps), Result.save and Result.load, torch.from_numpy interop; (b) for trials whose probe passes, the CPU subset tests/test_solver.py tests/test_api.py tests/test_torch_interop.py tests/test_project_compatibility.py tests/test_doctor.py run by the venv's pytest entry point (so the checkout is not on sys.path)",
+    "trial_matrix": [
+      "torch 2.2.2+cpu (the oldest torch the old pyproject allowed) with the numpy pip resolves (2.2.6)",
+      "torch 2.2.2+cpu with numpy<2 (1.26.4)",
+      "torch 2.3.1+cpu with numpy 2.2.6",
+      "torch 2.4.1+cpu with numpy 2.2.6",
+      "torch 2.14.0+cpu (the newest CPU build for Python 3.10 on the day of the run) with numpy 2.2.6: the clean-install record",
+      "torch 2.10.0+cu126 with cupy-cuda12x 13.6.0 on CUDA runtime 12.6, driver 591.86, RTX 3060: the clean-install record and the development host",
+      "Python 3.12.7 (Anaconda base interpreter) with the newest CPU torch for 3.12, if the download succeeds",
+      "Python 3.9 (installed on the host) must be refused by pip through Requires-Python"
+    ],
+    "doctor": "torchfdtd doctor and --json; tests/test_doctor.py monkeypatches torch.cuda.is_available, torch.version.cuda, nvidia-smi parsing, the CuPy probe and the fused-kernel probe to cover: no CUDA torch build, CUDA build without a driver, CUDA build with a driver but no device, driver too old for the torch runtime, CuPy missing, CuPy broken, kernel compile failure; the real fused launch runs on the development host",
+    "not_tried": "cupy-cuda12x other than 13.6.0; CUDA runtimes other than 12.6; drivers other than 591.86; torch builds between 2.4.1 and 2.10.0 and between 2.10.0 and 2.14.0; Python 3.11 and 3.13; Linux and macOS"
+  },
+  "reference_method": "actual pip installations and executions; a version is supported only when its probe passed and its CPU subset had no failures; a version is excluded from pyproject.toml when its probe failed",
+  "observables": [
+    {
+      "name": "probe_status",
+      "unit": "passed|failed",
+      "definition": "per trial: import location, run, save/load, torch/numpy interop"
+    },
+    {
+      "name": "subset_results",
+      "unit": "counts",
+      "definition": "per trial with a passing probe: passed, failed, skipped of the CPU subset"
+    },
+    {
+      "name": "doctor_checks",
+      "unit": "status per check",
+      "definition": "cuda, driver, cupy, fused_kernels, backend entries and the exit code"
+    }
+  ],
+  "acceptance_limits": {
+    "bounds": "pyproject.toml lower bounds equal the oldest trial that passed the probe and the subset with the numpy that pip resolves; a numpy constraint is added when the oldest torch needs one; docs/INSTALL.md lists every trial with its outcome and does not claim untried versions",
+    "doctor": "exit 0 and backend cpu/torch in the CPU environment; exit 0, fused_kernels ok and backend cuda/fused in the CUDA environment; every monkeypatched situation in tests/test_doctor.py yields the expected status and message; the real launch on the RTX 3060 reports 20 steps on 400 cells",
+    "subset": "0 failed, 0 errors in every trial that is claimed supported (CUDA-only tests skip)",
+    "source_of_limits": "COMPLETION_PROGRAM_KO.md G8-06; pass/fail on real installations, no numeric threshold"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 15,
+    "passed": [
+      "tests/test_doctor.py::test_no_cuda_device_reports_cpu_execution_and_skips_the_kernel_probe",
+      "tests/test_doctor.py::test_cuda_build_without_driver_names_the_driver",
+      "tests/test_doctor.py::test_cuda_build_with_driver_but_no_device_is_an_error",
+      "tests/test_doctor.py::test_old_driver_is_reported_against_the_torch_runtime",
+      "tests/test_doctor.py::test_missing_cupy_is_a_notice_with_the_extra_to_install",
+      "tests/test_doctor.py::test_broken_cupy_is_an_error_with_the_import_message",
+      "tests/test_doctor.py::test_any_cupy_distribution_that_fails_to_import_is_an_error[cupy-cuda11x]",
+      "tests/test_doctor.py::test_any_cupy_distribution_that_fails_to_import_is_an_error[cupy-cuda13x]",
+      "tests/test_doctor.py::test_any_cupy_distribution_that_fails_to_import_is_an_error[cupy-rocm-5-0]",
+      "tests/test_doctor.py::test_any_cupy_distribution_that_fails_to_import_is_an_error[cupy]",
+      "tests/test_doctor.py::test_no_cupy_distribution_at_all_stays_a_notice",
+      "tests/test_doctor.py::test_kernel_compile_failure_is_reported_and_falls_back_to_the_torch_kernel",
+      "tests/test_doctor.py::test_cli_doctor_prints_json_and_exits_with_the_report_status",
+      "tests/test_doctor.py::test_real_fused_kernel_probe_launches_on_this_device",
+      "tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 6.145,
+    "suite_timestamp": "2026-09-24T00:09:36.985821+09:00"
+  },
+  "required_tests": [
+    "tests/test_doctor.py",
+    "tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_doctor.py": [
+      "tests/test_doctor.py::test_no_cuda_device_reports_cpu_execution_and_skips_the_kernel_probe",
+      "tests/test_doctor.py::test_cuda_build_without_driver_names_the_driver",
+      "tests/test_doctor.py::test_cuda_build_with_driver_but_no_device_is_an_error",
+      "tests/test_doctor.py::test_old_driver_is_reported_against_the_torch_runtime",
+      "tests/test_doctor.py::test_missing_cupy_is_a_notice_with_the_extra_to_install",
+      "tests/test_doctor.py::test_broken_cupy_is_an_error_with_the_import_message",
+      "tests/test_doctor.py::test_any_cupy_distribution_that_fails_to_import_is_an_error[cupy-cuda11x]",
+      "tests/test_doctor.py::test_any_cupy_distribution_that_fails_to_import_is_an_error[cupy-cuda13x]",
+      "tests/test_doctor.py::test_any_cupy_distribution_that_fails_to_import_is_an_error[cupy-rocm-5-0]",
+      "tests/test_doctor.py::test_any_cupy_distribution_that_fails_to_import_is_an_error[cupy]",
+      "tests/test_doctor.py::test_no_cupy_distribution_at_all_stays_a_notice",
+      "tests/test_doctor.py::test_kernel_compile_failure_is_reported_and_falls_back_to_the_torch_kernel",
+      "tests/test_doctor.py::test_cli_doctor_prints_json_and_exits_with_the_report_status",
+      "tests/test_doctor.py::test_real_fused_kernel_probe_launches_on_this_device"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G8-06.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260923T150958Z-g8-06-c67e2b4b/junit.xml",
+      "sha256": "6878595ada7826330a5d045e5649665746fab1105ee98f6d86932b960a315115",
+      "bytes": 2106,
+      "original_path": ".local/tmp/junit/rerecord/G8-06.xml"
+    }
+  ],
+  "applicable_scope": "G8-06 on Windows 11 only: doctor paths by monkeypatching plus the real fused launch on the RTX 3060; version bounds from the installation trials in docs/validation/clean_install/version_trials_2026-09-22.json (Python 3.10.2 and 3.12.7; torch 2.2.2, 2.3.1, 2.4.1, 2.14.0 CPU builds and 2.10.0+cu126; cupy-cuda12x 13.6.0 only). Linux not run; Python 3.11 and 3.13 not tried. re-recorded on aa3f8c1506b5 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T050924Z-g8-06-87040c4d",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

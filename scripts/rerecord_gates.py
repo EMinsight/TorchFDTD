@@ -65,6 +65,18 @@ parse_command = recorder.parse_command
 is_python = recorder.is_python
 
 
+def moved_under(root, token):
+    """An absolute path inside another checkout (the one an earlier round recorded from, identified by its gate
+    file), moved to the same place under the root, so a replay never runs or writes another tree's files."""
+    head, sep, tail = token.partition('::')
+    if not head or not Path(head).is_absolute():
+        return token
+    other = next((parent for parent in Path(head).parents if (parent / GATE_FILE).is_file()), None)
+    if other is None or other.resolve() == Path(root).resolve():
+        return token
+    return (Path(root) / Path(head).relative_to(other)).as_posix() + sep + tail
+
+
 def absolute_under(root, token):
     """A token naming a path that exists relative to the root, made absolute; ``file::node`` keeps its node id."""
     head, sep, tail = token.partition('::')
@@ -93,6 +105,8 @@ def prepare(command, root, interpreter, junit, absolute_paths):
             continue
         kept.append(token)
     argv = kept + [f'--junitxml={Path(junit).as_posix()}']
+    argv = [argv[0]] + [moved_under(root, token) for token in argv[1:]]
+    env = {name: moved_under(root, value) for name, value in env.items()}
     if absolute_paths:
         argv = [argv[0]] + [absolute_under(root, token) for token in argv[1:]]
         env = {name: absolute_under(root, value) for name, value in env.items()}

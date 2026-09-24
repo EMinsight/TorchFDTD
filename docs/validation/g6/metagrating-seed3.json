@@ -35,7 +35,7 @@
    "gradient_norm": 0.01753832772374153,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 8.289995099883527
+   "elapsed_s": 8.065760399999817
   },
   {
    "iteration": 2,
@@ -49,7 +49,7 @@
    "gradient_norm": 0.05289241671562195,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 8.359573899768293
+   "elapsed_s": 8.079618199999913
   },
   {
    "iteration": 3,
@@ -63,7 +63,7 @@
    "gradient_norm": 0.08367173373699188,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 8.198055400047451
+   "elapsed_s": 8.095834300000206
   },
   {
    "iteration": 4,
@@ -77,7 +77,7 @@
    "gradient_norm": 0.10625316202640533,
    "beta": 4.0,
    "beta_next": 8.0,
-   "elapsed_s": 8.25694019999355
+   "elapsed_s": 8.094426699999985
   },
   {
    "iteration": 5,
@@ -91,7 +91,7 @@
    "gradient_norm": 0.2543450593948364,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 8.233391600195318
+   "elapsed_s": 8.06857489999993
   },
   {
    "iteration": 6,
@@ -105,7 +105,7 @@
    "gradient_norm": 0.15747423470020294,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 8.53773710038513
+   "elapsed_s": 8.086973299999954
   },
   {
    "iteration": 7,
@@ -119,7 +119,7 @@
    "gradient_norm": 0.162933811545372,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 8.339585300069302
+   "elapsed_s": 8.035299299999679
   },
   {
    "iteration": 8,
@@ -133,7 +133,7 @@
    "gradient_norm": 0.08282535523176193,
    "beta": 8.0,
    "beta_next": 16.0,
-   "elapsed_s": 8.35750519996509
+   "elapsed_s": 8.024564299999838
   },
   {
    "iteration": 9,
@@ -147,7 +147,7 @@
    "gradient_norm": 0.24156098067760468,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 8.234474299941212
+   "elapsed_s": 8.080053099999986
   },
   {
    "iteration": 10,
@@ -161,7 +161,7 @@
    "gradient_norm": 0.1545180082321167,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 8.489112899638712
+   "elapsed_s": 8.060981199999787
   },
   {
    "iteration": 11,
@@ -175,7 +175,7 @@
    "gradient_norm": 0.034560784697532654,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 8.344340399838984
+   "elapsed_s": 8.05735790000017
   },
   {
    "iteration": 12,
@@ -189,7 +189,7 @@
    "gradient_norm": 0.05267728120088577,
    "beta": 16.0,
    "beta_next": 32.0,
-   "elapsed_s": 8.282796500250697
+   "elapsed_s": 8.13058299999966
   },
   {
    "iteration": 13,
@@ -203,7 +203,7 @@
    "gradient_norm": 0.05865291878581047,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 8.252788500394672
+   "elapsed_s": 8.098877299999913
   },
   {
    "iteration": 14,
@@ -217,7 +217,7 @@
    "gradient_norm": 0.06291893124580383,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 8.507259999867529
+   "elapsed_s": 8.084617199999684
   },
   {
    "iteration": 15,
@@ -231,7 +231,7 @@
    "gradient_norm": 0.06172171235084534,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 8.393875100184232
+   "elapsed_s": 8.088693000000148
   },
   {
    "iteration": 16,
@@ -245,7 +245,7 @@
    "gradient_norm": 0.06034267321228981,
    "beta": 32.0,
    "beta_next": 64.0,
-   "elapsed_s": 8.251470299903303
+   "elapsed_s": 8.088231700000051
   },
   {
    "iteration": 17,
@@ -259,7 +259,7 @@
    "gradient_norm": 0.09592308104038239,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 8.321583300363272
+   "elapsed_s": 8.083803700000317
   },
   {
    "iteration": 18,
@@ -273,7 +273,7 @@
    "gradient_norm": 0.08728562295436859,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 8.807581800036132
+   "elapsed_s": 8.036243800000193
   },
   {
    "iteration": 19,
@@ -287,7 +287,7 @@
    "gradient_norm": 0.0228872150182724,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 8.706715300213546
+   "elapsed_s": 8.055845899999895
   },
   {
    "iteration": 20,
@@ -301,7 +301,7 @@
    "gradient_norm": 0.044784437865018845,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 8.78520750021562
+   "elapsed_s": 8.039796999999908
   },
   {
    "iteration": 21,
@@ -315,7 +315,7 @@
    "gradient_norm": 0.032820191234350204,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 8.576578800100833
+   "elapsed_s": 8.083322200000111
   },
   {
    "iteration": 22,
@@ -329,7 +329,7 @@
    "gradient_norm": 0.024075547233223915,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 8.806272000074387
+   "elapsed_s": 8.033616600000187
   },
   {
    "iteration": 23,
@@ -343,7 +343,7 @@
    "gradient_norm": 0.019326670095324516,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 8.402844899799675
+   "elapsed_s": 8.110662000000048
   },
   {
    "iteration": 24,
@@ -357,7 +357,7 @@
    "gradient_norm": 0.016984345391392708,
    "beta": 64.0,
    "beta_next": 64.0,
-   "elapsed_s": 9.080651299562305
+   "elapsed_s": 8.128243499999826
   }
  ],
  "fabrication": {
@@ -452,8 +452,8 @@
   1
  ],
  "export": {
-  "gds": "D:\\TorchFDTD\\docs\\validation\\g6\\export\\metagrating\\seed3\\metagrating-seed3.gds",
-  "structures": "D:\\TorchFDTD\\docs\\validation\\g6\\export\\metagrating\\seed3\\metagrating-seed3-structures.json",
+  "gds": "D:\\torchfdtd-rc-wt\\docs\\validation\\g6\\export\\metagrating\\seed3\\metagrating-seed3.gds",
+  "structures": "D:\\torchfdtd-rc-wt\\docs\\validation\\g6\\export\\metagrating\\seed3\\metagrating-seed3-structures.json",
   "structure_count": 2
  },
  "final_evaluation": {
@@ -539,6 +539,6 @@
    "fine_gds": "polygons read back by import_gds from the exported file"
   }
  },
- "wall_time_s": 228.48454780038446,
+ "wall_time_s": 215.54664300000013,
  "device": "cpu"
 }

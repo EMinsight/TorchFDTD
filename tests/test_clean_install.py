@@ -134,3 +134,12 @@ def test_block_timeout_is_recorded_as_failed_with_its_output(tmp_path, monkeypat
     assert timed_out['stdout_tail'] in ('started\n', '')
     assert following['status'] == 'passed' and following['stdout_tail'] == 'next\n'
     assert result['runnable_blocks'] == 2 and result['all_runnable_passed'] is False
+
+
+def test_local_root_defaults_outside_the_checkout_and_refuses_one_inside():
+    """The probes assert that the installed package does not resolve under the checkout, so its environments live elsewhere."""
+    import argparse
+    import clean_install_check as check
+    assert not check.DEFAULT_LOCAL_ROOT.resolve().is_relative_to(ROOT.resolve())
+    with pytest.raises(SystemExit, match='inside the checkout'):
+        check.Check(argparse.Namespace(local_root=str(ROOT / '.local')))
