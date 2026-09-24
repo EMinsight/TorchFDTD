@@ -103,7 +103,13 @@ def test_report_lists_evidence_warnings_and_pending_approvals(rendered):
     expected = builder.judge.pending_scope_changes(ROOT, gates)
     for task_id in expected:
         assert f'| {task_id} |' in pending
-    assert 'G3-02' in expected and 'G3-08' in expected  # the revised cases of the record
+    declared = builder.declared_scope_changes(ROOT, gates)
+    assert 'G3-02' in declared and 'G3-08' in declared  # the revised cases of the record, pending or approved
+    approved = pending.split('### Approved scope changes', 1)[1] if '### Approved scope changes' in pending else ''
+    for task_id, (_, approval) in declared.items():
+        assert (task_id in expected) != bool(approval), f'{task_id} must be either pending or approved'
+        if approval:
+            assert f'| {task_id} |' in approved, f'the approved scope change of {task_id} is not listed with its approval'
     warnings = report.split('## Evidence warnings', 1)[1].split('## Pending owner approvals', 1)[0]
     for _, task in builder.all_tasks(gates):
         if task['id'] == builder.SELF_TASK:

@@ -606,6 +606,22 @@ def section_warnings(gates, verdicts):
     return lines
 
 
+def declared_scope_changes(root, gates):
+    """Task id -> (declarations, approval) for every task whose case files declare a scope change, approved or not."""
+    out = {}
+    for _, task in all_tasks(gates):
+        reasons = judge.scope_change_reasons(root, gates, dict(task, scope_change_approval=None))
+        if reasons:
+            out[task['id']] = (reasons, task.get('scope_change_approval'))
+    return out
+
+
+def approval_cell(approval):
+    if isinstance(approval, dict):
+        return cell(f"{approval.get('decision', 'approved')} by {approval.get('approved_by', 'owner')} on {approval.get('date', 'an unrecorded date')}")
+    return cell(str(approval))
+
+
 def section_pending_approvals(root, gates):
     lines = ['## Pending owner approvals', '',
              'Tasks whose case files declare a scope change (a revised case, or a limit looser than the program thresholds of the gate '
@@ -616,6 +632,13 @@ def section_pending_approvals(root, gates):
         lines += table(['Task', 'Declared change'], [[task_id, cell('; '.join(reasons))] for task_id, reasons in pending.items()])
     else:
         lines.append('None: every declared scope change carries an approval.')
+    approved = {task_id: entry for task_id, entry in declared_scope_changes(root, gates).items() if entry[1]}
+    if approved:
+        lines += ['', '### Approved scope changes', '',
+                  'Declared scope changes with the owner\'s recorded approval (`scope_change_approval` in the gate file). An approval accepts '
+                  'the declared limits of that task; it does not change the program thresholds.', '']
+        lines += table(['Task', 'Declared change', 'Approval'],
+                       [[task_id, cell('; '.join(reasons)), approval_cell(approval)] for task_id, (reasons, approval) in approved.items()])
     lines.append('')
     return lines
 
