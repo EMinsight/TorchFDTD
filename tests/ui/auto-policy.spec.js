@@ -7,6 +7,11 @@ test('Auto names its tier, approximate tiling needs consent and disk is an opt-i
  await expect(page.getByLabel('dimension',{exact:true})).toHaveValue('3d');
  const gpu=page.getByLabel('GPU',{exact:true});
  if(await gpu.isEnabled())await gpu.uncheck();
+ else{ // no CUDA device: the switch is disabled and the resource stays 'GPU if available'; pin the CPU explicitly
+  const toggle=page.locator('[data-advanced-toggle]');
+  if(await toggle.getAttribute('aria-expanded')!=='true')await toggle.click();
+  await page.getByLabel('resource',{exact:true}).selectOption('cpu');
+ }
  await expect(page.getByLabel('resource',{exact:true})).toHaveValue('cpu');
  const memory=page.getByLabel('memory',{exact:true}),consent=page.getByLabel('Allow approximate tiling',{exact:true}),status=page.locator('#execution-status');
  await expect(memory).toHaveValue('auto');

@@ -82,6 +82,11 @@ test('streamed host run reports its policy, progress and one final snapshot',asy
  await expect(page.getByLabel('dimension',{exact:true})).toHaveValue('3d');
  const gpu=page.getByLabel('GPU',{exact:true});
  if(await gpu.isEnabled())await gpu.uncheck();
+ else{ // no CUDA device: the switch is disabled and the resource stays 'GPU if available'; pin the CPU explicitly
+  const toggle=page.locator('[data-advanced-toggle]');
+  if(await toggle.getAttribute('aria-expanded')!=='true')await toggle.click();
+  await page.getByLabel('resource',{exact:true}).selectOption('cpu');
+ }
  await expect(page.getByLabel('resource',{exact:true})).toHaveValue('cpu');
  await page.getByLabel('time steps',{exact:true}).fill('120');
  await page.getByLabel('time steps',{exact:true}).press('Tab');
@@ -131,6 +136,11 @@ test('tiled mode shows its panel, the suggested overlap and the mismatch indicat
  await page.getByLabel('y min bc',{exact:true}).selectOption('pml');await page.getByLabel('y max bc',{exact:true}).selectOption('pml');
  const gpu=page.getByLabel('GPU',{exact:true});
  if(await gpu.isEnabled())await gpu.uncheck();
+ else{ // no CUDA device: the switch is disabled and the resource stays 'GPU if available'; pin the CPU explicitly
+  const toggle=page.locator('[data-advanced-toggle]');
+  if(await toggle.getAttribute('aria-expanded')!=='true')await toggle.click();
+  await page.getByLabel('resource',{exact:true}).selectOption('cpu');
+ }
  await expect(page.getByLabel('resource',{exact:true})).toHaveValue('cpu');
  await page.getByLabel('time steps',{exact:true}).fill('400');await page.getByLabel('time steps',{exact:true}).press('Tab');
  await expect(page.locator('.tiled-panel')).toHaveCount(0);

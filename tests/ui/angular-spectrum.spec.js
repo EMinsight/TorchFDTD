@@ -10,6 +10,11 @@ test('angular-spectrum panel propagates a stored plane and reports focus, spectr
  await page.locator('[data-action="region"]').first().click();
  const gpu=page.getByLabel('GPU',{exact:true});
  if(await gpu.isEnabled())await gpu.uncheck();
+ else{ // no CUDA device: the switch is disabled and the resource stays 'GPU if available'; pin the CPU explicitly
+  const toggle=page.locator('[data-advanced-toggle]');
+  if(await toggle.getAttribute('aria-expanded')!=='true')await toggle.click();
+  await page.getByLabel('resource',{exact:true}).selectOption('cpu');
+ }
  await expect(page.getByLabel('resource',{exact:true})).toHaveValue('cpu');
  await page.getByLabel('time steps',{exact:true}).fill('200');await page.getByLabel('time steps',{exact:true}).press('Tab');
  const submitted=page.waitForResponse(r=>r.url().endsWith('/api/jobs')&&r.request().method()==='POST');
