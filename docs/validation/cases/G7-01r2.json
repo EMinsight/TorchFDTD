@@ -20,7 +20,7 @@
     ],
     "pixels": 100,
     "pixel_um": 0.02,
-    "filter_radius_um": "chosen before the judged seeds on development seeds 11 to 13 from 0.06, 0.08, 0.10 and 0.12 um (with a morphological open and close before export if needed) as the smallest radius whose binary designs meet the 3-pixel linewidth and gap; the selection is recorded",
+    "filter_radius_um": "chosen before the judged seeds on development seeds 11 to 13 from 0.06, 0.08, 0.10 and 0.12 um (with a morphological open and close before export if needed) as the smallest radius whose binary designs meet the 3-pixel linewidth and gap; the selection runs at the declared 0.02 um mesh and 560 fs, because the feature sizes follow the filter and the pixel grid rather than the simulation mesh, and it is recorded",
     "projection_beta": [
       8,
       16,
@@ -73,7 +73,8 @@
     },
     "physical_time_fs": 1120,
     "rayleigh_anomaly_exclusion": "criteria (c) and (e) are judged at wavelengths at least 0.02 um from every Rayleigh anomaly of the evaluated k_x in air and substrate; excluded wavelengths are reported",
-    "torcwa_tm_convergence": "TM harmonics raised until the estimated error is at most 0.003"
+    "torcwa_tm_convergence": "TM harmonics raised until the estimated error is at most 0.003",
+    "absorber": "0.4 um CPML at every mesh; at 0.005 um the 80 cells are set through BoundaryFace.layers, since Region.pml_cells is capped at 50"
   },
   "seed": "logits 0.5 * randn with seeds 1, 2, 3",
   "precision": "float32 on CUDA",
