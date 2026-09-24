@@ -30,7 +30,7 @@ RECORDED = ROOT/'docs'/'validation'/'g7'/'G7-02'
 def few_threads():
     """The reduced grids are a few thousand cells; many Torch threads only contend on a shared host."""
     previous = torch.get_num_threads()
-    torch.set_num_threads(4)
+    torch.set_num_threads(2)
     yield
     torch.set_num_threads(previous)
 
@@ -157,11 +157,14 @@ def test_reduced_workflow_reports_every_start_and_criterion(tmp_path):
         assert set(record['final_design']) == {'design_grid', 'fine_mesh', 'longer_time'} and set(record['lines_1550']) == set(record['final_design'])
         assert set(record['checks']) == {'mesh_efficiency_change', 'mesh_axis_peak_change_um', 'time_efficiency_change', 'propagation_focal_relative_l2'}
         assert 'full_width_line' in record['propagation']
+        assert record['provenance'] == {k: summary['environment'][k] for k in wf.PROVENANCE_KEYS}
         bounds = record['width_bounds_um']
         assert all(bounds[0] - 1e-7 <= w <= bounds[1] + 1e-7 for w in record['final_widths_um'])
     # The information-only time study re-evaluates the recorded designs; at 1 and 1.5 times it repeats the recorded runs.
     study = wf.time_study(spec, tmp_path, backend='cpu', factors=(1., 1.5), log=lambda *_: None)
     assert study == json.loads((tmp_path/'time_convergence.json').read_text(encoding='utf-8')) and len(study['rows']) == 2 * 7
+    import torchfdtd
+    assert study['environment']['torchfdtd_file'] == str(Path(torchfdtd.__file__).resolve()) and study['environment']['torchfdtd_version']
     for record in records:
         for factor, grid in ((1., 'design_grid'), (1.5, 'longer_time')):
             row = next(r for r in study['rows'] if r['design'] == f"{record['start']} final" and r['time_factor'] == factor)
@@ -176,6 +179,8 @@ def judged(summary, records):
     """Re-judge the records against the case and check the summary's verdicts; returns the criterion rows."""
     assert not summary['reduced'] and not any(r['reduced'] for r in records)
     assert sorted(r['start'] for r in records) == sorted(wf.STARTS), 'every declared start must be present'
+    for record in (summary['environment'], *(r['provenance'] for r in records)):
+        assert record['torchfdtd_file'] and record['torchfdtd_version'] and record['commit'], 'every record names the torchfdtd and the commit that ran'
     refinement = CASE['fixture']['refinement']
     for record in records:
         assert record['iterations'] == refinement['iterations'] == len(record['history'])

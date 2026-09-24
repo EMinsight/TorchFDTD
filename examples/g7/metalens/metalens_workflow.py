@@ -17,16 +17,22 @@ DifferentiablePlaneSimulation forwards (no gradient) with the recorded incident,
 interpolation and time convention are those of the native plane monitors; the library design is also run
 through the native Simulation to tie this path to the recorded comparison.
 
-    python examples/g7/metalens/metalens_workflow.py --output-dir docs/validation/g7/G7-02
-    python examples/g7/metalens/metalens_workflow.py --reduced --backend cpu --iterations 1 --output-dir <dir>
+    python -m examples.g7.metalens.metalens_workflow --output-dir docs/validation/g7/G7-02
+    python -m examples.g7.metalens.metalens_workflow --time-study --output-dir docs/validation/g7/G7-02
+    python -m examples.g7.metalens.metalens_workflow --reduced --backend cpu --iterations 1 --output-dir <dir>
 
-The first form is the declared run (CUDA, float32). --reduced builds a five-ridge lens on a coarse short grid for
-the fast tests; its numbers have no meaning beyond exercising the same code.
+The first form is the declared run (CUDA, float32); the judged test in tests/test_g7_metalens.py runs the same
+function. --reduced builds a five-ridge lens on a coarse short grid for the fast tests; its numbers have no meaning
+beyond exercising the same code. The repository-only modules (examples/, the comparison helpers) are found by
+appending their directories to the end of sys.path, so an installed torchfdtd is never shadowed by this checkout;
+run from the repository root with -m, the working directory comes first and the checkout's package is imported.
+Every record names the imported torchfdtd file, its version and the commit of this checkout.
 """
 from __future__ import annotations
 
 import argparse
 import copy
+from importlib import metadata
 import json
 import math
 import platform
@@ -40,9 +46,9 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 LENS = REPO / 'examples' / 'meep_comparison' / 'metalens'
-for path in (str(LENS), str(REPO)):
+for path in (str(REPO), str(LENS)):
     if path not in sys.path:
-        sys.path.insert(0, path)
+        sys.path.append(path)
 import metalens_common as mc  # noqa: E402
 import torchfdtd_metalens as tm  # noqa: E402
 
@@ -355,7 +361,23 @@ def environment(device):
         commit, dirty = None, None
     return dict(python=platform.python_version(), torch=torch.__version__, cuda=torch.version.cuda, numpy=np.__version__, platform=platform.platform(),
                 device=torch.cuda.get_device_name(device) if device.type == 'cuda' else platform.processor() or 'cpu',
-                torchfdtd_file=torchfdtd.__file__, commit=commit, tracked_changes=dirty, gpu=mc.nvidia_smi() if device.type == 'cuda' else None)
+                gpu=mc.nvidia_smi() if device.type == 'cuda' else None, **provenance(commit, dirty))
+
+
+def provenance(commit, dirty):
+    """Which torchfdtd ran and which checkout held this example; copied into every record."""
+    try:
+        distribution = metadata.version('torchfdtd')
+    except metadata.PackageNotFoundError:
+        distribution = None
+    imported = Path(torchfdtd.__file__).resolve()
+    return dict(torchfdtd_file=str(imported), torchfdtd_version=getattr(torchfdtd, '__version__', None) or distribution,
+                torchfdtd_version_source=('torchfdtd.__version__' if getattr(torchfdtd, '__version__', None) else
+                                          'importlib.metadata.version("torchfdtd"): the installed distribution (the package defines no __version__)'),
+                checkout_import=REPO in imported.parents, commit=commit, tracked_changes=dirty)
+
+
+PROVENANCE_KEYS = ('torchfdtd_file', 'torchfdtd_version', 'torchfdtd_version_source', 'checkout_import', 'commit', 'tracked_changes')
 
 
 def design_summary(row):
@@ -489,7 +511,8 @@ def run(*, spec, backend='cuda', iterations=None, learning_rate=None, starts=STA
         initial_planes, initial_seconds = lines['design_grid'].lens(np.asarray(initial))
         initial_obs = line_observables(initial_planes, bare['design_grid'], spec)
         t, fine, longer = (centre_row(observed[n][1], variants[n]) for n in ('design_grid', 'fine_mesh', 'longer_time'))
-        record = dict(schema=SCHEMA, case_id='G7-02', start=start, reduced=bool(spec.get('reduced')), iterations=iterations, learning_rate_um=learning_rate,
+        record = dict(schema=SCHEMA, case_id='G7-02', start=start, reduced=bool(spec.get('reduced')), provenance={k: env[k] for k in PROVENANCE_KEYS},
+                      device=env['device'], iterations=iterations, learning_rate_um=learning_rate,
                       width_bounds_um=list(bounds), transition_um=spec['transition_um'],
                       ridges_x_um=[r['x_um'] for r in spec['ridges']], initial_widths_um=list(initial), final_widths_um=mc.as_list(final_widths, 9),
                       widths_at_bounds=int(np.sum((final_widths <= bounds[0] + 1e-7) | (final_widths >= bounds[1] - 1e-7))),
