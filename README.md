@@ -2,6 +2,8 @@
 
 # TorchFDTD
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22928834.svg)](https://doi.org/10.5281/zenodo.22928834)
+
 GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-differentiable simulations on NVIDIA CUDA. MIT licensed. Not affiliated with Ansys.
 
 ## Core features
@@ -140,6 +142,21 @@ npm run test:ui
 ```
 
 Validation uses analytic solutions and independently authored CPU/CUDA references; no commercial solver results are used.
+
+## Citing TorchFDTD
+
+If TorchFDTD contributes to published work, please cite the archived software. The concept DOI [10.5281/zenodo.22928834](https://doi.org/10.5281/zenodo.22928834) always resolves to the latest release; each release also has its own version DOI (0.15.0: [10.5281/zenodo.22928835](https://doi.org/10.5281/zenodo.22928835)). The same metadata is in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
+
+```bibtex
+@software{park_torchfdtd,
+  author    = {Park, Hyoseok},
+  title     = {{TorchFDTD}},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.22928834},
+  url       = {https://github.com/hyoseokp/TorchFDTD}
+}
+```
 
 ## AI-assisted development
 
