@@ -104,3 +104,9 @@ GPU) and draws no conclusion about algorithms from it.
 Acceptance: every stage is recorded with its median and range for cold and warm iterations; the
 streamed and batched comparisons are recorded even where they are slower; the recorded medians
 become the baseline and a test flags a later run whose stage median exceeds 1.25 times it.
+
+## Revisions
+
+Each revision is a separate case file that supersedes the declared one, with its reason, evidence and the owner's approval; the declared rows above are kept as declared.
+
+- G7-04r2: the reference is checked against 241 orders instead of 51 (every efficiency within 1e-4). Reason: the declared reference check compared the 101-order TORCWA reference with a 51-order solution, which measures the error of the 51-order solution rather than of the reference; a reference is checked against a higher order. Evidence: 101 orders against 51 differ by up to 4.7e-4 (T+1 at 1.50 um); 101 orders against the committed 241-order record (docs/validation/meep_comparison/metagrating_rcwa.json) differ by at most 6.4e-5 in any efficiency, 9.7e-6 in T+1 at 1.55 um and 8.7e-7 in the band mean, far below the smallest error target 0.002. Approved by the owner on 2026-09-24.
