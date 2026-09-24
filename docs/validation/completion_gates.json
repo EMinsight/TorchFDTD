@@ -893,14 +893,7 @@
             "20260923T183251Z-g3-02-e90cd4d2"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-02 as listed by scripts/check_release_gates.py on 2026-09-24 (2 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Fixture, in-test transfer-matrix oracle, records and rendered document added in 637e653. The recorded run fails 12 of 48 instances: the n=3.5 slabs at about 20 cells per material wavelength exceed the 0.01 R/T and 0.02 rad limits (0.013 to 0.037, 0.031 to 0.054 rad); at about 40 cells they pass. The limits were not relaxed. Revision 2 (docs/validation/cases/G3-02r2_slab_tmm_40_cells.json) fixes the mesh at about 40 cells per material wavelength for every index with unchanged limits; the 20-cell instances remain as reported measurements with the energy-balance and convergence-order tests. The first case and its FAILED evidence run stay in place.",
           "watch_paths": [
             "docs/validation/cases/G3-02*.json"
@@ -1034,14 +1027,7 @@
             "20260923T195353Z-g3-05-ac0e638c"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-05 as listed by scripts/check_release_gates.py on 2026-09-24 (1 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-05_drude_sphere.json. The record docs/validation/g3/G3-05.json is written by the full run.",
           "watch_paths": [
             "docs/validation/cases/G3-05_*.json",
@@ -1096,14 +1082,7 @@
             "20260923T195520Z-g3-06-28754df0"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-06 as listed by scripts/check_release_gates.py on 2026-09-24 (6 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Layer B: PEC cavity resonance from a monitor spectrum against the discrete and continuum TM110 eigenfrequency (tests/test_cavity_resonance.py, added 2026-09-22) and seeded eigenmodes against the discrete Yee dispersion. Layer A: mirrored half versus full domain with folded gradients, the independent exact-endpoint engine, adjoint Taylor checks. Not covered: PMC resonance from a spectrum, gradient mapping against a continuum derivative, Q."
         },
         {
@@ -1201,14 +1180,7 @@
             "20260923T202923Z-g3-08-f1c2dff5"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-08 as listed by scripts/check_release_gates.py on 2026-09-24 (1 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-08_bloch_grating_rcwa.json. The record docs/validation/g3/G3-08.json is written by the full run. Revision 2 (docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json) restates only the layer-A tolerance as the program pair rtol 1e-4, atol 1e-6 after run 20260921T181948Z-g3-08-6ccad85a failed one layer-A instance; its layer-A test lives in tests/test_physics_g3_b_r2.py and its records under docs/validation/g3/r2.",
           "watch_paths": [
             "docs/validation/cases/G3-08*.json",
@@ -1270,14 +1242,7 @@
             "20260923T212310Z-g3-09-e55a1b01"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-09 as listed by scripts/check_release_gates.py on 2026-09-24 (4 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Layer B: neff of the periodic and CPML solvers against the analytic slab TE/TM dispersion (within 0.5 percent) and the analytic HE11 fiber (within the pre-declared 2 percent). Not covered: field profile, confinement factor and modal power against analytic values."
         },
         {
@@ -1330,14 +1295,7 @@
             "20260923T212720Z-g3-10-f3da775f"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-10 as listed by scripts/check_release_gates.py on 2026-09-24 (2 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Layer B: passivity with the radiation defect measured by a closed flux box (tests/test_mode_branch_passivity.py, added 2026-09-22, mesh 0.05 um), reciprocity, straight-guide phase, Fresnel index step. Layer A: aperture versus full-cell, streamed versus resident, independent discrete interface. Not covered: bends, couplers, an independent solver for junction S values."
         },
         {
@@ -1386,14 +1344,7 @@
             "20260923T212746Z-g3-11-1121cd71"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-11 as listed by scripts/check_release_gates.py on 2026-09-24 (1 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Layer B: near-to-far and near-zone projection against analytic Hertzian fields including phase, Poynting theorem, native dipole pattern convergence against sin^2 theta (tests/test_radiation_dipole_pattern.py, added 2026-09-22, wraps the benchmark). Not covered: surface-position dependence, native far-field phase.",
           "watch_paths": [
             "benchmarks/radiation_dipole.py"
@@ -1448,14 +1399,7 @@
             "20260923T213042Z-g3-12-9d50987d"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-12 as listed by scripts/check_release_gates.py on 2026-09-24 (3 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Layer B: birefringent slab channel transmission and index VJP against the scalar transfer matrix (tests/test_tensor_slab_acceptance.py, added 2026-09-22, wraps the benchmark), coupled eigenpolarization standing wave, Fourier symbol and continuum refinement, CPML face criterion. Layer A: tensor and rotation gradients against finite differences, CUDA parity. Not covered: reflection and channel balance, oblique incidence.",
           "watch_paths": [
             "benchmarks/tensor_cpml_birefringent_slab.py",
@@ -1568,14 +1512,7 @@
             "20260923T213556Z-g3-14-ecf4b06b"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-14 as listed by scripts/check_release_gates.py on 2026-09-24 (9 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Layer A only by definition: CPU against CUDA torch, torch against fused CUDA, explicit adjoint against autograd, resident against streamed and reversible, float32 and float64. Float32 gradient budgets of 2e-4 to 3e-4 relative on five fixtures exceed the program rtol 1e-4 and are reported as differences in the case."
         },
         {
@@ -1640,14 +1577,7 @@
             "20260923T213649Z-g3-15-7368e5ea"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-15 as listed by scripts/check_release_gates.py on 2026-09-24 (3 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Layer A only by definition: full autograd oracles, explicit adjoints, central-difference sweeps (two PMC tests with an asserted second-order chain), Taylor remainders (ratio about 4 asserted in four tests), random directional VJPs (at most two seeds), over epsilon, ADE coefficients, density and shape. Not covered: waveform parameters through FDTD, adaptive round-off floor, several fixture seeds."
         },
         {
@@ -1698,14 +1628,7 @@
             "20260923T213745Z-g3-16-4c6f38b9"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-16 as listed by scripts/check_release_gates.py on 2026-09-24 (2 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "Layer B: slab thickness and permittivity derivatives against the Airy formula under joint mesh/width refinement with duration and PML controls (tests/test_gradient_mesh_slab.py, added 2026-09-22, wraps the benchmark; 1.63 and 1.78 percent at the followup within the 3 percent limit), polygon vertex derivatives under mesh refinement against fine-mesh differences (stored record). Not covered: sharp-interface shape derivative, curved-interface analytic derivatives.",
           "watch_paths": [
             "benchmarks/gradient_mesh.py",
@@ -2633,14 +2556,7 @@
             "20260923T222457Z-g6-04-3241b7e8"
           ],
           "blocker": null,
-          "scope_change_approval": {
-            "approved_by": "owner",
-            "date": "2026-09-24",
-            "decision": "approved",
-            "scope": "every scope change declared by the case files of G6-04 as listed by scripts/check_release_gates.py on 2026-09-24 (2 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
-          },
+          "scope_change_approval": null,
           "implementation_note": "torchfdtd.ports: track_port_modes (overlap matching with a reported minimum), port_normalization, shift_reference_plane and deembed_s_matrix, separate_directions, port_diagnostics (degenerate clusters, overlap matrix, confinement, weak-mode warning) and FixedPortSectionError raised by fixed_port_section, which ModeNetwork and ModeBranchNetwork call; gradients are with respect to a fixed basis (docs/PORTS.md)."
         },
         {
