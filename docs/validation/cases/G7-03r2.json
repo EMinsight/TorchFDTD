@@ -6,7 +6,7 @@
   "declaration": "docs/G7_WORKFLOWS.md",
   "platform": "rtx3060-win11-lab",
   "installation": "the release wheel in an environment outside the checkout",
-  "case_id": "G7-03",
+  "case_id": "G7-03r2",
   "task": "G7-03",
   "title": "Passive PIC coupler: fabrication-aware density design from three seeds, 2 x 2 modal S with phase, passivity, reciprocity, gradient check, GDS round trip",
   "fixture": {
@@ -16,10 +16,10 @@
     "guide_width_um": 0.6,
     "offset_um": 0.6,
     "design_box_pixels": [
-      6,
-      10
+      12,
+      20
     ],
-    "pixel_um": 0.2,
+    "pixel_um": 0.1,
     "symmetry": "rotate180",
     "mesh_um": 0.05,
     "check_mesh_um": 0.025,
@@ -38,24 +38,37 @@
       ],
       "quantities": "2 x 2 modal S matrix with phases",
       "gds": "export, re-import, simulate"
-    }
+    },
+    "design_box_um": "the declared 1.2 by 2.0 um box, unchanged",
+    "filter_radius_um": "chosen before the judged seeds on development seeds 11 to 13 as the smallest radius whose binary designs meet the 0.4 um (4-pixel) linewidth and gap; the selection is recorded"
   },
   "seed": "logits 0.5 * randn with seeds 1, 2, 3",
   "precision": "float32 on CUDA",
   "backend": "cuda",
   "reference_method": "central finite differences for the gradient; the pre-export binary structure for the GDS round trip",
   "baseline": {
-    "source": "docs/validation/g6/coupler-seed1.json",
-    "fine_gds_transmission": 0.6136
+    "source": "the G6 designs of docs/validation/g6/ evaluated by the G7 pipeline at 0.05 um (same GDS round trip)",
+    "value": 0.6025,
+    "design": "G6 seed 1, which violates the declared linewidth and gap",
+    "superseded_value": "0.6136 at 0.1 um"
   },
   "acceptance": {
     "all_seeds": "all three seeds reported",
-    "performance": "best seed transmission after the GDS round trip at least 0.6136 while meeting the declared linewidth and gap",
+    "performance": "best seed transmission after the GDS round trip, at 0.05 um, at least 0.6025 (the best G6 design through the same pipeline at the same mesh) while meeting the declared linewidth and gap",
     "passivity": "|S11|^2 + |S21|^2 and |S22|^2 + |S12|^2 at most 1.01 for every seed and wavelength",
     "reciprocity": "|S21 - S12| at most 1e-3 in every case",
     "gradient": "adjoint and central finite-difference derivatives within 2 percent at three pixels per seed",
     "gds": "the GDS round trip changes the transmission by at most 0.005",
     "mesh": "0.025 um changes the best seed transmission by at most 0.02"
   },
-  "superseded_by": "docs/validation/cases/G7-03r2.json"
+  "supersedes": {
+    "case": "docs/validation/cases/G7-03.json",
+    "status": "the original case stays in place; its failing runs are kept outside the repository by owner decision"
+  },
+  "revision": {
+    "reason": "the declared baseline 0.6136 is a G6 design evaluated at 0.1 um, while G7 judges at 0.05 um, and the mesh alone shifts this device by about 0.02; and 0.2 um pixels leave the declared 0.4 um linewidth and gap only two pixels, too coarse a parameterization for a fabrication-aware design",
+    "evidence": "the G6 designs through the G7 pipeline (same GDS round trip, 0.05 um, 2000 steps): best 0.6025 at 1.55 um (G6 seed 1, which violates the 0.4 um linewidth and gap); at 0.025 um 0.5961; the G6 value 0.6136 is its 0.1 um evaluation; the compliant 0.2-um-pixel design reaches 0.5915 at 0.05 um",
+    "approved_by": "owner",
+    "date": "2026-09-24"
+  }
 }

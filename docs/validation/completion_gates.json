@@ -2873,7 +2873,14 @@
           "required_tests": [],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-24",
+            "decision": "approved",
+            "scope": "G7-03: the revised case docs/validation/cases/G7-03r2.json supersedes G7-03.json (G7-03r2: 0.1 um design pixels (12 by 20) in the same box, the filter radius chosen on development seeds to meet the 0.4 um features, and (b) judged against the best G6 design evaluated by the same pipeline at the same 0.05 um mesh (0.6025) instead of its 0.1 um value (0.6136); other limits unchanged)",
+            "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
+            "note": "the declared baseline 0.6136 is a G6 design evaluated at 0.1 um, while G7 judges at 0.05 um, and the mesh alone shifts this device by about 0.02; and 0.2 um pixels leave the declared 0.4 um linewidth and gap only two pixels, too coarse a parameterization for a fabrication-aware design"
+          }
         },
         {
           "id": "G7-04",
