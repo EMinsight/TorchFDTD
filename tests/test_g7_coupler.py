@@ -46,23 +46,54 @@ def test_case_declaration_matches_the_workflow_constants():
     settings = workflow.Settings()
     assert (fixture['core_eps'], fixture['cladding_eps']) == (base.CORE_EPSILON, base.CLADDING_EPSILON)
     assert fixture['guide_width_um'] == base.GUIDE_WIDTH_UM and fixture['offset_um'] == 2*base.GUIDE_OFFSET_UM
-    assert tuple(fixture['design_box_pixels']) == base.PIXELS and fixture['pixel_um'] == base.PIXEL_UM
+    assert case['case_id'] == 'G7-03r2'
+    assert tuple(fixture['design_box_pixels']) == workflow.PIXELS and fixture['pixel_um'] == workflow.PIXEL_UM
+    # The revised pixels tile the example's unchanged design box.
+    assert (workflow.PIXELS[0]*workflow.PIXEL_UM, workflow.PIXELS[1]*workflow.PIXEL_UM) == pytest.approx(
+        (base.BOX_UM[1]-base.BOX_UM[0], base.BOX_UM[3]-base.BOX_UM[2]))
     assert (fixture['mesh_um'], fixture['check_mesh_um']) == (settings.mesh_um, settings.check_mesh_um)
     assert fixture['holdout_wavelength_um'] == workflow.HOLDOUT_UM
     assert tuple(fixture['evaluation']['wavelengths_um']) == workflow.WAVELENGTHS_UM
     assert fixture['fabrication'] == dict(min_linewidth_um=workflow.MIN_FEATURE_UM, min_gap_um=workflow.MIN_FEATURE_UM,
                                           erosion_dilation_um=workflow.EROSION_UM)
-    assert case['baseline']['fine_gds_transmission'] == workflow.LIMITS['performance']
+    assert case['baseline']['value'] == workflow.LIMITS['performance']
     # The same physical time as G6's 500 steps at 0.2 um at both meshes.
     assert settings.steps*settings.mesh_um == pytest.approx(500*.2) and settings.check_steps*settings.check_mesh_um == pytest.approx(500*.2)
     assert settings.device == 'cuda' and case['precision'] == 'float32 on CUDA'
-    # The workflow choices were fixed on development seeds only.
-    selection = workflow.DEVELOPMENT_SELECTION
-    assert selection['chosen_um'] == settings.filter_radius_um and selection['judged_seeds_used'] is False
-    assert not set(selection['development_seeds']) & set(workflow.SEEDS)
-    assert {run['seed'] for run in selection['runs']} <= set(selection['development_seeds'])
-    assert all(run['linewidth_px'] >= 2 and run['gap_px'] >= 2 for run in selection['runs'] if run['radius_um'] == settings.filter_radius_um)
-    assert selection['finite_difference_step']['chosen'] == settings.fd_step and selection['steps']['chosen'] == settings.steps
+    # The filter radius is chosen on development seeds only, ascending from the declared minimum feature.
+    assert not set(workflow.DEVELOPMENT_SEEDS) & set(workflow.SEEDS)
+    candidates = workflow.RADIUS_CANDIDATES_UM
+    assert candidates[0] == workflow.MIN_FEATURE_UM and list(candidates) == sorted(candidates)
+    assert all(b-a == pytest.approx(workflow.PIXEL_UM) for a, b in zip(candidates, candidates[1:]))
+
+
+def test_radius_selection_takes_the_smallest_complete_compliant_candidate_and_refuses_declared_seeds():
+    def run(radius, seed, violations=()):
+        return dict(radius_um=radius, seed=seed, violations=list(violations))
+    seeds = workflow.DEVELOPMENT_SEEDS
+    failing = [run(.4, s, ['min_gap'] if s == seeds[0] else []) for s in seeds]
+    passing = [run(.5, s) for s in seeds]
+    assert workflow.select_radius(failing+passing) == .5
+    assert workflow.select_radius(failing) is None                       # no compliant candidate yet
+    assert workflow.select_radius(failing+passing[:2]) is None           # 0.5 um not run for every development seed
+    assert workflow.select_radius(passing) is None                       # 0.4 um never tried, so 0.5 um is not known smallest
+    with pytest.raises(ValueError, match='declared seeds'):
+        workflow.develop(.4, workflow.SEEDS[0], workflow.REDUCED)
+    with pytest.raises(ValueError, match='development seeds first'):
+        workflow.build_problem(1, replace(workflow.Settings(), filter_radius_um=None), lambda density: density.sum())
+
+
+def test_development_run_records_feature_sizes_and_transmissions(tmp_path):
+    settings = replace(workflow.REDUCED, steps=100, iterations=1)
+    record = workflow.develop(.5, workflow.DEVELOPMENT_SEEDS[0], settings)
+    assert record['settings']['filter_radius_um'] == .5 and len(record['trace']) == 1
+    assert np.array(record['binary']).shape == workflow.PIXELS
+    assert record['linewidth_px'] == round(record['feature_sizes']['min_linewidth_um']/workflow.PIXEL_UM)
+    assert set(record['transmission']) == {'last_iterate', 'binary_density', 'structures'}
+    workflow.write_json(tmp_path/'development'/'radius-0.5-seed11.json', record)
+    selection = workflow.development_selection(tmp_path)
+    assert selection['runs'][0]['seed'] == workflow.DEVELOPMENT_SEEDS[0] and selection['judged_seeds_used'] is False
+    assert selection['selected_um'] is None                              # one run is never a complete selection
 
 
 def test_s_record_maps_the_ports_and_measures_passivity_and_reciprocity():
@@ -114,13 +145,13 @@ def test_adjoint_derivative_matches_central_differences_on_the_reduced_coupler()
 
 
 def test_fabrication_check_and_the_sub_pixel_erosion_and_dilation():
-    design = np.zeros(base.PIXELS, dtype=int)
-    design[2:4, 4:6] = 1                                   # a 0.4 um square: meets the declared 0.4 um
-    sizes = measure_feature_sizes(design, base.PIXEL_UM, boundary='extend')
+    design = np.zeros(workflow.PIXELS, dtype=int)
+    design[4:8, 8:12] = 1                                  # a 0.4 um square of 4 by 4 pixels: meets the declared 0.4 um
+    sizes = measure_feature_sizes(design, workflow.PIXEL_UM, boundary='extend')
     assert sizes.violations(min_linewidth_um=workflow.MIN_FEATURE_UM, min_gap_um=workflow.MIN_FEATURE_UM) == ()
     thin = design.copy()
-    thin[2:4, 5] = 0                                       # a 0.2 um line
-    assert 'min_linewidth' in measure_feature_sizes(thin, base.PIXEL_UM, boundary='extend').violations(
+    thin[4:8, 11] = 0                                      # a 0.3 um line
+    assert 'min_linewidth' in measure_feature_sizes(thin, workflow.PIXEL_UM, boundary='extend').violations(
         min_linewidth_um=workflow.MIN_FEATURE_UM)
     fine, eroded, dilated, realized = workflow.perturbed_designs(design)
     assert realized == pytest.approx(workflow.EROSION_UM) and fine.shape == (24, 40)
@@ -131,8 +162,8 @@ def test_fabrication_check_and_the_sub_pixel_erosion_and_dilation():
         assert (rows.min(), rows.max(), columns.min(), columns.max()) == bounds
         assert array.sum() == (bounds[1]-bounds[0]+1)*(bounds[3]-bounds[2]+1)
     # The box edge is extended, not eroded: a solid pixel on the edge keeps its edge side.
-    edge = np.zeros(base.PIXELS, dtype=int)
-    edge[0:2, 0:2] = 1
+    edge = np.zeros(workflow.PIXELS, dtype=int)
+    edge[0:4, 0:4] = 1
     _, eroded, _, _ = workflow.perturbed_designs(edge)
     rows, columns = np.nonzero(eroded)
     assert (rows.min(), rows.max(), columns.min(), columns.max()) == (0, 5, 0, 5)
@@ -147,7 +178,7 @@ def test_gds_round_trip_of_a_small_design_voxelizes_like_the_rectangles(tmp_path
     problem = workflow.build_problem(2, settings, model.objective)
     binary = problem.density(hard=True)
     assert 0 < binary.sum() < binary.numel()
-    exported = problem.export(tmp_path, origin_um=(base.BOX_UM[0], base.BOX_UM[2]), spacing_um=base.PIXEL_UM,
+    exported = problem.export(tmp_path, origin_um=(base.BOX_UM[0], base.BOX_UM[2]), spacing_um=workflow.PIXEL_UM,
                               z_min_um=-base.SLAB_UM/2, z_max_um=base.SLAB_UM/2, material=base.MATERIAL)
     back = DesignProblem.reimport(exported)
     assert len(back['structures']) == len(exported['structures']) and back['gds_structures']
@@ -182,7 +213,9 @@ def test_reduced_workflow_writes_complete_records_and_judges_them(tmp_path):
     assert names == ['a_all_seeds', 'b_performance', 'c_passivity', 'd_reciprocity', 'e_gradient', 'f_gds_round_trip', 'g_mesh']
     assert saved['criteria'][0]['passed'] is False     # one seed of three is never a complete run
     assert saved['criteria'][2]['cases'] == 7*3
-    assert saved['development_selection'] == json.loads(json.dumps(workflow.DEVELOPMENT_SELECTION))
+    selection = saved['development_selection']
+    assert selection['runs'] == [] and selection['selected_um'] is None and selection['judged_seeds_used'] is False
+    assert selection['radius_used_um'] == settings.filter_radius_um
     assert 'diagnostics_same_mesh_baseline' not in saved
     environment = record['environment']
     assert environment['commit'] and Path(environment['torchfdtd_file']).name == '__init__.py'
@@ -238,7 +271,9 @@ def test_recorded_run_is_complete_and_reproduces_its_summary(rejudged):
     assert rejudged['judged'] and recorded['judged'] and rejudged['seeds'] == list(workflow.SEEDS)
     assert json.loads(json.dumps(rejudged['criteria'])) == recorded['criteria']
     assert [c['criterion'] for c in recorded['criteria']] == list(CRITERIA)
-    assert recorded['development_selection'] == json.loads(json.dumps(workflow.DEVELOPMENT_SELECTION))
+    selection = recorded['development_selection']
+    assert selection['judged_seeds_used'] is False
+    assert selection['selected_um'] == selection['radius_used_um'] == workflow.Settings().filter_radius_um
     assert recorded['diagnostics_same_mesh_baseline']['judged'] is False
     assert all(path.is_file() for path in (RECORDED/'export').glob('seed*/*.gds'))
     assert len(list((RECORDED/'export').glob('seed*/*.gds'))) == len(workflow.SEEDS)

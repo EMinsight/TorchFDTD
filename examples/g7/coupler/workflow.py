@@ -2,9 +2,11 @@
 
 The device is the coupler of examples/design_mode_coupler.py: two slab guides of epsilon 4 in a
 cladding of 2.25, 0.6 um wide and offset by 0.6 um, a fixed-mode port on each guide (ModeNetwork),
-and a 6 by 10 pixel design box of 0.2 um under a 180-degree rotation symmetry. The declaration is
-docs/G7_WORKFLOWS.md (section G7-03) with docs/validation/cases/G7-03.json; the fixed quantities
-below are copied from there. For every seed the workflow
+and its 1.2 by 2.0 um design box, here as 12 by 20 pixels of 0.1 um under a 180-degree rotation
+symmetry. The declaration is docs/G7_WORKFLOWS.md (section G7-03) with the revised case
+docs/validation/cases/G7-03r2.json; the fixed quantities below are copied from there. The filter
+radius is chosen first, on development seeds only (develop(), select_radius()). For every seed the
+workflow
 
   1. checks the adjoint derivative of |S21|^2 at 1.55 um with respect to the design logits against
      central finite differences at three pixels of the start design;
@@ -20,6 +22,8 @@ judge() evaluates the seven acceptance criteria of the case from the seed record
 non-judged diagnostic: G6's three coupler designs through the same GDS round trip and meshes. Every record
 names the torchfdtd it imported (file, version, checkout or installed) and the repository commit.
 
+Development selection (CUDA; one process per radius and seed, development seeds only):
+    python -m examples.g7.coupler.workflow --output-dir docs/validation/g7/G7-03 --develop 0.4 --seeds 11
 Judged run (CUDA, float32):
     python -m examples.g7.coupler.workflow --output-dir docs/validation/g7/G7-03 --baseline
     python -m examples.g7.coupler.workflow --output-dir docs/validation/g7/G7-03
@@ -53,23 +57,28 @@ from torchfdtd.design_problem import Continuation, DesignProblem  # noqa: E402
 from torchfdtd.fabrication import binary_structures, fabrication_perturbation, measure_feature_sizes  # noqa: E402
 from torchfdtd.gds import export_gds, GDSLayer, import_gds  # noqa: E402
 
-CASE = 'docs/validation/cases/G7-03.json'
+CASE = 'docs/validation/cases/G7-03r2.json'
 SEEDS = (1, 2, 3)
+DEVELOPMENT_SEEDS = (11, 12, 13)   # the filter radius is chosen on these only, never on SEEDS
 WAVELENGTHS_UM = (1.5, 1.55, 1.6)
 DESIGN_UM, HOLDOUT_UM = base.WAVELENGTH_UM, base.HOLDOUT_UM
-MIN_FEATURE_UM = .4           # declared minimum linewidth and minimum gap
-EROSION_UM = .1               # declared erosion and dilation
-SUBPIXEL = 4                  # the 0.1 um perturbation acts on a grid of 0.05 um, a quarter pixel
-LIMITS = dict(performance=.6136, passivity=1.01, reciprocity=1e-3, gradient=.02, gds=.005, mesh=.02)
+PIXELS, PIXEL_UM = (12, 20), .1    # G7-03r2: 0.1 um pixels in the example's unchanged 1.2 by 2.0 um box
+MIN_FEATURE_UM = .4                # declared minimum linewidth and minimum gap (4 pixels)
+EROSION_UM = .1                    # declared erosion and dilation
+SUBPIXEL = 2                       # the 0.1 um perturbation acts on a grid of 0.05 um, half a pixel
+# Filter radii tried on the development seeds, ascending in one-pixel steps from the declared minimum feature;
+# the first whose designs meet the rule for every development seed is the smallest, so larger ones need no run.
+RADIUS_CANDIDATES_UM = (.4, .5, .6, .7, .8)
+# (b) compares with the best G6 design through this pipeline at 0.05 um (the case's baseline value).
+LIMITS = dict(performance=.6025, passivity=1.01, reciprocity=1e-3, gradient=.02, gds=.005, mesh=.02)
 
 
 @dataclass(frozen=True)
 class Settings:
     """Workflow parameters. mesh_um and check_mesh_um are declared; the others are workflow choices
-    fixed before the judged run on development seeds 11 to 13, never on the declared seeds: steps
-    keep the physical time of G6's 500 steps at 0.2 um; a filter radius of 0.6 um was the only one
-    of 0.4, 0.6 and 0.8 um whose designs met the 0.4 um linewidth and gap (0.5 um gave the same
-    design as 0.6 um); the central-difference step 0.02 agreed with the adjoint within 1.1e-4."""
+    fixed before any run of the declared seeds. steps keep the physical time of G6's 500 steps at
+    0.2 um (at 0.05 um, 2000 against 3000 steps changed |S21|^2 by 2.7e-4 on a random density). The
+    filter radius is select_radius() of the development records (None until they exist)."""
     mesh_um: float = .05
     steps: int = 2000
     check_mesh_um: float = .025
@@ -79,34 +88,16 @@ class Settings:
     continuation_every: int = 10
     beta_maximum: float = 64.
     learning_rate: float = .1
-    filter_radius_um: float = .6
+    filter_radius_um: float | None = None
     fd_step: float = .02
     fd_pixels: int = 3
     device: str = 'cuda'
     reduced: bool = False
 
 
-# G6's mesh and physical time; exercises every stage on the CPU, judges nothing.
-REDUCED = Settings(mesh_um=.2, steps=500, check_mesh_um=.1, check_steps=1000, iterations=2, device='cpu', reduced=True)
-
-# How the workflow choices of Settings were fixed, before any run of the declared seeds; copied into every summary.
-# Each run: 50 iterations of this workflow's optimizer on the CPU; linewidth and gap of the thresholded design in
-# pixels of 0.2 um (declared minimum: 2 pixels); |S21|^2 of the binary density at the run's own mesh.
-DEVELOPMENT_SELECTION = dict(
-    purpose='filter radius that makes the thresholded design meet the declared 0.4 um linewidth and gap',
-    development_seeds=[11, 12, 13], judged_seeds_used=False,
-    candidates_um=[.4, .5, .6, .8], chosen_um=.6,
-    runs=[dict(radius_um=r, seed=s, mesh_um=m, steps=n, linewidth_px=lw, gap_px=gp, transmission=t)
-          for r, s, m, n, lw, gp, t in ((.4, 11, .2, 500, 1, 1, .7388), (.4, 12, .2, 500, 1, 1, .7394), (.4, 13, .2, 500, 1, 1, .7394),
-                                        (.6, 11, .2, 500, 3, 3, .7321), (.6, 12, .2, 500, 3, 3, .7321), (.6, 13, .2, 500, 3, 3, .7321),
-                                        (.8, 11, .2, 500, 1, 1, .7268), (.8, 12, .2, 500, 1, 1, .7268), (.8, 13, .2, 500, 1, 1, .7268),
-                                        (.5, 11, .1, 1000, 3, 3, .6268), (.6, 11, .1, 1000, 3, 3, .6268))],
-    reason='0.4 and 0.8 um left one-pixel lines and gaps for every development seed; 0.6 um met the rule for all three, '
-           'and 0.5 um gave the same binary design as 0.6 um at 0.1 um',
-    finite_difference_step=dict(seed=11, mesh_um=.05, device='cuda', max_relative_error={'0.01': 5.7e-4, '0.02': 1.1e-4, '0.05': 2.9e-4},
-                                chosen=.02),
-    steps=dict(mesh_um=.05, density='uniform random, torch seed 1234', transmission_change_2000_to_3000=2.7e-4, chosen=2000),
-    evidence='development records kept outside the repository (g7_archive/G7-03/development)')
+# G6's mesh and physical time; exercises every stage on the CPU, judges nothing (any radius will do).
+REDUCED = Settings(mesh_um=.2, steps=500, check_mesh_um=.1, check_steps=1000, iterations=2, filter_radius_um=.4, device='cpu',
+                   reduced=True)
 
 
 class Coupler(base.CouplerForward):
@@ -154,8 +145,10 @@ def s_record(s):
 
 def build_problem(seed, settings, objective):
     """The declared start (logits 0.5 randn from torch.Generator().manual_seed(seed), as in G6) and schedule."""
-    initial = .5*torch.randn(base.PIXELS, generator=torch.Generator().manual_seed(seed))
-    design = DensityParameterization(base.PIXELS, spacing_um=base.PIXEL_UM, initial=initial, mode='logits',
+    if settings.filter_radius_um is None:
+        raise ValueError('Choose the filter radius on the development seeds first (develop, select_radius).')
+    initial = .5*torch.randn(PIXELS, generator=torch.Generator().manual_seed(seed))
+    design = DensityParameterization(PIXELS, spacing_um=PIXEL_UM, initial=initial, mode='logits',
                                      filter_radius_um=settings.filter_radius_um, boundary='truncate', symmetry='rotate180',
                                      beta=settings.beta, eta=.5)
     optimizer = torch.optim.Adam(design.parameters(), lr=settings.learning_rate)
@@ -165,7 +158,7 @@ def build_problem(seed, settings, objective):
 
 def orbit(pixel):
     """Representative of a pixel's orbit under the 180-degree rotation of the design box."""
-    image = (base.PIXELS[0]-1-pixel[0], base.PIXELS[1]-1-pixel[1])
+    image = (PIXELS[0]-1-pixel[0], PIXELS[1]-1-pixel[1])
     return min(tuple(pixel), image)
 
 
@@ -190,7 +183,7 @@ def gradient_check(problem, model, settings):
     order = torch.argsort(adjoint.abs().reshape(-1), descending=True).tolist()
     pixels, orbits = [], set()
     for flat in order:
-        pixel = divmod(flat, base.PIXELS[1])
+        pixel = divmod(flat, PIXELS[1])
         if orbit(pixel) not in orbits:
             orbits.add(orbit(pixel))
             pixels.append(pixel)
@@ -220,12 +213,12 @@ def gradient_check(problem, model, settings):
 def perturbed_designs(binary):
     """The binary design eroded and dilated by EROSION_UM on the sub-pixel grid (extended box edges)."""
     fine = np.kron(np.asarray(binary, dtype=bool), np.ones((SUBPIXEL, SUBPIXEL), dtype=bool))
-    eroded, dilated, realized = fabrication_perturbation(fine, EROSION_UM, base.PIXEL_UM/SUBPIXEL, boundary='extend')
+    eroded, dilated, realized = fabrication_perturbation(fine, EROSION_UM, PIXEL_UM/SUBPIXEL, boundary='extend')
     return fine, eroded, dilated, realized
 
 
 def structures_of(fine, name):
-    return binary_structures(fine, origin_um=(base.BOX_UM[0], base.BOX_UM[2]), spacing_um=base.PIXEL_UM/SUBPIXEL,
+    return binary_structures(fine, origin_um=(base.BOX_UM[0], base.BOX_UM[2]), spacing_um=PIXEL_UM/SUBPIXEL,
                              z_min_um=-base.SLAB_UM/2, z_max_um=base.SLAB_UM/2, material=base.MATERIAL, id_prefix=name)
 
 
@@ -257,10 +250,10 @@ def run_seed(seed, settings, models, export_dir):
     times['optimization'] = time.perf_counter()-mark
 
     smooth, binary = problem.density(), problem.density(hard=True)
-    sizes = measure_feature_sizes(binary, base.PIXEL_UM, boundary='extend')
+    sizes = measure_feature_sizes(binary, PIXEL_UM, boundary='extend')
     violations = sizes.violations(min_linewidth_um=MIN_FEATURE_UM, min_gap_um=MIN_FEATURE_UM)
     exported = problem.export(Path(export_dir)/f'seed{seed}', origin_um=(base.BOX_UM[0], base.BOX_UM[2]),
-                              spacing_um=base.PIXEL_UM, z_min_um=-base.SLAB_UM/2, z_max_um=base.SLAB_UM/2,
+                              spacing_um=PIXEL_UM, z_min_um=-base.SLAB_UM/2, z_max_um=base.SLAB_UM/2,
                               material=base.MATERIAL)
     reimported = problem.reimport(exported)
     fine, eroded, dilated, realized = perturbed_designs(binary.numpy())
@@ -290,7 +283,7 @@ def run_seed(seed, settings, models, export_dir):
         violations=list(violations), satisfies_declared_constraints=not violations,
         enforcement=f'conic filter radius {settings.filter_radius_um} um with tanh projection to beta {settings.beta_maximum}, '
                     'then this morphological check of the thresholded design',
-        perturbation=dict(realized_um=realized, grid_um=base.PIXEL_UM/SUBPIXEL, operation='digital-square erosion and dilation',
+        perturbation=dict(realized_um=realized, grid_um=PIXEL_UM/SUBPIXEL, operation='digital-square erosion and dilation',
                           nominal_transmission=nominal, solid_fraction=float(fine.mean()),
                           eroded=dict(transmission=transmission['eroded'][design_key],
                                       change=transmission['eroded'][design_key]-nominal, solid_fraction=float(eroded.mean())),
@@ -304,7 +297,7 @@ def run_seed(seed, settings, models, export_dir):
     times['total'] = time.perf_counter()-started
     return dict(
         task='G7-03', case=CASE, seed=seed, iterations=problem.iteration, settings=asdict(settings),
-        start='logits 0.5 * torch.randn((6, 10), generator=torch.Generator().manual_seed(seed))',
+        start=f'logits 0.5 * torch.randn({PIXELS}, generator=torch.Generator().manual_seed(seed))',
         history=history, gradient_check=gradient, final_density=smooth.tolist(), binary=binary.int().tolist(),
         fabrication=fabrication, evaluations=evaluations, transmission=transmission, differences=differences,
         holdout=dict(wavelength_um=HOLDOUT_UM, gds_transmission=transmission['gds'][f'{HOLDOUT_UM:.2f}']),
@@ -321,6 +314,79 @@ def run_seed(seed, settings, models, export_dir):
                          differences='after minus before: gds_round_trip = gds - structures, smoothing = structures - binary_density, '
                                      'thresholding = binary_density - smooth_density, check_mesh = gds_check_mesh - gds'),
         wall_time_s=times)
+
+
+def develop(radius_um, seed, settings):
+    """One development run of the filter-radius selection: the judged optimization and threshold on a development seed.
+
+    Records the measured linewidth and gap (pixels of 0.1 um; the rule is 4) and |S21|^2 at 1.55 um of the last
+    iterate, the binary density and the staircase rectangles at the design mesh.
+    """
+    if seed in SEEDS:
+        raise ValueError('The declared seeds never enter the development selection.')
+    settings = replace(settings, filter_radius_um=radius_um)
+    started = time.perf_counter()
+    model = Coupler(settings.mesh_um, settings.steps, DESIGN_UM, settings.device)
+    problem = build_problem(seed, settings, model.objective)
+    history = problem.run(settings.iterations)
+    binary = problem.density(hard=True)
+    sizes = measure_feature_sizes(binary, PIXEL_UM, boundary='extend')
+    rectangles = binary_structures(binary.numpy().astype(bool), origin_um=(base.BOX_UM[0], base.BOX_UM[2]), spacing_um=PIXEL_UM,
+                                   z_min_um=-base.SLAB_UM/2, z_max_um=base.SLAB_UM/2, material=base.MATERIAL,
+                                   id_prefix=f'development-seed{seed}')
+    return dict(radius_um=radius_um, seed=seed, settings=asdict(settings), linewidth_px=sizes.linewidth_pixels,
+                gap_px=sizes.gap_pixels, feature_sizes=sizes.report(),
+                violations=list(sizes.violations(min_linewidth_um=MIN_FEATURE_UM, min_gap_um=MIN_FEATURE_UM)),
+                binary=binary.int().tolist(),
+                transmission=dict(last_iterate=history[-1]['metrics']['transmission'],
+                                  binary_density=float(model.s_density(binary)[1, 0].abs().square()),
+                                  structures=float(model.s_structures(rectangles)[1, 0].abs().square())),
+                trace=[h['metrics']['transmission'] for h in history], environment=environment(settings),
+                wall_time_s=time.perf_counter()-started)
+
+
+def finite_difference_probe(seed, settings, steps=(.01, .02, .05)):
+    """Development check of the central-difference step: the gradient check of a development seed at several steps."""
+    if seed in SEEDS:
+        raise ValueError('The declared seeds never enter the development selection.')
+    model = Coupler(settings.mesh_um, settings.steps, DESIGN_UM, settings.device)
+    problem = build_problem(seed, settings, model.objective)
+    rows = {f'{step:g}': gradient_check(problem, model, replace(settings, fd_step=step)) for step in steps}
+    return dict(seed=seed, settings=asdict(settings), max_relative_error={key: row['max_relative_error'] for key, row in rows.items()},
+                checks=rows, environment=environment(settings))
+
+
+def select_radius(records):
+    """The smallest candidate radius whose binary designs meet the declared linewidth and gap for every development seed.
+
+    Candidates are taken in ascending order; a candidate not yet run for every development seed stops the scan,
+    so None means that no complete smaller candidate met the rule yet.
+    """
+    rows = {}
+    for record in records:
+        rows.setdefault(round(record['radius_um'], 6), {})[record['seed']] = record
+    for radius in RADIUS_CANDIDATES_UM:
+        runs = rows.get(round(radius, 6), {})
+        if set(runs) != set(DEVELOPMENT_SEEDS):
+            return None
+        if all(not run['violations'] for run in runs.values()):
+            return radius
+    return None
+
+
+def development_selection(output_dir):
+    """The recorded filter-radius selection (and step probe) from output_dir/development, for the summary."""
+    folder = Path(output_dir)/'development'
+    records = [json.loads(path.read_text(encoding='utf-8')) for path in sorted(folder.glob('radius-*.json'))]
+    probes = [json.loads(path.read_text(encoding='utf-8')) for path in sorted(folder.glob('fd-step-*.json'))]
+    return dict(rule='smallest candidate filter radius whose binary designs meet the declared 0.4 um (4-pixel) linewidth and gap '
+                     'for every development seed', candidates_um=list(RADIUS_CANDIDATES_UM), development_seeds=list(DEVELOPMENT_SEEDS),
+                judged_seeds_used=any(r['seed'] in SEEDS for r in records+probes), selected_um=select_radius(records),
+                runs=[dict(radius_um=r['radius_um'], seed=r['seed'], linewidth_px=r['linewidth_px'], gap_px=r['gap_px'],
+                           violations=r['violations'], transmission=r['transmission'], commit=r['environment']['commit'])
+                      for r in records],
+                finite_difference_step=[dict(seed=p['seed'], radius_um=p['settings']['filter_radius_um'],
+                                             max_relative_error=p['max_relative_error']) for p in probes])
 
 
 G6_EXPORT = ROOT/'docs/validation/g6/export/coupler'
@@ -466,7 +532,8 @@ def summarize(output_dir):
                    wall_time_s=dict(per_seed={r['seed']: r['wall_time_s'] for r in records},
                                     network_setup={r['seed']: r['network_setup_s'] for r in records},
                                     total=sum(r['wall_time_s']['total']+r['network_setup_s'] for r in records)),
-                   development_selection=DEVELOPMENT_SELECTION)
+                   development_selection=development_selection(output_dir))
+    summary['development_selection']['radius_used_um'] = records[0]['settings']['filter_radius_um']
     baseline = output_dir/'baseline.json'
     if baseline.exists():
         summary['diagnostics_same_mesh_baseline'] = json.loads(baseline.read_text(encoding='utf-8'))
@@ -501,15 +568,31 @@ def run(seeds, settings, output_dir):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--output-dir', type=Path, required=True)
-    parser.add_argument('--seeds', type=int, nargs='+', default=list(SEEDS))
+    parser.add_argument('--seeds', type=int, nargs='+', help='declared seeds by default; development seeds with --develop')
     parser.add_argument('--reduced', action='store_true', help='CPU mechanics run at a coarse mesh; never judged')
     parser.add_argument('--device', help='override the settings device')
     parser.add_argument('--summary-only', action='store_true', help='judge the seed records already in --output-dir')
     parser.add_argument('--baseline', action='store_true', help='write only the non-judged same-mesh baseline diagnostic')
+    parser.add_argument('--develop', type=float, metavar='RADIUS_UM', help='development run of one candidate filter radius')
+    parser.add_argument('--fd-probe', type=float, metavar='RADIUS_UM', help='development check of the central-difference step')
     args = parser.parse_args(argv)
     settings = REDUCED if args.reduced else Settings()
     if args.device:
         settings = replace(settings, device=args.device)
+    if args.develop is not None or args.fd_probe is not None:
+        for seed in args.seeds or DEVELOPMENT_SEEDS:
+            if args.develop is not None:
+                record = develop(args.develop, seed, settings)
+                write_json(args.output_dir/'development'/f'radius-{args.develop:g}-seed{seed}.json', record)
+                print(json.dumps({key: record[key] for key in ('radius_um', 'seed', 'linewidth_px', 'gap_px', 'violations', 'transmission')}),
+                      flush=True)
+            else:
+                record = finite_difference_probe(seed, replace(settings, filter_radius_um=args.fd_probe))
+                write_json(args.output_dir/'development'/f'fd-step-seed{seed}.json', record)
+                print(json.dumps(record['max_relative_error']), flush=True)
+        return record
+    if args.seeds is None:
+        args.seeds = list(SEEDS)
     if args.baseline:
         record = run_baseline(settings, args.output_dir)
         print(json.dumps({seed: dict(violations=d['violations'], linewidth_um=d['feature_sizes']['min_linewidth_um'],
