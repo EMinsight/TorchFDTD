@@ -535,7 +535,8 @@
             "20260923T020747Z-g1-06-78a77a52",
             "20260923T120503Z-g1-06-bd388ef0",
             "20260923T181907Z-g1-06-501f1f0e",
-            "20260924T080108Z-g1-06-f6c3ea64"
+            "20260924T080108Z-g1-06-f6c3ea64",
+            "20260924T083024Z-g1-06-3198adc0"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3119,7 +3120,8 @@
             "20260923T050909Z-g8-05-d20650f4",
             "20260923T150929Z-g8-05-df10799c",
             "20260923T224933Z-g8-05-e43c34bc",
-            "20260924T080115Z-g8-05-f3144c36"
+            "20260924T080115Z-g8-05-f3144c36",
+            "20260924T083030Z-g8-05-5095f3c9"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3165,7 +3167,8 @@
             "20260923T050924Z-g8-06-87040c4d",
             "20260923T150958Z-g8-06-c67e2b4b",
             "20260923T224943Z-g8-06-7de9aa28",
-            "20260924T080123Z-g8-06-b678cc04"
+            "20260924T080123Z-g8-06-b678cc04",
+            "20260924T083038Z-g8-06-36787558"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3210,7 +3213,8 @@
             "20260923T050935Z-g8-07-6be44a90",
             "20260923T151019Z-g8-07-3a10d8bd",
             "20260923T224951Z-g8-07-b1345db8",
-            "20260924T080129Z-g8-07-a0b05bd1"
+            "20260924T080129Z-g8-07-a0b05bd1",
+            "20260924T083045Z-g8-07-be20b6ec"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3331,7 +3335,7 @@
           "specification": "RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다. AI가 무소송/무침해를 보증하거나 상용 사용권을 추정하지 않는다. 필요한 소유자/전문가 판단은 BLOCKED_EXTERNAL로 남기고 기술 작업과 분리한다.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "docs/RELEASE_REVIEW.md",
@@ -3341,11 +3345,15 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-03.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-03.xml"
+          ],
           "required_tests": [
             "tests/test_release_review.py"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260924T083013Z-g9-03-65e0cdba"
+          ],
           "blocker": null,
           "scope_change_approval": null,
           "watch_paths": [
