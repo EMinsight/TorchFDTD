@@ -1,0 +1,42 @@
+{
+ "schema": "g7-04-readout-check-v1",
+ "case": "G7-04",
+ "kind": "development check, not a declared G7-04 quantity",
+ "solver": "torchfdtd",
+ "series": "staircase",
+ "precision": "float32",
+ "mesh_um": 0.01,
+ "date": "2026-09-24 22:56:10",
+ "cases": {
+  "fixture lines (on Ez rows)": {
+   "monitors_y_um": {
+    "reflection_y_um": -0.81,
+    "transmission_y_um": 1.01
+   },
+   "line_offset_um": 0.0,
+   "t1_design": 0.7752134832046231,
+   "t1_band_mean": 0.7703243105873699,
+   "order_sum_design": 0.9999244681490362,
+   "order_sum_band": [
+    0.9993166684507281,
+    1.0000027019723667
+   ]
+  },
+  "lines moved by +h/2 (pixel centres)": {
+   "monitors_y_um": {
+    "reflection_y_um": -0.805,
+    "transmission_y_um": 1.015
+   },
+   "line_offset_um": 0.005,
+   "t1_design": 0.7750953241497168,
+   "t1_band_mean": 0.7702090061353206,
+   "order_sum_design": 0.9997790260420909,
+   "order_sum_band": [
+    0.9992202432728018,
+    0.9998653844607167
+   ]
+  }
+ },
+ "t1_design_change": -0.00011815905490630829,
+ "t1_band_mean_change": -0.00011530445204932516
+}
