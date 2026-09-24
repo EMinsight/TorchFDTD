@@ -106,7 +106,7 @@ def oblique_block(g, seeds, best):
                         summary=summarize(wavelength, distance, residual, stacked.max(axis=1), worst_order), seconds=time.perf_counter()-started)
             cases.append(case)
             print(json.dumps(dict(polarization=polarization, configuration=label, summary=case['summary'])), flush=True)
-    return dict(design=f'seed{best}', kx_per_um=kx0, anomalies=anomalies,
+    return dict(design=best, kx_per_um=kx0, anomalies=anomalies,
                 normal_incidence_anomalies=rayleigh_anomalies(g, 0.), wavelength_um=wavelength.tolist(),
                 distance_to_nearest_anomaly_um=distance.tolist(), rcwa='the recorded TORCWA efficiencies of the same design and polarization',
                 cases=cases)
@@ -126,7 +126,7 @@ def main(argv=None):
     if 'rows' in args.blocks:
         record['rows'] = rows_block(g, seeds)
     if 'oblique' in args.blocks:
-        record['oblique'] = oblique_block(g, seeds, int(best))
+        record['oblique'] = oblique_block(g, seeds, f'seed{best}')
     record['environment'] = workflow.environment(workflow.torch.device('cuda'))
     workflow.write_json(args.out, record)
 
