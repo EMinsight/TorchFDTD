@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from .models import Project, Material, demo_project
+from .models import Project, Material, default_guards, demo_project
 from .plan import resolve_plan
 from .solver import Simulation, estimate, hardware, snapshot_frames
 from .stability_checks import stability_warnings
@@ -46,6 +46,22 @@ class WorkbenchFiles(StaticFiles):
         return super().lookup_path(path)
 
 
+class DefaultGuards:
+    """Handle every request inside models.default_guards(), body validation included.
+
+    The size guards a submitted project carries (Region.resident_cell_limit,
+    Project.limits) can lower the defaults but never raise them on the server.
+    A plain ASGI middleware keeps the request in one task, so the context
+    variable reaches the route's model validation.
+    """
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        with default_guards():
+            await self.app(scope, receive, send)
+
+
 def create_app(result_dir=None):
     app = FastAPI(title='TorchFDTD', version='0.15.0')
     # The Host allowlist is the loopback names only. TORCHFDTD_ALLOWED_HOSTS adds names, comma-separated;
@@ -53,6 +69,7 @@ def create_app(result_dir=None):
     extra = [h.strip() for h in os.environ.get('TORCHFDTD_ALLOWED_HOSTS', '').split(',') if h.strip()]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', *extra])
     app.add_middleware(GZipMiddleware, minimum_size=4096, compresslevel=1)
+    app.add_middleware(DefaultGuards)
     root = Path(result_dir or os.environ.get('TORCHFDTD_RESULTS') or os.environ.get('PHOTONWEAVE_RESULTS', 'results')).resolve()
     root.mkdir(parents=True, exist_ok=True)
     pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix='fdtd')

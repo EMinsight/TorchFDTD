@@ -37,14 +37,15 @@ for `auto` on a CUDA host, and off for `cpu`.
 | Memory | Meaning |
 | --- | --- |
 | Auto (recommended) | The server picks resident, then streamed host, then streamed disk, from the live resources. |
-| Resident (GPU or CPU memory) | The whole grid lives in device memory (GPU) or RAM (CPU). Limited to 8,000,000 cells. |
+| Resident (GPU or CPU memory) | The whole grid lives in device memory (GPU) or RAM (CPU). Limited to 8,000,000 cells (the Python API can raise this, [below](#raising-the-size-guards-python-api)). |
 | Streamed through host memory (DRAM) | Global E/H/CPML banks stay in RAM; extended x slabs move to the compute device one temporal block at a time. |
 | Streamed through disk (slow, opt-in) | Same slabs, but the global banks are scratch files. Needs a scratch disk. An explicit choice that Auto never makes. |
 | Tiled (approximate, large devices) | Overlapping resident tiles of a planar device with near-field stitching. Auto chooses it only with the **Allow approximate tiling in Auto** consent; see below. |
 
 `Region.memory_mode="streamed"` (the Python opt-in) is treated as a streamed
 request in the workbench. A `Resident` request with more than 8,000,000 cells is
-rejected when the project is validated, exactly as before.
+rejected when the project is validated, exactly as before; the server keeps
+this cap even for a project that carries a raised `Region.resident_cell_limit`.
 
 ### How Auto decides
 
@@ -54,8 +55,11 @@ then the approximate tiles with the user's consent, then a refusal; disk
 streaming is never chosen automatically.
 
 1. **Resident** when all of the following hold:
-   - `memory_mode` is `resident` and the grid has at most 8,000,000 cells;
-   - the resident estimate (`estimated_memory_mb` from `/api/validate`) is at
+   - `memory_mode` is `resident` and the grid has at most
+     `Region.resident_cell_limit` cells (8,000,000, always on the server);
+   - the resident estimate (`estimated_memory_mb` from `/api/validate`, the
+     [calibrated fused model](#resident-memory-of-the-fused-cuda-path) for
+     `backend="cuda"` with the fused kernel) is at
      most **75% of free device memory** on the GPU (the same check the resident
      CUDA solver applies before allocating) or at most **80% of available host
      memory** on the CPU.
@@ -101,6 +105,89 @@ width. Each candidate is checked again with the actual point and plane
 observations of the scene. The chosen slab, depth, bank storage and tile device
 appear in the status line, in the job record (`execution.policy`) and in the
 results panel.
+
+## Raising the size guards (Python API)
+
+Three guards bound every project by default. The Python API can raise them for
+a scene that fits the hardware, such as a 40 um tile of about 4.3e8 cells on a
+48 GB GPU; the workbench server never does.
+
+| Guard | Default | Opt-in | Checked by |
+| --- | --- | --- | --- |
+| Resident cells | 8,000,000 | `Region.resident_cell_limit` | `Region.require_resident()` in every resident entry point, the construction of an `execution_mode="resident"` region, and the resident rung of Auto |
+| Structures | 1000 | `Project.limits.max_structures` | project validation, before any structure is validated |
+| Frequency-plane samples | 12,000,000 complex samples (points x frequencies x components) per plane | `Project.limits.max_monitor_samples` | `estimate()`, and therefore `resolve_plan`, `Simulation` and `/api/validate` |
+
+Each accepts a positive integer or `None`, which removes the cap. With
+`resident_cell_limit=None` resident admission rests on the memory estimate
+alone: `Simulation.run` on CUDA refuses an estimate above 75% of the free
+device memory, and Auto applies the margins of step 1 above.
+
+```python
+from torchfdtd import Project, Region, Simulation
+
+project = Project(
+    region=Region(dimension='3d', size=(40., 40., 2.2), mesh=.02, pml_cells=12, steps=4000,
+                  backend='cuda', cuda_kernel='fused', cuda_monitor_kernel='fused',
+                  resident_cell_limit=None),                      # memory estimate only
+    limits=dict(max_structures=20_000, max_monitor_samples=None),
+    structures=pillars, sources=[sheet], monitors=[output_plane])
+result = Simulation(project).run()
+```
+
+- Whatever the cell limit, resident execution refuses a grid whose flat field
+  index reaches the signed 32-bit range, 3 x cells >= 2^31 (6 x cells for
+  complex Bloch fields): 715,827,882 real cells. The fused CUDA kernels and the
+  subpixel operator address a field array with 32-bit integers.
+- The fields are written to the project JSON only when they differ from the
+  defaults, so a project at the defaults saves, hashes and loads exactly as
+  before ([COMPATIBILITY.md](COMPATIBILITY.md)). A saved project keeps raised
+  limits, and the tiles of `plan_tiles` and `TiledPlaneSimulation` inherit them.
+- The limits change admission, not physics: the plan hash, the reference,
+  cache and restart keys (`torchfdtd.identity`) and the frequency-plane
+  `run_signature` ignore them.
+- The workbench server validates every request inside
+  `torchfdtd.models.default_guards()`: a carried limit above the default, or
+  `None`, becomes the default and a lower one is kept, so a request above a
+  default cap answers 422 and a project with raised limits runs under the
+  defaults ([SECURITY.md](SECURITY.md)).
+
+### Resident memory of the fused CUDA path
+
+For `backend="cuda"` with `cuda_kernel="fused"` and real fields, `estimate()`
+reports `memory_model: "fused_cuda"` and bounds the device memory of one
+resident run by
+
+    r x ((15 + s) N + C) + A + monitors + TFSF + subpixel + FIXED
+
+with r = 4 bytes (FP32) or 8 (FP64), N cells, s = 1 (3 with Yee sampling) and C
+CPML memory elements (counted from the boundary layout). The 15 reals per cell
+are E and H (6), the inverse permittivity and permeability (6) and the
+three-component temporary of the grid constructor (3), which sets the peak of a
+dielectric run; s is the sampled permittivity copied to the device, which needs
+its own block with Yee sampling because the CPML memories split the cached
+constructor block. A dispersive scene adds A: on every cell, whatever its
+structures, one int64 index per sample (three with Yee sampling) and 8 + 42 x
+poles reals: the P and Q states, the diagnostics weights and the step
+temporaries held by the pools of up to two captured CUDA graphs (a run with
+`cuda_graph_steps` above 1 captures a second graph with its own pool). FIXED is
+64 MiB for the graph pools, the diagnostics tables and allocator rounding.
+Monitors, TFSF and subpixel keep their existing terms. Every other resident
+path (`backend="auto"` or `"cpu"`, the Torch kernel, complex fields) keeps the
+tensor-expression bound of 200 bytes per cell in FP32 and 400 in FP64 plus 80
+or 160 per pole (`memory_model: "tensor_expression"`). The tensor batch and the
+grouped batch sum the per-case estimate; their cases hold the same arrays.
+
+`benchmarks/resident_memory_fused.py` measures the model: each case runs
+`Simulation(project).run()` (two cases: one `run_tensor_batch` cohort) in a fresh
+process, and the record keeps the Torch allocator's peak allocated and reserved
+bytes next to `estimate(project)`. The estimate is compared with the reserved
+peak, the memory the allocator took from the device, which exceeds the
+allocated peak where cached blocks fragment. The CUDA context, CuPy's module
+images and other processes are outside those counters and inside the 25% the
+solver keeps free. `tests/test_resident_guards.py` checks that the estimate of
+every recorded case is at least its peak and equals the recorded estimate, so a
+changed model has to be measured again.
 
 ## What streaming costs
 

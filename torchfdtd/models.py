@@ -3,16 +3,53 @@ from __future__ import annotations
 import json
 import math
 import pprint
+from contextlib import contextmanager
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator, model_serializer, model_validator
 from .optical_data import OpticalData
 
 
 class Model(BaseModel):
     model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
+
+
+# Default size guards. Region.resident_cell_limit and Project.limits raise them for
+# Python-API use ("Raising the size guards" in docs/EXECUTION_MODES.md); a project
+# validated inside default_guards(), as every workbench server request is, keeps
+# no guard above its default.
+RESIDENT_CELL_LIMIT = 8_000_000
+MAX_STRUCTURES = 1000
+MAX_MONITOR_SAMPLES = 12_000_000
+# The fused CUDA kernels and the subpixel operator address a field array with
+# signed 32-bit integers, so every resident grid keeps 3 x lanes x cells below
+# this bound, whatever its cell limit.
+RESIDENT_INDEX_LIMIT = 2**31
+_DEFAULT_GUARDS = ContextVar('torchfdtd_default_guards', default=False)
+
+
+@contextmanager
+def default_guards():
+    """Validate every Region and Project inside the block with the default size guards.
+
+    A limit carried by the input may lower a guard, never raise it: a larger value
+    or None (no cap) becomes the default. The workbench server wraps each request
+    in this block, so a client cannot lift the caps that bound its requests.
+    """
+    token = _DEFAULT_GUARDS.set(True)
+    try:
+        yield
+    finally:
+        _DEFAULT_GUARDS.reset(token)
+
+
+def _guarded(value, default):
+    if _DEFAULT_GUARDS.get() and (value is None or value > default):
+        return default
+    return value
 
 
 class LorentzPole(Model):
@@ -203,6 +240,9 @@ class Region(Model):
     # streamed host/disk execution from the live resources; see docs/EXECUTION_MODES.md.
     execution_mode: Literal['auto', 'resident', 'streamed_host', 'streamed_disk', 'tiled'] = 'auto'
     tiling: Tiling = Field(default_factory=Tiling)
+    # Largest grid the resident path admits; None leaves admission to the memory
+    # estimate. Written to JSON only when it differs from the default.
+    resident_cell_limit: int | None = Field(default=RESIDENT_CELL_LIMIT, ge=1, strict=True)
     cuda_kernel: Literal['torch', 'fused'] = 'torch'
     cuda_monitor_kernel: Literal['torch', 'fused'] = 'torch'
     precision: Literal['float32', 'float64'] = 'float32'
@@ -212,13 +252,40 @@ class Region(Model):
     slice_position: float = 0
     complex_display: Literal['real', 'imag', 'magnitude', 'phase'] = 'real'
 
+    @field_validator('resident_cell_limit')
+    @classmethod
+    def _default_cell_guard(cls, value):
+        return _guarded(value, RESIDENT_CELL_LIMIT)
+
+    @model_serializer(mode='wrap')
+    def _omit_default_cell_limit(self, handler):
+        # A region at the default limit serializes, and therefore hashes and loads in
+        # earlier versions, exactly as before the limit existed.
+        data = handler(self)
+        if self.resident_cell_limit == RESIDENT_CELL_LIMIT:
+            data.pop('resident_cell_limit', None)
+        return data
+
+    def resident_refusal(self):
+        """Why the resident path refuses this grid's size, or None when the size is admitted."""
+        cells = math.prod(self.shape)
+        limit = self.resident_cell_limit
+        if limit is not None and cells > limit:
+            return ('Resident execution is limited to 8 million cells' if limit == RESIDENT_CELL_LIMIT else
+                    f'Resident execution is limited to resident_cell_limit={limit:,} cells, and the grid has {cells:,}')
+        if 3*(2 if self.complex_fields else 1)*cells >= RESIDENT_INDEX_LIMIT:
+            return (f'Resident execution addresses each field array with signed 32-bit indices, '
+                    f'which {cells:,} {"complex " if self.complex_fields else ""}cells exceed')
+        return None
+
     def require_resident(self):
         if self.memory_mode == 'budgeted':
             raise ValueError('Budgeted scenes require the adjoint API and an explicit resident byte budget.')
         if self.memory_mode == 'streamed':
             raise ValueError('Streamed scenes require StreamedSimulation and explicit memory budgets.')
-        if math.prod(self.shape) > 8_000_000:
-            raise ValueError('Resident execution is limited to 8 million cells. Use memory_mode="streamed" with StreamedSimulation.')
+        refusal = self.resident_refusal()
+        if refusal:
+            raise ValueError(refusal+'. Use memory_mode="streamed" with StreamedSimulation.')
 
     @property
     def complex_fields(self):
@@ -326,7 +393,7 @@ class Region(Model):
             raise ValueError('The invariant z axis has no boundary condition in 2D; keep its defaults.')
         if max(self.shape) > 1_000_000:
             raise ValueError('A grid axis may contain at most one million cells.')
-        # The eight-million-cell guard applies to explicitly resident regions at
+        # The resident cell guard applies to explicitly resident regions at
         # construction. Resident entry points still call require_resident().
         if self.memory_mode == 'resident' and self.execution_mode == 'resident':self.require_resident()
         if self.dimension == '2d' and self.slice_axis != 'z':
@@ -583,6 +650,24 @@ class ImportProvenance(Model):
     differences: list[str] = Field(default_factory=list, max_length=1000)
 
 
+class ProjectLimits(Model):
+    """Project size guards; None removes a cap. The defaults bound every workbench
+    server request whatever a submitted project carries (docs/SECURITY.md)."""
+    max_structures: int | None = Field(default=MAX_STRUCTURES, ge=1, strict=True)
+    # Complex samples (points x frequencies x components) of one frequency-plane monitor.
+    max_monitor_samples: int | None = Field(default=MAX_MONITOR_SAMPLES, ge=1, strict=True)
+
+    @field_validator('max_structures')
+    @classmethod
+    def _default_structure_guard(cls, value):
+        return _guarded(value, MAX_STRUCTURES)
+
+    @field_validator('max_monitor_samples')
+    @classmethod
+    def _default_monitor_guard(cls, value):
+        return _guarded(value, MAX_MONITOR_SAMPLES)
+
+
 SCHEMA_VERSION = 1
 
 
@@ -609,8 +694,11 @@ class Project(Model):
     schema_version: Literal[1] = 1
     name: str = Field(default='Untitled', min_length=1, max_length=120)
     region: Region = Field(default_factory=Region)
+    # Declared before structures: the structure count is checked against it before
+    # any structure is validated. Written to JSON only when it differs from the defaults.
+    limits: ProjectLimits = Field(default_factory=ProjectLimits)
     materials: list[Material] = Field(default_factory=default_materials, min_length=1, max_length=100)
-    structures: list[Structure] = Field(default_factory=list, max_length=1000)
+    structures: list[Structure] = Field(default_factory=list)
     sources: list[Source] = Field(default_factory=list, max_length=512)
     global_source: SourceTimeSettings | None = Field(default_factory=SourceTimeSettings)
     monitors: list[Monitor | FieldMonitor] = Field(default_factory=list, max_length=512)  # trace storage is admitted by the resident estimate
@@ -627,6 +715,22 @@ class Project(Model):
     @classmethod
     def migrate(cls, data):
         return migrate_project(data)
+
+    @field_validator('structures', mode='before')
+    @classmethod
+    def _structure_guard(cls, value, info):
+        limits = info.data.get('limits')
+        cap = limits.max_structures if isinstance(limits, ProjectLimits) else MAX_STRUCTURES
+        if cap is not None and isinstance(value, (list, tuple)) and len(value) > cap:
+            raise ValueError(f'{len(value):,} structures exceed the limit of {cap:,} (Project.limits.max_structures).')
+        return value
+
+    @model_serializer(mode='wrap')
+    def _omit_default_limits(self, handler):
+        data = handler(self)
+        if self.limits == ProjectLimits():
+            data.pop('limits', None)
+        return data
 
     def content_hash(self):
         """SHA-256 of the canonical JSON of every field except the two version fields."""

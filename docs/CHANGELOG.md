@@ -7,6 +7,20 @@ the first section covers the whole history since the first commit (2026-09-20).
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
+## Unreleased
+
+### Added
+
+- Python opt-in to raise the size guards: `Region.resident_cell_limit` (default 8,000,000; `None` leaves resident admission to the memory estimate) and `Project.limits` with `max_structures` (default 1000) and `max_monitor_samples` (default 12 million complex samples per frequency plane; `None` removes a cap). The defaults are unchanged and are written to JSON only when changed, so existing projects serialize, hash and load as before; tiles of `plan_tiles` inherit the limits. Resident execution refuses a grid whose 3 x cells (6 x for complex fields) reach 2^31, the range of the 32-bit field indices of the fused kernels, whatever its cell limit ([EXECUTION_MODES.md](EXECUTION_MODES.md#raising-the-size-guards-python-api), this commit).
+
+### Changed
+
+- The resident estimate of `backend="cuda"` with `cuda_kernel="fused"` uses a device model calibrated against measured peaks (`docs/validation/resident_memory_fused_3060.json`) instead of the 200 bytes per cell (FP32) of the tensor-expression bound, so resident admission and the Auto policy accept fused grids that fit; every other path keeps its estimate. `estimate()` reports the model as `memory_model` (this commit).
+
+### Security
+
+- The workbench server validates every request inside `default_guards()`: a submitted project may lower but never raise the structure, frequency-plane and resident-cell caps, so the Python opt-in above cannot lift them over HTTP ([SECURITY.md](SECURITY.md), this commit).
+
 ## 0.15.0 (2026-09-23)
 
 ### Security

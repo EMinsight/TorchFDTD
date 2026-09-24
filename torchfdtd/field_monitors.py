@@ -8,6 +8,7 @@ from itertools import product
 import numpy as np
 import torch
 from .spectra import frequency_samples,apodization_window
+from .models import MAX_MONITOR_SAMPLES
 
 
 def plane_plan(region,monitor,quadrature_counts=None):
@@ -79,11 +80,12 @@ def point_trace_memory(project):
 
 def monitor_memory(project):
     size=point_trace_memory(project)
+    cap=project.limits.max_monitor_samples
     for raw in project.monitors:
         if not raw.enabled or raw.kind!='field':continue
         m=project.resolved_monitor(raw);n=len(plane_plan(project.region,m)['weights']);nf=len(frequency_samples(m.spectrum))
         nc=len(m.required_fields)
-        if n*nf*nc>12_000_000:raise ValueError(f'{m.name}: frequency field buffer exceeds 12 million complex samples. Reduce frequency points or increase monitor downsampling.')
+        if cap is not None and n*nf*nc>cap:raise ValueError(f'{m.name}: frequency field buffer exceeds {"12 million" if cap==MAX_MONITOR_SAMPLES else f"{cap:,}"} complex samples. Reduce frequency points or increase monitor downsampling.')
         size += n*nf*nc*(16 if project.region.precision=='float64' or m.dft_precision=='float64' else 8)*4+n*nc*8*24+project.region.steps*16
     return size
 

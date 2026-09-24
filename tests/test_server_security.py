@@ -349,3 +349,34 @@ def test_npz_readers_never_unpickle_and_fail_closed_on_hostile_archives(tmp_path
     for loader in [Result.load, lambda path: load_native_radiation_plane(path, 'plane')]:
         with pytest.raises((zipfile.BadZipFile, ValueError, OSError, EOFError)):
             loader(truncated)
+
+
+def test_raised_size_limits_do_not_lift_the_server_caps(client):
+    """Project.limits and Region.resident_cell_limit are a Python-API opt-in; a request carrying them keeps the default caps."""
+    from torchfdtd import Region, Source
+    from torchfdtd.solver import estimate
+    from test_resident_guards import LARGE, structures, wide_plane
+    base = demo_project().model_dump()
+    raised = {'max_structures': None, 'max_monitor_samples': None}
+    # Structures: 1001 with a raised limit are accepted by the Python API and refused by the server.
+    payload = {**base, 'limits': raised, 'structures': structures(1001)}
+    Project.model_validate(payload)
+    for route in ('/api/validate', '/api/jobs'):
+        response = client.post(route, json=payload)
+        assert response.status_code == 422 and '1,001 structures exceed the limit of 1,000' in response.text, route
+    # A small project with raised limits validates, and the server echoes its own caps.
+    response = client.post('/api/validate', json={**base, 'limits': raised, 'region': {**base['region'], 'resident_cell_limit': None}})
+    assert response.status_code == 200
+    echoed = response.json()['project']
+    assert 'limits' not in echoed and 'resident_cell_limit' not in echoed['region']
+    # Monitor samples: the raised limit in the JSON does not lift the 12 million sample cap.
+    wide = wide_plane(max_monitor_samples=None).model_dump(mode='json')
+    estimate(Project.model_validate(wide))
+    response = client.post('/api/validate', json=wide)
+    assert response.status_code == 422 and 'exceeds 12 million complex samples' in response.text
+    # Cells: an explicit resident grid above 8 million cells is refused whatever limit it carries.
+    resident = Project(region=Region(**LARGE, execution_mode='resident', resident_cell_limit=None),
+                       sources=[Source(center=(0, 0, 0))]).model_dump(mode='json')
+    for route in ('/api/validate', '/api/jobs'):
+        response = client.post(route, json=resident)
+        assert response.status_code == 422 and 'limited to 8 million cells' in response.text, route

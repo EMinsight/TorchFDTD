@@ -163,6 +163,29 @@ def source_profile(src, loc, region):
     return np.exp(1j*phase)
 
 
+# Resident device model of the fused real CUDA path, calibrated against the peaks in
+# docs/validation/resident_memory_fused_3060.json (docs/EXECUTION_MODES.md). Per cell:
+# E, H, the inverse permittivity and permeability and the three-component temporary
+# of the grid constructor are 15 reals; the sampled permittivity copied to the device
+# adds one real (three with Yee sampling); every CPML memory element adds one. A
+# dispersive scene adds, on every cell, one int64 index per sample and 8 + 42 x poles
+# reals: ADE state, diagnostics weights and the step temporaries held by the pools
+# of up to two captured CUDA graphs (cuda_graph_steps > 1 captures a second one).
+FUSED_CELL_REALS = 15
+FUSED_ADE_REALS = (8, 42)
+FUSED_FIXED_BYTES = 64*2**20       # CUDA graph pools, diagnostics tables, allocator rounding
+
+
+def fused_resident_bytes(region, cells, poles):
+    """Device bytes of a fused resident run before monitors, TFSF and subpixel terms."""
+    from .boundaries import BoundaryDescription
+    real = 8 if region.precision == 'float64' else 4
+    samples = 3 if region.material_sampling == 'yee' else 1
+    psi = sum(math.prod(s['shape']) for segments in BoundaryDescription(region).cpml.values() for s in segments)
+    ade = cells*(8*samples+real*(FUSED_ADE_REALS[0]+FUSED_ADE_REALS[1]*poles)) if poles else 0
+    return real*((FUSED_CELL_REALS+samples)*cells+psi)+ade+FUSED_FIXED_BYTES
+
+
 def estimate(p: Project, *, endpoint_dispatch=True):
     """Native resident estimate. PMC projects describe the endpoint dispatch unless
     endpoint_dispatch is False, which describes the volume-plus-face Yee grid."""
@@ -256,13 +279,19 @@ def estimate(p: Project, *, endpoint_dispatch=True):
         real_bytes=8 if r.precision=='float64' else 4
         auxiliary_bytes+=surface*(16+real_bytes)+(10*box['incident_line_cells']+r.steps)*real_bytes
     if boxes:warnings.append('TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.')
+    # The fused real CUDA kernels (explicit backend="cuda") have the calibrated model; every
+    # other resident path keeps the tensor-expression bound of the Torch and NumPy updates.
+    fused = r.backend == 'cuda' and r.cuda_kernel == 'fused' and not r.complex_fields
+    volume_bytes = (fused_resident_bytes(r, stored, max_poles) if fused else
+                    stored*((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1))
     snapshot = snapshot_frames(p)
     if snapshot['aliased']:
         warnings.append(f'Stored frames alias the carrier: {snapshot["frames_per_period"]:.1f} frames per optical period '
                         f'(period {snapshot["period_steps"]:.1f} steps, one frame every {snapshot["effective_interval"]} steps). '
                         f'The playback will look like backward motion; store a frame at least every {snapshot["period_steps"]/SNAPSHOT_FRAMES_PER_PERIOD:.0f} steps.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
-            'estimated_memory_mb': round((stored * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
+            'estimated_memory_mb': round((volume_bytes+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
+            'memory_model': 'fused_cuda' if fused else 'tensor_expression',
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes,
             'point_trace_estimated_bytes': point_trace_memory(p), 'snapshot': snapshot}
 
@@ -300,7 +329,7 @@ def run_signature(p: Project, steps):
     are excluded, so resident and streamed runs of one scene share a signature."""
     import hashlib
     r = p.region
-    config = dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
+    config = dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','resident_cell_limit','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
                   sources=[p.resolved_source(s).model_dump() for s in p.sources], steps=steps,
                   nodes=[a.tolist() for a in r.mesh_nodes])
     return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
