@@ -558,7 +558,7 @@ def judge(records, case, spec):
     return dict(criteria=rows, all_pass=all(r['passed'] for r in rows), best_start=best['start'])
 
 
-def time_study(spec, output_dir, *, backend='cuda', factors=(1., 1.5, 2., 3.), log=print):
+def time_study(spec, output_dir, *, backend='cuda', factors=(1., 1.5, 2., 3., 4.), log=print):
     """Information, not a criterion: the recorded designs on the design grid against the physical run time.
 
     Reads the records of a finished run in output_dir and evaluates every start's initial and final widths and the
