@@ -157,21 +157,20 @@ row: error against the cell count, which does not depend on the hardware. Dotted
 - Package: the TorchFDTD records come from a checkout import of this branch; the release-candidate round re-runs the TorchFDTD points with the installed wheel. The driver imports an installed torchfdtd when one exists (repository root appended to the end of `sys.path`). Every record states `torchfdtd_file`, `torchfdtd_version`, `torchfdtd_import` and the git commit. The Windows venv also holds an editable install of the main checkout; path imports take precedence over its finder, and the records name the file that ran.
 - Absorber: `Region.pml_cells` is capped at 50, so the 80-cell absorber at 0.005 um (and every other mesh) is set with `BoundaryFace(kind='pml', layers=n)` on the y faces; no package change. The derived geometry notes record this.
 - The two solvers do not share Ez nodes in y at 0.04 um (91 rows); their staircases differ there (13 against 12 ridge rows).
-- Shared host: timed runs were taken inside a timing window agreed with the other agents, with each run gated on a Windows host load of at most 30 % (sampled before the run and recorded in every sample). Runs first taken at 90-100 % host load (Meep resolution 25 at 4.9 s against 0.44 s quiet, TorchFDTD about 2x slower) were re-measured; their accuracy values were identical, and they are kept outside the repository. Three timed samples have no load reading (the PowerShell query returned nothing): Meep smoothed resolution 100 run 1 and TorchFDTD staircase float32 0.005 um runs 1 and 3; their times lie within the ranges of their points. The TorchFDTD block held the GPU lock alone (it ran before the lock gained shared slots; GPU memory in use before every point stayed at the 1.25-1.44 GB desktop level).
+- Host load: timed runs were taken on a quiet host, each gated on a Windows host load of at most 30 % (sampled before the run and recorded in every sample). Runs first taken at 90-100 % host load (Meep resolution 25 at 4.9 s against 0.44 s quiet, TorchFDTD about 2x slower) were re-measured; their accuracy values were identical, and they are kept outside the repository. Three timed samples have no load reading (the PowerShell query returned nothing): Meep smoothed resolution 100 run 1 and TorchFDTD staircase float32 0.005 um runs 1 and 3; their times lie within the ranges of their points. No other job used the GPU during the TorchFDTD timings (GPU memory in use before every point stayed at the 1.25-1.44 GB desktop level).
 - Meep runs in WSL with 4 MPI ranks on a 12-core CPU and TorchFDTD on the GPU; the cost ratio compares these two setups only.
 
 ### Reproduce
 
-From the worktree root. Every TorchFDTD and TORCWA command goes through the shared GPU lock; Meep runs
-inside the WSL distribution.
+From the repository root. The timed runs need an otherwise idle GPU and host; the TorchFDTD and TORCWA runs
+use CUDA, and Meep runs with MPI (here in a Linux environment under WSL).
 
 ```bash
-# reference (TORCWA 0.1.4.2, CUDA)
-D:/TorchFDTD/.venv/Scripts/python.exe D:/TorchFDTD/.local/gpu_lock.py C:/anaconda3/python.exe examples/g7/solvers/rcwa_reference.py
+# reference: a Python environment with TORCWA 0.1.4.2 (CUDA)
+python examples/g7/solvers/rcwa_reference.py
 # TorchFDTD, four calls: --series staircase|smoothed, --precision float32|float64
-D:/TorchFDTD/.venv/Scripts/python.exe D:/TorchFDTD/.local/gpu_lock.py D:/TorchFDTD/.venv/Scripts/python.exe \
-    examples/g7/solvers/torchfdtd_sweep.py --series staircase --precision float32 --max-host-cpu-percent 30
-# Meep, two calls: --series staircase|smoothed (micromamba environment "meep", OMP_NUM_THREADS=1)
+python examples/g7/solvers/torchfdtd_sweep.py --series staircase --precision float32 --max-host-cpu-percent 30
+# Meep 1.34, two calls: --series staircase|smoothed
 OMP_NUM_THREADS=1 mpirun -np 4 python examples/g7/solvers/meep_sweep.py --ranks 4 --series staircase --max-host-cpu-percent 30
 # analysis, tables and figure (reads records only)
 python examples/g7/solvers/analyze.py
