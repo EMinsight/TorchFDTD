@@ -1,8 +1,7 @@
 """G7-04 TorchFDTD sweep: the metagrating at meshes 0.04, 0.02, 0.01 and 0.005 um, one series and precision per call.
 
-From the worktree root on the RTX 3060 workstation, through the shared GPU lock:
-    D:/TorchFDTD/.venv/Scripts/python.exe D:/TorchFDTD/.local/gpu_lock.py \
-        D:/TorchFDTD/.venv/Scripts/python.exe examples/g7/solvers/torchfdtd_sweep.py --series staircase --precision float32
+From the repository root on a CUDA GPU; the timed runs need an otherwise idle GPU:
+    python examples/g7/solvers/torchfdtd_sweep.py --series staircase --precision float32 --max-host-cpu-percent 30
 
 Each mesh uses the derived geometry of common.derive_geometry (same physical time, 0.4 um absorber,
 Courant number of the base fixture, half-cell shift in the staircase series where an edge would sit
@@ -152,8 +151,7 @@ def run_point(base, mesh, series, precision, repeats, compare, gate):
                     device=torch.cuda.get_device_name(0)),
         host=dict(shared=True, gpu_before=gpu_before, gpu_after=tm.nvidia_smi(), host_cpu_percent_before=cpu_before,
                   host_cpu_percent_after=tm.host_cpu_load_percent(), max_host_cpu_percent=gate[0], max_wait_seconds=gate[1],
-                  note='shared workstation: GPU jobs of other agents take turns through D:/TorchFDTD/.local/gpu_lock.py, which this run held; '
-                       'CPU jobs of other sessions may run concurrently; the Windows host CPU load is sampled before every run and recorded, '
+                  note='the timed runs need an otherwise idle GPU; the Windows host CPU load is sampled before every run and recorded, '
                        'and with max_host_cpu_percent every run waits until the load is below it (at most max_wait_seconds)'),
         environment=dict(platform=platform.platform(), python=sys.version.split()[0], torch=torch.__version__, torch_cuda=torch.version.cuda,
                          packages=tm.versions(('torch', 'cupy-cuda12x', 'numpy')), git=git_state(), **package_state()))

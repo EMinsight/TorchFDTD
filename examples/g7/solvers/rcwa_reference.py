@@ -1,8 +1,9 @@
 """G7-04 reference (case G7-04r2): TORCWA 0.1.4.2 with 101 Fourier orders, checked against 241 orders.
 
-    C:\\anaconda3\\python.exe examples/g7/solvers/rcwa_reference.py
+    python examples/g7/solvers/rcwa_reference.py
 
-(through D:/TorchFDTD/.local/gpu_lock.py on the shared workstation; TORCWA runs on CUDA). Reuses
+(in a Python environment with TORCWA 0.1.4.2; TORCWA runs on CUDA and needs an otherwise idle GPU only
+for a representative recorded run time). Reuses
 solve() of examples/meep_comparison/metagrating/rcwa_metagrating.py on the unshifted base geometry:
 s polarisation (E along the ridges), normal incidence from the substrate, the ridge layer sampled on
 20,000 real-space cells whose boundaries hold the ridge edges. 101 orders are 50 harmonics and 241

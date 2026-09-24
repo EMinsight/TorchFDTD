@@ -8,8 +8,8 @@ The scene is the one of examples/meep_comparison/metagrating/meep_metagrating.py
 CustomSource, Meep PML of the same 0.4 um thickness, add_dft_fields lines on the centred grid) with
 eps_averaging=False in the staircase series and Meep's default subpixel averaging in the smoothed
 series. Per point: one bare-substrate reference run, one warm-up and three timed grating runs.
-Before every run the ranks wait while the pause file exists (another session's CPU timing window) and,
-with --max-host-cpu-percent, until the Windows host load is below that value; the load and the wait are recorded.
+Before every run the ranks wait while the optional --pause-file exists and, with --max-host-cpu-percent,
+until the Windows host load is below that value; the load and the wait are recorded.
 Only the MPI master writes the record.
 """
 from __future__ import annotations
@@ -35,7 +35,6 @@ spec = importlib.util.spec_from_file_location('meep_metagrating', common.METAGRA
 mm = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mm)
 
-PAUSE_FILE = '/mnt/d/TorchFDTD/.local/eqp_cpu_go'
 LOAD_SAMPLE_SLEEP = 3.0  # seconds the non-master ranks sleep while the master samples the host load
 
 
@@ -65,7 +64,7 @@ def make_simulation(g, ridges=None, *, eps_averaging):
 
 
 def wait_for_host(pause_file, max_cpu_percent, max_wait_seconds):
-    """Wait while the pause file exists and, with max_cpu_percent, until the Windows host load is below it.
+    """Wait while the optional pause file exists and, with max_cpu_percent, until the Windows host load is below it.
 
     Only the master samples the load (powershell.exe, about a second); the other ranks sleep meanwhile
     instead of spinning in an MPI barrier, so the sample does not count this job's own waiting ranks.
@@ -219,7 +218,8 @@ def main():
     parser.add_argument('--series', choices=common.SERIES, required=True)
     parser.add_argument('--resolutions', type=int, nargs='+', default=list(common.MEEP_RESOLUTIONS))
     parser.add_argument('--repeats', type=int, default=3)
-    parser.add_argument('--pause-file', default=PAUSE_FILE)
+    parser.add_argument('--pause-file', default=None,
+                        help='optional file whose existence delays the next run until it is removed (default: no pause)')
     parser.add_argument('--max-host-cpu-percent', type=float, default=None, help='wait before each run until the host load is at most this')
     parser.add_argument('--max-wait-seconds', type=float, default=3600, help='longest wait for a quiet host before a run starts anyway')
     parser.add_argument('--out-dir', default=str(common.RECORDS))

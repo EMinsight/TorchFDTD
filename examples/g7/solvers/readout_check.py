@@ -4,8 +4,8 @@ At 0.01 um the fixture's DFT lines (y = -0.81 and 1.01 um) lie on Ez rows, while
 between rows. This check runs the staircase point at 0.01 um once with the fixture lines and once with both
 lines moved by +h/2 onto pixel centres (one reference and one grating run each, no timing):
 
-    OMP_NUM_THREADS=1 mpirun -np 4 python examples/g7/solvers/readout_check.py --solver meep            (WSL, "meep" env)
-    D:/TorchFDTD/.local/gpu_lock.py ... python examples/g7/solvers/readout_check.py --solver torchfdtd   (RTX 3060)
+    OMP_NUM_THREADS=1 mpirun -np 4 python examples/g7/solvers/readout_check.py --solver meep       (Meep 1.34)
+    python examples/g7/solvers/readout_check.py --solver torchfdtd                                 (CUDA GPU)
 
 Writes docs/validation/g7/G7-04/readout_check_<solver>.json.
 """
