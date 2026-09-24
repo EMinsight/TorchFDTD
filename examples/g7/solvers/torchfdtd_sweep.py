@@ -9,7 +9,8 @@ Courant number of the base fixture, half-cell shift in the staircase series wher
 on a node). The scene is the one of examples/meep_comparison/metagrating/torchfdtd_metagrating.py
 with the precision, the interface method (staircase, or the experimental subpixel interfaces for the
 smoothed series) and the absorber thickness of the point. Per point: one bare-substrate reference run,
-one warm-up and three timed grating runs (fused CUDA kernels). The record keeps the per-order Fourier
+one warm-up and three timed grating runs (fused CUDA kernels); with --max-host-cpu-percent every run
+first waits until the Windows host load is below that value. The record keeps the per-order Fourier
 means of the DFT lines, the efficiencies from the compare.py decomposition and every timing sample.
 """
 from __future__ import annotations
@@ -55,12 +56,24 @@ def git_state():
     return dict(commit=run('rev-parse', 'HEAD'), dirty=bool(run('status', '--porcelain', '--untracked-files=no')))
 
 
+def wait_for_host(max_cpu_percent, max_wait_seconds):
+    """With max_cpu_percent, wait until the Windows host load is at most that value (at most max_wait_seconds)."""
+    started = time.perf_counter()
+    while True:
+        cpu = tm.host_cpu_load_percent()
+        waited = time.perf_counter() - started
+        busy = max_cpu_percent is not None and cpu is not None and cpu > max_cpu_percent
+        if not busy or waited >= max_wait_seconds:
+            return dict(waited_seconds=waited, host_cpu_percent_before=cpu, gate_timed_out=bool(busy))
+        time.sleep(15)
+
+
 def full_record(result, ref_result):
     return dict(phasor_time_sign=1, monitors={n: tm.monitor_record(result, n) for n in ('reflection', 'transmission')},
                 reference_monitors={n: tm.monitor_record(ref_result, n) for n in ('reflection', 'transmission')})
 
 
-def run_point(base, mesh, series, precision, repeats, compare):
+def run_point(base, mesh, series, precision, repeats, compare, gate):
     g = common.derive_geometry(base, mesh, series)
     sample = make_project(g, precision=precision, series=series)
     reference = make_project(g, ridges=[], precision=precision, series=series)
@@ -70,13 +83,17 @@ def run_point(base, mesh, series, precision, repeats, compare):
     if stairs is not None:
         stairs = {k: v for k, v in stairs.items() if k not in ('ez_x_nodes_um', 'ez_y_nodes_um')}
     gpu_before, cpu_before = tm.nvidia_smi(), tm.host_cpu_load_percent()
+    host = wait_for_host(*gate)
     ref_result, ref_timing = tm.timed_run(reference)
+    ref_timing.update(host)
+    host = wait_for_host(*gate)
     _, warmup = tm.timed_run(sample)
+    warmup.update(host)
     samples, t1_runs = [], []
     for _ in range(repeats):
-        cpu = tm.host_cpu_load_percent()
+        host = wait_for_host(*gate)
         result, timing = tm.timed_run(sample)
-        samples.append(dict(timing, host_cpu_percent_before=cpu))
+        samples.append(dict(timing, **host))
         amps = common.point_amplitudes(full_record(result, ref_result))
         T, _ = common.efficiencies_from_amplitudes(amps, g['substrate_index'])
         t1_runs.append(T[:, common.ORDERS.index(1)])
@@ -114,9 +131,10 @@ def run_point(base, mesh, series, precision, repeats, compare):
                     median_setup_seconds=float(np.median([s['setup_seconds'] for s in samples])), reference=ref_timing,
                     device=torch.cuda.get_device_name(0)),
         host=dict(shared=True, gpu_before=gpu_before, gpu_after=tm.nvidia_smi(), host_cpu_percent_before=cpu_before,
-                  host_cpu_percent_after=tm.host_cpu_load_percent(),
+                  host_cpu_percent_after=tm.host_cpu_load_percent(), max_host_cpu_percent=gate[0], max_wait_seconds=gate[1],
                   note='shared workstation: GPU jobs of other agents take turns through D:/TorchFDTD/.local/gpu_lock.py, which this run held; '
-                       'CPU jobs of other sessions may run concurrently (host CPU load before and after is recorded)'),
+                       'CPU jobs of other sessions may run concurrently; the Windows host CPU load is sampled before every run and recorded, '
+                       'and with max_host_cpu_percent every run waits until the load is below it (at most max_wait_seconds)'),
         environment=dict(platform=platform.platform(), python=sys.version.split()[0], torch=torch.__version__, torch_cuda=torch.version.cuda,
                          packages=tm.versions(('torchfdtd', 'torch', 'cupy-cuda12x', 'numpy')), torchfdtd_file=torchfdtd.__file__,
                          git=git_state()))
@@ -130,6 +148,8 @@ def main():
     parser.add_argument('--meshes', type=float, nargs='+', default=list(common.TORCHFDTD_MESHES_UM))
     parser.add_argument('--repeats', type=int, default=3)
     parser.add_argument('--out-dir', default=str(common.RECORDS))
+    parser.add_argument('--max-host-cpu-percent', type=float, default=None, help='wait before each run until the host load is at most this')
+    parser.add_argument('--max-wait-seconds', type=float, default=600, help='longest wait for a quiet host before a run starts anyway')
     args = parser.parse_args()
     tm.require_checkout_import()
     torch.backends.cudnn.benchmark = False
@@ -137,7 +157,7 @@ def main():
     compare = common.load_compare()
     for mesh in args.meshes:
         assert mesh in common.TORCHFDTD_MESHES_UM, mesh
-        record = run_point(base, mesh, args.series, args.precision, args.repeats, compare)
+        record = run_point(base, mesh, args.series, args.precision, args.repeats, compare, (args.max_host_cpu_percent, args.max_wait_seconds))
         out = Path(args.out_dir) / f'torchfdtd-{args.series}-{args.precision}-{mesh:g}.json'
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_bytes((json.dumps(record, indent=1, allow_nan=False) + '\n').encode('utf-8'))
