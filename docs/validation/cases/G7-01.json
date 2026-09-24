@@ -79,5 +79,6 @@
     "mesh": "0.01 um changes T+1 (TE, normal) by at most 0.02 at every wavelength",
     "energy_balance": "|1 - sum R - sum T| at most 0.02 in every evaluated case",
     "fabrication": "the best seed meets the declared linewidth and gap; every seed reports its violations"
-  }
+  },
+  "superseded_by": "docs/validation/cases/G7-01r2.json"
 }
