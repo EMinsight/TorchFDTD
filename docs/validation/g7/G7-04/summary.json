@@ -1,0 +1,1620 @@
+{
+ "schema": "g7-04-summary-v1",
+ "case": "G7-04",
+ "declaration": "docs/G7_WORKFLOWS.md",
+ "case_file": "docs/validation/cases/G7-04r2.json",
+ "reference": {
+  "source": "rcwa_reference.json",
+  "order_count": 101,
+  "t1_design": 0.7746397485614476,
+  "t1_band_mean": 0.7700297340367978,
+  "check": {
+   "case": "docs/validation/cases/G7-04r2.json",
+   "against_order_count": 241,
+   "max_abs_difference_per_efficiency": {
+    "T-1": 4.893856092710869e-05,
+    "T+0": 2.4734621233521437e-05,
+    "T+1": 6.374504068529241e-05,
+    "R-1": 2.7043484078406732e-05,
+    "R+0": 5.583265920539038e-05,
+    "R+1": 1.5875450523592655e-05
+   },
+   "max_abs_difference": 6.374504068529241e-05,
+   "at_efficiency": "T+1",
+   "at_wavelength_um": 1.5,
+   "limit_abs": 0.0001,
+   "passed": true,
+   "t1_design_difference": -9.729771584865432e-06,
+   "t1_band_mean_difference": -8.696935798191419e-07
+  }
+ },
+ "targets": [
+  0.01,
+  0.005,
+  0.002
+ ],
+ "cost_definition": "wall time: median of three full solves (setup and stepping) after one warm-up; cell-steps: cells times steps of the point; matched costs by log-log interpolation between the two meshes that bracket the last crossing of the target in refinement order; \"<=\" marks a target already met at the coarsest mesh (its cost is an upper bound)",
+ "curves": {
+  "torchfdtd/staircase/float32": [
+   {
+    "solver": "torchfdtd",
+    "series": "staircase",
+    "precision": "float32",
+    "mesh_um": 0.04,
+    "resolution_per_um": 25,
+    "cells": [
+     50,
+     91
+    ],
+    "cell_count": 4550,
+    "steps": 6000,
+    "cell_steps": 27300000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 10,
+    "dt_s": 9.340271173528747e-17,
+    "t1_design": 0.7740617499577955,
+    "t1_band_mean": 0.7711317027602743,
+    "error_t1_design": 0.0005779986036520413,
+    "error_t1_band_mean": 0.0011019687234765652,
+    "samples_full_seconds": [
+     0.12118539999937639,
+     0.13410519999888493,
+     0.261353699999745
+    ],
+    "median_full_seconds": 0.13410519999888493,
+    "min_full_seconds": 0.12118539999937639,
+    "max_full_seconds": 0.261353699999745,
+    "median_stepping_seconds": 0.11459080000349786,
+    "repeats": 3,
+    "solver_seconds": 1.2723682999931043,
+    "warmup_full_seconds": 0.12784729999839328,
+    "reference_run_full_seconds": 0.6278766999967047,
+    "host_cpu_percent_before_samples": [
+     16.0,
+     19.0,
+     21.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9987050399874906,
+    "ridge_rows": 13,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "staircase",
+    "precision": "float32",
+    "mesh_um": 0.02,
+    "resolution_per_um": 50,
+    "cells": [
+     100,
+     182
+    ],
+    "cell_count": 18200,
+    "steps": 12000,
+    "cell_steps": 218400000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 20,
+    "dt_s": 4.670135586764374e-17,
+    "t1_design": 0.7761157122630363,
+    "t1_band_mean": 0.7706338321311994,
+    "error_t1_design": 0.0014759637015887561,
+    "error_t1_band_mean": 0.0006040980944016505,
+    "samples_full_seconds": [
+     0.40129929999966407,
+     0.4326915000056033,
+     0.3116182999947341
+    ],
+    "median_full_seconds": 0.40129929999966407,
+    "min_full_seconds": 0.3116182999947341,
+    "max_full_seconds": 0.4326915000056033,
+    "median_stepping_seconds": 0.3794220999989193,
+    "repeats": 3,
+    "solver_seconds": 2.1639925000054063,
+    "warmup_full_seconds": 0.46650910000607837,
+    "reference_run_full_seconds": 0.5518742999993265,
+    "host_cpu_percent_before_samples": [
+     21.0,
+     16.0,
+     19.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9988483204187746,
+    "ridge_rows": 25,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "staircase",
+    "precision": "float32",
+    "mesh_um": 0.01,
+    "resolution_per_um": 100,
+    "cells": [
+     200,
+     364
+    ],
+    "cell_count": 72800,
+    "steps": 24000,
+    "cell_steps": 1747200000,
+    "shift_um": [
+     0.005,
+     0.005
+    ],
+    "pml_cells": 40,
+    "dt_s": 2.335067793382187e-17,
+    "t1_design": 0.7752134832046231,
+    "t1_band_mean": 0.7703243105873699,
+    "error_t1_design": 0.0005737346431755608,
+    "error_t1_band_mean": 0.0002945765505721898,
+    "samples_full_seconds": [
+     1.3928402999954415,
+     1.3680422999968869,
+     1.4234922999967239
+    ],
+    "median_full_seconds": 1.3928402999954415,
+    "min_full_seconds": 1.3680422999968869,
+    "max_full_seconds": 1.4234922999967239,
+    "median_stepping_seconds": 1.3651832999967155,
+    "repeats": 3,
+    "solver_seconds": 7.226840799987258,
+    "warmup_full_seconds": 1.4521053999997093,
+    "reference_run_full_seconds": 1.5903604999984964,
+    "host_cpu_percent_before_samples": [
+     24.0,
+     19.0,
+     18.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9999244681490362,
+    "ridge_rows": 50,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "staircase",
+    "precision": "float32",
+    "mesh_um": 0.005,
+    "resolution_per_um": 200,
+    "cells": [
+     400,
+     728
+    ],
+    "cell_count": 291200,
+    "steps": 48000,
+    "cell_steps": 13977600000,
+    "shift_um": [
+     0.0025,
+     0.0025
+    ],
+    "pml_cells": 80,
+    "dt_s": 1.1675338966910934e-17,
+    "t1_design": 0.7748389376937728,
+    "t1_band_mean": 0.7700861644116153,
+    "error_t1_design": 0.00019918913232519486,
+    "error_t1_band_mean": 5.643037481750657e-05,
+    "samples_full_seconds": [
+     6.924782399997639,
+     6.935963699994318,
+     7.031367399998999
+    ],
+    "median_full_seconds": 6.935963699994318,
+    "min_full_seconds": 6.924782399997639,
+    "max_full_seconds": 7.031367399998999,
+    "median_stepping_seconds": 6.897560099998373,
+    "repeats": 3,
+    "solver_seconds": 35.093731499997375,
+    "warmup_full_seconds": 7.094050500003505,
+    "reference_run_full_seconds": 7.107567500002915,
+    "host_cpu_percent_before_samples": [
+     null,
+     1.0,
+     null
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 1.0000480789978656,
+    "ridge_rows": 100,
+    "repeat_max_abs_t1_difference": 0.0
+   }
+  ],
+  "torchfdtd/staircase/float64": [
+   {
+    "solver": "torchfdtd",
+    "series": "staircase",
+    "precision": "float64",
+    "mesh_um": 0.04,
+    "resolution_per_um": 25,
+    "cells": [
+     50,
+     91
+    ],
+    "cell_count": 4550,
+    "steps": 6000,
+    "cell_steps": 27300000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 10,
+    "dt_s": 9.340271173528747e-17,
+    "t1_design": 0.7740616973244656,
+    "t1_band_mean": 0.771131651987938,
+    "error_t1_design": 0.0005780512369819579,
+    "error_t1_band_mean": 0.00110191795114023,
+    "samples_full_seconds": [
+     0.32891270000254735,
+     0.39967620000243187,
+     0.2869963999983156
+    ],
+    "median_full_seconds": 0.32891270000254735,
+    "min_full_seconds": 0.2869963999983156,
+    "max_full_seconds": 0.39967620000243187,
+    "median_stepping_seconds": 0.3067679000014323,
+    "repeats": 3,
+    "solver_seconds": 2.306714300008025,
+    "warmup_full_seconds": 0.3787203000028967,
+    "reference_run_full_seconds": 0.9124087000018335,
+    "host_cpu_percent_before_samples": [
+     13.0,
+     15.0,
+     16.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9987050080747268,
+    "ridge_rows": 13,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "staircase",
+    "precision": "float64",
+    "mesh_um": 0.02,
+    "resolution_per_um": 50,
+    "cells": [
+     100,
+     182
+    ],
+    "cell_count": 18200,
+    "steps": 12000,
+    "cell_steps": 218400000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 20,
+    "dt_s": 4.670135586764374e-17,
+    "t1_design": 0.7761156262974345,
+    "t1_band_mean": 0.7706337676076023,
+    "error_t1_design": 0.0014758777359868969,
+    "error_t1_band_mean": 0.0006040335708045186,
+    "samples_full_seconds": [
+     0.6517834999976913,
+     0.6787142000030144,
+     0.6753681999980472
+    ],
+    "median_full_seconds": 0.6753681999980472,
+    "min_full_seconds": 0.6517834999976913,
+    "max_full_seconds": 0.6787142000030144,
+    "median_stepping_seconds": 0.6439323000013246,
+    "repeats": 3,
+    "solver_seconds": 3.405486399999063,
+    "warmup_full_seconds": 0.5800722999993013,
+    "reference_run_full_seconds": 0.8195482000010088,
+    "host_cpu_percent_before_samples": [
+     16.0,
+     17.0,
+     14.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9988482981162817,
+    "ridge_rows": 25,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "staircase",
+    "precision": "float64",
+    "mesh_um": 0.01,
+    "resolution_per_um": 100,
+    "cells": [
+     200,
+     364
+    ],
+    "cell_count": 72800,
+    "steps": 24000,
+    "cell_steps": 1747200000,
+    "shift_um": [
+     0.005,
+     0.005
+    ],
+    "pml_cells": 40,
+    "dt_s": 2.335067793382187e-17,
+    "t1_design": 0.7752134296336026,
+    "t1_band_mean": 0.7703242699054974,
+    "error_t1_design": 0.0005736810721550523,
+    "error_t1_band_mean": 0.0002945358686996524,
+    "samples_full_seconds": [
+     2.5373906000022544,
+     2.5369820999985677,
+     2.5608726999998908
+    ],
+    "median_full_seconds": 2.5373906000022544,
+    "min_full_seconds": 2.5369820999985677,
+    "max_full_seconds": 2.5608726999998908,
+    "median_stepping_seconds": 2.506255799999053,
+    "repeats": 3,
+    "solver_seconds": 12.90245679999498,
+    "warmup_full_seconds": 2.5061989999958314,
+    "reference_run_full_seconds": 2.7610123999984353,
+    "host_cpu_percent_before_samples": [
+     22.0,
+     17.0,
+     25.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9999244866516428,
+    "ridge_rows": 50,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "staircase",
+    "precision": "float64",
+    "mesh_um": 0.005,
+    "resolution_per_um": 200,
+    "cells": [
+     400,
+     728
+    ],
+    "cell_count": 291200,
+    "steps": 48000,
+    "cell_steps": 13977600000,
+    "shift_um": [
+     0.0025,
+     0.0025
+    ],
+    "pml_cells": 80,
+    "dt_s": 1.1675338966910934e-17,
+    "t1_design": 0.7748388617361059,
+    "t1_band_mean": 0.7700861023272807,
+    "error_t1_design": 0.00019911317465837186,
+    "error_t1_band_mean": 5.636829048294434e-05,
+    "samples_full_seconds": [
+     14.97685740000452,
+     15.072266399998625,
+     15.073995599996124
+    ],
+    "median_full_seconds": 15.072266399998625,
+    "min_full_seconds": 14.97685740000452,
+    "max_full_seconds": 15.073995599996124,
+    "median_stepping_seconds": 15.006353199998557,
+    "repeats": 3,
+    "solver_seconds": 74.96836260000418,
+    "warmup_full_seconds": 14.905713100000867,
+    "reference_run_full_seconds": 14.939530100004049,
+    "host_cpu_percent_before_samples": [
+     11.0,
+     28.0,
+     23.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 1.0000480696241016,
+    "ridge_rows": 100,
+    "repeat_max_abs_t1_difference": 0.0
+   }
+  ],
+  "torchfdtd/smoothed/float32": [
+   {
+    "solver": "torchfdtd",
+    "series": "smoothed",
+    "precision": "float32",
+    "mesh_um": 0.04,
+    "resolution_per_um": 25,
+    "cells": [
+     50,
+     91
+    ],
+    "cell_count": 4550,
+    "steps": 6000,
+    "cell_steps": 27300000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 10,
+    "dt_s": 9.340271173528747e-17,
+    "t1_design": 0.7846365344432893,
+    "t1_band_mean": 0.7791254524031803,
+    "error_t1_design": 0.009996785881841719,
+    "error_t1_band_mean": 0.009095718366382566,
+    "samples_full_seconds": [
+     0.17295459999877494,
+     0.2928077000033227,
+     0.315960100000666
+    ],
+    "median_full_seconds": 0.2928077000033227,
+    "min_full_seconds": 0.17295459999877494,
+    "max_full_seconds": 0.315960100000666,
+    "median_stepping_seconds": 0.2378404999981285,
+    "repeats": 3,
+    "solver_seconds": 1.6972071000054711,
+    "warmup_full_seconds": 0.18428010000206996,
+    "reference_run_full_seconds": 0.7312046000006376,
+    "host_cpu_percent_before_samples": [
+     17.0,
+     13.0,
+     19.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9988723463362168,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "smoothed",
+    "precision": "float32",
+    "mesh_um": 0.02,
+    "resolution_per_um": 50,
+    "cells": [
+     100,
+     182
+    ],
+    "cell_count": 18200,
+    "steps": 12000,
+    "cell_steps": 218400000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 20,
+    "dt_s": 4.670135586764374e-17,
+    "t1_design": 0.7761157106095442,
+    "t1_band_mean": 0.7706338514538341,
+    "error_t1_design": 0.0014759620480966351,
+    "error_t1_band_mean": 0.000604117417036365,
+    "samples_full_seconds": [
+     0.5464232999947853,
+     0.5384697999979835,
+     0.5126477000012528
+    ],
+    "median_full_seconds": 0.5384697999979835,
+    "min_full_seconds": 0.5126477000012528,
+    "max_full_seconds": 0.5464232999947853,
+    "median_stepping_seconds": 0.44462059999932535,
+    "repeats": 3,
+    "solver_seconds": 2.7316516999999294,
+    "warmup_full_seconds": 0.4845805000004475,
+    "reference_run_full_seconds": 0.6495304000054603,
+    "host_cpu_percent_before_samples": [
+     10.0,
+     25.0,
+     20.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9988483172247041,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "smoothed",
+    "precision": "float32",
+    "mesh_um": 0.01,
+    "resolution_per_um": 100,
+    "cells": [
+     200,
+     364
+    ],
+    "cell_count": 72800,
+    "steps": 24000,
+    "cell_steps": 1747200000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 40,
+    "dt_s": 2.335067793382187e-17,
+    "t1_design": 0.7750994355600056,
+    "t1_band_mean": 0.7703934731448742,
+    "error_t1_design": 0.00045968699855802875,
+    "error_t1_band_mean": 0.00036373910807641074,
+    "samples_full_seconds": [
+     1.7047231999968062,
+     1.7303089000051841,
+     1.7176994000037666
+    ],
+    "median_full_seconds": 1.7176994000037666,
+    "min_full_seconds": 1.7047231999968062,
+    "max_full_seconds": 1.7303089000051841,
+    "median_stepping_seconds": 1.5107198000041535,
+    "repeats": 3,
+    "solver_seconds": 8.61494190000667,
+    "warmup_full_seconds": 1.678096399999049,
+    "reference_run_full_seconds": 1.784114000001864,
+    "host_cpu_percent_before_samples": [
+     17.0,
+     17.0,
+     18.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9999286244271495,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "smoothed",
+    "precision": "float32",
+    "mesh_um": 0.005,
+    "resolution_per_um": 200,
+    "cells": [
+     400,
+     728
+    ],
+    "cell_count": 291200,
+    "steps": 48000,
+    "cell_steps": 13977600000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 80,
+    "dt_s": 1.1675338966910934e-17,
+    "t1_design": 0.7748089918351573,
+    "t1_band_mean": 0.7701014098515204,
+    "error_t1_design": 0.00016924327370970715,
+    "error_t1_band_mean": 7.167581472267148e-05,
+    "samples_full_seconds": [
+     8.35376720000204,
+     8.486340900002688,
+     8.340467800000624
+    ],
+    "median_full_seconds": 8.35376720000204,
+    "min_full_seconds": 8.340467800000624,
+    "max_full_seconds": 8.486340900002688,
+    "median_stepping_seconds": 7.847269900004903,
+    "repeats": 3,
+    "solver_seconds": 41.882394000000204,
+    "warmup_full_seconds": 8.354188699995575,
+    "reference_run_full_seconds": 8.347629399999278,
+    "host_cpu_percent_before_samples": [
+     23.0,
+     0.0,
+     0.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 1.000048920588553,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   }
+  ],
+  "torchfdtd/smoothed/float64": [
+   {
+    "solver": "torchfdtd",
+    "series": "smoothed",
+    "precision": "float64",
+    "mesh_um": 0.04,
+    "resolution_per_um": 25,
+    "cells": [
+     50,
+     91
+    ],
+    "cell_count": 4550,
+    "steps": 6000,
+    "cell_steps": 27300000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 10,
+    "dt_s": 9.340271173528747e-17,
+    "t1_design": 0.7846364869736917,
+    "t1_band_mean": 0.7791254151862628,
+    "error_t1_design": 0.009996738412244133,
+    "error_t1_band_mean": 0.009095681149465018,
+    "samples_full_seconds": [
+     0.23989330000040354,
+     0.31916759999876376,
+     0.3581562999970629
+    ],
+    "median_full_seconds": 0.31916759999876376,
+    "min_full_seconds": 0.23989330000040354,
+    "max_full_seconds": 0.3581562999970629,
+    "median_stepping_seconds": 0.26367629999731435,
+    "repeats": 3,
+    "solver_seconds": 1.9402067999981227,
+    "warmup_full_seconds": 0.24776070000370964,
+    "reference_run_full_seconds": 0.7752288999981829,
+    "host_cpu_percent_before_samples": [
+     21.0,
+     11.0,
+     8.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9988723718367193,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "smoothed",
+    "precision": "float64",
+    "mesh_um": 0.02,
+    "resolution_per_um": 50,
+    "cells": [
+     100,
+     182
+    ],
+    "cell_count": 18200,
+    "steps": 12000,
+    "cell_steps": 218400000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 20,
+    "dt_s": 4.670135586764374e-17,
+    "t1_design": 0.7761156262974351,
+    "t1_band_mean": 0.7706337676076027,
+    "error_t1_design": 0.001475877735987563,
+    "error_t1_band_mean": 0.0006040335708049627,
+    "samples_full_seconds": [
+     0.853097399995022,
+     0.7339700000011362,
+     0.766986700000416
+    ],
+    "median_full_seconds": 0.766986700000416,
+    "min_full_seconds": 0.7339700000011362,
+    "max_full_seconds": 0.853097399995022,
+    "median_stepping_seconds": 0.6791761000058614,
+    "repeats": 3,
+    "solver_seconds": 3.915194799999881,
+    "warmup_full_seconds": 0.771755599998869,
+    "reference_run_full_seconds": 0.7893851000044378,
+    "host_cpu_percent_before_samples": [
+     4.0,
+     4.0,
+     2.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9988482981162821,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "smoothed",
+    "precision": "float64",
+    "mesh_um": 0.01,
+    "resolution_per_um": 100,
+    "cells": [
+     200,
+     364
+    ],
+    "cell_count": 72800,
+    "steps": 24000,
+    "cell_steps": 1747200000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 40,
+    "dt_s": 2.335067793382187e-17,
+    "t1_design": 0.7750993854622584,
+    "t1_band_mean": 0.7703934229830356,
+    "error_t1_design": 0.00045963690081085584,
+    "error_t1_band_mean": 0.000363688946237839,
+    "samples_full_seconds": [
+     2.678546400005871,
+     2.6289331000007223,
+     2.707400499995856
+    ],
+    "median_full_seconds": 2.678546400005871,
+    "min_full_seconds": 2.6289331000007223,
+    "max_full_seconds": 2.707400499995856,
+    "median_stepping_seconds": 2.494379099996877,
+    "repeats": 3,
+    "solver_seconds": 13.484833700007584,
+    "warmup_full_seconds": 2.69613930000196,
+    "reference_run_full_seconds": 2.7738144000031753,
+    "host_cpu_percent_before_samples": [
+     5.0,
+     8.0,
+     4.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 0.9999286488986519,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "torchfdtd",
+    "series": "smoothed",
+    "precision": "float64",
+    "mesh_um": 0.005,
+    "resolution_per_um": 200,
+    "cells": [
+     400,
+     728
+    ],
+    "cell_count": 291200,
+    "steps": 48000,
+    "cell_steps": 13977600000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 80,
+    "dt_s": 1.1675338966910934e-17,
+    "t1_design": 0.7748089299344713,
+    "t1_band_mean": 0.7701013615892164,
+    "error_t1_design": 0.00016918137302368574,
+    "error_t1_band_mean": 7.162755241862939e-05,
+    "samples_full_seconds": [
+     16.043984099997033,
+     16.032459499998367,
+     16.03222370000003
+    ],
+    "median_full_seconds": 16.032459499998367,
+    "min_full_seconds": 16.03222370000003,
+    "max_full_seconds": 16.043984099997033,
+    "median_stepping_seconds": 15.56308629999694,
+    "repeats": 3,
+    "solver_seconds": 80.01483040000312,
+    "warmup_full_seconds": 15.981395800001337,
+    "reference_run_full_seconds": 15.924767300006351,
+    "host_cpu_percent_before_samples": [
+     1.0,
+     7.0,
+     5.0
+    ],
+    "device": "NVIDIA GeForce RTX 3060",
+    "energy_sum_design": 1.0000489288483259,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   }
+  ],
+  "meep/staircase/float64": [
+   {
+    "solver": "meep",
+    "series": "staircase",
+    "precision": "float64",
+    "mesh_um": 0.04,
+    "resolution_per_um": 25,
+    "cells": [
+     50,
+     91
+    ],
+    "cell_count": 4550,
+    "steps": 6000,
+    "cell_steps": 27300000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 10,
+    "dt_s": 9.340271173528747e-17,
+    "t1_design": 0.7439797229488884,
+    "t1_band_mean": 0.741108038980369,
+    "error_t1_design": 0.030660025612559205,
+    "error_t1_band_mean": 0.02892169505642872,
+    "samples_full_seconds": [
+     0.44309954100000937,
+     0.5016190860000052,
+     0.43730801799999597
+    ],
+    "median_full_seconds": 0.44309954100000937,
+    "min_full_seconds": 0.43730801799999597,
+    "max_full_seconds": 0.5016190860000052,
+    "median_stepping_seconds": 0.440784500999996,
+    "repeats": 3,
+    "solver_seconds": 2.307802701000007,
+    "warmup_full_seconds": 0.43958448800000127,
+    "reference_run_full_seconds": 0.4861915679999953,
+    "host_cpu_percent_before_samples": [
+     20.0,
+     18.0,
+     6.0
+    ],
+    "device": "CPU, 4 MPI ranks",
+    "energy_sum_design": 1.0027153828838942,
+    "ridge_rows": 12,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "meep",
+    "series": "staircase",
+    "precision": "float64",
+    "mesh_um": 0.02,
+    "resolution_per_um": 50,
+    "cells": [
+     100,
+     182
+    ],
+    "cell_count": 18200,
+    "steps": 12000,
+    "cell_steps": 218400000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 20,
+    "dt_s": 4.670135586764374e-17,
+    "t1_design": 0.7761215398107009,
+    "t1_band_mean": 0.7706264464666497,
+    "error_t1_design": 0.0014817912492532948,
+    "error_t1_band_mean": 0.0005967124298519311,
+    "samples_full_seconds": [
+     0.9244777309999961,
+     0.9650251639999965,
+     0.9690073140000095
+    ],
+    "median_full_seconds": 0.9650251639999965,
+    "min_full_seconds": 0.9244777309999961,
+    "max_full_seconds": 0.9690073140000095,
+    "median_stepping_seconds": 0.9624103239999897,
+    "repeats": 3,
+    "solver_seconds": 4.7903403319999995,
+    "warmup_full_seconds": 0.9464593680000064,
+    "reference_run_full_seconds": 0.985370754999991,
+    "host_cpu_percent_before_samples": [
+     29.0,
+     26.0,
+     12.0
+    ],
+    "device": "CPU, 4 MPI ranks",
+    "energy_sum_design": 0.9988526758229641,
+    "ridge_rows": 25,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "meep",
+    "series": "staircase",
+    "precision": "float64",
+    "mesh_um": 0.01,
+    "resolution_per_um": 100,
+    "cells": [
+     200,
+     364
+    ],
+    "cell_count": 72800,
+    "steps": 24000,
+    "cell_steps": 1747200000,
+    "shift_um": [
+     0.005,
+     0.005
+    ],
+    "pml_cells": 40,
+    "dt_s": 2.335067793382187e-17,
+    "t1_design": 0.7756088705948798,
+    "t1_band_mean": 0.7707407304135873,
+    "error_t1_design": 0.0009691220334322459,
+    "error_t1_band_mean": 0.0007109963767895078,
+    "samples_full_seconds": [
+     3.1970484440000746,
+     3.1945322109999097,
+     3.2364711569999827
+    ],
+    "median_full_seconds": 3.1970484440000746,
+    "min_full_seconds": 3.1945322109999097,
+    "max_full_seconds": 3.2364711569999827,
+    "median_stepping_seconds": 3.1885244100000136,
+    "repeats": 3,
+    "solver_seconds": 15.913995234999902,
+    "warmup_full_seconds": 3.1276590379999334,
+    "reference_run_full_seconds": 3.1582843850000017,
+    "host_cpu_percent_before_samples": [
+     15.0,
+     26.0,
+     25.0
+    ],
+    "device": "CPU, 4 MPI ranks",
+    "energy_sum_design": 1.0003645100656087,
+    "ridge_rows": 50,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "meep",
+    "series": "staircase",
+    "precision": "float64",
+    "mesh_um": 0.005,
+    "resolution_per_um": 200,
+    "cells": [
+     400,
+     728
+    ],
+    "cell_count": 291200,
+    "steps": 48000,
+    "cell_steps": 13977600000,
+    "shift_um": [
+     0.0025,
+     0.0025
+    ],
+    "pml_cells": 80,
+    "dt_s": 1.1675338966910934e-17,
+    "t1_design": 0.774909250379276,
+    "t1_band_mean": 0.7701953335286907,
+    "error_t1_design": 0.00026950181782847693,
+    "error_t1_band_mean": 0.00016559949189298706,
+    "samples_full_seconds": [
+     34.272191015999965,
+     31.31631905200004,
+     27.48343681999995
+    ],
+    "median_full_seconds": 31.31631905200004,
+    "min_full_seconds": 27.48343681999995,
+    "max_full_seconds": 34.272191015999965,
+    "median_stepping_seconds": 31.27955233,
+    "repeats": 3,
+    "solver_seconds": 147.335224315,
+    "warmup_full_seconds": 28.408052881999993,
+    "reference_run_full_seconds": 25.855224545000056,
+    "host_cpu_percent_before_samples": [
+     23.0,
+     1.0,
+     21.0
+    ],
+    "device": "CPU, 4 MPI ranks",
+    "energy_sum_design": 1.0001125563580562,
+    "ridge_rows": 100,
+    "repeat_max_abs_t1_difference": 0.0
+   }
+  ],
+  "meep/smoothed/float64": [
+   {
+    "solver": "meep",
+    "series": "smoothed",
+    "precision": "float64",
+    "mesh_um": 0.04,
+    "resolution_per_um": 25,
+    "cells": [
+     50,
+     91
+    ],
+    "cell_count": 4550,
+    "steps": 6000,
+    "cell_steps": 27300000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 10,
+    "dt_s": 9.340271173528747e-17,
+    "t1_design": 0.7842548725111883,
+    "t1_band_mean": 0.7789624091270482,
+    "error_t1_design": 0.009615123949740734,
+    "error_t1_band_mean": 0.00893267509025042,
+    "samples_full_seconds": [
+     0.3891977890000362,
+     0.43073388700008763,
+     0.4452089330000035
+    ],
+    "median_full_seconds": 0.43073388700008763,
+    "min_full_seconds": 0.3891977890000362,
+    "max_full_seconds": 0.4452089330000035,
+    "median_stepping_seconds": 0.42860147200008214,
+    "repeats": 3,
+    "solver_seconds": 2.1622161140001026,
+    "warmup_full_seconds": 0.4214489080000021,
+    "reference_run_full_seconds": 0.4756265969999731,
+    "host_cpu_percent_before_samples": [
+     21.0,
+     17.0,
+     16.0
+    ],
+    "device": "CPU, 4 MPI ranks",
+    "energy_sum_design": 1.002893741332888,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "meep",
+    "series": "smoothed",
+    "precision": "float64",
+    "mesh_um": 0.02,
+    "resolution_per_um": 50,
+    "cells": [
+     100,
+     182
+    ],
+    "cell_count": 18200,
+    "steps": 12000,
+    "cell_steps": 218400000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 20,
+    "dt_s": 4.670135586764374e-17,
+    "t1_design": 0.7760969055908215,
+    "t1_band_mean": 0.7706405368266848,
+    "error_t1_design": 0.001457157029373879,
+    "error_t1_band_mean": 0.0006108027898870105,
+    "samples_full_seconds": [
+     1.0161620930000481,
+     1.0732459009998365,
+     1.1370418590001918
+    ],
+    "median_full_seconds": 1.0732459009998365,
+    "min_full_seconds": 1.0161620930000481,
+    "max_full_seconds": 1.1370418590001918,
+    "median_stepping_seconds": 1.0650845039999695,
+    "repeats": 3,
+    "solver_seconds": 5.214757143000043,
+    "warmup_full_seconds": 0.921193626999866,
+    "reference_run_full_seconds": 1.0671136630001001,
+    "host_cpu_percent_before_samples": [
+     30.0,
+     29.0,
+     1.0
+    ],
+    "device": "CPU, 4 MPI ranks",
+    "energy_sum_design": 0.9988197378522088,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "meep",
+    "series": "smoothed",
+    "precision": "float64",
+    "mesh_um": 0.01,
+    "resolution_per_um": 100,
+    "cells": [
+     200,
+     364
+    ],
+    "cell_count": 72800,
+    "steps": 24000,
+    "cell_steps": 1747200000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 40,
+    "dt_s": 2.335067793382187e-17,
+    "t1_design": 0.7751213491429508,
+    "t1_band_mean": 0.7704966380537801,
+    "error_t1_design": 0.0004816005815032609,
+    "error_t1_band_mean": 0.0004669040169823502,
+    "samples_full_seconds": [
+     3.795977593999851,
+     3.160922216000017,
+     3.767981170999974
+    ],
+    "median_full_seconds": 3.767981170999974,
+    "min_full_seconds": 3.160922216000017,
+    "max_full_seconds": 3.795977593999851,
+    "median_stepping_seconds": 3.7401553459999377,
+    "repeats": 3,
+    "solver_seconds": 17.973798011999634,
+    "warmup_full_seconds": 3.959840688999975,
+    "reference_run_full_seconds": 3.2890763419998166,
+    "host_cpu_percent_before_samples": [
+     null,
+     3.0,
+     5.0
+    ],
+    "device": "CPU, 4 MPI ranks",
+    "energy_sum_design": 1.0003476245157215,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   },
+   {
+    "solver": "meep",
+    "series": "smoothed",
+    "precision": "float64",
+    "mesh_um": 0.005,
+    "resolution_per_um": 200,
+    "cells": [
+     400,
+     728
+    ],
+    "cell_count": 291200,
+    "steps": 48000,
+    "cell_steps": 13977600000,
+    "shift_um": [
+     0.0,
+     0.0
+    ],
+    "pml_cells": 80,
+    "dt_s": 1.1675338966910934e-17,
+    "t1_design": 0.7747858624848096,
+    "t1_band_mean": 0.7701346959565329,
+    "error_t1_design": 0.00014611392336205675,
+    "error_t1_band_mean": 0.00010496191973519142,
+    "samples_full_seconds": [
+     23.218332672000088,
+     24.005290710000054,
+     26.039101701999925
+    ],
+    "median_full_seconds": 24.005290710000054,
+    "min_full_seconds": 23.218332672000088,
+    "max_full_seconds": 26.039101701999925,
+    "median_stepping_seconds": 23.91830631599987,
+    "repeats": 3,
+    "solver_seconds": 121.11868776200004,
+    "warmup_full_seconds": 25.294695635999915,
+    "reference_run_full_seconds": 22.561267042000054,
+    "host_cpu_percent_before_samples": [
+     10.0,
+     19.0,
+     28.0
+    ],
+    "device": "CPU, 4 MPI ranks",
+    "energy_sum_design": 1.0001055909966752,
+    "ridge_rows": null,
+    "repeat_max_abs_t1_difference": 0.0
+   }
+  ]
+ },
+ "matched_costs": {
+  "torchfdtd/staircase/float32": {
+   "t1_design": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.13410519999888493,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "coarsest point",
+     "wall_seconds": 0.13410519999888493,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.002": {
+     "status": "coarsest point",
+     "wall_seconds": 0.13410519999888493,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    }
+   },
+   "t1_band_mean": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.13410519999888493,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "coarsest point",
+     "wall_seconds": 0.13410519999888493,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.002": {
+     "status": "coarsest point",
+     "wall_seconds": 0.13410519999888493,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    }
+   }
+  },
+  "torchfdtd/staircase/float64": {
+   "t1_design": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.32891270000254735,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "coarsest point",
+     "wall_seconds": 0.32891270000254735,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.002": {
+     "status": "coarsest point",
+     "wall_seconds": 0.32891270000254735,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    }
+   },
+   "t1_band_mean": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.32891270000254735,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "coarsest point",
+     "wall_seconds": 0.32891270000254735,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.002": {
+     "status": "coarsest point",
+     "wall_seconds": 0.32891270000254735,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    }
+   }
+  },
+  "torchfdtd/smoothed/float32": {
+   "t1_design": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.2928077000033227,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "interpolated",
+     "wall_seconds": 0.3650955855603339,
+     "cell_steps": 57974910.25592034,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.002": {
+     "status": "interpolated",
+     "wall_seconds": 0.4888075568862135,
+     "cell_steps": 156968878.6352376,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    }
+   },
+   "t1_band_mean": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.2928077000033227,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "interpolated",
+     "wall_seconds": 0.33493669176739593,
+     "cell_steps": 43194907.92999943,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.002": {
+     "status": "interpolated",
+     "wall_seconds": 0.41149224174348104,
+     "cell_steps": 87212534.48666507,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    }
+   }
+  },
+  "torchfdtd/smoothed/float64": {
+   "t1_design": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.31916759999876376,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "interpolated",
+     "wall_seconds": 0.43844936849824817,
+     "cell_steps": 57973415.59094752,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.002": {
+     "status": "interpolated",
+     "wall_seconds": 0.6672675828218324,
+     "cell_steps": 156960551.29587317,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    }
+   },
+   "t1_band_mean": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.31916759999876376,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "interpolated",
+     "wall_seconds": 0.3872862199889244,
+     "cell_steps": 43193787.93776358,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.002": {
+     "status": "interpolated",
+     "wall_seconds": 0.5208159098023323,
+     "cell_steps": 87207229.45828599,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    }
+   }
+  },
+  "meep/staircase/float64": {
+   "t1_design": {
+    "0.01": {
+     "status": "interpolated",
+     "wall_seconds": 0.5908894466170137,
+     "cell_steps": 58900898.52428519,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.005": {
+     "status": "interpolated",
+     "wall_seconds": 0.706063230369082,
+     "cell_steps": 94783774.38510084,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.002": {
+     "status": "interpolated",
+     "wall_seconds": 0.8934659923649065,
+     "cell_steps": 177770752.37687555,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    }
+   },
+   "t1_band_mean": {
+    "0.01": {
+     "status": "interpolated",
+     "wall_seconds": 0.5482830408242416,
+     "cell_steps": 48227210.21218853,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.005": {
+     "status": "interpolated",
+     "wall_seconds": 0.6300567971253113,
+     "cell_steps": 69917808.12101524,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.002": {
+     "status": "interpolated",
+     "wall_seconds": 0.7571657529638754,
+     "cell_steps": 114237601.43248633,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    }
+   }
+  },
+  "meep/smoothed/float64": {
+   "t1_design": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.43073388700008763,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "interpolated",
+     "wall_seconds": 0.5910376335463364,
+     "cell_steps": 56122109.40323353,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.002": {
+     "status": "interpolated",
+     "wall_seconds": 0.9207853923024268,
+     "cell_steps": 154060711.20728225,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    }
+   },
+   "t1_band_mean": {
+    "0.01": {
+     "status": "coarsest point",
+     "wall_seconds": 0.43073388700008763,
+     "cell_steps": 27300000.0,
+     "between_meshes_um": [
+      0.04,
+      0.04
+     ]
+    },
+    "0.005": {
+     "status": "interpolated",
+     "wall_seconds": 0.5247729501107644,
+     "cell_steps": 42805994.260392584,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    },
+    "0.002": {
+     "status": "interpolated",
+     "wall_seconds": 0.7167949994643874,
+     "cell_steps": 87088379.628521,
+     "between_meshes_um": [
+      0.04,
+      0.02
+     ]
+    }
+   }
+  }
+ },
+ "hardware_statement": "TorchFDTD ran on a GPU (NVIDIA RTX 3060, fused CUDA kernels) and Meep 1.34 on a CPU (Intel i7-12700, 4 MPI ranks in WSL). Wall times therefore compare two solver-and-hardware combinations on a shared workstation; no conclusion about the algorithms is drawn from the cost ratio. The cell-count axis is hardware-independent.",
+ "acceptance": {
+  "records": {
+   "passed": true,
+   "points": 24,
+   "detail": "every point has three timed runs after one warm-up; median and range recorded"
+  },
+  "curves": {
+   "passed": true,
+   "figure": "docs/figures/g7/G7-04.png",
+   "detail": "rendered by this script from the summary numbers; tests/test_g7_solvers.py re-derives them from the point records"
+  },
+  "matched_cost": {
+   "passed": true,
+   "detail": "errors 0.01, 0.005, 0.002 for each solver, sampling series and TorchFDTD precision, both observables; log-log interpolation in refinement order, last crossing (common.cost_to_reach)"
+  },
+  "separation": {
+   "passed": true,
+   "detail": "equal-cell-count table (same mesh) and equal-error table (matched costs) are separate"
+  },
+  "hardware": {
+   "passed": true,
+   "statement": "TorchFDTD ran on a GPU (NVIDIA RTX 3060, fused CUDA kernels) and Meep 1.34 on a CPU (Intel i7-12700, 4 MPI ranks in WSL). Wall times therefore compare two solver-and-hardware combinations on a shared workstation; no conclusion about the algorithms is drawn from the cost ratio. The cell-count axis is hardware-independent."
+  }
+ },
+ "solver_seconds": {
+  "torchfdtd": 293.6212136000104,
+  "meep": 316.81682161399976
+ },
+ "reference_check_passed": true,
+ "tables": {
+  "reference": [
+   "| TORCWA orders | T+1(1.55) | band-mean T+1 | role |",
+   "|---|---|---|---|",
+   "| 101 | 0.774640 | 0.770030 | reference |",
+   "| 241 | 0.774649 | 0.770031 | check (case G7-04r2) |",
+   "| largest difference, six efficiencies x 41 wavelengths | 6.4e-05 (T+1 at 1.50 um) | limit 1e-04 | pass |"
+  ],
+  "geometry": [
+   "| mesh (um) | Meep resolution (1/um) | cells | absorber cells per y face | steps | dt (s) | staircase shift (um) | Ez rows in the ridge, TorchFDTD / Meep (staircase) |",
+   "|---|---|---|---|---|---|---|---|",
+   "| 0.04 | 25 | 50 x 91 | 10 | 6,000 | 9.340271e-17 | 0 | 13 / 12 |",
+   "| 0.02 | 50 | 100 x 182 | 20 | 12,000 | 4.670136e-17 | 0 | 25 / 25 |",
+   "| 0.01 | 100 | 200 x 364 | 40 | 24,000 | 2.335068e-17 | 0.005 | 50 / 50 |",
+   "| 0.005 | 200 | 400 x 728 | 80 | 48,000 | 1.167534e-17 | 0.0025 | 100 / 100 |"
+  ],
+  "points": [
+   "| solver | series | precision | mesh (um) | resolution (1/um) | cells | steps | median time (s) | range (s) | T+1(1.55) | error | band-mean T+1 | error |",
+   "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+   "| TorchFDTD | staircase | float32 | 0.04 | 25 | 50 x 91 = 4,550 | 6,000 | 0.134 | 0.121-0.261 | 0.77406 | 5.78e-04 | 0.77113 | 1.10e-03 |",
+   "| TorchFDTD | staircase | float32 | 0.02 | 50 | 100 x 182 = 18,200 | 12,000 | 0.401 | 0.312-0.433 | 0.77612 | 1.48e-03 | 0.77063 | 6.04e-04 |",
+   "| TorchFDTD | staircase | float32 | 0.01 | 100 | 200 x 364 = 72,800 | 24,000 | 1.393 | 1.368-1.423 | 0.77521 | 5.74e-04 | 0.77032 | 2.95e-04 |",
+   "| TorchFDTD | staircase | float32 | 0.005 | 200 | 400 x 728 = 291,200 | 48,000 | 6.936 | 6.925-7.031 | 0.77484 | 1.99e-04 | 0.77009 | 5.64e-05 |",
+   "| TorchFDTD | staircase | float64 | 0.04 | 25 | 50 x 91 = 4,550 | 6,000 | 0.329 | 0.287-0.400 | 0.77406 | 5.78e-04 | 0.77113 | 1.10e-03 |",
+   "| TorchFDTD | staircase | float64 | 0.02 | 50 | 100 x 182 = 18,200 | 12,000 | 0.675 | 0.652-0.679 | 0.77612 | 1.48e-03 | 0.77063 | 6.04e-04 |",
+   "| TorchFDTD | staircase | float64 | 0.01 | 100 | 200 x 364 = 72,800 | 24,000 | 2.537 | 2.537-2.561 | 0.77521 | 5.74e-04 | 0.77032 | 2.95e-04 |",
+   "| TorchFDTD | staircase | float64 | 0.005 | 200 | 400 x 728 = 291,200 | 48,000 | 15.072 | 14.977-15.074 | 0.77484 | 1.99e-04 | 0.77009 | 5.64e-05 |",
+   "| TorchFDTD | smoothed | float32 | 0.04 | 25 | 50 x 91 = 4,550 | 6,000 | 0.293 | 0.173-0.316 | 0.78464 | 1.00e-02 | 0.77913 | 9.10e-03 |",
+   "| TorchFDTD | smoothed | float32 | 0.02 | 50 | 100 x 182 = 18,200 | 12,000 | 0.538 | 0.513-0.546 | 0.77612 | 1.48e-03 | 0.77063 | 6.04e-04 |",
+   "| TorchFDTD | smoothed | float32 | 0.01 | 100 | 200 x 364 = 72,800 | 24,000 | 1.718 | 1.705-1.730 | 0.77510 | 4.60e-04 | 0.77039 | 3.64e-04 |",
+   "| TorchFDTD | smoothed | float32 | 0.005 | 200 | 400 x 728 = 291,200 | 48,000 | 8.354 | 8.340-8.486 | 0.77481 | 1.69e-04 | 0.77010 | 7.17e-05 |",
+   "| TorchFDTD | smoothed | float64 | 0.04 | 25 | 50 x 91 = 4,550 | 6,000 | 0.319 | 0.240-0.358 | 0.78464 | 1.00e-02 | 0.77913 | 9.10e-03 |",
+   "| TorchFDTD | smoothed | float64 | 0.02 | 50 | 100 x 182 = 18,200 | 12,000 | 0.767 | 0.734-0.853 | 0.77612 | 1.48e-03 | 0.77063 | 6.04e-04 |",
+   "| TorchFDTD | smoothed | float64 | 0.01 | 100 | 200 x 364 = 72,800 | 24,000 | 2.679 | 2.629-2.707 | 0.77510 | 4.60e-04 | 0.77039 | 3.64e-04 |",
+   "| TorchFDTD | smoothed | float64 | 0.005 | 200 | 400 x 728 = 291,200 | 48,000 | 16.032 | 16.032-16.044 | 0.77481 | 1.69e-04 | 0.77010 | 7.16e-05 |",
+   "| Meep | staircase | float64 | 0.04 | 25 | 50 x 91 = 4,550 | 6,000 | 0.443 | 0.437-0.502 | 0.74398 | 3.07e-02 | 0.74111 | 2.89e-02 |",
+   "| Meep | staircase | float64 | 0.02 | 50 | 100 x 182 = 18,200 | 12,000 | 0.965 | 0.924-0.969 | 0.77612 | 1.48e-03 | 0.77063 | 5.97e-04 |",
+   "| Meep | staircase | float64 | 0.01 | 100 | 200 x 364 = 72,800 | 24,000 | 3.197 | 3.195-3.236 | 0.77561 | 9.69e-04 | 0.77074 | 7.11e-04 |",
+   "| Meep | staircase | float64 | 0.005 | 200 | 400 x 728 = 291,200 | 48,000 | 31.316 | 27.483-34.272 | 0.77491 | 2.70e-04 | 0.77020 | 1.66e-04 |",
+   "| Meep | smoothed | float64 | 0.04 | 25 | 50 x 91 = 4,550 | 6,000 | 0.431 | 0.389-0.445 | 0.78425 | 9.62e-03 | 0.77896 | 8.93e-03 |",
+   "| Meep | smoothed | float64 | 0.02 | 50 | 100 x 182 = 18,200 | 12,000 | 1.073 | 1.016-1.137 | 0.77610 | 1.46e-03 | 0.77064 | 6.11e-04 |",
+   "| Meep | smoothed | float64 | 0.01 | 100 | 200 x 364 = 72,800 | 24,000 | 3.768 | 3.161-3.796 | 0.77512 | 4.82e-04 | 0.77050 | 4.67e-04 |",
+   "| Meep | smoothed | float64 | 0.005 | 200 | 400 x 728 = 291,200 | 48,000 | 24.005 | 23.218-26.039 | 0.77479 | 1.46e-04 | 0.77013 | 1.05e-04 |"
+  ],
+  "equal_cell_count": [
+   "| mesh (um) | cells | steps | series | TorchFDTD float32: error 1.55 / error band / time (s) | TorchFDTD float64: error 1.55 / error band / time (s) | Meep float64: error 1.55 / error band / time (s) |",
+   "|---|---|---|---|---|---|---|",
+   "| 0.04 | 4,550 | 6,000 | staircase | 5.78e-04 / 1.10e-03 / 0.134 | 5.78e-04 / 1.10e-03 / 0.329 | 3.07e-02 / 2.89e-02 / 0.443 |",
+   "| 0.04 | 4,550 | 6,000 | smoothed | 1.00e-02 / 9.10e-03 / 0.293 | 1.00e-02 / 9.10e-03 / 0.319 | 9.62e-03 / 8.93e-03 / 0.431 |",
+   "| 0.02 | 18,200 | 12,000 | staircase | 1.48e-03 / 6.04e-04 / 0.401 | 1.48e-03 / 6.04e-04 / 0.675 | 1.48e-03 / 5.97e-04 / 0.965 |",
+   "| 0.02 | 18,200 | 12,000 | smoothed | 1.48e-03 / 6.04e-04 / 0.538 | 1.48e-03 / 6.04e-04 / 0.767 | 1.46e-03 / 6.11e-04 / 1.073 |",
+   "| 0.01 | 72,800 | 24,000 | staircase | 5.74e-04 / 2.95e-04 / 1.393 | 5.74e-04 / 2.95e-04 / 2.537 | 9.69e-04 / 7.11e-04 / 3.197 |",
+   "| 0.01 | 72,800 | 24,000 | smoothed | 4.60e-04 / 3.64e-04 / 1.718 | 4.60e-04 / 3.64e-04 / 2.679 | 4.82e-04 / 4.67e-04 / 3.768 |",
+   "| 0.005 | 291,200 | 48,000 | staircase | 1.99e-04 / 5.64e-05 / 6.936 | 1.99e-04 / 5.64e-05 / 15.072 | 2.70e-04 / 1.66e-04 / 31.316 |",
+   "| 0.005 | 291,200 | 48,000 | smoothed | 1.69e-04 / 7.17e-05 / 8.354 | 1.69e-04 / 7.16e-05 / 16.032 | 1.46e-04 / 1.05e-04 / 24.005 |"
+  ],
+  "equal_error": [
+   "| curve | observable | error 0.01 | error 0.005 | error 0.002 |",
+   "|---|---|---|---|---|",
+   "| TorchFDTD staircase float32 | T+1 at 1.55 um | <= 0.134 s / <= 2.73e+07 | <= 0.134 s / <= 2.73e+07 | <= 0.134 s / <= 2.73e+07 |",
+   "| TorchFDTD staircase float32 | band-mean T+1 | <= 0.134 s / <= 2.73e+07 | <= 0.134 s / <= 2.73e+07 | <= 0.134 s / <= 2.73e+07 |",
+   "| TorchFDTD staircase float64 | T+1 at 1.55 um | <= 0.329 s / <= 2.73e+07 | <= 0.329 s / <= 2.73e+07 | <= 0.329 s / <= 2.73e+07 |",
+   "| TorchFDTD staircase float64 | band-mean T+1 | <= 0.329 s / <= 2.73e+07 | <= 0.329 s / <= 2.73e+07 | <= 0.329 s / <= 2.73e+07 |",
+   "| TorchFDTD smoothed float32 | T+1 at 1.55 um | <= 0.293 s / <= 2.73e+07 | 0.365 s / 5.8e+07 | 0.489 s / 1.57e+08 |",
+   "| TorchFDTD smoothed float32 | band-mean T+1 | <= 0.293 s / <= 2.73e+07 | 0.335 s / 4.32e+07 | 0.411 s / 8.72e+07 |",
+   "| TorchFDTD smoothed float64 | T+1 at 1.55 um | <= 0.319 s / <= 2.73e+07 | 0.438 s / 5.8e+07 | 0.667 s / 1.57e+08 |",
+   "| TorchFDTD smoothed float64 | band-mean T+1 | <= 0.319 s / <= 2.73e+07 | 0.387 s / 4.32e+07 | 0.521 s / 8.72e+07 |",
+   "| Meep staircase | T+1 at 1.55 um | 0.591 s / 5.89e+07 | 0.706 s / 9.48e+07 | 0.893 s / 1.78e+08 |",
+   "| Meep staircase | band-mean T+1 | 0.548 s / 4.82e+07 | 0.63 s / 6.99e+07 | 0.757 s / 1.14e+08 |",
+   "| Meep smoothed | T+1 at 1.55 um | <= 0.431 s / <= 2.73e+07 | 0.591 s / 5.61e+07 | 0.921 s / 1.54e+08 |",
+   "| Meep smoothed | band-mean T+1 | <= 0.431 s / <= 2.73e+07 | 0.525 s / 4.28e+07 | 0.717 s / 8.71e+07 |"
+  ]
+ }
+}

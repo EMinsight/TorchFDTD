@@ -27,6 +27,13 @@ def test_workflow_triggers_are_the_declared_three():
     assert set(triggers) == {'push', 'pull_request', 'workflow_dispatch'}, triggers
 
 
+def test_workflow_skips_only_the_manuscripts():
+    """Tests read the README and documents under docs/ (the validation report, the gate records, the release review),
+    so a push that changes only those must still run the suite; only the manuscripts are skipped."""
+    ignored = re.findall(r"^\s+- '([^']+)'", workflow_text().split('jobs:', 1)[0], re.MULTILINE)
+    assert ignored and set(ignored) == {'docs/paper/**', 'docs/paper-cpc/**'}, ignored
+
+
 def test_workflow_runs_the_cpu_pr_suite_only():
     text = workflow_text()
     assert 'scripts/run_suite.py cpu-pr' in text

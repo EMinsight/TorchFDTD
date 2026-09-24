@@ -2009,7 +2009,8 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_gpu_runner_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-06.xml",
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_gpu_runner_policy.py --junitxml=D:/TorchFDTD/.local/worktrees/g9-report/.local/tmp/junit/rerecord/G4-06.xml",
             "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_gpu_runner_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G4-06.xml",
-            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_gpu_runner_policy.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G4-06.xml"
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_gpu_runner_policy.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G4-06.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_gpu_runner_policy.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G4-06.xml"
           ],
           "required_tests": [
             "tests/test_gpu_runner_policy.py"
@@ -2019,7 +2020,8 @@
             "20260921T212752Z-g4-06-c6698b17",
             "20260923T042713Z-g4-06-61d814f9",
             "20260923T142707Z-g4-06-c173d093",
-            "20260923T214307Z-g4-06-77b53ff7"
+            "20260923T214307Z-g4-06-77b53ff7",
+            "20260924T092226Z-g4-06-2028458c"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2832,7 +2834,14 @@
           "required_tests": [],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-24",
+            "decision": "approved",
+            "scope": "G7-01: the revised case docs/validation/cases/G7-01r2.json supersedes G7-01.json (G7-01r2: design and judged mesh 0.01 um with a 0.005 um mesh check; 3 um more air and substrate in every run; 1120 fs of physical time; the filter radius chosen on development seeds 11 to 13 to meet the 3-pixel features; (c) and (e) judged at least 0.02 um from every Rayleigh anomaly, excluded wavelengths reported; TORCWA TM converged to 0.003; acceptance limits unchanged)",
+            "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
+            "note": "the declared fixture could not meet its own criteria for any design: (1) at the fixed k_x the +1 air order has a Rayleigh anomaly at 1.5111 um inside the band and the declared cell leaves 0.91 um of air, so the evanescent order reaches the absorber; (2) the 0.02 um mesh is one cell per pixel, too coarse for a 0.02 agreement; (3) 560 fs does not outlast a resonance near 1.50 um; (4) a 0.06 um filter does not guarantee the declared 3-pixel features; (5) TORCWA TM with the Laurent rule converges as 1/N and stopped short of its tolerance"
+          }
         },
         {
           "id": "G7-02",
@@ -2864,23 +2873,60 @@
           "required_tests": [],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-24",
+            "decision": "approved",
+            "scope": "G7-03: the revised case docs/validation/cases/G7-03r2.json supersedes G7-03.json (G7-03r2: 0.1 um design pixels (12 by 20) in the same box, the filter radius chosen on development seeds to meet the 0.4 um features, and (b) judged against the best G6 design evaluated by the same pipeline at the same 0.05 um mesh (0.6025) instead of its 0.1 um value (0.6136); other limits unchanged)",
+            "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
+            "note": "the declared baseline 0.6136 is a G6 design evaluated at 0.1 um, while G7 judges at 0.05 um, and the mesh alone shifts this device by about 0.02; and 0.2 um pixels leave the declared 0.4 um linewidth and gap only two pixels, too coarse a parameterization for a fabrication-aware design"
+          }
         },
         {
           "id": "G7-04",
           "title": "동일 정확도 독립 solver 교차 검증 및 공정 비교",
           "specification": "동일 정확도 독립 solver 교차 검증 및 공정 비교",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
-          "verification_state": "NOT_RUN",
+          "implementation_state": "IMPLEMENTED",
+          "verification_state": "VERIFIED",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
-          "actual_test_commands": [],
-          "required_tests": [],
-          "evidence": [],
+          "code_paths": [
+            "examples/g7/solvers/common.py",
+            "examples/g7/solvers/torchfdtd_sweep.py",
+            "examples/g7/solvers/meep_sweep.py",
+            "examples/g7/solvers/rcwa_reference.py",
+            "examples/g7/solvers/analyze.py",
+            "examples/g7/solvers/readout_check.py",
+            "docs/validation/cases/G7-04r2.json",
+            "docs/G7_RESULTS.md"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-04.xml"
+          ],
+          "actual_test_commands": [
+            "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-04.xml"
+          ],
+          "required_tests": [
+            "tests/test_g7_solvers.py"
+          ],
+          "evidence": [
+            "20260924T140733Z-g7-04-a1b4bd63"
+          ],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-24",
+            "decision": "approved",
+            "scope": "G7-04: the revised case docs/validation/cases/G7-04r2.json supersedes G7-04.json (G7-04r2: the reference is checked against 241 orders instead of 51 (every efficiency within 1e-4).)",
+            "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
+            "note": "the declared reference check compared the 101-order TORCWA reference with a 51-order solution, which measures the error of the 51-order solution rather than of the reference; a reference is checked against a higher order"
+          },
+          "watch_paths": [
+            "examples/g7/solvers/common.py",
+            "examples/g7/solvers/analyze.py",
+            "docs/validation/cases/G7-04r2.json"
+          ],
+          "implementation_note": "The accuracy-versus-cost sweeps of TorchFDTD (RTX 3060) and Meep 1.34 (i7-12700, 4 ranks) against a TORCWA reference checked against 241 orders (G7-04r2) are committed under docs/validation/g7/G7-04/; the judged test reproduces the tables and asserts every acceptance item from those records. The TorchFDTD records name the package that ran."
         },
         {
           "id": "G7-05",
@@ -3526,7 +3572,11 @@
             "20260924T002805Z-g9-07-9330aedc",
             "20260924T080237Z-g9-07-ecffe5e5",
             "20260924T083146Z-g9-07-22bfbb6e",
-            "20260924T083421Z-g9-07-1d9e17b9"
+            "20260924T083421Z-g9-07-1d9e17b9",
+            "20260924T092504Z-g9-07-b6b58a57",
+            "20260924T122152Z-g9-07-0714d191",
+            "20260924T140459Z-g9-07-42bba8f8",
+            "20260924T140841Z-g9-07-b59bcfc6"
           ],
           "blocker": null,
           "scope_change_approval": null,
