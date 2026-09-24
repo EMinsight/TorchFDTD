@@ -2009,7 +2009,8 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_gpu_runner_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/g4-06.xml",
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_gpu_runner_policy.py --junitxml=D:/TorchFDTD/.local/worktrees/g9-report/.local/tmp/junit/rerecord/G4-06.xml",
             "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_gpu_runner_policy.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G4-06.xml",
-            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_gpu_runner_policy.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G4-06.xml"
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_gpu_runner_policy.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G4-06.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_gpu_runner_policy.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G4-06.xml"
           ],
           "required_tests": [
             "tests/test_gpu_runner_policy.py"
@@ -2019,7 +2020,8 @@
             "20260921T212752Z-g4-06-c6698b17",
             "20260923T042713Z-g4-06-61d814f9",
             "20260923T142707Z-g4-06-c173d093",
-            "20260923T214307Z-g4-06-77b53ff7"
+            "20260923T214307Z-g4-06-77b53ff7",
+            "20260924T092226Z-g4-06-2028458c"
           ],
           "blocker": null,
           "scope_change_approval": null,
