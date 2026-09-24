@@ -1,14 +1,18 @@
 """G7-01: the metagrating application workflow of docs/G7_WORKFLOWS.md, judged on the criteria of
-docs/validation/cases/G7-01.json.
+docs/validation/cases/G7-01r2.json.
 
 The fast tests check the mechanics at a CPU size: the permittivity transfer, the diffraction-order
-decomposition against the fixture's compare.py, the objective's adjoint gradient against finite
-differences, the bare-substrate Fresnel balance for TE and TM at both incidences, the TORCWA script
-against a uniform film, and the records of a short run. TORCHFDTD_G7_FULL=1 runs the declared
-workflow (the RTX 3060 and the TORCWA interpreter); TORCHFDTD_G7_RECORD=<dir> writes its records
-there (docs/validation/g7/G7-01 for the committed evidence) and TORCHFDTD_G7_CHECKPOINT_DIR=<dir>
-keeps the design states there so that an interrupted run resumes. Without the flag, the committed
-records are re-judged when present. Every seed is judged; none is selected.
+decomposition against the fixture's compare.py, the Rayleigh anomalies, the radius-selection rule,
+the objective's adjoint gradient against finite differences, the bare-substrate Fresnel balance for
+TE and TM at both incidences, the TORCWA script against a uniform film, and the records of a short
+run. TORCHFDTD_G7_FULL=1 runs the declared workflow (the RTX 3060 and the TORCWA interpreter) from
+the radius selection recorded in the records directory: one seed stage per declared seed as
+parallel subprocesses, each prefixed by TORCHFDTD_G7_LAUNCHER (the GPU lock command on the shared
+workstation), then the judgement. TORCHFDTD_G7_RECORD=<dir> names the records directory
+(docs/validation/g7/G7-01 for the committed evidence) and TORCHFDTD_G7_CHECKPOINT_DIR=<dir> keeps the
+design states so that an interrupted run resumes. The subprocesses import the same torchfdtd as this
+test (checkout or installed wheel). Without the flag, the committed records are re-judged when
+present. Every seed is judged; none is selected.
 """
 import importlib.util
 import json
@@ -17,6 +21,7 @@ import os
 from dataclasses import replace
 from pathlib import Path
 import subprocess
+import sys
 from types import SimpleNamespace
 
 import numpy as np
@@ -31,6 +36,7 @@ FULL = os.environ.get('TORCHFDTD_G7_FULL') == '1'
 RECORD = os.environ.get('TORCHFDTD_G7_RECORD')
 CHECKPOINTS = os.environ.get('TORCHFDTD_G7_CHECKPOINT_DIR')
 RCWA_PYTHON = os.environ.get('TORCHFDTD_RCWA_PYTHON', 'C:/anaconda3/python.exe')
+LAUNCHER = os.environ.get('TORCHFDTD_G7_LAUNCHER', '').split()
 CRITERIA = ('all_seeds', 'performance', 'rcwa_agreement', 'mesh', 'energy_balance', 'fabrication')
 
 
@@ -52,7 +58,7 @@ def fake_plane(x_um, fields):
 
 def test_binary_density_is_an_exact_staircase_on_the_design_mesh(fixture):
     _, g = fixture
-    region = workflow.build_project(g, .02, 'TE', 'normal', small()).region
+    region = workflow.build_project(g, .02, 'TE', 'normal', small(extension_um=0.)).region
     ez = workflow.layer_epsilon(torch.as_tensor(workflow.two_ridge_density(g)), region, g)[:, :, 0, 2].numpy()
     si, sub = g['ridge_index']**2, g['substrate_index']**2
     # the fixture's staircase: Ez columns 2-5 and 29-39, rows 92-116, substrate rows 0-91
@@ -60,13 +66,60 @@ def test_binary_density_is_an_exact_staircase_on_the_design_mesh(fixture):
     assert np.flatnonzero(np.isclose(ez[3], si)).tolist() == list(range(92, 117))
     assert np.flatnonzero(np.isclose(ez[0], sub)).tolist() == list(range(92))
     assert set(np.unique(np.round(ez, 6))) <= {1., round(sub, 6), round(si, 6)}
-    fine = workflow.build_project(g, .01, 'TM', 'normal', small()).region
+    fine = workflow.build_project(g, .01, 'TM', 'normal', small(extension_um=0.)).region
     eps = workflow.layer_epsilon(torch.as_tensor(workflow.two_ridge_density(g)), fine, g)[:, :, 0].numpy()
     # on the 0.01 um grid Ez column 3 (x = -0.97 um) lies on the left edge of the first ridge and row 183 on the substrate top:
     # both receive the mean of the two sides; the normal components Ex (walls) and Ey (layer faces) never straddle
     assert math.isclose(eps[3, 200, 2], (si+1)/2, rel_tol=1e-6) and math.isclose(eps[0, 183, 2], (sub+1)/2, rel_tol=1e-6)
     assert set(np.unique(np.round(eps[:, 184:233, 0], 5))) == {1., round(si, 5)}
     assert set(np.unique(np.round(eps[4:11, :, 1], 5))) == {1., round(sub, 5), round(si, 5)}
+
+
+def test_revised_case_sets_the_declared_run(fixture):
+    case, g = fixture
+    p = workflow.case_parameters(case)
+    assert p['candidates_um'] == [.06, .08, .1, .12] and p['development_seeds'] == [11, 12, 13]
+    assert (p['selection_mesh_um'], p['selection_time_fs'], p['exclusion_um'], p['rcwa_error_target'], p['absorber_um']) == (.02, 560., .02, .003, .4)
+    settings = workflow.Settings.declared(case, dict(chosen_radius_um=.08))
+    assert (settings.design_mesh_um, settings.fine_mesh_um, settings.physical_time_fs, settings.extension_um) == (.01, .005, 1120., 3.)
+    assert (settings.filter_radius_um, settings.seeds, settings.betas, settings.band_points) == (.08, (1, 2, 3), (8., 16., 32., 64.), 41)
+    selection = workflow.Settings.for_selection(case, .1, 12)
+    assert (selection.design_mesh_um, selection.physical_time_fs, selection.extension_um, selection.seeds) == (.02, 560., 3., (12,))
+    # 0.005 um: 1928 rows for the 9.64 um cell, the 0.4 um absorber as 80 cells per face, 1120 fs
+    region = workflow.build_project(g, .005, 'TE', 'normal', settings).region
+    assert region.shape[:2] == (400, 1928) and region.pml_layers(1, 0) == region.pml_layers(1, 1) == 80
+    assert math.isclose(region.steps*region.time_step, 1120e-15, rel_tol=1e-4)
+    with pytest.raises(ValueError, match='chose no radius'):
+        workflow.Settings.declared(case, dict(chosen_radius_um=None))
+
+
+def test_rayleigh_anomalies_and_the_excluded_wavelengths(fixture):
+    _, g = fixture
+    kx = workflow.bloch_kx(g)
+    inside = [a for a in workflow.rayleigh_anomalies(g, kx) if 1.5 <= a['wavelength_um'] <= 1.6]
+    assert [(a['order'], a['medium']) for a in inside] == [(1, 'air')] and math.isclose(inside[0]['wavelength_um'], 1.5111, abs_tol=1e-4)
+    wavelength = np.linspace(1.5, 1.6, 41)
+    kept = workflow.anomaly_distance(g, kx, wavelength) >= .02-1e-12
+    assert wavelength[~kept].round(4).tolist() == [round(1.5+.0025*k, 4) for k in range(13)]
+    assert workflow.anomaly_distance(g, 0., wavelength).min() > .05     # normal incidence: 1.444 um in the substrate, 2 um in air
+
+
+def test_radius_selection_takes_the_smallest_compliant_candidate(tmp_path):
+    def write(radius, seed, violations):
+        workflow.write_json(tmp_path/f'selection-r{radius:g}-seed{seed}.json',
+                            dict(radius_um=radius, seed=seed, violations=violations, record={}, environment=dict(commit='c')))
+    for seed, violations in ((11, []), (12, []), (13, ['min_gap'])):
+        write(.06, seed, violations)
+    write(.08, 11, [])
+    write(.08, 12, [])
+    selection = workflow.select_decide(tmp_path)
+    assert selection['chosen_radius_um'] is None and selection['pending_radius_um'] == [.08]
+    write(.08, 13, [])
+    selection = workflow.select_decide(tmp_path)
+    assert selection['chosen_radius_um'] == .08 and selection['pending_radius_um'] == [] and len(selection['runs']) == 6
+    assert selection['development_seeds'] == [11, 12, 13] and not selection['judged_seeds_used']
+    with pytest.raises(ValueError, match='not a development seed'):
+        workflow.select_run(.06, 2, tmp_path)
 
 
 def test_te_decomposition_matches_the_fixture_routine(fixture):
@@ -114,7 +167,7 @@ def test_decomposition_separates_known_waves_at_the_bloch_wavevector(fixture, po
 @pytest.mark.parametrize('polarization,incidence', [('TE', 'normal'), ('TM', 'normal'), ('TE', 'bloch'), ('TM', 'bloch')])
 def test_bare_substrate_matches_fresnel(fixture, polarization, incidence):
     _, g = fixture
-    evaluator = workflow.CaseEvaluator(g, small(time_fraction=.3, band_points=3), .04, polarization, incidence)
+    evaluator = workflow.CaseEvaluator(g, small(physical_time_fs=168., band_points=3), .04, polarization, incidence)
     d = evaluator.diagnostics
     assert d['max_abs_R0_minus_fresnel'] < 3e-3 and d['max_abs_T0_minus_fresnel'] < 3e-3, d
     assert d['max_other_order_power_over_incident'] < 1e-8, d
@@ -124,7 +177,7 @@ def test_bare_substrate_matches_fresnel(fixture, polarization, incidence):
 
 def test_objective_gradient_matches_central_differences(fixture):
     _, g = fixture
-    objective = workflow.TransmissionObjective(g, small(time_fraction=.1))
+    objective = workflow.TransmissionObjective(g, small())
     rho = (.2+.6*torch.rand((workflow.pixel_count(g), 1), generator=torch.Generator().manual_seed(3))).requires_grad_(True)
     loss, metrics = objective(rho)
     assert set(metrics) == {'T+1 1.50 um', 'T+1 1.55 um', 'T+1 1.60 um', 'T-1 mean', 'T+0 mean', 'T+1 mean'}
@@ -184,17 +237,17 @@ def load_records(directory):
 def rejudge(directory):
     """Recompute every criterion from the seed records and check it against the summary."""
     summary, records = load_records(directory)
-    case, _, provenance = workflow.declared()
+    case, g, provenance = workflow.declared()
     assert summary['provenance'] == provenance, 'the records were judged against another case file or geometry'
     settings = workflow.Settings(**{k: tuple(v) if isinstance(v, list) else v for k, v in summary['settings'].items()})
-    criteria = json.loads(json.dumps(workflow.judge(records, case, settings)))
+    criteria = json.loads(json.dumps(workflow.judge(records, case, settings, g)))
     assert criteria == summary['criteria']
     assert set(criteria) == set(CRITERIA)
     return summary, records, criteria
 
 
 def test_short_run_writes_complete_records(tmp_path):
-    settings = small(time_fraction=.1, band_points=3)
+    settings = small(band_points=3)
     workflow.run(settings, tmp_path, rcwa_python=RCWA_PYTHON, skip_rcwa=True)
     summary, records, criteria = rejudge(tmp_path)
     assert [r['seed'] for r in records] == [1]
@@ -208,7 +261,8 @@ def test_short_run_writes_complete_records(tmp_path):
     assert record['fabrication']['declared'] == dict(min_linewidth_um=.06, min_gap_um=.06, perturbation_um=.02, boundary=['periodic', 'extend'])
     # a development run is not the declared workflow: one seed and no TORCWA check fail (a) and (c)
     assert not criteria['all_seeds']['passed'] and not criteria['rcwa_agreement']['passed'] and not summary['all_passed']
-    assert summary['rcwa'] is None and len(summary['references']) == 8
+    assert summary['rcwa'] == {'1': None} and len(summary['references']['1']) == 8
+    assert all(math.isclose(e['physical_time_fs'], 56., rel_tol=1e-3) for e in record['evaluations'])
     # every record names the torchfdtd it imported (checkout or installed wheel) and the checkout commit
     for environment in (record['environment'], summary['environment']):
         assert Path(environment['torchfdtd']['file']).name == '__init__.py' and environment['torchfdtd']['version']
@@ -226,14 +280,24 @@ def test_two_ridge_fixture_reproduces_the_committed_native_record(fixture):
     if not torch.cuda.is_available():
         pytest.skip('CUDA unavailable')
     _, g = fixture
-    result = workflow.fixture_reproduction(workflow.CaseEvaluator(g, workflow.Settings(), .02, 'TE', 'normal'), g)
+    result = workflow.fixture_reproduction(g)
+    assert result['steps'] == g['steps']
     assert result['max_abs_order_efficiency_difference'] < 1e-4, result
 
 
 @pytest.mark.skipif(not FULL, reason='set TORCHFDTD_G7_FULL=1 for the declared three-seed workflow and its TORCWA check (hours)')
-def test_declared_workflow_meets_every_acceptance_criterion(tmp_path):
-    directory = Path(RECORD) if RECORD else tmp_path
-    workflow.main(['--out', str(directory), '--rcwa-python', RCWA_PYTHON]+(['--checkpoint-dir', CHECKPOINTS] if CHECKPOINTS else []))
+def test_declared_workflow_meets_every_acceptance_criterion():
+    directory = Path(RECORD) if RECORD else RECORDS
+    settings, selection = workflow.declared_run(directory)
+    import torchfdtd
+    package_root = str(Path(torchfdtd.__file__).resolve().parents[1])
+    environment = dict(os.environ, PYTHONPATH=os.pathsep.join(filter(None, [package_root, os.environ.get('PYTHONPATH')])))
+    script = str(ROOT/'examples'/'g7'/'metagrating'/'workflow.py')
+    processes = [subprocess.Popen(LAUNCHER+[sys.executable, script, '--stage', 'seed', '--seed', str(seed), '--out', str(directory),
+                                            '--rcwa-python', RCWA_PYTHON]+(['--checkpoint-dir', CHECKPOINTS] if CHECKPOINTS else []),
+                                  env=environment) for seed in settings.seeds]
+    assert [process.wait() for process in processes] == [0]*len(processes)
+    workflow.judge_stage(settings, directory, selection=selection)
     assert_every_criterion(directory)
 
 

@@ -11,11 +11,12 @@ ridges) is p polarisation. The fixed Bloch wavevector k_x becomes the incidence 
 asin(k_x lambda / (2 pi n_sub)) in the input layer, so the angle follows the wavelength. Each
 0.02 um pixel is sampled by samples_per_pixel real-space cells, so every pixel edge lies on a
 sample boundary. TORCWA forms the permittivity Toeplitz matrix from the FFT of the samples
-(Laurent rule for both polarisations; it has no inverse rule), so TM converges more slowly with
-the harmonic count than TE. For every case the harmonic count rises through the job's sequence
-until every order efficiency at the convergence wavelengths changes by less than the tolerance,
-and the band is evaluated at that count. Efficiencies use the s-p basis with power normalisation;
-an order that does not propagate in its medium is reported as zero.
+(Laurent rule for both polarisations; it has no inverse rule), so TM converges as 1/N with the
+harmonic count N. For every case the count rises through the job's sequence until the estimated
+error at the convergence wavelengths is at most the job's error target, and the band is evaluated
+at that count. The estimate assumes an error decaying as 1/N: the largest change of any order
+efficiency from the previous count N_prev, times N_prev / (N - N_prev). Efficiencies use the s-p
+basis with power normalisation; an order that does not propagate in its medium is reported as zero.
 """
 from __future__ import annotations
 
@@ -79,19 +80,17 @@ def run_case(job, case, device):
                                                 for w, (T, R) in rows.items()})
         if previous is not None:
             entry['max_abs_change_from_previous'] = float(np.max(abs(values-previous)))
+            entry['first_order_error_estimate'] = entry['max_abs_change_from_previous']*sweep[-1]['harmonics']/(n-sweep[-1]['harmonics'])
             print(json.dumps(dict(design=case['design'], polarization=pol, incidence=case['incidence'], harmonics=n,
-                                  max_abs_change_from_previous=entry['max_abs_change_from_previous'])), flush=True)
+                                  first_order_error_estimate=entry['first_order_error_estimate'])), flush=True)
         sweep.append(entry)
         previous = values
-        if len(sweep) > 1 and entry['max_abs_change_from_previous'] < job['tolerance']:
+        if len(sweep) > 1 and entry['first_order_error_estimate'] <= job['error_target']:
             chosen = n
             break
     converged = chosen is not None
     chosen = chosen or job['harmonics'][-1]
-    # An error decaying as 1/N (the Laurent rule for TM) leaves about change * N_prev / (N - N_prev) at N.
-    counts = [entry['harmonics'] for entry in sweep]
-    k = counts.index(chosen)
-    error_estimate = sweep[k]['max_abs_change_from_previous']*counts[k-1]/(counts[k]-counts[k-1]) if k else None
+    error_estimate = sweep[-1].get('first_order_error_estimate')
     T = {str(m): [] for m in job['orders']}
     R = {str(m): [] for m in job['orders']}
     for w in case['wavelengths_um']:
@@ -118,12 +117,12 @@ def main(argv=None):
         cases.append(run_case(job, case, device))
         print(json.dumps({k: cases[-1][k] for k in ('design', 'polarization', 'incidence', 'harmonics', 'converged', 'max_abs_total_minus_one', 'seconds')}),
               flush=True)
-    result = dict(schema='torchfdtd-g7-01-rcwa-v1', package=dict(torcwa=importlib.metadata.version('torcwa'), torch=torch.__version__,
+    result = dict(schema='torchfdtd-g7-01-rcwa-v2', package=dict(torcwa=importlib.metadata.version('torcwa'), torch=torch.__version__,
                   python=platform.python_version(), interpreter=Path(sys.executable).name, device=str(device),
                   device_name=torch.cuda.get_device_name(device) if device.type == 'cuda' else platform.processor(), dtype='complex128'),
                   citation='C. Kim and B. Lee, TORCWA: GPU-accelerated Fourier modal method and gradient-based optimization for metasurface '
                            'design, Comput. Phys. Commun. 282, 108552 (2023)',
-                  method=__doc__.split('\n\n', 2)[2].strip(), samples_per_pixel=job['samples_per_pixel'], tolerance=job['tolerance'],
+                  method=__doc__.split('\n\n', 2)[2].strip(), samples_per_pixel=job['samples_per_pixel'], error_target=job['error_target'],
                   harmonic_sequence=job['harmonics'], cases=cases, seconds=time.perf_counter()-started)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
