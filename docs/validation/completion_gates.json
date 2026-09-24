@@ -2882,7 +2882,14 @@
           "required_tests": [],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-24",
+            "decision": "approved",
+            "scope": "G7-04: the revised case docs/validation/cases/G7-04r2.json supersedes G7-04.json (G7-04r2: the reference is checked against 241 orders instead of 51 (every efficiency within 1e-4).)",
+            "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
+            "note": "the declared reference check compared the 101-order TORCWA reference with a 51-order solution, which measures the error of the 51-order solution rather than of the reference; a reference is checked against a higher order"
+          }
         },
         {
           "id": "G7-05",

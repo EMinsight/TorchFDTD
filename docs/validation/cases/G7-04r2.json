@@ -6,14 +6,14 @@
   "declaration": "docs/G7_WORKFLOWS.md",
   "platform": "rtx3060-win11-lab",
   "installation": "the release wheel in an environment outside the checkout",
-  "case_id": "G7-04",
+  "case_id": "G7-04r2",
   "task": "G7-04",
   "title": "Independent solver at matched accuracy: TorchFDTD and Meep against a converged RCWA reference, accuracy-versus-cost curves",
   "fixture": {
     "base": "examples/meep_comparison/metagrating/geometry.json",
     "polarization": "TE",
     "incidence": "normal",
-    "reference": "TORCWA 101 Fourier orders, checked against 51 (at most 1e-4)",
+    "reference": "TORCWA 101 Fourier orders, checked against 241 orders (every efficiency at most 1e-4)",
     "torchfdtd": {
       "device": "RTX 3060, fused CUDA kernels",
       "meshes_um": [
@@ -56,5 +56,14 @@
     "separation": "equal-cell-count and equal-error comparisons reported separately",
     "hardware": "the record states CPU against GPU hardware and draws no algorithmic conclusion from it"
   },
-  "superseded_by": "docs/validation/cases/G7-04r2.json"
+  "supersedes": {
+    "case": "docs/validation/cases/G7-04.json",
+    "status": "the original case stays in place; its failing runs are kept outside the repository by owner decision"
+  },
+  "revision": {
+    "reason": "the declared reference check compared the 101-order TORCWA reference with a 51-order solution, which measures the error of the 51-order solution rather than of the reference; a reference is checked against a higher order",
+    "evidence": "101 orders against 51 differ by up to 4.7e-4 (T+1 at 1.50 um); 101 orders against the committed 241-order record (docs/validation/meep_comparison/metagrating_rcwa.json) differ by at most 6.4e-5 in any efficiency, 9.7e-6 in T+1 at 1.55 um and 8.7e-7 in the band mean, far below the smallest error target 0.002",
+    "approved_by": "owner",
+    "date": "2026-09-24"
+  }
 }
