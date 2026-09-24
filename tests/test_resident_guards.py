@@ -4,8 +4,9 @@ Region.resident_cell_limit and Project.limits (max_structures, max_monitor_sampl
 default to the historical guards and raise them only when a Python caller sets
 them. Inside models.default_guards(), which wraps every workbench request, a
 carried limit can lower a guard but never raise it (the server check is in
-tests/test_server_security.py). A small fused CUDA run stays within the
-calibrated resident estimate (docs/EXECUTION_MODES.md).
+tests/test_server_security.py). The fused CUDA resident
+estimate is checked against the peaks recorded in
+docs/validation/resident_memory_fused_3060.json (docs/EXECUTION_MODES.md).
 """
 import json
 import math
@@ -23,6 +24,7 @@ from torchfdtd.plan import resolve_plan
 from torchfdtd.solver import estimate, run_signature
 
 ROOT = Path(__file__).resolve().parents[1]
+RECORD = ROOT/'docs'/'validation'/'resident_memory_fused_3060.json'
 CPU_RECORD = dict(cuda=False, cupy=False, gpu=None, gpu_free_bytes=0, gpu_total_bytes=0,
                   host_total_bytes=64*2**30, host_available_bytes=32*2**30)
 # 256 x 256 x 128 = 8,388,608 cells: just above the default resident cell guard.
@@ -204,6 +206,26 @@ def test_estimate_selects_the_fused_model_only_for_explicit_real_fused_cuda():
     large = [Project(region=Region(**{**LARGE, 'backend': 'cuda'}, cuda_kernel=kernel), sources=[Source(center=(0, 0, 0))])
              for kernel in ('fused', 'torch')]
     assert estimate(large[0])['estimated_memory_mb'] < estimate(large[1])['estimated_memory_mb']
+
+
+def test_estimate_bounds_every_recorded_peak():
+    record = json.loads(RECORD.read_text(encoding='utf-8'))
+    assert record['kind'] == 'resident_memory' and record['environment']['device']
+    names = set()
+    for case in record['cases']:
+        names.add(case['name'])
+        projects = [Project.model_validate(p) for p in case['projects']]
+        assert len(projects) == case['batch'] and math.prod(projects[0].region.shape) == case['cells']
+        summaries = [estimate(p) for p in projects]
+        assert {s['memory_model'] for s in summaries} == {'fused_cuda' if case['kernel'] == 'fused' else 'tensor_expression'}
+        current = sum(int(round(s['estimated_memory_mb']*2**20)) for s in summaries)
+        # The record was made with this model; a changed model must be measured again.
+        assert current == case['estimate_bytes'], case['name']
+        assert case['finite'] and case['peak_allocated_bytes'] <= case['peak_reserved_bytes']
+        assert current >= case['peak_reserved_bytes'], (case['name'], current, case['peak_reserved_bytes'])
+    for required in ('fused-f32-cpml-64m', 'fused-f32-periodic-64m', 'fused-f32-plane-16m', 'fused-f32-lorentz-16m',
+                     'fused-f64-cpml-32m', 'torch-f32-cpml-16m', 'tensor-batch-f32-2x16m'):
+        assert required in names
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')

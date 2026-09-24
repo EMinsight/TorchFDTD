@@ -189,6 +189,41 @@ solver keeps free. `tests/test_resident_guards.py` checks that the estimate of
 every recorded case is at least its peak and equals the recorded estimate, so a
 changed model has to be measured again.
 
+The record, [resident_memory_fused_3060.json](validation/resident_memory_fused_3060.json)
+(RTX 3060 12 GB, driver 591.86, torch 2.10.0+cu126 with CUDA 12.6, CuPy 13.6.0,
+revision 1e51bb2), holds 43 cases of 60 steps: FP32 and FP64 cubes from 1 to 64
+million cells, a 1000 x 1000 x 64 slab, CPML or periodic faces, a frequency
+plane with the fused or the Torch monitor kernel, cell and Yee sampling, one to
+three Lorentz poles filling the grid, `cuda_graph_steps` 1 and 8, two
+tensor-batch cohorts and the Torch kernel. Every estimate is at least its
+reserved peak. The fused estimates are 1.08 to 1.85 times the peak and at least
+55 MiB above it; for the dielectric grids of 16 million cells and more they are
+1.08 to 1.18 times the peak. With cell sampling that peak is the grid
+construction: 60.0 to 60.3 allocated bytes per cell in FP32 from 4 to 64
+million cells and 120.0 to 120.3 in FP64 from 4 to 33 million. The unchanged
+Torch-kernel estimate is 1.36 to 1.88 times its peak. The per-cell terms do not
+depend on the grid size; the ladder stops at 64 million cells, what a 12 GB card
+holds.
+
+| Case | Cells | Peak allocated, MiB | Peak reserved, MiB | Estimate, MiB | Estimate / reserved |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `fused-f32-cpml-1m` | 1,000,000 | 61 | 74 | 134 | 1.81 |
+| `fused-f32-cpml-16m` | 16,003,008 | 920 | 926 | 1,096 | 1.18 |
+| `fused-f32-cpml-64m` | 64,000,000 | 3,662 | 3,676 | 4,109 | 1.12 |
+| `fused-f32-periodic-64m` | 64,000,000 | 3,662 | 3,676 | 3,970 | 1.08 |
+| `fused-f32-cpml-slab-64m` | 64,000,000 | 3,662 | 3,676 | 4,297 | 1.17 |
+| `fused-f32-cpml-slab-plane-64m` | 64,000,000 | 4,288 | 4,316 | 6,224 | 1.44 |
+| `fused-f32-yee-16m` | 16,003,008 | 975 | 1,108 | 1,218 | 1.10 |
+| `fused-f64-cpml-32m` | 32,768,000 | 3,750 | 3,756 | 4,242 | 1.13 |
+| `fused-f32-lorentz-16m` | 16,003,008 | 2,639 | 2,664 | 4,270 | 1.60 |
+| `fused-f32-multipole3-4m` | 4,096,000 | 1,198 | 1,332 | 2,461 | 1.85 |
+| `fused-f32-lorentz-graph8-4m` | 4,096,000 | 681 | 1,012 | 1,149 | 1.14 |
+| `fused-f32-yee-multipole2-graph8-4m` | 4,096,000 | 1,027 | 1,736 | 1,899 | 1.09 |
+| `fused-f64-lorentz-graph8-4m` | 4,096,000 | 1,332 | 1,920 | 2,202 | 1.15 |
+| `tensor-batch-f32-2x16m` | 32,006,016 | 1,776 | 1,844 | 2,192 | 1.19 |
+| `torch-f32-cpml-16m` | 16,003,008 | 1,408 | 1,622 | 3,052 | 1.88 |
+| `torch-f64-cpml-4m` | 4,096,000 | 735 | 842 | 1,562 | 1.86 |
+
 ## What streaming costs
 
 Streaming replaces one resident field update per step by a host-to-device
