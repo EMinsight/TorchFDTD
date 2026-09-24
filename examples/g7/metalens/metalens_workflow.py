@@ -352,11 +352,15 @@ def angular_spectrum_check(lens, bare, obs, spec):
 # ----------------------------------------------------------------------------
 # The workflow
 # ----------------------------------------------------------------------------
-def environment(device):
+def environment(device, output_dir=None):
+    """Host, packages and provenance; tracked_changes ignores the record directory, which a run rewrites before its time study."""
     try:
+        exclude = []
+        if output_dir is not None and REPO in Path(output_dir).resolve().parents:
+            exclude = [f':(exclude){Path(output_dir).resolve().relative_to(REPO).as_posix()}']
         commit = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=REPO, capture_output=True, text=True, timeout=30, check=True).stdout.strip()
-        dirty = bool(subprocess.run(['git', 'status', '--porcelain', '--untracked-files=no'], cwd=REPO, capture_output=True, text=True, timeout=30,
-                                    check=True).stdout.strip())
+        dirty = bool(subprocess.run(['git', 'status', '--porcelain', '--untracked-files=no', '--', '.', *exclude], cwd=REPO, capture_output=True,
+                                    text=True, timeout=30, check=True).stdout.strip())
     except (OSError, subprocess.SubprocessError):
         commit, dirty = None, None
     return dict(python=platform.python_version(), torch=torch.__version__, cuda=torch.version.cuda, numpy=np.__version__, platform=platform.platform(),
@@ -440,7 +444,7 @@ def run(*, spec, backend='cuda', iterations=None, learning_rate=None, starts=STA
     iterations = refinement['iterations'] if iterations is None else iterations
     learning_rate = refinement['learning_rate_um'] if learning_rate is None else learning_rate
     device = device_of(backend)
-    env = environment(device)   # the commit and tree state the run loaded, before any later edit
+    env = environment(device, output_dir)   # the commit and tree state the run loaded, before any later edit
     started_all = time.perf_counter()
     library = library_widths()
     bounds = (min(library), max(library))
@@ -592,7 +596,7 @@ def time_study(spec, output_dir, *, backend='cuda', factors=(1., 1.5, 2., 3., 4.
     summary = json.loads((output_dir / 'summary.json').read_text(encoding='utf-8'))
     records = [json.loads((output_dir / name).read_text(encoding='utf-8')) for name in summary['records']]
     device = device_of(backend)
-    env = environment(device)
+    env = environment(device, output_dir)
     staircase = torch.as_tensor(voxelize(tm.build_2d(spec, with_lens=True, backend=backend))[0], device=device, dtype=torch.float32)
     designs = {'library staircase': None}
     for record in records:
