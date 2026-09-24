@@ -65,7 +65,12 @@ def test_recorded_derived_defaults_keep_run_times_and_stay_within_memory():
     from pathlib import Path
     record = json.loads((Path(__file__).resolve().parents[1]/'docs/validation/endpoint_budget_defaults.json').read_text())
     assert {c['device'] for c in record['cases']} == {'cpu', 'cuda'}
+    # The budgets only admit: every old- and new-default run executes the same steps.
+    assert record['identical_work'] and 'only compared with the planned payload' in record['budget_role']
     for case in record['cases']:
+        if case['device'] == 'cuda':
+            assert all('utilization_percent' in run['gpu_load_before'] and 'utilization_percent' in run['gpu_load_after']
+                       for runs in case['runs'].values() for run in runs)
         new = case['new_default']['total_seconds']
         if case['old_default_admits']:
             old = case['old_default']['total_seconds']

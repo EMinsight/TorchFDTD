@@ -4,12 +4,14 @@ tensor_budget_bytes and host_preparation_budget_bytes only admit a planned
 payload; neither sets a chunk, slot or checkpoint count. Each case runs one
 forward and material VJP through EndpointProject, alternating the old defaults
 (256 MB tensor, 64 MB host preparation) and the new ones (None, derived from
-free CUDA or available host memory), and records wall times and the peak
+free CUDA or available host memory), and records wall times, the executed
+step counts of every run, the GPU load around every CUDA timing, and the peak
 memory of the derived-default run against the memory it was derived from.
+--cases splits a device run into short pieces; --merge takes every piece.
 
-  python benchmarks/endpoint_budget_defaults.py --device cuda --output cuda.json
+  python benchmarks/endpoint_budget_defaults.py --device cuda --cases closed:32 closed:64 --output cuda-a.json
   python benchmarks/endpoint_budget_defaults.py --device cpu --output cpu.json
-  python benchmarks/endpoint_budget_defaults.py --merge cpu.json cuda.json --output docs/validation/endpoint_budget_defaults.json
+  python benchmarks/endpoint_budget_defaults.py --merge cpu.json cuda-a.json cuda-b.json --output docs/validation/endpoint_budget_defaults.json
 """
 import argparse
 import datetime
@@ -36,6 +38,11 @@ STEPS = {'cuda': 400, 'cpu': 200}
 REPEATS = 3
 SOURCE_STATE = ('recorded from the uncommitted working tree on top of environment.commit; the code measured is the '
                 'commit that adds this record')
+BUDGET_ROLE = ('tensor_budget_bytes and host_preparation_budget_bytes are only compared with the planned payload '
+               '(EndpointSimulation/EndpointCPMLSimulation constructors and memory_plan checks, EndpointProject._admit); the '
+               'checkpoint count and the raster chunk size are separate arguments, so a budget cannot change the executed work. '
+               'identical_work compares the executed step counts of every old- and new-default run.')
+EXECUTION_KEYS = ('forward_steps', 'replayed_steps', 'reverse_steps', 'checkpoint_saves', 'peak_checkpoints')
 
 
 def project(kind, cells, steps, device):
@@ -67,7 +74,8 @@ def run_once(p, device, budgets):
     sync()
     done = time.perf_counter()
     assert bool(torch.isfinite(gradient).all())
-    return adapter, dict(build_seconds=built-start, run_seconds=done-built, total_seconds=done-start)
+    execution = {k: adapter.simulation.last_report[k] for k in EXECUTION_KEYS}
+    return adapter, dict(build_seconds=built-start, run_seconds=done-built, total_seconds=done-start, execution=execution)
 
 
 def measure(kind, cells, device):
@@ -109,11 +117,19 @@ def measure(kind, cells, device):
     except ValueError as error:
         report.update(old_default_admits=False, old_default_refusal=str(error))
     timings = {'old': [], 'new': []}
-    for _ in range(REPEATS):
+    for repeat in range(REPEATS):
         for mode, budgets in (('old', OLD), ('new', {})):
             if mode == 'old' and not report['old_default_admits']:
                 continue
-            timings[mode].append(run_once(p, device, budgets)[1])
+            # The GPU is shared: read its load just outside every timed run.
+            before = load() if device == 'cuda' else None
+            timing = run_once(p, device, budgets)[1]
+            if device == 'cuda':
+                timing.update(gpu_load_before=before, gpu_load_after=load())
+            timings[mode].append(dict(timing, repeat=repeat))
+    report['runs'] = {mode: values for mode, values in timings.items() if values}
+    works = {json.dumps(v['execution'], sort_keys=True) for values in timings.values() for v in values}
+    report.update(identical_work=len(works) == 1, execution=json.loads(next(iter(works))))
     for mode, values in timings.items():
         if not values:
             continue
@@ -142,6 +158,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--device', choices=('cpu', 'cuda'))
     parser.add_argument('--case', nargs=2)
+    parser.add_argument('--cases', nargs='+', help='kind:cells entries, a subset of CASES for one device run')
     parser.add_argument('--output')
     parser.add_argument('--merge', nargs='+')
     args = parser.parse_args()
@@ -152,17 +169,19 @@ def main():
         parts = [json.loads(Path(p).read_text()) for p in args.merge]
         cases = [c for part in parts for c in part['cases']]
         ratios = [c['new_over_old_median_total'] for c in cases if 'new_over_old_median_total' in c]
-        record = dict(schema='torchfdtd.endpoint_budget_defaults.v1',
+        record = dict(schema='torchfdtd.endpoint_budget_defaults.v2', budget_role=BUDGET_ROLE,
                       old_defaults=OLD, new_defaults='None: tensor budget = 80% of free CUDA memory (cuda_budget_limit) or of available host memory; '
                                                      'host preparation budget = 80% of available host memory; derived when the adapter is built',
                       workload='EndpointProject, point Ez source and two point monitors, a centred index-1.5 cube, checkpoints=4, one forward '
                                'and one material VJP; closed = PMC on every face, cpml = PML on both x faces (4 layers) and PMC elsewhere',
-                      timing=f'{REPEATS} repeats per default after one untimed derived-default run, old and new alternating in one process; '
-                             'build = adapter construction and rasterization, run = forward and VJP',
+                      timing=f'{REPEATS} repeats per default after one untimed derived-default run, old and new alternating in one process '
+                             '(runs.*.repeat); build = adapter construction and rasterization, run = forward and VJP. On CUDA every '
+                             'run carries the nvidia-smi utilization and memory in use (all processes) just before and after it.',
                       peak='first derived-default run in a fresh process: CUDA allocator allocated growth against free CUDA memory at start; '
                            'CPU: peak private bytes growth against available host memory (host_new_process_peak marks a resolved peak)',
                       steps=STEPS, cases_per_device=CASES, source_state=SOURCE_STATE,
-                      environments={p['device']: p['environment'] for p in parts}, cases=cases,
+                      environments=[dict(p['environment'], device=p['device']) for p in parts], cases=cases,
+                      identical_work=all(c['identical_work'] for c in cases),
                       new_over_old_median_total_range=[min(ratios), max(ratios)] if ratios else None,
                       maximum_peak_over_available=max(c['peak_over_available'] for c in cases),
                       refused_by_old_defaults=[f"{c['device']} {c['kind']} {c['cells_per_axis']}^3" for c in cases if not c['old_default_admits']])
@@ -180,7 +199,8 @@ def main():
     environment['commit'] = git_revision(ROOT)
     environment['recorded_at'] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds')
     cases = []
-    for kind, cells in CASES[args.device]:
+    selected = CASES[args.device] if not args.cases else [(c.split(':')[0], int(c.split(':')[1])) for c in args.cases]
+    for kind, cells in selected:
         before = load() if args.device == 'cuda' else None
         out = subprocess.run([sys.executable, __file__, '--case', kind, str(cells), '--device', args.device],
                              capture_output=True, text=True, env=env, cwd=ROOT)
