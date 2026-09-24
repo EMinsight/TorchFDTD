@@ -17,38 +17,57 @@ class Model(BaseModel):
     model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
 
 
-# Default size guards. Region.resident_cell_limit and Project.limits raise them for
-# Python-API use ("Raising the size guards" in docs/EXECUTION_MODES.md); a project
-# validated inside default_guards(), as every workbench server request is, keeps
-# no guard above its default.
-RESIDENT_CELL_LIMIT = 8_000_000
-MAX_STRUCTURES = 1000
-MAX_MONITOR_SAMPLES = 12_000_000
+# The Python API has no fixed size caps: resident execution is admitted by the memory
+# estimate, and Region.resident_cell_limit and Project.limits are optional user caps
+# ("Size limits" in docs/EXECUTION_MODES.md). The workbench server applies these
+# request limits to everything it validates or runs, whatever a submitted project
+# carries (docs/SECURITY.md).
+SERVER_LIMITS = dict(resident_cells=8_000_000, structures=1000, sources=512, monitors=512, materials=100,
+                     mesh_refinements=64, monitor_samples=12_000_000, steps=100_000, frequency_points=2001,
+                     signal_samples=100_000)
 # The fused CUDA kernels and the subpixel operator address a field array with
 # signed 32-bit integers, so every resident grid keeps 3 x lanes x cells below
 # this bound, whatever its cell limit.
 RESIDENT_INDEX_LIMIT = 2**31
-_DEFAULT_GUARDS = ContextVar('torchfdtd_default_guards', default=False)
+_SERVER = ContextVar('torchfdtd_server_limits', default=False)
 
 
 @contextmanager
-def default_guards():
-    """Validate every Region and Project inside the block with the default size guards.
+def server_limits():
+    """Apply SERVER_LIMITS to every model validated and every scene admitted inside the block.
 
-    A limit carried by the input may lower a guard, never raise it: a larger value
-    or None (no cap) becomes the default. The workbench server wraps each request
-    in this block, so a client cannot lift the caps that bound its requests.
+    The workbench server runs each request, its job threads and its modal worker
+    process inside this block. A cap a submitted project carries can lower a
+    server limit but never raise it; the project itself is not changed.
     """
-    token = _DEFAULT_GUARDS.set(True)
+    token = _SERVER.set(True)
     try:
         yield
     finally:
-        _DEFAULT_GUARDS.reset(token)
+        _SERVER.reset(token)
 
 
-def _guarded(value, default):
-    if _DEFAULT_GUARDS.get() and (value is None or value > default):
-        return default
+def server_limit(name):
+    """The server limit called name while server_limits() is active, otherwise None."""
+    return SERVER_LIMITS[name] if _SERVER.get() else None
+
+
+def effective_limit(cap, name):
+    """The tighter of an optional user cap (None: no cap) and the active server limit."""
+    server = server_limit(name)
+    return cap if server is None else server if cap is None else min(cap, server)
+
+
+def _check_count(value, cap, what):
+    # Applied before the items are validated, so an oversized list costs no model construction.
+    if cap is not None and isinstance(value, (list, tuple)) and len(value) > cap:
+        raise ValueError(f'{len(value):,} {what} exceed the limit of {cap:,}.')
+    return value
+
+
+def _check_at_most(value, cap, what):
+    if cap is not None and value > cap:
+        raise ValueError(f'{value:,} {what} exceed the limit of {cap:,}.')
     return value
 
 
@@ -217,13 +236,13 @@ class Region(Model):
     mesh_grading: float = Field(default=1.25, ge=1.05, le=1.5)
     mesh_ppw: float = Field(default=24, ge=6, le=80)
     mesh_auto_refine: bool = True
-    mesh_refinements: list[MeshRefinement] = Field(default_factory=list, max_length=64)
+    mesh_refinements: list[MeshRefinement] = Field(default_factory=list)
     _auto_boxes: tuple = PrivateAttr(default=())
     _coarse_limit: float | None = PrivateAttr(default=None)
     _mesh_cache: object = PrivateAttr(default=None)
     courant_factor: float = Field(default=0.99, gt=0, le=0.99)
     time_step_override: float | None = Field(default=None,gt=0)
-    steps: int = Field(default=1000, ge=10, le=100000)
+    steps: int = Field(default=1000, ge=10)
     run_control: RunControl = Field(default_factory=RunControl)
     pml_cells: int = Field(default=10, ge=3, le=50)
     # Dispersive (ADE) material inside a PML layer. 'ade' keeps the pole update
@@ -240,9 +259,9 @@ class Region(Model):
     # streamed host/disk execution from the live resources; see docs/EXECUTION_MODES.md.
     execution_mode: Literal['auto', 'resident', 'streamed_host', 'streamed_disk', 'tiled'] = 'auto'
     tiling: Tiling = Field(default_factory=Tiling)
-    # Largest grid the resident path admits; None leaves admission to the memory
-    # estimate. Written to JSON only when it differs from the default.
-    resident_cell_limit: int | None = Field(default=RESIDENT_CELL_LIMIT, ge=1, strict=True)
+    # Optional cap on the grid the resident path admits. None, the default, leaves
+    # admission to the memory estimate; written to JSON only when set.
+    resident_cell_limit: int | None = Field(default=None, ge=1, strict=True)
     cuda_kernel: Literal['torch', 'fused'] = 'torch'
     cuda_monitor_kernel: Literal['torch', 'fused'] = 'torch'
     precision: Literal['float32', 'float64'] = 'float32'
@@ -252,27 +271,35 @@ class Region(Model):
     slice_position: float = 0
     complex_display: Literal['real', 'imag', 'magnitude', 'phase'] = 'real'
 
-    @field_validator('resident_cell_limit')
+    @field_validator('mesh_refinements', mode='before')
     @classmethod
-    def _default_cell_guard(cls, value):
-        return _guarded(value, RESIDENT_CELL_LIMIT)
+    def _server_refinements(cls, value):
+        return _check_count(value, server_limit('mesh_refinements'), 'mesh refinements')
+
+    @field_validator('steps')
+    @classmethod
+    def _server_steps(cls, value):
+        return _check_at_most(value, server_limit('steps'), 'time steps')
 
     @model_serializer(mode='wrap')
-    def _omit_default_cell_limit(self, handler):
-        # A region at the default limit serializes, and therefore hashes and loads in
-        # earlier versions, exactly as before the limit existed.
+    def _omit_unset_cell_limit(self, handler):
+        # A region without a cap serializes, and therefore hashes and loads in
+        # earlier versions, exactly as before the field existed.
         data = handler(self)
-        if self.resident_cell_limit == RESIDENT_CELL_LIMIT:
+        if self.resident_cell_limit is None:
             data.pop('resident_cell_limit', None)
         return data
 
     def resident_refusal(self):
-        """Why the resident path refuses this grid's size, or None when the size is admitted."""
+        """Why the resident path refuses this grid's size, or None when the size is admitted.
+
+        Memory is admitted separately, by the estimate against the free memory."""
         cells = math.prod(self.shape)
-        limit = self.resident_cell_limit
+        limit = effective_limit(self.resident_cell_limit, 'resident_cells')
         if limit is not None and cells > limit:
-            return ('Resident execution is limited to 8 million cells' if limit == RESIDENT_CELL_LIMIT else
-                    f'Resident execution is limited to resident_cell_limit={limit:,} cells, and the grid has {cells:,}')
+            if limit == server_limit('resident_cells'):
+                return f'The workbench server limits resident execution to {limit:,} cells, and the grid has {cells:,}'
+            return f'Resident execution is limited to resident_cell_limit={limit:,} cells, and the grid has {cells:,}'
         if 3*(2 if self.complex_fields else 1)*cells >= RESIDENT_INDEX_LIMIT:
             return (f'Resident execution addresses each field array with signed 32-bit indices, '
                     f'which {cells:,} {"complex " if self.complex_fields else ""}cells exceed')
@@ -393,7 +420,7 @@ class Region(Model):
             raise ValueError('The invariant z axis has no boundary condition in 2D; keep its defaults.')
         if max(self.shape) > 1_000_000:
             raise ValueError('A grid axis may contain at most one million cells.')
-        # The resident cell guard applies to explicitly resident regions at
+        # The resident size checks apply to explicitly resident regions at
         # construction. Resident entry points still call require_resident().
         if self.memory_mode == 'resident' and self.execution_mode == 'resident':self.require_resident()
         if self.dimension == '2d' and self.slice_axis != 'z':
@@ -451,9 +478,14 @@ class Structure(Item):
 
 
 class TimeSignal(Model):
-    time_s: list[float] = Field(min_length=2, max_length=100000)
-    amplitude: list[float] = Field(min_length=2, max_length=100000)
-    phase_rad: list[float] = Field(min_length=2, max_length=100000)
+    time_s: list[float] = Field(min_length=2)
+    amplitude: list[float] = Field(min_length=2)
+    phase_rad: list[float] = Field(min_length=2)
+
+    @field_validator('time_s', 'amplitude', 'phase_rad', mode='before')
+    @classmethod
+    def _server_samples(cls, value):
+        return _check_count(value, server_limit('signal_samples'), 'source signal samples')
 
     @model_validator(mode='after')
     def valid_samples(self):
@@ -559,14 +591,24 @@ class SpectrumSettings(Model):
     chebyshev_wavelength: bool = False
     chebyshev_nodes: Literal['roots','lobatto'] = 'roots'
     use_source_limits: bool = False
-    custom_frequencies_hz: list[float] = Field(default_factory=list, max_length=2001)
+    custom_frequencies_hz: list[float] = Field(default_factory=list)
     wavelength_start: float = Field(default=1.3, gt=0)
     wavelength_stop: float = Field(default=1.8, gt=0)
-    frequency_points: int = Field(default=101, ge=1, le=2001)
+    frequency_points: int = Field(default=101, ge=1)
     # Preserve the legacy Hann FFT when opening existing native projects.
     apodization: Literal['hann', 'none', 'start', 'end', 'full'] = 'hann'
     apodization_center: float = Field(default=20e-15, ge=0)  # seconds
     apodization_time_width: float = Field(default=10e-15, gt=0)  # seconds
+
+    @field_validator('custom_frequencies_hz', mode='before')
+    @classmethod
+    def _server_custom_frequencies(cls, value):
+        return _check_count(value, server_limit('frequency_points'), 'custom frequencies')
+
+    @field_validator('frequency_points')
+    @classmethod
+    def _server_frequency_points(cls, value):
+        return _check_at_most(value, server_limit('frequency_points'), 'frequency points')
 
     @model_validator(mode='after')
     def valid_band(self):
@@ -651,21 +693,18 @@ class ImportProvenance(Model):
 
 
 class ProjectLimits(Model):
-    """Project size guards; None removes a cap. The defaults bound every workbench
-    server request whatever a submitted project carries (docs/SECURITY.md)."""
-    max_structures: int | None = Field(default=MAX_STRUCTURES, ge=1, strict=True)
+    """Optional user caps on a project; None, the default, is no cap.
+
+    Resident execution is admitted by the memory estimate, which counts the
+    monitors, sources and materials. The workbench server applies SERVER_LIMITS
+    whatever a submitted project carries (docs/SECURITY.md)."""
+    max_structures: int | None = Field(default=None, ge=1, strict=True)
+    max_sources: int | None = Field(default=None, ge=1, strict=True)
+    max_monitors: int | None = Field(default=None, ge=1, strict=True)
+    max_materials: int | None = Field(default=None, ge=1, strict=True)
+    max_mesh_refinements: int | None = Field(default=None, ge=1, strict=True)
     # Complex samples (points x frequencies x components) of one frequency-plane monitor.
-    max_monitor_samples: int | None = Field(default=MAX_MONITOR_SAMPLES, ge=1, strict=True)
-
-    @field_validator('max_structures')
-    @classmethod
-    def _default_structure_guard(cls, value):
-        return _guarded(value, MAX_STRUCTURES)
-
-    @field_validator('max_monitor_samples')
-    @classmethod
-    def _default_monitor_guard(cls, value):
-        return _guarded(value, MAX_MONITOR_SAMPLES)
+    max_monitor_samples: int | None = Field(default=None, ge=1, strict=True)
 
 
 SCHEMA_VERSION = 1
@@ -694,14 +733,14 @@ class Project(Model):
     schema_version: Literal[1] = 1
     name: str = Field(default='Untitled', min_length=1, max_length=120)
     region: Region = Field(default_factory=Region)
-    # Declared before structures: the structure count is checked against it before
-    # any structure is validated. Written to JSON only when it differs from the defaults.
+    # Declared before the lists it caps, which are checked against it before their
+    # items are validated. Written to JSON only when a cap is set.
     limits: ProjectLimits = Field(default_factory=ProjectLimits)
-    materials: list[Material] = Field(default_factory=default_materials, min_length=1, max_length=100)
+    materials: list[Material] = Field(default_factory=default_materials, min_length=1)
     structures: list[Structure] = Field(default_factory=list)
-    sources: list[Source] = Field(default_factory=list, max_length=512)
+    sources: list[Source] = Field(default_factory=list)
     global_source: SourceTimeSettings | None = Field(default_factory=SourceTimeSettings)
-    monitors: list[Monitor | FieldMonitor] = Field(default_factory=list, max_length=512)  # trace storage is admitted by the resident estimate
+    monitors: list[Monitor | FieldMonitor] = Field(default_factory=list)  # trace storage is admitted by the resident estimate
     global_monitor: SpectrumSettings = Field(default_factory=lambda:SpectrumSettings(sampling='frequency',apodization='none'))
     import_provenance: ImportProvenance | None = None
     # Edit counter and content hash of the saved file (G8-04). The workbench
@@ -716,14 +755,12 @@ class Project(Model):
     def migrate(cls, data):
         return migrate_project(data)
 
-    @field_validator('structures', mode='before')
+    @field_validator('materials', 'structures', 'sources', 'monitors', mode='before')
     @classmethod
-    def _structure_guard(cls, value, info):
+    def _count_limits(cls, value, info):
         limits = info.data.get('limits')
-        cap = limits.max_structures if isinstance(limits, ProjectLimits) else MAX_STRUCTURES
-        if cap is not None and isinstance(value, (list, tuple)) and len(value) > cap:
-            raise ValueError(f'{len(value):,} structures exceed the limit of {cap:,} (Project.limits.max_structures).')
-        return value
+        cap = getattr(limits, 'max_'+info.field_name, None) if isinstance(limits, ProjectLimits) else None
+        return _check_count(value, effective_limit(cap, info.field_name), info.field_name)
 
     @model_serializer(mode='wrap')
     def _omit_default_limits(self, handler):
@@ -760,6 +797,7 @@ class Project(Model):
         if self.global_source is None and any(s.use_global_source for s in self.sources):
             raise ValueError('Global source settings are unavailable. Configure them before enabling inheritance.')
         r = self.region
+        _check_count(r.mesh_refinements, self.limits.max_mesh_refinements, 'mesh refinements')
         from .tensor_project import uses_tensor, validate_tensor_project
         if uses_tensor(self):validate_tensor_project(self)
         from .mesh import configure_auto_mesh

@@ -9,7 +9,8 @@ import torch
 from fastapi.testclient import TestClient
 
 from torchfdtd import FieldMonitor, Monitor, Project, Region, Simulation, Source
-from torchfdtd.execution_modes import (RESIDENT_CELL_LIMIT, _base_options, _browser_scene, resolve_execution)
+from torchfdtd.execution_modes import (_base_options, _browser_scene, resolve_execution)
+from torchfdtd.models import SERVER_LIMITS, server_limits
 from torchfdtd.server import create_app
 from torchfdtd.solver import estimate
 
@@ -200,14 +201,21 @@ def test_auto_policy_through_the_validate_route(tmp_path, monkeypatch):
     app.state.pool.shutdown()
 
 
-def test_resident_cell_guard_applies_to_explicit_resident_regions():
+def test_resident_cell_caps_apply_to_explicit_resident_regions():
+    # The Python API admits resident grids by memory; an explicit cap or the server limit refuses at validation.
     settings = dict(dimension='3d', size=(25.6, 25.6, 12.8), mesh=.1, pml_cells=3)
-    with pytest.raises(ValueError, match='8 million'):
-        Region(**settings, execution_mode='resident')
-    region = Region(**settings)
-    assert region.execution_mode == 'auto' and np.prod(region.shape) > RESIDENT_CELL_LIMIT
-    with pytest.raises(ValueError, match='8 million'):
-        Simulation(Project(region=region, sources=[Source(center=(0, 0, 0))]))
+    region = Region(**settings, execution_mode='resident')
+    assert np.prod(region.shape) > SERVER_LIMITS['resident_cells']
+    Simulation(Project(region=region, sources=[Source(center=(0, 0, 0))]))
+    with pytest.raises(ValueError, match='resident_cell_limit=8,000,000'):
+        Region(**settings, execution_mode='resident', resident_cell_limit=8_000_000)
+    with pytest.raises(ValueError, match='resident_cell_limit=8,000,000'):
+        Simulation(Project(region=Region(**settings, resident_cell_limit=8_000_000), sources=[Source(center=(0, 0, 0))]))
+    with server_limits():
+        with pytest.raises(ValueError, match='server limits resident execution to 8,000,000 cells'):
+            Region(**settings, execution_mode='resident')
+        with pytest.raises(ValueError, match='server limits resident execution to 8,000,000 cells'):
+            Simulation(Project(region=Region(**settings), sources=[Source(center=(0, 0, 0))]))
 
 
 def _finished(client, key, timeout=180):
@@ -312,7 +320,7 @@ def test_large_auto_scene_validates_and_resolves_streamed(tmp_path):
     with TestClient(app) as client:
         p = Project(region=Region(dimension='3d', size=(25.6, 25.6, 12.8), mesh=.1, pml_cells=3, steps=100, backend='cpu'),
                     sources=[Source(center=(0, 0, 0))], monitors=[Monitor(center=(1, 0, 0))])
-        assert np.prod(p.region.shape) > RESIDENT_CELL_LIMIT
+        assert np.prod(p.region.shape) > SERVER_LIMITS['resident_cells']
         response = client.post('/api/validate', json=p.model_dump())
         assert response.status_code == 200
         execution = response.json()['execution']
@@ -438,7 +446,14 @@ def test_point_traces_and_spectra_enter_the_resident_estimate_and_can_be_refused
     assert fits['resident']['fits'] and fits['mode'] == 'resident'
     assert not refused['resident']['fits'] and 'exceeds 80%' in refused['resident']['reason'] and refused['mode'] != 'resident'
     assert len(one.model_copy(update=dict(monitors=[Monitor(id=f'm{i}', center=(.3, .1, 0), component='Ez') for i in range(512)])).monitors) == 512
-    with pytest.raises(ValidationError):
-        Project.model_validate(dict(one.model_dump(), monitors=[Monitor(id=f'm{i}', center=(.3, .1, 0), component='Ez').model_dump() for i in range(513)]))
-    with pytest.raises(ValidationError):
-        Project.model_validate(dict(one.model_dump(), sources=[Source(id=f's{i}', center=(-.3, 0, 0), component='Ez', wavelength=1., pulse_cycles=2).model_dump() for i in range(513)]))
+    # The Python API admits the trace memory instead of counting monitors; the server keeps 512, a user cap refuses.
+    beyond = dict(one.model_dump(), monitors=[Monitor(id=f'm{i}', center=(.3, .1, 0), component='Ez').model_dump() for i in range(513)])
+    assert len(Project.model_validate(beyond).monitors) == 513
+    with pytest.raises(ValidationError, match='513 monitors exceed the limit of 512'):
+        Project.model_validate(dict(beyond, limits=dict(max_monitors=512)))
+    with server_limits(), pytest.raises(ValidationError, match='513 monitors exceed the limit of 512'):
+        Project.model_validate(beyond)
+    sources = dict(one.model_dump(), sources=[Source(id=f's{i}', center=(-.3, 0, 0), component='Ez', wavelength=1., pulse_cycles=2).model_dump() for i in range(513)])
+    assert len(Project.model_validate(sources).sources) == 513
+    with server_limits(), pytest.raises(ValidationError, match='513 sources exceed the limit of 512'):
+        Project.model_validate(sources)

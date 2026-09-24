@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from .models import Project, Material, default_guards, demo_project
+from .models import Project, Material, demo_project, server_limits
 from .plan import resolve_plan
 from .solver import Simulation, estimate, hardware, snapshot_frames
 from .stability_checks import stability_warnings
@@ -46,20 +46,29 @@ class WorkbenchFiles(StaticFiles):
         return super().lookup_path(path)
 
 
-class DefaultGuards:
-    """Handle every request inside models.default_guards(), body validation included.
+class ServerLimits:
+    """Handle every request inside models.server_limits(), body validation included.
 
-    The size guards a submitted project carries (Region.resident_cell_limit,
-    Project.limits) can lower the defaults but never raise them on the server.
-    A plain ASGI middleware keeps the request in one task, so the context
-    variable reaches the route's model validation.
+    A plain ASGI middleware keeps the request in one task, so the context variable
+    reaches the route's model validation and the threadpool of synchronous routes.
     """
     def __init__(self, app):
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        with default_guards():
+        with server_limits():
             await self.app(scope, receive, send)
+
+
+def _limited(fn, *args, **kwargs):
+    with server_limits():
+        return fn(*args, **kwargs)
+
+
+class ServerExecutor(ThreadPoolExecutor):
+    """A job pool whose tasks run inside models.server_limits(), like the requests that queue them."""
+    def submit(self, fn, /, *args, **kwargs):
+        return super().submit(_limited, fn, *args, **kwargs)
 
 
 def create_app(result_dir=None):
@@ -69,10 +78,10 @@ def create_app(result_dir=None):
     extra = [h.strip() for h in os.environ.get('TORCHFDTD_ALLOWED_HOSTS', '').split(',') if h.strip()]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', *extra])
     app.add_middleware(GZipMiddleware, minimum_size=4096, compresslevel=1)
-    app.add_middleware(DefaultGuards)
+    app.add_middleware(ServerLimits)
     root = Path(result_dir or os.environ.get('TORCHFDTD_RESULTS') or os.environ.get('PHOTONWEAVE_RESULTS', 'results')).resolve()
     root.mkdir(parents=True, exist_ok=True)
-    pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix='fdtd')
+    pool = ServerExecutor(max_workers=1, thread_name_prefix='fdtd')
     jobs, lock = {}, threading.Lock()
 
     @app.middleware('http')

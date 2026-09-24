@@ -284,16 +284,20 @@ def estimate(p: Project, *, endpoint_dispatch=True):
     fused = r.backend == 'cuda' and r.cuda_kernel == 'fused' and not r.complex_fields
     volume_bytes = (fused_resident_bytes(r, stored, max_poles) if fused else
                     stored*((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1))
+    # Every soft or one-way source term keeps its sampled waveform, one real per step, on the device.
+    terms = sum(len(q.polarization_components)*(2 if q.injection == 'oneway' else 1)
+                for q in map(p.resolved_source, p.sources) if q.enabled and q.kind != 'tfsf')
+    source_bytes = r.steps*terms*(8 if r.precision == 'float64' else 4)
     snapshot = snapshot_frames(p)
     if snapshot['aliased']:
         warnings.append(f'Stored frames alias the carrier: {snapshot["frames_per_period"]:.1f} frames per optical period '
                         f'(period {snapshot["period_steps"]:.1f} steps, one frame every {snapshot["effective_interval"]} steps). '
                         f'The playback will look like backward motion; store a frame at least every {snapshot["period_steps"]/SNAPSHOT_FRAMES_PER_PERIOD:.0f} steps.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
-            'estimated_memory_mb': round((volume_bytes+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
+            'estimated_memory_mb': round((volume_bytes+monitor_memory(p)+auxiliary_bytes+interface_bytes+source_bytes)/2**20, 1),
             'memory_model': 'fused_cuda' if fused else 'tensor_expression',
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes,
-            'point_trace_estimated_bytes': point_trace_memory(p), 'snapshot': snapshot}
+            'point_trace_estimated_bytes': point_trace_memory(p), 'source_waveform_estimated_bytes': source_bytes, 'snapshot': snapshot}
 
 
 def pulse_envelope_parameters(source):
@@ -496,10 +500,17 @@ class Simulation:
         from .plan import resources_copy
         plan = self.plan
         stats = resources_copy(plan)
+        # Admission by the resident estimate: 75% of the free device memory, or 80% of the
+        # available host memory on the CPU, the margins of the Auto policy.
         if use_cuda:
             free, _ = torch.cuda.mem_get_info()
             if stats['estimated_memory_mb']*2**20 > free*.75:
                 raise ValueError('Insufficient free GPU memory. Increase mesh spacing or reduce the domain.')
+        else:
+            from .memory_profile import host_memory
+            available = host_memory()['available_bytes']
+            if available is not None and stats['estimated_memory_mb']*2**20 > available*.8:
+                raise ValueError('Insufficient available host memory. Increase mesh spacing or reduce the domain.')
         dtype = torch.float64 if r.precision == 'float64' else torch.float32
         fdtd.set_backend(f'torch.cuda.{r.precision}' if use_cuda else 'numpy')
         # Upstream 0.2.2 leaves a dtype class attribute behind on backend switches.

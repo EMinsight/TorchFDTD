@@ -9,17 +9,21 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
+### Behaviour change
+
+- The Python API has no fixed size caps. Resident execution (`Simulation`, the adjoint entry points, the tensor batch and the Auto policy) is admitted by the memory estimate against 75% of the free device memory, or 80% of the available host memory on the CPU, which `Simulation` now also checks, instead of the 8,000,000-cell limit. Also lifted: 1000 structures, 512 sources, 512 monitors, 100 materials, 64 mesh refinements, 12,000,000 samples per frequency plane, 100,000 steps, 2001 frequency points or custom frequencies, 100,000 samples of a sampled source, and the 1,000,000-vertex default of `GDSLimits` (now `None`; `max_structures` may exceed 1000). Monitors, sources, materials and the step count enter the estimate. Resident execution still refuses a grid whose 3 x cells (6 x for complex fields) reach 2^31, the range of the 32-bit field indices. A script that relied on an early refusal now runs or fails the memory admission; the workbench server keeps every limit (Security below) ([EXECUTION_MODES.md](EXECUTION_MODES.md#size-limits), this commit).
+
 ### Added
 
-- Python opt-in to raise the size guards: `Region.resident_cell_limit` (default 8,000,000; `None` leaves resident admission to the memory estimate) and `Project.limits` with `max_structures` (default 1000) and `max_monitor_samples` (default 12 million complex samples per frequency plane; `None` removes a cap). The defaults are unchanged and are written to JSON only when changed, so existing projects serialize, hash and load as before; tiles of `plan_tiles` inherit the limits. Resident execution refuses a grid whose 3 x cells (6 x for complex fields) reach 2^31, the range of the 32-bit field indices of the fused kernels, whatever its cell limit ([EXECUTION_MODES.md](EXECUTION_MODES.md#raising-the-size-guards-python-api), this commit).
+- Optional user caps: `Region.resident_cell_limit` and `Project.limits` (`max_structures`, `max_sources`, `max_monitors`, `max_materials`, `max_mesh_refinements`, `max_monitor_samples`), `None` by default and written to JSON only when set, so existing projects serialize, hash and load as before; the tiles of `plan_tiles` inherit them (1e51bb2, this commit).
 
 ### Changed
 
-- The resident estimate of `backend="cuda"` with `cuda_kernel="fused"` uses a device model calibrated against measured peaks (`docs/validation/resident_memory_fused_3060.json`) instead of the 200 bytes per cell (FP32) of the tensor-expression bound, so resident admission and the Auto policy accept fused grids that fit; every other path keeps its estimate. `estimate()` reports the model as `memory_model` (this commit).
+- The resident estimate of `backend="cuda"` with `cuda_kernel="fused"` uses a device model calibrated against measured peaks (`docs/validation/resident_memory_fused_3060.json`, which also states the estimate of the 4.33e8-cell RTX 5880 metalens tile) instead of the 200 bytes per cell (FP32) of the tensor-expression bound, so resident admission and the Auto policy accept fused grids that fit; a plane on the fused monitor kernel is counted by its own buffers instead of the Torch-kernel bound. Every estimate adds the source waveforms (`source_waveform_estimated_bytes`); `memory_model` names the model (1e51bb2, this commit).
 
 ### Security
 
-- The workbench server validates every request inside `default_guards()`: a submitted project may lower but never raise the structure, frequency-plane and resident-cell caps, so the Python opt-in above cannot lift them over HTTP ([SECURITY.md](SECURITY.md), this commit).
+- The workbench server applies `SERVER_LIMITS` (8,000,000 resident cells, 1000 structures, 512 sources, 512 monitors, 100 materials, 64 mesh refinements, 12,000,000 samples per frequency plane, 100,000 steps, 2001 frequency points, 100,000 source-signal samples) inside `server_limits()` to every request, job thread and modal worker, whatever caps a submitted project carries, and GDS uploads keep the 1,000,000-vertex limit ([SECURITY.md](SECURITY.md), 1e51bb2, this commit).
 
 ## 0.15.0 (2026-09-23)
 

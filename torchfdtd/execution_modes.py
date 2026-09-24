@@ -22,7 +22,7 @@ import warnings
 import numpy as np
 import torch
 
-from .models import Project, Monitor, RESIDENT_CELL_LIMIT  # noqa: F401  (the default; each region carries its own)
+from .models import Project, Monitor, effective_limit
 from .memory_profile import host_memory
 
 # The resident CUDA solver refuses estimates above 75% of free device memory.
@@ -280,7 +280,7 @@ def _resident_fit(project, summary, backend, health, cells):
         free, fraction, pool = health.get('host_available_bytes'), RESIDENT_HOST_FRACTION, 'available host memory'
     limit = int(free*fraction) if free is not None else None
     fits, reason = True, f'resident estimate {_gib(required)} within {fraction:.0%} of {pool} ({_gib(free)})'
-    cell_limit, refusal = project.region.resident_cell_limit, project.region.resident_refusal()
+    cell_limit, refusal = effective_limit(project.region.resident_cell_limit, 'resident_cells'), project.region.resident_refusal()
     if project.region.memory_mode == 'streamed':
         fits, reason = False, 'memory_mode is streamed'
     elif cell_limit is not None and cells > cell_limit:
