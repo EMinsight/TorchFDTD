@@ -7,6 +7,12 @@ the first section covers the whole history since the first commit (2026-09-20).
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
+## Unreleased
+
+### Behaviour change
+
+- Full-autograd reference oracles (`DifferentiableSimulation.reference`, `DispersiveSimulation.reference`, `TensorDispersiveSimulation.reference`, `SourceWaveformSimulation.reference`, `ModeInjectedPlaneSimulation.reference`) no longer refuse above a fixed product of two million cell-steps (pole-cell-steps for the ADE oracles). They admit the retained autograd graph by a memory estimate instead: the graph tensors, one restart state per step (fields, CPML memories, stored PMC faces, pole banks, at the field element size; tensor ADE adds each operator application) times a measured factor, against 80% of free CUDA memory or of available host memory, and the graph nodes against 80% of available host memory. The new keyword `graph_budget_bytes` caps the estimate, and a refusal names the estimate, the memory it was compared with and that keyword. The factors bound the peaks measured on CPU and on the RTX 3060 ([validation/oracle_graph_memory.json](validation/oracle_graph_memory.json), `benchmarks/oracle_graph_memory.py`) (this commit).
+
 ## 0.15.0 (2026-09-23)
 
 ### Security

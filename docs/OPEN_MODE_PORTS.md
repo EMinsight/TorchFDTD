@@ -185,8 +185,9 @@ Marker geometry is not rasterized.
 injects only its rows of the fixed sheets and accumulates only its own plane
 observers, through the existing tile transposes; the same holds for
 `ModeBranchNetwork`. The `reference` method runs the identical fixed sheets
-through full Torch autograd on small resident problems, at most two million
-cell-steps, as the oracle for the checkpointed adjoint.
+through full Torch autograd on small resident problems, admitted by its
+estimated graph memory (optional `graph_budget_bytes` cap), as the oracle for
+the checkpointed adjoint.
 
 ### Recorded checks
 

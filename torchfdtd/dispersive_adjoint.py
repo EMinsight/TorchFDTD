@@ -250,7 +250,7 @@ class DispersiveSimulation(DifferentiableSimulation):
         if any(s.enabled and s.injection != 'soft' for s in self.project.sources):
             raise ValueError('Dispersive differentiation currently requires soft source injection.')
 
-    def _inputs(self, epsilon, strength, omega0, gamma, *, reference=False, streamed=False):
+    def _inputs(self, epsilon, strength, omega0, gamma, *, reference=False, streamed=False, graph_budget_bytes=None):
         r = self.project.region
         if not streamed:
             from .adjoint_memory import _resident_contract
@@ -279,17 +279,20 @@ class DispersiveSimulation(DifferentiableSimulation):
         if strength.ndim == 0 or not 1 <= strength.shape[0] <= 64:
             raise ValueError('Strength needs a leading pole axis of length 1 to 64.')
         count = strength.shape[0]
-        if reference and math.prod(r.shape)*r.steps*(1+count)>2_000_000:
-            raise ValueError('Full-autograd ADE oracle is restricted to two million pole-cell-steps.')
+        if reference:
+            from .oracle_memory import admit_oracle, oracle_graph_bytes
+            admit_oracle(oracle_graph_bytes(r, 'ade', pole_count=count), epsilon.device, graph_budget_bytes)
         for value in (strength, omega0, gamma):
             if value.shape not in ((), (count,), (count, *grid), (count, *grid, 3)):
                 raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3), with stored upper PMC rows included.')
         layout = _ParameterLayout(tuple(tuple(value.shape) for value in (epsilon, strength, omega0, gamma)), count)
         return (epsilon, strength, omega0, gamma), layout
 
-    def _pack(self, epsilon, strength, omega0, gamma, *, reference=False, streamed=False, admission=None):
+    def _pack(self, epsilon, strength, omega0, gamma, *, reference=False, streamed=False, admission=None,
+              graph_budget_bytes=None):
         values, layout = DispersiveSimulation._inputs(self, epsilon, strength, omega0, gamma,
-                                                     reference=reference, streamed=streamed)
+                                                     reference=reference, streamed=streamed,
+                                                     graph_budget_bytes=graph_budget_bytes)
         epsilon, strength, omega0, gamma = values
         r = self.project.region
         if admission is not None:admission(layout)
@@ -343,8 +346,10 @@ class DispersiveSimulation(DifferentiableSimulation):
             [m.component for m in self.project.monitors if m.enabled], frequency_hz, window, block_size)
         return self._evaluate(epsilon_inf, strength, omega0, gamma, spectral)
 
-    def reference(self, epsilon_inf, strength, omega0, gamma):
-        parameters, layout = self._pack(epsilon_inf, strength, omega0, gamma, reference=True)
+    def reference(self, epsilon_inf, strength, omega0, gamma, *, graph_budget_bytes=None):
+        """Full-autograd oracle, admitted by its estimated graph memory; graph_budget_bytes caps it."""
+        parameters, layout = self._pack(epsilon_inf, strength, omega0, gamma, reference=True,
+                                        graph_budget_bytes=graph_budget_bytes)
         system = _DispersiveSystem(self.project, epsilon_inf, parameters, layout)
         state = tuple(torch.zeros_like(x) for x in system.state())
         signals = []

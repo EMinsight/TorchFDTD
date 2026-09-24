@@ -1,7 +1,6 @@
 """Fixed-profile source waveform and dielectric VJPs with bounded checkpoint replay."""
 from __future__ import annotations
 
-import math
 import hashlib
 import numpy as np
 import torch
@@ -178,9 +177,10 @@ class SourceWaveformSimulation(DifferentiableSimulation):
             [m.component for m in self.project.monitors if m.enabled],frequency_hz,window,block_size)
         return self._evaluate(epsilon,waveforms,spectral)
 
-    def reference(self,epsilon,waveforms):
-        if math.prod(self.project.region.shape)*self.project.region.steps>2_000_000:
-            raise ValueError('Full-autograd reference is restricted to two million cell-steps.')
+    def reference(self,epsilon,waveforms,*,graph_budget_bytes=None):
+        """Full-autograd oracle, admitted by its estimated graph memory; graph_budget_bytes caps it."""
+        from .oracle_memory import admit_oracle,oracle_graph_bytes
+        admit_oracle(oracle_graph_bytes(self.project.region,'yee'),epsilon.device,graph_budget_bytes)
         carrier,_=self._pack(epsilon,waveforms)
         owned=carrier[:epsilon.numel()].view(epsilon.shape)
         system=_SourceSystem(self.project.model_copy(deep=True),owned,carrier=carrier,
