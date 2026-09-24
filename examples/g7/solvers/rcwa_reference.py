@@ -1,14 +1,14 @@
-"""G7-04 reference: TORCWA 0.1.4.2 with 101 Fourier orders, checked against 51 orders.
+"""G7-04 reference (case G7-04r2): TORCWA 0.1.4.2 with 101 Fourier orders, checked against 241 orders.
 
     C:\\anaconda3\\python.exe examples/g7/solvers/rcwa_reference.py
 
 (through D:/TorchFDTD/.local/gpu_lock.py on the shared workstation; TORCWA runs on CUDA). Reuses
 solve() of examples/meep_comparison/metagrating/rcwa_metagrating.py on the unshifted base geometry:
 s polarisation (E along the ridges), normal incidence from the substrate, the ridge layer sampled on
-20,000 real-space cells whose boundaries hold the ridge edges. 101 orders are 50 harmonics and 51
-orders are 25 harmonics (order = 2 * harmonics + 1). Every efficiency (T and R of orders -1, 0, +1)
-at every one of the 41 wavelengths is compared between the two counts; the declared check is a
-largest difference of at most 1e-4.
+20,000 real-space cells whose boundaries hold the ridge edges. 101 orders are 50 harmonics and 241
+orders are 120 harmonics (order = 2 * harmonics + 1). Every efficiency (T and R of orders -1, 0, +1)
+at every one of the 41 wavelengths is compared between the two counts; the declared check
+(docs/validation/cases/G7-04r2.json) is a largest difference of at most 1e-4.
 """
 from __future__ import annotations
 
@@ -28,7 +28,9 @@ sys.path.insert(0, str(HERE))
 import common  # noqa: E402
 
 CHECK_LIMIT = 1e-4
-ORDER_COUNTS = (51, 101)
+REFERENCE_ORDERS = 101
+CHECK_ORDERS = 241
+ORDER_COUNTS = (REFERENCE_ORDERS, CHECK_ORDERS)
 
 
 def load_rcwa():
@@ -66,11 +68,13 @@ def main():
                             max_abs_total_minus_one=float(np.max(abs(np.asarray(total) - 1))),
                             **{k: v for k, v in common.observables(Tm, wavelengths).items() if k != 'design_index'})
         print(count, 'orders: T+1(1.55) =', bands[count]['t1_design'], 'band mean', bands[count]['t1_band_mean'], flush=True)
-    lo, hi = bands[ORDER_COUNTS[0]], bands[ORDER_COUNTS[1]]
-    diffs = {f'{kind}{int(m):+d}': float(np.max(abs(np.asarray(hi[kind][m]) - np.asarray(lo[kind][m])))) for kind in ('T', 'R') for m in hi['T']}
+    ref, chk = bands[REFERENCE_ORDERS], bands[CHECK_ORDERS]
+    diff = {f'{kind}{int(m):+d}': abs(np.asarray(ref[kind][m]) - np.asarray(chk[kind][m])) for kind in ('T', 'R') for m in ref['T']}
+    diffs = {k: float(v.max()) for k, v in diff.items()}
     largest = max(diffs.values())
+    where = max(diff, key=lambda k: diffs[k])
     record = dict(
-        schema='g7-04-rcwa-reference-v1', case='G7-04', solver='rcwa', geometry_sha256=g['_sha256'], date=time.strftime('%Y-%m-%d'),
+        schema='g7-04-rcwa-reference-v1', case='G7-04r2', solver='rcwa', geometry_sha256=g['_sha256'], date=time.strftime('%Y-%m-%d'),
         package=dict(torcwa=importlib.metadata.version('torcwa'), torch=torch.__version__, device=str(device),
                      device_name=torch.cuda.get_device_name(0) if device.type == 'cuda' else None, dtype='complex128', python=sys.version.split()[0]),
         citation='C. Kim and B. Lee, TORCWA: GPU-accelerated Fourier modal method and gradient-based optimization for metasurface design, '
@@ -79,10 +83,11 @@ def main():
                'normal incidence, s polarisation, permittivity on a real-space grid with the ridge edges on cell boundaries (Laurent rule), '
                'S-parameters with power normalisation; order count = 2 * harmonics + 1',
         samples=args.samples, wavelength_um=wavelengths.tolist(), bands={str(k): v for k, v in bands.items()},
-        reference=dict(order_count=ORDER_COUNTS[1], t1_design=hi['t1_design'], t1_band_mean=hi['t1_band_mean']),
-        check=dict(against_order_count=ORDER_COUNTS[0], max_abs_difference_per_efficiency=diffs, max_abs_difference=largest,
+        reference=dict(order_count=REFERENCE_ORDERS, t1_design=ref['t1_design'], t1_band_mean=ref['t1_band_mean']),
+        check=dict(case='docs/validation/cases/G7-04r2.json', against_order_count=CHECK_ORDERS, max_abs_difference_per_efficiency=diffs,
+                   max_abs_difference=largest, at_efficiency=where, at_wavelength_um=float(wavelengths[int(np.argmax(diff[where]))]),
                    limit_abs=CHECK_LIMIT, passed=bool(largest <= CHECK_LIMIT),
-                   t1_design_difference=hi['t1_design'] - lo['t1_design'], t1_band_mean_difference=hi['t1_band_mean'] - lo['t1_band_mean']),
+                   t1_design_difference=ref['t1_design'] - chk['t1_design'], t1_band_mean_difference=ref['t1_band_mean'] - chk['t1_band_mean']),
         seconds=time.perf_counter() - started)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
