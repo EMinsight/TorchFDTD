@@ -2857,7 +2857,14 @@
           "required_tests": [],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-24",
+            "decision": "approved",
+            "scope": "G7-02: the revised case docs/validation/cases/G7-02r2.json supersedes G7-02.json (G7-02r2: every forward run continues until the cell energy falls below 1e-3 of its peak after the source (capped at 10 times the declared window), the refinement finds that step count for the current design in every iteration, and (d) compares the efficiency at twice the stop time; the limit 0.005 and the other criteria are unchanged)",
+            "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
+            "note": "the declared 303.6 fs window ends while the lens still holds energy in the ridge array: at 1x the cell holds 1.7e-2 (library) to 1.85e-2 (refined) of its peak energy, so the efficiency depends on where the window ends (changes of 0.005 to 0.039 between 1x and 1.5x, and oscillations of 0.005 up to 4x), and a refinement at that window optimizes a truncated response"
+          }
         },
         {
           "id": "G7-03",
