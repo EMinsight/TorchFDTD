@@ -16,9 +16,12 @@ below are copied from there. For every seed the workflow
      pre-export rectangles and the re-imported GDS polygons (1.50 um is held out, never optimized);
   5. evaluates the re-imported GDS design again at the 0.025 um mesh over the same physical time.
 
-judge() evaluates the seven acceptance criteria of the case from the seed records.
+judge() evaluates the seven acceptance criteria of the case from the seed records. same_mesh_baseline() is a
+non-judged diagnostic: G6's three coupler designs through the same GDS round trip and meshes. Every record
+names the torchfdtd it imported (file, version, checkout or installed) and the repository commit.
 
 Judged run (CUDA, float32):
+    python -m examples.g7.coupler.workflow --output-dir docs/validation/g7/G7-03 --baseline
     python -m examples.g7.coupler.workflow --output-dir docs/validation/g7/G7-03
 Reduced mechanics run (CPU, a few minutes, never judged):
     python -m examples.g7.coupler.workflow --reduced --seeds 1 --output-dir <scratch>
@@ -32,17 +35,24 @@ import math
 from pathlib import Path
 import platform
 import subprocess
+import sys
 import time
 
 import numpy as np
 import torch
 
-from examples import design_mode_coupler as base
-from torchfdtd.design_parameterization import DensityParameterization
-from torchfdtd.design_problem import Continuation, DesignProblem
-from torchfdtd.fabrication import binary_structures, fabrication_perturbation, measure_feature_sizes
-
 ROOT = Path(__file__).resolve().parents[3]
+# examples/ ships with the repository, not with the wheel. Appending the root (never prepending it) keeps an
+# installed torchfdtd in charge while the repository-only examples stay importable.
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
+from examples import design_mode_coupler as base  # noqa: E402
+import torchfdtd  # noqa: E402
+from torchfdtd.design_parameterization import DensityParameterization  # noqa: E402
+from torchfdtd.design_problem import Continuation, DesignProblem  # noqa: E402
+from torchfdtd.fabrication import binary_structures, fabrication_perturbation, measure_feature_sizes  # noqa: E402
+from torchfdtd.gds import export_gds, GDSLayer, import_gds  # noqa: E402
+
 CASE = 'docs/validation/cases/G7-03.json'
 SEEDS = (1, 2, 3)
 WAVELENGTHS_UM = (1.5, 1.55, 1.6)
@@ -78,6 +88,25 @@ class Settings:
 
 # G6's mesh and physical time; exercises every stage on the CPU, judges nothing.
 REDUCED = Settings(mesh_um=.2, steps=500, check_mesh_um=.1, check_steps=1000, iterations=2, device='cpu', reduced=True)
+
+# How the workflow choices of Settings were fixed, before any run of the declared seeds; copied into every summary.
+# Each run: 50 iterations of this workflow's optimizer on the CPU; linewidth and gap of the thresholded design in
+# pixels of 0.2 um (declared minimum: 2 pixels); |S21|^2 of the binary density at the run's own mesh.
+DEVELOPMENT_SELECTION = dict(
+    purpose='filter radius that makes the thresholded design meet the declared 0.4 um linewidth and gap',
+    development_seeds=[11, 12, 13], judged_seeds_used=False,
+    candidates_um=[.4, .5, .6, .8], chosen_um=.6,
+    runs=[dict(radius_um=r, seed=s, mesh_um=m, steps=n, linewidth_px=lw, gap_px=gp, transmission=t)
+          for r, s, m, n, lw, gp, t in ((.4, 11, .2, 500, 1, 1, .7388), (.4, 12, .2, 500, 1, 1, .7394), (.4, 13, .2, 500, 1, 1, .7394),
+                                        (.6, 11, .2, 500, 3, 3, .7321), (.6, 12, .2, 500, 3, 3, .7321), (.6, 13, .2, 500, 3, 3, .7321),
+                                        (.8, 11, .2, 500, 1, 1, .7268), (.8, 12, .2, 500, 1, 1, .7268), (.8, 13, .2, 500, 1, 1, .7268),
+                                        (.5, 11, .1, 1000, 3, 3, .6268), (.6, 11, .1, 1000, 3, 3, .6268))],
+    reason='0.4 and 0.8 um left one-pixel lines and gaps for every development seed; 0.6 um met the rule for all three, '
+           'and 0.5 um gave the same binary design as 0.6 um at 0.1 um',
+    finite_difference_step=dict(seed=11, mesh_um=.05, device='cuda', max_relative_error={'0.01': 5.7e-4, '0.02': 1.1e-4, '0.05': 2.9e-4},
+                                chosen=.02),
+    steps=dict(mesh_um=.05, density='uniform random, torch seed 1234', transmission_change_2000_to_3000=2.7e-4, chosen=2000),
+    evidence='development records kept outside the repository (g7_archive/G7-03/development)')
 
 
 class Coupler(base.CouplerForward):
@@ -294,6 +323,56 @@ def run_seed(seed, settings, models, export_dir):
         wall_time_s=times)
 
 
+G6_EXPORT = ROOT/'docs/validation/g6/export/coupler'
+
+
+def same_mesh_baseline(models, settings):
+    """Non-judged diagnostic: G6's three coupler designs through this workflow's GDS round trip and meshes.
+
+    Each G6 binary design (docs/validation/g6/export/coupler/seedN, optimized by G6 at 0.2 um and never
+    optimized here) becomes the same rectangles and export_gds file as a judged seed, is re-imported with
+    import_gds and evaluated at the design mesh and the check mesh at every wavelength; its linewidth and
+    gap are measured against the declared rule. The re-export must voxelize like G6's committed GDS.
+    """
+    import tempfile
+    started = time.perf_counter()
+    layer = GDSLayer(layer=1, datatype=0, z_min=-base.SLAB_UM/2, z_max=base.SLAB_UM/2, material=base.MATERIAL)
+    designs = {}
+    with tempfile.TemporaryDirectory() as scratch:
+        for seed in SEEDS:
+            folder = G6_EXPORT/f'seed{seed}'
+            pixels = np.array(json.loads((folder/f'coupler-seed{seed}-binary.json').read_text(encoding='utf-8'))['pixels'], dtype=bool)
+            sizes = measure_feature_sizes(pixels, base.PIXEL_UM, boundary='extend')
+            name = f'g6-coupler-seed{seed}'
+            structures = binary_structures(pixels, origin_um=(base.BOX_UM[0], base.BOX_UM[2]), spacing_um=base.PIXEL_UM,
+                                           z_min_um=-base.SLAB_UM/2, z_max_um=base.SLAB_UM/2, material=base.MATERIAL, id_prefix=name)
+            path = Path(scratch)/f'{name}.gds'
+            export_gds(path, structures, layers={s.id: (1, 0) for s in structures}, cell='DESIGN')
+            polygons = import_gds(path, cell='DESIGN', layers=[layer]).structures
+            committed = import_gds(folder/f'coupler-seed{seed}.gds', cell='DESIGN', layers=[layer]).structures
+            forward = models.design[DESIGN_UM]
+            identical = bool(torch.equal(forward.structure_epsilon(polygons), forward.structure_epsilon(committed)))
+            evaluations = {stage: {} for stage in ('structures', 'gds', 'gds_check_mesh')}
+            for wavelength in WAVELENGTHS_UM:
+                key = f'{wavelength:.2f}'
+                evaluations['structures'][key] = s_record(models.design[wavelength].s_structures(structures))
+                evaluations['gds'][key] = s_record(models.design[wavelength].s_structures(polygons))
+                evaluations['gds_check_mesh'][key] = s_record(models.check[wavelength].s_structures(polygons))
+            g6 = json.loads((ROOT/f'docs/validation/g6/coupler-seed{seed}.json').read_text(encoding='utf-8'))
+            designs[seed] = dict(
+                source=f'docs/validation/g6/export/coupler/seed{seed}', binary=pixels.astype(int).tolist(),
+                feature_sizes=sizes.report(), violations=list(sizes.violations(min_linewidth_um=MIN_FEATURE_UM, min_gap_um=MIN_FEATURE_UM)),
+                transmission={stage: {key: value['transmission'] for key, value in values.items()} for stage, values in evaluations.items()},
+                g6_recorded_fine_gds_transmission=g6['final_evaluation']['stages']['fine_gds']['transmission'],
+                g6_recorded_fine_mesh_um=g6['declared']['fine_mesh_um'], committed_gds_voxelizes_identically=identical,
+                evaluations=evaluations)
+    return dict(diagnostic='same-mesh baseline', judged=False,
+                note='G6 designs re-evaluated with the G7 pipeline; they were not optimized in G7, and this block enters no '
+                     'criterion of the case',
+                mesh_um=settings.mesh_um, steps=settings.steps, check_mesh_um=settings.check_mesh_um, check_steps=settings.check_steps,
+                designs=designs, environment=environment(settings), wall_time_s=time.perf_counter()-started)
+
+
 def _criterion(name, value, limit, passed, **details):
     return dict(criterion=name, value=value, limit=limit, passed=bool(passed), **details)
 
@@ -347,14 +426,23 @@ def judge(records):
 
 
 def environment(settings):
+    """Where torchfdtd came from (checkout or installed wheel), its version and the repository commit."""
     try:
         commit = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         commit = None
+    try:
+        from importlib.metadata import PackageNotFoundError, version
+        distribution = version('torchfdtd')
+    except (ImportError, PackageNotFoundError):
+        distribution = None
+    source = Path(torchfdtd.__file__).resolve()
     device = torch.device(settings.device)
     return dict(python=platform.python_version(), torch=torch.__version__, numpy=np.__version__, os=platform.platform(),
                 device=torch.cuda.get_device_name(device) if device.type == 'cuda' else platform.processor() or 'cpu',
-                commit=commit, torchfdtd=str(Path(__import__('torchfdtd').__file__).parent))
+                commit=commit, torchfdtd_file=str(source), torchfdtd_version=getattr(torchfdtd, '__version__', None),
+                torchfdtd_distribution_version=distribution,
+                torchfdtd_import='checkout' if ROOT in source.parents else 'installed')
 
 
 def write_json(path, payload):
@@ -377,9 +465,20 @@ def summarize(output_dir):
                    environment={r['seed']: r['environment'] for r in records},
                    wall_time_s=dict(per_seed={r['seed']: r['wall_time_s'] for r in records},
                                     network_setup={r['seed']: r['network_setup_s'] for r in records},
-                                    total=sum(r['wall_time_s']['total']+r['network_setup_s'] for r in records)))
+                                    total=sum(r['wall_time_s']['total']+r['network_setup_s'] for r in records)),
+                   development_selection=DEVELOPMENT_SELECTION)
+    baseline = output_dir/'baseline.json'
+    if baseline.exists():
+        summary['diagnostics_same_mesh_baseline'] = json.loads(baseline.read_text(encoding='utf-8'))
     write_json(output_dir/'summary.json', summary)
     return summary
+
+
+def run_baseline(settings, output_dir, models=None):
+    """Write the non-judged same-mesh baseline diagnostic to output_dir/baseline.json."""
+    record = same_mesh_baseline(models or Models(settings), settings)
+    write_json(Path(output_dir)/'baseline.json', record)
+    return record
 
 
 def run(seeds, settings, output_dir):
@@ -406,10 +505,17 @@ def main(argv=None):
     parser.add_argument('--reduced', action='store_true', help='CPU mechanics run at a coarse mesh; never judged')
     parser.add_argument('--device', help='override the settings device')
     parser.add_argument('--summary-only', action='store_true', help='judge the seed records already in --output-dir')
+    parser.add_argument('--baseline', action='store_true', help='write only the non-judged same-mesh baseline diagnostic')
     args = parser.parse_args(argv)
     settings = REDUCED if args.reduced else Settings()
     if args.device:
         settings = replace(settings, device=args.device)
+    if args.baseline:
+        record = run_baseline(settings, args.output_dir)
+        print(json.dumps({seed: dict(violations=d['violations'], linewidth_um=d['feature_sizes']['min_linewidth_um'],
+                                     gap_um=d['feature_sizes']['min_gap_um'], **{stage: values[f'{DESIGN_UM:.2f}'] for stage, values in d['transmission'].items()})
+                          for seed, d in record['designs'].items()}, indent=1))
+        return record
     summary = summarize(args.output_dir) if args.summary_only else run(args.seeds, settings, args.output_dir)[1]
     print(json.dumps({c['criterion']: dict(value=c['value'], limit=c['limit'], passed=c['passed']) for c in summary['criteria']}, indent=1))
     return summary
