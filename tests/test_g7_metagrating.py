@@ -108,15 +108,17 @@ def test_radius_selection_takes_the_smallest_compliant_candidate(tmp_path):
     def write(radius, seed, violations):
         workflow.write_json(tmp_path/f'selection-r{radius:g}-seed{seed}.json',
                             dict(radius_um=radius, seed=seed, violations=violations, record={}, environment=dict(commit='c')))
-    for seed, violations in ((11, []), (12, []), (13, ['min_gap'])):
-        write(.06, seed, violations)
+    write(.06, 11, [])
+    selection = workflow.select_decide(tmp_path)
+    assert selection['chosen_radius_um'] is None and selection['pending_radius_um'] == [.06]
+    write(.06, 12, ['min_gap'])      # the first violating design rejects 0.06; seed 13 need not run
     write(.08, 11, [])
     write(.08, 12, [])
     selection = workflow.select_decide(tmp_path)
     assert selection['chosen_radius_um'] is None and selection['pending_radius_um'] == [.08]
     write(.08, 13, [])
     selection = workflow.select_decide(tmp_path)
-    assert selection['chosen_radius_um'] == .08 and selection['pending_radius_um'] == [] and len(selection['runs']) == 6
+    assert selection['chosen_radius_um'] == .08 and selection['pending_radius_um'] == [] and len(selection['runs']) == 5
     assert selection['development_seeds'] == [11, 12, 13] and not selection['judged_seeds_used']
     with pytest.raises(ValueError, match='not a development seed'):
         workflow.select_run(.06, 2, tmp_path)

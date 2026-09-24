@@ -645,7 +645,8 @@ def select_run(radius_um, seed, directory):
 
 def select_decide(directory):
     """The selection record: the smallest candidate radius whose development designs all meet the declared
-    linewidth and gap as thresholded; None (with the candidates still to run) when no finished candidate does."""
+    linewidth and gap as thresholded. A candidate fails at its first violating design, so its remaining
+    seeds need not run; the result is None, with the candidate still to run, until a candidate passes."""
     case, _, provenance = declared()
     p = case_parameters(case)
     runs = [json.loads(path.read_text(encoding='utf-8')) for path in sorted(Path(directory).glob('selection-r*-seed*.json'))]
@@ -654,15 +655,17 @@ def select_decide(directory):
     chosen, pending = None, []
     for radius in sorted(p['candidates_um']):
         done = {row['seed']: row for row in rows if math.isclose(row['radius_um'], radius)}
+        if any(row['violations'] for row in done.values()):
+            continue
         if set(done) != set(p['development_seeds']):
             pending.append(radius)
             break
-        if all(not row['violations'] for row in done.values()):
-            chosen = radius
-            break
+        chosen = radius
+        break
     return dict(schema='torchfdtd-g7-01-radius-selection-v1', task='G7-01', provenance=provenance,
                 rule='the smallest candidate radius at which the thresholded designs of every development seed meet the declared '
-                     'linewidth and gap; candidates in increasing order, each run with the declared schedule at the selection mesh and time',
+                     'linewidth and gap; candidates in increasing order, each run with the declared schedule at the selection mesh and time; '
+                     'a candidate is rejected at its first violating design and its remaining seeds are not run',
                 candidates_um=sorted(p['candidates_um']), development_seeds=p['development_seeds'], judged_seeds_used=False,
                 selection_mesh_um=p['selection_mesh_um'], selection_time_fs=p['selection_time_fs'], extension_um=p['extension_um'],
                 chosen_radius_um=chosen, open_close=False, pending_radius_um=pending, runs=rows, commits=commits,
