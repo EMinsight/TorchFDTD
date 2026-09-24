@@ -8,7 +8,8 @@ The scene is the one of examples/meep_comparison/metagrating/meep_metagrating.py
 CustomSource, Meep PML of the same 0.4 um thickness, add_dft_fields lines on the centred grid) with
 eps_averaging=False in the staircase series and Meep's default subpixel averaging in the smoothed
 series. Per point: one bare-substrate reference run, one warm-up and three timed grating runs.
-Before every run each rank waits while the pause file exists (another session's CPU timing window).
+Before every run the ranks wait while the pause file exists (another session's CPU timing window) and,
+with --max-host-cpu-percent, until the Windows host load is below that value; the load and the wait are recorded.
 Only the MPI master writes the record.
 """
 from __future__ import annotations
@@ -35,6 +36,7 @@ mm = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mm)
 
 PAUSE_FILE = '/mnt/d/TorchFDTD/.local/eqp_cpu_go'
+LOAD_SAMPLE_SLEEP = 3.0  # seconds the non-master ranks sleep while the master samples the host load
 
 
 def make_simulation(g, ridges=None, *, eps_averaging):
@@ -62,18 +64,36 @@ def make_simulation(g, ridges=None, *, eps_averaging):
     return sim, dfts, dt_meep
 
 
-def wait_for_pause_file(path):
-    waited = 0.0
-    while path and os.path.exists(path):
+def wait_for_host(pause_file, max_cpu_percent, max_wait_seconds):
+    """Wait while the pause file exists and, with max_cpu_percent, until the Windows host load is below it.
+
+    Only the master samples the load (powershell.exe, about a second); the other ranks sleep meanwhile
+    instead of spinning in an MPI barrier, so the sample does not count this job's own waiting ranks.
+    The decision is broadcast from the master. After max_wait_seconds the run starts regardless and the
+    record says so.
+    """
+    from mpi4py import MPI
+    comm = MPI.COMM_WORLD
+    waited, started = 0.0, time.perf_counter()
+    while True:
+        while pause_file and os.path.exists(pause_file):
+            time.sleep(30)
+        if mp.am_master():
+            cpu = mm.host_cpu_load_percent()
+        else:
+            cpu = None
+            time.sleep(LOAD_SAMPLE_SLEEP)
+        cpu = comm.bcast(cpu, root=0)
+        waited = time.perf_counter() - started
+        busy = max_cpu_percent is not None and cpu is not None and cpu > max_cpu_percent
+        if not busy or waited >= max_wait_seconds:
+            comm.Barrier()
+            return dict(waited_seconds=waited, host_cpu_percent_before=cpu, gate_timed_out=bool(busy))
         time.sleep(30)
-        waited += 30
-    cpu = mm.host_cpu_load_percent() if mp.am_master() else None
-    mp.all_wait()
-    return waited, cpu
 
 
-def timed_run(g, ridges, eps_averaging, pause_file):
-    waited, cpu = wait_for_pause_file(pause_file)
+def timed_run(g, ridges, eps_averaging, gate):
+    host = wait_for_host(*gate)
     started = time.perf_counter()
     sim, dfts, dt_meep = make_simulation(g, ridges, eps_averaging=eps_averaging)
     sim.init_sim()
@@ -86,8 +106,7 @@ def timed_run(g, ridges, eps_averaging, pause_file):
     full = time.perf_counter() - started
     steps_run = int(sim.fields.t)
     assert steps_run == g['steps'], (steps_run, g['steps'])
-    return sim, dfts, dt_meep, dict(setup_seconds=setup, stepping_seconds=stepping, full_seconds=full, steps_run=steps_run,
-                                    waited_for_pause_file_seconds=waited, host_cpu_percent_before=cpu)
+    return sim, dfts, dt_meep, dict(setup_seconds=setup, stepping_seconds=stepping, full_seconds=full, steps_run=steps_run, **host)
 
 
 def staircase(sim, g):
@@ -112,7 +131,7 @@ def lines(sim, dfts, g):
     return {name: mm.dft_line(sim, dfts[name], g) for name in ('reflection', 'transmission')}
 
 
-def run_point(base, resolution, series, pause_file, repeats, compare):
+def run_point(base, resolution, series, gate, repeats, compare):
     mesh = {r: h for r, h in zip(common.MEEP_RESOLUTIONS, common.TORCHFDTD_MESHES_UM)}[resolution]
     g = common.derive_geometry(base, mesh, series)
     assert g['g7_04']['resolution_per_um'] == resolution
@@ -120,15 +139,15 @@ def run_point(base, resolution, series, pause_file, repeats, compare):
     cpu_before = mm.host_cpu_load_percent() if mp.am_master() else None
     gpu_before = mm.nvidia_smi() if mp.am_master() else None
 
-    sim, dfts, dt_meep, ref_timing = timed_run(g, [], eps_averaging, pause_file)
+    sim, dfts, dt_meep, ref_timing = timed_run(g, [], eps_averaging, gate)
     assert math.isclose(dt_meep * mm.TIME_UNIT, g['g7_04']['dt_s'], rel_tol=1e-9), (dt_meep * mm.TIME_UNIT, g['g7_04']['dt_s'])
     reference_monitors = lines(sim, dfts, g)
     sim.reset_meep()
-    sim, dfts, _, warmup = timed_run(g, None, eps_averaging, pause_file)
+    sim, dfts, _, warmup = timed_run(g, None, eps_averaging, gate)
     sim.reset_meep()
     samples, t1_runs = [], []
     for k in range(repeats):
-        sim, dfts, _, timing = timed_run(g, None, eps_averaging, pause_file)
+        sim, dfts, _, timing = timed_run(g, None, eps_averaging, gate)
         samples.append(timing)
         monitors = lines(sim, dfts, g)
         amps = common.point_amplitudes(dict(monitors=monitors, reference_monitors=reference_monitors))
@@ -174,9 +193,10 @@ def run_point(base, resolution, series, pause_file, repeats, compare):
                     median_setup_seconds=float(np.median([s['setup_seconds'] for s in samples])), reference=ref_timing,
                     device=f'CPU, {mp.count_processors()} MPI ranks'),
         host=dict(shared=True, host_cpu_percent_before=cpu_before, host_cpu_percent_after=mm.host_cpu_load_percent(), gpu_before=gpu_before,
-                  pause_file=pause_file,
-                  note='shared workstation: other agents use the GPU and other sessions may run CPU jobs; host CPU load (Windows, all cores) before and '
-                       'after the point is recorded; runs wait while the pause file exists'),
+                  pause_file=gate[0], max_host_cpu_percent=gate[1], max_wait_seconds=gate[2],
+                  note='shared workstation: other agents use the GPU and other sessions may run CPU jobs; the Windows host CPU load (all cores) is '
+                       'sampled before every run and recorded; runs wait while the pause file exists and, with max_host_cpu_percent, until '
+                       'the load is below it (at most max_wait_seconds)'),
         environment=dict(platform=platform.platform(), python=sys.version.split()[0], wsl_distribution=os.environ.get('WSL_DISTRO_NAME'),
                          meep_version=mp.__version__, packages=mm.versions(('meep', 'numpy', 'mpi4py')), meep_mpi=bool(mp.with_mpi()),
                          mpi_processes=int(mp.count_processors()), omp_num_threads=os.environ.get('OMP_NUM_THREADS'),
@@ -200,6 +220,8 @@ def main():
     parser.add_argument('--resolutions', type=int, nargs='+', default=list(common.MEEP_RESOLUTIONS))
     parser.add_argument('--repeats', type=int, default=3)
     parser.add_argument('--pause-file', default=PAUSE_FILE)
+    parser.add_argument('--max-host-cpu-percent', type=float, default=None, help='wait before each run until the host load is at most this')
+    parser.add_argument('--max-wait-seconds', type=float, default=3600, help='longest wait for a quiet host before a run starts anyway')
     parser.add_argument('--out-dir', default=str(common.RECORDS))
     args = parser.parse_args()
     mp.verbosity(0)
@@ -208,7 +230,8 @@ def main():
     compare = common.load_compare()
     for resolution in args.resolutions:
         assert resolution in common.MEEP_RESOLUTIONS, resolution
-        record = run_point(base, resolution, args.series, args.pause_file, args.repeats, compare)
+        gate = (args.pause_file, args.max_host_cpu_percent, args.max_wait_seconds)
+        record = run_point(base, resolution, args.series, gate, args.repeats, compare)
         if record is None:
             continue
         out = Path(args.out_dir) / f'meep-{args.series}-float64-{resolution}.json'
