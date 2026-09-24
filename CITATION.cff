@@ -10,6 +10,14 @@ authors:
   - family-names: Park
     given-names: Hyoseok
     affiliation: "Department of Physics, Chungnam National University, Daejeon, Republic of Korea"
+doi: 10.5281/zenodo.22928834
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22928834
+    description: "Concept DOI of TorchFDTD, resolving to the latest version"
+  - type: doi
+    value: 10.5281/zenodo.22928835
+    description: "Version DOI of TorchFDTD 0.15.0"
 repository-code: "https://github.com/hyoseokp/TorchFDTD"
 license: MIT
 version: 0.15.0
