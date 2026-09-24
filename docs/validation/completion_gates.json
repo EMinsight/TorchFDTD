@@ -3367,7 +3367,7 @@
           "specification": "validation report를 기계 산출물에서 생성한다. 내부 검증 보고서를 제3자 인증서라고 부르지 않는다. 숫자·지원 표·README·API docs·wheel 버전을 일치시킨다.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "FAILED",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "scripts/build_validation_report.py",
@@ -3400,7 +3400,8 @@
             "20260923T090611Z-g9-07-43fac87d",
             "20260923T163744Z-g9-07-f2ec5075",
             "20260924T000735Z-g9-07-b659fecd",
-            "20260924T001744Z-g9-07-97c6903d"
+            "20260924T001744Z-g9-07-97c6903d",
+            "20260924T002805Z-g9-07-9330aedc"
           ],
           "blocker": null,
           "scope_change_approval": null,
