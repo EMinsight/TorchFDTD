@@ -81,10 +81,12 @@ best seed's transmission by at most 0.02.
 | TorchFDTD | RTX 3060, fused CUDA kernels, meshes 0.04, 0.02, 0.01 and 0.005 um, steps scaled to the same physical time |
 | Meep 1.34 | i7-12700, 4 MPI ranks in the torchfdtd-bench WSL distribution, resolutions 25, 50, 100 and 200 per um, the same physical time |
 | Observables | T+1 at 1.55 um and the band-mean T+1; error = absolute difference to the reference; cost = wall time (median of three runs), cells and steps |
+| Material sampling | two series per solver: staircase (Meep with eps_averaging off), with the whole structure shifted by half a cell in x and y at a mesh where an edge would fall on a node (the shift leaves the order efficiencies of the periodic structure unchanged); and smoothed (Meep's default subpixel averaging, TorchFDTD's experimental subpixel interfaces) without a shift |
+| Physical time and absorber | 560 fs and a 0.4 um absorber at every mesh; Courant number of the base fixture |
 
 Acceptance: every point is recorded with its median and range; the accuracy-versus-cost curve of
 both solvers is rendered from the record; the cost to reach errors of 0.01, 0.005 and 0.002 is
-reported by log-log interpolation for each solver; equal-cell-count and equal-error comparisons are
+reported by log-log interpolation for each solver and each sampling series; equal-cell-count and equal-error comparisons are
 reported separately; the record states that the two solvers ran on different hardware (CPU against
 GPU) and draws no conclusion about algorithms from it.
 

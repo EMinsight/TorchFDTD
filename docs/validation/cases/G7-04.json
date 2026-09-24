@@ -37,7 +37,13 @@
       "T+1 at 1.55 um",
       "band-mean T+1"
     ],
-    "repeats": 3
+    "repeats": 3,
+    "material_sampling": {
+      "staircase": "both solvers; Meep eps_averaging off; the whole structure is shifted by half a cell in x and y at a mesh where an edge would fall on a node",
+      "smoothed": "Meep default subpixel averaging; TorchFDTD experimental subpixel interfaces; no shift"
+    },
+    "physical_time_fs": 560,
+    "absorber_um": 0.4
   },
   "seed": "not applicable: fixed geometry",
   "precision": "TorchFDTD float32 and float64; Meep double",
@@ -46,7 +52,7 @@
   "acceptance": {
     "records": "every point with median and range of three runs",
     "curves": "accuracy-versus-cost curves of both solvers rendered from the record",
-    "matched_cost": "cost to reach errors 0.01, 0.005 and 0.002 by log-log interpolation for each solver",
+    "matched_cost": "cost to reach errors 0.01, 0.005 and 0.002 by log-log interpolation for each solver and each sampling series",
     "separation": "equal-cell-count and equal-error comparisons reported separately",
     "hardware": "the record states CPU against GPU hardware and draws no algorithmic conclusion from it"
   }
