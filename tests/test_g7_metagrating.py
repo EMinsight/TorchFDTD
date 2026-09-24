@@ -209,6 +209,10 @@ def test_short_run_writes_complete_records(tmp_path):
     # a development run is not the declared workflow: one seed and no TORCWA check fail (a) and (c)
     assert not criteria['all_seeds']['passed'] and not criteria['rcwa_agreement']['passed'] and not summary['all_passed']
     assert summary['rcwa'] is None and len(summary['references']) == 8
+    # every record names the torchfdtd it imported (checkout or installed wheel) and the checkout commit
+    for environment in (record['environment'], summary['environment']):
+        assert Path(environment['torchfdtd']['file']).name == '__init__.py' and environment['torchfdtd']['version']
+        assert 'commit' in environment and 'tracked_changes' in environment
 
 
 def assert_every_criterion(directory):
