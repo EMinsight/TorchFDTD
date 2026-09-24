@@ -4,7 +4,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22928834.svg)](https://doi.org/10.5281/zenodo.22928834)
 
-GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-differentiable simulations on NVIDIA CUDA. MIT licensed. Not affiliated with Ansys.
+GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-differentiable simulations on NVIDIA CUDA. MIT licensed.
 
 ## Core features
 
@@ -14,13 +14,12 @@ GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-
 - **Inverse design.** Checkpointed and reversible Torch adjoints for dielectric, dispersive (ADE), Bloch, CPML, PEC/PMC, density, polygon/spline shape and source-waveform parameters. Objectives on point signals, plane spectra, N-port S-parameters, far-field and near-zone projections.
 - **Beyond VRAM.** Streamed execution across VRAM, DRAM and NVMe with measured memory reservations, a metadata planner and a crash-resumable journal.
 - **Physics.** 3D and 2D Yee grids, uniform or graded mesh, per-face CPML, periodic/Bloch, PEC/PMC/symmetry, Drude/Lorentz dispersion with passive fitting, anisotropic tensors, subpixel interfaces, point/sheet/plane/one-way/TFSF/mode sources, DFT monitors, mode ports, near-to-far field, diffraction orders.
-- **Interoperability.** GDS import/export with holes, etch layers, sidewall angles and port markers; independent read/write of a documented Lumerical FSP subset.
+- **Interoperability.** GDS import/export with holes, etch layers, sidewall angles and port markers.
 
 ## How much faster
 
 | Comparison | Setting | Result |
 |---|---|---|
-| Lumerical FDTD, CPU 16 threads vs TorchFDTD on RTX 5880 | 128³, 2,000 steps, sphere | **15.2×** run wall time (6.5× at 64³) |
 | flaport/fdtd on CUDA vs TorchFDTD fused kernels | 64³ and 96³, 800 steps | **16 to 17×** and **10 to 12×** |
 | 16-case parameter sweeps vs flaport/fdtd sequential | 32³ and 64³ | **31 to 44×** and **15 to 16×** |
 | Torch CPU vs GPU, differentiable forward and backward | 128 × 64 × 64, 32 steps | **69×** resident, **12×** with DRAM streaming |
@@ -31,7 +30,7 @@ GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-
 | Larger than the GPU, capacity run | 2.42 billion cells, 58 GB (54 GiB) of E/H on a 48 GiB GPU, 10 steps plus full material gradient | 2.23 GB peak CUDA memory, 58 min, gradient within 9.1e-8 of the oracle |
 | Larger than the GPU, crash and resume | 2.26 billion cells, 54 GB (50.6 GiB) of E/H, same policy | killed after the first backward record, resumed process finishes with 3.03 GB peak CUDA memory and the gradient within 9.1e-8 |
 
-Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The Meep and FDTDX rows come from the same-hardware comparison in [docs/CROSS_SOLVER_COMPARISON.md](docs/CROSS_SOLVER_COMPARISON.md), which also lists the solver differences behind them. The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations. The Lumerical rows are aggregate timings of earlier builds; no commercial data is redistributed.
+Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The Meep and FDTDX rows come from the same-hardware comparison in [docs/CROSS_SOLVER_COMPARISON.md](docs/CROSS_SOLVER_COMPARISON.md), which also lists the solver differences behind them. The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations.
 
 <!-- meep-comparison:start -->
 ## Compared with Meep
@@ -64,7 +63,7 @@ The workbench's FDTD panel has a **GPU** switch and a **Memory** selector; `/api
 
 ## Compared with FDTDX
 
-Ahead: browser CAD, FSP interoperability, same-GPU structure batches, beyond-VRAM streaming with restart, GDS export and browser import, shape derivatives on top of density parameterization.
+Ahead: browser CAD, same-GPU structure batches, beyond-VRAM streaming with restart, GDS export and browser import, shape derivatives on top of density parameterization.
 Equal: nonuniform meshes, dispersive materials, anisotropic materials, boundaries, mode sources and ports, far-field projection, differentiable physics with fixed eigenmodes.
 Behind: single-problem multi-GPU (verified with CPU ranks only). Row-by-row evidence: [docs/FDTDX_PARITY_KO.md](docs/FDTDX_PARITY_KO.md).
 
@@ -130,7 +129,7 @@ print(Result.load("results/first.npz").summary["backend"])
 
 - [Python and batch API](docs/PYTHON_BATCH.md), [tensor batches](docs/TENSOR_BATCH.md), [differentiable FDTD](docs/DIFFERENTIABLE_FDTD.md), [shape gradients](docs/SHAPE_GRADIENTS.md)
 - [Streamed execution](docs/STREAMED_FDTD.md), [planner](docs/STREAMED_WORK_PLANNING.md), [restart journal](docs/STREAMED_RESTART.md), [beyond-VRAM records](docs/BEYOND_VRAM_RESTART.md), [propagated case](docs/BEYOND_VRAM_PROPAGATED.md)
-- [Mode ports](docs/OPEN_MODE_PORTS.md), [far field](docs/FARFIELD_WORKFLOW.md), [GDS](docs/GDS.md), [FSP](docs/FSP.md), [materials](docs/MATERIALS.md), [boundaries](docs/BOUNDARIES.md)
+- [Mode ports](docs/OPEN_MODE_PORTS.md), [far field](docs/FARFIELD_WORKFLOW.md), [GDS](docs/GDS.md), [materials](docs/MATERIALS.md), [boundaries](docs/BOUNDARIES.md)
 - [Measurements and feature record](docs/MEASUREMENTS.md), [cross-solver comparison with Meep and FDTDX](docs/CROSS_SOLVER_COMPARISON.md), [worked comparisons with Meep](docs/MEEP_COMPARISON.md), [feature checklist](docs/FEATURE_CHECKLIST.md), [acceptance record](docs/ACCEPTANCE.md)
 - [Security model](docs/SECURITY.md), [compatibility and support policy](docs/COMPATIBILITY.md), [changelog](docs/CHANGELOG.md), [third-party notices and SBOM](docs/THIRD_PARTY_NOTICES.md)
 
@@ -164,4 +163,4 @@ During the development of TorchFDTD, OpenAI GPT-6 Astra and Anthropic Claude Fab
 
 ## Attribution
 
-[flaport/fdtd](https://github.com/flaport/fdtd) (MIT) supplies the grid foundation. PyTorch, NumPy, FastAPI, Three.js, Lucide and Vite keep their licenses. Contributions are welcome; back numerical changes with CPU/GPU parity checks and reproducible benchmark conditions.
+[flaport/fdtd](https://github.com/flaport/fdtd) (MIT) supplies the grid foundation. PyTorch, NumPy, FastAPI, Three.js, Lucide and Vite keep their licenses. Contributions are welcome; back numerical changes with CPU/GPU parity checks and reproducible benchmark conditions. TorchFDTD is not affiliated with Ansys.

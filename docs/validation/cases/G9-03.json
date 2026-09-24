@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G9-03",
+  "task": "G9-03",
+  "title": "The open contract and distribution questions of docs/RELEASE_REVIEW.md stay tracked, the owner's decision on them is recorded, and no document claims a clearance",
+  "declared": "2026-09-24",
+  "declared_before_run": true,
+  "fixture": {
+    "documents": ["docs/RELEASE_REVIEW.md", "README.md"],
+    "package_modules": ["torchfdtd/fsp.py", "torchfdtd/fsp_binary.py", "torchfdtd/fsp_native.py"],
+    "owner_decision": "24 September 2026: keep the interoperability features in the package, stop describing them in the README, accept the remaining risk; the contractual question stays open",
+    "test": "tests/test_release_review.py"
+  },
+  "seed": "not applicable",
+  "precision": "not applicable: document checks, no simulation",
+  "backend": "cpu",
+  "reference_method": "the owner's instruction of 24 September 2026 and the gate list of docs/RELEASE_REVIEW.md; this task tracks questions and decisions and draws no legal conclusion",
+  "observables": [
+    {"name": "open_question_listed", "unit": "boolean", "definition": "the review keeps its contract-issue section, its outstanding-gates list and the statement that gate 1 remains an open contractual question"},
+    {"name": "owner_decision_recorded", "unit": "boolean", "definition": "an owner-decision section dated 24 September 2026 states that the features stay, that the README no longer describes them, that the decision accepts the remaining risk and that it does not resolve the contractual question; every package module it names exists"},
+    {"name": "clearance_claims", "unit": "count", "definition": "affirmative clearance phrases in the review (is legally cleared, has been cleared, no legal risk, no infringement, guarantees that, is permitted by ansys), case-insensitive"},
+    {"name": "readme_interoperability_mentions", "unit": "count", "definition": "occurrences of Lumerical, FSP or .fsp in README.md"}
+  ],
+  "acceptance": {
+    "tracking": "open_question_listed and owner_decision_recorded are true",
+    "wording": "clearance_claims is 0",
+    "readme": "readme_interoperability_mentions is 0 while the named package modules exist, and the README keeps the statement that TorchFDTD is not affiliated with Ansys",
+    "source_of_limits": "G9-03 in docs/COMPLETION_PROGRAM_KO.md: track the unresolved contract and distribution questions from the actual documents, never guarantee absence of litigation or infringement or assume commercial rights, keep owner and expert judgement separate from technical work"
+  }
+}

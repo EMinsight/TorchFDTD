@@ -3330,18 +3330,29 @@
           "title": "RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다",
           "specification": "RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다. AI가 무소송/무침해를 보증하거나 상용 사용권을 추정하지 않는다. 필요한 소유자/전문가 판단은 BLOCKED_EXTERNAL로 남기고 기술 작업과 분리한다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
-            "docs/RELEASE_REVIEW.md"
+            "docs/RELEASE_REVIEW.md",
+            "README.md",
+            "docs/validation/cases/G9-03.json"
           ],
-          "planned_test_commands": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-03.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_release_review.py"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": null,
+          "watch_paths": [
+            "docs/RELEASE_REVIEW.md",
+            "README.md"
+          ],
+          "implementation_note": "The owner decided on 24 September 2026 to keep the interoperability features and stop describing them in the README, accepting the remaining risk; the contractual question of RELEASE_REVIEW gate 1 stays open and is recorded as such. tests/test_release_review.py checks the review record and the README."
         },
         {
           "id": "G9-04",

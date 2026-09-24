@@ -141,6 +141,31 @@ is met by the FDTDX comparison except for single-problem multi-GPU. Gate 1
 remains open as a contractual question that publication does not settle, and
 gate 5 applies to any paper submission.
 
+## Owner decision, 24 September 2026
+
+The owner decided how gate 1 is handled in the public repository while the
+contractual question stays open:
+
+- The interoperability features stay in the package: the FSP subset reader and
+  writer (`torchfdtd/fsp.py`, `torchfdtd/fsp_binary.py`, `torchfdtd/fsp_native.py`
+  and the `fsp_*` modules beside them), the optional installed-API bridge, the
+  installed property catalogue and the legacy automatic pulse rules.
+- The README no longer describes them. On this date the FSP interoperability
+  claim, the FSP documentation link and the aggregate timing row against the
+  commercial solver were removed from it. The feature documentation
+  ([FSP.md](FSP.md)) and the measurement record ([MEASUREMENTS.md](MEASUREMENTS.md))
+  stay in the repository, and the README keeps the statement that TorchFDTD is
+  not affiliated with Ansys.
+- The decision is the owner's acceptance of the remaining risk. It does not
+  resolve the contractual question: the applicable agreement, licence type and
+  governing law are still not established, no vendor has been contacted, and
+  nothing in this record is a legal opinion or a clearance.
+
+Task G9-03 of the completion program tracks this record.
+`tests/test_release_review.py` checks that the open questions and this decision
+stay recorded, that the review makes no clearance claim, and that the README
+does not describe these features while the package keeps them.
+
 ## Release-candidate procedure
 
 The technical gate run of a candidate (build the wheel, clean install,
