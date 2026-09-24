@@ -2880,13 +2880,26 @@
           "title": "동일 정확도 독립 solver 교차 검증 및 공정 비교",
           "specification": "동일 정확도 독립 solver 교차 검증 및 공정 비교",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "examples/g7/solvers/common.py",
+            "examples/g7/solvers/torchfdtd_sweep.py",
+            "examples/g7/solvers/meep_sweep.py",
+            "examples/g7/solvers/rcwa_reference.py",
+            "examples/g7/solvers/analyze.py",
+            "examples/g7/solvers/readout_check.py",
+            "docs/validation/cases/G7-04r2.json",
+            "docs/G7_RESULTS.md"
+          ],
+          "planned_test_commands": [
+            "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-04.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_g7_solvers.py"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": {
@@ -2896,7 +2909,13 @@
             "scope": "G7-04: the revised case docs/validation/cases/G7-04r2.json supersedes G7-04.json (G7-04r2: the reference is checked against 241 orders instead of 51 (every efficiency within 1e-4).)",
             "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
             "note": "the declared reference check compared the 101-order TORCWA reference with a 51-order solution, which measures the error of the 51-order solution rather than of the reference; a reference is checked against a higher order"
-          }
+          },
+          "watch_paths": [
+            "examples/g7/solvers/common.py",
+            "examples/g7/solvers/analyze.py",
+            "docs/validation/cases/G7-04r2.json"
+          ],
+          "implementation_note": "The accuracy-versus-cost sweeps of TorchFDTD (RTX 3060) and Meep 1.34 (i7-12700, 4 ranks) against a TORCWA reference checked against 241 orders (G7-04r2) are committed under docs/validation/g7/G7-04/; the judged test reproduces the tables and asserts every acceptance item from those records. The TorchFDTD records name the package that ran."
         },
         {
           "id": "G7-05",
