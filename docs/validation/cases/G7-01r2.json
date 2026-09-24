@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-24",
+  "declared_before_run": true,
+  "declaration": "docs/G7_WORKFLOWS.md",
+  "platform": "rtx3060-win11-lab",
+  "installation": "the release wheel in an environment outside the checkout",
+  "case_id": "G7-01r2",
+  "task": "G7-01",
+  "title": "Metagrating workflow: density design from three seeds, TE/TM, normal and fixed-k_x incidence, 41 wavelengths, orders with phase, RCWA check",
+  "fixture": {
+    "base": "examples/meep_comparison/metagrating/geometry.json",
+    "period_um": 2.0,
+    "substrate_index": 1.444,
+    "ridge_index": 3.48,
+    "design_layer_um": [
+      0.01,
+      0.51
+    ],
+    "pixels": 100,
+    "pixel_um": 0.02,
+    "filter_radius_um": "chosen before the judged seeds on development seeds 11 to 13 from 0.06, 0.08, 0.10 and 0.12 um (with a morphological open and close before export if needed) as the smallest radius whose binary designs meet the 3-pixel linewidth and gap; the selection is recorded",
+    "projection_beta": [
+      8,
+      16,
+      32,
+      64
+    ],
+    "iterations_per_beta": 20,
+    "optimizer": "Adam",
+    "learning_rate": 0.1,
+    "objective": "mean T+1 at 1.50, 1.55, 1.60 um, TE, normal incidence from the substrate",
+    "fabrication": {
+      "min_linewidth_um": 0.06,
+      "min_gap_um": 0.06,
+      "boundary": "periodic",
+      "binarize_at": 0.5
+    },
+    "evaluation": {
+      "meshes_um": [
+        0.01,
+        0.005
+      ],
+      "polarizations": [
+        "TE (E along the ridges)",
+        "TM (H along the ridges)"
+      ],
+      "incidence": [
+        "normal",
+        "fixed k_x = 2 pi n_sub sin(10 deg) / 1.55 um"
+      ],
+      "wavelengths_um": [
+        1.5,
+        1.6,
+        41
+      ],
+      "orders": [
+        -1,
+        0,
+        1
+      ],
+      "quantities": "reflected and transmitted order amplitudes (complex) and efficiencies",
+      "judged_mesh_um": 0.01,
+      "mesh_check": "0.005 um against 0.01 um, TE, normal incidence, every seed and wavelength"
+    },
+    "independent_solver": "TORCWA 0.1.4.2 on the same binary pixel pattern and k_x",
+    "design_mesh_um": 0.01,
+    "cell_extension_um": {
+      "air_above_layer": 3.0,
+      "substrate_below_layer": 3.0,
+      "applies_to": "every design and evaluation run"
+    },
+    "physical_time_fs": 1120,
+    "rayleigh_anomaly_exclusion": "criteria (c) and (e) are judged at wavelengths at least 0.02 um from every Rayleigh anomaly of the evaluated k_x in air and substrate; excluded wavelengths are reported",
+    "torcwa_tm_convergence": "TM harmonics raised until the estimated error is at most 0.003"
+  },
+  "seed": "logits 0.5 * randn with seeds 1, 2, 3",
+  "precision": "float32 on CUDA",
+  "backend": "cuda",
+  "reference_method": "TORCWA (grid-free RCWA) for every evaluated case",
+  "baseline": {
+    "source": "docs/validation/meep_comparison/metagrating_comparison.json",
+    "band_mean_T_plus1": 0.7706
+  },
+  "acceptance": {
+    "all_seeds": "all three seeds reported with history, design and every evaluation",
+    "performance": "best seed band-mean T+1 (TE, normal, binary, judged mesh 0.01 um) is at least 0.7706",
+    "rcwa_agreement": "every order efficiency within 0.02 of TORCWA in every evaluated case at 0.01 um (TE and TM), at every wavelength at least 0.02 um from all Rayleigh anomalies of the evaluated k_x; excluded wavelengths reported",
+    "mesh": "0.005 um changes T+1 (TE, normal) by at most 0.02 at every wavelength, for every seed",
+    "energy_balance": "|1 - sum R - sum T| at most 0.02 in every evaluated case at every wavelength at least 0.02 um from all Rayleigh anomalies of the evaluated k_x; excluded wavelengths reported",
+    "fabrication": "the best seed meets the declared linewidth and gap; every seed reports its violations"
+  },
+  "supersedes": {
+    "case": "docs/validation/cases/G7-01.json",
+    "status": "the original case stays in place; its failing runs are kept outside the repository by owner decision"
+  },
+  "revision": {
+    "reason": "the declared fixture could not meet its own criteria for any design: (1) at the fixed k_x the +1 air order has a Rayleigh anomaly at 1.5111 um inside the band and the declared cell leaves 0.91 um of air, so the evanescent order reaches the absorber; (2) the 0.02 um mesh is one cell per pixel, too coarse for a 0.02 agreement; (3) 560 fs does not outlast a resonance near 1.50 um; (4) a 0.06 um filter does not guarantee the declared 3-pixel features; (5) TORCWA TM with the Laurent rule converges as 1/N and stopped short of its tolerance",
+    "evidence": "best design, fixed k_x, 3 um more air and substrate, wavelengths at least 0.02 um from any anomaly: energy residual 0.0042 (TE) and 0.0039 (TM), largest |FDTD - TORCWA| 0.0035 (TE) and 0.0027 (TM) at 0.01 um, against 0.0903 and 0.0807 residuals in the declared cell; 0.02 um from the anomaly the evanescent decay length is 1.5 um and a propagating order leaves at most 80.7 degrees from the normal; TE at 0.02 um misses 0.02 by discretization (0.0229 at 1.5775 um, 0.0035 at 0.01 um); doubling the time brings the resonant case from 0.090 to 0.0071",
+    "approved_by": "owner",
+    "date": "2026-09-24"
+  }
+}

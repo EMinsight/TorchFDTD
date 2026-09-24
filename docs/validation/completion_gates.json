@@ -2834,7 +2834,14 @@
           "required_tests": [],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-24",
+            "decision": "approved",
+            "scope": "G7-01: the revised case docs/validation/cases/G7-01r2.json supersedes G7-01.json (G7-01r2: design and judged mesh 0.01 um with a 0.005 um mesh check; 3 um more air and substrate in every run; 1120 fs of physical time; the filter radius chosen on development seeds 11 to 13 to meet the 3-pixel features; (c) and (e) judged at least 0.02 um from every Rayleigh anomaly, excluded wavelengths reported; TORCWA TM converged to 0.003; acceptance limits unchanged)",
+            "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
+            "note": "the declared fixture could not meet its own criteria for any design: (1) at the fixed k_x the +1 air order has a Rayleigh anomaly at 1.5111 um inside the band and the declared cell leaves 0.91 um of air, so the evanescent order reaches the absorber; (2) the 0.02 um mesh is one cell per pixel, too coarse for a 0.02 agreement; (3) 560 fs does not outlast a resonance near 1.50 um; (4) a 0.06 um filter does not guarantee the declared 3-pixel features; (5) TORCWA TM with the Laurent rule converges as 1/N and stopped short of its tolerance"
+          }
         },
         {
           "id": "G7-02",
