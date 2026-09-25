@@ -77,7 +77,7 @@ Install the wheel; it carries the built browser workbench, so no Node.js and no 
 ```powershell
 python -m venv torchfdtd-env
 torchfdtd-env/Scripts/python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu126
-torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-0.15.0-py3-none-any.whl[cuda-kernels]"
+torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-0.16.0-py3-none-any.whl[cuda-kernels]"
 torchfdtd-env/Scripts/torchfdtd doctor
 torchfdtd-env/Scripts/torchfdtd serve
 ```
