@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.15.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260924T140733Z-g7-04-a1b4bd63` recorded 2026-09-24T14:07:33+00:00 at commit `bab17be9e58e`.
+Package version `0.15.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T054137Z-g7-04-087c885b` recorded 2026-09-25T05:41:37+00:00 at commit `92005aea2e95`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -120,7 +120,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G7-01 | 공개 metagrating/meta-atom 전체 workflow | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G7-02 | 소형 유한 metalens의 실제 propagation·PSF·최종 재평가 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G7-03 | 수동 PIC 역설계·복수 초기화·제작 제약·GDS 재평가 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G7-04 | 동일 정확도 독립 solver 교차 검증 및 공정 비교 | IMPLEMENTED | VERIFIED | `20260924T140733Z-g7-04-a1b4bd63` | `bab17be9e58e` | PASS | evidence matches the current checkout |
+| G7-04 | 동일 정확도 독립 solver 교차 검증 및 공정 비교 | IMPLEMENTED | VERIFIED | `20260925T054137Z-g7-04-087c885b` | `92005aea2e95` | PASS | evidence matches the current checkout |
 | G7-05 | cold/warm·전체 iteration·streaming·tuning 비용과 반복 변동 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 
 ### G8 저장·GUI·clean 설치 (WORKSTATION, P1)
