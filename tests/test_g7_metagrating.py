@@ -8,7 +8,8 @@ TE and TM at both incidences, the TORCWA script against a uniform film, and the 
 run. TORCHFDTD_G7_FULL=1 runs the declared workflow (the RTX 3060 and the TORCWA interpreter) from
 the radius selection recorded in the records directory: one seed stage per declared seed as
 parallel subprocesses, each prefixed by TORCHFDTD_G7_LAUNCHER (the GPU lock command on the shared
-workstation), then the judgement. TORCHFDTD_G7_RECORD=<dir> names the records directory
+workstation), then one TORCWA process for every seed with TORCHFDTD_G7_RCWA_THREADS threads (started
+once TORCHFDTD_G7_PAUSE_FILE, if named, does not exist), then the judgement. TORCHFDTD_G7_RECORD=<dir> names the records directory
 (docs/validation/g7/G7-01 for the committed evidence) and TORCHFDTD_G7_CHECKPOINT_DIR=<dir> keeps the
 design states so that an interrupted run resumes. The subprocesses import the same torchfdtd as this
 test (checkout or installed wheel). Without the flag, the committed records are re-judged when
@@ -22,6 +23,7 @@ from dataclasses import replace
 from pathlib import Path
 import subprocess
 import sys
+import time
 from types import SimpleNamespace
 
 import numpy as np
@@ -37,6 +39,8 @@ RECORD = os.environ.get('TORCHFDTD_G7_RECORD')
 CHECKPOINTS = os.environ.get('TORCHFDTD_G7_CHECKPOINT_DIR')
 RCWA_PYTHON = os.environ.get('TORCHFDTD_RCWA_PYTHON', 'C:/anaconda3/python.exe')
 LAUNCHER = os.environ.get('TORCHFDTD_G7_LAUNCHER', '').split()
+RCWA_THREADS = os.environ.get('TORCHFDTD_G7_RCWA_THREADS')
+PAUSE = os.environ.get('TORCHFDTD_G7_PAUSE_FILE')
 CRITERIA = ('all_seeds', 'performance', 'rcwa_agreement', 'mesh', 'energy_balance', 'fabrication')
 
 
@@ -104,22 +108,41 @@ def test_rayleigh_anomalies_and_the_excluded_wavelengths(fixture):
     assert workflow.anomaly_distance(g, 0., wavelength).min() > .05     # normal incidence: 1.444 um in the substrate, 2 um in air
 
 
-def test_radius_selection_takes_the_smallest_compliant_candidate(tmp_path):
-    def write(radius, seed, violations):
-        workflow.write_json(tmp_path/f'selection-r{radius:g}-seed{seed}.json',
-                            dict(radius_um=radius, seed=seed, violations=violations, record={}, environment=dict(commit='c')))
-    write(.06, 11, [])
+def test_open_close_gives_three_pixel_lines_and_gaps_across_the_period():
+    pattern = np.zeros(100, int)
+    pattern[[10, 11]] = 1                  # a two-pixel line, removed by the opening
+    pattern[20:30] = 1
+    pattern[31:40] = 1                     # a one-pixel gap, filled by the closing
+    pattern[:2] = pattern[-2:] = 1         # a four-pixel line across the periodic seam
+    processed = workflow.open_close(pattern, 3)[:, 0].astype(int)
+    expected = np.zeros(100, int)
+    expected[20:40] = 1
+    expected[:2] = expected[-2:] = 1
+    assert processed.tolist() == expected.tolist()
+    sizes = workflow.measure_feature_sizes(processed[:, None], .02, boundary=('periodic', 'extend'))
+    assert not sizes.violations(min_linewidth_um=.06, min_gap_um=.06)
+
+
+def test_radius_selection_takes_the_smallest_candidate_that_meets_the_rule(tmp_path):
+    def write(radius, seed, violations, processed_violations=None):
+        run = dict(radius_um=radius, seed=seed, violations=violations, record={}, environment=dict(commit='c'))
+        if processed_violations is not None:
+            run['open_close'] = dict(violations=processed_violations, changed_pixels=2, environment=dict(commit='d'))
+        workflow.write_json(tmp_path/f'selection-r{radius:g}-seed{seed}.json', run)
+    write(.06, 11, ['min_linewidth'], [])
+    write(.06, 12, ['min_gap'], [])
     selection = workflow.select_decide(tmp_path)
     assert selection['chosen_radius_um'] is None and selection['pending_radius_um'] == [.06]
-    write(.06, 12, ['min_gap'])      # the first violating design rejects 0.06; seed 13 need not run
-    write(.08, 11, [])
-    write(.08, 12, [])
+    write(.06, 13, [])                     # a design without the open and close is not yet counted
+    assert workflow.select_decide(tmp_path)['pending_radius_um'] == [.06]
+    write(.06, 13, [], [])
+    write(.12, 11, [])
     selection = workflow.select_decide(tmp_path)
-    assert selection['chosen_radius_um'] is None and selection['pending_radius_um'] == [.08]
-    write(.08, 13, [])
-    selection = workflow.select_decide(tmp_path)
-    assert selection['chosen_radius_um'] == .08 and selection['pending_radius_um'] == [] and len(selection['runs']) == 5
-    assert selection['development_seeds'] == [11, 12, 13] and not selection['judged_seeds_used']
+    assert selection['chosen_radius_um'] == .06 and selection['open_close'] and selection['pending_radius_um'] == []
+    assert selection['filtering_alone']['0.06'] == dict(seeds=[11, 12, 13], violating_seeds=[11, 12], meets_on_filtering_alone=False)
+    assert selection['development_seeds'] == [11, 12, 13] and not selection['judged_seeds_used'] and selection['commits'] == ['c', 'd']
+    case, _, _ = workflow.declared()
+    assert workflow.Settings.declared(case, selection).open_close
     with pytest.raises(ValueError, match='not a development seed'):
         workflow.select_run(.06, 2, tmp_path)
 
@@ -249,7 +272,7 @@ def rejudge(directory):
 
 
 def test_short_run_writes_complete_records(tmp_path):
-    settings = small(band_points=3)
+    settings = small(band_points=3, open_close=True)
     workflow.run(settings, tmp_path, rcwa_python=RCWA_PYTHON, skip_rcwa=True)
     summary, records, criteria = rejudge(tmp_path)
     assert [r['seed'] for r in records] == [1]
@@ -260,7 +283,11 @@ def test_short_run_writes_complete_records(tmp_path):
     for e in record['evaluations']:
         assert len(e['wavelength_um']) == 3 and set(e['T']) == set(e['R']) == {str(m) for m in workflow.ALL_ORDERS}
         assert set(e['amplitudes']['t']) == set(e['amplitudes']['r']) == {'-1', '0', '1'}
-    assert record['fabrication']['declared'] == dict(min_linewidth_um=.06, min_gap_um=.06, perturbation_um=.02, boundary=['periodic', 'extend'])
+    assert record['fabrication']['declared'] == dict(min_linewidth_um=.06, min_gap_um=.06, boundary=['periodic', 'extend'])
+    assert record['fabrication']['thresholded']['declared']['perturbation_um'] == .02 and not record['fabrication']['violations']
+    closed = record['open_close']
+    assert closed['processed'] == record['binary'] and closed['changed_pixels'] == sum(a != b for a, b in zip(closed['thresholded'], closed['processed']))
+    assert closed['band_mean_T_plus1']['processed'] == float(np.mean(workflow.find(record, settings.design_mesh_um, 'TE', 'normal')['T']['1']))
     # a development run is not the declared workflow: one seed and no TORCWA check fail (a) and (c)
     assert not criteria['all_seeds']['passed'] and not criteria['rcwa_agreement']['passed'] and not summary['all_passed']
     assert summary['rcwa'] == {'1': None} and len(summary['references']['1']) == 8
@@ -295,10 +322,14 @@ def test_declared_workflow_meets_every_acceptance_criterion():
     package_root = str(Path(torchfdtd.__file__).resolve().parents[1])
     environment = dict(os.environ, PYTHONPATH=os.pathsep.join(filter(None, [package_root, os.environ.get('PYTHONPATH')])))
     script = str(ROOT/'examples'/'g7'/'metagrating'/'workflow.py')
-    processes = [subprocess.Popen(LAUNCHER+[sys.executable, script, '--stage', 'seed', '--seed', str(seed), '--out', str(directory),
-                                            '--rcwa-python', RCWA_PYTHON]+(['--checkpoint-dir', CHECKPOINTS] if CHECKPOINTS else []),
-                                  env=environment) for seed in settings.seeds]
+    processes = [subprocess.Popen(LAUNCHER+[sys.executable, script, '--stage', 'seed', '--seed', str(seed), '--skip-rcwa', '--out', str(directory)]
+                                  + (['--checkpoint-dir', CHECKPOINTS] if CHECKPOINTS else []), env=environment) for seed in settings.seeds]
     assert [process.wait() for process in processes] == [0]*len(processes)
+    while PAUSE and Path(PAUSE).exists():
+        time.sleep(30)
+    threads = {name: RCWA_THREADS for name in ('OMP_NUM_THREADS', 'MKL_NUM_THREADS')} if RCWA_THREADS else {}
+    subprocess.run(LAUNCHER+[sys.executable, script, '--stage', 'rcwa', '--out', str(directory), '--rcwa-python', RCWA_PYTHON],
+                   env=dict(environment, **threads), check=True)
     workflow.judge_stage(settings, directory, selection=selection)
     assert_every_criterion(directory)
 

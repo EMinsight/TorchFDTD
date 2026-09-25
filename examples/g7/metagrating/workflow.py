@@ -13,7 +13,8 @@ file docs/validation/cases/G7-01r2.json supplies the declared quantities and cri
 
     python -m examples.g7.metagrating.workflow --stage select-run --radius 0.06 --seed 11 --selection-dir <dev dir> --out <records>
     python -m examples.g7.metagrating.workflow --stage select-decide --selection-dir <dev dir> --out <records>
-    python -m examples.g7.metagrating.workflow --stage seed --seed 1 --out <records>        (one per declared seed, in parallel)
+    python -m examples.g7.metagrating.workflow --stage seed --seed 1 --skip-rcwa --out <records>   (one per declared seed, in parallel)
+    python -m examples.g7.metagrating.workflow --stage rcwa --out <records>              (one TORCWA process for every seed)
     python -m examples.g7.metagrating.workflow --stage judge --out <records>
     python -m examples.g7.metagrating.workflow --small --out <dir>                           (CPU-sized development run)
 
@@ -43,6 +44,7 @@ from torchfdtd import (AdjointOptions, Boundaries, BoundaryFace, DifferentiableP
 from torchfdtd.density_layer import _overlap
 from torchfdtd.design_parameterization import DensityParameterization
 from torchfdtd.design_problem import Continuation, DesignProblem
+from torchfdtd.fabrication import measure_feature_sizes, morphological_open
 from torchfdtd.solver import field_axes
 
 C0 = 299792458.0
@@ -74,6 +76,7 @@ class Settings:
     extension_um: float = 3.             # air above the layer and substrate below it, added to the fixture's cell
     absorber_um: float = .4
     filter_radius_um: float | None = None
+    open_close: bool = False             # periodic open-then-close of every thresholded design before its checks
     iterations_per_beta: int = 20
     betas: tuple = (8., 16., 32., 64.)
     learning_rate: float = .1
@@ -101,15 +104,17 @@ class Settings:
         fine = [m for m in evaluation['meshes_um'] if not math.isclose(m, evaluation['judged_mesh_um'])]
         return cls(design_mesh_um=f['design_mesh_um'], fine_mesh_um=fine[0], physical_time_fs=f['physical_time_fs'],
                    extension_um=p['extension_um'], absorber_um=p['absorber_um'], filter_radius_um=selection['chosen_radius_um'],
+                   open_close=bool(selection.get('open_close', False)),
                    iterations_per_beta=f['iterations_per_beta'], betas=tuple(float(b) for b in f['projection_beta']),
                    learning_rate=f['learning_rate'], band_points=evaluation['wavelengths_um'][2], seeds=tuple(declared_seeds(case)),
                    rcwa_error_target=p['rcwa_error_target'], anomaly_exclusion_um=p['exclusion_um'])
 
     @classmethod
     def for_selection(cls, case, radius_um, seed):
-        """One development design of the radius selection: the declared schedule at the selection mesh and time."""
+        """One development design of the radius selection: the declared schedule at the selection mesh and time,
+        thresholded without the open and close (the selection records the feature sizes of the filter alone)."""
         p = case_parameters(case)
-        return replace(cls.declared(case, dict(chosen_radius_um=radius_um)), design_mesh_um=p['selection_mesh_um'],
+        return replace(cls.declared(case, dict(chosen_radius_um=radius_um, open_close=False)), design_mesh_um=p['selection_mesh_um'],
                        physical_time_fs=p['selection_time_fs'], seeds=(seed,))
 
     @classmethod
@@ -179,6 +184,14 @@ def declared_seeds(case):
 def pixel_count(g):
     """100 pixels of the fixture mesh (0.02 um) across the period."""
     return int(round(g['period_um']/g['mesh_um']))
+
+
+def open_close(binary, side):
+    """Periodic open-then-close of a thresholded pixel design by a line of `side` pixels: the opening removes every
+    line narrower than `side`, the closing then fills every gap narrower than `side`, so both meet `side` pixels."""
+    array = np.asarray(binary, dtype=bool).reshape(-1, 1)
+    opened = morphological_open(array, side, boundary=('periodic', 'extend'))
+    return ~morphological_open(~opened, side, boundary=('periodic', 'extend'))
 
 
 def bloch_kx(g):
@@ -459,11 +472,29 @@ def design_seed(seed, objective, settings, case, *, checkpoint=None):
     fabrication = problem.fabrication(spacing_um=pixel_um, min_linewidth_um=fab['min_linewidth_um'], min_gap_um=fab['min_gap_um'],
                                       perturbation_um=pixel_um, boundary=(fab['boundary'], 'extend'))
     binary = problem.density(hard=True)
+    extra = {}
+    if settings.open_close:
+        # The optimizer never sees the open and close; every check below uses the processed design.
+        side = int(round(fab['min_linewidth_um']/pixel_um))
+        if side != int(round(fab['min_gap_um']/pixel_um)):
+            raise ValueError('one open-then-close side serves the declared linewidth and gap only when they are equal')
+        thresholded = binary.bool().cpu().numpy()
+        processed = open_close(thresholded, side)
+        sizes = measure_feature_sizes(processed, pixel_um, boundary=(fab['boundary'], 'extend'))
+        violations = list(sizes.violations(min_linewidth_um=fab['min_linewidth_um'], min_gap_um=fab['min_gap_um']))
+        loss_before, metrics_before = problem.evaluate(binary)
+        binary = torch.as_tensor(processed, dtype=binary.dtype)
+        extra['open_close'] = dict(side_pixels=side, boundary=[fab['boundary'], 'extend'], changed_pixels=int((thresholded != processed).sum()),
+                                   thresholded=thresholded[:, 0].astype(int).tolist(), processed=processed[:, 0].astype(int).tolist(),
+                                   thresholded_design_mesh=dict(objective=loss_before, metrics=metrics_before))
+        fabrication = dict(feature_sizes=sizes.report(), violations=violations, satisfies_declared_constraints=not violations,
+                           declared=dict(min_linewidth_um=fab['min_linewidth_um'], min_gap_um=fab['min_gap_um'], boundary=[fab['boundary'], 'extend']),
+                           measured='the design after the open and close', thresholded=fabrication)
     loss, metrics = problem.evaluate(binary)
     return dict(seed=seed, iterations=problem.iteration, filter_radius_um=settings.filter_radius_um, history=history,
                 initial_logits=initial[:, 0].tolist(), final_logits=design.design.detach()[:, 0].tolist(),
                 smooth_density=problem.density()[:, 0].tolist(), binary=binary[:, 0].int().tolist(),
-                design_mesh_binary=dict(objective=loss, metrics=metrics), fabrication=fabrication,
+                design_mesh_binary=dict(objective=loss, metrics=metrics), fabrication=fabrication, **extra,
                 design_wall_seconds=time.perf_counter()-started, iteration_seconds=sum(h['elapsed_s'] for h in history))
 
 
@@ -625,61 +656,107 @@ def write_json(path, value):
 
 
 def select_run(radius_um, seed, directory):
-    """One development design of the radius selection; its record goes to `directory` (kept outside the repository)."""
+    """One development design of the radius selection, kept in `directory` (outside the repository).
+
+    The design runs at the selection mesh and time and records the feature sizes of its thresholded
+    pattern, the filter alone. The declared open and close is then applied, with its changed pixels,
+    the feature sizes of the processed pattern and the band-mean T+1 (TE, normal incidence) of both
+    patterns at the judged mesh and time. A design already in `directory` is reused, so only the
+    open-and-close block is computed again.
+    """
     case, g, provenance = declared()
     if seed not in case_parameters(case)['development_seeds'] or seed in declared_seeds(case):
         raise ValueError(f'seed {seed} is not a development seed of the case file')
-    settings = Settings.for_selection(case, radius_um, seed)
-    record = design_seed(seed, TransmissionObjective(g, settings), settings, case)
-    e = CaseEvaluator(g, settings, settings.design_mesh_um, 'TE', 'normal').evaluate(record['binary'])
-    sizes = record['fabrication']['feature_sizes']
-    row = dict(radius_um=radius_um, seed=seed, mesh_um=settings.design_mesh_um, physical_time_fs=e['physical_time_fs'],
-               linewidth_pixels=sizes['linewidth_pixels'], gap_pixels=sizes['gap_pixels'], violations=record['fabrication']['violations'],
-               smooth_objective=-record['history'][-1]['objective'], binary_objective=-record['design_mesh_binary']['objective'],
-               band_mean_T_plus1=float(np.mean(e['T']['1'])), binary=record['binary'], seconds=record['design_wall_seconds'])
-    write_json(Path(directory)/f'selection-r{radius_um:g}-seed{seed}.json',
-               dict(row, record=record, evaluation=e, settings=asdict(settings), provenance=provenance, environment=environment(torch.device(settings.backend))))
-    print(json.dumps({k: v for k, v in row.items() if k != 'binary'}), flush=True)
+    path = Path(directory)/f'selection-r{radius_um:g}-seed{seed}.json'
+    if path.exists():
+        run = load_json(path)[0]
+    else:
+        settings = Settings.for_selection(case, radius_um, seed)
+        record = design_seed(seed, TransmissionObjective(g, settings), settings, case)
+        e = CaseEvaluator(g, settings, settings.design_mesh_um, 'TE', 'normal').evaluate(record['binary'])
+        sizes = record['fabrication']['feature_sizes']
+        run = dict(radius_um=radius_um, seed=seed, mesh_um=settings.design_mesh_um, physical_time_fs=e['physical_time_fs'],
+                   linewidth_pixels=sizes['linewidth_pixels'], gap_pixels=sizes['gap_pixels'], violations=record['fabrication']['violations'],
+                   smooth_objective=-record['history'][-1]['objective'], binary_objective=-record['design_mesh_binary']['objective'],
+                   band_mean_T_plus1=float(np.mean(e['T']['1'])), binary=record['binary'], seconds=record['design_wall_seconds'],
+                   record=record, evaluation=e, settings=asdict(settings), provenance=provenance,
+                   environment=environment(torch.device(settings.backend)))
+    f = case['fixture']
+    fab = f['fabrication']
+    side = int(round(fab['min_linewidth_um']/f['pixel_um']))
+    thresholded = np.asarray(run['binary'], dtype=bool).reshape(-1, 1)
+    processed = open_close(thresholded, side)
+    sizes = measure_feature_sizes(processed, f['pixel_um'], boundary=(fab['boundary'], 'extend'))
+    judged = Settings.declared(case, dict(chosen_radius_um=radius_um, open_close=True))
+    evaluator = CaseEvaluator(g, judged, judged.design_mesh_um, 'TE', 'normal')
+    before, after = evaluator.evaluate(thresholded[:, 0].astype(float)), evaluator.evaluate(processed[:, 0].astype(float))
+    run['open_close'] = dict(side_pixels=side, changed_pixels=int((thresholded != processed).sum()), processed=processed[:, 0].astype(int).tolist(),
+                             linewidth_pixels=sizes.linewidth_pixels, gap_pixels=sizes.gap_pixels,
+                             violations=list(sizes.violations(min_linewidth_um=fab['min_linewidth_um'], min_gap_um=fab['min_gap_um'])),
+                             mesh_um=judged.design_mesh_um, physical_time_fs=after['physical_time_fs'],
+                             band_mean_T_plus1=dict(thresholded=float(np.mean(before['T']['1'])), processed=float(np.mean(after['T']['1']))),
+                             environment=environment(evaluator.device))
+    write_json(path, run)
+    row = {k: v for k, v in run.items() if k not in ('binary', 'record', 'evaluation', 'settings', 'provenance', 'environment')}
+    summary = {k: v for k, v in row['open_close'].items() if k not in ('processed', 'environment')}
+    print(json.dumps(dict(row, open_close=summary)), flush=True)
     return row
 
 
 def select_decide(directory):
-    """The selection record: the smallest candidate radius whose development designs all meet the declared
-    linewidth and gap as thresholded. A candidate fails at its first violating design, so its remaining
-    seeds need not run; the result is None, with the candidate still to run, until a candidate passes."""
+    """The selection record of the development designs in `directory`.
+
+    The declared open and close before export makes every thresholded design meet the linewidth and
+    gap, so the smallest candidate is chosen once all its development designs are recorded with the
+    open and close and meet them. The feature sizes of the filter alone are recorded for every run; a
+    candidate was run on further seeds only while none of its designs had violated them.
+    """
     case, _, provenance = declared()
     p = case_parameters(case)
     runs = [json.loads(path.read_text(encoding='utf-8')) for path in sorted(Path(directory).glob('selection-r*-seed*.json'))]
     rows = [{k: v for k, v in run.items() if k not in ('record', 'evaluation', 'settings', 'provenance', 'environment')} for run in runs]
-    commits = sorted({run['environment']['commit'] for run in runs})
-    chosen, pending = None, []
+    commits = {run['environment']['commit'] for run in runs} | {run['open_close']['environment']['commit'] for run in runs if 'open_close' in run}
+    for row in rows:
+        if 'open_close' in row:
+            row['open_close'] = {k: v for k, v in row['open_close'].items() if k != 'environment'}
+    alone = {}
     for radius in sorted(p['candidates_um']):
         done = {row['seed']: row for row in rows if math.isclose(row['radius_um'], radius)}
-        if any(row['violations'] for row in done.values()):
-            continue
+        alone[f'{radius:g}'] = dict(seeds=sorted(done), violating_seeds=sorted(s for s, row in done.items() if row['violations']),
+                                    meets_on_filtering_alone=set(done) == set(p['development_seeds']) and not any(row['violations'] for row in done.values()))
+    chosen, pending = None, []
+    for radius in sorted(p['candidates_um']):
+        done = {row['seed']: row for row in rows if math.isclose(row['radius_um'], radius) and 'open_close' in row}
         if set(done) != set(p['development_seeds']):
             pending.append(radius)
             break
-        chosen = radius
-        break
-    return dict(schema='torchfdtd-g7-01-radius-selection-v1', task='G7-01', provenance=provenance,
-                rule='the smallest candidate radius at which the thresholded designs of every development seed meet the declared '
-                     'linewidth and gap; candidates in increasing order, each run with the declared schedule at the selection mesh and time; '
-                     'a candidate is rejected at its first violating design and its remaining seeds are not run',
+        if not any(row['open_close']['violations'] for row in done.values()):
+            chosen = radius
+            break
+    return dict(schema='torchfdtd-g7-01-radius-selection-v2', task='G7-01', provenance=provenance,
+                rule='the smallest candidate radius whose binary designs of every development seed meet the declared linewidth and gap, '
+                     'with the declared periodic open-then-close of 3 pixels before export; the feature sizes of the filter alone are '
+                     'recorded for every run, and a candidate was run on further seeds only while none of its designs had violated them',
+                decision='on filtering alone 0.06, 0.08 and 0.10 um each left a narrower line or gap; the open and close makes every '
+                         'design compliant, so the smallest candidate is chosen and the open and close is applied to every binary design '
+                         '(development and declared seeds) before its evaluation, fabrication check and TORCWA check; the 0.12 um runs '
+                         'are information and do not change the choice',
                 candidates_um=sorted(p['candidates_um']), development_seeds=p['development_seeds'], judged_seeds_used=False,
                 selection_mesh_um=p['selection_mesh_um'], selection_time_fs=p['selection_time_fs'], extension_um=p['extension_um'],
-                chosen_radius_um=chosen, open_close=False, pending_radius_um=pending, runs=rows, commits=commits,
+                chosen_radius_um=chosen, open_close=chosen is not None, open_close_side_pixels=3, pending_radius_um=pending,
+                filtering_alone=alone, runs=rows, commits=sorted(commits),
                 development_records='kept outside the repository (g7_archive/G7-01/r2-selection)')
 
 
 def seed_stage(settings, seed, out, *, rcwa_python, selection=None, checkpoint=None, skip_rcwa=False):
-    """Design, fabrication check, every evaluation and the TORCWA check of one seed; writes seed<N>.json."""
+    """Design, fabrication check and every evaluation of one seed, and its TORCWA check unless skipped; writes seed<N>.json."""
     case, g, provenance = declared()
     device = torch.device(settings.backend)
     started = time.perf_counter()
     record = design_seed(seed, TransmissionObjective(g, settings), settings, case, checkpoint=checkpoint)
     print(json.dumps(dict(seed=seed, smooth=-record['history'][-1]['objective'], binary=record['design_mesh_binary']['metrics'],
-                          violations=record['fabrication']['violations'], seconds=round(record['design_wall_seconds'], 1))), flush=True)
+                          violations=record['fabrication']['violations'], changed_pixels=record.get('open_close', {}).get('changed_pixels'),
+                          seconds=round(record['design_wall_seconds'], 1))), flush=True)
     wall = dict(design=time.perf_counter()-started)
     evaluations, references = [], []
     for mesh in (settings.design_mesh_um, settings.fine_mesh_um):
@@ -688,24 +765,49 @@ def seed_stage(settings, seed, out, *, rcwa_python, selection=None, checkpoint=N
                 evaluator = CaseEvaluator(g, settings, mesh, polarization, incidence)
                 references.append(dict(evaluator.describe(), reference_wall_seconds=evaluator.reference_seconds, **evaluator.diagnostics))
                 evaluations.append(evaluator.evaluate(record['binary']))
+                if settings.open_close and (mesh, polarization, incidence) == (settings.design_mesh_um, 'TE', 'normal'):
+                    before = evaluator.evaluate(record['open_close']['thresholded'])
+                    record['open_close']['band_mean_T_plus1'] = dict(thresholded=float(np.mean(before['T']['1'])),
+                                                                     processed=float(np.mean(evaluations[-1]['T']['1'])),
+                                                                     mesh_um=mesh, polarization=polarization, incidence=incidence)
                 print(json.dumps(dict(seed=seed, mesh_um=mesh, polarization=polarization, incidence=incidence,
                                       band_mean_T_plus1=round(float(np.mean(evaluations[-1]['T']['1'])), 4),
                                       energy=round(evaluations[-1]['max_abs_energy_residual'], 4))), flush=True)
                 del evaluator
     wall['evaluation'] = time.perf_counter()-started-wall['design']
-    record.update(evaluations=evaluations, references=references)
-    if not skip_rcwa:
-        rcwa_started = time.perf_counter()
-        with tempfile.TemporaryDirectory(prefix=f'g7-01-rcwa-seed{seed}-') as directory:
-            rcwa = run_rcwa(rcwa_job(g, settings, {f'seed{seed}': record['binary']}), rcwa_python, directory)
-        wall['rcwa'] = time.perf_counter()-rcwa_started
-        record.update(rcwa=rcwa['cases'], rcwa_run=dict(interpreter=rcwa_python, **{k: v for k, v in rcwa.items() if k != 'cases'}))
+    record.update(evaluations=evaluations, references=references, schema='torchfdtd-g7-01-seed-v2', task='G7-01', settings=asdict(settings),
+                  provenance=provenance, environment=environment(device),
+                  selection=None if selection is None else dict(chosen_radius_um=selection['chosen_radius_um'], open_close=selection['open_close']))
     wall['total'] = time.perf_counter()-started
-    record.update(schema='torchfdtd-g7-01-seed-v2', task='G7-01', settings=asdict(settings), provenance=provenance,
-                  selection=None if selection is None else dict(chosen_radius_um=selection['chosen_radius_um'], open_close=selection['open_close']),
-                  environment=environment(device), wall_seconds=wall)
+    record['wall_seconds'] = wall
+    if not skip_rcwa:
+        add_rcwa([record], settings, rcwa_python)
     write_json(Path(out)/f'seed{seed}.json', record)
     return record
+
+
+def add_rcwa(records, settings, rcwa_python):
+    """One TORCWA process for every record's binary design; its cases and run description go into each record."""
+    _, g, _ = declared()
+    started = time.perf_counter()
+    with tempfile.TemporaryDirectory(prefix='g7-01-rcwa-') as directory:
+        rcwa = run_rcwa(rcwa_job(g, settings, {f"seed{r['seed']}": r['binary'] for r in records}), rcwa_python, directory)
+    seconds = time.perf_counter()-started
+    run = dict(interpreter=rcwa_python, threads=os.environ.get('OMP_NUM_THREADS'), designs=[r['seed'] for r in records],
+               **{k: v for k, v in rcwa.items() if k != 'cases'})
+    for record in records:
+        record.update(rcwa=[c for c in rcwa['cases'] if c['design'] == f"seed{record['seed']}"], rcwa_run=run)
+        record['wall_seconds']['rcwa_process'] = seconds
+    return records
+
+
+def rcwa_stage(settings, out, *, rcwa_python):
+    """The TORCWA check of every seed record in `out` in one process, written back into the records."""
+    paths = [Path(out)/f'seed{seed}.json' for seed in settings.seeds]
+    records = add_rcwa([load_json(path)[0] for path in paths], settings, rcwa_python)
+    for path, record in zip(paths, records):
+        write_json(path, record)
+    return records
 
 
 def judge_stage(settings, out, *, selection=None):
@@ -720,7 +822,9 @@ def judge_stage(settings, out, *, selection=None):
         rcwa={r['seed']: r.get('rcwa_run') for r in records}, wall_seconds={r['seed']: r['wall_seconds'] for r in records},
         seeds={r['seed']: dict(band_mean_T_plus1_TE_normal_design_mesh=criteria['performance']['per_seed'][r['seed']],
                                objective_binary_design_mesh=r['design_mesh_binary']['metrics'], violations=r['fabrication']['violations'],
-                               feature_sizes=r['fabrication']['feature_sizes'], binary=r['binary']) for r in records},
+                               feature_sizes=r['fabrication']['feature_sizes'], binary=r['binary'],
+                               open_close=None if 'open_close' not in r else {k: r['open_close'].get(k) for k in ('changed_pixels', 'band_mean_T_plus1')})
+               for r in records},
         references={r['seed']: r['references'] for r in records[:1]},
         conventions=dict(
             epsilon='arithmetic mean of the permittivity over a cell-sized box at each Yee component; pixel k centred on the Ez node '
@@ -742,10 +846,13 @@ def judge_stage(settings, out, *, selection=None):
 
 
 def run(settings, out, *, rcwa_python, selection=None, checkpoint_dir=None, skip_rcwa=False):
-    """Every seed in turn, then the judgement (the declared run starts one seed stage per seed in parallel instead)."""
+    """Every seed in turn, one TORCWA process for all of them, then the judgement (the declared run starts the seed
+    stages in parallel instead)."""
     for seed in settings.seeds:
-        seed_stage(settings, seed, out, rcwa_python=rcwa_python, selection=selection, skip_rcwa=skip_rcwa,
+        seed_stage(settings, seed, out, rcwa_python=rcwa_python, selection=selection, skip_rcwa=True,
                    checkpoint=None if checkpoint_dir is None else Path(checkpoint_dir)/f'seed{seed}.pt')
+    if not skip_rcwa:
+        rcwa_stage(settings, out, rcwa_python=rcwa_python)
     return judge_stage(settings, out, selection=selection)
 
 
@@ -762,7 +869,7 @@ def declared_run(out):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--out', type=Path, required=True, help='directory of the records: radius-selection.json, seed<N>.json, summary.json')
-    parser.add_argument('--stage', choices=('all', 'select-run', 'select-decide', 'seed', 'judge'), default='all')
+    parser.add_argument('--stage', choices=('all', 'select-run', 'select-decide', 'seed', 'rcwa', 'judge'), default='all')
     parser.add_argument('--seed', type=int, help='the seed of a seed or select-run stage')
     parser.add_argument('--radius', type=float, help='the candidate filter radius (um) of a select-run stage')
     parser.add_argument('--selection-dir', type=Path, help='directory of the development selection records (outside the repository)')
@@ -784,6 +891,8 @@ def main(argv=None):
     if args.stage == 'seed':
         return seed_stage(settings, args.seed, args.out, rcwa_python=args.rcwa_python, selection=selection, checkpoint=checkpoint,
                           skip_rcwa=args.skip_rcwa)
+    if args.stage == 'rcwa':
+        return rcwa_stage(settings, args.out, rcwa_python=args.rcwa_python)
     if args.stage == 'judge':
         return judge_stage(settings, args.out, selection=selection)
     return run(settings, args.out, rcwa_python=args.rcwa_python, selection=selection, checkpoint_dir=args.checkpoint_dir,
