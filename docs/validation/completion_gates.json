@@ -3641,7 +3641,8 @@
           "actual_test_commands": [
             "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-b2f060510b0c.xml",
             "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-47bd8ace3e69.xml",
-            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-3338a4b9a3a9.xml"
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-3338a4b9a3a9.xml",
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-2d7cc517b07c.xml"
           ],
           "required_tests": [
             "tests/test_rerecord_gates.py"
@@ -3649,7 +3650,8 @@
           "evidence": [
             "20260923T074741Z-g9-06-47bc6631",
             "20260923T162502Z-g9-06-c90ef9ab",
-            "20260923T235752Z-g9-06-b92d9083"
+            "20260923T235752Z-g9-06-b92d9083",
+            "20260925T195834Z-g9-06-621431b7"
           ],
           "blocker": null,
           "scope_change_approval": null,
