@@ -9,8 +9,13 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
+### Changed
+
+- `ReversibleCPMLSimulation` and `ReversibleCPMLPlaneSimulation` run a call that cannot request a gradient (under `torch.no_grad()` or `torch.inference_mode()`, or with an `epsilon` that does not require gradients) forward only: the recorded forward's updates, source injections, observations and DFT blocks in the same order, scalar or diagonal epsilon, CPU or fused CUDA, without the boundary trace, the terminal interior copy or the 64-step reconstruction scale. Signals and spectra are bitwise equal to the recorded forward's. The report gains `forward_only`; on a forward-only call `sampled_forward_peak` and `sampled_forward_l2` are None, `terminal_copies` is 0, and the observations and the final E and H fields are checked for non-finite values. Admission is unchanged. The new option `ReversibleCPMLOptions(forward_only='never')` (default `'auto'`) records every call as before ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#forward-only-calls), this commit).
+
 ### Performance
 
+- The validity checks of recorded CPML (finite observations and boundary trace, finite `epsilon >= 1` in both material maps) combine their chunks into one device flag and read it once per tensor instead of once per chunk; every chunk is still checked. A recorded forward of the 96-step test fixture makes 8 scalar reads instead of 21 (`tests/test_reversible_cpml_fast_paths.py`, this commit).
 - `SpectralObservation` indexes its E and H observer groups with index tensors built once per observation instead of Python lists converted on every DFT block, in the online accumulation and in the adjoint transpose. The gathered elements and their order are unchanged, so spectra and gradients are bitwise equal; every online-spectrum path uses it, including the plane simulations and recorded CPML (`tests/test_adjoint_spectrum_index.py`, this commit).
 
 ## 0.16.0 (2026-09-26)
