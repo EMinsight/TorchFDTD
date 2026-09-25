@@ -2,7 +2,7 @@
 
 Record: `docs/validation/dispersive_pml_absorber.json` (case `docs/validation/cases/DISPERSIVE_PML_ABSORBER.json`, declared at commit 639d3ff431bd). Driver `benchmarks/dispersive_pml_absorber.py`. Every number below is copied from the record; nothing here is typed by hand. The absorber and the measured mechanism are described in [BOUNDARIES.md](BOUNDARIES.md#dispersive-materials-inside-pml).
 
-Environment: Python 3.10.2, torch 2.10.0+cu126 (CUDA 12.6), GPU NVIDIA GeForce RTX 3060, Windows-10-10.0.26200-SP0; run at 2026-09-25T13:53:26+00:00 on commit e7c8970ad515709eb76a6a3b4286b2eec2b57d13 with 0 dirty paths; rows merged from 2 later run(s) on commit(s) e7c8970ad515.
+Environment: Python 3.10.2, torch 2.10.0+cu126 (CUDA 12.6), GPU NVIDIA GeForce RTX 3060, Windows-10-10.0.26200-SP0; run at 2026-09-25T20:17:05+00:00 on commit 96655adc506c1a1d1120bf0a50867adaba644afc with 0 dirty paths; rows merged from 2 later run(s) on commit(s) 96655adc506c.
 
 Verdict: every judged row passes (14 judged rows, 31 recorded rows).
 

@@ -49,9 +49,9 @@
     "gpu": "NVIDIA GeForce RTX 3060",
     "os": "Windows-10-10.0.26200-SP0",
     "machine": "AMD64",
-    "commit": "e7c8970ad515709eb76a6a3b4286b2eec2b57d13",
+    "commit": "96655adc506c1a1d1120bf0a50867adaba644afc",
     "dirty_paths": 0,
-    "recorded_at": "2026-09-25T13:53:26+00:00",
+    "recorded_at": "2026-09-25T20:17:05+00:00",
     "merged": [
       {
         "python": "3.10.2",
@@ -62,9 +62,9 @@
         "gpu": "NVIDIA GeForce RTX 3060",
         "os": "Windows-10-10.0.26200-SP0",
         "machine": "AMD64",
-        "commit": "e7c8970ad515709eb76a6a3b4286b2eec2b57d13",
+        "commit": "96655adc506c1a1d1120bf0a50867adaba644afc",
         "dirty_paths": 0,
-        "recorded_at": "2026-09-25T13:57:19+00:00",
+        "recorded_at": "2026-09-25T20:23:27+00:00",
         "rows": [
           "stability-sin-array-cpml-cuda-float32",
           "stability-sin-array-absorber-cuda-float32"
@@ -74,8 +74,8 @@
           "torchfdtd/boundaries.py": "443450116e8997112f17e7268731171c815829655ef4ce42d2feec20626f19f3",
           "torchfdtd/materials.py": "664e30993394b7e74062d503f4a97cd4bcdd3779cdde201f03425b02e5557033",
           "torchfdtd/cuda_kernels.py": "60057613a9f5ae32ea79df364eae2755062c0debbe04ed043ad505c05bf43e8a",
-          "torchfdtd/solver.py": "95a193710ab8538e81f4bf2559dcc335461526ced56fc5c0a531de2aa29e29ec",
-          "torchfdtd/tensor_batch.py": "7cbdb9b5bf333e7bfe56f85cebeaea7d2a8a047333361d034bc1d1f247bcecfc",
+          "torchfdtd/solver.py": "fdbeac997b3a7179576964904791a45522951aa8ed4e4c992840c973b9f9d8ab",
+          "torchfdtd/tensor_batch.py": "89cd606909dd1d35db57f485143a5a029f610c2c86bf45ef12acae3f1848446b",
           "torchfdtd/run_control.py": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3"
         }
       },
@@ -88,9 +88,9 @@
         "gpu": "NVIDIA GeForce RTX 3060",
         "os": "Windows-10-10.0.26200-SP0",
         "machine": "AMD64",
-        "commit": "e7c8970ad515709eb76a6a3b4286b2eec2b57d13",
+        "commit": "96655adc506c1a1d1120bf0a50867adaba644afc",
         "dirty_paths": 0,
-        "recorded_at": "2026-09-25T15:00:53+00:00",
+        "recorded_at": "2026-09-25T22:00:15+00:00",
         "rows": [
           "reflection-dilute-fill-TE-absorber",
           "reflection-dilute-fill-TE-cpml",
@@ -135,8 +135,8 @@
           "torchfdtd/boundaries.py": "443450116e8997112f17e7268731171c815829655ef4ce42d2feec20626f19f3",
           "torchfdtd/materials.py": "664e30993394b7e74062d503f4a97cd4bcdd3779cdde201f03425b02e5557033",
           "torchfdtd/cuda_kernels.py": "60057613a9f5ae32ea79df364eae2755062c0debbe04ed043ad505c05bf43e8a",
-          "torchfdtd/solver.py": "95a193710ab8538e81f4bf2559dcc335461526ced56fc5c0a531de2aa29e29ec",
-          "torchfdtd/tensor_batch.py": "7cbdb9b5bf333e7bfe56f85cebeaea7d2a8a047333361d034bc1d1f247bcecfc",
+          "torchfdtd/solver.py": "fdbeac997b3a7179576964904791a45522951aa8ed4e4c992840c973b9f9d8ab",
+          "torchfdtd/tensor_batch.py": "89cd606909dd1d35db57f485143a5a029f610c2c86bf45ef12acae3f1848446b",
           "torchfdtd/run_control.py": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3"
         }
       }
@@ -147,8 +147,8 @@
     "torchfdtd/boundaries.py": "443450116e8997112f17e7268731171c815829655ef4ce42d2feec20626f19f3",
     "torchfdtd/materials.py": "664e30993394b7e74062d503f4a97cd4bcdd3779cdde201f03425b02e5557033",
     "torchfdtd/cuda_kernels.py": "60057613a9f5ae32ea79df364eae2755062c0debbe04ed043ad505c05bf43e8a",
-    "torchfdtd/solver.py": "95a193710ab8538e81f4bf2559dcc335461526ced56fc5c0a531de2aa29e29ec",
-    "torchfdtd/tensor_batch.py": "7cbdb9b5bf333e7bfe56f85cebeaea7d2a8a047333361d034bc1d1f247bcecfc",
+    "torchfdtd/solver.py": "fdbeac997b3a7179576964904791a45522951aa8ed4e4c992840c973b9f9d8ab",
+    "torchfdtd/tensor_batch.py": "89cd606909dd1d35db57f485143a5a029f610c2c86bf45ef12acae3f1848446b",
     "torchfdtd/run_control.py": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3"
   },
   "spec": {
@@ -363,7 +363,7 @@
         }
       },
       "error": null,
-      "seconds": 3.2773440000019036,
+      "seconds": 3.823787799978163,
       "judgement": {
         "judged": true,
         "criterion": "normal",
@@ -454,7 +454,7 @@
         }
       },
       "error": null,
-      "seconds": 3.188738700002432,
+      "seconds": 5.024664500000654,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -543,7 +543,7 @@
         }
       },
       "error": null,
-      "seconds": 3.1062673999986146,
+      "seconds": 7.055841099994723,
       "judgement": {
         "judged": true,
         "criterion": "normal",
@@ -634,7 +634,7 @@
         }
       },
       "error": null,
-      "seconds": 2.9621790000237525,
+      "seconds": 5.027065400005085,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -723,7 +723,7 @@
         }
       },
       "error": null,
-      "seconds": 3.0482025999808684,
+      "seconds": 5.136684199998854,
       "judgement": {
         "judged": true,
         "criterion": "normal",
@@ -814,7 +814,7 @@
         }
       },
       "error": null,
-      "seconds": 2.970751700020628,
+      "seconds": 4.722728799999459,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -903,7 +903,7 @@
         }
       },
       "error": null,
-      "seconds": 3.0546637999941595,
+      "seconds": 4.271957300021313,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -992,7 +992,7 @@
         }
       },
       "error": null,
-      "seconds": 2.9909597000223584,
+      "seconds": 4.338766200002283,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1132,7 +1132,7 @@
         }
       },
       "error": null,
-      "seconds": 42.786752400017576,
+      "seconds": 47.21915089999675,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1273,7 +1273,7 @@
         }
       },
       "error": null,
-      "seconds": 52.82879589998629,
+      "seconds": 61.50103670000681,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1414,7 +1414,7 @@
         }
       },
       "error": null,
-      "seconds": 40.13958459999412,
+      "seconds": 44.63757779999287,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1555,7 +1555,7 @@
         }
       },
       "error": null,
-      "seconds": 42.56300799999735,
+      "seconds": 47.571945800009416,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1696,7 +1696,7 @@
         }
       },
       "error": null,
-      "seconds": 53.6789284000115,
+      "seconds": 67.3072863999987,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1837,7 +1837,7 @@
         }
       },
       "error": null,
-      "seconds": 40.969754699995974,
+      "seconds": 44.959743600018555,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1978,7 +1978,7 @@
         }
       },
       "error": null,
-      "seconds": 38.03272879999713,
+      "seconds": 43.95138329998008,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2119,7 +2119,7 @@
         }
       },
       "error": null,
-      "seconds": 47.12059649999719,
+      "seconds": 55.59661400000914,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2260,7 +2260,7 @@
         }
       },
       "error": null,
-      "seconds": 34.813041599991266,
+      "seconds": 40.04943399998592,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2401,7 +2401,7 @@
         }
       },
       "error": null,
-      "seconds": 36.858382399979746,
+      "seconds": 49.122864900011336,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2542,7 +2542,7 @@
         }
       },
       "error": null,
-      "seconds": 43.69005950001883,
+      "seconds": 62.06563820000156,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2683,7 +2683,7 @@
         }
       },
       "error": null,
-      "seconds": 36.604877799982205,
+      "seconds": 61.00884679998853,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2774,7 +2774,7 @@
         }
       },
       "error": null,
-      "seconds": 7.708036099997116,
+      "seconds": 14.193929200002458,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2864,7 +2864,7 @@
         }
       },
       "error": null,
-      "seconds": 8.39996589999646,
+      "seconds": 12.449846599978628,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2954,7 +2954,7 @@
         }
       },
       "error": null,
-      "seconds": 9.38110840000445,
+      "seconds": 14.925553000008222,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -3044,7 +3044,7 @@
         }
       },
       "error": null,
-      "seconds": 7.549590899987379,
+      "seconds": 17.19211569998879,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -3181,7 +3181,7 @@
         "energy_rate_per_step": -0.0015973344063200563,
         "amplitude_rate_per_s": -20945078421087.41
       },
-      "seconds": 120.7399226000125,
+      "seconds": 224.2155158999958,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -3350,7 +3350,7 @@
         "energy_rate_per_step": -0.0004506122382193734,
         "amplitude_rate_per_s": -5908661723971.775
       },
-      "seconds": 111.33291580001242,
+      "seconds": 215.264643100003,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -3519,7 +3519,7 @@
         "energy_rate_per_step": -0.0004432755767299109,
         "amplitude_rate_per_s": -5812459607722.504
       },
-      "seconds": 140.5124310000101,
+      "seconds": 207.70543420000467,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -3694,7 +3694,7 @@
           "im": 0.0016668546511310913
         }
       },
-      "seconds": 138.69482100001187,
+      "seconds": 185.23931309999898,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -3871,7 +3871,7 @@
           "im": 0.002092260538719883
         }
       },
-      "seconds": 143.15250450000167,
+      "seconds": 319.9702483000001,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4049,7 +4049,7 @@
           "im": 0.0018824005124381648
         }
       },
-      "seconds": 112.64578190000611,
+      "seconds": 455.01542099998915,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4226,7 +4226,7 @@
           "im": 0.0015715961766920646
         }
       },
-      "seconds": 121.57513219999964,
+      "seconds": 286.60956370001077,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4401,7 +4401,7 @@
           "im": 0.020043139768619843
         }
       },
-      "seconds": 105.4955009999976,
+      "seconds": 311.8364603999944,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4576,7 +4576,7 @@
           "im": 0.21948935403984265
         }
       },
-      "seconds": 121.62861970000085,
+      "seconds": 411.7920236000209,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4753,7 +4753,7 @@
           "im": 0.028604255319015164
         }
       },
-      "seconds": 43.53268780000508,
+      "seconds": 55.33487809999497,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4925,7 +4925,7 @@
           "im": 0.0019219805513124263
         }
       },
-      "seconds": 130.50892160000512,
+      "seconds": 301.00059229999897,
       "judgement": {
         "judged": true,
         "criterion": "diverges",
@@ -5440,7 +5440,7 @@
         }
       ],
       "error": null,
-      "seconds": 744.5010570000159,
+      "seconds": 1133.7951984000101,
       "judgement": {
         "judged": true,
         "criterion": "stable_float64",
@@ -5997,7 +5997,7 @@
         }
       ],
       "error": null,
-      "seconds": 4.181118100008462,
+      "seconds": 6.7045701000024565,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
@@ -6179,7 +6179,7 @@
           "im": 0.07689250843964719
         }
       },
-      "seconds": 168.41359620000003,
+      "seconds": 158.0270272999769,
       "judgement": {
         "judged": true,
         "criterion": "diverges",
@@ -6694,7 +6694,7 @@
         }
       ],
       "error": null,
-      "seconds": 1078.6221526000008,
+      "seconds": 865.1824552000035,
       "judgement": {
         "judged": true,
         "criterion": "stable_float64",
@@ -7251,7 +7251,7 @@
         }
       ],
       "error": null,
-      "seconds": 3.9647004999860656,
+      "seconds": 7.124949399993056,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
@@ -7807,7 +7807,7 @@
         }
       ],
       "error": null,
-      "seconds": 25.53040129999863,
+      "seconds": 42.710423499986064,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
@@ -8364,7 +8364,7 @@
         }
       ],
       "error": null,
-      "seconds": 3.636210500000743,
+      "seconds": 6.427145299996482,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
@@ -8546,7 +8546,7 @@
           "im": 0.0019219805513124263
         }
       },
-      "seconds": 1.1068044000130612,
+      "seconds": 1.8319663000002038,
       "judgement": {
         "judged": true,
         "criterion": "diverges",
@@ -8687,7 +8687,7 @@
           "im": 0.0019219805513124263
         }
       },
-      "seconds": 36.627940600010334,
+      "seconds": 63.57249540000339,
       "judgement": {
         "judged": true,
         "criterion": "diverges",
@@ -9202,7 +9202,7 @@
         }
       ],
       "error": null,
-      "seconds": 186.1953564999858,
+      "seconds": 313.89098919997923,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
