@@ -49,9 +49,9 @@
     "gpu": "NVIDIA GeForce RTX 3060",
     "os": "Windows-10-10.0.26200-SP0",
     "machine": "AMD64",
-    "commit": "7be6bc07622402ffd18baf29fa9e60c6fbb36c17",
+    "commit": "e7c8970ad515709eb76a6a3b4286b2eec2b57d13",
     "dirty_paths": 0,
-    "recorded_at": "2026-09-25T08:18:03+00:00",
+    "recorded_at": "2026-09-25T13:53:26+00:00",
     "merged": [
       {
         "python": "3.10.2",
@@ -62,20 +62,20 @@
         "gpu": "NVIDIA GeForce RTX 3060",
         "os": "Windows-10-10.0.26200-SP0",
         "machine": "AMD64",
-        "commit": "7be6bc07622402ffd18baf29fa9e60c6fbb36c17",
-        "dirty_paths": 2,
-        "recorded_at": "2026-09-25T08:24:48+00:00",
+        "commit": "e7c8970ad515709eb76a6a3b4286b2eec2b57d13",
+        "dirty_paths": 0,
+        "recorded_at": "2026-09-25T13:57:19+00:00",
         "rows": [
           "stability-sin-array-cpml-cuda-float32",
           "stability-sin-array-absorber-cuda-float32"
         ],
         "source_sha256": {
           "benchmarks/dispersive_pml_absorber.py": "80f5b79adebb6a7d29160ad767ee14a694a20345b4b572c03a14a5fbbe7658fb",
-          "torchfdtd/boundaries.py": "23c362b6914f8ea7196a911c443aaf3c7bf1e5abafc9edc84c2fff6deee7e669",
-          "torchfdtd/materials.py": "6da2cad0d5ec877397ac7ef5be70c2ff6183ed9491266c74f40df8ddb50e6f87",
+          "torchfdtd/boundaries.py": "443450116e8997112f17e7268731171c815829655ef4ce42d2feec20626f19f3",
+          "torchfdtd/materials.py": "664e30993394b7e74062d503f4a97cd4bcdd3779cdde201f03425b02e5557033",
           "torchfdtd/cuda_kernels.py": "60057613a9f5ae32ea79df364eae2755062c0debbe04ed043ad505c05bf43e8a",
-          "torchfdtd/solver.py": "b92c23c7f6002ec1f488867a7f58f93bf7f6af30a14a8c345614c075ac10ab8e",
-          "torchfdtd/tensor_batch.py": "9e7dd6bb13ffe6f014d9fb583b60f785ee18f36606bbac03bb66e05868d39afa",
+          "torchfdtd/solver.py": "95a193710ab8538e81f4bf2559dcc335461526ced56fc5c0a531de2aa29e29ec",
+          "torchfdtd/tensor_batch.py": "7cbdb9b5bf333e7bfe56f85cebeaea7d2a8a047333361d034bc1d1f247bcecfc",
           "torchfdtd/run_control.py": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3"
         }
       },
@@ -88,9 +88,9 @@
         "gpu": "NVIDIA GeForce RTX 3060",
         "os": "Windows-10-10.0.26200-SP0",
         "machine": "AMD64",
-        "commit": "7be6bc07622402ffd18baf29fa9e60c6fbb36c17",
-        "dirty_paths": 3,
-        "recorded_at": "2026-09-25T09:20:50+00:00",
+        "commit": "e7c8970ad515709eb76a6a3b4286b2eec2b57d13",
+        "dirty_paths": 0,
+        "recorded_at": "2026-09-25T15:00:53+00:00",
         "rows": [
           "reflection-dilute-fill-TE-absorber",
           "reflection-dilute-fill-TE-cpml",
@@ -132,11 +132,11 @@
         ],
         "source_sha256": {
           "benchmarks/dispersive_pml_absorber.py": "80f5b79adebb6a7d29160ad767ee14a694a20345b4b572c03a14a5fbbe7658fb",
-          "torchfdtd/boundaries.py": "23c362b6914f8ea7196a911c443aaf3c7bf1e5abafc9edc84c2fff6deee7e669",
-          "torchfdtd/materials.py": "6da2cad0d5ec877397ac7ef5be70c2ff6183ed9491266c74f40df8ddb50e6f87",
+          "torchfdtd/boundaries.py": "443450116e8997112f17e7268731171c815829655ef4ce42d2feec20626f19f3",
+          "torchfdtd/materials.py": "664e30993394b7e74062d503f4a97cd4bcdd3779cdde201f03425b02e5557033",
           "torchfdtd/cuda_kernels.py": "60057613a9f5ae32ea79df364eae2755062c0debbe04ed043ad505c05bf43e8a",
-          "torchfdtd/solver.py": "b92c23c7f6002ec1f488867a7f58f93bf7f6af30a14a8c345614c075ac10ab8e",
-          "torchfdtd/tensor_batch.py": "9e7dd6bb13ffe6f014d9fb583b60f785ee18f36606bbac03bb66e05868d39afa",
+          "torchfdtd/solver.py": "95a193710ab8538e81f4bf2559dcc335461526ced56fc5c0a531de2aa29e29ec",
+          "torchfdtd/tensor_batch.py": "7cbdb9b5bf333e7bfe56f85cebeaea7d2a8a047333361d034bc1d1f247bcecfc",
           "torchfdtd/run_control.py": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3"
         }
       }
@@ -144,11 +144,11 @@
   },
   "source_sha256": {
     "benchmarks/dispersive_pml_absorber.py": "80f5b79adebb6a7d29160ad767ee14a694a20345b4b572c03a14a5fbbe7658fb",
-    "torchfdtd/boundaries.py": "23c362b6914f8ea7196a911c443aaf3c7bf1e5abafc9edc84c2fff6deee7e669",
-    "torchfdtd/materials.py": "6da2cad0d5ec877397ac7ef5be70c2ff6183ed9491266c74f40df8ddb50e6f87",
+    "torchfdtd/boundaries.py": "443450116e8997112f17e7268731171c815829655ef4ce42d2feec20626f19f3",
+    "torchfdtd/materials.py": "664e30993394b7e74062d503f4a97cd4bcdd3779cdde201f03425b02e5557033",
     "torchfdtd/cuda_kernels.py": "60057613a9f5ae32ea79df364eae2755062c0debbe04ed043ad505c05bf43e8a",
-    "torchfdtd/solver.py": "b92c23c7f6002ec1f488867a7f58f93bf7f6af30a14a8c345614c075ac10ab8e",
-    "torchfdtd/tensor_batch.py": "9e7dd6bb13ffe6f014d9fb583b60f785ee18f36606bbac03bb66e05868d39afa",
+    "torchfdtd/solver.py": "95a193710ab8538e81f4bf2559dcc335461526ced56fc5c0a531de2aa29e29ec",
+    "torchfdtd/tensor_batch.py": "7cbdb9b5bf333e7bfe56f85cebeaea7d2a8a047333361d034bc1d1f247bcecfc",
     "torchfdtd/run_control.py": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3"
   },
   "spec": {
@@ -363,7 +363,7 @@
         }
       },
       "error": null,
-      "seconds": 3.877256399995531,
+      "seconds": 3.2773440000019036,
       "judgement": {
         "judged": true,
         "criterion": "normal",
@@ -454,7 +454,7 @@
         }
       },
       "error": null,
-      "seconds": 3.5185338000010233,
+      "seconds": 3.188738700002432,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -543,7 +543,7 @@
         }
       },
       "error": null,
-      "seconds": 3.453840800008038,
+      "seconds": 3.1062673999986146,
       "judgement": {
         "judged": true,
         "criterion": "normal",
@@ -634,7 +634,7 @@
         }
       },
       "error": null,
-      "seconds": 3.29264929999772,
+      "seconds": 2.9621790000237525,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -723,7 +723,7 @@
         }
       },
       "error": null,
-      "seconds": 3.6059734000009485,
+      "seconds": 3.0482025999808684,
       "judgement": {
         "judged": true,
         "criterion": "normal",
@@ -814,7 +814,7 @@
         }
       },
       "error": null,
-      "seconds": 3.3800277000118513,
+      "seconds": 2.970751700020628,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -903,7 +903,7 @@
         }
       },
       "error": null,
-      "seconds": 3.5437035000068136,
+      "seconds": 3.0546637999941595,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -992,7 +992,7 @@
         }
       },
       "error": null,
-      "seconds": 3.287240700010443,
+      "seconds": 2.9909597000223584,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1132,7 +1132,7 @@
         }
       },
       "error": null,
-      "seconds": 61.206139999994775,
+      "seconds": 42.786752400017576,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1273,7 +1273,7 @@
         }
       },
       "error": null,
-      "seconds": 79.99037639999005,
+      "seconds": 52.82879589998629,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1414,7 +1414,7 @@
         }
       },
       "error": null,
-      "seconds": 52.073474899996654,
+      "seconds": 40.13958459999412,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1555,7 +1555,7 @@
         }
       },
       "error": null,
-      "seconds": 58.77974269998958,
+      "seconds": 42.56300799999735,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1696,7 +1696,7 @@
         }
       },
       "error": null,
-      "seconds": 75.1885692000069,
+      "seconds": 53.6789284000115,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1837,7 +1837,7 @@
         }
       },
       "error": null,
-      "seconds": 48.928336700002546,
+      "seconds": 40.969754699995974,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -1978,7 +1978,7 @@
         }
       },
       "error": null,
-      "seconds": 59.73487880000903,
+      "seconds": 38.03272879999713,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2119,7 +2119,7 @@
         }
       },
       "error": null,
-      "seconds": 73.14721680000366,
+      "seconds": 47.12059649999719,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2260,7 +2260,7 @@
         }
       },
       "error": null,
-      "seconds": 56.16542180000397,
+      "seconds": 34.813041599991266,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2401,7 +2401,7 @@
         }
       },
       "error": null,
-      "seconds": 61.25931249999849,
+      "seconds": 36.858382399979746,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2542,7 +2542,7 @@
         }
       },
       "error": null,
-      "seconds": 79.40435539999453,
+      "seconds": 43.69005950001883,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2683,7 +2683,7 @@
         }
       },
       "error": null,
-      "seconds": 50.90447550000681,
+      "seconds": 36.604877799982205,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2774,7 +2774,7 @@
         }
       },
       "error": null,
-      "seconds": 10.560727899995982,
+      "seconds": 7.708036099997116,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2864,7 +2864,7 @@
         }
       },
       "error": null,
-      "seconds": 8.238212199998088,
+      "seconds": 8.39996589999646,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -2954,7 +2954,7 @@
         }
       },
       "error": null,
-      "seconds": 10.689978399997926,
+      "seconds": 9.38110840000445,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -3044,7 +3044,7 @@
         }
       },
       "error": null,
-      "seconds": 9.835725199998706,
+      "seconds": 7.549590899987379,
       "judgement": {
         "judged": false,
         "R_max_on_band": {
@@ -3181,7 +3181,7 @@
         "energy_rate_per_step": -0.0015973344063200563,
         "amplitude_rate_per_s": -20945078421087.41
       },
-      "seconds": 161.10196489999362,
+      "seconds": 120.7399226000125,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -3350,7 +3350,7 @@
         "energy_rate_per_step": -0.0004506122382193734,
         "amplitude_rate_per_s": -5908661723971.775
       },
-      "seconds": 161.05654029999278,
+      "seconds": 111.33291580001242,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -3519,7 +3519,7 @@
         "energy_rate_per_step": -0.0004432755767299109,
         "amplitude_rate_per_s": -5812459607722.504
       },
-      "seconds": 109.99006880000525,
+      "seconds": 140.5124310000101,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -3694,7 +3694,7 @@
           "im": 0.0016668546511310913
         }
       },
-      "seconds": 109.71173429999908,
+      "seconds": 138.69482100001187,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -3871,7 +3871,7 @@
           "im": 0.002092260538719883
         }
       },
-      "seconds": 139.5902766999934,
+      "seconds": 143.15250450000167,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4049,7 +4049,7 @@
           "im": 0.0018824005124381648
         }
       },
-      "seconds": 158.17546610000136,
+      "seconds": 112.64578190000611,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4226,7 +4226,7 @@
           "im": 0.0015715961766920646
         }
       },
-      "seconds": 122.65157799998997,
+      "seconds": 121.57513219999964,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4401,7 +4401,7 @@
           "im": 0.020043139768619843
         }
       },
-      "seconds": 103.72436500000185,
+      "seconds": 105.4955009999976,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4576,7 +4576,7 @@
           "im": 0.21948935403984265
         }
       },
-      "seconds": 104.81374160000996,
+      "seconds": 121.62861970000085,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4753,7 +4753,7 @@
           "im": 0.028604255319015164
         }
       },
-      "seconds": 71.300630800004,
+      "seconds": 43.53268780000508,
       "judgement": {
         "judged": false,
         "numbers": {
@@ -4925,7 +4925,7 @@
           "im": 0.0019219805513124263
         }
       },
-      "seconds": 116.61850290000439,
+      "seconds": 130.50892160000512,
       "judgement": {
         "judged": true,
         "criterion": "diverges",
@@ -5440,7 +5440,7 @@
         }
       ],
       "error": null,
-      "seconds": 577.8863539000013,
+      "seconds": 744.5010570000159,
       "judgement": {
         "judged": true,
         "criterion": "stable_float64",
@@ -5997,7 +5997,7 @@
         }
       ],
       "error": null,
-      "seconds": 6.794786700003897,
+      "seconds": 4.181118100008462,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
@@ -6179,7 +6179,7 @@
           "im": 0.07689250843964719
         }
       },
-      "seconds": 110.2957419000013,
+      "seconds": 168.41359620000003,
       "judgement": {
         "judged": true,
         "criterion": "diverges",
@@ -6694,7 +6694,7 @@
         }
       ],
       "error": null,
-      "seconds": 553.3140822000132,
+      "seconds": 1078.6221526000008,
       "judgement": {
         "judged": true,
         "criterion": "stable_float64",
@@ -7251,7 +7251,7 @@
         }
       ],
       "error": null,
-      "seconds": 6.571892199994181,
+      "seconds": 3.9647004999860656,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
@@ -7807,7 +7807,7 @@
         }
       ],
       "error": null,
-      "seconds": 39.059752000001026,
+      "seconds": 25.53040129999863,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
@@ -8364,7 +8364,7 @@
         }
       ],
       "error": null,
-      "seconds": 6.296507199993357,
+      "seconds": 3.636210500000743,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
@@ -8546,7 +8546,7 @@
           "im": 0.0019219805513124263
         }
       },
-      "seconds": 1.5260740999947302,
+      "seconds": 1.1068044000130612,
       "judgement": {
         "judged": true,
         "criterion": "diverges",
@@ -8687,7 +8687,7 @@
           "im": 0.0019219805513124263
         }
       },
-      "seconds": 61.41630840000289,
+      "seconds": 36.627940600010334,
       "judgement": {
         "judged": true,
         "criterion": "diverges",
@@ -9202,7 +9202,7 @@
         }
       ],
       "error": null,
-      "seconds": 326.4598733000021,
+      "seconds": 186.1953564999858,
       "judgement": {
         "judged": true,
         "criterion": "stable_float32",
