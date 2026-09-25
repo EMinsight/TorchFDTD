@@ -54,7 +54,7 @@ modal worker:
 
 | Python-API constraint lifted | Server limit | Where the server checks it |
 | --- | --- | --- |
-| 8,000,000 resident cells (`Region.require_resident`) | 8,000,000 cells | `Region.resident_refusal` at every resident entry point and in the Auto policy |
+| 8,000,000 resident cells (`Region.require_resident`) | 8,000,000 cells | `Region.resident_refusal` at every resident entry point and in the Auto policy, and `adjoint_memory._resident_contract` when a byte budget is given (budgeted adjoint, mode-network and design paths) |
 | `Project.structures` `max_length=1000` | 1000 structures | project validation, before the items are validated |
 | `Project.sources` `max_length=512` | 512 sources | project validation, before the items |
 | `Project.monitors` `max_length=512` | 512 monitors | project validation, before the items |
@@ -71,7 +71,9 @@ monitors on both sides. `tests/test_server_security.py::test_every_server_limit_
 posts, for each limit, a project the Python API accepts to the project routes
 and nested in a GDS export and a mode-network request, and expects 422;
 `test_gds_uploads_keep_the_vertex_limit_the_python_api_lifts` converts an
-upload of 1.04 million vertices. `tests/test_resident_guards.py` checks that the
+upload of 1.04 million vertices, and
+`test_budgeted_mode_network_and_design_routes_keep_the_resident_cell_limit` posts
+budgeted mode-network and design requests above 8,000,000 cells. `tests/test_resident_guards.py` checks that the
 job pools and the modal worker run under the limits.
 
 ## What the server does not do

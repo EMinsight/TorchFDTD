@@ -110,17 +110,24 @@ results panel.
 ## Size limits
 
 The Python API has no fixed size caps. Resident execution is admitted by the
-memory estimate: `Simulation.run` refuses an estimate above 75% of the free
-device memory on CUDA and above 80% of the available host memory on the CPU,
-the adjoint entry points admit their own reservation against 80% of the free
-device and host memory, and Auto applies the margins of step 1 above.
-Monitors, sources, materials and the step count enter the estimate through
-their traces, DFT buffers, waveforms and ADE states; structures cost host
-rasterization time, not device memory. The only fixed bound is the 32-bit
+memory estimate: `Simulation.run` refuses a device estimate above 75% of the
+free device memory on CUDA, together with a host estimate above 80% of the
+available host memory (below), and an estimate above 80% of the available host
+memory on the CPU; the adjoint entry points admit their own reservation against
+80% of the free device and host memory; the tensor batch admits its cohort
+against `memory_fraction` (0.6 by default, at most 0.9) of the free device
+memory; `BatchRunner` divides 80% of the available host memory (or
+`memory_limit_mb`) among its CPU workers; and Auto applies the margins of step
+1 above. Monitors, sources, materials and the step count enter the estimate
+through their traces, DFT buffers, waveforms and ADE states; structures cost
+host rasterization time, not device memory. The only fixed bound is the 32-bit
 field index: resident execution refuses a grid whose 3 x cells (6 x cells for
-complex Bloch fields) reach 2^31, 715,827,882 real cells, because the fused
-CUDA kernels and the subpixel operator address a field array with signed
-32-bit integers.
+complex Bloch fields) reach 2^31, so at most 715,827,882 real cells, because
+the fused CUDA kernels and the subpixel operator address a field array with
+signed 32-bit integers; the rule applies to every resident path, including the
+Torch and NumPy updates that would not need it. Under the workbench server a
+byte budget (`resident_budget_bytes` of the adjoint, mode-network and design
+paths) does not lift the 8,000,000-cell limit.
 
 A caller may set optional caps; each is `None` (no cap) by default and accepts
 a positive integer:
@@ -187,7 +194,24 @@ component), one sample buffer and two windows of one real per step; the Torch
 monitor kernel keeps the bound of four accumulators and 192 bytes of tables per
 point and component. Every soft or one-way source term adds its waveform, one
 real per step. FIXED is 64 MiB for the graph pools, the diagnostics tables and
-allocator rounding. Every other resident path (`backend="auto"` or `"cpu"`, the
+allocator rounding.
+
+A CUDA run also holds host memory, which `estimate()` reports as
+`host_estimated_mb` and `Simulation` and Auto admit against 80% of the
+available host memory: the plan's sampled material (per cell 10 bytes kept and
+18 at the planning peak with cell sampling, 27 and 53 with Yee sampling, 87 and
+161 with subpixel interfaces), the E and H copies and one field-sized temporary
+after the loop (9 field values per cell), or the plane post-processing (the
+accumulator's host copy plus 44 bytes per sample) when that is larger, the
+plan's interpolation maps (150 bytes per plane point and component), the
+waveforms and sample times (20 bytes per step and source term), the point
+traces, the snapshot frames and 512 MiB for the CUDA, CuPy and Python runtime.
+The factors are tracemalloc measurements with about 10% added: 8.1/16.1,
+24.0/48.0 and 78.5/146.0 bytes per cell for the material, 40.0 bytes per sample
+for `plane_result`, 136 bytes per point and component for the maps and 17.6
+bytes per step and term for the waveforms. On the CPU the same maps, waveforms,
+frames and the post-processing beyond the three accumulator temporaries enter
+`estimated_memory_mb`. Every other resident path (`backend="auto"` or `"cpu"`, the
 Torch kernel, complex fields) keeps the tensor-expression bound of 200 bytes per
 cell in FP32 and 400 in FP64 plus 80 or 160 per pole (`memory_model:
 "tensor_expression"`). The tensor batch and the grouped batch sum the per-case

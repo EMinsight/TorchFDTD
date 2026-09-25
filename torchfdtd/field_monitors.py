@@ -78,20 +78,28 @@ def point_trace_memory(project):
     return size
 
 
-def monitor_memory(project):
-    size=point_trace_memory(project)
-    r=project.region;real=8 if r.precision=='float64' else 4
+def plane_sizes(project):
+    """(points, frequencies, components, accumulator bytes per sample) of every enabled plane, within the sample cap."""
+    r=project.region;sizes=[]
     cap=effective_limit(project.limits.max_monitor_samples,'monitor_samples')
-    # The shared CUDA DFT (explicit backend="cuda") keeps no step temporaries: the accumulator,
-    # the eight-corner interpolation tables, one sample buffer and the two windows. The Torch
-    # update is bounded by four accumulators and 192 bytes of tables per point and component.
-    fused=r.backend=='cuda' and r.cuda_monitor_kernel=='fused' and not r.complex_fields
     for raw in project.monitors:
         if not raw.enabled or raw.kind!='field':continue
         m=project.resolved_monitor(raw);n=len(plane_plan(project.region,m)['weights']);nf=len(frequency_samples(m.spectrum))
         nc=len(m.required_fields)
         if cap is not None and n*nf*nc>cap:raise ValueError(f'{m.name}: frequency field buffer of {n*nf*nc:,} complex samples exceeds the limit of {cap:,}. Reduce frequency points or increase monitor downsampling.')
-        value=n*nf*nc*(16 if r.precision=='float64' or m.dft_precision=='float64' else 8)
+        sizes.append((n,nf,nc,16 if r.precision=='float64' or m.dft_precision=='float64' else 8))
+    return sizes
+
+
+def monitor_memory(project):
+    size=point_trace_memory(project)
+    r=project.region;real=8 if r.precision=='float64' else 4
+    # The shared CUDA DFT (explicit backend="cuda") keeps no step temporaries: the accumulator,
+    # the eight-corner interpolation tables, one sample buffer and the two windows. The Torch
+    # update is bounded by four accumulators and 192 bytes of tables per point and component.
+    fused=r.backend=='cuda' and r.cuda_monitor_kernel=='fused' and not r.complex_fields
+    for n,nf,nc,sample in plane_sizes(project):
+        value=n*nf*nc*sample
         size += value+n*nc*(8*(8+real)+real)+2*r.steps*real if fused else value*4+n*nc*8*24+r.steps*16
     return size
 
