@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from torchfdtd import Project, Region, Material, Structure, Simulation, DifferentiableSimulation, run_tensor_batch, LorentzPole
+from torchfdtd import Project, Region, Material, Structure, Source, Monitor, Simulation, DifferentiableSimulation, run_tensor_batch, LorentzPole
 from torchfdtd.boundaries import YeeGrid
 from torchfdtd.materials import configure_materials
 from torchfdtd.run_control import StateDiagnostics
@@ -13,12 +13,16 @@ from torchfdtd.subpixel_dispersive import MIXED, WHOLE, NEXT, WINDOW
 from test_solver import small
 
 DRUDE = dict(model='drude', epsilon_inf=5., plasma_rad_s=1.37e16, collision_rad_s=1.5e14)
+TWO_POLES = [LorentzPole(resonance_rad_s=0., strength_rad_s_squared=1.6e32, damping_rad_s=1e14),
+             LorentzPole(resonance_rad_s=4e15, strength_rad_s_squared=8e30, damping_rad_s=3e14)]
 
 
-def periodic_scene(structures, materials, mesh=.02, size=.24, bloch=False):
-    bounds = {a+'_'+s: dict(kind='bloch' if bloch else 'periodic') for a in 'xyz' for s in ('min', 'max')}
-    r = Region(dimension='3d', size=(size,)*3, mesh=mesh, material_sampling='yee', interface_method='subpixel', boundaries=bounds,
-               bloch_phase=(.43, -.27, .18) if bloch else (0, 0, 0), precision='float64', backend='cpu', steps=100)
+def periodic_scene(structures, materials, mesh=.02, size=.24, bloch=False, dimension='3d'):
+    axes = 'xyz' if dimension == '3d' else 'xy'
+    bounds = {a+'_'+s: dict(kind='bloch' if bloch else 'periodic') for a in axes for s in ('min', 'max')}
+    r = Region(dimension=dimension, size=(size, size, size if dimension == '3d' else 1.), mesh=mesh, material_sampling='yee',
+               interface_method='subpixel', boundaries=bounds, bloch_phase=(.43, -.27, .18 if dimension == '3d' else 0) if bloch else (0, 0, 0),
+               precision='float64', backend='cpu', steps=100)
     return Project(region=r, materials=materials, structures=structures)
 
 
@@ -67,9 +71,10 @@ def dispersive_operator(plan, material, omega, size):
     return M
 
 
-def test_dispersive_state_is_the_node_tensor_at_the_bilinear_frequency():
-    """Drive only the D-driven state with a sinusoidal D and compare with the assembled node tensors at (2/dt) tan(w dt/2)."""
-    project = sphere_scene()
+@pytest.mark.parametrize('poles', [None, TWO_POLES], ids=['drude', 'multipole'])
+def test_dispersive_state_is_the_node_tensor_at_the_bilinear_frequency(poles):
+    """Drive only the D-driven state with a sinusoidal D and compare with the static share plus the assembled node tensors at (2/dt) tan(w dt/2)."""
+    project = sphere_scene(poles=poles)
     grid, plan = grid_for(project)
     state = grid.subpixel.dispersive
     driven = np.flatnonzero(plan.dispersive.driven)
@@ -92,9 +97,12 @@ def test_dispersive_state_is_the_node_tensor_at_the_bilinear_frequency():
     fit = np.linalg.lstsq(basis, history, rcond=None)[0]
     measured = fit[0]+1j*fit[1]  # E = Re(measured e^{-i w t})
     Omega = 2/dt*np.tan(omega*dt/2)
-    expected = (dispersive_operator(plan, project.materials[0], Omega, size)@amplitude)[driven]
+    static = plan.update_diagonal.reshape(-1)*amplitude
+    for row, cols, values in zip(plan.rows, plan.columns, plan.values):
+        static[row] += values@amplitude[cols]
+    expected = static[driven]+(dispersive_operator(plan, project.materials[0], Omega, size)@amplitude)[driven]
     np.testing.assert_allclose(measured, expected, rtol=0, atol=2e-6*abs(expected).max())
-    continuum = (dispersive_operator(plan, project.materials[0], omega, size)@amplitude)[driven]
+    continuum = static[driven]+(dispersive_operator(plan, project.materials[0], omega, size)@amplitude)[driven]
     assert abs(measured-continuum).max() > 1e-4*abs(expected).max()
 
 
@@ -137,12 +145,14 @@ def test_off_grid_slab_nodes_take_exact_fractions_and_axis_normals(axis):
 
 
 def leapfrog_norms(project, steps, every):
-    """State norm of a closed box started from a random H; E, D and the dispersive states start consistent at zero."""
+    """State norm of a closed box started from a random E and H. E at the D-driven samples is not state: the first
+    step assigns it from D, so its random start leaves no offset."""
     grid, plan = grid_for(project)
     rng = np.random.default_rng(3)
-    grid.H[:] = rng.normal(size=grid.H.shape)
-    if project.region.complex_fields:
-        grid.H[:] += 1j*rng.normal(size=grid.H.shape)
+    for field in (grid.E, grid.H):
+        field[:] = rng.normal(size=field.shape)
+        if project.region.complex_fields:
+            field[:] += 1j*rng.normal(size=field.shape)
     diagnostics = StateDiagnostics(grid)
     norms = []
     for n in range(steps):
@@ -177,14 +187,69 @@ def one_step_matrix(project):
 
 
 @pytest.mark.parametrize('bloch', [False, True])
-@pytest.mark.parametrize('collision', [0., 1.5e14])
-def test_one_step_map_has_no_eigenvalue_outside_the_unit_circle(collision, bloch):
-    """The complete update (fields, CPML-free periodic box, ADE and dispersive branch states) on a 6^3 grid."""
+def test_one_step_map_has_no_eigenvalue_outside_the_unit_circle(bloch):
+    """The complete update (fields, CPML-free periodic box, ADE and dispersive branch states) of a damped Drude sphere
+    on a 6^3 grid. A lossless Drude medium has Jordan chains at 1 (persistent currents), so its spectral radius is
+    1 up to a rounding-dependent 1e-8 in staircase as well; its field norms are checked instead."""
     p = periodic_scene([Structure(kind='sphere', material='metal', radius=.07, center=(.013, -.007, .004))],
-                       [Material(name='metal', **dict(DRUDE, collision_rad_s=collision))], mesh=.04, bloch=bloch)
+                       [Material(name='metal', **DRUDE)], mesh=.04, bloch=bloch)
     A, plan = one_step_matrix(p)
     assert plan.metadata['dispersive']['mixed_nodes'] > 0
     assert abs(np.linalg.eigvals(A)).max() <= 1+1e-12
+
+
+def drude(collision, plasma=3e16):
+    return Material(name='metal', model='drude', epsilon_inf=1., plasma_rad_s=plasma, collision_rad_s=collision)
+
+
+ADVERSARIAL = {
+    # A Drude cylinder in 2D, a slab whose faces sit a hair inside and outside node windows (fractions near 0
+    # and 1) and a slab tilted by 3 degrees: with incremented E at the D-driven samples, a one-time E write there
+    # grew |H| linearly in each of them.
+    'cylinder_2d': lambda collision: periodic_scene([Structure(kind='circle', material='metal', radius=.13, center=(.013, -.007, 0))],
+                                                    [drude(collision, 1e17)], mesh=.04, size=.48, dimension='2d'),
+    'slab': lambda collision: periodic_scene([Structure(kind='rectangle', material='metal', size=(3., 3., .08+2e-9), center=(0, 0, 1e-9))],
+                                             [drude(collision)], mesh=.04),
+    'tilted_slab': lambda collision: periodic_scene([Structure(kind='rectangle', material='metal', size=(3., 3., .06), center=(0, 0, .01),
+                                                               rotation_angles=(0., 3., 0.))], [drude(collision)], mesh=.04),
+}
+
+
+@pytest.mark.parametrize('name', list(ADVERSARIAL))
+def test_damped_cylinder_and_slabs_have_no_eigenvalue_outside_the_unit_circle(name):
+    """With damping the one-step map has no Jordan chain at 1, so its whole spectrum must lie in the unit disc. A
+    lossless Drude medium keeps persistent currents (P and D grow linearly while the fields stay put; the staircase
+    update of the same slab has such chains as well), so the lossless cases are checked by their field norms below."""
+    A, plan = one_step_matrix(ADVERSARIAL[name](1e14))
+    assert plan.metadata['dispersive']['mixed_nodes'] > 0
+    # The static modes form a large cluster at 1 whose computed eigenvalues carry rounding of up to about 2e-12 on
+    # this non-normal map (2D cylinder); a Jordan chain would split by about 1e-8 and an instability by more.
+    assert abs(np.linalg.eigvals(A)).max() <= 1+1e-10
+
+
+@pytest.mark.parametrize('name', list(ADVERSARIAL))
+def test_lossless_cylinder_and_slabs_keep_a_bounded_norm_from_a_random_start(name):
+    norms, _ = leapfrog_norms(ADVERSARIAL[name](0.), 3000, 25)
+    check_bounded(norms, 0.)
+
+
+@pytest.mark.parametrize('collision', [0., 1.5e14])
+@pytest.mark.parametrize('name', list(ADVERSARIAL))
+def test_an_e_write_on_driven_samples_leaves_no_static_source(name, collision):
+    """E written at the D-driven samples between the E and H updates kicks H once; the next step assigns E from D
+    again, so no static source remains. With incremented E such a kick grew |H| linearly (lossless) or left a
+    static H about 50 times the perturbation (damped)."""
+    grid, plan = grid_for(ADVERSARIAL[name](collision))
+    driven = np.flatnonzero(plan.dispersive.driven)
+    grid.update_E()
+    grid.E.reshape(-1)[driven] += 1e-3*np.random.default_rng(5).normal(size=len(driven))
+    grid.update_H()
+    kick = abs(grid.H).max()
+    peak = 0.
+    for n in range(4000):
+        grid.update_E(); grid.update_H()
+        peak = max(peak, abs(grid.H).max())
+    assert 0 < kick and peak <= 10*kick
 
 
 @pytest.mark.parametrize('bloch', [False, True])
@@ -196,9 +261,7 @@ def test_closed_box_state_norm_does_not_grow(collision, bloch):
 
 
 def test_multipole_material_closed_box_does_not_grow():
-    poles = [LorentzPole(resonance_rad_s=0., strength_rad_s_squared=1.6e32, damping_rad_s=1e14),
-             LorentzPole(resonance_rad_s=4e15, strength_rad_s_squared=8e30, damping_rad_s=3e14)]
-    norms, _ = leapfrog_norms(sphere_scene(poles=poles), 3000, 25)
+    norms, _ = leapfrog_norms(sphere_scene(poles=TWO_POLES), 3000, 25)
     check_bounded(norms, 1)
 
 
@@ -245,6 +308,28 @@ def test_unsupported_dispersive_interfaces_are_refused():
         Simulation(p).run()
     with pytest.raises(ValueError, match='staircase'):
         DifferentiableSimulation(drude_scene())
+
+
+def film_scene(source):
+    """A 1.5-cell Drude film with eps_inf = 1 crossing the source plane: the permittivity image equals the background."""
+    periodic = {} if source.kind == 'tfsf' else dict(boundaries=dict(y_min=dict(kind='periodic'), y_max=dict(kind='periodic')))
+    r = Region(size=(1.2, 1.2, 1.), dimension='2d', mesh=.01, pml_cells=12, backend='cpu', precision='float64', steps=20,
+               material_sampling='yee', interface_method='subpixel', **periodic)
+    return Project(region=r, materials=[Material(name='metal', model='drude', epsilon_inf=1., plasma_rad_s=1.37e16, collision_rad_s=1.5e14)],
+                   structures=[Structure(kind='rectangle', size=(.9, .015, 1.), center=(0., .0132, 0.), material='metal')],
+                   sources=[source], monitors=[Monitor(id='e', name='e', center=(.45, .2, 0), component='Ez')])
+
+
+def test_driven_samples_in_tfsf_and_oneway_neighbourhoods_are_refused():
+    tfsf = Source(kind='tfsf', size=(.6, .6, 1.), component='Ez', normal='x', direction='+', wavelength=.5,
+                  time_definition='standard', pulse_length=2e-15, pulse_offset=8e-15)
+    with pytest.raises(ValueError, match='dispersive material cannot intersect the TFSF face neighborhood'):
+        Simulation(film_scene(tfsf)).run()
+    oneway = Source(kind='plane', injection='oneway', normal='x', center=(-.3, 0, 0), size=(0, 1.2, 0), component='Ez', wavelength=.5)
+    with pytest.raises(ValueError, match='dispersive materials cannot intersect the injection neighborhood'):
+        Simulation(film_scene(oneway)).run()
+    p = film_scene(tfsf); p.structures[0].size = (.5, .015, 1.)
+    assert Simulation(p).run().summary['subpixel']['dispersive']['driven_samples'] > 0
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')

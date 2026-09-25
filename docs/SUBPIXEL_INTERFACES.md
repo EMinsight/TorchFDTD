@@ -32,8 +32,9 @@ Grouped batches separate different interface methods before forming cohorts.
 The present scope is isotropic, lossless, nondispersive dielectrics and
 isotropic Drude/Lorentz/multipole dispersive materials, 2D or 3D, with constant
 spacing on each axis. Different x/y/z spacings are supported. Nonuniform nodes,
-two dispersive materials in one node cell and `pml_dispersion="frozen"` with a
-dispersive structure raise validation errors. Dispersive cells use the
+two dispersive materials in one node cell, a dispersive surface within one
+averaging window (two cells) of a nonperiodic grid boundary and
+`pml_dispersion="frozen"` with a dispersive structure raise validation errors. Dispersive cells use the
 construction of [Dispersive interfaces](#dispersive-interfaces) below.
 Real-field fused CUDA and tensor cohorts support float32/float64. Complex
 Bloch fields use the reference Torch path. This is not a mapping to a
@@ -137,13 +138,20 @@ each axis. The node kinds are:
   whole the share `1/2 D/eps_m` (a D-driven bank per edge). An edge between two
   whole cells keeps the ordinary ADE of the material.
 - **Next** (nondispersive cells adjacent to a mixed or whole cell): the static
-  tensor `n n^T B + (I - n n^T)/C` in the coupled operator.
+  tensor `n n^T B + (I - n n^T)/C` in the coupled operator, without its coupling
+  between a D-driven edge and an E-updated edge. What remains is a block-diagonal
+  principal part of the tensor, so it stays positive and within the bounds.
 - **Ordinary:** unchanged.
 
-Every bank solves `eps x + sum_j P_j = d` with the trapezoidal update of the
-ADE, driven by the increment `d` of its share of `D`. Edges with a mixed or
-whole end ("D-driven samples") take their field from these banks plus the
-static shares of their other end.
+Edges with a mixed or whole end ("D-driven samples") keep `D` as their state,
+advanced by `c curl(H)` each step. Every bank solves `eps x + sum_j P_j = d`
+with the trapezoidal update of the ADE for its share `d` of the new `D`. The E
+of a D-driven sample is then assigned from `D`: the static share of a next-cell
+end (its diagonal and couplings, which link D-driven samples only) plus the bank
+outputs. E there is never incremented, so neither a direct write nor rounding
+leaves a lasting offset between E and the E of its `D`. An incremented E, as in
+the first version of this method, kept such an offset as a static source: one
+E perturbation at the D-driven samples grew |H| linearly in lossless scenes.
 
 **Passivity and stability.** Each branch is a passive medium driven by `D`, so
 every node share is a passive impedance. The discrete response is the bilinear
@@ -155,35 +163,49 @@ eigenvalues in `(0, 1]`, and the vacuum CFL bound is unchanged.
 `tests/test_subpixel_dispersive.py` checks each of these claims:
 
 - the assembled instantaneous operator is Hermitian and bounded, for real and Bloch fields;
-- the complete one-step map of a 6^3 periodic box (fields, ADE and dispersive states) has no eigenvalue outside the unit circle (lossless and damped, real and Bloch);
-- the driven state reproduces the node tensors at the bilinear frequency (relative 2e-6);
-- closed-box runs from a consistent state keep a bounded state norm for 3,000 steps (default suite) and 200,000 steps (`long`), including a two-pole material.
+- the complete one-step map (fields, ADE and dispersive states) has no eigenvalue outside the unit circle for damped Drude media: a sphere in a 6^3 periodic box (real and Bloch), a 2D cylinder, a slab whose faces sit a hair inside and outside node windows, and a slab tilted by 3 degrees. A lossless Drude medium carries persistent currents, Jordan chains at 1 in which `P` and `D` grow while the fields stay put (the staircase update of the same slab has them as well), so its spectral radius is 1 up to a rounding-dependent 1e-8 and the lossless scenes are checked by their field norms;
+- the driven state reproduces the static share plus the node tensors at the bilinear frequency (relative 2e-6), for a Drude and a two-pole material;
+- closed boxes started from random E and H keep a bounded state norm for 3,000 steps (default suite) and 200,000 steps (`long`), lossless and damped, for the sphere, a two-pole material, the lossless cylinder and both lossless slabs;
+- an E write at the D-driven samples between the E and H updates leaves no static source: over 4,000 steps |H| stays within 10 times its one-step kick, lossless and damped.
 
-**Window.** Development runs chose the window of two steps. They used a 2D Drude
-cylinder at h = 0.01 to 0.0025 um and 3D Drude spheres of radius 0.018 to 0.055
-um at h = 0.005 um (3.6 to 11 cells per radius, not the radii of the G3-05
-case), with windows of 0.75 to 3 steps. With one step, each mixed cell's
-laminate resonance adds absorption at the blue edge of the plasmon band. Two
-steps reduce the largest scattering and absorption errors by factors of 1.5 to 4
-on every development sphere. Wider windows oversmooth spheres of four cells per
-radius.
+**Window and development record.** Development runs chose the window of two
+steps: a 2D TE Drude cylinder of radius 0.05 um at h = 0.01 to 0.0025 um, and
+3D Drude spheres centred on a node in the G3-05 fixture (its domain, PML, TFSF
+box, monitors and band) at h = 0.005 um, the judged mesh of G3-05, with radii
+0.018 to 0.055 um that bracket its judged radii within 10 percent. Windows of
+0.75 to 3 steps were compared. With one step, each mixed cell's laminate
+resonance adds absorption at the blue edge of the plasmon band. Two steps
+reduce the largest scattering and absorption errors by factors of 1.5 to 4 on
+every development sphere. Wider windows oversmooth spheres of four cells per
+radius. Because this development used the G3-05 fixture and its neighbourhood,
+G3-05 does not judge the method. The held-out case G3-05r4
+(`docs/validation/cases/G3-05r4.json`, other radii, spheres off the node
+lattice) does, and it lists every development run.
 
 **Scope and refusals.** Resident CPU, Torch CUDA and fused CUDA forwards, CUDA
 graphs and tensor cohorts share the state: the fused kernel writes the curl
 buffer and the D-driven banks run after it. The following raise errors:
 
 - two dispersive materials in one node cell;
-- a dispersive surface within one window of a nonperiodic grid boundary;
+- a dispersive surface within one window of a nonperiodic grid boundary, so a
+  metal film or waveguide that runs into the PML needs staircase interfaces;
 - `pml_dispersion="frozen"` with a dispersive structure;
-- a soft E source on a D-driven sample (its E derives from D, so an injected E
-  would remain as a static offset).
+- a soft E source, a TFSF face neighbourhood or a one-way injection
+  neighbourhood on a D-driven sample. Their E is assigned from `D` each step,
+  so a direct E write there would be discarded. The TFSF and one-way checks see
+  the D-driven samples with their material, although the ADE ownership map
+  leaves them unowned.
 
 Complex fused updates, the differentiable and reversible solvers, streamed and
 budgeted execution, the tensor-material path, mode ports and PMC/endpoint scenes
 refuse subpixel scenes as before.
 
 `result.summary["subpixel"]["dispersive"]` reports the mixed, whole-surface and
-next nodes and the D-driven samples. The permittivity image shows the reciprocal
+next nodes, the D-driven samples and `device_bytes`, the modelled device memory
+of the state (branch states and coefficients, their norm weights, the node
+data, `D`, the full-volume norm weights and the temporaries of one update). The
+resident estimate adds an upper bound of it before planning: every node within
+one window of a dispersive object's bounding box counted as a mixed node. The permittivity image shows the reciprocal
 of the instantaneous diagonal. The state norm weighs E with it and adds the
 branch energies weighted by their share of `Z`. The construction is first order
 at curved surfaces, and the two-step window smooths features thinner than about

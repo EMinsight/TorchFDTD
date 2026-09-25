@@ -158,8 +158,8 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
         validate_oneway_materials(p,eps,volume_ownership)
         if interface_plan is not None and interface_plan.dispersive is not None:
             from .injection import source_terms
-            from .subpixel_dispersive import refuse_driven_sources
-            refuse_driven_sources(interface_plan.dispersive,[t for raw in p.sources for t in source_terms(p,raw)],p.region.shape)
+            from .subpixel_dispersive import refuse_driven_writers
+            refuse_driven_writers(interface_plan.dispersive,p,[t for raw in p.sources for t in source_terms(p,raw)],eps,volume_ownership)
         for obj in p.structures:
             if obj.enabled and counts.get(obj.id)==0:
                 message='no Yee component centers intersect this object; subpixel integration may still include it. Check quadrature and mesh convergence.' if interface_plan is not None else 'no cells intersect this object. Refine mesh or reposition it.'

@@ -11,7 +11,9 @@ Geometry, spectral bounding and implementation here are independently written.
 Node cells that meet a dispersive object leave this operator: their edge
 triplets take the D-driven dispersive node tensors of
 torchfdtd.subpixel_dispersive, and nondispersive cells next to them the static
-averaging tensor of the same construction.
+averaging tensor of the same construction, whose coupling between a D-driven
+edge and an E-updated edge is dropped (a block-diagonal principal part of the
+tensor, so it stays positive and within the bounds).
 """
 from dataclasses import dataclass
 from itertools import product
@@ -92,7 +94,10 @@ def prepare_interfaces(project):
         node_ids=np.concatenate(node_ids);positions=np.concatenate(positions);normals=np.concatenate(normals)
         for start in range(0,candidate_count,512):
             nodes=node_ids[start:start+512];points=positions[start:start+512];normal=normals[start:start+512];m=len(points)
-            degenerate+=int(np.count_nonzero(np.linalg.norm(normal,axis=1)<.5))
+            kept=np.ones(m,bool)
+            if dispersive is not None:
+                flat=np.ravel_multi_index(nodes.T,node_shape);kind=dispersive.kind[flat];kept=(kind!=MIXED)&(kind!=WHOLE)
+            degenerate+=int(np.count_nonzero(kept&(np.linalg.norm(normal,axis=1)<.5)))
             line=np.empty((3,2,m));face=np.empty_like(line)
             for a in range(3):
                 for sign in range(2):
@@ -104,10 +109,9 @@ def prepare_interfaces(project):
                 inv=np.column_stack([line[a,s] for a,s in enumerate(signs)])
                 eps=np.column_stack([face[a,s] for a,s in enumerate(signs)])
                 tensor,clipped=interface_tensor(inv,eps,normal,geometry.epsilon_bounds)
-                if dispersive is not None:
-                    flat=np.ravel_multi_index(nodes.T,node_shape);kind=dispersive.kind[flat]
-                    if np.any(kind==NEXT):tensor[kind==NEXT]=dispersive.static_tensors(flat[kind==NEXT]);clipped[kind==NEXT]=False
-                clipped_count+=int(np.count_nonzero(clipped));triplet_count+=m
+                if dispersive is not None and np.any(kind==NEXT):
+                    tensor[kind==NEXT]=dispersive.static_tensors(flat[kind==NEXT]);clipped[kind==NEXT]=False
+                clipped_count+=int(np.count_nonzero(clipped&kept));triplet_count+=int(np.count_nonzero(kept))
                 indices=[];valid=[];phases=[]
                 for a,s in enumerate(signs):
                     edge=nodes.copy()
@@ -130,6 +134,7 @@ def prepare_interfaces(project):
                     for b in range(3):
                         if a==b:continue
                         mask=valid[a]&valid[b]&(tensor[:,a,b]!=0)
+                        if dispersive is not None:mask&=dispersive.driven[indices[a]]==dispersive.driven[indices[b]]
                         if not np.any(mask):continue
                         value=tensor[mask,a,b]/8
                         if r.complex_fields:value=value*np.conj(phases[a][mask])*phases[b][mask]
@@ -150,6 +155,7 @@ def prepare_interfaces(project):
     else:rows=np.empty(0,np.int64);columns=np.empty((0,8),np.int32);values=np.empty((0,8),complex if r.complex_fields else float)
     real_bytes=8 if r.precision=='float64' else 4;field_bytes=real_bytes*(2 if r.complex_fields else 1)
     memory=rows.nbytes+columns.nbytes+values.size*field_bytes+size*field_bytes
+    if dispersive is not None:memory+=dispersive.metadata['device_bytes']
     metadata=dict(method='bounded_symmetric_edge_face',quadrature=r.subpixel_quadrature,
                   candidate_nodes=candidate_count,coupled_edges=len(rows),triplets=triplet_count,
                   spectrally_bounded_triplets=clipped_count,degenerate_normals=degenerate,
@@ -164,20 +170,24 @@ def prepare_interfaces(project):
 class SubpixelState:
     def __init__(self,grid,plan):
         self._grid=weakref.ref(grid)
+        rows,columns,values=plan.rows,plan.columns,plan.values
+        if plan.dispersive is not None:
+            # The dispersive state assigns E at D-driven samples, their rows included.
+            kept=~plan.dispersive.driven[rows];rows,columns,values=rows[kept],columns[kept],values[kept]
         if grid.is_torch:
-            self.rows=torch.as_tensor(plan.rows,device=grid.E.device,dtype=torch.int64)
-            self.columns=torch.as_tensor(plan.columns,device=grid.E.device,dtype=torch.int32)
-            self.values=torch.as_tensor(plan.values,device=grid.E.device,dtype=grid.E.dtype)
+            self.rows=torch.as_tensor(rows,device=grid.E.device,dtype=torch.int64)
+            self.columns=torch.as_tensor(columns,device=grid.E.device,dtype=torch.int32)
+            self.values=torch.as_tensor(values,device=grid.E.device,dtype=grid.E.dtype)
             grid.inverse_permittivity[:]=torch.as_tensor(plan.diagonal if plan.update_diagonal is None else plan.update_diagonal,device=grid.E.device,dtype=grid.E.real.dtype)
         else:
-            self.rows=plan.rows;self.columns=plan.columns;self.values=plan.values.astype(grid.E.dtype)
+            self.rows=rows;self.columns=columns;self.values=values.astype(grid.E.dtype)
             grid.inverse_permittivity[:]=plan.diagonal if plan.update_diagonal is None else plan.update_diagonal
         self.curl_buffer=grid._zeros(grid.E.shape)
         grid.memory_states.append(self.curl_buffer)
         self.dispersive=None
         if plan.dispersive is not None:
             from .subpixel_dispersive import DispersiveState
-            self.dispersive=DispersiveState(grid,plan.dispersive)
+            self.dispersive=DispersiveState(grid,plan.dispersive,plan)
             # The state norm weighs E with the instantaneous inverse permittivity, which includes the dispersive shares.
             grid.energy_inverse_permittivity=grid._coefficient(plan.diagonal)
 
