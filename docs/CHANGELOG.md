@@ -18,10 +18,17 @@ Commits that only record validation evidence or documentation ("Record ...",
 ### Added
 
 - Optional user caps: `Region.resident_cell_limit` and `Project.limits` (`max_structures`, `max_sources`, `max_monitors`, `max_materials`, `max_mesh_refinements`, `max_monitor_samples`), `None` by default and written to JSON only when set, so existing projects serialize, hash and load as before; the tiles of `plan_tiles` inherit them (1e51bb2, this commit).
+- `scripts/record_platform_g4.py` records a full G4 run on a platform other than the one of the gate evidence (every G4 task's command and the `gpu-nightly` suite) from its JUnit reports into `docs/validation/platforms/g4/<id>.json`, with the reports copied beside it and the gate file untouched; `tests/test_platform_matrix.py` re-parses the copies and fails on a failure, an error, a skip other than an optional platform check, or a G4 required test the record does not name. First platform: WSL2 Ubuntu 22.04 on the RTX 3060 (`rtx3060-wsl2-ubuntu2204` in [PLATFORM_MATRIX.md](PLATFORM_MATRIX.md), case `G4-01r2_platform_matrix`) (371341f).
 
 ### Changed
 
 - The resident estimate of `backend="cuda"` with `cuda_kernel="fused"` uses a device model calibrated against measured peaks (`docs/validation/resident_memory_fused_3060.json`, which also states the estimate of the 4.33e8-cell RTX 5880 metalens tile) instead of the 200 bytes per cell (FP32) of the tensor-expression bound, so resident admission and the Auto policy accept fused grids that fit; a plane on the fused monitor kernel is counted by its own buffers instead of the Torch-kernel bound. Every estimate adds the source waveforms (`source_waveform_estimated_bytes`); `memory_model` names the model (1e51bb2, this commit).
+
+### Fixed
+
+- CUDA admission (resident, tensor and grouped batches, `BatchRunner`, the Auto policy, propagation, endpoint and oracle budgets) reads the smaller of the CUDA runtime free memory and the device-wide NVML free memory (`torchfdtd.cuda_memory.cuda_mem_info`). Under the Windows WDDM driver `cudaMemGetInfo` of one process ignores the allocations of another: with 2 GiB held by a second process on the RTX 3060 the runtime reading did not drop at all, so admission could accept work into memory another process held (f446a9a).
+- On Linux the process I/O deltas of the memory report (`process_io_delta_bytes` of `scratch_disk_written_bytes` and `scratch_disk_read_bytes`) count the bytes passed through read and write calls, `/proc/self/io` `rchar` and `wchar`, as the Windows transfer counters do; they were `read_bytes` and `write_bytes`, storage traffic that counts a page rewritten while dirty once and a cached read not at all, so the written delta of a disk-bank run fell below the bytes the bank files received. Found by the G5-02 test in the WSL2 gpu-nightly run; Windows numbers are unchanged (this commit).
+- `scripts/platform_report.py` writes the interpreter path with the home directory replaced by `<user home>`, as the evidence recorder does; a venv under the home directory, as on a Linux host, was written verbatim into the platform record (827acfd).
 
 ### Security
 

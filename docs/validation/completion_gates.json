@@ -1805,7 +1805,14 @@
             "20260923T213812Z-g4-01-f3e0cfde"
           ],
           "blocker": null,
-          "scope_change_approval": null,
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-25",
+            "decision": "approved",
+            "scope": "G4-01: the revised case docs/validation/cases/G4-01r2_platform_matrix.json supersedes G4-01_platform_matrix.json: the recorded platforms add rtx3060-wsl2-ubuntu2204 (WSL2 Ubuntu 22.04 on the RTX 3060, labelled as WSL2, not native Linux), and the case declares the per-platform G4 run record and the no-home-path rule; no limit is loosened",
+            "basis": "the owner was told the revision only adds the recorded WSL2 platform and its run-record check, loosening nothing, and approved it (2026-09-25)",
+            "note": "the Linux + CUDA G4 record is a 1.0.0 condition; native Linux is not recorded"
+          },
           "watch_paths": [
             "docs/PLATFORM_MATRIX.md",
             "docs/validation/platforms/*.json",
