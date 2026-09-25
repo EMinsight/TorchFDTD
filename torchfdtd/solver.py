@@ -14,7 +14,7 @@ import torch
 from fdtd.backend import NumpyBackend
 
 from .waveforms import TAIL_INNER, TAIL_OUTER, pulse_parameters, source_time_signal
-from .models import Project
+from .models import Project, server_admission
 from .boundaries import YeeGrid
 from .materials import configure_materials, permittivity
 from .spectra import point_spectrum, apodization_window
@@ -326,6 +326,24 @@ def snapshot_frames(p: Project):
                 aliased=bool(per_period is not None and per_period < SNAPSHOT_FRAMES_PER_PERIOD))
 
 
+def resident_output_bytes(p: Project):
+    """Host memory the outputs of a resident run take besides the grid.
+
+    The final E and H copies with one transient copy of the same size (the CUDA
+    staging tensor, or |E| for the summary), the point traces, and the display
+    frames: at most steps//interval + 1 of them, each at most 256 x 256 and copied
+    once into the Result, plus the Python list of the latest frame in the progress.
+    The workbench counts them under memory admission (docs/SECURITY.md)."""
+    r = p.region
+    real = 8 if r.precision == 'float64' else 4
+    field = real*(2 if r.complex_fields else 1)
+    axis = 'xyz'.index(r.slice_axis)
+    plane = math.prod(min(256, n) for a, n in enumerate(r.shape) if a != axis)
+    frames = r.steps//max(r.snapshot_interval, math.ceil(r.steps/100))+1
+    points = sum(m.enabled and m.kind == 'point' for m in p.monitors)
+    return 9*math.prod(r.shape)*field+r.steps*points*field+plane*(2*frames*real+32)
+
+
 def run_signature(p: Project, steps):
     """Physical identity of a run for matched frequency-plane references.
 
@@ -512,6 +530,15 @@ class Simulation:
             available = host_memory()['available_bytes']
             if available is not None and stats['estimated_memory_mb']*2**20 > available*.8:
                 raise ValueError('Insufficient available host memory. Increase mesh spacing or reduce the domain.')
+        # Under the workbench's memory admission the host outputs count too (added to the estimate on the CPU).
+        if server_admission() == 'memory':
+            from .memory_profile import host_memory
+            available = host_memory()['available_bytes']
+            outputs = resident_output_bytes(p)+(0 if use_cuda else int(stats['estimated_memory_mb']*2**20))
+            if available is not None and outputs > available*.8:
+                raise ValueError(f'Insufficient available host memory for the run outputs (final E and H fields, point traces, '
+                                 f'display frames{"" if use_cuda else ", with the resident estimate"}): {outputs/2**30:.2f} GiB '
+                                 f'exceed 80% of the {available/2**30:.2f} GiB available. Increase mesh spacing or reduce the domain.')
         dtype = torch.float64 if r.precision == 'float64' else torch.float32
         fdtd.set_backend(f'torch.cuda.{r.precision}' if use_cuda else 'numpy')
         # Upstream 0.2.2 leaves a dtype class attribute behind on backend switches.

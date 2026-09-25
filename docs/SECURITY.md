@@ -81,13 +81,24 @@ starts the server without the ten `SERVER_LIMITS` above: resident execution
 and every count and size in the table except the GDS vertex limit are admitted
 as on the Python API, by the memory estimate against 75% of the free device
 memory (80% of the available host memory on the CPU) and by the caps the
-project carries (`Region.resident_cell_limit`, `Project.limits`). The requests,
-the tasks of the job pools and the modal worker all run in this mode: a job
-task keeps the mode of the request that queued it, and the job thread passes
-it to the spawned modal worker. `/api/health` reports it as `admission`
-(`"fixed"` or `"memory"`) with `server_limits` (the `SERVER_LIMITS` values, or `null`),
-and the execution panel of the workbench shows it. Without the flag the server
-behaves as described above.
+project carries (`Region.resident_cell_limit`, `Project.limits`). The
+requests, the tasks of the job pools and the modal worker all run in this
+mode: a job task keeps the mode of the request that queued it, and the job
+thread passes it to the spawned modal worker. `/api/health` reports it as
+`admission` (`"fixed"` or `"memory"`) with `server_limits` (the
+`SERVER_LIMITS` values, or `null`), and the execution panel of the workbench
+shows it. Without the flag the server behaves as described above.
+
+In this mode the host outputs of a resident run count as well
+(`torchfdtd.solver.resident_output_bytes`): the final E and H copies with one
+transient copy of the same size (36 bytes per cell for real float32 fields,
+in proportion to the element size for float64 and Bloch fields), the point
+traces and the display frames (at most 101 frames, each decimated to at most
+256 x 256 values). They are checked against 80% of the available host memory,
+on their own for a GPU run and added to the resident estimate on the CPU, by
+`/api/validate`, where the resident tier then reports that it does not fit and
+Auto moves on, and again by `Simulation` when the job starts, which refuses
+with "Insufficient available host memory for the run outputs".
 
 The flag lifts only those size limits. It keeps the loopback-only bind, the
 `Host` and `Origin` checks, `MAX_REQUEST_BYTES` and the FSP upload limit, the
@@ -98,11 +109,9 @@ bounds of the HTTP routes, the 16-pole limit of a Lorentz material, one
 million cells per grid axis and the 2^31 bound of the 32-bit field indices.
 A memory estimate bounds the memory a scene is expected to use, not its run
 time or the disk it writes, so one request can occupy the GPU, the host
-memory and the results directory for as long as it runs; the display frames
-the workbench keeps for a resident run (up to 100 slices of the display plane,
-each also sent in the job progress) are held in host memory outside the
-estimate. The mode is meant for a single user running the workbench on their
-own machine; on a machine shared with other local accounts keep the default.
+memory and the results directory for as long as it runs. The mode is meant
+for a single user running the workbench on their own machine; on a machine
+shared with other local accounts keep the default.
 `tests/test_server_memory_admission.py` checks the mode on the routes, the job
 threads, the design jobs and the modal worker, and runs the security checks of
 `tests/test_server_security.py` against a memory-admission server.

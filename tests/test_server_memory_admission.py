@@ -5,8 +5,10 @@ modal worker (tests/test_server_security.py, tests/test_resident_guards.py).
 With create_app(memory_admission=True) the size limits are lifted and resident
 execution is admitted by the memory estimate as on the Python API, in the
 requests and in the job threads and modal worker they start, while the input
-limits of the server stay (docs/SECURITY.md). Memory is simulated: the resolver
-reads CPU_RECORD and the CPU Simulation a patched host_memory.
+limits of the server stay (docs/SECURITY.md). The host outputs of a resident
+run (final E and H, point traces, display frames) count against the available
+host memory in this mode. Memory is simulated: the resolver reads CPU_RECORD
+and the CPU Simulation a patched host_memory.
 """
 import contextlib
 import inspect
@@ -15,14 +17,16 @@ import threading
 import time
 
 import pytest
+import torch
 from fastapi.testclient import TestClient
 
 import test_server_security as security
 from test_mode_network_integration import payload as modal_payload
 from test_resident_guards import CPU_RECORD, LARGE, SERVER_CASES, oversized, single_oversized, structures, wide_plane
-from torchfdtd import Project, Region, Source, cli, server
+from torchfdtd import Project, Region, Simulation, Source, cli, server
 from torchfdtd.models import SERVER_LIMITS, demo_project, server_admission, server_limit, server_limits
-from torchfdtd.solver import estimate
+from torchfdtd.execution_modes import _resident_fit
+from torchfdtd.solver import estimate, resident_output_bytes
 
 
 @pytest.fixture(autouse=True)
@@ -162,6 +166,79 @@ def test_memory_admission_lifts_every_server_size_limit(memory_client):
     assert memory_client.post('/api/validate', json=wide_plane().model_dump(mode='json')).status_code == 200
     response = memory_client.post('/api/validate', json=wide_plane(max_monitor_samples=20_000_000).model_dump(mode='json'))
     assert response.status_code == 422 and 'exceeds the limit of 20,000,000' in response.text
+
+
+# ------------------------------------------------------------------------------------------ run outputs
+def small_resident(**region):
+    p = demo_project()
+    p.region = Region(**{**p.region.model_dump(), 'backend': 'cpu', 'steps': 100, 'execution_mode': 'resident', **region})
+    return p
+
+
+def test_the_run_outputs_bound_what_a_resident_run_returns():
+    # A 600 x 300 grid: the display frames are decimated to 200 x 150, the final fields are full size.
+    p = small_resident(size=(30., 15., demo_project().region.size[2]), steps=60)
+    with server_limits(memory_admission=True):
+        result = Simulation(p).run()
+    r = p.region
+    assert r.shape[:2] == (600, 300) and result.frames.shape[1:] == (200, 150)
+    assert len(result.frames) <= r.steps//max(r.snapshot_interval, math.ceil(r.steps/100))+1
+    frames = 2*result.frames.nbytes
+    assert frames <= 2*len(result.frames)*256*256*4
+    fields = result.electric.nbytes+result.magnetic.nbytes
+    assert fields+fields//2+result.signals.nbytes+frames <= resident_output_bytes(p)
+
+
+def test_memory_admission_refuses_a_run_whose_outputs_exceed_host_memory(tmp_path, monkeypatch):
+    """The estimate alone fits 80% of the host memory, the estimate plus the run outputs do not."""
+    p = small_resident()
+    required, outputs = int(estimate(p)['estimated_memory_mb']*2**20), resident_output_bytes(p)
+    available = int((required+outputs//2)/.8)
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=4*available, available_bytes=available))
+    monkeypatch.setattr(server, 'execution_resources', lambda: dict(CPU_RECORD, host_available_bytes=available))
+    assert Simulation(p).run().summary['steps'] == 100
+    with server_limits(memory_admission=True), pytest.raises(ValueError, match='host memory for the run outputs'):
+        Simulation(p).run()
+    body = p.model_dump(mode='json')
+    with workbench(tmp_path / 'fixed', False) as client:
+        job = finished(client, '/api/jobs/'+client.post('/api/jobs', json=body).json()['id'])
+        assert job['status'] == 'completed', job
+    with workbench(tmp_path / 'memory', True) as client:
+        execution = client.post('/api/validate', json=body).json()['execution']
+        reason = execution['resident']['reason']
+        assert not execution['resident']['fits'] and execution['resident']['host_output_bytes'] == required+outputs
+        assert reason.startswith('resident estimate and run outputs') and 'exceed 80% of available host memory' in reason
+        assert execution['warnings'] == ['Resident execution was requested but '+reason+'.']
+        job = finished(client, '/api/jobs/'+client.post('/api/jobs', json=body).json()['id'])
+        assert job['status'] == 'failed', job
+        assert job['error'].startswith('Insufficient available host memory for the run outputs (final E and H fields, point traces, '
+                                       'display frames, with the resident estimate)'), job['error']
+        auto = dict(body, region=dict(body['region'], execution_mode='auto'))
+        assert client.post('/api/validate', json=auto).json()['execution']['mode'] != 'resident'
+
+
+def test_on_the_gpu_the_run_outputs_alone_meet_the_host_memory():
+    p = Project(region=Region(**{**LARGE, 'backend': 'cuda', 'execution_mode': 'resident'}), sources=[Source(center=(0, 0, 0))])
+    summary, cells, outputs = estimate(p), math.prod(p.region.shape), resident_output_bytes(p)
+    assert outputs > 9*cells*4
+    device = dict(CPU_RECORD, cuda=True, gpu='simulated', gpu_free_bytes=64*2**30, gpu_total_bytes=64*2**30)
+    fit = _resident_fit(p, summary, 'cuda', dict(device, host_available_bytes=outputs), cells)
+    assert fit['fits'] and 'host_output_bytes' not in fit
+    with server_limits(memory_admission=True):
+        fit = _resident_fit(p, summary, 'cuda', dict(device, host_available_bytes=outputs), cells)
+        assert not fit['fits'] and fit['host_output_bytes'] == outputs
+        assert fit['reason'].startswith('run outputs') and 'exceed 80% of available host memory' in fit['reason']
+        fit = _resident_fit(p, summary, 'cuda', device, cells)
+        assert fit['fits'] and 'within 75% of free device memory' in fit['reason'] and 'within 80% of available host memory' in fit['reason']
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
+def test_cuda_dispatch_counts_the_run_outputs_under_memory_admission(monkeypatch):
+    p = small_resident(backend='cuda')
+    outputs = resident_output_bytes(p)
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=4*outputs, available_bytes=outputs))
+    with server_limits(memory_admission=True), pytest.raises(ValueError, match=r'run outputs \(final E and H fields, point traces, display frames\): '):
+        Simulation(p).run()
 
 
 # ------------------------------------------------------------------------------------ threads and workers

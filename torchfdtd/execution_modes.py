@@ -22,7 +22,7 @@ import warnings
 import numpy as np
 import torch
 
-from .models import Project, Monitor, effective_limit
+from .models import Project, Monitor, effective_limit, server_admission
 from .memory_profile import host_memory
 
 # The resident CUDA solver refuses estimates above 75% of free device memory.
@@ -272,7 +272,7 @@ def _describe(storage, options, reservation, health):
 
 
 def _resident_fit(project, summary, backend, health, cells):
-    from .solver import estimate
+    from .solver import estimate, resident_output_bytes
     summary = summary or estimate(project)
     required = int(summary['estimated_memory_mb']*2**20)
     if backend == 'cuda':
@@ -290,8 +290,20 @@ def _resident_fit(project, summary, backend, health, cells):
         fits, reason = False, refusal
     elif limit is not None and required > limit:
         fits, reason = False, f'resident estimate {_gib(required)} exceeds {fraction:.0%} of {pool} ({_gib(free)})'
-    return dict(fits=fits, reason=reason, estimated_bytes=required, free_bytes=free, limit_bytes=limit,
-                fraction=fraction, cell_limit=cell_limit)
+    record = dict(fits=fits, reason=reason, estimated_bytes=required, free_bytes=free, limit_bytes=limit,
+                  fraction=fraction, cell_limit=cell_limit)
+    # Under the workbench's memory admission the host outputs of the run count too, as Simulation checks.
+    if server_admission() == 'memory':
+        available = health.get('host_available_bytes')
+        outputs = resident_output_bytes(project)+(0 if backend == 'cuda' else required)
+        what = 'run outputs' if backend == 'cuda' else 'resident estimate and run outputs'
+        record['host_output_bytes'] = outputs
+        if fits and available is not None and outputs > available*RESIDENT_HOST_FRACTION:
+            record.update(fits=False, reason=f'{what} {_gib(outputs)} (final E and H fields, point traces, display frames) '
+                                             f'exceed {RESIDENT_HOST_FRACTION:.0%} of available host memory ({_gib(available)})')
+        elif fits:
+            record['reason'] += f'; {what} {_gib(outputs)} within {RESIDENT_HOST_FRACTION:.0%} of available host memory'
+    return record
 
 
 def resolve_execution(project, *, health, scratch, summary=None):

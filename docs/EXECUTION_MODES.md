@@ -163,13 +163,16 @@ Project(..., limits=dict(max_structures=20_000, max_monitor_samples=50_000_000))
 - `torchfdtd serve --memory-admission` starts the server without these limits:
   the workbench then admits scenes like the Python API, by the memory estimate
   and the caps the project carries, in its requests, job threads and modal
-  worker. The input limits of the server stay, and the mode is meant for a
-  single user on their own machine
-  ([SECURITY.md](SECURITY.md#memory-admission)). The execution panel shows the
-  admission ("admission memory estimate" or "admission fixed server limits
-  (8,000,000 resident cells)") and states the cell limit in its help text only
-  when the server applies it; `/api/health` reports it as `admission` and
-  `server_limits`.
+  worker. A resident run is also admitted by its host outputs, the final E and
+  H copies, the point traces and the display frames (at most 101 frames of at
+  most 256 x 256 values), against 80% of the available host memory, added to
+  the estimate on the CPU (`torchfdtd.solver.resident_output_bytes`). The input
+  limits of the server stay, and the mode is meant for a single user on their
+  own machine ([SECURITY.md](SECURITY.md#memory-admission)). The execution
+  panel shows the admission ("admission memory estimate" or "admission fixed
+  server limits (8,000,000 resident cells)") and states the cell limit in its
+  help text only when the server applies it; `/api/health` reports it as
+  `admission` and `server_limits`.
 
 ```powershell
 torchfdtd serve --memory-admission
