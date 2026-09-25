@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from torchfdtd import Project, Region, Material, Structure, Source, Monitor, Simulation, DifferentiableSimulation, run_tensor_batch, LorentzPole
+from torchfdtd import Project, Region, Material, Structure, Source, Monitor, FieldMonitor, Simulation, DifferentiableSimulation, run_tensor_batch, LorentzPole
 from torchfdtd.boundaries import YeeGrid
 from torchfdtd.materials import configure_materials
 from torchfdtd.run_control import StateDiagnostics
@@ -289,6 +289,41 @@ def test_open_scene_runs_and_reports_the_node_tensors(dimension):
     assert info['mixed_nodes'] > 0 and info['method'] == 'node_tensor_dispersive_laminate'
     assert np.all(np.isfinite(result.electric)) and abs(result.signals).max() > 0
     assert any('dispersive averaging tensor' in w for w in result.summary['warnings'])
+
+
+def two_pole_cylinder(mesh, interface, cylinder=True):
+    import test_physics_g3_b as g3
+    spectrum = g3.wavelength_spectrum(.30, .42, 13)
+    monitors = g3.box_monitors(.2, 'xy', spectrum)+[FieldMonitor(id='incident', name='incident', normal='x', center=(0., 0., 0.), size=(0., .1, 1.), spectrum=spectrum)]
+    return Project(region=g3.region('2d', (.8, .8, 1.), mesh, .1, 'cpu', 'float64', 60., interface),
+                   materials=[Material(name='metal', model='multipole', epsilon_inf=3., poles=TWO_POLES)],
+                   structures=[Structure(kind='circle', radius=.05, material='metal', center=(.0013, -.0021, 0.))] if cylinder else [],
+                   sources=[Source(kind='tfsf', size=(.5, .5, 1.), component='Ey', normal='x', direction='+', wavelength=.36,
+                                   time_definition='standard', pulse_length=1.5e-15, pulse_offset=7e-15)],
+                   monitors=monitors)
+
+
+def test_two_pole_cylinder_against_the_mie_series():
+    """Regression guard, not a judged case: a Drude plus Lorentz metal, TE cylinder of radius 0.05 um off the node
+    lattice at h = 0.01 um, against the infinite-cylinder Mie series with the same permittivity over 0.30 to 0.42 um.
+    The limits were set from one development run (largest errors 3.6 percent for scattering and 47 percent for
+    absorption, against 24 and 932 percent for staircase) with a margin of about two, and require at most a third
+    of the staircase error."""
+    import test_physics_g3_b as g3
+    from torchfdtd.materials import permittivity
+    reference = Simulation(two_pole_cylinder(.01, 'staircase', False)).run()
+    wavelengths, intensity = g3.incident_intensity(reference)
+    eps = permittivity(two_pole_cylinder(.01, 'subpixel').materials[0], g3.C0/(wavelengths*1e-6))
+    parts = [g3.cylinder_cross_sections([w], .05, complex(np.sqrt(e)), 'TE') for w, e in zip(wavelengths, eps)]
+    mie = {k: np.array([q[k][0] for q in parts]) for k in ('scattering', 'absorption')}
+    errors = {}
+    for interface in ('staircase', 'subpixel'):
+        sample = Simulation(two_pole_cylinder(.01, interface)).run()
+        errors[interface] = (abs(g3.scattered_power(sample, reference, 'xy')/intensity*1e6/mie['scattering']-1).max(),
+                             abs(g3.total_inward_power(sample, 'xy')/intensity*1e6/mie['absorption']-1).max())
+    scattering, absorption = errors['subpixel']
+    assert scattering < .1 and absorption < 1.
+    assert scattering < errors['staircase'][0]/3 and absorption < errors['staircase'][1]/3
 
 
 def test_unsupported_dispersive_interfaces_are_refused():
