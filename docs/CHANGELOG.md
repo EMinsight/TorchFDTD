@@ -7,7 +7,7 @@ the first section covers the whole history since the first commit (2026-09-20).
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
-## Unreleased
+## 0.16.1 (2026-09-26)
 
 Patch release: the `torchfdtd` package is byte-identical to 0.16.0.
 

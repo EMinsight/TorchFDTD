@@ -59,7 +59,7 @@ CUDA runtimes other than 12.6, drivers other than 591.86.
 ```powershell
 python -m venv torchfdtd-env
 torchfdtd-env/Scripts/python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu126
-torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-0.16.0-py3-none-any.whl[cuda-kernels]"
+torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-0.16.1-py3-none-any.whl[cuda-kernels]"
 torchfdtd-env/Scripts/torchfdtd doctor
 torchfdtd-env/Scripts/torchfdtd serve
 ```
