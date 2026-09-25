@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 69 | 7 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 69 | 13 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 68 | 8 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 68 | 14 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -78,7 +78,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G4-01 | 보유한 실제 GPU와 OS·driver·runtime부터 확인한다 | IMPLEMENTED | VERIFIED | `20260923T213812Z-g4-01-f3e0cfde` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
+| G4-01 | 보유한 실제 GPU와 OS·driver·runtime부터 확인한다 | IMPLEMENTED | VERIFIED | `20260923T213812Z-g4-01-f3e0cfde` | `3e9300300d15` | FAIL | STALE: test source changed since the run: tests/test_platform_matrix.py |
 | G4-02 | torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다. | IMPLEMENTED | VERIFIED | `20260923T213850Z-g4-02-e1a17660` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-03 | noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다 | IMPLEMENTED | VERIFIED | `20260923T213916Z-g4-03-76bb26f3` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-04 | 최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다 | IMPLEMENTED | VERIFIED | `20260923T213956Z-g4-04-c280e637` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
@@ -165,11 +165,13 @@ Every record written by `scripts/platform_report.py` under `docs/validation/plat
 | Platform id | GPU | Driver | CUDA runtime | torch | CuPy | Python | OS | Recorded |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | rtx3060-win11-lab | NVIDIA GeForce RTX 3060 (cc 8.6, 12287 MiB) | 591.86 | 12.6 | 2.10.0+cu126 | 13.6.0 | 3.10.2 | Windows-10-10.0.26200-SP0 | 2026-09-21T15:53:07+00:00 |
+| rtx3060-wsl2-ubuntu2204 | NVIDIA GeForce RTX 3060 (cc 8.6, 12287 MiB) | 591.86 | 12.8 | 2.11.0+cu128 | 13.6.0 | 3.12.14 | Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35 | 2026-09-25T06:23:47+00:00 |
 | rtx5880-ada-win11-remote | NVIDIA RTX 5880 Ada Generation (cc 8.9, 49139 MiB) | 581.80 | 12.8 | 2.10.0 | 13.6.0 | 3.11.14 | Windows-10-10.0.26100-SP0 | 2026-09-21T19:27:38+00:00 |
 
 | Platform id | G4 evidence runs recorded on this platform | Other tasks whose newest run was recorded here |
 | --- | --- | --- |
 | rtx3060-win11-lab | G4-01 `20260923T213812Z-g4-01-f3e0cfde` (platform_id); G4-02 `20260923T213850Z-g4-02-e1a17660` (platform_id); G4-03 `20260923T213916Z-g4-03-76bb26f3` (platform_id); G4-04 `20260923T213956Z-g4-04-c280e637` (platform_id); G4-05 `20260923T214253Z-g4-05-e0a9e8d3` (platform_id); G4-06 `20260924T092226Z-g4-06-2028458c` (platform_id) | 65 |
+| rtx3060-wsl2-ubuntu2204 | none | 0 |
 | rtx5880-ada-win11-remote | none | 0 |
 
 Newest runs that match no platform record: none.
@@ -294,6 +296,7 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | G3-16 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G3-17 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-01 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
+| G4-01 | scope change pending approval (1 declaration(s), scope_change_approval is null): docs/validation/cases/G4-01r2_platform_matrix.json declares supersedes (a revised case) |
 | G4-02 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-03 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-04 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
@@ -312,7 +315,9 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 
 Tasks whose case files declare a scope change (a revised case, or a limit looser than the program thresholds of the gate file) while `scope_change_approval` is still null. Section 0 of the program requires the owner's recorded approval for such changes; nothing here grants it, and the tasks keep their recorded states until it is given.
 
-None: every declared scope change carries an approval.
+| Task | Declared change |
+| --- | --- |
+| G4-01 | docs/validation/cases/G4-01r2_platform_matrix.json declares supersedes (a revised case) |
 
 ### Approved scope changes
 
