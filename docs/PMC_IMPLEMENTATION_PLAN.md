@@ -115,8 +115,9 @@ print(parameter.grad, sim.memory_plan(30))
 ```
 
 `tensor_budget_bytes` bounds the planned solver tensor payload. Its default,
-None, derives the budget when the solver is built: 80% of free CUDA memory on
-CUDA, 80% of available host memory on CPU. An integer overrides it.
+None, derives the budget at every admission for the bytes admitted: 80% of
+free CUDA memory on CUDA, 80% of available host memory on CPU. An integer
+overrides it, and a refusal names the budget used.
 
 The internal time increment is `dt_seconds * c0 * 1e6`. Magnetic field values
 are impedance scaled (`Z0 H`) so the stored electric and magnetic values have
@@ -218,7 +219,7 @@ orders, matching the native material precedence. This fixed staircase rasterizer
 is not a differentiable shape sampler. Supply packed sampled epsilon linked to
 a differentiable sampler for material/shape parameter gradients. The separately
 named `host_preparation_budget_bytes` (default: 80% of available host memory
-when the adapter is built) admits conservative chunk
+at each admission) admits conservative chunk
 scratch and native pulse preparation before rasterization/waveform creation.
 These CPU temporaries are separate from the resident tensor budget. Existing
 Project objects, Python/runtime overhead and caller parameterization graphs are
@@ -297,7 +298,7 @@ admitted for the actual project. Python topology objects, allocator/runtime
 overhead and caller parameter graphs are excluded explicitly. The CPU
 correctness backend remains limited to 32,768 cells. The separate EndpointProject
 API takes explicit budgets as overrides; without them it derives both budgets
-from memory when the adapter is built. Native CUDA dispatch uses direct kernels, not CUDA graph capture.
+from memory at every admission. Native CUDA dispatch uses direct kernels, not CUDA graph capture.
 Diagnostics include the complete packed E/H states, including endpoints, as an
 unweighted state-norm growth heuristic, not a conserved electromagnetic energy.
 Field-limit and nonfinite checks, fixed-duration progress, and cancellation are

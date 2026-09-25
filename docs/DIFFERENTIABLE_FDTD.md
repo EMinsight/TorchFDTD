@@ -248,10 +248,15 @@ also have native forward, full-autograd and central-difference checks. Device/ho
 three-tier CUDA execution and write-failure cleanup. Full-autograd reference
 evaluation (`reference`, and the dispersive, tensor ADE, source-waveform and
 modal oracles) is admitted by an estimate of its retained graph: the graph
-tensors against 80% of free CUDA memory or of available host memory, the graph
-nodes against available host memory. `graph_budget_bytes` sets an explicit cap
-on the estimate. The estimate is calibrated against measured CPU and CUDA peaks
-in [oracle_graph_memory.json](validation/oracle_graph_memory.json).
+tensors (per step the restart state, the reciprocal and scaled permittivity and,
+for ADE, the oscillator coefficients at the parameters' own resolution) against
+80% of free CUDA memory or of available host memory, the graph nodes (a base
+per step plus a share per source term, and under Windows WDDM the device graph
+as well) against available host memory. The
+permittivity dtype must match the project precision. `graph_budget_bytes` sets
+an explicit cap on the estimate. The estimate is calibrated against measured
+CPU and CUDA peaks, with held-out cases, in
+[oracle_graph_memory.json](validation/oracle_graph_memory.json).
 
 See the [measured development results](validation/ADJOINT_REPORT.md) and
 [next execution milestones](HIERARCHICAL_EXECUTION.md). Physical-gradient

@@ -7,7 +7,7 @@ from .models import Project
 from .geometry import contains
 from .waveforms import source_time_signal
 from .differentiable import DifferentiableResult
-from .pmc_simulation import EndpointSimulation, derived_budget_bytes
+from .pmc_simulation import EndpointSimulation, admit_budget
 
 
 class EndpointProject:
@@ -17,9 +17,9 @@ class EndpointProject:
     remain separate from the native project. Physical positions use nearest Yee samples with lower-coordinate
     tie breaking. Out-of-domain and wall-constrained requests are rejected,
     never silently moved to the next active sample. Budgets left as None are
-    derived when the adapter is built: the tensor budget from free CUDA memory
-    or available host memory (80%, as the solver does), the host preparation
-    budget from 80% of available host memory.
+    derived at every admission for the bytes admitted: the tensor budget from
+    free CUDA memory or available host memory (80%, as the solver does), the
+    host preparation budget from 80% of available host memory.
     """
     def __init__(self,project,*,boundary_faces=None,device='cpu',checkpoints=4,
                  tensor_budget_bytes=None,host_preparation_budget_bytes=None):
@@ -52,8 +52,7 @@ class EndpointProject:
             self.cpml_options=endpoint_cpml_options(r)
         else:self.cpml_options=None
         nodes=tuple(np.array(a,copy=True) for a in r.mesh_nodes)
-        if host_preparation_budget_bytes is None:host_preparation_budget_bytes=derived_budget_bytes('cpu')
-        if isinstance(host_preparation_budget_bytes,bool) or not isinstance(host_preparation_budget_bytes,int) or host_preparation_budget_bytes<=0:
+        if host_preparation_budget_bytes is not None and (isinstance(host_preparation_budget_bytes,bool) or not isinstance(host_preparation_budget_bytes,int) or host_preparation_budget_bytes<=0):
             raise ValueError('A positive host_preparation_budget_bytes, or None to derive it from host memory, is required.')
         self.host_preparation_budget_bytes=host_preparation_budget_bytes
         self.source_records=[];self.observation_records=[];sources=[];observers=[];self._terms=[]
@@ -97,13 +96,12 @@ class EndpointProject:
         if self.project.model_dump_json()!=self._project_fingerprint:
             raise ValueError('Endpoint Project changed after preparation. Rebuild the adapter.')
         plan=self.simulation.memory_plan(self.project.region.steps)
-        if plan['tensor_upper_bound_bytes']>self.simulation.tensor_budget_bytes:
-            raise ValueError('Endpoint Project duration exceeds the endpoint tensor budget.')
+        self.simulation.admit_tensors(plan['tensor_upper_bound_bytes'],'Endpoint Project duration exceeds the endpoint tensor budget')
         # Bounded chunk coordinate/membership scratch plus native FP64 pulse
         # arrays and stacking. Solver tensor payload is admitted separately.
         preparation=512*min(65536,self.simulation.topology.counts['E'])+self.project.region.steps*(8+16*len(self._terms))
-        if preparation>self.host_preparation_budget_bytes:
-            raise ValueError('Endpoint Project exceeds host preparation byte budget.')
+        admit_budget(preparation,self.host_preparation_budget_bytes,'cpu','Endpoint Project exceeds host preparation byte budget',
+                     'host_preparation_budget_bytes')
         return dict(plan,adapter_host_preparation_bytes=preparation)
 
     def plan(self):

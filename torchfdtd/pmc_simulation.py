@@ -18,18 +18,30 @@ from .pmc_reference import EndpointTopology, EndpointReference, ReferenceState
 C_UM_S = 299792458.0 * 1e6
 
 
-def derived_budget_bytes(device):
-    """Default byte budget: 80% of free CUDA memory on CUDA, else of available host memory.
+def derived_budget_bytes(device,required=0):
+    """Budget derived now for `required` bytes: 80% of free CUDA memory, else of available host memory.
 
-    Unknown host memory is not a limit, as in the other host admissions.
+    On CUDA, unused cached allocator blocks are released first when that makes
+    `required` fit. Unknown host memory is not a limit, as in the other host
+    admissions.
     """
     device=torch.device(device)
     if device.type=='cuda':
         from .cuda_memory import cuda_budget_limit
-        return cuda_budget_limit(device,0)
+        return cuda_budget_limit(device,required)
     from .memory_profile import host_memory
     available=host_memory()['available_bytes']
     return 2**63-1 if available is None else int(available*.8)
+
+
+def admit_budget(required,budget,device,what,keyword):
+    """Refuse `required` bytes above an explicit budget, or above the budget derived now from memory."""
+    limit=derived_budget_bytes(device,required) if budget is None else budget
+    if required>limit:
+        source=(f'{keyword}={budget:,}' if budget is not None else
+                f'the derived budget, 80% of {"free CUDA" if torch.device(device).type=="cuda" else "available host"} memory; '
+                f'pass {keyword} to set it')
+        raise ValueError(f'{what}: {required:,} bytes needed, {limit:,} bytes allowed ({source}).')
 
 
 def _reverse_schedule(steps,slots):
@@ -63,8 +75,8 @@ class EndpointSimulation:
     ``checkpoints`` controls resident saved states; replay trades time for space.
     ``tensor_budget_bytes`` bounds solver tensor payload, not allocator/runtime
     overhead or the Python sparse metadata used by the CPU correctness backend.
-    None derives it when the solver is built: 80% of free CUDA memory on CUDA,
-    80% of available host memory on CPU.
+    None derives it at every admission for the bytes it admits: 80% of free
+    CUDA memory on CUDA, 80% of available host memory on CPU.
     """
     def __init__(self, nodes_um, faces, *, dt_seconds, sources, observations,
                  device='cpu', checkpoints=4, tensor_budget_bytes=None):
@@ -81,8 +93,7 @@ class EndpointSimulation:
         self.device=torch.device(device)
         if self.device.type not in ('cpu','cuda'):raise ValueError('Only CPU reference and CUDA devices are supported.')
         if self.device.type=='cuda':self.device=torch.device('cuda',torch.cuda.current_device() if self.device.index is None else self.device.index)
-        self.checkpoints=checkpoints
-        self.tensor_budget_bytes=derived_budget_bytes(self.device) if tensor_budget_bytes is None else tensor_budget_bytes
+        self.checkpoints=checkpoints;self.tensor_budget_bytes=tensor_budget_bytes
         self.source_ids=tuple(self.dof('E',c,q) for c,q in sources)
         if len(set(self.source_ids))!=len(self.source_ids):raise ValueError('Source DOFs must be unique.')
         self.observation_ids=tuple((f,self.dof(f,c,q)) for f,c,q in observations)
@@ -92,8 +103,8 @@ class EndpointSimulation:
             raise ValueError('CPU endpoint reference is limited to 32768 cells; use CUDA for larger resident simulations.')
         preliminary_metadata=(81*sum(self.topology.counts.values()) if self.device.type=='cpu'
                               else sum(4*(2*n+1) for n in self.topology.shape))
-        if self._payload(1,0)+preliminary_metadata+8*len(self.source_ids)>self.tensor_budget_bytes:
-            raise ValueError('Endpoint tensor budget is too small for fields/workspaces/metadata.')
+        self.admit_tensors(self._payload(1,0)+preliminary_metadata+8*len(self.source_ids)+self._construction_bytes,
+                           'Endpoint tensor budget is too small for fields/workspaces/metadata')
         if self.device.type=='cuda':
             self.backend=EndpointCUDA(self.topology,device=self.device)
             self.metadata_bytes=self.backend.metadata_bytes
@@ -103,6 +114,13 @@ class EndpointSimulation:
             self.metadata_bytes=sum(t.numel()*t.element_size() for group in self.backend.operators.values() for t in group)+sum(t.numel()*t.element_size() for t in self.backend.active.values())
         self.source_tensor=torch.tensor(self.source_ids,device=self.device,dtype=torch.long)
         self.metadata_bytes+=self.source_tensor.numel()*8
+
+    # Metadata a subclass builds beyond the base preliminary bound.
+    _construction_bytes=0
+
+    def admit_tensors(self,required,what):
+        """Admit solver tensor bytes against tensor_budget_bytes or the budget derived now."""
+        admit_budget(required,self.tensor_budget_bytes,self.device,what,'tensor_budget_bytes')
 
     def dof(self,family,component,index):
         """Resolve exact Yee integer coordinates without nearest-cell snapping."""
@@ -192,7 +210,7 @@ class EndpointSimulation:
         if epsilon.shape!=(self.topology.counts['E'],):raise ValueError('Positive sampled epsilon is required at every E DOF.')
         if waveforms.ndim!=2 or waveforms.shape[1]!=len(self.source_ids):raise ValueError('Waveforms must have shape [steps, sources].')
         plan=self.memory_plan(waveforms.shape[0])
-        if plan['tensor_upper_bound_bytes']>self.tensor_budget_bytes:raise ValueError('Requested simulation exceeds endpoint tensor budget.')
+        self.admit_tensors(plan['tensor_upper_bound_bytes'],'Requested simulation exceeds endpoint tensor budget')
         for value in (epsilon,waveforms):
             if not bool(torch.isfinite(value.detach()).all()):raise ValueError('Inputs must be finite.')
         if bool((epsilon.detach()<=0).any()):raise ValueError('Positive sampled epsilon is required at every E DOF.')
