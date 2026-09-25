@@ -187,6 +187,7 @@ def test_absorber_update_is_the_trapezoidal_lossy_ade_update():
 
 def test_default_ade_keeps_the_cpml_update_and_kernel_text():
     from torchfdtd.cuda_kernels import FusedYeeCUDA
+    old_dtype = torch.get_default_dtype()
     fdtd.set_backend('torch.float64')
     try:
         texts = {}
@@ -198,6 +199,7 @@ def test_default_ade_keeps_the_cpml_update_and_kernel_text():
     finally:
         fdtd.set_backend('numpy')
         fdtd.backend.float = np.float64
+        torch.set_default_dtype(old_dtype)
     assert 'absorber' not in texts['ade'] and {f'psi{t}_1' in texts['ade'] for t in range(4)} == {True}
     # x_min keeps its CPML memory; x_max and the y faces are absorbers.
     assert 'psi0_0' in texts['absorber'] and 'psi0_1' not in texts['absorber'] and 'psi2_0' not in texts['absorber']
