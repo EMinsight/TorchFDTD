@@ -7,7 +7,7 @@ from .models import Project
 from .geometry import contains
 from .waveforms import source_time_signal
 from .differentiable import DifferentiableResult
-from .pmc_simulation import EndpointSimulation
+from .pmc_simulation import EndpointSimulation, derived_budget_bytes
 
 
 class EndpointProject:
@@ -16,10 +16,13 @@ class EndpointProject:
     Without an override, use the native Project face labels. Explicit overrides
     remain separate from the native project. Physical positions use nearest Yee samples with lower-coordinate
     tie breaking. Out-of-domain and wall-constrained requests are rejected,
-    never silently moved to the next active sample.
+    never silently moved to the next active sample. Budgets left as None are
+    derived when the adapter is built: the tensor budget from free CUDA memory
+    or available host memory (80%, as the solver does), the host preparation
+    budget from 80% of available host memory.
     """
     def __init__(self,project,*,boundary_faces=None,device='cpu',checkpoints=4,
-                 tensor_budget_bytes=256_000_000,host_preparation_budget_bytes=64_000_000):
+                 tensor_budget_bytes=None,host_preparation_budget_bytes=None):
         self.project=Project.model_validate(project.model_dump() if isinstance(project,Project) else project)
         p=self.project;r=p.region
         if r.dimension!='3d' or r.precision!='float32' or r.complex_fields:
@@ -49,8 +52,9 @@ class EndpointProject:
             self.cpml_options=endpoint_cpml_options(r)
         else:self.cpml_options=None
         nodes=tuple(np.array(a,copy=True) for a in r.mesh_nodes)
+        if host_preparation_budget_bytes is None:host_preparation_budget_bytes=derived_budget_bytes('cpu')
         if isinstance(host_preparation_budget_bytes,bool) or not isinstance(host_preparation_budget_bytes,int) or host_preparation_budget_bytes<=0:
-            raise ValueError('A positive host_preparation_budget_bytes is required.')
+            raise ValueError('A positive host_preparation_budget_bytes, or None to derive it from host memory, is required.')
         self.host_preparation_budget_bytes=host_preparation_budget_bytes
         self.source_records=[];self.observation_records=[];sources=[];observers=[];self._terms=[]
         def location(item,component):

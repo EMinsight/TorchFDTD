@@ -304,17 +304,18 @@ class ModeInjectedPlaneSimulation(DifferentiablePlaneSimulation):
                 mode.validate_quadrature(SimpleNamespace(normal=normal,
                     points_um=plan['points_um'],weights=plan['weights']))
 
-    def reference(self,epsilon,frequency_hz,*,block_size=32):
+    def reference(self,epsilon,frequency_hz,*,block_size=32,graph_budget_bytes=None):
         """Small-problem full Torch autograd oracle through the same fixed sheets.
 
         Every timestep stays in the autograd graph. This is the check for the
-        checkpointed resident adjoint, not a large-simulation path.
+        checkpointed resident adjoint, not a large-simulation path. The graph
+        is admitted by its estimated memory; graph_budget_bytes caps it.
         """
         if isinstance(self.model,_ModalStreamedSimulation):
             raise ValueError('The full-autograd oracle uses resident systems.')
         region=self.model.project.region
-        if math.prod(region.shape)*region.steps>2_000_000:
-            raise ValueError('Full-autograd reference is restricted to at most two million cell-steps.')
+        from .oracle_memory import admit_oracle,oracle_graph_bytes
+        admit_oracle(oracle_graph_bytes(region,'yee'),epsilon.device,graph_budget_bytes)
         launch=self.launch
         _check_launch_signatures(self.model.project,launch,epsilon)
         material,_,_=_frozen_launch_material(launch,epsilon)

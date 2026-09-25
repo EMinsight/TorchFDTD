@@ -11,7 +11,7 @@ import torch
 from torch.autograd.function import once_differentiable
 
 from .boundaries import CURL_TERMS
-from .pmc_simulation import EndpointSimulation, _reverse_schedule
+from .pmc_simulation import EndpointSimulation, _reverse_schedule, derived_budget_bytes
 from .pmc_cuda import CompactEndpointTopology
 
 
@@ -95,10 +95,11 @@ class EndpointCPMLSimulation(EndpointSimulation):
     positive layer count. The PML plus one cell of sampled electric epsilon
     must equal ``background_epsilon`` and has zero material VJP. CPML profile
     parameters, mesh and sources are fixed. No native Project dispatch.
+    ``tensor_budget_bytes=None`` derives the budget as EndpointSimulation does.
     """
     def __init__(self,nodes_um,faces,*,dt_seconds,sources,observations,pml_cells,
                  background_epsilon,reflection=1e-6,device='cpu',checkpoints=4,
-                 tensor_budget_bytes=256_000_000):
+                 tensor_budget_bytes=None):
         if torch.device(device).type not in ('cpu','cuda'):
             raise ValueError('Endpoint CPML supports CPU reference or direct CUDA.')
         aliases={'pec':'pec','antisymmetric':'pec','pmc':'pmc','symmetric':'pmc','pml':'pml'}
@@ -126,6 +127,7 @@ class EndpointCPMLSimulation(EndpointSimulation):
         # Extra derivative metadata is at most 20 bytes per potential psi.
         self._psi_count=2*sum(topology.counts.values())
         minimum_extra=20*self._psi_count+100*sum(topology.counts.values())
+        if tensor_budget_bytes is None:tensor_budget_bytes=derived_budget_bytes(device)
         if isinstance(tensor_budget_bytes,bool) or not isinstance(tensor_budget_bytes,int) or tensor_budget_bytes<=minimum_extra:
             raise ValueError('Endpoint CPML tensor budget is too small for auxiliary metadata.')
         super().__init__(topology.nodes,closed,dt_seconds=dt_seconds,sources=sources,

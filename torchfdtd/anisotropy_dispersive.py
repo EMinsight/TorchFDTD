@@ -361,12 +361,17 @@ class TensorDispersiveSimulation(TensorDielectricSimulation):
                                        [m.component for m in self.project.monitors if m.enabled], frequency_hz, window, block_size)
         return self._evaluate(epsilon_inf, strength, omega0, gamma, spectral)
 
-    def reference(self, epsilon_inf, strength, omega0, gamma):
-        """Small-problem full-autograd oracle over the same discrete update."""
+    def reference(self, epsilon_inf, strength, omega0, gamma, *, graph_budget_bytes=None):
+        """Small-problem full-autograd oracle over the same discrete update.
+
+        The retained graph is admitted by its estimated memory, which depends
+        on the Neumann length fixed by packing; graph_budget_bytes caps it.
+        """
+        from .oracle_memory import admit_oracle, oracle_graph_bytes
         r = self.project.region
-        if math.prod(r.shape)*r.steps*(1+strength.shape[0]) > 2_000_000:
-            raise ValueError('Full-autograd tensor ADE oracle is restricted to two million pole-cell-steps.')
         parameters, layout, _ = self._pack(epsilon_inf, strength, omega0, gamma)
+        admit_oracle(oracle_graph_bytes(r, 'tensor_ade', pole_count=layout.pole_count, iterations=layout.iterations),
+                     parameters.device, graph_budget_bytes)
         system = _TensorDispersiveSystem(self.project, epsilon_inf, parameters, layout)
         # The oracle differentiates through the operators built from the live parameters.
         epsilon, chi, frequency2, damping = layout.views(parameters)
