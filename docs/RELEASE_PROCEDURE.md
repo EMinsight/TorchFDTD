@@ -241,3 +241,22 @@ candidate is called RC_READY.
 - The validation report is an internal record of what was run. It is not an
   attestation by a third party and does not state that the solver is correct
   for problems outside the recorded fixtures.
+
+## 8. Interim releases before 1.0.0
+
+By the owner's decision of 2026-09-26, a release before 1.0.0 (0.17.0 and
+later interim versions) follows a shorter procedure; the full
+release-candidate round of steps 1 to 6 is run for 1.0.0. An interim release:
+
+1. starts from a commit whose CI run is green, and sets the version of record
+   as in step 1;
+2. regenerates the notices and the SBOM (step 2) and builds and checks the
+   wheel with `scripts/clean_install_check.py` (step 3);
+3. runs the `gpu-nightly` suite on the RTX 3060 host from the checkout, with
+   the GPU held exclusively, and requires no failure and no error;
+4. renders the validation report and records G9-07 (step 6), without
+   re-recording the other gates against the wheel.
+
+Its gate evidence is therefore the evidence recorded at earlier commits, and
+the judge may list tasks as STALE. The release notes say so, and give the
+wheel's SHA-256, the `gpu-nightly` counts and the CI run.
