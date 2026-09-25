@@ -1,5 +1,6 @@
 """G4-01: the platform report runs, and the platform matrix lists only recorded platforms."""
 import json
+import os
 import re
 import subprocess
 import sys
@@ -40,6 +41,19 @@ def test_platform_report_runs_and_records_every_field(tmp_path):
         assert all(g['total_memory_bytes'] > 0 and 0 <= g['free_memory_bytes_at_record'] <= g['total_memory_bytes'] for g in record['gpus'])
     else:
         assert record['gpus'] == []
+
+
+def test_platform_report_replaces_the_home_directory(tmp_path):
+    # The interpreter lies under the home directory the child sees, as a venv under ~ does on a Linux host.
+    home = Path(sys.executable).parent.parent
+    output = tmp_path / 'probe.json'
+    completed = subprocess.run([sys.executable, str(ROOT / 'scripts' / 'platform_report.py'), '--id', 'probe', '--output', str(output)],
+                               capture_output=True, text=True, cwd=ROOT, timeout=300,
+                               env=dict(os.environ, HOME=str(home), USERPROFILE=str(home)))
+    assert completed.returncode == 0, completed.stderr
+    record = json.loads(output.read_text(encoding='utf-8'))
+    assert record['python_executable'].startswith('<user home>'), record['python_executable']
+    assert not [key for key, value in record.items() if str(home).lower() in str(value).lower()]
 
 
 def test_matrix_rows_come_from_record_files_only():
