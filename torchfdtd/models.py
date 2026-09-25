@@ -21,7 +21,7 @@ class Model(BaseModel):
 # estimate, and Region.resident_cell_limit and Project.limits are optional user caps
 # ("Size limits" in docs/EXECUTION_MODES.md). The workbench server applies these
 # request limits to everything it validates or runs, whatever a submitted project
-# carries (docs/SECURITY.md).
+# carries, unless it was started with memory admission (docs/SECURITY.md).
 SERVER_LIMITS = dict(resident_cells=8_000_000, structures=1000, sources=512, monitors=512, materials=100,
                      mesh_refinements=64, monitor_samples=12_000_000, steps=100_000, frequency_points=2001,
                      signal_samples=100_000)
@@ -29,27 +29,35 @@ SERVER_LIMITS = dict(resident_cells=8_000_000, structures=1000, sources=512, mon
 # signed 32-bit integers, so every resident grid keeps 3 x lanes x cells below
 # this bound, whatever its cell limit.
 RESIDENT_INDEX_LIMIT = 2**31
-_SERVER = ContextVar('torchfdtd_server_limits', default=False)
+# None outside the workbench server, 'fixed' under SERVER_LIMITS, 'memory' under memory admission.
+_SERVER = ContextVar('torchfdtd_server_limits', default=None)
 
 
 @contextmanager
-def server_limits():
+def server_limits(memory_admission=False):
     """Apply SERVER_LIMITS to every model validated and every scene admitted inside the block.
 
     The workbench server runs each request, its job threads and its modal worker
     process inside this block. A cap a submitted project carries can lower a
-    server limit but never raise it; the project itself is not changed.
+    server limit but never raise it; the project itself is not changed. With
+    memory_admission (torchfdtd serve --memory-admission) the block applies no
+    SERVER_LIMITS, so scenes are admitted by the memory estimate as on the Python API.
     """
-    token = _SERVER.set(True)
+    token = _SERVER.set('memory' if memory_admission else 'fixed')
     try:
         yield
     finally:
         _SERVER.reset(token)
 
 
+def server_admission():
+    """'fixed' or 'memory' inside server_limits(), otherwise None."""
+    return _SERVER.get()
+
+
 def server_limit(name):
-    """The server limit called name while server_limits() is active, otherwise None."""
-    return SERVER_LIMITS[name] if _SERVER.get() else None
+    """The server limit called name while server_limits() applies SERVER_LIMITS, otherwise None."""
+    return SERVER_LIMITS[name] if _SERVER.get() == 'fixed' else None
 
 
 def effective_limit(cap, name):

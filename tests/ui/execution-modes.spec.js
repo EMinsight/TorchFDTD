@@ -75,6 +75,24 @@ test('GPU switch, memory modes, execution status line and a small Auto run',asyn
  expect(errors).toEqual([]);
 });
 
+test('the execution panel names the admission the server reports',async({page})=>{
+ const health=await (await page.request.get('/api/health')).json();
+ expect(['fixed','memory']).toContain(health.admission);
+ await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
+ await page.locator('[data-example="3d"]').click();
+ const admission=page.locator('#admission'),properties=page.locator('#properties');
+ await expect(page.locator('#execution-status')).toContainText('Auto →');
+ if(health.admission==='memory'){ // torchfdtd serve --memory-admission
+  expect(health.server_limits).toBeNull();
+  await expect(admission).toHaveText('admission memory estimate');
+  await expect(properties).not.toContainText('million cells');
+ }else{
+  expect(health.server_limits.resident_cells).toBe(8000000);
+  await expect(admission).toHaveText('admission fixed server limits (8,000,000 resident cells)');
+  await expect(properties).toContainText('75% of free GPU memory (80% of host memory on CPU) and at most 8 million cells;');
+ }
+});
+
 test('streamed host run reports its policy, progress and one final snapshot',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');

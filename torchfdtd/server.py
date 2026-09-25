@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from .models import Project, Material, demo_project, server_limits
+from .models import SERVER_LIMITS, Project, Material, demo_project, server_admission, server_limits
 from .plan import resolve_plan
 from .solver import Simulation, estimate, hardware, snapshot_frames
 from .stability_checks import stability_warnings
@@ -52,33 +52,40 @@ class ServerLimits:
     A plain ASGI middleware keeps the request in one task, so the context variable
     reaches the route's model validation and the threadpool of synchronous routes.
     """
-    def __init__(self, app):
+    def __init__(self, app, memory_admission=False):
         self.app = app
+        self.memory_admission = memory_admission
 
     async def __call__(self, scope, receive, send):
-        with server_limits():
+        with server_limits(memory_admission=self.memory_admission):
             await self.app(scope, receive, send)
 
 
-def _limited(fn, *args, **kwargs):
-    with server_limits():
+def _limited(admission, fn, *args, **kwargs):
+    with server_limits(memory_admission=admission == 'memory'):
         return fn(*args, **kwargs)
 
 
 class ServerExecutor(ThreadPoolExecutor):
-    """A job pool whose tasks run inside models.server_limits(), like the requests that queue them."""
+    """A job pool whose tasks run inside models.server_limits(), like the requests that queue them.
+
+    A task keeps the admission of the request that queued it; one queued outside a
+    request runs under SERVER_LIMITS.
+    """
     def submit(self, fn, /, *args, **kwargs):
-        return super().submit(_limited, fn, *args, **kwargs)
+        return super().submit(_limited, server_admission(), fn, *args, **kwargs)
 
 
-def create_app(result_dir=None):
+def create_app(result_dir=None, memory_admission=False):
+    # memory_admission (torchfdtd serve --memory-admission) lifts SERVER_LIMITS: scenes are admitted
+    # by the memory estimate as on the Python API. The input limits stay (docs/SECURITY.md).
     app = FastAPI(title='TorchFDTD', version='0.15.0')
     # The Host allowlist is the loopback names only. TORCHFDTD_ALLOWED_HOSTS adds names, comma-separated;
     # tests/conftest.py sets it to testserver, the TestClient default, which no deployment allows.
     extra = [h.strip() for h in os.environ.get('TORCHFDTD_ALLOWED_HOSTS', '').split(',') if h.strip()]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', *extra])
     app.add_middleware(GZipMiddleware, minimum_size=4096, compresslevel=1)
-    app.add_middleware(ServerLimits)
+    app.add_middleware(ServerLimits, memory_admission=memory_admission)
     root = Path(result_dir or os.environ.get('TORCHFDTD_RESULTS') or os.environ.get('PHOTONWEAVE_RESULTS', 'results')).resolve()
     root.mkdir(parents=True, exist_ok=True)
     pool = ServerExecutor(max_workers=1, thread_name_prefix='fdtd')
@@ -111,7 +118,9 @@ def create_app(result_dir=None):
 
     @app.get('/api/health')
     def health():
-        return {**hardware(), **execution_resources(), 'hostname': socket.gethostname(), 'version': '0.15.0'}
+        admission = server_admission()
+        return {**hardware(), **execution_resources(), 'hostname': socket.gethostname(), 'version': '0.15.0',
+                'admission': admission, 'server_limits': SERVER_LIMITS if admission == 'fixed' else None}
 
     @app.get('/api/capabilities')
     def capabilities():

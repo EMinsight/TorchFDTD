@@ -37,7 +37,7 @@ for `auto` on a CUDA host, and off for `cpu`.
 | Memory | Meaning |
 | --- | --- |
 | Auto (recommended) | The server picks resident, then streamed host, then streamed disk, from the live resources. |
-| Resident (GPU or CPU memory) | The whole grid lives in device memory (GPU) or RAM (CPU), admitted by the memory estimate. The workbench server limits it to 8,000,000 cells; the Python API has no cell cap ([size limits](#size-limits)). |
+| Resident (GPU or CPU memory) | The whole grid lives in device memory (GPU) or RAM (CPU), admitted by the memory estimate. The workbench server limits it to 8,000,000 cells unless it runs with `--memory-admission`; the Python API has no cell cap ([size limits](#size-limits)). |
 | Streamed through host memory (DRAM) | Global E/H/CPML banks stay in RAM; extended x slabs move to the compute device one temporal block at a time. |
 | Streamed through disk (slow, opt-in) | Same slabs, but the global banks are scratch files. Needs a scratch disk. An explicit choice that Auto never makes. |
 | Tiled (approximate, large devices) | Overlapping resident tiles of a planar device with near-field stitching. Auto chooses it only with the **Allow approximate tiling in Auto** consent; see below. |
@@ -45,7 +45,7 @@ for `auto` on a CUDA host, and off for `cpu`.
 `Region.memory_mode="streamed"` (the Python opt-in) is treated as a streamed
 request in the workbench. A `Resident` request with more than 8,000,000 cells is
 rejected when the workbench validates the project, whatever cap the project
-carries.
+carries, unless the server runs with [memory admission](#size-limits).
 
 ### How Auto decides
 
@@ -56,7 +56,8 @@ streaming is never chosen automatically.
 
 1. **Resident** when all of the following hold:
    - `memory_mode` is `resident`, and the grid has at most 8,000,000 cells on
-     the workbench server (on the Python API, at most `Region.resident_cell_limit`
+     the workbench server with its fixed limits (on the Python API and on a
+     server with `--memory-admission`, at most `Region.resident_cell_limit`
      cells when that optional cap is set);
    - the resident estimate (`estimated_memory_mb` from `/api/validate`, the
      [calibrated fused model](#resident-memory-of-the-fused-cuda-path) for
@@ -158,9 +159,21 @@ Project(..., limits=dict(max_structures=20_000, max_monitor_samples=50_000_000))
   monitors, 100 materials, 64 mesh refinements, 12,000,000 samples per plane,
   100,000 steps, 2001 frequency points and 100,000 samples of a sampled source
   (`torchfdtd.models.SERVER_LIMITS`, [SECURITY.md](SECURITY.md)). A cap a
-  project carries can lower them, never raise them. The live-frame bound of the
-  browser and its help text ("at most 8 million cells") describe the server and
-  are unchanged.
+  project carries can lower them, never raise them.
+- `torchfdtd serve --memory-admission` starts the server without these limits:
+  the workbench then admits scenes like the Python API, by the memory estimate
+  and the caps the project carries, in its requests, job threads and modal
+  worker. The input limits of the server stay, and the mode is meant for a
+  single user on their own machine
+  ([SECURITY.md](SECURITY.md#memory-admission)). The execution panel shows the
+  admission ("admission memory estimate" or "admission fixed server limits
+  (8,000,000 resident cells)") and states the cell limit in its help text only
+  when the server applies it; `/api/health` reports it as `admission` and
+  `server_limits`.
+
+```powershell
+torchfdtd serve --memory-admission
+```
 
 ### Resident memory of the fused CUDA path
 
