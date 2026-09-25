@@ -2873,7 +2873,7 @@
           "specification": "수동 PIC 역설계·복수 초기화·제작 제약·GDS 재평가",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "examples/g7/coupler/workflow.py",
@@ -2884,7 +2884,9 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_coupler.py -k \"not test_full_\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-03.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_coupler.py -k \"not test_full_\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-03.xml"
+          ],
           "required_tests": [
             "tests/test_g7_coupler.py::test_case_declaration_matches_the_workflow_constants",
             "tests/test_g7_coupler.py::test_radius_selection_takes_the_smallest_complete_compliant_candidate_and_refuses_declared_seeds",
@@ -2906,7 +2908,9 @@
             "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[f_gds_round_trip]",
             "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[g_mesh]"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260925T130822Z-g7-03-f5260d92"
+          ],
           "blocker": null,
           "scope_change_approval": {
             "approved_by": "owner",
