@@ -333,6 +333,8 @@ Declared scope changes with the owner's recorded approval (`scope_change_approva
 | G3-16 | docs/validation/cases/G3-16_physical_parameter_gradients.json acceptance/geometry_maps/fp32_chain/rtol = 0.0003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-16_physical_parameter_gradients.json acceptance/geometry_maps/streamed/rtol = 0.0004 is looser than the loosest program rtol 0.0001 | approved by owner on 2026-09-24 |
 | G6-04 | docs/validation/cases/G6-04.json acceptance/tracked_neff_error_max/difference_from_common_criterion states a limit looser than the program threshold; docs/validation/cases/G6-04.json acceptance/separated_amplitudes/atol = 1e-05 is looser than the loosest program atol 1e-06 | approved by owner on 2026-09-24 |
 | G7-01 | docs/validation/cases/G7-01.json declares superseded_by (a revised case); docs/validation/cases/G7-01r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
+| G7-02 | docs/validation/cases/G7-02.json declares superseded_by (a revised case); docs/validation/cases/G7-02r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
+| G7-03 | docs/validation/cases/G7-03.json declares superseded_by (a revised case); docs/validation/cases/G7-03r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
 | G7-04 | docs/validation/cases/G7-04.json declares superseded_by (a revised case); docs/validation/cases/G7-04r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
 | G9-05 | docs/validation/cases/G9-05.json acceptance/independent_user declares a program threshold not applicable | approved by owner on 2026-09-24 |
 
