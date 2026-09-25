@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "DISPERSIVE_PML_ABSORBER",
+  "task": "1.0.0 condition: dispersive media crossing the PML",
+  "title": "Adiabatic absorber (Region.pml_dispersion='absorber') for Drude and Lorentz media crossing the absorbing layer: normal-incidence reflection of homogeneous fills, half-space and dispersive-fill reflection recorded, and 20,000-step stability on the fixtures that diverge with the CPML",
+  "declared": "2026-09-25",
+  "declared_at_commit": "639d3ff431bd822c958fedc3ef196b3b0ff164c9",
+  "declared_before_run": true,
+  "driver": "benchmarks/dispersive_pml_absorber.py",
+  "record": "docs/validation/dispersive_pml_absorber.json",
+  "fixture": {
+    "absorber": "every PML face that an enabled dispersive structure reaches by its bounding box (boundaries.absorber_faces, the test of the validation warning) becomes a graded, matched electric and magnetic conductivity of the face's depth; the other PML faces keep the CPML. sigma = sigma_scale*40/(L+1)*rho**polynomial in units of c/reference_step, rho the physical depth into the layer over its thickness, corners add the face losses; trapezoidal (Crank-Nicolson) loss s = sigma*courant/2 on E and H; in ADE cells the E loss is sigma*eps_ref with eps_ref the real bilinear permittivity at the source centre (eps_inf where that is not positive), solved together with the pole: (eps_inf + s eps_ref) E_new + dP = (eps_inf - s eps_ref) E_old + courant*curl H; default face profile (sigma_scale 1, polynomial 3)",
+    "materials": {
+      "sin": "single-pole Lorentz silicon nitride of the documented divergence: eps_inf 1, resonance 1.4e16 rad/s, linewidth 1e13 rad/s (damping 2e13 rad/s), delta_epsilon 3; eps about 4.02 at 1.55 um and 4.2 at 0.55 um; negative between 1.4e16 and 2.8e16 rad/s, inside the band of every grid below",
+      "drude": "G3-03 Drude metal: eps_inf 1, plasma 2e15 rad/s, collision 1e14 rad/s; eps about -1.70 + 0.22i at 1.55 um",
+      "dielectric": "nondispersive n = 2 (mechanism row only)",
+      "drude_dielectric": "stability-sweep Drude dielectric: eps_inf 4, plasma 1e15 rad/s, collision 1e14 rad/s; Re eps 3.1 to 3.5 over 1.3 to 1.8 um, negative below 5e14 rad/s inside the grid band",
+      "dilute": "vacuum carrying a 1e-6 Lorentz pole (eps_inf 1, resonance 1.4e16 rad/s, linewidth 1e13 rad/s, delta_epsilon 1e-6): a dispersive fill that makes its faces absorbers while the medium is vacuum to 1e-6"
+    },
+    "reflection": {
+      "engine": "torchfdtd.Simulation, 2D, staircase Yee sampling, courant_factor 0.99, mesh 0.025 um (dt 5.837669e-17 s), precision float64 on CPU",
+      "geometry": "x strip; soft plane sheet at x = 0 spanning the periodic y cell; point monitor(s) at x = 1.0 um; x_max layer from 1.5 um; x_min layer from -9.5 um; the layers lie inside the region",
+      "long_reference_domain": "the same with the x_max layer 16 um farther (monitor to its inner edge 16.5 um: its echo returns after 220 fs in n = 2, 110 fs in vacuum is beyond the pulse); identical x_min distance, nodes, source and monitor positions, so short - long is the x_max return and the x_min echo cancels",
+      "layers": 40,
+      "layers_note": "1.0 um; the depth sweep also records 80 layers (x_max and x_min faces carry the depth, pml_cells 40)",
+      "source": {
+        "pulse": "gaussian",
+        "time_definition": "standard",
+        "wavelength_um": 1.55,
+        "power_fwhm_s": 8.609020092789869e-15,
+        "offset_s": 2.5e-14,
+        "eliminate_discontinuities": true,
+        "note": "G3-07 one-cycle normal-incidence pulse; the oblique rows (dilute fill, absorber and CPML) use the G3-07 three-cycle 1.45 um pulse with Bloch y faces at the 30 and 60 deg design k_parallel"
+      },
+      "duration_fs": 150.0,
+      "steps": 2570,
+      "polarizations": {
+        "TE": "Ez sheet, Ez monitors",
+        "TM": "Ey sheet, Hz monitors"
+      },
+      "fill_rows": "the dilute medium (TE), SiN (TE, TM) and the Drude dielectric (TE) fill a 0.3 um periodic cell over the whole x range, so the medium crosses both x faces everywhere and both become absorbers; one monitor at y = 0",
+      "half_space_rows": "Drude metal and SiN, TE and TM, in the G3-07 interface geometry: the medium fills y from -0.9875 to 0.0125 um of a 2 um periodic cell over the whole x range, both layers included; monitors at y = 0.5 um (vacuum side) and y = -0.5 um (medium side); at 40 and 80 layers",
+      "frequencies": {
+        "wavelength_um": [
+          1.3,
+          1.8
+        ],
+        "points": 21,
+        "spacing": "uniform in frequency from c/1.8 um to c/1.3 um (1.3 to 1.6 um for the oblique rows)"
+      }
+    },
+    "stability": {
+      "corner_post": {
+        "region_um": [
+          1.2,
+          1.2,
+          1.0
+        ],
+        "mesh_um": 0.02,
+        "shape": [
+          60,
+          60,
+          50
+        ],
+        "dt_s": 3.8131497390620113e-17,
+        "layers": 12,
+        "post": "centre (0.6, 0.6, 0) um, size (0.2, 0.2, 0.6) um: inside the region it fills the outer five cells of the x_max/y_max layer corner and z from -0.3 to 0.3 um",
+        "source": "soft point Ex at (0.2, 0.2, 0.05) um, gaussian at 0.55 um, power FWHM 9.164 fs, offset 27 fs, C1 endpoint taper; source end 52.98 fs (step 1389)",
+        "monitor": "point Ex at (0.25, 0.25, 0) um",
+        "materials": [
+          "sin",
+          "drude"
+        ],
+        "note": "the smallest fixture found to diverge with the CPML in the shakedown; the same post 0.35 um inside the interior, a nondispersive n = 2 post and a post ten cells deep are recorded as mechanism rows",
+        "absorber_faces": "x_max, y_max, z_min and z_max (the post spans z -0.3 to 0.3 um and the z layers start at 0.26 um); x_min and y_min keep the CPML"
+      },
+      "pillar_array": {
+        "region_um": [
+          6.0,
+          6.0,
+          1.4
+        ],
+        "mesh_um": 0.02,
+        "shape": [
+          300,
+          300,
+          70
+        ],
+        "layers": 12,
+        "pillars": "sin, 0.2 x 0.2 x 0.6 um on a 0.3 um square lattice through the lateral layers to the outer boundary (23 x 23 pillars)",
+        "source": "soft Ex plane sheet 5.4 x 5.4 um at z = -0.4 um, the same 0.55 um pulse",
+        "monitor": "point Ex at (0, 0, 0.4) um",
+        "execution": "CUDA float32, fused kernel",
+        "absorber_faces": "the four lateral faces; the z faces keep the CPML"
+      },
+      "steps": {
+        "absorber_rows": 20000,
+        "cpml_controls": 4000,
+        "mesh10nm_mechanism_row": 8000
+      },
+      "sample_interval_steps": 250,
+      "executions": [
+        "CPU float64 (torch/NumPy grid)",
+        "CUDA float32 fused kernel",
+        "CUDA float32 torch kernel (SiN post)",
+        "run_tensor_batch float32 (SiN post, one case)"
+      ],
+      "mechanism_rows": "CPML ('ade') SiN corner post varied one parameter at a time, 4000 steps float64 CPU: post 0.35 um inside the interior, nondispersive n = 2 post, post 10 and 3 cells deep, sigma_scale 0.25, CFS alpha 0.2 with alpha_polynomial 1, kappa 4, linewidth 1e14 and 1e15 rad/s; and the post at 10 nm with 24 layers (same physical geometry), 8000 steps float64 CUDA fused"
+    },
+    "gpu": "shared NVIDIA GeForce RTX 3060 under the repository GPU lock"
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU reflection and stability rows, CUDA 10 nm mechanism row)",
+    "float32 (CUDA stability rows)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "reflection: G3-07 power ratio R(f) = |DFT(short - long)(f)|^2 / |DFT(long)(f)|^2 at each monitor with the DFT written in the driver, the long domain being the reference; stability: the run-control state norm (volume-weighted epsilon|E|^2 + |H|^2 plus the passive oscillator energy, the quantity the production divergence check reads) and the interior energy outside every layer, sampled every 250 steps, judged with the G3-07 long-time limits and the stability sweep's post-source ratios",
+  "observables": [
+    {
+      "name": "R_max_on_band",
+      "unit": "power ratio",
+      "definition": "max over the declared band of R(f), per monitor"
+    },
+    {
+      "name": "R_broadband",
+      "unit": "power ratio",
+      "definition": "time-domain energy ratio sum (short - long)^2 / sum long^2 over the trace (reported)"
+    },
+    {
+      "name": "energy_last_over_peak",
+      "unit": "dimensionless",
+      "definition": "state norm at the last sample over the maximum state norm of the run (G3-07)"
+    },
+    {
+      "name": "late_growth",
+      "unit": "dimensionless",
+      "definition": "max state norm over the second half of the run divided by max(state norm at the half-way sample, 1e-12 x peak) (G3-07)"
+    },
+    {
+      "name": "growth_ratio, last_over_peak",
+      "unit": "dimensionless",
+      "definition": "stability sweep definitions (benchmarks/stability_sweep.py judge) for the state norm and the interior energy: the post-source peak is the maximum over the first quarter of the samples after source_end_time, floored at 1e-12 of the overall peak; growth is the maximum later sample over it; last/peak the final sample over it"
+    },
+    {
+      "name": "growth (CPML rows)",
+      "unit": "1/step, 1/s, rad/s",
+      "definition": "least-squares slope of ln(state norm) over the second half of the samples, the amplitude rate per second, and the dominant frequency of the monitor trace over the second half after removing that rate, with the bilinear permittivity of the medium there (reported)"
+    }
+  ],
+  "acceptance": {
+    "reflection": {
+      "normal": {
+        "R_max_on_band": 1e-06,
+        "applies_to": "the absorber fill rows of the dilute medium (TE) and SiN (TE, TM) at 40 layers, band 1.3 to 1.8 um"
+      }
+    },
+    "stability": {
+      "sweep": {
+        "growth_ratio_max": 1.5,
+        "last_over_peak_max_open": 1.0,
+        "last_over_peak_max_closed": 1.001
+      },
+      "stable_float64": {
+        "energy_last_over_peak_max": 1e-06,
+        "late_growth_max": 1.000001,
+        "growth_ratio_max": 1.5,
+        "last_over_peak_max": 1.0,
+        "applies_to": "absorber rows on CPU float64: every sample finite, all 20,000 steps, and each limit on the state norm (G3-07) and on both energies (sweep)"
+      },
+      "stable_float32": {
+        "energy_last_over_peak_max": 1e-06,
+        "growth_ratio_max": 1.5,
+        "last_over_peak_max": 1.0,
+        "applies_to": "absorber rows on CUDA float32 (fused, torch kernel, tensor batch): the same without late_growth, whose 1e-12 floor lies below the float32 round-off level of the state norm"
+      },
+      "diverges": {
+        "growth_ratio_min": 1000000.0,
+        "applies_to": "CPML controls: the fixture must diverge with pml_dispersion='ade', i.e. a FloatingPointError or a post-source state-norm growth ratio of at least run_control's default growth_limit 1e6"
+      }
+    },
+    "reported_only": "the CPML counterparts of the reflection rows; the Drude-dielectric fill (the E loss of a pole cell is matched to Re eps at the source centre only, since matching every frequency by damping D is not dissipative where E.P < 0, so a medium whose permittivity changes across the band is mismatched away from the centre); the half-space rows (every passive absorber scatters where a transverse interface crosses it: only a coordinate stretch preserves the transverse modes, and the stretch is what diverges); the 80-layer rows, the oblique rows (absorber and CPML) and the mechanism rows",
+    "verdict": "the case passes when every judged row passes",
+    "source_of_limits": "completion_gates.json proposed_thresholds pml_normal_reflected_power_ratio (reflection); G3-07_cpml_reflection_stability.json stability limits (energy_last_over_peak_max, late_growth_max); STABILITY_SWEEP.json growth_ratio_max and last_over_peak_max_open; run_control growth_limit default for the controls"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_dispersive_pml_absorber.py::test_record_covers_the_declared_case",
+      "tests/test_dispersive_pml_absorber.py::test_every_verdict_follows_from_the_record_and_the_case_limits",
+      "tests/test_dispersive_pml_absorber.py::test_twenty_thousand_steps_of_the_diverging_fixture_in_float64"
+    ],
+    "not_yet_covered": []
+  },
+  "notes": "Declared after a shakedown that fixed the fixtures and the split between judged and recorded rows, not the limits. The shakedown found the smallest diverging fixture (the corner post; the documented 6 um pillar array also diverges on the RTX 3060, with the same numbers in float64 and float32), chose 40 absorber layers for the reflection rows, and added the matching of the pole-cell E loss to Re eps at the source centre. With the loss matched to eps_inf, the SiN half-space medium-side monitor reflected 0.15 at 40 layers and sigma_scale 0.3. The shakedown also changed the absorber from every PML face to the faces that dispersive structures reach, after the oblique vacuum rows reflected 7.5e-3 (30 deg) and 0.17 (60 deg) at 40 layers, against 4e-10 and 9e-10 for a 10-layer CPML. Shakedown values of rows declared here: pure vacuum through a 20-layer absorber 1.5e-11, SiN fill 1.6e-8 at 40 layers (TE and TM), Drude-dielectric fill 5.0e-5 at 40 layers, Drude-metal half-space rows 2e-2 to 7e-2 per monitor at 40 layers with sigma_scale 0.3, and, with every face an absorber, float32 CUDA stability of 1.6e-13 (corner post) and 5.0e-9 (pillar array) of the peak after 20,000 steps. The half-space rows are recorded, not judged: the G3-07 interface budget of 1e-4 is out of reach of any passive absorber at the depths the model admits (at most 100 layers), and no looser budget is declared."
+}
