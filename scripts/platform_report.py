@@ -3,7 +3,9 @@
 The record is one JSON file under docs/validation/platforms/ and is the only
 basis for a row of docs/PLATFORM_MATRIX.md: a platform without a record file
 is "not recorded" there, never assumed. Nothing is executed on the GPU beyond
-the memory query; this is an inventory, not a verification.
+the memory query; this is an inventory, not a verification. The interpreter
+path is written with the user's home directory replaced by ``<user home>``, so
+a record never carries the account name.
 """
 import argparse
 import datetime
@@ -12,6 +14,9 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from record_gate_evidence import redact_home  # noqa: E402
 
 RECORD_VERSION = 1
 PLATFORMS_DIR = Path('docs') / 'validation' / 'platforms'
@@ -39,7 +44,7 @@ def collect():
         record_version=RECORD_VERSION,
         recorded_at=datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat(),
         os=platform.platform(), machine=platform.machine(),
-        python=sys.version.split()[0], python_executable=sys.executable,
+        python=sys.version.split()[0], python_executable=redact_home(sys.executable),
         torch=torch.__version__, cupy=module_version('cupy'), numpy=module_version('numpy'),
         cuda_runtime=torch.version.cuda, torch_cuda_available=bool(torch.cuda.is_available()),
         driver=None, gpus=[],

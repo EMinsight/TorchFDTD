@@ -54,7 +54,7 @@ modal worker:
 
 | Python-API constraint lifted | Server limit | Where the server checks it |
 | --- | --- | --- |
-| 8,000,000 resident cells (`Region.require_resident`) | 8,000,000 cells | `Region.resident_refusal` at every resident entry point and in the Auto policy |
+| 8,000,000 resident cells (`Region.require_resident`) | 8,000,000 cells | `Region.resident_refusal` at every resident entry point and in the Auto policy, and `adjoint_memory._resident_contract` when a byte budget is given (budgeted adjoint, mode-network and design paths) |
 | `Project.structures` `max_length=1000` | 1000 structures | project validation, before the items are validated |
 | `Project.sources` `max_length=512` | 512 sources | project validation, before the items |
 | `Project.monitors` `max_length=512` | 512 monitors | project validation, before the items |
@@ -71,7 +71,9 @@ monitors on both sides. `tests/test_server_security.py::test_every_server_limit_
 posts, for each limit, a project the Python API accepts to the project routes
 and nested in a GDS export and a mode-network request, and expects 422;
 `test_gds_uploads_keep_the_vertex_limit_the_python_api_lifts` converts an
-upload of 1.04 million vertices. `tests/test_resident_guards.py` checks that the
+upload of 1.04 million vertices, and
+`test_budgeted_mode_network_and_design_routes_keep_the_resident_cell_limit` posts
+budgeted mode-network and design requests above 8,000,000 cells. `tests/test_resident_guards.py` checks that the
 job pools and the modal worker run under the limits.
 
 ### Memory admission
@@ -79,8 +81,9 @@ job pools and the modal worker run under the limits.
 `torchfdtd serve --memory-admission` (or `create_app(memory_admission=True)`)
 starts the server without the ten `SERVER_LIMITS` above: resident execution
 and every count and size in the table except the GDS vertex limit are admitted
-as on the Python API, by the memory estimate against 75% of the free device
-memory (80% of the available host memory on the CPU) and by the caps the
+as on the Python API, by the memory estimate (75% of the free device memory,
+and 80% of the available host memory for the host arrays of the run; the whole
+estimate against 80% of the host memory on the CPU) and by the caps the
 project carries (`Region.resident_cell_limit`, `Project.limits`). The
 requests, the tasks of the job pools and the modal worker all run in this
 mode: a job task keeps the mode of the request that queued it, and the job
@@ -89,16 +92,17 @@ thread passes it to the spawned modal worker. `/api/health` reports it as
 `SERVER_LIMITS` values, or `null`), and the execution panel of the workbench
 shows it. Without the flag the server behaves as described above.
 
-In this mode the host outputs of a resident run count as well
-(`torchfdtd.solver.resident_output_bytes`): the final E and H copies with one
-transient copy of the same size (36 bytes per cell for real float32 fields,
-in proportion to the element size for float64 and Bloch fields), the point
-traces and the display frames (at most 101 frames, each decimated to at most
-256 x 256 values). They are checked against 80% of the available host memory,
-on their own for a GPU run and added to the resident estimate on the CPU, by
-`/api/validate`, where the resident tier then reports that it does not fit and
-Auto moves on, and again by `Simulation` when the job starts, which refuses
-with "Insufficient available host memory for the run outputs".
+The host arrays of a resident run are part of that estimate in either mode
+([EXECUTION_MODES.md](EXECUTION_MODES.md#resident-memory-of-the-fused-cuda-path)):
+the final E and H copies with one field-sized temporary (9 field values per
+cell), the snapshot frames (at most 101, each decimated to at most 256 x 256
+values), the point traces, the plan's material and maps and the runtime. Under
+the fixed limits they stay small; under memory admission they are what bounds
+a large GPU grid on the host. `/api/validate` then reports that the resident
+tier does not fit ("resident host estimate ... exceeds 80% of available host
+memory", or the whole estimate on the CPU) and Auto moves on, and `Simulation`
+refuses the same scene when the job starts ("Insufficient available host
+memory").
 
 The flag lifts only those size limits. It keeps the loopback-only bind, the
 `Host` and `Origin` checks, `MAX_REQUEST_BYTES` and the FSP upload limit, the

@@ -17,7 +17,7 @@ import numpy as np
 import pytest
 import torch
 
-from torchfdtd import FieldMonitor, Project, Region, Simulation, Source, Structure
+from torchfdtd import FieldMonitor, Monitor, Project, Region, Simulation, Source, Structure
 from torchfdtd.execution_modes import _resident_fit, resolve_execution
 from torchfdtd.models import SERVER_LIMITS, ProjectLimits, demo_project, effective_limit, server_limit, server_limits
 from torchfdtd.plan import resolve_plan
@@ -177,7 +177,7 @@ def test_cpu_simulation_is_admitted_by_the_available_host_memory(monkeypatch):
 def test_the_32_bit_field_index_bound_holds_without_a_cell_limit():
     # 1000 x 1000 x 716 real cells: 3 x cells reaches 2**31, which the fused kernels cannot address.
     settings = dict(dimension='3d', size=(100., 100., 71.6), mesh=.1, pml_cells=3)
-    with pytest.raises(ValueError, match='signed 32-bit indices, which 716,000,000 cells exceed'):
+    with pytest.raises(ValueError, match='signed 32-bit field index of the fused CUDA kernels\\), which 716,000,000 cells reach'):
         Region(**settings, execution_mode='resident')
     region = Region(**settings)
     assert 3*math.prod(region.shape) >= 2**31 and 'signed 32-bit' in region.resident_refusal()
@@ -205,9 +205,23 @@ def test_user_caps_refuse_each_list(name, what):
     assert getattr(Project.model_validate(dict(payload, limits={name: counts[name]})).limits, name) == counts[name]
 
 
+def _traced_peak(project):
+    """Peak NumPy and Python host bytes of a CPU run, from tracemalloc."""
+    import gc
+    import tracemalloc
+    gc.collect()
+    tracemalloc.start()
+    try:
+        Simulation(project).run()
+        return tracemalloc.get_traced_memory()[1]
+    finally:
+        tracemalloc.stop()
+
+
 def test_monitor_samples_are_admitted_by_the_estimate_with_an_optional_cap():
-    summary = estimate(wide_plane())
-    assert summary['estimated_memory_mb'] > 0
+    # 23.5 million plane samples on the CPU: the run and its plane post-processing stay within the estimate.
+    p = wide_plane()
+    assert _traced_peak(p) <= estimate(p)['estimated_memory_mb']*2**20
     with pytest.raises(ValueError, match='frequency field buffer of 23,520,000 complex samples exceeds the limit of 20,000,000'):
         resolve_plan(wide_plane(max_monitor_samples=20_000_000))
     assert resolve_plan(wide_plane()).resources['cells'] == 160*160*20
@@ -216,15 +230,33 @@ def test_monitor_samples_are_admitted_by_the_estimate_with_an_optional_cap():
 
 
 def test_estimate_covers_steps_through_traces_windows_and_source_waveforms():
+    from torchfdtd.solver import HOST_WAVEFORM_BYTES
     p = demo_project('3d')
+    p.region.backend = 'cpu'
+    p.monitors = [*p.monitors, FieldMonitor(id='plane', normal='x', center=(1., 0, 0), size=(0, 1., 1.),
+                                            spectrum=dict(sampling='frequency', frequency_points=5, apodization='none'))]
+    p = Project.model_validate(p.model_dump())
     long = Project.model_validate(dict(p.model_dump(), region=dict(p.region.model_dump(), steps=200_000)))
     short, extended = estimate(p), estimate(long)
+    added = 200_000-p.region.steps
     assert short['source_waveform_estimated_bytes'] == p.region.steps*4
     assert extended['source_waveform_estimated_bytes'] == 200_000*4
-    assert extended['point_trace_estimated_bytes'] > short['point_trace_estimated_bytes']
-    grown = (extended['source_waveform_estimated_bytes']+extended['point_trace_estimated_bytes']
-             -short['source_waveform_estimated_bytes']-short['point_trace_estimated_bytes'])/2**20
+    # The stored frames: one every max(snapshot_interval, ceil(steps/100)) steps, a list and its stacked copy.
+    r = p.region
+    frames = [q.steps//max(q.snapshot_interval, math.ceil(q.steps/100))+1 for q in (r, long.region)]
+    pixels = math.prod(min(n, 256) for i, n in enumerate(r.shape) if i != 'xyz'.index(r.slice_axis))
+    # Point traces and spectra with the host copy of the trace, the device waveform copy, the plan's waveform
+    # and sample times, the plane's windows and the frames.
+    grown = (extended['point_trace_estimated_bytes']-short['point_trace_estimated_bytes']+added*4
+             +added*(4+HOST_WAVEFORM_BYTES)+added*16+2*(frames[1]-frames[0])*pixels*4)/2**20
     assert extended['estimated_memory_mb']-short['estimated_memory_mb'] == pytest.approx(grown, abs=.1)
+
+
+def test_cpu_estimate_bounds_the_peak_of_many_sources_and_monitors_over_a_long_run():
+    region = Region(dimension='2d', size=(3., 3., 1.), mesh=.05, pml_cells=5, steps=5000, backend='cpu')
+    p = Project(region=region, sources=[Source(id=f's{i}', center=(-.5, .02*i-.3, 0), wavelength=1.) for i in range(30)],
+                monitors=[Monitor(id=f'm{i}', center=(.5, .02*i-.3, 0)) for i in range(30)])
+    assert _traced_peak(p) <= estimate(p)['estimated_memory_mb']*2**20
 
 
 def test_tiles_inherit_the_project_limits():
@@ -274,12 +306,110 @@ def test_server_limits_leave_the_submitted_project_unchanged():
     assert Project.model_validate(payload).model_dump()['limits']['max_structures'] == 10**6
 
 
-def test_server_executor_threads_run_under_the_server_limits():
-    from torchfdtd.server import ServerExecutor
+def test_server_executor_threads_run_under_the_server_limits(tmp_path):
+    from torchfdtd.server import ServerExecutor, create_app
     with ServerExecutor(max_workers=1) as pool:
         assert pool.submit(server_limit, 'resident_cells').result() == SERVER_LIMITS['resident_cells']
         assert pool.submit(effective_limit, 10**9, 'monitor_samples').result() == SERVER_LIMITS['monitor_samples']
     assert server_limit('resident_cells') is None
+    # The job pool of the app (shared by the design and mode-network routes) and the FSP pool are both limited.
+    app = create_app(tmp_path/'results')
+    try:
+        assert isinstance(app.state.pool, ServerExecutor) and isinstance(app.state.fsp_pool, ServerExecutor)
+        assert app.state.fsp_pool.submit(server_limit, 'structures').result() == SERVER_LIMITS['structures']
+    finally:
+        app.state.pool.shutdown()
+        app.state.fsp_pool.shutdown()
+
+
+def test_a_byte_budget_keeps_the_server_cell_limit():
+    from torchfdtd import AdjointOptions
+    from torchfdtd.adjoint_memory import _resident_contract
+    region = Region(**LARGE)
+    options = AdjointOptions(resident_budget_bytes=2**40)
+    _resident_contract(region, options)
+    with server_limits(), pytest.raises(ValueError, match='server limits resident execution to 8,000,000 cells'):
+        _resident_contract(region, options)
+    with server_limits():
+        _resident_contract(Region(**{**LARGE, 'size': (12.8, 12.8, 12.8)}), options)
+
+
+def test_auto_policy_refuses_a_cuda_scene_whose_host_arrays_exceed_the_host_memory(tmp_path):
+    p = Project(region=Region(**{**LARGE, 'backend': 'cuda'}, cuda_kernel='fused'), sources=[Source(center=(0, 0, 0))])
+    summary = estimate(p)
+    host = int(summary['host_estimated_mb']*2**20)
+    assert host > 8_388_608*(27+36)
+    health = dict(CPU_RECORD, cuda=True, cupy=True, gpu='fake', gpu_free_bytes=48*2**30, gpu_total_bytes=48*2**30)
+    fit = _resident_fit(p, summary, 'cuda', dict(health, host_available_bytes=int(host/.8)+2**20), math.prod(p.region.shape))
+    assert fit['fits'] and fit['host_estimated_bytes'] == host
+    fit = _resident_fit(p, summary, 'cuda', dict(health, host_available_bytes=int(host/.8)-2**20), math.prod(p.region.shape))
+    assert not fit['fits'] and 'resident host estimate' in fit['reason'] and 'exceeds 80% of available host memory' in fit['reason']
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
+def test_a_cuda_simulation_is_refused_when_its_host_arrays_exceed_the_host_memory(monkeypatch):
+    p = demo_project('3d')
+    p.region.backend = 'cuda'
+    host = int(estimate(p)['host_estimated_mb']*2**20)
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=4*host, available_bytes=host))
+    monkeypatch.setattr('torchfdtd.solver.YeeGrid', lambda *a, **k: pytest.fail('allocated fields before the host check'))
+    with pytest.raises(ValueError, match='Insufficient available host memory'):
+        Simulation(p).run()
+
+
+def test_batch_runner_divides_the_host_memory_among_cpu_workers(monkeypatch):
+    from torchfdtd import BatchCase, BatchRunner
+    p = demo_project()
+    cases = [BatchCase(f'c{i}', p, {}) for i in range(4)]
+    reserve = estimate(p)['estimated_memory_mb']*1.5+64
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=2**40, available_bytes=int(2.2*reserve/.8*2**20)))
+    with BatchRunner(backend='cpu', max_workers=4) as runner:
+        counts, plan = runner._plan(cases)
+    assert counts[None] == 2 and plan['memory_budget_mb']['None'] == pytest.approx(2.2*reserve, rel=1e-6)
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=2**40, available_bytes=int(.5*reserve/.8*2**20)))
+    with BatchRunner(backend='cpu', max_workers=4) as runner, pytest.raises(ValueError, match='Insufficient batch memory'):
+        runner._plan(cases)
+
+
+def test_admission_only_fields_do_not_block_exports_or_reference_matching(tmp_path):
+    from test_fsp_geometry_write import shape_fixture
+    from test_fsp_settings_write import imported
+    from torchfdtd.fsp_geometry import write_fsp_geometry, write_fsp_scene
+    document, p = imported(shape_fixture())
+    p.region.resident_cell_limit = 10**8
+    for write in (write_fsp_geometry, write_fsp_scene):
+        _, report = write(document, p)
+        assert 'region.resident_cell_limit' in report['native_only_settings']
+    # A radiation box and its incident reference that differ only in the cap still match.
+    from test_radiation import dipole_faces
+    from test_radiation_box_io import FACES, IDS
+    from torchfdtd.radiation_box_io import load_native_radiation_box
+    faces, bounds, _ = dipole_faces(4)
+    paths = []
+    for cap in (None, 10**8):
+        project = Project(region=Region(dimension='3d', size=(3.,)*3, mesh=.1, pml_cells=3, background_index=1.3,
+                                        precision='float64', steps=10, resident_cell_limit=cap),
+                          sources=[Source(id='dipole', component='Ez', center=(0., 0., 0.))])
+        metadata, arrays = [], {}
+        for index, name in enumerate(FACES):
+            face = faces[name]
+            info = dict(id=name, components=list(face.components), flux_units=face.flux_units, run_signature=face.run_signature,
+                        shape=list(face.shape), normal_axis=face.normal, settings=dict(spectrum=dict(apodization='none'), time_downsample=1))
+            metadata.append(info)
+            arrays.update({f'field_monitor_{index}_{key}': getattr(face, key).numpy() for key in ('fields', 'frequency_hz', 'points_um', 'weights')})
+        path = tmp_path/f'box-{cap}.npz'
+        np.savez_compressed(path, project=np.asarray(project.model_dump_json()),
+                            summary=np.asarray(json.dumps(dict(steps=10, termination_reason='steps', cancelled=False))),
+                            field_monitors=np.asarray(json.dumps(metadata)), **arrays)
+        paths.append(path)
+    load_native_radiation_box(paths[1], IDS, reference_path=paths[0], bounds_um=bounds, refractive_index=1.3)
+
+
+def test_the_subpixel_kernel_indexes_rows_with_64_bits():
+    import inspect
+    from torchfdtd import cuda_subpixel
+    source = inspect.getsource(cuda_subpixel.SubpixelCUDA.__init__)
+    assert 'long long i=(long long)blockIdx.x*blockDim.x+threadIdx.x;' in source and 'int i=blockIdx' not in source
 
 
 def test_the_server_modal_worker_runs_under_the_server_limits(monkeypatch):
@@ -336,8 +466,12 @@ def test_estimate_bounds_every_recorded_peak():
         assert current == case['estimate_bytes'], case['name']
         assert case['finite'] and case['peak_allocated_bytes'] <= case['peak_reserved_bytes']
         assert current >= case['peak_reserved_bytes'], (case['name'], current, case['peak_reserved_bytes'])
+        # The host arrays of the CUDA run (peak working set of the process) stay within the host estimate.
+        host = sum(int(round(s['host_estimated_mb']*2**20)) for s in summaries)
+        assert host == case['host_estimate_bytes'] and host >= case['host_peak_working_set_bytes'], case['name']
     for required in ('fused-f32-cpml-64m', 'fused-f32-periodic-64m', 'fused-f32-plane-16m', 'fused-f32-lorentz-16m',
-                     'fused-f64-cpml-32m', 'fused-f32-metalens-62m', 'torch-f32-cpml-16m', 'tensor-batch-f32-2x16m'):
+                     'fused-f64-cpml-32m', 'fused-f32-yee-periodic-64m', 'fused-f64-yee-16m', 'fused-f32-metalens-62m',
+                     'torch-f32-cpml-16m', 'tensor-batch-f32-2x16m'):
         assert required in names
 
 

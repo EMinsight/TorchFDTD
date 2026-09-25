@@ -394,6 +394,29 @@ def test_every_server_limit_refuses_an_oversized_request(client):
     assert response.status_code == 200 and response.json()['project']['limits']['max_structures'] == 10
 
 
+def test_budgeted_mode_network_and_design_routes_keep_the_resident_cell_limit(client):
+    """A byte budget (mode networks) or the design planner's generated budgets do not lift the 8,000,000-cell limit."""
+    from test_mode_network_project import config
+    from torchfdtd.periodic_design import PeriodicDesignConfig
+    network = config()
+    network['project']['region'] = dict(network['project']['region'], size=[14., 14., 6.], mesh=.05)  # 9,408,000 cells
+    network['project']['sources'][0]['size'] = [14., 14., 0.]
+    network['execution'] = dict(network['execution'], resident_budget_bytes=64*2**30, network_budget_bytes=16*2**30,
+                                host_budget_bytes=40*2**30)
+    for route in ('/api/mode-networks/validate', '/api/mode-networks/python'):
+        response = client.post(route, json=network)
+        assert response.status_code == 422 and 'server limits resident execution to 8,000,000 cells' in response.text, route
+    design = dict(PeriodicDesignConfig().model_dump(mode='json'), period_um=[6.4, 6.4], mesh_um=.025)  # 9,568,256 cells
+    response = client.post('/api/design/plan', json=dict(design, execution='resident'))
+    assert response.status_code == 422 and 'server limits resident execution to 8,000,000 cells' in response.text
+    response = client.post('/api/design/plan', json=design)
+    assert response.status_code == 200, response.text
+    selection = response.json()['selection']
+    assert selection['mode'] != 'resident'
+    assert any(a['mode'] == 'resident' and not a['admitted'] and 'server limits resident execution' in a['reason']
+               for a in selection['attempts'])
+
+
 def test_gds_uploads_keep_the_vertex_limit_the_python_api_lifts(tmp_path, client):
     pytest.importorskip('gdstk')
     import gdstk

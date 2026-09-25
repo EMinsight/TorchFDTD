@@ -14,12 +14,12 @@ import torch
 from fdtd.backend import NumpyBackend
 
 from .waveforms import TAIL_INNER, TAIL_OUTER, pulse_parameters, source_time_signal
-from .models import Project, server_admission
+from .models import Project
 from .boundaries import YeeGrid
 from .materials import configure_materials, permittivity
 from .spectra import point_spectrum, apodization_window
 from .mesh import configure_auto_mesh, mesh_summary
-from .field_monitors import FrequencyPlane,FrequencyUpdates,monitor_memory,point_trace_memory
+from .field_monitors import FrequencyPlane,FrequencyUpdates,monitor_memory,plane_sizes,point_trace_memory
 
 C0 = 299792458.0
 # fdtd changes a process-global backend and torch default dtype.
@@ -186,6 +186,47 @@ def fused_resident_bytes(region, cells, poles):
     return real*((FUSED_CELL_REALS+samples)*cells+psi)+ade+FUSED_FIXED_BYTES
 
 
+# Host memory of a resident run, measured with tracemalloc (docs/EXECUTION_MODES.md), with about 10%
+# added: per cell the plan's sampled material after planning and at its peak while planning (float64
+# permittivity and its ownership map: 8.1/16.1 cell, 24.0/48.0 Yee, 78.5/146.0 subpixel), per plane
+# point and component the plan's interpolation maps (136), per accumulated sample the peak of
+# plane_result (40.0), and per step and source term the plan's float64 waveform and sample times (17.6).
+HOST_MATERIAL_BYTES = {'cell': (10, 18), 'yee': (27, 53), 'subpixel': (87, 161)}
+HOST_PLANE_POINT_BYTES = 150
+HOST_PLANE_SAMPLE_BYTES = 44
+HOST_WAVEFORM_BYTES = 20
+HOST_FIXED_BYTES = 512*2**20       # CUDA, CuPy and Python runtime of the run (up to 273 MiB measured at 1M cells)
+
+
+def display_host_bytes(p):
+    """Host bytes of the stored snapshot frames (decimated slices, then stacked) and the trace copy."""
+    r = p.region
+    field = (8 if r.precision == 'float64' else 4)*(2 if r.complex_fields else 1)
+    axis = 'xyz'.index(r.slice_axis)
+    pixels = math.prod(min(n, 256) for i, n in enumerate(r.shape) if i != axis)
+    # One frame every max(snapshot_interval, ceil(steps/100)) steps, plus the last or an early stop.
+    frames = r.steps//max(r.snapshot_interval, math.ceil(r.steps/100))+1
+    traces = r.steps*sum(m.enabled and m.kind == 'point' for m in p.monitors)*field
+    return 2*frames*pixels*field+traces
+
+
+def resident_host_bytes(p, cells, terms):
+    """Host bytes of a resident run whose fields live on a CUDA device.
+
+    Planning holds the material at its peak. After the time loop the host keeps the
+    material, the E and H copies and the larger of one field-sized temporary (a copy
+    or np.abs) and the plane post-processing (a host copy of the accumulator plus
+    the peak of plane_result); the plan maps, waveforms and point traces stay throughout."""
+    r = p.region
+    field = (8 if r.precision == 'float64' else 4)*(2 if r.complex_fields else 1)
+    kept, peak = HOST_MATERIAL_BYTES['subpixel' if r.interface_method == 'subpixel' else r.material_sampling]
+    planes = plane_sizes(p)
+    post = sum(n*nf*nc*(sample+HOST_PLANE_SAMPLE_BYTES) for n, nf, nc, sample in planes)
+    base = (sum(n*nc for n, _, nc, _ in planes)*HOST_PLANE_POINT_BYTES+r.steps*terms*HOST_WAVEFORM_BYTES
+            +point_trace_memory(p)+display_host_bytes(p)+HOST_FIXED_BYTES)
+    return base+max(cells*peak, cells*(kept+6*field)+max(3*field*cells, post))
+
+
 def estimate(p: Project, *, endpoint_dispatch=True):
     """Native resident estimate. PMC projects describe the endpoint dispatch unless
     endpoint_dispatch is False, which describes the volume-plus-face Yee grid."""
@@ -288,14 +329,26 @@ def estimate(p: Project, *, endpoint_dispatch=True):
     terms = sum(len(q.polarization_components)*(2 if q.injection == 'oneway' else 1)
                 for q in map(p.resolved_source, p.sources) if q.enabled and q.kind != 'tfsf')
     source_bytes = r.steps*terms*(8 if r.precision == 'float64' else 4)
+    host_bytes = resident_host_bytes(p, n, terms)
+    host_extra = 0
+    if r.backend != 'cuda':
+        # On the CPU the estimate is host memory, and the tensor-expression bound covers the material and the
+        # field copies. Add the plan maps and waveforms, the frames, and the part of the plane post-processing that the
+        # three per-step accumulator temporaries of monitor_memory do not already cover (they are gone by then).
+        planes = plane_sizes(p)
+        host_extra = (r.steps*terms*HOST_WAVEFORM_BYTES+sum(n_*nc*HOST_PLANE_POINT_BYTES for n_, _, nc, _ in planes)
+                      +display_host_bytes(p))
+        host_extra += sum(n_*nf*nc*max(0, HOST_PLANE_SAMPLE_BYTES-3*sample) for n_, nf, nc, sample in planes)
     snapshot = snapshot_frames(p)
     if snapshot['aliased']:
         warnings.append(f'Stored frames alias the carrier: {snapshot["frames_per_period"]:.1f} frames per optical period '
                         f'(period {snapshot["period_steps"]:.1f} steps, one frame every {snapshot["effective_interval"]} steps). '
                         f'The playback will look like backward motion; store a frame at least every {snapshot["period_steps"]/SNAPSHOT_FRAMES_PER_PERIOD:.0f} steps.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
-            'estimated_memory_mb': round((volume_bytes+monitor_memory(p)+auxiliary_bytes+interface_bytes+source_bytes)/2**20, 1),
+            'estimated_memory_mb': round((volume_bytes+monitor_memory(p)+auxiliary_bytes+interface_bytes+source_bytes+host_extra)/2**20, 1),
             'memory_model': 'fused_cuda' if fused else 'tensor_expression',
+            # Host memory the run needs when its fields live on a CUDA device (resident_host_bytes).
+            'host_estimated_mb': round(host_bytes/2**20, 1),
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes,
             'point_trace_estimated_bytes': point_trace_memory(p), 'source_waveform_estimated_bytes': source_bytes, 'snapshot': snapshot}
 
@@ -324,24 +377,6 @@ def snapshot_frames(p: Project):
     return dict(interval=r.snapshot_interval, effective_interval=interval, frames=r.steps//interval,
                 shortest_wavelength_um=shortest, period_steps=period, frames_per_period=per_period,
                 aliased=bool(per_period is not None and per_period < SNAPSHOT_FRAMES_PER_PERIOD))
-
-
-def resident_output_bytes(p: Project):
-    """Host memory the outputs of a resident run take besides the grid.
-
-    The final E and H copies with one transient copy of the same size (the CUDA
-    staging tensor, or |E| for the summary), the point traces, and the display
-    frames: at most steps//interval + 1 of them, each at most 256 x 256 and copied
-    once into the Result, plus the Python list of the latest frame in the progress.
-    The workbench counts them under memory admission (docs/SECURITY.md)."""
-    r = p.region
-    real = 8 if r.precision == 'float64' else 4
-    field = real*(2 if r.complex_fields else 1)
-    axis = 'xyz'.index(r.slice_axis)
-    plane = math.prod(min(256, n) for a, n in enumerate(r.shape) if a != axis)
-    frames = r.steps//max(r.snapshot_interval, math.ceil(r.steps/100))+1
-    points = sum(m.enabled and m.kind == 'point' for m in p.monitors)
-    return 9*math.prod(r.shape)*field+r.steps*points*field+plane*(2*frames*real+32)
 
 
 def run_signature(p: Project, steps):
@@ -518,27 +553,19 @@ class Simulation:
         from .plan import resources_copy
         plan = self.plan
         stats = resources_copy(plan)
-        # Admission by the resident estimate: 75% of the free device memory, or 80% of the
-        # available host memory on the CPU, the margins of the Auto policy.
+        # Admission by the resident estimate: 75% of the free device memory and 80% of the
+        # available host memory for the run's host arrays, or 80% of the available host memory
+        # on the CPU, the margins of the Auto policy.
+        from .memory_profile import host_memory
+        available = host_memory()['available_bytes']
+        host_required = stats.get('host_estimated_mb' if use_cuda else 'estimated_memory_mb')
         if use_cuda:
             from .cuda_memory import cuda_mem_info
             free, _ = cuda_mem_info()
             if stats['estimated_memory_mb']*2**20 > free*.75:
                 raise ValueError('Insufficient free GPU memory. Increase mesh spacing or reduce the domain.')
-        else:
-            from .memory_profile import host_memory
-            available = host_memory()['available_bytes']
-            if available is not None and stats['estimated_memory_mb']*2**20 > available*.8:
-                raise ValueError('Insufficient available host memory. Increase mesh spacing or reduce the domain.')
-        # Under the workbench's memory admission the host outputs count too (added to the estimate on the CPU).
-        if server_admission() == 'memory':
-            from .memory_profile import host_memory
-            available = host_memory()['available_bytes']
-            outputs = resident_output_bytes(p)+(0 if use_cuda else int(stats['estimated_memory_mb']*2**20))
-            if available is not None and outputs > available*.8:
-                raise ValueError(f'Insufficient available host memory for the run outputs (final E and H fields, point traces, '
-                                 f'display frames{"" if use_cuda else ", with the resident estimate"}): {outputs/2**30:.2f} GiB '
-                                 f'exceed 80% of the {available/2**30:.2f} GiB available. Increase mesh spacing or reduce the domain.')
+        if available is not None and host_required is not None and host_required*2**20 > available*.8:
+            raise ValueError('Insufficient available host memory. Increase mesh spacing or reduce the domain.')
         dtype = torch.float64 if r.precision == 'float64' else torch.float32
         fdtd.set_backend(f'torch.cuda.{r.precision}' if use_cuda else 'numpy')
         # Upstream 0.2.2 leaves a dtype class attribute behind on backend switches.

@@ -1,0 +1,24 @@
+{
+  "platform_id": "rtx3060-wsl2-ubuntu2204",
+  "record_version": 1,
+  "recorded_at": "2026-09-25T06:23:47+00:00",
+  "os": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+  "machine": "x86_64",
+  "python": "3.12.14",
+  "python_executable": "<user home>/torchfdtd-bench/venv-g4/bin/python",
+  "torch": "2.11.0+cu128",
+  "cupy": "13.6.0",
+  "numpy": "2.5.3",
+  "cuda_runtime": "12.8",
+  "torch_cuda_available": true,
+  "driver": "591.86",
+  "gpus": [
+    {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3060",
+      "compute_capability": "8.6",
+      "total_memory_bytes": 12884377600,
+      "free_memory_bytes_at_record": 11791237120
+    }
+  ]
+}

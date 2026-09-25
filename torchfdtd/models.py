@@ -298,19 +298,28 @@ class Region(Model):
             data.pop('resident_cell_limit', None)
         return data
 
-    def resident_refusal(self):
-        """Why the resident path refuses this grid's size, or None when the size is admitted.
-
-        Memory is admitted separately, by the estimate against the free memory."""
+    def cell_cap_refusal(self):
+        """Why the cell caps refuse this grid (a user cap, or the server limit while it applies), or None."""
         cells = math.prod(self.shape)
         limit = effective_limit(self.resident_cell_limit, 'resident_cells')
         if limit is not None and cells > limit:
             if limit == server_limit('resident_cells'):
                 return f'The workbench server limits resident execution to {limit:,} cells, and the grid has {cells:,}'
             return f'Resident execution is limited to resident_cell_limit={limit:,} cells, and the grid has {cells:,}'
+        return None
+
+    def resident_refusal(self):
+        """Why the resident path refuses this grid's size, or None when the size is admitted.
+
+        Memory is admitted separately, by the estimate against the free memory."""
+        refusal = self.cell_cap_refusal()
+        if refusal:
+            return refusal
+        cells = math.prod(self.shape)
         if 3*(2 if self.complex_fields else 1)*cells >= RESIDENT_INDEX_LIMIT:
-            return (f'Resident execution addresses each field array with signed 32-bit indices, '
-                    f'which {cells:,} {"complex " if self.complex_fields else ""}cells exceed')
+            # Applied to every resident path, although only the fused CUDA kernels and the subpixel operator need it.
+            return (f'Resident execution is limited to 3 x cells below 2**31 (the signed 32-bit field index of the fused '
+                    f'CUDA kernels), which {cells:,} {"complex " if self.complex_fields else ""}cells reach')
         return None
 
     def require_resident(self):
