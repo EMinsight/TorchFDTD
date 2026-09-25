@@ -62,6 +62,8 @@ CASES = {
     **{f'fused-f32-plane-{k}': _case(CUBES[k], plane=True) for k in ('4m', '16m')},
     'fused-f32-torchplane-4m': _case(CUBES['4m'], plane=True, monitor_kernel='torch'),
     **{f'fused-f32-yee-{k}': _case(CUBES[k], sampling='yee') for k in ('4m', '16m')},
+    'fused-f32-yee-periodic-64m': _case(CUBES['64m'], sampling='yee', boundary='periodic'),
+    'fused-f64-yee-16m': _case(CUBES['16m'], sampling='yee', precision='float64'),
     **{f'fused-f32-lorentz-{k}': _case(CUBES[k], poles=1) for k in ('4m', '16m')},
     'fused-f32-multipole2-4m': _case(CUBES['4m'], poles=2),
     'fused-f32-multipole3-4m': _case(CUBES['4m'], poles=3),
@@ -161,6 +163,7 @@ def project(case, index=0):
 
 
 def run_case(name):
+    import psutil
     import torch
     from torchfdtd import Simulation
     from torchfdtd.solver import estimate
@@ -168,6 +171,9 @@ def run_case(name):
     projects = [project(case, i) for i in range(case['batch'])]
     torch.cuda.init()
     torch.cuda.synchronize()
+    # Host memory: the growth of the process's peak working set over the run. Under the Windows WDDM
+    # driver the private (committed) bytes also count the device allocations, so they are not used.
+    base_working_set = psutil.Process().memory_info().wset
     base_allocated, base_reserved = torch.cuda.memory_allocated(), torch.cuda.memory_reserved()
     torch.cuda.reset_peak_memory_stats()
     started = time.perf_counter()
@@ -181,17 +187,21 @@ def run_case(name):
         finite = all(bool(torch.isfinite(torch.as_tensor(item.result.electric)).all()) for item in report.items)
     torch.cuda.synchronize()
     seconds = time.perf_counter()-started
+    host_peak = psutil.Process().memory_info().peak_wset-base_working_set
     try:
         import cupy
         cupy_pool = int(cupy.get_default_memory_pool().total_bytes())
     except ImportError:
         cupy_pool = None
-    estimates = [int(round(estimate(p)['estimated_memory_mb']*2**20)) for p in projects]
+    summaries = [estimate(p) for p in projects]
+    estimates = [int(round(s['estimated_memory_mb']*2**20)) for s in summaries]
     shape = projects[0].region.shape
     return dict(name=name, **{**case, 'shape': list(shape)}, cells=math.prod(shape), steps=projects[0].region.steps,
                 peak_allocated_bytes=int(torch.cuda.max_memory_allocated()-base_allocated),
                 peak_reserved_bytes=int(torch.cuda.max_memory_reserved()-base_reserved),
                 cupy_pool_bytes=cupy_pool, estimate_bytes=sum(estimates), seconds=seconds, finite=finite,
+                host_peak_working_set_bytes=int(host_peak),
+                host_estimate_bytes=sum(int(round(s['host_estimated_mb']*2**20)) for s in summaries),
                 # A metalens tile is rebuilt by metalens_tile(case['metalens']) instead of storing thousands of pillars.
                 projects=None if case['metalens'] else [p.model_dump(mode='json') for p in projects],
                 environment=environment())

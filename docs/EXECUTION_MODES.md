@@ -110,17 +110,24 @@ results panel.
 ## Size limits
 
 The Python API has no fixed size caps. Resident execution is admitted by the
-memory estimate: `Simulation.run` refuses an estimate above 75% of the free
-device memory on CUDA and above 80% of the available host memory on the CPU,
-the adjoint entry points admit their own reservation against 80% of the free
-device and host memory, and Auto applies the margins of step 1 above.
-Monitors, sources, materials and the step count enter the estimate through
-their traces, DFT buffers, waveforms and ADE states; structures cost host
-rasterization time, not device memory. The only fixed bound is the 32-bit
+memory estimate: `Simulation.run` refuses a device estimate above 75% of the
+free device memory on CUDA, together with a host estimate above 80% of the
+available host memory (below), and an estimate above 80% of the available host
+memory on the CPU; the adjoint entry points admit their own reservation against
+80% of the free device and host memory; the tensor batch admits its cohort
+against `memory_fraction` (0.6 by default, at most 0.9) of the free device
+memory; `BatchRunner` divides 80% of the available host memory (or
+`memory_limit_mb`) among its CPU workers; and Auto applies the margins of step
+1 above. Monitors, sources, materials and the step count enter the estimate
+through their traces, DFT buffers, waveforms and ADE states; structures cost
+host rasterization time, not device memory. The only fixed bound is the 32-bit
 field index: resident execution refuses a grid whose 3 x cells (6 x cells for
-complex Bloch fields) reach 2^31, 715,827,882 real cells, because the fused
-CUDA kernels and the subpixel operator address a field array with signed
-32-bit integers.
+complex Bloch fields) reach 2^31, so at most 715,827,882 real cells, because
+the fused CUDA kernels and the subpixel operator address a field array with
+signed 32-bit integers; the rule applies to every resident path, including the
+Torch and NumPy updates that would not need it. Under the workbench server a
+byte budget (`resident_budget_bytes` of the adjoint, mode-network and design
+paths) does not lift the 8,000,000-cell limit.
 
 A caller may set optional caps; each is `None` (no cap) by default and accepts
 a positive integer:
@@ -187,7 +194,24 @@ component), one sample buffer and two windows of one real per step; the Torch
 monitor kernel keeps the bound of four accumulators and 192 bytes of tables per
 point and component. Every soft or one-way source term adds its waveform, one
 real per step. FIXED is 64 MiB for the graph pools, the diagnostics tables and
-allocator rounding. Every other resident path (`backend="auto"` or `"cpu"`, the
+allocator rounding.
+
+A CUDA run also holds host memory, which `estimate()` reports as
+`host_estimated_mb` and `Simulation` and Auto admit against 80% of the
+available host memory: the plan's sampled material (per cell 10 bytes kept and
+18 at the planning peak with cell sampling, 27 and 53 with Yee sampling, 87 and
+161 with subpixel interfaces), the E and H copies and one field-sized temporary
+after the loop (9 field values per cell), or the plane post-processing (the
+accumulator's host copy plus 44 bytes per sample) when that is larger, the
+plan's interpolation maps (150 bytes per plane point and component), the
+waveforms and sample times (20 bytes per step and source term), the point
+traces, the snapshot frames and 512 MiB for the CUDA, CuPy and Python runtime.
+The factors are tracemalloc measurements with about 10% added: 8.1/16.1,
+24.0/48.0 and 78.5/146.0 bytes per cell for the material, 40.0 bytes per sample
+for `plane_result`, 136 bytes per point and component for the maps and 17.6
+bytes per step and term for the waveforms. On the CPU the same maps, waveforms,
+frames and the post-processing beyond the three accumulator temporaries enter
+`estimated_memory_mb`. Every other resident path (`backend="auto"` or `"cpu"`, the
 Torch kernel, complex fields) keeps the tensor-expression bound of 200 bytes per
 cell in FP32 and 400 in FP64 plus 80 or 160 per pole (`memory_model:
 "tensor_expression"`). The tensor batch and the grouped batch sum the per-case
@@ -207,42 +231,47 @@ changed model has to be measured again.
 The record,
 [resident_memory_fused_3060.json](validation/resident_memory_fused_3060.json)
 (RTX 3060 12 GB, driver 591.86, torch 2.10.0+cu126 with CUDA 12.6, CuPy 13.6.0,
-revision 3d77ee0), holds 46 cases: FP32 and FP64 cubes from 1 to 64 million
+revision a783127), holds 48 cases: FP32 and FP64 cubes from 1 to 64 million
 cells, a 1000 x 1000 x 64 slab, CPML or periodic faces, a frequency plane with
-the fused or the Torch monitor kernel, cell and Yee sampling, one to three
-Lorentz poles filling the grid, `cuda_graph_steps` 1 and 8, three lateral tiles
-of the RTX 5880 metalens configuration below (17 to 62 million cells, 1600
-steps), two tensor-batch cohorts and the Torch kernel. Every estimate is at
-least its reserved peak. The fused estimates are 1.08 to 1.85 times the peak
-and at least 56 MiB above it; for the dielectric grids of 16 million cells and
-more they are 1.08 to 1.23 times the peak. With cell sampling that peak is the
-grid construction: 60.0 to 60.3 allocated bytes per cell in FP32 from 4 to 64
-million cells and 120.0 to 120.3 in FP64 from 4 to 33 million. The unchanged
-Torch-kernel estimate is 1.36 to 1.88 times its peak. The per-cell terms do not
-depend on the grid size; the ladder stops at 64 million cells, what a 12 GB
-card holds.
+the fused or the Torch monitor kernel, cell and Yee sampling (with CPML,
+periodic and FP64), one to three Lorentz poles filling the grid,
+`cuda_graph_steps` 1 and 8, three lateral tiles of the RTX 5880 metalens
+configuration below (17 to 62 million cells, 1600 steps), two tensor-batch
+cohorts and the Torch kernel. Every estimate is at least its reserved peak. The
+fused estimates are 1.07 to 1.85 times the peak and at least 56 MiB above it;
+for the dielectric grids of 16 million cells and more they are 1.07 to 1.23
+times the peak. With cell sampling that peak is the grid construction: 60.0 to
+60.3 allocated bytes per cell in FP32 from 4 to 64 million cells and 120.0 to
+120.3 in FP64 from 4 to 33 million. The unchanged Torch-kernel estimate is 1.36
+to 1.88 times its peak. The host estimate (`host_estimated_mb`) is 1.08 to 2.60
+times the peak working set the run added to the process (read with psutil;
+under WDDM the private bytes also count the device allocations, so they are not
+used). The per-cell terms do not depend on the grid size; the ladder stops at
+64 million cells, what a 12 GB card holds.
 
-| Case | Cells | Peak allocated, MiB | Peak reserved, MiB | Estimate, MiB | Estimate / reserved |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `fused-f32-cpml-1m` | 1,000,000 | 61 | 74 | 134 | 1.81 |
-| `fused-f32-cpml-16m` | 16,003,008 | 920 | 926 | 1,096 | 1.18 |
-| `fused-f32-cpml-64m` | 64,000,000 | 3,662 | 3,676 | 4,109 | 1.12 |
-| `fused-f32-periodic-64m` | 64,000,000 | 3,662 | 3,676 | 3,970 | 1.08 |
-| `fused-f32-cpml-slab-64m` | 64,000,000 | 3,662 | 3,676 | 4,297 | 1.17 |
-| `fused-f32-cpml-slab-plane-64m` | 64,000,000 | 4,288 | 4,316 | 5,064 | 1.17 |
-| `fused-f32-yee-16m` | 16,003,008 | 975 | 1,108 | 1,218 | 1.10 |
-| `fused-f64-cpml-32m` | 32,768,000 | 3,750 | 3,756 | 4,242 | 1.13 |
-| `fused-f32-lorentz-16m` | 16,003,008 | 2,639 | 2,664 | 4,270 | 1.60 |
-| `fused-f32-multipole3-4m` | 4,096,000 | 1,198 | 1,332 | 2,461 | 1.85 |
-| `fused-f32-lorentz-graph8-4m` | 4,096,000 | 681 | 1,012 | 1,149 | 1.14 |
-| `fused-f32-yee-multipole2-graph8-4m` | 4,096,000 | 1,027 | 1,736 | 1,899 | 1.09 |
-| `fused-f64-lorentz-graph8-4m` | 4,096,000 | 1,332 | 1,920 | 2,202 | 1.15 |
-| `fused-f32-metalens-17m` | 17,314,300 | 1,080 | 1,206 | 1,394 | 1.16 |
-| `fused-f32-metalens-39m` | 38,957,175 | 2,407 | 2,682 | 3,040 | 1.13 |
-| `fused-f32-metalens-62m` | 61,864,375 | 3,807 | 4,254 | 4,779 | 1.12 |
-| `tensor-batch-f32-2x16m` | 32,006,016 | 1,776 | 1,844 | 2,192 | 1.19 |
-| `torch-f32-cpml-16m` | 16,003,008 | 1,408 | 1,622 | 3,052 | 1.88 |
-| `torch-f64-cpml-4m` | 4,096,000 | 735 | 842 | 1,562 | 1.86 |
+| Case | Cells | Peak allocated, MiB | Peak reserved, MiB | Estimate, MiB | Estimate / reserved | Host peak, MiB | Host estimate, MiB |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `fused-f32-cpml-1m` | 1,000,000 | 61 | 74 | 134 | 1.81 | 273 | 556 |
+| `fused-f32-cpml-16m` | 16,003,008 | 920 | 926 | 1,096 | 1.18 | 909 | 1,216 |
+| `fused-f32-cpml-64m` | 64,000,000 | 3,662 | 3,676 | 4,109 | 1.12 | 2,968 | 3,322 |
+| `fused-f32-periodic-64m` | 64,000,000 | 3,662 | 3,676 | 3,970 | 1.08 | 2,967 | 3,322 |
+| `fused-f32-cpml-slab-64m` | 64,000,000 | 3,662 | 3,676 | 4,297 | 1.17 | 2,969 | 3,322 |
+| `fused-f32-cpml-slab-plane-64m` | 64,000,000 | 4,288 | 4,316 | 5,064 | 1.17 | 4,277 | 4,833 |
+| `fused-f32-yee-16m` | 16,003,008 | 975 | 1,108 | 1,218 | 1.10 | 1,137 | 1,475 |
+| `fused-f32-yee-periodic-64m` | 64,000,000 | 3,662 | 3,676 | 4,458 | 1.21 | 3,884 | 4,359 |
+| `fused-f64-yee-16m` | 16,003,008 | 1,942 | 2,212 | 2,372 | 1.07 | 1,869 | 2,027 |
+| `fused-f64-cpml-32m` | 32,768,000 | 3,750 | 3,756 | 4,242 | 1.13 | 2,845 | 3,078 |
+| `fused-f32-lorentz-16m` | 16,003,008 | 2,639 | 2,664 | 4,270 | 1.60 | 942 | 1,216 |
+| `fused-f32-multipole3-4m` | 4,096,000 | 1,198 | 1,332 | 2,461 | 1.85 | 498 | 692 |
+| `fused-f32-lorentz-graph8-4m` | 4,096,000 | 681 | 1,012 | 1,149 | 1.14 | 473 | 692 |
+| `fused-f32-yee-multipole2-graph8-4m` | 4,096,000 | 1,027 | 1,736 | 1,899 | 1.09 | 561 | 759 |
+| `fused-f64-lorentz-graph8-4m` | 4,096,000 | 1,332 | 1,920 | 2,202 | 1.15 | 584 | 834 |
+| `fused-f32-metalens-17m` | 17,314,300 | 1,080 | 1,206 | 1,394 | 1.16 | 1,305 | 1,657 |
+| `fused-f32-metalens-39m` | 38,957,175 | 2,407 | 2,682 | 3,040 | 1.13 | 2,638 | 3,043 |
+| `fused-f32-metalens-62m` | 61,864,375 | 3,807 | 4,254 | 4,779 | 1.12 | 4,068 | 4,512 |
+| `tensor-batch-f32-2x16m` | 32,006,016 | 1,776 | 1,844 | 2,192 | 1.19 | 1,277 | 2,432 |
+| `torch-f32-cpml-16m` | 16,003,008 | 1,408 | 1,622 | 3,052 | 1.88 | 924 | 1,216 |
+| `torch-f64-cpml-4m` | 4,096,000 | 735 | 842 | 1,562 | 1.86 | 561 | 834 |
 
 **RTX 5880 cross-check.** The 41 um metalens tile measured on an RTX 5880 Ada
 (48 GB; 2050 x 2050 x 103 = 432,857,500 cells, graded z, 12 CPML cells on six
@@ -250,14 +279,16 @@ faces, Yee sampling, 19,881 constant-n pillars on a substrate, one broadband Ex
 sheet, one nearest-interpolation Ex/Ey/Ez plane of 4,104,676 points at three
 frequencies, fused FP32 kernels with the CUDA graph, 1600 steps) peaked at 25.6
 GB for the process in nvidia-smi, CUDA context included. `estimate()` gives
-34,461,764,813 bytes (32.1 GiB) for that tile, recorded as `reference_5880` and
-rebuilt by `metalens_tile(41)`: 1.35 times 25.6e9 bytes and 1.25 times 25.6
-GiB. Resident admission accepts it when at least 42.8 GiB of the card is free.
-The scaled tiles on the RTX 3060 reserve 72.1 to 73.0 bytes per cell (the Yee
-upload's own block) and allocate 64.5 to 65.4; at 432,857,500 cells that is
-29.1 GiB reserved and 26.0 GiB allocated. The 25.6 GB of the RTX 5880 run lies
-near the allocated figure and below the reserved one; these records do not show
-why that run held less, and the estimate bounds both figures.
+34,461,764,813 bytes (32.1 GiB) of device memory for that tile, recorded as
+`reference_5880` and rebuilt by `metalens_tile(41)`: 1.35 times 25.6e9 bytes
+and 1.25 times 25.6 GiB. Resident admission accepts it when at least 42.8 GiB
+of the card is free and, for its host arrays (27.7 GiB), at least 34.6 GiB of
+host memory is available. The scaled tiles on the RTX 3060 reserve 72.1 to 73.0
+bytes per cell (the Yee upload's own block) and allocate 64.5 to 65.4; at
+432,857,500 cells that is 29.1 GiB reserved and 26.0 GiB allocated. The 25.6 GB
+of the RTX 5880 run lies near the allocated figure and below the reserved one;
+these records do not show why that run held less, and the estimate bounds both
+figures.
 
 ## What streaming costs
 

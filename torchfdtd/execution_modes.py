@@ -290,8 +290,15 @@ def _resident_fit(project, summary, backend, health, cells):
         fits, reason = False, refusal
     elif limit is not None and required > limit:
         fits, reason = False, f'resident estimate {_gib(required)} exceeds {fraction:.0%} of {pool} ({_gib(free)})'
+    # A CUDA run also keeps its plan, the E/H copies and the plane post-processing in host memory.
+    host = summary.get('host_estimated_mb') if backend == 'cuda' else None
+    host_required = None if host is None else int(host*2**20)
+    available = health.get('host_available_bytes')
+    if fits and host_required is not None and available is not None and host_required > int(available*RESIDENT_HOST_FRACTION):
+        fits, reason = False, (f'resident host estimate {_gib(host_required)} exceeds {RESIDENT_HOST_FRACTION:.0%} of '
+                               f'available host memory ({_gib(available)})')
     return dict(fits=fits, reason=reason, estimated_bytes=required, free_bytes=free, limit_bytes=limit,
-                fraction=fraction, cell_limit=cell_limit)
+                fraction=fraction, cell_limit=cell_limit, host_estimated_bytes=host_required)
 
 
 def resolve_execution(project, *, health, scratch, summary=None):
