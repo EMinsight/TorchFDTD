@@ -29,6 +29,12 @@ SERVER_LIMITS = dict(resident_cells=8_000_000, structures=1000, sources=512, mon
 # signed 32-bit integers, so every resident grid keeps 3 x lanes x cells below
 # this bound, whatever its cell limit.
 RESIDENT_INDEX_LIMIT = 2**31
+# Under memory admission the size limits give way to the memory estimate, but every list keeps a ceiling,
+# checked before its items are validated: a request of at most 32 MB (server.MAX_REQUEST_BYTES) then
+# validates in at most about 3.3 GB of host memory, 3 KiB per list item and 80 bytes per request byte of
+# numbers (docs/SECURITY.md, tests/test_server_memory_admission.py). frequency_points also caps a custom list.
+MEMORY_ADMISSION_LIMITS = dict(structures=200_000, sources=10_000, monitors=10_000, materials=1000, mesh_refinements=10_000,
+                               frequency_points=1_000_000, signal_samples=1_000_000)
 # None outside the workbench server, 'fixed' under SERVER_LIMITS, 'memory' under memory admission.
 _SERVER = ContextVar('torchfdtd_server_limits', default=None)
 
@@ -56,8 +62,11 @@ def server_admission():
 
 
 def server_limit(name):
-    """The server limit called name while server_limits() applies SERVER_LIMITS, otherwise None."""
-    return SERVER_LIMITS[name] if _SERVER.get() == 'fixed' else None
+    """The server limit called name: SERVER_LIMITS under the fixed limits, the list ceiling of
+    MEMORY_ADMISSION_LIMITS (None for a size the memory estimate admits) under memory admission,
+    otherwise None."""
+    admission = _SERVER.get()
+    return SERVER_LIMITS[name] if admission == 'fixed' else MEMORY_ADMISSION_LIMITS.get(name) if admission == 'memory' else None
 
 
 def effective_limit(cap, name):
@@ -714,7 +723,8 @@ class ProjectLimits(Model):
 
     Resident execution is admitted by the memory estimate, which counts the
     monitors, sources and materials. The workbench server applies SERVER_LIMITS
-    whatever a submitted project carries (docs/SECURITY.md)."""
+    whatever a submitted project carries, or under memory admission the list
+    ceilings of MEMORY_ADMISSION_LIMITS and the memory estimate (docs/SECURITY.md)."""
     max_structures: int | None = Field(default=None, ge=1, strict=True)
     max_sources: int | None = Field(default=None, ge=1, strict=True)
     max_monitors: int | None = Field(default=None, ge=1, strict=True)
@@ -820,6 +830,12 @@ class Project(Model):
         from .mesh import configure_auto_mesh
         configure_auto_mesh(self)
         r.valid_grid()
+        # Under the workbench server nothing is planned before this count-only check of the host memory planning takes.
+        if server_admission() is not None:
+            from .solver import preadmission_refusal
+            refusal = preadmission_refusal(self)
+            if refusal:
+                raise ValueError(refusal)
         from .endpoint_native import uses_endpoint, validate_pmc_project
         endpoint = uses_endpoint(r)
         if endpoint:validate_pmc_project(self)
@@ -855,8 +871,8 @@ class Project(Model):
                     raise ValueError(f'{source.name}: source range exceeds the temporal Nyquist limit. Refine the mesh.')
         for monitor in self.monitors:
             monitor=self.resolved_monitor(monitor);spec = monitor.spectrum
-            from .spectra import frequency_samples
-            if monitor.enabled and spec.sampling != 'fft' and max(frequency_samples(spec)) >= .5/(dt*monitor.time_downsample):
+            from .spectra import highest_frequency
+            if monitor.enabled and spec.sampling != 'fft' and highest_frequency(spec) >= .5/(dt*monitor.time_downsample):
                 raise ValueError(f'{monitor.name}: requested spectrum exceeds the temporal Nyquist limit. Refine the mesh or increase the minimum wavelength.')
             if monitor.kind=='field' and r.dimension=='2d' and monitor.normal=='z':
                 raise ValueError('A 2D flux monitor must be x-normal or y-normal.')

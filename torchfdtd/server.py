@@ -28,6 +28,24 @@ from .optical_data import OpticalData
 # Bytes accepted in one request body on every route except the FSP uploads,
 # which stream under fsp.MAX_FSP_BYTES. Module level so tests can lower it.
 MAX_REQUEST_BYTES = 32_000_000
+# Results turned into JSON stay bounded whatever a run recorded (the NPZ download keeps everything):
+# a finished job keeps its point-monitor spectra for spectra.csv strided to at most STORED_MONITOR_VALUES
+# samples in all, GET /api/jobs/{key} sends its point-monitor series strided to at most
+# STATUS_MONITOR_VALUES values in all, and a frequency-field plane is sent strided to at most
+# FIELD_JSON_POINTS points.
+STORED_MONITOR_VALUES = 4_000_000
+STATUS_MONITOR_VALUES = 400_000
+FIELD_JSON_POINTS = 512*512
+MONITOR_SERIES = ('time_fs', 'signal', 'signal_imag', 'window', 'frequency_thz', 'wavelength_um', 'spectrum', 'spectrum_real', 'spectrum_imag')
+
+
+def _thinned_monitors(monitors, budget):
+    """Point-monitor records with every series strided by one factor so that all together hold at most budget values."""
+    total = sum(len(m[k]) for m in monitors for k in MONITOR_SERIES)
+    if total <= budget:
+        return monitors
+    stride = -(-total//budget)
+    return [dict(m, **{k: m[k][::stride] for k in MONITOR_SERIES}, json_stride=stride) for m in monitors]
 
 
 def _finite(value):
@@ -273,7 +291,8 @@ def create_app(result_dir=None, memory_admission=False):
                 job['execution'] = {**execution, 'report': result.summary['execution']['report']}
             result.save(root / f'{key}.npz')
             job['summary'] = result.summary
-            job['monitors'] = result.monitor_data() if len(result.times)>1 else []
+            job['monitors'] = (result.monitor_data(spectrum_points=max(2000, STORED_MONITOR_VALUES//(5*max(1, len(result.point_monitors)))))
+                               if len(result.times)>1 else [])
             job['flux_monitors'] = result.flux_data()
             job['frequency_fields'] = result.frequency_fields
             job['frames'] = result.frames
@@ -324,7 +343,21 @@ def create_app(result_dir=None, memory_admission=False):
         job = get_job(key)
         result = {k:v for k,v in list(job.items()) if k not in ('cancel','frames','epsilon','frame_steps','frequency_fields')}
         result['cancel_requested'] = job['cancel'].is_set()
+        if result.get('monitors'):
+            result['monitors'] = _thinned_monitors(result['monitors'], STATUS_MONITOR_VALUES)
         return result
+
+    @app.delete('/api/jobs/{key}')
+    def delete_job(key: str):
+        # Releases a finished job's results, held in memory for the result routes, and its files.
+        with lock:
+            job = get_job(key)
+            if job['status'] in ('queued', 'running'):
+                raise HTTPException(409, 'Cancel the job before deleting it.')
+            del jobs[key]
+        for name in (f'{key}.npz', f'{key}.design.json', f'{key}.modal.npz'):
+            (root/name).unlink(missing_ok=True)
+        return {'id': key, 'deleted': True}
 
     @app.get('/api/jobs')
     def job_list():
@@ -368,9 +401,15 @@ def create_app(result_dir=None, memory_admission=False):
         if component not in names:raise HTTPException(422,'This field component was not recorded. Enable it and rerun.')
         c=names.index(component)
         data=m['fields'][frequency_index,:,c].reshape(m['shape']).squeeze(axis=m['normal'])
+        points=m['points_um'].reshape(*m['shape'],3).squeeze(axis=m['normal'])
+        # A plane above FIELD_JSON_POINTS is strided along each axis; full_shape and stride say how.
+        side=FIELD_JSON_POINTS**(1/max(1,sum(n>1 for n in data.shape)))
+        stride=tuple(max(1,int(np.ceil(n/side))) if data.size>FIELD_JSON_POINTS else 1 for n in data.shape)
+        full_shape=data.shape;view=tuple(slice(None,None,s) for s in stride)
+        data=data[view];points=points[view]
         return dict(real=data.real.tolist(),imag=data.imag.tolist(),magnitude=abs(data).tolist(),shape=data.shape,
-                    frequency_thz=float(m['frequency_hz'][frequency_index]*1e-12),points_um=m['points_um'].tolist(),
-                    normal=m['normal_axis'],component=component,units=m['field_units'])
+                    frequency_thz=float(m['frequency_hz'][frequency_index]*1e-12),points_um=points.reshape(-1,3).tolist(),
+                    normal=m['normal_axis'],component=component,units=m['field_units'],full_shape=full_shape,stride=stride)
 
     @app.post('/api/jobs/{key}/cancel')
     def cancel(key: str):

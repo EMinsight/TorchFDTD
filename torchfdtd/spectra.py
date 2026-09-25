@@ -44,6 +44,35 @@ def frequency_samples(settings: SpectrumSettings):
     return np.linspace(C0/(b*1e-6), C0/(a*1e-6), n)
 
 
+def frequency_count(settings: SpectrumSettings):
+    """len(frequency_samples(settings)) without building the samples."""
+    if settings.sampling == 'fft':
+        raise ValueError('FFT samples depend on the recorded time grid.')
+    return len(settings.custom_frequencies_hz) if settings.sampling == 'custom' else settings.frequency_points
+
+
+def highest_frequency(settings: SpectrumSettings):
+    """max(frequency_samples(settings)) from the extreme sample alone, evaluated as frequency_samples evaluates it."""
+    if settings.sampling == 'custom':
+        return max(settings.custom_frequencies_hz)
+    a, b, n = settings.wavelength_start, settings.wavelength_stop, settings.frequency_points
+    if settings.sampling == 'fft':
+        raise ValueError('FFT samples depend on the recorded time grid.')
+    if settings.sampling == 'chebyshev':
+        # u rises with the node index; the highest frequency is at the largest u, or at the smallest for wavelength nodes.
+        k = 0 if settings.chebyshev_wavelength else n-1
+        index = np.array([k], dtype=np.int64)
+        u = ((np.array([.5]) if n == 1 else (1-np.cos(np.pi*index/(n-1)))/2) if settings.chebyshev_nodes == 'lobatto'
+             else (1-np.cos(np.pi*(index+.5)/n))/2)
+        if settings.chebyshev_wavelength:
+            return float((C0/((a+(b-a)*u)*1e-6))[0])
+        return float((C0/(b*1e-6)+(C0/(a*1e-6)-C0/(b*1e-6))*u)[0])
+    if n == 1:
+        return float(C0/(1e-6*(a+b)/2) if settings.sampling == 'wavelength' else .5*C0*1e6*(1/a+1/b))
+    # linspace keeps its end points exactly, so the extreme sample is the shortest wavelength.
+    return float(C0/(np.float64(a)*1e-6))
+
+
 def direct_transform(times, signal, frequencies, window=None):
     t, e, f = np.asarray(times), np.asarray(signal), np.asarray(frequencies)
     if t.ndim != 1 or e.shape != t.shape or f.ndim != 1 or len(t) < 2:

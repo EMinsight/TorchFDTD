@@ -22,8 +22,8 @@ from fastapi.testclient import TestClient
 import test_server_security as security
 from test_mode_network_integration import payload as modal_payload
 from test_resident_guards import CPU_RECORD, LARGE, SERVER_CASES, oversized, single_oversized, structures, wide_plane
-from torchfdtd import Project, Region, Simulation, Source, cli, server
-from torchfdtd.models import SERVER_LIMITS, demo_project, server_admission, server_limit, server_limits
+from torchfdtd import FieldMonitor, Monitor, Project, Region, Simulation, Source, cli, server
+from torchfdtd.models import MEMORY_ADMISSION_LIMITS, SERVER_LIMITS, demo_project, server_admission, server_limit, server_limits
 from torchfdtd.execution_modes import _resident_fit
 from torchfdtd.solver import display_host_bytes, estimate
 
@@ -326,7 +326,7 @@ def test_the_modal_worker_receives_the_admission_of_its_request(tmp_path, monkey
         worker = threading.Thread(target=mode_network_worker, args=(snapshot, output, Connection(), memory_admission))
         worker.start()
         worker.join(30)
-    assert seen == [('fixed', SERVER_LIMITS['structures'], len(small['project']['structures'])), ('memory', None, 1001)]
+    assert seen == [('fixed', SERVER_LIMITS['structures'], len(small['project']['structures'])), ('memory', MEMORY_ADMISSION_LIMITS['structures'], 1001)]
     assert all(b'recorded' in data for data in sent)
 
 
@@ -361,3 +361,332 @@ def test_input_limits_of_the_models_hold_under_memory_admission(memory_client):
         assert response.status_code == 422 and message in response.text, (message, response.text[:300])
     response = memory_client.post('/api/materials/data', json={'text': '1 1.5 0', 'reference': 'x'*2001})
     assert response.status_code == 422 and 'at most 2000 characters' in response.text
+
+
+# ---------------------------------------------------------------------------------------------- scalars
+def huge(field):
+    """A demo project asking for 10**12 steps, frequency points or plane points; its source is src0."""
+    base = demo_project().model_dump(mode='json')
+    base['sources'] = [dict(s, id='src0') for s in base['sources']]
+    spectrum = dict(sampling='frequency', frequency_points=10**12, wavelength_start=1.5, wavelength_stop=1.6, apodization='none')
+    if field == 'steps':
+        return dict(base, region=dict(base['region'], steps=10**12))
+    if field == 'frequency_points':
+        return dict(base, monitors=[dict(base['monitors'][0], spectrum=spectrum)])
+    # 10**12 plane points: a 1e6 x 1e6-cell layer with a z-normal plane across it (the old 500 of G9 review)
+    region = Region(dimension='3d', size=(1e5, 1e5, 1.2), mesh=.1, pml_cells=3, steps=10, backend='cpu')
+    plane = FieldMonitor(id='plane', normal='z', center=(0, 0, 0), size=(9.9e4, 9.9e4, 0),
+                         spectrum=dict(sampling='frequency', frequency_points=2, wavelength_start=1.5, wavelength_stop=1.6, apodization='none'))
+    return Project(region=region, sources=[Source(id='src0', center=(0, 0, 0))], monitors=[plane]).model_dump(mode='json')
+
+
+@pytest.mark.parametrize('field', ['steps', 'frequency_points', 'plane'])
+def test_10_to_the_12_steps_frequencies_or_plane_points_answer_422_in_both_modes(field, tmp_path):
+    body = huge(field)
+    network = dict(modal_payload(), project=body)
+    for memory_admission in (False, True):
+        with workbench(tmp_path / str(memory_admission), memory_admission) as client:
+            for route, payload in [*((r, body) for r in ('/api/validate', '/api/jobs', '/api/mesh/preview', '/api/python',
+                                                          '/api/sources/src0/preview')),
+                                   ('/api/mode-networks/validate', network), ('/api/gds/export', {'project': body, 'layers': {'x': [1, 0]}})]:
+                started = time.monotonic()
+                response = client.post(route, json=payload)
+                assert response.status_code == 422, (memory_admission, field, route, response.status_code, response.text[:200])
+                assert time.monotonic()-started < 20, (memory_admission, field, route)
+
+
+def test_the_nyquist_check_and_the_counts_need_no_frequency_array():
+    import random
+    from torchfdtd.models import SpectrumSettings
+    from torchfdtd.spectra import frequency_count, frequency_samples, highest_frequency
+    rng = random.Random(1)
+    for _ in range(600):
+        a = rng.uniform(.2, 3)
+        b = a+rng.choice([0, rng.uniform(1e-6, 3)])
+        spectrum = SpectrumSettings(sampling=rng.choice(['frequency', 'wavelength', 'chebyshev']), wavelength_start=a, wavelength_stop=b,
+                                    frequency_points=1 if a == b else rng.choice([1, 2, 3, rng.randint(2, 5000)]),
+                                    chebyshev_nodes=rng.choice(['roots', 'lobatto']), chebyshev_wavelength=rng.random() < .5)
+        samples = frequency_samples(spectrum)
+        assert highest_frequency(spectrum) == samples.max() and frequency_count(spectrum) == len(samples), spectrum
+    custom = SpectrumSettings(sampling='custom', custom_frequencies_hz=[1e14, 2e14, 3e14])
+    assert highest_frequency(custom) == 3e14 and frequency_count(custom) == 3
+    # The Python API validates 10**12 frequency points without building them.
+    started = time.monotonic()
+    Project.model_validate(huge('frequency_points'))
+    assert time.monotonic()-started < 5
+
+
+def _planning_peak(body):
+    """Peak host bytes of validation, estimate() and resolve_plan, from tracemalloc."""
+    import gc
+    import tracemalloc
+    from torchfdtd.plan import resolve_plan
+    gc.collect()
+    tracemalloc.start()
+    try:
+        with server_limits(memory_admission=True):
+            project = Project.model_validate(body)
+            estimate(project)
+            resolve_plan(project)
+        return tracemalloc.get_traced_memory()[1], project
+    finally:
+        tracemalloc.stop()
+
+
+def test_preadmission_bytes_bound_what_planning_holds():
+    from torchfdtd import BoundaryFace
+    from torchfdtd.solver import preadmission_bytes
+    base = demo_project().model_dump(mode='json')
+    spectrum = dict(sampling='chebyshev', frequency_points=300_000, wavelength_start=1.5, wavelength_stop=1.6, apodization='none')
+    bloch = {f'{a}_{s}': BoundaryFace(kind='bloch') for a in 'xy' for s in ('min', 'max')}
+    cases = {
+        'steps': dict(base, region=dict(base['region'], steps=300_000)),
+        'terms': dict(base, region=dict(base['region'], steps=200_000), sources=[dict(base['sources'][0], id=f's{i}') for i in range(5)]),
+        'frequencies': dict(base, monitors=[dict(base['monitors'][0], spectrum=spectrum)]),
+        'items': dict(base, structures=[{'id': f'q{i}'} for i in range(3000)], monitors=[{'id': f'm{i}'} for i in range(2000)]),
+        'plane': Project(region=Region(dimension='3d', size=(3.4, 3.4, 1.), mesh=.01, pml_cells=4, steps=100, backend='cpu'),
+                         sources=[Source(center=(0, 0, 0))],
+                         monitors=[FieldMonitor(id='plane', normal='z', center=(0, 0, 0), size=(3., 3., 0),
+                                                spectrum=dict(sampling='frequency', frequency_points=2, wavelength_start=1.5,
+                                                              wavelength_stop=1.6, apodization='none'))]).model_dump(mode='json'),
+        'oneway': Project(region=Region(dimension='2d', size=(4., 2., 1.), mesh=.1, pml_cells=5, steps=100_000, backend='cpu',
+                                        boundaries={'y_min': BoundaryFace(kind='periodic'), 'y_max': BoundaryFace(kind='periodic')}),
+                          sources=[Source(id='ow', kind='plane', injection='oneway', normal='x', center=(-1., 0., 0.), size=(0., 2., 0.),
+                                          component='Ez')]).model_dump(mode='json'),
+        'tfsf': Project(region=Region(dimension='2d', size=(4., 4., 1.), mesh=.1, pml_cells=5, steps=200_000, backend='cpu'),
+                        sources=[Source(id='box', kind='tfsf', normal='x', center=(0., 0., 0.), size=(2., 2., 1.), component='Ez')]).model_dump(mode='json'),
+        'bloch sheet': Project(region=Region(dimension='3d', size=(3.2, 3.2, 1.), mesh=.01, pml_cells=5, steps=100, backend='cpu',
+                                             material_sampling='yee', boundaries=bloch, bloch_phase=(.5, .3, 0.)),
+                               sources=[Source(id='sheet', kind='plane', normal='z', center=(0., 0., -.2), size=(3.2, 3.2, 0.),
+                                               component='Ex')]).model_dump(mode='json')}
+    for name, body in cases.items():
+        peak, project = _planning_peak(body)
+        assert peak <= preadmission_bytes(project), (name, peak, preadmission_bytes(project))
+
+
+def test_the_preadmission_check_refuses_before_anything_is_planned(tmp_path, monkeypatch):
+    from torchfdtd.solver import preadmission_bytes
+    base = demo_project().model_dump(mode='json')
+    # 10,000 monitors of 999,999 frequency points each: every list and value within its ceiling, 450 GiB to plan.
+    spectrum = dict(sampling='frequency', frequency_points=999_999, wavelength_start=1.5, wavelength_stop=1.6, apodization='none')
+    many = dict(base, monitors=[dict(base['monitors'][0], id=f'm{i}', spectrum=spectrum) for i in range(10_000)])
+    with workbench(tmp_path / 'memory', True) as client:
+        response = client.post('/api/validate', json=many)
+        assert response.status_code == 422 and 'Planning this project would take' in response.text, response.text[:300]
+    # Both modes compare the planning bytes with the available host memory.
+    with server_limits():
+        needed = preadmission_bytes(Project.model_validate(base))
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=2*needed, available_bytes=needed))
+    for memory_admission in (False, True):
+        with workbench(tmp_path / str(memory_admission), memory_admission) as client:
+            response = client.post('/api/validate', json=base)
+            assert response.status_code == 422 and 'above 80% of the' in response.text, response.text[:300]
+    Project.model_validate(base)   # the Python API has no such check
+
+
+# ---------------------------------------------------------------------------------------- list ceilings
+CEILING_ITEMS = {'structures': lambda n: {'structures': [{} for _ in range(n)]},
+                 'sources': lambda n: {'sources': [{} for _ in range(n)]},
+                 'monitors': lambda n: {'monitors': [{} for _ in range(n)]},
+                 'materials': lambda n: {'materials': [*demo_project().model_dump(mode='json')['materials'], *({'name': str(i)} for i in range(n))]},
+                 'mesh_refinements': lambda n: {'region': {'mesh_refinements': [{} for _ in range(n)]}}}
+# Numbers in lists: host bytes per request byte, measured below; polygon vertices are the densest.
+NUMBER_ITEMS = {'vertices': lambda n: {'structures': [{'kind': 'polygon', 'vertices': [[i % 7, i % 5] for i in range(n)]}]},
+                'custom_frequencies': lambda n: {'monitors': [{'spectrum': {'sampling': 'custom', 'custom_frequencies_hz': list(range(1, n+1))}}]},
+                'signal_samples': lambda n: {'sources': [{'pulse': 'sampled', 'use_global_source': False,
+                                                          'signal': {'time_s': list(range(n)), 'amplitude': [1]*n, 'phase_rad': [0]*n}}]}}
+ITEM_BYTES = 3*1024
+NUMBER_BYTES_PER_REQUEST_BYTE = 80
+VALIDATION_BOUND = 3.3e9
+
+
+def _request(parts):
+    import json
+    base = demo_project().model_dump(mode='json')
+    for key, value in parts.items():
+        base[key] = dict(base[key], **value) if isinstance(value, dict) else value
+    return json.dumps(base, separators=(',', ':'))
+
+
+def _request_peak(client, text):
+    import gc
+    import tracemalloc
+    gc.collect()
+    tracemalloc.start()
+    try:
+        response = client.post('/api/validate', content=text, headers={'content-type': 'application/json'})
+        return response, tracemalloc.get_traced_memory()[1]
+    finally:
+        tracemalloc.stop()
+
+
+@pytest.mark.parametrize('kind', list(CEILING_ITEMS))
+def test_memory_admission_keeps_each_list_ceiling_before_the_items_are_validated(kind, memory_client, monkeypatch):
+    ceiling = MEMORY_ADMISSION_LIMITS[kind]
+    extra = len(demo_project().materials) if kind == 'materials' else 0
+    response, peak = _request_peak(memory_client, _request(CEILING_ITEMS[kind](ceiling+1-extra)))
+    assert response.status_code == 422 and f'exceed the limit of {ceiling:,}' in response.text, response.text[:200]
+    # Refused before the items are validated (the count check runs first): 200,001 structures would take 230 MB.
+    assert kind != 'structures' or peak < 64*2**20, peak
+    # Below the ceiling the items are validated; the pre-check then refuses, so only validation is measured.
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=2**20, available_bytes=1))
+    n = min(2000, ceiling//4)
+    (_, low), (_, high) = (_request_peak(memory_client, _request(CEILING_ITEMS[kind](count))) for count in (n, 3*n))
+    assert (high-low)/(2*n) <= ITEM_BYTES, (kind, (high-low)/(2*n))
+
+
+@pytest.mark.parametrize('kind', list(NUMBER_ITEMS))
+def test_numbers_validate_within_the_stated_bytes_per_request_byte(kind, memory_client, monkeypatch):
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=2**20, available_bytes=1))
+    texts = [_request(NUMBER_ITEMS[kind](n)) for n in (100_000, 300_000)]
+    (_, low), (_, high) = (_request_peak(memory_client, text) for text in texts)
+    assert (high-low)/(len(texts[1])-len(texts[0])) <= NUMBER_BYTES_PER_REQUEST_BYTE, (kind, (high-low)/(len(texts[1])-len(texts[0])))
+
+
+def test_the_stated_validation_bound_covers_a_full_request():
+    items = sum(MEMORY_ADMISSION_LIMITS[kind] for kind in CEILING_ITEMS)
+    assert ITEM_BYTES*items+NUMBER_BYTES_PER_REQUEST_BYTE*server.MAX_REQUEST_BYTES <= VALIDATION_BOUND
+
+
+# ----------------------------------------------------------------------------------------- result JSON
+def _plane_and_trace_project():
+    region = Region(dimension='3d', size=(2.4, 2.4, 1.2), mesh=.05, pml_cells=4, steps=400, backend='cpu')
+    plane = FieldMonitor(id='plane', normal='z', center=(0, 0, 0), size=(1.4, 1.4, 0),
+                         spectrum=dict(sampling='frequency', frequency_points=3, wavelength_start=1.5, wavelength_stop=1.6, apodization='none'))
+    return Project(region=region, sources=[Source(center=(0, 0, .2))], monitors=[Monitor(id='probe', center=(.1, 0, 0)), plane])
+
+
+@pytest.mark.parametrize('memory_admission', [False, True])
+def test_result_routes_send_bounded_json(memory_admission, tmp_path, monkeypatch):
+    monkeypatch.setattr(server, 'FIELD_JSON_POINTS', 100)
+    monkeypatch.setattr(server, 'STATUS_MONITOR_VALUES', 300)
+    body = _plane_and_trace_project().model_dump(mode='json')
+    with workbench(tmp_path, memory_admission) as client:
+        key = client.post('/api/jobs', json=body).json()['id']
+        assert finished(client, '/api/jobs/'+key, 120)['status'] == 'completed'
+        plane = client.get(f'/api/jobs/{key}/field-monitors/plane', params=dict(component='Ez')).json()
+        assert plane['full_shape'] == [28, 28] and plane['stride'] == [3, 3] and plane['shape'] == [10, 10]
+        assert len(plane['real']) == 10 and len(plane['points_um']) == 100
+        status = client.get('/api/jobs/'+key).json()
+        probe, = status['monitors']
+        assert sum(len(probe[k]) for k in server.MONITOR_SERIES) <= 300 and probe['json_stride'] > 1
+        # The CSV export keeps the stored spectrum: the 200 FFT bins above DC of 400 steps.
+        assert len(client.get(f'/api/jobs/{key}/spectra.csv').text.strip().splitlines()) == 1+200
+
+
+def test_stored_spectra_are_strided_to_their_budget(tmp_path, monkeypatch):
+    monkeypatch.setattr(server, 'STORED_MONITOR_VALUES', 5000)
+    body = Project(region=Region(dimension='2d', size=(2., 2., 1.), mesh=.05, pml_cells=4, steps=6000, backend='cpu'),
+                   sources=[Source(center=(0, 0, 0))], monitors=[Monitor(id='probe', center=(.1, 0, 0))]).model_dump(mode='json')
+    with workbench(tmp_path, True) as client:
+        key = client.post('/api/jobs', json=body).json()['id']
+        assert finished(client, '/api/jobs/'+key, 300)['status'] == 'completed'
+        rows = client.get(f'/api/jobs/{key}/spectra.csv').text.strip().splitlines()
+        # 3000 FFT bins above DC kept within 2000 samples (the floor of the per-monitor share): every second bin.
+        assert len(rows)-1 == 1500, len(rows)
+
+
+def test_a_finished_job_can_be_deleted_to_release_its_results(tmp_path, monkeypatch):
+    release = threading.Event()
+
+    class Blocking:
+        def __init__(self, project):
+            pass
+
+        def run(self, progress, cancel):
+            release.wait(10)
+            raise ValueError('released')
+    small = demo_project()
+    small.region.backend = 'cpu'
+    small.region.steps = 40
+    with workbench(tmp_path, True) as client:
+        key = client.post('/api/jobs', json=small.model_dump(mode='json')).json()['id']
+        assert finished(client, '/api/jobs/'+key)['status'] == 'completed'
+        assert (tmp_path/f'{key}.npz').exists()
+        assert client.delete('/api/jobs/'+key, headers={'Origin': 'https://evil.example'}).status_code == 403
+        assert client.delete('/api/jobs/'+key).json() == {'id': key, 'deleted': True}
+        assert client.get('/api/jobs/'+key).status_code == 404 and not (tmp_path/f'{key}.npz').exists()
+        assert client.delete('/api/jobs/'+key).status_code == 404
+        monkeypatch.setattr(server, 'Simulation', Blocking)
+        running = client.post('/api/jobs', json=small.model_dump(mode='json')).json()['id']
+        assert client.delete('/api/jobs/'+running).status_code == 409
+        release.set()
+        assert finished(client, '/api/jobs/'+running)['status'] == 'failed'
+        assert client.delete('/api/jobs/'+running).status_code == 200
+
+
+# ------------------------------------------------------------------------------------------ previews
+def test_the_source_preview_covers_at_most_its_window(monkeypatch):
+    from torchfdtd import BoundaryFace, source_preview
+    monkeypatch.setattr(source_preview, 'PREVIEW_STEPS', 500)
+    point = demo_project()
+    point.region.steps = 2000
+    tfsf = Project(region=Region(dimension='2d', size=(4., 4., 1.), mesh=.1, pml_cells=5, steps=2000, backend='cpu'),
+                   sources=[Source(id='box', kind='tfsf', normal='x', center=(0., 0., 0.), size=(2., 2., 1.), component='Ez')])
+    oneway = Project(region=Region(dimension='2d', size=(4., 2., 1.), mesh=.1, pml_cells=5, steps=2000, backend='cpu',
+                                   boundaries={'y_min': BoundaryFace(kind='periodic'), 'y_max': BoundaryFace(kind='periodic')}),
+                     sources=[Source(id='ow', kind='plane', injection='oneway', normal='x', center=(-1., 0., 0.), size=(0., 2., 0.), component='Ez')])
+    for project, source in ((point, point.sources[0].id), (tfsf, 'box'), (oneway, 'ow')):
+        out = source_preview.preview_source(project, source)
+        assert out['steps'] == 2000 and out['preview_steps'] == 500 and len(out['signal']) == len(out['time_fs']) == 500
+        assert all(len(i['signal']) == 500 for i in out['injections']) and 'first 500 of the 2,000 steps' in out['note']
+        assert project.region.steps == 2000
+    point.region.steps = 400
+    out = source_preview.preview_source(point, point.sources[0].id)
+    assert out['preview_steps'] == 400 and len(out['signal']) == 400 and 'first' not in out['note']
+
+
+# ------------------------------------------------------------------------------------------ host estimate
+def test_the_host_estimate_counts_the_structures_beyond_the_covered_ones():
+    from torchfdtd.solver import HOST_COVERED_STRUCTURES, HOST_STRUCTURE_BYTES
+    base = demo_project().model_dump(mode='json')
+    def project(n, backend):
+        return Project.model_validate(dict(base, region=dict(base['region'], backend=backend),
+                                           structures=[dict(base['structures'][0], id=f's{i}') for i in range(n)]))
+    for backend, key in (('cuda', 'host_estimated_mb'), ('cpu', 'estimated_memory_mb')):
+        low, high = (estimate(project(n, backend))[key] for n in (HOST_COVERED_STRUCTURES, HOST_COVERED_STRUCTURES+2000))
+        assert high-low == pytest.approx(2000*HOST_STRUCTURE_BYTES/2**20, abs=.2), (backend, high-low)
+    # The plan keeps no more per structure than the estimate counts.
+    import gc
+    import tracemalloc
+    from torchfdtd.plan import resolve_plan
+    kept = []
+    for n in (1000, 3000):
+        p = project(n, 'cpu')
+        gc.collect()
+        tracemalloc.start()
+        plan = resolve_plan(p)
+        kept.append(tracemalloc.get_traced_memory()[1])
+        tracemalloc.stop()
+        del plan
+    assert (kept[1]-kept[0])/2000 <= HOST_STRUCTURE_BYTES
+
+
+# ------------------------------------------------------------------------------------- design state paths
+def test_the_design_state_directory_stays_inside_the_server_root(tmp_path):
+    from torchfdtd.periodic_design import PeriodicDesignConfig
+    config = PeriodicDesignConfig().model_dump(mode='json')
+    for memory_admission in (False, True):
+        root = tmp_path / str(memory_admission)
+        with workbench(root, memory_admission) as client:
+            for path in [str(tmp_path / 'outside'), 'C:/Windows/Temp', '\\\\server\\share', '/tmp/x', '../escape', 'runs/../../escape',
+                         'C:relative', 'a:b', '.']:
+                for route in ('/api/design/config', '/api/design/plan', '/api/design/jobs'):
+                    response = client.post(route, json=dict(config, state_directory=path, disk_budget_gib=1))
+                    assert response.status_code == 422 and 'design state directory' in response.text, (path, route, response.text[:200])
+            assert not (tmp_path / 'outside').exists() and not (tmp_path / 'escape').exists()
+            response = client.post('/api/design/plan', json=dict(config, state_directory='runs/first', disk_budget_gib=1))
+            assert response.status_code == 200, response.text[:300]
+            assert (root / 'design-state' / 'runs' / 'first').is_dir()
+
+
+# --------------------------------------------------------------------------------------------- documents
+def test_documents_state_the_fixed_limits_as_the_default_only():
+    from pathlib import Path
+    from torchfdtd.models import ProjectLimits
+    docs = Path(__file__).resolve().parents[1] / 'docs'
+    for name in ('ADJOINT_MEMORY_PLAN.md', 'EXECUTION_MODES.md', 'STREAMED_FDTD.md', 'SECURITY.md'):
+        for paragraph in (docs / name).read_text(encoding='utf-8').split('\n\n'):
+            if '8,000,000' in paragraph and 'server' in paragraph and not paragraph.startswith('|'):
+                assert 'memory-admission' in paragraph or 'memory admission' in paragraph, (name, paragraph[:200])
+    assert 'memory admission' in ProjectLimits.__doc__

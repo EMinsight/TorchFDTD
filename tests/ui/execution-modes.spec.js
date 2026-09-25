@@ -1,4 +1,40 @@
 import {test,expect} from '@playwright/test';
+import {spawn} from 'node:child_process';
+import fs from 'node:fs';
+import net from 'node:net';
+import path from 'node:path';
+
+// A second workbench server on a free loopback port, CPU only, with its own results directory under results/.
+async function serve(flags){
+ const python=process.env.TORCHFDTD_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
+ const port=await new Promise((resolve,reject)=>{const probe=net.createServer();probe.on('error',reject);probe.listen(0,'127.0.0.1',()=>{const {port}=probe.address();probe.close(()=>resolve(port));});});
+ fs.mkdirSync('results',{recursive:true});
+ const results=fs.mkdtempSync(path.resolve('results','admission-'));
+ const child=spawn(python,['-m','torchfdtd.cli','serve','--port',String(port),...flags],{env:{...process.env,CUDA_VISIBLE_DEVICES:'-1',TORCHFDTD_RESULTS:results},stdio:'ignore'});
+ const url=`http://127.0.0.1:${port}`;
+ for(let attempt=0;attempt<360;attempt++){
+  try{const response=await fetch(url+'/api/health');if(response.ok)return {url,child,health:await response.json()};}catch{}
+  await new Promise(resolve=>setTimeout(resolve,250));
+ }
+ child.kill();throw new Error('the second workbench server did not answer /api/health');
+}
+
+async function expectAdmission(page,url,health){
+ expect(['fixed','memory']).toContain(health.admission);
+ await page.goto(url+'/');await expect(page.locator('#tree')).toContainText('waveguide');
+ await page.locator('[data-example="3d"]').click();
+ const admission=page.locator('#admission'),properties=page.locator('#properties');
+ await expect(page.locator('#execution-status')).toContainText('Auto →');
+ if(health.admission==='memory'){ // torchfdtd serve --memory-admission
+  expect(health.server_limits).toBeNull();
+  await expect(admission).toHaveText('admission memory estimate');
+  await expect(properties).not.toContainText('million cells');
+ }else{
+  expect(health.server_limits.resident_cells).toBe(8000000);
+  await expect(admission).toHaveText('admission fixed server limits (8,000,000 resident cells)');
+  await expect(properties).toContainText('75% of free GPU memory (80% of host memory on CPU) and at most 8 million cells;');
+ }
+}
 
 test('GPU switch, memory modes, execution status line and a small Auto run',async({page})=>{
  const health=await (await page.request.get('/api/health')).json();
@@ -75,22 +111,16 @@ test('GPU switch, memory modes, execution status line and a small Auto run',asyn
  expect(errors).toEqual([]);
 });
 
-test('the execution panel names the admission the server reports',async({page})=>{
+test('the execution panel names the admission of each server mode',async({page,baseURL})=>{
+ test.setTimeout(180000);
+ // The server under test shows its own mode; a second server started here shows the other one.
  const health=await (await page.request.get('/api/health')).json();
- expect(['fixed','memory']).toContain(health.admission);
- await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
- await page.locator('[data-example="3d"]').click();
- const admission=page.locator('#admission'),properties=page.locator('#properties');
- await expect(page.locator('#execution-status')).toContainText('Auto →');
- if(health.admission==='memory'){ // torchfdtd serve --memory-admission
-  expect(health.server_limits).toBeNull();
-  await expect(admission).toHaveText('admission memory estimate');
-  await expect(properties).not.toContainText('million cells');
- }else{
-  expect(health.server_limits.resident_cells).toBe(8000000);
-  await expect(admission).toHaveText('admission fixed server limits (8,000,000 resident cells)');
-  await expect(properties).toContainText('75% of free GPU memory (80% of host memory on CPU) and at most 8 million cells;');
- }
+ await expectAdmission(page,baseURL,health);
+ const other=await serve(health.admission==='memory'?[]:['--memory-admission']);
+ try{
+  expect(other.health.admission).not.toBe(health.admission);
+  await expectAdmission(page,other.url,other.health);
+ }finally{other.child.kill();}
 });
 
 test('streamed host run reports its policy, progress and one final snapshot',async({page})=>{

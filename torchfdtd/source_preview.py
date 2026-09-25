@@ -14,6 +14,9 @@ from .waveforms import pulse_parameters
 from .capabilities import INCIDENCE
 
 BANDWIDTH_FRACTION = .01   # amplitude spectrum above 1 percent of its peak (-40 dB)
+# The preview keeps every sample, so a longer run is previewed over its first PREVIEW_STEPS steps: its
+# arrays, its JSON and the per-step incident line of a TFSF or one-way source stay bounded.
+PREVIEW_STEPS = 100_000
 
 
 def effective_bandwidth(frequency_hz, spectrum, *, fraction=BANDWIDTH_FRACTION):
@@ -153,6 +156,9 @@ def preview_source(project, source_id, *, incidence=None):
     """
     original = next((s for s in project.sources if s.id == source_id), None)
     if original is None:raise ValueError('Source not found in this project')
+    steps = project.region.steps
+    if steps > PREVIEW_STEPS:
+        project = project.model_copy(update={'region': project.region.model_copy(update={'steps': PREVIEW_STEPS})})
     source = project.resolved_source(original)
     region = project.region
     times = np.arange(1, region.steps+1)*region.time_step+source.time_offset_steps*region.time_step
@@ -196,7 +202,7 @@ def preview_source(project, source_id, *, incidence=None):
                                    'None theta keeps the single Cartesian component')
     # Keep every actual sample: downsampling oscillations can hide aliasing.
     return dict(name=source.name, id=source.id, enabled=source.enabled,
-                inherited=original.use_global_source, dt_fs=region.time_step*1e15,
+                inherited=original.use_global_source, dt_fs=region.time_step*1e15, steps=steps, preview_steps=region.steps,
                 pulse_parameters=pulse_parameters(source).as_dict() if source.pulse in ('gaussian','broadband') else None,
                 time_fs=(times*1e15).tolist(), signal=values.astype(float).tolist(),
                 field_family=source.component[0],time_offset_steps=source.time_offset_steps,
@@ -218,4 +224,6 @@ def preview_source(project, source_id, *, incidence=None):
                       'Amplitude scales its soft drive, not a calibrated incident power.' if source.injection=='oneway' else
                       'Actual mesh-time samples, including local amplitude and phase. '
                       'Magnetic injection uses the H half-step time. The plotted envelope precedes signed vector weights. '
-                      'The sheet spatial phase is listed per axis under spatial. FFT uses the full simulation interval without a window.'))
+                      'The sheet spatial phase is listed per axis under spatial. FFT uses the full simulation interval without a window.')
+                     +(f' The preview covers the first {region.steps:,} of the {steps:,} steps; the FFT and the bandwidth use those steps.'
+                       if steps > region.steps else ''))
