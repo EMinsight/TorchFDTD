@@ -8,6 +8,9 @@ periodic problem. CPML and device accuracy are validated separately.
 
 Method context: Werner, Bauer and Cary, JCP 250, 2013 (arXiv:1212.4857).
 Geometry, spectral bounding and implementation here are independently written.
+Samples whose cell meets a dispersive object leave this operator: their edge
+triplets are dropped and torchfdtd.subpixel_dispersive gives them a diagonal
+sample-wise passive Lorentz medium, so the operator stays block diagonal.
 """
 from dataclasses import dataclass
 from itertools import product
@@ -49,6 +52,7 @@ class SubpixelPlan:
     ownership: np.ndarray
     counts: dict
     metadata: dict
+    dispersive: object = None
 
     @property
     def epsilon(self):return 1/self.diagonal
@@ -67,6 +71,11 @@ def prepare_interfaces(project):
     parts=[_voxelize_at(project,field_axes(r,c),True) for c in ('Ex','Ey','Ez')]
     diagonal=np.stack([1/p[0].astype(float) for p in parts],axis=-1)
     baseline=diagonal.reshape(-1).copy();ownership=np.stack([p[2] for p in parts],axis=-1)
+    from .subpixel_dispersive import prepare_dispersive
+    dispersive=prepare_dispersive(project,ownership)
+    # Every sample of a dispersive medium leaves the coupled operator, including round-off couplings inside it.
+    blocked=np.isin(ownership.reshape(-1),[i for i,m in enumerate(project.materials) if m.oscillators])
+    if dispersive is not None:blocked[dispersive.touched]=True
     counts={key:max(p[1].get(key,0) for p in parts) for key in parts[0][1]}
     shape=np.array(r.shape);steps=np.array([v[1]-v[0] for v in r.mesh_nodes]);dim=geometry.dim
     node_shape=tuple(int(shape[a]) if a in geometry.periodic or a>=dim else int(shape[a]+1) for a in range(3))
@@ -106,6 +115,8 @@ def prepare_interfaces(project):
                             turns=np.floor_divide(edge[:,b],shape[b]);phase*=np.exp(1j*turns*r.bloch_phase[b]);edge[:,b]%=shape[b]
                         else:good&=(edge[:,b]>=0)&(edge[:,b]<shape[b]);edge[:,b]=np.clip(edge[:,b],0,shape[b]-1)
                     indices.append(np.ravel_multi_index(edge.T,r.shape)*3+a);valid.append(good);phases.append(phase)
+                touched=np.any([v&blocked[i] for v,i in zip(valid,indices)],axis=0)
+                valid=[v&~touched for v in valid]
                 for a in range(3):
                     mask=valid[a];idx=indices[a][mask]
                     np.add.at(diagonal.reshape(-1),idx,(tensor[mask,a,a]-baseline[idx])/8)
@@ -117,6 +128,11 @@ def prepare_interfaces(project):
                         if r.complex_fields:value=value*np.conj(phases[a][mask])*phases[b][mask]
                         all_rows.append(indices[a][mask]);all_cols.append(indices[b][mask]);all_values.append(value)
     size=int(np.prod(shape))*3
+    if dispersive is not None:
+        diagonal.reshape(-1)[dispersive.indices]=1/dispersive.epsilon
+        diagonal.reshape(-1)[dispersive.full]=1/dispersive.full_epsilon
+        ownership.reshape(-1)[dispersive.indices]=-1
+        ownership.reshape(-1)[dispersive.full]=dispersive.owners
     if all_rows:
         sparse=coo_matrix((np.concatenate(all_values),(np.concatenate(all_rows),np.concatenate(all_cols))),shape=(size,size)).tocsr()
         sparse.eliminate_zeros();length=np.diff(sparse.indptr);rows=np.flatnonzero(length)
@@ -132,8 +148,10 @@ def prepare_interfaces(project):
                   spectrally_bounded_triplets=clipped_count,degenerate_normals=degenerate,
                   inverse_epsilon_bounds=[1/geometry.epsilon_bounds[1],1/geometry.epsilon_bounds[0]],
                   auxiliary_device_bytes=memory,preparation_seconds=time.perf_counter()-started,
-                  epsilon_image='Reciprocal diagonal of the global inverse constitutive operator. Off-diagonal terms also act on fields.')
-    return SubpixelPlan(diagonal,rows,columns,values,ownership,counts,metadata)
+                  epsilon_image='Reciprocal diagonal of the global inverse constitutive operator. Off-diagonal terms also act on fields.'
+                  +(' Samples of mixed dispersive cells show their epsilon-infinity; their poles act through the ADE.' if dispersive is not None else ''))
+    if dispersive is not None:metadata['dispersive']=dispersive.metadata
+    return SubpixelPlan(diagonal,rows,columns,values,ownership,counts,metadata,dispersive)
 
 
 class SubpixelState:
@@ -162,3 +180,6 @@ class SubpixelState:
 
 def configure_interfaces(grid,plan):
     grid.subpixel=SubpixelState(grid,plan) if plan is not None else None
+    if plan is not None and plan.dispersive is not None and len(plan.dispersive.indices):
+        from .subpixel_dispersive import InterfaceADE
+        grid.material_states.append(InterfaceADE(grid,plan.dispersive))

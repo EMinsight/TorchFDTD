@@ -97,6 +97,9 @@ class StateDiagnostics:
         self.material_weights = [state.take(
             self.volume[...,None].expand(*r.shape,3) if self.torch else
             np.broadcast_to(self.volume[...,None],(*r.shape,3))) for state in grid.material_states]
+        # Sample-wise interface poles (torchfdtd.subpixel_dispersive) carry their energy factors in the weights.
+        self.pole_weights = [state.energy_weights(grid, weight) if hasattr(state, 'energy_weights') else None
+                             for state, weight in zip(grid.material_states, self.material_weights)]
         self.cuda = None
         self.backend = 'torch' if self.torch else 'numpy'
         if fused and self.torch and grid.E.is_cuda:
@@ -127,7 +130,11 @@ class StateDiagnostics:
         for j in range(3):
             energy = energy + self.square_sum(g.E[...,j], self.real64(self.volume)/self.real64(g.inverse_permittivity[...,j]))
             energy = energy + self.square_sum(g.H[...,j], self.volume)
-        for state, weight in zip(g.material_states, self.material_weights):
+        for state, weight, poles in zip(g.material_states, self.material_weights, self.pole_weights):
+            if poles is not None:
+                for p, q, (q_weight, p_weight) in zip(state.P, state.Q, poles):
+                    energy = energy + self.square_sum(q, q_weight) + self.square_sum(p, p_weight)
+                continue
             for j, (w0, strength, _) in enumerate(state.oscillators):
                 p = state.P[j] if state.multiple else state.P
                 q = state.Q[j] if state.multiple else state.Q

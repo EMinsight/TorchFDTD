@@ -103,9 +103,10 @@ Bookkeeping in `G3-05_drude_sphere.oracles.json`. Record
 | Staircased Drude spheres r = 0.02, 0.035, 0.05 um at h = 0.02, 0.01, 0.005 um, `tests/test_physics_g3_b.py::test_g3_05_drude_sphere` | Complex-index Bohren-Huffman series with the analytic Drude permittivity (`analytic_continuum`); an ADE-sampled permittivity variant separates the time discretisation | Closed form in the test | at h = 0.005 um the scattering errors are 138, 46 and 45 percent and the absorption errors 673, 499 and 345 percent against the case budgets of 50/30/20 and 100/60/40 percent: FAILED as the case anticipated; inner/outer surface consistency 3e-4 to 3.2e-3 | 48 fs, 1259 to 5036 steps | 0.08 um |
 | Layer A, `test_g3_05_drude_cuda_layer_a` | CUDA float32 against CPU float64 (`shared_discrete_operator`) | Same operator | 0 to 7e-5 relative against rtol 1e-4 | 1259 and 2518 steps | 0.08 um |
 
-Open residual: no conformal treatment of a dispersive interface exists
-(`tests/test_physics_g3_b_r2.py::test_g3_05_subpixel_rejects_dispersive`), so
-the staircase error dominates and the task stays FAILED.
+Open residual: the staircase error dominates and the task stays FAILED; the
+dispersive subpixel interfaces of
+[SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md#dispersive-interfaces) are not
+judged on this case.
 
 ### G3-07 `G3-07_cpml_reflection_stability`
 

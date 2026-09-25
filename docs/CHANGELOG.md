@@ -7,6 +7,12 @@ the first section covers the whole history since the first commit (2026-09-20).
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
+## Unreleased
+
+### Added
+
+- Dispersive subpixel interfaces: with `interface_method='subpixel'`, a Yee sample whose cell meets a single-pole (Drude or one Lorentz pole) material takes the diagonal of the inverse averaging tensor with dispersive tangential and normal laminate averages (Deinega and Valuev 2007), written exactly as epsilon-infinity plus two passive Lorentz poles per sample and advanced by the unchanged trapezoidal ADE (`torchfdtd/subpixel_dispersive.py`); such samples leave the coupled dielectric operator, which keeps its spectral bounds. Resident CPU, Torch CUDA, fused CUDA and tensor cohorts run it; multipole materials, two dispersive materials in one Yee cell and `pml_dispersion='frozen'` with a dispersive structure are refused, where subpixel previously refused every dispersive material. Dielectric-only subpixel scenes are unchanged bit for bit ([SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md#dispersive-interfaces), this commit).
+
 ## 0.15.0 (2026-09-23)
 
 ### Security

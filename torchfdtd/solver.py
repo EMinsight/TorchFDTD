@@ -241,6 +241,8 @@ def estimate(p: Project, *, endpoint_dispatch=True):
         field_bytes=real_bytes*(2 if r.complex_fields else 1)
         interface_bytes=n*(3*8*(field_bytes+4)+24+3*field_bytes)
         warnings.append('Subpixel uses a bounded symmetric edge/face operator on lossless uniform-axis grids. The epsilon image shows only its reciprocal diagonal. Check face-quadrature and mesh convergence, especially at corners, overlaps and unresolved thin features.')
+        if dispersive:
+            warnings.append('Cells cut by a dispersive surface use the diagonal of the dispersive laminate tensor: two passive Lorentz poles per Yee sample and no off-diagonal coupling. Check mesh convergence near plasmon resonances.')
     from .injection import oneway_metadata
     planes=[oneway_metadata(s,r) for s in p.sources if s.enabled and s.injection=='oneway' and s.kind!='tfsf']
     if planes:
