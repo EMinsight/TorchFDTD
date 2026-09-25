@@ -128,8 +128,9 @@ def configure_materials(grid, project, ownership):
     permittivity band lies inside the grid band (surface-plasmon-like modes
     grow after the source has ended, a lossless Lorentz SiN post array in a
     20 nm grid diverges after ~1000 steps once the domain exceeds a few µm).
-    With 'absorber' the PML faces carry no stretched coordinates and the ADE
-    runs everywhere. Its E conductivity is sigma*eps_ref, eps_ref the real
+    With 'absorber' the faces those materials reach carry no stretched
+    coordinates (boundaries.absorber_faces) and the ADE runs everywhere. Its
+    E conductivity is sigma*eps_ref, eps_ref the real
     permittivity at the reference frequency (eps_inf where that is not
     positive), so that eps_ref*sigma matches the magnetic loss sigma*mu there;
     the trapezoidal update then solves (eps_inf + s eps_ref) E_new + dP =

@@ -362,9 +362,9 @@ def _run_control(region):
                 source_tail_amplitude=float(c.source_tail_amplitude), after_source_s=float(c.after_source_s))
 
 
-def _boundary_plan(region):
+def _boundary_plan(region, absorber_faces=()):
     from .boundaries import BoundaryDescription
-    template = BoundaryDescription(region)
+    template = BoundaryDescription(region, absorber_faces)
     faces = []
     for axis in range(3):
         for side, face in enumerate(region.boundaries.pair(axis)):
@@ -461,6 +461,7 @@ def resolve_plan(project):
     """Resolve every physical input of ``project`` once and return the frozen plan."""
     from .models import Project
     from .solver import estimate, field_axes
+    from .boundaries import absorber_faces
     project = Project.model_validate(project.model_dump())
     r = project.region
     nodes = tuple(_frozen(a) for a in r.mesh_nodes)
@@ -479,7 +480,7 @@ def resolve_plan(project):
                   sample_time_steps=dict(SAMPLE_TIME_STEPS), fourier_convention=FOURIER_CONVENTION,
                   background_index=float(r.background_index), material_sampling=r.material_sampling,
                   interface_method=r.interface_method, subpixel_quadrature=int(r.subpixel_quadrature),
-                  boundaries=_boundary_plan(r), pml_dispersion=r.pml_dispersion, structures=structures,
+                  boundaries=_boundary_plan(r, absorber_faces(project)), pml_dispersion=r.pml_dispersion, structures=structures,
                   materials=materials, ade=_ade_plans(project), sources=_source_plans(project),
                   monitors=_monitor_plans(project))
     # The PML dispersion mode changes the absorber update (docs/BOUNDARIES.md), so it is hashed with the exterior.

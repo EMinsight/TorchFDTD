@@ -498,7 +498,11 @@ class Simulation:
             if obj.enabled and counts.get(obj.id) == 0:
                 message='no Yee component centers intersect this object; subpixel integration may still include it. Check quadrature and mesh convergence.' if interface_plan is not None else 'no cells intersect this object. Refine mesh or reposition it.'
                 stats['warnings'].append(f'{obj.name}: {message}')
-        g = YeeGrid(r)
+        from .boundaries import absorber_faces
+        faces = absorber_faces(p)
+        if r.pml_dispersion == 'absorber':
+            stats['absorber_faces'] = ['xyz'[a]+('_max' if s else '_min') for a, s in faces]
+        g = YeeGrid(r, faces)
         plan.verify_grid(g)
         if use_cuda:
             g.inverse_permittivity[:] = torch.as_tensor(1/(eps if eps.ndim == 4 else eps[..., None]), device='cuda', dtype=dtype)

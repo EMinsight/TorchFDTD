@@ -192,9 +192,10 @@ class Region(Model):
     # Dispersive (ADE) material inside a PML layer. 'ade' keeps the pole update
     # there (unstable for poles whose negative-permittivity band lies inside the
     # grid band); 'frozen' replaces it by the real permittivity at the source
-    # centre frequency; 'absorber' turns every PML face into a graded, matched
-    # electric and magnetic conductivity layer of the same depth and keeps the
-    # ADE. Resident forward solvers only; see docs/BOUNDARIES.md.
+    # centre frequency; 'absorber' turns every PML face that a dispersive
+    # structure reaches into a graded, matched electric and magnetic conductivity
+    # layer of the same depth and keeps the ADE. Resident forward solvers only;
+    # see docs/BOUNDARIES.md.
     pml_dispersion: Literal['ade', 'frozen', 'absorber'] = 'ade'
     boundaries: Boundaries = Field(default_factory=Boundaries)
     bloch_phase: tuple[float, float, float] = (0, 0, 0)  # radians per positive unit-cell translation
