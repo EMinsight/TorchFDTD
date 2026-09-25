@@ -248,3 +248,115 @@ def test_forward_only_rejects_nonfinite_fields(monkeypatch, device):
     monkeypatch.setattr(core, '_advance_recorded', poisoned)
     with torch.no_grad(), pytest.raises(RuntimeError, match='CPML fields became nonfinite'):
         model(base, fixed_epsilon=fixed)
+
+
+def legacy_interior_scale(system, a, b, chunk=None):
+    """The 0.16.0 drift scale: fixed blocks of 65536 real lanes."""
+    square = torch.zeros((), dtype=torch.float64, device=system.device)
+    peak = torch.zeros((), dtype=torch.float32, device=system.device)
+    for field in system.state()[:2]:
+        capacity = 32768 if field.is_complex() else 65536
+        rows = field.view(-1, field.shape[2], 3)
+        for z in range(a, b + 1, capacity // 3):
+            end = min(b + 1, z + capacity // 3)
+            row_count = max(1, capacity // (3 * (end - z)))
+            for row in range(0, rows.shape[0], row_count):
+                block = rows[row:row + row_count, z:end].reshape(-1)
+                peak = torch.maximum(peak, block.abs().amax())
+                lanes = torch.view_as_real(block) if block.is_complex() else block
+                square.add_(lanes.to(torch.float64).square().sum())
+    maximum, norm = float(peak), math.sqrt(float(square))
+    if not math.isfinite(maximum) or not math.isfinite(norm):
+        raise RuntimeError('Reversible interior fields became nonfinite.')
+    return maximum, norm
+
+
+def wide(case, device):
+    """48 x 49 transverse cells: the 11-plane interior spans several default chunks."""
+    project = extended_fixture(True)[0] if case == 'diagonal-bloch' else fixture(64)[0]
+    project.region.size = (4.8, 4.9, 2)
+    if device == 'cuda':
+        project.region.cuda_kernel = 'fused'
+    shape = project.region.shape
+    base = torch.full(shape, 1.4)
+    base[:, :, 9:11] = 2.25
+    base[20:30, 10:40, 6:12] = 3.1
+    fixed = torch.full(shape, 1.3)
+    fixed[:, :, 15:] = 1.7
+    if case == 'diagonal-bloch':
+        offsets = torch.tensor([0., .2, .4])
+        base, fixed = base[..., None]+offsets, fixed[..., None]+offsets
+    return project, base.contiguous().to(device), fixed.contiguous().to(device)
+
+
+def timeless(report):
+    report = dict(report, last_backward=dict(report['last_backward']))
+    del report['forward_seconds'], report['last_backward']['seconds']
+    return report
+
+
+@pytest.mark.parametrize('device', ['cpu', 'cuda'])
+@pytest.mark.parametrize('case', ['scalar', 'diagonal-bloch'])
+def test_diagnostic_chunk_default_is_unchanged_and_large_chunk_moves_only_the_drift_l2(monkeypatch, device, case):
+    cuda_or_cpu(device)
+    torch.set_num_threads(1)
+    project, base, fixed = wide(case, device)
+
+    def run(**options):
+        model = ReversibleCPMLSimulation(project, ReversibleCPMLOptions(**options))
+        parameter = base.clone().requires_grad_()
+        result = model(parameter, fixed_epsilon=fixed)
+        seed = torch.randn(result.signals.shape, dtype=result.signals.dtype,
+                           generator=torch.Generator().manual_seed(907)).to(device)
+        gradient, = torch.autograd.grad(result.signals, parameter, seed)
+        return result.signals.detach(), gradient, result.report
+
+    a, b = ReversibleCPMLSimulation(project).interior_z
+    lanes = 3*project.region.shape[0]*project.region.shape[1]*(b-a+1)*(2 if project.region.complex_fields else 1)
+    assert lanes > 65536
+    with monkeypatch.context() as patch:
+        patch.setattr(core, '_interior_scale', legacy_interior_scale)
+        old = run()
+    default, large = run(), run(diagnostic_chunk_elements=1 << 20)
+    assert torch.equal(default[0], old[0]) and torch.equal(default[1], old[1])
+    assert timeless(default[2]) == timeless(old[2])
+    assert default[2]['diagnostic_chunk_elements'] == 65536
+    assert torch.equal(large[0], default[0]) and torch.equal(large[1], default[1])
+    assert large[2]['diagnostic_chunk_elements'] == lanes
+    assert large[2]['sampled_forward_peak'] == default[2]['sampled_forward_peak']
+    assert large[2]['last_backward']['initial_max_abs'] == default[2]['last_backward']['initial_max_abs']
+    for value, reference in ((large[2]['sampled_forward_l2'], default[2]['sampled_forward_l2']),
+                             (large[2]['last_backward']['initial_l2'], default[2]['last_backward']['initial_l2'])):
+        assert reference > 0 and abs(value-reference) <= 1e-12*reference
+        print(dict(case=case, device=device, drift_l2_relative_difference=abs(value-reference)/reference))
+    assert default[1].abs().max() > 0
+
+
+@pytest.mark.parametrize('device', ['cpu', 'cuda'])
+def test_diagnostic_chunk_reservation_grows_by_24_bytes_per_lane(device):
+    cuda_or_cpu(device)
+    project, _, _ = wide('scalar', device)
+    a, b = ReversibleCPMLSimulation(project).interior_z
+    lanes = 3*project.region.shape[0]*project.region.shape[1]*(b-a+1)
+    plans = [ReversibleCPMLSimulation(project, ReversibleCPMLOptions(diagnostic_chunk_elements=n)).plan(device=device)
+             for n in (65536, 1 << 20)]
+    assert [p['diagnostic_chunk_elements'] for p in plans] == [65536, lanes]
+    growth = 24*(lanes-65536)
+    assert plans[1]['diagnostic_reservation_bytes']-plans[0]['diagnostic_reservation_bytes'] == growth
+    assert plans[1]['workspace_reservation_bytes']-plans[0]['workspace_reservation_bytes'] == growth
+    extra = plans[1]['memory_reservation_bytes']-plans[0]['memory_reservation_bytes']
+    # CUDA adds its 5% allocation headroom on top of the scratch.
+    assert extra == growth if device == 'cpu' else growth <= extra <= growth*21//20+1
+    # A chunk larger than the interior is bounded by the interior.
+    small, _, _ = fixture(20)
+    bounded = [ReversibleCPMLSimulation(small, ReversibleCPMLOptions(diagnostic_chunk_elements=n)).plan(device=device)
+               for n in (65536, 1 << 26)]
+    for key in ('diagnostic_chunk_elements', 'diagnostic_reservation_bytes', 'memory_reservation_bytes'):
+        assert bounded[0][key] == bounded[1][key]
+    assert bounded[0]['diagnostic_chunk_elements'] == 3*6*7*11
+
+
+@pytest.mark.parametrize('value', [65535, (1 << 26)+1, True, 65536.])
+def test_diagnostic_chunk_option_is_validated(value):
+    with pytest.raises(ValueError, match='diagnostic_chunk_elements'):
+        ReversibleCPMLOptions(diagnostic_chunk_elements=value)

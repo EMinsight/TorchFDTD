@@ -9,6 +9,10 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
+### Added
+
+- `ReversibleCPMLOptions(diagnostic_chunk_elements=...)`, 65536 (the previous fixed value) through 2**26, sets the real lanes per chunk of the recorded-CPML drift diagnostic and of the finite and material checks; the report and the reservation carry it (`diagnostic_chunk_elements`, 24 bytes of scratch per lane in `diagnostic_reservation_bytes`). The default reproduces earlier reports bitwise. A larger chunk cuts the number of small reductions (146,224 per 1200-step forward of a 920 x 920 x 125 grid with 99 interior planes at the default, 570 at 2**24) and changes only the float64 summation order of the reported drift L2 values, not signals, spectra or gradients ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#what-is-recorded-and-reconstructed), this commit).
+
 ### Changed
 
 - `ReversibleCPMLSimulation` and `ReversibleCPMLPlaneSimulation` run a call that cannot request a gradient (under `torch.no_grad()` or `torch.inference_mode()`, or with an `epsilon` that does not require gradients) forward only: the recorded forward's updates, source injections, observations and DFT blocks in the same order, scalar or diagonal epsilon, CPU or fused CUDA, without the boundary trace, the terminal interior copy or the 64-step reconstruction scale. Signals and spectra are bitwise equal to the recorded forward's. The report gains `forward_only`; on a forward-only call `sampled_forward_peak` and `sampled_forward_l2` are None, `terminal_copies` is 0, and the observations and the final E and H fields are checked for non-finite values. Admission is unchanged. The new option `ReversibleCPMLOptions(forward_only='never')` (default `'auto'`) records every call as before ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#forward-only-calls), this commit).
