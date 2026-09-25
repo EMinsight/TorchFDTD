@@ -16,7 +16,7 @@ test); a platform with a record but neither is inventoried, not verified.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | rtx3060-win11-lab | NVIDIA GeForce RTX 3060 | 8.6 | 591.86 | 12.6 | 2.10.0+cu126 | 13.6.0 | 3.10.2 | Windows-10-10.0.26200-SP0 | [rtx3060-win11-lab](validation/platforms/rtx3060-win11-lab.json) | G4-01 to G4-06 evidence runs listed in [validation/completion_gates.json](validation/completion_gates.json) |
 | rtx5880-ada-win11-remote | NVIDIA RTX 5880 Ada Generation | 8.9 | 581.80 | 12.8 | 2.10.0 | 13.6.0 | 3.11.14 | Windows-10-10.0.26100-SP0 | [rtx5880-ada-win11-remote](validation/platforms/rtx5880-ada-win11-remote.json) | none yet: the G4 tests have not been recorded on this platform
-| rtx3060-wsl2-ubuntu2204 | NVIDIA GeForce RTX 3060 | 8.6 | 591.86 | 12.8 | 2.11.0+cu128 | 13.6.0 | 3.12.14 | Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35 | [rtx3060-wsl2-ubuntu2204](validation/platforms/rtx3060-wsl2-ubuntu2204.json) | none yet: the G4 run on this platform has not been recorded |
+| rtx3060-wsl2-ubuntu2204 | NVIDIA GeForce RTX 3060 | 8.6 | 591.86 | 12.8 | 2.11.0+cu128 | 13.6.0 | 3.12.14 | Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35 | [rtx3060-wsl2-ubuntu2204](validation/platforms/rtx3060-wsl2-ubuntu2204.json) | G4-01 to G4-06 required tests and the gpu-nightly suite in the [run record](validation/platforms/g4/rtx3060-wsl2-ubuntu2204.json), not gate evidence |
 
 ## Notes
 
@@ -36,5 +36,26 @@ test); a platform with a record but neither is inventoried, not verified.
   holding torch 2.11.0+cu128 and the extras `dev,cuda-kernels,gds,hdf5`. The
   CPU-only GitHub Actions job (`cpu-pr` suite) is Linux without a GPU and has
   no row here. macOS has no test record of any kind.
+- What ran on `rtx3060-wsl2-ubuntu2204`: inside the WSL2 distribution, from a
+  full git clone on its ext4 file system outside the home directory at commit
+  `ee739535589f` (Linux git cannot read the `gitdir: D:/...` file of a Windows
+  worktree, and pytest writes the checkout path into the JUnit reports), with
+  a venv of Python 3.12.14, torch 2.11.0+cu128 and
+  `pip install -e .[dev,cuda-kernels,gds,hdf5]`. The planned command of every
+  G4 task (G4-04 also with `PYTORCH_NO_CUDA_MEMORY_CACHING=1
+  CUDA_LAUNCH_BLOCKING=1`) and `python scripts/run_suite.py gpu-nightly` ran
+  there with two CPU threads, beside other jobs on the shared GPU.
+  `scripts/record_platform_g4.py` wrote the
+  [run record](validation/platforms/g4/rtx3060-wsl2-ubuntu2204.json) from
+  their JUnit reports: the seven task runs passed 251 tests with no failure
+  and no skip; gpu-nightly passed 3,293 tests with no failure or error,
+  deselected the two `long` tests and skipped 98: two optional platform
+  checks, 95 opt-in tests whose `TORCHFDTD_G3_FINE`, `TORCHFDTD_G3_FULL`,
+  `TORCHFDTD_G6_FULL` or `TORCHFDTD_G7_FULL` variable the suite does not set,
+  and the clean-install check of the wheel that its record names on the
+  Windows host. The record is not gate evidence: G4-01 to G4-06 are judged on
+  the Windows runs of `rtx3060-win11-lab`. The first gpu-nightly run here
+  failed one G5-02 test because the Linux process I/O counters were
+  storage-layer bytes; that was fixed in 5986c9a before the recorded run.
 - The two-GPU HPC profile has no platform at all; see
   [RELEASE_SCOPE.md](RELEASE_SCOPE.md).
