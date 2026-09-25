@@ -1,19 +1,22 @@
-"""G7-01: the metagrating application workflow of docs/G7_WORKFLOWS.md, case G7-01r2.
+"""G7-01: the metagrating application workflow of docs/G7_WORKFLOWS.md, case G7-01r3.
 
 A density of 100 pixels (0.02 um) across the 2.0 um period of the metagrating fixture
-(examples/meep_comparison/metagrating/geometry.json: grid, absorbers, pulse and DFT lines; G7-01r2
-adds 3 um of air above and of substrate below and runs 1120 fs) is extruded through the 0.5 um
-silicon layer on SiO2 and designed with DesignProblem from three seeds for the mean +1 transmitted
-order efficiency at 1.50, 1.55 and 1.60 um (TE, E along the ridges, normal incidence from the
-substrate) at the 0.01 um mesh. The filter radius is chosen first, on development seeds only.
-Every seed's design is binarized, checked for the declared linewidth and gap, evaluated at 0.01 and
-0.005 um for TE and TM at normal incidence and at a fixed Bloch wavevector over 41 wavelengths, and
-checked against TORCWA 0.1.4.2 (rcwa_check.py, run in the interpreter that holds TORCWA). The case
-file docs/validation/cases/G7-01r2.json supplies the declared quantities and criteria.
+(examples/meep_comparison/metagrating/geometry.json: grid, absorbers, pulse and DFT lines, with 3 um
+more air above and substrate below) is extruded through the 0.5 um silicon layer on SiO2 and designed
+with DesignProblem from three seeds at the 0.01 um mesh over 1120 fs. The design is robust: eroded,
+nominal and dilated projections of the same filtered density are evaluated and the smallest of their
+mean +1 transmitted order efficiencies at 1.50, 1.55 and 1.60 um (TE, E along the ridges, normal
+incidence from the substrate) is maximized; the threshold shift is chosen first, on development seeds
+only. Every seed's nominal design is binarized, opened and closed by 3 pixels, checked for the declared
+linewidth and gap, evaluated over 2240 fs at 0.01 and 0.005 um for TE and TM at normal incidence and at
+a fixed Bloch wavevector over 41 wavelengths, and checked against TORCWA 0.1.4.2 (rcwa_check.py, run in
+the interpreter that holds TORCWA). The fixture's two-ridge baseline is evaluated in the same path. The
+case file docs/validation/cases/G7-01r3.json supplies the declared quantities and criteria.
 
-    python -m examples.g7.metagrating.workflow --stage select-run --radius 0.06 --seed 11 --selection-dir <dev dir> --out <records>
+    python -m examples.g7.metagrating.workflow --stage select-run --shift 0.1 --seed 11 --selection-dir <dev dir> --out <records>
     python -m examples.g7.metagrating.workflow --stage select-decide --selection-dir <dev dir> --out <records>
     python -m examples.g7.metagrating.workflow --stage seed --seed 1 --skip-rcwa --out <records>   (one per declared seed, in parallel)
+    python -m examples.g7.metagrating.workflow --stage baseline --out <records>          (the two-ridge baseline in the judged path)
     python -m examples.g7.metagrating.workflow --stage rcwa --out <records>              (one TORCWA process for every seed)
     python -m examples.g7.metagrating.workflow --stage judge --out <records>
     python -m examples.g7.metagrating.workflow --small --out <dir>                           (CPU-sized development run)
@@ -50,10 +53,12 @@ from torchfdtd.solver import field_axes
 C0 = 299792458.0
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-CASE_PATH = ROOT/'docs'/'validation'/'cases'/'G7-01r2.json'
+CASE_PATH = ROOT/'docs'/'validation'/'cases'/'G7-01r3.json'
 GEOMETRY_PATH = ROOT/'examples'/'meep_comparison'/'metagrating'/'geometry.json'
 RCWA_SCRIPT = HERE/'rcwa_check.py'
-SELECTION = 'radius-selection.json'
+SELECTION = 'threshold-selection.json'
+BASELINE = 'baseline.json'
+REALIZATIONS = ('eroded', 'nominal', 'dilated')
 ORDERS = (-1, 0, 1)
 ALL_ORDERS = tuple(range(-3, 4))           # every order that can propagate in the band, for the energy balance
 DESIGN_WAVELENGTHS_UM = (1.50, 1.55, 1.60)
@@ -67,15 +72,17 @@ COURANT = .99/math.sqrt(2)
 
 @dataclass(frozen=True)
 class Settings:
-    """Parameters of one run. Settings.declared() reads the declared run from the case file and the radius
-    selection; Settings.for_selection() is one development design of the selection; small_run() is a CPU
-    development size that judges nothing."""
+    """Parameters of one run. Settings.declared() reads the declared run from the case file and the
+    threshold selection; Settings.for_selection() is one development design of the selection; small_run()
+    is a CPU development size that judges nothing."""
     design_mesh_um: float = .01
     fine_mesh_um: float = .005
-    physical_time_fs: float = 1120.
+    physical_time_fs: float = 1120.      # of every design run
+    evaluation_time_fs: float = 2240.    # of every evaluation, of the designs, the baseline and the bare substrate
     extension_um: float = 3.             # air above the layer and substrate below it, added to the fixture's cell
     absorber_um: float = .4
     filter_radius_um: float | None = None
+    threshold_shift: float | None = None  # robust projection at eta 0.5 +- shift; None designs the nominal projection alone
     open_close: bool = False             # periodic open-then-close of every thresholded design before its checks
     iterations_per_beta: int = 20
     betas: tuple = (8., 16., 32., 64.)
@@ -94,34 +101,34 @@ class Settings:
 
     @classmethod
     def declared(cls, case, selection):
-        """The declared run of the case file, with the filter radius of the recorded selection."""
+        """The declared run of the case file, with the threshold shift of the recorded selection."""
         f, p = case['fixture'], case_parameters(case)
         evaluation = f['evaluation']
         if not math.isclose(f['design_mesh_um'], evaluation['judged_mesh_um']):
             raise ValueError('the case file judges at a mesh other than the design mesh')
-        if selection.get('chosen_radius_um') is None:
-            raise ValueError('the radius selection chose no radius; the declared run cannot start')
+        if selection.get('chosen_threshold_shift') is None:
+            raise ValueError('the threshold selection chose no shift; the declared run cannot start')
         fine = [m for m in evaluation['meshes_um'] if not math.isclose(m, evaluation['judged_mesh_um'])]
-        return cls(design_mesh_um=f['design_mesh_um'], fine_mesh_um=fine[0], physical_time_fs=f['physical_time_fs'],
-                   extension_um=p['extension_um'], absorber_um=p['absorber_um'], filter_radius_um=selection['chosen_radius_um'],
-                   open_close=bool(selection.get('open_close', False)),
+        return cls(design_mesh_um=f['design_mesh_um'], fine_mesh_um=fine[0], physical_time_fs=p['design_time_fs'],
+                   evaluation_time_fs=p['evaluation_time_fs'], extension_um=p['extension_um'], absorber_um=p['absorber_um'],
+                   filter_radius_um=f['filter_radius_um'], threshold_shift=selection['chosen_threshold_shift'], open_close=True,
                    iterations_per_beta=f['iterations_per_beta'], betas=tuple(float(b) for b in f['projection_beta']),
                    learning_rate=f['learning_rate'], band_points=evaluation['wavelengths_um'][2], seeds=tuple(declared_seeds(case)),
                    rcwa_error_target=p['rcwa_error_target'], anomaly_exclusion_um=p['exclusion_um'])
 
     @classmethod
-    def for_selection(cls, case, radius_um, seed):
-        """One development design of the radius selection: the declared schedule at the selection mesh and time,
-        thresholded without the open and close (the selection records the feature sizes of the filter alone)."""
+    def for_selection(cls, case, threshold_shift, seed):
+        """One development design of the threshold selection: the declared schedule at the selection mesh and
+        time, thresholded without the open and close (the selection judges the robust design alone)."""
         p = case_parameters(case)
-        return replace(cls.declared(case, dict(chosen_radius_um=radius_um, open_close=False)), design_mesh_um=p['selection_mesh_um'],
-                       physical_time_fs=p['selection_time_fs'], seeds=(seed,))
+        return replace(cls.declared(case, dict(chosen_threshold_shift=threshold_shift)), design_mesh_um=p['selection_mesh_um'],
+                       physical_time_fs=p['selection_time_fs'], evaluation_time_fs=p['selection_time_fs'], open_close=False, seeds=(seed,))
 
     @classmethod
     def small_run(cls):
-        return cls(design_mesh_um=.04, fine_mesh_um=.02, physical_time_fs=56., extension_um=.2, filter_radius_um=.06, iterations_per_beta=1,
-                   band_points=5, seeds=(1,), backend='cpu', checkpoints=4, rcwa_harmonics=(10, 20), rcwa_error_target=1., rcwa_device='cpu',
-                   small=True)
+        return cls(design_mesh_um=.04, fine_mesh_um=.02, physical_time_fs=56., evaluation_time_fs=56., extension_um=.2, filter_radius_um=.06,
+                   iterations_per_beta=1, band_points=5, seeds=(1,), backend='cpu', checkpoints=4, rcwa_harmonics=(10, 20), rcwa_error_target=1.,
+                   rcwa_device='cpu', small=True)
 
     @property
     def iterations(self):
@@ -151,26 +158,30 @@ def declared():
 
 
 def case_parameters(case):
-    """The quantities that the case file states in prose: radius candidates and development seeds, the
-    selection mesh and time, the anomaly exclusion, the TORCWA TM error target, the absorber, the cell
-    extension and the 0.02 limit of (c), (d) and (e)."""
+    """The quantities of the case file that the workflow reads: the threshold-shift candidates, their
+    fallback and development seeds, the selection mesh and time, the design and evaluation times, the
+    anomaly exclusion, the TORCWA TM error target, the absorber, the cell extension and the 0.02 limit of
+    (c), (d) and (e); the ones stated in prose are parsed and checked."""
     f = case['fixture']
+    robust = f['robust_projection']
 
     def search(pattern, text):
         found = re.search(pattern, text)
         if found is None:
             raise ValueError(f'the case file no longer states {pattern!r}: {text}')
         return found
-    radius = search(r'development seeds (\d+) to (\d+) from ([\d., and]+) um', f['filter_radius_um'])
-    selection = search(r'at the declared (\d+\.\d+) um mesh and (\d+) fs', f['filter_radius_um'])
     extension = f['cell_extension_um']
     if extension['air_above_layer'] != extension['substrate_below_layer'] or 'every design and evaluation run' not in extension['applies_to']:
         raise ValueError('the workflow adds the same extension above and below in every run')
     for key in ('rcwa_agreement', 'mesh', 'energy_balance'):
         search(r'0\.02', case['acceptance'][key])
-    return dict(candidates_um=[float(v) for v in re.findall(r'\d+\.\d+', radius.group(3))],
-                development_seeds=list(range(int(radius.group(1)), int(radius.group(2))+1)),
-                selection_mesh_um=float(selection.group(1)), selection_time_fs=float(selection.group(2)),
+    search(r'larger of 0\.7706 and', case['acceptance']['performance'])
+    search(r'3 pixels is applied to every binary design', f['open_close'])
+    return dict(shift_candidates=[float(v) for v in robust['threshold_shift_candidates']],
+                shift_fallback=float(search(r'if every candidate is rejected, (\d+\.\d+)', robust['threshold_shift_rule']).group(1)),
+                development_seeds=[int(s) for s in robust['development_seeds']], selection_mesh_um=float(robust['selection_mesh_um']),
+                selection_time_fs=float(robust['selection_time_fs']), design_time_fs=float(f['physical_time_fs']['design']),
+                evaluation_time_fs=float(f['physical_time_fs']['evaluation']),
                 exclusion_um=float(search(r'at least (\d+\.\d+) um from every Rayleigh anomaly', f['rayleigh_anomaly_exclusion']).group(1)),
                 rcwa_error_target=float(search(r'at most (\d+\.\d+)', f['torcwa_tm_convergence']).group(1)),
                 absorber_um=float(search(r'(\d+\.\d+) um CPML', f['absorber']).group(1)), extension_um=extension['air_above_layer'], limit=.02)
@@ -222,12 +233,12 @@ def fixture_time_fs(g):
     return g['steps']*COURANT*g['mesh_um']*1e-6/C0*1e15
 
 
-def build_project(g, mesh_um, polarization, incidence, settings, *, monitors=('reflection', 'transmission')):
+def build_project(g, mesh_um, polarization, incidence, settings, time_fs, *, monitors=('reflection', 'transmission')):
     """The fixture scene without structures: the permittivity is supplied explicitly by layer_epsilon.
 
     The cell grows by settings.extension_um of substrate below and of air above, so the source, the DFT
     lines and the layer keep their positions; the absorber keeps its physical thickness at every mesh
-    (set per face, since Region.pml_cells is capped at 50) and the run lasts settings.physical_time_fs.
+    (set per face, since Region.pml_cells is capped at 50) and the run lasts time_fs.
     TE drives Ez (E along the ridges), TM drives Hz (H along the ridges); the Bloch incidence sets the
     declared k_x on both periodic faces, and the plane source carries its phase exp(i k_x x).
     """
@@ -237,7 +248,7 @@ def build_project(g, mesh_um, polarization, incidence, settings, *, monitors=('r
     absorber = int(round(settings.absorber_um/mesh_um))
     cuda = settings.backend == 'cuda'
     region = Region(dimension='2d', size=(lx, ly+2*settings.extension_um, 1), mesh=mesh_um,
-                    steps=int(round(settings.physical_time_fs*1e-15/(COURANT*mesh_um*1e-6/C0))), pml_cells=min(absorber, 50), courant_factor=.99,
+                    steps=int(round(time_fs*1e-15/(COURANT*mesh_um*1e-6/C0))), pml_cells=min(absorber, 50), courant_factor=.99,
                     backend=settings.backend, precision='float32', material_sampling='yee', cuda_kernel='fused' if cuda else 'torch',
                     cuda_monitor_kernel='fused' if cuda else 'torch',
                     boundaries=Boundaries(x_min=BoundaryFace(kind=kind), x_max=BoundaryFace(kind=kind), y_min=BoundaryFace(layers=absorber),
@@ -391,7 +402,7 @@ class CaseEvaluator:
         self.device = torch.device(settings.backend)
         self.wavelength = band_wavelengths(g, settings)
         self.frequency = C0/(self.wavelength*1e-6)
-        self.project = build_project(g, mesh_um, polarization, incidence, settings)
+        self.project = build_project(g, mesh_um, polarization, incidence, settings, settings.evaluation_time_fs)
         self.model = DifferentiablePlaneSimulation(self.project, AdjointOptions(checkpoints=0))
         started = _clock(self.device)
         self.reference = self.planes(np.zeros(pixel_count(g)))
@@ -433,11 +444,12 @@ class TransmissionObjective:
         self.device = torch.device(settings.backend)
         self.wavelength = np.asarray(DESIGN_WAVELENGTHS_UM)
         self.frequency = C0/(self.wavelength*1e-6)
-        project = build_project(g, settings.design_mesh_um, 'TE', 'normal', settings, monitors=('transmission',))
+        time_fs = settings.physical_time_fs
+        project = build_project(g, settings.design_mesh_um, 'TE', 'normal', settings, time_fs, monitors=('transmission',))
         self.region = project.region
         self.model = DifferentiablePlaneSimulation(project, AdjointOptions(checkpoints=settings.checkpoints))
-        reference = DifferentiablePlaneSimulation(build_project(g, settings.design_mesh_um, 'TE', 'normal', settings, monitors=('reflection',)),
-                                                  AdjointOptions(checkpoints=0))
+        reference = DifferentiablePlaneSimulation(build_project(g, settings.design_mesh_um, 'TE', 'normal', settings, time_fs,
+                                                                monitors=('reflection',)), AdjointOptions(checkpoints=0))
         with torch.no_grad():
             planes = reference(layer_epsilon(torch.zeros(pixel_count(g), device=self.device), self.region, g), self.frequency)
         self.incident = incident(planes, self.wavelength, g, 0., 'TE')
@@ -448,22 +460,81 @@ class TransmissionObjective:
         return transmitted_efficiency(plane, *self.incident, self.wavelength, self.g, 0., 'TE', ORDERS)
 
     def __call__(self, density):
+        """Minus the mean T+1 of `density`, or of the smallest of its three realizations when it carries them.
+
+        A RobustDensity output carries its eroded and dilated projections: all three are evaluated
+        without gradient, and the loss and gradient are those of the realization with the smallest mean
+        T+1 (the gradient of the minimum). A fixed density, as in DesignProblem.evaluate, is evaluated alone.
+        """
+        realizations = getattr(density, 'realizations', None)
+        extra = {}
+        if realizations is not None:
+            designs = dict(eroded=realizations['eroded'], nominal=density, dilated=realizations['dilated'])
+            with torch.no_grad():
+                values = {name: float(self.efficiencies(design.detach())[:, ORDERS.index(1)].mean()) for name, design in designs.items()}
+            active = min(REALIZATIONS, key=lambda name: values[name])
+            extra = {f'T+1 mean {name}': value for name, value in values.items()}
+            extra['active realization'] = float(REALIZATIONS.index(active))
+            density = designs[active]
         T = self.efficiencies(density)
         plus = T[:, ORDERS.index(1)]
         metrics = {f'T+1 {w:.2f} um': plus[i] for i, w in enumerate(self.wavelength)}
-        metrics.update({f'T{m:+d} mean': T[:, k].mean() for k, m in enumerate(ORDERS)})
+        metrics.update({f'T{m:+d} mean': T[:, k].mean() for k, m in enumerate(ORDERS)}, **extra)
         return -plus.mean(), metrics
 
 
+def project(filtered, beta, eta):
+    """The tanh projection of DensityParameterization at threshold eta, applied to a filtered density."""
+    beta, eta = filtered.new_tensor(beta), filtered.new_tensor(eta)
+    lower = torch.tanh(beta*eta)
+    return ((lower+torch.tanh(beta*(filtered-eta)))/(lower+torch.tanh(beta*(1-eta)))).clamp(0, 1)
+
+
+class RobustDensity(DensityParameterization):
+    """A DensityParameterization whose soft output, the nominal projection (eta 0.5) of the filtered density,
+    carries the eroded (eta 0.5 + shift) and dilated (eta 0.5 - shift) projections of the same filtered
+    density in its `realizations` attribute, for the robust objective. The hard output is the nominal
+    design thresholded at 0.5, as for the parent class."""
+    def __init__(self, *args, threshold_shift, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not 0 < threshold_shift < float(self.eta) or not float(self.eta)+threshold_shift < 1:
+            raise ValueError('the threshold shift must keep both shifted thresholds inside (0, 1)')
+        self.threshold_shift = float(threshold_shift)
+        self._config['threshold_shift'] = self.threshold_shift
+
+    def filtered(self):
+        """The filtered density: the parent's output with its projection switched off (beta 0) for this call."""
+        beta = float(self.beta)
+        with torch.no_grad():
+            self.beta.fill_(0.)
+        try:
+            return super().forward()
+        finally:
+            with torch.no_grad():
+                self.beta.fill_(beta)
+
+    def forward(self, *, hard=False, straight_through=False):
+        if hard or straight_through:
+            return super().forward(hard=hard, straight_through=straight_through)
+        filtered, beta, eta = self.filtered(), float(self.beta), float(self.eta)
+        nominal = project(filtered, beta, eta)
+        nominal.realizations = dict(eroded=project(filtered, beta, eta+self.threshold_shift),
+                                    dilated=project(filtered, beta, eta-self.threshold_shift))
+        return nominal
+
+
 def design_seed(seed, objective, settings, case, *, checkpoint=None):
-    """One start: 0.5 randn logits, conic filter, tanh projection continuation, Adam; binarized at 0.5."""
+    """One start: 0.5 randn logits, conic filter, tanh projection continuation (robust with eroded and dilated
+    projections when settings.threshold_shift is set), Adam; the nominal design binarized at 0.5."""
     f = case['fixture']
     pixels, pixel_um = f['pixels'], f['pixel_um']
     started = time.perf_counter()
     generator = torch.Generator().manual_seed(seed)
     initial = .5*torch.randn((pixels, 1), generator=generator)
-    design = DensityParameterization((pixels, 1), spacing_um=(pixel_um, f['design_layer_um'][1]-f['design_layer_um'][0]), initial=initial,
-                                     mode='logits', filter_radius_um=settings.filter_radius_um, boundary='periodic', beta=settings.betas[0], eta=.5)
+    options = dict(spacing_um=(pixel_um, f['design_layer_um'][1]-f['design_layer_um'][0]), initial=initial, mode='logits',
+                   filter_radius_um=settings.filter_radius_um, boundary='periodic', beta=settings.betas[0], eta=.5)
+    design = (DensityParameterization((pixels, 1), **options) if settings.threshold_shift is None
+              else RobustDensity((pixels, 1), threshold_shift=settings.threshold_shift, **options))
     optimizer = torch.optim.Adam(design.parameters(), lr=settings.learning_rate)
     problem = DesignProblem(design, objective, optimizer, name=f'g7-01-seed{seed}',
                             continuation=Continuation(every=settings.iterations_per_beta, factor=2., maximum=settings.betas[-1]))
@@ -473,6 +544,16 @@ def design_seed(seed, objective, settings, case, *, checkpoint=None):
                                       perturbation_um=pixel_um, boundary=(fab['boundary'], 'extend'))
     binary = problem.density(hard=True)
     extra = {}
+    if settings.threshold_shift is not None:
+        with torch.no_grad():
+            nominal = problem.parameterization()
+            realizations = dict(nominal.realizations, nominal=nominal)
+        patterns = {name: (value >= .5).cpu().numpy() for name, value in realizations.items()}
+        extra['robust'] = dict(threshold_shift=settings.threshold_shift, eta={name: .5+d for name, d in
+                                                                              zip(REALIZATIONS, (settings.threshold_shift, 0., -settings.threshold_shift))},
+                               thresholded={name: pattern[:, 0].astype(int).tolist() for name, pattern in patterns.items()},
+                               feature_sizes={name: measure_feature_sizes(pattern, pixel_um, boundary=(fab['boundary'], 'extend')).report()
+                                              for name, pattern in patterns.items()})
     if settings.open_close:
         # The optimizer never sees the open and close; every check below uses the processed design.
         side = int(round(fab['min_linewidth_um']/pixel_um))
@@ -511,7 +592,7 @@ def fixture_reproduction(g, backend='cuda'):
     path = ROOT/'docs'/'validation'/'meep_comparison'/'metagrating_comparison.json'
     committed, _ = load_json(path)
     recorded = committed['efficiencies']['torchfdtd']
-    settings = replace(Settings(), physical_time_fs=fixture_time_fs(g), extension_um=0., backend=backend)
+    settings = replace(Settings(), evaluation_time_fs=fixture_time_fs(g), extension_um=0., backend=backend)
     e = CaseEvaluator(g, settings, g['mesh_um'], 'TE', 'normal').evaluate(two_ridge_density(g))
     difference = max(float(np.max(abs(np.asarray(e[kind][str(m)])-np.asarray(recorded[kind][str(m)])))) for kind in ('T', 'R') for m in ORDERS)
     return dict(record=path.relative_to(ROOT).as_posix(), steps=e['steps'], band_mean_T_plus1=float(np.mean(e['T']['1'])),
@@ -557,11 +638,13 @@ def worst_difference(evaluation, reference, keep=None):
     return dict(value=worst[0], at_wavelength_um=worst[1], at_order=worst[2])
 
 
-def judge(records, case, settings, g):
-    """Every acceptance criterion of the case file, from the seed records alone.
+def judge(records, case, settings, g, baseline=None):
+    """Every acceptance criterion of the case file, from the seed records and the baseline record alone.
 
-    (c) and (e) keep the wavelengths at least settings.anomaly_exclusion_um from every Rayleigh anomaly of
-    the evaluated k_x and report the excluded ones; the values over all wavelengths are recorded beside them.
+    (b) is judged against the larger of the declared baseline and the baseline design evaluated in the
+    judged path (a missing baseline record fails it). (c) and (e) keep the wavelengths at least
+    settings.anomaly_exclusion_um from every Rayleigh anomaly of the evaluated k_x and report the excluded
+    ones; the values over all wavelengths are recorded beside them.
     """
     f = case['fixture']
     limit = case_parameters(case)['limit']
@@ -578,9 +661,14 @@ def judge(records, case, settings, g):
 
     scores = {r['seed']: float(np.mean(find(r, design, 'TE', 'normal')['T']['1'])) for r in records}
     best = max(scores, key=scores.get)
-    baseline = case['baseline']['band_mean_T_plus1']
-    criteria['performance'] = dict(value=scores[best], limit_min=baseline, best_seed=best, per_seed=scores, passed=scores[best] >= baseline,
-                                   statistic=f'band-mean T+1, TE, normal incidence, binary design, {design:g} um')
+    declared_baseline = case['baseline']['band_mean_T_plus1']
+    judged_baseline = None if baseline is None else baseline['band_mean_T_plus1']
+    bound = max(declared_baseline, judged_baseline if judged_baseline is not None else declared_baseline)
+    criteria['performance'] = dict(value=scores[best], limit_min=bound, declared_baseline=declared_baseline, judged_path_baseline=judged_baseline,
+                                   best_seed=best, per_seed=scores, passed=judged_baseline is not None and scores[best] >= bound,
+                                   statistic=f'band-mean T+1, TE, normal incidence, binary design after the open and close, {design:g} um, '
+                                             f'{settings.evaluation_time_fs:g} fs, against the larger of the declared baseline and the '
+                                             'baseline design in the same path')
 
     wavelength = band_wavelengths(g, settings)
     keep = {i: anomaly_distance(g, bloch_kx(g) if i == 'bloch' else 0., wavelength) >= settings.anomaly_exclusion_um-1e-12 for i in INCIDENCES}
@@ -655,50 +743,70 @@ def write_json(path, value):
     path.write_bytes((json.dumps(value, indent=1, allow_nan=False)+'\n').encode('utf-8'))
 
 
-def select_run(radius_um, seed, directory):
-    """One development design of the radius selection, kept in `directory` (outside the repository).
+def open_close_side(case):
+    """The declared minimum linewidth and gap in pixels, the side of the open and close."""
+    f = case['fixture']
+    fab = f['fabrication']
+    side = int(round(fab['min_linewidth_um']/f['pixel_um']))
+    if side != int(round(fab['min_gap_um']/f['pixel_um'])):
+        raise ValueError('one open-then-close side serves the declared linewidth and gap only when they are equal')
+    return side
 
-    The design runs at the selection mesh and time and records the feature sizes of its thresholded
-    pattern, the filter alone. The declared open and close is then applied, with its changed pixels,
-    the feature sizes of the processed pattern and the band-mean T+1 (TE, normal incidence) of both
-    patterns at the judged mesh and time. A design already in `directory` is reused, so only the
-    open-and-close block is computed again.
+
+def open_close_block(case, evaluator, thresholded):
+    """The open and close of a thresholded design with its changed pixels, the feature sizes of the processed
+    design and the band-mean T+1 of both patterns through `evaluator`; the evaluation of the processed one too."""
+    f = case['fixture']
+    fab = f['fabrication']
+    thresholded = np.asarray(thresholded, dtype=bool).reshape(-1, 1)
+    processed = open_close(thresholded, open_close_side(case))
+    sizes = measure_feature_sizes(processed, f['pixel_um'], boundary=(fab['boundary'], 'extend'))
+    before = evaluator.evaluate(thresholded[:, 0].astype(float))
+    changed = int((thresholded != processed).sum())
+    after = evaluator.evaluate(processed[:, 0].astype(float)) if changed else before
+    block = dict(side_pixels=open_close_side(case), changed_pixels=changed, thresholded=thresholded[:, 0].astype(int).tolist(),
+                 processed=processed[:, 0].astype(int).tolist(), linewidth_pixels=sizes.linewidth_pixels, gap_pixels=sizes.gap_pixels,
+                 violations=list(sizes.violations(min_linewidth_um=fab['min_linewidth_um'], min_gap_um=fab['min_gap_um'])),
+                 mesh_um=evaluator.mesh_um, physical_time_fs=after['physical_time_fs'],
+                 band_mean_T_plus1=dict(thresholded=float(np.mean(before['T']['1'])), processed=float(np.mean(after['T']['1']))))
+    return block, after
+
+
+def select_run(threshold_shift, seed, directory):
+    """One development design of the threshold selection, kept in `directory` (outside the repository).
+
+    The robust design runs at the selection mesh and time and records the feature sizes of its nominal
+    design thresholded at 0.5 (the robust design alone). The declared open and close is then applied,
+    with its changed pixels, the feature sizes of the processed pattern and the band-mean T+1 (TE,
+    normal incidence) of both patterns in the judged path. A design already in `directory` is reused, so
+    only the open-and-close block is computed again.
     """
     case, g, provenance = declared()
     if seed not in case_parameters(case)['development_seeds'] or seed in declared_seeds(case):
         raise ValueError(f'seed {seed} is not a development seed of the case file')
-    path = Path(directory)/f'selection-r{radius_um:g}-seed{seed}.json'
+    path = Path(directory)/f'selection-d{threshold_shift:g}-seed{seed}.json'
     if path.exists():
         run = load_json(path)[0]
     else:
-        settings = Settings.for_selection(case, radius_um, seed)
+        settings = Settings.for_selection(case, threshold_shift, seed)
         record = design_seed(seed, TransmissionObjective(g, settings), settings, case)
         e = CaseEvaluator(g, settings, settings.design_mesh_um, 'TE', 'normal').evaluate(record['binary'])
         sizes = record['fabrication']['feature_sizes']
-        run = dict(radius_um=radius_um, seed=seed, mesh_um=settings.design_mesh_um, physical_time_fs=e['physical_time_fs'],
+        run = dict(threshold_shift=threshold_shift, seed=seed, mesh_um=settings.design_mesh_um, physical_time_fs=e['physical_time_fs'],
                    linewidth_pixels=sizes['linewidth_pixels'], gap_pixels=sizes['gap_pixels'], violations=record['fabrication']['violations'],
                    smooth_objective=-record['history'][-1]['objective'], binary_objective=-record['design_mesh_binary']['objective'],
-                   band_mean_T_plus1=float(np.mean(e['T']['1'])), binary=record['binary'], seconds=record['design_wall_seconds'],
-                   record=record, evaluation=e, settings=asdict(settings), provenance=provenance,
+                   band_mean_T_plus1=float(np.mean(e['T']['1'])), binary=record['binary'],
+                   robust_feature_sizes={name: dict(linewidth_pixels=v['linewidth_pixels'], gap_pixels=v['gap_pixels'])
+                                         for name, v in record['robust']['feature_sizes'].items()},
+                   seconds=record['design_wall_seconds'], record=record, evaluation=e, settings=asdict(settings), provenance=provenance,
                    environment=environment(torch.device(settings.backend)))
-    f = case['fixture']
-    fab = f['fabrication']
-    side = int(round(fab['min_linewidth_um']/f['pixel_um']))
-    thresholded = np.asarray(run['binary'], dtype=bool).reshape(-1, 1)
-    processed = open_close(thresholded, side)
-    sizes = measure_feature_sizes(processed, f['pixel_um'], boundary=(fab['boundary'], 'extend'))
-    judged = Settings.declared(case, dict(chosen_radius_um=radius_um, open_close=True))
+    judged = Settings.declared(case, dict(chosen_threshold_shift=threshold_shift))
     evaluator = CaseEvaluator(g, judged, judged.design_mesh_um, 'TE', 'normal')
-    before, after = evaluator.evaluate(thresholded[:, 0].astype(float)), evaluator.evaluate(processed[:, 0].astype(float))
-    run['open_close'] = dict(side_pixels=side, changed_pixels=int((thresholded != processed).sum()), processed=processed[:, 0].astype(int).tolist(),
-                             linewidth_pixels=sizes.linewidth_pixels, gap_pixels=sizes.gap_pixels,
-                             violations=list(sizes.violations(min_linewidth_um=fab['min_linewidth_um'], min_gap_um=fab['min_gap_um'])),
-                             mesh_um=judged.design_mesh_um, physical_time_fs=after['physical_time_fs'],
-                             band_mean_T_plus1=dict(thresholded=float(np.mean(before['T']['1'])), processed=float(np.mean(after['T']['1']))),
-                             environment=environment(evaluator.device))
+    block, _ = open_close_block(case, evaluator, run['binary'])
+    run['open_close'] = dict(block, environment=environment(evaluator.device))
     write_json(path, run)
     row = {k: v for k, v in run.items() if k not in ('binary', 'record', 'evaluation', 'settings', 'provenance', 'environment')}
-    summary = {k: v for k, v in row['open_close'].items() if k not in ('processed', 'environment')}
+    summary = {k: v for k, v in row['open_close'].items() if k not in ('thresholded', 'processed', 'environment')}
     print(json.dumps(dict(row, open_close=summary)), flush=True)
     return row
 
@@ -706,46 +814,39 @@ def select_run(radius_um, seed, directory):
 def select_decide(directory):
     """The selection record of the development designs in `directory`.
 
-    The declared open and close before export makes every thresholded design meet the linewidth and
-    gap, so the smallest candidate is chosen once all its development designs are recorded with the
-    open and close and meet them. The feature sizes of the filter alone are recorded for every run; a
-    candidate was run on further seeds only while none of its designs had violated them.
+    Candidates in increasing order: the smallest threshold shift whose nominal designs of every development
+    seed, thresholded at 0.5, meet the declared linewidth and gap without the open and close. A candidate is
+    rejected at its first violating design; the result is None, with the candidate still to run, until a
+    candidate passes; if every candidate is rejected, the declared fallback.
     """
     case, _, provenance = declared()
     p = case_parameters(case)
-    runs = [json.loads(path.read_text(encoding='utf-8')) for path in sorted(Path(directory).glob('selection-r*-seed*.json'))]
+    runs = [json.loads(path.read_text(encoding='utf-8')) for path in sorted(Path(directory).glob('selection-d*-seed*.json'))]
     rows = [{k: v for k, v in run.items() if k not in ('record', 'evaluation', 'settings', 'provenance', 'environment')} for run in runs]
     commits = {run['environment']['commit'] for run in runs} | {run['open_close']['environment']['commit'] for run in runs if 'open_close' in run}
     for row in rows:
         if 'open_close' in row:
             row['open_close'] = {k: v for k, v in row['open_close'].items() if k != 'environment'}
-    alone = {}
-    for radius in sorted(p['candidates_um']):
-        done = {row['seed']: row for row in rows if math.isclose(row['radius_um'], radius)}
-        alone[f'{radius:g}'] = dict(seeds=sorted(done), violating_seeds=sorted(s for s, row in done.items() if row['violations']),
-                                    meets_on_filtering_alone=set(done) == set(p['development_seeds']) and not any(row['violations'] for row in done.values()))
-    chosen, pending = None, []
-    for radius in sorted(p['candidates_um']):
-        done = {row['seed']: row for row in rows if math.isclose(row['radius_um'], radius) and 'open_close' in row}
-        if set(done) != set(p['development_seeds']):
-            pending.append(radius)
+    chosen, pending, rejected = None, [], []
+    for shift in sorted(p['shift_candidates']):
+        done = {row['seed']: row for row in rows if math.isclose(row['threshold_shift'], shift)}
+        if any(row['violations'] for row in done.values()):
+            rejected.append(shift)
+            continue
+        if set(done) != set(p['development_seeds']) or not all('open_close' in row for row in done.values()):
+            pending.append(shift)
             break
-        if not any(row['open_close']['violations'] for row in done.values()):
-            chosen = radius
-            break
-    return dict(schema='torchfdtd-g7-01-radius-selection-v2', task='G7-01', provenance=provenance,
-                rule='the smallest candidate radius whose binary designs of every development seed meet the declared linewidth and gap, '
-                     'with the declared periodic open-then-close of 3 pixels before export; the feature sizes of the filter alone are '
-                     'recorded for every run, and a candidate was run on further seeds only while none of its designs had violated them',
-                decision='on filtering alone 0.06, 0.08 and 0.10 um each left a narrower line or gap; the open and close makes every '
-                         'design compliant, so the smallest candidate is chosen and the open and close is applied to every binary design '
-                         '(development and declared seeds) before its evaluation, fabrication check and TORCWA check; the 0.12 um runs '
-                         'are information and do not change the choice',
-                candidates_um=sorted(p['candidates_um']), development_seeds=p['development_seeds'], judged_seeds_used=False,
-                selection_mesh_um=p['selection_mesh_um'], selection_time_fs=p['selection_time_fs'], extension_um=p['extension_um'],
-                chosen_radius_um=chosen, open_close=chosen is not None, open_close_side_pixels=3, pending_radius_um=pending,
-                filtering_alone=alone, runs=rows, commits=sorted(commits),
-                development_records='kept outside the repository (g7_archive/G7-01/r2-selection)')
+        chosen = shift
+        break
+    fallback = chosen is None and not pending
+    if fallback:
+        chosen = p['shift_fallback']
+    return dict(schema='torchfdtd-g7-01-threshold-selection-v1', task='G7-01', provenance=provenance,
+                rule=case['fixture']['robust_projection']['threshold_shift_rule'], candidates=sorted(p['shift_candidates']),
+                development_seeds=p['development_seeds'], judged_seeds_used=False, selection_mesh_um=p['selection_mesh_um'],
+                selection_time_fs=p['selection_time_fs'], extension_um=p['extension_um'], chosen_threshold_shift=chosen,
+                chosen_by_fallback=fallback, rejected=rejected, pending=pending, open_close=True, open_close_side_pixels=open_close_side(case),
+                runs=rows, commits=sorted(commits), development_records='kept outside the repository (g7_archive/G7-01/r3-selection)')
 
 
 def seed_stage(settings, seed, out, *, rcwa_python, selection=None, checkpoint=None, skip_rcwa=False):
@@ -775,14 +876,33 @@ def seed_stage(settings, seed, out, *, rcwa_python, selection=None, checkpoint=N
                                       energy=round(evaluations[-1]['max_abs_energy_residual'], 4))), flush=True)
                 del evaluator
     wall['evaluation'] = time.perf_counter()-started-wall['design']
-    record.update(evaluations=evaluations, references=references, schema='torchfdtd-g7-01-seed-v2', task='G7-01', settings=asdict(settings),
+    record.update(evaluations=evaluations, references=references, schema='torchfdtd-g7-01-seed-v3', task='G7-01', settings=asdict(settings),
                   provenance=provenance, environment=environment(device),
-                  selection=None if selection is None else dict(chosen_radius_um=selection['chosen_radius_um'], open_close=selection['open_close']))
+                  selection=None if selection is None else dict(chosen_threshold_shift=selection['chosen_threshold_shift'],
+                                                                open_close=selection['open_close']))
     wall['total'] = time.perf_counter()-started
     record['wall_seconds'] = wall
     if not skip_rcwa:
         add_rcwa([record], settings, rcwa_python)
     write_json(Path(out)/f'seed{seed}.json', record)
+    return record
+
+
+def baseline_stage(settings, out):
+    """The fixture's two-ridge baseline in the judged path (design mesh, evaluation time, TE, normal incidence,
+    the open and close applied); writes baseline.json."""
+    case, g, provenance = declared()
+    device = torch.device(settings.backend)
+    started = time.perf_counter()
+    evaluator = CaseEvaluator(g, settings, settings.design_mesh_um, 'TE', 'normal')
+    block, evaluation = open_close_block(case, evaluator, two_ridge_density(g))
+    record = dict(schema='torchfdtd-g7-01-baseline-v1', task='G7-01', design='the two ridges of geometry.json (pixels 2-5 and 29-39)',
+                  source=case['baseline']['source'], declared_band_mean_T_plus1=case['baseline']['band_mean_T_plus1'],
+                  band_mean_T_plus1=float(np.mean(evaluation['T']['1'])), open_close=block, evaluation=evaluation,
+                  reference=dict(evaluator.describe(), **evaluator.diagnostics), settings=asdict(settings), provenance=provenance,
+                  environment=environment(device), wall_seconds=time.perf_counter()-started)
+    write_json(Path(out)/BASELINE, record)
+    print(json.dumps(dict(baseline_band_mean_T_plus1=record['band_mean_T_plus1'], changed_pixels=block['changed_pixels'])), flush=True)
     return record
 
 
@@ -811,26 +931,33 @@ def rcwa_stage(settings, out, *, rcwa_python):
 
 
 def judge_stage(settings, out, *, selection=None):
-    """Judge every criterion from the seed records in `out` and write summary.json."""
+    """Judge every criterion from the seed and baseline records in `out` and write summary.json."""
     case, g, provenance = declared()
     records = [load_json(Path(out)/f'seed{seed}.json')[0] for seed in settings.seeds]
-    criteria = judge(records, case, settings, g)
+    baseline = load_json(Path(out)/BASELINE)[0] if (Path(out)/BASELINE).exists() else None
+    criteria = judge(records, case, settings, g, baseline)
     summary = dict(
-        schema='torchfdtd-g7-01-summary-v2', task='G7-01', date=time.strftime('%Y-%m-%d'), declaration='docs/G7_WORKFLOWS.md',
+        schema='torchfdtd-g7-01-summary-v3', task='G7-01', date=time.strftime('%Y-%m-%d'), declaration='docs/G7_WORKFLOWS.md',
         provenance=provenance, settings=asdict(settings), selection=selection, environment=environment(torch.device('cpu')),
         seed_environments={r['seed']: r['environment'] for r in records},
+        baseline=None if baseline is None else {k: baseline[k] for k in ('design', 'band_mean_T_plus1', 'declared_band_mean_T_plus1', 'environment')},
         rcwa={r['seed']: r.get('rcwa_run') for r in records}, wall_seconds={r['seed']: r['wall_seconds'] for r in records},
         seeds={r['seed']: dict(band_mean_T_plus1_TE_normal_design_mesh=criteria['performance']['per_seed'][r['seed']],
                                objective_binary_design_mesh=r['design_mesh_binary']['metrics'], violations=r['fabrication']['violations'],
                                feature_sizes=r['fabrication']['feature_sizes'], binary=r['binary'],
-                               open_close=None if 'open_close' not in r else {k: r['open_close'].get(k) for k in ('changed_pixels', 'band_mean_T_plus1')})
+                               open_close=None if 'open_close' not in r else {k: r['open_close'].get(k) for k in ('changed_pixels', 'band_mean_T_plus1')},
+                               robust=None if 'robust' not in r else {k: r['robust'][k] for k in ('threshold_shift', 'feature_sizes')})
                for r in records},
         references={r['seed']: r['references'] for r in records[:1]},
         conventions=dict(
             epsilon='arithmetic mean of the permittivity over a cell-sized box at each Yee component; pixel k centred on the Ez node '
                     'x = -1 + 0.02 k um',
             cell=f'the fixture cell with {settings.extension_um:g} um more substrate below and air above; absorbers of '
-                 f'{settings.absorber_um:g} um at every mesh; {settings.physical_time_fs:g} fs',
+                 f'{settings.absorber_um:g} um at every mesh; design runs over {settings.physical_time_fs:g} fs, evaluations over '
+                 f'{settings.evaluation_time_fs:g} fs',
+            robust='eroded, nominal and dilated tanh projections of the same filtered density at eta 0.5 + shift, 0.5 and 0.5 - shift; '
+                   'the smallest of their mean T+1 at the design wavelengths is maximized; the judged design is the nominal one '
+                   'thresholded at 0.5, then opened and closed',
             efficiency='order branch power over the forward order-0 power at the reflection line of the bare-substrate run of the same case',
             amplitudes='|a|^2 = efficiency; TE amplitudes of E, TM amplitudes of H; exp(-i omega t); phase referenced to x = 0, to the '
                        'incident wave at y = 0.01 um, to y = 0.51 um for transmitted and y = 0.01 um for reflected orders',
@@ -846,32 +973,34 @@ def judge_stage(settings, out, *, selection=None):
 
 
 def run(settings, out, *, rcwa_python, selection=None, checkpoint_dir=None, skip_rcwa=False):
-    """Every seed in turn, one TORCWA process for all of them, then the judgement (the declared run starts the seed
-    stages in parallel instead)."""
+    """Every seed in turn, the baseline, one TORCWA process for all seeds, then the judgement (the declared run
+    starts the seed stages in parallel instead)."""
     for seed in settings.seeds:
         seed_stage(settings, seed, out, rcwa_python=rcwa_python, selection=selection, skip_rcwa=True,
                    checkpoint=None if checkpoint_dir is None else Path(checkpoint_dir)/f'seed{seed}.pt')
+    baseline_stage(settings, out)
     if not skip_rcwa:
         rcwa_stage(settings, out, rcwa_python=rcwa_python)
     return judge_stage(settings, out, selection=selection)
 
 
 def declared_run(out):
-    """The declared settings and the recorded radius selection of the records directory `out`."""
+    """The declared settings and the recorded threshold selection of the records directory `out`."""
     case, _, _ = declared()
     path = Path(out)/SELECTION
     if not path.exists():
-        raise FileNotFoundError(f'{path} is missing: run the radius selection (stages select-run and select-decide) first')
+        raise FileNotFoundError(f'{path} is missing: run the threshold selection (stages select-run and select-decide) first')
     selection = load_json(path)[0]
     return Settings.declared(case, selection), selection
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--out', type=Path, required=True, help='directory of the records: radius-selection.json, seed<N>.json, summary.json')
-    parser.add_argument('--stage', choices=('all', 'select-run', 'select-decide', 'seed', 'rcwa', 'judge'), default='all')
+    parser.add_argument('--out', type=Path, required=True,
+                        help='directory of the records: threshold-selection.json, seed<N>.json, baseline.json, summary.json')
+    parser.add_argument('--stage', choices=('all', 'select-run', 'select-decide', 'seed', 'baseline', 'rcwa', 'judge'), default='all')
     parser.add_argument('--seed', type=int, help='the seed of a seed or select-run stage')
-    parser.add_argument('--radius', type=float, help='the candidate filter radius (um) of a select-run stage')
+    parser.add_argument('--shift', type=float, help='the candidate threshold shift of a select-run stage')
     parser.add_argument('--selection-dir', type=Path, help='directory of the development selection records (outside the repository)')
     parser.add_argument('--small', action='store_true', help='CPU development size: coarser meshes, shorter runs, one seed, few iterations')
     parser.add_argument('--checkpoint-dir', type=Path, help='save the design state after every iteration and resume from it')
@@ -880,17 +1009,19 @@ def main(argv=None):
     parser.add_argument('--skip-rcwa', action='store_true', help='development only: no TORCWA check (criterion c then fails)')
     args = parser.parse_args(argv)
     if args.stage == 'select-run':
-        return select_run(args.radius, args.seed, args.selection_dir)
+        return select_run(args.shift, args.seed, args.selection_dir)
     if args.stage == 'select-decide':
         selection = select_decide(args.selection_dir)
         write_json(args.out/SELECTION, selection)
-        print(json.dumps(dict(chosen_radius_um=selection['chosen_radius_um'], pending_radius_um=selection['pending_radius_um'])), flush=True)
+        print(json.dumps({k: selection[k] for k in ('chosen_threshold_shift', 'chosen_by_fallback', 'rejected', 'pending')}), flush=True)
         return selection
     settings, selection = (Settings.small_run(), None) if args.small else declared_run(args.out)
     checkpoint = None if args.checkpoint_dir is None else args.checkpoint_dir/f'seed{args.seed}.pt'
     if args.stage == 'seed':
         return seed_stage(settings, args.seed, args.out, rcwa_python=args.rcwa_python, selection=selection, checkpoint=checkpoint,
                           skip_rcwa=args.skip_rcwa)
+    if args.stage == 'baseline':
+        return baseline_stage(settings, args.out)
     if args.stage == 'rcwa':
         return rcwa_stage(settings, args.out, rcwa_python=args.rcwa_python)
     if args.stage == 'judge':
