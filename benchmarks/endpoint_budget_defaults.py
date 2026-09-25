@@ -91,15 +91,23 @@ def measure(kind, cells, device):
     report['host_available_bytes'] = host_memory()['available_bytes']
     if device == 'cuda':
         torch.cuda.synchronize()
-        report['cuda_free_bytes'], report['cuda_total_bytes'] = torch.cuda.mem_get_info()
+        # Under WDDM the runtime reading of one process ignores other processes'
+        # allocations; admission takes the smaller of it and NVML's device-wide reading.
+        from torchfdtd.cuda_memory import cuda_mem_info, nvml_free_bytes
+        report['cuda_runtime_free_bytes'], report['cuda_total_bytes'] = torch.cuda.mem_get_info()
+        report['cuda_nvml_free_bytes'] = nvml_free_bytes(torch.device('cuda', torch.cuda.current_device()))
+        report['cuda_free_bytes'] = cuda_mem_info()[0]
         allocated = torch.cuda.memory_allocated()
         torch.cuda.reset_peak_memory_stats()
     adapter, first = run_once(p, device, {})
     plan = adapter.simulation.memory_plan(p.region.steps)
-    report.update(first_run_new_default=first, derived_tensor_budget_bytes=adapter.simulation.tensor_budget_bytes,
-                  derived_host_preparation_budget_bytes=adapter.host_preparation_budget_bytes,
-                  planned_tensor_bytes=plan['tensor_upper_bound_bytes'],
-                  planned_host_preparation_bytes=adapter.plan()['memory']['adapter_host_preparation_bytes'])
+    preparation = adapter.plan()['memory']['adapter_host_preparation_bytes']
+    # The None budgets are derived at each admission for the bytes admitted.
+    from torchfdtd.pmc_simulation import derived_budget_bytes
+    report.update(first_run_new_default=first,
+                  derived_tensor_budget_bytes=derived_budget_bytes(adapter.simulation.device, plan['tensor_upper_bound_bytes']),
+                  derived_host_preparation_budget_bytes=derived_budget_bytes('cpu', preparation),
+                  planned_tensor_bytes=plan['tensor_upper_bound_bytes'], planned_host_preparation_bytes=preparation)
     host_after = process.memory_info()
     report.update(host_peak_growth_bytes=host_after.peak_pagefile-host_before.private,
                   host_new_process_peak=host_after.peak_pagefile > host_before.peak_pagefile)
@@ -177,8 +185,10 @@ def main():
                       timing=f'{REPEATS} repeats per default after one untimed derived-default run, old and new alternating in one process '
                              '(runs.*.repeat); build = adapter construction and rasterization, run = forward and VJP. On CUDA every '
                              'run carries the nvidia-smi utilization and memory in use (all processes) just before and after it.',
-                      peak='first derived-default run in a fresh process: CUDA allocator allocated growth against free CUDA memory at start; '
-                           'CPU: peak private bytes growth against available host memory (host_new_process_peak marks a resolved peak)',
+                      peak='first derived-default run in a fresh process: CUDA allocator allocated growth against the admission '
+                           'reading of free CUDA memory at start (cuda_free_bytes, the smaller of the runtime reading cuda_runtime_free_bytes '
+                           'and the device-wide NVML reading cuda_nvml_free_bytes); CPU: peak private bytes growth against available host '
+                           'memory (host_new_process_peak marks a resolved peak)',
                       steps=STEPS, cases_per_device=CASES, source_state=SOURCE_STATE,
                       environments=[dict(p['environment'], device=p['device']) for p in parts], cases=cases,
                       identical_work=all(c['identical_work'] for c in cases),

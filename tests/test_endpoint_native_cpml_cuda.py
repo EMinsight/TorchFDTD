@@ -74,7 +74,10 @@ def test_native_cpml_cuda_results_npz_material_and_waveform_vjp(tmp_path):
     torch.cuda.synchronize()
     peak_delta = torch.cuda.max_memory_allocated()-baseline_bytes
     plan = gpu.simulation.memory_plan(project.region.steps)
-    assert plan['tensor_upper_bound_bytes'] <= gpu.simulation.tensor_budget_bytes
+    # The default budget is derived at each admission for the planned bytes.
+    from torchfdtd.pmc_simulation import derived_budget_bytes
+    assert gpu.simulation.tensor_budget_bytes is None
+    assert plan['tensor_upper_bound_bytes'] <= derived_budget_bytes(gpu.simulation.device, plan['tensor_upper_bound_bytes'])
     assert peak_delta <= plan['tensor_upper_bound_bytes']
     print(dict(trace_max_error=float((actual.signals.cpu()-reference.signals).abs().max().detach()),
                material_vjp_max_error=float((gpu_gradients[0].cpu()-cpu_gradients[0]).abs().max()),
