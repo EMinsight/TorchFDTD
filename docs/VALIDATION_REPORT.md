@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.16.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T214448Z-g9-03-cc9b3082` recorded 2026-09-25T21:44:48+00:00 at commit `70c7bd788fa6`.
+Package version `0.16.1` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T214448Z-g9-03-cc9b3082` recorded 2026-09-25T21:44:48+00:00 at commit `70c7bd788fa6`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 9 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 15 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 62 | 14 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 62 | 20 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -39,7 +39,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G1-03 | quadrant_intensity_allocation의 FP32 불안정. | IMPLEMENTED | VERIFIED | `20260925T153209Z-g1-03-979fa1dc` | `2c5f3754c047` | PASS | evidence matches the current checkout |
 | G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260925T153623Z-g1-04-913aac0b` | `2c5f3754c047` | PASS | evidence matches the current checkout |
 | G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260925T154054Z-g1-05-db0ca6c4` | `2c5f3754c047` | PASS | evidence matches the current checkout |
-| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260925T214433Z-g1-06-0559a2e3` | `70c7bd788fa6` | PASS | evidence matches the current checkout |
+| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260925T214433Z-g1-06-0559a2e3` | `70c7bd788fa6` | FAIL | STALE: watched file changed since the run: README.md |
 
 ### G2 물리·격자·실행 계약 (WORKSTATION, P0)
 
@@ -82,7 +82,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G4-02 | torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다. | IMPLEMENTED | VERIFIED | `20260925T181033Z-g4-02-2a8fcb7a` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G4-03 | noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다 | IMPLEMENTED | VERIFIED | `20260925T181052Z-g4-03-bcf97791` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G4-04 | 최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다 | IMPLEMENTED | VERIFIED | `20260925T181122Z-g4-04-63d67c63` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
-| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260925T181227Z-g4-05-b38e7dd0` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260925T181227Z-g4-05-b38e7dd0` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: pyproject.toml |
 | G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260925T181236Z-g4-06-9f842377` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 
 ### G5 메모리·재시작·장기 안정성 (WORKSTATION, P0)
@@ -140,9 +140,9 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260925T185140Z-g9-01-f668e584` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
-| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260925T185202Z-g9-02-c3f5ecdd` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
-| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T214448Z-g9-03-cc9b3082` | `70c7bd788fa6` | PASS | evidence matches the current checkout |
-| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260925T185220Z-g9-04-6cd780b0` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260925T185202Z-g9-02-c3f5ecdd` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: docs/THIRD_PARTY_NOTICES.md |
+| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T214448Z-g9-03-cc9b3082` | `70c7bd788fa6` | FAIL | STALE: watched file changed since the run: README.md |
+| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260925T185220Z-g9-04-6cd780b0` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260925T195834Z-g9-06-621431b7` | `2d7cc517b07c` | FAIL | STALE: test source changed since the run: tests/test_readme_measurements.py |
 | G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | SELF | none | none | self | this report's own gate, recorded after the render; judge it with scripts/check_release_gates.py |
@@ -178,32 +178,32 @@ Newest runs that match no platform record: none.
 
 ## Clean-install record
 
-Newest record `20260925T150709Z-2612d831.json` (kind `clean_install_record`), taken at commit `2612d831ef91` on 2026-09-25T15:07:09+00:00 with 0 dirty packaging paths; all steps passed: yes.
+Newest record `20260925T220012Z-c0c49777.json` (kind `clean_install_record`), taken at commit `c0c497778f9b` on 2026-09-25T22:00:12+00:00 with 0 dirty packaging paths; all steps passed: yes.
 
-Wheel `torchfdtd-0.16.0-py3-none-any.whl`, SHA-256 `57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd`, 980,088 bytes, 160 entries, 153 package files; browser assets match the committed ones: yes; frontend assets current: yes.
+Wheel `torchfdtd-0.16.1-py3-none-any.whl`, SHA-256 `2e63550b609832282bcce2d7c13280f06073ca9019f6629ab6916cb964d322b4`, 980,325 bytes, 160 entries, 153 package files; browser assets match the committed ones: yes; frontend assets current: yes.
 
 | Environment | Python | torch | cupy-cuda12x | numpy | torchfdtd | Packages |
 | --- | --- | --- | --- | --- | --- | --- |
-| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 0.16.0 | 40 |
-| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 0.16.0 | 42 |
+| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 0.16.1 | 40 |
+| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 0.16.1 | 42 |
 
 | Step | Status | Seconds |
 | --- | --- | --- |
-| build_wheel | passed | 14.65 |
-| cpu_venv_create | passed | 116.71 |
-| cpu_pip_install_torch | passed | 94.13 |
-| cpu_pip_install_wheel | passed | 54.63 |
-| cpu_package_list | passed | 0.98 |
-| cpu_import_run_save_load | passed | 11.21 |
-| cpu_server_index_assets_api | passed | 4.51 |
-| cpu_doctor | passed | 4.56 |
-| cuda_venv_create | passed | 35.27 |
-| cuda_pip_install_torch | passed | 246.37 |
-| cuda_pip_install_wheel_extras | passed | 62.75 |
-| cuda_package_list | passed | 0.88 |
-| cuda_fused_forward_run | passed | 17.47 |
-| cuda_doctor | passed | 4.38 |
-| readme_examples | passed | 16.3 |
+| build_wheel | passed | 12.66 |
+| cpu_venv_create | passed | 13.9 |
+| cpu_pip_install_torch | passed | 97.49 |
+| cpu_pip_install_wheel | passed | 58.23 |
+| cpu_package_list | passed | 1.13 |
+| cpu_import_run_save_load | passed | 14.08 |
+| cpu_server_index_assets_api | passed | 5.62 |
+| cpu_doctor | passed | 5.63 |
+| cuda_venv_create | passed | 16.3 |
+| cuda_pip_install_torch | passed | 172.45 |
+| cuda_pip_install_wheel_extras | passed | 81.1 |
+| cuda_package_list | passed | 1.28 |
+| cuda_fused_forward_run | passed | 20.84 |
+| cuda_doctor | passed | 4.89 |
+| readme_examples | passed | 22.13 |
 
 ## Suite policy
 
@@ -373,7 +373,7 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 
 | Check | Result | Detail |
 | --- | --- | --- |
-| package version | ok | pyproject.toml 0.16.0, COMPATIBILITY.md 0.16.0, CHANGELOG.md 0.16.0, clean-install wheel 0.16.0 |
+| package version | ok | pyproject.toml 0.16.1, COMPATIBILITY.md 0.16.1, CHANGELOG.md 0.16.1, clean-install wheel 0.16.1 |
 | README row check `test_quick_start_selects_the_measured_path_explicitly` | ok | reproduced from its record |
 | README row check `test_readme_a100_row_matches_the_double_precision_record` | ok | reproduced from its record |
 | README row check `test_readme_capacity_row_matches_the_fp32_record` | ok | reproduced from its record |
