@@ -56,11 +56,13 @@ def stability_warnings(project):
     warnings = []
     r = project.region
     contacts = _pml_contacts(project) if r.pml_dispersion == 'ade' else []
-    materials = {m.name: m for m in project.materials}
+    # One band test per material, not per structure: a metalens tile names thousands of posts.
+    used = {s.material for s, _ in contacts}
+    negative = {m.name: negative_permittivity_in_band(m, r.time_step) for m in project.materials if m.name in used}
     ending, crossing = [], []
     for s, faces in contacts:
         named = f'{s.name} ({", ".join(face for face, _ in faces)})'
-        inside = any(ends for _, ends in faces) and negative_permittivity_in_band(materials[s.material], r.time_step)
+        inside = any(ends for _, ends in faces) and negative[s.material]
         (ending if inside else crossing).append(named)
     if ending:
         warnings.append(f'Dispersive material inside PML layers, ending there: {"; ".join(ending)}. A pole whose Re eps turns '
