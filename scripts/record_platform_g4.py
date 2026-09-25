@@ -17,9 +17,17 @@ every test its required_tests name (a file entry enumerated with pytest --collec
 the task's own command) with its outcome in the task's runs and the suite run. The tree must be
 clean and every report must start after the source commit was made.
 tests/test_platform_matrix.py re-parses the copies against the record.
+
+Every skip is classified from its reason. Three classes are expected: an optional platform
+check (tests/conftest.py prefix), an opt-in test whose reason names a ``TORCHFDTD_*=1``
+variable the run's command does not set (the suites leave those runs to their recorded
+evidence), and a check of a file that a record names on the host that wrote it ("... is not on
+this host"). Any other skip is unexpected and fails the record, as does any skip of a test
+that a G4 task requires.
 """
 import argparse
 import datetime
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -30,6 +38,19 @@ import record_gate_evidence as recorder  # noqa: E402
 RECORD_VERSION = 1
 PLATFORMS = Path('docs') / 'validation' / 'platforms'
 SUITE = 'suite'
+OPT_IN = re.compile(r'\b(TORCHFDTD_[A-Z0-9_]+)=1\b')
+
+
+def skip_class(reason, command):
+    """The expected class of a skip reason for a run of command, or None for an unexpected skip."""
+    if recorder.optional_skip(reason):
+        return 'optional platform check'
+    variables = OPT_IN.findall(reason or '')
+    if variables and not any(recorder.parse_command(command)[0].get(name) for name in variables):
+        return 'opt-in, not set by the run: ' + ', '.join(variables)
+    if ' is not on this host' in (reason or ''):
+        return 'file of another host'
+    return None
 
 
 def outcome(results, test_id):
@@ -45,6 +66,7 @@ def run_entry(label, task, exit_code, copy, command, results, root):
                 time_seconds=round(results['suite_time_seconds'], 3),
                 counts={key: (results[key] if key == 'total' else len(results[key])) for key in ('total', 'passed', 'failed', 'errors', 'skipped')},
                 failed=results['failed'], errors=results['errors'], skipped=results['skipped_reasons'],
+                skip_classes={test: skip_class(reason, command) for test, reason in results['skipped_reasons'].items()},
                 gpu_required_skips=results['gpu_required_skips'])
 
 
@@ -68,9 +90,9 @@ def main(argv=None):
     for label, task, *_ in args.run:
         if task not in (*task_ids, SUITE):
             raise SystemExit(f'run {label}: {task!r} is neither a G4 task ({", ".join(task_ids)}) nor {SUITE!r}')
-    missing = [task_id for task_id in task_ids if not any(task == task_id for _, task, *_ in args.run)]
-    if missing or not any(task == SUITE for _, task, *_ in args.run):
-        raise SystemExit('a G4 record needs a run of every G4 task and the suite run; missing: ' + ', '.join(missing or [SUITE]))
+    missing = [task_id for task_id in (*task_ids, SUITE) if not any(task == task_id for _, task, *_ in args.run)]
+    if missing:
+        raise SystemExit('a G4 record needs a run of every G4 task and the suite run; missing: ' + ', '.join(missing))
 
     out_dir = root / PLATFORMS / 'g4'
     record_path = out_dir / f'{args.platform}.json'
@@ -115,7 +137,7 @@ def main(argv=None):
                 {test for entry in judged for key in ('passed', 'failed', 'errors', 'skipped') for test in entry[5][key] if recorder.matches(item, test)})
             required[task['id']][item] = {test: {entry[0]: outcome(entry[5], test) for entry in judged} for test in ids}
 
-    unexpected = sorted({test for run in runs for test, reason in run['skipped'].items() if not recorder.optional_skip(reason)})
+    unexpected = sorted({test for run in runs for test, kind in run['skip_classes'].items() if kind is None})
     not_passed = sorted({f'{task_id} {test} ({label}: {state})' for task_id, items in required.items() for tests in items.values()
                          for test, states in tests.items() for label, state in states.items() if state != 'passed'})
     record = dict(

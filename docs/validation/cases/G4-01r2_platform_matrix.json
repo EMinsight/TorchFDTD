@@ -2,7 +2,7 @@
   "schema_version": 1,
   "kind": "acceptance_case",
   "declared": "2026-09-25",
-  "declared_at_commit": "827acfd2114b92c99f103bf8d40e3e64c875a5e6",
+  "declared_at_commit": "119a122de8d6e26b0e03ac638c2fac458d93de30",
   "declared_before_run": true,
   "case_id": "G4-01r2_platform_matrix",
   "task": "G4-01",
@@ -58,13 +58,13 @@
     {
       "name": "platform_g4_run",
       "unit": "boolean",
-      "definition": "for every docs/validation/platforms/g4/<id>.json: its platform has a record and a row whose 'Verified by' cell links it, and no row links a missing one; every JUnit copy matches its stored SHA-256 and re-parses to the recorded counts, failures, errors and skips; every run exited 0 with no failure, no error and no skip other than an optional platform check; a gpu-nightly run is present; for every G4 task the record names exactly the task's current required_tests, has a run of the task's own command, and every test those entries name passed in that run and in the gpu-nightly run"
+      "definition": "for every docs/validation/platforms/g4/<id>.json: its platform has a record and a row whose 'Verified by' cell links it, and no row links a missing one; every JUnit copy matches its stored SHA-256 and re-parses to the recorded counts, failures, errors and skips; every run exited 0 with no failure, no error and no skip outside three expected classes (an optional platform check; an opt-in test whose reason names a TORCHFDTD_*=1 variable the run's command does not set; a check of a file that a record names on the host that wrote it, 'is not on this host'), each skip's class as recorded; a gpu-nightly run is present; for every G4 task the record names exactly the task's current required_tests, has a run of the task's own command, and every test those entries name passed in that run and in the gpu-nightly run"
     }
   ],
   "acceptance": {
     "report": "the report exits 0 and contains every listed field; with CUDA available it lists at least one GPU with a d.d compute capability and 0 <= free <= total memory; home_directory_in_record is false",
     "matrix": "no matrix row carries a value without a record file; at least one row is recorded",
-    "platform_g4_run": "platform_g4_run is true; the recorder itself names every test of a file entry (pytest --collect-only through the task's command), reports a failed test as not passed with a nonzero exit, and refuses a run set without a task or the suite and a dirty tree",
+    "platform_g4_run": "platform_g4_run is true; the recorder itself names every test of a file entry (pytest --collect-only through the task's command), reports a failed test as not passed and an unexpected skip as such with a nonzero exit, classifies skip reasons as declared, and refuses a run set without a task or the suite and a dirty tree",
     "source_of_limits": "fixture-specific; no numerical threshold applies"
   },
   "tests": {

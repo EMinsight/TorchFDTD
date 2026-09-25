@@ -138,7 +138,9 @@ def test_platform_g4_run_records_pass_every_g4_required_test():
             assert {key: parsed[key] if key == 'total' else len(parsed[key]) for key in run['counts']} == run['counts'], run['label']
             assert (parsed['failed'], parsed['errors'], parsed['skipped_reasons']) == (run['failed'], run['errors'], run['skipped']), run['label']
             assert run['exit_code'] == 0 and not parsed['failed'] and not parsed['errors'], f"{run['label']}: {parsed['failed'] + parsed['errors']}"
-            unexpected = [test for test, reason in parsed['skipped_reasons'].items() if not recorder.optional_skip(reason)]
+            classes = {test: platform_g4.skip_class(reason, run['command']) for test, reason in parsed['skipped_reasons'].items()}
+            assert classes == run['skip_classes'], run['label']
+            unexpected = [test for test, kind in classes.items() if kind is None]
             assert not unexpected, f"{run['label']} skipped {unexpected}"
             runs[run['label']] = (run['task'], parsed)
         assert [run for run in record['runs'] if run['task'] == 'suite' and 'run_suite.py gpu-nightly' in run['command']], 'no gpu-nightly run'
@@ -155,9 +157,22 @@ def test_platform_g4_run_records_pass_every_g4_required_test():
                     assert all(test in runs[label][1]['passed'] for label in judged), test
 
 
+def test_platform_g4_skip_classes():
+    command = 'python scripts/run_suite.py gpu-nightly --junitxml=x.xml'
+    assert platform_g4.skip_class('optional platform check: Requires installed licensed Lumerical', command) == 'optional platform check'
+    assert platform_g4.skip_class('finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)', command) == 'opt-in, not set by the run: TORCHFDTD_G3_FINE'
+    assert platform_g4.skip_class('finest mesh: set TORCHFDTD_G3_FINE=1', 'TORCHFDTD_G3_FINE=1 ' + command) is None
+    assert platform_g4.skip_class('the recorded wheel is not on this host: D:/x.whl', command) == 'file of another host'
+    for reason in ('CUDA unavailable', 'needs a few GiB of free RAM', 'fixture file missing', ''):
+        assert platform_g4.skip_class(reason, command) is None, reason
+
+
 def _write_junit(path, cases):
-    body = ''.join(f'<testcase classname="{classname}" name="{name}" time="0.001">'
-                   + ('<failure message="boom">boom</failure>' if state == 'failed' else '') + '</testcase>' for classname, name, state in cases)
+    def outcome(state):
+        if state == 'failed':
+            return '<failure message="boom">boom</failure>'
+        return f'<skipped type="pytest.skip" message="{state[8:]}">{state[8:]}</skipped>' if state.startswith('skipped:') else ''
+    body = ''.join(f'<testcase classname="{classname}" name="{name}" time="0.001">{outcome(state)}</testcase>' for classname, name, state in cases)
     path.write_text('<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" failures="0" errors="0" skipped="0" '
                     f'tests="{len(cases)}" time="0.01" timestamp="{datetime.datetime.now().astimezone().isoformat()}">{body}</testsuite></testsuites>',
                     encoding='utf-8')
@@ -199,6 +214,13 @@ def test_platform_g4_recorder_names_every_required_test_and_fails_a_failure(tmp_
     record = json.loads(output.read_text(encoding='utf-8'))
     assert not record['all_passed'] and record['runs'][2]['failed'] == ['tests/test_alpha.py::test_two']
     assert record['required_tests_not_passed'] == ['G4-01 tests/test_alpha.py::test_two (gpu-nightly: failed)']
+    extra = [('tests.test_alpha', 'test_opt_in', 'skipped:set TORCHFDTD_X_FULL=1 for it'), ('tests.test_alpha', 'test_ram', 'skipped:needs RAM')]
+    _write_junit(tmp_path / 'suite.xml', [*alpha, *beta, *extra])
+    assert platform_g4.main(argv) == 1
+    record = json.loads(output.read_text(encoding='utf-8'))
+    assert record['runs'][2]['skip_classes'] == {'tests/test_alpha.py::test_opt_in': 'opt-in, not set by the run: TORCHFDTD_X_FULL',
+                                                 'tests/test_alpha.py::test_ram': None}
+    assert record['unexpected_skips'] == ['tests/test_alpha.py::test_ram'] and not record['required_tests_not_passed']
     with pytest.raises(SystemExit, match='missing: G4-02'):
         platform_g4.main(['--root', str(root), '--platform', 'lab', *runs[0], *runs[2]])
     (root / 'tests' / 'test_beta.py').write_text('def test_b():\n    assert False\n', encoding='utf-8')
