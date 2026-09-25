@@ -105,12 +105,12 @@ Rendered from [validation/completion_gates.json](validation/completion_gates.jso
 | G5 | 메모리·재시작·장기 안정성 | WORKSTATION | 10 | 10 | 0 | 0 | 0 | 10 pass, 0 fail |
 | G6 | 사용자 물리·역설계 API | WORKSTATION | 8 | 8 | 0 | 0 | 0 | 8 pass, 0 fail |
 | G7 | 대표 응용·동일 정확도 비용 | WORKSTATION | 5 | 2 | 0 | 3 | 0 | 2 pass, 3 fail |
-| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 7 pass, 0 fail |
-| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 5 | 0 | 1 | 0 | 5 pass, 1 fail |
+| G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 4 pass, 3 fail |
+| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 5 | 0 | 1 | 0 | 3 pass, 3 fail |
 | H1 | 실제 단일 문제 multi-GPU | HPC | 6 | 0 | 0 | 1 | 5 | 0 pass, 6 fail |
 
-- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 71 of 76 required tasks pass the judge, 5 fail, and G9-07 (this report) is judged after the render; NOT RELEASABLE.
-- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 71 of 82 required tasks pass the judge, 11 fail, and G9-07 (this report) is judged after the render; NOT RELEASABLE.
+- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 66 of 76 required tasks pass the judge, 10 fail, and G9-07 (this report) is judged after the render; NOT RELEASABLE.
+- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 66 of 82 required tasks pass the judge, 16 fail, and G9-07 (this report) is judged after the render; NOT RELEASABLE.
 <!-- stage-status:end -->
 
 ## Scope changes
