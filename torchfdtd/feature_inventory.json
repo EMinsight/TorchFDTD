@@ -842,7 +842,7 @@
       "native": "partial",
       "ui": "implemented",
       "fsp": "missing",
-      "scope": "실험적 subpixel. lossless dielectric: 축별 일정 간격의 2D/3D, 전역 Hermitian/positive edge-triplet 연산자, CPU/Torch/fused CUDA·tensor, Python/UI/JSON. 해석 평면 분율·고굴절률 이산 에너지·Mie 구 산란 검사. Drude/Lorentz/multipole 곡면: 2셀 node 평균 텐서와 D 구동 ADE branch(정확도는 held-out G3-05r4에서 판정). 비주기 경계(PML 포함) 한 창(2셀) 이내의 분산 표면, 한 창 안의 두 분산 재료, frozen PML, D 구동 샘플 위의 soft E 소스·TFSF·one-way는 거절. 모든 조건의 오차 개선은 아니며 고굴절률 소자·모드·비균일 subpixel 검증은 남음.",
+      "scope": "실험적 subpixel. lossless dielectric: 축별 일정 간격의 2D/3D, 전역 Hermitian/positive edge-triplet 연산자, CPU/Torch/fused CUDA·tensor, Python/UI/JSON. 해석 평면 분율·고굴절률 이산 에너지·Mie 구 산란 검사. Drude/Lorentz/multipole 곡면: 2셀 node 평균 텐서와 D 구동 ADE branch(정확도는 held-out G3-05r5에서 판정). 비주기 경계(PML 포함) 한 창(2셀) 이내의 분산 표면, 한 창 안의 두 분산 재료, frozen PML, D 구동 샘플 위의 soft E 소스·TFSF·one-way는 거절. 모든 조건의 오차 개선은 아니며 고굴절률 소자·모드·비균일 subpixel 검증은 남음.",
       "evidence": [
         "torchfdtd/subpixel.py",
         "torchfdtd/subpixel_geometry.py",

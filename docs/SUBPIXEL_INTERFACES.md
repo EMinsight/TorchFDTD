@@ -179,9 +179,9 @@ resonance adds absorption at the blue edge of the plasmon band. Two steps
 reduce the largest scattering and absorption errors by factors of 1.5 to 4 on
 every development sphere. Wider windows oversmooth spheres of four cells per
 radius. Because this development used the G3-05 fixture and its neighbourhood,
-G3-05 does not judge the method. The held-out case G3-05r4
-(`docs/validation/cases/G3-05r4.json`, other radii, spheres off the node
-lattice) does, and it lists every development run.
+G3-05 does not judge the method. The held-out case G3-05r5
+(`docs/validation/cases/G3-05r5_drude_sphere_subpixel.json`, other radii,
+spheres off the node lattice) does, and it lists every development run.
 
 **Scope and refusals.** Resident CPU, Torch CUDA and fused CUDA forwards, CUDA
 graphs and tensor cohorts share the state: the fused kernel writes the curl

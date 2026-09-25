@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "case_id": "G3-05r5_drude_sphere_subpixel",
+  "task": "G3-05",
+  "title": "Drude metal spheres with dispersive subpixel interfaces on a held-out fixture: scattering and absorption against Mie with a complex index, mesh sequence h, h/2, h/4 (revision 5 of G3-05_drude_sphere: other radii, spheres off the node lattice)",
+  "declared": "2026-09-26",
+  "declared_at_commit": "2095eaef0034f3bdc3852c94b8651ccc46b77c81",
+  "declared_before_run": true,
+  "supersedes": {
+    "case": "docs/validation/cases/G3-05_drude_sphere.json",
+    "record": "docs/validation/g3/G3-05.json",
+    "evidence_runs": [
+      "20260921T181951Z-g3-05-8fafa59e",
+      "20260923T033229Z-g3-05-c3f1ab53",
+      "20260923T132959Z-g3-05-819bbad4",
+      "20260923T195353Z-g3-05-ac0e638c",
+      "20260925T172351Z-g3-05-1cf30b22"
+    ],
+    "status": "kept in place as the finding; that case, its record and its FAILED evidence are not rewritten",
+    "earlier_revisions": "G3-05r2 (diagonal dispersive average, failed at the judged mesh) and G3-05r3 (the node averaging tensor, developed on neighbours of the judged radii in the G3-05 fixture) are superseded and kept outside the repository",
+    "refused_revision": "G3-05r4 was refused at validation (the averaging window of its r = 0.06 um sphere reached the TFSF face neighbourhood along z at h = 0.02 um) before any result was observed; no r4 number was seen"
+  },
+  "revision": {
+    "reason": "the first case staircases the Drude sphere at the Yee positions and records that failure: at h = 0.005 um the scattering errors are 1.376, 0.458 and 0.445 and the absorption errors 6.733, 4.985 and 3.446 for r = 0.02, 0.035 and 0.05 um against 0.5/0.3/0.2 and 1.0/0.6/0.4. The dispersive subpixel method was developed on that fixture, at its judged mesh and on radii within 10 percent of its judged radii, so it cannot be judged there; this revision judges it with the same physics, band, mesh sequence and limits on radii and centres that no development run used",
+    "evidence": "docs/validation/g3/G3-05.json (the FAILED runs listed under supersedes); the method, its passivity and stability checks and its development record in docs/SUBPIXEL_INTERFACES.md#dispersive-interfaces; the development runs listed below",
+    "approved_by": "owner",
+    "date": "2026-09-22",
+    "basis": "the owner's 1.0.0 release condition of 2026-09-22: \"accuracy of curved metal/plasmonic surfaces (dispersive subpixel averaging or a conformal method), then re-judge G3-05\""
+  },
+  "difference_from_first_case": "fixture.spheres (three radii, each with a centre off the node lattice) instead of radii_um with centred spheres; fixture.interface_method \"subpixel\" with subpixel_quadrature 8 (the solver default) instead of the staircase; the fixture text that describes them; acceptance.per_radius keyed by the new radii with the G3-05 budget pairs in size order. The Drude model, band, pulse, domain, PML, TFSF box, monitors, duration, mesh sequence, judged mesh, observables, self-consistency limit, layer A and the ADE diagnostic are copied from G3-05_drude_sphere.json",
+  "fixture": {
+    "method": "Closed TFSF box; six inner monitor planes inside the box (total field) give the absorption as the net inward total-field power and, after matched-reference subtraction, the scattered power; six outer planes outside the box give the scattered power independently (the two scattered powers must agree). The Drude sphere uses the dispersive subpixel interfaces of the solver (interface_method \"subpixel\", docs/SUBPIXEL_INTERFACES.md#dispersive-interfaces): every node cell (two mesh steps per axis) that meets the sphere takes the dispersive averaging tensor n n^T (B + f/eps_m) + (I - n n^T)/(C + f eps_m), assembled on the edge triplets of the coupled operator and advanced by trapezoidal ADE banks driven by D, with E at those samples assigned from D every step; edges between two cells wholly inside keep the Drude ADE. Physical domain, PML thickness, source, monitors and duration are fixed across the mesh sequence, and so is each sphere centre in um, so its offset from the node lattice in mesh steps changes with the mesh.",
+    "drude": {
+      "model": "epsilon(omega) = epsilon_inf - plasma_rad_s^2 / (omega^2 + i collision_rad_s omega), exp(-i omega t)",
+      "epsilon_inf": 5.0,
+      "plasma_rad_s": 1.37e+16,
+      "collision_rad_s": 150000000000000.0,
+      "description": "silver-like analytic model (plasma energy about 9 eV, damping about 0.1 eV, epsilon_inf 5); quasi-static dipole resonance where Re epsilon = -2, near 0.364 um; the model is analytic and identical in the solver and in the Mie series"
+    },
+    "spheres": [
+      {
+        "radius_um": 0.027,
+        "center_um": [
+          0.0012,
+          -0.0019,
+          0.0007
+        ],
+        "center_in_steps": {
+          "0.02": [
+            0.06,
+            -0.095,
+            0.035
+          ],
+          "0.01": [
+            0.12,
+            -0.19,
+            0.07
+          ],
+          "0.005": [
+            0.24,
+            -0.38,
+            0.14
+          ]
+        },
+        "size_parameter_at_0.39um": 0.435,
+        "cells_per_radius_at_judged_mesh": 5.4
+      },
+      {
+        "radius_um": 0.0425,
+        "center_um": [
+          -0.0016,
+          0.0008,
+          0.0023
+        ],
+        "center_in_steps": {
+          "0.02": [
+            -0.08,
+            0.04,
+            0.115
+          ],
+          "0.01": [
+            -0.16,
+            0.08,
+            0.23
+          ],
+          "0.005": [
+            -0.32,
+            0.16,
+            0.46
+          ]
+        },
+        "size_parameter_at_0.39um": 0.685,
+        "cells_per_radius_at_judged_mesh": 8.5
+      },
+      {
+        "radius_um": 0.058,
+        "center_um": [
+          0.0012,
+          -0.0007,
+          0.0016
+        ],
+        "center_in_steps": {
+          "0.02": [
+            0.06,
+            -0.035,
+            0.08
+          ],
+          "0.01": [
+            0.12,
+            -0.07,
+            0.16
+          ],
+          "0.005": [
+            0.24,
+            -0.14,
+            0.32
+          ]
+        },
+        "size_parameter_at_0.39um": 0.934,
+        "cells_per_radius_at_judged_mesh": 11.6
+      }
+    ],
+    "held_out": "Apart from the refused r4 attempt, whose h = 0.02 um runs of the two smaller spheres were discarded unseen, no run of any dispersive subpixel method used these radii or these centres on this fixture. The nearest development radii on it are 0.025 and 0.03 um (0.027 is 8 percent above the first and 10 percent below the second), 0.04 and 0.045 um (0.0425 is 6.3 percent above and 5.6 percent below) and 0.055 um, the largest (0.058 is 5.5 percent above it); every development sphere on it was centred on a node except the off-lattice review runs of r = 0.035 um at h = 0.01 um. Each centre is offset by a different fraction of the judged mesh step on each axis (0.14 to 0.46 in magnitude), set before any run.",
+    "domain_um": 0.48,
+    "pml_um": 0.08,
+    "tfsf_um": 0.24,
+    "inner_monitor_half_um": 0.09,
+    "outer_monitor_half_um": 0.15,
+    "band": [
+      0.33,
+      0.45,
+      9
+    ],
+    "pulse_wavelength_um": 0.39,
+    "pulse_length_s": 2e-15,
+    "pulse_offset_s": 8e-15,
+    "duration_fs": 48,
+    "duration_note": "the Drude relaxation time 1/collision_rad_s is 6.7 fs, so 48 fs leaves exp(-7.2) of the polarization energy",
+    "mesh_sequence_um": [
+      0.02,
+      0.01,
+      0.005
+    ],
+    "judged_mesh_um": 0.005,
+    "grids": [
+      "24^3",
+      "48^3",
+      "96^3 (CPU FP64 only, above the CUDA cap of the recorded run)"
+    ],
+    "layer_a": "fused CUDA FP32 against CPU FP64 at 24^3 and 48^3 on the scattering and absorption observables",
+    "ade_diagnostic": "the record also stores the Mie result evaluated with the ADE-sampled permittivity at (2/dt) tan(omega dt/2), which separates the time-discretisation of the material from the grid error",
+    "interface_method": "subpixel",
+    "subpixel_quadrature": 8
+  },
+  "seed": null,
+  "precision": [
+    "float64 (CPU reference)",
+    "float32 (CUDA, layer A)"
+  ],
+  "backend": [
+    "cpu",
+    "cuda"
+  ],
+  "reference_method": "Bohren-Huffman sphere series with the complex index sqrt(epsilon(omega)) of the same analytic Drude model, written in tests/test_physics_g3_b.py with SciPy spherical Bessel functions; checked against the real-index repository series and against the quasi-static absorption and scattering limits of a Drude sphere",
+  "observables": [
+    {
+      "name": "scattering_um2",
+      "unit": "um^2",
+      "definition": "outward scattered power through the outer planes divided by the incident intensity"
+    },
+    {
+      "name": "inner_scattering_um2",
+      "unit": "um^2",
+      "definition": "the same from the inner planes after subtracting the matched reference fields; its difference from the outer value over the band maximum is the self-consistency check"
+    },
+    {
+      "name": "absorption_um2",
+      "unit": "um^2",
+      "definition": "net inward total-field power through the inner planes divided by the incident intensity"
+    },
+    {
+      "name": "max_scattering_relative_error",
+      "unit": "dimensionless",
+      "definition": "max over the nine wavelengths of |scattering/Mie - 1|"
+    },
+    {
+      "name": "max_absorption_relative_error",
+      "unit": "dimensionless",
+      "definition": "max over the nine wavelengths of |absorption/Mie - 1|"
+    },
+    {
+      "name": "peak_scattering_um, peak_absorption_um",
+      "unit": "um",
+      "definition": "refined peak wavelengths of the measured and Mie curves (diagnostic, not judged)"
+    }
+  ],
+  "acceptance": {
+    "judged_at": "h/4 = 0.005 um, CPU FP64",
+    "justification": "The 2 percent Mie threshold of the program is declared not applicable, as in G3-05. The G3-05 budgets were written for a staircased sphere of 4, 7 and 10 cells per radius from its effective-radius uncertainty h/(2a): the quasi-static scattering scales with a^6 and the absorption with a^3, and the plasmon peak shifts with the effective shape, so fixed-wavelength errors on the flanks are amplified by the peak steepness (Q about 10); the scattering budgets are roughly 6 h/(2a) rounded down and the absorption budgets are doubled because the absorption is the small difference of the inward and outward total-field powers. They are kept unchanged here although the held-out spheres have 5.4, 8.5 and 11.6 cells per radius, so they are slightly looser against that argument than in G3-05. These are loose engineering budgets, not a claim of percent-level accuracy.",
+    "self_consistency": {
+      "inner_outer_scattering_max_difference_over_band_maximum": 0.02,
+      "definition": "max over the band of |inner - outer| scattered cross section divided by the band maximum of the outer value; a per-wavelength relative form was replaced before the recorded run because it is amplified where the coarse-mesh cross section is nearly zero"
+    },
+    "layer_a_cuda_fp32_vs_cpu_fp64": {
+      "rtol": 0.0001,
+      "atol": 0.0
+    },
+    "convergence_reporting": "the error at h, h/2 and h/4 is reported for every radius and observable; no order or monotonicity is required",
+    "source_of_limits": "the G3-05 fixture-specific budgets, unchanged; the 2 percent Mie threshold of the program is declared not applicable to this fixture",
+    "per_radius": {
+      "0.027": {
+        "scattering_relative_error": 0.5,
+        "absorption_relative_error": 1.0
+      },
+      "0.0425": {
+        "scattering_relative_error": 0.3,
+        "absorption_relative_error": 0.6
+      },
+      "0.058": {
+        "scattering_relative_error": 0.2,
+        "absorption_relative_error": 0.4
+      }
+    },
+    "budget_assignment": "the three G3-05 budget pairs, unchanged, assigned by size order: the smallest sphere takes the budgets of r = 0.02 um, the middle one those of 0.035 um and the largest those of 0.05 um",
+    "unchanged_from_first_case": "every limit, the self-consistency limit, layer A, the judged mesh and the convergence reporting; only the radii and centres differ"
+  },
+  "development_runs": [
+    {
+      "method": "diagonal dispersive average (the G3-05r2 method, replaced)",
+      "fixture": "G3-05 fixture, centred spheres",
+      "execution": "CPU FP64",
+      "mesh_um": [
+        0.02,
+        0.01
+      ],
+      "radii_um": [
+        0.02,
+        0.035,
+        0.05
+      ],
+      "purpose": "inverse and tensor diagonal variants"
+    },
+    {
+      "method": "diagonal dispersive average",
+      "fixture": "2D TE Drude cylinder, radius 0.05 um, domain 0.8 um, TFSF 0.5 um, band 0.30 to 0.42 um",
+      "execution": "CPU FP64",
+      "mesh_um": [
+        0.01,
+        0.005,
+        0.0025
+      ],
+      "purpose": "staircase, inverse, tensor and arithmetic variants"
+    },
+    {
+      "method": "diagonal dispersive average",
+      "fixture": "the G3-05 geometry scaled by 2 (domain 0.96 um), centred spheres",
+      "execution": "CUDA FP32",
+      "mesh_um": [
+        0.01
+      ],
+      "radii_um": [
+        0.04,
+        0.07,
+        0.1
+      ],
+      "purpose": "size trend, and one 96 fs run of r = 0.1 um"
+    },
+    {
+      "method": "diagonal dispersive average",
+      "fixture": "G3-05r2 judged run on the G3-05 fixture",
+      "execution": "CPU FP64 and CUDA FP32 layer A",
+      "mesh_um": [
+        0.02,
+        0.01,
+        0.005
+      ],
+      "radii_um": [
+        0.02,
+        0.035,
+        0.05
+      ],
+      "purpose": "judged; failed at h = 0.005 um"
+    },
+    {
+      "method": "node averaging tensor (this method)",
+      "fixture": "the 2D TE Drude cylinder above",
+      "execution": "CPU FP64",
+      "mesh_um": [
+        0.01,
+        0.005,
+        0.0025
+      ],
+      "purpose": "prototype with a one-step window; package with windows of one and two steps"
+    },
+    {
+      "method": "node averaging tensor",
+      "fixture": "G3-05 fixture, centred spheres",
+      "execution": "CUDA FP32",
+      "mesh_um": [
+        0.005
+      ],
+      "runs": [
+        "window 1: r = 0.018, 0.022, 0.025, 0.03, 0.04, 0.045, 0.055 um",
+        "diagonal-average and staircase controls: r = 0.025 um",
+        "normal-branch kernel factors 0.75 and 1.25: r = 0.022, 0.045 um",
+        "windows 1.25, 1.5, 2, 2.5 and 3: r = 0.022, 0.045 um",
+        "window 2: r = 0.018, 0.03, 0.04, 0.055 um"
+      ],
+      "purpose": "choice of the window and the tangential average"
+    },
+    {
+      "method": "node averaging tensor",
+      "fixture": "G3-05 fixture, centred sphere",
+      "execution": "CPU FP64",
+      "mesh_um": [
+        0.02
+      ],
+      "radii_um": [
+        0.05
+      ],
+      "purpose": "harmonic and majority tangential variants"
+    },
+    {
+      "method": "node averaging tensor",
+      "fixture": "G3-05 fixture, centred spheres",
+      "execution": "CPU FP64",
+      "mesh_um": [
+        0.02
+      ],
+      "radii_um": [
+        0.03,
+        0.05
+      ],
+      "purpose": "package against prototype"
+    },
+    {
+      "method": "node averaging tensor",
+      "fixture": "G3-05 fixture, centred sphere",
+      "execution": "CUDA FP32 against CPU FP64",
+      "mesh_um": [
+        0.02,
+        0.01
+      ],
+      "radii_um": [
+        0.03
+      ],
+      "purpose": "layer A development"
+    },
+    {
+      "method": "node averaging tensor with incremented E (commit cd0df2c)",
+      "fixture": "G3-05r3 judged run on the G3-05 fixture",
+      "execution": "CPU FP64 and CUDA FP32 layer A",
+      "mesh_um": [
+        0.02,
+        0.01,
+        0.005
+      ],
+      "radii_um": [
+        0.02,
+        0.035,
+        0.05
+      ],
+      "purpose": "judged; kept outside the repository as a development-contaminated attempt"
+    },
+    {
+      "method": "node averaging tensor with incremented E",
+      "fixture": "G3-05 fixture, sphere moved off the node lattice (independent review, 2026-09-26)",
+      "execution": "CPU FP64",
+      "mesh_um": [
+        0.01
+      ],
+      "radii_um": [
+        0.035
+      ],
+      "purpose": "translation sensitivity"
+    },
+    {
+      "method": "node averaging tensor with E assigned from D (this revision)",
+      "fixture": "G3-05 fixture, centred sphere",
+      "execution": "CPU FP64",
+      "mesh_um": [
+        0.02
+      ],
+      "radii_um": [
+        0.03
+      ],
+      "purpose": "regression against the incremented-E method: every monitor field agrees within 4e-15 relative"
+    },
+    {
+      "method": "node averaging tensor with E assigned from D",
+      "fixture": "2D TE cylinder of a Drude plus Lorentz metal, radius 0.05 um, centre (0.0013, -0.0021) um, domain 0.8 um, TFSF 0.5 um, band 0.30 to 0.42 um",
+      "execution": "CPU FP64",
+      "mesh_um": [
+        0.01,
+        0.005
+      ],
+      "purpose": "development of the two-pole regression guard of tests/test_subpixel_dispersive.py"
+    },
+    {
+      "method": "node averaging tensor with E assigned from D",
+      "fixture": "G3-05r4 judged attempt on the G3-05 fixture: spheres r = 0.027 um at (0.0012, -0.0019, 0.0007) um, 0.0425 um at (-0.0016, 0.0008, 0.0023) um and 0.06 um at (0.0021, 0.0014, -0.0009) um",
+      "execution": "CPU FP64",
+      "mesh_um": [
+        0.02
+      ],
+      "purpose": "refused at validation on the r = 0.06 um sphere; the empty reference and the r = 0.027 and 0.0425 um runs completed and their errors were discarded without being printed or written"
+    },
+    {
+      "method": "planning only (no time stepping)",
+      "fixture": "this case and the r4 spheres",
+      "execution": "CPU",
+      "mesh_um": [
+        0.02,
+        0.01,
+        0.005
+      ],
+      "purpose": "validity of every sphere at every mesh against the TFSF, one-way and source refusals"
+    }
+  ],
+  "development_evidence": "Before this declaration the method was run only as listed in development_runs. On the G3-05 fixture at h = 0.005 um in CUDA FP32, window-2 centred spheres of radius 0.018, 0.03, 0.04 and 0.055 um gave largest scattering errors 0.257, 0.093, 0.056 and 0.034 and largest absorption errors 0.279, 0.190, 0.159 and 0.181, inside the budget pairs that this case assigns to comparable sizes; the reviewer's off-lattice r = 0.035 um sphere at h = 0.01 um moved the errors from 0.195 to 0.205 (scattering) and 0.464 to 0.375 (absorption). This is why the case is declared; the limits are copied from G3-05, not chosen from these runs.",
+  "oracle_class": [
+    "analytic_continuum",
+    "shared_discrete_operator"
+  ],
+  "tests": {
+    "existing": [
+      "tests/test_physics_g3_05r5.py::test_g3_05r5_drude_sphere_subpixel",
+      "tests/test_physics_g3_05r5.py::test_g3_05r5_drude_cuda_layer_a"
+    ],
+    "layers": {
+      "tests/test_physics_g3_05r5.py::test_g3_05r5_drude_sphere_subpixel": {
+        "layer": "B",
+        "oracle_class": "analytic_continuum",
+        "oracle": "complex-index Bohren-Huffman series with the analytic Drude permittivity: scattering and absorption per sphere at h = 0.005 um against the case budgets; the ADE-sampled permittivity variant separates the time discretisation"
+      },
+      "tests/test_physics_g3_05r5.py::test_g3_05r5_drude_cuda_layer_a": {
+        "layer": "A",
+        "oracle_class": "shared_discrete_operator",
+        "oracle": "CUDA float32 (fused kernel) against CPU float64 scattering and absorption at h = 0.02 and 0.01 um, rtol 1e-4"
+      }
+    },
+    "not_yet_covered": [
+      "a finer mesh sequence (h/8 needs 192^3 cells)",
+      "Lorentz or multipole metals on this fixture",
+      "several translations per radius"
+    ]
+  },
+  "notes": "Declared at the commit named in declared_at_commit (the method is that of 0546e79; 2095eae after it adds a test only) and before any run of this method on these spheres, apart from the r4 attempt on the two smaller ones listed in development_runs; the case is added in the commit that follows it. The record is docs/validation/g3/G3-05r5.json, written by TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 python -m pytest tests/test_physics_g3_05r5.py."
+}
