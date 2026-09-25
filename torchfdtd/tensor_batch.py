@@ -34,6 +34,8 @@ def _topology(region):
             region.reference_step, region.time_step, region.rectangular_courant,
             region.mesh_type, region.mesh_steps is not None,region.interface_method,
             json.dumps(region.boundaries.model_dump(), sort_keys=True),
+            # The absorber changes the fused kernel; the other modes keep their earlier signatures.
+            *(('absorber',) if region.pml_dispersion == 'absorber' else ()),
             tuple(region.pml_layers(axis, side) for axis in range(3) for side in range(2)),
             tuple(tuple(n) for n in region.mesh_nodes))
 

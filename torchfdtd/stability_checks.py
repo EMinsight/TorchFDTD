@@ -37,6 +37,6 @@ def stability_warnings(project):
     if inside and project.region.pml_dispersion == 'ade':
         named = '; '.join(f'{name} ({", ".join(faces)})' for name, faces in inside)
         warnings.append(f'Dispersive material inside PML layers: {named}. The coupled ADE/CPML update is not a stable absorber for '
-                        'dispersive media that reach the outer boundary (docs/BOUNDARIES.md); set region.pml_dispersion="frozen" or '
-                        'end the structure before the PML.')
+                        'dispersive media that reach the outer boundary (docs/BOUNDARIES.md); set region.pml_dispersion="absorber" '
+                        '(or "frozen" for a dielectric), or end the structure before the PML.')
     return warnings

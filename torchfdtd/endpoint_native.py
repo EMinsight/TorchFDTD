@@ -90,6 +90,8 @@ def validate_endpoint_project(project):
     active={obj.material for obj in project.structures if obj.enabled}
     if any(m.oscillators for m in project.materials if m.name in active):
         raise ValueError('PMC native dispatch does not support ADE/dispersive materials.')
+    if r.pml_dispersion=='absorber':
+        raise ValueError('PMC native dispatch does not implement pml_dispersion="absorber".')
     if not project.monitors:raise ValueError('PMC native dispatch requires at least one point monitor.')
     if any(not s.enabled or s.kind!='point' or s.injection!='soft' or not s.component.startswith('E') for s in project.sources):
         raise ValueError('PMC native dispatch accepts enabled point soft electric sources only.')

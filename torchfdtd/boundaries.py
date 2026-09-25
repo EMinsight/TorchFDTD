@@ -14,6 +14,8 @@ import fdtd
 import numpy as np
 import torch
 
+from .models import BoundaryFace
+
 
 # (derivative axis, input component, output component, curl sign)
 CURL_TERMS = ((0, 2, 1, -1), (0, 1, 2, 1),
@@ -39,6 +41,69 @@ def reject_pmc_faces(region, path):
     if any(f.kind in ('pmc', 'symmetric') for a in range(3) for f in region.boundaries.pair(a)):
         raise ValueError(f'PMC/symmetric faces are not implemented by {path}. '
                          'Use DifferentiableSimulation, StreamedSimulation, run_tensor_batch or the endpoint Simulation dispatch.')
+
+
+def reject_pml_dispersion(region, path):
+    """Explicit refusal for paths that run the plain CPML and ADE on every PML face."""
+    if region.pml_dispersion != 'ade':
+        raise ValueError(f'pml_dispersion="{region.pml_dispersion}" is implemented by the resident Simulation and run_tensor_batch only, '
+                         f'not by {path}.')
+
+
+def absorber_profiles(region, courant):
+    """Half-step loss s = sigma*courant/2 of the adiabatic absorber, per active axis at its (integer, half) Yee nodes.
+
+    Every PML face of region.pml_dispersion == 'absorber' is a graded conductivity of
+    its CPML depth: sigma = sigma_scale*40/(L+1)*rho**polynomial in units of
+    c/reference_step, rho the physical depth into the layer over its thickness.
+    Corner cells add the losses of their faces.
+    """
+    profiles = {}
+    for axis, nodes in enumerate(region.mesh_nodes):
+        n = region.shape[axis]
+        if n == 1:
+            continue
+        nodes = np.asarray(nodes, dtype=np.float64)
+        points = (nodes[:-1], (nodes[:-1]+nodes[1:])/2)
+        loss = [np.zeros(n), np.zeros(n)]
+        for side, face in enumerate(region.boundaries.pair(axis)):
+            layers = region.pml_layers(axis, side)
+            if not layers:
+                continue
+            inner, outer = (nodes[layers], nodes[0]) if side == 0 else (nodes[n-layers], nodes[n])
+            for k, point in enumerate(points):
+                rho = np.clip((point-inner)/(outer-inner), 0, 1)
+                loss[k] += face.sigma_scale*40/(layers+1)*rho**face.polynomial*courant/2
+        profiles[axis] = tuple(loss)
+    return profiles
+
+
+def absorber_loss(profiles, shape, family, indices=None, components=True):
+    """Absorber loss per (x, y, z, component) sample, the sum over axes in axis order.
+
+    Without indices the full shape+(3,) array; with flat indices into the field
+    (components) or its cells (not components, three columns) only those samples.
+    """
+    if indices is None:
+        loss = np.zeros(tuple(shape)+(3,))
+        for c in range(3):
+            for axis, pair in profiles.items():
+                view = [1, 1, 1]
+                view[axis] = shape[axis]
+                loss[..., c] += pair[0 if is_nodal(family, c, axis) else 1].reshape(view)
+        return loss
+    indices = np.asarray(indices, dtype=np.int64)
+    cells, comp = np.divmod(indices, 3) if components else (indices, None)
+    coords = np.unravel_index(cells, tuple(shape))
+    loss = np.zeros(len(indices)) if components else np.zeros((len(indices), 3))
+    for axis, pair in profiles.items():
+        for c in range(3):
+            value = pair[0 if is_nodal(family, c, axis) else 1][coords[axis]]
+            if components:
+                loss[comp == c] += value[comp == c]
+            else:
+                loss[:, c] += value
+    return loss
 
 
 def pmc_faces(region):
@@ -154,6 +219,19 @@ class YeeGrid(fdtd.Grid):
         self.memory_states = []
         self.material_states = []
         self.incident_states = []
+        # The adiabatic absorber replaces the stretched coordinates on every PML face.
+        self.absorber = None
+        if region.pml_dispersion == 'absorber':
+            if lower or upper:
+                raise ValueError('pml_dispersion="absorber" does not implement PMC/symmetric faces.')
+            if region.interface_method == 'subpixel':
+                raise ValueError('pml_dispersion="absorber" requires staircase interfaces.')
+            default = BoundaryFace()
+            if any(f.kind == 'pml' and (f.kappa, f.alpha, f.alpha_polynomial) != (default.kappa, default.alpha, default.alpha_polynomial)
+                   for a in range(3) for f in region.boundaries.pair(a)):
+                raise ValueError('pml_dispersion="absorber" grades a conductivity from layers, sigma_scale and polynomial; '
+                                 'the stretched-coordinate kappa and alpha of the PML faces must keep their defaults.')
+            self.absorber = absorber_profiles(region, self.courant_number)
         for forward in (False, True):
             for axis, component, output, _ in CURL_TERMS:
                 n = region.shape[axis]
@@ -164,7 +242,7 @@ class YeeGrid(fdtd.Grid):
                 target_shape = extended_shape(region.shape, upper, 'H' if forward else 'E', output)
                 segments = []
                 for side, face in enumerate(region.boundaries.pair(axis)):
-                    if face.kind != 'pml':
+                    if face.kind != 'pml' or self.absorber is not None:
                         continue
                     layers = region.pml_layers(axis, side)
                     base = 0 if side == 0 else n - layers
@@ -243,16 +321,42 @@ class YeeGrid(fdtd.Grid):
                 result[_slice(axis, -1, output)] += sign * edge
         return result
 
+    def absorber_update(self, family):
+        """(decay, gain) of the trapezoidal absorber loss, F <- decay*F + gain*dF, built on first use."""
+        cached = self.__dict__.setdefault('_absorber_update', {})
+        if family not in cached:
+            loss = absorber_loss(self.absorber, self.region.shape, family)
+            cached[family] = (self._coefficient((1-loss)/(1+loss)), self._coefficient(1/(1+loss)))
+        return cached[family]
+
+    def absorber_axes(self):
+        """Per-axis (integer, half) node losses on the field device for the fused kernels."""
+        cached = self.__dict__.get('_absorber_axes')
+        if cached is None:
+            cached = self._absorber_axes = {axis: tuple(self._coefficient(v) for v in pair) for axis, pair in self.absorber.items()}
+        return cached
+
     def update_E(self):
         prepared = [state.prepare(self.E) for state in self.material_states]
         curl=self.curl(self.H,False)
-        self.E += self.courant_number * self.inverse_permittivity * curl
+        if self.absorber is None:
+            self.E += self.courant_number * self.inverse_permittivity * curl
+        else:
+            decay, gain = self.absorber_update('E')
+            self.E *= decay
+            self.E += self.courant_number * gain * self.inverse_permittivity * curl
         if getattr(self,'subpixel',None) is not None:self.subpixel.add(curl)
         for state, (old, response) in zip(self.material_states, prepared):
             state.correct(self.E, old, response)
 
     def update_H(self):
-        self.H -= self.courant_number * self.inverse_permeability * self.curl(self.E, True)
+        if self.absorber is None:
+            self.H -= self.courant_number * self.inverse_permeability * self.curl(self.E, True)
+        else:
+            decay, gain = self.absorber_update('H')
+            curl = self.curl(self.E, True)
+            self.H *= decay
+            self.H -= self.courant_number * gain * self.inverse_permeability * curl
 
 
 class BoundaryDescription:

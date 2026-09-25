@@ -89,7 +89,7 @@ def test_stability_checks_warn_for_dispersive_structures_inside_the_pml_and_name
     assert dispersive_structures_in_pml(p) == [('drude slab', ['y_min', 'y_max'])]
     warnings = stability_warnings(p)
     assert len(warnings) == 1
-    assert 'drude slab (y_min, y_max)' in warnings[0] and 'pml_dispersion="frozen"' in warnings[0] and 'end the structure before the PML' in warnings[0]
+    assert 'drude slab (y_min, y_max)' in warnings[0] and 'pml_dispersion="absorber"' in warnings[0] and 'end the structure before the PML' in warnings[0]
     three = dispersive_project(dimension='3d')
     assert dispersive_structures_in_pml(three) == [('drude slab', ['y_min', 'y_max', 'z_min', 'z_max'])]
     assert len(stability_warnings(three)) == 1
