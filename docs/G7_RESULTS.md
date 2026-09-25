@@ -17,8 +17,10 @@ pixels).
 
 **Package.** The records come from a checkout import of this branch at commit 0950126 (each record names the
 file, the missing `__version__` attribute, the distribution version 0.15.0, `torchfdtd_import: checkout` and the
-commit). The release-candidate round re-runs the judged test with the installed wheel; the workflow appends the
-repository root to the end of `sys.path`, so an installed torchfdtd is used when one exists.
+commit). The gate G7-03 re-judges these committed records criterion by criterion, and the release-candidate round
+repeats that re-judge with the installed wheel; it does not rerun the workflow. The declared run from the installed
+wheel (`TORCHFDTD_G7_FULL=1`, about 3 to 4 hours of GPU) is still to be done. The workflow appends the repository
+root to the end of `sys.path`, so an installed torchfdtd is used when one exists.
 
 **Result: all seven criteria pass.** The three seeds reach one design that meets the 0.4 um linewidth and gap
 (0.5 um and 0.7 um measured), with \|S21\|^2 = 0.6115 at 1.55 um after the GDS round trip at 0.05 um.

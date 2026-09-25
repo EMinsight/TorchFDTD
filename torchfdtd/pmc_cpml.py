@@ -95,10 +95,12 @@ class EndpointCPMLSimulation(EndpointSimulation):
     positive layer count. The PML plus one cell of sampled electric epsilon
     must equal ``background_epsilon`` and has zero material VJP. CPML profile
     parameters, mesh and sources are fixed. No native Project dispatch.
+    ``tensor_budget_bytes=None`` derives the budget at every admission, as
+    EndpointSimulation does.
     """
     def __init__(self,nodes_um,faces,*,dt_seconds,sources,observations,pml_cells,
                  background_epsilon,reflection=1e-6,device='cpu',checkpoints=4,
-                 tensor_budget_bytes=256_000_000):
+                 tensor_budget_bytes=None):
         if torch.device(device).type not in ('cpu','cuda'):
             raise ValueError('Endpoint CPML supports CPU reference or direct CUDA.')
         aliases={'pec':'pec','antisymmetric':'pec','pmc':'pmc','symmetric':'pmc','pml':'pml'}
@@ -126,12 +128,13 @@ class EndpointCPMLSimulation(EndpointSimulation):
         # Extra derivative metadata is at most 20 bytes per potential psi.
         self._psi_count=2*sum(topology.counts.values())
         minimum_extra=20*self._psi_count+100*sum(topology.counts.values())
-        if isinstance(tensor_budget_bytes,bool) or not isinstance(tensor_budget_bytes,int) or tensor_budget_bytes<=minimum_extra:
+        if tensor_budget_bytes is not None and (isinstance(tensor_budget_bytes,bool) or not isinstance(tensor_budget_bytes,int) or tensor_budget_bytes<=minimum_extra):
             raise ValueError('Endpoint CPML tensor budget is too small for auxiliary metadata.')
+        # The base constructor admits its preliminary bound plus this metadata.
+        self._construction_bytes=minimum_extra
         super().__init__(topology.nodes,closed,dt_seconds=dt_seconds,sources=sources,
             observations=observations,device=device,checkpoints=checkpoints,
-            tensor_budget_bytes=tensor_budget_bytes-minimum_extra)
-        self.tensor_budget_bytes=tensor_budget_bytes
+            tensor_budget_bytes=tensor_budget_bytes)
         reference=self.backend
         if self.device.type=='cuda':
             from .pmc_cpml_cuda import EndpointCPMLCUDA
@@ -228,8 +231,8 @@ class EndpointCPMLSimulation(EndpointSimulation):
                 raise ValueError('Inputs must be contiguous FP32 tensors on the configured device.')
         if epsilon.shape!=(self.topology.counts['E'],):raise ValueError('One epsilon per endpoint E DOF is required.')
         if waveforms.ndim!=2 or waveforms.shape[1]!=len(self.source_ids):raise ValueError('Waveforms require [steps,sources].')
-        if self.memory_plan(len(waveforms))['tensor_upper_bound_bytes']>self.tensor_budget_bytes:
-            raise ValueError('Requested simulation exceeds endpoint CPML tensor budget.')
+        self.admit_tensors(self.memory_plan(len(waveforms))['tensor_upper_bound_bytes'],
+                           'Requested simulation exceeds endpoint CPML tensor budget')
         if any(not bool(torch.isfinite(v).all()) for v in (epsilon,waveforms)):
             raise ValueError('Inputs must be finite.')
         if bool((epsilon<1).any()):raise ValueError('Endpoint CPML requires epsilon at least one.')

@@ -26,6 +26,7 @@ from .solver import ENGINE_LOCK, Result, index_at, field_axes
 from .field_monitors import FrequencyPlane,FrequencyUpdates
 from .run_control import StateDiagnostics, DecayDecision, source_end_time
 from .cuda_graph import CudaStepGraphs, observation_schedule, validate_graph_steps
+from .cuda_memory import cuda_mem_info
 
 
 def _topology(region, faces=()):
@@ -138,7 +139,7 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
     if any(_topology(p.region,absorber_faces(p))!=baseline for p in projects):
         raise ValueError('Tensor batch requires identical precision, steps, nodes, timestep and boundaries. Freeze common graded refinements or group compatible projects.')
     estimate_bytes=sum(s['estimated_memory_mb'] for s in stats)*2**20
-    free,_=torch.cuda.mem_get_info()
+    free,_=cuda_mem_info()
     if estimate_bytes>free*memory_fraction:
         raise ValueError('Tensor cohort exceeds its GPU memory allowance. Split it into smaller cohorts.')
     dtype=torch.float32 if first.precision=='float32' else torch.float64

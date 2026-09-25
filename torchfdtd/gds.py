@@ -127,7 +127,9 @@ class GDSLimits:
     max_file_bytes: int = 64*1024*1024
     max_instances: int = 10000
     max_structures: int = 1000
-    max_total_vertices: int = 1000000
+    # None, the Python-API default, admits any vertex count; the workbench server
+    # passes an explicit limit (gds_service.SERVER_GDS_LIMITS).
+    max_total_vertices: int | None = None
     max_depth: int = 64
     max_span_um: float = 10000.
     max_absolute_um: float = 1000000.
@@ -135,10 +137,14 @@ class GDSLimits:
     def __post_init__(self):
         for name in ('max_file_bytes','max_instances','max_structures','max_total_vertices','max_depth'):
             value=getattr(self,name)
+            if name=='max_total_vertices' and value is None:continue
             if isinstance(value,bool) or not isinstance(value,int) or value<1:raise ValueError('Admission limits must be positive integers.')
         if any(not math.isfinite(x) or x<=0 for x in (self.max_span_um,self.max_absolute_um)):
             raise ValueError('Coordinate limits must be finite and positive.')
-        if self.max_structures>1000:raise ValueError('Native projects admit at most 1000 structures.')
+
+    @property
+    def vertex_limit(self):
+        return math.inf if self.max_total_vertices is None else self.max_total_vertices
 
 
 @dataclass(frozen=True)
@@ -295,9 +301,9 @@ def _preflight(cell,limits):
             if isinstance(ref.cell,str):raise ValueError(f'Unresolved GDS cell reference: {ref.cell}')
             child=visit(ref.cell,(*stack,current.name));repeat=max(1,ref.repetition.size)
             count+=child[0]*repeat;vertices+=child[1]*repeat;labels+=child[2]*repeat;paths+=child[3]*repeat;instances+=child[4]*repeat
-            if count+labels+instances>limits.max_instances or vertices>limits.max_total_vertices:
+            if count+labels+instances>limits.max_instances or vertices>limits.vertex_limit:
                 raise ValueError('Expanded GDS hierarchy exceeds instance/vertex admission limits.')
-        if count+labels+instances>limits.max_instances or vertices>limits.max_total_vertices:
+        if count+labels+instances>limits.max_instances or vertices>limits.vertex_limit:
             raise ValueError('Expanded GDS hierarchy exceeds instance/vertex admission limits.')
         visited.add(current.name);memo[current.name]=(count,vertices,labels,paths,instances)
         return memo[current.name]
@@ -361,7 +367,7 @@ def import_gds(path,*,cell,layers,port_layers=(),unmapped='error',limits=None,
         if np.max(np.abs(flat_path.widths()))>limits.max_span_um:
             raise ValueError('Transformed GDS path width exceeds admission limit.')
         polygons.extend(flat_path.to_polygons())
-    if len(polygons)>limits.max_instances or sum(len(p.points) for p in polygons)>limits.max_total_vertices:
+    if len(polygons)>limits.max_instances or sum(len(p.points) for p in polygons)>limits.vertex_limit:
         raise ValueError('Flattened GDS geometry exceeds instance/vertex admission limits.')
     stack={(entry.layer,entry.datatype) for entry in layers}
     etch_pairs={pair for entry in layers for pair in entry.etch_by}
@@ -384,7 +390,7 @@ def import_gds(path,*,cell,layers,port_layers=(),unmapped='error',limits=None,
             _admit_xy(outer,limits,xy_bounds_um)
             if len(converted)>=limits.max_structures:raise ValueError('Converted stack exceeds max_structures.')
             converted_vertices+=len(outer)+sum(len(h) for h in holes);hole_count+=len(holes)
-            if converted_vertices>limits.max_total_vertices:raise ValueError('Converted stack exceeds max_total_vertices.')
+            if converted_vertices>limits.vertex_limit:raise ValueError('Converted stack exceeds max_total_vertices.')
             converted.append((key,tuple(map(tuple,outer)),tuple(tuple(map(tuple,h)) for h in holes),layer,(z0,z1)))
     for layer in layers:
         key=(layer.layer,layer.datatype);source=groups.get(key,[])

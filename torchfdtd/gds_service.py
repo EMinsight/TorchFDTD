@@ -12,6 +12,8 @@ from .models import Model, Project
 from . import gds
 
 MAX_UPLOAD_BYTES = 32_000_000
+# Uploads keep the vertex limit that the Python API leaves open (docs/SECURITY.md).
+SERVER_GDS_LIMITS = gds.GDSLimits(max_total_vertices=1_000_000)
 
 
 class GDSConversion(Model):
@@ -98,7 +100,7 @@ def attach_gds_routes(app, root):
             imported = gds.import_gds(uploads[key], cell=payload.cell,
                 layers=[gds.GDSLayer(**row) for row in payload.layers],
                 port_layers=[gds.GDSPortLayer(**row) for row in payload.port_layers],
-                unmapped=payload.unmapped)
+                unmapped=payload.unmapped, limits=SERVER_GDS_LIMITS)
             project = payload.project
             if payload.replace_geometry:
                 project = project.model_copy(update={'structures': []})

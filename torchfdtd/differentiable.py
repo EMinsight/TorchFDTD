@@ -794,10 +794,18 @@ class DifferentiableSimulation(torch.nn.Module):
         if spectral is not None:return spectral.result(signals,report)
         return DifferentiableResult(signals,r.time_step,tuple(m.component for m in self.project.monitors if m.enabled),report)
 
-    def reference(self,epsilon):
-        """Small-problem full-autograd oracle. Not the large-simulation path."""
-        if math.prod(self.project.region.shape)*self.project.region.steps>2_000_000:
-            raise ValueError('Full-autograd reference is restricted to at most two million cell-steps.')
+    def reference(self,epsilon,*,graph_budget_bytes=None):
+        """Small-problem full-autograd oracle. Not the large-simulation path.
+
+        The retained graph is admitted by its estimated memory against free
+        device or host memory. graph_budget_bytes caps it further.
+        """
+        from .oracle_memory import admit_oracle,check_oracle_dtype,oracle_graph_bytes,oracle_source_terms
+        r=self.project.region
+        # The graph runs at epsilon's dtype and the estimate counts the project precision.
+        check_oracle_dtype(epsilon,r)
+        admit_oracle(oracle_graph_bytes(r,'yee',material_elements=epsilon.numel(),source_terms=oracle_source_terms(self.project)),
+                     epsilon.device,graph_budget_bytes)
         system=_System(self.project,epsilon)
         state=tuple(torch.zeros_like(x) for x in system.state())
         signals=[]

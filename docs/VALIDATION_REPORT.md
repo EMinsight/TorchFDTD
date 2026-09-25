@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.15.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T130822Z-g7-03-f5260d92` recorded 2026-09-25T13:08:22+00:00 at commit `30ba43a92056`.
+Package version `0.15.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T145114Z-g4-01-3612e39b` recorded 2026-09-25T14:51:14+00:00 at commit `338757eaab1d`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 9 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 15 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 60 | 16 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 60 | 22 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -39,7 +39,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G1-03 | quadrant_intensity_allocation의 FP32 불안정. | IMPLEMENTED | VERIFIED | `20260923T180913Z-g1-03-45424e33` | `4635db7eab69` | PASS | evidence matches the current checkout |
 | G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260923T181355Z-g1-04-584298f5` | `4635db7eab69` | PASS | evidence matches the current checkout |
 | G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260923T181843Z-g1-05-14e56c39` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260925T064615Z-g1-06-4590b94f` | `6fd0c76648b4` | PASS | evidence matches the current checkout |
+| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260925T064615Z-g1-06-4590b94f` | `6fd0c76648b4` | FAIL | STALE: watched file changed since the run: README.md |
 
 ### G2 물리·격자·실행 계약 (WORKSTATION, P0)
 
@@ -69,8 +69,8 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G3-11 | dipole far/near field와 표면/격자 수렴 | IMPLEMENTED | VERIFIED | `20260923T212746Z-g3-11-1121cd71` | `3e9300300d15` | PASS | evidence matches the current checkout |
 | G3-12 | tensor slab 및 tensor gradient | IMPLEMENTED | VERIFIED | `20260923T213042Z-g3-12-9d50987d` | `3e9300300d15` | PASS | evidence matches the current checkout |
 | G3-13 | 곡면 grid offset/mesh/smoothing 폭 물리 수렴 | IMPLEMENTED | VERIFIED | `20260923T213445Z-g3-13-72cea131` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G3-14 | 무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교 | IMPLEMENTED | VERIFIED | `20260923T213556Z-g3-14-ecf4b06b` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G3-15 | full-autograd·directional VJP·FD sweep·Taylor 검사 | IMPLEMENTED | VERIFIED | `20260923T213649Z-g3-15-7368e5ea` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
+| G3-14 | 무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교 | IMPLEMENTED | VERIFIED | `20260923T213556Z-g3-14-ecf4b06b` | `3e9300300d15` | FAIL | STALE: test source changed since the run: tests/test_endpoint_native_cpml_cuda.py |
+| G3-15 | full-autograd·directional VJP·FD sweep·Taylor 검사 | IMPLEMENTED | VERIFIED | `20260923T213649Z-g3-15-7368e5ea` | `3e9300300d15` | FAIL | STALE: test source changed since the run: tests/test_dispersive_adjoint.py |
 | G3-16 | 실제 shape/material 파라미터의 물리 gradient 수렴 | IMPLEMENTED | VERIFIED | `20260923T213745Z-g3-16-4c6f38b9` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G3-17 | oracle 독립성·정밀도·시간·PML 오차 budget 확인 | IMPLEMENTED | VERIFIED | `20260923T213754Z-g3-17-de4fa8eb` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 
@@ -78,11 +78,11 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G4-01 | 보유한 실제 GPU와 OS·driver·runtime부터 확인한다 | IMPLEMENTED | VERIFIED | `20260923T213812Z-g4-01-f3e0cfde` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
+| G4-01 | 보유한 실제 GPU와 OS·driver·runtime부터 확인한다 | IMPLEMENTED | VERIFIED | `20260925T145114Z-g4-01-3612e39b` | `338757eaab1d` | PASS | evidence matches the current checkout |
 | G4-02 | torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다. | IMPLEMENTED | VERIFIED | `20260923T213850Z-g4-02-e1a17660` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-03 | noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다 | IMPLEMENTED | VERIFIED | `20260923T213916Z-g4-03-76bb26f3` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-04 | 최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다 | IMPLEMENTED | VERIFIED | `20260923T213956Z-g4-04-c280e637` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260923T214253Z-g4-05-e0a9e8d3` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
+| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260923T214253Z-g4-05-e0a9e8d3` | `3e9300300d15` | FAIL | STALE: watched file changed since the run: tests/conftest.py |
 | G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260924T092226Z-g4-06-2028458c` | `cd3a5017380d` | PASS | evidence matches the current checkout |
 
 ### G5 메모리·재시작·장기 안정성 (WORKSTATION, P0)
@@ -139,12 +139,12 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260923T225017Z-g9-01-37fad064` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
+| G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260923T225017Z-g9-01-37fad064` | `9d2eb55a1955` | FAIL | STALE: test source changed since the run: tests/test_server_security.py |
 | G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260923T225107Z-g9-02-626de86f` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T064631Z-g9-03-d91c825e` | `6fd0c76648b4` | PASS | evidence matches the current checkout |
-| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260923T225117Z-g9-04-ec7eb9cb` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
+| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T064631Z-g9-03-d91c825e` | `6fd0c76648b4` | FAIL | STALE: watched file changed since the run: README.md |
+| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260923T225117Z-g9-04-ec7eb9cb` | `9d2eb55a1955` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260923T235752Z-g9-06-b92d9083` | `3338a4b9a3a9` | FAIL | STALE: test source changed since the run: tests/test_gpu_runner_policy.py |
+| G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260923T235752Z-g9-06-b92d9083` | `3338a4b9a3a9` | FAIL | STALE: test source changed since the run: tests/test_budgeted_resident.py |
 | G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | SELF | none | none | self | this report's own gate, recorded after the render; judge it with scripts/check_release_gates.py |
 
 ### H1 실제 단일 문제 multi-GPU (HPC, P1)
@@ -165,11 +165,13 @@ Every record written by `scripts/platform_report.py` under `docs/validation/plat
 | Platform id | GPU | Driver | CUDA runtime | torch | CuPy | Python | OS | Recorded |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | rtx3060-win11-lab | NVIDIA GeForce RTX 3060 (cc 8.6, 12287 MiB) | 591.86 | 12.6 | 2.10.0+cu126 | 13.6.0 | 3.10.2 | Windows-10-10.0.26200-SP0 | 2026-09-21T15:53:07+00:00 |
+| rtx3060-wsl2-ubuntu2204 | NVIDIA GeForce RTX 3060 (cc 8.6, 12287 MiB) | 591.86 | 12.8 | 2.11.0+cu128 | 13.6.0 | 3.12.14 | Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35 | 2026-09-25T06:23:47+00:00 |
 | rtx5880-ada-win11-remote | NVIDIA RTX 5880 Ada Generation (cc 8.9, 49139 MiB) | 581.80 | 12.8 | 2.10.0 | 13.6.0 | 3.11.14 | Windows-10-10.0.26100-SP0 | 2026-09-21T19:27:38+00:00 |
 
 | Platform id | G4 evidence runs recorded on this platform | Other tasks whose newest run was recorded here |
 | --- | --- | --- |
-| rtx3060-win11-lab | G4-01 `20260923T213812Z-g4-01-f3e0cfde` (platform_id); G4-02 `20260923T213850Z-g4-02-e1a17660` (platform_id); G4-03 `20260923T213916Z-g4-03-76bb26f3` (platform_id); G4-04 `20260923T213956Z-g4-04-c280e637` (platform_id); G4-05 `20260923T214253Z-g4-05-e0a9e8d3` (platform_id); G4-06 `20260924T092226Z-g4-06-2028458c` (platform_id) | 66 |
+| rtx3060-win11-lab | G4-01 `20260925T145114Z-g4-01-3612e39b` (platform_id); G4-02 `20260923T213850Z-g4-02-e1a17660` (platform_id); G4-03 `20260923T213916Z-g4-03-76bb26f3` (platform_id); G4-04 `20260923T213956Z-g4-04-c280e637` (platform_id); G4-05 `20260923T214253Z-g4-05-e0a9e8d3` (platform_id); G4-06 `20260924T092226Z-g4-06-2028458c` (platform_id) | 66 |
+| rtx3060-wsl2-ubuntu2204 | none | 0 |
 | rtx5880-ada-win11-remote | none | 0 |
 
 Newest runs that match no platform record: none.
@@ -293,7 +295,6 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | G3-15 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G3-16 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G3-17 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G4-01 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-02 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-03 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
 | G4-04 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
@@ -331,6 +332,7 @@ Declared scope changes with the owner's recorded approval (`scope_change_approva
 | G3-14 | docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_solver.py/float32/atol = 2e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_spacetime.py/float32/atol = 2e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_pec_boundaries.py/signals/atol = 2e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_pec_boundaries.py/gradient/atol = 3e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/within_program_thresholds/tests/test_streamed_density.py response/atol = 4e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/looser_than_program_thresholds/tests/test_tensor_native_cuda.py table VJP float32/rtol = 0.0003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/looser_than_program_thresholds/tests/test_endpoint_native_cpml_cuda.py VJPs float32/rtol = 0.0002 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/looser_than_program_thresholds/tests/test_streamed_density.py gradient float32/rtol = 0.0003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-14_discrete_backend_agreement.json acceptance/looser_than_program_thresholds/tests/test_streamed_density.py gradient float32/atol = 7e-06 is looser than the loosest program atol 1e-06 | approved by owner on 2026-09-24 |
 | G3-15 | docs/validation/cases/G3-15_gradient_checks.json acceptance/waveform/float32/rtol = 0.003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-15_gradient_checks.json acceptance/waveform/float32/atol = 0.0003 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-15_gradient_checks.json acceptance/shape/cuda_float32_versus_autograd/rtol = 0.0003 is looser than the loosest program rtol 0.0001 | approved by owner on 2026-09-24 |
 | G3-16 | docs/validation/cases/G3-16_physical_parameter_gradients.json acceptance/geometry_maps/fp32_chain/rtol = 0.0003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-16_physical_parameter_gradients.json acceptance/geometry_maps/streamed/rtol = 0.0004 is looser than the loosest program rtol 0.0001 | approved by owner on 2026-09-24 |
+| G4-01 | docs/validation/cases/G4-01r2_platform_matrix.json declares supersedes (a revised case) | approved by owner on 2026-09-25 |
 | G6-04 | docs/validation/cases/G6-04.json acceptance/tracked_neff_error_max/difference_from_common_criterion states a limit looser than the program threshold; docs/validation/cases/G6-04.json acceptance/separated_amplitudes/atol = 1e-05 is looser than the loosest program atol 1e-06 | approved by owner on 2026-09-24 |
 | G7-01 | docs/validation/cases/G7-01.json declares superseded_by (a revised case); docs/validation/cases/G7-01r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
 | G7-02 | docs/validation/cases/G7-02.json declares superseded_by (a revised case); docs/validation/cases/G7-02r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |

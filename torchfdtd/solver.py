@@ -19,7 +19,7 @@ from .boundaries import YeeGrid
 from .materials import configure_materials, permittivity
 from .spectra import point_spectrum, apodization_window
 from .mesh import configure_auto_mesh, mesh_summary
-from .field_monitors import FrequencyPlane,FrequencyUpdates,monitor_memory,point_trace_memory
+from .field_monitors import FrequencyPlane,FrequencyUpdates,monitor_memory,plane_sizes,point_trace_memory
 
 C0 = 299792458.0
 # fdtd changes a process-global backend and torch default dtype.
@@ -163,6 +163,70 @@ def source_profile(src, loc, region):
     return np.exp(1j*phase)
 
 
+# Resident device model of the fused real CUDA path, calibrated against the peaks in
+# docs/validation/resident_memory_fused_3060.json (docs/EXECUTION_MODES.md). Per cell:
+# E, H, the inverse permittivity and permeability and the three-component temporary
+# of the grid constructor are 15 reals; the sampled permittivity copied to the device
+# adds one real (three with Yee sampling); every CPML memory element adds one. A
+# dispersive scene adds, on every cell, one int64 index per sample and 8 + 42 x poles
+# reals: ADE state, diagnostics weights and the step temporaries held by the pools
+# of up to two captured CUDA graphs (cuda_graph_steps > 1 captures a second one).
+FUSED_CELL_REALS = 15
+FUSED_ADE_REALS = (8, 42)
+FUSED_FIXED_BYTES = 64*2**20       # CUDA graph pools, diagnostics tables, allocator rounding
+
+
+def fused_resident_bytes(region, cells, poles):
+    """Device bytes of a fused resident run before monitors, TFSF and subpixel terms."""
+    from .boundaries import BoundaryDescription
+    real = 8 if region.precision == 'float64' else 4
+    samples = 3 if region.material_sampling == 'yee' else 1
+    psi = sum(math.prod(s['shape']) for segments in BoundaryDescription(region).cpml.values() for s in segments)
+    ade = cells*(8*samples+real*(FUSED_ADE_REALS[0]+FUSED_ADE_REALS[1]*poles)) if poles else 0
+    return real*((FUSED_CELL_REALS+samples)*cells+psi)+ade+FUSED_FIXED_BYTES
+
+
+# Host memory of a resident run, measured with tracemalloc (docs/EXECUTION_MODES.md), with about 10%
+# added: per cell the plan's sampled material after planning and at its peak while planning (float64
+# permittivity and its ownership map: 8.1/16.1 cell, 24.0/48.0 Yee, 78.5/146.0 subpixel), per plane
+# point and component the plan's interpolation maps (136), per accumulated sample the peak of
+# plane_result (40.0), and per step and source term the plan's float64 waveform and sample times (17.6).
+HOST_MATERIAL_BYTES = {'cell': (10, 18), 'yee': (27, 53), 'subpixel': (87, 161)}
+HOST_PLANE_POINT_BYTES = 150
+HOST_PLANE_SAMPLE_BYTES = 44
+HOST_WAVEFORM_BYTES = 20
+HOST_FIXED_BYTES = 512*2**20       # CUDA, CuPy and Python runtime of the run (up to 273 MiB measured at 1M cells)
+
+
+def display_host_bytes(p):
+    """Host bytes of the stored snapshot frames (decimated slices, then stacked) and the trace copy."""
+    r = p.region
+    field = (8 if r.precision == 'float64' else 4)*(2 if r.complex_fields else 1)
+    axis = 'xyz'.index(r.slice_axis)
+    pixels = math.prod(min(n, 256) for i, n in enumerate(r.shape) if i != axis)
+    # One frame every max(snapshot_interval, ceil(steps/100)) steps, plus the last or an early stop.
+    frames = r.steps//max(r.snapshot_interval, math.ceil(r.steps/100))+1
+    traces = r.steps*sum(m.enabled and m.kind == 'point' for m in p.monitors)*field
+    return 2*frames*pixels*field+traces
+
+
+def resident_host_bytes(p, cells, terms):
+    """Host bytes of a resident run whose fields live on a CUDA device.
+
+    Planning holds the material at its peak. After the time loop the host keeps the
+    material, the E and H copies and the larger of one field-sized temporary (a copy
+    or np.abs) and the plane post-processing (a host copy of the accumulator plus
+    the peak of plane_result); the plan maps, waveforms and point traces stay throughout."""
+    r = p.region
+    field = (8 if r.precision == 'float64' else 4)*(2 if r.complex_fields else 1)
+    kept, peak = HOST_MATERIAL_BYTES['subpixel' if r.interface_method == 'subpixel' else r.material_sampling]
+    planes = plane_sizes(p)
+    post = sum(n*nf*nc*(sample+HOST_PLANE_SAMPLE_BYTES) for n, nf, nc, sample in planes)
+    base = (sum(n*nc for n, _, nc, _ in planes)*HOST_PLANE_POINT_BYTES+r.steps*terms*HOST_WAVEFORM_BYTES
+            +point_trace_memory(p)+display_host_bytes(p)+HOST_FIXED_BYTES)
+    return base+max(cells*peak, cells*(kept+6*field)+max(3*field*cells, post))
+
+
 def estimate(p: Project, *, endpoint_dispatch=True):
     """Native resident estimate. PMC projects describe the endpoint dispatch unless
     endpoint_dispatch is False, which describes the volume-plus-face Yee grid."""
@@ -235,13 +299,6 @@ def estimate(p: Project, *, endpoint_dispatch=True):
                 warnings.append(f'{m.name}: start-apodization center is beyond the simulation end.')
     if r.mesh_type == 'graded':
         warnings.append('Graded rectilinear mesh coarsens background gaps and retains the fine timestep. Refinement boxes project across each coordinate axis. Check convergence against a uniform Yee mesh, especially near resonances and thin features.')
-    from .boundaries import absorber_faces, absorber_slabs
-    absorber_bytes=0
-    faces=absorber_faces(p)
-    if faces and not (r.backend=='cuda' and r.cuda_kernel=='fused'):
-        # The torch/NumPy update keeps decay and gain of E and H on the absorber slabs.
-        absorber_bytes=4*3*(8 if r.precision=='float64' else 4)*sum(math.prod(len(range(n)[b]) for n,b in zip(r.shape,box))
-                                                                    for box in absorber_slabs(r,faces))
     interface_bytes=0
     if r.interface_method=='subpixel':
         real_bytes=8 if r.precision=='float64' else 4
@@ -263,15 +320,44 @@ def estimate(p: Project, *, endpoint_dispatch=True):
         real_bytes=8 if r.precision=='float64' else 4
         auxiliary_bytes+=surface*(16+real_bytes)+(10*box['incident_line_cells']+r.steps)*real_bytes
     if boxes:warnings.append('TFSF boxes use normal-incidence live Yee lines and a homogeneous background shell. Inside is total field, outside is scattered field. Amplitude scales the auxiliary soft drive. Check incident PML, mesh and time convergence before quantitative scattering.')
+    # The fused real CUDA kernels (explicit backend="cuda") have the calibrated model; every
+    # other resident path keeps the tensor-expression bound of the Torch and NumPy updates.
+    fused = r.backend == 'cuda' and r.cuda_kernel == 'fused' and not r.complex_fields
+    volume_bytes = (fused_resident_bytes(r, stored, max_poles) if fused else
+                    stored*((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1))
+    # Every soft or one-way source term keeps its sampled waveform, one real per step, on the device.
+    terms = sum(len(q.polarization_components)*(2 if q.injection == 'oneway' else 1)
+                for q in map(p.resolved_source, p.sources) if q.enabled and q.kind != 'tfsf')
+    source_bytes = r.steps*terms*(8 if r.precision == 'float64' else 4)
+    host_bytes = resident_host_bytes(p, n, terms)
+    from .boundaries import absorber_faces, absorber_slabs
+    absorber_bytes = 0
+    faces = absorber_faces(p)
+    if faces and not fused:
+        # The torch/NumPy update keeps decay and gain of E and H on the absorber slabs.
+        absorber_bytes = 4*3*(8 if r.precision == 'float64' else 4)*sum(math.prod(len(range(n_)[b]) for n_, b in zip(r.shape, box))
+                                                                        for box in absorber_slabs(r, faces))
+    host_extra = 0
+    if r.backend != 'cuda':
+        # On the CPU the estimate is host memory, and the tensor-expression bound covers the material and the
+        # field copies. Add the plan maps and waveforms, the frames, and the part of the plane post-processing that the
+        # three per-step accumulator temporaries of monitor_memory do not already cover (they are gone by then).
+        planes = plane_sizes(p)
+        host_extra = (r.steps*terms*HOST_WAVEFORM_BYTES+sum(n_*nc*HOST_PLANE_POINT_BYTES for n_, _, nc, _ in planes)
+                      +display_host_bytes(p))
+        host_extra += sum(n_*nf*nc*max(0, HOST_PLANE_SAMPLE_BYTES-3*sample) for n_, nf, nc, sample in planes)
     snapshot = snapshot_frames(p)
     if snapshot['aliased']:
         warnings.append(f'Stored frames alias the carrier: {snapshot["frames_per_period"]:.1f} frames per optical period '
                         f'(period {snapshot["period_steps"]:.1f} steps, one frame every {snapshot["effective_interval"]} steps). '
                         f'The playback will look like backward motion; store a frame at least every {snapshot["period_steps"]/SNAPSHOT_FRAMES_PER_PERIOD:.0f} steps.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
-            'estimated_memory_mb': round((stored * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes+absorber_bytes)/2**20, 1),
+            'estimated_memory_mb': round((volume_bytes+monitor_memory(p)+auxiliary_bytes+interface_bytes+source_bytes+host_extra+absorber_bytes)/2**20, 1),
+            'memory_model': 'fused_cuda' if fused else 'tensor_expression',
+            # Host memory the run needs when its fields live on a CUDA device (resident_host_bytes).
+            'host_estimated_mb': round(host_bytes/2**20, 1),
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes,
-            'point_trace_estimated_bytes': point_trace_memory(p), 'snapshot': snapshot,
+            'point_trace_estimated_bytes': point_trace_memory(p), 'source_waveform_estimated_bytes': source_bytes, 'snapshot': snapshot,
             **({'absorber_cache_estimated_bytes': absorber_bytes} if absorber_bytes else {})}
 
 
@@ -308,7 +394,7 @@ def run_signature(p: Project, steps):
     are excluded, so resident and streamed runs of one scene share a signature."""
     import hashlib
     r = p.region
-    config = dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
+    config = dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','resident_cell_limit','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
                   sources=[p.resolved_source(s).model_dump() for s in p.sources], steps=steps,
                   nodes=[a.tolist() for a in r.mesh_nodes])
     # Absorber faces follow the structures, so a device and its air reference can differ there.
@@ -480,10 +566,19 @@ class Simulation:
         from .plan import resources_copy
         plan = self.plan
         stats = resources_copy(plan)
+        # Admission by the resident estimate: 75% of the free device memory and 80% of the
+        # available host memory for the run's host arrays, or 80% of the available host memory
+        # on the CPU, the margins of the Auto policy.
+        from .memory_profile import host_memory
+        available = host_memory()['available_bytes']
+        host_required = stats.get('host_estimated_mb' if use_cuda else 'estimated_memory_mb')
         if use_cuda:
-            free, _ = torch.cuda.mem_get_info()
+            from .cuda_memory import cuda_mem_info
+            free, _ = cuda_mem_info()
             if stats['estimated_memory_mb']*2**20 > free*.75:
                 raise ValueError('Insufficient free GPU memory. Increase mesh spacing or reduce the domain.')
+        if available is not None and host_required is not None and host_required*2**20 > available*.8:
+            raise ValueError('Insufficient available host memory. Increase mesh spacing or reduce the domain.')
         dtype = torch.float64 if r.precision == 'float64' else torch.float32
         fdtd.set_backend(f'torch.cuda.{r.precision}' if use_cuda else 'numpy')
         # Upstream 0.2.2 leaves a dtype class attribute behind on backend switches.
