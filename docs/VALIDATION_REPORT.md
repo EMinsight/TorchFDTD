@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.16.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T212748Z-g1-06-4672b8c8` recorded 2026-09-25T21:27:48+00:00 at commit `dd08d4fe8519`.
+Package version `0.16.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T214448Z-g9-03-cc9b3082` recorded 2026-09-25T21:44:48+00:00 at commit `70c7bd788fa6`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 66 | 10 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 66 | 16 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 9 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 15 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -39,7 +39,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G1-03 | quadrant_intensity_allocation의 FP32 불안정. | IMPLEMENTED | VERIFIED | `20260925T153209Z-g1-03-979fa1dc` | `2c5f3754c047` | PASS | evidence matches the current checkout |
 | G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260925T153623Z-g1-04-913aac0b` | `2c5f3754c047` | PASS | evidence matches the current checkout |
 | G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260925T154054Z-g1-05-db0ca6c4` | `2c5f3754c047` | PASS | evidence matches the current checkout |
-| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260925T212748Z-g1-06-4672b8c8` | `dd08d4fe8519` | PASS | evidence matches the current checkout |
+| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260925T214433Z-g1-06-0559a2e3` | `70c7bd788fa6` | PASS | evidence matches the current checkout |
 
 ### G2 물리·격자·실행 계약 (WORKSTATION, P0)
 
@@ -141,7 +141,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260925T185140Z-g9-01-f668e584` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 | G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260925T185202Z-g9-02-c3f5ecdd` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
-| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T185211Z-g9-03-1f054837` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: README.md |
+| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T214448Z-g9-03-cc9b3082` | `70c7bd788fa6` | PASS | evidence matches the current checkout |
 | G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260925T185220Z-g9-04-6cd780b0` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260925T195834Z-g9-06-621431b7` | `2d7cc517b07c` | FAIL | STALE: test source changed since the run: tests/test_readme_measurements.py |
@@ -334,7 +334,6 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | G8-07 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 | G9-01 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 | G9-02 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
-| G9-03 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 | G9-04 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 
 ## Pending owner approvals
