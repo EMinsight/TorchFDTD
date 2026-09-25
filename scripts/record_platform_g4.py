@@ -6,7 +6,9 @@ tool writes them to docs/validation/platforms/g4/<platform id>.json instead, wit
 copy of every JUnit report under docs/validation/platforms/g4/<platform id>/. It executes no
 test: run each command first with --junitxml, then pass every report with the exact command,
 the G4 task whose planned command it replays (``suite`` for scripts/run_suite.py) and its exit
-status. Commands run from the checkout root and name no home directory, since the record keeps them.
+status. Commands run from the checkout root and name no home directory, since the record keeps them;
+the checkout itself must lie outside the home directory, since pytest writes the test file paths
+into the reports and the copies are kept byte for byte.
 
     python scripts/record_platform_g4.py --platform rtx3060-wsl2-ubuntu2204 \\
         --run g4-01 G4-01 0 .local/tmp/junit/linux/g4-01.xml "python -m pytest -q ... --junitxml=..." \\
@@ -111,6 +113,11 @@ def main(argv=None):
         started = recorder.parse_timestamp(results['suite_timestamp'])
         if started is None or started < committed_at:
             raise SystemExit(f'run {label}: the report started at {results["suite_timestamp"]}, not after commit {commit[:12]} was made')
+        text = Path(junit).read_text(encoding='utf-8', errors='replace').lower()
+        home = str(Path.home())
+        if any(form.lower() in text for form in (home, home.replace('\\', '/'))):
+            raise SystemExit(f'run {label}: the report names the home directory {home}; run from a checkout outside it, '
+                             'since the copy is kept byte for byte')
         parsed.append((label, task, int(exit_code), Path(junit), command, results))
 
     if copies.exists():

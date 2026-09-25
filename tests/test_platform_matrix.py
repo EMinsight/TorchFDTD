@@ -15,6 +15,7 @@ MATRIX = ROOT / 'docs' / 'PLATFORM_MATRIX.md'
 PLATFORMS = ROOT / 'docs' / 'validation' / 'platforms'
 G4_RUNS = PLATFORMS / 'g4'
 GATES = ROOT / 'docs' / 'validation' / 'completion_gates.json'
+HOME_PATH = re.compile(r'(?i)/root/|/home/|/Users/|[A-Z]:\\Users\\')
 COLUMNS = ['Platform id', 'GPU', 'Compute capability', 'Driver', 'CUDA runtime', 'torch', 'CuPy', 'Python', 'OS', 'Record', 'Verified by']
 RECORD_FIELDS = ['record_version', 'recorded_at', 'os', 'python', 'torch', 'cupy', 'cuda_runtime', 'torch_cuda_available', 'driver', 'gpus']
 
@@ -129,6 +130,10 @@ def test_platform_g4_run_records_pass_every_g4_required_test():
     for path in records:
         record = json.loads(path.read_text(encoding='utf-8'))
         assert record['platform_id'] == path.stem and (PLATFORMS / f'{path.stem}.json').is_file()
+        copies = sorted((G4_RUNS / path.stem).glob('*.xml'))
+        assert {f'docs/validation/platforms/g4/{path.stem}/{copy.name}' for copy in copies} == {run['junit'] for run in record['runs']}
+        for item in [path, *copies]:
+            assert not HOME_PATH.search(item.read_text(encoding='utf-8')), f'{item.name} names a home directory'
         runs = {}
         for run in record['runs']:
             copy = ROOT / run['junit']
@@ -223,6 +228,9 @@ def test_platform_g4_recorder_names_every_required_test_and_fails_a_failure(tmp_
     assert record['unexpected_skips'] == ['tests/test_alpha.py::test_ram'] and not record['required_tests_not_passed']
     with pytest.raises(SystemExit, match='missing: G4-02'):
         platform_g4.main(['--root', str(root), '--platform', 'lab', *runs[0], *runs[2]])
+    _write_junit(tmp_path / 'suite.xml', [*alpha, *beta, ('tests.test_alpha', 'test_opt_in', f'skipped:set TORCHFDTD_X_FULL=1 in {Path.home()}')])
+    with pytest.raises(SystemExit, match='names the home directory'):
+        platform_g4.main(argv)
     (root / 'tests' / 'test_beta.py').write_text('def test_b():\n    assert False\n', encoding='utf-8')
     with pytest.raises(SystemExit, match='dirty tree'):
         platform_g4.main(argv)
