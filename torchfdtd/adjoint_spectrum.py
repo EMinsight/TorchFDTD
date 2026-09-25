@@ -35,6 +35,7 @@ class SpectralObservation:
             raise ValueError('Window must contain one finite weight per timestep.')
         self.groups = {family: [i for i, c in enumerate(self.components) if c[0] == family] for family in ('E', 'H')}
         self.observers = None
+        self._index_tensors = {}
 
     def _fixed(self, value, name):
         if isinstance(value, torch.Tensor) and value.requires_grad:
@@ -55,18 +56,28 @@ class SpectralObservation:
         if self.window is not None:kernel = kernel*self.window[None, start:stop]
         return kernel
 
+    def _index(self, family):
+        # Built once per observation: indexing with the Python list converted
+        # it element by element on every block. Same elements, same order.
+        index = self._index_tensors.get(family)
+        if index is None:
+            index = self._index_tensors[family] = torch.tensor(self.groups[family], dtype=torch.long, device=self.device)
+        return index
+
     def accumulate(self, output, samples, start):
         stop = start+samples.shape[0]
         for family, indices in self.groups.items():
             if indices:
-                output[:, indices] += self.kernel(start, stop, family)@samples[:, indices].to(self.complex_dtype)
+                index = self._index(family)
+                output[:, index] += self.kernel(start, stop, family)@samples[:, index].to(self.complex_dtype)
 
     def transpose(self, seed, start, stop):
         result = torch.empty((stop-start, len(self.components)), dtype=self.complex_dtype if self.complex_samples else self.dtype, device=self.device)
         for family, indices in self.groups.items():
             if indices:
-                values=self.kernel(start, stop, family).conj().T@seed[:, indices]
-                result[:, indices] = values if self.complex_samples else values.real
+                index = self._index(family)
+                values=self.kernel(start, stop, family).conj().T@seed[:, index]
+                result[:, index] = values if self.complex_samples else values.real
         return result
 
     def reservation(self, depth):

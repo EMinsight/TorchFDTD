@@ -7,6 +7,12 @@ the first section covers the whole history since the first commit (2026-09-20).
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
+## Unreleased
+
+### Performance
+
+- `SpectralObservation` indexes its E and H observer groups with index tensors built once per observation instead of Python lists converted on every DFT block, in the online accumulation and in the adjoint transpose. The gathered elements and their order are unchanged, so spectra and gradients are bitwise equal; every online-spectrum path uses it, including the plane simulations and recorded CPML (`tests/test_adjoint_spectrum_index.py`, this commit).
+
 ## 0.16.0 (2026-09-26)
 
 ### Behaviour change
