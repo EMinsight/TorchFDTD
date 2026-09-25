@@ -237,7 +237,8 @@ def render_scope(text, gates, verdicts):
 def version_strings(root):
     pyproject = re.search(r'^version\s*=\s*"([^"]+)"', (root / 'pyproject.toml').read_text(encoding='utf-8'), re.M)
     compatibility = re.search(r'Version of record: \*\*([^*]+)\*\*', (root / 'docs' / 'COMPATIBILITY.md').read_text(encoding='utf-8'))
-    changelog = re.search(r'^## ([^\s(]+)', (root / 'docs' / 'CHANGELOG.md').read_text(encoding='utf-8'), re.M)
+    # The newest released section; an "Unreleased" section above it collects changes since that release.
+    changelog = re.search(r'^## (?!Unreleased\b)([^\s(]+)', (root / 'docs' / 'CHANGELOG.md').read_text(encoding='utf-8'), re.M)
     return dict(pyproject=pyproject.group(1) if pyproject else None,
                 compatibility=compatibility.group(1) if compatibility else None,
                 changelog=changelog.group(1) if changelog else None)

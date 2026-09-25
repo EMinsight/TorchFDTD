@@ -96,7 +96,8 @@ def test_large_streamed_project_is_not_admitted_as_resident():
     p.region.dimension='3d'
     p.region.size=(100.,100.,100.)
     policy=AdjointExecutionPolicy(resident=AdjointOptions(),device='cpu')
-    with pytest.raises(ValueError,match='8 million'):
+    # No cell cap applies on the Python API; one billion cells exceed the 32-bit field indices.
+    with pytest.raises(ValueError,match='signed 32-bit'):
         policy.simulation(p)
 
 

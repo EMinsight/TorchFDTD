@@ -37,14 +37,15 @@ for `auto` on a CUDA host, and off for `cpu`.
 | Memory | Meaning |
 | --- | --- |
 | Auto (recommended) | The server picks resident, then streamed host, then streamed disk, from the live resources. |
-| Resident (GPU or CPU memory) | The whole grid lives in device memory (GPU) or RAM (CPU). Limited to 8,000,000 cells. |
+| Resident (GPU or CPU memory) | The whole grid lives in device memory (GPU) or RAM (CPU), admitted by the memory estimate. The workbench server limits it to 8,000,000 cells; the Python API has no cell cap ([size limits](#size-limits)). |
 | Streamed through host memory (DRAM) | Global E/H/CPML banks stay in RAM; extended x slabs move to the compute device one temporal block at a time. |
 | Streamed through disk (slow, opt-in) | Same slabs, but the global banks are scratch files. Needs a scratch disk. An explicit choice that Auto never makes. |
 | Tiled (approximate, large devices) | Overlapping resident tiles of a planar device with near-field stitching. Auto chooses it only with the **Allow approximate tiling in Auto** consent; see below. |
 
 `Region.memory_mode="streamed"` (the Python opt-in) is treated as a streamed
 request in the workbench. A `Resident` request with more than 8,000,000 cells is
-rejected when the project is validated, exactly as before.
+rejected when the workbench validates the project, whatever cap the project
+carries.
 
 ### How Auto decides
 
@@ -54,8 +55,12 @@ then the approximate tiles with the user's consent, then a refusal; disk
 streaming is never chosen automatically.
 
 1. **Resident** when all of the following hold:
-   - `memory_mode` is `resident` and the grid has at most 8,000,000 cells;
-   - the resident estimate (`estimated_memory_mb` from `/api/validate`) is at
+   - `memory_mode` is `resident`, and the grid has at most 8,000,000 cells on
+     the workbench server (on the Python API, at most `Region.resident_cell_limit`
+     cells when that optional cap is set);
+   - the resident estimate (`estimated_memory_mb` from `/api/validate`, the
+     [calibrated fused model](#resident-memory-of-the-fused-cuda-path) for
+     `backend="cuda"` with the fused kernel) is at
      most **75% of free device memory** on the GPU (the same check the resident
      CUDA solver applies before allocating) or at most **80% of available host
      memory** on the CPU.
@@ -101,6 +106,158 @@ width. Each candidate is checked again with the actual point and plane
 observations of the scene. The chosen slab, depth, bank storage and tile device
 appear in the status line, in the job record (`execution.policy`) and in the
 results panel.
+
+## Size limits
+
+The Python API has no fixed size caps. Resident execution is admitted by the
+memory estimate: `Simulation.run` refuses an estimate above 75% of the free
+device memory on CUDA and above 80% of the available host memory on the CPU,
+the adjoint entry points admit their own reservation against 80% of the free
+device and host memory, and Auto applies the margins of step 1 above.
+Monitors, sources, materials and the step count enter the estimate through
+their traces, DFT buffers, waveforms and ADE states; structures cost host
+rasterization time, not device memory. The only fixed bound is the 32-bit
+field index: resident execution refuses a grid whose 3 x cells (6 x cells for
+complex Bloch fields) reach 2^31, 715,827,882 real cells, because the fused
+CUDA kernels and the subpixel operator address a field array with signed
+32-bit integers.
+
+A caller may set optional caps; each is `None` (no cap) by default and accepts
+a positive integer:
+
+| Cap | Field | Checked by |
+| --- | --- | --- |
+| Resident cells | `Region.resident_cell_limit` | `Region.require_resident()` in every resident entry point, the construction of an `execution_mode="resident"` region, and the resident rung of Auto |
+| Structures, sources, monitors, materials | `Project.limits.max_structures`, `max_sources`, `max_monitors`, `max_materials` | project validation, before the items are validated |
+| Mesh refinement boxes | `Project.limits.max_mesh_refinements` | project validation |
+| Frequency-plane samples (points x frequencies x components per plane) | `Project.limits.max_monitor_samples` | `estimate()`, and therefore `resolve_plan`, `Simulation` and `/api/validate` |
+
+```python
+from torchfdtd import Project, Region, Simulation
+
+project = Project(
+    region=Region(dimension='3d', size=(40., 40., 2.2), mesh=.02, pml_cells=12, steps=4000,
+                  backend='cuda', cuda_kernel='fused', cuda_monitor_kernel='fused'),
+    structures=pillars, sources=[sheet], monitors=[output_plane])
+result = Simulation(project).run()        # admitted when the estimate fits 75% of the free VRAM
+
+# Optional caps, for example to keep generated scenes of a sweep small:
+Region(..., resident_cell_limit=50_000_000)
+Project(..., limits=dict(max_structures=20_000, max_monitor_samples=50_000_000))
+```
+
+- The caps are written to the project JSON only when set, so a project without
+  caps saves, hashes and loads exactly as before
+  ([COMPATIBILITY.md](COMPATIBILITY.md)). A saved project keeps its caps, and
+  the tiles of `plan_tiles` and `TiledPlaneSimulation` inherit them.
+- The caps change admission, not physics: the plan hash, the reference, cache
+  and restart keys (`torchfdtd.identity`) and the frequency-plane
+  `run_signature` ignore them.
+- The workbench server keeps its request limits whatever a submitted project
+  carries: 8,000,000 resident cells, 1000 structures, 512 sources, 512
+  monitors, 100 materials, 64 mesh refinements, 12,000,000 samples per plane,
+  100,000 steps, 2001 frequency points and 100,000 samples of a sampled source
+  (`torchfdtd.models.SERVER_LIMITS`, [SECURITY.md](SECURITY.md)). A cap a
+  project carries can lower them, never raise them. The live-frame bound of the
+  browser and its help text ("at most 8 million cells") describe the server and
+  are unchanged.
+
+### Resident memory of the fused CUDA path
+
+For `backend="cuda"` with `cuda_kernel="fused"` and real fields, `estimate()`
+reports `memory_model: "fused_cuda"` and bounds the device memory of one
+resident run by
+
+    r x ((15 + s) N + C) + A + monitors + sources + TFSF + subpixel + FIXED
+
+with r = 4 bytes (FP32) or 8 (FP64), N cells, s = 1 (3 with Yee sampling) and C
+CPML memory elements (counted from the boundary layout). The 15 reals per cell
+are E and H (6), the inverse permittivity and permeability (6) and the
+three-component temporary of the grid constructor (3), which sets the peak of a
+dielectric run; s is the sampled permittivity copied to the device, which needs
+its own block with Yee sampling because the CPML memories split the cached
+constructor block. A dispersive scene adds A: on every cell, whatever its
+structures, one int64 index per sample (three with Yee sampling) and 8 + 42 x
+poles reals: the P and Q states, the diagnostics weights and the step
+temporaries held by the pools of up to two captured CUDA graphs (a run with
+`cuda_graph_steps` above 1 captures a second graph with its own pool). A plane
+monitor on the fused monitor kernel costs its accumulator, the eight-corner
+interpolation tables (an int64 index and a real weight per corner, point and
+component), one sample buffer and two windows of one real per step; the Torch
+monitor kernel keeps the bound of four accumulators and 192 bytes of tables per
+point and component. Every soft or one-way source term adds its waveform, one
+real per step. FIXED is 64 MiB for the graph pools, the diagnostics tables and
+allocator rounding. Every other resident path (`backend="auto"` or `"cpu"`, the
+Torch kernel, complex fields) keeps the tensor-expression bound of 200 bytes per
+cell in FP32 and 400 in FP64 plus 80 or 160 per pole (`memory_model:
+"tensor_expression"`). The tensor batch and the grouped batch sum the per-case
+estimate; their cases hold the same arrays.
+
+`benchmarks/resident_memory_fused.py` measures the model: each case runs
+`Simulation(project).run()` (two cases: one `run_tensor_batch` cohort) in a fresh
+process, and the record keeps the Torch allocator's peak allocated and reserved
+bytes next to `estimate(project)`. The estimate is compared with the reserved
+peak, the memory the allocator took from the device, which exceeds the
+allocated peak where cached blocks fragment. The CUDA context, CuPy's module
+images and other processes are outside those counters and inside the 25% the
+solver keeps free. `tests/test_resident_guards.py` checks that the estimate of
+every recorded case is at least its peak and equals the recorded estimate, so a
+changed model has to be measured again.
+
+The record,
+[resident_memory_fused_3060.json](validation/resident_memory_fused_3060.json)
+(RTX 3060 12 GB, driver 591.86, torch 2.10.0+cu126 with CUDA 12.6, CuPy 13.6.0,
+revision 3d77ee0), holds 46 cases: FP32 and FP64 cubes from 1 to 64 million
+cells, a 1000 x 1000 x 64 slab, CPML or periodic faces, a frequency plane with
+the fused or the Torch monitor kernel, cell and Yee sampling, one to three
+Lorentz poles filling the grid, `cuda_graph_steps` 1 and 8, three lateral tiles
+of the RTX 5880 metalens configuration below (17 to 62 million cells, 1600
+steps), two tensor-batch cohorts and the Torch kernel. Every estimate is at
+least its reserved peak. The fused estimates are 1.08 to 1.85 times the peak
+and at least 56 MiB above it; for the dielectric grids of 16 million cells and
+more they are 1.08 to 1.23 times the peak. With cell sampling that peak is the
+grid construction: 60.0 to 60.3 allocated bytes per cell in FP32 from 4 to 64
+million cells and 120.0 to 120.3 in FP64 from 4 to 33 million. The unchanged
+Torch-kernel estimate is 1.36 to 1.88 times its peak. The per-cell terms do not
+depend on the grid size; the ladder stops at 64 million cells, what a 12 GB
+card holds.
+
+| Case | Cells | Peak allocated, MiB | Peak reserved, MiB | Estimate, MiB | Estimate / reserved |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `fused-f32-cpml-1m` | 1,000,000 | 61 | 74 | 134 | 1.81 |
+| `fused-f32-cpml-16m` | 16,003,008 | 920 | 926 | 1,096 | 1.18 |
+| `fused-f32-cpml-64m` | 64,000,000 | 3,662 | 3,676 | 4,109 | 1.12 |
+| `fused-f32-periodic-64m` | 64,000,000 | 3,662 | 3,676 | 3,970 | 1.08 |
+| `fused-f32-cpml-slab-64m` | 64,000,000 | 3,662 | 3,676 | 4,297 | 1.17 |
+| `fused-f32-cpml-slab-plane-64m` | 64,000,000 | 4,288 | 4,316 | 5,064 | 1.17 |
+| `fused-f32-yee-16m` | 16,003,008 | 975 | 1,108 | 1,218 | 1.10 |
+| `fused-f64-cpml-32m` | 32,768,000 | 3,750 | 3,756 | 4,242 | 1.13 |
+| `fused-f32-lorentz-16m` | 16,003,008 | 2,639 | 2,664 | 4,270 | 1.60 |
+| `fused-f32-multipole3-4m` | 4,096,000 | 1,198 | 1,332 | 2,461 | 1.85 |
+| `fused-f32-lorentz-graph8-4m` | 4,096,000 | 681 | 1,012 | 1,149 | 1.14 |
+| `fused-f32-yee-multipole2-graph8-4m` | 4,096,000 | 1,027 | 1,736 | 1,899 | 1.09 |
+| `fused-f64-lorentz-graph8-4m` | 4,096,000 | 1,332 | 1,920 | 2,202 | 1.15 |
+| `fused-f32-metalens-17m` | 17,314,300 | 1,080 | 1,206 | 1,394 | 1.16 |
+| `fused-f32-metalens-39m` | 38,957,175 | 2,407 | 2,682 | 3,040 | 1.13 |
+| `fused-f32-metalens-62m` | 61,864,375 | 3,807 | 4,254 | 4,779 | 1.12 |
+| `tensor-batch-f32-2x16m` | 32,006,016 | 1,776 | 1,844 | 2,192 | 1.19 |
+| `torch-f32-cpml-16m` | 16,003,008 | 1,408 | 1,622 | 3,052 | 1.88 |
+| `torch-f64-cpml-4m` | 4,096,000 | 735 | 842 | 1,562 | 1.86 |
+
+**RTX 5880 cross-check.** The 41 um metalens tile measured on an RTX 5880 Ada
+(48 GB; 2050 x 2050 x 103 = 432,857,500 cells, graded z, 12 CPML cells on six
+faces, Yee sampling, 19,881 constant-n pillars on a substrate, one broadband Ex
+sheet, one nearest-interpolation Ex/Ey/Ez plane of 4,104,676 points at three
+frequencies, fused FP32 kernels with the CUDA graph, 1600 steps) peaked at 25.6
+GB for the process in nvidia-smi, CUDA context included. `estimate()` gives
+34,461,764,813 bytes (32.1 GiB) for that tile, recorded as `reference_5880` and
+rebuilt by `metalens_tile(41)`: 1.35 times 25.6e9 bytes and 1.25 times 25.6
+GiB. Resident admission accepts it when at least 42.8 GiB of the card is free.
+The scaled tiles on the RTX 3060 reserve 72.1 to 73.0 bytes per cell (the Yee
+upload's own block) and allocate 64.5 to 65.4; at 432,857,500 cells that is
+29.1 GiB reserved and 26.0 GiB allocated. The 25.6 GB of the RTX 5880 run lies
+near the allocated figure and below the reserved one; these records do not show
+why that run held less, and the estimate bounds both figures.
 
 ## What streaming costs
 

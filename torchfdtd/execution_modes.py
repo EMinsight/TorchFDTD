@@ -22,10 +22,9 @@ import warnings
 import numpy as np
 import torch
 
-from .models import Project, Monitor
+from .models import Project, Monitor, effective_limit
 from .memory_profile import host_memory
 
-RESIDENT_CELL_LIMIT = 8_000_000
 # The resident CUDA solver refuses estimates above 75% of free device memory.
 RESIDENT_DEVICE_FRACTION = .75
 # Host admission everywhere in the streamed engine uses 80% of available RAM.
@@ -281,14 +280,17 @@ def _resident_fit(project, summary, backend, health, cells):
         free, fraction, pool = health.get('host_available_bytes'), RESIDENT_HOST_FRACTION, 'available host memory'
     limit = int(free*fraction) if free is not None else None
     fits, reason = True, f'resident estimate {_gib(required)} within {fraction:.0%} of {pool} ({_gib(free)})'
+    cell_limit, refusal = effective_limit(project.region.resident_cell_limit, 'resident_cells'), project.region.resident_refusal()
     if project.region.memory_mode == 'streamed':
         fits, reason = False, 'memory_mode is streamed'
-    elif cells > RESIDENT_CELL_LIMIT:
-        fits, reason = False, f'{cells:,} cells exceed the resident limit of {RESIDENT_CELL_LIMIT:,}'
+    elif cell_limit is not None and cells > cell_limit:
+        fits, reason = False, f'{cells:,} cells exceed the resident limit of {cell_limit:,}'
+    elif refusal:
+        fits, reason = False, refusal
     elif limit is not None and required > limit:
         fits, reason = False, f'resident estimate {_gib(required)} exceeds {fraction:.0%} of {pool} ({_gib(free)})'
     return dict(fits=fits, reason=reason, estimated_bytes=required, free_bytes=free, limit_bytes=limit,
-                fraction=fraction, cell_limit=RESIDENT_CELL_LIMIT)
+                fraction=fraction, cell_limit=cell_limit)
 
 
 def resolve_execution(project, *, health, scratch, summary=None):

@@ -36,9 +36,43 @@ This is an engineering description, not a certification.
 | Stored paths | GDS and FSP services | Uploads are stored under `<results>/gds/<uuid>.gds` and `<results>/fsp/<uuid>/project.fsp`; `/api/gds/export` writes `<results>/gds/export-<uuid>.gds`, reads it back into the JSON response and removes it before answering. The `x-filename` header is a display name: the FSP route keeps only the last path component and requires `.fsp`, the GDS route echoes it back and never uses it for a path |
 | Route parameters | every `{key}` route | Job, upload and design keys are looked up in server-session dictionaries; a key that is not a known uuid answers 404 and no path is built from it. `/api/examples/{name}` is an allowlist |
 | Static files | `WorkbenchFiles` in `torchfdtd/server.py` | The bundled `torchfdtd/web` directory is served with Starlette's containment check plus a rejection of absolute paths, drive letters, UNC prefixes and `:` so that on Windows a request such as `/C:/...` or `//server/share/...` never reaches `os.path.join`, where it would replace the web directory and let `realpath` touch a drive root or a network share |
+| Size limits | `ServerLimits` middleware and `ServerExecutor` in `torchfdtd/server.py`, `torchfdtd.models.server_limits` | Every request (body validation included), every task of the server's job pools and the modal worker process run inside `server_limits()`, which applies `SERVER_LIMITS` ([below](#size-limits-of-the-server)) whatever caps a submitted project carries. A request above a limit answers 422. A cap the project carries can lower a limit, never raise it, and the project is echoed unchanged |
 | JSON bodies | pydantic models with `extra='forbid'` and `allow_inf_nan=False` | Unknown keys, wrong types, out-of-range values, `NaN`, `Infinity` and out-of-range literals answer 422; a body nested too deeply answers 400. The 422 body is rendered through a handler that never re-emits a nonfinite input, so the rejection itself cannot fail |
 | Response headers | `local_origin` middleware | `X-Content-Type-Options: nosniff` on every response |
 | Queues | job services | At most one running and two queued jobs per queue, and a bounded job table, so a loop of `POST /api/jobs` cannot exhaust memory |
+
+### Size limits of the server
+
+The Python API admits scenes by their memory estimate and has no fixed size
+caps ([EXECUTION_MODES.md](EXECUTION_MODES.md#size-limits)). Each constraint
+it lifted after 0.15.0 remains a request limit of the server. The limits are
+checked on every route that takes a project or a part of one (validate, jobs,
+mesh preview, freeze and coordinates, Python export, source preview, GDS and
+FSP conversion and export, the mode-network requests with a nested project and
+the scenes the design routes build) and again in the server's job threads and
+modal worker:
+
+| Python-API constraint lifted | Server limit | Where the server checks it |
+| --- | --- | --- |
+| 8,000,000 resident cells (`Region.require_resident`) | 8,000,000 cells | `Region.resident_refusal` at every resident entry point and in the Auto policy |
+| `Project.structures` `max_length=1000` | 1000 structures | project validation, before the items are validated |
+| `Project.sources` `max_length=512` | 512 sources | project validation, before the items |
+| `Project.monitors` `max_length=512` | 512 monitors | project validation, before the items |
+| `Project.materials` `max_length=100` | 100 materials | project validation, before the items |
+| `Region.mesh_refinements` `max_length=64` | 64 refinement boxes | region validation, before the items |
+| 12,000,000 complex samples per frequency plane (`monitor_memory`) | 12,000,000 samples | `estimate()`, called by `/api/validate`, `/api/jobs` and the mesh preview |
+| `Region.steps` `le=100000` | 100,000 steps | region validation |
+| `SpectrumSettings.frequency_points` `le=2001` and `custom_frequencies_hz` `max_length=2001` | 2001 frequencies | spectrum validation |
+| `TimeSignal.time_s`, `amplitude`, `phase_rad` `max_length=100000` | 100,000 samples | signal validation, before the items |
+| `GDSLimits.max_total_vertices` default 1,000,000 (now `None`) | 1,000,000 vertices | `gds_service.SERVER_GDS_LIMITS`, passed by `/api/gds/{key}/convert` |
+
+The FSP analysis-group expansion keeps its import limit of 512 sources and
+monitors on both sides. `tests/test_server_security.py::test_every_server_limit_refuses_an_oversized_request`
+posts, for each limit, a project the Python API accepts to the project routes
+and nested in a GDS export and a mode-network request, and expects 422;
+`test_gds_uploads_keep_the_vertex_limit_the_python_api_lifts` converts an
+upload of 1.04 million vertices. `tests/test_resident_guards.py` checks that the
+job pools and the modal worker run under the limits.
 
 ## What the server does not do
 

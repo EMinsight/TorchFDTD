@@ -4,6 +4,7 @@ import torch
 
 from torchfdtd import Project, Region, Simulation, Source, DifferentiableSimulation, StreamedSimulation, StreamedAdjointOptions
 from torchfdtd.boundaries import YeeGrid
+from torchfdtd.models import server_limits
 from test_differentiable import project
 
 
@@ -126,13 +127,15 @@ def test_public_memory_plan_matches_execution_without_domain_allocation(diagonal
     assert all(result.report[key]==value for key,value in estimate.items())
 
 
-def test_large_region_requires_explicit_streamed_mode():
+def test_large_region_is_admitted_by_memory_and_capped_on_request():
     settings = dict(dimension='3d', size=(25.6,25.6,12.8), mesh=.1, pml_cells=3)
-    with pytest.raises(ValueError,match='8 million'):
-        Region(**settings,execution_mode='resident')
-    # The default workbench execution_mode='auto' defers the guard to the resident entry points.
-    with pytest.raises(ValueError,match='8 million'):
-        Simulation(Project(region=Region(**settings),sources=[Source(center=(0,0,0))]))
+    # The Python API has no cell cap; a user cap refuses at validation and at the resident entry point.
+    Region(**settings,execution_mode='resident')
+    Simulation(Project(region=Region(**settings),sources=[Source(center=(0,0,0))]))
+    with pytest.raises(ValueError,match='resident_cell_limit=8,000,000'):
+        Region(**settings,execution_mode='resident',resident_cell_limit=8_000_000)
+    with pytest.raises(ValueError,match='resident_cell_limit=8,000,000'):
+        Simulation(Project(region=Region(**settings,resident_cell_limit=8_000_000),sources=[Source(center=(0,0,0))]))
     region = Region(**settings,memory_mode='streamed')
     assert region.shape == (256,256,128)
     assert Region.model_validate(region.model_dump()).memory_mode == 'streamed'
@@ -197,9 +200,12 @@ ENTRY_POINTS = {
 }
 
 
+@pytest.mark.parametrize('cap', ['user', 'server'])
 @pytest.mark.parametrize('name', list(ENTRY_POINTS), ids=list(ENTRY_POINTS))
-def test_auto_execution_mode_keeps_the_guard_at_every_resident_entry_point(name, monkeypatch):
-    """Region validation admits the scene under execution_mode='auto'; each resident entry point refuses it before allocating."""
+def test_auto_execution_mode_keeps_the_cell_cap_at_every_resident_entry_point(name, cap, monkeypatch):
+    """Region validation admits the scene under execution_mode='auto'; with a user cap, or under the server
+    limits, each resident entry point refuses it before allocating."""
+    import contextlib
     import numpy as np
     from torchfdtd import Material, Structure
     entry, faces, extra = ENTRY_POINTS[name]
@@ -207,6 +213,8 @@ def test_auto_execution_mode_keeps_the_guard_at_every_resident_entry_point(name,
         extra = dict(materials=[Material(name='Air', index=1), Material(name='t', model='tensor', epsilon_tensor=(2., 2., 2., 0, 0, 0))],
                      structures=[Structure(id='b', size=(1., 1., 1.), material='t')])
     p = _auto_mode_scene(faces, **extra)
+    if cap == 'user':
+        p.region.resident_cell_limit = 8_000_000
     def tripwire(original):
         def guarded(*args, **kwargs):
             shape = args[0] if args and isinstance(args[0], (tuple, list, torch.Size)) else args
@@ -217,8 +225,10 @@ def test_auto_execution_mode_keeps_the_guard_at_every_resident_entry_point(name,
     for module in (torch, np):
         for attribute in ('zeros', 'empty', 'ones', 'full'):
             monkeypatch.setattr(module, attribute, tripwire(getattr(module, attribute)))
-    with pytest.raises(ValueError, match='Resident execution is limited to 8 million cells'):
-        entry(p)
+    message = 'resident_cell_limit=8,000,000 cells' if cap == 'user' else 'server limits resident execution to 8,000,000 cells'
+    with server_limits() if cap == 'server' else contextlib.nullcontext():
+        with pytest.raises(ValueError, match=message):
+            entry(p)
 
 
 def test_streamed_mode_rejects_resident_entry_points_before_allocation(monkeypatch):
@@ -275,10 +285,12 @@ def test_backward_admission_counts_the_forward_banks_this_run_already_holds(monk
 
 
 def test_resident_guard_rechecks_mutated_shape():
-    region = Region()
+    region = Region(resident_cell_limit=8_000_000)
     region.dimension = '3d'
     region.size = (100,100,100)
-    with pytest.raises(ValueError,match='8 million'):region.require_resident()
+    with pytest.raises(ValueError,match='resident_cell_limit=8,000,000'):region.require_resident()
+    region.resident_cell_limit = None
+    with pytest.raises(ValueError,match='signed 32-bit'):region.require_resident()
 
 
 def test_estimate_labels_streamed_storage_scope():

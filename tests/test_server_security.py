@@ -349,3 +349,68 @@ def test_npz_readers_never_unpickle_and_fail_closed_on_hostile_archives(tmp_path
     for loader in [Result.load, lambda path: load_native_radiation_plane(path, 'plane')]:
         with pytest.raises((zipfile.BadZipFile, ValueError, OSError, EOFError)):
             loader(truncated)
+
+
+PROJECT_ROUTES = ('/api/validate', '/api/jobs', '/api/mesh/preview', '/api/python', '/api/sources/src0/preview')
+
+
+def test_every_server_limit_refuses_an_oversized_request(client):
+    """Each size constraint the Python API lifted stays a limit of every route that takes a project or its parts.
+
+    The projects below are valid on the Python API. Through the server each one answers 422, on the
+    project routes and nested in a GDS export and a mode-network request, whatever caps it carries.
+    """
+    from torchfdtd import Region, Source
+    from torchfdtd.solver import estimate
+    from test_resident_guards import LARGE, SERVER_CASES, oversized, single_oversized, wide_plane
+    payload = oversized()
+    raised = {name: None for name in ('max_structures', 'max_sources', 'max_monitors', 'max_materials',
+                                      'max_mesh_refinements', 'max_monitor_samples')}
+    for field, message in SERVER_CASES.items():
+        project = dict(single_oversized(field, payload), limits=raised)
+        project['sources'] = [dict(s, id='src0' if i == 0 else s['id']) for i, s in enumerate(project['sources'])]
+        Project.model_validate(project)
+        for route in PROJECT_ROUTES:
+            response = client.post(route, json=project)
+            assert response.status_code == 422 and message in response.text, (field, route, response.text[:300])
+        for route, body in (('/api/gds/export', {'project': project, 'layers': {'s0': [1, 0]}}),
+                            ('/api/mode-networks/validate', {'project': project})):
+            response = client.post(route, json=body)
+            assert response.status_code == 422 and message in response.text, (field, route, response.text[:300])
+    # Monitor samples are admitted by the estimate: 23.5 million samples pass the Python API and not the server.
+    wide = wide_plane().model_dump(mode='json')
+    estimate(Project.model_validate(wide))
+    for route in ('/api/validate', '/api/jobs', '/api/mesh/preview'):
+        response = client.post(route, json=wide)
+        assert response.status_code == 422 and 'exceeds the limit of 12,000,000' in response.text, route
+    # Resident cells: an explicit resident grid above 8 million cells, admitted by memory on the Python API.
+    resident = Project(region=Region(**LARGE, execution_mode='resident'), sources=[Source(center=(0, 0, 0))]).model_dump(mode='json')
+    for route in ('/api/validate', '/api/jobs'):
+        response = client.post(route, json=resident)
+        assert response.status_code == 422 and 'server limits resident execution to 8,000,000 cells' in response.text, route
+    # A small project carrying caps validates, and the server echoes it unchanged.
+    capped = dict(demo_project().model_dump(), limits={'max_structures': 10})
+    response = client.post('/api/validate', json=capped)
+    assert response.status_code == 200 and response.json()['project']['limits']['max_structures'] == 10
+
+
+def test_gds_uploads_keep_the_vertex_limit_the_python_api_lifts(tmp_path, client):
+    pytest.importorskip('gdstk')
+    import gdstk
+    from test_gds import write
+    from torchfdtd import gds, gds_service
+    assert gds.GDSLimits().max_total_vertices is None and gds_service.SERVER_GDS_LIMITS.max_total_vertices == 1_000_000
+    # 130 polygons of 8000 vertices: 1.04 million vertices in 130 instances.
+    library = gdstk.Library()
+    top = library.new_cell('TOP')
+    angles = np.linspace(0, 2*np.pi, 8000, endpoint=False)
+    for k in range(130):
+        top.add(gdstk.Polygon(np.c_[np.cos(angles)+3*k, np.sin(angles)], layer=1))
+    (tmp_path / 'dense').mkdir()
+    upload = client.post('/api/gds/inspect', content=write(tmp_path / 'dense', library).read_bytes())
+    assert upload.status_code == 200, upload.text
+    project = demo_project().model_dump()
+    body = {'project': project, 'cell': 'TOP',
+            'layers': [{'layer': 1, 'datatype': 0, 'z_min': 0, 'z_max': .1, 'material': project['materials'][0]['name']}]}
+    response = client.post('/api/gds/' + upload.json()['id'] + '/convert', json=body)
+    assert response.status_code == 422 and 'instance/vertex admission limits' in response.text, response.text

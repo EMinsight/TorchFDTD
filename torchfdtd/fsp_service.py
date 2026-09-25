@@ -1,7 +1,6 @@
 """Serialized, asynchronous vendor bridge jobs for the loopback workbench."""
 import json
 import threading
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.parse import unquote
 from uuid import uuid4
@@ -21,7 +20,9 @@ class ExportRequest(Model):
 def attach_fsp_routes(app, root):
     root = Path(root) / 'fsp'
     root.mkdir(parents=True, exist_ok=True)
-    pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix='fsp-bridge')
+    from .server import ServerExecutor
+    # Imported scenes are validated in this pool, under the server limits of the upload request.
+    pool = ServerExecutor(max_workers=1, thread_name_prefix='fsp-bridge')
     jobs, lock = {}, threading.Lock()
     app.state.fsp_pool = pool
 

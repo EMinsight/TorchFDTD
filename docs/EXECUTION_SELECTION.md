@@ -61,11 +61,13 @@ and includes cold cuBLAS/Lt pools for spectral observations. Caller inputs,
 geometry and optimizer graphs remain outside these budgets. CUDA context and
 OS file cache are not included.
 
-Generated resident candidates now use [explicit byte admission](BUDGETED_RESIDENT.md)
-instead of the workbench's eight-million-cell guard. Create large projects with
-`memory_mode="streamed"` or `"budgeted"` to defer allocation. Resident workspace,
-checkpoint, transfer and CUDA-index checks must all pass. Explicit custom
-resident candidates without `resident_budget_bytes` retain the old guard.
+Generated resident candidates now use [explicit byte admission](BUDGETED_RESIDENT.md).
+Create large projects with `memory_mode="streamed"` or `"budgeted"` to defer
+allocation. Resident workspace, checkpoint, transfer and CUDA-index checks must
+all pass. Explicit custom resident candidates without `resident_budget_bytes`
+are admitted by the resident reservation against the free memory; the Python
+API has no cell guard, and the workbench server keeps its eight-million-cell
+limit.
 Resident denial is recorded as a candidate rejection.
 Execution rechecks live resources before copying resident inputs or creating
 fields. A selected policy is not an exclusive resource reservation.

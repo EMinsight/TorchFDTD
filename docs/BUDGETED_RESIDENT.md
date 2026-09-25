@@ -1,11 +1,13 @@
 # Resident adjoints admitted by memory budget
 
 Large grids that fit GPU memory should not be forced into slower spatial
-streaming by the workbench's eight-million-cell guard. The experimental adjoint
+streaming by a cell guard. The experimental adjoint
 API accepts `Region(memory_mode="budgeted")` with an explicit
 `AdjointOptions.resident_budget_bytes`. The planner checks bytes and CUDA index
 ranges before creating fields, packing ADE material arrays or copying CPU
-design parameters to CUDA. The default workbench guard remains unchanged.
+design parameters to CUDA. Without a byte budget the Python API admits a
+resident grid by the same reservation against the free memory; the workbench
+server keeps its eight-million-cell limit.
 
 The newer [allocation-derived CUDA planner](RESIDENT_ALLOCATION_MODEL.md)
 counts native field/adjoint owners and exact checkpoint states separately from
@@ -55,8 +57,9 @@ Native ADE pole and packed-parameter offsets already use 64-bit arithmetic.
 The [unified selector](EXECUTION_SELECTION.md) gives generated resident
 candidates the corresponding GPU or host byte budget. It can therefore consider
 resident execution above eight million cells. Explicit custom candidates keep
-their declared options. A custom resident candidate without the new budget
-retains the old guard. Neither the caller's region mode nor its design tensors
+their declared options. A custom resident candidate without the new budget is
+admitted by the reservation against the free memory, as the Python API has no
+cell guard. Neither the caller's region mode nor its design tensors
 are modified. This mode does not enable large grids in the ordinary GUI/NumPy
 solver, and it does not imply that a grid exceeding VRAM fits resident execution.
 
