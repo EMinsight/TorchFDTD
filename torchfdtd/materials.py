@@ -126,8 +126,8 @@ def configure_materials(grid, project, ownership):
     the source centre frequency, so the absorber sees a constant dielectric.
     The coupled ADE/CPML update is unstable there for poles whose negative-
     permittivity band lies inside the grid band (surface-plasmon-like modes
-    grow after the source has ended, a lossless Lorentz SiN post array in a
-    20 nm grid diverges after ~1000 steps once the domain exceeds a few µm).
+    grow after the source has ended; a SiN post filling the outer five cells of
+    a 20 nm CPML corner diverges, docs/BOUNDARIES.md).
     With 'absorber' the faces those materials reach carry no stretched
     coordinates (boundaries.absorber_faces) and the ADE runs everywhere. Its
     E conductivity is sigma*eps_ref, eps_ref the real

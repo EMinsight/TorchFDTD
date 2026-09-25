@@ -7,6 +7,16 @@ the first section covers the whole history since the first commit (2026-09-20).
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
+## Unreleased
+
+### Added
+
+- `Region.pml_dispersion='absorber'`: every PML face that an enabled dispersive (Drude/Lorentz/multipole) structure reaches becomes an adiabatic absorber of the same depth. It is a graded, matched electric and magnetic conductivity, updated trapezoidally; pole cells solve their ADE together with an E loss matched to Re ε at the source centre. The other faces keep the CPML. It runs in the resident CPU and CUDA solvers (torch and fused kernels) and in `run_tensor_batch`, and the run summary lists `absorber_faces`. The differentiable, dispersive-adjoint, plane-adjoint, streamed and reversible solvers and the open-waveguide mode solver refuse it. Absorber faces are also refused next to PMC/symmetric faces, with subpixel interfaces, and when their `kappa` or `alpha` is not the default. It removes the divergence of dispersive media crossing the PML, which is now reproduced and explained: a SiN or Drude post filling the outer five cells of a CPML corner grows by e^0.057 per step in float64 and float32 alike, in the pole's negative-permittivity band. It is an instability of the stretched-coordinate PML around negative-permittivity inclusions, not a coupling defect, and it survives mesh refinement. Case `DISPERSIVE_PML_ABSORBER`: the SiN and Drude posts and the 6 um SiN pillar array stay stable for 20,000 steps (float64 CPU, float32 CUDA fused, torch kernel and tensor batch), and a homogeneous SiN fill through 40 absorber layers reflects 1.6e-8 at normal incidence (limit 1e-6). The absorber reflects far more than the CPML at oblique incidence, where a transverse interface crosses it and in strongly dispersive fills; those numbers are recorded, not judged. Record `docs/validation/dispersive_pml_absorber.json`, tables in [DISPERSIVE_PML_ABSORBER.md](DISPERSIVE_PML_ABSORBER.md), description in [BOUNDARIES.md](BOUNDARIES.md#dispersive-materials-inside-pml) (344fdf1, 639d3ff, 8afce59, this commit).
+
+### Changed
+
+- The plane adjoints (`DifferentiablePlaneSimulation` and its subclasses) and every other `_System`-based solver refuse `pml_dispersion='frozen'` as `DifferentiableSimulation` already did, instead of running the plain CPML/ADE update. The validation warning for dispersive structures inside a PML suggests `pml_dispersion='absorber'` (344fdf1).
+
 ## 0.15.0 (2026-09-23)
 
 ### Security

@@ -76,49 +76,103 @@ Still required for full parity: independent FSP mapping, named Lumerical PML-pro
 
 ## Dispersive materials inside PML
 
-`Region.pml_dispersion = 'frozen'` (default `'ade'`) removes the Drude/Lorentz pole
-update from cells that lie inside a PML layer and gives those cells the real
-permittivity of the material at the source centre frequency (the static
-permittivity when no pulsed source is enabled). The interior keeps the full ADE.
-This is done in `configure_materials`, so it applies to the resident CPU/CUDA
-solvers and to `run_tensor_batch`. The differentiable, dispersive-adjoint and
-streamed solvers reject `'frozen'` rather than silently running the unfrozen
-update.
+`Region.pml_dispersion` selects what happens where a Drude, Lorentz or multipole (ADE) material reaches a PML layer:
 
-Measured reason (single-pole Lorentz silicon nitride posts, 20 nm grid, 12-layer
-CPML, 4000 steps, RTX 5880): posts that cross the whole lateral PML diverge after
-about 1450 steps once the domain exceeds a few micrometres, with either kernel,
-with or without the graded mesh and for linewidths of 1e13 and 1e14 rad/s. The
-same posts stopped six cells short of the outer boundary, i.e. absent from the
-outer half of the PML, run stably; a CFS profile (`alpha` 0.05–0.5,
-`alpha_polynomial` 1) only delays the growth to 1600 steps; freezing only the
-outermost one or two cell layers does not help; freezing the whole PML does. The
-unstable cells are therefore the pole cells in the high-conductivity part of the
-CPML, and the stretched-coordinate CPML as implemented is not a stable absorber
-for them. Freezing has two known limits: a step in permittivity at the interior/
-PML interface for frequencies away from the centre frequency, and no meaning for
-media whose real permittivity is negative at that frequency; `configure_materials`
-refuses such a material inside the PML with a `ValueError` naming the material,
-the frequency and the value. An adiabatic
-conductivity absorber on the faces touched by dispersive media is the more
-general fix and is not implemented.
+- `'ade'` (default): every PML face is the stretched-coordinate CPML above, and the pole update runs inside the layer. This diverges for some geometries (below).
+- `'absorber'`: every PML face that an enabled dispersive structure reaches becomes an adiabatic absorber of the same depth, a graded and matched electric and magnetic conductivity, and the pole update runs everywhere. The other PML faces keep the CPML. The absorber is stable for every medium measured. Its reflection depends on what crosses the layer (below).
+- `'frozen'`: the CPML is kept, and cells inside a PML layer lose their pole and take the real permittivity of the material at the source centre frequency (the static permittivity without a pulsed source). This is wrong away from that frequency and is refused for a medium whose real permittivity there is not positive.
 
-Validation warns about the configuration: `/api/validate` (and so the
-workbench) and the summary printed by `torchfdtd run` list every enabled
-dispersive structure whose support bounds reach a PML layer, with the faces,
-whenever `pml_dispersion` is `'ade'`
-(`torchfdtd.stability_checks.stability_warnings`, appended to the estimate's
-warnings; the numeric modules are untouched). The check uses the structure's
-bounding box, so a rotated or curved object that only nearly reaches the layer
-is also named; nothing is rejected.
+A face counts as reached when the bounding box of an enabled dispersive structure enters its layer, the same test as the validation warning (`torchfdtd.boundaries.absorber_faces`). A pole cell therefore never lies in a stretched layer, corners included. The run summary lists the faces as `absorber_faces`.
 
-The [stability sweep](STABILITY_SWEEP.md) (20,000 steps, 120 x 80 and 32^3
-cells, CPU float64 and RTX 3060 float32) did not reproduce the divergence on its
-bounded fixtures: Drude, two-pole Lorentz and Drude-metal slabs crossing the
-lateral PML with `'ade'` ended at most 8.7e-7 of their post-source peak in
-float64 (growth ratio at most 2.7e-5) and on the float32 round-off floor
-(1.7e-13 to 3.1e-13 of the peak) on CUDA, and the 20 nm SiN post array of the
-paragraph above on a 3 x 4 um domain ended at 5.9e-17 (float64) and 4.5e-11
-(float32) of its peak. The divergence remains what it was measured to be, a
-property of domains larger than a few micrometres, and the warning stands for
-every domain size.
+The resident CPU and CUDA solvers (torch and fused kernels) and `run_tensor_batch` implement all three modes. A tensor-batch cohort only groups projects with the same absorber faces. Some paths refuse modes with a `ValueError` naming the path:
+
+- the differentiable, dispersive-adjoint, plane-adjoint, streamed and reversible solvers refuse `'frozen'` and `'absorber'`;
+- the open-waveguide mode solver refuses `'absorber'`;
+- absorber faces are refused next to PMC/symmetric faces, with subpixel interfaces, and when their `kappa` or `alpha` is not the default.
+
+Validation (`/api/validate`, `torchfdtd run`) warns about any enabled dispersive structure that reaches a PML layer while the mode is `'ade'`, and suggests `'absorber'`.
+
+### Why the CPML diverges
+
+The numbers come from `docs/validation/dispersive_pml_absorber.json`: case [`DISPERSIVE_PML_ABSORBER`](validation/cases/DISPERSIVE_PML_ABSORBER.json), driver `benchmarks/dispersive_pml_absorber.py`, tables in [DISPERSIVE_PML_ABSORBER.md](DISPERSIVE_PML_ABSORBER.md). The smallest fixture found is a single 3D post. It fills the outer five cells of the x_max/y_max corner of a 12-layer CPML: a 1.2 x 1.2 x 1.0 um box with 20 nm cells, 180,000 cells in all. The post is either the single-pole Lorentz SiN of the original report or the G3-03 Drude metal. With `'ade'`:
+
+- **SiN post.** The state norm grows by e^0.0573 per step, 7.5e14 1/s in amplitude, identically in float64 on the CPU and in float32 on CUDA. Round-off is therefore not the cause. The growing field oscillates at 2.26e16 rad/s, where the bilinear SiN permittivity is -0.53. That frequency lies in the pole's negative band (1.4e16 to 2.8e16 rad/s), which is well inside the band of the grid.
+- **Drude post.** It grows at 3.8e14 1/s, at 1.73e15 rad/s, where the permittivity is -0.33.
+- **6 um pillar array.** The original report's array (0.2 um SiN pillars on a 0.3 um lattice through the lateral layers) grows at the same rate and frequency as the single post. Its divergence is this corner mode. Whether a domain diverges therefore depends on where the lattice cuts the pillars at the outer wall: the depth rows below show that a piece three or five cells deep grows and one ten cells deep does not.
+
+One-parameter variations of the SiN post, 4000 steps in float64:
+
+| Variation | Result |
+| --- | --- |
+| Post 0.35 um inside the interior | decays |
+| Nondispersive n = 2 post | decays |
+| Post 10 cells deep | decays |
+| Post 3 cells deep | grows at 1.2e15 1/s |
+| `sigma_scale` 0.25 | grows at 2.0e14 1/s, a quarter of the rate |
+| CFS `alpha` 0.2 | grows at 7.1e14 1/s |
+| `kappa` 4 | grows at 4.3e14 1/s |
+| Linewidth 1e14 rad/s | grows at 6.9e14 1/s |
+| Linewidth 1e15 rad/s | grows at 1.0e14 1/s |
+| 10 nm cells, same physical post and layer (8000 steps) | grows at 1.0e15 1/s, at 1.66e16 rad/s (permittivity -6.1) |
+
+The growth needs a negative permittivity inside the stretched layer. It scales with the CPML conductivity, survives mesh refinement and does not depend on the precision. The coupling is already the Roden-Gedney one: the CPML stretches the curl and leaves the constitutive (ADE) update unstretched. This is therefore an instability of the stretched-coordinate PML itself around negative-permittivity (plasmon-like) inclusions, not a coupling defect or a float32 effect. No local change of the coupling removes it. A stretching matched to the dispersion (Becache, Joly and Vinoles) exists for one homogeneous medium, not for posts in vacuum. CFS profiles only slow the growth. The fix removes the stretch from the faces such media cross.
+
+### The absorber
+
+For an absorber face with L layers, `sigma_scale` and `polynomial`, the conductivity at a Yee sample of physical depth ρ (depth into the layer over the layer thickness) is
+
+```
+sigma = sigma_scale * 40/(L+1) * rho**polynomial      (units of c/reference_step, the CPML's scale)
+s     = sigma * courant / 2                            (corners add the losses of their faces)
+E <- (1-s)/(1+s) E + courant/(1+s) * inverse_permittivity * curl H
+H <- (1-s)/(1+s) H - courant/(1+s) * inverse_permeability * curl E
+```
+
+E and H lose the same fraction per step, so a normal-incidence wave in a nondispersive medium sees an impedance-matched layer.
+
+A pole cell cannot be matched at every frequency by a passive loss. Damping D instead of E, as Meep does, would scale ε(ω) at every frequency, but it injects energy where E·P < 0, and that is the negative band that diverges. The E conductivity of a pole cell is therefore σ·ε_ref. Here ε_ref is the real bilinear permittivity at the source centre frequency: the static value without a pulsed source, and ε∞ where it is not positive. The trapezoidal step solves the pole with it:
+
+```
+(eps_inf + s*eps_ref) E_new + (P_new - P_old) = (eps_inf - s*eps_ref) E_old + courant * curl H
+```
+
+Every added term is a non-negative loss, so the absorber is a passive medium. That is the argument for its stability, and the record below tests it. The stretched-coordinate `kappa` and `alpha` have no meaning in it and must keep their defaults.
+
+Unlike a PML, a passive absorber reflects wherever the transverse structure of the wave changes with the loss: at oblique incidence, where a transverse interface crosses the layer, and in a medium whose permittivity changes across the band. A deeper layer reduces that reflection (compare 80 with 40 layers below).
+
+### Measured reflection and stability
+
+Reflection runs use the G3-07 layout: a 2D strip with 25 nm cells, 150 fs, the band 1.3 to 1.8 um, and 40 absorber layers (1 um) unless stated. R is the maximum over the band of the reflected-to-incident power ratio at each monitor.
+
+Judged against the case limits, every row passes:
+
+- **Normal-incidence reflection** through a homogeneous fill of the x absorbers: 6.3e-14 for vacuum carrying a 1e-6 pole, and 1.6e-8 for SiN in TE and in TM. The limit is 1e-6, the program's normal-incidence PML threshold; the CPML gives 5e-14 on the same fills.
+- **20,000-step stability of the absorber** on the diverging fixtures, relative to the peak state norm:
+
+| Fixture | Execution | Final state norm / peak |
+| --- | --- | --- |
+| SiN and Drude posts | float64 CPU | 2.4e-19 (late growth 1.8e-6) |
+| SiN and Drude posts | float32 CUDA, fused kernel | 8.2e-14 and 8.6e-14 |
+| SiN post | float32 CUDA, torch kernel | 1.1e-13 |
+| SiN post | `run_tensor_batch` | 8.2e-14, identical to the fused run |
+| 6 um pillar array | float32 CUDA | 1.5e-8 |
+
+  The limits are G3-07's 1e-6 for the final value and 1.000001 for late growth (float64 only), and the stability sweep's growth ratio of 1.5 on the state norm and the interior energy.
+- **The CPML controls** of the same fixtures diverge in float64 and float32.
+
+Recorded, not judged:
+
+- **Drude-dielectric fill.** The stability sweep's medium, whose Re ε runs from 3.1 to 3.5 across the band, reflects 5.0e-5. Its E loss is matched only at the source centre.
+- **G3-07 half space** crossing the x absorbers, per monitor (vacuum side / medium side):
+
+| Medium | Polarization | 40 layers | 80 layers | CPML, 40 layers |
+| --- | --- | --- | --- | --- |
+| Drude metal | TE | 0.027 / 0.030 | 9.2e-3 / 9.5e-3 | 3.5e-9 / 3.7e-9 |
+| Drude metal | TM | 0.090 / 0.11 | 0.031 / 0.035 | 1.3e-7 / 4.4e-7 |
+| SiN | TE | 0.87 / 0.19 | 0.61 / 0.15 | 6.8e-6 / 1.4e-6 |
+| SiN | TM | 1.2 / 0.016 | 0.45 / 5.3e-3 | 3.0e-7 / 4.2e-9 |
+
+  G3-07's interface budget for the CPML is 1e-4. The absorber is far from it at 40 and 80 layers, since a passive absorber is not reflectionless across a transverse interface. The case declares no looser budget.
+- **Oblique vacuum**, through the dilute fill: 7.5e-3 at 30 deg and 0.17 at 60 deg, against 1.1e-14 and 8.6e-9 for the CPML.
+
+`'absorber'` is therefore a stability fix, not a better absorber. Prefer ending dispersive structures before the PML. When they must cross it, as SiN pillars cross the lateral faces of a metalens tile, `'absorber'` keeps the run finite. Only the crossed faces change, so the other faces keep the CPML. Give the crossed faces more depth and expect reflections of order 1e-2 from waves that reach them obliquely or along a transverse interface.

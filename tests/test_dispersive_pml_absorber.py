@@ -7,7 +7,6 @@ coefficients, the coupled trapezoidal ADE update, the refusals of the paths that
 do not implement it and a short run of the diverging fixture.
 """
 import json
-import math
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -71,6 +70,9 @@ def test_record_covers_the_declared_case(case, record):
     assert record['case']['case_id'] == case['case_id'] and record['case']['declared_at_commit'] == case['declared_at_commit']
     assert record['acceptance'] == case['acceptance']
     assert {row['id'] for row in record['rows']} == {spec['id'] for spec in bench.rows()}
+    for row in record['rows']:
+        if row['kind'] == 'stability':
+            assert row['steps_completed'] == row['steps'] and len(row['samples']) == row['steps']//row['sample_interval'], row['id']
 
 
 def test_every_verdict_follows_from_the_record_and_the_case_limits(case, record):
@@ -78,6 +80,11 @@ def test_every_verdict_follows_from_the_record_and_the_case_limits(case, record)
         again = bench.verdict({k: v for k, v in row.items() if k not in ('judgement', 'passed')}, case['acceptance'])
         assert again['judgement'] == row['judgement'] and again['passed'] == row['passed'], row['id']
     assert record['failing_ids'] == [row['id'] for row in record['rows'] if not row['passed']]
+    assert record['passed'] and not record['failing_ids'], record['failing_ids']
+
+
+def test_document_is_rendered_from_the_record(record):
+    assert (ROOT/'docs'/'DISPERSIVE_PML_ABSORBER.md').read_text(encoding='utf-8') == bench.render(record)
     assert record['passed'] == (not record['failing_ids'])
 
 
