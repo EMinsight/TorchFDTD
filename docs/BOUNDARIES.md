@@ -82,15 +82,33 @@ Still required for full parity: independent FSP mapping, named Lumerical PML-pro
 - `'absorber'`: every PML face that an enabled dispersive structure reaches becomes an adiabatic absorber of the same depth, a graded and matched electric and magnetic conductivity, and the pole update runs everywhere. The other PML faces keep the CPML. The absorber is stable for every medium measured. Its reflection depends on what crosses the layer (below).
 - `'frozen'`: the CPML is kept, and cells inside a PML layer lose their pole and take the real permittivity of the material at the source centre frequency (the static permittivity without a pulsed source). This is wrong away from that frequency and is refused for a medium whose real permittivity there is not positive.
 
-A face counts as reached when the bounding box of an enabled dispersive structure enters its layer, the same test as the validation warning (`torchfdtd.boundaries.absorber_faces`). A pole cell therefore never lies in a stretched layer, corners included. The run summary lists the faces as `absorber_faces`.
+A face counts as reached when the bounding box of an enabled dispersive structure enters or touches its layer, within 1e-6 of a cell. This is the same test as the validation warning (`torchfdtd.boundaries.absorber_faces`). Touching counts because the upper CPML rows of E include the node on the inner edge of the layer. A pole sample therefore never lies in a stretched layer, corners included.
 
-The resident CPU and CUDA solvers (torch and fused kernels) and `run_tensor_batch` implement all three modes. A tensor-batch cohort only groups projects with the same absorber faces. Some paths refuse modes with a `ValueError` naming the path:
+Where the absorber faces are recorded:
 
-- the differentiable, dispersive-adjoint, plane-adjoint, streamed and reversible solvers refuse `'frozen'` and `'absorber'`;
-- the open-waveguide mode solver refuses `'absorber'`;
-- absorber faces are refused next to PMC/symmetric faces, with subpixel interfaces, and when their `kappa` or `alpha` is not the default.
+- the run summaries of `Simulation` and `run_tensor_batch` list them as `absorber_faces`;
+- the resolved plan describes them in `boundaries.absorber`, with the per-axis losses and each dispersive material's reference permittivity, and `verify_grid` checks all three against the prepared grid;
+- the run signature that matches frequency-plane references, and the tile signature of stitched planes, include them. A device run with absorber faces therefore does not normalise against an air reference whose faces are CPML.
 
-Validation (`/api/validate`, `torchfdtd run`) warns about any enabled dispersive structure that reaches a PML layer while the mode is `'ade'`, and suggests `'absorber'`.
+The resident CPU and CUDA solvers (torch and fused kernels) and `run_tensor_batch` implement all three modes. A tensor-batch cohort only groups projects with the same absorber faces. Refusals, each a `ValueError` naming the path:
+
+- the differentiable, dispersive-adjoint, plane-adjoint, streamed and reversible solvers refuse a mode other than `'ade'` only when it would change the run: `'absorber'` with absorber faces, `'frozen'` with a dispersive structure reaching a PML layer;
+- absorber faces are refused next to PMC/symmetric faces, with subpixel interfaces, and with stretching (`kappa` other than 1, or `alpha` above its default; `alpha=0` is accepted);
+- a soft sheet with `extend_through_pml` that crosses an absorber face is refused, both at planning and in the tiled mode's admission.
+
+The sheet refusal comes from a measurement. A CPML leaves alone a wave that has no wavevector along the face normal inside a lateral layer, but the absorber's loss acts in every direction. It damps the sheet's wave inside the lateral layers, and the laterally varying front diffracts back into the interior. In a 2D test, all faces were absorbers (a dilute fill, 40 layers, 25 nm cells) and a y-normal sheet at 1.3–1.8 µm was compared with the same sheet under the CPML. The largest relative power difference over the band, at three interior monitors, was:
+
+| Sheet | Power error |
+| --- | --- |
+| Extended through the x absorbers | 0.27, 0.038 and 0.37 |
+| Ending at the interior | 9.4e-3, 6.6e-3 and 4.7e-2 (the oblique reflection of its edge waves) |
+
+Dividing the soft-source term by (1 + s) in absorber cells changes the extended-sheet error only in the third digit. Every other source is confined to the interior, where the absorber has no loss, so no source term needs that factor.
+
+Validation (`/api/validate`, `torchfdtd run`) warns about every enabled dispersive structure that reaches a PML layer while the mode is `'ade'`, and it separates two cases:
+
+- **Recommends `'absorber'`:** structures whose material's Re ε turns negative somewhere in the band of the grid and that end inside a layer, meaning their whole extent along the face normal lies in the layer. This is the configuration that diverged below.
+- **States the cost instead:** every other dispersive structure, in particular a slab or half-space that crosses the layer from the interior. The CPML stayed stable for those in the records and reflects 4e-9 to 7e-6 per monitor in the G3-07 half space, while the absorber reflects 0.016 to 1.2. The warning advises keeping `'ade'` with the run-control divergence check.
 
 ### Why the CPML diverges
 
@@ -136,7 +154,15 @@ A pole cell cannot be matched at every frequency by a passive loss. Damping D in
 (eps_inf + s*eps_ref) E_new + (P_new - P_old) = (eps_inf - s*eps_ref) E_old + courant * curl H
 ```
 
-Every added term is a non-negative loss, so the absorber is a passive medium. That is the argument for its stability, and the record below tests it. The stretched-coordinate `kappa` and `alpha` have no meaning in it and must keep their defaults.
+Every added term is a non-negative loss, so the absorber is a passive medium. That is the argument for its stability, and the record below tests it.
+
+A second check is the spectral radius of the source-free one-step operator (E, H, CPML memories and pole states) on an 11 x 11 x 5-cell box with a post in the corner where x_max and y_max meet. With the CPML it exceeds 1 by about 1e-3 for the SiN and the Drude post. With the absorber it stays within 1e-13 of 1. `tests/test_dispersive_pml_absorber.py` asserts more than 5e-4 and at most 1e-12.
+
+The stretched-coordinate `kappa` and `alpha` have no meaning in the absorber: `kappa` must stay 1 and `alpha` at most its default.
+
+The trapezoidal step is stable for any s, but s above 1 makes the decay factor (1-s)/(1+s) negative. The outermost cells then ring at the Nyquist frequency while they decay: `sigma_scale` 20 over 3 layers gives s = 47.6 and a factor of -0.96 per step. The largest loss is s_max = `sigma_scale`·20/(L+1)·courant. The default profile gives 1.08 at 12 layers in 2D and 0.34 at 40, so keep `sigma_scale` at or below about (L+1)/(20·courant).
+
+Memory: the torch and NumPy updates keep the decay and gain factors of E and H only on the absorber slabs, four arrays of three components per slab cell, and the resident estimate counts them as `absorber_cache_estimated_bytes`. The fused kernel keeps one profile per axis.
 
 Unlike a PML, a passive absorber reflects wherever the transverse structure of the wave changes with the loss: at oblique incidence, where a transverse interface crosses the layer, and in a medium whose permittivity changes across the band. A deeper layer reduces that reflection (compare 80 with 40 layers below).
 
@@ -160,6 +186,11 @@ Judged against the case limits, every row passes:
   The limits are G3-07's 1e-6 for the final value and 1.000001 for late growth (float64 only), and the stability sweep's growth ratio of 1.5 on the state norm and the interior energy.
 - **The CPML controls** of the same fixtures diverge in float64 and float32.
 
+What "every judged row passes" does and does not show:
+
+- **Stability rows.** In float64 the SiN and the Drude post rows agree to six or seven digits at every sample. The post sits deep in a strongly lossy region and contributes almost nothing to the state norm, so the two materials are not independent evidence there. With the tail far below the 1e-12 floor, energy growth slower than about 1e-3 to 5e-3 per step would pass those limits; the measured CPML growth is 0.008 to 0.095 per step. The spectral-radius test above closes that gap.
+- **Reflection rows.** The split between judged and recorded rows was fixed after the shakedown, and every configuration that missed the program's limits there is recorded, not judged. The judged rows only show that the absorber meets the normal-incidence limit for weakly dispersive fills.
+
 Recorded, not judged:
 
 - **Drude-dielectric fill.** The stability sweep's medium, whose Re ε runs from 3.1 to 3.5 across the band, reflects 5.0e-5. Its E loss is matched only at the source centre.
@@ -175,4 +206,4 @@ Recorded, not judged:
   G3-07's interface budget for the CPML is 1e-4. The absorber is far from it at 40 and 80 layers, since a passive absorber is not reflectionless across a transverse interface. The case declares no looser budget.
 - **Oblique vacuum**, through the dilute fill: 7.5e-3 at 30 deg and 0.17 at 60 deg, against 1.1e-14 and 8.6e-9 for the CPML.
 
-`'absorber'` is therefore a stability fix, not a better absorber. Prefer ending dispersive structures before the PML. When they must cross it, as SiN pillars cross the lateral faces of a metalens tile, `'absorber'` keeps the run finite. Only the crossed faces change, so the other faces keep the CPML. Give the crossed faces more depth and expect reflections of order 1e-2 from waves that reach them obliquely or along a transverse interface.
+`'absorber'` is therefore a stability fix, not a better absorber. Prefer ending dispersive structures before the PML. When they must cross it, as SiN pillars cross the lateral faces of a metalens tile, `'absorber'` keeps the run finite. Only the crossed faces change, so the other faces keep the CPML. Give the crossed faces more depth, and expect reflections of order 1e-2 from waves that reach them obliquely or along a transverse interface. A source sheet must then end at the interior of those faces rather than extend through them.

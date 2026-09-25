@@ -116,7 +116,7 @@ class _System:
         self.current_step=0
         # Preparing coefficients must not allocate another full-volume E/H
         # field or touch fdtd's process-global backend.
-        reject_pml_dispersion(r,type(self).__name__)
+        reject_pml_dispersion(project,type(self).__name__)
         template=BoundaryDescription(r)
         # PMC/symmetric walls: lower walls mirror inside the volume arrays,
         # upper walls keep their tangential E, normal H and E edges in stored
@@ -713,7 +713,7 @@ class DifferentiableSimulation(torch.nn.Module):
         p=self.project;r=p.region
         if r.interface_method!='staircase':
             raise ValueError('DifferentiableSimulation currently requires staircase coefficients.')
-        reject_pml_dispersion(r,type(self).__name__)
+        reject_pml_dispersion(p,type(self).__name__)
         active={s.material for s in p.structures if s.enabled}
         if not self._explicit_dispersive_parameters and any(m.oscillators and m.name in active for m in p.materials):
             raise ValueError('Dispersive ADE derivatives are not implemented yet.')

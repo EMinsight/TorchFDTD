@@ -20,8 +20,8 @@ from torchfdtd import Project, Region, Structure, Source, Monitor, Material, Sim
 from torchfdtd.models import Boundaries, BoundaryFace, FieldMonitor
 from torchfdtd.boundaries import BoundaryDescription, YeeGrid, absorber_faces, absorber_loss, absorber_profiles
 from torchfdtd.materials import configure_materials
-from torchfdtd.plan import resolve_plan
-from torchfdtd.solver import voxelize
+from torchfdtd.plan import PlanInvalidated, resolve_plan
+from torchfdtd.solver import estimate, run_signature, voxelize
 from torchfdtd.stability_checks import stability_warnings
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,10 +29,24 @@ CASE_PATH = ROOT/'docs'/'validation'/'cases'/'DISPERSIVE_PML_ABSORBER.json'
 RECORD_PATH = ROOT/'docs'/'validation'/'dispersive_pml_absorber.json'
 CUDA = pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
 SIN = Material(name='sin', model='lorentz', epsilon_inf=1., resonance_rad_s=1.4e16, linewidth_rad_s=1e13, delta_epsilon=3.)
+DRUDE = Material(name='sin', model='drude', epsilon_inf=1., plasma_rad_s=2e15, collision_rad_s=1e14)
+# Non-unit eps_inf, a Drude pole whose Re eps at the source centre is negative (eps_ref falls back to eps_inf) and two poles.
+LORENTZ_225 = Material(name='sin', model='lorentz', epsilon_inf=2.25, resonance_rad_s=1.4e16, linewidth_rad_s=1e13, delta_epsilon=3.)
+METAL = Material(name='sin', model='drude', epsilon_inf=2., plasma_rad_s=1.2e16, collision_rad_s=1e14)
+MULTIPOLE = Material(name='sin', model='multipole', epsilon_inf=1.5, poles=[
+    dict(resonance_rad_s=1.4e16, strength_rad_s_squared=3*1.4e16**2, damping_rad_s=2e13),
+    dict(resonance_rad_s=5e15, strength_rad_s_squared=.5*5e15**2, damping_rad_s=1e14)])
+
+
+@pytest.fixture(autouse=True)
+def restore_threads():
+    threads = torch.get_num_threads()
+    yield
+    torch.set_num_threads(threads)
 
 
 def slab_project(mode='absorber', *, dimension='2d', backend='cpu', precision='float64', kernel='torch', steps=40, sampling='yee',
-                 everywhere=False):
+                 everywhere=False, material=SIN):
     """A SiN slab through the y faces and the x_max face into the corners; x faces 5 and 7 layers deep, x_min stays vacuum."""
     three = dimension == '3d'
     faces = dict(x_min=BoundaryFace(layers=5), x_max=BoundaryFace(layers=7, sigma_scale=.8, polynomial=2))
@@ -40,7 +54,7 @@ def slab_project(mode='absorber', *, dimension='2d', backend='cpu', precision='f
                backend=backend, cuda_kernel=kernel, material_sampling=sampling, pml_dispersion=mode, boundaries=Boundaries(**faces))
     slab = Structure(name='slab', center=(0 if everywhere else .75, 0, 0), size=(100. if everywhere else .8, 100., 100. if three else 1.),
                      material='sin')
-    return Project(region=r, materials=[Material(name='void', index=1), SIN], structures=[slab],
+    return Project(region=r, materials=[Material(name='void', index=1), material], structures=[slab],
                    sources=[Source(kind='point', component='Ex', center=(-.3, .1, 0), wavelength=.55, pulse_cycles=2)],
                    monitors=[Monitor(component='Ex', center=(.2, 0, 0))])
 
@@ -70,6 +84,10 @@ def test_record_covers_the_declared_case(case, record):
     assert record['case']['case_id'] == case['case_id'] and record['case']['declared_at_commit'] == case['declared_at_commit']
     assert record['acceptance'] == case['acceptance']
     assert {row['id'] for row in record['rows']} == {spec['id'] for spec in bench.rows()}
+    # Every run of the record was clean and ran the sources hashed in it, which are the sources of this tree.
+    runs = [record['environment'], *record['environment'].get('merged', [])]
+    assert all(run['dirty_paths'] == 0 for run in runs) and len({run['commit'] for run in runs}) == 1
+    assert all(run.get('source_sha256', record['source_sha256']) == record['source_sha256'] for run in runs)
     for row in record['rows']:
         if row['kind'] == 'stability':
             assert row['steps_completed'] == row['steps'] and len(row['samples']) == row['steps']//row['sample_interval'], row['id']
@@ -146,12 +164,29 @@ def test_absorber_replaces_the_stretched_coordinates_of_its_faces_and_enters_the
     assert Simulation(p).run().summary['absorber_faces'] == ['x_max', 'y_min', 'y_max']
 
 
-def test_absorber_update_is_the_trapezoidal_lossy_ade_update():
+def bilinear_reference(material, dt):
+    """Re eps at the 0.55 um source centre from the poles written out here; eps_inf where it is not positive."""
+    f = 299792458./.55e-6
+    omega = 2/dt*np.tan(np.pi*f*dt)
+    eps = material.epsilon_inf+0j
+    if material.model == 'lorentz':
+        eps += material.delta_epsilon*material.resonance_rad_s**2/(material.resonance_rad_s**2-omega**2-2j*material.linewidth_rad_s*omega)
+    elif material.model == 'drude':
+        eps -= material.plasma_rad_s**2/(omega**2+1j*material.collision_rad_s*omega)
+    else:
+        for pole in material.poles:
+            eps += pole.strength_rad_s_squared/(pole.resonance_rad_s**2-omega**2-1j*pole.damping_rad_s*omega)
+    return eps.real if eps.real > 0 else material.epsilon_inf
+
+
+@pytest.mark.parametrize('material,expected', [(SIN, (4.1, 4.3)), (LORENTZ_225, (5.35, 5.55)), (METAL, None), (MULTIPOLE, (5.6, 5.85))],
+                         ids=['sin', 'lorentz-eps-inf-2.25', 'metal-negative', 'multipole'])
+def test_absorber_update_is_the_trapezoidal_lossy_ade_update(material, expected):
     """(eps_inf + s eps_ref) E_new + (P_new - P_old) = (eps_inf - s eps_ref) E_old + courant*curl H on every E sample,
-    eps_ref the bilinear Re eps at the source centre (eps elsewhere); H decays with the same s."""
+    eps_ref the bilinear Re eps at the source centre, or eps_inf where that is negative (eps elsewhere); H decays with the same s."""
     for sampling in ('yee', 'cell'):
         # The slab fills the region, so every face is an absorber and no CPML memory advances with the extra curls below.
-        p = slab_project(dimension='3d', sampling=sampling, everywhere=True)
+        p = slab_project(dimension='3d', sampling=sampling, everywhere=True, material=material)
         p.structures.append(Structure(name='hole', center=(0, 0, 0), size=(.4, .4, .4), material='void'))
         p = Project.model_validate(p.model_dump())
         assert len(absorber_faces(p)) == 6
@@ -168,12 +203,11 @@ def test_absorber_update_is_the_trapezoidal_lossy_ade_update():
         s = absorber_loss(g.absorber, p.region.shape, 'E')
         assert s.max() > .5 and state.absorber is not None
         eps = 1/g.inverse_permittivity
-        f = 299792458./.55e-6
-        omega = 2/g.time_step*np.tan(np.pi*f*g.time_step)
-        reference = (SIN.epsilon_inf+SIN.delta_epsilon*SIN.resonance_rad_s**2/(SIN.resonance_rad_s**2-omega**2-2j*SIN.linewidth_rad_s*omega)).real
-        assert 4 < reference < 4.3
+        reference = bilinear_reference(material, g.time_step)
+        assert (reference == material.epsilon_inf) if expected is None else expected[0] < reference < expected[1]
+        assert np.all(eps[eps != 1] == material.epsilon_inf)
         ref, dp = eps.copy(), np.zeros_like(g.E)
-        for array, value in ((ref, reference), (dp, state.P-p0)):
+        for array, value in ((ref, reference), (dp, (state.P-p0).sum(axis=0) if state.multiple else state.P-p0)):
             (array.reshape(-1) if state.components else array.reshape(-1, 3))[state.indices] = value
         lhs = (eps+s*ref)*g.E+dp
         rhs = (eps-s*ref)*e0+g.courant_number*curl_h
@@ -207,27 +241,102 @@ def test_default_ade_keeps_the_cpml_update_and_kernel_text():
 
 
 # ----------------------------------------------------------------------------------------------- refusals and warnings
-def test_paths_without_the_absorber_refuse_it():
+def test_paths_without_the_absorber_refuse_it_only_where_it_changes_the_run():
     from torchfdtd import DifferentiableSimulation, StreamedSimulation, StreamedAdjointOptions, DifferentiablePlaneSimulation
     from torchfdtd.differentiable import _System
     from torchfdtd.open_mode_operators import plan_open_mode_operators
-    p = slab_project()
-    p.materials[1] = Material(name='sin', index=2.)
-    for build in (lambda: DifferentiableSimulation(p), lambda: StreamedSimulation(p, StreamedAdjointOptions(device='cpu')),
-                  lambda: _System(p, torch.ones(p.region.shape, dtype=torch.float64))):
-        with pytest.raises(ValueError, match='pml_dispersion="absorber" is implemented by the resident Simulation and run_tensor_batch only'):
-            build()
-    plane = p.model_copy(deep=True)
-    plane.monitors = [FieldMonitor(normal='x', center=(.2, 0, 0), size=(0, .6, 1))]
-    with pytest.raises(ValueError, match='not by DifferentiablePlaneSimulation'):
-        DifferentiablePlaneSimulation(plane)
-    with pytest.raises(ValueError, match='Open waveguide modes are solved with the CPML'):
-        plan_open_mode_operators(p.region, 'x', 1.55)
-    frozen = slab_project('frozen')
-    frozen.materials[1] = Material(name='sin', index=2.)
-    with pytest.raises(ValueError, match='not by DifferentiablePlaneSimulation'):
-        plane.region.pml_dispersion = 'frozen'
-        DifferentiablePlaneSimulation(Project.model_validate(plane.model_dump()))
+    for mode in ('absorber', 'frozen'):
+        p = slab_project(mode)
+        message = f'pml_dispersion="{mode}" is implemented by the resident Yee Simulation and run_tensor_batch only'
+        for build in (lambda: DifferentiableSimulation(p), lambda: StreamedSimulation(p, StreamedAdjointOptions(device='cpu')),
+                      lambda: _System(p, torch.ones(p.region.shape, dtype=torch.float64))):
+            with pytest.raises(ValueError, match=message):
+                build()
+        plane = p.model_copy(deep=True)
+        plane.monitors = [FieldMonitor(normal='x', center=(.2, 0, 0), size=(0, .6, 1))]
+        with pytest.raises(ValueError, match='not by DifferentiablePlaneSimulation'):
+            DifferentiablePlaneSimulation(Project.model_validate(plane.model_dump()))
+        # Without a dispersive structure in a PML layer neither mode changes anything, and nothing is refused.
+        dielectric = Project.model_validate(dict(plane.model_dump(), materials=[m.model_dump() for m in plane.materials[:1]]+[
+            Material(name='sin', index=2.).model_dump()]))
+        DifferentiablePlaneSimulation(dielectric)
+        DifferentiableSimulation(dielectric.model_copy(update=dict(monitors=p.monitors)))
+        plan_open_mode_operators(slab_project(mode, dimension='3d', precision='float32').region, 'x', 1.55)
+
+
+def test_native_tensor_projects_run_with_every_mode():
+    from test_tensor_native import scene
+    reference = None
+    for mode in ('ade', 'frozen', 'absorber'):
+        p = scene(True)
+        p.region.pml_dispersion = mode
+        signals = Simulation(Project.model_validate(p.model_dump())).run().signals
+        reference = signals if reference is None else reference
+        np.testing.assert_array_equal(signals, reference)
+
+
+def extended_sheet_project(extend=True, crossing='x'):
+    """2D: a SiN slab through the x faces (or the y faces) and a y-normal soft sheet, extended through the x layers or not."""
+    r = Region(dimension='2d', size=(2., 2., 1.), mesh=.1, pml_cells=4, steps=20, precision='float64', backend='cpu',
+               material_sampling='yee', pml_dispersion='absorber')
+    slab = (Structure(name='slab', center=(0, .1, 0), size=(100., .2, 1.), material='sin') if crossing == 'x' else
+            Structure(name='slab', center=(.3, 0, 0), size=(.2, 100., 1.), material='sin'))
+    sheet = Source(name='sheet', kind='plane', normal='y', component='Ez', center=(0, -.4, 0), size=(2. if extend else 1.2, 0, 0),
+                   extend_through_pml=extend, wavelength=.55, pulse_cycles=2)
+    return Project(region=r, materials=[Material(name='void', index=1), SIN], structures=[slab], sources=[sheet],
+                   monitors=[Monitor(component='Ez', center=(0, -.2, 0))])
+
+
+def test_a_sheet_extended_through_an_absorber_face_is_refused():
+    with pytest.raises(ValueError, match='sheet: a soft sheet with extend_through_pml crosses the absorber face x_min'):
+        Simulation(extended_sheet_project()).run()
+    assert absorber_faces(extended_sheet_project(extend=False)) == ((0, 0), (0, 1))
+    # The sheet may still extend through CPML faces when the dispersive slab crosses only the y faces.
+    crossing_y = extended_sheet_project(crossing='y')
+    assert absorber_faces(crossing_y) == ((1, 0), (1, 1))
+    assert Simulation(crossing_y).run().summary['absorber_faces'] == ['y_min', 'y_max']
+
+
+def test_tiled_admission_refuses_extended_sheets_across_tile_absorbers_and_notes_the_faces():
+    from test_tiled import small_row
+    from torchfdtd.execution_modes import _tiled_candidate
+    health = dict(host_available_bytes=1 << 40, gpu_free_bytes=None)
+    out = {}
+    for through in (True, False):
+        p = small_row(through_pml=through)
+        p.materials.append(SIN.model_copy(update=dict(name='dispersive sin')))
+        for structure in p.structures:
+            structure.material = 'dispersive sin'
+        p.region.pml_dispersion = 'absorber'
+        p.region.tiling = p.region.tiling.model_copy(update=dict(size_um=1.5, overlap_um=.5))
+        out[through] = _tiled_candidate(Project.model_validate(p.model_dump()), 'cpu', health)
+    assert not out[True]['admitted'] and 'extend_through_pml crosses the absorber face' in out[True]['reason']
+    assert out[False]['admitted'] and any('absorber faces' in note for note in out[False]['notes'])
+
+
+def test_run_and_tile_signatures_distinguish_absorber_faces():
+    """A device with absorber faces and its air reference differ in their signatures; without absorber faces nothing changes."""
+    from torchfdtd.tiled import plan_tiles, _signature
+    from test_tiled import small_row
+    metal = Material(name='metal', model='drude', epsilon_inf=1., plasma_rad_s=2e15, collision_rad_s=1e14)
+    for mode in ('absorber', 'ade'):
+        r = Region(dimension='2d', size=(2.0, 2.0, 1.), mesh=.05, pml_cells=6, steps=50, backend='cpu', material_sampling='yee',
+                   pml_dispersion=mode)
+        device = Project(region=r, materials=[Material(name='void', index=1), metal],
+                         structures=[Structure(name='film', center=(0, .3, 0), size=(100., .05, 1.), material='metal')],
+                         sources=[Source(kind='plane', component='Ez', center=(0, -.4, 0), size=(1.2, 0, 0), wavelength=1.55)],
+                         monitors=[FieldMonitor(normal='y', center=(0, .6, 0), size=(1.2, 0, 1))])
+        air = device.model_copy(update=dict(structures=[]))
+        assert (run_signature(device, 50) == run_signature(air, 50)) == (mode == 'ade')
+        tiled = small_row(through_pml=False)
+        tiled.materials.append(SIN.model_copy(update=dict(name='dispersive sin')))
+        for structure in tiled.structures:
+            structure.material = 'dispersive sin'
+        tiled.region.pml_dispersion = mode
+        tiled = Project.model_validate(tiled.model_dump())
+        empty = tiled.model_copy(update=dict(structures=[]))
+        signatures = [_signature(plan_tiles(q, 1.5, .5, normal='y')) for q in (tiled, empty)]
+        assert (signatures[0] == signatures[1]) == (mode == 'ade')
 
 
 def test_absorber_refuses_pmc_faces_and_subpixel_interfaces():
@@ -239,19 +348,66 @@ def test_absorber_refuses_pmc_faces_and_subpixel_interfaces():
                  pml_dispersion='absorber')
     with pytest.raises(ValueError, match='requires staircase interfaces'):
         BoundaryDescription(sub, ((0, 0),))
-    for face in (dict(kappa=3.), dict(alpha=.1), dict(alpha_polynomial=1.)):
+    for face in (dict(kappa=3.), dict(alpha=.1, alpha_polynomial=1.)):
         stretched = Region(dimension='2d', size=(1.6, 1.6, 1.), mesh=.1, pml_cells=3, pml_dispersion='absorber',
                            boundaries=Boundaries(y_max=BoundaryFace(**face)))
-        with pytest.raises(ValueError, match='kappa and alpha of its faces must keep their defaults'):
+        with pytest.raises(ValueError, match='kappa and alpha of its faces must stay at 1 and at most the default alpha'):
             BoundaryDescription(stretched, ((1, 1),))
         BoundaryDescription(stretched, ((1, 0),))
+    # No stretching: alpha 0 (as the endpoint CPML requires) and an alpha polynomial without alpha are admitted.
+    for face in (dict(alpha=0.), dict(alpha=0., alpha_polynomial=2.)):
+        plain = Region(dimension='2d', size=(1.6, 1.6, 1.), mesh=.1, pml_cells=3, pml_dispersion='absorber',
+                       boundaries=Boundaries(y_max=BoundaryFace(**face)))
+        assert BoundaryDescription(plain, ((1, 1),)).absorber is not None
 
 
-def test_validation_warning_names_the_absorber_and_is_silent_with_it():
-    p = slab_project('ade')
-    (warning,) = stability_warnings(p)
-    assert 'pml_dispersion="absorber"' in warning and 'slab (x_max, y_min, y_max)' in warning
-    assert stability_warnings(slab_project('absorber')) == []
+def post_in_layer_project(material, *, mode='ade', size=.2):
+    """2D: a post of the material lying inside the x_max layer only (it ends inside the layer)."""
+    r = Region(dimension='2d', size=(2., 1.6, 1.), mesh=.1, pml_cells=4, steps=10, material_sampling='yee', pml_dispersion=mode)
+    return Project(region=r, materials=[Material(name='void', index=1), material.model_copy(update=dict(name='post material'))],
+                   structures=[Structure(name='post', center=(1., 0, 0), size=(size, .2, 1.), material='post material')],
+                   sources=[Source(component='Ez', center=(-.3, 0, 0), wavelength=.55)], monitors=[Monitor(component='Ez', center=(0, 0, 0))])
+
+
+def test_warning_recommends_the_absorber_only_where_a_negative_permittivity_structure_ends_in_the_layer():
+    (ending,) = stability_warnings(post_in_layer_project(SIN))
+    assert 'post (x_max)' in ending and 'set region.pml_dispersion="absorber"' in ending and 'grows by e^0.057 per step' in ending
+    (crossing,) = stability_warnings(slab_project('ade', everywhere=True))
+    assert 'slab (x_min, x_max, y_min, y_max)' in crossing and 'keep pml_dispersion="ade"' in crossing
+    assert '4e-9 to 7e-6' in crossing and '0.016 to 1.2' in crossing and 'set region.pml_dispersion="absorber"' not in crossing
+    # A strongly damped pole keeps Re eps positive on the whole band of the grid: no recommendation either.
+    damped = Material(name='damped', model='lorentz', epsilon_inf=4., resonance_rad_s=1e15, linewidth_rad_s=2e15, delta_epsilon=1.)
+    (positive,) = stability_warnings(post_in_layer_project(damped))
+    assert 'keep pml_dispersion="ade"' in positive
+    assert stability_warnings(slab_project('absorber')) == [] and stability_warnings(post_in_layer_project(SIN, mode='absorber')) == []
+
+
+@pytest.mark.parametrize('gap', [0., 1e-12, -.05])
+def test_a_structure_touching_the_layer_makes_its_face_an_absorber(gap):
+    """A SiN box ending on the inner edge of the x_max layer (or inside it) turns x_max into an absorber, so no pole sample
+    stays in a stretched row; the upper E rows of the CPML include the node on that edge."""
+    from torchfdtd.boundaries import CURL_TERMS
+    r = Region(dimension='2d', size=(2., 1.6, 1.), mesh=.1, pml_cells=4, steps=10, precision='float64', backend='cpu',
+               material_sampling='yee', pml_dispersion='absorber')
+    high = r.interior_bounds(0)[1]
+    edge = high-gap
+    box = Structure(name='box', center=((edge-.2)/2, 0, 0), size=(edge+.2, .4, 1.), material='sin')
+    p = Project(region=r, materials=[Material(name='void', index=1), SIN], structures=[box],
+                sources=[Source(component='Ez', center=(-.3, 0, 0), wavelength=.55)], monitors=[Monitor(component='Ez', center=(0, 0, 0))])
+    assert (0, 1) in absorber_faces(p)
+    fdtd.set_backend('numpy')
+    _, _, owner = voxelize(p, with_ownership=True)
+    g = YeeGrid(r, absorber_faces(p))
+    stretched = 0
+    for (forward, axis, comp), segments in g.cpml.items():
+        if forward:
+            continue
+        out = next(o for a, c, o, _ in CURL_TERMS if a == axis and c == comp)
+        for segment in segments:
+            index = [slice(None)]*3
+            index[axis] = slice(segment['slice'][axis].start+1, segment['slice'][axis].stop+1)
+            stretched += int(np.count_nonzero(owner[tuple(index)+(out,)] == 1))
+    assert stretched == 0
 
 
 # ----------------------------------------------------------------------------------------------- short runs
@@ -265,6 +421,84 @@ def test_short_run_of_the_diverging_fixture_grows_with_the_cpml_and_decays_with_
         peak = max(s['state_norm'] for s in samples if s['step'] <= 1400)
         out[mode] = samples[-1]['state_norm']/peak
     assert out['ade'] > 1e6 and out['absorber'] < 1e-6, out
+
+
+def spectral_radius(p):
+    """Largest |eigenvalue| of the source-free one-step operator on E, H, the CPML memories and the pole states (float64)."""
+    fdtd.set_backend('numpy')
+    fdtd.backend.float = np.float64
+    g, _ = numpy_grid(p)
+    arrays = [g.E, g.H, *g.memory_states]
+    sizes = [a.size for a in arrays]
+    columns = []
+    for j in range(sum(sizes)):
+        vector = np.zeros(sum(sizes))
+        vector[j] = 1.
+        offset = 0
+        for a, size in zip(arrays, sizes):
+            a.reshape(-1)[:] = vector[offset:offset+size]
+            offset += size
+        g.update_E()
+        g.update_H()
+        columns.append(np.concatenate([a.reshape(-1) for a in arrays]))
+    return float(np.abs(np.linalg.eigvals(np.stack(columns, axis=1))).max())
+
+
+def corner_post_cell(mode, material, sampling):
+    """11 x 11 x 5 cells, 3 CPML layers, z periodic, a post filling the x_max/y_max corner (after the reviewer's fixture)."""
+    faces = dict(z_min=BoundaryFace(kind='periodic'), z_max=BoundaryFace(kind='periodic'))
+    r = Region(dimension='3d', size=(.22, .22, .1), mesh=.02, pml_cells=3, steps=10, precision='float64', backend='cpu',
+               material_sampling=sampling, pml_dispersion=mode, boundaries=Boundaries(**faces))
+    return Project(region=r, materials=[Material(name='void', index=1), material],
+                   structures=[Structure(name='post', center=(.11, .11, 0), size=(.12, .12, .06), material='sin')],
+                   sources=[Source(kind='point', component='Ex', center=(0, 0, 0), wavelength=.55, pulse_cycles=2)],
+                   monitors=[Monitor(component='Ex', center=(0, 0, 0))])
+
+
+@pytest.mark.parametrize('material,sampling', [pytest.param(SIN, 'yee', id='sin-yee'),
+                                               *(pytest.param(m, s, id=f'{n}-{s}', marks=pytest.mark.long)
+                                                 for n, m, s in (('sin', SIN, 'cell'), ('drude', DRUDE, 'yee'), ('drude', DRUDE, 'cell')))])
+def test_one_step_operator_grows_with_the_cpml_and_is_contractive_with_the_absorber(material, sampling):
+    torch.set_num_threads(2)
+    assert spectral_radius(corner_post_cell('ade', material, sampling))-1 > 5e-4
+    absorber = corner_post_cell('absorber', material, sampling)
+    assert absorber_faces(absorber) == ((0, 1), (1, 1))
+    assert spectral_radius(absorber)-1 <= 1e-12
+
+
+def test_torch_grid_keeps_the_absorber_coefficients_on_its_slabs_and_the_estimate_counts_them():
+    p = slab_project(dimension='3d')
+    g, _ = numpy_grid(p)
+    g.update_E()
+    g.update_H()
+    cached = sum(decay.size+gain.size for family in ('E', 'H') for _, decay, gain in g.absorber_update(family))
+    shape = p.region.shape
+    interior = [n-p.region.pml_layers(a, 0)*((a, 0) in g.absorber_faces)-p.region.pml_layers(a, 1)*((a, 1) in g.absorber_faces)
+                for a, n in enumerate(shape)]
+    slab_cells = int(np.prod(shape)-np.prod(interior))
+    assert cached == 4*3*slab_cells < 4*g.E.size
+    summary = estimate(p)
+    assert summary['absorber_cache_estimated_bytes'] == cached*8
+    assert 'absorber_cache_estimated_bytes' not in estimate(slab_project('ade', dimension='3d'))
+
+
+def test_plan_describes_the_absorber_and_verify_grid_checks_it():
+    p = slab_project(dimension='3d')
+    plan = resolve_plan(p)
+    absorber = plan.boundaries.absorber
+    assert absorber['faces'] == [[0, 1], [1, 0], [1, 1], [2, 0], [2, 1]]
+    assert set(absorber['profiles']) == {0, 1, 2} and absorber['reference_epsilon']['sin'] == pytest.approx(
+        bilinear_reference(SIN, p.region.time_step), rel=1e-12)
+    assert 'absorber' in plan.to_json()['boundaries'] and 'absorber' not in resolve_plan(slab_project('ade')).to_json()['boundaries']
+    g, _ = numpy_grid(p)
+    plan.verify_grid(g)
+    g.absorber[1][0][0] *= 2
+    with pytest.raises(PlanInvalidated, match='absorber'):
+        plan.verify_grid(g)
+    g, _ = numpy_grid(p)
+    g.absorber_reference['sin'] += 1e-9
+    with pytest.raises(PlanInvalidated, match='reference permittivity'):
+        plan.verify_grid(g)
 
 
 @pytest.mark.parametrize('material', ['dilute', 'sin'])
@@ -303,6 +537,7 @@ def test_tensor_batch_matches_the_fused_simulation():
     other.structures[0].center = (.65, 0, 0)
     report = run_tensor_batch([p, other], device=0)
     np.testing.assert_array_equal(report.items[0].result.signals, single)
+    assert report.items[0].result.summary['absorber_faces'] == ['x_max', 'y_min', 'y_max', 'z_min', 'z_max']
     mixed = p.model_copy(deep=True)
     mixed.region.pml_dispersion = 'ade'
     with pytest.raises(ValueError, match='identical'):

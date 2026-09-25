@@ -235,6 +235,13 @@ def estimate(p: Project, *, endpoint_dispatch=True):
                 warnings.append(f'{m.name}: start-apodization center is beyond the simulation end.')
     if r.mesh_type == 'graded':
         warnings.append('Graded rectilinear mesh coarsens background gaps and retains the fine timestep. Refinement boxes project across each coordinate axis. Check convergence against a uniform Yee mesh, especially near resonances and thin features.')
+    from .boundaries import absorber_faces, absorber_slabs
+    absorber_bytes=0
+    faces=absorber_faces(p)
+    if faces and not (r.backend=='cuda' and r.cuda_kernel=='fused'):
+        # The torch/NumPy update keeps decay and gain of E and H on the absorber slabs.
+        absorber_bytes=4*3*(8 if r.precision=='float64' else 4)*sum(math.prod(len(range(n)[b]) for n,b in zip(r.shape,box))
+                                                                    for box in absorber_slabs(r,faces))
     interface_bytes=0
     if r.interface_method=='subpixel':
         real_bytes=8 if r.precision=='float64' else 4
@@ -262,9 +269,10 @@ def estimate(p: Project, *, endpoint_dispatch=True):
                         f'(period {snapshot["period_steps"]:.1f} steps, one frame every {snapshot["effective_interval"]} steps). '
                         f'The playback will look like backward motion; store a frame at least every {snapshot["period_steps"]/SNAPSHOT_FRAMES_PER_PERIOD:.0f} steps.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
-            'estimated_memory_mb': round((stored * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes)/2**20, 1),
+            'estimated_memory_mb': round((stored * ((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1)+monitor_memory(p)+auxiliary_bytes+interface_bytes+absorber_bytes)/2**20, 1),
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes,
-            'point_trace_estimated_bytes': point_trace_memory(p), 'snapshot': snapshot}
+            'point_trace_estimated_bytes': point_trace_memory(p), 'snapshot': snapshot,
+            **({'absorber_cache_estimated_bytes': absorber_bytes} if absorber_bytes else {})}
 
 
 def pulse_envelope_parameters(source):
@@ -303,6 +311,11 @@ def run_signature(p: Project, steps):
     config = dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
                   sources=[p.resolved_source(s).model_dump() for s in p.sources], steps=steps,
                   nodes=[a.tolist() for a in r.mesh_nodes])
+    # Absorber faces follow the structures, so a device and its air reference can differ there.
+    from .boundaries import absorber_faces
+    faces = absorber_faces(p)
+    if faces:
+        config['absorber_faces'] = [list(face) for face in faces]
     return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
 
 
@@ -503,12 +516,12 @@ class Simulation:
         if r.pml_dispersion == 'absorber':
             stats['absorber_faces'] = ['xyz'[a]+('_max' if s else '_min') for a, s in faces]
         g = YeeGrid(r, faces)
-        plan.verify_grid(g)
         if use_cuda:
             g.inverse_permittivity[:] = torch.as_tensor(1/(eps if eps.ndim == 4 else eps[..., None]), device='cuda', dtype=dtype)
         else:
             g.inverse_permittivity[:] = 1/(eps if eps.ndim == 4 else eps[..., None])
         configure_materials(g, p, ownership)
+        plan.verify_grid(g)
         configure_interfaces(g,interface_plan)
         from .cuda_kernels import configure_cuda_kernel
         configure_cuda_kernel(g, r.cuda_kernel)

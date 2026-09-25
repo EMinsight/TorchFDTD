@@ -144,6 +144,7 @@ def configure_materials(grid, project, ownership):
     absorber = getattr(grid, 'absorber', None)
     reference_hz = frozen_pml_frequency_hz(project) if frozen or absorber is not None else None
     states = []
+    grid.absorber_reference = {}
     for i, m in enumerate(project.materials):
         if not m.oscillators or not np.any(ownership == i):
             continue
@@ -172,7 +173,7 @@ def configure_materials(grid, project, ownership):
         if absorber is not None:
             loss = absorber_loss(absorber, ownership.shape[:3], 'E', indices, state.components)
             if np.any(loss):
-                ref = absorber_reference_epsilon(m, reference_hz, grid.time_step)
+                ref = grid.absorber_reference[m.name] = absorber_reference_epsilon(m, reference_hz, grid.time_step)
                 state.absorber = tuple(grid._coefficient(v) for v in
                                        (m.epsilon_inf+loss*ref, m.epsilon_inf*(1+loss), loss*(m.epsilon_inf-ref)))
         states.append(state)

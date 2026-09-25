@@ -43,8 +43,6 @@ def plan_open_mode_operators(region, normal, wavelength_um):
         raise ValueError('region must be a native Region.')
     if normal not in ('x', 'y', 'z'):
         raise ValueError('normal must be x, y or z.')
-    if region.pml_dispersion == 'absorber':
-        raise ValueError('Open waveguide modes are solved with the CPML; pml_dispersion="absorber" is not implemented for them.')
     if (isinstance(wavelength_um, bool) or not isinstance(wavelength_um, (int, float))
             or not math.isfinite(wavelength_um) or wavelength_um <= 0):
         raise ValueError('wavelength_um must be a fixed positive finite scalar.')

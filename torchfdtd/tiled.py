@@ -393,6 +393,11 @@ def _signature(plan):
         region.pop(key, None)
     payload = dict(region=region, sources=[plan.project.resolved_source(s).model_dump(mode='json') for s in plan.project.sources],
                    normal=plan.normal, offset=plan.offset_um, tiles=[(t.id, t.core, t.extended) for t in plan.tiles])
+    # Tile absorber faces follow the structures a tile cuts, so a device and its air reference can differ there.
+    from .boundaries import absorber_faces
+    faces = [[list(face) for face in absorber_faces(t.project)] for t in plan.tiles]
+    if any(faces):
+        payload['absorber_faces'] = faces
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 

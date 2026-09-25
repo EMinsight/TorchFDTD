@@ -565,6 +565,14 @@ def _tiled_candidate(project, backend, health):
     result = dict(admitted=False, reason=None, notes=[], plan=None)
     try:
         plan, notes = _tiled_plan(project)
+        # Tiles inherit pml_dispersion: a tile face that a dispersive structure crosses becomes an absorber, and a
+        # sheet extended through such a face is refused here (boundaries.absorber_faces), not in the middle of a run.
+        from .boundaries import absorber_faces
+        absorbed = sum(bool(absorber_faces(tile.project)) for tile in plan.tiles)
+        if absorbed:
+            notes.append(f'pml_dispersion="absorber": {absorbed} of {len(plan.tiles)} tiles have absorber faces where dispersive '
+                         'structures cross the tile boundary; they reflect about 1e-2 to 1 at oblique incidence and across '
+                         'transverse interfaces (docs/BOUNDARIES.md).')
         largest = max(plan.tiles, key=lambda tile: math.prod(tile.project.region.shape))
         largest_bytes = int(estimate(largest.project)['estimated_memory_mb']*2**20)
     except (ValueError, RuntimeError) as exc:
