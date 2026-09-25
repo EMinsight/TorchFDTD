@@ -105,10 +105,10 @@ def test_off_grid_slab_samples_take_exact_fractions_and_the_laminate_branches(ax
     assert plan.metadata['dispersive']['mixed_samples'] == len(d.indices) == 2*r.shape[(axis+1) % 3]*r.shape[(axis+2) % 3]*3
 
 
-def periodic_sphere(collision, mesh=.02, dielectric=False):
-    bounds = {a+'_'+s: dict(kind='periodic') for a in 'xyz' for s in ('min', 'max')}
+def periodic_sphere(collision, mesh=.02, dielectric=False, bloch=False):
+    bounds = {a+'_'+s: dict(kind='bloch' if bloch else 'periodic') for a in 'xyz' for s in ('min', 'max')}
     r = Region(dimension='3d', size=(.24, .24, .24), mesh=mesh, material_sampling='yee', interface_method='subpixel',
-               boundaries=bounds, precision='float64', backend='cpu', steps=100)
+               boundaries=bounds, bloch_phase=(.43, -.27, .18) if bloch else (0, 0, 0), precision='float64', backend='cpu', steps=100)
     materials = [Material(name='metal', **dict(DRUDE, collision_rad_s=collision)), Material(name='glass', index=2)]
     structures = [Structure(kind='sphere', material='metal', radius=.071, center=(.013, -.007, .004))]
     if dielectric:
@@ -125,6 +125,8 @@ def leapfrog_norms(project, steps, every):
     configure_interfaces(grid, plan)
     rng = np.random.default_rng(3)
     grid.E[:] = rng.normal(size=grid.E.shape); grid.H[:] = rng.normal(size=grid.H.shape)
+    if project.region.complex_fields:
+        grid.E[:] += 1j*rng.normal(size=grid.E.shape); grid.H[:] += 1j*rng.normal(size=grid.H.shape)
     diagnostics = StateDiagnostics(grid)
     norms = []
     for n in range(steps):
@@ -145,9 +147,10 @@ def check_bounded(norms, collision):
         assert norms.min() >= .5*norms[0]
 
 
+@pytest.mark.parametrize('bloch', [False, True])
 @pytest.mark.parametrize('collision', [0., 1.5e14])
-def test_closed_box_state_norm_does_not_grow(collision):
-    norms, plan = leapfrog_norms(periodic_sphere(collision, dielectric=True), 3000, 25)
+def test_closed_box_state_norm_does_not_grow(collision, bloch):
+    norms, plan = leapfrog_norms(periodic_sphere(collision, dielectric=True, bloch=bloch), 3000, 25)
     assert plan.metadata['dispersive']['mixed_samples'] > 0 and len(plan.rows) > 0
     check_bounded(norms, collision)
 
