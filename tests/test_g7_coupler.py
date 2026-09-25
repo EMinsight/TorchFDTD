@@ -37,6 +37,7 @@ from torchfdtd.fabrication import measure_feature_sizes
 ROOT = Path(__file__).resolve().parents[1]
 RECORDED = ROOT/'docs/validation/g7/G7-03'
 FULL = os.environ.get('TORCHFDTD_G7_FULL') == '1'
+CUDA = torch.cuda.is_available()
 RECORD = os.environ.get('TORCHFDTD_G7_RECORD')
 
 
@@ -306,24 +307,22 @@ def _full_directory(tmp_path_factory):
     return Path(RECORD) if RECORD else tmp_path_factory.getbasetemp()/'g7-coupler'
 
 
-@pytest.mark.skipif(not FULL, reason='set TORCHFDTD_G7_FULL=1 for the judged G7-03 run (CUDA, about half an hour per seed)')
+@pytest.mark.skipif(not FULL, reason='set TORCHFDTD_G7_FULL=1 for the judged G7-03 run (about half an hour per seed)')
 def test_full_same_mesh_baseline(tmp_path_factory):
-    if not torch.cuda.is_available():
-        pytest.skip('the judged G7-03 run needs CUDA')
+    assert CUDA, 'the judged G7-03 run needs CUDA'
     record = workflow.run_baseline(workflow.Settings(), _full_directory(tmp_path_factory))
     assert record['judged'] is False and sorted(record['designs']) == list(workflow.SEEDS)
 
 
-@pytest.mark.skipif(not FULL, reason='set TORCHFDTD_G7_FULL=1 for the judged G7-03 run (CUDA, about half an hour per seed)')
+@pytest.mark.skipif(not FULL, reason='set TORCHFDTD_G7_FULL=1 for the judged G7-03 run (about half an hour per seed)')
 @pytest.mark.parametrize('seed', workflow.SEEDS)
 def test_full_declared_seed(seed, tmp_path_factory):
-    if not torch.cuda.is_available():
-        pytest.skip('the judged G7-03 run needs CUDA')
+    assert CUDA, 'the judged G7-03 run needs CUDA'
     directory = _full_directory(tmp_path_factory)
     records, _ = workflow.run([seed], workflow.Settings(), directory)
     assert records[0]['seed'] == seed and len(records[0]['history']) == workflow.Settings().iterations
 
 
-@pytest.mark.skipif(not FULL, reason='set TORCHFDTD_G7_FULL=1 for the judged G7-03 run (CUDA, about half an hour per seed)')
+@pytest.mark.skipif(not FULL, reason='set TORCHFDTD_G7_FULL=1 for the judged G7-03 run (about half an hour per seed)')
 def test_full_declared_run_meets_every_criterion(tmp_path_factory):
     judge_directory(_full_directory(tmp_path_factory))
