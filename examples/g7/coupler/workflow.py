@@ -223,6 +223,14 @@ def structures_of(fine, name):
                              z_min_um=-base.SLAB_UM/2, z_max_um=base.SLAB_UM/2, material=base.MATERIAL, id_prefix=name)
 
 
+def lf_line_endings(*paths):
+    """Rewrite text files written in the platform's text mode (CRLF on Windows) with LF, content unchanged."""
+    for path in paths:
+        data = Path(path).read_bytes()
+        if b'\r\n' in data:
+            Path(path).write_bytes(data.replace(b'\r\n', b'\n'))
+
+
 def _sync(settings):
     if torch.device(settings.device).type == 'cuda':
         torch.cuda.synchronize()
@@ -256,6 +264,7 @@ def run_seed(seed, settings, models, export_dir):
     exported = problem.export(Path(export_dir)/f'seed{seed}', origin_um=(base.BOX_UM[0], base.BOX_UM[2]),
                               spacing_um=PIXEL_UM, z_min_um=-base.SLAB_UM/2, z_max_um=base.SLAB_UM/2,
                               material=base.MATERIAL)
+    lf_line_endings(exported['structure_path'], exported['sidecar_path'], exported['binary_path'])
     reimported = problem.reimport(exported)
     fine, eroded, dilated, realized = perturbed_designs(binary.numpy())
     shapes = dict(eroded=structures_of(eroded, f'seed{seed}-eroded'), dilated=structures_of(dilated, f'seed{seed}-dilated'))

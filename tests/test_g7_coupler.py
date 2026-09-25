@@ -219,6 +219,7 @@ def test_reduced_workflow_writes_complete_records_and_judges_them(tmp_path):
             assert {'real', 'imag', 'power', 'phase_rad'} == set(entry['S21'])
     assert len(record['history']) == 1 and record['iterations'] == 1
     assert (tmp_path/record['export']['gds']).is_file()
+    assert all(b'\r' not in path.read_bytes() for path in (tmp_path/'export').rglob('*.json'))
     assert record['differences']['1.55']['gds_round_trip'] == 0.
     saved = json.loads((tmp_path/'summary.json').read_text(encoding='utf-8'))
     assert saved == json.loads(json.dumps(summary)) and saved['judged'] is False
@@ -290,6 +291,7 @@ def test_recorded_run_is_complete_and_reproduces_its_summary(rejudged):
     assert recorded['diagnostics_same_mesh_baseline']['judged'] is False
     assert all(path.is_file() for path in (RECORDED/'export').glob('seed*/*.gds'))
     assert len(list((RECORDED/'export').glob('seed*/*.gds'))) == len(workflow.SEEDS)
+    assert all(b'\r' not in path.read_bytes() for path in RECORDED.rglob('*.json'))
 
 
 @pytest.mark.parametrize('criterion', [pytest.param(name, marks=pytest.mark.xfail(strict=True, reason=RECORDED_FAILURES[name]))
