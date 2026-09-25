@@ -536,7 +536,8 @@
             "20260923T120503Z-g1-06-bd388ef0",
             "20260923T181907Z-g1-06-501f1f0e",
             "20260924T080108Z-g1-06-f6c3ea64",
-            "20260924T083024Z-g1-06-3198adc0"
+            "20260924T083024Z-g1-06-3198adc0",
+            "20260925T064615Z-g1-06-4590b94f"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3401,13 +3402,15 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-03.xml"
           ],
           "actual_test_commands": [
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-03.xml"
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-03.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-03.xml"
           ],
           "required_tests": [
             "tests/test_release_review.py"
           ],
           "evidence": [
-            "20260924T083013Z-g9-03-65e0cdba"
+            "20260924T083013Z-g9-03-65e0cdba",
+            "20260925T064631Z-g9-03-d91c825e"
           ],
           "blocker": null,
           "scope_change_approval": null,
