@@ -164,7 +164,7 @@ class DifferentiablePlaneSimulation(torch.nn.Module):
         self.project=Project.model_validate(project.model_dump())
         from .boundaries import reject_pmc_faces, reject_pml_dispersion
         reject_pmc_faces(self.project.region,type(self).__name__)
-        reject_pml_dispersion(self.project,type(self).__name__)
+        reject_pml_dispersion(self.project,type(self).__name__,self._resident_model_type._explicit_dispersive_parameters)
         active=[m for m in self.project.monitors if m.enabled]
         if not active or any(m.kind!='field' for m in active):
             raise ValueError('DifferentiablePlaneSimulation requires enabled field monitors only.')

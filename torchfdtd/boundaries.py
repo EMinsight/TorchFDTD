@@ -43,15 +43,20 @@ def reject_pmc_faces(region, path):
                          'Use DifferentiableSimulation, StreamedSimulation, run_tensor_batch or the endpoint Simulation dispatch.')
 
 
-def reject_pml_dispersion(project, path):
+def reject_pml_dispersion(project, path, explicit=False):
     """Explicit refusal for paths that run the plain CPML and ADE on every PML face.
 
     Only a mode that changes the run is refused: 'absorber' with absorber faces,
-    'frozen' with an enabled dispersive structure reaching a PML layer.
+    'frozen' with an enabled dispersive structure reaching a PML layer. Paths whose
+    oscillators come from parameter tensors (explicit) refuse every mode but 'ade':
+    the structures do not say where the poles are.
     """
     mode = project.region.pml_dispersion
     if mode == 'ade':
         return
+    if explicit:
+        raise ValueError(f'pml_dispersion="{mode}" is implemented by the resident Yee Simulation and run_tensor_batch only, '
+                         f'not by {path}, whose oscillators are parameter tensors; use pml_dispersion="ade".')
     from .stability_checks import dispersive_structures_in_pml
     if absorber_faces(project) if mode == 'absorber' else dispersive_structures_in_pml(project):
         raise ValueError(f'pml_dispersion="{mode}" is implemented by the resident Yee Simulation and run_tensor_batch only, '

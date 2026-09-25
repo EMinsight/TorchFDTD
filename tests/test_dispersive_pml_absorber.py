@@ -264,6 +264,26 @@ def test_paths_without_the_absorber_refuse_it_only_where_it_changes_the_run():
         plan_open_mode_operators(slab_project(mode, dimension='3d', precision='float32').region, 'x', 1.55)
 
 
+def test_paths_with_oscillator_parameter_tensors_refuse_every_mode_but_ade():
+    """DispersiveSimulation and its plane and streamed forms take their poles from tensors, not from structures, so
+    'frozen' and 'absorber' cannot be honoured there, and a project without dispersive structures must not slip through."""
+    from torchfdtd import (DispersiveSimulation, DispersivePlaneSimulation, StreamedDispersiveSimulation, StreamedAdjointOptions,
+                           AdjointOptions)
+    from test_differentiable import project
+    from test_adjoint_planes import scene
+    for mode in ('frozen', 'absorber'):
+        p, plane = project(steps=10), scene()
+        p.region.pml_dispersion = plane.region.pml_dispersion = mode
+        p, plane = Project.model_validate(p.model_dump()), Project.model_validate(plane.model_dump())
+        for build, name in ((lambda: DispersiveSimulation(p, AdjointOptions(checkpoints=2)), 'DispersiveSimulation'),
+                            (lambda: StreamedDispersiveSimulation(p, StreamedAdjointOptions(device='cpu')), 'StreamedDispersiveSimulation'),
+                            (lambda: DispersivePlaneSimulation(plane, AdjointOptions(checkpoints=2)), 'DispersivePlaneSimulation')):
+            with pytest.raises(ValueError, match=f'pml_dispersion="{mode}" .* not by {name}, whose oscillators are parameter tensors'):
+                build()
+    DispersiveSimulation(project(steps=10), AdjointOptions(checkpoints=2))
+    DispersivePlaneSimulation(scene(), AdjointOptions(checkpoints=2))
+
+
 def test_native_tensor_projects_run_with_every_mode():
     from test_tensor_native import scene
     reference = None
