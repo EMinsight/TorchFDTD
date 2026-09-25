@@ -3,6 +3,159 @@
 Results of the G7 application workflows and cost measurements declared in
 [G7_WORKFLOWS.md](G7_WORKFLOWS.md). Each section is written from its own committed records.
 
+## G7-03: passive PIC coupler (application C)
+
+Declared in [G7_WORKFLOWS.md](G7_WORKFLOWS.md) (section G7-03) and
+[`docs/validation/cases/G7-03r2.json`](validation/cases/G7-03r2.json), which revises the original case: 0.1 um
+design pixels instead of 0.2 um, and (b) judged against the best G6 design evaluated by the same pipeline at the
+same 0.05 um mesh (0.6025) instead of its 0.1 um value (0.6136). The runs of the original case are kept outside the
+repository by owner decision. Code: [`examples/g7/coupler/workflow.py`](../examples/g7/coupler/workflow.py).
+Tests: `tests/test_g7_coupler.py`. Records: [`docs/validation/g7/G7-03/`](validation/g7/G7-03): `seed1.json` to
+`seed3.json`, `summary.json` (the seven criteria, the radius selection, the same-mesh baseline), `baseline.json`,
+`development/` (the radius selection runs) and `export/seedN/` (GDS, rectangles, layer-stack sidecar, binary
+pixels).
+
+**Package.** The records come from a checkout import of this branch at commit 0950126 (each record names the
+file, the missing `__version__` attribute, the distribution version 0.15.0, `torchfdtd_import: checkout` and the
+commit). The release-candidate round re-runs the judged test with the installed wheel; the workflow appends the
+repository root to the end of `sys.path`, so an installed torchfdtd is used when one exists.
+
+**Result: all seven criteria pass.** The three seeds reach one design that meets the 0.4 um linewidth and gap
+(0.5 um and 0.7 um measured), with \|S21\|^2 = 0.6115 at 1.55 um after the GDS round trip at 0.05 um.
+
+| Criterion | Value | Limit | Result |
+|---|---|---|---|
+| (a) all seeds reported | 1, 2, 3, full history and every evaluation | 1, 2, 3 | pass |
+| (b) best seed \|S21\|^2 at 1.55 um after the GDS round trip at 0.05 um, design meeting 0.4 um linewidth and gap | 0.6115; 0.5 um linewidth, 0.7 um gap | >= 0.6025, compliant | pass |
+| (c) max of \|S11\|^2 + \|S21\|^2 and \|S22\|^2 + \|S12\|^2 over 63 S matrices | 0.6366 | <= 1.01 | pass |
+| (d) max \|S21 - S12\| over 63 S matrices | 2.60e-4 | <= 1e-3 | pass |
+| (e) adjoint against central difference, 9 pixels | 2.35e-3 (relative) | <= 0.02 | pass |
+| (f) \|T(re-imported GDS) - T(pre-export rectangles)\|, every seed and wavelength | 0 | <= 0.005 | pass |
+| (g) \|T(GDS, 0.025 um) - T(GDS, 0.05 um)\| at 1.55 um, best seed | 0.0024 | <= 0.02 | pass |
+
+### What ran
+
+The device is the offset-guide coupler of `examples/design_mode_coupler.py`: two slab guides of epsilon 4 in 2.25,
+0.6 um wide and 0.6 um apart laterally, a fixed-mode port on each (`ModeNetwork`), and its 1.2 by 2.0 um design box
+as 12 by 20 pixels of 0.1 um under a 180-degree rotation symmetry. Mesh 0.05 um, 2000 steps (the physical time of
+G6's 500 steps at 0.2 um), CUDA, float32. For each seed, starting from logits `0.5 * randn` of
+`torch.Generator().manual_seed(seed)`:
+
+1. gradient check at the start design: the adjoint derivative of \|S21\|^2 at 1.55 um with respect to the design
+   logits (through filter, symmetry, projection, density transfer and network) against central differences of
+   step 0.02, at the three largest adjoint magnitudes of distinct rotation orbits;
+2. 50 Adam iterations (learning rate 0.1) maximizing \|S21\|^2 at 1.55 um; conic filter of radius 0.6 um; tanh
+   projection from beta 4, doubled every 10 iterations to 64;
+3. threshold at one half; minimum linewidth and gap by morphological opening of the binary pixels
+   (`measure_feature_sizes`, box edges extended) against 0.4 um; the design on 0.05 um cells eroded and dilated by
+   0.1 um and evaluated as rectangles;
+4. export to native rectangles and GDS, re-import of both, and the 2 x 2 modal S matrix with phases at 1.50, 1.55
+   and 1.60 um for the smooth and the binary density (`bounded_density_layer`), the pre-export rectangles and the
+   re-imported GDS polygons (staircase voxelization), and the eroded and dilated designs;
+5. the re-imported GDS at 0.025 um with 4000 steps (same physical time).
+
+1.50 um is never optimized. Every S matrix enters (c) and (d): seven evaluations per seed and wavelength.
+
+### Filter radius, chosen on development seeds
+
+Development seeds 11, 12 and 13 (never 1 to 3) ran the same optimization at the same mesh for the candidate radii in
+ascending one-pixel steps from the 0.4 um rule; the first radius whose designs meet 4 pixels for all three seeds is
+the smallest, so 0.7 and 0.8 um were not needed. Linewidth and gap in pixels of 0.1 um; \|S21\|^2 at 1.55 um of the
+rectangles at 0.05 um:
+
+| Radius (um) | Seed 11 | Seed 12 | Seed 13 |
+|---|---|---|---|
+| 0.4 | 3 / 3, 0.6059 | 1 / 3, 0.6067 | 3 / 3, 0.6059 |
+| 0.5 | 3 / 3, 0.6106 | 5 / 2, 0.6091 | 1 / 2, 0.6092 |
+| 0.6 | 5 / 7, 0.6115 | 5 / 7, 0.6115 | 5 / 7, 0.6115 |
+
+The central-difference step 0.02 and the 2000 steps were fixed earlier on development seed 11 (adjoint and central
+difference within 1.1e-4 at 0.05 um with the 0.2 um pixels of the original case; 2000 against 3000 steps changed
+\|S21\|^2 by 2.7e-4); the judged checks agree within 2.35e-3.
+
+### Per seed
+
+T is \|S21\|^2 of the re-imported GDS at 0.05 um; the changes are at 1.55 um: eroded or dilated minus nominal,
+staircase rectangles minus binary density (smoothing), 0.025 um minus 0.05 um (mesh).
+
+| Seed | T 1.55 | T 1.50 (holdout) | T 1.60 | Linewidth / gap (um) | Erosion 0.1 um | Dilation 0.1 um | Smoothing | Mesh | Max column power | Max \|S21 - S12\| | Gradient max rel. error | Wall time (s) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 0.6115 | 0.5821 | 0.6346 | 0.5 / 0.7 | -0.0986 | -0.1260 | +0.0014 | -0.0024 | 0.6366 | 2.6e-4 | 6.7e-4 | 3989 |
+| 2 | 0.6115 | 0.5821 | 0.6346 | 0.5 / 0.7 | -0.0986 | -0.1260 | +0.0014 | -0.0024 | 0.6366 | 2.6e-4 | 1.7e-3 | 4354 |
+| 3 | 0.6115 | 0.5821 | 0.6346 | 0.5 / 0.7 | -0.0986 | -0.1260 | +0.0014 | -0.0024 | 0.6366 | 2.6e-4 | 2.4e-3 | 4294 |
+
+The seeds start at \|S21\|^2 = 0.310, 0.318 and 0.319 and end in one binary design (rows along x from the left port,
+columns along y from -1 um, `#` core); the three are tied and the summary names seed 1 as the best:
+
+```
+############........
+############........
+############........
+############........
+.....########.......
+......#######.......
+.......#######......
+.......########.....
+........############
+........############
+........############
+........############
+```
+
+For that design at 1.55 um: 0.6089 smooth density, 0.6101 binary density, 0.6115 rectangles and GDS, 0.6091 GDS at
+0.025 um. Its S matrix after the GDS round trip at 0.05 um, magnitude and phase (radians) at the port phase planes:
+
+| Wavelength (um) | S11 | S21 | S12 | S22 | Column 1 | Column 2 | \|S21 - S12\| |
+|---|---|---|---|---|---|---|---|
+| 1.50 | 0.1458 at -1.439 | 0.7629 at -2.961 | 0.7632 at -2.961 | 0.1467 at -0.543 | 0.6033 | 0.6040 | 2.5e-4 |
+| 1.55 | 0.0928 at -2.076 | 0.7820 at +2.732 | 0.7822 at +2.732 | 0.0970 at -1.132 | 0.6201 | 0.6213 | 2.3e-4 |
+| 1.60 | 0.0365 at -2.927 | 0.7966 at +2.176 | 0.7968 at +2.176 | 0.0404 at -1.699 | 0.6359 | 0.6366 | 2.4e-4 |
+
+### Same-mesh baseline (diagnostic, not judged)
+
+`baseline.json` (also in `summary.json` as `diagnostics_same_mesh_baseline`, `judged: false`): the G6 coupler
+designs of `docs/validation/g6/export/coupler/`, optimized by G6 at 0.2 um and not in G7, exported and re-imported
+by the same code as the judged seeds (their voxelization equals that of G6's committed GDS) and evaluated at the same
+meshes. \|S21\|^2 at 1.55 um (1.50 um in brackets):
+
+| Design | Linewidth / gap (um) | 0.05 um | 0.025 um | G6 record at 0.1 um |
+|---|---|---|---|---|
+| G6 seed 1 | 0.2 / 0.2 (violates both) | 0.6025 (0.5744) | 0.5961 (0.5706) | 0.6136 |
+| G6 seeds 2 and 3 (one design) | 0.2 / 0.4 (violates linewidth) | 0.5887 (0.5675) | 0.5930 (0.5729) | 0.5760 |
+| G7-03r2, seeds 1 to 3 | 0.5 / 0.7 | 0.6115 (0.5821) | 0.6091 (0.5816) | |
+
+### Reading the criteria
+
+- (b) The compliant design beats the best G6 design at the same mesh by 0.009 at 0.05 um and by 0.013 at
+  0.025 um, although the G6 design violates the linewidth and gap.
+- (c) The coupler radiates 36 to 40 percent of the input power out of the guided channels, so the bound holds with
+  a wide margin and does not test the normalization near unity; the straight guide of `tests/test_g7_coupler.py`
+  does (column power within 0.01 of one).
+- (f) Zero by construction: rectangles and re-imported polygons voxelize identically when the pixel edges lie on
+  mesh nodes, as at 0.05 and 0.025 um. The material-transfer difference between the optimized density and the
+  staircase geometry is the smoothing column (+0.0014 at 1.55 um), and the judged transmission includes it.
+- Fabrication sensitivity: a 0.1 um over- or under-etch lowers \|S21\|^2 by 0.099 (erosion) and 0.126 (dilation).
+- Wall times: 3989 to 4354 s per seed (gradient check 157 to 177 s, 50 iterations 3441 to 3735 s, evaluations 370 to
+  457 s) with the three seeds and other agents' jobs sharing the GPU; the baseline diagnostic took 726 s.
+
+### Reproduce
+
+From the checkout root; each command takes its own GPU slot, and the last judges the records:
+
+```
+set TORCHFDTD_G7_FULL=1
+set TORCHFDTD_G7_RECORD=docs/validation/g7/G7-03
+python D:/TorchFDTD/.local/gpu_lock.py python -m pytest -s tests/test_g7_coupler.py::test_full_same_mesh_baseline
+python D:/TorchFDTD/.local/gpu_lock.py python -m pytest -s "tests/test_g7_coupler.py::test_full_declared_seed[1]"
+python D:/TorchFDTD/.local/gpu_lock.py python -m pytest -s "tests/test_g7_coupler.py::test_full_declared_seed[2]"
+python D:/TorchFDTD/.local/gpu_lock.py python -m pytest -s "tests/test_g7_coupler.py::test_full_declared_seed[3]"
+python -m pytest tests/test_g7_coupler.py::test_full_declared_run_meets_every_criterion
+```
+
+The radius selection: `python -m examples.g7.coupler.workflow --output-dir docs/validation/g7/G7-03 --develop R
+--seeds S` for R = 0.4, 0.5, 0.6 and S = 11, 12, 13. Without the flags, `tests/test_g7_coupler.py` re-judges the
+committed records criterion by criterion and checks that the development records select the radius in use.
+
 ## G7-04: independent solver at matched accuracy
 
 Declared in [G7_WORKFLOWS.md](G7_WORKFLOWS.md) (section G7-04) and
