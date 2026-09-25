@@ -2872,13 +2872,40 @@
           "title": "수동 PIC 역설계·복수 초기화·제작 제약·GDS 재평가",
           "specification": "수동 PIC 역설계·복수 초기화·제작 제약·GDS 재평가",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "examples/g7/coupler/workflow.py",
+            "examples/design_mode_coupler.py",
+            "docs/validation/cases/G7-03r2.json",
+            "docs/G7_RESULTS.md"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_coupler.py -k \"not test_full_\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-03.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_g7_coupler.py::test_case_declaration_matches_the_workflow_constants",
+            "tests/test_g7_coupler.py::test_radius_selection_takes_the_smallest_complete_compliant_candidate_and_refuses_declared_seeds",
+            "tests/test_g7_coupler.py::test_committed_development_records_select_the_radius_in_use",
+            "tests/test_g7_coupler.py::test_development_run_records_feature_sizes_and_transmissions",
+            "tests/test_g7_coupler.py::test_s_record_maps_the_ports_and_measures_passivity_and_reciprocity",
+            "tests/test_g7_coupler.py::test_straight_guide_through_the_coupler_region_is_passive_reciprocal_and_phased",
+            "tests/test_g7_coupler.py::test_adjoint_derivative_matches_central_differences_on_the_reduced_coupler",
+            "tests/test_g7_coupler.py::test_fabrication_check_and_the_sub_pixel_erosion_and_dilation",
+            "tests/test_g7_coupler.py::test_gds_round_trip_of_a_small_design_voxelizes_like_the_rectangles",
+            "tests/test_g7_coupler.py::test_reduced_workflow_writes_complete_records_and_judges_them",
+            "tests/test_g7_coupler.py::test_same_mesh_baseline_reevaluates_the_g6_designs_without_judging_them",
+            "tests/test_g7_coupler.py::test_recorded_run_is_complete_and_reproduces_its_summary",
+            "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[a_all_seeds]",
+            "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[b_performance]",
+            "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[c_passivity]",
+            "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[d_reciprocity]",
+            "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[e_gradient]",
+            "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[f_gds_round_trip]",
+            "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[g_mesh]"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": {
@@ -2888,7 +2915,13 @@
             "scope": "G7-03: the revised case docs/validation/cases/G7-03r2.json supersedes G7-03.json (G7-03r2: 0.1 um design pixels (12 by 20) in the same box, the filter radius chosen on development seeds to meet the 0.4 um features, and (b) judged against the best G6 design evaluated by the same pipeline at the same 0.05 um mesh (0.6025) instead of its 0.1 um value (0.6136); other limits unchanged)",
             "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
             "note": "the declared baseline 0.6136 is a G6 design evaluated at 0.1 um, while G7 judges at 0.05 um, and the mesh alone shifts this device by about 0.02; and 0.2 um pixels leave the declared 0.4 um linewidth and gap only two pixels, too coarse a parameterization for a fabrication-aware design"
-          }
+          },
+          "watch_paths": [
+            "examples/g7/coupler/workflow.py",
+            "examples/design_mode_coupler.py",
+            "docs/validation/cases/G7-03r2.json"
+          ],
+          "implementation_note": "The fabrication-aware offset-guide coupler (G7-03r2: 0.1 um pixels, filter radius 0.6 um chosen on development seeds 11 to 13) is committed under docs/validation/g7/G7-03/: the three declared seeds, the development selection and a non-judged same-mesh baseline of the G6 designs. The gate re-judges the committed records criterion by criterion on the CPU; TORCHFDTD_G7_FULL=1 reruns the declared workflow on CUDA (about 3 to 4 hours in one GPU slot) and judges the fresh records. The records name the package that ran."
         },
         {
           "id": "G7-04",
