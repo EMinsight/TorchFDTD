@@ -39,12 +39,15 @@ The first form is the declared run (CUDA, float32); the judged test in tests/tes
 function. --reduced builds a five-ridge lens on a coarse short grid with a looser stop for the fast tests; its numbers
 have no meaning beyond exercising the same code. The repository-only modules (examples/, the comparison helpers) are
 found by appending their directories to the end of sys.path, so an installed torchfdtd is never shadowed by this
-checkout. Every record names the imported torchfdtd file, its version and the commit of this checkout.
+checkout. Every record names the imported torchfdtd file, its version, whether it came from the installed
+distribution or the checkout, the local wheel it was installed from with that file's SHA-256, and the commit of this
+checkout. The judged run imports the installed wheel from a working directory outside the checkout.
 """
 from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 from importlib import metadata
 import json
 import math
@@ -53,6 +56,8 @@ import shlex
 import subprocess
 import sys
 import time
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 import numpy as np
@@ -498,19 +503,38 @@ def environment(device, output_dir=None):
 
 
 def provenance(commit, dirty):
-    """Which torchfdtd ran and which checkout held this example; copied into every record."""
+    """Which torchfdtd ran and which checkout held this example; copied into every record.
+
+    torchfdtd_import is 'installed' when the package was imported from the installed distribution's directory,
+    'checkout' when from this checkout and 'other' otherwise (an editable install of another checkout, for example).
+    """
     try:
-        distribution = metadata.version('torchfdtd')
+        dist = metadata.distribution('torchfdtd')
     except metadata.PackageNotFoundError:
-        distribution = None
+        dist = None
     imported = Path(torchfdtd.__file__).resolve()
-    return dict(torchfdtd_file=str(imported), torchfdtd_version=getattr(torchfdtd, '__version__', None) or distribution,
+    installed = dist is not None and Path(dist.locate_file('')).resolve() in imported.parents
+    return dict(torchfdtd_file=str(imported), torchfdtd_version=getattr(torchfdtd, '__version__', None) or (dist.version if dist else None),
                 torchfdtd_version_source=('torchfdtd.__version__' if getattr(torchfdtd, '__version__', None) else
                                           'importlib.metadata.version("torchfdtd"): the installed distribution (the package defines no __version__)'),
-                checkout_import=REPO in imported.parents, commit=commit, tracked_changes=dirty)
+                checkout_import=REPO in imported.parents,
+                torchfdtd_import='checkout' if REPO in imported.parents else 'installed' if installed else 'other',
+                torchfdtd_wheel=installed_wheel(dist), commit=commit, tracked_changes=dirty)
 
 
-PROVENANCE_KEYS = ('torchfdtd_file', 'torchfdtd_version', 'torchfdtd_version_source', 'checkout_import', 'commit', 'tracked_changes')
+def installed_wheel(dist):
+    """The local wheel file pip installed the distribution from (its direct_url.json) and that file's SHA-256 now; None otherwise."""
+    text = dist.read_text('direct_url.json') if dist is not None else None
+    info = json.loads(text) if text else {}
+    if 'archive_info' not in info or not info.get('url', '').startswith('file:'):
+        return None
+    path = Path(urllib.request.url2pathname(urllib.parse.urlparse(info['url']).path))
+    sha256 = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+    return dict(url=info['url'], path=str(path), sha256=sha256)
+
+
+PROVENANCE_KEYS = ('torchfdtd_file', 'torchfdtd_version', 'torchfdtd_version_source', 'checkout_import', 'torchfdtd_import', 'torchfdtd_wheel',
+                   'commit', 'tracked_changes')
 
 
 def design_summary(row):

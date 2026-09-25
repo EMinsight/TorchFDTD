@@ -5,7 +5,8 @@ fast tests run on the CPU and check the mechanics on the declared lens descripti
 the three starts, the time rule's energy against the native StateDiagnostics history, the shape gradient of a ridge
 width against central differences, the plane-forward lines against the native monitors, the side-lobe and width
 extraction, the angular-spectrum propagation against a direct line and the record schema. The judged run of the
-declared lens (float32 on CUDA, one to two hours on the RTX 3060) runs only with TORCHFDTD_G7_FULL=1;
+declared lens (float32 on CUDA, one to two hours on the RTX 3060, the installed wheel imported from a working
+directory outside the checkout; judged() refuses records that name another torchfdtd) runs only with TORCHFDTD_G7_FULL=1;
 TORCHFDTD_G7_RECORD=<dir> writes its records there (docs/validation/g7/G7-02 for the recorded evidence), and
 TORCHFDTD_G7_LAUNCHER=<command prefix> runs its stages as parallel processes behind that prefix (a GPU lock command,
 for example). Without the flag, test_recorded_run_meets_every_criterion re-judges the committed records and skips
@@ -201,6 +202,7 @@ def test_reduced_workflow_reports_every_start_and_criterion(tmp_path):
         assert all(bounds[0] - 1e-7 <= w <= bounds[1] + 1e-7 for w in record['final_widths_um'])
     import torchfdtd
     assert common['environment']['torchfdtd_file'] == str(Path(torchfdtd.__file__).resolve()) and common['environment']['torchfdtd_version']
+    assert (common['environment']['torchfdtd_import'] == 'checkout') == common['environment']['checkout_import']
 
 
 def judged(summary, records):
@@ -209,6 +211,7 @@ def judged(summary, records):
     assert sorted(r['start'] for r in records) == sorted(wf.STARTS), 'every declared start must be present'
     for record in (summary['environment'], *summary['stage_provenance'].values(), *(r['provenance'] for r in records)):
         assert record['torchfdtd_file'] and record['torchfdtd_version'] and record['commit'], 'every record names the torchfdtd and the commit that ran'
+        assert record['torchfdtd_import'] == 'installed' and record['torchfdtd_wheel']['sha256'], 'the declared run imports the installed wheel'
     refinement = CASE['fixture']['refinement']
     for record in records:
         assert record['iterations'] == refinement['iterations'] == len(record['history'])
