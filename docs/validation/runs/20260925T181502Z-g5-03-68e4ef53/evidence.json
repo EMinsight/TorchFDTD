@@ -1,0 +1,228 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260925T181502Z-g5-03-68e4ef53",
+  "task": "G5-03",
+  "stage": "G5",
+  "task_title": "planner의 byte admission과 실제 peak를 맞추고 원자적 동시 reservation 또는 동등 admission으로 여러 작업이 각각 free memory를 보고 동시에 초과하는 문제를 다룬다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_admission_peak_g5.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G5-03.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-26T03:14:50.136298+09:00",
+  "recorded_at": "2026-09-25T18:15:02+00:00",
+  "source_commit": "2c5f3754c0470b2888d02462d6d2305a5098326a",
+  "source_commit_time": "2026-09-26T00:18:35+09:00",
+  "source_tree_sha256": "c8ef04dafb82abeac29f5b256ab5548a7e0bf5a97bb443ddc8402651941e456f",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "5d2fb7eac934221d9a04bce9d8128da4e53eba2a7c7ca76501b22f3dbb6337d1",
+      "head_sha256": "f4a33ca7d37f18eeba49b9ac33f9c2577e4192f5e32b79a11d679453a062575f"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "57c2f728fcddc7cc21272b5204474769cf25a84b435292818e89860ac52b6d2b",
+      "head_sha256": "8254f678d2bfe2da2940e772e60030b237b372f639336e595e4b0dde64900d28"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "4afb7a5b9c89b6a4cf95251fa5ad505202e247bbdbc2ca7f0ab02d1f8d16a0aa",
+      "head_sha256": "3c29461e2b15d685eaabd7f347f42482f7ff6b87dc8e6c355019d2013bb691e7"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0a1db11fbc191d0de4cd05575810fcec35f52a1f7025b8ff4fa5075d874aadd9",
+      "head_sha256": "3d3557eb215787b4290a06b6333d6eb66db09fc4441da7c6cb01c5315fedbea8"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "00d57966e826b74da4d5947bfac27df491e3ab9b1935ea4305e2bb2e51d17b26",
+      "head_sha256": "1715d62d5815e18e340c05f367d302204012e3eb9c5c5a79fd196494f7d2516c"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd",
+  "package_path": "D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_admission_peak_g5.py": "5bd5fb8621b4a4c05534872b695d567f6938bde0e55d6e389825e8957a73e450"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G5-03.json",
+  "fixture_sha256": "56e798b65c5ee9b14018e3c0602a7c188a49392ceef2f00d8473a5cd61fbddab",
+  "acceptance_criteria_path": "docs/validation/cases/G5-03.json",
+  "acceptance_criteria_sha256": "56e798b65c5ee9b14018e3c0602a7c188a49392ceef2f00d8473a5cd61fbddab",
+  "case_first_commit": "649ad7961803a98634a2ad6b08559ff6ea8a8dba",
+  "case_first_commit_time": "2026-09-22T04:54:52+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cuda",
+    "cpu"
+  ],
+  "physics_configuration": {
+    "module": "tests/test_admission_peak_g5.py",
+    "ladder": [
+      {
+        "shape": [
+          64,
+          32,
+          32
+        ],
+        "cells": 65536
+      },
+      {
+        "shape": [
+          128,
+          48,
+          48
+        ],
+        "cells": 294912
+      },
+      {
+        "shape": [
+          256,
+          64,
+          64
+        ],
+        "cells": 1048576
+      }
+    ],
+    "region": "3D, uniform mesh 0.05 um, 4 CPML cells on every face, Yee sampling, FP32, 12 steps, memory_mode streamed",
+    "structure": "smooth sphere of radius 0.3 um (width 0.08 um), permittivity 4 in air, scalar epsilon",
+    "source_and_monitors": "Ez point source at (-0.3, 0, 0) um, standard Gaussian pulse (0.8 um, FWHM 0.5 fs, centre 0.5 fs, amplitude 100); point probes Ez (0.3, 0, 0) and Hy (0.2, 0.1, 0); full time history; objective sum of squared signals",
+    "policy": "StreamedAdjointOptions(device=cuda, slab_width=8, temporal_depth=4, checkpoints=1, tile_transfers=sync) with state_storage host and disk (private scratch directory, disk_budget_bytes 4 GiB), gpu_budget_bytes 2 GiB, host_budget_bytes 16 GiB; one small warm-up run precedes the ladder so the CUDA kernels are loaded",
+    "instruments": "report['forward_memory'] and report['backward_memory'] of torchfdtd/memory_accounting.py: peak_torch_allocated_bytes.delta_bytes (exact allocator peak after torch.cuda.reset_peak_memory_stats before each rung), host_bank_bytes.bytes (SlabBlockOperator bank ledger), scratch_disk_peak_file_bytes.bytes (StateStore), peak_process_rss_bytes.delta_bytes (working set, informational)",
+    "registry": "torchfdtd/reservation_registry.py: ReservationRegistry.acquire under one threading.Lock; StreamedSimulation forward and backward phases hold a lease on the host, gpu and disk tiers for the duration of the phase; the concurrency tests run the scatterer of tests/g5_support.py on CPU tiles with host and disk banks and a budget of 1.5 times one reservation"
+  },
+  "reference_method": "the planner's own reservation (torchfdtd/streamed.py::_reservation) compared with the measured peaks of the same run; a bound check, not a physics oracle. The registry is checked by construction: two threads released together by a barrier, and a run blocked inside its first tile while a second run is admitted against the same budget",
+  "observables": [
+    {
+      "name": "gpu_ratio",
+      "unit": "dimensionless",
+      "definition": "gpu_reservation_bytes / max over phases of peak_torch_allocated_bytes.delta_bytes"
+    },
+    {
+      "name": "bank_ratio",
+      "unit": "dimensionless",
+      "definition": "host_reservation_bytes / peak host_bank_bytes for host banks; disk_reservation_bytes / peak scratch_disk_peak_file_bytes for disk banks"
+    },
+    {
+      "name": "gpu_margin_bytes",
+      "unit": "bytes",
+      "definition": "gpu_reservation_bytes minus the measured peak Torch allocated delta"
+    },
+    {
+      "name": "bank_margin_bytes",
+      "unit": "bytes",
+      "definition": "the tier reservation minus the measured peak bank bytes"
+    },
+    {
+      "name": "rss_ratio_informational",
+      "unit": "dimensionless",
+      "definition": "host_reservation_bytes / working-set delta of the phase; recorded, not a criterion: the working set also holds pinned staging, Torch host tensors of the caller, allocator arenas and runtime pages that the reservation does not model"
+    }
+  ],
+  "acceptance_limits": {
+    "minimum_ratio": 1.0,
+    "rule": "on every rung and for both bank tiers, gpu_ratio >= minimum_ratio and bank_ratio >= minimum_ratio, with the allocator peak flagged exact; the measured peak Torch allocated delta never exceeds the measured peak Torch reserved bytes",
+    "registry": "of two simultaneous requests of 600 bytes against a 1000-byte budget exactly one is admitted and the other raises ValueError starting with 'Concurrent streamed reservation refused'; a request that overflows one tier registers nothing on any tier; a second StreamedSimulation run against a budget of 1.5 reservations is refused with that message while the first run is inside its forward phase, and is admitted after the first run finishes; a failed phase releases its lease",
+    "scope_statement": "the registry guarantee is per Python process and is admission, not a quota: it does not see other processes, does not limit later allocations of an admitted run and does not replace the live free-memory checks",
+    "source_of_limits": "G5-03 specification: the byte admission is matched against the actual peak (ratio at least one) and concurrent admission is atomic; the margin is recorded rather than bounded above because the reservation is a documented conservative bound (docs/STREAMED_FDTD.md)"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 7,
+    "passed": [
+      "tests/test_admission_peak_g5.py::test_reservation_bounds_measured_peaks_on_every_rung",
+      "tests/test_admission_peak_g5.py::test_registry_admits_only_one_of_two_simultaneous_requests",
+      "tests/test_admission_peak_g5.py::test_registry_requests_are_all_or_nothing_across_tiers",
+      "tests/test_admission_peak_g5.py::test_streamed_requests_name_every_tier_of_the_options",
+      "tests/test_admission_peak_g5.py::test_second_concurrent_run_is_refused_and_the_lease_is_released[host]",
+      "tests/test_admission_peak_g5.py::test_second_concurrent_run_is_refused_and_the_lease_is_released[disk]",
+      "tests/test_admission_peak_g5.py::test_failed_phase_releases_its_lease"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 10.903,
+    "suite_timestamp": "2026-09-26T03:14:50.136298+09:00"
+  },
+  "required_tests": [
+    "tests/test_admission_peak_g5.py::test_reservation_bounds_measured_peaks_on_every_rung",
+    "tests/test_admission_peak_g5.py::test_registry_admits_only_one_of_two_simultaneous_requests",
+    "tests/test_admission_peak_g5.py::test_registry_requests_are_all_or_nothing_across_tiers",
+    "tests/test_admission_peak_g5.py::test_streamed_requests_name_every_tier_of_the_options",
+    "tests/test_admission_peak_g5.py::test_second_concurrent_run_is_refused_and_the_lease_is_released",
+    "tests/test_admission_peak_g5.py::test_failed_phase_releases_its_lease"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G5-03.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260925T181502Z-g5-03-68e4ef53/junit.xml",
+      "sha256": "4b4b06e23150628124f2b7748153683eb171418ae8c82c9bdaaabb340173a9cc",
+      "bytes": 1161,
+      "original_path": ".local/tmp/junit/rerecord/G5-03.xml"
+    }
+  ],
+  "applicable_scope": "RTX 3060 three-rung ladder (65,536 to 1,048,576 cells, FP32, host and disk banks, synchronous CUDA tiles) for the admission-versus-peak ratios; the concurrent-reservation registry on CPU tiles with host and disk banks; the registry guarantee is per Python process and is admission, not a quota re-recorded on 2c5f3754c047 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T221340Z-g5-03-a578dc72",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

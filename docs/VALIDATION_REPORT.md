@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.15.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T145114Z-g4-01-3612e39b` recorded 2026-09-25T14:51:14+00:00 at commit `338757eaab1d`.
+Package version `0.16.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T214448Z-g9-03-cc9b3082` recorded 2026-09-25T21:44:48+00:00 at commit `70c7bd788fa6`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 60 | 16 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 60 | 22 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 9 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 15 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -24,94 +24,94 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G0-01 | 실제 HEAD/dirty tree/기존 계획/자원·권한 확인 | IMPLEMENTED | VERIFIED | `20260923T175644Z-g0-01-9c309625` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G0-02 | RELEASE_SCOPE와 기능·검증 상태 분리 | IMPLEMENTED | VERIFIED | `20260923T175700Z-g0-02-bca10398` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G0-03 | 기존 완료 계획·gate·fixture·raw evidence 단일 추적 | IMPLEMENTED | VERIFIED | `20260923T175710Z-g0-03-bef86964` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G0-04 | 필수 누락/실패/skip/source 불일치에서 출고 실패 판정기 | IMPLEMENTED | VERIFIED | `20260923T180319Z-g0-04-6e4de0a5` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G0-05 | 판정기 자체 failure injection과 세션 인계 구조 | IMPLEMENTED | VERIFIED | `20260923T180703Z-g0-05-93dca35e` | `4635db7eab69` | PASS | evidence matches the current checkout |
+| G0-01 | 실제 HEAD/dirty tree/기존 계획/자원·권한 확인 | IMPLEMENTED | VERIFIED | `20260925T152831Z-g0-01-32e611df` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G0-02 | RELEASE_SCOPE와 기능·검증 상태 분리 | IMPLEMENTED | VERIFIED | `20260925T152840Z-g0-02-fc8c6833` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G0-03 | 기존 완료 계획·gate·fixture·raw evidence 단일 추적 | IMPLEMENTED | VERIFIED | `20260925T152847Z-g0-03-b285b07c` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G0-04 | 필수 누락/실패/skip/source 불일치에서 출고 실패 판정기 | IMPLEMENTED | VERIFIED | `20260925T152947Z-g0-04-ff462c40` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G0-05 | 판정기 자체 failure injection과 세션 인계 구조 | IMPLEMENTED | VERIFIED | `20260925T153048Z-g0-05-d3d746e0` | `2c5f3754c047` | PASS | evidence matches the current checkout |
 
 ### G1 과거 리뷰 회귀 및 수정 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G1-01 | 자동 graded mesh와 미분 평면 모델의 격자 불일치. | IMPLEMENTED | VERIFIED | `20260923T180754Z-g1-01-72bedd87` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G1-02 | reference signature의 실제 격자 누락. | IMPLEMENTED | VERIFIED | `20260923T180837Z-g1-02-de5b921a` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G1-03 | quadrant_intensity_allocation의 FP32 불안정. | IMPLEMENTED | VERIFIED | `20260923T180913Z-g1-03-45424e33` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260923T181355Z-g1-04-584298f5` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260923T181843Z-g1-05-14e56c39` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260925T064615Z-g1-06-4590b94f` | `6fd0c76648b4` | FAIL | STALE: watched file changed since the run: README.md |
+| G1-01 | 자동 graded mesh와 미분 평면 모델의 격자 불일치. | IMPLEMENTED | VERIFIED | `20260925T153120Z-g1-01-46c3d71c` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G1-02 | reference signature의 실제 격자 누락. | IMPLEMENTED | VERIFIED | `20260925T153149Z-g1-02-3955ab3e` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G1-03 | quadrant_intensity_allocation의 FP32 불안정. | IMPLEMENTED | VERIFIED | `20260925T153209Z-g1-03-979fa1dc` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260925T153623Z-g1-04-913aac0b` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260925T154054Z-g1-05-db0ca6c4` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260925T214433Z-g1-06-0559a2e3` | `70c7bd788fa6` | PASS | evidence matches the current checkout |
 
 ### G2 물리·격자·실행 계약 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G2-01 | 기존 구조를 활용하여 immutable resolved/compiled simulation plan을 만든다 | IMPLEMENTED | VERIFIED | `20260923T181928Z-g2-01-f7c8fd4d` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G2-02 | forward/adjoint/streamed/tensor batch/GUI가 서로 다른 규칙으로 물리 입력을 다시 해석하지 않도록 한다 | IMPLEMENTED | VERIFIED | `20260923T181944Z-g2-02-be64b4f1` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G2-03 | capability registry를 만들고 dimensions × mesh × materials × boundaries × sources × monitors × forward/backward × resident/streamed × precision/backend의 유효 조합을 명시한다 | IMPLEMENTED | VERIFIED | `20260923T182049Z-g2-03-e0055f47` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G2-04 | 전수 조합 대신 위험 기반 pairwise 검사와 고위험 3~4개 기능 조합을 설계한다 | IMPLEMENTED | VERIFIED | `20260923T182145Z-g2-04-b060dd10` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G2-05 | "+/- DFT", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다. | IMPLEMENTED | VERIFIED | `20260923T182213Z-g2-05-4a9fdb62` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G2-06 | cache/reference/restart마다 필요한 동일성 조건을 분리한다 | IMPLEMENTED | VERIFIED | `20260923T182245Z-g2-06-44144ccb` | `4635db7eab69` | PASS | evidence matches the current checkout |
+| G2-01 | 기존 구조를 활용하여 immutable resolved/compiled simulation plan을 만든다 | IMPLEMENTED | VERIFIED | `20260925T154120Z-g2-01-2c0e1af8` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G2-02 | forward/adjoint/streamed/tensor batch/GUI가 서로 다른 규칙으로 물리 입력을 다시 해석하지 않도록 한다 | IMPLEMENTED | VERIFIED | `20260925T154132Z-g2-02-d83b965e` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G2-03 | capability registry를 만들고 dimensions × mesh × materials × boundaries × sources × monitors × forward/backward × resident/streamed × precision/backend의 유효 조합을 명시한다 | IMPLEMENTED | VERIFIED | `20260925T154234Z-g2-03-86639748` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G2-04 | 전수 조합 대신 위험 기반 pairwise 검사와 고위험 3~4개 기능 조합을 설계한다 | IMPLEMENTED | VERIFIED | `20260925T154351Z-g2-04-3df6ab34` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G2-05 | "+/- DFT", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다. | IMPLEMENTED | VERIFIED | `20260925T154402Z-g2-05-40c9ac1b` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G2-06 | cache/reference/restart마다 필요한 동일성 조건을 분리한다 | IMPLEMENTED | VERIFIED | `20260925T154434Z-g2-06-febe46ed` | `2c5f3754c047` | PASS | evidence matches the current checkout |
 
 ### G3 독립 물리·gradient 검증 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G3-01 | 균일 매질 2D/3D 전파·위상·분산 | IMPLEMENTED | VERIFIED | `20260923T182721Z-g3-01-8cf720e9` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G3-02 | 유전체 slab normal/oblique TE/TM과 TMM | IMPLEMENTED | VERIFIED | `20260923T183251Z-g3-02-e90cd4d2` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G3-03 | Drude/Lorentz slab fit/ADE 오차 분리 | IMPLEMENTED | VERIFIED | `20260923T183414Z-g3-03-563173dd` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G3-04 | dielectric cylinder/sphere Mie 산란 | IMPLEMENTED | VERIFIED | `20260923T185232Z-g3-04-ee03b515` | `4635db7eab69` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 4635db7eab69 alone |
-| G3-05 | 금속/분산 곡면 산란·흡수 수렴 | IMPLEMENTED | FAILED | `20260923T195353Z-g3-05-ac0e638c` | `4635db7eab69` | FAIL | verification_state is FAILED |
-| G3-06 | PEC/PMC cavity·symmetry와 gradient mapping | IMPLEMENTED | VERIFIED | `20260923T195520Z-g3-06-28754df0` | `4635db7eab69` | PASS | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 4635db7eab69 alone |
-| G3-07 | PML normal/oblique 반사·장시간 안정성 | IMPLEMENTED | VERIFIED | `20260923T195646Z-g3-07-ab3662ea` | `4635db7eab69` | PASS | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 4635db7eab69 alone |
-| G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | VERIFIED | `20260923T202923Z-g3-08-f1c2dff5` | `4635db7eab69` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 4635db7eab69 alone |
-| G3-09 | mode neff·field·confinement·power oracle | IMPLEMENTED | VERIFIED | `20260923T212310Z-g3-09-e55a1b01` | `3e9300300d15` | PASS | evidence matches the current checkout |
-| G3-10 | PIC S·수동성·상반성과 누락 방사 채널 | IMPLEMENTED | VERIFIED | `20260923T212720Z-g3-10-f3da775f` | `3e9300300d15` | PASS | evidence matches the current checkout |
-| G3-11 | dipole far/near field와 표면/격자 수렴 | IMPLEMENTED | VERIFIED | `20260923T212746Z-g3-11-1121cd71` | `3e9300300d15` | PASS | evidence matches the current checkout |
-| G3-12 | tensor slab 및 tensor gradient | IMPLEMENTED | VERIFIED | `20260923T213042Z-g3-12-9d50987d` | `3e9300300d15` | PASS | evidence matches the current checkout |
-| G3-13 | 곡면 grid offset/mesh/smoothing 폭 물리 수렴 | IMPLEMENTED | VERIFIED | `20260923T213445Z-g3-13-72cea131` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G3-14 | 무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교 | IMPLEMENTED | VERIFIED | `20260923T213556Z-g3-14-ecf4b06b` | `3e9300300d15` | FAIL | STALE: test source changed since the run: tests/test_endpoint_native_cpml_cuda.py |
-| G3-15 | full-autograd·directional VJP·FD sweep·Taylor 검사 | IMPLEMENTED | VERIFIED | `20260923T213649Z-g3-15-7368e5ea` | `3e9300300d15` | FAIL | STALE: test source changed since the run: tests/test_dispersive_adjoint.py |
-| G3-16 | 실제 shape/material 파라미터의 물리 gradient 수렴 | IMPLEMENTED | VERIFIED | `20260923T213745Z-g3-16-4c6f38b9` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G3-17 | oracle 독립성·정밀도·시간·PML 오차 budget 확인 | IMPLEMENTED | VERIFIED | `20260923T213754Z-g3-17-de4fa8eb` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
+| G3-01 | 균일 매질 2D/3D 전파·위상·분산 | IMPLEMENTED | VERIFIED | `20260925T155003Z-g3-01-0e4faa11` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G3-02 | 유전체 slab normal/oblique TE/TM과 TMM | IMPLEMENTED | VERIFIED | `20260925T155453Z-g3-02-348033c1` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G3-03 | Drude/Lorentz slab fit/ADE 오차 분리 | IMPLEMENTED | VERIFIED | `20260925T155556Z-g3-03-2d6718f7` | `2c5f3754c047` | PASS | evidence matches the current checkout |
+| G3-04 | dielectric cylinder/sphere Mie 산란 | IMPLEMENTED | VERIFIED | `20260925T161237Z-g3-04-e349627f` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-05 | 금속/분산 곡면 산란·흡수 수렴 | IMPLEMENTED | FAILED | `20260925T172351Z-g3-05-1cf30b22` | `2c5f3754c047` | FAIL | verification_state is FAILED |
+| G3-06 | PEC/PMC cavity·symmetry와 gradient mapping | IMPLEMENTED | VERIFIED | `20260925T172508Z-g3-06-4f792935` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-07 | PML normal/oblique 반사·장시간 안정성 | IMPLEMENTED | VERIFIED | `20260925T172613Z-g3-07-f4fdc0c6` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | VERIFIED | `20260925T175618Z-g3-08-ad1182cd` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-09 | mode neff·field·confinement·power oracle | IMPLEMENTED | VERIFIED | `20260925T175629Z-g3-09-b83f2635` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-10 | PIC S·수동성·상반성과 누락 방사 채널 | IMPLEMENTED | VERIFIED | `20260925T180000Z-g3-10-7adda5e8` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-11 | dipole far/near field와 표면/격자 수렴 | IMPLEMENTED | VERIFIED | `20260925T180016Z-g3-11-753e7ab7` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-12 | tensor slab 및 tensor gradient | IMPLEMENTED | VERIFIED | `20260925T180304Z-g3-12-01ae90bc` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-13 | 곡면 grid offset/mesh/smoothing 폭 물리 수렴 | IMPLEMENTED | VERIFIED | `20260925T180712Z-g3-13-f2220d44` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-14 | 무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교 | IMPLEMENTED | VERIFIED | `20260925T180814Z-g3-14-4e944236` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-15 | full-autograd·directional VJP·FD sweep·Taylor 검사 | IMPLEMENTED | VERIFIED | `20260925T180857Z-g3-15-38db1a43` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-16 | 실제 shape/material 파라미터의 물리 gradient 수렴 | IMPLEMENTED | VERIFIED | `20260925T180940Z-g3-16-7595c18d` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-17 | oracle 독립성·정밀도·시간·PML 오차 budget 확인 | IMPLEMENTED | VERIFIED | `20260925T180946Z-g3-17-339f39b7` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 
 ### G4 CUDA·CI·환경 검증 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G4-01 | 보유한 실제 GPU와 OS·driver·runtime부터 확인한다 | IMPLEMENTED | VERIFIED | `20260925T145114Z-g4-01-3612e39b` | `338757eaab1d` | PASS | evidence matches the current checkout |
-| G4-02 | torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다. | IMPLEMENTED | VERIFIED | `20260923T213850Z-g4-02-e1a17660` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G4-03 | noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다 | IMPLEMENTED | VERIFIED | `20260923T213916Z-g4-03-76bb26f3` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G4-04 | 최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다 | IMPLEMENTED | VERIFIED | `20260923T213956Z-g4-04-c280e637` | `3e9300300d15` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260923T214253Z-g4-05-e0a9e8d3` | `3e9300300d15` | FAIL | STALE: watched file changed since the run: tests/conftest.py |
-| G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260924T092226Z-g4-06-2028458c` | `cd3a5017380d` | PASS | evidence matches the current checkout |
+| G4-01 | 보유한 실제 GPU와 OS·driver·runtime부터 확인한다 | IMPLEMENTED | VERIFIED | `20260925T181003Z-g4-01-34391cbe` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-02 | torch/fused, CUDA graph on/off, fused/reference monitor, FP32/FP64, real/complex, standard/nondefault stream의 valid 경로를 비교한다. | IMPLEMENTED | VERIFIED | `20260925T181033Z-g4-02-2a8fcb7a` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-03 | noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다 | IMPLEMENTED | VERIFIED | `20260925T181052Z-g4-03-bcf97791` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-04 | 최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다 | IMPLEMENTED | VERIFIED | `20260925T181122Z-g4-04-63d67c63` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260925T181227Z-g4-05-b38e7dd0` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260925T181236Z-g4-06-9f842377` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 
 ### G5 메모리·재시작·장기 안정성 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G5-01 | resident/host/disk/async 경로를 같은 물리 문제·관측자·목적함수에서 비교한다 | IMPLEMENTED | VERIFIED | `20260923T221312Z-g5-01-f5803427` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G5-02 | peak Torch allocated/reserved, CUDA 전체 process memory(가용한 계측 사용), RSS/PSS 또는 플랫폼 동등량, committed memory, OS cache, 디스크 사용량·총 읽기/쓰기·실효 대역폭을 구분한다 | IMPLEMENTED | VERIFIED | `20260923T221324Z-g5-02-b714b93d` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G5-03 | planner의 byte admission과 실제 peak를 맞추고 원자적 동시 reservation 또는 동등 admission으로 여러 작업이 각각 free memory를 보고 동시에 초과하는 문제를 다룬다 | IMPLEMENTED | VERIFIED | `20260923T221340Z-g5-03-a578dc72` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G5-04 | 전체 3D epsilon/VJP를 만들지 않는 geometry/density slab 생성·gradient 축약 경로를 공개 합성 구조로 시험한다 | IMPLEMENTED | VERIFIED | `20260923T221415Z-g5-04-2bba1874` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G5-05 | meaningful beyond-VRAM 사례 하나를 추가한다 | IMPLEMENTED | VERIFIED | `20260923T221422Z-g5-05-bd1a2304` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G5-06 | 위 대규모 사례는 승인된 실행/디스크 쓰기 예산 안에서 수행한다 | IMPLEMENTED | VERIFIED | `20260923T221428Z-g5-06-66a78577` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G5-07 | forward 중단, backward 중단, process kill, simulated ENOSPC/OOM, read/write fault, truncate/checksum 오류, CUDA transfer failure, cancellation을 주입한다 | IMPLEMENTED | VERIFIED | `20260923T221929Z-g5-07-0059441c` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G5-08 | checkpoint에 solver와 필요한 auxiliary states, optimizer state, scheduler/projection state, RNG, effective source, configuration fingerprint를 보존한다 | IMPLEMENTED | VERIFIED | `20260923T222133Z-g5-08-f224db63` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G5-09 | journal은 run별 소유권과 동시 writer 잠금을 갖는다 | IMPLEMENTED | VERIFIED | `20260923T222349Z-g5-09-8865c95f` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G5-10 | 경량 fixture에서 1e5 steps, 반복 실행, 최소 100 optimizer updates 및 승인된 장시간 soak를 수행한다 | IMPLEMENTED | VERIFIED | `20260923T222355Z-g5-10-99edb19d` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
+| G5-01 | resident/host/disk/async 경로를 같은 물리 문제·관측자·목적함수에서 비교한다 | IMPLEMENTED | VERIFIED | `20260925T181430Z-g5-01-b18d9585` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-02 | peak Torch allocated/reserved, CUDA 전체 process memory(가용한 계측 사용), RSS/PSS 또는 플랫폼 동등량, committed memory, OS cache, 디스크 사용량·총 읽기/쓰기·실효 대역폭을 구분한다 | IMPLEMENTED | VERIFIED | `20260925T181444Z-g5-02-bf6b6450` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-03 | planner의 byte admission과 실제 peak를 맞추고 원자적 동시 reservation 또는 동등 admission으로 여러 작업이 각각 free memory를 보고 동시에 초과하는 문제를 다룬다 | IMPLEMENTED | VERIFIED | `20260925T181502Z-g5-03-68e4ef53` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-04 | 전체 3D epsilon/VJP를 만들지 않는 geometry/density slab 생성·gradient 축약 경로를 공개 합성 구조로 시험한다 | IMPLEMENTED | VERIFIED | `20260925T181537Z-g5-04-c77ecb32` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-05 | meaningful beyond-VRAM 사례 하나를 추가한다 | IMPLEMENTED | VERIFIED | `20260925T181543Z-g5-05-83821e73` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-06 | 위 대규모 사례는 승인된 실행/디스크 쓰기 예산 안에서 수행한다 | IMPLEMENTED | VERIFIED | `20260925T181550Z-g5-06-f4068853` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-07 | forward 중단, backward 중단, process kill, simulated ENOSPC/OOM, read/write fault, truncate/checksum 오류, CUDA transfer failure, cancellation을 주입한다 | IMPLEMENTED | VERIFIED | `20260925T182026Z-g5-07-df4bcf0d` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-08 | checkpoint에 solver와 필요한 auxiliary states, optimizer state, scheduler/projection state, RNG, effective source, configuration fingerprint를 보존한다 | IMPLEMENTED | VERIFIED | `20260925T182219Z-g5-08-bcc4fbbd` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-09 | journal은 run별 소유권과 동시 writer 잠금을 갖는다 | IMPLEMENTED | VERIFIED | `20260925T182433Z-g5-09-f060976e` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-10 | 경량 fixture에서 1e5 steps, 반복 실행, 최소 100 optimizer updates 및 승인된 장시간 soak를 수행한다 | IMPLEMENTED | VERIFIED | `20260925T182439Z-g5-10-9758e548` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 
 ### G6 사용자 물리·역설계 API (WORKSTATION, P1)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G6-01 | 재료 CSV/nk/epsilon import, passive fitting, 원자료 출처·사용권·해시, fit band, 시간 이산화에 따른 n/k 오차, extrapolation 경고를 하나의 workflow로 묶는다 | IMPLEMENTED | VERIFIED | `20260923T222407Z-g6-01-114c1af7` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G6-02 | source의 실제 공간 분포·위상·편광·시간 파형·유효 bandwidth를 preview한다 | IMPLEMENTED | VERIFIED | `20260923T222417Z-g6-02-3f663e29` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G6-03 | reference를 포함한 R/T/A, 복소 S, phase/group delay, mode decomposition, diffraction, far-field/near-zone을 기존 결과와 통합한다 | IMPLEMENTED | VERIFIED | `20260923T222451Z-g6-03-3a35e50c` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G6-04 | 포트별 mode tracking, normalization, reference plane, forward/backward separation과 퇴화/약한 모드 진단을 제공한다 | IMPLEMENTED | VERIFIED | `20260923T222457Z-g6-04-3241b7e8` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G6-05 | 기존 design/periodic/mode-network API를 재사용해 objective→parameterization→optimizer→history→resume→final evaluation의 최소 고수준 인터페이스를 통합한다 | IMPLEMENTED | VERIFIED | `20260923T222623Z-g6-05-c203fd5c` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G6-06 | density filter, projection, beta continuation, symmetry, mask, min linewidth/gap, fabrication perturbation, binary export를 실제 검사와 연결한다 | IMPLEMENTED | VERIFIED | `20260923T222749Z-g6-06-e2218845` | `9d2eb55a1955` | PASS | evidence matches the current checkout |
-| G6-07 | export된 binary/GDS 구조를 다시 import하여 독립 finer forward로 평가한다 | IMPLEMENTED | VERIFIED | `20260923T224837Z-g6-07-af85816a` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G6-08 | low-intensity/near-zero reference/frequency cutoff/evanescent/backflow에서 NaN·음의 국소 flux·invalid phase를 임의 clipping으로 숨기지 않는다 | IMPLEMENTED | VERIFIED | `20260923T224847Z-g6-08-27705f46` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
+| G6-01 | 재료 CSV/nk/epsilon import, passive fitting, 원자료 출처·사용권·해시, fit band, 시간 이산화에 따른 n/k 오차, extrapolation 경고를 하나의 workflow로 묶는다 | IMPLEMENTED | VERIFIED | `20260925T182450Z-g6-01-282c19ac` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-02 | source의 실제 공간 분포·위상·편광·시간 파형·유효 bandwidth를 preview한다 | IMPLEMENTED | VERIFIED | `20260925T182500Z-g6-02-23218c0b` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-03 | reference를 포함한 R/T/A, 복소 S, phase/group delay, mode decomposition, diffraction, far-field/near-zone을 기존 결과와 통합한다 | IMPLEMENTED | VERIFIED | `20260925T182532Z-g6-03-68af24a9` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-04 | 포트별 mode tracking, normalization, reference plane, forward/backward separation과 퇴화/약한 모드 진단을 제공한다 | IMPLEMENTED | VERIFIED | `20260925T182538Z-g6-04-87af450e` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-05 | 기존 design/periodic/mode-network API를 재사용해 objective→parameterization→optimizer→history→resume→final evaluation의 최소 고수준 인터페이스를 통합한다 | IMPLEMENTED | VERIFIED | `20260925T182701Z-g6-05-7ef3e1df` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-06 | density filter, projection, beta continuation, symmetry, mask, min linewidth/gap, fabrication perturbation, binary export를 실제 검사와 연결한다 | IMPLEMENTED | VERIFIED | `20260925T182824Z-g6-06-c85a9f8a` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-07 | export된 binary/GDS 구조를 다시 import하여 독립 finer forward로 평가한다 | IMPLEMENTED | VERIFIED | `20260925T184831Z-g6-07-041c7db3` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-08 | low-intensity/near-zero reference/frequency cutoff/evanescent/backflow에서 NaN·음의 국소 flux·invalid phase를 임의 clipping으로 숨기지 않는다 | IMPLEMENTED | VERIFIED | `20260925T184840Z-g6-08-4bc4d0b5` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 
 ### G7 대표 응용·동일 정확도 비용 (WORKSTATION, P1)
 
@@ -119,32 +119,32 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G7-01 | 공개 metagrating/meta-atom 전체 workflow | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G7-02 | 소형 유한 metalens의 실제 propagation·PSF·최종 재평가 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G7-03 | 수동 PIC 역설계·복수 초기화·제작 제약·GDS 재평가 | IMPLEMENTED | VERIFIED | `20260925T130822Z-g7-03-f5260d92` | `30ba43a92056` | PASS | evidence matches the current checkout |
-| G7-04 | 동일 정확도 독립 solver 교차 검증 및 공정 비교 | IMPLEMENTED | VERIFIED | `20260925T054137Z-g7-04-087c885b` | `92005aea2e95` | PASS | evidence matches the current checkout |
+| G7-03 | 수동 PIC 역설계·복수 초기화·제작 제약·GDS 재평가 | IMPLEMENTED | VERIFIED | `20260925T185002Z-g7-03-353beb5b` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G7-04 | 동일 정확도 독립 solver 교차 검증 및 공정 비교 | IMPLEMENTED | VERIFIED | `20260925T185015Z-g7-04-0621a753` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 | G7-05 | cold/warm·전체 iteration·streaming·tuning 비용과 반복 변동 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 
 ### G8 저장·GUI·clean 설치 (WORKSTATION, P1)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G8-01 | 기존 Project JSON/NPZ compatibility와 schema migration을 시험한다 | IMPLEMENTED | VERIFIED | `20260923T224857Z-g8-01-2e733767` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260923T224908Z-g8-02-882d22ba` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260923T224914Z-g8-03-39b0bae7` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260923T224924Z-g8-04-e8e32bbf` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260924T083030Z-g8-05-5095f3c9` | `8cd5d84882f8` | FAIL | STALE: watched file changed since the run: README.md |
-| G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260924T083038Z-g8-06-36787558` | `8cd5d84882f8` | FAIL | STALE: watched file changed since the run: README.md |
-| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260924T083045Z-g8-07-be20b6ec` | `8cd5d84882f8` | FAIL | STALE: watched file changed since the run: README.md |
+| G8-01 | 기존 Project JSON/NPZ compatibility와 schema migration을 시험한다 | IMPLEMENTED | VERIFIED | `20260925T185027Z-g8-01-cfa5ea5b` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260925T185039Z-g8-02-5f7ca728` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260925T185045Z-g8-03-8a90df49` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260925T185055Z-g8-04-a14fd673` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260925T185103Z-g8-05-0ad59cae` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: README.md |
+| G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260925T185114Z-g8-06-b9837806` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: README.md |
+| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260925T185122Z-g8-07-9666971b` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: README.md |
 
 ### G9 보안·운영·출고 판정 (WORKSTATION, P0)
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260923T225017Z-g9-01-37fad064` | `9d2eb55a1955` | FAIL | STALE: test source changed since the run: tests/test_server_security.py |
-| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260923T225107Z-g9-02-626de86f` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T064631Z-g9-03-d91c825e` | `6fd0c76648b4` | FAIL | STALE: watched file changed since the run: README.md |
-| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260923T225117Z-g9-04-ec7eb9cb` | `9d2eb55a1955` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
+| G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260925T185140Z-g9-01-f668e584` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260925T185202Z-g9-02-c3f5ecdd` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T214448Z-g9-03-cc9b3082` | `70c7bd788fa6` | PASS | evidence matches the current checkout |
+| G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260925T185220Z-g9-04-6cd780b0` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260923T235752Z-g9-06-b92d9083` | `3338a4b9a3a9` | FAIL | STALE: test source changed since the run: tests/test_budgeted_resident.py |
+| G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260925T195834Z-g9-06-621431b7` | `2d7cc517b07c` | FAIL | STALE: test source changed since the run: tests/test_readme_measurements.py |
 | G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | SELF | none | none | self | this report's own gate, recorded after the render; judge it with scripts/check_release_gates.py |
 
 ### H1 실제 단일 문제 multi-GPU (HPC, P1)
@@ -170,7 +170,7 @@ Every record written by `scripts/platform_report.py` under `docs/validation/plat
 
 | Platform id | G4 evidence runs recorded on this platform | Other tasks whose newest run was recorded here |
 | --- | --- | --- |
-| rtx3060-win11-lab | G4-01 `20260925T145114Z-g4-01-3612e39b` (platform_id); G4-02 `20260923T213850Z-g4-02-e1a17660` (platform_id); G4-03 `20260923T213916Z-g4-03-76bb26f3` (platform_id); G4-04 `20260923T213956Z-g4-04-c280e637` (platform_id); G4-05 `20260923T214253Z-g4-05-e0a9e8d3` (platform_id); G4-06 `20260924T092226Z-g4-06-2028458c` (platform_id) | 66 |
+| rtx3060-win11-lab | G4-01 `20260925T181003Z-g4-01-34391cbe` (platform_id); G4-02 `20260925T181033Z-g4-02-2a8fcb7a` (platform_id); G4-03 `20260925T181052Z-g4-03-bcf97791` (platform_id); G4-04 `20260925T181122Z-g4-04-63d67c63` (platform_id); G4-05 `20260925T181227Z-g4-05-b38e7dd0` (platform_id); G4-06 `20260925T181236Z-g4-06-9f842377` (platform_id) | 66 |
 | rtx3060-wsl2-ubuntu2204 | none | 0 |
 | rtx5880-ada-win11-remote | none | 0 |
 
@@ -178,32 +178,32 @@ Newest runs that match no platform record: none.
 
 ## Clean-install record
 
-Newest record `20260923T173837Z-afda8955.json` (kind `clean_install_record`), taken at commit `afda8955fa1c` on 2026-09-23T17:38:37+00:00 with 0 dirty packaging paths; all steps passed: yes.
+Newest record `20260925T150709Z-2612d831.json` (kind `clean_install_record`), taken at commit `2612d831ef91` on 2026-09-25T15:07:09+00:00 with 0 dirty packaging paths; all steps passed: yes.
 
-Wheel `torchfdtd-0.15.0-py3-none-any.whl`, SHA-256 `675c55e0188f51d41cd58df189eea7a82f1dd798e4e60ac888f12da372e9011e`, 968,615 bytes, 159 entries, 152 package files; browser assets match the committed ones: yes; frontend assets current: yes.
+Wheel `torchfdtd-0.16.0-py3-none-any.whl`, SHA-256 `57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd`, 980,088 bytes, 160 entries, 153 package files; browser assets match the committed ones: yes; frontend assets current: yes.
 
 | Environment | Python | torch | cupy-cuda12x | numpy | torchfdtd | Packages |
 | --- | --- | --- | --- | --- | --- | --- |
-| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 0.15.0 | 40 |
-| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 0.15.0 | 42 |
+| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 0.16.0 | 40 |
+| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 0.16.0 | 42 |
 
 | Step | Status | Seconds |
 | --- | --- | --- |
-| build_wheel | passed | 26.4 |
-| cpu_venv_create | passed | 19.18 |
-| cpu_pip_install_torch | passed | 110.74 |
-| cpu_pip_install_wheel | passed | 57.87 |
-| cpu_package_list | passed | 3.44 |
-| cpu_import_run_save_load | passed | 10.78 |
-| cpu_server_index_assets_api | passed | 7.8 |
-| cpu_doctor | passed | 9.88 |
-| cuda_venv_create | passed | 15.36 |
-| cuda_pip_install_torch | passed | 152.3 |
-| cuda_pip_install_wheel_extras | passed | 65.99 |
-| cuda_package_list | passed | 4.58 |
-| cuda_fused_forward_run | passed | 17.0 |
-| cuda_doctor | passed | 4.78 |
-| readme_examples | passed | 17.94 |
+| build_wheel | passed | 14.65 |
+| cpu_venv_create | passed | 116.71 |
+| cpu_pip_install_torch | passed | 94.13 |
+| cpu_pip_install_wheel | passed | 54.63 |
+| cpu_package_list | passed | 0.98 |
+| cpu_import_run_save_load | passed | 11.21 |
+| cpu_server_index_assets_api | passed | 4.51 |
+| cpu_doctor | passed | 4.56 |
+| cuda_venv_create | passed | 35.27 |
+| cuda_pip_install_torch | passed | 246.37 |
+| cuda_pip_install_wheel_extras | passed | 62.75 |
+| cuda_package_list | passed | 0.88 |
+| cuda_fused_forward_run | passed | 17.47 |
+| cuda_doctor | passed | 4.38 |
+| readme_examples | passed | 16.3 |
 
 ## Suite policy
 
@@ -226,18 +226,18 @@ One line per G3 task. Where `docs/validation/g3/<task>.json` exists, the criteri
 | G3-03 | Drude and two-pole Lorentz slabs: complex R, T and absorption against TMM with the same analytic permittivity; fitting error and ADE time-discretization error separated | `G3-03.json` | abs dR, dT, dA at most 0.01 and t phase at most 0.02 rad for 8 analytic and 2 fitted slabs; ADE constitutive n, k error at most 0.001 | 0.00204, 0.0027, 0.000659, 0.00508 rad; ADE 0.000761 | pass |
 | G3-04 | Closed-box TFSF scattering of a dielectric cylinder (2D, TM and TE) and a dielectric sphere (3D) against the Mie series | `G3-04.json` | integrated cross-section relative error at most 0.02 at the judged meshes (cylinder h = 0.0125 um TM and TE, sphere h = 0.05 um), CPU FP64 | cylinder TM 0.0174; cylinder TE 0.00373; sphere 0.00309; CUDA FP32 layer A max relative difference 2.08e-06 | pass |
 | G3-05 | Drude metal sphere at three sizes below and near the plasmon resonance: scattering and absorption against Mie with a complex index, mesh sequence h, h/2, h/4 | `G3-05.json` | scattering and absorption relative error at h = 0.005 um, CPU FP64, within the case's per-radius budgets | r = 0.02 um: scattering 1.38 (budget 0.5), absorption 6.73 (budget 1); r = 0.035 um: scattering 0.458 (budget 0.3), absorption 4.99 (budget 0.6); r = 0.05 um: scattering 0.445 (budget 0.2), absorption 3.45 (budget 0.4) | **FAIL** |
-| G3-06 | PEC/PMC cavity eigenfrequency, symmetry-reduced versus full domain, and gradient mapping | none (the test assertions are the record) | the pass/fail assertions of the required tests | 93 passed, 0 failed, 0 skipped in `20260923T195520Z-g3-06-28754df0` | VERIFIED |
+| G3-06 | PEC/PMC cavity eigenfrequency, symmetry-reduced versus full domain, and gradient mapping | none (the test assertions are the record) | the pass/fail assertions of the required tests | 93 passed, 0 failed, 0 skipped in `20260925T172508Z-g3-06-4f792935` | VERIFIED |
 | G3-07 | Default CPML reflection at normal and oblique incidence in vacuum and in n=2, next to a dielectric interface, and 20,000-step stability | `G3-07.json` | reflected/incident power at most 1e-06 at normal incidence, 0.0001 at the declared oblique angles and 0.0001 next to an n=2 interface; energy after 20,000 steps at most 1e-06 of the peak | 2.14e-09, 8.64e-10, 1.2e-05; 3.56e-16 | pass |
 | G3-08 | Bloch-periodic binary dielectric grating: forward and backward diffraction efficiencies and phases against TORCWA at normal and 20-degree incidence, TE and TM, three wavelengths | `G3-08.json` | diffraction efficiency error at most 0.01 and dominant-order phase error at most 0.02 rad against TORCWA at 640 harmonics (12 judged configurations); CUDA FP32 layer A relative difference at most 0.0001 | 0.00306; 0.0143 rad; layer A 0.000115 (12 rows) | **FAIL** |
-| G3-09 | Mode solver effective index, field, confinement and power against analytic slab and fiber oracles | none (the test assertions are the record) | the pass/fail assertions of the required tests | 32 passed, 0 failed, 0 skipped in `20260923T212310Z-g3-09-e55a1b01` | VERIFIED |
-| G3-10 | PIC mode-port networks: straight guide, discontinuity, Y branch and crossing S, reciprocity, passivity with the radiation defect measured | none (the test assertions are the record) | the pass/fail assertions of the required tests | 23 passed, 0 failed, 0 skipped in `20260923T212720Z-g3-10-f3da775f` | VERIFIED |
-| G3-11 | Dipole radiation: near-to-far and near-zone projection against analytic Hertzian fields, native far-field pattern convergence | none (the test assertions are the record) | the pass/fail assertions of the required tests | 56 passed, 0 failed, 0 skipped in `20260923T212746Z-g3-11-1121cd71` | VERIFIED |
-| G3-12 | Tensor dielectrics: eigenpolarization dispersion, birefringent slab transmission and tensor gradients | none (the test assertions are the record) | the pass/fail assertions of the required tests | 45 passed, 0 failed, 0 skipped in `20260923T213042Z-g3-12-9d50987d` | VERIFIED |
+| G3-09 | Mode solver effective index, field, confinement and power against analytic slab and fiber oracles | none (the test assertions are the record) | the pass/fail assertions of the required tests | 32 passed, 0 failed, 0 skipped in `20260925T175629Z-g3-09-b83f2635` | VERIFIED |
+| G3-10 | PIC mode-port networks: straight guide, discontinuity, Y branch and crossing S, reciprocity, passivity with the radiation defect measured | none (the test assertions are the record) | the pass/fail assertions of the required tests | 23 passed, 0 failed, 0 skipped in `20260925T180000Z-g3-10-7adda5e8` | VERIFIED |
+| G3-11 | Dipole radiation: near-to-far and near-zone projection against analytic Hertzian fields, native far-field pattern convergence | none (the test assertions are the record) | the pass/fail assertions of the required tests | 56 passed, 0 failed, 0 skipped in `20260925T180016Z-g3-11-753e7ab7` | VERIFIED |
+| G3-12 | Tensor dielectrics: eigenpolarization dispersion, birefringent slab transmission and tensor gradients | none (the test assertions are the record) | the pass/fail assertions of the required tests | 45 passed, 0 failed, 0 skipped in `20260925T180304Z-g3-12-01ae90bc` | VERIFIED |
 | G3-13 | Curved-interface convergence on the G3-04 dielectric cylinder: mesh sequence with staircase and subpixel interfaces, sub-cell centre shifts and the differentiable-solid smoothing width | `G3-13.json` | subpixel max relative error below the staircase error at h = 0.05 um for TM and TE (the mesh sequence, shifts and smoothing widths are reported only) | TM: staircase 0.0383, subpixel 0.00997; TE: staircase 0.112, subpixel 0.0197 | pass |
-| G3-14 | Small discrete problems: CPU torch, CUDA torch, fused CUDA, streamed and reversible forward and VJP agreement | none (the test assertions are the record) | the pass/fail assertions of the required tests | 75 passed, 0 failed, 0 skipped in `20260923T213556Z-g3-14-ecf4b06b` | VERIFIED |
-| G3-15 | Full-autograd oracle, explicit adjoint, central-difference step sweep, Taylor remainder and directional VJP checks | none (the test assertions are the record) | the pass/fail assertions of the required tests | 34 passed, 0 failed, 0 skipped in `20260923T213649Z-g3-15-7368e5ea` | VERIFIED |
-| G3-16 | Physical shape and material parameter gradients: slab thickness and permittivity against the Airy derivative, polygon vertices under mesh refinement | none (the test assertions are the record) | the pass/fail assertions of the required tests | 19 passed, 0 failed, 0 skipped in `20260923T213745Z-g3-16-4c6f38b9` | VERIFIED |
-| G3-17 | Oracle independence, precision floor, time-window and PML error budgets of every G3 fixture | none (the test assertions are the record) | the pass/fail assertions of the required tests | 4 passed, 0 failed, 0 skipped in `20260923T213754Z-g3-17-de4fa8eb` | VERIFIED |
+| G3-14 | Small discrete problems: CPU torch, CUDA torch, fused CUDA, streamed and reversible forward and VJP agreement | none (the test assertions are the record) | the pass/fail assertions of the required tests | 75 passed, 0 failed, 0 skipped in `20260925T180814Z-g3-14-4e944236` | VERIFIED |
+| G3-15 | Full-autograd oracle, explicit adjoint, central-difference step sweep, Taylor remainder and directional VJP checks | none (the test assertions are the record) | the pass/fail assertions of the required tests | 34 passed, 0 failed, 0 skipped in `20260925T180857Z-g3-15-38db1a43` | VERIFIED |
+| G3-16 | Physical shape and material parameter gradients: slab thickness and permittivity against the Airy derivative, polygon vertices under mesh refinement | none (the test assertions are the record) | the pass/fail assertions of the required tests | 19 passed, 0 failed, 0 skipped in `20260925T180940Z-g3-16-7595c18d` | VERIFIED |
+| G3-17 | Oracle independence, precision floor, time-window and PML error budgets of every G3 fixture | none (the test assertions are the record) | the pass/fail assertions of the required tests | 4 passed, 0 failed, 0 skipped in `20260925T180946Z-g3-17-339f39b7` | VERIFIED |
 
 ## Cross-solver and Meep comparison headlines
 
@@ -286,28 +286,55 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 
 | Task | Warning |
 | --- | --- |
-| G3-04 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 4635db7eab69 alone |
-| G3-06 | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 4635db7eab69 alone |
-| G3-07 | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 4635db7eab69 alone |
-| G3-08 | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 4635db7eab69 alone |
-| G3-13 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G3-14 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G3-15 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G3-16 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G3-17 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G4-02 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G4-03 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G4-04 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G4-05 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 3e9300300d15 alone |
-| G6-07 | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G6-08 | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G8-01 | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G8-02 | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G8-03 | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G8-04 | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G9-01 | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G9-02 | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G9-04 | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
+| G3-04 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-06 | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-07 | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-08 | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-09 | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-10 | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-11 | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-12 | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-13 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-14 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-15 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-16 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-17 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-01 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-02 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-03 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-04 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-05 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G4-06 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-01 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-02 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-03 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-04 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-05 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-06 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-07 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-08 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-09 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G5-10 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-01 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-02 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-03 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-04 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-05 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-06 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-07 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G6-08 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G7-03 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G7-04 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-01 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-02 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-03 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-04 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-05 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-06 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-07 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G9-01 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G9-02 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G9-04 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 
 ## Pending owner approvals
 
@@ -346,12 +373,13 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 
 | Check | Result | Detail |
 | --- | --- | --- |
-| package version | ok | pyproject.toml 0.15.0, COMPATIBILITY.md 0.15.0, CHANGELOG.md 0.15.0, clean-install wheel 0.15.0 |
+| package version | ok | pyproject.toml 0.16.0, COMPATIBILITY.md 0.16.0, CHANGELOG.md 0.16.0, clean-install wheel 0.16.0 |
 | README row check `test_quick_start_selects_the_measured_path_explicitly` | ok | reproduced from its record |
+| README row check `test_readme_a100_row_matches_the_double_precision_record` | ok | reproduced from its record |
 | README row check `test_readme_capacity_row_matches_the_fp32_record` | ok | reproduced from its record |
 | README row check `test_readme_fdtdx_adjoint_row_matches_the_cross_solver_record` | ok | reproduced from its record |
 | README row check `test_readme_fdtdx_row_matches_the_cross_solver_record` | ok | reproduced from its record |
-| README row check `test_readme_meep_row_matches_the_cross_solver_record` | ok | reproduced from its record |
+| README row check `test_readme_meep_row_uses_the_fastest_rank_count_of_the_sweep` | ok | reproduced from its record |
 | README row check `test_readme_restart_row_matches_the_restart_record` | ok | reproduced from its record |
 | README "Compared with Meep" block | ok | equals the renderer output for the committed records |
 | MEEP_COMPARISON.md | ok | equals the renderer output for the committed records |
@@ -359,4 +387,4 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 | RELEASE_SCOPE.md support claims | ok | 22 verification cells and the stage-status block rendered from the gate file |
 | attestation wording | ok | no line uses the words that tests/test_validation_report.py forbids |
 
-12 checks, 0 mismatch(es).
+13 checks, 0 mismatch(es).

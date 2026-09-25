@@ -1,0 +1,219 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260925T181003Z-g4-01-34391cbe",
+  "task": "G4-01",
+  "stage": "G4",
+  "task_title": "보유한 실제 GPU와 OS·driver·runtime부터 확인한다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_platform_matrix.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G4-01.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-26T03:09:51.129192+09:00",
+  "recorded_at": "2026-09-25T18:10:03+00:00",
+  "source_commit": "2c5f3754c0470b2888d02462d6d2305a5098326a",
+  "source_commit_time": "2026-09-26T00:18:35+09:00",
+  "source_tree_sha256": "e2572f1f3074e94dc8eeece35b48815dcb1bec213e67c62cf25f36b0704341b4",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "5d2fb7eac934221d9a04bce9d8128da4e53eba2a7c7ca76501b22f3dbb6337d1",
+      "head_sha256": "f4a33ca7d37f18eeba49b9ac33f9c2577e4192f5e32b79a11d679453a062575f"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "57c2f728fcddc7cc21272b5204474769cf25a84b435292818e89860ac52b6d2b",
+      "head_sha256": "8254f678d2bfe2da2940e772e60030b237b372f639336e595e4b0dde64900d28"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "4afb7a5b9c89b6a4cf95251fa5ad505202e247bbdbc2ca7f0ab02d1f8d16a0aa",
+      "head_sha256": "3c29461e2b15d685eaabd7f347f42482f7ff6b87dc8e6c355019d2013bb691e7"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0a1db11fbc191d0de4cd05575810fcec35f52a1f7025b8ff4fa5075d874aadd9",
+      "head_sha256": "3d3557eb215787b4290a06b6333d6eb66db09fc4441da7c6cb01c5315fedbea8"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "00d57966e826b74da4d5947bfac27df491e3ab9b1935ea4305e2bb2e51d17b26",
+      "head_sha256": "1715d62d5815e18e340c05f367d302204012e3eb9c5c5a79fd196494f7d2516c"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd",
+  "package_path": "D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_platform_matrix.py": "810e4c936b2bab44bfc97277f07461dd278a0204647233efb6da1d5017b23a91"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "docs/PLATFORM_MATRIX.md",
+    "docs/validation/platforms/*.json",
+    "scripts/platform_report.py"
+  ],
+  "watch_sha256": {
+    "docs/PLATFORM_MATRIX.md": "fd60f0218d15fca06ae80648f6161947cd880565d6b471ec144b08f439d084d4",
+    "docs/validation/platforms/rtx3060-win11-lab.json": "3f6802b442e65f7311e10db71851e7c2e495013e16977a5b8a4836433228746b",
+    "docs/validation/platforms/rtx3060-wsl2-ubuntu2204.json": "591715164b9641f59dc2ff4a990aa1c494316400e7a1c0c7173b01b07b4b7867",
+    "docs/validation/platforms/rtx5880-ada-win11-remote.json": "2c858b392f440b626c197985d8b00182366fb3b453c474b45a6ea1ef322a93f1",
+    "scripts/platform_report.py": "b6097d35bcea4f2f3f81ff6e3df745b7931935c27ce6c4504eccb03495981670"
+  },
+  "fixture_path": "docs/validation/cases/G4-01r2_platform_matrix.json",
+  "fixture_sha256": "dc2c60fb392aba1e07a227014f44a53368971025803bff89059ac86224cde847",
+  "acceptance_criteria_path": "docs/validation/cases/G4-01r2_platform_matrix.json",
+  "acceptance_criteria_sha256": "dc2c60fb392aba1e07a227014f44a53368971025803bff89059ac86224cde847",
+  "case_first_commit": "371341f382a6b062e524875d423928bc5cfb2351",
+  "case_first_commit_time": "2026-09-25T15:31:33+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": null,
+  "backend": [
+    "cuda"
+  ],
+  "physics_configuration": {
+    "report": "scripts/platform_report.py --id <platform id> writes docs/validation/platforms/<id>.json with the GPU name, compute capability, driver (nvidia-smi), CUDA runtime (torch.version.cuda), torch, CuPy, numpy, Python, OS and the free/total device memory at the time of the record; the interpreter path is written with the home directory replaced by '<user home>'",
+    "matrix": "docs/PLATFORM_MATRIX.md, one row per platform; hardware cells are copied from the record file or read 'not recorded'",
+    "growth": "a platform enters the matrix only through a record written by scripts/platform_report.py on that host (under WSL2, inside the distribution); its row is copied from that record, and the OS cell states WSL2 where the record's platform string does",
+    "recorded_platforms": [
+      "rtx3060-win11-lab",
+      "rtx5880-ada-win11-remote",
+      "rtx3060-wsl2-ubuntu2204: WSL2 Ubuntu 22.04 on the RTX 3060 lab host, the same GPU and Windows driver through the WSL CUDA driver; not a native Linux install"
+    ],
+    "unrecorded_platforms": "none",
+    "assumed_platforms": "none",
+    "platform_g4_runs": "scripts/record_platform_g4.py writes docs/validation/platforms/g4/<id>.json and a byte-for-byte copy of every JUnit report under docs/validation/platforms/g4/<id>/ from the JUnit reports of every G4 task's planned command and of scripts/run_suite.py gpu-nightly, run on that platform at one clean commit from a checkout outside the home directory; it executes no test and does not touch the gate file"
+  },
+  "reference_method": "the record file written by scripts/platform_report.py on the machine itself; the matrix test cross-checks every table cell against that file and rejects a row whose cells are not backed by a record. A platform G4 run record is checked against its own JUnit copies and the current G4 required_tests of docs/validation/completion_gates.json",
+  "observables": [
+    {
+      "name": "record_fields",
+      "unit": "set",
+      "definition": "record_version, recorded_at, os, python, torch, cupy, cuda_runtime, torch_cuda_available, driver, gpus (name, compute_capability, total and free memory) present in a fresh report"
+    },
+    {
+      "name": "home_directory_in_record",
+      "unit": "boolean",
+      "definition": "a fresh report written by an interpreter that lies under the home directory contains that directory in any field"
+    },
+    {
+      "name": "matrix_consistency",
+      "unit": "boolean",
+      "definition": "every hardware cell of a recorded row equals the record; every cell of an unrecorded row reads 'not recorded'; every record file has a row"
+    },
+    {
+      "name": "local_gpu_recorded",
+      "unit": "boolean",
+      "definition": "the GPU torch reports on the test host has a record file"
+    },
+    {
+      "name": "platform_g4_run",
+      "unit": "boolean",
+      "definition": "for every docs/validation/platforms/g4/<id>.json: its platform has a record and a row whose 'Verified by' cell links it, and no row links a missing one; every JUnit copy matches its stored SHA-256 and re-parses to the recorded counts, failures, errors and skips; every run exited 0 with no failure, no error and no skip outside three expected classes (an optional platform check; an opt-in test whose reason names a TORCHFDTD_*=1 variable the run's command does not set; a check of a file that a record names on the host that wrote it, 'is not on this host'), each skip's class as recorded; no JUnit copy and no record names a home directory (/root/, /home/, /Users/, X:\\Users\\); a gpu-nightly run is present; for every G4 task the record names exactly the task's current required_tests, has a run of the task's own command, and every test those entries name passed in that run and in the gpu-nightly run"
+    }
+  ],
+  "acceptance_limits": {
+    "report": "the report exits 0 and contains every listed field; with CUDA available it lists at least one GPU with a d.d compute capability and 0 <= free <= total memory; home_directory_in_record is false",
+    "matrix": "no matrix row carries a value without a record file; at least one row is recorded",
+    "platform_g4_run": "platform_g4_run is true; the recorder itself names every test of a file entry (pytest --collect-only through the task's command), reports a failed test as not passed and an unexpected skip as such with a nonzero exit, classifies skip reasons as declared, and refuses a run set without a task or the suite, a report that names the home directory and a dirty tree",
+    "source_of_limits": "fixture-specific; no numerical threshold applies"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 8,
+    "passed": [
+      "tests/test_platform_matrix.py::test_platform_report_runs_and_records_every_field",
+      "tests/test_platform_matrix.py::test_platform_report_replaces_the_home_directory",
+      "tests/test_platform_matrix.py::test_matrix_rows_come_from_record_files_only",
+      "tests/test_platform_matrix.py::test_every_record_file_has_a_matrix_row",
+      "tests/test_platform_matrix.py::test_local_record_matches_this_gpu_when_present",
+      "tests/test_platform_matrix.py::test_platform_g4_run_records_pass_every_g4_required_test",
+      "tests/test_platform_matrix.py::test_platform_g4_skip_classes",
+      "tests/test_platform_matrix.py::test_platform_g4_recorder_names_every_required_test_and_fails_a_failure"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 7.821,
+    "suite_timestamp": "2026-09-26T03:09:51.129192+09:00"
+  },
+  "required_tests": [
+    "tests/test_platform_matrix.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_platform_matrix.py": [
+      "tests/test_platform_matrix.py::test_platform_report_runs_and_records_every_field",
+      "tests/test_platform_matrix.py::test_platform_report_replaces_the_home_directory",
+      "tests/test_platform_matrix.py::test_matrix_rows_come_from_record_files_only",
+      "tests/test_platform_matrix.py::test_every_record_file_has_a_matrix_row",
+      "tests/test_platform_matrix.py::test_local_record_matches_this_gpu_when_present",
+      "tests/test_platform_matrix.py::test_platform_g4_run_records_pass_every_g4_required_test",
+      "tests/test_platform_matrix.py::test_platform_g4_skip_classes",
+      "tests/test_platform_matrix.py::test_platform_g4_recorder_names_every_required_test_and_fails_a_failure"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G4-01.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260925T181003Z-g4-01-34391cbe/junit.xml",
+      "sha256": "e5d18248700c92151f0cf307b16c0cf48584e72ca96407e2509f92c42a9523a9",
+      "bytes": 1210,
+      "original_path": ".local/tmp/junit/rerecord/G4-01.xml"
+    }
+  ],
+  "applicable_scope": "G4-01: platform inventory and matrix under the revised case G4-01r2 (rtx3060-win11-lab, rtx3060-wsl2-ubuntu2204 with its G4 run record) at 338757eaab1d re-recorded on 2c5f3754c047 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260925T145114Z-g4-01-3612e39b",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

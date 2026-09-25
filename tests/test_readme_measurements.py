@@ -2,6 +2,7 @@
 import json
 import math
 import re
+import statistics
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,15 +48,40 @@ def test_readme_restart_row_matches_the_restart_record():
     assert f'{error:.1e}'.replace('e-08', 'e-8') in row
 
 
-def test_readme_meep_row_matches_the_cross_solver_record():
+def _meep_ranks(ranks):
+    record = json.loads((ROOT / f'docs/validation/cross_solver/meep_throughput_ranks{ranks}.json').read_text(encoding='utf-8'))
+    return {case['name']: case for case in record['cases']}, record
+
+
+def _span(values, digits):
+    return f'{min(values):.{digits}f} to {max(values):.{digits}f}'
+
+
+def test_readme_meep_row_uses_the_fastest_rank_count_of_the_sweep():
     readme = (ROOT / 'README.md').read_text(encoding='utf-8')
-    record = _cross_solver()
-    row = _row(readme, 'Meep 1.34, 12 MPI ranks on i7-12700 vs TorchFDTD on RTX 3060')
-    assert record['environments']['meep']['meep_version'] == '1.34.0'
-    assert record['environments']['meep']['mpi_processes'] == 12
-    ratios = [_full_solve_ratio(record, 'meep', case) for case in ('sphere-64', 'sphere-96')]
-    assert f'**{ratios[0]:.0f}×** and **{ratios[1]:.0f}×** full solve' in row
-    assert 'double precision' in row and 'other processes on the host' in row
+    cases = _cross_solver()['throughput']['cases']
+    walls = {ranks: sum(case['median_wall_seconds'] for case in _meep_ranks(ranks)[0].values()) for ranks in (4, 8, 12, 16)}
+    assert min(walls, key=walls.get) == 4
+    meep, record = _meep_ranks(4)
+    assert record['environment']['meep_version'] == '1.34.0' and set(meep) == set(cases)
+    torch_runs = {name: case['solvers']['torchfdtd'] for name, case in cases.items()}
+    full = [meep[name]['median_wall_seconds'] / torch_runs[name]['median_wall_seconds'] for name in cases]
+    stepping = [meep[name]['median_loop_seconds'] / torch_runs[name]['median_loop_seconds'] for name in cases]
+    row = _row(readme, 'Meep 1.34 at its fastest rank count (4 MPI ranks on i7-12700) vs TorchFDTD on RTX 3060')
+    assert f'**{_span(full, 0)}×** full solve, **{_span(stepping, 0)}×** stepping' in row
+    assert 'Meep in double precision, TorchFDTD in single' in row
+
+
+def test_readme_a100_row_matches_the_double_precision_record():
+    readme = (ROOT / 'README.md').read_text(encoding='utf-8')
+    record = json.loads((ROOT / 'docs/validation/paper_review/torchfdtd-precision-a100.json').read_text(encoding='utf-8'))
+    assert 'A100' in record['hardware']['gpu']
+    meep, _ = _meep_ranks(4)
+    full = [meep[case['name']]['median_wall_seconds'] / statistics.median(run['wall_seconds'] for run in case['runs'])
+            for case in record['cases'] if case['precision'] == 'float64']
+    assert len(full) == 4
+    row = _row(readme, 'Meep 1.34, 4 MPI ranks on i7-12700 vs TorchFDTD in double precision on an A100 80GB')
+    assert f'**{_span(full, 0)}×** full solve' in row and 'both solvers in double precision' in row
 
 
 def test_readme_fdtdx_row_matches_the_cross_solver_record():
@@ -63,8 +89,10 @@ def test_readme_fdtdx_row_matches_the_cross_solver_record():
     record = _cross_solver()
     row = _row(readme, 'FDTDX 0.6.2 on the same RTX 3060 vs TorchFDTD')
     assert record['environments']['fdtdx']['packages']['fdtdx'] == '0.6.2'
-    ratios = [_full_solve_ratio(record, 'fdtdx', case) for case in ('sphere-64', 'sphere-96')]
-    assert f'**{ratios[0]:.1f}×** and **{ratios[1]:.1f}×** full solve' in row
+    cases = record['throughput']['cases']
+    full = [_full_solve_ratio(record, 'fdtdx', case) for case in cases]
+    stepping = [cases[case]['solvers']['fdtdx']['median_loop_seconds'] / cases[case]['solvers']['torchfdtd']['median_loop_seconds'] for case in cases]
+    assert f'**{_span(full, 1)}×** full solve, **{_span(stepping, 1)}×** stepping' in row
 
 
 def test_readme_fdtdx_adjoint_row_matches_the_cross_solver_record():

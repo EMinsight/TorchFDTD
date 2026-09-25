@@ -25,13 +25,14 @@ GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-
 | 16-case parameter sweeps vs flaport/fdtd sequential | 32³ and 64³ | **31 to 44×** and **15 to 16×** |
 | Torch CPU vs GPU, differentiable forward and backward | 128 × 64 × 64, 32 steps | **69×** resident, **12×** with DRAM streaming |
 | CPU worker vs CUDA worker ensemble | 4 × 64³, 800 steps | **40×** |
-| Meep 1.34, 12 MPI ranks on i7-12700 vs TorchFDTD on RTX 3060 | 64³ and 96³, 800 steps, sphere, Meep in double precision with other processes on the host | **38×** and **44×** full solve |
-| FDTDX 0.6.2 on the same RTX 3060 vs TorchFDTD | 64³ and 96³, 800 steps, sphere | **6.8×** and **6.4×** full solve |
+| Meep 1.34 at its fastest rank count (4 MPI ranks on i7-12700) vs TorchFDTD on RTX 3060 | vacuum and sphere, 64³ and 96³, 800 steps, Meep in double precision, TorchFDTD in single | **30 to 36×** full solve, **36 to 41×** stepping |
+| Meep 1.34, 4 MPI ranks on i7-12700 vs TorchFDTD in double precision on an A100 80GB | the same scenes, both solvers in double precision; a data-center GPU against a desktop CPU | **49 to 59×** full solve |
+| FDTDX 0.6.2 on the same RTX 3060 vs TorchFDTD | vacuum and sphere, 64³ and 96³, 800 steps | **6.4 to 7.3×** full solve, **4.4 to 5.7×** stepping |
 | FDTDX adjoint (checkpointed, reversible) vs TorchFDTD checkpointed adjoint | 64³, 128 steps, full permittivity gradient, 2 checkpoints, same RTX 3060 | **52×** and **2.0×** time to gradient, gradients within 1.1e-7 relative |
 | Larger than the GPU, capacity run | 2.42 billion cells, 58 GB (54 GiB) of E/H on a 48 GiB GPU, 10 steps plus full material gradient | 2.23 GB peak CUDA memory, 58 min, gradient within 9.1e-8 of the oracle |
 | Larger than the GPU, crash and resume | 2.26 billion cells, 54 GB (50.6 GiB) of E/H, same policy | killed after the first backward record, resumed process finishes with 3.03 GB peak CUDA memory and the gradient within 9.1e-8 |
 
-Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The Meep and FDTDX rows come from the same-hardware comparison in [docs/CROSS_SOLVER_COMPARISON.md](docs/CROSS_SOLVER_COMPARISON.md), which also lists the solver differences behind them. The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations.
+Every row has its conditions, hardware and raw records in [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md). The Meep and FDTDX rows come from the same-hardware comparison in [docs/CROSS_SOLVER_COMPARISON.md](docs/CROSS_SOLVER_COMPARISON.md), which also lists the solver differences behind them; the Meep rows use the 4-rank member of its rank sweep (`docs/validation/cross_solver/meep_throughput_ranks4.json`), the fastest of 4, 8, 12 and 16 ranks, and the A100 row the double-precision record `docs/validation/paper_review/torchfdtd-precision-a100.json`. The two beyond-VRAM rows are ten-step capacity gates, not sustained optimizations.
 
 <!-- meep-comparison:start -->
 ## Compared with Meep
@@ -77,7 +78,7 @@ Install the wheel; it carries the built browser workbench, so no Node.js and no 
 ```powershell
 python -m venv torchfdtd-env
 torchfdtd-env/Scripts/python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu126
-torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-0.15.0-py3-none-any.whl[cuda-kernels]"
+torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-0.16.0-py3-none-any.whl[cuda-kernels]"
 torchfdtd-env/Scripts/torchfdtd doctor
 torchfdtd-env/Scripts/torchfdtd serve
 ```
@@ -147,7 +148,7 @@ Validation uses analytic solutions and independently authored CPU/CUDA reference
 
 ## Citing TorchFDTD
 
-If TorchFDTD contributes to published work, please cite the paper ([arXiv:2609.30039](https://arxiv.org/abs/2609.30039)) and the archived software. The concept DOI [10.5281/zenodo.22928834](https://doi.org/10.5281/zenodo.22928834) always resolves to the latest release; each release also has its own version DOI (0.15.0: [10.5281/zenodo.22928835](https://doi.org/10.5281/zenodo.22928835)). The same metadata is in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
+If TorchFDTD contributes to published work, please cite the paper ([arXiv:2609.30039](https://arxiv.org/abs/2609.30039)) and the archived software. The concept DOI [10.5281/zenodo.22928834](https://doi.org/10.5281/zenodo.22928834) always resolves to the latest release; each release also has its own version DOI (0.16.0: [10.5281/zenodo.22968357](https://doi.org/10.5281/zenodo.22968357); 0.15.0: [10.5281/zenodo.22928835](https://doi.org/10.5281/zenodo.22928835)). The same metadata is in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
 
 ```bibtex
 @misc{park2026torchfdtd,
