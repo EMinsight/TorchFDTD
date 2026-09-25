@@ -2,6 +2,7 @@
 
 # TorchFDTD
 
+[![arXiv](https://img.shields.io/badge/arXiv-2609.30039-b31b1b.svg)](https://arxiv.org/abs/2609.30039)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22928834.svg)](https://doi.org/10.5281/zenodo.22928834)
 
 GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-differentiable simulations on NVIDIA CUDA. MIT licensed.
@@ -54,7 +55,7 @@ The workbench's FDTD panel has a **GPU** switch and a **Memory** selector; `/api
 | Mode | When | What it costs | Limits |
 |---|---|---|---|
 | GPU switch ([docs](docs/EXECUTION_MODES.md#gpu-switch)) | A CUDA device is reported; CuPy adds the fused kernels | Nothing beyond the device | Without CuPy the PyTorch kernels run and streamed tiles fall back to the CPU |
-| Resident ([docs](docs/EXECUTION_MODES.md#memory-modes)) | The estimate fits 75% of free VRAM (80% of RAM on CPU) and at most 8 million cells | The fastest path, live frames | The whole grid in one memory |
+| Resident ([docs](docs/EXECUTION_MODES.md#memory-modes)) | The estimate fits 75% of free VRAM and its host arrays 80% of RAM (the whole estimate on CPU); the workbench server also limits it to 8 million cells | The fastest path, live frames | The whole grid in one memory |
 | Streamed DRAM ([docs](docs/EXECUTION_MODES.md#how-auto-decides)) | The grid exceeds the device but the conservative reservation fits 80% of available RAM | Slab traffic every temporal block; 5.5 to 11 times the resident time in the records | Forward only, one final snapshot, no dispersive/TFSF/subpixel/PMC scenes |
 | Streamed disk ([docs](docs/EXECUTION_MODES.md#choosing-a-scratch-disk)) | Explicit opt-in only, never chosen by Auto: the DRAM banks do not fit and scratch space is admitted up to 80% of the free volume | The same slabs through buffered file I/O; 1.9 to 2.4 times the DRAM time in the records | As above, plus a scratch directory to manage |
 | Tiled approximate ([docs](docs/TILED_STITCHING.md)) | A planar device fits neither VRAM nor DRAM; Auto selects it only with the "allow approximate tiling" consent, else the Tiled mode is explicit | Overlapping resident tiles: about 2.5 times the device cells at 1.5 um overlap, longer than the whole device would take | Exact only for an empty region or when every tile holds every scatterer; near-field error of 5 to 12% in the records, read the mismatch indicator; forward only in the browser |
@@ -76,7 +77,7 @@ Install the wheel; it carries the built browser workbench, so no Node.js and no 
 ```powershell
 python -m venv torchfdtd-env
 torchfdtd-env/Scripts/python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu126
-torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-0.15.0-py3-none-any.whl[cuda-kernels]"
+torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-0.16.0-py3-none-any.whl[cuda-kernels]"
 torchfdtd-env/Scripts/torchfdtd doctor
 torchfdtd-env/Scripts/torchfdtd serve
 ```
@@ -144,9 +145,20 @@ Validation uses analytic solutions and independently authored CPU/CUDA reference
 
 ## Citing TorchFDTD
 
-If TorchFDTD contributes to published work, please cite the archived software. The concept DOI [10.5281/zenodo.22928834](https://doi.org/10.5281/zenodo.22928834) always resolves to the latest release; each release also has its own version DOI (0.15.0: [10.5281/zenodo.22928835](https://doi.org/10.5281/zenodo.22928835)). The same metadata is in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
+If TorchFDTD contributes to published work, please cite the paper ([arXiv:2609.30039](https://arxiv.org/abs/2609.30039)) and the archived software. The concept DOI [10.5281/zenodo.22928834](https://doi.org/10.5281/zenodo.22928834) always resolves to the latest release; each release also has its own version DOI (0.15.0: [10.5281/zenodo.22928835](https://doi.org/10.5281/zenodo.22928835)). The same metadata is in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
 
 ```bibtex
+@misc{park2026torchfdtd,
+  author        = {Park, Hyoseok},
+  title         = {{TorchFDTD}: {GPU}-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design},
+  year          = {2026},
+  eprint        = {2609.30039},
+  archivePrefix = {arXiv},
+  primaryClass  = {physics.optics},
+  doi           = {10.48550/arXiv.2609.30039},
+  url           = {https://arxiv.org/abs/2609.30039}
+}
+
 @software{park_torchfdtd,
   author    = {Park, Hyoseok},
   title     = {{TorchFDTD}},

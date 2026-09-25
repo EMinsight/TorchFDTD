@@ -59,7 +59,7 @@ not domain decomposition.
 | --- | --- | --- |
 | Project model | One `Project` JSON shared by the browser CAD and Python; CLI `torchfdtd serve` on loopback only | VERIFIED (G8-01, G8-03, G9-01) |
 | Results | NPZ fields and monitors, JSON/CSV monitor export, browser field viewer; complex fields kept in NPZ ([BOUNDARIES.md](BOUNDARIES.md)). No chunked/lazy large-result format has been chosen yet | VERIFIED (G8-01, G8-02) |
-| GDS | Import and export with layers/datatypes, units, hierarchy, arrays, PATH, even-odd holes, layer etch, z-node sidewall staircase, port markers and N-port builders ([GDS.md](GDS.md), [GDS_MODE_PORTS.md](GDS_MODE_PORTS.md)). Rejected: holes touching the outline at a vertex, nested holes | MIXED: VERIFIED G6-07; NOT_RUN G7-03 |
+| GDS | Import and export with layers/datatypes, units, hierarchy, arrays, PATH, even-odd holes, layer etch, z-node sidewall staircase, port markers and N-port builders ([GDS.md](GDS.md), [GDS_MODE_PORTS.md](GDS_MODE_PORTS.md)). Rejected: holes touching the outline at a vertex, nested holes | VERIFIED (G6-07, G7-03) |
 | FSP | Independent read and writeback of a documented layout subset ([FSP.md](FSP.md)); general FSP compatibility is not claimed and the provenance question stays open in RELEASE_REVIEW.md | Not a gate row; distribution decision pending (G9-03) |
 | Packaging | Wheel built from a fresh staging directory with the browser assets included (`scripts/build_preview.py`); `cuda-kernels`, `gds`, `dev` extras | VERIFIED (G8-05, G8-07, G9-06) |
 
@@ -104,13 +104,13 @@ Rendered from [validation/completion_gates.json](validation/completion_gates.jso
 | G4 | CUDA·CI·환경 검증 | WORKSTATION | 6 | 6 | 0 | 0 | 0 | 6 pass, 0 fail |
 | G5 | 메모리·재시작·장기 안정성 | WORKSTATION | 10 | 10 | 0 | 0 | 0 | 10 pass, 0 fail |
 | G6 | 사용자 물리·역설계 API | WORKSTATION | 8 | 8 | 0 | 0 | 0 | 8 pass, 0 fail |
-| G7 | 대표 응용·동일 정확도 비용 | WORKSTATION | 5 | 1 | 0 | 4 | 0 | 1 pass, 4 fail |
+| G7 | 대표 응용·동일 정확도 비용 | WORKSTATION | 5 | 2 | 0 | 3 | 0 | 2 pass, 3 fail |
 | G8 | 저장·GUI·clean 설치 | WORKSTATION | 7 | 7 | 0 | 0 | 0 | 7 pass, 0 fail |
-| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 5 | 0 | 1 | 0 | 4 pass, 2 fail |
+| G9 | 보안·운영·출고 판정 | WORKSTATION | 7 | 5 | 0 | 1 | 0 | 5 pass, 1 fail |
 | H1 | 실제 단일 문제 multi-GPU | HPC | 6 | 0 | 0 | 1 | 5 | 0 pass, 6 fail |
 
-- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 69 of 76 required tasks pass the judge, 7 fail, and G9-07 (this report) is judged after the render; NOT RELEASABLE.
-- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 69 of 82 required tasks pass the judge, 13 fail, and G9-07 (this report) is judged after the render; NOT RELEASABLE.
+- WORKSTATION (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9): 71 of 76 required tasks pass the judge, 5 fail, and G9-07 (this report) is judged after the render; NOT RELEASABLE.
+- HPC (stages G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1): 71 of 82 required tasks pass the judge, 11 fail, and G9-07 (this report) is judged after the render; NOT RELEASABLE.
 <!-- stage-status:end -->
 
 ## Scope changes

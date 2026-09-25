@@ -277,7 +277,7 @@ Environment: Python 3.10.2, numpy 2.2.6, torch 2.10.0+cu126 (CUDA runtime 12.6),
 
 ## G3-04 Mie scattering of a dielectric cylinder and sphere
 
-Case `G3-04_mie_cylinder_sphere`, record `docs/validation/g3/G3-04.json` generated 2026-09-23T18:52:27+00:00. Closed TFSF box, matched empty-box reference, cross section from the outward scattered power over the incident intensity, against the Mie series written in the test with SciPy Bessel functions. Limit: relative error at most 2.000% at the judged mesh; the coarser meshes are recorded and non-monotone sequences are allowed on staircased surfaces.
+Case `G3-04_mie_cylinder_sphere`, record `docs/validation/g3/G3-04.json` generated 2026-09-25T16:12:36+00:00. Closed TFSF box, matched empty-box reference, cross section from the outward scattered power over the incident intensity, against the Mie series written in the test with SciPy Bessel functions. Limit: relative error at most 2.000% at the judged mesh; the coarser meshes are recorded and non-monotone sequences are allowed on staircased surfaces.
 
 | Fixture | Polarization | h (um) | Grid | Steps | Execution | Max relative error | Judged |
 |---|---|---:|---|---:|---|---:|---|
@@ -316,7 +316,7 @@ Resonance of the 0.25 um, n = 3.5 cylinder (TE): peak position within 1.000% and
 | 0.025 | cpu float64 | 1.1214 | 1.1365 | -1.326% | 0.0778 | 0.0653 | 19.086% | recorded |
 ## G3-05 Drude sphere scattering and absorption
 
-Case `G3-05_drude_sphere`, record `docs/validation/g3/G3-05.json` generated 2026-09-23T19:53:50+00:00. Analytic Drude model epsilon_inf = 5.0, omega_p = 1.37e+16 rad/s, gamma = 1.5e+14 rad/s, radii [0.02, 0.035, 0.05] um, band 0.33 to 0.45 um, mesh sequence [0.02, 0.01, 0.005] um at a fixed 0.48 um domain. Scattering from the outer planes, absorption from the net inward total-field power of the inner planes, both against the complex-index Mie series. The per-radius budgets are the fixture-specific ones of the case (the 2 percent program threshold is declared not applicable); a failure is a recorded finding.
+Case `G3-05_drude_sphere`, record `docs/validation/g3/G3-05.json` generated 2026-09-25T17:23:50+00:00. Analytic Drude model epsilon_inf = 5.0, omega_p = 1.37e+16 rad/s, gamma = 1.5e+14 rad/s, radii [0.02, 0.035, 0.05] um, band 0.33 to 0.45 um, mesh sequence [0.02, 0.01, 0.005] um at a fixed 0.48 um domain. Scattering from the outer planes, absorption from the net inward total-field power of the inner planes, both against the complex-index Mie series. The per-radius budgets are the fixture-specific ones of the case (the 2 percent program threshold is declared not applicable); a failure is a recorded finding.
 
 | r (um) | h (um) | Cells/r | Execution | Max scattering error | Budget | Max absorption error | Budget | Peak sca (um) | Mie | Peak abs (um) | Mie | Inner/outer | Judged |
 |---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
@@ -459,7 +459,7 @@ Empty cell (no grating): forward zero-order transmission relative to the inciden
 | TM | 20 | cpu float64 | 0.99999732 | 3.0e-31 | 4.2e-08 | 1e-04 |
 | TM | 20 | cuda float32 | 0.99999341 | 1.3e-12 | 4.2e-08 | 1e-04 |
 
-**Revision 2 (case `G3-08r2_bloch_grating_rcwa_layer_a`, records under `docs/validation/g3/r2`, generated 2026-09-23T20:29:16+00:00).** Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record. The re-run of the 12 judged physics rows gives a largest efficiency error of 0.0031, a largest dominant phase error of 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits.
+**Revision 2 (case `G3-08r2_bloch_grating_rcwa_layer_a`, records under `docs/validation/g3/r2`, generated 2026-09-25T17:56:16+00:00).** Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record. The re-run of the 12 judged physics rows gives a largest efficiency error of 0.0031, a largest dominant phase error of 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits.
 
 | Pol | Angle | Wavelength (um) | Max relative difference | Largest excess over rtol abs(cpu) + atol | Result |
 |---|---:|---:|---:|---:|---|
@@ -477,21 +477,21 @@ Empty cell (no grating): forward zero-order transmission relative to the inciden
 | TM | 20 | 1.06 | 9.52e-05 | -1.0e-06 | pass |
 ## G3-13 Curved-interface convergence
 
-Case `G3-13_curved_interface_convergence`, record `docs/validation/g3/G3-13.json` generated 2026-09-23T21:34:44+00:00. The G3-04 cylinder (radius 0.3 um, n = 1.5) at h = [0.05, 0.025, 0.0125] um with the staircase and the subpixel interface, centre shifts of [0.0, 0.25, 0.5] h at h = 0.05 um, and the differentiable-solid transition width [1e-06, 0.125, 0.25, 0.5, 1.0, 2.0] h at h = 0.05 um. Pass/fail item: the subpixel error at h is below the staircase error at h; everything else is reported.
+Case `G3-13_curved_interface_convergence`, record `docs/validation/g3/G3-13.json` generated 2026-09-25T18:07:10+00:00. The G3-04 cylinder (radius 0.3 um, n = 1.5) at h = [0.05, 0.025, 0.0125] um with the staircase and the subpixel interface, centre shifts of [0.0, 0.25, 0.5] h at h = 0.05 um, and the differentiable-solid transition width [1e-06, 0.125, 0.25, 0.5, 1.0, 2.0] h at h = 0.05 um. Pass/fail item: the subpixel error at h is below the staircase error at h; everything else is reported.
 
 | Polarization | Interface | h (um) | Max relative error | Wall (s) |
 |---|---|---:|---:|---:|
-| TE | staircase | 0.0125 | 0.373% | 23.2 |
-| TE | staircase | 0.025 | 0.700% | 2.6 |
+| TE | staircase | 0.0125 | 0.373% | 26.8 |
+| TE | staircase | 0.025 | 0.700% | 2.0 |
 | TE | staircase | 0.05 | 11.163% | 0.6 |
-| TE | subpixel | 0.0125 | 0.106% | 23.5 |
+| TE | subpixel | 0.0125 | 0.106% | 30.4 |
 | TE | subpixel | 0.025 | 0.454% | 2.2 |
 | TE | subpixel | 0.05 | 1.974% | 0.6 |
-| TM | staircase | 0.0125 | 1.737% | 22.8 |
-| TM | staircase | 0.025 | 5.117% | 2.1 |
-| TM | staircase | 0.05 | 3.830% | 0.6 |
-| TM | subpixel | 0.0125 | 0.064% | 28.8 |
-| TM | subpixel | 0.025 | 0.253% | 2.3 |
+| TM | staircase | 0.0125 | 1.737% | 21.3 |
+| TM | staircase | 0.025 | 5.117% | 2.0 |
+| TM | staircase | 0.05 | 3.830% | 0.5 |
+| TM | subpixel | 0.0125 | 0.064% | 26.2 |
+| TM | subpixel | 0.025 | 0.253% | 2.0 |
 | TM | subpixel | 0.05 | 0.997% | 0.6 |
 
 | Polarization | Staircase order estimates | Subpixel order estimates | Subpixel(h) < staircase(h) | Subpixel(h) error < staircase(h/2) | Subpixel(h) wall < staircase(h/2) |

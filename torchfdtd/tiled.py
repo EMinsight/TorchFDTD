@@ -245,7 +245,7 @@ def _tile_project(p, identifier, lateral, extended, full, center, size, sources,
     monitor_data = dict(record_fields=COMPONENTS, downsample=1, downsample_xyz=None, use_global_monitor=False,
                         spatial_interpolation='specified')
     return Project.model_validate(dict(
-        name=f'{p.name} {identifier}', region=region, materials=[m.model_dump() for m in p.materials],
+        name=f'{p.name} {identifier}', region=region, limits=p.limits.model_dump(), materials=[m.model_dump() for m in p.materials],
         structures=[s.model_dump() for s in structures],
         # A sheet flagged extend_through_pml keeps spanning the tile's own CPML.
         sources=[restricted(s, Source, full if s.extend_through_pml else extended).model_dump() for s in sources],

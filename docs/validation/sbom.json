@@ -4,7 +4,7 @@
   "generator": "scripts/provenance_inventory.py",
   "project": {
     "name": "torchfdtd",
-    "version": "0.15.0",
+    "version": "0.16.0",
     "license": "MIT",
     "license_files": [
       "LICENSE",
@@ -1430,8 +1430,8 @@
       "docs/validation/sbom.json",
       "tests/test_provenance_inventory.py"
     ],
-    "files_scanned": 1841,
-    "tracked_files": 1866,
+    "files_scanned": 2202,
+    "tracked_files": 2246,
     "findings": []
   },
   "history_note": {

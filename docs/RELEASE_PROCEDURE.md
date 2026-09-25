@@ -152,8 +152,10 @@ licensed tools).
 
 For the 0.15.0 candidate the owner accepted the RTX 3060 run alone
 (2026-09-23), because the RTX 5880 Ada host was committed to other work; the
-G9-06 scope line of that candidate says so. The two-host run below remains the
-procedure for later candidates.
+G9-06 scope line of that candidate says so. The 0.16.0 candidate was recorded
+the same way, the RTX 5880 Ada host remaining committed to other work by the
+owner's instruction. The two-host run below remains the procedure for later
+candidates.
 
 On the RTX 5880 Ada host (platform record
 `docs/validation/platforms/rtx5880-ada-win11-remote.json`; rewrite it with

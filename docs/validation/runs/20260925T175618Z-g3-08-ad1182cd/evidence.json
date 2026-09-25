@@ -1,0 +1,294 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260925T175618Z-g3-08-ad1182cd",
+  "task": "G3-08",
+  "stage": "G3",
+  "task_title": "Bloch grating·회절과 독립 RCWA",
+  "command": "$env:TORCHFDTD_G3_FULL='1'; $env:TORCHFDTD_G3_RECORD='D:/torchfdtd-rc-wt/docs/validation/g3/r2'; D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_physics_g3_b.py D:/torchfdtd-rc-wt/tests/test_physics_g3_b_r2.py -k \"g3_08 and not g3_08_grating_cuda_layer_a\" --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G3-08.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-26T02:26:18.416540+09:00",
+  "recorded_at": "2026-09-25T17:56:18+00:00",
+  "source_commit": "2c5f3754c0470b2888d02462d6d2305a5098326a",
+  "source_commit_time": "2026-09-26T00:18:35+09:00",
+  "source_tree_sha256": "510aa23d32d9187fd638a7db6108e317247d114470e7f2e56a02d9183ae1e728",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "5d2fb7eac934221d9a04bce9d8128da4e53eba2a7c7ca76501b22f3dbb6337d1",
+      "head_sha256": "f4a33ca7d37f18eeba49b9ac33f9c2577e4192f5e32b79a11d679453a062575f"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "57c2f728fcddc7cc21272b5204474769cf25a84b435292818e89860ac52b6d2b",
+      "head_sha256": "8254f678d2bfe2da2940e772e60030b237b372f639336e595e4b0dde64900d28"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0a1db11fbc191d0de4cd05575810fcec35f52a1f7025b8ff4fa5075d874aadd9",
+      "head_sha256": "3d3557eb215787b4290a06b6333d6eb66db09fc4441da7c6cb01c5315fedbea8"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "00d57966e826b74da4d5947bfac27df491e3ab9b1935ea4305e2bb2e51d17b26",
+      "head_sha256": "1715d62d5815e18e340c05f367d302204012e3eb9c5c5a79fd196494f7d2516c"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd",
+  "package_path": "D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_physics_g3_b.py": "8790681b54d6c2527b5ddb072ad3579bc0b0e0535ae592e388631e8433ced029",
+    "tests/test_physics_g3_b_r2.py": "589426764047cf4041f674f929729423920b044e34a66d16bf98cf9ecbf43e2a"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "docs/validation/cases/G3-08*.json",
+    "docs/validation/g3/G3-08_torcwa_reference.json",
+    "benchmarks/g3_torcwa_grating.py"
+  ],
+  "watch_sha256": {
+    "benchmarks/g3_torcwa_grating.py": "6bbb2e553e39a9f8d97aa7499f2d7ad3752fa281ff4d58b3227d87f0c39c9563",
+    "docs/validation/cases/G3-08_bloch_grating_rcwa.json": "54ba1dadb928a7ce258f2053efc53d4edf9bc7e5266ef979864561dde7226b21",
+    "docs/validation/cases/G3-08_bloch_grating_rcwa.oracles.json": "e1e4eec3bc6db8e79d30c458b2f9071526c5aa2d8715bed94dac84afd742a6e9",
+    "docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json": "bc11b2501ed91e247ab6a9b1a2ee21d17543d83682c9d7e91ba2f1638def4f74",
+    "docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.oracles.json": "a83a3e6553232015b330536c37077e3cd7232406a86c79a7e4fbfd77e9572901",
+    "docs/validation/g3/G3-08_torcwa_reference.json": "970ca2145af90a70074a8eaf58d430e6e0cdd1b617eeaf9667e58e5308b11e19"
+  },
+  "fixture_path": "docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json",
+  "fixture_sha256": "bc11b2501ed91e247ab6a9b1a2ee21d17543d83682c9d7e91ba2f1638def4f74",
+  "acceptance_criteria_path": "docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json",
+  "acceptance_criteria_sha256": "bc11b2501ed91e247ab6a9b1a2ee21d17543d83682c9d7e91ba2f1638def4f74",
+  "case_first_commit": "75f781df14a7a1e1c89475693dccd6322fc0ba27",
+  "case_first_commit_time": "2026-09-22T03:35:55+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32 (CUDA, judged)",
+    "float64 (CPU, layer A at h = 0.01 um)"
+  ],
+  "backend": [
+    "cuda",
+    "cpu"
+  ],
+  "physics_configuration": {
+    "method": "2D TorchFDTD run (period along x, propagation along +y, ridges along the invariant z) with Bloch boundaries on x, native CPML on y, a soft Bloch plane sheet below the grating and three line monitors: incident (empty run only), reflection between source and grating, transmission beyond the grating. The lines are lifted to a two-sample z-invariant plane and decomposed with the native torchfdtd.radiation.diffraction_orders (E and H separation into forward and backward Rayleigh orders). Efficiency = order power / forward zero-order power of the incident monitor in the matched empty-cell run; the reflected field is the sample minus the empty-cell field. Phases: transmitted amplitude propagated from the transmission line to the grating exit face, reflected amplitude propagated from the reflection line to the grating entrance face, both divided by the incident amplitude propagated from the incident line to the entrance face, using the continuum k_y of each order; TE compares Ez, TM compares Ex. Interface method subpixel (axis-aligned faces have exact fractions), Yee material sampling; the staircase interface is recorded as a control.",
+    "period_um": 1.2,
+    "fill": 0.5,
+    "height_um": 0.5,
+    "index": 2.0,
+    "superstrate_and_substrate": "vacuum on both sides (freestanding grating)",
+    "wavelengths_um": [
+      0.92,
+      1.02,
+      1.06
+    ],
+    "angles_deg": [
+      0.0,
+      20.0
+    ],
+    "wavelength_selection": "chosen from a TORCWA zero-order scan (0.55 to 1.2 um, both angles) so that no propagating order lies within 10 percent of grazing and no sharp guided-mode resonance (width below 0.02 um) falls on the three points; the scan is not part of the record",
+    "incidence": "the Bloch wavevector is fixed per run at k_x = k_0 sin(20 deg) of the run's own wavelength, so each oblique run is judged at its own wavelength only (fixed-k Bloch injection is not fixed-angle); the normal-incidence runs are judged at all three wavelengths",
+    "propagating_orders": {
+      "0deg": [
+        -1,
+        0,
+        1
+      ],
+      "20deg": [
+        -1,
+        0
+      ]
+    },
+    "domain_y_um": 2.2,
+    "pml_um": 0.4,
+    "source_y_um": -0.6,
+    "incident_y_um": -0.45,
+    "reflection_y_um": -0.3,
+    "grating_center_y_um": 0.15,
+    "transmission_y_um": 0.6,
+    "pulse_length_s": 5e-15,
+    "pulse_offset_s": 1.5e-14,
+    "duration_fs": 300,
+    "fast_duration_fs": 150,
+    "duration_note": "150 fs left zero-order efficiency offsets of about 0.002 in an exploratory run; 300 fs is declared for every judged and layer-A row and 150 fs is recorded as a control",
+    "mesh_sequence_um": [
+      0.01,
+      0.005
+    ],
+    "judged_mesh_um": 0.005,
+    "grids": [
+      "120 x 220",
+      "240 x 440 (105,600 cells, below the 48^3 cap)"
+    ],
+    "judged_execution": "CUDA FP32 (torch kernel, complex Bloch fields) at h = 0.005 um",
+    "layer_a": "the same discrete problem at h = 0.01 um in CPU FP64 and CUDA FP32 for all eight configurations; the CPU FP64 rows are also compared with TORCWA and recorded",
+    "controls": "staircase interface at both meshes and the 150 fs duration at h = 0.01 um, normal incidence, both polarizations, recorded and not judged"
+  },
+  "reference_method": "TORCWA 0.1.4.2 rigorous coupled-wave analysis (Kim and Lee, Comput. Phys. Commun. 282, 108552, 2023) run in the C:/anaconda3 interpreter by benchmarks/g3_torcwa_grating.py, complex128, profile sampled at 16384 points with the two edge samples averaged, harmonic sequence 20, 40, 80, 160, 320, 640, oracle at 640 harmonics, stored in docs/validation/g3/G3-08_torcwa_reference.json with the change at the last doubling and a 1/N Richardson estimate per value; empty-layer phase check t = exp(i k_z d) recorded",
+  "observables": [
+    {
+      "name": "efficiency",
+      "unit": "dimensionless",
+      "definition": "transmitted (forward) and reflected (backward) power of every propagating order divided by the incident power"
+    },
+    {
+      "name": "phase_rad",
+      "unit": "rad",
+      "definition": "argument of the face-referenced complex amplitude ratio defined in the method"
+    },
+    {
+      "name": "efficiency_sum",
+      "unit": "dimensionless",
+      "definition": "sum of all propagating transmitted and reflected efficiencies (lossless balance)"
+    },
+    {
+      "name": "empty_cell",
+      "unit": "dimensionless",
+      "definition": "with no grating: forward zero-order transmission at the transmission line relative to the incident line, other orders and the backward zero order"
+    }
+  ],
+  "acceptance_limits": {
+    "efficiency_absolute_error": 0.01,
+    "dominant_order_phase_error_rad": 0.02,
+    "dominant_order_efficiency": 0.05,
+    "lossless_balance_absolute_error": 0.01,
+    "empty_cell": {
+      "normal_incidence": 1e-06,
+      "oblique_incidence": 0.0001,
+      "applies_to": "zero-order transmission error, every other order and the backward zero order",
+      "execution": "CPU FP64 at h = 0.01 um and 150 fs; the same check on CUDA FP32 is recorded against max(limit, layer-A rtol 1e-4) because FP32 roundoff of the DFT fields is of order 1e-5",
+      "source": "completion_gates.json proposed_thresholds pml_normal_reflected_power_ratio and pml_declared_oblique_reflected_power_ratio; a first draft of this case used 1e-6 for both angles, which contradicts the program's oblique PML target and was corrected before the recorded run after a CPU FP64 empty-cell run at 20 degrees returned a 2.7e-6 zero-order deficit"
+    },
+    "oracle_convergence": {
+      "efficiency_change_at_last_doubling": {
+        "TE": 1e-06,
+        "TM": 0.0005
+      },
+      "phase_change_at_last_doubling": {
+        "TE": 1e-06,
+        "TM": 0.002
+      },
+      "note": "TORCWA forms the Toeplitz matrix of epsilon directly (Laurent rule), so its TM sequence converges like 1/N; the TM oracle uncertainty at 640 harmonics is about 4e-4 in efficiency and 1e-3 rad, well inside the limits above"
+    },
+    "judged_at": "subpixel interface, h = 0.005 um, 300 fs, CUDA FP32; the layer-A rows at h = 0.01 um are compared with TORCWA and recorded but not judged; revision 2 re-runs the same judged rows and records them under docs/validation/g3/r2",
+    "layer_a_cuda_fp32_vs_cpu_fp64": {
+      "rtol": 0.0001,
+      "atol": 1e-06,
+      "applied_to": "every propagating transmitted and reflected efficiency: |cuda - cpu| <= rtol * |cpu| + atol",
+      "source": "completion_gates.json proposed_thresholds discrete_dimensionless_fp32 (rtol 1e-4, atol 1e-6); the first case transcribed the pair with atol 0",
+      "applicability_note": "Under the first case the instance TM, 20 degrees, 0.92 um failed with a relative difference of 1.15e-4 on a reflected zero-order efficiency of 0.022, an absolute difference of 2.6e-6; the other eleven configurations were within 1e-4 and all twelve judged physics rows passed. The atol of the program pair covers FP32 roundoff of that size on efficiencies below 0.03 and changes nothing for the efficiencies of order one. The physics criteria are unchanged."
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds slab_R_T_absolute_error, lossless_complete_channel_balance_absolute_error and phase_error_radians_on_predeclared_supported_signal_band; the dominance threshold and the oracle-convergence limits are fixture-specific"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 28,
+    "passed": [
+      "tests/test_physics_g3_b.py::test_g3_08_torcwa_reference_is_converged",
+      "tests/test_physics_g3_b.py::test_g3_08_empty_cell",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TE-0.0-0.92]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TE-0.0-1.02]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TE-0.0-1.06]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TE-20.0-0.92]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TE-20.0-1.02]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TE-20.0-1.06]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TM-0.0-0.92]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TM-0.0-1.02]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TM-0.0-1.06]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TM-20.0-0.92]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TM-20.0-1.02]",
+      "tests/test_physics_g3_b.py::test_g3_08_grating_orders[TM-20.0-1.06]",
+      "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls[TE]",
+      "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls[TM]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-0.0-0.92]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-0.0-1.02]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-0.0-1.06]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-20.0-0.92]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-20.0-1.02]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-20.0-1.06]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-0.0-0.92]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-0.0-1.02]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-0.0-1.06]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-20.0-0.92]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-20.0-1.02]",
+      "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-20.0-1.06]"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 1798.482,
+    "suite_timestamp": "2026-09-26T02:26:18.416540+09:00"
+  },
+  "required_tests": [
+    "tests/test_physics_g3_b.py::test_g3_08_torcwa_reference_is_converged",
+    "tests/test_physics_g3_b.py::test_g3_08_empty_cell",
+    "tests/test_physics_g3_b.py::test_g3_08_grating_orders",
+    "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a",
+    "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-08.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260925T175618Z-g3-08-ad1182cd/junit.xml",
+      "sha256": "98999fb28e5ad166231c5f30ed9a5d6b66dbfe331d7c55b99e2c533b66f55c07",
+      "bytes": 3425,
+      "original_path": ".local/tmp/junit/rerecord/G3-08.xml"
+    }
+  ],
+  "applicable_scope": "Layer B physics of the 2D Bloch grating (subpixel interface, torch CUDA kernel, FP32, RTX 3060) against TORCWA at h = 0.005 um re-run under the revision-2 case, layer A CUDA FP32 against CPU FP64 at h = 0.01 um against rtol 1e-4 and atol 1e-6, staircase and duration controls; the TORCWA oracle at 640 harmonics with its convergence record. re-recorded on 2c5f3754c047 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T202923Z-g3-08-f1c2dff5",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

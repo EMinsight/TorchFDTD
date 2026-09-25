@@ -1,0 +1,297 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260925T181052Z-g4-03-bcf97791",
+  "task": "G4-03",
+  "stage": "G4",
+  "task_title": "noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_cuda_robustness.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G4-03.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-26T03:10:38.244861+09:00",
+  "recorded_at": "2026-09-25T18:10:52+00:00",
+  "source_commit": "2c5f3754c0470b2888d02462d6d2305a5098326a",
+  "source_commit_time": "2026-09-26T00:18:35+09:00",
+  "source_tree_sha256": "825293fa4c6f88da8c1245bbee32ce25e1172e3012fa2dc98153bad13a59f562",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "5d2fb7eac934221d9a04bce9d8128da4e53eba2a7c7ca76501b22f3dbb6337d1",
+      "head_sha256": "f4a33ca7d37f18eeba49b9ac33f9c2577e4192f5e32b79a11d679453a062575f"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "57c2f728fcddc7cc21272b5204474769cf25a84b435292818e89860ac52b6d2b",
+      "head_sha256": "8254f678d2bfe2da2940e772e60030b237b372f639336e595e4b0dde64900d28"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "4afb7a5b9c89b6a4cf95251fa5ad505202e247bbdbc2ca7f0ab02d1f8d16a0aa",
+      "head_sha256": "3c29461e2b15d685eaabd7f347f42482f7ff6b87dc8e6c355019d2013bb691e7"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0a1db11fbc191d0de4cd05575810fcec35f52a1f7025b8ff4fa5075d874aadd9",
+      "head_sha256": "3d3557eb215787b4290a06b6333d6eb66db09fc4441da7c6cb01c5315fedbea8"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "00d57966e826b74da4d5947bfac27df491e3ab9b1935ea4305e2bb2e51d17b26",
+      "head_sha256": "1715d62d5815e18e340c05f367d302204012e3eb9c5c5a79fd196494f7d2516c"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd",
+  "package_path": "D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_cuda_robustness.py": "69773c86c48a9bcdd428fad72d9f8052a87c12114fbe06e8ef1c36db988c9eb3"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G4-03_cuda_robustness.json",
+  "fixture_sha256": "4140be1601fdec139ca6283dcb0cec8625e34ad3098d320353be4e299c7a5f84",
+  "acceptance_criteria_path": "docs/validation/cases/G4-03_cuda_robustness.json",
+  "acceptance_criteria_sha256": "4140be1601fdec139ca6283dcb0cec8625e34ad3098d320353be4e299c7a5f84",
+  "case_first_commit": "a73f47920e9c24a3a77164e1cf74a6dc5d39927f",
+  "case_first_commit_time": "2026-09-22T01:30:25+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float64"
+  ],
+  "backend": [
+    "cuda"
+  ],
+  "physics_configuration": {
+    "problem": "the G4-02 problem: 20 x 18 x 16 cells, 0.1 um mesh, 4 CPML cells, index-1.5 sphere, Ez point source, Ez point monitor, x-normal plane DFT with three frequencies, float64",
+    "size_um": [
+      2.0,
+      1.8,
+      1.6
+    ],
+    "mesh_um": 0.1,
+    "pml_cells": 4,
+    "steps": 60,
+    "sphere_index": 1.5,
+    "sphere_center_um": [
+      0.2,
+      0.1,
+      -0.1
+    ],
+    "sphere_radius_um": 0.3,
+    "source_um": [
+      -0.4,
+      0.0,
+      0.1
+    ],
+    "wavelength_um": 1.0,
+    "point_monitor_um": [
+      0.5,
+      -0.1,
+      0.2
+    ],
+    "plane_x_um": 0.6,
+    "plane_size_um": [
+      1.0,
+      0.8
+    ],
+    "plane_frequency_points": 3,
+    "adjoint_checkpoints": 2,
+    "cancel_after_steps": 5,
+    "checks": {
+      "noncontiguous_inputs": "epsilon as a permuted view of a transposed copy and as a stride-2 slice of a larger tensor, through DifferentiableSimulation forward and backward",
+      "noncontiguous_rejection": "FusedYeeCUDA on a grid whose E is a transposed view, and _direct_cuda_view on a strided or CPU tensor",
+      "duplicate_observers": "the point monitor and the plane monitor registered twice under different ids in Simulation (torch/torch/eager and fused/fused/graph); duplicate point monitors in the adjoint with torch and fused backward",
+      "repeated_calls": "two runs of one Simulation object with the same graph setting and one with the opposite setting; two forward calls of one DifferentiableSimulation, two torch.autograd.grad calls on one graph with retain_graph, one on the other graph, and a .backward accumulation",
+      "input_lifetime": "the host numpy array and its CPU tensor are deleted after the CUDA upload and confirmed collected by a weak reference before the run",
+      "stream_synchronization": "the whole run inside torch.cuda.stream(side) for torch/fused kernels with graphs off and on, and the adjoint with torch and fused backward",
+      "cancellation": "threading.Event set from the first progress callback at step 5; the run must report cancelled at that step",
+      "exception": "a progress callback that raises RuntimeError at step 5; a backward with create_graph=True which the discrete adjoint refuses",
+      "allocator": "torch.cuda.memory_allocated() after gc.collect() and torch.cuda.synchronize(), against a baseline taken after one warm-up run of the same configuration"
+    }
+  },
+  "reference_method": "self-consistency of the CUDA path: the contiguous, single-observer, first-call, default-stream, uncancelled run of the same discrete problem on the same device; the G4-02 case ties that run to the CPU float64 solution",
+  "observables": [
+    {
+      "name": "forward identity",
+      "unit": "boolean",
+      "definition": "numpy.testing.assert_array_equal on E, H, signals, frames, frame steps, plane DFT fields and flux (bitwise)"
+    },
+    {
+      "name": "signal identity",
+      "unit": "boolean",
+      "definition": "torch.equal on adjoint signals (bitwise)"
+    },
+    {
+      "name": "gradient agreement",
+      "unit": "dimensionless",
+      "definition": "epsilon gradient against the reference gradient, or against twice it for duplicate observers and accumulation"
+    },
+    {
+      "name": "leaked_bytes",
+      "unit": "bytes",
+      "definition": "torch.cuda.memory_allocated() after cleanup minus the warm baseline"
+    },
+    {
+      "name": "termination",
+      "unit": "string",
+      "definition": "summary.termination_reason, summary.cancelled and summary.steps of the cancelled run"
+    }
+  ],
+  "acceptance_limits": {
+    "float64": {
+      "rtol": 1e-07,
+      "atol": 1e-09
+    },
+    "identity": "forward results and adjoint signals are bitwise identical to the reference run; noncontiguous epsilon views give bitwise identical signals and gradients",
+    "gradients": "duplicate-observer, repeated-call, accumulated and side-stream gradients agree with the reference gradient within rtol 1e-7 and atol 1e-9 times max |gradient_ref|",
+    "allocator": {
+      "tolerance_bytes": 0,
+      "definition": "no torch CUDA bytes remain allocated after a cancelled run or after an exception, relative to the warm baseline"
+    },
+    "cancellation": "termination_reason 'cancelled', cancelled true, 0 < steps < 60, exactly one progress event at the cancelled step, signals truncated to that step",
+    "rejection_policy": "numpy input, float16, complex, mismatched precision, wrong shape, epsilon < 1, NaN, a string cuda_graph_steps and an unknown checkpoint storage each raise ValueError with the named message; noncontiguous fused-kernel grid arrays raise ValueError 'Fused CUDA arrays must be contiguous'; strided or CPU tensors raise ValueError 'Direct CUDA views require contiguous'",
+    "source_of_limits": "completion_gates.json proposed_thresholds discrete_dimensionless_fp64; the allocator tolerance of zero bytes and the bitwise identities are fixture-specific budgets declared here before the run"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 29,
+    "passed": [
+      "tests/test_cuda_robustness.py::test_noncontiguous_epsilon_views_match_contiguous[transposed]",
+      "tests/test_cuda_robustness.py::test_noncontiguous_epsilon_views_match_contiguous[sliced]",
+      "tests/test_cuda_robustness.py::test_fused_kernel_rejects_noncontiguous_grid_arrays",
+      "tests/test_cuda_robustness.py::test_duplicate_observers_record_identical_copies[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_duplicate_observers_record_identical_copies[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_duplicate_point_monitor_gradients_accumulate[torch]",
+      "tests/test_cuda_robustness.py::test_duplicate_point_monitor_gradients_accumulate[fused]",
+      "tests/test_cuda_robustness.py::test_repeated_runs_of_one_simulation_object_agree[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_repeated_runs_of_one_simulation_object_agree[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_repeated_forward_and_backward_on_one_model[torch]",
+      "tests/test_cuda_robustness.py::test_repeated_forward_and_backward_on_one_model[fused]",
+      "tests/test_cuda_robustness.py::test_host_input_released_after_upload_still_runs",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[torch-torch-True]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[fused-fused-False]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_identical_adjoint[torch]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_identical_adjoint[fused]",
+      "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[torch-torch-True]",
+      "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[fused-fused-False]",
+      "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[torch-torch-True]",
+      "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[fused-fused-False]",
+      "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_exception_in_backward_releases_every_allocation[torch]",
+      "tests/test_cuda_robustness.py::test_exception_in_backward_releases_every_allocation[fused]",
+      "tests/test_cuda_robustness.py::test_unsupported_inputs_are_rejected_by_name"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 10.094,
+    "suite_timestamp": "2026-09-26T03:10:38.244861+09:00"
+  },
+  "required_tests": [
+    "tests/test_cuda_robustness.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_cuda_robustness.py": [
+      "tests/test_cuda_robustness.py::test_noncontiguous_epsilon_views_match_contiguous[transposed]",
+      "tests/test_cuda_robustness.py::test_noncontiguous_epsilon_views_match_contiguous[sliced]",
+      "tests/test_cuda_robustness.py::test_fused_kernel_rejects_noncontiguous_grid_arrays",
+      "tests/test_cuda_robustness.py::test_duplicate_observers_record_identical_copies[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_duplicate_observers_record_identical_copies[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_duplicate_point_monitor_gradients_accumulate[torch]",
+      "tests/test_cuda_robustness.py::test_duplicate_point_monitor_gradients_accumulate[fused]",
+      "tests/test_cuda_robustness.py::test_repeated_runs_of_one_simulation_object_agree[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_repeated_runs_of_one_simulation_object_agree[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_repeated_forward_and_backward_on_one_model[torch]",
+      "tests/test_cuda_robustness.py::test_repeated_forward_and_backward_on_one_model[fused]",
+      "tests/test_cuda_robustness.py::test_host_input_released_after_upload_still_runs",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[torch-torch-True]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[fused-fused-False]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_identical_adjoint[torch]",
+      "tests/test_cuda_robustness.py::test_caller_stream_gives_identical_adjoint[fused]",
+      "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[torch-torch-True]",
+      "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[fused-fused-False]",
+      "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[torch-torch-False]",
+      "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[torch-torch-True]",
+      "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[fused-fused-False]",
+      "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[fused-fused-True]",
+      "tests/test_cuda_robustness.py::test_exception_in_backward_releases_every_allocation[torch]",
+      "tests/test_cuda_robustness.py::test_exception_in_backward_releases_every_allocation[fused]",
+      "tests/test_cuda_robustness.py::test_unsupported_inputs_are_rejected_by_name"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G4-03.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260925T181052Z-g4-03-bcf97791/junit.xml",
+      "sha256": "aaf55d512c0aad091100c9a78784578ae94e9732ecc0183f55a2ab29c55859eb",
+      "bytes": 4124,
+      "original_path": ".local/tmp/junit/rerecord/G4-03.xml"
+    }
+  ],
+  "applicable_scope": "G4-03 on the RTX 3060: noncontiguous epsilon views, duplicate observers, repeated forward/backward, released host inputs, caller stream, cancellation and exceptions with zero-byte allocator residue, named rejections, on the 20x18x16 float64 problem with torch and fused kernels, graphs off and on; not run on the RTX 5880 Ada re-recorded on 2c5f3754c047 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T213916Z-g4-03-76bb26f3",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

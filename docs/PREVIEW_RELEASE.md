@@ -1,6 +1,6 @@
 # Private development preview
 
-Version: **0.15.0**. Repository:
+Version: **0.16.0**. Repository:
 [hyoseokp/TorchFDTD](https://github.com/hyoseokp/TorchFDTD).
 
 This repository is staged privately under the user's GitHub account. It is an
@@ -47,7 +47,7 @@ For the current TorchFDTD APIs, build a wheel from the current checkout:
 ```sh
 python scripts/build_preview.py
 cd dist/private-preview
-python -m pip install torchfdtd-0.15.0-py3-none-any.whl
+python -m pip install torchfdtd-0.16.0-py3-none-any.whl
 torchfdtd serve
 ```
 

@@ -18,6 +18,7 @@ from .cuda_graph import validate_graph_steps
 from .models import Project
 from .solver import estimate
 from .tensor_batch import _topology, run_tensor_batch
+from .cuda_memory import cuda_mem_info
 
 
 def _cases(cases):
@@ -113,7 +114,7 @@ def run_grouped_batch(cases, *, cohort_size=4, objective=None, output_dir=None,
     if root is not None and root.exists():
         raise FileExistsError('Grouped batch output directory exists. Use a new directory.')
     with torch.cuda.device(device):
-        free, _ = torch.cuda.mem_get_info()
+        free, _ = cuda_mem_info()
         plan = _plan(cases, cohort_size, int(free * memory_fraction))
         plan['planning_seconds'] = time.perf_counter() - start
         if root is not None:
