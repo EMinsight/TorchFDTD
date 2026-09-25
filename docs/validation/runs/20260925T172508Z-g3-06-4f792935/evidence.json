@@ -1,0 +1,330 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260925T172508Z-g3-06-4f792935",
+  "task": "G3-06",
+  "stage": "G3",
+  "task_title": "PEC/PMC cavity·symmetry와 gradient mapping",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_cavity_resonance.py D:/torchfdtd-rc-wt/tests/test_pec_boundaries.py D:/torchfdtd-rc-wt/tests/test_pmc_general.py D:/torchfdtd-rc-wt/tests/test_pmc_dispersive.py D:/torchfdtd-rc-wt/tests/test_pmc_reference.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G3-06.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-26T02:23:56.524373+09:00",
+  "recorded_at": "2026-09-25T17:25:08+00:00",
+  "source_commit": "2c5f3754c0470b2888d02462d6d2305a5098326a",
+  "source_commit_time": "2026-09-26T00:18:35+09:00",
+  "source_tree_sha256": "60e1ab0c37f1fa699f1e8d30dfd59cebbb6f7f34a6d0d153a00a3249b9c26d7c",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "5d2fb7eac934221d9a04bce9d8128da4e53eba2a7c7ca76501b22f3dbb6337d1",
+      "head_sha256": "f4a33ca7d37f18eeba49b9ac33f9c2577e4192f5e32b79a11d679453a062575f"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "57c2f728fcddc7cc21272b5204474769cf25a84b435292818e89860ac52b6d2b",
+      "head_sha256": "8254f678d2bfe2da2940e772e60030b237b372f639336e595e4b0dde64900d28"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd",
+  "package_path": "D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_cavity_resonance.py": "9ec12d6a8271596346c30190745f840583308d9200ba789246e146a004569cd8",
+    "tests/test_pec_boundaries.py": "bd63edd06c2ecf5b8f32a86f82168e2257d4b7561ff583caea7cc32eb59de53b",
+    "tests/test_pmc_general.py": "51afa4d2e7eb19713c76c7d6418b4e1e7e6467a81ceb804245474c11fda3cfe8",
+    "tests/test_pmc_dispersive.py": "7bd298af186ef45a10be5ab3dc9b6b6e4ac82f52bc7fd84db699c05c41bfde75",
+    "tests/test_pmc_reference.py": "f248d3d079d14d879af595694dfa68061062003f2405fa8ac3e02c9beb769c86"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G3-06_pec_pmc_cavity.json",
+  "fixture_sha256": "1733a4f1c1fa27358e07080af73fe315239a197b1e1a47c6f9fd37fd13030f92",
+  "acceptance_criteria_path": "docs/validation/cases/G3-06_pec_pmc_cavity.json",
+  "acceptance_criteria_sha256": "1733a4f1c1fa27358e07080af73fe315239a197b1e1a47c6f9fd37fd13030f92",
+  "case_first_commit": "5c0172da60d27ad0e5aa6906910ae256e53de1f6",
+  "case_first_commit_time": "2026-09-22T01:25:18+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": {
+    "mirrored_epsilon": 7,
+    "gradient_direction": 11,
+    "gradient_epsilon": 3,
+    "cavity_resonance": "deterministic, no random input"
+  },
+  "precision": [
+    "float32",
+    "float64 for the adjoint Taylor checks"
+  ],
+  "backend": [
+    "cpu",
+    "cuda for the endpoint-solver, streamed and tensor-batch comparisons"
+  ],
+  "physics_configuration": {
+    "cavity_resonance": "tests/test_cavity_resonance.py: closed PEC cube of 8 cells at 0.1 um (0.8 um side), uniform permittivity n^2 for n in {1.0, 1.5}, float32 Yee path (DifferentiableSimulation, torch kernel, CPU), 4000 steps at dt = 0.99/sqrt(3)*0.1 um/c = 1.9066e-16 s (763 fs, about 200 TM110 periods), Ez point source at the central Ez node with a 2-cycle Gaussian pulse centred on the continuum TM110 wavelength, two Ez point monitors at Yee indices (3,2,3) and (5,3,1); the spectrum is the time-integral DFT of the monitor signal with the first 600 steps (source interval, past 8 sigma of the pulse for both indices) zeroed, searched on a 601-point grid over 0.85 to 1.15 of the continuum frequency, refined on a 401-point grid over two coarse steps and by parabolic interpolation",
+    "discrete_eigenmode_marching": "tests/test_pec_boundaries.py (16^3 cells, 0.1 um, PEC or antisymmetric on one axis, periodic on the others, float32 NumPy YeeGrid, courant 0.99/sqrt(3), 35 steps, exact standing-wave initial condition q = pi/16); tests/test_pmc_general.py (12x6x6 cells with PMC/PEC/PMC faces, float32, 35 reference steps); tests/test_pmc_reference.py (6^3 nodes, dimensionless dt 0.3, five PEC/PMC parity cases, 24 steps)",
+    "symmetry_reduction": "tests/test_pmc_general.py and tests/test_pmc_dispersive.py mirrored pairs: half domains 12x6x6 or 6x12x6 cells with PMC on the mirrored upper faces and a CPML axis that is not mirrored, full domains 12x12x12 cells with PEC on both ends, image sources with 180 degree phase for odd images, random epsilon 1.5+U(0,1) seed 7, two Lorentz poles (omega0 2e15 and 3e15 rad/s, gamma 1e14 and 3e14 rad/s) in the dispersive twin, 16 steps, float32, CPU; tests/test_pec_boundaries.py reduced 16 cells versus doubled 32-cell periodic domain",
+    "independent_endpoint_solver": "tests/test_pmc_general.py cavity_scene: 8x7x6 cells with PEC/PMC faces, glass block n = 1.7, Ez continuous and Ey Gaussian sources at 0.5 um, six point monitors including upper-face and edge samples, 40 steps, float32, CPU and CUDA",
+    "boundaries": "PEC and PMC at mesh endpoints with stored upper PMC face and edge arrays; no PML in the eigenmode and resonance fixtures; CPML on the non-mirrored axis of the symmetry fixtures",
+    "pml": "none in the cavity fixtures; 3 to 4 CPML layers on the non-mirrored axis of the mirrored pairs"
+  },
+  "reference_method": "Discrete oracle: closed-form Yee dispersion of the cavity eigenmode, omega dt = 2 asin((S/n) sqrt(sum_i sin^2(q_i/2))) with S = c dt/h and q_i = m_i pi/N_i, derived independently of the update code. Continuum oracle: omega = (c/n) pi sqrt(sum_i (m_i/L_i)^2). Symmetry oracle: the full mirrored domain solved by full Torch autograd through the same discretisation, folded onto the half domain. Independent implementation: the sparse-incidence exact-endpoint PEC/PMC engine of Simulation.run against the stored-face Yee path.",
+  "observables": [
+    {
+      "name": "tm110_resonance_relative_error_discrete",
+      "unit": "dimensionless",
+      "definition": "|f_peak/f_discrete - 1| for the spectrum peak of each monitor (tests/test_cavity_resonance.py)"
+    },
+    {
+      "name": "tm110_resonance_relative_error_continuum",
+      "unit": "dimensionless",
+      "definition": "|f_peak/f_continuum - 1|; the difference from the discrete error is the analytic numerical dispersion of the 8-cell cube, 0.225 percent for n = 1 and 0.457 percent for n = 1.5"
+    },
+    {
+      "name": "eigenmode_phase_advance",
+      "unit": "reduced field",
+      "definition": "E after N steps against E0 cos(N omega_discrete dt) at every node including stored PMC faces"
+    },
+    {
+      "name": "half_versus_full_signals",
+      "unit": "reduced field",
+      "definition": "monitor signals of the PMC half domain against the PEC full domain"
+    },
+    {
+      "name": "folded_gradient",
+      "unit": "d objective / d epsilon",
+      "definition": "adjoint gradient of the half domain against the full-domain autograd gradient folded over the images; wall rows nonzero, inert padding rows exactly zero"
+    },
+    {
+      "name": "endpoint_solver_signals",
+      "unit": "reduced field",
+      "definition": "stored-face Yee signals against the exact-endpoint engine"
+    }
+  ],
+  "acceptance_limits": {
+    "cavity_resonance": {
+      "discrete_relative_error_max": 0.001,
+      "continuum_relative_error_max": 0.01,
+      "discrimination": "the measured peak must lie closer to the discrete than to the continuum eigenfrequency",
+      "source_of_limits": "continuum: completion_gates.json cavity_resonant_frequency_relative_error; discrete: estimator floor declared from the DFT grid spacing 5e-6 f and the leakage of the next excited mode at 1.73 f and of the negative-frequency image, both below 1e-4"
+    },
+    "eigenmode_phase_advance": {
+      "float32": {
+        "atol": 3e-06,
+        "rtol": 3e-06,
+        "where": "tests/test_pec_boundaries.py"
+      },
+      "pmc": {
+        "atol": 4e-06,
+        "rtol": 4e-06,
+        "where": "tests/test_pmc_general.py"
+      },
+      "pmc_reference": {
+        "atol": 2e-06,
+        "rtol": 3e-05,
+        "where": "tests/test_pmc_reference.py"
+      },
+      "note": "tighter than the program's float32 discrete limit rtol 1e-4, atol 1e-6 on the rtol side; the absolute floor 2e-6 to 4e-6 is the float32 round-off after 24 to 35 steps"
+    },
+    "symmetry_reduction": {
+      "signals": {
+        "atol": 4e-06,
+        "rtol": 4e-05
+      },
+      "folded_gradient": {
+        "atol": "2e-6 times max |expected|",
+        "rtol": 4e-05
+      },
+      "reduced_versus_doubled_fields": {
+        "atol": 4e-06,
+        "rtol": 4e-06
+      },
+      "note": "recorded budgets of the repository; the rtol 4e-5 is within the program's float32 rtol 1e-4"
+    },
+    "independent_endpoint_solver": {
+      "rtol": 3e-05,
+      "atol": 2e-06
+    },
+    "adjoint_taylor_float64": {
+      "autograd": {
+        "atol": 1e-12,
+        "rtol": 1e-09
+      },
+      "central_difference_sweep": "h in (4e-3, 2e-3, 1e-3): last error below 1e-6 |directional derivative| and errors[0] > 3 errors[1] > 9 errors[2]"
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds cavity_resonant_frequency_relative_error 0.01 and discrete_dimensionless_fp32 / fp64; the tighter recorded assertions are not loosened by this case"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 93,
+    "passed": [
+      "tests/test_cavity_resonance.py::test_pec_cavity_tm110_resonance_matches_discrete_then_continuum_eigenfrequency[1.0]",
+      "tests/test_cavity_resonance.py::test_pec_cavity_tm110_resonance_matches_discrete_then_continuum_eigenfrequency[1.5]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[1-pec-0]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[1-pec-1]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[1-pec-2]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[1-antisymmetric-0]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[1-antisymmetric-1]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[1-antisymmetric-2]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[2-pec-0]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[2-pec-1]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[2-pec-2]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[2-antisymmetric-0]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[2-antisymmetric-1]",
+      "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction[2-antisymmetric-2]",
+      "tests/test_pec_boundaries.py::test_exact_curl_transpose[False]",
+      "tests/test_pec_boundaries.py::test_exact_curl_transpose[True]",
+      "tests/test_pec_boundaries.py::test_forbidden_wall_forcing_and_subpixel_are_rejected",
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint[False-cpu]",
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint[False-cuda]",
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint[True-cpu]",
+      "tests/test_pec_boundaries.py::test_resident_and_streamed_adjoint[True-cuda]",
+      "tests/test_pec_boundaries.py::test_magnetic_wall_rejects_periodic_endpoint_mixing[pmc]",
+      "tests/test_pec_boundaries.py::test_magnetic_wall_rejects_periodic_endpoint_mixing[symmetric]",
+      "tests/test_pec_boundaries.py::test_nonuniform_pec_metric_and_transpose[0]",
+      "tests/test_pec_boundaries.py::test_nonuniform_pec_metric_and_transpose[1]",
+      "tests/test_pec_boundaries.py::test_nonuniform_pec_metric_and_transpose[2]",
+      "tests/test_pec_boundaries.py::test_real_cuda_batch_reuses_pec_physics",
+      "tests/test_pec_boundaries.py::test_vector_source_secondary_wall_component_rejected[Ex-45-90]",
+      "tests/test_pec_boundaries.py::test_vector_source_secondary_wall_component_rejected[Hy-90-0]",
+      "tests/test_pec_boundaries.py::test_compound_oneway_sources_do_not_bypass_mirror_guard[plane]",
+      "tests/test_pec_boundaries.py::test_compound_oneway_sources_do_not_bypass_mirror_guard[tfsf]",
+      "tests/test_pec_boundaries.py::test_three_dimensional_pec_edges_and_corners_preserve_constraints",
+      "tests/test_pmc_general.py::test_pmc_cavity_eigenmode_follows_discrete_dispersion[0]",
+      "tests/test_pmc_general.py::test_pmc_cavity_eigenmode_follows_discrete_dispersion[1]",
+      "tests/test_pmc_general.py::test_pmc_cavity_eigenmode_follows_discrete_dispersion[2]",
+      "tests/test_pmc_general.py::test_yee_faces_match_independent_exact_endpoint_solver[cpu]",
+      "tests/test_pmc_general.py::test_yee_faces_match_independent_exact_endpoint_solver[cuda]",
+      "tests/test_pmc_general.py::test_face_curl_transpose_with_nonzero_psi[False]",
+      "tests/test_pmc_general.py::test_face_curl_transpose_with_nonzero_psi[True]",
+      "tests/test_pmc_general.py::test_symmetric_half_domain_matches_mirrored_full_domain[upper_yz_edge]",
+      "tests/test_pmc_general.py::test_symmetric_half_domain_matches_mirrored_full_domain[upper_x_lower_z]",
+      "tests/test_pmc_general.py::test_per_face_cpml_profiles_are_independent_next_to_pmc",
+      "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64",
+      "tests/test_pmc_general.py::test_cuda_adjoint_matches_autograd_and_central_differences[float32]",
+      "tests/test_pmc_general.py::test_cuda_adjoint_matches_autograd_and_central_differences[float64]",
+      "tests/test_pmc_general.py::test_checkpoint_tiers_carry_face_state[host]",
+      "tests/test_pmc_general.py::test_checkpoint_tiers_carry_face_state[disk]",
+      "tests/test_pmc_general.py::test_streamed_matches_resident_with_pmc_faces[host-cpu]",
+      "tests/test_pmc_general.py::test_streamed_matches_resident_with_pmc_faces[host-cuda]",
+      "tests/test_pmc_general.py::test_streamed_matches_resident_with_pmc_faces[disk-cpu]",
+      "tests/test_pmc_general.py::test_streamed_matches_resident_with_pmc_faces[disk-cuda]",
+      "tests/test_pmc_general.py::test_streamed_cpu_float64_and_wall_source_ownership",
+      "tests/test_pmc_general.py::test_tensor_batch_matches_single_and_keeps_stored_faces",
+      "tests/test_pmc_general.py::test_cpml_reflection_next_to_pmc_faces",
+      "tests/test_pmc_general.py::test_rejected_combinations_raise_explicitly",
+      "tests/test_pmc_general.py::test_plane_source_on_a_stored_face_is_refused_before_any_field_allocation",
+      "tests/test_pmc_general.py::test_tensor_batch_rejects_unsupported_pmc_features",
+      "tests/test_pmc_dispersive.py::test_dispersive_half_domain_matches_mirrored_full_domain[upper_yz_edge]",
+      "tests/test_pmc_dispersive.py::test_dispersive_half_domain_matches_mirrored_full_domain[upper_x_lower_z]",
+      "tests/test_pmc_dispersive.py::test_dispersive_adjoint_taylor_check_float64",
+      "tests/test_pmc_dispersive.py::test_cuda_dispersive_adjoint_matches_autograd[False-float32]",
+      "tests/test_pmc_dispersive.py::test_cuda_dispersive_adjoint_matches_autograd[False-float64]",
+      "tests/test_pmc_dispersive.py::test_cuda_dispersive_adjoint_matches_autograd[True-float32]",
+      "tests/test_pmc_dispersive.py::test_cuda_dispersive_adjoint_matches_autograd[True-float64]",
+      "tests/test_pmc_dispersive.py::test_checkpoint_tiers_carry_face_pole_state[host]",
+      "tests/test_pmc_dispersive.py::test_checkpoint_tiers_carry_face_pole_state[disk]",
+      "tests/test_pmc_dispersive.py::test_streamed_dispersive_matches_resident_with_pmc_faces[host-cpu]",
+      "tests/test_pmc_dispersive.py::test_streamed_dispersive_matches_resident_with_pmc_faces[host-cuda]",
+      "tests/test_pmc_dispersive.py::test_streamed_dispersive_matches_resident_with_pmc_faces[disk-cpu]",
+      "tests/test_pmc_dispersive.py::test_streamed_dispersive_matches_resident_with_pmc_faces[disk-cuda]",
+      "tests/test_pmc_dispersive.py::test_tensor_batch_face_ade_banks_match_resident",
+      "tests/test_pmc_dispersive.py::test_dispersive_pmc_rejections_are_exact",
+      "tests/test_pmc_reference.py::test_unique_face_edge_ownership_and_payload_bytes",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[0-faces0]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[0-faces1]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[0-faces2]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[0-faces3]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[0-faces4]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[1-faces0]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[1-faces1]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[1-faces2]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[1-faces3]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[1-faces4]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[2-faces0]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[2-faces1]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[2-faces2]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[2-faces3]",
+      "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain[2-faces4]",
+      "tests/test_pmc_reference.py::test_explicit_step_transpose_and_shared_material_gradient[False]",
+      "tests/test_pmc_reference.py::test_explicit_step_transpose_and_shared_material_gradient[True]",
+      "tests/test_pmc_reference.py::test_actual_endpoint_geometry_sampler_and_gradient",
+      "tests/test_pmc_reference.py::test_magnetic_wall_never_falls_through_to_ordinary_yee",
+      "tests/test_pmc_reference.py::test_nonuniform_endpoint_material_sharing_is_explicit"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 70.708,
+    "suite_timestamp": "2026-09-26T02:23:56.524373+09:00"
+  },
+  "required_tests": [
+    "tests/test_cavity_resonance.py::test_pec_cavity_tm110_resonance_matches_discrete_then_continuum_eigenfrequency",
+    "tests/test_pec_boundaries.py::test_cavity_eigenmode_and_full_domain_reduction",
+    "tests/test_pmc_general.py::test_pmc_cavity_eigenmode_follows_discrete_dispersion",
+    "tests/test_pmc_reference.py::test_exact_cavity_and_doubled_domain",
+    "tests/test_pmc_general.py::test_symmetric_half_domain_matches_mirrored_full_domain",
+    "tests/test_pmc_dispersive.py::test_dispersive_half_domain_matches_mirrored_full_domain",
+    "tests/test_pmc_general.py::test_yee_faces_match_independent_exact_endpoint_solver",
+    "tests/test_pmc_general.py::test_adjoint_gradient_taylor_check_float64",
+    "tests/test_pmc_general.py::test_cuda_adjoint_matches_autograd_and_central_differences"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-06.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260925T172508Z-g3-06-4f792935/junit.xml",
+      "sha256": "52ce5f475af1422bd9daddfd74cba67f554baa1085454e16cff66a7dd33c6abc",
+      "bytes": 11830,
+      "original_path": ".local/tmp/junit/rerecord/G3-06.xml"
+    }
+  ],
+  "applicable_scope": "Re-recorded on the merged main tree after a shared test module changed in a merged branch. re-recorded on 2c5f3754c047 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T195520Z-g3-06-28754df0",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

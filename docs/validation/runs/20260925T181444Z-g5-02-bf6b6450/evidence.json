@@ -1,0 +1,222 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260925T181444Z-g5-02-bf6b6450",
+  "task": "G5-02",
+  "stage": "G5",
+  "task_title": "peak Torch allocated/reserved, CUDA 전체 process memory(가용한 계측 사용), RSS/PSS 또는 플랫폼 동등량, committed memory, OS cache, 디스크 사용량·총 읽기/쓰기·실효 대역폭을 구분한다",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_memory_accounting_g5.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G5-02.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-26T03:14:36.285989+09:00",
+  "recorded_at": "2026-09-25T18:14:44+00:00",
+  "source_commit": "2c5f3754c0470b2888d02462d6d2305a5098326a",
+  "source_commit_time": "2026-09-26T00:18:35+09:00",
+  "source_tree_sha256": "399bc6487139aa73bc4f34a5d161066806b69a4900b8ff3653b79215c0758217",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "5d2fb7eac934221d9a04bce9d8128da4e53eba2a7c7ca76501b22f3dbb6337d1",
+      "head_sha256": "f4a33ca7d37f18eeba49b9ac33f9c2577e4192f5e32b79a11d679453a062575f"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "57c2f728fcddc7cc21272b5204474769cf25a84b435292818e89860ac52b6d2b",
+      "head_sha256": "8254f678d2bfe2da2940e772e60030b237b372f639336e595e4b0dde64900d28"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "4afb7a5b9c89b6a4cf95251fa5ad505202e247bbdbc2ca7f0ab02d1f8d16a0aa",
+      "head_sha256": "3c29461e2b15d685eaabd7f347f42482f7ff6b87dc8e6c355019d2013bb691e7"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0a1db11fbc191d0de4cd05575810fcec35f52a1f7025b8ff4fa5075d874aadd9",
+      "head_sha256": "3d3557eb215787b4290a06b6333d6eb66db09fc4441da7c6cb01c5315fedbea8"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "00d57966e826b74da4d5947bfac27df491e3ab9b1935ea4305e2bb2e51d17b26",
+      "head_sha256": "1715d62d5815e18e340c05f367d302204012e3eb9c5c5a79fd196494f7d2516c"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd",
+  "package_path": "D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_memory_accounting_g5.py": "551cfb51a5f9d4b5256899ca174c6d5522336a70f87f5c508015e4016c8fa550"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [],
+  "watch_sha256": {},
+  "fixture_path": "docs/validation/cases/G5-02.json",
+  "fixture_sha256": "ef210c102b5257491dcb090805a043ed1ceb3e1e51f8cac241a03275f6db4da4",
+  "acceptance_criteria_path": "docs/validation/cases/G5-02.json",
+  "acceptance_criteria_sha256": "ef210c102b5257491dcb090805a043ed1ceb3e1e51f8cac241a03275f6db4da4",
+  "case_first_commit": "649ad7961803a98634a2ad6b08559ff6ea8a8dba",
+  "case_first_commit_time": "2026-09-22T04:54:52+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": null,
+  "precision": [
+    "float32"
+  ],
+  "backend": [
+    "cuda",
+    "cpu"
+  ],
+  "physics_configuration": {
+    "module": "tests/test_memory_accounting_g5.py with the scatterer of tests/g5_support.py (24 x 16 x 16 cells, 40 steps, two point probes, full time history)",
+    "runs": "StreamedSimulation forward and backward with host_sync, disk_sync and host_async CUDA tiles (slab_width 6, temporal_depth 4, checkpoints 2), one CPU-tile run with host banks, and two MemoryMeter phases around explicit CUDA allocations",
+    "instrument_module": "torchfdtd/memory_accounting.py: MemoryMeter around each phase of torchfdtd/streamed.py::_Streamed (report['forward_memory'], report['backward_memory'])",
+    "fields": {
+      "peak_torch_allocated_bytes": "torch.cuda.max_memory_allocated (exact when the phase set a new process peak or began at it, otherwise the sampled torch.cuda.memory_allocated lower bound, flagged exact=false); at_start_bytes, delta_bytes, prior_process_peak_bytes",
+      "peak_torch_reserved_bytes": "torch.cuda.max_memory_reserved with the same exactness rule",
+      "cuda_process_memory_bytes": "torch.cuda.mem_get_info free-memory decrease during the phase, device-wide, sampled every 20 ms and at the end; nvidia-smi --query-compute-apps used_memory for this pid when the driver exposes it (N/A under WDDM on Windows, reported as null with the reason)",
+      "peak_process_rss_bytes": "working set from psapi.GetProcessMemoryInfo (Windows) or /proc/self/status VmRSS (Linux), sampled every 20 ms and at the phase boundaries, with the OS lifetime peak",
+      "peak_process_private_bytes": "PrivateUsage (Windows) or RssAnon (Linux)",
+      "peak_process_committed_bytes": "PagefileUsage commit charge (Windows) or VmSize (Linux, labelled virtual size)",
+      "os_file_cache_bytes": "psapi.GetPerformanceInfo SystemCache times PageSize (Windows) or /proc/meminfo Cached (Linux): change over the phase, system-wide",
+      "scratch_disk_written_bytes, scratch_disk_read_bytes": "StateStore logical byte counters of the scratch bank files plus the process I/O counter deltas (GetProcessIoCounters or /proc/self/io)",
+      "scratch_disk_bandwidth_bytes_per_second": "logical scratch bytes divided by the phase wall time",
+      "scratch_disk_peak_file_bytes": "peak sum of live scratch bank file sizes; every bank file is truncated to its size and the size is read back with os.fstat",
+      "host_bank_bytes": "SlabBlockOperator bank ledger: peak and created bytes of live host field banks released through weak references"
+    },
+    "caveats_written_into_every_record": "each field carries instrument, caveat and domain (device, host, system, disk); total_memory_bytes is null with a note that the fields overlap; the SCOPE text states which fields contain which"
+  },
+  "reference_method": "internal consistency of the instruments: the Torch allocator's own counters, the OS process counters and the StateStore file sizes read back with os.fstat; no physics oracle is involved",
+  "observables": [
+    {
+      "name": "peak_torch_allocated_bytes",
+      "unit": "bytes",
+      "definition": "as above, per phase"
+    },
+    {
+      "name": "peak_torch_reserved_bytes",
+      "unit": "bytes",
+      "definition": "as above, per phase"
+    },
+    {
+      "name": "cuda_process_memory_bytes",
+      "unit": "bytes",
+      "definition": "device-wide free-memory decrease, per phase"
+    },
+    {
+      "name": "peak_process_rss_bytes",
+      "unit": "bytes",
+      "definition": "working set, per phase"
+    },
+    {
+      "name": "scratch_disk_written_bytes",
+      "unit": "bytes",
+      "definition": "logical bank writes, per phase"
+    },
+    {
+      "name": "scratch_disk_peak_file_bytes",
+      "unit": "bytes",
+      "definition": "peak live bank file bytes, per phase"
+    },
+    {
+      "name": "host_bank_bytes",
+      "unit": "bytes",
+      "definition": "peak live host bank bytes, per phase"
+    }
+  ],
+  "acceptance_limits": {
+    "presence": "every field listed above is present in both phase records with domain, instrument and caveat; total_memory_bytes is null; the record is JSON-serializable",
+    "ordering": "0 < peak_torch_allocated_bytes <= peak_torch_reserved_bytes and allocated at_start <= reserved at_start in every CUDA phase; the delta of the allocated peak is positive; the allocator peaks are exact when the test resets the peak counters first",
+    "domains": "peak_process_rss_bytes has domain host, its caveat says it is not device memory, its instrument does not name torch.cuda, and its value differs from the Torch allocated peak; CPU-tile runs report the three device fields as null with a not-applicable instrument and still report the host fields",
+    "disk": "for the disk-bank run, in each phase created_file_bytes == created_banks * state_bytes, scratch_disk_written_bytes and scratch_disk_read_bytes equal the StateStore counters, scratch_disk_peak_file_bytes is an integer multiple of state_bytes between 1 and state_bank_capacity, host_bank_bytes is zero, the effective rates equal bytes / seconds; in the forward phase written bytes equal created_file_bytes exactly (every owned row of every bank committed once) and in the backward phase written bytes are at least created_file_bytes",
+    "host_banks": "for host-bank runs host_bank_bytes is a positive multiple of state_bytes and the scratch bytes are zero",
+    "source_of_limits": "G5-02 specification: the quantities are separated and never summed; equalities are exact byte counts and no numeric tolerance applies"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 7,
+    "passed": [
+      "tests/test_memory_accounting_g5.py::test_streamed_report_exposes_instrumented_memory_fields[host_sync]",
+      "tests/test_memory_accounting_g5.py::test_streamed_report_exposes_instrumented_memory_fields[disk_sync]",
+      "tests/test_memory_accounting_g5.py::test_streamed_report_exposes_instrumented_memory_fields[host_async]",
+      "tests/test_memory_accounting_g5.py::test_disk_bytes_match_the_bank_file_sizes",
+      "tests/test_memory_accounting_g5.py::test_cpu_tiles_report_host_fields_and_no_device_fields",
+      "tests/test_memory_accounting_g5.py::test_operating_system_instruments_return_integers",
+      "tests/test_memory_accounting_g5.py::test_allocator_peak_is_exact_only_when_the_phase_sets_a_new_process_peak"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 6.343,
+    "suite_timestamp": "2026-09-26T03:14:36.285989+09:00"
+  },
+  "required_tests": [
+    "tests/test_memory_accounting_g5.py::test_streamed_report_exposes_instrumented_memory_fields",
+    "tests/test_memory_accounting_g5.py::test_disk_bytes_match_the_bank_file_sizes",
+    "tests/test_memory_accounting_g5.py::test_cpu_tiles_report_host_fields_and_no_device_fields",
+    "tests/test_memory_accounting_g5.py::test_operating_system_instruments_return_integers",
+    "tests/test_memory_accounting_g5.py::test_allocator_peak_is_exact_only_when_the_phase_sets_a_new_process_peak"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G5-02.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260925T181444Z-g5-02-bf6b6450/junit.xml",
+      "sha256": "ca7f9f035f31333119ad048683a7e563ad2afa66fdab972525b4268dfde63596",
+      "bytes": 1205,
+      "original_path": ".local/tmp/junit/rerecord/G5-02.xml"
+    }
+  ],
+  "applicable_scope": "Windows 11 with the RTX 3060 under WDDM (nvidia-smi per-process memory reported as N/A) and CPU tiles: the streamed report's per-phase memory fields for host, disk and asynchronous CUDA tiles; Linux instruments (/proc) and TCC/Linux nvidia-smi are implemented but not exercised here re-recorded on 2c5f3754c047 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T221324Z-g5-02-b714b93d",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}
