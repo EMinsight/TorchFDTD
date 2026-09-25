@@ -7,6 +7,20 @@ the first section covers the whole history since the first commit (2026-09-20).
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
+## Unreleased
+
+Patch release: the `torchfdtd` package is byte-identical to 0.16.0.
+
+### Added
+
+- The drivers and records of a tiled 1 mm x 1 mm SiN metalens: `benchmarks/paper_review/lens1mm/` (the tile driver and the stitching and angular-spectrum propagation) and `docs/validation/paper_review/lens1mm-*` (post widths and the compact record of the run on an RTX 5880 Ada) (38c2086).
+
+### Documentation
+
+- README speed table: Meep at its fastest rank count (4 ranks), a double-precision A100 row, and the FDTDX full-solve and stepping ranges over all four scenes, each recomputed from its record by `tests/test_readme_measurements.py` (dd08d4f).
+- Citation of the TorchFDTD paper (arXiv:2609.30039) and the Zenodo version DOI of 0.16.0 (70c7bd7).
+- The interim release procedure before 1.0.0 in [RELEASE_PROCEDURE.md](RELEASE_PROCEDURE.md) (4443b48).
+
 ## 0.16.0 (2026-09-26)
 
 ### Behaviour change
