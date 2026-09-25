@@ -2,6 +2,7 @@
 
 # TorchFDTD
 
+[![arXiv](https://img.shields.io/badge/arXiv-2609.30039-b31b1b.svg)](https://arxiv.org/abs/2609.30039)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22928834.svg)](https://doi.org/10.5281/zenodo.22928834)
 
 GPU FDTD for photonics: a browser CAD workbench, a Python project API and Torch-differentiable simulations on NVIDIA CUDA. MIT licensed.
@@ -144,9 +145,20 @@ Validation uses analytic solutions and independently authored CPU/CUDA reference
 
 ## Citing TorchFDTD
 
-If TorchFDTD contributes to published work, please cite the archived software. The concept DOI [10.5281/zenodo.22928834](https://doi.org/10.5281/zenodo.22928834) always resolves to the latest release; each release also has its own version DOI (0.15.0: [10.5281/zenodo.22928835](https://doi.org/10.5281/zenodo.22928835)). The same metadata is in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
+If TorchFDTD contributes to published work, please cite the paper ([arXiv:2609.30039](https://arxiv.org/abs/2609.30039)) and the archived software. The concept DOI [10.5281/zenodo.22928834](https://doi.org/10.5281/zenodo.22928834) always resolves to the latest release; each release also has its own version DOI (0.15.0: [10.5281/zenodo.22928835](https://doi.org/10.5281/zenodo.22928835)). The same metadata is in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
 
 ```bibtex
+@misc{park2026torchfdtd,
+  author        = {Park, Hyoseok},
+  title         = {{TorchFDTD}: {GPU}-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design},
+  year          = {2026},
+  eprint        = {2609.30039},
+  archivePrefix = {arXiv},
+  primaryClass  = {physics.optics},
+  doi           = {10.48550/arXiv.2609.30039},
+  url           = {https://arxiv.org/abs/2609.30039}
+}
+
 @software{park_torchfdtd,
   author    = {Park, Hyoseok},
   title     = {{TorchFDTD}},
