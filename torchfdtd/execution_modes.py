@@ -43,7 +43,8 @@ def execution_resources():
     cuda = torch.cuda.is_available() and torch.cuda.device_count() > 0
     record = dict(cuda=cuda, cupy=False, gpu=None, gpu_free_bytes=0, gpu_total_bytes=0)
     if cuda:
-        free, total = torch.cuda.mem_get_info()
+        from .cuda_memory import cuda_mem_info
+        free, total = cuda_mem_info()
         record.update(gpu=torch.cuda.get_device_name(0), gpu_free_bytes=int(free), gpu_total_bytes=int(total))
         try:
             from .cuda_bootstrap import prepare_cuda_kernels

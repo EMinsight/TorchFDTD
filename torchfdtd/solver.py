@@ -503,7 +503,8 @@ class Simulation:
         # Admission by the resident estimate: 75% of the free device memory, or 80% of the
         # available host memory on the CPU, the margins of the Auto policy.
         if use_cuda:
-            free, _ = torch.cuda.mem_get_info()
+            from .cuda_memory import cuda_mem_info
+            free, _ = cuda_mem_info()
             if stats['estimated_memory_mb']*2**20 > free*.75:
                 raise ValueError('Insufficient free GPU memory. Increase mesh spacing or reduce the domain.')
         else:

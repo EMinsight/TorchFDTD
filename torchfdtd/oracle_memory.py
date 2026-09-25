@@ -16,7 +16,7 @@ import math
 import torch
 
 from .boundaries import BoundaryDescription
-from .cuda_memory import cuda_budget_limit
+from .cuda_memory import cuda_budget_limit, cuda_mem_info
 from .memory_profile import host_memory
 
 # Retained tensor bytes per step in restart states. Tensor ADE adds three
@@ -99,7 +99,7 @@ def admit_oracle(estimate,device,graph_budget_bytes=None):
         limit=cuda_budget_limit(device,required['graph'])
         if required['graph']>limit:
             refuse('retained graph on CUDA',required['graph'],limit,
-                   f'80% of {torch.cuda.mem_get_info(device)[0]:,} bytes of free CUDA memory')
+                   f'80% of {cuda_mem_info(device)[0]:,} bytes of free CUDA memory')
     available=host_memory()['available_bytes']
     if available is not None and required['host']>int(available*.8):
         refuse('host memory for the graph nodes' if cuda else 'retained graph',required['host'],int(available*.8),

@@ -25,6 +25,7 @@ import torch
 
 from .models import Project
 from .solver import Result, Simulation, estimate
+from .cuda_memory import cuda_mem_info
 
 
 @dataclass
@@ -200,7 +201,7 @@ class BatchRunner:
         for device in self.devices:
             budget = float('inf')
             if device is not None:
-                free, _ = torch.cuda.mem_get_info(device)
+                free, _ = cuda_mem_info(device)
                 # Workers release unused allocator blocks after each case. Existing
                 # contexts remain: reserving overhead again is conservative.
                 budget = free/2**20*self.memory_fraction

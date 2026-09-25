@@ -99,3 +99,36 @@ def test_real_cache_release_preserves_live_tensor_and_rechecks_capacity(monkeypa
     assert cuda_budget_limit(device,1024**2,2*1024**2)>=1024**2
     assert state==dict(queries=2,releases=1)
     torch.testing.assert_close(live.cpu(),expected,rtol=0,atol=0)
+
+
+def test_admission_takes_the_smaller_of_runtime_and_nvml_free_memory(monkeypatch):
+    import torchfdtd.cuda_memory as cm
+    monkeypatch.setattr(torch.cuda,'mem_get_info',lambda device:(10*2**30,12*2**30))
+    monkeypatch.setattr(cm,'nvml_free_bytes',lambda device:4*2**30)
+    assert cm.cuda_mem_info('cuda:0')==(4*2**30,12*2**30)
+    assert cuda_budget_limit('cuda:0',0)==int(4*2**30*.8)
+    monkeypatch.setattr(cm,'nvml_free_bytes',lambda device:11*2**30)
+    assert cm.cuda_mem_info('cuda:0')==(10*2**30,12*2**30)
+    monkeypatch.setattr(cm,'nvml_free_bytes',lambda device:None)
+    assert cm.cuda_mem_info('cuda:0')==(10*2**30,12*2**30)
+
+
+@pytest.mark.cuda
+@pytest.mark.nvml
+def test_admission_counts_memory_held_by_another_process():
+    """Under Windows WDDM cudaMemGetInfo of a second process ignores the first one's allocations; NVML does not."""
+    import subprocess,sys
+    import torchfdtd.cuda_memory as cm
+    if not torch.cuda.is_available():pytest.skip('CUDA is not available')
+    if cm._nvml() is None:pytest.skip('NVML library not found')
+    hold=2*2**30
+    code=(f"import sys,torch;x=torch.empty({hold},dtype=torch.uint8,device='cuda');x.fill_(1);"
+          "torch.cuda.synchronize();print('ready',flush=True);sys.stdin.read()")
+    before=cm.cuda_mem_info('cuda:0')[0]
+    holder=subprocess.Popen([sys.executable,'-c',code],stdin=subprocess.PIPE,stdout=subprocess.PIPE,text=True)
+    try:
+        assert holder.stdout.readline().strip()=='ready'
+        assert before-cm.cuda_mem_info('cuda:0')[0]>=.9*hold
+    finally:
+        holder.stdin.close()
+        holder.wait(timeout=120)
