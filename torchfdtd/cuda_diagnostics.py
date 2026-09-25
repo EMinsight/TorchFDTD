@@ -36,20 +36,17 @@ class CudaStateDiagnostics:
             # Four elements per thread amortize descriptor/reduction work.
             tasks.extend((d, start) for start in range(0, array.numel(), 1024))
 
-        add(g.E, 0, diagnostics.volume, g.inverse_permittivity)
+        add(g.E, 0, diagnostics.volume, diagnostics.inverse)
         add(g.H, 1, diagnostics.volume)
-        for state, weight, poles in zip(g.material_states, diagnostics.material_weights, diagnostics.pole_weights):
-            if poles is not None:
-                for p, q, (q_weight, p_weight) in zip(state.P, state.Q, poles):
-                    add(q, 2, q_weight)
-                    add(p, 2, p_weight)
-                continue
+        for state, weight in zip(g.material_states, diagnostics.material_weights):
             for j, (w0, strength, _) in enumerate(state.oscillators):
                 p = state.P[j] if state.multiple else state.P
                 q = state.Q[j] if state.multiple else state.Q
                 add(q, 2, weight, factor=1/(g.time_step*math.sqrt(strength)))
                 # Zero-frequency P is still checked for non-finite values.
                 add(p, 2, weight, factor=w0/math.sqrt(strength))
+        for array, weight in diagnostics.dispersive_terms:
+            add(array, 2, weight)
         for segments in g.cpml.values():
             for segment in segments:
                 add(segment['psi'], 3)

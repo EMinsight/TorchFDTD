@@ -64,6 +64,8 @@ class FusedBatchYeeCUDA:
         prepared=[[(state,field,*state.prepare(field)) for state,field in pairs] for pairs in targets]
         self.update(False)
         if self.interface_update is not None:self.interface_update.update()
+        for g in self.grids:
+            if getattr(getattr(g,'subpixel',None),'dispersive',None) is not None:g.subpixel.dispersive.apply(g.subpixel.curl_buffer)
         for states in prepared:
             for state,field,old,response in states:state.correct(field,old,response)
 

@@ -242,7 +242,7 @@ def estimate(p: Project, *, endpoint_dispatch=True):
         interface_bytes=n*(3*8*(field_bytes+4)+24+3*field_bytes)
         warnings.append('Subpixel uses a bounded symmetric edge/face operator on lossless uniform-axis grids. The epsilon image shows only its reciprocal diagonal. Check face-quadrature and mesh convergence, especially at corners, overlaps and unresolved thin features.')
         if dispersive:
-            warnings.append('Cells cut by a dispersive surface use the diagonal of the dispersive laminate tensor: two passive Lorentz poles per Yee sample and no off-diagonal coupling. Check mesh convergence near plasmon resonances.')
+            warnings.append('Node cells cut by a dispersive surface use the dispersive averaging tensor (D-driven normal and tangential laminate branches). Check mesh convergence near plasmon resonances.')
     from .injection import oneway_metadata
     planes=[oneway_metadata(s,r) for s in p.sources if s.enabled and s.injection=='oneway' and s.kind!='tfsf']
     if planes:
@@ -496,6 +496,9 @@ class Simulation:
         eps, counts, ownership = material.epsilon, material.counts, material.ownership
         from .injection import validate_oneway_materials
         validate_oneway_materials(p, eps, ownership)
+        if interface_plan is not None and interface_plan.dispersive is not None:
+            from .subpixel_dispersive import refuse_driven_sources
+            refuse_driven_sources(interface_plan.dispersive, plan.source_terms, r.shape)
         for obj in p.structures:
             if obj.enabled and counts.get(obj.id) == 0:
                 message='no Yee component centers intersect this object; subpixel integration may still include it. Check quadrature and mesh convergence.' if interface_plan is not None else 'no cells intersect this object. Refine mesh or reposition it.'

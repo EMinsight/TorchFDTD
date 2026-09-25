@@ -30,12 +30,11 @@ the original update. Native batch functions accept subpixel projects.
 Grouped batches separate different interface methods before forming cohorts.
 
 The present scope is isotropic, lossless, nondispersive dielectrics and
-single-pole (Drude or one Lorentz pole) dispersive materials, 2D or 3D, with
-constant spacing on each axis. Different x/y/z spacings are supported.
-Multipole materials, two dispersive materials in one Yee cell,
-`pml_dispersion="frozen"` with a dispersive structure and nonuniform nodes raise
-validation errors. Dispersive cells use the diagonal construction of
-[Dispersive interfaces](#dispersive-interfaces) below.
+isotropic Drude/Lorentz/multipole dispersive materials, 2D or 3D, with constant
+spacing on each axis. Different x/y/z spacings are supported. Nonuniform nodes,
+two dispersive materials in one node cell and `pml_dispersion="frozen"` with a
+dispersive structure raise validation errors. Dispersive cells use the
+construction of [Dispersive interfaces](#dispersive-interfaces) below.
 Real-field fused CUDA and tensor cohorts support float32/float64. Complex
 Bloch fields use the reference Torch path. This is not a mapping to a
 commercial conformal algorithm, and unsupported FSP writes remain errors.
@@ -100,94 +99,92 @@ Yee centers inside a structure does not prove that its subpixel integrals vanish
 - High-index resonances still need tighter error targets, longer-duration
   controls and more device geometries. The current sphere study is not a mode
   port, waveguide or inverse-design validation.
-- Multipole and mixed dispersive cells, the off-diagonal (full tensor)
-  dispersive coupling, nonuniform subpixel metrics and independent equal-error
-  performance comparisons remain required follow-up work.
+- Cells mixing two dispersive materials, nonuniform subpixel metrics and
+  independent equal-error performance comparisons remain required follow-up work.
 
 ## Dispersive interfaces
 
-An electric Yee sample whose cell (one mesh step per axis, centred on the
-sample) meets a dispersive object leaves the coupled operator above and carries
-a diagonal, sample-wise dispersive medium instead. With the cell holding a
-fraction `f` of one single-pole medium
-`eps_m(w) = eps_inf + s/(w0^2 - w^2 - i g w)` and nondispersive media elsewhere,
-`C` and `B` the cell averages of `eps` and `1/eps` over the nondispersive part,
-and `n` the unit normal of the dispersive surface nearest the sample, the
-tangential and normal laminate averages and the component `c` of the diagonal
-inverse tensor are
+Node cells that meet a dispersive object leave the coupled operator above and
+take the dispersive averaging tensor of `torchfdtd.subpixel_dispersive`. A node
+cell here is the box of `WINDOW` = 2 mesh steps per axis centred on a Yee node.
+When it holds a fraction `f` of one dispersive medium `eps_m(w)` (any number of
+Drude or Lorentz poles) and nondispersive media elsewhere, with `C` and `B` the
+cell averages of `eps` and `1/eps` over the nondispersive part and `n` the unit
+normal of the dispersive surface, the constitutive map `E = Z D` of the cell is
 
 ```text
-eps_par(w)    = C + f eps_m(w)
-1/eps_perp(w) = B + f/eps_m(w)
-1/eps_c(w)    = (1 - n_c^2)/eps_par(w) + n_c^2/eps_perp(w)
+Z(w) = n n^T (B + f/eps_m(w)) + (I - n n^T)/(C + f eps_m(w))
 ```
 
-This is the normal/tangential split of the dispersive response of Deinega and
-Valuev (Opt. Lett. 32, 3429, 2007) applied to the averaging tensor of Farjadpour
-et al. (Opt. Lett. 31, 2972, 2006) and Kottke, Farjadpour and Johnson (Phys.
-Rev. E 77, 036611, 2008), kept diagonal like the planar-interface diagonal of the
-coupled operator. The fractions, `C` and `B` come from the analytic line
-integrals of the geometry pass with Gauss-Legendre nodes on the two other axes
-(`subpixel_quadrature` per axis).
+the averaging tensor of Farjadpour et al. (Opt. Lett. 31, 2972, 2006) and
+Kottke, Farjadpour and Johnson (Phys. Rev. E 77, 036611, 2008) with its
+dispersive response split into the normal (series) and tangential (parallel)
+laminate branches, as in Deinega and Valuev (Opt. Lett. 32, 3429, 2007). The
+fractions and averages come from the analytic line integrals of the geometry
+pass with `subpixel_quadrature` Gauss-Legendre nodes on the other two axes.
 
-**Exact pole form and passivity.** In the metal denominator
-`L = w0^2 - w^2 - i g w`, `1/eps_c = c0 - a1/(L + b1) - a2/(L + b2)` with
-`c0 = (1 - n_c^2)/(C + f eps_inf) + n_c^2 (B + f/eps_inf)` and nonnegative
-`a_j`, `b_j`. With `lambda = -L` the zeros of `1/eps_c` are the eigenvalues
-`lambda_j` of the symmetric 2x2 matrix `diag(b) - v v^T`, `v_k^2 = a_k/c0`, and
+**Assembly.** As in the coupled operator, each node contributes through its
+eight edge triplets with weight 1/8. For one tensor per node this gives the edge
+of axis `a` on side `s` the share `1/2 [(Z Dbar)_a + s Z_aa delta_a]`, where
+`Dbar` and `delta` are the half sum and half difference of `D` on the two edges of
+each axis. The node kinds are:
 
-```text
-eps_c(w) = eps' + sum_j r_j/(w0^2 + lambda_j - w^2 - i g w)
-eps' = 1/c0,   r_j = (x_j . v)^2/c0 >= 0,   lambda_j >= 0
-```
+- **Mixed** (`0 < f < 1`): the share above. Five D-driven banks advance it:
+  - the medium in series with `B` for the normal part of `Dbar`;
+  - the laminate `C + f eps_m` for its tangential part;
+  - the same two for the `Z_aa delta_a` terms.
+- **Whole** (`f = 1`): the node gives each adjacent edge whose other end is not
+  whole the share `1/2 D/eps_m` (a D-driven bank per edge). An edge between two
+  whole cells keeps the ordinary ADE of the material.
+- **Next** (nondispersive cells adjacent to a mixed or whole cell): the static
+  tensor `n n^T B + (I - n n^T)/C` in the coupled operator.
+- **Ordinary:** unchanged.
 
-for the eigenvectors `x_j`. `lambda_j >= 0` because `diag(b) - v v^T` is
-positive semidefinite exactly when `1/eps_c` at `L = 0` is nonnegative, and that
-value is `n_c^2 B >= 0`. `eps' >= 1` because `C + f eps_inf >= 1` and
-`B + f/eps_inf <= 1` for `eps_inf >= 1` and nondispersive permittivities
-`>= 1`. Each sample is therefore a passive Lorentz sum with instantaneous
-permittivity at least one, the model class the trapezoidal ADE already
-integrates for staircased materials; `torchfdtd.subpixel_dispersive.InterfaceADE`
-is `MaterialADE` with per-sample `eps_inf`, `w0`, strength and damping, so the
-discrete response is `eps_c` at `(2/dt) tan(w dt/2)` like every other ADE
-material. Samples of a dispersive material and every sample touched by one are
-removed from the coupled operator together with every edge triplet they belong
-to. A kept sample takes its own sampled inverse permittivity for the one-eighth
-share of each dropped triplet, so the coupled operator remains an equal-weight
-sum of spectrally bounded Hermitian 3x3 blocks; the global instantaneous
-operator is block diagonal with eigenvalues in `(0, 1]` and the vacuum CFL bound
-is unchanged. A
-residue below `1e-12` of the metal strength is decomposition round-off of a
-vanishing pole and is set to zero.
+Every bank solves `eps x + sum_j P_j = d` with the trapezoidal update of the
+ADE, driven by the increment `d` of its share of `D`. Edges with a mixed or
+whole end ("D-driven samples") take their field from these banks plus the
+static shares of their other end.
 
-The long-run evidence is `tests/test_subpixel_dispersive.py`: a closed periodic
-box with a Drude sphere and a dielectric slab started from random fields keeps a
-bounded state norm without growth for 3,000 steps (default suite) and 200,000
-steps (`long`), lossless and damped. The same module checks the pole form
-against the direct laminate (relative `1e-12`, including the degenerate normals),
-the bilinear discrete response of `InterfaceADE` (relative `1e-5`), exact slab
-fractions and branches, the refusals, and CPU, Torch CUDA, fused CUDA and tensor
-cohort agreement.
+**Passivity and stability.** Each branch is a passive medium driven by `D`, so
+every node share is a passive impedance. The discrete response is the bilinear
+image of `Z(w)` at `(2/dt) tan(w dt/2)`, as for every ADE material. The
+high-frequency value of each share is at most one (`B + f/eps_inf <= 1` and
+`1/(C + f eps_inf) <= 1` for permittivities `>= 1`), so the instantaneous
+operator, static and dispersive together, is Hermitian and positive with
+eigenvalues in `(0, 1]`, and the vacuum CFL bound is unchanged.
+`tests/test_subpixel_dispersive.py` checks each of these claims:
 
-**Choice of diagonal.** Development runs on a 2D Drude cylinder and on 3D Drude
-spheres of sizes other than the judged G3-05 ones compared three diagonals: the
-fill-fraction average of `eps_m` alone was worse than staircase; the diagonal of
-the tensor `(1 - n_c^2) eps_par + n_c^2 eps_perp` was best in 2D but worst in
-3D; the diagonal of the inverse tensor above was the best in 3D. In 3D a clear
-excess of absorption remains on the red side of the plasmon band, where the
-laminate resonance of each mixed cell lies; a longer run time does not change
-it. Curved metal interfaces are therefore not yet within the accuracy claims of
-this method; the off-diagonal dispersive coupling of the full tensor is the
-next step.
+- the assembled instantaneous operator is Hermitian and bounded, for real and Bloch fields;
+- the complete one-step map of a 6^3 periodic box (fields, ADE and dispersive states) has no eigenvalue outside the unit circle (lossless and damped, real and Bloch);
+- the driven state reproduces the node tensors at the bilinear frequency (relative 2e-6);
+- closed-box runs from a consistent state keep a bounded state norm for 3,000 steps (default suite) and 200,000 steps (`long`), including a two-pole material.
 
-**Execution.** The resident CPU, Torch CUDA and fused CUDA forwards and the
-tensor cohorts run it through the shared ADE prepare/correct path. Complex fused
-updates, the differentiable and reversible solvers, streamed and budgeted
-execution, the tensor-material path, mode ports and PMC/endpoint scenes refuse
-subpixel scenes as before. `result.summary["subpixel"]["dispersive"]` reports the
-mixed and full samples and the range of `eps'`; the permittivity image shows
-`eps'` at mixed samples.
+**Window.** Development runs chose the window of two steps. They used a 2D Drude
+cylinder at h = 0.01 to 0.0025 um and 3D Drude spheres of radius 0.018 to 0.055
+um at h = 0.005 um (3.6 to 11 cells per radius, not the radii of the G3-05
+case), with windows of 0.75 to 3 steps. With one step, each mixed cell's
+laminate resonance adds absorption at the blue edge of the plasmon band. Two
+steps reduce the largest scattering and absorption errors by factors of 1.5 to 4
+on every development sphere. Wider windows oversmooth spheres of four cells per
+radius.
 
-Reproduce checks with `python -m pytest tests/test_subpixel.py` and the commands
-in the validation report. The UI selection/run check is
-`npx playwright test tests/ui/subpixel.spec.js` against a running workbench.
+**Scope and refusals.** Resident CPU, Torch CUDA and fused CUDA forwards, CUDA
+graphs and tensor cohorts share the state: the fused kernel writes the curl
+buffer and the D-driven banks run after it. The following raise errors:
+
+- two dispersive materials in one node cell;
+- a dispersive surface within one window of a nonperiodic grid boundary;
+- `pml_dispersion="frozen"` with a dispersive structure;
+- a soft E source on a D-driven sample (its E derives from D, so an injected E
+  would remain as a static offset).
+
+Complex fused updates, the differentiable and reversible solvers, streamed and
+budgeted execution, the tensor-material path, mode ports and PMC/endpoint scenes
+refuse subpixel scenes as before.
+
+`result.summary["subpixel"]["dispersive"]` reports the mixed, whole-surface and
+next nodes and the D-driven samples. The permittivity image shows the reciprocal
+of the instantaneous diagonal. The state norm weighs E with it and adds the
+branch energies weighted by their share of `Z`. The construction is first order
+at curved surfaces, and the two-step window smooths features thinner than about
+two cells, such as thin films.

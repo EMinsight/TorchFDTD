@@ -8,9 +8,10 @@ periodic problem. CPML and device accuracy are validated separately.
 
 Method context: Werner, Bauer and Cary, JCP 250, 2013 (arXiv:1212.4857).
 Geometry, spectral bounding and implementation here are independently written.
-Samples whose cell meets a dispersive object leave this operator: their edge
-triplets are dropped and torchfdtd.subpixel_dispersive gives them a diagonal
-sample-wise passive Lorentz medium, so the operator stays block diagonal.
+Node cells that meet a dispersive object leave this operator: their edge
+triplets take the D-driven dispersive node tensors of
+torchfdtd.subpixel_dispersive, and nondispersive cells next to them the static
+averaging tensor of the same construction.
 """
 from dataclasses import dataclass
 from itertools import product
@@ -53,6 +54,7 @@ class SubpixelPlan:
     counts: dict
     metadata: dict
     dispersive: object = None
+    update_diagonal: np.ndarray = None
 
     @property
     def epsilon(self):return 1/self.diagonal
@@ -71,11 +73,8 @@ def prepare_interfaces(project):
     parts=[_voxelize_at(project,field_axes(r,c),True) for c in ('Ex','Ey','Ez')]
     diagonal=np.stack([1/p[0].astype(float) for p in parts],axis=-1)
     baseline=diagonal.reshape(-1).copy();ownership=np.stack([p[2] for p in parts],axis=-1)
-    from .subpixel_dispersive import prepare_dispersive
+    from .subpixel_dispersive import prepare_dispersive,MIXED,WHOLE,NEXT
     dispersive=prepare_dispersive(project,ownership)
-    # Every sample of a dispersive medium leaves the coupled operator, including round-off couplings inside it.
-    blocked=np.isin(ownership.reshape(-1),[i for i,m in enumerate(project.materials) if m.oscillators])
-    if dispersive is not None:blocked[dispersive.touched]=True
     counts={key:max(p[1].get(key,0) for p in parts) for key in parts[0][1]}
     shape=np.array(r.shape);steps=np.array([v[1]-v[0] for v in r.mesh_nodes]);dim=geometry.dim
     node_shape=tuple(int(shape[a]) if a in geometry.periodic or a>=dim else int(shape[a]+1) for a in range(3))
@@ -85,6 +84,7 @@ def prepare_interfaces(project):
         coords=np.stack(np.unravel_index(flat,node_shape),axis=1)
         points=np.column_stack([r.mesh_nodes[a][coords[:,a]] if a<dim else np.zeros(len(coords)) for a in range(3)])
         n,mask=geometry.normals_and_candidates(points,radius)
+        if dispersive is not None:mask|=dispersive.active[flat]
         if np.any(mask):node_ids.append(coords[mask]);positions.append(points[mask]);normals.append(n[mask])
     all_rows=[];all_cols=[];all_values=[];clipped_count=0;triplet_count=0;degenerate=0
     candidate_count=sum(map(len,positions))
@@ -104,6 +104,9 @@ def prepare_interfaces(project):
                 inv=np.column_stack([line[a,s] for a,s in enumerate(signs)])
                 eps=np.column_stack([face[a,s] for a,s in enumerate(signs)])
                 tensor,clipped=interface_tensor(inv,eps,normal,geometry.epsilon_bounds)
+                if dispersive is not None:
+                    flat=np.ravel_multi_index(nodes.T,node_shape);kind=dispersive.kind[flat]
+                    if np.any(kind==NEXT):tensor[kind==NEXT]=dispersive.static_tensors(flat[kind==NEXT]);clipped[kind==NEXT]=False
                 clipped_count+=int(np.count_nonzero(clipped));triplet_count+=m
                 indices=[];valid=[];phases=[]
                 for a,s in enumerate(signs):
@@ -115,8 +118,12 @@ def prepare_interfaces(project):
                             turns=np.floor_divide(edge[:,b],shape[b]);phase*=np.exp(1j*turns*r.bloch_phase[b]);edge[:,b]%=shape[b]
                         else:good&=(edge[:,b]>=0)&(edge[:,b]<shape[b]);edge[:,b]=np.clip(edge[:,b],0,shape[b]-1)
                     indices.append(np.ravel_multi_index(edge.T,r.shape)*3+a);valid.append(good);phases.append(phase)
-                touched=np.any([v&blocked[i] for v,i in zip(valid,indices)],axis=0)
-                valid=[v&~touched for v in valid]
+                if dispersive is not None:
+                    # A dispersive cell's share of a D-driven edge comes from the dispersive state instead of the baseline.
+                    for a in range(3):
+                        moved=valid[a]&((kind==MIXED)|((kind==WHOLE)&dispersive.driven[indices[a]]))
+                        np.add.at(diagonal.reshape(-1),indices[a][moved],-baseline[indices[a][moved]]/8)
+                    valid=[v&(kind!=MIXED)&(kind!=WHOLE) for v in valid]
                 for a in range(3):
                     mask=valid[a];idx=indices[a][mask]
                     np.add.at(diagonal.reshape(-1),idx,(tensor[mask,a,a]-baseline[idx])/8)
@@ -128,11 +135,11 @@ def prepare_interfaces(project):
                         if r.complex_fields:value=value*np.conj(phases[a][mask])*phases[b][mask]
                         all_rows.append(indices[a][mask]);all_cols.append(indices[b][mask]);all_values.append(value)
     size=int(np.prod(shape))*3
+    update=None
     if dispersive is not None:
-        diagonal.reshape(-1)[dispersive.indices]=1/dispersive.epsilon
-        diagonal.reshape(-1)[dispersive.full]=1/dispersive.full_epsilon
-        ownership.reshape(-1)[dispersive.indices]=-1
-        ownership.reshape(-1)[dispersive.full]=dispersive.owners
+        update=diagonal.copy();diagonal.reshape(-1)[:]+=dispersive.instantaneous
+        ownership.reshape(-1)[dispersive.driven]=-1
+        ownership.reshape(-1)[dispersive.standard]=dispersive.owners
     if all_rows:
         sparse=coo_matrix((np.concatenate(all_values),(np.concatenate(all_rows),np.concatenate(all_cols))),shape=(size,size)).tocsr()
         sparse.eliminate_zeros();length=np.diff(sparse.indptr);rows=np.flatnonzero(length)
@@ -149,9 +156,9 @@ def prepare_interfaces(project):
                   inverse_epsilon_bounds=[1/geometry.epsilon_bounds[1],1/geometry.epsilon_bounds[0]],
                   auxiliary_device_bytes=memory,preparation_seconds=time.perf_counter()-started,
                   epsilon_image='Reciprocal diagonal of the global inverse constitutive operator. Off-diagonal terms also act on fields.'
-                  +(' Samples of mixed dispersive cells show their epsilon-infinity; their poles act through the ADE.' if dispersive is not None else ''))
+                  +(' Samples next to dispersive cells include the high-frequency value of the dispersive node tensors.' if dispersive is not None else ''))
     if dispersive is not None:metadata['dispersive']=dispersive.metadata
-    return SubpixelPlan(diagonal,rows,columns,values,ownership,counts,metadata,dispersive)
+    return SubpixelPlan(diagonal,rows,columns,values,ownership,counts,metadata,dispersive,update)
 
 
 class SubpixelState:
@@ -161,25 +168,29 @@ class SubpixelState:
             self.rows=torch.as_tensor(plan.rows,device=grid.E.device,dtype=torch.int64)
             self.columns=torch.as_tensor(plan.columns,device=grid.E.device,dtype=torch.int32)
             self.values=torch.as_tensor(plan.values,device=grid.E.device,dtype=grid.E.dtype)
-            grid.inverse_permittivity[:]=torch.as_tensor(plan.diagonal,device=grid.E.device,dtype=grid.E.real.dtype)
+            grid.inverse_permittivity[:]=torch.as_tensor(plan.diagonal if plan.update_diagonal is None else plan.update_diagonal,device=grid.E.device,dtype=grid.E.real.dtype)
         else:
             self.rows=plan.rows;self.columns=plan.columns;self.values=plan.values.astype(grid.E.dtype)
-            grid.inverse_permittivity[:]=plan.diagonal
+            grid.inverse_permittivity[:]=plan.diagonal if plan.update_diagonal is None else plan.update_diagonal
         self.curl_buffer=grid._zeros(grid.E.shape)
         grid.memory_states.append(self.curl_buffer)
+        self.dispersive=None
+        if plan.dispersive is not None:
+            from .subpixel_dispersive import DispersiveState
+            self.dispersive=DispersiveState(grid,plan.dispersive)
+            # The state norm weighs E with the instantaneous inverse permittivity, which includes the dispersive shares.
+            grid.energy_inverse_permittivity=grid._coefficient(plan.diagonal)
 
     @property
     def grid(self):return self._grid()
 
     def add(self,curl):
-        if not len(self.rows):return
-        values=curl.reshape(-1)[self.columns]
-        correction=(self.values*values).sum(axis=1)*self.grid.courant_number
-        self.grid.E.reshape(-1)[self.rows]+=correction
+        if len(self.rows):
+            values=curl.reshape(-1)[self.columns]
+            correction=(self.values*values).sum(axis=1)*self.grid.courant_number
+            self.grid.E.reshape(-1)[self.rows]+=correction
+        if self.dispersive is not None:self.dispersive.apply(curl)
 
 
 def configure_interfaces(grid,plan):
     grid.subpixel=SubpixelState(grid,plan) if plan is not None else None
-    if plan is not None and plan.dispersive is not None and len(plan.dispersive.indices):
-        from .subpixel_dispersive import InterfaceADE
-        grid.material_states.append(InterfaceADE(grid,plan.dispersive))

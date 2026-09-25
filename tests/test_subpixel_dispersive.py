@@ -1,132 +1,148 @@
-"""Dispersive subpixel interfaces (torchfdtd.subpixel_dispersive): laminate poles, preparation, stability and backends."""
-from types import SimpleNamespace
-
+"""Dispersive subpixel interfaces (torchfdtd.subpixel_dispersive): node tensors, assembly, stability and backends."""
 import fdtd
 import numpy as np
 import pytest
 import torch
 
-from torchfdtd import Project, Region, Material, Structure, Simulation, DifferentiableSimulation, run_tensor_batch
+from torchfdtd import Project, Region, Material, Structure, Simulation, DifferentiableSimulation, run_tensor_batch, LorentzPole
 from torchfdtd.boundaries import YeeGrid
 from torchfdtd.materials import configure_materials
 from torchfdtd.run_control import StateDiagnostics
 from torchfdtd.subpixel import prepare_interfaces, configure_interfaces
-from torchfdtd.subpixel_dispersive import DispersiveInterfaces, InterfaceADE, interface_poles
+from torchfdtd.subpixel_dispersive import MIXED, WHOLE, NEXT, WINDOW
 from test_solver import small
 
 DRUDE = dict(model='drude', epsilon_inf=5., plasma_rad_s=1.37e16, collision_rad_s=1.5e14)
 
 
-def laminate(f, c, b, w, e, s, w0, gamma, omega):
-    """The diagonal of the inverse dispersive Kottke tensor evaluated directly."""
-    metal = e+s/(w0**2-omega**2-1j*gamma*omega)
-    return 1/((1-w)/(c+f*metal)+w*(b+f/metal))
-
-
-def test_laminate_poles_are_the_inverse_tensor_diagonal_and_passive():
-    rng = np.random.default_rng(5)
-    n = 4000
-    f = rng.uniform(0, 1, n); f[:40] = .5; f[40:60] = 0
-    w = rng.uniform(0, 1, n); w[:20] = 1; w[20:40] = 0; w[60:80] = 1-1e-15; w[80:100] = 1e-15
-    dielectric = rng.uniform(1, 12, n); dielectric[:40] = 1
-    c, b = (1-f)*dielectric, (1-f)/dielectric
-    e, s = rng.uniform(1, 8, n), rng.uniform(.1, 5, n)*1e32
-    w0, gamma = rng.choice([0., 1e16], n), rng.uniform(0, 3e14, n)
-    eps, mu, r = interface_poles(f, c, b, w, e, s)
-    assert eps.min() >= 1-1e-12 and mu.min() >= 0 and r.min() >= 0
-    for omega in (1e15, 3e15, 5.2e15, 7e15, 2e16):
-        L = w0**2-omega**2-1j*gamma*omega
-        np.testing.assert_allclose(eps+(r/(L+mu)).sum(0), laminate(f, c, b, w, e, s, w0, gamma, omega), rtol=1e-12)
-    # Tangential samples keep the fill-fraction average; normal samples the harmonic (series) laminate.
-    omega = 4e15
-    for weight, expected in ((0., lambda m: .7+.3*m), (1., lambda m: 1/(.7+.3/m))):
-        eps, mu, r = interface_poles(.3, .7, .7, weight, 5., 1.8e32)
-        L = -omega**2-1j*1e14*omega
-        np.testing.assert_allclose(eps+(r/(L+mu)).sum(0), expected(5.+1.8e32/L), rtol=1e-13)
-
-
-def test_sample_ade_is_the_bilinear_image_of_the_laminate():
-    """The trapezoidal update of one sample reproduces eps_c at (2/dt) tan(omega dt/2), like MaterialADE."""
-    dt, omega = 1.2e-17, 4.6e15
-    f, c, b, w = np.array([.2, .5, .8, .5]), np.array([.8, .5, .2, 1.]), np.array([.8, .5, .2, .25]), np.array([.3, 1., 0., .6])
-    e, s, gamma = 5., 1.37e16**2, 1.5e14
-    eps, mu, r = interface_poles(f, c, b, w, e, s)
-    interfaces = DispersiveInterfaces(np.arange(len(f)), eps, (np.sqrt(mu), r, np.full(mu.shape, gamma)), np.empty(0, int),
-                                      np.empty(0, np.int32), np.empty(0), {})
-    grid = SimpleNamespace(is_torch=False, time_step=dt, E=np.zeros(len(f)), memory_states=[],
-                           _zeros=np.zeros, _coefficient=lambda a: np.asarray(a, dtype=float))
-    state = InterfaceADE(grid, interfaces)
-    steps = 24000
-    t = np.arange(steps+1)*dt
-    drive = np.cos(omega*t)*(1-np.exp(-(t/(400*dt))**2))
-    history = np.empty((steps, len(f)))
-    for n in range(steps):
-        old, response = state.prepare(grid.E)
-        grid.E += (drive[n+1]-drive[n])/eps
-        state.correct(grid.E, old, response)
-        history[n] = grid.E
-    tail = slice(steps//2, steps)
-    basis = np.stack([np.cos(omega*t[1:][tail]), np.sin(omega*t[1:][tail])], 1)
-    fit = np.linalg.lstsq(basis, history[tail], rcond=None)[0]
-    measured = 1/(fit[0]+1j*fit[1])
-    Omega = 2/dt*np.tan(omega*dt/2)
-    np.testing.assert_allclose(measured, laminate(f, c, b, w, e, s, 0., gamma, Omega), rtol=1e-5)
-    assert np.all(abs(measured/laminate(f, c, b, w, e, s, 0., gamma, omega)-1) > 1e-4)
-
-
-def slab_project(axis, shift=.013):
-    bounds = {a+'_'+s: dict(kind='periodic') for a in 'xyz' for s in ('min', 'max')}
-    r = Region(dimension='3d', size=(1, 1, 1), mesh=1/10, material_sampling='yee', interface_method='subpixel',
-               boundaries=bounds, precision='float64', backend='cpu', steps=100)
-    size = [3., 3., 3.]; size[axis] = .37; center = [0., 0., 0.]; center[axis] = shift
-    return Project(region=r, materials=[Material(name='metal', **DRUDE), Material(name='glass', index=1.5)],
-                   structures=[Structure(kind='rectangle', material='metal', size=tuple(size), center=tuple(center))])
-
-
-@pytest.mark.parametrize('axis', [0, 1, 2])
-def test_off_grid_slab_samples_take_exact_fractions_and_the_laminate_branches(axis):
-    p = slab_project(axis); r = p.region; h = r.mesh
-    plan = prepare_interfaces(p); d = plan.dispersive
-    lo, hi = .013-.185, .013+.185
-    cells, components = np.divmod(d.indices, 3)
-    position = np.stack(np.unravel_index(cells, r.shape), 1)[:, axis]*h-.5+np.where(components == axis, h/2, 0)
-    fraction = np.clip(np.minimum(position+h/2, hi)-np.maximum(position-h/2, lo), 0, h)/h
-    metal = p.materials[0]
-    s = metal.oscillators[0][1]
-    normal = components == axis
-    expected = np.where(normal, 5/(fraction+(1-fraction)*5), (1-fraction)+5*fraction)
-    np.testing.assert_allclose(d.epsilon, expected, rtol=1e-12)
-    strength = np.where(normal, fraction*s/(fraction+(1-fraction)*5)**2, fraction*s)
-    np.testing.assert_allclose(d.oscillators[1].sum(0), strength, rtol=1e-12)
-    assert np.all((fraction > 0) & (fraction < 1))
-    assert np.all(plan.ownership.reshape(-1)[d.indices] == -1)
-    np.testing.assert_allclose(plan.diagonal.reshape(-1)[d.indices], 1/d.epsilon, rtol=0)
-    assert not np.isin(plan.rows, d.touched).any() and not np.isin(plan.columns[plan.values != 0], d.touched).any()
-    assert plan.metadata['dispersive']['mixed_samples'] == len(d.indices) == 2*r.shape[(axis+1) % 3]*r.shape[(axis+2) % 3]*3
-
-
-def periodic_sphere(collision, mesh=.02, dielectric=False, bloch=False):
+def periodic_scene(structures, materials, mesh=.02, size=.24, bloch=False):
     bounds = {a+'_'+s: dict(kind='bloch' if bloch else 'periodic') for a in 'xyz' for s in ('min', 'max')}
-    r = Region(dimension='3d', size=(.24, .24, .24), mesh=mesh, material_sampling='yee', interface_method='subpixel',
-               boundaries=bounds, bloch_phase=(.43, -.27, .18) if bloch else (0, 0, 0), precision='float64', backend='cpu', steps=100)
-    materials = [Material(name='metal', **dict(DRUDE, collision_rad_s=collision)), Material(name='glass', index=2)]
-    structures = [Structure(kind='sphere', material='metal', radius=.071, center=(.013, -.007, .004))]
-    if dielectric:
-        structures.append(Structure(kind='rectangle', material='glass', size=(.3, .3, .05), center=(0, 0, -.09)))
+    r = Region(dimension='3d', size=(size,)*3, mesh=mesh, material_sampling='yee', interface_method='subpixel', boundaries=bounds,
+               bloch_phase=(.43, -.27, .18) if bloch else (0, 0, 0), precision='float64', backend='cpu', steps=100)
     return Project(region=r, materials=materials, structures=structures)
 
 
-def leapfrog_norms(project, steps, every):
+def sphere_scene(collision=1.5e14, dielectric=False, bloch=False, poles=None, mesh=.02):
+    metal = Material(name='metal', **dict(DRUDE, collision_rad_s=collision)) if poles is None else \
+        Material(name='metal', model='multipole', epsilon_inf=3., poles=poles)
+    structures = [Structure(kind='sphere', material='metal', radius=.071, center=(.013, -.007, .004))]
+    if dielectric:
+        structures.append(Structure(kind='rectangle', material='glass', size=(.3, .3, .05), center=(0, 0, -.09)))
+    return periodic_scene(structures, [metal, Material(name='glass', index=2)], mesh=mesh, bloch=bloch)
+
+
+def grid_for(project):
     plan = prepare_interfaces(project)
     fdtd.set_backend('numpy'); fdtd.backend.float = np.float64
     grid = YeeGrid(project.region)
     grid.inverse_permittivity[:] = plan.diagonal
     configure_materials(grid, project, plan.ownership)
     configure_interfaces(grid, plan)
+    return grid, plan
+
+
+def permittivity_at(material, omega):
+    return material.instantaneous_epsilon+sum(s/(w0*w0-omega*omega-1j*g*omega) for w0, s, g in material.oscillators)
+
+
+def dispersive_operator(plan, material, omega, size):
+    """E = M(omega) D of the dispersive shares, assembled from the plan with the node tensor written out."""
+    M = np.zeros((size, size), complex)
+    eps_m = permittivity_at(material, omega)
+    for g in plan.dispersive.groups:
+        M[g['half_index'], g['half_index']] += g['half_weight']/eps_m
+        f, C, B, n = g['fraction'], g['arithmetic'], g['harmonic'], g['normal']
+        normal = B+f/eps_m; tangential = 1/(C+f*eps_m)
+        Z = n[:, :, None]*n[:, None, :]*normal[:, None, None]+(np.eye(3)-n[:, :, None]*n[:, None, :])*tangential[:, None, None]
+        phase = np.ones(g['edges'].shape) if g['phases'] is None else g['phases']
+        for k in range(len(f)):
+            for a in range(3):
+                for s, sign in ((0, 1), (1, -1)):
+                    row = g['edges'][a, s, k]
+                    for b in range(3):
+                        for t in range(2):
+                            # 1/2 [(Z Dbar)_a + sign Z_aa delta_a], Dbar = (D+ + D-)/2, delta = (D+ - D-)/2
+                            weight = Z[k, a, b]/4+(sign*(1 if t == 0 else -1)*Z[k, a, a]/4 if b == a else 0)
+                            M[row, g['edges'][b, t, k]] += weight*np.conj(phase[a, s, k])*phase[b, t, k]
+    return M
+
+
+def test_dispersive_state_is_the_node_tensor_at_the_bilinear_frequency():
+    """Drive only the D-driven state with a sinusoidal D and compare with the assembled node tensors at (2/dt) tan(w dt/2)."""
+    project = sphere_scene()
+    grid, plan = grid_for(project)
+    state = grid.subpixel.dispersive
+    driven = np.flatnonzero(plan.dispersive.driven)
+    size = grid.E.size; dt = grid.time_step; c = grid.courant_number; omega = 4.6e15
+    rng = np.random.default_rng(4)
+    amplitude = np.zeros(size, complex); amplitude[driven] = rng.normal(size=len(driven))+1j*rng.normal(size=len(driven))
+    steps = 9000
+    t = np.arange(steps+1)*dt
+    ramp = 1-np.exp(-(t/(300*dt))**2)
+    D = (amplitude[None, :]*np.exp(-1j*omega*t)[:, None]*ramp[:, None]).real
+    grid.E[:] = 0
+    history = []
+    for n in range(steps):
+        state.apply(((D[n+1]-D[n])/c).reshape(grid.E.shape))
+        if n >= steps//2:
+            history.append(grid.E.reshape(-1)[driven].copy())
+    history = np.array(history)
+    time = t[steps//2+1:steps+1]
+    basis = np.stack([np.cos(omega*time), np.sin(omega*time)], 1)
+    fit = np.linalg.lstsq(basis, history, rcond=None)[0]
+    measured = fit[0]+1j*fit[1]  # E = Re(measured e^{-i w t})
+    Omega = 2/dt*np.tan(omega*dt/2)
+    expected = (dispersive_operator(plan, project.materials[0], Omega, size)@amplitude)[driven]
+    np.testing.assert_allclose(measured, expected, rtol=0, atol=2e-6*abs(expected).max())
+    continuum = (dispersive_operator(plan, project.materials[0], omega, size)@amplitude)[driven]
+    assert abs(measured-continuum).max() > 1e-4*abs(expected).max()
+
+
+def high_frequency_operator(plan, material, size):
+    static = np.diag(plan.update_diagonal.reshape(-1)).astype(complex)
+    for row, cols, values in zip(plan.rows, plan.columns, plan.values):
+        np.add.at(static[row], cols, values)
+    return static+dispersive_operator(plan, material, 1e30, size)
+
+
+@pytest.mark.parametrize('bloch', [False, True])
+def test_instantaneous_operator_is_hermitian_positive_and_cfl_bounded(bloch):
+    project = sphere_scene(dielectric=True, bloch=bloch, mesh=.04)
+    plan = prepare_interfaces(project)
+    M = high_frequency_operator(plan, project.materials[0], plan.diagonal.size)
+    np.testing.assert_allclose(M, M.conj().T, atol=1e-14, rtol=0)
+    eigen = np.linalg.eigvalsh(M)
+    assert eigen.min() > 0 and eigen.max() <= 1+1e-12
+    # The epsilon image carries the diagonal of this operator.
+    np.testing.assert_allclose(np.diag(M).real, plan.diagonal.reshape(-1), rtol=1e-12)
+
+
+@pytest.mark.parametrize('axis', [0, 1, 2])
+def test_off_grid_slab_nodes_take_exact_fractions_and_axis_normals(axis):
+    size = [3., 3., 3.]; size[axis] = .37; center = [0., 0., 0.]; center[axis] = .013
+    project = periodic_scene([Structure(kind='rectangle', material='metal', size=tuple(size), center=tuple(center))],
+                             [Material(name='metal', **DRUDE)], mesh=.1, size=1.)
+    plan = prepare_interfaces(project); d = plan.dispersive; r = project.region; h = r.mesh
+    group = d.groups[0]
+    nodes = np.stack(np.unravel_index(np.flatnonzero(d.kind == MIXED), d.node_shape), 1)
+    x = r.mesh_nodes[axis][nodes[:, axis]]
+    lo, hi = .013-.185, .013+.185; w = WINDOW*h
+    expected = np.clip(np.minimum(x+w/2, hi)-np.maximum(x-w/2, lo), 0, w)/w
+    np.testing.assert_allclose(group['fraction'], expected, rtol=1e-12)
+    np.testing.assert_allclose(abs(group['normal'][:, axis]), 1)
+    np.testing.assert_allclose(group['arithmetic'], 1-expected, rtol=1e-12); np.testing.assert_allclose(group['harmonic'], 1-expected, rtol=1e-12)
+    assert np.all(plan.ownership.reshape(-1)[d.driven] == -1) and np.all(plan.ownership.reshape(-1)[d.standard] == 0)
+    np.testing.assert_allclose(d.next_tensors, np.broadcast_to(np.eye(3), d.next_tensors.shape), atol=1e-15)
+    assert set(np.unique(d.kind)) == {0, MIXED, WHOLE, NEXT}
+
+
+def leapfrog_norms(project, steps, every):
+    """State norm of a closed box started from a random H; E, D and the dispersive states start consistent at zero."""
+    grid, plan = grid_for(project)
     rng = np.random.default_rng(3)
-    grid.E[:] = rng.normal(size=grid.E.shape); grid.H[:] = rng.normal(size=grid.H.shape)
+    grid.H[:] = rng.normal(size=grid.H.shape)
     if project.region.complex_fields:
-        grid.E[:] += 1j*rng.normal(size=grid.E.shape); grid.H[:] += 1j*rng.normal(size=grid.H.shape)
+        grid.H[:] += 1j*rng.normal(size=grid.H.shape)
     diagnostics = StateDiagnostics(grid)
     norms = []
     for n in range(steps):
@@ -142,23 +158,54 @@ def check_bounded(norms, collision):
     if collision:
         assert norms[-quarter:].max() < norms[:quarter].max()
     else:
-        # Lossless: the state norm oscillates about a conserved discrete energy and never trends upward.
         assert norms[-quarter:].max() <= 1.05*norms[:quarter].max()
         assert norms.min() >= .5*norms[0]
+
+
+def one_step_matrix(project):
+    grid, plan = grid_for(project)
+    states = [grid.E, grid.H]+[a for a in grid.memory_states if a is not grid.subpixel.curl_buffer]
+    sizes = [a.size for a in states]; n = sum(sizes)
+    A = np.zeros((n, n), complex if project.region.complex_fields else float)
+    for j in range(n):
+        vector = np.zeros(n); vector[j] = 1; k = 0
+        for a, m in zip(states, sizes):
+            a.reshape(-1)[:] = vector[k:k+m]; k += m
+        grid.update_E(); grid.update_H()
+        A[:, j] = np.concatenate([a.reshape(-1) for a in states])
+    return A, plan
+
+
+@pytest.mark.parametrize('bloch', [False, True])
+@pytest.mark.parametrize('collision', [0., 1.5e14])
+def test_one_step_map_has_no_eigenvalue_outside_the_unit_circle(collision, bloch):
+    """The complete update (fields, CPML-free periodic box, ADE and dispersive branch states) on a 6^3 grid."""
+    p = periodic_scene([Structure(kind='sphere', material='metal', radius=.07, center=(.013, -.007, .004))],
+                       [Material(name='metal', **dict(DRUDE, collision_rad_s=collision))], mesh=.04, bloch=bloch)
+    A, plan = one_step_matrix(p)
+    assert plan.metadata['dispersive']['mixed_nodes'] > 0
+    assert abs(np.linalg.eigvals(A)).max() <= 1+1e-12
 
 
 @pytest.mark.parametrize('bloch', [False, True])
 @pytest.mark.parametrize('collision', [0., 1.5e14])
 def test_closed_box_state_norm_does_not_grow(collision, bloch):
-    norms, plan = leapfrog_norms(periodic_sphere(collision, dielectric=True, bloch=bloch), 3000, 25)
-    assert plan.metadata['dispersive']['mixed_samples'] > 0 and len(plan.rows) > 0
+    norms, plan = leapfrog_norms(sphere_scene(collision, dielectric=True, bloch=bloch), 3000, 25)
+    assert plan.metadata['dispersive']['mixed_nodes'] > 0 and len(plan.rows) > 0
     check_bounded(norms, collision)
+
+
+def test_multipole_material_closed_box_does_not_grow():
+    poles = [LorentzPole(resonance_rad_s=0., strength_rad_s_squared=1.6e32, damping_rad_s=1e14),
+             LorentzPole(resonance_rad_s=4e15, strength_rad_s_squared=8e30, damping_rad_s=3e14)]
+    norms, _ = leapfrog_norms(sphere_scene(poles=poles), 3000, 25)
+    check_bounded(norms, 1)
 
 
 @pytest.mark.long
 @pytest.mark.parametrize('collision', [0., 1.5e14])
 def test_closed_box_state_norm_does_not_grow_over_200000_steps(collision):
-    norms, _ = leapfrog_norms(periodic_sphere(collision, dielectric=True), 200000, 500)
+    norms, _ = leapfrog_norms(sphere_scene(collision, dielectric=True), 200000, 500)
     check_bounded(norms, collision)
 
 
@@ -172,29 +219,30 @@ def drude_scene(backend='cpu', precision='float64', dimension='3d'):
     return Project.model_validate(p.model_dump())
 
 
-def test_open_scene_runs_and_reports_interface_samples():
-    result = Simulation(drude_scene()).run()
+@pytest.mark.parametrize('dimension', ['2d', '3d'])
+def test_open_scene_runs_and_reports_the_node_tensors(dimension):
+    result = Simulation(drude_scene(dimension=dimension)).run()
     info = result.summary['subpixel']['dispersive']
-    assert info['mixed_samples'] > 0 and info['method'] == 'diagonal_inverse_laminate_two_pole'
+    assert info['mixed_nodes'] > 0 and info['method'] == 'node_tensor_dispersive_laminate'
     assert np.all(np.isfinite(result.electric)) and abs(result.signals).max() > 0
-    assert any('dispersive laminate' in w for w in result.summary['warnings'])
+    assert any('dispersive averaging tensor' in w for w in result.summary['warnings'])
 
 
 def test_unsupported_dispersive_interfaces_are_refused():
-    p = drude_scene()
-    data = p.model_dump(); data['materials'][-1] = dict(name='metal', model='multipole', poles=[
-        dict(resonance_rad_s=3e15, strength_rad_s_squared=1e31, damping_rad_s=1e14),
-        dict(resonance_rad_s=5e15, strength_rad_s_squared=1e31, damping_rad_s=1e14)])
-    with pytest.raises(ValueError, match='one Drude or Lorentz pole'):
-        Project.model_validate(data)
-    data = p.model_dump(); data['region']['pml_dispersion'] = 'frozen'
+    data = drude_scene().model_dump(); data['region']['pml_dispersion'] = 'frozen'
     with pytest.raises(ValueError, match='frozen'):
         Project.model_validate(data)
-    p = periodic_sphere(1e14)
+    p = sphere_scene()
     p.materials.append(Material(name='gold', **dict(DRUDE, plasma_rad_s=1.2e16)))
     p.structures.append(Structure(kind='sphere', material='gold', radius=.03, center=(.013, -.007, .09)))
-    with pytest.raises(ValueError, match='one dispersive material per Yee cell'):
+    with pytest.raises(ValueError, match='one dispersive material per node cell'):
         prepare_interfaces(p)
+    p = drude_scene(); p.structures[0].center = (0, 0, 0); p.structures[0].radius = 1.25
+    with pytest.raises(ValueError, match='nonperiodic grid boundary'):
+        prepare_interfaces(p)
+    p = drude_scene(); p.sources[0].center = (.013+.5, -.021, .007)
+    with pytest.raises(ValueError, match='overlaps node cells cut by a dispersive surface'):
+        Simulation(p).run()
     with pytest.raises(ValueError, match='staircase'):
         DifferentiableSimulation(drude_scene())
 

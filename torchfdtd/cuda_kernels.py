@@ -306,6 +306,7 @@ class FusedYeeCUDA:
         prepared = [state.prepare(g.E) for state in g.material_states]
         self.update(False)
         if self.interface_update is not None:self.interface_update.update()
+        if getattr(getattr(g, 'subpixel', None), 'dispersive', None) is not None:g.subpixel.dispersive.apply(g.subpixel.curl_buffer)
         for state, (old, response) in zip(g.material_states, prepared):
             state.correct(g.E, old, response)
 
