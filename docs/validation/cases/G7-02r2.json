@@ -6,7 +6,7 @@
   "declaration": "docs/G7_WORKFLOWS.md",
   "platform": "rtx3060-win11-lab",
   "installation": "the release wheel in an environment outside the checkout",
-  "case_id": "G7-02",
+  "case_id": "G7-02r2",
   "task": "G7-02",
   "title": "Small finite metalens: full-aperture field, three deterministic starts refined by the shape VJP, mesh, time and propagation-model checks",
   "fixture": {
@@ -19,7 +19,7 @@
     "wavelength_um": 1.55,
     "polarization": "E out of plane",
     "mesh_um": 0.025,
-    "steps": 5200,
+    "steps": "from the time rule",
     "starts": [
       "library design of design_2d.json",
       "every ridge one library step wider where allowed",
@@ -30,13 +30,16 @@
       "objective": "focal-point intensity at 1.55 um",
       "iterations": 20,
       "optimizer": "Adam",
-      "learning_rate_um": 0.01
+      "learning_rate_um": 0.01,
+      "step_count": "in every iteration a forward run of the current design finds the 1e-3 stop, and the value and gradient run for that fixed step count"
     },
     "validation": {
       "fine_mesh_um": 0.0125,
-      "longer_time_factor": 1.5,
-      "propagation": "angular spectrum from the aperture line y = -7.9 um to the focal line y = 5.6 um and the axis"
-    }
+      "longer_time_factor": null,
+      "propagation": "angular spectrum from the aperture line y = -7.9 um to the focal line y = 5.6 um and the axis",
+      "longer_time": "twice the stop time of the 1e-3 rule, capped at 10 times the declared window"
+    },
+    "time_rule": "every forward run, of the lens and of the bare cell, continues until the total field energy in the cell (the native StateDiagnostics measure) falls below 1e-3 of its peak after the source has ended, checked every 20 steps, capped at 10 times the declared 303.6 fs window"
   },
   "seed": "three deterministic starts",
   "precision": "float32 on CUDA",
@@ -50,10 +53,19 @@
     "all_starts": "all three starts reported",
     "performance": "best refined design focusing efficiency at least 0.5571",
     "mesh": "0.0125 um changes the focusing efficiency by at most 0.02 and the axial peak by at most 0.1 um",
-    "time": "1.5 times the physical time changes the focusing efficiency by at most 0.005",
+    "time": "doubling the stop time changes the focusing efficiency by at most 0.005",
     "propagation": "propagated and direct focal-line intensities within 5 percent relative L2",
     "psf": "focal-line FWHM of the best design at most 1.25 lambda / (2 NA) = 1.76 um",
     "scope": "a unit-cell phase library alone is never reported as a full-lens validation"
   },
-  "superseded_by": "docs/validation/cases/G7-02r2.json"
+  "supersedes": {
+    "case": "docs/validation/cases/G7-02.json",
+    "status": "the original case stays in place; its failing runs are kept outside the repository by owner decision"
+  },
+  "revision": {
+    "reason": "the declared 303.6 fs window ends while the lens still holds energy in the ridge array: at 1x the cell holds 1.7e-2 (library) to 1.85e-2 (refined) of its peak energy, so the efficiency depends on where the window ends (changes of 0.005 to 0.039 between 1x and 1.5x, and oscillations of 0.005 up to 4x), and a refinement at that window optimizes a truncated response",
+    "evidence": "energy stop study: 98 to 99 percent of the energy left at 10x sits within 0.5 um of the ridge layer (a slowly leaking array mode, not absorber reflection); the library design gives 0.55672 at the 1e-3 stop (3.46x) and 0.55671 at the 1e-4 stop (7.77x), and the native auto-shutoff at 1e-4 gives 0.55672; the refined narrower design reaches 1e-3 at 4.97x",
+    "approved_by": "owner",
+    "date": "2026-09-24"
+  }
 }
