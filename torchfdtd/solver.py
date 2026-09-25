@@ -199,12 +199,13 @@ HOST_FIXED_BYTES = 512*2**20       # CUDA, CuPy and Python runtime of the run (u
 
 
 def display_host_bytes(p):
-    """Host bytes of the stored snapshot frames (at most 101 decimated slices, then stacked) and the trace copy."""
+    """Host bytes of the stored snapshot frames (decimated slices, then stacked) and the trace copy."""
     r = p.region
     field = (8 if r.precision == 'float64' else 4)*(2 if r.complex_fields else 1)
     axis = 'xyz'.index(r.slice_axis)
     pixels = math.prod(min(n, 256) for i, n in enumerate(r.shape) if i != axis)
-    frames = min(r.steps, 100)+1
+    # One frame every max(snapshot_interval, ceil(steps/100)) steps, plus the last or an early stop.
+    frames = r.steps//max(r.snapshot_interval, math.ceil(r.steps/100))+1
     traces = r.steps*sum(m.enabled and m.kind == 'point' for m in p.monitors)*field
     return 2*frames*pixels*field+traces
 

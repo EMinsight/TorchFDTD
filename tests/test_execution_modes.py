@@ -111,6 +111,8 @@ def _planar_row(**tiling):
     """The 2D sparse pillar row of the tiling record under the automatic policy."""
     from test_tiled import pillar_row
     p = pillar_row(period=1.25, count=4, half=(.1, .15), seed=5)
+    # Two stored frames: 85 frames of this 8400-cell grid would outweigh the arrays the rungs are ordered by.
+    p.region.snapshot_interval = p.region.steps
     p.region.tiling = p.region.tiling.model_copy(update={**dict(size_um=1.5, overlap_um=.5), **tiling})
     return Project.model_validate(p.model_dump())
 
@@ -432,7 +434,8 @@ def test_point_traces_and_spectra_enter_the_resident_estimate_and_can_be_refused
     per_trace = steps*4+(steps//2+1)*16  # float32 samples plus the complex128 FFT spectrum
     assert estimate(one)['point_trace_estimated_bytes'] == per_trace
     assert estimate(many)['point_trace_estimated_bytes'] == 400*per_trace
-    assert estimate(many)['estimated_memory_mb']-estimate(one)['estimated_memory_mb'] == pytest.approx(399*per_trace/2**20, abs=.1)
+    # Each trace also has its host copy in the result, one float32 sample per step.
+    assert estimate(many)['estimated_memory_mb']-estimate(one)['estimated_memory_mb'] == pytest.approx(399*(per_trace+steps*4)/2**20, abs=.1)
     from torchfdtd import Boundaries, BoundaryFace
     bloch = one.model_copy(update=dict(region=one.region.model_copy(update=dict(
         boundaries=Boundaries(y_min=BoundaryFace(kind='bloch'), y_max=BoundaryFace(kind='bloch')), bloch_phase=(0, .3, 0)))))

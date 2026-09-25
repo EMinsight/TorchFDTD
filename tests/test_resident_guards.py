@@ -241,10 +241,14 @@ def test_estimate_covers_steps_through_traces_windows_and_source_waveforms():
     added = 200_000-p.region.steps
     assert short['source_waveform_estimated_bytes'] == p.region.steps*4
     assert extended['source_waveform_estimated_bytes'] == 200_000*4
+    # The stored frames: one every max(snapshot_interval, ceil(steps/100)) steps, a list and its stacked copy.
+    r = p.region
+    frames = [q.steps//max(q.snapshot_interval, math.ceil(q.steps/100))+1 for q in (r, long.region)]
+    pixels = math.prod(min(n, 256) for i, n in enumerate(r.shape) if i != 'xyz'.index(r.slice_axis))
     # Point traces and spectra with the host copy of the trace, the device waveform copy, the plan's waveform
-    # and sample times, and the plane's windows.
+    # and sample times, the plane's windows and the frames.
     grown = (extended['point_trace_estimated_bytes']-short['point_trace_estimated_bytes']+added*4
-             +added*(4+HOST_WAVEFORM_BYTES)+added*16)/2**20
+             +added*(4+HOST_WAVEFORM_BYTES)+added*16+2*(frames[1]-frames[0])*pixels*4)/2**20
     assert extended['estimated_memory_mb']-short['estimated_memory_mb'] == pytest.approx(grown, abs=.1)
 
 
