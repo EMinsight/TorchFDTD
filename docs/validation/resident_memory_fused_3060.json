@@ -10,22 +10,22 @@
   "cupy": "13.6.0",
   "driver": "591.86"
  },
- "revision": "3d77ee0d93c4acc8418ad2153d7443fe562bec1b",
+ "revision": "a783127a6970f966631f01f3fb1118d6ade7e4cb",
  "source_sha256": {
-  "torchfdtd/models.py": "c1d6827ecb7baf5800f37a73f722d137f93c8af4fd317d681ddd252045d5acac",
-  "torchfdtd/solver.py": "eb15fb152022ffbcd1f71c699926ead092d467ca93149d737bcdb748b2906246",
+  "torchfdtd/models.py": "9f7b40bee9915984764ecdde426216f243e478456973997f9701388660a56f2f",
+  "torchfdtd/solver.py": "f25da8a0091bfd31d92b03d445bd9a3bc72bf8ef62e789326a8b6d828f3b38d8",
   "torchfdtd/boundaries.py": "63e0e189c1de4d07ec8f6e82f337f6b91a6e459e1f9805071e1fc2fe9f1603dc",
   "torchfdtd/cuda_kernels.py": "893f6aae8d76e22f2bf743af3532010314a10c70a53bcc0495ada6a5bda0d4a1",
   "torchfdtd/cuda_monitors.py": "2eb755e8e51f2e3339fcbe8e469d8bcfc8835e398c6c62bc08c037b8d7008976",
   "torchfdtd/cuda_diagnostics.py": "e4b007fe4d721fa29e7955a5403040003c27c0a32df6747a6966df97b6b29eae",
   "torchfdtd/cuda_graph.py": "791feb844c4e833550fb4632c351d81f4d7183a5ab73bbd9efa98ddd294f1825",
-  "torchfdtd/field_monitors.py": "91508a65046a80ea9f376442459d8f4f75aaa9e508b582a59e6f6cbe27bddbcb",
+  "torchfdtd/field_monitors.py": "e905fcb6140f9d0424368765faeef11e07153bb83fb3efaf9d48c1d9c38a48c4",
   "torchfdtd/materials.py": "02d126a13d546d49fdcba4e074f38670a97d47485e426fbd64ec3b68ff2c3164",
   "torchfdtd/run_control.py": "48847061a80e0f7047e9c598b28375dac5ea315a3ff1c9339c37c9cd6bfae8e3",
   "torchfdtd/plan.py": "6aa20121f7b05e226e2e73b733542def4ad70c07e830c97ee27155852cbeb511",
-  "torchfdtd/tensor_batch.py": "16ea8fc34e24dc1bab883d95cf5c7efca85c6f86a3d62b06617a3fd79d42a62c",
+  "torchfdtd/tensor_batch.py": "e82f0f4e2e4f24bc54665c6926b2e3dc9663c7430a9931c96e8943d94f159d44",
   "torchfdtd/cuda_batch.py": "d877e0372595e1c0075897accba73d7526a0b09043c0e5a065ce6fa433010f1c",
-  "benchmarks/resident_memory_fused.py": "604e5d99db208f5f1e7019c5431948302dc88513deb19666c46abe742dc1b851"
+  "benchmarks/resident_memory_fused.py": "78dcb0eef545c92993936fd08979288eb8d067b1c6a568a86c4f246d44efeb88"
  },
  "mesh_um": 0.05,
  "pml_cells": 10,
@@ -54,8 +54,10 @@
    "peak_reserved_bytes": 77594624,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 140194611,
-   "seconds": 0.7870982000022195,
+   "seconds": 0.829046400001971,
    "finite": true,
+   "host_peak_working_set_bytes": 286449664,
+   "host_estimate_bytes": 583217971,
    "projects": [
     {
      "schema_version": 1,
@@ -460,8 +462,10 @@
    "peak_reserved_bytes": 283115520,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 352636109,
-   "seconds": 1.3700315999885788,
+   "seconds": 1.1181337000161875,
    "finite": true,
+   "host_peak_working_set_bytes": 460353536,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -866,8 +870,10 @@
    "peak_reserved_bytes": 970981376,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1149239296,
-   "seconds": 3.2260870000027353,
+   "seconds": 2.6222497999842744,
    "finite": true,
+   "host_peak_working_set_bytes": 952774656,
+   "host_estimate_bytes": 1275068416,
    "projects": [
     {
      "schema_version": 1,
@@ -1272,8 +1278,10 @@
    "peak_reserved_bytes": 3854565376,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 4309018214,
-   "seconds": 11.13054060000286,
+   "seconds": 6.331508100003703,
    "finite": true,
+   "host_peak_working_set_bytes": 3111743488,
+   "host_estimate_bytes": 3482950042,
    "projects": [
     {
      "schema_version": 1,
@@ -1678,8 +1686,10 @@
    "peak_reserved_bytes": 3854565376,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 4506045645,
-   "seconds": 11.847958700003801,
+   "seconds": 6.821650199999567,
    "finite": true,
+   "host_peak_working_set_bytes": 3113492480,
+   "host_estimate_bytes": 3482950042,
    "projects": [
     {
      "schema_version": 1,
@@ -2084,8 +2094,10 @@
    "peak_reserved_bytes": 4525654016,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 5309464576,
-   "seconds": 18.636873399998876,
+   "seconds": 14.51487929999712,
    "finite": true,
+   "host_peak_working_set_bytes": 4484427776,
+   "host_estimate_bytes": 5067872666,
    "projects": [
     {
      "schema_version": 1,
@@ -2542,8 +2554,10 @@
    "peak_reserved_bytes": 257949696,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 329252864,
-   "seconds": 1.0702252000046428,
+   "seconds": 1.0001708999916445,
    "finite": true,
+   "host_peak_working_set_bytes": 459194368,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -2948,8 +2962,10 @@
    "peak_reserved_bytes": 970981376,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1091253043,
-   "seconds": 2.985473100008676,
+   "seconds": 1.9594541999977082,
    "finite": true,
+   "host_peak_working_set_bytes": 950865920,
+   "host_estimate_bytes": 1275068416,
    "projects": [
     {
      "schema_version": 1,
@@ -3354,8 +3370,10 @@
    "peak_reserved_bytes": 3854565376,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 4163161293,
-   "seconds": 10.34608930000104,
+   "seconds": 6.475617299991427,
    "finite": true,
+   "host_peak_working_set_bytes": 3111112704,
+   "host_estimate_bytes": 3482950042,
    "projects": [
     {
      "schema_version": 1,
@@ -3760,8 +3778,10 @@
    "peak_reserved_bytes": 287309824,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 368574464,
-   "seconds": 1.3850139999995008,
+   "seconds": 1.1662377000029664,
    "finite": true,
+   "host_peak_working_set_bytes": 478904320,
+   "host_estimate_bytes": 743230669,
    "projects": [
     {
      "schema_version": 1,
@@ -4218,8 +4238,10 @@
    "peak_reserved_bytes": 970981376,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1193698918,
-   "seconds": 3.6065257000009296,
+   "seconds": 2.990637099981541,
    "finite": true,
+   "host_peak_working_set_bytes": 991395840,
+   "host_estimate_bytes": 1322673766,
    "projects": [
     {
      "schema_version": 1,
@@ -4676,8 +4698,10 @@
    "peak_reserved_bytes": 308281344,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 392796570,
-   "seconds": 1.622875999993994,
+   "seconds": 1.5575472000055015,
    "finite": true,
+   "host_peak_working_set_bytes": 540295168,
+   "host_estimate_bytes": 743230669,
    "projects": [
     {
      "schema_version": 1,
@@ -5134,8 +5158,10 @@
    "peak_reserved_bytes": 283115520,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 385351680,
-   "seconds": 1.3689853999967454,
+   "seconds": 1.2207080000080168,
    "finite": true,
+   "host_peak_working_set_bytes": 526209024,
+   "host_estimate_bytes": 795764326,
    "projects": [
     {
      "schema_version": 1,
@@ -5540,8 +5566,10 @@
    "peak_reserved_bytes": 1161822208,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1277270426,
-   "seconds": 3.607283199991798,
+   "seconds": 3.043535500008147,
    "finite": true,
+   "host_peak_working_set_bytes": 1192275968,
+   "host_estimate_bytes": 1547069030,
    "projects": [
     {
      "schema_version": 1,
@@ -5924,6 +5952,822 @@
    ]
   },
   {
+   "name": "fused-f32-yee-periodic-64m",
+   "shape": [
+    400,
+    400,
+    400
+   ],
+   "precision": "float32",
+   "kernel": "fused",
+   "monitor_kernel": "fused",
+   "boundary": "periodic",
+   "plane": false,
+   "poles": 0,
+   "sampling": "yee",
+   "batch": 1,
+   "graph_steps": 1,
+   "metalens": null,
+   "cells": 64000000,
+   "steps": 60,
+   "peak_allocated_bytes": 3840000000,
+   "peak_reserved_bytes": 3854565376,
+   "cupy_pool_bytes": 0,
+   "estimate_bytes": 4675076096,
+   "seconds": 7.408394400001271,
+   "finite": true,
+   "host_peak_working_set_bytes": 4072210432,
+   "host_estimate_bytes": 4570952499,
+   "projects": [
+    {
+     "schema_version": 1,
+     "name": "memory 0",
+     "region": {
+      "dimension": "3d",
+      "size": [
+       20.0,
+       20.0,
+       20.0
+      ],
+      "mesh": 0.05,
+      "mesh_steps": null,
+      "mesh_coordinates": null,
+      "material_sampling": "yee",
+      "interface_method": "staircase",
+      "subpixel_quadrature": 8,
+      "mesh_type": "uniform",
+      "mesh_max": 0.15,
+      "mesh_grading": 1.25,
+      "mesh_ppw": 24.0,
+      "mesh_auto_refine": true,
+      "mesh_refinements": [],
+      "courant_factor": 0.99,
+      "time_step_override": null,
+      "steps": 60,
+      "run_control": {
+       "auto_shutoff": false,
+       "decay_threshold": 1e-06,
+       "check_interval": 50,
+       "consecutive_checks": 3,
+       "min_steps": 100,
+       "source_tail_amplitude": 1e-08,
+       "after_source_s": 0.0,
+       "divergence_check": true,
+       "growth_limit": 1000000.0,
+       "field_limit": null
+      },
+      "pml_cells": 10,
+      "pml_dispersion": "ade",
+      "boundaries": {
+       "x_min": {
+        "kind": "periodic",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "x_max": {
+        "kind": "periodic",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "y_min": {
+        "kind": "periodic",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "y_max": {
+        "kind": "periodic",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "z_min": {
+        "kind": "periodic",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "z_max": {
+        "kind": "periodic",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       }
+      },
+      "bloch_phase": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "background_index": 1.0,
+      "backend": "cuda",
+      "memory_mode": "resident",
+      "execution_mode": "auto",
+      "tiling": {
+       "size_um": 20.0,
+       "overlap_um": 2.0,
+       "max_angle_deg": 45.0,
+       "propagation_um": null,
+       "allow_approximate": false
+      },
+      "cuda_kernel": "fused",
+      "cuda_monitor_kernel": "fused",
+      "precision": "float32",
+      "snapshot_interval": 20,
+      "field": "Ez",
+      "slice_axis": "z",
+      "slice_position": 0.0,
+      "complex_display": "real"
+     },
+     "materials": [
+      {
+       "name": "Air",
+       "index": 1.0,
+       "color": "#b7c5d7",
+       "model": "dielectric",
+       "epsilon_tensor": [
+        2.25,
+        2.25,
+        2.25,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "epsilon_inf": 1.0,
+       "plasma_rad_s": 2000000000000000.0,
+       "collision_rad_s": 100000000000000.0,
+       "resonance_rad_s": 2000000000000000.0,
+       "linewidth_rad_s": 100000000000000.0,
+       "delta_epsilon": 1.0,
+       "poles": [],
+       "samples": null,
+       "fit_band_um": null,
+       "fit_dt_s": null,
+       "provenance": null
+      },
+      {
+       "name": "SiO2 (constant n)",
+       "index": 1.444,
+       "color": "#80c4d7",
+       "model": "dielectric",
+       "epsilon_tensor": [
+        2.25,
+        2.25,
+        2.25,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "epsilon_inf": 1.0,
+       "plasma_rad_s": 2000000000000000.0,
+       "collision_rad_s": 100000000000000.0,
+       "resonance_rad_s": 2000000000000000.0,
+       "linewidth_rad_s": 100000000000000.0,
+       "delta_epsilon": 1.0,
+       "poles": [],
+       "samples": null,
+       "fit_band_um": null,
+       "fit_dt_s": null,
+       "provenance": null
+      },
+      {
+       "name": "SiN (constant n)",
+       "index": 2.0,
+       "color": "#69a1e8",
+       "model": "dielectric",
+       "epsilon_tensor": [
+        2.25,
+        2.25,
+        2.25,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "epsilon_inf": 1.0,
+       "plasma_rad_s": 2000000000000000.0,
+       "collision_rad_s": 100000000000000.0,
+       "resonance_rad_s": 2000000000000000.0,
+       "linewidth_rad_s": 100000000000000.0,
+       "delta_epsilon": 1.0,
+       "poles": [],
+       "samples": null,
+       "fit_band_um": null,
+       "fit_dt_s": null,
+       "provenance": null
+      },
+      {
+       "name": "Si (constant n)",
+       "index": 3.48,
+       "color": "#cc8bdc",
+       "model": "dielectric",
+       "epsilon_tensor": [
+        2.25,
+        2.25,
+        2.25,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "epsilon_inf": 1.0,
+       "plasma_rad_s": 2000000000000000.0,
+       "collision_rad_s": 100000000000000.0,
+       "resonance_rad_s": 2000000000000000.0,
+       "linewidth_rad_s": 100000000000000.0,
+       "delta_epsilon": 1.0,
+       "poles": [],
+       "samples": null,
+       "fit_band_um": null,
+       "fit_dt_s": null,
+       "provenance": null
+      }
+     ],
+     "structures": [
+      {
+       "id": "block",
+       "name": "object",
+       "center": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "enabled": true,
+       "kind": "rectangle",
+       "size": [
+        10.0,
+        10.0,
+        10.0
+       ],
+       "radius": 0.5,
+       "inner_radius": 0.3,
+       "rotation": 0.0,
+       "rotation_axes": [
+        "z",
+        "x",
+        "y"
+       ],
+       "rotation_angles": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "make_ellipsoid": false,
+       "radius_2": 0.5,
+       "radius_3": 0.5,
+       "inner_radius_2": 0.3,
+       "theta_start": 0.0,
+       "theta_stop": 360.0,
+       "vertices": [
+        [
+         -0.5,
+         -0.5
+        ],
+        [
+         0.5,
+         -0.5
+        ],
+        [
+         0.0,
+         0.5
+        ]
+       ],
+       "holes": [],
+       "material": "SiN (constant n)",
+       "mesh_order": 2
+      }
+     ],
+     "sources": [
+      {
+       "wavelength": 1.1,
+       "pulse": "gaussian",
+       "pulse_cycles": 3.0,
+       "time_definition": "cycles",
+       "pulse_length": 2e-14,
+       "pulse_offset": 5e-14,
+       "signal": null,
+       "wavelength_start": 1.3,
+       "wavelength_stop": 1.8,
+       "optimize_for_short_pulse": true,
+       "eliminate_discontinuities": false,
+       "chirp_bandwidth_hz": 100000000000000.0,
+       "id": "source",
+       "name": "source",
+       "center": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "enabled": true,
+       "kind": "point",
+       "injection": "soft",
+       "normal": "x",
+       "direction": "+",
+       "incident_pml_cells": 96,
+       "size": [
+        0.0,
+        2.0,
+        0.0
+       ],
+       "component": "Ez",
+       "theta": null,
+       "phi": 0.0,
+       "amplitude": 1.0,
+       "phase": 0.0,
+       "use_global_source": false,
+       "extend_through_pml": false
+      }
+     ],
+     "global_source": {
+      "wavelength": 1.55,
+      "pulse": "gaussian",
+      "pulse_cycles": 3.0,
+      "time_definition": "cycles",
+      "pulse_length": 2e-14,
+      "pulse_offset": 5e-14,
+      "signal": null,
+      "wavelength_start": 1.3,
+      "wavelength_stop": 1.8,
+      "optimize_for_short_pulse": true,
+      "eliminate_discontinuities": false,
+      "chirp_bandwidth_hz": 100000000000000.0
+     },
+     "monitors": [
+      {
+       "id": "probe",
+       "name": "monitor",
+       "center": [
+        0.2,
+        0.0,
+        0.0
+       ],
+       "enabled": true,
+       "kind": "point",
+       "component": "Ez",
+       "spectrum": {
+        "sampling": "fft",
+        "chebyshev_wavelength": false,
+        "chebyshev_nodes": "roots",
+        "use_source_limits": false,
+        "custom_frequencies_hz": [],
+        "wavelength_start": 1.3,
+        "wavelength_stop": 1.8,
+        "frequency_points": 101,
+        "apodization": "hann",
+        "apodization_center": 2e-14,
+        "apodization_time_width": 1e-14
+       },
+       "use_global_monitor": false,
+       "inherit_apodization": true,
+       "time_downsample": 1
+      }
+     ],
+     "global_monitor": {
+      "sampling": "frequency",
+      "chebyshev_wavelength": false,
+      "chebyshev_nodes": "roots",
+      "use_source_limits": false,
+      "custom_frequencies_hz": [],
+      "wavelength_start": 1.3,
+      "wavelength_stop": 1.8,
+      "frequency_points": 101,
+      "apodization": "none",
+      "apodization_center": 2e-14,
+      "apodization_time_width": 1e-14
+     },
+     "import_provenance": null,
+     "revision": 0,
+     "content_sha256": null
+    }
+   ]
+  },
+  {
+   "name": "fused-f64-yee-16m",
+   "shape": [
+    252,
+    252,
+    252
+   ],
+   "precision": "float64",
+   "kernel": "fused",
+   "monitor_kernel": "fused",
+   "boundary": "cpml",
+   "plane": false,
+   "poles": 0,
+   "sampling": "yee",
+   "batch": 1,
+   "graph_steps": 1,
+   "metalens": null,
+   "cells": 16003008,
+   "steps": 60,
+   "peak_allocated_bytes": 2036236800,
+   "peak_reserved_bytes": 2319450112,
+   "cupy_pool_bytes": 0,
+   "estimate_bytes": 2487327130,
+   "seconds": 6.037153299985221,
+   "finite": true,
+   "host_peak_working_set_bytes": 1960194048,
+   "host_estimate_bytes": 2125253837,
+   "projects": [
+    {
+     "schema_version": 1,
+     "name": "memory 0",
+     "region": {
+      "dimension": "3d",
+      "size": [
+       12.600000000000001,
+       12.600000000000001,
+       12.600000000000001
+      ],
+      "mesh": 0.05,
+      "mesh_steps": null,
+      "mesh_coordinates": null,
+      "material_sampling": "yee",
+      "interface_method": "staircase",
+      "subpixel_quadrature": 8,
+      "mesh_type": "uniform",
+      "mesh_max": 0.15,
+      "mesh_grading": 1.25,
+      "mesh_ppw": 24.0,
+      "mesh_auto_refine": true,
+      "mesh_refinements": [],
+      "courant_factor": 0.99,
+      "time_step_override": null,
+      "steps": 60,
+      "run_control": {
+       "auto_shutoff": false,
+       "decay_threshold": 1e-06,
+       "check_interval": 50,
+       "consecutive_checks": 3,
+       "min_steps": 100,
+       "source_tail_amplitude": 1e-08,
+       "after_source_s": 0.0,
+       "divergence_check": true,
+       "growth_limit": 1000000.0,
+       "field_limit": null
+      },
+      "pml_cells": 10,
+      "pml_dispersion": "ade",
+      "boundaries": {
+       "x_min": {
+        "kind": "pml",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "x_max": {
+        "kind": "pml",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "y_min": {
+        "kind": "pml",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "y_max": {
+        "kind": "pml",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "z_min": {
+        "kind": "pml",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       },
+       "z_max": {
+        "kind": "pml",
+        "layers": null,
+        "sigma_scale": 1.0,
+        "kappa": 1.0,
+        "alpha": 1e-08,
+        "polynomial": 3.0,
+        "alpha_polynomial": 0.0
+       }
+      },
+      "bloch_phase": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "background_index": 1.0,
+      "backend": "cuda",
+      "memory_mode": "resident",
+      "execution_mode": "auto",
+      "tiling": {
+       "size_um": 20.0,
+       "overlap_um": 2.0,
+       "max_angle_deg": 45.0,
+       "propagation_um": null,
+       "allow_approximate": false
+      },
+      "cuda_kernel": "fused",
+      "cuda_monitor_kernel": "fused",
+      "precision": "float64",
+      "snapshot_interval": 20,
+      "field": "Ez",
+      "slice_axis": "z",
+      "slice_position": 0.0,
+      "complex_display": "real"
+     },
+     "materials": [
+      {
+       "name": "Air",
+       "index": 1.0,
+       "color": "#b7c5d7",
+       "model": "dielectric",
+       "epsilon_tensor": [
+        2.25,
+        2.25,
+        2.25,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "epsilon_inf": 1.0,
+       "plasma_rad_s": 2000000000000000.0,
+       "collision_rad_s": 100000000000000.0,
+       "resonance_rad_s": 2000000000000000.0,
+       "linewidth_rad_s": 100000000000000.0,
+       "delta_epsilon": 1.0,
+       "poles": [],
+       "samples": null,
+       "fit_band_um": null,
+       "fit_dt_s": null,
+       "provenance": null
+      },
+      {
+       "name": "SiO2 (constant n)",
+       "index": 1.444,
+       "color": "#80c4d7",
+       "model": "dielectric",
+       "epsilon_tensor": [
+        2.25,
+        2.25,
+        2.25,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "epsilon_inf": 1.0,
+       "plasma_rad_s": 2000000000000000.0,
+       "collision_rad_s": 100000000000000.0,
+       "resonance_rad_s": 2000000000000000.0,
+       "linewidth_rad_s": 100000000000000.0,
+       "delta_epsilon": 1.0,
+       "poles": [],
+       "samples": null,
+       "fit_band_um": null,
+       "fit_dt_s": null,
+       "provenance": null
+      },
+      {
+       "name": "SiN (constant n)",
+       "index": 2.0,
+       "color": "#69a1e8",
+       "model": "dielectric",
+       "epsilon_tensor": [
+        2.25,
+        2.25,
+        2.25,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "epsilon_inf": 1.0,
+       "plasma_rad_s": 2000000000000000.0,
+       "collision_rad_s": 100000000000000.0,
+       "resonance_rad_s": 2000000000000000.0,
+       "linewidth_rad_s": 100000000000000.0,
+       "delta_epsilon": 1.0,
+       "poles": [],
+       "samples": null,
+       "fit_band_um": null,
+       "fit_dt_s": null,
+       "provenance": null
+      },
+      {
+       "name": "Si (constant n)",
+       "index": 3.48,
+       "color": "#cc8bdc",
+       "model": "dielectric",
+       "epsilon_tensor": [
+        2.25,
+        2.25,
+        2.25,
+        0.0,
+        0.0,
+        0.0
+       ],
+       "epsilon_inf": 1.0,
+       "plasma_rad_s": 2000000000000000.0,
+       "collision_rad_s": 100000000000000.0,
+       "resonance_rad_s": 2000000000000000.0,
+       "linewidth_rad_s": 100000000000000.0,
+       "delta_epsilon": 1.0,
+       "poles": [],
+       "samples": null,
+       "fit_band_um": null,
+       "fit_dt_s": null,
+       "provenance": null
+      }
+     ],
+     "structures": [
+      {
+       "id": "block",
+       "name": "object",
+       "center": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "enabled": true,
+       "kind": "rectangle",
+       "size": [
+        6.300000000000001,
+        6.300000000000001,
+        6.300000000000001
+       ],
+       "radius": 0.5,
+       "inner_radius": 0.3,
+       "rotation": 0.0,
+       "rotation_axes": [
+        "z",
+        "x",
+        "y"
+       ],
+       "rotation_angles": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "make_ellipsoid": false,
+       "radius_2": 0.5,
+       "radius_3": 0.5,
+       "inner_radius_2": 0.3,
+       "theta_start": 0.0,
+       "theta_stop": 360.0,
+       "vertices": [
+        [
+         -0.5,
+         -0.5
+        ],
+        [
+         0.5,
+         -0.5
+        ],
+        [
+         0.0,
+         0.5
+        ]
+       ],
+       "holes": [],
+       "material": "SiN (constant n)",
+       "mesh_order": 2
+      }
+     ],
+     "sources": [
+      {
+       "wavelength": 1.1,
+       "pulse": "gaussian",
+       "pulse_cycles": 3.0,
+       "time_definition": "cycles",
+       "pulse_length": 2e-14,
+       "pulse_offset": 5e-14,
+       "signal": null,
+       "wavelength_start": 1.3,
+       "wavelength_stop": 1.8,
+       "optimize_for_short_pulse": true,
+       "eliminate_discontinuities": false,
+       "chirp_bandwidth_hz": 100000000000000.0,
+       "id": "source",
+       "name": "source",
+       "center": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "enabled": true,
+       "kind": "point",
+       "injection": "soft",
+       "normal": "x",
+       "direction": "+",
+       "incident_pml_cells": 96,
+       "size": [
+        0.0,
+        2.0,
+        0.0
+       ],
+       "component": "Ez",
+       "theta": null,
+       "phi": 0.0,
+       "amplitude": 1.0,
+       "phase": 0.0,
+       "use_global_source": false,
+       "extend_through_pml": false
+      }
+     ],
+     "global_source": {
+      "wavelength": 1.55,
+      "pulse": "gaussian",
+      "pulse_cycles": 3.0,
+      "time_definition": "cycles",
+      "pulse_length": 2e-14,
+      "pulse_offset": 5e-14,
+      "signal": null,
+      "wavelength_start": 1.3,
+      "wavelength_stop": 1.8,
+      "optimize_for_short_pulse": true,
+      "eliminate_discontinuities": false,
+      "chirp_bandwidth_hz": 100000000000000.0
+     },
+     "monitors": [
+      {
+       "id": "probe",
+       "name": "monitor",
+       "center": [
+        0.2,
+        0.0,
+        0.0
+       ],
+       "enabled": true,
+       "kind": "point",
+       "component": "Ez",
+       "spectrum": {
+        "sampling": "fft",
+        "chebyshev_wavelength": false,
+        "chebyshev_nodes": "roots",
+        "use_source_limits": false,
+        "custom_frequencies_hz": [],
+        "wavelength_start": 1.3,
+        "wavelength_stop": 1.8,
+        "frequency_points": 101,
+        "apodization": "hann",
+        "apodization_center": 2e-14,
+        "apodization_time_width": 1e-14
+       },
+       "use_global_monitor": false,
+       "inherit_apodization": true,
+       "time_downsample": 1
+      }
+     ],
+     "global_monitor": {
+      "sampling": "frequency",
+      "chebyshev_wavelength": false,
+      "chebyshev_nodes": "roots",
+      "use_source_limits": false,
+      "custom_frequencies_hz": [],
+      "wavelength_start": 1.3,
+      "wavelength_stop": 1.8,
+      "frequency_points": 101,
+      "apodization": "none",
+      "apodization_center": 2e-14,
+      "apodization_time_width": 1e-14
+     },
+     "import_provenance": null,
+     "revision": 0,
+     "content_sha256": null
+    }
+   ]
+  },
+  {
    "name": "fused-f32-lorentz-4m",
    "shape": [
     160,
@@ -5946,8 +6790,10 @@
    "peak_reserved_bytes": 757071872,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1204604109,
-   "seconds": 3.397739599997294,
+   "seconds": 1.9135302000213414,
    "finite": true,
+   "host_peak_working_set_bytes": 494342144,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -6383,8 +7229,10 @@
    "peak_reserved_bytes": 2793406464,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 4477838950,
-   "seconds": 11.484854199996335,
+   "seconds": 5.427967600000557,
    "finite": true,
+   "host_peak_working_set_bytes": 987897856,
+   "host_estimate_bytes": 1275068416,
    "projects": [
     {
      "schema_version": 1,
@@ -6820,8 +7668,10 @@
    "peak_reserved_bytes": 1145044992,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1892679680,
-   "seconds": 4.613206899986835,
+   "seconds": 2.350991300016176,
    "finite": true,
+   "host_peak_working_set_bytes": 521457664,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -7262,8 +8112,10 @@
    "peak_reserved_bytes": 1396703232,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 2580860109,
-   "seconds": 5.706728000004659,
+   "seconds": 2.7158202000136953,
    "finite": true,
+   "host_peak_working_set_bytes": 522698752,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -7709,8 +8561,10 @@
    "peak_reserved_bytes": 851443712,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1302855680,
-   "seconds": 3.744341400000849,
+   "seconds": 2.0517146000056528,
    "finite": true,
+   "host_peak_working_set_bytes": 558899200,
+   "host_estimate_bytes": 795764326,
    "projects": [
     {
      "schema_version": 1,
@@ -8146,8 +9000,10 @@
    "peak_reserved_bytes": 1270874112,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1991036109,
-   "seconds": 4.928306799993152,
+   "seconds": 2.5580220999836456,
    "finite": true,
+   "host_peak_working_set_bytes": 585420800,
+   "host_estimate_bytes": 795764326,
    "projects": [
     {
      "schema_version": 1,
@@ -8588,8 +9444,10 @@
    "peak_reserved_bytes": 1061158912,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1204604109,
-   "seconds": 3.3962774999963585,
+   "seconds": 1.7891701999760699,
    "finite": true,
+   "host_peak_working_set_bytes": 496070656,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -9025,8 +9883,10 @@
    "peak_reserved_bytes": 1742733312,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1892679680,
-   "seconds": 4.6340454000019236,
+   "seconds": 2.467193299991777,
    "finite": true,
+   "host_peak_working_set_bytes": 524599296,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -9467,8 +10327,10 @@
    "peak_reserved_bytes": 2145386496,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 2580860109,
-   "seconds": 5.844184999994468,
+   "seconds": 2.697995800001081,
    "finite": true,
+   "host_peak_working_set_bytes": 526270464,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -9914,8 +10776,10 @@
    "peak_reserved_bytes": 1155530752,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1302855680,
-   "seconds": 3.786632200004533,
+   "seconds": 1.9824461999814957,
    "finite": true,
+   "host_peak_working_set_bytes": 560128000,
+   "host_estimate_bytes": 795764326,
    "projects": [
     {
      "schema_version": 1,
@@ -10351,8 +11215,10 @@
    "peak_reserved_bytes": 1820327936,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1991036109,
-   "seconds": 5.031439499987755,
+   "seconds": 2.4565843000018504,
    "finite": true,
+   "host_peak_working_set_bytes": 587894784,
+   "host_estimate_bytes": 795764326,
    "projects": [
     {
      "schema_version": 1,
@@ -10793,8 +11659,10 @@
    "peak_reserved_bytes": 973078528,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1149239296,
-   "seconds": 3.363863999999012,
+   "seconds": 1.9624257999821566,
    "finite": true,
+   "host_peak_working_set_bytes": 953446400,
+   "host_estimate_bytes": 1275068416,
    "projects": [
     {
      "schema_version": 1,
@@ -11199,8 +12067,10 @@
    "peak_reserved_bytes": 289406976,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 368574464,
-   "seconds": 1.447688999993261,
+   "seconds": 1.1513667000108398,
    "finite": true,
+   "host_peak_working_set_bytes": 479162368,
+   "host_estimate_bytes": 743230669,
    "projects": [
     {
      "schema_version": 1,
@@ -11657,8 +12527,10 @@
    "peak_reserved_bytes": 331350016,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 392796570,
-   "seconds": 1.6856365999992704,
+   "seconds": 1.3411438000039198,
    "finite": true,
+   "host_peak_working_set_bytes": 543977472,
+   "host_estimate_bytes": 743230669,
    "projects": [
     {
      "schema_version": 1,
@@ -12115,8 +12987,10 @@
    "peak_reserved_bytes": 155189248,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 213385216,
-   "seconds": 1.3600355000089621,
+   "seconds": 0.9399427000025753,
    "finite": true,
+   "host_peak_working_set_bytes": 336506880,
+   "host_estimate_bytes": 619498701,
    "projects": [
     {
      "schema_version": 1,
@@ -12521,8 +13395,10 @@
    "peak_reserved_bytes": 499122176,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 638058496,
-   "seconds": 3.3663418000069214,
+   "seconds": 1.7794823999865912,
    "finite": true,
+   "host_peak_working_set_bytes": 574676992,
+   "host_estimate_bytes": 874407526,
    "projects": [
     {
      "schema_version": 1,
@@ -12927,8 +13803,10 @@
    "peak_reserved_bytes": 1935671296,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 2231369728,
-   "seconds": 11.113501299987547,
+   "seconds": 5.107133000012254,
    "finite": true,
+   "host_peak_working_set_bytes": 1575833600,
+   "host_estimate_bytes": 1853148365,
    "projects": [
     {
      "schema_version": 1,
@@ -13333,8 +14211,10 @@
    "peak_reserved_bytes": 3938451456,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 4448164250,
-   "seconds": 21.69020489999093,
+   "seconds": 10.824273300007917,
    "finite": true,
+   "host_peak_working_set_bytes": 2983292928,
+   "host_estimate_bytes": 3228041216,
    "projects": [
     {
      "schema_version": 1,
@@ -13739,8 +14619,10 @@
    "peak_reserved_bytes": 1419771904,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 2309278925,
-   "seconds": 7.318091399996774,
+   "seconds": 3.6970069000090007,
    "finite": true,
+   "host_peak_working_set_bytes": 608964608,
+   "host_estimate_bytes": 874407526,
    "projects": [
     {
      "schema_version": 1,
@@ -14176,8 +15058,10 @@
    "peak_reserved_bytes": 2208301056,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 3685534925,
-   "seconds": 11.53527700000268,
+   "seconds": 5.2445745000150055,
    "finite": true,
+   "host_peak_working_set_bytes": 636264448,
+   "host_estimate_bytes": 874407526,
    "projects": [
     {
      "schema_version": 1,
@@ -14618,8 +15502,10 @@
    "peak_reserved_bytes": 2013265920,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 2309278925,
-   "seconds": 7.367949099992984,
+   "seconds": 3.36493569999584,
    "finite": true,
+   "host_peak_working_set_bytes": 612028416,
+   "host_estimate_bytes": 874407526,
    "projects": [
     {
      "schema_version": 1,
@@ -15055,8 +15941,10 @@
    "peak_reserved_bytes": 522190848,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 662804890,
-   "seconds": 3.3702362999902107,
+   "seconds": 1.8504697000025772,
    "finite": true,
+   "host_peak_working_set_bytes": 591912960,
+   "host_estimate_bytes": 891499315,
    "projects": [
     {
      "schema_version": 1,
@@ -15513,8 +16401,10 @@
    "peak_reserved_bytes": 123731968,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 199963443,
-   "seconds": 1.5179798000026494,
+   "seconds": 0.9325157999992371,
    "finite": true,
+   "host_peak_working_set_bytes": 298184704,
+   "host_estimate_bytes": 583217971,
    "projects": [
     {
      "schema_version": 1,
@@ -15919,8 +16809,10 @@
    "peak_reserved_bytes": 467664896,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 819252429,
-   "seconds": 4.20391519999248,
+   "seconds": 2.0120063000067603,
    "finite": true,
+   "host_peak_working_set_bytes": 474550272,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -16325,8 +17217,10 @@
    "peak_reserved_bytes": 1700790272,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 3200568525,
-   "seconds": 14.635846499993932,
+   "seconds": 6.571201699989615,
    "finite": true,
+   "host_peak_working_set_bytes": 968433664,
+   "host_estimate_bytes": 1275068416,
    "projects": [
     {
      "schema_version": 1,
@@ -16731,8 +17625,10 @@
    "peak_reserved_bytes": 840957952,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1146932429,
-   "seconds": 6.293989199999487,
+   "seconds": 3.2360025999951176,
    "finite": true,
+   "host_peak_working_set_bytes": 495726592,
+   "host_estimate_bytes": 726138880,
    "projects": [
     {
      "schema_version": 1,
@@ -17168,8 +18064,10 @@
    "peak_reserved_bytes": 882900992,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1638400000,
-   "seconds": 7.806658000001335,
+   "seconds": 3.7647801999992225,
    "finite": true,
+   "host_peak_working_set_bytes": 588333056,
+   "host_estimate_bytes": 874407526,
    "projects": [
     {
      "schema_version": 1,
@@ -17574,8 +18472,10 @@
    "peak_reserved_bytes": 1264582656,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 1462134374,
-   "seconds": 50.73936469999899,
+   "seconds": 28.630661800008966,
    "finite": true,
+   "host_peak_working_set_bytes": 1368735744,
+   "host_estimate_bytes": 1737175859,
    "projects": null
   },
   {
@@ -17601,8 +18501,10 @@
    "peak_reserved_bytes": 2812280832,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 3187775898,
-   "seconds": 131.8037772000098,
+   "seconds": 65.26558460001252,
    "finite": true,
+   "host_peak_working_set_bytes": 2766180352,
+   "host_estimate_bytes": 3190816768,
    "projects": null
   },
   {
@@ -17628,8 +18530,10 @@
    "peak_reserved_bytes": 4460642304,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 5010934989,
-   "seconds": 213.82475690000865,
+   "seconds": 101.83595579999383,
    "finite": true,
+   "host_peak_working_set_bytes": 4265824256,
+   "host_estimate_bytes": 4730650624,
    "projects": null
   },
   {
@@ -17655,8 +18559,10 @@
    "peak_reserved_bytes": 1933574144,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 2298478592,
-   "seconds": 6.634157599997707,
+   "seconds": 4.832459400000516,
    "finite": true,
+   "host_peak_working_set_bytes": 1339260928,
+   "host_estimate_bytes": 2550136832,
    "projects": [
     {
      "schema_version": 1,
@@ -18439,8 +19345,10 @@
    "peak_reserved_bytes": 1686110208,
    "cupy_pool_bytes": 0,
    "estimate_bytes": 2409208218,
-   "seconds": 6.377600599997095,
+   "seconds": 4.642204900010256,
    "finite": true,
+   "host_peak_working_set_bytes": 558755840,
+   "host_estimate_bytes": 1452277760,
    "projects": [
     {
      "schema_version": 1,
