@@ -83,6 +83,19 @@ def test_radius_selection_takes_the_smallest_complete_compliant_candidate_and_re
         workflow.build_problem(1, replace(workflow.Settings(), filter_radius_um=None), lambda density: density.sum())
 
 
+def test_committed_development_records_select_the_radius_in_use():
+    if not (RECORDED/'development').is_dir():
+        pytest.skip('no recorded development selection under docs/validation/g7/G7-03/development')
+    selection = workflow.development_selection(RECORDED)
+    assert selection['judged_seeds_used'] is False
+    assert {run['seed'] for run in selection['runs']} == set(workflow.DEVELOPMENT_SEEDS)
+    assert selection['selected_um'] == workflow.Settings().filter_radius_um
+    for run in selection['runs']:
+        record = json.loads((RECORDED/'development'/f"radius-{run['radius_um']:g}-seed{run['seed']}.json").read_text(encoding='utf-8'))
+        sizes = measure_feature_sizes(np.array(record['binary']), workflow.PIXEL_UM, boundary='extend')
+        assert (sizes.linewidth_pixels, sizes.gap_pixels) == (run['linewidth_px'], run['gap_px'])
+
+
 def test_development_run_records_feature_sizes_and_transmissions(tmp_path):
     settings = replace(workflow.REDUCED, steps=100, iterations=1)
     record = workflow.develop(.5, workflow.DEVELOPMENT_SEEDS[0], settings)

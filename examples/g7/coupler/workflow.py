@@ -78,7 +78,8 @@ class Settings:
     """Workflow parameters. mesh_um and check_mesh_um are declared; the others are workflow choices
     fixed before any run of the declared seeds. steps keep the physical time of G6's 500 steps at
     0.2 um (at 0.05 um, 2000 against 3000 steps changed |S21|^2 by 2.7e-4 on a random density). The
-    filter radius is select_radius() of the development records (None until they exist)."""
+    filter radius is select_radius() of the development records in docs/validation/g7/G7-03/development:
+    0.4 and 0.5 um left features below 4 pixels, 0.6 um met the rule for development seeds 11, 12, 13."""
     mesh_um: float = .05
     steps: int = 2000
     check_mesh_um: float = .025
@@ -88,7 +89,7 @@ class Settings:
     continuation_every: int = 10
     beta_maximum: float = 64.
     learning_rate: float = .1
-    filter_radius_um: float | None = None
+    filter_radius_um: float | None = .6
     fd_step: float = .02
     fd_pixels: int = 3
     device: str = 'cuda'
@@ -512,9 +513,12 @@ def environment(settings):
 
 
 def write_json(path, payload):
+    """Write through a temporary file, so seeds running in parallel never read a partial record."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=1, allow_nan=False)+'\n', encoding='utf-8', newline='\n')
+    temporary = path.with_name(path.name+'.tmp')
+    temporary.write_text(json.dumps(payload, indent=1, allow_nan=False)+'\n', encoding='utf-8', newline='\n')
+    temporary.replace(path)
 
 
 def summarize(output_dir):
