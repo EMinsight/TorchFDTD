@@ -280,8 +280,12 @@ class DispersiveSimulation(DifferentiableSimulation):
             raise ValueError('Strength needs a leading pole axis of length 1 to 64.')
         count = strength.shape[0]
         if reference:
-            from .oracle_memory import admit_oracle, oracle_graph_bytes
-            admit_oracle(oracle_graph_bytes(r, 'ade', pole_count=count), epsilon.device, graph_budget_bytes)
+            from .oracle_memory import admit_oracle, oracle_graph_bytes, oracle_source_terms
+            # Per-cell oscillator parameters make every step's coefficients per cell too.
+            admit_oracle(oracle_graph_bytes(r, 'ade', pole_count=count, material_elements=epsilon.numel(),
+                                            parameter_elements=max(v.numel() for v in (strength, omega0, gamma)),
+                                            source_terms=oracle_source_terms(self.project)),
+                         epsilon.device, graph_budget_bytes)
         for value in (strength, omega0, gamma):
             if value.shape not in ((), (count,), (count, *grid), (count, *grid, 3)):
                 raise ValueError('Oscillator shape must be scalar, (P,), (P,Nx,Ny,Nz), or (P,Nx,Ny,Nz,3), with stored upper PMC rows included.')

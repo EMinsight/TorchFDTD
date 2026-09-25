@@ -314,9 +314,12 @@ class ModeInjectedPlaneSimulation(DifferentiablePlaneSimulation):
         if isinstance(self.model,_ModalStreamedSimulation):
             raise ValueError('The full-autograd oracle uses resident systems.')
         region=self.model.project.region
-        from .oracle_memory import admit_oracle,oracle_graph_bytes
-        admit_oracle(oracle_graph_bytes(region,'yee'),epsilon.device,graph_budget_bytes)
+        from .oracle_memory import admit_oracle,check_oracle_dtype,oracle_graph_bytes
+        # The graph runs at epsilon's dtype and the estimate counts the project precision.
+        check_oracle_dtype(epsilon,region)
         launch=self.launch
+        admit_oracle(oracle_graph_bytes(region,'yee',material_elements=epsilon.numel(),source_terms=len(launch.terms)),
+                     epsilon.device,graph_budget_bytes)
         _check_launch_signatures(self.model.project,launch,epsilon)
         material,_,_=_frozen_launch_material(launch,epsilon)
         def run(spectral):

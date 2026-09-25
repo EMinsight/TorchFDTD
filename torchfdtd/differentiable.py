@@ -800,8 +800,12 @@ class DifferentiableSimulation(torch.nn.Module):
         The retained graph is admitted by its estimated memory against free
         device or host memory. graph_budget_bytes caps it further.
         """
-        from .oracle_memory import admit_oracle,oracle_graph_bytes
-        admit_oracle(oracle_graph_bytes(self.project.region,'yee'),epsilon.device,graph_budget_bytes)
+        from .oracle_memory import admit_oracle,check_oracle_dtype,oracle_graph_bytes,oracle_source_terms
+        r=self.project.region
+        # The graph runs at epsilon's dtype and the estimate counts the project precision.
+        check_oracle_dtype(epsilon,r)
+        admit_oracle(oracle_graph_bytes(r,'yee',material_elements=epsilon.numel(),source_terms=oracle_source_terms(self.project)),
+                     epsilon.device,graph_budget_bytes)
         system=_System(self.project,epsilon)
         state=tuple(torch.zeros_like(x) for x in system.state())
         signals=[]

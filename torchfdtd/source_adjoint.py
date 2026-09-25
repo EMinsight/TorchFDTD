@@ -180,7 +180,8 @@ class SourceWaveformSimulation(DifferentiableSimulation):
     def reference(self,epsilon,waveforms,*,graph_budget_bytes=None):
         """Full-autograd oracle, admitted by its estimated graph memory; graph_budget_bytes caps it."""
         from .oracle_memory import admit_oracle,oracle_graph_bytes
-        admit_oracle(oracle_graph_bytes(self.project.region,'yee'),epsilon.device,graph_budget_bytes)
+        admit_oracle(oracle_graph_bytes(self.project.region,'yee',material_elements=epsilon.numel(),source_terms=len(self._layout)),
+                     epsilon.device,graph_budget_bytes)
         carrier,_=self._pack(epsilon,waveforms)
         owned=carrier[:epsilon.numel()].view(epsilon.shape)
         system=_SourceSystem(self.project.model_copy(deep=True),owned,carrier=carrier,
