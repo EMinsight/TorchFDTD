@@ -2911,13 +2911,15 @@
             "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-04.xml"
           ],
           "actual_test_commands": [
-            "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-04.xml"
+            "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-04.xml",
+            "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G7-04.xml"
           ],
           "required_tests": [
             "tests/test_g7_solvers.py"
           ],
           "evidence": [
-            "20260924T140733Z-g7-04-a1b4bd63"
+            "20260924T140733Z-g7-04-a1b4bd63",
+            "20260925T054137Z-g7-04-087c885b"
           ],
           "blocker": null,
           "scope_change_approval": {
