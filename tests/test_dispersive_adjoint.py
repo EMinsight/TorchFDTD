@@ -118,11 +118,13 @@ def test_invalid_parameters_and_options():
 
 
 def test_reference_size_guard_precedes_parameter_packing(monkeypatch):
-    p=project(steps=10000)
+    # The oracle is admitted by its graph memory estimate, before packing.
+    p=project(steps=10)
     eps=torch.full(p.region.shape,1.5,dtype=torch.float64)
     model=DispersiveSimulation(p)
+    model.project.region.steps=10**7
     monkeypatch.setattr(torch,'cat',lambda *a,**k: pytest.fail('Large oracle allocated packed parameters'))
-    with pytest.raises(ValueError,match='two million'):
+    with pytest.raises(ValueError,match='estimated .* bytes of retained graph'):
         model.reference(eps,[1e30],1e15,2e14)
 
 

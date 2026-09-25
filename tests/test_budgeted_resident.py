@@ -8,6 +8,7 @@ from torchfdtd import (AdjointOptions, AdjointExecutionPolicy, Region, Project,
     Monitor, Source, DifferentiableSimulation, DispersiveSimulation, estimate_adjoint_memory)
 from torchfdtd.adjoint_memory import _cuda_index_contract
 from torchfdtd.execution_tuning import _resident_reservation
+from torchfdtd.models import server_limits
 from test_streamed_dispersive import scene,inputs
 
 
@@ -39,11 +40,15 @@ def test_large_metadata_requires_explicit_budget_without_allocating(monkeypatch,
 def test_default_workbench_guard_remains_and_budgeted_mode_roundtrips():
     p=large_scene()
     assert Project.model_validate(p.model_dump()).region.memory_mode=='budgeted'
-    with pytest.raises(ValueError,match='8 million'):
-        Region.model_validate({**p.region.model_dump(),'memory_mode':'resident','execution_mode':'resident'})
-    # The workbench default execution_mode='auto' keeps the guard at the resident entry points.
-    with pytest.raises(ValueError,match='8 million'):
-        Region.model_validate({**p.region.model_dump(),'memory_mode':'resident'}).require_resident()
+    resident={**p.region.model_dump(),'memory_mode':'resident'}
+    # The Python API admits the grid by memory; the workbench server keeps its cell limit, also for
+    # the default execution_mode='auto' at the resident entry points.
+    Region.model_validate({**resident,'execution_mode':'resident'}).require_resident()
+    with server_limits():
+        with pytest.raises(ValueError,match='server limits resident execution to 8,000,000 cells'):
+            Region.model_validate({**resident,'execution_mode':'resident'})
+        with pytest.raises(ValueError,match='server limits resident execution to 8,000,000 cells'):
+            Region.model_validate(resident).require_resident()
 
 
 def test_index_rejection_precedes_boundary_arrays_and_memory_query(monkeypatch):

@@ -1,0 +1,1242 @@
+{
+  "record_version": 1,
+  "kind": "platform_g4_run",
+  "platform_id": "rtx3060-wsl2-ubuntu2204",
+  "platform_record": "docs/validation/platforms/rtx3060-wsl2-ubuntu2204.json",
+  "recorded_at": "2026-09-25T11:35:22+00:00",
+  "source_commit": "ee739535589f25cfd712077f8f193e6758b5184c",
+  "source_commit_time": "2026-09-25T19:15:56+09:00",
+  "gate_file": "docs/validation/completion_gates.json",
+  "gate_file_sha256": "fd8bb7fae28a26f8387139b0b2f3a337fb47fee926ab553fb8d2d387bba2b366",
+  "environment": {
+    "python": "3.12.14",
+    "python_executable": "<user home>/torchfdtd-bench/venv-g4/bin/python",
+    "os": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "machine": "x86_64",
+    "torch": "2.11.0+cu128",
+    "cupy": "13.6.0",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "cuda_runtime": "12.8",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "<user home>/torchfdtd-bench/venv-g4/lib/python3.12/site-packages/fdtd/__init__.py",
+    "torchfdtd_location": "/opt/torchfdtd-g4/TorchFDTD/torchfdtd/__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 41928716288,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "runs": [
+    {
+      "label": "g4-01",
+      "task": "G4-01",
+      "command": "python -m pytest -q -p no:cacheprovider tests/test_platform_matrix.py --junitxml=.local/tmp/junit/linux/g4-01.xml",
+      "exit_code": 0,
+      "junit": "docs/validation/platforms/g4/rtx3060-wsl2-ubuntu2204/g4-01.xml",
+      "junit_sha256": "57f5a00e6d6bd0158285519abefeab2d7a845eb09459f9ddb94a52cabcc4436e",
+      "started": "2026-09-25T19:18:08.276261+09:00",
+      "time_seconds": 5.578,
+      "counts": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed": [],
+      "errors": [],
+      "skipped": {},
+      "skip_classes": {},
+      "gpu_required_skips": []
+    },
+    {
+      "label": "g4-02",
+      "task": "G4-02",
+      "command": "python -m pytest -q -p no:cacheprovider tests/test_cuda_matrix.py --junitxml=.local/tmp/junit/linux/g4-02.xml",
+      "exit_code": 0,
+      "junit": "docs/validation/platforms/g4/rtx3060-wsl2-ubuntu2204/g4-02.xml",
+      "junit_sha256": "be974c8e17e1a79d975d626b11ba5748bef26e8b15b0babed1e2e9029474505b",
+      "started": "2026-09-25T19:18:18.754030+09:00",
+      "time_seconds": 52.278,
+      "counts": {
+        "total": 98,
+        "passed": 98,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed": [],
+      "errors": [],
+      "skipped": {},
+      "skip_classes": {},
+      "gpu_required_skips": []
+    },
+    {
+      "label": "g4-03",
+      "task": "G4-03",
+      "command": "python -m pytest -q -p no:cacheprovider tests/test_cuda_robustness.py --junitxml=.local/tmp/junit/linux/g4-03.xml",
+      "exit_code": 0,
+      "junit": "docs/validation/platforms/g4/rtx3060-wsl2-ubuntu2204/g4-03.xml",
+      "junit_sha256": "395cb81f36e5649abccff6e52664b7b914a7f099883ca85c50159563f7942c77",
+      "started": "2026-09-25T19:19:14.111206+09:00",
+      "time_seconds": 27.377,
+      "counts": {
+        "total": 29,
+        "passed": 29,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed": [],
+      "errors": [],
+      "skipped": {},
+      "skip_classes": {},
+      "gpu_required_skips": []
+    },
+    {
+      "label": "g4-04",
+      "task": "G4-04",
+      "command": "python -m pytest -q -p no:cacheprovider tests/test_cuda_edge_fixtures.py --junitxml=.local/tmp/junit/linux/g4-04.xml",
+      "exit_code": 0,
+      "junit": "docs/validation/platforms/g4/rtx3060-wsl2-ubuntu2204/g4-04.xml",
+      "junit_sha256": "37ac969ebf27e74d2888abca0c3661070ba6afc4d5d39eb85411249bb8e8fc63",
+      "started": "2026-09-25T19:19:49.023715+09:00",
+      "time_seconds": 24.773,
+      "counts": {
+        "total": 34,
+        "passed": 34,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed": [],
+      "errors": [],
+      "skipped": {},
+      "skip_classes": {},
+      "gpu_required_skips": []
+    },
+    {
+      "label": "g4-04-oob",
+      "task": "G4-04",
+      "command": "PYTORCH_NO_CUDA_MEMORY_CACHING=1 CUDA_LAUNCH_BLOCKING=1 python -m pytest -q -p no:cacheprovider tests/test_cuda_edge_fixtures.py --junitxml=.local/tmp/junit/linux/g4-04-oob.xml",
+      "exit_code": 0,
+      "junit": "docs/validation/platforms/g4/rtx3060-wsl2-ubuntu2204/g4-04-oob.xml",
+      "junit_sha256": "8a7c2960c610350a0ba6bdd13ec7c0cd7f497353124f3b662d0a3889aeeaf150",
+      "started": "2026-09-25T19:20:16.768070+09:00",
+      "time_seconds": 135.353,
+      "counts": {
+        "total": 34,
+        "passed": 34,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed": [],
+      "errors": [],
+      "skipped": {},
+      "skip_classes": {},
+      "gpu_required_skips": []
+    },
+    {
+      "label": "g4-05",
+      "task": "G4-05",
+      "command": "python -m pytest -q -p no:cacheprovider tests/test_suite_policy.py tests/test_release_gates.py --junitxml=.local/tmp/junit/linux/g4-05.xml",
+      "exit_code": 0,
+      "junit": "docs/validation/platforms/g4/rtx3060-wsl2-ubuntu2204/g4-05.xml",
+      "junit_sha256": "fd8aac2412d6b1b38c734c6f1c79402c96014b96106bf3128feb2c61095fab89",
+      "started": "2026-09-25T19:22:35.047627+09:00",
+      "time_seconds": 22.745,
+      "counts": {
+        "total": 42,
+        "passed": 42,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed": [],
+      "errors": [],
+      "skipped": {},
+      "skip_classes": {},
+      "gpu_required_skips": []
+    },
+    {
+      "label": "g4-06",
+      "task": "G4-06",
+      "command": "python -m pytest -q -p no:cacheprovider tests/test_gpu_runner_policy.py --junitxml=.local/tmp/junit/linux/g4-06.xml",
+      "exit_code": 0,
+      "junit": "docs/validation/platforms/g4/rtx3060-wsl2-ubuntu2204/g4-06.xml",
+      "junit_sha256": "b5581316724eb69092da704e61ba2231149d749dd5ec8a558d705a47aa167dca",
+      "started": "2026-09-25T19:23:02.396300+09:00",
+      "time_seconds": 0.058,
+      "counts": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "failed": [],
+      "errors": [],
+      "skipped": {},
+      "skip_classes": {},
+      "gpu_required_skips": []
+    },
+    {
+      "label": "gpu-nightly",
+      "task": "suite",
+      "command": "python scripts/run_suite.py gpu-nightly --junitxml=.local/tmp/junit/linux/gpu-nightly.xml",
+      "exit_code": 0,
+      "junit": "docs/validation/platforms/g4/rtx3060-wsl2-ubuntu2204/gpu-nightly.xml",
+      "junit_sha256": "3bd5213d85a820ed40df718f1e76fe155f0ca7a6ef26a4c508c91c9e4014e195",
+      "started": "2026-09-25T19:23:07.133035+09:00",
+      "time_seconds": 4296.188,
+      "counts": {
+        "total": 3391,
+        "passed": 3293,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 98
+      },
+      "failed": [],
+      "errors": [],
+      "skipped": {
+        "tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel": "the recorded wheel is not on this host: D:\\torchfdtd-clean\\dist\\afda8955fa1c\\torchfdtd-0.15.0-py3-none-any.whl",
+        "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[coupler]": "set TORCHFDTD_G6_FULL=1 for the judged three-start runs (about half an hour on a CPU)",
+        "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[metagrating]": "set TORCHFDTD_G6_FULL=1 for the judged three-start runs (about half an hour on a CPU)",
+        "tests/test_domain_decomposition.py::test_two_cuda_devices_single_problem": "optional platform check: Requires at least two visible CUDA GPUs and NCCL; not emulated by CPU ranks.",
+        "tests/test_fsp.py::test_installed_lumerical_fsp_roundtrip": "optional platform check: Requires installed licensed Lumerical",
+        "tests/test_g7_solvers.py::test_g7_04_acceptance_from_committed_records": "set TORCHFDTD_G7_FULL=1 for the G7-04 acceptance check",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d[Ez-1.0-40]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d[Ez-1.5-40]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d[Ey-1.0-40]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d[Ey-1.5-40]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d[Ey-1.0-40]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d[Ey-1.5-40]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d[Ez-1.0-40]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d[Ez-1.5-40]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TE-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TE-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TE-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TM-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TM-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TM-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TE-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TE-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TE-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TM-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TM-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TM-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TE-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TE-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TE-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TM-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TM-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TM-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TE-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TE-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TE-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TM-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TM-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TM-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TE-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TE-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TE-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TM-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TM-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TM-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TE-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TE-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TE-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TM-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TM-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TM-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TE-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TE-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TE-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TM-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TM-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TM-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TE-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TE-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TE-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TM-0]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TM-20]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TM-45]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm[drude-TE-h10]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm[drude-TM-h10]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm[lorentz-TE-h10]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm[lorentz-TM-h10]": "finest mesh: set TORCHFDTD_G3_FINE=1 (the recorded run does)",
+        "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering[TM]": "judged mesh of the cylinder fixture (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering[TE]": "judged mesh of the cylinder fixture (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_04_cylinder_resonance": "judged mesh of the resonance fixture (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.02]": "judged mesh h/4 of the Drude fixture (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.035]": "judged mesh h/4 of the Drude fixture (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.05]": "judged mesh h/4 of the Drude fixture (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-0.0-0.92]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-0.0-1.02]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-0.0-1.06]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-20.0-0.92]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-20.0-1.02]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-20.0-1.06]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-0.0-0.92]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-0.0-1.02]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-0.0-1.06]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-20.0-0.92]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-20.0-1.02]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-20.0-1.06]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls[TE]": "recorded control rows (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls[TM]": "recorded control rows (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-0.0-0.92]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-0.0-1.02]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-0.0-1.06]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-20.0-0.92]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-20.0-1.02]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-20.0-1.06]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-0.0-0.92]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-0.0-1.02]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-0.0-1.06]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-20.0-0.92]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-20.0-1.02]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-20.0-1.06]": "CPU FP64 grating runs at the full duration (TORCHFDTD_G3_FULL=1 runs it)"
+      },
+      "skip_classes": {
+        "tests/test_clean_install.py::test_record_matches_the_current_packaging_inputs_and_wheel": "file of another host",
+        "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[coupler]": "opt-in, not set by the run: TORCHFDTD_G6_FULL",
+        "tests/test_design_reimport.py::test_three_starts_meet_the_declared_final_and_holdout_thresholds[metagrating]": "opt-in, not set by the run: TORCHFDTD_G6_FULL",
+        "tests/test_domain_decomposition.py::test_two_cuda_devices_single_problem": "optional platform check",
+        "tests/test_fsp.py::test_installed_lumerical_fsp_roundtrip": "optional platform check",
+        "tests/test_g7_solvers.py::test_g7_04_acceptance_from_committed_records": "opt-in, not set by the run: TORCHFDTD_G7_FULL",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d[Ez-1.0-40]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d[Ez-1.5-40]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d[Ey-1.0-40]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_2d[Ey-1.5-40]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d[Ey-1.0-40]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d[Ey-1.5-40]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d[Ez-1.0-40]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG301::test_propagation_phase_3d[Ez-1.5-40]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TE-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TE-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TE-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TM-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TM-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.2-TM-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TE-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TE-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TE-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TM-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TM-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n1.5_d0.5-TM-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TE-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TE-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TE-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TM-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TM-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.2-TM-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TE-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TE-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TE-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TM-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TM-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_slab_r_t_against_tmm_40_cells[n3.5_d0.5-TM-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TE-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TE-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TE-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TM-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TM-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.2-TM-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TE-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TE-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TE-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TM-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TM-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n1.5_d0.5-TM-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TE-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TE-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TE-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TM-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TM-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.2-TM-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TE-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TE-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TE-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TM-0]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TM-20]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG302::test_dispersion_order[n3.5_d0.5-TM-45]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm[drude-TE-h10]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm[drude-TM-h10]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm[lorentz-TE-h10]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_a.py::TestG303::test_analytic_slab_against_tmm[lorentz-TM-h10]": "opt-in, not set by the run: TORCHFDTD_G3_FINE",
+        "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering[TM]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_04_cylinder_scattering[TE]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_04_cylinder_resonance": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.02]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.035]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_05_drude_sphere[0.05]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-0.0-0.92]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-0.0-1.02]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-0.0-1.06]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-20.0-0.92]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-20.0-1.02]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TE-20.0-1.06]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-0.0-0.92]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-0.0-1.02]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-0.0-1.06]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-20.0-0.92]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-20.0-1.02]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_grating_cuda_layer_a[TM-20.0-1.06]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls[TE]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b.py::test_g3_08_staircase_and_duration_controls[TM]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-0.0-0.92]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-0.0-1.02]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-0.0-1.06]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-20.0-0.92]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-20.0-1.02]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TE-20.0-1.06]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-0.0-0.92]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-0.0-1.02]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-0.0-1.06]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-20.0-0.92]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-20.0-1.02]": "opt-in, not set by the run: TORCHFDTD_G3_FULL",
+        "tests/test_physics_g3_b_r2.py::test_g3_08r2_grating_cuda_layer_a[TM-20.0-1.06]": "opt-in, not set by the run: TORCHFDTD_G3_FULL"
+      },
+      "gpu_required_skips": []
+    }
+  ],
+  "required_tests": {
+    "G4-01": {
+      "tests/test_platform_matrix.py": {
+        "tests/test_platform_matrix.py::test_platform_report_runs_and_records_every_field": {
+          "g4-01": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_platform_matrix.py::test_platform_report_replaces_the_home_directory": {
+          "g4-01": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_platform_matrix.py::test_matrix_rows_come_from_record_files_only": {
+          "g4-01": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_platform_matrix.py::test_every_record_file_has_a_matrix_row": {
+          "g4-01": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_platform_matrix.py::test_local_record_matches_this_gpu_when_present": {
+          "g4-01": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_platform_matrix.py::test_platform_g4_run_records_pass_every_g4_required_test": {
+          "g4-01": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_platform_matrix.py::test_platform_g4_skip_classes": {
+          "g4-01": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_platform_matrix.py::test_platform_g4_recorder_names_every_required_test_and_fails_a_failure": {
+          "g4-01": "passed",
+          "gpu-nightly": "passed"
+        }
+      }
+    },
+    "G4-02": {
+      "tests/test_cuda_matrix.py": {
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-torch-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-torch-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-torch-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-torch-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-torch-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-torch-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-torch-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-torch-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-fused-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-fused-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-fused-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-fused-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-fused-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-fused-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-fused-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-eager-fused-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-torch-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-torch-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-torch-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-torch-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-torch-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-torch-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-torch-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-torch-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-fused-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-fused-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-fused-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-fused-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-fused-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-fused-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-fused-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[torch-graph-fused-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-torch-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-torch-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-torch-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-torch-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-torch-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-torch-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-torch-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-torch-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-fused-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-fused-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-fused-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-fused-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-fused-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-fused-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-fused-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-eager-fused-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-torch-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-torch-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-torch-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-torch-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-torch-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-torch-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-torch-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-torch-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-fused-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-fused-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-fused-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-fused-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-fused-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-fused-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-fused-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_cell[fused-graph-fused-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-torch-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-torch-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-torch-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-torch-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-torch-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-torch-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-torch-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-torch-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-fused-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-fused-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-fused-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-fused-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-fused-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-fused-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-fused-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[torch-fused-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-torch-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-torch-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-torch-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-torch-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-torch-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-torch-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-torch-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-torch-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-fused-float32-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-fused-float32-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-fused-float32-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-fused-float32-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-fused-float64-real-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-fused-float64-real-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-fused-float64-complex-default]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_cell[fused-fused-float64-complex-side]": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_adjoint_rejects_unsupported_combinations_by_name": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_matrix.py::test_forward_rejects_unsupported_combinations_by_name": {
+          "g4-02": "passed",
+          "gpu-nightly": "passed"
+        }
+      }
+    },
+    "G4-03": {
+      "tests/test_cuda_robustness.py": {
+        "tests/test_cuda_robustness.py::test_noncontiguous_epsilon_views_match_contiguous[transposed]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_noncontiguous_epsilon_views_match_contiguous[sliced]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_fused_kernel_rejects_noncontiguous_grid_arrays": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_duplicate_observers_record_identical_copies[torch-torch-False]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_duplicate_observers_record_identical_copies[fused-fused-True]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_duplicate_point_monitor_gradients_accumulate[torch]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_duplicate_point_monitor_gradients_accumulate[fused]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_repeated_runs_of_one_simulation_object_agree[torch-torch-False]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_repeated_runs_of_one_simulation_object_agree[fused-fused-True]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_repeated_forward_and_backward_on_one_model[torch]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_repeated_forward_and_backward_on_one_model[fused]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_host_input_released_after_upload_still_runs": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[torch-torch-False]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[torch-torch-True]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[fused-fused-False]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_caller_stream_gives_bitwise_identical_forward[fused-fused-True]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_caller_stream_gives_identical_adjoint[torch]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_caller_stream_gives_identical_adjoint[fused]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[torch-torch-False]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[torch-torch-True]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[fused-fused-False]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_cancellation_mid_run_releases_every_allocation[fused-fused-True]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[torch-torch-False]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[torch-torch-True]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[fused-fused-False]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_exception_mid_run_releases_every_allocation[fused-fused-True]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_exception_in_backward_releases_every_allocation[torch]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_exception_in_backward_releases_every_allocation[fused]": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_robustness.py::test_unsupported_inputs_are_rejected_by_name": {
+          "g4-03": "passed",
+          "gpu-nightly": "passed"
+        }
+      }
+    },
+    "G4-04": {
+      "tests/test_cuda_edge_fixtures.py": {
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[ade_odd-float32]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[ade_odd-float64]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[index_boundaries-float32]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[index_boundaries-float64]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[minimum_grid-float32]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[minimum_grid-float64]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[odd_sizes-float32]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[odd_sizes-float64]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[strong_contrast-float32]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_named_boundary_fixture[strong_contrast-float64]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture_seeds_are_the_declared_twenty": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092200]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092201]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092202]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092203]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092204]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092205]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092206]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092207]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092208]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092209]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092210]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092211]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092212]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092213]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092214]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092215]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092216]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092217]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092218]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_random_fixture[2026092219]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_streamed_partial_slabs_and_unaligned_tiles[5-3-sync-2]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_streamed_partial_slabs_and_unaligned_tiles[5-3-async-2]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_cuda_edge_fixtures.py::test_streamed_partial_slabs_and_unaligned_tiles[4-7-async-3]": {
+          "g4-04": "passed",
+          "g4-04-oob": "passed",
+          "gpu-nightly": "passed"
+        }
+      }
+    },
+    "G4-05": {
+      "tests/test_suite_policy.py": {
+        "tests/test_suite_policy.py::test_cuda_marker_rules": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_suite_policy.py::test_gpu_required_turns_cuda_skips_into_failures": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_suite_policy.py::test_without_gpu_required_cuda_skips_stay_skips": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_suite_policy.py::test_cpu_pr_suite_hides_cuda_and_deselects_cuda_and_long_tests": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_suite_policy.py::test_gpu_nightly_suite_requires_the_gpu_and_excludes_long_tests": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_suite_policy.py::test_release_full_suite_enables_opt_in_tests": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_suite_policy.py::test_gpu_suites_refuse_to_run_without_a_cuda_device": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_suite_policy.py::test_markers_are_declared_in_pyproject": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        }
+      },
+      "tests/test_release_gates.py::test_gpu_required_skip_of_an_unlisted_test_is_a_failure": {
+        "tests/test_release_gates.py::test_gpu_required_skip_of_an_unlisted_test_is_a_failure": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        }
+      },
+      "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not": {
+        "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not[CUDA GPU not available]": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not[Requires installed GPU]": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_release_gates.py::test_gpu_skip_reasons_are_classified_and_optional_checks_are_not[could not import 'cupy': No module named cupy]": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        }
+      },
+      "tests/test_release_gates.py::test_judge_classifies_gpu_skips_in_evidence_recorded_without_the_field": {
+        "tests/test_release_gates.py::test_judge_classifies_gpu_skips_in_evidence_recorded_without_the_field": {
+          "g4-05": "passed",
+          "gpu-nightly": "passed"
+        }
+      }
+    },
+    "G4-06": {
+      "tests/test_gpu_runner_policy.py": {
+        "tests/test_gpu_runner_policy.py::test_workflow_has_no_self_hosted_runner_and_no_pull_request_target": {
+          "g4-06": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_gpu_runner_policy.py::test_workflow_triggers_are_the_declared_three": {
+          "g4-06": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_gpu_runner_policy.py::test_workflow_skips_only_the_manuscripts": {
+          "g4-06": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_gpu_runner_policy.py::test_workflow_runs_the_cpu_pr_suite_only": {
+          "g4-06": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_gpu_runner_policy.py::test_policy_names_the_three_suites_and_the_fork_rule": {
+          "g4-06": "passed",
+          "gpu-nightly": "passed"
+        },
+        "tests/test_gpu_runner_policy.py::test_suite_runner_knows_the_same_three_suites": {
+          "g4-06": "passed",
+          "gpu-nightly": "passed"
+        }
+      }
+    }
+  },
+  "totals": {
+    "total": 3642,
+    "passed": 3544,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 98
+  },
+  "unexpected_skips": [],
+  "required_tests_not_passed": [],
+  "all_passed": true
+}

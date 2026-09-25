@@ -25,6 +25,12 @@
       "identifier": "https://github.com/hyoseokp/TorchFDTD",
       "relation": "isSupplementTo",
       "scheme": "url"
+    },
+    {
+      "identifier": "10.48550/arXiv.2609.30039",
+      "relation": "isDocumentedBy",
+      "scheme": "doi",
+      "resource_type": "publication-preprint"
     }
   ]
 }

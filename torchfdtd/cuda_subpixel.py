@@ -14,7 +14,7 @@ class SubpixelCUDA:
         real='double' if grids[0].E.dtype==torch.float64 else 'float'
         source=r'''
 extern "C" __global__ void subpixel_update(const long long* table) {
-    int i=blockIdx.x*blockDim.x+threadIdx.x;
+    long long i=(long long)blockIdx.x*blockDim.x+threadIdx.x;
     const long long* t=table+6*blockIdx.y;
     if(i>=t[5])return;
     const long long* rows=(const long long*)t[0];

@@ -25,6 +25,7 @@ import torch
 
 from .models import Project
 from .solver import Result, Simulation, estimate
+from .cuda_memory import cuda_mem_info
 
 
 @dataclass
@@ -156,7 +157,7 @@ class BatchRunner:
     the solver estimate plus 768 MiB per worker for context/allocator overhead.
     This is an estimate, not an allocation guarantee; other applications can still
     consume memory. ``memory_fraction`` reserves a share of currently free VRAM.
-    CPU jobs use max_workers and an optional aggregate memory_limit_mb.
+    CPU workers divide 80% of the available host memory, or the aggregate memory_limit_mb.
     """
     def __init__(self, *, backend='auto', devices=None, max_workers=2,
                  memory_fraction=.6, memory_limit_mb=None, cpu_threads=1, cuda_graph=True):
@@ -200,10 +201,17 @@ class BatchRunner:
         for device in self.devices:
             budget = float('inf')
             if device is not None:
-                free, _ = torch.cuda.mem_get_info(device)
+                free, _ = cuda_mem_info(device)
                 # Workers release unused allocator blocks after each case. Existing
                 # contexts remain: reserving overhead again is conservative.
                 budget = free/2**20*self.memory_fraction
+            else:
+                # CPU workers share the host: each case's Simulation admits itself against the same
+                # available memory, so the workers divide 80% of it among themselves.
+                from .memory_profile import host_memory
+                available = host_memory()['available_bytes']
+                if available is not None:
+                    budget = available/2**20*.8
             if self.memory_limit_mb is not None:budget = min(budget, self.memory_limit_mb)
             count = min(self.max_workers, len(cases), int(budget/reserve_mb) if math.isfinite(budget) else self.max_workers)
             if count < 1:raise ValueError(f'Insufficient batch memory on {device}: budget {budget:.1f} MiB, estimated worker {reserve_mb:.1f} MiB.')

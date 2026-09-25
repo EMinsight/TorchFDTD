@@ -345,7 +345,7 @@ class TensorDielectricSimulation(_TensorValidation, DifferentiableSimulation):
             raise ValueError('Full-tensor fused kernels are not validated.')
         super().__init__(project, replace(options, backward_kernel='torch'))
         self._validate_project()
-        # Region.valid_grid applies the eight-million-cell guard only to execution_mode='resident';
+        # Region.valid_grid applies the resident size checks only to execution_mode='resident';
         # the resident contract is repeated here so that construction refuses before any allocation.
         from .adjoint_memory import _resident_contract
         _resident_contract(self.project.region, self.options)

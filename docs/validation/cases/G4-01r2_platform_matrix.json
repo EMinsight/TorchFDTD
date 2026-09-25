@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-25",
+  "declared_at_commit": "6b351eedf85ad5665821eeddeedb9dd36572f214",
+  "declared_before_run": true,
+  "case_id": "G4-01r2_platform_matrix",
+  "task": "G4-01",
+  "title": "Platform inventory of the real GPU hosts, a matrix that lists only recorded platforms, and the G4 run record of a platform other than the one of the gate evidence (revision 2 of G4-01_platform_matrix)",
+  "supersedes": {
+    "case": "docs/validation/cases/G4-01_platform_matrix.json",
+    "status": "kept in place; its evidence runs are not edited"
+  },
+  "revision": {
+    "reason": "The first case named one recorded platform. Since its declaration the RTX 5880 Ada record was written on that workstation (commit d4683ff), and a third platform, WSL2 Ubuntu 22.04 on the RTX 3060 lab host, is recorded now. The G4 tests are also run in full on that WSL2 platform. Its runs cannot go into the gate file: the judge reads the newest evidence run of each task, so a second platform's run would replace the Windows evidence of record. They are recorded instead next to the platform record, and the matrix's 'Verified by' cell links that record. This revision lists the recorded platforms and declares that record and its check. It also requires records without the user's home directory: platform_report.py wrote the interpreter path verbatim, which under WSL2 is a path under /root. The limits are unchanged; this revision adds observables and loosens none.",
+    "date": "2026-09-25"
+  },
+  "fixture": {
+    "report": "scripts/platform_report.py --id <platform id> writes docs/validation/platforms/<id>.json with the GPU name, compute capability, driver (nvidia-smi), CUDA runtime (torch.version.cuda), torch, CuPy, numpy, Python, OS and the free/total device memory at the time of the record; the interpreter path is written with the home directory replaced by '<user home>'",
+    "matrix": "docs/PLATFORM_MATRIX.md, one row per platform; hardware cells are copied from the record file or read 'not recorded'",
+    "growth": "a platform enters the matrix only through a record written by scripts/platform_report.py on that host (under WSL2, inside the distribution); its row is copied from that record, and the OS cell states WSL2 where the record's platform string does",
+    "recorded_platforms": [
+      "rtx3060-win11-lab",
+      "rtx5880-ada-win11-remote",
+      "rtx3060-wsl2-ubuntu2204: WSL2 Ubuntu 22.04 on the RTX 3060 lab host, the same GPU and Windows driver through the WSL CUDA driver; not a native Linux install"
+    ],
+    "unrecorded_platforms": "none",
+    "assumed_platforms": "none",
+    "platform_g4_runs": "scripts/record_platform_g4.py writes docs/validation/platforms/g4/<id>.json and a byte-for-byte copy of every JUnit report under docs/validation/platforms/g4/<id>/ from the JUnit reports of every G4 task's planned command and of scripts/run_suite.py gpu-nightly, run on that platform at one clean commit from a checkout outside the home directory; it executes no test and does not touch the gate file"
+  },
+  "seed": null,
+  "precision": null,
+  "backend": [
+    "cuda"
+  ],
+  "reference_method": "the record file written by scripts/platform_report.py on the machine itself; the matrix test cross-checks every table cell against that file and rejects a row whose cells are not backed by a record. A platform G4 run record is checked against its own JUnit copies and the current G4 required_tests of docs/validation/completion_gates.json",
+  "observables": [
+    {
+      "name": "record_fields",
+      "unit": "set",
+      "definition": "record_version, recorded_at, os, python, torch, cupy, cuda_runtime, torch_cuda_available, driver, gpus (name, compute_capability, total and free memory) present in a fresh report"
+    },
+    {
+      "name": "home_directory_in_record",
+      "unit": "boolean",
+      "definition": "a fresh report written by an interpreter that lies under the home directory contains that directory in any field"
+    },
+    {
+      "name": "matrix_consistency",
+      "unit": "boolean",
+      "definition": "every hardware cell of a recorded row equals the record; every cell of an unrecorded row reads 'not recorded'; every record file has a row"
+    },
+    {
+      "name": "local_gpu_recorded",
+      "unit": "boolean",
+      "definition": "the GPU torch reports on the test host has a record file"
+    },
+    {
+      "name": "platform_g4_run",
+      "unit": "boolean",
+      "definition": "for every docs/validation/platforms/g4/<id>.json: its platform has a record and a row whose 'Verified by' cell links it, and no row links a missing one; every JUnit copy matches its stored SHA-256 and re-parses to the recorded counts, failures, errors and skips; every run exited 0 with no failure, no error and no skip outside three expected classes (an optional platform check; an opt-in test whose reason names a TORCHFDTD_*=1 variable the run's command does not set; a check of a file that a record names on the host that wrote it, 'is not on this host'), each skip's class as recorded; no JUnit copy and no record names a home directory (/root/, /home/, /Users/, X:\\Users\\); a gpu-nightly run is present; for every G4 task the record names exactly the task's current required_tests, has a run of the task's own command, and every test those entries name passed in that run and in the gpu-nightly run"
+    }
+  ],
+  "acceptance": {
+    "report": "the report exits 0 and contains every listed field; with CUDA available it lists at least one GPU with a d.d compute capability and 0 <= free <= total memory; home_directory_in_record is false",
+    "matrix": "no matrix row carries a value without a record file; at least one row is recorded",
+    "platform_g4_run": "platform_g4_run is true; the recorder itself names every test of a file entry (pytest --collect-only through the task's command), reports a failed test as not passed and an unexpected skip as such with a nonzero exit, classifies skip reasons as declared, and refuses a run set without a task or the suite, a report that names the home directory and a dirty tree",
+    "source_of_limits": "fixture-specific; no numerical threshold applies"
+  },
+  "tests": {
+    "existing": [
+      "tests/test_platform_matrix.py"
+    ],
+    "not_yet_covered": [
+      "the G4 tests on the RTX 5880 Ada workstation (its row is inventoried, not verified)",
+      "a native, non-WSL Linux CUDA host"
+    ]
+  },
+  "notes": "An inventory, not a verification: the matrix's 'Verified by' column points at the G4 evidence runs of the gate file (the platform of record) or at a platform G4 run record written by scripts/record_platform_g4.py. A platform G4 run record is not gate evidence and does not change a gate state."
+}

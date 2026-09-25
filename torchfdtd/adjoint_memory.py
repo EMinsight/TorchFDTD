@@ -7,6 +7,7 @@ import torch
 
 from .boundaries import BoundaryDescription
 from .memory_profile import host_memory
+from .models import server_limit
 from .cuda_memory import cuda_budget_limit
 from .state_store import disk_free
 
@@ -14,8 +15,12 @@ from .state_store import disk_free
 def _resident_contract(region,options):
     if options.resident_budget_bytes is None:
         region.require_resident()
-    elif region.memory_mode=='streamed':
+        return
+    if region.memory_mode=='streamed':
         raise ValueError('Use memory_mode="budgeted" for byte-admitted resident execution.')
+    # A byte budget replaces the memory estimate, not the server's resident-cell limit.
+    refusal=region.cell_cap_refusal() if server_limit('resident_cells') is not None else None
+    if refusal:raise ValueError(refusal+'. Use memory_mode="streamed" with StreamedSimulation.')
 
 
 def _cuda_index_contract(region,monitor_count,observation_steps):

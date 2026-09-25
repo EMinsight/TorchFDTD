@@ -116,7 +116,7 @@ def _apodization_values(spec):
 
 def _region(plan,node,base,project,origin,native_only):
     old,new=base.region,project.region;changes=_changed(old,new)
-    local={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','precision','snapshot_interval','field','slice_axis','slice_position','complex_display'}
+    local={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','resident_cell_limit','precision','snapshot_interval','field','slice_axis','slice_position','complex_display'}
     mesh_fields={'mesh','mesh_type','mesh_steps','mesh_coordinates','size','material_sampling'}
     remesh=bool(changes&mesh_fields)
     supported=local|mesh_fields|{'steps','courant_factor','time_step_override','background_index','boundaries','pml_cells'}

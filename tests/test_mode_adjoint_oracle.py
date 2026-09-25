@@ -74,5 +74,5 @@ def test_full_autograd_oracle_rejects_streamed_and_large_problems():
         streamed.reference(base, FREQUENCY)
     model = ModeInjectedPlaneSimulation(p, launch, AdjointOptions(checkpoints=1))
     model.model.project.region.steps = 10**7
-    with pytest.raises(ValueError, match='two million'):
+    with pytest.raises(ValueError, match='estimated .* bytes of retained graph'):
         model.reference(base, FREQUENCY)

@@ -111,11 +111,12 @@ def _write_fsp(document,project,*,settings):
         from .fsp_settings import plan_settings, verify_settings
         settings_patches,settings_native_only,instruments=plan_settings(document,base,project,conversion)
         native_only.extend(settings_native_only)
-    allowed_region={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','precision','snapshot_interval',
-                    'field','slice_axis','slice_position','complex_display'}
-    region_values=project.region.model_dump()
-    for key,before in base.region.model_dump().items():
-        if before==region_values[key]:continue
+    allowed_region={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','resident_cell_limit','precision',
+                    'snapshot_interval','field','slice_axis','slice_position','complex_display'}
+    region_values=project.region.model_dump();base_values=base.region.model_dump()
+    # A field written only when set (an optional cap) can appear on either side.
+    for key in [*base_values,*(k for k in region_values if k not in base_values)]:
+        if base_values.get(key)==region_values.get(key):continue
         if not settings:
             if key not in allowed_region:raise ValueError(f'Geometry export cannot write region.{key}. Save the full native JSON project.')
             native_only.append('region.'+key)

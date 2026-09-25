@@ -12,7 +12,7 @@ import numpy as np
 
 from .fsp_binary import FspDocument, Node
 from .waveforms import pulse_parameters
-from .models import Boundaries, BoundaryFace, ImportProvenance, Material, Monitor, FieldMonitor, Project, Region, Source, SourceTimeSettings, TimeSignal, SpectrumSettings, Structure
+from .models import SERVER_LIMITS, Boundaries, BoundaryFace, ImportProvenance, Material, Monitor, FieldMonitor, Project, Region, Source, SourceTimeSettings, TimeSignal, SpectrumSettings, Structure
 
 C0 = 299792458.0
 ZERO_UUID = '{00000000-0000-0000-0000-000000000000}'
@@ -366,9 +366,10 @@ def convert_analysis_group(node, origin, region, report, global_source, global_m
         except (Unsupported, ValueError) as exc:
             mapping_issue(report, child, exc)
     for kind, added, existing in (('sources', len(sources), source_count), ('monitors', len(monitors), monitor_count)):
-        limit = next(m.max_length for m in Project.model_fields[kind].metadata if hasattr(m, 'max_length'))
+        # Analysis groups expand into sources and monitors; the import keeps the server's per-project limit.
+        limit = SERVER_LIMITS[kind]
         if added+existing > limit:
-            raise Unsupported(f'Its members expand to {added} native {kind} ({existing} already imported), above the native limit of {limit} {kind}. Disable the group or reduce it in Lumerical.')
+            raise Unsupported(f'Its members expand to {added} native {kind} ({existing} already imported), above the import limit of {limit} {kind}. Disable the group or reduce it in Lumerical.')
     return sources, monitors
 
 

@@ -47,7 +47,8 @@ class PropagationRequest(BaseModel):
 def _budget_bytes(device):
     """Half the free device memory on CUDA, a quarter of the available host memory on the CPU."""
     if device.type == 'cuda':
-        free, _ = torch.cuda.mem_get_info(device)
+        from .cuda_memory import cuda_mem_info
+        free, _ = cuda_mem_info(device)
         return int(free*.5)
     from .memory_profile import host_memory
     available = host_memory()['available_bytes']

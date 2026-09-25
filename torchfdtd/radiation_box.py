@@ -310,7 +310,7 @@ def native_radiation_box(result,monitor_ids,*,bounds_um,refractive_index,frequen
         reference_project=Project.model_validate(ref[0]);_complete(ref[1]);_geometry(reference_project,bounds,refractive_index,True)
         _sources(reference_project,bounds,True)
         if data[1]['steps']!=ref[1]['steps']: raise ValueError('Incident reference completed duration must match.')
-        ignored={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','field','slice_axis','slice_position','complex_display','snapshot_interval'}
+        ignored={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','resident_cell_limit','field','slice_axis','slice_position','complex_display','snapshot_interval'}
         if project.region.model_dump(exclude=ignored)!=reference_project.region.model_dump(exclude=ignored) or [project.resolved_source(s).model_dump() for s in project.sources]!=[reference_project.resolved_source(s).model_dump() for s in reference_project.sources]:
             raise ValueError('Incident reference mesh/background/source metadata must match.')
     stored=[];signature=None;frequency=None;dtype=None;raw_frequency=None

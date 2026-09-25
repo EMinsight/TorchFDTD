@@ -87,9 +87,12 @@ Torch ADE step on CUDA (`tests/test_pmc_dispersive.py`).
 The packet/workspace/complex-CUDA suites passed 50 checks on RTX 3060. Their
 runtime is not used as a benchmark because a separate CR validation was active.
 
-For grids above eight million cells, construct `Region(memory_mode="streamed",
-...)` and use this Python API with explicit budgets. This opt-in cannot run
-through the resident solver or workbench. The resident limit remains unchanged.
+For grids whose resident estimate does not fit the device (or host) memory,
+construct `Region(memory_mode="streamed", ...)` and use this Python API with
+explicit budgets. This opt-in cannot run through the resident solver or
+workbench. The Python API admits resident grids by their memory estimate; the
+workbench server keeps its 8,000,000-cell resident limit
+([EXECUTION_MODES.md](EXECUTION_MODES.md#size-limits)).
 Each grid axis is limited to one million cells to bound mesh metadata. Passing
 admission is not evidence of physical-VRAM-overflow performance. A unified
 resident/DRAM/NVMe policy remains unfinished.

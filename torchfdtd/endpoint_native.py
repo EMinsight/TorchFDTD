@@ -4,6 +4,7 @@ import time
 from dataclasses import asdict
 import numpy as np
 import torch
+from .cuda_memory import cuda_mem_info
 
 
 
@@ -170,7 +171,7 @@ def run_endpoint(project,progress=None,cancel=None):
         if not torch.cuda.is_available():raise ValueError('CUDA requested but unavailable.')
     from .memory_profile import host_memory
     available=host_memory()['available_bytes']
-    budgets=admit_endpoint(stats,use_cuda=use_cuda,gpu_free_bytes=torch.cuda.mem_get_info()[0] if use_cuda else None,host_available_bytes=available)
+    budgets=admit_endpoint(stats,use_cuda=use_cuda,gpu_free_bytes=cuda_mem_info()[0] if use_cuda else None,host_available_bytes=available)
     adapter=endpoint_from_project(project,device='cuda' if use_cuda else 'cpu',checkpoints=0,
         **budgets)
     sim=adapter.simulation;epsilon=adapter.rasterize();waveforms=adapter.waveforms()

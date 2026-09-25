@@ -82,8 +82,9 @@ terms and fixed complex spatial profiles. Existing resident boundary restriction
 apply. Spatial source positions/profiles, Bloch phases, eigenmodes and monitor
 settings remain fixed. TFSF, one-way incident-line sources, ADE/tensor/PMC endpoint
 routes and spatially streamed waveform derivatives are not exposed by this API.
-Higher-order gradients are rejected. The full-autograd reference is restricted to
-two million cell-steps and is only an implementation oracle.
+Higher-order gradients are rejected. The full-autograd reference is admitted by
+its estimated graph memory, with `graph_budget_bytes` as an optional cap, and is
+only an implementation oracle.
 
 ## Validation
 

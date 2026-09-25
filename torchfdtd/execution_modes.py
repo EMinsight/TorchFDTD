@@ -22,10 +22,9 @@ import warnings
 import numpy as np
 import torch
 
-from .models import Project, Monitor
+from .models import Project, Monitor, effective_limit
 from .memory_profile import host_memory
 
-RESIDENT_CELL_LIMIT = 8_000_000
 # The resident CUDA solver refuses estimates above 75% of free device memory.
 RESIDENT_DEVICE_FRACTION = .75
 # Host admission everywhere in the streamed engine uses 80% of available RAM.
@@ -44,7 +43,8 @@ def execution_resources():
     cuda = torch.cuda.is_available() and torch.cuda.device_count() > 0
     record = dict(cuda=cuda, cupy=False, gpu=None, gpu_free_bytes=0, gpu_total_bytes=0)
     if cuda:
-        free, total = torch.cuda.mem_get_info()
+        from .cuda_memory import cuda_mem_info
+        free, total = cuda_mem_info()
         record.update(gpu=torch.cuda.get_device_name(0), gpu_free_bytes=int(free), gpu_total_bytes=int(total))
         try:
             from .cuda_bootstrap import prepare_cuda_kernels
@@ -281,14 +281,24 @@ def _resident_fit(project, summary, backend, health, cells):
         free, fraction, pool = health.get('host_available_bytes'), RESIDENT_HOST_FRACTION, 'available host memory'
     limit = int(free*fraction) if free is not None else None
     fits, reason = True, f'resident estimate {_gib(required)} within {fraction:.0%} of {pool} ({_gib(free)})'
+    cell_limit, refusal = effective_limit(project.region.resident_cell_limit, 'resident_cells'), project.region.resident_refusal()
     if project.region.memory_mode == 'streamed':
         fits, reason = False, 'memory_mode is streamed'
-    elif cells > RESIDENT_CELL_LIMIT:
-        fits, reason = False, f'{cells:,} cells exceed the resident limit of {RESIDENT_CELL_LIMIT:,}'
+    elif cell_limit is not None and cells > cell_limit:
+        fits, reason = False, f'{cells:,} cells exceed the resident limit of {cell_limit:,}'
+    elif refusal:
+        fits, reason = False, refusal
     elif limit is not None and required > limit:
         fits, reason = False, f'resident estimate {_gib(required)} exceeds {fraction:.0%} of {pool} ({_gib(free)})'
+    # A CUDA run also keeps its plan, the E/H copies and the plane post-processing in host memory.
+    host = summary.get('host_estimated_mb') if backend == 'cuda' else None
+    host_required = None if host is None else int(host*2**20)
+    available = health.get('host_available_bytes')
+    if fits and host_required is not None and available is not None and host_required > int(available*RESIDENT_HOST_FRACTION):
+        fits, reason = False, (f'resident host estimate {_gib(host_required)} exceeds {RESIDENT_HOST_FRACTION:.0%} of '
+                               f'available host memory ({_gib(available)})')
     return dict(fits=fits, reason=reason, estimated_bytes=required, free_bytes=free, limit_bytes=limit,
-                fraction=fraction, cell_limit=RESIDENT_CELL_LIMIT)
+                fraction=fraction, cell_limit=cell_limit, host_estimated_bytes=host_required)
 
 
 def resolve_execution(project, *, health, scratch, summary=None):

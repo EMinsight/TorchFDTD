@@ -113,7 +113,13 @@ def system_file_cache():
 
 
 def process_io():
-    """Bytes this process has read and written through the OS, lifetime counters."""
+    """Bytes this process has read and written through the OS, lifetime counters.
+
+    Both platforms count the bytes passed through read and write calls, page-cache hits
+    included: Windows ReadTransferCount and WriteTransferCount, Linux rchar and wchar. The
+    Linux read_bytes and write_bytes count storage traffic instead (a page rewritten while
+    dirty once, a cached read not at all), so they can fall below the bytes a file received.
+    """
     if sys.platform == 'win32':
         counters = _IoCounters()
         if not _kernel32.GetProcessIoCounters(_kernel32.GetCurrentProcess(), ctypes.byref(counters)):
@@ -130,10 +136,10 @@ def process_io():
             values[name.strip()] = int(value)
     except OSError:
         return None
-    if 'read_bytes' not in values:
+    if 'rchar' not in values or 'wchar' not in values:
         return None
-    return dict(read_bytes=values['read_bytes'], write_bytes=values['write_bytes'],
-                instrument='/proc/self/io read_bytes and write_bytes (storage traffic of this process, not only scratch files)')
+    return dict(read_bytes=values['rchar'], write_bytes=values['wchar'],
+                instrument='/proc/self/io rchar and wchar (bytes through read and write calls on every descriptor, not only scratch files)')
 
 
 _smi_usable = None
