@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
 
-// A second workbench server on a free loopback port, CPU only, with its own results directory under results/.
+// A second workbench server on a free loopback port, CPU only, with its own results directory under results/,
+// which stop() removes once the server has exited.
 async function serve(flags){
  const python=process.env.TORCHFDTD_TEST_PYTHON||(process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python');
  const port=await new Promise((resolve,reject)=>{const probe=net.createServer();probe.on('error',reject);probe.listen(0,'127.0.0.1',()=>{const {port}=probe.address();probe.close(()=>resolve(port));});});
@@ -12,11 +13,13 @@ async function serve(flags){
  const results=fs.mkdtempSync(path.resolve('results','admission-'));
  const child=spawn(python,['-m','torchfdtd.cli','serve','--port',String(port),...flags],{env:{...process.env,CUDA_VISIBLE_DEVICES:'-1',TORCHFDTD_RESULTS:results},stdio:'ignore'});
  const url=`http://127.0.0.1:${port}`;
+ const exited=new Promise(resolve=>child.once('exit',resolve));
+ const stop=async()=>{child.kill();await exited;fs.rmSync(results,{recursive:true,force:true});};
  for(let attempt=0;attempt<360;attempt++){
-  try{const response=await fetch(url+'/api/health');if(response.ok)return {url,child,health:await response.json()};}catch{}
+  try{const response=await fetch(url+'/api/health');if(response.ok)return {url,stop,health:await response.json()};}catch{}
   await new Promise(resolve=>setTimeout(resolve,250));
  }
- child.kill();throw new Error('the second workbench server did not answer /api/health');
+ await stop();throw new Error('the second workbench server did not answer /api/health');
 }
 
 async function expectAdmission(page,url,health){
@@ -120,7 +123,7 @@ test('the execution panel names the admission of each server mode',async({page,b
  try{
   expect(other.health.admission).not.toBe(health.admission);
   await expectAdmission(page,other.url,other.health);
- }finally{other.child.kill();}
+ }finally{await other.stop();}
 });
 
 test('streamed host run reports its policy, progress and one final snapshot',async({page})=>{

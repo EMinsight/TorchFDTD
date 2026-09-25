@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import math
 import os
 import socket
 import threading
@@ -12,14 +13,14 @@ from uuid import uuid4
 from fastapi import FastAPI, HTTPException, Request, Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .models import SERVER_LIMITS, Project, Material, demo_project, server_admission, server_limits
 from .plan import resolve_plan
-from .solver import Simulation, estimate, hardware, snapshot_frames
+from .solver import Simulation, admit_planning, estimate, hardware, snapshot_frames
 from .stability_checks import stability_warnings
 from .execution_modes import execution_resources, resolve_execution, run_streamed_job, run_tiled_job, scratch_directory
 from .material_fit import OpticalDataRequest, MaterialFitRequest, fit_material, material_fit_report, discretization_report
@@ -28,24 +29,66 @@ from .optical_data import OpticalData
 # Bytes accepted in one request body on every route except the FSP uploads,
 # which stream under fsp.MAX_FSP_BYTES. Module level so tests can lower it.
 MAX_REQUEST_BYTES = 32_000_000
-# Results turned into JSON stay bounded whatever a run recorded (the NPZ download keeps everything):
-# a finished job keeps its point-monitor spectra for spectra.csv strided to at most STORED_MONITOR_VALUES
-# samples in all, GET /api/jobs/{key} sends its point-monitor series strided to at most
-# STATUS_MONITOR_VALUES values in all, and a frequency-field plane is sent strided to at most
-# FIELD_JSON_POINTS points.
-STORED_MONITOR_VALUES = 4_000_000
-STATUS_MONITOR_VALUES = 400_000
+# Results turned into JSON stay bounded whatever a run recorded: a finished job keeps the point-monitor
+# series and the flux of its planes, sent by GET /api/jobs/{key}, strided to at most MONITOR_JSON_VALUES
+# values each in all, and a frequency-field plane is sent strided to at most FIELD_JSON_POINTS points.
+# The CSV exports stream from the saved result file or the stored planes, and the NPZ download keeps everything.
+MONITOR_JSON_VALUES = 1_000_000
 FIELD_JSON_POINTS = 512*512
-MONITOR_SERIES = ('time_fs', 'signal', 'signal_imag', 'window', 'frequency_thz', 'wavelength_um', 'spectrum', 'spectrum_real', 'spectrum_imag')
+CSV_CHUNK_ROWS = 20_000
 
 
-def _thinned_monitors(monitors, budget):
-    """Point-monitor records with every series strided by one factor so that all together hold at most budget values."""
-    total = sum(len(m[k]) for m in monitors for k in MONITOR_SERIES)
-    if total <= budget:
-        return monitors
-    stride = -(-total//budget)
-    return [dict(m, **{k: m[k][::stride] for k in MONITOR_SERIES}, json_stride=stride) for m in monitors]
+def _plane_strides(shape, budget):
+    """Per-axis strides that keep a plane within budget points, the shorter axes kept whole where they fit."""
+    if math.prod(shape) <= budget:
+        return (1,)*len(shape)
+    strides, left = [1]*len(shape), float(budget)
+    axes = sorted((i for i, n in enumerate(shape) if n > 1), key=lambda i: shape[i])
+    for rank, i in enumerate(axes):
+        side = max(1, math.floor(left**(1/(len(axes)-rank))))
+        strides[i] = math.ceil(shape[i]/side)
+        left /= math.ceil(shape[i]/strides[i])
+    return tuple(strides)
+
+
+def _csv_stream(header, rows):
+    """The CSV text of header and rows, generated in pieces of CSV_CHUNK_ROWS rows."""
+    import csv
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(header)
+    for chunk in rows:
+        writer.writerows(chunk)
+        yield out.getvalue()
+        out.seek(0)
+        out.truncate()
+    yield out.getvalue()
+
+
+def _saved_monitor_rows(path, spectra):
+    """Rows of monitors.csv (traces decimated as Result.monitor_data does) or spectra.csv (every sample) from a saved
+    result, one monitor's arrays at a time."""
+    import json
+    import numpy as np
+    from itertools import repeat
+    from .solver import C0
+    with np.load(path, allow_pickle=False) as data:
+        metadata, times = json.loads(data['monitor_spectra'].item()), data['times']
+        if len(times) <= 1:
+            return
+        for k, m in enumerate(metadata):
+            if spectra:
+                frequency, value = data[f'monitor_{k}_frequency_hz'], data[f'monitor_{k}_spectrum']
+                for start in range(0, len(frequency), CSV_CHUNK_ROWS):
+                    f, v = frequency[start:start+CSV_CHUNK_ROWS], value[start:start+CSV_CHUNK_ROWS]
+                    yield zip(repeat(m['name']), repeat(m['component']), (f*1e-12).tolist(), (C0/f*1e6).tolist(), v.real.tolist(),
+                              v.imag.tolist(), abs(v).tolist(), repeat(m['units']), repeat(m['settings']['apodization']))
+            else:
+                signal = data['signals'][:, k]
+                shifted = times+((times[1]-times[0])/2 if m['component'].startswith('H') else 0)
+                stride = max(1, len(signal)//2000)
+                yield zip(repeat(m['name']), repeat(m['component']), (shifted[::stride]*1e15).tolist(), signal[::stride].real.tolist(),
+                          signal[::stride].imag.tolist())
 
 
 def _finite(value):
@@ -158,7 +201,7 @@ def create_app(result_dir=None, memory_admission=False):
     @app.post('/api/validate')
     def validate(project: Project):
         # Dispatch-time contracts (exact-endpoint PMC, tensor media) are rejections, not server faults.
-        try:summary=estimate(project);plan_hash=resolve_plan(project).plan_hash
+        try:admit_planning(project);summary=estimate(project);plan_hash=resolve_plan(project).plan_hash
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
         summary['warnings']=list(summary['warnings'])+stability_warnings(project)
         # Endpoint and tensor dispatches build their own estimate; the stored frame rate applies to every dispatch.
@@ -190,7 +233,7 @@ def create_app(result_dir=None, memory_admission=False):
         for nodes in r.mesh_nodes:
             stride=max(1,(len(nodes)+999)//1000)
             axes.append(sorted(set(nodes[::stride].tolist()+[float(nodes[-1])])))
-        try:summary=estimate(project)
+        try:admit_planning(project);summary=estimate(project)
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
         return dict(summary=summary, nodes_um=axes,
                     preview_decimated=any(len(v)>1000 for v in r.mesh_nodes),
@@ -264,6 +307,7 @@ def create_app(result_dir=None, memory_admission=False):
     def source_preview(source_id: str, project: Project, incidence: str | None = Query(None)):
         from .source_preview import preview_source
         try:
+            admit_planning(project)
             return preview_source(project, source_id, incidence=incidence)
         except ValueError as exc:
             # A missing source is 404; a refused incidence definition (registry message) is 422.
@@ -278,6 +322,7 @@ def create_app(result_dir=None, memory_admission=False):
         def update(data):
             job['progress'] = data
         try:
+            admit_planning(project)
             job['execution'] = execution = resolution(project)
             if execution.get('error'):
                 raise ValueError(execution['error'])
@@ -291,9 +336,8 @@ def create_app(result_dir=None, memory_admission=False):
                 job['execution'] = {**execution, 'report': result.summary['execution']['report']}
             result.save(root / f'{key}.npz')
             job['summary'] = result.summary
-            job['monitors'] = (result.monitor_data(spectrum_points=max(2000, STORED_MONITOR_VALUES//(5*max(1, len(result.point_monitors)))))
-                               if len(result.times)>1 else [])
-            job['flux_monitors'] = result.flux_data()
+            job['monitors'] = result.monitor_data(max_values=MONITOR_JSON_VALUES) if len(result.times)>1 else []
+            job['flux_monitors'] = result.flux_data(max_values=MONITOR_JSON_VALUES)
             job['frequency_fields'] = result.frequency_fields
             job['frames'] = result.frames
             job['frame_steps'] = result.frame_steps.tolist()
@@ -307,7 +351,7 @@ def create_app(result_dir=None, memory_admission=False):
     def run(project: Project):
         # The plan hash identifies the physics the job computes; the workbench
         # compares it with the current project's hash from /api/validate.
-        try:plan_hash=resolve_plan(project).plan_hash
+        try:admit_planning(project);plan_hash=resolve_plan(project).plan_hash
         except ValueError as exc:raise HTTPException(422,str(exc)) from exc
         # A scene the preflight already rejects is refused here, not queued to fail at dispatch.
         preflight=resolution(project)
@@ -343,8 +387,6 @@ def create_app(result_dir=None, memory_admission=False):
         job = get_job(key)
         result = {k:v for k,v in list(job.items()) if k not in ('cancel','frames','epsilon','frame_steps','frequency_fields')}
         result['cancel_requested'] = job['cancel'].is_set()
-        if result.get('monitors'):
-            result['monitors'] = _thinned_monitors(result['monitors'], STATUS_MONITOR_VALUES)
         return result
 
     @app.delete('/api/jobs/{key}')
@@ -361,19 +403,26 @@ def create_app(result_dir=None, memory_admission=False):
 
     @app.get('/api/jobs')
     def job_list():
+        # The flux planes by name only; their spectra are in each job's record (GET /api/jobs/{key}).
         return [dict(id=k,name=j['project']['name'],status=j['status'],created=j['created'],
-                     flux_monitors=j.get('flux_monitors',[])) for k,j in list(jobs.items())]
+                     flux_monitors=[dict(id=m['id'],name=m['name'],normal=m['normal']) for m in j.get('flux_monitors',[])])
+                for k,j in list(jobs.items())]
 
     @app.get('/api/jobs/{key}/flux.csv')
     def flux_csv(key:str):
         import csv
+        from itertools import repeat
         job=get_job(key)
         if 'flux_monitors' not in job:raise HTTPException(409,'Flux results are not ready.')
-        out=io.StringIO();writer=csv.writer(out)
-        writer.writerow(['monitor','normal','frequency_thz','wavelength_um','signed_flux','units'])
-        for m in job['flux_monitors']:
-            writer.writerows(zip([m['name']]*len(m['flux']),[m['normal']]*len(m['flux']),m['frequency_thz'],m['wavelength_um'],m['flux'],[m['units']]*len(m['flux'])))
-        return Response(out.getvalue(),media_type='text/csv',headers={'Content-Disposition':'attachment; filename=flux.csv'})
+        def rows():
+            # Every frequency of the stored planes, not the strided JSON copy.
+            for m in job.get('frequency_fields',[]):
+                if m['flux'] is None:continue
+                for start in range(0,len(m['frequency_hz']),CSV_CHUNK_ROWS):
+                    f,flux=m['frequency_hz'][start:start+CSV_CHUNK_ROWS],m['flux'][start:start+CSV_CHUNK_ROWS]
+                    yield zip(repeat(m['name']),repeat(m['normal_axis']),(f*1e-12).tolist(),(299792458.0/f*1e6).tolist(),flux.tolist(),repeat(m['flux_units']))
+        return StreamingResponse(_csv_stream(['monitor','normal','frequency_thz','wavelength_um','signed_flux','units'],rows()),
+                                 media_type='text/csv',headers={'Content-Disposition':'attachment; filename=flux.csv'})
 
     @app.get('/api/jobs/{key}/normalize-flux')
     def normalized_flux(key:str,reference:str,monitor:str,subtract_incident:bool=False):
@@ -402,9 +451,8 @@ def create_app(result_dir=None, memory_admission=False):
         c=names.index(component)
         data=m['fields'][frequency_index,:,c].reshape(m['shape']).squeeze(axis=m['normal'])
         points=m['points_um'].reshape(*m['shape'],3).squeeze(axis=m['normal'])
-        # A plane above FIELD_JSON_POINTS is strided along each axis; full_shape and stride say how.
-        side=FIELD_JSON_POINTS**(1/max(1,sum(n>1 for n in data.shape)))
-        stride=tuple(max(1,int(np.ceil(n/side))) if data.size>FIELD_JSON_POINTS else 1 for n in data.shape)
+        # A plane above FIELD_JSON_POINTS is strided along its axes; full_shape and stride say how.
+        stride=_plane_strides(data.shape,FIELD_JSON_POINTS)
         full_shape=data.shape;view=tuple(slice(None,None,s) for s in stride)
         data=data[view];points=points[view]
         return dict(real=data.real.tolist(),imag=data.imag.tolist(),magnitude=abs(data).tolist(),shape=data.shape,
@@ -439,31 +487,24 @@ def create_app(result_dir=None, memory_admission=False):
 
     @app.get('/api/jobs/{key}/monitors.csv')
     def csv(key: str):
-        import csv
         job = get_job(key)
-        if 'monitors' not in job:
+        path = root/f'{key}.npz'
+        if 'monitors' not in job or not path.exists():
             raise HTTPException(409, 'Monitor results are not ready.')
-        out = io.StringIO()
-        writer = csv.writer(out)
-        writer.writerow(['monitor', 'component', 'time_fs', 'reduced_field', 'reduced_field_imag'])
-        for m in job['monitors']:
-            for t,s,i in zip(m['time_fs'], m['signal'], m['signal_imag']):
-                writer.writerow([m['name'], m['component'], t, s, i])
-        return Response(out.getvalue(), media_type='text/csv', headers={'Content-Disposition':'attachment; filename=monitors.csv'})
+        return StreamingResponse(_csv_stream(['monitor', 'component', 'time_fs', 'reduced_field', 'reduced_field_imag'],
+                                             _saved_monitor_rows(path, spectra=False)),
+                                 media_type='text/csv', headers={'Content-Disposition':'attachment; filename=monitors.csv'})
 
     @app.get('/api/jobs/{key}/spectra.csv')
     def spectra_csv(key: str):
-        import csv
+        # Every spectrum sample, read from the saved result, whatever the JSON copy of the job keeps.
         job = get_job(key)
-        if 'monitors' not in job:
+        path = root/f'{key}.npz'
+        if 'monitors' not in job or not path.exists():
             raise HTTPException(409, 'Monitor results are not ready.')
-        out = io.StringIO()
-        writer = csv.writer(out)
-        writer.writerow(['monitor', 'component', 'frequency_thz', 'wavelength_um', 'real', 'imag', 'magnitude', 'units', 'apodization'])
-        for m in job['monitors']:
-            for f, wl, re, im, mag in zip(m['frequency_thz'], m['wavelength_um'], m['spectrum_real'], m['spectrum_imag'], m['spectrum']):
-                writer.writerow([m['name'], m['component'], f, wl, re, im, mag, m['spectrum_units'], m['spectrum_settings']['apodization']])
-        return Response(out.getvalue(), media_type='text/csv', headers={'Content-Disposition':'attachment; filename=spectra.csv'})
+        return StreamingResponse(_csv_stream(['monitor', 'component', 'frequency_thz', 'wavelength_um', 'real', 'imag', 'magnitude', 'units', 'apodization'],
+                                             _saved_monitor_rows(path, spectra=True)),
+                                 media_type='text/csv', headers={'Content-Disposition':'attachment; filename=spectra.csv'})
 
     from .design_service import attach_design_routes
     attach_design_routes(app, root, pool, jobs, lock)

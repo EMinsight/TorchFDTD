@@ -14,7 +14,7 @@ import torch
 from fdtd.backend import NumpyBackend
 
 from .waveforms import TAIL_INNER, TAIL_OUTER, pulse_parameters, source_time_signal
-from .models import Project
+from .models import Project, server_admission
 from .boundaries import YeeGrid
 from .materials import configure_materials, permittivity
 from .spectra import point_spectrum, apodization_window
@@ -261,16 +261,22 @@ def preadmission_bytes(p):
             +planes*PREADMISSION_PLANE_BYTES+profile*PREADMISSION_PROFILE_BYTES+items*PREADMISSION_ITEM_BYTES)
 
 
-def preadmission_refusal(p):
-    """Why the server refuses to plan this project (preadmission_bytes above 80% of the available host memory), or None."""
+def admit_planning(p):
+    """Under memory admission (torchfdtd serve --memory-admission), refuse a project whose planning would take
+    more than 80% of the available host memory (preadmission_bytes) before any of it is built.
+
+    The server calls this where it starts planning or running a project, not when a model is validated, so a
+    stored project validated again never depends on the free memory; the fixed server limits bound planning
+    on their own."""
+    if server_admission() != 'memory':
+        return
     from .memory_profile import host_memory
     available = host_memory()['available_bytes']
     needed = preadmission_bytes(p)
-    if available is None or needed <= .8*available:
-        return None
-    return (f'Planning this project would take {needed/2**30:.2f} GiB of host memory before its memory admission '
-            f'(steps, source terms, monitor frequencies, plane points and items), above 80% of the {available/2**30:.2f} GiB '
-            f'available. Reduce the steps, the frequency points or the monitor planes.')
+    if available is not None and needed > .8*available:
+        raise ValueError(f'Planning this project would take {needed/2**30:.2f} GiB of host memory before its memory admission '
+                         f'(steps, source terms, monitor frequencies, plane points and items), above 80% of the '
+                         f'{available/2**30:.2f} GiB available. Reduce the steps, the frequency points or the monitor planes.')
 
 
 def structure_host_bytes(p):
@@ -516,23 +522,27 @@ class Result:
                             signals=self.signals, times=self.times, E=self.electric, H=self.magnetic,
                             monitor_spectra=json.dumps(metadata), **spectral_arrays)
 
-    def monitor_data(self, spectrum_points=None):
-        """Point-monitor traces (at most about 4000 samples) and spectra as JSON lists; with spectrum_points,
-        a longer spectrum is strided to at most that many samples and carries its spectrum_stride."""
+    def monitor_data(self, max_values=None):
+        """Point-monitor traces (at most about 4000 samples) and spectra as JSON lists. With max_values, the nine
+        series of all monitors together hold at most max_values values: a longer spectrum or trace is strided
+        and carries its spectrum_stride or trace_stride."""
         output = []
         monitors = self.point_monitors
         dt = self.times[1]-self.times[0] if len(self.times)>1 else 1
+        cap = None if max_values is None or not monitors else max(1, max_values//(9*len(monitors)))
         for k, m in enumerate(monitors):
             signal = self.signals[:, k]
             complex_signal = np.iscomplexobj(signal)
             spec = self.spectra[k]
             f, value = spec['frequency_hz'], spec['value']
             thinned = {}
-            if spectrum_points is not None and len(f) > spectrum_points:
-                thinned['spectrum_stride'] = -(-len(f)//spectrum_points)
+            if cap is not None and len(f) > cap:
+                thinned['spectrum_stride'] = -(-len(f)//cap)
                 f, value = f[::thinned['spectrum_stride']], value[::thinned['spectrum_stride']]
             times = self.times + (dt/2 if m.component.startswith('H') else 0)
             stride = max(1, len(signal)//2000)
+            if cap is not None and -(-len(signal)//stride) > cap:
+                stride = thinned['trace_stride'] = -(-len(signal)//cap)
             output.append({'id': m.id, 'name': m.name, 'component': m.component,
                            'time_fs': (times[::stride]*1e15).tolist(), 'signal': signal[::stride].real.tolist(),
                            'signal_imag': signal[::stride].imag.tolist(), 'complex': complex_signal,
@@ -573,10 +583,19 @@ class Result:
             raise ValueError('Expected one enabled frequency plane with this name or id.')
         return matches[0]
 
-    def flux_data(self):
-        return [dict(id=m['id'],name=m['name'],normal=m['normal_axis'],frequency_thz=(m['frequency_hz']*1e-12).tolist(),
-                     wavelength_um=(C0/m['frequency_hz']*1e6).tolist(),flux=m['flux'].tolist(),units=m['flux_units'],
-                     points=len(m['weights']),shape=m['shape'],settings=m['settings']) for m in self.frequency_fields if m['flux'] is not None]
+    def flux_data(self, max_values=None):
+        """Signed flux per frequency of every plane; with max_values the three series of all planes hold at most
+        max_values values, a longer one strided and carrying its flux_stride."""
+        planes = [m for m in self.frequency_fields if m['flux'] is not None]
+        cap = None if max_values is None or not planes else max(1, max_values//(3*len(planes)))
+        output = []
+        for m in planes:
+            stride = -(-len(m['frequency_hz'])//cap) if cap is not None and len(m['frequency_hz']) > cap else 1
+            f = m['frequency_hz'][::stride]
+            output.append(dict(id=m['id'],name=m['name'],normal=m['normal_axis'],frequency_thz=(f*1e-12).tolist(),
+                               wavelength_um=(C0/f*1e6).tolist(),flux=m['flux'][::stride].tolist(),units=m['flux_units'],
+                               points=len(m['weights']),shape=m['shape'],settings=m['settings'],**({'flux_stride': stride} if stride > 1 else {})))
+        return output
 
 
 class Simulation:

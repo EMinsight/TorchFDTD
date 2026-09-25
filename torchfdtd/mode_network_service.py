@@ -14,6 +14,7 @@ from fastapi import HTTPException
 from fastapi.responses import FileResponse, Response
 
 from .models import server_admission
+from .solver import admit_planning
 from .mode_network_project import ModeNetworkConfig, mode_network_plan, mode_network_request_digest
 from .mode_network_worker import MAX_MESSAGE_BYTES, close_owned_process, mode_network_worker
 
@@ -106,6 +107,7 @@ def attach_mode_network_routes(app, root, pool, jobs, lock):
                             job['status'] = 'cancelled'
     def validate_plan(config):
         try:
+            admit_planning(config.project)
             return mode_network_plan(config)
         except (ValueError, RuntimeError) as exc:
             raise HTTPException(422, str(exc)) from exc

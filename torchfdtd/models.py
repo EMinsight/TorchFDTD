@@ -830,12 +830,6 @@ class Project(Model):
         from .mesh import configure_auto_mesh
         configure_auto_mesh(self)
         r.valid_grid()
-        # Under the workbench server nothing is planned before this count-only check of the host memory planning takes.
-        if server_admission() is not None:
-            from .solver import preadmission_refusal
-            refusal = preadmission_refusal(self)
-            if refusal:
-                raise ValueError(refusal)
         from .endpoint_native import uses_endpoint, validate_pmc_project
         endpoint = uses_endpoint(r)
         if endpoint:validate_pmc_project(self)

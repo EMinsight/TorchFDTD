@@ -384,14 +384,19 @@ def huge(field):
 def test_10_to_the_12_steps_frequencies_or_plane_points_answer_422_in_both_modes(field, tmp_path):
     body = huge(field)
     network = dict(modal_payload(), project=body)
+    planning = [*((r, body) for r in ('/api/validate', '/api/jobs', '/api/mesh/preview', '/api/sources/src0/preview')),
+                ('/api/mode-networks/validate', network)]
+    # These plan nothing: they may accept the project, but never answer 500.
+    exports = [('/api/python', body), ('/api/gds/export', {'project': body, 'layers': {'x': [1, 0]}})]
     for memory_admission in (False, True):
         with workbench(tmp_path / str(memory_admission), memory_admission) as client:
-            for route, payload in [*((r, body) for r in ('/api/validate', '/api/jobs', '/api/mesh/preview', '/api/python',
-                                                          '/api/sources/src0/preview')),
-                                   ('/api/mode-networks/validate', network), ('/api/gds/export', {'project': body, 'layers': {'x': [1, 0]}})]:
+            for route, payload in planning+exports:
                 started = time.monotonic()
                 response = client.post(route, json=payload)
-                assert response.status_code == 422, (memory_admission, field, route, response.status_code, response.text[:200])
+                # The source preview reads no monitor: under the fixed limits it previews the source of the huge plane.
+                preview_only = field == 'plane' and route == '/api/sources/src0/preview' and not memory_admission
+                expected = (422,) if (route, payload) in planning and not preview_only else (200, 422)
+                assert response.status_code in expected, (memory_admission, field, route, response.status_code, response.text[:200])
                 assert time.monotonic()-started < 20, (memory_admission, field, route)
 
 
@@ -473,15 +478,21 @@ def test_the_preadmission_check_refuses_before_anything_is_planned(tmp_path, mon
     with workbench(tmp_path / 'memory', True) as client:
         response = client.post('/api/validate', json=many)
         assert response.status_code == 422 and 'Planning this project would take' in response.text, response.text[:300]
-    # Both modes compare the planning bytes with the available host memory.
+    # Memory admission compares the planning bytes with the available host memory where planning starts.
+    # The fixed limits bound planning on their own: the check does not apply there, nor in model validation.
     with server_limits():
         needed = preadmission_bytes(Project.model_validate(base))
     monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=2*needed, available_bytes=needed))
-    for memory_admission in (False, True):
+    for memory_admission, status in ((False, 200), (True, 422)):
         with workbench(tmp_path / str(memory_admission), memory_admission) as client:
-            response = client.post('/api/validate', json=base)
-            assert response.status_code == 422 and 'above 80% of the' in response.text, response.text[:300]
-    Project.model_validate(base)   # the Python API has no such check
+            for route in ('/api/validate', '/api/jobs', '/api/mesh/preview', '/api/sources/src0/preview'):
+                response = client.post(route, json=dict(base, sources=[dict(base['sources'][0], id='src0')]))
+                assert response.status_code == status or (status == 200 and response.status_code == 202), (route, response.text[:300])
+                assert status == 200 or 'above 80% of the' in response.text, response.text[:300]
+            response = client.post('/api/python', json=base)
+            assert response.status_code == 200
+    with server_limits(memory_admission=True):
+        Project.model_validate(base)   # validation alone never reads the free memory
 
 
 # ---------------------------------------------------------------------------------------- list ceilings
@@ -556,10 +567,13 @@ def _plane_and_trace_project():
     return Project(region=region, sources=[Source(center=(0, 0, .2))], monitors=[Monitor(id='probe', center=(.1, 0, 0)), plane])
 
 
+MONITOR_SERIES = ('time_fs', 'signal', 'signal_imag', 'window', 'frequency_thz', 'wavelength_um', 'spectrum', 'spectrum_real', 'spectrum_imag')
+
+
 @pytest.mark.parametrize('memory_admission', [False, True])
 def test_result_routes_send_bounded_json(memory_admission, tmp_path, monkeypatch):
     monkeypatch.setattr(server, 'FIELD_JSON_POINTS', 100)
-    monkeypatch.setattr(server, 'STATUS_MONITOR_VALUES', 300)
+    monkeypatch.setattr(server, 'MONITOR_JSON_VALUES', 300)
     body = _plane_and_trace_project().model_dump(mode='json')
     with workbench(tmp_path, memory_admission) as client:
         key = client.post('/api/jobs', json=body).json()['id']
@@ -569,21 +583,70 @@ def test_result_routes_send_bounded_json(memory_admission, tmp_path, monkeypatch
         assert len(plane['real']) == 10 and len(plane['points_um']) == 100
         status = client.get('/api/jobs/'+key).json()
         probe, = status['monitors']
-        assert sum(len(probe[k]) for k in server.MONITOR_SERIES) <= 300 and probe['json_stride'] > 1
-        # The CSV export keeps the stored spectrum: the 200 FFT bins above DC of 400 steps.
+        assert sum(len(probe[k]) for k in MONITOR_SERIES) <= 300 and probe['spectrum_stride'] > 1 and probe['trace_stride'] > 1
+        # The CSV exports come from the saved result: every one of the 200 FFT bins above DC of 400 steps,
+        # and the traces decimated as always (400 samples, under the 2000 of Result.monitor_data).
         assert len(client.get(f'/api/jobs/{key}/spectra.csv').text.strip().splitlines()) == 1+200
+        assert len(client.get(f'/api/jobs/{key}/monitors.csv').text.strip().splitlines()) == 1+400
 
 
-def test_stored_spectra_are_strided_to_their_budget(tmp_path, monkeypatch):
-    monkeypatch.setattr(server, 'STORED_MONITOR_VALUES', 5000)
-    body = Project(region=Region(dimension='2d', size=(2., 2., 1.), mesh=.05, pml_cells=4, steps=6000, backend='cpu'),
-                   sources=[Source(center=(0, 0, 0))], monitors=[Monitor(id='probe', center=(.1, 0, 0))]).model_dump(mode='json')
+def test_the_stored_series_budget_is_a_total_over_every_monitor(tmp_path, monkeypatch):
+    monkeypatch.setattr(server, 'MONITOR_JSON_VALUES', 9000)
+    monitors = [Monitor(id=f'p{i}', center=(.02*i-.4, .1, 0)) for i in range(40)]
+    body = Project(region=Region(dimension='2d', size=(2., 2., 1.), mesh=.05, pml_cells=4, steps=3000, backend='cpu'),
+                   sources=[Source(center=(0, 0, 0))], monitors=monitors).model_dump(mode='json')
     with workbench(tmp_path, True) as client:
         key = client.post('/api/jobs', json=body).json()['id']
         assert finished(client, '/api/jobs/'+key, 300)['status'] == 'completed'
+        stored = client.get('/api/jobs/'+key).json()['monitors']
+        assert len(stored) == 40 and sum(len(m[k]) for m in stored for k in MONITOR_SERIES) <= 9000
+        # spectra.csv streams every sample of every monitor from the saved result, with the stride of none.
         rows = client.get(f'/api/jobs/{key}/spectra.csv').text.strip().splitlines()
-        # 3000 FFT bins above DC kept within 2000 samples (the floor of the per-monitor share): every second bin.
-        assert len(rows)-1 == 1500, len(rows)
+        assert len(rows)-1 == 40*1500
+
+
+def test_flux_json_is_strided_and_the_job_list_names_planes_only(tmp_path, monkeypatch):
+    monkeypatch.setattr(server, 'MONITOR_JSON_VALUES', 600)
+    plane = FieldMonitor(id='flux', normal='x', center=(.4, 0, 0), size=(0, 1., 1.),
+                         spectrum=dict(sampling='frequency', frequency_points=500, wavelength_start=1.3, wavelength_stop=1.8, apodization='none'))
+    body = Project(region=Region(dimension='2d', size=(2., 2., 1.), mesh=.05, pml_cells=4, steps=400, backend='cpu'),
+                   sources=[Source(center=(0, 0, 0))], monitors=[plane]).model_dump(mode='json')
+    for memory_admission in (False, True):
+        with workbench(tmp_path / str(memory_admission), memory_admission) as client:
+            key = client.post('/api/jobs', json=body).json()['id']
+            assert finished(client, '/api/jobs/'+key, 120)['status'] == 'completed'
+            flux, = client.get('/api/jobs/'+key).json()['flux_monitors']
+            assert flux['flux_stride'] == 3 and len(flux['flux']) == len(flux['frequency_thz']) == 167
+            listed, = client.get('/api/jobs').json()
+            assert listed['flux_monitors'] == [{'id': 'flux', 'name': flux['name'], 'normal': flux['normal']}]
+            assert len(client.get(f'/api/jobs/{key}/flux.csv').text.strip().splitlines()) == 1+500
+
+
+def test_the_plane_stride_is_chosen_per_axis():
+    assert server._plane_strides((28, 28), 100) == (3, 3)
+    assert server._plane_strides((3, 10**6), 512*512) == (1, 12)
+    assert server._plane_strides((10**6, 3), 512*512) == (12, 1)
+    assert server._plane_strides((200, 300), 512*512) == (1, 1)
+    for shape in ((3, 10**6), (700, 900), (5, 7000), (1, 10**6), (2000, 2000, 1)):
+        strides = server._plane_strides(shape, 512*512)
+        counts = [-(-n//s) for n, s in zip(shape, strides)]
+        assert math.prod(counts) <= 512*512, (shape, counts)
+    counts = [-(-n//s) for n, s in zip((3, 10**6), server._plane_strides((3, 10**6), 512*512))]
+    assert math.prod(counts) > 250_000
+
+
+def test_stored_projects_answer_without_reading_the_free_memory(tmp_path, monkeypatch):
+    """A finished job's project is validated again by the post-processing routes; the planning check is not part of it."""
+    body = _plane_and_trace_project().model_dump(mode='json')
+    for memory_admission in (False, True):
+        with workbench(tmp_path / str(memory_admission), memory_admission) as client:
+            key = client.post('/api/jobs', json=body).json()['id']
+            assert finished(client, '/api/jobs/'+key, 120)['status'] == 'completed'
+            with monkeypatch.context() as scarce:
+                scarce.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=2**20, available_bytes=1))
+                for route in ('farfield-monitors', 'propagation-monitors', 'diffraction-monitors'):
+                    response = client.get(f'/api/jobs/{key}/{route}')
+                    assert response.status_code == 200, (memory_admission, route, response.text[:200])
 
 
 def test_a_finished_job_can_be_deleted_to_release_its_results(tmp_path, monkeypatch):
@@ -670,7 +733,7 @@ def test_the_design_state_directory_stays_inside_the_server_root(tmp_path):
         root = tmp_path / str(memory_admission)
         with workbench(root, memory_admission) as client:
             for path in [str(tmp_path / 'outside'), 'C:/Windows/Temp', '\\\\server\\share', '/tmp/x', '../escape', 'runs/../../escape',
-                         'C:relative', 'a:b', '.']:
+                         'C:relative', 'a:b', '.', 'with\0nul', 'tab\there', 'x'*300]:
                 for route in ('/api/design/config', '/api/design/plan', '/api/design/jobs'):
                     response = client.post(route, json=dict(config, state_directory=path, disk_budget_gib=1))
                     assert response.status_code == 422 and 'design state directory' in response.text, (path, route, response.text[:200])
