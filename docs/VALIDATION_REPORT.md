@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.15.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260924T140733Z-g7-04-a1b4bd63` recorded 2026-09-24T14:07:33+00:00 at commit `bab17be9e58e`.
+Package version `0.15.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T064631Z-g9-03-d91c825e` recorded 2026-09-25T06:46:31+00:00 at commit `6fd0c76648b4`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 69 | 7 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 69 | 13 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 66 | 10 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 66 | 16 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -39,7 +39,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G1-03 | quadrant_intensity_allocation의 FP32 불안정. | IMPLEMENTED | VERIFIED | `20260923T180913Z-g1-03-45424e33` | `4635db7eab69` | PASS | evidence matches the current checkout |
 | G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260923T181355Z-g1-04-584298f5` | `4635db7eab69` | PASS | evidence matches the current checkout |
 | G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260923T181843Z-g1-05-14e56c39` | `4635db7eab69` | PASS | evidence matches the current checkout |
-| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260924T083024Z-g1-06-3198adc0` | `8cd5d84882f8` | PASS | evidence matches the current checkout |
+| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260925T064615Z-g1-06-4590b94f` | `6fd0c76648b4` | PASS | evidence matches the current checkout |
 
 ### G2 물리·격자·실행 계약 (WORKSTATION, P0)
 
@@ -120,7 +120,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G7-01 | 공개 metagrating/meta-atom 전체 workflow | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G7-02 | 소형 유한 metalens의 실제 propagation·PSF·최종 재평가 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G7-03 | 수동 PIC 역설계·복수 초기화·제작 제약·GDS 재평가 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G7-04 | 동일 정확도 독립 solver 교차 검증 및 공정 비교 | IMPLEMENTED | VERIFIED | `20260924T140733Z-g7-04-a1b4bd63` | `bab17be9e58e` | PASS | evidence matches the current checkout |
+| G7-04 | 동일 정확도 독립 solver 교차 검증 및 공정 비교 | IMPLEMENTED | VERIFIED | `20260925T054137Z-g7-04-087c885b` | `92005aea2e95` | PASS | evidence matches the current checkout |
 | G7-05 | cold/warm·전체 iteration·streaming·tuning 비용과 반복 변동 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 
 ### G8 저장·GUI·clean 설치 (WORKSTATION, P1)
@@ -131,9 +131,9 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260923T224908Z-g8-02-882d22ba` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
 | G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260923T224914Z-g8-03-39b0bae7` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
 | G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260923T224924Z-g8-04-e8e32bbf` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260924T083030Z-g8-05-5095f3c9` | `8cd5d84882f8` | PASS | evidence matches the current checkout |
-| G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260924T083038Z-g8-06-36787558` | `8cd5d84882f8` | PASS | evidence matches the current checkout |
-| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260924T083045Z-g8-07-be20b6ec` | `8cd5d84882f8` | PASS | evidence matches the current checkout |
+| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260924T083030Z-g8-05-5095f3c9` | `8cd5d84882f8` | FAIL | STALE: watched file changed since the run: README.md |
+| G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260924T083038Z-g8-06-36787558` | `8cd5d84882f8` | FAIL | STALE: watched file changed since the run: README.md |
+| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260924T083045Z-g8-07-be20b6ec` | `8cd5d84882f8` | FAIL | STALE: watched file changed since the run: README.md |
 
 ### G9 보안·운영·출고 판정 (WORKSTATION, P0)
 
@@ -141,7 +141,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260923T225017Z-g9-01-37fad064` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
 | G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260923T225107Z-g9-02-626de86f` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
-| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260924T083013Z-g9-03-65e0cdba` | `8cd5d84882f8` | PASS | evidence matches the current checkout |
+| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T064631Z-g9-03-d91c825e` | `6fd0c76648b4` | PASS | evidence matches the current checkout |
 | G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260923T225117Z-g9-04-ec7eb9cb` | `9d2eb55a1955` | PASS | evidence was recorded on a dirty tree (6 paths); it is not tied to commit 9d2eb55a1955 alone |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260923T235752Z-g9-06-b92d9083` | `3338a4b9a3a9` | FAIL | STALE: test source changed since the run: tests/test_gpu_runner_policy.py |
@@ -333,6 +333,8 @@ Declared scope changes with the owner's recorded approval (`scope_change_approva
 | G3-16 | docs/validation/cases/G3-16_physical_parameter_gradients.json acceptance/geometry_maps/fp32_chain/rtol = 0.0003 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-16_physical_parameter_gradients.json acceptance/geometry_maps/streamed/rtol = 0.0004 is looser than the loosest program rtol 0.0001 | approved by owner on 2026-09-24 |
 | G6-04 | docs/validation/cases/G6-04.json acceptance/tracked_neff_error_max/difference_from_common_criterion states a limit looser than the program threshold; docs/validation/cases/G6-04.json acceptance/separated_amplitudes/atol = 1e-05 is looser than the loosest program atol 1e-06 | approved by owner on 2026-09-24 |
 | G7-01 | docs/validation/cases/G7-01.json declares superseded_by (a revised case); docs/validation/cases/G7-01r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
+| G7-02 | docs/validation/cases/G7-02.json declares superseded_by (a revised case); docs/validation/cases/G7-02r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
+| G7-03 | docs/validation/cases/G7-03.json declares superseded_by (a revised case); docs/validation/cases/G7-03r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
 | G7-04 | docs/validation/cases/G7-04.json declares superseded_by (a revised case); docs/validation/cases/G7-04r2.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
 | G9-05 | docs/validation/cases/G9-05.json acceptance/independent_user declares a program threshold not applicable | approved by owner on 2026-09-24 |
 

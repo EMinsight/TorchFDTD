@@ -133,14 +133,26 @@ def recomputed(committed):
     return load('analyze').analyze(RECORDS)
 
 
+def assert_same(a, b, where):
+    """Same structure and values; floats within 1e-12 relative, since log and exp may differ in the last bit between C libraries."""
+    if isinstance(a, float) or isinstance(b, float):
+        assert math.isclose(a, b, rel_tol=1e-12, abs_tol=0.0), (where, a, b)
+    elif isinstance(a, dict):
+        assert a.keys() == b.keys(), where
+        for k in a:
+            assert_same(a[k], b[k], f'{where}.{k}')
+    elif isinstance(a, list):
+        assert len(a) == len(b), where
+        for i, (x, y) in enumerate(zip(a, b)):
+            assert_same(x, y, f'{where}[{i}]')
+    else:
+        assert a == b, (where, a, b)
+
+
 def test_records_reproduce_summary(committed, recomputed):
     assert recomputed['tables'] == committed['tables']
-    assert recomputed['matched_costs'] == committed['matched_costs']
-    assert recomputed['reference'] == committed['reference']
-    assert recomputed['acceptance'] == committed['acceptance']
-    for key, points in committed['curves'].items():
-        for a, b in zip(recomputed['curves'][key], points):
-            assert a == b, key
+    for part in ('matched_costs', 'reference', 'acceptance', 'curves'):
+        assert_same(recomputed[part], committed[part], part)
 
 
 def test_results_page_carries_the_rendered_tables(recomputed):
