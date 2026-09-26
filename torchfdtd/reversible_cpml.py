@@ -27,15 +27,20 @@ class ReversibleCPMLOptions(ReversibleOptions):
 
     Optional asynchronous CPU traces use a bounded pinned two-slot ring.
     No files are created by this API. Fields and CPML remain resident.
+    forward_only='auto' runs a call that cannot request a gradient without
+    the trace, terminal copies and drift diagnostics; 'never' records anyway.
     """
 
     trace_storage: str = 'device'
     collar_cells: int = 1
     trace_transfers: str = 'sync'
     trace_chunk_steps: int = 32
+    forward_only: str = 'auto'
 
     def __post_init__(self):
         super().__post_init__()
+        if self.forward_only not in ('auto', 'never'):
+            raise ValueError('forward_only must be auto or never.')
         if self.trace_storage not in ('device', 'cpu'):
             raise ValueError('trace_storage must be device or cpu.')
         if self.trace_transfers not in ('sync', 'async'):
@@ -138,21 +143,50 @@ def _interior_scale(system, a, b):
 
 
 def _require_finite(value, message, chunk):
+    # Chunks bound the scratch. The verdict stays on the device and is read
+    # once, instead of one host synchronization per chunk.
     flat = value.reshape(-1)
     chunk = max(1, chunk // 2) if value.is_complex() else chunk
+    finite = torch.ones((), dtype=torch.bool, device=value.device)
     for start in range(0, flat.numel(), chunk):
-        if not bool(torch.isfinite(flat[start:start + chunk]).all()):
-            raise RuntimeError(message)
+        finite &= torch.isfinite(flat[start:start + chunk]).all()
+    if not bool(finite):
+        raise RuntimeError(message)
+
+
+def _require_material(value, chunk):
+    flat = value.reshape(-1)
+    valid = torch.ones((), dtype=torch.bool, device=value.device)
+    for start in range(0, flat.numel(), chunk):
+        block = flat[start:start + chunk]
+        valid &= torch.isfinite(block).all() & ~(block < 1).any()
+    if not bool(valid):
+        raise ValueError('The recorded CPML CFL contract requires finite epsilon >= 1 in both maps.')
+
+
+def _recorded_system(epsilon, project, spectral):
+    system = _System(project, epsilon.detach(), prepare_kernels=False,
+                     observation_monitors=None if spectral is None else spectral.observers)
+    if epsilon.is_cuda:
+        from .cuda_kernels import FusedYeeCUDA
+        from .cuda_complex import FusedComplexYeeCUDA
+        kernel = FusedComplexYeeCUDA if system.field_dtype == torch.complex64 else FusedYeeCUDA
+        system.kernel = kernel(system.grid, direct_views=True)
+    return system
 
 
 def _advance_recorded(system, step, frame, a, b):
-    """The native E-then-H update, with a trace between the two updates."""
+    """The native E-then-H update, with a trace between the two updates.
+
+    Without a frame (forward only) the same updates run with no trace copy.
+    """
     e, h, *psis = system.state()
     if system.kernel is not None:
         system.kernel.update_E()
         system.inject(e, 'E', step)
-        frame[0].copy_(e[:, :, b + 1, :2])
-        frame[1].copy_(h[:, :, a - 1, :2])
+        if frame is not None:
+            frame[0].copy_(e[:, :, b + 1, :2])
+            frame[1].copy_(h[:, :, a - 1, :2])
         system.kernel.update_H()
         system.inject(h, 'H', step)
     else:
@@ -160,8 +194,9 @@ def _advance_recorded(system, step, frame, a, b):
         next_e = system.inject(e + system.grid.courant_number / system.eps4 * curl,
                                'E', step, functional=True)
         del curl
-        frame[0].copy_(next_e[:, :, b + 1, :2])
-        frame[1].copy_(h[:, :, a - 1, :2])
+        if frame is not None:
+            frame[0].copy_(next_e[:, :, b + 1, :2])
+            frame[1].copy_(h[:, :, a - 1, :2])
         curl, psis = system.curl(next_e, psis, True)
         next_h = system.inject(h - system.grid.courant_number * curl,
                                'H', step, functional=True)
@@ -170,16 +205,44 @@ def _advance_recorded(system, step, frame, a, b):
     system.current_step = step + 1
 
 
+@torch.no_grad()
+def _forward_only(epsilon, project, interval, report, spectral):
+    """The recorded forward's steps, observations and DFT blocks, with no tape.
+
+    Signals and spectra equal the recorded path's bit for bit. No boundary
+    trace, terminal copy or reconstruction scale is kept, so no adjoint exists.
+    """
+    system = _recorded_system(epsilon, project, spectral)
+    a, b = interval
+    block_size = project.region.steps if spectral is None else spectral.block_size
+    samples = system.grid.E.new_empty((block_size, len(system.monitors)))
+    signals = samples if spectral is None else spectral.zeros()
+    started = time.perf_counter()
+    for step in range(project.region.steps):
+        _advance_recorded(system, step, None, a, b)
+        row = step % block_size
+        samples[row] = system.observe(system.state())
+        if spectral is not None and (row + 1 == block_size or step + 1 == project.region.steps):
+            spectral.accumulate(signals, samples[:row + 1], step - row)
+    chunk = report['diagnostic_chunk_elements']
+    _require_finite(signals, 'Recorded CPML observations became nonfinite.', chunk)
+    for field in system.state()[:2]:
+        _require_finite(field, 'CPML fields became nonfinite.', chunk)
+    if epsilon.is_cuda:
+        torch.cuda.synchronize(epsilon.device)
+    report.update(forward_seconds=time.perf_counter() - started,
+                  sampled_forward_peak=None, sampled_forward_l2=None,
+                  diagnostic_cadence_steps=0, terminal_copies=0,
+                  observation_block_shape=list(samples.shape),
+                  observation_history_retained=spectral is None,
+                  checkpoint_replays=0, backward_calls=0)
+    return signals
+
+
 class _RecordedCPML(torch.autograd.Function):
     @staticmethod
     def forward(ctx, epsilon, project, options, interval, report, spectral):
-        system = _System(project, epsilon.detach(), prepare_kernels=False,
-                         observation_monitors=None if spectral is None else spectral.observers)
-        if epsilon.is_cuda:
-            from .cuda_kernels import FusedYeeCUDA
-            from .cuda_complex import FusedComplexYeeCUDA
-            kernel = FusedComplexYeeCUDA if system.field_dtype == torch.complex64 else FusedYeeCUDA
-            system.kernel = kernel(system.grid, direct_views=True)
+        system = _recorded_system(epsilon, project, spectral)
         a, b = interval
         trace_device = epsilon.device if options.trace_storage == 'device' else torch.device('cpu')
         shape = (project.region.steps, 2, *epsilon.shape[:2], 2)
@@ -371,17 +434,15 @@ class ReversibleCPMLSimulation(torch.nn.Module):
                                                    spectral=spectral)
         chunk = reservation['diagnostic_chunk_elements']
         for value in (epsilon, fixed_epsilon):
-            flat = value.reshape(-1)
-            for start in range(0, flat.numel(), chunk):
-                block = flat[start:start + chunk]
-                if not bool(torch.isfinite(block).all()) or bool((block < 1).any()):
-                    raise ValueError('The recorded CPML CFL contract requires finite epsilon >= 1 in both maps.')
+            _require_material(value, chunk)
         if epsilon.is_cuda:
             from .cuda_bootstrap import prepare_cuda_kernels
             prepare_cuda_kernels()
         a, b = interval
         effective = fixed_epsilon.clone()
         effective[:, :, a:b + 1] = epsilon[:, :, a:b + 1]
+        # effective requires a gradient exactly when one can be requested.
+        forward_only = self.options.forward_only == 'auto' and not effective.requires_grad
         report = dict(experimental=True, adjoint='recorded-interface CPML reconstruction',
                       higher_order=False, full_time_autograd=False, spatial_streaming=False,
                       checkpoint_capacity=0, reconstruction_interval_z=[a, b],
@@ -389,8 +450,12 @@ class ReversibleCPMLSimulation(torch.nn.Module):
                       material_gradient_scope='interior only, exterior fixed by explicit background',
                       source_material_gradient='unrestricted interior, fixed impressed increments',
                       cpml_primal_inverted=False,
-                      backend='fused CUDA' if epsilon.is_cuda else 'torch CPU', **reservation)
-        signals = _RecordedCPML.apply(effective, project, self.options, interval, report, spectral)
+                      backend='fused CUDA' if epsilon.is_cuda else 'torch CPU',
+                      forward_only=forward_only, **reservation)
+        if forward_only:
+            signals = _forward_only(effective, project, interval, report, spectral)
+        else:
+            signals = _RecordedCPML.apply(effective, project, self.options, interval, report, spectral)
         if spectral is not None:
             return spectral.result(signals, report)
         return DifferentiableResult(signals, project.region.time_step,

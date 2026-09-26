@@ -13,13 +13,13 @@ def send_message(connection, message):
     connection.send_bytes(payload)
 
 
-def mode_network_worker(snapshot, output_path, connection):
+def mode_network_worker(snapshot, output_path, connection, memory_admission=False):
     """Only the parent-selected generated scratch path is written by this child."""
     try:
         from .models import server_limits
         from .mode_network_project import ModeNetworkConfig, run_mode_network
-        # Only the workbench server spawns this worker; its request limits apply here too.
-        with server_limits():
+        # Only the workbench server spawns this worker; its request limits (or its memory admission) apply here too.
+        with server_limits(memory_admission=memory_admission):
             config = ModeNetworkConfig.model_validate(snapshot)
             result = run_mode_network(config, on_progress=lambda data:
                 send_message(connection, {'type': 'progress', 'data': data}))

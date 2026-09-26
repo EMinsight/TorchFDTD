@@ -16,12 +16,15 @@ identifiers:
     value: 10.5281/zenodo.22928834
     description: "Concept DOI of TorchFDTD, resolving to the latest version"
   - type: doi
+    value: 10.5281/zenodo.22968357
+    description: "Version DOI of TorchFDTD 0.16.0"
+  - type: doi
     value: 10.5281/zenodo.22928835
     description: "Version DOI of TorchFDTD 0.15.0"
 repository-code: "https://github.com/hyoseokp/TorchFDTD"
 license: MIT
-version: 0.15.0
-date-released: "2026-09-24"
+version: 0.16.1
+date-released: "2026-09-26"
 preferred-citation:
   type: article
   title: "TorchFDTD: GPU-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design"

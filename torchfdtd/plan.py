@@ -499,7 +499,10 @@ def resolve_plan(project):
     from .models import Project
     from .solver import estimate, field_axes
     from .boundaries import absorber_faces
+    from .field_monitors import plane_sizes
     project = Project.model_validate(project.model_dump())
+    # The plane sample caps are counted before any plane or map is built.
+    plane_sizes(project)
     r = project.region
     nodes = tuple(_frozen(a) for a in r.mesh_nodes)
     axes = {c: tuple(_frozen(a) for a in field_axes(r, c)) for c in COMPONENTS}

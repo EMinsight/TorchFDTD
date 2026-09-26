@@ -35,8 +35,9 @@ This is an engineering description, not a certification.
 | Upload streaming | `/api/gds/inspect`, `/api/fsp/import`, `/api/fsp/native-import` | Bodies are read in chunks and the request is refused at 413 as soon as the running total passes the route's limit |
 | Stored paths | GDS and FSP services | Uploads are stored under `<results>/gds/<uuid>.gds` and `<results>/fsp/<uuid>/project.fsp`; `/api/gds/export` writes `<results>/gds/export-<uuid>.gds`, reads it back into the JSON response and removes it before answering. The `x-filename` header is a display name: the FSP route keeps only the last path component and requires `.fsp`, the GDS route echoes it back and never uses it for a path |
 | Route parameters | every `{key}` route | Job, upload and design keys are looked up in server-session dictionaries; a key that is not a known uuid answers 404 and no path is built from it. `/api/examples/{name}` is an allowlist |
+| Design state directory | `/api/design/config`, `/api/design/plan`, `/api/design/jobs` | The `state_directory` of a design configuration names a subdirectory of `<results>/design-state`; a control character, a component over 255 characters, a drive, a root or UNC share, a colon, `.` or a name that resolves outside answers 422 before any path is resolved or created, and a name the file system refuses answers 422 |
 | Static files | `WorkbenchFiles` in `torchfdtd/server.py` | The bundled `torchfdtd/web` directory is served with Starlette's containment check plus a rejection of absolute paths, drive letters, UNC prefixes and `:` so that on Windows a request such as `/C:/...` or `//server/share/...` never reaches `os.path.join`, where it would replace the web directory and let `realpath` touch a drive root or a network share |
-| Size limits | `ServerLimits` middleware and `ServerExecutor` in `torchfdtd/server.py`, `torchfdtd.models.server_limits` | Every request (body validation included), every task of the server's job pools and the modal worker process run inside `server_limits()`, which applies `SERVER_LIMITS` ([below](#size-limits-of-the-server)) whatever caps a submitted project carries. A request above a limit answers 422. A cap the project carries can lower a limit, never raise it, and the project is echoed unchanged |
+| Size limits | `ServerLimits` middleware and `ServerExecutor` in `torchfdtd/server.py`, `torchfdtd.models.server_limits` | Every request (body validation included), every task of the server's job pools and the modal worker process run inside `server_limits()`, which applies `SERVER_LIMITS` ([below](#size-limits-of-the-server)) whatever caps a submitted project carries. A request above a limit answers 422. A cap the project carries can lower a limit, never raise it, and the project is echoed unchanged. `torchfdtd serve --memory-admission` replaces these limits by list ceilings and a check of the host memory planning takes ([memory admission](#memory-admission)) |
 | JSON bodies | pydantic models with `extra='forbid'` and `allow_inf_nan=False` | Unknown keys, wrong types, out-of-range values, `NaN`, `Infinity` and out-of-range literals answer 422; a body nested too deeply answers 400. The 422 body is rendered through a handler that never re-emits a nonfinite input, so the rejection itself cannot fail |
 | Response headers | `local_origin` middleware | `X-Content-Type-Options: nosniff` on every response |
 | Queues | job services | At most one running and two queued jobs per queue, and a bounded job table, so a loop of `POST /api/jobs` cannot exhaust memory |
@@ -45,7 +46,8 @@ This is an engineering description, not a certification.
 
 The Python API admits scenes by their memory estimate and has no fixed size
 caps ([EXECUTION_MODES.md](EXECUTION_MODES.md#size-limits)). Each constraint
-it lifted after 0.15.0 remains a request limit of the server. The limits are
+it lifted after 0.15.0 remains a request limit of the server, unless it runs
+with [memory admission](#memory-admission), which replaces them. The limits are
 checked on every route that takes a project or a part of one (validate, jobs,
 mesh preview, freeze and coordinates, Python export, source preview, GDS and
 FSP conversion and export, the mode-network requests with a nested project and
@@ -74,7 +76,80 @@ and nested in a GDS export and a mode-network request, and expects 422;
 upload of 1.04 million vertices, and
 `test_budgeted_mode_network_and_design_routes_keep_the_resident_cell_limit` posts
 budgeted mode-network and design requests above 8,000,000 cells. `tests/test_resident_guards.py` checks that the
-job pools and the modal worker run under the limits.
+job pools and the modal worker run under the limits, and
+`tests/test_server_memory_admission.py` checks the same routes under memory admission.
+
+### Memory admission
+
+`torchfdtd serve --memory-admission` (or `create_app(memory_admission=True)`)
+replaces the ten `SERVER_LIMITS` above by the admission of the Python API:
+the resident grid, the step count, the samples of a frequency plane and the
+monitor frequencies are admitted by the memory estimate (75% of the free
+device memory, and 80% of the available host memory for the host arrays of
+the run; the whole estimate against 80% of the host memory on the CPU) and by
+the caps the project carries (`Region.resident_cell_limit`, `Project.limits`).
+It keeps two input bounds that the memory estimate cannot give:
+
+| What | Under memory admission | Checked |
+| --- | --- | --- |
+| Lists (`torchfdtd.models.MEMORY_ADMISSION_LIMITS`) | 200,000 structures, 10,000 sources, 10,000 monitors, 1000 materials, 10,000 refinement boxes, 1,000,000 frequency points or custom frequencies, 1,000,000 samples of a sampled source | before the items are validated, like the fixed limits |
+| Planning | the host memory that `estimate()`, `resolve_plan` and the resolver take (`torchfdtd.solver.preadmission_bytes`: per step, per source term and step, per monitor frequency, per plane point and component, per Bloch sheet cell and per list item, calibrated with tracemalloc) against 80% of the available host memory | `torchfdtd.solver.admit_planning`, from counts alone, where planning or running starts (validate, jobs and their thread, mesh and source previews, mode-network planning, the design's scene) and before any array is built; never in model validation, so a stored job's project is validated again without reading the free memory; under the fixed limits the limits bound planning instead |
+
+With the ceilings, a request of at most `MAX_REQUEST_BYTES` (32 MB) validates
+in at most about 3.3 GB of host memory: at most 3 KiB per list item (231,000
+items) and 80 bytes per request byte of numbers (polygon vertices are the
+densest, about 60), measured by `tests/test_server_memory_admission.py`.
+Everything planned from it afterwards is counted first. The requests, the
+tasks of the job pools and the modal worker all run in this mode: a job task
+keeps the mode of the request that queued it, and the job thread passes it to
+the spawned modal worker. `/api/health` reports it as `admission` (`"fixed"`
+or `"memory"`) with `server_limits` (the `SERVER_LIMITS` values, or `null`),
+and the execution panel of the workbench shows it. Without the flag the
+server behaves as described above.
+
+The host arrays of a resident run are part of the estimate in either mode
+([EXECUTION_MODES.md](EXECUTION_MODES.md#resident-memory-of-the-fused-cuda-path)):
+the final E and H copies with one field-sized temporary (9 field values per
+cell), the snapshot frames (at most 101, each decimated to at most 256 x 256
+values), the point traces, the plan's material, maps and structures and the
+runtime. Under the fixed limits they stay small; under memory admission they
+are what bounds a large GPU grid on the host. `/api/validate` then reports
+that the resident tier does not fit ("resident host estimate ... exceeds 80%
+of available host memory", or the whole estimate on the CPU) and Auto moves
+on, and `Simulation` refuses the same scene when the job starts ("Insufficient
+available host memory").
+
+In either mode the results the server turns into JSON stay bounded: a finished
+job keeps the point-monitor series and the flux of its planes, which
+`GET /api/jobs/{key}` sends, strided to at most 1,000,000 values each in all
+(`MONITOR_JSON_VALUES`; a strided series carries `spectrum_stride`,
+`trace_stride` or `flux_stride`), `GET /api/jobs` names each job's flux planes
+only, `GET /api/jobs/{key}/field-monitors/{id}` sends a plane strided along its
+axes to at most 512 x 512 points (`full_shape`, `stride`), and the source
+preview covers the first 100,000 steps of a longer run (`preview_steps`). The
+CSV exports stream in pieces: `spectra.csv` and `monitors.csv` from the saved
+result file one monitor's arrays at a time, with every spectrum sample and the
+usual trace decimation, and `flux.csv` from the stored planes, with every
+frequency. The NPZ download keeps every array. `DELETE /api/jobs/{key}`
+releases a finished job's results and files, so a large run does not hold
+host memory until the job table rotates.
+
+The flag lifts only those size limits. It keeps the loopback-only bind, the
+`Host` and `Origin` checks, `MAX_REQUEST_BYTES` and the FSP upload limit, the
+FSP parser limits and the 512-member analysis-group import limit, the GDS
+upload limits (`SERVER_GDS_LIMITS`, 1,000,000 vertices), the text and list
+caps of the request models, the queue and job-table limits and the other
+bounds of the HTTP routes, the 16-pole limit of a Lorentz material, one
+million cells per grid axis, the 2^31 bound of the 32-bit field indices and
+the confinement of a design state directory to `<results>/design-state`.
+A memory estimate bounds the memory a scene is expected to use, not its run
+time or the disk it writes, so one request can occupy the GPU, the host
+memory and the results directory for as long as it runs. The mode is meant
+for a single user running the workbench on their own machine; on a machine
+shared with other local accounts keep the default.
+`tests/test_server_memory_admission.py` checks the mode on the routes, the job
+threads, the design jobs and the modal worker, and runs the security checks of
+`tests/test_server_security.py` against a memory-admission server.
 
 ## What the server does not do
 

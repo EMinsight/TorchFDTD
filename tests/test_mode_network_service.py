@@ -13,7 +13,7 @@ import numpy as np
 import pytest
 
 
-def _blocking_worker(snapshot, output_path, connection):
+def _blocking_worker(snapshot, output_path, connection, memory_admission=False):
     from torchfdtd.mode_network_worker import send_message
     send_message(connection, {'type': 'progress', 'data': {'pid': os.getpid()}})
     while True:

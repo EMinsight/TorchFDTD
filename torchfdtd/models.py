@@ -21,7 +21,7 @@ class Model(BaseModel):
 # estimate, and Region.resident_cell_limit and Project.limits are optional user caps
 # ("Size limits" in docs/EXECUTION_MODES.md). The workbench server applies these
 # request limits to everything it validates or runs, whatever a submitted project
-# carries (docs/SECURITY.md).
+# carries, unless it was started with memory admission (docs/SECURITY.md).
 SERVER_LIMITS = dict(resident_cells=8_000_000, structures=1000, sources=512, monitors=512, materials=100,
                      mesh_refinements=64, monitor_samples=12_000_000, steps=100_000, frequency_points=2001,
                      signal_samples=100_000)
@@ -29,27 +29,44 @@ SERVER_LIMITS = dict(resident_cells=8_000_000, structures=1000, sources=512, mon
 # signed 32-bit integers, so every resident grid keeps 3 x lanes x cells below
 # this bound, whatever its cell limit.
 RESIDENT_INDEX_LIMIT = 2**31
-_SERVER = ContextVar('torchfdtd_server_limits', default=False)
+# Under memory admission the size limits give way to the memory estimate, but every list keeps a ceiling,
+# checked before its items are validated: a request of at most 32 MB (server.MAX_REQUEST_BYTES) then
+# validates in at most about 3.3 GB of host memory, 3 KiB per list item and 80 bytes per request byte of
+# numbers (docs/SECURITY.md, tests/test_server_memory_admission.py). frequency_points also caps a custom list.
+MEMORY_ADMISSION_LIMITS = dict(structures=200_000, sources=10_000, monitors=10_000, materials=1000, mesh_refinements=10_000,
+                               frequency_points=1_000_000, signal_samples=1_000_000)
+# None outside the workbench server, 'fixed' under SERVER_LIMITS, 'memory' under memory admission.
+_SERVER = ContextVar('torchfdtd_server_limits', default=None)
 
 
 @contextmanager
-def server_limits():
+def server_limits(memory_admission=False):
     """Apply SERVER_LIMITS to every model validated and every scene admitted inside the block.
 
     The workbench server runs each request, its job threads and its modal worker
     process inside this block. A cap a submitted project carries can lower a
-    server limit but never raise it; the project itself is not changed.
+    server limit but never raise it; the project itself is not changed. With
+    memory_admission (torchfdtd serve --memory-admission) the block applies no
+    SERVER_LIMITS, so scenes are admitted by the memory estimate as on the Python API.
     """
-    token = _SERVER.set(True)
+    token = _SERVER.set('memory' if memory_admission else 'fixed')
     try:
         yield
     finally:
         _SERVER.reset(token)
 
 
+def server_admission():
+    """'fixed' or 'memory' inside server_limits(), otherwise None."""
+    return _SERVER.get()
+
+
 def server_limit(name):
-    """The server limit called name while server_limits() is active, otherwise None."""
-    return SERVER_LIMITS[name] if _SERVER.get() else None
+    """The server limit called name: SERVER_LIMITS under the fixed limits, the list ceiling of
+    MEMORY_ADMISSION_LIMITS (None for a size the memory estimate admits) under memory admission,
+    otherwise None."""
+    admission = _SERVER.get()
+    return SERVER_LIMITS[name] if admission == 'fixed' else MEMORY_ADMISSION_LIMITS.get(name) if admission == 'memory' else None
 
 
 def effective_limit(cap, name):
@@ -709,7 +726,8 @@ class ProjectLimits(Model):
 
     Resident execution is admitted by the memory estimate, which counts the
     monitors, sources and materials. The workbench server applies SERVER_LIMITS
-    whatever a submitted project carries (docs/SECURITY.md)."""
+    whatever a submitted project carries, or under memory admission the list
+    ceilings of MEMORY_ADMISSION_LIMITS and the memory estimate (docs/SECURITY.md)."""
     max_structures: int | None = Field(default=None, ge=1, strict=True)
     max_sources: int | None = Field(default=None, ge=1, strict=True)
     max_monitors: int | None = Field(default=None, ge=1, strict=True)
@@ -850,8 +868,8 @@ class Project(Model):
                     raise ValueError(f'{source.name}: source range exceeds the temporal Nyquist limit. Refine the mesh.')
         for monitor in self.monitors:
             monitor=self.resolved_monitor(monitor);spec = monitor.spectrum
-            from .spectra import frequency_samples
-            if monitor.enabled and spec.sampling != 'fft' and max(frequency_samples(spec)) >= .5/(dt*monitor.time_downsample):
+            from .spectra import highest_frequency
+            if monitor.enabled and spec.sampling != 'fft' and highest_frequency(spec) >= .5/(dt*monitor.time_downsample):
                 raise ValueError(f'{monitor.name}: requested spectrum exceeds the temporal Nyquist limit. Refine the mesh or increase the minimum wavelength.')
             if monitor.kind=='field' and r.dimension=='2d' and monitor.normal=='z':
                 raise ValueError('A 2D flux monitor must be x-normal or y-normal.')

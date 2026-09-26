@@ -1,0 +1,266 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260925T180940Z-g3-16-7595c18d",
+  "task": "G3-16",
+  "stage": "G3",
+  "task_title": "실제 shape/material 파라미터의 물리 gradient 수렴",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_gradient_mesh_slab.py D:/torchfdtd-rc-wt/tests/test_gradient_mesh.py D:/torchfdtd-rc-wt/tests/test_shape_gradients.py D:/torchfdtd-rc-wt/tests/test_differentiable_geometry.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G3-16.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-26T03:09:02.217561+09:00",
+  "recorded_at": "2026-09-25T18:09:40+00:00",
+  "source_commit": "2c5f3754c0470b2888d02462d6d2305a5098326a",
+  "source_commit_time": "2026-09-26T00:18:35+09:00",
+  "source_tree_sha256": "dad639f230d89a7ac13adff1861c15e0400ebec90e8bea3aef9fa30e188dc265",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "5d2fb7eac934221d9a04bce9d8128da4e53eba2a7c7ca76501b22f3dbb6337d1",
+      "head_sha256": "f4a33ca7d37f18eeba49b9ac33f9c2577e4192f5e32b79a11d679453a062575f"
+    },
+    {
+      "path": "docs/validation/g3/G3-05.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "57c2f728fcddc7cc21272b5204474769cf25a84b435292818e89860ac52b6d2b",
+      "head_sha256": "8254f678d2bfe2da2940e772e60030b237b372f639336e595e4b0dde64900d28"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "4afb7a5b9c89b6a4cf95251fa5ad505202e247bbdbc2ca7f0ab02d1f8d16a0aa",
+      "head_sha256": "3c29461e2b15d685eaabd7f347f42482f7ff6b87dc8e6c355019d2013bb691e7"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0a1db11fbc191d0de4cd05575810fcec35f52a1f7025b8ff4fa5075d874aadd9",
+      "head_sha256": "3d3557eb215787b4290a06b6333d6eb66db09fc4441da7c6cb01c5315fedbea8"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "00d57966e826b74da4d5947bfac27df491e3ab9b1935ea4305e2bb2e51d17b26",
+      "head_sha256": "1715d62d5815e18e340c05f367d302204012e3eb9c5c5a79fd196494f7d2516c"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd",
+  "package_path": "D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_gradient_mesh_slab.py": "003ea1ef73a470e983888e99f4d4368ab46e3a7b4e63ea6a72c5dfbf39acc4fb",
+    "tests/test_gradient_mesh.py": "5a83c28d7a126d871d819ac38fb112c4ec5791668a33d93e881055d7482248ee",
+    "tests/test_shape_gradients.py": "506522aa570c83d7b41cee03a176fa7e119d3e8ef7ea01fb8dda3941619a28f4",
+    "tests/test_differentiable_geometry.py": "09ee7ff51c9e005e02337cf8cdbf01eefeac02a007115ab7821deb671a07eee9"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "benchmarks/gradient_mesh.py",
+    "benchmarks/shape_gradient_polygon.py",
+    "docs/validation/shape_gradient_polygon_3060.json"
+  ],
+  "watch_sha256": {
+    "benchmarks/gradient_mesh.py": "0225e127b4c92bc9ca711ac337aae54fd1304af9cd64e0172fee15096ecac95c",
+    "benchmarks/shape_gradient_polygon.py": "98c121d387f855ab6437c806bb10d5614a602969d4f80f53864e920ee8d94c11",
+    "docs/validation/shape_gradient_polygon_3060.json": "0d35dafc62e71a6b8c39cc2d6868695c07df44b2706c2ec96967cc500d2f087e"
+  },
+  "fixture_path": "docs/validation/cases/G3-16_physical_parameter_gradients.json",
+  "fixture_sha256": "f8222fb55b672249ac8ad09fa630617b38b563db888b9a9297b6a497291cf884",
+  "acceptance_criteria_path": "docs/validation/cases/G3-16_physical_parameter_gradients.json",
+  "acceptance_criteria_sha256": "f8222fb55b672249ac8ad09fa630617b38b563db888b9a9297b6a497291cf884",
+  "case_first_commit": "5c0172da60d27ad0e5aa6906910ae256e53de1f6",
+  "case_first_commit_time": "2026-09-22T01:25:18+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "deterministic",
+  "precision": [
+    "float32 CUDA for the slab and polygon adjoints",
+    "float64 for the polygon reference differences and the geometry map checks"
+  ],
+  "backend": [
+    "cuda for the slab study",
+    "cpu for the record contract and geometry maps",
+    "cpu and cuda for the FP32 chain"
+  ],
+  "physics_configuration": {
+    "planar_slab": "tests/test_gradient_mesh_slab.py via benchmarks/gradient_mesh.py: 2D domain 8 x 0.24 um, y periodic, slab thickness 0.23 um at x = 0.013 um with permittivity 2.25 in air, wavelength 1.55 um, one-cycle plane pulse at x = -1.5 um, transmitted and reflected normalized-flux planes at x = +-0.8 um, physical time 90 fs (time_step_override so that steps times dt is exact), CPML 0.4 um, float32 CUDA, DifferentiableSolid.box through smooth_geometry_epsilon of width w, 8 checkpoints; joint refinement (mesh, width) = (0.04, 0.16), (0.02, 0.12), (0.01, 0.08) um then the regularization followup (0.01, 0.06) um with actual improvement steps of 0.001 um and 0.01 in epsilon; fixed-width controls (0.04, 0.12) and (0.01, 0.12) um; duration control 120 fs and PML control 0.5 um at (0.01, 0.06) um",
+    "polygon_grating": "tests/test_shape_gradients.py record docs/validation/shape_gradient_polygon_3060.json: pentagon of five off-grid vertices with epsilon 4 in a 4 x 0.6 um y-periodic domain, 60 fs, CPML 0.24 um, normalized transmitted flux at 1.55 um, checkpointed adjoint at (mesh, width) = (0.04, 0.08), (0.02, 0.08), (0.01, 0.08) and (0.02, 0.04), (0.01, 0.04) um in float32, float64 precision control, 90 fs duration control, 0.30 um PML control; reference central differences at mesh 0.005 um in float64 with steps 0.002 and 0.001 um for widths 0.08 and 0.04 um; sharp-interface forward runs (width 1e-9) at 0.01 and 0.005 um",
+    "geometry_maps": "tests/test_differentiable_geometry.py: box centre, rotation and epsilon, cylinder radius and height, background epsilon through the fill VJP (float64, no FDTD) and an FP32 geometry-to-FDTD adjoint and streamed chain on 18 steps",
+    "pml": "0.4 um in the slab study with a 0.5 um control; 0.24 um in the polygon record with a 0.30 um control"
+  },
+  "reference_method": "Closed-form Airy transmission T(d, epsilon) of an air/slab/air stack and its analytic derivatives dT/dd and dT/depsilon, checked against an independent complex-amplitude transfer formula by central differences (tests/test_gradient_mesh.py); for the polygon, central differences of the same regularised fill at a four times finer mesh (mesh convergence of the regularised derivative, not a sharp-interface shape derivative, as docs/SHAPE_GRADIENTS.md states).",
+  "observables": [
+    {
+      "name": "transmission_absolute_error",
+      "unit": "dimensionless",
+      "definition": "|T - T_airy| per case"
+    },
+    {
+      "name": "thickness_derivative_relative_error",
+      "unit": "dimensionless",
+      "definition": "|dT/dd - analytic| / |analytic| with the derivative per um"
+    },
+    {
+      "name": "epsilon_derivative_relative_error",
+      "unit": "dimensionless",
+      "definition": "|dT/depsilon - analytic| / |analytic|"
+    },
+    {
+      "name": "conservation_error",
+      "unit": "dimensionless",
+      "definition": "|T + R - 1| with R from the incident-subtracted reflected plane"
+    },
+    {
+      "name": "improvement",
+      "unit": "dimensionless",
+      "definition": "predicted, actual and analytic change of T for a gradient step of 0.001 um in thickness and 0.01 in epsilon"
+    },
+    {
+      "name": "control_changes",
+      "unit": "dimensionless",
+      "definition": "changes of T, dT/dd, dT/depsilon when the duration goes 90 to 120 fs or the PML 0.4 to 0.5 um"
+    },
+    {
+      "name": "polygon_gradient_relative_l2",
+      "unit": "dimensionless",
+      "definition": "relative L2 of the ten vertex derivatives against the fine-mesh float64 central differences"
+    }
+  ],
+  "acceptance_limits": {
+    "slab": {
+      "followup_gradient_relative_error_max": 0.03,
+      "fine_transmission_absolute_error_max": 0.005,
+      "conservation_max": 0.0005,
+      "joint_errors_strictly_decrease": true,
+      "followup_below_finest_joint": true,
+      "improvement_positive": true,
+      "fixed_width_discretization_converges": true,
+      "control_change_max": 1e-05,
+      "where": "benchmarks/gradient_mesh.py summarize, declared with docs/gradient_mesh.md"
+    },
+    "polygon": {
+      "fine_relative_l2_max": 0.03,
+      "reference_step_halving_max": 0.005,
+      "conservation_max": 0.0005,
+      "control_transmission_max": 0.0001,
+      "control_gradient_relative_max": 0.002,
+      "where": "docs/validation/shape_gradient_polygon_3060.json tolerances, checked by tests/test_shape_gradients.py"
+    },
+    "airy_oracle_self_check": {
+      "rtol": 2e-07,
+      "atol": 2e-09
+    },
+    "geometry_maps": {
+      "fill_vjp": {
+        "rtol": 2e-06,
+        "atol": 1e-07
+      },
+      "fp32_chain": {
+        "rtol": 0.0003
+      },
+      "streamed": {
+        "rtol": 0.0004
+      }
+    },
+    "source_of_limits": "completion_gates.json proposed_thresholds physical_parameter_gradient_relative_error_nonzero 0.03 for the slab followup and the polygon fine mesh; the slab's first 0.08 um width missed 3 percent (2.80 and 3.19 percent) and the 0.06 um followup is the declared fixture, kept in the record as the initial_validation note"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 19,
+    "passed": [
+      "tests/test_gradient_mesh_slab.py::test_slab_thickness_and_epsilon_derivatives_refine_toward_airy_with_controls",
+      "tests/test_gradient_mesh.py::test_airy_derivatives_against_complex_amplitude_transfer_formula",
+      "tests/test_gradient_mesh.py::test_refinement_preserves_physical_domain_time_source_and_absorber",
+      "tests/test_shape_gradients.py::test_polygon_fill_reduces_to_existing_sampling_and_voxelizer_is_bitwise_unchanged[yee]",
+      "tests/test_shape_gradients.py::test_polygon_fill_reduces_to_existing_sampling_and_voxelizer_is_bitwise_unchanged[cell]",
+      "tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference[cpu]",
+      "tests/test_shape_gradients.py::test_polygon_vjp_taylor_remainder_and_central_difference[cuda]",
+      "tests/test_shape_gradients.py::test_spline_outline_geometry_periodicity_and_control_point_gradient",
+      "tests/test_shape_gradients.py::test_polygon_and_spline_input_contracts",
+      "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint[cpu]",
+      "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint[cuda]",
+      "tests/test_shape_gradients.py::test_existing_solid_and_density_gradients_are_unchanged",
+      "tests/test_shape_gradients.py::test_shape_gradient_convergence_record_and_refinement_contract",
+      "tests/test_differentiable_geometry.py::test_independent_rotated_box_membership_yee_locations_and_overwrite",
+      "tests/test_differentiable_geometry.py::test_geometry_vjp_directional_derivative_all_parameters_and_noncontiguous_seed",
+      "tests/test_differentiable_geometry.py::test_geometry_keeps_only_parameters_and_axes_between_forward_and_backward",
+      "tests/test_differentiable_geometry.py::test_fp32_geometry_to_fdtd_adjoint_and_streamed_chain[cpu]",
+      "tests/test_differentiable_geometry.py::test_fp32_geometry_to_fdtd_adjoint_and_streamed_chain[cuda]",
+      "tests/test_differentiable_geometry.py::test_empty_geometry_material_gradient_and_invalid_input_contracts"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 37.124,
+    "suite_timestamp": "2026-09-26T03:09:02.217561+09:00"
+  },
+  "required_tests": [
+    "tests/test_gradient_mesh_slab.py::test_slab_thickness_and_epsilon_derivatives_refine_toward_airy_with_controls",
+    "tests/test_gradient_mesh.py::test_airy_derivatives_against_complex_amplitude_transfer_formula",
+    "tests/test_gradient_mesh.py::test_refinement_preserves_physical_domain_time_source_and_absorber",
+    "tests/test_shape_gradients.py::test_shape_gradient_convergence_record_and_refinement_contract",
+    "tests/test_shape_gradients.py::test_vertex_and_control_gradients_through_checkpointed_adjoint",
+    "tests/test_differentiable_geometry.py::test_geometry_vjp_directional_derivative_all_parameters_and_noncontiguous_seed",
+    "tests/test_differentiable_geometry.py::test_fp32_geometry_to_fdtd_adjoint_and_streamed_chain"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {},
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G3-16.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260925T180940Z-g3-16-7595c18d/junit.xml",
+      "sha256": "fa364450593f5e7c4248e170e72fe31cd961c28e4aceb0b22f6b70de3ed91754",
+      "bytes": 2929,
+      "original_path": ".local/tmp/junit/rerecord/G3-16.xml"
+    }
+  ],
+  "applicable_scope": "Re-recorded on the merged main tree after a shared test module changed in a merged branch. re-recorded on 2c5f3754c047 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260923T213745Z-g3-16-4c6f38b9",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

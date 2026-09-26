@@ -148,7 +148,8 @@
             "20260921T212112Z-g0-01-78c4f2c1",
             "20260923T015312Z-g0-01-b108faa3",
             "20260923T114705Z-g0-01-6b89b72b",
-            "20260923T175644Z-g0-01-9c309625"
+            "20260923T175644Z-g0-01-9c309625",
+            "20260925T152831Z-g0-01-32e611df"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -184,7 +185,8 @@
             "20260921T212114Z-g0-02-a4700f5a",
             "20260923T015324Z-g0-02-29e3f1fd",
             "20260923T114722Z-g0-02-2dbc5325",
-            "20260923T175700Z-g0-02-bca10398"
+            "20260923T175700Z-g0-02-bca10398",
+            "20260925T152840Z-g0-02-fc8c6833"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -225,7 +227,8 @@
             "20260921T212115Z-g0-03-9d45ae2d",
             "20260923T015331Z-g0-03-e83e4abe",
             "20260923T114734Z-g0-03-b899ef06",
-            "20260923T175710Z-g0-03-bef86964"
+            "20260923T175710Z-g0-03-bef86964",
+            "20260925T152847Z-g0-03-b285b07c"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -265,7 +268,8 @@
             "20260921T212305Z-g0-04-4a232a3c",
             "20260923T015546Z-g0-04-bfffa939",
             "20260923T115024Z-g0-04-03145ee1",
-            "20260923T180319Z-g0-04-6e4de0a5"
+            "20260923T180319Z-g0-04-6e4de0a5",
+            "20260925T152947Z-g0-04-ff462c40"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -306,7 +310,8 @@
             "20260921T212525Z-g0-05-d0b1a9fe",
             "20260923T015748Z-g0-05-513e4642",
             "20260923T115417Z-g0-05-7f98f66d",
-            "20260923T180703Z-g0-05-93dca35e"
+            "20260923T180703Z-g0-05-93dca35e",
+            "20260925T153048Z-g0-05-d3d746e0"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -355,7 +360,8 @@
             "20260921T140954Z-g1-01-202f68c3",
             "20260923T015817Z-g1-01-6cdecc7e",
             "20260923T115455Z-g1-01-dc61e590",
-            "20260923T180754Z-g1-01-72bedd87"
+            "20260923T180754Z-g1-01-72bedd87",
+            "20260925T153120Z-g1-01-46c3d71c"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -387,7 +393,8 @@
             "20260921T140958Z-g1-02-2afa31eb",
             "20260923T015845Z-g1-02-9d3855c4",
             "20260923T115524Z-g1-02-db3390fa",
-            "20260923T180837Z-g1-02-de5b921a"
+            "20260923T180837Z-g1-02-de5b921a",
+            "20260925T153149Z-g1-02-3955ab3e"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -421,7 +428,8 @@
             "20260921T140949Z-g1-03-72ef3ff6",
             "20260923T015906Z-g1-03-7b04fa07",
             "20260923T115551Z-g1-03-5b818885",
-            "20260923T180913Z-g1-03-45424e33"
+            "20260923T180913Z-g1-03-45424e33",
+            "20260925T153209Z-g1-03-979fa1dc"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -460,7 +468,8 @@
             "20260921T184733Z-g1-04-e39845b1",
             "20260923T020323Z-g1-04-6fcc44c4",
             "20260923T120014Z-g1-04-7f1e02b6",
-            "20260923T181355Z-g1-04-584298f5"
+            "20260923T181355Z-g1-04-584298f5",
+            "20260925T153623Z-g1-04-913aac0b"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -496,7 +505,8 @@
             "20260921T184737Z-g1-05-c820d464",
             "20260923T020737Z-g1-05-01697526",
             "20260923T120439Z-g1-05-3590f8ee",
-            "20260923T181843Z-g1-05-14e56c39"
+            "20260923T181843Z-g1-05-14e56c39",
+            "20260925T154054Z-g1-05-db0ca6c4"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -537,7 +547,10 @@
             "20260923T181907Z-g1-06-501f1f0e",
             "20260924T080108Z-g1-06-f6c3ea64",
             "20260924T083024Z-g1-06-3198adc0",
-            "20260925T064615Z-g1-06-4590b94f"
+            "20260925T064615Z-g1-06-4590b94f",
+            "20260925T154108Z-g1-06-a94accf6",
+            "20260925T212748Z-g1-06-4672b8c8",
+            "20260925T214433Z-g1-06-0559a2e3"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -592,7 +605,8 @@
             "20260921T164040Z-g2-01-2739bbf9",
             "20260923T020759Z-g2-01-343bace3",
             "20260923T120516Z-g2-01-da49bfe6",
-            "20260923T181928Z-g2-01-f7c8fd4d"
+            "20260923T181928Z-g2-01-f7c8fd4d",
+            "20260925T154120Z-g2-01-2c0e1af8"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -635,7 +649,8 @@
             "20260921T164046Z-g2-02-fc7ab609",
             "20260923T020808Z-g2-02-e9628a2b",
             "20260923T120535Z-g2-02-18f261f8",
-            "20260923T181944Z-g2-02-be64b4f1"
+            "20260923T181944Z-g2-02-be64b4f1",
+            "20260925T154132Z-g2-02-d83b965e"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -674,7 +689,8 @@
             "20260921T171604Z-g2-03-53e2e466",
             "20260923T020855Z-g2-03-311a4450",
             "20260923T120627Z-g2-03-54c6224d",
-            "20260923T182049Z-g2-03-e0055f47"
+            "20260923T182049Z-g2-03-e0055f47",
+            "20260925T154234Z-g2-03-86639748"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -712,7 +728,8 @@
             "20260921T171624Z-g2-04-481b2694",
             "20260923T020939Z-g2-04-452fe590",
             "20260923T120714Z-g2-04-77c92ee0",
-            "20260923T182145Z-g2-04-b060dd10"
+            "20260923T182145Z-g2-04-b060dd10",
+            "20260925T154351Z-g2-04-3df6ab34"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -749,7 +766,8 @@
             "20260921T212539Z-g2-05-d33352b2",
             "20260923T020954Z-g2-05-1e628e43",
             "20260923T120732Z-g2-05-ed21c58c",
-            "20260923T182213Z-g2-05-4a9fdb62"
+            "20260923T182213Z-g2-05-4a9fdb62",
+            "20260925T154402Z-g2-05-40c9ac1b"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -787,7 +805,8 @@
             "20260921T164116Z-g2-06-c78e74ff",
             "20260923T021009Z-g2-06-129bf256",
             "20260923T120748Z-g2-06-d6690446",
-            "20260923T182245Z-g2-06-44144ccb"
+            "20260923T182245Z-g2-06-44144ccb",
+            "20260925T154434Z-g2-06-febe46ed"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -845,7 +864,8 @@
             "20260921T172232Z-g3-01-05fb5cda",
             "20260923T021325Z-g3-01-9fcd1221",
             "20260923T121112Z-g3-01-19465f27",
-            "20260923T182721Z-g3-01-8cf720e9"
+            "20260923T182721Z-g3-01-8cf720e9",
+            "20260925T155003Z-g3-01-0e4faa11"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -894,7 +914,8 @@
             "20260921T170604Z-g3-02-ef141f60",
             "20260923T021749Z-g3-02-de257a36",
             "20260923T121544Z-g3-02-d3d5f429",
-            "20260923T183251Z-g3-02-e90cd4d2"
+            "20260923T183251Z-g3-02-e90cd4d2",
+            "20260925T155453Z-g3-02-348033c1"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -947,7 +968,8 @@
             "20260921T172237Z-g3-03-562cfaf5",
             "20260923T021859Z-g3-03-be04bedf",
             "20260923T121658Z-g3-03-cccdf4d1",
-            "20260923T183414Z-g3-03-563173dd"
+            "20260923T183414Z-g3-03-563173dd",
+            "20260925T155556Z-g3-03-2d6718f7"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -993,7 +1015,8 @@
             "20260921T181942Z-g3-04-b95d2106",
             "20260923T023409Z-g3-04-f7ba808f",
             "20260923T123204Z-g3-04-05d2c627",
-            "20260923T185232Z-g3-04-ee03b515"
+            "20260923T185232Z-g3-04-ee03b515",
+            "20260925T161237Z-g3-04-e349627f"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -1035,7 +1058,8 @@
             "20260921T181951Z-g3-05-8fafa59e",
             "20260923T033229Z-g3-05-c3f1ab53",
             "20260923T132959Z-g3-05-819bbad4",
-            "20260923T195353Z-g3-05-ac0e638c"
+            "20260923T195353Z-g3-05-ac0e638c",
+            "20260925T172351Z-g3-05-1cf30b22"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1097,7 +1121,8 @@
             "20260921T185058Z-g3-06-8e377c95",
             "20260923T033401Z-g3-06-03365bc5",
             "20260923T133125Z-g3-06-8f106f4b",
-            "20260923T195520Z-g3-06-28754df0"
+            "20260923T195520Z-g3-06-28754df0",
+            "20260925T172508Z-g3-06-4f792935"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1149,7 +1174,8 @@
             "20260921T172247Z-g3-07-fcf2441e",
             "20260923T033514Z-g3-07-0c405a29",
             "20260923T133246Z-g3-07-cbe45435",
-            "20260923T195646Z-g3-07-ab3662ea"
+            "20260923T195646Z-g3-07-ab3662ea",
+            "20260925T172613Z-g3-07-f4fdc0c6"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -1202,7 +1228,8 @@
             "20260921T192159Z-g3-08-12eb742b",
             "20260923T040705Z-g3-08-4c62d94c",
             "20260923T140629Z-g3-08-37e9bcf3",
-            "20260923T202923Z-g3-08-f1c2dff5"
+            "20260923T202923Z-g3-08-f1c2dff5",
+            "20260925T175618Z-g3-08-ad1182cd"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1271,7 +1298,8 @@
             "20260921T164916Z-g3-09-a7e7b272",
             "20260923T040723Z-g3-09-ad9ce200",
             "20260923T140645Z-g3-09-1415252b",
-            "20260923T212310Z-g3-09-e55a1b01"
+            "20260923T212310Z-g3-09-e55a1b01",
+            "20260925T175629Z-g3-09-b83f2635"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1331,7 +1359,8 @@
             "20260921T164946Z-g3-10-ea83b20f",
             "20260923T041117Z-g3-10-c017582d",
             "20260923T141102Z-g3-10-3d8a3f19",
-            "20260923T212720Z-g3-10-f3da775f"
+            "20260923T212720Z-g3-10-f3da775f",
+            "20260925T180000Z-g3-10-7adda5e8"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1387,7 +1416,8 @@
             "20260921T165000Z-g3-11-74c48d39",
             "20260923T041150Z-g3-11-a0a719bd",
             "20260923T141130Z-g3-11-0f66eb2a",
-            "20260923T212746Z-g3-11-1121cd71"
+            "20260923T212746Z-g3-11-1121cd71",
+            "20260925T180016Z-g3-11-753e7ab7"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1449,7 +1479,8 @@
             "20260921T165015Z-g3-12-562acc59",
             "20260923T041443Z-g3-12-3e345f17",
             "20260923T141435Z-g3-12-d81a898c",
-            "20260923T213042Z-g3-12-9d50987d"
+            "20260923T213042Z-g3-12-9d50987d",
+            "20260925T180304Z-g3-12-01ae90bc"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1499,7 +1530,8 @@
             "20260921T181945Z-g3-13-ecfade50",
             "20260923T041829Z-g3-13-c1d509fa",
             "20260923T141810Z-g3-13-8880e833",
-            "20260923T213445Z-g3-13-72cea131"
+            "20260923T213445Z-g3-13-72cea131",
+            "20260925T180712Z-g3-13-f2220d44"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -1569,7 +1601,8 @@
             "20260921T185333Z-g3-14-1bd80f8e",
             "20260923T041941Z-g3-14-8d297356",
             "20260923T141920Z-g3-14-daa944f0",
-            "20260923T213556Z-g3-14-ecf4b06b"
+            "20260923T213556Z-g3-14-ecf4b06b",
+            "20260925T180814Z-g3-14-4e944236"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1641,7 +1674,8 @@
             "20260921T190441Z-g3-15-ca5f7da9",
             "20260923T042029Z-g3-15-df51ddec",
             "20260923T142013Z-g3-15-20b354d0",
-            "20260923T213649Z-g3-15-7368e5ea"
+            "20260923T213649Z-g3-15-7368e5ea",
+            "20260925T180857Z-g3-15-38db1a43"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1699,7 +1733,8 @@
             "20260921T190545Z-g3-16-7cf64e2d",
             "20260923T042123Z-g3-16-6f5198d9",
             "20260923T142107Z-g3-16-afd7ad6e",
-            "20260923T213745Z-g3-16-4c6f38b9"
+            "20260923T213745Z-g3-16-4c6f38b9",
+            "20260925T180940Z-g3-16-7595c18d"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1750,7 +1785,8 @@
             "20260921T210000Z-g3-17-dc84d85f",
             "20260923T042135Z-g3-17-3c8ac8b1",
             "20260923T142121Z-g3-17-ce8e7971",
-            "20260923T213754Z-g3-17-de4fa8eb"
+            "20260923T213754Z-g3-17-de4fa8eb",
+            "20260925T180946Z-g3-17-339f39b7"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -1803,7 +1839,8 @@
             "20260923T042153Z-g4-01-f0212da8",
             "20260923T142145Z-g4-01-425ce442",
             "20260923T213812Z-g4-01-f3e0cfde",
-            "20260925T145114Z-g4-01-3612e39b"
+            "20260925T145114Z-g4-01-3612e39b",
+            "20260925T181003Z-g4-01-34391cbe"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -1856,7 +1893,8 @@
             "20260921T163724Z-g4-02-b5c11b4f",
             "20260923T042229Z-g4-02-5acbf56f",
             "20260923T142227Z-g4-02-69c5dfbc",
-            "20260923T213850Z-g4-02-e1a17660"
+            "20260923T213850Z-g4-02-e1a17660",
+            "20260925T181033Z-g4-02-2a8fcb7a"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -1895,7 +1933,8 @@
             "20260921T163744Z-g4-03-5f80ac67",
             "20260923T042254Z-g4-03-3e636cc3",
             "20260923T142248Z-g4-03-3fc0fde3",
-            "20260923T213916Z-g4-03-76bb26f3"
+            "20260923T213916Z-g4-03-76bb26f3",
+            "20260925T181052Z-g4-03-bcf97791"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -1938,7 +1977,8 @@
             "20260921T163757Z-g4-04-7e1cdb0f",
             "20260923T042326Z-g4-04-5d1fc9c6",
             "20260923T142320Z-g4-04-c438e262",
-            "20260923T213956Z-g4-04-c280e637"
+            "20260923T213956Z-g4-04-c280e637",
+            "20260925T181122Z-g4-04-63d67c63"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -1984,7 +2024,8 @@
             "20260921T212749Z-g4-05-d9c1df76",
             "20260923T042658Z-g4-05-f04e7ecb",
             "20260923T142650Z-g4-05-e0edcc9e",
-            "20260923T214253Z-g4-05-e0a9e8d3"
+            "20260923T214253Z-g4-05-e0a9e8d3",
+            "20260925T181227Z-g4-05-b38e7dd0"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2030,7 +2071,8 @@
             "20260923T042713Z-g4-06-61d814f9",
             "20260923T142707Z-g4-06-c173d093",
             "20260923T214307Z-g4-06-77b53ff7",
-            "20260924T092226Z-g4-06-2028458c"
+            "20260924T092226Z-g4-06-2028458c",
+            "20260925T181236Z-g4-06-9f842377"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2089,7 +2131,8 @@
             "20260921T200923Z-g5-01-d42add9e",
             "20260923T042926Z-g5-01-62b6dd06",
             "20260923T142913Z-g5-01-de221da2",
-            "20260923T221312Z-g5-01-f5803427"
+            "20260923T221312Z-g5-01-f5803427",
+            "20260925T181430Z-g5-01-b18d9585"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2132,7 +2175,8 @@
             "20260921T200934Z-g5-02-e1aa0e9d",
             "20260923T042947Z-g5-02-cbb37667",
             "20260923T142937Z-g5-02-2f54180c",
-            "20260923T221324Z-g5-02-b714b93d"
+            "20260923T221324Z-g5-02-b714b93d",
+            "20260925T181444Z-g5-02-bf6b6450"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2175,7 +2219,8 @@
             "20260921T200952Z-g5-03-8f43e40b",
             "20260923T043008Z-g5-03-625fdc11",
             "20260923T143001Z-g5-03-546d2aec",
-            "20260923T221340Z-g5-03-a578dc72"
+            "20260923T221340Z-g5-03-a578dc72",
+            "20260925T181502Z-g5-03-68e4ef53"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2217,7 +2262,8 @@
             "20260921T201010Z-g5-04-c3e8d3fe",
             "20260923T043056Z-g5-04-02724d67",
             "20260923T143047Z-g5-04-1f022e98",
-            "20260923T221415Z-g5-04-2bba1874"
+            "20260923T221415Z-g5-04-2bba1874",
+            "20260925T181537Z-g5-04-c77ecb32"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2260,7 +2306,8 @@
             "20260922T104607Z-g5-05-f4da14b2",
             "20260923T043111Z-g5-05-e3c7efa3",
             "20260923T143058Z-g5-05-ae197e34",
-            "20260923T221422Z-g5-05-bd1a2304"
+            "20260923T221422Z-g5-05-bd1a2304",
+            "20260925T181543Z-g5-05-83821e73"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -2298,7 +2345,8 @@
             "20260922T104613Z-g5-06-8a029692",
             "20260923T043127Z-g5-06-5f8f80d2",
             "20260923T143105Z-g5-06-b6eb1f3c",
-            "20260923T221428Z-g5-06-66a78577"
+            "20260923T221428Z-g5-06-66a78577",
+            "20260925T181550Z-g5-06-f4068853"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -2345,7 +2393,8 @@
             "20260921T204924Z-g5-07-b25fc657",
             "20260923T043624Z-g5-07-32449d89",
             "20260923T143554Z-g5-07-918d02ed",
-            "20260923T221929Z-g5-07-0059441c"
+            "20260923T221929Z-g5-07-0059441c",
+            "20260925T182026Z-g5-07-df4bcf0d"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2386,7 +2435,8 @@
             "20260921T203532Z-g5-08-bbf1867e",
             "20260923T043828Z-g5-08-ac371944",
             "20260923T143802Z-g5-08-e2e5cd35",
-            "20260923T222133Z-g5-08-f224db63"
+            "20260923T222133Z-g5-08-f224db63",
+            "20260925T182219Z-g5-08-bcc4fbbd"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2430,7 +2480,8 @@
             "20260921T203815Z-g5-09-939acc1a",
             "20260923T044105Z-g5-09-5f476b73",
             "20260923T144036Z-g5-09-8468e676",
-            "20260923T222349Z-g5-09-8865c95f"
+            "20260923T222349Z-g5-09-8865c95f",
+            "20260925T182433Z-g5-09-f060976e"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2470,7 +2521,8 @@
             "20260921T203823Z-g5-10-0fade0c0",
             "20260923T044114Z-g5-10-f85f72fe",
             "20260923T144050Z-g5-10-a56357bd",
-            "20260923T222355Z-g5-10-99edb19d"
+            "20260923T222355Z-g5-10-99edb19d",
+            "20260925T182439Z-g5-10-9758e548"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2524,7 +2576,8 @@
             "20260921T195534Z-g6-01-bdd21c2c",
             "20260923T044129Z-g6-01-b59302cf",
             "20260923T144110Z-g6-01-899faccb",
-            "20260923T222407Z-g6-01-114c1af7"
+            "20260923T222407Z-g6-01-114c1af7",
+            "20260925T182450Z-g6-01-282c19ac"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2565,7 +2618,8 @@
             "20260921T195548Z-g6-02-9b5a95d6",
             "20260923T044144Z-g6-02-d106078d",
             "20260923T144130Z-g6-02-df8a6e4f",
-            "20260923T222417Z-g6-02-3f663e29"
+            "20260923T222417Z-g6-02-3f663e29",
+            "20260925T182500Z-g6-02-23218c0b"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2602,7 +2656,8 @@
             "20260921T195559Z-g6-03-b314c028",
             "20260923T044224Z-g6-03-054a0040",
             "20260923T144216Z-g6-03-4ba8cff8",
-            "20260923T222451Z-g6-03-3a35e50c"
+            "20260923T222451Z-g6-03-3a35e50c",
+            "20260925T182532Z-g6-03-68af24a9"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2644,7 +2699,8 @@
             "20260921T195524Z-g6-04-cd77e84a",
             "20260923T044234Z-g6-04-2f397d8e",
             "20260923T144228Z-g6-04-f20bd916",
-            "20260923T222457Z-g6-04-3241b7e8"
+            "20260923T222457Z-g6-04-3241b7e8",
+            "20260925T182538Z-g6-04-87af450e"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -2694,7 +2750,8 @@
             "20260923T044411Z-g6-05-70abffd8",
             "20260923T052003Z-g6-05-a93e7a97",
             "20260923T144401Z-g6-05-a68f0a36",
-            "20260923T222623Z-g6-05-c203fd5c"
+            "20260923T222623Z-g6-05-c203fd5c",
+            "20260925T182701Z-g6-05-7ef3e1df"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2732,7 +2789,8 @@
             "20260923T044544Z-g6-06-24f1f247",
             "20260923T052141Z-g6-06-5bb897b9",
             "20260923T144533Z-g6-06-88b66961",
-            "20260923T222749Z-g6-06-e2218845"
+            "20260923T222749Z-g6-06-e2218845",
+            "20260925T182824Z-g6-06-c85a9f8a"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2773,7 +2831,8 @@
             "20260921T202810Z-g6-07-e5631996",
             "20260923T050737Z-g6-07-a39e1eb7",
             "20260923T150735Z-g6-07-59a56247",
-            "20260923T224837Z-g6-07-af85816a"
+            "20260923T224837Z-g6-07-af85816a",
+            "20260925T184831Z-g6-07-041c7db3"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2811,7 +2870,8 @@
             "20260921T195609Z-g6-08-374a45a0",
             "20260923T050756Z-g6-08-df947a4f",
             "20260923T150754Z-g6-08-7959b749",
-            "20260923T224847Z-g6-08-27705f46"
+            "20260923T224847Z-g6-08-27705f46",
+            "20260925T184840Z-g6-08-4bc4d0b5"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -2893,7 +2953,8 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_coupler.py -k \"not test_full_\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-03.xml"
           ],
           "actual_test_commands": [
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_coupler.py -k \"not test_full_\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-03.xml"
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_coupler.py -k \"not test_full_\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-03.xml",
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_g7_coupler.py -k \"not test_full_\" --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G7-03.xml"
           ],
           "required_tests": [
             "tests/test_g7_coupler.py::test_case_declaration_matches_the_workflow_constants",
@@ -2917,7 +2978,8 @@
             "tests/test_g7_coupler.py::test_recorded_run_meets_the_criterion[g_mesh]"
           ],
           "evidence": [
-            "20260925T130822Z-g7-03-f5260d92"
+            "20260925T130822Z-g7-03-f5260d92",
+            "20260925T185002Z-g7-03-353beb5b"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -2958,14 +3020,16 @@
           ],
           "actual_test_commands": [
             "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-04.xml",
-            "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G7-04.xml"
+            "$env:TORCHFDTD_G7_FULL='1'; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_solvers.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G7-04.xml",
+            "$env:TORCHFDTD_G7_FULL='1'; D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_g7_solvers.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G7-04.xml"
           ],
           "required_tests": [
             "tests/test_g7_solvers.py"
           ],
           "evidence": [
             "20260924T140733Z-g7-04-a1b4bd63",
-            "20260925T054137Z-g7-04-087c885b"
+            "20260925T054137Z-g7-04-087c885b",
+            "20260925T185015Z-g7-04-0621a753"
           ],
           "blocker": null,
           "scope_change_approval": {
@@ -3042,7 +3106,8 @@
             "20260921T212803Z-g8-01-21814658",
             "20260923T050811Z-g8-01-47f042fc",
             "20260923T150820Z-g8-01-333cab45",
-            "20260923T224857Z-g8-01-2e733767"
+            "20260923T224857Z-g8-01-2e733767",
+            "20260925T185027Z-g8-01-cfa5ea5b"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3083,7 +3148,8 @@
             "20260921T192908Z-g8-02-76c35baa",
             "20260923T050824Z-g8-02-aefb6942",
             "20260923T150845Z-g8-02-c067cfaa",
-            "20260923T224908Z-g8-02-882d22ba"
+            "20260923T224908Z-g8-02-882d22ba",
+            "20260925T185039Z-g8-02-5f7ca728"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3127,7 +3193,8 @@
             "20260921T192925Z-g8-03-25de93db",
             "20260923T050835Z-g8-03-9114813f",
             "20260923T150854Z-g8-03-c49426ec",
-            "20260923T224914Z-g8-03-39b0bae7"
+            "20260923T224914Z-g8-03-39b0bae7",
+            "20260925T185045Z-g8-03-8a90df49"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3175,7 +3242,8 @@
             "20260921T192929Z-g8-04-705af196",
             "20260923T050850Z-g8-04-9cab3e41",
             "20260923T150911Z-g8-04-e63a91d7",
-            "20260923T224924Z-g8-04-e8e32bbf"
+            "20260923T224924Z-g8-04-e8e32bbf",
+            "20260925T185055Z-g8-04-a14fd673"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3222,7 +3290,8 @@
             "20260923T150929Z-g8-05-df10799c",
             "20260923T224933Z-g8-05-e43c34bc",
             "20260924T080115Z-g8-05-f3144c36",
-            "20260924T083030Z-g8-05-5095f3c9"
+            "20260924T083030Z-g8-05-5095f3c9",
+            "20260925T185103Z-g8-05-0ad59cae"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3269,7 +3338,8 @@
             "20260923T150958Z-g8-06-c67e2b4b",
             "20260923T224943Z-g8-06-7de9aa28",
             "20260924T080123Z-g8-06-b678cc04",
-            "20260924T083038Z-g8-06-36787558"
+            "20260924T083038Z-g8-06-36787558",
+            "20260925T185114Z-g8-06-b9837806"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3315,7 +3385,8 @@
             "20260923T151019Z-g8-07-3a10d8bd",
             "20260923T224951Z-g8-07-b1345db8",
             "20260924T080129Z-g8-07-a0b05bd1",
-            "20260924T083045Z-g8-07-be20b6ec"
+            "20260924T083045Z-g8-07-be20b6ec",
+            "20260925T185122Z-g8-07-9666971b"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3373,7 +3444,8 @@
             "20260923T050949Z-g9-01-266acf6c",
             "20260923T085146Z-g9-01-a7b6ed12",
             "20260923T151044Z-g9-01-aa27ac1c",
-            "20260923T225017Z-g9-01-37fad064"
+            "20260923T225017Z-g9-01-37fad064",
+            "20260925T185140Z-g9-01-f668e584"
           ],
           "blocker": null,
           "scope_change_approval": null
@@ -3418,7 +3490,8 @@
             "20260922T064526Z-g9-02-3d2ecc54",
             "20260923T051021Z-g9-02-52c4b660",
             "20260923T151127Z-g9-02-cc54d6f5",
-            "20260923T225107Z-g9-02-626de86f"
+            "20260923T225107Z-g9-02-626de86f",
+            "20260925T185202Z-g9-02-c3f5ecdd"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3448,14 +3521,18 @@
           ],
           "actual_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-03.xml",
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-03.xml"
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-03.xml",
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_release_review.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-03.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_release_review.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-03.xml"
           ],
           "required_tests": [
             "tests/test_release_review.py"
           ],
           "evidence": [
             "20260924T083013Z-g9-03-65e0cdba",
-            "20260925T064631Z-g9-03-d91c825e"
+            "20260925T064631Z-g9-03-d91c825e",
+            "20260925T185211Z-g9-03-1f054837",
+            "20260925T214448Z-g9-03-cc9b3082"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3503,7 +3580,8 @@
             "20260923T052154Z-g9-04-b221e298",
             "20260923T080205Z-g9-04-03b0495b",
             "20260923T151152Z-g9-04-a75f3c5b",
-            "20260923T225117Z-g9-04-ec7eb9cb"
+            "20260923T225117Z-g9-04-ec7eb9cb",
+            "20260925T185220Z-g9-04-6cd780b0"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3567,7 +3645,8 @@
           "actual_test_commands": [
             "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-b2f060510b0c.xml",
             "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-47bd8ace3e69.xml",
-            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-3338a4b9a3a9.xml"
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-3338a4b9a3a9.xml",
+            "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe scripts/run_suite.py release-full --ignore=tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/release-full-rtx3060-2d7cc517b07c.xml"
           ],
           "required_tests": [
             "tests/test_rerecord_gates.py"
@@ -3575,7 +3654,8 @@
           "evidence": [
             "20260923T074741Z-g9-06-47bc6631",
             "20260923T162502Z-g9-06-c90ef9ab",
-            "20260923T235752Z-g9-06-b92d9083"
+            "20260923T235752Z-g9-06-b92d9083",
+            "20260925T195834Z-g9-06-621431b7"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3638,7 +3718,12 @@
             "20260925T054244Z-g9-07-63e622d2",
             "20260925T064751Z-g9-07-2c34c28a",
             "20260925T131022Z-g9-07-636aa182",
-            "20260925T145406Z-g9-07-2ee9e7ee"
+            "20260925T145406Z-g9-07-2ee9e7ee",
+            "20260925T200900Z-g9-07-ab1b146e",
+            "20260925T212917Z-g9-07-53b40ae9",
+            "20260925T214605Z-g9-07-5db9df53",
+            "20260925T221033Z-g9-07-8eccc778",
+            "20260926T001219Z-g9-07-ec7ab862"
           ],
           "blocker": null,
           "scope_change_approval": null,

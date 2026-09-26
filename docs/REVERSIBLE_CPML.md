@@ -106,6 +106,10 @@ for iteration in range(2):
 
 For CUDA, place both material tensors on the same CUDA device and request the corresponding device in `plan`. The actual input device selects execution. GPU execution requires the supported Torch/CuPy environment. Planning is repeated during execution, so a previous successful plan does not reserve physical memory.
 
+## Forward-only calls
+
+A call that cannot request a gradient runs forward only: under `torch.no_grad()` or `torch.inference_mode()`, or with an `epsilon` that does not require gradients. It performs the recorded forward's field updates, source injections, observations and DFT blocks in the same order on the same CPU or fused CUDA path, so its signals and spectra are bitwise equal to those of the recorded forward. It keeps no boundary trace or terminal interior copy and computes no reconstruction scale, so its result has no adjoint. The report then has `forward_only=True`, `sampled_forward_peak=None`, `sampled_forward_l2=None` and `terminal_copies=0`. Both material maps are validated as on the recorded path, and the observations and the final E and H fields must be finite. Admission is unchanged: the reservation still includes the trace and the terminal copies. Use `ReversibleCPMLOptions(forward_only="never")` to record every call, for example to read the forward drift scales without requesting a gradient.
+
 ## Online fixed-plane spectra
 
 `ReversibleCPMLPlaneSimulation` returns the same monitor-ID mapping of six-component `DifferentiablePlaneResult` objects as the checkpointed plane API. Plane positions, interpolation maps, quadrature, frequencies, and source settings remain fixed. Construction builds host quadrature/interpolation maps before `plan()`. Planning and execution charge their layout allowance, but construction is not allocation-free.
@@ -235,6 +239,7 @@ With `N` grid cells, transverse area `A = Nx*Ny`, and `T` timesteps, storage is 
 | `trace_storage` | `"device"` or `"cpu"`, default `"device"` | Store boundary history on the field device or in CPU memory. |
 | `trace_transfers` | `"sync"` or `"async"`, default `"sync"` | Async requires CUDA execution and CPU trace storage. |
 | `trace_chunk_steps` | Integer 1 through 1024, default `32` | Requested async chunk length K, effectively min(K,T). |
+| `forward_only` | `"auto"` or `"never"`, default `"auto"` | `"auto"` runs a call that cannot request a gradient forward only (below). `"never"` records the tape on every call. |
 
 On CPU, both storage choices use host memory and require synchronous transfers. On CUDA, CPU trace storage can use synchronous copies or an asynchronous two-slot transport. The asynchronous mode owns two pinned host chunks, two device chunks, eight reusable events, and one copy stream in addition to the full pageable host archive. Requested chunk length K is clamped to T, so a short run does not reserve unused full-length chunks. Field packing and backward consumption must run on the CUDA compute stream captured during forward. A different-stream backward is rejected. Error cleanup drains the original streams. Sequential retained backward opens a fresh reverse reader after resetting the solver state. A rejected stream call can be retried on the original stream with a retained graph, but a failed transport is not a promise of arbitrary CUDA-error recovery. Run a new forward after a transport failure. This API creates no SSD archive, and asynchronous trace transfers do not make the fields spatially streamed or establish a performance gain.
 

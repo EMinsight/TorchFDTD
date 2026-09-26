@@ -50,7 +50,7 @@ def test_serve_binds_loopback_by_default_and_refuses_other_hosts(monkeypatch):
     import uvicorn
     calls = []
     monkeypatch.setattr(uvicorn, 'run', lambda app, **kw: calls.append(kw))
-    monkeypatch.setattr(server, 'create_app', lambda: object())
+    monkeypatch.setattr(server, 'create_app', lambda **kwargs: object())
     monkeypatch.setattr(sys, 'argv', ['torchfdtd', 'serve', '--port', '8123'])
     cli.main()
     assert calls == [{'host': '127.0.0.1', 'port': 8123}]

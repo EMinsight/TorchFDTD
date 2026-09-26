@@ -1,0 +1,337 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\TorchFDTD\\.local\\worktrees\\rel-0170\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/ui/g8-journey.spec.js",
+      "tests/ui/g8-editing.spec.js",
+      "--reporter=json"
+    ],
+    "configFile": "D:\\TorchFDTD\\.local\\worktrees\\rel-0170\\playwright.config.js",
+    "rootDir": "D:/TorchFDTD/.local/worktrees/rel-0170/tests/ui",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/TorchFDTD/.local/worktrees/rel-0170/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "D:/TorchFDTD/.local/worktrees/rel-0170/tests/ui",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "g8-editing.spec.js",
+      "file": "g8-editing.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "undo and redo restore edits and the history is bounded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 41109,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-26T00:05:18.591Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fcb8981e010808e4c662-430bf8aead8a5ff80637",
+          "file": "g8-editing.spec.js",
+          "line": 19,
+          "column": 1
+        },
+        {
+          "title": "multi-select, duplicate all, copy, paste and delete all",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2406,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-26T00:05:59.845Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fcb8981e010808e4c662-59c23486703e86d7e002",
+          "file": "g8-editing.spec.js",
+          "line": 47,
+          "column": 1
+        },
+        {
+          "title": "autosave to browser storage and recovery after reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2263,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-26T00:06:02.265Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fcb8981e010808e4c662-94c672d0632682e8007a",
+          "file": "g8-editing.spec.js",
+          "line": 76,
+          "column": 1
+        },
+        {
+          "title": "the saved project carries a monotonic revision and a content hash the server confirms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2152,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-26T00:06:04.541Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fcb8981e010808e4c662-b8723f969bcd6383b3f0",
+          "file": "g8-editing.spec.js",
+          "line": 93,
+          "column": 1
+        },
+        {
+          "title": "non-finite and out-of-range values are refused with a visible message",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1583,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-26T00:06:06.705Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fcb8981e010808e4c662-2956e9d78ea2dad92100",
+          "file": "g8-editing.spec.js",
+          "line": 116,
+          "column": 1
+        },
+        {
+          "title": "results are marked stale when the plan changes after a run and current again when it is restored",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7279,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-26T00:06:08.300Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fcb8981e010808e4c662-b12cb4e4f543a4ce4909",
+          "file": "g8-editing.spec.js",
+          "line": 145,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "g8-journey.spec.js",
+      "file": "g8-journey.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "workbench journey: GDS import, materials, source, boundaries, mesh preview, preflight, queue, cancel, results, exports",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13073,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [
+                    {
+                      "buffer": ""
+                    }
+                  ],
+                  "retry": 0,
+                  "startTime": "2026-09-26T00:06:15.618Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "journey-timing",
+                      "contentType": "application/json",
+                      "body": "eyJnZHNfaW1wb3J0IjoyMDQyLCJtYXRlcmlhbHMiOjI1MTcsInNvdXJjZV9tb25pdG9yIjozNDkyLCJib3VuZGFyaWVzIjo0Mjg3LCJtZXNoX3ByZXZpZXciOjQ3NTMsInByZWZsaWdodCI6NTAyNCwiY2FuY2VsIjo2MjgwLCJyZXJ1biI6MTE0NDgsInJlc3VsdHNfb3ZlcmxheSI6MTE2NTgsImV4cG9ydHMiOjEyOTg0LCJ0b3RhbF9tcyI6MTI5ODR9"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a2e9ede1f1bc9f292381-5214331b7990f2d2107c",
+          "file": "g8-journey.spec.js",
+          "line": 7,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-26T00:05:17.135Z",
+    "duration": 71673.86,
+    "expected": 7,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

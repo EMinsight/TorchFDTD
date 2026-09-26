@@ -28,9 +28,11 @@ near `L = sqrt(T)`. At T = 10,000 this is approximately 200 field states or
 existing in-place fused kernel is not an adjoint implementation and cannot
 supply missing kernel derivatives.
 
-The workbench server still rejects resident grids above 8,000,000 cells; the
-Python API admits them by the resident reservation against the free device and
-host memory ([EXECUTION_MODES.md](EXECUTION_MODES.md#size-limits)). The separate
+With its fixed limits, the default, the workbench server still rejects
+resident grids above 8,000,000 cells; the Python API and a server started with
+`torchfdtd serve --memory-admission` admit them by the resident reservation
+against the free device and host memory
+([EXECUTION_MODES.md](EXECUTION_MODES.md#size-limits)). The separate
 [budgeted resident adjoint](BUDGETED_RESIDENT.md) now requires an explicit byte
 budget and checks device/host workspace, checkpoint tiers and CUDA indices.
 Actual 256-cubed dielectric and 208-cubed ADE runs pass short forward/VJP checks.

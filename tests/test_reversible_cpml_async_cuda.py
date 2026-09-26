@@ -114,7 +114,8 @@ def test_public_async_forward_failure_drains_and_backward_failure_can_retry(monk
     monkeypatch.setattr(transport.AsyncBoundaryTrace, 'close', record_close)
     monkeypatch.setattr(public, '_advance_recorded', fail_forward)
     with pytest.raises(RuntimeError, match='injected forward failure'):
-        model(base, fixed_epsilon=fixed)
+        # A differentiable input: a no-grad call would run forward only, without a transport.
+        model(base.clone().requires_grad_(), fixed_epsilon=fixed)
     assert closed == [('closed', 0)]
     monkeypatch.setattr(public, '_advance_recorded', advance)
     parameter = base.clone().requires_grad_()
