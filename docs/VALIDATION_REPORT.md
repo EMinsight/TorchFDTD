@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 62 | 14 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 62 | 20 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 59 | 17 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 59 | 23 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -129,8 +129,8 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G8-01 | 기존 Project JSON/NPZ compatibility와 schema migration을 시험한다 | IMPLEMENTED | VERIFIED | `20260925T185027Z-g8-01-cfa5ea5b` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
 | G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260925T185039Z-g8-02-5f7ca728` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
-| G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260925T185045Z-g8-03-8a90df49` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
-| G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260925T185055Z-g8-04-a14fd673` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260925T185045Z-g8-03-8a90df49` | `2c5f3754c047` | FAIL | STALE: watched file missing: torchfdtd/web/assets/index-BMhgsHC5.js |
+| G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260925T185055Z-g8-04-a14fd673` | `2c5f3754c047` | FAIL | STALE: watched file missing: torchfdtd/web/assets/index-BMhgsHC5.js |
 | G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260925T185103Z-g8-05-0ad59cae` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: README.md |
 | G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260925T185114Z-g8-06-b9837806` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: README.md |
 | G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260925T185122Z-g8-07-9666971b` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: README.md |
@@ -139,12 +139,12 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 
 | Task | Title | Implementation | Verification | Newest run | Source commit | Judgement | Reason |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260925T185140Z-g9-01-f668e584` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit 2c5f3754c047 alone |
+| G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260925T185140Z-g9-01-f668e584` | `2c5f3754c047` | FAIL | STALE: test source changed since the run: tests/test_server_security.py |
 | G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260925T185202Z-g9-02-c3f5ecdd` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: docs/THIRD_PARTY_NOTICES.md |
 | G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260925T214448Z-g9-03-cc9b3082` | `70c7bd788fa6` | FAIL | STALE: watched file changed since the run: README.md |
 | G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260925T185220Z-g9-04-6cd780b0` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | NOT_ASSESSED | NOT_RUN | none | none | FAIL | verification_state is NOT_RUN |
-| G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260925T195834Z-g9-06-621431b7` | `2d7cc517b07c` | FAIL | STALE: test source changed since the run: tests/test_readme_measurements.py |
+| G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260925T195834Z-g9-06-621431b7` | `2d7cc517b07c` | FAIL | STALE: test source changed since the run: tests/test_mode_network_service.py |
 | G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | SELF | none | none | self | this report's own gate, recorded after the render; judge it with scripts/check_release_gates.py |
 
 ### H1 실제 단일 문제 multi-GPU (HPC, P1)
