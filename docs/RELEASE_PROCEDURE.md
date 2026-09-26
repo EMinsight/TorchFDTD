@@ -154,8 +154,11 @@ For the 0.15.0 candidate the owner accepted the RTX 3060 run alone
 (2026-09-23), because the RTX 5880 Ada host was committed to other work; the
 G9-06 scope line of that candidate says so. The 0.16.0 candidate was recorded
 the same way, the RTX 5880 Ada host remaining committed to other work by the
-owner's instruction. The two-host run below remains the procedure for later
-candidates.
+owner's instruction. For the 1.0.0 round the RTX 5880 remains reserved for
+other work under the owner's 2026-09-26 handoff. The full RTX 3060 round is
+therefore the recorded workstation scope. The two-host run below remains the
+procedure when both hosts are available. This does not remove the separate
+two-GPU HPC acceptance requirement.
 
 On the RTX 5880 Ada host (platform record
 `docs/validation/platforms/rtx5880-ada-win11-remote.json`; rewrite it with

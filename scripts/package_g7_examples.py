@@ -12,6 +12,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 FILES = (
+    'LICENSE', 'THIRD_PARTY_NOTICES.txt',
     'examples/design_mode_coupler.py',
     'examples/meep_comparison/metagrating/geometry.json',
     'examples/meep_comparison/metalens/geometry.json',
