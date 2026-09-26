@@ -316,7 +316,12 @@ def load_records(directory):
 def rejudge(directory):
     """Recompute every criterion from the seed records and check it against the summary."""
     summary, records, baseline = load_records(directory)
-    case, g, provenance = workflow.declared()
+    previous = workflow.CASE_PATH
+    try:
+        workflow.CASE_PATH = ROOT/summary['provenance']['case']
+        case, g, provenance = workflow.declared()
+    finally:
+        workflow.CASE_PATH = previous
     assert summary['provenance'] == provenance, 'the records were judged against another case file or geometry'
     settings = workflow.Settings(**{k: tuple(v) if isinstance(v, list) else v for k, v in summary['settings'].items()})
     criteria = json.loads(json.dumps(workflow.judge(records, case, settings, g, baseline)))
@@ -379,21 +384,14 @@ def test_two_ridge_fixture_reproduces_the_committed_native_record(fixture):
 @pytest.mark.skipif(not FULL, reason='set TORCHFDTD_G7_FULL=1 for the declared three-seed workflow and its TORCWA check (hours)')
 def test_declared_workflow_meets_every_acceptance_criterion():
     directory = Path(RECORD) if RECORD else RECORDS
-    settings, selection = workflow.declared_run(directory)
-    import torchfdtd
-    package_root = str(Path(torchfdtd.__file__).resolve().parents[1])
-    environment = dict(os.environ, PYTHONPATH=os.pathsep.join(filter(None, [package_root, os.environ.get('PYTHONPATH')])))
-    script = str(ROOT/'examples'/'g7'/'metagrating'/'workflow.py')
-    processes = [subprocess.Popen(LAUNCHER+[sys.executable, script, '--stage', 'seed', '--seed', str(seed), '--skip-rcwa', '--out', str(directory)]
-                                  + (['--checkpoint-dir', CHECKPOINTS] if CHECKPOINTS else []), env=environment) for seed in settings.seeds]
-    processes.append(subprocess.Popen(LAUNCHER+[sys.executable, script, '--stage', 'baseline', '--out', str(directory)], env=environment))
-    assert [process.wait() for process in processes] == [0]*len(processes)
-    while PAUSE and Path(PAUSE).exists():
-        time.sleep(30)
-    threads = {name: RCWA_THREADS for name in ('OMP_NUM_THREADS', 'MKL_NUM_THREADS')} if RCWA_THREADS else {}
-    subprocess.run(LAUNCHER+[sys.executable, script, '--stage', 'rcwa', '--out', str(directory), '--rcwa-python', RCWA_PYTHON],
-                   env=dict(environment, **threads), check=True)
-    workflow.judge_stage(settings, directory, selection=selection)
+    # Run with the installed-wheel interpreter from outside the source checkout.
+    # r4 fixes six steps and does not support replaying r3 checkpoints.
+    script = str(ROOT/'examples/g7/metagrating/wheel_entry_r4.py')
+    environment = dict(os.environ)
+    environment.pop('PYTHONPATH', None)
+    subprocess.run(LAUNCHER+[sys.executable, script, '--stage', 'all',
+                            '--out', str(directory.resolve()), '--rcwa-python', RCWA_PYTHON],
+                   cwd=Path(sys.executable).parent, env=environment, check=True)
     assert_every_criterion(directory)
 
 

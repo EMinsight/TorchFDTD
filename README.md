@@ -103,6 +103,9 @@ This route reuses packages available in the base Python environment. Install a s
 
 Each example includes its geometry, run commands and comparison results.
 
+For complete design studies, follow the [installed-wheel application workflows](docs/G7_RUN.md):
+metagrating, finite metalens and photonic integrated circuit, with fixed seeds and acceptance criteria.
+
 | Example | What to explore |
 |---|---|
 | [Microring resonator](examples/meep_comparison/microring) | A bus-coupled ring, transmission spectra and resonance positions compared with Meep |

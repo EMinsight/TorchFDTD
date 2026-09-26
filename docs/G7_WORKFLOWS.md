@@ -14,6 +14,10 @@ best fine-GDS transmission 0.6136, with declared fabrication constraints violate
 
 ## G7-01: metagrating (application A)
 
+The current run is **G7-01r4** below. The original table is retained as the
+declaration history. Follow [G7_RUN.md](G7_RUN.md) to run the approved revision
+from an installed wheel.
+
 | Quantity | Fixed value |
 |---|---|
 | Stack | SiO2 substrate (n = 1.444) below y = 0.01 um; design layer 0.01 to 0.51 um; air above; the grid, absorbers, pulse and DFT lines of `examples/meep_comparison/metagrating/geometry.json` |
@@ -92,6 +96,9 @@ GPU) and draws no conclusion about algorithms from it.
 
 ## G7-05: cost of a design iteration
 
+The current cost case is **G7-05r2** below. Its broadband/sequential adjoint
+comparison supersedes the original tensor-batch row.
+
 | Quantity | Fixed value |
 |---|---|
 | Workloads | one design iteration of G7-01 (three wavelengths, TE) and one of G7-03 |
@@ -106,6 +113,26 @@ streamed and batched comparisons are recorded even where they are slower; the re
 become the baseline and a test flags a later run whose stage median exceeds 1.25 times it.
 
 ## Revisions
+
+- G7-01r4 (owner approved 2026-09-27): the r3 performance attempt failed. The
+  revised design uses six alternating ridge/gap runs with a minimum of three
+  pixels per run. A disclosed TORCWA-assisted initializer is perturbed with
+  logit jitter 0.03 for held-out seeds 7, 8 and 9. Six Adam steps at 0.02 um and
+  560 fs precede selection of the better initial or final hard design by the
+  same short objective. Development used seeds 11 to 13. Judging retains the
+  0.01/0.005 um meshes, 2240 fs, all 41 wavelengths, TE/TM and normal/Bloch
+  incidence, anomaly exclusions and every numerical limit. Performance is
+  compared with the larger of 0.7706 and the baseline in the judged path.
+  See [G7-01r4.json](validation/cases/G7-01r4.json).
+- G7-05r2 (owner approved 2026-09-27): the released tensor-batch API is forward
+  only and cannot perform the required design backward. The cost study compares
+  one broadband three-frequency adjoint with three sequential single-frequency
+  adjoints contributing to one mean objective and one optimizer update. The
+  workload remains G7-01r3 for reproducibility. All seven stages, five fresh
+  processes of six iterations, resident/host comparison, tuning cost and 1.25x
+  regression limit are retained. The calibrated host policy is 200 x cells,
+  48 temporal steps and 16 checkpoints. See
+  [G7-05r2.json](validation/cases/G7-05r2.json).
 
 Each revision is a separate case file that supersedes the declared one, with its reason, evidence and the owner's approval; the declared rows above are kept as declared.
 
