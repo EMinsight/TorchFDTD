@@ -50,7 +50,14 @@ def worker(scenario, *, reduced=False, backend='cuda'):
     else:
         runner = G703Iteration(seed=1, reduced=reduced, backend=backend)
     started = time.perf_counter()
-    observations = [runner.step() for _ in range(6)]
+    observations = []
+    for iteration in range(1, 7):
+        observation = runner.step()
+        observations.append(observation)
+        # Progress is emitted after the synchronized stage timers have stopped.
+        print(json.dumps(dict(scenario=scenario, iteration=iteration,
+                              complete_iteration_seconds=sum(observation['stages'].values()),
+                              objective=observation['objective'])), flush=True)
     policy = asdict(runner.objective.policy) if spec['workload'] == 'g701' else None
     return dict(scenario=scenario, reduced=reduced, backend=backend,
                 package_version=importlib.metadata.version('torchfdtd'),
