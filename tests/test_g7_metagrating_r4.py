@@ -11,6 +11,19 @@ RECORDS = ROOT/'docs/validation/g7/G7-01'
 CRITERIA = ('all_seeds', 'performance', 'rcwa_agreement', 'mesh', 'energy_balance', 'fabrication')
 
 
+def test_r4_help_describes_the_active_case_without_changing_the_shared_workflow(capsys):
+    previous = w.CASE_PATH
+    from examples.g7.metagrating import workflow_r4
+    assert w.CASE_PATH == previous
+    with pytest.raises(SystemExit) as stopped:
+        workflow_r4.main(['--help'])
+    assert stopped.value.code == 0
+    output = capsys.readouterr().out
+    assert 'G7-01r4' in output and 'G7-01r3' not in output
+    assert '--checkpoint-dir' not in output and '--select-run' not in output
+    assert w.CASE_PATH == previous
+
+
 @pytest.fixture
 def declaration(monkeypatch):
     monkeypatch.setattr(w, 'CASE_PATH', ROOT/'docs/validation/cases/G7-01r4.json')
