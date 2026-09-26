@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-27",
+  "declared_before_run": true,
+  "declaration": "docs/G7_WORKFLOWS.md",
+  "platform": "rtx3060-win11-lab",
+  "installation": "the release wheel in an environment outside the checkout",
+  "case_id": "G7-05r2",
+  "task": "G7-05",
+  "title": "Cost of a complete design iteration: stage times, cold and warm, resident and streamed, broadband and sequential adjoint, autotuning break-even",
+  "fixture": {
+    "workloads": [
+      "one G7-01r3 robust design iteration (three wavelengths, TE)",
+      "one G7-03 iteration"
+    ],
+    "stages": [
+      "T_geometry",
+      "T_setup",
+      "T_forward",
+      "T_monitor",
+      "T_backward",
+      "T_transfer_io",
+      "T_optimizer"
+    ],
+    "synchronization": "each stage bounded by a CUDA synchronization; overlapping asynchronous work is not summed",
+    "cpu_threads": {
+      "OMP_NUM_THREADS": 2,
+      "MKL_NUM_THREADS": 2
+    },
+    "execution_policy": "identical seed-1 CPU design input for resident and host-streamed adjoints; policy options recorded in every process. Resident uses 64 checkpoints. A predeclaration policy calibration chose the host-streamed 200-cell x slab, temporal depth 48 and 16 checkpoints; the global field state remains in host DRAM. The scene and objective are identical.",
+    "cold": "first iteration of a fresh process",
+    "warm": "median of iterations 2 to 6",
+    "repeats": 5,
+    "comparisons": [
+      "resident against host-streamed (G7-01)",
+      "one broadband three-frequency FDTD adjoint solve against three sequential one-frequency FDTD adjoint solves; all three gradients contribute to the same mean objective before one Adam update, including geometry, normalization and backward"
+    ],
+    "tuning": "policy autotuner cost and break-even iteration count"
+  },
+  "seed": "the G7-01r3 and G7-03 seed 1 starts",
+  "precision": "float32 on CUDA",
+  "backend": "cuda",
+  "reference_method": "the recorded medians become the regression baseline",
+  "acceptance": {
+    "stages": "every stage recorded with median and range for cold and warm iterations",
+    "comparisons": "streamed and broadband/sequential adjoint comparisons recorded even where slower; a native tensor-batch result, if included, is labelled forward-only",
+    "regression": "a test flags a later run whose stage median exceeds 1.25 times the recorded baseline"
+  },
+  "supersedes": {
+    "case": "docs/validation/cases/G7-05.json",
+    "status": "original case retained; its full-iteration tensor-batch comparison is technically unavailable in the released API"
+  },
+  "revision": {
+    "reason": "run_tensor_batch provides forward-only native Project cases and no backward path; the differentiable G7-01 design supplies explicit epsilon. RecomputedAdjointBatch replays cases sequentially and cannot be called a fused tensor batch.",
+    "evidence": "torchfdtd/tensor_batch.py, torchfdtd/adjoint_batch.py, docs/TENSOR_BATCH.md; D:/TorchFDTD/.local/g7_archive/G7-05/revision_proposal.md; installed-wheel development: one full G7-01r3 resident iteration and two host-streamed policies agreed in objective and gradient; the calibrated 200/48/16 host policy took about 5.9 minutes rather than about 55 minutes for the original 32/4/32 policy. These are not five-process judged timings.",
+    "approved_by": "owner",
+    "date": "2026-09-27",
+    "approval": "Owner requested completion of the 1.0.0 release candidate through release deployment on 2026-09-27."
+  },
+  "difference_from_first_case": "Only the impossible whole-iteration tensor-batch comparison is replaced by the broadband-versus-sequential adjoint comparison. The original G7-01 workload is identified explicitly as the r3 robust design iteration for reproducibility; the later r4 segment design has a different mesh, duration and parameterization and is not substituted silently. Every stage, fresh-process repetition, storage comparison, autotuner item and 1.25x regression limit remains."
+}
