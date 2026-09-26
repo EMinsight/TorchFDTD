@@ -28,9 +28,11 @@ def execution_policy(settings, storage):
             resident=AdjointOptions(checkpoints=settings.checkpoints),
             device=device, host_budget_bytes=host_budget)
     if storage == 'host':
+        slab_width = 32 if settings.small else 200
+        temporal_depth = 4 if settings.small else 48
         options = StreamedAdjointOptions(
-            device=device, slab_width=32, temporal_depth=4,
-            checkpoints=min(settings.checkpoints, 32), gpu_budget_bytes=2 * 1024**3,
+            device=device, slab_width=slab_width, temporal_depth=temporal_depth,
+            checkpoints=min(settings.checkpoints, 16), gpu_budget_bytes=2 * 1024**3,
             host_budget_bytes=host_budget, state_storage='host',
             tile_transfers='async' if device == 'cuda' else 'sync')
         return AdjointExecutionPolicy(
