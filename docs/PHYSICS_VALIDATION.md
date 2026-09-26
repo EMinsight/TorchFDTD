@@ -363,7 +363,7 @@ Layer A (CUDA FP32 against CPU FP64 on scattering and absorption, rtol 1e-4):
 
 ### Held-out dispersive subpixel rejudgement (G3-05r5)
 
-Case `G3-05r5_drude_sphere_subpixel`, record `docs/validation/g3/G3-05r5.json` generated 2026-09-26T11:24:05+00:00. The three sphere radii and their off-lattice centres were declared before this run. The Drude model, mesh sequence, reference, observables and size-ordered error budgets are those of the original case. The judged rows are CPU FP64 at h = 0.005 um; other meshes and CUDA FP32 are reported for convergence and Layer A.
+Case `G3-05r5_drude_sphere_subpixel`, record `docs/validation/g3/G3-05r5.json` generated 2026-09-26T12:52:31+00:00. The three sphere radii and their off-lattice centres were declared before this run. The Drude model, mesh sequence, reference, observables and size-ordered error budgets are those of the original case. The judged rows are CPU FP64 at h = 0.005 um; other meshes and CUDA FP32 are reported for convergence and Layer A.
 
 | r (um) | h (um) | Execution | Max scattering error | Budget | Max absorption error | Budget | Inner/outer | Judged |
 |---:|---:|---|---:|---:|---:|---:|---:|---|
