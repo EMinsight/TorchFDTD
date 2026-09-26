@@ -9,6 +9,14 @@ workflow.CASE_PATH = workflow.ROOT/'docs/validation/cases/G7-01r4.json'
 
 
 def main(argv=None):
+    case, _ = workflow.load_json(workflow.CASE_PATH)
+    revision = case.get('revision', {})
+    if (case.get('declared_before_run') is not True
+            or not revision.get('approved_by')
+            or 'draft_status' in case):
+        raise RuntimeError(
+            'G7-01r4 is a draft. Owner approval and a committed declaration '
+            'are required before any declared workflow stage runs.')
     return workflow.main(argv)
 
 
