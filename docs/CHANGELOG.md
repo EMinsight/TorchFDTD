@@ -2,14 +2,17 @@
 
 User-visible changes of TorchFDTD, newest first, one line per change with the commit
 that made it. The rules for what goes here, for deprecations and for result-impact
-notices are in [COMPATIBILITY.md](COMPATIBILITY.md). There is no release tag yet, so
-the first section covers the whole history since the first commit (2026-09-20).
+notices are in [COMPATIBILITY.md](COMPATIBILITY.md). Dated sections correspond
+to release versions, and the unreleased section collects changes for the next release.
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
 ## Unreleased
 
 ### Added
+
+- Installed-wheel application examples: an examples-only ZIP with a per-file SHA-256 manifest and a PowerShell guide for the metagrating, finite metalens and PIC coupler. The metagrating r4 workflow uses a disclosed TORCWA-assisted initializer, constrained ridge/gap lengths and new held-out seeds, with unchanged accuracy and efficiency limits (`0f45751`, [G7_RUN.md](G7_RUN.md)).
+- Complete design-iteration cost study: seven synchronized stages, five fresh processes with cold/warm statistics, resident versus host-streamed execution, broadband versus sequential adjoints and policy-tuning break-even. The native tensor-batch path remains forward only (`1fb6efd`, case G7-05r2).
 
 - Dispersive subpixel interfaces: with `interface_method='subpixel'`, node cells (two mesh steps per axis) that meet a Drude, Lorentz or multipole object take the dispersive averaging tensor `n n^T (B + f/eps_m) + (I - n n^T)/(C + f eps_m)` with its normal and tangential laminate branches (Deinega and Valuev 2007), assembled on the edge triplets of the coupled operator and advanced by trapezoidal ADE banks driven by D (`torchfdtd/subpixel_dispersive.py`); nondispersive cells next to them take the static tensor without its coupling between a D-driven and an E-updated edge. The D-driven samples keep D as their state and their E is assigned from it every step, so an E write or rounding leaves no static offset. The instantaneous operator stays Hermitian with eigenvalues in (0, 1]. Resident CPU, Torch CUDA, fused CUDA and tensor cohorts run it; two dispersive materials in one node cell, a dispersive surface within one window of a nonperiodic boundary, `pml_dispersion='frozen'` with a dispersive structure, and soft E sources, TFSF face neighbourhoods and one-way injection neighbourhoods on D-driven samples are refused, where subpixel previously refused every dispersive material. `summary['subpixel']['dispersive']['device_bytes']` models the state's device memory and the resident estimate adds an upper bound of it; the subpixel triplet, spectral-bounding and degenerate-normal counts leave out the node triplets the dispersive tensors replace. Dielectric-only subpixel scenes are unchanged bit for bit ([SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md#dispersive-interfaces), this commit).
 
