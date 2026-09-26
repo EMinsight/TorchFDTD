@@ -229,46 +229,62 @@ PREADMISSION_PROFILE_BYTES = 64
 PREADMISSION_ITEM_BYTES = 16*1024
 
 
+def planning_counts(p):
+    """What planning a project builds, counted without building it: source terms (one per step each),
+    cells of the complex Bloch sheet profiles, monitor frequencies, plane points x recorded components,
+    and list items."""
+    from .field_monitors import plane_point_count
+    from .spectra import frequency_count
+    r = p.region
+    counts = dict(terms=0, sheet_cells=0, frequencies=0, plane_points=0,
+                  items=len(p.structures)+len(p.sources)+len(p.monitors)+len(p.materials)+len(r.mesh_refinements))
+    for raw in p.sources:
+        s = p.resolved_source(raw)
+        if not s.enabled:
+            continue
+        counts['terms'] += 1 if s.kind == 'tfsf' else len(s.polarization_components)*(2 if s.injection == 'oneway' else 1)
+        if s.kind == 'plane' and s.injection != 'oneway' and r.complex_fields:
+            for component, _ in s.polarization_components:
+                loc = source_slice(s.model_copy(update={'component': component, 'theta': None}), r)
+                counts['sheet_cells'] += math.prod(len(range(*part.indices(n))) if isinstance(part, slice) else 1 for part, n in zip(loc, r.shape))
+    for raw in p.monitors:
+        m = p.resolved_monitor(raw)
+        if not m.enabled:
+            continue
+        if m.spectrum.sampling != 'fft':
+            counts['frequencies'] += frequency_count(m.spectrum)
+        if m.kind == 'field':
+            counts['plane_points'] += plane_point_count(r, m)*len(m.required_fields)
+    return counts
+
+
 def preadmission_bytes(p):
     """Host bytes the workbench spends on a project before its memory admission, from counts alone.
 
     Nothing here builds an array, so a request asking for 10**12 steps, frequencies or plane points
     is measured, and refused, before any of them is allocated."""
-    from .field_monitors import plane_point_count
-    from .spectra import frequency_count
-    r = p.region
-    terms = 0
-    profile = 0
-    for raw in p.sources:
-        s = p.resolved_source(raw)
-        if not s.enabled:
-            continue
-        terms += 1 if s.kind == 'tfsf' else len(s.polarization_components)*(2 if s.injection == 'oneway' else 1)
-        if s.kind == 'plane' and s.injection != 'oneway' and r.complex_fields:
-            for component, _ in s.polarization_components:
-                loc = source_slice(s.model_copy(update={'component': component, 'theta': None}), r)
-                profile += math.prod(len(range(*part.indices(n))) if isinstance(part, slice) else 1 for part, n in zip(loc, r.shape))
-    frequencies = planes = 0
-    for raw in p.monitors:
-        m = p.resolved_monitor(raw)
-        if not m.enabled or m.spectrum.sampling == 'fft':
-            continue
-        frequencies += frequency_count(m.spectrum)
-        if m.kind == 'field':
-            planes += plane_point_count(r, m)*len(m.required_fields)
-    items = len(p.structures)+len(p.sources)+len(p.monitors)+len(p.materials)+len(r.mesh_refinements)
-    return (r.steps*(PREADMISSION_STEP_BYTES+PREADMISSION_TERM_STEP_BYTES*terms)+frequencies*PREADMISSION_FREQUENCY_BYTES
-            +planes*PREADMISSION_PLANE_BYTES+profile*PREADMISSION_PROFILE_BYTES+items*PREADMISSION_ITEM_BYTES)
+    c = planning_counts(p)
+    return (p.region.steps*(PREADMISSION_STEP_BYTES+PREADMISSION_TERM_STEP_BYTES*c['terms'])+c['frequencies']*PREADMISSION_FREQUENCY_BYTES
+            +c['plane_points']*PREADMISSION_PLANE_BYTES+c['sheet_cells']*PREADMISSION_PROFILE_BYTES+c['items']*PREADMISSION_ITEM_BYTES)
 
 
 def admit_planning(p):
-    """Under memory admission (torchfdtd serve --memory-admission), refuse a project whose planning would take
-    more than 80% of the available host memory (preadmission_bytes) before any of it is built.
+    """Refuse, before any of it is built, a project whose planning the workbench server would not hold.
 
-    The server calls this where it starts planning or running a project, not when a model is validated, so a
-    stored project validated again never depends on the free memory; the fixed server limits bound planning
-    on their own."""
-    if server_admission() != 'memory':
+    Under the fixed server limits the Bloch sheet cells and the plane points x recorded components of the
+    project are counted against SERVER_LIMITS (sheet_cells, plane_points): they are the sizes planning
+    builds that the other limits leave open. Under memory admission (torchfdtd serve --memory-admission)
+    preadmission_bytes is compared with 80% of the available host memory. The server calls this where it
+    starts planning or running a project, not when a model is validated, so a stored project validated
+    again never depends on the free memory."""
+    admission = server_admission()
+    if admission == 'fixed':
+        from .models import server_limit
+        counts = planning_counts(p)
+        for name, what in (('sheet_cells', 'Bloch source sheet cells'), ('plane_points', 'plane points x recorded components')):
+            if counts[name] > server_limit(name):
+                raise ValueError(f'{counts[name]:,} {what} exceed the limit of {server_limit(name):,}.')
+    if admission != 'memory':
         return
     from .memory_profile import host_memory
     available = host_memory()['available_bytes']

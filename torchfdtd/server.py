@@ -31,9 +31,10 @@ from .optical_data import OpticalData
 MAX_REQUEST_BYTES = 32_000_000
 # Results turned into JSON stay bounded whatever a run recorded: a finished job keeps the point-monitor
 # series and the flux of its planes, sent by GET /api/jobs/{key}, strided to at most MONITOR_JSON_VALUES
-# values each in all, and a frequency-field plane is sent strided to at most FIELD_JSON_POINTS points.
-# The CSV exports stream from the saved result file or the stored planes, and the NPZ download keeps everything.
-MONITOR_JSON_VALUES = 1_000_000
+# values each in all (about 10 MiB of JSON each), and a frequency-field plane is sent strided to at most
+# FIELD_JSON_POINTS points. The CSV exports stream from the saved result file or the stored planes, and
+# the NPZ download keeps everything.
+MONITOR_JSON_VALUES = 400_000
 FIELD_JSON_POINTS = 512*512
 CSV_CHUNK_ROWS = 20_000
 
@@ -66,8 +67,8 @@ def _csv_stream(header, rows):
 
 
 def _saved_monitor_rows(path, spectra):
-    """Rows of monitors.csv (traces decimated as Result.monitor_data does) or spectra.csv (every sample) from a saved
-    result, one monitor's arrays at a time."""
+    """Rows of monitors.csv (traces decimated as Result.monitor_data does, from the traces array read once) or
+    spectra.csv (every sample, one monitor's spectrum at a time) from a saved result."""
     import json
     import numpy as np
     from itertools import repeat
@@ -76,6 +77,7 @@ def _saved_monitor_rows(path, spectra):
         metadata, times = json.loads(data['monitor_spectra'].item()), data['times']
         if len(times) <= 1:
             return
+        signals = None if spectra else data['signals']
         for k, m in enumerate(metadata):
             if spectra:
                 frequency, value = data[f'monitor_{k}_frequency_hz'], data[f'monitor_{k}_spectrum']
@@ -84,7 +86,7 @@ def _saved_monitor_rows(path, spectra):
                     yield zip(repeat(m['name']), repeat(m['component']), (f*1e-12).tolist(), (C0/f*1e6).tolist(), v.real.tolist(),
                               v.imag.tolist(), abs(v).tolist(), repeat(m['units']), repeat(m['settings']['apodization']))
             else:
-                signal = data['signals'][:, k]
+                signal = signals[:, k]
                 shifted = times+((times[1]-times[0])/2 if m['component'].startswith('H') else 0)
                 stride = max(1, len(signal)//2000)
                 yield zip(repeat(m['name']), repeat(m['component']), (shifted[::stride]*1e15).tolist(), signal[::stride].real.tolist(),
@@ -387,7 +389,8 @@ def create_app(result_dir=None, memory_admission=False):
         job = get_job(key)
         result = {k:v for k,v in list(job.items()) if k not in ('cancel','frames','epsilon','frame_steps','frequency_fields')}
         result['cancel_requested'] = job['cancel'].is_set()
-        return result
+        # Rendered here, in the threadpool of this synchronous route, not on the event loop.
+        return JSONResponse(jsonable_encoder(result))
 
     @app.delete('/api/jobs/{key}')
     def delete_job(key: str):
@@ -396,9 +399,13 @@ def create_app(result_dir=None, memory_admission=False):
             job = get_job(key)
             if job['status'] in ('queued', 'running'):
                 raise HTTPException(409, 'Cancel the job before deleting it.')
+            # The files go first: a result file still open (a download streaming from it, on Windows) keeps the job.
+            try:
+                for name in (f'{key}.npz', f'{key}.design.json', f'{key}.modal.npz'):
+                    (root/name).unlink(missing_ok=True)
+            except PermissionError as exc:
+                raise HTTPException(409, 'A result file of this job is in use (a download may be streaming); try again.') from exc
             del jobs[key]
-        for name in (f'{key}.npz', f'{key}.design.json', f'{key}.modal.npz'):
-            (root/name).unlink(missing_ok=True)
         return {'id': key, 'deleted': True}
 
     @app.get('/api/jobs')

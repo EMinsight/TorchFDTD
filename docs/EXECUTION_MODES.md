@@ -166,7 +166,9 @@ Project(..., limits=dict(max_structures=20_000, max_monitor_samples=50_000_000))
   submitted project carries (see the next item for `--memory-admission`):
   8,000,000 resident cells, 1000 structures, 512 sources, 512
   monitors, 100 materials, 64 mesh refinements, 12,000,000 samples per plane,
-  100,000 steps, 2001 frequency points and 100,000 samples of a sampled source
+  100,000 steps, 2001 frequency points, 100,000 samples of a sampled source,
+  8,000,000 cells of Bloch source sheets and 12,000,000 plane points x
+  recorded components over every plane
   (`torchfdtd.models.SERVER_LIMITS`, [SECURITY.md](SECURITY.md)). A cap a
   project carries can lower them, never raise them.
 - `torchfdtd serve --memory-admission` starts the server without these limits:

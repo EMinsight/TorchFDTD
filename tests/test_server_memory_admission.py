@@ -210,10 +210,23 @@ def test_on_the_gpu_the_host_arrays_bound_a_grid_above_the_server_cell_limit():
         assert not fit['fits'] and fit['reason'].startswith('resident host estimate')
 
 
-def test_budgeted_mode_network_and_design_routes_are_admitted_by_their_budgets(tmp_path):
-    """The counterpart of test_server_security::test_budgeted_mode_network_and_design_routes_keep_the_resident_cell_limit."""
+def simulate_host_memory(monkeypatch, available):
+    """Every torchfdtd module reading the host memory sees available bytes, the ones that imported host_memory by name too."""
+    import sys
+    from torchfdtd import memory_profile
+    original = memory_profile.host_memory
+    for name, module in list(sys.modules.items()):
+        if name.startswith('torchfdtd') and getattr(module, 'host_memory', None) is original:
+            monkeypatch.setattr(module, 'host_memory', lambda: dict(total_bytes=2*available, available_bytes=available))
+
+
+def test_budgeted_mode_network_and_design_routes_are_admitted_by_their_budgets(tmp_path, monkeypatch):
+    """The counterpart of test_server_security::test_budgeted_mode_network_and_design_routes_keep_the_resident_cell_limit.
+
+    With 1 TiB of host memory simulated, the byte budgets of the requests decide, on any host."""
     from test_mode_network_project import config
     from torchfdtd.periodic_design import PeriodicDesignConfig
+    simulate_host_memory(monkeypatch, 2**40)
     network = config()
     network['project']['region'] = dict(network['project']['region'], size=[14., 14., 6.], mesh=.05)  # 9,408,000 cells
     network['project']['sources'][0]['size'] = [14., 14., 0.]
@@ -733,7 +746,7 @@ def test_the_design_state_directory_stays_inside_the_server_root(tmp_path):
         root = tmp_path / str(memory_admission)
         with workbench(root, memory_admission) as client:
             for path in [str(tmp_path / 'outside'), 'C:/Windows/Temp', '\\\\server\\share', '/tmp/x', '../escape', 'runs/../../escape',
-                         'C:relative', 'a:b', '.', 'with\0nul', 'tab\there', 'x'*300]:
+                         'C:relative', 'a:b', '.', 'with\0nul', 'tab\there', 'x'*300, 'runs\\first', '//server/share/x']:
                 for route in ('/api/design/config', '/api/design/plan', '/api/design/jobs'):
                     response = client.post(route, json=dict(config, state_directory=path, disk_budget_gib=1))
                     assert response.status_code == 422 and 'design state directory' in response.text, (path, route, response.text[:200])
@@ -753,3 +766,132 @@ def test_documents_state_the_fixed_limits_as_the_default_only():
             if '8,000,000' in paragraph and 'server' in paragraph and not paragraph.startswith('|'):
                 assert 'memory-admission' in paragraph or 'memory admission' in paragraph, (name, paragraph[:200])
     assert 'memory admission' in ProjectLimits.__doc__
+
+
+# ------------------------------------------------------------------------------- fixed planning limits
+def _bloch_sheet_project(side_um, mesh=.01):
+    """A 3D Bloch cell whose z-normal sheet source spans (side_um/mesh)**2 cells."""
+    from torchfdtd import BoundaryFace
+    bloch = {f'{a}_{s}': BoundaryFace(kind='bloch') for a in 'xy' for s in ('min', 'max')}
+    region = Region(dimension='3d', size=(side_um, side_um, 1.2), mesh=mesh, pml_cells=5, steps=100, backend='cpu',
+                    material_sampling='yee', boundaries=bloch, bloch_phase=(.5, .3, 0.))
+    return Project(region=region, sources=[Source(id='sheet', kind='plane', normal='z', center=(0., 0., -.2),
+                                                  size=(side_um, side_um, 0.), component='Ex')]).model_dump(mode='json')
+
+
+def _many_planes_project(planes, side=9.9):
+    """planes z-normal planes of side/mesh points squared (990 x 990 by default), 2 frequencies and 6 components
+    each: every default plane (11,761,200 samples) under the per-plane limit, 5,880,600 points x components each."""
+    region = Region(dimension='3d', size=(10.2, 10.2, 2.2), mesh=.01, pml_cells=4, steps=100, backend='cpu')
+    spectrum = dict(sampling='frequency', frequency_points=2, wavelength_start=1.5, wavelength_stop=1.6, apodization='none')
+    monitors = [FieldMonitor(id=f'plane{i}', normal='z', center=(0, 0, round(-.99+.02*i, 2)), size=(side, side, 0), spectrum=spectrum)
+                for i in range(planes)]
+    return Project(region=region, sources=[Source(id='src0', center=(0, 0, 0))], monitors=monitors).model_dump(mode='json')
+
+
+@pytest.mark.parametrize('case', ['bloch sheet of 10**8 cells', '100 planes of 5.9e8 points x components'])
+def test_fixed_limits_count_bloch_sheets_and_planes_before_building_them(case, tmp_path, monkeypatch):
+    from torchfdtd.solver import planning_counts
+    body, source = ((_bloch_sheet_project(100.), 'sheet') if case.startswith('bloch') else (_many_planes_project(100), 'src0'))
+    name, what = ('sheet_cells', 'Bloch source sheet cells') if case.startswith('bloch') else ('plane_points', 'plane points x recorded components')
+    with server_limits():
+        count = planning_counts(Project.model_validate(body))[name]
+    assert 10**8 <= count <= 10**9
+    message = f'{count:,} {what} exceed the limit of {SERVER_LIMITS[name]:,}'
+    # With 4 GiB free, memory admission refuses the same projects by their planning memory.
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=2**33, available_bytes=2**32))
+    for memory_admission in (False, True):
+        with workbench(tmp_path / str(memory_admission), memory_admission) as client:
+            for route in ('/api/validate', '/api/jobs', '/api/mesh/preview', f'/api/sources/{source}/preview'):
+                started = time.monotonic()
+                response, peak = _request_peak(client, __import__('json').dumps(body)) if route == '/api/validate' else (client.post(route, json=body), 0)
+                assert response.status_code == 422, (memory_admission, route, response.text[:300])
+                assert (message if not memory_admission else 'Planning this project would take') in response.text, response.text[:300]
+                assert time.monotonic()-started < 20 and peak < 64*2**20, (route, time.monotonic()-started, peak)
+
+
+def test_fixed_limits_admit_sheets_and_planes_within_them_whatever_the_free_memory(tmp_path, monkeypatch):
+    monkeypatch.setattr('torchfdtd.memory_profile.host_memory', lambda: dict(total_bytes=2**20, available_bytes=1))
+    with workbench(tmp_path, False) as client:
+        assert client.post('/api/validate', json=_bloch_sheet_project(1.6)).status_code == 200
+        assert client.post('/api/sources/sheet/preview', json=_bloch_sheet_project(1.6)).status_code == 200
+        response = client.post('/api/validate', json=_many_planes_project(20, side=1.))   # 20 planes of 100 x 100 points
+        assert response.status_code == 200, response.text[:300]
+
+
+# --------------------------------------------------------------------------------------- result files
+def test_monitors_csv_reads_the_traces_once(tmp_path, monkeypatch):
+    import numpy
+    loads = []
+    real_load = numpy.load
+
+    class Counting:
+        def __init__(self, archive):
+            self.archive = archive
+
+        def __enter__(self):
+            self.archive.__enter__()
+            return self
+
+        def __exit__(self, *exc):
+            return self.archive.__exit__(*exc)
+
+        def __getitem__(self, name):
+            loads.append(name)
+            return self.archive[name]
+
+    monkeypatch.setattr(numpy, 'load', lambda *a, **k: Counting(real_load(*a, **k)))
+    body = Project(region=Region(dimension='2d', size=(2., 2., 1.), mesh=.05, pml_cells=4, steps=300, backend='cpu'),
+                   sources=[Source(center=(0, 0, 0))],
+                   monitors=[Monitor(id=f'p{i}', component=c, center=(.1*i, .1, 0)) for i, c in enumerate(('Ez', 'Hx', 'Hy'))]).model_dump(mode='json')
+    with workbench(tmp_path, False) as client:
+        key = client.post('/api/jobs', json=body).json()['id']
+        assert finished(client, '/api/jobs/'+key, 120)['status'] == 'completed'
+        stored = client.get('/api/jobs/'+key).json()['monitors']
+        loads.clear()
+        rows = client.get(f'/api/jobs/{key}/monitors.csv').text.strip().splitlines()
+    assert loads.count('signals') == 1 and len(rows) == 1+3*300
+    # The rows are the stored traces (below the JSON budget, so not strided), monitor after monitor.
+    expected = [f"{m['name']},{m['component']},{t},{s},{i}" for m in stored for t, s, i in zip(m['time_fs'], m['signal'], m['signal_imag'])]
+    assert rows[1:] == expected
+
+
+def test_a_job_whose_result_file_is_in_use_is_kept_on_delete(tmp_path, monkeypatch):
+    import pathlib
+    small = demo_project()
+    small.region.backend = 'cpu'
+    small.region.steps = 40
+    with workbench(tmp_path, False) as client:
+        key = client.post('/api/jobs', json=small.model_dump(mode='json')).json()['id']
+        assert finished(client, '/api/jobs/'+key)['status'] == 'completed'
+        real_unlink = pathlib.Path.unlink
+
+        def unlink(path, missing_ok=False):
+            if path.name == f'{key}.npz':
+                raise PermissionError(13, 'The process cannot access the file because it is being used by another process')
+            return real_unlink(path, missing_ok=missing_ok)
+        with monkeypatch.context() as busy:
+            busy.setattr(pathlib.Path, 'unlink', unlink)
+            response = client.delete('/api/jobs/'+key)
+            assert response.status_code == 409 and 'in use' in response.text
+        assert client.get('/api/jobs/'+key).status_code == 200 and (tmp_path/f'{key}.npz').exists()
+        assert client.delete('/api/jobs/'+key).status_code == 200 and not (tmp_path/f'{key}.npz').exists()
+
+
+def test_the_job_status_is_rendered_in_its_route_within_a_400k_value_budget(tmp_path):
+    from fastapi.responses import JSONResponse
+    assert server.MONITOR_JSON_VALUES <= 400_000
+    app = server.create_app(tmp_path)
+    try:
+        route = next(r for r in app.routes if getattr(r, 'path', None) == '/api/jobs/{key}' and 'GET' in r.methods)
+        app.state.jobs['k'] = dict(id='k', status='completed', cancel=threading.Event(), project={'name': 'x'},
+                                   monitors=[dict(id='p', time_fs=[0., 1.], signal=[0., 1.])], frames=None)
+        response = route.endpoint('k')
+        # A rendered response: the synchronous route encodes it in the threadpool, off the event loop.
+        assert isinstance(response, JSONResponse)
+        assert __import__('json').loads(response.body) == dict(id='k', status='completed', project={'name': 'x'},
+                                                             monitors=[dict(id='p', time_fs=[0., 1.], signal=[0., 1.])],
+                                                             cancel_requested=False)
+    finally:
+        app.state.pool.shutdown()
+        app.state.fsp_pool.shutdown()

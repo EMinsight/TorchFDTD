@@ -3,7 +3,7 @@ import json
 import pprint
 import threading
 import time
-from pathlib import Path, PurePath
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -20,12 +20,13 @@ def attach_design_routes(app, root, pool, jobs, lock):
         name = config.state_directory
         if name is None:
             return config
-        # Rejected before any path is resolved: a control character, a drive, a root or UNC share, a colon, or a
-        # name resolving outside; a name the file system refuses answers 422 as well.
+        # The same names are refused on every platform, before any path is resolved: a control character, a
+        # backslash, a colon (drive or stream syntax), a leading slash (a root or a UNC share), a component over
+        # 255 characters, or a name resolving outside; a name the file system refuses answers 422 as well.
         refusal = HTTPException(422, "The state directory names a subdirectory of the server's design state directory "
-                                     '(<results>/design-state), not a path of its own.')
-        if (any(ord(c) < 32 for c in name) or PurePath(name).anchor or ':' in name
-                or any(len(part) > 255 for part in PurePath(name).parts)):
+                                     '(<results>/design-state), written with forward slashes, not a path of its own.')
+        if (any(ord(c) < 32 for c in name) or '\\' in name or ':' in name or name.startswith('/')
+                or any(len(part) > 255 for part in name.split('/'))):
             raise refusal
         try:
             path = (state_root/name).resolve()
