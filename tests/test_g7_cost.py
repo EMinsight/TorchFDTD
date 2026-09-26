@@ -118,3 +118,14 @@ def test_recorded_autotuner_and_break_even():
     assert measured['break_even_iterations'] == autotuner_break_even(
         record['tuner']['seconds'], before['warm']['median'], after['warm']['median'],
         untuned_cold_seconds=before['cold']['median'], tuned_cold_seconds=after['cold']['median'])
+
+
+def test_recorded_cost_payload_is_the_release_wheel():
+    execution = json.loads((RECORDS/'execution.json').read_text(encoding='utf-8'))
+    assert execution['gpu_lock'] == 'exclusive' and execution['cpu_threads'] == 2
+    assert execution['installation']['payload_matches']
+    assert execution['installation']['payload_files'] > 0
+    for scenario in SCENARIOS:
+        summary = json.loads((RECORDS/scenario/'summary.json').read_text(encoding='utf-8'))
+        assert summary['wheel_sha256'] == execution['wheel_sha256']
+        assert summary['package_version'] == execution['installation']['versions']['torchfdtd']

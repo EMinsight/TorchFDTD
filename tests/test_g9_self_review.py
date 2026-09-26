@@ -19,6 +19,7 @@ def test_three_documented_workflows_completed_from_independent_installation():
     assert environment['fresh_venv'] and not environment['system_site_packages']
     assert 'site-packages' in environment['package_file']
     assert environment['solver_source_on_sys_path'] is False
+    assert environment['payload_matches'] and environment['payload_files'] > 0
     assert len(environment['wheel_sha256']) == 64
     assert record['examples']['contains_solver_source'] is False
     assert set(record['workflows']) == {'metagrating', 'metalens', 'coupler'}
