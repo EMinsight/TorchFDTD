@@ -29,6 +29,9 @@ class ReversibleCPMLOptions(ReversibleOptions):
     No files are created by this API. Fields and CPML remain resident.
     forward_only='auto' runs a call that cannot request a gradient without
     the trace, terminal copies and drift diagnostics; 'never' records anyway.
+    diagnostic_chunk_elements bounds the real lanes of one drift-diagnostic
+    and validity-check chunk. Above the default, the fp64 summation order of
+    the drift L2 changes; signals and gradients do not.
     """
 
     trace_storage: str = 'device'
@@ -36,11 +39,15 @@ class ReversibleCPMLOptions(ReversibleOptions):
     trace_transfers: str = 'sync'
     trace_chunk_steps: int = 32
     forward_only: str = 'auto'
+    diagnostic_chunk_elements: int = 65536
 
     def __post_init__(self):
         super().__post_init__()
         if self.forward_only not in ('auto', 'never'):
             raise ValueError('forward_only must be auto or never.')
+        if (type(self.diagnostic_chunk_elements) is not int
+                or not 65536 <= self.diagnostic_chunk_elements <= 1 << 26):
+            raise ValueError('diagnostic_chunk_elements must be an integer in [65536, 2**26].')
         if self.trace_storage not in ('device', 'cpu'):
             raise ValueError('trace_storage must be device or cpu.')
         if self.trace_transfers not in ('sync', 'async'):
@@ -114,10 +121,10 @@ def _validate_project(project, options):
     return a, b
 
 
-def _interior_blocks(field, a, b):
+def _interior_blocks(field, a, b, chunk=65536):
     # Reshape only the complete contiguous native field. Each copied rectangle
-    # contains at most 65536 real lanes, even for a very long z axis.
-    capacity = 32768 if field.is_complex() else 65536
+    # contains at most `chunk` real lanes, even for a very long z axis.
+    capacity = chunk // 2 if field.is_complex() else chunk
     rows = field.view(-1, field.shape[2], 3)
     for z in range(a, b + 1, capacity // 3):
         end = min(b + 1, z + capacity // 3)
@@ -126,11 +133,11 @@ def _interior_blocks(field, a, b):
             yield rows[row:row + row_count, z:end].reshape(-1)
 
 
-def _interior_scale(system, a, b):
+def _interior_scale(system, a, b, chunk=65536):
     square = torch.zeros((), dtype=torch.float64, device=system.device)
     peak = torch.zeros((), dtype=torch.float32, device=system.device)
     for field in system.state()[:2]:
-        for block in _interior_blocks(field, a, b):
+        for block in _interior_blocks(field, a, b, chunk):
             peak = torch.maximum(peak, block.abs().amax())
             lanes = torch.view_as_real(block) if block.is_complex() else block
             converted = lanes.to(torch.float64)
@@ -270,7 +277,7 @@ class _RecordedCPML(torch.autograd.Function):
                 if spectral is not None and (row + 1 == block_size or step + 1 == project.region.steps):
                     spectral.accumulate(signals, samples[:row + 1], step - row)
                 if (step + 1) % 64 == 0 or step + 1 == project.region.steps:
-                    current_maximum, current_norm = _interior_scale(system, a, b)
+                    current_maximum, current_norm = _interior_scale(system, a, b, options.diagnostic_chunk_elements)
                     maximum = max(maximum, current_maximum)
                     norm = max(norm, current_norm)
             if transport is not None:
@@ -343,7 +350,7 @@ class _RecordedCPML(torch.autograd.Function):
                             current_block = begin
                             regenerated_blocks += 1
                         inverse.step(step, frame, observation_index=step - begin)
-            absolute, l2 = _interior_scale(system, a, b)
+            absolute, l2 = _interior_scale(system, a, b, ctx.options.diagnostic_chunk_elements)
             forward_peak, forward_l2 = ctx.scale
             relative_peak = absolute / forward_peak if forward_peak else (0. if absolute == 0 else math.inf)
             relative_l2 = l2 / forward_l2 if forward_l2 else (0. if l2 == 0 else math.inf)

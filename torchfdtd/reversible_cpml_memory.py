@@ -23,10 +23,13 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
         raise ValueError('material_components must be 1 or 3.')
     transfers = getattr(options, 'trace_transfers', 'sync')
     requested_chunk = getattr(options, 'trace_chunk_steps', 32)
+    diagnostic_lanes = getattr(options, 'diagnostic_chunk_elements', 65536)
     if transfers not in ('sync', 'async'):
         raise ValueError('trace_transfers must be sync or async.')
     if type(requested_chunk) is not int or not 1 <= requested_chunk <= 1024:
         raise ValueError('trace_chunk_steps must be an integer in [1, 1024].')
+    if type(diagnostic_lanes) is not int or not 65536 <= diagnostic_lanes <= 1 << 26:
+        raise ValueError('diagnostic_chunk_elements must be an integer in [65536, 2**26].')
     storage = options.trace_storage
     if storage not in ('device', 'cpu'):
         raise ValueError('Trace storage must be device or cpu.')
@@ -66,7 +69,7 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
     frame = 4*plane*item
     trace = project.region.steps*frame
     interior_cells = plane*(interval[1]-interval[0]+1)
-    chunk = min(65536, 3*interior_cells*(2 if complex_fields else 1))
+    chunk = min(diagnostic_lanes, 3*interior_cells*(2 if complex_fields else 1))
     # Rectangular packing and abs scratch each require one FP32 chunk,
     # alongside two FP64 reduction chunks. Never flatten a strided volume.
     diagnostics = 24*chunk+4096
