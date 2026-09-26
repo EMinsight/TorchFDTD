@@ -14,7 +14,7 @@ import torch
 from fdtd.backend import NumpyBackend
 
 from .waveforms import TAIL_INNER, TAIL_OUTER, pulse_parameters, source_time_signal
-from .models import Project
+from .models import Project, server_admission
 from .boundaries import YeeGrid
 from .materials import configure_materials, permittivity
 from .spectra import point_spectrum, apodization_window
@@ -190,11 +190,16 @@ def fused_resident_bytes(region, cells, poles):
 # added: per cell the plan's sampled material after planning and at its peak while planning (float64
 # permittivity and its ownership map: 8.1/16.1 cell, 24.0/48.0 Yee, 78.5/146.0 subpixel), per plane
 # point and component the plan's interpolation maps (136), per accumulated sample the peak of
-# plane_result (40.0), and per step and source term the plan's float64 waveform and sample times (17.6).
+# plane_result (40.0), per step and source term the plan's float64 waveform and sample times (17.6), and
+# per structure its plan record and canonical form (6.1 kept, 6.5 while planning). The first
+# HOST_COVERED_STRUCTURES (28 MiB) lie within the margins of the recorded peaks (HOST_FIXED_BYTES on
+# CUDA, the tensor-expression bound on the CPU; up to 2810 pillars in the metalens records).
 HOST_MATERIAL_BYTES = {'cell': (10, 18), 'yee': (27, 53), 'subpixel': (87, 161)}
 HOST_PLANE_POINT_BYTES = 150
 HOST_PLANE_SAMPLE_BYTES = 44
 HOST_WAVEFORM_BYTES = 20
+HOST_STRUCTURE_BYTES = 7*1024
+HOST_COVERED_STRUCTURES = 4096
 HOST_FIXED_BYTES = 512*2**20       # CUDA, CuPy and Python runtime of the run (up to 273 MiB measured at 1M cells)
 
 
@@ -210,6 +215,75 @@ def display_host_bytes(p):
     return 2*frames*pixels*field+traces
 
 
+# Host bytes the server holds for a project before any memory admission (request validation,
+# estimate(), resolve_plan and the resolver), per unit of what the project asks for, from
+# tracemalloc through /api/validate (tests/test_server_memory_admission.py) with a margin: per step,
+# per source term and step (sampled waveforms and sample times), per frequency sample of a monitor,
+# per plane point and field component (plane and interpolation maps), per Bloch sheet cell (the
+# complex profile) and per list item (its model, plan record and hash).
+PREADMISSION_STEP_BYTES = 96
+PREADMISSION_TERM_STEP_BYTES = 32
+PREADMISSION_FREQUENCY_BYTES = 48
+PREADMISSION_PLANE_BYTES = 320
+PREADMISSION_PROFILE_BYTES = 64
+PREADMISSION_ITEM_BYTES = 16*1024
+
+
+def preadmission_bytes(p):
+    """Host bytes the workbench spends on a project before its memory admission, from counts alone.
+
+    Nothing here builds an array, so a request asking for 10**12 steps, frequencies or plane points
+    is measured, and refused, before any of them is allocated."""
+    from .field_monitors import plane_point_count
+    from .spectra import frequency_count
+    r = p.region
+    terms = 0
+    profile = 0
+    for raw in p.sources:
+        s = p.resolved_source(raw)
+        if not s.enabled:
+            continue
+        terms += 1 if s.kind == 'tfsf' else len(s.polarization_components)*(2 if s.injection == 'oneway' else 1)
+        if s.kind == 'plane' and s.injection != 'oneway' and r.complex_fields:
+            for component, _ in s.polarization_components:
+                loc = source_slice(s.model_copy(update={'component': component, 'theta': None}), r)
+                profile += math.prod(len(range(*part.indices(n))) if isinstance(part, slice) else 1 for part, n in zip(loc, r.shape))
+    frequencies = planes = 0
+    for raw in p.monitors:
+        m = p.resolved_monitor(raw)
+        if not m.enabled or m.spectrum.sampling == 'fft':
+            continue
+        frequencies += frequency_count(m.spectrum)
+        if m.kind == 'field':
+            planes += plane_point_count(r, m)*len(m.required_fields)
+    items = len(p.structures)+len(p.sources)+len(p.monitors)+len(p.materials)+len(r.mesh_refinements)
+    return (r.steps*(PREADMISSION_STEP_BYTES+PREADMISSION_TERM_STEP_BYTES*terms)+frequencies*PREADMISSION_FREQUENCY_BYTES
+            +planes*PREADMISSION_PLANE_BYTES+profile*PREADMISSION_PROFILE_BYTES+items*PREADMISSION_ITEM_BYTES)
+
+
+def admit_planning(p):
+    """Under memory admission (torchfdtd serve --memory-admission), refuse a project whose planning would take
+    more than 80% of the available host memory (preadmission_bytes) before any of it is built.
+
+    The server calls this where it starts planning or running a project, not when a model is validated, so a
+    stored project validated again never depends on the free memory; the fixed server limits bound planning
+    on their own."""
+    if server_admission() != 'memory':
+        return
+    from .memory_profile import host_memory
+    available = host_memory()['available_bytes']
+    needed = preadmission_bytes(p)
+    if available is not None and needed > .8*available:
+        raise ValueError(f'Planning this project would take {needed/2**30:.2f} GiB of host memory before its memory admission '
+                         f'(steps, source terms, monitor frequencies, plane points and items), above 80% of the '
+                         f'{available/2**30:.2f} GiB available. Reduce the steps, the frequency points or the monitor planes.')
+
+
+def structure_host_bytes(p):
+    """Host bytes of the structures' plan records beyond the ones the recorded margins cover."""
+    return HOST_STRUCTURE_BYTES*max(0, len(p.structures)-HOST_COVERED_STRUCTURES)
+
+
 def resident_host_bytes(p, cells, terms):
     """Host bytes of a resident run whose fields live on a CUDA device.
 
@@ -223,7 +297,7 @@ def resident_host_bytes(p, cells, terms):
     planes = plane_sizes(p)
     post = sum(n*nf*nc*(sample+HOST_PLANE_SAMPLE_BYTES) for n, nf, nc, sample in planes)
     base = (sum(n*nc for n, _, nc, _ in planes)*HOST_PLANE_POINT_BYTES+r.steps*terms*HOST_WAVEFORM_BYTES
-            +point_trace_memory(p)+display_host_bytes(p)+HOST_FIXED_BYTES)
+            +structure_host_bytes(p)+point_trace_memory(p)+display_host_bytes(p)+HOST_FIXED_BYTES)
     return base+max(cells*peak, cells*(kept+6*field)+max(3*field*cells, post))
 
 
@@ -337,6 +411,7 @@ def estimate(p: Project, *, endpoint_dispatch=True):
         # three per-step accumulator temporaries of monitor_memory do not already cover (they are gone by then).
         planes = plane_sizes(p)
         host_extra = (r.steps*terms*HOST_WAVEFORM_BYTES+sum(n_*nc*HOST_PLANE_POINT_BYTES for n_, _, nc, _ in planes)
+                      +structure_host_bytes(p)
                       +display_host_bytes(p))
         host_extra += sum(n_*nf*nc*max(0, HOST_PLANE_SAMPLE_BYTES-3*sample) for n_, nf, nc, sample in planes)
     snapshot = snapshot_frames(p)
@@ -447,24 +522,35 @@ class Result:
                             signals=self.signals, times=self.times, E=self.electric, H=self.magnetic,
                             monitor_spectra=json.dumps(metadata), **spectral_arrays)
 
-    def monitor_data(self):
+    def monitor_data(self, max_values=None):
+        """Point-monitor traces (at most about 4000 samples) and spectra as JSON lists. With max_values, the nine
+        series of all monitors together hold at most max_values values: a longer spectrum or trace is strided
+        and carries its spectrum_stride or trace_stride."""
         output = []
         monitors = self.point_monitors
         dt = self.times[1]-self.times[0] if len(self.times)>1 else 1
+        cap = None if max_values is None or not monitors else max(1, max_values//(9*len(monitors)))
         for k, m in enumerate(monitors):
             signal = self.signals[:, k]
             complex_signal = np.iscomplexobj(signal)
             spec = self.spectra[k]
             f, value = spec['frequency_hz'], spec['value']
+            thinned = {}
+            if cap is not None and len(f) > cap:
+                thinned['spectrum_stride'] = -(-len(f)//cap)
+                f, value = f[::thinned['spectrum_stride']], value[::thinned['spectrum_stride']]
             times = self.times + (dt/2 if m.component.startswith('H') else 0)
             stride = max(1, len(signal)//2000)
+            if cap is not None and -(-len(signal)//stride) > cap:
+                stride = thinned['trace_stride'] = -(-len(signal)//cap)
             output.append({'id': m.id, 'name': m.name, 'component': m.component,
                            'time_fs': (times[::stride]*1e15).tolist(), 'signal': signal[::stride].real.tolist(),
                            'signal_imag': signal[::stride].imag.tolist(), 'complex': complex_signal,
                            'window': apodization_window(times, m.spectrum)[::stride].tolist(),
                            'frequency_thz': (f*1e-12).tolist(), 'wavelength_um': (C0/f*1e6).tolist(),
                            'spectrum': abs(value).tolist(), 'spectrum_real': value.real.tolist(), 'spectrum_imag': value.imag.tolist(),
-                           'spectrum_units': spec['units'], 'transform': spec['transform'], 'spectrum_settings': m.spectrum.model_dump()})
+                           'spectrum_units': spec['units'], 'transform': spec['transform'], 'spectrum_settings': m.spectrum.model_dump(),
+                           **thinned})
         return output
 
     @classmethod
@@ -497,10 +583,19 @@ class Result:
             raise ValueError('Expected one enabled frequency plane with this name or id.')
         return matches[0]
 
-    def flux_data(self):
-        return [dict(id=m['id'],name=m['name'],normal=m['normal_axis'],frequency_thz=(m['frequency_hz']*1e-12).tolist(),
-                     wavelength_um=(C0/m['frequency_hz']*1e6).tolist(),flux=m['flux'].tolist(),units=m['flux_units'],
-                     points=len(m['weights']),shape=m['shape'],settings=m['settings']) for m in self.frequency_fields if m['flux'] is not None]
+    def flux_data(self, max_values=None):
+        """Signed flux per frequency of every plane; with max_values the three series of all planes hold at most
+        max_values values, a longer one strided and carrying its flux_stride."""
+        planes = [m for m in self.frequency_fields if m['flux'] is not None]
+        cap = None if max_values is None or not planes else max(1, max_values//(3*len(planes)))
+        output = []
+        for m in planes:
+            stride = -(-len(m['frequency_hz'])//cap) if cap is not None and len(m['frequency_hz']) > cap else 1
+            f = m['frequency_hz'][::stride]
+            output.append(dict(id=m['id'],name=m['name'],normal=m['normal_axis'],frequency_thz=(f*1e-12).tolist(),
+                               wavelength_um=(C0/f*1e6).tolist(),flux=m['flux'][::stride].tolist(),units=m['flux_units'],
+                               points=len(m['weights']),shape=m['shape'],settings=m['settings'],**({'flux_stride': stride} if stride > 1 else {})))
+        return output
 
 
 class Simulation:

@@ -7,7 +7,7 @@ clipped physical cell widths, including graded and partially covered cells.
 from itertools import product
 import numpy as np
 import torch
-from .spectra import frequency_samples,apodization_window
+from .spectra import frequency_count,frequency_samples,apodization_window
 from .models import effective_limit
 
 
@@ -39,6 +39,18 @@ def plane_plan(region,monitor,quadrature_counts=None):
     points=np.stack([v.ravel() for v in np.meshgrid(*axes,indexing='ij')],axis=1)
     area=np.prod(np.stack(np.broadcast_arrays(*[v.reshape(tuple(-1 if a==i else 1 for a in range(3))) for i,v in enumerate(widths)])),axis=0).ravel()
     return dict(points_um=points,weights=area,shape=tuple(len(a) for a in axes),normal=normal)
+
+
+def plane_point_count(region,monitor):
+    """len(plane_plan(region,monitor)['weights']) from the mesh nodes, without building the plane."""
+    count=1;normal='xyz'.index(monitor.normal)
+    for a,nodes in enumerate(region.mesh_nodes):
+        if (region.dimension=='2d' and a==2) or a==normal:continue
+        lo,hi=monitor.center[a]-monitor.size[a]/2,monitor.center[a]+monitor.size[a]/2
+        inside=int(np.count_nonzero((nodes>lo+1e-12)&(nodes<hi-1e-12)))
+        stride=monitor.downsample_xyz[a] if monitor.downsample_xyz is not None else monitor.downsample
+        count*=-(-(inside+1)//stride)
+    return count
 
 
 def interpolation_map(region,component,points):
@@ -74,7 +86,7 @@ def point_trace_memory(project):
     for raw in project.monitors:
         if not raw.enabled or raw.kind!='point':continue
         m=project.resolved_monitor(raw);samples=len(range(0,r.steps,m.time_downsample))
-        size+=r.steps*field+16*(len(frequency_samples(m.spectrum)) if m.spectrum.sampling!='fft' else samples//2+1)
+        size+=r.steps*field+16*(frequency_count(m.spectrum) if m.spectrum.sampling!='fft' else samples//2+1)
     return size
 
 
@@ -84,7 +96,8 @@ def plane_sizes(project):
     cap=effective_limit(project.limits.max_monitor_samples,'monitor_samples')
     for raw in project.monitors:
         if not raw.enabled or raw.kind!='field':continue
-        m=project.resolved_monitor(raw);n=len(plane_plan(project.region,m)['weights']);nf=len(frequency_samples(m.spectrum))
+        # Counted, not built: the cap is checked before any plane array exists.
+        m=project.resolved_monitor(raw);n=plane_point_count(project.region,m);nf=frequency_count(m.spectrum)
         nc=len(m.required_fields)
         if cap is not None and n*nf*nc>cap:raise ValueError(f'{m.name}: frequency field buffer of {n*nf*nc:,} complex samples exceeds the limit of {cap:,}. Reduce frequency points or increase monitor downsampling.')
         sizes.append((n,nf,nc,16 if r.precision=='float64' or m.dft_precision=='float64' else 8))

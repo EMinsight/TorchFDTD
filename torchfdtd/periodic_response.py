@@ -31,6 +31,9 @@ def _periodic_project(spec,*,dtype,mesh,steps,pml_cells,forward_kernel,memory_mo
                              y_min=BoundaryFace(kind='bloch'),y_max=BoundaryFace(kind='bloch'))),
         sources=[Source(id='periodic-plane-source',kind='plane',normal='z',size=(*period,0),center=(0,0,source_z),component='Ex',wavelength=wavelength,pulse_cycles=1)],
         monitors=[FieldMonitor(id=name,normal='z',size=(*period,0),center=(0,0,z)) for name,z in [('incident',probe_z),('detector',detector)]])
+    # Under the workbench's memory admission the design's planning is counted before it is built.
+    from .solver import admit_planning
+    admit_planning(project)
     return project,kt
 
 

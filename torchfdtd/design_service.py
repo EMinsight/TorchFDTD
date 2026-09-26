@@ -3,6 +3,7 @@ import json
 import pprint
 import threading
 import time
+from pathlib import Path, PurePath
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -12,16 +13,43 @@ from .periodic_design import PeriodicDesignConfig, periodic_design_plan, run_per
 
 
 def attach_design_routes(app, root, pool, jobs, lock):
+    state_root = (Path(root)/'design-state').resolve()
+
+    def contained(config, create=False):
+        # A client names a subdirectory of the server's design state root, never a filesystem path.
+        name = config.state_directory
+        if name is None:
+            return config
+        # Rejected before any path is resolved: a control character, a drive, a root or UNC share, a colon, or a
+        # name resolving outside; a name the file system refuses answers 422 as well.
+        refusal = HTTPException(422, "The state directory names a subdirectory of the server's design state directory "
+                                     '(<results>/design-state), not a path of its own.')
+        if (any(ord(c) < 32 for c in name) or PurePath(name).anchor or ':' in name
+                or any(len(part) > 255 for part in PurePath(name).parts)):
+            raise refusal
+        try:
+            path = (state_root/name).resolve()
+            inside = path != state_root and path.is_relative_to(state_root)
+            if inside and create:
+                path.mkdir(parents=True, exist_ok=True)
+        except (OSError, ValueError) as exc:
+            raise HTTPException(422, 'The state directory name cannot be used as a directory on this server.') from exc
+        if not inside:
+            raise refusal
+        return config.model_copy(update={'state_directory': str(path)})
+
     @app.get('/api/design/defaults')
     def defaults():
         return PeriodicDesignConfig().model_dump(mode='json')
 
     @app.post('/api/design/config')
     def validate(config: PeriodicDesignConfig):
+        contained(config)
         return config.model_dump(mode='json')
 
     @app.post('/api/design/plan')
     def plan(config: PeriodicDesignConfig):
+        config = contained(config, create=True)
         try:return periodic_design_plan(config)
         except (ValueError, RuntimeError) as exc:raise HTTPException(422,str(exc)) from exc
 
@@ -55,6 +83,7 @@ def attach_design_routes(app, root, pool, jobs, lock):
 
     @app.post('/api/design/jobs',status_code=202)
     def run(config: PeriodicDesignConfig):
+        config = contained(config, create=True)
         with lock:
             if sum(j['status'] in ('queued','running') for j in jobs.values()) >= 3:
                 raise HTTPException(409,'The shared run queue is full (one running and two waiting).')

@@ -91,8 +91,8 @@ For grids whose resident estimate does not fit the device (or host) memory,
 construct `Region(memory_mode="streamed", ...)` and use this Python API with
 explicit budgets. This opt-in cannot run through the resident solver or
 workbench. The Python API admits resident grids by their memory estimate; the
-workbench server keeps its 8,000,000-cell resident limit
-([EXECUTION_MODES.md](EXECUTION_MODES.md#size-limits)).
+workbench server keeps its 8,000,000-cell resident limit unless it is started
+with `--memory-admission` ([EXECUTION_MODES.md](EXECUTION_MODES.md#size-limits)).
 Each grid axis is limited to one million cells to bound mesh metadata. Passing
 admission is not evidence of physical-VRAM-overflow performance. A unified
 resident/DRAM/NVMe policy remains unfinished.

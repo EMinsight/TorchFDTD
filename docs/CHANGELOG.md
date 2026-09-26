@@ -9,14 +9,29 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
+### Added
+
+- `torchfdtd serve --memory-admission` and `create_app(memory_admission=True)`: the workbench server admits scenes by the memory estimate and the caps a project carries, as the Python API does, instead of `SERVER_LIMITS`, in its requests, job threads and modal worker. Every list keeps a ceiling checked before its items are validated (200,000 structures, 10,000 sources and monitors, 1000 materials, 10,000 refinement boxes, 1,000,000 frequency points and signal samples; `torchfdtd.models.MEMORY_ADMISSION_LIMITS`), so a 32 MB request validates in at most about 3.3 GB. The input limits (request and upload sizes, FSP and GDS parser limits, text caps, route bounds, one million cells per axis, the 2^31 index bound) and the loopback, `Host` and `Origin` checks stay. `/api/health` reports `admission` and `server_limits`, and the execution panel shows the admission. The default is unchanged; the mode is meant for a single user on their own machine ([SECURITY.md](SECURITY.md#memory-admission), this commit).
+- `DELETE /api/jobs/{key}` releases a finished job's results and files (this commit).
+
 ### Changed
 
+- Under memory admission the workbench server checks, from counts alone and where planning or running starts (never in model validation), the host memory that `estimate()`, `resolve_plan` and the resolver will take (`torchfdtd.solver.admit_planning`, `preadmission_bytes`: steps, source terms, monitor frequencies, plane points, Bloch sheet cells and list items) against 80% of the available host memory before any array is built; 10**12 steps, frequencies or plane points answer 422 in either mode, under the fixed limits through the limits. `valid_scene` checks the temporal Nyquist limit and `estimate()` counts frequencies and plane points without building them. The source preview covers the first 100,000 steps of a longer run (`preview_steps`). A finished job keeps its point-monitor series and plane flux strided to at most 1,000,000 values each (`spectrum_stride`, `trace_stride`, `flux_stride`), `GET /api/jobs` lists flux planes by name, `GET /api/jobs/{key}/field-monitors/{id}` sends a plane strided along its axes to at most 512 x 512 points (`full_shape`, `stride`), and the CSV exports stream, `spectra.csv` and `monitors.csv` from the saved result with every spectrum sample; the NPZ download keeps every array (this commit).
+- The host estimate (`host_estimated_mb`, and the CPU estimate) counts 7 KiB of plan record per structure beyond the first 4096, which the recorded margins cover, so Auto streams a scene with GDS-scale structure counts instead of admitting a resident run that fails (this commit).
 - `ReversibleCPMLSimulation` and `ReversibleCPMLPlaneSimulation` run a call that cannot request a gradient (under `torch.no_grad()` or `torch.inference_mode()`, or with an `epsilon` that does not require gradients) forward only: the recorded forward's updates, source injections, observations and DFT blocks in the same order, scalar or diagonal epsilon, CPU or fused CUDA, without the boundary trace, the terminal interior copy or the 64-step reconstruction scale. Signals and spectra are bitwise equal to the recorded forward's. The report gains `forward_only`; on a forward-only call `sampled_forward_peak` and `sampled_forward_l2` are None, `terminal_copies` is 0, and the observations and the final E and H fields are checked for non-finite values. Admission is unchanged. The new option `ReversibleCPMLOptions(forward_only='never')` (default `'auto'`) records every call as before ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#forward-only-calls), this commit).
 
 ### Performance
 
 - The validity checks of recorded CPML (finite observations and boundary trace, finite `epsilon >= 1` in both material maps) combine their chunks into one device flag and read it once per tensor instead of once per chunk; every chunk is still checked. A recorded forward of the 96-step test fixture makes 8 scalar reads instead of 21 (`tests/test_reversible_cpml_fast_paths.py`, this commit).
 - `SpectralObservation` indexes its E and H observer groups with index tensors built once per observation instead of Python lists converted on every DFT block, in the online accumulation and in the adjoint transpose. The gathered elements and their order are unchanged, so spectra and gradients are bitwise equal; every online-spectrum path uses it, including the plane simulations and recorded CPML (`tests/test_adjoint_spectrum_index.py`, this commit).
+
+### Fixed
+
+- A frequency-plane monitor was built point by point before its sample limit was checked, so a plane of 10**12 points answered 500 on `/api/validate` and `/api/jobs`; the points are counted from the mesh nodes and the request answers 422 (this commit).
+
+### Security
+
+- Under the workbench server the `state_directory` of a design configuration names a subdirectory of `<results>/design-state`; a drive, a root or UNC share, a colon or a name resolving outside answers 422, where the server used to read and write the path the client chose (this commit).
 
 ## 0.16.1 (2026-09-26)
 
