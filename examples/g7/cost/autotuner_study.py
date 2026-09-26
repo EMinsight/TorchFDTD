@@ -105,12 +105,20 @@ def main(argv=None):
         if (resident.get('package_version'), resident.get('wheel_sha256')) != (
                 host.get('package_version'), host.get('wheel_sha256')):
             raise ValueError('The compared summaries must use the same installed wheel.')
+        selected = resident if selected_storage == 'resident' else host
         before = resident['statistics']['full_iteration']['warm']['median']
-        after = (resident if selected_storage == 'resident' else host)[
-            'statistics']['full_iteration']['warm']['median']
-        measured = dict(untuned_resident_seconds=before, tuned_policy_seconds=after,
+        after = selected['statistics']['full_iteration']['warm']['median']
+        before_cold = resident['statistics']['full_iteration']['cold']['median']
+        after_cold = selected['statistics']['full_iteration']['cold']['median']
+        measured = dict(untuned_resident_warm_seconds=before,
+                        tuned_policy_warm_seconds=after,
+                        untuned_resident_cold_seconds=before_cold,
+                        tuned_policy_cold_seconds=after_cold,
                         selected_storage=selected_storage,
-                        break_even_iterations=autotuner_break_even(tuning_seconds, before, after),
+                        break_even_iterations=autotuner_break_even(
+                            tuning_seconds, before, after,
+                            untuned_cold_seconds=before_cold,
+                            tuned_cold_seconds=after_cold),
                         resident_summary=str(args.resident_summary),
                         host_summary=str(args.host_summary))
     result = dict(task='G7-05', status='development' if args.reduced else 'acceptance',

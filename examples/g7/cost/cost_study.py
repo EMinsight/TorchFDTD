@@ -7,6 +7,7 @@ package; only then are the repository-only examples added to sys.path.
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict
 import hashlib
 import importlib.metadata
 import json
@@ -46,9 +47,11 @@ def worker(scenario, *, reduced=False, backend='cuda'):
         runner = G703Iteration(seed=1, reduced=reduced, backend=backend)
     started = time.perf_counter()
     observations = [runner.step() for _ in range(6)]
+    policy = asdict(runner.objective.policy) if spec['workload'] == 'g701' else None
     return dict(scenario=scenario, reduced=reduced, backend=backend,
                 package_version=importlib.metadata.version('torchfdtd'),
                 package_path=str(PACKAGE), interpreter=sys.executable,
+                execution_policy=policy,
                 iterations=[row['stages'] for row in observations],
                 observations=[{key: value for key, value in row.items() if key != 'stages'}
                               for row in observations],
@@ -118,12 +121,16 @@ def main(argv=None):
     paths = {row['package_path'] for row in records}
     if len(versions) != 1 or len(paths) != 1:
         raise RuntimeError('The fresh processes imported different installations.')
+    policies = [row['execution_policy'] for row in records]
+    if any(policy != policies[0] for policy in policies):
+        raise RuntimeError('The fresh processes used different execution policies.')
     if wheel is not None and not next(iter(versions)) in wheel.name:
         raise RuntimeError('Installed TorchFDTD version does not match the wheel filename.')
     summary = dict(scenario=args.scenario, reduced=args.reduced, backend=args.backend,
                    package_version=next(iter(versions)), package_path=next(iter(paths)),
                    torchfdtd_import='installed', wheel=None if wheel is None else str(wheel),
-                   wheel_sha256=wheel_hash, stage_names=list(STAGES),
+                   wheel_sha256=wheel_hash, execution_policy=policies[0],
+                   stage_names=list(STAGES),
                    statistics=summarize_fresh_processes(records),
                    process_wall_seconds=[row['process_wall_seconds'] for row in records],
                    observations=[row['observations'] for row in records])

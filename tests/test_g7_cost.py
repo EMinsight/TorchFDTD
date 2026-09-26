@@ -65,5 +65,9 @@ def test_autotuner_break_even_counts_full_iterations():
     assert autotuner_break_even(0., 1.25, 1.) == 1
     assert autotuner_break_even(4., 1., 1.) is None
     assert autotuner_break_even(4., 1., 1.1) is None
+    assert autotuner_break_even(12., 80., 60.,
+                                untuned_cold_seconds=100., tuned_cold_seconds=90.) == 2
+    assert autotuner_break_even(5., 80., 60.,
+                                untuned_cold_seconds=100., tuned_cold_seconds=120.) == 3
     with pytest.raises(ValueError, match='nonnegative'):
         autotuner_break_even(float('nan'), 1., .9)

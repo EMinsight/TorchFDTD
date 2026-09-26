@@ -103,17 +103,28 @@ def stage_regressions(baseline, candidate, *, factor=1.25):
     return failures
 
 
-def autotuner_break_even(tuning_seconds, untuned_iteration_seconds, tuned_iteration_seconds):
+def autotuner_break_even(tuning_seconds, untuned_iteration_seconds, tuned_iteration_seconds,
+                         *, untuned_cold_seconds=None, tuned_cold_seconds=None):
     """First positive iteration count whose accumulated saving repays tuning.
 
-    A policy with no positive per-iteration saving has no finite break-even.
+    A policy with no warm saving breaks even only if its cold saving pays for tuning.
     The full iteration times supplied here must include the same seven stages.
+    Cold times default to warm times for simple repeated-iteration comparisons.
     """
-    values = (tuning_seconds, untuned_iteration_seconds, tuned_iteration_seconds)
+    if untuned_cold_seconds is None:
+        untuned_cold_seconds = untuned_iteration_seconds
+    if tuned_cold_seconds is None:
+        tuned_cold_seconds = tuned_iteration_seconds
+    values = (tuning_seconds, untuned_iteration_seconds, tuned_iteration_seconds,
+              untuned_cold_seconds, tuned_cold_seconds)
     if any(not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0
            for value in values):
         raise ValueError('Tuning and iteration times must be finite and nonnegative.')
-    saving = untuned_iteration_seconds - tuned_iteration_seconds
-    if saving <= 0:
+    first_saving = untuned_cold_seconds-tuned_cold_seconds
+    still_to_repay = tuning_seconds-first_saving
+    if still_to_repay <= 0:
+        return 1
+    warm_saving = untuned_iteration_seconds-tuned_iteration_seconds
+    if warm_saving <= 0:
         return None
-    return max(1, math.ceil(tuning_seconds / saving))
+    return 1+math.ceil(still_to_repay/warm_saving)
