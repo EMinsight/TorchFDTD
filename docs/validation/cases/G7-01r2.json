@@ -101,5 +101,6 @@
     "evidence": "best design, fixed k_x, 3 um more air and substrate, wavelengths at least 0.02 um from any anomaly: energy residual 0.0042 (TE) and 0.0039 (TM), largest |FDTD - TORCWA| 0.0035 (TE) and 0.0027 (TM) at 0.01 um, against 0.0903 and 0.0807 residuals in the declared cell; 0.02 um from the anomaly the evanescent decay length is 1.5 um and a propagating order leaves at most 80.7 degrees from the normal; TE at 0.02 um misses 0.02 by discretization (0.0229 at 1.5775 um, 0.0035 at 0.01 um); doubling the time brings the resonant case from 0.090 to 0.0071",
     "approved_by": "owner",
     "date": "2026-09-24"
-  }
+  },
+  "superseded_by": "docs/validation/cases/G7-01r3.json"
 }

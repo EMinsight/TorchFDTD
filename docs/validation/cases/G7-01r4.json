@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance_case",
+  "declared": "2026-09-27",
+  "declared_before_run": true,
+  "declaration": "docs/G7_WORKFLOWS.md",
+  "platform": "rtx3060-win11-lab",
+  "installation": "the release wheel in an environment outside the checkout",
+  "case_id": "G7-01r4",
+  "task": "G7-01",
+  "title": "Metagrating workflow: constrained three-ridge density design from three new held-out seeds, TE/TM, normal and fixed-k_x incidence, 41 wavelengths, orders and RCWA check",
+  "fixture": {
+    "base": "examples/meep_comparison/metagrating/geometry.json",
+    "period_um": 2.0,
+    "substrate_index": 1.444,
+    "ridge_index": 3.48,
+    "design_layer_um": [
+      0.01,
+      0.51
+    ],
+    "pixels": 100,
+    "pixel_um": 0.02,
+    "filter_radius_um": 0.0,
+    "projection_beta": [
+      8
+    ],
+    "iterations_per_beta": 6,
+    "optimizer": "Adam",
+    "learning_rate": 0.05,
+    "objective": "mean T+1 at 1.50, 1.55, 1.60 um, TE, normal incidence from the substrate",
+    "fabrication": {
+      "min_linewidth_um": 0.06,
+      "min_gap_um": 0.06,
+      "boundary": "periodic",
+      "binarize_at": 0.5
+    },
+    "evaluation": {
+      "meshes_um": [
+        0.01,
+        0.005
+      ],
+      "polarizations": [
+        "TE (E along the ridges)",
+        "TM (H along the ridges)"
+      ],
+      "incidence": [
+        "normal",
+        "fixed k_x = 2 pi n_sub sin(10 deg) / 1.55 um"
+      ],
+      "wavelengths_um": [
+        1.5,
+        1.6,
+        41
+      ],
+      "orders": [
+        -1,
+        0,
+        1
+      ],
+      "quantities": "reflected and transmitted order amplitudes (complex) and efficiencies",
+      "judged_mesh_um": 0.01,
+      "mesh_check": "0.005 um against 0.01 um, TE, normal incidence, every seed and wavelength"
+    },
+    "independent_solver": "TORCWA 0.1.4.2 on the same binary pixel pattern and k_x",
+    "design_mesh_um": 0.02,
+    "cell_extension_um": {
+      "air_above_layer": 3.0,
+      "substrate_below_layer": 3.0,
+      "applies_to": "every design and evaluation run"
+    },
+    "physical_time_fs": {
+      "design": 560,
+      "evaluation": 2240,
+      "note": "design optimization runs over 560 fs at 0.02 um; every evaluation, baseline and bare substrate is unchanged at 2240 fs on 0.01/0.005 um"
+    },
+    "rayleigh_anomaly_exclusion": "criteria (c) and (e) are judged at wavelengths at least 0.02 um from every Rayleigh anomaly of the evaluated k_x in air and substrate; excluded wavelengths are reported",
+    "torcwa_tm_convergence": "TM harmonics raised until the estimated error is at most 0.003",
+    "absorber": "0.4 um CPML at every mesh; at 0.005 um the 80 cells are set through BoundaryFace.layers, since Region.pml_cells is capped at 50",
+    "filter_radius_note": "the segment minimum guarantees the declared three-pixel linewidth and gap; no conic filter is applied",
+    "schedule_note": "the six-step segment schedule was fixed after development seeds 11-13 and before held-out seeds 7-9; the old r3 robust projection and 80-step schedule are superseded",
+    "open_close": "a periodic open-then-close of 3 pixels is applied to every binary design (development and declared seeds and the baseline) before its evaluation, fabrication check and TORCWA check; its changed pixels and the band-mean T+1 before and after are recorded",
+    "three_ridge_segments": {
+      "runs": 6,
+      "period_pixels": 100,
+      "minimum_run_pixels": 3,
+      "first_ridge_pixel": 2,
+      "initial_runs": [
+        3,
+        17,
+        4,
+        7,
+        13,
+        56
+      ],
+      "initial_selection": "the six-run initializer was selected by TORCWA on unjudged development designs and then evaluated by FDTD; the RCWA cross-solver comparison is not blind to this choice",
+      "initial_logit_jitter_std": 0.03,
+      "development_seeds": [
+        11,
+        12,
+        13
+      ],
+      "held_out_seeds": [
+        7,
+        8,
+        9
+      ],
+      "parameterization": "minimum length 3 pixels plus a softmax allocation of the remaining 82 pixels over six alternating ridge/gap runs; smooth logistic edges at beta 8 carry the design gradient",
+      "binary_quantization": "largest-remainder allocation with stable tie order, preserving total length 100 and all six minimum lengths",
+      "optimization": "six Adam steps at learning rate 0.05 on 0.02 um over 560 fs; TE normal mean T+1 at 1.50, 1.55 and 1.60 um",
+      "selection": "select the higher of the initial and final hard binary short-design objective, with the initial winning a tie; no 0.01/0.005 um evaluation is used to select",
+      "judged_design": "the selected hard binary design, then the unchanged periodic 3-pixel open-then-close, whose changed-pixel count must be reported"
+    }
+  },
+  "seed": "three-ridge logit jitter 0.03 with seeds 7, 8, 9",
+  "precision": "float32 on CUDA",
+  "backend": "cuda",
+  "reference_method": "TORCWA (grid-free RCWA) for every evaluated case",
+  "baseline": {
+    "source": "docs/validation/meep_comparison/metagrating_comparison.json",
+    "band_mean_T_plus1": 0.7706,
+    "judged_path": "the fixture's two-ridge design evaluated in the judged path: 0.01 um, the 3 um extension, 2240 fs, TE, normal incidence, 41 wavelengths, the open and close applied; recorded",
+    "limit": "the larger of 0.7706 and the judged-path value"
+  },
+  "acceptance": {
+    "all_seeds": "all three seeds reported with history, design and every evaluation",
+    "performance": "best seed band-mean T+1 (TE, normal, binary after the open and close, judged mesh 0.01 um, 2240 fs) is at least the larger of 0.7706 and the band-mean T+1 of the baseline two-ridge design evaluated in the same path",
+    "rcwa_agreement": "every order efficiency within 0.02 of TORCWA in every evaluated case at 0.01 um (TE and TM), at every wavelength at least 0.02 um from all Rayleigh anomalies of the evaluated k_x; excluded wavelengths reported",
+    "mesh": "0.005 um changes T+1 (TE, normal) by at most 0.02 at every wavelength, for every seed",
+    "energy_balance": "|1 - sum R - sum T| at most 0.02 in every evaluated case at every wavelength at least 0.02 um from all Rayleigh anomalies of the evaluated k_x; excluded wavelengths reported",
+    "fabrication": "the best seed meets the declared linewidth and gap; every seed reports its violations"
+  },
+  "supersedes": {
+    "case": "docs/validation/cases/G7-01r3.json",
+    "status": "G7-01r3 remains declared; its failed judged records remain local by owner decision"
+  },
+  "revision": {
+    "reason": "G7-01r3 passed its numerical mesh and energy criteria but its judged TE-normal band-mean T+1 values 0.246815, 0.258498 and 0.521791 for seeds 1-3 all missed the unchanged 0.7706 performance threshold. The 100-logit robust-density method did not produce competitive fabricable layouts. This revision changes the design parameterization and optimization schedule while retaining every evaluation path and numerical limit.",
+    "evidence": "r3 judged performance: 0.246815, 0.258498, 0.521791 against 0.7706. Unjudged r4 development candidate (3,21,5,7,13,51): FDTD 0.01 um/2240 fs TE-normal 41-wavelength mean T+1 = 0.803038; 0.005 um value 0.802401; maximum wavelength mesh difference 0.000793; largest energy residual over TE/TM and both incidences on anomaly-kept wavelengths 0.001666; largest all-order FDTD–converged TORCWA difference 0.002165. The TORCWA-selected initializer (3,17,4,7,13,56) itself scored 0.802031 in FDTD. After the first 0.1-logit-jitter development yielded narrow margins, the frozen 0.03-jitter six-step method selected initial, initial and final hard designs on unjudged seeds 11-13. Installed-wheel 0.01 um/2240 fs FDTD band-mean T+1 values of those selected designs were 0.801258, 0.802031 and 0.777631, all above the unchanged 0.7706 limit; none of these are held-out seeds. Selected seed 11 additionally had 0.000272 maximum pointwise mesh difference and 0.001446 maximum anomaly-kept energy residual over TE/TM and both incidences. Its four TORCWA cases converged at 80, 80, 240 and 400 harmonics, with a maximum all-order FDTD–TORCWA difference of 0.002271, below the unchanged 0.02 limit.",
+    "approved_by": "owner",
+    "date": "2026-09-27",
+    "approval": "Owner requested completion of the 1.0.0 release candidate through release deployment on 2026-09-27."
+  },
+  "difference_from_r3": "three-ridge six-run parameterization, TORCWA-selected initialization disclosed, new held-out seeds 7-9, and a 0.02 um/560 fs six-step short design optimization with initial/final selection; all 0.01/0.005 um 2240 fs evaluations, TE/TM incidence cases, baseline and acceptance limits unchanged"
+}
