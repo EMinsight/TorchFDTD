@@ -47,7 +47,7 @@ def reject_pml_dispersion(project, path, explicit=False):
     """Explicit refusal for paths that run the plain CPML and ADE on every PML face.
 
     Only a mode that changes the run is refused: 'absorber' with absorber faces,
-    'frozen' with an enabled dispersive structure reaching a PML layer. Paths whose
+    'frozen' with a sample of an enabled dispersive structure in a PML layer. Paths whose
     oscillators come from parameter tensors (explicit) refuse every mode but 'ade':
     the structures do not say where the poles are.
     """
@@ -66,10 +66,10 @@ def reject_pml_dispersion(project, path, explicit=False):
 def absorber_faces(project):
     """(axis, side) of the PML faces that become the adiabatic absorber.
 
-    With region.pml_dispersion == 'absorber' these are the faces an enabled dispersive
-    structure reaches or touches by its bounding box, the test of the validation
-    warning; every other PML face keeps the CPML, so no pole sample lies in a
-    stretched layer. A soft sheet extended through the PML across an absorber face
+    With region.pml_dispersion == 'absorber' these are the faces whose layer rows
+    hold a material sample of an enabled dispersive structure, by its bounding box
+    (the rows 'frozen' freezes, and the test of the validation warning); every other
+    PML face keeps the CPML, so no pole sample lies in a stretched row. A soft sheet extended through the PML across an absorber face
     is refused: the absorber damps its wave inside the layer (docs/BOUNDARIES.md).
     Every other source lies in the interior, where the absorber has no loss.
     """

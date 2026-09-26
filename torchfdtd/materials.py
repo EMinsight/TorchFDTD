@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import torch
 
-from .boundaries import absorber_loss
+from .boundaries import absorber_loss, absorber_slabs
 
 
 def permittivity(material, frequency_hz, dt=0):
@@ -168,13 +168,26 @@ def configure_materials(grid, project, ownership):
             owned = owned & ~pml
             if not np.any(owned):
                 continue
-        indices = np.flatnonzero(owned)
-        state = MaterialADE(grid, m, indices, ownership.ndim == 4)
+        lossy = ()
         if absorber is not None:
-            loss = absorber_loss(absorber, ownership.shape[:3], 'E', indices, state.components)
-            if np.any(loss):
-                ref = grid.absorber_reference[m.name] = absorber_reference_epsilon(m, reference_hz, grid.time_step)
-                state.absorber = tuple(grid._coefficient(v) for v in
-                                       (m.epsilon_inf+loss*ref, m.epsilon_inf*(1+loss), loss*(m.epsilon_inf-ref)))
-        states.append(state)
+            # Samples with absorber loss get a state of their own with its coefficients. The loss is zero off the
+            # slabs, so only the slab samples are indexed, box by box.
+            view, parts = owned.reshape(ownership.shape), [np.zeros(0, dtype=np.int64)]
+            for box in absorber_slabs(region, grid.absorber_faces):
+                local = np.nonzero(view[box])
+                parts.append(np.ravel_multi_index(tuple(c+b.start for c, b in zip(local, box))+local[3:], ownership.shape))
+            candidates = np.sort(np.concatenate(parts))
+            loss = absorber_loss(absorber, ownership.shape[:3], 'E', candidates, ownership.ndim == 4)
+            keep = loss != 0 if ownership.ndim == 4 else np.any(loss != 0, axis=1)
+            lossy, loss = candidates[keep], loss[keep]
+            owned[lossy] = False
+        indices = np.flatnonzero(owned)
+        if len(indices):
+            states.append(MaterialADE(grid, m, indices, ownership.ndim == 4))
+        if len(lossy):
+            state = MaterialADE(grid, m, lossy, ownership.ndim == 4)
+            ref = grid.absorber_reference[m.name] = absorber_reference_epsilon(m, reference_hz, grid.time_step)
+            state.absorber = tuple(grid._coefficient(v) for v in
+                                   (m.epsilon_inf+loss*ref, m.epsilon_inf*(1+loss), loss*(m.epsilon_inf-ref)))
+            states.append(state)
     grid.material_states = states

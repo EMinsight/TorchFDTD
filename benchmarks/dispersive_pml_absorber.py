@@ -107,11 +107,13 @@ def reflection_project(*, long, material='vacuum', pol='TE', mode='absorber', la
 
 
 def corner_post_project(material, mode, *, size=(1.2, 1.2, 1.), steps=20000, sample=SAMPLE, precision='float64', backend='cpu',
-                        kernel='torch', depth=.1, mesh=.02, layers=POST_LAYERS, inside=False, face=None, linewidth=None):
+                        kernel='torch', depth=.1, mesh=.02, layers=POST_LAYERS, inside=False, face=None, linewidth=None, form='post'):
     """A 0.6 um post filling the outer `depth` of the x_max/y_max corner of a 12-layer CPML box (20 nm cells).
 
     inside moves the post 0.35 um into the interior; face overrides the CPML profile of every face;
     linewidth replaces the Lorentz damping; material 'dielectric' is a nondispersive n=2 post.
+    form 'enter' is a post from 0.15 um inside the interior to 2 cells short of the outer edge in x and y, 'film' the
+    same span in x only (through the y faces), and 'bar' a 0.2 x 0.2 um bar along x through the x_max layer.
     """
     X, Y, Z = size
     r = Region(dimension='3d', size=size, mesh=mesh, steps=steps, precision=precision, backend=backend, cuda_kernel=kernel,
@@ -123,6 +125,12 @@ def corner_post_project(material, mode, *, size=(1.2, 1.2, 1.), steps=20000, sam
         medium = medium.model_copy(update=dict(linewidth_rad_s=linewidth))
     center = (X/2-.35, Y/2-.35, 0) if inside else (X/2, Y/2, 0)
     post = Structure(name='post', center=center, size=(2*depth, 2*depth, .6), material='medium')
+    if form in ('enter', 'film'):
+        lo, hi = r.interior_bounds(0)[1]-.15, X/2-2*mesh
+        post = Structure(name=form, center=((lo+hi)/2, (lo+hi)/2 if form == 'enter' else 0, 0),
+                         size=(hi-lo, hi-lo if form == 'enter' else 100., .6), material='medium')
+    elif form == 'bar':
+        post = Structure(name='bar', center=(X/2, 0, 0), size=(X, .2, .2), material='medium')
     return Project(name=f'{material} corner post {mode}', region=r, materials=[Material(name='void', index=1), medium],
                    structures=[post], sources=[Source(kind='point', component='Ex', center=(X/2-.4, Y/2-.4, .05), **VISIBLE_PULSE)],
                    monitors=[Monitor(component='Ex', center=(X/2-.35, Y/2-.35, 0.))])
@@ -173,6 +181,14 @@ def rows():
     out.append(dict(id='mechanism-mesh10nm-cpml-cuda-float64', kind='stability', fixture='corner_post', material='sin', mode='ade',
                     steps=8000, precision='float64', backend='cuda', kernel='fused', judged=None,
                     options=dict(mesh=.01, layers=2*POST_LAYERS, sample=2*SAMPLE)))
+    # Where a structure ends: entering the corner from the interior and ending inside the layers (post, film), and a Drude bar
+    # crossing a layer, each with the CPML and with the absorber (reported, not judged).
+    for name, material, steps, options in (('enter-post', 'sin', 4000, dict(form='enter')), ('enter-film', 'sin', 4000, dict(form='film')),
+                                           ('drude-bar', 'drude', 12000, dict(form='bar'))):
+        for mode in ('ade', 'absorber'):
+            out.append(dict(id=f'mechanism-{name}-{"absorber" if mode == "absorber" else "cpml"}-cpu-float64', kind='stability',
+                            fixture='corner_post', material=material, mode=mode, steps=steps, precision='float64', backend='cpu',
+                            kernel='torch', judged=None, options=dict(size=(.9, .9, 1.), **options)))
     for material in ('sin', 'drude'):
         out.append(dict(id=f'stability-{material}-post-cpml-cpu-float64', kind='stability', fixture='corner_post', material=material, mode='ade',
                         steps=4000, precision='float64', backend='cpu', kernel='torch', judged='diverges'))
@@ -282,7 +298,7 @@ def execute(spec):
             out.update(shape=list(p.region.shape), cells=int(math.prod(p.region.shape)), dt_s=p.region.time_step,
                        source_end_fs=source_end_time(p)*1e15, steps_completed=int(samples[-1]['step']) if samples else 0,
                        sample_interval=p.region.run_control.check_interval, samples=samples, error=error)
-            if spec['mode'] == 'ade' and samples:
+            if (spec['mode'] == 'ade' or spec['id'].startswith('mechanism')) and samples:
                 medium = next(m for m in p.materials if m.name == 'medium')
                 out['growth'] = growth(samples, signals if medium.oscillators else None, p.region.time_step, medium)
     except Exception as exc:   # an admission or contract error is a recorded outcome
@@ -466,11 +482,12 @@ def render(record):
     lines += ['', '## Growth with the CPML', '',
               'Least-squares rate of ln(state norm) over the second half of the samples, the amplitude rate per second, the dominant '
               'frequency of the monitor trace there and the bilinear permittivity of the medium at that frequency (growing rows only). '
-              'The mechanism rows vary one parameter of the SiN corner post at a time.', '',
+              'The mechanism rows vary one parameter of the SiN corner post at a time, or the form of the structure (with the '
+              'CPML and with the absorber).', '',
               '| row | variation | energy rate per step | amplitude rate (1/s) | frequency (rad/s) | bilinear eps | last state norm / peak |',
               '| --- | --- | ---: | ---: | ---: | --- | ---: |']
     for r in rows:
-        if r['kind'] != 'stability' or r['mode'] != 'ade':
+        if r['kind'] != 'stability' or (r['mode'] != 'ade' and not r['id'].startswith('mechanism')):
             continue
         g = r.get('growth') or {}
         eps = g.get('bilinear_epsilon')

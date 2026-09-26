@@ -196,6 +196,9 @@ HOST_PLANE_POINT_BYTES = 150
 HOST_PLANE_SAMPLE_BYTES = 44
 HOST_WAVEFORM_BYTES = 20
 HOST_FIXED_BYTES = 512*2**20       # CUDA, CuPy and Python runtime of the run (up to 273 MiB measured at 1M cells)
+# Host transient of the pole coefficients of pml_dispersion='absorber' per cell of its slabs, over the material kept
+# after planning (163 Yee, 118 cell, measured on a full SiN fill, about 10% added).
+HOST_ABSORBER_SLAB_BYTES = {'cell': 130, 'yee': 180}
 
 
 def display_host_bytes(p):
@@ -220,11 +223,14 @@ def resident_host_bytes(p, cells, terms):
     r = p.region
     field = (8 if r.precision == 'float64' else 4)*(2 if r.complex_fields else 1)
     kept, peak = HOST_MATERIAL_BYTES['subpixel' if r.interface_method == 'subpixel' else r.material_sampling]
+    from .boundaries import absorber_faces, absorber_slabs
+    slab = sum(math.prod(len(range(n)[b]) for n, b in zip(r.shape, box)) for box in absorber_slabs(r, absorber_faces(p)))
+    absorber = slab*HOST_ABSORBER_SLAB_BYTES.get(r.material_sampling, 0)
     planes = plane_sizes(p)
     post = sum(n*nf*nc*(sample+HOST_PLANE_SAMPLE_BYTES) for n, nf, nc, sample in planes)
     base = (sum(n*nc for n, _, nc, _ in planes)*HOST_PLANE_POINT_BYTES+r.steps*terms*HOST_WAVEFORM_BYTES
             +point_trace_memory(p)+display_host_bytes(p)+HOST_FIXED_BYTES)
-    return base+max(cells*peak, cells*(kept+6*field)+max(3*field*cells, post))
+    return base+max(cells*peak, cells*kept+absorber, cells*(kept+6*field)+max(3*field*cells, post))
 
 
 def estimate(p: Project, *, endpoint_dispatch=True):
@@ -333,10 +339,11 @@ def estimate(p: Project, *, endpoint_dispatch=True):
     from .boundaries import absorber_faces, absorber_slabs
     absorber_bytes = 0
     faces = absorber_faces(p)
-    if faces and not fused:
-        # The torch/NumPy update keeps decay and gain of E and H on the absorber slabs.
-        absorber_bytes = 4*3*(8 if r.precision == 'float64' else 4)*sum(math.prod(len(range(n_)[b]) for n_, b in zip(r.shape, box))
-                                                                        for box in absorber_slabs(r, faces))
+    if faces:
+        # Three coefficients per pole sample with absorber loss, at most every sample of the slabs, and on the torch/NumPy
+        # update the decay and gain of E and H there.
+        absorber_bytes = (3 if fused else 7)*3*(8 if r.precision == 'float64' else 4)*sum(
+            math.prod(len(range(n_)[b]) for n_, b in zip(r.shape, box)) for box in absorber_slabs(r, faces))
     host_extra = 0
     if r.backend != 'cuda':
         # On the CPU the estimate is host memory, and the tensor-expression bound covers the material and the
@@ -358,7 +365,7 @@ def estimate(p: Project, *, endpoint_dispatch=True):
             'host_estimated_mb': round(host_bytes/2**20, 1),
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes,
             'point_trace_estimated_bytes': point_trace_memory(p), 'source_waveform_estimated_bytes': source_bytes, 'snapshot': snapshot,
-            **({'absorber_cache_estimated_bytes': absorber_bytes} if absorber_bytes else {})}
+            **({'absorber_estimated_bytes': absorber_bytes} if absorber_bytes else {})}
 
 
 def pulse_envelope_parameters(source):

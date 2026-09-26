@@ -520,6 +520,10 @@ def run_tiled(project, plan, *, backend, options=None, executor='sequential', bl
     options = dict(options or {})
     projects = [Project.model_validate({**t.project.model_dump(), 'region': {**t.project.region.model_dump(), 'backend': backend}})
                 for t in plan.tiles]
+    # A sheet extended across a tile's absorber face is refused before the first tile runs (boundaries.absorber_faces).
+    from .boundaries import absorber_faces
+    for q in projects:
+        absorber_faces(q)
     started = time.perf_counter()
     if executor == 'sequential':
         from .solver import Simulation
