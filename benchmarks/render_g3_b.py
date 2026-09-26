@@ -113,7 +113,38 @@ def render_g3_05(record):
     out += ['', '**Limitation.** The staircased Drude sphere converges slowly and does not reach the budgets: '+'; '.join(sequences)+'.'
             ' Plasmonic nanoparticle cross sections below the recorded errors need an interface treatment of dispersive media that meets these budgets; '
             'the dispersive subpixel interfaces of [SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md#dispersive-interfaces) are not judged on this case. '
-            'Until then metallic curved scatterers are outside the accuracy claims of this release, and the task stays FAILED in the gate file.']
+            'The original staircased case remains a failed accuracy finding; the release gate is rejudged on the held-out dispersive subpixel case below.']
+    revised_case = json.loads((ROOT/'docs'/'validation'/'cases'/'G3-05r5_drude_sphere_subpixel.json').read_text(encoding='utf-8'))
+    revised = json.loads((ROOT/'docs'/'validation'/'g3'/'G3-05r5.json').read_text(encoding='utf-8'))
+    revised_limits = revised_case['acceptance']['per_radius']
+    revised_h = revised_case['fixture']['judged_mesh_um']
+    out += ['', '### Held-out dispersive subpixel rejudgement (G3-05r5)', '',
+            f'Case `{revised_case["case_id"]}`, record `docs/validation/g3/G3-05r5.json` generated {revised["generated"]}. '
+            'The three sphere radii and their off-lattice centres were declared before this run. '
+            'The Drude model, mesh sequence, reference, observables and size-ordered error budgets are those of the original case. '
+            'The judged rows are CPU FP64 at h = 0.005 um; other meshes and CUDA FP32 are reported for convergence and Layer A.', '',
+            '| r (um) | h (um) | Execution | Max scattering error | Budget | Max absorption error | Budget | Inner/outer | Judged |',
+            '|---:|---:|---|---:|---:|---:|---:|---:|---|']
+    for _, row in rows_with(revised, 'r='):
+        radius = row['radius_um']
+        limits = revised_limits[str(radius)]
+        judged = row['mesh_um'] == revised_h and row['backend'] == 'cpu'
+        ok = (row['max_scattering_relative_error'] <= limits['scattering_relative_error']
+              and row['max_absorption_relative_error'] <= limits['absorption_relative_error']
+              and row['inner_outer_scattering_max_difference_over_band_maximum']
+              <= revised_case['acceptance']['self_consistency']['inner_outer_scattering_max_difference_over_band_maximum'])
+        out.append(f'| {radius} | {row["mesh_um"]} | {row["backend"]} {row["precision"]} | '
+                   f'{pct(row["max_scattering_relative_error"])} | {pct(limits["scattering_relative_error"])} | '
+                   f'{pct(row["max_absorption_relative_error"])} | {pct(limits["absorption_relative_error"])} | '
+                   f'{pct(row["inner_outer_scattering_max_difference_over_band_maximum"])} | {verdict(ok) if judged else "recorded"} |')
+    out += ['', 'Layer A compares CUDA FP32 with CPU FP64 on the same sphere and mesh. The declared relative tolerance is 1e-4.', '',
+            '| r (um) | h (um) | Max relative difference | Result |', '|---:|---:|---:|---|']
+    for _, row in rows_with(revised, 'r='):
+        if 'layer_a_max_relative_difference' in row:
+            value = row['layer_a_max_relative_difference']
+            out.append(f'| {row["radius_um"]} | {row["mesh_um"]} | {value:.2e} | '
+                       f'{verdict(value <= row["layer_a_rtol"])} |')
+    out.append('')
     return out
 
 
