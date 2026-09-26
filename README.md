@@ -123,6 +123,12 @@ Each example includes its geometry, run commands and comparison results.
 
 For gradients and optimization, start with [differentiable FDTD](docs/DIFFERENTIABLE_FDTD.md) and [shape gradients](docs/SHAPE_GRADIENTS.md). For larger studies, see [parameter sweeps](docs/PYTHON_BATCH.md) and [tensor batches](docs/TENSOR_BATCH.md).
 
+## How it works
+
+[![Animated overview of TorchFDTD: a 1 mm metalens cut into tiles, stitched near field and angular-spectrum propagation](docs/assets/torchfdtd-explainer.gif)](https://github.com/hyoseokp/TorchFDTD/raw/refs/heads/main/docs/assets/torchfdtd-explainer.mp4)
+
+*A two-minute animated overview: the Yee update, fused CUDA kernels, the discrete adjoint with checkpoints, host memory streaming, and lateral tiles with angular-spectrum propagation for a 1 mm metalens. The preview shows the tile scene. [Full video](https://github.com/hyoseokp/TorchFDTD/raw/refs/heads/main/docs/assets/torchfdtd-explainer.mp4) · [Scenes and data](docs/assets/torchfdtd-explainer.md).*
+
 ## Core features
 
 <details>
