@@ -11,10 +11,14 @@ from dataclasses import asdict
 import hashlib
 import importlib.metadata
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 import time
+
+os.environ['OMP_NUM_THREADS'] = '2'
+os.environ['MKL_NUM_THREADS'] = '2'
 
 import torchfdtd
 
@@ -51,6 +55,8 @@ def worker(scenario, *, reduced=False, backend='cuda'):
     return dict(scenario=scenario, reduced=reduced, backend=backend,
                 package_version=importlib.metadata.version('torchfdtd'),
                 package_path=str(PACKAGE), interpreter=sys.executable,
+                cpu_threads=dict(omp=os.environ['OMP_NUM_THREADS'],
+                                 mkl=os.environ['MKL_NUM_THREADS']),
                 execution_policy=policy,
                 iterations=[row['stages'] for row in observations],
                 observations=[{key: value for key, value in row.items() if key != 'stages'}
@@ -119,8 +125,9 @@ def main(argv=None):
         records.append(json.loads(path.read_text(encoding='utf-8')))
     versions = {row['package_version'] for row in records}
     paths = {row['package_path'] for row in records}
-    if len(versions) != 1 or len(paths) != 1:
-        raise RuntimeError('The fresh processes imported different installations.')
+    thread_policies = {tuple(sorted(row['cpu_threads'].items())) for row in records}
+    if len(versions) != 1 or len(paths) != 1 or len(thread_policies) != 1:
+        raise RuntimeError('The fresh processes used different installations or CPU thread settings.')
     policies = [row['execution_policy'] for row in records]
     if any(policy != policies[0] for policy in policies):
         raise RuntimeError('The fresh processes used different execution policies.')
@@ -128,6 +135,7 @@ def main(argv=None):
         raise RuntimeError('Installed TorchFDTD version does not match the wheel filename.')
     summary = dict(scenario=args.scenario, reduced=args.reduced, backend=args.backend,
                    package_version=next(iter(versions)), package_path=next(iter(paths)),
+                   cpu_threads=records[0]['cpu_threads'],
                    torchfdtd_import='installed', wheel=None if wheel is None else str(wheel),
                    wheel_sha256=wheel_hash, execution_policy=policies[0],
                    stage_names=list(STAGES),

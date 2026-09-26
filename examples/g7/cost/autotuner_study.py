@@ -10,9 +10,13 @@ from dataclasses import asdict
 import hashlib
 import importlib.metadata
 import json
+import os
 from pathlib import Path
 import sys
 import time
+
+os.environ['OMP_NUM_THREADS'] = '2'
+os.environ['MKL_NUM_THREADS'] = '2'
 
 import numpy as np
 import torch
@@ -103,8 +107,12 @@ def main(argv=None):
         host = checked_summary(args.host_summary, 'g701-host-broadband',
                                reduced=args.reduced, backend=args.backend)
         if (resident.get('package_version'), resident.get('wheel_sha256')) != (
-                host.get('package_version'), host.get('wheel_sha256')):
-            raise ValueError('The compared summaries must use the same installed wheel.')
+                host.get('package_version'), host.get('wheel_sha256')) or (
+                resident.get('package_version') != importlib.metadata.version('torchfdtd')):
+            raise ValueError('The tuner and compared summaries must use the same installed wheel.')
+        if (resident.get('cpu_threads') != host.get('cpu_threads')
+                or resident.get('cpu_threads') != dict(omp='2', mkl='2')):
+            raise ValueError('The compared summaries must use the same two-thread CPU policy.')
         selected = resident if selected_storage == 'resident' else host
         before = resident['statistics']['full_iteration']['warm']['median']
         after = selected['statistics']['full_iteration']['warm']['median']
@@ -125,6 +133,8 @@ def main(argv=None):
                   reduced=args.reduced, backend=args.backend,
                   package_version=importlib.metadata.version('torchfdtd'),
                   package_path=str(PACKAGE), interpreter=sys.executable,
+                  cpu_threads=dict(omp=os.environ['OMP_NUM_THREADS'],
+                                   mkl=os.environ['MKL_NUM_THREADS']),
                   case=None if not case_path.exists() else str(case_path),
                   case_sha256=None if not case_path.exists() else hashlib.sha256(
                       case_path.read_bytes()).hexdigest(),
