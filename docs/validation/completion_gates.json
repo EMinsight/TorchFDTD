@@ -1048,7 +1048,7 @@
             "docs/PHYSICS_VALIDATION.md"
           ],
           "planned_test_commands": [
-            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_05r5.py -k g3_05_ --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05r5.xml"
+            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_05r5.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05r5.xml"
           ],
           "actual_test_commands": [
             "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05.xml",
