@@ -1036,14 +1036,19 @@
           "owner": null,
           "code_paths": [
             "tests/test_physics_g3_b.py",
+            "tests/test_physics_g3_05r5.py",
             "torchfdtd/materials.py",
+            "torchfdtd/subpixel.py",
+            "torchfdtd/subpixel_dispersive.py",
             "torchfdtd/tfsf.py",
             "docs/validation/cases/G3-05_drude_sphere.json",
+            "docs/validation/cases/G3-05r5_drude_sphere_subpixel.json",
             "docs/validation/g3/G3-05.json",
+            "docs/validation/g3/G3-05r5.json",
             "docs/PHYSICS_VALIDATION.md"
           ],
           "planned_test_commands": [
-            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05.xml"
+            "set TORCHFDTD_G3_FULL=1 and TORCHFDTD_G3_RECORD=docs/validation/g3; D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_05r5.py -k g3_05_ --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05r5.xml"
           ],
           "actual_test_commands": [
             "TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3 D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/TorchFDTD/.local/tmp/junit/G3-05.xml",
@@ -1051,8 +1056,8 @@
             "$env:TORCHFDTD_G3_FULL='1'; $env:TORCHFDTD_G3_RECORD='D:/torchfdtd-rc-wt/docs/validation/g3'; D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_physics_g3_b.py -k g3_05 --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G3-05.xml"
           ],
           "required_tests": [
-            "tests/test_physics_g3_b.py::test_g3_05_drude_sphere",
-            "tests/test_physics_g3_b.py::test_g3_05_drude_cuda_layer_a"
+            "tests/test_physics_g3_05r5.py::test_g3_05r5_drude_sphere_subpixel",
+            "tests/test_physics_g3_05r5.py::test_g3_05r5_drude_cuda_layer_a"
           ],
           "evidence": [
             "20260921T181951Z-g3-05-8fafa59e",
@@ -1064,15 +1069,15 @@
           "blocker": null,
           "scope_change_approval": {
             "approved_by": "owner",
-            "date": "2026-09-24",
+            "date": "2026-09-22",
             "decision": "approved",
-            "scope": "every scope change declared by the case files of G3-05 as listed by scripts/check_release_gates.py on 2026-09-24 (1 declaration(s)): revised cases, limits looser than the program thresholds and, for G3-05, a program threshold declared not applicable",
-            "basis": "the owner was shown the twelve pending tasks with their declarations (revised cases G3-02 and G3-08; float32 and physically motivated tolerances of G3-06, G3-09, G3-10, G3-11, G3-12, G3-14, G3-15, G3-16 and G6-04; the Drude-sphere limitation of G3-05) and approved all of them",
-            "note": "approval of the declared limits, not a change of the program thresholds; G3-05 stays FAILED and its curved-metal accuracy remains a 1.0.0 condition"
+            "scope": "The held-out G3-05r5 case rejudges curved dispersive subpixel accuracy with off-lattice spheres; the original failed staircase case remains recorded, and the accuracy limits are unchanged.",
+            "basis": "The owner's 2026-09-22 condition for 1.0.0 requires dispersive subpixel or conformal curved-metal accuracy followed by G3-05 rejudgement; G3-05r5 revision.approved_by names the owner and that decision.",
+            "note": "The 2026-09-24 approval of the original G3-05 limitation remains in the earlier evidence; this approval covers the held-out revision and does not erase the failed staircase result."
           },
-          "implementation_note": "Fixture, independent reference and tests added in tests/test_physics_g3_b.py; the pre-declared case is docs/validation/cases/G3-05_drude_sphere.json. The record docs/validation/g3/G3-05.json is written by the full run.",
+          "implementation_note": "The original staircased Drude sphere remains a failed historical case. Dispersive subpixel interfaces and the held-out off-lattice G3-05r5 case have CPU FP64 and CUDA FP32 records in docs/validation/g3/G3-05r5.json; release gate evidence must be rerecorded on the integrated commit.",
           "watch_paths": [
-            "docs/validation/cases/G3-05_*.json",
+            "docs/validation/cases/G3-05*.json",
             "examples/tfsf_sphere.py"
           ]
         },
