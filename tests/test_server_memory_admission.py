@@ -210,10 +210,23 @@ def test_on_the_gpu_the_host_arrays_bound_a_grid_above_the_server_cell_limit():
         assert not fit['fits'] and fit['reason'].startswith('resident host estimate')
 
 
-def test_budgeted_mode_network_and_design_routes_are_admitted_by_their_budgets(tmp_path):
-    """The counterpart of test_server_security::test_budgeted_mode_network_and_design_routes_keep_the_resident_cell_limit."""
+def simulate_host_memory(monkeypatch, available):
+    """Every torchfdtd module reading the host memory sees available bytes, the ones that imported host_memory by name too."""
+    import sys
+    from torchfdtd import memory_profile
+    original = memory_profile.host_memory
+    for name, module in list(sys.modules.items()):
+        if name.startswith('torchfdtd') and getattr(module, 'host_memory', None) is original:
+            monkeypatch.setattr(module, 'host_memory', lambda: dict(total_bytes=2*available, available_bytes=available))
+
+
+def test_budgeted_mode_network_and_design_routes_are_admitted_by_their_budgets(tmp_path, monkeypatch):
+    """The counterpart of test_server_security::test_budgeted_mode_network_and_design_routes_keep_the_resident_cell_limit.
+
+    With 1 TiB of host memory simulated, the byte budgets of the requests decide, on any host."""
     from test_mode_network_project import config
     from torchfdtd.periodic_design import PeriodicDesignConfig
+    simulate_host_memory(monkeypatch, 2**40)
     network = config()
     network['project']['region'] = dict(network['project']['region'], size=[14., 14., 6.], mesh=.05)  # 9,408,000 cells
     network['project']['sources'][0]['size'] = [14., 14., 0.]
@@ -733,7 +746,7 @@ def test_the_design_state_directory_stays_inside_the_server_root(tmp_path):
         root = tmp_path / str(memory_admission)
         with workbench(root, memory_admission) as client:
             for path in [str(tmp_path / 'outside'), 'C:/Windows/Temp', '\\\\server\\share', '/tmp/x', '../escape', 'runs/../../escape',
-                         'C:relative', 'a:b', '.', 'with\0nul', 'tab\there', 'x'*300]:
+                         'C:relative', 'a:b', '.', 'with\0nul', 'tab\there', 'x'*300, 'runs\\first', '//server/share/x']:
                 for route in ('/api/design/config', '/api/design/plan', '/api/design/jobs'):
                     response = client.post(route, json=dict(config, state_directory=path, disk_budget_gib=1))
                     assert response.status_code == 422 and 'design state directory' in response.text, (path, route, response.text[:200])

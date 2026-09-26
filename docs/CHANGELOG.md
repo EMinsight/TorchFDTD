@@ -32,7 +32,7 @@ Commits that only record validation evidence or documentation ("Record ...",
 ### Security
 
 - The workbench server limits the cells of the complex Bloch source sheets to 8,000,000 and the plane points x recorded components over every frequency plane to 12,000,000 (`SERVER_LIMITS` `sheet_cells` and `plane_points`), counted before anything is built where planning starts; the other limits left both open, and a 30000 x 30000-cell Bloch sheet took about 34 GB in `/api/validate` (this commit).
-- Under the workbench server the `state_directory` of a design configuration names a subdirectory of `<results>/design-state`; a drive, a root or UNC share, a colon or a name resolving outside answers 422, where the server used to read and write the path the client chose (this commit).
+- Under the workbench server the `state_directory` of a design configuration names a subdirectory of `<results>/design-state` with forward slashes; a control character, a backslash, a colon, a leading slash, a component over 255 characters or a name resolving outside answers 422 on every platform, where the server used to read and write the path the client chose (this commit).
 
 ## 0.16.1 (2026-09-26)
 
