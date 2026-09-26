@@ -76,6 +76,7 @@ class Settings:
     threshold selection; Settings.for_selection() is one development design of the selection; small_run()
     is a CPU development size that judges nothing."""
     design_mesh_um: float = .01
+    optimization_mesh_um: float | None = None  # r4 optimizes on a short coarse grid, then judges at design_mesh_um
     fine_mesh_um: float = .005
     physical_time_fs: float = 1120.      # of every design run
     evaluation_time_fs: float = 2240.    # of every evaluation, of the designs, the baseline and the bare substrate
@@ -104,6 +105,19 @@ class Settings:
         """The declared run of the case file, with the threshold shift of the recorded selection."""
         f, p = case['fixture'], case_parameters(case)
         evaluation = f['evaluation']
+        if 'three_ridge_segments' in f:
+            fine = [m for m in evaluation['meshes_um'] if not math.isclose(m, evaluation['judged_mesh_um'])]
+            if len(fine) != 1 or not math.isclose(f['design_mesh_um'], .02):
+                raise ValueError('the constrained design must optimize at 0.02 um and judge at the two declared meshes')
+            return cls(design_mesh_um=evaluation['judged_mesh_um'], optimization_mesh_um=f['design_mesh_um'],
+                       fine_mesh_um=fine[0], physical_time_fs=p['design_time_fs'],
+                       evaluation_time_fs=p['evaluation_time_fs'], extension_um=p['extension_um'],
+                       absorber_um=p['absorber_um'], filter_radius_um=0., threshold_shift=None,
+                       open_close=True, iterations_per_beta=f['iterations_per_beta'],
+                       betas=tuple(float(beta) for beta in f['projection_beta']),
+                       learning_rate=f['learning_rate'], band_points=evaluation['wavelengths_um'][2],
+                       seeds=tuple(declared_seeds(case)), rcwa_error_target=p['rcwa_error_target'],
+                       anomaly_exclusion_um=p['exclusion_um'])
         if not math.isclose(f['design_mesh_um'], evaluation['judged_mesh_um']):
             raise ValueError('the case file judges at a mesh other than the design mesh')
         if selection.get('chosen_threshold_shift') is None:
@@ -163,7 +177,7 @@ def case_parameters(case):
     anomaly exclusion, the TORCWA TM error target, the absorber, the cell extension and the 0.02 limit of
     (c), (d) and (e); the ones stated in prose are parsed and checked."""
     f = case['fixture']
-    robust = f['robust_projection']
+    robust = f.get('robust_projection')
 
     def search(pattern, text):
         found = re.search(pattern, text)
@@ -177,10 +191,18 @@ def case_parameters(case):
         search(r'0\.02', case['acceptance'][key])
     search(r'larger of 0\.7706 and', case['acceptance']['performance'])
     search(r'3 pixels is applied to every binary design', f['open_close'])
-    return dict(shift_candidates=[float(v) for v in robust['threshold_shift_candidates']],
-                shift_fallback=float(search(r'if every candidate is rejected, (\d+\.\d+)', robust['threshold_shift_rule']).group(1)),
-                development_seeds=[int(s) for s in robust['development_seeds']], selection_mesh_um=float(robust['selection_mesh_um']),
-                selection_time_fs=float(robust['selection_time_fs']), design_time_fs=float(f['physical_time_fs']['design']),
+    if robust is None:
+        segment = f['three_ridge_segments']
+        selection = dict(shift_candidates=[], shift_fallback=None,
+                         development_seeds=[int(seed) for seed in segment['development_seeds']],
+                         selection_mesh_um=float(f['design_mesh_um']),
+                         selection_time_fs=float(f['physical_time_fs']['design']))
+    else:
+        selection = dict(shift_candidates=[float(v) for v in robust['threshold_shift_candidates']],
+                         shift_fallback=float(search(r'if every candidate is rejected, (\d+\.\d+)', robust['threshold_shift_rule']).group(1)),
+                         development_seeds=[int(s) for s in robust['development_seeds']], selection_mesh_um=float(robust['selection_mesh_um']),
+                         selection_time_fs=float(robust['selection_time_fs']))
+    return dict(**selection, design_time_fs=float(f['physical_time_fs']['design']),
                 evaluation_time_fs=float(f['physical_time_fs']['evaluation']),
                 exclusion_um=float(search(r'at least (\d+\.\d+) um from every Rayleigh anomaly', f['rayleigh_anomaly_exclusion']).group(1)),
                 rcwa_error_target=float(search(r'at most (\d+\.\d+)', f['torcwa_tm_convergence']).group(1)),
@@ -445,10 +467,10 @@ class TransmissionObjective:
         self.wavelength = np.asarray(DESIGN_WAVELENGTHS_UM)
         self.frequency = C0/(self.wavelength*1e-6)
         time_fs = settings.physical_time_fs
-        project = build_project(g, settings.design_mesh_um, 'TE', 'normal', settings, time_fs, monitors=('transmission',))
+        project = build_project(g, settings.optimization_mesh_um or settings.design_mesh_um, 'TE', 'normal', settings, time_fs, monitors=('transmission',))
         self.region = project.region
         self.model = DifferentiablePlaneSimulation(project, AdjointOptions(checkpoints=settings.checkpoints))
-        reference = DifferentiablePlaneSimulation(build_project(g, settings.design_mesh_um, 'TE', 'normal', settings, time_fs,
+        reference = DifferentiablePlaneSimulation(build_project(g, settings.optimization_mesh_um or settings.design_mesh_um, 'TE', 'normal', settings, time_fs,
                                                                 monitors=('reflection',)), AdjointOptions(checkpoints=0))
         with torch.no_grad():
             planes = reference(layer_epsilon(torch.zeros(pixel_count(g), device=self.device), self.region, g), self.frequency)
@@ -854,7 +876,12 @@ def seed_stage(settings, seed, out, *, rcwa_python, selection=None, checkpoint=N
     case, g, provenance = declared()
     device = torch.device(settings.backend)
     started = time.perf_counter()
-    record = design_seed(seed, TransmissionObjective(g, settings), settings, case, checkpoint=checkpoint)
+    if 'three_ridge_segments' in case['fixture']:
+        from .r4_design import design_seed as constrained_design_seed
+        record = constrained_design_seed(seed, TransmissionObjective(g, settings), settings, case,
+                                        checkpoint=checkpoint)
+    else:
+        record = design_seed(seed, TransmissionObjective(g, settings), settings, case, checkpoint=checkpoint)
     print(json.dumps(dict(seed=seed, smooth=-record['history'][-1]['objective'], binary=record['design_mesh_binary']['metrics'],
                           violations=record['fabrication']['violations'], changed_pixels=record.get('open_close', {}).get('changed_pixels'),
                           seconds=round(record['design_wall_seconds'], 1))), flush=True)
@@ -867,7 +894,8 @@ def seed_stage(settings, seed, out, *, rcwa_python, selection=None, checkpoint=N
                 references.append(dict(evaluator.describe(), reference_wall_seconds=evaluator.reference_seconds, **evaluator.diagnostics))
                 evaluations.append(evaluator.evaluate(record['binary']))
                 if settings.open_close and (mesh, polarization, incidence) == (settings.design_mesh_um, 'TE', 'normal'):
-                    before = evaluator.evaluate(record['open_close']['thresholded'])
+                    before = (evaluations[-1] if record['open_close']['changed_pixels'] == 0
+                              else evaluator.evaluate(record['open_close']['thresholded']))
                     record['open_close']['band_mean_T_plus1'] = dict(thresholded=float(np.mean(before['T']['1'])),
                                                                      processed=float(np.mean(evaluations[-1]['T']['1'])),
                                                                      mesh_um=mesh, polarization=polarization, incidence=incidence)
@@ -955,9 +983,15 @@ def judge_stage(settings, out, *, selection=None):
             cell=f'the fixture cell with {settings.extension_um:g} um more substrate below and air above; absorbers of '
                  f'{settings.absorber_um:g} um at every mesh; design runs over {settings.physical_time_fs:g} fs, evaluations over '
                  f'{settings.evaluation_time_fs:g} fs',
-            robust='eroded, nominal and dilated tanh projections of the same filtered density at eta 0.5 + shift, 0.5 and 0.5 - shift; '
-                   'the smallest of their mean T+1 at the design wavelengths is maximized; the judged design is the nominal one '
-                   'thresholded at 0.5, then opened and closed',
+            robust=(None if 'three_ridge_segments' in case['fixture'] else
+                    'eroded, nominal and dilated tanh projections of the same filtered density at eta 0.5 + shift, 0.5 and 0.5 - shift; '
+                    'the smallest of their mean T+1 at the design wavelengths is maximized; the judged design is the nominal one '
+                    'thresholded at 0.5, then opened and closed'),
+            constrained_segments=(None if 'three_ridge_segments' not in case['fixture'] else
+                                  'six alternating ridge/gap runs of at least three pixels, initialized from the disclosed '
+                                  'TORCWA-assisted development design with seed-specific logit jitter; six Adam steps '
+                                  'on the 0.02 um/560 fs short objective, with the better initial or final hard design '
+                                  'selected before 0.01/0.005 um/2240 fs evaluation'),
             efficiency='order branch power over the forward order-0 power at the reflection line of the bare-substrate run of the same case',
             amplitudes='|a|^2 = efficiency; TE amplitudes of E, TM amplitudes of H; exp(-i omega t); phase referenced to x = 0, to the '
                        'incident wave at y = 0.01 um, to y = 0.51 um for transmitted and y = 0.01 um for reflected orders',
@@ -987,6 +1021,8 @@ def run(settings, out, *, rcwa_python, selection=None, checkpoint_dir=None, skip
 def declared_run(out):
     """The declared settings and the recorded threshold selection of the records directory `out`."""
     case, _, _ = declared()
+    if 'three_ridge_segments' in case['fixture']:
+        return Settings.declared(case, None), None
     path = Path(out)/SELECTION
     if not path.exists():
         raise FileNotFoundError(f'{path} is missing: run the threshold selection (stages select-run and select-decide) first')
