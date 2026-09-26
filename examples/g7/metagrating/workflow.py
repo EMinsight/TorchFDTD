@@ -711,7 +711,9 @@ def judge(records, case, settings, g, baseline=None):
         rcwa_converged=bool(judged) and all(row['rcwa_converged'] for row in judged),
         statistic=f'max |eta_TorchFDTD - eta_TORCWA| over every propagating order (T and R), TE and TM at {design:g} um, at the '
                   f'wavelengths at least {settings.anomaly_exclusion_um:g} um from every Rayleigh anomaly of the evaluated k_x',
-        passed=len(judged) == len(records)*len(POLARIZATIONS)*len(INCIDENCES) and worst is not None and worst['value'] <= limit)
+        passed=(len(judged) == len(records)*len(POLARIZATIONS)*len(INCIDENCES)
+                and all(row['rcwa_converged'] for row in judged)
+                and worst is not None and worst['value'] <= limit))
 
     mesh_change = {}
     for r in records:

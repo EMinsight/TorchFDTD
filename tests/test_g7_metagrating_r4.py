@@ -58,3 +58,13 @@ def test_records_are_complete_installed_wheel_runs(declaration):
 def test_recorded_criterion(declaration, criterion):
     _, _, criteria = judged(declaration)
     assert criteria[criterion]['passed'], criteria[criterion]
+
+
+def test_unconverged_reference_cannot_pass_agreement(declaration):
+    case, geometry, _ = declaration
+    _, records, _ = judged(declaration)
+    records[0]['rcwa'][0]['converged'] = False
+    baseline = json.loads((RECORDS/'baseline.json').read_text(encoding='utf-8'))
+    criteria = w.judge(records, case, w.Settings.declared(case, None), geometry, baseline)
+    assert not criteria['rcwa_agreement']['rcwa_converged']
+    assert not criteria['rcwa_agreement']['passed']
