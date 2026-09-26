@@ -359,7 +359,41 @@ Layer A (CUDA FP32 against CPU FP64 on scattering and absorption, rtol 1e-4):
 | 0.05 | 0.01 | 7.72e-06 | pass |
 | 0.05 | 0.02 | 5.29e-06 | pass |
 
-**Limitation.** The staircased Drude sphere converges slowly and does not reach the budgets: r = 0.02 um: scattering 1657.979%, 270.768%, 137.555% and absorption 3682.135%, 2505.893%, 673.265% at h = 0.02, 0.01, 0.005 um; r = 0.035 um: scattering 477.893%, 69.159%, 45.758% and absorption 1812.565%, 559.269%, 498.501% at h = 0.02, 0.01, 0.005 um; r = 0.05 um: scattering 85.438%, 64.285%, 44.515% and absorption 308.670%, 340.338%, 344.579% at h = 0.02, 0.01, 0.005 um. Plasmonic nanoparticle cross sections below the recorded errors need an interface treatment of dispersive media that meets these budgets; the dispersive subpixel interfaces of [SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md#dispersive-interfaces) are not judged on this case. Until then metallic curved scatterers are outside the accuracy claims of this release, and the task stays FAILED in the gate file.
+**Limitation.** The staircased Drude sphere converges slowly and does not reach the budgets: r = 0.02 um: scattering 1657.979%, 270.768%, 137.555% and absorption 3682.135%, 2505.893%, 673.265% at h = 0.02, 0.01, 0.005 um; r = 0.035 um: scattering 477.893%, 69.159%, 45.758% and absorption 1812.565%, 559.269%, 498.501% at h = 0.02, 0.01, 0.005 um; r = 0.05 um: scattering 85.438%, 64.285%, 44.515% and absorption 308.670%, 340.338%, 344.579% at h = 0.02, 0.01, 0.005 um. Plasmonic nanoparticle cross sections below the recorded errors need an interface treatment of dispersive media that meets these budgets; the dispersive subpixel interfaces of [SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md#dispersive-interfaces) are not judged on this case. The original staircased case remains a failed accuracy finding; the release gate is rejudged on the held-out dispersive subpixel case below.
+
+### Held-out dispersive subpixel rejudgement (G3-05r5)
+
+Case `G3-05r5_drude_sphere_subpixel`, record `docs/validation/g3/G3-05r5.json` generated 2026-09-26T11:24:05+00:00. The three sphere radii and their off-lattice centres were declared before this run. The Drude model, mesh sequence, reference, observables and size-ordered error budgets are those of the original case. The judged rows are CPU FP64 at h = 0.005 um; other meshes and CUDA FP32 are reported for convergence and Layer A.
+
+| r (um) | h (um) | Execution | Max scattering error | Budget | Max absorption error | Budget | Inner/outer | Judged |
+|---:|---:|---|---:|---:|---:|---:|---:|---|
+| 0.027 | 0.005 | cpu float64 | 15.295% | 50.000% | 26.322% | 100.000% | 0.024% | pass |
+| 0.027 | 0.01 | cpu float64 | 41.671% | 50.000% | 101.700% | 100.000% | 0.036% | recorded |
+| 0.027 | 0.01 | cuda float32 | 41.671% | 50.000% | 101.701% | 100.000% | 0.036% | recorded |
+| 0.027 | 0.02 | cpu float64 | 95.927% | 50.000% | 401.914% | 100.000% | 0.119% | recorded |
+| 0.027 | 0.02 | cuda float32 | 95.927% | 50.000% | 401.913% | 100.000% | 0.119% | recorded |
+| 0.0425 | 0.005 | cpu float64 | 4.796% | 30.000% | 15.279% | 60.000% | 0.004% | pass |
+| 0.0425 | 0.01 | cpu float64 | 11.257% | 30.000% | 27.032% | 60.000% | 0.004% | recorded |
+| 0.0425 | 0.01 | cuda float32 | 11.257% | 30.000% | 27.031% | 60.000% | 0.004% | recorded |
+| 0.0425 | 0.02 | cpu float64 | 37.344% | 30.000% | 73.888% | 60.000% | 0.059% | recorded |
+| 0.0425 | 0.02 | cuda float32 | 37.344% | 30.000% | 73.888% | 60.000% | 0.059% | recorded |
+| 0.058 | 0.005 | cpu float64 | 3.168% | 20.000% | 15.875% | 40.000% | 0.016% | pass |
+| 0.058 | 0.01 | cpu float64 | 3.727% | 20.000% | 29.855% | 40.000% | 0.025% | recorded |
+| 0.058 | 0.01 | cuda float32 | 3.727% | 20.000% | 29.854% | 40.000% | 0.025% | recorded |
+| 0.058 | 0.02 | cpu float64 | 11.153% | 20.000% | 74.493% | 40.000% | 0.070% | recorded |
+| 0.058 | 0.02 | cuda float32 | 11.153% | 20.000% | 74.492% | 40.000% | 0.070% | recorded |
+
+Layer A compares CUDA FP32 with CPU FP64 on the same sphere and mesh. The declared relative tolerance is 1e-4.
+
+| r (um) | h (um) | Max relative difference | Result |
+|---:|---:|---:|---|
+| 0.027 | 0.01 | 1.01e-05 | pass |
+| 0.027 | 0.02 | 1.52e-05 | pass |
+| 0.0425 | 0.01 | 1.03e-05 | pass |
+| 0.0425 | 0.02 | 7.56e-06 | pass |
+| 0.058 | 0.01 | 8.92e-06 | pass |
+| 0.058 | 0.02 | 7.15e-06 | pass |
+
 ## G3-08 Bloch grating diffraction orders against RCWA
 
 Case `G3-08_bloch_grating_rcwa`, record `docs/validation/g3/G3-08.json` generated 2026-09-21T17:46:00+00:00. Freestanding binary grating, period 1.2 um, fill 0.5, height 0.5 um, n = 2.0, wavelengths [0.92, 1.02, 1.06] um at [0.0, 20.0] degrees, TE and TM. Oracle: TORCWA rigorous coupled-wave analysis, Kim and Lee, Comput. Phys. Commun. 282, 108552 (2023), version 0.1.4.2, complex128, harmonics [20, 40, 80, 160, 320, 640] with the oracle at 640; empty-layer phase check error 8.9e-10. Limits: efficiency error at most 0.01 per propagating order, phase error at most 0.02 rad on orders whose oracle efficiency is at least 0.05, lossless balance within 0.01.
