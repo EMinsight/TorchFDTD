@@ -11,11 +11,31 @@ from dataclasses import replace
 import numpy as np
 import torch
 
-from torchfdtd import AdjointOptions, DifferentiablePlaneSimulation, StreamedAdjointOptions
+from torchfdtd import (AdjointExecutionPolicy, AdjointOptions,
+                       DifferentiablePlaneSimulation, StreamedAdjointOptions)
 from torchfdtd.design_parameterization import DensityParameterization
 
 from examples.g7.cost.timing import StageTimes
 from examples.g7.metagrating import workflow as w
+
+
+def execution_policy(settings, storage):
+    """The two declared storage choices with the same CPU input contract."""
+    device = settings.backend
+    host_budget = 8 * 1024**3
+    if storage == 'resident':
+        return AdjointExecutionPolicy(
+            resident=AdjointOptions(checkpoints=settings.checkpoints),
+            device=device, host_budget_bytes=host_budget)
+    if storage == 'host':
+        options = StreamedAdjointOptions(
+            device=device, slab_width=32, temporal_depth=4,
+            checkpoints=settings.checkpoints, gpu_budget_bytes=2 * 1024**3,
+            host_budget_bytes=host_budget, state_storage='host',
+            tile_transfers='async' if device == 'cuda' else 'sync')
+        return AdjointExecutionPolicy(
+            streamed=options, device=device, host_budget_bytes=host_budget)
+    raise ValueError('Storage must be resident or host.')
 
 
 class TimedTransmissionObjective(w.TransmissionObjective):
@@ -26,25 +46,17 @@ class TimedTransmissionObjective(w.TransmissionObjective):
         self.timer = timer
         self.storage = storage
         self.frequency_mode = frequencies
-        self.device = torch.device('cpu' if storage == 'host' else settings.backend)
+        # Both policies receive the same CPU design and return CPU observables.
+        # Solver transfer costs then stay inside the timed forward/backward stages.
+        self.device = torch.device('cpu')
         self.wavelength = np.asarray(w.DESIGN_WAVELENGTHS_UM)
         self.frequency = w.C0 / (self.wavelength * 1e-6)
         project = w.build_project(geometry, settings.design_mesh_um, 'TE', 'normal',
                                   settings, settings.physical_time_fs,
                                   monitors=('transmission',))
         self.region = project.region
-        if storage == 'host':
-            options = StreamedAdjointOptions(device=settings.backend, slab_width=32,
-                                            temporal_depth=4, checkpoints=settings.checkpoints,
-                                            gpu_budget_bytes=2 * 1024**3,
-                                            host_budget_bytes=8 * 1024**3,
-                                            state_storage='host',
-                                            tile_transfers='async' if settings.backend == 'cuda' else 'sync')
-        elif storage == 'resident':
-            options = AdjointOptions(checkpoints=settings.checkpoints)
-        else:
-            raise ValueError('Storage must be resident or host.')
-        self.model = DifferentiablePlaneSimulation(project, options)
+        self.policy = execution_policy(settings, storage)
+        self.model = self.policy.simulation(project)
         reference_project = w.build_project(geometry, settings.design_mesh_um, 'TE',
                                              'normal', settings, settings.physical_time_fs,
                                              monitors=('reflection',))
@@ -62,7 +74,7 @@ class TimedTransmissionObjective(w.TransmissionObjective):
             epsilon = w.layer_epsilon(density.to(self.device), self.region, self.g)
         if self.frequency_mode == 'broadband':
             with self.timer.stage('T_forward'):
-                plane = self.model(epsilon, self.frequency)['transmission']
+                plane = self.model(epsilon, frequency_hz=self.frequency)['transmission']
             with self.timer.stage('T_monitor'):
                 return w.transmitted_efficiency(plane, *self.incident, self.wavelength,
                                                 self.g, 0., 'TE', w.ORDERS)
@@ -71,7 +83,7 @@ class TimedTransmissionObjective(w.TransmissionObjective):
         rows = []
         for index in range(len(self.frequency)):
             with self.timer.stage('T_forward'):
-                plane = self.model(epsilon, self.frequency[index:index+1])['transmission']
+                plane = self.model(epsilon, frequency_hz=self.frequency[index:index+1])['transmission']
             with self.timer.stage('T_monitor'):
                 rows.append(w.transmitted_efficiency(
                     plane, self.incident[0][index:index+1], self.incident[1][index:index+1],
@@ -107,8 +119,7 @@ class G701Iteration:
                 fixture = self.case['fixture']
                 initial = .5 * torch.randn((fixture['pixels'], 1),
                                             generator=torch.Generator().manual_seed(self.seed))
-                design_device = torch.device('cpu' if self.storage == 'host' else settings.backend)
-                initial = initial.to(design_device)
+                initial = initial.to('cpu')
                 options = dict(spacing_um=(fixture['pixel_um'],
                                            fixture['design_layer_um'][1]-fixture['design_layer_um'][0]),
                                initial=initial, mode='logits',

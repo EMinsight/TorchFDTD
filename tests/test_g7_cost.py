@@ -27,6 +27,8 @@ def test_declared_stages_and_cold_warm_medians():
     assert (cold['min'], cold['median'], cold['max']) == (1., 21., 41.)
     assert (warm['min'], warm['median'], warm['max']) == (4., 24., 44.)
     assert warm['samples'] == [4., 14., 24., 34., 44.]
+    assert summary['full_iteration']['cold']['median'] == 7*21.
+    assert summary['full_iteration']['warm']['median'] == 7*24.
 
 
 def test_regression_threshold_and_invalid_records():

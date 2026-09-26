@@ -64,6 +64,7 @@ def summarize_fresh_processes(records):
     if len(records) != 5:
         raise ValueError('G7-05 needs exactly five fresh process records.')
     cold, warm = {s: [] for s in STAGES}, {s: [] for s in STAGES}
+    full_cold, full_warm = [], []
     for process in records:
         iterations = process.get('iterations')
         if not isinstance(iterations, list) or len(iterations) != 6:
@@ -75,8 +76,12 @@ def summarize_fresh_processes(records):
         for stage in STAGES:
             cold[stage].append(float(iterations[0][stage]))
             warm[stage].append(statistics.median(float(row[stage]) for row in iterations[1:]))
+        full_cold.append(sum(float(iterations[0][stage]) for stage in STAGES))
+        full_warm.append(statistics.median(
+            sum(float(row[stage]) for stage in STAGES) for row in iterations[1:]))
     return dict(cold={s: _range(cold[s]) for s in STAGES},
                 warm={s: _range(warm[s]) for s in STAGES},
+                full_iteration=dict(cold=_range(full_cold), warm=_range(full_warm)),
                 process_count=5, iterations_per_process=6)
 
 

@@ -78,6 +78,15 @@ def main(argv=None):
     parser.add_argument('--compare-to', type=Path,
                         help='A previous summary of this scenario; fail if a stage median exceeds 1.25 times it.')
     args = parser.parse_args(argv)
+    if not args.reduced:
+        case_path = ROOT/'docs/validation/cases/G7-05r2.json'
+        if not case_path.exists():
+            parser.error('The approved G7-05r2 case has not been committed.')
+        case = json.loads(case_path.read_text(encoding='utf-8'))
+        if (case.get('declared_before_run') is not True
+                or not case.get('revision', {}).get('approved_by')
+                or 'draft_status' in case):
+            parser.error('The G7-05r2 case needs owner approval before full timing.')
     if args.worker:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(worker(args.scenario, reduced=args.reduced,
