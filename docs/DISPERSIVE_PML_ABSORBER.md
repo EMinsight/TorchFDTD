@@ -2,9 +2,9 @@
 
 Record: `docs/validation/dispersive_pml_absorber.json` (case `docs/validation/cases/DISPERSIVE_PML_ABSORBER.json`, declared at commit 639d3ff431bd). Driver `benchmarks/dispersive_pml_absorber.py`. Every number below is copied from the record; nothing here is typed by hand. The absorber and the measured mechanism are described in [BOUNDARIES.md](BOUNDARIES.md#dispersive-materials-inside-pml).
 
-Environment: Python 3.10.2, torch 2.10.0+cu126 (CUDA 12.6), GPU NVIDIA GeForce RTX 3060, Windows-10-10.0.26200-SP0; run at 2026-09-25T20:17:05+00:00 on commit 96655adc506c1a1d1120bf0a50867adaba644afc with 0 dirty paths; rows merged from 2 later run(s) on commit(s) 96655adc506c.
+Environment: Python 3.10.2, torch 2.10.0+cu126 (CUDA 12.6), GPU None, Windows-10-10.0.26200-SP0; run at 2026-09-26T01:30:29+00:00 on commit 030581a7759aa520c199e18b5f839e1dbc667227 with 0 dirty paths; rows merged from 2 later run(s) on commit(s) 030581a7759a.
 
-Verdict: every judged row passes (14 judged rows, 31 recorded rows).
+Verdict: every judged row passes (14 judged rows, 37 recorded rows).
 
 ## Reflection
 
@@ -57,7 +57,7 @@ Run-control state norm and interior energy every 250 steps. `last/peak` and `lat
 
 ## Growth with the CPML
 
-Least-squares rate of ln(state norm) over the second half of the samples, the amplitude rate per second, the dominant frequency of the monitor trace there and the bilinear permittivity of the medium at that frequency (growing rows only). The mechanism rows vary one parameter of the SiN corner post at a time.
+Least-squares rate of ln(state norm) over the second half of the samples, the amplitude rate per second, the dominant frequency of the monitor trace there and the bilinear permittivity of the medium at that frequency (growing rows only). The mechanism rows vary one parameter of the SiN corner post at a time, or the form of the structure (with the CPML and with the absorber).
 
 | row | variation | energy rate per step | amplitude rate (1/s) | frequency (rad/s) | bilinear eps | last state norm / peak |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
@@ -71,6 +71,12 @@ Least-squares rate of ln(state norm) over the second half of the samples, the am
 | mechanism-linewidth1e14-cpml-cpu-float64 | {"linewidth": 100000000000000.0} | 0.0527 | 6.9e+14 | 2.24e+16 | -0.571 + 0.02i | 1 |
 | mechanism-linewidth1e15-cpml-cpu-float64 | {"linewidth": 1000000000000000.0} | 0.0079 | 1.04e+14 | 2.2e+16 | -0.647 + 0.219i | 8.3e-10 |
 | mechanism-mesh10nm-cpml-cuda-float64 | {"layers": 24, "mesh": 0.01, "sample": 500} | 0.0396 | 1.04e+15 | 1.66e+16 | -6.1 + 0.0286i | 1 |
+| mechanism-enter-post-cpml-cpu-float64 | {"form": "enter", "size": [0.9, 0.9, 1.0]} | 0.1 | 1.31e+15 | 2.4e+16 | -0.252 + 0.00138i | 1 |
+| mechanism-enter-post-absorber-cpu-float64 | {"form": "enter", "size": [0.9, 0.9, 1.0]} | -3.15e-05 | -4.13e+11 | n/a | n/a | 2.91e-17 |
+| mechanism-enter-film-cpml-cpu-float64 | {"form": "film", "size": [0.9, 0.9, 1.0]} | 0.0764 | 1e+15 | 2.47e+16 | -0.135 + 0.00117i | 1 |
+| mechanism-enter-film-absorber-cpu-float64 | {"form": "film", "size": [0.9, 0.9, 1.0]} | -0.000338 | -4.43e+12 | n/a | n/a | 2.66e-17 |
+| mechanism-drude-bar-cpml-cpu-float64 | {"form": "bar", "size": [0.9, 0.9, 1.0]} | 0.00114 | 1.49e+13 | 1.18e+15 | -1.85 + 0.241i | 1.59e-08 |
+| mechanism-drude-bar-absorber-cpu-float64 | {"form": "bar", "size": [0.9, 0.9, 1.0]} | -0.00239 | -3.13e+13 | n/a | n/a | 6.84e-24 |
 | stability-sin-post-cpml-cpu-float64 | control | 0.0573 | 7.52e+14 | 2.26e+16 | -0.532 + 0.00192i | 1 |
 | stability-drude-post-cpml-cpu-float64 | control | 0.0287 | 3.77e+14 | 1.73e+15 | -0.331 + 0.0769i | 1 |
 | stability-sin-post-cpml-cuda-float32 | control | 0.0573 | 7.52e+14 | 2.26e+16 | -0.532 + 0.00192i | 1 |
