@@ -85,6 +85,31 @@ grids and short runs do not satisfy the full acceptance criteria above.
 & $py "$examples/examples/g7/coupler/workflow.py" --reduced --seeds 1 2 3 --output-dir coupler-small
 ```
 
+## Optional complete-iteration cost study
+
+G7-05r2 times the fixed G7-01r3 robust design iteration and the PIC iteration.
+Each scenario starts five new processes and performs six iterations per process.
+Run this separately with the GPU idle, since other GPU work would invalidate
+the timing comparison. Allow several hours on the RTX 3060. Disk caches are
+retained across processes. Set `$wheel` to the wheel installed in this environment:
+
+```powershell
+$wheel = 'D:/downloads/torchfdtd-1.0.0-py3-none-any.whl'
+foreach ($scenario in @('g701-resident-broadband', 'g701-host-broadband', 'g701-resident-sequential', 'g703-resident')) {
+    & $py "$examples/examples/g7/cost/cost_study.py" --scenario $scenario --out "cost/$scenario" --wheel $wheel
+    if ($LASTEXITCODE -ne 0) { throw "Cost study failed: $scenario" }
+}
+& $py "$examples/examples/g7/cost/autotuner_study.py" --out cost/autotuner.json --resident-summary cost/g701-resident-broadband/summary.json --host-summary cost/g701-host-broadband/summary.json
+```
+
+Each scenario writes `process1.json` through `process5.json` and `summary.json`.
+The summary contains all seven stages and cold/warm medians and ranges.
+The autotuner reports its cost and the break-even iteration count, or `null`
+when the measured choice provides no gain. To compare a later run with a saved
+baseline, use a new output directory and add `--compare-to <baseline-summary.json>`.
+It flags stage medians greater than 1.25 times the baseline. Keep the problem,
+thread policy and hardware comparable when interpreting that flag.
+
 ## Build the examples archive from a checkout
 
 Release maintainers can reproduce the archive with the standard library alone:
