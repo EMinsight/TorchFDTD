@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.17.1` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260926T044250Z-g7-02-f08ed130` recorded 2026-09-26T04:42:50+00:00 at commit `4e8a03ed8079`.
+Package version `0.17.1` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260926T125324Z-g3-05-5008244d` recorded 2026-09-26T12:53:24+00:00 at commit `a8124a771d9e`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 60 | 16 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 60 | 22 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 59 | 17 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 59 | 23 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -60,10 +60,10 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G3-02 | 유전체 slab normal/oblique TE/TM과 TMM | IMPLEMENTED | VERIFIED | `20260925T155453Z-g3-02-348033c1` | `2c5f3754c047` | PASS | evidence matches the current checkout |
 | G3-03 | Drude/Lorentz slab fit/ADE 오차 분리 | IMPLEMENTED | VERIFIED | `20260925T155556Z-g3-03-2d6718f7` | `2c5f3754c047` | PASS | evidence matches the current checkout |
 | G3-04 | dielectric cylinder/sphere Mie 산란 | IMPLEMENTED | VERIFIED | `20260925T161237Z-g3-04-e349627f` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 2c5f3754c047 alone |
-| G3-05 | 금속/분산 곡면 산란·흡수 수렴 | IMPLEMENTED | FAILED | `20260925T172351Z-g3-05-1cf30b22` | `2c5f3754c047` | FAIL | verification_state is FAILED |
+| G3-05 | 금속/분산 곡면 산란·흡수 수렴 | IMPLEMENTED | VERIFIED | `20260926T125324Z-g3-05-5008244d` | `a8124a771d9e` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit a8124a771d9e alone |
 | G3-06 | PEC/PMC cavity·symmetry와 gradient mapping | IMPLEMENTED | VERIFIED | `20260925T172508Z-g3-06-4f792935` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 2c5f3754c047 alone |
 | G3-07 | PML normal/oblique 반사·장시간 안정성 | IMPLEMENTED | VERIFIED | `20260925T172613Z-g3-07-f4fdc0c6` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 2c5f3754c047 alone |
-| G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | VERIFIED | `20260925T175618Z-g3-08-ad1182cd` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | VERIFIED | `20260925T175618Z-g3-08-ad1182cd` | `2c5f3754c047` | FAIL | STALE: test source changed since the run: tests/test_physics_g3_b_r2.py |
 | G3-09 | mode neff·field·confinement·power oracle | IMPLEMENTED | VERIFIED | `20260925T175629Z-g3-09-b83f2635` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
 | G3-10 | PIC S·수동성·상반성과 누락 방사 채널 | IMPLEMENTED | VERIFIED | `20260925T180000Z-g3-10-7adda5e8` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
 | G3-11 | dipole far/near field와 표면/격자 수렴 | IMPLEMENTED | VERIFIED | `20260925T180016Z-g3-11-753e7ab7` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
@@ -72,7 +72,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G3-14 | 무차원 small discrete CPU/Torch/CUDA/VJP 수치 비교 | IMPLEMENTED | VERIFIED | `20260925T180814Z-g3-14-4e944236` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G3-15 | full-autograd·directional VJP·FD sweep·Taylor 검사 | IMPLEMENTED | VERIFIED | `20260925T180857Z-g3-15-38db1a43` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G3-16 | 실제 shape/material 파라미터의 물리 gradient 수렴 | IMPLEMENTED | VERIFIED | `20260925T180940Z-g3-16-7595c18d` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
-| G3-17 | oracle 독립성·정밀도·시간·PML 오차 budget 확인 | IMPLEMENTED | VERIFIED | `20260925T180946Z-g3-17-339f39b7` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-17 | oracle 독립성·정밀도·시간·PML 오차 budget 확인 | IMPLEMENTED | VERIFIED | `20260925T180946Z-g3-17-339f39b7` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: docs/ORACLE_BUDGET.md |
 
 ### G4 CUDA·CI·환경 검증 (WORKSTATION, P0)
 
@@ -287,6 +287,7 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | Task | Warning |
 | --- | --- |
 | G3-04 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 2c5f3754c047 alone |
+| G3-05 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit a8124a771d9e alone |
 | G3-06 | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 2c5f3754c047 alone |
 | G3-07 | evidence was recorded on a dirty tree (2 paths); it is not tied to commit 2c5f3754c047 alone |
 | G3-08 | evidence was recorded on a dirty tree (4 paths); it is not tied to commit 2c5f3754c047 alone |
@@ -349,7 +350,7 @@ Declared scope changes with the owner's recorded approval (`scope_change_approva
 | Task | Declared change | Approval |
 | --- | --- | --- |
 | G3-02 | docs/validation/cases/G3-02_dielectric_slab_tmm.oracles.json declares superseded_by (a revised case); docs/validation/cases/G3-02r2_slab_tmm_40_cells.json declares supersedes (a revised case) | approved by owner on 2026-09-24 |
-| G3-05 | docs/validation/cases/G3-05_drude_sphere.json acceptance/justification declares a program threshold not applicable | approved by owner on 2026-09-24 |
+| G3-05 | docs/validation/cases/G3-05_drude_sphere.json acceptance/justification declares a program threshold not applicable; docs/validation/cases/G3-05r5_drude_sphere_subpixel.json declares supersedes (a revised case); docs/validation/cases/G3-05r5_drude_sphere_subpixel.json acceptance/justification declares a program threshold not applicable; docs/validation/cases/G3-05r5_drude_sphere_subpixel.json acceptance/source_of_limits declares a program threshold not applicable | approved by owner on 2026-09-22 |
 | G3-06 | docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/eigenmode_phase_advance/float32/atol = 3e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/eigenmode_phase_advance/pmc/atol = 4e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/eigenmode_phase_advance/pmc_reference/atol = 2e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/symmetry_reduction/signals/atol = 4e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/symmetry_reduction/reduced_versus_doubled_fields/atol = 4e-06 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-06_pec_pmc_cavity.json acceptance/independent_endpoint_solver/atol = 2e-06 is looser than the loosest program atol 1e-06 | approved by owner on 2026-09-24 |
 | G3-08 | docs/validation/cases/G3-08r2_bloch_grating_rcwa_layer_a.json declares revision_of (a revised case) | approved by owner on 2026-09-24 |
 | G3-09 | docs/validation/cases/G3-09_mode_solver_oracles.json acceptance/fiber_beta_relative_error_max/difference_from_common_criterion states a limit looser than the program threshold; docs/validation/cases/G3-09_mode_solver_oracles.json acceptance/homogeneous_neff/atol = 2e-05 is looser than the loosest program atol 1e-06; docs/validation/cases/G3-09_mode_solver_oracles.json acceptance/modal_power/gram/rtol = 0.0002 is looser than the loosest program rtol 0.0001; docs/validation/cases/G3-09_mode_solver_oracles.json acceptance/modal_power/gram/atol = 0.0002 is looser than the loosest program atol 1e-06 | approved by owner on 2026-09-24 |
