@@ -840,8 +840,9 @@ class Project(Model):
         if endpoint:validate_pmc_project(self)
         if r.interface_method=='subpixel':
             active={s.material for s in self.structures if s.enabled}
-            if any(m.oscillators and m.name in active for m in self.materials):
-                raise ValueError('Subpixel interfaces currently require lossless nondispersive materials. Choose staircase for dispersive materials.')
+            dispersive=[m for m in self.materials if m.oscillators and m.name in active]
+            if dispersive and r.pml_dispersion=='frozen':
+                raise ValueError('pml_dispersion="frozen" is not implemented for dispersive subpixel interfaces. Keep pml_dispersion="ade" or choose staircase.')
         dt = r.time_step
         from .waveforms import pulse_parameters
         for source in self.sources:

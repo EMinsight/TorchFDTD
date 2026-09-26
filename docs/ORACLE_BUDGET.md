@@ -103,9 +103,27 @@ Bookkeeping in `G3-05_drude_sphere.oracles.json`. Record
 | Staircased Drude spheres r = 0.02, 0.035, 0.05 um at h = 0.02, 0.01, 0.005 um, `tests/test_physics_g3_b.py::test_g3_05_drude_sphere` | Complex-index Bohren-Huffman series with the analytic Drude permittivity (`analytic_continuum`); an ADE-sampled permittivity variant separates the time discretisation | Closed form in the test | at h = 0.005 um the scattering errors are 138, 46 and 45 percent and the absorption errors 673, 499 and 345 percent against the case budgets of 50/30/20 and 100/60/40 percent: FAILED as the case anticipated; inner/outer surface consistency 3e-4 to 3.2e-3 | 48 fs, 1259 to 5036 steps | 0.08 um |
 | Layer A, `test_g3_05_drude_cuda_layer_a` | CUDA float32 against CPU float64 (`shared_discrete_operator`) | Same operator | 0 to 7e-5 relative against rtol 1e-4 | 1259 and 2518 steps | 0.08 um |
 
-Open residual: no conformal treatment of a dispersive interface exists
-(`tests/test_physics_g3_b_r2.py::test_g3_05_subpixel_rejects_dispersive`), so
-the staircase error dominates and the task stays FAILED.
+Open residual: the staircase error dominates and the task stays FAILED; the
+dispersive subpixel interfaces of
+[SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md#dispersive-interfaces) were
+developed on this fixture and are not judged on it. The held-out revision
+G3-05r5 below judges them.
+
+### G3-05r5 `G3-05r5_drude_sphere_subpixel`
+
+The G3-05 physics, band, mesh sequence and budgets with the dispersive subpixel
+interfaces, on spheres of radius 0.027, 0.0425 and 0.058 um centred off the node
+lattice, which no development run used. G3-05r4 was refused at validation before
+any result was observed (its r = 0.06 um averaging window reached the TFSF
+neighbourhood); its h = 0.02 um runs of the two smaller spheres were discarded
+unseen. The case file lists every run and carries the oracle classes and layers.
+Record
+`docs/validation/g3/G3-05r5.json` (pending the judged run).
+
+| Fixture | Oracle (class) | Independence | Precision floor | Time window | PML |
+| --- | --- | --- | --- | --- | --- |
+| Drude spheres r = 0.027, 0.0425, 0.058 um off the node lattice, dispersive subpixel interfaces, h = 0.02, 0.01, 0.005 um, `tests/test_physics_g3_05r5.py::test_g3_05r5_drude_sphere_subpixel` | Complex-index Bohren-Huffman series with the analytic Drude permittivity (`analytic_continuum`); an ADE-sampled permittivity variant separates the time discretisation | Closed form in the test | pending; budgets 50/30/20 percent (scattering) and 100/60/40 percent (absorption) at h = 0.005 um, inner/outer consistency 2 percent of the band maximum | 48 fs, 1259 to 5036 steps | 0.08 um |
+| Layer A, `test_g3_05r5_drude_cuda_layer_a` | CUDA float32 against CPU float64 (`shared_discrete_operator`) | Same operator | pending; rtol 1e-4 | 1259 and 2518 steps | 0.08 um |
 
 ### G3-07 `G3-07_cpml_reflection_stability`
 

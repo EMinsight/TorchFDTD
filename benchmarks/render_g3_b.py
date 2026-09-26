@@ -103,22 +103,17 @@ def render_g3_05(record):
     for key, r in rows_with(record, 'r='):
         if 'layer_a_max_relative_difference' in r:
             out.append(f'| {r["radius_um"]} | {r["mesh_um"]} | {r["layer_a_max_relative_difference"]:.2e} | {verdict(r["layer_a_max_relative_difference"] <= r["layer_a_rtol"])} |')
-    # Limitation statement, numbers from the CPU FP64 rows of the record and the subpixel rejection record.
+    # Limitation statement, numbers from the CPU FP64 rows of the record.
     sequences = []
     for radius in case['fixture']['radii_um']:
         rows = sorted((r for k, r in rows_with(record, f'r={radius}/') if r['backend'] == 'cpu'), key=lambda r: -r['mesh_um'])
         if rows:
             sequences.append(f'r = {radius} um: scattering {", ".join(pct(r["max_scattering_relative_error"]) for r in rows)} and absorption '
                              f'{", ".join(pct(r["max_absorption_relative_error"]) for r in rows)} at h = {", ".join(str(r["mesh_um"]) for r in rows)} um')
-    subpixel = load('G3-05_subpixel')
-    rejection = ''
-    if subpixel:
-        row = next(iter(subpixel['rows'].values()))
-        rejection = (f' The subpixel interface operator rejects the same sphere with `interface_method = "subpixel"` at validation '
-                     f'("{row["rejection"]}", recorded in `docs/validation/g3/G3-05_subpixel.json`), so the package offers no conformal or subpixel treatment of a dispersive interface.')
-    out += ['', '**Limitation.** The staircased Drude sphere converges slowly and does not reach the budgets: '+'; '.join(sequences)+'.'+rejection+
-            ' Plasmonic nanoparticle cross sections below the recorded errors need a conformal or subpixel treatment of dispersive interfaces that the package does not provide; '
-            'until then metallic curved scatterers are outside the accuracy claims of this release, and the task stays FAILED in the gate file.']
+    out += ['', '**Limitation.** The staircased Drude sphere converges slowly and does not reach the budgets: '+'; '.join(sequences)+'.'
+            ' Plasmonic nanoparticle cross sections below the recorded errors need an interface treatment of dispersive media that meets these budgets; '
+            'the dispersive subpixel interfaces of [SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md#dispersive-interfaces) are not judged on this case. '
+            'Until then metallic curved scatterers are outside the accuracy claims of this release, and the task stays FAILED in the gate file.']
     return out
 
 

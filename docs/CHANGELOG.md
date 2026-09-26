@@ -7,6 +7,12 @@ the first section covers the whole history since the first commit (2026-09-20).
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
+## Unreleased
+
+### Added
+
+- Dispersive subpixel interfaces: with `interface_method='subpixel'`, node cells (two mesh steps per axis) that meet a Drude, Lorentz or multipole object take the dispersive averaging tensor `n n^T (B + f/eps_m) + (I - n n^T)/(C + f eps_m)` with its normal and tangential laminate branches (Deinega and Valuev 2007), assembled on the edge triplets of the coupled operator and advanced by trapezoidal ADE banks driven by D (`torchfdtd/subpixel_dispersive.py`); nondispersive cells next to them take the static tensor without its coupling between a D-driven and an E-updated edge. The D-driven samples keep D as their state and their E is assigned from it every step, so an E write or rounding leaves no static offset. The instantaneous operator stays Hermitian with eigenvalues in (0, 1]. Resident CPU, Torch CUDA, fused CUDA and tensor cohorts run it; two dispersive materials in one node cell, a dispersive surface within one window of a nonperiodic boundary, `pml_dispersion='frozen'` with a dispersive structure, and soft E sources, TFSF face neighbourhoods and one-way injection neighbourhoods on D-driven samples are refused, where subpixel previously refused every dispersive material. `summary['subpixel']['dispersive']['device_bytes']` models the state's device memory and the resident estimate adds an upper bound of it; the subpixel triplet, spectral-bounding and degenerate-normal counts leave out the node triplets the dispersive tensors replace. Dielectric-only subpixel scenes are unchanged bit for bit ([SUBPIXEL_INTERFACES.md](SUBPIXEL_INTERFACES.md#dispersive-interfaces), this commit).
+
 ## 0.17.1 (2026-09-26)
 
 ### Added

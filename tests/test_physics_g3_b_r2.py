@@ -1,4 +1,4 @@
-"""Revision-2 items of the G3-08 and G3-05 fixtures that must not change tests/test_physics_g3_b.py.
+"""Revision-2 items of the G3-08 fixture that must not change tests/test_physics_g3_b.py.
 
 The first G3-08 case declared the layer-A tolerance as rtol 1e-4 with atol 0 and one
 instance failed it (TM, 20 degrees, 0.92 um: 1.15e-4 on an efficiency of 0.022, an
@@ -11,9 +11,9 @@ together with this module for the revision-2 record:
   TORCHFDTD_G3_FULL=1 TORCHFDTD_G3_RECORD=docs/validation/g3/r2 python -m pytest -q -p no:cacheprovider \
       tests/test_physics_g3_b.py tests/test_physics_g3_b_r2.py -k "g3_08 and not g3_08_grating_cuda_layer_a"
 
-The G3-05 item records that the subpixel interface operator rejects dispersive (ADE)
-materials, so the staircased Drude sphere of the first case has no conformal
-alternative in the package.
+The G3-05 item that recorded the rejection of dispersive materials by the subpixel
+operator was removed when dispersive subpixel interfaces were added
+(docs/SUBPIXEL_INTERFACES.md).
 """
 import json
 import os
@@ -25,9 +25,8 @@ import numpy as np
 import pytest
 import torch
 
-from torchfdtd import Project
-from test_physics_g3_b import (CASES, CUDA, drude_project, full_only, grating_configurations, grating_row,
-                               grating_row_id, needs_cuda, check_grating_row)
+from test_physics_g3_b import (CASES, CUDA, full_only, grating_configurations, grating_row, grating_row_id, needs_cuda,
+                               check_grating_row)
 
 ROOT = Path(__file__).resolve().parents[1]
 RECORD_DIR = os.environ.get('TORCHFDTD_G3_RECORD')
@@ -74,16 +73,3 @@ def test_g3_08r2_grating_cuda_layer_a(polarization, angle, wavelength):
     record_file('G3-08r2', R2_CASE['case_id'], grating_row_id(cuda), dict(cuda, **verdict))
     assert excess <= 0., f'layer A r2 {polarization} {angle:g} deg {wavelength} um: excess {excess:.2e} over rtol {rtol} atol {atol}'
 
-
-def test_g3_05_subpixel_rejects_dispersive():
-    """The subpixel operator has no dispersive branch: a Drude sphere with interface_method subpixel is rejected at validation."""
-    f = CASES['G3-05']['fixture']
-    project = drude_project(f['mesh_sequence_um'][1], f['radii_um'][-1])
-    payload = project.model_dump()
-    payload['region']['interface_method'] = 'subpixel'
-    with pytest.raises(ValueError, match='lossless nondispersive') as info:
-        Project.model_validate(payload)
-    message = info.value.errors()[0]['msg'].replace('Value error, ', '', 1) if hasattr(info.value, 'errors') else str(info.value)
-    record_file('G3-05_subpixel', CASES['G3-05']['case_id'], f'r={f["radii_um"][-1]}/h={f["mesh_sequence_um"][1]}/subpixel',
-                dict(radius_um=f['radii_um'][-1], mesh_um=f['mesh_sequence_um'][1], interface='subpixel', supported=False,
-                     rejection=message, source='torchfdtd/models.py Project.valid_scene and torchfdtd/subpixel_geometry.py'))

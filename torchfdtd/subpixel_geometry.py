@@ -13,19 +13,21 @@ from .geometry import contains, object_bounds, radii, rotation_matrix
 
 
 class DielectricGeometry:
-    def __init__(self, project):
+    """Values default to the instantaneous permittivity (epsilon-infinity for
+    dispersive objects). ``value(material)``, and ``value(None)`` for the
+    background, substitutes other piecewise-constant values such as labels."""
+    def __init__(self, project, value=None):
         self.region=project.region
         self.dim=2 if self.region.dimension=='2d' else 3
         self.periodic=[a for a in range(self.dim) if self.region.boundaries.pair(a)[0].kind in ('periodic','bloch')]
         self.span=np.array(self.region.actual_size)
-        self.background=self.region.background_index**2
+        self.background=self.region.background_index**2 if value is None else value(None)
         materials={m.name:m for m in project.materials}
         self.objects=[]
         for obj in sorted(project.structures,key=lambda s:-s.mesh_order):
             if not obj.enabled:continue
             m=materials[obj.material]
-            if m.oscillators:raise ValueError('Subpixel interfaces currently require lossless nondispersive materials. Select staircase interfaces for dispersive materials.')
-            self.objects.append((obj,m.instantaneous_epsilon))
+            self.objects.append((obj,m.instantaneous_epsilon if value is None else value(m)))
         values=[self.background]+[v for _,v in self.objects]
         self.epsilon_bounds=min(values),max(values)
 
@@ -81,12 +83,15 @@ class DielectricGeometry:
                             a=np.deg2rad(angle);plane(np.array([-np.sin(a),np.cos(a),0.]),0.)
         return roots
 
-    def line_average(self, centers, axis, length, *, inverse=False, chunk=256):
-        """Average epsilon or its inverse over centered, axis-aligned edges."""
+    def line_average(self, centers, axis, length, *, inverse=False, chunk=256, table=None):
+        """Average epsilon or its inverse over centered, axis-aligned edges.
+
+        With ``table`` the values are integer labels and rows of the table are averaged."""
         centers=np.asarray(centers,dtype=float).reshape(-1,3)
         if axis>=self.dim or length==0:
-            eps=self.epsilon(centers);return 1/eps if inverse else eps
-        result=np.empty(len(centers))
+            eps=self.epsilon(centers)
+            return table[eps.astype(int)] if table is not None else 1/eps if inverse else eps
+        result=np.empty(len(centers)) if table is None else np.empty((len(centers),table.shape[1]))
         for start in range(0,len(centers),chunk):
             p=self.wrap(centers[start:start+chunk]);m=len(p)
             knots=[np.full(m,-.5),np.full(m,.5)]
@@ -103,25 +108,42 @@ class DielectricGeometry:
             width=np.diff(t,axis=1);mid=(t[:,1:]+t[:,:-1])/2
             points=np.broadcast_to(p[:,None,:],(*mid.shape,3)).copy();points[:,:,axis]+=length*mid
             eps=self.epsilon(points)
-            result[start:start+m]=np.sum(width*(1/eps if inverse else eps),axis=1)
+            if table is None:result[start:start+m]=np.sum(width*(1/eps if inverse else eps),axis=1)
+            else:result[start:start+m]=np.sum(width[...,None]*table[eps.astype(int)],axis=1)
         return result
 
-    def face_average(self, centers, axis, steps, order, normal=None):
+    def face_average(self, centers, axis, steps, order, normal=None, table=None):
         transverse=[a for a in range(self.dim) if a!=axis]
-        if len(transverse)==1:return self.line_average(centers,transverse[0],steps[transverse[0]])
+        if len(transverse)==1:return self.line_average(centers,transverse[0],steps[transverse[0]],table=table)
         a,b=transverse;nodes,weights=np.polynomial.legendre.leggauss(order)
-        result=np.zeros(len(centers))
+        result=np.zeros(len(centers) if table is None else (len(centers),table.shape[1]))
         # Integrate the direction of strongest interface variation analytically.
         # This gives exact fractions for every axis-aligned layer, including
         # a face whose discontinuity would otherwise lie across Gauss nodes.
         swap=np.zeros(len(centers),bool) if normal is None else abs(normal[:,b])>abs(normal[:,a])
         for mask,inner,outer in ((~swap,a,b),(swap,b,a)):
             if not np.any(mask):continue
-            value=np.zeros(np.count_nonzero(mask))
+            value=np.zeros((np.count_nonzero(mask),)+result.shape[1:])
             for x,w in zip(nodes,weights):
                 points=np.array(centers[mask],copy=True);points[:,outer]+=x*steps[outer]/2
-                value+=w/2*self.line_average(points,inner,steps[inner])
+                value+=w/2*self.line_average(points,inner,steps[inner],table=table)
             result[mask]=value
+        return result
+
+    def volume_average(self, centers, steps, order, normal, table):
+        """Label-table average over the axis-aligned cell of ``steps`` centred at each point.
+
+        Gauss-Legendre nodes run along the axis of weakest normal variation and
+        face_average integrates the other two, analytically along the strongest."""
+        if self.dim==2:return self.face_average(centers,2,steps,order,normal,table)
+        nodes,weights=np.polynomial.legendre.leggauss(order)
+        result=np.zeros((len(centers),table.shape[1]));weakest=np.argmin(abs(normal),axis=1)
+        for axis in range(3):
+            mask=weakest==axis
+            if not np.any(mask):continue
+            for x,w in zip(nodes,weights):
+                points=np.array(centers[mask],copy=True);points[:,axis]+=x*steps[axis]/2
+                result[mask]+=w/2*self.face_average(points,axis,steps,order,normal[mask],table)
         return result
 
     def normals_and_candidates(self, points, radius):

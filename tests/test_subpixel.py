@@ -85,8 +85,8 @@ def test_unsupported_physics_is_explicit_and_old_projects_keep_staircase():
     assert Region().interface_method=='staircase'
     with pytest.raises(ValueError,match='Yee'):Region(interface_method='subpixel')
     p=small();p.region.material_sampling='yee';p.region.interface_method='subpixel'
-    next(m for m in p.materials if m.name==p.structures[0].material).model='drude'
-    with pytest.raises(ValueError,match='nondispersive'):Simulation(p)
+    next(m for m in p.materials if m.name==p.structures[0].material).model='drude';p.region.pml_dispersion='frozen'
+    with pytest.raises(ValueError,match='frozen'):Simulation(p)
 
 
 @pytest.mark.parametrize('kind',['rectangle','sphere','circle','ring','polygon'])
