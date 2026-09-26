@@ -3,6 +3,160 @@
 Results of the G7 application workflows and cost measurements declared in
 [G7_WORKFLOWS.md](G7_WORKFLOWS.md). Each section is written from its own committed records.
 
+## G7-02: small finite metalens (application B)
+
+Declared in [G7_WORKFLOWS.md](G7_WORKFLOWS.md) (section G7-02 and its revision G7-02r2) and
+[`docs/validation/cases/G7-02r2.json`](validation/cases/G7-02r2.json), which supersedes
+[`G7-02.json`](validation/cases/G7-02.json) with a time rule and keeps its acceptance limits. Code:
+[`examples/g7/metalens/metalens_workflow.py`](../examples/g7/metalens/metalens_workflow.py). Records:
+[`docs/validation/g7/G7-02/`](validation/g7/G7-02): `common.json` (the native tie, the shutoff cross-check and
+the gradient check), `start-library.json`, `start-wider.json`, `start-narrower.json` and `summary.json`.
+`tests/test_g7_metalens.py` re-judges the records against the case file.
+
+**Verdict: every criterion passes for all three starts.** The best refined design (narrower start) has a
+focusing efficiency of 0.6988 against the declared 0.5571; the library start ends 0.0002 below it. Doubling the
+stop time changes the efficiency of the final designs by at most 0.0015 (limit 0.005). For the wider start the
+doubled run reaches the declared cap and covers 1.18 times its stop time, not two times (see Time rule).
+
+### Run
+
+| Item | Value |
+|---|---|
+| Command | `TORCHFDTD_G7_FULL=1 TORCHFDTD_G7_RECORD=<checkout>/docs/validation/g7/G7-02 python -m pytest -q -p no:cacheprovider <checkout>/tests/test_g7_metalens.py -k declared_workflow`, with the interpreter of the wheel environment, from a working directory outside the checkout |
+| Package | the release wheel `torchfdtd-0.16.0-py3-none-any.whl` (built from 2612d831ef91), SHA-256 `57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd`, installed with the `dev` and `cuda-kernels` extras in a fresh virtual environment without system site-packages, with torch 2.10.0+cu126 and cupy-cuda12x 13.6.0. Every record names the imported file (that environment's site-packages), version 0.16.0, `torchfdtd_import: installed` and the wheel's SHA-256 |
+| Code | examples and tests of this branch at commit 0fb8d51, no tracked changes outside the record directory (recorded in every record) |
+| Device | NVIDIA GeForce RTX 3060, float32, fused CUDA kernels; the GPU lock was held exclusively, so no other GPU job ran |
+| Wall time | 5139 s: common stage 133 s, library 1373 s, wider 2371 s, narrower 1261 s; one refinement iteration (stop search, value and gradient) took 43 to 129 s, growing with the stop step count |
+
+A first run of the same command and wheel, with the GPU shared with other jobs, stopped in iteration 4 of the
+narrower start with a CUDA illegal memory access, at the same second as Windows driver events (nvlddmkm 153). Its
+common stage and its library and wider starts gave values identical to these records in every field except wall
+times. It is kept outside the repository.
+
+### Method
+
+- Lens and grid as declared: `examples/meep_comparison/metalens/geometry.json` (33 ridges on a 0.6 um pitch,
+  height 1.0 um, n = 3.48, Ez), 0.025 um, 1.0 um CPML, the recorded source sheet and the incident (y = -7.9 um,
+  20 um wide), focal (y = 5.6 um) and axis (x = 0) lines. Lens and line builders, the observables and the focusing
+  efficiency come from `torchfdtd_metalens.py` and `metalens_common.py`, the functions `compare.py` applies to the
+  comparison records.
+- Time rule (G7-02r2): every forward run, of the lens and of the bare cell, continues until the total field energy
+  in the cell (the StateDiagnostics measure, float64) is at most 1e-3 of its running peak, checked every 20 steps
+  once the source has ended (step 2676), capped at 10 times the declared 5200-step (303.6 fs) window. The energy is
+  evaluated on the adjoint's own Yee system for the regularized permittivity; the run of the found length follows.
+- Starts: the widths of `design_2d.json`, every ridge one library step (0.05 um) wider, and one step narrower. Four
+  ridges already have the widest library width and keep it in the wider start; no ridge has the narrowest.
+- Design model: each ridge is a `DifferentiableSolid.box` whose width is a Torch parameter, rasterized by
+  `smooth_geometry_epsilon` with a 0.05 um transition (two cells of the design grid, four of the 0.0125 um grid).
+  The bounded shape VJP of that function carries the adjoint permittivity gradient to the widths. Every
+  validation run rasterizes the same regularized boxes.
+- Refinement: objective |Ez|^2 at (0, 5.6) um at 1.55 um relative to the bare-cell incident intensity, through
+  `DifferentiableSimulation.spectrum` (online DFT, 32 device checkpoints); `torch.optim.Adam` with default betas,
+  learning rate 0.01 um, 20 iterations. Each iteration first finds the stop of the current widths and then runs the
+  value and gradient for that step count. Widths are clipped to the library range 0.075 to 0.575 um after each step.
+  The final design is the iterate after the 20th step; no iterate is selected.
+- Validation of each final design: `DifferentiablePlaneSimulation` forwards with the recorded lines, whose
+  interpolation and time convention are those of the native plane monitors, each normalized by its own bare cell
+  at its own stop: the design grid; 0.0125 um (80 CPML cells per face, window 10400 steps, cap 100000 steps, which is
+  9.6 windows because of the Region step limit); and the design grid with lens and bare cell run for twice their
+  stops, within the cap.
+- Tie to the recorded comparison: the staircase library design (the voxelized structures) at its stop (18000
+  steps, 3.46 times the window) gives efficiency 0.5567197 through the native `Simulation` and 0.5567203 through
+  the plane forward. The recorded comparison value 0.5571 was taken at the declared window; (b) keeps it as the
+  limit.
+- Native shutoff cross-check: `RunControl(auto_shutoff=True, decay_threshold=1e-3, check_interval=20,
+  consecutive_checks=2)` on the same staircase lens stops at 18100 steps, the rule at 18000.
+- Gradient check (library start at its stop, 17360 steps, ridge at x = -5.4 um, float32): adjoint 15.6864 per um
+  against central differences 15.4419, 15.6288 and 15.6736 at steps of 4, 2 and 1 nm, relative differences 1.58,
+  0.37 and 0.081 percent, falling as the square of the step (the truncation error of the cubic transition). The fast
+  test repeats the check in float64 on the CPU on a reduced lens and requires agreement within 1e-4.
+
+### Starts and final designs
+
+Efficiency is the compare.py focusing efficiency at 1.55 um (power within 1.5 FWHM of the focal-line peak over the
+bare-cell power through the incident line). The focal-point intensity is the objective, relative to the incident
+intensity. Stop steps are on the grid named; a window is 5200 steps at 0.025 um and 10400 at 0.0125 um.
+
+| Start | Initial efficiency | Initial stop (steps) | Focal-point intensity, initial / final | Stops during the refinement (steps) | Widths at a bound after the refinement |
+|---|---|---|---|---|---|
+| library | 0.5598 | 17360 (3.34 windows) | 9.561 / 12.183 | 15480 to 20200 | 2 |
+| wider | 0.4384 | 25940 (4.99 windows) | 6.760 / 11.295 | 25760 to 48520 | 4 |
+| narrower | 0.4565 | 14400 (2.77 windows) | 7.291 / 12.351 | 13960 to 25660 | 0 |
+
+| Start | Final efficiency: design grid / 0.0125 um / twice the stop | Final stop: design grid / 0.0125 um (steps) | Twice-the-stop run (steps) | Axial peak y (um): design grid / 0.0125 um | Focal-line FWHM (um) | Side-lobe ratio | Transmission |
+|---|---|---|---|---|---|---|---|
+| library | 0.6986 / 0.6979 / 0.6988 | 18960 (3.65 windows) / 38520 (3.70) | 37920 | 5.877 / 5.902 | 1.127 | 0.091 | 0.861 |
+| wider | 0.6230 / 0.6313 / 0.6240 | 44120 (8.48 windows) / 80780 (7.77) | 52000 (the cap) | 5.404 / 5.386 | 1.108 | 0.089 | 0.792 |
+| narrower | 0.6988 / 0.6918 / 0.6973 | 17860 (3.43 windows) / 34500 (3.32) | 35720 | 5.217 / 5.221 | 1.144 | 0.053 | 0.845 |
+
+The initial efficiency of the library start (0.5598) is that of the regularized fill at its stop; the staircase of
+the same widths gives 0.5567 at its stop. The side-lobe ratio is the largest focal-line intensity outside the main
+lobe, bounded by the first minima on each side of the peak, over the peak. The objective does not constrain the
+axial peak: the axial maxima of the final designs lie at 5.22 to 5.88 um while the intensity at the declared focal
+point rose.
+
+### Criteria
+
+| Criterion | Value | Limit | Result |
+|---|---|---|---|
+| (a) all three starts reported | library, wider, narrower | three starts | pass |
+| (b) best refined efficiency (narrower start, design grid) | 0.6988 | at least 0.5571 | pass |
+| (c) 0.0125 um: efficiency change, library / wider / narrower | 0.0007 / 0.0083 / 0.0070 | at most 0.02 | pass |
+| (c) 0.0125 um: axial peak change (um) | 0.025 / 0.019 / 0.004 | at most 0.1 | pass |
+| (d) twice the stop time: efficiency change | 0.00015 / 0.0010 / 0.0015 | at most 0.005 | pass |
+| (e) propagated against direct focal-line intensity, relative L2 | 0.022 / 0.0074 / 0.0034 | at most 0.05 | pass |
+| (f) focal-line FWHM of the best design (um) | 1.144 | at most 1.76 | pass |
+| scope | every number comes from full-aperture 33-ridge runs; the unit-cell library only supplies the start widths | - | pass |
+
+(c) to (e) are judged on every start's final design, not only the best one.
+
+### Time rule
+
+Every stop search of the run reached 1e-3 before the cap: the bare cell at 2820 steps (0.54 windows, 164.6 fs) on
+the design grid and 5620 steps at 0.0125 um, the 60 refinement iterations and every validation run. The stops depend
+on the design. The library and narrower starts stay between 2.7 and 4.9 windows. The wider start rises from 4.99
+windows at iteration 0 to 9.33 windows (48520 steps) at iteration 19, and its final design stops at 8.48 windows.
+Twice that is beyond the declared cap of 10 windows, so its (d) run is capped at 52000 steps, 1.18 times its stop:
+for this start (d) compares the efficiency at the stop with the efficiency 0.18 stops later, not at twice the time.
+This follows the declared rule ("twice the stop time of the 1e-3 rule, capped at 10 times the declared window").
+The other two starts are compared at exactly twice their stops.
+
+### Propagation
+
+The angular spectrum of the complex Ez on the 20 um incident line (zero padding 4, air) reproduces the direct focal
+line within 2.2, 0.74 and 0.34 percent (relative L2, library, wider, narrower) and the direct axial line within 1.9,
+1.7 and 0.86 percent. As information, the same propagation from a line widened to the whole interior (22 um) gives
+1.1, 1.2 and 0.61 percent on the focal line. The axial profiles are flat near their maxima, so the propagated axial
+peak lies 0.17, 0.50 and 0.17 um from the direct one from the 20 um line (0.013, 0.37 and 0.21 um from the
+full-width line); no criterion applies to it.
+
+### Limits
+
+- The validated object is the regularized fill with a 0.05 um transition, not sharp-edged ridges. Its mesh check
+  refines one permittivity profile; the staircase or subpixel model of the same widths was not evaluated.
+- The objective is the intensity at one point and one wavelength, for one polarization in 2D; nothing is claimed for
+  1.50 and 1.60 um (their values are in the records), for TE, or for a 3D lens.
+- Widths were clipped to the library range; the declaration does not name a bound. Two widths of the library start
+  and four of the wider start end on the upper bound.
+- For the wider start, (d) covers 1.18 times the stop, not two times (Time rule).
+- The records store the focal and axial lines at 1.55 um for every grid and summaries at all three wavelengths; each
+  start record is about 290 kB.
+
+### Reproduce
+
+The judged run needs a CUDA GPU and takes about 1.5 hours on an otherwise idle RTX 3060.
+
+```bash
+# wheel environment outside the checkout
+python -m venv <env>
+<env>/python -m pip install torch==2.10.0+cu126 --index-url https://download.pytorch.org/whl/cu126
+<env>/python -m pip install "torchfdtd-0.16.0-py3-none-any.whl[dev,cuda-kernels]"
+# judged run, from a working directory outside the checkout
+TORCHFDTD_G7_FULL=1 TORCHFDTD_G7_RECORD=<checkout>/docs/validation/g7/G7-02 <env>/python -m pytest -q -p no:cacheprovider <checkout>/tests/test_g7_metalens.py -k declared_workflow
+# fast checks and the re-judgement of the committed records, from the repository root
+python -m pytest tests/test_g7_metalens.py
+```
+
 ## G7-04: independent solver at matched accuracy
 
 Declared in [G7_WORKFLOWS.md](G7_WORKFLOWS.md) (section G7-04) and
