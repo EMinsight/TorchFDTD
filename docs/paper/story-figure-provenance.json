@@ -1,6 +1,8 @@
 {
   "description": "Vector schematics and plots from completed records. No new simulation or interpolated field image.",
   "inputs": {
+    "paper_review/metagrating_fields.npz": "c87ad8cd9977a1235e4871f0dbe7c992cbb9444c0be537e5595cc4183ef44a5d",
+    "paper_review/lens1mm-tiled-5880.npz": "6db89a63b9b3a5573568f684eaaa8833fd223849ec0d5849ce6ff0c48ffc1eb4",
     "cpu-gpu-adjoint-256-dielectric-a100.json": "d4230fef1bd546fa2a6e5f8d97ab979b5f085ea80592b903f92354d1e6d16b73",
     "cpu-gpu-adjoint-256-ade-a100.json": "c8c3deedc497caadbc919cdffdeaa247ffbeb6e684f67e154208e216ae47f89d",
     "angular-spectrum-3060.json": "580e4816fd5deab9902413a9313b80e84f7062d4e27055175cfa9e501937a67a",
@@ -22,9 +24,9 @@
     "paper_review/scaling-adjoint-3060-256.json": "38fa488a63f68712b20ac1a385972da791a6244458da5dd6d7ac103b598df5c5",
     "paper_review/scaling-adjoint-3060-320.json": "e839cd5366b94df422a8ddd52cda6c5f42e7e88b5cb7c034e3c40debe2205015",
     "paper_review/scaling-adjoint-3060-384.json": "ad977846ed2b531e258f8b544638a40e2ae4dd00247745275bd1cf9ceeb63b73",
-    "paper_review/scaling-adjoint-3060-384-resident-plan.json": "234429d66e4b39a076c2aa1b150540dfd81e234d691307a99b94a82d376f1b35",
     "paper_review/metagrating_showcase.json": "ab2075285af990272e393a89d621da8962b0ac0b4982043f742c9be07378f677",
-    "paper_review/metagrating_fields.npz": "c87ad8cd9977a1235e4871f0dbe7c992cbb9444c0be537e5595cc4183ef44a5d"
+    "paper_review/lens1mm-tiled-5880.json": "28c3e95700d18ad69db0667c4def3738062134f57aeae928454b46667b85df20",
+    "paper_review/lens1mm-exit-window.npz": "081143729585722d95047d78093deb38e0b5f61e4e409c93c2aa9144cf4e543d"
   },
-  "generator_sha256": "eaa621c0cb126e80187c96f92833c969c21f1257ccd449e87384c8dc045e1428"
+  "generator_sha256": "0580bd884e60fcc2fc5afe4d5492a5c159882893654f012360a1d093fd36f6b5"
 }

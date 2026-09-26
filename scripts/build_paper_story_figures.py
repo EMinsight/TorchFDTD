@@ -224,6 +224,12 @@ def metalens_topview(ax, geometry):
 
 def architecture():
     """Orthographic algorithm schematic, not a simulated device or field."""
+    with plt.rc_context({'font.family': 'serif', 'font.serif': ['cmr10'], 'mathtext.fontset': 'cm',
+                         'axes.unicode_minus': False, 'axes.formatter.use_mathtext': True}):
+        _architecture()
+
+
+def _architecture():
     fig, ax = plt.subplots(figsize=(WIDTH, 4.0))
     fig.subplots_adjust(0, 0, 1, 1)
     ax.set(xlim=(0, 160), ylim=(0, 101.5), aspect='equal')
@@ -253,51 +259,85 @@ def architecture():
         text((x0 + x1) / 2, y0 - offset, label, size=size, color=color)
 
     def label(x, y, s):
-        text(x, y, s, size=9, weight='bold')
+        text(x, y, r'$\mathbf{' + s + '}$', size=9)
 
     def title(x, y, s):
         text(x, y, s, size=8, ha='left')
 
-    # ---------------- (a) forward map and its transpose ----------------
-    label(2, 98.3, 'a'); title(6.5, 98.3, 'Optical model and its discrete transpose')
-    fy, fh = 79, 10          # forward row
-    ry, rh = 57, 9           # reverse row
-    fwd = [(2, 15, 'Design\nparameters $p$'), (22, 17, 'Material\n$\\epsilon(p)$'),
-           (87, 20, 'Plane spectra\n$E_\\omega,\\,H_\\omega$'), (112, 22, 'Angular spectrum\n$P_z=F^{-1}H_zF$'),
-           (139, 19, 'Objective\n$J$')]
-    for x, w, s in fwd:
-        rbox(x, fy, w, fh, s, edge=INK, fill='white')
-    rev = [(2, 15, 'Gradient\n$\\nabla_{\\!p}J$'), (22, 17, 'Material\ncotangent $\\bar\\epsilon$'),
-           (45, 36, 'Transposed sweep\nwith checkpoint replay'), (87, 20, 'Plane\ncotangent'),
-           (112, 22, 'Propagation\ntranspose $P_z^{\\mathsf{T}}$'), (139, 19, 'Seed\n$\\bar J=1$')]
-    for x, w, s in rev:
-        rbox(x, ry, w, rh, s, edge=TEAL, fill=pale['teal'], color=INK)
-    # FDTD domain cross-section, schematic geometry only.
-    x0, y0, w0, h0 = 45, 73, 36, 22
-    rect(x0, y0, w0, h0, fc=pale['grey'], ec=LINE, lw=0.6)
-    rect(x0 + 3, y0 + 2.5, w0 - 6, h0 - 5, fc='white', ec='none')
-    text(x0 + w0 - 1.2, y0 + 1.3, 'PML', size=5.4, color=MUTED, ha='right')
-    ax.plot([x0 + 4, x0 + w0 - 4], [78.4, 78.4], color=ORANGE, lw=1.1, solid_capstyle='butt')
-    text(x0 + 4, 76.7, 'source', size=5.4, color=ORANGE, ha='left')
-    for px, pw in [(52, 2.6), (57, 3.6), (62.5, 2.6), (68, 3.6), (73.5, 2.6)]:
-        rect(px, 81.6, pw, 3.8, fc=BLUE, ec='none')
-    text(63, 87.3, 'design region', size=5.4, color=BLUE)
-    ax.plot([x0 + 4, x0 + w0 - 4], [90, 90], color=TEAL, lw=1.1, solid_capstyle='butt')
-    text(x0 + 4, 91.7, 'plane monitor', size=5.4, color=TEAL, ha='left')
-    text(x0 + 1.2, y0 + h0 - 1.3, 'FDTD domain', size=5.6, color=MUTED, ha='left')
-    # forward arrows
-    for xa, xb in [(17, 22), (39, 45), (81, 87), (107, 112), (134, 139)]:
-        arrow((xa, fy + fh / 2), (xb, fy + fh / 2), color=INK)
-    # reverse arrows
-    for xa, xb in [(139, 134), (112, 107), (87, 81), (45, 39), (22, 17)]:
-        arrow((xa, ry + rh / 2), (xb, ry + rh / 2), color=TEAL)
-    # transposition links
-    for xc in (30.5, 63, 97, 123):
-        ax.plot([xc, xc], [ry + rh, fy if xc != 63 else y0], color=TEAL, lw=0.6, ls=(0, (1.2, 1.6)))
-    arrow((148.5, fy), (148.5, ry + rh), color=TEAL, lw=0.8)
-    text(150.2, (fy + ry + rh) / 2, 'reverse\nsweep', size=5.6, color=TEAL, ha='left')
-    text(80, 52.2, 'Every forward kernel has its own transpose kernel. The reverse row is the '
-         'discrete adjoint of the row above it.', size=6.2, color=MUTED)
+    # ---------------- (a) forward map and its discrete adjoint ----------------
+    label(2, 98.3, 'a'); title(6.5, 98.3, 'Differentiable forward model and its discrete adjoint')
+    fy, fh = 76.5, 12        # forward row
+    ry, rh = 55.5, 10        # reverse row
+    fc_y = fy + fh / 2
+
+    def ebox(x, w, y, h, head, eq, edge=INK, fill='white', eq_size=7.2, ls='-'):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle='round,pad=0,rounding_size=1.4',
+                                    facecolor=fill, edgecolor=edge, linewidth=0.7, linestyle=ls))
+        text(x + w / 2, y + h * 0.70, head, size=6.4, color=INK)
+        text(x + w / 2, y + h * 0.33, eq, size=eq_size, color=INK)
+
+    # device: posts on a substrate in oblique projection, the design parameters p set the posts
+    def prism(x, y, w, d, h, top, side, front, lw=0.5):
+        dx, dy = 0.55 * d, 0.45 * d
+        ax.add_patch(Polygon([(x, y), (x + w, y), (x + w, y + h), (x, y + h)], closed=True, fc=front, ec=INK, lw=lw))
+        ax.add_patch(Polygon([(x, y + h), (x + w, y + h), (x + w + dx, y + h + dy), (x + dx, y + h + dy)], closed=True,
+                             fc=top, ec=INK, lw=lw))
+        ax.add_patch(Polygon([(x + w, y), (x + w + dx, y + dy), (x + w + dx, y + h + dy), (x + w, y + h)], closed=True,
+                             fc=side, ec=INK, lw=lw))
+    prism(2.0, 77.0, 14.5, 7, 2.2, '#dfe3e8', '#c9ced3', '#eef0f2')
+    for dz in (3.8, 0.4):
+        for px, pd in [(3.3, 1.9), (7.2, 2.8), (11.8, 1.9)]:
+            prism(px + 0.55 * dz, 79.2 + 0.45 * dz, pd, pd * 0.8, 5.0, '#9dbde0', '#5f8fc6', '#7ea6d1', lw=0.4)
+    text(10.5, 89.6, 'design $p$', size=6.4)
+    text(9.5, 74.6, r'$\epsilon(p)$', size=7.4)
+
+    ebox(25, 27, fy, fh, 'Fused Yee update', r'$u^{n+1}=F_n(u^{n},p)$')
+    # exit-plane field of the metagrating (Ex, real part), drawn from its record
+    name = 'paper_review/metagrating_fields.npz'
+    INPUTS[name] = hashlib.sha256((DATA / name).read_bytes()).hexdigest()
+    mg = np.load(DATA / name)
+    ex = mg['Ex_real_final_binary']
+    lim = float(np.abs(ex).max())
+    ax.imshow(ex.T, origin='lower', extent=(56.5, 72.5, fy - 0.5, fy + fh + 0.5), cmap='RdBu_r', vmin=-lim, vmax=lim,
+              interpolation='bilinear', zorder=2)
+    rect(56.5, fy - 0.5, 16, fh + 1, fc='none', ec=INK, lw=0.5, zorder=3)
+    text(64.5, fy + fh + 2.3, r'$E_\omega(x,z)$', size=7.0)
+    ebox(77, 28, fy, fh, 'Angular spectrum', r'$E_d=\mathcal{F}^{-1}\!\left[e^{\mathrm{i}dk_z}\mathcal{F}E_\omega\right]$',
+         eq_size=6.9, ls=(0, (3, 2)))
+    text(91, fy + fh + 2.3, 'optional', size=5.6, color=MUTED)
+    # focusing section of the 1 mm lens, drawn from its record
+    name = 'paper_review/lens1mm-tiled-5880.npz'
+    INPUTS[name] = hashlib.sha256((DATA / name).read_bytes()).hexdigest()
+    ln = np.load(DATA / name)
+    sec = np.log10(np.maximum(ln['section'] / float(ln['reference_intensity']), 0.3))
+    ax.imshow(sec.T, origin='lower', extent=(109.5, 131.5, fy - 0.5, fy + fh + 0.5), cmap='magma', aspect=None,
+              interpolation='bilinear', zorder=2)
+    rect(109.5, fy - 0.5, 22, fh + 1, fc='none', ec=INK, lw=0.5, zorder=3)
+    text(120.5, fy + fh + 2.3, r'$|E_d(x,z)|^2$', size=7.0)
+    ebox(136, 20, fy, fh, 'Objective', r'$J=\mathcal{J}(E_d)$')
+    for xa, xb in [(21.5, 25), (52, 56.5), (72.5, 77), (105, 109.5), (131.5, 136)]:
+        arrow((xa, fc_y), (xb, fc_y), color=INK)
+    text(54.25, fc_y + 1.8, 'DFT', size=5.6, color=MUTED)
+
+    # reverse row: the transposed kernels, Eq. (3)
+    rc_y = ry + rh / 2
+    ebox(136, 20, ry, rh, 'Seed', r'$\bar J=1$', edge=TEAL, fill=pale['teal'])
+    ebox(100, 31, ry, rh, 'Transposed propagation', r'$\bar E_\omega=\mathcal{P}_d^{\mathsf{T}}\,\partial J/\partial E_d$',
+         edge=TEAL, fill=pale['teal'], eq_size=6.9, ls=(0, (3, 2)))
+    ebox(44.5, 51, ry, rh, 'Transposed sweep with checkpoint replay',
+         r'$\bar u^{n}=\left(\partial F_n/\partial u\right)^{\mathsf{T}}\bar u^{n+1}+\partial J/\partial u^{n}$',
+         edge=TEAL, fill=pale['teal'], eq_size=6.9)
+    ebox(2, 38, ry, rh, 'Parameter gradient',
+         r'$\nabla_{\!p}J=\sum_n\left(\partial F_n/\partial p\right)^{\mathsf{T}}\bar u^{n+1}$',
+         edge=TEAL, fill=pale['teal'], eq_size=6.9)
+    for xa, xb in [(136, 131), (100, 95.5), (44.5, 40)]:
+        arrow((xa, rc_y), (xb, rc_y), color=TEAL)
+    arrow((146, fy), (146, ry + rh), color=TEAL, lw=0.8)
+    # forward states stored during the forward sweep and replayed by the transposed sweep
+    arrow((48.5, fy), (48.5, ry + rh), color=BLUE, lw=0.8)
+    text(50, (fy + ry + rh) / 2, r'checkpoints $u^{n_c}$', size=5.6, color=BLUE, ha='left')
+    text(147.6, (fy + ry + rh) / 2, 'reverse\nsweep', size=5.6, color=TEAL, ha='left')
+    ax.set(xlim=(0, 160), ylim=(0, 101.5))
     ax.plot([2, 158], [48.6, 48.6], color=LINE, lw=0.6)
 
     # ---------------- (b) host-streamed sweep over causal slabs ----------------
@@ -352,37 +392,31 @@ def architecture():
     text(lx + 6.2, 20.8, 'Host DRAM: state\nbanks of all slabs and\nblock checkpoints', size=5.5, ha='left', linespacing=1.15)
     arrow((lx + 1, 29.4), (lx + 1, 23.6), color=BLUE, lw=0.6, style='<|-|>', ms=5)
     text(lx + 2.2, 26.5, 'read / write', size=5.4, color=BLUE, ha='left')
-    text(47, 2.2, 'Slabs advance one block at a time, left to right. The device holds one slab\n'
-         'and the full-domain discrete problem is unchanged.', size=6.0, color=MUTED)
-    ax.plot([96, 96], [0.5, 46.5], color=LINE, lw=0.6)
+    ax.plot([96, 96], [5.5, 46.5], color=LINE, lw=0.6)
 
-    # ---------------- (c) independent tiles ----------------
-    label(100, 45.5, 'c'); title(104.5, 45.5, 'Independent lateral tiles')
-    gx, core, ov, pml = 108, 16, 4, 3
-    rh, gap, ytop = 6, 3.6, 34.5
-    tiles = [('tile 1', 0, BLUE, pale['blue']), ('tile 2', core, TEAL, pale['teal'])]
-    for i, (name, cx, col, fill) in enumerate(tiles):
-        y = ytop - i * (rh + gap)
-        rect(gx + cx - ov - pml, y, pml, rh, fc='#e3e7eb', ec='#b5bcc4', lw=0.5)
-        rect(gx + cx + core + ov, y, pml, rh, fc='#e3e7eb', ec='#b5bcc4', lw=0.5)
-        for hx in (gx + cx - ov, gx + cx + core):
-            rect(hx, y, ov, rh, fc='white', ec=col, lw=0.5, hatch='////')
-        rect(gx + cx, y, core, rh, fc=fill, ec=col, lw=0.8)
-        text(gx + cx + core / 2, y + rh / 2, name, size=6, color=col)
-    ya = ytop - 2 * (rh + gap)
-    rect(gx, ya, core, rh * 0.6, fc=BLUE, ec='none')
-    rect(gx + core, ya, core, rh * 0.6, fc=TEAL, ec='none')
-    ax.plot([gx + core, gx + core], [ya, ya + rh * 0.6], color='white', lw=0.8)
-    text(gx + core, ya - 2.4, 'assembled output plane, cores only', size=6, color=INK)
-    for i, (name, cx, col, fill) in enumerate(tiles):
-        y = ytop - i * (rh + gap)
-        arrow((gx + cx + core / 2, y), (gx + cx + core / 2, ya + rh * 0.6), color=col, lw=0.6, ms=5)
-    ax.plot([gx + core, gx + core], [ya + rh * 0.6 + 0.5, ytop + rh + 1.2], color=ORANGE, lw=0.7, ls=(0, (2, 1.5)))
-    text(gx + core, ytop + rh + 2.6, 'artificial cut', size=5.8, color=ORANGE)
-    text(148.5, ytop + rh / 2, 'grey: own PML', size=5.6, color=MUTED, ha='left')
-    text(148.5, ytop - rh - gap + rh / 2, 'hatched: overlap', size=5.6, color=MUTED, ha='left')
-    text(130, 2.2, 'Each tile is solved on its own, so coupling across the cut\nis lost, and its error is measured against the full domain.',
-         size=6.0, color=MUTED)
+    # ---------------- (c) slab width against the device budget ----------------
+    label(100, 45.5, 'c'); title(104.5, 45.5, 'Slab width and device budget')
+    bx0, bl, bh2, hw = 106, 34, 5.0, 1.1      # host domain bar: origin, length, height, halo width
+    gx0, gw, gh = 147, 3.6, 11.0              # GPU memory gauge
+    rows = [(r'narrow $W$', 12, 30.5, 0.14), (r'wide $W$', 3, 12.5, 0.86)]
+    for name, nslab, y, fill in rows:
+        sw = bl / nslab
+        cur = nslab // 2
+        for k in range(nslab):
+            rect(bx0 + k * sw, y, sw, bh2, fc='#c9ced3' if k < cur else 'white', ec='#9aa3ad', lw=0.4)
+        xs = bx0 + cur * sw
+        ax.add_patch(Polygon([(xs - hw, y), (xs + sw + hw, y), (xs + sw + hw, y + bh2), (xs - hw, y + bh2)],
+                             closed=True, facecolor=TEAL, edgecolor=TEAL, alpha=0.35, lw=0.5, zorder=4))
+        rect(xs, y, sw, bh2, fc=TEAL, ec=TEAL, lw=0.5, zorder=5)
+        text(bx0, y + bh2 + 2.2, name, size=6.2, ha='left')
+        # gauge: the device allocation of this slab block
+        yg = y + bh2 / 2 - gh / 2
+        rect(gx0, yg, gw, gh, fc='white', ec=INK, lw=0.5)
+        rect(gx0, yg, gw, gh * fill, fc=TEAL, ec='none', alpha=0.85)
+        arrow((bx0 + bl + 0.4, y + bh2 / 2), (gx0 - 0.3, y + bh2 / 2), color=MUTED, lw=0.6)
+    text(gx0 + gw / 2, 30.5 + bh2 / 2 + gh / 2 + 2.0, 'GPU', size=6.0, color=MUTED)
+    text(bx0 + bl / 2, 8.2, r'device $\propto (W+2K)\,N_yN_z$,   halo work $2K/W$', size=6.4)
+
     save(fig, 'execution-overview')
 
 
@@ -734,11 +768,9 @@ def grid_scaling():
     sizes = [128, 192, 256, 320, 384]
     adj = {n: read(f'paper_review/scaling-adjoint-3060-{n}.json') for n in sizes
            if (DATA / f'paper_review/scaling-adjoint-3060-{n}.json').exists()}
-    refused = read('paper_review/scaling-adjoint-3060-384-resident-plan.json')
     res = [c for c in fwd['cases'] if 'median' in c]
     stm = [c for c in sfwd['cases'] if 'median' in c]
     fig, axes = plt.subplots(1, 3, figsize=(WIDTH, 2.45))
-    limit_n = 8e6 ** (1 / 3)   # edge of a cube at the eight-million-cell resident limit
     style = dict(ms=4, mfc='white', mew=1.1)
 
     def xaxis(ax, ticks=(64, 128, 256, 512), lo=56, hi=580):
@@ -756,9 +788,6 @@ def grid_scaling():
     if stm:
         ax.plot([c['n'] for c in stm], [c['cell_steps_per_second_full'] / 1e9 for c in stm],
                 marker='D', color=PURPLE, ls=(0, (3, 2)), label='Streamed, full solve', **style)
-    ax.axvline(limit_n, color=GREY, lw=0.7, ls=(0, (1, 2)))
-    ax.text(limit_n * 0.94, 0.04, 'resident limit\n8 million cells', transform=ax.get_xaxis_transform(), ha='right',
-            va='bottom', fontsize=5.8, color=GREY)
     xaxis(ax)
     top = max(c['cell_steps_per_second_loop'] / 1e9 for c in res)
     ax.set(ylabel='Rate (10$^9$ cell-steps/s)', ylim=(0, 1.45 * top))
@@ -790,10 +819,6 @@ def grid_scaling():
     ax = axes[2]
     for mode, color, marker, name in (('cuda_resident', ORANGE, 's', 'Resident'), ('cuda_dram', TEAL, '^', 'Host-streamed')):
         ax.plot([s[0] for s in series[mode]], [s[1] for s in series[mode]], marker=marker, color=color, label=name, **style)
-    if refused.get('stage') == 'failed':
-        n_refused = refused['configuration']['size']
-        ax.text(0.97, 0.04, f'{n_refused}$^3$: only the streamed\nadjoint fits the budget', transform=ax.transAxes,
-                ha='right', va='bottom', fontsize=5.8, color=MUTED)
     xaxis(ax, ticks=(128, 256, 384), lo=100, hi=480)
     ax.set(yscale='log', ylabel='Time to gradient (s)')
     ax.legend(loc='upper left')
@@ -883,11 +908,177 @@ def metagrating_design(mesh='fine', duration='long_duration'):
     save(fig, 'metagrating-design')
 
 
+def tiled_lens():
+    """The 1 mm metalens evaluated with overlapping tiles and angular-spectrum propagation on one RTX 5880."""
+    with plt.rc_context({'font.family': 'serif', 'font.serif': ['cmr10'], 'mathtext.fontset': 'cm',
+                         'axes.unicode_minus': False, 'axes.formatter.use_mathtext': True}):
+        _tiled_lens()
+
+
+def _tiled_lens():
+    from matplotlib.colors import LogNorm
+    rec = read('paper_review/lens1mm-tiled-5880.json')
+    npz = {}
+    for key, name in (('run', 'paper_review/lens1mm-tiled-5880.npz'), ('exit', 'paper_review/lens1mm-exit-window.npz')):
+        INPUTS[name] = hashlib.sha256((DATA / name).read_bytes()).hexdigest()
+        npz[key] = np.load(DATA / name)
+    d, w = npz['run'], npz['exit']
+    design, tiling = rec['design'], rec['tiling']
+    lam = [float(v) for v in d['lam_um']]
+    k = int(np.argmin(np.abs(np.array(lam) - design['design_wavelength_um'])))
+    half, f, tile = design['half_width_um'], design['focal_length_um'], tiling['tile_um']
+    na = half / np.hypot(half, f)
+    side = int(round(2 * half / tile))
+    quad = (side + 1) // 2
+    um = r'$\mu$m'
+
+    # schematic row in drawing units across the full width, as in Fig. 1a; plot panels below it
+    SW, SH, left, right = 160, 31, 0.08, 0.93
+    ha = SH * WIDTH / SW
+    H = ha + 4.4
+    fig = plt.figure(figsize=(WIDTH, H))
+    ax = fig.add_axes([0, 1 - ha / H, 1, ha / H])
+    ax.set(xlim=(0, SW), ylim=(0, SH), aspect='equal')
+    ax.axis('off')
+
+    def text(x, y, s, size=6.8, color=INK, ha='center', va='center', **kw):
+        ax.text(x, y, s, fontsize=size, color=color, ha=ha, va=va, **kw)
+
+    def rect(x, y, w_, h, fc='none', ec=INK, lw=0.6, **kw):
+        ax.add_patch(Rectangle((x, y), w_, h, facecolor=fc, edgecolor=ec, lw=lw, **kw))
+
+    def arrow(a, b, color=INK, lw=0.8):
+        ax.annotate('', b, a, arrowprops=dict(arrowstyle='-|>', color=color, lw=lw, shrinkA=1.5, shrinkB=1.5,
+                                              mutation_scale=6))
+
+    def dim(x0, x1, y, label):
+        ax.annotate('', (x1, y), (x0, y), arrowprops=dict(arrowstyle='<|-|>', color=MUTED, lw=0.55, mutation_scale=4,
+                                                          shrinkA=0, shrinkB=0))
+        text((x0 + x1) / 2, y - 1.7, label, size=6.2, color=MUTED)
+
+    def ebox(x, w_, y, h, head, eq):
+        ax.add_patch(FancyBboxPatch((x, y), w_, h, boxstyle='round,pad=0,rounding_size=1.4', facecolor='white',
+                                    edgecolor=INK, linewidth=0.7))
+        text(x + w_ / 2, y + h * 0.70, head, size=6.4)
+        text(x + w_ / 2, y + h * 0.33, eq, size=6.9)
+
+    x0 = left * SW
+    text(x0, 28.6, r'$\mathbf{a}$   Tiled near field and angular-spectrum propagation', size=8, ha='left')
+    yc, ytop = 12.5, 23.4
+
+    # aperture: tile grid, the simulated quadrant and one tile
+    A = 17.0
+    s = A / (2 * half)
+    cx, cy = x0 + A / 2, yc
+    rect(x0, yc - A / 2, A, A, fc=PALE['grey'], ec='none')
+    rect(cx - 0.5 * tile * s, cy - 0.5 * tile * s, quad * tile * s, quad * tile * s, fc=BLUES[0], ec='none')
+    rect(cx + 0.5 * tile * s, cy + 0.5 * tile * s, tile * s, tile * s, fc=BLUE, ec='none', zorder=3)
+    for e in (np.arange(side + 1) - side / 2) * tile * s:
+        ax.plot([cx + e, cx + e], [cy - A / 2, cy + A / 2], color='white', lw=0.25, zorder=2)
+        ax.plot([cx - A / 2, cx + A / 2], [cy + e, cy + e], color='white', lw=0.25, zorder=2)
+    rect(x0, yc - A / 2, A, A, ec=INK, lw=0.6, zorder=4)
+    text(cx, ytop, 'aperture', size=6.4)
+    dim(x0, x0 + A, yc - A / 2 - 1.3, '1 mm')
+
+    # two neighbouring tiles in section, each with its own absorbers (grey), overlaps (hatched), posts on silica and
+    # the exit plane, assembled from their cores
+    core, pml, ov, rh, pad = 10.5, 1.6, 2.0, 6.4, 0.8
+    tx = x0 + A + 5.5
+    tw = 2 * (pml + ov) + 2 * core
+    c0 = tx + pml + ov
+    ya = 4.3
+    for i, col in enumerate((BLUE, TEAL)):
+        y = 14.2 - i * 7.0
+        tl = c0 + i * core - ov - pml
+        width = 2 * (pml + ov) + core
+        rect(tl, y, width, rh, fc='#e3e7eb', ec='#b5bcc4', lw=0.5)
+        inner = (tl + pml, y + pad, width - 2 * pml, rh - 2 * pad)
+        rect(*inner, fc='white', ec='none')
+        rect(inner[0], inner[1], inner[2], 1.4, fc='#eef0f2', ec='none')
+        n_posts = int(inner[2] / 1.05)
+        for j in range(n_posts):
+            pw = 0.3 + 0.45 * ((0.29 * (j + 11 * i)) % 1)
+            px = inner[0] + (j + 0.5) * inner[2] / n_posts
+            rect(px - pw / 2, inner[1] + 1.4, pw, 1.9, fc='#7ea6d1', ec='#5f8fc6', lw=0.3)
+        for hx in (tl + pml, tl + pml + ov + core):
+            rect(hx, inner[1], ov, inner[3], fc='none', ec=col, lw=0.5, hatch='////')
+        ze = inner[1] + 4.0
+        ax.plot([c0 + i * core, c0 + (i + 1) * core], [ze, ze], color=TEAL, lw=0.8, ls=(0, (3, 1.5)))
+        if i == 0:
+            text(tl + width + 0.5, ze, '$z_e$', size=5.8, color=TEAL, ha='left')
+        cx_ = c0 + i * core + core / 2
+        arrow((cx_, y), (cx_, ya + 1.6), color=col, lw=0.6)
+    rect(c0, ya, core, 1.6, fc=BLUE, ec='none')
+    rect(c0 + core, ya, core, 1.6, fc=TEAL, ec='none')
+    ax.plot([c0 + core] * 2, [ya, 21.0], color=ORANGE, lw=0.7, ls=(0, (2, 1.5)))
+    text(tx + tw / 2, ytop, 'tiles', size=6.4)
+    dim(c0, c0 + core, ya - 1.2, f'{tile:.0f} {um}')
+
+    # core assembly, the assembled exit-plane field around a corner where four tiles meet, and propagation
+    bx = tx + tw + 5.5
+    ebox(bx, 29, yc - 6, 12, 'Core assembly', r'$E_\omega=\sum_t\chi_t\,E_{\omega,t}$')
+    fx0, F = bx + 29 + 5.5, 16.5
+    ex = w['ex'].real
+    lim = float(np.abs(ex).max())
+    xw = w['x_um']
+    ax.imshow(ex.T, origin='lower', extent=(fx0, fx0 + F, yc - F / 2, yc + F / 2), cmap='RdBu_r', vmin=-lim, vmax=lim,
+              interpolation='bilinear', zorder=2)
+    for seam in w['seams_um']:
+        u = fx0 + (seam - xw[0]) / (xw[-1] - xw[0]) * F
+        ax.plot([u, u], [yc - F / 2, yc + F / 2], color='white', lw=0.6, ls=(0, (2, 1.5)), zorder=3)
+        v = yc - F / 2 + (seam - xw[0]) / (xw[-1] - xw[0]) * F
+        ax.plot([fx0, fx0 + F], [v, v], color='white', lw=0.6, ls=(0, (2, 1.5)), zorder=3)
+    rect(fx0, yc - F / 2, F, F, ec=INK, lw=0.5, zorder=4)
+    text(fx0 + F / 2, ytop, r'$E_\omega(x,y,z_e)$', size=7.0)
+    px0 = fx0 + F + 5.5
+    ebox(px0, 31.5, yc - 6, 12, 'Angular spectrum', r'$E(z)=\mathcal{F}^{-1}\!\left[e^{\mathrm{i}zk_z}\mathcal{F}E_\omega\right]$')
+    for xa, xb in [(x0 + A, tx), (tx + tw, bx), (bx + 29, fx0), (fx0 + F, px0)]:
+        arrow((xa, yc), (xb, yc))
+
+    grid = fig.add_gridspec(2, 3, left=left, right=right, top=(H - ha - 0.34) / H, bottom=0.42 / H,
+                            width_ratios=[1, 1.35, 1], wspace=0.5, hspace=0.5)
+    ax = fig.add_subplot(grid[0, :])
+    z, x = d['section_z_um'], d['section_x_um']
+    ratio = d['section'] / float(d['reference_intensity'])
+    im = ax.imshow(ratio.T, origin='lower', aspect='auto', extent=[z[0], z[-1], x[0], x[-1]], cmap='magma',
+                   norm=LogNorm(vmin=0.3, vmax=float(rec['peak_over_transmitted'])))
+    ax.axvline(f, color='white', lw=0.6, ls=(0, (2, 2)))
+    ax.set(xlabel=f'$z$ ({um})', ylabel=f'$x$ ({um})')
+    cb = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.015)
+    cb.set_label('$|E|^2$ / transmitted', fontsize=6.5)
+    cb.ax.tick_params(labelsize=6)
+    panel(ax, 'b', f'Section $y=0$ at {lam[k] * 1e3:.0f} nm')
+
+    axial_ax = ax = fig.add_subplot(grid[1, 0:2])
+    za = d['axial_z_um']
+    for i, (l, color) in enumerate(zip(lam, (BLUE, TEAL, RED))):
+        ax.plot(za, d['axial'][i] / d['axial'][i].max(), color=color, lw=1.0, label=f'{l * 1e3:.0f} nm')
+    ax.axvline(f, color=GREY, lw=0.7, ls=(0, (3, 2)))
+    ax.text(f + 6, 1.02, 'design focus', fontsize=5.8, color=GREY, va='bottom')
+    ax.set(xlabel=f'$z$ ({um})', ylabel='On-axis $|E|^2$ (norm.)', xlim=(0.7 * f, 1.25 * f), ylim=(0, 1.12))
+    ax.legend(loc='upper left', bbox_to_anchor=(0.23, 0.99), fontsize=6)
+    ygrid(ax)
+    panel(ax, 'c', 'On-axis intensity')
+
+    ax = fig.add_subplot(grid[1, 2])
+    fx = d['focal_x_um']
+    sel = np.abs(fx) <= 2.0
+    spot = d['focal'][k][np.ix_(sel, sel)]
+    ax.imshow((spot / spot.max()).T, origin='lower', extent=[fx[sel][0], fx[sel][-1]] * 2, cmap='magma')
+    s = rec['results'][f'{lam[k] * 1e3:.0f}nm']
+    ax.text(0.04, 0.96, f"FWHM {s['fwhm_x_um']:.2f} $\\times$ {s['fwhm_y_um']:.2f} {um}\nsquare pupil "
+            f"{0.886 * lam[k] / (2 * na):.2f} {um}", transform=ax.transAxes, va='top', ha='left', fontsize=5.8,
+            color='white')
+    ax.set(xlabel=f'$x$ ({um})', ylabel=f'$y$ ({um})', xticks=[-2, 0, 2], yticks=[-2, 0, 2])
+    align_square_title(fig, ax, axial_ax, 'd', f"Focus at $z={s['focus_z_um']:.0f}$ {um}")
+    save(fig, 'tiled-metalens')
+
+
 def build_story_figures():
     apply_style()
     architecture(); memory_cost(); exterior_propagation(); tiling_overlap(); application()
     dispersive_slabs(); metalens_meep(); microring_meep()
-    grid_scaling(); metagrating_design()
+    grid_scaling(); metagrating_design(); tiled_lens()
     record = {'description': 'Vector schematics and plots from completed records. No new simulation or interpolated field image.',
               'inputs': INPUTS, 'generator_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     (OUT.parent / 'story-figure-provenance.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
