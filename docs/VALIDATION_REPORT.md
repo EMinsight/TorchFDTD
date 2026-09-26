@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.17.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260926T044250Z-g7-02-f08ed130` recorded 2026-09-26T04:42:50+00:00 at commit `4e8a03ed8079`.
+Package version `0.17.1` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260926T044250Z-g7-02-f08ed130` recorded 2026-09-26T04:42:50+00:00 at commit `4e8a03ed8079`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -178,32 +178,32 @@ Newest runs that match no platform record: none.
 
 ## Clean-install record
 
-Newest record `20260926T010914Z-f5d3bcf1.json` (kind `clean_install_record`), taken at commit `f5d3bcf12d21` on 2026-09-26T01:09:14+00:00 with 0 dirty packaging paths; all steps passed: yes.
+Newest record `20260926T071740Z-316b25ef.json` (kind `clean_install_record`), taken at commit `316b25ef5d93` on 2026-09-26T07:17:40+00:00 with 0 dirty packaging paths; all steps passed: yes.
 
-Wheel `torchfdtd-0.17.0-py3-none-any.whl`, SHA-256 `2bb919c1f5f8ecacb84c64d00a638c16b468313cb4cb6f4a371daa9957529ec1`, 987,823 bytes, 160 entries, 153 package files; browser assets match the committed ones: yes; frontend assets current: yes.
+Wheel `torchfdtd-0.17.1-py3-none-any.whl`, SHA-256 `5b1c7180fc1c48397e0d85872a35e389a655d4f974a65c6e505953a9f92e1ea3`, 994,824 bytes, 160 entries, 153 package files; browser assets match the committed ones: yes; frontend assets current: yes.
 
 | Environment | Python | torch | cupy-cuda12x | numpy | torchfdtd | Packages |
 | --- | --- | --- | --- | --- | --- | --- |
-| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 0.17.0 | 40 |
-| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 0.17.0 | 42 |
+| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 0.17.1 | 40 |
+| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 0.17.1 | 42 |
 
 | Step | Status | Seconds |
 | --- | --- | --- |
-| build_wheel | passed | 13.8 |
-| cpu_venv_create | passed | 21.95 |
-| cpu_pip_install_torch | passed | 110.51 |
-| cpu_pip_install_wheel | passed | 64.73 |
-| cpu_package_list | passed | 1.19 |
-| cpu_import_run_save_load | passed | 11.57 |
-| cpu_server_index_assets_api | passed | 4.01 |
-| cpu_doctor | passed | 3.85 |
-| cuda_venv_create | passed | 15.08 |
-| cuda_pip_install_torch | passed | 209.59 |
-| cuda_pip_install_wheel_extras | passed | 69.6 |
-| cuda_package_list | passed | 1.05 |
-| cuda_fused_forward_run | passed | 19.51 |
-| cuda_doctor | passed | 5.38 |
-| readme_examples | passed | 20.78 |
+| build_wheel | passed | 7.93 |
+| cpu_venv_create | passed | 10.68 |
+| cpu_pip_install_torch | passed | 88.38 |
+| cpu_pip_install_wheel | passed | 47.19 |
+| cpu_package_list | passed | 0.81 |
+| cpu_import_run_save_load | passed | 9.28 |
+| cpu_server_index_assets_api | passed | 3.4 |
+| cpu_doctor | passed | 2.8 |
+| cuda_venv_create | passed | 11.32 |
+| cuda_pip_install_torch | passed | 136.28 |
+| cuda_pip_install_wheel_extras | passed | 55.12 |
+| cuda_package_list | passed | 0.89 |
+| cuda_fused_forward_run | passed | 16.6 |
+| cuda_doctor | passed | 3.44 |
+| readme_examples | passed | 12.55 |
 
 ## Suite policy
 
@@ -276,7 +276,7 @@ From [validation/known_limitations.json](validation/known_limitations.json); eac
 | --- | --- | --- | --- | --- |
 | plasmonic-nanoparticle-staircase | Scattering and absorption of a staircased Drude metal sphere resolved by 4 to 10 cells per radius fail the case's own loose budgets at h = 0.005 um (scattering 1.376, 0.458 and 0.445 against budgets 0.5, 0.3 and 0.2; absorption 6.733, 4.985 and 3.446 against 1.0, 0.6 and 0.4 for radii 0.02, 0.035 and 0.05 um). Plasmonic nanoparticle cross sections are not a supported accuracy claim of the staircase material sampling. | FAILED gate, kept as a finding | G3-05 | `docs/validation/g3/G3-05.json`, `docs/validation/cases/G3-05_drude_sphere.json`, `docs/validation/runs/20260921T181951Z-g3-05-8fafa59e/evidence.json` |
 | high-index-slab-resolution | At about 20 cells per material wavelength the n = 3.5 slabs exceed the 0.01 R/T and 0.02 rad phase limits (max abs dR 0.0128 to 0.0373, phase 0.0315 to 0.0539 rad) because of the second-order Yee phase error; the limits are met at about 40 cells per material wavelength (revision 2 of the case). Users of high-index structures need that resolution for 1 percent transmission accuracy. | resolution requirement of the staircase Yee scheme; first case FAILED and kept, revision-2 case VERIFIED | G3-02, G3-01 | `docs/validation/g3/G3-02.json`, `docs/validation/g3/G3-02r2.json`, `docs/PHYSICS_VALIDATION.md` |
-| frozen-pml-dispersion | Drude/Lorentz pole cells inside the high-conductivity part of the CPML diverge after about 1500 steps on domains larger than a few micrometres; Region.pml_dispersion = 'frozen' avoids this by giving PML cells the real permittivity at the source centre frequency, at the price of a permittivity step at the interior/PML interface away from that frequency and no meaning for media whose real permittivity is negative there. The differentiable, dispersive-adjoint and streamed solvers reject 'frozen'; an adiabatic conductivity absorber is not implemented. | documented limit of the default 'ade' and the 'frozen' PML modes | none | `docs/BOUNDARIES.md` |
+| dispersive-media-in-pml | Drude/Lorentz pole cells inside a stretched CPML layer can diverge: a SiN or Drude post filling the outer five cells of a CPML corner grows by e^0.057 per step, in float64 and float32 alike, at a frequency in the pole's negative-permittivity band; a post entering the corner layers from the interior grows by e^0.10 per step, and a Drude bar crossing a layer by e^0.0011. This is an instability of the stretched-coordinate PML around negative-permittivity inclusions. Region.pml_dispersion = 'absorber' turns the faces that dispersive structures reach into an adiabatic absorber, which stays stable for 20,000 steps on those fixtures but reflects far more than the CPML: 0.17 at 60 deg through 40 layers, 0.016 to 1.2 per monitor where a transverse interface crosses it (G3-07 half space) and 5e-5 in a strongly dispersive fill. 'frozen' keeps the CPML, at the price of a permittivity step away from the source centre and no meaning for negative permittivity. The differentiable, plane-adjoint and streamed solvers reject both where they would change the run, the paths whose oscillators are parameter tensors reject both outright, and a soft sheet extended through an absorber face is refused. | documented limit of the 'ade' CPML and of the 'absorber' and 'frozen' remedies | none | `docs/BOUNDARIES.md`, `docs/validation/dispersive_pml_absorber.json`, `docs/validation/cases/DISPERSIVE_PML_ABSORBER.json` |
 | grating-cuda-fp32-layer-a | One Bloch grating configuration (TM, 20 degrees, 0.92 um) exceeds the CUDA FP32 layer-A tolerance against CPU FP64 by 15 percent (relative difference 1.15e-4 against rtol 1e-4); the efficiency and phase agreement with TORCWA is within its limits. | FAILED gate, kept as a finding | G3-08 | `docs/validation/g3/G3-08.json`, `docs/validation/runs/20260921T181948Z-g3-08-6ccad85a/evidence.json` |
 | multi-gpu | Single-problem multi-GPU forward, adjoint and scaling (the HPC profile, stage H1) cannot be verified: no host with two or more NVIDIA GPUs is available to the program. The domain decomposition is verified with two and three Linux CPU Gloo ranks only, which do not count as CUDA verification. | BLOCKED_EXTERNAL | H1-02, H1-03, H1-04, H1-05, H1-06 | `docs/validation/completion_gates.json`, `docs/RELEASE_SCOPE.md`, `docs/DOMAIN_DECOMPOSITION.md` |
 
@@ -373,7 +373,7 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 
 | Check | Result | Detail |
 | --- | --- | --- |
-| package version | ok | pyproject.toml 0.17.0, COMPATIBILITY.md 0.17.0, CHANGELOG.md 0.17.0, clean-install wheel 0.17.0 |
+| package version | ok | pyproject.toml 0.17.1, COMPATIBILITY.md 0.17.1, CHANGELOG.md 0.17.1, clean-install wheel 0.17.1 |
 | README row check `test_quick_start_selects_the_measured_path_explicitly` | ok | reproduced from its record |
 | README row check `test_readme_a100_row_matches_the_double_precision_record` | ok | reproduced from its record |
 | README row check `test_readme_capacity_row_matches_the_fp32_record` | ok | reproduced from its record |
