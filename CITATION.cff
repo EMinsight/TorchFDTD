@@ -29,7 +29,7 @@ identifiers:
     description: "Version DOI of TorchFDTD 0.15.0"
 repository-code: "https://github.com/hyoseokp/TorchFDTD"
 license: MIT
-version: 0.17.0
+version: 0.17.1
 date-released: "2026-09-26"
 preferred-citation:
   type: article
