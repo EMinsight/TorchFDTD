@@ -2901,23 +2901,39 @@
           "title": "공개 metagrating/meta-atom 전체 workflow",
           "specification": "공개 metagrating/meta-atom 전체 workflow",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "examples/g7/metagrating/*.py",
+            "docs/validation/cases/G7-01r4.json",
+            "examples/meep_comparison/metagrating/geometry.json",
+            "docs/validation/g7/G7-01/*.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_metagrating_r4.py tests/test_g7_metagrating_segments.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-01-100.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_g7_metagrating_r4.py",
+            "tests/test_g7_metagrating_segments.py"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": {
             "approved_by": "owner",
-            "date": "2026-09-24",
+            "date": "2026-09-27",
             "decision": "approved",
-            "scope": "G7-01: the revised case docs/validation/cases/G7-01r2.json supersedes G7-01.json (G7-01r2: design and judged mesh 0.01 um with a 0.005 um mesh check; 3 um more air and substrate in every run; 1120 fs of physical time; the filter radius chosen on development seeds 11 to 13 to meet the 3-pixel features; (c) and (e) judged at least 0.02 um from every Rayleigh anomaly, excluded wavelengths reported; TORCWA TM converged to 0.003; acceptance limits unchanged)",
-            "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
-            "note": "the declared fixture could not meet its own criteria for any design: (1) at the fixed k_x the +1 air order has a Rayleigh anomaly at 1.5111 um inside the band and the declared cell leaves 0.91 um of air, so the evanescent order reaches the absorber; (2) the 0.02 um mesh is one cell per pixel, too coarse for a 0.02 agreement; (3) 560 fs does not outlast a resonance near 1.50 um; (4) a 0.06 um filter does not guarantee the declared 3-pixel features; (5) TORCWA TM with the Laurent rule converges as 1/N and stopped short of its tolerance"
-          }
+            "scope": "Approved G7-01r4 constrained six-run parameterization and six-step schedule, new held-out seeds 7-9, with unchanged numerical acceptance limits and fine-mesh/RCWA evaluation.",
+            "basis": "Owner instruction to complete the 1.0.0 release candidate through release deployment after the revision proposals."
+          },
+          "watch_paths": [
+            "examples/g7/metagrating/*.py",
+            "docs/validation/cases/G7-01r4.json",
+            "examples/meep_comparison/metagrating/geometry.json",
+            "docs/validation/g7/G7-01/*.json"
+          ],
+          "implementation_note": "The G7-01r4 held-out seeds 7, 8 and 9 run from the installed 0.17.0 wheel. The gate recomputes all criteria from the complete seed, baseline and TORCWA records. The constrained initializer used TORCWA-assisted development on other designs and is disclosed. The full workflow remains available through wheel_entry_r4.py."
         },
         {
           "id": "G7-02",
@@ -3085,16 +3101,40 @@
           "title": "cold/warm·전체 iteration·streaming·tuning 비용과 반복 변동",
           "specification": "cold/warm·전체 iteration·streaming·tuning 비용과 반복 변동",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "examples/g7/cost/*.py",
+            "examples/g7/metagrating/workflow.py",
+            "examples/g7/coupler/workflow.py",
+            "docs/validation/cases/G7-05r2.json",
+            "docs/validation/g7/G7-05/**/*.json"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_cost.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-05-100.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_g7_cost.py"
+          ],
           "evidence": [],
           "blocker": null,
-          "scope_change_approval": null
+          "scope_change_approval": {
+            "approved_by": "owner",
+            "date": "2026-09-27",
+            "decision": "approved",
+            "scope": "Approved G7-05r2: compare a broadband adjoint with three sequential single-frequency adjoints for the fixed G7-01r3 workload, retaining all stage, repetition, storage and tuning criteria.",
+            "basis": "Owner instruction to complete the 1.0.0 release candidate through release deployment after the revision proposals."
+          },
+          "watch_paths": [
+            "examples/g7/cost/*.py",
+            "examples/g7/metagrating/workflow.py",
+            "examples/g7/coupler/workflow.py",
+            "docs/validation/cases/G7-05r2.json",
+            "docs/validation/g7/G7-05/**/*.json"
+          ],
+          "implementation_note": "The G7-05r2 cost study records five fresh processes of six full design iterations for each of four scenarios, using the installed 0.17.0 wheel under an exclusive RTX 3060 lock. Rejudging recomputes stage statistics, verifies installation/policy consistency and tuning break-even, and checks the 1.25x regression threshold."
         }
       ]
     },
@@ -3632,15 +3672,24 @@
           "title": "독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다",
           "specification": "독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다. 타인의 사용성 테스트를 에이전트의 자기 점검으로 대체하지 않는다.",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
           "code_paths": [
-            "docs/validation/cases/G9-05.json"
+            "docs/G7_RUN.md",
+            "scripts/package_g7_examples.py",
+            "docs/validation/cases/G9-05.json",
+            "docs/validation/g9-05-self-review.json",
+            "docs/validation/g9-05/*.json"
           ],
-          "planned_test_commands": [],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g9_self_review.py tests/test_g7_examples_package.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-05-100.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_g9_self_review.py",
+            "tests/test_g7_examples_package.py"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": {
@@ -3651,7 +3700,14 @@
             "basis": "the owner was told that the program requires an independent user or installation and that an agent self-check does not replace another person's usability test, and decided to skip the independent user and have the self-review done instead",
             "note": "the self-review is not evidence of usability by another person; the task stays NOT_RUN until the self-review is recorded"
           },
-          "implementation_note": "Owner decision of 24 September 2026: the independent-user test is skipped and replaced by the maintainer's agent's self-review of the three G7 workflows from an independent installation (docs/validation/cases/G9-05.json). It runs after the G7 workflows are VERIFIED."
+          "implementation_note": "The installation self-review follows README.md and G7_RUN.md using a fresh external environment and an examples-only archive. Three full workflows plus the documented CPU mechanics runs are recorded after G7-01/02/03 pass. This is not another person's usability test.",
+          "watch_paths": [
+            "docs/G7_RUN.md",
+            "scripts/package_g7_examples.py",
+            "docs/validation/cases/G9-05.json",
+            "docs/validation/g9-05-self-review.json",
+            "docs/validation/g9-05/*.json"
+          ]
         },
         {
           "id": "G9-06",
