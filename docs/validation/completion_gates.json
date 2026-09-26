@@ -2918,7 +2918,7 @@
           "specification": "소형 유한 metalens의 실제 propagation·PSF·최종 재평가",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "examples/g7/metalens/metalens_workflow.py",
@@ -2928,7 +2928,9 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_metalens.py -k \"not test_declared_workflow\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-02.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_metalens.py -k \"not test_declared_workflow\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-02.xml"
+          ],
           "required_tests": [
             "tests/test_g7_metalens.py::test_declared_lens_and_limits_are_those_of_the_case",
             "tests/test_g7_metalens.py::test_three_starts_follow_the_library",
@@ -2941,7 +2943,9 @@
             "tests/test_g7_metalens.py::test_reduced_workflow_reports_every_start_and_criterion",
             "tests/test_g7_metalens.py::test_recorded_run_meets_every_criterion"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260926T044250Z-g7-02-f08ed130"
+          ],
           "blocker": null,
           "scope_change_approval": {
             "approved_by": "owner",
