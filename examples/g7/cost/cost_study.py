@@ -26,7 +26,7 @@ if str(ROOT) not in sys.path:
 
 from examples.g7.cost.g701_iteration import G701Iteration  # noqa: E402
 from examples.g7.cost.g703_iteration import G703Iteration  # noqa: E402
-from examples.g7.cost.timing import STAGES, summarize_fresh_processes  # noqa: E402
+from examples.g7.cost.timing import STAGES, stage_regressions, summarize_fresh_processes  # noqa: E402
 
 
 SCENARIOS = {
@@ -75,6 +75,8 @@ def main(argv=None):
     parser.add_argument('--reduced', action='store_true', help='Development fixture only; not acceptance data.')
     parser.add_argument('--backend', choices=('cpu', 'cuda'), default='cuda')
     parser.add_argument('--wheel', type=Path, help='Installed release wheel; required for the full five-process run.')
+    parser.add_argument('--compare-to', type=Path,
+                        help='A previous summary of this scenario; fail if a stage median exceeds 1.25 times it.')
     args = parser.parse_args(argv)
     if args.worker:
         args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -116,9 +118,18 @@ def main(argv=None):
                    statistics=summarize_fresh_processes(records),
                    process_wall_seconds=[row['process_wall_seconds'] for row in records],
                    observations=[row['observations'] for row in records])
+    if args.compare_to is not None:
+        baseline = json.loads(args.compare_to.read_text(encoding='utf-8'))
+        if (baseline.get('scenario'), baseline.get('reduced'), baseline.get('backend')) != (
+                args.scenario, args.reduced, args.backend):
+            parser.error('The regression baseline must have the same scenario and execution fixture.')
+        summary['regression_factor'] = 1.25
+        summary['regressions'] = stage_regressions(baseline['statistics'], summary['statistics'])
     target = args.out/'summary.json'
     target.write_text(json.dumps(summary, indent=1)+'\n', encoding='utf-8')
     print(target, flush=True)
+    if summary.get('regressions'):
+        raise SystemExit(f'{len(summary["regressions"])} stage medians exceed the recorded baseline by more than 1.25x')
 
 
 if __name__ == '__main__':
