@@ -2917,13 +2917,30 @@
           "title": "소형 유한 metalens의 실제 propagation·PSF·최종 재평가",
           "specification": "소형 유한 metalens의 실제 propagation·PSF·최종 재평가",
           "required_by_current_plan": true,
-          "implementation_state": "NOT_ASSESSED",
+          "implementation_state": "IMPLEMENTED",
           "verification_state": "NOT_RUN",
           "owner": null,
-          "code_paths": [],
-          "planned_test_commands": [],
+          "code_paths": [
+            "examples/g7/metalens/metalens_workflow.py",
+            "docs/validation/cases/G7-02r2.json",
+            "docs/G7_RESULTS.md"
+          ],
+          "planned_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g7_metalens.py -k \"not test_declared_workflow\" --junitxml=D:/TorchFDTD/.local/tmp/junit/G7-02.xml"
+          ],
           "actual_test_commands": [],
-          "required_tests": [],
+          "required_tests": [
+            "tests/test_g7_metalens.py::test_declared_lens_and_limits_are_those_of_the_case",
+            "tests/test_g7_metalens.py::test_three_starts_follow_the_library",
+            "tests/test_g7_metalens.py::test_stop_rule_uses_the_native_energy_measure",
+            "tests/test_g7_metalens.py::test_ridge_width_gradient_matches_central_differences",
+            "tests/test_g7_metalens.py::test_plane_forward_lines_reproduce_the_native_monitors",
+            "tests/test_g7_metalens.py::test_width_and_side_lobe_extraction_on_a_closed_form_profile",
+            "tests/test_g7_metalens.py::test_non_finite_values_are_recorded_as_null",
+            "tests/test_g7_metalens.py::test_angular_spectrum_reproduces_a_direct_focal_line_on_a_small_lens",
+            "tests/test_g7_metalens.py::test_reduced_workflow_reports_every_start_and_criterion",
+            "tests/test_g7_metalens.py::test_recorded_run_meets_every_criterion"
+          ],
           "evidence": [],
           "blocker": null,
           "scope_change_approval": {
@@ -2933,7 +2950,12 @@
             "scope": "G7-02: the revised case docs/validation/cases/G7-02r2.json supersedes G7-02.json (G7-02r2: every forward run continues until the cell energy falls below 1e-3 of its peak after the source (capped at 10 times the declared window), the refinement finds that step count for the current design in every iteration, and (d) compares the efficiency at twice the stop time; the limit 0.005 and the other criteria are unchanged)",
             "basis": "the owner approved revising the flawed G7 criteria and publishing the revised cases, with the failing runs of the original criteria kept out of the repository (instruction of 2026-09-24)",
             "note": "the declared 303.6 fs window ends while the lens still holds energy in the ridge array: at 1x the cell holds 1.7e-2 (library) to 1.85e-2 (refined) of its peak energy, so the efficiency depends on where the window ends (changes of 0.005 to 0.039 between 1x and 1.5x, and oscillations of 0.005 up to 4x), and a refinement at that window optimizes a truncated response"
-          }
+          },
+          "watch_paths": [
+            "examples/g7/metalens/metalens_workflow.py",
+            "docs/validation/cases/G7-02r2.json"
+          ],
+          "implementation_note": "The small finite metalens (G7-02r2: every forward run continues until the cell energy falls below 1e-3 of its peak) is committed under docs/validation/g7/G7-02/: the common stage and the three declared starts, run from the installed 0.16.0 wheel outside the checkout (each record names the wheel and its SHA-256). The gate re-judges the committed records criterion by criterion on the CPU; TORCHFDTD_G7_FULL=1 reruns the declared workflow on CUDA (one to two hours)."
         },
         {
           "id": "G7-03",
