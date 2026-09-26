@@ -148,7 +148,7 @@ Validation uses analytic solutions and independently authored CPU/CUDA reference
 
 ## Citing TorchFDTD
 
-If TorchFDTD contributes to published work, please cite the paper ([arXiv:2609.30039](https://arxiv.org/abs/2609.30039)) and the archived software. The concept DOI [10.5281/zenodo.22928834](https://doi.org/10.5281/zenodo.22928834) always resolves to the latest release; each release also has its own version DOI (0.17.0: [10.5281/zenodo.22971153](https://doi.org/10.5281/zenodo.22971153); 0.16.1: [10.5281/zenodo.22969522](https://doi.org/10.5281/zenodo.22969522); 0.16.0: [10.5281/zenodo.22968357](https://doi.org/10.5281/zenodo.22968357); 0.15.0: [10.5281/zenodo.22928835](https://doi.org/10.5281/zenodo.22928835)). The same metadata is in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
+If TorchFDTD contributes to published work, please cite the paper ([arXiv:2609.30039](https://arxiv.org/abs/2609.30039)) and the archived software. The concept DOI [10.5281/zenodo.22928834](https://doi.org/10.5281/zenodo.22928834) always resolves to the latest release; each release also has its own version DOI (0.17.1: [10.5281/zenodo.22975223](https://doi.org/10.5281/zenodo.22975223); 0.17.0: [10.5281/zenodo.22971153](https://doi.org/10.5281/zenodo.22971153); 0.16.1: [10.5281/zenodo.22969522](https://doi.org/10.5281/zenodo.22969522); 0.16.0: [10.5281/zenodo.22968357](https://doi.org/10.5281/zenodo.22968357); 0.15.0: [10.5281/zenodo.22928835](https://doi.org/10.5281/zenodo.22928835)). The same metadata is in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
 
 ```bibtex
 @misc{park2026torchfdtd,

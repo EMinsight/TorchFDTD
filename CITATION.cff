@@ -16,6 +16,9 @@ identifiers:
     value: 10.5281/zenodo.22928834
     description: "Concept DOI of TorchFDTD, resolving to the latest version"
   - type: doi
+    value: 10.5281/zenodo.22975223
+    description: "Version DOI of TorchFDTD 0.17.1"
+  - type: doi
     value: 10.5281/zenodo.22971153
     description: "Version DOI of TorchFDTD 0.17.0"
   - type: doi
