@@ -96,3 +96,19 @@ def stage_regressions(baseline, candidate, *, factor=1.25):
                                      baseline_seconds=before, candidate_seconds=after,
                                      factor=None if before == 0 else after/before))
     return failures
+
+
+def autotuner_break_even(tuning_seconds, untuned_iteration_seconds, tuned_iteration_seconds):
+    """First positive iteration count whose accumulated saving repays tuning.
+
+    A policy with no positive per-iteration saving has no finite break-even.
+    The full iteration times supplied here must include the same seven stages.
+    """
+    values = (tuning_seconds, untuned_iteration_seconds, tuned_iteration_seconds)
+    if any(not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0
+           for value in values):
+        raise ValueError('Tuning and iteration times must be finite and nonnegative.')
+    saving = untuned_iteration_seconds - tuned_iteration_seconds
+    if saving <= 0:
+        return None
+    return max(1, math.ceil(tuning_seconds / saving))

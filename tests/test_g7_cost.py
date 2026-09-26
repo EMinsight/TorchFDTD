@@ -5,7 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from examples.g7.cost.timing import STAGES, StageTimes, stage_regressions, summarize_fresh_processes
+from examples.g7.cost.timing import (STAGES, StageTimes, autotuner_break_even,
+                                     stage_regressions, summarize_fresh_processes)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,3 +55,13 @@ def test_cpu_stage_timer_reports_only_declared_stages():
             timer.call('T_monitor', lambda: None)
     with pytest.raises(KeyError):
         timer.call('T_unknown', lambda: None)
+
+
+def test_autotuner_break_even_counts_full_iterations():
+    assert autotuner_break_even(5., 1.25, 1.) == 20
+    assert autotuner_break_even(5.1, 1.25, 1.) == 21
+    assert autotuner_break_even(0., 1.25, 1.) == 1
+    assert autotuner_break_even(4., 1., 1.) is None
+    assert autotuner_break_even(4., 1., 1.1) is None
+    with pytest.raises(ValueError, match='nonnegative'):
+        autotuner_break_even(float('nan'), 1., .9)
