@@ -9,6 +9,8 @@ from __future__ import annotations
 import numpy as np
 import torch
 
+from .boundaries import absorber_loss, absorber_slabs
+
 
 def permittivity(material, frequency_hz, dt=0):
     f = np.asarray(frequency_hz, dtype=float)
@@ -56,6 +58,8 @@ class MaterialADE:
         self.k = coefficient(strength*dt*dt/(4*denominator))
         self.k_sum = self.k.sum(axis=0) if self.multiple else self.k
         self.eps = material.epsilon_inf
+        # (eps_new, eps_free, carry) of samples inside the adiabatic absorber, see configure_materials.
+        self.absorber = None
 
     def take(self, field):
         flat = field.reshape(-1) if self.components else field.reshape(-1, 3)
@@ -67,7 +71,11 @@ class MaterialADE:
     def correct(self, field, old, response):
         free = self.take(field)
         total_response = response.sum(axis=0) if self.multiple else response
-        new = (self.eps*free-self.k_sum*old-total_response)/(self.eps+self.k_sum)
+        if self.absorber is None:
+            new = (self.eps*free-self.k_sum*old-total_response)/(self.eps+self.k_sum)
+        else:
+            eps_new, eps_free, carry = self.absorber
+            new = (eps_free*free+(carry-self.k_sum)*old-total_response)/(eps_new+self.k_sum)
         delta = response+self.k*(new+old)
         self.P += delta
         self.Q *= -1
@@ -103,6 +111,13 @@ def frozen_pml_frequency_hz(project):
     return float(np.mean(values)) if values else None
 
 
+def absorber_reference_epsilon(material, reference_hz, dt):
+    """Real discrete permittivity the absorber loss is matched to: at the source centre, else static; eps_inf if not positive."""
+    eps = float(permittivity(material, reference_hz, dt).real if reference_hz else
+                material.instantaneous_epsilon + sum(s/(w0*w0) for w0, s, _ in material.oscillators if w0))
+    return eps if eps > 0 else material.epsilon_inf
+
+
 def configure_materials(grid, project, ownership):
     """Attach one ADE state per dispersive material.
 
@@ -111,16 +126,25 @@ def configure_materials(grid, project, ownership):
     the source centre frequency, so the absorber sees a constant dielectric.
     The coupled ADE/CPML update is unstable there for poles whose negative-
     permittivity band lies inside the grid band (surface-plasmon-like modes
-    grow after the source has ended, a lossless Lorentz SiN post array in a
-    20 nm grid diverges after ~1000 steps once the domain exceeds a few µm).
+    grow after the source has ended; a SiN post filling the outer five cells of
+    a 20 nm CPML corner diverges, docs/BOUNDARIES.md).
+    With 'absorber' the faces those materials reach carry no stretched
+    coordinates (boundaries.absorber_faces) and the ADE runs everywhere. Its
+    E conductivity is sigma*eps_ref, eps_ref the real
+    permittivity at the reference frequency (eps_inf where that is not
+    positive), so that eps_ref*sigma matches the magnetic loss sigma*mu there;
+    the trapezoidal update then solves (eps_inf + s eps_ref) E_new + dP =
+    (eps_inf - s eps_ref) E_old + courant*curl H with s = sigma*dt/2.
     """
     region = project.region
     frozen = region.pml_dispersion == 'frozen'
     pml = pml_cell_mask(region, ownership.shape).reshape(-1) if frozen else None
     if frozen and ownership.ndim == 4:
         pml = np.repeat(pml, ownership.shape[3])
-    reference_hz = frozen_pml_frequency_hz(project) if frozen else None
+    absorber = getattr(grid, 'absorber', None)
+    reference_hz = frozen_pml_frequency_hz(project) if frozen or absorber is not None else None
     states = []
+    grid.absorber_reference = {}
     for i, m in enumerate(project.materials):
         if not m.oscillators or not np.any(ownership == i):
             continue
@@ -144,5 +168,26 @@ def configure_materials(grid, project, ownership):
             owned = owned & ~pml
             if not np.any(owned):
                 continue
-        states.append(MaterialADE(grid, m, np.flatnonzero(owned), ownership.ndim == 4))
+        lossy = ()
+        if absorber is not None:
+            # Samples with absorber loss get a state of their own with its coefficients. The loss is zero off the
+            # slabs, so only the slab samples are indexed, box by box.
+            view, parts = owned.reshape(ownership.shape), [np.zeros(0, dtype=np.int64)]
+            for box in absorber_slabs(region, grid.absorber_faces):
+                local = np.nonzero(view[box])
+                parts.append(np.ravel_multi_index(tuple(c+b.start for c, b in zip(local, box))+local[3:], ownership.shape))
+            candidates = np.sort(np.concatenate(parts))
+            loss = absorber_loss(absorber, ownership.shape[:3], 'E', candidates, ownership.ndim == 4)
+            keep = loss != 0 if ownership.ndim == 4 else np.any(loss != 0, axis=1)
+            lossy, loss = candidates[keep], loss[keep]
+            owned[lossy] = False
+        indices = np.flatnonzero(owned)
+        if len(indices):
+            states.append(MaterialADE(grid, m, indices, ownership.ndim == 4))
+        if len(lossy):
+            state = MaterialADE(grid, m, lossy, ownership.ndim == 4)
+            ref = grid.absorber_reference[m.name] = absorber_reference_epsilon(m, reference_hz, grid.time_step)
+            state.absorber = tuple(grid._coefficient(v) for v in
+                                   (m.epsilon_inf+loss*ref, m.epsilon_inf*(1+loss), loss*(m.epsilon_inf-ref)))
+            states.append(state)
     grid.material_states = states

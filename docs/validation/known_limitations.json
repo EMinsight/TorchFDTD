@@ -18,11 +18,11 @@
       "sources": ["docs/validation/g3/G3-02.json", "docs/validation/g3/G3-02r2.json", "docs/PHYSICS_VALIDATION.md"]
     },
     {
-      "id": "frozen-pml-dispersion",
-      "statement": "Drude/Lorentz pole cells inside the high-conductivity part of the CPML diverge after about 1500 steps on domains larger than a few micrometres; Region.pml_dispersion = 'frozen' avoids this by giving PML cells the real permittivity at the source centre frequency, at the price of a permittivity step at the interior/PML interface away from that frequency and no meaning for media whose real permittivity is negative there. The differentiable, dispersive-adjoint and streamed solvers reject 'frozen'; an adiabatic conductivity absorber is not implemented.",
-      "status": "documented limit of the default 'ade' and the 'frozen' PML modes",
+      "id": "dispersive-media-in-pml",
+      "statement": "Drude/Lorentz pole cells inside a stretched CPML layer can diverge: a SiN or Drude post filling the outer five cells of a CPML corner grows by e^0.057 per step, in float64 and float32 alike, at a frequency in the pole's negative-permittivity band; a post entering the corner layers from the interior grows by e^0.10 per step, and a Drude bar crossing a layer by e^0.0011. This is an instability of the stretched-coordinate PML around negative-permittivity inclusions. Region.pml_dispersion = 'absorber' turns the faces that dispersive structures reach into an adiabatic absorber, which stays stable for 20,000 steps on those fixtures but reflects far more than the CPML: 0.17 at 60 deg through 40 layers, 0.016 to 1.2 per monitor where a transverse interface crosses it (G3-07 half space) and 5e-5 in a strongly dispersive fill. 'frozen' keeps the CPML, at the price of a permittivity step away from the source centre and no meaning for negative permittivity. The differentiable, plane-adjoint and streamed solvers reject both where they would change the run, the paths whose oscillators are parameter tensors reject both outright, and a soft sheet extended through an absorber face is refused.",
+      "status": "documented limit of the 'ade' CPML and of the 'absorber' and 'frozen' remedies",
       "tasks": [],
-      "sources": ["docs/BOUNDARIES.md"]
+      "sources": ["docs/BOUNDARIES.md", "docs/validation/dispersive_pml_absorber.json", "docs/validation/cases/DISPERSIVE_PML_ABSORBER.json"]
     },
     {
       "id": "grating-cuda-fp32-layer-a",

@@ -393,6 +393,11 @@ def _signature(plan):
         region.pop(key, None)
     payload = dict(region=region, sources=[plan.project.resolved_source(s).model_dump(mode='json') for s in plan.project.sources],
                    normal=plan.normal, offset=plan.offset_um, tiles=[(t.id, t.core, t.extended) for t in plan.tiles])
+    # Tile absorber faces follow the structures a tile cuts, so a device and its air reference can differ there.
+    from .boundaries import absorber_faces
+    faces = [[list(face) for face in absorber_faces(t.project)] for t in plan.tiles]
+    if any(faces):
+        payload['absorber_faces'] = faces
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
@@ -515,6 +520,10 @@ def run_tiled(project, plan, *, backend, options=None, executor='sequential', bl
     options = dict(options or {})
     projects = [Project.model_validate({**t.project.model_dump(), 'region': {**t.project.region.model_dump(), 'backend': backend}})
                 for t in plan.tiles]
+    # A sheet extended across a tile's absorber face is refused before the first tile runs (boundaries.absorber_faces).
+    from .boundaries import absorber_faces
+    for q in projects:
+        absorber_faces(q)
     started = time.perf_counter()
     if executor == 'sequential':
         from .solver import Simulation

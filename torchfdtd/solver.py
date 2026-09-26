@@ -201,6 +201,9 @@ HOST_WAVEFORM_BYTES = 20
 HOST_STRUCTURE_BYTES = 7*1024
 HOST_COVERED_STRUCTURES = 4096
 HOST_FIXED_BYTES = 512*2**20       # CUDA, CuPy and Python runtime of the run (up to 273 MiB measured at 1M cells)
+# Host transient of the pole coefficients of pml_dispersion='absorber' per cell of its slabs, over the material kept
+# after planning (163 Yee, 118 cell, measured on a full SiN fill, about 10% added).
+HOST_ABSORBER_SLAB_BYTES = {'cell': 130, 'yee': 180}
 
 
 def display_host_bytes(p):
@@ -310,11 +313,14 @@ def resident_host_bytes(p, cells, terms):
     r = p.region
     field = (8 if r.precision == 'float64' else 4)*(2 if r.complex_fields else 1)
     kept, peak = HOST_MATERIAL_BYTES['subpixel' if r.interface_method == 'subpixel' else r.material_sampling]
+    from .boundaries import absorber_faces, absorber_slabs
+    slab = sum(math.prod(len(range(n)[b]) for n, b in zip(r.shape, box)) for box in absorber_slabs(r, absorber_faces(p)))
+    absorber = slab*HOST_ABSORBER_SLAB_BYTES.get(r.material_sampling, 0)
     planes = plane_sizes(p)
     post = sum(n*nf*nc*(sample+HOST_PLANE_SAMPLE_BYTES) for n, nf, nc, sample in planes)
     base = (sum(n*nc for n, _, nc, _ in planes)*HOST_PLANE_POINT_BYTES+r.steps*terms*HOST_WAVEFORM_BYTES
             +structure_host_bytes(p)+point_trace_memory(p)+display_host_bytes(p)+HOST_FIXED_BYTES)
-    return base+max(cells*peak, cells*(kept+6*field)+max(3*field*cells, post))
+    return base+max(cells*peak, cells*kept+absorber, cells*(kept+6*field)+max(3*field*cells, post))
 
 
 def estimate(p: Project, *, endpoint_dispatch=True):
@@ -420,6 +426,14 @@ def estimate(p: Project, *, endpoint_dispatch=True):
                 for q in map(p.resolved_source, p.sources) if q.enabled and q.kind != 'tfsf')
     source_bytes = r.steps*terms*(8 if r.precision == 'float64' else 4)
     host_bytes = resident_host_bytes(p, n, terms)
+    from .boundaries import absorber_faces, absorber_slabs
+    absorber_bytes = 0
+    faces = absorber_faces(p)
+    if faces:
+        # Three coefficients per pole sample with absorber loss, at most every sample of the slabs, and on the torch/NumPy
+        # update the decay and gain of E and H there.
+        absorber_bytes = (3 if fused else 7)*3*(8 if r.precision == 'float64' else 4)*sum(
+            math.prod(len(range(n_)[b]) for n_, b in zip(r.shape, box)) for box in absorber_slabs(r, faces))
     host_extra = 0
     if r.backend != 'cuda':
         # On the CPU the estimate is host memory, and the tensor-expression bound covers the material and the
@@ -436,12 +450,13 @@ def estimate(p: Project, *, endpoint_dispatch=True):
                         f'(period {snapshot["period_steps"]:.1f} steps, one frame every {snapshot["effective_interval"]} steps). '
                         f'The playback will look like backward motion; store a frame at least every {snapshot["period_steps"]/SNAPSHOT_FRAMES_PER_PERIOD:.0f} steps.')
     return {**mesh_summary(p), 'shape': r.shape, 'actual_size_um':r.actual_size, 'cells': n, 'dt_fs': dt*1e15, 'duration_fs': dt*r.steps*1e15,
-            'estimated_memory_mb': round((volume_bytes+monitor_memory(p)+auxiliary_bytes+interface_bytes+source_bytes+host_extra)/2**20, 1),
+            'estimated_memory_mb': round((volume_bytes+monitor_memory(p)+auxiliary_bytes+interface_bytes+source_bytes+host_extra+absorber_bytes)/2**20, 1),
             'memory_model': 'fused_cuda' if fused else 'tensor_expression',
             # Host memory the run needs when its fields live on a CUDA device (resident_host_bytes).
             'host_estimated_mb': round(host_bytes/2**20, 1),
             'warnings': warnings, 'oneway_planes':planes,'tfsf_boxes':boxes,'tfsf_auxiliary_estimated_bytes':auxiliary_bytes,
-            'point_trace_estimated_bytes': point_trace_memory(p), 'source_waveform_estimated_bytes': source_bytes, 'snapshot': snapshot}
+            'point_trace_estimated_bytes': point_trace_memory(p), 'source_waveform_estimated_bytes': source_bytes, 'snapshot': snapshot,
+            **({'absorber_estimated_bytes': absorber_bytes} if absorber_bytes else {})}
 
 
 def pulse_envelope_parameters(source):
@@ -480,6 +495,11 @@ def run_signature(p: Project, steps):
     config = dict(region=r.model_dump(exclude={'backend','cuda_kernel','cuda_monitor_kernel','execution_mode','tiling','resident_cell_limit','field','slice_axis','slice_position','complex_display','snapshot_interval'}),
                   sources=[p.resolved_source(s).model_dump() for s in p.sources], steps=steps,
                   nodes=[a.tolist() for a in r.mesh_nodes])
+    # Absorber faces follow the structures, so a device and its air reference can differ there.
+    from .boundaries import absorber_faces
+    faces = absorber_faces(p)
+    if faces:
+        config['absorber_faces'] = [list(face) for face in faces]
     return hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
 
 
@@ -704,13 +724,17 @@ class Simulation:
             if obj.enabled and counts.get(obj.id) == 0:
                 message='no Yee component centers intersect this object; subpixel integration may still include it. Check quadrature and mesh convergence.' if interface_plan is not None else 'no cells intersect this object. Refine mesh or reposition it.'
                 stats['warnings'].append(f'{obj.name}: {message}')
-        g = YeeGrid(r)
-        plan.verify_grid(g)
+        from .boundaries import absorber_faces
+        faces = absorber_faces(p)
+        if r.pml_dispersion == 'absorber':
+            stats['absorber_faces'] = ['xyz'[a]+('_max' if s else '_min') for a, s in faces]
+        g = YeeGrid(r, faces)
         if use_cuda:
             g.inverse_permittivity[:] = torch.as_tensor(1/(eps if eps.ndim == 4 else eps[..., None]), device='cuda', dtype=dtype)
         else:
             g.inverse_permittivity[:] = 1/(eps if eps.ndim == 4 else eps[..., None])
         configure_materials(g, p, ownership)
+        plan.verify_grid(g)
         configure_interfaces(g,interface_plan)
         from .cuda_kernels import configure_cuda_kernel
         configure_cuda_kernel(g, r.cuda_kernel)

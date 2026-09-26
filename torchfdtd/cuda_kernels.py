@@ -14,7 +14,7 @@ from functools import lru_cache
 
 import torch
 
-from .boundaries import CURL_TERMS, extended_shape
+from .boundaries import CURL_TERMS, extended_shape, is_nodal
 
 
 def _direct_cuda_view(cupy, tensor):
@@ -289,11 +289,23 @@ class FusedYeeCUDA:
     def _update_statements(self,forward,inverse,argument,real,*,subpixel=False):
         g=self.grid
         lines=[]
+        absorber=getattr(g,'absorber',None)
+        if absorber is not None:
+            # Trapezoidal loss of the adiabatic absorber: s summed over the axes in axis order.
+            axes=g.absorber_axes()
+            names={(axis,k):argument(f'absorber{axis}_{k}',axes[axis][k]) for axis in axes for k in range(2)}
+            family='H' if forward else 'E'
         for comp in range(3):
             if subpixel:lines.append(f'curl_buffer[3*i+{comp}]=c{comp};')
             index = '0' if inverse.numel() == 1 else str(comp) if inverse.numel() == 3 else f'3*i+{comp}'
-            lines.append(f'dst[3*i+{comp}] {"-=" if forward else "+="} '
-                         f'(({real})({g.courant_number:.17g}) * inverse[{index}]) * c{comp};')
+            if absorber is None:
+                lines.append(f'dst[3*i+{comp}] {"-=" if forward else "+="} '
+                             f'(({real})({g.courant_number:.17g}) * inverse[{index}]) * c{comp};')
+                continue
+            loss='+'.join(f'{names[axis,0 if is_nodal(family,comp,axis) else 1]}[{"xyz"[axis]}]' for axis in sorted(axes))
+            lines.extend(['{',f'const {real} s = ({real})0+{loss};',
+                          f'dst[3*i+{comp}] = ((1-s)/(1+s))*dst[3*i+{comp}] {"-" if forward else "+"} '
+                          f'((({real})({g.courant_number:.17g}) * (1/(1+s))) * inverse[{index}]) * c{comp};','}'])
         return lines
 
     def update(self, forward):

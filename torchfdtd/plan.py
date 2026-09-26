@@ -43,6 +43,13 @@ PLACEMENT_FIELDS = ('backend', 'cuda_kernel', 'cuda_monitor_kernel', 'memory_mod
 # through the sampled waveform, realized support, frequency samples and
 # apodization they produce.
 UNHASHED = {'hashed': False}
+# Fields that exist only for some scenes: left out of the canonical and browser forms while None,
+# so the hashes and JSON of every other scene stay what they were.
+OPTIONAL = {'omit_none': True}
+
+
+def _present(value, f):
+    return not f.name.startswith('_') and not (f.metadata.get('omit_none') and getattr(value, f.name) is None)
 
 
 class PlanInvalidated(ValueError):
@@ -75,7 +82,7 @@ def _canonical(value):
         return _canonical_array(value)
     if is_dataclass(value) and not isinstance(value, type):
         return {f.name: _canonical(getattr(value, f.name)) for f in fields(value)
-                if not f.name.startswith('_') and f.metadata.get('hashed', True)}
+                if _present(value, f) and f.metadata.get('hashed', True)}
     if isinstance(value, dict):
         return {str(k): _canonical(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
@@ -100,7 +107,7 @@ def _json_value(value):
             return value.tolist()
         return _canonical_array(value)
     if is_dataclass(value) and not isinstance(value, type):
-        return {f.name: _json_value(getattr(value, f.name)) for f in fields(value) if not f.name.startswith('_')}
+        return {f.name: _json_value(getattr(value, f.name)) for f in fields(value) if _present(value, f)}
     if isinstance(value, dict):
         return {str(k): _json_value(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
@@ -149,6 +156,8 @@ class BoundaryPlan:
     pmc_lower: dict
     pmc_upper: dict
     cpml: tuple
+    # Absorber faces, their per-axis (integer, half node) losses and the reference permittivity of each dispersive material.
+    absorber: dict | None = field(default=None, metadata=OPTIONAL)
 
 
 @dataclass(frozen=True, eq=False)
@@ -323,6 +332,18 @@ class SimulationPlan:
                 inv_k = host(actual['inv_k']).reshape(-1)
                 if not np.array_equal(inv_k, (1/planned.kappa).astype(inv_k.dtype)):
                     raise PlanInvalidated(f'Grid CPML kappa differs from the plan on axis {key[1]}.')
+        absorber = self.boundaries.absorber
+        if (absorber is None) != (getattr(grid, 'absorber', None) is None):
+            raise PlanInvalidated('Grid absorber faces differ from the plan.')
+        if absorber is not None:
+            if [list(face) for face in grid.absorber_faces] != absorber['faces']:
+                raise PlanInvalidated('Grid absorber faces differ from the plan.')
+            for axis, pair in absorber['profiles'].items():
+                if any(not np.array_equal(host(actual), planned) for planned, actual in zip(pair, grid.absorber[axis])):
+                    raise PlanInvalidated(f'Grid absorber profile differs from the plan on axis {axis}.')
+            for name, value in getattr(grid, 'absorber_reference', {}).items():
+                if value != absorber['reference_epsilon'].get(name):
+                    raise PlanInvalidated(f'Grid absorber reference permittivity of {name} differs from the plan.')
 
     def verify_planes(self, planes):
         """Raise PlanInvalidated when prepared frequency planes differ from the plan's field monitors."""
@@ -362,9 +383,9 @@ def _run_control(region):
                 source_tail_amplitude=float(c.source_tail_amplitude), after_source_s=float(c.after_source_s))
 
 
-def _boundary_plan(region):
+def _boundary_plan(region, absorber_faces=(), reference_epsilon=None):
     from .boundaries import BoundaryDescription
-    template = BoundaryDescription(region)
+    template = BoundaryDescription(region, absorber_faces)
     faces = []
     for axis in range(3):
         for side, face in enumerate(region.boundaries.pair(axis)):
@@ -382,7 +403,23 @@ def _boundary_plan(region):
                         {k: complex(v) for k, v in template.wrap.items()},
                         {k: float(v) for k, v in template.pec_upper.items()},
                         {k: float(v) for k, v in template.pmc_lower.items()},
-                        {k: float(v) for k, v in template.pmc_upper.items()}, tuple(segments))
+                        {k: float(v) for k, v in template.pmc_upper.items()}, tuple(segments),
+                        None if template.absorber is None else dict(
+                            faces=[list(face) for face in template.absorber_faces],
+                            profiles={axis: tuple(_frozen(v) for v in pair) for axis, pair in template.absorber.items()},
+                            reference_epsilon=dict(reference_epsilon or {})))
+
+
+def _absorber_references(project):
+    """Real permittivity each active dispersive material's absorber loss is matched to (materials.configure_materials)."""
+    from .materials import absorber_reference_epsilon, frozen_pml_frequency_hz
+    r = project.region
+    if r.pml_dispersion != 'absorber':
+        return {}
+    active = {s.material for s in project.structures if s.enabled}
+    reference_hz = frozen_pml_frequency_hz(project)
+    return {m.name: absorber_reference_epsilon(m, reference_hz, r.time_step) for m in project.materials
+            if m.oscillators and m.name in active}
 
 
 def _ade_plans(project):
@@ -461,6 +498,7 @@ def resolve_plan(project):
     """Resolve every physical input of ``project`` once and return the frozen plan."""
     from .models import Project
     from .solver import estimate, field_axes
+    from .boundaries import absorber_faces
     from .field_monitors import plane_sizes
     project = Project.model_validate(project.model_dump())
     # The plane sample caps are counted before any plane or map is built.
@@ -482,7 +520,8 @@ def resolve_plan(project):
                   sample_time_steps=dict(SAMPLE_TIME_STEPS), fourier_convention=FOURIER_CONVENTION,
                   background_index=float(r.background_index), material_sampling=r.material_sampling,
                   interface_method=r.interface_method, subpixel_quadrature=int(r.subpixel_quadrature),
-                  boundaries=_boundary_plan(r), pml_dispersion=r.pml_dispersion, structures=structures,
+                  boundaries=_boundary_plan(r, absorber_faces(project), _absorber_references(project)), pml_dispersion=r.pml_dispersion,
+                  structures=structures,
                   materials=materials, ade=_ade_plans(project), sources=_source_plans(project),
                   monitors=_monitor_plans(project))
     # The PML dispersion mode changes the absorber update (docs/BOUNDARIES.md), so it is hashed with the exterior.

@@ -18,7 +18,7 @@ import numpy as np
 import torch
 
 from .batch import BatchCase, BatchItem, BatchReport
-from .boundaries import YeeGrid, pmc_faces
+from .boundaries import YeeGrid, absorber_faces, pmc_faces
 from .materials import configure_materials
 from .models import Project
 from .plan import resolve_plan, resources_copy
@@ -29,12 +29,14 @@ from .cuda_graph import CudaStepGraphs, observation_schedule, validate_graph_ste
 from .cuda_memory import cuda_mem_info
 
 
-def _topology(region):
-    """Exact compatibility signature shared with the heterogeneous scheduler."""
+def _topology(region, faces=()):
+    """Exact compatibility signature shared with the heterogeneous scheduler; faces are the project's absorber faces."""
     return (region.dimension, region.precision, region.steps, region.courant_factor,
             region.reference_step, region.time_step, region.rectangular_courant,
             region.mesh_type, region.mesh_steps is not None,region.interface_method,
             json.dumps(region.boundaries.model_dump(), sort_keys=True),
+            # Absorber faces change the fused kernel; without them the signature is the earlier one.
+            *((('absorber',)+tuple(faces)) if faces else ()),
             tuple(region.pml_layers(axis, side) for axis in range(3) for side in range(2)),
             tuple(tuple(n) for n in region.mesh_nodes))
 
@@ -133,8 +135,8 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
     resolved=[resolve_plan(p) for p in projects]
     stats=[resources_copy(plan) for plan in resolved]
     first=projects[0].region
-    baseline=_topology(first)
-    if any(_topology(p.region)!=baseline for p in projects):
+    baseline=_topology(first,absorber_faces(projects[0]))
+    if any(_topology(p.region,absorber_faces(p))!=baseline for p in projects):
         raise ValueError('Tensor batch requires identical precision, steps, nodes, timestep and boundaries. Freeze common graded refinements or group compatible projects.')
     estimate_bytes=sum(s['estimated_memory_mb'] for s in stats)*2**20
     free,_=cuda_mem_info()
@@ -144,8 +146,9 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
     fdtd.set_backend(f'torch.cuda.{first.precision}');fdtd.backend.float=dtype
     grids=[];epsilon=[];traces=[];planes=[];diagnostics=[];decisions=[]
     for p,s,plan in zip(projects,stats,resolved):
-        g=YeeGrid(p.region)
-        plan.verify_grid(g)
+        faces=absorber_faces(p)
+        if p.region.pml_dispersion=='absorber':s['absorber_faces']=['xyz'[a]+('_max' if side else '_min') for a,side in faces]
+        g=YeeGrid(p.region,faces)
         from .subpixel import configure_interfaces
         material=plan.material
         interface_plan=material.interface
@@ -174,6 +177,7 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
             g.face_material_states.extend((k,MaterialADE(g,m,np.flatnonzero(owners.reshape(-1)==i),True))
                                           for i,m in enumerate(p.materials) if m.oscillators and np.any(owners==i))
         configure_materials(g,p,volume_ownership)
+        plan.verify_grid(g)
         configure_interfaces(g,interface_plan)
         from .tfsf import prepare_tfsf
         prepare_tfsf(g,p,eps,volume_ownership)

@@ -14,6 +14,7 @@ import time
 import torch
 
 from .batch import BatchCase, BatchItem, BatchReport, _write_json
+from .boundaries import absorber_faces
 from .cuda_graph import validate_graph_steps
 from .models import Project
 from .solver import estimate
@@ -52,7 +53,7 @@ def _plan(cases, cohort_size, memory_limit_bytes):
         cost = math.ceil(estimate(case.project)['estimated_memory_mb'] * 2**20)
         if memory_limit_bytes is not None and cost > memory_limit_bytes:
             raise ValueError(f'{case.id}: one case exceeds the GPU memory allowance.')
-        key = _topology(r)
+        key = _topology(r, absorber_faces(case.project))
         if key not in groups:
             groups[key] = dict(group=len(groups), signature=hashlib.sha256(repr(key).encode()).hexdigest(),
                                shape=list(r.shape), precision=r.precision, steps=r.steps,

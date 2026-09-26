@@ -14,6 +14,8 @@ import fdtd
 import numpy as np
 import torch
 
+from .models import BoundaryFace
+
 
 # (derivative axis, input component, output component, curl sign)
 CURL_TERMS = ((0, 2, 1, -1), (0, 1, 2, 1),
@@ -39,6 +41,133 @@ def reject_pmc_faces(region, path):
     if any(f.kind in ('pmc', 'symmetric') for a in range(3) for f in region.boundaries.pair(a)):
         raise ValueError(f'PMC/symmetric faces are not implemented by {path}. '
                          'Use DifferentiableSimulation, StreamedSimulation, run_tensor_batch or the endpoint Simulation dispatch.')
+
+
+def reject_pml_dispersion(project, path, explicit=False):
+    """Explicit refusal for paths that run the plain CPML and ADE on every PML face.
+
+    Only a mode that changes the run is refused: 'absorber' with absorber faces,
+    'frozen' with a sample of an enabled dispersive structure in a PML layer. Paths whose
+    oscillators come from parameter tensors (explicit) refuse every mode but 'ade':
+    the structures do not say where the poles are.
+    """
+    mode = project.region.pml_dispersion
+    if mode == 'ade':
+        return
+    if explicit:
+        raise ValueError(f'pml_dispersion="{mode}" is implemented by the resident Yee Simulation and run_tensor_batch only, '
+                         f'not by {path}, whose oscillators are parameter tensors; use pml_dispersion="ade".')
+    from .stability_checks import dispersive_structures_in_pml
+    if absorber_faces(project) if mode == 'absorber' else dispersive_structures_in_pml(project):
+        raise ValueError(f'pml_dispersion="{mode}" is implemented by the resident Yee Simulation and run_tensor_batch only, '
+                         f'not by {path}; this project has dispersive structures in its PML layers.')
+
+
+def absorber_faces(project):
+    """(axis, side) of the PML faces that become the adiabatic absorber.
+
+    With region.pml_dispersion == 'absorber' these are the faces whose layer rows
+    hold a material sample of an enabled dispersive structure, by its bounding box
+    (the rows 'frozen' freezes, and the test of the validation warning); every other
+    PML face keeps the CPML, so no pole sample lies in a stretched row. A soft sheet extended through the PML across an absorber face
+    is refused: the absorber damps its wave inside the layer (docs/BOUNDARIES.md).
+    Every other source lies in the interior, where the absorber has no loss.
+    """
+    if project.region.pml_dispersion != 'absorber':
+        return ()
+    from .stability_checks import dispersive_structures_in_pml
+    r = project.region
+    names = {face for _, faces in dispersive_structures_in_pml(project) for face in faces}
+    faces = tuple(sorted(('xyz'.index(name[0]), int(name.endswith('max'))) for name in names))
+    tolerance = 1e-6*r.reference_step
+    for source in project.sources:
+        if not source.enabled or not source.extend_through_pml:
+            continue
+        for axis, side in faces:
+            if 'xyz'[axis] == source.normal:
+                continue
+            low, high = r.interior_bounds(axis)
+            edge = source.center[axis]+(source.size[axis]/2 if side else -source.size[axis]/2)
+            if (edge > high+tolerance) if side else (edge < low-tolerance):
+                raise ValueError(f'{source.name}: a soft sheet with extend_through_pml crosses the absorber face '
+                                 f'{"xyz"[axis]}_{"max" if side else "min"}; the absorber damps the sheet inside the layer '
+                                 '(a 27 to 37 percent power error in the interior, docs/BOUNDARIES.md). End the sheet at the '
+                                 'interior or use pml_dispersion="ade".')
+    return faces
+
+
+def absorber_profiles(region, courant, faces):
+    """Half-step loss s = sigma*courant/2 of the adiabatic absorber, per active axis at its (integer, half) Yee nodes.
+
+    Each absorber face is a graded conductivity of its PML depth: sigma =
+    sigma_scale*40/(L+1)*rho**polynomial in units of c/reference_step, rho the
+    physical depth into the layer over its thickness. Corner cells add the losses
+    of their faces.
+    """
+    profiles = {}
+    for axis, nodes in enumerate(region.mesh_nodes):
+        n = region.shape[axis]
+        if n == 1:
+            continue
+        nodes = np.asarray(nodes, dtype=np.float64)
+        points = (nodes[:-1], (nodes[:-1]+nodes[1:])/2)
+        loss = [np.zeros(n), np.zeros(n)]
+        for side, face in enumerate(region.boundaries.pair(axis)):
+            layers = region.pml_layers(axis, side)
+            if not layers or (axis, side) not in faces:
+                continue
+            inner, outer = (nodes[layers], nodes[0]) if side == 0 else (nodes[n-layers], nodes[n])
+            for k, point in enumerate(points):
+                rho = np.clip((point-inner)/(outer-inner), 0, 1)
+                loss[k] += face.sigma_scale*40/(layers+1)*rho**face.polynomial*courant/2
+        profiles[axis] = tuple(loss)
+    return profiles
+
+
+def absorber_loss(profiles, shape, family, indices=None, components=True, box=None):
+    """Absorber loss per (x, y, z, component) sample, the sum over axes in axis order.
+
+    Without indices the shape+(3,) array, or the box (a slice per axis) of it; with
+    flat indices into the field (components) or its cells (not components, three
+    columns) only those samples.
+    """
+    if indices is None:
+        box = box or tuple(slice(0, n) for n in shape)
+        loss = np.zeros(tuple(len(range(n)[b]) for n, b in zip(shape, box))+(3,))
+        for c in range(3):
+            for axis, pair in profiles.items():
+                view = [1, 1, 1]
+                view[axis] = loss.shape[axis]
+                loss[..., c] += pair[0 if is_nodal(family, c, axis) else 1][box[axis]].reshape(view)
+        return loss
+    indices = np.asarray(indices, dtype=np.int64)
+    cells, comp = np.divmod(indices, 3) if components else (indices, None)
+    coords = np.unravel_index(cells, tuple(shape))
+    loss = np.zeros(len(indices)) if components else np.zeros((len(indices), 3))
+    for axis, pair in profiles.items():
+        for c in range(3):
+            value = pair[0 if is_nodal(family, c, axis) else 1][coords[axis]]
+            if components:
+                loss[comp == c] += value[comp == c]
+            else:
+                loss[:, c] += value
+    return loss
+
+
+def absorber_slabs(region, faces):
+    """Disjoint boxes (a slice per axis) covering the layers of the absorber faces: an earlier axis keeps its corners."""
+    boxes, bounds = [], [slice(0, n) for n in region.shape]
+    for axis in range(3):
+        n = region.shape[axis]
+        sides = [side for a, side in faces if a == axis]
+        for side in sides:
+            layers = region.pml_layers(axis, side)
+            box = list(bounds)
+            box[axis] = slice(0, layers) if side == 0 else slice(n-layers, n)
+            boxes.append(tuple(box))
+        if sides:
+            bounds[axis] = slice(region.pml_layers(axis, 0) if 0 in sides else 0, n-region.pml_layers(axis, 1) if 1 in sides else n)
+    return boxes
 
 
 def pmc_faces(region):
@@ -99,7 +228,7 @@ class YeeGrid(fdtd.Grid):
     PMC/symmetric faces allocate the stored upper face/edge arrays. Only the
     fused CUDA kernel updates them; the Torch/NumPy curl below rejects them.
     """
-    def __init__(self, region):
+    def __init__(self, region, absorber_faces=()):
         region.require_resident()
         super().__init__(shape=region.shape, grid_spacing=region.reference_step * 1e-6,
                          courant_number=region.courant_factor/math.sqrt(2 if region.dimension == '2d' else 3))
@@ -116,11 +245,11 @@ class YeeGrid(fdtd.Grid):
             else:
                 kind = np.complex128 if region.precision == 'float64' else np.complex64
                 self.E, self.H = self.E.astype(kind), self.H.astype(kind)
-        self._prepare_boundaries(region)
+        self._prepare_boundaries(region, absorber_faces)
         self.faces = {family: [self._zeros(shape) for _, _, shape in blocks] for family, blocks in self.pmc_blocks.items()}
         self.face_inverse_permittivity = [self._zeros(shape)+1 for _, _, shape in self.pmc_blocks['E']]
 
-    def _prepare_boundaries(self,region):
+    def _prepare_boundaries(self,region,absorber_faces=()):
         self.wrap = {}
         # PEC planes are exactly mesh endpoints. Upper tangential E is a
         # zero ghost node. Lower tangential E / normal H are zero states.
@@ -154,6 +283,21 @@ class YeeGrid(fdtd.Grid):
         self.memory_states = []
         self.material_states = []
         self.incident_states = []
+        # The adiabatic absorber replaces the stretched coordinates on the faces of absorber_faces(project).
+        absorber_faces = {(a, s) for a, s in absorber_faces if region.pml_layers(a, s)}
+        self.absorber = None
+        if absorber_faces:
+            if region.pml_dispersion != 'absorber':
+                raise ValueError('Absorber faces require pml_dispersion="absorber".')
+            if lower or upper:
+                raise ValueError('pml_dispersion="absorber" does not implement PMC/symmetric faces.')
+            if region.interface_method == 'subpixel':
+                raise ValueError('pml_dispersion="absorber" requires staircase interfaces.')
+            if any(f.kappa != 1 or f.alpha > BoundaryFace().alpha for f in (region.boundaries.pair(a)[s] for a, s in absorber_faces)):
+                raise ValueError('pml_dispersion="absorber" grades a conductivity from layers, sigma_scale and polynomial; '
+                                 'the stretched-coordinate kappa and alpha of its faces must stay at 1 and at most the default alpha.')
+            self.absorber = absorber_profiles(region, self.courant_number, absorber_faces)
+            self.absorber_faces = tuple(sorted(absorber_faces))
         for forward in (False, True):
             for axis, component, output, _ in CURL_TERMS:
                 n = region.shape[axis]
@@ -164,7 +308,7 @@ class YeeGrid(fdtd.Grid):
                 target_shape = extended_shape(region.shape, upper, 'H' if forward else 'E', output)
                 segments = []
                 for side, face in enumerate(region.boundaries.pair(axis)):
-                    if face.kind != 'pml':
+                    if face.kind != 'pml' or (axis, side) in absorber_faces:
                         continue
                     layers = region.pml_layers(axis, side)
                     base = 0 if side == 0 else n - layers
@@ -243,23 +387,56 @@ class YeeGrid(fdtd.Grid):
                 result[_slice(axis, -1, output)] += sign * edge
         return result
 
+    def absorber_update(self, family):
+        """[(box, decay, gain)] of the trapezoidal absorber loss, F <- decay*F + gain*dF on the absorber slabs only."""
+        cached = self.__dict__.setdefault('_absorber_update', {})
+        if family not in cached:
+            cached[family] = []
+            for box in absorber_slabs(self.region, self.absorber_faces):
+                loss = absorber_loss(self.absorber, self.region.shape, family, box=box)
+                cached[family].append((box, self._coefficient((1-loss)/(1+loss)), self._coefficient(1/(1+loss))))
+        return cached[family]
+
+    def absorber_axes(self):
+        """Per-axis (integer, half) node losses on the field device for the fused kernels."""
+        cached = self.__dict__.get('_absorber_axes')
+        if cached is None:
+            cached = self._absorber_axes = {axis: tuple(self._coefficient(v) for v in pair) for axis, pair in self.absorber.items()}
+        return cached
+
     def update_E(self):
         prepared = [state.prepare(self.E) for state in self.material_states]
         curl=self.curl(self.H,False)
-        self.E += self.courant_number * self.inverse_permittivity * curl
+        if self.absorber is None:
+            self.E += self.courant_number * self.inverse_permittivity * curl
+        else:
+            # Slab values first, with the operation order of the lossless update outside them.
+            slabs = [(box, self.E[box]*decay+self.courant_number*gain*self.inverse_permittivity[box]*curl[box])
+                     for box, decay, gain in self.absorber_update('E')]
+            self.E += self.courant_number * self.inverse_permittivity * curl
+            for box, value in slabs:
+                self.E[box] = value
         if getattr(self,'subpixel',None) is not None:self.subpixel.add(curl)
         for state, (old, response) in zip(self.material_states, prepared):
             state.correct(self.E, old, response)
 
     def update_H(self):
-        self.H -= self.courant_number * self.inverse_permeability * self.curl(self.E, True)
+        if self.absorber is None:
+            self.H -= self.courant_number * self.inverse_permeability * self.curl(self.E, True)
+        else:
+            curl = self.curl(self.E, True)
+            slabs = [(box, self.H[box]*decay-self.courant_number*gain*self.inverse_permeability[box]*curl[box])
+                     for box, decay, gain in self.absorber_update('H')]
+            self.H -= self.courant_number * self.inverse_permeability * curl
+            for box, value in slabs:
+                self.H[box] = value
 
 
 class BoundaryDescription:
     """Boundary coefficients and state shapes without allocating volume fields."""
-    def __init__(self,region):
+    def __init__(self,region,absorber_faces=()):
         self.courant_number=region.rectangular_courant
-        YeeGrid._prepare_boundaries(self,region)
+        YeeGrid._prepare_boundaries(self,region,absorber_faces)
 
     def _zeros(self,shape):return None
 
