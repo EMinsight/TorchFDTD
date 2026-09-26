@@ -1,0 +1,408 @@
+{
+ "criteria": [
+  {
+   "id": "a",
+   "criterion": "all three starts reported",
+   "value": [
+    "library",
+    "narrower",
+    "wider"
+   ],
+   "limit": [
+    "library",
+    "narrower",
+    "wider"
+   ],
+   "passed": true
+  },
+  {
+   "id": "b",
+   "criterion": "best refined design focusing efficiency at least 0.5571",
+   "value": 0.6988150195162599,
+   "best_start": "narrower",
+   "limit": 0.5571,
+   "comparison": ">=",
+   "passed": true,
+   "all_starts": {
+    "library": 0.6986221847500099,
+    "wider": 0.6229919201000087,
+    "narrower": 0.6988150195162599
+   }
+  },
+  {
+   "id": "c",
+   "criterion": "0.0125 um changes the focusing efficiency by at most 0.02 and the axial peak by at most 0.1 um",
+   "value": {
+    "efficiency": {
+     "library": 0.0006787150000495679,
+     "wider": 0.008290894524955461,
+     "narrower": 0.007049807522299223
+    },
+    "axis_peak_um": {
+     "library": 0.025193452380999126,
+     "wider": 0.018541666666616052,
+     "narrower": 0.003795698924759172
+    }
+   },
+   "limit": {
+    "efficiency": 0.02,
+    "axis_peak_um": 0.1
+   },
+   "comparison": "<=",
+   "passed": true
+  },
+  {
+   "id": "d",
+   "criterion": "doubling the stop time changes the focusing efficiency by at most 0.005",
+   "value": {
+    "library": 0.0001505922499999146,
+    "wider": 0.0010185472000000528,
+    "narrower": 0.0015215103500001437
+   },
+   "limit": 0.005,
+   "comparison": "<=",
+   "passed": true
+  },
+  {
+   "id": "e",
+   "criterion": "propagated and direct focal-line intensities within 5 percent relative L2",
+   "value": {
+    "library": 0.022177285917837027,
+    "wider": 0.007391897966308267,
+    "narrower": 0.0033857664809380816
+   },
+   "limit": 0.05,
+   "comparison": "<=",
+   "passed": true
+  },
+  {
+   "id": "f",
+   "criterion": "focal-line FWHM of the best design at most 1.25 lambda / (2 NA) = 1.76 um",
+   "value": 1.1436852098232797,
+   "best_start": "narrower",
+   "limit": 1.76,
+   "comparison": "<=",
+   "passed": true,
+   "all_starts": {
+    "library": 1.1269261733763818,
+    "wider": 1.1077916212437717,
+    "narrower": 1.1436852098232797
+   }
+  },
+  {
+   "id": "scope",
+   "criterion": "a unit-cell phase library alone is never reported as a full-lens validation",
+   "value": "every reported number comes from a full-aperture 33-ridge run; the unit-cell library only supplies the start widths",
+   "passed": true
+  }
+ ],
+ "all_pass": true,
+ "best_start": "narrower",
+ "schema": "torchfdtd-g7-02r2-v1",
+ "case_id": "G7-02r2",
+ "reduced": false,
+ "date": "2026-09-26",
+ "environment": {
+  "python": "3.10.2",
+  "torch": "2.10.0+cu126",
+  "cuda": "12.6",
+  "numpy": "2.2.6",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "device": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+  "gpu": null,
+  "torchfdtd_file": "D:\\TorchFDTD\\.local\\venvs\\g7-02\\Lib\\site-packages\\torchfdtd\\__init__.py",
+  "torchfdtd_version": "0.16.0",
+  "torchfdtd_version_source": "importlib.metadata.version(\"torchfdtd\"): the installed distribution (the package defines no __version__)",
+  "checkout_import": false,
+  "torchfdtd_import": "installed",
+  "torchfdtd_wheel": {
+   "url": "file:///D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+   "path": "D:\\torchfdtd-clean\\dist\\2612d831ef91\\torchfdtd-0.16.0-py3-none-any.whl",
+   "sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd"
+  },
+  "commit": "0fb8d51612b91f2d08c7f2cab170508ba13f7d50",
+  "tracked_changes": false
+ },
+ "design": {
+  "transition_um": 0.05,
+  "width_bounds_um": [
+   0.075,
+   0.575
+  ],
+  "checkpoints": 32,
+  "optimizer": "torch.optim.Adam, default betas",
+  "stop_rule": {
+   "threshold": 0.001,
+   "check_steps": 20,
+   "cap_factor": 10
+  },
+  "objective": "|Ez|^2 at (x, y) = (0.0, 5.6) um, 1.55 um, relative to the bare-cell mean incident |Ez|^2 (1.91665e-28 reduced units) through DifferentiableSimulation.spectrum, run for the stop of the current design"
+ },
+ "grids": {
+  "design_grid": {
+   "mesh_um": 0.025,
+   "window_steps": 5200,
+   "cap_steps": 52000
+  },
+  "fine_mesh": {
+   "mesh_um": 0.0125,
+   "window_steps": 10400,
+   "cap_steps": 100000
+  }
+ },
+ "stops": {
+  "library": {
+   "design_grid": {
+    "lens_stop": {
+     "steps": 18960,
+     "reached": true,
+     "relative_energy": 0.0009930784350947492,
+     "window_factor": 3.646153846153846,
+     "time_fs": 1106.8221340631567,
+     "seconds": 6.01367559999926
+    },
+    "lens_steps": 18960,
+    "bare_steps": 2820
+   },
+   "longer_time": {
+    "lens_stop": {
+     "steps": 18960,
+     "reached": true,
+     "relative_energy": 0.0009930784350947492,
+     "window_factor": 3.646153846153846,
+     "time_fs": 1106.8221340631567,
+     "seconds": 6.01367559999926
+    },
+    "lens_steps": 37920,
+    "bare_steps": 5640
+   },
+   "fine_mesh": {
+    "lens_stop": {
+     "steps": 38520,
+     "reached": true,
+     "relative_energy": 0.0009979846598345743,
+     "window_factor": 3.703846153846154,
+     "time_fs": 1124.335142513523,
+     "seconds": 42.163515099993674
+    },
+    "lens_steps": 38520,
+    "bare_steps": 5620
+   }
+  },
+  "wider": {
+   "design_grid": {
+    "lens_stop": {
+     "steps": 44120,
+     "reached": true,
+     "relative_energy": 0.0009996447946403193,
+     "window_factor": 8.484615384615385,
+     "time_fs": 2575.5797761005524,
+     "seconds": 14.082469099987065
+    },
+    "lens_steps": 44120,
+    "bare_steps": 2820
+   },
+   "longer_time": {
+    "lens_stop": {
+     "steps": 44120,
+     "reached": true,
+     "relative_energy": 0.0009996447946403193,
+     "window_factor": 8.484615384615385,
+     "time_fs": 2575.5797761005524,
+     "seconds": 14.082469099987065
+    },
+    "lens_steps": 52000,
+    "bare_steps": 5640
+   },
+   "fine_mesh": {
+    "lens_stop": {
+     "steps": 80780,
+     "reached": true,
+     "relative_energy": 0.0009984088921041793,
+     "window_factor": 7.767307692307693,
+     "time_fs": 2357.834704367663,
+     "seconds": 87.82418190001044
+    },
+    "lens_steps": 80780,
+    "bare_steps": 5620
+   }
+  },
+  "narrower": {
+   "design_grid": {
+    "lens_stop": {
+     "steps": 17860,
+     "reached": true,
+     "relative_energy": 0.0009993598174033265,
+     "window_factor": 3.4346153846153844,
+     "time_fs": 1042.6077697451465,
+     "seconds": 5.497447500005364
+    },
+    "lens_steps": 17860,
+    "bare_steps": 2820
+   },
+   "longer_time": {
+    "lens_stop": {
+     "steps": 17860,
+     "reached": true,
+     "relative_energy": 0.0009993598174033265,
+     "window_factor": 3.4346153846153844,
+     "time_fs": 1042.6077697451465,
+     "seconds": 5.497447500005364
+    },
+    "lens_steps": 35720,
+    "bare_steps": 5640
+   },
+   "fine_mesh": {
+    "lens_stop": {
+     "steps": 34500,
+     "reached": true,
+     "relative_energy": 0.000999837791856064,
+     "window_factor": 3.3173076923076925,
+     "time_fs": 1006.997985896068,
+     "seconds": 37.141699300002074
+    },
+    "lens_steps": 34500,
+    "bare_steps": 5620
+   }
+  }
+ },
+ "common": "common.json",
+ "consistency": {
+  "note": "staircase library design (voxelize) on the design grid at 1.55 um, lens and bare cell each run to its 1e-3 stop: native Simulation against the DifferentiablePlaneSimulation forward used for every validation",
+  "lens_steps": 18000,
+  "bare_steps": 2820,
+  "native": {
+   "axis_peak_y_um": 5.557810750279931,
+   "axis_peak_intensity": 9.508610708986563,
+   "focal_plane_peak_x_um": 4.413452202931337e-06,
+   "focal_plane_peak_intensity": 9.526290250353076,
+   "fwhm_um": 1.16509004214755,
+   "efficiency": 0.5567196957000078,
+   "transmission": 0.6714019,
+   "side_lobe_ratio": 0.05704248245910625
+  },
+  "plane_forward": {
+   "axis_peak_y_um": 5.555819295558957,
+   "axis_peak_intensity": 9.5085223156585,
+   "focal_plane_peak_x_um": -1.1016613044242951e-06,
+   "focal_plane_peak_intensity": 9.526278125022033,
+   "fwhm_um": 1.165092996369797,
+   "efficiency": 0.5567202864250079,
+   "transmission": 0.6714023,
+   "side_lobe_ratio": 0.057042527271127394
+  },
+  "efficiency_difference": 5.907250001380149e-07,
+  "axis_peak_difference_um": 0.001991454720974062,
+  "recorded_comparison_efficiency": 0.5571
+ },
+ "native_shutoff": {
+  "note": "native Simulation with RunControl(auto_shutoff=True, consecutive_checks=2) on the staircase lens; find_stop uses one check and the running peak",
+  "native_steps": 18100,
+  "termination_reason": "decayed",
+  "find_stop_steps": 18000,
+  "find_stop_relative_energy": 0.0009808599772465107,
+  "native_last_check": {
+   "step": 18100,
+   "time_s": 1.0566181765054396e-12,
+   "state_norm": 107.01575810622717,
+   "relative_norm": 0.0009804333514586466,
+   "field_peak": 0.10371795296669006,
+   "source_finished": true
+  }
+ },
+ "gradient_check": {
+  "ridge": 7,
+  "x_um": -5.4,
+  "width_um": 0.125,
+  "objective": 9.560973167419434,
+  "adjoint_per_um": 15.686355590820312,
+  "precision": "float32",
+  "steps": 17360,
+  "central_differences": [
+   {
+    "step_um": 0.004,
+    "central_difference_per_um": 15.44189453125,
+    "relative_difference": 0.01583102766798419
+   },
+   {
+    "step_um": 0.002,
+    "central_difference_per_um": 15.628814697265625,
+    "relative_difference": 0.0036817183304857213
+   },
+   {
+    "step_um": 0.001,
+    "central_difference_per_um": 15.673637390136719,
+    "relative_difference": 0.0008114390021296015
+   }
+  ]
+ },
+ "stage_provenance": {
+  "common": {
+   "torchfdtd_file": "D:\\TorchFDTD\\.local\\venvs\\g7-02\\Lib\\site-packages\\torchfdtd\\__init__.py",
+   "torchfdtd_version": "0.16.0",
+   "torchfdtd_version_source": "importlib.metadata.version(\"torchfdtd\"): the installed distribution (the package defines no __version__)",
+   "checkout_import": false,
+   "torchfdtd_import": "installed",
+   "torchfdtd_wheel": {
+    "url": "file:///D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+    "path": "D:\\torchfdtd-clean\\dist\\2612d831ef91\\torchfdtd-0.16.0-py3-none-any.whl",
+    "sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd"
+   },
+   "commit": "0fb8d51612b91f2d08c7f2cab170508ba13f7d50",
+   "tracked_changes": false
+  },
+  "library": {
+   "torchfdtd_file": "D:\\TorchFDTD\\.local\\venvs\\g7-02\\Lib\\site-packages\\torchfdtd\\__init__.py",
+   "torchfdtd_version": "0.16.0",
+   "torchfdtd_version_source": "importlib.metadata.version(\"torchfdtd\"): the installed distribution (the package defines no __version__)",
+   "checkout_import": false,
+   "torchfdtd_import": "installed",
+   "torchfdtd_wheel": {
+    "url": "file:///D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+    "path": "D:\\torchfdtd-clean\\dist\\2612d831ef91\\torchfdtd-0.16.0-py3-none-any.whl",
+    "sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd"
+   },
+   "commit": "0fb8d51612b91f2d08c7f2cab170508ba13f7d50",
+   "tracked_changes": false
+  },
+  "wider": {
+   "torchfdtd_file": "D:\\TorchFDTD\\.local\\venvs\\g7-02\\Lib\\site-packages\\torchfdtd\\__init__.py",
+   "torchfdtd_version": "0.16.0",
+   "torchfdtd_version_source": "importlib.metadata.version(\"torchfdtd\"): the installed distribution (the package defines no __version__)",
+   "checkout_import": false,
+   "torchfdtd_import": "installed",
+   "torchfdtd_wheel": {
+    "url": "file:///D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+    "path": "D:\\torchfdtd-clean\\dist\\2612d831ef91\\torchfdtd-0.16.0-py3-none-any.whl",
+    "sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd"
+   },
+   "commit": "0fb8d51612b91f2d08c7f2cab170508ba13f7d50",
+   "tracked_changes": false
+  },
+  "narrower": {
+   "torchfdtd_file": "D:\\TorchFDTD\\.local\\venvs\\g7-02\\Lib\\site-packages\\torchfdtd\\__init__.py",
+   "torchfdtd_version": "0.16.0",
+   "torchfdtd_version_source": "importlib.metadata.version(\"torchfdtd\"): the installed distribution (the package defines no __version__)",
+   "checkout_import": false,
+   "torchfdtd_import": "installed",
+   "torchfdtd_wheel": {
+    "url": "file:///D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+    "path": "D:\\torchfdtd-clean\\dist\\2612d831ef91\\torchfdtd-0.16.0-py3-none-any.whl",
+    "sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd"
+   },
+   "commit": "0fb8d51612b91f2d08c7f2cab170508ba13f7d50",
+   "tracked_changes": false
+  }
+ },
+ "wall_seconds": {
+  "common": 132.66955789999338,
+  "start_library": 1373.400117799989,
+  "start_wider": 2370.577423300012,
+  "start_narrower": 1261.1583162999887
+ },
+ "records": [
+  "start-library.json",
+  "start-wider.json",
+  "start-narrower.json"
+ ]
+}

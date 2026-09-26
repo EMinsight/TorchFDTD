@@ -1,0 +1,129 @@
+{
+ "schema": "torchfdtd-g7-02r2-v1",
+ "case_id": "G7-02r2",
+ "stage": "common",
+ "reduced": false,
+ "environment": {
+  "python": "3.10.2",
+  "torch": "2.10.0+cu126",
+  "cuda": "12.6",
+  "numpy": "2.2.6",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "device": "NVIDIA GeForce RTX 3060",
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 3060",
+   "driver_version": "591.86",
+   "memory.total": "12288",
+   "memory.used": "869",
+   "utilization.gpu": "0"
+  },
+  "torchfdtd_file": "D:\\TorchFDTD\\.local\\venvs\\g7-02\\Lib\\site-packages\\torchfdtd\\__init__.py",
+  "torchfdtd_version": "0.16.0",
+  "torchfdtd_version_source": "importlib.metadata.version(\"torchfdtd\"): the installed distribution (the package defines no __version__)",
+  "checkout_import": false,
+  "torchfdtd_import": "installed",
+  "torchfdtd_wheel": {
+   "url": "file:///D:/torchfdtd-clean/dist/2612d831ef91/torchfdtd-0.16.0-py3-none-any.whl",
+   "path": "D:\\torchfdtd-clean\\dist\\2612d831ef91\\torchfdtd-0.16.0-py3-none-any.whl",
+   "sha256": "57920904d42fe76bd0a38ce002223a0f1fb0174fd890abc2f1781bac8d8794dd"
+  },
+  "commit": "0fb8d51612b91f2d08c7f2cab170508ba13f7d50",
+  "tracked_changes": false
+ },
+ "bare_stop": {
+  "steps": 2820,
+  "reached": true,
+  "relative_energy": 0.0008354741850234384,
+  "threshold": 0.001,
+  "check_steps": 20,
+  "cap_steps": 52000,
+  "cap_limited_by_region": false,
+  "window_factor": 0.5423076923076923,
+  "time_fs": 164.62227943344416,
+  "source_end_step": 2676,
+  "seconds": 1.5584534999798052
+ },
+ "staircase_stop": {
+  "steps": 18000,
+  "reached": true,
+  "relative_energy": 0.0009808599772465107,
+  "threshold": 0.001,
+  "check_steps": 20,
+  "cap_steps": 52000,
+  "cap_limited_by_region": false,
+  "window_factor": 3.4615384615384617,
+  "time_fs": 1050.780507021984,
+  "source_end_step": 2676,
+  "seconds": 5.879944000014802
+ },
+ "consistency": {
+  "note": "staircase library design (voxelize) on the design grid at 1.55 um, lens and bare cell each run to its 1e-3 stop: native Simulation against the DifferentiablePlaneSimulation forward used for every validation",
+  "lens_steps": 18000,
+  "bare_steps": 2820,
+  "native": {
+   "axis_peak_y_um": 5.557810750279931,
+   "axis_peak_intensity": 9.508610708986563,
+   "focal_plane_peak_x_um": 4.413452202931337e-06,
+   "focal_plane_peak_intensity": 9.526290250353076,
+   "fwhm_um": 1.16509004214755,
+   "efficiency": 0.5567196957000078,
+   "transmission": 0.6714019,
+   "side_lobe_ratio": 0.05704248245910625
+  },
+  "plane_forward": {
+   "axis_peak_y_um": 5.555819295558957,
+   "axis_peak_intensity": 9.5085223156585,
+   "focal_plane_peak_x_um": -1.1016613044242951e-06,
+   "focal_plane_peak_intensity": 9.526278125022033,
+   "fwhm_um": 1.165092996369797,
+   "efficiency": 0.5567202864250079,
+   "transmission": 0.6714023,
+   "side_lobe_ratio": 0.057042527271127394
+  },
+  "efficiency_difference": 5.907250001380149e-07,
+  "axis_peak_difference_um": 0.001991454720974062,
+  "recorded_comparison_efficiency": 0.5571
+ },
+ "native_shutoff": {
+  "note": "native Simulation with RunControl(auto_shutoff=True, consecutive_checks=2) on the staircase lens; find_stop uses one check and the running peak",
+  "native_steps": 18100,
+  "termination_reason": "decayed",
+  "find_stop_steps": 18000,
+  "find_stop_relative_energy": 0.0009808599772465107,
+  "native_last_check": {
+   "step": 18100,
+   "time_s": 1.0566181765054396e-12,
+   "state_norm": 107.01575810622717,
+   "relative_norm": 0.0009804333514586466,
+   "field_peak": 0.10371795296669006,
+   "source_finished": true
+  }
+ },
+ "gradient_check": {
+  "ridge": 7,
+  "x_um": -5.4,
+  "width_um": 0.125,
+  "objective": 9.560973167419434,
+  "adjoint_per_um": 15.686355590820312,
+  "precision": "float32",
+  "steps": 17360,
+  "central_differences": [
+   {
+    "step_um": 0.004,
+    "central_difference_per_um": 15.44189453125,
+    "relative_difference": 0.01583102766798419
+   },
+   {
+    "step_um": 0.002,
+    "central_difference_per_um": 15.628814697265625,
+    "relative_difference": 0.0036817183304857213
+   },
+   {
+    "step_um": 0.001,
+    "central_difference_per_um": 15.673637390136719,
+    "relative_difference": 0.0008114390021296015
+   }
+  ]
+ },
+ "seconds": 132.66955789999338
+}
