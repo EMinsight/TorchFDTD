@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `0.16.1` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T214448Z-g9-03-cc9b3082` recorded 2026-09-25T21:44:48+00:00 at commit `70c7bd788fa6`.
+Package version `0.17.0` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260925T214448Z-g9-03-cc9b3082` recorded 2026-09-25T21:44:48+00:00 at commit `70c7bd788fa6`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -178,32 +178,32 @@ Newest runs that match no platform record: none.
 
 ## Clean-install record
 
-Newest record `20260925T220012Z-c0c49777.json` (kind `clean_install_record`), taken at commit `c0c497778f9b` on 2026-09-25T22:00:12+00:00 with 0 dirty packaging paths; all steps passed: yes.
+Newest record `20260926T010914Z-f5d3bcf1.json` (kind `clean_install_record`), taken at commit `f5d3bcf12d21` on 2026-09-26T01:09:14+00:00 with 0 dirty packaging paths; all steps passed: yes.
 
-Wheel `torchfdtd-0.16.1-py3-none-any.whl`, SHA-256 `2e63550b609832282bcce2d7c13280f06073ca9019f6629ab6916cb964d322b4`, 980,325 bytes, 160 entries, 153 package files; browser assets match the committed ones: yes; frontend assets current: yes.
+Wheel `torchfdtd-0.17.0-py3-none-any.whl`, SHA-256 `2bb919c1f5f8ecacb84c64d00a638c16b468313cb4cb6f4a371daa9957529ec1`, 987,823 bytes, 160 entries, 153 package files; browser assets match the committed ones: yes; frontend assets current: yes.
 
 | Environment | Python | torch | cupy-cuda12x | numpy | torchfdtd | Packages |
 | --- | --- | --- | --- | --- | --- | --- |
-| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 0.16.1 | 40 |
-| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 0.16.1 | 42 |
+| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 0.17.0 | 40 |
+| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 0.17.0 | 42 |
 
 | Step | Status | Seconds |
 | --- | --- | --- |
-| build_wheel | passed | 12.66 |
-| cpu_venv_create | passed | 13.9 |
-| cpu_pip_install_torch | passed | 97.49 |
-| cpu_pip_install_wheel | passed | 58.23 |
-| cpu_package_list | passed | 1.13 |
-| cpu_import_run_save_load | passed | 14.08 |
-| cpu_server_index_assets_api | passed | 5.62 |
-| cpu_doctor | passed | 5.63 |
-| cuda_venv_create | passed | 16.3 |
-| cuda_pip_install_torch | passed | 172.45 |
-| cuda_pip_install_wheel_extras | passed | 81.1 |
-| cuda_package_list | passed | 1.28 |
-| cuda_fused_forward_run | passed | 20.84 |
-| cuda_doctor | passed | 4.89 |
-| readme_examples | passed | 22.13 |
+| build_wheel | passed | 13.8 |
+| cpu_venv_create | passed | 21.95 |
+| cpu_pip_install_torch | passed | 110.51 |
+| cpu_pip_install_wheel | passed | 64.73 |
+| cpu_package_list | passed | 1.19 |
+| cpu_import_run_save_load | passed | 11.57 |
+| cpu_server_index_assets_api | passed | 4.01 |
+| cpu_doctor | passed | 3.85 |
+| cuda_venv_create | passed | 15.08 |
+| cuda_pip_install_torch | passed | 209.59 |
+| cuda_pip_install_wheel_extras | passed | 69.6 |
+| cuda_package_list | passed | 1.05 |
+| cuda_fused_forward_run | passed | 19.51 |
+| cuda_doctor | passed | 5.38 |
+| readme_examples | passed | 20.78 |
 
 ## Suite policy
 
@@ -373,7 +373,7 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 
 | Check | Result | Detail |
 | --- | --- | --- |
-| package version | ok | pyproject.toml 0.16.1, COMPATIBILITY.md 0.16.1, CHANGELOG.md 0.16.1, clean-install wheel 0.16.1 |
+| package version | ok | pyproject.toml 0.17.0, COMPATIBILITY.md 0.17.0, CHANGELOG.md 0.17.0, clean-install wheel 0.17.0 |
 | README row check `test_quick_start_selects_the_measured_path_explicitly` | ok | reproduced from its record |
 | README row check `test_readme_a100_row_matches_the_double_precision_record` | ok | reproduced from its record |
 | README row check `test_readme_capacity_row_matches_the_fp32_record` | ok | reproduced from its record |
