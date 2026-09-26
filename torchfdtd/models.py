@@ -21,10 +21,12 @@ class Model(BaseModel):
 # estimate, and Region.resident_cell_limit and Project.limits are optional user caps
 # ("Size limits" in docs/EXECUTION_MODES.md). The workbench server applies these
 # request limits to everything it validates or runs, whatever a submitted project
-# carries, unless it was started with memory admission (docs/SECURITY.md).
+# carries, unless it was started with memory admission (docs/SECURITY.md). sheet_cells (the cells of
+# the complex Bloch sheet profiles) and plane_points (plane points x recorded components, over every
+# plane) bound what planning builds beyond the other limits; solver.admit_planning counts them.
 SERVER_LIMITS = dict(resident_cells=8_000_000, structures=1000, sources=512, monitors=512, materials=100,
                      mesh_refinements=64, monitor_samples=12_000_000, steps=100_000, frequency_points=2001,
-                     signal_samples=100_000)
+                     signal_samples=100_000, sheet_cells=8_000_000, plane_points=12_000_000)
 # The fused CUDA kernels and the subpixel operator address a field array with
 # signed 32-bit integers, so every resident grid keeps 3 x lanes x cells below
 # this bound, whatever its cell limit.
