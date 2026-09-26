@@ -142,7 +142,7 @@ class ServerExecutor(ThreadPoolExecutor):
 def create_app(result_dir=None, memory_admission=False):
     # memory_admission (torchfdtd serve --memory-admission) lifts SERVER_LIMITS: scenes are admitted
     # by the memory estimate as on the Python API. The input limits stay (docs/SECURITY.md).
-    app = FastAPI(title='TorchFDTD', version='0.16.1')
+    app = FastAPI(title='TorchFDTD', version='0.17.0')
     # The Host allowlist is the loopback names only. TORCHFDTD_ALLOWED_HOSTS adds names, comma-separated;
     # tests/conftest.py sets it to testserver, the TestClient default, which no deployment allows.
     extra = [h.strip() for h in os.environ.get('TORCHFDTD_ALLOWED_HOSTS', '').split(',') if h.strip()]
@@ -182,7 +182,7 @@ def create_app(result_dir=None, memory_admission=False):
     @app.get('/api/health')
     def health():
         admission = server_admission()
-        return {**hardware(), **execution_resources(), 'hostname': socket.gethostname(), 'version': '0.16.1',
+        return {**hardware(), **execution_resources(), 'hostname': socket.gethostname(), 'version': '0.17.0',
                 'admission': admission, 'server_limits': SERVER_LIMITS if admission == 'fixed' else None}
 
     @app.get('/api/capabilities')
