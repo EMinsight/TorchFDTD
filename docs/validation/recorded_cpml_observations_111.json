@@ -1,0 +1,1243 @@
+{
+  "kind": "recorded_cpml_observation_comparison",
+  "baseline_commit": "76a2f81ea8dc9996848c1c57cd44fb1ffebf591d",
+  "device": "NVIDIA GeForce RTX 3060",
+  "accuracy": {
+    "tests": 93,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "summary": [
+    {
+      "shape": [
+        64,
+        64,
+        125
+      ],
+      "steps": 512,
+      "repeats": 15,
+      "quadrature_counts": [
+        8,
+        8
+      ],
+      "complex_fields": false,
+      "material_components": 3,
+      "median_seconds": {
+        "baseline": 0.3555741999880411,
+        "observations": 0.30101579998154193
+      },
+      "reduction_fraction": {
+        "observations": 0.15343745414693777
+      },
+      "median_paired_reduction": 0.14035821254580627,
+      "bootstrap_95_interval": [
+        0.10395296749680538,
+        0.24918267502395997
+      ],
+      "faster_pairs": 13
+    },
+    {
+      "shape": [
+        192,
+        192,
+        125
+      ],
+      "steps": 512,
+      "repeats": 15,
+      "quadrature_counts": [
+        8,
+        8
+      ],
+      "complex_fields": false,
+      "material_components": 3,
+      "median_seconds": {
+        "baseline": 1.9650402999832295,
+        "observations": 1.9485091000096872
+      },
+      "reduction_fraction": {
+        "observations": 0.00841265187980289
+      },
+      "median_paired_reduction": 0.006392761848901696,
+      "bootstrap_95_interval": [
+        -0.00370458812850738,
+        0.010841871331011332
+      ],
+      "faster_pairs": 11
+    },
+    {
+      "shape": [
+        64,
+        64,
+        125
+      ],
+      "steps": 512,
+      "repeats": 9,
+      "quadrature_counts": [
+        8,
+        8
+      ],
+      "complex_fields": false,
+      "material_components": 1,
+      "median_seconds": {
+        "baseline": 0.3057943999883719,
+        "observations": 0.25814280001213774
+      },
+      "reduction_fraction": {
+        "observations": 0.15582888364877234
+      },
+      "median_paired_reduction": 0.09667835632859667,
+      "bootstrap_95_interval": [
+        0.0037628770595011796,
+        0.23099577127792636
+      ],
+      "faster_pairs": 8
+    },
+    {
+      "shape": [
+        64,
+        64,
+        125
+      ],
+      "steps": 512,
+      "repeats": 9,
+      "quadrature_counts": [
+        8,
+        8
+      ],
+      "complex_fields": true,
+      "material_components": 3,
+      "median_seconds": {
+        "baseline": 0.5021085999906063,
+        "observations": 0.475267999980133
+      },
+      "reduction_fraction": {
+        "observations": 0.05345576636404048
+      },
+      "median_paired_reduction": 0.05332870217883312,
+      "bootstrap_95_interval": [
+        -0.00654563113295481,
+        0.13224694707344098
+      ],
+      "faster_pairs": 7
+    },
+    {
+      "shape": [
+        64,
+        64,
+        125
+      ],
+      "steps": 512,
+      "repeats": 9,
+      "quadrature_counts": [
+        64,
+        64
+      ],
+      "complex_fields": false,
+      "material_components": 3,
+      "median_seconds": {
+        "baseline": 0.585421999974642,
+        "observations": 0.5328658000216819
+      },
+      "reduction_fraction": {
+        "observations": 0.0897748973479584
+      },
+      "median_paired_reduction": 0.11800053164407331,
+      "bootstrap_95_interval": [
+        -0.27871870906494656,
+        0.23160530608362506
+      ],
+      "faster_pairs": 5
+    }
+  ],
+  "measurements": [
+    {
+      "device": "NVIDIA GeForce RTX 3060",
+      "torch_version": "2.10.0+cu126",
+      "cuda_version": "12.6",
+      "cases": [
+        {
+          "shape": [
+            64,
+            64,
+            125
+          ],
+          "steps": 512,
+          "repeats": 15,
+          "quadrature_counts": [
+            8,
+            8
+          ],
+          "material_components": 3,
+          "complex_fields": false,
+          "samples": {
+            "baseline": [
+              {
+                "seconds": 0.3678553000208922,
+                "forward_seconds": 0.19831130001693964,
+                "backward_seconds": 0.14974389999406412,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.35814340005163103,
+                "forward_seconds": 0.17536450002808124,
+                "backward_seconds": 0.15760479995515198,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.32346069999039173,
+                "forward_seconds": 0.15583770000375807,
+                "backward_seconds": 0.1522158000152558,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3226483999751508,
+                "forward_seconds": 0.1612522000214085,
+                "backward_seconds": 0.1360014000092633,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3217830000212416,
+                "forward_seconds": 0.1578023000038229,
+                "backward_seconds": 0.14626060001319274,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3940715999924578,
+                "forward_seconds": 0.24586299998918548,
+                "backward_seconds": 0.13205469999229535,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3273716000257991,
+                "forward_seconds": 0.16873299999861047,
+                "backward_seconds": 0.13525429996661842,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3359375,
+                "forward_seconds": 0.1649015999864787,
+                "backward_seconds": 0.14786999998614192,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3243101999978535,
+                "forward_seconds": 0.17046779999509454,
+                "backward_seconds": 0.13448470004368573,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.36513839999679476,
+                "forward_seconds": 0.18739229999482632,
+                "backward_seconds": 0.14986349997343495,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3839127999963239,
+                "forward_seconds": 0.22089880000567064,
+                "backward_seconds": 0.13873639999656007,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.42923499998869374,
+                "forward_seconds": 0.20358670002315193,
+                "backward_seconds": 0.20189329999266192,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.4134830000111833,
+                "forward_seconds": 0.2446819000178948,
+                "backward_seconds": 0.14260250004008412,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3220865000039339,
+                "forward_seconds": 0.16206960001727566,
+                "backward_seconds": 0.14144089998444542,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3555741999880411,
+                "forward_seconds": 0.17473309999331832,
+                "backward_seconds": 0.16426299995509908,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              }
+            ],
+            "observations": [
+              {
+                "seconds": 0.281175899959635,
+                "forward_seconds": 0.12432489998172969,
+                "backward_seconds": 0.1393263999489136,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.2648156000068411,
+                "forward_seconds": 0.10848650004481897,
+                "backward_seconds": 0.13755750004202127,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.26266400003805757,
+                "forward_seconds": 0.10731970000779256,
+                "backward_seconds": 0.13881010003387928,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3098026000079699,
+                "forward_seconds": 0.15275339997606352,
+                "backward_seconds": 0.1337642000289634,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.4218834000057541,
+                "forward_seconds": 0.2056756999809295,
+                "backward_seconds": 0.18656059994827956,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.2879448999883607,
+                "forward_seconds": 0.12889310001628473,
+                "backward_seconds": 0.13309429999208078,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.32300440000835806,
+                "forward_seconds": 0.14008559996727854,
+                "backward_seconds": 0.15883339999709278,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.30101579998154193,
+                "forward_seconds": 0.13161250000121072,
+                "backward_seconds": 0.14886529999785125,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.2787906000157818,
+                "forward_seconds": 0.12506749999010935,
+                "backward_seconds": 0.13533590000588447,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.2820473999599926,
+                "forward_seconds": 0.12066600000252947,
+                "backward_seconds": 0.14313229999970645,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3328269000048749,
+                "forward_seconds": 0.15195219998713583,
+                "backward_seconds": 0.15352350001921877,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.2834590999991633,
+                "forward_seconds": 0.11938529997132719,
+                "backward_seconds": 0.1377828000113368,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3104501999914646,
+                "forward_seconds": 0.13002839998807758,
+                "backward_seconds": 0.15682380000362173,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.342493399977684,
+                "forward_seconds": 0.16018050001002848,
+                "backward_seconds": 0.16242180002154782,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.3132062000222504,
+                "forward_seconds": 0.14873989997431636,
+                "backward_seconds": 0.13756179995834827,
+                "peak_torch_cuda_bytes": 132361216,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              }
+            ]
+          },
+          "median_seconds": {
+            "baseline": 0.3555741999880411,
+            "observations": 0.30101579998154193
+          },
+          "reduction_fraction": {
+            "observations": 0.15343745414693777
+          },
+          "paired_reduction_fraction": {
+            "observations": [
+              0.2356345010017098,
+              0.2605877981594398,
+              0.18795699123306198,
+              0.03981361744911882,
+              -0.3110804485566503,
+              0.26930816634877586,
+              0.013340192054218769,
+              0.10395296749680538,
+              0.14035821254580627,
+              0.2275602895711093,
+              0.1330664150607589,
+              0.339617924897481,
+              0.24918267502395997,
+              -0.06335844555267256,
+              0.11915375178293475
+            ]
+          },
+          "all_spectra_and_gradients_bitwise_equal": true,
+          "baseline": "1.1.0 recorded kernels and observation loop, reproduced with the optional changes disabled"
+        },
+        {
+          "shape": [
+            192,
+            192,
+            125
+          ],
+          "steps": 512,
+          "repeats": 15,
+          "quadrature_counts": [
+            8,
+            8
+          ],
+          "material_components": 3,
+          "complex_fields": false,
+          "samples": {
+            "baseline": [
+              {
+                "seconds": 2.0175160999642685,
+                "forward_seconds": 0.8235268999706022,
+                "backward_seconds": 1.16720919997897,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9768072000006214,
+                "forward_seconds": 0.7872502999962308,
+                "backward_seconds": 1.165448700019624,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 2.001212899980601,
+                "forward_seconds": 0.8331202999688685,
+                "backward_seconds": 1.145686699950602,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 2.010156199976336,
+                "forward_seconds": 0.7944623000221327,
+                "backward_seconds": 1.1864959999802522,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9887285999720916,
+                "forward_seconds": 0.7952133999788202,
+                "backward_seconds": 1.16321450000396,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.941092299995944,
+                "forward_seconds": 0.7873237999738194,
+                "backward_seconds": 1.1308317999937572,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.94616049999604,
+                "forward_seconds": 0.7852917999844067,
+                "backward_seconds": 1.1445379999931902,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9389949000324123,
+                "forward_seconds": 0.8041489999741316,
+                "backward_seconds": 1.1160860999953002,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.948568299994804,
+                "forward_seconds": 0.7974121000152081,
+                "backward_seconds": 1.1278193999896757,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9311763000441715,
+                "forward_seconds": 0.7750195999979042,
+                "backward_seconds": 1.1397296999930404,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9489885999937542,
+                "forward_seconds": 0.7907633999711834,
+                "backward_seconds": 1.1331405999953859,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9650402999832295,
+                "forward_seconds": 0.7906064999988303,
+                "backward_seconds": 1.1488793999888003,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.966099699959159,
+                "forward_seconds": 0.7881011000135913,
+                "backward_seconds": 1.1507350000320002,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9484198999707587,
+                "forward_seconds": 0.8034909000271,
+                "backward_seconds": 1.120638800028246,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9802046999684535,
+                "forward_seconds": 0.8131562999915332,
+                "backward_seconds": 1.136623199970927,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              }
+            ],
+            "observations": [
+              {
+                "seconds": 2.004618600010872,
+                "forward_seconds": 0.8027499999734573,
+                "backward_seconds": 1.17130459996406,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9936851999955252,
+                "forward_seconds": 0.7794343999703415,
+                "backward_seconds": 1.1883079999824986,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 2.046334000013303,
+                "forward_seconds": 0.8334884999785572,
+                "backward_seconds": 1.1742412999738008,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9716036000172608,
+                "forward_seconds": 0.7822211000020616,
+                "backward_seconds": 1.1643482000217773,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9515829000156373,
+                "forward_seconds": 0.8023596999701113,
+                "backward_seconds": 1.1269326000474393,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9538954999879934,
+                "forward_seconds": 0.7834797999821603,
+                "backward_seconds": 1.14379070000723,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9285741999628954,
+                "forward_seconds": 0.7566561999847181,
+                "backward_seconds": 1.1453132999595255,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9250134999747388,
+                "forward_seconds": 0.7653328000451438,
+                "backward_seconds": 1.1394576999591663,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9379181999829598,
+                "forward_seconds": 0.7771760000032373,
+                "backward_seconds": 1.1402911999612115,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9193151999497786,
+                "forward_seconds": 0.7599150000023656,
+                "backward_seconds": 1.134943600045517,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9562088000238873,
+                "forward_seconds": 0.8100175999570638,
+                "backward_seconds": 1.1150272999657318,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9485091000096872,
+                "forward_seconds": 0.7946766000241041,
+                "backward_seconds": 1.12925830000313,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9447834999882616,
+                "forward_seconds": 0.7605871999985538,
+                "backward_seconds": 1.1581702000112273,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9378004999598488,
+                "forward_seconds": 0.784882000007201,
+                "backward_seconds": 1.1281254999921657,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              },
+              {
+                "seconds": 1.9096871999790892,
+                "forward_seconds": 0.7649263999774121,
+                "backward_seconds": 1.1243475999799557,
+                "peak_torch_cuda_bytes": 1031499264,
+                "reconstruction_relative_l2": 4.297363181265905e-07
+              }
+            ]
+          },
+          "median_seconds": {
+            "baseline": 1.9650402999832295,
+            "observations": 1.9485091000096872
+          },
+          "reduction_fraction": {
+            "observations": 0.00841265187980289
+          },
+          "paired_reduction_fraction": {
+            "observations": [
+              0.006392761848901696,
+              -0.008538010178685385,
+              -0.022546876463338528,
+              0.019178907569237347,
+              0.018678114226835962,
+              -0.006595873875794744,
+              0.009036407856998663,
+              0.007210643028220276,
+              0.0054656026231528765,
+              0.006141904337849224,
+              -0.00370458812850738,
+              0.00841265187980289,
+              0.010841871331011332,
+              0.005450262549191454,
+              0.035611217360754566
+            ]
+          },
+          "all_spectra_and_gradients_bitwise_equal": true,
+          "baseline": "1.1.0 recorded kernels and observation loop, reproduced with the optional changes disabled"
+        }
+      ],
+      "timing": "Synchronized wall time for material setup, recorded forward, spectrum and backward, after warmup",
+      "source_sha256": {
+        "torchfdtd/reversible_cpml.py": "28f241898f50a41921e12287895d43905c5e209d426252cf3dabf4bc2806b651",
+        "torchfdtd/reversible_cpml_kernels.py": "45e6d7104ccbfce5422dd3f91692b8fd298dafc3c01f55afec3bda8133a6d560",
+        "torchfdtd/recorded_observations.py": "ccabc3c7d1bd7db9f4c05eb8aca6f955d7dbcab5f4806d3982a89d8939f3c31e",
+        "torchfdtd/reversible_cpml_memory.py": "dd6ef5bc779e0faa669ee77c54007ea1082a1167daad8275ba830c98738f8586",
+        "benchmarks/recorded_cpml_dispatch_perf.py": "d955b51ae6978853274c14d3b973477db9cb520809c722127e97a62e43db0009"
+      }
+    },
+    {
+      "device": "NVIDIA GeForce RTX 3060",
+      "torch_version": "2.10.0+cu126",
+      "cuda_version": "12.6",
+      "cases": [
+        {
+          "shape": [
+            64,
+            64,
+            125
+          ],
+          "steps": 512,
+          "repeats": 9,
+          "quadrature_counts": [
+            8,
+            8
+          ],
+          "material_components": 1,
+          "complex_fields": false,
+          "samples": {
+            "baseline": [
+              {
+                "seconds": 0.2946533999638632,
+                "forward_seconds": 0.1611292000161484,
+                "backward_seconds": 0.11616269999649376,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.25318980001611635,
+                "forward_seconds": 0.12525849998928607,
+                "backward_seconds": 0.11649699998088181,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.2553726999904029,
+                "forward_seconds": 0.11870059999637306,
+                "backward_seconds": 0.1238578999764286,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.3690133999916725,
+                "forward_seconds": 0.19009260000893846,
+                "backward_seconds": 0.15932750003412366,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.31497900001704693,
+                "forward_seconds": 0.17463059996953234,
+                "backward_seconds": 0.11679249996086583,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.3057943999883719,
+                "forward_seconds": 0.1569646000280045,
+                "backward_seconds": 0.1307818999630399,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.2514831000007689,
+                "forward_seconds": 0.12105700001120567,
+                "backward_seconds": 0.11731669999426231,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.335684499994386,
+                "forward_seconds": 0.18667850003112108,
+                "backward_seconds": 0.12939339998411015,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.3175061999936588,
+                "forward_seconds": 0.16808759997365996,
+                "backward_seconds": 0.1351396000245586,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              }
+            ],
+            "observations": [
+              {
+                "seconds": 0.2479143999516964,
+                "forward_seconds": 0.10664179996820167,
+                "backward_seconds": 0.12837130000116304,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.23530589998699725,
+                "forward_seconds": 0.10300629999255762,
+                "backward_seconds": 0.11652699997648597,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.2731750999810174,
+                "forward_seconds": 0.12157500005559996,
+                "backward_seconds": 0.13321810000343248,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.3108149000327103,
+                "forward_seconds": 0.12728529999731109,
+                "backward_seconds": 0.16643099999055266,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.23086720000719652,
+                "forward_seconds": 0.09872439998434857,
+                "backward_seconds": 0.11933910002699122,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.27623070002300665,
+                "forward_seconds": 0.1245041000074707,
+                "backward_seconds": 0.1318364999606274,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.2505368000129238,
+                "forward_seconds": 0.10897920001298189,
+                "backward_seconds": 0.12834719999227673,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.25814280001213774,
+                "forward_seconds": 0.11540229996899143,
+                "backward_seconds": 0.12388229998759925,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              },
+              {
+                "seconds": 0.293336599948816,
+                "forward_seconds": 0.13297869998496026,
+                "backward_seconds": 0.13643640000373125,
+                "peak_torch_cuda_bytes": 111389696,
+                "reconstruction_relative_l2": 4.679606122608982e-07
+              }
+            ]
+          },
+          "median_seconds": {
+            "baseline": 0.3057943999883719,
+            "observations": 0.25814280001213774
+          },
+          "reduction_fraction": {
+            "observations": 0.15582888364877234
+          },
+          "paired_reduction_fraction": {
+            "observations": [
+              0.15862365755120744,
+              0.07063436215827312,
+              -0.06971144523781714,
+              0.1577137848118132,
+              0.26703938994440335,
+              0.09667835632859667,
+              0.0037628770595011796,
+              0.23099577127792636,
+              0.07612323805117982
+            ]
+          },
+          "all_spectra_and_gradients_bitwise_equal": true,
+          "baseline": "1.1.0 recorded kernels and observation loop, reproduced with the optional changes disabled"
+        }
+      ],
+      "timing": "Synchronized wall time for material setup, recorded forward, spectrum and backward, after warmup",
+      "source_sha256": {
+        "torchfdtd/reversible_cpml.py": "28f241898f50a41921e12287895d43905c5e209d426252cf3dabf4bc2806b651",
+        "torchfdtd/reversible_cpml_kernels.py": "45e6d7104ccbfce5422dd3f91692b8fd298dafc3c01f55afec3bda8133a6d560",
+        "torchfdtd/recorded_observations.py": "ccabc3c7d1bd7db9f4c05eb8aca6f955d7dbcab5f4806d3982a89d8939f3c31e",
+        "torchfdtd/reversible_cpml_memory.py": "dd6ef5bc779e0faa669ee77c54007ea1082a1167daad8275ba830c98738f8586",
+        "benchmarks/recorded_cpml_dispatch_perf.py": "d955b51ae6978853274c14d3b973477db9cb520809c722127e97a62e43db0009"
+      }
+    },
+    {
+      "device": "NVIDIA GeForce RTX 3060",
+      "torch_version": "2.10.0+cu126",
+      "cuda_version": "12.6",
+      "cases": [
+        {
+          "shape": [
+            64,
+            64,
+            125
+          ],
+          "steps": 512,
+          "repeats": 9,
+          "quadrature_counts": [
+            8,
+            8
+          ],
+          "material_components": 3,
+          "complex_fields": true,
+          "samples": {
+            "baseline": [
+              {
+                "seconds": 0.4645682999980636,
+                "forward_seconds": 0.1898782000062056,
+                "backward_seconds": 0.2589206999982707,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.4688317999825813,
+                "forward_seconds": 0.1967068999656476,
+                "backward_seconds": 0.2558582000201568,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.49149949999991804,
+                "forward_seconds": 0.19209259998751804,
+                "backward_seconds": 0.28359840001212433,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.5021085999906063,
+                "forward_seconds": 0.21908700000494719,
+                "backward_seconds": 0.2680823999689892,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.5297827000031248,
+                "forward_seconds": 0.23454059998039156,
+                "backward_seconds": 0.27520009997533634,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.5059944999520667,
+                "forward_seconds": 0.20202949998201802,
+                "backward_seconds": 0.2885606000199914,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.49634439998771995,
+                "forward_seconds": 0.21955149999121204,
+                "backward_seconds": 0.2623276000376791,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.5476995999924839,
+                "forward_seconds": 0.2598827999900095,
+                "backward_seconds": 0.26976890000514686,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.5597317999927327,
+                "forward_seconds": 0.27903340000193566,
+                "backward_seconds": 0.263312799972482,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              }
+            ],
+            "observations": [
+              {
+                "seconds": 0.5033496000105515,
+                "forward_seconds": 0.20219330000691116,
+                "backward_seconds": 0.2771692000096664,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.4719006000086665,
+                "forward_seconds": 0.17426230001728982,
+                "backward_seconds": 0.27550539997173473,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.4832868999801576,
+                "forward_seconds": 0.20169920002808794,
+                "backward_seconds": 0.2589711000327952,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.4753318000002764,
+                "forward_seconds": 0.19590710004558787,
+                "backward_seconds": 0.2588013000204228,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.4706815999816172,
+                "forward_seconds": 0.1815067999996245,
+                "backward_seconds": 0.27446210000198334,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.4464567999821156,
+                "forward_seconds": 0.17515929997898638,
+                "backward_seconds": 0.25516380002954975,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.48412209999514744,
+                "forward_seconds": 0.19328720000339672,
+                "backward_seconds": 0.2651596000068821,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.475267999980133,
+                "forward_seconds": 0.17645379999885336,
+                "backward_seconds": 0.27759259997401386,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              },
+              {
+                "seconds": 0.4572980999946594,
+                "forward_seconds": 0.17797950003296137,
+                "backward_seconds": 0.2638464999618009,
+                "peak_torch_cuda_bytes": 206367744,
+                "reconstruction_relative_l2": 4.869846492294998e-07
+              }
+            ]
+          },
+          "median_seconds": {
+            "baseline": 0.5021085999906063,
+            "observations": 0.475267999980133
+          },
+          "reduction_fraction": {
+            "observations": 0.05345576636404048
+          },
+          "paired_reduction_fraction": {
+            "observations": [
+              -0.08347814522137975,
+              -0.00654563113295481,
+              0.016709274413833186,
+              0.05332870217883312,
+              0.11155724794554256,
+              0.1176647176512613,
+              0.024624635621707247,
+              0.13224694707344098,
+              0.18300496773526753
+            ]
+          },
+          "all_spectra_and_gradients_bitwise_equal": true,
+          "baseline": "1.1.0 recorded kernels and observation loop, reproduced with the optional changes disabled"
+        }
+      ],
+      "timing": "Synchronized wall time for material setup, recorded forward, spectrum and backward, after warmup",
+      "source_sha256": {
+        "torchfdtd/reversible_cpml.py": "28f241898f50a41921e12287895d43905c5e209d426252cf3dabf4bc2806b651",
+        "torchfdtd/reversible_cpml_kernels.py": "45e6d7104ccbfce5422dd3f91692b8fd298dafc3c01f55afec3bda8133a6d560",
+        "torchfdtd/recorded_observations.py": "ccabc3c7d1bd7db9f4c05eb8aca6f955d7dbcab5f4806d3982a89d8939f3c31e",
+        "torchfdtd/reversible_cpml_memory.py": "dd6ef5bc779e0faa669ee77c54007ea1082a1167daad8275ba830c98738f8586",
+        "benchmarks/recorded_cpml_dispatch_perf.py": "d955b51ae6978853274c14d3b973477db9cb520809c722127e97a62e43db0009"
+      }
+    },
+    {
+      "device": "NVIDIA GeForce RTX 3060",
+      "torch_version": "2.10.0+cu126",
+      "cuda_version": "12.6",
+      "cases": [
+        {
+          "shape": [
+            64,
+            64,
+            125
+          ],
+          "steps": 512,
+          "repeats": 9,
+          "quadrature_counts": [
+            64,
+            64
+          ],
+          "material_components": 3,
+          "complex_fields": false,
+          "samples": {
+            "baseline": [
+              {
+                "seconds": 0.585421999974642,
+                "forward_seconds": 0.15678609994938597,
+                "backward_seconds": 0.3589263000176288,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.5676976999966428,
+                "forward_seconds": 0.1469755000434816,
+                "backward_seconds": 0.3486487999907695,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.4174666000180878,
+                "forward_seconds": 0.14314200001535937,
+                "backward_seconds": 0.19349089998286217,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.6466661000158638,
+                "forward_seconds": 0.2015172999817878,
+                "backward_seconds": 0.34731430001556873,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.682331999996677,
+                "forward_seconds": 0.19559429999208078,
+                "backward_seconds": 0.3961402000277303,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.5586427999660373,
+                "forward_seconds": 0.22896259999834,
+                "backward_seconds": 0.23453960003098473,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.6428739000111818,
+                "forward_seconds": 0.1847884000162594,
+                "backward_seconds": 0.35832609998760745,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.6041566000203602,
+                "forward_seconds": 0.15937539999140427,
+                "backward_seconds": 0.3565298999892548,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.5290210000239313,
+                "forward_seconds": 0.13672319997567683,
+                "backward_seconds": 0.31829210004070774,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              }
+            ],
+            "observations": [
+              {
+                "seconds": 0.4816423000302166,
+                "forward_seconds": 0.14597079996019602,
+                "backward_seconds": 0.2066375999711454,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.581287200038787,
+                "forward_seconds": 0.11630759999388829,
+                "backward_seconds": 0.3682781999814324,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.5834684000001289,
+                "forward_seconds": 0.12520180002320558,
+                "backward_seconds": 0.37297289998969063,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.4968947999877855,
+                "forward_seconds": 0.13104110001586378,
+                "backward_seconds": 0.25900640001054853,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.46731829998316243,
+                "forward_seconds": 0.13091910001821816,
+                "backward_seconds": 0.2194654000340961,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.7143470000009984,
+                "forward_seconds": 0.152004899980966,
+                "backward_seconds": 0.448081300011836,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.5283639000263065,
+                "forward_seconds": 0.11556079995352775,
+                "backward_seconds": 0.3343718000105582,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.5328658000216819,
+                "forward_seconds": 0.2016662000096403,
+                "backward_seconds": 0.2274932999862358,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              },
+              {
+                "seconds": 0.5345092000206932,
+                "forward_seconds": 0.18319820001488551,
+                "backward_seconds": 0.2276107999496162,
+                "peak_torch_cuda_bytes": 151471104,
+                "reconstruction_relative_l2": 4.83393760060807e-07
+              }
+            ]
+          },
+          "median_seconds": {
+            "baseline": 0.585421999974642,
+            "observations": 0.5328658000216819
+          },
+          "reduction_fraction": {
+            "observations": 0.0897748973479584
+          },
+          "paired_reduction_fraction": {
+            "observations": [
+              0.1772733172803903,
+              -0.02393791632804665,
+              -0.39764091300920534,
+              0.23160530608362506,
+              0.31511595530410674,
+              -0.27871870906494656,
+              0.1781220235926262,
+              0.11800053164407331,
+              -0.01037425734803299
+            ]
+          },
+          "all_spectra_and_gradients_bitwise_equal": true,
+          "baseline": "1.1.0 recorded kernels and observation loop, reproduced with the optional changes disabled"
+        }
+      ],
+      "timing": "Synchronized wall time for material setup, recorded forward, spectrum and backward, after warmup",
+      "source_sha256": {
+        "torchfdtd/reversible_cpml.py": "28f241898f50a41921e12287895d43905c5e209d426252cf3dabf4bc2806b651",
+        "torchfdtd/reversible_cpml_kernels.py": "45e6d7104ccbfce5422dd3f91692b8fd298dafc3c01f55afec3bda8133a6d560",
+        "torchfdtd/recorded_observations.py": "ccabc3c7d1bd7db9f4c05eb8aca6f955d7dbcab5f4806d3982a89d8939f3c31e",
+        "torchfdtd/reversible_cpml_memory.py": "dd6ef5bc779e0faa669ee77c54007ea1082a1167daad8275ba830c98738f8586",
+        "benchmarks/recorded_cpml_dispatch_perf.py": "d955b51ae6978853274c14d3b973477db9cb520809c722127e97a62e43db0009"
+      }
+    }
+  ],
+  "accuracy_contract": "Bitwise equality of all compared spectra and material gradients. Direct field samples retain zero/subnormal bit patterns.",
+  "timing_scope": "Reduced single-GPU fixtures. Synchronized wall time including setup, recorded forward, spectrum and backward after warmup. Windows desktop rendering remained active.",
+  "not_claimed": "No measured speedup is claimed for other GPUs or larger metalenses."
+}

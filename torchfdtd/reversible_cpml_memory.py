@@ -90,8 +90,13 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
         trace_metadata = transport['metadata_allowance_bytes']
     trace_device = trace if device.type == 'cuda' and storage == 'device' else 0
     trace_host = trace if device.type == 'cpu' or storage == 'cpu' else 0
-    extra_active = diagnostics+material+transfer_device+trace_device
-    extra_host = preparation+transfer_host+trace_host+trace_metadata+spectral_layout
+    # The inherited point metadata allocation bounds the number of point
+    # monitors. Plane spectra expose their expanded monitor count directly.
+    monitor_count = (len(spectral.components) if spectral is not None else
+                     len(getattr(project, 'monitors', ())))
+    observation_map = 8*monitor_count if device.type == 'cuda' else 0
+    extra_active = diagnostics+material+transfer_device+trace_device+observation_map
+    extra_host = preparation+transfer_host+trace_host+trace_metadata+spectral_layout+observation_map
     # Inherit the existing runtime reserve and add allocator rounding/headroom
     # for new CUDA allocations rather than consuming the old reserve silently.
     headroom = (extra_active+19)//20+4096 if device.type == 'cuda' else 0
@@ -112,11 +117,12 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
     parts = dict(base['workspace_components_bytes'])
     parts.update(reconstruction_diagnostics=diagnostics,
                  effective_material_and_autograd=material,
-                 trace_device_transfer=transfer_device)
+                 trace_device_transfer=transfer_device,
+                 recorded_observation_map=observation_map)
     actual_terminal = 6*plane*(interval[1]-interval[0]+1)*item
     result = dict(base, memory_reservation_bytes=active, host_reservation_bytes=host,
         gpu_reservation_bytes=active if device.type == 'cuda' else 0,
-        workspace_reservation_bytes=base['workspace_reservation_bytes']+diagnostics+material+transfer_device,
+        workspace_reservation_bytes=base['workspace_reservation_bytes']+diagnostics+material+transfer_device+observation_map,
         workspace_components_bytes=parts,
         workspace_model='cpml_reversible_conservative_'+base['workspace_model'],
         inherited_workspace_model=base['workspace_model'],
@@ -145,6 +151,7 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
         material_assembly_and_autograd_bytes=material,
         diagnostic_chunk_elements=chunk, diagnostic_buffer_bytes=24*chunk,
         diagnostic_rounding_bytes=4096, diagnostic_reservation_bytes=diagnostics,
+        recorded_observation_map_bytes=observation_map,
         source_preparation_host_bytes=preparation,
         retained_caller_epsilon_bytes=material_components*cells*4,
         retained_caller_fixed_epsilon_bytes=material_components*cells*4,

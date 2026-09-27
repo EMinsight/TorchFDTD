@@ -17,6 +17,7 @@ import torch
 from .boundaries import BoundaryDescription
 from .differentiable import DifferentiableResult, _System
 from .models import Project
+from .recorded_observations import recorder
 from .reversible import ReversibleOptions
 from .solver import source_slice
 
@@ -259,12 +260,13 @@ def _forward_only(epsilon, project, interval, report, spectral):
     a, b = interval
     block_size = project.region.steps if spectral is None else spectral.block_size
     samples = system.grid.E.new_empty((block_size, len(system.monitors)))
+    record = recorder(system, samples)
     signals = samples if spectral is None else spectral.zeros()
     started = time.perf_counter()
     for step in range(project.region.steps):
         _advance_recorded(system, step, None, a, b)
         row = step % block_size
-        samples[row] = system.observe(system.state())
+        record(row)
         if spectral is not None and (row + 1 == block_size or step + 1 == project.region.steps):
             spectral.accumulate(signals, samples[:row + 1], step - row)
     chunk = report['diagnostic_chunk_elements']
@@ -299,6 +301,7 @@ class _RecordedCPML(torch.autograd.Function):
             archive = torch.empty(shape, dtype=system.field_dtype, device=trace_device)
         block_size = project.region.steps if spectral is None else spectral.block_size
         samples = system.grid.E.new_empty((block_size, len(system.monitors)))
+        record = recorder(system, samples)
         signals = samples if spectral is None else spectral.zeros()
         maximum = norm = 0.
         started = time.perf_counter()
@@ -309,7 +312,7 @@ class _RecordedCPML(torch.autograd.Function):
                 if transport is not None:
                     transport.commit(step)
                 row = step % block_size
-                samples[row] = system.observe(system.state())
+                record(row)
                 if spectral is not None and (row + 1 == block_size or step + 1 == project.region.steps):
                     spectral.accumulate(signals, samples[:row + 1], step - row)
                 if (step + 1) % 64 == 0 or step + 1 == project.region.steps:

@@ -60,6 +60,18 @@ def test_complete_arithmetic_and_metadata_only(monkeypatch, device, storage):
     assert calls == [10**8]
 
 
+def test_recorded_observation_map_is_admitted_on_host_and_device(monkeypatch):
+    project, _ = mock_base(monkeypatch)
+    before = _cpml_reversible_reservation(project, options(), 'cuda', (2, 5))
+    project.monitors = [object()]*5
+    after = _cpml_reversible_reservation(project, options(), 'cuda', (2, 5))
+    assert after['recorded_observation_map_bytes'] == 40
+    assert after['host_reservation_bytes'] == before['host_reservation_bytes']+40
+    assert after['memory_reservation_bytes'] >= before['memory_reservation_bytes']+40
+    with pytest.raises(ValueError, match='CUDA budget'):
+        _cpml_reversible_reservation(project, options(gpu_budget_bytes=before['memory_reservation_bytes']), 'cuda', (2, 5))
+
+
 @pytest.mark.parametrize('device,storage,budget', [
     ('cpu', 'cpu', 'host_budget_bytes'), ('cpu', 'device', 'resident_budget_bytes'),
     ('cuda', 'device', 'gpu_budget_bytes'), ('cuda', 'cpu', 'host_budget_bytes'),

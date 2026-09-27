@@ -7,7 +7,7 @@ to release versions, and the unreleased section collects changes for the next re
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
-## 1.1.0 (2026-09-28)
+## 1.1.1 (2026-09-28)
 
 ### Added
 
@@ -18,6 +18,8 @@ Commits that only record validation evidence or documentation ("Record ...",
 - Recorded CPML simulations accept soft electric sources outside the reconstruction interval, including its non-PML collar. Each component must lie wholly inside or outside the interval. Exterior sources enter through the recorded halos. The default interval is unchanged, and previously supported inputs keep their forward results and gradients (this commit).
 
 ### Performance
+
+- CUDA recorded CPML observations write directly into the sample buffer, preserving field bits and removing temporary gather/scatter outputs. The observation index is included in host/device memory admission. See [measured comparisons](REVERSIBLE_CPML.md#recorded-observation-performance) for workload-specific timings (this commit).
 
 - CUDA reconstruction combines the inverse electric-field update and material VJP in one kernel. Real and complex paths share curl H without changing component arithmetic. Interior kernels use restricted pointers, bounded 32-bit indices and 128-thread launch bounds. Comparisons with the separate kernels require bitwise equality of fields, gradients and adjoint states across block sizes 64, 128, 256 and 512. Changing `interior_z` can change gradient roundoff and remains opt-in (this commit).
 

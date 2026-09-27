@@ -287,7 +287,7 @@ On CPU, both storage choices use host memory and require synchronous transfers. 
 
 `plan(device=..., material_components=1)` performs metadata-only admission for scalar maps. Use `material_components=3` for diagonal maps. It reports interval, trace shape, terminal bytes, complete conservative resident/host/GPU reservations, and allocation scope. It includes solver working buffers and transfer allowances, and checks explicit budgets and available memory before creating effective material or fields. Caller input ownership, optimizer state, external autograd graphs, and CUDA context are distinct from solver-owned allocations. The report identifies retained caller-input sizes. The estimate is an engineering reservation, not a platform-independent measurement of peak process memory.
 
-Use checkpointed `DifferentiableSimulation` when a problem falls outside this contract or reconstruction drift is unacceptable. This guide makes no performance comparison or broader feature-completion claim.
+Use checkpointed `DifferentiableSimulation` when a problem falls outside this contract or reconstruction drift is unacceptable. The measured observation comparisons below are limited to their stated fixtures.
 
 ## Targeted validation
 
@@ -296,3 +296,20 @@ The [previous-version integration evidence](validation/reversible_cpml_workflow.
 The complete two-iteration CPU example above was also executed with one Torch CPU thread. Both backward passes completed with finite gradients. These checks establish the stated discrete workflow and admission scope, not general absorption convergence, throughput, or overall FDTDX parity.
 
 The [extended workflow evidence](validation/reversible_cpml_extended_workflow.json) records the separately validated Bloch, diagonal-material, asynchronous trace, and online-plane integration scope. The earlier record above remains evidence for its original version, not a substitute for those extension checks.
+
+
+## Recorded observation performance
+
+CUDA E/H observations copy field bits directly into the existing sample block. This removes temporary gather/scatter outputs and retains monitor order, duplicate locations, complex values and subnormals. Field updates, source timing, DFT accumulation and the adjoint arithmetic are unchanged. Admission includes one int64 index per observation on the host and GPU.
+
+Measured on an RTX 3060 with PyTorch 2.10.0+cu126, using 512 steps and synchronized forward-plus-backward wall time including setup. Each path was warmed first and execution order alternated. Windows desktop rendering remained active. The baseline reproduces the previous recorded observation loop.
+
+| Grid | Material / field | Plane quadrature | Repeats | Previous loop (s) | Direct recording (s) | Median time reduction |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| 64 × 64 × 125 | diagonal / real | 8 × 8 | 15 | 0.355574 | 0.301016 | 15.34% |
+| 192 × 192 × 125 | diagonal / real | 8 × 8 | 15 | 1.965040 | 1.948509 | 0.84% |
+| 64 × 64 × 125 | scalar / real | 8 × 8 | 9 | 0.305794 | 0.258143 | 15.58% |
+| 64 × 64 × 125 | diagonal / complex | 8 × 8 | 9 | 0.502109 | 0.475268 | 5.35% |
+| 64 × 64 × 125 | diagonal / real | 64 × 64 | 9 | 0.585422 | 0.532866 | 8.98% |
+
+All compared spectra and gradients were bitwise equal. Timing differences depend on grid size and observation density. These measurements do not establish a speedup for larger metalenses, A100, H200 or B200. The [raw measurements](validation/recorded_cpml_observations_111.json) include every sample, paired variability and peak Torch CUDA memory. Reproduce with `python -m benchmarks.recorded_cpml_dispatch_perf --output comparison.json`.
