@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 61 | 15 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 61 | 21 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 62 | 14 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 62 | 20 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -83,7 +83,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G4-03 | noncontiguous tensors, duplicate observers, multiple calls/backward, input lifetime, stream synchronization, cancellation, allocator cleanup을 검사한다 | IMPLEMENTED | VERIFIED | `20260925T181052Z-g4-03-bcf97791` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G4-04 | 최소 격자·홀수 크기·부분 slab·비정렬 tile·index boundary·강한 material contrast·ADE/CPML memory를 무작위/경계 fixture에 포함한다 | IMPLEMENTED | VERIFIED | `20260925T181122Z-g4-04-63d67c63` | `2c5f3754c047` | PASS | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G4-05 | CPU PR suite, 신뢰한 코드의 GPU 정기 suite, 실제 release의 전체 GPU suite를 분리한다 | IMPLEMENTED | VERIFIED | `20260925T181227Z-g4-05-b38e7dd0` | `2c5f3754c047` | FAIL | STALE: watched file changed since the run: pyproject.toml |
-| G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260925T181236Z-g4-06-9f842377` | `2c5f3754c047` | FAIL | STALE: test source changed since the run: tests/test_gpu_runner_policy.py |
+| G4-06 | public fork PR의 untrusted code를 개인/연구실 GPU host에서 자동 실행하지 않는다 | IMPLEMENTED | VERIFIED | `20260926T195655Z-g4-06-bc7aad7f` | `675bcde226d2` | PASS | evidence matches the current checkout |
 
 ### G5 메모리·재시작·장기 안정성 (WORKSTATION, P0)
 
@@ -170,7 +170,7 @@ Every record written by `scripts/platform_report.py` under `docs/validation/plat
 
 | Platform id | G4 evidence runs recorded on this platform | Other tasks whose newest run was recorded here |
 | --- | --- | --- |
-| rtx3060-win11-lab | G4-01 `20260925T181003Z-g4-01-34391cbe` (platform_id); G4-02 `20260925T181033Z-g4-02-2a8fcb7a` (platform_id); G4-03 `20260925T181052Z-g4-03-bcf97791` (platform_id); G4-04 `20260925T181122Z-g4-04-63d67c63` (platform_id); G4-05 `20260925T181227Z-g4-05-b38e7dd0` (platform_id); G4-06 `20260925T181236Z-g4-06-9f842377` (platform_id) | 70 |
+| rtx3060-win11-lab | G4-01 `20260925T181003Z-g4-01-34391cbe` (platform_id); G4-02 `20260925T181033Z-g4-02-2a8fcb7a` (platform_id); G4-03 `20260925T181052Z-g4-03-bcf97791` (platform_id); G4-04 `20260925T181122Z-g4-04-63d67c63` (platform_id); G4-05 `20260925T181227Z-g4-05-b38e7dd0` (platform_id); G4-06 `20260926T195655Z-g4-06-bc7aad7f` (platform_id) | 70 |
 | rtx3060-wsl2-ubuntu2204 | none | 0 |
 | rtx5880-ada-win11-remote | none | 0 |
 
@@ -305,7 +305,6 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | G4-03 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G4-04 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G4-05 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
-| G4-06 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G5-01 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G5-02 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
 | G5-03 | evidence was recorded on a dirty tree (5 paths); it is not tied to commit 2c5f3754c047 alone |
