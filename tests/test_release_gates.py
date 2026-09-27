@@ -382,14 +382,13 @@ def test_unknown_task_is_refused(repo, tmp_path):
         record(repo, 'G9-99', passing_junit(tmp_path))
 
 
-def test_repository_gate_file_is_adopted_and_not_yet_releasable(capsys):
+def test_repository_gate_file_is_adopted():
     gates = json.loads(REAL_GATES.read_text(encoding='utf-8'))
     assert gates['kind'] == 'completion_gates' and gates['adopted_commit'] and gates['planning_snapshot_commit']
     ids = [t['id'] for s in gates['stages'] for t in s['tasks']]
     assert len(ids) == len(set(ids)) == gates['task_count']
-    code = judge.main(['--root', str(ROOT)])
-    out = capsys.readouterr().out
-    assert code == 1 and 'NOT RELEASABLE' in out and 'verification_state is NOT_RUN' in out
+    # Readiness changes as evidence is recorded. Controlled repositories above
+    # test the passing, missing, failed and stale states independently of this tree.
 
 
 def test_junit_older_than_the_commit_is_refused_unless_allowed_and_then_warned(repo, tmp_path, capsys):

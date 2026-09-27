@@ -11,7 +11,8 @@ host (the test files are present and, when the recorded run used CUDA, this host
 device); ``--tasks``, ``--stage``, ``--exclude`` and ``--all`` narrow or widen it. ``--dry-run``
 prints the plan without running anything. G9-07's tests compare the committed validation report
 with a fresh render, so that task is recorded after the report is rebuilt from the batch's
-evidence (docs/RELEASE_PROCEDURE.md step 6), not inside the batch: pass ``--exclude G9-07``.
+evidence (docs/RELEASE_PROCEDURE.md step 6), not inside the batch. G9-06 is run in
+step 5: pass ``--exclude G9-06 G9-07`` for the step 4 batch.
 
 ``--wheel <path>`` installs that wheel into a fresh virtual environment under
 ``.local/venvs/rc`` and runs every command with that interpreter from a working directory
@@ -32,7 +33,7 @@ import re
 import shutil
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 SCRIPTS = Path(__file__).resolve().parent
 GATE_FILE = Path('docs') / 'validation' / 'completion_gates.json'
@@ -65,10 +66,34 @@ parse_command = recorder.parse_command
 is_python = recorder.is_python
 
 
-def moved_under(root, token):
+def recorded_roots(argv, test_sources):
+    """Recover old checkout prefixes from recorded test paths, including removed worktrees."""
+    sources = [str(path).replace('\\', '/') for path in test_sources]
+    if any(Path(path).is_absolute() or PureWindowsPath(path).is_absolute() or '..' in path.split('/') for path in sources):
+        raise ValueError('recorded test sources must be repository-relative paths')
+    prefixes = set()
+    for token in argv:
+        head = token.partition('::')[0].replace('\\', '/')
+        if not (Path(head).is_absolute() or PureWindowsPath(head).is_absolute()):
+            continue
+        matches = [path for path in sources if head.endswith('/' + path)]
+        if len(matches) > 1:
+            raise ValueError(f'ambiguous recorded test path: {token!r}')
+        if matches:
+            prefixes.add(head[:-len(matches[0])].rstrip('/'))
+    return sorted(prefixes, key=len, reverse=True)
+
+
+def moved_under(root, token, origins=()):
     """An absolute path inside another checkout (the one an earlier round recorded from, identified by its gate
     file), moved to the same place under the root, so a replay never runs or writes another tree's files."""
     head, sep, tail = token.partition('::')
+    portable = head.replace('\\', '/')
+    for origin in origins:
+        if portable.startswith(origin + '/'):
+            return (Path(root) / portable[len(origin) + 1:]).as_posix() + sep + tail
+    if origins:
+        return token
     if not head or not Path(head).is_absolute():
         return token
     other = next((parent for parent in Path(head).parents if (parent / GATE_FILE).is_file()), None)
@@ -86,9 +111,37 @@ def absolute_under(root, token):
     return token
 
 
-def prepare(command, root, interpreter, junit, absolute_paths):
+def unwrap_gpu_lock(argv, external_gpu_lock):
+    """Replay a known local lock wrapper only when the caller already holds the GPU lock."""
+    if len(argv) < 2 or not is_python(argv[0]) or argv[1].replace('\\', '/').split('/')[-1] != 'gpu_lock.py':
+        return argv
+    if not external_gpu_lock:
+        raise ValueError('a recorded gpu_lock.py command requires --external-gpu-lock and an outer GPU lock')
+    index, modes = 2, set()
+    while index < len(argv) and argv[index].startswith('--'):
+        option = argv[index]
+        if option in ('--exclusive', '--short'):
+            modes.add(option)
+            index += 1
+        elif option == '--vram-mib':
+            if index + 1 >= len(argv) or not argv[index + 1].isdigit() or int(argv[index + 1]) <= 0:
+                raise ValueError('gpu_lock.py --vram-mib requires a positive integer')
+            index += 2
+        else:
+            raise ValueError(f'unsupported gpu_lock.py option: {option}')
+    if len(modes) > 1:
+        raise ValueError('gpu_lock.py --exclusive and --short exclude each other')
+    child = argv[index:]
+    if len(child) < 3 or not is_python(child[0]) or child[1:3] != ['-m', 'pytest']:
+        raise ValueError('only a Python -m pytest child can be replayed from gpu_lock.py')
+    return child
+
+
+def prepare(command, root, interpreter, junit, absolute_paths, test_sources=(), external_gpu_lock=False):
     """The environment and argument vector to run: interpreter substituted, JUnit path replaced, paths resolved."""
     env, argv = parse_command(command)
+    origins = recorded_roots(argv, test_sources)
+    argv = unwrap_gpu_lock(argv, external_gpu_lock)
     if is_python(argv[0]):
         argv[0] = Path(interpreter).as_posix()
     elif absolute_paths:
@@ -105,12 +158,23 @@ def prepare(command, root, interpreter, junit, absolute_paths):
             continue
         kept.append(token)
     argv = kept + [f'--junitxml={Path(junit).as_posix()}']
-    argv = [argv[0]] + [moved_under(root, token) for token in argv[1:]]
-    env = {name: moved_under(root, value) for name, value in env.items()}
+    argv = [argv[0]] + [moved_under(root, token, origins) for token in argv[1:]]
+    env = {name: moved_under(root, value, origins) for name, value in env.items()}
     if absolute_paths:
         argv = [argv[0]] + [absolute_under(root, token) for token in argv[1:]]
         env = {name: absolute_under(root, value) for name, value in env.items()}
     return env, argv
+
+
+def validate_test_paths(root, argv):
+    """Reject missing explicit pytest source paths before any task in the batch starts."""
+    for token in argv[1:]:
+        if token.startswith('-'):
+            continue
+        head = token.partition('::')[0].replace('\\', '/')
+        if head.endswith('.py') and 'tests' in head.split('/'):
+            if not (Path(root) / head).is_file():
+                raise ValueError(f'replayed test file is missing: {head}')
 
 
 def shown_command(env, argv):
@@ -230,6 +294,8 @@ def main(argv=None):
     parser.add_argument('--torch-index', default='https://download.pytorch.org/whl/cu126', help='index for the torch requirement')
     parser.add_argument('--find-links', action='append', default=[], help='local wheel directory consulted before any index')
     parser.add_argument('--extras', default='dev,cuda-kernels,gds', help='extras installed with the wheel (default dev,cuda-kernels,gds)')
+    parser.add_argument('--external-gpu-lock', action='store_true',
+                        help='the caller holds an outer GPU lock; unwrap recorded gpu_lock.py launchers without reacquiring it')
     parser.add_argument('--platform', default=None, help='platform id of this host (docs/validation/platforms/<id>.json), written into every new evidence record')
     parser.add_argument('--root', default=None, help='repository root (default: the checkout containing this script)')
     parser.add_argument('--gates', default=None, help='gate file (default: docs/validation/completion_gates.json under root)')
@@ -262,6 +328,18 @@ def main(argv=None):
     if not planned:
         return 0 if not args.tasks else 1
 
+    future_python = (root / '.local' / 'venvs' / 'rc' / ('Scripts/python.exe' if sys.platform == 'win32' else 'bin/python')
+                     if args.wheel else Path(sys.executable))
+    for _, task, _, evidence, _ in planned:
+        try:
+            _, command = prepare(evidence['command'], root, future_python, junit_dir / f"{task['id']}.xml",
+                                 absolute_paths=bool(args.wheel), test_sources=evidence.get('test_source_sha256', {}),
+                                 external_gpu_lock=args.external_gpu_lock)
+            validate_test_paths(root, command)
+        except ValueError as error:
+            print(f"{task['id']} command preflight failed: {error}")
+            return 2
+
     tmp = root / '.local' / 'tmp'
     tmp.mkdir(parents=True, exist_ok=True)
     junit_dir.mkdir(parents=True, exist_ok=True)
@@ -273,9 +351,9 @@ def main(argv=None):
             raise SystemExit(f'wheel not found: {dist}')
         env_base.pop('PYTHONPATH', None)
         work_root = tmp / 'rc-work'
-        if work_root.exists():
+        if work_root.exists() and not args.dry_run:
             shutil.rmtree(work_root)
-        work_root.mkdir(parents=True)
+        work_root.mkdir(parents=True, exist_ok=True)
         if args.dry_run:
             interpreter = root / '.local' / 'venvs' / 'rc' / ('Scripts/python.exe' if sys.platform == 'win32' else 'bin/python')
         else:
@@ -283,12 +361,11 @@ def main(argv=None):
             package = probe_installed_package(interpreter, root, work_root, env_base)
             print(f'wheel interpreter {interpreter} imports torchfdtd from {package}')
 
-    results = []
+    results, dirty_counts = [], {}
     for stage, task, run_id, evidence, _ in planned:
         junit = junit_dir / f"{task['id']}.xml"
-        if junit.exists():
-            junit.unlink()
-        env_extra, argv = prepare(evidence['command'], root, interpreter, junit, absolute_paths=bool(args.wheel))
+        env_extra, argv = prepare(evidence['command'], root, interpreter, junit, absolute_paths=bool(args.wheel),
+                                  test_sources=evidence.get('test_source_sha256', {}), external_gpu_lock=args.external_gpu_lock)
         shown = shown_command(env_extra, argv)
         cwd = work_root / task['id'].lower() if args.wheel else root
         print(f"== {task['id']} (previous {run_id})")
@@ -296,6 +373,8 @@ def main(argv=None):
         if args.dry_run:
             results.append((task['id'], run_id, '(dry run)', '(dry run)', 0))
             continue
+        if junit.exists():
+            junit.unlink()
         cwd.mkdir(parents=True, exist_ok=True)
         exit_code = run_command(argv, dict(env_base, **env_extra), cwd)
         print(f"   exit {exit_code}", flush=True)
@@ -322,17 +401,18 @@ def main(argv=None):
         new_evidence = load_json(runs_dir / new_id / 'evidence.json')
         state = new_evidence['verification_state_assigned']
         if new_evidence.get('dirty_source_manifest'):
-            state += f" (dirty: {len(new_evidence['dirty_source_manifest'])} paths)"
+            dirty_counts[new_id] = len(new_evidence['dirty_source_manifest'])
         results.append((task['id'], run_id, new_id, state, exit_code))
 
     width = max(len(row[2]) for row in results)
     print()
     print(f"{'task':<7} {'previous run':<40} {'new run':<{width}}  state")
     for task_id, previous, new_id, state, _ in results:
-        print(f'{task_id:<7} {previous:<40} {new_id:<{width}}  {state}')
+        warning = f' (dirty: {dirty_counts[new_id]} paths)' if new_id in dirty_counts else ''
+        print(f'{task_id:<7} {previous:<40} {new_id:<{width}}  {state}{warning}')
     if args.dry_run:
         return 0
-    return 0 if all(state == 'VERIFIED' for _, _, _, state, _ in results) else 1
+    return 0 if all(state == 'VERIFIED' and code == 0 for _, _, _, state, code in results) else 1
 
 
 if __name__ == '__main__':

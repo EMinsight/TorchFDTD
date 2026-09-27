@@ -47,8 +47,10 @@ platform_g4 = load_script('record_platform_g4')
 def test_platform_report_runs_and_records_every_field(tmp_path):
     output = tmp_path / 'probe.json'
     completed = subprocess.run([sys.executable, str(ROOT / 'scripts' / 'platform_report.py'), '--id', 'probe', '--output', str(output)],
-                               capture_output=True, text=True, cwd=ROOT, timeout=300)
+                               capture_output=True, text=True, encoding='utf-8', cwd=ROOT, timeout=300,
+                               env=dict(os.environ, PYTHONIOENCODING='utf-8'))
     assert completed.returncode == 0, completed.stderr
+    assert str(output) in completed.stdout
     record = json.loads(output.read_text(encoding='utf-8'))
     assert record['platform_id'] == 'probe'
     for field in RECORD_FIELDS:
@@ -66,9 +68,10 @@ def test_platform_report_replaces_the_home_directory(tmp_path):
     home = Path(sys.executable).parent.parent
     output = tmp_path / 'probe.json'
     completed = subprocess.run([sys.executable, str(ROOT / 'scripts' / 'platform_report.py'), '--id', 'probe', '--output', str(output)],
-                               capture_output=True, text=True, cwd=ROOT, timeout=300,
-                               env=dict(os.environ, HOME=str(home), USERPROFILE=str(home)))
+                               capture_output=True, text=True, encoding='utf-8', cwd=ROOT, timeout=300,
+                               env=dict(os.environ, HOME=str(home), USERPROFILE=str(home), PYTHONIOENCODING='utf-8'))
     assert completed.returncode == 0, completed.stderr
+    assert str(output) in completed.stdout
     record = json.loads(output.read_text(encoding='utf-8'))
     assert record['python_executable'].startswith('<user home>'), record['python_executable']
     assert not [key for key, value in record.items() if str(home).lower() in str(value).lower()]

@@ -77,7 +77,7 @@ git diff --stat <wheel source_commit> HEAD -- torchfdtd pyproject.toml README.md
 ## 4. Re-record every gate with the wheel
 
 ```powershell
-D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all --exclude G9-07 --platform rtx3060-win11-lab `
+D:/TorchFDTD/.venv/Scripts/python.exe scripts/rerecord_gates.py --all --exclude G9-06 G9-07 --platform rtx3060-win11-lab `
     --wheel D:/torchfdtd-clean/dist/<commit12>/torchfdtd-<version>-py3-none-any.whl `
     --torch "torch==2.10.0+cu126" --find-links D:/TorchFDTD/.local/wheels --extras dev,cuda-kernels,gds,hdf5
 ```
@@ -96,14 +96,27 @@ the interpreter's environment (`--interpreter`), the host's platform id
 replayed run and a scope ending in `re-recorded on <commit> for the release
 candidate`. The
 table it prints lists task, previous run id, new run id and the state written
-to the gate file; the exit status is 0 only when every task is VERIFIED. G9-07
-is excluded here because its tests compare the committed report with a fresh
+to the gate file; the exit status is 0 only when every task is VERIFIED.
+G9-06 is excluded here because step 5 runs and records the full suite.
+G9-07 is excluded because its tests compare the committed report with a fresh
 render; step 6 records it after the report is rebuilt from this batch.
+
+Before creating the wheel environment or running any task, the re-recorder
+prepares every selected command and checks explicit test paths. Recorded test
+source paths identify the old checkout even if its worktree has since been
+removed. A recorded `gpu_lock.py` launcher needs an outer lock: run the whole
+batch inside the host's `gpu_lock.py --exclusive` and add
+`--external-gpu-lock` to `rerecord_gates.py`. That option replaces only the
+recognized lock launcher with its unchanged `python -m pytest` child, using
+the wheel interpreter. It must not be used without an outer lock. Unknown
+launcher options are rejected, so a nested lock cannot silently deadlock the
+batch or run the development interpreter instead of the wheel interpreter.
 
 Tasks whose recorded command writes records into the tree (the G3 fixtures with
 `TORCHFDTD_G3_RECORD=docs/validation/g3`) leave those files modified; the
 recorder lists them in `dirty_source_manifest` and the judge reports the
-warning. Re-render `docs/PHYSICS_VALIDATION.md` with
+warning. This warning remains separate from the test verdict and exit code;
+guarded source changes are still rejected. Re-render `docs/PHYSICS_VALIDATION.md` with
 `scripts/render_physics_validation.py` and commit the regenerated records with
 the evidence.
 
