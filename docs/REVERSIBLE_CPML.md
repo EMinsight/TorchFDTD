@@ -8,7 +8,7 @@ It is separate from the lossless all-periodic `ReversibleSimulation`. Boundary r
 
 The admitted problem has uniform 3D Yee sampling, staircase interfaces, real FP32 or fixed-Bloch complex64 fields and real FP32 scalar or diagonal Yee permittivity. The x and y face pairs may be periodic or Bloch with fixed phases. Both z faces must use CPML. The timestep count is fixed and fields remain resident on CPU or CUDA.
 
-Sources are fixed soft electric point increments or z-normal plane increments. Each resolved polarization component and its full injection support must sample inside the reconstruction interval. The point API observes E/H after each complete native step. `ReversibleCPMLPlaneSimulation` instead returns online spectra on fixed collocated field planes. Current Project validation requires sources and monitors inside the non-PML physical region. Monitors may lie in the fixed non-PML collar outside the reconstructed interval.
+Sources are fixed soft electric point increments or z-normal plane increments. Each resolved polarization component must lie wholly inside or wholly outside the reconstruction interval. Sources outside the interval contribute through the recorded boundary planes and are not undone in the interior. The point API observes E/H after each complete native step. `ReversibleCPMLPlaneSimulation` instead returns online spectra on fixed collocated field planes. Project validation requires sources and monitors inside the non-PML physical region. Both may lie outside the reconstructed interval.
 
 Off-diagonal tensor coupling, ADE dispersion, nonuniform meshes, subpixel interfaces, spatial streaming, adaptive stopping, H sources, and one-way/TFSF injection are outside this API. The derivative contract is first order. The API does not differentiate source settings or the boundary configuration.
 
@@ -32,6 +32,39 @@ effective[:, :, a:b + 1] = epsilon[:, :, a:b + 1]
 Consequently, the derivative with respect to `epsilon` is exactly zero outside that interval. This is the actual derivative of the declared parameterization, not an unrestricted full-domain material gradient subsequently discarded in the exterior. Source cells inside the interval receive their actual material derivative because the impressed increments are fixed independently of epsilon. To keep additional design cells fixed, use a differentiable mask such as `torch.where` before calling the model.
 
 The interval comes from the union of the actual staggered E- and H-update CPML descriptor rows. `collar_cells` removes additional lossless rows on each side, with a minimum of one. Excessive CPML thickness or collar width is rejected if fewer than two reconstruction planes remain. Sources use the native nearest-Yee sampling convention, checked independently for each resolved component.
+
+### Restricting reconstruction to the design layers
+
+`ReversibleCPMLOptions(interior_z=(a, b))` selects inclusive z indices inside
+the CPML-free interval defined above. At least two planes must remain. The
+default `None` reconstructs the original full interior.
+
+```python
+options = ReversibleCPMLOptions(interior_z=(45, 81))
+model = ReversibleCPMLSimulation(project, options)
+result = model(epsilon, fixed_epsilon=background)
+```
+
+Choose the interval to contain every cell that the parameterization may change,
+including the support of all three Yee components for diagonal maps. With an
+explicit interval, each call requires `epsilon == fixed_epsilon` everywhere
+outside it and rejects a mismatch before field allocation. Put fixed substrates
+and other exterior materials in both maps. The interval is specified in advance,
+so `plan()` can compute storage without inspecting the material tensors.
+
+The full-domain forward and field adjoint are unchanged. Forward signals and
+spectra remain bitwise equal when the effective material maps agree. Material
+gradients are zero outside the selected interval. Inside it, changing the
+recording cuts changes floating-point reconstruction rounding, so compare the
+gradients with a checkpointed adjoint for the intended design. The reconstruction
+residual is normalized over the selected interval and is not directly comparable
+to a residual measured over a different interval.
+
+A narrower interval reduces reconstruction work and terminal E/H storage. It
+does not reduce the boundary-trace size or the full-domain forward/adjoint arrays.
+Admission retains its conservative full-state allowance. `PeriodicLayerResponse`
+checks the design layer's component support against the selected interval and
+uses a separate cache identity for each option setting.
 
 ## Complete CPU optimization example
 
@@ -221,7 +254,14 @@ For an interval `[a,b]`, each timestep stores four transverse component planes i
 - `Ex` and `Ey` at z index `b+1`, after the electric update and electric-source injection.
 - `Hx` and `Hy` at z index `a-1`, before the magnetic update.
 
-Backward starts from one owned terminal copy of the interior E/H fields. It restores the upper electric trace, reverses the interior H update, restores the lower magnetic trace, removes the known electric increment, and reverses the interior E update. It does not invert CPML memory variables or reconstruct the exterior primal fields.
+Backward starts from one owned terminal copy of the interior E/H fields. It restores the upper electric trace, reverses the interior H update, restores the lower magnetic trace, removes electric increments inside the interval, and reverses the interior E update. It does not invert CPML memory variables or reconstruct the exterior primal fields.
+
+The CUDA path combines the inverse E update and material-gradient accumulation
+in one kernel, sharing the same curl H. Its full-domain adjoint runs before that
+kernel because it does not read the reconstructed primal fields. The component
+arithmetic retains its original order and disables FMA contraction. Interior
+kernels use bounded 32-bit indices and 128-thread blocks. Separate inverse-E and
+gradient kernels remain available internally for numerical comparisons.
 
 The adjoint remains full-domain: all E/H cotangents and all CPML auxiliary cotangents propagate through the normal discrete transpose. Only the material contribution is evaluated on the reconstructed interior. Truncating the field adjoint at the recording planes would lose effects of radiation leaving and returning through the exterior.
 
@@ -236,6 +276,7 @@ With `N` grid cells, transverse area `A = Nx*Ny`, and `T` timesteps, storage is 
 | Option | Values | Meaning |
 | --- | --- | --- |
 | `collar_cells` | Positive integer, default `1` | Additional lossless rows excluded at each recording cut. |
+| `interior_z` | Inclusive integer pair `(a, b)` with `a < b`, default `None` | Optional subset of the CPML-free reconstruction interval. Exterior epsilon must match the fixed map. |
 | `trace_storage` | `"device"` or `"cpu"`, default `"device"` | Store boundary history on the field device or in CPU memory. |
 | `trace_transfers` | `"sync"` or `"async"`, default `"sync"` | Async requires CUDA execution and CPU trace storage. |
 | `trace_chunk_steps` | Integer 1 through 1024, default `32` | Requested async chunk length K, effectively min(K,T). |

@@ -83,8 +83,8 @@ class PeriodicLayerResponse(torch.nn.Module):
             raise ValueError('Patterned layer must lie inside the non-PML region.')
         if recorded:
             from .density_layer import _layer_z_fraction
-            from .reversible_cpml import _interior_interval
-            a, b = _interior_interval(region, policy.recorded.collar_cells)
+            from .reversible_cpml import _resolve_interval
+            a, b = _resolve_interval(region, policy.recorded)
             scalar = torch.empty((), dtype=dtype, device='cpu')
             for component in ('Ex', 'Ey', 'Ez'):
                 fraction = _layer_z_fraction(region, component, -spec['height_um']/2,

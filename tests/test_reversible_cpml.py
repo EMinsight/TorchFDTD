@@ -197,12 +197,19 @@ def test_cpml_invalid_options(options):
 
 
 def test_cpml_descriptor_interval_and_source_component_index():
-    project, _, _ = fixture()
+    project, base, fixed = fixture()
     model = ReversibleCPMLSimulation(project, ReversibleCPMLOptions(collar_cells=2))
     assert model.interior_z == (5, 13)
-    # A source in the non-PML collar is legal for native forward, but cannot be
-    # undone using only the chosen reconstructed interval.
+    # Sources outside the reconstruction are carried by the recorded halos.
     axes = field_axes(project.region, 'Ex')
     project.sources[0].center = tuple(float(axes[a][(2, 3, 3)[a]]) for a in range(3))
-    with pytest.raises(ValueError, match='inside the reconstruction interval'):
-        ReversibleCPMLSimulation(project)
+    model = ReversibleCPMLSimulation(project, ReversibleCPMLOptions(collar_cells=2))
+    parameter = base.clone().requires_grad_()
+    reference_parameter = base.clone().requires_grad_()
+    actual = model(parameter, fixed_epsilon=fixed)
+    expected = DifferentiableSimulation(project, AdjointOptions(checkpoints=3))(
+        effective(reference_parameter, fixed, model.interior_z))
+    assert torch.equal(actual.signals, expected.signals)
+    gradient, = torch.autograd.grad(actual.signals.square().mean(), parameter)
+    reference, = torch.autograd.grad(expected.signals.square().mean(), reference_parameter)
+    assert relative(gradient, reference) < 1e-4

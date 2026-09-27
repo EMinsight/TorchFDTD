@@ -37,23 +37,44 @@ def _local_curl(field, a, b, forward, wrap):
                         dx[..., 1]-dy[..., 0]), dim=-1)
 
 
+def _interior_indices(shape, a, b, *, legacy=False):
+    """One cell per thread, with bounded 32-bit field offsets on CUDA."""
+    nx, ny, nz = shape
+    integer = 'long long' if legacy else 'int'
+    cast = '(long long)' if legacy else ''
+    neighbors = (('(x+1)%NX', '(x+NX-1)%NX', '(y+1)%NY', '(y+NY-1)%NY')
+                 if legacy else ('(x+1==NX?0:x+1)', '(x==0?NX-1:x-1)',
+                                 '(y+1==NY?0:y+1)', '(y==0?NY-1:y-1)'))
+    xp, xm, yp, ym = [s.replace('NX', str(nx)).replace('NY', str(ny)) for s in neighbors]
+    return f'''const {integer} q={cast}blockIdx.x*blockDim.x+threadIdx.x;
+ const {integer} depth={b-a+1};if(q>={nx*ny*(b-a+1)})return;
+ const {integer} z=q%depth+{a},y=(q/depth)%{ny},x=q/(depth*{ny});
+ const {integer} i=(x*{ny}+y)*{nz}+z;
+ const {integer} xp=(({xp})*{ny}+y)*{nz}+z, xm=(({xm})*{ny}+y)*{nz}+z;
+ const {integer} yp=(x*{ny}+({yp}))*{nz}+z, ym=(x*{ny}+({ym}))*{nz}+z;
+ '''
+
+
+def _interior_launch_contract(system, block_size):
+    if type(block_size) is not int or block_size not in (64, 128, 256, 512):
+        raise ValueError('Interior CUDA block size must be 64, 128, 256 or 512.')
+    from .adjoint_memory import _cuda_index_contract
+    _cuda_index_contract(system.region, 0, 0)
+
+
 class _InteriorCUDA:
- def __init__(self,s,a,b,gradient,eb):
+ def __init__(self,s,a,b,gradient,eb,*,block_size=128,legacy=False):
+  _interior_launch_contract(s,block_size)
   self.s=s;self.cp=prepare_cuda_kernels();self.a=a;self.b=b
+  self.block_size=block_size
   nx,ny,nz=s.region.shape;cn=s.grid.courant_number
   diagonal=s.epsilon.ndim==4
   # Each thread owns one interior cell. Only x/y wrap, no exterior target write.
-  common=f'''const long long q=(long long)blockIdx.x*blockDim.x+threadIdx.x;
- const long long depth={b-a+1};if(q>={nx*ny*(b-a+1)})return;
- const long long z=q%depth+{a},y=(q/depth)%{ny},x=q/(depth*{ny});
- const long long i=(x*{ny}+y)*{nz}+z;
- const long long xp=(((x+1)%{nx})*{ny}+y)*{nz}+z;
- const long long xm=(((x+{nx}-1)%{nx})*{ny}+y)*{nz}+z;
- const long long yp=(x*{ny}+(y+1)%{ny})*{nz}+z;
- const long long ym=(x*{ny}+(y+{ny}-1)%{ny})*{nz}+z;
- '''
-  self.kernels={};self.count=nx*ny*(b-a+1)
-  for phase in ('h','e','g'):
+  common=_interior_indices(s.region.shape,a,b,legacy=legacy)
+  qualifier='' if legacy else ' __restrict__'
+  bounds='' if legacy else f'__launch_bounds__({block_size}) '
+  self.kernels={};self.programs={};self.count=nx*ny*(b-a+1)
+  for phase in ('h','e','g','eg'):
    forward=phase=='h'
    diffs={}
    for axis,plus,minus in [('x','xp','xm'),('y','yp','ym'),('z','i+1','i-1')]:
@@ -61,41 +82,45 @@ class _InteriorCUDA:
      diffs[axis,c]=f'(f[3*({plus})+{c}]-f[3*i+{c}])' if forward else f'(f[3*i+{c}]-f[3*({minus})+{c}])'
    curls=[diffs['y',2]+'-'+diffs['z',1],diffs['z',0]+'-'+diffs['x',2],diffs['x',1]+'-'+diffs['y',0]]
    body=common+'\n'+''.join(f'const float c{c}={v};\n' for c,v in enumerate(curls))
-   if phase=='g':
-    if diagonal:
-     body+=''.join(f'out[3*i+{c}]+=(-((float){cn:.17g})*bar[3*i+{c}]*c{c})/(eps[3*i+{c}]*eps[3*i+{c}]);' for c in range(3))
-    else:body+=f'out[i]+=(-((float){cn:.17g})*((bar[3*i]*c0+bar[3*i+1]*c1)+bar[3*i+2]*c2))/(eps[i]*eps[i]);'
-   else:
+   if phase!='g':
     for c in range(3):
      ep=f'eps[3*i+{c}]' if diagonal else 'eps[i]'
      scale=f'((float){cn:.17g})' if forward else f'(-((float){cn:.17g})/{ep})'
      body+=f'out[3*i+{c}]+={scale}*c{c};'
-   source='extern "C" __global__ void interior(const float* f,float* out,const float* eps,const float* bar){'+body+'}'
-   with self.cp.cuda.Device(s.device.index):
-    fn,module=_compile(source,s.device.index,self.cp.cuda.Device(s.device.index).compute_capability,'interior')
-    tensors=(s.grid.E,s.grid.H,s.epsilon,eb) if phase=='h' else ((s.grid.H,s.grid.E,s.epsilon,eb) if phase=='e' else (s.grid.H,gradient,s.epsilon,eb))
+   if phase in ('g','eg'):
+    target='grad' if phase=='eg' else 'out'
+    if diagonal:
+     body+=''.join(f'{target}[3*i+{c}]+=(-((float){cn:.17g})*bar[3*i+{c}]*c{c})/(eps[3*i+{c}]*eps[3*i+{c}]);' for c in range(3))
+    else:body+=f'{target}[i]+=(-((float){cn:.17g})*((bar[3*i]*c0+bar[3*i+1]*c1)+bar[3*i+2]*c2))/(eps[i]*eps[i]);'
+   extra=f',float*{qualifier} grad' if phase=='eg' else ''
+   source=f'extern "C" __global__ void {bounds}interior(const float*{qualifier} f,float*{qualifier} out,const float*{qualifier} eps,const float*{qualifier} bar{extra})'+'{'+body+'}'
+   tensors=(s.grid.E,s.grid.H,s.epsilon,eb) if phase=='h' else ((s.grid.H,gradient,s.epsilon,eb) if phase=='g' else (s.grid.H,s.grid.E,s.epsilon,eb))
+   if phase=='eg':tensors+= (gradient,)
+   self.programs[phase]=(source,tensors)
+ def run(self,phase):
+  if phase not in self.kernels:
+   source,tensors=self.programs[phase]
+   with self.cp.cuda.Device(self.s.device.index):
+    fn,module=_compile(source,self.s.device.index,self.cp.cuda.Device(self.s.device.index).compute_capability,'interior')
     arrays=tuple(_direct_cuda_view(self.cp,t) for t in tensors)
    self.kernels[phase]=(fn,arrays,module)
- def run(self,phase):
   fn,arrays,_=self.kernels[phase]
   with self.cp.cuda.Device(self.s.device.index),self.cp.cuda.ExternalStream(torch.cuda.current_stream(self.s.device).cuda_stream,device_id=self.s.device.index):
-   fn(((self.count+127)//128,),(128,),arrays)
+   fn(((self.count+self.block_size-1)//self.block_size,),(self.block_size,),arrays)
 
 
 class _ComplexInteriorCUDA:
-    def __init__(self,s,a,b,gradient,bar):
-        self.s=s;self.cp=prepare_cuda_kernels();self.launches={}
+    def __init__(self,s,a,b,gradient,bar,*,block_size=128,legacy=False):
+        _interior_launch_contract(s,block_size)
+        self.s=s;self.cp=prepare_cuda_kernels();self.launches={};self.programs={}
+        self.block_size=block_size
         nx,ny,nz=s.region.shape;depth=b-a+1;self.count=nx*ny*depth;cn=s.grid.courant_number
         diagonal=s.epsilon.ndim==4
         def eps(c):return f'eps[3*i+{c}]' if diagonal else 'eps[i]'
-        common=f'''const long long q=(long long)blockIdx.x*blockDim.x+threadIdx.x;
- if(q>={self.count})return;
- const long long z=q%{depth}+{a}, y=(q/{depth})%{ny}, x=q/({depth}LL*{ny});
- const long long i=(x*{ny}+y)*{nz}+z;
- const long long xp=(((x+1)%{nx})*{ny}+y)*{nz}+z, xm=(((x+{nx}-1)%{nx})*{ny}+y)*{nz}+z;
- const long long yp=(x*{ny}+(y+1)%{ny})*{nz}+z, ym=(x*{ny}+(y+{ny}-1)%{ny})*{nz}+z;
- '''
-        for name in ('h','e','g'):
+        common=_interior_indices(s.region.shape,a,b,legacy=legacy)
+        qualifier='' if legacy else ' __restrict__'
+        bounds='' if legacy else f'__launch_bounds__({block_size}) '
+        for name in ('h','e','g','eg'):
             forward=name=='h';diff={}
             for axis,size in (('x',nx),('y',ny)):
                 if size==1:
@@ -111,21 +136,28 @@ class _ComplexInteriorCUDA:
             for c in (0,1):diff['z',c]=f'(f[3*(i+1)+{c}]-f[3*i+{c}])' if forward else f'(f[3*i+{c}]-f[3*(i-1)+{c}])'
             curl=[diff['y',2]+'-'+diff['z',1],diff['z',0]+'-'+diff['x',2],diff['x',1]+'-'+diff['y',0]]
             body=common+''.join(f'const C c{c}={value};\n' for c,value in enumerate(curl))
-            if name=='g':
-                terms=[f'(-((float){cn:.17g})*(bar[3*i+{c}].r*c{c}.r+bar[3*i+{c}].j*c{c}.j))/({eps(c)}*{eps(c)})' for c in range(3)]
-                body+=(''.join(f'out[3*i+{c}]+={terms[c]};' for c in range(3)) if diagonal else f'out[i]+=({terms[0]}+{terms[1]})+{terms[2]};')
-            else:
+            if name!='g':
                 body+=''.join(f'out[3*i+{c}]+=c{c}*'+(f'((float){cn:.17g});' if forward else f'(-((float){cn:.17g})/{eps(c)});') for c in range(3))
-            source=complex_definition('float')+'extern "C" __global__ void interior(const C* f,'+('float' if name=='g' else 'C')+'* out,const float* eps,const C* bar){'+body+'}'
-            tensors=(s.grid.E,s.grid.H,s.epsilon,bar) if name=='h' else ((s.grid.H,s.grid.E,s.epsilon,bar) if name=='e' else (s.grid.H,gradient,s.epsilon,bar))
-            with self.cp.cuda.Device(s.device.index):
-                fn,module=_compile(source,s.device.index,self.cp.cuda.Device(s.device.index).compute_capability,'interior')
+            if name in ('g','eg'):
+                target='grad' if name=='eg' else 'out'
+                terms=[f'(-((float){cn:.17g})*(bar[3*i+{c}].r*c{c}.r+bar[3*i+{c}].j*c{c}.j))/({eps(c)}*{eps(c)})' for c in range(3)]
+                body+=(''.join(f'{target}[3*i+{c}]+={terms[c]};' for c in range(3)) if diagonal else f'{target}[i]+=({terms[0]}+{terms[1]})+{terms[2]};')
+            target_type='float' if name=='g' else 'C'
+            extra=f',float*{qualifier} grad' if name=='eg' else ''
+            source=complex_definition('float')+f'extern "C" __global__ void {bounds}interior(const C*{qualifier} f,{target_type}*{qualifier} out,const float*{qualifier} eps,const C*{qualifier} bar{extra})'+'{'+body+'}'
+            tensors=(s.grid.E,s.grid.H,s.epsilon,bar) if name=='h' else ((s.grid.H,gradient,s.epsilon,bar) if name=='g' else (s.grid.H,s.grid.E,s.epsilon,bar))
+            if name=='eg':tensors+=(gradient,)
+            self.programs[name]=(source,tensors)
+    def run(self,name):
+        if name not in self.launches:
+            source,tensors=self.programs[name]
+            with self.cp.cuda.Device(self.s.device.index):
+                fn,module=_compile(source,self.s.device.index,self.cp.cuda.Device(self.s.device.index).compute_capability,'interior')
                 views=tuple(_direct_cuda_view(self.cp,t) for t in tensors)
             self.launches[name]=(fn,views,module)
-    def run(self,name):
         fn,views,_=self.launches[name]
         with self.cp.cuda.Device(self.s.device.index),self.cp.cuda.ExternalStream(torch.cuda.current_stream(self.s.device).cuda_stream,device_id=self.s.device.index):
-            fn(((self.count+127)//128,),(128,),views)
+            fn(((self.count+self.block_size-1)//self.block_size,),(self.block_size,),views)
 
 
 class InteriorReconstruction:
@@ -188,6 +220,17 @@ class InteriorReconstruction:
                     raise ValueError('Reconstruction interval needs a CPML-free collar at both cuts.')
         self.system, self.a, self.b = system, a, b
         self.gradient, self.signal_bar = gradient, signal_bar.contiguous()
+        self._sources = {}
+        for family, sources in system.sources.items():
+            selected = []
+            for source in sources:
+                z = source[0][2]
+                lo, hi = (z.start or 0, (z.stop if z.stop is not None else shape[2])-1) if isinstance(z, slice) else (z, z)
+                if a <= lo <= hi <= b:
+                    selected.append(source)
+                elif not (hi < a or lo > b):
+                    raise ValueError('Source support must lie wholly inside or outside the reconstruction interval.')
+            self._sources[family] = selected
         self._next_step = system.region.steps-1
         self._fused = self._inverse = None
         if epsilon.is_cuda:
@@ -216,7 +259,7 @@ class InteriorReconstruction:
                 if self._fused is not None else self._psi_bars)
 
     def _undo_sources(self, family, field, n):
-        for loc, component, wave, profile in reversed(self.system.sources[family]):
+        for loc, component, wave, profile in reversed(self._sources[family]):
             field[loc + (component,)] -= wave[n] if profile is None else wave[n]*profile
 
     @torch.no_grad()
@@ -247,11 +290,12 @@ class InteriorReconstruction:
         h[:, :, a-1, :2].copy_(trace[1])
         self._undo_sources('E', e, n)
         if self._inverse is not None:
-            self._inverse.run('e')
             self._fused.step(n, observation_index=row)
             # E-transpose only changes h_bar, so e_bar is still the required
             # post-observation, post-H-transpose electric cotangent here.
-            self._inverse.run('g')
+            # With material_gradient=False the transpose reads no primal E/H,
+            # allowing the E inverse and material VJP to share one curl H.
+            self._inverse.run('eg')
         else:
             curl = _local_curl(h, a, b, False, s.grid.wrap)
             eps = s.eps4[:, :, a:b+1]

@@ -7,6 +7,20 @@ to release versions, and the unreleased section collects changes for the next re
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
+## 1.1.0 (2026-09-28)
+
+### Added
+
+- `ReversibleCPMLOptions(interior_z=(a, b))` restricts reconstruction to an explicit inclusive z interval inside the CPML-free interior. It reduces reconstruction work and terminal-field storage while preserving the full-domain forward and field adjoint. Each call checks that epsilon equals the fixed material map outside the interval. Point and plane APIs and `PeriodicLayerResponse` use the same interval and support checks ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#restricting-reconstruction-to-the-design-layers), this commit).
+
+### Changed
+
+- Recorded CPML simulations accept soft electric sources outside the reconstruction interval, including its non-PML collar. Each component must lie wholly inside or outside the interval. Exterior sources enter through the recorded halos. The default interval is unchanged, and previously supported inputs keep their forward results and gradients (this commit).
+
+### Performance
+
+- CUDA reconstruction combines the inverse electric-field update and material VJP in one kernel. Real and complex paths share curl H without changing component arithmetic. Interior kernels use restricted pointers, bounded 32-bit indices and 128-thread launch bounds. Comparisons with the separate kernels require bitwise equality of fields, gradients and adjoint states across block sizes 64, 128, 256 and 512. Changing `interior_z` can change gradient roundoff and remains opt-in (this commit).
+
 ## 1.0.0 (2026-09-27)
 
 ### Added

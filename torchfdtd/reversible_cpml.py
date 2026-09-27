@@ -40,6 +40,7 @@ class ReversibleCPMLOptions(ReversibleOptions):
     trace_chunk_steps: int = 32
     forward_only: str = 'auto'
     diagnostic_chunk_elements: int = 65536
+    interior_z: tuple[int, int] | None = None
 
     def __post_init__(self):
         super().__post_init__()
@@ -59,6 +60,11 @@ class ReversibleCPMLOptions(ReversibleOptions):
         if (isinstance(self.collar_cells, bool) or not isinstance(self.collar_cells, int)
                 or self.collar_cells < 1):
             raise ValueError('collar_cells must be a positive integer.')
+        if self.interior_z is not None and (
+                type(self.interior_z) is not tuple or len(self.interior_z) != 2
+                or any(type(v) is not int for v in self.interior_z)
+                or self.interior_z[0] >= self.interior_z[1]):
+            raise ValueError('interior_z must be None or two integer inclusive indices with lo < hi.')
 
 
 def _interior_interval(region, collar):
@@ -87,6 +93,16 @@ def _interior_interval(region, collar):
     return a, b
 
 
+def _resolve_interval(region, options):
+    lower, upper = _interior_interval(region, options.collar_cells)
+    if options.interior_z is None:
+        return lower, upper
+    a, b = options.interior_z
+    if not lower <= a < b <= upper:
+        raise ValueError(f'interior_z must lie inside the CPML-free reconstruction interval [{lower}, {upper}].')
+    return a, b
+
+
 def _validate_project(project, options):
     r = project.region
     recommendation = ' Use checkpointed DifferentiableSimulation for other supported physics.'
@@ -100,7 +116,7 @@ def _validate_project(project, options):
         raise ValueError('ReversibleCPMLSimulation requires periodic or Bloch x/y and CPML on both z faces.' + recommendation)
     if any(m.model != 'dielectric' or m.oscillators for m in project.materials):
         raise ValueError('ReversibleCPMLSimulation supports only nondispersive dielectric declarations.' + recommendation)
-    a, b = _interior_interval(r, options.collar_cells)
+    a, b = _resolve_interval(r, options)
     for raw in project.sources:
         source = project.resolved_source(raw)
         if not source.enabled:
@@ -113,8 +129,8 @@ def _validate_project(project, options):
             resolved = source.model_copy(update={'component': component, 'theta': None})
             z = source_slice(resolved, r)[2]
             lo, hi = (z.start, z.stop - 1) if isinstance(z, slice) else (z, z)
-            if not a <= lo <= hi <= b:
-                raise ValueError('Every electric source component must lie inside the reconstruction interval.')
+            if not (a <= lo <= hi <= b or hi < a or lo > b):
+                raise ValueError('Every electric source component must lie wholly inside or outside the reconstruction interval.')
     monitors = [m for m in project.monitors if m.enabled]
     if not monitors or any(m.kind != 'point' or m.time_downsample != 1 for m in monitors):
         raise ValueError('ReversibleCPMLSimulation requires point E/H monitors sampled every timestep.' + recommendation)
@@ -169,6 +185,26 @@ def _require_material(value, chunk):
         valid &= torch.isfinite(block).all() & ~(block < 1).any()
     if not bool(valid):
         raise ValueError('The recorded CPML CFL contract requires finite epsilon >= 1 in both maps.')
+
+
+@torch.no_grad()
+def _require_fixed_exterior(value, fixed, interval, chunk):
+    """Check both cuts with bounded scratch and one device-to-host verdict."""
+    a, b = interval
+    nz = value.shape[2]
+    components = 3 if value.ndim == 4 else 1
+    rows = value.view(-1, nz, components)
+    background = fixed.view_as(rows)
+    valid = torch.ones((), dtype=torch.bool, device=value.device)
+    for first, stop in ((0, a), (b+1, nz)):
+        for z in range(first, stop, max(1, chunk // components)):
+            end = min(stop, z + max(1, chunk // components))
+            count = max(1, chunk // ((end-z)*components))
+            for row in range(0, rows.shape[0], count):
+                valid &= torch.eq(rows[row:row+count, z:end],
+                                  background[row:row+count, z:end]).all()
+    if not bool(valid):
+        raise ValueError('With explicit interior_z, epsilon must equal fixed_epsilon outside the reconstruction interval.')
 
 
 def _recorded_system(epsilon, project, spectral):
@@ -384,8 +420,8 @@ class ReversibleCPMLSimulation(torch.nn.Module):
     exterior gradient is exactly zero by the actual forward definition.
 
     Both FP32 maps have the grid shape or grid shape plus three components.
-    Point or z-plane sources are fixed impressed electric increments inside
-    the reconstructed interval. Bloch fields use complex64. The full resident
+    Point or z-plane sources are fixed impressed electric increments and may
+    lie outside the reconstructed interval. Bloch fields use complex64. The full resident
     CPML forward and adjoint are retained, while only four boundary planes
     per timestep and one interior terminal state replace checkpoint replay.
     """
@@ -442,6 +478,8 @@ class ReversibleCPMLSimulation(torch.nn.Module):
         chunk = reservation['diagnostic_chunk_elements']
         for value in (epsilon, fixed_epsilon):
             _require_material(value, chunk)
+        if self.options.interior_z is not None:
+            _require_fixed_exterior(epsilon, fixed_epsilon, interval, chunk)
         if epsilon.is_cuda:
             from .cuda_bootstrap import prepare_cuda_kernels
             prepare_cuda_kernels()
