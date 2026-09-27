@@ -3681,7 +3681,7 @@
           "specification": "독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다. 타인의 사용성 테스트를 에이전트의 자기 점검으로 대체하지 않는다.",
           "required_by_current_plan": true,
           "implementation_state": "IMPLEMENTED",
-          "verification_state": "NOT_RUN",
+          "verification_state": "VERIFIED",
           "owner": null,
           "code_paths": [
             "docs/G7_RUN.md",
@@ -3693,12 +3693,16 @@
           "planned_test_commands": [
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g9_self_review.py tests/test_g7_examples_package.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-05-100.xml"
           ],
-          "actual_test_commands": [],
+          "actual_test_commands": [
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_g9_self_review.py tests/test_g7_examples_package.py --junitxml=D:\\TorchFDTD\\.local\\tmp\\junit\\G9-05-100.xml"
+          ],
           "required_tests": [
             "tests/test_g9_self_review.py",
             "tests/test_g7_examples_package.py"
           ],
-          "evidence": [],
+          "evidence": [
+            "20260927T051216Z-g9-05-22b875cb"
+          ],
           "blocker": null,
           "scope_change_approval": {
             "approved_by": "owner",
