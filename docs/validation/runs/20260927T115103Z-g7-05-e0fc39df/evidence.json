@@ -1,0 +1,284 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260927T115103Z-g7-05-e0fc39df",
+  "task": "G7-05",
+  "stage": "G7",
+  "task_title": "cold/warm·전체 iteration·streaming·tuning 비용과 반복 변동",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_g7_cost.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G7-05.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-27T20:50:58.746787+09:00",
+  "recorded_at": "2026-09-27T11:51:03+00:00",
+  "source_commit": "6d03e49d91d431c158f438309b97a0380bc8042b",
+  "source_commit_time": "2026-09-27T17:33:00+09:00",
+  "source_tree_sha256": "d65c9a4151596b01feb34e3e37814c733679e0c1bb8fee43176f5a26b0ab7e97",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "8f642f3d10100564eeb97722b85bb0a13364d9cfa3ff341290163da41a185028",
+      "head_sha256": "5d2fb7eac934221d9a04bce9d8128da4e53eba2a7c7ca76501b22f3dbb6337d1"
+    },
+    {
+      "path": "docs/validation/g3/G3-05r5.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "660f3e77698ae559b894fc847cbd983d0410ebdcb1f21780a9996059be3a1e64",
+      "head_sha256": "3ba4e47f1f926a7d9121829e8da70b320c9194f648212fed6a7f0a0694c0bcb5"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "cbd1a8bb6a4bf3ee02b76ebbf4fa9310ee0bd525f4344657962e5edd285d64a4",
+      "head_sha256": "4afb7a5b9c89b6a4cf95251fa5ad505202e247bbdbc2ca7f0ab02d1f8d16a0aa"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0be5c98bde55fefa457890f3a030613e53da5c62ed15cfb6d07793c86e55d27a",
+      "head_sha256": "0a1db11fbc191d0de4cd05575810fcec35f52a1f7025b8ff4fa5075d874aadd9"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1cf1fc739a75d26b9d6fb5f6eb3200199aa690548486ae17463e67919cce52ad",
+      "head_sha256": "00d57966e826b74da4d5947bfac27df491e3ab9b1935ea4305e2bb2e51d17b26"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "47c5107a12f4535fc5cf625343f3324f37f90f040ec656603df686f98cfe1cea",
+      "head_sha256": "0cf498b4b9be89ccf20a147f40b5540a2f8a749e16392eb869337b7d7cac97ef"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "b58f8f851e3d00a0f8b1e8217deb442d978e545f74789cabe13a3e2f565b5965",
+      "head_sha256": "2eeb1007ba664028ca7ea4e497661d135c7e6dc116d4399d716241798841e2a4"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "e3c186bbe15356b293587ac07aa02a42b27e00b662015b3737ed13a0daf39607",
+      "head_sha256": "2a2df60180dce6e424b17204873e116d24119ba8218238877fe565bd2d91de4c"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "bf05fd17e7cc7cc6ec4ddd9860051c4ce65b2e18e3635b67b99f5e522ac278fd",
+      "head_sha256": "ccedd3842e94c3dd486a8be3aadccc2b423ce63a358e1f3ffb5158abf208f937"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "2977be3c54ae5f88dc47d1485fc9ffd80bef5a9a57a66cb121403d0b4d2696a6",
+      "head_sha256": "53bb3f4d0217713c2dff71f4dbd813e9f19bb43d2ad73e62a6dc9987c883758a"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "cf6583586d0b0380c72b8026a1db7c50813b732e8ccab1d4f801ad40b4f75756",
+      "head_sha256": "9fc4e2c8179d42d9ba55f17b9d40a37488f15a6d4a44d66595c66daaf633e1a7"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "eadd08329804ce205c7213325a2febd4536e169f70bc9f8399f30f14ba4dcb8e",
+  "package_path": "D:/torchfdtd-clean/dist/561d1e449464/torchfdtd-1.0.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_g7_cost.py": "a72c98401365688e9b409720925359c749c68558d1256d90530d641f5a91ec9d"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "examples/g7/cost/*.py",
+    "examples/g7/metagrating/workflow.py",
+    "examples/g7/coupler/workflow.py",
+    "docs/validation/cases/G7-05r2.json",
+    "docs/validation/g7/G7-05/**/*.json"
+  ],
+  "watch_sha256": {
+    "docs/validation/cases/G7-05r2.json": "b3f00abee42c50fc31f252458fcc27bf6d10b67671a7b0afd320ecfd8a054787",
+    "docs/validation/g7/G7-05/autotuner.json": "e69a8d3c03cc693fc37a36f2a33520030e8c63fced123e8ad2e772bf2b1074ed",
+    "docs/validation/g7/G7-05/execution.json": "963ae4ab76fc29236eb7d80276de60cf97183f6c5caa4f5918f2e829572bac1d",
+    "docs/validation/g7/G7-05/g701-host-broadband/process1.json": "5c6cc7b12dec3d85240389e777e3a2cbdd4d7a8c06aa9e8464ae731143e46164",
+    "docs/validation/g7/G7-05/g701-host-broadband/process2.json": "6c949bca94324dfe1e5745c94cb4fae416debdd475e8bab35d22d95daec641bd",
+    "docs/validation/g7/G7-05/g701-host-broadband/process3.json": "0ff2ba331a0008318299043a520b5b46da43331702ca57a14171254c5ada88ae",
+    "docs/validation/g7/G7-05/g701-host-broadband/process4.json": "d7524361ae76868d742832f356b96b1e66124abf48729272f3ea361365050811",
+    "docs/validation/g7/G7-05/g701-host-broadband/process5.json": "01400c293cb52da482d14f47f31678fe623663f597b61e7a67e1d44339581f8e",
+    "docs/validation/g7/G7-05/g701-host-broadband/summary.json": "224e70fed3cdf6d441d3fd2ba1fa0c731a693534bd38284bd67eff9af8866b92",
+    "docs/validation/g7/G7-05/g701-resident-broadband/process1.json": "c031ddf5defb746a781aa28f271f3ee8eae5590bc4de0ff1f34c7dd075a91870",
+    "docs/validation/g7/G7-05/g701-resident-broadband/process2.json": "66254bb0dda20e74c34ad8dd8307ef27dbe6efb76caf4c98fdc2a5f9487d6032",
+    "docs/validation/g7/G7-05/g701-resident-broadband/process3.json": "2e43316f3e3feda964317a310ec1c82d0cc784f94de16d31a02499bf39e3f5e1",
+    "docs/validation/g7/G7-05/g701-resident-broadband/process4.json": "ec7e7d66cf506bdb484454d770cfee2dfecd6215944e50cf6aa7944e0c713f53",
+    "docs/validation/g7/G7-05/g701-resident-broadband/process5.json": "7bd3131a3c732c8536e63a716ef06f2cf5b41cccf9b2d562c4156f294766bd9d",
+    "docs/validation/g7/G7-05/g701-resident-broadband/summary.json": "3ade7766b28092b66c5bea4bdd204d50542f489839a0af64389df68329c59a4b",
+    "docs/validation/g7/G7-05/g701-resident-sequential/process1.json": "c65dd841bab4f517911cebe2bb807ce9c122191d983e88b4f5cfd49c014b50e6",
+    "docs/validation/g7/G7-05/g701-resident-sequential/process2.json": "611b7a40c274fadf1b73e146ab41631bfb3e716b03c0d247bee4e4ba868160e2",
+    "docs/validation/g7/G7-05/g701-resident-sequential/process3.json": "70a92a69a9054ea0ec60ef1534e8bff59ae11271d2c5437bd801c5966850de39",
+    "docs/validation/g7/G7-05/g701-resident-sequential/process4.json": "1dd9eeaee83ef0958011365ed4c112a949749198571ef186a8ea97d9a41d6e9e",
+    "docs/validation/g7/G7-05/g701-resident-sequential/process5.json": "5a4b1a5b6e2d55075bba4e393fcb0e18ae4cdc7a476decff2faf213a1b85af28",
+    "docs/validation/g7/G7-05/g701-resident-sequential/summary.json": "ddd41672a9087ffdcb8666d54fd0a71709056894ac9b9d9d62ec15cfea706f0c",
+    "docs/validation/g7/G7-05/g703-resident/process1.json": "d4d77b98080962f9cadc081a45454ba8b11939933d6e39bf35043ed8a97422fb",
+    "docs/validation/g7/G7-05/g703-resident/process2.json": "477572d79056471a5428db4b2b8cd377e22b34b1289bfb5f2b4992c95a7b23bf",
+    "docs/validation/g7/G7-05/g703-resident/process3.json": "985c12d250b82c5de22cf02959f8bced530a2052419c03fd4dbfe1d7b27af53f",
+    "docs/validation/g7/G7-05/g703-resident/process4.json": "3fbf2bef205c3e2cf36bb543f6184642ba1ea4dc1663253157e353c70788f9cc",
+    "docs/validation/g7/G7-05/g703-resident/process5.json": "c355b5087dbc49fe5337c435d4fe26a91a5c668d175efb1d7d1df5c19888adef",
+    "docs/validation/g7/G7-05/g703-resident/summary.json": "60172d7eefd9e4e9c8ed785051728a19802a5d200ed1ab016394598e2f21fec5",
+    "examples/g7/cost/autotuner_study.py": "2cd1bf56719409c5d6e4018d1dad6faaf2087d3c73ce8b75ef0ad204f487cea6",
+    "examples/g7/cost/cost_study.py": "e76d0e5c38e3658d5319b722a9f678e6d148941e417f7202f38469b5c0fd2338",
+    "examples/g7/cost/g701_iteration.py": "4cb62323f8ff5cedcf10a610ee9a1a246c657b4909c1418eba9d01d7e61be048",
+    "examples/g7/cost/g703_iteration.py": "d98a21d7a5bb554a7821f228ffd1a94ea2378cd8a8442caf1f04e7eabb333e40",
+    "examples/g7/cost/timing.py": "dbf917617476494882b50bade02150e4c7efbccf9dc15843ab682945ad072128",
+    "examples/g7/coupler/workflow.py": "4a00419bf20fb9f761827298225f619ea532fc36b7563e2c0bccf78f057f1935",
+    "examples/g7/metagrating/workflow.py": "e10211defb9188b088cc1a3eacad6e7c12f84c623038b183592f1cfdb1ee7a17"
+  },
+  "fixture_path": "docs/validation/cases/G7-05r2.json",
+  "fixture_sha256": "b3f00abee42c50fc31f252458fcc27bf6d10b67671a7b0afd320ecfd8a054787",
+  "acceptance_criteria_path": "docs/validation/cases/G7-05r2.json",
+  "acceptance_criteria_sha256": "b3f00abee42c50fc31f252458fcc27bf6d10b67671a7b0afd320ecfd8a054787",
+  "case_first_commit": "1fb6efd3796b3d7451e0460b857cd8965cb0bf69",
+  "case_first_commit_time": "2026-09-27T02:39:18+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "the G7-01r3 and G7-03 seed 1 starts",
+  "precision": "float32 on CUDA",
+  "backend": "cuda",
+  "physics_configuration": {
+    "workloads": [
+      "one G7-01r3 robust design iteration (three wavelengths, TE)",
+      "one G7-03 iteration"
+    ],
+    "stages": [
+      "T_geometry",
+      "T_setup",
+      "T_forward",
+      "T_monitor",
+      "T_backward",
+      "T_transfer_io",
+      "T_optimizer"
+    ],
+    "synchronization": "each stage bounded by a CUDA synchronization; overlapping asynchronous work is not summed",
+    "cpu_threads": {
+      "OMP_NUM_THREADS": 2,
+      "MKL_NUM_THREADS": 2
+    },
+    "execution_policy": "identical seed-1 CPU design input for resident and host-streamed adjoints; policy options recorded in every process. Resident uses 64 checkpoints. A predeclaration policy calibration chose the host-streamed 200-cell x slab, temporal depth 48 and 16 checkpoints; the global field state remains in host DRAM. The scene and objective are identical.",
+    "cold": "first iteration of a fresh process",
+    "warm": "median of iterations 2 to 6",
+    "repeats": 5,
+    "comparisons": [
+      "resident against host-streamed (G7-01)",
+      "one broadband three-frequency FDTD adjoint solve against three sequential one-frequency FDTD adjoint solves; all three gradients contribute to the same mean objective before one Adam update, including geometry, normalization and backward"
+    ],
+    "tuning": "policy autotuner cost and break-even iteration count"
+  },
+  "reference_method": "the recorded medians become the regression baseline",
+  "observables": null,
+  "acceptance_limits": {
+    "stages": "every stage recorded with median and range for cold and warm iterations",
+    "comparisons": "streamed and broadband/sequential adjoint comparisons recorded even where slower; a native tensor-batch result, if included, is labelled forward-only",
+    "regression": "a test flags a later run whose stage median exceeds 1.25 times the recorded baseline"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 10,
+    "passed": [
+      "tests/test_g7_cost.py::test_declared_stages_and_cold_warm_medians",
+      "tests/test_g7_cost.py::test_regression_threshold_and_invalid_records",
+      "tests/test_g7_cost.py::test_cpu_stage_timer_reports_only_declared_stages",
+      "tests/test_g7_cost.py::test_autotuner_break_even_counts_full_iterations",
+      "tests/test_g7_cost.py::test_recorded_five_process_statistics_and_installation[g701-resident-broadband]",
+      "tests/test_g7_cost.py::test_recorded_five_process_statistics_and_installation[g701-host-broadband]",
+      "tests/test_g7_cost.py::test_recorded_five_process_statistics_and_installation[g701-resident-sequential]",
+      "tests/test_g7_cost.py::test_recorded_five_process_statistics_and_installation[g703-resident]",
+      "tests/test_g7_cost.py::test_recorded_autotuner_and_break_even",
+      "tests/test_g7_cost.py::test_recorded_cost_payload_is_the_release_wheel"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 0.087,
+    "suite_timestamp": "2026-09-27T20:50:58.746787+09:00"
+  },
+  "required_tests": [
+    "tests/test_g7_cost.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_g7_cost.py": [
+      "tests/test_g7_cost.py::test_declared_stages_and_cold_warm_medians",
+      "tests/test_g7_cost.py::test_regression_threshold_and_invalid_records",
+      "tests/test_g7_cost.py::test_cpu_stage_timer_reports_only_declared_stages",
+      "tests/test_g7_cost.py::test_autotuner_break_even_counts_full_iterations",
+      "tests/test_g7_cost.py::test_recorded_five_process_statistics_and_installation[g701-resident-broadband]",
+      "tests/test_g7_cost.py::test_recorded_five_process_statistics_and_installation[g701-host-broadband]",
+      "tests/test_g7_cost.py::test_recorded_five_process_statistics_and_installation[g701-resident-sequential]",
+      "tests/test_g7_cost.py::test_recorded_five_process_statistics_and_installation[g703-resident]",
+      "tests/test_g7_cost.py::test_recorded_autotuner_and_break_even",
+      "tests/test_g7_cost.py::test_recorded_cost_payload_is_the_release_wheel"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G7-05.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260927T115103Z-g7-05-e0fc39df/junit.xml",
+      "sha256": "9522e2f5cfd382cf37d6fbf3a0adacce1a8c2a7807294255fa4b758e19b81456",
+      "bytes": 1464,
+      "original_path": ".local/tmp/junit/rerecord/G7-05.xml"
+    }
+  ],
+  "applicable_scope": "G7-05: CPU rejudgement of complete installed-wheel acceptance records; raw numerical runs used 0.17.0. re-recorded on 6d03e49d91d4 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260927T005030Z-g7-05-f30c250a",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observables": "not declared: no case file supplied the \"observables\" entry for this run",
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

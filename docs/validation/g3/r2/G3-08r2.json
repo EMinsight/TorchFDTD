@@ -28,24 +28,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.3495391876757295,
+      "efficiency": 0.34953918767572956,
       "torcwa_efficiency": 0.35042699220889334,
-      "efficiency_error": -0.0008878045331638384,
-      "phase_rad": 0.6686431734700786,
+      "efficiency_error": -0.0008878045331637829,
+      "phase_rad": 0.6686431734700785,
       "torcwa_phase_rad": 0.6641186184360632,
-      "phase_error_rad": 0.004524555034015387,
+      "phase_error_rad": 0.004524555034015276,
       "dominant": true,
-      "counter_direction_power": 8.057727411953129e-08
+      "counter_direction_power": 8.057727411951346e-08
      },
      "reflection": {
-      "efficiency": 0.061958011966923646,
+      "efficiency": 0.06195801196692367,
       "torcwa_efficiency": 0.06116610801959139,
-      "efficiency_error": 0.0007919039473322578,
+      "efficiency_error": 0.0007919039473322856,
       "phase_rad": 2.4650032167915463,
       "torcwa_phase_rad": 2.4617778034850555,
       "phase_error_rad": 0.003225413306490843,
       "dominant": true,
-      "counter_direction_power": 3.3677994052023172e-09
+      "counter_direction_power": 3.3677994052014797e-09
      }
     },
     "0": {
@@ -93,11 +93,11 @@
      }
     }
    },
-   "efficiency_sum": 0.9996940036224133,
+   "efficiency_sum": 0.9996940036224136,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0008878045388105438,
    "max_dominant_phase_error_rad": 0.005482655004474701,
-   "wall_s": 40.469012099987594,
+   "wall_s": 40.54683439998189,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -119,24 +119,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.3495389599510682,
+      "efficiency": 0.34953895995106815,
       "torcwa_efficiency": 0.35042699220889334,
-      "efficiency_error": -0.0008880322578251332,
+      "efficiency_error": -0.0008880322578251887,
       "phase_rad": 0.668643710241432,
       "torcwa_phase_rad": 0.6641186184360632,
       "phase_error_rad": 0.004525091805368753,
       "dominant": true,
-      "counter_direction_power": 8.044021052021106e-08
+      "counter_direction_power": 8.044021052025971e-08
      },
      "reflection": {
       "efficiency": 0.06195822110757983,
       "torcwa_efficiency": 0.06116610801959139,
       "efficiency_error": 0.00079211308798844,
-      "phase_rad": 2.4650038341068465,
+      "phase_rad": 2.465003834106847,
       "torcwa_phase_rad": 2.4617778034850555,
-      "phase_error_rad": 0.003226030621791054,
+      "phase_error_rad": 0.003226030621791498,
       "dominant": true,
-      "counter_direction_power": 3.369996530640992e-09
+      "counter_direction_power": 3.3699965306398745e-09
      }
     },
     "0": {
@@ -186,26 +186,26 @@
    },
    "efficiency_sum": 0.9996941700441909,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.0008880322578251332,
+   "max_efficiency_error": 0.0008880322578251887,
    "max_dominant_phase_error_rad": 0.00548243866288417,
-   "wall_s": 5.76605920001748,
+   "wall_s": 5.8672976000234485,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
-   "layer_a_r2_max_excess": -6.9866605405102035e-06,
+   "layer_a_r2_max_excess": -6.9866605405379624e-06,
    "layer_a_r2_pass": true,
-   "layer_a_max_relative_difference": 3.375522382703478e-06,
+   "layer_a_max_relative_difference": 3.3755223822555026e-06,
    "instances": {
     "transmission m=-1": {
-     "cpu": 0.3495391876757295,
-     "cuda": 0.3495389599510682,
-     "absolute_difference": 2.277246612947259e-07,
-     "allowance": 3.5953918767572946e-05
+     "cpu": 0.34953918767572956,
+     "cuda": 0.34953895995106815,
+     "absolute_difference": 2.277246614057482e-07,
+     "allowance": 3.595391876757295e-05
     },
     "reflection m=-1": {
-     "cpu": 0.061958011966923646,
+     "cpu": 0.06195801196692367,
      "cuda": 0.06195822110757983,
-     "absolute_difference": 2.091406561821607e-07,
-     "allowance": 7.195801196692364e-06
+     "absolute_difference": 2.0914065615440514e-07,
+     "allowance": 7.195801196692368e-06
     },
     "transmission m=0": {
      "cpu": 0.09317596031327087,
@@ -283,14 +283,14 @@
       "counter_direction_power": 4.419476607316178e-09
      },
      "reflection": {
-      "efficiency": 0.1578445881742327,
+      "efficiency": 0.15784458817423275,
       "torcwa_efficiency": 0.15874030357586139,
-      "efficiency_error": -0.0008957154016286939,
+      "efficiency_error": -0.0008957154016286384,
       "phase_rad": -1.291735295323823,
       "torcwa_phase_rad": -1.2990734740836594,
       "phase_error_rad": 0.0073381787598363335,
       "dominant": true,
-      "counter_direction_power": 9.341028870089736e-09
+      "counter_direction_power": 9.341028870105109e-09
      }
     },
     "1": {
@@ -318,9 +318,9 @@
    },
    "efficiency_sum": 1.0001633838490058,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.0008957154016286939,
+   "max_efficiency_error": 0.0008957154016286384,
    "max_dominant_phase_error_rad": 0.0073381787598363335,
-   "wall_s": 41.33406079999986,
+   "wall_s": 41.25562399998307,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -364,24 +364,24 @@
     },
     "0": {
      "transmission": {
-      "efficiency": 0.08005035987987091,
+      "efficiency": 0.0800503598798709,
       "torcwa_efficiency": 0.08034689326707364,
-      "efficiency_error": -0.0002965333872027298,
+      "efficiency_error": -0.0002965333872027437,
       "phase_rad": -1.421577393843292,
       "torcwa_phase_rad": -1.42778997647448,
       "phase_error_rad": 0.006212582631187846,
       "dominant": true,
-      "counter_direction_power": 4.39814833946229e-09
+      "counter_direction_power": 4.39814833945863e-09
      },
      "reflection": {
-      "efficiency": 0.1578448061074213,
+      "efficiency": 0.15784480610742121,
       "torcwa_efficiency": 0.15874030357586139,
-      "efficiency_error": -0.0008954974684400874,
-      "phase_rad": -1.2917365064126016,
+      "efficiency_error": -0.0008954974684401706,
+      "phase_rad": -1.2917365064126014,
       "torcwa_phase_rad": -1.2990734740836594,
-      "phase_error_rad": 0.007336967671057737,
+      "phase_error_rad": 0.007336967671057959,
       "dominant": true,
-      "counter_direction_power": 9.360790657828542e-09
+      "counter_direction_power": 9.36079065781353e-09
      }
     },
     "1": {
@@ -407,16 +407,16 @@
      }
     }
    },
-   "efficiency_sum": 1.0001635547058318,
+   "efficiency_sum": 1.0001635547058316,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.0008954974684400874,
-   "max_dominant_phase_error_rad": 0.007336967671057737,
-   "wall_s": 5.91708360001212,
+   "max_efficiency_error": 0.0008954974684401706,
+   "max_dominant_phase_error_rad": 0.007336967671057959,
+   "wall_s": 5.979946800041944,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
    "layer_a_r2_max_excess": -2.0400000972641453e-06,
    "layer_a_r2_pass": true,
-   "layer_a_max_relative_difference": 1.380682043821248e-06,
+   "layer_a_max_relative_difference": 1.3806820429420417e-06,
    "instances": {
     "transmission m=-1": {
      "cpu": 0.3706722015081298,
@@ -432,15 +432,15 @@
     },
     "transmission m=0": {
      "cpu": 0.08005044067435212,
-     "cuda": 0.08005035987987091,
-     "absolute_difference": 8.079448120257293e-08,
+     "cuda": 0.0800503598798709,
+     "absolute_difference": 8.079448121645072e-08,
      "allowance": 9.005044067435213e-06
     },
     "reflection m=0": {
-     "cpu": 0.1578445881742327,
-     "cuda": 0.1578448061074213,
-     "absolute_difference": 2.1793318860652278e-07,
-     "allowance": 1.678445881742327e-05
+     "cpu": 0.15784458817423275,
+     "cuda": 0.15784480610742121,
+     "absolute_difference": 2.179331884677449e-07,
+     "allowance": 1.6784458817423278e-05
     },
     "transmission m=1": {
      "cpu": 0.37067220150812963,
@@ -528,14 +528,14 @@
       "counter_direction_power": 1.361097430990923e-06
      },
      "reflection": {
-      "efficiency": 0.019500924838145424,
+      "efficiency": 0.019500924838145427,
       "torcwa_efficiency": 0.019612521648511592,
-      "efficiency_error": -0.00011159681036616853,
+      "efficiency_error": -0.00011159681036616506,
       "phase_rad": -3.0608613384823515,
       "torcwa_phase_rad": -3.06137777806967,
       "phase_error_rad": 0.0005164395873182848,
       "dominant": false,
-      "counter_direction_power": 5.8288396800853306e-08
+      "counter_direction_power": 5.828839680085862e-08
      }
     }
    },
@@ -543,7 +543,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.000770722035799698,
    "max_dominant_phase_error_rad": 0.006926146325853422,
-   "wall_s": 41.70731590001378,
+   "wall_s": 40.12039900000673,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -609,14 +609,14 @@
     },
     "1": {
      "transmission": {
-      "efficiency": 0.33169432185615616,
+      "efficiency": 0.33169432185615594,
       "torcwa_efficiency": 0.33092300782318956,
-      "efficiency_error": 0.0007713140329665968,
-      "phase_rad": -0.5606916719157495,
+      "efficiency_error": 0.0007713140329663748,
+      "phase_rad": -0.5606916719157496,
       "torcwa_phase_rad": -0.5616984735435347,
-      "phase_error_rad": 0.0010068016277852143,
+      "phase_error_rad": 0.0010068016277851033,
       "dominant": true,
-      "counter_direction_power": 1.3612726208782976e-06
+      "counter_direction_power": 1.3612726208780765e-06
      },
      "reflection": {
       "efficiency": 0.019500969876698398,
@@ -626,15 +626,15 @@
       "torcwa_phase_rad": -3.06137777806967,
       "phase_error_rad": 0.0005171499934490953,
       "dominant": false,
-      "counter_direction_power": 5.819132497549118e-08
+      "counter_direction_power": 5.8191324975489714e-08
      }
     }
    },
-   "efficiency_sum": 1.0004916706977107,
+   "efficiency_sum": 1.0004916706977105,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0007713174578905524,
    "max_dominant_phase_error_rad": 0.006927060429559484,
-   "wall_s": 5.754404899984365,
+   "wall_s": 5.92791979998583,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
    "layer_a_r2_max_excess": -2.9044206152080554e-06,
@@ -667,15 +667,15 @@
     },
     "transmission m=1": {
      "cpu": 0.33169372985898926,
-     "cuda": 0.33169432185615616,
-     "absolute_difference": 5.919971668988389e-07,
+     "cuda": 0.33169432185615594,
+     "absolute_difference": 5.919971666767943e-07,
      "allowance": 3.4169372985898925e-05
     },
     "reflection m=1": {
-     "cpu": 0.019500924838145424,
+     "cpu": 0.019500924838145427,
      "cuda": 0.019500969876698398,
-     "absolute_difference": 4.5038552973913903e-08,
-     "allowance": 2.9500924838145423e-06
+     "absolute_difference": 4.5038552970444456e-08,
+     "allowance": 2.950092483814543e-06
     }
    }
   },
@@ -697,24 +697,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.4591251155206611,
+      "efficiency": 0.459125115520661,
       "torcwa_efficiency": 0.4632305063246826,
-      "efficiency_error": -0.004105390804021503,
-      "phase_rad": 0.007381017001162855,
+      "efficiency_error": -0.004105390804021614,
+      "phase_rad": 0.007381017001162936,
       "torcwa_phase_rad": 0.0027140520701912254,
-      "phase_error_rad": 0.004666964930971629,
+      "phase_error_rad": 0.00466696493097171,
       "dominant": true,
-      "counter_direction_power": 2.7489956785311985e-08
+      "counter_direction_power": 2.7489956785330666e-08
      },
      "reflection": {
       "efficiency": 0.12950570574839138,
       "torcwa_efficiency": 0.13010920369574755,
       "efficiency_error": -0.0006034979473561741,
-      "phase_rad": 0.7216918011747356,
+      "phase_rad": 0.7216918011747357,
       "torcwa_phase_rad": 0.7206069483307477,
-      "phase_error_rad": 0.0010848528439879601,
+      "phase_error_rad": 0.0010848528439880711,
       "dominant": true,
-      "counter_direction_power": 7.666072052795562e-09
+      "counter_direction_power": 7.666072052795953e-09
      }
     },
     "0": {
@@ -740,11 +740,11 @@
      }
     }
    },
-   "efficiency_sum": 0.9906162167350204,
+   "efficiency_sum": 0.9906162167350202,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.004105390804021503,
+   "max_efficiency_error": 0.004105390804021614,
    "max_dominant_phase_error_rad": 0.005646594199057331,
-   "wall_s": 40.72444789999281,
+   "wall_s": 39.923926900024526,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -766,24 +766,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.4591239837713785,
+      "efficiency": 0.45912398377137853,
       "torcwa_efficiency": 0.4632305063246826,
-      "efficiency_error": -0.004106522553304126,
-      "phase_rad": 0.007386290534295048,
+      "efficiency_error": -0.004106522553304071,
+      "phase_rad": 0.007386290534295126,
       "torcwa_phase_rad": 0.0027140520701912254,
-      "phase_error_rad": 0.004672238464103822,
+      "phase_error_rad": 0.0046722384641039,
       "dominant": true,
-      "counter_direction_power": 2.7407322762389565e-08
+      "counter_direction_power": 2.740732276237097e-08
      },
      "reflection": {
-      "efficiency": 0.12950633535467312,
+      "efficiency": 0.12950633535467304,
       "torcwa_efficiency": 0.13010920369574755,
-      "efficiency_error": -0.0006028683410744251,
-      "phase_rad": 0.7216985158766768,
+      "efficiency_error": -0.0006028683410745084,
+      "phase_rad": 0.7216985158766767,
       "torcwa_phase_rad": 0.7206069483307477,
-      "phase_error_rad": 0.0010915675459290952,
+      "phase_error_rad": 0.0010915675459289842,
       "dominant": true,
-      "counter_direction_power": 7.430231604803244e-09
+      "counter_direction_power": 7.430231604814071e-09
      }
     },
     "0": {
@@ -811,9 +811,9 @@
    },
    "efficiency_sum": 0.9906099835095356,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.004106522553304126,
+   "max_efficiency_error": 0.004106522553304071,
    "max_dominant_phase_error_rad": 0.005617645463510623,
-   "wall_s": 5.6926547000184655,
+   "wall_s": 5.79048139997758,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
    "layer_a_r2_max_excess": -7.624044422764158e-06,
@@ -821,15 +821,15 @@
    "layer_a_max_relative_difference": 4.2636716380294525e-05,
    "instances": {
     "transmission m=-1": {
-     "cpu": 0.4591251155206611,
-     "cuda": 0.4591239837713785,
-     "absolute_difference": 1.1317492826234954e-06,
-     "allowance": 4.691251155206611e-05
+     "cpu": 0.459125115520661,
+     "cuda": 0.45912398377137853,
+     "absolute_difference": 1.131749282456962e-06,
+     "allowance": 4.6912511552066095e-05
     },
     "reflection m=-1": {
      "cpu": 0.12950570574839138,
-     "cuda": 0.12950633535467312,
-     "absolute_difference": 6.296062817490178e-07,
+     "cuda": 0.12950633535467304,
+     "absolute_difference": 6.296062816657511e-07,
      "allowance": 1.395057057483914e-05
     },
     "transmission m=0": {
@@ -889,29 +889,29 @@
       "efficiency": 0.5464988530608497,
       "torcwa_efficiency": 0.5443968731925837,
       "efficiency_error": 0.0021019798682659907,
-      "phase_rad": -0.26244747438927835,
+      "phase_rad": -0.26244747438927846,
       "torcwa_phase_rad": -0.26703780846768815,
-      "phase_error_rad": 0.004590334078409808,
+      "phase_error_rad": 0.004590334078409697,
       "dominant": true,
-      "counter_direction_power": 2.5290771603556762e-08
+      "counter_direction_power": 2.5290771603556858e-08
      },
      "reflection": {
-      "efficiency": 0.17532330699670057,
+      "efficiency": 0.17532330699670043,
       "torcwa_efficiency": 0.1766195590112097,
-      "efficiency_error": -0.0012962520145091416,
+      "efficiency_error": -0.0012962520145092804,
       "phase_rad": -2.3064472859848353,
       "torcwa_phase_rad": -2.30424801401487,
       "phase_error_rad": -0.0021992719699652774,
       "dominant": true,
-      "counter_direction_power": 1.3061887414373175e-08
+      "counter_direction_power": 1.3061887414357042e-08
      }
     }
    },
-   "efficiency_sum": 1.0027618610353528,
+   "efficiency_sum": 1.0027618610353526,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0021019798682659907,
    "max_dominant_phase_error_rad": 0.00979906217681581,
-   "wall_s": 40.57183790000272,
+   "wall_s": 39.80918709997786,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -962,17 +962,17 @@
       "torcwa_phase_rad": -0.26703780846768815,
       "phase_error_rad": 0.004589860312233629,
       "dominant": true,
-      "counter_direction_power": 2.5264326606020282e-08
+      "counter_direction_power": 2.5264326605998418e-08
      },
      "reflection": {
-      "efficiency": 0.17532432339821694,
+      "efficiency": 0.17532432339821696,
       "torcwa_efficiency": 0.1766195590112097,
-      "efficiency_error": -0.0012952356129927733,
+      "efficiency_error": -0.0012952356129927456,
       "phase_rad": -2.306446629627637,
       "torcwa_phase_rad": -2.30424801401487,
       "phase_error_rad": -0.0021986156127669076,
       "dominant": true,
-      "counter_direction_power": 1.2793927730997337e-08
+      "counter_direction_power": 1.2793927731011878e-08
      }
     }
    },
@@ -980,7 +980,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0021034745593772053,
    "max_dominant_phase_error_rad": 0.00980017621440088,
-   "wall_s": 5.791885699989507,
+   "wall_s": 5.81020870001521,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
    "layer_a_r2_max_excess": -1.3899751440346842e-05,
@@ -1006,10 +1006,10 @@
      "allowance": 5.564988530608497e-05
     },
     "reflection m=0": {
-     "cpu": 0.17532330699670057,
-     "cuda": 0.17532432339821694,
-     "absolute_difference": 1.0164015163682816e-06,
-     "allowance": 1.853233069967006e-05
+     "cpu": 0.17532330699670043,
+     "cuda": 0.17532432339821696,
+     "absolute_difference": 1.016401516534815e-06,
+     "allowance": 1.8532330699670045e-05
     }
    }
   },
@@ -1078,7 +1078,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0034707537523525067,
    "max_dominant_phase_error_rad": 0.003107339115513419,
-   "wall_s": 40.96502629999304,
+   "wall_s": 41.20597700000508,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1147,7 +1147,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0034697510911758656,
    "max_dominant_phase_error_rad": 0.003107726891617091,
-   "wall_s": 5.892084299994167,
+   "wall_s": 5.789744600013364,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
    "layer_a_r2_max_excess": -2.2118704277347815e-06,
@@ -1267,7 +1267,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0003822497588426253,
    "max_dominant_phase_error_rad": 0.003010318418041502,
-   "wall_s": 41.03511470000376,
+   "wall_s": 40.98316329997033,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1358,7 +1358,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0003822724847184489,
    "max_dominant_phase_error_rad": 0.0030109955103301556,
-   "wall_s": 5.744524500012631,
+   "wall_s": 5.8494922000099905,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
    "layer_a_r2_max_excess": -1.01309809718188e-06,
@@ -1421,24 +1421,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.42704026659894817,
+      "efficiency": 0.4270402665989483,
       "torcwa_efficiency": 0.4263538388548103,
-      "efficiency_error": 0.0006864277441378519,
+      "efficiency_error": 0.0006864277441379629,
       "phase_rad": -0.42708168969503796,
       "torcwa_phase_rad": -0.42892795732348193,
       "phase_error_rad": 0.001846267628443976,
       "dominant": true,
-      "counter_direction_power": 5.454534789487451e-08
+      "counter_direction_power": 5.4545347894898075e-08
      },
      "reflection": {
-      "efficiency": 0.016207917013742773,
+      "efficiency": 0.016207917013742777,
       "torcwa_efficiency": 0.01622343013673235,
-      "efficiency_error": -1.5513122989578576e-05,
+      "efficiency_error": -1.5513122989575107e-05,
       "phase_rad": -1.9398811063737307,
       "torcwa_phase_rad": -1.944371823215898,
       "phase_error_rad": 0.004490716842167286,
       "dominant": false,
-      "counter_direction_power": 3.823188572142573e-07
+      "counter_direction_power": 3.8231885721425247e-07
      }
     },
     "0": {
@@ -1472,25 +1472,25 @@
       "torcwa_phase_rad": -0.4289279573073345,
       "phase_error_rad": 0.0018618193531782512,
       "dominant": true,
-      "counter_direction_power": 5.4516963340505514e-08
+      "counter_direction_power": 5.451696334050762e-08
      },
      "reflection": {
-      "efficiency": 0.016208581028973802,
+      "efficiency": 0.01620858102897379,
       "torcwa_efficiency": 0.01622343013056843,
-      "efficiency_error": -1.484910159462935e-05,
+      "efficiency_error": -1.4849101594643227e-05,
       "phase_rad": -1.9397509239178323,
       "torcwa_phase_rad": -1.9443718232577945,
       "phase_error_rad": 0.004620899339962126,
       "dominant": false,
-      "counter_direction_power": 3.824511929785202e-07
+      "counter_direction_power": 3.8245119297856305e-07
      }
     }
    },
-   "efficiency_sum": 1.0002124864243485,
+   "efficiency_sum": 1.0002124864243487,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0008832272053644202,
    "max_dominant_phase_error_rad": 0.006022552453845753,
-   "wall_s": 40.681824700004654,
+   "wall_s": 41.15440790000139,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1529,7 +1529,7 @@
       "torcwa_phase_rad": -1.944371823215898,
       "phase_error_rad": 0.00449172478786819,
       "dominant": false,
-      "counter_direction_power": 3.8235931104670617e-07
+      "counter_direction_power": 3.823593110467125e-07
      }
     },
     "0": {
@@ -1573,7 +1573,7 @@
       "torcwa_phase_rad": -1.9443718232577945,
       "phase_error_rad": 0.004621029851473946,
       "dominant": false,
-      "counter_direction_power": 3.824554020415361e-07
+      "counter_direction_power": 3.82455402041552e-07
      }
     }
    },
@@ -1581,23 +1581,23 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0008831922116020047,
    "max_dominant_phase_error_rad": 0.006022880823397747,
-   "wall_s": 5.92363109998405,
+   "wall_s": 5.8145809000125155,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
-   "layer_a_r2_max_excess": -2.614063172123151e-06,
+   "layer_a_r2_max_excess": -2.6140631721196814e-06,
    "layer_a_r2_pass": true,
    "layer_a_max_relative_difference": 7.088633353593732e-06,
    "instances": {
     "transmission m=-1": {
-     "cpu": 0.42704026659894817,
+     "cpu": 0.4270402665989483,
      "cuda": 0.42704026138741014,
-     "absolute_difference": 5.2115380344552875e-09,
-     "allowance": 4.370402665989482e-05
+     "absolute_difference": 5.21153814547759e-09,
+     "allowance": 4.3704026659894826e-05
     },
     "reflection m=-1": {
-     "cpu": 0.016207917013742773,
+     "cpu": 0.016207917013742777,
      "cuda": 0.016207910285213522,
-     "absolute_difference": 6.728529251126547e-09,
+     "absolute_difference": 6.728529254595994e-09,
      "allowance": 2.6207917013742774e-06
     },
     "transmission m=0": {
@@ -1619,10 +1619,10 @@
      "allowance": 4.370503573001039e-05
     },
     "reflection m=1": {
-     "cpu": 0.016208581028973802,
+     "cpu": 0.01620858102897379,
      "cuda": 0.01620858504320612,
-     "absolute_difference": 4.01423231807807e-09,
-     "allowance": 2.62085810289738e-06
+     "absolute_difference": 4.014232331955858e-09,
+     "allowance": 2.620858102897379e-06
     }
    }
   },
@@ -1644,24 +1644,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.3963813162625965,
+      "efficiency": 0.3963813162625966,
       "torcwa_efficiency": 0.39595605417991003,
-      "efficiency_error": 0.0004252620826864506,
+      "efficiency_error": 0.0004252620826865616,
       "phase_rad": -0.6389698677534235,
       "torcwa_phase_rad": -0.6402221568179324,
       "phase_error_rad": 0.0012522890645089158,
       "dominant": true,
-      "counter_direction_power": 1.5244825921521045e-07
+      "counter_direction_power": 1.5244825921521818e-07
      },
      "reflection": {
-      "efficiency": 0.026210771494093482,
+      "efficiency": 0.02621077149409348,
       "torcwa_efficiency": 0.02618573092866405,
-      "efficiency_error": 2.504056542943292e-05,
+      "efficiency_error": 2.504056542942945e-05,
       "phase_rad": -2.1489402226901673,
       "torcwa_phase_rad": -2.1505359040674623,
       "phase_error_rad": 0.001595681377295044,
       "dominant": false,
-      "counter_direction_power": 8.710101890973307e-07
+      "counter_direction_power": 8.710101890973805e-07
      }
     },
     "0": {
@@ -1709,11 +1709,11 @@
      }
     }
    },
-   "efficiency_sum": 0.9997004270238997,
+   "efficiency_sum": 0.9997004270238999,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0008417644794975199,
    "max_dominant_phase_error_rad": 0.0068579112947253495,
-   "wall_s": 40.87535410001874,
+   "wall_s": 40.09020540001802,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1742,7 +1742,7 @@
       "torcwa_phase_rad": -0.6402221568179324,
       "phase_error_rad": 0.0012530092374425372,
       "dominant": true,
-      "counter_direction_power": 1.5228580794517138e-07
+      "counter_direction_power": 1.522858079451791e-07
      },
      "reflection": {
       "efficiency": 0.02621063472657449,
@@ -1752,7 +1752,7 @@
       "torcwa_phase_rad": -2.1505359040674623,
       "phase_error_rad": 0.0015959075025566705,
       "dominant": false,
-      "counter_direction_power": 8.719881618151819e-07
+      "counter_direction_power": 8.719881618151813e-07
      }
     },
     "0": {
@@ -1804,23 +1804,23 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0008416238438906654,
    "max_dominant_phase_error_rad": 0.006858625044393163,
-   "wall_s": 5.778039500000887,
+   "wall_s": 5.857254399976227,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
-   "layer_a_r2_max_excess": -3.4843096304187378e-06,
+   "layer_a_r2_max_excess": -3.484309630422207e-06,
    "layer_a_r2_pass": true,
-   "layer_a_max_relative_difference": 5.217989063062508e-06,
+   "layer_a_max_relative_difference": 5.2179890629301415e-06,
    "instances": {
     "transmission m=-1": {
-     "cpu": 0.3963813162625965,
+     "cpu": 0.3963813162625966,
      "cuda": 0.3963820001128047,
-     "absolute_difference": 6.838502082384679e-07,
-     "allowance": 4.063813162625965e-05
+     "absolute_difference": 6.838502081274456e-07,
+     "allowance": 4.0638131626259655e-05
     },
     "reflection m=-1": {
-     "cpu": 0.026210771494093482,
+     "cpu": 0.02621077149409348,
      "cuda": 0.02621063472657449,
-     "absolute_difference": 1.3676751899061035e-07,
+     "absolute_difference": 1.367675189871409e-07,
      "allowance": 3.621077149409348e-06
     },
     "transmission m=0": {
@@ -1914,7 +1914,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.001991992695407674,
    "max_dominant_phase_error_rad": 0.007968467679413727,
-   "wall_s": 49.41267059999518,
+   "wall_s": 42.06308039999567,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1983,7 +1983,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0019926148855017867,
    "max_dominant_phase_error_rad": 0.00797568331335241,
-   "wall_s": 5.766275400004815,
+   "wall_s": 5.873169699974824,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
    "layer_a_r2_max_excess": -6.743516944926405e-07,
@@ -2037,11 +2037,11 @@
       "efficiency": 0.5524904919573295,
       "torcwa_efficiency": 0.5538528748271506,
       "efficiency_error": -0.0013623828698211549,
-      "phase_rad": -0.08207217911302202,
+      "phase_rad": -0.08207217911302211,
       "torcwa_phase_rad": -0.0864182144655129,
-      "phase_error_rad": 0.004346035352490882,
+      "phase_error_rad": 0.004346035352490785,
       "dominant": true,
-      "counter_direction_power": 4.031467591956396e-08
+      "counter_direction_power": 4.0314675919571465e-08
      },
      "reflection": {
       "efficiency": 0.028444347104715096,
@@ -2051,7 +2051,7 @@
       "torcwa_phase_rad": -1.6177613643953812,
       "phase_error_rad": 0.014637278583122582,
       "dominant": false,
-      "counter_direction_power": 1.054345693616112e-08
+      "counter_direction_power": 1.05434569361614e-08
      }
     },
     "0": {
@@ -2081,7 +2081,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0013623828698211549,
    "max_dominant_phase_error_rad": 0.008819034521119429,
-   "wall_s": 43.45313179999357,
+   "wall_s": 41.28893859998789,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -2110,7 +2110,7 @@
       "torcwa_phase_rad": -0.0864182144655129,
       "phase_error_rad": 0.004351599079571597,
       "dominant": true,
-      "counter_direction_power": 4.032016258507681e-08
+      "counter_direction_power": 4.032016258510216e-08
      },
      "reflection": {
       "efficiency": 0.02844494013339747,
@@ -2150,7 +2150,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0013663346350233363,
    "max_dominant_phase_error_rad": 0.008802532011764286,
-   "wall_s": 5.80014909998863,
+   "wall_s": 5.841150399995968,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
    "layer_a_r2_max_excess": -3.2514060280989395e-06,
@@ -2201,24 +2201,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.5472796895701783,
+      "efficiency": 0.5472796895701781,
       "torcwa_efficiency": 0.544884588236893,
-      "efficiency_error": 0.0023951013332852433,
-      "phase_rad": -0.5248001449019858,
+      "efficiency_error": 0.0023951013332851323,
+      "phase_rad": -0.5248001449019859,
       "torcwa_phase_rad": -0.5298400104017086,
-      "phase_error_rad": 0.005039865499722795,
+      "phase_error_rad": 0.005039865499722684,
       "dominant": true,
-      "counter_direction_power": 1.0005006158316572e-07
+      "counter_direction_power": 1.000500615831488e-07
      },
      "reflection": {
-      "efficiency": 0.005431864094462532,
+      "efficiency": 0.0054318640944625365,
       "torcwa_efficiency": 0.005217792102717784,
-      "efficiency_error": 0.00021407199174474853,
-      "phase_rad": -2.7563099909150304,
+      "efficiency_error": 0.00021407199174475287,
+      "phase_rad": -2.75630999091503,
       "torcwa_phase_rad": -2.7669952002452494,
-      "phase_error_rad": 0.010685209330218992,
+      "phase_error_rad": 0.010685209330219436,
       "dominant": false,
-      "counter_direction_power": 6.220089349884974e-08
+      "counter_direction_power": 6.220089349885748e-08
      }
     },
     "0": {
@@ -2244,11 +2244,11 @@
      }
     }
    },
-   "efficiency_sum": 0.9999341982940704,
+   "efficiency_sum": 0.9999341982940703,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.002546433954255717,
    "max_dominant_phase_error_rad": 0.007977386986149249,
-   "wall_s": 43.74632330000168,
+   "wall_s": 43.1890596000012,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -2273,11 +2273,11 @@
       "efficiency": 0.5472778652982343,
       "torcwa_efficiency": 0.544884588236893,
       "efficiency_error": 0.0023932770613412924,
-      "phase_rad": -0.5247951070714866,
+      "phase_rad": -0.5247951070714867,
       "torcwa_phase_rad": -0.5298400104017086,
-      "phase_error_rad": 0.005044903330222006,
+      "phase_error_rad": 0.005044903330221895,
       "dominant": true,
-      "counter_direction_power": 1.000171666248141e-07
+      "counter_direction_power": 1.0001716662483395e-07
      },
      "reflection": {
       "efficiency": 0.005432380973759717,
@@ -2287,7 +2287,7 @@
       "torcwa_phase_rad": -2.7669952002452494,
       "phase_error_rad": 0.010656169505270263,
       "dominant": false,
-      "counter_direction_power": 6.363947488333109e-08
+      "counter_direction_power": 6.363947488333476e-08
      }
     },
     "0": {
@@ -2317,24 +2317,24 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0025392461567493863,
    "max_dominant_phase_error_rad": 0.007982285659943855,
-   "wall_s": 5.867905899998732,
+   "wall_s": 5.896207800018601,
    "layer_a_r2_rtol": 0.0001,
    "layer_a_r2_atol": 1e-06,
-   "layer_a_r2_max_excess": -1.0263071122618255e-06,
+   "layer_a_r2_max_excess": -1.0263071122661627e-06,
    "layer_a_r2_pass": true,
-   "layer_a_max_relative_difference": 9.515689056199987e-05,
+   "layer_a_max_relative_difference": 9.51568905612014e-05,
    "instances": {
     "transmission m=-1": {
-     "cpu": 0.5472796895701783,
+     "cpu": 0.5472796895701781,
      "cuda": 0.5472778652982343,
-     "absolute_difference": 1.8242719439509614e-06,
-     "allowance": 5.572796895701782e-05
+     "absolute_difference": 1.824271943839939e-06,
+     "allowance": 5.5727968957017815e-05
     },
     "reflection m=-1": {
-     "cpu": 0.005431864094462532,
+     "cpu": 0.0054318640944625365,
      "cuda": 0.005432380973759717,
-     "absolute_difference": 5.168792971844277e-07,
-     "allowance": 1.5431864094462532e-06
+     "absolute_difference": 5.168792971800909e-07,
+     "allowance": 1.5431864094462536e-06
     },
     "transmission m=0": {
      "cpu": 0.31084995028114026,
@@ -2351,5 +2351,5 @@
    }
   }
  },
- "generated": "2026-09-25T17:56:16+00:00"
+ "generated": "2026-09-27T10:55:29+00:00"
 }

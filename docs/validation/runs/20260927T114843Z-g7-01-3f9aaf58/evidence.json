@@ -1,0 +1,352 @@
+{
+  "recorder_version": 2,
+  "run_id": "20260927T114843Z-g7-01-3f9aaf58",
+  "task": "G7-01",
+  "stage": "G7",
+  "task_title": "공개 metagrating/meta-atom 전체 workflow",
+  "command": "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_g7_metagrating_r4.py D:/torchfdtd-rc-wt/tests/test_g7_metagrating_segments.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G7-01.xml",
+  "exit_code": 0,
+  "exit_code_source": "argument",
+  "execution_timestamp": "2026-09-27T20:48:34.204898+09:00",
+  "recorded_at": "2026-09-27T11:48:43+00:00",
+  "source_commit": "6d03e49d91d431c158f438309b97a0380bc8042b",
+  "source_commit_time": "2026-09-27T17:33:00+09:00",
+  "source_tree_sha256": "044e8a3b1789731d927b7bd8e960e22851eca80916b851375f460d1501ebed5f",
+  "junit_started_before_commit": false,
+  "precommit_junit_reason": null,
+  "dirty_source_manifest": [
+    {
+      "path": "docs/validation/g3/G3-04.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "8f642f3d10100564eeb97722b85bb0a13364d9cfa3ff341290163da41a185028",
+      "head_sha256": "5d2fb7eac934221d9a04bce9d8128da4e53eba2a7c7ca76501b22f3dbb6337d1"
+    },
+    {
+      "path": "docs/validation/g3/G3-05r5.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "660f3e77698ae559b894fc847cbd983d0410ebdcb1f21780a9996059be3a1e64",
+      "head_sha256": "3ba4e47f1f926a7d9121829e8da70b320c9194f648212fed6a7f0a0694c0bcb5"
+    },
+    {
+      "path": "docs/validation/g3/G3-13.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "cbd1a8bb6a4bf3ee02b76ebbf4fa9310ee0bd525f4344657962e5edd285d64a4",
+      "head_sha256": "4afb7a5b9c89b6a4cf95251fa5ad505202e247bbdbc2ca7f0ab02d1f8d16a0aa"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "0be5c98bde55fefa457890f3a030613e53da5c62ed15cfb6d07793c86e55d27a",
+      "head_sha256": "0a1db11fbc191d0de4cd05575810fcec35f52a1f7025b8ff4fa5075d874aadd9"
+    },
+    {
+      "path": "docs/validation/g3/r2/G3-08r2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "1cf1fc739a75d26b9d6fb5f6eb3200199aa690548486ae17463e67919cce52ad",
+      "head_sha256": "00d57966e826b74da4d5947bfac27df491e3ab9b1935ea4305e2bb2e51d17b26"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "47c5107a12f4535fc5cf625343f3324f37f90f040ec656603df686f98cfe1cea",
+      "head_sha256": "0cf498b4b9be89ccf20a147f40b5540a2f8a749e16392eb869337b7d7cac97ef"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "b58f8f851e3d00a0f8b1e8217deb442d978e545f74789cabe13a3e2f565b5965",
+      "head_sha256": "2eeb1007ba664028ca7ea4e497661d135c7e6dc116d4399d716241798841e2a4"
+    },
+    {
+      "path": "docs/validation/g6/coupler-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "e3c186bbe15356b293587ac07aa02a42b27e00b662015b3737ed13a0daf39607",
+      "head_sha256": "2a2df60180dce6e424b17204873e116d24119ba8218238877fe565bd2d91de4c"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed1.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "bf05fd17e7cc7cc6ec4ddd9860051c4ce65b2e18e3635b67b99f5e522ac278fd",
+      "head_sha256": "ccedd3842e94c3dd486a8be3aadccc2b423ce63a358e1f3ffb5158abf208f937"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed2.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "2977be3c54ae5f88dc47d1485fc9ffd80bef5a9a57a66cb121403d0b4d2696a6",
+      "head_sha256": "53bb3f4d0217713c2dff71f4dbd813e9f19bb43d2ad73e62a6dc9987c883758a"
+    },
+    {
+      "path": "docs/validation/g6/metagrating-seed3.json",
+      "status": "M",
+      "renamed_from": null,
+      "working_tree_sha256": "cf6583586d0b0380c72b8026a1db7c50813b732e8ccab1d4f801ad40b4f75756",
+      "head_sha256": "9fc4e2c8179d42d9ba55f17b9d40a37488f15a6d4a44d66595c66daaf633e1a7"
+    }
+  ],
+  "dirty_guarded_paths": [],
+  "dirty_allowed": false,
+  "dirty_allowed_reason": null,
+  "package_or_wheel_sha256": "eadd08329804ce205c7213325a2febd4536e169f70bc9f8399f30f14ba4dcb8e",
+  "package_path": "D:/torchfdtd-clean/dist/561d1e449464/torchfdtd-1.0.0-py3-none-any.whl",
+  "platform_id": "rtx3060-win11-lab",
+  "test_source_sha256": {
+    "tests/test_g7_metagrating_r4.py": "02c966e8f6033bd139c8a87d690bc8e806a9b56775df4620949910e4f6efbb1d",
+    "tests/test_g7_metagrating_segments.py": "da14564fa2520de0a34c906118bb0f5f48ef96dac340b81f62dffab96bd54e78"
+  },
+  "unresolved_test_classnames": [],
+  "watch_paths": [
+    "examples/g7/metagrating/*.py",
+    "docs/validation/cases/G7-01r4.json",
+    "examples/meep_comparison/metagrating/geometry.json",
+    "docs/validation/g7/G7-01/*.json"
+  ],
+  "watch_sha256": {
+    "docs/validation/cases/G7-01r4.json": "08740fc082bf830ecf00773518aafb0f150479b6bc40956a27edc6171d0a4222",
+    "docs/validation/g7/G7-01/baseline.json": "bbff1efd67e413dc1476906dcda5ea6e18cb979eae5d5b5934740c2a87df562b",
+    "docs/validation/g7/G7-01/radius-selection.json": "8201945afa44b14f30306d964e2a1664575966b12f1f53dbf6687a74bef9d8ff",
+    "docs/validation/g7/G7-01/seed7.json": "0da65fa6f6bee550578c33ce01589e0cb979ae86453d72306ca36e131892dd6a",
+    "docs/validation/g7/G7-01/seed8.json": "863e0232d216df429aad3c15ac21e13cde854795d6f32a18b7fccf07e08e1e9b",
+    "docs/validation/g7/G7-01/seed9.json": "3919b4e9b2a77cd16acd55258080dbfdd894e35405cd0cba439e9c14d650ef6f",
+    "docs/validation/g7/G7-01/summary.json": "68e8742d0f87bdb0d34381c0c20b6a939d754b864dd973952c736f3b17f01b43",
+    "docs/validation/g7/G7-01/threshold-selection.json": "0f28ef5f347d74035739f32cfa2c1681c563debb7ff9a9bc3f382117364b7288",
+    "examples/g7/metagrating/constrained_segments.py": "ced6a6dfee913e736d52ec6ed80d4416b4a731a1aa50ac82e18db7db397088d2",
+    "examples/g7/metagrating/r4_design.py": "35712334119564b60407f5a1218deb3b4705867d610d73e9f0919d8911ff34e4",
+    "examples/g7/metagrating/rcwa_check.py": "014c1f51523627bdc30ecdeb8cd398c210dd978265791743bdca2787c5e40a0a",
+    "examples/g7/metagrating/wheel_entry_r4.py": "cafa10929cae7b593bf319c5290358da3872a1fd12c1d11709cac8a14ae17cd4",
+    "examples/g7/metagrating/workflow.py": "e10211defb9188b088cc1a3eacad6e7c12f84c623038b183592f1cfdb1ee7a17",
+    "examples/g7/metagrating/workflow_r4.py": "6a084783290d077ff1dea5a70fe1513f04cb75ca203d178288681b07805d3665",
+    "examples/meep_comparison/metagrating/geometry.json": "0b880d40dfae2af210089e8a865e8cc76bfa18971120e4a079bb0b98ded5376c"
+  },
+  "fixture_path": "docs/validation/cases/G7-01r4.json",
+  "fixture_sha256": "08740fc082bf830ecf00773518aafb0f150479b6bc40956a27edc6171d0a4222",
+  "acceptance_criteria_path": "docs/validation/cases/G7-01r4.json",
+  "acceptance_criteria_sha256": "08740fc082bf830ecf00773518aafb0f150479b6bc40956a27edc6171d0a4222",
+  "case_first_commit": "fe6ec8b5225670fe75d67e38e83e156ad6f675ef",
+  "case_first_commit_time": "2026-09-27T02:39:17+09:00",
+  "declared_before_run_verified": true,
+  "declaration_note": null,
+  "environment": {
+    "python": "3.10.2",
+    "python_executable": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\Scripts\\python.exe",
+    "os": "Windows-10-10.0.26200-SP0",
+    "machine": "",
+    "torch": "2.10.0+cu126",
+    "cupy": "13.6.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "cuda_runtime": "12.6",
+    "torch_cuda_available": true,
+    "cuda_driver": "591.86",
+    "fdtd_location": "D:\\torchfdtd-rc-wt\\.local\\venvs\\rc\\lib\\site-packages\\fdtd\\__init__.py",
+    "torchfdtd_location": "D:\\torchfdtd-rc-wt\\torchfdtd\\__init__.py",
+    "fdtd": "0.2.2"
+  },
+  "hardware": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logical_cpus": 20,
+    "ram_total_bytes": 85628207104,
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3060",
+        "memory_total_mib": 12288
+      }
+    ]
+  },
+  "seed": "three-ridge logit jitter 0.03 with seeds 7, 8, 9",
+  "precision": "float32 on CUDA",
+  "backend": "cuda",
+  "physics_configuration": {
+    "base": "examples/meep_comparison/metagrating/geometry.json",
+    "period_um": 2.0,
+    "substrate_index": 1.444,
+    "ridge_index": 3.48,
+    "design_layer_um": [
+      0.01,
+      0.51
+    ],
+    "pixels": 100,
+    "pixel_um": 0.02,
+    "filter_radius_um": 0.0,
+    "projection_beta": [
+      8
+    ],
+    "iterations_per_beta": 6,
+    "optimizer": "Adam",
+    "learning_rate": 0.05,
+    "objective": "mean T+1 at 1.50, 1.55, 1.60 um, TE, normal incidence from the substrate",
+    "fabrication": {
+      "min_linewidth_um": 0.06,
+      "min_gap_um": 0.06,
+      "boundary": "periodic",
+      "binarize_at": 0.5
+    },
+    "evaluation": {
+      "meshes_um": [
+        0.01,
+        0.005
+      ],
+      "polarizations": [
+        "TE (E along the ridges)",
+        "TM (H along the ridges)"
+      ],
+      "incidence": [
+        "normal",
+        "fixed k_x = 2 pi n_sub sin(10 deg) / 1.55 um"
+      ],
+      "wavelengths_um": [
+        1.5,
+        1.6,
+        41
+      ],
+      "orders": [
+        -1,
+        0,
+        1
+      ],
+      "quantities": "reflected and transmitted order amplitudes (complex) and efficiencies",
+      "judged_mesh_um": 0.01,
+      "mesh_check": "0.005 um against 0.01 um, TE, normal incidence, every seed and wavelength"
+    },
+    "independent_solver": "TORCWA 0.1.4.2 on the same binary pixel pattern and k_x",
+    "design_mesh_um": 0.02,
+    "cell_extension_um": {
+      "air_above_layer": 3.0,
+      "substrate_below_layer": 3.0,
+      "applies_to": "every design and evaluation run"
+    },
+    "physical_time_fs": {
+      "design": 560,
+      "evaluation": 2240,
+      "note": "design optimization runs over 560 fs at 0.02 um; every evaluation, baseline and bare substrate is unchanged at 2240 fs on 0.01/0.005 um"
+    },
+    "rayleigh_anomaly_exclusion": "criteria (c) and (e) are judged at wavelengths at least 0.02 um from every Rayleigh anomaly of the evaluated k_x in air and substrate; excluded wavelengths are reported",
+    "torcwa_tm_convergence": "TM harmonics raised until the estimated error is at most 0.003",
+    "absorber": "0.4 um CPML at every mesh; at 0.005 um the 80 cells are set through BoundaryFace.layers, since Region.pml_cells is capped at 50",
+    "filter_radius_note": "the segment minimum guarantees the declared three-pixel linewidth and gap; no conic filter is applied",
+    "schedule_note": "the six-step segment schedule was fixed after development seeds 11-13 and before held-out seeds 7-9; the old r3 robust projection and 80-step schedule are superseded",
+    "open_close": "a periodic open-then-close of 3 pixels is applied to every binary design (development and declared seeds and the baseline) before its evaluation, fabrication check and TORCWA check; its changed pixels and the band-mean T+1 before and after are recorded",
+    "three_ridge_segments": {
+      "runs": 6,
+      "period_pixels": 100,
+      "minimum_run_pixels": 3,
+      "first_ridge_pixel": 2,
+      "initial_runs": [
+        3,
+        17,
+        4,
+        7,
+        13,
+        56
+      ],
+      "initial_selection": "the six-run initializer was selected by TORCWA on unjudged development designs and then evaluated by FDTD; the RCWA cross-solver comparison is not blind to this choice",
+      "initial_logit_jitter_std": 0.03,
+      "development_seeds": [
+        11,
+        12,
+        13
+      ],
+      "held_out_seeds": [
+        7,
+        8,
+        9
+      ],
+      "parameterization": "minimum length 3 pixels plus a softmax allocation of the remaining 82 pixels over six alternating ridge/gap runs; smooth logistic edges at beta 8 carry the design gradient",
+      "binary_quantization": "largest-remainder allocation with stable tie order, preserving total length 100 and all six minimum lengths",
+      "optimization": "six Adam steps at learning rate 0.05 on 0.02 um over 560 fs; TE normal mean T+1 at 1.50, 1.55 and 1.60 um",
+      "selection": "select the higher of the initial and final hard binary short-design objective, with the initial winning a tie; no 0.01/0.005 um evaluation is used to select",
+      "judged_design": "the selected hard binary design, then the unchanged periodic 3-pixel open-then-close, whose changed-pixel count must be reported"
+    }
+  },
+  "reference_method": "TORCWA (grid-free RCWA) for every evaluated case",
+  "observables": null,
+  "acceptance_limits": {
+    "all_seeds": "all three seeds reported with history, design and every evaluation",
+    "performance": "best seed band-mean T+1 (TE, normal, binary after the open and close, judged mesh 0.01 um, 2240 fs) is at least the larger of 0.7706 and the band-mean T+1 of the baseline two-ridge design evaluated in the same path",
+    "rcwa_agreement": "every order efficiency within 0.02 of TORCWA in every evaluated case at 0.01 um (TE and TM), at every wavelength at least 0.02 um from all Rayleigh anomalies of the evaluated k_x; excluded wavelengths reported",
+    "mesh": "0.005 um changes T+1 (TE, normal) by at most 0.02 at every wavelength, for every seed",
+    "energy_balance": "|1 - sum R - sum T| at most 0.02 in every evaluated case at every wavelength at least 0.02 um from all Rayleigh anomalies of the evaluated k_x; excluded wavelengths reported",
+    "fabrication": "the best seed meets the declared linewidth and gap; every seed reports its violations"
+  },
+  "observed_metrics": null,
+  "test_results": {
+    "total": 14,
+    "passed": [
+      "tests/test_g7_metagrating_r4.py::test_r4_help_describes_the_active_case_without_changing_the_shared_workflow",
+      "tests/test_g7_metagrating_r4.py::test_r4_declaration_keeps_held_out_seeds_and_numeric_limits",
+      "tests/test_g7_metagrating_r4.py::test_records_are_complete_installed_wheel_runs",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[all_seeds]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[performance]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[rcwa_agreement]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[mesh]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[energy_balance]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[fabrication]",
+      "tests/test_g7_metagrating_r4.py::test_unconverged_reference_cannot_pass_agreement",
+      "tests/test_g7_metagrating_segments.py::test_hard_design_keeps_six_fabricable_periodic_runs[runs0]",
+      "tests/test_g7_metagrating_segments.py::test_hard_design_keeps_six_fabricable_periodic_runs[runs1]",
+      "tests/test_g7_metagrating_segments.py::test_smooth_density_gradient_and_design_problem_step",
+      "tests/test_g7_metagrating_segments.py::test_invalid_runs_are_refused"
+    ],
+    "failed": [],
+    "errors": [],
+    "skipped": [],
+    "skipped_reasons": {},
+    "gpu_required_skips": [],
+    "failure_messages": {},
+    "suite_time_seconds": 1.333,
+    "suite_timestamp": "2026-09-27T20:48:34.204898+09:00"
+  },
+  "required_tests": [
+    "tests/test_g7_metagrating_r4.py",
+    "tests/test_g7_metagrating_segments.py"
+  ],
+  "skipped_required_tests": [],
+  "enumerated_required_tests": {
+    "tests/test_g7_metagrating_r4.py": [
+      "tests/test_g7_metagrating_r4.py::test_r4_help_describes_the_active_case_without_changing_the_shared_workflow",
+      "tests/test_g7_metagrating_r4.py::test_r4_declaration_keeps_held_out_seeds_and_numeric_limits",
+      "tests/test_g7_metagrating_r4.py::test_records_are_complete_installed_wheel_runs",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[all_seeds]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[performance]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[rcwa_agreement]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[mesh]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[energy_balance]",
+      "tests/test_g7_metagrating_r4.py::test_recorded_criterion[fabrication]",
+      "tests/test_g7_metagrating_r4.py::test_unconverged_reference_cannot_pass_agreement"
+    ],
+    "tests/test_g7_metagrating_segments.py": [
+      "tests/test_g7_metagrating_segments.py::test_hard_design_keeps_six_fabricable_periodic_runs[runs0]",
+      "tests/test_g7_metagrating_segments.py::test_hard_design_keeps_six_fabricable_periodic_runs[runs1]",
+      "tests/test_g7_metagrating_segments.py::test_smooth_density_gradient_and_design_problem_step",
+      "tests/test_g7_metagrating_segments.py::test_invalid_runs_are_refused"
+    ]
+  },
+  "gpu_required_skips": [],
+  "junit_original_path": ".local/tmp/junit/rerecord/G7-01.xml",
+  "artifact_paths_and_sha256": [
+    {
+      "path": "docs/validation/runs/20260927T114843Z-g7-01-3f9aaf58/junit.xml",
+      "sha256": "4e09aac9cea7be2ef6dd48b51dcd321faf192272c038d7eab62c1a8e5a6ff508",
+      "bytes": 1950,
+      "original_path": ".local/tmp/junit/rerecord/G7-01.xml"
+    }
+  ],
+  "applicable_scope": "G7-01: CPU rejudgement of complete installed-wheel acceptance records; raw numerical runs used 0.17.0. re-recorded on 6d03e49d91d4 for the release candidate.",
+  "note": "rerecord_gates.py replay of 20260927T005018Z-g7-01-f1216e48",
+  "verification_state_assigned": "VERIFIED",
+  "verification_reason": "no failures or errors, and no required test skipped or absent",
+  "null_reasons": {
+    "observables": "not declared: no case file supplied the \"observables\" entry for this run",
+    "observed_metrics": "no observed-metrics file was supplied; the JUnit pass/fail record is the only measurement"
+  },
+  "gate_file": "docs/validation/completion_gates.json"
+}

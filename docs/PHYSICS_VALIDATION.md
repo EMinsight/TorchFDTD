@@ -277,7 +277,7 @@ Environment: Python 3.10.2, numpy 2.2.6, torch 2.10.0+cu126 (CUDA runtime 12.6),
 
 ## G3-04 Mie scattering of a dielectric cylinder and sphere
 
-Case `G3-04_mie_cylinder_sphere`, record `docs/validation/g3/G3-04.json` generated 2026-09-25T16:12:36+00:00. Closed TFSF box, matched empty-box reference, cross section from the outward scattered power over the incident intensity, against the Mie series written in the test with SciPy Bessel functions. Limit: relative error at most 2.000% at the judged mesh; the coarser meshes are recorded and non-monotone sequences are allowed on staircased surfaces.
+Case `G3-04_mie_cylinder_sphere`, record `docs/validation/g3/G3-04.json` generated 2026-09-27T09:20:45+00:00. Closed TFSF box, matched empty-box reference, cross section from the outward scattered power over the incident intensity, against the Mie series written in the test with SciPy Bessel functions. Limit: relative error at most 2.000% at the judged mesh; the coarser meshes are recorded and non-monotone sequences are allowed on staircased surfaces.
 
 | Fixture | Polarization | h (um) | Grid | Steps | Execution | Max relative error | Judged |
 |---|---|---:|---|---:|---|---:|---|
@@ -363,7 +363,7 @@ Layer A (CUDA FP32 against CPU FP64 on scattering and absorption, rtol 1e-4):
 
 ### Held-out dispersive subpixel rejudgement (G3-05r5)
 
-Case `G3-05r5_drude_sphere_subpixel`, record `docs/validation/g3/G3-05r5.json` generated 2026-09-26T12:52:31+00:00. The three sphere radii and their off-lattice centres were declared before this run. The Drude model, mesh sequence, reference, observables and size-ordered error budgets are those of the original case. The judged rows are CPU FP64 at h = 0.005 um; other meshes and CUDA FP32 are reported for convergence and Layer A.
+Case `G3-05r5_drude_sphere_subpixel`, record `docs/validation/g3/G3-05r5.json` generated 2026-09-27T10:22:58+00:00. The three sphere radii and their off-lattice centres were declared before this run. The Drude model, mesh sequence, reference, observables and size-ordered error budgets are those of the original case. The judged rows are CPU FP64 at h = 0.005 um; other meshes and CUDA FP32 are reported for convergence and Layer A.
 
 | r (um) | h (um) | Execution | Max scattering error | Budget | Max absorption error | Budget | Inner/outer | Judged |
 |---:|---:|---|---:|---:|---:|---:|---:|---|
@@ -493,7 +493,7 @@ Empty cell (no grating): forward zero-order transmission relative to the inciden
 | TM | 20 | cpu float64 | 0.99999732 | 3.0e-31 | 4.2e-08 | 1e-04 |
 | TM | 20 | cuda float32 | 0.99999341 | 1.3e-12 | 4.2e-08 | 1e-04 |
 
-**Revision 2 (case `G3-08r2_bloch_grating_rcwa_layer_a`, records under `docs/validation/g3/r2`, generated 2026-09-25T17:56:16+00:00).** Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record. The re-run of the 12 judged physics rows gives a largest efficiency error of 0.0031, a largest dominant phase error of 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits.
+**Revision 2 (case `G3-08r2_bloch_grating_rcwa_layer_a`, records under `docs/validation/g3/r2`, generated 2026-09-27T10:55:29+00:00).** Only the layer-A tolerance is restated as the program pair rtol 1e-4 and atol 1e-6; the first case and its FAILED run stay on record. The re-run of the 12 judged physics rows gives a largest efficiency error of 0.0031, a largest dominant phase error of 0.0143 rad and sums of T and R within 0.0069 of one, all within the unchanged limits.
 
 | Pol | Angle | Wavelength (um) | Max relative difference | Largest excess over rtol abs(cpu) + atol | Result |
 |---|---:|---:|---:|---:|---|
@@ -511,20 +511,20 @@ Empty cell (no grating): forward zero-order transmission relative to the inciden
 | TM | 20 | 1.06 | 9.52e-05 | -1.0e-06 | pass |
 ## G3-13 Curved-interface convergence
 
-Case `G3-13_curved_interface_convergence`, record `docs/validation/g3/G3-13.json` generated 2026-09-25T18:07:10+00:00. The G3-04 cylinder (radius 0.3 um, n = 1.5) at h = [0.05, 0.025, 0.0125] um with the staircase and the subpixel interface, centre shifts of [0.0, 0.25, 0.5] h at h = 0.05 um, and the differentiable-solid transition width [1e-06, 0.125, 0.25, 0.5, 1.0, 2.0] h at h = 0.05 um. Pass/fail item: the subpixel error at h is below the staircase error at h; everything else is reported.
+Case `G3-13_curved_interface_convergence`, record `docs/validation/g3/G3-13.json` generated 2026-09-27T11:05:17+00:00. The G3-04 cylinder (radius 0.3 um, n = 1.5) at h = [0.05, 0.025, 0.0125] um with the staircase and the subpixel interface, centre shifts of [0.0, 0.25, 0.5] h at h = 0.05 um, and the differentiable-solid transition width [1e-06, 0.125, 0.25, 0.5, 1.0, 2.0] h at h = 0.05 um. Pass/fail item: the subpixel error at h is below the staircase error at h; everything else is reported.
 
 | Polarization | Interface | h (um) | Max relative error | Wall (s) |
 |---|---|---:|---:|---:|
-| TE | staircase | 0.0125 | 0.373% | 26.8 |
+| TE | staircase | 0.0125 | 0.373% | 19.0 |
 | TE | staircase | 0.025 | 0.700% | 2.0 |
-| TE | staircase | 0.05 | 11.163% | 0.6 |
-| TE | subpixel | 0.0125 | 0.106% | 30.4 |
+| TE | staircase | 0.05 | 11.163% | 0.5 |
+| TE | subpixel | 0.0125 | 0.106% | 20.8 |
 | TE | subpixel | 0.025 | 0.454% | 2.2 |
 | TE | subpixel | 0.05 | 1.974% | 0.6 |
-| TM | staircase | 0.0125 | 1.737% | 21.3 |
+| TM | staircase | 0.0125 | 1.737% | 19.9 |
 | TM | staircase | 0.025 | 5.117% | 2.0 |
 | TM | staircase | 0.05 | 3.830% | 0.5 |
-| TM | subpixel | 0.0125 | 0.064% | 26.2 |
+| TM | subpixel | 0.0125 | 0.064% | 19.6 |
 | TM | subpixel | 0.025 | 0.253% | 2.0 |
 | TM | subpixel | 0.05 | 0.997% | 0.6 |
 

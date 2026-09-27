@@ -25,7 +25,7 @@
     6.075091712409337e-33,
     0.0
    ],
-   "backward_zero_order": 5.630209483404908e-08,
+   "backward_zero_order": 5.630209483405765e-08,
    "zero_order_limit": 1e-06,
    "other_order_limit": 1e-06
   },
@@ -40,7 +40,7 @@
    "zero_order_transmission": 0.9999973174085071,
    "other_orders": [
     0.0,
-    2.9654441718188966e-31,
+    2.777357307313315e-31,
     0.0,
     0.0
    ],
@@ -56,14 +56,14 @@
    "backend": "cuda",
    "precision": "float32",
    "duration_fs": 150,
-   "zero_order_transmission": 1.000000372919116,
+   "zero_order_transmission": 1.000000372919117,
    "other_orders": [
     0.0,
     1.6765741898888182e-33,
     3.249668451943085e-33,
     0.0
    ],
-   "backward_zero_order": 5.6469039385577686e-08,
+   "backward_zero_order": 5.64690393857959e-08,
    "zero_order_limit": 0.0001,
    "other_order_limit": 0.0001
   },
@@ -78,7 +78,7 @@
    "zero_order_transmission": 0.9999934051806708,
    "other_orders": [
     0.0,
-    1.307906245429146e-12,
+    1.3079062454640255e-12,
     0.0,
     0.0
    ],
@@ -104,24 +104,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.35028003065259466,
+      "efficiency": 0.3502800306525945,
       "torcwa_efficiency": 0.35042699220889334,
-      "efficiency_error": -0.0001469615562986748,
+      "efficiency_error": -0.00014696155629884133,
       "phase_rad": 0.6651896517379041,
       "torcwa_phase_rad": 0.6641186184360632,
       "phase_error_rad": 0.0010710333018408846,
       "dominant": true,
-      "counter_direction_power": 4.7023115908791394e-08
+      "counter_direction_power": 4.702311590881997e-08
      },
      "reflection": {
-      "efficiency": 0.06135481160656243,
+      "efficiency": 0.06135481160656242,
       "torcwa_efficiency": 0.06116610801959139,
-      "efficiency_error": 0.00018870358697103962,
+      "efficiency_error": 0.00018870358697103268,
       "phase_rad": 2.462738858668515,
       "torcwa_phase_rad": 2.4617778034850555,
       "phase_error_rad": 0.0009610551834593473,
       "dominant": true,
-      "counter_direction_power": 2.621294171666369e-09
+      "counter_direction_power": 2.6212941716652965e-09
      }
     },
     "0": {
@@ -169,11 +169,11 @@
      }
     }
    },
-   "efficiency_sum": 1.0001117510680761,
+   "efficiency_sum": 1.000111751068076,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.00018870477874304709,
    "max_dominant_phase_error_rad": 0.0018940263702759697,
-   "wall_s": 20.221033100009663
+   "wall_s": 20.376737800019328
   },
   "TE/0deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -218,21 +218,21 @@
       "efficiency": 0.080363901216202,
       "torcwa_efficiency": 0.08034689326707364,
       "efficiency_error": 1.700794912835868e-05,
-      "phase_rad": -1.426447228324024,
+      "phase_rad": -1.4264472283240242,
       "torcwa_phase_rad": -1.42778997647448,
-      "phase_error_rad": 0.0013427481504559857,
+      "phase_error_rad": 0.0013427481504557637,
       "dominant": true,
-      "counter_direction_power": 2.8566374320017897e-10
+      "counter_direction_power": 2.8566374320022033e-10
      },
      "reflection": {
-      "efficiency": 0.15818304299907265,
+      "efficiency": 0.1581830429990727,
       "torcwa_efficiency": 0.15874030357586139,
-      "efficiency_error": -0.0005572605767887318,
-      "phase_rad": -1.2963916532929993,
+      "efficiency_error": -0.0005572605767886762,
+      "phase_rad": -1.296391653292999,
       "torcwa_phase_rad": -1.2990734740836594,
-      "phase_error_rad": 0.002681820790660039,
+      "phase_error_rad": 0.002681820790660261,
       "dominant": true,
-      "counter_direction_power": 6.739084902714544e-10
+      "counter_direction_power": 6.739084902762771e-10
      }
     },
     "1": {
@@ -260,9 +260,9 @@
    },
    "efficiency_sum": 1.0004438392517072,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.0005572605767887318,
-   "max_dominant_phase_error_rad": 0.002681820790660039,
-   "wall_s": 20.265715000015916
+   "max_efficiency_error": 0.0005572605767886762,
+   "max_dominant_phase_error_rad": 0.002681820790660261,
+   "wall_s": 20.431212799972855
   },
   "TE/0deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -333,17 +333,17 @@
       "torcwa_phase_rad": -0.5616984735435347,
       "phase_error_rad": -9.886829993299706e-05,
       "dominant": true,
-      "counter_direction_power": 1.108454960125993e-06
+      "counter_direction_power": 1.1084549601260664e-06
      },
      "reflection": {
-      "efficiency": 0.019629245939678134,
+      "efficiency": 0.01962924593967812,
       "torcwa_efficiency": 0.019612521648511592,
-      "efficiency_error": 1.6724291166541477e-05,
+      "efficiency_error": 1.67242911665276e-05,
       "phase_rad": -3.0608438045673734,
       "torcwa_phase_rad": -3.06137777806967,
       "phase_error_rad": 0.0005339735022964476,
       "dominant": false,
-      "counter_direction_power": 5.247525509189168e-08
+      "counter_direction_power": 5.2475255091878236e-08
      }
     }
    },
@@ -351,7 +351,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0006100990428626329,
    "max_dominant_phase_error_rad": 0.00327451376625576,
-   "wall_s": 20.26037610002095
+   "wall_s": 20.44498420000309
   },
   "TE/20deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -371,24 +371,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.4601748722594368,
+      "efficiency": 0.4601748722594369,
       "torcwa_efficiency": 0.4632305063246826,
-      "efficiency_error": -0.0030556340652457825,
-      "phase_rad": 0.0017699381378296502,
+      "efficiency_error": -0.003055634065245727,
+      "phase_rad": 0.0017699381378295707,
       "torcwa_phase_rad": 0.0027140520701912254,
-      "phase_error_rad": -0.0009441139323615752,
+      "phase_error_rad": -0.0009441139323616548,
       "dominant": true,
-      "counter_direction_power": 1.6716421030924191e-09
+      "counter_direction_power": 1.6716421030916463e-09
      },
      "reflection": {
-      "efficiency": 0.12975684976464735,
+      "efficiency": 0.1297568497646473,
       "torcwa_efficiency": 0.13010920369574755,
-      "efficiency_error": -0.00035235393110019664,
-      "phase_rad": 0.7156147579455434,
+      "efficiency_error": -0.00035235393110025215,
+      "phase_rad": 0.7156147579455433,
       "torcwa_phase_rad": 0.7206069483307477,
-      "phase_error_rad": -0.004992190385204265,
+      "phase_error_rad": -0.004992190385204376,
       "dominant": true,
-      "counter_direction_power": 4.321456539803231e-10
+      "counter_direction_power": 4.321456539830593e-10
      }
     },
     "0": {
@@ -416,9 +416,9 @@
    },
    "efficiency_sum": 0.9930870468400151,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.0030556340652457825,
+   "max_efficiency_error": 0.003055634065245727,
    "max_dominant_phase_error_rad": 0.014273250743412236,
-   "wall_s": 20.259405799995875
+   "wall_s": 20.439807099988684
   },
   "TE/20deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -485,7 +485,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0012760213463441916,
    "max_dominant_phase_error_rad": 0.004833699222672516,
-   "wall_s": 20.254592899989802
+   "wall_s": 20.461462599982042
   },
   "TE/20deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -552,7 +552,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0015355926757124605,
    "max_dominant_phase_error_rad": 0.0008292747900005004,
-   "wall_s": 20.259658499999205
+   "wall_s": 20.463644800009206
   },
   "TM/0deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -641,7 +641,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.00015693791723568433,
    "max_dominant_phase_error_rad": 0.0004367598646149995,
-   "wall_s": 20.26305819998379
+   "wall_s": 20.47861270001158
   },
   "TM/0deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -661,24 +661,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.4267311832769224,
+      "efficiency": 0.426731183276922,
       "torcwa_efficiency": 0.4263538388548103,
-      "efficiency_error": 0.0003773444221120692,
-      "phase_rad": -0.4289269913384033,
+      "efficiency_error": 0.0003773444221116806,
+      "phase_rad": -0.42892699133840356,
       "torcwa_phase_rad": -0.42892795732348193,
-      "phase_error_rad": 9.659850786492008e-07,
+      "phase_error_rad": 9.65985078371645e-07,
       "dominant": true,
-      "counter_direction_power": 6.113956421562715e-08
+      "counter_direction_power": 6.113956421559568e-08
      },
      "reflection": {
-      "efficiency": 0.016295904839032364,
+      "efficiency": 0.01629590483903237,
       "torcwa_efficiency": 0.01622343013673235,
-      "efficiency_error": 7.247470230001274e-05,
-      "phase_rad": -1.943581512763719,
+      "efficiency_error": 7.247470230001968e-05,
+      "phase_rad": -1.9435815127637188,
       "torcwa_phase_rad": -1.944371823215898,
-      "phase_error_rad": 0.0007903104521789217,
+      "phase_error_rad": 0.0007903104521791438,
       "dominant": false,
-      "counter_direction_power": 3.6286807657810674e-07
+      "counter_direction_power": 3.628680765781283e-07
      }
     },
     "0": {
@@ -705,32 +705,32 @@
     },
     "1": {
      "transmission": {
-      "efficiency": 0.42673475339373873,
+      "efficiency": 0.42673475339373845,
       "torcwa_efficiency": 0.4263538388143941,
-      "efficiency_error": 0.0003809145793446378,
-      "phase_rad": -0.4289232717957069,
+      "efficiency_error": 0.00038091457934436024,
+      "phase_rad": -0.428923271795707,
       "torcwa_phase_rad": -0.4289279573073345,
-      "phase_error_rad": 4.685511627633421e-06,
+      "phase_error_rad": 4.6855116275223985e-06,
       "dominant": true,
-      "counter_direction_power": 6.118649607784993e-08
+      "counter_direction_power": 6.118649607784544e-08
      },
      "reflection": {
-      "efficiency": 0.016296591251298117,
+      "efficiency": 0.016296591251298106,
       "torcwa_efficiency": 0.01622343013056843,
-      "efficiency_error": 7.316112072968534e-05,
+      "efficiency_error": 7.316112072967493e-05,
       "phase_rad": -1.9435506348904916,
       "torcwa_phase_rad": -1.9443718232577945,
       "phase_error_rad": 0.0008211883673028275,
       "dominant": false,
-      "counter_direction_power": 3.6287872260039347e-07
+      "counter_direction_power": 3.628787226004166e-07
      }
     }
    },
-   "efficiency_sum": 1.0002078061043627,
+   "efficiency_sum": 1.0002078061043622,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0005015466303309873,
    "max_dominant_phase_error_rad": 0.001765054452290915,
-   "wall_s": 20.265239000000292
+   "wall_s": 20.614504700002726
   },
   "TM/0deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -753,11 +753,11 @@
       "efficiency": 0.39609325226506836,
       "torcwa_efficiency": 0.39595605417991003,
       "efficiency_error": 0.00013719808515832987,
-      "phase_rad": -0.6406065066006869,
+      "phase_rad": -0.6406065066006866,
       "torcwa_phase_rad": -0.6402221568179324,
-      "phase_error_rad": -0.0003843497827544784,
+      "phase_error_rad": -0.00038434978275425635,
       "dominant": true,
-      "counter_direction_power": 1.395902031593699e-07
+      "counter_direction_power": 1.395902031593796e-07
      },
      "reflection": {
       "efficiency": 0.026295543454299342,
@@ -767,7 +767,7 @@
       "torcwa_phase_rad": -2.1505359040674623,
       "phase_error_rad": -0.001483894200400293,
       "dominant": false,
-      "counter_direction_power": 8.33260977078371e-07
+      "counter_direction_power": 8.332609770783226e-07
      }
     },
     "0": {
@@ -819,7 +819,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.00045921490420902655,
    "max_dominant_phase_error_rad": 0.003219217668196439,
-   "wall_s": 20.271637900004862
+   "wall_s": 20.485436200047843
   },
   "TM/20deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -886,7 +886,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0009184743448037713,
    "max_dominant_phase_error_rad": 0.005332618599798389,
-   "wall_s": 20.29149270002381
+   "wall_s": 20.598313900001813
   },
   "TM/20deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -906,14 +906,14 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.5528480902709128,
+      "efficiency": 0.5528480902709125,
       "torcwa_efficiency": 0.5538528748271506,
-      "efficiency_error": -0.0010047845562378699,
-      "phase_rad": -0.0865955288167596,
+      "efficiency_error": -0.001004784556238092,
+      "phase_rad": -0.08659552881675961,
       "torcwa_phase_rad": -0.0864182144655129,
-      "phase_error_rad": -0.00017731435124669626,
+      "phase_error_rad": -0.00017731435124671013,
       "dominant": true,
-      "counter_direction_power": 4.553266308449071e-09
+      "counter_direction_power": 4.5532663084560225e-09
      },
      "reflection": {
       "efficiency": 0.0281381508418945,
@@ -923,7 +923,7 @@
       "torcwa_phase_rad": -1.6177613643953812,
       "phase_error_rad": 0.005082220355247635,
       "dominant": false,
-      "counter_direction_power": 2.4886180145197203e-09
+      "counter_direction_power": 2.488618014518555e-09
      }
     },
     "0": {
@@ -949,11 +949,11 @@
      }
     }
    },
-   "efficiency_sum": 0.9965285412956688,
+   "efficiency_sum": 0.9965285412956686,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0017359410089531901,
    "max_dominant_phase_error_rad": 0.003372707950039522,
-   "wall_s": 20.25260789997992
+   "wall_s": 20.46979210001882
   },
   "TM/20deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -973,24 +973,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.5448256018417305,
+      "efficiency": 0.5448256018417307,
       "torcwa_efficiency": 0.544884588236893,
-      "efficiency_error": -5.898639516255244e-05,
-      "phase_rad": -0.5280637272900666,
+      "efficiency_error": -5.8986395162330396e-05,
+      "phase_rad": -0.5280637272900665,
       "torcwa_phase_rad": -0.5298400104017086,
-      "phase_error_rad": 0.0017762831116420186,
+      "phase_error_rad": 0.0017762831116421296,
       "dominant": true,
-      "counter_direction_power": 1.508664992027723e-08
+      "counter_direction_power": 1.5086649920305773e-08
      },
      "reflection": {
-      "efficiency": 0.00533363301424166,
+      "efficiency": 0.005333633014241662,
       "torcwa_efficiency": 0.005217792102717784,
-      "efficiency_error": 0.00011584091152387621,
+      "efficiency_error": 0.00011584091152387795,
       "phase_rad": -2.7575466677161846,
       "torcwa_phase_rad": -2.7669952002452494,
       "phase_error_rad": 0.009448532529064746,
       "dominant": false,
-      "counter_direction_power": 1.8562038634347808e-08
+      "counter_direction_power": 1.856203863435282e-08
      }
     },
     "0": {
@@ -1016,11 +1016,11 @@
      }
     }
    },
-   "efficiency_sum": 0.9973008366759504,
+   "efficiency_sum": 0.9973008366759506,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0017770628587849002,
    "max_dominant_phase_error_rad": 0.003143768557600346,
-   "wall_s": 20.258766000013566
+   "wall_s": 20.48887729999842
   },
   "TE/0deg/1.02um/staircase/h=0.01/300fs/cuda-float32": {
    "polarization": "TE",
@@ -1062,14 +1062,14 @@
     },
     "0": {
      "transmission": {
-      "efficiency": 0.08022042856389958,
+      "efficiency": 0.08022042856389956,
       "torcwa_efficiency": 0.08034689326707364,
-      "efficiency_error": -0.00012646470317406733,
-      "phase_rad": -1.4223618646150433,
+      "efficiency_error": -0.0001264647031740812,
+      "phase_rad": -1.422361864615043,
       "torcwa_phase_rad": -1.42778997647448,
-      "phase_error_rad": 0.005428111859436591,
+      "phase_error_rad": 0.005428111859436813,
       "dominant": true,
-      "counter_direction_power": 4.415503409791649e-09
+      "counter_direction_power": 4.415503409786374e-09
      },
      "reflection": {
       "efficiency": 0.15836650146981415,
@@ -1079,7 +1079,7 @@
       "torcwa_phase_rad": -1.2990734740836594,
       "phase_error_rad": 0.06831909322890417,
       "dominant": true,
-      "counter_direction_power": 9.397070330365267e-09
+      "counter_direction_power": 9.397070330359605e-09
      }
     },
     "1": {
@@ -1109,7 +1109,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.00041037058762005696,
    "max_dominant_phase_error_rad": 0.06831909322890417,
-   "wall_s": 5.564857699995628,
+   "wall_s": 5.613624599995092,
    "judged_against_torcwa": false,
    "failures": [
     "dominant phase error 0.0683 > 0.02"
@@ -1155,24 +1155,24 @@
     },
     "0": {
      "transmission": {
-      "efficiency": 0.08040648042325549,
+      "efficiency": 0.0804064804232555,
       "torcwa_efficiency": 0.08034689326707364,
-      "efficiency_error": 5.958715618184507e-05,
-      "phase_rad": -1.4266446659340526,
+      "efficiency_error": 5.958715618185895e-05,
+      "phase_rad": -1.4266446659340524,
       "torcwa_phase_rad": -1.42778997647448,
-      "phase_error_rad": 0.0011453105404273245,
+      "phase_error_rad": 0.0011453105404275465,
       "dominant": true,
-      "counter_direction_power": 2.826911819492133e-10
+      "counter_direction_power": 2.826911819504642e-10
      },
      "reflection": {
-      "efficiency": 0.15831276723145715,
+      "efficiency": 0.15831276723145712,
       "torcwa_efficiency": 0.15874030357586139,
-      "efficiency_error": -0.0004275363444042335,
+      "efficiency_error": -0.00042753634440426125,
       "phase_rad": -1.265745999780432,
       "torcwa_phase_rad": -1.2990734740836594,
       "phase_error_rad": 0.03332747430322747,
       "dominant": true,
-      "counter_direction_power": 6.823995559716602e-10
+      "counter_direction_power": 6.823995559711176e-10
      }
     },
     "1": {
@@ -1200,9 +1200,9 @@
    },
    "efficiency_sum": 1.0004451074591358,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.0004275363444042335,
+   "max_efficiency_error": 0.00042753634440426125,
    "max_dominant_phase_error_rad": 0.03332747430322747,
-   "wall_s": 20.163221800001338,
+   "wall_s": 20.405817800026853,
    "judged_against_torcwa": false,
    "failures": [
     "dominant phase error 0.0333 > 0.02"
@@ -1248,14 +1248,14 @@
     },
     "0": {
      "transmission": {
-      "efficiency": 0.08029454542864946,
+      "efficiency": 0.08029454542864942,
       "torcwa_efficiency": 0.08034689326707364,
-      "efficiency_error": -5.2347838424185444e-05,
+      "efficiency_error": -5.234783842422708e-05,
       "phase_rad": -1.4198337044243405,
       "torcwa_phase_rad": -1.42778997647448,
       "phase_error_rad": 0.007956272050139379,
       "dominant": true,
-      "counter_direction_power": 4.681749560652334e-09
+      "counter_direction_power": 4.681749560642149e-09
      },
      "reflection": {
       "efficiency": 0.156406642969226,
@@ -1265,7 +1265,7 @@
       "torcwa_phase_rad": -1.2990734740836594,
       "phase_error_rad": 0.004839848911692091,
       "dominant": true,
-      "counter_direction_power": 8.288131158109926e-09
+      "counter_direction_power": 8.28813115810268e-09
      }
     },
     "1": {
@@ -1295,7 +1295,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.002333660606635396,
    "max_dominant_phase_error_rad": 0.007956272050139379,
-   "wall_s": 2.8331734999956097,
+   "wall_s": 2.8650866000098176,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1317,14 +1317,14 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.4334722737116787,
+      "efficiency": 0.4334722737116788,
       "torcwa_efficiency": 0.4263538388548103,
-      "efficiency_error": 0.007118434856868361,
-      "phase_rad": -0.43596226607904115,
+      "efficiency_error": 0.007118434856868472,
+      "phase_rad": -0.4359622660790409,
       "torcwa_phase_rad": -0.42892795732348193,
-      "phase_error_rad": -0.007034308755559215,
+      "phase_error_rad": -0.007034308755558993,
       "dominant": true,
-      "counter_direction_power": 1.451727277080319e-07
+      "counter_direction_power": 1.4517272770792527e-07
      },
      "reflection": {
       "efficiency": 0.017577334169250662,
@@ -1334,7 +1334,7 @@
       "torcwa_phase_rad": -1.944371823215898,
       "phase_error_rad": 0.07556888587063826,
       "dominant": false,
-      "counter_direction_power": 6.532044532673187e-07
+      "counter_direction_power": 6.532044532673488e-07
      }
     },
     "0": {
@@ -1361,32 +1361,32 @@
     },
     "1": {
      "transmission": {
-      "efficiency": 0.4226290633308146,
+      "efficiency": 0.42262906333081474,
       "torcwa_efficiency": 0.4263538388143941,
-      "efficiency_error": -0.0037247754835794677,
-      "phase_rad": -0.4147367421636062,
+      "efficiency_error": -0.0037247754835793567,
+      "phase_rad": -0.414736742163606,
       "torcwa_phase_rad": -0.4289279573073345,
-      "phase_error_rad": 0.014191215143728342,
+      "phase_error_rad": 0.014191215143728508,
       "dominant": true,
-      "counter_direction_power": 1.6351294914271257e-07
+      "counter_direction_power": 1.6351294914269423e-07
      },
      "reflection": {
-      "efficiency": 0.016376778021526973,
+      "efficiency": 0.01637677802152697,
       "torcwa_efficiency": 0.01622343013056843,
-      "efficiency_error": 0.00015334789095854118,
+      "efficiency_error": 0.0001533478909585377,
       "phase_rad": -1.8831050953837545,
       "torcwa_phase_rad": -1.9443718232577945,
       "phase_error_rad": 0.06126672787403997,
       "dominant": false,
-      "counter_direction_power": 3.3113312576373296e-07
+      "counter_direction_power": 3.31133125763733e-07
      }
     }
    },
-   "efficiency_sum": 1.0002268610974459,
+   "efficiency_sum": 1.000226861097446,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.007118434856868361,
-   "max_dominant_phase_error_rad": 0.014191215143728342,
-   "wall_s": 5.561743600002956,
+   "max_efficiency_error": 0.007118434856868472,
+   "max_dominant_phase_error_rad": 0.014191215143728508,
+   "wall_s": 5.607310899998993,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1408,14 +1408,14 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.4300850971345766,
+      "efficiency": 0.4300850971345765,
       "torcwa_efficiency": 0.4263538388548103,
-      "efficiency_error": 0.0037312582797662808,
-      "phase_rad": -0.4332975219978595,
+      "efficiency_error": 0.0037312582797661697,
+      "phase_rad": -0.43329752199785937,
       "torcwa_phase_rad": -0.42892795732348193,
-      "phase_error_rad": -0.004369564674377546,
+      "phase_error_rad": -0.004369564674377435,
       "dominant": true,
-      "counter_direction_power": 9.167666577640044e-08
+      "counter_direction_power": 9.167666577641872e-08
      },
      "reflection": {
       "efficiency": 0.01692841398186232,
@@ -1425,7 +1425,7 @@
       "torcwa_phase_rad": -1.944371823215898,
       "phase_error_rad": 0.0368886958860799,
       "dominant": false,
-      "counter_direction_power": 4.753088169042486e-07
+      "counter_direction_power": 4.7530881690423777e-07
      }
     },
     "0": {
@@ -1455,29 +1455,29 @@
       "efficiency": 0.42450619805201545,
       "torcwa_efficiency": 0.4263538388143941,
       "efficiency_error": -0.001847640762378644,
-      "phase_rad": -0.42258712637879664,
+      "phase_rad": -0.42258712637879686,
       "torcwa_phase_rad": -0.4289279573073345,
-      "phase_error_rad": 0.006340830928537877,
+      "phase_error_rad": 0.006340830928537655,
       "dominant": true,
-      "counter_direction_power": 1.1079999332636142e-07
+      "counter_direction_power": 1.107999933263749e-07
      },
      "reflection": {
       "efficiency": 0.016371004841409485,
       "torcwa_efficiency": 0.01622343013056843,
       "efficiency_error": 0.0001475747108410537,
-      "phase_rad": -1.9141426153381527,
+      "phase_rad": -1.9141426153381529,
       "torcwa_phase_rad": -1.9443718232577945,
-      "phase_error_rad": 0.030229207919641787,
+      "phase_error_rad": 0.030229207919641565,
       "dominant": false,
-      "counter_direction_power": 3.407271011852033e-07
+      "counter_direction_power": 3.40727101185205e-07
      }
     }
    },
    "efficiency_sum": 1.0002150778284002,
    "torcwa_harmonics": 640,
-   "max_efficiency_error": 0.0037312582797662808,
-   "max_dominant_phase_error_rad": 0.006340830928537877,
-   "wall_s": 20.173569400009,
+   "max_efficiency_error": 0.0037312582797661697,
+   "max_dominant_phase_error_rad": 0.006340830928537655,
+   "wall_s": 20.405380900017917,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1499,24 +1499,24 @@
    "orders": {
     "-1": {
      "transmission": {
-      "efficiency": 0.4276187277485045,
+      "efficiency": 0.42761872774850435,
       "torcwa_efficiency": 0.4263538388548103,
-      "efficiency_error": 0.0012648888936941938,
-      "phase_rad": -0.4256628499389599,
+      "efficiency_error": 0.0012648888936940272,
+      "phase_rad": -0.42566284993896003,
       "torcwa_phase_rad": -0.42892795732348193,
-      "phase_error_rad": 0.0032651073845220147,
+      "phase_error_rad": 0.0032651073845219036,
       "dominant": true,
-      "counter_direction_power": 5.250017514685308e-07
+      "counter_direction_power": 5.25001751468386e-07
      },
      "reflection": {
-      "efficiency": 0.016125728113919324,
+      "efficiency": 0.016125728113919317,
       "torcwa_efficiency": 0.01622343013673235,
-      "efficiency_error": -9.770202281302737e-05,
-      "phase_rad": -1.9306390759996923,
+      "efficiency_error": -9.77020228130343e-05,
+      "phase_rad": -1.9306390759996928,
       "torcwa_phase_rad": -1.944371823215898,
-      "phase_error_rad": 0.013732747216205654,
+      "phase_error_rad": 0.01373274721620521,
       "dominant": false,
-      "counter_direction_power": 4.993788473207395e-06
+      "counter_direction_power": 4.993788473207413e-06
      }
     },
     "0": {
@@ -1560,19 +1560,19 @@
       "torcwa_phase_rad": -1.9443718232577945,
       "phase_error_rad": 0.013859128871187787,
       "dominant": false,
-      "counter_direction_power": 4.994468009550307e-06
+      "counter_direction_power": 4.994468009550319e-06
      }
     }
    },
-   "efficiency_sum": 1.0016242990627324,
+   "efficiency_sum": 1.0016242990627322,
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0012746517278790503,
    "max_dominant_phase_error_rad": 0.0032812712711927094,
-   "wall_s": 2.8414077000052202,
+   "wall_s": 2.85932370001683,
    "judged_against_torcwa": false,
    "failures": []
   }
  },
- "generated": "2026-09-25T17:37:02+00:00",
+ "generated": "2026-09-27T10:36:52+00:00",
  "full_mode": true
 }

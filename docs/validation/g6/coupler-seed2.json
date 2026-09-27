@@ -49,7 +49,7 @@
    "gradient_norm": 0.04434816166758537,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 9.620325600000797
+   "elapsed_s": 10.092109300021548
   },
   {
    "iteration": 2,
@@ -62,7 +62,7 @@
    "gradient_norm": 0.04746707156300545,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 9.611285599996336
+   "elapsed_s": 10.095873399986885
   },
   {
    "iteration": 3,
@@ -75,7 +75,7 @@
    "gradient_norm": 0.04861944913864136,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 9.652425899985246
+   "elapsed_s": 10.168210500036366
   },
   {
    "iteration": 4,
@@ -88,7 +88,7 @@
    "gradient_norm": 0.04750639945268631,
    "beta": 4.0,
    "beta_next": 8.0,
-   "elapsed_s": 9.641369499993743
+   "elapsed_s": 10.186889500007965
   },
   {
    "iteration": 5,
@@ -101,7 +101,7 @@
    "gradient_norm": 0.18438273668289185,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 9.680043400003342
+   "elapsed_s": 10.208321400044952
   },
   {
    "iteration": 6,
@@ -114,7 +114,7 @@
    "gradient_norm": 0.14465443789958954,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 9.608345899992855
+   "elapsed_s": 10.136447400029283
   },
   {
    "iteration": 7,
@@ -127,7 +127,7 @@
    "gradient_norm": 0.06340298056602478,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 9.591439599986188
+   "elapsed_s": 10.166960100003053
   },
   {
    "iteration": 8,
@@ -140,7 +140,7 @@
    "gradient_norm": 0.06091455742716789,
    "beta": 8.0,
    "beta_next": 16.0,
-   "elapsed_s": 9.5936209000065
+   "elapsed_s": 10.208123299991712
   },
   {
    "iteration": 9,
@@ -153,7 +153,7 @@
    "gradient_norm": 0.047106850892305374,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 9.63120670002536
+   "elapsed_s": 10.196083699993324
   },
   {
    "iteration": 10,
@@ -166,7 +166,7 @@
    "gradient_norm": 0.055633243173360825,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 9.61203150000074
+   "elapsed_s": 10.194064099981915
   },
   {
    "iteration": 11,
@@ -179,7 +179,7 @@
    "gradient_norm": 0.05436505749821663,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 9.620981300016865
+   "elapsed_s": 10.187990400008857
   },
   {
    "iteration": 12,
@@ -192,7 +192,7 @@
    "gradient_norm": 0.04602069780230522,
    "beta": 16.0,
    "beta_next": 32.0,
-   "elapsed_s": 9.74667320001754
+   "elapsed_s": 10.114731799985748
   },
   {
    "iteration": 13,
@@ -205,7 +205,7 @@
    "gradient_norm": 0.02809012122452259,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 9.619926300016232
+   "elapsed_s": 10.113156499981415
   },
   {
    "iteration": 14,
@@ -218,7 +218,7 @@
    "gradient_norm": 0.02029678225517273,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 9.616245399985928
+   "elapsed_s": 10.14565959997708
   },
   {
    "iteration": 15,
@@ -231,7 +231,7 @@
    "gradient_norm": 0.01533710677176714,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 9.645710899989353
+   "elapsed_s": 10.270857600029558
   },
   {
    "iteration": 16,
@@ -244,7 +244,7 @@
    "gradient_norm": 0.012350773438811302,
    "beta": 32.0,
    "beta_next": 64.0,
-   "elapsed_s": 9.622156800003722
+   "elapsed_s": 10.171818400034681
   }
  ],
  "fabrication": {
@@ -458,6 +458,6 @@
    "fine_gds": "polygons read back by import_gds from the exported file"
   }
  },
- "wall_time_s": 189.86568760001683,
+ "wall_time_s": 199.14016330003506,
  "device": "cpu"
 }
