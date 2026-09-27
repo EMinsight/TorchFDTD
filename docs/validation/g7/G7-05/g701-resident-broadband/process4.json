@@ -1,0 +1,188 @@
+{
+ "scenario": "g701-resident-broadband",
+ "reduced": false,
+ "backend": "cuda",
+ "package_version": "0.17.0",
+ "package_path": "D:\\TorchFDTD\\.local\\venvs\\g7-05\\Lib\\site-packages\\torchfdtd\\__init__.py",
+ "interpreter": "D:\\TorchFDTD\\.local\\venvs\\g7-05\\Scripts\\python.exe",
+ "cpu_threads": {
+  "omp": "2",
+  "mkl": "2"
+ },
+ "execution_policy": {
+  "resident": {
+   "checkpoints": 64,
+   "storage": "device",
+   "gpu_budget_bytes": null,
+   "host_budget_bytes": null,
+   "disk_budget_bytes": null,
+   "checkpoint_directory": null,
+   "device_checkpoints": 0,
+   "host_checkpoints": 0,
+   "backward_kernel": "auto",
+   "checkpoint_transfers": "sync",
+   "staging_slots": 2,
+   "resident_budget_bytes": null
+  },
+  "streamed": null,
+  "device": "cuda",
+  "host_budget_bytes": 8589934592,
+  "recorded": null
+ },
+ "iterations": [
+  {
+   "T_geometry": 0.012855200038757175,
+   "T_setup": 11.360576899984153,
+   "T_forward": 36.926722399977734,
+   "T_monitor": 0.001971200021216646,
+   "T_backward": 22.681854700000258,
+   "T_transfer_io": 0.00013169998419471085,
+   "T_optimizer": 0.00036299999919719994
+  },
+  {
+   "T_geometry": 0.010677700047381222,
+   "T_setup": 0.0,
+   "T_forward": 38.10332060002838,
+   "T_monitor": 0.001724999980069697,
+   "T_backward": 21.587228399992455,
+   "T_transfer_io": 7.079998613335192e-05,
+   "T_optimizer": 0.00024310001754201949
+  },
+  {
+   "T_geometry": 0.010073000012198463,
+   "T_setup": 0.0,
+   "T_forward": 35.531887199991615,
+   "T_monitor": 0.0018588999810162932,
+   "T_backward": 21.34870370000135,
+   "T_transfer_io": 6.740001845173538e-05,
+   "T_optimizer": 0.00023040000814944506
+  },
+  {
+   "T_geometry": 0.009396700042998418,
+   "T_setup": 0.0,
+   "T_forward": 35.357535200048005,
+   "T_monitor": 0.0016043999639805406,
+   "T_backward": 21.09951010000077,
+   "T_transfer_io": 6.750001921318471e-05,
+   "T_optimizer": 0.00025519999326206744
+  },
+  {
+   "T_geometry": 0.009668800019426271,
+   "T_setup": 0.0,
+   "T_forward": 35.95086830001674,
+   "T_monitor": 0.0016228000167757273,
+   "T_backward": 21.348490799980937,
+   "T_transfer_io": 7.350000669248402e-05,
+   "T_optimizer": 0.0002395000192336738
+  },
+  {
+   "T_geometry": 0.00903330001165159,
+   "T_setup": 0.0,
+   "T_forward": 35.74472919999971,
+   "T_monitor": 0.0015570999821648002,
+   "T_backward": 21.38650919997599,
+   "T_transfer_io": 7.300000288523734e-05,
+   "T_optimizer": 0.00028500001644715667
+  }
+ ],
+ "observations": [
+  {
+   "objective": 0.0012688101031185684,
+   "gradient_norm": 0.002860364271327853,
+   "metrics": {
+    "T+1 1.50 um": 0.0005826613425370824,
+    "T+1 1.55 um": 0.0011624316836700657,
+    "T+1 1.60 um": 0.002061337283148557,
+    "T-1 mean": 0.001322861202322439,
+    "T+0 mean": 0.6352677519079782,
+    "T+1 mean": 0.0012688101031185684,
+    "T+1 mean eroded": 0.005939165792509772,
+    "T+1 mean nominal": 0.008812938157245882,
+    "T+1 mean dilated": 0.0012688101031185684,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.004434060990993913,
+   "gradient_norm": 0.006396572105586529,
+   "metrics": {
+    "T+1 1.50 um": 0.002037808844325032,
+    "T+1 1.55 um": 0.004248072966918759,
+    "T+1 1.60 um": 0.007016301161737948,
+    "T-1 mean": 0.004791885903616797,
+    "T+0 mean": 0.6404729041028342,
+    "T+1 mean": 0.004434060990993913,
+    "T+1 mean eroded": 0.019119201234799873,
+    "T+1 mean nominal": 0.07777572318064291,
+    "T+1 mean dilated": 0.004434060990993913,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.01069048687749552,
+   "gradient_norm": 0.017721213400363922,
+   "metrics": {
+    "T+1 1.50 um": 0.005019726061652779,
+    "T+1 1.55 um": 0.010122214166469213,
+    "T+1 1.60 um": 0.01692952040436457,
+    "T-1 mean": 0.011850055522362174,
+    "T+0 mean": 0.6444032591765043,
+    "T+1 mean": 0.01069048687749552,
+    "T+1 mean eroded": 0.04217419795509794,
+    "T+1 mean nominal": 0.188683433869242,
+    "T+1 mean dilated": 0.01069048687749552,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.02188988037557697,
+   "gradient_norm": 0.031071333214640617,
+   "metrics": {
+    "T+1 1.50 um": 0.010054457015387963,
+    "T+1 1.55 um": 0.020159669881161284,
+    "T+1 1.60 um": 0.03545551423018166,
+    "T-1 mean": 0.02438330253825737,
+    "T+0 mean": 0.6394231125530635,
+    "T+1 mean": 0.02188988037557697,
+    "T+1 mean eroded": 0.07631720810205359,
+    "T+1 mean nominal": 0.2965221258310163,
+    "T+1 mean dilated": 0.02188988037557697,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.03103426186517948,
+   "gradient_norm": 0.21170562505722046,
+   "metrics": {
+    "T+1 1.50 um": 0.018923613472763202,
+    "T+1 1.55 um": 0.04043415033585797,
+    "T+1 1.60 um": 0.03374502178691727,
+    "T-1 mean": 0.05214712120241366,
+    "T+0 mean": 0.5225192242387651,
+    "T+1 mean": 0.03103426186517948,
+    "T+1 mean eroded": 0.12398621780556895,
+    "T+1 mean nominal": 0.3317790713505588,
+    "T+1 mean dilated": 0.03103426186517948,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.034828905108138256,
+   "gradient_norm": 0.10957501828670502,
+   "metrics": {
+    "T+1 1.50 um": 0.01784476087371367,
+    "T+1 1.55 um": 0.03394165518591274,
+    "T+1 1.60 um": 0.052700299264788364,
+    "T-1 mean": 0.03796012275660705,
+    "T+0 mean": 0.6267234754374154,
+    "T+1 mean": 0.034828905108138256,
+    "T+1 mean eroded": 0.176081652263951,
+    "T+1 mean nominal": 0.35050819916003845,
+    "T+1 mean dilated": 0.034828905108138256,
+    "active realization": 2.0
+   }
+  }
+ ],
+ "process_wall_seconds": 358.58094859999255,
+ "stage_definition": "Every declared stage is synchronized before and after. Explicit host copies are in T_transfer_io; internal host-streamed transfers remain within T_forward or T_backward, so no overlap is counted twice. T_setup is cold-only model/reference preparation."
+}

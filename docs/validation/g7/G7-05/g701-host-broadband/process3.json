@@ -1,0 +1,194 @@
+{
+ "scenario": "g701-host-broadband",
+ "reduced": false,
+ "backend": "cuda",
+ "package_version": "0.17.0",
+ "package_path": "D:\\TorchFDTD\\.local\\venvs\\g7-05\\Lib\\site-packages\\torchfdtd\\__init__.py",
+ "interpreter": "D:\\TorchFDTD\\.local\\venvs\\g7-05\\Scripts\\python.exe",
+ "cpu_threads": {
+  "omp": "2",
+  "mkl": "2"
+ },
+ "execution_policy": {
+  "resident": null,
+  "streamed": {
+   "slab_width": 200,
+   "temporal_depth": 48,
+   "checkpoints": 16,
+   "gpu_budget_bytes": 2147483648,
+   "host_budget_bytes": 8589934592,
+   "device": "cuda",
+   "cuda_binding": "direct",
+   "reuse_tile_buffers": true,
+   "tile_transfers": "async",
+   "tile_buffers": 2,
+   "local_checkpoints": 0,
+   "state_storage": "host",
+   "state_directory": null,
+   "disk_budget_bytes": null,
+   "disk_free_reserve_bytes": 0,
+   "restart_directory": null,
+   "restart_every_blocks": 1,
+   "optimizer_moments": 0
+  },
+  "device": "cuda",
+  "host_budget_bytes": 8589934592,
+  "recorded": null
+ },
+ "iterations": [
+  {
+   "T_geometry": 0.012575700035085902,
+   "T_setup": 10.969316199974855,
+   "T_forward": 93.4986840999627,
+   "T_monitor": 0.001999199972487986,
+   "T_backward": 233.50499659997877,
+   "T_transfer_io": 0.00012390001211315393,
+   "T_optimizer": 0.0003617999900598079
+  },
+  {
+   "T_geometry": 0.007920999982161447,
+   "T_setup": 0.0,
+   "T_forward": 92.78374280000571,
+   "T_monitor": 0.0014698999875690788,
+   "T_backward": 233.6964583999943,
+   "T_transfer_io": 7.929999264888465e-05,
+   "T_optimizer": 0.0002538000117056072
+  },
+  {
+   "T_geometry": 0.008068099996307865,
+   "T_setup": 0.0,
+   "T_forward": 91.97642260001157,
+   "T_monitor": 0.0014380000066012144,
+   "T_backward": 232.21354230001452,
+   "T_transfer_io": 7.56000226829201e-05,
+   "T_optimizer": 0.0002437999937683344
+  },
+  {
+   "T_geometry": 0.007490500021958724,
+   "T_setup": 0.0,
+   "T_forward": 94.59475459996611,
+   "T_monitor": 0.0014228999789338559,
+   "T_backward": 234.51722969999537,
+   "T_transfer_io": 7.43999844416976e-05,
+   "T_optimizer": 0.0002395999908912927
+  },
+  {
+   "T_geometry": 0.008588999946368858,
+   "T_setup": 0.0,
+   "T_forward": 95.58898450000561,
+   "T_monitor": 0.0018387000018265098,
+   "T_backward": 262.58526439999696,
+   "T_transfer_io": 7.970002479851246e-05,
+   "T_optimizer": 0.000248699972871691
+  },
+  {
+   "T_geometry": 0.008185699989553541,
+   "T_setup": 0.0,
+   "T_forward": 105.414658099995,
+   "T_monitor": 0.0024489999923389405,
+   "T_backward": 324.5936256000132,
+   "T_transfer_io": 0.00010500001371838152,
+   "T_optimizer": 0.00039999998989515007
+  }
+ ],
+ "observations": [
+  {
+   "objective": 0.0012688095000859612,
+   "gradient_norm": 0.002860363107174635,
+   "metrics": {
+    "T+1 1.50 um": 0.000582660250347257,
+    "T+1 1.55 um": 0.0011624344188987683,
+    "T+1 1.60 um": 0.002061333831011858,
+    "T-1 mean": 0.0013228591097758898,
+    "T+0 mean": 0.6352677452994329,
+    "T+1 mean": 0.0012688095000859612,
+    "T+1 mean eroded": 0.005939165578957667,
+    "T+1 mean nominal": 0.00881293272381238,
+    "T+1 mean dilated": 0.0012688095000859612,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.004434063601423101,
+   "gradient_norm": 0.006396573968231678,
+   "metrics": {
+    "T+1 1.50 um": 0.0020378094443162078,
+    "T+1 1.55 um": 0.004248076321431851,
+    "T+1 1.60 um": 0.007016305038521243,
+    "T-1 mean": 0.004791887126750375,
+    "T+0 mean": 0.6404728806157061,
+    "T+1 mean": 0.004434063601423101,
+    "T+1 mean eroded": 0.019119207443901606,
+    "T+1 mean nominal": 0.07777574247685158,
+    "T+1 mean dilated": 0.004434063601423101,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.010690478610934343,
+   "gradient_norm": 0.017721207812428474,
+   "metrics": {
+    "T+1 1.50 um": 0.005019721236111143,
+    "T+1 1.55 um": 0.010122206047877069,
+    "T+1 1.60 um": 0.016929508548814823,
+    "T-1 mean": 0.011850053243633618,
+    "T+0 mean": 0.6444032117196598,
+    "T+1 mean": 0.010690478610934343,
+    "T+1 mean eroded": 0.04217420367019809,
+    "T+1 mean nominal": 0.18868331154798187,
+    "T+1 mean dilated": 0.010690478610934343,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.021889888915739977,
+   "gradient_norm": 0.031071370467543602,
+   "metrics": {
+    "T+1 1.50 um": 0.010054460927361288,
+    "T+1 1.55 um": 0.020159687594269178,
+    "T+1 1.60 um": 0.03545551822558946,
+    "T-1 mean": 0.024383287785420548,
+    "T+0 mean": 0.639423123167362,
+    "T+1 mean": 0.021889888915739977,
+    "T+1 mean eroded": 0.07631717265639852,
+    "T+1 mean nominal": 0.2965220199102661,
+    "T+1 mean dilated": 0.021889888915739977,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.031034339634317454,
+   "gradient_norm": 0.21170574426651,
+   "metrics": {
+    "T+1 1.50 um": 0.018923611898065785,
+    "T+1 1.55 um": 0.04043416787083072,
+    "T+1 1.60 um": 0.03374523913405587,
+    "T-1 mean": 0.052147208656575995,
+    "T+0 mean": 0.5225192249522098,
+    "T+1 mean": 0.031034339634317454,
+    "T+1 mean eroded": 0.12398617542862637,
+    "T+1 mean nominal": 0.3317790996364157,
+    "T+1 mean dilated": 0.031034339634317454,
+    "active realization": 2.0
+   }
+  },
+  {
+   "objective": 0.03482891767721319,
+   "gradient_norm": 0.1095748096704483,
+   "metrics": {
+    "T+1 1.50 um": 0.017844777740877872,
+    "T+1 1.55 um": 0.03394169258688761,
+    "T+1 1.60 um": 0.05270028270387408,
+    "T-1 mean": 0.03796012559080008,
+    "T+0 mean": 0.6267234509386432,
+    "T+1 mean": 0.03482891767721319,
+    "T+1 mean eroded": 0.1760815973674057,
+    "T+1 mean nominal": 0.35050816917505884,
+    "T+1 mean dilated": 0.03482891767721319,
+    "active realization": 2.0
+   }
+  }
+ ],
+ "process_wall_seconds": 2106.0862065999827,
+ "stage_definition": "Every declared stage is synchronized before and after. Explicit host copies are in T_transfer_io; internal host-streamed transfers remain within T_forward or T_backward, so no overlap is counted twice. T_setup is cold-only model/reference preparation."
+}

@@ -488,3 +488,72 @@ python examples/g7/solvers/analyze.py
 python -m pytest tests/test_g7_solvers.py
 TORCHFDTD_G7_FULL=1 python -m pytest tests/test_g7_solvers.py
 ```
+
+## G7-01: constrained metagrating (G7-01r4)
+
+The installed 0.17.0 release wheel ran held-out seeds 7, 8 and 9 on the RTX 3060. All six criteria pass. Records are in [validation/g7/G7-01/](validation/g7/G7-01/). `tests/test_g7_metagrating_r4.py` recomputes every criterion.
+
+The six-run initializer used TORCWA-assisted development, followed by logit jitter 0.03 and six Adam steps on a 0.02 um mesh over 560 fs. The initial or final hard design was selected by that short objective before any 0.01/0.005 um, 2240 fs evaluation. The cross-solver comparison is therefore not blind to initialization. All 41 wavelengths and TE/TM, normal/fixed-kx conditions are reported. Energy and RCWA criteria exclude wavelengths within 0.02 um of a Rayleigh anomaly as declared.
+
+| Seed | Mean T+1, TE normal, 0.01 um | Selected hard design | Changed pixels |
+|---|---:|---|---:|
+| 7 | 0.798186 | final | 0 |
+| 8 | 0.802031 | initial | 0 |
+| 9 | 0.801258 | initial | 0 |
+
+| Criterion | Value | Limit |
+|---|---:|---:|
+| performance | 0.802031 | 0.7706 |
+| rcwa_agreement | 0.00227115 | 0.02 |
+| mesh | 0.00040534 | 0.02 |
+| energy_balance | 0.00153028 | 0.02 |
+
+The r3 performance attempt failed and is retained outside the repository. G7-01r4 was committed before these held-out runs. The fabrication minimum is 0.06 um for both lines and gaps. See [G7_RUN.md](G7_RUN.md) for reproduction.
+
+## G7-05: complete design-iteration cost (G7-05r2)
+
+The four scenarios ran sequentially under an exclusive RTX 3060 GPU lock, from the installed 0.17.0 wheel, with OMP/MKL each fixed at two threads. Each scenario has five fresh processes of six full iterations. Cold is iteration 1. Warm is the median of iterations 2 to 6 within a process, then the median across the five processes. Ranges are across the five process samples. Disk caches are retained across fresh processes. Records and policies are in [validation/g7/G7-05/](validation/g7/G7-05/).
+
+The metagrating workload is the declared G7-01r3 robust iteration, not the r4 six-run optimization. Broadband and sequential runs accumulate the same mean three-frequency objective before one optimizer update. Native tensor batching is forward only and is not labelled as a complete design iteration.
+
+| Scenario | Cold total (s) | Warm total (s) | Warm range (s) |
+|---|---:|---:|---:|
+| g701-resident-broadband | 70.984 | 58.528 | 56.819 to 63.077 |
+| g701-host-broadband | 342.493 | 329.121 | 326.730 to 345.537 |
+| g701-resident-sequential | 188.000 | 172.933 | 170.232 to 197.216 |
+| g703-resident | 21.810 | 19.533 | 19.336 to 20.179 |
+
+### Stage medians and ranges (seconds)
+
+| Scenario | Stage | Cold median [min, max] | Warm median [min, max] |
+|---|---|---:|---:|
+| g701-resident-broadband | T_geometry | 0.013351 [0.012774, 0.013813] | 0.009669 [0.009431, 0.009814] |
+| g701-resident-broadband | T_setup | 11.161775 [10.960454, 11.447403] | 0.000000 [0.000000, 0.000000] |
+| g701-resident-broadband | T_forward | 36.926722 [35.693417, 37.975003] | 36.450739 [35.355569, 39.271834] |
+| g701-resident-broadband | T_monitor | 0.001930 [0.001819, 0.002175] | 0.001626 [0.001553, 0.001736] |
+| g701-resident-broadband | T_backward | 22.561777 [21.751209, 22.681855] | 21.773196 [21.348704, 23.080431] |
+| g701-resident-broadband | T_transfer_io | 0.000132 [0.000105, 0.000199] | 0.000072 [0.000068, 0.000075] |
+| g701-resident-broadband | T_optimizer | 0.000350 [0.000338, 0.000563] | 0.000243 [0.000234, 0.000262] |
+| g701-host-broadband | T_geometry | 0.012576 [0.011614, 0.018059] | 0.008404 [0.008068, 0.009399] |
+| g701-host-broadband | T_setup | 11.458184 [10.969316, 17.293603] | 0.000000 [0.000000, 0.000000] |
+| g701-host-broadband | T_forward | 93.268967 [91.417005, 128.692783] | 91.964899 [91.224837, 105.330528] |
+| g701-host-broadband | T_monitor | 0.001840 [0.001553, 0.002235] | 0.001546 [0.001470, 0.001678] |
+| g701-host-broadband | T_backward | 238.701696 [233.504997, 303.787620] | 234.517230 [233.079161, 240.196016] |
+| g701-host-broadband | T_transfer_io | 0.000138 [0.000114, 0.000283] | 0.000079 [0.000076, 0.000096] |
+| g701-host-broadband | T_optimizer | 0.000371 [0.000340, 0.000956] | 0.000259 [0.000249, 0.000297] |
+| g701-resident-sequential | T_geometry | 0.012804 [0.012531, 0.018093] | 0.010015 [0.009745, 0.015371] |
+| g701-resident-sequential | T_setup | 11.120080 [10.967155, 13.188223] | 0.000000 [0.000000, 0.000000] |
+| g701-resident-sequential | T_forward | 110.197712 [107.899955, 127.542529] | 107.862195 [105.575967, 123.437456] |
+| g701-resident-sequential | T_monitor | 0.005510 [0.004939, 0.007024] | 0.005040 [0.004780, 0.007191] |
+| g701-resident-sequential | T_backward | 66.722279 [65.049904, 90.823791] | 64.930842 [64.641045, 76.817314] |
+| g701-resident-sequential | T_transfer_io | 0.000114 [0.000108, 0.000165] | 0.000071 [0.000067, 0.000120] |
+| g701-resident-sequential | T_optimizer | 0.000447 [0.000340, 0.000751] | 0.000244 [0.000238, 0.000513] |
+| g703-resident | T_geometry | 0.144582 [0.143446, 0.146766] | 0.003212 [0.003096, 0.003311] |
+| g703-resident | T_setup | 0.956340 [0.940353, 0.973740] | 0.000000 [0.000000, 0.000000] |
+| g703-resident | T_forward | 5.466623 [5.279170, 5.793118] | 4.473089 [4.401365, 4.541236] |
+| g703-resident | T_monitor | 0.000123 [0.000117, 0.000265] | 0.000103 [0.000101, 0.000104] |
+| g703-resident | T_backward | 15.306520 [15.092268, 16.356917] | 15.075454 [14.953064, 15.822134] |
+| g703-resident | T_transfer_io | 0.000120 [0.000117, 0.000238] | 0.000065 [0.000063, 0.000074] |
+| g703-resident | T_optimizer | 0.000380 [0.000355, 0.000468] | 0.000237 [0.000232, 0.000250] |
+
+The policy tuner took 3.674 s and selected `resident`. Break-even against untuned resident execution: none (no measured gain). The calculation includes cold and warm full-iteration costs. Internal host transfers are included in forward/backward stages. Explicit copies are in transfer/IO. These stages do not overlap in the accounting. A later stage median above 1.25 times this baseline is flagged by the regression test and `--compare-to`.

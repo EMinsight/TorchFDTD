@@ -1,0 +1,35 @@
+{
+  "task": "G7-05",
+  "case": "docs/validation/cases/G7-05r2.json",
+  "wheel": "D:/torchfdtd-clean/dist/f5d3bcf12d21/torchfdtd-0.17.0-py3-none-any.whl",
+  "wheel_sha256": "2bb919c1f5f8ecacb84c64d00a638c16b468313cb4cb6f4a371daa9957529ec1",
+  "source_commit": "2eff8479dfbaf2791f759493e63324fc4f60cf3a",
+  "hardware": "NVIDIA GeForce RTX 3060, 591.86, 12288 MiB",
+  "gpu_lock": "exclusive",
+  "cpu_threads": 2,
+  "installation": {
+    "payload_matches": true,
+    "payload_files": 153,
+    "versions": {
+      "torchfdtd": "0.17.0",
+      "torch": "2.10.0+cu126",
+      "cupy-cuda12x": "13.6.0",
+      "numpy": "2.2.6",
+      "scipy": "1.15.3",
+      "fdtd": "0.2.2"
+    }
+  },
+  "disk_cache": "Retained across fresh processes; CuPy and Torch extension caches under D:/TorchFDTD/.local.",
+  "scripts": [
+    "examples/g7/cost/cost_study.py",
+    "examples/g7/cost/autotuner_study.py"
+  ],
+  "scenarios": [
+    "g701-resident-broadband",
+    "g701-host-broadband",
+    "g701-resident-sequential",
+    "g703-resident"
+  ],
+  "repeats": 5,
+  "iterations_per_process": 6
+}

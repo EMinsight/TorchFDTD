@@ -1,0 +1,127 @@
+{
+ "scenario": "g703-resident",
+ "reduced": false,
+ "backend": "cuda",
+ "package_version": "0.17.0",
+ "package_path": "D:\\TorchFDTD\\.local\\venvs\\g7-05\\Lib\\site-packages\\torchfdtd\\__init__.py",
+ "interpreter": "D:\\TorchFDTD\\.local\\venvs\\g7-05\\Scripts\\python.exe",
+ "cpu_threads": {
+  "omp": "2",
+  "mkl": "2"
+ },
+ "execution_policy": null,
+ "iterations": [
+  {
+   "T_geometry": 0.14580019999993965,
+   "T_setup": 0.9563395999721251,
+   "T_forward": 5.793118299974594,
+   "T_monitor": 0.00012340000830590725,
+   "T_backward": 15.404528499988373,
+   "T_transfer_io": 0.00011710001854225993,
+   "T_optimizer": 0.00041060004150494933
+  },
+  {
+   "T_geometry": 0.0030955999973230064,
+   "T_setup": 0.0,
+   "T_forward": 4.913147800019942,
+   "T_monitor": 0.00011760002234950662,
+   "T_backward": 15.871417900023516,
+   "T_transfer_io": 6.330001633614302e-05,
+   "T_optimizer": 0.00023070001043379307
+  },
+  {
+   "T_geometry": 0.003016900038346648,
+   "T_setup": 0.0,
+   "T_forward": 4.432105999963824,
+   "T_monitor": 0.00010010000551119447,
+   "T_backward": 15.214624300017022,
+   "T_transfer_io": 6.350001785904169e-05,
+   "T_optimizer": 0.0002536000101827085
+  },
+  {
+   "T_geometry": 0.0032167999888770282,
+   "T_setup": 0.0,
+   "T_forward": 4.569420200015884,
+   "T_monitor": 9.970000246539712e-05,
+   "T_backward": 15.239000100002158,
+   "T_transfer_io": 6.260001100599766e-05,
+   "T_optimizer": 0.00023200002033263445
+  },
+  {
+   "T_geometry": 0.00286829995457083,
+   "T_setup": 0.0,
+   "T_forward": 4.473088700033259,
+   "T_monitor": 0.00010350003140047193,
+   "T_backward": 15.086375000013504,
+   "T_transfer_io": 6.089999806135893e-05,
+   "T_optimizer": 0.000235699990298599
+  },
+  {
+   "T_geometry": 0.0035017000045627356,
+   "T_setup": 0.0,
+   "T_forward": 4.4188941000029445,
+   "T_monitor": 0.00017369998386129737,
+   "T_backward": 15.324620799976401,
+   "T_transfer_io": 5.9399986639618874e-05,
+   "T_optimizer": 0.00023180001880973577
+  }
+ ],
+ "observations": [
+  {
+   "objective": 0.30974143743515015,
+   "gradient_norm": 0.008460059762001038,
+   "metrics": {
+    "transmission": 0.30974143743515015,
+    "reflection": 0.0010855786968022585,
+    "reverse_transmission": 0.3097417652606964
+   }
+  },
+  {
+   "objective": 0.32033810019493103,
+   "gradient_norm": 0.008495790883898735,
+   "metrics": {
+    "transmission": 0.32033810019493103,
+    "reflection": 0.0010422674240544438,
+    "reverse_transmission": 0.32033830881118774
+   }
+  },
+  {
+   "objective": 0.33103886246681213,
+   "gradient_norm": 0.00860212929546833,
+   "metrics": {
+    "transmission": 0.33103886246681213,
+    "reflection": 0.0010740237776190042,
+    "reverse_transmission": 0.33103907108306885
+   }
+  },
+  {
+   "objective": 0.34191596508026123,
+   "gradient_norm": 0.008720990270376205,
+   "metrics": {
+    "transmission": 0.34191596508026123,
+    "reflection": 0.0011476579820737243,
+    "reverse_transmission": 0.3419163227081299
+   }
+  },
+  {
+   "objective": 0.35295799374580383,
+   "gradient_norm": 0.008805273100733757,
+   "metrics": {
+    "transmission": 0.35295799374580383,
+    "reflection": 0.001251035020686686,
+    "reverse_transmission": 0.3529583513736725
+   }
+  },
+  {
+   "objective": 0.3641029894351959,
+   "gradient_norm": 0.008822601288557053,
+   "metrics": {
+    "transmission": 0.3641029894351959,
+    "reflection": 0.0013831638498231769,
+    "reverse_transmission": 0.3641032874584198
+   }
+  }
+ ],
+ "process_wall_seconds": 121.92905330000212,
+ "stage_definition": "Every declared stage is synchronized before and after. Explicit host copies are in T_transfer_io; internal host-streamed transfers remain within T_forward or T_backward, so no overlap is counted twice. T_setup is cold-only model/reference preparation."
+}
