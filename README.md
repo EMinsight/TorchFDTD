@@ -28,7 +28,7 @@ Use Python 3.10 or 3.12. The [release wheel](https://github.com/hyoseokp/TorchFD
 ```powershell
 python -m venv torchfdtd-env
 torchfdtd-env/Scripts/python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu126
-torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd[cuda-kernels] @ https://github.com/hyoseokp/TorchFDTD/releases/download/v0.17.1/torchfdtd-0.17.1-py3-none-any.whl"
+torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd[cuda-kernels] @ https://github.com/hyoseokp/TorchFDTD/releases/download/v0.17.1/torchfdtd-1.0.0-py3-none-any.whl"
 torchfdtd-env/Scripts/torchfdtd doctor
 torchfdtd-env/Scripts/torchfdtd serve
 ```

@@ -32,8 +32,8 @@ identifiers:
     description: "Version DOI of TorchFDTD 0.15.0"
 repository-code: "https://github.com/hyoseokp/TorchFDTD"
 license: MIT
-version: 0.17.1
-date-released: "2026-09-26"
+version: 1.0.0
+date-released: "2026-09-27"
 preferred-citation:
   type: article
   title: "TorchFDTD: GPU-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design"

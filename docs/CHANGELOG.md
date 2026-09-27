@@ -7,7 +7,7 @@ to release versions, and the unreleased section collects changes for the next re
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
-## Unreleased
+## 1.0.0 (2026-09-27)
 
 ### Added
 
