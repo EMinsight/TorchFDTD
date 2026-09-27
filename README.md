@@ -3,6 +3,10 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2609.30039-b31b1b.svg)](https://arxiv.org/abs/2609.30039)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22928834.svg)](https://doi.org/10.5281/zenodo.22928834)
 
+[![TorchFDTD Explained: GPU-Accelerated FDTD for Inverse Design (video)](https://img.youtube.com/vi/l9mPIDTsBns/maxresdefault.jpg)](https://www.youtube.com/watch?v=l9mPIDTsBns)
+
+*Watch the overview on YouTube: [TorchFDTD Explained: GPU-Accelerated FDTD for Inverse Design](https://www.youtube.com/watch?v=l9mPIDTsBns).*
+
 Open-source GPU FDTD for photonics, with PyTorch gradients and a browser workbench. MIT licensed.
 
 Build a device in Python or in the browser, simulate its electromagnetic fields, and use discrete adjoints with PyTorch autograd for inverse design.
@@ -125,12 +129,6 @@ metagrating, finite metalens and photonic integrated circuit, with fixed seeds a
 *A pulse focusing above a silicon-pillar metalens. Full 3D FDTD, rendered as a translucent volume of instantaneous E<sub>x</sub>. Red and blue indicate opposite field signs, with one fixed scale throughout. [Full-resolution video](https://github.com/hyoseokp/TorchFDTD/raw/refs/heads/main/docs/assets/metalens-volume.mp4) · [Model and reproduction](docs/assets/metalens-volume.md).*
 
 For gradients and optimization, start with [differentiable FDTD](docs/DIFFERENTIABLE_FDTD.md) and [shape gradients](docs/SHAPE_GRADIENTS.md). For larger studies, see [parameter sweeps](docs/PYTHON_BATCH.md) and [tensor batches](docs/TENSOR_BATCH.md).
-
-## How it works
-
-[![Animated overview of TorchFDTD: a 1 mm metalens cut into tiles, stitched near field and angular-spectrum propagation](docs/assets/torchfdtd-explainer.gif)](https://github.com/hyoseokp/TorchFDTD/raw/refs/heads/main/docs/assets/torchfdtd-explainer.mp4)
-
-*A two-minute animated overview: the Yee update, fused CUDA kernels, the discrete adjoint with checkpoints, host memory streaming, and lateral tiles with angular-spectrum propagation for a 1 mm metalens. The preview shows the tile scene. [Full video](https://github.com/hyoseokp/TorchFDTD/raw/refs/heads/main/docs/assets/torchfdtd-explainer.mp4) · [Scenes and data](docs/assets/torchfdtd-explainer.md).*
 
 ## Core features
 
