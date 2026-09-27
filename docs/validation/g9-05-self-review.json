@@ -1,0 +1,108 @@
+{
+  "task": "G9-05",
+  "independent_user_test": false,
+  "case_sha256": "6529a6b7ea23ffa55e79382f820906f600f7e2b44ebe887b23c6a0b481df1e94",
+  "instructions": [
+    "README.md",
+    "docs/G7_RUN.md",
+    "docs/G7_WORKFLOWS.md"
+  ],
+  "preconditions": {
+    "G7-01": {
+      "judge_exit_code": 0,
+      "evidence": "20260927T005018Z-g7-01-f1216e48",
+      "verification_state": "VERIFIED"
+    },
+    "G7-02": {
+      "judge_exit_code": 0,
+      "evidence": "20260926T044250Z-g7-02-f08ed130",
+      "verification_state": "VERIFIED"
+    },
+    "G7-03": {
+      "judge_exit_code": 0,
+      "evidence": "20260925T185002Z-g7-03-353beb5b",
+      "verification_state": "VERIFIED"
+    }
+  },
+  "installation": {
+    "package_file": "D:\\torchfdtd-selfreview-100\\venv\\Lib\\site-packages\\torchfdtd\\__init__.py",
+    "package_version": "0.17.1",
+    "solver_source_on_sys_path": false,
+    "fresh_venv": true,
+    "system_site_packages": false,
+    "wheel_sha256": "5b1c7180fc1c48397e0d85872a35e389a655d4f974a65c6e505953a9f92e1ea3",
+    "wheel": "D:\\torchfdtd-clean\\dist\\316b25ef5d93\\torchfdtd-0.17.1-py3-none-any.whl",
+    "payload_matches": true,
+    "payload_files": 153
+  },
+  "examples": {
+    "archive_sha256": "99b098b0d079fc64ddbbc959cba61330feb6183bf6d3a45ce2d8a8470d819fba",
+    "source_commit": "dbf8fef42f6f49d690195cdc7eca9237f44752b4",
+    "contains_solver_source": false
+  },
+  "workflows": {
+    "metagrating": {
+      "commands": [
+        "D:\\torchfdtd-selfreview-100\\venv\\Scripts\\python.exe -u D:\\torchfdtd-selfreview-100\\examples-r5\\examples\\g7\\metagrating\\wheel_entry_r4.py --stage all --out metagrating --rcwa-python D:\\torchfdtd-selfreview-100\\venv\\Scripts\\python.exe"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 6928.747757600038,
+      "completed": true,
+      "summary_path": "docs/validation/g9-05/metagrating.json",
+      "summary_sha256": "8e65347fcfa671c1f48470bc5e3e1c4540347d2f42fb409202aaf867966b0b25"
+    },
+    "metalens": {
+      "commands": [
+        "D:\\torchfdtd-selfreview-100\\venv\\Scripts\\python.exe -u D:\\torchfdtd-selfreview-100\\examples-r5\\examples\\g7\\metalens\\metalens_workflow.py --output-dir metalens"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 4526.296289500024,
+      "completed": true,
+      "summary_path": "docs/validation/g9-05/metalens.json",
+      "summary_sha256": "25ce689c0a1f27fe682af6a938ae52e1db94514e8411bc0e3488b09825e12108"
+    },
+    "coupler": {
+      "commands": [
+        "D:\\torchfdtd-selfreview-100\\venv\\Scripts\\python.exe -u D:\\torchfdtd-selfreview-100\\examples-r5\\examples\\g7\\coupler\\workflow.py --output-dir coupler"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 3568.017408600019,
+      "completed": true,
+      "summary_path": "docs/validation/g9-05/coupler.json",
+      "summary_sha256": "c52d9fda107012ae385aa25e4223f1581bfe107813eb713f27819ac3468d6278"
+    }
+  },
+  "workflows_completed": 3,
+  "cpu_development": {
+    "metalens": {
+      "commands": [
+        "D:\\torchfdtd-selfreview-100\\venv\\Scripts\\python.exe -u D:\\torchfdtd-selfreview-100\\examples-r5\\examples\\g7\\metalens\\metalens_workflow.py --reduced --backend cpu --iterations 1 --output-dir metalens-small"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 42.758779099967796
+    },
+    "coupler": {
+      "commands": [
+        "D:\\torchfdtd-selfreview-100\\venv\\Scripts\\python.exe -u D:\\torchfdtd-selfreview-100\\examples-r5\\examples\\g7\\coupler\\workflow.py --reduced --seeds 1 2 3 --output-dir coupler-small"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 294.3925671999459
+    }
+  },
+  "issues_found": [
+    {
+      "id": "G9-05-doc-1",
+      "stage": "installation preparation",
+      "issue": "README lacked a direct installed-wheel G7 run guide and an examples-only input bundle.",
+      "resolution": "Added the linked G7_RUN guide, archive exporter and per-file manifest before the full runs.",
+      "fix_commit": "0f457510a1b36c79772aad2c1a3138a3ffdb8534"
+    },
+    {
+      "id": "G9-05-doc-2",
+      "stage": "installed command help check before full runs",
+      "issue": "The r4 entry point displayed the r3 help and unsupported checkpoint/selection options.",
+      "resolution": "Gave r4 its own parser and help, with only supported stages and held-out seeds.",
+      "fix_commit": "4cb07776304bf21d99e0e4c4b3e050c22ee3ff78"
+    }
+  ]
+}

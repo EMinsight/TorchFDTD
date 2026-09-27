@@ -1,0 +1,361 @@
+{
+ "task": "G7-03",
+ "case": "docs/validation/cases/G7-03r2.json",
+ "seeds": [
+  1,
+  2,
+  3
+ ],
+ "best_seed": 1,
+ "criteria": [
+  {
+   "criterion": "a_all_seeds",
+   "value": [
+    1,
+    2,
+    3
+   ],
+   "limit": [
+    1,
+    2,
+    3
+   ],
+   "passed": true,
+   "note": "every declared seed with its full history and every evaluation"
+  },
+  {
+   "criterion": "b_performance",
+   "value": 0.6115006009533319,
+   "limit": 0.6025,
+   "passed": true,
+   "best_seed": 1,
+   "best_seed_violations": [],
+   "per_seed": {
+    "1": {
+     "gds_transmission": 0.6115006009533319,
+     "holdout_gds_transmission": 0.5820827337304204,
+     "violations": [],
+     "linewidth_um": 0.5,
+     "gap_um": 0.7000000000000001
+    },
+    "2": {
+     "gds_transmission": 0.6115006009533319,
+     "holdout_gds_transmission": 0.5820827337304204,
+     "violations": [],
+     "linewidth_um": 0.5,
+     "gap_um": 0.7000000000000001
+    },
+    "3": {
+     "gds_transmission": 0.6115006009533319,
+     "holdout_gds_transmission": 0.5820827337304204,
+     "violations": [],
+     "linewidth_um": 0.5,
+     "gap_um": 0.7000000000000001
+    }
+   },
+   "note": "|S21|^2 at 1.55 um of the re-imported GDS at the design mesh; the best seed must also meet the declared 0.4 um linewidth and gap"
+  },
+  {
+   "criterion": "c_passivity",
+   "value": 0.6365606477738297,
+   "limit": 1.01,
+   "passed": true,
+   "worst": {
+    "seed": 1,
+    "stage": "structures",
+    "wavelength_um": 1.6
+   },
+   "cases": 63
+  },
+  {
+   "criterion": "d_reciprocity",
+   "value": 0.0002596718250801018,
+   "limit": 0.001,
+   "passed": true,
+   "worst": {
+    "seed": 1,
+    "stage": "eroded",
+    "wavelength_um": 1.6
+   },
+   "cases": 63
+  },
+  {
+   "criterion": "e_gradient",
+   "value": 0.0023544809050064183,
+   "limit": 0.02,
+   "passed": true,
+   "worst": {
+    "seed": 3,
+    "pixel": [
+     2,
+     15
+    ]
+   },
+   "checked": 9
+  },
+  {
+   "criterion": "f_gds_round_trip",
+   "value": 0.0,
+   "limit": 0.005,
+   "passed": true,
+   "worst": {
+    "seed": 1,
+    "wavelength_um": 1.5
+   },
+   "note": "|T(re-imported GDS) - T(pre-export rectangles)| at every seed and wavelength, same mesh and voxelization"
+  },
+  {
+   "criterion": "g_mesh",
+   "value": 0.0024021008364139007,
+   "limit": 0.02,
+   "passed": true,
+   "best_seed": 1,
+   "signed": -0.0024021008364139007,
+   "per_seed": {
+    "1": -0.0024021008364139007,
+    "2": -0.0024021008364139007,
+    "3": -0.0024021008364139007
+   },
+   "note": "|T(GDS, check mesh) - T(GDS, design mesh)| at 1.55 um for the best seed"
+  }
+ ],
+ "passed": true,
+ "settings": {
+  "mesh_um": 0.05,
+  "steps": 2000,
+  "check_mesh_um": 0.025,
+  "check_steps": 4000,
+  "iterations": 50,
+  "beta": 4.0,
+  "continuation_every": 10,
+  "beta_maximum": 64.0,
+  "learning_rate": 0.1,
+  "filter_radius_um": 0.6,
+  "fd_step": 0.02,
+  "fd_pixels": 3,
+  "device": "cuda",
+  "reduced": false
+ },
+ "judged": true,
+ "environment": {
+  "1": {
+   "python": "3.10.2",
+   "torch": "2.10.0+cu126",
+   "numpy": "2.2.6",
+   "os": "Windows-10-10.0.26200-SP0",
+   "device": "NVIDIA GeForce RTX 3060",
+   "commit": null,
+   "torchfdtd_file": "D:\\torchfdtd-selfreview-100\\venv\\Lib\\site-packages\\torchfdtd\\__init__.py",
+   "torchfdtd_version": null,
+   "torchfdtd_distribution_version": "0.17.1",
+   "torchfdtd_import": "installed"
+  },
+  "2": {
+   "python": "3.10.2",
+   "torch": "2.10.0+cu126",
+   "numpy": "2.2.6",
+   "os": "Windows-10-10.0.26200-SP0",
+   "device": "NVIDIA GeForce RTX 3060",
+   "commit": null,
+   "torchfdtd_file": "D:\\torchfdtd-selfreview-100\\venv\\Lib\\site-packages\\torchfdtd\\__init__.py",
+   "torchfdtd_version": null,
+   "torchfdtd_distribution_version": "0.17.1",
+   "torchfdtd_import": "installed"
+  },
+  "3": {
+   "python": "3.10.2",
+   "torch": "2.10.0+cu126",
+   "numpy": "2.2.6",
+   "os": "Windows-10-10.0.26200-SP0",
+   "device": "NVIDIA GeForce RTX 3060",
+   "commit": null,
+   "torchfdtd_file": "D:\\torchfdtd-selfreview-100\\venv\\Lib\\site-packages\\torchfdtd\\__init__.py",
+   "torchfdtd_version": null,
+   "torchfdtd_distribution_version": "0.17.1",
+   "torchfdtd_import": "installed"
+  }
+ },
+ "wall_time_s": {
+  "per_seed": {
+   "1": {
+    "gradient_check": 49.04822729999432,
+    "optimization": 1018.6575336000533,
+    "evaluation": 108.43512109998846,
+    "total": 1177.1403336999938
+   },
+   "2": {
+    "gradient_check": 47.88907679996919,
+    "optimization": 1033.406129800016,
+    "evaluation": 112.08548939996399,
+    "total": 1193.4251015000045
+   },
+   "3": {
+    "gradient_check": 50.96289439999964,
+    "optimization": 1032.719263100007,
+    "evaluation": 109.83050719997846,
+    "total": 1193.560641499993
+   }
+  },
+  "network_setup": {
+   "1": 0.6745125000015832,
+   "2": 0.0,
+   "3": 0.0
+  },
+  "total": 3564.800589199993
+ },
+ "development_selection": {
+  "rule": "smallest candidate filter radius whose binary designs meet the declared 0.4 um (4-pixel) linewidth and gap for every development seed",
+  "candidates_um": [
+   0.4,
+   0.5,
+   0.6,
+   0.7,
+   0.8
+  ],
+  "development_seeds": [
+   11,
+   12,
+   13
+  ],
+  "judged_seeds_used": false,
+  "selected_um": 0.6,
+  "runs": [
+   {
+    "radius_um": 0.4,
+    "seed": 11,
+    "linewidth_px": 3,
+    "gap_px": 3,
+    "violations": [
+     "min_linewidth",
+     "min_gap"
+    ],
+    "transmission": {
+     "last_iterate": 0.6048057079315186,
+     "binary_density": 0.6049518585205078,
+     "structures": 0.6059008836746216
+    },
+    "commit": "7f516afe5146a679f71bbc4b74ec231668ad567c"
+   },
+   {
+    "radius_um": 0.4,
+    "seed": 12,
+    "linewidth_px": 1,
+    "gap_px": 3,
+    "violations": [
+     "min_linewidth",
+     "min_gap"
+    ],
+    "transmission": {
+     "last_iterate": 0.6037819981575012,
+     "binary_density": 0.604631245136261,
+     "structures": 0.6067212820053101
+    },
+    "commit": "7f516afe5146a679f71bbc4b74ec231668ad567c"
+   },
+   {
+    "radius_um": 0.4,
+    "seed": 13,
+    "linewidth_px": 3,
+    "gap_px": 3,
+    "violations": [
+     "min_linewidth",
+     "min_gap"
+    ],
+    "transmission": {
+     "last_iterate": 0.6041464805603027,
+     "binary_density": 0.6049518585205078,
+     "structures": 0.6059008836746216
+    },
+    "commit": "7f516afe5146a679f71bbc4b74ec231668ad567c"
+   },
+   {
+    "radius_um": 0.5,
+    "seed": 11,
+    "linewidth_px": 3,
+    "gap_px": 3,
+    "violations": [
+     "min_linewidth",
+     "min_gap"
+    ],
+    "transmission": {
+     "last_iterate": 0.6092321872711182,
+     "binary_density": 0.6101534962654114,
+     "structures": 0.6106081008911133
+    },
+    "commit": "7f516afe5146a679f71bbc4b74ec231668ad567c"
+   },
+   {
+    "radius_um": 0.5,
+    "seed": 12,
+    "linewidth_px": 5,
+    "gap_px": 2,
+    "violations": [
+     "min_gap"
+    ],
+    "transmission": {
+     "last_iterate": 0.6083008646965027,
+     "binary_density": 0.6104156374931335,
+     "structures": 0.6090694069862366
+    },
+    "commit": "7f516afe5146a679f71bbc4b74ec231668ad567c"
+   },
+   {
+    "radius_um": 0.5,
+    "seed": 13,
+    "linewidth_px": 1,
+    "gap_px": 2,
+    "violations": [
+     "min_linewidth",
+     "min_gap"
+    ],
+    "transmission": {
+     "last_iterate": 0.6078243255615234,
+     "binary_density": 0.6095935106277466,
+     "structures": 0.6091546416282654
+    },
+    "commit": "7f516afe5146a679f71bbc4b74ec231668ad567c"
+   },
+   {
+    "radius_um": 0.6,
+    "seed": 11,
+    "linewidth_px": 5,
+    "gap_px": 7,
+    "violations": [],
+    "transmission": {
+     "last_iterate": 0.6090508103370667,
+     "binary_density": 0.610095202922821,
+     "structures": 0.61150062084198
+    },
+    "commit": "7f516afe5146a679f71bbc4b74ec231668ad567c"
+   },
+   {
+    "radius_um": 0.6,
+    "seed": 12,
+    "linewidth_px": 5,
+    "gap_px": 7,
+    "violations": [],
+    "transmission": {
+     "last_iterate": 0.6090222597122192,
+     "binary_density": 0.610095202922821,
+     "structures": 0.61150062084198
+    },
+    "commit": "7f516afe5146a679f71bbc4b74ec231668ad567c"
+   },
+   {
+    "radius_um": 0.6,
+    "seed": 13,
+    "linewidth_px": 5,
+    "gap_px": 7,
+    "violations": [],
+    "transmission": {
+     "last_iterate": 0.6089817881584167,
+     "binary_density": 0.610095202922821,
+     "structures": 0.61150062084198
+    },
+    "commit": "7f516afe5146a679f71bbc4b74ec231668ad567c"
+   }
+  ],
+  "finite_difference_step": [],
+  "radius_used_um": 0.6
+ }
+}
