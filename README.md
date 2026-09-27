@@ -3,9 +3,9 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2609.30039-b31b1b.svg)](https://arxiv.org/abs/2609.30039)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22928834.svg)](https://doi.org/10.5281/zenodo.22928834)
 
-[![TorchFDTD Explained: GPU-Accelerated FDTD for Inverse Design (video)](https://img.youtube.com/vi/l9mPIDTsBns/maxresdefault.jpg)](https://www.youtube.com/watch?v=l9mPIDTsBns)
+https://github.com/user-attachments/assets/021d317c-bd63-4019-8391-9211d9be4166
 
-*Watch the overview on YouTube: [TorchFDTD Explained: GPU-Accelerated FDTD for Inverse Design](https://www.youtube.com/watch?v=l9mPIDTsBns).*
+*Also on YouTube: [TorchFDTD Explained: GPU-Accelerated FDTD for Inverse Design](https://www.youtube.com/watch?v=l9mPIDTsBns).*
 
 Open-source GPU FDTD for photonics, with PyTorch gradients and a browser workbench. MIT licensed.
 
