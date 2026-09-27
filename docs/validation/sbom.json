@@ -4,7 +4,7 @@
   "generator": "scripts/provenance_inventory.py",
   "project": {
     "name": "torchfdtd",
-    "version": "0.17.1",
+    "version": "1.0.0",
     "license": "MIT",
     "license_files": [
       "LICENSE",
@@ -20,7 +20,7 @@
   "host": {
     "os": "Windows",
     "platform": "Windows-10-10.0.26200-SP0",
-    "machine": "AMD64"
+    "machine": ""
   },
   "declared_dependencies": {
     "runtime": [
@@ -1430,8 +1430,8 @@
       "docs/validation/sbom.json",
       "tests/test_provenance_inventory.py"
     ],
-    "files_scanned": 2394,
-    "tracked_files": 2440,
+    "files_scanned": 2481,
+    "tracked_files": 2539,
     "findings": []
   },
   "history_note": {
