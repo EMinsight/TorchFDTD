@@ -4025,7 +4025,8 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/G9-07.xml",
             "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_validation_report.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G9-07.xml",
             "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_validation_report.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-07.xml",
-            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_validation_report.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-07.xml"
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_validation_report.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-07.xml",
+            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_validation_report.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G9-07.xml"
           ],
           "required_tests": [
             "tests/test_validation_report.py"
@@ -4067,7 +4068,8 @@
             "20260926T082852Z-g9-07-1c297af9",
             "20260926T125544Z-g9-07-d8d9d64b",
             "20260927T051324Z-g9-07-47bcc02b",
-            "20260927T140253Z-g9-07-efeba6cc"
+            "20260927T140253Z-g9-07-efeba6cc",
+            "20260928T030412Z-g9-07-7dec3b6f"
           ],
           "blocker": null,
           "scope_change_approval": null,
