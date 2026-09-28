@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `1.1.1` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260928T025801Z-g9-06-5712adb4` recorded 2026-09-28T02:58:01+00:00 at commit `ab6488b57bfe`.
+Package version `1.1.1` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260928T042239Z-g3-05-7d4926f8` recorded 2026-09-28T04:22:39+00:00 at commit `131b3318b6bf`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -60,7 +60,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G3-02 | 유전체 slab normal/oblique TE/TM과 TMM | IMPLEMENTED | VERIFIED | `20260927T220123Z-g3-02-843857ab` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
 | G3-03 | Drude/Lorentz slab fit/ADE 오차 분리 | IMPLEMENTED | VERIFIED | `20260927T220311Z-g3-03-90902a0e` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
 | G3-04 | dielectric cylinder/sphere Mie 산란 | IMPLEMENTED | VERIFIED | `20260927T223005Z-g3-04-2ada52a3` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G3-05 | 금속/분산 곡면 산란·흡수 수렴 | IMPLEMENTED | VERIFIED | `20260927T234053Z-g3-05-fb451a61` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (2 paths); it is not tied to commit a5ae4ef4bec3 alone |
+| G3-05 | 금속/분산 곡면 산란·흡수 수렴 | IMPLEMENTED | VERIFIED | `20260928T042239Z-g3-05-7d4926f8` | `131b3318b6bf` | PASS | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 131b3318b6bf alone |
 | G3-06 | PEC/PMC cavity·symmetry와 gradient mapping | IMPLEMENTED | VERIFIED | `20260927T234224Z-g3-06-59bc31f2` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (2 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G3-07 | PML normal/oblique 반사·장시간 안정성 | IMPLEMENTED | VERIFIED | `20260927T234334Z-g3-07-4b58219a` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (2 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G3-08 | Bloch grating·회절과 독립 RCWA | IMPLEMENTED | VERIFIED | `20260928T001503Z-g3-08-11133c40` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (4 paths); it is not tied to commit a5ae4ef4bec3 alone |
@@ -287,7 +287,7 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | Task | Warning |
 | --- | --- |
 | G3-04 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G3-05 | evidence was recorded on a dirty tree (2 paths); it is not tied to commit a5ae4ef4bec3 alone |
+| G3-05 | evidence was recorded on a dirty tree (1 paths); it is not tied to commit 131b3318b6bf alone |
 | G3-06 | evidence was recorded on a dirty tree (2 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G3-07 | evidence was recorded on a dirty tree (2 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G3-08 | evidence was recorded on a dirty tree (4 paths); it is not tied to commit a5ae4ef4bec3 alone |
