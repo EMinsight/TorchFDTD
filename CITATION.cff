@@ -11,28 +11,6 @@ authors:
     given-names: Hyoseok
     affiliation: "Department of Physics, Chungnam National University, Daejeon, Republic of Korea"
 doi: 10.5281/zenodo.22928834
-identifiers:
-  - type: doi
-    value: 10.5281/zenodo.22928834
-    description: "Concept DOI of TorchFDTD, resolving to the latest version"
-  - type: doi
-    value: 10.5281/zenodo.22998813
-    description: "Version DOI of TorchFDTD 1.0.0"
-  - type: doi
-    value: 10.5281/zenodo.22975223
-    description: "Version DOI of TorchFDTD 0.17.1"
-  - type: doi
-    value: 10.5281/zenodo.22971153
-    description: "Version DOI of TorchFDTD 0.17.0"
-  - type: doi
-    value: 10.5281/zenodo.22969522
-    description: "Version DOI of TorchFDTD 0.16.1"
-  - type: doi
-    value: 10.5281/zenodo.22968357
-    description: "Version DOI of TorchFDTD 0.16.0"
-  - type: doi
-    value: 10.5281/zenodo.22928835
-    description: "Version DOI of TorchFDTD 0.15.0"
 repository-code: "https://github.com/hyoseokp/TorchFDTD"
 license: MIT
 version: 1.1.1
