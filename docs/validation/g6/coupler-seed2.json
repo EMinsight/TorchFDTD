@@ -49,7 +49,7 @@
    "gradient_norm": 0.04434816166758537,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 10.092109300021548
+   "elapsed_s": 12.268926599994302
   },
   {
    "iteration": 2,
@@ -62,7 +62,7 @@
    "gradient_norm": 0.04746707156300545,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 10.095873399986885
+   "elapsed_s": 12.16350759996567
   },
   {
    "iteration": 3,
@@ -75,7 +75,7 @@
    "gradient_norm": 0.04861944913864136,
    "beta": 4.0,
    "beta_next": 4.0,
-   "elapsed_s": 10.168210500036366
+   "elapsed_s": 11.898848799988627
   },
   {
    "iteration": 4,
@@ -88,7 +88,7 @@
    "gradient_norm": 0.04750639945268631,
    "beta": 4.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.186889500007965
+   "elapsed_s": 12.1227377000032
   },
   {
    "iteration": 5,
@@ -101,7 +101,7 @@
    "gradient_norm": 0.18438273668289185,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.208321400044952
+   "elapsed_s": 12.179016599955503
   },
   {
    "iteration": 6,
@@ -114,7 +114,7 @@
    "gradient_norm": 0.14465443789958954,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.136447400029283
+   "elapsed_s": 12.067283699987456
   },
   {
    "iteration": 7,
@@ -127,7 +127,7 @@
    "gradient_norm": 0.06340298056602478,
    "beta": 8.0,
    "beta_next": 8.0,
-   "elapsed_s": 10.166960100003053
+   "elapsed_s": 12.344395499967504
   },
   {
    "iteration": 8,
@@ -140,7 +140,7 @@
    "gradient_norm": 0.06091455742716789,
    "beta": 8.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.208123299991712
+   "elapsed_s": 12.168788200011477
   },
   {
    "iteration": 9,
@@ -153,7 +153,7 @@
    "gradient_norm": 0.047106850892305374,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.196083699993324
+   "elapsed_s": 11.952969099977054
   },
   {
    "iteration": 10,
@@ -166,7 +166,7 @@
    "gradient_norm": 0.055633243173360825,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.194064099981915
+   "elapsed_s": 12.081885599996895
   },
   {
    "iteration": 11,
@@ -179,7 +179,7 @@
    "gradient_norm": 0.05436505749821663,
    "beta": 16.0,
    "beta_next": 16.0,
-   "elapsed_s": 10.187990400008857
+   "elapsed_s": 12.365348400024232
   },
   {
    "iteration": 12,
@@ -192,7 +192,7 @@
    "gradient_norm": 0.04602069780230522,
    "beta": 16.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.114731799985748
+   "elapsed_s": 12.134969100006856
   },
   {
    "iteration": 13,
@@ -205,7 +205,7 @@
    "gradient_norm": 0.02809012122452259,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.113156499981415
+   "elapsed_s": 11.998274900019169
   },
   {
    "iteration": 14,
@@ -218,7 +218,7 @@
    "gradient_norm": 0.02029678225517273,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.14565959997708
+   "elapsed_s": 11.933963600022253
   },
   {
    "iteration": 15,
@@ -231,7 +231,7 @@
    "gradient_norm": 0.01533710677176714,
    "beta": 32.0,
    "beta_next": 32.0,
-   "elapsed_s": 10.270857600029558
+   "elapsed_s": 11.718841699999757
   },
   {
    "iteration": 16,
@@ -244,7 +244,7 @@
    "gradient_norm": 0.012350773438811302,
    "beta": 32.0,
    "beta_next": 64.0,
-   "elapsed_s": 10.171818400034681
+   "elapsed_s": 12.072671099973377
   }
  ],
  "fabrication": {
@@ -377,8 +377,8 @@
   ]
  ],
  "export": {
-  "gds": "D:\\torchfdtd-rc-wt\\docs\\validation\\g6\\export\\coupler\\seed2\\coupler-seed2.gds",
-  "structures": "D:\\torchfdtd-rc-wt\\docs\\validation\\g6\\export\\coupler\\seed2\\coupler-seed2-structures.json",
+  "gds": "D:\\torchfdtd-111-wt\\docs\\validation\\g6\\export\\coupler\\seed2\\coupler-seed2.gds",
+  "structures": "D:\\torchfdtd-111-wt\\docs\\validation\\g6\\export\\coupler\\seed2\\coupler-seed2-structures.json",
   "structure_count": 7
  },
  "final_evaluation": {
@@ -458,6 +458,6 @@
    "fine_gds": "polygons read back by import_gds from the exported file"
   }
  },
- "wall_time_s": 199.14016330003506,
+ "wall_time_s": 236.36685019999277,
  "device": "cpu"
 }

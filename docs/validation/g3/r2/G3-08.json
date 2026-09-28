@@ -173,7 +173,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.00018870477874304709,
    "max_dominant_phase_error_rad": 0.0018940263702759697,
-   "wall_s": 20.376737800019328
+   "wall_s": 20.904844200005755
   },
   "TE/0deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -262,7 +262,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0005572605767886762,
    "max_dominant_phase_error_rad": 0.002681820790660261,
-   "wall_s": 20.431212799972855
+   "wall_s": 20.932166099955793
   },
   "TE/0deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -351,7 +351,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0006100990428626329,
    "max_dominant_phase_error_rad": 0.00327451376625576,
-   "wall_s": 20.44498420000309
+   "wall_s": 20.918647600046825
   },
   "TE/20deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -418,7 +418,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.003055634065245727,
    "max_dominant_phase_error_rad": 0.014273250743412236,
-   "wall_s": 20.439807099988684
+   "wall_s": 21.463200699945446
   },
   "TE/20deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -485,7 +485,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0012760213463441916,
    "max_dominant_phase_error_rad": 0.004833699222672516,
-   "wall_s": 20.461462599982042
+   "wall_s": 21.442375999991782
   },
   "TE/20deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TE",
@@ -552,7 +552,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0015355926757124605,
    "max_dominant_phase_error_rad": 0.0008292747900005004,
-   "wall_s": 20.463644800009206
+   "wall_s": 21.477398399962112
   },
   "TM/0deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -641,7 +641,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.00015693791723568433,
    "max_dominant_phase_error_rad": 0.0004367598646149995,
-   "wall_s": 20.47861270001158
+   "wall_s": 21.445528999960516
   },
   "TM/0deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -730,7 +730,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0005015466303309873,
    "max_dominant_phase_error_rad": 0.001765054452290915,
-   "wall_s": 20.614504700002726
+   "wall_s": 21.57355929998448
   },
   "TM/0deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -819,7 +819,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.00045921490420902655,
    "max_dominant_phase_error_rad": 0.003219217668196439,
-   "wall_s": 20.485436200047843
+   "wall_s": 20.975897099997383
   },
   "TM/20deg/0.92um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -886,7 +886,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0009184743448037713,
    "max_dominant_phase_error_rad": 0.005332618599798389,
-   "wall_s": 20.598313900001813
+   "wall_s": 21.011871700000484
   },
   "TM/20deg/1.02um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -953,7 +953,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0017359410089531901,
    "max_dominant_phase_error_rad": 0.003372707950039522,
-   "wall_s": 20.46979210001882
+   "wall_s": 20.979644200007897
   },
   "TM/20deg/1.06um/subpixel/h=0.005/300fs/cuda-float32": {
    "polarization": "TM",
@@ -1020,7 +1020,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0017770628587849002,
    "max_dominant_phase_error_rad": 0.003143768557600346,
-   "wall_s": 20.48887729999842
+   "wall_s": 20.989868899981957
   },
   "TE/0deg/1.02um/staircase/h=0.01/300fs/cuda-float32": {
    "polarization": "TE",
@@ -1109,7 +1109,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.00041037058762005696,
    "max_dominant_phase_error_rad": 0.06831909322890417,
-   "wall_s": 5.613624599995092,
+   "wall_s": 5.7545972999650985,
    "judged_against_torcwa": false,
    "failures": [
     "dominant phase error 0.0683 > 0.02"
@@ -1202,7 +1202,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.00042753634440426125,
    "max_dominant_phase_error_rad": 0.03332747430322747,
-   "wall_s": 20.405817800026853,
+   "wall_s": 20.95107690000441,
    "judged_against_torcwa": false,
    "failures": [
     "dominant phase error 0.0333 > 0.02"
@@ -1295,7 +1295,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.002333660606635396,
    "max_dominant_phase_error_rad": 0.007956272050139379,
-   "wall_s": 2.8650866000098176,
+   "wall_s": 2.9610408999724314,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1386,7 +1386,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.007118434856868472,
    "max_dominant_phase_error_rad": 0.014191215143728508,
-   "wall_s": 5.607310899998993,
+   "wall_s": 5.799652100016829,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1477,7 +1477,7 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0037312582797661697,
    "max_dominant_phase_error_rad": 0.006340830928537655,
-   "wall_s": 20.405380900017917,
+   "wall_s": 20.918508899980225,
    "judged_against_torcwa": false,
    "failures": []
   },
@@ -1568,11 +1568,11 @@
    "torcwa_harmonics": 640,
    "max_efficiency_error": 0.0012746517278790503,
    "max_dominant_phase_error_rad": 0.0032812712711927094,
-   "wall_s": 2.85932370001683,
+   "wall_s": 2.9349546000012197,
    "judged_against_torcwa": false,
    "failures": []
   }
  },
- "generated": "2026-09-27T10:36:52+00:00",
+ "generated": "2026-09-27T23:54:51+00:00",
  "full_mode": true
 }
