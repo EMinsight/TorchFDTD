@@ -12,6 +12,119 @@ Sources are fixed soft electric point increments or z-normal plane increments. E
 
 Off-diagonal tensor coupling, ADE dispersion, nonuniform meshes, subpixel interfaces, spatial streaming, adaptive stopping, H sources, and one-way/TFSF injection are outside this API. The derivative contract is first order. The API does not differentiate source settings or the boundary configuration.
 
+## Optional CUDA launch and fusion settings
+
+The point and plane APIs accept these settings in `ReversibleCPMLOptions`:
+
+| Option | Default | Choices |
+|---|---|---|
+| `block_size` | `None` | `None` keeps the existing launch sizes. `128`, `256`, `512`, or `1024` selects a fixed size. `'auto'` measures each kernel on scratch storage. |
+| `forward_kernel` | `'split'` | `'fused_eh'` combines the E update, soft electric source injection, and H update. |
+| `adjoint_kernel` | `'split'` | `'one_pass'` combines the H and E transposes, using separate input/output cotangent buffers. |
+
+```python
+options = ReversibleCPMLOptions(
+    interior_z=(45, 79),  # inclusive pillar-layer indices for this particular grid
+    block_size='auto',
+    forward_kernel='fused_eh',
+    adjoint_kernel='split',
+)
+model = ReversibleCPMLSimulation(project, options)
+```
+
+These optimizations require CUDA, real FP32 fields, uniform periodic x/y,
+z-only CPML, scalar or diagonal dielectric permittivity, and constant scalar
+permeability. Fused forward additionally requires contiguous soft electric
+source support without spatial profiles. Jones components are injected in the
+same order as the split update. Sources and monitors may lie outside
+`interior_z`, subject to the existing source-support and physical-region checks.
+
+Fused forward uses a shared-memory marching layout when the z extent fits its
+thread/shared-memory limits, and a per-cell gather layout otherwise. The
+marching layout has a fixed two-dimensional block. `block_size` applies to the
+other kernels. It does not override the marching layout.
+
+Within the recorded CPML API's supported physics, unavailable optimizations use
+the existing split path. `report['forward_kernel_used']`,
+`report['forward_kernel_variant']` (when fused), `report['adjoint_kernel_used']`,
+and `report['fallback_reason']` identify the actual path and any fallback.
+The adjoint-used field is updated when backward executes. Unsupported physics
+such as dispersion, PMC, subpixel interfaces, and nonuniform meshes retain the
+API's existing validation errors. The options do not expand the physics contract.
+CUDA runtime and allocation failures propagate.
+
+Autotuning measures five alternating sweeps of 128/256/512/1024-thread launches
+on copies of writable arguments, chooses the lowest median time, and caches
+only metadata in the current process by device, compute capability and kernel
+source hash. `report['cuda_launches']` records the source hashes, chosen blocks,
+timings, cache reuse and optional specialization compilation failures. The
+first call includes this setup cost. Tuning must precede CUDA graph capture.
+It is opt-in because its setup cost can outweigh savings on short simulations.
+
+Forward E/H and electric CPML buffers, adjoint E/H buffers, and peak autotuning
+scratch are included in memory admission. The report exposes
+`fused_forward_buffer_bytes`, `fused_adjoint_buffer_bytes`, and
+`cuda_tuning_scratch_bytes`. These buffers can materially increase VRAM needs.
+
+For the same interval and inputs, the fused and block-size variants retain
+IEEE compilation (`--fmad=false`, `--ftz=false`) and the split expressions'
+operation order. Tests compare fields, traces, spectra, cotangents, CPML
+memories and material gradients with `torch.equal`. Changing the reconstruction
+interval still has the separately documented FP32 reconstruction error and
+requires a tolerance comparison with checkpointed exact-primal gradients.
+No precomputed `cn/epsilon` volume is required by these options.
+
+Run the tile benchmark under an exclusive GPU lock:
+
+```bash
+python benchmarks/reversible_cpml_fused_updates.py --core 4 --over 1.8 \
+  --steps 1200 --repeats 5 --trace cpu --out results/fused-tile.json
+```
+
+It alternates split, auto, fused forward, one-pass adjoint and combined modes
+after warmup, checks identical spectra/gradients, and reports forward-only,
+recorded forward, backward and complete-call times with source hashes. Larger
+16/24 micrometer cores require sufficient VRAM for the full reservation.
+Performance is workload- and device-dependent. The default paths stay split.
+
+### Measured tile performance
+
+RTX 3060, PyTorch 2.10.0+cu126, real diagonal permittivity, one polarization,
+1200 steps, reconstruction layers 45–79, asynchronous CPU boundary storage,
+and `diagnostic_chunk_elements=2**24`. Each mode was warmed once, followed by
+three measurements with alternating mode order. Times below are medians of
+the complete public forward-plus-gradient call, including per-call setup.
+Compilation and the first autotuning pass are outside the warmed measurements.
+
+| Mode | 240 × 240 × 125 (s) | 380 × 380 × 125 (s) |
+|---|---:|---:|
+| Split, original block sizes | 7.935 | 21.594 |
+| Split, automatic block sizes | 7.450 | 21.689 |
+| Fused E+H, original backward blocks | 7.242 | 20.364 |
+| Fused E+H, automatic backward blocks | Not measured | 19.241 |
+| Split forward, one-pass adjoint | 8.035 | 21.577 |
+| Fused E+H, one-pass adjoint, automatic blocks | 7.502 | 20.285 |
+
+Fused E+H with split adjoint reduced complete-call time by 8.7% on the smaller
+grid using original blocks and 10.9% on the larger grid using automatic blocks.
+On the larger grid the latter combination reduced forward-only time from
+7.772 to 5.758 seconds (25.9%). Automatic block selection alone did not improve
+both grids. One-pass adjoint did not provide a repeatable benefit on this GPU,
+so the example above keeps the split adjoint.
+
+All compared spectra and gradients were bitwise identical. On the larger grid,
+the largest measured Torch allocation increment was 2.935 GiB with all options,
+within the 5.139 GiB reservation. The records include every sample and source
+hash: [240-grid measurements](validation/fused_cpml_240.json) and
+[380-grid measurements](validation/fused_cpml_380.json). The latter also records
+per-kernel CUDA event times and an ideal unique-array byte model. Its GB/s
+figures exclude CPML traffic, repeated gathers and cache effects and are not
+measured DRAM bandwidth.
+
+These are single-tile measurements, with core widths 1.2 and 4 micrometers plus
+1.8-micrometer margins on each side. They do not establish full-lens throughput
+or performance on 16/24-micrometer cores, RTX 5880, A100 or B200.
+
 ## Material parameters and the fixed exterior
 
 Call the model with two contiguous, resolved real FP32 tensors of the same full grid shape on the same CPU or CUDA device. Use `(Nx,Ny,Nz)` for scalar epsilon or `(Nx,Ny,Nz,3)` for component-specific diagonal Yee epsilon:

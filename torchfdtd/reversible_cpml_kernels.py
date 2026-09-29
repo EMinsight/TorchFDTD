@@ -56,23 +56,24 @@ def _interior_indices(shape, a, b, *, legacy=False):
 
 
 def _interior_launch_contract(system, block_size):
-    if type(block_size) is not int or block_size not in (64, 128, 256, 512):
-        raise ValueError('Interior CUDA block size must be 64, 128, 256 or 512.')
+    if type(block_size) is not int or block_size not in (64, 128, 256, 512, 1024):
+        raise ValueError('Interior CUDA block size must be 64, 128, 256, 512 or 1024.')
     from .adjoint_memory import _cuda_index_contract
     _cuda_index_contract(system.region, 0, 0)
 
 
 class _InteriorCUDA:
- def __init__(self,s,a,b,gradient,eb,*,block_size=128,legacy=False):
-  _interior_launch_contract(s,block_size)
+ def __init__(self,s,a,b,gradient,eb,*,block_size=128,legacy=False,report=None):
+  _interior_launch_contract(s,128 if block_size=='auto' else block_size)
   self.s=s;self.cp=prepare_cuda_kernels();self.a=a;self.b=b
   self.block_size=block_size
+  self.report=report;self.launch_blocks={};self.bar=eb;self.bar_views={}
   nx,ny,nz=s.region.shape;cn=s.grid.courant_number
   diagonal=s.epsilon.ndim==4
   # Each thread owns one interior cell. Only x/y wrap, no exterior target write.
   common=_interior_indices(s.region.shape,a,b,legacy=legacy)
   qualifier='' if legacy else ' __restrict__'
-  bounds='' if legacy else f'__launch_bounds__({block_size}) '
+  bounds='' if legacy else f'__launch_bounds__({128 if block_size=="auto" else block_size}) '
   self.kernels={};self.programs={};self.count=nx*ny*(b-a+1)
   for phase in ('h','e','g','eg'):
    forward=phase=='h'
@@ -101,12 +102,25 @@ class _InteriorCUDA:
   if phase not in self.kernels:
    source,tensors=self.programs[phase]
    with self.cp.cuda.Device(self.s.device.index):
-    fn,module=_compile(source,self.s.device.index,self.cp.cuda.Device(self.s.device.index).compute_capability,'interior')
     arrays=tuple(_direct_cuda_view(self.cp,t) for t in tensors)
+    if self.block_size=='auto' or self.report is not None:
+     from .reversible_cuda_tuning import select_launch
+     fn,module,block=select_launch(source,'interior',tensors,arrays,self.count,
+         self.s.device.index,self.block_size,default=128,label='interior_'+phase,report=self.report)
+    else:
+     fn,module=_compile(source,self.s.device.index,self.cp.cuda.Device(self.s.device.index).compute_capability,'interior')
+     block=self.block_size
+    self.launch_blocks[phase]=block
    self.kernels[phase]=(fn,arrays,module)
   fn,arrays,_=self.kernels[phase]
+  if self.bar is not self.programs[phase][1][3]:
+   key=(phase,self.bar.data_ptr())
+   if key not in self.bar_views:
+    self.bar_views[key]=arrays[:3]+(_direct_cuda_view(self.cp,self.bar),)+arrays[4:]
+   arrays=self.bar_views[key]
+  block=self.launch_blocks[phase]
   with self.cp.cuda.Device(self.s.device.index),self.cp.cuda.ExternalStream(torch.cuda.current_stream(self.s.device).cuda_stream,device_id=self.s.device.index):
-   fn(((self.count+self.block_size-1)//self.block_size,),(self.block_size,),arrays)
+   fn(((self.count+block-1)//block,),(block,),arrays)
 
 
 class _ComplexInteriorCUDA:
@@ -180,7 +194,7 @@ class InteriorReconstruction:
     is installed on system, so ownership does not form a cycle.
     """
 
-    def __init__(self, system, a, b, gradient, signal_bar):
+    def __init__(self, system, a, b, gradient, signal_bar, *, options=None, report=None):
         shape = tuple(system.region.shape)
         if (type(a) is not int or type(b) is not int
                 or not 0 < a <= b < shape[2]-1):
@@ -239,7 +253,28 @@ class InteriorReconstruction:
             inverse_class = _ComplexInteriorCUDA if field_dtype == torch.complex64 else _InteriorCUDA
             self._fused = adjoint_class(system, gradient, self.signal_bar,
                                         direct_views=True, material_gradient=False)
-            self._inverse = inverse_class(system, a, b, gradient, self._fused.e_bar)
+            requested = getattr(options, 'block_size', None)
+            from .reversible_cuda_fused import eligibility_reason, OnePassAdjoint
+            reason = eligibility_reason(system)
+            if getattr(options, 'adjoint_kernel', 'split') == 'one_pass' and reason is None:
+                try:
+                    self._fused.one_pass = OnePassAdjoint(self._fused, requested, report)
+                except RuntimeError as exc:
+                    if 'compilation failed' not in str(exc):
+                        raise
+                    if report is not None:
+                        report['fallback_reason']['adjoint'] = str(exc)
+                else:
+                    if report is not None:
+                        report['adjoint_kernel_used'] = 'one_pass'
+            if requested is not None and reason is None and getattr(self._fused, 'one_pass', None) is None:
+                from .reversible_cuda_tuning import tune_adjoint
+                tune_adjoint(self._fused, requested, report)
+            if field_dtype == torch.float32 and requested is not None and reason is None:
+                self._inverse = inverse_class(system, a, b, gradient, self._fused.e_bar,
+                                              block_size=requested, report=report)
+            else:
+                self._inverse = inverse_class(system, a, b, gradient, self._fused.e_bar)
         else:
             self._e_bar = torch.zeros_like(system.grid.E)
             self._h_bar = torch.zeros_like(system.grid.H)
@@ -291,6 +326,8 @@ class InteriorReconstruction:
         self._undo_sources('E', e, n)
         if self._inverse is not None:
             self._fused.step(n, observation_index=row)
+            if isinstance(self._inverse, _InteriorCUDA):
+                self._inverse.bar = self._fused.e_bar
             # E-transpose only changes h_bar, so e_bar is still the required
             # post-observation, post-H-transpose electric cotangent here.
             # With material_gradient=False the transpose reads no primal E/H,

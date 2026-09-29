@@ -205,11 +205,15 @@ class FusedAdjointCUDA:
 
     def step(self,index,*,observation_index=None):
         import numpy as np
+        one_pass = getattr(self, 'one_pass', None)
+        if one_pass is not None:
+            return one_pass.step(index if observation_index is None else observation_index)
         with self.cp.cuda.Device(self.device),self.stream():
             if self.observer is not None:
                 fn,arrays,_,count=self.observer
                 fn(((count+127)//128,),(128,),(*arrays,np.int32(index if observation_index is None else observation_index)))
             for forward in (True,False):
                 fn,arrays,_=self.launches[forward,self.phase]
-                fn(((self.count+255)//256,),(256,),arrays)
+                block = getattr(self, 'tuned_blocks', {}).get((forward, self.phase), 256)
+                fn(((self.count+block-1)//block,),(block,),arrays)
         self.phase=1-self.phase

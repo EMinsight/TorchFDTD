@@ -95,7 +95,31 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
     monitor_count = (len(spectral.components) if spectral is not None else
                      len(getattr(project, 'monitors', ())))
     observation_map = 8*monitor_count if device.type == 'cuda' else 0
-    extra_active = diagnostics+material+transfer_device+trace_device+observation_map
+    forward_buffers = adjoint_buffers = tuning_scratch = 0
+    if device.type == 'cuda' and not complex_fields and (
+            getattr(options, 'forward_kernel', 'split') == 'fused_eh'
+            or getattr(options, 'adjoint_kernel', 'split') == 'one_pass'
+            or getattr(options, 'block_size', None) == 'auto'):
+        from .boundaries import BoundaryDescription
+        descriptors = BoundaryDescription(project.region)
+        psi_bytes = electric_psi_bytes = 0
+        for (forward, axis, _), segments in descriptors.cpml.items():
+            for segment in segments:
+                cut = segment['slice'][axis]
+                size = (cells // shape[axis]) * (cut.stop-cut.start) * item
+                psi_bytes += size
+                if not forward:
+                    electric_psi_bytes += size
+        if getattr(options, 'forward_kernel', 'split') == 'fused_eh':
+            forward_buffers = 6*cells*item + electric_psi_bytes
+        if getattr(options, 'adjoint_kernel', 'split') == 'one_pass':
+            adjoint_buffers = 6*cells*item
+        if getattr(options, 'block_size', None) == 'auto':
+            # Largest simultaneously writable set: two fields and all CPML
+            # memories. Interior E+VJP uses at most the same two-field bound.
+            tuning_scratch = 6*cells*item + psi_bytes
+    kernel_workspace = forward_buffers + adjoint_buffers + tuning_scratch
+    extra_active = diagnostics+material+transfer_device+trace_device+observation_map+kernel_workspace
     extra_host = preparation+transfer_host+trace_host+trace_metadata+spectral_layout+observation_map
     # Inherit the existing runtime reserve and add allocator rounding/headroom
     # for new CUDA allocations rather than consuming the old reserve silently.
@@ -118,11 +142,14 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
     parts.update(reconstruction_diagnostics=diagnostics,
                  effective_material_and_autograd=material,
                  trace_device_transfer=transfer_device,
-                 recorded_observation_map=observation_map)
+                 recorded_observation_map=observation_map,
+                 fused_forward_buffers=forward_buffers,
+                 fused_adjoint_buffers=adjoint_buffers,
+                 cuda_tuning_scratch=tuning_scratch)
     actual_terminal = 6*plane*(interval[1]-interval[0]+1)*item
     result = dict(base, memory_reservation_bytes=active, host_reservation_bytes=host,
         gpu_reservation_bytes=active if device.type == 'cuda' else 0,
-        workspace_reservation_bytes=base['workspace_reservation_bytes']+diagnostics+material+transfer_device+observation_map,
+        workspace_reservation_bytes=base['workspace_reservation_bytes']+diagnostics+material+transfer_device+observation_map+kernel_workspace,
         workspace_components_bytes=parts,
         workspace_model='cpml_reversible_conservative_'+base['workspace_model'],
         inherited_workspace_model=base['workspace_model'],
@@ -152,6 +179,9 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
         diagnostic_chunk_elements=chunk, diagnostic_buffer_bytes=24*chunk,
         diagnostic_rounding_bytes=4096, diagnostic_reservation_bytes=diagnostics,
         recorded_observation_map_bytes=observation_map,
+        fused_forward_buffer_bytes=forward_buffers,
+        fused_adjoint_buffer_bytes=adjoint_buffers,
+        cuda_tuning_scratch_bytes=tuning_scratch,
         source_preparation_host_bytes=preparation,
         retained_caller_epsilon_bytes=material_components*cells*4,
         retained_caller_fixed_epsilon_bytes=material_components*cells*4,

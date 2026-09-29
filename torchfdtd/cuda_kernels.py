@@ -311,7 +311,8 @@ class FusedYeeCUDA:
     def update(self, forward):
         kernel, arrays, _ = self.launches[forward]
         with self.cp.cuda.Device(self.device), self._stream():
-            kernel(((self.launch_count(self.grid, forward)+255)//256,), (256,), arrays)
+            block = getattr(self, 'tuned_blocks', {}).get(forward, 256)
+            kernel(((self.launch_count(self.grid, forward)+block-1)//block,), (block,), arrays)
 
     def update_E(self):
         g = self.grid

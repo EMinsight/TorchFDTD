@@ -42,9 +42,19 @@ class ReversibleCPMLOptions(ReversibleOptions):
     forward_only: str = 'auto'
     diagnostic_chunk_elements: int = 65536
     interior_z: tuple[int, int] | None = None
+    block_size: int | str | None = None
+    forward_kernel: str = 'split'
+    adjoint_kernel: str = 'split'
 
     def __post_init__(self):
         super().__post_init__()
+        if self.block_size is not None and self.block_size != 'auto' and (
+                type(self.block_size) is not int or self.block_size not in (128, 256, 512, 1024)):
+            raise ValueError('block_size must be None, auto, 128, 256, 512 or 1024.')
+        if self.forward_kernel not in ('split', 'fused_eh'):
+            raise ValueError('forward_kernel must be split or fused_eh.')
+        if self.adjoint_kernel not in ('split', 'one_pass'):
+            raise ValueError('adjoint_kernel must be split or one_pass.')
         if self.forward_only not in ('auto', 'never'):
             raise ValueError('forward_only must be auto or never.')
         if (type(self.diagnostic_chunk_elements) is not int
@@ -208,7 +218,7 @@ def _require_fixed_exterior(value, fixed, interval, chunk):
         raise ValueError('With explicit interior_z, epsilon must equal fixed_epsilon outside the reconstruction interval.')
 
 
-def _recorded_system(epsilon, project, spectral):
+def _recorded_system(epsilon, project, spectral, options=None, report=None):
     system = _System(project, epsilon.detach(), prepare_kernels=False,
                      observation_monitors=None if spectral is None else spectral.observers)
     if epsilon.is_cuda:
@@ -216,6 +226,34 @@ def _recorded_system(epsilon, project, spectral):
         from .cuda_complex import FusedComplexYeeCUDA
         kernel = FusedComplexYeeCUDA if system.field_dtype == torch.complex64 else FusedYeeCUDA
         system.kernel = kernel(system.grid, direct_views=True)
+    if options is not None:
+        if report is None:
+            report = {}
+        report.update(forward_kernel_used='split', adjoint_kernel_used='split',
+                      forward_kernel_requested=options.forward_kernel,
+                      adjoint_kernel_requested=options.adjoint_kernel,
+                      block_size_requested=options.block_size,
+                      fallback_reason={}, cuda_launches={})
+        if options.forward_kernel == 'fused_eh':
+            from .reversible_cuda_fused import make_forward
+            system.fused_eh = make_forward(system, options.block_size, report)
+            if system.fused_eh is not None:
+                # The fused engine owns both parity bindings. Release the
+                # unused split bindings before entering the time loop.
+                system.kernel = None
+        if options.block_size is not None:
+            from .reversible_cuda_fused import eligibility_reason
+            reason = eligibility_reason(system)
+            if reason:
+                report['fallback_reason']['block_size'] = reason
+            elif system.kernel is not None:
+                from .reversible_cuda_tuning import tune_yee
+                tune_yee(system.kernel, options.block_size, report)
+        if options.adjoint_kernel == 'one_pass':
+            from .reversible_cuda_fused import eligibility_reason
+            reason = eligibility_reason(system)
+            if reason:
+                report['fallback_reason']['adjoint'] = reason
     return system
 
 
@@ -224,6 +262,15 @@ def _advance_recorded(system, step, frame, a, b):
 
     Without a frame (forward only) the same updates run with no trace copy.
     """
+    engine = getattr(system, 'fused_eh', None)
+    if engine is not None:
+        engine.step(step)
+        if frame is not None:
+            frame[0].copy_(engine.E[1-engine.parity][:, :, b+1, :2])
+            frame[1].copy_(engine.H[engine.parity][:, :, a-1, :2])
+        engine.swap()
+        system.current_step = step + 1
+        return
     e, h, *psis = system.state()
     if system.kernel is not None:
         system.kernel.update_E()
@@ -250,13 +297,13 @@ def _advance_recorded(system, step, frame, a, b):
 
 
 @torch.no_grad()
-def _forward_only(epsilon, project, interval, report, spectral):
+def _forward_only(epsilon, project, interval, report, spectral, options=None):
     """The recorded forward's steps, observations and DFT blocks, with no tape.
 
     Signals and spectra equal the recorded path's bit for bit. No boundary
     trace, terminal copy or reconstruction scale is kept, so no adjoint exists.
     """
-    system = _recorded_system(epsilon, project, spectral)
+    system = _recorded_system(epsilon, project, spectral, options, report)
     a, b = interval
     block_size = project.region.steps if spectral is None else spectral.block_size
     samples = system.grid.E.new_empty((block_size, len(system.monitors)))
@@ -287,7 +334,7 @@ def _forward_only(epsilon, project, interval, report, spectral):
 class _RecordedCPML(torch.autograd.Function):
     @staticmethod
     def forward(ctx, epsilon, project, options, interval, report, spectral):
-        system = _recorded_system(epsilon, project, spectral)
+        system = _recorded_system(epsilon, project, spectral, options, report)
         a, b = interval
         trace_device = epsilon.device if options.trace_storage == 'device' else torch.device('cpu')
         shape = (project.region.steps, 2, *epsilon.shape[:2], 2)
@@ -366,7 +413,8 @@ class _RecordedCPML(torch.autograd.Function):
             spectral = ctx.spectral
             seed_buffer = signal_bar if spectral is None else system.grid.E.new_empty(
                 (spectral.block_size, len(system.monitors)))
-            inverse = InteriorReconstruction(system, a, b, gradient, seed_buffer)
+            inverse = InteriorReconstruction(system, a, b, gradient, seed_buffer,
+                                             options=ctx.options, report=report)
             staging = (system.grid.E.new_empty(archive.shape[1:])
                        if ctx.transport is None and archive.device != epsilon.device else None)
             reader = ctx.transport.reverse() if ctx.transport is not None else nullcontext(archive)
@@ -501,7 +549,7 @@ class ReversibleCPMLSimulation(torch.nn.Module):
                       backend='fused CUDA' if epsilon.is_cuda else 'torch CPU',
                       forward_only=forward_only, **reservation)
         if forward_only:
-            signals = _forward_only(effective, project, interval, report, spectral)
+            signals = _forward_only(effective, project, interval, report, spectral, self.options)
         else:
             signals = _RecordedCPML.apply(effective, project, self.options, interval, report, spectral)
         if spectral is not None:

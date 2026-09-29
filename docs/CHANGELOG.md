@@ -7,6 +7,13 @@ to release versions, and the unreleased section collects changes for the next re
 Commits that only record validation evidence or documentation ("Record ...",
 "[skip ci]") are not listed; `git log` has them.
 
+## Unreleased
+
+### Added
+
+- Recorded CPML point and plane APIs accept optional per-kernel CUDA block-size selection, fused E/H forward updates, and a one-pass field adjoint through `ReversibleCPMLOptions`. Reports identify actual kernels, fallbacks and tuning source hashes. Admission includes the extra field/CPML buffers and tuning scratch. Existing defaults remain unchanged ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#optional-cuda-launch-and-fusion-settings), this commit).
+- A public-API reversible tile benchmark alternates the optional kernels against the same split-path interval, checks bitwise fields and gradients, and records timings and source hashes (this commit).
+
 ## 1.1.1 (2026-09-28)
 
 ### Added

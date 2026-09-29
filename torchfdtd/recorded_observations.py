@@ -52,6 +52,10 @@ class _CUDARecorder:
                 cupy.cuda.Device(self.device).compute_capability, 'record_samples')
             self.arrays = tuple(_direct_cuda_view(cupy, value) for value in
                 (system.grid.E, system.grid.H, samples, self.mapping)) + (np.int32(self.count),)
+            self.engine = getattr(system, 'fused_eh', None)
+            if self.engine is not None:
+                self.parity_arrays = [tuple(_direct_cuda_view(cupy, value) for value in
+                    (self.engine.E[p], self.engine.H[p])) + self.arrays[2:] for p in (0, 1)]
 
     def stream(self):
         return self.cp.cuda.ExternalStream(torch.cuda.current_stream(self.device).cuda_stream,
@@ -63,4 +67,5 @@ class _CUDARecorder:
             raise ValueError('Recorded observation row is outside the sample block.')
         if self.count:
             with self.cp.cuda.Device(self.device), self.stream():
-                self.fn(((self.count+255)//256,), (256,), (*self.arrays, np.int32(row)))
+                arrays = self.arrays if self.engine is None else self.parity_arrays[self.engine.parity]
+                self.fn(((self.count+255)//256,), (256,), (*arrays, np.int32(row)))
