@@ -53,7 +53,20 @@ def select_launch(source, name, tensors, arrays, count, device, requested,
                 record.update(_CACHE[key], cached=True)
                 _CACHE.move_to_end(key)
                 block = record['block_size']
-                fn, module = compiled(block)
+                try:
+                    fn, module = compiled(block)
+                except RuntimeError as exc:
+                    if not str(exc).startswith('CUDA kernel compilation failed:'):
+                        raise
+                    # The compiled-module cache may evict an entry before the
+                    # metadata cache. Its next compilation can then fail.
+                    del _CACHE[key]
+                    record.pop('median_ms', None)
+                    record.update(cache_invalidated=True, fallback_reason=str(exc),
+                                  compile_errors={str(block): str(exc)})
+                    block = default
+                    fn, module = _compile(source, device, capability, name)
+                    record['block_size'] = block
             else:
                 head = source.split(f'{name}(', 1)[1].split(')', 1)[0]
                 parameters = head.split(',')
@@ -76,6 +89,8 @@ def select_launch(source, name, tensors, arrays, count, device, requested,
                     try:
                         candidates[block] = compiled(block)
                     except RuntimeError as exc:
+                        if not str(exc).startswith('CUDA kernel compilation failed:'):
+                            raise
                         errors[str(block)] = str(exc)
                 for block, (fn, _) in candidates.items():
                     fn(((count + block - 1) // block,), (block,), tuple(arguments))
@@ -107,6 +122,8 @@ def select_launch(source, name, tensors, arrays, count, device, requested,
             try:
                 fn, module = compiled(block)
             except RuntimeError as exc:
+                if not str(exc).startswith('CUDA kernel compilation failed:'):
+                    raise
                 block = default
                 fn, module = _compile(source, device, capability, name)
                 record['fallback_reason'] = str(exc)

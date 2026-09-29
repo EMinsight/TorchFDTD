@@ -12,13 +12,15 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from benchmarks.atomic_output import replace_file
+
 
 def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + '.tmp')
     temporary.write_text(json.dumps(value, indent=2, allow_nan=False) + '\n', encoding='utf8')
-    temporary.replace(path)
+    replace_file(temporary, path)
 
 
 def tensor_digest(value):
@@ -30,7 +32,8 @@ def tensor_digest(value):
 def source_hashes():
     root = Path(__file__).resolve().parents[1]
     paths = sorted((root / 'torchfdtd').rglob('*.py'))
-    paths += [Path(__file__).resolve(), root / 'benchmarks/cr_spectral_objective.py']
+    paths += [Path(__file__).resolve(), root / 'benchmarks/cr_spectral_objective.py',
+              root / 'benchmarks/atomic_output.py']
     return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 
 

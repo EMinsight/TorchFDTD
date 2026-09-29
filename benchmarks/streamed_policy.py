@@ -16,6 +16,11 @@ from types import SimpleNamespace
 
 import torch
 
+if __package__:
+    from .atomic_output import replace_file
+else:
+    from atomic_output import replace_file
+
 from torchfdtd import (AdjointOptions, BoundaryFace, DifferentiableSimulation, Monitor, FieldMonitor, Project,
                         Region, Source, StreamedAdjointOptions, StreamedSimulation,
                         DispersiveSimulation, StreamedDispersiveSimulation,
@@ -178,7 +183,7 @@ def main(argv=None):
         torch_version=torch.__version__,device=args.device,cpu_threads=torch.get_num_threads(),
         hardware=torch.cuda.get_device_name() if args.device=='cuda' else 'CPU',
         source_sha256={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in [Path(__file__).resolve(),*sorted((root/'torchfdtd').glob('*.py'))]},
+            for p in [Path(__file__).resolve(),root/'benchmarks/atomic_output.py',*sorted((root/'torchfdtd').glob('*.py'))]},
         gradient_coordinates=['epsilon_inf','strength / 1e30','omega0 / 1e15','gamma / 1e15'] if args.dispersive else ['epsilon'],
         eh_material_state_bytes=math.prod(region.shape)*6*(3 if args.dispersive else 1)*epsilon.element_size()*(2 if region.complex_fields else 1),
         state_size_scope='E/H and two-pole P/Q only, excludes CPML, workspaces, checkpoints and observations.',
@@ -190,7 +195,7 @@ def main(argv=None):
     if args.unified:
         data['scope']+=' Unified resident candidates include differentiable CPU-to-GPU input and CPU output/gradient transfers in their timed operation.'
     def save():
-        temp=path.with_suffix('.tmp');temp.write_bytes((json.dumps(data,indent=2)+'\n').encode('utf8'));temp.replace(path)
+        temp=path.with_suffix('.tmp');temp.write_bytes((json.dumps(data,indent=2)+'\n').encode('utf8'));replace_file(temp,path)
     save()
     try:
         started = time.perf_counter()

@@ -292,7 +292,7 @@ def test_adjoint_compile_failure_keeps_split_gradient(monkeypatch):
 
 
 @pytest.mark.cuda
-@pytest.mark.parametrize('requested', [1024, 'auto'])
+@pytest.mark.parametrize('requested', [1024, 'auto', 'cached_auto'])
 def test_block_specialization_failure_reports_original_launch(monkeypatch, requested):
     require_cuda()
     from collections import OrderedDict
@@ -306,6 +306,16 @@ def test_block_specialization_failure_reports_original_launch(monkeypatch, reque
         return original(source, *args)
 
     monkeypatch.setattr(tuning, '_CACHE', OrderedDict())
+    cached = requested == 'cached_auto'
+    if cached:
+        requested = 'auto'
+        x = base.clone().requires_grad_()
+        warm = ReversibleCPMLSimulation(project, ReversibleCPMLOptions(
+            block_size='auto'))(x, fixed_epsilon=fixed)
+        torch.autograd.grad(warm.signals.square().sum(), x)
+        assert tuning._CACHE
+        cached_sources = {key[2] for key in tuning._CACHE}
+        del warm, x
     monkeypatch.setattr(tuning, '_compile', fail_specialization)
     results = []
     for block in (None, requested):
@@ -321,6 +331,45 @@ def test_block_specialization_failure_reports_original_launch(monkeypatch, reque
         assert launch['fallback_reason']
         assert report['fallback_reason']['block_size:'+label] == launch['fallback_reason']
         assert launch['block_size'] == (128 if label.startswith('interior_') else 256)
+        if launch['cached']:
+            assert launch['cache_invalidated'], (label, launch)
+            assert 'median_ms' not in launch
+    if cached:
+        # Both adjoint phases share a program. The first invalidates its cached
+        # choice; the second then takes the cold-cache fallback for that source.
+        invalidated = {launch['source_sha256'] for launch in report['cuda_launches'].values()
+                       if launch.get('cache_invalidated')}
+        assert invalidated == cached_sources
+    assert not tuning._CACHE
+
+
+@pytest.mark.cuda
+@pytest.mark.parametrize('requested', [1024, 'auto', 'cached_auto'])
+def test_tuning_does_not_retry_non_compile_errors(monkeypatch, requested):
+    require_cuda()
+    from collections import OrderedDict
+    import torchfdtd.reversible_cuda_tuning as tuning
+    project, base, fixed = case()
+    monkeypatch.setattr(tuning, '_CACHE', OrderedDict())
+    if requested == 'cached_auto':
+        requested = 'auto'
+        with torch.no_grad():
+            ReversibleCPMLSimulation(project, ReversibleCPMLOptions(
+                block_size='auto'))(base, fixed_epsilon=fixed)
+        assert tuning._CACHE
+    calls = []
+    failure = RuntimeError('CUDA out of memory: injected module-load failure')
+
+    def fail(*args, **kwargs):
+        calls.append(args)
+        raise failure
+
+    monkeypatch.setattr(tuning, '_compile', fail)
+    with torch.no_grad(), pytest.raises(RuntimeError) as raised:
+        ReversibleCPMLSimulation(project, ReversibleCPMLOptions(
+            block_size=requested))(base, fixed_epsilon=fixed)
+    assert raised.value is failure
+    assert len(calls) == 1
 
 
 @pytest.mark.cuda

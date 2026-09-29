@@ -58,6 +58,9 @@ on copies of writable arguments, chooses the lowest median time, and caches
 only metadata in the current process by device, compute capability and kernel
 source hash. `report['cuda_launches']` records the source hashes, chosen blocks,
 timings, cache reuse and optional specialization compilation failures. The
+cache entry is invalidated if its later recompilation fails, and the original
+block size is used with `cache_invalidated` and the fallback reason recorded.
+Runtime and allocation errors are not retried as compilation failures. The
 first call includes this setup cost. Tuning must precede CUDA graph capture.
 It is opt-in because its setup cost can outweigh savings on short simulations.
 

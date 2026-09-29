@@ -14,6 +14,10 @@ Commits that only record validation evidence or documentation ("Record ...",
 - Recorded CPML point and plane APIs accept optional per-kernel CUDA block-size selection, fused E/H forward updates, and a one-pass field adjoint through `ReversibleCPMLOptions`. Reports identify actual kernels, fallbacks and tuning source hashes. Admission includes the extra field/CPML buffers and tuning scratch. Existing defaults remain unchanged ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#optional-cuda-launch-and-fusion-settings), this commit).
 - A public-API reversible tile benchmark alternates the optional kernels against the same split-path interval, checks bitwise fields and gradients, and records timings and source hashes (this commit).
 
+### Fixed
+
+- CR and streamed-policy benchmark records retry brief Windows file-replacement errors while preserving the previous complete output. Persistent errors are still reported (this commit).
+
 ## 1.1.1 (2026-09-28)
 
 ### Added
