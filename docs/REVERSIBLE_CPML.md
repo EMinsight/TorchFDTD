@@ -127,10 +127,10 @@ systems, while the complete-call measurements use the simulated tile fields.
 
 A [five-repeat confirmation on the final source](validation/fused_cpml_final_380.json)
 compares split with fused E+H plus automatic blocks on the 380-grid. Complete-call
-medians were 21.654 and 18.927 seconds (12.6% reduction). Every paired repetition
-favored the fused combination. Forward-only medians were 7.600 and 5.654 seconds
-(25.6% reduction). Spectra and gradients remained bitwise equal. This run also
-includes the final fallback-reporting and benchmark preflight changes, which
+medians were 21.196 and 18.506 seconds (12.7% reduction). Every paired repetition
+favored the fused combination. Forward-only medians were 7.595 and 5.587 seconds
+(26.4% reduction). Spectra and gradients remained bitwise equal. This run includes
+the final cached-compilation fallback and benchmark preflight handling, which
 do not change the kernel arithmetic measured in the earlier records.
 
 These are single-tile measurements, with core widths 1.2 and 4 micrometers plus
