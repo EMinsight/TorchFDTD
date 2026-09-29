@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `1.1.1` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260928T042239Z-g3-05-7d4926f8` recorded 2026-09-28T04:22:39+00:00 at commit `131b3318b6bf`.
+Package version `1.1.1` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260929T042502Z-g8-06-979eea11` recorded 2026-09-29T04:25:02+00:00 at commit `a67e9d08241d`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -39,7 +39,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G1-03 | quadrant_intensity_allocation의 FP32 불안정. | IMPLEMENTED | VERIFIED | `20260927T212931Z-g1-03-acc17422` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
 | G1-04 | restart 코드 호환성 검사 누락. | IMPLEMENTED | VERIFIED | `20260927T213447Z-g1-04-16f95726` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
 | G1-05 | journal 저장공간 산정. | IMPLEMENTED | VERIFIED | `20260927T214008Z-g1-05-e21dc28a` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
-| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260927T214019Z-g1-06-29a25f8b` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
+| G1-06 | 문서/실행 경로 일치. | IMPLEMENTED | VERIFIED | `20260929T042303Z-g1-06-8176929c` | `a67e9d08241d` | PASS | evidence matches the current checkout |
 
 ### G2 물리·격자·실행 계약 (WORKSTATION, P0)
 
@@ -131,9 +131,9 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G8-02 | 큰 결과의 chunked/lazy read가 필요하면 HDF5 또는 Zarr 중 요구에 맞는 한 구현을 우선 채택한다 | IMPLEMENTED | VERIFIED | `20260928T011644Z-g8-02-79491add` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G8-03 | GUI의 CAD/GDS → material/source/boundary → 실제 mesh preview → resource preflight → job queue → cancel/resume → 결과 overlay → 데이터/GDS export 경로를 E2E로 시험한다. | IMPLEMENTED | VERIFIED | `20260928T011651Z-g8-03-8f4a59e3` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G8-04 | geometry 편집의 undo/redo, copy/multiselect, autosave/recovery, versioned project, 구조/parameter 단위 검증과 결과 stale 표시를 구현/확인한다 | IMPLEMENTED | VERIFIED | `20260928T011703Z-g8-04-368c15ca` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260928T011712Z-g8-05-8e3fdee9` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260928T011723Z-g8-06-a3df8ab1` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260928T011732Z-g8-07-d46675a2` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
+| G8-05 | 최종 wheel에 frontend 정적 자산을 포함하고 최종 사용자가 Node/npm이나 저장소 checkout 없이 UI를 실행하도록 한다 | IMPLEMENTED | VERIFIED | `20260929T042320Z-g8-05-29a95f80` | `a67e9d08241d` | PASS | evidence matches the current checkout |
+| G8-06 | 지원 Python/Torch/CuPy/runtime 최소·최대 버전을 실제 설치 시험으로 확정한다 | IMPLEMENTED | VERIFIED | `20260929T042502Z-g8-06-979eea11` | `a67e9d08241d` | PASS | evidence matches the current checkout |
+| G8-07 | README의 모든 기본 예제를 installed wheel에서 실행한다 | IMPLEMENTED | VERIFIED | `20260929T042344Z-g8-07-ff0cc496` | `a67e9d08241d` | PASS | evidence matches the current checkout |
 
 ### G9 보안·운영·출고 판정 (WORKSTATION, P0)
 
@@ -141,7 +141,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G9-01 | local server의 loopback 기본값, origin/host 검증, 허용된 파일 경로, 업로드 크기, path traversal, 악성/손상 JSON/NPZ/GDS, 압축 폭탄과 unsafe pickle을 검사한다 | IMPLEMENTED | VERIFIED | `20260928T011752Z-g9-01-5126a045` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G9-02 | 코드와 번들 데이터의 출처·license·third-party notices·SBOM·dependency/security scan을 수행한다 | IMPLEMENTED | VERIFIED | `20260928T011835Z-g9-02-e797c557` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260928T011845Z-g9-03-e81ac48f` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
+| G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260929T042356Z-g9-03-01f0dcda` | `a67e9d08241d` | PASS | evidence matches the current checkout |
 | G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260928T011855Z-g9-04-8424e9ff` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | IMPLEMENTED | VERIFIED | `20260928T011908Z-g9-05-89c5c08e` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260928T025801Z-g9-06-5712adb4` | `ab6488b57bfe` | PASS | evidence matches the current checkout |
@@ -333,12 +333,8 @@ Every warning the judge attaches to a task; a warning never passes or fails a ta
 | G8-02 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G8-03 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G8-04 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G8-05 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G8-06 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G8-07 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G9-01 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G9-02 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G9-03 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G9-04 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 | G9-05 | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
 
