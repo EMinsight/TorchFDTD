@@ -125,13 +125,12 @@ figures exclude CPML traffic, repeated gathers and cache effects and are not
 measured DRAM bandwidth. Kernel profiles use separate zero-state scratch
 systems, while the complete-call measurements use the simulated tile fields.
 
-A [five-repeat confirmation on the final source](validation/fused_cpml_final_380.json)
+A [five-repeat confirmation for 1.1.2](validation/fused_cpml_112_380.json)
 compares split with fused E+H plus automatic blocks on the 380-grid. Complete-call
-medians were 21.196 and 18.506 seconds (12.7% reduction). Every paired repetition
-favored the fused combination. Forward-only medians were 7.595 and 5.587 seconds
-(26.4% reduction). Spectra and gradients remained bitwise equal. This run includes
-the final cached-compilation fallback and benchmark preflight handling, which
-do not change the kernel arithmetic measured in the earlier records.
+medians were 21.162 and 18.930 seconds (10.5% reduction). Every paired repetition
+favored the fused combination. Forward-only medians were 7.466 and 5.500 seconds
+(26.3% reduction). Spectra and gradients remained bitwise equal.
+The record includes source hashes for the release candidate.
 
 These are single-tile measurements, with core widths 1.2 and 4 micrometers plus
 1.8-micrometer margins on each side. They do not establish full-lens throughput
