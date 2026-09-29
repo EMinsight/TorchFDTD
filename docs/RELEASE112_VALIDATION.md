@@ -8,7 +8,8 @@ Historical gate records remain attached to the versions they tested.
 
 The [installed-wheel regression run](validation/release112_fasttrack/result.json)
 passed **417 tests**, with no failures, errors or skips among selected tests.
-One legacy CUDA reconstruction test marked `long` was deselected. It covers optional
+One legacy CUDA reconstruction test marked `long` was deselected.
+The selected checks cover optional
 fused E/H updates, one-pass field adjoints, launch tuning and fallbacks,
 recorded observations, CPML reconstruction, memory admission, shared CUDA
 defaults and benchmark output recovery. Tests ran from a separate working
