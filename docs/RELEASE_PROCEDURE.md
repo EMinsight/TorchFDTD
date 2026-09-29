@@ -1,5 +1,10 @@
 # Release-candidate procedure (G9-06)
 
+For v1.1.2, the owner selected patch validation covering the changed code.
+The [1.1.2 validation scope](RELEASE112_VALIDATION.md) records completed
+checks and omitted full-suite work. It does not claim a new complete
+WORKSTATION or G9-06 pass.
+
 Task G9-06 of the [completion program](COMPLETION_PROGRAM_KO.md) requires every
 required gate to be run on the exact source tree and wheel of the release
 candidate. A pass recorded at an earlier commit, combined with partial checks

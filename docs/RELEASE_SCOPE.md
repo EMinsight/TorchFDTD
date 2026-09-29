@@ -1,5 +1,10 @@
 # Release scope by profile
 
+For v1.1.2, the owner selected patch validation covering the changed code.
+The [1.1.2 validation scope](RELEASE112_VALIDATION.md) records completed
+checks and omitted full-suite work. It does not claim a new complete
+WORKSTATION or G9-06 pass.
+
 Adopted 21 September 2026 at commit f3efd34 as part of stage G0 of the
 [completion program](COMPLETION_PROGRAM_KO.md). This document states what each
 release profile claims to support, and separates two columns that earlier
