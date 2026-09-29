@@ -119,7 +119,16 @@ hash: [240-grid measurements](validation/fused_cpml_240.json) and
 [380-grid measurements](validation/fused_cpml_380.json). The latter also records
 per-kernel CUDA event times and an ideal unique-array byte model. Its GB/s
 figures exclude CPML traffic, repeated gathers and cache effects and are not
-measured DRAM bandwidth.
+measured DRAM bandwidth. Kernel profiles use separate zero-state scratch
+systems, while the complete-call measurements use the simulated tile fields.
+
+A [five-repeat confirmation on the final source](validation/fused_cpml_final_380.json)
+compares split with fused E+H plus automatic blocks on the 380-grid. Complete-call
+medians were 21.654 and 18.927 seconds (12.6% reduction). Every paired repetition
+favored the fused combination. Forward-only medians were 7.600 and 5.654 seconds
+(25.6% reduction). Spectra and gradients remained bitwise equal. This run also
+includes the final fallback-reporting and benchmark preflight changes, which
+do not change the kernel arithmetic measured in the earlier records.
 
 These are single-tile measurements, with core widths 1.2 and 4 micrometers plus
 1.8-micrometer margins on each side. They do not establish full-lens throughput
