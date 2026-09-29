@@ -1430,8 +1430,8 @@
       "docs/validation/sbom.json",
       "tests/test_provenance_inventory.py"
     ],
-    "files_scanned": 2820,
-    "tracked_files": 2878,
+    "files_scanned": 2822,
+    "tracked_files": 2880,
     "findings": []
   },
   "history_note": {
