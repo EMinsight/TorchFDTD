@@ -564,7 +564,8 @@
             "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_readme_measurements.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G1-06.xml",
             "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_readme_measurements.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G1-06.xml",
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_readme_measurements.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G1-06.xml",
-            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_readme_measurements.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G1-06.xml"
+            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_readme_measurements.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G1-06.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_readme_measurements.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G1-06.xml"
           ],
           "required_tests": [
             "tests/test_readme_measurements.py"
@@ -583,7 +584,8 @@
             "20260925T212748Z-g1-06-4672b8c8",
             "20260925T214433Z-g1-06-0559a2e3",
             "20260927T085259Z-g1-06-12ee104e",
-            "20260927T214019Z-g1-06-29a25f8b"
+            "20260927T214019Z-g1-06-29a25f8b",
+            "20260929T042303Z-g1-06-8176929c"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3567,7 +3569,8 @@
             "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_clean_install.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G8-05.xml",
             "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G8-05.xml",
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G8-05.xml",
-            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G8-05.xml"
+            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G8-05.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G8-05.xml"
           ],
           "required_tests": [
             "tests/test_clean_install.py::test_record_is_complete_and_every_step_passed",
@@ -3583,7 +3586,8 @@
             "20260924T083030Z-g8-05-5095f3c9",
             "20260925T185103Z-g8-05-0ad59cae",
             "20260927T115149Z-g8-05-535a0bab",
-            "20260928T011712Z-g8-05-8e3fdee9"
+            "20260928T011712Z-g8-05-8e3fdee9",
+            "20260929T042320Z-g8-05-29a95f80"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3619,7 +3623,8 @@
             "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_doctor.py D:/TorchFDTD/tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G8-06.xml",
             "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_doctor.py D:/torchfdtd-rc-wt/tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G8-06.xml",
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_doctor.py D:/torchfdtd-rc-wt/tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G8-06.xml",
-            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_doctor.py D:/torchfdtd-111-wt/tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G8-06.xml"
+            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_doctor.py D:/torchfdtd-111-wt/tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G8-06.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_doctor.py D:/torchfdtd-111-wt/tests/test_clean_install.py::test_doctor_reports_are_consistent_with_each_environment --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G8-06.xml"
           ],
           "required_tests": [
             "tests/test_doctor.py",
@@ -3634,7 +3639,8 @@
             "20260924T083038Z-g8-06-36787558",
             "20260925T185114Z-g8-06-b9837806",
             "20260927T115200Z-g8-06-ccd090ab",
-            "20260928T011723Z-g8-06-a3df8ab1"
+            "20260928T011723Z-g8-06-a3df8ab1",
+            "20260929T042502Z-g8-06-979eea11"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3669,7 +3675,8 @@
             "D:/TorchFDTD/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/TorchFDTD/tests/test_clean_install.py --junitxml=D:/TorchFDTD/.local/tmp/junit/rerecord/G8-07.xml",
             "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G8-07.xml",
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G8-07.xml",
-            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G8-07.xml"
+            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G8-07.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_clean_install.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G8-07.xml"
           ],
           "required_tests": [
             "tests/test_clean_install.py::test_every_runnable_readme_block_passed_on_the_installed_wheel",
@@ -3684,7 +3691,8 @@
             "20260924T083045Z-g8-07-be20b6ec",
             "20260925T185122Z-g8-07-9666971b",
             "20260927T115208Z-g8-07-28f86233",
-            "20260928T011732Z-g8-07-d46675a2"
+            "20260928T011732Z-g8-07-d46675a2",
+            "20260929T042344Z-g8-07-ff0cc496"
           ],
           "blocker": null,
           "scope_change_approval": null,
@@ -3828,7 +3836,8 @@
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider tests/test_release_review.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-03.xml",
             "D:/torchfdtd-rc-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_release_review.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-03.xml",
             "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-rc-wt/tests/test_release_review.py --junitxml=D:/torchfdtd-rc-wt/.local/tmp/junit/rerecord/G9-03.xml",
-            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_release_review.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G9-03.xml"
+            "D:/torchfdtd-111-wt/.local/venvs/rc/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_release_review.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G9-03.xml",
+            "D:/TorchFDTD/.venv/Scripts/python.exe -m pytest -q -p no:cacheprovider D:/torchfdtd-111-wt/tests/test_release_review.py --junitxml=D:/torchfdtd-111-wt/.local/tmp/junit/rerecord/G9-03.xml"
           ],
           "required_tests": [
             "tests/test_release_review.py"
@@ -3839,7 +3848,8 @@
             "20260925T185211Z-g9-03-1f054837",
             "20260925T214448Z-g9-03-cc9b3082",
             "20260927T115300Z-g9-03-e2ab4de7",
-            "20260928T011845Z-g9-03-e81ac48f"
+            "20260928T011845Z-g9-03-e81ac48f",
+            "20260929T042356Z-g9-03-01f0dcda"
           ],
           "blocker": null,
           "scope_change_approval": null,
