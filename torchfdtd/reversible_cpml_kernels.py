@@ -254,11 +254,11 @@ class InteriorReconstruction:
             self._fused = adjoint_class(system, gradient, self.signal_bar,
                                         direct_views=True, material_gradient=False)
             requested = getattr(options, 'block_size', None)
-            from .reversible_cuda_fused import eligibility_reason, OnePassAdjoint
+            from .reversible_cuda_fused import eligibility_reason, OnePassFieldAdjoint
             reason = eligibility_reason(system)
             if getattr(options, 'adjoint_kernel', 'split') == 'one_pass' and reason is None:
                 try:
-                    self._fused.one_pass = OnePassAdjoint(self._fused, requested, report)
+                    self._fused.one_pass = OnePassFieldAdjoint(self._fused, requested, report)
                 except RuntimeError as exc:
                     if 'compilation failed' not in str(exc):
                         raise

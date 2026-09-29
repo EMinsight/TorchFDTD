@@ -135,7 +135,7 @@ do not change the kernel arithmetic measured in the earlier records.
 
 These are single-tile measurements, with core widths 1.2 and 4 micrometers plus
 1.8-micrometer margins on each side. They do not establish full-lens throughput
-or performance on 16/24-micrometer cores, RTX 5880, A100 or B200.
+or performance on 16/24-micrometer cores or other GPUs.
 
 ## Material parameters and the fixed exterior
 
@@ -437,4 +437,4 @@ Measured on an RTX 3060 with PyTorch 2.10.0+cu126, using 512 steps and synchroni
 | 64 × 64 × 125 | diagonal / complex | 8 × 8 | 9 | 0.502109 | 0.475268 | 5.35% |
 | 64 × 64 × 125 | diagonal / real | 64 × 64 | 9 | 0.585422 | 0.532866 | 8.98% |
 
-All compared spectra and gradients were bitwise equal. Timing differences depend on grid size and observation density. These measurements do not establish a speedup for larger metalenses, A100, H200 or B200. The [raw measurements](validation/recorded_cpml_observations_111.json) include every sample, paired variability and peak Torch CUDA memory. Reproduce with `python -m benchmarks.recorded_cpml_dispatch_perf --output comparison.json`.
+All compared spectra and gradients were bitwise equal. Timing differences depend on grid size and observation density. These measurements do not establish a speedup for larger metalenses or other GPUs. The [raw measurements](validation/recorded_cpml_observations_111.json) include every sample, paired variability and peak Torch CUDA memory. Reproduce with `python -m benchmarks.recorded_cpml_dispatch_perf --output comparison.json`.

@@ -33,7 +33,7 @@ def build_tile(core=16.0, over=1.2, steps=1200, trace="device", diagonal=True, g
     L = core + 2 * over
     spec = SpectrumSettings(sampling="custom", custom_frequencies_hz=sorted(299792458.0 / (l * 1e-9) for l in LAM_NM), apodization="none")
     ncell = max(1, int(math.floor(core / PITCH + 1e-9)))
-    p = Project(name="b200 bench tile",
+    p = Project(name="Fused CPML tile benchmark",
         region=Region(dimension="3d", size=(L, L, 2.5), mesh=MESH, mesh_type="uniform", mesh_auto_refine=False,
                       boundaries=Boundaries(x_min=BoundaryFace(kind="periodic"), x_max=BoundaryFace(kind="periodic"),
                                             y_min=BoundaryFace(kind="periodic"), y_max=BoundaryFace(kind="periodic")),

@@ -168,7 +168,9 @@ For the 0.15.0 candidate the owner accepted the RTX 3060 run alone
 G9-06 scope line of that candidate says so. The 0.16.0 candidate was recorded
 the same way, the RTX 5880 Ada host remaining committed to other work by the
 owner's instruction. For the 1.0.0 round the RTX 5880 remains reserved for
-other work under the owner's 2026-09-26 handoff, including the 1.1.1 round. The full RTX 3060 round is
+other work under the owner's 2026-09-26 handoff, including the 1.1.1 round.
+For 1.1.2, the owner explicitly waived the RTX 5880 run on 2026-09-30 and
+authorized release after the RTX 3060 RC and exact-commit CI pass. The full RTX 3060 round is
 therefore the recorded workstation scope. The two-host run below remains the
 procedure when both hosts are available. This does not remove the separate
 two-GPU HPC acceptance requirement.

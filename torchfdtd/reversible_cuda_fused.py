@@ -1,8 +1,22 @@
-"""Opt-in real FP32 periodic-x/y, z-CPML fused updates.
+"""Optional fused field updates for real FP32, periodic x/y and z-only CPML.
 
-The marching and gather expressions were ported from the metalens b200_kernels
-prototype. Integration owns buffers per simulation and uses no global patches.
-IEEE compilation and term ordering match the native split kernels.
+The expressions originated in the metalens prototype and retain the native
+split Yee update's arithmetic order. E is advanced first, soft electric sources
+are added, and H then uses those new E values. Fusion removes an intermediate
+global-memory round trip without changing the time staggering or CPML recurrence.
+
+Two forward layouts implement the same equations. FusedEHMarching reuses two
+x planes in shared memory while advancing through an x chunk. FusedEHGather
+recomputes the neighboring E values needed by each cell's H update and handles
+z extents that exceed the marching layout's thread or shared-memory limits.
+Each simulation owns its buffers and launch bindings. No device-model-specific
+patches or process-wide kernel replacements are installed.
+
+OnePassFieldAdjoint applies the H transpose followed by the E transpose in one
+gather kernel. Separate old/new cotangent buffers prevent cross-thread hazards.
+Both directions preserve curl-term order and use the native IEEE compiler flags
+without fused multiply-add contraction or flush-to-zero. Unsupported physics
+is checked before allocation, and the caller records use of the split fallback.
 """
 from __future__ import annotations
 
@@ -73,14 +87,14 @@ def make_forward(system, requested, report):
     zblock = 32 * ((nz + 31) // 32)
     try:
         if zblock * 6 <= 1024 and 4 * 6 * zblock * 3 * 4 <= 48 * 1024:
-            engine = MarchingEH(system)
+            engine = FusedEHMarching(system)
             report['forward_kernel_variant'] = 'marching'
             report.setdefault('cuda_launches', {})['forward_fused_eh_marching'] = dict(
                 source_sha256=hashlib.sha256(engine.source.encode()).hexdigest(),
                 block_size=list(engine.block), requested='fixed_marching_layout')
         else:
-            engine = NaiveEH(system, requested, report)
-            report['forward_kernel_variant'] = 'naive'
+            engine = FusedEHGather(system, requested, report)
+            report['forward_kernel_variant'] = 'gather'
     except RuntimeError as exc:
         if 'compilation failed' not in str(exc):
             raise
@@ -91,8 +105,15 @@ def make_forward(system, requested, report):
 
 
 class _EHBase:
-    """Double-buffered one-pass E+H forward step. Binding shared by the two kernel layouts below: E, H and the E-CPML memories are
-    double-buffered (old -> new, then swap), the H-CPML memories are updated in place (only the owner thread touches them)."""
+    """Shared bindings for both fused E/H layouts.
+
+    E, H and E-CPML memories use old/new buffers because neighboring threads
+    may still need their previous values. A halo calculation can read an old
+    CPML memory but only its owning cell writes the new value. H-CPML memories
+    can be updated in place because only their owner reads and writes them.
+    The caller swaps parity after a complete launch, then rebinds observers
+    and adjoint inputs to the newly current fields.
+    """
 
     def _bind(self, system):
         g = system.grid
@@ -189,8 +210,14 @@ class _EHBase:
         for seg, pair in self.epsi: seg['psi'] = pair[self.parity]
 
 
-class NaiveEH(_EHBase):
-    """One thread per cell; the E values its H update differences (own, +x, +y, +z) are recomputed by that thread."""
+class FusedEHGather(_EHBase):
+    """Gather layout with one thread owning each cell's E and H outputs.
+
+    The thread recomputes E at its own cell and the +x/+y/+z neighbors needed
+    by curl E. All reads use the old buffers, so no block-wide or grid-wide
+    synchronization is required. Redundant neighbor arithmetic trades memory
+    reuse for support of z extents outside the shared-memory marching layout.
+    """
 
     def __init__(self, system, requested=None, report=None):
         import cupy
@@ -224,12 +251,12 @@ class NaiveEH(_EHBase):
             tensors, views = self.args[0]
             self.fn, self.module, bs = select_launch(self.source, 'eh_update',
                 tensors + [None], views + (np.int32(0),), self.count, self.dev,
-                requested, label='forward_fused_eh_naive', report=report)
+                requested, label='forward_fused_eh_gather', report=report)
         self.grid, self.block = ((self.count + bs - 1) // bs,), (bs,)
         self.parity = 0
 
 
-class MarchingEH(_EHBase):
+class FusedEHMarching(_EHBase):
     """2.5D blocking: a block owns TY y-rows x all z (ZB >= nz threads per row, two extra thread rows for the y halo) and marches
     along an x-chunk. Per plane x it loads H_old(x+1) (rows y0-1 .. y0+TY) to shared memory, computes E_new(x+1) once for rows
     y0 .. y0+TY (the last row is the halo the H update's y difference needs; x+1 = x1 is the next chunk's first plane, computed
@@ -298,7 +325,16 @@ class MarchingEH(_EHBase):
 
 
 
-class OnePassAdjoint:
+class OnePassFieldAdjoint:
+    """Gather the two field transposes without an intermediate global write.
+
+    Reconstruct post-H-transpose E cotangents locally, including the neighbors
+    needed by the E transpose, then write the new E/H cotangents once. CPML
+    cotangents have distinct input/output buffers and only their owner writes
+    each output. Material-gradient accumulation and field reconstruction stay
+    in their existing callers. This optional path does not assume that fewer
+    launches are faster for every grid or GPU.
+    """
     def __init__(self, adj, requested=None, report=None):
         cn = f'((float)({adj.system.grid.courant_number:.17g}))'
         cupy = adj.cp; s = adj.system; self.adj = weakref.proxy(adj)

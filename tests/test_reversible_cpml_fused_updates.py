@@ -91,14 +91,14 @@ def test_split_launch_sizes_preserve_every_field_and_psi(diagonal, block):
 
 @pytest.mark.cuda
 @pytest.mark.parametrize('diagonal', [False, True])
-@pytest.mark.parametrize('variant', ['marching', 'naive'])
+@pytest.mark.parametrize('variant', ['marching', 'gather'])
 def test_fused_forward_trace_fields_psi_and_recorder(diagonal, variant):
     require_cuda()
-    from torchfdtd.reversible_cuda_fused import MarchingEH, NaiveEH
+    from torchfdtd.reversible_cuda_fused import FusedEHMarching, FusedEHGather
     project, base, _ = case(diagonal)
     baseline = _recorded_system(base, project, None)
     candidate = _recorded_system(base, project, None)
-    candidate.fused_eh = (MarchingEH(candidate) if variant == 'marching' else NaiveEH(candidate))
+    candidate.fused_eh = (FusedEHMarching(candidate) if variant == 'marching' else FusedEHGather(candidate))
     samples = [torch.empty((project.region.steps, len(project.monitors)), device='cuda') for _ in range(2)]
     recorders = [recorder(system, data) for system, data in zip((baseline, candidate), samples)]
     for n in range(project.region.steps):
@@ -281,7 +281,7 @@ def test_adjoint_compile_failure_keeps_split_gradient(monkeypatch):
     def fail(*args, **kwargs):
         raise RuntimeError('CUDA kernel compilation failed: injected adjoint failure')
 
-    monkeypatch.setattr(fused, 'OnePassAdjoint', fail)
+    monkeypatch.setattr(fused, 'OnePassFieldAdjoint', fail)
     candidate = ReversibleCPMLSimulation(project, ReversibleCPMLOptions(
         adjoint_kernel='one_pass'))(x, fixed_epsilon=fixed)
     actual, = torch.autograd.grad(candidate.signals.square().sum(), x)
@@ -423,7 +423,7 @@ def test_marching_chunks_and_deep_grid_fallback(shape):
     report = {}
     candidate = _recorded_system(material, project, None,
         ReversibleCPMLOptions(forward_kernel='fused_eh'), report)
-    assert report['forward_kernel_variant'] == ('naive' if shape[2] == 170 else 'marching')
+    assert report['forward_kernel_variant'] == ('gather' if shape[2] == 170 else 'marching')
     # Populate every cell, including the periodic seams and PML, so this checks
     # all chunks even when the short source pulse cannot reach the far edges.
     generator = torch.Generator().manual_seed(187)
